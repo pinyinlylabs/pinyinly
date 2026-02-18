@@ -246,6 +246,12 @@ Customise this to suit your scenario.
   `EXPO_PUBLIC_SENTRY_DSN` in other places, the `Sentry.init()` call is not in code compiled by
   Metro and instead is in the entry-point `projects/app/api/index.cjs`.
 
+- **AI Image Generation (Optional)**: For AI-powered hint image generation using Gemini Nano Banana:
+  - `PYLY_GEMINI_IMAGE_API_KEY` - API key for Gemini image generation service
+
+  These should be configured in Vercel's environment variables if image generation is needed in
+  production.
+
 - **`EXPO_PUBLIC_`**: These are inlined into the build and exposed publicly. These need to be
   configured anywhere that builds are done:
   - `.github/workflows/release.yml`

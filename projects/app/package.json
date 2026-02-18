@@ -21,6 +21,7 @@
     "@expo/metro-runtime": "~6.1.2",
     "@floating-ui/react-native": "^0.10.7",
     "@formatjs/intl-segmenter": "^11.7.12",
+    "@google/genai": "^0.10.0",
     "@inngest/middleware-sentry": "^0.1.1",
     "@lottiefiles/dotlottie-react": "^0.13.5",
     "@lucia-auth/adapter-drizzle": "^1.1.0",

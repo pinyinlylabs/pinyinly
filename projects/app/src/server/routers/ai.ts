@@ -1,4 +1,5 @@
 import { requestOpenAiJson } from "@/server/lib/ai";
+import { generateImage } from "@/server/lib/gemini";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
@@ -50,6 +51,19 @@ const pronunciationHintOutputSchema = z
           .strict(),
       )
       .min(1),
+  })
+  .strict();
+
+const generateImageInputSchema = z
+  .object({
+    prompt: z.string(),
+  })
+  .strict();
+
+const generateImageOutputSchema = z
+  .object({
+    imageDataUrl: z.string(),
+    format: z.enum([`png`, `jpeg`, `webp`]),
   })
   .strict();
 
@@ -131,4 +145,48 @@ export const aiRouter = router({
         });
       }
     }),
+
+  generateHintImage: authedProcedure
+    .input(generateImageInputSchema)
+    .output(generateImageOutputSchema)
+    .mutation(async (opts) => {
+      const { prompt } = opts.input;
+
+      try {
+        const { buffer, mimeType } = await generateImage({ prompt });
+        const format = resolveImageFormat(mimeType);
+
+        // Convert buffer to data URL for client preview
+        const base64 = buffer.toString(`base64`);
+        const imageDataUrl = `data:${mimeType};base64,${base64}`;
+
+        return { imageDataUrl, format };
+      } catch (error) {
+        console.error(`Failed to generate hint image:`, error);
+        throw new TRPCError({
+          code: `INTERNAL_SERVER_ERROR`,
+          message: `Unable to generate image`,
+        });
+      }
+    }),
 });
+
+function resolveImageFormat(mimeType: string): `png` | `jpeg` | `webp` {
+  switch (mimeType) {
+    case `image/png`: {
+      return `png`;
+    }
+    case `image/jpeg`: {
+      return `jpeg`;
+    }
+    case `image/webp`: {
+      return `webp`;
+    }
+    default: {
+      throw new TRPCError({
+        code: `INTERNAL_SERVER_ERROR`,
+        message: `Unsupported image format: ${mimeType}`,
+      });
+    }
+  }
+}

@@ -1,15 +1,16 @@
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
   getHanziPronunciationHintKeyParams,
   getPinyinFinalToneKeyParams,
   hanziPronunciationHintExplanationSetting,
+  hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
-  useUserSetting,
-} from "@/client/ui/hooks/useUserSetting";
+} from "@/client/userSettings";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
@@ -23,6 +24,7 @@ import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
+import { AiImageGenerationModal } from "./AiImageGenerationModal";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -136,7 +138,17 @@ export function WikiHanziCharacterPronunciation({
     hanziPronunciationHintExplanationSetting,
     hintSettingKey,
   );
+  const hintImageSetting = useUserSetting(
+    hanziPronunciationHintImageSetting,
+    hintSettingKey,
+  );
+  const imagePromptSetting = useUserSetting(
+    hanziPronunciationHintImagePromptSetting,
+    hintSettingKey,
+  );
   const [showAiModal, setShowAiModal] = useState(false);
+  const [showImageGenerationModal, setShowImageGenerationModal] =
+    useState(false);
 
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
@@ -258,7 +270,27 @@ export function WikiHanziCharacterPronunciation({
         </View>
 
         <View className="gap-2 pt-2">
-          <Text className="pyly-body-subheading">Choose an image</Text>
+          <View className="gap-1">
+            <Text className="pyly-body-subheading">Choose an image</Text>
+            <Text className="text-[14px] text-fg-dim">
+              Pick the image that should appear on the wiki page
+            </Text>
+          </View>
+
+          <View className="flex-row items-center justify-between pb-2">
+            <Text className="text-[13px] text-fg-dim">
+              Want AI to create an image?
+            </Text>
+            <RectButton
+              variant="bare"
+              onPress={() => {
+                setShowImageGenerationModal(true);
+              }}
+            >
+              Generate image
+            </RectButton>
+          </View>
+
           <InlineEditableSettingImage
             setting={hanziPronunciationHintImageSetting}
             settingKey={hintSettingKey}
@@ -312,6 +344,34 @@ export function WikiHanziCharacterPronunciation({
           }}
         />
       ) : null}
+
+      {showImageGenerationModal && (
+        <AiImageGenerationModal
+          initialPrompt={
+            imagePromptSetting.value?.text ??
+            ([hintTextSetting.value?.text, hintExplanationSetting.value?.text]
+              .filter((v) => v != null && v.length > 0)
+              .join(` - `) ||
+              `Create an image representing ${hanzi} (${gloss}) pronounced ${pinyinUnit}`)
+          }
+          onConfirm={(assetId) => {
+            hintImageSetting.setValue({
+              imageId: assetId,
+            });
+            setShowImageGenerationModal(false);
+          }}
+          onDismiss={() => {
+            setShowImageGenerationModal(false);
+          }}
+          onSavePrompt={(prompt) => {
+            imagePromptSetting.setValue({
+              hanzi,
+              pinyin: hintSettingKey.pinyin,
+              text: prompt,
+            });
+          }}
+        />
+      )}
     </View>
   );
 }

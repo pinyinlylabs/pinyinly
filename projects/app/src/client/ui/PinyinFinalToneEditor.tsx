@@ -1,23 +1,23 @@
 import type {
-    UserSettingImageEntity,
-    UserSettingTextEntity,
+  UserSettingImageEntity,
+  UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
 import {
-    getPinyinFinalToneKeyParams,
-    pinyinFinalToneDescriptionSetting,
-    pinyinFinalToneImageSetting,
-    pinyinFinalToneNameSetting,
-    pinyinSoundNameSetting,
-    useUserSetting,
+  getPinyinFinalToneKeyParams,
+  pinyinFinalToneDescriptionSetting,
+  pinyinFinalToneImageSetting,
+  pinyinFinalToneNameSetting,
+  pinyinSoundNameSetting,
+  useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import type { PinyinSoundId } from "@/data/model";
 import {
-    defaultPinyinSoundInstructions,
-    defaultToneNames,
-    getDefaultFinalToneName,
-    loadPylyPinyinChart,
+  defaultPinyinSoundInstructions,
+  defaultToneNames,
+  getDefaultFinalToneName,
+  loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { loadFinalToneFrequencies } from "@/dictionary";
 import { use } from "react";

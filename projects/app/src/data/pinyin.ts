@@ -1,8 +1,8 @@
 import type {
-    PinyinSoundGroupId,
-    PinyinSoundId,
-    PinyinText,
-    PinyinUnit,
+  PinyinSoundGroupId,
+  PinyinSoundId,
+  PinyinText,
+  PinyinUnit,
 } from "@/data/model";
 import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";

@@ -1,19 +1,33 @@
 import {
-    isHanziCharacter,
-    parseIds,
-    splitHanziText,
-    strokeCountPlaceholderOrNull,
-    walkIdsNodeLeafs,
+  isHanziCharacter,
+  parseIds,
+  splitHanziText,
+  strokeCountPlaceholderOrNull,
+  walkIdsNodeLeafs,
 } from "@/data/hanzi";
-import type { HanziCharacter, HanziText, HanziWord, PinyinText, PinyinUnit } from '@/data/model';
-import { hanziCharacterSchema, hanziWordSchema, HskLevel, hskLevelSchema, PartOfSpeech, pinyinSoundIdSchema, pinyinTextSchema } from '@/data/model';
+import type {
+  HanziCharacter,
+  HanziText,
+  HanziWord,
+  PinyinText,
+  PinyinUnit,
+} from "@/data/model";
+import {
+  hanziCharacterSchema,
+  hanziWordSchema,
+  HskLevel,
+  hskLevelSchema,
+  PartOfSpeech,
+  pinyinSoundIdSchema,
+  pinyinTextSchema,
+} from "@/data/model";
 import { matchAllPinyinUnits } from "@/data/pinyin";
 import {
-    deepReadonly,
-    emptyArray,
-    mapArrayAdd,
-    memoize0,
-    memoize1,
+  deepReadonly,
+  emptyArray,
+  mapArrayAdd,
+  memoize0,
+  memoize1,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";

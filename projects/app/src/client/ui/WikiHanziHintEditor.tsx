@@ -1,10 +1,11 @@
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
   hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
-  useUserSetting,
-} from "@/client/ui/hooks/useUserSetting";
+} from "@/client/userSettings";
 import { getWikiCharacterData } from "@/client/wiki";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
@@ -18,6 +19,7 @@ import { nanoid } from "@/util/nanoid";
 import { Link } from "expo-router";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { AiImageGenerationModal } from "./AiImageGenerationModal";
 import { AllHintsModal } from "./AllHintsModal";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -52,8 +54,14 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     hanziWordMeaningHintImageSetting,
     hintSettingKey,
   );
+  const imagePromptSetting = useUserSetting(
+    hanziWordMeaningHintImagePromptSetting,
+    hintSettingKey,
+  );
 
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
+  const [showImageGenerationModal, setShowImageGenerationModal] =
+    useState(false);
 
   // Get available hints for this meaning
   const availableHints =
@@ -316,6 +324,21 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               Pick the image that should appear on the wiki page
             </Text>
           </View>
+
+          <View className="flex-row items-center justify-between pb-2">
+            <Text className="text-[13px] text-fg-dim">
+              Want AI to create an image?
+            </Text>
+            <RectButton
+              variant="bare"
+              onPress={() => {
+                setShowImageGenerationModal(true);
+              }}
+            >
+              Generate image
+            </RectButton>
+          </View>
+
           <InlineEditableSettingImage
             setting={hanziWordMeaningHintImageSetting}
             settingKey={hintSettingKey}
@@ -361,6 +384,34 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               hintHanziWord,
               presetHint.imageIds?.[0] ?? null,
             );
+          }}
+        />
+      )}
+
+      {/* AI Image Generation Modal */}
+      {showImageGenerationModal && (
+        <AiImageGenerationModal
+          initialPrompt={
+            imagePromptSetting.value?.text ??
+            ([hintSetting.value?.text, explanationSetting.value?.text]
+              .filter((v) => v != null && v.length > 0)
+              .join(` - `) ||
+              (meaning == null
+                ? `Create an image for ${hanzi}`
+                : `Create an image representing ${glossOrThrow(hanziWord, meaning)}`))
+          }
+          onConfirm={(assetId) => {
+            setImageSettingValue(hanziWord, assetId);
+            setShowImageGenerationModal(false);
+          }}
+          onDismiss={() => {
+            setShowImageGenerationModal(false);
+          }}
+          onSavePrompt={(prompt) => {
+            imagePromptSetting.setValue({
+              hanziWord,
+              text: prompt,
+            });
           }}
         />
       )}

@@ -148,6 +148,14 @@ export const hanziWordMeaningHintImageSetting = r.entity(`hwmhi/[hanziWord]`, {
   ...imageSettingFields,
 }) satisfies UserSettingImageEntity;
 
+export const hanziWordMeaningHintImagePromptSetting = r.entity(
+  `hwmhip/[hanziWord]`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    text: r.string().alias(`t`),
+  },
+) satisfies UserSettingTextEntity;
+
 export const hanziPronunciationHintTextSetting = r.entity(
   `hpht/[hanzi]/[pinyin]`,
   {
@@ -172,6 +180,15 @@ export const hanziPronunciationHintImageSetting: UserSettingImageEntity =
     pinyin: r.string().alias(`p`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity;
+
+export const hanziPronunciationHintImagePromptSetting = r.entity(
+  `hphip/[hanzi]/[pinyin]`,
+  {
+    hanzi: r.string().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    text: r.string().alias(`t`),
+  },
+) satisfies UserSettingTextEntity;
 
 export function getHanziPronunciationHintKeyParams(
   hanzi: HanziText,
