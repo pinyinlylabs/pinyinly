@@ -15,7 +15,7 @@ interface TextInputMultiProps extends Omit<
 }
 
 export function TextInputMulti(props: TextInputMultiProps) {
-  const innerRef = useRef<any>(null);
+  const innerRef = useRef<TextInput>(null);
 
   // On web, auto-resize the textarea to fit content
   useEffect(() => {
@@ -23,12 +23,12 @@ export function TextInputMulti(props: TextInputMultiProps) {
       return;
     } // Skip on native
 
-    const element = innerRef.current;
-    if (!element || !element._nativeTag) {
+    const element = innerRef.current as HTMLTextAreaElement | null;
+    if (!element) {
       return;
     } // Not a textarea
 
-    const textarea = element._nativeTag;
+    const textarea = element;
     if (textarea?.tagName !== `TEXTAREA`) {
       return;
     }
@@ -40,7 +40,9 @@ export function TextInputMulti(props: TextInputMultiProps) {
 
     adjustHeight();
     textarea.addEventListener(`input`, adjustHeight);
-    return () => textarea.removeEventListener(`input`, adjustHeight);
+    return () => {
+      textarea.removeEventListener(`input`, adjustHeight);
+    };
   }, []);
 
   return (
@@ -54,10 +56,7 @@ export function TextInputMulti(props: TextInputMultiProps) {
         // Disable the 1Password button in inputs.
         "1p-ignore": `true`,
       }}
-      style={{
-        ...(props.style as any),
-        overflow: `visible`,
-      }}
+      style={[props.style, { overflow: `visible` }]}
       className={inputClass({
         textAlign: props.textAlign,
         className: props.className,

@@ -213,7 +213,9 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
           />
           {showCounter ? (
             <View className="mt-1 flex-row items-center justify-between gap-2">
-              {overLimitMessage != null ? (
+              {overLimitMessage == null ? (
+                <View />
+              ) : (
                 <Text
                   className={
                     isTooLong
@@ -226,8 +228,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 >
                   {overLimitMessage}
                 </Text>
-              ) : (
-                <View />
               )}
               <View className="flex-row items-center gap-1">
                 <Text
