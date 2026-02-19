@@ -107,6 +107,26 @@ export function isImageCropRect(value: unknown): value is ImageCropRect {
   );
 }
 
+export function createCenteredCropRect(
+  imageWidth: number,
+  imageHeight: number,
+  frameAspectRatio: number | null,
+): ImageCropRect {
+  if (frameAspectRatio == null || imageWidth === 0 || imageHeight === 0) {
+    return { x: 0, y: 0, width: 1, height: 1 };
+  }
+
+  const imageAspectRatio = imageWidth / imageHeight;
+
+  if (imageAspectRatio > frameAspectRatio) {
+    const width = frameAspectRatio / imageAspectRatio;
+    return { x: (1 - width) / 2, y: 0, width, height: 1 };
+  }
+
+  const height = imageAspectRatio / frameAspectRatio;
+  return { x: 0, y: (1 - height) / 2, width: 1, height };
+}
+
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === `number` && Number.isFinite(value);
 }

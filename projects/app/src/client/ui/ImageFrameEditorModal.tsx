@@ -1,11 +1,3 @@
-import {
-  getLocalImageAssetSource,
-  isLocalImageAssetId,
-} from "@/client/assets/localImageAssets";
-import { trpc } from "@/client/trpc";
-import { useDb } from "@/client/ui/hooks/useDb";
-import { AssetStatusKind } from "@/data/model";
-import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
 import type {
   ImageSourcePropType,
@@ -31,11 +23,13 @@ import type {
 } from "./imageCrop";
 import {
   clampImageCropRectNormalized,
+  createCenteredCropRect,
   parseImageCrop,
   resolveFrameAspectRatio,
 } from "./imageCrop";
 import type { CornerHandle } from "./imageCropCalc";
 import { clampRectPx, getMinCropSizePx, resizeRectPx } from "./imageCropCalc";
+import { useAssetImageMeta } from "./useAssetImageMeta";
 
 interface ImageFrameEditorModalProps {
   assetId: string;
@@ -531,182 +525,6 @@ function DimLayer({
   );
 }
 
-function useAssetImageMeta(
-  assetId: string,
-  initialImageWidth?: number | null,
-  initialImageHeight?: number | null,
-): {
-  status: `loading` | `ready` | `error`;
-  imageSize: { width: number; height: number } | null;
-  imageSource: EditorImageSource | null;
-} {
-  const db = useDb();
-  const { data: assetData } = useLiveQuery(
-    (q) =>
-      q
-        .from({ asset: db.assetCollection })
-        .where(({ asset }) => eq(asset.assetId, assetId)),
-    [db.assetCollection, assetId],
-  );
-  const asset = assetData[0] ?? null;
-
-  const [localSource, setLocalSource] = useState<Awaited<
-    ReturnType<typeof getLocalImageAssetSource>
-  > | null>(null);
-  const [localSourceChecked, setLocalSourceChecked] = useState(false);
-  const [imageSize, setImageSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(
-    initialImageWidth != null && initialImageHeight != null
-      ? { width: initialImageWidth, height: initialImageHeight }
-      : null,
-  );
-
-  const isLocalAsset = isLocalImageAssetId(assetId);
-  const shouldFetchAssetKey =
-    !isLocalAsset && asset?.status === AssetStatusKind.Uploaded;
-  const assetKeyQuery = trpc.asset.getAssetKey.useQuery(
-    { assetId },
-    {
-      enabled: shouldFetchAssetKey,
-    },
-  );
-
-  const hasClearedLocalRef = useRef(false);
-  useEffect(() => {
-    if (hasClearedLocalRef.current) {
-      return;
-    }
-
-    hasClearedLocalRef.current = true;
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setLocalSource(null);
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setLocalSourceChecked(false);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const source = await getLocalImageAssetSource(assetId);
-      if (cancelled) {
-        return;
-      }
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setLocalSource(source ?? null);
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setLocalSourceChecked(true);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [assetId]);
-
-  useEffect(() => {
-    if (imageSize != null) {
-      return;
-    }
-
-    if (localSource != null) {
-      if (typeof Image.resolveAssetSource === `function`) {
-        const resolved = Image.resolveAssetSource(
-          localSource as Parameters<typeof Image.resolveAssetSource>[0],
-        );
-        if (resolved.width != null && resolved.height != null) {
-          // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-          setImageSize({ width: resolved.width, height: resolved.height });
-        }
-        return;
-      }
-
-      const localSourceUri =
-        typeof localSource === `string`
-          ? localSource
-          : typeof localSource === `object` &&
-              localSource != null &&
-              `uri` in localSource &&
-              typeof (localSource as { uri?: unknown }).uri === `string`
-            ? (localSource as { uri: string }).uri
-            : null;
-
-      if (localSourceUri != null) {
-        Image.getSize(
-          localSourceUri,
-          (width, height) => {
-            setImageSize({ width, height });
-          },
-          () => {
-            setImageSize(null);
-          },
-        );
-      }
-
-      return;
-    }
-
-    const baseUrl = process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL;
-    const assetKey = assetKeyQuery.data?.assetKey;
-    if (baseUrl == null || assetKey == null) {
-      return;
-    }
-
-    const imageUrl = `${baseUrl}${assetKey}`;
-    Image.getSize(
-      imageUrl,
-      (width, height) => {
-        setImageSize({ width, height });
-      },
-      () => {
-        setImageSize(null);
-      },
-    );
-  }, [assetKeyQuery.data?.assetKey, imageSize, localSource]);
-
-  if (localSource != null) {
-    return {
-      status: imageSize == null ? `loading` : `ready`,
-      imageSize,
-      imageSource: localSource as ImageSourcePropType,
-    };
-  }
-
-  if (isLocalAsset && !localSourceChecked) {
-    return { status: `loading`, imageSize: null, imageSource: null };
-  }
-
-  if (asset == null) {
-    return { status: `loading`, imageSize: null, imageSource: null };
-  }
-
-  if (asset.status === AssetStatusKind.Failed) {
-    return { status: `error`, imageSize: null, imageSource: null };
-  }
-
-  if (asset.status === AssetStatusKind.Pending) {
-    return { status: `loading`, imageSize: null, imageSource: null };
-  }
-
-  if (imageSize == null) {
-    return { status: `loading`, imageSize: null, imageSource: null };
-  }
-
-  const baseUrl = process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL;
-  const assetKey = assetKeyQuery.data?.assetKey;
-  const imageSource =
-    baseUrl != null && assetKey != null
-      ? ({ uri: `${baseUrl}${assetKey}` } satisfies EditorImageSource)
-      : null;
-
-  if (imageSource == null) {
-    return { status: `loading`, imageSize, imageSource: null };
-  }
-
-  return { status: `ready`, imageSize, imageSource };
-}
-
 function getContainSize(
   containerWidth: number,
   containerHeight: number,
@@ -730,26 +548,6 @@ function getContainSize(
     width: containerHeight * imageAspectRatio,
     height: containerHeight,
   };
-}
-
-function createCenteredCropRect(
-  imageWidth: number,
-  imageHeight: number,
-  frameAspectRatio: number | null,
-): ImageCropRect {
-  if (frameAspectRatio == null || imageWidth === 0 || imageHeight === 0) {
-    return { x: 0, y: 0, width: 1, height: 1 };
-  }
-
-  const imageAspectRatio = imageWidth / imageHeight;
-
-  if (imageAspectRatio > frameAspectRatio) {
-    const width = frameAspectRatio / imageAspectRatio;
-    return { x: (1 - width) / 2, y: 0, width, height: 1 };
-  }
-
-  const height = imageAspectRatio / frameAspectRatio;
-  return { x: 0, y: (1 - height) / 2, width: 1, height };
 }
 
 function areRectsClose(a: ImageCropRect, b: ImageCropRect) {
