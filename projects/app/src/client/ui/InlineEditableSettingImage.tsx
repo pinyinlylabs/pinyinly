@@ -110,7 +110,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   }
   if (includeHistory) {
     const seenIds = new Set<string>();
-    for (const entry of [...history.entries].reverse()) {
+    for (const entry of history.entries) {
       const assetId = entry.value?.imageId;
 
       if (typeof assetId !== `string` || assetId.length === 0) {
@@ -704,6 +704,16 @@ function HintImageTile({
   isHovered: boolean;
   size: number;
 }) {
+  const tileMeta = useAssetImageMeta(
+    assetId,
+    imageMeta?.imageWidth ?? null,
+    imageMeta?.imageHeight ?? null,
+  );
+  const resolvedImageWidth =
+    imageMeta?.imageWidth ?? tileMeta.imageSize?.width ?? null;
+  const resolvedImageHeight =
+    imageMeta?.imageHeight ?? tileMeta.imageSize?.height ?? null;
+
   return (
     <View className="relative" style={{ height: size, width: size }}>
       <View
@@ -713,8 +723,8 @@ function HintImageTile({
         <FramedAssetImage
           assetId={assetId}
           crop={imageMeta?.crop}
-          imageWidth={imageMeta?.imageWidth ?? null}
-          imageHeight={imageMeta?.imageHeight ?? null}
+          imageWidth={resolvedImageWidth}
+          imageHeight={resolvedImageHeight}
           className="size-full"
         />
       </View>
