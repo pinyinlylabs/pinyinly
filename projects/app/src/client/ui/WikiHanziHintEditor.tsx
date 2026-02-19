@@ -59,6 +59,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   );
 
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
+  const hintLengthTarget = 80;
 
   // Get available hints for this meaning
   const availableHints =
@@ -72,7 +73,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
       ? availableHints
       : (characterData?.mnemonic?.hints ?? []);
 
-  const selectedHint = (hintSetting.value as { t?: string } | null)?.t ?? null;
+  const hintSettingTextValue =
+    hintSetting.value?.text ??
+    (hintSetting.value as { t?: string } | null)?.t ??
+    null;
+  const selectedHint = hintSettingTextValue ?? null;
   const currentPresetHint =
     selectedHint == null
       ? null
@@ -207,7 +212,9 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   const currentHintText = selectedHint ?? fallbackHint?.hint ?? ``;
   let currentHintExplanation = currentPresetHint?.explanation;
   const explanationOverride =
-    (explanationSetting.value as { t?: string } | null)?.t ?? undefined;
+    explanationSetting.value?.text ??
+    (explanationSetting.value as { t?: string } | null)?.t ??
+    undefined;
   currentHintExplanation ??=
     selectedHint == null ? fallbackHint?.explanation : explanationOverride;
   let currentHintImageIds: readonly string[] | null = null;
@@ -218,6 +225,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     currentHintImageIds = [imageId];
   }
   const hasCurrentHint = currentHintText.length > 0;
+  const hasCustomHint = (hintSettingTextValue ?? ``).trim().length > 0;
   const canOpenGallery = hintsToShow.length > 0;
 
   return (
@@ -280,17 +288,23 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                 setting={hanziWordMeaningHintTextSetting}
                 settingKey={hintSettingKey}
                 placeholder="Add a hint"
+                maxLength={hintLengthTarget}
+                multiline
+                showCounterAtRatio={0.8}
+                overLimitMessage={`Keep hints under ${hintLengthTarget} characters. Move extra detail to the explanation.`}
                 renderDisplay={(value) => <Pylymark source={value} />}
               />
 
-              <InlineEditableSettingText
-                variant="hintExplanation"
-                setting={hanziWordMeaningHintExplanationSetting}
-                settingKey={hintSettingKey}
-                placeholder="Add an explanation"
-                multiline
-                renderDisplay={(value) => <Pylymark source={value} />}
-              />
+              {hasCustomHint ? (
+                <InlineEditableSettingText
+                  variant="hintExplanation"
+                  setting={hanziWordMeaningHintExplanationSetting}
+                  settingKey={hintSettingKey}
+                  placeholder="Add an explanation"
+                  multiline
+                  renderDisplay={(value) => <Pylymark source={value} />}
+                />
+              ) : null}
             </View>
           </View>
 

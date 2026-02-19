@@ -205,8 +205,6 @@ export function AiImageGenerationPanel({
         value={prompt}
         onChangeText={setPrompt}
         placeholder="Describe the image..."
-        multiline
-        numberOfLines={4}
         editable={!isProcessing}
       />
 

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
+import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
-import { TextInputSingle } from "./TextInputSingle";
+import { TextInputMulti } from "./TextInputMulti";
 
 interface AddCustomHintModalProps {
   onDismiss: () => void;
@@ -53,9 +54,15 @@ function AddCustomHintModalContent({
   const [showExplanation, setShowExplanation] = useState(
     initialExplanation.length > 0,
   );
+  const hintLengthTarget = 80;
+  const hintCounterThreshold = Math.ceil(hintLengthTarget * 0.8);
 
   const isEditing = initialHint.length > 0;
   const canSave = hint.trim().length > 0;
+  const trimmedHintLength = hint.trim().length;
+  const canShowExplanation = trimmedHintLength > 0;
+  const isHintTooLong = trimmedHintLength > hintLengthTarget;
+  const isHintAtLimit = trimmedHintLength >= hintLengthTarget;
 
   return (
     <View className="flex-1 bg-bg">
@@ -90,19 +97,56 @@ function AddCustomHintModalContent({
         <View className="gap-4 p-4">
           <View className="gap-2">
             <Text className="text-[14px] font-medium text-fg">Your hint</Text>
-            <TextInputSingle
+            <TextInputMulti
               placeholder="Enter a hint that helps you remember..."
               value={hint}
               onChangeText={setHint}
-              multiline
-              numberOfLines={3}
-              className="min-h-[80px] py-3"
-              textAlignVertical="top"
+              numberOfLines={6}
+              style={{ minHeight: 160 }}
             />
+            {trimmedHintLength >= hintCounterThreshold ? (
+              <View className="flex-row items-center justify-between gap-2">
+                <Text
+                  className={
+                    isHintTooLong
+                      ? `text-[12px] text-fg`
+                      : `text-[12px] text-fg-dim`
+                  }
+                  style={
+                    isHintTooLong
+                      ? { color: `var(--color-warning)` }
+                      : undefined
+                  }
+                >
+                  Keep hints under {hintLengthTarget} characters. Move extra
+                  detail to the explanation.
+                </Text>
+                <View className="flex-row items-center gap-1">
+                  <Text
+                    className={
+                      isHintAtLimit
+                        ? `
+                          text-right text-[11px] text-fg
+
+                          [--color-fg:var(--color-warning)]
+                        `
+                        : `text-right text-[11px] text-fg-dim`
+                    }
+                  >
+                    {trimmedHintLength}/{hintLengthTarget}
+                  </Text>
+                  <ProgressPieIcon
+                    progress={trimmedHintLength / hintLengthTarget}
+                    warn={isHintAtLimit}
+                    size={12}
+                  />
+                </View>
+              </View>
+            ) : null}
           </View>
 
           {/* Explanation toggle/field */}
-          {showExplanation ? (
+          {showExplanation && canShowExplanation ? (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
                 <Text className="text-[14px] font-medium text-fg">
@@ -121,17 +165,15 @@ function AddCustomHintModalContent({
                   />
                 </Pressable>
               </View>
-              <TextInputSingle
+              <TextInputMulti
                 placeholder="Why does this hint work for you?"
                 value={explanation}
                 onChangeText={setExplanation}
-                multiline
                 numberOfLines={2}
-                className="min-h-[60px] py-3"
-                textAlignVertical="top"
+                style={{ minHeight: 60 }}
               />
             </View>
-          ) : (
+          ) : canShowExplanation ? (
             <Pressable
               onPress={() => {
                 setShowExplanation(true);
@@ -142,7 +184,7 @@ function AddCustomHintModalContent({
                 Add explanation (optional)
               </Text>
             </Pressable>
-          )}
+          ) : null}
         </View>
       </ScrollView>
     </View>

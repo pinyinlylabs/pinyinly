@@ -6,7 +6,10 @@ import { tv } from "tailwind-variants";
 interface TextInputSingleProps extends Omit<
   PropsOf<typeof TextInput>,
   // make `placeholder` mandatory (encourage a11y)
-  `placeholder`
+  | `placeholder`
+  // exclude multiline props since this is a single-line input
+  | `multiline`
+  | `numberOfLines`
 > {
   disabled?: boolean;
   placeholder: string | undefined;
