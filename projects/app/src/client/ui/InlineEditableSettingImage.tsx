@@ -10,6 +10,7 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImageFrameEditorModal } from "./ImageFrameEditorModal";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
@@ -29,8 +30,11 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   previewHeight?: number;
   tileSize?: number;
   enablePasteDropZone?: boolean;
+  enableAiGeneration?: boolean;
+  initialAiPrompt?: string;
   frameConstraint?: ImageFrameConstraintInput | null;
   onUploadError?: (error: string) => void;
+  onSaveAiPrompt?: (prompt: string) => void;
   className?: string;
 }
 
@@ -42,8 +46,11 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   previewHeight = 200,
   tileSize = 64,
   enablePasteDropZone = false,
+  enableAiGeneration = false,
+  initialAiPrompt = ``,
   frameConstraint,
   onUploadError,
+  onSaveAiPrompt,
   className,
 }: InlineEditableSettingImageProps<T>) {
   const { value, setValue } = useUserSetting(setting, settingKey);
@@ -60,6 +67,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   );
   const [editorAssetId, setEditorAssetId] = useState<string | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<`upload` | `generate`>(`upload`);
   const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
 
   const historyImageAssetIds: string[] = [];
@@ -184,43 +192,123 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
 
         {shouldShowPickerPanel ? (
           <View className="gap-3 rounded-lg border border-fg/10 bg-fg/5 p-3">
-            {imageIdsToShow.length > 0 ? (
-              <View className="flex-row flex-wrap gap-2">
-                {imageIdsToShow.map((assetId) => {
-                  const isSelected = assetId === imageId;
-                  const isHovered = assetId === hoveredHintImageId;
-                  const meta = imageMetaById.get(assetId) ?? null;
-                  return (
-                    <Pressable
-                      key={assetId}
-                      onPress={() => {
-                        handleSelectHintImage(assetId);
-                      }}
-                      onHoverIn={() => {
-                        setHoveredHintImageId(assetId);
-                      }}
-                      onHoverOut={() => {
-                        setHoveredHintImageId(null);
-                      }}
-                    >
-                      <HintImageTile
-                        assetId={assetId}
-                        imageMeta={meta}
-                        isSelected={isSelected}
-                        isHovered={isHovered}
-                        size={tileSize}
+            {enableAiGeneration ? (
+              <>
+                <View className="flex-row gap-2 border-b border-fg/10 pb-2">
+                  <RectButton
+                    variant={activeTab === `upload` ? `filled` : `outline`}
+                    onPress={() => {
+                      setActiveTab(`upload`);
+                    }}
+                    className="flex-1"
+                  >
+                    Upload
+                  </RectButton>
+                  <RectButton
+                    variant={activeTab === `generate` ? `filled` : `outline`}
+                    onPress={() => {
+                      setActiveTab(`generate`);
+                    }}
+                    className="flex-1"
+                  >
+                    Generate
+                  </RectButton>
+                </View>
+
+                {activeTab === `upload` ? (
+                  <View className="gap-3">
+                    {imageIdsToShow.length > 0 ? (
+                      <View className="flex-row flex-wrap gap-2">
+                        {imageIdsToShow.map((assetId) => {
+                          const isSelected = assetId === imageId;
+                          const isHovered = assetId === hoveredHintImageId;
+                          const meta = imageMetaById.get(assetId) ?? null;
+                          return (
+                            <Pressable
+                              key={assetId}
+                              onPress={() => {
+                                handleSelectHintImage(assetId);
+                              }}
+                              onHoverIn={() => {
+                                setHoveredHintImageId(assetId);
+                              }}
+                              onHoverOut={() => {
+                                setHoveredHintImageId(null);
+                              }}
+                            >
+                              <HintImageTile
+                                assetId={assetId}
+                                imageMeta={meta}
+                                isSelected={isSelected}
+                                isHovered={isHovered}
+                                size={tileSize}
+                              />
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    ) : null}
+                    {enablePasteDropZone ? (
+                      <ImagePasteDropZone
+                        onUploadComplete={handleAddCustomImage}
+                        onUploadError={onUploadError}
                       />
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ) : null}
-            {enablePasteDropZone ? (
-              <ImagePasteDropZone
-                onUploadComplete={handleAddCustomImage}
-                onUploadError={onUploadError}
-              />
-            ) : null}
+                    ) : null}
+                  </View>
+                ) : (
+                  <View>
+                    <AiImageGenerationPanel
+                      initialPrompt={initialAiPrompt}
+                      onImageGenerated={(assetId) => {
+                        handleAddCustomImage(assetId);
+                      }}
+                      onError={onUploadError}
+                      onSavePrompt={onSaveAiPrompt}
+                    />
+                  </View>
+                )}
+              </>
+            ) : (
+              <>
+                {imageIdsToShow.length > 0 ? (
+                  <View className="flex-row flex-wrap gap-2">
+                    {imageIdsToShow.map((assetId) => {
+                      const isSelected = assetId === imageId;
+                      const isHovered = assetId === hoveredHintImageId;
+                      const meta = imageMetaById.get(assetId) ?? null;
+                      return (
+                        <Pressable
+                          key={assetId}
+                          onPress={() => {
+                            handleSelectHintImage(assetId);
+                          }}
+                          onHoverIn={() => {
+                            setHoveredHintImageId(assetId);
+                          }}
+                          onHoverOut={() => {
+                            setHoveredHintImageId(null);
+                          }}
+                        >
+                          <HintImageTile
+                            assetId={assetId}
+                            imageMeta={meta}
+                            isSelected={isSelected}
+                            isHovered={isHovered}
+                            size={tileSize}
+                          />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : null}
+                {enablePasteDropZone ? (
+                  <ImagePasteDropZone
+                    onUploadComplete={handleAddCustomImage}
+                    onUploadError={onUploadError}
+                  />
+                ) : null}
+              </>
+            )}
           </View>
         ) : null}
       </View>

@@ -19,7 +19,6 @@ import { nanoid } from "@/util/nanoid";
 import { Link } from "expo-router";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { AiImageGenerationModal } from "./AiImageGenerationModal";
 import { AllHintsModal } from "./AllHintsModal";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -60,8 +59,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   );
 
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
-  const [showImageGenerationModal, setShowImageGenerationModal] =
-    useState(false);
 
   // Get available hints for this meaning
   const availableHints =
@@ -325,20 +322,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             </Text>
           </View>
 
-          <View className="flex-row items-center justify-between pb-2">
-            <Text className="text-[13px] text-fg-dim">
-              Want AI to create an image?
-            </Text>
-            <RectButton
-              variant="bare"
-              onPress={() => {
-                setShowImageGenerationModal(true);
-              }}
-            >
-              Generate image
-            </RectButton>
-          </View>
-
           <InlineEditableSettingImage
             setting={hanziWordMeaningHintImageSetting}
             settingKey={hintSettingKey}
@@ -346,8 +329,24 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             previewHeight={200}
             tileSize={64}
             enablePasteDropZone
+            enableAiGeneration
+            initialAiPrompt={
+              imagePromptSetting.value?.text ??
+              ([hintSetting.value?.text, explanationSetting.value?.text]
+                .filter((v) => v != null && v.length > 0)
+                .join(` - `) ||
+                (meaning == null
+                  ? `Create an image for ${hanzi}`
+                  : `Create an image representing ${glossOrThrow(hanziWord, meaning)}`))
+            }
             frameConstraint={{ aspectRatio: 2 }}
             onUploadError={handleUploadError}
+            onSaveAiPrompt={(prompt) => {
+              imagePromptSetting.setValue({
+                hanziWord,
+                text: prompt,
+              });
+            }}
           />
         </View>
       </View>
@@ -384,34 +383,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               hintHanziWord,
               presetHint.imageIds?.[0] ?? null,
             );
-          }}
-        />
-      )}
-
-      {/* AI Image Generation Modal */}
-      {showImageGenerationModal && (
-        <AiImageGenerationModal
-          initialPrompt={
-            imagePromptSetting.value?.text ??
-            ([hintSetting.value?.text, explanationSetting.value?.text]
-              .filter((v) => v != null && v.length > 0)
-              .join(` - `) ||
-              (meaning == null
-                ? `Create an image for ${hanzi}`
-                : `Create an image representing ${glossOrThrow(hanziWord, meaning)}`))
-          }
-          onConfirm={(assetId) => {
-            setImageSettingValue(hanziWord, assetId);
-            setShowImageGenerationModal(false);
-          }}
-          onDismiss={() => {
-            setShowImageGenerationModal(false);
-          }}
-          onSavePrompt={(prompt) => {
-            imagePromptSetting.setValue({
-              hanziWord,
-              text: prompt,
-            });
           }}
         />
       )}
