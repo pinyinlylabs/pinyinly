@@ -53,5 +53,6 @@
     },
     "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace, 'Pinyinly Components'",
     "oxc.typeAware": true,
+    "oxc.enable": true,
   },
 }
