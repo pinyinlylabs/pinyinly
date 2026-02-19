@@ -1,14 +1,15 @@
 import {
-  analyzeAudioFile,
-  generateSpriteCommand,
-  parseFfmpegOutput,
-  parseTimestampToSeconds,
+    analyzeAudioFile,
+    generateSpriteCommand,
+    parseFfmpegOutput,
+    parseTimestampToSeconds,
 } from "#ffmpeg.ts";
 import { loadManifest } from "#manifestRead.ts";
 import { saveManifest, syncManifestWithFilesystem } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
 import * as fs from "@pinyinly/lib/fs";
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, test } from "vitest";
@@ -235,6 +236,12 @@ describe(
           "[0:a]concat=n=1:v=0:a=1[output]",
           "-map",
           "[output]",
+          "-fflags",
+          "+bitexact",
+          "-flags:a",
+          "+bitexact",
+          "-map_metadata",
+          "-1",
           "-c:a",
           "aac",
           "-b:a",
@@ -278,6 +285,12 @@ describe(
           "[2:a]atrim=duration=1[gap1]; [0:a][gap1][1:a]concat=n=3:v=0:a=1[output]",
           "-map",
           "[output]",
+          "-fflags",
+          "+bitexact",
+          "-flags:a",
+          "+bitexact",
+          "-map_metadata",
+          "-1",
           "-c:a",
           "aac",
           "-b:a",
@@ -322,6 +335,12 @@ describe(
           "[2:a]atrim=duration=0.5[gap1]; [0:a][gap1][1:a]concat=n=3:v=0:a=1[output]",
           "-map",
           "[output]",
+          "-fflags",
+          "+bitexact",
+          "-flags:a",
+          "+bitexact",
+          "-map_metadata",
+          "-1",
           "-c:a",
           "aac",
           "-b:a",
@@ -518,6 +537,65 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     // Clean up
     fs.unlinkSync(outputPath);
+  });
+
+  test(`sprite generation is deterministic (produces identical output for same inputs)`, async () => {
+    const outputPath1 = path.join(outputsDir, `test-sprite-determinism-1.m4a`);
+    const outputPath2 = path.join(outputsDir, `test-sprite-determinism-2.m4a`);
+
+    // Clean up any existing output files
+    for (const outputPath of [outputPath1, outputPath2]) {
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
+      }
+    }
+
+    const audioFiles = [
+      {
+        filePath: path.join(fixturesDir, `audio1.mp3`),
+        startTime: 0,
+        duration: 1.2,
+      },
+      {
+        filePath: path.join(fixturesDir, `audio2.mp3`),
+        startTime: 2.2,
+        duration: 0.864,
+      },
+      {
+        filePath: path.join(fixturesDir, `audio3.mp3`),
+        startTime: 4.064,
+        duration: 1.416,
+      },
+    ];
+
+    // Generate first sprite
+    const command1 = generateSpriteCommand(audioFiles, outputPath1);
+    const [program1, ...args1] = command1;
+    await execFileAsync(program1!, args1);
+
+    // Generate second sprite with identical inputs
+    const command2 = generateSpriteCommand(audioFiles, outputPath2);
+    const [program2, ...args2] = command2;
+    await execFileAsync(program2!, args2);
+
+    // Verify both files were created
+    expect(fs.existsSync(outputPath1)).toBe(true);
+    expect(fs.existsSync(outputPath2)).toBe(true);
+
+    // Compute SHA-256 hashes of both files
+    const hash1 = createHash(`sha256`)
+      .update(fs.readFileSync(outputPath1))
+      .digest(`hex`);
+    const hash2 = createHash(`sha256`)
+      .update(fs.readFileSync(outputPath2))
+      .digest(`hex`);
+
+    // Verify files are byte-for-byte identical
+    expect(hash1).toBe(hash2);
+
+    // Clean up
+    fs.unlinkSync(outputPath1);
+    fs.unlinkSync(outputPath2);
   });
 
   test(`full filesystem integration with manifest processing`, async () => {

@@ -338,6 +338,12 @@ export function generateSpriteCommand(
   const outputOptions = [
     `-map`,
     `[output]`,
+    `-fflags`,
+    `+bitexact`, // Force bitexact muxing for deterministic output
+    `-flags:a`,
+    `+bitexact`, // Force bitexact audio encoding for deterministic output
+    `-map_metadata`,
+    `-1`, // Strip all metadata to ensure deterministic output
     `-c:a`,
     `aac`, // Use AAC codec for M4A
     `-b:a`,
