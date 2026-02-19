@@ -1,40 +1,3 @@
-/**
- * TODO: PLACEHOLDER IMPLEMENTATION - UPDATE ONCE API DOCUMENTATION IS AVAILABLE
- *
- * This file contains a placeholder implementation for the Gemini Nano Banana image generation API.
- * Update this implementation once you have access to the actual API documentation.
- *
- * Steps to update:
- * 1. Update the request format:
- *    - Verify the correct HTTP method (POST, GET, etc.)
- *    - Update headers (authentication format, content-type, custom headers)
- *    - Update request body structure (field names, parameter formats)
- *    - Add API-specific parameters: image size, quality, aspect ratio, style, negative prompts, etc.
- *
- * 2. Update response parsing:
- *    - Check if the API returns:
- *      * JSON with base64-encoded image data (e.g., { "image": "base64string", "format": "png" })
- *      * Binary image data directly in response body
- *      * A signed URL to download the image from
- *      * Multi-part response with metadata
- *    - Parse any metadata returned (image format, dimensions, generation time, etc.)
- *
- * 3. Update format detection:
- *    - If API returns format info, use it instead of detecting from buffer
- *    - Handle different output formats (PNG, JPEG, WebP, etc.)
- *
- * 4. Error handling:
- *    - Review API error response format (status codes, error messages, error codes)
- *    - Add retry logic if recommended by API docs
- *    - Handle rate limiting, quota errors, and content policy violations
- *
- * 5. Testing:
- *    - Test with actual API calls using valid credentials
- *    - Verify image quality and format
- *    - Test error scenarios (invalid prompts, rate limits, auth failures)
- *    - Validate Buffer output works with downstream image processing
- */
-
 import { preflightCheckEnvVars } from "@/util/env";
 import { GoogleGenAI } from "@google/genai";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -59,14 +22,19 @@ function getGeminiConfig(): {
 }
 
 /**
- * Generate an image using Gemini Nano Banana based on a text prompt.
+ * Generate an image using Gemini Nano Banana based on a text prompt and optional style image.
  * Returns the image as a Buffer.
+ *
+ * @param opts - Options containing prompt and optional styleImageData
+ * @param opts.prompt - The text prompt for image generation
+ * @param opts.styleImageData - Optional style image data in format "mimeType;base64,data"
  *
  * Note: This is a placeholder implementation. Update the API call
  * format once you have access to the Gemini Nano Banana API documentation.
  */
 export async function generateImage(opts: {
   prompt: string;
+  styleImageData?: string;
 }): Promise<{ buffer: Buffer; mimeType: string }> {
   const { apiKey, model } = getGeminiConfig();
 
@@ -76,6 +44,33 @@ export async function generateImage(opts: {
 
   const client = new GoogleGenAI({ apiKey });
 
+  // Build parts array with optional style image
+  const parts: Array<{
+    text?: string;
+    inlineData?: { mimeType: string; data: string };
+  }> = [];
+
+  // Add style image if provided
+  if (opts.styleImageData != null && opts.styleImageData.length > 0) {
+    // Parse format: "mimeType;base64,data"
+    const formatMatch = opts.styleImageData.match(/^([^;]+);base64,(.+)$/);
+    if (formatMatch && formatMatch[1] != null && formatMatch[2] != null) {
+      const mimeType = formatMatch[1];
+      const base64Data = formatMatch[2];
+      parts.push({
+        inlineData: {
+          mimeType,
+          data: base64Data,
+        },
+      });
+    } else {
+      throw new Error(`Invalid style image data format`);
+    }
+  }
+
+  // Add text prompt
+  parts.push({ text: opts.prompt });
+
   const response = await client.models.generateContentStream({
     model,
     config: {
@@ -84,7 +79,7 @@ export async function generateImage(opts: {
     contents: [
       {
         role: `user`,
-        parts: [{ text: opts.prompt }],
+        parts,
       },
     ],
   });

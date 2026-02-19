@@ -57,6 +57,7 @@ const pronunciationHintOutputSchema = z
 const generateImageInputSchema = z
   .object({
     prompt: z.string(),
+    styleImageData: z.string().optional(),
   })
   .strict();
 
@@ -150,10 +151,13 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
-      const { prompt } = opts.input;
+      const { prompt, styleImageData } = opts.input;
 
       try {
-        const { buffer, mimeType } = await generateImage({ prompt });
+        const { buffer, mimeType } = await generateImage({
+          prompt,
+          styleImageData,
+        });
         const format = resolveImageFormat(mimeType);
 
         // Convert buffer to data URL for client preview
