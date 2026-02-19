@@ -35,8 +35,6 @@ vi.mock(`@google/genai`, () => {
   };
 });
 
-process.env[`PYLY_GEMINI_IMAGE_API_KEY`] ??= `test-key`;
-
 const hasApiKey =
   typeof process.env[`PYLY_GEMINI_IMAGE_API_KEY`] === `string` &&
   process.env[`PYLY_GEMINI_IMAGE_API_KEY`]?.length > 0;
@@ -222,38 +220,46 @@ describe(
 describe.skipIf(!hasApiKey)(
   `generateImage integration suite` satisfies HasNameOf<typeof generateImage>,
   () => {
-    test(`returns image data from the Gemini API`, async () => {
-      vi.doUnmock(`@google/genai`);
-      vi.resetModules();
-      const { generateImage: generateImageReal } = await import(
-        `#server/lib/gemini.ts`
-      );
+    test(
+      `returns image data from the Gemini API`,
+      { timeout: 20000 },
+      async () => {
+        vi.doUnmock(`@google/genai`);
+        vi.resetModules();
+        const { generateImage: generateImageReal } = await import(
+          `#server/lib/gemini.ts`
+        );
 
-      const result = await generateImageReal({
-        prompt: `A bright red apple on a wooden table, studio lighting`,
-      });
+        const result = await generateImageReal({
+          prompt: `A bright red apple on a wooden table, studio lighting`,
+        });
 
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-    });
+        expect(result.buffer.length).toBeGreaterThan(0);
+        expect(result.mimeType.startsWith(`image/`)).toBe(true);
+      },
+    );
 
-    test(`returns image data with a style image from the Gemini API`, async () => {
-      vi.doUnmock(`@google/genai`);
-      vi.resetModules();
-      const { generateImage: generateImageReal } = await import(
-        `#server/lib/gemini.ts`
-      );
+    test(
+      `returns image data with a style image from the Gemini API`,
+      { timeout: 20000 },
+      async () => {
+        vi.doUnmock(`@google/genai`);
+        vi.resetModules();
+        const { generateImage: generateImageReal } = await import(
+          `#server/lib/gemini.ts`
+        );
 
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-      const styleImageData = `image/png;base64,${pngBase64}`;
+        const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
+        const styleImageData = `image/png;base64,${pngBase64}`;
 
-      const result = await generateImageReal({
-        prompt: `A bright red apple on a wooden table, studio lighting`,
-        styleImageData,
-      });
+        const result = await generateImageReal({
+          prompt: `A bright red apple on a wooden table, studio lighting`,
+          styleImageData,
+        });
 
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-    });
+        expect(result.buffer.length).toBeGreaterThan(0);
+        expect(result.mimeType.startsWith(`image/`)).toBe(true);
+      },
+    );
   },
 );

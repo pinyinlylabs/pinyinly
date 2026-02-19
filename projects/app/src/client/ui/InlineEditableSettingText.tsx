@@ -1,20 +1,21 @@
-import {
-  useUserSetting,
-  useUserSettingHistory,
-} from "@/client/ui/hooks/useUserSetting";
 import type {
   UserSettingEntityInput,
   UserSettingKeyInput,
   UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
+import {
+  useUserSetting,
+  useUserSettingHistory,
+} from "@/client/ui/hooks/useUserSetting";
 import { formatRelativeTime } from "@/util/date";
-import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { FloatingMenuModal } from "./FloatingMenuModal";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
+import { FloatingMenuModal } from "./FloatingMenuModal";
 import { IconImage } from "./IconImage";
+import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
 
 export type InlineEditableSettingTextVariant =
@@ -30,6 +31,9 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   placeholder: string;
   defaultValue?: string;
   multiline?: boolean;
+  maxLength?: number;
+  showCounterAtRatio?: number;
+  overLimitMessage?: string;
   displayClassName?: string;
   emptyClassName?: string;
   inputClassName?: string;
@@ -51,6 +55,9 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   placeholder,
   defaultValue,
   multiline = false,
+  maxLength,
+  showCounterAtRatio = 0.8,
+  overLimitMessage,
   displayClassName,
   emptyClassName,
   inputClassName,
@@ -180,6 +187,14 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     class: emptyClassName,
   });
   const inputTextClassName = inputText({ variant, class: inputClassName });
+  const counterThreshold =
+    maxLength == null ? null : Math.ceil(maxLength * showCounterAtRatio);
+  const showCounter =
+    maxLength != null &&
+    counterThreshold != null &&
+    draft.length >= counterThreshold;
+  const isAtLimit = maxLength != null && draft.length >= maxLength;
+  const isTooLong = maxLength != null && draft.length > maxLength;
 
   return (
     <View>
@@ -196,6 +211,46 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
             className={inputTextClassName}
             style={showHistoryButton ? { paddingRight: 32 } : undefined}
           />
+          {showCounter ? (
+            <View className="mt-1 flex-row items-center justify-between gap-2">
+              {overLimitMessage == null ? (
+                <View />
+              ) : (
+                <Text
+                  className={
+                    isTooLong
+                      ? `text-[12px] text-fg`
+                      : `text-[12px] text-fg-dim`
+                  }
+                  style={
+                    isTooLong ? { color: `var(--color-warning)` } : undefined
+                  }
+                >
+                  {overLimitMessage}
+                </Text>
+              )}
+              <View className="flex-row items-center gap-1">
+                <Text
+                  className={
+                    isAtLimit
+                      ? `
+                        text-right text-[11px] text-fg
+
+                        [--color-fg:var(--color-warning)]
+                      `
+                      : `text-right text-[11px] text-fg-dim`
+                  }
+                >
+                  {draft.length}/{maxLength}
+                </Text>
+                <ProgressPieIcon
+                  progress={maxLength == null ? 0 : draft.length / maxLength}
+                  warn={isAtLimit}
+                  size={12}
+                />
+              </View>
+            </View>
+          ) : null}
           {showHistoryButton ? (
             <View className="absolute right-2 top-2">
               <FloatingMenuModal

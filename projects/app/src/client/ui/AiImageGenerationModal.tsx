@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
+import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
-import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 
 export interface AiImageGenerationModalProps {
   initialPrompt: string;
