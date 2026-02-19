@@ -1,41 +1,41 @@
 import type {
-    UserSettingEntityInput,
-    UserSettingEntityOutput,
-    UserSettingImageEntity,
-    UserSettingKeyInput,
+  UserSettingEntityInput,
+  UserSettingEntityOutput,
+  UserSettingImageEntity,
+  UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import {
-    useUserSetting,
-    useUserSettingHistory,
+  useUserSetting,
+  useUserSettingHistory,
 } from "@/client/ui/hooks/useUserSetting";
 import { useEffect, useRef, useState } from "react";
 import type {
-    LayoutChangeEvent,
-    PanResponderInstance,
-    ViewStyle,
+  LayoutChangeEvent,
+  PanResponderInstance,
+  ViewStyle,
 } from "react-native";
 import {
-    ActivityIndicator,
-    PanResponder,
-    Platform,
-    Pressable,
-    Text,
-    View,
+  ActivityIndicator,
+  PanResponder,
+  Platform,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { RectButton } from "./RectButton";
 import type {
-    ImageCrop,
-    ImageCropRect,
-    ImageFrameConstraintInput,
+  ImageCrop,
+  ImageCropRect,
+  ImageFrameConstraintInput,
 } from "./imageCrop";
 import {
-    createCenteredCropRect,
-    imageCropValueFromCrop,
-    parseImageCrop,
-    resolveFrameAspectRatio,
+  createCenteredCropRect,
+  imageCropValueFromCrop,
+  parseImageCrop,
+  resolveFrameAspectRatio,
 } from "./imageCrop";
 import { clamp, getMinCropSizePx } from "./imageCropCalc";
 import { useAssetImageMeta } from "./useAssetImageMeta";

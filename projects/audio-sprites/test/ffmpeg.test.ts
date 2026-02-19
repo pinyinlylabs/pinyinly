@@ -1,8 +1,8 @@
 import {
-    analyzeAudioFile,
-    generateSpriteCommand,
-    parseFfmpegOutput,
-    parseTimestampToSeconds,
+  analyzeAudioFile,
+  generateSpriteCommand,
+  parseFfmpegOutput,
+  parseTimestampToSeconds,
 } from "#ffmpeg.ts";
 import { loadManifest } from "#manifestRead.ts";
 import { saveManifest, syncManifestWithFilesystem } from "#manifestWrite.ts";
