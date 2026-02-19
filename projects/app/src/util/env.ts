@@ -24,3 +24,9 @@ export const IS_TIMING = truthyStrings.has(process.env[`TIMING`]);
 export const JWT_KEY = memoize0(() => {
   return Buffer.from(nonNullable(process.env.PYLY_JWT_KEY_BASE64), `base64`);
 });
+
+export const GEMINI_IMAGE_API_KEY =
+  typeof process.env[`PYLY_GEMINI_IMAGE_API_KEY`] === `string` &&
+  process.env[`PYLY_GEMINI_IMAGE_API_KEY`].length > 0
+    ? process.env[`PYLY_GEMINI_IMAGE_API_KEY`]
+    : null;

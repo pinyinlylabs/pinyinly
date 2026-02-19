@@ -44,6 +44,8 @@ declare global {
       PYLY_ASSETS_R2_BUCKET?: string;
       PYLY_ASSETS_R2_ENDPOINT?: string;
       PYLY_ASSETS_R2_SECRET_ACCESS_KEY?: string;
+      // Gemini API
+      PYLY_GEMINI_IMAGE_API_KEY?: string;
       // Other
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;

@@ -1,24 +1,12 @@
-import { preflightCheckEnvVars } from "@/util/env";
+import { GEMINI_IMAGE_API_KEY, preflightCheckEnvVars } from "@/util/env";
 import { GoogleGenAI } from "@google/genai";
 import { invariant } from "@pinyinly/lib/invariant";
 
-const DEFAULT_GEMINI_MODEL = `gemini-2.5-flash-image`;
-
-function getGeminiConfig(): {
-  apiKey: string;
-  model: string;
-} {
-  const apiKey = String(process.env[`PYLY_GEMINI_IMAGE_API_KEY`] ?? ``);
-  const model = DEFAULT_GEMINI_MODEL;
-
-  if (preflightCheckEnvVars) {
-    invariant(
-      apiKey.length > 0,
-      `PYLY_GEMINI_IMAGE_API_KEY is required for image generation`,
-    );
-  }
-
-  return { apiKey, model };
+if (preflightCheckEnvVars) {
+  invariant(
+    GEMINI_IMAGE_API_KEY != null,
+    `PYLY_GEMINI_IMAGE_API_KEY is required`,
+  );
 }
 
 /**
@@ -36,13 +24,8 @@ export async function generateImage(opts: {
   prompt: string;
   styleImageData?: string;
 }): Promise<{ buffer: Buffer; mimeType: string }> {
-  const { apiKey, model } = getGeminiConfig();
-
-  if (apiKey.length === 0) {
-    throw new Error(`Missing PYLY_GEMINI_IMAGE_API_KEY`);
-  }
-
-  const client = new GoogleGenAI({ apiKey });
+  invariant(GEMINI_IMAGE_API_KEY != null);
+  const client = new GoogleGenAI({ apiKey: GEMINI_IMAGE_API_KEY });
 
   // Build parts array with optional style image
   const parts: Array<{
@@ -72,7 +55,7 @@ export async function generateImage(opts: {
   parts.push({ text: opts.prompt });
 
   const response = await client.models.generateContentStream({
-    model,
+    model: `gemini-2.5-flash-image`,
     config: {
       responseModalities: [`IMAGE`, `TEXT`],
     },

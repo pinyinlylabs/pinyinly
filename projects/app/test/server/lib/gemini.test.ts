@@ -1,4 +1,6 @@
 import { generateImage } from "#server/lib/gemini.ts";
+import * as env from "#util/env.ts";
+import * as genai from "@google/genai";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 type MockStream = AsyncIterable<{
@@ -20,24 +22,7 @@ const { mockGenerateContentStream } = vi.hoisted(() => {
   };
 });
 
-vi.mock(`@google/genai`, () => {
-  return {
-    GoogleGenAI: class GoogleGenAI {
-      models = {
-        generateContentStream: (...args: unknown[]) =>
-          mockGenerateContentStream(...args),
-      };
-
-      constructor() {
-        // no-op
-      }
-    },
-  };
-});
-
-const hasApiKey =
-  typeof process.env[`PYLY_GEMINI_IMAGE_API_KEY`] === `string` &&
-  process.env[`PYLY_GEMINI_IMAGE_API_KEY`]?.length > 0;
+vi.mock(import(`@google/genai`));
 
 const mockResponseBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
 const mockResponseMimeType = `image/png`;
@@ -65,8 +50,18 @@ describe(
   `generateImage suite` satisfies HasNameOf<typeof generateImage>,
   () => {
     beforeEach(() => {
-      mockGenerateContentStream.mockReset();
+      vi.mocked(genai.GoogleGenAI).mockImplementation(() => ({
+        models: {
+          // @ts-expect-error Mocking internal method for testing purposes
+          generateContentStream: async (...args: unknown[]) =>
+            mockGenerateContentStream(...args),
+        },
+      }));
       mockGenerateContentStream.mockImplementation(() => createMockStream());
+
+      vi.spyOn(env, `GEMINI_IMAGE_API_KEY`, `get`).mockReturnValue(
+        `mock-api-key-for-testing`,
+      );
     });
 
     test(`returns image data from text prompt`, async () => {
@@ -217,7 +212,7 @@ describe(
   },
 );
 
-describe.skipIf(!hasApiKey)(
+describe.skipIf(env.GEMINI_IMAGE_API_KEY == null)(
   `generateImage integration suite` satisfies HasNameOf<typeof generateImage>,
   () => {
     test(
@@ -225,6 +220,7 @@ describe.skipIf(!hasApiKey)(
       { timeout: 20000 },
       async () => {
         vi.doUnmock(`@google/genai`);
+        vi.doUnmock(`#util/env.ts`);
         vi.resetModules();
         const { generateImage: generateImageReal } = await import(
           `#server/lib/gemini.ts`
@@ -244,6 +240,7 @@ describe.skipIf(!hasApiKey)(
       { timeout: 20000 },
       async () => {
         vi.doUnmock(`@google/genai`);
+        vi.doUnmock(`#util/env.ts`);
         vi.resetModules();
         const { generateImage: generateImageReal } = await import(
           `#server/lib/gemini.ts`
