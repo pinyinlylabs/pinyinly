@@ -35,8 +35,6 @@ vi.mock(`@google/genai`, () => {
   };
 });
 
-process.env[`PYLY_GEMINI_IMAGE_API_KEY`] ??= `test-key`;
-
 const hasApiKey =
   typeof process.env[`PYLY_GEMINI_IMAGE_API_KEY`] === `string` &&
   process.env[`PYLY_GEMINI_IMAGE_API_KEY`]?.length > 0;
