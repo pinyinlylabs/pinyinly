@@ -1,45 +1,38 @@
-import { reactInvariant } from "@/client/react";
 import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { IconImage } from "@/client/ui/IconImage";
 import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";
-import { invariant } from "@pinyinly/lib/invariant";
 import type { Href } from "expo-router";
-import { Link, usePathname } from "expo-router";
-import type { TabTriggerProps, TabTriggerSlotProps } from "expo-router/ui";
-import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
+import { Link, Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import type { FunctionComponent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Fragment, useLayoutEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
+/**
+ * Check if a pathname should highlight a navigation item.
+ * Returns true if the pathname matches the href or is a child route.
+ */
+function isNavItemActive(pathname: string, href: string): boolean {
+  if (pathname === href) {
+    return true;
+  }
+  if (pathname.startsWith(href + `/`)) {
+    return true;
+  }
+  return false;
+}
+
 export default function MenuLayout() {
   return (
-    <Tabs
+    <View
       className={`
         flex-1 items-stretch self-stretch
 
         md:flex-row
       `}
     >
-      {/* ROUTE DECLARATIONS */}
-      <TabList className="hidden">
-        {navItems.map((section, sectionIndex) =>
-          section.items.map((item, itemIndex) => (
-            <TabTrigger
-              key={`${sectionIndex}-${itemIndex}`}
-              name={item.name}
-              href={item.href}
-            />
-          )),
-        )}
-        {/* This is needed to make the route actually work with expo-router. */}
-        <TabTrigger name="sound" href="/sounds/[id]" />
-        <TabTrigger name="wiki-hanzi" href="/wiki/[hanzi]" />
-        <TabTrigger name="wiki-hint" href="/wiki/[hanzi]/edit/[meaningKey]" />
-      </TabList>
-
       {/* Mobile header nav */}
       <MobileTopMenu
         className="sm:hidden"
@@ -82,13 +75,17 @@ export default function MenuLayout() {
                   <Fragment key={sectionIndex}>
                     {/* GAP */}
                     {sectionIndex === 0 ? null : (
-                      <View className={`invisible h-[40px]`} />
+                      <View className="invisible h-[40px]" />
                     )}
                     {section.title == null ? null : (
                       <DesktopNavGroupTitle name={section.title} />
                     )}
                     {section.items.map((item, itemIndex) => (
-                      <DesktopNavGroupItem key={itemIndex} name={item.name} />
+                      <DesktopNavItem
+                        key={itemIndex}
+                        name={item.name}
+                        href={item.href}
+                      />
                     ))}
                   </Fragment>
                 ))}
@@ -104,11 +101,14 @@ export default function MenuLayout() {
                   <Fragment key={sectionIndex}>
                     {/* GAP */}
                     {sectionIndex === 0 ? null : (
-                      <View className={`invisible h-[40px]`} />
+                      <View className="invisible h-[40px]" />
                     )}
-
                     {section.items.map((item, itemIndex) => (
-                      <DesktopNavSubtleItem key={itemIndex} name={item.name} />
+                      <DesktopNavSubtleItem
+                        key={itemIndex}
+                        name={item.name}
+                        href={item.href}
+                      />
                     ))}
                   </Fragment>
                 ))}
@@ -124,7 +124,7 @@ export default function MenuLayout() {
             menu-lg:w-[600px] menu-lg:max-w-[600px] menu-lg:flex-none
           `}
         >
-          <TabSlot />
+          <Stack screenOptions={{ headerShown: false }} />
         </View>
 
         {/* Right side */}
@@ -139,9 +139,8 @@ export default function MenuLayout() {
         ></View>
       </ScrollView>
 
-      {/* is this needed? */}
       <StatusBar style="auto" />
-    </Tabs>
+    </View>
   );
 }
 
@@ -153,17 +152,30 @@ function DesktopNavGroupTitle({ name }: { name: string }) {
   );
 }
 
-interface TabTriggerChildProps extends Pick<
-  TabTriggerSlotProps,
-  `isFocused` | `href`
-> {
+interface NavItemProps {
   name: string;
+  href: Href;
 }
 
-const DesktopNavSubtleItem = customTabTrigger(
-  ({ name, isFocused: _isFocused, ...rest }) => {
-    return (
-      <Pressable {...rest}>
+const DesktopNavItem = ({ name, href }: NavItemProps) => {
+  const pathname = usePathname();
+  const isActive = isNavItemActive(pathname, href as string);
+
+  return (
+    <Link href={href} asChild>
+      <Pressable className={buttonContainerClass({ isFocused: isActive })}>
+        <Text className="font-sans text-sm/normal font-bold uppercase text-fg">
+          {name}
+        </Text>
+      </Pressable>
+    </Link>
+  );
+};
+
+const DesktopNavSubtleItem = ({ name, href }: NavItemProps) => {
+  return (
+    <Link href={href} asChild>
+      <Pressable>
         <Text
           className={`
             font-sans text-sm/[32px] font-bold uppercase text-fg-dim
@@ -174,27 +186,14 @@ const DesktopNavSubtleItem = customTabTrigger(
           {name}
         </Text>
       </Pressable>
-    );
-  },
-);
-
-const DesktopNavGroupItem = customTabTrigger(({ isFocused, name, ...rest }) => {
-  return (
-    <Pressable {...rest}>
-      <View className={buttonContainerClass({ isFocused })}>
-        <Text className="font-sans text-sm/normal font-bold uppercase text-fg">
-          {name}
-        </Text>
-      </View>
-    </Pressable>
+    </Link>
   );
-});
+};
 
 function MobileNavTrigger() {
   const [isOpen, setIsOpen] = useState(false);
   const pathName = usePathname();
 
-  // Close the menu when the screen size is large enough.
   const visualViewport = useVisualViewportSize();
   const isSm = visualViewport != null && visualViewport.width >= 640;
   useLayoutEffect(() => {
@@ -245,25 +244,29 @@ function MobileNavTrigger() {
                 .map((section, sectionIndex) => (
                   <MobileNavGroup key={sectionIndex} title={section.title}>
                     {section.items.map((item, itemIndex) => (
-                      <MobileNavGroupItem key={itemIndex} name={item.name} />
+                      <MobileNavItem
+                        key={itemIndex}
+                        name={item.name}
+                        href={item.href}
+                      />
                     ))}
                   </MobileNavGroup>
                 ))}
-
-              {/* GAP */}
 
               <View className="items-start px-4">
                 {navItems
                   .filter((section) => section.primary !== true)
                   .map((section, sectionIndex) => (
                     <Fragment key={sectionIndex}>
-                      {/* GAP */}
                       {sectionIndex === 0 ? null : (
-                        <View className={`invisible h-[40px]`} />
+                        <View className="invisible h-[40px]" />
                       )}
-
                       {section.items.map((item, itemIndex) => (
-                        <MobileNavSubtleItem key={itemIndex} name={item.name} />
+                        <MobileNavSubtleItem
+                          key={itemIndex}
+                          name={item.name}
+                          href={item.href}
+                        />
                       ))}
                     </Fragment>
                   ))}
@@ -290,16 +293,18 @@ function MobileNavGroup({
           <Text className="pyly-body-dt">{title}</Text>
         </View>
       )}
-      <View className={`gap-0.5 overflow-hidden rounded-xl`}>{children}</View>
+      <View className="gap-0.5 overflow-hidden rounded-xl">{children}</View>
     </View>
   );
 }
 
-const MobileNavGroupItem = customTabTrigger(
-  ({ name, isFocused = false, ...rest }) => {
-    return (
+const MobileNavItem = ({ name, href }: NavItemProps) => {
+  const pathname = usePathname();
+  const isActive = isNavItemActive(pathname, href as string);
+
+  return (
+    <Link href={href} asChild>
       <Pressable
-        {...rest}
         className={`
           flex-row bg-bg-high py-2.5 pl-4 pr-3
 
@@ -308,17 +313,17 @@ const MobileNavGroupItem = customTabTrigger(
       >
         <Text className="pyly-button-outline">{name}</Text>
         <View className="flex-1 items-end">
-          {isFocused ? <IconImage icon="check" size={24} /> : null}
+          {isActive ? <IconImage icon="check" size={24} /> : null}
         </View>
       </Pressable>
-    );
-  },
-);
+    </Link>
+  );
+};
 
-const MobileNavSubtleItem = customTabTrigger(
-  ({ name, isFocused: _isFocused, ...rest }) => {
-    return (
-      <Pressable {...rest}>
+const MobileNavSubtleItem = ({ name, href }: NavItemProps) => {
+  return (
+    <Link href={href} asChild>
+      <Pressable>
         <Text
           className={`
             font-sans text-sm/[32px] font-bold uppercase text-fg-dim
@@ -329,9 +334,9 @@ const MobileNavSubtleItem = customTabTrigger(
           {name}
         </Text>
       </Pressable>
-    );
-  },
-);
+    </Link>
+  );
+};
 
 function MobileTopMenu({
   leftButton,
@@ -352,15 +357,10 @@ function MobileTopMenu({
         ${className ?? ``}
       `}
     >
-      {/* Left icons */}
       <View className="w-[32px] shrink">{leftButton ?? null}</View>
-
-      {/* Middle title */}
       <View className="flex-1 items-center">
         <Text className="pyly-body-heading">{title}</Text>
       </View>
-
-      {/* Right icons */}
       <View className="w-[32px] shrink">{rightButton ?? null}</View>
     </View>
   );
@@ -368,7 +368,7 @@ function MobileTopMenu({
 
 const buttonContainerClass = tv({
   base: `
-    h-[32px] flex-1 items-end justify-center px-[24px]
+    h-[32px] flex-row items-center justify-end px-[24px]
 
     hover:bg-fg/5
   `,
@@ -384,21 +384,10 @@ const navItems: NavGroup[] = [
     title: `Learning`,
     primary: true,
     items: [
-      // { name: `Overview`, href: `/overview` },
       { name: `Wiki`, href: `/wiki` as const },
       { name: `Sounds`, href: `/sounds` as const },
       { name: `Skills`, href: `/skills` },
       { name: `History`, href: `/history` },
-      // { name: `Tutoring`, href: `/tutoring` },
-    ] satisfies NavItem[],
-  },
-  {
-    title: `Courses`,
-    primary: true,
-    items: [
-      { name: `HSK 1`, href: `/skills/hsk1` },
-      { name: `HSK 2`, href: `/skills/hsk2` },
-      { name: `HSK 3`, href: `/skills/hsk3` },
     ] satisfies NavItem[],
   },
   {
@@ -408,16 +397,9 @@ const navItems: NavGroup[] = [
       { name: `Profile`, href: `/settings/profile` },
       { name: `Accounts`, href: `/settings/accounts` },
       { name: `Appearance`, href: `/settings/appearance` },
-      // { name: `Courses`, href: `/settings/courses` },
-      // { name: `Notifications`, href: `/settings/notifications` },
-      // { name: `Billing`, href: `/settings/billing` },
-      // { name: `Support`, href: `/settings/support` },
     ] satisfies NavItem[],
   },
   {
-    // { name: "Logout", href: `/logout` },
-    // { name: "Terms", href: `/terms` },
-    // { name: "Privacy Policy", href: `/privacy` },
     items: [
       { name: `Developer`, href: `/settings/developer` },
       { name: `Acknowledgements`, href: `/acknowledgements` },
@@ -434,31 +416,4 @@ interface NavGroup {
   title?: string;
   items: NavItem[];
   primary?: boolean;
-}
-
-/**
- * Wrap a component in a `<TabTrigger>` and pass down the props.
- * @param Component
- * @returns
- */
-function customTabTrigger(Component: FunctionComponent<TabTriggerChildProps>) {
-  Component = __DEV__
-    ? // In dev mode add some extra validation checks to make sure that TabTrigger
-      // passes through the correct props to the child Pressable.
-      reactInvariant(Component, (props) => {
-        invariant(
-          `href` in props,
-          `customTabTrigger component missing required 'href' prop`,
-        );
-      })
-    : Component;
-
-  return Object.assign(
-    (props: Pick<TabTriggerProps, `name` | `style`>) => (
-      <TabTrigger {...props} asChild>
-        <Component name={props.name} />
-      </TabTrigger>
-    ),
-    { displayName: Component.displayName },
-  );
 }

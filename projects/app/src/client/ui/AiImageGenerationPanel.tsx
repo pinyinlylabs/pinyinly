@@ -189,11 +189,7 @@ export function AiImageGenerationPanel({
   }, [availableImages, showStyleSelector]);
 
   return (
-    <ScrollView
-      className="flex-1"
-      contentContainerClassName="gap-4 p-4"
-      scrollEnabled={false}
-    >
+    <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
       <View className="gap-1">
         <Text className="pyly-body-subheading">Image prompt</Text>
         <Text className="text-[14px] text-fg-dim">

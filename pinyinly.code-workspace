@@ -28,7 +28,7 @@
     },
     "tailwindCSS.experimental.classRegex": [
       // https://github.com/paolotiu/tailwind-intellisense-regex-list?tab=readme-ov-file#tailwind-variants
-      ["tv\\(([^)]*)\\)", "{?\\s?[\\w].*:\\s*?[\"'`]([^\"'`]*).*?,?\\s?}?"],
+      ["tv\\({([^]*?)}\\)", "[\"'`]([^\"'`]*)[\"'`]"],
     ],
     "files.exclude": {
       ".yarn/releases/*.*": true,
@@ -54,5 +54,12 @@
     "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace, 'Pinyinly Components'",
     "oxc.typeAware": true,
     "oxc.enable": true,
+    "tailwindCSS.classAttributes": [
+      "class",
+      "className",
+      "ngClass",
+      "class:list",
+      ".*ClassName",
+    ],
   },
 }
