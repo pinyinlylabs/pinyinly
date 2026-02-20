@@ -118,6 +118,10 @@ jobs:
       - uses: ./.github/actions/setup-tools
 
       - run: moon ci --color --job ${{ matrix.index }} --jobTotal 3
+        env:
+          # Exclude wiki content during CI builds to avoid bundling 3000+ MDX files.
+          # Wiki is lazy-loaded, so users won't be affected—preview will just show no wiki.
+          PYLY_SLIM_WIKI_FOR_TESTING: "true"
 
       - name: 🧾 Results
         uses: bradleyayers/moon-ci-retrospect@main
