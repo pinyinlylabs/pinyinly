@@ -1,6 +1,6 @@
 import type { HanziCharacter } from "@/data/model";
 import type { HanziWordMeaning, HanziWordWithMeaning } from "@/dictionary";
-import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
+import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { Text, View } from "react-native";
 import { HanziTile } from "./HanziTile";
 
@@ -56,7 +56,7 @@ function MultipleMeanings({
   const pinyins = meanings
     .map(([, meaning]) => meaning.pinyin?.[0])
     .filter((x) => x != null)
-    .filter(arrayFilterUniqueWithKey((x) => x));
+    .filter(arrayFilterUnique());
 
   return (
     <>

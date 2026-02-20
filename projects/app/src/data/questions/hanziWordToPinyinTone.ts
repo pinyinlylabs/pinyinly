@@ -23,10 +23,7 @@ import {
   hanziFromHanziWord,
   loadDictionary,
 } from "@/dictionary";
-import {
-  arrayFilterUniqueWithKey,
-  emptyArray,
-} from "@pinyinly/lib/collections";
+import { arrayFilterUnique, emptyArray } from "@pinyinly/lib/collections";
 import { identicalInvariant, invariant } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import {
@@ -118,7 +115,7 @@ export async function makeQuestionContext(
 
   const pinyinAnswersToneless = pinyinAnswers
     .map((p) => splitPinyinUnitTone(p).tonelessUnit)
-    .filter(arrayFilterUniqueWithKey((x) => x));
+    .filter(arrayFilterUnique());
 
   const ctx: QuestionContext = {
     usedHanzi: new Set([hanzi]),

@@ -1,4 +1,5 @@
 import {
+  arrayFilterUnique,
   deepTransform,
   makeRange,
   mapInvert,
@@ -466,3 +467,137 @@ describe(`maxK suite` satisfies HasNameOf<typeof maxK>, () => {
     expect(result).toEqual([3, 3, 2]);
   });
 });
+
+describe(
+  `arrayFilterUnique suite` satisfies HasNameOf<typeof arrayFilterUnique>,
+  () => {
+    test(`filters out duplicate numbers with default key function`, () => {
+      const arr = [1, 2, 1, 3, 2, 4];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([1, 2, 3, 4]);
+    });
+
+    test(`filters out duplicate strings with default key function`, () => {
+      const arr = [`apple`, `banana`, `apple`, `cherry`, `banana`];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([`apple`, `banana`, `cherry`]);
+    });
+
+    test(`preserves order of first occurrence`, () => {
+      const arr = [5, 1, 3, 1, 5, 2];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([5, 1, 3, 2]);
+    });
+
+    test(`handles empty array`, () => {
+      const arr: number[] = [];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([]);
+    });
+
+    test(`handles single element`, () => {
+      const arr = [42];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([42]);
+    });
+
+    test(`returns all elements when all are unique`, () => {
+      const arr = [1, 2, 3, 4, 5];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    test(`filters with custom key function on objects`, () => {
+      const arr = [
+        { id: 1, name: `Alice` },
+        { id: 2, name: `Bob` },
+        { id: 1, name: `Alice2` },
+        { id: 3, name: `Charlie` },
+      ];
+      const result = arr.filter(arrayFilterUnique((x) => x.id));
+      expect(result).toEqual([
+        { id: 1, name: `Alice` },
+        { id: 2, name: `Bob` },
+        { id: 3, name: `Charlie` },
+      ]);
+    });
+
+    test(`filters with key function extracting nested property`, () => {
+      const arr = [
+        { user: { id: 1 } },
+        { user: { id: 2 } },
+        { user: { id: 1 } },
+      ];
+      const result = arr.filter(arrayFilterUnique((x) => x.user.id));
+      expect(result).toEqual([{ user: { id: 1 } }, { user: { id: 2 } }]);
+    });
+
+    test(`handles mixed type key functions`, () => {
+      const arr = [`a`, `b`, `a`, `c`, `b`];
+      const result = arr.filter(arrayFilterUnique((x) => x.length));
+      expect(result).toEqual([`a`]);
+    });
+
+    test(`filters duplicates with null/undefined values`, () => {
+      const arr = [1, null, 2, null, undefined, 2, undefined];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([1, null, 2, undefined]);
+    });
+
+    test(`uses Set semantics for key comparison`, () => {
+      const arr = [0, -0, Number.NaN, Number.NaN, 1];
+      const result = arr.filter(arrayFilterUnique());
+      // Note: In JavaScript Sets, 0 and -0 are considered equal,
+      // and NaN is also considered equal to itself (SameValueZero)
+      expect(result).toEqual([0, Number.NaN, 1]);
+    });
+
+    test(`works with reference equality for objects`, () => {
+      const obj1 = { id: 1 };
+      const obj2 = { id: 1 };
+      const obj3 = { id: 2 };
+      const arr = [obj1, obj2, obj3, obj1];
+      const result = arr.filter(arrayFilterUnique());
+      expect(result).toEqual([obj1, obj2, obj3]);
+    });
+
+    test(`filters with stringified JSON key function`, () => {
+      const arr = [
+        { a: 1, b: 2 },
+        { a: 1, b: 2 },
+        { a: 1, b: 3 },
+      ];
+      const result = arr.filter(arrayFilterUnique((x) => JSON.stringify(x)));
+      expect(result).toEqual([
+        { a: 1, b: 2 },
+        { a: 1, b: 3 },
+      ]);
+    });
+
+    test(`maintains independent instances`, () => {
+      const filter1 = arrayFilterUnique();
+      const filter2 = arrayFilterUnique();
+      const arr1 = [1, 1, 2];
+      const arr2 = [1, 1, 2];
+
+      const result1 = arr1.filter(filter1);
+      const result2 = arr2.filter(filter2);
+
+      expect(result1).toEqual([1, 2]);
+      expect(result2).toEqual([1, 2]);
+    });
+
+    test(`does not filter across different filter instances`, () => {
+      const filter = arrayFilterUnique();
+      const arr1 = [1, 1];
+      const arr2 = [1, 1];
+
+      const result1 = arr1.filter(filter);
+      // Reusing the same filter instance will consider 1 as seen from arr1
+      const result2 = arr2.filter(filter);
+
+      expect(result1).toEqual([1]);
+      expect(result2).toEqual([]); // 1 is already seen
+    });
+  },
+);
