@@ -936,9 +936,6 @@ body {
   }
 }
 
-[data-pyly-react-navigation-screen] {
-  @apply absolute inset-0;
-}
 [data-pyly-react-navigation-screen][data-pyly-react-navigation-modal] {
-  @apply fixed;
+  @apply absolute inset-0 fixed;
 }
