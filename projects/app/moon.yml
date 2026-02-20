@@ -222,8 +222,26 @@ tasks:
       runInCI: false
 
   dev:
+    command: noop
+    deps:
+      - devExpo
+      - devServices
+    preset: server
+
+  devServices:
+    command: noop
+    deps:
+      - devInngest
+      - devMinio
+    preset: server
+
+  devExpo:
     command: yarn expo start
     preset: watcher
+    options:
+      # There's a memory leak that causes it to crash after a while, so we just
+      # restart it.
+      retryCount: 100
     env:
       # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
       # in the package.json or use the .mjs extension.
@@ -234,6 +252,13 @@ tasks:
   devInngest:
     command: npx -y inngest-cli@1.14.0 dev
     preset: watcher
+
+  devMinio:
+    command: minio server ./.minio --console-address :9001
+    preset: watcher
+    env:
+      MINIO_ROOT_USER: miniodev
+      MINIO_ROOT_PASSWORD: miniodev
 
   formatAssetJson:
     command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts

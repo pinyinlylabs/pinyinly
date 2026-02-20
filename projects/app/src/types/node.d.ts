@@ -1,6 +1,7 @@
 import type { AudioSpriteSource } from "@pinyinly/audio-sprites/client";
 import type { Asset } from "expo-asset";
 import type { AudioSource } from "expo-audio";
+import type { ImageSource } from "expo-image";
 
 declare global {
   type RnRequireSource = Parameters<(typeof Asset)[`fromModule`]>[0];
@@ -28,36 +29,53 @@ declare global {
     // Necessary to avoid noPropertyAccessFromIndexSignature errors. Keep in
     // sync with `env.ts`.
     interface ProcessEnv {
+      // Posthog
       EXPO_PUBLIC_POSTHOG_API_KEY?: string;
+      // Sentry
       EXPO_PUBLIC_SENTRY_DSN?: string;
+      PYLY_SENTRY_DEBUG?: string;
+      PYLY_SENTRY_ENABLED?: string;
+      PYLY_SENTRY_ENVIRONMENT?: string;
+      PYLY_SENTRY_PROFILES_SAMPLE_RATE?: string;
+      PYLY_SENTRY_TRACES_SAMPLE_RATE?: string;
+      // R2 Assets
+      EXPO_PUBLIC_ASSETS_CDN_BASE_URL?: string;
+      PYLY_ASSETS_R2_ACCESS_KEY_ID?: string;
+      PYLY_ASSETS_R2_BUCKET?: string;
+      PYLY_ASSETS_R2_ENDPOINT?: string;
+      PYLY_ASSETS_R2_SECRET_ACCESS_KEY?: string;
+      // Gemini API
+      PYLY_GEMINI_IMAGE_API_KEY?: string;
+      // Other
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;
-      /** @deprecated */
-      HHH_JWT_KEY_BASE64?: string;
-      PYLY_JWT_KEY_BASE64?: string;
-      /** @deprecated */
-      HHH_PREFLIGHT_CHECK_ENV_VARS?: string;
-      PYLY_PREFLIGHT_CHECK_ENV_VARS?: string;
-      /** @deprecated */
-      HHH_SENTRY_DEBUG?: string;
-      PYLY_SENTRY_DEBUG?: string;
-      /** @deprecated */
-      HHH_SENTRY_ENABLED?: string;
-      PYLY_SENTRY_ENABLED?: string;
-      /** @deprecated */
-      HHH_SENTRY_ENVIRONMENT?: string;
-      PYLY_SENTRY_ENVIRONMENT?: string;
-      /** @deprecated */
-      HHH_SENTRY_PROFILES_SAMPLE_RATE?: string;
-      PYLY_SENTRY_PROFILES_SAMPLE_RATE?: string;
-      /** @deprecated */
-      HHH_SENTRY_TRACES_SAMPLE_RATE?: string;
-      PYLY_SENTRY_TRACES_SAMPLE_RATE?: string;
       NODE_ENV?: string;
       POSTMARK_SERVER_TOKEN?: string;
+      PYLY_JWT_KEY_BASE64?: string;
+      PYLY_PREFLIGHT_CHECK_ENV_VARS?: string;
       SENTRY_DSN?: string;
     }
   }
+}
+
+declare module "*.jpg" {
+  const source: ImageSource;
+  export default source;
+}
+
+declare module "*.png" {
+  const source: ImageSource;
+  export default source;
+}
+
+declare module "*.webp" {
+  const source: ImageSource;
+  export default source;
+}
+
+declare module "*.gif" {
+  const source: ImageSource;
+  export default source;
 }
 
 export {};

@@ -1,20 +1,27 @@
-import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import {
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImagePromptSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziWordMeaningHintTextSetting,
+} from "@/client/userSettings";
 import { getWikiCharacterData } from "@/client/wiki";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
 import {
-  buildHanziWord,
   glossOrThrow,
   hanziFromHanziWord,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import { nanoid } from "@/util/nanoid";
+import { Link } from "expo-router";
 import { use, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
-import { AddCustomHintModal } from "./AddCustomHintModal";
+import { ScrollView, Text, View } from "react-native";
 import { AllHintsModal } from "./AllHintsModal";
-import { IconImage } from "./IconImage";
+import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
+import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
@@ -32,22 +39,27 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   // Load character data
   const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
-  const {
-    getHint,
-    setHint,
-    clearHint,
-    getCustomHints,
-    addCustomHint,
-    updateCustomHint,
-    removeCustomHint,
-  } = useHanziWordHint();
-  const selectedHint = getHint(hanziWord);
-  const customHints = getCustomHints(hanziWord);
+  const r = useRizzle();
+  const hintSettingKey = { hanziWord };
+  const hintSetting = useUserSetting(
+    hanziWordMeaningHintTextSetting,
+    hintSettingKey,
+  );
+  const explanationSetting = useUserSetting(
+    hanziWordMeaningHintExplanationSetting,
+    hintSettingKey,
+  );
+  const imageSetting = useUserSetting(
+    hanziWordMeaningHintImageSetting,
+    hintSettingKey,
+  );
+  const imagePromptSetting = useUserSetting(
+    hanziWordMeaningHintImagePromptSetting,
+    hintSettingKey,
+  );
 
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [showAllHintsModal, setShowAllHintsModal] = useState(false);
+  const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
+  const hintLengthTarget = 80;
 
   // Get available hints for this meaning
   const availableHints =
@@ -61,19 +73,115 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
       ? availableHints
       : (characterData?.mnemonic?.hints ?? []);
 
-  // Limit visible hints to 3 (combined preset + custom)
-  const VISIBLE_HINT_LIMIT = 3;
-  const totalHintCount = hintsToShow.length + customHints.length;
-  const hasMoreHints = totalHintCount > VISIBLE_HINT_LIMIT;
+  const hintSettingTextValue =
+    hintSetting.value?.text ??
+    (hintSetting.value as { t?: string } | null)?.t ??
+    null;
+  const selectedHint = hintSettingTextValue ?? null;
+  const currentPresetHint =
+    selectedHint == null
+      ? null
+      : (hintsToShow.find((hint) => hint.hint === selectedHint) ?? null);
 
-  // Calculate how many preset vs custom hints to show
-  const visiblePresetCount = Math.min(hintsToShow.length, VISIBLE_HINT_LIMIT);
-  const visibleCustomCount = Math.min(
-    customHints.length,
-    VISIBLE_HINT_LIMIT - visiblePresetCount,
+  const presetImageAssetIds = Array.from(
+    new Set(hintsToShow.flatMap((hint) => hint.imageAssetIds ?? [])),
   );
-  const visiblePresetHints = hintsToShow.slice(0, visiblePresetCount);
-  const visibleCustomHints = customHints.slice(0, visibleCustomCount);
+
+  const imageId = imageSetting.value?.imageId ?? null;
+
+  const setHintSettingValue = (
+    hintHanziWord: HanziWord,
+    value: string | null | undefined,
+  ) => {
+    const marshaledValue =
+      value == null
+        ? null
+        : hanziWordMeaningHintTextSetting.marshalValue({
+            hanziWord: hintHanziWord,
+            text: value,
+          });
+    const storedValue =
+      marshaledValue == null
+        ? null
+        : Object.fromEntries(
+            Object.entries(marshaledValue as Record<string, unknown>).filter(
+              ([key]) => key !== `h`,
+            ),
+          );
+
+    void r.mutate.setSetting({
+      key: hanziWordMeaningHintTextSetting.marshalKey({
+        hanziWord: hintHanziWord,
+      }),
+      value: storedValue,
+      now: new Date(),
+      historyId: nanoid(),
+    });
+  };
+
+  const setExplanationSettingValue = (
+    hintHanziWord: HanziWord,
+    value: string | null | undefined,
+  ) => {
+    const marshaledValue =
+      value == null
+        ? null
+        : hanziWordMeaningHintExplanationSetting.marshalValue({
+            hanziWord: hintHanziWord,
+            text: value,
+          });
+    const storedValue =
+      marshaledValue == null
+        ? null
+        : Object.fromEntries(
+            Object.entries(marshaledValue as Record<string, unknown>).filter(
+              ([key]) => key !== `h`,
+            ),
+          );
+
+    void r.mutate.setSetting({
+      key: hanziWordMeaningHintExplanationSetting.marshalKey({
+        hanziWord: hintHanziWord,
+      }),
+      value: storedValue,
+      now: new Date(),
+      historyId: nanoid(),
+    });
+  };
+
+  const setImageSettingValue = (
+    hintHanziWord: HanziWord,
+    value: string | null | undefined,
+  ) => {
+    const marshaledValue =
+      value == null
+        ? null
+        : hanziWordMeaningHintImageSetting.marshalValue({
+            hanziWord: hintHanziWord,
+            imageId: value,
+          });
+    const storedValue =
+      marshaledValue == null
+        ? null
+        : Object.fromEntries(
+            Object.entries(marshaledValue as Record<string, unknown>).filter(
+              ([key]) => key !== `h`,
+            ),
+          );
+
+    void r.mutate.setSetting({
+      key: hanziWordMeaningHintImageSetting.marshalKey({
+        hanziWord: hintHanziWord,
+      }),
+      value: storedValue,
+      now: new Date(),
+      historyId: nanoid(),
+    });
+  };
+
+  const handleUploadError = (error: string) => {
+    console.error(`Upload error:`, error);
+  };
 
   // Get components for the lozenge
   const components: { hanzi: string | undefined; label: string }[] = [];
@@ -100,11 +208,37 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
   const primaryGloss = glossOrThrow(hanziWord, meaning);
   const alternativeGlosses = meaning?.gloss.slice(1) ?? [];
+  const fallbackHint = hintsToShow[0];
+  const currentHintText = selectedHint ?? fallbackHint?.hint ?? ``;
+  let currentHintExplanation = currentPresetHint?.explanation;
+  const explanationOverride =
+    explanationSetting.value?.text ??
+    (explanationSetting.value as { t?: string } | null)?.t ??
+    undefined;
+  currentHintExplanation ??=
+    selectedHint == null ? fallbackHint?.explanation : explanationOverride;
+  let currentHintImageIds: readonly string[] | null = null;
+  if (imageId == null) {
+    currentHintImageIds =
+      currentPresetHint?.imageAssetIds ?? fallbackHint?.imageAssetIds ?? null;
+  } else {
+    currentHintImageIds = [imageId];
+  }
+  const hasCurrentHint = currentHintText.length > 0;
+  const hasCustomHint = (hintSettingTextValue ?? ``).trim().length > 0;
+  const canOpenGallery = hintsToShow.length > 0;
 
   return (
     <ScrollView className="flex-1 bg-bg">
       {/* Header */}
       <View className="gap-3 bg-bg-high p-4">
+        <View className="flex-row items-center gap-2">
+          <Link href={`/wiki/${encodeURIComponent(hanzi)}`}>
+            <Text className="text-[13px] font-medium text-fg-dim">{hanzi}</Text>
+          </Link>
+          <Text className="text-[13px] text-fg-dim">/</Text>
+          <Text className="text-[13px] text-fg-dim">Edit</Text>
+        </View>
         <View className="flex-row items-baseline gap-2.5">
           <Text className="text-[19px] font-semibold text-fg-loud">
             {hanzi}
@@ -146,264 +280,126 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           </Text>
         </View>
 
-        {hintsToShow.length === 0 && customHints.length === 0 ? (
-          <View
-            className={`items-center gap-2 rounded-xl border-2 border-dashed border-fg/20 px-4 py-6`}
-          >
-            <IconImage
-              size={32}
-              source={require(`../../assets/icons/puzzle.svg`)}
-              className="text-fg-dim"
-            />
-            <Text className="text-center text-fg-dim">
-              No hints available for this character
-            </Text>
-          </View>
-        ) : (
+        <View className="gap-3">
           <View className="gap-2">
-            {/* Preset hints (limited) */}
-            {visiblePresetHints.map((h, index) => {
-              const isSelected = selectedHint === h.hint;
-              const hintHanziWord = buildHanziWord(hanzi, h.meaningKey);
-              return (
-                <HintOption
-                  key={`preset-${index}`}
-                  hint={h.hint}
-                  explanation={h.explanation}
-                  isSelected={isSelected}
-                  onPress={() => {
-                    setHint(hintHanziWord, h.hint);
-                  }}
-                />
-              );
-            })}
+            <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
+              <InlineEditableSettingText
+                variant="hint"
+                setting={hanziWordMeaningHintTextSetting}
+                settingKey={hintSettingKey}
+                placeholder="Add a hint"
+                maxLength={hintLengthTarget}
+                multiline
+                showCounterAtRatio={0.8}
+                overLimitMessage={`Keep hints under ${hintLengthTarget} characters. Move extra detail to the explanation.`}
+                renderDisplay={(value) => <Pylymark source={value} />}
+              />
 
-            {/* Custom hints (limited) */}
-            {visibleCustomHints.map((h, index) => {
-              const isSelected = selectedHint === h.hint;
-              return (
-                <CustomHintOption
-                  key={`custom-${index}`}
-                  hint={h.hint}
-                  explanation={h.explanation}
-                  isSelected={isSelected}
-                  onPress={() => {
-                    setHint(hanziWord, h.hint);
-                  }}
-                  onEdit={() => {
-                    setEditingIndex(index);
-                    setIsModalOpen(true);
-                  }}
-                  onDelete={() => {
-                    // Clear selection if this hint was selected
-                    if (selectedHint === h.hint) {
-                      clearHint(hanziWord);
-                    }
-                    removeCustomHint(hanziWord, index);
-                  }}
+              {hasCustomHint ? (
+                <InlineEditableSettingText
+                  variant="hintExplanation"
+                  setting={hanziWordMeaningHintExplanationSetting}
+                  settingKey={hintSettingKey}
+                  placeholder="Add an explanation"
+                  multiline
+                  renderDisplay={(value) => <Pylymark source={value} />}
                 />
-              );
-            })}
-
-            {/* See more button */}
-            {hasMoreHints && (
-              <RectButton
-                variant="bare"
-                onPress={() => {
-                  setShowAllHintsModal(true);
-                }}
-              >
-                See all {totalHintCount} hints
-              </RectButton>
-            )}
+              ) : null}
+            </View>
           </View>
-        )}
 
-        {/* Create your own button */}
-        <RectButton
-          variant="outline"
-          onPress={() => {
-            setEditingIndex(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <Text>Create your own hint</Text>
-        </RectButton>
-
-        {/* Clear selection button */}
-        {selectedHint != null && (
-          <View className="mt-2">
+          <View className="items-center">
             <RectButton
               variant="bare"
               onPress={() => {
-                clearHint(hanziWord);
+                setShowHintGalleryModal(true);
               }}
+              disabled={!canOpenGallery}
             >
-              Clear selection
+              Browse hints
             </RectButton>
           </View>
-        )}
+
+          {canOpenGallery ? null : (
+            <Text className="text-[13px] text-fg-dim">
+              No system hints available for this character
+            </Text>
+          )}
+        </View>
+
+        {/* Image selection section */}
+        <View className="gap-2 pt-2">
+          <View className="gap-1">
+            <Text className="pyly-body-subheading">Choose an image</Text>
+            <Text className="text-[14px] text-fg-dim">
+              Pick the image that should appear on the wiki page
+            </Text>
+          </View>
+
+          <InlineEditableSettingImage
+            setting={hanziWordMeaningHintImageSetting}
+            settingKey={hintSettingKey}
+            presetImageIds={presetImageAssetIds}
+            previewHeight={200}
+            tileSize={64}
+            enablePasteDropZone
+            enableAiGeneration
+            initialAiPrompt={
+              imagePromptSetting.value?.text ??
+              ([hintSetting.value?.text, explanationSetting.value?.text]
+                .filter((v) => v != null && v.length > 0)
+                .join(` - `) ||
+                (meaning == null
+                  ? `Create an image for ${hanzi}`
+                  : `Create an image representing ${glossOrThrow(hanziWord, meaning)}`))
+            }
+            frameConstraint={{ aspectRatio: 2 }}
+            onUploadError={handleUploadError}
+            onSaveAiPrompt={(prompt) => {
+              imagePromptSetting.setValue({
+                hanziWord,
+                text: prompt,
+              });
+            }}
+          />
+        </View>
       </View>
 
-      {/* Custom hint modal */}
-      {isModalOpen && (
-        <AddCustomHintModal
-          onDismiss={() => {
-            setIsModalOpen(false);
-            setEditingIndex(null);
-          }}
-          onSave={(hint, explanation) => {
-            if (editingIndex === null) {
-              addCustomHint(hanziWord, hint, explanation);
-            } else {
-              updateCustomHint(hanziWord, editingIndex, hint, explanation);
-            }
-            setIsModalOpen(false);
-            setEditingIndex(null);
-          }}
-          initialHint={
-            editingIndex === null ? undefined : customHints[editingIndex]?.hint
-          }
-          initialExplanation={
-            editingIndex === null
-              ? undefined
-              : customHints[editingIndex]?.explanation
-          }
-        />
-      )}
-
       {/* All hints modal */}
-      {showAllHintsModal && (
+      {showHintGalleryModal && (
         <AllHintsModal
           hanzi={hanzi}
           onDismiss={() => {
-            setShowAllHintsModal(false);
+            setShowHintGalleryModal(false);
           }}
-          presetHints={hintsToShow}
-          customHints={customHints}
-          selectedHint={selectedHint}
-          onSelectPresetHint={(hintHanziWord, hint) => {
-            setHint(hintHanziWord, hint);
-          }}
-          onSelectCustomHint={(hint) => {
-            setHint(hanziWord, hint);
-          }}
-          onEditCustomHint={(index) => {
-            setEditingIndex(index);
-            setIsModalOpen(true);
-          }}
-          onDeleteCustomHint={(index) => {
-            // Clear selection if this hint was selected
-            if (selectedHint === customHints[index]?.hint) {
-              clearHint(hanziWord);
-            }
-            removeCustomHint(hanziWord, index);
+          presetHints={hintsToShow.map((hint) => ({
+            hint: hint.hint,
+            explanation: hint.explanation,
+            imageIds: hint.imageAssetIds ?? null,
+            meaningKey: hint.meaningKey,
+          }))}
+          currentHint={
+            hasCurrentHint
+              ? {
+                  hint: currentHintText,
+                  explanation: currentHintExplanation,
+                  imageIds: currentHintImageIds,
+                }
+              : null
+          }
+          onSavePresetHint={(hintHanziWord, presetHint) => {
+            setHintSettingValue(hintHanziWord, presetHint.hint);
+            setExplanationSettingValue(
+              hintHanziWord,
+              presetHint.explanation ?? null,
+            );
+            setImageSettingValue(
+              hintHanziWord,
+              presetHint.imageIds?.[0] ?? null,
+            );
           }}
         />
       )}
     </ScrollView>
   );
 }
-
-function HintOption({
-  hint,
-  explanation,
-  isSelected,
-  onPress,
-}: {
-  hint: string;
-  explanation: string | undefined;
-  isSelected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress}>
-      <View className={hintOptionClass({ isSelected })}>
-        <Text className="text-[14px] font-semibold text-fg-loud">
-          <Pylymark source={hint} />
-        </Text>
-        {explanation != null && (
-          <Text className="text-[14px] text-fg">
-            <Pylymark source={explanation} />
-          </Text>
-        )}
-      </View>
-    </Pressable>
-  );
-}
-
-function CustomHintOption({
-  hint,
-  explanation,
-  isSelected,
-  onPress,
-  onEdit,
-  onDelete,
-}: {
-  hint: string;
-  explanation: string | undefined;
-  isSelected: boolean;
-  onPress: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress}>
-      <View className={hintOptionClass({ isSelected })}>
-        {/* Your hint badge */}
-        <View className="mb-1 flex-row items-center gap-2">
-          <View className="rounded-full bg-purple/20 px-2 py-0.5">
-            <Text className="text-[11px] font-medium text-purple">
-              Your hint
-            </Text>
-          </View>
-          <View className="flex-1" />
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            hitSlop={8}
-          >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/puzzle.svg`)}
-              className="text-fg-dim"
-            />
-          </Pressable>
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            hitSlop={8}
-          >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/close.svg`)}
-              className="text-fg-dim"
-            />
-          </Pressable>
-        </View>
-        <Text className="text-[14px] font-semibold text-fg-loud">
-          <Pylymark source={hint} />
-        </Text>
-        {explanation != null && (
-          <Text className="text-[14px] text-fg">
-            <Pylymark source={explanation} />
-          </Text>
-        )}
-      </View>
-    </Pressable>
-  );
-}
-
-const hintOptionClass = tv({
-  base: `gap-1 rounded-lg border-2 p-3`,
-  variants: {
-    isSelected: {
-      true: `border-cyan bg-cyan/10`,
-      false: `border-fg-bg10 bg-fg-bg5`,
-    },
-  },
-});

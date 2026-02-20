@@ -20,12 +20,8 @@
 
 ## CRITICAL: Verify code changes
 
-After making code changes, verify the changes by running
-`moon run :lint :test :typecheck :typecheck`. This is faster than running `moon ci`.
-
-## CRITICAL: pre-commit checks
-
-Before committing code, always manually run `moon ci`. Only open a PR after this passes.
+After making code changes, automatically verify the changes by running
+`moon run :lint :test :typecheck :fmt`. This is faster than running `moon ci`.
 
 ## Project-Specific Patterns & Conventions
 
@@ -42,6 +38,8 @@ Before committing code, always manually run `moon ci`. Only open a PR after this
   Content is auto-loaded.
 - **Tests:** Mirror `src/` structure in `test/` (e.g., `src/util/date.ts` →
   `test/util/date.test.ts`).
+
+  New utility functions should have tests.
 
 ## References
 

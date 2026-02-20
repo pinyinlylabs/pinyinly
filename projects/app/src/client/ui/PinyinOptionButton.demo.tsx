@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { View } from "react-native";
 

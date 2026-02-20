@@ -2,6 +2,8 @@ import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
 import { z } from "zod/v4";
 
+const isString = (x: unknown): x is string => typeof x === `string`;
+
 export type Skill =
   | DeprecatedSkill
   | HanziWordSkill
@@ -44,6 +46,8 @@ export type PinyinFinalAssociationSkill =
  * - Tones: Single digit between 1 and 5, inclusive.
  */
 export type PinyinSoundId = string & z.BRAND<`PinyinSoundId`>;
+export const pinyinSoundIdSchema = z.custom<PinyinSoundId>(isString);
+
 /**
  * An ID for a group of pinyin sounds.
  *
@@ -51,6 +55,7 @@ export type PinyinSoundId = string & z.BRAND<`PinyinSoundId`>;
  * future user-defined groups may be added and these will have dynamic IDs.
  */
 export type PinyinSoundGroupId = string & z.BRAND<`PinyinSoundGroupId`>;
+export const pinyinSoundGroupIdSchema = z.custom<PinyinSoundGroupId>(isString);
 
 export interface BaseSrsState {
   prevReviewAt: Date;
@@ -63,6 +68,21 @@ export const srsKindSchema = z.enum({
 });
 export const SrsKind = srsKindSchema.enum;
 export type SrsKind = z.infer<typeof srsKindSchema>;
+
+/**
+ * Asset upload status for tracking optimistic uploads.
+ *
+ * - `pending`: Asset upload has been initiated but not confirmed
+ * - `uploaded`: Asset has been successfully uploaded to storage
+ * - `failed`: Asset upload failed
+ */
+export const assetStatusKindSchema = z.enum({
+  Pending: `debug--Pending`,
+  Uploaded: `debug--Uploaded`,
+  Failed: `debug--Failed`,
+});
+export const AssetStatusKind = assetStatusKindSchema.enum;
+export type AssetStatusKind = z.infer<typeof assetStatusKindSchema>;
 
 /**
  * A placeholder to force the code to be structured to allow multiple SRS
@@ -210,24 +230,13 @@ export type HanziCharacter = string & z.BRAND<`HanziCharacter`>;
  */
 export type HanziText = (string & z.BRAND<`HanziText`>) | HanziCharacter;
 
-export const hanziTextSchema = z.custom<HanziText>(
-  (x) => typeof x === `string`,
-);
+export const hanziTextSchema = z.custom<HanziText>(isString);
 export const pylyMarkSchema = z.string();
-export const hanziWordSchema = z.custom<HanziWord>(
-  (x) => typeof x === `string`,
-);
-export const hanziCharacterSchema = z.custom<HanziCharacter>(
-  (x) => typeof x === `string`,
-);
+export const hanziWordSchema = z.custom<HanziWord>(isString);
+export const hanziCharacterSchema = z.custom<HanziCharacter>(isString);
 
-export const pinyinTextSchema = z.custom<PinyinText>(
-  (x) => typeof x === `string`,
-);
-
-export const pinyinUnitSchema = z.custom<PinyinUnit>(
-  (x) => typeof x === `string`,
-);
+export const pinyinTextSchema = z.custom<PinyinText>(isString);
+export const pinyinUnitSchema = z.custom<PinyinUnit>(isString);
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss
@@ -687,6 +696,7 @@ export const wikiCharacterDataSchema = z.strictObject({
             meaningKey: z.string(),
             hint: z.string(),
             explanation: z.string().optional(),
+            imageAssetIds: z.array(z.string()).optional(),
           }),
         )
         .optional(),

@@ -8,8 +8,8 @@ import {
 } from "#data/questions/hanziWordToPinyinTone.ts";
 import { hanziWordToPinyinTone } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary.ts";
+import { 汉字 } from "#test/data/helpers.ts";
 import { describe, expect, test } from "vitest";
-import { 汉字 } from "../helpers.ts";
 
 describe(
   `tryHanziDistractor suite` satisfies HasNameOf<typeof tryHanziDistractor>,

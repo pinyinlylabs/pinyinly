@@ -8,6 +8,9 @@
 # Inngest
 /.inngest
 
+# Minio
+/.minio
+
 # Native
 *.orig.*
 *.jks

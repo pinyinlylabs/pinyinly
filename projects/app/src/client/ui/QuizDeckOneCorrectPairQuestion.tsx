@@ -1,39 +1,39 @@
-import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
+import { useMultiChoiceQuizTimer } from "@/client/ui/hooks/useMultiChoiceQuizTimer";
 import {
   autoCheckUserSetting,
   useUserSetting,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
+import { QuestionFlagKind } from "@/data/model";
 import type {
   MistakeType,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
   UnsavedSkillRating,
 } from "@/data/model";
-import { QuestionFlagKind } from "@/data/model";
-import type { OneCorrectPairQuestionGrade } from "@/data/questions/oneCorrectPair";
 import {
   gradeOneCorrectPairQuestion,
   oneCorrectPairChoiceText,
 } from "@/data/questions/oneCorrectPair";
+import type { OneCorrectPairQuestionGrade } from "@/data/questions/oneCorrectPair";
 import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
-import type { ReactNode } from "react";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NewSkillModal } from "./NewSkillModal";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
+import { TextAnswerButton } from "./TextAnswerButton";
+import {
+  ratingToButtonState,
+  textAnswerButtonFontSize,
+} from "./TextAnswerButton.utils";
 import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
-} from "./TextAnswerButton";
-import {
-  ratingToButtonState,
-  TextAnswerButton,
-  textAnswerButtonFontSize,
-} from "./TextAnswerButton";
+} from "./TextAnswerButton.utils";
 import { WikiHanziModal } from "./WikiHanziModal";
 
 const buttonThickness = 4;

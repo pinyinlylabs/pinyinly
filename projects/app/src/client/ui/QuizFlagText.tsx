@@ -18,10 +18,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <IconImage
-            className={flagIconClass()}
-            source={require(`../../assets/icons/dumbbell.svg`)}
-          />
+          <IconImage className={flagIconClass()} icon="dumbbell" />
           <Text className={flagTextClass()}>Hard question</Text>
         </View>
       );
@@ -33,10 +30,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-success)]`,
           })}
         >
-          <IconImage
-            className={flagIconClass()}
-            source={require(`../../assets/icons/plant-filled.svg`)}
-          />
+          <IconImage className={flagIconClass()} icon="plant-filled" />
           <Text className={flagTextClass()}>New skill</Text>
         </View>
       );
@@ -48,10 +42,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-warning)]`,
           })}
         >
-          <IconImage
-            className={flagIconClass()}
-            source={require(`../../assets/icons/shuffle.svg`)}
-          />
+          <IconImage className={flagIconClass()} icon="shuffle" />
           <Text className={flagTextClass()}>Other answer</Text>
         </View>
       );
@@ -63,10 +54,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <IconImage
-            className={flagIconClass()}
-            source={require(`../../assets/icons/alarm.svg`)}
-          />
+          <IconImage className={flagIconClass()} icon="alarm" />
           <Text className={flagTextClass()}>
             Overdue by{` `}
             {
@@ -94,10 +82,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-warning)]`,
           })}
         >
-          <IconImage
-            className={flagIconClass()}
-            source={require(`../../assets/icons/repeat.svg`)}
-          />
+          <IconImage className={flagIconClass()} icon="repeat" />
           <Text className={flagTextClass()}>Previous mistake</Text>
         </View>
       );
@@ -109,10 +94,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <IconImage
-            className={flagIconClass()}
-            source={require(`../../assets/icons/flag.svg`)}
-          />
+          <IconImage className={flagIconClass()} icon="flag" />
           <Text className={flagTextClass()}>Weak word</Text>
         </View>
       );

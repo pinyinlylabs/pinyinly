@@ -1,4 +1,3 @@
-// oxlint-disable typescript/no-deprecated
 import { memoize0 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 
@@ -13,8 +12,7 @@ const truthyStrings = new Set<string | undefined>([`true`, `1`]);
 // This isn't needed for `EXPO_PUBLIC_` environment variables as these are
 // already checked as build time.
 export const preflightCheckEnvVars = truthyStrings.has(
-  process.env.PYLY_PREFLIGHT_CHECK_ENV_VARS ??
-    process.env.HHH_PREFLIGHT_CHECK_ENV_VARS,
+  process.env.PYLY_PREFLIGHT_CHECK_ENV_VARS,
 );
 
 // oxlint-disable-next-line typescript/no-unsafe-argument
@@ -24,10 +22,11 @@ export const IS_CI = truthyStrings.has(process.env[`CI`]);
 export const IS_TIMING = truthyStrings.has(process.env[`TIMING`]);
 
 export const JWT_KEY = memoize0(() => {
-  return Buffer.from(
-    nonNullable(
-      process.env.PYLY_JWT_KEY_BASE64 ?? process.env.HHH_JWT_KEY_BASE64,
-    ),
-    `base64`,
-  );
+  return Buffer.from(nonNullable(process.env.PYLY_JWT_KEY_BASE64), `base64`);
 });
+
+export const GEMINI_IMAGE_API_KEY =
+  typeof process.env[`PYLY_GEMINI_IMAGE_API_KEY`] === `string` &&
+  process.env[`PYLY_GEMINI_IMAGE_API_KEY`].length > 0
+    ? process.env[`PYLY_GEMINI_IMAGE_API_KEY`]
+    : null;

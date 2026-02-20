@@ -1,9 +1,13 @@
 import { nanoid } from "#util/nanoid.ts";
 import type {
   ExtractVariableNames,
+  RizzleAliasedKey,
+  RizzleAliasName,
   RizzleCustom,
+  RizzleEntityMarshaled,
   RizzleIndexed,
   RizzleIndexTypes,
+  RizzleNullable,
   RizzleObject,
   RizzleObjectInput,
   RizzleObjectMarshaled,
@@ -12,6 +16,7 @@ import type {
   RizzleReplicache,
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
+  RizzleTypeAlias,
 } from "#util/rizzle.ts";
 import { keyPathVariableNames, r } from "#util/rizzle.ts";
 import type { IsEqual } from "@pinyinly/lib/types";
@@ -47,9 +52,7 @@ test(`string() key and value`, async () => {
   expect(getSpy).toHaveBeenCalledWith(`foo/1`);
 
   // Check that a ReadonlyJSONValue is parsed correctly.
-  getSpy.mockImplementationOnce(() =>
-    Promise.resolve({ id: `1`, name: `foo` }),
-  );
+  getSpy.mockImplementationOnce(async () => ({ id: `1`, name: `foo` }));
   await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
     id: `1`,
     name: `foo`,
@@ -229,7 +232,7 @@ test(`object()`, async () => {
     expect(getSpy.mock.calls[0]).toEqual([`foo/1`]);
 
     // Check that a ReadonlyJSONValue is parsed correctly.
-    getSpy.mockImplementationOnce(() => Promise.resolve({ id: `1`, n: `foo` }));
+    getSpy.mockImplementationOnce(async () => ({ id: `1`, n: `foo` }));
     await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
       id: `1`,
       name: `foo`,
@@ -330,12 +333,10 @@ test(`timestamp()`, async () => {
       [date.getTime(), date], // timestamp as number
       [date.getTime().toString(), date], // timestamp as string
     ] as const) {
-      vi.spyOn(tx, `get`).mockImplementationOnce(() =>
-        Promise.resolve({
-          id: `1`,
-          due: marshaled,
-        }),
-      );
+      vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
+        id: `1`,
+        due: marshaled,
+      }));
 
       await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
         id: `1`,
@@ -1284,11 +1285,11 @@ test(`replicache() mutator tx`, async () => {
 
   await db.mutate.incrementCounter({ id: `1` });
   await expect(
-    db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
+    db.replicache.query(async (tx) => db.query.counter.get(tx, { id: `1` })),
   ).resolves.toEqual({ id: `1`, count: 1 });
   await db.mutate.incrementCounter({ id: `1` });
   await expect(
-    db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
+    db.replicache.query(async (tx) => db.query.counter.get(tx, { id: `1` })),
   ).resolves.toEqual({ id: `1`, count: 2 });
 });
 
@@ -1311,12 +1312,13 @@ describe(`replicache() entity()`, async () => {
   test(`.set() only exposed to mutators`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
+        // oxlint-disable-next-line eslint(no-unused-expressions)
         db.text.set;
       },
     });
 
     // @ts-expect-error set() is not exposed on the query object
-
+    // oxlint-disable-next-line eslint(no-unused-expressions)
     db.query.text.set;
   });
 
@@ -1902,6 +1904,36 @@ typeChecks<RizzleObjectOutput<never>>(() => {
   >;
 });
 
+typeChecks<RizzleAliasName<never>>(() => {
+  type StringBase = RizzleCustom<string, string>;
+  type Aliased = RizzleTypeAlias<StringBase, `a`>;
+
+  true satisfies IsEqual<RizzleAliasName<StringBase>, undefined>;
+  true satisfies IsEqual<RizzleAliasName<Aliased>, `a`>;
+  true satisfies IsEqual<RizzleAliasName<RizzleOptional<Aliased>>, `a`>;
+  true satisfies IsEqual<RizzleAliasName<RizzleNullable<Aliased>>, `a`>;
+  true satisfies IsEqual<
+    RizzleAliasName<RizzleOptional<RizzleNullable<Aliased>>>,
+    `a`
+  >;
+});
+
+typeChecks<RizzleAliasedKey<never, never>>(() => {
+  type StringBase = RizzleCustom<string, string>;
+  type Aliased = RizzleTypeAlias<StringBase, `a`>;
+
+  true satisfies IsEqual<RizzleAliasedKey<StringBase, `name`>, `name`>;
+  true satisfies IsEqual<RizzleAliasedKey<Aliased, `name`>, `a`>;
+  true satisfies IsEqual<
+    RizzleAliasedKey<RizzleOptional<Aliased>, `name`>,
+    `a`
+  >;
+  true satisfies IsEqual<
+    RizzleAliasedKey<RizzleNullable<Aliased>, `name`>,
+    `a`
+  >;
+});
+
 test(
   `keyPathVariableNames()` satisfies HasNameOf<typeof keyPathVariableNames>,
   () => {
@@ -1914,4 +1946,175 @@ typeChecks<ExtractVariableNames<never>>(() => {
   true satisfies IsEqual<ExtractVariableNames<`a[b]`>, `b`>;
   true satisfies IsEqual<ExtractVariableNames<`a[b][c]`>, `b` | `c`>;
   true satisfies IsEqual<ExtractVariableNames<`a[b][c][d]`>, `b` | `c` | `d`>;
+});
+
+test(`marshaled types honor aliases`, () => {
+  const settings = r.entity(`settings/[id]`, {
+    id: r.string(),
+    soundId: r.string(`i`),
+    text: r.string(`t`),
+    meta: r.object({
+      inner: r.number(`n`),
+      plain: r.string(),
+    }),
+    tagged: r
+      .object({
+        flag: r.boolean(`f`),
+      })
+      .alias(`m`),
+  });
+
+  typeChecks(() => {
+    type Marshaled = RizzleEntityMarshaled<typeof settings>;
+    type Expected = {
+      id: string;
+      i: string;
+      t: string;
+      meta: {
+        n: number;
+        plain: string;
+      };
+      m: {
+        f: boolean;
+      };
+    };
+
+    true satisfies IsEqual<Marshaled, Expected>;
+  });
+});
+
+describe(`unmarshalValueSafe()`, () => {
+  test(`returns parsed output on valid data`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      count: r.number(),
+    });
+
+    const validData = { id: `123`, name: `test`, count: 42 };
+    const result = entity.unmarshalValueSafe(validData);
+
+    expect(result).toEqual(validData);
+  });
+
+  test(`returns null on invalid type`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      count: r.number(),
+    });
+
+    // Wrong type for count (should be number)
+    const invalidData = { id: `123`, name: `test`, count: `not-a-number` };
+    const result = entity.unmarshalValueSafe(invalidData);
+
+    expect(result).toBeNull();
+  });
+
+  test(`returns null on missing required field`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      count: r.number(),
+    });
+
+    // Missing required 'count' field
+    const incompleteData = { id: `123`, name: `test` };
+    const result = entity.unmarshalValueSafe(incompleteData);
+
+    expect(result).toBeNull();
+  });
+
+  test(`returns null on non-object input`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+    });
+
+    expect(entity.unmarshalValueSafe(null)).toBeNull();
+    expect(entity.unmarshalValueSafe(undefined)).toBeNull();
+    expect(entity.unmarshalValueSafe(`string`)).toBeNull();
+    expect(entity.unmarshalValueSafe(123)).toBeNull();
+    expect(entity.unmarshalValueSafe([])).toBeNull();
+  });
+
+  test(`handles nested objects with aliases`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      nested: r.object({
+        value: r.string(`v`),
+        flag: r.boolean(`f`),
+      }),
+    });
+
+    // Using alias keys (as they come from storage)
+    const marshaledData = { id: `123`, nested: { v: `test`, f: true } };
+    const result = entity.unmarshalValueSafe(marshaledData);
+
+    // Unmarshal converts aliases back to original field names
+    expect(result).toEqual({
+      id: `123`,
+      nested: { value: `test`, flag: true },
+    });
+  });
+
+  test(`returns null on invalid nested data`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      nested: r.object({
+        value: r.string(`v`),
+        flag: r.boolean(`f`),
+      }),
+    });
+
+    // Invalid: flag should be boolean, not string
+    const invalidData = { id: `123`, nested: { v: `test`, f: `not-boolean` } };
+    const result = entity.unmarshalValueSafe(invalidData);
+
+    expect(result).toBeNull();
+  });
+
+  test(`with optional fields`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      optional: r.string().optional(),
+    });
+
+    // Without optional field
+    const dataWithoutOptional = { id: `123`, name: `test` };
+    expect(entity.unmarshalValueSafe(dataWithoutOptional)).toEqual(
+      dataWithoutOptional,
+    );
+
+    // With optional field
+    const dataWithOptional = {
+      id: `123`,
+      name: `test`,
+      optional: `present`,
+    };
+    expect(entity.unmarshalValueSafe(dataWithOptional)).toEqual(
+      dataWithOptional,
+    );
+  });
+
+  test(`with nullable fields`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      nullable: r.string().nullable(),
+    });
+
+    // Nullable field with null value
+    const dataWithNull = { id: `123`, name: `test`, nullable: null };
+    expect(entity.unmarshalValueSafe(dataWithNull)).toEqual(dataWithNull);
+
+    // Nullable field with string value
+    const dataWithValue = { id: `123`, name: `test`, nullable: `value` };
+    expect(entity.unmarshalValueSafe(dataWithValue)).toEqual(dataWithValue);
+
+    // Nullable field with wrong type returns null
+    const dataWithWrongType = { id: `123`, name: `test`, nullable: 123 };
+    expect(entity.unmarshalValueSafe(dataWithWrongType)).toBeNull();
+  });
 });

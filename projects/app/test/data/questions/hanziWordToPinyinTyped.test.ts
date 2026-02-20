@@ -10,9 +10,8 @@ import {
 } from "#data/questions/hanziWordToPinyinTyped.ts";
 import { hanziWordToPinyinTyped } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary.ts";
+import { 拼音 } from "#test/data/helpers.ts";
 import { describe, expect, test } from "vitest";
-import { 拼音 } from "../helpers.ts";
-
 describe(
   `shouldAutoSubmitPinyinTypedAnswer suite` satisfies HasNameOf<
     typeof shouldAutoSubmitPinyinTypedAnswer

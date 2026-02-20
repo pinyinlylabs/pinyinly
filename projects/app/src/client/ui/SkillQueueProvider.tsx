@@ -1,30 +1,18 @@
-import { useDb } from "@/client/hooks/useDb";
 import {
   dictionaryQuery,
   isStructuralHanziQuery,
   skillLearningGraphQuery,
 } from "@/client/query";
+import { useDb } from "@/client/ui/hooks/useDb";
 import type { Skill, SrsStateType } from "@/data/model";
-import type { LatestSkillRating, SkillReviewQueue } from "@/data/skills";
 import { skillReviewQueue } from "@/data/skills";
+import type { LatestSkillRating } from "@/data/skills";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import type { PropsWithChildren } from "react";
-import { createContext, useEffect, useMemo, useState } from "react";
-import type { DeepReadonly } from "ts-essentials";
-
-export type SkillQueueContextValue = DeepReadonly<
-  | {
-      loading: false;
-      reviewQueue: SkillReviewQueue;
-      version: number;
-    }
-  | {
-      loading: true;
-    }
->;
-
-const Context = createContext<SkillQueueContextValue | null>(null);
+import { SkillQueueContext } from "./contexts";
+import type { SkillQueueContextValue } from "./contexts";
 
 const mockable = {
   getMaxQueueItems: () => 1,
@@ -54,11 +42,19 @@ export const SkillQueueProvider = Object.assign(
     const {
       data: latestSkillRatingsData,
       isLoading: isLatestSkillRatingsLoading,
-    } = useLiveQuery((q) =>
-      q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
+    } = useLiveQuery(
+      (q) => q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
+      [db.latestSkillRatingsCollection],
     );
     const { data: skillStateData, isLoading: isSkillStatesLoading } =
-      useLiveQuery((q) => q.from({ skillState: db.skillStateCollection }));
+      useLiveQuery(
+        (q) => q.from({ skillState: db.skillStateCollection }),
+        [db.skillStateCollection],
+      );
+
+    const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
+      loading: true,
+    });
 
     const skillSrsStates = useMemo(
       () =>
@@ -106,6 +102,7 @@ export const SkillQueueProvider = Object.assign(
         maxQueueItems: mockable.getMaxQueueItems(),
       });
 
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setSkillQueue((prev) => ({
         loading: false,
         reviewQueue,
@@ -125,11 +122,11 @@ export const SkillQueueProvider = Object.assign(
       dictionary,
     ]);
 
-    const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
-      loading: true,
-    });
-
-    return <Context.Provider value={skillQueue}>{children}</Context.Provider>;
+    return (
+      <SkillQueueContext.Provider value={skillQueue}>
+        {children}
+      </SkillQueueContext.Provider>
+    );
   },
-  { Context, mockable },
+  { Context: SkillQueueContext, mockable },
 );

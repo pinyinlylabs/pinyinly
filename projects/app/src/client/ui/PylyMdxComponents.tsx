@@ -1,8 +1,8 @@
-import { useSoundEffect } from "@/client/hooks/useSoundEffect";
-import { useSoundEffectCycle } from "@/client/hooks/useSoundEffectCycle";
 import { pickChildren } from "@/client/react";
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
+import { useSoundEffectCycle } from "@/client/ui/hooks/useSoundEffectCycle";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { MDXComponents } from "./MDXComponents";
@@ -89,11 +89,7 @@ const Audio = ({ src }: { src: PylyAudioSource }) => {
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
-      <IconImage
-        source={require(`../../assets/icons/speaker-2.svg`)}
-        size={24}
-        className="text-fg-loud"
-      />
+      <IconImage icon="speaker-2" size={24} className="text-fg-loud" />
     </Pressable>
   );
 };
@@ -103,19 +99,15 @@ const Speech = ({ srcs }: { srcs: PylyAudioSource[] }) => {
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
-      <IconImage
-        source={require(`../../assets/icons/speaker-2.svg`)}
-        size={24}
-        className="text-fg-loud"
-      />
+      <IconImage icon="speaker-2" size={24} className="text-fg-loud" />
     </Pressable>
   );
 };
 
-function TranslatedComponent({ children }: PropsWithChildren) {
-  return <>{children}</>;
+function TranslatedComponent({ children }: PropsWithChildren): ReactNode {
+  return children;
 }
 
-function HanziComponent({ children }: PropsWithChildren) {
-  return <>{children}</>;
+function HanziComponent({ children }: PropsWithChildren): ReactNode {
+  return children;
 }

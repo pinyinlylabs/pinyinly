@@ -5,6 +5,7 @@ import {
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
   defaultPinyinSoundInstructions,
+  getDefaultFinalToneName,
   loadHhPinyinChart,
   loadHmmPinyinChart,
   loadMmPinyinChart,
@@ -14,6 +15,7 @@ import {
   matchAllPinyinUnitsWithIndexes,
   normalizePinyinText,
   normalizePinyinUnit,
+  normalizePinyinUnitForHintKey,
   pinyinUnitCount,
   pinyinUnitPattern,
   pinyinUnitSuggestions,
@@ -133,6 +135,24 @@ describe(
       [`nü`, `nü`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
+    });
+  },
+);
+
+describe(
+  `normalizePinyinUnitForHintKey fixtures` satisfies HasNameOf<
+    typeof normalizePinyinUnitForHintKey
+  >,
+  () => {
+    test.for([
+      [`huar2`, `huá`],
+      [`huār`, `huā`],
+      [`chuanr4`, `chuàn`],
+      [`r`, `r`],
+      [`er2`, `ér`],
+      [`er5`, `er`],
+    ] as const)(`%s → %s`, ([input, expected]) => {
+      expect(normalizePinyinUnitForHintKey(input)).toEqual(expected);
     });
   },
 );
@@ -707,3 +727,99 @@ async function testPinyinChart(
     ]),
   );
 }
+
+describe(`getDefaultFinalToneName`, () => {
+  test(`should use preposition format for location-like tone names`, () => {
+    expect(
+      getDefaultFinalToneName({
+        finalName: `River Stage`,
+        toneName: `Outside`,
+      }),
+    ).toBe(`Outside the River Stage`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: `River Stage`,
+        toneName: `Entry`,
+      }),
+    ).toBe(`Entry the River Stage`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: `Mountain Pass`,
+        toneName: `Inside`,
+      }),
+    ).toBe(`Inside the Mountain Pass`);
+  });
+
+  test(`should use final+tone format with lowercase for non-preposition tone names`, () => {
+    expect(
+      getDefaultFinalToneName({
+        finalName: `River Stage`,
+        toneName: `Entrance`,
+      }),
+    ).toBe(`River Stage entrance`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: `Bathroom`,
+        toneName: `Bathroom`,
+      }),
+    ).toBe(`Bathroom bathroom`);
+  });
+
+  test(`should handle empty strings`, () => {
+    expect(
+      getDefaultFinalToneName({
+        finalName: ``,
+        toneName: `Outside`,
+      }),
+    ).toBe(`Outside`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: `River Stage`,
+        toneName: ``,
+      }),
+    ).toBe(`River Stage`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: ``,
+        toneName: ``,
+      }),
+    ).toBe(``);
+  });
+
+  test(`should trim whitespace`, () => {
+    expect(
+      getDefaultFinalToneName({
+        finalName: `  River Stage  `,
+        toneName: `  Outside  `,
+      }),
+    ).toBe(`Outside the River Stage`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: `  River Stage  `,
+        toneName: `  Entrance  `,
+      }),
+    ).toBe(`River Stage entrance`);
+  });
+
+  test(`should handle case-insensitive preposition matching`, () => {
+    expect(
+      getDefaultFinalToneName({
+        finalName: `River Stage`,
+        toneName: `OUTSIDE`,
+      }),
+    ).toBe(`OUTSIDE the River Stage`);
+
+    expect(
+      getDefaultFinalToneName({
+        finalName: `River Stage`,
+        toneName: `outside`,
+      }),
+    ).toBe(`outside the River Stage`);
+  });
+});

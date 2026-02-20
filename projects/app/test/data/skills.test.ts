@@ -1,13 +1,7 @@
-import type { Skill, SrsStateType } from "#data/model.ts";
 import { SkillKind, SrsKind } from "#data/model.ts";
+import type { Skill, SrsStateType } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
-import type {
-  LatestSkillRating,
-  RankRules,
-  SkillLearningGraph,
-  SkillReviewQueue,
-} from "#data/skills.ts";
 import {
   computeSkillRating,
   getHanziWordRank,
@@ -21,20 +15,26 @@ import {
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
+import type {
+  LatestSkillRating,
+  RankRules,
+  SkillLearningGraph,
+  SkillReviewQueue,
+} from "#data/skills.ts";
 import { getIsStructuralHanzi, loadDictionary } from "#dictionary.ts";
-import { Rating } from "#util/fsrs.ts";
-import { r } from "#util/rizzle.ts";
-import { invariant } from "@pinyinly/lib/invariant";
-import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { HistoryCommand } from "../data/helpers.ts";
 import {
   fsrsSrsState,
   mockSrsState,
   prettyQueue,
   seedSkillReviews as seedSkillHistory,
   时,
-} from "../data/helpers.ts";
-import { testReplicacheOptions } from "../util/rizzleHelpers.ts";
+} from "#test/data/helpers.ts";
+import type { HistoryCommand } from "#test/data/helpers.ts";
+import { testReplicacheOptions } from "#test/util/rizzleHelpers.ts";
+import { Rating } from "#util/fsrs.ts";
+import { r } from "#util/rizzle.ts";
+import { invariant } from "@pinyinly/lib/invariant";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const skillTest = test.extend<{
   isStructuralHanzi: Awaited<ReturnType<typeof getIsStructuralHanzi>>;

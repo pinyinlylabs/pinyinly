@@ -17,7 +17,7 @@ import type {
   HanziPinyinMistakeType,
   Skill,
 } from "./model";
-import { MistakeKind } from "./model";
+import { AssetStatusKind, MistakeKind } from "./model";
 import type { currentSchema } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
 
@@ -55,24 +55,6 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
     await tx.skillState.set(
       { skill },
       { skill, srs: srsStateFromFsrsState(fsrsState) },
-    );
-  },
-  async setPinyinSoundName(tx, { soundId, name }) {
-    const existing = await tx.pinyinSound.get({ soundId });
-    await tx.pinyinSound.set({ soundId }, { ...existing, soundId, name });
-  },
-  async setPinyinSoundGroupName(tx, { soundGroupId, name }) {
-    const existing = await tx.pinyinSoundGroup.get({ soundGroupId });
-    await tx.pinyinSoundGroup.set(
-      { soundGroupId },
-      { ...existing, soundGroupId, name },
-    );
-  },
-  async setPinyinSoundGroupTheme(tx, { soundGroupId, theme }) {
-    const existing = await tx.pinyinSoundGroup.get({ soundGroupId });
-    await tx.pinyinSoundGroup.set(
-      { soundGroupId },
-      { ...existing, soundGroupId, theme },
     );
   },
   async saveHanziGlossMistake(
@@ -151,8 +133,15 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       );
     }
   },
-  async setSetting(tx, { key, value }) {
+  async setSetting(tx, { key, value, skipHistory, historyId, now }) {
     await tx.setting.set({ key }, { key, value });
+
+    if (skipHistory !== true && historyId != null) {
+      await tx.settingHistory.set(
+        { id: historyId },
+        { id: historyId, key, value, createdAt: now },
+      );
+    }
   },
   async undoReview(tx, { reviewId, now }) {
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -222,5 +211,47 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         { skill, srs: srsStateFromFsrsState(fsrsState) },
       );
     }
+  },
+  async initAsset(tx, { assetId, contentType, contentLength, now }) {
+    await tx.asset.set(
+      { assetId },
+      {
+        assetId,
+        status: AssetStatusKind.Pending,
+        contentType,
+        contentLength,
+        createdAt: now,
+      },
+    );
+  },
+  async confirmAssetUpload(tx, { assetId, now }) {
+    const existing = await tx.asset.get({ assetId });
+    if (existing == null) {
+      // Asset record doesn't exist, create it as uploaded
+      // This can happen if the mutation was lost but upload succeeded
+      return;
+    }
+    await tx.asset.set(
+      { assetId },
+      {
+        ...existing,
+        status: AssetStatusKind.Uploaded,
+        uploadedAt: now,
+      },
+    );
+  },
+  async failAssetUpload(tx, { assetId, errorMessage, now: _now }) {
+    const existing = await tx.asset.get({ assetId });
+    if (existing == null) {
+      return;
+    }
+    await tx.asset.set(
+      { assetId },
+      {
+        ...existing,
+        status: AssetStatusKind.Failed,
+        errorMessage,
+      },
+    );
   },
 };

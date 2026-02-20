@@ -1,6 +1,7 @@
-import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
 import { reactInvariant } from "@/client/react";
+import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { IconImage } from "@/client/ui/IconImage";
+import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Href } from "expo-router";
@@ -34,6 +35,7 @@ export default function MenuLayout() {
           )),
         )}
         {/* This is needed to make the route actually work with expo-router. */}
+        <TabTrigger name="sound" href="/sounds/[id]" />
         <TabTrigger name="wiki-hanzi" href="/wiki/[hanzi]" />
         <TabTrigger name="wiki-hint" href="/wiki/[hanzi]/edit/[meaningKey]" />
       </TabList>
@@ -43,10 +45,7 @@ export default function MenuLayout() {
         className="sm:hidden"
         leftButton={
           <Link href="/learn">
-            <IconImage
-              source={require(`../../assets/icons/close.svg`)}
-              size={32}
-            />
+            <IconImage icon="close" size={32} />
           </Link>
         }
         rightButton={<MobileNavTrigger />}
@@ -66,21 +65,14 @@ export default function MenuLayout() {
           <View className="sticky items-end top-safe-offset-5">
             <View className="mb-5 h-[32px] justify-center pr-4">
               <Link href="/learn" asChild>
-                <RectButton
-                  variant="bare"
-                  className={`
-                    flex-row gap-2 opacity-75
-
-                    hover:opacity-100
-                  `}
-                >
-                  <IconImage
-                    source={require(`../../assets/icons/arrow-return-left.svg`)}
-                    size={24}
-                  />
-                  <Text className="pyly-button-bare">Back to practice</Text>
+                <RectButton variant="bare" iconStart="arrow-return-left">
+                  Back to practice
                 </RectButton>
               </Link>
+            </View>
+
+            <View className="mb-4">
+              <MenuDictionarySearch />
             </View>
 
             <View className="w-[200px] items-stretch rounded-xl bg-bg-high py-3">
@@ -207,11 +199,13 @@ function MobileNavTrigger() {
   const isSm = visualViewport != null && visualViewport.width >= 640;
   useLayoutEffect(() => {
     if (isSm) {
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setIsOpen(false);
     }
   }, [isSm]);
 
   useLayoutEffect(() => {
+    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
     setIsOpen(false);
   }, [pathName]);
 
@@ -222,7 +216,7 @@ function MobileNavTrigger() {
           setIsOpen((prev) => !prev);
         }}
       >
-        <IconImage source={require(`../../assets/icons/menu.svg`)} size={32} />
+        <IconImage icon="menu" size={32} />
       </Pressable>
       {isOpen ? (
         <Modal
@@ -241,10 +235,7 @@ function MobileNavTrigger() {
                     setIsOpen(false);
                   }}
                 >
-                  <IconImage
-                    source={require(`../../assets/icons/close.svg`)}
-                    size={32}
-                  />
+                  <IconImage icon="close" size={32} />
                 </Pressable>
               }
             />
@@ -317,12 +308,7 @@ const MobileNavGroupItem = customTabTrigger(
       >
         <Text className="pyly-button-outline">{name}</Text>
         <View className="flex-1 items-end">
-          {isFocused ? (
-            <IconImage
-              source={require(`../../assets/icons/check.svg`)}
-              size={24}
-            />
-          ) : null}
+          {isFocused ? <IconImage icon="check" size={24} /> : null}
         </View>
       </Pressable>
     );
@@ -399,10 +385,11 @@ const navItems: NavGroup[] = [
     primary: true,
     items: [
       // { name: `Overview`, href: `/overview` },
+      { name: `Wiki`, href: `/wiki` as const },
+      { name: `Sounds`, href: `/sounds` as const },
       { name: `Skills`, href: `/skills` },
       { name: `History`, href: `/history` },
       // { name: `Tutoring`, href: `/tutoring` },
-      // { name: `Wiki`, href: `/wiki` },
     ] satisfies NavItem[],
   },
   {
@@ -418,8 +405,9 @@ const navItems: NavGroup[] = [
     title: `Settings`,
     primary: true,
     items: [
+      { name: `Profile`, href: `/settings/profile` },
+      { name: `Accounts`, href: `/settings/accounts` },
       { name: `Appearance`, href: `/settings/appearance` },
-      // { name: `Profile`, href: `/settings/profile` },
       // { name: `Courses`, href: `/settings/courses` },
       // { name: `Notifications`, href: `/settings/notifications` },
       // { name: `Billing`, href: `/settings/billing` },

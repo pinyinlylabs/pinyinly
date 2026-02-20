@@ -1,4 +1,10 @@
 import { isHanziCharacter } from "#data/hanzi.ts";
+import {
+  MistakeKind,
+  QuestionFlagKind,
+  SkillKind,
+  SrsKind,
+} from "#data/model.ts";
 import type {
   HanziCharacter,
   HanziGlossMistakeType,
@@ -12,17 +18,12 @@ import type {
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
 } from "#data/model.ts";
-import {
-  MistakeKind,
-  QuestionFlagKind,
-  SkillKind,
-  SrsKind,
-} from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.js";
-import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
 import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
-import type { Rating } from "#util/fsrs.ts";
+import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
+import { emojiToRating } from "#test/helpers.ts";
 import { nextReview } from "#util/fsrs.ts";
+import type { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.js";
 import { splitN } from "#util/unicode.js";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
@@ -31,7 +32,6 @@ import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import type { DeepReadonly } from "ts-essentials";
 import { vi } from "vitest";
-import { emojiToRating } from "../helpers";
 
 export const date = (strings: TemplateStringsArray): Date => {
   const shorthand = strings.reduce((acc, str) => acc + str, ``);
@@ -280,6 +280,7 @@ export function parseHistoryCommand(
     case `🟠`: {
       const rating = emojiToRating(op);
 
+      // oxlint-disable-next-line eslint(prefer-const)
       let [skill, skillArgs] = splitN(opArgs!, ` `, 1) as [Skill, string?];
       const event: HistoryEventSkillReview = {
         kind: `skillReview`,

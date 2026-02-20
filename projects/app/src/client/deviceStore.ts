@@ -13,7 +13,7 @@ import { Platform } from "react-native";
 
 export type DeviceStoreToggleableEntity = RizzleEntity<
   string,
-  { enabled: RizzleBoolean | RizzleTypeAlias<RizzleBoolean> }
+  { enabled: RizzleTypeAlias<RizzleBoolean, `e`> }
 >;
 
 export type DeviceStoreEntity = RizzleAnyEntity;

@@ -3,13 +3,13 @@
 import { test } from "vitest";
 
 test(`@typescript-eslint/return-await`, () => {
-  const promiseValue = () => Promise.resolve(null);
+  const promiseValue = async () => null;
 
   const myAsyncFunction = async () => {
     return promiseValue();
   };
 
-  const mySyncFunction = () => {
+  const mySyncFunction = async () => {
     return promiseValue();
   };
 

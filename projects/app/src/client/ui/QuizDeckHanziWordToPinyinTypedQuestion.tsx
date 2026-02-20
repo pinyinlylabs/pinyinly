@@ -1,32 +1,32 @@
+import { intersperse } from "@/client/react";
 import {
   autoCheckUserSetting,
   useUserSetting,
-} from "@/client/hooks/useUserSetting";
-import { intersperse } from "@/client/react";
+} from "@/client/ui/hooks/useUserSetting";
 import { splitHanziText } from "@/data/hanzi";
+import { QuestionFlagKind } from "@/data/model";
 import type {
   HanziWordToPinyinTypedQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
-import { QuestionFlagKind } from "@/data/model";
+import { pinyinUnitSuggestions } from "@/data/pinyin";
 import type {
   PinyinUnitSuggestion,
   PinyinUnitSuggestions,
 } from "@/data/pinyin";
-import { pinyinUnitSuggestions } from "@/data/pinyin";
-import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
 import {
   gradeHanziToPinyinTypedQuestion,
   shouldAutoSubmitPinyinTypedAnswer,
 } from "@/data/questions/hanziWordToPinyinTyped";
+import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
+import { useRef, useState } from "react";
 import type { ReactNode, Ref } from "react";
-import { useMemo, useRef, useState } from "react";
-import type { TextInput } from "react-native";
 import { Text, View } from "react-native";
+import type { TextInput } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
@@ -34,11 +34,9 @@ import { PinyinOptionButton } from "./PinyinOptionButton";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
-import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle";
-import {
-  ratingToInputState,
-  TextAnswerInputSingle,
-} from "./TextAnswerInputSingle";
+import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
+import { ratingToInputState } from "./TextAnswerInputSingle.utils";
+import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
 
 export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
@@ -65,7 +63,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
 
-  const startTime = useMemo(() => Date.now(), []);
+  const [startTime] = useState(() => Date.now());
   const hanziCharacters = splitHanziText(
     hanziFromHanziWord(hanziWordFromSkill(skill)),
   );

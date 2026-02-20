@@ -1,4 +1,4 @@
-import { Section } from "@/client/ui/demo/helpers";
+import { Section } from "@/client/ui/demo/components";
 import { useLocalSearchParams } from "expo-router";
 import { StrictMode } from "react";
 import { Text, View } from "react-native";

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
+import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
-import { TextInputSingle } from "./TextInputSingle";
+import { TextInputMulti } from "./TextInputMulti";
 
 interface AddCustomHintModalProps {
   onDismiss: () => void;
@@ -53,9 +54,15 @@ function AddCustomHintModalContent({
   const [showExplanation, setShowExplanation] = useState(
     initialExplanation.length > 0,
   );
+  const hintLengthTarget = 80;
+  const hintCounterThreshold = Math.ceil(hintLengthTarget * 0.8);
 
   const isEditing = initialHint.length > 0;
   const canSave = hint.trim().length > 0;
+  const trimmedHintLength = hint.trim().length;
+  const canShowExplanation = trimmedHintLength > 0;
+  const isHintTooLong = trimmedHintLength > hintLengthTarget;
+  const isHintAtLimit = trimmedHintLength >= hintLengthTarget;
 
   return (
     <View className="flex-1 bg-bg">
@@ -86,63 +93,100 @@ function AddCustomHintModalContent({
       </View>
 
       {/* Content */}
-      <View className="gap-4 p-4">
-        <View className="gap-2">
-          <Text className="text-[14px] font-medium text-fg">Your hint</Text>
-          <TextInputSingle
-            placeholder="Enter a hint that helps you remember..."
-            value={hint}
-            onChangeText={setHint}
-            multiline
-            numberOfLines={3}
-            className="min-h-[80px] py-3"
-            textAlignVertical="top"
-          />
-        </View>
-
-        {/* Explanation toggle/field */}
-        {showExplanation ? (
+      <ScrollView className="flex-1">
+        <View className="gap-4 p-4">
           <View className="gap-2">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-[14px] font-medium text-fg">
-                Explanation (optional)
-              </Text>
-              <Pressable
-                onPress={() => {
-                  setShowExplanation(false);
-                  setExplanation(``);
-                }}
-              >
-                <IconImage
-                  size={16}
-                  source={require(`../../assets/icons/chevron-down.svg`)}
-                  className="text-fg-dim"
-                />
-              </Pressable>
-            </View>
-            <TextInputSingle
-              placeholder="Why does this hint work for you?"
-              value={explanation}
-              onChangeText={setExplanation}
-              multiline
-              numberOfLines={2}
-              className="min-h-[60px] py-3"
-              textAlignVertical="top"
+            <Text className="text-[14px] font-medium text-fg">Your hint</Text>
+            <TextInputMulti
+              placeholder="Enter a hint that helps you remember..."
+              value={hint}
+              onChangeText={setHint}
+              numberOfLines={6}
+              style={{ minHeight: 160 }}
             />
+            {trimmedHintLength >= hintCounterThreshold ? (
+              <View className="flex-row items-center justify-between gap-2">
+                <Text
+                  className={
+                    isHintTooLong
+                      ? `text-[12px] text-fg`
+                      : `text-[12px] text-fg-dim`
+                  }
+                  style={
+                    isHintTooLong
+                      ? { color: `var(--color-warning)` }
+                      : undefined
+                  }
+                >
+                  Keep hints under {hintLengthTarget} characters. Move extra
+                  detail to the explanation.
+                </Text>
+                <View className="flex-row items-center gap-1">
+                  <Text
+                    className={
+                      isHintAtLimit
+                        ? `
+                          text-right text-[11px] text-fg
+
+                          [--color-fg:var(--color-warning)]
+                        `
+                        : `text-right text-[11px] text-fg-dim`
+                    }
+                  >
+                    {trimmedHintLength}/{hintLengthTarget}
+                  </Text>
+                  <ProgressPieIcon
+                    progress={trimmedHintLength / hintLengthTarget}
+                    warn={isHintAtLimit}
+                    size={12}
+                  />
+                </View>
+              </View>
+            ) : null}
           </View>
-        ) : (
-          <Pressable
-            onPress={() => {
-              setShowExplanation(true);
-            }}
-            className="flex-row items-center gap-1.5"
-          >
-            <Text className="text-[14px] text-cyan">
-              Add explanation (optional)
-            </Text>
-          </Pressable>
-        )}
-      </View>
+
+          {/* Explanation toggle/field */}
+          {showExplanation && canShowExplanation ? (
+            <View className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-[14px] font-medium text-fg">
+                  Explanation (optional)
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setShowExplanation(false);
+                    setExplanation(``);
+                  }}
+                >
+                  <IconImage
+                    size={16}
+                    icon="chevron-down"
+                    className="text-fg-dim"
+                  />
+                </Pressable>
+              </View>
+              <TextInputMulti
+                placeholder="Why does this hint work for you?"
+                value={explanation}
+                onChangeText={setExplanation}
+                numberOfLines={2}
+                style={{ minHeight: 60 }}
+              />
+            </View>
+          ) : canShowExplanation ? (
+            <Pressable
+              onPress={() => {
+                setShowExplanation(true);
+              }}
+              className="flex-row items-center gap-1.5"
+            >
+              <Text className="text-[14px] text-cyan">
+                Add explanation (optional)
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+      </ScrollView>
     </View>
   );
 }

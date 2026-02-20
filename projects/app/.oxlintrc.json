@@ -1,16 +1,28 @@
 {
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["../oxlint-rules/base.oxlintrc.json"],
-  "jsPlugins": ["eslint-plugin-react-compiler"],
   "rules": {
-    "react-compiler/react-compiler": "error"
+    // "pinyinly/no-restricted-css-classes": [
+    //   "error",
+    //   {
+    //     "classes": [
+    //       { "name": "flex-col", "message": "flex-col is already the default" }
+    //     ]
+    //   }
+    // ]
   },
   "overrides": [
+    // expo-router pages
     {
       "files": ["src/app/**/*.ts", "src/app/**/*.tsx"],
       "rules": {
         // expo-router pages use a default export for the page
-        "import/no-default-export": "off"
+        "import/no-default-export": "off",
+        // Ensuring that default exports are named helps improve the grepability
+        // of the codebase by encouraging the re-use of the same identifier for
+        // the module's default export at its declaration site and at its import
+        // sites.
+        "import-js/no-anonymous-default-export": "error"
       }
     },
     {
@@ -18,16 +30,24 @@
       "rules": {
         "import/no-default-export": "deny"
       }
+    },
+    // Demo UI files
+    {
+      "files": ["src/**/*.demo.tsx"],
+      "rules": {
+        "eslint/no-empty-function": "off",
+        "import-js/no-anonymous-default-export": "off",
+        "import-js/no-named-default": "off",
+        "import/no-default-export": "off",
+        "no-console": "off",
+        "react/display-name": "off", // the display name is the filename
+        "react/only-export-components": "off",
+        "unicorn/no-anonymous-default-export": "off"
+      }
     }
   ],
   "env": {
     "builtin": true
   },
-  "ignorePatterns": [
-    "bin/**",
-    "test/**",
-    "**/*.d.ts",
-    "**/*.demo.tsx",
-    "src/app/dev/**"
-  ]
+  "ignorePatterns": ["**/*.d.ts", "src/app/dev/**"]
 }

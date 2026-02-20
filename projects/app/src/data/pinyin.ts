@@ -98,6 +98,24 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
   return result as PinyinUnit;
 });
 
+/**
+ * Normalize a pinyin unit for pronunciation hint keying.
+ *
+ * This preserves tone marks and collapses erhua suffixes so r-variants share
+ * the same hint key.
+ */
+export const normalizePinyinUnitForHintKey = memoize1(
+  function normalizePinyinUnitForHintKey(pinyinOrNumeric: string): PinyinUnit {
+    const normalized = normalizePinyinUnit(pinyinOrNumeric);
+
+    if (normalized.length > 2 && normalized.endsWith(`r`)) {
+      return normalized.slice(0, -1) as PinyinUnit;
+    }
+
+    return normalized;
+  },
+);
+
 const toneMap = {
   a: `_āáǎàa`,
   e: `_ēéěèe`,
@@ -404,6 +422,56 @@ export const defaultPinyinSoundGroupThemes = {
   tones: `Areas`,
 } as Record<PinyinSoundGroupId, string>;
 
+export const defaultToneNames = {
+  "1": `high and level`,
+  "2": `rising and questioning`,
+  "3": `mid-level and neutral`,
+  "4": `falling and definitive`,
+  "5": `light and short`,
+} as Record<string, string>;
+
+// Tone names that work as prepositions/locations and read better before the final
+const prepositionToneNames = new Set([
+  `outside`,
+  `inside`,
+  `above`,
+  `below`,
+  `entry`,
+  `exit`,
+  `beyond`,
+  `within`,
+  `beside`,
+  `behind`,
+]);
+
+export function getDefaultFinalToneName({
+  finalName,
+  toneName,
+}: {
+  finalName: string;
+  toneName: string;
+}): string {
+  const trimmedFinal = finalName.trim();
+  const trimmedTone = toneName.trim();
+
+  if (trimmedFinal.length === 0) {
+    return trimmedTone;
+  }
+  if (trimmedTone.length === 0) {
+    return trimmedFinal;
+  }
+
+  // Check if the tone name is a preposition-like word
+  const toneNameLower = trimmedTone.toLowerCase();
+  if (prepositionToneNames.has(toneNameLower)) {
+    // Keep original format: "Outside the River Stage"
+    return `${trimmedTone} the ${trimmedFinal}`;
+  }
+
+  // Otherwise, use final + lowercase tone: "River Stage entrance"
+  return `${trimmedFinal} ${toneNameLower}`;
+}
+
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
   [`tones`, `__u-`, `__-`, `__i-`, `__ue-`, `.-`, `-__`].map((id, index) => [
     id,
@@ -419,6 +487,7 @@ export interface PinyinChart {
   soundToCustomLabel: Record<PinyinSoundId, string>;
   soundToUnits: Record<PinyinSoundId, TonelessUnit[]>;
   soundGroups: { id: PinyinSoundGroupId; sounds: PinyinSoundId[] }[];
+  soundIds: PinyinSoundId[];
 }
 
 function buildPinyinChart(
@@ -467,6 +536,8 @@ function buildPinyinChart(
     sounds: group.items.split(` `) as PinyinSoundId[],
   }));
 
+  const soundIds = soundGroups.flatMap((group) => group.sounds);
+
   return {
     unitToInitialSound,
     unitToFinalSound,
@@ -474,6 +545,7 @@ function buildPinyinChart(
     soundGroups,
     soundToCustomLabel,
     soundToUnits,
+    soundIds,
   };
 }
 

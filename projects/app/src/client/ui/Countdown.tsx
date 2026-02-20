@@ -31,6 +31,7 @@ export const Countdown = ({ date }: { date: Date }) => {
   }, [date]);
 
   useEffect(() => {
+    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
     updateValue();
     const timer = setTimeout(() => {
       updateValue();

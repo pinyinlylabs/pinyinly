@@ -1,4 +1,4 @@
-import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
+import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { View } from "react-native";
@@ -45,10 +45,7 @@ export default () => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader
-      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
-      title="flex-col"
-    />
+    <LittlePrimaryHeader title="flex-col" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start" showFrame>
@@ -76,10 +73,7 @@ export default () => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader
-      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
-      title="flex-col + flex-1"
-    />
+    <LittlePrimaryHeader title="flex-col + flex-1" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack
@@ -186,6 +180,14 @@ export default () => (
         <RectButtonVariants inFlexRowParent className="flex-1" />
       </ExampleStack>
     </View>
+
+    <LittlePrimaryHeader title="icons" />
+
+    <View className="flex-row flex-wrap">
+      <ExampleStack title="bare" childrenClassName="gap-2">
+        <RectButtonIconExamples />
+      </ExampleStack>
+    </View>
   </View>
 );
 
@@ -205,6 +207,20 @@ const RectButtonVariants = (props: Partial<PropsOf<typeof RectButton>>) => (
     </RectButton>
     <RectButton variant="rounded" {...props}>
       Rounded
+    </RectButton>
+  </>
+);
+
+const RectButtonIconExamples = () => (
+  <>
+    <RectButton variant="bare" iconStart="arrow-return-left">
+      Back
+    </RectButton>
+    <RectButton variant="bare" iconEnd="check">
+      Done
+    </RectButton>
+    <RectButton variant="bare" iconStart="menu" iconEnd="close">
+      Toggle
     </RectButton>
   </>
 );

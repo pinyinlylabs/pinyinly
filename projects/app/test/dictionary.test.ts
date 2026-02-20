@@ -1183,12 +1183,16 @@ describe(
   >,
   async () => {
     function helloDict(): DictionaryJson {
-      const dict: DictionaryJson = new Map();
-      dict.set(`你好:hello`, {
-        gloss: [`hello`],
-        pinyin: [拼音`ni hao`],
-        pos: PartOfSpeech.Interjection,
-      });
+      const dict: DictionaryJson = new Map([
+        [
+          `你好:hello`,
+          {
+            gloss: [`hello`],
+            pinyin: [拼音`ni hao`],
+            pos: PartOfSpeech.Interjection,
+          },
+        ],
+      ]);
       return dict;
     }
 

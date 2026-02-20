@@ -140,17 +140,15 @@ for (const character of allCharacters) {
 
   if (graphicsRecord == null) {
     debug(`no graphics data for %O`, character);
-  } else {
-    if (
-      await updateJsonFileKey(
-        dataFile,
-        `strokes`,
-        graphicsRecord.strokes,
-        indentLevels,
-      )
-    ) {
-      debug(`wrote strokes for %O`, character);
-    }
+  } else if (
+    await updateJsonFileKey(
+      dataFile,
+      `strokes`,
+      graphicsRecord.strokes,
+      indentLevels,
+    )
+  ) {
+    debug(`wrote strokes for %O`, character);
   }
 
   {

@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."hanziword_meaning_hint" ADD COLUMN "primaryImageId" text;

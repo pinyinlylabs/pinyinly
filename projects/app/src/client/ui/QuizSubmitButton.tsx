@@ -4,7 +4,7 @@ import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
 import z from "zod/v4";
-import { ratingToThemeClass } from "./QuizDeckResultToast";
+import { ratingToThemeClass } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
 
 const quizSubmitButtonStateSchema = z.enum({

@@ -1,10 +1,8 @@
-import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
-import { HanziWordHintProvider } from "@/client/ui/HanziWordHintProvider";
+import { DemoHanziWordKnob } from "@/client/ui/demo/components";
+import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
 import { WikiHanziHintEditor } from "@/client/ui/WikiHanziHintEditor";
 import type { HanziWord } from "@/data/model";
-import { useEffect, useRef } from "react";
 import { Text, View } from "react-native";
-import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 import { Suspense } from "./Suspense";
 
 /**
@@ -22,55 +20,13 @@ export default () => {
       <DemoHanziWordKnob hanziWords={[`学:learn`, `好:good`, `看:look`]} />
 
       <View className="h-[600] w-[400] overflow-hidden rounded-lg border border-fg/20">
-        <HanziWordHintProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <DemoWithPrePopulatedHints hanziWord={hanziWord} />
-          </Suspense>
-        </HanziWordHintProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <WikiHanziHintEditor hanziWord={hanziWord} />
+        </Suspense>
       </View>
     </View>
   );
 };
-
-/**
- * Wrapper that pre-populates custom hints for demonstration.
- */
-function DemoWithPrePopulatedHints({ hanziWord }: { hanziWord: HanziWord }) {
-  const { addCustomHint } = useHanziWordHint();
-  const initializedRef = useRef(false);
-
-  // Pre-populate custom hints on mount (only once)
-  useEffect(() => {
-    if (initializedRef.current) {
-      return;
-    }
-    console.log(`Pre-populating custom hints for demo`);
-    initializedRef.current = true;
-
-    addCustomHint(
-      hanziWord,
-      `Imagine a **child** reaching up with their hand`,
-      `The hand (top) reaches for knowledge while the child (bottom) absorbs it`,
-    );
-    addCustomHint(
-      hanziWord,
-      `A student's **raised hand** in class`,
-      `Eager to learn, always asking questions`,
-    );
-    addCustomHint(
-      hanziWord,
-      `Knowledge flows from **fingers** to **mind**`,
-      `The hand gathers, the child grows`,
-    );
-    addCustomHint(
-      hanziWord,
-      `A child **practicing** with their hands`,
-      `Learning by doing, hands-on experience`,
-    );
-  }, [hanziWord, addCustomHint]);
-
-  return <WikiHanziHintEditor hanziWord={hanziWord} />;
-}
 
 function LoadingFallback() {
   return (

@@ -1,39 +1,15 @@
-import { Rating } from "@/util/fsrs";
-import type { ReactNode, Ref } from "react";
 import { useEffect, useState } from "react";
-import type { TextInput } from "react-native";
+import type { ReactNode, Ref } from "react";
 import { Text, View } from "react-native";
+import type { TextInput } from "react-native";
 import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { withIncorrectWobbleAnimation } from "./animations";
+import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
 import { TextInputSingle } from "./TextInputSingle";
-
-export type TextAnswerInputSingleState =
-  | `default`
-  | `success`
-  | `error`
-  | `warning`;
-
-/**
- * Maps a quiz rating to the corresponding input state.
- */
-export function ratingToInputState(rating: Rating): TextAnswerInputSingleState {
-  switch (rating) {
-    case Rating.Easy:
-    case Rating.Good: {
-      return `success`;
-    }
-    case Rating.Hard: {
-      return `warning`;
-    }
-    case Rating.Again: {
-      return `error`;
-    }
-  }
-}
 
 export type TextAnswerInputSingleProps = {
   autoFocus?: boolean;

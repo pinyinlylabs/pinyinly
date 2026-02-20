@@ -1,12 +1,13 @@
-import { useEventCallback } from "@/client/hooks/useEventCallback";
-import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
-import { useQuizProgress } from "@/client/hooks/useQuizProgress";
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useSkillQueue } from "@/client/hooks/useSkillQueue";
-import { useSoundEffect } from "@/client/hooks/useSoundEffect";
+import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
+import { usePostHog } from "@/client/ui/hooks/usePostHog";
+import { usePrefetchImages } from "@/client/ui/hooks/usePrefetchImages";
+import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import type { StackNavigationFor } from "@/client/ui/types";
-import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
+import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
@@ -16,20 +17,19 @@ import {
   NavigationIndependentTree,
   useTheme,
 } from "@react-navigation/native";
-import type {
-  StackCardInterpolatedStyle,
-  StackCardInterpolationProps,
-} from "@react-navigation/stack";
 import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { Link } from "expo-router";
+import type {
+  StackCardInterpolatedStyle,
+  StackCardInterpolationProps,
+} from "@react-navigation/stack";
+import { Link, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated as RnAnimated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
-import { usePostHog } from "./PostHogProvider";
 import { QuizDeckHanziWordToGlossTypedQuestion } from "./QuizDeckHanziWordToGlossTypedQuestion";
 import { QuizDeckHanziWordToPinyinTypedQuestion } from "./QuizDeckHanziWordToPinyinTypedQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
@@ -48,9 +48,10 @@ const Stack = createStackNavigator<{
 type Navigation = StackNavigationFor<typeof Stack>;
 
 export const QuizDeck = ({ className }: { className?: string }) => {
+  const router = useRouter();
   const theme = useTheme();
   const navigationRef = useRef<Navigation>(null);
-  const r = useReplicache();
+  const r = useRizzle();
   const postHog = usePostHog();
 
   const skillQueue = useSkillQueue();
@@ -79,7 +80,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
     if (reviewQueue.items.length === 0) {
       // No items in queue, clear question and stay on loading screen
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setQuestion(undefined);
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setQuestionVersion(undefined);
       return;
     }
@@ -160,6 +163,12 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     // Clear the current question so the next one loads when version changes
     // Keep questionVersion so we can detect when queue updates to a newer version
     setQuestion(undefined);
+  };
+
+  const handleClose = () => {
+    if (router.canDismiss()) {
+      router.dismiss();
+    }
   };
 
   const handleUndo = () => {
@@ -258,7 +267,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       <View
         className={`mb-[20px] w-full max-w-[600px] flex-row items-center gap-3 self-center px-4`}
       >
-        <CloseButton />
+        <CloseButton onPress={handleClose} />
         <QuizProgressBar progress={quizProgress.progress} />
         {skillQueue.loading ? null : (
           <QuizQueueButton queueStats={skillQueue.reviewQueue} />
@@ -285,6 +294,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           >
             <Stack.Screen
               name="loading"
+              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
               children={() => {
                 return (
                   <Reanimated.View
@@ -300,6 +310,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             />
             <Stack.Screen
               name="chill"
+              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
               children={() => {
                 return (
                   <View className="gap-2">
@@ -340,6 +351,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             />
             <Stack.Screen
               name="question"
+              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
               children={({
                 route: {
                   params: { question },

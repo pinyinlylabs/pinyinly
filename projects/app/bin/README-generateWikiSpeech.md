@@ -8,7 +8,7 @@ the Pinyinly wiki.
 1. Set your OpenAI API key:
 
    ```bash
-   export OPENAI_API_KEY='your-api-key-here'
+   export PYLY_OPENAI_API_KEY='your-api-key-here'
    ```
 
 2. Ensure you have ffmpeg installed (required for M4A conversion):

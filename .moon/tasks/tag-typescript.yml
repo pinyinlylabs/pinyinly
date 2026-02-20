@@ -1,6 +1,6 @@
 tasks:
   typecheck:
-    command: tsc --build
+    command: tsgo --build
     inputs:
       - "!dist/"
       - "!node_modules/"

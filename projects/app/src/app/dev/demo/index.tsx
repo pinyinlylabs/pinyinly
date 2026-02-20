@@ -1,4 +1,4 @@
-import { Section } from "@/client/ui/demo/helpers";
+import { Section } from "@/client/ui/demo/components";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { FunctionComponent } from "react";
 import { lazy } from "react";
@@ -26,15 +26,23 @@ const lazyDemo = <Demo extends FunctionComponent>(
 // prettier-ignore
 export const demos: Record<string, FunctionComponent> = {
   // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
+  [`AiPronunciationHintModal`]: lazyDemo(() => import(`../../../client/ui/AiPronunciationHintModal.demo`)),
+  [`CloseButton`]: lazyDemo(() => import(`../../../client/ui/CloseButton.demo`)),
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
   [`FloatingMenuModal`]: lazyDemo(() => import(`../../../client/ui/FloatingMenuModal.demo`)),
   [`HanziCharacter`]: lazyDemo(() => import(`../../../client/ui/HanziCharacter.demo`)),
+  [`HanziHintOption`]: lazyDemo(() => import(`../../../client/ui/HanziHintOption.demo`)),
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
   [`HanziTile`]: lazyDemo(() => import(`../../../client/ui/HanziTile.demo`)),
   [`HanziWordTile`]: lazyDemo(() => import(`../../../client/ui/HanziWordTile.demo`)),
   [`IconImage`]: lazyDemo(() => import(`../../../client/ui/IconImage.demo`)),
   [`Icons`]: lazyDemo(() => import(`../../../client/ui/Icons.demo`)),
   [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
+  [`ImagePasteDropZone`]: lazyDemo(() => import(`../../../client/ui/ImagePasteDropZone.demo`)),
+  [`ImageUploadButton`]: lazyDemo(() => import(`../../../client/ui/ImageUploadButton.demo`)),
+  [`InlineEditableSettingImage`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingImage.demo`)),
+  [`InlineEditableSettingText`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingText.demo`)),
+  [`MenuDictionarySearch`]: lazyDemo(() => import(`../../../client/ui/MenuDictionarySearch.demo`)),
   [`NewSkillModal`]: lazyDemo(() => import(`../../../client/ui/NewSkillModal.demo`)),
   [`NewSkillModalContentNewPronunciation`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewPronunciation.demo`)),
   [`NewSkillModalContentNewWord`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewWord.demo`)),
@@ -55,6 +63,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`SkillTile`]: lazyDemo(() => import(`../../../client/ui/SkillTile.demo`)),
   [`TextAnswerButton`]: lazyDemo(() => import(`../../../client/ui/TextAnswerButton.demo`)),
   [`TextAnswerInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextAnswerInputSingle.demo`)),
+  [`TextInputMulti`]: lazyDemo(() => import(`../../../client/ui/TextInputMulti.demo`)),
   [`TextInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextInputSingle.demo`)),
   [`Themes`]: lazyDemo(() => import(`../../../client/ui/Themes.demo`)),
   [`ThreeSplitLinesDown`]: lazyDemo(() => import(`../../../client/ui/ThreeSplitLinesDown.demo`)),

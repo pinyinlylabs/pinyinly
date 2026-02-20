@@ -1,7 +1,6 @@
+import { useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
-import { createContext, useEffect, useState } from "react";
-
-const Context = createContext<AudioContext | null>(null);
+import { AudioContextContext } from "./contexts";
 
 /**
  * An audio context provider so that the AudioContext can be cleaned up
@@ -24,7 +23,11 @@ export const AudioContextProvider = Object.assign(
       };
     }, [audioContext]);
 
-    return <Context.Provider value={audioContext}>{children}</Context.Provider>;
+    return (
+      <AudioContextContext.Provider value={audioContext}>
+        {children}
+      </AudioContextContext.Provider>
+    );
   },
-  { Context },
+  { Context: AudioContextContext },
 );

@@ -4,15 +4,12 @@ import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 import {
+  pgAssetStatusKind,
   pgBase64url,
   pgFsrsRating,
   pgHanziOrHanziWord,
   pgJsonObject,
-  pgMnemonicThemeId,
   pgPasskeyTransport,
-  pgPinyinInitialGroupId,
-  pgPinyinSoundGroupId,
-  pgPinyinSoundId,
   pgSkill,
   rizzleCustomType,
   zodJson,
@@ -57,6 +54,21 @@ export const userSetting = schema.table(
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [pg.unique().on(t.userId, t.key)],
+);
+
+export const userSettingHistory = schema.table(
+  `userSettingHistory`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .notNull()
+      .references(() => user.id),
+    key: pg.text(`key`).notNull(),
+    value: pgJsonObject(`value`),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [pg.index().on(t.userId, t.key), pg.index().on(t.userId, t.createdAt)],
 );
 
 export const authSession = schema.table(`authSession`, {
@@ -197,91 +209,50 @@ export const hanziPinyinMistake = schema.table(
   (t) => [pg.index().on(t.userId), pg.index().on(t.reviewId)],
 );
 
-export const pinyinInitialAssociation = schema.table(
-  `pinyinInitialAssociation`,
+/**
+ * User-uploaded assets (images for mnemonics).
+ *
+ * Assets are immutable once uploaded - they cannot be modified, only created.
+ * The asset file is stored in Cloudflare R2 at path: u/{userId}/{assetId}
+ */
+export const asset = schema.table(
+  `asset`,
   {
     id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
     userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    initial: pg.text(`initial`).notNull(),
-    name: pg.text(`name`).notNull(),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.initial)],
-);
-
-export const pinyinFinalAssociation = schema.table(
-  `pinyinFinalAssociation`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    final: pg.text(`final`).notNull(),
-    name: pg.text(`name`).notNull(),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.final)],
-);
-
-export const pinyinInitialGroupTheme = schema.table(
-  `pinyinInitialGroupTheme`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    groupId: pgPinyinInitialGroupId(`groupId`).notNull(),
-    themeId: pgMnemonicThemeId(`themeId`).notNull(),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.groupId)],
-);
-
-export const pinyinSound = schema.table(
-  `pinyinSound`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    soundId: pgPinyinSoundId(`soundId`).notNull(),
-    name: pg.text(`name`),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.soundId)],
-);
-
-export const pinyinSoundGroup = schema.table(
-  `pinyinSoundGroup`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    soundGroupId: pgPinyinSoundGroupId(`soundGroupId`).notNull(),
     /**
-     * Override the default name.
+     * Client-generated asset ID (nanoid). Used as the R2 object key suffix.
      */
-    name: pg.text(`name`),
+    assetId: pg.text(`assetId`).notNull(),
     /**
-     * Override the default theme.
+     * Upload status: pending, uploaded, or failed.
      */
-    theme: pg.text(`theme`),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    status: pgAssetStatusKind(`status`).notNull(),
+    /**
+     * MIME type of the asset (e.g. image/jpeg, image/png).
+     */
+    contentType: pg.text(`contentType`).notNull(),
+    /**
+     * File size in bytes.
+     */
+    contentLength: pg.integer(`contentLength`).notNull(),
+    /**
+     * When the asset record was created.
+     */
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+    /**
+     * When the upload was confirmed (status changed to uploaded).
+     */
+    uploadedAt: pg.timestamp(`uploadedAt`),
+    /**
+     * Error message if the upload failed.
+     */
+    errorMessage: pg.text(`errorMessage`),
   },
-  (t) => [pg.unique().on(t.userId, t.soundGroupId)],
+  (t) => [pg.unique().on(t.userId, t.assetId), pg.index().on(t.userId)],
 );
 
 /**

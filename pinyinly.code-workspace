@@ -11,8 +11,9 @@
     "editor.defaultFormatter": "oxc.oxc-vscode",
     "typescript.tsdk": "node_modules/typescript/lib",
     "editor.codeActionsOnSave": {
-      "source.formatDocument": "explicit",
-      "source.fixAll.eslint": "explicit",
+      "source.fixAll.oxc": "always",
+      "source.formatDocument": "always",
+      "source.fixAll.eslint": "always",
       "source.organizeImports": "always",
     },
     "eslint.useFlatConfig": true,
@@ -46,9 +47,12 @@
       "**/.react-email/**",
     ],
     "tailwindCSS.validate": false,
+    "typescript.experimental.useTsgo": true,
     "chat.tools.terminal.autoApprove": {
       "/^moon run [\\w-]+:\\w+/": true,
     },
     "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace, 'Pinyinly Components'",
+    "oxc.typeAware": true,
+    "oxc.enable": true,
   },
 }

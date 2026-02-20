@@ -1,6 +1,6 @@
 import * as matchers from "@testing-library/jest-dom/matchers";
-import type { Component } from "react";
 import { createElement, Fragment } from "react";
+import type { Component } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
 
@@ -47,6 +47,19 @@ vi.mock(`expo-image`, () => {
   };
 });
 
+vi.mock(`@/client/assets/localImageAssets`, () => {
+  return {
+    getLocalImageAssetSource: async () => {},
+    isLocalImageAssetId: () => false,
+  };
+});
+
+vi.mock(`#client/ui/IconRegistry.ts`, () => {
+  return {
+    createIconRegistry: () => ({}),
+  };
+});
+
 vi.mock(`expo-router`, () => {
   return {
     // SyntaxError: Unexpected token '<'
@@ -90,6 +103,13 @@ vi.mock(`react-native-reanimated`, () => {
   };
 });
 
+vi.mock(`expo-image-picker`, () => {
+  return {
+    launchImageLibraryAsync: () => null,
+    requestMediaLibraryPermissionsAsync: () => null,
+  };
+});
+
 vi.mock(`nativewind`, () => {
   return {
     cssInterop: () => null,
@@ -100,9 +120,19 @@ vi.mock(`nativewind`, () => {
   };
 });
 
+vi.mock(`@floating-ui/react-native`, () => {
+  return {
+    useFloating: () => null,
+    flip: null,
+    shift: null,
+    offset: null,
+  };
+});
+
 // Avoid pulling in expo-sqlite, as it crashes vitest.
 vi.mock(
   `../src/client/ui/replicacheOptions.ts`,
+  // oxlint-disable-next-line typescript-eslint(consistent-type-imports)
   (): typeof import("../src/client/ui/replicacheOptions.ts") => ({
     kvStore: {
       create: vi.fn(),

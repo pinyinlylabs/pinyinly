@@ -1,5 +1,5 @@
-import { useDb } from "@/client/hooks/useDb";
 import { historyPageCollection, historyPageData } from "@/client/query";
+import { useDb } from "@/client/ui/hooks/useDb";
 import { IconImage } from "@/client/ui/IconImage";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import { Suspense } from "@/client/ui/Suspense";
@@ -55,10 +55,8 @@ export default function HistoryPage() {
                   <View key={j} className="flex-row items-center gap-2">
                     <IconImage
                       size={16}
-                      source={
-                        finalRating.rating === Rating.Again
-                          ? require(`../../../assets/icons/close.svg`)
-                          : require(`../../../assets/icons/check.svg`)
+                      icon={
+                        finalRating.rating === Rating.Again ? `close` : `check`
                       }
                     />
                     <Text className="pyly-body">

@@ -13,7 +13,6 @@ import { routingIntegration } from "@/client/sentry";
 import { useAuth } from "@/client/auth";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
-import { HanziWordHintProvider } from "@/client/ui/HanziWordHintProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
@@ -28,20 +27,32 @@ import Head from "expo-router/head";
 import { cssInterop } from "nativewind";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import Reanimated from "react-native-reanimated";
 
 // NativeWind adapters for third party components
 
 // https://discord.com/channels/968718419904057416/1302346762899427390/1302486905656705045
-cssInterop(Image, {
-  className: { target: `style`, nativeStyleToProp: { color: `tintColor` } },
-});
+if (Platform.OS != `web`) {
+  // This breaks on web by having errors like:
+  //
+  // styleq: height typeof 85.83886255924172 is not "string" or "null". styleq:
+  // width typeof 128 is not "string" or "null".
+  //
+  // And passing strings through results in a broken CSS class like `85% 45%`
+  // instead of "width-[85%] height-[45%]" (but these classes wouldn't work
+  // anyway because they're dynamic and wouldn't be precompiled by tailwind).
+  cssInterop(Image, {
+    className: { target: `style`, nativeStyleToProp: { color: `tintColor` } },
+  });
+}
 cssInterop(Reanimated.View, { className: `style` });
 
 cssInterop(AppleAuthentication.AppleAuthenticationButton, {
   className: `style`,
 });
 
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
@@ -60,19 +71,15 @@ function RootLayout() {
             </Head>
 
             <AudioContextProvider>
-              <HanziWordHintProvider>
-                <Stack
-                  screenOptions={{ headerShown: false, animation: `fade` }}
-                >
-                  <Stack.Screen
-                    name="login"
-                    options={{
-                      presentation: `modal`,
-                      animation: `slide_from_bottom`,
-                    }}
-                  />
-                </Stack>
-              </HanziWordHintProvider>
+              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
+                <Stack.Screen
+                  name="login"
+                  options={{
+                    presentation: `modal`,
+                    animation: `slide_from_bottom`,
+                  }}
+                />
+              </Stack>
             </AudioContextProvider>
             <SplashScreen />
           </PostHogProvider>
@@ -82,6 +89,7 @@ function RootLayout() {
   );
 }
 
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
   const activeDeviceSession = useAuth().data?.activeDeviceSession;
 
@@ -97,4 +105,5 @@ function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
 }
 
 // Wrap the Root Layout route component with `Sentry.wrap` to capture gesture info and profiling data.
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 export default Sentry.wrap(RootLayout);

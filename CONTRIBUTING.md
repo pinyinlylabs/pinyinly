@@ -9,11 +9,28 @@ bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
 proto use
 ```
 
+Install Minio for local S3-compatible storage:
+
+```sh
+brew install minio/stable/minio
+brew install minio-mc
+# Create a `local` alias for mc
+mc alias set local http://127.0.0.1:9000 miniodev miniodev
+# Create the bucket
+mc mb --ignore-existing local/pinyinly-assets
+# Allow public read access
+mc anonymous set download local/pinyinly-assets
+```
+
 Now you can start the app:
 
-1. `npx inngest-cli@latest dev`
-1. `moon run app:dev`.
+1. `moon run app:dev` - Starts Expo, Inngest, and Minio together
 1. Scan the QR code on your phone.
+
+If you need to run services individually:
+
+- `moon run app:devExpo` - Just Expo
+- `moon run app:devServices` - Just Inngest + Minio
 
 # Guides
 
@@ -228,6 +245,12 @@ Customise this to suit your scenario.
   **`SENTRY_DSN`**: Needs to be defined here, even though it's typically defined using
   `EXPO_PUBLIC_SENTRY_DSN` in other places, the `Sentry.init()` call is not in code compiled by
   Metro and instead is in the entry-point `projects/app/api/index.cjs`.
+
+- **AI Image Generation (Optional)**: For AI-powered hint image generation using Gemini Nano Banana:
+  - `PYLY_GEMINI_IMAGE_API_KEY` - API key for Gemini image generation service
+
+  These should be configured in Vercel's environment variables if image generation is needed in
+  production.
 
 - **`EXPO_PUBLIC_`**: These are inlined into the build and exposed publicly. These need to be
   configured anywhere that builds are done:

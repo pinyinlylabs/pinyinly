@@ -1,4 +1,4 @@
-import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
+import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { useLayoutEffect } from "react";
 
 export function VisualViewportCssVariables() {

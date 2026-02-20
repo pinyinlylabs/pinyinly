@@ -128,7 +128,7 @@ export function formatTimeOffset(timestamp: Date): string {
   return `${hours.toString().padStart(2, `0`)}:${minutes.toString().padStart(2, `0`)}:${seconds.toString().padStart(2, `0`)}`;
 }
 
-export const readDictionaryJson = (): Promise<DictionaryJson> =>
+export const readDictionaryJson = async (): Promise<DictionaryJson> =>
   readFileWithSchema(dictionaryFilePath, dictionaryJsonSchema, new Map());
 
 export async function writeDictionaryJson(dict: DictionaryJson) {

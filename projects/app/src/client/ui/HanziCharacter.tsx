@@ -1,5 +1,5 @@
 import { G, Svg } from "react-native-svg";
-import z from "zod/v4";
+import type { HanziCharacterColor } from "./HanziCharacter.utils";
 import { PathCss } from "./svg";
 
 export function HanziCharacter(props: {
@@ -56,13 +56,3 @@ export function HanziCharacter(props: {
     </Svg>
   );
 }
-
-export const hanziCharacterColorSchema = z.enum([
-  `blue`,
-  `yellow`,
-  `amber`,
-  `cyanold`,
-  `fg`,
-]);
-
-export type HanziCharacterColor = z.infer<typeof hanziCharacterColorSchema>;

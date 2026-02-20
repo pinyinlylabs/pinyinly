@@ -1,5 +1,6 @@
-import type { LinearGradientProps } from "expo-linear-gradient";
 import { LinearGradient } from "expo-linear-gradient";
+import type { LinearGradientProps } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CloseButton } from "./CloseButton";
@@ -13,7 +14,13 @@ export const ReferencePageHeader = ({
   subtitle: string | null;
   gradientColors: LinearGradientProps[`colors`];
 }) => {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
+  const handleClose = () => {
+    if (router.canDismiss()) {
+      router.dismiss();
+    }
+  };
 
   return (
     <>
@@ -27,7 +34,7 @@ export const ReferencePageHeader = ({
           <Text className="text-[60px] text-[white]">{title ?? `⁉️`}</Text>
         </View>
         <View className="absolute left-4 top-safe-or-4">
-          <CloseButton />
+          <CloseButton onPress={handleClose} />
         </View>
       </LinearGradient>
 

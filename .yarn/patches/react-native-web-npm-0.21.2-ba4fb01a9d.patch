@@ -1,0 +1,37 @@
+diff --git a/dist/exports/Modal/ModalPortal.js b/dist/exports/Modal/ModalPortal.js
+index df3bcbbd4dee13c614466ca30af52f10bf20398c..2af45b398714f88027b2748666ab8088973a3db4 100644
+--- a/dist/exports/Modal/ModalPortal.js
++++ b/dist/exports/Modal/ModalPortal.js
+@@ -15,22 +15,20 @@ function ModalPortal(props) {
+   var children = props.children;
+   var elementRef = React.useRef(null);
+   if (canUseDOM && !elementRef.current) {
+-    var element = document.createElement('div');
+-    if (element && document.body) {
+-      document.body.appendChild(element);
+-      elementRef.current = element;
+-    }
++    elementRef.current = document.createElement('div');
+   }
+-  React.useEffect(() => {
+-    if (canUseDOM) {
++  React.useLayoutEffect(() => {
++    if (elementRef.current) {
++      if (!elementRef.current.parentElement) {
++        document.body.appendChild(elementRef.current);
++      }
+       return () => {
+-        if (document.body && elementRef.current) {
+-          document.body.removeChild(elementRef.current);
+-          elementRef.current = null;
++        if (elementRef.current.parentElement) {
++          elementRef.current.parentElement.removeChild(elementRef.current);
+         }
+       };
+     }
+-  }, []);
++  }, [elementRef.current])
+   return elementRef.current && canUseDOM ? /*#__PURE__*/createPortal(children, elementRef.current) : null;
+ }
+ export default ModalPortal;
+\ No newline at end of file

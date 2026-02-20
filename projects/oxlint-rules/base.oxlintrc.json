@@ -1,7 +1,34 @@
 {
-  "$schema": "https://oxc.rs/schemas/oxlint.json",
-  "plugins": ["typescript", "import", "eslint", "unicorn"],
-  "ignorePatterns": ["test/**", "**/*.d.ts"],
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import", "eslint", "unicorn", "react"],
+  "jsPlugins": [
+    {
+      "name": "react-compiler-js",
+      "specifier": "eslint-plugin-react-compiler"
+    },
+    {
+      "name": "react-hooks-js",
+      "specifier": "eslint-plugin-react-hooks"
+    },
+    {
+      "name": "import-js",
+      "specifier": "eslint-plugin-import"
+    },
+    {
+      "name": "drizzle-js",
+      "specifier": "eslint-plugin-drizzle"
+    }
+    // Crashes oxlint LSP
+    // {
+    //   "name": "stylistic-js",
+    //   "specifier": "@stylistic/eslint-plugin"
+    // }
+    //   {
+    //     "name": "pinyinly",
+    //     "specifier": "@pinyinly/eslint-rules"
+    //   }
+  ],
+  "ignorePatterns": ["**/*.d.ts"],
   "categories": {
     "correctness": "error",
     "restriction": "error",
@@ -45,6 +72,10 @@
     "no-eval": "deny",
     "no-func-assign": "deny",
     "no-global-assign": "deny",
+    "no-fallthrough": [
+      "error",
+      { "commentPattern": ".*intentional fallthrough.*" }
+    ],
 
     "unicorn/no-thenable": "deny",
     "unicorn/no-empty-file": "deny",
@@ -159,6 +190,18 @@
     // enforces consistent type specifier style for named imports
     "import/consistent-type-specifier-style": "error",
 
+    "import-js/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "peerDependencies": true,
+        "optionalDependencies": false
+      }
+    ],
+    // Prevent importing the default as if it were named
+    "import-js/no-named-default": "error",
+    "import-js/no-anonymous-default-export": "error",
+
     "typescript/prefer-for-of": "deny",
     "typescript/no-dynamic-delete": "deny",
     "typescript/no-implied-eval": "deny",
@@ -195,7 +238,99 @@
         "allowNumber": true,
         "allowRegExp": false
       }
+    ],
+    "typescript/promise-function-async": [
+      "error",
+      { "allowedPromiseNames": ["ReactNode"] }
+    ],
+
+    "react/exhaustive-deps": "off",
+    "react/jsx-filename-extension": ["error", { "extensions": ["tsx"] }],
+    "react/no-children-prop": "error",
+    "react/no-multi-comp": "off",
+    "react/only-export-components": "error",
+
+    "react-hooks-js/exhaustive-deps": [
+      "error",
+      { "additionalHooks": "(useLiveQuery)" }
+    ],
+    //
+    // From https://github.com/TheAlexLichter/oxlint-react-compiler-rules/issues/1#issue-3904052296
+    "react-hooks-js/component-hook-factories": "error",
+    "react-hooks-js/config": "error",
+    "react-hooks-js/error-boundaries": "error",
+    "react-hooks-js/gating": "error",
+    "react-hooks-js/globals": "error",
+    "react-hooks-js/immutability": "error",
+    "react-hooks-js/incompatible-library": "error",
+    "react-hooks-js/preserve-manual-memoization": "error",
+    "react-hooks-js/purity": "error",
+    "react-hooks-js/refs": "error",
+    "react-hooks-js/set-state-in-effect": "error",
+    "react-hooks-js/set-state-in-render": "error",
+    "react-hooks-js/static-components": "error",
+    "react-hooks-js/unsupported-syntax": "error",
+    "react-hooks-js/use-memo": "error",
+    //
+    // Recommended-latest rules (from LintRulePreset.RecommendedLatest)
+    "react-hooks-js/void-use-memo": "error",
+    //
+    // Off rules (LintRulePreset.Off) - not enabled by default
+    "react-hooks-js/automatic-effect-dependencies": "error",
+    "react-hooks-js/capitalized-calls": "error",
+    "react-hooks-js/fbt": "error",
+    "react-hooks-js/fire": "error",
+    "react-hooks-js/hooks": "error",
+    "react-hooks-js/invariant": "error",
+    "react-hooks-js/memoized-effect-dependencies": "error",
+    "react-hooks-js/no-deriving-state-in-effects": "error",
+    "react-hooks-js/rule-suppression": "error",
+    "react-hooks-js/syntax": "error",
+    // "react-hooks-js/todo": "error",
+
+    "react-compiler-js/react-compiler": "error",
+
+    "drizzle-js/enforce-update-with-where": "error",
+    "drizzle-js/enforce-delete-with-where": [
+      "error",
+      { "drizzleObjectName": ["db", "tx"] }
     ]
+
+    // "stylistic-js/quotes": ["error", "backtick"]
+
+    //
+    // pinyinly
+    //
+
+    // "pinyinly/import-names": [
+    //   "error",
+    //   {
+    //     "defaultImports": {
+    //       "node:path": "path",
+    //       "react-native-reanimated": "Reanimated"
+    //     },
+    //     "namedImports": {
+    //       "posthog-react-native": {
+    //         "PostHogProvider": "RnPostHogProvider",
+    //         "usePostHog": "rnUsePostHog"
+    //       },
+    //       "posthog-js/react": {
+    //         "PostHogProvider": "WebPostHogProvider",
+    //         "usePostHog": "webUsePostHog"
+    //       },
+    //       "react": {
+    //         "Suspense": "ReactSuspense"
+    //       },
+    //       "react-native": {
+    //         "Animated": "RnAnimated",
+    //         "Easing": "RnEasing",
+    //         "Image": "RnImage"
+    //       }
+    //     }
+    //   }
+    // ],
+    // "pinyinly/nameof": "error",
+    // "pinyinly/glob-template": "error"
   },
   "overrides": [
     // Ban CommonJS globals in ESM files, use import.meta.* instead
@@ -203,6 +338,13 @@
       "files": ["**/*.{js,mjs,ts,tsx}"],
       "rules": {
         "no-restricted-globals": ["error", "__dirname", "__filename"]
+      }
+    },
+    // Bin scripts
+    {
+      "files": ["bin/**/*.{js,mjs,ts,tsx}"],
+      "rules": {
+        "no-console": "off"
       }
     },
     {
@@ -219,13 +361,22 @@
       }
     },
     {
-      "files": ["test/**/*.{ts,tsx}"],
+      "files": ["test/**"],
       "rules": {
-         // it's nice to be able to write a quick generator functions in a test without worrying about yield
+        // it's nice to be able to write a quick generator functions in a test without worrying about yield
         "require-yield": "off",
+        "no-non-null-assertion": "off",
+
         "eslint/require-yield": "off",
-        
-        "no-non-null-assertion": "off"
+        "eslint/no-empty-function": "off",
+        "eslint/no-empty-pattern": "off",
+        "eslint/no-inner-declarations": "off",
+
+        "typescript/no-dynamic-delete": "off",
+        "typescript/no-explicit-any": "off",
+        "typescript/restrict-template-expressions": "off",
+
+        "react/rules-of-hooks": "off",
         // Backup from eslint config:
         //
         // "typescript/no-non-null-assertion": "off",
@@ -234,7 +385,7 @@
         // "typescript/return-await": "off", // this is annoying when you want a little function to return a promise
         // // It's useful to use inline type annotations for mocking.
         // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
-        // "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
+        "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
       }
     }
   ]

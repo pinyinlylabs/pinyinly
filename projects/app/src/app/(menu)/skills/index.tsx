@@ -1,19 +1,34 @@
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
-import { hanziWordsByRankQuery } from "@/client/query";
+import {
+  dictionaryQuery,
+  getTargetHanziWordsFromDictionary,
+  hanziWordsByRankData,
+} from "@/client/query";
 import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
+import { useDb } from "@/client/ui/hooks/useDb";
 import type { HanziWord } from "@/data/model";
 import type { RankNumber } from "@/data/skills";
 import { coerceRank, rankName } from "@/data/skills";
 import { meaningKeyFromHanziWord } from "@/dictionary";
+import { useLiveQuery } from "@tanstack/react-db";
+import { useQuery } from "@tanstack/react-query";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SkillsPage() {
-  const r = useReplicache();
-  const { data: hanziWordsByRank } = useRizzleQueryPaged(
-    hanziWordsByRankQuery(r),
+  const db = useDb();
+  const { data: dictionary } = useQuery(dictionaryQuery);
+  const { data: skillStates = [] } = useLiveQuery(
+    (q) => q.from({ skillState: db.skillStateCollection }),
+    [db.skillStateCollection],
   );
+
+  const hanziWordsByRank =
+    dictionary == null
+      ? null
+      : hanziWordsByRankData({
+          skillStates,
+          hanziWords: getTargetHanziWordsFromDictionary(dictionary),
+        });
 
   return (
     <View className="gap-5">

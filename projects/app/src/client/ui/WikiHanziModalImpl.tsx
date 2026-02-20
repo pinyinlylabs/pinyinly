@@ -1,13 +1,13 @@
-import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
-import { CloseButton2 } from "./CloseButton2";
+import { CloseButton } from "./CloseButton";
 import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -19,41 +19,37 @@ export function WikiHanziModalImpl({
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
-  const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-
   return (
-    <>
-      <ScrollView
-        className={
-          // Use a linear gradient on the background so that rubber band
-          // scrolling showing the correct color at the top and bottom.
-          `h-screen`
+    <ScrollView
+      className={
+        // Use a linear gradient on the background so that rubber band
+        // scrolling showing the correct color at the top and bottom.
+        `h-screen`
+      }
+      contentContainerClassName="pb-10 min-h-full"
+    >
+      <Header
+        hanzi={hanzi}
+        pinyin={
+          hanziWordMeanings.length === 1
+            ? hanziWordMeanings[0]?.[1].pinyin?.[0]
+            : undefined
         }
-        contentContainerClassName="pb-10 min-h-full"
-      >
-        <Header
-          hanzi={hanzi}
-          pinyin={
-            hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].pinyin?.[0]
-              : undefined
-          }
-          gloss={
-            hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].gloss[0]
-              : undefined
-          }
-          variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
-          onDismiss={onDismiss}
-        />
+        gloss={
+          hanziWordMeanings.length === 1
+            ? hanziWordMeanings[0]?.[1].gloss[0]
+            : undefined
+        }
+        variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
+        onDismiss={onDismiss}
+      />
 
-        <PylyMdxComponents>
-          <View className="flex-1 gap-6 bg-bg py-7">
-            {MeaningMdx == null ? null : <MeaningMdx />}
-          </View>
-        </PylyMdxComponents>
-      </ScrollView>
-    </>
+      <PylyMdxComponents>
+        <View className="flex-1 gap-6 bg-bg py-7">
+          <WikiMdxHanziMeaning hanzi={hanzi} />
+        </View>
+      </PylyMdxComponents>
+    </ScrollView>
   );
 }
 
@@ -65,7 +61,7 @@ function Header({
   variant,
   ...rest
 }: {
-  onDismiss?: () => void;
+  onDismiss: () => void;
 } & Pick<PropsOf<typeof HanziTile>, `gloss` | `hanzi` | `pinyin` | `variant`>) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -91,7 +87,7 @@ function Header({
             sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4
           `}
         >
-          <CloseButton2 onPress={onDismiss} />
+          <CloseButton onPress={onDismiss} />
 
           <View className="flex-1 content-center items-center">
             <Text
@@ -106,7 +102,7 @@ function Header({
           </View>
 
           <View className="invisible">
-            <CloseButton2 onPress={onDismiss} />
+            <CloseButton onPress={onDismiss} />
           </View>
         </View>
       </View>
