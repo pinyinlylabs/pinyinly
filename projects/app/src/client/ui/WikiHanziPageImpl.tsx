@@ -1,32 +1,41 @@
+import { hskLevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
-import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
+import {
+  arrayFilterUnique,
+  sortComparatorNumber,
+} from "@pinyinly/lib/collections";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { use, useState } from "react";
 import { Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
-import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
+import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
+  const hskLevels = hanziWordMeanings
+    .map(([_, meaning]) => meaning.hsk)
+    .filter((x) => x != null)
+    .filter(arrayFilterUnique())
+    .sort(sortComparatorNumber(hskLevelToNumber));
+  const pinyins = hanziWordMeanings
+    .map(([_, meaning]) => meaning.pinyin?.[0])
+    .filter((x) => x != null);
+  const glosses = hanziWordMeanings
+    .map(([_, meaning]) => meaning.gloss[0])
+    .filter((x) => x != null);
 
   return (
     <>
       <Header
         hanzi={hanzi}
-        pinyin={
-          hanziWordMeanings.length === 1
-            ? hanziWordMeanings[0]?.[1].pinyin?.[0]
-            : undefined
-        }
-        gloss={
-          hanziWordMeanings.length === 1
-            ? hanziWordMeanings[0]?.[1].gloss[0]
-            : undefined
-        }
-        variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
+        pinyins={pinyins}
+        glosses={glosses}
+        hskLevels={hskLevels}
       />
 
       <PylyMdxComponents>
@@ -39,15 +48,12 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
 }
 
 function Header({
-  gloss,
-  pinyin,
+  glosses,
+  pinyins,
   hanzi,
-  onDismiss: _onDismiss,
-  variant,
+  hskLevels,
   ...rest
-}: {
-  onDismiss?: () => void;
-} & Pick<PropsOf<typeof HanziTile>, `gloss` | `hanzi` | `pinyin` | `variant`>) {
+}: WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
   // Fix some glitchiness when opening the modal by delaying showing the
@@ -66,43 +72,37 @@ function Header({
 
   return (
     <>
-      <View className="sticky top-0 z-10">
-        <View
-          className={`
-            sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4
-          `}
-        >
-          <View className="flex-1 content-center items-center">
-            <Text
-              className={`
-                text-3xl text-fg-loud
+      <StickyScrollHeader hanzi={hanzi} show={showHeaderHanziTile} />
 
-                ${showHeaderHanziTile ? `opacity-100 transition-opacity` : `opacity-0`}
-              `}
-            >
-              {hanzi}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <View className="items-center">
-        <HanziTile
-          hanzi={hanzi}
-          pinyin={pinyin}
-          gloss={gloss}
-          className="place-self-center"
-          variant={variant}
-          size="47"
-        />
-      </View>
-      {/* Scroll detector */}
-      <View
-        className="h-0 w-full"
-        ref={(el) => {
-          ref1(el as Element | null);
-        }}
+      <WikiHanziHeaderOverview
+        hanzi={hanzi}
+        hskLevels={hskLevels}
+        pinyins={pinyins}
+        glosses={glosses}
+        hanziScrollRef={ref1}
       />
     </>
+  );
+}
+
+function StickyScrollHeader({ hanzi, show }: { hanzi: string; show: boolean }) {
+  return (
+    <View className="sticky top-0 z-10">
+      <View
+        className={`sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4`}
+      >
+        <View className="flex-1 content-center items-center">
+          <Text
+            className={`
+              text-3xl text-fg-loud
+
+              ${show ? `opacity-100 transition-opacity` : `opacity-0`}
+            `}
+          >
+            {hanzi}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

@@ -1,8 +1,8 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import type { HanziText, PinyinText } from "@/data/model";
 import { View } from "react-native";
-import { HanziTile } from "./HanziTile";
 import type { HanziTileProps } from "./HanziTile";
+import { HanziTile } from "./HanziTile";
 
 export default () => (
   <View className="max-w-full gap-4">

@@ -1,14 +1,12 @@
-// pyly-not-src-test
-
-import { HskLevel, PartOfSpeech } from "#data/model.js";
 import type { HanziText, partOfSpeechSchema } from "#data/model.js";
+import { HskLevel, PartOfSpeech } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.js";
+import type { HanziWordMeaning } from "#dictionary.js";
 import {
   buildHanziWord,
   hanziFromHanziWord,
   loadDictionary,
 } from "#dictionary.js";
-import type { HanziWordMeaning } from "#dictionary.js";
 import {
   dataDir,
   readDictionaryJson,

@@ -1,12 +1,6 @@
 import { invariant } from "@pinyinly/lib/invariant";
-import type { ImageProps } from "expo-image";
-import { createIconRegistry } from "./IconRegistry";
 import type { IconName, IconRegistry } from "./IconRegistry";
-
-export interface IconImageProps extends Pick<ImageProps, `className`> {
-  icon: IconName;
-  size?: 12 | 16 | 24 | 32;
-}
+import { createIconRegistry } from "./IconRegistry";
 
 export function classNameLintInvariant(className: string) {
   invariant(
