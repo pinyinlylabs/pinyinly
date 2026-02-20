@@ -294,6 +294,10 @@
     --color-theme-placeholder-panel-fg-dim: #3b3c3d;
     --color-theme-placeholder-panel-fg-loud: #898989;
     --color-theme-placeholder-panel-on-fg: #1a1d1e;
+
+    --color-lozenge-blue-bg: rgba(2, 131, 245, 0);
+    --color-lozenge-blue-fg: rgba(2, 131, 245, 1);
+    --color-lozenge-blue-border: rgba(2, 131, 245, 1);
   }
 
   .pyly-color-scheme-light {
@@ -376,6 +380,10 @@
     --color-theme-placeholder-panel-fg-dim: #828282;
     --color-theme-placeholder-panel-fg-loud: #6c6c6c;
     --color-theme-placeholder-panel-on-fg: #ffffff;
+
+    --color-lozenge-blue-bg: rgba(228, 244, 255, 1);
+    --color-lozenge-blue-fg: rgba(2, 131, 245, 1);
+    --color-lozenge-blue-border: rgba(174, 220, 255, 1);
   }
 
   /* declare MDX component clases */

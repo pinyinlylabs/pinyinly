@@ -61,6 +61,13 @@ const config = {
       on: {
         fg: `rgb(from var(--color-on-fg) r g b / calc(alpha * <alpha-value>))`,
       },
+      lozenge: {
+        blue: {
+          bg: `rgb(from var(--color-lozenge-blue-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-blue-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-blue-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+      },
 
       // Colors
       cloud: `rgb(from var(--color-cloud) r g b / calc(alpha * <alpha-value>))`,
