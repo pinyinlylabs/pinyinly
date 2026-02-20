@@ -56,6 +56,7 @@ const getFrameAlignedTime = (
 
 /**
  * Create a sprite filename from a group of files with deterministic hashing.
+ * @param manifestDir Directory where the manifest.json is located (used to resolve relative paths)
  * @param spriteName Name prefix for the sprite file
  * @param audioFiles Array of audio file info for the sprite
  * @param fileHashMap Map of file paths to their content hashes
@@ -63,6 +64,7 @@ const getFrameAlignedTime = (
  * @returns The generated sprite filename
  */
 const createSpriteFromFiles = (
+  manifestDir: string,
   spriteName: string,
   audioFiles: AudioFileInfo[],
   fileHashMap: Map<string, string>,
@@ -76,9 +78,13 @@ const createSpriteFromFiles = (
   const hash = crypto.createHash(`sha256`);
 
   // Create a deterministic sprite filename by hashing all parameters that affect sprite content
-  const spriteContentHashes = sortedFiles
-    .map((audioFile) => fileHashMap.get(audioFile.filePath))
-    .filter((hash): hash is string => hash != null);
+  const spriteContentHashes = sortedFiles.map((audioFile) => {
+    const manifestRelativePath = path.relative(manifestDir, audioFile.filePath);
+    return nonNullable(
+      fileHashMap.get(manifestRelativePath),
+      `Missing file hash for ${manifestRelativePath}`,
+    );
+  });
   hash.update(JSON.stringify(spriteContentHashes));
 
   // Include the ffmpeg command used to generate the sprite
@@ -212,6 +218,7 @@ export const recomputeManifest = async (
     const matchedRule = spriteToRule.get(spriteName);
     const bitrate = matchedRule?.bitrate ?? `128k`;
     const spriteFileName = createSpriteFromFiles(
+      manifestDir,
       spriteName,
       segments,
       fileHashMap,

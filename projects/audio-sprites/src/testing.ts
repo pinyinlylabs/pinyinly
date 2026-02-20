@@ -1,7 +1,11 @@
 import * as fs from "@pinyinly/lib/fs";
+import { glob } from "@pinyinly/lib/fs";
+import chalk from "chalk";
 import { execa } from "execa";
+import { execSync } from "node:child_process";
 import path from "node:path";
-import { generateSpriteCommand, analyzeAudioFile } from "./ffmpeg.ts";
+import { describe, expect, test } from "vitest";
+import { analyzeAudioFile, generateSpriteCommand } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
 import {
   applyRulesWithRule,
@@ -10,10 +14,6 @@ import {
   syncManifestWithFilesystem,
 } from "./manifestWrite.ts";
 import type { AudioFileInfo, SpriteManifest } from "./types.ts";
-import { glob } from "@pinyinly/lib/fs";
-import chalk from "chalk";
-import { execSync } from "node:child_process";
-import { describe, expect, test } from "vitest";
 
 /**
  * Result of checking the sprite manifest status.
