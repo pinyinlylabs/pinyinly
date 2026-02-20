@@ -1,12 +1,12 @@
-import { Image } from "expo-image";
 import type { ImageProps } from "expo-image";
+import { Image } from "expo-image";
 import { tv } from "tailwind-variants";
 import { classNameLintInvariant, iconRegistry } from "./IconImage.utils";
 import type { IconName } from "./IconRegistry";
 
 export interface IconImageProps extends Pick<ImageProps, `className`> {
   icon: IconName;
-  size?: 12 | 16 | 24 | 32;
+  size?: 12 | 16 | 20 | 24 | 32;
 }
 
 export function IconImage({ icon, className, size }: IconImageProps) {
@@ -36,6 +36,7 @@ const imageClass = tv({
     size: {
       12: `size-[12px]`,
       16: `size-[16px]`,
+      20: `size-[20px]`,
       24: `size-[24px]`,
       32: `size-[32px]`,
     },

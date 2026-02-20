@@ -2,6 +2,7 @@
 // oxlint-disable eslint-plugin-import/no-commonjs
 export const createIconRegistry = () => ({
   // <pyly-glob-template glob="../../assets/icons/*.svg" template="  [`${filenameWithoutExt}`]: require(`${path}`),">
+  [`add-circled-filled`]: require(`../../assets/icons/add-circled-filled.svg`),
   [`alarm-filled`]: require(`../../assets/icons/alarm-filled.svg`),
   [`alarm`]: require(`../../assets/icons/alarm.svg`),
   [`arrow-down`]: require(`../../assets/icons/arrow-down.svg`),
@@ -19,6 +20,7 @@ export const createIconRegistry = () => ({
   [`cart`]: require(`../../assets/icons/cart.svg`),
   [`check-circled-filled`]: require(`../../assets/icons/check-circled-filled.svg`),
   [`check`]: require(`../../assets/icons/check.svg`),
+  [`chevron-down-circled`]: require(`../../assets/icons/chevron-down-circled.svg`),
   [`chevron-down`]: require(`../../assets/icons/chevron-down.svg`),
   [`chevron-left`]: require(`../../assets/icons/chevron-left.svg`),
   [`chevron-right`]: require(`../../assets/icons/chevron-right.svg`),
@@ -41,6 +43,7 @@ export const createIconRegistry = () => ({
   [`keyboard`]: require(`../../assets/icons/keyboard.svg`),
   [`loader`]: require(`../../assets/icons/loader.svg`),
   [`lock-filled`]: require(`../../assets/icons/lock-filled.svg`),
+  [`lock`]: require(`../../assets/icons/lock.svg`),
   [`medal`]: require(`../../assets/icons/medal.svg`),
   [`meh-circled`]: require(`../../assets/icons/meh-circled.svg`),
   [`menu`]: require(`../../assets/icons/menu.svg`),
@@ -69,9 +72,10 @@ export const createIconRegistry = () => ({
   [`trending-down`]: require(`../../assets/icons/trending-down.svg`),
   [`trending-up`]: require(`../../assets/icons/trending-up.svg`),
   [`undo`]: require(`../../assets/icons/undo.svg`),
+  [`unlock`]: require(`../../assets/icons/unlock.svg`),
   [`voice-square`]: require(`../../assets/icons/voice-square.svg`),
   [`zap-filled`]: require(`../../assets/icons/zap-filled.svg`),
-  // </pyly-glob-template>
+// </pyly-glob-template>
 }) as const;
 // oxlint-enable eslint-plugin-import/no-commonjs
 
