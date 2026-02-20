@@ -56,6 +56,9 @@ config = {
           process.env[`PYLY_SLIM_WIKI_FOR_TESTING`] === `true`;
 
         if (useSlimWiki) {
+          console.warn(
+            `⚠️  PYLY_SLIM_WIKI_FOR_TESTING enabled, using slim wiki registry.`,
+          );
           // Route to the slim/CI version instead of the full registry
           const slimModuleName = moduleName.replace(
             `/wikiRegistry`,
