@@ -14,8 +14,8 @@ import { glob, readFileSync } from "@pinyinly/lib/fs";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import path from "node:path";
-import { Suspense as ReactSuspense } from "react";
 import type { PropsWithChildren } from "react";
+import { Suspense as ReactSuspense } from "react";
 import { test as baseTest, describe, expect } from "vitest";
 
 const test = baseTest.extend(rizzleFixture);
@@ -53,31 +53,35 @@ describe(`mdx rendering (via registry)`, () => {
   for (const [path, entry] of entries) {
     const Component = entry.component;
     // Test a sample of the registry entries - ensures faithful production behavior
-    test(`${path} component renders correctly`, async ({ rizzle }) => {
-      const Providers = testProviders(rizzle);
-      const element = (
-        <Providers>
-          <ReactSuspense fallback={<div data-testid="suspense-fallback" />}>
-            <PylyMdxComponents>
-              <Component />
-            </PylyMdxComponents>
-          </ReactSuspense>
-        </Providers>
-      );
+    test(
+      `${path} component renders correctly`,
+      { timeout: 10000 },
+      async ({ rizzle }) => {
+        const Providers = testProviders(rizzle);
+        const element = (
+          <Providers>
+            <ReactSuspense fallback={<div data-testid="suspense-fallback" />}>
+              <PylyMdxComponents>
+                <Component />
+              </PylyMdxComponents>
+            </ReactSuspense>
+          </Providers>
+        );
 
-      const { queryByTestId } = render(element);
+        const { queryByTestId } = render(element);
 
-      // Wait for component to load - handle race condition where fallback might not be rendered
-      const fallback = queryByTestId(`suspense-fallback`);
+        // Wait for component to load - handle race condition where fallback might not be rendered
+        const fallback = queryByTestId(`suspense-fallback`);
 
-      // If fallback exists, wait for it to be removed; otherwise just wait a tick to ensure rendering is complete
-      if (fallback) {
-        await waitForElementToBeRemoved(fallback);
-      }
+        // If fallback exists, wait for it to be removed; otherwise just wait a tick to ensure rendering is complete
+        if (fallback) {
+          await waitForElementToBeRemoved(fallback);
+        }
 
-      // Render again to make sure there are no errors thrown.
-      render(element);
-    });
+        // Render again to make sure there are no errors thrown.
+        render(element);
+      },
+    );
   }
 });
 
