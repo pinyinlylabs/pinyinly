@@ -50,13 +50,14 @@ describe(
   `generateImage suite` satisfies HasNameOf<typeof generateImage>,
   () => {
     beforeEach(() => {
-      vi.mocked(genai.GoogleGenAI).mockImplementation(() => ({
-        models: {
-          // @ts-expect-error Mocking internal method for testing purposes
-          generateContentStream: async (...args: unknown[]) =>
-            mockGenerateContentStream(...args),
-        },
-      }));
+      vi.mocked(genai.GoogleGenAI).mockImplementation(function (this: unknown) {
+        return {
+          models: {
+            generateContentStream: async (...args: unknown[]) =>
+              mockGenerateContentStream(...args),
+          },
+        };
+      });
       mockGenerateContentStream.mockImplementation(() => createMockStream());
 
       vi.spyOn(env, `GEMINI_IMAGE_API_KEY`, `get`).mockReturnValue(

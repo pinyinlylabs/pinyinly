@@ -14,5 +14,10 @@ export default defineConfig({
     },
     testTimeout: 30_000, // pglite can be slow
   },
+  resolve: {
+    alias: {
+      "react-native": `react-native-web`,
+    },
+  },
   plugins: [viteMdxPlugin(), tsconfigPaths(), react()],
 });

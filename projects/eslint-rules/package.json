@@ -31,6 +31,6 @@
     "oxlint-tsgolint": "^0.12.2",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   }
 }
