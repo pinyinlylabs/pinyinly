@@ -67,6 +67,7 @@
         "^.moon/.*.ya?ml$",
         "^.github/.*.ya?ml$",
         "^projects/[^/]+/[^/]+.ya?ml$",
+        "^moon.ya?ml$",
       ],
       matchStrings: [
         // @pyly-test: "npx -y foo@1.2.3" depName=foo currentValue=1.2.3
