@@ -181,7 +181,7 @@
     "ucd-full": "^16.0.0",
     "vite": "^7.0.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.18",
     "yaml": "^2.7.0",
     "yargs": "^18.0.0"
   },
