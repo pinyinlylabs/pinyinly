@@ -18,7 +18,7 @@ export async function iterTake<T>(
   return results;
 }
 
-export function arrayFilterUniqueWithKey<T>(
+export function arrayFilterUnique<T>(
   keyFn: (x: T) => unknown = (x) => x,
 ): (item: T) => boolean {
   const seen = new Set();

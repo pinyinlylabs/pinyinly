@@ -19,7 +19,7 @@ import type {
   RizzleEntityOutput,
 } from "@/util/rizzle";
 import {
-  arrayFilterUniqueWithKey,
+  arrayFilterUnique,
   memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
@@ -212,7 +212,7 @@ export function getTargetHanziWordsFromDictionary(
     ...dictionary.hsk2HanziWords,
     ...dictionary.hsk3HanziWords,
     ...dictionary.hsk4HanziWords,
-  ].filter(arrayFilterUniqueWithKey((x) => x));
+  ].filter(arrayFilterUnique());
 }
 
 export function hanziWordsByRankData({

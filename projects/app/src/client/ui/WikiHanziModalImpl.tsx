@@ -1,12 +1,18 @@
+import { hskLevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
-import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
+import {
+  arrayFilterUnique,
+  sortComparatorNumber,
+} from "@pinyinly/lib/collections";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { CloseButton } from "./CloseButton";
-import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
+import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export function WikiHanziModalImpl({
@@ -18,6 +24,17 @@ export function WikiHanziModalImpl({
 }) {
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
+  const hskLevels = hanziWordMeanings
+    .map(([_, meaning]) => meaning.hsk)
+    .filter((x) => x != null)
+    .filter(arrayFilterUnique())
+    .sort(sortComparatorNumber(hskLevelToNumber));
+  const pinyins = hanziWordMeanings
+    .map(([_, meaning]) => meaning.pinyin?.[0])
+    .filter((x) => x != null);
+  const glosses = hanziWordMeanings
+    .map(([_, meaning]) => meaning.gloss[0])
+    .filter((x) => x != null);
 
   return (
     <ScrollView
@@ -30,17 +47,9 @@ export function WikiHanziModalImpl({
     >
       <Header
         hanzi={hanzi}
-        pinyin={
-          hanziWordMeanings.length === 1
-            ? hanziWordMeanings[0]?.[1].pinyin?.[0]
-            : undefined
-        }
-        gloss={
-          hanziWordMeanings.length === 1
-            ? hanziWordMeanings[0]?.[1].gloss[0]
-            : undefined
-        }
-        variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
+        pinyins={pinyins}
+        hskLevels={hskLevels}
+        glosses={glosses}
         onDismiss={onDismiss}
       />
 
@@ -54,15 +63,15 @@ export function WikiHanziModalImpl({
 }
 
 function Header({
-  gloss,
-  pinyin,
+  glosses,
+  pinyins,
   hanzi,
+  hskLevels,
   onDismiss,
-  variant,
   ...rest
 }: {
   onDismiss: () => void;
-} & Pick<PropsOf<typeof HanziTile>, `gloss` | `hanzi` | `pinyin` | `variant`>) {
+} & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
   // Fix some glitchiness when opening the modal by delaying showing the
@@ -107,22 +116,12 @@ function Header({
         </View>
       </View>
 
-      <View className="items-center">
-        <HanziTile
-          hanzi={hanzi}
-          pinyin={pinyin}
-          gloss={gloss}
-          className="place-self-center"
-          variant={variant}
-          size="47"
-        />
-      </View>
-      {/* Scroll detector */}
-      <View
-        className="h-0 w-full"
-        ref={(el) => {
-          ref1(el as Element | null);
-        }}
+      <WikiHanziHeaderOverview
+        hanzi={hanzi}
+        hskLevels={hskLevels}
+        pinyins={pinyins}
+        glosses={glosses}
+        hanziScrollRef={ref1}
       />
     </>
   );
