@@ -53,6 +53,7 @@ declare global {
       POSTMARK_SERVER_TOKEN?: string;
       PYLY_JWT_KEY_BASE64?: string;
       PYLY_PREFLIGHT_CHECK_ENV_VARS?: string;
+      PYLY_SLIM_WIKI_FOR_TESTING?: string;
       SENTRY_DSN?: string;
     }
   }
