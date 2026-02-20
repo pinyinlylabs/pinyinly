@@ -3,7 +3,7 @@
 
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
-import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
+import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { registry_ForTesting } from "#client/wiki.js";

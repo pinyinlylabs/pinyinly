@@ -3,6 +3,7 @@ fileGroups:
     - $SENTRY_*
   expoCliEnv:
     - "$EXPO_*"
+    - "$PYLY_*"
   # WARNING: these must end in trialing slash to be rsync
   buildVercelExpoOutdir:
     - dist/.cache/vercel-expo/
