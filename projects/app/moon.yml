@@ -343,6 +343,9 @@ tasks:
   test:
     deps:
       - ~:codegen
+    outputs:
+      - "src/assets/audio/manifest.json"
+      - "src/assets/audio/sprites/*.m4a"
     env:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     options:
