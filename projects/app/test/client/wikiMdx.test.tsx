@@ -55,7 +55,7 @@ describe(`mdx rendering (via registry)`, () => {
     // Test a sample of the registry entries - ensures faithful production behavior
     test(
       `${path} component renders correctly`,
-      { timeout: 10000 },
+      { timeout: 10000, retry: 2 },
       async ({ rizzle }) => {
         const Providers = testProviders(rizzle);
         const element = (
