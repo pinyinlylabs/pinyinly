@@ -15,11 +15,17 @@ import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import z from "zod/v4";
 import {
+  downloadAssetFromRemote,
+  listLocalAssetFiles,
+  uploadAssetToRemote,
+} from "./assetSync";
+import {
   pgBatchUpdate,
   substring,
   withDrizzle,
   withRepeatableReadTransaction,
 } from "./db";
+import { getR2Bucket, getR2Client } from "./r2/client";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
@@ -865,6 +871,225 @@ const retryFailedMutations = inngest.createFunction(
   },
 );
 
+const syncAssetBlobs = inngest.createFunction(
+  {
+    id: `syncAssetBlobs`,
+    singleton: { mode: `skip` },
+  },
+  {
+    // Sync every 5 minutes
+    cron: `*/5 * * * *`,
+  },
+  async ({ step, logger }) => {
+    {
+      const isOffline = await step.run(`checkInternetConnection`, async () =>
+        checkIsOffline(),
+      );
+      if (isOffline) {
+        logger.warn(`No internet connection, skipping asset blob sync`);
+        return;
+      }
+    }
+
+    // Find all sync rules
+    const remoteSyncs = await step.run(`findSyncRules`, async () =>
+      withDrizzle(async (db) => db.query.remoteSync.findMany()),
+    );
+
+    // Iterate over each remote sync rule and process it one by one.
+    for (const remoteSync of remoteSyncs) {
+      const remoteSyncId: string = remoteSync.id;
+      const userId: string = remoteSync.userId;
+
+      try {
+        const localAssets = await step.run(
+          `listLocalAssetFiles-${remoteSyncId}`,
+          async () => {
+            const s3Client = getR2Client();
+            const bucket = getR2Bucket();
+            return [...(await listLocalAssetFiles(s3Client, bucket, userId))];
+          },
+        );
+
+        const localAssetsSet = new Set(localAssets);
+
+        const remoteAssets = await step.run(
+          `listRemoteAssets-${remoteSyncId}`,
+          async () => {
+            const remoteClient = createTrpcClient(
+              remoteSync.remoteUrl,
+              remoteSync.remoteSessionId,
+            );
+            return remoteClient.asset.listUploadedAssets.query();
+          },
+        );
+
+        const remoteAssetsSet = new Set(remoteAssets);
+
+        // Diff to find assets to upload and download
+        const toUpload: string[] = [];
+        for (const id of localAssets) {
+          if (!remoteAssetsSet.has(id)) {
+            toUpload.push(id);
+          }
+        }
+
+        const toDownload: string[] = [];
+        for (const id of remoteAssets) {
+          if (!localAssetsSet.has(id)) {
+            toDownload.push(id);
+          }
+        }
+
+        logger.info(
+          `Asset sync for ${remoteSync.id}: ${toUpload.length} to upload, ${toDownload.length} to download`,
+        );
+
+        // Fan out upload jobs
+        for (const assetId of toUpload) {
+          await step.sendEvent(`emit-upload-${assetId}`, {
+            name: `asset/sync-upload`,
+            data: { remoteSyncId: remoteSync.id, assetId },
+            id: `asset-upload-${remoteSync.id}-${assetId}`,
+          });
+        }
+
+        // Fan out download jobs
+        for (const assetId of toDownload) {
+          await step.sendEvent(`emit-download-${assetId}`, {
+            name: `asset/sync-download`,
+            data: { remoteSyncId: remoteSync.id, assetId },
+            id: `asset-download-${remoteSync.id}-${assetId}`,
+          });
+        }
+      } catch (error) {
+        logger.error(
+          `Error during asset blob sync for remote sync ${remoteSync.id}:`,
+          error,
+        );
+      }
+    }
+  },
+);
+
+const syncAssetBlobUpload = inngest.createFunction(
+  {
+    id: `syncAssetBlobUpload`,
+    singleton: {
+      key: `event.data.remoteSyncId + "-" + event.data.assetId`,
+      mode: `skip`,
+    },
+    throttle: {
+      limit: 5,
+      period: `10s`,
+    },
+  },
+  { event: `asset/sync-upload` },
+  async ({ event, step, logger }) => {
+    const { remoteSyncId, assetId } = event.data as {
+      remoteSyncId: string;
+      assetId: string;
+    };
+
+    const remoteSync = await step.run(`fetchRemoteSyncRule`, async () =>
+      withDrizzle(async (db) =>
+        db.query.remoteSync.findFirst({
+          where: eq(s.remoteSync.id, remoteSyncId),
+        }),
+      ),
+    );
+
+    if (remoteSync == null) {
+      logger.error(`Remote sync rule ${remoteSyncId} not found`);
+      return;
+    }
+
+    try {
+      await step.run(`uploadAsset-${assetId}`, async () => {
+        const s3Client = getR2Client();
+        const bucket = getR2Bucket();
+
+        await uploadAssetToRemote(
+          createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
+          s3Client,
+          bucket,
+          remoteSync.userId,
+          assetId,
+        );
+      });
+
+      logger.info(
+        `Successfully uploaded asset ${assetId} for remote sync ${remoteSyncId}`,
+      );
+    } catch (error) {
+      logger.error(
+        `Failed to upload asset ${assetId} for remote sync ${remoteSyncId}:`,
+        error,
+      );
+      throw error;
+    }
+  },
+);
+
+const syncAssetBlobDownload = inngest.createFunction(
+  {
+    id: `syncAssetBlobDownload`,
+    singleton: {
+      key: `event.data.remoteSyncId + "-" + event.data.assetId`,
+      mode: `skip`,
+    },
+    throttle: {
+      limit: 5,
+      period: `10s`,
+    },
+  },
+  { event: `asset/sync-download` },
+  async ({ event, step, logger }) => {
+    const { remoteSyncId, assetId } = event.data as {
+      remoteSyncId: string;
+      assetId: string;
+    };
+
+    const remoteSync = await step.run(`fetchRemoteSyncRule`, async () =>
+      withDrizzle(async (db) =>
+        db.query.remoteSync.findFirst({
+          where: eq(s.remoteSync.id, remoteSyncId),
+        }),
+      ),
+    );
+
+    if (remoteSync == null) {
+      logger.error(`Remote sync rule ${remoteSyncId} not found`);
+      return;
+    }
+
+    try {
+      await step.run(`downloadAsset-${assetId}`, async () => {
+        const s3Client = getR2Client();
+        const bucket = getR2Bucket();
+
+        await downloadAssetFromRemote(
+          createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
+          s3Client,
+          bucket,
+          remoteSync.userId,
+          assetId,
+        );
+      });
+
+      logger.info(
+        `Successfully downloaded asset ${assetId} for remote sync ${remoteSyncId}`,
+      );
+    } catch (error) {
+      logger.error(
+        `Failed to download asset ${assetId} for remote sync ${remoteSyncId}:`,
+        error,
+      );
+      throw error;
+    }
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   dataIntegrityDictionary,
@@ -875,6 +1100,9 @@ export const functions = [
   retryFailedMutations,
   syncRemotePull,
   syncRemotePush,
+  syncAssetBlobs,
+  syncAssetBlobUpload,
+  syncAssetBlobDownload,
   devTestThrowRootError,
   devTestThrowStepError,
   devTestLogRootError,

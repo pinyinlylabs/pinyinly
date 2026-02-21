@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { z } from "zod/v4";
 import { getR2Bucket, getR2Client } from "./client";
 
 /**
@@ -12,16 +13,17 @@ import { getR2Bucket, getR2Client } from "./client";
 export const MAX_ASSET_SIZE_BYTES = 5 * 1024 * 1024;
 
 /**
- * Allowed image MIME types for upload.
+ * Zod schema for allowed image MIME types.
  */
-export const ALLOWED_IMAGE_TYPES = [
+export const imageTypeEnum = z.enum([
   `image/jpeg`,
   `image/png`,
   `image/webp`,
   `image/gif`,
-] as const;
+]);
 
-export type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number];
+export type AllowedImageType = z.infer<typeof imageTypeEnum>;
+export const ALLOWED_IMAGE_TYPES = imageTypeEnum.options;
 
 /**
  * Presigned URL expiration time in seconds (15 minutes).
