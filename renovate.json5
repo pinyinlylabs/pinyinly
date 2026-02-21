@@ -50,10 +50,10 @@
     {
       description: "Update version in moon/github actions/proto configs",
       customType: "regex",
-      fileMatch: [
-        "^.moon/.*.ya?ml$",
-        "^.github/workflows/.*.ya?ml$",
-        "^.prototools$",
+      managerFilePatterns: [
+        "/^.moon/.*.ya?ml$/",
+        "/^.github/workflows/.*.ya?ml$/",
+        "/^.prototools$/",
       ],
       matchStrings: [
         ".*?(:|=)\\s+('|\\\")(=?)(?<currentValue>.*)('|\\\")\\s+#\\s+renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.*?))?\\n",
@@ -63,18 +63,13 @@
     {
       description: "Update pinned npx/npm i -g/yarn dlx packages",
       customType: "regex",
-      fileMatch: [
-        "^.moon/.*.ya?ml$",
-        "^.github/.*.ya?ml$",
-        "^projects/[^/]+/[^/]+.ya?ml$",
-        "^moon.ya?ml$",
+      managerFilePatterns: [
+        "/^.moon/.*.ya?ml$/",
+        "/^.github/.*.ya?ml$/",
+        "/^projects/[^/]+/[^/]+.ya?ml$/",
+        "/^moon.ya?ml$/",
       ],
       matchStrings: [
-        // @pyly-test: "npx -y foo@1.2.3" depName=foo currentValue=1.2.3
-        // @pyly-test: "npx  -y  foo@1.2.3" depName=foo currentValue=1.2.3
-        // @pyly-test: "npx -y -p foo@1.2.3" depName=foo currentValue=1.2.3
-        // @pyly-test: "npx -y --package foo@1.2.3" depName=foo currentValue=1.2.3
-        // @pyly-test: "npx -y -p @foo/bar@1.2.3" depName=@foo/bar currentValue=1.2.3
         "(npx|npm exec|yarn dlx|pnpm dlx|npm\\s+i\\s+-g)(\\s+-[-a-z]+?)*\\s+(?:-p|--package\\s+)?(?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>\\S+)",
       ],
       datasourceTemplate: "npm",
@@ -83,7 +78,7 @@
     {
       description: "Update Vercel runtimes",
       customType: "regex",
-      fileMatch: ["/vercel.json$"],
+      managerFilePatterns: ["//vercel.json$/"],
       matchStrings: [
         '"runtime": "(?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>.+?)"',
       ],
