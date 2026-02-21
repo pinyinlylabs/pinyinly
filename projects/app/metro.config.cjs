@@ -2,14 +2,15 @@
 const { withNativeWind } = require(`nativewind/metro`);
 const { withMdx } = require(`@pinyinly/mdx/metro`);
 const { withAudioSprites } = require(`@pinyinly/audio-sprites/metro`);
+const { withSlimWikiRegistryResolver } = require(
+  `./src/metro/withSlimWikiRegistryResolver`,
+);
 
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
 // TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
 // from `expo/metro-config`.
 let config = getSentryExpoConfig(__dirname);
-
-const originalResolveRequest = config.resolver?.resolveRequest;
 config = {
   ...config,
 
@@ -33,45 +34,10 @@ config = {
       `riv`,
     ],
     unstable_enablePackageExports: true,
-
-    resolveRequest(context, moduleName, platform) {
-      const parentResolver = originalResolveRequest ?? context.resolveRequest;
-
-      // Custom resolver: Conditionally route wikiRegistry imports
-      //
-      // When PYLY_SLIM_WIKI_FOR_TESTING=true (CI builds), Metro resolves:
-      //   import { _wikiRegistry } from "./wikiRegistry"
-      // to:
-      //   "./wikiRegistry.slim.ts" (empty registry, 13 lines)
-      // instead of:
-      //   "./wikiRegistry.ts" (full registry with 3000+ MDX imports, 3074 lines)
-      //
-      // This happens at Metro's module resolution phase BEFORE processing imports,
-      // so Metro never sees or bundles the 3000+ MDX files. This is similar to
-      // how platform-specific resolution works (.web.ts, .ios.ts).
-      //
-      // Result: CI builds go from 5-10min → ~1-2min per platform
-      if (moduleName.endsWith(`/wikiRegistry`)) {
-        const useSlimWiki =
-          process.env[`PYLY_SLIM_WIKI_FOR_TESTING`] === `true`;
-
-        if (useSlimWiki) {
-          console.warn(
-            `⚠️  PYLY_SLIM_WIKI_FOR_TESTING enabled, using slim wiki registry.`,
-          );
-          // Route to the slim/CI version instead of the full registry
-          const slimModuleName = moduleName.replace(
-            `/wikiRegistry`,
-            `/wikiRegistry.slim`,
-          );
-          return parentResolver(context, slimModuleName, platform);
-        }
-      }
-
-      return parentResolver(context, moduleName, platform);
-    },
   },
 };
+
+config = withSlimWikiRegistryResolver(config);
 
 config = withAudioSprites(config, {
   manifestPath: `./src/assets/audio/manifest.json`,
