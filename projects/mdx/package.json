@@ -36,7 +36,7 @@
     "eslint-plugin-unicorn": "^60.0.0",
     "oxfmt": "^0.31.0",
     "oxlint": "^1.47.0",
-    "oxlint-tsgolint": "^0.12.2",
+    "oxlint-tsgolint": "^0.14.0",
     "ts-essentials": "^10.1.1",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "vitest": "^4.0.18"
