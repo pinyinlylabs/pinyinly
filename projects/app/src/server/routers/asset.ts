@@ -1,10 +1,13 @@
 import {
   ALLOWED_IMAGE_TYPES,
+  createPresignedReadUrl,
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
   verifyAssetExists,
 } from "@/server/lib/r2/assets";
+import { getR2Bucket, getR2Client } from "@/server/lib/r2/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
+import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { z } from "zod/v4";
 
 const assetStatusSchema = z.enum([`pending`, `uploaded`, `failed`]);
@@ -121,5 +124,118 @@ export const assetRouter = router({
         contentType: result.contentType,
         contentLength: result.contentLength,
       };
+    }),
+
+  /**
+   * Get a presigned download URL for an asset (used for remote sync).
+   */
+  getDownloadUrl: authedProcedure
+    .input(
+      z
+        .object({
+          assetId: z.string(),
+        })
+        .strict(),
+    )
+    .output(
+      z
+        .object({
+          url: z.string(),
+        })
+        .nullable(),
+    )
+    .query(async (opts) => {
+      const { userId } = opts.ctx.session;
+      const { assetId } = opts.input;
+
+      const assetKey = `u/${userId}/${assetId}`;
+      const exists = await verifyAssetExists(assetKey);
+
+      if (!exists.exists) {
+        return null;
+      }
+
+      const url = await createPresignedReadUrl(assetKey);
+      return { url };
+    }),
+
+  /**
+   * Get a presigned upload URL for an asset (used for remote sync).
+   */
+  getUploadUrl: authedProcedure
+    .input(
+      z
+        .object({
+          assetId: z.string(),
+          contentLength: z.number().int().positive(),
+          contentType: z.enum(ALLOWED_IMAGE_TYPES),
+        })
+        .strict(),
+    )
+    .output(
+      z
+        .object({
+          url: z.string(),
+        })
+        .nullable(),
+    )
+    .mutation(async (opts) => {
+      const { userId } = opts.ctx.session;
+      const { assetId, contentLength, contentType } = opts.input;
+
+      const result = await createPresignedUploadUrl({
+        userId,
+        assetId,
+        contentType,
+        contentLength,
+      });
+
+      return {
+        url: result.uploadUrl,
+      };
+    }),
+
+  /**
+   * List all uploaded assets for the current user (used for remote sync).
+   * Returns assets that physically exist in S3, not just database records.
+   */
+  listUploadedAssets: authedProcedure
+    .output(z.array(z.string()))
+    .query(async (opts) => {
+      const { userId } = opts.ctx.session;
+
+      const s3Client = getR2Client();
+      const bucket = getR2Bucket();
+
+      try {
+        const command = new ListObjectsV2Command({
+          Bucket: bucket,
+          Prefix: `u/${userId}/`,
+        });
+
+        const response = await s3Client.send(command);
+        const assetIds: string[] = [];
+
+        if (response.Contents) {
+          for (const obj of response.Contents) {
+            const key = obj.Key;
+            if (key !== null && key !== undefined && key.length > 0) {
+              const assetId = key.split(`/`).pop();
+              if (
+                assetId !== null &&
+                assetId !== undefined &&
+                assetId.length > 0
+              ) {
+                assetIds.push(assetId);
+              }
+            }
+          }
+        }
+
+        return assetIds;
+      } catch (error) {
+        console.error(`Failed to list uploaded assets`, { error, userId });
+        throw error;
+      }
     }),
 });
