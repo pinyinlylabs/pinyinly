@@ -172,7 +172,7 @@
     "openai": "^5.0.1",
     "oxfmt": "^0.31.0",
     "oxlint": "^1.47.0",
-    "oxlint-tsgolint": "^0.12.2",
+    "oxlint-tsgolint": "^0.14.0",
     "react-test-renderer": "19.x",
     "resolve-package-path": "^4.0.3",
     "ts-essentials": "^10.1.1",
