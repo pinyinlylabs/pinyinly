@@ -24,7 +24,7 @@ tasks:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   renovateCheck:
-    command: npx -y -p renovate@37.424.1 renovate-config-validator --strict
+    command: npx -y -p renovate@37.440.7 renovate-config-validator --strict
     inputs:
       - renovate.json5
 
