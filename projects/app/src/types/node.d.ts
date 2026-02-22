@@ -99,7 +99,7 @@ declare global {
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;
       PYLY_JWT_KEY_BASE64?: string;
-      PYLY_PREFLIGHT_CHECK_ENV_VARS?: string;
+      PYLY_PREFLIGHT_CHECK_PRIVATE_ENV_VARS?: string;
     }
   }
 }

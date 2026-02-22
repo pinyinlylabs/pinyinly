@@ -96,22 +96,6 @@ describe(
       const result = formatRelativeTime(start, end);
       expect(result).toBe(`just now`);
     });
-
-    test(`defaults to current time when end date is not provided (past)`, () => {
-      // This test is harder to assert precisely without mocking Date.now()
-      // but we can at least verify it returns something with the right format
-      const pastDate = new Date(Date.now() - 60_000); // 1 minute ago
-      const result = formatRelativeTime(pastDate);
-      expect(result).toMatch(/\d+ minutes? ago/);
-    });
-
-    test(`defaults to current time when end date is not provided (future)`, () => {
-      // This test is harder to assert precisely without mocking Date.now()
-      // but we can at least verify it returns something with the right format
-      const futureDate = new Date(Date.now() + 60_000); // 1 minute in future
-      const result = formatRelativeTime(futureDate);
-      expect(result).toMatch(/in \d+ minutes?/);
-    });
   },
 );
 

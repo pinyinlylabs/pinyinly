@@ -5,6 +5,7 @@ import {
 import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
+import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { ImageProps as ExpoImageProps } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
@@ -135,8 +136,7 @@ export function AssetImage({
   }
 
   // Construct CDN URL: baseUrl + u/{userId}/{assetId}
-  const baseUrl = process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL;
-  if (baseUrl == null || baseUrl.length === 0) {
+  if (assetsCdnBaseUrl == null) {
     return (
       <View className="size-full items-center justify-center bg-fg/5">
         <Text className="text-xs text-fg-dim">CDN URL not configured</Text>
@@ -155,7 +155,7 @@ export function AssetImage({
     );
   }
 
-  const imageUrl = `${baseUrl}${assetKey}`;
+  const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
 
   return (
     <ExpoImage

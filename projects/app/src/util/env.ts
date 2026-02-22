@@ -2,7 +2,7 @@ import { memoize0 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { RemoveIndexSignature } from "@pinyinly/lib/types";
 
-const missingEnvVars: string[] = [];
+const missingPrivateEnvVars: string[] = [];
 
 // true when running under the Node.js test runner.
 export const isRunningTests = `NODE_TEST_CONTEXT` in process.env;
@@ -11,9 +11,10 @@ export const isRunningTests = `NODE_TEST_CONTEXT` in process.env;
 // (rather than waiting until their code paths are accessed).
 //
 // This isn't needed for `EXPO_PUBLIC_` environment variables as these are
-// already checked as build time.
-export const preflightCheckEnvVars = truthyOrFalse(
-  `PYLY_PREFLIGHT_CHECK_ENV_VARS`,
+// replaced at build time so they need to be checked using the patched
+// babel-preset-expo-npm and having `PYLY_STRICT_EXPO_ENV_VARS` set.
+const preflightCheckEnvVars = truthyOrFalse(
+  `PYLY_PREFLIGHT_CHECK_PRIVATE_ENV_VARS`,
 );
 
 export const isCi = truthyOrFalse(`CI`);
@@ -56,9 +57,9 @@ export const openaiApiKey = privateStringOrNull(`PYLY_OPENAI_API_KEY`);
 // configuration. In development, it's less disruptive to allow the app to start
 // and only fail when the relevant code paths are accessed.
 
-if (preflightCheckEnvVars && missingEnvVars.length > 0) {
+if (preflightCheckEnvVars && missingPrivateEnvVars.length > 0) {
   throw new Error(
-    `Missing required environment variables: ${missingEnvVars.join(`, `)}`,
+    `Missing required environment variables: ${missingPrivateEnvVars.join(`, `)}`,
   );
 }
 
@@ -76,7 +77,7 @@ function privateStringOrNull(key: PrivateEnvVarKey): string | null {
   const parsedValue =
     typeof envValue === `string` && envValue.length > 0 ? envValue : null;
   if (parsedValue === null) {
-    missingEnvVars.push(key);
+    missingPrivateEnvVars.push(key);
   }
   return parsedValue;
 }
@@ -91,7 +92,7 @@ function publicStringOrNull(
   const parsedValue =
     typeof envValue === `string` && envValue.length > 0 ? envValue : null;
   if (parsedValue === null) {
-    missingEnvVars.push(key);
+    missingPrivateEnvVars.push(key);
   }
   return parsedValue;
 }
