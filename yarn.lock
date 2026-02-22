@@ -2552,18 +2552,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint-community/eslint-utils@npm:^4.4.0, @eslint-community/eslint-utils@npm:^4.7.0, @eslint-community/eslint-utils@npm:^4.8.0":
-  version: 4.9.0
-  resolution: "@eslint-community/eslint-utils@npm:4.9.0"
-  dependencies:
-    eslint-visitor-keys: "npm:^3.4.3"
-  peerDependencies:
-    eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
-  checksum: 10c0/8881e22d519326e7dba85ea915ac7a143367c805e6ba1374c987aa2fbdd09195cc51183d2da72c0e2ff388f84363e1b220fd0d19bef10c272c63455162176817
-  languageName: node
-  linkType: hard
-
-"@eslint-community/eslint-utils@npm:^4.9.1":
+"@eslint-community/eslint-utils@npm:^4.4.0, @eslint-community/eslint-utils@npm:^4.7.0, @eslint-community/eslint-utils@npm:^4.8.0, @eslint-community/eslint-utils@npm:^4.9.1":
   version: 4.9.1
   resolution: "@eslint-community/eslint-utils@npm:4.9.1"
   dependencies:
@@ -2574,14 +2563,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint-community/regexpp@npm:^4.12.1":
-  version: 4.12.1
-  resolution: "@eslint-community/regexpp@npm:4.12.1"
-  checksum: 10c0/a03d98c246bcb9109aec2c08e4d10c8d010256538dcb3f56610191607214523d4fb1b00aa81df830b6dffb74c5fa0be03642513a289c567949d3e550ca11cdf6
-  languageName: node
-  linkType: hard
-
-"@eslint-community/regexpp@npm:^4.12.2":
+"@eslint-community/regexpp@npm:^4.12.1, @eslint-community/regexpp@npm:^4.12.2":
   version: 4.12.2
   resolution: "@eslint-community/regexpp@npm:4.12.2"
   checksum: 10c0/fddcbc66851b308478d04e302a4d771d6917a0b3740dc351513c0da9ca2eab8a1adf99f5e0aa7ab8b13fa0df005c81adeee7e63a92f3effd7d367a163b721c2d
@@ -23357,22 +23339,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.12.1, ws@npm:^8.17.0, ws@npm:^8.17.1, ws@npm:^8.18.0":
-  version: 8.18.3
-  resolution: "ws@npm:8.18.3"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10c0/eac918213de265ef7cb3d4ca348b891a51a520d839aa51cdb8ca93d4fa7ff9f6ccb339ccee89e4075324097f0a55157c89fa3f7147bde9d8d7e90335dc087b53
-  languageName: node
-  linkType: hard
-
-"ws@npm:^8.18.3":
+"ws@npm:^8.12.1, ws@npm:^8.17.0, ws@npm:^8.17.1, ws@npm:^8.18.0, ws@npm:^8.18.3":
   version: 8.19.0
   resolution: "ws@npm:8.19.0"
   peerDependencies:
