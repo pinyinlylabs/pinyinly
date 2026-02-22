@@ -251,7 +251,7 @@ tasks:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   devInngest:
-    command: npx -y inngest-cli@1.14.0 dev
+    command: npx -y inngest-cli@1.17.1 dev
     preset: watcher
 
   devMinio:
