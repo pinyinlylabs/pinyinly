@@ -60,7 +60,7 @@ describe(
       });
       mockGenerateContentStream.mockImplementation(() => createMockStream());
 
-      vi.spyOn(env, `GEMINI_IMAGE_API_KEY`, `get`).mockReturnValue(
+      vi.spyOn(env, `geminiImageApiKey`, `get`).mockReturnValue(
         `mock-api-key-for-testing`,
       );
     });
@@ -213,7 +213,7 @@ describe(
   },
 );
 
-describe.skipIf(env.GEMINI_IMAGE_API_KEY == null)(
+describe.skipIf(env.geminiImageApiKey == null)(
   `generateImage integration suite` satisfies HasNameOf<typeof generateImage>,
   () => {
     test(

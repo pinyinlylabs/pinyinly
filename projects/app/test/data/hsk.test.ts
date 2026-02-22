@@ -13,7 +13,7 @@ import {
   upsertHanziWordMeaning,
   writeDictionaryJson,
 } from "#test/helpers.ts";
-import { IS_CI } from "#util/env.js";
+import { isCi } from "#util/env.js";
 import { toCamelCase } from "#util/unicode.js";
 import { memoize0, memoize1 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
@@ -273,7 +273,7 @@ test(`hsk word lists match vendor data`, async () => {
 
         // Auto-update the dictionary
         if (
-          !IS_CI &&
+          !isCi &&
           hasAnyPinyinOverlap !== true &&
           vendorPinyins.length === 1
         ) {
@@ -297,7 +297,7 @@ test(`hsk word lists match vendor data`, async () => {
           .toBe(true);
 
         // Autofix the local data in development.
-        if (!IS_CI) {
+        if (!isCi) {
           if (isInDictionary) {
             for (const [hanziWord] of dictionaryItems) {
               const dict = await readDictionaryJson();

@@ -1,23 +1,23 @@
-import { imageTypeEnum } from "@/server/lib/r2/assets";
+import { imageTypeEnum } from "@/server/lib/s3/assets";
 import type { AppRouter } from "@/server/routers/_app";
-import type { S3Client } from "@aws-sdk/client-s3";
+import { assetsS3Bucket } from "@/util/env";
 import {
   GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import type { TRPCClient } from "@trpc/client";
+import { getAssetsS3Client } from "./s3/client";
 
 /**
  * List all asset files that exist in local storage.
  * Storage is the source of truth - returns all objects under the user's prefix.
  * This includes both uploaded and downloaded assets.
  */
-export async function listLocalAssetFiles(
-  s3Client: S3Client,
-  bucket: string,
-  userId: string,
-): Promise<Set<string>> {
+export async function listAssetFiles(userId: string): Promise<string[]> {
+  const s3Client = getAssetsS3Client();
+
   const assetIds = new Set<string>();
   const prefix = `u/${userId}/`;
 
@@ -25,7 +25,7 @@ export async function listLocalAssetFiles(
 
   while (true) {
     const command = new ListObjectsV2Command({
-      Bucket: bucket,
+      Bucket: nonNullable(assetsS3Bucket),
       Prefix: prefix,
       ContinuationToken: continuationToken,
     });
@@ -53,13 +53,11 @@ export async function listLocalAssetFiles(
   }
 
   // Return all assets that physically exist in storage
-  return assetIds;
+  return [...assetIds];
 }
 
 export async function downloadAssetFromRemote(
   trpcClient: TRPCClient<AppRouter>,
-  s3Client: S3Client,
-  bucket: string,
   userId: string,
   assetId: string,
 ): Promise<void> {
@@ -91,12 +89,13 @@ export async function downloadAssetFromRemote(
   // Upload to local S3 storage
   const assetKey = `u/${userId}/${assetId}`;
   const command = new PutObjectCommand({
-    Bucket: bucket,
+    Bucket: nonNullable(assetsS3Bucket),
     Key: assetKey,
     Body: Buffer.from(buffer),
     ContentType: contentType,
   });
 
+  const s3Client = getAssetsS3Client();
   await s3Client.send(command);
 }
 
@@ -108,16 +107,16 @@ export async function downloadAssetFromRemote(
  */
 export async function uploadAssetToRemote(
   trpcClient: TRPCClient<AppRouter>,
-  s3Client: S3Client,
-  bucket: string,
   userId: string,
   assetId: string,
 ): Promise<void> {
   const assetKey = `u/${userId}/${assetId}`;
 
+  const s3Client = getAssetsS3Client();
+
   // Download the blob from local S3
   const getCommand = new GetObjectCommand({
-    Bucket: bucket,
+    Bucket: nonNullable(assetsS3Bucket),
     Key: assetKey,
   });
 

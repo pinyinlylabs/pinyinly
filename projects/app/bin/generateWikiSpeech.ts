@@ -1,4 +1,6 @@
+import { openaiApiKey } from "#util/env.js";
 import { mkdir, writeFile } from "@pinyinly/lib/fs";
+import { invariant } from "@pinyinly/lib/invariant";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import OpenAI from "openai";
@@ -151,19 +153,10 @@ async function generateWikiSpeech(
     console.log(`Base filename: ${baseFileName}`);
   }
 
-  // Check if PYLY_OPENAI_API_KEY is set
-  if (
-    process.env[`PYLY_OPENAI_API_KEY`] == null ||
-    process.env[`PYLY_OPENAI_API_KEY`] === ``
-  ) {
-    console.error(
-      `Error: PYLY_OPENAI_API_KEY environment variable is not set.`,
-    );
-    console.error(
-      `Please set your OpenAI API key: export PYLY_OPENAI_API_KEY='your-api-key'`,
-    );
-    throw new Error(`PYLY_OPENAI_API_KEY environment variable is not set`);
-  }
+  invariant(
+    openaiApiKey != null,
+    `PYLY_OPENAI_API_KEY environment variable is not set`,
+  );
 
   const openai = new OpenAI();
   const createdFiles: string[] = [];

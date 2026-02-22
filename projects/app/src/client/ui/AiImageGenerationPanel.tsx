@@ -132,7 +132,7 @@ export function AiImageGenerationPanel({
       // Save prompt if callback provided
       onSavePrompt?.(prompt.trim());
 
-      // Upload to R2
+      // Upload to S3
       await uploadImageBlob({
         blob,
         contentType: `image/${generatedImageFormat}`,

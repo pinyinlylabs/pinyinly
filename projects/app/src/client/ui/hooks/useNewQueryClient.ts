@@ -1,4 +1,4 @@
-import { IS_CI } from "@/util/env";
+import { isCi } from "@/util/env";
 import { QueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ export function useNewQueryClient() {
         defaultOptions: {
           queries: {
             throwOnError: true,
-            retry: !IS_CI,
+            retry: !isCi,
           },
         },
       }),

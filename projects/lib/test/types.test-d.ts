@@ -1,10 +1,11 @@
-import { test } from "vitest";
 import type {
   Flatten,
   IsEqual,
   IsExhaustedRest,
   PartialIfUndefined,
+  RemoveIndexSignature,
 } from "#types.ts";
+import { test } from "vitest";
 
 test(`IsEqual`, () => {
   true satisfies IsEqual<`a`, `a`>;
@@ -79,4 +80,19 @@ test(`IsExhaustedRest`, () => {
 
   // @ts-expect-error never is not an empty object
   true satisfies IsExhaustedRest<never>;
+});
+
+test(`RemoveIndexSignature`, () => {
+  interface Foo {
+    [key: string]: number;
+    a: number;
+    b: number;
+  }
+
+  type FooWithoutIndexSignature = RemoveIndexSignature<Foo>;
+
+  true satisfies IsEqual<FooWithoutIndexSignature, { a: number; b: number }>;
+
+  // oxlint-disable-next-line typescript/no-empty-object-type,typescript/ban-types
+  true satisfies IsEqual<RemoveIndexSignature<{ [key: string]: number }>, {}>;
 });

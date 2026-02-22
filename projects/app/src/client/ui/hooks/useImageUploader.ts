@@ -30,12 +30,12 @@ interface ImageUploaderOptions {
 }
 
 /**
- * Hook for uploading images to R2 storage via presigned URLs.
+ * Hook for uploading images to S3 storage via presigned URLs.
  *
  * Flow:
  * 1. Optimistically create pending asset in Replicache
  * 2. Request presigned upload URL from server
- * 3. Upload image directly to R2
+ * 3. Upload image directly to S3
  * 4. Confirm upload in Replicache
  * 5. Verify upload on server
  */

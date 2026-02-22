@@ -1,9 +1,9 @@
+import { objectMap } from "@pinyinly/lib/collections";
 import type { JWTHeaderParameters, JWTPayload, ProduceJWT } from "jose";
 import { SignJWT } from "jose";
 import { jwtVerify } from "jose/jwt/verify";
 import { z } from "zod/v4";
-import { objectMap } from "@pinyinly/lib/collections";
-import { JWT_KEY } from "./env";
+import { jwtKey } from "./env";
 
 const defaultAlg = `HS256`;
 
@@ -37,7 +37,7 @@ export const jwtSchema = (config?: JwtSchemaOptions) => {
   );
 
   return z.string().transform(async (token) => {
-    const { payload, protectedHeader } = await jwtVerify(token, JWT_KEY());
+    const { payload, protectedHeader } = await jwtVerify(token, jwtKey());
 
     // Enforce headers schema.
     protectedHeaderSchema.parse(protectedHeader);
@@ -63,7 +63,7 @@ export async function jwtSign<T extends JWTPayload>(
     signJwt = signJwt.setExpirationTime(config.expirationTime);
   }
 
-  return signJwt.sign(JWT_KEY());
+  return signJwt.sign(jwtKey());
 }
 
 export function toJwtSchema<T extends JWTPayload>(config?: {
@@ -81,6 +81,6 @@ export function toJwtSchema<T extends JWTPayload>(config?: {
       signJwt.setExpirationTime(config.expirationTime);
     }
 
-    return signJwt.sign(JWT_KEY());
+    return signJwt.sign(jwtKey());
   });
 }

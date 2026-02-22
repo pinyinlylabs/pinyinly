@@ -1,13 +1,6 @@
-import { GEMINI_IMAGE_API_KEY, preflightCheckEnvVars } from "@/util/env";
+import { geminiImageApiKey } from "@/util/env";
 import { GoogleGenAI } from "@google/genai";
-import { invariant } from "@pinyinly/lib/invariant";
-
-if (preflightCheckEnvVars) {
-  invariant(
-    GEMINI_IMAGE_API_KEY != null,
-    `PYLY_GEMINI_IMAGE_API_KEY is required`,
-  );
-}
+import { nonNullable } from "@pinyinly/lib/invariant";
 
 /**
  * Generate an image using Gemini Nano Banana based on a text prompt and optional style image.
@@ -24,8 +17,7 @@ export async function generateImage(opts: {
   prompt: string;
   styleImageData?: string;
 }): Promise<{ buffer: Buffer; mimeType: string }> {
-  invariant(GEMINI_IMAGE_API_KEY != null);
-  const client = new GoogleGenAI({ apiKey: GEMINI_IMAGE_API_KEY });
+  const client = new GoogleGenAI({ apiKey: nonNullable(geminiImageApiKey) });
 
   // Build parts array with optional style image
   const parts: Array<{
