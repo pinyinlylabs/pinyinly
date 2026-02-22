@@ -8,8 +8,9 @@ import {
   mapIdsNodeLeafs,
   walkIdsNodeLeafs,
 } from "#data/hanzi.js";
-import { wikiCharacterDataSchema } from "#data/model.js";
 import type { HanziText, WikiCharacterData } from "#data/model.js";
+import { wikiCharacterDataSchema } from "#data/model.js";
+import type { CharactersKey, CharactersValue } from "#dictionary.js";
 import {
   buildHanziWord,
   getIsComponentFormHanzi,
@@ -17,9 +18,8 @@ import {
   loadCharacters,
   loadDictionary,
 } from "#dictionary.js";
-import type { CharactersKey, CharactersValue } from "#dictionary.js";
 import { dataDir, getFonts, projectRoot, wikiDir } from "#test/helpers.ts";
-import { IS_CI } from "#util/env.js";
+import { isCi } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
 import {
@@ -46,7 +46,7 @@ describe(`speech files`, async () => {
   await createSpeechFileTests({
     audioGlob: path.join(wikiDir, `**/*.{mp3,m4a,aac}`),
     projectRoot,
-    isCI: IS_CI,
+    isCI: isCi,
   });
 });
 
@@ -508,7 +508,7 @@ describe(`character.json files`, async () => {
       });
     }
 
-    if (!IS_CI) {
+    if (!isCi) {
       await writeJsonFileIfChanged(
         path.join(dataDir, `characters.asset.json`),
         [...expected.entries()].sort(

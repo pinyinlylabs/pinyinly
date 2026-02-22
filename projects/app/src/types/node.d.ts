@@ -29,32 +29,77 @@ declare global {
     // Necessary to avoid noPropertyAccessFromIndexSignature errors. Keep in
     // sync with `env.ts`.
     interface ProcessEnv {
+      //
       // Posthog
+      //
+
       EXPO_PUBLIC_POSTHOG_API_KEY?: string;
+
+      //
       // Sentry
+      //
+
       EXPO_PUBLIC_SENTRY_DSN?: string;
       PYLY_SENTRY_DEBUG?: string;
       PYLY_SENTRY_ENABLED?: string;
       PYLY_SENTRY_ENVIRONMENT?: string;
       PYLY_SENTRY_PROFILES_SAMPLE_RATE?: string;
       PYLY_SENTRY_TRACES_SAMPLE_RATE?: string;
-      // R2 Assets
+      SENTRY_DSN?: string;
+
+      //
+      // S3 Assets
+      //
+
       EXPO_PUBLIC_ASSETS_CDN_BASE_URL?: string;
-      PYLY_ASSETS_R2_ACCESS_KEY_ID?: string;
-      PYLY_ASSETS_R2_BUCKET?: string;
-      PYLY_ASSETS_R2_ENDPOINT?: string;
-      PYLY_ASSETS_R2_SECRET_ACCESS_KEY?: string;
+      PYLY_ASSETS_S3_ACCESS_KEY_ID?: string;
+      PYLY_ASSETS_S3_BUCKET?: string;
+      PYLY_ASSETS_S3_ENDPOINT?: string;
+      PYLY_ASSETS_S3_SECRET_ACCESS_KEY?: string;
+
+      //
+      // Open AI
+      //
+
+      PYLY_OPENAI_API_KEY?: string;
+
+      //
       // Gemini API
+      //
+
       PYLY_GEMINI_IMAGE_API_KEY?: string;
+
+      //
+      // Github Actions
+      //
+
+      /**
+       * Set in both CI testing and deployment environments.
+       */
+      CI?: string;
+
+      //
+      // Vitest
+      //
+
+      NODE_ENV?: string;
+      PYLY_SLIM_WIKI_FOR_TESTING?: string;
+      TIMING?: string;
+
+      //
+      // Postmark (emails)
+      //
+
+      PYLY_POSTMARK_SERVER_TOKEN?: string;
+
+      //
       // Other
+      //
+
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;
-      NODE_ENV?: string;
-      POSTMARK_SERVER_TOKEN?: string;
       PYLY_JWT_KEY_BASE64?: string;
       PYLY_PREFLIGHT_CHECK_ENV_VARS?: string;
-      PYLY_SLIM_WIKI_FOR_TESTING?: string;
-      SENTRY_DSN?: string;
     }
   }
 }

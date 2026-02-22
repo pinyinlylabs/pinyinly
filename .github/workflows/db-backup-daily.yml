@@ -44,7 +44,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
-      - name: Upload to Cloudflare R2
+      - name: Upload to S3
         run: |
           aws s3 cp "${{ env.GZIP_NAME }}" "${{ env.UPLOAD_PATH }}" \
             --endpoint-url ${{ env.BACKUPS_R2_ENDPOINT }}

@@ -7,7 +7,7 @@ offline-first architecture using optimistic updates.
 
 ### Key Components
 
-1. **Cloudflare R2 Storage**: User-uploaded files are stored in R2 buckets
+1. **S3 Storage**: User-uploaded files are stored in S3 buckets
 2. **Replicache Integration**: Asset status is synced across devices
 3. **Optimistic Uploads**: UI can show assets immediately before upload completes
 4. **Asset Immutability**: Once uploaded, assets cannot be modified (only created)
@@ -21,7 +21,7 @@ Call initAsset mutator (optimistic) → Creates pending asset in Replicache
   ↓
 Request presigned upload URL from server → Returns S3 presigned URL
   ↓
-Upload file directly to R2 using presigned URL
+Upload file directly to S3 using presigned URL
   ↓
 Call confirmAssetUpload mutator → Marks asset as uploaded in Replicache
 ```
@@ -54,12 +54,12 @@ Added to v9 schema:
 
 ### 3. Server Infrastructure
 
-#### R2 Client (`server/lib/r2/`)
+#### S3 Client (`server/lib/s3/`)
 
 - `client.ts`: S3 client initialization, config management
 - `assets.ts`: Presigned URL generation, asset verification
   - `createPresignedUploadUrl()`: Generate upload URL
-  - `verifyAssetExists()`: Check if asset exists in R2
+  - `verifyAssetExists()`: Check if asset exists in S3
   - `MAX_ASSET_SIZE_BYTES`: 5MB limit
   - `ALLOWED_IMAGE_TYPES`: jpeg, png, webp, gif
 
@@ -81,16 +81,16 @@ Added asset sync entity:
 Environment variables (`.env.local.sample`):
 
 ```
-PYLY_ASSETS_R2_ENDPOINT=https://<accountId>.r2.cloudflarestorage.com
-PYLY_ASSETS_R2_ACCESS_KEY_ID=...
-PYLY_ASSETS_R2_SECRET_ACCESS_KEY=...
-PYLY_ASSETS_R2_BUCKET=pinyinly-assets
+PYLY_ASSETS_S3_ENDPOINT=https://<accountId>.r2.cloudflarestorage.com
+PYLY_ASSETS_S3_ACCESS_KEY_ID=...
+PYLY_ASSETS_S3_SECRET_ACCESS_KEY=...
+PYLY_ASSETS_S3_BUCKET=pinyinly-assets
 EXPO_PUBLIC_ASSETS_CDN_BASE_URL=https://assets.example.com
 ```
 
 ## Asset Key Format
 
-Assets are stored in R2 with key: `u/{userId}/{assetId}`
+Assets are stored in S3 with key: `u/{userId}/{assetId}`
 
 - `u/` prefix: Identifies user-uploaded assets
 - `{userId}`: Scopes assets to user
@@ -124,7 +124,7 @@ async function uploadImage(file: File) {
     contentLength: file.size,
   });
 
-  // 3. Upload file directly to R2
+  // 3. Upload file directly to S3
   await fetch(uploadUrl, {
     method: "PUT",
     body: file,
@@ -179,7 +179,7 @@ const pending = assets.filter(([, a]) => a.status === AssetStatusKind.Pending);
 Potential improvements not included in this implementation:
 
 1. **Image Transformation**: Server-side resizing/optimization
-2. **Garbage Collection**: Delete unused assets from R2
+2. **Garbage Collection**: Delete unused assets from S3
 3. **Progress Tracking**: Upload progress callbacks
 4. **Retry Logic**: Automatic retry for failed uploads
 5. **Hints**: System vs. user-provided hints structure
@@ -187,7 +187,7 @@ Potential improvements not included in this implementation:
 
 ## Local Development with Minio
 
-For local development, use Minio as a drop-in S3-compatible replacement for R2.
+For local development, use Minio as a drop-in S3-compatible replacement for S3.
 
 ### Setup
 
@@ -207,10 +207,10 @@ For local development, use Minio as a drop-in S3-compatible replacement for R2.
 3. **Configure `.env.local`**:
 
    ```
-   PYLY_ASSETS_R2_ENDPOINT=http://localhost:9000
-   PYLY_ASSETS_R2_ACCESS_KEY_ID=minioadmin
-   PYLY_ASSETS_R2_SECRET_ACCESS_KEY=minioadmin
-   PYLY_ASSETS_R2_BUCKET=pinyinly-assets
+   PYLY_ASSETS_S3_ENDPOINT=http://localhost:9000
+   PYLY_ASSETS_S3_ACCESS_KEY_ID=minioadmin
+   PYLY_ASSETS_S3_SECRET_ACCESS_KEY=minioadmin
+   PYLY_ASSETS_S3_BUCKET=pinyinly-assets
    EXPO_PUBLIC_ASSETS_CDN_BASE_URL=http://localhost:9000
    ```
 
@@ -228,8 +228,8 @@ Minio data persists in `./minio-data` across restarts.
 - Server runs at `http://localhost:9000`
 - Console at `http://localhost:9001`
 
-The API will automatically use the endpoint from `PYLY_ASSETS_R2_ENDPOINT` whether it's Minio
-locally or R2 in production.
+The API will automatically use the endpoint from `PYLY_ASSETS_S3_ENDPOINT` whether it's Minio
+locally or S3 in production.
 
 ## Testing
 
@@ -243,7 +243,7 @@ To test the implementation:
 ## Security Considerations
 
 - Presigned URLs expire after 15 minutes
-- Assets are scoped to userId in R2 key structure
+- Assets are scoped to userId in S3 key structure
 - Content-Type and Content-Length are validated server-side
 - File size limits prevent abuse
 - Only authenticated users can upload

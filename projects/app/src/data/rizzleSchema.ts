@@ -1,11 +1,10 @@
-import { Rating } from "@/util/fsrs";
 import type { FsrsState } from "@/util/fsrs";
-import { r, RizzleCustom } from "@/util/rizzle";
+import { Rating } from "@/util/fsrs";
 import type { RizzleReplicache } from "@/util/rizzle";
+import { r, RizzleCustom } from "@/util/rizzle";
 import { memoize0 } from "@pinyinly/lib/collections";
 import omit from "lodash/omit.js";
 import { z } from "zod/v4";
-import { AssetStatusKind, PartOfSpeech, SkillKind, SrsKind } from "./model";
 import type {
   HanziText,
   HanziWord,
@@ -14,6 +13,7 @@ import type {
   Skill,
   SrsStateType,
 } from "./model";
+import { AssetStatusKind, PartOfSpeech, SkillKind, SrsKind } from "./model";
 
 export const rSkillKind = memoize0(function rSkillKind() {
   return r.enum(SkillKind, {
@@ -492,7 +492,7 @@ export const v11 = {
 
   /**
    * Mark an asset as successfully uploaded.
-   * Called after the upload to R2 completes successfully.
+   * Called after the upload to S3 completes successfully.
    */
   confirmAssetUpload: r
     .mutator({

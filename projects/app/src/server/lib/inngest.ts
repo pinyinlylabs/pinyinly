@@ -4,19 +4,19 @@ import { hanziWordSkill } from "@/data/skills";
 import { loadDictionary, loadHanziWordMigrations } from "@/dictionary";
 import * as s from "@/server/pgSchema";
 import type { AppRouter } from "@/server/routers/_app";
-import { preflightCheckEnvVars } from "@/util/env";
+import { postmarkServerToken } from "@/util/env";
 import { httpSessionHeaderTx } from "@/util/http";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
 import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
-import { Inngest } from "inngest";
+import { EventSchemas, Inngest, RetryAfterError } from "inngest";
 import * as postmark from "postmark";
 import z from "zod/v4";
 import {
   downloadAssetFromRemote,
-  listLocalAssetFiles,
+  listAssetFiles,
   uploadAssetToRemote,
 } from "./assetSync";
 import {
@@ -25,7 +25,6 @@ import {
   withDrizzle,
   withRepeatableReadTransaction,
 } from "./db";
-import { getR2Bucket, getR2Client } from "./r2/client";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
@@ -35,16 +34,29 @@ import {
 } from "./replicache";
 import { retryMutation as retryMutationV13 } from "./replicache/v12";
 
-const { POSTMARK_SERVER_TOKEN } = process.env;
-
-if (preflightCheckEnvVars) {
-  invariant(POSTMARK_SERVER_TOKEN != null, `POSTMARK_SERVER_TOKEN is required`);
-}
-
 // Create a client to send and receive events
 export const inngest = new Inngest({
   id: `my-app`,
   middleware: [sentryMiddleware()],
+  schemas: new EventSchemas().fromSchema({
+    "asset/sync-upload": z.object({
+      remoteSyncId: z.string(),
+      assetId: z.string(),
+    }),
+    "asset/sync-download": z.object({
+      remoteSyncId: z.string(),
+      assetId: z.string(),
+    }),
+    "replicache/retry-mutations": z.object({
+      startMutationRecordId: z.string(),
+    }),
+    "test/hello.world.email": z.never(),
+    "test/test-fn": z.never(),
+    "test/test-log-root-error": z.never(),
+    "test/test-log-step-error": z.never(),
+    "test/test-throw-root-error": z.never(),
+    "test/test-throw-step-error": z.never(),
+  }),
 });
 
 const devTestThrowRootError = inngest.createFunction(
@@ -87,8 +99,7 @@ const helloWorldEmail = inngest.createFunction(
   { id: `hello-world-email` },
   { event: `test/hello.world.email` },
   async ({ step }) => {
-    invariant(POSTMARK_SERVER_TOKEN != null);
-    const client = new postmark.ServerClient(POSTMARK_SERVER_TOKEN);
+    const client = new postmark.ServerClient(nonNullable(postmarkServerToken));
 
     const response = await step.run(`sendEmail`, async () =>
       client.sendEmail({
@@ -420,16 +431,8 @@ const syncRemotePull = inngest.createFunction(
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
   },
-  async ({ step, logger }) => {
-    {
-      const isOffline = await step.run(`checkInternetConnection`, async () =>
-        checkIsOffline(),
-      );
-      if (isOffline) {
-        logger.warn(`No internet connection, skipping`);
-        return;
-      }
-    }
+  async ({ step }) => {
+    await onlineOrRetryLater();
 
     // Find all sync rules
     const remoteSyncs = await step.run(`findSyncRules`, async () =>
@@ -700,10 +703,7 @@ const retryFailedMutations = inngest.createFunction(
   },
   { event: `replicache/retry-mutations` },
   async ({ event, step, logger }) => {
-    const eventDataSchema = z.object({
-      startMutationRecordId: z.string(),
-    });
-    const { startMutationRecordId } = eventDataSchema.parse(event.data);
+    const { startMutationRecordId } = event.data;
 
     // Fetch the starting mutation and all subsequent failed mutations for the same client
     const mutationChain = await step.run(`fetch-mutation-chain`, async () => {
@@ -871,6 +871,16 @@ const retryFailedMutations = inngest.createFunction(
   },
 );
 
+async function onlineOrRetryLater() {
+  const isOffline = await checkIsOffline();
+  if (isOffline) {
+    throw new RetryAfterError(
+      `No internet connection`,
+      10 * 60 * 1000 /* retry after 10 minutes */,
+    );
+  }
+}
+
 const syncAssetBlobs = inngest.createFunction(
   {
     id: `syncAssetBlobs`,
@@ -881,15 +891,7 @@ const syncAssetBlobs = inngest.createFunction(
     cron: `*/5 * * * *`,
   },
   async ({ step, logger }) => {
-    {
-      const isOffline = await step.run(`checkInternetConnection`, async () =>
-        checkIsOffline(),
-      );
-      if (isOffline) {
-        logger.warn(`No internet connection, skipping asset blob sync`);
-        return;
-      }
-    }
+    await onlineOrRetryLater();
 
     // Find all sync rules
     const remoteSyncs = await step.run(`findSyncRules`, async () =>
@@ -904,11 +906,7 @@ const syncAssetBlobs = inngest.createFunction(
       try {
         const localAssets = await step.run(
           `listLocalAssetFiles-${remoteSyncId}`,
-          async () => {
-            const s3Client = getR2Client();
-            const bucket = getR2Bucket();
-            return [...(await listLocalAssetFiles(s3Client, bucket, userId))];
-          },
+          async () => listAssetFiles(userId),
         );
 
         const localAssetsSet = new Set(localAssets);
@@ -920,7 +918,7 @@ const syncAssetBlobs = inngest.createFunction(
               remoteSync.remoteUrl,
               remoteSync.remoteSessionId,
             );
-            return remoteClient.asset.listUploadedAssets.query();
+            return remoteClient.asset.listAssetBucketUserFiles.query();
           },
         );
 
@@ -950,7 +948,6 @@ const syncAssetBlobs = inngest.createFunction(
           await step.sendEvent(`emit-upload-${assetId}`, {
             name: `asset/sync-upload`,
             data: { remoteSyncId: remoteSync.id, assetId },
-            id: `asset-upload-${remoteSync.id}-${assetId}`,
           });
         }
 
@@ -959,7 +956,6 @@ const syncAssetBlobs = inngest.createFunction(
           await step.sendEvent(`emit-download-${assetId}`, {
             name: `asset/sync-download`,
             data: { remoteSyncId: remoteSync.id, assetId },
-            id: `asset-download-${remoteSync.id}-${assetId}`,
           });
         }
       } catch (error) {
@@ -986,10 +982,9 @@ const syncAssetBlobUpload = inngest.createFunction(
   },
   { event: `asset/sync-upload` },
   async ({ event, step, logger }) => {
-    const { remoteSyncId, assetId } = event.data as {
-      remoteSyncId: string;
-      assetId: string;
-    };
+    await onlineOrRetryLater();
+
+    const { remoteSyncId, assetId } = event.data;
 
     const remoteSync = await step.run(`fetchRemoteSyncRule`, async () =>
       withDrizzle(async (db) =>
@@ -1006,13 +1001,8 @@ const syncAssetBlobUpload = inngest.createFunction(
 
     try {
       await step.run(`uploadAsset-${assetId}`, async () => {
-        const s3Client = getR2Client();
-        const bucket = getR2Bucket();
-
         await uploadAssetToRemote(
           createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
-          s3Client,
-          bucket,
           remoteSync.userId,
           assetId,
         );
@@ -1045,10 +1035,9 @@ const syncAssetBlobDownload = inngest.createFunction(
   },
   { event: `asset/sync-download` },
   async ({ event, step, logger }) => {
-    const { remoteSyncId, assetId } = event.data as {
-      remoteSyncId: string;
-      assetId: string;
-    };
+    await onlineOrRetryLater();
+
+    const { remoteSyncId, assetId } = event.data;
 
     const remoteSync = await step.run(`fetchRemoteSyncRule`, async () =>
       withDrizzle(async (db) =>
@@ -1065,13 +1054,8 @@ const syncAssetBlobDownload = inngest.createFunction(
 
     try {
       await step.run(`downloadAsset-${assetId}`, async () => {
-        const s3Client = getR2Client();
-        const bucket = getR2Bucket();
-
         await downloadAssetFromRemote(
           createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
-          s3Client,
-          bucket,
           remoteSync.userId,
           assetId,
         );

@@ -4,10 +4,12 @@ import {
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
   verifyAssetExists,
-} from "@/server/lib/r2/assets";
-import { getR2Bucket, getR2Client } from "@/server/lib/r2/client";
+} from "@/server/lib/s3/assets";
+import { getAssetsS3Client } from "@/server/lib/s3/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
+import { assetsS3Bucket } from "@/util/env";
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { z } from "zod/v4";
 
 const assetStatusSchema = z.enum([`pending`, `uploaded`, `failed`]);
@@ -44,7 +46,7 @@ export const assetRouter = router({
    *
    * The client should:
    * 1. Call this endpoint to get an upload URL
-   * 2. Upload the file directly to R2 using the presigned URL
+   * 2. Upload the file directly to S3 using the presigned URL
    * 3. Call `confirmUpload` to mark the asset as uploaded
    */
   requestUploadUrl: authedProcedure
@@ -90,7 +92,7 @@ export const assetRouter = router({
     }),
 
   /**
-   * Confirm that an asset has been successfully uploaded to R2.
+   * Confirm that an asset has been successfully uploaded to S3.
    *
    * This verifies the asset exists in storage and returns its metadata.
    * The client should call this after successfully uploading via the presigned URL.
@@ -199,17 +201,16 @@ export const assetRouter = router({
    * List all uploaded assets for the current user (used for remote sync).
    * Returns assets that physically exist in S3, not just database records.
    */
-  listUploadedAssets: authedProcedure
+  listAssetBucketUserFiles: authedProcedure
     .output(z.array(z.string()))
     .query(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      const s3Client = getR2Client();
-      const bucket = getR2Bucket();
+      const s3Client = getAssetsS3Client();
 
       try {
         const command = new ListObjectsV2Command({
-          Bucket: bucket,
+          Bucket: nonNullable(assetsS3Bucket),
           Prefix: `u/${userId}/`,
         });
 

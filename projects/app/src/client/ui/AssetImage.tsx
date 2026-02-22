@@ -6,8 +6,8 @@ import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { Image as ExpoImage } from "expo-image";
 import type { ImageProps as ExpoImageProps } from "expo-image";
+import { Image as ExpoImage } from "expo-image";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
@@ -23,7 +23,7 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
 }
 
 /**
- * Displays an uploaded image from R2/Minio storage.
+ * Displays an uploaded image from S3/Minio storage.
  *
  * Constructs the CDN URL from EXPO_PUBLIC_ASSETS_CDN_BASE_URL + asset key (u/{userId}/{assetId}).
  * Queries TanStack DB for the asset status and shows appropriate states:

@@ -1,11 +1,13 @@
+import { assetsS3Bucket } from "@/util/env";
 import {
   GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { z } from "zod/v4";
-import { getR2Bucket, getR2Client } from "./client";
+import { getAssetsS3Client } from "./client";
 
 /**
  * Maximum file size for user uploads (5MB).
@@ -64,8 +66,8 @@ export async function createPresignedUploadUrl(opts: {
     throw new Error(`Content type ${contentType} is not allowed`);
   }
 
-  const client = getR2Client();
-  const bucket = getR2Bucket();
+  const client = getAssetsS3Client();
+  const bucket = nonNullable(assetsS3Bucket);
   const assetKey = `u/${userId}/${assetId}`;
 
   const command = new PutObjectCommand({
@@ -90,12 +92,11 @@ export async function verifyAssetExists(assetKey: string): Promise<{
   contentType?: string;
   contentLength?: number;
 }> {
-  const client = getR2Client();
-  const bucket = getR2Bucket();
+  const client = getAssetsS3Client();
 
   try {
     const command = new HeadObjectCommand({
-      Bucket: bucket,
+      Bucket: nonNullable(assetsS3Bucket),
       Key: assetKey,
     });
 
@@ -125,11 +126,10 @@ export async function verifyAssetExists(assetKey: string): Promise<{
 export async function createPresignedReadUrl(
   assetKey: string,
 ): Promise<string> {
-  const client = getR2Client();
-  const bucket = getR2Bucket();
+  const client = getAssetsS3Client();
 
   const command = new GetObjectCommand({
-    Bucket: bucket,
+    Bucket: nonNullable(assetsS3Bucket),
     Key: assetKey,
   });
 
