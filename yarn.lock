@@ -2640,13 +2640,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/css-tree@npm:^3.6.5":
-  version: 3.6.5
-  resolution: "@eslint/css-tree@npm:3.6.5"
+"@eslint/css-tree@npm:^3.6.8":
+  version: 3.6.9
+  resolution: "@eslint/css-tree@npm:3.6.9"
   dependencies:
     mdn-data: "npm:2.23.0"
     source-map-js: "npm:^1.0.1"
-  checksum: 10c0/dd6baf8c88d6014e0afa8ddf13067b87a728484a2805093c4c9e0ec57427bc3462016a5b1ac0d9e590218a5d99440f8d43bfdcea8025b834e0adb8e4005e7b0e
+  checksum: 10c0/5dd436fb6e9aa2cc3a00252cea6287f78fde1cba664894fc9b46c4817f23d5d5614bfbe55decd05ae062877b80a653bc73106e8e3ca311d4ff18e2baa9e71634
   languageName: node
   linkType: hard
 
@@ -12892,12 +12892,12 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^3.1.0":
-  version: 3.7.11
-  resolution: "eslint-plugin-better-tailwindcss@npm:3.7.11"
+  version: 3.8.0
+  resolution: "eslint-plugin-better-tailwindcss@npm:3.8.0"
   dependencies:
-    "@eslint/css-tree": "npm:^3.6.5"
+    "@eslint/css-tree": "npm:^3.6.8"
     enhanced-resolve: "npm:^5.18.3"
-    jiti: "npm:^2.5.1"
+    jiti: "npm:^2.6.1"
     postcss: "npm:^8.5.6"
     postcss-import: "npm:^16.1.1"
     synckit: "npm:^0.11.11"
@@ -12906,7 +12906,7 @@ __metadata:
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
     tailwindcss: ^3.3.0 || ^4.1.6
-  checksum: 10c0/755786b5e14fa5b227dbdb9acfffd45ec9ca0ff133e396e675ced79fed9ec381f327d04737b6ac90d94a807e20fda2de8da4ad8e7ed2fd5b43878506a0669aba
+  checksum: 10c0/7dba48b581fcf3bbeff4f30246a01a6cd0320554a46396007062fa9362922956f4493f9ec0ab83de6e9da556edc3029dfc526e8126afc7f2f3bdda9fa2e677d3
   languageName: node
   linkType: hard
 
@@ -16045,12 +16045,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jiti@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "jiti@npm:2.5.1"
+"jiti@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "jiti@npm:2.6.1"
   bin:
     jiti: lib/jiti-cli.mjs
-  checksum: 10c0/f0a38d7d8842cb35ffe883038166aa2d52ffd21f1a4fc839ae4076ea7301c22a1f11373f8fc52e2667de7acde8f3e092835620dd6f72a0fbe9296b268b0874bb
+  checksum: 10c0/79b2e96a8e623f66c1b703b98ec1b8be4500e1d217e09b09e343471bbb9c105381b83edbb979d01cef18318cc45ce6e153571b6c83122170eefa531c64b6789b
   languageName: node
   linkType: hard
 
