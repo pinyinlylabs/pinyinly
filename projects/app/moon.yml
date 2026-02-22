@@ -343,6 +343,7 @@ tasks:
   test:
     deps:
       - ~:codegen
+      - audio-sprites:src
     outputs:
       - "src/assets/audio/manifest.json"
       - "src/assets/audio/sprites/*.m4a"
