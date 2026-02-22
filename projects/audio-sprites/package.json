@@ -16,6 +16,7 @@
   "dependencies": {
     "@babel/core": "^7.20.0",
     "chalk": "^5.5.0",
+    "debug": "^4.4.3",
     "execa": "^9.6.0",
     "lru-cache": "^11.1.0",
     "zod": "^3.25.76"
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
     "@pinyinly/lib": "workspace:*",
+    "@types/debug": "^4",
     "@types/node": "22.x",
     "@typescript-eslint/parser": "^8.36.0",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",

@@ -6403,10 +6403,12 @@ __metadata:
     "@babel/core": "npm:^7.20.0"
     "@pinyinly/eslint-rules": "workspace:*"
     "@pinyinly/lib": "workspace:*"
+    "@types/debug": "npm:^4"
     "@types/node": "npm:22.x"
     "@typescript-eslint/parser": "npm:^8.36.0"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260207.1"
     chalk: "npm:^5.5.0"
+    debug: "npm:^4.4.3"
     eslint: "npm:^9.13.0"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-unicorn: "npm:^60.0.0"
@@ -9341,7 +9343,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/debug@npm:^4 <=4.3.x, @types/debug@npm:^4.0.0, @types/debug@npm:^4.1.12":
+"@types/debug@npm:^4, @types/debug@npm:^4 <=4.3.x, @types/debug@npm:^4.0.0, @types/debug@npm:^4.1.12":
   version: 4.1.12
   resolution: "@types/debug@npm:4.1.12"
   dependencies:
