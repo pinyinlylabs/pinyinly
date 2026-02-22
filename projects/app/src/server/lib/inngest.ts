@@ -377,13 +377,23 @@ const syncRemotePush = inngest.createFunction(
                 remoteSync.remoteSessionId,
               );
 
-              await trpcClient.replicache.push.mutate({
+              const result = await trpcClient.replicache.push.mutate({
                 mutations: mutationBatchToPush,
                 profileId: remoteSync.remoteProfileId,
                 clientGroupId: remoteSync.remoteClientGroupId,
                 pushVersion: 1,
                 schemaVersion,
               });
+
+              // Check for errors (VersionNotSupportedResponse or ClientStateNotFoundResponse)
+              if (result != null) {
+                console.error(
+                  `Error pushing mutations to remote for clientId=${clientId}, remoteSyncId=${remoteSync.id}:`,
+                  result,
+                );
+                // Don't update lastSyncedMutationIds - will retry on next sync
+                return lastSyncedMutationId; // Return current value unchanged
+              }
 
               const newLastSyncedMutationId = mutationBatchToPush.at(-1)?.id;
               invariant(
