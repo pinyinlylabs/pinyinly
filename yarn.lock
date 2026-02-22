@@ -10569,7 +10569,7 @@ __metadata:
 
 "babel-preset-expo@patch:babel-preset-expo@npm%3A54.0.8#~/.yarn/patches/babel-preset-expo-npm-54.0.8-1b48011421.patch":
   version: 54.0.8
-  resolution: "babel-preset-expo@patch:babel-preset-expo@npm%3A54.0.8#~/.yarn/patches/babel-preset-expo-npm-54.0.8-1b48011421.patch::version=54.0.8&hash=d27e8c"
+  resolution: "babel-preset-expo@patch:babel-preset-expo@npm%3A54.0.8#~/.yarn/patches/babel-preset-expo-npm-54.0.8-1b48011421.patch::version=54.0.8&hash=9830a3"
   dependencies:
     "@babel/helper-module-imports": "npm:^7.25.9"
     "@babel/plugin-proposal-decorators": "npm:^7.12.9"
@@ -10602,7 +10602,7 @@ __metadata:
       optional: true
     expo:
       optional: true
-  checksum: 10c0/b4f3c1684479bb71e0be772c3dbf9171cd5a95176674b3823ebd4b15c1a27f5193948a9195868e66c731fbae508f49ef3cf1a0f5a48020787107627e4f00d8b2
+  checksum: 10c0/6a92e9eb62a57d751f77a7458980be8446936d94e1e77de6b8048f9ec09638f5bca5511c9c31918722cc2a083476182a717f7e343a0e5cd7395c87588a0f96c1
   languageName: node
   linkType: hard
 

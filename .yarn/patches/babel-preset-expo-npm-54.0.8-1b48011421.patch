@@ -19,7 +19,7 @@ index 4c973809c3a0620826f44cd1aa21e2ea9bab22a7..d216f186470c2ae098ca8183fb635c49
                          key.value.startsWith('EXPO_PUBLIC_')) {
                          const envVar = key.value;
                          debug(`${isProduction ? 'Inlining' : 'Referencing'} environment variable in %s: %s`, filename, envVar);
-+                        if (strictEnvVars && !(key.value in process.env)) {
++                        if (strictEnvVars && (process.env[key.value] == null || process.env[key.value].length === 0)) {
 +                            throw new Error(`Missing environment variable ${key.value} for ${filename}`);
 +                        }
                          publicEnvVars.add(envVar);
