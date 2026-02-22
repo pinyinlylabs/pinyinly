@@ -6,11 +6,13 @@ import {
   writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
+import makeDebug from "debug";
 import * as crypto from "node:crypto";
-
 import path from "node:path";
 import { loadManifest } from "./manifestRead.ts";
 import type { SpriteManifest, SpriteRule, SpriteSegment } from "./types.ts";
+
+const debug = makeDebug(`pyly:audio-sprites`);
 
 /**
  * Generate sprite assignments for files based on rules.
@@ -56,7 +58,6 @@ const getFrameAlignedTime = (
 
 /**
  * Create a sprite filename from a group of files with deterministic hashing.
- * @param manifestDir Directory where the manifest.json is located (used to resolve relative paths)
  * @param spriteName Name prefix for the sprite file
  * @param audioFiles Array of audio file info for the sprite
  * @param fileHashMap Map of file paths to their content hashes
@@ -64,35 +65,43 @@ const getFrameAlignedTime = (
  * @returns The generated sprite filename
  */
 const createSpriteFromFiles = (
-  manifestDir: string,
   spriteName: string,
   audioFiles: AudioFileInfo[],
   fileHashMap: Map<string, string>,
   bitrate = `128k`,
 ): string => {
-  // Sort files by path to ensure consistent ordering
-  const sortedFiles = [...audioFiles].sort((a, b) =>
-    a.filePath.localeCompare(b.filePath),
+  const fnDebug = debug.extend(
+    `createSpriteFromFiles()` satisfies HasNameOf<typeof createSpriteFromFiles>,
   );
 
   const hash = crypto.createHash(`sha256`);
 
+  fnDebug(`fileHashMap: %o`, fileHashMap);
+
   // Create a deterministic sprite filename by hashing all parameters that affect sprite content
-  const spriteContentHashes = sortedFiles.map((audioFile) => {
-    const manifestRelativePath = path.relative(manifestDir, audioFile.filePath);
+  const spriteContentHashes = audioFiles.map((audioFile) => {
     return nonNullable(
-      fileHashMap.get(manifestRelativePath),
-      `Missing file hash for ${manifestRelativePath}`,
+      fileHashMap.get(audioFile.filePath),
+      `Missing file hash for ${audioFile.filePath}`,
     );
   });
-  hash.update(JSON.stringify(spriteContentHashes));
+
+  {
+    const hashes = JSON.stringify(spriteContentHashes);
+    fnDebug(`updating hash with hashes: %o`, hashes);
+    hash.update(hashes);
+  }
 
   // Include the ffmpeg command used to generate the sprite
   // This ensures that any changes to the command will result in a different sprite file
   // This is important for reproducibility and cache invalidation.
-  hash.update(
-    JSON.stringify(generateSpriteCommand(sortedFiles, ``, 44_100, bitrate)),
-  );
+  {
+    const cmd = JSON.stringify(
+      generateSpriteCommand(audioFiles, ``, 44_100, bitrate),
+    );
+    fnDebug(`updating hash with cmd: %o`, cmd);
+    hash.update(cmd);
+  }
 
   // Generate sprite filename: spriteName-hash.m4a
   return `${spriteName}-${hash.digest(`hex`).slice(0, 12)}.m4a`;
@@ -111,6 +120,10 @@ export const recomputeManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<SpriteManifest> => {
+  const fnDebug = debug.extend(
+    `recomputeManifest()` satisfies HasNameOf<typeof recomputeManifest>,
+  );
+
   const manifestDir = path.dirname(manifestPath);
   const inputFiles = await getInputFiles(manifest, manifestPath);
 
@@ -138,6 +151,7 @@ export const recomputeManifest = async (
     try {
       const fileHash = hashFile(absolutePath);
       fileHashMap.set(relativePath, fileHash);
+      fnDebug(`Hashed file %o: %o`, relativePath, fileHash);
 
       // Check if we already have segment data for this content hash
       const existingSegment = existingSegmentsByHash.get(fileHash);
@@ -149,6 +163,7 @@ export const recomputeManifest = async (
           await analyzeAudioFileDuration(absolutePath);
 
       fileDurationMap.set(relativePath, duration);
+      fnDebug(`File duration %o: %o`, relativePath, duration);
     } catch (error) {
       console.warn(`Failed to process file ${relativePath}:`, error);
     }
@@ -167,8 +182,6 @@ export const recomputeManifest = async (
     if (duration === undefined || fileHash === undefined) {
       continue; // Skip files that failed to process
     }
-
-    const absolutePath = path.resolve(manifestDir, relativePath);
 
     // Apply rules to determine sprite name and get the matched rule
     const ruleResult = applyRulesWithRule(relativePath, manifest.rules);
@@ -195,7 +208,7 @@ export const recomputeManifest = async (
     );
 
     const audioFileInfo: AudioFileInfo = {
-      filePath: absolutePath,
+      filePath: relativePath,
       startTime,
       duration,
       hash: fileHash,
@@ -209,6 +222,7 @@ export const recomputeManifest = async (
       duration: audioFileInfo.duration,
       hash: audioFileInfo.hash,
     };
+    fnDebug(`Segment %o: %o`, relativePath, updatedSegments[relativePath]);
   }
 
   // Generate sprite filenames and update segment references
@@ -218,7 +232,6 @@ export const recomputeManifest = async (
     const matchedRule = spriteToRule.get(spriteName);
     const bitrate = matchedRule?.bitrate ?? `128k`;
     const spriteFileName = createSpriteFromFiles(
-      manifestDir,
       spriteName,
       segments,
       fileHashMap,

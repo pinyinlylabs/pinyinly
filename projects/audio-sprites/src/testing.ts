@@ -1,6 +1,7 @@
 import * as fs from "@pinyinly/lib/fs";
 import { glob } from "@pinyinly/lib/fs";
 import chalk from "chalk";
+import makeDebug from "debug";
 import { execa } from "execa";
 import { execSync } from "node:child_process";
 import path from "node:path";
@@ -14,6 +15,8 @@ import {
   syncManifestWithFilesystem,
 } from "./manifestWrite.ts";
 import type { AudioFileInfo, SpriteManifest } from "./types.ts";
+
+const debug = makeDebug(`pyly:audio-sprites`);
 
 /**
  * Result of checking the sprite manifest status.
@@ -156,10 +159,15 @@ function validateRuleVariables(rule: { match: string; sprite: string }): void {
 export async function checkSpriteManifest(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
+  const fnDebug = debug.extend(
+    `checkSpriteManifest()` satisfies HasNameOf<typeof checkSpriteManifest>,
+  );
+
   const { manifestPath, syncManifest = false } = options;
 
   // Check if manifest file exists
   if (!fs.existsSync(manifestPath)) {
+    fnDebug(`Manifest file does not exist at path: %o`, manifestPath);
     return {
       manifestExists: false,
       hashesUpToDate: false,
@@ -175,6 +183,7 @@ export async function checkSpriteManifest(
 
   // Sync manifest with filesystem if requested
   if (syncManifest) {
+    fnDebug(`Attempting to sync manifest`);
     try {
       manifest = await syncManifestWithFilesystem(manifestPath);
     } catch (error) {
@@ -182,6 +191,7 @@ export async function checkSpriteManifest(
       throw new Error(`Failed to sync manifest: ${message}`);
     }
   } else {
+    fnDebug(`Reading manifest from %o`, manifestPath);
     const loadedManifest = loadManifest(manifestPath);
     if (!loadedManifest) {
       throw new Error(`Failed to load manifest from ${manifestPath}`);
@@ -226,6 +236,7 @@ export async function checkSpriteManifest(
     );
 
     if (!fs.existsSync(spriteFilePath)) {
+      fnDebug(`Missing sprite file: %o`, spriteFilePath);
       missingSpriteFiles.push(spriteFile);
     }
   }
@@ -257,6 +268,13 @@ export async function checkSpriteManifest(
   const hashesUpToDate = outdatedFiles.length === 0;
   const spriteFilesExist = missingSpriteFiles.length === 0;
   const needsRegeneration = !hashesUpToDate || !spriteFilesExist;
+  fnDebug(`result: %o`, {
+    hashesUpToDate,
+    spriteFilesExist,
+    missingSpriteFiles,
+    outdatedFiles,
+    needsRegeneration,
+  });
 
   return {
     manifestExists: true,
@@ -396,14 +414,22 @@ export async function generateSprites(manifestPath: string): Promise<void> {
 export async function verifySprites(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
-  const { autoRegenerate = false, autoCleanup = false } = options;
+  const fnDebug = debug.extend(
+    `verifySprites()` satisfies HasNameOf<typeof verifySprites>,
+  );
 
+  fnDebug(`options: %o`, options);
+
+  const { autoRegenerate = false, autoCleanup = false } = options;
   let result = await checkSpriteManifest(options);
+
+  fnDebug(`checkSpriteManifest result: %j`, result);
 
   // Handle cleanup of unused sprite files
   if (result.unusedSpriteFiles.length > 0 && autoCleanup) {
-    console.warn(
-      `Found ${result.unusedSpriteFiles.length} unused sprite files, cleaning up...`,
+    fnDebug(
+      `Found %s unused sprite files, cleaning up...`,
+      result.unusedSpriteFiles.length,
     );
 
     try {
@@ -425,7 +451,7 @@ export async function verifySprites(
 
   // Handle regeneration of missing/outdated sprites
   if (result.needsRegeneration && autoRegenerate) {
-    console.warn(`Sprites need regeneration, auto-generating...`);
+    fnDebug(`Sprites need regeneration, auto-generating...`);
 
     try {
       await generateSprites(options.manifestPath);
