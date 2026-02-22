@@ -5,6 +5,7 @@ import {
 import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
+import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
@@ -128,13 +129,12 @@ export function useAssetImageMeta(
       return;
     }
 
-    const baseUrl = process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL;
     const assetKey = assetKeyQuery.data?.assetKey;
-    if (baseUrl == null || assetKey == null) {
+    if (assetsCdnBaseUrl == null || assetKey == null) {
       return;
     }
 
-    const imageUrl = `${baseUrl}${assetKey}`;
+    const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
     Image.getSize(
       imageUrl,
       (width, height) => {
@@ -174,11 +174,12 @@ export function useAssetImageMeta(
     return { status: `loading`, imageSize: null, imageSource: null };
   }
 
-  const baseUrl = process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL;
   const assetKey = assetKeyQuery.data?.assetKey;
   const imageSource =
-    baseUrl != null && assetKey != null
-      ? ({ uri: `${baseUrl}${assetKey}` } satisfies ImageSourcePropType)
+    assetsCdnBaseUrl != null && assetKey != null
+      ? ({
+          uri: `${assetsCdnBaseUrl}${assetKey}`,
+        } satisfies ImageSourcePropType)
       : null;
 
   if (imageSource == null) {

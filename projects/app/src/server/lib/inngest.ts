@@ -308,16 +308,8 @@ const syncRemotePush = inngest.createFunction(
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
   },
-  async ({ step, logger }) => {
-    {
-      const isOffline = await step.run(`checkInternetConnection`, async () =>
-        checkIsOffline(),
-      );
-      if (isOffline) {
-        logger.warn(`No internet connection, skipping`);
-        return;
-      }
-    }
+  async ({ step }) => {
+    await onlineOrRetryLater();
 
     // Find all sync rules
     const remoteSyncs = await step.run(`findSyncRules`, async () => {
