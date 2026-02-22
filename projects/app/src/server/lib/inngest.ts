@@ -941,9 +941,11 @@ const syncAssetBlobs = inngest.createFunction(
           }
         }
 
-        logger.info(
-          `Asset sync for ${remoteSync.id}: ${toUpload.length} to upload, ${toDownload.length} to download`,
-        );
+        if (toUpload.length > 0 || toDownload.length > 0) {
+          logger.info(
+            `Asset sync for ${remoteSync.id}: ${toUpload.length} to upload, ${toDownload.length} to download`,
+          );
+        }
 
         // Fan out upload jobs
         for (const assetId of toUpload) {
