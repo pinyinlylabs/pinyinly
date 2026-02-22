@@ -349,7 +349,9 @@ tasks:
     env:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     options:
-      envFile: .env.local
+      envFile:
+        - .env.test
+        - .env.test.local
 
   typecheck:
     deps:
