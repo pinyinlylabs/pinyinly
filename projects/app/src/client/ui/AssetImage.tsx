@@ -135,15 +135,6 @@ export function AssetImage({
     );
   }
 
-  // Construct CDN URL: baseUrl + u/{userId}/{assetId}
-  if (assetsCdnBaseUrl == null) {
-    return (
-      <View className="size-full items-center justify-center bg-fg/5">
-        <Text className="text-xs text-fg-dim">CDN URL not configured</Text>
-      </View>
-    );
-  }
-
   const assetKey =
     userId == null ? assetKeyQuery.data?.assetKey : `u/${userId}/${assetId}`;
 

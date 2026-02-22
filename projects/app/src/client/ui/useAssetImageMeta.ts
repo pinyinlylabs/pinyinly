@@ -130,7 +130,7 @@ export function useAssetImageMeta(
     }
 
     const assetKey = assetKeyQuery.data?.assetKey;
-    if (assetsCdnBaseUrl == null || assetKey == null) {
+    if (assetKey == null) {
       return;
     }
 
@@ -176,11 +176,11 @@ export function useAssetImageMeta(
 
   const assetKey = assetKeyQuery.data?.assetKey;
   const imageSource =
-    assetsCdnBaseUrl != null && assetKey != null
-      ? ({
+    assetKey == null
+      ? null
+      : ({
           uri: `${assetsCdnBaseUrl}${assetKey}`,
-        } satisfies ImageSourcePropType)
-      : null;
+        } satisfies ImageSourcePropType);
 
   if (imageSource == null) {
     return { status: `loading`, imageSize, imageSource: null };
