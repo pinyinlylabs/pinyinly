@@ -3,6 +3,7 @@ tasks:
     command: vitest
     inputs:
       - "$DEBUG"
+      - "$DEBUG_*"
       - "$EXPO_*"
       - "$PYLY_*"
       - "**/*"
