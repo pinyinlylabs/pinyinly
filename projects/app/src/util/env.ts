@@ -1,5 +1,5 @@
 import { memoize0 } from "@pinyinly/lib/collections";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { RemoveIndexSignature } from "@pinyinly/lib/types";
 
 const missingPrivateEnvVars: string[] = [];
@@ -46,7 +46,7 @@ export const postmarkServerToken = privateStringOrNull(
   `PYLY_POSTMARK_SERVER_TOKEN`,
 );
 
-export const assetsCdnBaseUrl = publicStringOrNull(
+export const assetsCdnBaseUrl = publicStringOrThrow(
   process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL,
   `EXPO_PUBLIC_ASSETS_CDN_BASE_URL`,
 );
@@ -85,15 +85,16 @@ function privateStringOrNull(key: PrivateEnvVarKey): string | null {
 type PublicEnvVarKey = keyof RemoveIndexSignature<typeof process.env> &
   `EXPO_PUBLIC_${string}`;
 
-function publicStringOrNull(
+function publicStringOrThrow(
   envValue: string | undefined,
   key: PublicEnvVarKey,
-): string | null {
+): string {
   const parsedValue =
     typeof envValue === `string` && envValue.length > 0 ? envValue : null;
-  if (parsedValue === null) {
-    missingPrivateEnvVars.push(key);
-  }
+  invariant(
+    parsedValue !== null,
+    `Missing required public environment variable: ${key}`,
+  );
   return parsedValue;
 }
 
