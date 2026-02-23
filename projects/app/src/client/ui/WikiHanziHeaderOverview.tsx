@@ -56,14 +56,14 @@ export function WikiHanziHeaderOverview({
           </View>
         )}
         {glosses == null ? null : (
-          <View className="flex-row gap-1">
+          <View className="flex-row">
             {intersperse(
               glosses.map((gloss, i) => (
                 <Text className="font-sans text-[16px] text-fg-loud" key={i}>
                   {gloss}
                 </Text>
               )),
-              <Text className="text-fg">;</Text>,
+              <Text className="text-fg">; </Text>,
             )}
             {/* TODO: make this expand/collapse the definition */}
             {/* <IconImage
