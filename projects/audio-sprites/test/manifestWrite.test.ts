@@ -730,8 +730,8 @@ describe(
             },
           },
           "spriteFiles": [
-            "beep-37726e835cb2.m4a",
-            "hello-285195cf96b6.m4a",
+            "beep-8bebe0df3f03.m4a",
+            "hello-4050a51a75cf.m4a",
           ],
         }
       `);

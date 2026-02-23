@@ -2,6 +2,10 @@ tasks:
   test:
     command: vitest
     inputs:
+      - "$DEBUG"
+      - "$DEBUG_*"
+      - "$EXPO_*"
+      - "$PYLY_*"
       - "**/*"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
       - "/yarn.lock" # Dependencies can change behaviour

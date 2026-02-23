@@ -268,7 +268,7 @@ export function parseFfmpegOutput(output: string) {
  * @returns Array of ffmpeg command arguments
  */
 export function generateSpriteCommand(
-  audioFiles: Pick<AudioFileInfo, `filePath` | `startTime` | `duration`>[],
+  audioFiles: Pick<AudioFileInfo, `relFilePath` | `startTime` | `duration`>[],
   outputPath: string,
   sampleRate = 44_100,
   bitrate = `128k`,
@@ -284,7 +284,7 @@ export function generateSpriteCommand(
 
   // Add input files
   for (const file of sortedFiles) {
-    command.push(`-i`, file.filePath);
+    command.push(`-i`, file.relFilePath);
   }
 
   // Generate silence for padding if needed

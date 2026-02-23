@@ -307,7 +307,8 @@
     //   {
     //     "defaultImports": {
     //       "node:path": "path",
-    //       "react-native-reanimated": "Reanimated"
+    //       "react-native-reanimated": "Reanimated",
+    //       "debug": "makeDebug",
     //     },
     //     "namedImports": {
     //       "posthog-react-native": {

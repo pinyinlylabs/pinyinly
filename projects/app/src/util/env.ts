@@ -46,11 +46,6 @@ export const postmarkServerToken = privateStringOrNull(
   `PYLY_POSTMARK_SERVER_TOKEN`,
 );
 
-export const assetsCdnBaseUrl = publicStringOrNull(
-  process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL,
-  `EXPO_PUBLIC_ASSETS_CDN_BASE_URL`,
-);
-
 export const openaiApiKey = privateStringOrNull(`PYLY_OPENAI_API_KEY`);
 
 // In production fail on startup so that healthchecks don't pass with missing
@@ -63,6 +58,21 @@ if (preflightCheckEnvVars && missingPrivateEnvVars.length > 0) {
   );
 }
 
+//
+// Public environment variables  (i.e. EXPO_PUBLIC_*)
+//
+// These are checked in a patched version of babel-preset-expo-npm, which throws
+// if any EXPO_PUBLIC_ variable is accessed but not set. This is necessary
+// because these variables are inlined at build time, so they won't be caught by
+// checks like the above that run at runtime.
+//
+// Default values should be used to avoid needing to set these in local and test
+// environments or having null checks everywhere.
+//
+
+export const assetsCdnBaseUrl =
+  process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL ?? `/`;
+
 // Helpers
 
 type PrivateEnvVarKey = Exclude<
@@ -74,21 +84,6 @@ type PrivateEnvVarKey = Exclude<
 
 function privateStringOrNull(key: PrivateEnvVarKey): string | null {
   const envValue = process.env[key];
-  const parsedValue =
-    typeof envValue === `string` && envValue.length > 0 ? envValue : null;
-  if (parsedValue === null) {
-    missingPrivateEnvVars.push(key);
-  }
-  return parsedValue;
-}
-
-type PublicEnvVarKey = keyof RemoveIndexSignature<typeof process.env> &
-  `EXPO_PUBLIC_${string}`;
-
-function publicStringOrNull(
-  envValue: string | undefined,
-  key: PublicEnvVarKey,
-): string | null {
   const parsedValue =
     typeof envValue === `string` && envValue.length > 0 ? envValue : null;
   if (parsedValue === null) {

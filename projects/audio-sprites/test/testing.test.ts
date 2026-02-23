@@ -622,22 +622,22 @@ describe(
           "sprites/sprite-0.m4a" => [
             {
               "duration": 1.5,
-              "filePath": "audio1.m4a",
               "hash": "hash1",
+              "relFilePath": "audio1.m4a",
               "startTime": 0,
             },
             {
               "duration": 1,
-              "filePath": "../audio3.m4a",
               "hash": "hash3",
+              "relFilePath": "../audio3.m4a",
               "startTime": 2.5,
             },
           ],
           "../sprites-1.m4a" => [
             {
               "duration": 2,
-              "filePath": "subdir/audio2.m4a",
               "hash": "hash2",
+              "relFilePath": "subdir/audio2.m4a",
               "startTime": 0,
             },
           ],
