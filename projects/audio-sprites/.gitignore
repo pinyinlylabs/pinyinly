@@ -12,3 +12,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Test generated files
+test/integration-test
