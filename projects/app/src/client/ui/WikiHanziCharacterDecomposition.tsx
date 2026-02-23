@@ -4,13 +4,13 @@ import {
   useSelectedHint,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
+import { walkIdsNodeLeafs } from "@/data/hanzi";
+import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintTextSetting,
-} from "@/client/userSettings";
-import { walkIdsNodeLeafs } from "@/data/hanzi";
-import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
+} from "@/data/userSettings";
 import type { HanziWordMeaning } from "@/dictionary";
 import {
   glossOrThrow,

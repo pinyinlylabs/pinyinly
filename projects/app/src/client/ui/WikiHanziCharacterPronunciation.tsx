@@ -1,4 +1,12 @@
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import type { HanziText, PinyinUnit } from "@/data/model";
+import {
+  defaultPinyinSoundInstructions,
+  defaultToneNames,
+  getDefaultFinalToneName,
+  loadPylyPinyinChart,
+  splitPinyinUnit,
+} from "@/data/pinyin";
 import {
   getHanziPronunciationHintKeyParams,
   getPinyinFinalToneKeyParams,
@@ -10,15 +18,7 @@ import {
   pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
-} from "@/client/userSettings";
-import type { HanziText, PinyinUnit } from "@/data/model";
-import {
-  defaultPinyinSoundInstructions,
-  defaultToneNames,
-  getDefaultFinalToneName,
-  loadPylyPinyinChart,
-  splitPinyinUnit,
-} from "@/data/pinyin";
+} from "@/data/userSettings";
 import type { RelativePathString } from "expo-router";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";

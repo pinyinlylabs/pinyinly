@@ -1,14 +1,14 @@
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { getWikiCharacterData } from "@/client/wiki";
+import { walkIdsNodeLeafs } from "@/data/hanzi";
+import type { HanziWord } from "@/data/model";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
-} from "@/client/userSettings";
-import { getWikiCharacterData } from "@/client/wiki";
-import { walkIdsNodeLeafs } from "@/data/hanzi";
-import type { HanziWord } from "@/data/model";
+} from "@/data/userSettings";
 import {
   glossOrThrow,
   hanziFromHanziWord,

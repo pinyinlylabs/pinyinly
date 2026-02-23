@@ -1,4 +1,4 @@
-import { AssetStatusKind } from "@/data/model";
+import { getImageSettingKeyPatterns } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import {
   ALLOWED_IMAGE_TYPES,
@@ -8,7 +8,9 @@ import {
   verifyAssetExists,
 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
+import * as schema from "@/server/pgSchema";
 import { getAssetKeyForId } from "@/util/assetKey";
+import { and, eq, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 
 const assetStatusSchema = z.enum([`pending`, `uploaded`, `failed`]);
@@ -166,38 +168,78 @@ export const assetRouter = router({
     }),
 
   /**
-   * List all uploaded assets for the current user (used for remote sync).
-   * Returns assets that physically exist in S3, not just database records.
+   * List all assets referenced in user settings (used for remote sync).
+   * Returns asset IDs that are actually in use by the user in their settings,
+   * avoiding the need to sync the entire bucket.
    */
   listAssetBucketUserFiles: authedProcedure
     .output(z.array(z.string()))
     .query(async (opts) => {
       const { userId } = opts.ctx.session;
       try {
-        const assetRows = await withDrizzle((db) =>
-          db.query.asset.findMany({
-            where: (t, { and, eq }) =>
-              and(eq(t.userId, userId), eq(t.status, AssetStatusKind.Uploaded)),
-            columns: {
-              assetId: true,
-            },
-          }),
-        );
+        const keyPatterns = getImageSettingKeyPatterns();
 
-        if (assetRows.length === 0) {
-          return [];
-        }
+        const assetIds = await withDrizzle(async (db) => {
+          // Build OR conditions for each key pattern
+          const keyConditions = keyPatterns.map(
+            (pattern) => sql`${schema.userSetting.key} LIKE ${pattern}`,
+          );
+          const historyKeyConditions = keyPatterns.map(
+            (pattern) => sql`${schema.userSettingHistory.key} LIKE ${pattern}`,
+          );
 
-        const assetIds = await Promise.all(
-          assetRows.map(async ({ assetId }) => {
-            const result = await verifyAssetExists(getAssetKeyForId(assetId));
-            return result.exists ? assetId : null;
-          }),
-        );
+          // Query userSetting table for imageId values (aliased as 't' in JSON)
+          const currentSettings = await db
+            .select({
+              assetId: sql<string | null>`${schema.userSetting.value}->>'t'`,
+            })
+            .from(schema.userSetting)
+            .where(
+              and(
+                eq(schema.userSetting.userId, userId),
+                or(...keyConditions),
+                sql`${schema.userSetting.value}->>'t' IS NOT NULL`,
+              ),
+            );
 
-        return assetIds.filter((assetId): assetId is string => assetId != null);
+          // Query userSettingHistory table for imageId values
+          const historicalSettings = await db
+            .select({
+              assetId: sql<
+                string | null
+              >`${schema.userSettingHistory.value}->>'t'`,
+            })
+            .from(schema.userSettingHistory)
+            .where(
+              and(
+                eq(schema.userSettingHistory.userId, userId),
+                or(...historyKeyConditions),
+                sql`${schema.userSettingHistory.value}->>'t' IS NOT NULL`,
+              ),
+            );
+
+          // Combine and deduplicate asset IDs
+          const allAssetIds = new Set<string>();
+          for (const { assetId } of currentSettings) {
+            if (assetId != null && assetId.length > 0) {
+              allAssetIds.add(assetId);
+            }
+          }
+          for (const { assetId } of historicalSettings) {
+            if (assetId != null && assetId.length > 0) {
+              allAssetIds.add(assetId);
+            }
+          }
+
+          return Array.from(allAssetIds);
+        });
+
+        return assetIds;
       } catch (error) {
-        console.error(`Failed to list uploaded assets`, { error, userId });
+        console.error(`Failed to list asset references in user settings`, {
+          error,
+          userId,
+        });
         throw error;
       }
     }),

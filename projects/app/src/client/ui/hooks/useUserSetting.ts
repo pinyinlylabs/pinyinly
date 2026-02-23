@@ -1,10 +1,10 @@
 import { parseImageCrop } from "@/client/ui/imageCrop";
+import type { HanziWord } from "@/data/model";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
-} from "@/client/userSettings";
-import type { HanziWord } from "@/data/model";
+} from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import type {
   RizzleAnyEntity,
@@ -44,7 +44,7 @@ export {
   type UserSettingImageEntity,
   type UserSettingTextEntity,
   type UserSettingToggleableEntity,
-} from "@/client/userSettings";
+} from "@/data/userSettings";
 
 export type UserSettingEntity = RizzleAnyEntity;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
