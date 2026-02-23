@@ -81,8 +81,8 @@ const createSpriteFromFiles = (
   // Create a deterministic sprite filename by hashing all parameters that affect sprite content
   const spriteContentHashes = audioFiles.map((audioFile) => {
     return nonNullable(
-      fileHashMap.get(audioFile.filePath),
-      `Missing file hash for ${audioFile.filePath}`,
+      fileHashMap.get(audioFile.relFilePath),
+      `Missing file hash for ${audioFile.relFilePath}`,
     );
   });
 
@@ -208,7 +208,7 @@ export const recomputeManifest = async (
     );
 
     const audioFileInfo: AudioFileInfo = {
-      filePath: relativePath,
+      relFilePath: relativePath,
       startTime,
       duration,
       hash: fileHash,

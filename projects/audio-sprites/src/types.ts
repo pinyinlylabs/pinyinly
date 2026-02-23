@@ -89,8 +89,8 @@ export type SpriteManifest = z.infer<typeof spriteManifestSchema>;
  * Audio file info for sprite generation.
  */
 export interface AudioFileInfo {
-  /** Absolute path to the audio file */
-  filePath: string;
+  /** Relative path to the audio file (relative to manifest.json directory) */
+  relFilePath: string;
   /** Expected start time in the sprite (in seconds) */
   startTime: number;
   /** Duration of the audio file (in seconds) */

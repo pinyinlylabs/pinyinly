@@ -310,7 +310,7 @@ export function getAllAudioFilesBySprite(
     }
 
     const audioFileInfo: AudioFileInfo = {
-      filePath,
+      relFilePath: filePath,
       startTime: segment.start,
       duration: segment.duration,
       hash: segment.hash,
@@ -357,7 +357,7 @@ export async function generateSprites(manifestPath: string): Promise<void> {
       const firstFile = audioFiles[0];
       if (firstFile) {
         // Convert absolute path back to relative path to match against rules
-        const relativePath = path.relative(manifestDir, firstFile.filePath);
+        const relativePath = path.relative(manifestDir, firstFile.relFilePath);
         const ruleResult = applyRulesWithRule(relativePath, manifest.rules);
         if (
           ruleResult?.rule.bitrate != null &&

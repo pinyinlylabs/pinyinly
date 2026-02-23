@@ -215,7 +215,7 @@ describe(
     test(`generates correct command for single file`, () => {
       const audioFiles = [
         {
-          filePath: `/path/to/audio1.m4a`,
+          relFilePath: `../path/to/audio1.m4a`,
           startTime: 0,
           duration: 1.5,
         },
@@ -227,7 +227,7 @@ describe(
         [
           "ffmpeg",
           "-i",
-          "/path/to/audio1.m4a",
+          "../path/to/audio1.m4a",
           "-f",
           "lavfi",
           "-i",
@@ -257,12 +257,12 @@ describe(
     test(`generates correct command for multiple files with delays`, () => {
       const audioFiles = [
         {
-          filePath: `/path/to/audio1.m4a`,
+          relFilePath: `../path/to/audio1.m4a`,
           startTime: 0,
           duration: 1.5,
         },
         {
-          filePath: `/path/to/audio2.m4a`,
+          relFilePath: `../path/to/audio2.m4a`,
           startTime: 2.5, // 1 second buffer after first file
           duration: 2,
         },
@@ -274,9 +274,9 @@ describe(
         [
           "ffmpeg",
           "-i",
-          "/path/to/audio1.m4a",
+          "../path/to/audio1.m4a",
           "-i",
-          "/path/to/audio2.m4a",
+          "../path/to/audio2.m4a",
           "-f",
           "lavfi",
           "-i",
@@ -306,12 +306,12 @@ describe(
     test(`sorts files by start time`, () => {
       const audioFiles = [
         {
-          filePath: `/path/to/audio2.m4a`,
+          relFilePath: `../path/to/audio2.m4a`,
           startTime: 2,
           duration: 1,
         },
         {
-          filePath: `/path/to/audio1.m4a`,
+          relFilePath: `../path/to/audio1.m4a`,
           startTime: 0,
           duration: 1.5,
         },
@@ -324,9 +324,9 @@ describe(
         [
           "ffmpeg",
           "-i",
-          "/path/to/audio1.m4a",
+          "../path/to/audio1.m4a",
           "-i",
-          "/path/to/audio2.m4a",
+          "../path/to/audio2.m4a",
           "-f",
           "lavfi",
           "-i",
@@ -356,7 +356,7 @@ describe(
     test(`allows custom sample rate`, () => {
       const audioFiles = [
         {
-          filePath: `/path/to/audio1.m4a`,
+          relFilePath: `audio1.m4a`,
           startTime: 0,
           duration: 1,
         },
@@ -381,7 +381,7 @@ describe(
     test(`uses custom bitrate when specified`, () => {
       const audioFiles = [
         {
-          filePath: `/path/to/audio1.m4a`,
+          relFilePath: `../path/to/audio1.m4a`,
           startTime: 0,
           duration: 1.5,
         },
@@ -402,7 +402,7 @@ describe(
     test(`uses default bitrate when not specified`, () => {
       const audioFiles = [
         {
-          filePath: `/path/to/audio1.m4a`,
+          relFilePath: `../path/to/audio1.m4a`,
           startTime: 0,
           duration: 1.5,
         },
@@ -446,12 +446,12 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     const audioFiles = [
       {
-        filePath: path.join(fixturesDir, `audio1.mp3`),
+        relFilePath: `audio1.mp3`,
         startTime: 0,
         duration: 1.2,
       },
       {
-        filePath: path.join(fixturesDir, `audio2.mp3`),
+        relFilePath: `audio2.mp3`,
         startTime: 2.2, // 1.2 + 1 second buffer
         duration: 0.864,
       },
@@ -461,7 +461,7 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     // Execute the generated ffmpeg command
     const [program, ...args] = command;
-    await execFileAsync(program!, args);
+    await execFileAsync(program!, args, { cwd: fixturesDir });
 
     // Verify the output file was created
     expect(fs.existsSync(outputPath)).toBe(true);
@@ -495,17 +495,17 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     const audioFiles = [
       {
-        filePath: path.join(fixturesDir, `audio1.mp3`), // 1.2 seconds
+        relFilePath: `audio1.mp3`, // 1.2 seconds
         startTime: 0,
         duration: 1.2,
       },
       {
-        filePath: path.join(fixturesDir, `audio2.mp3`), // 0.864 seconds
+        relFilePath: `audio2.mp3`, // 0.864 seconds
         startTime: 2.2, // 1.2 + 1 second buffer
         duration: 0.864,
       },
       {
-        filePath: path.join(fixturesDir, `audio3.mp3`), // 1.416 seconds
+        relFilePath: `audio3.mp3`, // 1.416 seconds
         startTime: 4.064, // 2.2 + 0.864 + 1 second buffer
         duration: 1.416,
       },
@@ -515,7 +515,7 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     // Execute the generated ffmpeg command
     const [program, ...args] = command;
-    await execFileAsync(program!, args);
+    await execFileAsync(program!, args, { cwd: fixturesDir });
 
     // Verify the output file was created
     expect(fs.existsSync(outputPath)).toBe(true);
@@ -552,17 +552,17 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     const audioFiles = [
       {
-        filePath: path.join(fixturesDir, `audio1.mp3`),
+        relFilePath: `audio1.mp3`,
         startTime: 0,
         duration: 1.2,
       },
       {
-        filePath: path.join(fixturesDir, `audio2.mp3`),
+        relFilePath: `audio2.mp3`,
         startTime: 2.2,
         duration: 0.864,
       },
       {
-        filePath: path.join(fixturesDir, `audio3.mp3`),
+        relFilePath: `audio3.mp3`,
         startTime: 4.064,
         duration: 1.416,
       },
@@ -571,12 +571,12 @@ describe(`Integration tests with real ffmpeg`, () => {
     // Generate first sprite
     const command1 = generateSpriteCommand(audioFiles, outputPath1);
     const [program1, ...args1] = command1;
-    await execFileAsync(program1!, args1);
+    await execFileAsync(program1!, args1, { cwd: fixturesDir });
 
     // Generate second sprite with identical inputs
     const command2 = generateSpriteCommand(audioFiles, outputPath2);
     const [program2, ...args2] = command2;
-    await execFileAsync(program2!, args2);
+    await execFileAsync(program2!, args2, { cwd: fixturesDir });
 
     // Verify both files were created
     expect(fs.existsSync(outputPath1)).toBe(true);
@@ -694,7 +694,7 @@ describe(`Integration tests with real ffmpeg`, () => {
     // Generate audio files for sprite generation
     const audioFilesForSprite = Object.entries(updatedManifest.segments).map(
       ([filePath, segment]) => ({
-        filePath: path.join(testDir, filePath),
+        relFilePath: filePath,
         startTime: segment.start,
         duration: segment.duration,
       }),
@@ -719,7 +719,7 @@ describe(`Integration tests with real ffmpeg`, () => {
 
     // Execute the sprite generation command
     const [program, ...args] = spriteCommand;
-    await execFileAsync(program!, args);
+    await execFileAsync(program!, args, { cwd: testDir });
 
     // Verify the sprite was created
     expect(fs.existsSync(spriteOutputPath)).toBe(true);
