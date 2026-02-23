@@ -35,7 +35,7 @@ export async function listAssetFiles(userId: string): Promise<string[]> {
     }),
   );
 
-  return assetIds.filter((assetId): assetId is string => assetId != null);
+  return assetIds.filter((assetId) => assetId != null);
 }
 
 export async function downloadAssetFromRemote(
