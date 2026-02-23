@@ -26,6 +26,10 @@ import {
   withRepeatableReadTransaction,
 } from "./db";
 import {
+  getUnmigratedAssetCount,
+  migrateAssetIdsBatch,
+} from "./migrateAssetIds";
+import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
   ignoreRemoteClientForRemoteSync,
@@ -50,6 +54,7 @@ export const inngest = new Inngest({
     "replicache/retry-mutations": z.object({
       startMutationRecordId: z.string(),
     }),
+    "migrateAssetIds/manual": z.never(),
     "test/hello.world.email": z.never(),
     "test/test-fn": z.never(),
     "test/test-log-root-error": z.never(),
@@ -1076,10 +1081,65 @@ const syncAssetBlobDownload = inngest.createFunction(
   },
 );
 
+/**
+ * Migrate assets from old ID format (plain hash) to new format (sha256/<hash>).
+ * Runs periodically to progressively migrate existing assets.
+ */
+const migrateAssetIds = inngest.createFunction(
+  { id: `migrateAssetIds` },
+  { event: `migrateAssetIds/manual` }, // Manual trigger only
+  async ({ step, logger }) => {
+    const summary = await step.run(`migrate-batch`, async () => {
+      return withDrizzle(async (db) => {
+        return withRepeatableReadTransaction(db, async (tx) => {
+          // Get count before migration
+          const totalUnmigrated = await getUnmigratedAssetCount(tx);
+
+          if (totalUnmigrated === 0) {
+            logger.info(`No assets need migration`);
+            return {
+              totalUnmigrated: 0,
+              migratedCount: 0,
+              errors: [],
+            };
+          }
+
+          logger.info(`Found ${totalUnmigrated} assets to migrate`);
+
+          // Migrate a batch of assets
+          const result = await migrateAssetIdsBatch(tx, {
+            batchSize: 20, // Smaller batches to avoid timeout
+            dryRun: false,
+          });
+
+          logger.info(
+            `Migrated ${result.migratedCount} assets, ${result.errors.length} errors`,
+          );
+
+          if (result.errors.length > 0) {
+            logger.error(
+              `Migration errors:`,
+              result.errors.map((e) => `${e.assetId}: ${e.error}`).join(`, `),
+            );
+          }
+
+          return {
+            totalUnmigrated,
+            ...result,
+          };
+        });
+      });
+    });
+
+    return summary;
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   dataIntegrityDictionary,
   helloWorldEmail,
+  migrateAssetIds,
   migrateHanziWords,
   pgFullVacuumGarbageCollection,
   replicacheGarbageCollection,
