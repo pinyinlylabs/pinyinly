@@ -382,9 +382,7 @@ function HintImagePreview({
   if (assetId == null) {
     return (
       <View
-        className={`
-          w-full items-center justify-center rounded-lg border border-dashed border-fg/20 bg-fg-bg5
-        `}
+        className={`w-full items-center justify-center bg-fg-bg5`}
         style={aspectRatio == null ? { height } : { aspectRatio }}
       >
         <Text className="text-xs text-fg-dim">No image selected</Text>
@@ -394,7 +392,7 @@ function HintImagePreview({
 
   return (
     <View
-      className="w-full overflow-hidden rounded-lg border border-fg/10 bg-fg-bg5"
+      className="w-full overflow-hidden bg-fg-bg5"
       style={aspectRatio == null ? { height } : { aspectRatio }}
     >
       <FramedAssetImage
@@ -482,7 +480,7 @@ function InlineImageRepositionEditor({
   if (!canSave || imageSize == null || effectiveCropRect == null) {
     return (
       <View
-        className={`w-full items-center justify-center rounded-lg border border-fg/10 bg-fg-bg5`}
+        className={`w-full items-center justify-center`}
         style={containerStyle}
       >
         <ActivityIndicator size="small" className="text-fg" />
@@ -609,7 +607,7 @@ function InlineImageRepositionFrame({
 
   return (
     <View
-      className="relative w-full overflow-hidden rounded-lg border border-fg/10 bg-fg-bg5"
+      className="relative w-full overflow-hidden"
       style={containerStyle}
       onLayout={(event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
@@ -636,10 +634,8 @@ function InlineImageRepositionFrame({
         {...(moveResponder?.panHandlers ?? {})}
       />
       <View className="pointer-events-none absolute inset-0 items-center justify-center">
-        <View className="rounded-full border border-fg/10 bg-bg/85 px-3 py-1">
-          <Text className="text-[12px] text-fg-dim">
-            Drag image to reposition
-          </Text>
+        <View className="rounded-md bg-bg/70 px-3 py-1">
+          <Text className="text-[12px] text-fg">Drag image to reposition</Text>
         </View>
       </View>
       <View className="absolute inset-x-3 bottom-3 flex-row items-center justify-between">
