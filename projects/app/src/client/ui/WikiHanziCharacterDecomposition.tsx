@@ -1,40 +1,42 @@
 import { useIsBetaEnabled } from "@/client/ui/hooks/useBetaFeatures";
-import { useSelectedHint } from "@/client/ui/hooks/useUserSetting";
+import {
+  hanziWordMeaningHintImageSetting,
+  useSelectedHint,
+  useUserSetting,
+} from "@/client/ui/hooks/useUserSetting";
+import {
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImagePromptSetting,
+  hanziWordMeaningHintTextSetting,
+} from "@/client/userSettings";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
+import type { HanziWordMeaning } from "@/dictionary";
 import {
+  glossOrThrow,
   hanziFromHanziWord,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
-import type { HanziWordMeaning } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Link } from "expo-router";
-import { use } from "react";
 import type { ReactNode } from "react";
+import { use } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
 import { IconImage } from "./IconImage";
-import { FramedAssetImage } from "./ImageFrame";
+import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
-import type { ImageCrop } from "./imageCrop";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
-  illustration?: {
-    assetId: string;
-    crop?: ImageCrop;
-    imageWidth?: number;
-    imageHeight?: number;
-  } | null;
 }
 
 export function WikiHanziCharacterDecomposition({
   characterData,
-  illustration,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
   const dictionary = use(loadDictionary());
@@ -114,19 +116,9 @@ export function WikiHanziCharacterDecomposition({
           ) : null}
         </View>
 
-        {illustration?.assetId == null ? (
-          <View className="h-4" />
-        ) : (
-          <View className="my-4 h-[200px] w-full overflow-hidden">
-            <FramedAssetImage
-              assetId={illustration.assetId}
-              crop={illustration.crop}
-              imageWidth={illustration.imageWidth}
-              imageHeight={illustration.imageHeight}
-              className="size-full"
-            />
-          </View>
-        )}
+        <View className="my-4 w-full">
+          <CoverImageSection hanzi={characterData.hanzi} />
+        </View>
 
         <MeaningsSection
           hanzi={characterData.hanzi}
@@ -137,18 +129,83 @@ export function WikiHanziCharacterDecomposition({
   );
 }
 
+function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
+  const dictionary = use(loadDictionary());
+  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
+
+  // Use the first meaning as the primary meaning for cover image.
+  const hanziWord = hanziWordMeanings[0]?.[0];
+
+  const settingKey =
+    hanziWord == null ? ({ skip: true } as const) : { hanziWord };
+
+  const imagePromptSetting = useUserSetting(
+    hanziWordMeaningHintImagePromptSetting,
+    settingKey,
+  );
+
+  const explanationSetting = useUserSetting(
+    hanziWordMeaningHintExplanationSetting,
+    settingKey,
+  );
+
+  const hintSetting = useUserSetting(
+    hanziWordMeaningHintTextSetting,
+    settingKey,
+  );
+
+  const handleUploadError = (error: string) => {
+    console.error(`Upload error:`, error);
+  };
+
+  if (hanziWord == null) {
+    return null;
+  }
+
+  const meaning = dictionary.lookupHanziWord(hanziWord);
+
+  return (
+    <InlineEditableSettingImage
+      setting={hanziWordMeaningHintImageSetting}
+      settingKey={{ hanziWord }}
+      presetImageIds={/* TODO */ []}
+      previewHeight={200}
+      tileSize={64}
+      enablePasteDropZone
+      enableAiGeneration
+      initialAiPrompt={
+        imagePromptSetting?.value?.text ??
+        ([hintSetting?.value?.text, explanationSetting?.value?.text]
+          .filter((v) => v != null && v.length > 0)
+          .join(` - `) ||
+          (meaning == null
+            ? `Create an image for ${hanzi}`
+            : `Create an image representing ${glossOrThrow(hanziWord, meaning)}`))
+      }
+      frameConstraint={{ aspectRatio: 2 }}
+      onUploadError={handleUploadError}
+      onSaveAiPrompt={(prompt) => {
+        imagePromptSetting?.setValue({
+          hanziWord,
+          text: prompt,
+        });
+      }}
+    />
+  );
+}
+
 function MeaningsSection({
   hanzi,
   mnemonicHints,
 }: {
-  hanzi: string;
+  hanzi: HanziText;
   mnemonicHints:
     | readonly { readonly meaningKey: string; readonly hint: string }[]
     | undefined;
 }) {
   const isBetaEnabled = useIsBetaEnabled();
   const dictionary = use(loadDictionary());
-  const hanziWordMeanings = dictionary.lookupHanzi(hanzi as HanziText);
+  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
   // If hanzi is not in dictionary or beta is not enabled, don't show this section
   if (!isBetaEnabled || hanziWordMeanings.length === 0) {

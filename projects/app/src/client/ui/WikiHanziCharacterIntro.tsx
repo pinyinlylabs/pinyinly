@@ -1,6 +1,5 @@
-import { useHanziWordHintOverrides } from "@/client/ui/hooks/useUserSetting";
 import { isHanziCharacter } from "@/data/hanzi";
-import type { HanziWord, PinyinUnit, WikiCharacterData } from "@/data/model";
+import type { PinyinUnit, WikiCharacterData } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
@@ -17,25 +16,10 @@ export function WikiHanziCharacterIntro({
 }: WikiHanziCharacterIntroProps) {
   const dictionary = use(loadDictionary());
   const meanings = dictionary.lookupHanzi(characterData.hanzi);
-  const primaryHanziWord =
-    meanings[0]?.[0] ?? (`${characterData.hanzi}:unknown` as HanziWord);
-  const primaryHintImage = useHanziWordHintOverrides(primaryHanziWord);
 
   return (
     <>
-      <WikiHanziCharacterDecomposition
-        characterData={characterData}
-        illustration={
-          primaryHintImage.imageId == null
-            ? null
-            : {
-                assetId: primaryHintImage.imageId,
-                crop: primaryHintImage.imageCrop,
-                imageWidth: primaryHintImage.imageWidth,
-                imageHeight: primaryHintImage.imageHeight,
-              }
-        }
-      />
+      <WikiHanziCharacterDecomposition characterData={characterData} />
 
       {meanings.length === 1 && meanings[0] != null ? (
         <>
