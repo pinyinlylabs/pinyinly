@@ -15,7 +15,7 @@ offline-first architecture using optimistic updates.
 ### Asset Lifecycle
 
 ```
-Client generates assetId (nanoid)
+Client generates assetId (algorithm-prefixed, e.g., sha256/<base64url>)
   ↓
 Call initAsset mutator (optimistic) → Creates pending asset in Replicache
   ↓
@@ -32,7 +32,7 @@ Call confirmAssetUpload mutator → Marks asset as uploaded in Replicache
 
 Added `asset` table with:
 
-- `assetId`: Client-generated ID (nanoid)
+- `assetId`: Client-generated ID (algorithm-prefixed, e.g., sha256/<base64url>)
 - `status`: pending | uploaded | failed
 - `contentType`: MIME type
 - `contentLength`: File size in bytes
@@ -90,24 +90,23 @@ EXPO_PUBLIC_ASSETS_CDN_BASE_URL=https://assets.example.com
 
 ## Asset Key Format
 
-Assets are stored in S3 with key: `u/{userId}/{assetId}`
+Assets are stored in S3 with key: `blob/{assetId}`
 
-- `u/` prefix: Identifies user-uploaded assets
-- `{userId}`: Scopes assets to user
-- `{assetId}`: Unique identifier (nanoid)
+- `blob/` prefix: Identifies user-uploaded blobs
+- `{assetId}`: Algorithm-prefixed hash (e.g., `sha256/<base64url>`)
 
 ## Usage Flow
 
 ### Client-side Upload Flow
 
 ```typescript
-import { nanoid } from "nanoid";
+import { getBlobSha256Base64Url } from "@/client/util/assetHash";
 import { trpc } from "@/client/query";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 
 async function uploadImage(file: File) {
   const r = useRizzle();
-  const assetId = nanoid();
+  const assetId = await getBlobSha256Base64Url(file);
 
   // 1. Optimistically create pending asset
   await r.mutate.initAsset({

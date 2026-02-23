@@ -213,7 +213,8 @@ export const hanziPinyinMistake = schema.table(
  * User-uploaded assets (images for mnemonics).
  *
  * Assets are immutable once uploaded - they cannot be modified, only created.
- * The asset file is stored in S3 at path: u/{userId}/{assetId}
+ * The asset file is stored in S3 at path: blob/{assetId}
+ * where assetId is algorithm-prefixed (e.g., sha256/<base64url-hash>).
  */
 export const asset = schema.table(
   `asset`,
@@ -224,7 +225,8 @@ export const asset = schema.table(
       .references(() => user.id)
       .notNull(),
     /**
-     * Client-generated asset ID (nanoid). Used as the S3 object key suffix.
+     * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
+     * Used as the S3 object key suffix.
      */
     assetId: pg.text(`assetId`).notNull(),
     /**

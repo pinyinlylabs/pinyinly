@@ -1,3 +1,5 @@
+import { AssetStatusKind } from "@/data/model";
+import { withDrizzle } from "@/server/lib/db";
 import {
   ALLOWED_IMAGE_TYPES,
   createPresignedReadUrl,
@@ -5,42 +7,14 @@ import {
   MAX_ASSET_SIZE_BYTES,
   verifyAssetExists,
 } from "@/server/lib/s3/assets";
-import { getAssetsS3Client } from "@/server/lib/s3/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
-import { assetsS3Bucket } from "@/util/env";
-import { ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { getAssetKeyForId } from "@/util/assetKey";
 import { z } from "zod/v4";
 
 const assetStatusSchema = z.enum([`pending`, `uploaded`, `failed`]);
 export type AssetStatus = z.infer<typeof assetStatusSchema>;
 
 export const assetRouter = router({
-  /**
-   * Resolve the asset key for the current user and asset ID.
-   */
-  getAssetKey: authedProcedure
-    .input(
-      z
-        .object({
-          assetId: z.string(),
-        })
-        .strict(),
-    )
-    .output(
-      z
-        .object({
-          assetKey: z.string(),
-        })
-        .strict(),
-    )
-    .query(async (opts) => {
-      const { userId } = opts.ctx.session;
-      const { assetId } = opts.input;
-      return {
-        assetKey: `u/${userId}/${assetId}`,
-      };
-    }),
   /**
    * Request a presigned URL for uploading an asset.
    *
@@ -54,8 +28,8 @@ export const assetRouter = router({
       z
         .object({
           /**
-           * Client-generated asset ID (nanoid). This allows optimistic UI updates
-           * by using the ID immediately before upload completes.
+           * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
+           * This allows optimistic UI updates by using the ID immediately before upload completes.
            */
           assetId: z.string(),
           /**
@@ -78,11 +52,9 @@ export const assetRouter = router({
         .strict(),
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId, contentType, contentLength } = opts.input;
 
       const result = await createPresignedUploadUrl({
-        userId,
         assetId,
         contentType,
         contentLength,
@@ -115,10 +87,9 @@ export const assetRouter = router({
         .strict(),
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId } = opts.input;
 
-      const assetKey = `u/${userId}/${assetId}`;
+      const assetKey = getAssetKeyForId(assetId);
       const result = await verifyAssetExists(assetKey);
 
       return {
@@ -147,10 +118,9 @@ export const assetRouter = router({
         .nullable(),
     )
     .query(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId } = opts.input;
 
-      const assetKey = `u/${userId}/${assetId}`;
+      const assetKey = getAssetKeyForId(assetId);
       const exists = await verifyAssetExists(assetKey);
 
       if (!exists.exists) {
@@ -182,11 +152,9 @@ export const assetRouter = router({
         .nullable(),
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId, contentLength, contentType } = opts.input;
 
       const result = await createPresignedUploadUrl({
-        userId,
         assetId,
         contentType,
         contentLength,
@@ -205,35 +173,29 @@ export const assetRouter = router({
     .output(z.array(z.string()))
     .query(async (opts) => {
       const { userId } = opts.ctx.session;
-
-      const s3Client = getAssetsS3Client();
-
       try {
-        const command = new ListObjectsV2Command({
-          Bucket: nonNullable(assetsS3Bucket),
-          Prefix: `u/${userId}/`,
-        });
+        const assetRows = await withDrizzle((db) =>
+          db.query.asset.findMany({
+            where: (t, { and, eq }) =>
+              and(eq(t.userId, userId), eq(t.status, AssetStatusKind.Uploaded)),
+            columns: {
+              assetId: true,
+            },
+          }),
+        );
 
-        const response = await s3Client.send(command);
-        const assetIds: string[] = [];
-
-        if (response.Contents) {
-          for (const obj of response.Contents) {
-            const key = obj.Key;
-            if (key !== null && key !== undefined && key.length > 0) {
-              const assetId = key.split(`/`).pop();
-              if (
-                assetId !== null &&
-                assetId !== undefined &&
-                assetId.length > 0
-              ) {
-                assetIds.push(assetId);
-              }
-            }
-          }
+        if (assetRows.length === 0) {
+          return [];
         }
 
-        return assetIds;
+        const assetIds = await Promise.all(
+          assetRows.map(async ({ assetId }) => {
+            const result = await verifyAssetExists(getAssetKeyForId(assetId));
+            return result.exists ? assetId : null;
+          }),
+        );
+
+        return assetIds.filter((assetId): assetId is string => assetId != null);
       } catch (error) {
         console.error(`Failed to list uploaded assets`, { error, userId });
         throw error;

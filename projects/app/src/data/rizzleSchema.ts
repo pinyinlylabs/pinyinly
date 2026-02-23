@@ -446,7 +446,8 @@ export const v11 = {
    * Tracks the status of user-uploaded assets.
    *
    * Assets are immutable once uploaded. The asset ID is generated client-side
-   * (nanoid) to enable optimistic UI updates before the upload completes.
+   * (algorithm-prefixed, e.g., sha256/<base64url>) to enable optimistic UI
+   * updates before the upload completes.
    */
   asset: r.entity(`a/[assetId]`, {
     assetId: r.string().alias(`i`),

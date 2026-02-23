@@ -1007,7 +1007,6 @@ const syncAssetBlobUpload = inngest.createFunction(
       await step.run(`uploadAsset-${assetId}`, async () => {
         await uploadAssetToRemote(
           createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
-          remoteSync.userId,
           assetId,
         );
       });
@@ -1060,7 +1059,6 @@ const syncAssetBlobDownload = inngest.createFunction(
       await step.run(`downloadAsset-${assetId}`, async () => {
         await downloadAssetFromRemote(
           createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
-          remoteSync.userId,
           assetId,
         );
       });
