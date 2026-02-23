@@ -1,5 +1,5 @@
 import { memoize0 } from "@pinyinly/lib/collections";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { RemoveIndexSignature } from "@pinyinly/lib/types";
 
 const missingPrivateEnvVars: string[] = [];
@@ -72,6 +72,11 @@ if (preflightCheckEnvVars && missingPrivateEnvVars.length > 0) {
 
 export const assetsCdnBaseUrl =
   process.env.EXPO_PUBLIC_ASSETS_CDN_BASE_URL ?? `/`;
+
+invariant(
+  assetsCdnBaseUrl.endsWith(`/`),
+  `EXPO_PUBLIC_ASSETS_CDN_BASE_URL must end with a slash`,
+);
 
 // Helpers
 
