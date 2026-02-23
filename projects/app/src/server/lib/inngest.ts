@@ -37,6 +37,7 @@ import {
   updateRemoteSyncClientLastMutationId,
 } from "./replicache";
 import { retryMutation as retryMutationV13 } from "./replicache/v12";
+import { assetIdSchema } from "./s3/assets";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
@@ -925,7 +926,13 @@ const syncAssetBlobs = inngest.createFunction(
               remoteSync.remoteUrl,
               remoteSync.remoteSessionId,
             );
-            return remoteClient.asset.listAssetBucketUserFiles.query();
+            const assetIds =
+              await remoteClient.asset.listAssetBucketUserFiles.query();
+            // Filter out any legacy asset IDs that don't match the expected format, to
+            // avoid syncing invalid asset IDs.
+            return assetIds.filter(
+              (assetId) => assetIdSchema.safeParse(assetId).success,
+            );
           },
         );
 
