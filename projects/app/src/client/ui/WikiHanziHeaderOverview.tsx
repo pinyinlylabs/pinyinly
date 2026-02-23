@@ -63,7 +63,7 @@ export function WikiHanziHeaderOverview({
           </View>
         )}
         {glosses == null ? null : (
-          <ExpanableGlosses
+          <ExpandableGlosses
             hanzi={hanzi}
             glosses={glosses}
             meanings={meanings}
@@ -74,7 +74,7 @@ export function WikiHanziHeaderOverview({
   );
 }
 
-function ExpanableGlosses({
+function ExpandableGlosses({
   hanzi,
   glosses,
   meanings,
@@ -101,7 +101,7 @@ function ExpanableGlosses({
 
         {meanings == null || !isHanziCharacter(hanzi) ? null : (
           <RectButton
-            iconStart="chevron-down-circled"
+            iconStart={expanded ? `chevron-up-circled` : `chevron-down-circled`}
             onPress={() => {
               setExpanded((value) => !value);
             }}
