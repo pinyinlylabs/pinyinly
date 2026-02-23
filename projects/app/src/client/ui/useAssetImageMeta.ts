@@ -2,9 +2,9 @@ import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
-import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
+import { getAssetKeyForId } from "@/util/assetKey";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
@@ -46,14 +46,10 @@ export function useAssetImageMeta(
   );
 
   const isLocalAsset = isLocalImageAssetId(assetId);
-  const shouldFetchAssetKey =
-    !isLocalAsset && asset?.status === AssetStatusKind.Uploaded;
-  const assetKeyQuery = trpc.asset.getAssetKey.useQuery(
-    { assetId },
-    {
-      enabled: shouldFetchAssetKey,
-    },
-  );
+  const assetKey =
+    !isLocalAsset && asset?.status === AssetStatusKind.Uploaded
+      ? getAssetKeyForId(assetId)
+      : null;
 
   const hasClearedLocalRef = useRef(false);
   useEffect(() => {
@@ -129,7 +125,6 @@ export function useAssetImageMeta(
       return;
     }
 
-    const assetKey = assetKeyQuery.data?.assetKey;
     if (assetKey == null) {
       return;
     }
@@ -144,7 +139,7 @@ export function useAssetImageMeta(
         setImageSize(null);
       },
     );
-  }, [assetKeyQuery.data?.assetKey, imageSize, localSource]);
+  }, [assetKey, imageSize, localSource]);
 
   if (localSource != null) {
     return {
@@ -174,7 +169,6 @@ export function useAssetImageMeta(
     return { status: `loading`, imageSize: null, imageSource: null };
   }
 
-  const assetKey = assetKeyQuery.data?.assetKey;
   const imageSource =
     assetKey == null
       ? null

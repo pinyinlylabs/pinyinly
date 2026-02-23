@@ -1,7 +1,7 @@
 import { trpc } from "@/client/trpc";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { getBlobSha256Base64Url } from "@/client/util/assetHash";
 import type { currentSchema } from "@/data/rizzleSchema";
-import { nanoid } from "@/util/nanoid";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -76,7 +76,7 @@ export function useImageUploader({
         throw new Error(`Image must be smaller than 5MB`);
       }
 
-      const assetId = nanoid();
+      const assetId = await getBlobSha256Base64Url(blob);
 
       await rep.mutate.initAsset({
         assetId,

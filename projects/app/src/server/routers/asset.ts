@@ -1,3 +1,5 @@
+import { getImageSettingKeyPatterns } from "@/data/userSettings";
+import { withDrizzle } from "@/server/lib/db";
 import {
   ALLOWED_IMAGE_TYPES,
   createPresignedReadUrl,
@@ -5,42 +7,16 @@ import {
   MAX_ASSET_SIZE_BYTES,
   verifyAssetExists,
 } from "@/server/lib/s3/assets";
-import { getAssetsS3Client } from "@/server/lib/s3/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
-import { assetsS3Bucket } from "@/util/env";
-import { ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import * as schema from "@/server/pgSchema";
+import { getAssetKeyForId } from "@/util/assetKey";
+import { and, eq, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 
 const assetStatusSchema = z.enum([`pending`, `uploaded`, `failed`]);
 export type AssetStatus = z.infer<typeof assetStatusSchema>;
 
 export const assetRouter = router({
-  /**
-   * Resolve the asset key for the current user and asset ID.
-   */
-  getAssetKey: authedProcedure
-    .input(
-      z
-        .object({
-          assetId: z.string(),
-        })
-        .strict(),
-    )
-    .output(
-      z
-        .object({
-          assetKey: z.string(),
-        })
-        .strict(),
-    )
-    .query(async (opts) => {
-      const { userId } = opts.ctx.session;
-      const { assetId } = opts.input;
-      return {
-        assetKey: `u/${userId}/${assetId}`,
-      };
-    }),
   /**
    * Request a presigned URL for uploading an asset.
    *
@@ -54,8 +30,8 @@ export const assetRouter = router({
       z
         .object({
           /**
-           * Client-generated asset ID (nanoid). This allows optimistic UI updates
-           * by using the ID immediately before upload completes.
+           * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
+           * This allows optimistic UI updates by using the ID immediately before upload completes.
            */
           assetId: z.string(),
           /**
@@ -78,11 +54,9 @@ export const assetRouter = router({
         .strict(),
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId, contentType, contentLength } = opts.input;
 
       const result = await createPresignedUploadUrl({
-        userId,
         assetId,
         contentType,
         contentLength,
@@ -115,10 +89,9 @@ export const assetRouter = router({
         .strict(),
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId } = opts.input;
 
-      const assetKey = `u/${userId}/${assetId}`;
+      const assetKey = getAssetKeyForId(assetId);
       const result = await verifyAssetExists(assetKey);
 
       return {
@@ -147,10 +120,9 @@ export const assetRouter = router({
         .nullable(),
     )
     .query(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId } = opts.input;
 
-      const assetKey = `u/${userId}/${assetId}`;
+      const assetKey = getAssetKeyForId(assetId);
       const exists = await verifyAssetExists(assetKey);
 
       if (!exists.exists) {
@@ -182,11 +154,9 @@ export const assetRouter = router({
         .nullable(),
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session;
       const { assetId, contentLength, contentType } = opts.input;
 
       const result = await createPresignedUploadUrl({
-        userId,
         assetId,
         contentType,
         contentLength,
@@ -198,44 +168,78 @@ export const assetRouter = router({
     }),
 
   /**
-   * List all uploaded assets for the current user (used for remote sync).
-   * Returns assets that physically exist in S3, not just database records.
+   * List all assets referenced in user settings (used for remote sync).
+   * Returns asset IDs that are actually in use by the user in their settings,
+   * avoiding the need to sync the entire bucket.
    */
   listAssetBucketUserFiles: authedProcedure
     .output(z.array(z.string()))
     .query(async (opts) => {
       const { userId } = opts.ctx.session;
-
-      const s3Client = getAssetsS3Client();
-
       try {
-        const command = new ListObjectsV2Command({
-          Bucket: nonNullable(assetsS3Bucket),
-          Prefix: `u/${userId}/`,
-        });
+        const keyPatterns = getImageSettingKeyPatterns();
 
-        const response = await s3Client.send(command);
-        const assetIds: string[] = [];
+        const assetIds = await withDrizzle(async (db) => {
+          // Build OR conditions for each key pattern
+          const keyConditions = keyPatterns.map(
+            (pattern) => sql`${schema.userSetting.key} LIKE ${pattern}`,
+          );
+          const historyKeyConditions = keyPatterns.map(
+            (pattern) => sql`${schema.userSettingHistory.key} LIKE ${pattern}`,
+          );
 
-        if (response.Contents) {
-          for (const obj of response.Contents) {
-            const key = obj.Key;
-            if (key !== null && key !== undefined && key.length > 0) {
-              const assetId = key.split(`/`).pop();
-              if (
-                assetId !== null &&
-                assetId !== undefined &&
-                assetId.length > 0
-              ) {
-                assetIds.push(assetId);
-              }
+          // Query userSetting table for imageId values (aliased as 't' in JSON)
+          const currentSettings = await db
+            .select({
+              assetId: sql<string | null>`${schema.userSetting.value}->>'t'`,
+            })
+            .from(schema.userSetting)
+            .where(
+              and(
+                eq(schema.userSetting.userId, userId),
+                or(...keyConditions),
+                sql`${schema.userSetting.value}->>'t' IS NOT NULL`,
+              ),
+            );
+
+          // Query userSettingHistory table for imageId values
+          const historicalSettings = await db
+            .select({
+              assetId: sql<
+                string | null
+              >`${schema.userSettingHistory.value}->>'t'`,
+            })
+            .from(schema.userSettingHistory)
+            .where(
+              and(
+                eq(schema.userSettingHistory.userId, userId),
+                or(...historyKeyConditions),
+                sql`${schema.userSettingHistory.value}->>'t' IS NOT NULL`,
+              ),
+            );
+
+          // Combine and deduplicate asset IDs
+          const allAssetIds = new Set<string>();
+          for (const { assetId } of currentSettings) {
+            if (assetId != null && assetId.length > 0) {
+              allAssetIds.add(assetId);
             }
           }
-        }
+          for (const { assetId } of historicalSettings) {
+            if (assetId != null && assetId.length > 0) {
+              allAssetIds.add(assetId);
+            }
+          }
+
+          return Array.from(allAssetIds);
+        });
 
         return assetIds;
       } catch (error) {
-        console.error(`Failed to list uploaded assets`, { error, userId });
+        console.error(`Failed to list asset references in user settings`, {
+          error,
+          userId,
+        });
         throw error;
       }
     }),

@@ -1,64 +1,45 @@
-import { imageTypeEnum } from "@/server/lib/s3/assets";
+import { AssetStatusKind } from "@/data/model";
+import { withDrizzle } from "@/server/lib/db";
+import { imageTypeEnum, verifyAssetExists } from "@/server/lib/s3/assets";
 import type { AppRouter } from "@/server/routers/_app";
+import { getAssetKeyForId } from "@/util/assetKey";
 import { assetsS3Bucket } from "@/util/env";
-import {
-  GetObjectCommand,
-  ListObjectsV2Command,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { TRPCClient } from "@trpc/client";
 import { getAssetsS3Client } from "./s3/client";
 
 /**
- * List all asset files that exist in local storage.
- * Storage is the source of truth - returns all objects under the user's prefix.
- * This includes both uploaded and downloaded assets.
+ * List all asset files that exist in local storage for a user.
+ * Uses the DB as the source of truth, then verifies storage exists.
  */
 export async function listAssetFiles(userId: string): Promise<string[]> {
-  const s3Client = getAssetsS3Client();
+  const assetRows = await withDrizzle((db) =>
+    db.query.asset.findMany({
+      where: (t, { and, eq }) =>
+        and(eq(t.userId, userId), eq(t.status, AssetStatusKind.Uploaded)),
+      columns: {
+        assetId: true,
+      },
+    }),
+  );
 
-  const assetIds = new Set<string>();
-  const prefix = `u/${userId}/`;
-
-  let continuationToken: string | undefined;
-
-  while (true) {
-    const command = new ListObjectsV2Command({
-      Bucket: nonNullable(assetsS3Bucket),
-      Prefix: prefix,
-      ContinuationToken: continuationToken,
-    });
-
-    const response = await s3Client.send(command);
-
-    // Extract assetId from key format "u/{userId}/{assetId}"
-    if (response.Contents != null) {
-      for (const obj of response.Contents) {
-        if (obj.Key != null && obj.Key.length > 0) {
-          const assetId = obj.Key.slice(prefix.length);
-          if (assetId.length > 0) {
-            assetIds.add(assetId);
-          }
-        }
-      }
-    }
-
-    // Check if there are more results
-    if (response.IsTruncated !== true) {
-      break;
-    }
-
-    continuationToken = response.NextContinuationToken;
+  if (assetRows.length === 0) {
+    return [];
   }
 
-  // Return all assets that physically exist in storage
-  return [...assetIds];
+  const assetIds = await Promise.all(
+    assetRows.map(async ({ assetId }) => {
+      const result = await verifyAssetExists(getAssetKeyForId(assetId));
+      return result.exists ? assetId : null;
+    }),
+  );
+
+  return assetIds.filter((assetId): assetId is string => assetId != null);
 }
 
 export async function downloadAssetFromRemote(
   trpcClient: TRPCClient<AppRouter>,
-  userId: string,
   assetId: string,
 ): Promise<void> {
   // Get presigned download URL from remote server
@@ -87,7 +68,7 @@ export async function downloadAssetFromRemote(
   const buffer = await response.arrayBuffer();
 
   // Upload to local S3 storage
-  const assetKey = `u/${userId}/${assetId}`;
+  const assetKey = getAssetKeyForId(assetId);
   const command = new PutObjectCommand({
     Bucket: nonNullable(assetsS3Bucket),
     Key: assetKey,
@@ -107,10 +88,9 @@ export async function downloadAssetFromRemote(
  */
 export async function uploadAssetToRemote(
   trpcClient: TRPCClient<AppRouter>,
-  userId: string,
   assetId: string,
 ): Promise<void> {
-  const assetKey = `u/${userId}/${assetId}`;
+  const assetKey = getAssetKeyForId(assetId);
 
   const s3Client = getAssetsS3Client();
 

@@ -2,9 +2,9 @@ import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
-import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
+import { getAssetKeyForId } from "@/util/assetKey";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { ImageProps as ExpoImageProps } from "expo-image";
@@ -18,7 +18,7 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
    */
   assetId: string;
   /**
-   * Optional userId - if not provided, will be fetched from asset entity
+   * Optional userId (ignored for content-addressed assets).
    */
   userId?: string;
 }
@@ -26,7 +26,8 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
 /**
  * Displays an uploaded image from S3/Minio storage.
  *
- * Constructs the CDN URL from EXPO_PUBLIC_ASSETS_CDN_BASE_URL + asset key (u/{userId}/{assetId}).
+ * Constructs the CDN URL from EXPO_PUBLIC_ASSETS_CDN_BASE_URL + asset key
+ * (blob/{assetId}, where assetId is algorithm-prefixed).
  * Queries TanStack DB for the asset status and shows appropriate states:
  * - Pending: Loading indicator
  * - Uploaded: Display image
@@ -34,7 +35,7 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
  */
 export function AssetImage({
   assetId,
-  userId,
+  userId: _userId,
   contentFit = `cover`,
   ...imageProps
 }: AssetImageProps) {
@@ -53,16 +54,6 @@ export function AssetImage({
   > | null>(null);
   const [localSourceChecked, setLocalSourceChecked] = useState(false);
   const isLocalAsset = isLocalImageAssetId(assetId);
-  const shouldFetchAssetKey =
-    !isLocalAsset &&
-    userId == null &&
-    asset?.status === AssetStatusKind.Uploaded;
-  const assetKeyQuery = trpc.asset.getAssetKey.useQuery(
-    { assetId },
-    {
-      enabled: shouldFetchAssetKey,
-    },
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -135,16 +126,7 @@ export function AssetImage({
     );
   }
 
-  const assetKey =
-    userId == null ? assetKeyQuery.data?.assetKey : `u/${userId}/${assetId}`;
-
-  if (assetKey == null) {
-    return (
-      <View className="size-full items-center justify-center bg-fg/5">
-        <ActivityIndicator size="small" className="text-fg" />
-      </View>
-    );
-  }
+  const assetKey = getAssetKeyForId(assetId);
 
   const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
 

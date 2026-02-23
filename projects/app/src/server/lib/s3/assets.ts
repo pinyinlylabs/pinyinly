@@ -1,3 +1,4 @@
+import { getAssetKeyForId } from "@/util/assetKey";
 import { assetsS3Bucket } from "@/util/env";
 import {
   GetObjectCommand,
@@ -28,6 +29,18 @@ export type AllowedImageType = z.infer<typeof imageTypeEnum>;
 export const ALLOWED_IMAGE_TYPES = imageTypeEnum.options;
 
 /**
+ * Zod schema for validating asset ID format.
+ * Asset IDs must be in the format: sha256/<base64url-hash>
+ * where the hash is a 43-character base64url-encoded SHA-256 digest.
+ */
+export const assetIdSchema = z
+  .string()
+  .regex(
+    /^sha256\/[A-Za-z0-9_-]{43}$/,
+    `Asset ID must be in format sha256/<base64url-hash>`,
+  );
+
+/**
  * Presigned URL expiration time in seconds (15 minutes).
  */
 const PRESIGNED_URL_EXPIRY_SECONDS = 15 * 60;
@@ -43,18 +56,24 @@ export interface PresignedUploadUrlResult {
 /**
  * Generate a presigned URL for uploading an asset to R2.
  *
- * The asset key format is: `u/{userId}/{assetId}`
- * - `u/` prefix identifies user-uploaded assets
- * - `{userId}` scopes assets to a user
- * - `{assetId}` is the unique asset identifier
+ * The asset key format is: `blob/{assetId}`
+ * - `blob/` prefix identifies user-uploaded blobs
+ * - `{assetId}` is algorithm-prefixed (e.g., `sha256/<base64url-hash>`)
  */
 export async function createPresignedUploadUrl(opts: {
-  userId: string;
   assetId: string;
   contentType: AllowedImageType;
   contentLength: number;
 }): Promise<PresignedUploadUrlResult> {
-  const { userId, assetId, contentType, contentLength } = opts;
+  const { assetId, contentType, contentLength } = opts;
+
+  // Validate asset ID format
+  const assetIdValidation = assetIdSchema.safeParse(assetId);
+  if (!assetIdValidation.success) {
+    throw new Error(
+      `Invalid asset ID format: ${assetIdValidation.error.issues[0]?.message ?? `unknown error`}`,
+    );
+  }
 
   if (contentLength > MAX_ASSET_SIZE_BYTES) {
     throw new Error(
@@ -68,7 +87,7 @@ export async function createPresignedUploadUrl(opts: {
 
   const client = getAssetsS3Client();
   const bucket = nonNullable(assetsS3Bucket);
-  const assetKey = `u/${userId}/${assetId}`;
+  const assetKey = getAssetKeyForId(assetId);
 
   const command = new PutObjectCommand({
     Bucket: bucket,

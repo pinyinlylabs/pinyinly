@@ -231,3 +231,27 @@ export function getPinyinFinalToneKeyParams(
 ) {
   return { soundId, tone };
 }
+
+/**
+ * All user settings that contain image references.
+ * Used for syncing assets between servers.
+ */
+export const imageSettings = [
+  pinyinSoundImageSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziPronunciationHintImageSetting,
+  pinyinFinalToneImageSetting,
+] as const satisfies readonly UserSettingImageEntity[];
+
+/**
+ * Get SQL LIKE patterns for finding user settings that contain images.
+ * Returns patterns like 'psi/%', 'hwmhi/%', etc.
+ */
+export function getImageSettingKeyPatterns(): string[] {
+  return imageSettings.map((setting) => {
+    const keyPath = setting._def.keyPath;
+    // Extract the prefix before the first parameter (e.g., "psi/" from "psi/[soundId]")
+    const prefix = keyPath.split(`[`)[0] ?? ``;
+    return `${prefix}%`;
+  });
+}

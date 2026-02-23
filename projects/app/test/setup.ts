@@ -1,6 +1,6 @@
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { createElement, Fragment } from "react";
 import type { Component } from "react";
+import { createElement, Fragment } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
 
@@ -37,6 +37,15 @@ vi.mock(`rive-react-native`, () => {
 
 vi.mock(`expo-haptics`, () => {
   return {};
+});
+
+vi.mock(`expo-crypto`, () => {
+  return {
+    CryptoDigestAlgorithm: {
+      SHA256: `SHA-256`,
+    },
+    digest: async () => new Uint8Array(32).buffer,
+  };
 });
 
 vi.mock(`expo-image`, () => {
