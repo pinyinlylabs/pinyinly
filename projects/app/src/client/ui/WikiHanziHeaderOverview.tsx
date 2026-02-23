@@ -1,14 +1,20 @@
 import { intersperse } from "@/client/react";
+import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText, HskLevel } from "@/data/model";
+import type { HanziWordWithMeaning } from "@/dictionary";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
+import { useState } from "react";
 import { Text, View } from "react-native";
 import { HskLozenge } from "./HskLozenge";
+import { RectButton } from "./RectButton";
+import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";
 
 export interface WikiHanziHeaderOverviewDataProps {
   hskLevels: readonly HskLevel[];
-  glosses?: readonly string[];
+  glosses: readonly string[] | undefined;
   hanzi: HanziText;
-  pinyins?: readonly string[];
+  pinyins: readonly string[] | undefined;
+  meanings: readonly HanziWordWithMeaning[] | undefined;
 }
 
 export function WikiHanziHeaderOverview({
@@ -16,6 +22,7 @@ export function WikiHanziHeaderOverview({
   hanzi,
   pinyins,
   glosses,
+  meanings,
   hanziScrollRef,
   ...rest
 }: {
@@ -56,24 +63,58 @@ export function WikiHanziHeaderOverview({
           </View>
         )}
         {glosses == null ? null : (
-          <View className="flex-row gap-1">
-            {intersperse(
-              glosses.map((gloss, i) => (
-                <Text className="font-sans text-[16px] text-fg-loud" key={i}>
-                  {gloss}
-                </Text>
-              )),
-              <Text className="text-fg">;</Text>,
-            )}
-            {/* TODO: make this expand/collapse the definition */}
-            {/* <IconImage
-                  icon="chevron-down-circled"
-                  size={20}
-                  className="opacity-50"
-                /> */}
-          </View>
+          <ExpandableGlosses
+            hanzi={hanzi}
+            glosses={glosses}
+            meanings={meanings}
+          />
         )}
       </View>
     </View>
+  );
+}
+
+function ExpandableGlosses({
+  hanzi,
+  glosses,
+  meanings,
+}: {
+  hanzi: HanziText;
+  glosses: readonly string[];
+  meanings: readonly HanziWordWithMeaning[] | undefined;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <>
+      <View className="flex-row items-center gap-1">
+        <Text>
+          {intersperse(
+            glosses.map((gloss, i) => (
+              <Text className="font-sans text-[16px] text-fg-loud" key={i}>
+                {gloss}
+              </Text>
+            )),
+            <Text className="text-fg">; </Text>,
+          )}
+        </Text>
+
+        {meanings == null || !isHanziCharacter(hanzi) ? null : (
+          <RectButton
+            iconStart={expanded ? `chevron-up-circled` : `chevron-down-circled`}
+            onPress={() => {
+              setExpanded((value) => !value);
+            }}
+            variant="bare"
+            className="opacity-70"
+          />
+        )}
+      </View>
+      {meanings == null || !isHanziCharacter(hanzi) || !expanded ? null : (
+        <View className="mt-2 rounded bg-fg/5 p-2">
+          <WikiHanziCharacterMeanings hanzi={hanzi} meanings={meanings} />
+        </View>
+      )}
+    </>
   );
 }

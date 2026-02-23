@@ -24,6 +24,7 @@ export const createIconRegistry = () => ({
   [`chevron-down`]: require(`../../assets/icons/chevron-down.svg`),
   [`chevron-left`]: require(`../../assets/icons/chevron-left.svg`),
   [`chevron-right`]: require(`../../assets/icons/chevron-right.svg`),
+  [`chevron-up-circled`]: require(`../../assets/icons/chevron-up-circled.svg`),
   [`chevron-up`]: require(`../../assets/icons/chevron-up.svg`),
   [`circle-warning`]: require(`../../assets/icons/circle-warning.svg`),
   [`close-circled-filled`]: require(`../../assets/icons/close-circled-filled.svg`),

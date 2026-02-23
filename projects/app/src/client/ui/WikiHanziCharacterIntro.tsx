@@ -1,12 +1,11 @@
 import { useHanziWordHintOverrides } from "@/client/ui/hooks/useUserSetting";
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziWord, PinyinUnit, WikiCharacterData } from "@/data/model";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import type { HanziWordWithMeaning } from "@/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
-import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
 
 interface WikiHanziCharacterIntroProps {
@@ -24,13 +23,6 @@ export function WikiHanziCharacterIntro({
 
   return (
     <>
-      <WikiHanziCharacterMeanings
-        hanzi={characterData.hanzi}
-        meanings={meanings}
-      />
-
-      <View className="h-2" />
-
       <WikiHanziCharacterDecomposition
         characterData={characterData}
         illustration={

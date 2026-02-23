@@ -1,8 +1,7 @@
 import type { HanziCharacter } from "@/data/model";
 import type { HanziWordMeaning, HanziWordWithMeaning } from "@/dictionary";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
-import { Text, View } from "react-native";
-import { HanziTile } from "./HanziTile";
+import { Text } from "react-native";
 
 export function WikiHanziCharacterMeanings({
   hanzi,
@@ -59,41 +58,25 @@ function MultipleMeanings({
     .filter(arrayFilterUnique());
 
   return (
-    <>
-      <Text className="pyly-mdx-p">
-        <Text className="pyly-bold">{hanzi}</Text> has{` `}
-        <Text className="pyly-bold">
-          {cardinalToWord(meanings.length)} main meanings
-        </Text>
-        {` `}
-        in modern Mandarin,{` `}
-        {pinyins.length === 1 ? (
-          <>
-            {countToQuantifierWord(meanings.length)} pronounced{` `}
-            <Text className="pyly-bold">{pinyins[0]}</Text>
-          </>
-        ) : (
-          <>
-            with <Text className="pyly-bold">different pronunciations</Text>
-          </>
-        )}
-        :
+    <Text className="pyly-mdx-p">
+      <Text className="pyly-bold">{hanzi}</Text> has{` `}
+      <Text className="pyly-bold">
+        {cardinalToWord(meanings.length)} main meanings
       </Text>
-      <View className="flex-row gap-2 px-4">
-        {meanings.map(([hanziWord, meaning]) => {
-          const gloss = meaning.gloss[0];
-          const primaryPinyin = meaning.pinyin?.[0];
-          return (
-            <HanziTile
-              key={hanziWord}
-              hanzi={hanzi}
-              pinyin={primaryPinyin}
-              gloss={gloss}
-            />
-          );
-        })}
-      </View>
-    </>
+      {` `}
+      in modern Mandarin,{` `}
+      {pinyins.length === 1 ? (
+        <>
+          {countToQuantifierWord(meanings.length)} pronounced{` `}
+          <Text className="pyly-bold">{pinyins[0]}</Text>
+        </>
+      ) : (
+        <>
+          with <Text className="pyly-bold">different pronunciations</Text>
+        </>
+      )}
+      :
+    </Text>
   );
 }
 
