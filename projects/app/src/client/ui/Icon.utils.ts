@@ -1,6 +1,4 @@
 import { invariant } from "@pinyinly/lib/invariant";
-import type { IconName, IconRegistry } from "./IconRegistry2";
-import { createIconRegistry } from "./IconRegistry2";
 
 export function classNameLintInvariant(className: string) {
   invariant(
@@ -12,7 +10,3 @@ export function classNameLintInvariant(className: string) {
     `use the \`size\` prop instead of passing a size- class`,
   );
 }
-
-export const iconRegistry: IconRegistry = createIconRegistry();
-
-export const iconNames = Object.keys(iconRegistry) as readonly IconName[];

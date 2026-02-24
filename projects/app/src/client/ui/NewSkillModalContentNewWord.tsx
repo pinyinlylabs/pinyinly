@@ -3,7 +3,7 @@ import { loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
@@ -55,7 +55,7 @@ export const NewSkillModalContentNewWord = ({
       <PylyMdxComponents>
         <View className="flex-1 gap-2 bg-bg py-7">
           <View className="flex-row items-center gap-2 px-4">
-            <IconImage
+            <Icon
               icon="note-2"
               size={32}
               className="text-[var(--color-theme-grass-panel-bg)]"
@@ -106,7 +106,7 @@ function Header({
               active:scale-95
             `}
           >
-            <IconImage icon="close" size={32} className="text-fg-loud" />
+            <Icon icon="close" size={32} className="text-fg-loud" />
           </Pressable>
         </View>
 

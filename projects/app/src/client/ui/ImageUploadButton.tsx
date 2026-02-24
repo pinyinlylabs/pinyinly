@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { ActivityIndicator, Text } from "react-native";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { RectButton } from "./RectButton";
 import { useImageUploader } from "./hooks/useImageUploader";
 
@@ -73,7 +73,7 @@ export function ImageUploadButton({
         </>
       ) : (
         <>
-          <IconImage size={16} icon="puzzle" className="text-fg" />
+          <Icon size={16} icon="puzzle" className="text-fg" />
           <Text className="text-fg">{buttonText}</Text>
         </>
       )}

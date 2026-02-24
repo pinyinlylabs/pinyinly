@@ -1,11 +1,12 @@
 import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { isValidElement, useState } from "react";
-import { Pressable, Text, View } from "react-native";
 import type { ViewProps } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { IconImage } from "./IconImage";
-import type { IconName } from "./IconRegistry2";
+import type { IconProps } from "./Icon";
+import { Icon } from "./Icon";
+import type { IconName } from "./iconRegistry";
 
 export type ButtonVariant =
   | `filled`
@@ -21,7 +22,7 @@ export type RectButtonProps = {
   inFlexRowParent?: boolean;
   iconStart?: IconName;
   iconEnd?: IconName;
-  iconSize?: 12 | 16 | 24 | 32;
+  iconSize?: IconProps[`size`];
 } & Pick<
   PropsOf<typeof Pressable>,
   keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
@@ -93,7 +94,7 @@ export function RectButton({
         ) : (
           <View className={iconLayout({ variant })}>
             {iconStart == null ? null : (
-              <IconImage
+              <Icon
                 icon={iconStart}
                 className={textClassName}
                 size={iconSize}
@@ -101,11 +102,7 @@ export function RectButton({
             )}
             {textContent}
             {iconEnd == null ? null : (
-              <IconImage
-                icon={iconEnd}
-                className={textClassName}
-                size={iconSize}
-              />
+              <Icon icon={iconEnd} className={textClassName} size={iconSize} />
             )}
           </View>
         )}

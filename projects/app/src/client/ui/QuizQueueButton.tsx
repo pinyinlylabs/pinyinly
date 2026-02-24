@@ -3,7 +3,7 @@ import { Link } from "expo-router";
 import { Text } from "react-native";
 import Reanimated, { Easing, ZoomIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 
 export function QuizQueueButton({
   queueStats,
@@ -28,11 +28,7 @@ export function QuizQueueButton({
         md:justify-start
       `}
     >
-      <IconImage
-        size={32}
-        className="self-center text-fg"
-        icon="inbox-filled"
-      />
+      <Icon size={32} className="self-center text-fg" icon="inbox-filled" />
       {queueStats == null || queueCount == null ? null : queueCount > 0 ? (
         <CountLozenge
           count={queueCount}

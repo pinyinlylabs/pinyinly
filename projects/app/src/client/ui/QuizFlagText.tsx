@@ -4,7 +4,7 @@ import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 
 export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
@@ -18,7 +18,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <IconImage className={flagIconClass()} icon="dumbbell" />
+          <Icon className={flagIconClass()} icon="dumbbell" />
           <Text className={flagTextClass()}>Hard question</Text>
         </View>
       );
@@ -30,7 +30,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-success)]`,
           })}
         >
-          <IconImage className={flagIconClass()} icon="plant-filled" />
+          <Icon className={flagIconClass()} icon="plant-filled" />
           <Text className={flagTextClass()}>New skill</Text>
         </View>
       );
@@ -42,7 +42,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-warning)]`,
           })}
         >
-          <IconImage className={flagIconClass()} icon="shuffle" />
+          <Icon className={flagIconClass()} icon="shuffle" />
           <Text className={flagTextClass()}>Other answer</Text>
         </View>
       );
@@ -54,7 +54,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <IconImage className={flagIconClass()} icon="alarm" />
+          <Icon className={flagIconClass()} icon="alarm" />
           <Text className={flagTextClass()}>
             Overdue by{` `}
             {
@@ -82,7 +82,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-warning)]`,
           })}
         >
-          <IconImage className={flagIconClass()} icon="repeat" />
+          <Icon className={flagIconClass()} icon="repeat" />
           <Text className={flagTextClass()}>Previous mistake</Text>
         </View>
       );
@@ -94,7 +94,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <IconImage className={flagIconClass()} icon="flag" />
+          <Icon className={flagIconClass()} icon="flag" />
           <Text className={flagTextClass()}>Weak word</Text>
         </View>
       );

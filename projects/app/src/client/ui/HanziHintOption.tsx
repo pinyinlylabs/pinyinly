@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { Pylymark } from "./Pylymark";
 
 interface HanziHintOptionProps {
@@ -49,7 +49,7 @@ export function HanziHintOption({
                 }}
                 hitSlop={8}
               >
-                <IconImage size={16} icon="puzzle" className="text-fg-dim" />
+                <Icon size={16} icon="puzzle" className="text-fg-dim" />
               </Pressable>
             )}
             {onDelete != null && (
@@ -60,7 +60,7 @@ export function HanziHintOption({
                 }}
                 hitSlop={8}
               >
-                <IconImage size={16} icon="close" className="text-fg-dim" />
+                <Icon size={16} icon="close" className="text-fg-dim" />
               </Pressable>
             )}
           </View>

@@ -4,7 +4,7 @@ import { useSoundEffectCycle } from "@/client/ui/hooks/useSoundEffectCycle";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import type { PropsWithChildren, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { MDXComponents } from "./MDXComponents";
 import { WikiHanziCharacterIntro } from "./WikiHanziCharacterIntro";
 
@@ -89,7 +89,7 @@ const Audio = ({ src }: { src: PylyAudioSource }) => {
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
-      <IconImage icon="speaker-2" size={24} className="text-fg-loud" />
+      <Icon icon="speaker-2" size={24} className="text-fg-loud" />
     </Pressable>
   );
 };
@@ -99,7 +99,7 @@ const Speech = ({ srcs }: { srcs: PylyAudioSource[] }) => {
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
-      <IconImage icon="speaker-2" size={24} className="text-fg-loud" />
+      <Icon icon="speaker-2" size={24} className="text-fg-loud" />
     </Pressable>
   );
 };

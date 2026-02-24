@@ -1,3 +1,4 @@
+import type { IconRegistry } from "#client/ui/iconRegistry.js";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import type { Component } from "react";
 import { createElement, Fragment } from "react";
@@ -63,9 +64,10 @@ vi.mock(`@/client/assets/localImageAssets`, () => {
   };
 });
 
-vi.mock(`#client/ui/IconRegistry2.ts`, () => {
+vi.mock(import(`#client/ui/iconRegistry.ts`), () => {
   return {
-    createIconRegistry: () => ({}),
+    iconRegistry: {} as IconRegistry,
+    iconNames: [],
   };
 });
 
