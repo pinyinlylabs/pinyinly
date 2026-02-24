@@ -40,6 +40,7 @@ export async function removeBackgroundFromImage(
     image: imageFile,
     prompt: `Remove the background without affecting the foreground item`,
     background: `transparent`,
+    output_format: `png`,
   });
 
   if (!response.data || response.data.length === 0) {
