@@ -5,7 +5,7 @@ import { Pressable, Text, View } from "react-native";
 import type { ViewProps } from "react-native";
 import { tv } from "tailwind-variants";
 import { IconImage } from "./IconImage";
-import type { IconName } from "./IconRegistry";
+import type { IconName } from "./IconRegistry2";
 
 export type ButtonVariant =
   | `filled`

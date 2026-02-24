@@ -63,7 +63,7 @@ vi.mock(`@/client/assets/localImageAssets`, () => {
   };
 });
 
-vi.mock(`#client/ui/IconRegistry.ts`, () => {
+vi.mock(`#client/ui/IconRegistry2.ts`, () => {
   return {
     createIconRegistry: () => ({}),
   };

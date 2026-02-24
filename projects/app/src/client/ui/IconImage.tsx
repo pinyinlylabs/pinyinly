@@ -2,7 +2,7 @@ import type { ImageProps } from "expo-image";
 import { Image } from "expo-image";
 import { tv } from "tailwind-variants";
 import { classNameLintInvariant, iconRegistry } from "./IconImage.utils";
-import type { IconName } from "./IconRegistry";
+import type { IconName } from "./IconRegistry2";
 
 export interface IconImageProps extends Pick<ImageProps, `className`> {
   icon: IconName;

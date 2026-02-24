@@ -1,6 +1,6 @@
 import { invariant } from "@pinyinly/lib/invariant";
-import type { IconName, IconRegistry } from "./IconRegistry";
-import { createIconRegistry } from "./IconRegistry";
+import type { IconName, IconRegistry } from "./IconRegistry2";
+import { createIconRegistry } from "./IconRegistry2";
 
 export function classNameLintInvariant(className: string) {
   invariant(
