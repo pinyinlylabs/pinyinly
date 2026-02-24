@@ -229,7 +229,7 @@ export const asset = schema.table(
      * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
      * Used as the S3 object key suffix.
      */
-    assetId: pgAssetId(`assetId`).notNull(),
+    assetId: pgAssetId(`assetId`).notNull().unique(),
     /**
      * Upload status: pending, uploaded, or failed.
      */
@@ -255,7 +255,7 @@ export const asset = schema.table(
      */
     errorMessage: pg.text(`errorMessage`),
   },
-  (t) => [pg.unique().on(t.userId, t.assetId), pg.index().on(t.userId)],
+  (t) => [pg.index().on(t.userId)],
 );
 
 /**
