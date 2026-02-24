@@ -23,6 +23,9 @@
   .pyly-button-bare {
     @apply font-sans text-sm/normal font-bold uppercase text-fg;
   }
+  .pyly-button-bare2 {
+    @apply font-sans text-sm/normal font-bold uppercase text-fg;
+  }
 
   /* --- */
 
