@@ -12,6 +12,7 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
 import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 import { EventSchemas, Inngest, RetryAfterError } from "inngest";
 import * as postmark from "postmark";
 import z from "zod/v4";
@@ -102,11 +103,12 @@ const devTestCrypto = inngest.createFunction(
   { id: `test-crypto` },
   { event: `test/crypto` },
   async () => {
-    const Crypto = await import(`expo-crypto`);
-    return Crypto.digestStringAsync(
-      Crypto.CryptoDigestAlgorithm.SHA256,
-      `test`,
-    );
+    return {
+      digest: await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        `test`,
+      ),
+    };
   },
 );
 
