@@ -10,14 +10,14 @@ import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
 
-import type { LocalImageAssetId } from "@/client/assets/localImageAssets";
+import type { AssetId } from "@/data/model";
 import type { ImageSourcePropType } from "react-native";
 
 type GeneratedImageFormat = `png` | `jpeg` | `webp`;
 
 export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
-  onImageGenerated: (assetId: string) => void;
+  onImageGenerated: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
 }
@@ -30,7 +30,7 @@ export function AiImageGenerationPanel({
 }: AiImageGenerationPanelProps) {
   const [prompt, setPrompt] = useState(initialPrompt);
   const [selectedStyleAssetId, setSelectedStyleAssetId] =
-    useState<LocalImageAssetId | null>(null);
+    useState<AssetId | null>(null);
   const [styleImageData, setStyleImageData] = useState<string | null>(null);
   const [showStyleSelector, setShowStyleSelector] = useState(false);
   const [generatedImageDataUrl, setGeneratedImageDataUrl] = useState<
@@ -42,7 +42,7 @@ export function AiImageGenerationPanel({
   const [isConfirming, setIsConfirming] = useState(false);
   const [isLoadingStyle, setIsLoadingStyle] = useState(false);
   const [stylePreviewSources, setStylePreviewSources] = useState<
-    Partial<Record<LocalImageAssetId, ImageSourcePropType>>
+    Partial<Record<AssetId, ImageSourcePropType>>
   >({});
   const [availableImages] = useState(() => getAvailableLocalImageAssets());
 
@@ -59,7 +59,7 @@ export function AiImageGenerationPanel({
     },
   });
 
-  const handleSelectStyleImage = async (assetId: LocalImageAssetId) => {
+  const handleSelectStyleImage = async (assetId: AssetId) => {
     setIsLoadingStyle(true);
     setError(null);
 

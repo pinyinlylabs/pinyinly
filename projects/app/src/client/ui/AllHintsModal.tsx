@@ -1,4 +1,4 @@
-import type { HanziText, HanziWord } from "@/data/model";
+import type { AssetId, HanziText, HanziWord } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -9,7 +9,7 @@ import { RectButton } from "./RectButton";
 interface PresetHint {
   hint: string;
   explanation?: string;
-  imageIds: readonly string[] | null;
+  imageIds: readonly AssetId[] | null;
   meaningKey: string;
 }
 
@@ -20,7 +20,7 @@ interface AllHintsModalProps {
   currentHint: {
     hint: string;
     explanation?: string;
-    imageIds: readonly string[] | null;
+    imageIds: readonly AssetId[] | null;
   } | null;
   onSavePresetHint: (hanziWord: HanziWord, hint: PresetHint) => void;
 }

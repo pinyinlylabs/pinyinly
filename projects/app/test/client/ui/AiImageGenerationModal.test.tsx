@@ -1,12 +1,13 @@
 // @vitest-environment happy-dom
 
+import type { AssetId } from "#data/model.js";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 type AiImageGenerationModalType = (props: {
   initialPrompt: string;
-  onConfirm: (assetId: string) => void;
+  onConfirm: (assetId: AssetId) => void;
   onDismiss: () => void;
   onSavePrompt?: (prompt: string) => void;
 }) => ReactElement;

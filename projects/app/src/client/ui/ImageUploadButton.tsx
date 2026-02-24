@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import * as ImagePicker from "expo-image-picker";
 import { ActivityIndicator, Text } from "react-native";
 import { Icon } from "./Icon";
@@ -8,7 +9,7 @@ interface ImageUploadButtonProps {
   /**
    * Called when the upload completes successfully with the assetId.
    */
-  onUploadComplete: (assetId: string) => void;
+  onUploadComplete: (assetId: AssetId) => void;
   /**
    * Called when the upload fails with an error message.
    */

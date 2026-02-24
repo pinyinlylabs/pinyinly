@@ -100,13 +100,13 @@ Assets are stored in S3 with key: `blob/{assetId}`
 ### Client-side Upload Flow
 
 ```typescript
-import { getBlobSha256Base64Url } from "@/client/util/assetHash";
+import { getArrayBufferAssetId } from "@/util/assetId";
 import { trpc } from "@/client/query";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 
 async function uploadImage(file: File) {
   const r = useRizzle();
-  const assetId = await getBlobSha256Base64Url(file);
+  const assetId = await getArrayBufferAssetId(file);
 
   // 1. Optimistically create pending asset
   await r.mutate.initAsset({

@@ -1,8 +1,9 @@
+import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
 import { withDrizzle } from "@/server/lib/db";
-import { imageTypeEnum, verifyAssetExists } from "@/server/lib/s3/assets";
+import { imageTypeEnum, verifyObjectExists } from "@/server/lib/s3/assets";
 import type { AppRouter } from "@/server/routers/_app";
-import { getAssetKeyForId } from "@/util/assetKey";
+import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsS3Bucket } from "@/util/env";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { nonNullable } from "@pinyinly/lib/invariant";
@@ -13,7 +14,7 @@ import { getAssetsS3Client } from "./s3/client";
  * List all asset files that exist in local storage for a user.
  * Uses the DB as the source of truth, then verifies storage exists.
  */
-export async function listAssetFiles(userId: string): Promise<string[]> {
+export async function listAssetFiles(userId: string): Promise<AssetId[]> {
   const assetRows = await withDrizzle((db) =>
     db.query.asset.findMany({
       where: (t, { and, eq }) =>
@@ -30,7 +31,7 @@ export async function listAssetFiles(userId: string): Promise<string[]> {
 
   const assetIds = await Promise.all(
     assetRows.map(async ({ assetId }) => {
-      const result = await verifyAssetExists(getAssetKeyForId(assetId));
+      const result = await verifyObjectExists(getBucketObjectKeyForId(assetId));
       return result.exists ? assetId : null;
     }),
   );
@@ -40,7 +41,7 @@ export async function listAssetFiles(userId: string): Promise<string[]> {
 
 export async function downloadAssetFromRemote(
   trpcClient: TRPCClient<AppRouter>,
-  assetId: string,
+  assetId: AssetId,
 ): Promise<void> {
   // Get presigned download URL from remote server
   const downloadUrlResult = await trpcClient.asset.getDownloadUrl.query({
@@ -68,7 +69,7 @@ export async function downloadAssetFromRemote(
   const buffer = await response.arrayBuffer();
 
   // Upload to local S3 storage
-  const assetKey = getAssetKeyForId(assetId);
+  const assetKey = getBucketObjectKeyForId(assetId);
   const command = new PutObjectCommand({
     Bucket: nonNullable(assetsS3Bucket),
     Key: assetKey,
@@ -88,9 +89,9 @@ export async function downloadAssetFromRemote(
  */
 export async function uploadAssetToRemote(
   trpcClient: TRPCClient<AppRouter>,
-  assetId: string,
+  assetId: AssetId,
 ): Promise<void> {
-  const assetKey = getAssetKeyForId(assetId);
+  const assetKey = getBucketObjectKeyForId(assetId);
 
   const s3Client = getAssetsS3Client();
 

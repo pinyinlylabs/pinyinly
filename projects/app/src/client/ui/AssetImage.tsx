@@ -1,11 +1,11 @@
-import type { AssetId } from "@/data/model";
 import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { useDb } from "@/client/ui/hooks/useDb";
+import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
-import { getAssetKeyForId } from "@/util/assetKey";
+import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { ImageProps as ExpoImageProps } from "expo-image";
@@ -127,7 +127,7 @@ export function AssetImage({
     );
   }
 
-  const assetKey = getAssetKeyForId(assetId);
+  const assetKey = getBucketObjectKeyForId(assetId);
 
   const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
 

@@ -9,6 +9,7 @@ import {
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
+import type { AssetId } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
@@ -45,8 +46,9 @@ export default function SoundsPage() {
   const settingsByKey = new Map(
     settings.map((setting) => [
       setting.key,
+      // TODO: get rid of this unsafe casting
       setting.value as {
-        t?: string;
+        t?: AssetId;
         c?: unknown;
         w?: number;
         ht?: number;

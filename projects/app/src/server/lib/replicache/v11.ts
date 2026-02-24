@@ -4,6 +4,7 @@ import {
   skillsToReReviewForHanziPinyinMistake,
 } from "@/data/mistakes";
 import type {
+  AssetId,
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
   Skill,
@@ -258,7 +259,7 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
     await db.insert(s.asset).values([
       {
         userId,
-        assetId,
+        assetId: assetId as AssetId,
         status: AssetStatusKind.Pending,
         contentType,
         contentLength,
@@ -273,7 +274,12 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         status: AssetStatusKind.Uploaded,
         uploadedAt: now,
       })
-      .where(and(eq(s.asset.userId, userId), eq(s.asset.assetId, assetId)));
+      .where(
+        and(
+          eq(s.asset.userId, userId),
+          eq(s.asset.assetId, assetId as AssetId),
+        ),
+      );
   },
   async failAssetUpload(db, userId, { assetId, errorMessage }) {
     await db
@@ -282,7 +288,12 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         status: AssetStatusKind.Failed,
         errorMessage,
       })
-      .where(and(eq(s.asset.userId, userId), eq(s.asset.assetId, assetId)));
+      .where(
+        and(
+          eq(s.asset.userId, userId),
+          eq(s.asset.assetId, assetId as AssetId),
+        ),
+      );
   },
 };
 

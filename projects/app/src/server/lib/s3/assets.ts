@@ -1,5 +1,5 @@
 import type { AssetId } from "@/data/model";
-import { getAssetKeyForId } from "@/util/assetKey";
+import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsS3Bucket } from "@/util/env";
 import {
   GetObjectCommand,
@@ -68,7 +68,7 @@ export async function createPresignedUploadUrl(opts: {
 
   const client = getAssetsS3Client();
   const bucket = nonNullable(assetsS3Bucket);
-  const assetKey = getAssetKeyForId(assetId);
+  const assetKey = getBucketObjectKeyForId(assetId);
 
   const command = new PutObjectCommand({
     Bucket: bucket,
@@ -85,9 +85,9 @@ export async function createPresignedUploadUrl(opts: {
 }
 
 /**
- * Verify that an asset exists in R2 and return its metadata.
+ * Verify that an object exists in R2 and return its metadata.
  */
-export async function verifyAssetExists(assetKey: string): Promise<{
+export async function verifyObjectExists(objectKey: string): Promise<{
   exists: boolean;
   contentType?: string;
   contentLength?: number;
@@ -97,7 +97,7 @@ export async function verifyAssetExists(assetKey: string): Promise<{
   try {
     const command = new HeadObjectCommand({
       Bucket: nonNullable(assetsS3Bucket),
-      Key: assetKey,
+      Key: objectKey,
     });
 
     const response = await client.send(command);
@@ -147,7 +147,7 @@ export async function createPresignedReadUrl(
  */
 export async function fetchAssetBuffer(assetId: AssetId): Promise<Buffer> {
   const s3Client = getAssetsS3Client();
-  const assetKey = getAssetKeyForId(assetId);
+  const assetKey = getBucketObjectKeyForId(assetId);
 
   const command = new GetObjectCommand({
     Bucket: nonNullable(assetsS3Bucket),

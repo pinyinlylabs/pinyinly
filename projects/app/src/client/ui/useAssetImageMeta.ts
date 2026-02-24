@@ -1,11 +1,11 @@
-import type { AssetId } from "@/data/model";
 import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { useDb } from "@/client/ui/hooks/useDb";
+import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
-import { getAssetKeyForId } from "@/util/assetKey";
+import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
@@ -49,7 +49,7 @@ export function useAssetImageMeta(
   const isLocalAsset = isLocalImageAssetId(assetId);
   const assetKey =
     !isLocalAsset && asset?.status === AssetStatusKind.Uploaded
-      ? getAssetKeyForId(assetId)
+      ? getBucketObjectKeyForId(assetId)
       : null;
 
   const hasClearedLocalRef = useRef(false);

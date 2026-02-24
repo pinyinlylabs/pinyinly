@@ -6,11 +6,11 @@ import {
   createPresignedReadUrl,
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
-  verifyAssetExists,
+  verifyObjectExists,
 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import * as schema from "@/server/pgSchema";
-import { getAssetKeyForId } from "@/util/assetKey";
+import { getBucketObjectKeyForId } from "@/util/assetId";
 import { and, eq, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 
@@ -92,8 +92,8 @@ export const assetRouter = router({
     .mutation(async (opts) => {
       const { assetId } = opts.input;
 
-      const assetKey = getAssetKeyForId(assetId);
-      const result = await verifyAssetExists(assetKey);
+      const assetKey = getBucketObjectKeyForId(assetId);
+      const result = await verifyObjectExists(assetKey);
 
       return {
         success: result.exists,
@@ -123,8 +123,8 @@ export const assetRouter = router({
     .query(async (opts) => {
       const { assetId } = opts.input;
 
-      const assetKey = getAssetKeyForId(assetId);
-      const exists = await verifyAssetExists(assetKey);
+      const assetKey = getBucketObjectKeyForId(assetId);
+      const exists = await verifyObjectExists(assetKey);
 
       if (!exists.exists) {
         return null;

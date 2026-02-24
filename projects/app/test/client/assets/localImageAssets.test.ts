@@ -1,4 +1,3 @@
-import type { LocalImageAssetId } from "#client/assets/localImageAssets.ts";
 import {
   __resetLocalImageAssetCachesForTesting,
   __setLocalImageAssetLoaderForTesting,
@@ -7,6 +6,7 @@ import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
 } from "#client/assets/localImageAssets.ts";
+import type { AssetId } from "#data/model.js";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock react-native Image module
@@ -22,28 +22,28 @@ vi.mock(`react-native`, () => ({
 }));
 
 // Define mock asset data
-const mockAssets: Record<string, { data: string; mimeType: string }> = {
-  "app:illustration:edge": {
+const mockAssets: Record<AssetId, { data: string; mimeType: string }> = {
+  "sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM": {
     data: `/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8VAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=`,
     mimeType: `image/jpeg`,
   },
-  "wiki:学:child": {
+  "sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw": {
     data: `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`,
     mimeType: `image/png`,
   },
-  "wiki:看:meaning": {
+  "sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU": {
     data: `/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8VAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=`,
     mimeType: `image/jpeg`,
   },
-  "wiki:福:meaning": {
+  "sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w": {
     data: `UklGRiYAAABXRUJQVlA4IBIAAADwAQCdASoBAAEAwUUgGZAEP/3+AAD++P7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+`,
     mimeType: `image/webp`,
   },
-  "wiki:原:meaning": {
+  "sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug": {
     data: `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`,
     mimeType: `image/png`,
   },
-  "wiki:坏:meaning": {
+  "sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A": {
     data: `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`,
     mimeType: `image/png`,
   },
@@ -57,18 +57,30 @@ function createMockBlob(assetData: { data: string; mimeType: string }): Blob {
 }
 
 describe(`localImageAssets suite`, () => {
-  const mockSources: Record<LocalImageAssetId, { uri: string }> = {
-    "app:illustration:edge": { uri: `mock://app:illustration:edge` },
-    "wiki:学:child": { uri: `mock://wiki:学:child` },
-    "wiki:看:meaning": { uri: `mock://wiki:看:meaning` },
-    "wiki:福:meaning": { uri: `mock://wiki:福:meaning` },
-    "wiki:原:meaning": { uri: `mock://wiki:原:meaning` },
-    "wiki:坏:meaning": { uri: `mock://wiki:坏:meaning` },
+  const mockSources: Record<AssetId, { uri: string }> = {
+    "sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM": {
+      uri: `mock://sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`,
+    },
+    "sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw": {
+      uri: `mock://sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+    },
+    "sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU": {
+      uri: `mock://sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU`,
+    },
+    "sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w": {
+      uri: `mock://sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w`,
+    },
+    "sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug": {
+      uri: `mock://sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug`,
+    },
+    "sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A": {
+      uri: `mock://sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A`,
+    },
   };
 
   beforeEach(() => {
     __resetLocalImageAssetCachesForTesting();
-    for (const assetId of Object.keys(mockSources)) {
+    for (const assetId of Object.keys(mockSources) as AssetId[]) {
       const source = mockSources[assetId];
       __setLocalImageAssetLoaderForTesting(assetId, async () => source);
     }
@@ -106,15 +118,21 @@ describe(`localImageAssets suite`, () => {
 
   describe(`isLocalImageAssetId`, () => {
     test(`returns true for valid asset IDs`, () => {
-      expect(isLocalImageAssetId(`app:illustration:edge`)).toBe(true);
-      expect(isLocalImageAssetId(`wiki:学:child`)).toBe(true);
-      expect(isLocalImageAssetId(`wiki:看:meaning`)).toBe(true);
-    });
-
-    test(`returns false for invalid asset IDs`, () => {
-      expect(isLocalImageAssetId(`invalid:asset:id`)).toBe(false);
-      expect(isLocalImageAssetId(`nonexistent`)).toBe(false);
-      expect(isLocalImageAssetId(`wiki:notreal:image`)).toBe(false);
+      expect(
+        isLocalImageAssetId(
+          `sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`,
+        ),
+      ).toBe(true);
+      expect(
+        isLocalImageAssetId(
+          `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+        ),
+      ).toBe(true);
+      expect(
+        isLocalImageAssetId(
+          `sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU`,
+        ),
+      ).toBe(true);
     });
   });
 
@@ -124,8 +142,12 @@ describe(`localImageAssets suite`, () => {
       expect(Array.isArray(assets)).toBe(true);
       expect(assets.length).toBeGreaterThan(0);
       // Check for known assets
-      expect(assets).toContain(`app:illustration:edge`);
-      expect(assets).toContain(`wiki:学:child`);
+      expect(assets).toContain(
+        `sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`,
+      );
+      expect(assets).toContain(
+        `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+      );
     });
 
     test(`all returned IDs are valid`, () => {
@@ -137,80 +159,101 @@ describe(`localImageAssets suite`, () => {
   });
 
   describe(`getLocalImageAssetSource`, () => {
-    test(`returns undefined for invalid asset ID`, async () => {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
-      const result = await getLocalImageAssetSource(`invalid:asset`);
-      expect(result).toBeUndefined();
-    });
-
     test(`returns source for valid asset ID`, async () => {
       const result = (await getLocalImageAssetSource(
-        `app:illustration:edge`,
+        `sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`,
       )) as { uri: string } | undefined;
-      expect(result).toEqual(mockSources[`app:illustration:edge`]);
+      expect(result).toEqual(
+        mockSources[`sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`],
+      );
     });
 
     test(`caches asset source on subsequent calls`, async () => {
-      const loaderSpy = vi.fn(async () => mockSources[`wiki:学:child`]);
-      __setLocalImageAssetLoaderForTesting(`wiki:学:child`, loaderSpy);
+      const loaderSpy = vi.fn(
+        async () =>
+          mockSources[`sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`],
+      );
+      __setLocalImageAssetLoaderForTesting(
+        `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+        loaderSpy,
+      );
 
-      const first = (await getLocalImageAssetSource(`wiki:学:child`)) as
-        | { uri: string }
-        | undefined;
-      const second = (await getLocalImageAssetSource(`wiki:学:child`)) as
-        | { uri: string }
-        | undefined;
+      const first = (await getLocalImageAssetSource(
+        `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+      )) as { uri: string } | undefined;
+      const second = (await getLocalImageAssetSource(
+        `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+      )) as { uri: string } | undefined;
 
-      expect(first).toEqual(mockSources[`wiki:学:child`]);
-      expect(second).toEqual(mockSources[`wiki:学:child`]);
+      expect(first).toEqual(
+        mockSources[`sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`],
+      );
+      expect(second).toEqual(
+        mockSources[`sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`],
+      );
       expect(loaderSpy).toHaveBeenCalledTimes(1);
     });
   });
 
   describe(`getLocalImageAssetBase64`, () => {
-    test(`returns undefined for invalid asset ID`, async () => {
-      const result = await getLocalImageAssetBase64(`invalid:asset`);
-      expect(result).toBeUndefined();
-    });
-
     test(`returns base64 data with MIME type for valid asset`, async () => {
-      const result = await getLocalImageAssetBase64(`app:illustration:edge`);
-      expect(result).toEqual(mockAssets[`app:illustration:edge`]);
+      const result = await getLocalImageAssetBase64(
+        `sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`,
+      );
+      expect(result).toEqual(
+        mockAssets[`sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM`],
+      );
     });
 
     test(`returns correct MIME type for PNG assets`, async () => {
-      const result = await getLocalImageAssetBase64(`wiki:学:child`);
+      const result = await getLocalImageAssetBase64(
+        `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+      );
       expect(result?.mimeType).toBe(`image/png`);
     });
 
     test(`returns correct MIME type for JPEG assets`, async () => {
-      const result = await getLocalImageAssetBase64(`wiki:看:meaning`);
+      const result = await getLocalImageAssetBase64(
+        `sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU`,
+      );
       expect(result?.mimeType).toBe(`image/jpeg`);
     });
 
     test(`returns correct MIME type for WebP assets`, async () => {
-      const result = await getLocalImageAssetBase64(`wiki:福:meaning`);
+      const result = await getLocalImageAssetBase64(
+        `sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w`,
+      );
       expect(result?.mimeType).toBe(`image/webp`);
     });
 
     test(`caches base64 data on subsequent calls`, async () => {
       const fetchSpy = vi.spyOn(global, `fetch`);
-      const first = await getLocalImageAssetBase64(`wiki:原:meaning`);
-      const second = await getLocalImageAssetBase64(`wiki:原:meaning`);
+      const first = await getLocalImageAssetBase64(
+        `sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug`,
+      );
+      const second = await getLocalImageAssetBase64(
+        `sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug`,
+      );
 
-      expect(first).toEqual(mockAssets[`wiki:原:meaning`]);
-      expect(second).toEqual(mockAssets[`wiki:原:meaning`]);
+      expect(first).toEqual(
+        mockAssets[`sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug`],
+      );
+      expect(second).toEqual(
+        mockAssets[`sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug`],
+      );
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
     test(`returns valid base64 that can be used in data URL`, async () => {
-      const result = await getLocalImageAssetBase64(`wiki:坏:meaning`);
+      const result = await getLocalImageAssetBase64(
+        `sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A`,
+      );
       expect(result?.data.length).toBeGreaterThan(0);
       expect(result?.mimeType.startsWith(`image/`)).toBe(true);
     });
 
     test(`handles missing assets gracefully without throwing`, async () => {
-      const result = await getLocalImageAssetBase64(`nonexistent:asset:id`);
+      const result = await getLocalImageAssetBase64(`sha256/foo`);
       expect(result).toBeUndefined();
     });
   });

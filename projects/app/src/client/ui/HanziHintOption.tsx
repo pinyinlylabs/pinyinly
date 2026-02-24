@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -8,7 +9,7 @@ import { Pylymark } from "./Pylymark";
 interface HanziHintOptionProps {
   hint: string;
   explanation?: string;
-  imageIds: readonly string[] | null;
+  imageIds: readonly AssetId[] | null;
   isSelected: boolean;
   isUser?: boolean;
   onPress: () => void;
@@ -80,7 +81,7 @@ export function HanziHintOption({
   );
 }
 
-function HintThumbnailRow({ imageIds }: { imageIds: readonly string[] }) {
+function HintThumbnailRow({ imageIds }: { imageIds: readonly AssetId[] }) {
   return (
     <View className="mt-2 flex-row flex-wrap gap-2">
       {imageIds.slice(0, 3).map((assetId) => (

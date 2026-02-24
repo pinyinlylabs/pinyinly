@@ -63,7 +63,10 @@ export const pinyinSoundGroupIdSchema = z.custom<PinyinSoundGroupId>(isString);
  * Asset IDs are in the format: `sha256/<base64url-hash>`
  * where the hash is a 43-character base64url-encoded SHA-256 digest.
  */
-export type AssetId = string & z.BRAND<`AssetId`>;
+export type AssetId =
+  | (string & z.BRAND<`AssetId`>)
+  // Convenience for writing inline strings in tests.
+  | `sha256/${string}`;
 export const assetIdSchema = z.custom<AssetId>(
   (val): val is AssetId =>
     typeof val === `string` && /^sha256\/[A-Za-z0-9_-]{43}$/.test(val),

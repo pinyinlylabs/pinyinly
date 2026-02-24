@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { Image } from "react-native";
 
@@ -6,52 +7,74 @@ import { Image } from "react-native";
 export type LocalImageLoader = () => Promise<RnRequireSource>;
 
 type LocalImageAssetEntry = {
-  ext: `png` | `jpg` | `jpeg` | `webp`;
+  mimeType: `image/png` | `image/jpeg` | `image/webp`;
   loader: LocalImageLoader;
 };
 
-const localImageAssets: Record<string, LocalImageAssetEntry> = {
-  "app:illustration:edge": {
-    ext: `jpg`,
-    loader: async () => require(`../../assets/illustrations/edge.jpg`),
+const localImageAssets: Record<AssetId, LocalImageAssetEntry> = {
+  // app:illustration:edge
+  "sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM": {
+    mimeType: `image/jpeg` as const,
+    loader: async () =>
+      require(
+        `../../assets/sha256/SRyYDLFWSOWMwUgJk29w9AxsInv51FOJgfZLpoQ1qbM.jpg`,
+      ),
   },
-  "wiki:学:child": {
-    ext: `png`,
-    loader: async () => require(`../wiki/学/child.png`),
+  // wiki:学:child
+  "sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw": {
+    mimeType: `image/png` as const,
+    loader: async () =>
+      require(
+        `../../assets/sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw.png`,
+      ),
   },
-  "wiki:原:meaning": {
-    ext: `png`,
-    loader: async () => require(`../wiki/原/meaning.png`),
+  // wiki:原:meaning
+  "sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug": {
+    mimeType: `image/png` as const,
+    loader: async () =>
+      require(
+        `../../assets/sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug.png`,
+      ),
   },
-  "wiki:坏:meaning": {
-    ext: `png`,
-    loader: async () => require(`../wiki/坏/meaning.png`),
+  // wiki:坏:meaning
+  "sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A": {
+    mimeType: `image/png` as const,
+    loader: async () =>
+      require(
+        `../../assets/sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A.png`,
+      ),
   },
-  "wiki:看:meaning": {
-    ext: `jpg`,
-    loader: async () => require(`../wiki/看/meaning.jpg`),
+  // wiki:看:meaning
+  "sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU": {
+    mimeType: `image/jpeg` as const,
+    loader: async () =>
+      require(
+        `../../assets/sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU.jpg`,
+      ),
   },
-  "wiki:福:meaning": {
-    ext: `webp`,
-    loader: async () => require(`../wiki/福/meaning.webp`),
+  // wiki:福:meaning
+  "sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w": {
+    mimeType: `image/webp` as const,
+    loader: async () =>
+      require(
+        `../../assets/sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w.webp`,
+      ),
   },
 };
 
 const localImageAssetCache = new Map<string, RnRequireSource>();
 const localImageBase64Cache = new Map<
-  string,
+  AssetId,
   { data: string; mimeType: string }
 >();
 // oxlint-enable eslint-plugin-import/no-commonjs, eslint-plugin-import/no-relative-parent-imports, typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-return
 
-export type LocalImageAssetId = keyof typeof localImageAssets;
-
-export function isLocalImageAssetId(assetId: string): boolean {
+export function isLocalImageAssetId(assetId: AssetId): boolean {
   return assetId in localImageAssets;
 }
 
 export async function getLocalImageAssetSource(
-  assetId: string,
+  assetId: AssetId,
 ): Promise<RnRequireSource | undefined> {
   const entry = localImageAssets[assetId];
   if (entry == null) {
@@ -69,23 +92,9 @@ export async function getLocalImageAssetSource(
  * Get the MIME type for a local image asset based on its ID.
  * Gets MIME type from the stored extension.
  */
-function getMimeTypeForAssetId(assetId: LocalImageAssetId): string {
+function getMimeTypeForAssetId(assetId: AssetId): string {
   const entry = localImageAssets[assetId];
-  if (entry == null) {
-    return `image/jpeg`; // Default fallback
-  }
-
-  if (entry.ext === `png`) {
-    return `image/png`;
-  }
-  if (entry.ext === `webp`) {
-    return `image/webp`;
-  }
-  if (entry.ext === `jpg` || entry.ext === `jpeg`) {
-    return `image/jpeg`;
-  }
-
-  return `image/jpeg`;
+  return entry?.mimeType ?? `image/jpeg`; // Default to JPEG if not found
 }
 
 /**
@@ -93,7 +102,7 @@ function getMimeTypeForAssetId(assetId: LocalImageAssetId): string {
  * Handles both React Native and Web environments.
  */
 export async function getLocalImageAssetBase64(
-  assetId: string,
+  assetId: AssetId,
 ): Promise<{ data: string; mimeType: string } | undefined> {
   if (!isLocalImageAssetId(assetId)) {
     return undefined;
@@ -168,13 +177,13 @@ export async function getLocalImageAssetBase64(
  * List all available local image assets.
  */
 export const getAvailableLocalImageAssets = memoize0(
-  (): ReadonlyArray<LocalImageAssetId> => {
-    return Object.keys(localImageAssets);
+  (): ReadonlyArray<AssetId> => {
+    return Object.keys(localImageAssets) as unknown as ReadonlyArray<AssetId>;
   },
 );
 
 export function __setLocalImageAssetLoaderForTesting(
-  assetId: LocalImageAssetId,
+  assetId: AssetId,
   loader: LocalImageLoader,
 ): void {
   const entry = localImageAssets[assetId];
