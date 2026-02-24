@@ -1,6 +1,7 @@
 import { trpc } from "@/client/trpc";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { getBlobSha256Base64Url } from "@/client/util/assetHash";
+import type { AssetId } from "@/data/model";
 import type { currentSchema } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type * as ImagePicker from "expo-image-picker";
@@ -25,7 +26,7 @@ function isAllowedImageType(value: string): value is AllowedImageType {
 }
 
 interface ImageUploaderOptions {
-  onUploadComplete: (assetId: string) => void;
+  onUploadComplete: (assetId: AssetId) => void;
   onUploadError?: (error: string) => void;
 }
 

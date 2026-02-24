@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
@@ -16,7 +17,7 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
   /**
    * The asset ID (not the full key).
    */
-  assetId: string;
+  assetId: AssetId;
   /**
    * Optional userId (ignored for content-addressed assets).
    */

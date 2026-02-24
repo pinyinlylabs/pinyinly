@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
@@ -18,7 +19,7 @@ export interface AssetImageMetaResult {
 }
 
 export function useAssetImageMeta(
-  assetId: string,
+  assetId: AssetId,
   initialImageWidth?: number | null,
   initialImageHeight?: number | null,
 ): AssetImageMetaResult {

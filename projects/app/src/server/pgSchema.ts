@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 import {
+  pgAssetId,
   pgAssetStatusKind,
   pgBase64url,
   pgFsrsRating,
@@ -228,7 +229,7 @@ export const asset = schema.table(
      * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
      * Used as the S3 object key suffix.
      */
-    assetId: pg.text(`assetId`).notNull(),
+    assetId: pgAssetId(`assetId`).notNull(),
     /**
      * Upload status: pending, uploaded, or failed.
      */

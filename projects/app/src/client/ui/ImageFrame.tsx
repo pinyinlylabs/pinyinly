@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import { useState } from "react";
 import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
@@ -5,7 +6,7 @@ import { AssetImage } from "./AssetImage";
 import type { ImageCrop } from "./imageCrop";
 
 interface FramedAssetImageProps {
-  assetId: string;
+  assetId: AssetId;
   crop?: ImageCrop | null;
   imageWidth?: number | null;
   imageHeight?: number | null;

@@ -1,4 +1,5 @@
-import { hanziWordSkillKinds } from "@/data/model";
+import type { AssetId } from "@/data/model";
+import { assetIdSchema, hanziWordSkillKinds } from "@/data/model";
 import { supportedSchemas } from "@/data/rizzleSchema";
 import { hanziWordSkill } from "@/data/skills";
 import { loadDictionary, loadHanziWordMigrations } from "@/dictionary";
@@ -26,10 +27,6 @@ import {
   withRepeatableReadTransaction,
 } from "./db";
 import {
-  getUnmigratedAssetCount,
-  migrateAssetIdsBatch,
-} from "./migrateAssetIds";
-import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
   ignoreRemoteClientForRemoteSync,
@@ -37,7 +34,6 @@ import {
   updateRemoteSyncClientLastMutationId,
 } from "./replicache";
 import { retryMutation as retryMutationV13 } from "./replicache/v12";
-import { assetIdSchema } from "./s3/assets";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
@@ -46,11 +42,11 @@ export const inngest = new Inngest({
   schemas: new EventSchemas().fromSchema({
     "asset/sync-upload": z.object({
       remoteSyncId: z.string(),
-      assetId: z.string(),
+      assetId: assetIdSchema,
     }),
     "asset/sync-download": z.object({
       remoteSyncId: z.string(),
-      assetId: z.string(),
+      assetId: assetIdSchema,
     }),
     "replicache/retry-mutations": z.object({
       startMutationRecordId: z.string(),
@@ -930,23 +926,23 @@ const syncAssetBlobs = inngest.createFunction(
               await remoteClient.asset.listAssetBucketUserFiles.query();
             // Filter out any legacy asset IDs that don't match the expected format, to
             // avoid syncing invalid asset IDs.
-            return assetIds.filter(
-              (assetId) => assetIdSchema.safeParse(assetId).success,
-            );
+            return assetIds
+              .map((assetId) => assetIdSchema.safeParse(assetId).data)
+              .filter((x) => x != null);
           },
         );
 
         const remoteAssetsSet = new Set(remoteAssets);
 
         // Diff to find assets to upload and download
-        const toUpload: string[] = [];
+        const toUpload: AssetId[] = [];
         for (const id of localAssets) {
           if (!remoteAssetsSet.has(id)) {
             toUpload.push(id);
           }
         }
 
-        const toDownload: string[] = [];
+        const toDownload: AssetId[] = [];
         for (const id of remoteAssets) {
           if (!localAssetsSet.has(id)) {
             toDownload.push(id);
@@ -1088,65 +1084,10 @@ const syncAssetBlobDownload = inngest.createFunction(
   },
 );
 
-/**
- * Migrate assets from old ID format (plain hash) to new format (sha256/<hash>).
- * Runs periodically to progressively migrate existing assets.
- */
-const migrateAssetIds = inngest.createFunction(
-  { id: `migrateAssetIds` },
-  { event: `migrateAssetIds/manual` }, // Manual trigger only
-  async ({ step, logger }) => {
-    const summary = await step.run(`migrate-batch`, async () => {
-      return withDrizzle(async (db) => {
-        return withRepeatableReadTransaction(db, async (tx) => {
-          // Get count before migration
-          const totalUnmigrated = await getUnmigratedAssetCount(tx);
-
-          if (totalUnmigrated === 0) {
-            logger.info(`No assets need migration`);
-            return {
-              totalUnmigrated: 0,
-              migratedCount: 0,
-              errors: [],
-            };
-          }
-
-          logger.info(`Found ${totalUnmigrated} assets to migrate`);
-
-          // Migrate a batch of assets
-          const result = await migrateAssetIdsBatch(tx, {
-            batchSize: 20, // Smaller batches to avoid timeout
-            dryRun: false,
-          });
-
-          logger.info(
-            `Migrated ${result.migratedCount} assets, ${result.errors.length} errors`,
-          );
-
-          if (result.errors.length > 0) {
-            logger.error(
-              `Migration errors:`,
-              result.errors.map((e) => `${e.assetId}: ${e.error}`).join(`, `),
-            );
-          }
-
-          return {
-            totalUnmigrated,
-            ...result,
-          };
-        });
-      });
-    });
-
-    return summary;
-  },
-);
-
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   dataIntegrityDictionary,
   helloWorldEmail,
-  migrateAssetIds,
   migrateHanziWords,
   pgFullVacuumGarbageCollection,
   replicacheGarbageCollection,

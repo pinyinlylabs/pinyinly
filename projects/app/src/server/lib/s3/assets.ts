@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import { getAssetKeyForId } from "@/util/assetKey";
 import { assetsS3Bucket } from "@/util/env";
 import {
@@ -29,18 +30,6 @@ export type AllowedImageType = z.infer<typeof imageTypeEnum>;
 export const ALLOWED_IMAGE_TYPES = imageTypeEnum.options;
 
 /**
- * Zod schema for validating asset ID format.
- * Asset IDs must be in the format: sha256/<base64url-hash>
- * where the hash is a 43-character base64url-encoded SHA-256 digest.
- */
-export const assetIdSchema = z
-  .string()
-  .regex(
-    /^sha256\/[A-Za-z0-9_-]{43}$/,
-    `Asset ID must be in format sha256/<base64url-hash>`,
-  );
-
-/**
  * Presigned URL expiration time in seconds (15 minutes).
  */
 const PRESIGNED_URL_EXPIRY_SECONDS = 15 * 60;
@@ -61,19 +50,11 @@ export interface PresignedUploadUrlResult {
  * - `{assetId}` is algorithm-prefixed (e.g., `sha256/<base64url-hash>`)
  */
 export async function createPresignedUploadUrl(opts: {
-  assetId: string;
+  assetId: AssetId;
   contentType: AllowedImageType;
   contentLength: number;
 }): Promise<PresignedUploadUrlResult> {
   const { assetId, contentType, contentLength } = opts;
-
-  // Validate asset ID format
-  const assetIdValidation = assetIdSchema.safeParse(assetId);
-  if (!assetIdValidation.success) {
-    throw new Error(
-      `Invalid asset ID format: ${assetIdValidation.error.issues[0]?.message ?? `unknown error`}`,
-    );
-  }
 
   if (contentLength > MAX_ASSET_SIZE_BYTES) {
     throw new Error(
@@ -155,4 +136,36 @@ export async function createPresignedReadUrl(
   return getSignedUrl(client, command, {
     expiresIn: PRESIGNED_URL_EXPIRY_SECONDS,
   });
+}
+
+/**
+ * Fetch an asset buffer from S3 by asset ID.
+ * Useful for retrieving assets for processing or transformation.
+ *
+ * @param assetId - The asset ID to fetch (format: sha256/<base64url>)
+ * @returns The asset buffer
+ */
+export async function fetchAssetBuffer(assetId: AssetId): Promise<Buffer> {
+  const s3Client = getAssetsS3Client();
+  const assetKey = getAssetKeyForId(assetId);
+
+  const command = new GetObjectCommand({
+    Bucket: nonNullable(assetsS3Bucket),
+    Key: assetKey,
+  });
+
+  const response = await s3Client.send(command);
+
+  if (!response.Body) {
+    throw new Error(`Failed to fetch asset from S3: ${assetId}`);
+  }
+
+  const chunks: Uint8Array[] = [];
+  const body = response.Body as AsyncIterable<Uint8Array>;
+
+  for await (const chunk of body) {
+    chunks.push(chunk);
+  }
+
+  return Buffer.concat(chunks);
 }

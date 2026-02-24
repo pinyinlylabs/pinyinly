@@ -1,3 +1,4 @@
+import { assetIdSchema } from "@/data/model";
 import { getImageSettingKeyPatterns } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import {
@@ -33,7 +34,7 @@ export const assetRouter = router({
            * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
            * This allows optimistic UI updates by using the ID immediately before upload completes.
            */
-          assetId: z.string(),
+          assetId: assetIdSchema,
           /**
            * MIME type of the file being uploaded.
            */
@@ -75,7 +76,7 @@ export const assetRouter = router({
     .input(
       z
         .object({
-          assetId: z.string(),
+          assetId: assetIdSchema,
         })
         .strict(),
     )
@@ -108,7 +109,7 @@ export const assetRouter = router({
     .input(
       z
         .object({
-          assetId: z.string(),
+          assetId: assetIdSchema,
         })
         .strict(),
     )
@@ -140,7 +141,7 @@ export const assetRouter = router({
     .input(
       z
         .object({
-          assetId: z.string(),
+          assetId: assetIdSchema,
           contentLength: z.number().int().positive(),
           contentType: z.enum(ALLOWED_IMAGE_TYPES),
         })

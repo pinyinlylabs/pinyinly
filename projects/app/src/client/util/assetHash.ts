@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import * as Crypto from "expo-crypto";
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -20,7 +21,7 @@ function toBase64Url(base64: string): string {
     .replaceAll(/=+$/gu, ``);
 }
 
-export async function getBlobSha256Base64Url(blob: Blob): Promise<string> {
+export async function getBlobSha256Base64Url(blob: Blob): Promise<AssetId> {
   const buffer = await blob.arrayBuffer();
   const digest = await Crypto.digest(
     Crypto.CryptoDigestAlgorithm.SHA256,
@@ -28,5 +29,5 @@ export async function getBlobSha256Base64Url(blob: Blob): Promise<string> {
   );
   const base64 = bytesToBase64(new Uint8Array(digest));
   const hash = toBase64Url(base64);
-  return `sha256/${hash}`;
+  return `sha256/${hash}` as AssetId;
 }

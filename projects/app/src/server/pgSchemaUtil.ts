@@ -1,3 +1,4 @@
+import { assetIdSchema } from "@/data/model";
 import {
   rAssetStatusKind,
   rFsrsRating,
@@ -265,3 +266,6 @@ export const passkeyTransportEnumSchema = z.enum([
   `usb`,
 ]);
 export const pgPasskeyTransport = pgZod(passkeyTransportEnumSchema, `text`);
+
+// Asset IDs
+export const pgAssetId = pgZod(assetIdSchema, `text`);

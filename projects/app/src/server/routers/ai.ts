@@ -1,5 +1,8 @@
+import { assetIdSchema } from "@/data/model";
 import { requestOpenAiJson } from "@/server/lib/ai";
+import { createAssetFromBuffer } from "@/server/lib/createAsset";
 import { generateImage } from "@/server/lib/gemini";
+import { removeBackgroundFromImage } from "@/server/lib/openai/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
@@ -170,6 +173,40 @@ export const aiRouter = router({
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate image`,
+        });
+      }
+    }),
+
+  removeBackground: authedProcedure
+    .input(z.object({ assetId: assetIdSchema }).strict())
+    .output(z.object({ assetId: assetIdSchema }).strict())
+    .mutation(async (opts) => {
+      const { assetId: originalAssetId } = opts.input;
+      const { userId } = opts.ctx.session;
+
+      try {
+        // Remove background from the image
+        const { buffer: processedBuffer, mimeType: processedMimeType } =
+          await removeBackgroundFromImage(originalAssetId);
+
+        // Create asset from the processed buffer
+        const newAssetId = await createAssetFromBuffer(
+          userId,
+          processedBuffer,
+          processedMimeType,
+        );
+
+        return { assetId: newAssetId };
+      } catch (error) {
+        console.error(`Failed to remove background:`, error);
+
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+
+        throw new TRPCError({
+          code: `INTERNAL_SERVER_ERROR`,
+          message: `Unable to remove background`,
         });
       }
     }),
