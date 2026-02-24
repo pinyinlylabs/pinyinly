@@ -166,7 +166,7 @@ export default function SoundIdPage() {
               previewHeight={200}
               tileSize={64}
               enablePasteDropZone
-              frameConstraint={{ aspectRatio: 2 }}
+              frameConstraint={{ aspectRatio: 1 }}
             />
           </View>
 
