@@ -11,7 +11,7 @@ export type Skill =
   | PinyinFinalAssociationSkill;
 
 export type DeprecatedSkill =
-  | (string & z.BRAND<`DeprecatedSkill`>)
+  | (string & z.$brand<`DeprecatedSkill`>)
   | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
 
 export type HanziWordToGlossTypedSkill = `het:${string}:${string}`;
@@ -21,7 +21,7 @@ export type HanziWordToPinyinToneSkill = `hpt:${string}:${string}`;
 export type HanziWordToPinyinFinalSkill = `hpf:${string}:${string}`;
 
 export type HanziWordSkill =
-  | (string & z.BRAND<`HanziWordSkill`>)
+  | (string & z.$brand<`HanziWordSkill`>)
   | HanziWordToGlossTypedSkill
   | HanziWordToPinyinTypedSkill
   | HanziWordToPinyinInitialSkill
@@ -30,11 +30,11 @@ export type HanziWordSkill =
   | `${`he` | `eh` | `ph` | `ih`}:${string}:${string}`;
 
 export type PinyinInitialAssociationSkill =
-  | (string & z.BRAND<`PinyinInitialAssociationSkill`>)
+  | (string & z.$brand<`PinyinInitialAssociationSkill`>)
   | `pia:${string}:${string}`;
 
 export type PinyinFinalAssociationSkill =
-  | (string & z.BRAND<`PinyinFinalAssociationSkill`>)
+  | (string & z.$brand<`PinyinFinalAssociationSkill`>)
   | `pfa:${string}:${string}`;
 
 /**
@@ -45,7 +45,7 @@ export type PinyinFinalAssociationSkill =
  * - Finals: prefixed with '-`.
  * - Tones: Single digit between 1 and 5, inclusive.
  */
-export type PinyinSoundId = string & z.BRAND<`PinyinSoundId`>;
+export type PinyinSoundId = string & z.$brand<`PinyinSoundId`>;
 export const pinyinSoundIdSchema = z.custom<PinyinSoundId>(isString);
 
 /**
@@ -54,7 +54,7 @@ export const pinyinSoundIdSchema = z.custom<PinyinSoundId>(isString);
  * There is a default set of groups, and these groups have static IDs. In the
  * future user-defined groups may be added and these will have dynamic IDs.
  */
-export type PinyinSoundGroupId = string & z.BRAND<`PinyinSoundGroupId`>;
+export type PinyinSoundGroupId = string & z.$brand<`PinyinSoundGroupId`>;
 export const pinyinSoundGroupIdSchema = z.custom<PinyinSoundGroupId>(isString);
 
 /**
@@ -64,13 +64,13 @@ export const pinyinSoundGroupIdSchema = z.custom<PinyinSoundGroupId>(isString);
  * where the hash is a 43-character base64url-encoded SHA-256 digest.
  */
 export type AssetId =
-  | (string & z.BRAND<`AssetId`>)
+  | (string & z.$brand<`AssetId`>)
   // Convenience for writing inline strings in tests.
   | `sha256/${string}`;
-export const assetIdSchema = z.custom<AssetId>(
-  (val): val is AssetId =>
-    typeof val === `string` && /^sha256\/[A-Za-z0-9_-]{43}$/.test(val),
-);
+export const assetIdSchema = z
+  .string()
+  .regex(/^sha256\/[A-Za-z0-9_-]{43}$/, `Invalid AssetId format`)
+  .pipe(z.custom<AssetId>());
 
 export interface BaseSrsState {
   prevReviewAt: Date;
@@ -201,7 +201,9 @@ export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;
  * Hanzi can have multiple meanings, so this offers a way to represent a word
  * with a specific meaning.
  */
-export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
+export type HanziWord =
+  | (string & z.$brand<`HanziWord`>)
+  | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
  * A single pinyin unit (e.g. `hǎo`). This should not include numeric
@@ -211,7 +213,7 @@ export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`;
  * A unit is a single sound or component (e.g. nǐ, or 儿 in 一点儿), so `nǐ hǎo`
  * would be two units: `nǐ` and `hǎo`.
  */
-export type PinyinUnit = string & z.BRAND<`PinyinUnit`>;
+export type PinyinUnit = string & z.$brand<`PinyinUnit`>;
 
 /**
  * A single pinyin unit in numeric tone form (e.g. `hao3`).
@@ -219,9 +221,9 @@ export type PinyinUnit = string & z.BRAND<`PinyinUnit`>;
  * A unit is a single sound or component (e.g. ni3, or r5 for 儿), so `ni3 hao3`
  * would be two units: `ni3` and `hao3`.
  */
-export type PinyinNumericUnit = string & z.BRAND<`PinyinNumericUnit`>;
+export type PinyinNumericUnit = string & z.$brand<`PinyinNumericUnit`>;
 
-export type PinyinText = PinyinUnit | (string & z.BRAND<`PinyinText`>);
+export type PinyinText = PinyinUnit | (string & z.$brand<`PinyinText`>);
 
 /**
  * Space-separated pinyin units, used for efficient storage.
@@ -231,19 +233,19 @@ export type PinyinText = PinyinUnit | (string & z.BRAND<`PinyinText`>);
  * unit boundaries.
  */
 export type PinyinPronunciationSpaceSeparated = string &
-  z.BRAND<`PinyinPronunciationSpaceSeparated`>;
+  z.$brand<`PinyinPronunciationSpaceSeparated`>;
 
 /**
  * Single Hanzi character (in the Unicode sense).
  *
  * This is the hanzi companion to {@link PinyinUnit}.
  */
-export type HanziCharacter = string & z.BRAND<`HanziCharacter`>;
+export type HanziCharacter = string & z.$brand<`HanziCharacter`>;
 
 /**
  * Non-space separated hanzi text.
  */
-export type HanziText = (string & z.BRAND<`HanziText`>) | HanziCharacter;
+export type HanziText = (string & z.$brand<`HanziText`>) | HanziCharacter;
 
 export const hanziTextSchema = z.custom<HanziText>(isString);
 export const pylyMarkSchema = z.string();
