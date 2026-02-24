@@ -212,9 +212,7 @@ export function ImageFrameEditorModal({
                   onPress={() => {
                     void handleRemoveBackground();
                   }}
-                  disabled={
-                    imageMeta.status !== `ready` || currentAssetId == null
-                  }
+                  disabled={imageMeta.status !== `ready`}
                   className="py-2"
                 >
                   Remove Background
