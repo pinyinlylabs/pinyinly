@@ -106,7 +106,7 @@ import { useRizzle } from "@/client/ui/hooks/useRizzle";
 
 async function uploadImage(file: File) {
   const r = useRizzle();
-  const assetId = await getArrayBufferAssetId(file);
+  const assetId = await getArrayBufferAssetId(await file.arrayBuffer());
 
   // 1. Optimistically create pending asset
   await r.mutate.initAsset({
