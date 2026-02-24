@@ -20,4 +20,8 @@ export default defineConfig({
     },
   },
   plugins: [viteMdxPlugin(), tsconfigPaths(), react()],
+  define: {
+    __DEV__: `true`,
+    "process.env.EXPO_OS": JSON.stringify(`web`),
+  },
 });

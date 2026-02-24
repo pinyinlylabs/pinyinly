@@ -179,7 +179,3 @@ vi.mock(
 
   vi.stubGlobal(`localStorage`, localStorageMock);
 }
-
-// Set up __DEV__ global variable
-// @ts-expect-error __DEV__ is not defined in Node
-globalThis.__DEV__ = true;
