@@ -80,14 +80,6 @@ vi.mock(`react-native-svg`, () => {
   };
 });
 
-vi.mock(`expo-secure-store`, () => {
-  return {
-    getItemAsync: () => null,
-    deleteItemAsync: () => null,
-    setItemAsync: () => null,
-  };
-});
-
 vi.mock(`react-native-reanimated`, () => {
   return {
     useSharedValue: () => null,
