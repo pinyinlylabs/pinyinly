@@ -68,7 +68,7 @@ export function ImageFrameEditorModal({
   const [removeBackgroundError, setRemoveBackgroundError] = useState<
     string | null
   >(null);
-  const initialAssetIdRef = useRef<string | null>(null);
+  const initialAssetIdRef = useRef<AssetId | null>(null);
 
   const removeBackgroundMutation = trpc.ai.removeBackground.useMutation();
 
