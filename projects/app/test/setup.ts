@@ -40,15 +40,6 @@ vi.mock(`expo-haptics`, () => {
   return {};
 });
 
-vi.mock(`expo-crypto`, () => {
-  return {
-    CryptoDigestAlgorithm: {
-      SHA256: `SHA-256`,
-    },
-    digest: async () => new Uint8Array(32).buffer,
-  };
-});
-
 vi.mock(`expo-image`, () => {
   return {
     // SyntaxError: The requested module 'expo-image' does not provide an export
