@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -11,7 +12,7 @@ import {
 import { useImageUploader } from "./hooks/useImageUploader";
 
 interface ImagePasteDropZoneProps {
-  onUploadComplete: (assetId: string) => void;
+  onUploadComplete: (assetId: AssetId) => void;
   onUploadError?: (error: string) => void;
 }
 
@@ -24,7 +25,7 @@ export function ImagePasteDropZone({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const hasPreview = previewUrl != null && previewUrl.length > 0;
 
-  const handleUploadComplete = (assetId: string) => {
+  const handleUploadComplete = (assetId: AssetId) => {
     setPreviewUrl((current) => {
       if (current != null && current.length > 0) {
         URL.revokeObjectURL(current);

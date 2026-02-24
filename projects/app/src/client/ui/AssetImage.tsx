@@ -3,8 +3,9 @@ import {
   isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { useDb } from "@/client/ui/hooks/useDb";
+import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
-import { getAssetKeyForId } from "@/util/assetKey";
+import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { ImageProps as ExpoImageProps } from "expo-image";
@@ -16,7 +17,7 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
   /**
    * The asset ID (not the full key).
    */
-  assetId: string;
+  assetId: AssetId;
   /**
    * Optional userId (ignored for content-addressed assets).
    */
@@ -126,7 +127,7 @@ export function AssetImage({
     );
   }
 
-  const assetKey = getAssetKeyForId(assetId);
+  const assetKey = getBucketObjectKeyForId(assetId);
 
   const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
 

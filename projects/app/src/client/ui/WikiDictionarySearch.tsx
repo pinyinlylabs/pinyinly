@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { use, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { TextInputSingle } from "./TextInputSingle";
 
 const maxResults = 24;
@@ -27,7 +27,7 @@ export function WikiDictionarySearch() {
   return (
     <View className="gap-4">
       <View className="relative">
-        <IconImage
+        <Icon
           icon="search"
           size={16}
           className="absolute left-4 top-1/2 -translate-y-1/2 text-fg-dim"

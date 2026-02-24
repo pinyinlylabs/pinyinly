@@ -186,6 +186,11 @@
     "yargs": "^18.0.0"
   },
   "private": true,
+  "browserslist": [
+    "> 0.2%",
+    "not dead",
+    "not op_mini all"
+  ],
   "expo": {
     "install": {
       "exclude": [

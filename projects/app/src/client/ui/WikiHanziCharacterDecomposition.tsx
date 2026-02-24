@@ -1,7 +1,5 @@
-import { useIsBetaEnabled } from "@/client/ui/hooks/useBetaFeatures";
 import {
   hanziWordMeaningHintImageSetting,
-  useSelectedHint,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
@@ -14,22 +12,19 @@ import {
 import type { HanziWordMeaning } from "@/dictionary";
 import {
   glossOrThrow,
-  hanziFromHanziWord,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { use } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
-import { IconImage } from "./IconImage";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
+import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
-import { RectButton } from "./RectButton";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
@@ -203,12 +198,11 @@ function MeaningsSection({
     | readonly { readonly meaningKey: string; readonly hint: string }[]
     | undefined;
 }) {
-  const isBetaEnabled = useIsBetaEnabled();
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
-  // If hanzi is not in dictionary or beta is not enabled, don't show this section
-  if (!isBetaEnabled || hanziWordMeanings.length === 0) {
+  // If hanzi is not in dictionary, don't show this section
+  if (hanziWordMeanings.length === 0) {
     return null;
   }
 
@@ -251,14 +245,16 @@ function MeaningItem({
   meaning: HanziWordMeaning;
   mnemonicHint: string | undefined;
 }) {
-  const meaningKey = meaningKeyFromHanziWord(hanziWord);
-  const hanzi = hanziFromHanziWord(hanziWord);
-
-  // Get hint override if set
-  const hintOverride = useSelectedHint(hanziWord);
-  const displayHint = hintOverride ?? mnemonicHint;
-  const hasOverride = hintOverride != null;
-  const hasHint = displayHint != null;
+  const hintSetting = useUserSetting(hanziWordMeaningHintTextSetting, {
+    hanziWord,
+  });
+  const hintSettingTextValue =
+    hintSetting.value?.text ??
+    (hintSetting.value as { t?: string } | null)?.t ??
+    null;
+  const displayHint = hintSettingTextValue ?? mnemonicHint ?? null;
+  const hasCustomHint = (hintSettingTextValue ?? ``).trim().length > 0;
+  const hasHint = displayHint != null && displayHint.length > 0;
 
   // Display glosses: first one bold, rest dim and semicolon-separated
   const primaryGloss = meaning.gloss[0];
@@ -267,70 +263,57 @@ function MeaningItem({
   return (
     <View className="gap-1">
       <View className="flex-row items-center gap-2">
-        <View
-          className={`
-            m-1 size-3 rounded-full border-2
-
-            ${hasOverride ? `border-cyan bg-cyan` : `border-fg-bg25`}
-          `}
-        />
+        <Circle hasCustomHint={hasCustomHint} />
         <Text className="pyly-body flex-1">
           <Text className="pyly-bold">{primaryGloss}</Text>
           {secondaryGlosses.length > 0 ? (
             <Text className="text-fg-dim">; {secondaryGlosses.join(`; `)}</Text>
           ) : null}
         </Text>
-        {hasHint ? (
-          <Link
-            href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(meaningKey)}`}
-            asChild
-          >
-            <RectButton variant="bare" className="text-sm text-cyan">
-              {hasOverride ? `Edit` : `Customize`}
-            </RectButton>
-          </Link>
+      </View>
+      <View className="gap-2 pl-7">
+        <InlineEditableSettingText
+          variant="hint"
+          setting={hanziWordMeaningHintTextSetting}
+          settingKey={{ hanziWord }}
+          placeholder="Add a hint"
+          defaultValue={displayHint ?? ``}
+          maxLength={80}
+          multiline
+          showCounterAtRatio={0.8}
+          overLimitMessage="Keep hints under 80 characters. Move extra detail to the explanation."
+          renderDisplay={(value) => <Pylymark source={value} />}
+        />
+
+        {hasCustomHint ? (
+          <InlineEditableSettingText
+            variant="hintExplanation"
+            setting={hanziWordMeaningHintExplanationSetting}
+            settingKey={{ hanziWord }}
+            placeholder="Add an explanation"
+            multiline
+            renderDisplay={(value) => <Pylymark source={value} />}
+          />
         ) : null}
       </View>
-      {hasHint ? (
-        <View className="pl-7">
-          <Text className="pyly-body">
-            <Pylymark source={displayHint} />
-          </Text>
-        </View>
-      ) : (
-        <View className="pl-7">
-          <NoHintPlaceholder hanziWord={hanziWord} />
-        </View>
+      {hasHint ? null : (
+        <Text className="pyly-body-caption pl-7 text-fg-dim">
+          Add a hint to make this meaning easier to recognize.
+        </Text>
       )}
     </View>
   );
 }
 
-function NoHintPlaceholder({ hanziWord }: { hanziWord: HanziWord }) {
-  const meaningKey = meaningKeyFromHanziWord(hanziWord);
-  const hanzi = hanziFromHanziWord(hanziWord);
-
+function Circle({ hasCustomHint }: { hasCustomHint: boolean }) {
   return (
-    <Link
-      href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(meaningKey)}`}
-      asChild
-    >
-      <RectButton variant="bare">
-        <View
-          className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
-        >
-          <IconImage size={32} icon="puzzle" className="text-fg-dim" />
-          <View className="items-center">
-            <Text className="font-sans text-base font-bold text-fg-dim">
-              No hint
-            </Text>
-            <Text className="pyly-body-caption opacity-80">
-              Create a hint here
-            </Text>
-          </View>
-        </View>
-      </RectButton>
-    </Link>
+    <View
+      className={`
+        m-1 size-3 rounded-full border-2
+
+        ${hasCustomHint ? `border-cyan bg-cyan` : `border-fg-bg25`}
+      `}
+    />
   );
 }
 

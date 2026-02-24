@@ -1,6 +1,6 @@
 // prettier-ignore
 // oxlint-disable eslint-plugin-import/no-commonjs
-export const createIconRegistry = () => ({
+export const iconRegistry = {
   // <pyly-glob-template glob="../../assets/icons/*.svg" template="  [`${filenameWithoutExt}`]: require(`${path}`),">
   [`add-circled-filled`]: require(`../../assets/icons/add-circled-filled.svg`),
   [`alarm-filled`]: require(`../../assets/icons/alarm-filled.svg`),
@@ -51,6 +51,7 @@ export const createIconRegistry = () => ({
   [`message-bubble-filled`]: require(`../../assets/icons/message-bubble-filled.svg`),
   [`message-text`]: require(`../../assets/icons/message-text.svg`),
   [`note-2`]: require(`../../assets/icons/note-2.svg`),
+  [`photos-filled`]: require(`../../assets/icons/photos-filled.svg`),
   [`plant-filled`]: require(`../../assets/icons/plant-filled.svg`),
   [`profile-filled`]: require(`../../assets/icons/profile-filled.svg`),
   [`profile`]: require(`../../assets/icons/profile.svg`),
@@ -77,8 +78,10 @@ export const createIconRegistry = () => ({
   [`voice-square`]: require(`../../assets/icons/voice-square.svg`),
   [`zap-filled`]: require(`../../assets/icons/zap-filled.svg`),
 // </pyly-glob-template>
-}) as const;
+} as const;
 // oxlint-enable eslint-plugin-import/no-commonjs
 
-export type IconRegistry = ReturnType<typeof createIconRegistry>;
+export type IconRegistry = typeof iconRegistry;
 export type IconName = keyof IconRegistry;
+
+export const iconNames = Object.keys(iconRegistry) as readonly IconName[];

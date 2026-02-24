@@ -1,5 +1,5 @@
 import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
-import { IconImage } from "@/client/ui/IconImage";
+import { Icon } from "@/client/ui/Icon";
 import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";
 import type { Href } from "expo-router";
@@ -38,7 +38,7 @@ export default function MenuLayout() {
         className="sm:hidden"
         leftButton={
           <Link href="/learn">
-            <IconImage icon="close" size={32} />
+            <Icon icon="close" size={32} />
           </Link>
         }
         rightButton={<MobileNavTrigger />}
@@ -215,7 +215,7 @@ function MobileNavTrigger() {
           setIsOpen((prev) => !prev);
         }}
       >
-        <IconImage icon="menu" size={32} />
+        <Icon icon="menu" size={32} />
       </Pressable>
       {isOpen ? (
         <Modal
@@ -234,7 +234,7 @@ function MobileNavTrigger() {
                     setIsOpen(false);
                   }}
                 >
-                  <IconImage icon="close" size={32} />
+                  <Icon icon="close" size={32} />
                 </Pressable>
               }
             />
@@ -313,7 +313,7 @@ const MobileNavItem = ({ name, href }: NavItemProps) => {
       >
         <Text className="pyly-button-outline">{name}</Text>
         <View className="flex-1 items-end">
-          {isActive ? <IconImage icon="check" size={24} /> : null}
+          {isActive ? <Icon icon="check" size={24} /> : null}
         </View>
       </Pressable>
     </Link>

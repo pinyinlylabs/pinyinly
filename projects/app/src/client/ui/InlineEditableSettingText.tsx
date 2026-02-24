@@ -14,7 +14,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { tv } from "tailwind-variants";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
 
@@ -265,11 +265,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 }
               >
                 <RectButton variant="bare">
-                  <IconImage
-                    icon="time-circled"
-                    size={16}
-                    className="text-fg-dim"
-                  />
+                  <Icon icon="time-circled" size={16} className="text-fg-dim" />
                 </RectButton>
               </FloatingMenuModal>
             </View>

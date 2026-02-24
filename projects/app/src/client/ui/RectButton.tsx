@@ -1,17 +1,19 @@
 import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { isValidElement, useState } from "react";
-import { Pressable, Text, View } from "react-native";
 import type { ViewProps } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { IconImage } from "./IconImage";
-import type { IconName } from "./IconRegistry";
+import type { IconProps } from "./Icon";
+import { Icon } from "./Icon";
+import type { IconName } from "./iconRegistry";
 
 export type ButtonVariant =
   | `filled`
   | `outline`
   | `option`
   | `bare`
+  | `bare2`
   | `rounded`;
 
 export type RectButtonProps = {
@@ -21,7 +23,7 @@ export type RectButtonProps = {
   inFlexRowParent?: boolean;
   iconStart?: IconName;
   iconEnd?: IconName;
-  iconSize?: 12 | 16 | 24 | 32;
+  iconSize?: IconProps[`size`];
 } & Pick<
   PropsOf<typeof Pressable>,
   keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
@@ -93,7 +95,7 @@ export function RectButton({
         ) : (
           <View className={iconLayout({ variant })}>
             {iconStart == null ? null : (
-              <IconImage
+              <Icon
                 icon={iconStart}
                 className={textClassName}
                 size={iconSize}
@@ -101,11 +103,7 @@ export function RectButton({
             )}
             {textContent}
             {iconEnd == null ? null : (
-              <IconImage
-                icon={iconEnd}
-                className={textClassName}
-                size={iconSize}
-              />
+              <Icon icon={iconEnd} className={textClassName} size={iconSize} />
             )}
           </View>
         )}
@@ -135,6 +133,7 @@ const pressable = tv({
         focus-visible:outline-sky/75
       `,
       bare: `transition-transform`,
+      bare2: `transition-transform`,
       rounded: `rounded-full transition-transform`,
     },
     inFlexRowParent: {
@@ -177,6 +176,11 @@ const pressable = tv({
         active:scale-95
       `,
     },
+    {
+      variant: `bare2`,
+      disabled: false,
+      class: `active:scale-[98%]`,
+    },
   ],
 });
 
@@ -192,6 +196,7 @@ const roundedRect = tv({
       outline: `rounded-xl border-2 border-fg/20 px-4 py-2`,
       option: `rounded-xl border border-fg/20 px-3 py-2`,
       bare: `px-2 py-1`,
+      bare2: `rounded px-2 py-1`,
       rounded: `rounded-full border border-fg/20 px-4 py-2`,
     },
     hoveredOrPressed: {
@@ -205,6 +210,7 @@ const roundedRect = tv({
     },
   },
   compoundVariants: [
+    // Filled
     {
       variant: `filled`,
       hoveredOrPressed: true,
@@ -256,6 +262,12 @@ const roundedRect = tv({
       hoveredOrPressed: true,
       class: `border-fg/30`,
     },
+    // Bare2
+    {
+      variant: `bare2`,
+      hoveredOrPressed: true,
+      class: `bg-fg/10`,
+    },
   ],
 });
 
@@ -266,6 +278,7 @@ const text = tv({
       outline: `pyly-button-outline`,
       option: `pyly-button-option`,
       bare: `pyly-button-bare`,
+      bare2: `pyly-button-bare2`,
       rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
     },
   },
@@ -310,6 +323,7 @@ const iconLayout = tv({
   variants: {
     variant: {
       bare: `gap-2`,
+      bare2: `gap-2`,
       filled: ``,
       outline: ``,
       option: ``,

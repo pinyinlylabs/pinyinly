@@ -16,7 +16,7 @@
         "meaningKey": "bad",
         "hint": "**Soil** that's **not** fertile is **bad** for crops.",
         "explanation": "If you're growing crops, everything depends on the soil (土). When the soil isn't (不) good, that's very bad news for your harvest.",
-        "imageAssetIds": ["wiki:坏:meaning"]
+        "imageAssetIds": ["sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A"]
       }
     ]
   },

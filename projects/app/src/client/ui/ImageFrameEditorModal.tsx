@@ -1,3 +1,5 @@
+import { trpc } from "@/client/trpc";
+import type { AssetId } from "@/data/model";
 import { useEffect, useRef, useState } from "react";
 import type {
   ImageSourcePropType,
@@ -32,7 +34,7 @@ import { clampRectPx, getMinCropSizePx, resizeRectPx } from "./imageCropCalc";
 import { useAssetImageMeta } from "./useAssetImageMeta";
 
 interface ImageFrameEditorModalProps {
-  assetId: string;
+  assetId: AssetId;
   frameConstraint?: ImageFrameConstraintInput | null;
   initialCrop?: ImageCrop | null;
   initialImageWidth?: number | null;
@@ -59,14 +61,22 @@ export function ImageFrameEditorModal({
   onSave,
 }: ImageFrameEditorModalProps) {
   const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
+  const [cropRect, setCropRect] = useState<ImageCropRect | null>(null);
+  const [initialRect, setInitialRect] = useState<ImageCropRect | null>(null);
+  const [currentAssetId, setCurrentAssetId] = useState(assetId);
+  const [isRemovingBackground, setIsRemovingBackground] = useState(false);
+  const [removeBackgroundError, setRemoveBackgroundError] = useState<
+    string | null
+  >(null);
+  const initialAssetIdRef = useRef<string | null>(null);
+
+  const removeBackgroundMutation = trpc.ai.removeBackground.useMutation();
+
   const imageMeta = useAssetImageMeta(
-    assetId,
+    currentAssetId,
     initialImageWidth,
     initialImageHeight,
   );
-  const [cropRect, setCropRect] = useState<ImageCropRect | null>(null);
-  const [initialRect, setInitialRect] = useState<ImageCropRect | null>(null);
-  const initialAssetIdRef = useRef<string | null>(null);
   const defaultCropRect =
     imageMeta.imageSize == null
       ? null
@@ -87,8 +97,8 @@ export function ImageFrameEditorModal({
       return;
     }
 
-    if (initialAssetIdRef.current !== assetId) {
-      initialAssetIdRef.current = assetId;
+    if (initialAssetIdRef.current !== currentAssetId) {
+      initialAssetIdRef.current = currentAssetId;
       setCropRect(null);
       setInitialRect(defaultCropRect);
       return;
@@ -97,7 +107,7 @@ export function ImageFrameEditorModal({
     if (initialRect == null) {
       setInitialRect(defaultCropRect);
     }
-  }, [assetId, defaultCropRect, initialRect]);
+  }, [currentAssetId, defaultCropRect, initialRect]);
 
   const isDirty =
     initialRect != null &&
@@ -111,6 +121,29 @@ export function ImageFrameEditorModal({
     }
 
     confirmDiscardChanges({ onDiscard: dismiss });
+  };
+
+  const handleRemoveBackground = async () => {
+    setIsRemovingBackground(true);
+    setRemoveBackgroundError(null);
+
+    try {
+      const result = await removeBackgroundMutation.mutateAsync({
+        assetId: currentAssetId,
+      });
+
+      if (result.assetId != null) {
+        setCurrentAssetId(result.assetId);
+        setCropRect(null);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : `Failed to remove background`;
+      setRemoveBackgroundError(errorMessage);
+      console.error(`Background removal error:`, error);
+    } finally {
+      setIsRemovingBackground(false);
+    }
   };
 
   return (
@@ -154,7 +187,40 @@ export function ImageFrameEditorModal({
               <Text className="text-[14px] text-fg-dim">
                 Drag the frame to reposition. Drag a corner to resize.
               </Text>
+              {removeBackgroundError == null ? null : (
+                <Text className="text-[12px] text-red">
+                  Background removal failed: {removeBackgroundError}
+                </Text>
+              )}
             </View>
+
+            {isRemovingBackground ? (
+              <View
+                className={`
+                  flex-row items-center justify-center gap-2 border-t border-fg/10 px-4 py-3
+                `}
+              >
+                <ActivityIndicator size="small" className="text-fg" />
+                <Text className="text-[14px] text-fg-dim">
+                  Removing background...
+                </Text>
+              </View>
+            ) : (
+              <View className="border-t border-fg/10 px-4 py-2">
+                <RectButton
+                  variant="outline"
+                  onPress={() => {
+                    void handleRemoveBackground();
+                  }}
+                  disabled={
+                    imageMeta.status !== `ready` || currentAssetId == null
+                  }
+                  className="py-2"
+                >
+                  Remove Background
+                </RectButton>
+              </View>
+            )}
 
             <View className="flex-1 px-4">
               {imageMeta.status === `ready` &&

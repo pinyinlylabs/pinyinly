@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { RectButton } from "./RectButton";
 import { ExampleStack } from "./demo/components";
 
@@ -80,11 +80,7 @@ function ThemeExamples() {
 
       <View className="mt-2 w-[245px] gap-2 bg-bg px-3 py-2">
         <View className="flex-row items-center gap-2">
-          <IconImage
-            icon="check-circled-filled"
-            size={32}
-            className="text-fg"
-          />
+          <Icon icon="check-circled-filled" size={32} className="text-fg" />
           <Text className="pyly-body-title">
             Title <Text className="pyly-bold">loud</Text>
           </Text>

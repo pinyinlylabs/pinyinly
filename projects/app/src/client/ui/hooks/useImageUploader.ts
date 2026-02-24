@@ -1,7 +1,8 @@
 import { trpc } from "@/client/trpc";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import { getBlobSha256Base64Url } from "@/client/util/assetHash";
+import type { AssetId } from "@/data/model";
 import type { currentSchema } from "@/data/rizzleSchema";
+import { getArrayBufferAssetId } from "@/util/assetId";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -25,7 +26,7 @@ function isAllowedImageType(value: string): value is AllowedImageType {
 }
 
 interface ImageUploaderOptions {
-  onUploadComplete: (assetId: string) => void;
+  onUploadComplete: (assetId: AssetId) => void;
   onUploadError?: (error: string) => void;
 }
 
@@ -76,7 +77,7 @@ export function useImageUploader({
         throw new Error(`Image must be smaller than 5MB`);
       }
 
-      const assetId = await getBlobSha256Base64Url(blob);
+      const assetId = await getArrayBufferAssetId(await blob.arrayBuffer());
 
       await rep.mutate.initAsset({
         assetId,

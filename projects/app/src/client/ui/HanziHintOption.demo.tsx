@@ -1,13 +1,22 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { HanziHintOption } from "@/client/ui/HanziHintOption";
 import { RectButton } from "@/client/ui/RectButton";
+import type { AssetId } from "@/data/model";
 import { useState } from "react";
 import { Text, View } from "react-native";
 
 const presetHint = `A **child** reaching up for knowledge`;
 const userHint = `My **classroom** memory hook`;
-const presetImageIds = [`wiki:学:child`, `wiki:看:meaning`, `wiki:坏:meaning`];
-const userImageIds = [`wiki:学:child`, `wiki:原:meaning`, `wiki:福:meaning`];
+const presetImageIds = [
+  `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+  `sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU`,
+  `sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A`,
+] as AssetId[];
+const userImageIds = [
+  `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
+  `sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug`,
+  `sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w`,
+] as AssetId[];
 
 export default () => {
   const [selectedHint, setSelectedHint] = useState<string>(presetHint);

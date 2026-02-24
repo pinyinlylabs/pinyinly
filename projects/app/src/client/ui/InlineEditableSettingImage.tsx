@@ -8,6 +8,7 @@ import {
   useUserSetting,
   useUserSettingHistory,
 } from "@/client/ui/hooks/useUserSetting";
+import type { AssetId } from "@/data/model";
 import { useEffect, useRef, useState } from "react";
 import type {
   LayoutChangeEvent,
@@ -43,7 +44,7 @@ import { useAssetImageMeta } from "./useAssetImageMeta";
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   setting: T;
   settingKey: UserSettingKeyInput<T>;
-  presetImageIds?: readonly string[];
+  presetImageIds?: readonly AssetId[];
   includeHistory?: boolean;
   previewHeight?: number;
   tileSize?: number;
@@ -86,22 +87,21 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const imageWidth = typeof imageWidthRaw === `number` ? imageWidthRaw : null;
   const imageHeight =
     typeof imageHeightRaw === `number` ? imageHeightRaw : null;
-  const [hoveredHintImageId, setHoveredHintImageId] = useState<string | null>(
+  const [hoveredHintImageId, setHoveredHintImageId] = useState<AssetId | null>(
     null,
   );
-  const [inlineEditorAssetId, setInlineEditorAssetId] = useState<string | null>(
-    null,
-  );
+  const [inlineEditorAssetId, setInlineEditorAssetId] =
+    useState<AssetId | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<`upload` | `generate`>(`upload`);
   const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
   const isPointerHoverCapable = usePointerHoverCapability();
   const isInlineRepositioning = inlineEditorAssetId != null;
 
-  const historyImageAssetIds: string[] = [];
-  const imageMetaById = new Map<string, ImageMeta>();
+  const historyImageAssetIds: AssetId[] = [];
+  const imageMetaById = new Map<AssetId, ImageMeta>();
   if (imageId != null) {
-    imageMetaById.set(imageId, {
+    imageMetaById.set(imageId as AssetId, {
       imageId,
       crop: imageCrop,
       imageWidth,
@@ -119,11 +119,11 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       if (seenIds.has(assetId)) {
         continue;
       }
-      seenIds.add(assetId);
-      historyImageAssetIds.push(assetId);
+      seenIds.add(assetId as AssetId);
+      historyImageAssetIds.push(assetId as AssetId);
       const meta = buildImageMeta(entry.value);
-      if (meta != null && !imageMetaById.has(meta.imageId)) {
-        imageMetaById.set(meta.imageId, meta);
+      if (meta != null && !imageMetaById.has(meta.imageId as AssetId)) {
+        imageMetaById.set(meta.imageId as AssetId, meta);
       }
     }
   }
@@ -132,10 +132,10 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       ...historyImageAssetIds,
       ...presetImageIds,
       ...(imageId == null ? [] : [imageId]),
-    ]),
+    ] as AssetId[]),
   );
 
-  const handleSelectHintImage = (assetId: string) => {
+  const handleSelectHintImage = (assetId: AssetId) => {
     const meta = imageMetaById.get(assetId);
     setValue({
       imageId: assetId,
@@ -146,7 +146,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     setIsPickerOpen(false);
   };
 
-  const handleAddCustomImage = (assetId: string) => {
+  const handleAddCustomImage = (assetId: AssetId) => {
     setValue({ imageId: assetId } as UserSettingEntityInput<T>);
     if (frameAspectRatio != null) {
       setInlineEditorAssetId(assetId);
@@ -154,7 +154,8 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     setIsPickerOpen(false);
   };
 
-  const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
+  const previewHintImageId =
+    hoveredHintImageId ?? (imageId as AssetId | null) ?? null;
   const previewMeta =
     previewHintImageId == null
       ? null
@@ -232,7 +233,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                     if (imageId == null) {
                       return;
                     }
-                    setInlineEditorAssetId(imageId);
+                    setInlineEditorAssetId(imageId as AssetId);
                   }}
                 >
                   Reposition
@@ -374,7 +375,7 @@ function HintImagePreview({
   height,
   aspectRatio,
 }: {
-  assetId: string | null;
+  assetId: AssetId | null;
   imageMeta: ImageMeta | null;
   height: number;
   aspectRatio: number | null;
@@ -416,7 +417,7 @@ function InlineImageRepositionEditor({
   onCancel,
   onSave,
 }: {
-  assetId: string;
+  assetId: AssetId;
   frameAspectRatio: number | null;
   initialCrop: ImageCrop | null;
   initialImageWidth: number | null;
@@ -432,7 +433,7 @@ function InlineImageRepositionEditor({
   );
   const [cropRect, setCropRect] = useState<ImageCropRect | null>(null);
   const [initialRect, setInitialRect] = useState<ImageCropRect | null>(null);
-  const initialAssetIdRef = useRef<string | null>(null);
+  const initialAssetIdRef = useRef<AssetId | null>(null);
   const defaultCropRect =
     imageMeta.imageSize == null
       ? null
@@ -523,7 +524,7 @@ function InlineImageRepositionFrame({
   onSave,
   onCropRectChange,
 }: {
-  assetId: string;
+  assetId: AssetId;
   cropRect: ImageCropRect;
   imageSize: { width: number; height: number };
   frameAspectRatio: number | null;
@@ -694,7 +695,7 @@ function HintImageTile({
   isHovered,
   size,
 }: {
-  assetId: string;
+  assetId: AssetId;
   imageMeta: ImageMeta | null;
   isSelected: boolean;
   isHovered: boolean;

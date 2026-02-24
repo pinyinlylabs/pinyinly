@@ -1,4 +1,4 @@
-import type { PinyinSoundId } from "@/data/model";
+import type { AssetId, PinyinSoundId } from "@/data/model";
 import { nullIfEmpty } from "@/util/unicode";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { Text, View } from "react-native";
@@ -11,7 +11,7 @@ interface PinyinSoundProps {
   label: string;
   name: string | null;
   image: {
-    assetId: string;
+    assetId: AssetId;
     crop: ImageCrop;
     imageWidth: number | null;
     imageHeight: number | null;

@@ -1,4 +1,4 @@
-import { classNameLintInvariant } from "#client/ui/IconImage.utils.ts";
+import { classNameLintInvariant } from "#client/ui/Icon.utils.ts";
 import { describe, expect, test } from "vitest";
 
 describe(

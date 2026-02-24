@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { use, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { searchDictionaryEntries } from "./dictionarySearch";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { Portal } from "./Portal";
 import { TextInputSingle } from "./TextInputSingle";
 
@@ -59,7 +59,7 @@ export function MenuDictionarySearch() {
   return (
     <View className="w-[200px]">
       <View ref={setReference} collapsable={false}>
-        <IconImage
+        <Icon
           icon="search"
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-dim"

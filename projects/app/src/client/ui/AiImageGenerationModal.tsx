@@ -1,3 +1,4 @@
+import type { AssetId } from "@/data/model";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
@@ -6,7 +7,7 @@ import { RectButton } from "./RectButton";
 
 export interface AiImageGenerationModalProps {
   initialPrompt: string;
-  onConfirm: (assetId: string) => void;
+  onConfirm: (assetId: AssetId) => void;
   onDismiss: () => void;
   onSavePrompt?: (prompt: string) => void;
 }

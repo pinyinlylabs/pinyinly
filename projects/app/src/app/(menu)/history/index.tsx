@@ -1,6 +1,6 @@
 import { historyPageCollection, historyPageData } from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
-import { IconImage } from "@/client/ui/IconImage";
+import { Icon } from "@/client/ui/Icon";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import { Suspense } from "@/client/ui/Suspense";
 import { formatDurationShort, formatRelativeTime } from "@/util/date";
@@ -53,7 +53,7 @@ export default function HistoryPage() {
                 const otherRatings = skillGroup.ratings.slice(1);
                 return (
                   <View key={j} className="flex-row items-center gap-2">
-                    <IconImage
+                    <Icon
                       size={16}
                       icon={
                         finalRating.rating === Rating.Again ? `close` : `check`

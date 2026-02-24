@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { PageSheetModal } from "./PageSheetModal";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
@@ -158,11 +158,7 @@ function AddCustomHintModalContent({
                     setExplanation(``);
                   }}
                 >
-                  <IconImage
-                    size={16}
-                    icon="chevron-down"
-                    className="text-fg-dim"
-                  />
+                  <Icon size={16} icon="chevron-down" className="text-fg-dim" />
                 </Pressable>
               </View>
               <TextInputMulti

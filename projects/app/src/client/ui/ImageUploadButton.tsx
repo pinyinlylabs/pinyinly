@@ -1,6 +1,7 @@
+import type { AssetId } from "@/data/model";
 import * as ImagePicker from "expo-image-picker";
 import { ActivityIndicator, Text } from "react-native";
-import { IconImage } from "./IconImage";
+import { Icon } from "./Icon";
 import { RectButton } from "./RectButton";
 import { useImageUploader } from "./hooks/useImageUploader";
 
@@ -8,7 +9,7 @@ interface ImageUploadButtonProps {
   /**
    * Called when the upload completes successfully with the assetId.
    */
-  onUploadComplete: (assetId: string) => void;
+  onUploadComplete: (assetId: AssetId) => void;
   /**
    * Called when the upload fails with an error message.
    */
@@ -73,7 +74,7 @@ export function ImageUploadButton({
         </>
       ) : (
         <>
-          <IconImage size={16} icon="puzzle" className="text-fg" />
+          <Icon size={16} icon="puzzle" className="text-fg" />
           <Text className="text-fg">{buttonText}</Text>
         </>
       )}

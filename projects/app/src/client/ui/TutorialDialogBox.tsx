@@ -1,4 +1,4 @@
-import { IconImage } from "@/client/ui/IconImage";
+import { Icon } from "@/client/ui/Icon";
 import { SpeechBubble } from "@/client/ui/SpeechBubble";
 import { useState } from "react";
 import { Text } from "react-native";
@@ -64,7 +64,7 @@ export const TutorialDialogBox = ({
         {/* Reserve some space for the "Next" chevron icon, so that it doesn't overlap the content of the text. */}
         <Text className="inline-block w-[24px]"></Text>
 
-        <IconImage
+        <Icon
           icon="chevron-right"
           size={24}
           className={`

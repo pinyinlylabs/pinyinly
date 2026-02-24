@@ -35,8 +35,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
   [`HanziTile`]: lazyDemo(() => import(`../../../client/ui/HanziTile.demo`)),
   [`HanziWordTile`]: lazyDemo(() => import(`../../../client/ui/HanziWordTile.demo`)),
-  [`IconImage`]: lazyDemo(() => import(`../../../client/ui/IconImage.demo`)),
-  [`Icons`]: lazyDemo(() => import(`../../../client/ui/Icons.demo`)),
+  [`Icon`]: lazyDemo(() => import(`../../../client/ui/Icon.demo`)),
   [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
   [`ImagePasteDropZone`]: lazyDemo(() => import(`../../../client/ui/ImagePasteDropZone.demo`)),
   [`ImageUploadButton`]: lazyDemo(() => import(`../../../client/ui/ImageUploadButton.demo`)),
@@ -72,7 +71,6 @@ export const demos: Record<string, FunctionComponent> = {
   [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
   [`WikiHanziCharacterDecomposition`]: lazyDemo(() => import(`../../../client/ui/WikiHanziCharacterDecomposition.demo`)),
   [`WikiHanziCharacterIntro`]: lazyDemo(() => import(`../../../client/ui/WikiHanziCharacterIntro.demo`)),
-  [`WikiHanziHintEditor`]: lazyDemo(() => import(`../../../client/ui/WikiHanziHintEditor.demo`)),
   [`WikiHanziModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziModal.demo`)),
 // </pyly-glob-template>
 };

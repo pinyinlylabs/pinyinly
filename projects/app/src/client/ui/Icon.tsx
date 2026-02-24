@@ -1,15 +1,16 @@
 import type { ImageProps } from "expo-image";
 import { Image } from "expo-image";
 import { tv } from "tailwind-variants";
-import { classNameLintInvariant, iconRegistry } from "./IconImage.utils";
-import type { IconName } from "./IconRegistry";
+import { classNameLintInvariant } from "./Icon.utils";
+import type { IconName } from "./iconRegistry";
+import { iconRegistry } from "./iconRegistry";
 
-export interface IconImageProps extends Pick<ImageProps, `className`> {
+export interface IconProps extends Pick<ImageProps, `className`> {
   icon: IconName;
   size?: 12 | 16 | 20 | 24 | 32;
 }
 
-export function IconImage({ icon, className, size }: IconImageProps) {
+export function Icon({ icon, className, size }: IconProps) {
   if (__DEV__ && className != null) {
     classNameLintInvariant(className);
   }
