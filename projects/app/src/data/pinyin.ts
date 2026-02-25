@@ -549,6 +549,13 @@ function buildPinyinChart(
   };
 }
 
+export function getPinyinSoundLabel(
+  soundId: PinyinSoundId,
+  chart: DeepReadonly<PinyinChart>,
+): string {
+  return chart.soundToCustomLabel[soundId] ?? soundId;
+}
+
 const pinyinChartSpecSchema = z.object({
   items: z.record(z.string(), z.string()),
   labels: z.record(z.string(), z.string()).optional(),

@@ -1,8 +1,11 @@
+import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
+import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import {
   pinyinSoundDescriptionSetting,
+  pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSettingKey,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
@@ -14,13 +17,14 @@ import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
+import { SettingText } from "@/client/ui/SettingText";
 import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
+  getPinyinSoundLabel,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
-import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -30,7 +34,6 @@ import { tv } from "tailwind-variants";
 
 export default function SoundIdPage() {
   "use memo";
-  "mySoundIdPage";
   const { id: rawId, tone: rawTone } = useLocalSearchParams<
     `/sounds/[id]` & { tone?: string }
   >();
@@ -95,7 +98,7 @@ export default function SoundIdPage() {
     (g) => g.id === pinyinSoundGroupId,
   );
 
-  const label = chart.soundToCustomLabel[id] ?? id;
+  const label = getPinyinSoundLabel(id, chart);
 
   useEffect(() => {
     if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
@@ -112,7 +115,50 @@ export default function SoundIdPage() {
   return (
     <ScrollView ref={scrollRef}>
       <View className="w-full max-w-[800px] self-center pb-2 pt-safe-offset-4 px-safe-or-4">
-        <View className="mb-5 flex-row items-center gap-4">
+        <View className="flex-row items-center gap-1">
+          <Link href="/sounds" asChild>
+            <RectButton variant="bare2" iconSize={20}>
+              Sounds
+            </RectButton>
+          </Link>
+          {pinyinSoundGroupId == null ? null : (
+            <>
+              <Text className="text-fg-dim">/</Text>
+              <Link href="/sounds" asChild>
+                <RectButton variant="bare2" iconSize={20}>
+                  <Text className="text-fg">
+                    <SettingText
+                      setting={pinyinSoundGroupNameSetting}
+                      settingKey={{ soundGroupId: pinyinSoundGroupId }}
+                    />
+                  </Text>
+                </RectButton>
+              </Link>
+            </>
+          )}
+          <Text className="text-fg-dim">/</Text>
+          {pinyinSoundGroup == null ? (
+            <RectButton variant="bare2">{label}</RectButton>
+          ) : (
+            <FloatingMenuModal
+              menu={
+                <SiblingSoundMenu
+                  sounds={pinyinSoundGroup?.sounds}
+                  currentSoundId={id}
+                />
+              }
+            >
+              <RectButton
+                iconEnd="chevron-up-down"
+                variant="bare2"
+                iconSize={16}
+              >
+                {label}
+              </RectButton>
+            </FloatingMenuModal>
+          )}
+        </View>
+        <View className="my-5 flex-row items-center gap-4">
           <View className={pinyinPartBox()}>
             <Text className="text-center font-cursive text-2xl text-fg">
               {label}
@@ -127,19 +173,6 @@ export default function SoundIdPage() {
         </View>
 
         <View className="gap-2">
-          <Text className="text-lg text-fg">
-            {nullIfEmpty(pinyinSoundGroup?.name) ?? `Untitled group`}:
-          </Text>
-          <View className="flex-row flex-wrap gap-1">
-            {pinyinSoundGroup?.sounds.map((siblingId) => (
-              <Link key={siblingId} href={`/sounds/${siblingId}`}>
-                <Text className={siblingId === id ? `text-fg` : `text-fg/50`}>
-                  {pinyinSounds.get(siblingId)?.label}
-                </Text>
-              </Link>
-            ))}
-          </View>
-
           <View>
             <Text className="pyly-body-title">Pronunciation</Text>
 
@@ -270,3 +303,31 @@ export default function SoundIdPage() {
 const pinyinPartBox = tv({
   base: `size-20 justify-center gap-1 rounded-xl bg-bg-high p-2`,
 });
+
+function SiblingSoundMenu({
+  sounds,
+  currentSoundId,
+  onRequestClose,
+}: {
+  sounds: readonly PinyinSoundId[];
+  currentSoundId: PinyinSoundId;
+} & FloatingMenuModalMenuProps) {
+  const chart = loadPylyPinyinChart();
+
+  return (
+    <View className="max-h-60 items-start overflow-y-scroll rounded-xl bg-bg-high p-3">
+      {sounds.map((soundId) => (
+        <Link key={soundId} href={`/sounds/${soundId}`} asChild>
+          <RectButton
+            variant="bare2"
+            onPress={onRequestClose}
+            iconEnd={soundId === currentSoundId ? `check` : undefined}
+            iconSize={16}
+          >
+            {getPinyinSoundLabel(soundId, chart)}
+          </RectButton>
+        </Link>
+      ))}
+    </View>
+  );
+}
