@@ -15,9 +15,25 @@ export default defineConfig({
     testTimeout: 30_000, // pglite can be slow
   },
   resolve: {
+    extensions: [
+      // Putting .web extension first allows us to import expo-* modules because
+      // it resolves the way Metro would do it for API routes.
+      `.web.tsx`,
+      `.tsx`,
+      `.web.ts`,
+      `.ts`,
+      `.web.js`,
+      `.js`,
+      `.jsx`,
+      `.json`,
+    ],
     alias: {
       "react-native": `react-native-web`,
     },
   },
   plugins: [viteMdxPlugin(), tsconfigPaths(), react()],
+  define: {
+    __DEV__: `true`,
+    "process.env.EXPO_OS": JSON.stringify(`web`),
+  },
 });

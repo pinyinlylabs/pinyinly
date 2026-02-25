@@ -40,15 +40,6 @@ vi.mock(`expo-haptics`, () => {
   return {};
 });
 
-vi.mock(`expo-crypto`, () => {
-  return {
-    CryptoDigestAlgorithm: {
-      SHA256: `SHA-256`,
-    },
-    digest: async () => new Uint8Array(32).buffer,
-  };
-});
-
 vi.mock(`expo-image`, () => {
   return {
     // SyntaxError: The requested module 'expo-image' does not provide an export
@@ -86,14 +77,6 @@ vi.mock(`react-native-svg`, () => {
     G: () => null,
     Path: () => null,
     Svg: () => null,
-  };
-});
-
-vi.mock(`expo-secure-store`, () => {
-  return {
-    getItemAsync: () => null,
-    deleteItemAsync: () => null,
-    setItemAsync: () => null,
   };
 });
 
@@ -179,7 +162,3 @@ vi.mock(
 
   vi.stubGlobal(`localStorage`, localStorageMock);
 }
-
-// Set up __DEV__ global variable
-// @ts-expect-error __DEV__ is not defined in Node
-globalThis.__DEV__ = true;

@@ -12,6 +12,7 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
 import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 import { EventSchemas, Inngest, RetryAfterError } from "inngest";
 import * as postmark from "postmark";
 import z from "zod/v4";
@@ -53,17 +54,18 @@ export const inngest = new Inngest({
     }),
     "migrateAssetIds/manual": z.never(),
     "test/hello.world.email": z.never(),
-    "test/test-fn": z.never(),
-    "test/test-log-root-error": z.never(),
-    "test/test-log-step-error": z.never(),
-    "test/test-throw-root-error": z.never(),
-    "test/test-throw-step-error": z.never(),
+    "test/fn": z.never(),
+    "test/crypto": z.never(),
+    "test/log-root-error": z.never(),
+    "test/log-step-error": z.never(),
+    "test/throw-root-error": z.never(),
+    "test/throw-step-error": z.never(),
   }),
 });
 
 const devTestThrowRootError = inngest.createFunction(
   { id: `test-throw-root-error` },
-  { event: `test/test-throw-root-error` },
+  { event: `test/throw-root-error` },
   () => {
     throw new Error(`test error`);
   },
@@ -71,7 +73,7 @@ const devTestThrowRootError = inngest.createFunction(
 
 const devTestThrowStepError = inngest.createFunction(
   { id: `test-throw-step-error` },
-  { event: `test/test-throw-step-error` },
+  { event: `test/throw-step-error` },
   async ({ step }) => {
     await step.run(`throw error`, () => {
       throw new Error(`test error`);
@@ -81,7 +83,7 @@ const devTestThrowStepError = inngest.createFunction(
 
 const devTestLogRootError = inngest.createFunction(
   { id: `test-log-root-error` },
-  { event: `test/test-log-root-error` },
+  { event: `test/log-root-error` },
   () => {
     console.error(new Error(`test error`));
   },
@@ -89,11 +91,24 @@ const devTestLogRootError = inngest.createFunction(
 
 const devTestLogStepError = inngest.createFunction(
   { id: `test-log-step-error` },
-  { event: `test/test-log-step-error` },
+  { event: `test/log-step-error` },
   async ({ step }) => {
     await step.run(`log error`, () => {
       console.error(new Error(`test error`));
     });
+  },
+);
+
+const devTestCrypto = inngest.createFunction(
+  { id: `test-crypto` },
+  { event: `test/crypto` },
+  async () => {
+    return {
+      digest: await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        `test`,
+      ),
+    };
   },
 );
 
@@ -1097,6 +1112,7 @@ export const functions = [
   syncAssetBlobs,
   syncAssetBlobUpload,
   syncAssetBlobDownload,
+  devTestCrypto,
   devTestThrowRootError,
   devTestThrowStepError,
   devTestLogRootError,

@@ -1,3 +1,4 @@
+import { trpc } from "@/client/trpc";
 import type {
   UserSettingEntityInput,
   UserSettingEntityOutput,
@@ -9,6 +10,7 @@ import {
   useUserSettingHistory,
 } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
+import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 import type {
   LayoutChangeEvent,
@@ -167,6 +169,14 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const canEditCrop = frameAspectRatio != null && imageId != null;
   const shouldShowPreviewButtons = !isInlineRepositioning;
   const shouldShowPickerPanel = isPickerOpen;
+  const handleRemoveBackgroundApply = (next: RemoveBackgroundApplyInput) => {
+    setValue({
+      imageId: next.imageId,
+      imageCrop: imageCropValueFromCrop(next.imageCrop ?? null),
+      imageWidth: next.imageWidth ?? undefined,
+      imageHeight: next.imageHeight ?? undefined,
+    } as UserSettingEntityInput<T>);
+  };
   const inlineEditor =
     inlineEditorAssetId == null ? null : (
       <InlineImageRepositionEditor
@@ -194,54 +204,143 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   return (
     <View className={className}>
       <View className="gap-2">
-        <View className="group relative">
-          {isInlineRepositioning ? (
-            inlineEditor
-          ) : (
-            <HintImagePreview
-              assetId={previewHintImageId}
-              imageMeta={previewMeta}
-              height={previewHeight}
-              aspectRatio={frameAspectRatio}
-            />
-          )}
-          {shouldShowPreviewButtons ? (
-            <View
-              className={
-                isPointerHoverCapable
-                  ? `
-                    pointer-events-none absolute inset-x-3 bottom-3 flex-row items-center
-                    justify-end gap-2 opacity-0
+        {imageId == null ? (
+          <View className="group relative">
+            {isInlineRepositioning ? (
+              inlineEditor
+            ) : (
+              <HintImagePreview
+                assetId={previewHintImageId}
+                imageMeta={previewMeta}
+                height={previewHeight}
+                aspectRatio={frameAspectRatio}
+              />
+            )}
+            {shouldShowPreviewButtons ? (
+              <View
+                className={
+                  isPointerHoverCapable
+                    ? `
+                      pointer-events-none absolute inset-x-3 bottom-3 flex-row items-center
+                      justify-end gap-2 opacity-0
 
-                    group-hover:pointer-events-auto group-hover:opacity-100
-                  `
-                  : `absolute inset-x-3 bottom-3 flex-row items-center justify-end gap-2`
-              }
-            >
-              <RectButton
-                variant="bare"
-                onPress={() => {
-                  setIsPickerOpen((current) => !current);
-                }}
+                      group-hover:pointer-events-auto group-hover:opacity-100
+                    `
+                    : `absolute inset-x-3 bottom-3 flex-row items-center justify-end gap-2`
+                }
               >
-                Change
-              </RectButton>
-              {canEditCrop ? (
                 <RectButton
                   variant="bare"
                   onPress={() => {
-                    if (imageId == null) {
-                      return;
-                    }
-                    setInlineEditorAssetId(imageId as AssetId);
+                    setIsPickerOpen((current) => !current);
                   }}
                 >
-                  Reposition
+                  Change
                 </RectButton>
-              ) : null}
-            </View>
-          ) : null}
-        </View>
+                {canEditCrop ? (
+                  <RectButton
+                    variant="bare"
+                    onPress={() => {
+                      if (imageId == null) {
+                        return;
+                      }
+                      setInlineEditorAssetId(imageId as AssetId);
+                    }}
+                  >
+                    Reposition
+                  </RectButton>
+                ) : null}
+              </View>
+            ) : null}
+          </View>
+        ) : (
+          <RemoveBackgroundControls
+            assetId={imageId as AssetId}
+            imageCrop={imageCrop}
+            imageWidth={imageWidth}
+            imageHeight={imageHeight}
+            frameAspectRatio={frameAspectRatio}
+            onApply={handleRemoveBackgroundApply}
+          >
+            {({ canRemove, isRemoving, error, removeBackground }) => (
+              <>
+                <View className="group relative">
+                  {isInlineRepositioning ? (
+                    inlineEditor
+                  ) : (
+                    <HintImagePreview
+                      assetId={previewHintImageId}
+                      imageMeta={previewMeta}
+                      height={previewHeight}
+                      aspectRatio={frameAspectRatio}
+                    />
+                  )}
+                  {shouldShowPreviewButtons ? (
+                    <View
+                      className={
+                        isPointerHoverCapable
+                          ? `
+                            pointer-events-none absolute inset-x-3 bottom-3 flex-row items-center
+                            justify-end gap-2 opacity-0
+
+                            group-hover:pointer-events-auto group-hover:opacity-100
+                          `
+                          : `absolute inset-x-3 bottom-3 flex-row items-center justify-end gap-2`
+                      }
+                    >
+                      <RectButton
+                        variant="bare"
+                        onPress={() => {
+                          setIsPickerOpen((current) => !current);
+                        }}
+                      >
+                        Change
+                      </RectButton>
+                      {canEditCrop ? (
+                        <RectButton
+                          variant="bare"
+                          onPress={() => {
+                            if (imageId == null) {
+                              return;
+                            }
+                            setInlineEditorAssetId(imageId as AssetId);
+                          }}
+                        >
+                          Reposition
+                        </RectButton>
+                      ) : null}
+                      <RectButton
+                        variant="bare"
+                        onPress={() => {
+                          void removeBackground();
+                        }}
+                        disabled={!canRemove || isRemoving}
+                      >
+                        Remove Background
+                      </RectButton>
+                    </View>
+                  ) : null}
+                </View>
+                {shouldShowPreviewButtons &&
+                !isInlineRepositioning &&
+                (error != null || isRemoving) ? (
+                  isRemoving ? (
+                    <View className="flex-row items-center gap-2">
+                      <ActivityIndicator size="small" className="text-fg" />
+                      <Text className="text-[12px] text-fg-dim">
+                        Removing background...
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text className="text-[12px] text-red">
+                      Background removal failed: {error}
+                    </Text>
+                  )
+                ) : null}
+              </>
+            )}
+          </RemoveBackgroundControls>
+        )}
 
         {shouldShowPickerPanel ? (
           <View className="gap-3 rounded-lg border border-fg/10 bg-fg/5 p-3">
@@ -367,6 +466,111 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       </View>
     </View>
   );
+}
+
+interface RemoveBackgroundApplyInput {
+  imageId: AssetId;
+  imageCrop: ImageCrop | null;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+}
+
+interface RemoveBackgroundControlsRenderProps {
+  canRemove: boolean;
+  isRemoving: boolean;
+  error: string | null;
+  removeBackground: () => Promise<void>;
+}
+
+interface RemoveBackgroundControlsProps {
+  assetId: AssetId;
+  imageCrop: ImageCrop;
+  imageWidth: number | null;
+  imageHeight: number | null;
+  frameAspectRatio: number | null;
+  onApply: (next: RemoveBackgroundApplyInput) => void;
+  children: (controls: RemoveBackgroundControlsRenderProps) => ReactElement;
+}
+
+function RemoveBackgroundControls({
+  assetId,
+  imageCrop,
+  imageWidth,
+  imageHeight,
+  frameAspectRatio,
+  onApply,
+  children,
+}: RemoveBackgroundControlsProps): ReactElement {
+  const imageMeta = useAssetImageMeta(assetId, imageWidth, imageHeight);
+  const [isRemovingBackground, setIsRemovingBackground] = useState(false);
+  const [removeBackgroundError, setRemoveBackgroundError] = useState<
+    string | null
+  >(null);
+  const removeBackgroundMutation = trpc.ai.removeBackground.useMutation();
+
+  useEffect(() => {
+    setRemoveBackgroundError(null);
+  }, [assetId]);
+
+  const handleRemoveBackground = async () => {
+    if (isRemovingBackground) {
+      return;
+    }
+
+    setIsRemovingBackground(true);
+    setRemoveBackgroundError(null);
+
+    try {
+      const result = await removeBackgroundMutation.mutateAsync({ assetId });
+      if (result.assetId == null) {
+        return;
+      }
+
+      const cropRect = imageCrop.kind === `rect` ? imageCrop.rect : null;
+      const nextSize =
+        imageMeta.imageSize ??
+        (imageWidth != null && imageHeight != null
+          ? { width: imageWidth, height: imageHeight }
+          : null);
+      const shouldKeepCrop =
+        cropRect != null &&
+        isRectAspectRatioCompatible(cropRect, frameAspectRatio);
+      const nextCrop: ImageCrop | null =
+        shouldKeepCrop || nextSize == null
+          ? cropRect == null
+            ? null
+            : { kind: `rect`, rect: cropRect }
+          : {
+              kind: `rect`,
+              rect: createCenteredCropRect(
+                nextSize.width,
+                nextSize.height,
+                frameAspectRatio,
+              ),
+            };
+
+      onApply({
+        imageId: result.assetId,
+        imageCrop: nextCrop,
+        imageWidth: nextSize?.width ?? null,
+        imageHeight: nextSize?.height ?? null,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : `Failed to remove background`;
+      setRemoveBackgroundError(errorMessage);
+      console.error(`Background removal error:`, error);
+    } finally {
+      setIsRemovingBackground(false);
+    }
+  };
+
+  return children({
+    canRemove: imageMeta.status === `ready` && !isRemovingBackground,
+    isRemoving: isRemovingBackground,
+    error: removeBackgroundError,
+    removeBackground: handleRemoveBackground,
+  });
 }
 
 function HintImagePreview({
@@ -750,6 +954,22 @@ function clampCropPosition(rect: ImageCropRect): ImageCropRect {
   return { x, y, width, height };
 }
 
+function isRectAspectRatioCompatible(
+  rect: ImageCropRect,
+  frameAspectRatio: number | null,
+): boolean {
+  if (frameAspectRatio == null) {
+    return true;
+  }
+
+  if (rect.height <= 0 || rect.width <= 0) {
+    return false;
+  }
+
+  const rectRatio = rect.width / rect.height;
+  return Math.abs(rectRatio - frameAspectRatio) <= 0.01;
+}
+
 function getImageScale(
   frameSize: { width: number; height: number },
   rect: ImageCropRect,
@@ -765,7 +985,7 @@ function getImageScale(
 function rectToPx(
   rect: ImageCropRect,
   imageSize: { width: number; height: number },
-) {
+): { x: number; y: number; width: number; height: number } {
   return {
     x: rect.x * imageSize.width,
     y: rect.y * imageSize.height,

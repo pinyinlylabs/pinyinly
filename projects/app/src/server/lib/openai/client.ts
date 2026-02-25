@@ -3,8 +3,6 @@ import { fetchAssetBuffer } from "@/server/lib/s3/assets";
 import { openaiApiKey } from "@/util/env";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
-// eslint-disable-next-line @expoCodeImports/no-restricted-imports -- Server-only code, Node.js is guaranteed
-import { Readable } from "node:stream";
 import { OpenAI, toFile } from "openai";
 
 export const getOpenAIClient = memoize0((): OpenAI => {
@@ -30,7 +28,7 @@ export async function removeBackgroundFromImage(
   const openaiClient = getOpenAIClient();
 
   // Convert image buffer to a file object for the OpenAI API
-  const imageFile = await toFile(Readable.from(imageBuffer), `image.png`, {
+  const imageFile = await toFile(imageBuffer, `image.png`, {
     type: `image/png`,
   });
 
@@ -40,6 +38,7 @@ export async function removeBackgroundFromImage(
     image: imageFile,
     prompt: `Remove the background without affecting the foreground item`,
     background: `transparent`,
+    output_format: `png`,
   });
 
   if (!response.data || response.data.length === 0) {

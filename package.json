@@ -70,6 +70,7 @@
     "@react-navigation/elements@npm:^2.8.4": "patch:@react-navigation/elements@npm%3A2.9.2#~/.yarn/patches/@react-navigation-elements-npm-2.9.2-498006ac98.patch",
     "@react-navigation/elements@npm:^2.9.2": "patch:@react-navigation/elements@npm%3A2.9.2#~/.yarn/patches/@react-navigation-elements-npm-2.9.2-498006ac98.patch",
     "metro@npm:0.83.2": "patch:metro@npm%3A0.83.3#~/.yarn/patches/metro-npm-0.83.3-6f86736a59.patch",
-    "metro@npm:0.83.3": "patch:metro@npm%3A0.83.3#~/.yarn/patches/metro-npm-0.83.3-6f86736a59.patch"
+    "metro@npm:0.83.3": "patch:metro@npm%3A0.83.3#~/.yarn/patches/metro-npm-0.83.3-6f86736a59.patch",
+    "expo-crypto@npm:~15.0.8": "patch:expo-crypto@npm%3A15.0.8#~/.yarn/patches/expo-crypto-npm-15.0.8-fd3ff49cd4.patch"
   }
 }
