@@ -149,7 +149,7 @@ export default function SoundIdPage() {
               }
             >
               <RectButton
-                iconEnd="chevon-up-down"
+                iconEnd="chevron-up-down"
                 variant="bare2"
                 iconSize={16}
               >

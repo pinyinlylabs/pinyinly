@@ -20,7 +20,7 @@ export const iconRegistry = {
   [`cart`]: require(`../../assets/icons/cart.svg`),
   [`check-circled-filled`]: require(`../../assets/icons/check-circled-filled.svg`),
   [`check`]: require(`../../assets/icons/check.svg`),
-  [`chevon-up-down`]: require(`../../assets/icons/chevon-up-down.svg`),
+  [`chevron-up-down`]: require(`../../assets/icons/chevron-up-down.svg`),
   [`chevron-down-circled`]: require(`../../assets/icons/chevron-down-circled.svg`),
   [`chevron-down`]: require(`../../assets/icons/chevron-down.svg`),
   [`chevron-left`]: require(`../../assets/icons/chevron-left.svg`),
