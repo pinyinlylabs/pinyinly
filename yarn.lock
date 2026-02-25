@@ -6312,7 +6312,7 @@ __metadata:
     expo-audio: "npm:~1.1.0"
     expo-auth-session: "npm:~7.0.10"
     expo-constants: "npm:~18.0.12"
-    expo-crypto: "npm:~15.0.8"
+    expo-crypto: "patch:expo-crypto@npm%3A15.0.8#~/.yarn/patches/expo-crypto-npm-15.0.8-fd3ff49cd4.patch"
     expo-dev-client: "npm:~6.0.20"
     expo-device: "npm:~8.0.10"
     expo-font: "npm:~14.0.10"
@@ -13632,7 +13632,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-crypto@npm:~15.0.8":
+"expo-crypto@npm:15.0.8":
   version: 15.0.8
   resolution: "expo-crypto@npm:15.0.8"
   dependencies:
@@ -13640,6 +13640,17 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10c0/714806a2245a0aa05b7ec0d7044cd6ec317f3da7d96298b3a4b39c3ef8f62f25fa0d64b5b9df4018151a6b65c4c4348f6a7f5ad23e09bd73364daab260745df5
+  languageName: node
+  linkType: hard
+
+"expo-crypto@patch:expo-crypto@npm%3A15.0.8#~/.yarn/patches/expo-crypto-npm-15.0.8-fd3ff49cd4.patch":
+  version: 15.0.8
+  resolution: "expo-crypto@patch:expo-crypto@npm%3A15.0.8#~/.yarn/patches/expo-crypto-npm-15.0.8-fd3ff49cd4.patch::version=15.0.8&hash=89fcd4"
+  dependencies:
+    base64-js: "npm:^1.3.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/9f93c707759c42303aa6aa02a2c353ef0666dcad5fc3bb940c11d30df87af99b537b70f439234694e601dd2a70a6ed18cf602211e3f2177f6b257586f7860967
   languageName: node
   linkType: hard
 
