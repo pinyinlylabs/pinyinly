@@ -266,6 +266,8 @@ export function AiImageGenerationPanel({
                         void handleSelectStyleImage(assetId);
                       }}
                       disabled={isProcessing}
+                      // oxlint-disable-next-line typescript/no-deprecated
+                      rawChildren
                     >
                       <View className="gap-2">
                         <View

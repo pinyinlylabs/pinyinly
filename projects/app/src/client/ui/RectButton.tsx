@@ -1,6 +1,6 @@
 import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
-import { isValidElement, useState } from "react";
+import { useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -24,6 +24,10 @@ export type RectButtonProps = {
   iconStart?: IconName;
   iconEnd?: IconName;
   iconSize?: IconProps[`size`];
+  /**
+   * @deprecated Use a `variant` to control styling or use a different component.
+   */
+  rawChildren?: boolean;
 } & Pick<
   PropsOf<typeof Pressable>,
   keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
@@ -37,6 +41,8 @@ export function RectButton({
   iconStart,
   iconEnd,
   iconSize,
+  // oxlint-disable-next-line typescript/no-deprecated
+  rawChildren = false,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
@@ -46,12 +52,11 @@ export function RectButton({
 
   const flat = pressed || disabled;
   const textClassName = extractTextClasses(className);
-  const hasChildren = children != null;
-  const textContent = isValidElement(children) ? (
+  const content = rawChildren ? (
     children
-  ) : hasChildren ? (
+  ) : children == null ? null : (
     <Text className={text({ variant, class: textClassName })}>{children}</Text>
-  ) : null;
+  );
 
   return (
     <Pressable
@@ -91,7 +96,7 @@ export function RectButton({
         })}
       >
         {iconStart == null && iconEnd == null ? (
-          textContent
+          content
         ) : (
           <View className={iconLayout({ variant })}>
             {iconStart == null ? null : (
@@ -101,7 +106,7 @@ export function RectButton({
                 size={iconSize}
               />
             )}
-            {textContent}
+            {content}
             {iconEnd == null ? null : (
               <Icon icon={iconEnd} className={textClassName} size={iconSize} />
             )}
@@ -274,11 +279,11 @@ const roundedRect = tv({
 const text = tv({
   variants: {
     variant: {
-      filled: `pyly-button-filled`,
+      filled: `font-sans text-base/snug font-bold uppercase text-bg`,
       outline: `pyly-button-outline`,
-      option: `pyly-button-option`,
-      bare: `pyly-button-bare`,
-      bare2: `pyly-button-bare2`,
+      option: `font-sans text-base/snug font-medium text-fg`,
+      bare: `font-sans text-sm/normal font-bold uppercase text-fg`,
+      bare2: `font-sans text-sm/normal font-bold uppercase text-fg`,
       rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
     },
   },

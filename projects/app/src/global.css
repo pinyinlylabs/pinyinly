@@ -8,23 +8,8 @@
   TEXT STYLES
   
   */
-  .pyly-button-filled {
-    @apply font-sans text-base/snug font-bold uppercase text-bg;
-  }
   .pyly-button-outline {
     @apply font-sans text-base/snug font-bold uppercase text-fg;
-  }
-  .pyly-button-option {
-    @apply font-sans text-base/snug font-medium text-fg;
-  }
-  .pyly-button-option-caption {
-    @apply font-sans text-sm/snug text-fg-dim;
-  }
-  .pyly-button-bare {
-    @apply font-sans text-sm/normal font-bold uppercase text-fg;
-  }
-  .pyly-button-bare2 {
-    @apply font-sans text-sm/normal font-bold uppercase text-fg;
   }
 
   /* --- */

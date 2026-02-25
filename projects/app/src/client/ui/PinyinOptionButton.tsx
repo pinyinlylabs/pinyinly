@@ -48,8 +48,10 @@ export function PinyinOptionButton({
         props.onPointerDown?.(e);
       }}
     >
-      <Text className="pyly-button-option">{pinyin}</Text>
-      <Text className="pyly-button-option-caption">{shortcutKey}</Text>
+      <Text className="font-sans text-base/snug font-medium text-fg">
+        {pinyin}
+      </Text>
+      <Text className="font-sans text-sm/snug text-fg-dim">{shortcutKey}</Text>
     </RectButton>
   );
 }
