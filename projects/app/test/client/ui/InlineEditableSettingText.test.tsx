@@ -1,12 +1,12 @@
 // @vitest-environment happy-dom
 
 import { InlineEditableSettingText } from "#client/ui/InlineEditableSettingText.tsx";
-import * as useUserSettingModule from "#client/ui/hooks/useUserSetting.ts";
 import type {
   UseUserSettingResult,
   UserSettingHistoryEntry,
   UserSettingTextEntity,
 } from "#client/ui/hooks/useUserSetting.ts";
+import * as useUserSettingModule from "#client/ui/hooks/useUserSetting.ts";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -80,6 +80,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -95,6 +96,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -110,6 +112,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -129,6 +132,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -148,6 +152,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -174,6 +179,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -207,6 +213,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -236,6 +243,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -265,6 +273,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -294,6 +303,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -326,6 +336,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="default"
         sanitizeValue={customSanitize}
       />,
@@ -363,6 +374,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue=""
         sanitizeValue={customSanitize}
       />,
@@ -396,6 +408,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="   "
       />,
     );

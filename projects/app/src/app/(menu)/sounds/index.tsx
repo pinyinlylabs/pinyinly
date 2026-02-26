@@ -91,7 +91,7 @@ export default function SoundsPage() {
         <Text className="pyly-body-title">Sounds</Text>
       </View>
 
-      {pinyinSoundGroupsQuery.data?.map(({ id, name, theme, sounds }) => {
+      {pinyinSoundGroupsQuery.data?.map(({ id, sounds }) => {
         return (
           <View key={id} className="gap-4">
             <View className="flex-row items-center gap-2">
@@ -99,7 +99,6 @@ export default function SoundsPage() {
                 setting={pinyinSoundGroupNameSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Group name"
-                defaultValue={name}
                 displayClassName="text-lg font-bold text-fg"
                 emptyClassName="text-lg font-bold text-fg/30"
                 inputClassName="text-lg font-bold text-fg"
@@ -109,7 +108,6 @@ export default function SoundsPage() {
                 setting={pinyinSoundGroupThemeSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Theme"
-                defaultValue={theme}
                 displayClassName="text-fg-dim"
                 emptyClassName="text-fg-dim/70"
                 inputClassName="text-fg"

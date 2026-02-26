@@ -269,6 +269,7 @@ function MeaningItem({
           setting={hanziWordMeaningHintTextSetting}
           settingKey={{ hanziWord }}
           placeholder="Add a hint"
+          // oxlint-disable-next-line typescript/no-deprecated
           defaultValue={displayHint ?? ``}
           maxLength={80}
           multiline

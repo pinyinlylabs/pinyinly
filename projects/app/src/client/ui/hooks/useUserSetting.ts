@@ -121,9 +121,9 @@ const skippedSettingKeyInfo = {
   keyParamMarshaled: {} as Record<string, string>,
 };
 
-type UserSettingKeyParamsNoSkip<T extends UserSettingEntity> =
+export type UserSettingKeyParamsNoSkip<T extends UserSettingEntity> =
   UserSettingKeyInput<T> & { skip?: never };
-type UserSettingKeyParamsSkip<T extends UserSettingEntity> = {
+export type UserSettingKeyParamsSkip<T extends UserSettingEntity> = {
   skip: true;
 } & Partial<UserSettingKeyInput<T>>;
 

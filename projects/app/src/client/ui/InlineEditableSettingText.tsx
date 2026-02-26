@@ -16,6 +16,7 @@ import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
+import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
 export type InlineEditableSettingTextVariant =
   | `body`
@@ -28,6 +29,11 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   setting: T;
   settingKey: UserSettingKeyInput<T>;
   placeholder: string;
+  /**
+   * @deprecated Use `useUserSettingTextDefaultValue` hook instead for better
+   * consistency and to avoid confusion with the `defaultValue` prop of the
+   * underlying `TextInput`.
+   */
   defaultValue?: string;
   multiline?: boolean;
   maxLength?: number;
@@ -52,6 +58,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   setting,
   settingKey,
   placeholder,
+  // oxlint-disable-next-line typescript/no-deprecated
   defaultValue,
   multiline = false,
   maxLength,
@@ -68,8 +75,12 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   "use memo";
   const { value, setValue } = useUserSetting(setting, settingKey);
   const history = useUserSettingHistory(setting, settingKey);
+  const defaultValueFromHook = useUserSettingTextDefaultValue(
+    setting,
+    settingKey,
+  );
   const currentValue: string = value?.text ?? ``;
-  const fallbackValue = defaultValue ?? ``;
+  const fallbackValue = defaultValue ?? defaultValueFromHook ?? ``;
   const displayValue = currentValue.length > 0 ? currentValue : fallbackValue;
   const hasDisplayValue = displayValue.length > 0;
   const sanitizedDefaultValue = sanitizeValue(fallbackValue);

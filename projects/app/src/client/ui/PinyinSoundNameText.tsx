@@ -1,4 +1,4 @@
-import { PinyinSoundId } from "@/data/model";
+import type { PinyinSoundId } from "@/data/model";
 import { getPinyinSoundLabel, loadPylyPinyinChart } from "@/data/pinyin";
 
 export function PinyinSoundNameText({

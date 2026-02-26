@@ -140,6 +140,7 @@ function ToneTileEditor({
           setting={pinyinFinalToneNameSetting}
           settingKey={descriptionSettingKey}
           placeholder="Name this tone location"
+          // oxlint-disable-next-line typescript/no-deprecated
           defaultValue={defaultFinalToneName}
           displayClassName="text-base font-medium text-fg"
           emptyClassName="text-base font-medium text-fg-dim"
