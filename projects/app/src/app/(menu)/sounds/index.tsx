@@ -103,7 +103,7 @@ export default function SoundsPage() {
                 emptyClassName="text-lg font-bold text-fg/30"
                 inputClassName="text-lg font-bold text-fg"
               />
-              <Text className="text-fg-dim">({sounds.length})</Text>
+              <Text className="font-sans text-fg-dim">({sounds.length})</Text>
               <InlineEditableSettingText
                 setting={pinyinSoundGroupThemeSetting}
                 settingKey={{ soundGroupId: id }}
