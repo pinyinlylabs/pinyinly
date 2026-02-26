@@ -133,7 +133,7 @@ export default function SoundIdPage() {
           />
         </View>
 
-        <View className="gap-2">
+        <View className="gap-10">
           <WikiTitledBox title="Pronunciation">
             <View className="gap-4 p-4">
               <Text className="pyly-body">
@@ -142,27 +142,24 @@ export default function SoundIdPage() {
             </View>
           </WikiTitledBox>
 
-          <View className="gap-2">
-            <Text className="pyly-body-title">Description</Text>
-            <InlineEditableSettingText
-              setting={pinyinSoundDescriptionSetting}
-              settingKey={{ soundId: id }}
-              placeholder="Add a description to help with mnemonic generation…"
-              multiline
-            />
-          </View>
-
-          <View className="gap-2">
-            <Text className="pyly-body-title">Image</Text>
-            <InlineEditableSettingImage
-              setting={pinyinSoundImageSetting}
-              settingKey={{ soundId: id }}
-              previewHeight={200}
-              tileSize={64}
-              enablePasteDropZone
-              frameConstraint={{ aspectRatio: 1 }}
-            />
-          </View>
+          <WikiTitledBox title="Mnemonic story role">
+            <View className="gap-4 p-4">
+              <InlineEditableSettingText
+                setting={pinyinSoundDescriptionSetting}
+                settingKey={{ soundId: id }}
+                placeholder="Add a description to help with mnemonic generation…"
+                multiline
+              />
+              <InlineEditableSettingImage
+                setting={pinyinSoundImageSetting}
+                settingKey={{ soundId: id }}
+                previewHeight={200}
+                tileSize={64}
+                enablePasteDropZone
+                frameConstraint={{ aspectRatio: 1 }}
+              />
+            </View>
+          </WikiTitledBox>
 
           <View className="flex-row flex-wrap gap-1">
             <Text className="pyly-body-title">Names</Text>
