@@ -15,6 +15,7 @@ import {
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
+import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
@@ -28,7 +29,7 @@ import {
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
-import { Link, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -279,22 +280,18 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
 
   return (
     <View className="flex-row items-center gap-1">
-      <Link href="/sounds" asChild>
-        <RectButton variant="bare2" iconSize={20}>
-          Sounds
-        </RectButton>
-      </Link>
+      <RectButton href="/sounds" variant="bare2" iconSize={20}>
+        Sounds
+      </RectButton>
       {pinyinSoundGroupId == null ? null : (
         <>
           <Text className="text-fg-dim">/</Text>
-          <Link href="/sounds" asChild>
-            <RectButton variant="bare2" iconSize={20}>
-              <SettingText
-                setting={pinyinSoundGroupNameSetting}
-                settingKey={{ soundGroupId: pinyinSoundGroupId }}
-              />
-            </RectButton>
-          </Link>
+          <RectButton href="/sounds" variant="bare2" iconSize={20}>
+            <SettingText
+              setting={pinyinSoundGroupNameSetting}
+              settingKey={{ soundGroupId: pinyinSoundGroupId }}
+            />
+          </RectButton>
         </>
       )}
       <Text className="text-fg-dim">/</Text>
@@ -320,17 +317,6 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
   );
 }
 
-function PinyinSoundNameText({
-  pinyinSoundId,
-}: {
-  pinyinSoundId: PinyinSoundId;
-}) {
-  const chart = loadPylyPinyinChart();
-  const label = getPinyinSoundLabel(pinyinSoundId, chart);
-
-  return label;
-}
-
 function SiblingSoundMenu({
   sounds,
   currentSoundId,
@@ -342,16 +328,16 @@ function SiblingSoundMenu({
   return (
     <View className="max-h-60 items-start overflow-y-scroll rounded-xl bg-bg-high p-3">
       {sounds.map((soundId) => (
-        <Link key={soundId} href={`/sounds/${soundId}`} asChild>
-          <RectButton
-            variant="bare2"
-            onPress={onRequestClose}
-            iconEnd={soundId === currentSoundId ? `check` : undefined}
-            iconSize={16}
-          >
-            <PinyinSoundNameText pinyinSoundId={soundId} />
-          </RectButton>
-        </Link>
+        <RectButton
+          key={soundId}
+          href={`/sounds/${soundId}`}
+          variant="bare2"
+          onPress={onRequestClose}
+          iconEnd={soundId === currentSoundId ? `check` : undefined}
+          iconSize={16}
+        >
+          <PinyinSoundNameText pinyinSoundId={soundId} />
+        </RectButton>
       ))}
     </View>
   );

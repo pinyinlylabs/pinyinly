@@ -54,14 +54,13 @@ export default function WebsiteLayout() {
                   entering={FadeIn.duration(100)}
                   exiting={FadeOut.duration(100)}
                 >
-                  <Link href="/learn" asChild>
-                    <RectButton
-                      variant="filled"
-                      className="[--color-fg:var(--color-cyanold)]"
-                    >
-                      Get Started
-                    </RectButton>
-                  </Link>
+                  <RectButton
+                    href="/learn"
+                    variant="filled"
+                    className="[--color-fg:var(--color-cyanold)]"
+                  >
+                    Get Started
+                  </RectButton>
                 </Reanimated.View>
               </View>
             )}

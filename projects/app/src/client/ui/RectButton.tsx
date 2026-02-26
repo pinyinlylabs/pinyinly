@@ -1,5 +1,7 @@
 import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
+import type { Href } from "expo-router";
+import { Link } from "expo-router";
 import { useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
@@ -20,6 +22,7 @@ export type RectButtonProps = {
   variant?: ButtonVariant;
   children?: ViewProps[`children`];
   className?: string;
+  href?: Href;
   inFlexRowParent?: boolean;
   iconStart?: IconName;
   iconEnd?: IconName;
@@ -37,6 +40,7 @@ export function RectButton({
   children,
   variant = `outline`,
   className,
+  href,
   inFlexRowParent = false,
   iconStart,
   iconEnd,
@@ -55,10 +59,12 @@ export function RectButton({
   const content = rawChildren ? (
     children
   ) : children == null ? null : (
-    <Text className={text({ variant, class: textClassName })}>{children}</Text>
+    <Text className={textClass({ variant, class: textClassName })}>
+      {children}
+    </Text>
   );
 
-  return (
+  const pressable = (
     <Pressable
       {...pressableProps}
       onHoverIn={(e) => {
@@ -78,7 +84,7 @@ export function RectButton({
         setPressed(false);
         pressableProps.onPressOut?.(e);
       }}
-      className={pressable({
+      className={pressableClass({
         flat,
         variant,
         disabled,
@@ -87,7 +93,7 @@ export function RectButton({
       })}
     >
       <View
-        className={roundedRect({
+        className={roundedRectClass({
           flat,
           variant,
           disabled,
@@ -98,7 +104,7 @@ export function RectButton({
         {iconStart == null && iconEnd == null ? (
           content
         ) : (
-          <View className={iconLayout({ variant })}>
+          <View className={iconLayoutClass({ variant })}>
             {iconStart == null ? null : (
               <Icon
                 icon={iconStart}
@@ -115,9 +121,17 @@ export function RectButton({
       </View>
     </Pressable>
   );
+
+  return href == null ? (
+    pressable
+  ) : (
+    <Link href={href} asChild>
+      {pressable}
+    </Link>
+  );
 }
 
-const pressable = tv({
+const pressableClass = tv({
   base: `web:transition-all`,
   variants: {
     flat: {
@@ -189,7 +203,7 @@ const pressable = tv({
   ],
 });
 
-const roundedRect = tv({
+const roundedRectClass = tv({
   base: `
     box-border select-none items-center justify-center
 
@@ -276,7 +290,7 @@ const roundedRect = tv({
   ],
 });
 
-const text = tv({
+const textClass = tv({
   variants: {
     variant: {
       filled: `font-sans text-base/snug font-bold uppercase text-bg`,
@@ -323,7 +337,7 @@ const extractTextClasses = (className?: string) => {
   return classes === `` ? undefined : classes;
 };
 
-const iconLayout = tv({
+const iconLayoutClass = tv({
   base: `flex-row items-center`,
   variants: {
     variant: {
