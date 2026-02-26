@@ -1,12 +1,10 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import {
-  pinyinSoundGroupNameSetting,
   pinyinSoundGroupNameSettingKey,
   pinyinSoundGroupThemeSetting,
   pinyinSoundGroupThemeSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
 import {
-  defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
@@ -42,25 +40,16 @@ export function usePinyinSoundGroups() {
     const result = [];
 
     for (const { id, sounds } of chart.soundGroups) {
-      const nameKey = pinyinSoundGroupNameSettingKey(id);
       const themeKey = pinyinSoundGroupThemeSettingKey(id);
 
-      const nameOverride = settings.find((s) => s.key === nameKey);
       const themeOverride = settings.find((s) => s.key === themeKey);
 
-      const nameValueData = nameOverride?.value
-        ? pinyinSoundGroupNameSetting.unmarshalValueSafe(nameOverride.value)
-        : null;
       const themeValueData = themeOverride?.value
         ? pinyinSoundGroupThemeSetting.unmarshalValueSafe(themeOverride.value)
         : null;
 
       result.push({
         id,
-        name:
-          nullIfEmpty(nameValueData?.text) ??
-          defaultPinyinSoundGroupNames[id] ??
-          ``,
         theme:
           nullIfEmpty(themeValueData?.text) ??
           defaultPinyinSoundGroupThemes[id] ??

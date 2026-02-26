@@ -116,7 +116,7 @@ export default function SoundIdPage() {
 
   return (
     <ScrollView ref={scrollRef}>
-      <View className="w-full max-w-[800px] self-center pb-2 px-safe pt-safe-offset-4">
+      <View className="w-full max-w-[800px] self-center pb-2 px-safe pt-safe">
         <Breadcrumb pinyinSoundId={id} />
 
         <View className="my-5 flex-row items-center gap-4">
