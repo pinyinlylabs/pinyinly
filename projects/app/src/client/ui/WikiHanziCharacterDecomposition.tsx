@@ -203,14 +203,9 @@ function MeaningsSection({
     return null;
   }
 
-  const meaningsCount = hanziWordMeanings.length;
-
   return (
     <View className="gap-4 p-4">
-      <Text className="pyly-body">
-        <Text className="pyly-bold">{hanzi}</Text>
-        {` `}({meaningsCount} {meaningsCount === 1 ? `meaning` : `meanings`})
-      </Text>
+      <Text className="pyly-body-heading">{hanzi} meanings</Text>
 
       <View className="gap-3">
         {hanziWordMeanings.map(([hanziWord, meaning]) => {
