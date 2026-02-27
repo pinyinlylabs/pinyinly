@@ -133,12 +133,12 @@ function NoResults({
 }) {
   return (
     <View className="items-center px-4 pb-8 pt-10">
-      <Text className="mb-10 font-sans text-lg text-fg-dim">
+      <Text className="mb-10 font-sans text-lg font-medium text-fg-dim">
         No results for &quot;<Text className={`text-fg`}>{query}</Text>&quot;
       </Text>
 
       <View className="w-full items-start gap-2">
-        <Text className="font-sans text-sm font-medium uppercase">
+        <Text className="font-sans text-sm font-semibold uppercase text-fg">
           Try searching for
         </Text>
         <View className="flex-row flex-wrap gap-2">
