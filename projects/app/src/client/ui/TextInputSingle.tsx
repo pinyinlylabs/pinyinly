@@ -3,6 +3,8 @@ import type { Ref } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 
+type TextInputVariant = `bare` | `flat`;
+
 interface TextInputSingleProps extends Omit<
   PropsOf<typeof TextInput>,
   // make `placeholder` mandatory (encourage a11y)
@@ -14,9 +16,13 @@ interface TextInputSingleProps extends Omit<
   disabled?: boolean;
   placeholder: string | undefined;
   ref?: Ref<TextInput>;
+  variant?: TextInputVariant;
 }
 
-export function TextInputSingle(props: TextInputSingleProps) {
+export function TextInputSingle({
+  variant = `flat`,
+  ...props
+}: TextInputSingleProps) {
   return (
     <TextInput
       {...props}
@@ -29,22 +35,31 @@ export function TextInputSingle(props: TextInputSingleProps) {
       className={inputClass({
         textAlign: props.textAlign,
         className: props.className,
+        variant,
       })}
     />
   );
 }
 
 const inputClass = tv({
-  base: `
-    pyly-body-input rounded-xl bg-bg-high px-4 py-3 outline-none
-
-    placeholder:text-fg/30
-  `,
+  base: ``,
   variants: {
     textAlign: {
       left: `text-left`,
       center: `text-center`,
       right: `text-right`,
+    },
+    variant: {
+      bare: `
+        font-sans text-sm font-medium text-fg outline-none
+
+        placeholder:text-fg-dim
+      `,
+      flat: `
+        pyly-body-input rounded-xl bg-bg-high px-4 py-3 outline-none
+
+        placeholder:text-fg/30
+      `,
     },
   },
 });

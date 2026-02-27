@@ -26,7 +26,7 @@ export function WikiHanziHeaderOverview({
   hanziScrollRef,
   ...rest
 }: {
-  hanziScrollRef: (node?: Element | null) => void;
+  hanziScrollRef: (node: Element | null) => void;
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 

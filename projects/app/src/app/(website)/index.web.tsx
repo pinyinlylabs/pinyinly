@@ -1,21 +1,20 @@
 import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { useIntersectionObserver } from "usehooks-ts";
 
 export default function WebsitePage() {
   const setIsBodyGetStartedVisible = useWebsiteStore(
     (s) => s.setIsBodyGetStartedVisible,
   );
-  const { isIntersecting, ref } = useIntersectionObserver({
+  const [ref, entry] = useIntersectionObserver({
     threshold: 0.5,
-    initialIsIntersecting: true,
   });
 
   useEffect(() => {
-    setIsBodyGetStartedVisible(isIntersecting);
-  }, [isIntersecting, setIsBodyGetStartedVisible]);
+    setIsBodyGetStartedVisible(entry?.isIntersecting === true);
+  }, [entry?.isIntersecting, setIsBodyGetStartedVisible]);
 
   return (
     <>

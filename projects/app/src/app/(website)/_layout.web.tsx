@@ -1,21 +1,20 @@
 import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
 import { invariant } from "@pinyinly/lib/invariant";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { Image } from "expo-image";
 import { Link, Slot } from "expo-router";
 import { ScrollView, View } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
-import { useIntersectionObserver } from "usehooks-ts";
 
 export default function WebsiteLayout() {
   const isBodyGetStartedVisible = useWebsiteStore(
     (s) => s.isBodyGetStartedVisible,
   );
 
-  const { isIntersecting, ref } = useIntersectionObserver({
+  const [ref, entry] = useIntersectionObserver({
     threshold: 0.5,
-    initialIsIntersecting: true,
   });
 
   const calligraphy = require(`../../assets/www/calligraphy.png`) as {
@@ -30,7 +29,7 @@ export default function WebsiteLayout() {
           www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-bg
           transition-all
 
-          ${isIntersecting ? `` : `border-b-2 border-solid border-bg-high`}
+          ${entry?.isIntersecting == true ? `` : `border-b-2 border-solid border-bg-high`}
         `}
       >
         <View className="flex w-full max-w-www-col justify-between">

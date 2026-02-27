@@ -30,7 +30,7 @@ export function searchDictionaryEntries(
   entries: DictionaryEntries,
   query: string,
   options: DictionarySearchOptions = {},
-): DictionarySearchResult[] {
+): readonly DictionarySearchResult[] {
   const trimmedQuery = query.trim();
   if (trimmedQuery.length === 0) {
     return [];
