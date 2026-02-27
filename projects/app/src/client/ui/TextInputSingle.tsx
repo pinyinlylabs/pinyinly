@@ -1,7 +1,9 @@
+import { mergeRefs } from "@/client/react";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { Ref } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
+import { useAutoFocusRef } from "./hooks/useAutoFocusRef";
 
 type TextInputVariant = `bare` | `flat`;
 
@@ -23,9 +25,13 @@ export function TextInputSingle({
   variant = `flat`,
   ...props
 }: TextInputSingleProps) {
+  const autoFocusRef = useAutoFocusRef(props.autoFocus);
+  const ref = mergeRefs(props.ref, autoFocusRef);
+
   return (
     <TextInput
       {...props}
+      ref={ref}
       // @ts-expect-error `dataSet` isn't a standard prop in react-native, but it exists for react-native-web
       // since https://github.com/necolas/react-native-web/releases/tag/0.13.0
       dataSet={{
