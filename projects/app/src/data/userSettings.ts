@@ -4,13 +4,18 @@ import type {
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
-import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
+import {
+  defaultPinyinSoundGroupNames,
+  defaultPinyinSoundGroupThemes,
+  normalizePinyinUnitForHintKey,
+} from "@/data/pinyin";
 import {
   rHanziWord,
   rPinyinSoundGroupId,
   rPinyinSoundId,
 } from "@/data/rizzleSchema";
 import type {
+  RizzleAnyEntity,
   RizzleBoolean,
   RizzleEntity,
   RizzleType,
@@ -65,6 +70,53 @@ export type UserSettingToggleableEntity = RizzleEntity<
   { enabled: RizzleTypeAlias<RizzleBoolean, `e`> }
 >;
 
+export type UserSettingKeyInput<T extends RizzleAnyEntity> = Parameters<
+  T[`marshalKey`]
+>[0];
+
+export type UserSettingDefaultValueFn<T extends RizzleAnyEntity> = (
+  keyParams: UserSettingKeyInput<T>,
+) => Record<string, unknown> | null;
+
+export interface UserSetting<T extends RizzleAnyEntity = RizzleAnyEntity> {
+  kind: `userSetting`;
+  entity: T;
+  historyLimit?: number;
+  defaultValue?: UserSettingDefaultValueFn<T>;
+}
+
+export type UserSettingLike<T extends RizzleAnyEntity = RizzleAnyEntity> =
+  | UserSetting<T>
+  | T;
+
+export function defineUserSetting<T extends RizzleAnyEntity>(
+  userSetting: Omit<UserSetting<T>, `kind`>,
+): UserSetting<T> {
+  return {
+    kind: `userSetting`,
+    ...userSetting,
+  };
+}
+
+export function isUserSetting<T extends RizzleAnyEntity>(
+  userSettingLike: UserSettingLike<T>,
+): userSettingLike is UserSetting<T> {
+  return (
+    typeof userSettingLike === `object` &&
+    userSettingLike != null &&
+    `kind` in userSettingLike &&
+    userSettingLike.kind === `userSetting`
+  );
+}
+
+export function userSettingEntity<T extends RizzleAnyEntity>(
+  userSettingLike: UserSettingLike<T>,
+): T {
+  return isUserSetting(userSettingLike)
+    ? userSettingLike.entity
+    : userSettingLike;
+}
+
 //
 // Settings
 //
@@ -73,6 +125,10 @@ export const autoCheckUserSetting = r.entity(`autoCheck`, {
   enabled: r.boolean(`e`),
 }) satisfies UserSettingToggleableEntity;
 
+export const autoCheckUserSettingDef = defineUserSetting({
+  entity: autoCheckUserSetting,
+});
+
 // Sounds
 
 export const pinyinSoundNameSetting = r.entity(`psn/[soundId]`, {
@@ -80,25 +136,51 @@ export const pinyinSoundNameSetting = r.entity(`psn/[soundId]`, {
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
 
+export const pinyinSoundNameSettingDef = defineUserSetting({
+  entity: pinyinSoundNameSetting,
+});
+
 export const pinyinSoundGroupNameSetting = r.entity(`psgn/[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
+
+export const pinyinSoundGroupNameSettingDef = defineUserSetting({
+  entity: pinyinSoundGroupNameSetting,
+  defaultValue: ({ soundGroupId }) => ({
+    text: defaultPinyinSoundGroupNames[soundGroupId],
+  }),
+});
 
 export const pinyinSoundGroupThemeSetting = r.entity(`psgt/[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
 
+export const pinyinSoundGroupThemeSettingDef = defineUserSetting({
+  entity: pinyinSoundGroupThemeSetting,
+  defaultValue: ({ soundGroupId }) => ({
+    text: defaultPinyinSoundGroupThemes[soundGroupId],
+  }),
+});
+
 export const pinyinSoundDescriptionSetting = r.entity(`psd/[soundId]`, {
   soundId: rPinyinSoundId().alias(`i`),
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
 
+export const pinyinSoundDescriptionSettingDef = defineUserSetting({
+  entity: pinyinSoundDescriptionSetting,
+});
+
 export const pinyinSoundImageSetting = r.entity(`psi/[soundId]`, {
   soundId: rPinyinSoundId().alias(`i`),
   ...imageSettingFields,
 }) satisfies UserSettingImageEntity;
+
+export const pinyinSoundImageSettingDef = defineUserSetting({
+  entity: pinyinSoundImageSetting,
+});
 
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundNameSetting.marshalKey({ soundId });
@@ -135,6 +217,10 @@ export const hanziWordMeaningHintTextSetting = r.entity(`hwmht/[hanziWord]`, {
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
 
+export const hanziWordMeaningHintTextSettingDef = defineUserSetting({
+  entity: hanziWordMeaningHintTextSetting,
+});
+
 export const hanziWordMeaningHintExplanationSetting = r.entity(
   `hwmhe/[hanziWord]`,
   {
@@ -143,10 +229,18 @@ export const hanziWordMeaningHintExplanationSetting = r.entity(
   },
 ) satisfies UserSettingTextEntity;
 
+export const hanziWordMeaningHintExplanationSettingDef = defineUserSetting({
+  entity: hanziWordMeaningHintExplanationSetting,
+});
+
 export const hanziWordMeaningHintImageSetting = r.entity(`hwmhi/[hanziWord]`, {
   hanziWord: rHanziWord().alias(`h`),
   ...imageSettingFields,
 }) satisfies UserSettingImageEntity;
+
+export const hanziWordMeaningHintImageSettingDef = defineUserSetting({
+  entity: hanziWordMeaningHintImageSetting,
+});
 
 export const hanziWordMeaningHintImagePromptSetting = r.entity(
   `hwmhip/[hanziWord]`,
@@ -155,6 +249,10 @@ export const hanziWordMeaningHintImagePromptSetting = r.entity(
     text: r.string().alias(`t`),
   },
 ) satisfies UserSettingTextEntity;
+
+export const hanziWordMeaningHintImagePromptSettingDef = defineUserSetting({
+  entity: hanziWordMeaningHintImagePromptSetting,
+});
 
 export const hanziPronunciationHintTextSetting = r.entity(
   `hpht/[hanzi]/[pinyin]`,
@@ -165,6 +263,10 @@ export const hanziPronunciationHintTextSetting = r.entity(
   },
 ) satisfies UserSettingTextEntity;
 
+export const hanziPronunciationHintTextSettingDef = defineUserSetting({
+  entity: hanziPronunciationHintTextSetting,
+});
+
 export const hanziPronunciationHintExplanationSetting = r.entity(
   `hphe/[hanzi]/[pinyin]`,
   {
@@ -174,12 +276,20 @@ export const hanziPronunciationHintExplanationSetting = r.entity(
   },
 ) satisfies UserSettingTextEntity;
 
+export const hanziPronunciationHintExplanationSettingDef = defineUserSetting({
+  entity: hanziPronunciationHintExplanationSetting,
+});
+
 export const hanziPronunciationHintImageSetting: UserSettingImageEntity =
   r.entity(`hphi/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity;
+
+export const hanziPronunciationHintImageSettingDef = defineUserSetting({
+  entity: hanziPronunciationHintImageSetting,
+});
 
 export const hanziPronunciationHintImagePromptSetting = r.entity(
   `hphip/[hanzi]/[pinyin]`,
@@ -189,6 +299,10 @@ export const hanziPronunciationHintImagePromptSetting = r.entity(
     text: r.string().alias(`t`),
   },
 ) satisfies UserSettingTextEntity;
+
+export const hanziPronunciationHintImagePromptSettingDef = defineUserSetting({
+  entity: hanziPronunciationHintImagePromptSetting,
+});
 
 export function getHanziPronunciationHintKeyParams(
   hanzi: HanziText,
@@ -210,6 +324,10 @@ export const pinyinFinalToneNameSetting = r.entity(`pftn/[soundId]/[tone]`, {
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
 
+export const pinyinFinalToneNameSettingDef = defineUserSetting({
+  entity: pinyinFinalToneNameSetting,
+});
+
 export const pinyinFinalToneDescriptionSetting = r.entity(
   `pftd/[soundId]/[tone]`,
   {
@@ -219,11 +337,19 @@ export const pinyinFinalToneDescriptionSetting = r.entity(
   },
 ) satisfies UserSettingTextEntity;
 
+export const pinyinFinalToneDescriptionSettingDef = defineUserSetting({
+  entity: pinyinFinalToneDescriptionSetting,
+});
+
 export const pinyinFinalToneImageSetting = r.entity(`pfti/[soundId]/[tone]`, {
   soundId: rPinyinSoundId().alias(`s`),
   tone: r.string().alias(`n`),
   ...imageSettingFields,
 }) satisfies UserSettingImageEntity;
+
+export const pinyinFinalToneImageSettingDef = defineUserSetting({
+  entity: pinyinFinalToneImageSetting,
+});
 
 export function getPinyinFinalToneKeyParams(
   soundId: PinyinSoundId,
@@ -242,6 +368,76 @@ export const imageSettings = [
   hanziPronunciationHintImageSetting,
   pinyinFinalToneImageSetting,
 ] as const satisfies readonly UserSettingImageEntity[];
+
+export const userSettingDefinitions = [
+  autoCheckUserSettingDef,
+  pinyinSoundNameSettingDef,
+  pinyinSoundGroupNameSettingDef,
+  pinyinSoundGroupThemeSettingDef,
+  pinyinSoundDescriptionSettingDef,
+  pinyinSoundImageSettingDef,
+  hanziWordMeaningHintTextSettingDef,
+  hanziWordMeaningHintExplanationSettingDef,
+  hanziWordMeaningHintImageSettingDef,
+  hanziWordMeaningHintImagePromptSettingDef,
+  hanziPronunciationHintTextSettingDef,
+  hanziPronunciationHintExplanationSettingDef,
+  hanziPronunciationHintImageSettingDef,
+  hanziPronunciationHintImagePromptSettingDef,
+  pinyinFinalToneNameSettingDef,
+  pinyinFinalToneDescriptionSettingDef,
+  pinyinFinalToneImageSettingDef,
+] as const satisfies readonly UserSetting[];
+
+function userSettingFromEntity(entity: RizzleAnyEntity): UserSetting | null {
+  for (const userSetting of userSettingDefinitions) {
+    if (userSetting.entity === entity) {
+      return userSetting;
+    }
+  }
+  return null;
+}
+
+function userSettingPrefixFromKey(settingKey: string): string {
+  const keyParamIndex = settingKey.indexOf(`/`);
+  return keyParamIndex === -1
+    ? settingKey
+    : settingKey.slice(0, keyParamIndex + 1);
+}
+
+export function getUserSettingHistoryLimit(
+  userSettingLike: UserSettingLike,
+): number | undefined {
+  const userSetting = isUserSetting(userSettingLike)
+    ? userSettingLike
+    : userSettingFromEntity(userSettingLike);
+  return userSetting?.historyLimit;
+}
+
+export function getUserSettingHistoryLimitFromKey(
+  settingKey: string,
+): number | undefined {
+  const settingKeyPrefix = userSettingPrefixFromKey(settingKey);
+  for (const userSetting of userSettingDefinitions) {
+    if (userSetting.entity.keyPrefix === settingKeyPrefix) {
+      return userSetting.historyLimit;
+    }
+  }
+  return undefined;
+}
+
+export function getUserSettingDefaultValue<T extends RizzleAnyEntity>(
+  userSettingLike: UserSettingLike<T>,
+  keyParams: UserSettingKeyInput<T>,
+): Record<string, unknown> | null {
+  const userSetting = isUserSetting(userSettingLike)
+    ? userSettingLike
+    : userSettingFromEntity(userSettingLike);
+  if (userSetting?.defaultValue == null) {
+    return null;
+  }
+  return userSetting.defaultValue(keyParams);
+}
 
 /**
  * Get SQL LIKE patterns for finding user settings that contain images.

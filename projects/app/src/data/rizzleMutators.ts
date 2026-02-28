@@ -19,7 +19,8 @@ import type {
 } from "./model";
 import { AssetStatusKind, MistakeKind } from "./model";
 import type { currentSchema } from "./rizzleSchema";
-import { srsStateFromFsrsState } from "./rizzleSchema";
+import { currentSchema as schema, srsStateFromFsrsState } from "./rizzleSchema";
+import { getUserSettingHistoryLimitFromKey } from "./userSettings";
 
 type Tx = RizzleReplicacheMutatorTx<typeof currentSchema>;
 
@@ -141,6 +142,26 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         { id: historyId },
         { id: historyId, key, value, createdAt: now },
       );
+
+      const historyLimit = getUserSettingHistoryLimitFromKey(key);
+      if (historyLimit == null) {
+        return;
+      }
+
+      const allHistoryForKey = await tx.settingHistory.byKey(key).toArray();
+      const staleEntries = allHistoryForKey
+        .sort((a, b) => {
+          const timeDiff = a[1].createdAt.getTime() - b[1].createdAt.getTime();
+          if (timeDiff !== 0) {
+            return timeDiff;
+          }
+          return a[1].id.localeCompare(b[1].id);
+        })
+        .slice(0, Math.max(0, allHistoryForKey.length - historyLimit));
+
+      for (const [, entry] of staleEntries) {
+        await tx.tx.del(schema.settingHistory.marshalKey({ id: entry.id }));
+      }
     }
   },
   async undoReview(tx, { reviewId, now }) {

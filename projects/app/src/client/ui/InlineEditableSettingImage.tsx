@@ -5,10 +5,8 @@ import type {
   UserSettingImageEntity,
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
-import {
-  useUserSetting,
-  useUserSettingHistory,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { useUserSettingHistory } from "@/client/ui/hooks/useUserSettingHistory";
 import type { AssetId } from "@/data/model";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";

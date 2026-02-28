@@ -3,17 +3,27 @@
 import { InlineEditableSettingText } from "#client/ui/InlineEditableSettingText.tsx";
 import type {
   UseUserSettingResult,
-  UserSettingHistoryEntry,
   UserSettingTextEntity,
 } from "#client/ui/hooks/useUserSetting.ts";
 import * as useUserSettingModule from "#client/ui/hooks/useUserSetting.ts";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+const { useUserSettingHistoryMockFn } = vi.hoisted(() => ({
+  useUserSettingHistoryMockFn: vi.fn(),
+}));
+
 // Mock the hooks
 vi.mock(`@/client/ui/hooks/useUserSetting`, () => ({
   useUserSetting: vi.fn(),
-  useUserSettingHistory: vi.fn(),
+}));
+
+vi.mock(`@/client/ui/hooks/useUserSettingHistory`, () => ({
+  useUserSettingHistory: useUserSettingHistoryMockFn,
+}));
+
+vi.mock(`#client/ui/hooks/useUserSettingHistory.ts`, () => ({
+  useUserSettingHistory: useUserSettingHistoryMockFn,
 }));
 
 const mockSetting = {
@@ -32,7 +42,7 @@ describe(`InlineEditableSettingText`, () => {
     options: {
       currentValue?: string | null;
       defaultValue?: string;
-      history?: UserSettingHistoryEntry<UserSettingTextEntity>[];
+      history?: Array<{ id: string; createdAt: Date; value: unknown }>;
     } = {},
   ) => {
     const { currentValue = null, history = [] } = options;
@@ -48,9 +58,8 @@ describe(`InlineEditableSettingText`, () => {
         setValue: mockSetValue,
       } as UseUserSettingResult<UserSettingTextEntity>);
 
-    const useUserSettingHistoryMock = vi
-      .spyOn(useUserSettingModule, `useUserSettingHistory`)
-      .mockReturnValue({
+    const useUserSettingHistoryMock =
+      useUserSettingHistoryMockFn.mockReturnValue({
         isLoading: false,
         entries: history,
       });
