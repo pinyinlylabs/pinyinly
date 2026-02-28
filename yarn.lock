@@ -8937,6 +8937,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@standard-schema/spec@npm:1.1.0"
+  checksum: 10c0/d90f55acde4b2deb983529c87e8025fa693de1a5e8b49ecc6eb84d1fd96328add0e03d7d551442156c7432fd78165b2c26ff561b970a9a881f046abb78d6a526
+  languageName: node
+  linkType: hard
+
 "@stylistic/eslint-plugin@npm:^5.0.0":
   version: 5.9.0
   resolution: "@stylistic/eslint-plugin@npm:5.9.0"
@@ -8974,7 +8981,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/db@npm:0.5.8, @tanstack/db@npm:^0.5.8":
+"@tanstack/db-ivm@npm:0.1.17":
+  version: 0.1.17
+  resolution: "@tanstack/db-ivm@npm:0.1.17"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/c06c87edc52746ef14de7a4fb28a5fc7546e74a4d3bf6fde0c1a5ef21120f68e3e960cfabb05cb65dea7549c6c0695e3d86dcf5a356b5ab27f8f6b45a09ebfa4
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.5.30":
+  version: 0.5.30
+  resolution: "@tanstack/db@npm:0.5.30"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.17"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/bcc462a41b6f46c5a457af2986297e7370eaaff834fd65a5d3e11d9e97fae01e0ea145d16acf1b7d16e0d7a2dd39f51960b4b35c3d15616140c98ebaa0cbe216
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:^0.5.8":
   version: 0.5.8
   resolution: "@tanstack/db@npm:0.5.8"
   dependencies:
@@ -9009,6 +9041,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/pacer-lite@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@tanstack/pacer-lite@npm:0.2.1"
+  checksum: 10c0/373f289e5a0ab890d41befcef7842103cc8f3ccdc1521379ab08cb4c96ae236fe59581b9ad7d88212003bde5aa9d8318b550123004ef6d550c6e12cdb36b4588
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-core@npm:5.90.20, @tanstack/query-core@npm:^5.90.11":
   version: 5.90.20
   resolution: "@tanstack/query-core@npm:5.90.20"
@@ -9037,14 +9076,14 @@ __metadata:
   linkType: hard
 
 "@tanstack/react-db@npm:^0.1.52":
-  version: 0.1.52
-  resolution: "@tanstack/react-db@npm:0.1.52"
+  version: 0.1.74
+  resolution: "@tanstack/react-db@npm:0.1.74"
   dependencies:
-    "@tanstack/db": "npm:0.5.8"
+    "@tanstack/db": "npm:0.5.30"
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10c0/4757873d3c42da9752692b2808619d6be4c573547e5d77b2d7f8b0633a7cd75e6e2049bad6be203faeb22acee8b8f5d0418e2fe2bc6d4b15c30cc0af7d462955
+  checksum: 10c0/7a8ef15cf2d4d0482fe30dc4d429307e684ef576deccd3406ab312bf17c1c8b7eb53c3c8795a4d7112c075eaefe02c4268871ad5725caad76e0c01c4a3b02135
   languageName: node
   linkType: hard
 
