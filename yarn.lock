@@ -8937,6 +8937,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@standard-schema/spec@npm:1.1.0"
+  checksum: 10c0/d90f55acde4b2deb983529c87e8025fa693de1a5e8b49ecc6eb84d1fd96328add0e03d7d551442156c7432fd78165b2c26ff561b970a9a881f046abb78d6a526
+  languageName: node
+  linkType: hard
+
 "@stylistic/eslint-plugin@npm:^5.0.0":
   version: 5.9.0
   resolution: "@stylistic/eslint-plugin@npm:5.9.0"
@@ -8974,7 +8981,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/db@npm:0.5.8, @tanstack/db@npm:^0.5.8":
+"@tanstack/db-ivm@npm:0.1.17":
+  version: 0.1.17
+  resolution: "@tanstack/db-ivm@npm:0.1.17"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/c06c87edc52746ef14de7a4fb28a5fc7546e74a4d3bf6fde0c1a5ef21120f68e3e960cfabb05cb65dea7549c6c0695e3d86dcf5a356b5ab27f8f6b45a09ebfa4
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.5.8":
   version: 0.5.8
   resolution: "@tanstack/db@npm:0.5.8"
   dependencies:
@@ -8984,6 +9003,19 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/cabac3c5b76d50b15ae774eb36d38ca06c040a9f60984e03f5064d28492533f2813491a1b4217601f5c33f99dd0030ea2cf52b4caaf58085e30ad25b86ca1337
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:^0.5.8":
+  version: 0.5.30
+  resolution: "@tanstack/db@npm:0.5.30"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.17"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/bcc462a41b6f46c5a457af2986297e7370eaaff834fd65a5d3e11d9e97fae01e0ea145d16acf1b7d16e0d7a2dd39f51960b4b35c3d15616140c98ebaa0cbe216
   languageName: node
   linkType: hard
 
@@ -9006,6 +9038,13 @@ __metadata:
   version: 0.1.0
   resolution: "@tanstack/pacer-lite@npm:0.1.0"
   checksum: 10c0/f6495fb0a5e0b5b42851ca00ff05c73388e9b4619d3c41ccbdee942c3afa1f04a5fd4a9df017b2c6af9b77b9ffc52bffe841d6cb42a71e4a3c5a44e12f61bd09
+  languageName: node
+  linkType: hard
+
+"@tanstack/pacer-lite@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@tanstack/pacer-lite@npm:0.2.1"
+  checksum: 10c0/373f289e5a0ab890d41befcef7842103cc8f3ccdc1521379ab08cb4c96ae236fe59581b9ad7d88212003bde5aa9d8318b550123004ef6d550c6e12cdb36b4588
   languageName: node
   linkType: hard
 
