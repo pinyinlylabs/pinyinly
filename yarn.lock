@@ -8937,6 +8937,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@standard-schema/spec@npm:1.1.0"
+  checksum: 10c0/d90f55acde4b2deb983529c87e8025fa693de1a5e8b49ecc6eb84d1fd96328add0e03d7d551442156c7432fd78165b2c26ff561b970a9a881f046abb78d6a526
+  languageName: node
+  linkType: hard
+
 "@stylistic/eslint-plugin@npm:^5.0.0":
   version: 5.9.0
   resolution: "@stylistic/eslint-plugin@npm:5.9.0"
@@ -8971,6 +8978,31 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/63aae87b446efdc3c815296860841b5b0f21883344cc067d464f5be4ef379912fb9e9488938a34af075f4b1f3f53cf3fb58fa93026d3ce4c3d64fe4ec5b23235
+  languageName: node
+  linkType: hard
+
+"@tanstack/db-ivm@npm:0.1.17":
+  version: 0.1.17
+  resolution: "@tanstack/db-ivm@npm:0.1.17"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/c06c87edc52746ef14de7a4fb28a5fc7546e74a4d3bf6fde0c1a5ef21120f68e3e960cfabb05cb65dea7549c6c0695e3d86dcf5a356b5ab27f8f6b45a09ebfa4
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.5.30":
+  version: 0.5.30
+  resolution: "@tanstack/db@npm:0.5.30"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.17"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/bcc462a41b6f46c5a457af2986297e7370eaaff834fd65a5d3e11d9e97fae01e0ea145d16acf1b7d16e0d7a2dd39f51960b4b35c3d15616140c98ebaa0cbe216
   languageName: node
   linkType: hard
 
@@ -9009,6 +9041,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/pacer-lite@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@tanstack/pacer-lite@npm:0.2.1"
+  checksum: 10c0/373f289e5a0ab890d41befcef7842103cc8f3ccdc1521379ab08cb4c96ae236fe59581b9ad7d88212003bde5aa9d8318b550123004ef6d550c6e12cdb36b4588
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-core@npm:5.90.20, @tanstack/query-core@npm:^5.90.11":
   version: 5.90.20
   resolution: "@tanstack/query-core@npm:5.90.20"
@@ -9017,15 +9056,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "@tanstack/query-db-collection@npm:1.0.5"
+  version: 1.0.27
+  resolution: "@tanstack/query-db-collection@npm:1.0.27"
   dependencies:
-    "@standard-schema/spec": "npm:^1.0.0"
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db": "npm:0.5.30"
   peerDependencies:
-    "@tanstack/db": "*"
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/67ae0c1f81634475f34f7df42e5e81294caf1ee2b24d3ddd8dc890f5aa11d756237d66a70beb9f1d979e0c4dd63a197fd70697b6769ecc87c850877b8c9168d6
+  checksum: 10c0/86707a60c03ef3ebf6c503e9a30291a4fd626bd1d5da82d3d949a190fb758734eb13865066b52155754925d95b2f3f3e00324dc6fcac6187aec52944ebf6bd99
   languageName: node
   linkType: hard
 
