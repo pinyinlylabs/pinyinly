@@ -15,9 +15,11 @@ import {
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
+import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
+import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
@@ -27,7 +29,7 @@ import {
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
-import { Link, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -114,50 +116,9 @@ export default function SoundIdPage() {
 
   return (
     <ScrollView ref={scrollRef}>
-      <View className="w-full max-w-[800px] self-center pb-2 pt-safe-offset-4 px-safe-or-4">
-        <View className="flex-row items-center gap-1">
-          <Link href="/sounds" asChild>
-            <RectButton variant="bare2" iconSize={20}>
-              Sounds
-            </RectButton>
-          </Link>
-          {pinyinSoundGroupId == null ? null : (
-            <>
-              <Text className="text-fg-dim">/</Text>
-              <Link href="/sounds" asChild>
-                <RectButton variant="bare2" iconSize={20}>
-                  <Text className="text-fg">
-                    <SettingText
-                      setting={pinyinSoundGroupNameSetting}
-                      settingKey={{ soundGroupId: pinyinSoundGroupId }}
-                    />
-                  </Text>
-                </RectButton>
-              </Link>
-            </>
-          )}
-          <Text className="text-fg-dim">/</Text>
-          {pinyinSoundGroup == null ? (
-            <RectButton variant="bare2">{label}</RectButton>
-          ) : (
-            <FloatingMenuModal
-              menu={
-                <SiblingSoundMenu
-                  sounds={pinyinSoundGroup?.sounds}
-                  currentSoundId={id}
-                />
-              }
-            >
-              <RectButton
-                iconEnd="chevron-up-down"
-                variant="bare2"
-                iconSize={16}
-              >
-                {label}
-              </RectButton>
-            </FloatingMenuModal>
-          )}
-        </View>
+      <View className="w-full max-w-[800px] self-center pb-2 px-safe pt-safe">
+        <Breadcrumb pinyinSoundId={id} />
+
         <View className="my-5 flex-row items-center gap-4">
           <View className={pinyinPartBox()}>
             <Text className="text-center font-cursive text-2xl text-fg">
@@ -172,36 +133,33 @@ export default function SoundIdPage() {
           />
         </View>
 
-        <View className="gap-2">
-          <View>
-            <Text className="pyly-body-title">Pronunciation</Text>
+        <View className="gap-10">
+          <WikiTitledBox title="Pronunciation">
+            <View className="gap-4 p-4">
+              <Text className="pyly-body">
+                <Pylymark source={defaultPinyinSoundInstructions[id] ?? ``} />
+              </Text>
+            </View>
+          </WikiTitledBox>
 
-            <Text className="pyly-body">
-              <Pylymark source={defaultPinyinSoundInstructions[id] ?? ``} />
-            </Text>
-          </View>
-
-          <View className="gap-2">
-            <Text className="pyly-body-title">Description</Text>
-            <InlineEditableSettingText
-              setting={pinyinSoundDescriptionSetting}
-              settingKey={{ soundId: id }}
-              placeholder="Add a description to help with mnemonic generation…"
-              multiline
-            />
-          </View>
-
-          <View className="gap-2">
-            <Text className="pyly-body-title">Image</Text>
-            <InlineEditableSettingImage
-              setting={pinyinSoundImageSetting}
-              settingKey={{ soundId: id }}
-              previewHeight={200}
-              tileSize={64}
-              enablePasteDropZone
-              frameConstraint={{ aspectRatio: 1 }}
-            />
-          </View>
+          <WikiTitledBox title="Mnemonic story role">
+            <View className="gap-4 p-4">
+              <InlineEditableSettingText
+                setting={pinyinSoundDescriptionSetting}
+                settingKey={{ soundId: id }}
+                placeholder="Add a description to help with mnemonic generation…"
+                multiline
+              />
+              <InlineEditableSettingImage
+                setting={pinyinSoundImageSetting}
+                settingKey={{ soundId: id }}
+                previewHeight={200}
+                tileSize={64}
+                enablePasteDropZone
+                frameConstraint={{ aspectRatio: 1 }}
+              />
+            </View>
+          </WikiTitledBox>
 
           <View className="flex-row flex-wrap gap-1">
             <Text className="pyly-body-title">Names</Text>
@@ -304,6 +262,58 @@ const pinyinPartBox = tv({
   base: `size-20 justify-center gap-1 rounded-xl bg-bg-high p-2`,
 });
 
+function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
+  const chart = loadPylyPinyinChart();
+  const pinyinSoundGroups = usePinyinSoundGroups();
+
+  const pinyinSoundGroupId = useMemo(
+    () => chart.soundGroups.find((g) => g.sounds.includes(pinyinSoundId))?.id,
+    [chart, pinyinSoundId],
+  );
+
+  const pinyinSoundGroup = pinyinSoundGroups.data?.find(
+    (g) => g.id === pinyinSoundGroupId,
+  );
+
+  return (
+    <View className="flex-row items-center gap-1">
+      <RectButton href="/sounds" variant="bare2" iconSize={20}>
+        Sounds
+      </RectButton>
+      {pinyinSoundGroupId == null ? null : (
+        <>
+          <Text className="text-fg-dim">/</Text>
+          <RectButton href="/sounds" variant="bare2" iconSize={20}>
+            <SettingText
+              setting={pinyinSoundGroupNameSetting}
+              settingKey={{ soundGroupId: pinyinSoundGroupId }}
+            />
+          </RectButton>
+        </>
+      )}
+      <Text className="text-fg-dim">/</Text>
+      {pinyinSoundGroup == null ? (
+        <RectButton variant="bare2">
+          <PinyinSoundNameText pinyinSoundId={pinyinSoundId} />
+        </RectButton>
+      ) : (
+        <FloatingMenuModal
+          menu={
+            <SiblingSoundMenu
+              sounds={pinyinSoundGroup?.sounds}
+              currentSoundId={pinyinSoundId}
+            />
+          }
+        >
+          <RectButton iconEnd="chevron-up-down" variant="bare2" iconSize={16}>
+            <PinyinSoundNameText pinyinSoundId={pinyinSoundId} />
+          </RectButton>
+        </FloatingMenuModal>
+      )}
+    </View>
+  );
+}
+
 function SiblingSoundMenu({
   sounds,
   currentSoundId,
@@ -312,21 +322,19 @@ function SiblingSoundMenu({
   sounds: readonly PinyinSoundId[];
   currentSoundId: PinyinSoundId;
 } & FloatingMenuModalMenuProps) {
-  const chart = loadPylyPinyinChart();
-
   return (
     <View className="max-h-60 items-start overflow-y-scroll rounded-xl bg-bg-high p-3">
       {sounds.map((soundId) => (
-        <Link key={soundId} href={`/sounds/${soundId}`} asChild>
-          <RectButton
-            variant="bare2"
-            onPress={onRequestClose}
-            iconEnd={soundId === currentSoundId ? `check` : undefined}
-            iconSize={16}
-          >
-            {getPinyinSoundLabel(soundId, chart)}
-          </RectButton>
-        </Link>
+        <RectButton
+          key={soundId}
+          href={`/sounds/${soundId}`}
+          variant="bare2"
+          onPress={onRequestClose}
+          iconEnd={soundId === currentSoundId ? `check` : undefined}
+          iconSize={16}
+        >
+          <PinyinSoundNameText pinyinSoundId={soundId} />
+        </RectButton>
       ))}
     </View>
   );

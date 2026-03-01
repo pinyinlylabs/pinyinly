@@ -1,22 +1,20 @@
 import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
-import { Link } from "expo-router";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { useIntersectionObserver } from "usehooks-ts";
 
 export default function WebsitePage() {
   const setIsBodyGetStartedVisible = useWebsiteStore(
     (s) => s.setIsBodyGetStartedVisible,
   );
-  const { isIntersecting, ref } = useIntersectionObserver({
+  const [ref, entry] = useIntersectionObserver({
     threshold: 0.5,
-    initialIsIntersecting: true,
   });
 
   useEffect(() => {
-    setIsBodyGetStartedVisible(isIntersecting);
-  }, [isIntersecting, setIsBodyGetStartedVisible]);
+    setIsBodyGetStartedVisible(entry?.isIntersecting === true);
+  }, [entry?.isIntersecting, setIsBodyGetStartedVisible]);
 
   return (
     <>
@@ -36,22 +34,21 @@ export default function WebsitePage() {
         </View>
 
         <View className="w-[350px] items-stretch gap-2">
-          <Link href="/learn" asChild>
-            <RectButton
-              variant="filled"
-              className="[--color-fg:var(--color-cyanold)]"
-              ref={(el) => {
-                //  RectButton is a <View> rather than a DOM element.
-                ref(el as Element | null);
-              }}
-            >
-              Get Started
-            </RectButton>
-          </Link>
+          <RectButton
+            href="/learn"
+            variant="filled"
+            className="[--color-fg:var(--color-cyanold)]"
+            ref={(el) => {
+              //  RectButton is a <View> rather than a DOM element.
+              ref(el as Element | null);
+            }}
+          >
+            Get Started
+          </RectButton>
 
-          <Link href="/learn" asChild>
-            <RectButton variant="outline">I already have an account</RectButton>
-          </Link>
+          <RectButton href="/learn" variant="outline">
+            I already have an account
+          </RectButton>
         </View>
       </View>
 

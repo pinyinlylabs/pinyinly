@@ -1,14 +1,12 @@
 import { trpc } from "@/client/trpc";
 import type {
   UserSettingEntityInput,
+  UserSettingEntityLike,
   UserSettingEntityOutput,
   UserSettingImageEntity,
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
-import {
-  useUserSetting,
-  useUserSettingHistory,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -44,7 +42,7 @@ import { clamp, getMinCropSizePx } from "./imageCropCalc";
 import { useAssetImageMeta } from "./useAssetImageMeta";
 
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
-  setting: T;
+  setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
   presetImageIds?: readonly AssetId[];
   includeHistory?: boolean;
@@ -81,7 +79,10 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   className,
 }: InlineEditableSettingImageProps<T>) {
   const { value, setValue } = useUserSetting(setting, settingKey);
-  const history = useUserSettingHistory(setting, settingKey);
+  // TODO: Implement useUserSettingHistory or an alternative for tracking image history
+  const history = {
+    entries: [] as Array<{ value: UserSettingEntityOutput<T> }>,
+  };
   const imageId = value?.imageId ?? null;
   const imageCrop = parseImageCrop(value?.imageCrop);
   const imageWidthRaw = value?.imageWidth as unknown;

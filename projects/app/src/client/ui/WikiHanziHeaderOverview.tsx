@@ -26,7 +26,7 @@ export function WikiHanziHeaderOverview({
   hanziScrollRef,
   ...rest
 }: {
-  hanziScrollRef: (node?: Element | null) => void;
+  hanziScrollRef: (node: Element | null) => void;
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -111,7 +111,7 @@ function ExpandableGlosses({
         )}
       </View>
       {meanings == null || !isHanziCharacter(hanzi) || !expanded ? null : (
-        <View className="mt-2 rounded bg-fg/5 p-2">
+        <View className="mt-2 rounded-lg bg-fg/5 p-4">
           <WikiHanziCharacterMeanings hanzi={hanzi} meanings={meanings} />
         </View>
       )}

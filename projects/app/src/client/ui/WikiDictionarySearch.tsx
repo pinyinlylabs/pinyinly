@@ -1,4 +1,4 @@
-import { searchDictionaryEntries } from "@/client/ui/dictionarySearch";
+import { searchDictionaryEntries } from "@/client/ui/quickSearch";
 import { loadDictionary } from "@/dictionary";
 import { useRouter } from "expo-router";
 import { use, useState } from "react";

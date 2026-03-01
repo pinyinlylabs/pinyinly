@@ -66,6 +66,8 @@ export function ImageUploadButton({
       }}
       disabled={uploading}
       className="flex-row items-center gap-2"
+      // oxlint-disable-next-line typescript/no-deprecated
+      rawChildren
     >
       {uploading ? (
         <>

@@ -5,7 +5,6 @@ import type {
   RizzleReplicacheMutators,
   RizzleReplicacheMutatorTx,
 } from "@/util/rizzle";
-import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
   nextReviewForOtherSkillMistake,
@@ -18,8 +17,8 @@ import type {
   Skill,
 } from "./model";
 import { AssetStatusKind, MistakeKind } from "./model";
-import type { currentSchema } from "./rizzleSchema";
-import { srsStateFromFsrsState } from "./rizzleSchema";
+import { currentSchema, srsStateFromFsrsState } from "./rizzleSchema";
+import { getUserSettingHistoryLimitFromKey } from "./userSettings";
 
 type Tx = RizzleReplicacheMutatorTx<typeof currentSchema>;
 
@@ -27,11 +26,11 @@ async function fsrsStateForSkill(tx: Tx, skill: Skill) {
   const skillRatingsByDate = await tx.skillRating
     .bySkill(skill)
     .toArray()
-    .then((x) =>
-      x
+    .then((ratingArray) =>
+      ratingArray
         // Filter out trashed ratings
         .filter(([, r]) => r.trashedAt == null)
-        .sort(sortComparatorDate((x) => x[1].createdAt)),
+        .sort((a, b) => a[1].createdAt.getTime() - b[1].createdAt.getTime()),
     );
   let fsrsState: FsrsState | null = null;
   for (const [, { rating, createdAt }] of skillRatingsByDate) {
@@ -141,7 +140,32 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         { id: historyId },
         { id: historyId, key, value, createdAt: now },
       );
+
+      const historyLimit = getUserSettingHistoryLimitFromKey(key);
+      if (historyLimit == null) {
+        return;
+      }
+
+      const allHistoryForKey = await tx.settingHistory.byKey(key).toArray();
+      const staleEntries = allHistoryForKey
+        .sort((a, b) => {
+          const timeDiff = a[1].createdAt.getTime() - b[1].createdAt.getTime();
+          if (timeDiff !== 0) {
+            return timeDiff;
+          }
+          return a[1].id.localeCompare(b[1].id);
+        })
+        .slice(0, Math.max(0, allHistoryForKey.length - historyLimit));
+
+      for (const [, entry] of staleEntries) {
+        await tx.tx.del(
+          currentSchema.settingHistory.marshalKey({ id: entry.id }),
+        );
+      }
     }
+  },
+  async deleteSettingHistory(tx, { id }) {
+    await tx.tx.del(currentSchema.settingHistory.marshalKey({ id }));
   },
   async undoReview(tx, { reviewId, now }) {
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;

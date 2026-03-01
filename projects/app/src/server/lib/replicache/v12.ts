@@ -11,6 +11,7 @@ import type {
 } from "@/data/model";
 import { AssetStatusKind, MistakeKind } from "@/data/model";
 import { v13 as schema } from "@/data/rizzleSchema";
+import { getUserSettingHistoryLimitFromKey } from "@/data/userSettings";
 import type { Drizzle, Xmin } from "@/server/lib/db";
 import {
   assertMinimumIsolationLevel,
@@ -40,6 +41,7 @@ import {
   makeDrizzleMutationHandler,
   replicacheMutationSchema,
 } from "@/util/rizzle";
+import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
@@ -155,7 +157,49 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
           createdAt: now,
         },
       ]);
+
+      const historyLimit = getUserSettingHistoryLimitFromKey(key);
+      if (historyLimit == null) {
+        return;
+      }
+
+      const entries = await db.query.userSettingHistory.findMany({
+        where: and(
+          eq(s.userSettingHistory.userId, userId),
+          eq(s.userSettingHistory.key, key),
+        ),
+        columns: {
+          id: true,
+          createdAt: true,
+        },
+      });
+
+      const staleEntryIds = entries
+        .sort(sortComparatorDate((x) => x.createdAt))
+        .slice(0, Math.max(0, entries.length - historyLimit))
+        .map((entry) => entry.id);
+
+      if (staleEntryIds.length > 0) {
+        await db
+          .delete(s.userSettingHistory)
+          .where(
+            and(
+              eq(s.userSettingHistory.userId, userId),
+              inArray(s.userSettingHistory.id, staleEntryIds),
+            ),
+          );
+      }
     }
+  },
+  async deleteSettingHistory(db, userId, { id }) {
+    await db
+      .delete(s.userSettingHistory)
+      .where(
+        and(
+          eq(s.userSettingHistory.userId, userId),
+          eq(s.userSettingHistory.id, id),
+        ),
+      );
   },
   async undoReview(db, userId, { reviewId, now }) {
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;

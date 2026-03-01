@@ -6289,6 +6289,7 @@ __metadata:
     "@types/ws": "npm:^8 <=8.17.x"
     "@typescript-eslint/utils": "npm:^8.26.0"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260207.1"
+    "@uidotdev/usehooks": "npm:^2.4.1"
     "@vercel/functions": "npm:^3.0.0"
     "@vitejs/plugin-react": "npm:^5.0.0"
     array-from-async: "npm:^3.0.0"
@@ -6381,7 +6382,6 @@ __metadata:
     tsx: "npm:^4.15.7"
     typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     ucd-full: "npm:^16.0.0"
-    usehooks-ts: "npm:^3.1.0"
     vite: "npm:^7.0.0"
     vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
@@ -9981,6 +9981,16 @@ __metadata:
   bin:
     tsgo: bin/tsgo.js
   checksum: 10c0/9a554bd59682ec8743dc5e77a55e58e37fae700946de1dd7eee156215dc58ef76731cf22cf0497ec5b1babff0c3704c21d35898ad9c16fa6c2ffdfedeffc0c9a
+  languageName: node
+  linkType: hard
+
+"@uidotdev/usehooks@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@uidotdev/usehooks@npm:2.4.1"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 10c0/181c43fb324dbe4fef9762c61ab4b8235efa48abedf39a9bfeab65872522c43dae789c4f85b82a1164ed7bb18ae7ff25c3a19e7c4e0eb944937ac7f8109cee9b
   languageName: node
   linkType: hard
 
@@ -23109,17 +23119,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/35e1179f872a53227bdf8a827f7911da4c37c0f4091c29b76b1e32473d1670ebe7bcd880b808b7549ba9a5605c233350f800ffab963ee4a4ee346ee983b6019b
-  languageName: node
-  linkType: hard
-
-"usehooks-ts@npm:^3.1.0":
-  version: 3.1.1
-  resolution: "usehooks-ts@npm:3.1.1"
-  dependencies:
-    lodash.debounce: "npm:^4.0.8"
-  peerDependencies:
-    react: ^16.8.0  || ^17 || ^18 || ^19 || ^19.0.0-rc
-  checksum: 10c0/8bbebf52b063f2e705eb27364f08ec2eff987b9e8d28d82a28248652dd89ef53cb514e1f2ee1cbc6ac6e083a8dce86310301c3e92a99902b98c32a26381202d7
   languageName: node
   linkType: hard
 

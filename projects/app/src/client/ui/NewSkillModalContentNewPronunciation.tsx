@@ -1,8 +1,8 @@
 import type { HanziText, PinyinText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { useIntersectionObserver } from "usehooks-ts";
 import { Icon } from "./Icon";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 
@@ -76,10 +76,7 @@ function Header({
   subtitle?: string;
   onDismiss?: () => void;
 }) {
-  const [ref1, isIntersecting1] = useIntersectionObserver({
-    // threshold: 1,
-    initialIsIntersecting: true,
-  });
+  const [ref, entry] = useIntersectionObserver();
 
   return (
     <>
@@ -87,7 +84,7 @@ function Header({
       <View
         className="absolute top-[60px] h-0 w-full"
         ref={(el) => {
-          ref1(el as Element | null);
+          ref(el as Element | null);
         }}
       />
 
@@ -123,7 +120,7 @@ function Header({
             className={`
               text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
 
-              ${isIntersecting1 ? `scale-100` : `scale-[0.75]`}
+              ${entry?.isIntersecting === true ? `scale-100` : `scale-[0.75]`}
             `}
           >
             {title}
@@ -135,7 +132,7 @@ function Header({
             className={`
               text-center font-sans text-[18px] font-normal text-fg-loud transition-opacity
 
-              ${isIntersecting1 ? `opacity-100` : `opacity-0`}
+              ${entry?.isIntersecting === true ? `opacity-100` : `opacity-0`}
             `}
           >
             {subtitle}

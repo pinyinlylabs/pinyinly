@@ -25,6 +25,7 @@ import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
+import { WikiTitledBox } from "./WikiTitledBox";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
@@ -75,52 +76,48 @@ export function WikiHanziCharacterDecomposition({
   }
 
   return (
-    <View className="mx-4 gap-2">
-      <Text className="pyly-body-subheading">Recognize the character</Text>
-      <View className="rounded-lg bg-fg-bg5">
-        <View className="gap-4 p-4 pb-0">
-          {componentsElements.length > 0 ? (
-            <>
-              <Text className="pyly-body">
-                Use the components of{` `}
-                <Text className="pyly-bold">{characterData.hanzi}</Text> to
-                help:
-              </Text>
+    <WikiTitledBox title="Recognize the character" className="mx-4 mt-4">
+      <View className="gap-4 p-4 pb-0">
+        {componentsElements.length > 0 ? (
+          <>
+            <Text className="pyly-body">
+              Use the components of{` `}
+              <Text className="pyly-bold">{characterData.hanzi}</Text> to help:
+            </Text>
 
-              <View className="flex-row gap-5">{componentsElements}</View>
-            </>
-          ) : Array.isArray(characterData.strokes) ? (
-            <>
-              <Text className="pyly-body">
-                What does{` `}
-                <Text className="pyly-bold">{characterData.hanzi}</Text>
-                {` `}
-                resemble?
-              </Text>
+            <View className="flex-row gap-5">{componentsElements}</View>
+          </>
+        ) : Array.isArray(characterData.strokes) ? (
+          <>
+            <Text className="pyly-body">
+              What does{` `}
+              <Text className="pyly-bold">{characterData.hanzi}</Text>
+              {` `}
+              resemble?
+            </Text>
 
-              <View className="flex-1 items-center">
-                <HanziCharacter
-                  className="size-12"
-                  strokesData={characterData.strokes}
-                  highlightStrokes={parseIndexRanges(
-                    `0-${characterData.strokes.length - 1}`,
-                  )}
-                />
-              </View>
-            </>
-          ) : null}
-        </View>
-
-        <View className="my-4 w-full">
-          <CoverImageSection hanzi={characterData.hanzi} />
-        </View>
-
-        <MeaningsSection
-          hanzi={characterData.hanzi}
-          mnemonicHints={characterData.mnemonic?.hints}
-        />
+            <View className="flex-1 items-center">
+              <HanziCharacter
+                className="size-12"
+                strokesData={characterData.strokes}
+                highlightStrokes={parseIndexRanges(
+                  `0-${characterData.strokes.length - 1}`,
+                )}
+              />
+            </View>
+          </>
+        ) : null}
       </View>
-    </View>
+
+      <View className="my-4 w-full">
+        <CoverImageSection hanzi={characterData.hanzi} />
+      </View>
+
+      <MeaningsSection
+        hanzi={characterData.hanzi}
+        mnemonicHints={characterData.mnemonic?.hints}
+      />
+    </WikiTitledBox>
   );
 }
 
@@ -206,14 +203,9 @@ function MeaningsSection({
     return null;
   }
 
-  const meaningsCount = hanziWordMeanings.length;
-
   return (
     <View className="gap-4 p-4">
-      <Text className="pyly-body">
-        <Text className="pyly-bold">{hanzi}</Text>
-        {` `}({meaningsCount} {meaningsCount === 1 ? `meaning` : `meanings`})
-      </Text>
+      <Text className="pyly-body-heading">{hanzi} meanings</Text>
 
       <View className="gap-3">
         {hanziWordMeanings.map(([hanziWord, meaning]) => {
@@ -277,6 +269,7 @@ function MeaningItem({
           setting={hanziWordMeaningHintTextSetting}
           settingKey={{ hanziWord }}
           placeholder="Add a hint"
+          // oxlint-disable-next-line typescript/no-deprecated
           defaultValue={displayHint ?? ``}
           maxLength={80}
           multiline

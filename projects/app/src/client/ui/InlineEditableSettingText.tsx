@@ -1,12 +1,11 @@
 import type {
   UserSettingEntityInput,
+  UserSettingEntityLike,
   UserSettingKeyInput,
   UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
-import {
-  useUserSetting,
-  useUserSettingHistory,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { useUserSettingHistory } from "@/client/ui/hooks/useUserSettingHistory";
 import { formatRelativeTime } from "@/util/date";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -14,9 +13,9 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { tv } from "tailwind-variants";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
-import { Icon } from "./Icon";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
+import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
 export type InlineEditableSettingTextVariant =
   | `body`
@@ -26,9 +25,14 @@ export type InlineEditableSettingTextVariant =
 
 interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   variant?: InlineEditableSettingTextVariant;
-  setting: T;
+  setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
   placeholder: string;
+  /**
+   * @deprecated Use `useUserSettingTextDefaultValue` hook instead for better
+   * consistency and to avoid confusion with the `defaultValue` prop of the
+   * underlying `TextInput`.
+   */
   defaultValue?: string;
   multiline?: boolean;
   maxLength?: number;
@@ -53,6 +57,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   setting,
   settingKey,
   placeholder,
+  // oxlint-disable-next-line typescript/no-deprecated
   defaultValue,
   multiline = false,
   maxLength,
@@ -69,8 +74,12 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   "use memo";
   const { value, setValue } = useUserSetting(setting, settingKey);
   const history = useUserSettingHistory(setting, settingKey);
+  const defaultValueFromHook = useUserSettingTextDefaultValue(
+    setting,
+    settingKey,
+  );
   const currentValue: string = value?.text ?? ``;
-  const fallbackValue = defaultValue ?? ``;
+  const fallbackValue = defaultValue ?? defaultValueFromHook ?? ``;
   const displayValue = currentValue.length > 0 ? currentValue : fallbackValue;
   const hasDisplayValue = displayValue.length > 0;
   const sanitizedDefaultValue = sanitizeValue(fallbackValue);
@@ -264,9 +273,12 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   />
                 }
               >
-                <RectButton variant="bare">
-                  <Icon icon="time-circled" size={16} className="text-fg-dim" />
-                </RectButton>
+                <RectButton
+                  variant="bare"
+                  iconStart="time-circled"
+                  iconSize={16}
+                  className={`text-fg-dim`}
+                />
               </FloatingMenuModal>
             </View>
           ) : null}
