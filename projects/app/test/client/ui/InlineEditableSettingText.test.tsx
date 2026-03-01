@@ -26,9 +26,14 @@ vi.mock(`#client/ui/hooks/useUserSettingHistory.ts`, () => ({
   useUserSettingHistory: useUserSettingHistoryMockFn,
 }));
 
-const mockSetting = {
+const mockSettingEntity = {
   marshalKey: vi.fn((k: { id: string }) => `mock-key-${k.id}`),
 } as unknown as UserSettingTextEntity;
+
+const mockSetting = {
+  kind: `userSetting` as const,
+  entity: mockSettingEntity,
+};
 
 describe(`InlineEditableSettingText`, () => {
   let mockSetValue: ReturnType<typeof vi.fn>;

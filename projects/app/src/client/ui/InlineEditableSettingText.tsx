@@ -1,5 +1,6 @@
 import type {
   UserSettingEntityInput,
+  UserSettingEntityLike,
   UserSettingKeyInput,
   UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
@@ -24,7 +25,7 @@ export type InlineEditableSettingTextVariant =
 
 interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   variant?: InlineEditableSettingTextVariant;
-  setting: T;
+  setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
   placeholder: string;
   /**

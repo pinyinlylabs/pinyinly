@@ -1,11 +1,10 @@
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { HanziWord } from "@/data/model";
-import type { UserSettingLike } from "@/data/userSettings";
+import type { UserSetting } from "@/data/userSettings";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
-  userSettingEntity,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import type {
@@ -43,16 +42,15 @@ export {
   pinyinSoundImageSettingKey,
   pinyinSoundNameSetting,
   pinyinSoundNameSettingKey,
+  quickSearchPickSetting,
   type UserSetting,
   type UserSettingImageEntity,
-  type UserSettingLike,
   type UserSettingTextEntity,
   type UserSettingToggleableEntity,
 } from "@/data/userSettings";
 
 export type UserSettingEntity = RizzleAnyEntity;
-export type UserSettingEntityLike<T extends UserSettingEntity> =
-  UserSettingLike<T>;
+export type UserSettingEntityLike<T extends UserSettingEntity> = UserSetting<T>;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
   T[`marshalKey`]
 >[0];
@@ -82,9 +80,10 @@ export type UseUserSettingSetValue<T extends UserSettingEntity> = (
 ) => void;
 
 export function getSettingKeyInfo<T extends UserSettingEntity>(
-  settingEntity: T,
+  userSetting: UserSetting<T>,
   keyParams: UserSettingKeyInput<T>,
 ) {
+  const settingEntity = userSetting.entity;
   const settingKey = settingEntity.marshalKey(keyParams);
   const valueShape = (
     settingEntity._def.valueType as unknown as {
@@ -156,12 +155,12 @@ export function useUserSetting<T extends UserSettingEntity>(
   const keyParams = skip ? null : keyParamsOrOptions;
   const db = useDb();
   const r = useRizzle();
-  const settingEntity = userSettingEntity(userSetting);
+  const settingEntity = userSetting.entity;
 
   const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
   const { settingKey, keyParamAliases, keyParamMarshaled } = skip
     ? skippedSettingKeyInfo
-    : getSettingKeyInfo(settingEntity, keyInput);
+    : getSettingKeyInfo(userSetting, keyInput);
 
   const result = useLiveQuery(
     (q) =>

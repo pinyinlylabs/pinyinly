@@ -1,4 +1,3 @@
-import { userSettingEntity } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./useDb";
 import type {
@@ -22,14 +21,12 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
   isLoading: boolean;
   entries: UserSettingHistoryEntry<T>[];
 } {
-  const settingEntity = userSettingEntity(userSetting);
+  const db = useDb();
   const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
   const { settingKey, keyParamMarshaled } = getSettingKeyInfo(
-    settingEntity,
+    userSetting,
     keyInput,
   );
-  const db = useDb();
-
   const result = useLiveQuery(
     (q) =>
       q
@@ -45,7 +42,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
       value:
         entry.value == null
           ? null
-          : settingEntity.unmarshalValueSafe({
+          : userSetting.entity.unmarshalValueSafe({
               ...keyParamMarshaled,
               ...entry.value,
             }),

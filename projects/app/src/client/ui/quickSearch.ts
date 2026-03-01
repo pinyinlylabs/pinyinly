@@ -1,4 +1,9 @@
-import type { HanziText, HanziWord, PinyinText } from "@/data/model";
+import type {
+  HanziText,
+  HanziWord,
+  PinyinSoundId,
+  PinyinText,
+} from "@/data/model";
 import {
   matchAllPinyinUnits,
   normalizePinyinText,
@@ -7,13 +12,28 @@ import {
 } from "@/data/pinyin";
 import { hanziFromHanziWord } from "@/dictionary";
 
-export type DictionarySearchResult = {
+export type QuickSearchResultKind = `hanziWord` | `pinyinSound`;
+
+export type QuickSearchHanziWordResult = {
+  kind: `hanziWord`;
   hanziWord: HanziWord;
   hanzi: HanziText;
   gloss?: string;
   pinyin?: PinyinText;
+  sortKey: string;
   score: number;
 };
+
+export type QuickSearchPinyinSoundResult = {
+  kind: `pinyinSound`;
+  pinyinSoundId: PinyinSoundId;
+  sortKey: string;
+  score: number;
+};
+
+export type QuickSearchResult =
+  | QuickSearchHanziWordResult
+  | QuickSearchPinyinSoundResult;
 
 type DictionaryEntries = readonly [
   HanziWord,
@@ -26,11 +46,11 @@ type DictionarySearchOptions = {
 
 const hanziQueryRegex = /[\u3400-\u9FFF]/;
 
-export function searchDictionaryEntries(
+export function quickSearch(
   entries: DictionaryEntries,
   query: string,
   options: DictionarySearchOptions = {},
-): readonly DictionarySearchResult[] {
+): readonly QuickSearchResult[] {
   const trimmedQuery = query.trim();
   if (trimmedQuery.length === 0) {
     return [];
@@ -41,7 +61,7 @@ export function searchDictionaryEntries(
   const queryPinyin = normalizePinyinForSearch(lowerQuery);
   const limit = Math.max(1, options.limit ?? 10);
 
-  return findDictionaryMatches(
+  return findHanziWordMatches(
     entries,
     {
       query: trimmedQuery,
@@ -53,7 +73,34 @@ export function searchDictionaryEntries(
   );
 }
 
-function findDictionaryMatches(
+export function searchDictionaryEntries(
+  entries: DictionaryEntries,
+  query: string,
+  options: DictionarySearchOptions = {},
+): readonly QuickSearchHanziWordResult[] {
+  const trimmedQuery = query.trim();
+  if (trimmedQuery.length === 0) {
+    return [];
+  }
+
+  const lowerQuery = trimmedQuery.toLowerCase();
+  const hasHanziQuery = hanziQueryRegex.test(trimmedQuery);
+  const queryPinyin = normalizePinyinForSearch(lowerQuery);
+  const limit = Math.max(1, options.limit ?? 10);
+
+  return findHanziWordMatches(
+    entries,
+    {
+      query: trimmedQuery,
+      lowerQuery,
+      hasHanziQuery,
+      queryPinyin,
+    },
+    limit,
+  );
+}
+
+function findHanziWordMatches(
   entries: DictionaryEntries,
   params: {
     query: string;
@@ -62,9 +109,9 @@ function findDictionaryMatches(
     queryPinyin: ReturnType<typeof normalizePinyinForSearch>;
   },
   limit: number,
-): DictionarySearchResult[] {
+): QuickSearchHanziWordResult[] {
   const { query, lowerQuery, hasHanziQuery, queryPinyin } = params;
-  const resultsByWord = new Map<HanziWord, DictionarySearchResult>();
+  const resultsByWord = new Map<HanziWord, QuickSearchHanziWordResult>();
 
   for (const [hanziWord, meaning] of entries) {
     const hanzi = hanziFromHanziWord(hanziWord);
@@ -101,11 +148,13 @@ function findDictionaryMatches(
     const score = existing ? Math.min(existing.score, bestScore) : bestScore;
 
     resultsByWord.set(hanziWord, {
+      kind: `hanziWord`,
       hanziWord,
       hanzi,
       gloss: meaning.gloss[0],
       pinyin: meaning.pinyin?.[0] ?? undefined,
       score,
+      sortKey: hanzi,
     });
   }
 
@@ -114,10 +163,10 @@ function findDictionaryMatches(
       if (a.score !== b.score) {
         return a.score - b.score;
       }
-      if (a.hanzi.length !== b.hanzi.length) {
-        return a.hanzi.length - b.hanzi.length;
+      if (a.sortKey.length !== b.sortKey.length) {
+        return a.sortKey.length - b.sortKey.length;
       }
-      return a.hanzi.localeCompare(b.hanzi);
+      return a.sortKey.localeCompare(b.sortKey);
     })
     .slice(0, limit);
 }

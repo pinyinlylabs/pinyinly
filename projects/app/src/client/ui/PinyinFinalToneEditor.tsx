@@ -1,7 +1,3 @@
-import type {
-  UserSettingImageEntity,
-  UserSettingTextEntity,
-} from "@/client/ui/hooks/useUserSetting";
 import {
   getPinyinFinalToneKeyParams,
   pinyinFinalToneDescriptionSetting,
@@ -111,10 +107,6 @@ function ToneTileEditor({
 
   const descriptionSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
   const imageSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
-  const descriptionSetting =
-    pinyinFinalToneDescriptionSetting as unknown as UserSettingTextEntity;
-  const imageSetting =
-    pinyinFinalToneImageSetting as unknown as UserSettingImageEntity;
 
   return (
     <View
@@ -153,7 +145,7 @@ function ToneTileEditor({
         <View>
           <InlineEditableSettingText
             variant="body"
-            setting={descriptionSetting}
+            setting={pinyinFinalToneDescriptionSetting}
             settingKey={descriptionSettingKey}
             placeholder="Describe what this tone position looks like..."
             multiline
@@ -164,7 +156,7 @@ function ToneTileEditor({
         <View className="gap-2 pt-2">
           <Text className="pyly-body-subheading">Image</Text>
           <InlineEditableSettingImage
-            setting={imageSetting}
+            setting={pinyinFinalToneImageSetting}
             settingKey={imageSettingKey}
             previewHeight={200}
             tileSize={64}

@@ -45,7 +45,9 @@ export function usePinyinSoundGroups() {
       const themeOverride = settings.find((s) => s.key === themeKey);
 
       const themeValueData = themeOverride?.value
-        ? pinyinSoundGroupThemeSetting.unmarshalValueSafe(themeOverride.value)
+        ? pinyinSoundGroupThemeSetting.entity.unmarshalValueSafe(
+            themeOverride.value,
+          )
         : null;
 
       result.push({
