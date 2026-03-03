@@ -116,6 +116,8 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
         <RecentQueries
           onRemove={onRemoveRecent}
           onSelect={() => {
+            // Don't re-add recent items to the recent history when selecting
+            // them, otherwise we end up with duplicates.
             onDismiss();
           }}
         />
