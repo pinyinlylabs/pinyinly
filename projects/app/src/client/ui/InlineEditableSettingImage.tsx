@@ -27,6 +27,7 @@ import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { RectButton } from "./RectButton";
+import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import type {
   ImageCrop,
   ImageCropRect,
@@ -79,10 +80,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   className,
 }: InlineEditableSettingImageProps<T>) {
   const { value, setValue } = useUserSetting(setting, settingKey);
-  // TODO: Implement useUserSettingHistory or an alternative for tracking image history
-  const history = {
-    entries: [] as Array<{ value: UserSettingEntityOutput<T> }>,
-  };
+  const history = useUserSettingHistory(setting, settingKey);
   const imageId = value?.imageId ?? null;
   const imageCrop = parseImageCrop(value?.imageCrop);
   const imageWidthRaw = value?.imageWidth as unknown;
