@@ -6,9 +6,9 @@ import {
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
-import { use, useState } from "react";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
+import { use } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { CloseButton } from "./CloseButton";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
@@ -76,19 +76,9 @@ function Header({
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
-  // Fix some glitchiness when opening the modal by delaying showing the
-  // header hanzi tile until after a short timeout.
-  const [uiStable, setUiStable] = useState(false);
-  useTimeout(() => {
-    setUiStable(true);
-  }, 250);
+  const [ref, entry] = useIntersectionObserver();
 
-  const [ref1, isIntersecting1] = useIntersectionObserver({
-    // threshold: 1,
-    initialIsIntersecting: true,
-  });
-
-  const showHeaderHanziTile = uiStable && !isIntersecting1;
+  const showHeaderHanziTile = entry != null && !entry.isIntersecting;
 
   return (
     <>
@@ -124,7 +114,7 @@ function Header({
         pinyins={pinyins}
         glosses={glosses}
         meanings={meanings}
-        hanziScrollRef={ref1}
+        hanziScrollRef={ref}
       />
     </>
   );

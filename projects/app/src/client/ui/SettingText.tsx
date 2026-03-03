@@ -1,23 +1,22 @@
 import type {
+  UserSettingEntityLike,
   UserSettingKeyInput,
   UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type { ReactNode } from "react";
+import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
 interface SettingTextProps<T extends UserSettingTextEntity> {
-  setting: T;
+  setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
-  defaultValue?: string;
 }
 
 export function SettingText<T extends UserSettingTextEntity>({
   setting,
   settingKey,
-  defaultValue,
-}: SettingTextProps<T>): ReactNode {
-  "use memo";
+}: SettingTextProps<T>): string {
   const { value } = useUserSetting(setting, settingKey);
+  const defaultValue = useUserSettingTextDefaultValue(setting, settingKey);
 
   return value?.text ?? defaultValue ?? ``;
 }

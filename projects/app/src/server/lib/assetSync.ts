@@ -48,7 +48,7 @@ export async function downloadAssetFromRemote(
     assetId,
   });
 
-  if (downloadUrlResult == null || downloadUrlResult.url == null) {
+  if (downloadUrlResult == null) {
     throw new Error(`Failed to get download URL for asset ${assetId}`);
   }
 
@@ -134,7 +134,7 @@ export async function uploadAssetToRemote(
     contentType,
   });
 
-  if (uploadUrlResult == null || uploadUrlResult.url == null) {
+  if (uploadUrlResult == null) {
     throw new Error(`Failed to get upload URL for asset ${assetId}`);
   }
 

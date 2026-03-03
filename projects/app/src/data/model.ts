@@ -72,6 +72,106 @@ export const assetIdSchema = z
   .regex(/^sha256\/[A-Za-z0-9_-]{43}$/, `Invalid AssetId format`)
   .pipe(z.custom<AssetId>());
 
+export const hanziWordPinyinlyObjectIdKind = `hw` as const;
+export const skillPinyinlyObjectIdKind = `sk` as const;
+export const pinyinSoundIdPinyinlyObjectIdKind = `ps` as const;
+export const assetIdPinyinlyObjectIdKind = `a` as const;
+
+/**
+ * A polymorphic object ID that can reference different entity types in Pinyinly.
+ *
+ * Prefixes (aligned with Rizzle entity key paths):
+ * - `hw/` → Hanzi word (e.g., `hw/好:positive`)
+ * - `sk/` → Skill ID (e.g., `sk/he:好:positive`)
+ * - `ps/` → Pinyin Sound ID (e.g., `ps/n-`)
+ * - `a/` → Asset ID (e.g., `a/sha256/...`)
+ */
+export type PinyinlyObjectId =
+  | `${typeof hanziWordPinyinlyObjectIdKind}/${string}`
+  | `${typeof skillPinyinlyObjectIdKind}/${string}`
+  | `${typeof pinyinSoundIdPinyinlyObjectIdKind}/${string}`
+  | `${typeof assetIdPinyinlyObjectIdKind}/${string}`;
+
+export const pinyinlyObjectIdKinds = [
+  hanziWordPinyinlyObjectIdKind,
+  skillPinyinlyObjectIdKind,
+  pinyinSoundIdPinyinlyObjectIdKind,
+  assetIdPinyinlyObjectIdKind,
+] as const;
+
+export type PinyinlyObjectIdKind = (typeof pinyinlyObjectIdKinds)[number];
+
+export function pinyinlyObjectIdKind(
+  objectId: PinyinlyObjectId,
+): PinyinlyObjectIdKind | null {
+  for (const kind of pinyinlyObjectIdKinds) {
+    if (objectId.startsWith(`${kind}/`)) {
+      return kind;
+    }
+  }
+  return null;
+}
+
+export function hanziWordFromPinyinlyObjectId(
+  objectId: PinyinlyObjectId,
+): HanziWord | null {
+  if (!objectId.startsWith(`${hanziWordPinyinlyObjectIdKind}/`)) {
+    return null;
+  }
+  const hanziWord = objectId.slice(3);
+  return hanziWord as HanziWord;
+}
+
+export function skillIdFromPinyinlyObjectId(
+  objectId: PinyinlyObjectId,
+): Skill | null {
+  if (!objectId.startsWith(`${skillPinyinlyObjectIdKind}/`)) {
+    return null;
+  }
+  const skillId = objectId.slice(3);
+  return skillId as Skill;
+}
+
+export function soundIdFromPinyinlyObjectId(
+  objectId: PinyinlyObjectId,
+): PinyinSoundId | null {
+  if (!objectId.startsWith(`${pinyinSoundIdPinyinlyObjectIdKind}/`)) {
+    return null;
+  }
+  const soundId = objectId.slice(3);
+  return soundId as PinyinSoundId;
+}
+
+export function assetIdFromPinyinlyObjectId(
+  objectId: PinyinlyObjectId,
+): AssetId | null {
+  if (!objectId.startsWith(`${assetIdPinyinlyObjectIdKind}/`)) {
+    return null;
+  }
+  const assetId = objectId.slice(2);
+  return assetId as AssetId;
+}
+
+export function hanziWordPinyinlyObjectId(
+  hanziWord: HanziWord,
+): PinyinlyObjectId {
+  return `${hanziWordPinyinlyObjectIdKind}/${hanziWord}` as PinyinlyObjectId;
+}
+
+export function skillPinyinlyObjectId(skill: Skill): PinyinlyObjectId {
+  return `${skillPinyinlyObjectIdKind}/${skill}` as PinyinlyObjectId;
+}
+
+export function pinyinSoundIdPinyinlyObjectId(
+  soundId: PinyinSoundId,
+): PinyinlyObjectId {
+  return `${pinyinSoundIdPinyinlyObjectIdKind}/${soundId}` as PinyinlyObjectId;
+}
+
+export function assetIdPinyinlyObjectId(assetId: AssetId): PinyinlyObjectId {
+  return `${assetIdPinyinlyObjectIdKind}/${assetId}` as PinyinlyObjectId;
+}
+
 export interface BaseSrsState {
   prevReviewAt: Date;
   nextReviewAt: Date;

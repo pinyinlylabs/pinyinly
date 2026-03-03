@@ -29,7 +29,7 @@ export function TextInputMulti(props: TextInputMultiProps) {
     } // Not a textarea
 
     const textarea = element;
-    if (textarea?.tagName !== `TEXTAREA`) {
+    if (textarea.tagName !== `TEXTAREA`) {
       return;
     }
 

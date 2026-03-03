@@ -162,7 +162,7 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
     const updatedAt = now;
     const createdAt = now;
-    const value = name == null ? null : { t: name };
+    const value = { t: name };
     await db
       .insert(s.userSetting)
       .values([{ userId, key: `pia.${initial}`, value, updatedAt, createdAt }])
@@ -174,7 +174,7 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async setPinyinFinalAssociation(db, userId, { final, name, now }) {
     const updatedAt = now;
     const createdAt = now;
-    const value = name == null ? null : { t: name };
+    const value = { t: name };
     await db
       .insert(s.userSetting)
       .values([{ userId, key: `pfa.${final}`, value, updatedAt, createdAt }])
@@ -186,7 +186,7 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async setPinyinInitialGroupTheme(db, userId, { groupId, themeId, now }) {
     const updatedAt = now;
     const createdAt = now;
-    const value = themeId == null ? null : { t: themeId };
+    const value = { t: themeId };
     await db
       .insert(s.userSetting)
       .values([{ userId, key: `pigt.${groupId}`, value, updatedAt, createdAt }])

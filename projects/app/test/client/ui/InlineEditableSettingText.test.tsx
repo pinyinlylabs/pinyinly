@@ -1,24 +1,39 @@
 // @vitest-environment happy-dom
 
 import { InlineEditableSettingText } from "#client/ui/InlineEditableSettingText.tsx";
-import * as useUserSettingModule from "#client/ui/hooks/useUserSetting.ts";
 import type {
   UseUserSettingResult,
-  UserSettingHistoryEntry,
   UserSettingTextEntity,
 } from "#client/ui/hooks/useUserSetting.ts";
+import * as useUserSettingModule from "#client/ui/hooks/useUserSetting.ts";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+const { useUserSettingHistoryMockFn } = vi.hoisted(() => ({
+  useUserSettingHistoryMockFn: vi.fn(),
+}));
 
 // Mock the hooks
 vi.mock(`@/client/ui/hooks/useUserSetting`, () => ({
   useUserSetting: vi.fn(),
-  useUserSettingHistory: vi.fn(),
 }));
 
-const mockSetting = {
+vi.mock(`@/client/ui/hooks/useUserSettingHistory`, () => ({
+  useUserSettingHistory: useUserSettingHistoryMockFn,
+}));
+
+vi.mock(`#client/ui/hooks/useUserSettingHistory.ts`, () => ({
+  useUserSettingHistory: useUserSettingHistoryMockFn,
+}));
+
+const mockSettingEntity = {
   marshalKey: vi.fn((k: { id: string }) => `mock-key-${k.id}`),
 } as unknown as UserSettingTextEntity;
+
+const mockSetting = {
+  kind: `userSetting` as const,
+  entity: mockSettingEntity,
+};
 
 describe(`InlineEditableSettingText`, () => {
   let mockSetValue: ReturnType<typeof vi.fn>;
@@ -32,7 +47,7 @@ describe(`InlineEditableSettingText`, () => {
     options: {
       currentValue?: string | null;
       defaultValue?: string;
-      history?: UserSettingHistoryEntry<UserSettingTextEntity>[];
+      history?: Array<{ id: string; createdAt: Date; value: unknown }>;
     } = {},
   ) => {
     const { currentValue = null, history = [] } = options;
@@ -48,9 +63,8 @@ describe(`InlineEditableSettingText`, () => {
         setValue: mockSetValue,
       } as UseUserSettingResult<UserSettingTextEntity>);
 
-    const useUserSettingHistoryMock = vi
-      .spyOn(useUserSettingModule, `useUserSettingHistory`)
-      .mockReturnValue({
+    const useUserSettingHistoryMock =
+      useUserSettingHistoryMockFn.mockReturnValue({
         isLoading: false,
         entries: history,
       });
@@ -80,6 +94,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -95,6 +110,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -110,6 +126,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -129,6 +146,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -148,6 +166,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -174,6 +193,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -207,6 +227,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -236,6 +257,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -265,6 +287,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -294,6 +317,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="Default Name"
       />,
     );
@@ -326,6 +350,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="default"
         sanitizeValue={customSanitize}
       />,
@@ -363,6 +388,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue=""
         sanitizeValue={customSanitize}
       />,
@@ -396,6 +422,7 @@ describe(`InlineEditableSettingText`, () => {
         setting={mockSetting}
         settingKey={{ id: `test` }}
         placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
         defaultValue="   "
       />,
     );

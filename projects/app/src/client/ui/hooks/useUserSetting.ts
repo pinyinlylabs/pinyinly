@@ -1,5 +1,6 @@
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { HanziWord } from "@/data/model";
+import type { UserSetting } from "@/data/userSettings";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImageSetting,
@@ -41,12 +42,15 @@ export {
   pinyinSoundImageSettingKey,
   pinyinSoundNameSetting,
   pinyinSoundNameSettingKey,
+  quickSearchPickSetting,
+  type UserSetting,
   type UserSettingImageEntity,
   type UserSettingTextEntity,
   type UserSettingToggleableEntity,
 } from "@/data/userSettings";
 
 export type UserSettingEntity = RizzleAnyEntity;
+export type UserSettingEntityLike<T extends UserSettingEntity> = UserSetting<T>;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
   T[`marshalKey`]
 >[0];
@@ -65,12 +69,6 @@ export interface UserSettingSetOptions {
   skipHistory?: boolean;
 }
 
-export interface UserSettingHistoryEntry<T extends UserSettingEntity> {
-  id: string;
-  createdAt: Date;
-  value: UserSettingEntityOutput<T>;
-}
-
 export type UseUserSettingUpdateFn<T extends UserSettingEntity> = (
   prev: UserSettingEntityOutput<T>,
   isLoading: boolean,
@@ -81,17 +79,18 @@ export type UseUserSettingSetValue<T extends UserSettingEntity> = (
   options?: UserSettingSetOptions,
 ) => void;
 
-function getSettingKeyInfo<T extends UserSettingEntity>(
-  userSettingEntity: T,
+export function getSettingKeyInfo<T extends UserSettingEntity>(
+  userSetting: UserSetting<T>,
   keyParams: UserSettingKeyInput<T>,
 ) {
-  const settingKey = userSettingEntity.marshalKey(keyParams);
+  const settingEntity = userSetting.entity;
+  const settingKey = settingEntity.marshalKey(keyParams);
   const valueShape = (
-    userSettingEntity._def.valueType as unknown as {
+    settingEntity._def.valueType as unknown as {
       _def: { shape: Record<string, RizzleType> };
     }
   )._def.shape;
-  const keyParamNames = keyPathVariableNames(userSettingEntity._def.keyPath);
+  const keyParamNames = keyPathVariableNames(settingEntity._def.keyPath);
   const keyParamAliases = keyParamNames.map((name) => {
     const type = valueShape[name];
     return type == null ? name : (type._getAlias() ?? name);
@@ -114,36 +113,36 @@ function getSettingKeyInfo<T extends UserSettingEntity>(
   return { settingKey, keyParamAliases, keyParamMarshaled, valueShape };
 }
 
-const noKeyParams = {} as const; // allow memoization inside rizzle
+export const noKeyParams = {} as const; // allow memoization inside rizzle
 const skippedSettingKeyInfo = {
   settingKey: ``,
   keyParamAliases: [] as string[],
   keyParamMarshaled: {} as Record<string, string>,
 };
 
-type UserSettingKeyParamsNoSkip<T extends UserSettingEntity> =
+export type UserSettingKeyParamsNoSkip<T extends UserSettingEntity> =
   UserSettingKeyInput<T> & { skip?: never };
-type UserSettingKeyParamsSkip<T extends UserSettingEntity> = {
+export type UserSettingKeyParamsSkip<T extends UserSettingEntity> = {
   skip: true;
 } & Partial<UserSettingKeyInput<T>>;
 
 export function useUserSetting<T extends UserSettingEntity>(
-  userSettingEntity: T,
+  userSetting: UserSettingEntityLike<T>,
   keyParams: UserSettingKeyParamsNoSkip<T>,
 ): UseUserSettingResult<T>;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSettingEntity: T,
+  userSetting: UserSettingEntityLike<T>,
   keyParams: UserSettingKeyParamsSkip<T>,
 ): null;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSettingEntity: T,
+  userSetting: UserSettingEntityLike<T>,
 ): UseUserSettingResult<T>;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSettingEntity: T,
+  userSetting: UserSettingEntityLike<T>,
   keyParams: UserSettingKeyParamsNoSkip<T> | UserSettingKeyParamsSkip<T>,
 ): UseUserSettingResult<T> | null;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSettingEntity: T,
+  userSetting: UserSettingEntityLike<T>,
   keyParamsOrOptions?: UserSettingKeyInput<T> | UserSettingKeyParamsSkip<T>,
 ): UseUserSettingResult<T> | null {
   const hasOptions =
@@ -156,11 +155,12 @@ export function useUserSetting<T extends UserSettingEntity>(
   const keyParams = skip ? null : keyParamsOrOptions;
   const db = useDb();
   const r = useRizzle();
+  const settingEntity = userSetting.entity;
 
   const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
   const { settingKey, keyParamAliases, keyParamMarshaled } = skip
     ? skippedSettingKeyInfo
-    : getSettingKeyInfo(userSettingEntity, keyInput);
+    : getSettingKeyInfo(userSetting, keyInput);
 
   const result = useLiveQuery(
     (q) =>
@@ -177,7 +177,7 @@ export function useUserSetting<T extends UserSettingEntity>(
   const value =
     settingData?.value == null
       ? null
-      : userSettingEntity.unmarshalValueSafe({
+      : settingEntity.unmarshalValueSafe({
           ...keyParamMarshaled,
           ...settingData.value,
         });
@@ -194,7 +194,7 @@ export function useUserSetting<T extends UserSettingEntity>(
     const marshaledValue =
       nextValue == null
         ? null
-        : userSettingEntity.marshalValue({
+        : settingEntity.marshalValue({
             ...(keyInput as Record<string, unknown>),
             ...(nextValue as Record<string, unknown>),
           } as RizzleEntityInput<T>);
@@ -226,45 +226,6 @@ export function useUserSetting<T extends UserSettingEntity>(
   }
 
   return { isLoading, value, setValue };
-}
-
-export function useUserSettingHistory<T extends UserSettingEntity>(
-  userSettingEntity: T,
-  keyParams?: UserSettingKeyInput<T>,
-): {
-  isLoading: boolean;
-  entries: UserSettingHistoryEntry<T>[];
-} {
-  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
-  const { settingKey, keyParamMarshaled } = getSettingKeyInfo(
-    userSettingEntity,
-    keyInput,
-  );
-  const db = useDb();
-
-  const result = useLiveQuery(
-    (q) =>
-      q
-        .from({ settingHistory: db.settingHistoryCollection })
-        .where(({ settingHistory }) => eq(settingHistory.key, settingKey)),
-    [db.settingHistoryCollection, settingKey],
-  );
-
-  const entries = (result.data ?? [])
-    .map((entry) => ({
-      id: entry.id,
-      createdAt: entry.createdAt,
-      value:
-        entry.value == null
-          ? null
-          : userSettingEntity.unmarshalValueSafe({
-              ...keyParamMarshaled,
-              ...entry.value,
-            }),
-    }))
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-  return { isLoading: result.isLoading, entries };
 }
 
 export interface HanziWordHintOverrides {

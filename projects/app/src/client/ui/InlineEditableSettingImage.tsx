@@ -1,14 +1,12 @@
 import { trpc } from "@/client/trpc";
 import type {
   UserSettingEntityInput,
+  UserSettingEntityLike,
   UserSettingEntityOutput,
   UserSettingImageEntity,
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
-import {
-  useUserSetting,
-  useUserSettingHistory,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +27,7 @@ import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { RectButton } from "./RectButton";
+import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import type {
   ImageCrop,
   ImageCropRect,
@@ -44,7 +43,7 @@ import { clamp, getMinCropSizePx } from "./imageCropCalc";
 import { useAssetImageMeta } from "./useAssetImageMeta";
 
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
-  setting: T;
+  setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
   presetImageIds?: readonly AssetId[];
   includeHistory?: boolean;
@@ -103,7 +102,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const historyImageAssetIds: AssetId[] = [];
   const imageMetaById = new Map<AssetId, ImageMeta>();
   if (imageId != null) {
-    imageMetaById.set(imageId as AssetId, {
+    imageMetaById.set(imageId, {
       imageId,
       crop: imageCrop,
       imageWidth,
@@ -121,11 +120,11 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       if (seenIds.has(assetId)) {
         continue;
       }
-      seenIds.add(assetId as AssetId);
-      historyImageAssetIds.push(assetId as AssetId);
+      seenIds.add(assetId);
+      historyImageAssetIds.push(assetId);
       const meta = buildImageMeta(entry.value);
-      if (meta != null && !imageMetaById.has(meta.imageId as AssetId)) {
-        imageMetaById.set(meta.imageId as AssetId, meta);
+      if (meta != null && !imageMetaById.has(meta.imageId)) {
+        imageMetaById.set(meta.imageId, meta);
       }
     }
   }
@@ -134,7 +133,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       ...historyImageAssetIds,
       ...presetImageIds,
       ...(imageId == null ? [] : [imageId]),
-    ] as AssetId[]),
+    ]),
   );
 
   const handleSelectHintImage = (assetId: AssetId) => {
@@ -156,8 +155,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     setIsPickerOpen(false);
   };
 
-  const previewHintImageId =
-    hoveredHintImageId ?? (imageId as AssetId | null) ?? null;
+  const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
   const previewMeta =
     previewHintImageId == null
       ? null
@@ -238,15 +236,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                   Change
                 </RectButton>
                 {canEditCrop ? (
-                  <RectButton
-                    variant="bare"
-                    onPress={() => {
-                      if (imageId == null) {
-                        return;
-                      }
-                      setInlineEditorAssetId(imageId as AssetId);
-                    }}
-                  >
+                  <RectButton variant="bare" disabled>
                     Reposition
                   </RectButton>
                 ) : null}
@@ -255,7 +245,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
           </View>
         ) : (
           <RemoveBackgroundControls
-            assetId={imageId as AssetId}
+            assetId={imageId}
             imageCrop={imageCrop}
             imageWidth={imageWidth}
             imageHeight={imageHeight}
@@ -300,10 +290,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                         <RectButton
                           variant="bare"
                           onPress={() => {
-                            if (imageId == null) {
-                              return;
-                            }
-                            setInlineEditorAssetId(imageId as AssetId);
+                            setInlineEditorAssetId(imageId);
                           }}
                         >
                           Reposition
@@ -321,9 +308,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                     </View>
                   ) : null}
                 </View>
-                {shouldShowPreviewButtons &&
-                !isInlineRepositioning &&
-                (error != null || isRemoving) ? (
+                {shouldShowPreviewButtons && (error != null || isRemoving) ? (
                   isRemoving ? (
                     <View className="flex-row items-center gap-2">
                       <ActivityIndicator size="small" className="text-fg" />
@@ -522,9 +507,6 @@ function RemoveBackgroundControls({
 
     try {
       const result = await removeBackgroundMutation.mutateAsync({ assetId });
-      if (result.assetId == null) {
-        return;
-      }
 
       const cropRect = imageCrop.kind === `rect` ? imageCrop.rect : null;
       const nextSize =
@@ -682,7 +664,7 @@ function InlineImageRepositionEditor({
   const containerStyle =
     frameAspectRatio == null ? { height } : { aspectRatio: frameAspectRatio };
 
-  if (!canSave || imageSize == null || effectiveCropRect == null) {
+  if (!canSave) {
     return (
       <View
         className={`w-full items-center justify-center`}
@@ -1105,7 +1087,7 @@ function usePointerHoverCapability(): boolean {
 }
 
 interface ImageMeta {
-  imageId: string;
+  imageId: AssetId;
   crop: ImageCrop;
   imageWidth?: number | null;
   imageHeight?: number | null;

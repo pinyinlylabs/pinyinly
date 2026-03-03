@@ -19,17 +19,19 @@ import {
   pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
-import type { RelativePathString } from "expo-router";
+import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
+import { WikiTitledBox } from "./WikiTitledBox";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -148,219 +150,206 @@ export function WikiHanziCharacterPronunciation({
   };
 
   return (
-    <View className="mt-4 gap-2">
-      <View className="mx-4">
-        <Text className="pyly-body-subheading">Remember the pronunciation</Text>
+    <WikiTitledBox title="Remember the pronunciation" className="mx-4 mt-4">
+      <View className="gap-4 p-4">
+        <Text className="pyly-body">
+          <Text className="pyly-bold">{hanzi}</Text> is pronounced{` `}
+          <Text className="pyly-bold">{pinyinUnit}</Text>.
+        </Text>
+
+        <Text className="pyly-body">
+          Use a story about &ldquo;
+          <Text className="pyly-bold">{gloss}</Text>
+          &rdquo; to remember the initial, the final, and the tone of{` `}
+          <Text className="pyly-bold">{pinyinUnit}</Text>.
+        </Text>
       </View>
 
-      <View className="mx-4 rounded-lg bg-fg/5">
+      {splitPinyin == null ? null : (
         <View className="gap-4 p-4">
-          <Text className="pyly-body">
-            <Text className="pyly-bold">{hanzi}</Text> is pronounced{` `}
-            <Text className="pyly-bold">{pinyinUnit}</Text>.
-          </Text>
-
-          <Text className="pyly-body">
-            Use a story about &ldquo;
-            <Text className="pyly-bold">{gloss}</Text>
-            &rdquo; to remember the initial, the final, and the tone of{` `}
-            <Text className="pyly-bold">{pinyinUnit}</Text>.
-          </Text>
-        </View>
-
-        {splitPinyin == null ? null : (
-          <View className="gap-4 p-4">
-            <View className="">
-              <Text className="pyly-body text-center">
-                <Text className="pyly-bold">{pinyinUnit}</Text>
-              </Text>
-              <View className="px-[15%] py-2">
-                <ThreeSplitLinesDown className="h-[10px] w-full" />
-              </View>
-              <View className="flex-row gap-4">
-                <View className="flex-1 items-center gap-1 border-fg/10">
-                  <SoundLinkBlock
-                    href={`/sounds/${splitPinyin.initialSoundId}`}
-                    label={initialLabel}
-                    name={initialPinyinSoundName ?? null}
-                  />
-                </View>
-                <View className="flex-1 items-center gap-1 border-fg/10">
-                  <SoundLinkBlock
-                    href={`/sounds/${splitPinyin.finalSoundId}`}
-                    label={finalLabel}
-                    name={null}
-                  />
-                </View>
-                <View className="flex-1 items-center gap-1 border-fg/10">
-                  <SoundLinkBlock
-                    href={`/sounds/${splitPinyin.toneSoundId}`}
-                    label={
-                      <>
-                        {splitPinyin.tone}
-                        <Text className="align-super text-[10px]">
-                          {ordinalSuffix(splitPinyin.tone)}
-                        </Text>
-                      </>
-                    }
-                    name={null}
-                  />
-                </View>
-              </View>
-              <View className="mt-3 items-center gap-2">
-                <FinalToneForkedArrow />
-                <Link
-                  href={
-                    `/sounds/${splitPinyin.finalSoundId}?tone=${splitPinyin.tone}` as RelativePathString
-                  }
-                  asChild
-                >
-                  <RectButton variant="bare" className="items-center">
-                    <SoundNameLabel>{finalToneName}</SoundNameLabel>
-                  </RectButton>
-                </Link>
-              </View>
-            </View>
-          </View>
-        )}
-        {__DEV__ ? (
-          <View className="flex-row items-start gap-4 p-4">
-            <RectButton
-              variant="bare2"
-              iconStart="keyboard"
-              iconSize={20}
-              className="opacity-80"
-            >
-              Add hint
-            </RectButton>
-            <RectButton
-              variant="bare2"
-              iconStart="photos-filled"
-              iconSize={20}
-              className="opacity-80"
-            >
-              Add image
-            </RectButton>
-          </View>
-        ) : null}
-
-        <View className="gap-4 p-4">
-          <Text className="pyly-body-subheading">Your pronunciation hint</Text>
-
-          <View className="gap-2">
-            <InlineEditableSettingText
-              variant="hint"
-              setting={hanziPronunciationHintTextSetting}
-              settingKey={hintSettingKey}
-              placeholder="Add a hint"
-              renderDisplay={(value) => <Pylymark source={value} />}
-            />
-
-            <InlineEditableSettingText
-              variant="hintExplanation"
-              setting={hanziPronunciationHintExplanationSetting}
-              settingKey={hintSettingKey}
-              placeholder="Add an explanation"
-              multiline
-              renderDisplay={(value) => <Pylymark source={value} />}
-            />
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            <Text className="text-[13px] text-fg-dim">
-              Want help brainstorming a hint?
+          <View className="">
+            <Text className="pyly-body text-center">
+              <Text className="pyly-bold">{pinyinUnit}</Text>
             </Text>
-            <RectButton
-              variant="bare"
-              onPress={() => {
-                setShowAiModal(true);
-              }}
-              disabled={splitPinyin == null}
-            >
-              Use AI
-            </RectButton>
-          </View>
-
-          <View className="gap-2 pt-2">
-            <View className="gap-1">
-              <Text className="pyly-body-subheading">Choose an image</Text>
-              <Text className="text-[14px] text-fg-dim">
-                Pick the image that should appear on the wiki page
-              </Text>
+            <View className="px-[15%] py-2">
+              <ThreeSplitLinesDown className="h-[10px] w-full" />
             </View>
-
-            <InlineEditableSettingImage
-              setting={hanziPronunciationHintImageSetting}
-              settingKey={hintSettingKey}
-              previewHeight={200}
-              tileSize={64}
-              enablePasteDropZone
-              enableAiGeneration
-              initialAiPrompt={
-                imagePromptSetting.value?.text ??
-                ([
-                  hintTextSetting.value?.text,
-                  hintExplanationSetting.value?.text,
-                ]
-                  .filter((v) => v != null && v.length > 0)
-                  .join(` - `) ||
-                  `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`)
-              }
-              frameConstraint={{ aspectRatio: 2 }}
-              onUploadError={handleUploadError}
-              onSaveAiPrompt={(prompt) => {
-                imagePromptSetting.setValue({
-                  ...getHanziPronunciationHintKeyParams(hanzi, pinyinUnit),
-                  text: prompt,
-                });
-              }}
-            />
+            <View className="flex-row gap-4">
+              <View className="flex-1 items-center gap-1 border-fg/10">
+                <SoundLinkBlock
+                  href={`/sounds/${splitPinyin.initialSoundId}`}
+                  label={initialLabel}
+                  name={initialPinyinSoundName ?? null}
+                />
+              </View>
+              <View className="flex-1 items-center gap-1 border-fg/10">
+                <SoundLinkBlock
+                  href={`/sounds/${splitPinyin.finalSoundId}`}
+                  label={finalLabel}
+                  name={null}
+                />
+              </View>
+              <View className="flex-1 items-center gap-1 border-fg/10">
+                <SoundLinkBlock
+                  href={`/sounds/${splitPinyin.toneSoundId}`}
+                  label={
+                    <>
+                      {splitPinyin.tone}
+                      <Text className="align-super text-[10px]">
+                        {ordinalSuffix(splitPinyin.tone)}
+                      </Text>
+                    </>
+                  }
+                  name={null}
+                />
+              </View>
+            </View>
+            <View className="mt-3 items-center gap-2">
+              <FinalToneForkedArrow />
+              <Link
+                href={`/sounds/${splitPinyin.finalSoundId}?tone=${splitPinyin.tone}`}
+                className={soundNameClass()}
+              >
+                {finalToneName}
+              </Link>
+            </View>
           </View>
         </View>
+      )}
+      {__DEV__ ? (
+        <View className="flex-row items-start gap-4 p-4">
+          <RectButton
+            variant="bare2"
+            iconStart="keyboard"
+            iconSize={20}
+            className="opacity-80"
+          >
+            Add hint
+          </RectButton>
+          <RectButton
+            variant="bare2"
+            iconStart="photos-filled"
+            iconSize={20}
+            className="opacity-80"
+          >
+            Add image
+          </RectButton>
+        </View>
+      ) : null}
 
-        {showAiModal && splitPinyin != null ? (
-          <AiPronunciationHintModal
-            hanzi={hanzi}
-            pinyinUnit={pinyinUnit}
-            gloss={gloss}
-            initial={{
-              soundId: splitPinyin.initialSoundId,
-              name: initialPinyinSoundName ?? null,
-              description: initialSoundDescription,
+      <View className="gap-4 p-4">
+        <Text className="pyly-body-subheading">Your pronunciation hint</Text>
+
+        <View className="gap-2">
+          <InlineEditableSettingText
+            variant="hint"
+            setting={hanziPronunciationHintTextSetting}
+            settingKey={hintSettingKey}
+            placeholder="Add a hint"
+            renderDisplay={(value) => <Pylymark source={value} />}
+          />
+
+          <InlineEditableSettingText
+            variant="hintExplanation"
+            setting={hanziPronunciationHintExplanationSetting}
+            settingKey={hintSettingKey}
+            placeholder="Add an explanation"
+            multiline
+            renderDisplay={(value) => <Pylymark source={value} />}
+          />
+        </View>
+
+        <View className="flex-row items-center justify-between">
+          <Text className="text-[13px] text-fg-dim">
+            Want help brainstorming a hint?
+          </Text>
+          <RectButton
+            variant="bare"
+            onPress={() => {
+              setShowAiModal(true);
             }}
-            final={{
-              soundId: splitPinyin.finalSoundId,
-              name: finalPinyinSoundName ?? null,
-              description: finalSoundDescription,
-            }}
-            tone={{
-              soundId: splitPinyin.toneSoundId,
-              name: tonePinyinSoundName ?? null,
-              description: toneSoundDescription,
-            }}
-            toneNumber={splitPinyin.tone}
-            finalToneScene={{ description: finalToneSceneDescription }}
-            onApplyHint={({ text, explanation }) => {
-              hintTextSetting.setValue({
-                hanzi,
-                pinyin: hintSettingKey.pinyin,
-                text,
+            disabled={splitPinyin == null}
+          >
+            Use AI
+          </RectButton>
+        </View>
+
+        <View className="gap-2 pt-2">
+          <View className="gap-1">
+            <Text className="pyly-body-subheading">Choose an image</Text>
+            <Text className="text-[14px] text-fg-dim">
+              Pick the image that should appear on the wiki page
+            </Text>
+          </View>
+
+          <InlineEditableSettingImage
+            setting={hanziPronunciationHintImageSetting}
+            settingKey={hintSettingKey}
+            previewHeight={200}
+            tileSize={64}
+            enablePasteDropZone
+            enableAiGeneration
+            initialAiPrompt={
+              imagePromptSetting.value?.text ??
+              ([hintTextSetting.value?.text, hintExplanationSetting.value?.text]
+                .filter((v) => v != null && v.length > 0)
+                .join(` - `) ||
+                `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`)
+            }
+            frameConstraint={{ aspectRatio: 2 }}
+            onUploadError={handleUploadError}
+            onSaveAiPrompt={(prompt) => {
+              imagePromptSetting.setValue({
+                ...getHanziPronunciationHintKeyParams(hanzi, pinyinUnit),
+                text: prompt,
               });
-              if (explanation != null && explanation.length > 0) {
-                hintExplanationSetting.setValue({
-                  hanzi,
-                  pinyin: hintSettingKey.pinyin,
-                  text: explanation,
-                });
-              }
-            }}
-            onDismiss={() => {
-              setShowAiModal(false);
             }}
           />
-        ) : null}
+        </View>
       </View>
-    </View>
+
+      {showAiModal && splitPinyin != null ? (
+        <AiPronunciationHintModal
+          hanzi={hanzi}
+          pinyinUnit={pinyinUnit}
+          gloss={gloss}
+          initial={{
+            soundId: splitPinyin.initialSoundId,
+            name: initialPinyinSoundName ?? null,
+            description: initialSoundDescription,
+          }}
+          final={{
+            soundId: splitPinyin.finalSoundId,
+            name: finalPinyinSoundName ?? null,
+            description: finalSoundDescription,
+          }}
+          tone={{
+            soundId: splitPinyin.toneSoundId,
+            name: tonePinyinSoundName ?? null,
+            description: toneSoundDescription,
+          }}
+          toneNumber={splitPinyin.tone}
+          finalToneScene={{ description: finalToneSceneDescription }}
+          onApplyHint={({ text, explanation }) => {
+            hintTextSetting.setValue({
+              hanzi,
+              pinyin: hintSettingKey.pinyin,
+              text,
+            });
+            if (explanation != null && explanation.length > 0) {
+              hintExplanationSetting.setValue({
+                hanzi,
+                pinyin: hintSettingKey.pinyin,
+                text: explanation,
+              });
+            }
+          }}
+          onDismiss={() => {
+            setShowAiModal(false);
+          }}
+        />
+      ) : null}
+    </WikiTitledBox>
   );
 }
 
@@ -369,26 +358,20 @@ function SoundLinkBlock({
   label,
   name,
 }: {
-  href: string;
+  href: Href;
   label: ReactNode;
   name: string | null;
 }) {
   return (
     <View className="w-full items-center gap-1">
-      <Link href={href as RelativePathString} asChild>
-        <RectButton variant="bare">
-          <Text className="pyly-body pyly-ref text-center text-fg/50">
-            {label}
-          </Text>
-        </RectButton>
+      <Link href={href} className={soundNameClass({ className: `text-fg/50` })}>
+        {label}
       </Link>
       {name == null ? null : (
         <>
           <DownArrow />
-          <Link href={href as RelativePathString} asChild>
-            <RectButton variant="bare">
-              <SoundNameLabel>{name}</SoundNameLabel>
-            </RectButton>
+          <Link href={href} className={soundNameClass()}>
+            {name}
           </Link>
         </>
       )}
@@ -396,9 +379,9 @@ function SoundLinkBlock({
   );
 }
 
-function SoundNameLabel({ children }: { children: ReactNode }) {
-  return <Text className="pyly-body pyly-ref text-center">{children}</Text>;
-}
+const soundNameClass = tv({
+  base: `pyly-body pyly-ref`,
+});
 
 function FinalToneForkedArrow() {
   return (

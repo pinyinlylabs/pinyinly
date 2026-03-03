@@ -6,8 +6,8 @@ import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import type { StackNavigationFor } from "@/client/ui/types";
-import { MistakeKind, QuestionKind } from "@/data/model";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
+import { MistakeKind, QuestionKind } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
@@ -17,13 +17,13 @@ import {
   NavigationIndependentTree,
   useTheme,
 } from "@react-navigation/native";
-import {
-  createStackNavigator,
-  TransitionPresets,
-} from "@react-navigation/stack";
 import type {
   StackCardInterpolatedStyle,
   StackCardInterpolationProps,
+} from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  TransitionPresets,
 } from "@react-navigation/stack";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -105,8 +105,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           );
 
           // Check if this effect was cancelled before setting state
-
-          if (abortController.signal.aborted) {
+          if (abortController.signal.aborted as boolean) {
             return;
           }
           // Ensure we're only moving forward in version (or setting initial version)

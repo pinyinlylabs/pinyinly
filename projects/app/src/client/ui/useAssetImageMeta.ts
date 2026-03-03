@@ -70,7 +70,7 @@ export function useAssetImageMeta(
 
     void (async () => {
       const source = await getLocalImageAssetSource(assetId);
-      if (cancelled) {
+      if (cancelled as boolean) {
         return;
       }
       // oxlint-disable-next-line react-hooks-js/set-state-in-effect
@@ -94,10 +94,8 @@ export function useAssetImageMeta(
         const resolved = Image.resolveAssetSource(
           localSource as Parameters<typeof Image.resolveAssetSource>[0],
         );
-        if (resolved.width != null && resolved.height != null) {
-          // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-          setImageSize({ width: resolved.width, height: resolved.height });
-        }
+        // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+        setImageSize({ width: resolved.width, height: resolved.height });
         return;
       }
 
@@ -105,7 +103,6 @@ export function useAssetImageMeta(
         typeof localSource === `string`
           ? localSource
           : typeof localSource === `object` &&
-              localSource != null &&
               `uri` in localSource &&
               typeof (localSource as { uri?: unknown }).uri === `string`
             ? (localSource as { uri: string }).uri

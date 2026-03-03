@@ -1,6 +1,6 @@
 import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { Icon } from "@/client/ui/Icon";
-import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
+import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
 import type { Href } from "expo-router";
 import { Link, Stack, usePathname } from "expo-router";
@@ -64,9 +64,7 @@ export default function MenuLayout() {
               </Link>
             </View>
 
-            <View className="mb-4">
-              <MenuDictionarySearch />
-            </View>
+            <QuickSearchButton className="mb-4 place-self-stretch" />
 
             <View className="w-[200px] items-stretch rounded-xl bg-bg-high py-3">
               {navItems

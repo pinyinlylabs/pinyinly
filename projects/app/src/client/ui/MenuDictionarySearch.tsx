@@ -3,9 +3,9 @@ import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
 import { useRouter } from "expo-router";
 import { use, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { searchDictionaryEntries } from "./dictionarySearch";
 import { Icon } from "./Icon";
 import { Portal } from "./Portal";
+import { searchDictionaryEntries } from "./quickSearch";
 import { TextInputSingle } from "./TextInputSingle";
 
 const gap = 8;
