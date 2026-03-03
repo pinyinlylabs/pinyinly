@@ -120,7 +120,7 @@ function Header({
             className={`
               text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
 
-              ${entry?.isIntersecting === true ? `scale-100` : `scale-[0.75]`}
+              ${entry?.isIntersecting === false ? `scale-[0.75]` : `scale-100`}
             `}
           >
             {title}
@@ -132,7 +132,7 @@ function Header({
             className={`
               text-center font-sans text-[18px] font-normal text-fg-loud transition-opacity
 
-              ${entry?.isIntersecting === true ? `opacity-100` : `opacity-0`}
+              ${entry?.isIntersecting === false ? `opacity-0` : `opacity-100`}
             `}
           >
             {subtitle}

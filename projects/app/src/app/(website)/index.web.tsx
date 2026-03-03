@@ -13,7 +13,7 @@ export default function WebsitePage() {
   });
 
   useEffect(() => {
-    setIsBodyGetStartedVisible(entry?.isIntersecting === true);
+    setIsBodyGetStartedVisible(entry?.isIntersecting !== false);
   }, [entry?.isIntersecting, setIsBodyGetStartedVisible]);
 
   return (

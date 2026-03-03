@@ -29,7 +29,11 @@ export default function WebsiteLayout() {
           www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-bg
           transition-all
 
-          ${entry?.isIntersecting == true ? `` : `border-b-2 border-solid border-bg-high`}
+          ${
+            entry?.isIntersecting === false
+              ? `border-b-2 border-solid border-bg-high`
+              : ``
+          }
         `}
       >
         <View className="flex w-full max-w-www-col justify-between">
