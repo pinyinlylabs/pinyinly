@@ -26,7 +26,7 @@ const meaningImageStyleOptionsConst = [
       width: 0.22,
       height: 0.22,
     },
-    stylePrompt: `Use the illustration style from the first image, keep the background a solid color, make outlines crisp and contiguous, use solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes. Make it angled like someone swung it down and only the tip lodged in the board.`,
+    stylePrompt: `Use the illustration style from the first image, keep the background a solid color, make outlines crisp and contiguous, use solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes.`,
   },
   {
     kind: `realistic`,
