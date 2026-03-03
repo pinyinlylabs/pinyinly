@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import type { AssetId } from "#data/model.js";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -184,7 +184,7 @@ describe(`AiImageGenerationModal suite`, () => {
     AiImageGenerationModal = module.AiImageGenerationModal;
   });
 
-  test(`shows available style previews`, async () => {
+  test(`does not show style selector controls`, () => {
     render(
       <AiImageGenerationModal
         initialPrompt=""
@@ -193,14 +193,12 @@ describe(`AiImageGenerationModal suite`, () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(`Choose style image`));
-
-    expect(await screen.findByText(`Available styles:`)).toBeInTheDocument();
-    expect(screen.getByText(`style:one`)).toBeInTheDocument();
-    expect(screen.getByText(`style:two`)).toBeInTheDocument();
+    expect(screen.queryByText(`Style image`)).not.toBeInTheDocument();
+    expect(screen.queryByText(`Choose style image`)).not.toBeInTheDocument();
+    expect(screen.queryByText(`Available styles:`)).not.toBeInTheDocument();
   });
 
-  test(`selects a style image`, async () => {
+  test(`renders image generation form`, () => {
     render(
       <AiImageGenerationModal
         initialPrompt=""
@@ -209,13 +207,8 @@ describe(`AiImageGenerationModal suite`, () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(`Choose style image`));
-
-    const styleOption = await screen.findByText(`style:one`);
-    fireEvent.click(styleOption);
-
-    await waitFor(() => {
-      expect(screen.getByText(`Selected: style:one`)).toBeInTheDocument();
-    });
+    expect(screen.getByText(`AI image generator`)).toBeInTheDocument();
+    expect(screen.getByText(`Image prompt`)).toBeInTheDocument();
+    expect(screen.getByText(`Generate`)).toBeInTheDocument();
   });
 });

@@ -26,6 +26,7 @@ export {
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
+  hanziWordMeaningAiImageStyleSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,

@@ -114,6 +114,13 @@ export const quickSearchPickSetting = defineUserSetting({
   historyLimit: 20,
 });
 
+export const hanziWordMeaningAiImageStyleSetting = defineUserSetting({
+  entity: r.entity(`hwmais`, {
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+  defaultValue: () => ({ text: `comic` }),
+});
+
 // Sounds
 
 export const pinyinSoundNameSetting = defineUserSetting({
@@ -306,6 +313,7 @@ export const imageSettingDefs = [
 export const userSettingDefinitions = [
   autoCheckUserSetting,
   quickSearchPickSetting,
+  hanziWordMeaningAiImageStyleSetting,
   pinyinSoundNameSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
