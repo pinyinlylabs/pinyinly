@@ -98,6 +98,9 @@
     "unicorn/prefer-math-trunc": "off",
 
     "eslint/prefer-const": "deny",
+    // It's annoying to have to put tailwind-variant functions above the
+    // component definition, so this rule can stay disabled.
+    "eslint/no-use-before-define": "off",
     "eslint/no-unused-expressions": "deny",
     "eslint/no-restricted-imports": [
       "deny",
@@ -202,24 +205,24 @@
     "import-js/no-named-default": "error",
     "import-js/no-anonymous-default-export": "error",
 
-    "typescript/prefer-for-of": "deny",
-    "typescript/no-dynamic-delete": "deny",
-    "typescript/no-implied-eval": "deny",
-    "typescript/no-unnecessary-type-assertion": "deny",
-    "typescript/no-unsafe-assignment": "deny",
-    "typescript/no-unsafe-member-access": "deny",
-    "typescript/no-unsafe-argument": "deny",
-    "typescript/no-explicit-any": "deny",
-    "typescript/no-import-type-side-effects": "deny",
     "typescript/consistent-type-imports": "deny",
-    "typescript/no-unsafe-return": "deny",
-    "typescript/no-unsafe-call": "deny",
-    "typescript/no-unnecessary-type-constraint": "deny",
-    "typescript/require-await": "off",
     "typescript/explicit-module-boundary-types": "off",
+    "typescript/no-dynamic-delete": "deny",
+    "typescript/no-explicit-any": "deny",
+    "typescript/no-implied-eval": "deny",
+    "typescript/no-import-type-side-effects": "deny",
     // Often only having one usage of a type parameter is fine because it's
     // the only way to use "_ extends _".
     "typescript/no-unnecessary-type-arguments": "deny",
+    "typescript/no-unnecessary-type-assertion": "deny",
+    "typescript/no-unnecessary-type-constraint": "deny",
+    "typescript/no-unsafe-argument": "deny",
+    "typescript/no-unsafe-assignment": "deny",
+    "typescript/no-unsafe-call": "deny",
+    "typescript/no-unsafe-member-access": "deny",
+    "typescript/no-unsafe-return": "deny",
+    "typescript/prefer-for-of": "deny",
+    "typescript/require-await": "off",
     "typescript/return-await": "deny",
     "typescript/no-empty-object-type": "deny",
     "typescript/strict-boolean-expressions": "deny",
