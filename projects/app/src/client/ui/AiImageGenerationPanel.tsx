@@ -322,7 +322,7 @@ export function AiImageGenerationPanel({
         <Text className="text-[14px] text-fg-dim">Loading style image...</Text>
       ) : null}
 
-      {hasGenerated && generatedImageDataUrl != null ? (
+      {hasGenerated ? (
         <View className="gap-2">
           <Text className="pyly-body-subheading">Preview</Text>
           <View className="items-center rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
@@ -341,7 +341,7 @@ export function AiImageGenerationPanel({
             onPress={() => {
               void handleConfirm();
             }}
-            disabled={!hasGenerated || isProcessing}
+            disabled={isProcessing}
           >
             Generate
           </RectButton>

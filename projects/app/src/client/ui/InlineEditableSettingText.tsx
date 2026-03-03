@@ -110,7 +110,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       while (current) {
         // Check for modal indicators
         // React Native Modal renders with role="dialog" on web
-        if (current.getAttribute?.(`role`) === `dialog`) {
+        if (current.getAttribute(`role`) === `dialog`) {
           return true;
         }
         // Also check for React Native Web's modal container
@@ -253,7 +253,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   {draft.length}/{maxLength}
                 </Text>
                 <ProgressPieIcon
-                  progress={maxLength == null ? 0 : draft.length / maxLength}
+                  progress={maxLength == 0 ? 0 : draft.length / maxLength}
                   warn={isAtLimit}
                   size={12}
                 />

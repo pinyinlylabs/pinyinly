@@ -130,7 +130,6 @@ export async function getLocalImageAssetBase64(
       uri = source;
     } else if (
       typeof source === `object` &&
-      source != null &&
       `uri` in source &&
       typeof (source as { uri?: unknown }).uri === `string`
     ) {

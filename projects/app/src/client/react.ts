@@ -132,7 +132,7 @@ export const mergeProps = <T extends Record<string, any>>(
     const overrideValue = overrides[key];
 
     // Merge refs
-    if (key === `ref` && props[key] != null) {
+    if ((key as string) === `ref` && props[key] != null) {
       // @ts-expect-error no overlap
       props[key] = mergeRefs(props[key], overrideValue);
       continue;

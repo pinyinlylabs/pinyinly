@@ -211,6 +211,7 @@
     "typescript/no-explicit-any": "deny",
     "typescript/no-implied-eval": "deny",
     "typescript/no-import-type-side-effects": "deny",
+    "typescript/no-unnecessary-condition": "error",
     // Often only having one usage of a type parameter is fine because it's
     // the only way to use "_ extends _".
     "typescript/no-unnecessary-type-arguments": "deny",

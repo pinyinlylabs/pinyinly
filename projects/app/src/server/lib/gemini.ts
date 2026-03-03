@@ -67,7 +67,7 @@ export async function generateImage(opts: {
     const inlinePart = parts.find((part) => part.inlineData?.data != null);
     if (inlinePart?.inlineData?.data != null) {
       base64 = inlinePart.inlineData.data;
-      mimeType = inlinePart.inlineData?.mimeType ?? ``;
+      mimeType = inlinePart.inlineData.mimeType ?? ``;
       break;
     }
   }

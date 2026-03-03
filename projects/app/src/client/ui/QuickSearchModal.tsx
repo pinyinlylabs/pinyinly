@@ -256,7 +256,7 @@ function RecentQueries({
               >
                 <HanziWordResultContent
                   hanzi={hanzi}
-                  gloss={dictionaryEntry?.gloss?.[0]}
+                  gloss={dictionaryEntry?.gloss[0]}
                   pinyin={dictionaryEntry?.pinyin?.[0]}
                 />
               </ResultItem>

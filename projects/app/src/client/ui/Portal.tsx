@@ -8,9 +8,9 @@
  *
  */
 
-import { createPortal } from "react-dom";
 import type { PropsWithChildren } from "react";
 import { useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 
 export function Portal({ children }: PropsWithChildren) {
   const element = document.createElement(`div`);
@@ -20,7 +20,7 @@ export function Portal({ children }: PropsWithChildren) {
       document.body.append(element);
     }
     return () => {
-      if (element?.parentElement) {
+      if (element.parentElement) {
         element.remove();
       }
     };

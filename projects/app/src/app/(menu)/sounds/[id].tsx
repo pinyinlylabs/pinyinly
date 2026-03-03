@@ -96,7 +96,7 @@ export default function SoundIdPage() {
   )?.id;
 
   const pinyinSound = pinyinSounds.get(id);
-  const pinyinSoundGroup = pinyinSoundGroups.data?.find(
+  const pinyinSoundGroup = pinyinSoundGroups.data.find(
     (g) => g.id === pinyinSoundGroupId,
   );
 
@@ -271,7 +271,7 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
     [chart, pinyinSoundId],
   );
 
-  const pinyinSoundGroup = pinyinSoundGroups.data?.find(
+  const pinyinSoundGroup = pinyinSoundGroups.data.find(
     (g) => g.id === pinyinSoundGroupId,
   );
 
@@ -300,7 +300,7 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
         <FloatingMenuModal
           menu={
             <SiblingSoundMenu
-              sounds={pinyinSoundGroup?.sounds}
+              sounds={pinyinSoundGroup.sounds}
               currentSoundId={pinyinSoundId}
             />
           }

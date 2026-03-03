@@ -35,7 +35,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
     [db.settingHistoryCollection, settingKey],
   );
 
-  const entries = (result.data ?? [])
+  const entries = result.data
     .map((entry) => ({
       id: entry.id,
       createdAt: entry.createdAt,

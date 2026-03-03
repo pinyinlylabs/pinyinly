@@ -6,6 +6,7 @@ import { memoize0 } from "@pinyinly/lib/collections";
 import omit from "lodash/omit.js";
 import { z } from "zod/v4";
 import type {
+  AssetId,
   HanziText,
   HanziWord,
   PinyinlyObjectId,
@@ -84,6 +85,7 @@ const brandedString = <T extends string>() =>
   _brandedStringImpl as RizzleCustom<T, T, T>;
 
 export const rHanziOrHanziWord = brandedString<HanziText | HanziWord>;
+export const rAssetId = brandedString<AssetId>;
 export const rPinyinSoundId = brandedString<PinyinSoundId>;
 export const rPinyinlyObjectId = brandedString<PinyinlyObjectId>;
 export const rPinyinSoundGroupId = brandedString<PinyinSoundGroupId>;

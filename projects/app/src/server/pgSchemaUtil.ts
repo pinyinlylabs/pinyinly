@@ -24,20 +24,20 @@ type PgCustomColumn = s.PgCustomColumn<
 >;
 
 function unstable__columnName(column: PgCustomColumn): string {
-  // oxlint-disable-next-line typescript/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any,typescript/no-unsafe-assignment
   const tableName = (column.table as any)[
     // oxlint-disable-next-line typescript/no-unsafe-member-access, typescript/no-explicit-any
     (Table as any).Symbol.Name as symbol
-  ] as string;
+  ];
 
   invariant(
-    tableName != null,
+    typeof tableName === `string`,
     `could not introspect table name, maybe drizzle internals changed`,
   );
 
   const columnName = column.name;
   invariant(
-    columnName != null,
+    (columnName as unknown) != null,
     `could not introspect column name, maybe drizzle internals changed`,
   );
 

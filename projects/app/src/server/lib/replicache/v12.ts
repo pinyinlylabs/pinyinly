@@ -159,9 +159,6 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
       ]);
 
       const historyLimit = getUserSettingHistoryLimitFromKey(key);
-      if (historyLimit == null) {
-        return;
-      }
 
       const entries = await db.query.userSettingHistory.findMany({
         where: and(

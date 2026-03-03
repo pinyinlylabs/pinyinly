@@ -64,7 +64,7 @@ export function useImageUploader({
 
     try {
       const resolvedContentType = contentType ?? blob.type;
-      if (resolvedContentType == null || resolvedContentType.length === 0) {
+      if (resolvedContentType.length === 0) {
         throw new Error(`Image type is missing`);
       }
 
@@ -137,7 +137,7 @@ export function useImageUploader({
   ): Promise<void> => {
     const response = await fetch(asset.uri);
     const blob = await response.blob();
-    const contentType = asset.mimeType ?? blob.type ?? `image/jpeg`;
+    const contentType = asset.mimeType ?? blob.type;
     await uploadImageBlob({ blob, contentType });
   };
 

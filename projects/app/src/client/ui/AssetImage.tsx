@@ -65,7 +65,7 @@ export function AssetImage({
 
     void (async () => {
       const source = await getLocalImageAssetSource(assetId);
-      if (cancelled) {
+      if (cancelled as boolean) {
         return;
       }
       setLocalSource(source ?? null);

@@ -91,7 +91,7 @@ export default function SoundsPage() {
         <Text className="pyly-body-title">Sounds</Text>
       </View>
 
-      {pinyinSoundGroupsQuery.data?.map(({ id, sounds }) => {
+      {pinyinSoundGroupsQuery.data.map(({ id, sounds }) => {
         return (
           <View key={id} className="gap-4">
             <View className="flex-row items-center gap-2">

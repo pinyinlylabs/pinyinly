@@ -1,4 +1,5 @@
 import type {
+  AssetId,
   HanziText,
   PinyinSoundGroupId,
   PinyinSoundId,
@@ -10,6 +11,7 @@ import {
   normalizePinyinUnitForHintKey,
 } from "@/data/pinyin";
 import {
+  rAssetId,
   rHanziWord,
   rPinyinlyObjectId,
   rPinyinSoundGroupId,
@@ -39,7 +41,7 @@ export type UserSettingTextEntity = RizzleEntity<
 // A user setting entity that has an `imageId` field
 
 const imageSettingFields = {
-  imageId: r.string().alias(`t`),
+  imageId: rAssetId().alias(`t`),
   imageCrop: r
     .object({
       x: r.number().optional().alias(`x`),
@@ -57,7 +59,7 @@ export type UserSettingImageEntity = RizzleEntity<
   string,
   {
     imageId: RizzleTypeAlias<
-      RizzleType<RizzleTypeDef, string, string, string>,
+      RizzleType<RizzleTypeDef, AssetId, AssetId, AssetId>,
       `t`
     >;
     imageCrop: RizzleTypeAlias<RizzleType, `c`>;

@@ -142,9 +142,6 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       );
 
       const historyLimit = getUserSettingHistoryLimitFromKey(key);
-      if (historyLimit == null) {
-        return;
-      }
 
       const allHistoryForKey = await tx.settingHistory.byKey(key).toArray();
       const staleEntries = allHistoryForKey

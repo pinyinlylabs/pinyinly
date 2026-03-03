@@ -11,10 +11,6 @@ import { Pylymark } from "./Pylymark";
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`学:learn`);
 
-  if (hanziWord == null) {
-    return null;
-  }
-
   const hintSettingKey = { hanziWord };
 
   return (
