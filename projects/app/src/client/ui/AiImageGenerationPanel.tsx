@@ -1,22 +1,20 @@
-import {
-  getAvailableLocalImageAssets,
-  getLocalImageAssetBase64,
-  getLocalImageAssetSource,
-} from "@/client/assets/localImageAssets";
+import { getLocalImageAssetBase64 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
+import type { MeaningImageStyleKind } from "@/client/ui/meaningImageStyles";
+import { getMeaningImageStyle } from "@/client/ui/meaningImageStyles";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
 
 import type { AssetId } from "@/data/model";
-import type { ImageSourcePropType } from "react-native";
 
 type GeneratedImageFormat = `png` | `jpeg` | `webp`;
 
 export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
+  aiStyleKind?: MeaningImageStyleKind | null;
   onImageGenerated: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
@@ -24,15 +22,13 @@ export interface AiImageGenerationPanelProps {
 
 export function AiImageGenerationPanel({
   initialPrompt = ``,
+  aiStyleKind = null,
   onImageGenerated,
   onError,
   onSavePrompt,
 }: AiImageGenerationPanelProps) {
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [selectedStyleAssetId, setSelectedStyleAssetId] =
-    useState<AssetId | null>(null);
   const [styleImageData, setStyleImageData] = useState<string | null>(null);
-  const [showStyleSelector, setShowStyleSelector] = useState(false);
   const [generatedImageDataUrl, setGeneratedImageDataUrl] = useState<
     string | null
   >(null);
@@ -41,10 +37,6 @@ export function AiImageGenerationPanel({
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isLoadingStyle, setIsLoadingStyle] = useState(false);
-  const [stylePreviewSources, setStylePreviewSources] = useState<
-    Partial<Record<AssetId, ImageSourcePropType>>
-  >({});
-  const [availableImages] = useState(() => getAvailableLocalImageAssets());
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();
 
@@ -59,7 +51,9 @@ export function AiImageGenerationPanel({
     },
   });
 
-  const handleSelectStyleImage = async (assetId: AssetId) => {
+  const loadStyleImageData = async (
+    assetId: AssetId,
+  ): Promise<string | null> => {
     setIsLoadingStyle(true);
     setError(null);
 
@@ -67,27 +61,22 @@ export function AiImageGenerationPanel({
       const result = await getLocalImageAssetBase64(assetId);
       if (result == null) {
         setError(`Failed to load style image`);
-        setIsLoadingStyle(false);
-        return;
+        onError?.(`Failed to load style image`);
+        return null;
       }
 
       // Combine base64 data with MIME type
       const base64WithMimeType = `${result.mimeType};base64,${result.data}`;
       setStyleImageData(base64WithMimeType);
-      setSelectedStyleAssetId(assetId);
-      setShowStyleSelector(false);
+      return base64WithMimeType;
     } catch (err) {
-      console.error(`Failed to select style image:`, err);
+      console.error(`Failed to load style image:`, err);
       setError(`Failed to load style image`);
       onError?.(`Failed to load style image`);
+      return null;
     } finally {
       setIsLoadingStyle(false);
     }
-  };
-
-  const handleClearStyleImage = () => {
-    setSelectedStyleAssetId(null);
-    setStyleImageData(null);
   };
 
   const handleGenerate = async () => {
@@ -102,12 +91,31 @@ export function AiImageGenerationPanel({
     setGeneratedImageFormat(null);
 
     try {
+      let effectiveStyleImageData: string | undefined;
+      let stylePromptText = ``;
+
+      if (aiStyleKind != null) {
+        const styleInfo = getMeaningImageStyle(aiStyleKind);
+        stylePromptText = styleInfo.stylePrompt;
+        effectiveStyleImageData =
+          styleImageData ??
+          (await loadStyleImageData(styleInfo.assetId)) ??
+          undefined;
+
+        if (effectiveStyleImageData == null) {
+          return;
+        }
+      }
+
+      const fullPrompt =
+        prompt.trim() + (stylePromptText ? `\n\n${stylePromptText}` : ``);
+
       const result = await generateMutation.mutateAsync({
-        prompt: prompt.trim(),
-        styleImageData: styleImageData ?? undefined,
+        prompt: fullPrompt,
+        styleImageData: effectiveStyleImageData,
       });
       setGeneratedImageDataUrl(result.imageDataUrl);
-      setGeneratedImageFormat(result.format as GeneratedImageFormat);
+      setGeneratedImageFormat(result.format);
     } catch (err) {
       console.error(`AI image generation failed:`, err);
       const errorMsg = `Unable to generate image right now.`;
@@ -152,41 +160,35 @@ export function AiImageGenerationPanel({
   const hasGenerated = generatedImageDataUrl != null;
 
   useEffect(() => {
-    if (!showStyleSelector) {
+    if (aiStyleKind == null) {
+      setStyleImageData(null);
       return;
     }
 
     let isActive = true;
 
-    const loadPreviews = async () => {
-      const entries = await Promise.all(
-        availableImages.map(async (assetId) => {
-          const source = await getLocalImageAssetSource(assetId);
-          return [assetId, source] as const;
-        }),
-      );
-
-      if (!isActive) {
-        return;
-      }
-
-      setStylePreviewSources((previous) => {
-        const next = { ...previous };
-        for (const [assetId, source] of entries) {
-          if (source != null) {
-            next[assetId] = source as ImageSourcePropType;
-          }
+    const preloadStyle = async () => {
+      setIsLoadingStyle(true);
+      try {
+        const styleInfo = getMeaningImageStyle(aiStyleKind);
+        const result = await getLocalImageAssetBase64(styleInfo.assetId);
+        if (!isActive || result == null) {
+          return;
         }
-        return next;
-      });
+        setStyleImageData(`${result.mimeType};base64,${result.data}`);
+      } finally {
+        if (isActive) {
+          setIsLoadingStyle(false);
+        }
+      }
     };
 
-    void loadPreviews();
+    void preloadStyle();
 
     return () => {
       isActive = false;
     };
-  }, [availableImages, showStyleSelector]);
+  }, [aiStyleKind]);
 
   return (
     <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
@@ -203,100 +205,6 @@ export function AiImageGenerationPanel({
         placeholder="Describe the image..."
         editable={!isProcessing}
       />
-
-      {/* Style Image Selector */}
-      <View className="gap-2">
-        <Text className="pyly-body-subheading">Style image</Text>
-        <Text className="text-[14px] text-fg-dim">
-          (Optional) Choose an image to use as a style reference
-        </Text>
-
-        {selectedStyleAssetId != null && styleImageData != null ? (
-          <View className="gap-2">
-            <View className="items-center rounded-lg border border-fg-bg10 bg-fg-bg5 p-2">
-              <Image
-                source={{
-                  uri: `data:${styleImageData}`,
-                }}
-                style={{ width: 120, height: 120 }}
-                resizeMode="contain"
-              />
-            </View>
-            <Text className="text-[13px] text-fg-dim">
-              Selected: {selectedStyleAssetId}
-            </Text>
-            <RectButton
-              variant="filled"
-              onPress={handleClearStyleImage}
-              disabled={isProcessing}
-            >
-              Clear style image
-            </RectButton>
-          </View>
-        ) : (
-          <RectButton
-            variant="filled"
-            onPress={() => {
-              setShowStyleSelector(!showStyleSelector);
-            }}
-            disabled={isProcessing}
-          >
-            Choose style image
-          </RectButton>
-        )}
-
-        {showStyleSelector && (
-          <View className="gap-2 rounded-lg bg-fg-bg5 p-3">
-            {availableImages.length === 0 ? (
-              <Text className="text-[13px] text-fg-dim">
-                No style images available
-              </Text>
-            ) : (
-              <>
-                <Text className="text-[13px] font-semibold text-fg-dim">
-                  Available styles:
-                </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {availableImages.map((assetId) => (
-                    <RectButton
-                      key={assetId}
-                      variant="outline"
-                      className="w-[150px]"
-                      onPress={() => {
-                        void handleSelectStyleImage(assetId);
-                      }}
-                      disabled={isProcessing}
-                      // oxlint-disable-next-line typescript/no-deprecated
-                      rawChildren
-                    >
-                      <View className="gap-2">
-                        <View
-                          className={`items-center rounded-lg border border-fg-bg10 bg-fg-bg5 p-2`}
-                        >
-                          {stylePreviewSources[assetId] == null ? (
-                            <Text className="text-[11px] text-fg-dim">
-                              Loading...
-                            </Text>
-                          ) : (
-                            <Image
-                              source={stylePreviewSources[assetId]}
-                              style={{ width: 100, height: 80 }}
-                              resizeMode="cover"
-                            />
-                          )}
-                        </View>
-                        <Text className="text-[12px] text-fg-dim">
-                          {assetId}
-                        </Text>
-                      </View>
-                    </RectButton>
-                  ))}
-                </View>
-              </>
-            )}
-          </View>
-        )}
-      </View>
 
       <View className="flex-row items-center justify-end gap-2">
         <RectButton

@@ -1,4 +1,5 @@
 import { autoCheckUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { MeaningImageStyleSettingControl } from "@/client/ui/MeaningImageStyleSettingControl";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import { Text, View } from "react-native";
 
@@ -24,6 +25,11 @@ export default function AppearanceSettingsPage() {
             <UserSettingToggleButton entity={autoCheckUserSetting} />
           </View>
         </View>
+      </View>
+
+      <View className="gap-2">
+        <Text className="pyly-body-dt">Images</Text>
+        <MeaningImageStyleSettingControl />
       </View>
     </View>
   );

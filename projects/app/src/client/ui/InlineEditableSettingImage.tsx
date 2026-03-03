@@ -7,6 +7,7 @@ import type {
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import type { MeaningImageStyleKind } from "@/client/ui/meaningImageStyles";
 import type { AssetId } from "@/data/model";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -52,6 +53,7 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   enablePasteDropZone?: boolean;
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
+  aiStyleKind?: MeaningImageStyleKind | null;
   frameConstraint?: ImageFrameConstraintInput | null;
   onUploadError?: (error: string) => void;
   onSaveAiPrompt?: (prompt: string) => void;
@@ -74,6 +76,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   enablePasteDropZone = false,
   enableAiGeneration = false,
   initialAiPrompt = ``,
+  aiStyleKind = null,
   frameConstraint,
   onUploadError,
   onSaveAiPrompt,
@@ -396,6 +399,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                   <View>
                     <AiImageGenerationPanel
                       initialPrompt={initialAiPrompt}
+                      aiStyleKind={aiStyleKind}
                       onImageGenerated={(assetId) => {
                         handleAddCustomImage(assetId);
                       }}
