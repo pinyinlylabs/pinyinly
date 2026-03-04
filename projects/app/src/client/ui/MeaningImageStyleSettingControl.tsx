@@ -56,7 +56,7 @@ function MeaningImageStyleOptionCard({
         <View
           className={
             isSelected
-              ? `size-20 overflow-hidden rounded-md border-2 border-cyan bg-fg-bg10`
+              ? `size-20 overflow-hidden rounded-md border-2 border-blue bg-fg-bg10`
               : `size-20 overflow-hidden rounded-md bg-fg-bg10`
           }
         >

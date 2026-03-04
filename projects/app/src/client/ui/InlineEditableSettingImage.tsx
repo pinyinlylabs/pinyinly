@@ -918,7 +918,7 @@ function HintImageTile({
       <View
         className={
           isSelected
-            ? `absolute inset-0 rounded-md border-2 border-cyan`
+            ? `absolute inset-0 rounded-md border-2 border-blue`
             : isHovered
               ? `absolute inset-0 rounded-md border-2 border-cyan/40`
               : `absolute inset-0 rounded-md border border-fg/10`
