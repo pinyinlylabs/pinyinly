@@ -2,10 +2,10 @@ import type {
   UserSettingEntityInput,
   UserSettingEntityLike,
   UserSettingKeyInput,
-  UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useUserSettingHistory } from "@/client/ui/hooks/useUserSettingHistory";
+import type { UserSettingTextEntity } from "@/data/userSettings";
 import { formatRelativeTime } from "@/util/date";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";

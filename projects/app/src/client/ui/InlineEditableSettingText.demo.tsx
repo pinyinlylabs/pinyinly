@@ -1,8 +1,8 @@
+import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintTextSetting,
-} from "@/client/ui/hooks/useUserSetting";
-import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+} from "@/data/userSettings";
 import { View } from "react-native";
 import { DemoHanziWordKnob } from "./demo/components";
 import { useDemoHanziWordKnob } from "./demo/utils";

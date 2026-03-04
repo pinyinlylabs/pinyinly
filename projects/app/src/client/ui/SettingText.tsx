@@ -1,9 +1,9 @@
 import type {
   UserSettingEntityLike,
   UserSettingKeyInput,
-  UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import type { UserSettingTextEntity } from "@/data/userSettings";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
 interface SettingTextProps<T extends UserSettingTextEntity> {

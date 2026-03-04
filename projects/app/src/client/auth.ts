@@ -28,7 +28,7 @@ const deviceSessionSchema = z.object({
    */
   serverSessionId: z.string().optional(),
   userId: z.string().optional(),
-  userName: z.string().optional(),
+  userName: z.string().nullish(),
   /**
    * Authentication method used for this session.
    * Undefined for anonymous sessions.
@@ -152,8 +152,24 @@ export function useAuth(): AuthApi {
     });
 
     if (res2.verified) {
-      const { session } = res2;
-      signInWithServerSessionId(session.id, `passkey`);
+      const { session, user } = res2;
+      invariant(data != null, `expected auth state to be initialized`);
+
+      // Try activating an existing session first.
+      const usedExisting = signInToExistingDeviceSession(
+        (s) => s.serverSessionId === session.id,
+      );
+      if (!usedExisting) {
+        const newSession: DeviceSession = makeDeviceSession({
+          serverSessionId: session.id,
+          authMethod: `passkey`,
+          userId: user.id,
+          userName: user.name,
+        });
+        authState.setValue({
+          deviceSessions: [newSession, ...data.allDeviceSessions],
+        });
+      }
     } else {
       console.error(`Passkey authentication failed`, res2);
     }
@@ -171,8 +187,24 @@ export function useAuth(): AuthApi {
     });
 
     if (res2.verified) {
-      const { session } = res2;
-      signInWithServerSessionId(session.id, `passkey`);
+      const { session, user } = res2;
+      invariant(data != null, `expected auth state to be initialized`);
+
+      // Try activating an existing session first.
+      const usedExisting = signInToExistingDeviceSession(
+        (s) => s.serverSessionId === session.id,
+      );
+      if (!usedExisting) {
+        const newSession: DeviceSession = makeDeviceSession({
+          serverSessionId: session.id,
+          authMethod: `passkey`,
+          userId: user.id,
+          userName: user.name,
+        });
+        authState.setValue({
+          deviceSessions: [newSession, ...data.allDeviceSessions],
+        });
+      }
     } else {
       console.error(`Passkey authentication failed`, res2);
     }
@@ -182,11 +214,10 @@ export function useAuth(): AuthApi {
     async (identityToken: string) => {
       invariant(data != null, `expected auth state to be initialized`);
 
-      const { session /*, user */ } = await signInWithAppleMutate({
+      const { session, user } = await signInWithAppleMutate({
         identityToken,
       });
       // Activate an existing session if one exists with a matching session ID.
-      // TODO: also look for matching user ID first.
       const existingSession = data.allDeviceSessions.find(
         (s) => s.serverSessionId === session.id,
       );
@@ -195,8 +226,8 @@ export function useAuth(): AuthApi {
         makeDeviceSession({
           serverSessionId: session.id,
           authMethod: `apple`,
-          // userId: session.userId, // TODO: implement
-          // userName: session.userName, // TODO: implement
+          userId: user.id,
+          userName: user.name,
         });
       const newState: AuthState2 = {
         deviceSessions: [
@@ -291,7 +322,10 @@ export function useAuth(): AuthApi {
 }
 
 function makeDeviceSession(
-  opts?: Pick<DeviceSession, `serverSessionId` | `authMethod`>,
+  opts?: Pick<
+    DeviceSession,
+    `serverSessionId` | `authMethod` | `userId` | `userName`
+  >,
 ): DeviceSession {
   return {
     ...opts,

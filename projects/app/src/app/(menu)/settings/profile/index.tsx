@@ -1,6 +1,8 @@
 import { useAuth } from "@/client/auth";
+import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
+import { userNameSetting } from "@/data/userSettings";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 
@@ -35,7 +37,7 @@ export default function ProfileSettingsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="pyly-body-title">Profile</Text>
+        <Text className="pyly-body-title">Account</Text>
       </View>
 
       {/* Current Account */}
@@ -47,6 +49,20 @@ export default function ProfileSettingsPage() {
           showDetails={true}
         />
       </View>
+
+      {/* Account Name Editor */}
+      {isAuthenticated && (
+        <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
+          <Text className="text-sm text-fg-dim">Account Name</Text>
+          <InlineEditableSettingText
+            variant="body"
+            setting={userNameSetting}
+            settingKey={{}}
+            placeholder="Enter account name"
+            displayClassName="text-base"
+          />
+        </View>
+      )}
 
       {/* Account Management */}
       <View className="gap-3 rounded-lg border bg-bg-high p-4">

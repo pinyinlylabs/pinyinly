@@ -31,7 +31,6 @@ export const schema = pg.pgSchema(`haohaohow`);
 
 export const user = schema.table(`user`, {
   id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-  name: pg.varchar(`name`, { length: 30 }),
   createdAt: pg
     .timestamp(`createdAt`, {
       mode: `date`,

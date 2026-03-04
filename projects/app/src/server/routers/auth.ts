@@ -1,5 +1,6 @@
 import { getLucia, getOrCreateUser } from "@/server/lib/auth";
 import { withDrizzle } from "@/server/lib/db";
+import { getUserName, setUserName } from "@/server/lib/queries";
 import { procedure, router } from "@/server/lib/trpc";
 import * as schema from "@/server/pgSchema";
 import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
@@ -118,7 +119,7 @@ export const authRouter = router({
           }),
           user: z.object({
             id: z.string(),
-            name: z.string().optional(),
+            name: z.string().nullable(),
           }),
         })
         .strict(),
@@ -142,9 +143,11 @@ export const authRouter = router({
         return { session, userId };
       });
 
+      const name = await withDrizzle(async (db) => getUserName(db, userId));
+
       return {
         session: { id: session.id },
-        user: { id: userId },
+        user: { id: userId, name },
       };
     }),
 
@@ -229,7 +232,6 @@ export const authRouter = router({
           .insert(schema.user)
           .values({
             id: cookie.userId,
-            name: cookie.userName,
           })
           .returning();
         invariant(newUser !== undefined);
@@ -255,10 +257,13 @@ export const authRouter = router({
         const lucia = getLucia(db);
         const session = await lucia.createSession(newUser.id, {});
 
+        // Create the userName setting with the provided userName
+        await setUserName(db, newUser.id, cookie.userName);
+
         return {
           verified: true,
           session: { id: session.id },
-          user: { id: newUser.id, name: newUser.name },
+          user: { id: newUser.id, name: cookie.userName },
         };
       });
     }),
@@ -308,9 +313,9 @@ export const authRouter = router({
     .mutation(async (opts) => {
       const { response, cookie } = opts.input;
 
-      return withDrizzle(async (db) => {
+      const dbResult = await withDrizzle(async (db) => {
         if (response.response.userHandle == null) {
-          return { verified: false };
+          return { verified: false as const };
         }
 
         const credentialId = response.id;
@@ -324,7 +329,7 @@ export const authRouter = router({
         });
 
         if (authPasskey == null) {
-          return { verified: false };
+          return { verified: false as const };
         }
 
         // Verify the authentication response
@@ -342,7 +347,7 @@ export const authRouter = router({
         });
 
         if (!verification.verified) {
-          return { verified: false };
+          return { verified: false as const };
         }
 
         // Update the counter in the database
@@ -358,21 +363,26 @@ export const authRouter = router({
         const lucia = getLucia(db);
         const session = await lucia.createSession(authPasskey.userId, {});
 
-        // Get user data if needed
-        const user = await db.query.user.findFirst({
-          where: eq(schema.user.id, authPasskey.userId),
-        });
-
-        invariant(
-          user !== undefined,
-          `User not found for passkey authentication`,
-        );
-
         return {
-          verified: true,
+          verified: true as const,
           session: { id: session.id },
-          user: { id: user.id, name: user.name },
+          userId: authPasskey.userId,
         };
       });
+
+      if (!dbResult.verified) {
+        return { verified: false };
+      }
+
+      // Get user name after successful auth
+      const name = await withDrizzle(async (db) =>
+        getUserName(db, dbResult.userId),
+      );
+
+      return {
+        verified: true,
+        session: { id: dbResult.session.id },
+        user: { id: dbResult.userId, name },
+      };
     }),
 });

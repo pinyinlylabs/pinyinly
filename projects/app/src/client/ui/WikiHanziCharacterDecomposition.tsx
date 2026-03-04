@@ -1,13 +1,11 @@
-import {
-  hanziWordMeaningHintImageSetting,
-  useUserSetting,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {
   hanziWordMeaningAiImageStyleSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
+  hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/data/userSettings";
 import type { HanziWordMeaning } from "@/dictionary";

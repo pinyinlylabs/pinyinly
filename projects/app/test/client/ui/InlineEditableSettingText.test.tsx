@@ -1,11 +1,9 @@
 // @vitest-environment happy-dom
 
-import { InlineEditableSettingText } from "#client/ui/InlineEditableSettingText.tsx";
-import type {
-  UseUserSettingResult,
-  UserSettingTextEntity,
-} from "#client/ui/hooks/useUserSetting.ts";
+import type { UseUserSettingResult } from "#client/ui/hooks/useUserSetting.ts";
 import * as useUserSettingModule from "#client/ui/hooks/useUserSetting.ts";
+import { InlineEditableSettingText } from "#client/ui/InlineEditableSettingText.tsx";
+import type { UserSettingTextEntity } from "#data/userSettings.ts";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 

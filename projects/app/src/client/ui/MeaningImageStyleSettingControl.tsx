@@ -1,7 +1,4 @@
-import {
-  hanziWordMeaningAiImageStyleSetting,
-  useUserSetting,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { FramedAssetImage } from "@/client/ui/ImageFrame";
 import {
   getMeaningImageStyle,
@@ -9,6 +6,7 @@ import {
   normalizeMeaningImageStyleKind,
 } from "@/client/ui/meaningImageStyles";
 import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
+import { hanziWordMeaningAiImageStyleSetting } from "@/data/userSettings";
 import { Pressable, Text, View } from "react-native";
 
 export function MeaningImageStyleSettingControl() {

@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."user" DROP COLUMN "name";

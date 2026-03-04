@@ -107,6 +107,12 @@ export const autoCheckUserSetting = defineUserSetting({
   }) satisfies UserSettingToggleableEntity,
 });
 
+export const userNameSetting = defineUserSetting({
+  entity: r.entity(`userName`, {
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
 export const quickSearchPickSetting = defineUserSetting({
   entity: r.entity(`qsr`, {
     objectId: rPinyinlyObjectId().alias(`o`),
@@ -312,6 +318,7 @@ export const imageSettingDefs = [
 
 export const userSettingDefinitions = [
   autoCheckUserSetting,
+  userNameSetting,
   quickSearchPickSetting,
   hanziWordMeaningAiImageStyleSetting,
   pinyinSoundNameSetting,

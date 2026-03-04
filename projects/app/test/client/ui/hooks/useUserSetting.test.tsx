@@ -2,21 +2,19 @@
 
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
-import {
-  autoCheckUserSetting,
-  useUserSetting,
-} from "#client/ui/hooks/useUserSetting.ts";
 import type { UseUserSettingResult } from "#client/ui/hooks/useUserSetting.ts";
+import { useUserSetting } from "#client/ui/hooks/useUserSetting.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import type { HanziWord } from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
-import { r } from "#util/rizzle.ts";
+import { autoCheckUserSetting } from "#data/userSettings.ts";
 import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { r } from "#util/rizzle.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { act } from "react";
-import { expect, test as baseTest } from "vitest";
+import { test as baseTest, expect } from "vitest";
 
 const testWithRizzle = baseTest.extend(rizzleFixture);
 
