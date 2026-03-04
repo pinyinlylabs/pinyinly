@@ -1,3 +1,4 @@
+import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import {
@@ -75,6 +76,7 @@ export function WikiHanziCharacterPronunciation({
     pinyinSoundDescriptionSetting,
     skipSoundSettings ? { skip: true } : { soundId: splitPinyin.toneSoundId },
   );
+  const { aiImageStyle } = useAiImageStyleSetting();
   const finalToneDescriptionSetting = useUserSetting(
     pinyinFinalToneDescriptionSetting,
     skipSoundSettings
@@ -289,6 +291,7 @@ export function WikiHanziCharacterPronunciation({
             tileSize={64}
             enablePasteDropZone
             enableAiGeneration
+            aiImageStyle={aiImageStyle}
             initialAiPrompt={
               imagePromptSetting.value?.text ??
               ([hintTextSetting.value?.text, hintExplanationSetting.value?.text]

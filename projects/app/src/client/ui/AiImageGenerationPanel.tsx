@@ -1,8 +1,8 @@
+import type { AiImageStyleKind } from "@/client/aiImageStyle";
+import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { getLocalImageAssetBase64 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
-import type { MeaningImageStyleKind } from "@/client/ui/meaningImageStyles";
-import { getMeaningImageStyle } from "@/client/ui/meaningImageStyles";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
@@ -14,7 +14,7 @@ type GeneratedImageFormat = `png` | `jpeg` | `webp`;
 
 export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
-  aiStyleKind?: MeaningImageStyleKind | null;
+  aiImageStyle?: AiImageStyleKind | null;
   onImageGenerated: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
@@ -22,7 +22,7 @@ export interface AiImageGenerationPanelProps {
 
 export function AiImageGenerationPanel({
   initialPrompt = ``,
-  aiStyleKind = null,
+  aiImageStyle = null,
   onImageGenerated,
   onError,
   onSavePrompt,
@@ -94,12 +94,12 @@ export function AiImageGenerationPanel({
       let effectiveStyleImageData: string | undefined;
       let stylePromptText = ``;
 
-      if (aiStyleKind != null) {
-        const styleInfo = getMeaningImageStyle(aiStyleKind);
-        stylePromptText = styleInfo.stylePrompt;
+      if (aiImageStyle != null) {
+        const config = getAiImageStyleConfig(aiImageStyle);
+        stylePromptText = config.stylePrompt;
         effectiveStyleImageData =
           styleImageData ??
-          (await loadStyleImageData(styleInfo.assetId)) ??
+          (await loadStyleImageData(config.assetId)) ??
           undefined;
 
         if (effectiveStyleImageData == null) {
@@ -160,7 +160,7 @@ export function AiImageGenerationPanel({
   const hasGenerated = generatedImageDataUrl != null;
 
   useEffect(() => {
-    if (aiStyleKind == null) {
+    if (aiImageStyle == null) {
       setStyleImageData(null);
       return;
     }
@@ -170,7 +170,7 @@ export function AiImageGenerationPanel({
     const preloadStyle = async () => {
       setIsLoadingStyle(true);
       try {
-        const styleInfo = getMeaningImageStyle(aiStyleKind);
+        const styleInfo = getAiImageStyleConfig(aiImageStyle);
         const result = await getLocalImageAssetBase64(styleInfo.assetId);
         if (!isActive || result == null) {
           return;
@@ -188,7 +188,7 @@ export function AiImageGenerationPanel({
     return () => {
       isActive = false;
     };
-  }, [aiStyleKind]);
+  }, [aiImageStyle]);
 
   return (
     <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">

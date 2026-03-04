@@ -1,35 +1,32 @@
-import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import { FramedAssetImage } from "@/client/ui/ImageFrame";
+import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import {
-  getMeaningImageStyle,
-  meaningImageStyleOptions,
-  normalizeMeaningImageStyleKind,
-} from "@/client/ui/meaningImageStyles";
+  aiImageStyleConfigs,
+  getAiImageStyleConfig,
+} from "@/client/aiImageStyle";
+import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
+import { FramedAssetImage } from "@/client/ui/ImageFrame";
 import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
-import { hanziWordMeaningAiImageStyleSetting } from "@/data/userSettings";
 import { Pressable, Text, View } from "react-native";
 
 export function MeaningImageStyleSettingControl() {
-  const styleSetting = useUserSetting(hanziWordMeaningAiImageStyleSetting);
-  const selectedStyleKind = normalizeMeaningImageStyleKind(
-    styleSetting.value?.text,
-  );
+  const { aiImageStyle, setAiImageStyle } = useAiImageStyleSetting();
 
   return (
     <View className="gap-3">
-      <Text className="pyly-body-heading">AI meaning image style</Text>
+      <Text className="pyly-body-heading">AI image style</Text>
       <Text className="pyly-body-caption">
-        Used for generated meaning mnemonic images in Recognize the character.
+        Used for generated mnemonic images in both Recognize the character and
+        Remember the pronunciation.
       </Text>
 
       <View className="flex-row gap-3">
-        {meaningImageStyleOptions.map((option) => (
+        {aiImageStyleConfigs.map((config) => (
           <MeaningImageStyleOptionCard
-            key={option.kind}
-            styleKind={option.kind}
-            isSelected={selectedStyleKind === option.kind}
+            key={config.kind}
+            aiImageStyle={config.kind}
+            isSelected={aiImageStyle === config.kind}
             onSelect={() => {
-              styleSetting.setValue({ text: option.kind });
+              setAiImageStyle(config.kind);
             }}
           />
         ))}
@@ -39,16 +36,16 @@ export function MeaningImageStyleSettingControl() {
 }
 
 function MeaningImageStyleOptionCard({
-  styleKind,
+  aiImageStyle,
   isSelected,
   onSelect,
 }: {
-  styleKind: (typeof meaningImageStyleOptions)[number][`kind`];
+  aiImageStyle: AiImageStyleKind;
   isSelected: boolean;
   onSelect: () => void;
 }) {
-  const style = getMeaningImageStyle(styleKind);
-  const styleImageMeta = useAssetImageMeta(style.assetId, null, null);
+  const config = getAiImageStyleConfig(aiImageStyle);
+  const styleImageMeta = useAssetImageMeta(config.assetId, null, null);
 
   return (
     <Pressable onPress={onSelect}>
@@ -61,14 +58,14 @@ function MeaningImageStyleOptionCard({
           }
         >
           <FramedAssetImage
-            assetId={style.assetId}
-            crop={{ kind: `rect`, rect: style.thumbnailCropRect }}
+            assetId={config.assetId}
+            crop={{ kind: `rect`, rect: config.thumbnailCropRect }}
             imageWidth={styleImageMeta.imageSize?.width ?? null}
             imageHeight={styleImageMeta.imageSize?.height ?? null}
             className="size-full"
           />
         </View>
-        <Text className="pyly-body text-center">{style.label}</Text>
+        <Text className="pyly-body text-center">{config.label}</Text>
       </View>
     </Pressable>
   );

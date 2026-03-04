@@ -1,9 +1,9 @@
 import type { AssetId } from "@/data/model";
 
-export type MeaningImageStyleKind = `comic` | `realistic`;
+export type AiImageStyleKind = `comic` | `realistic`;
 
-interface MeaningImageStyleOption {
-  kind: MeaningImageStyleKind;
+interface AiImageStyleConfig {
+  kind: AiImageStyleKind;
   label: string;
   assetId: AssetId;
   thumbnailCropRect: {
@@ -15,7 +15,7 @@ interface MeaningImageStyleOption {
   stylePrompt: string;
 }
 
-const meaningImageStyleOptionsConst = [
+export const aiImageStyleConfigs = [
   {
     kind: `comic`,
     label: `Comic`,
@@ -40,23 +40,21 @@ const meaningImageStyleOptionsConst = [
     },
     stylePrompt: ``,
   },
-] as const satisfies readonly MeaningImageStyleOption[];
+] as const satisfies readonly AiImageStyleConfig[];
 
-export const meaningImageStyleOptions = meaningImageStyleOptionsConst;
-
-const meaningImageStyleByKind = new Map(
-  meaningImageStyleOptions.map((style) => [style.kind, style] as const),
+const aiImageStyleByKind = new Map(
+  aiImageStyleConfigs.map((style) => [style.kind, style] as const),
 );
 
-export function normalizeMeaningImageStyleKind(
+export function normalizeAiImageStyleKind(
   value: string | null | undefined,
-): MeaningImageStyleKind {
+): AiImageStyleKind {
   return value === `realistic` ? `realistic` : `comic`;
 }
 
-export function getMeaningImageStyle(
-  kind: MeaningImageStyleKind,
-): MeaningImageStyleOption {
-  const fallbackStyle = meaningImageStyleOptions[0];
-  return meaningImageStyleByKind.get(kind) ?? fallbackStyle;
+export function getAiImageStyleConfig(
+  kind: AiImageStyleKind,
+): AiImageStyleConfig {
+  const fallbackStyle = aiImageStyleConfigs[0];
+  return aiImageStyleByKind.get(kind) ?? fallbackStyle;
 }
