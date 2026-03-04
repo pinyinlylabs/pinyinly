@@ -3,12 +3,12 @@ import type {
   UserSettingEntityInput,
   UserSettingEntityLike,
   UserSettingEntityOutput,
-  UserSettingImageEntity,
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { MeaningImageStyleKind } from "@/client/ui/meaningImageStyles";
 import type { AssetId } from "@/data/model";
+import type { UserSettingImageEntity } from "@/data/userSettings";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 import type {

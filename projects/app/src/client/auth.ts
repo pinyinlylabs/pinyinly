@@ -28,7 +28,7 @@ const deviceSessionSchema = z.object({
    */
   serverSessionId: z.string().optional(),
   userId: z.string().optional(),
-  userName: z.string().optional(),
+  userName: z.string().nullish(),
   /**
    * Authentication method used for this session.
    * Undefined for anonymous sessions.
@@ -37,13 +37,6 @@ const deviceSessionSchema = z.object({
 });
 
 type DeviceSession = z.infer<typeof deviceSessionSchema>;
-
-// const authState2Schema = z.object({
-//   /**
-//    * The array is ordered, the first session is always the "active" session.
-//    */
-//   clientSessions: z.array(deviceSessionSchema).min(1),
-// });
 
 const authStateSetting = r.entity(`authState`, {
   deviceSessions: r
@@ -73,6 +66,10 @@ type AuthApi = {
   logInToExistingDeviceSession: (
     predicate: (deviceSession: DeviceSession) => boolean,
   ) => boolean;
+  setDeviceSessionUserName: (opts: {
+    dbName: string;
+    userName: string | null;
+  }) => void;
   signUpWithPasskey: (opts: { name: string }) => Promise<void>;
   logInWithPasskey: () => Promise<void>;
   signOut: () => void;
@@ -152,8 +149,24 @@ export function useAuth(): AuthApi {
     });
 
     if (res2.verified) {
-      const { session } = res2;
-      signInWithServerSessionId(session.id, `passkey`);
+      const { session, user } = res2;
+      invariant(data != null, `expected auth state to be initialized`);
+
+      // Try activating an existing session first.
+      const usedExisting = logInToExistingDeviceSession(
+        (s) => s.serverSessionId === session.id,
+      );
+      if (!usedExisting) {
+        const newSession: DeviceSession = makeDeviceSession({
+          serverSessionId: session.id,
+          authMethod: `passkey`,
+          userId: user.id,
+          userName: user.name,
+        });
+        authState.setValue({
+          deviceSessions: [newSession, ...data.allDeviceSessions],
+        });
+      }
     } else {
       console.error(`Passkey authentication failed`, res2);
     }
@@ -171,22 +184,37 @@ export function useAuth(): AuthApi {
     });
 
     if (res2.verified) {
-      const { session } = res2;
-      signInWithServerSessionId(session.id, `passkey`);
+      const { session, user } = res2;
+      invariant(data != null, `expected auth state to be initialized`);
+
+      // Try activating an existing session first.
+      const usedExisting = logInToExistingDeviceSession(
+        (s) => s.serverSessionId === session.id,
+      );
+      if (!usedExisting) {
+        const newSession: DeviceSession = makeDeviceSession({
+          serverSessionId: session.id,
+          authMethod: `passkey`,
+          userId: user.id,
+          userName: user.name,
+        });
+        authState.setValue({
+          deviceSessions: [newSession, ...data.allDeviceSessions],
+        });
+      }
     } else {
       console.error(`Passkey authentication failed`, res2);
     }
   };
 
-  const signInWithApple = useCallback(
+  const logInWithApple = useCallback(
     async (identityToken: string) => {
       invariant(data != null, `expected auth state to be initialized`);
 
-      const { session /*, user */ } = await signInWithAppleMutate({
+      const { session, user } = await signInWithAppleMutate({
         identityToken,
       });
       // Activate an existing session if one exists with a matching session ID.
-      // TODO: also look for matching user ID first.
       const existingSession = data.allDeviceSessions.find(
         (s) => s.serverSessionId === session.id,
       );
@@ -195,8 +223,8 @@ export function useAuth(): AuthApi {
         makeDeviceSession({
           serverSessionId: session.id,
           authMethod: `apple`,
-          // userId: session.userId, // TODO: implement
-          // userName: session.userName, // TODO: implement
+          userId: user.id,
+          userName: user.name,
         });
       const newState: AuthState2 = {
         deviceSessions: [
@@ -211,7 +239,7 @@ export function useAuth(): AuthApi {
     [authState, data, signInWithAppleMutate],
   );
 
-  const signInToExistingDeviceSession = useCallback<
+  const logInToExistingDeviceSession = useCallback<
     AuthApi[`logInToExistingDeviceSession`]
   >(
     (predicate) => {
@@ -237,14 +265,14 @@ export function useAuth(): AuthApi {
     [authState, data],
   );
 
-  const signInWithServerSessionId = useCallback<
+  const logInWithServerSessionId = useCallback<
     AuthApi[`logInWithServerSessionId`]
   >(
     (serverSessionId: string, authMethod?: `apple` | `passkey`) => {
       invariant(data != null, `expected auth state to be initialized`);
 
       // Try activating an existing session first.
-      const usedExisting = signInToExistingDeviceSession(
+      const usedExisting = logInToExistingDeviceSession(
         (s) => s.serverSessionId === serverSessionId,
       );
       if (usedExisting) {
@@ -256,7 +284,7 @@ export function useAuth(): AuthApi {
         deviceSessions: [newSession, ...data.allDeviceSessions],
       });
     },
-    [authState, data, signInToExistingDeviceSession],
+    [authState, data, logInToExistingDeviceSession],
   );
 
   const signOut = useCallback(() => {
@@ -279,11 +307,48 @@ export function useAuth(): AuthApi {
     });
   }, [authState, data]);
 
+  const setAuthStateValue = authState.setValue;
+  const setDeviceSessionUserName = useCallback<
+    AuthApi[`setDeviceSessionUserName`]
+  >(
+    (opts) => {
+      setAuthStateValue((prevValue) => {
+        if (prevValue) {
+          // Find the session matching the current session's dbName
+          const sessionIndex = prevValue.deviceSessions.findIndex(
+            (session) => session.replicacheDbName === opts.dbName,
+          );
+
+          // Only update if we found the session and the value actually changed
+          if (sessionIndex !== -1) {
+            const currentSessionUserName =
+              prevValue.deviceSessions[sessionIndex]?.userName;
+
+            if (currentSessionUserName !== opts.userName) {
+              const updatedSessions = prevValue.deviceSessions.map(
+                (session, index) =>
+                  index === sessionIndex
+                    ? { ...session, userName: opts.userName }
+                    : session,
+              );
+
+              return { ...prevValue, deviceSessions: updatedSessions };
+            }
+          }
+        }
+
+        return prevValue;
+      });
+    },
+    [setAuthStateValue],
+  );
+
   return {
     data,
-    logInWithApple: signInWithApple,
-    logInToExistingDeviceSession: signInToExistingDeviceSession,
-    logInWithServerSessionId: signInWithServerSessionId,
+    logInWithApple: logInWithApple,
+    logInToExistingDeviceSession: logInToExistingDeviceSession,
+    logInWithServerSessionId: logInWithServerSessionId,
+    setDeviceSessionUserName,
     signUpWithPasskey,
     logInWithPasskey,
     signOut,
@@ -291,7 +356,10 @@ export function useAuth(): AuthApi {
 }
 
 function makeDeviceSession(
-  opts?: Pick<DeviceSession, `serverSessionId` | `authMethod`>,
+  opts?: Pick<
+    DeviceSession,
+    `serverSessionId` | `authMethod` | `userId` | `userName`
+  >,
 ): DeviceSession {
   return {
     ...opts,

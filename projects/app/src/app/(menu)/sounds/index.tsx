@@ -1,16 +1,16 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
-import {
-  pinyinSoundGroupNameSetting,
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundImageSettingKey,
-  pinyinSoundNameSettingKey,
-} from "@/client/ui/hooks/useUserSetting";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
 import type { AssetId } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
+import {
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupThemeSetting,
+  pinyinSoundImageSettingKey,
+  pinyinSoundNameSettingKey,
+} from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { useMemo } from "react";

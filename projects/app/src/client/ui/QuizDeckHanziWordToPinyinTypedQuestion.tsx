@@ -1,32 +1,30 @@
 import { intersperse } from "@/client/react";
-import {
-  autoCheckUserSetting,
-  useUserSetting,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { splitHanziText } from "@/data/hanzi";
-import { QuestionFlagKind } from "@/data/model";
 import type {
   HanziWordToPinyinTypedQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
-import { pinyinUnitSuggestions } from "@/data/pinyin";
+import { QuestionFlagKind } from "@/data/model";
 import type {
   PinyinUnitSuggestion,
   PinyinUnitSuggestions,
 } from "@/data/pinyin";
+import { pinyinUnitSuggestions } from "@/data/pinyin";
+import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
 import {
   gradeHanziToPinyinTypedQuestion,
   shouldAutoSubmitPinyinTypedAnswer,
 } from "@/data/questions/hanziWordToPinyinTyped";
-import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordFromSkill } from "@/data/skills";
+import { autoCheckUserSetting } from "@/data/userSettings";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import { useRef, useState } from "react";
 import type { ReactNode, Ref } from "react";
-import { Text, View } from "react-native";
+import { useRef, useState } from "react";
 import type { TextInput } from "react-native";
+import { Text, View } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
@@ -35,8 +33,8 @@ import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
-import { ratingToInputState } from "./TextAnswerInputSingle.utils";
 import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
+import { ratingToInputState } from "./TextAnswerInputSingle.utils";
 
 export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,

@@ -1,14 +1,14 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import {
-  pinyinSoundGroupNameSettingKey,
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundGroupThemeSettingKey,
-} from "@/client/ui/hooks/useUserSetting";
-import {
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
+import {
+  pinyinSoundGroupNameSettingKey,
+  pinyinSoundGroupThemeSetting,
+  pinyinSoundGroupThemeSettingKey,
+} from "@/data/userSettings";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";

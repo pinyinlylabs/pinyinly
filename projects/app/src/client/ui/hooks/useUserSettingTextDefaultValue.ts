@@ -1,8 +1,8 @@
+import type { UserSettingTextEntity } from "@/data/userSettings";
 import { getUserSettingDefaultValue } from "@/data/userSettings";
 import type {
   UserSettingEntityLike,
   UserSettingKeyInput,
-  UserSettingTextEntity,
 } from "./useUserSetting";
 
 /**

@@ -12,6 +12,7 @@ import {
   skillPinyinlyObjectIdKind,
   soundIdFromPinyinlyObjectId,
 } from "@/data/model";
+import { quickSearchPickSetting } from "@/data/userSettings";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { useDebounce } from "@uidotdev/usehooks";
 import type { Href } from "expo-router";
@@ -20,7 +21,7 @@ import { use, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { useRizzle } from "./hooks/useRizzle";
-import { quickSearchPickSetting, useUserSetting } from "./hooks/useUserSetting";
+import { useUserSetting } from "./hooks/useUserSetting";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import { Icon } from "./Icon";
 import { PageSheetModal } from "./PageSheetModal";

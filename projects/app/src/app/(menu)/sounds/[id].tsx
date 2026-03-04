@@ -3,15 +3,7 @@ import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import {
-  pinyinSoundDescriptionSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundGroupThemeSettingKey,
-  pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
-  pinyinSoundNameSettingKey,
-  useUserSetting,
-} from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
@@ -26,6 +18,14 @@ import {
   getPinyinSoundLabel,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
+import {
+  pinyinSoundDescriptionSetting,
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupThemeSettingKey,
+  pinyinSoundImageSetting,
+  pinyinSoundNameSetting,
+  pinyinSoundNameSettingKey,
+} from "@/data/userSettings";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";

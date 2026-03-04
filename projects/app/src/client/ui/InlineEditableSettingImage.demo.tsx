@@ -1,7 +1,7 @@
 import { DemoHanziWordKnob } from "@/client/ui/demo/components";
 import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
-import { hanziWordMeaningHintImageSetting } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
+import { hanziWordMeaningHintImageSetting } from "@/data/userSettings";
 import { Text, View } from "react-native";
 
 export default () => {

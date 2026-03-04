@@ -1,9 +1,7 @@
-import type {
-  UserSettingEntityLike,
-  UserSettingToggleableEntity,
-} from "@/client/ui/hooks/useUserSetting";
+import type { UserSettingEntityLike } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { ToggleButton } from "@/client/ui/ToggleButton";
+import type { UserSettingToggleableEntity } from "@/data/userSettings";
 
 export function UserSettingToggleButton({
   entity,

@@ -19,37 +19,6 @@ import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./useDb";
 import { useRizzle } from "./useRizzle";
 
-export {
-  autoCheckUserSetting,
-  getHanziPronunciationHintKeyParams,
-  getPinyinFinalToneKeyParams,
-  hanziPronunciationHintExplanationSetting,
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
-  hanziWordMeaningAiImageStyleSetting,
-  hanziWordMeaningHintExplanationSetting,
-  hanziWordMeaningHintImageSetting,
-  hanziWordMeaningHintTextSetting,
-  pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneImageSetting,
-  pinyinFinalToneNameSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundDescriptionSettingKey,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundGroupNameSettingKey,
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundGroupThemeSettingKey,
-  pinyinSoundImageSetting,
-  pinyinSoundImageSettingKey,
-  pinyinSoundNameSetting,
-  pinyinSoundNameSettingKey,
-  quickSearchPickSetting,
-  type UserSetting,
-  type UserSettingImageEntity,
-  type UserSettingTextEntity,
-  type UserSettingToggleableEntity,
-} from "@/data/userSettings";
-
 export type UserSettingEntity = RizzleAnyEntity;
 export type UserSettingEntityLike<T extends UserSettingEntity> = UserSetting<T>;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<

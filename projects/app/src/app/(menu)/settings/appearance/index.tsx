@@ -1,6 +1,6 @@
-import { autoCheckUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { MeaningImageStyleSettingControl } from "@/client/ui/MeaningImageStyleSettingControl";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
+import { autoCheckUserSetting } from "@/data/userSettings";
 import { Text, View } from "react-native";
 
 export default function AppearanceSettingsPage() {
