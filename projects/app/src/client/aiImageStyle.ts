@@ -48,8 +48,8 @@ const aiImageStyleByKind = new Map(
 
 export function normalizeAiImageStyleKind(
   value: string | null | undefined,
-): AiImageStyleKind {
-  return value === `realistic` ? `realistic` : `comic`;
+): AiImageStyleKind | null {
+  return value == null ? null : value === `realistic` ? `realistic` : `comic`;
 }
 
 export function getAiImageStyleConfig(

@@ -8,7 +8,7 @@ import { useUserSetting } from "./useUserSetting";
  */
 export interface UseAiImageStyleResult {
   /** The normalized AI image style ('comic' or 'realistic'), defaults to 'comic' if unset */
-  aiImageStyle: AiImageStyleKind;
+  aiImageStyle: AiImageStyleKind | null;
   /** Whether the setting is currently loading */
   isLoading: boolean;
   /** Function to update the AI image style preference */

@@ -8,7 +8,7 @@ import { FramedAssetImage } from "@/client/ui/ImageFrame";
 import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
 import { Pressable, Text, View } from "react-native";
 
-export function MeaningImageStyleSettingControl() {
+export function AiImageStyleSettingControl() {
   const { aiImageStyle, setAiImageStyle } = useAiImageStyleSetting();
 
   return (
@@ -21,7 +21,7 @@ export function MeaningImageStyleSettingControl() {
 
       <View className="flex-row gap-3">
         {aiImageStyleConfigs.map((config) => (
-          <MeaningImageStyleOptionCard
+          <AiImageStyleOptionCard
             key={config.kind}
             aiImageStyle={config.kind}
             isSelected={aiImageStyle === config.kind}
@@ -35,7 +35,7 @@ export function MeaningImageStyleSettingControl() {
   );
 }
 
-function MeaningImageStyleOptionCard({
+function AiImageStyleOptionCard({
   aiImageStyle,
   isSelected,
   onSelect,
