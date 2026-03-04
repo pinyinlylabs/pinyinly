@@ -1,4 +1,4 @@
-import type { CornerHandle, Rect, Size } from "#client/ui/imageCropCalc.ts";
+import type { CornerHandle, Rect, Size } from "#client/ui/imageCrop.ts";
 import {
   applyCornerDelta,
   clamp,
@@ -6,28 +6,29 @@ import {
   enforceAspectRatio,
   getMinCropSizePx,
   resizeRectPx,
-} from "#client/ui/imageCropCalc.ts";
+} from "#client/ui/imageCrop.ts";
 import { describe, expect, test } from "vitest";
 
 const imageSize: Size = { width: 1000, height: 800 };
 const minSize = getMinCropSizePx(imageSize);
 
-describe(`imageCropCalc`, () => {
-  describe(`clamp`, () => {
-    test(`returns value when within bounds`, () => {
-      expect(clamp(5, 0, 10)).toBe(5);
-    });
-
-    test(`clamps to min when below range`, () => {
-      expect(clamp(-5, 0, 10)).toBe(0);
-    });
-
-    test(`clamps to max when above range`, () => {
-      expect(clamp(15, 0, 10)).toBe(10);
-    });
+describe(`clamp` satisfies HasNameOf<typeof clamp>, () => {
+  test(`returns value when within bounds`, () => {
+    expect(clamp(5, 0, 10)).toBe(5);
   });
 
-  describe(`getMinCropSizePx`, () => {
+  test(`clamps to min when below range`, () => {
+    expect(clamp(-5, 0, 10)).toBe(0);
+  });
+
+  test(`clamps to max when above range`, () => {
+    expect(clamp(15, 0, 10)).toBe(10);
+  });
+});
+
+describe(
+  `getMinCropSizePx` satisfies HasNameOf<typeof getMinCropSizePx>,
+  () => {
     test(`returns at least 40px`, () => {
       const smallImage: Size = { width: 100, height: 100 };
       expect(getMinCropSizePx(smallImage)).toBe(40);
@@ -41,53 +42,56 @@ describe(`imageCropCalc`, () => {
       const largeImage: Size = { width: 2000, height: 2000 };
       expect(getMinCropSizePx(largeImage)).toBe(100); // 2000 * 0.05 = 100
     });
+  },
+);
+
+describe(`clampRectPx` satisfies HasNameOf<typeof clampRectPx>, () => {
+  test(`clamps width to max image width`, () => {
+    const rect: Rect = { x: 0, y: 0, width: 1500, height: 400 };
+    const result = clampRectPx(rect, imageSize, minSize);
+    expect(result.width).toBe(1000);
   });
 
-  describe(`clampRectPx`, () => {
-    test(`clamps width to max image width`, () => {
-      const rect: Rect = { x: 0, y: 0, width: 1500, height: 400 };
-      const result = clampRectPx(rect, imageSize, minSize);
-      expect(result.width).toBe(1000);
-    });
-
-    test(`clamps height to max image height`, () => {
-      const rect: Rect = { x: 0, y: 0, width: 500, height: 1500 };
-      const result = clampRectPx(rect, imageSize, minSize);
-      expect(result.height).toBe(800);
-    });
-
-    test(`respects minimum size`, () => {
-      const rect: Rect = { x: 0, y: 0, width: 10, height: 10 };
-      const result = clampRectPx(rect, imageSize, minSize);
-      expect(result.width).toBeGreaterThanOrEqual(minSize);
-      expect(result.height).toBeGreaterThanOrEqual(minSize);
-    });
-
-    test(`adjusts x position if rectangle extends past right edge`, () => {
-      const rect: Rect = { x: 900, y: 0, width: 200, height: 400 };
-      const result = clampRectPx(rect, imageSize, minSize);
-      expect(result.x).toBe(800); // 1000 - 200
-      expect(result.width).toBe(200);
-    });
-
-    test(`adjusts y position if rectangle extends past bottom edge`, () => {
-      const rect: Rect = { x: 0, y: 700, width: 400, height: 200 };
-      const result = clampRectPx(rect, imageSize, minSize);
-      expect(result.y).toBe(600); // 800 - 200
-      expect(result.height).toBe(200);
-    });
-
-    test(`keeps rectangle within bounds`, () => {
-      const rect: Rect = { x: 100, y: 100, width: 500, height: 400 };
-      const result = clampRectPx(rect, imageSize, minSize);
-      expect(result.x).toBeGreaterThanOrEqual(0);
-      expect(result.y).toBeGreaterThanOrEqual(0);
-      expect(result.x + result.width).toBeLessThanOrEqual(1000);
-      expect(result.y + result.height).toBeLessThanOrEqual(800);
-    });
+  test(`clamps height to max image height`, () => {
+    const rect: Rect = { x: 0, y: 0, width: 500, height: 1500 };
+    const result = clampRectPx(rect, imageSize, minSize);
+    expect(result.height).toBe(800);
   });
 
-  describe(`applyCornerDelta`, () => {
+  test(`respects minimum size`, () => {
+    const rect: Rect = { x: 0, y: 0, width: 10, height: 10 };
+    const result = clampRectPx(rect, imageSize, minSize);
+    expect(result.width).toBeGreaterThanOrEqual(minSize);
+    expect(result.height).toBeGreaterThanOrEqual(minSize);
+  });
+
+  test(`adjusts x position if rectangle extends past right edge`, () => {
+    const rect: Rect = { x: 900, y: 0, width: 200, height: 400 };
+    const result = clampRectPx(rect, imageSize, minSize);
+    expect(result.x).toBe(800); // 1000 - 200
+    expect(result.width).toBe(200);
+  });
+
+  test(`adjusts y position if rectangle extends past bottom edge`, () => {
+    const rect: Rect = { x: 0, y: 700, width: 400, height: 200 };
+    const result = clampRectPx(rect, imageSize, minSize);
+    expect(result.y).toBe(600); // 800 - 200
+    expect(result.height).toBe(200);
+  });
+
+  test(`keeps rectangle within bounds`, () => {
+    const rect: Rect = { x: 100, y: 100, width: 500, height: 400 };
+    const result = clampRectPx(rect, imageSize, minSize);
+    expect(result.x).toBeGreaterThanOrEqual(0);
+    expect(result.y).toBeGreaterThanOrEqual(0);
+    expect(result.x + result.width).toBeLessThanOrEqual(1000);
+    expect(result.y + result.height).toBeLessThanOrEqual(800);
+  });
+});
+
+describe(
+  `applyCornerDelta` satisfies HasNameOf<typeof applyCornerDelta>,
+  () => {
     const baseRect: Rect = { x: 100, y: 100, width: 400, height: 300 };
 
     test(`applies topLeft delta: x and y increase, width and height decrease`, () => {
@@ -127,9 +131,12 @@ describe(`imageCropCalc`, () => {
       expect(result.width).toBe(350);
       expect(result.height).toBe(260);
     });
-  });
+  },
+);
 
-  describe(`enforceAspectRatio`, () => {
+describe(
+  `enforceAspectRatio` satisfies HasNameOf<typeof enforceAspectRatio>,
+  () => {
     const aspectRatio = 4 / 3; // width / height
 
     test(`uses width as driving dimension when useWidth is true`, () => {
@@ -275,9 +282,12 @@ describe(`imageCropCalc`, () => {
       expect(result.height).toBeGreaterThanOrEqual(minSize);
       expect(result.width / result.height).toBeCloseTo(0.5, 5);
     });
-  });
+  },
+);
 
-  describe(`resizeRectPx without aspect ratio`, () => {
+describe(
+  `resizeRectPx without aspect ratio` satisfies HasNameOf<typeof resizeRectPx>,
+  () => {
     const baseRect: Rect = { x: 100, y: 100, width: 400, height: 300 };
 
     test(`resizes topLeft by dragging up-left`, () => {
@@ -337,9 +347,14 @@ describe(`imageCropCalc`, () => {
       expect(result.width).toBeGreaterThanOrEqual(minSize);
       expect(result.height).toBeGreaterThanOrEqual(minSize);
     });
-  });
+  },
+);
 
-  describe(`resizeRectPx with aspect ratio (non-web)`, () => {
+describe(
+  `resizeRectPx with aspect ratio (non-web)` satisfies HasNameOf<
+    typeof resizeRectPx
+  >,
+  () => {
     const baseRect: Rect = { x: 100, y: 100, width: 400, height: 300 };
     const aspectRatio = 4 / 3;
 
@@ -419,9 +434,14 @@ describe(`imageCropCalc`, () => {
       expect(result.width).toBeGreaterThanOrEqual(minSize);
       expect(result.height).toBeGreaterThanOrEqual(minSize);
     });
-  });
+  },
+);
 
-  describe(`resizeRectPx with aspect ratio (web - horizontal only)`, () => {
+describe(
+  `resizeRectPx with aspect ratio (web - horizontal only)` satisfies HasNameOf<
+    typeof resizeRectPx
+  >,
+  () => {
     const baseRect: Rect = { x: 100, y: 100, width: 400, height: 300 };
     const aspectRatio = 4 / 3;
 
@@ -476,58 +496,58 @@ describe(`imageCropCalc`, () => {
         expect(result.width / result.height).toBeCloseTo(aspectRatio, 5);
       }
     });
+  },
+);
+
+describe(`real-world scenarios`, () => {
+  const imageSize: Size = { width: 1920, height: 1440 };
+  const aspectRatio = 1; // Square
+
+  test(`allows shrinking from top-right corner by dragging left on web`, () => {
+    const startRect: Rect = { x: 300, y: 300, width: 600, height: 600 };
+    // Drag left (negative dx)
+    const result = resizeRectPx(
+      startRect,
+      `topRight`,
+      -100,
+      50, // Small vertical movement (should be ignored on web)
+      aspectRatio,
+      imageSize,
+      true,
+    );
+    expect(result.width).toBeLessThan(startRect.width);
+    expect(result.height).toBeLessThan(startRect.height);
+    expect(result.width / result.height).toBeCloseTo(1, 5);
   });
 
-  describe(`real-world scenarios`, () => {
-    const imageSize: Size = { width: 1920, height: 1440 };
-    const aspectRatio = 1; // Square
+  test(`constrains crop to image bounds`, () => {
+    const startRect: Rect = { x: 1800, y: 1300, width: 200, height: 200 };
+    const result = resizeRectPx(
+      startRect,
+      `bottomRight`,
+      500, // Dragging way past right edge
+      500,
+      null,
+      imageSize,
+      false,
+    );
+    expect(result.x + result.width).toBeLessThanOrEqual(imageSize.width);
+    expect(result.y + result.height).toBeLessThanOrEqual(imageSize.height);
+  });
 
-    test(`allows shrinking from top-right corner by dragging left on web`, () => {
-      const startRect: Rect = { x: 300, y: 300, width: 600, height: 600 };
-      // Drag left (negative dx)
-      const result = resizeRectPx(
-        startRect,
-        `topRight`,
-        -100,
-        50, // Small vertical movement (should be ignored on web)
-        aspectRatio,
-        imageSize,
-        true,
-      );
-      expect(result.width).toBeLessThan(startRect.width);
-      expect(result.height).toBeLessThan(startRect.height);
-      expect(result.width / result.height).toBeCloseTo(1, 5);
-    });
-
-    test(`constrains crop to image bounds`, () => {
-      const startRect: Rect = { x: 1800, y: 1300, width: 200, height: 200 };
-      const result = resizeRectPx(
-        startRect,
-        `bottomRight`,
-        500, // Dragging way past right edge
-        500,
-        null,
-        imageSize,
-        false,
-      );
-      expect(result.x + result.width).toBeLessThanOrEqual(imageSize.width);
-      expect(result.y + result.height).toBeLessThanOrEqual(imageSize.height);
-    });
-
-    test(`grows from bottom-left corner by dragging left`, () => {
-      const startRect: Rect = { x: 500, y: 400, width: 400, height: 400 };
-      const result = resizeRectPx(
-        startRect,
-        `bottomLeft`,
-        -100, // Drag left
-        100,
-        1, // Square aspect
-        imageSize,
-        false,
-      );
-      expect(result.width).toBeGreaterThan(startRect.width);
-      expect(result.x).toBeLessThan(startRect.x);
-      expect(result.width / result.height).toBeCloseTo(1, 5);
-    });
+  test(`grows from bottom-left corner by dragging left`, () => {
+    const startRect: Rect = { x: 500, y: 400, width: 400, height: 400 };
+    const result = resizeRectPx(
+      startRect,
+      `bottomLeft`,
+      -100, // Drag left
+      100,
+      1, // Square aspect
+      imageSize,
+      false,
+    );
+    expect(result.width).toBeGreaterThan(startRect.width);
+    expect(result.x).toBeLessThan(startRect.x);
+    expect(result.width / result.height).toBeCloseTo(1, 5);
   });
 });
