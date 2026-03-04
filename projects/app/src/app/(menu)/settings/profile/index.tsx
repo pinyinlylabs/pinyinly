@@ -61,6 +61,9 @@ export default function ProfileSettingsPage() {
             placeholder="Enter account name"
             displayClassName="text-base"
           />
+          <Text className="text-xs text-fg-dim/60">
+            Updated automatically across your devices
+          </Text>
         </View>
       )}
 

@@ -9,7 +9,7 @@ import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import type { RizzleEntityInput } from "@/util/rizzle";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { use, useEffect } from "react";
+import { use, useCallback, useEffect, useRef } from "react";
 import { windowEventListenerEffect } from "./windowEventListenerEffect";
 
 /**
@@ -109,17 +109,23 @@ export const useDeviceStore = <T extends DeviceStoreEntity>(
   setting: T,
 ): UseDeviceStoreResult<T> => {
   const result = useDeviceStoreQuery(setting);
-  const mutate = useDeviceStoreMutation(setting);
+  const { mutate } = useDeviceStoreMutation(setting);
 
   const isLoading = result.isPending;
   const value = result.data ?? null;
 
-  const setValue: UseDeviceStoreSetValue<T> = (updater) => {
-    if (typeof updater === `function`) {
-      updater = updater(value, isLoading);
-    }
-    mutate.mutate(updater);
-  };
+  const isLoadingRef = useRef(isLoading);
+  const valueRef = useRef(value);
+
+  const setValue: UseDeviceStoreSetValue<T> = useCallback(
+    (updater) => {
+      if (typeof updater === `function`) {
+        updater = updater(valueRef.current, isLoadingRef.current);
+      }
+      mutate(updater);
+    },
+    [mutate],
+  );
 
   return { isLoading, value, setValue };
 };
