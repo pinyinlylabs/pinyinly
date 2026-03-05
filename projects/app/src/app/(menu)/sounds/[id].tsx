@@ -1,9 +1,6 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
-import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
-import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
@@ -11,6 +8,7 @@ import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
+import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
@@ -21,16 +19,11 @@ import {
 import {
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
-  pinyinSoundGroupThemeSettingKey,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
-  pinyinSoundNameSettingKey,
 } from "@/data/userSettings";
-import { loadPinyinSoundNameSuggestions } from "@/dictionary";
-import { sortComparatorString } from "@pinyinly/lib/collections";
-import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { useLocalSearchParams } from "expo-router";
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -41,64 +34,13 @@ export default function SoundIdPage() {
   >();
   const id = rawId as PinyinSoundId;
   const focusedTone = typeof rawTone === `string` ? rawTone : null;
-  const r = useRizzle();
   const chart = loadPylyPinyinChart();
-  const db = useDb();
 
   const scrollRef = useRef<ScrollView>(null);
   const hasScrolledRef = useRef(false);
   const [toneAnchorY, setToneAnchorY] = useState<number | null>(null);
-
-  const soundNameSuggestions = use(loadPinyinSoundNameSuggestions());
-
-  const relevantKeys = useMemo(
-    () => chart.soundIds.map((soundId) => pinyinSoundNameSettingKey(soundId)),
-    [chart],
-  );
-
-  const { data: settings } = useLiveQuery(
-    (q) =>
-      q
-        .from({ setting: db.settingCollection })
-        .where(({ setting }) => inArray(setting.key, relevantKeys)),
-    [db.settingCollection, relevantKeys],
-  );
-
-  const settingsByKey = new Map(
-    settings.map((setting) => [
-      setting.key,
-      setting.value as { t?: string } | null,
-    ]),
-  );
-
-  const pinyinSounds = new Map(
-    chart.soundIds.map((soundId) => {
-      const nameValueData = settingsByKey.get(
-        pinyinSoundNameSettingKey(soundId),
-      )?.t;
-
-      return [
-        soundId,
-        {
-          name: nameValueData ?? null,
-          label: chart.soundToCustomLabel[soundId] ?? soundId,
-        },
-      ];
-    }),
-  );
-  const pinyinSoundGroups = usePinyinSoundGroups();
-  const { setValue: setSoundName } = useUserSetting(pinyinSoundNameSetting, {
-    soundId: id,
-  });
-
-  const pinyinSoundGroupId = chart.soundGroups.find((g) =>
-    g.sounds.includes(id),
-  )?.id;
-
-  const pinyinSound = pinyinSounds.get(id);
-  const pinyinSoundGroup = pinyinSoundGroups.data.find(
-    (g) => g.id === pinyinSoundGroupId,
-  );
+  const [isEditSoundNameModalOpen, setIsEditSoundNameModalOpen] =
+    useState(false);
 
   const label = getPinyinSoundLabel(id, chart);
 
@@ -131,6 +73,13 @@ export default function SoundIdPage() {
             settingKey={{ soundId: id }}
             placeholder="Name this sound"
           />
+          <RectButton
+            onPress={() => {
+              setIsEditSoundNameModalOpen(true);
+            }}
+            variant="bare2"
+            iconStart="pencil"
+          />
         </View>
 
         <View className="gap-10">
@@ -160,84 +109,6 @@ export default function SoundIdPage() {
               />
             </View>
           </WikiTitledBox>
-
-          <View className="flex-row flex-wrap gap-1">
-            <Text className="pyly-body-title">Names</Text>
-          </View>
-
-          <View className="gap-2">
-            {[...soundNameSuggestions.entries()]
-              .flatMap(([theme, namesBySoundId]) => {
-                const names = namesBySoundId.get(id);
-                return names ? ([[theme, names]] as const) : [];
-              })
-              .sort(
-                // Put the current theme at the top.
-                sortComparatorString(
-                  ([theme]) =>
-                    `${theme === pinyinSoundGroup?.theme ? 0 : 1}-${theme}`,
-                ),
-              )
-              .map(([theme, names]) => (
-                <View key={theme}>
-                  <Text className="pyly-body-heading">
-                    {theme}
-                    {theme === pinyinSoundGroup?.theme ? (
-                      ` ✅`
-                    ) : (
-                      <RectButton
-                        onPress={() => {
-                          if (pinyinSoundGroup?.id != null) {
-                            void r.mutate.setSetting({
-                              key: pinyinSoundGroupThemeSettingKey(
-                                pinyinSoundGroup.id,
-                              ),
-                              value: { t: theme },
-                              now: new Date(),
-                            });
-                          }
-                        }}
-                        variant="bare"
-                      >
-                        Use theme
-                      </RectButton>
-                    )}
-                  </Text>
-                  {[...names.entries()].map(([name, nameDescription], i) => (
-                    <View key={i} className="flex-row items-center gap-2">
-                      <Text
-                        className={`
-                          text-fg-dim
-
-                          hover:text-fg
-                        `}
-                        onPress={() => {
-                          setSoundName({ soundId: id, text: name });
-                        }}
-                      >
-                        Use
-                      </Text>
-                      <Text className="font-bold text-fg">
-                        <Text
-                          className={
-                            pinyinSound?.name === name
-                              ? `text-[green]`
-                              : undefined
-                          }
-                        >
-                          {name}
-                        </Text>
-
-                        {` `}
-                        <Text className="text-sm font-normal text-fg-dim">
-                          {nameDescription}
-                        </Text>
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              ))}
-          </View>
         </View>
 
         {/* Final-tone details editor for finals */}
@@ -253,6 +124,13 @@ export default function SoundIdPage() {
             }}
           />
         )}
+        <SoundNameEditModal
+          soundId={id}
+          isOpen={isEditSoundNameModalOpen}
+          onClose={() => {
+            setIsEditSoundNameModalOpen(false);
+          }}
+        />
       </View>
     </ScrollView>
   );
