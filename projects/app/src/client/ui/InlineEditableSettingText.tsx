@@ -364,6 +364,7 @@ const displayContainer = tv({
 });
 
 const displayTextStyle = tv({
+  base: `text-left`,
   variants: {
     variant: {
       body: `pyly-body text-[14px] text-fg`,
@@ -375,6 +376,7 @@ const displayTextStyle = tv({
 });
 
 const emptyTextStyle = tv({
+  base: `text-left`,
   variants: {
     variant: {
       body: `pyly-body text-[14px] text-fg-dim`,
@@ -386,6 +388,7 @@ const emptyTextStyle = tv({
 });
 
 const inputText = tv({
+  base: `text-left`,
   variants: {
     variant: {
       body: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
