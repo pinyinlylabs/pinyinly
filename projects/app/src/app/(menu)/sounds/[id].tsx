@@ -1,5 +1,6 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
+import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -9,6 +10,8 @@ import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
+import type { SoundUsageExample } from "@/client/ui/soundUsageExamples";
+import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
@@ -17,13 +20,15 @@ import {
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import {
+  hanziPronunciationHintTextSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
+import { loadDictionary } from "@/dictionary";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -124,6 +129,9 @@ export default function SoundIdPage() {
             }}
           />
         )}
+
+        <SoundUsageExamplesSection pinyinSoundId={id} />
+
         <SoundNameEditModal
           soundId={id}
           isOpen={isEditSoundNameModalOpen}
@@ -139,6 +147,67 @@ export default function SoundIdPage() {
 const pinyinPartBox = tv({
   base: `size-20 justify-center gap-1 rounded-xl bg-bg-high p-2`,
 });
+
+function SoundUsageExamplesSection({
+  pinyinSoundId,
+}: {
+  pinyinSoundId: PinyinSoundId;
+}) {
+  const dictionary = use(loadDictionary());
+  const usageExamples = pickSoundUsageExamplesForEntries({
+    allEntries: dictionary.allEntries,
+    limit: 5,
+    soundId: pinyinSoundId,
+  });
+
+  if (!isInitialOrFinalSoundId(pinyinSoundId)) {
+    return null;
+  }
+
+  return (
+    <WikiTitledBox title="Usage examples" className="mt-10">
+      <View className="gap-4 p-4">
+        <Text className="pyly-body text-fg-dim">
+          Characters that use this sound. Open any character to inspect its wiki
+          page.
+        </Text>
+
+        {usageExamples.length === 0 ? (
+          <Text className="pyly-body text-fg-dim">
+            No single-character examples found yet for this sound.
+          </Text>
+        ) : (
+          <View className="gap-2">
+            {usageExamples.map((example) => (
+              <SoundUsageExampleRow key={example.hanziWord} example={example} />
+            ))}
+          </View>
+        )}
+      </View>
+    </WikiTitledBox>
+  );
+}
+
+function SoundUsageExampleRow({ example }: { example: SoundUsageExample }) {
+  return (
+    <View className="gap-1 rounded-lg border border-fg/10 bg-bg p-3">
+      <Text className="pyly-body-title">
+        <HanziWordRefText hanziWord={example.hanziWord} gloss={false} />
+        <Text className="text-fg-dim"> {example.pinyin}</Text>
+      </Text>
+      <Text className="pyly-body text-fg-dim">{example.gloss}</Text>
+      <SettingText
+        setting={hanziPronunciationHintTextSetting}
+        settingKey={{ hanzi: example.hanzi, pinyin: example.pinyin }}
+        className="pyly-body text-xs italic text-fg-dim/80"
+      />
+    </View>
+  );
+}
+
+function isInitialOrFinalSoundId(soundId: PinyinSoundId): boolean {
+  return soundId.endsWith(`-`) || soundId.startsWith(`-`);
+}
 
 function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
   const chart = loadPylyPinyinChart();
