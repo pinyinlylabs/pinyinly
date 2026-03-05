@@ -1,3 +1,4 @@
+import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
 import type {
   UserSettingEntityInput,
@@ -6,7 +7,6 @@ import type {
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type { MeaningImageStyleKind } from "@/client/ui/meaningImageStyles";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
 import type { ReactElement } from "react";
@@ -35,12 +35,15 @@ import type {
   ImageFrameConstraintInput,
 } from "./imageCrop";
 import {
+  clampImageCropRectPosition,
   createCenteredCropRect,
+  getImageScale,
+  getZoomedImageCropRect,
   imageCropValueFromCrop,
+  isImageCropRectAspectRatioCompatible,
   parseImageCrop,
   resolveFrameAspectRatio,
 } from "./imageCrop";
-import { clamp, getMinCropSizePx } from "./imageCropCalc";
 import { useAssetImageMeta } from "./useAssetImageMeta";
 
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
@@ -53,7 +56,7 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   enablePasteDropZone?: boolean;
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
-  aiStyleKind?: MeaningImageStyleKind | null;
+  aiImageStyle?: AiImageStyleKind | null;
   frameConstraint?: ImageFrameConstraintInput | null;
   onUploadError?: (error: string) => void;
   onSaveAiPrompt?: (prompt: string) => void;
@@ -76,7 +79,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   enablePasteDropZone = false,
   enableAiGeneration = false,
   initialAiPrompt = ``,
-  aiStyleKind = null,
+  aiImageStyle = null,
   frameConstraint,
   onUploadError,
   onSaveAiPrompt,
@@ -399,7 +402,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                   <View>
                     <AiImageGenerationPanel
                       initialPrompt={initialAiPrompt}
-                      aiStyleKind={aiStyleKind}
+                      aiImageStyle={aiImageStyle}
                       onImageGenerated={(assetId) => {
                         handleAddCustomImage(assetId);
                       }}
@@ -520,7 +523,7 @@ function RemoveBackgroundControls({
           : null);
       const shouldKeepCrop =
         cropRect != null &&
-        isRectAspectRatioCompatible(cropRect, frameAspectRatio);
+        isImageCropRectAspectRatioCompatible(cropRect, frameAspectRatio);
       const nextCrop: ImageCrop | null =
         shouldKeepCrop || nextSize == null
           ? cropRect == null
@@ -776,7 +779,7 @@ function InlineImageRepositionFrame({
           -gestureState.dx / (currentImageSize.width * scale) || 0;
         const dyNormalized =
           -gestureState.dy / (currentImageSize.height * scale) || 0;
-        const nextRect = clampCropPosition({
+        const nextRect = clampImageCropRectPosition({
           x: startRect.x + dxNormalized,
           y: startRect.y + dyNormalized,
           width: startRect.width,
@@ -834,7 +837,7 @@ function InlineImageRepositionFrame({
           <RectButton
             variant="outline"
             onPress={() => {
-              const nextRect = getZoomedRect(
+              const nextRect = getZoomedImageCropRect(
                 cropRect,
                 imageSize,
                 frameAspectRatio,
@@ -848,7 +851,7 @@ function InlineImageRepositionFrame({
           <RectButton
             variant="outline"
             onPress={() => {
-              const nextRect = getZoomedRect(
+              const nextRect = getZoomedImageCropRect(
                 cropRect,
                 imageSize,
                 frameAspectRatio,
@@ -918,7 +921,7 @@ function HintImageTile({
       <View
         className={
           isSelected
-            ? `absolute inset-0 rounded-md border-2 border-cyan`
+            ? `absolute inset-0 rounded-md border-2 border-blue`
             : isHovered
               ? `absolute inset-0 rounded-md border-2 border-cyan/40`
               : `absolute inset-0 rounded-md border border-fg/10`
@@ -927,133 +930,6 @@ function HintImageTile({
       />
     </View>
   );
-}
-
-function clampCropPosition(rect: ImageCropRect): ImageCropRect {
-  const width = clamp(rect.width, 0, 1);
-  const height = clamp(rect.height, 0, 1);
-  const maxX = Math.max(0, 1 - width);
-  const maxY = Math.max(0, 1 - height);
-  const x = clamp(rect.x, 0, maxX);
-  const y = clamp(rect.y, 0, maxY);
-
-  return { x, y, width, height };
-}
-
-function isRectAspectRatioCompatible(
-  rect: ImageCropRect,
-  frameAspectRatio: number | null,
-): boolean {
-  if (frameAspectRatio == null) {
-    return true;
-  }
-
-  if (rect.height <= 0 || rect.width <= 0) {
-    return false;
-  }
-
-  const rectRatio = rect.width / rect.height;
-  return Math.abs(rectRatio - frameAspectRatio) <= 0.01;
-}
-
-function getImageScale(
-  frameSize: { width: number; height: number },
-  rect: ImageCropRect,
-  imageSize: { width: number; height: number },
-): number {
-  const rectWidthPx = rect.width * imageSize.width;
-  const rectHeightPx = rect.height * imageSize.height;
-  const scaleX = rectWidthPx <= 0 ? 1 : frameSize.width / rectWidthPx;
-  const scaleY = rectHeightPx <= 0 ? 1 : frameSize.height / rectHeightPx;
-  return Math.max(scaleX, scaleY);
-}
-
-function rectToPx(
-  rect: ImageCropRect,
-  imageSize: { width: number; height: number },
-): { x: number; y: number; width: number; height: number } {
-  return {
-    x: rect.x * imageSize.width,
-    y: rect.y * imageSize.height,
-    width: rect.width * imageSize.width,
-    height: rect.height * imageSize.height,
-  };
-}
-
-function rectFromPx(
-  rectPx: { x: number; y: number; width: number; height: number },
-  imageSize: { width: number; height: number },
-): ImageCropRect {
-  return clampCropPosition({
-    x: rectPx.x / imageSize.width,
-    y: rectPx.y / imageSize.height,
-    width: rectPx.width / imageSize.width,
-    height: rectPx.height / imageSize.height,
-  });
-}
-
-function clampRectPxPosition(
-  rectPx: { x: number; y: number; width: number; height: number },
-  imageSize: { width: number; height: number },
-  minSizePx: number,
-) {
-  const width = clamp(rectPx.width, minSizePx, imageSize.width);
-  const height = clamp(rectPx.height, minSizePx, imageSize.height);
-  const x = clamp(rectPx.x, 0, Math.max(0, imageSize.width - width));
-  const y = clamp(rectPx.y, 0, Math.max(0, imageSize.height - height));
-
-  return { x, y, width, height };
-}
-
-function getZoomedRect(
-  rect: ImageCropRect,
-  imageSize: { width: number; height: number },
-  frameAspectRatio: number | null,
-  zoomFactor: number,
-): ImageCropRect {
-  const rectPx = rectToPx(rect, imageSize);
-  const centerX = rectPx.x + rectPx.width / 2;
-  const centerY = rectPx.y + rectPx.height / 2;
-  const minSizePx = getMinCropSizePx(imageSize);
-
-  let nextWidth = rectPx.width * zoomFactor;
-  let nextHeight = rectPx.height * zoomFactor;
-
-  if (frameAspectRatio == null) {
-    nextWidth = clamp(nextWidth, minSizePx, imageSize.width);
-    nextHeight = clamp(nextHeight, minSizePx, imageSize.height);
-  } else {
-    nextWidth = clamp(nextWidth, minSizePx, imageSize.width);
-    nextHeight = nextWidth / frameAspectRatio;
-
-    if (nextHeight > imageSize.height) {
-      nextHeight = imageSize.height;
-      nextWidth = nextHeight * frameAspectRatio;
-    }
-
-    if (nextHeight < minSizePx) {
-      nextHeight = minSizePx;
-      nextWidth = nextHeight * frameAspectRatio;
-    }
-
-    if (nextWidth > imageSize.width) {
-      nextWidth = imageSize.width;
-      nextHeight = nextWidth / frameAspectRatio;
-    }
-  }
-
-  const nextRectPx = clampRectPxPosition(
-    {
-      x: centerX - nextWidth / 2,
-      y: centerY - nextHeight / 2,
-      width: nextWidth,
-      height: nextHeight,
-    },
-    imageSize,
-    minSizePx,
-  );
-
-  return rectFromPx(nextRectPx, imageSize);
 }
 
 function usePointerHoverCapability(): boolean {

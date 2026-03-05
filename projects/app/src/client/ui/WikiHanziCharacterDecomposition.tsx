@@ -2,7 +2,6 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {
-  hanziWordMeaningAiImageStyleSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
@@ -23,9 +22,9 @@ import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
-import { normalizeMeaningImageStyleKind } from "./meaningImageStyles";
 import { Pylymark } from "./Pylymark";
 import { WikiTitledBox } from "./WikiTitledBox";
+import { useAiImageStyleSetting } from "./hooks/useAiImageStyleSetting";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
@@ -145,12 +144,7 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
     hanziWordMeaningHintTextSetting,
     settingKey,
   );
-  const meaningImageStyleSetting = useUserSetting(
-    hanziWordMeaningAiImageStyleSetting,
-  );
-  const meaningImageStyleKind = normalizeMeaningImageStyleKind(
-    meaningImageStyleSetting.value?.text,
-  );
+  const { aiImageStyle } = useAiImageStyleSetting();
 
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
@@ -171,7 +165,7 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
       tileSize={64}
       enablePasteDropZone
       enableAiGeneration
-      aiStyleKind={meaningImageStyleKind}
+      aiImageStyle={aiImageStyle}
       initialAiPrompt={
         imagePromptSetting?.value?.text ??
         ([hintSetting?.value?.text, explanationSetting?.value?.text]

@@ -120,7 +120,7 @@ export const quickSearchPickSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const hanziWordMeaningAiImageStyleSetting = defineUserSetting({
+export const aiImageStyleSetting = defineUserSetting({
   entity: r.entity(`hwmais`, {
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
@@ -317,10 +317,10 @@ export const imageSettingDefs = [
 ] as const satisfies readonly UserSetting[];
 
 export const userSettingDefinitions = [
+  aiImageStyleSetting,
   autoCheckUserSetting,
   userNameSetting,
   quickSearchPickSetting,
-  hanziWordMeaningAiImageStyleSetting,
   pinyinSoundNameSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
@@ -332,11 +332,22 @@ export const userSettingDefinitions = [
   hanziWordMeaningHintImagePromptSetting,
   hanziPronunciationHintTextSetting,
   hanziPronunciationHintExplanationSetting,
-  hanziPronunciationHintImageSetting,
   hanziPronunciationHintImagePromptSetting,
-  pinyinFinalToneNameSetting,
+  hanziPronunciationHintImageSetting,
+  hanziPronunciationHintTextSetting,
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImagePromptSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziWordMeaningHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
+  pinyinFinalToneNameSetting,
+  pinyinSoundDescriptionSetting,
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupThemeSetting,
+  pinyinSoundImageSetting,
+  pinyinSoundNameSetting,
+  quickSearchPickSetting,
 ] as const satisfies readonly UserSetting[];
 
 function userSettingPrefixFromKey(settingKey: string): string {

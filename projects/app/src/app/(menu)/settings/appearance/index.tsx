@@ -1,4 +1,4 @@
-import { MeaningImageStyleSettingControl } from "@/client/ui/MeaningImageStyleSettingControl";
+import { AiImageStyleSettingControl } from "@/client/ui/AiImageStyleSettingControl";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import { autoCheckUserSetting } from "@/data/userSettings";
 import { Text, View } from "react-native";
@@ -29,7 +29,7 @@ export default function AppearanceSettingsPage() {
 
       <View className="gap-2">
         <Text className="pyly-body-dt">Images</Text>
-        <MeaningImageStyleSettingControl />
+        <AiImageStyleSettingControl />
       </View>
     </View>
   );
