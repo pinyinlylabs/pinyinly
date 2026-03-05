@@ -1,6 +1,7 @@
+import { openaiApiKey } from "#util/env.js";
 import type { FsDbCache } from "@pinyinly/lib/fs";
 import { readFile } from "@pinyinly/lib/fs";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
 import path from "node:path";
 import OpenAI from "openai";
@@ -18,7 +19,11 @@ export const openAiWithFsDbCache = async (
     debug?: Debugger;
   },
 ) => {
-  const openai = ctx.openai ?? new OpenAI();
+  const openai =
+    ctx.openai ??
+    new OpenAI({
+      apiKey: nonNullable(openaiApiKey),
+    });
   const debug = ctx.debug?.extend(`openAi`);
   const cached = ctx.fsDbCache.get(body);
 
@@ -51,7 +56,9 @@ export const openAiWithFsDbCache = async (
 };
 
 export function makeSimpleAiClient(fsDbCache: FsDbCache) {
-  const openai = new OpenAI();
+  const openai = new OpenAI({
+    apiKey: nonNullable(openaiApiKey),
+  });
 
   return async function simpleOpenAiWithCache<Schema extends z.ZodType>(
     docs: string[],
