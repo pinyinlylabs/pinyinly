@@ -20,6 +20,7 @@ import {
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import {
+  hanziPronunciationHintTextSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundImageSetting,
@@ -195,6 +196,11 @@ function SoundUsageExampleRow({ example }: { example: SoundUsageExample }) {
         <Text className="text-fg-dim"> {example.pinyin}</Text>
       </Text>
       <Text className="pyly-body text-fg-dim">{example.gloss}</Text>
+      <SettingText
+        setting={hanziPronunciationHintTextSetting}
+        settingKey={{ hanzi: example.hanzi, pinyin: example.pinyin }}
+        className="pyly-body text-xs italic text-fg-dim/80"
+      />
     </View>
   );
 }
