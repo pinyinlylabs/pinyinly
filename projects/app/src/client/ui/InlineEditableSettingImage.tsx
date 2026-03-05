@@ -339,11 +339,11 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
             {enableAiGeneration ? (
               <Tabs defaultValue="upload" className="mx-1 gap-2">
                 <Tabs.List className="flex-row gap-1">
-                  <Tabs.Trigger value="upload" className="flex-1">
-                    Upload
-                  </Tabs.Trigger>
                   <Tabs.Trigger value="create" className="flex-1">
                     Create
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="upload" className="flex-1">
+                    Upload
                   </Tabs.Trigger>
                 </Tabs.List>
 
