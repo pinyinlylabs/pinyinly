@@ -75,11 +75,7 @@ function TabsTrigger({
         setPressed(false);
         pressableProps.onPressOut?.(e);
       }}
-      className={triggerPressableClass({
-        isActive,
-        disabled,
-        className,
-      })}
+      className={className}
     >
       <View
         className={triggerInnerClass({
@@ -135,20 +131,6 @@ export const Tabs = Object.assign(
 
 const tabsListClass = tv({
   base: `rounded-lg bg-fg/5 p-1`,
-});
-
-const triggerPressableClass = tv({
-  base: ``,
-  variants: {
-    isActive: {
-      true: ``,
-      false: ``,
-    },
-    disabled: {
-      true: ``,
-      false: ``,
-    },
-  },
 });
 
 const triggerInnerClass = tv({
