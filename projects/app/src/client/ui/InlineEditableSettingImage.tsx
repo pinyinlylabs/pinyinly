@@ -28,6 +28,7 @@ import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { RectButton } from "./RectButton";
+import { Tabs } from "./Tabs";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import type {
   ImageCrop,
@@ -100,7 +101,6 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const [inlineEditorAssetId, setInlineEditorAssetId] =
     useState<AssetId | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<`upload` | `generate`>(`upload`);
   const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
   const isPointerHoverCapable = usePointerHoverCapability();
   const isInlineRepositioning = inlineEditorAssetId != null;
@@ -334,84 +334,69 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
         )}
 
         {shouldShowPickerPanel ? (
-          <View className="gap-3 rounded-lg border border-fg/10 bg-fg/5 p-3">
+          <View className="gap-3">
             {enableAiGeneration ? (
-              <>
-                <View className="flex-row gap-2 border-b border-fg/10 pb-2">
-                  <RectButton
-                    variant={activeTab === `upload` ? `filled` : `outline`}
-                    onPress={() => {
-                      setActiveTab(`upload`);
-                    }}
-                    className="flex-1"
-                  >
+              <Tabs defaultValue="upload" className="mx-1 gap-2">
+                <Tabs.List className="flex-row gap-1">
+                  <Tabs.Trigger value="upload" className="flex-1">
                     Upload
-                  </RectButton>
-                  <RectButton
-                    variant={activeTab === `generate` ? `filled` : `outline`}
-                    onPress={() => {
-                      setActiveTab(`generate`);
-                    }}
-                    className="flex-1"
-                  >
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="generate" className="flex-1">
                     Generate
-                  </RectButton>
-                </View>
+                  </Tabs.Trigger>
+                </Tabs.List>
 
-                {activeTab === `upload` ? (
-                  <View className="gap-3">
-                    {imageIdsToShow.length > 0 ? (
-                      <View className="flex-row flex-wrap gap-2">
-                        {imageIdsToShow.map((assetId) => {
-                          const isSelected = assetId === imageId;
-                          const isHovered = assetId === hoveredHintImageId;
-                          const meta = imageMetaById.get(assetId) ?? null;
-                          return (
-                            <Pressable
-                              key={assetId}
-                              onPress={() => {
-                                handleSelectHintImage(assetId);
-                              }}
-                              onHoverIn={() => {
-                                setHoveredHintImageId(assetId);
-                              }}
-                              onHoverOut={() => {
-                                setHoveredHintImageId(null);
-                              }}
-                            >
-                              <HintImageTile
-                                assetId={assetId}
-                                imageMeta={meta}
-                                isSelected={isSelected}
-                                isHovered={isHovered}
-                                size={tileSize}
-                              />
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    ) : null}
-                    {enablePasteDropZone ? (
-                      <ImagePasteDropZone
-                        onUploadComplete={handleAddCustomImage}
-                        onUploadError={onUploadError}
-                      />
-                    ) : null}
-                  </View>
-                ) : (
-                  <View>
-                    <AiImageGenerationPanel
-                      initialPrompt={initialAiPrompt}
-                      aiImageStyle={aiImageStyle}
-                      onImageGenerated={(assetId) => {
-                        handleAddCustomImage(assetId);
-                      }}
-                      onError={onUploadError}
-                      onSavePrompt={onSaveAiPrompt}
+                <Tabs.Content value="upload" className="gap-3">
+                  {imageIdsToShow.length > 0 ? (
+                    <View className="flex-row flex-wrap gap-2">
+                      {imageIdsToShow.map((assetId) => {
+                        const isSelected = assetId === imageId;
+                        const isHovered = assetId === hoveredHintImageId;
+                        const meta = imageMetaById.get(assetId) ?? null;
+                        return (
+                          <Pressable
+                            key={assetId}
+                            onPress={() => {
+                              handleSelectHintImage(assetId);
+                            }}
+                            onHoverIn={() => {
+                              setHoveredHintImageId(assetId);
+                            }}
+                            onHoverOut={() => {
+                              setHoveredHintImageId(null);
+                            }}
+                          >
+                            <HintImageTile
+                              assetId={assetId}
+                              imageMeta={meta}
+                              isSelected={isSelected}
+                              isHovered={isHovered}
+                              size={tileSize}
+                            />
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  ) : null}
+                  {enablePasteDropZone ? (
+                    <ImagePasteDropZone
+                      onUploadComplete={handleAddCustomImage}
+                      onUploadError={onUploadError}
                     />
-                  </View>
-                )}
-              </>
+                  ) : null}
+                </Tabs.Content>
+                <Tabs.Content value="generate">
+                  <AiImageGenerationPanel
+                    initialPrompt={initialAiPrompt}
+                    aiImageStyle={aiImageStyle}
+                    onImageGenerated={(assetId) => {
+                      handleAddCustomImage(assetId);
+                    }}
+                    onError={onUploadError}
+                    onSavePrompt={onSaveAiPrompt}
+                  />
+                </Tabs.Content>
+              </Tabs>
             ) : (
               <>
                 {imageIdsToShow.length > 0 ? (
