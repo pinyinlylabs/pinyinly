@@ -107,6 +107,7 @@ export default function SoundIdPage() {
               <InlineEditableSettingImage
                 setting={pinyinSoundImageSetting}
                 settingKey={{ soundId: id }}
+                enableAiGeneration
                 previewHeight={200}
                 tileSize={64}
                 enablePasteDropZone
