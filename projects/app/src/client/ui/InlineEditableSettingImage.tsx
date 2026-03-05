@@ -342,8 +342,8 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                   <Tabs.Trigger value="upload" className="flex-1">
                     Upload
                   </Tabs.Trigger>
-                  <Tabs.Trigger value="generate" className="flex-1">
-                    Generate
+                  <Tabs.Trigger value="create" className="flex-1">
+                    Create
                   </Tabs.Trigger>
                 </Tabs.List>
 
@@ -386,7 +386,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                     />
                   ) : null}
                 </Tabs.Content>
-                <Tabs.Content value="generate">
+                <Tabs.Content value="create">
                   <AiImageGenerationPanel
                     initialPrompt={initialAiPrompt}
                     aiImageStyle={aiImageStyle}
