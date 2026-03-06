@@ -11,7 +11,7 @@ import type {
   UserSettingImageEntity,
   UserSettingTextEntity,
 } from "@/data/userSettings";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
@@ -51,7 +51,6 @@ export function AiImageGenerationPanel({
   onSavePrompt,
 }: AiImageGenerationPanelProps) {
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [styleImageData, setStyleImageData] = useState<string | null>(null);
   const [generatedImageDataUrl, setGeneratedImageDataUrl] = useState<
     string | null
   >(null);
@@ -146,7 +145,6 @@ export function AiImageGenerationPanel({
 
       // Combine base64 data with MIME type
       const base64WithMimeType = `${result.mimeType};base64,${result.data}`;
-      setStyleImageData(base64WithMimeType);
       return base64WithMimeType;
     } catch (err) {
       console.error(`Failed to load style image:`, err);
@@ -170,24 +168,23 @@ export function AiImageGenerationPanel({
     setGeneratedImageFormat(null);
 
     try {
-      let effectiveStyleImageData: string | undefined;
-      let stylePromptText = ``;
+      // Build reference images array
+      const referenceImages: Array<{ label: string; imageData: string }> = [];
 
+      // Add style image as first reference if selected
       if (aiImageStyle != null) {
         const config = getAiImageStyleConfig(aiImageStyle);
-        stylePromptText = config.stylePrompt;
-        effectiveStyleImageData =
-          styleImageData ??
-          (await loadStyleImageData(config.assetId)) ??
-          undefined;
+        const styleImageData = await loadStyleImageData(config.assetId);
 
-        if (effectiveStyleImageData == null) {
+        if (styleImageData == null) {
           return;
         }
-      }
 
-      // Build reference images from fetched settings
-      const referenceImages: Array<{ label: string; imageData: string }> = [];
+        referenceImages.push({
+          label: config.stylePrompt,
+          imageData: styleImageData,
+        });
+      }
 
       // Process reference 1
       const ref1ImageId = reference1ImageSetting?.value?.imageId;
@@ -237,12 +234,8 @@ export function AiImageGenerationPanel({
         }
       }
 
-      const fullPrompt =
-        prompt.trim() + (stylePromptText ? `\n\n${stylePromptText}` : ``);
-
       const result = await generateMutation.mutateAsync({
-        prompt: fullPrompt,
-        styleImageData: effectiveStyleImageData,
+        prompt: prompt.trim(),
         referenceImages:
           referenceImages.length > 0 ? referenceImages : undefined,
       });
@@ -290,37 +283,6 @@ export function AiImageGenerationPanel({
   const isProcessing =
     isGenerating || uploading || isConfirming || isLoadingStyle;
   const hasGenerated = generatedImageDataUrl != null;
-
-  useEffect(() => {
-    if (aiImageStyle == null) {
-      setStyleImageData(null);
-      return;
-    }
-
-    let isActive = true;
-
-    const preloadStyle = async () => {
-      setIsLoadingStyle(true);
-      try {
-        const styleInfo = getAiImageStyleConfig(aiImageStyle);
-        const result = await getLocalImageAssetBase64(styleInfo.assetId);
-        if (!isActive || result == null) {
-          return;
-        }
-        setStyleImageData(`${result.mimeType};base64,${result.data}`);
-      } finally {
-        if (isActive) {
-          setIsLoadingStyle(false);
-        }
-      }
-    };
-
-    void preloadStyle();
-
-    return () => {
-      isActive = false;
-    };
-  }, [aiImageStyle]);
 
   return (
     <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">

@@ -5,12 +5,11 @@ import { GoogleGenAI } from "@google/genai";
 import { nonNullable } from "@pinyinly/lib/invariant";
 
 /**
- * Generate an image using Gemini Nano Banana based on a text prompt and optional style image.
+ * Generate an image using Gemini Nano Banana based on a text prompt and optional reference images.
  * Returns the image as a Buffer.
  *
- * @param opts - Options containing prompt and optional styleImageData
+ * @param opts - Options containing prompt and optional referenceImages
  * @param opts.prompt - The text prompt for image generation
- * @param opts.styleImageData - Optional style image data in format "mimeType;base64,data"
  * @param opts.referenceImages - Optional array of reference images with labels
  *
  * Note: This is a placeholder implementation. Update the API call
@@ -18,31 +17,12 @@ import { nonNullable } from "@pinyinly/lib/invariant";
  */
 export async function generateImage(opts: {
   prompt: string;
-  styleImageData?: string;
   referenceImages?: AiReferenceImage[];
 }): Promise<{ buffer: Buffer; mimeType: string }> {
   const client = new GoogleGenAI({ apiKey: nonNullable(geminiImageApiKey) });
 
-  // Build parts array with optional style image and reference images
+  // Build parts array with optional reference images
   const parts: Part[] = [];
-
-  // Add style image if provided
-  if (opts.styleImageData != null && opts.styleImageData.length > 0) {
-    // Parse format: "mimeType;base64,data"
-    const formatMatch = opts.styleImageData.match(/^([^;]+);base64,(.+)$/);
-    if (formatMatch && formatMatch[1] != null && formatMatch[2] != null) {
-      const mimeType = formatMatch[1];
-      const base64Data = formatMatch[2];
-      parts.push({
-        inlineData: {
-          mimeType,
-          data: base64Data,
-        },
-      });
-    } else {
-      throw new Error(`Invalid style image data format`);
-    }
-  }
 
   // Add reference images if provided
   if (opts.referenceImages != null && opts.referenceImages.length > 0) {

@@ -26,7 +26,7 @@ export const aiImageStyleConfigs = [
       width: 0.22,
       height: 0.22,
     },
-    stylePrompt: `Use the illustration style from the first image, keep the background a solid color, make outlines crisp and contiguous, use solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes.`,
+    stylePrompt: `Use this illustration style, keep the background a solid color, make outlines crisp and contiguous, use solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes`,
   },
   {
     kind: `realistic`,

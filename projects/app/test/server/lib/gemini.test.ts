@@ -93,11 +93,15 @@ describe(
     test(`returns image data with style image`, async () => {
       // Create a minimal valid PNG base64 (1x1 transparent pixel)
       const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-      const styleImageData = `image/png;base64,${pngBase64}`;
 
       const result = await generateImage({
         prompt: `A bright red apple on a wooden table, studio lighting`,
-        styleImageData,
+        referenceImages: [
+          {
+            label: `style`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
+        ],
       });
 
       expect(result.buffer.length).toBeGreaterThan(0);
@@ -111,6 +115,7 @@ describe(
           {
             role: `user`,
             parts: [
+              { text: `style:` },
               {
                 inlineData: {
                   mimeType: `image/png`,
@@ -127,11 +132,15 @@ describe(
     test(`handles style image with JPEG format`, async () => {
       // Minimal valid JPEG base64 (1x1 pixel)
       const jpegBase64 = `/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8VAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=`;
-      const styleImageData = `image/jpeg;base64,${jpegBase64}`;
 
       const result = await generateImage({
         prompt: `A bright red apple on a wooden table, studio lighting`,
-        styleImageData,
+        referenceImages: [
+          {
+            label: `style`,
+            imageData: `image/jpeg;base64,${jpegBase64}`,
+          },
+        ],
       });
 
       expect(result.buffer.length).toBeGreaterThan(0);
@@ -145,6 +154,7 @@ describe(
           {
             role: `user`,
             parts: [
+              { text: `style:` },
               {
                 inlineData: {
                   mimeType: `image/jpeg`,
@@ -159,34 +169,48 @@ describe(
     });
 
     test(`throws error for malformed style image data`, async () => {
-      const invalidStyleData = `not-a-valid-format`;
-
       await expect(
         generateImage({
           prompt: `A test prompt`,
-          styleImageData: invalidStyleData,
+          referenceImages: [
+            {
+              label: `style`,
+              imageData: `not-a-valid-format`,
+            },
+          ],
         }),
-      ).rejects.toThrow(`Invalid style image data format`);
+      ).rejects.toThrow(
+        `Invalid reference image data format for label "style"`,
+      );
     });
 
     test(`throws error for missing base64 in style image data`, async () => {
-      const invalidStyleData = `image/png;data,xyz`;
-
       await expect(
         generateImage({
           prompt: `A test prompt`,
-          styleImageData: invalidStyleData,
+          referenceImages: [
+            {
+              label: `style`,
+              imageData: `image/png;data,xyz`,
+            },
+          ],
         }),
-      ).rejects.toThrow(`Invalid style image data format`);
+      ).rejects.toThrow(
+        `Invalid reference image data format for label "style"`,
+      );
     });
 
     test(`properly separates mime type from base64 data`, async () => {
       const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-      const styleImageData = `image/webp;base64,${pngBase64}`;
 
       const result = await generateImage({
         prompt: `A test prompt`,
-        styleImageData,
+        referenceImages: [
+          {
+            label: `style`,
+            imageData: `image/webp;base64,${pngBase64}`,
+          },
+        ],
       });
 
       expect(result.buffer.length).toBeGreaterThan(0);
@@ -200,6 +224,7 @@ describe(
           {
             role: `user`,
             parts: [
+              { text: `style:` },
               {
                 inlineData: {
                   mimeType: `image/webp`,
@@ -300,14 +325,16 @@ describe(
       });
     });
 
-    test(`includes style and reference images together`, async () => {
+    test(`includes multiple reference images together`, async () => {
       const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-      const styleImageData = `image/png;base64,${pngBase64}`;
 
       const result = await generateImage({
         prompt: `A landscape in oil painting style`,
-        styleImageData,
         referenceImages: [
+          {
+            label: `style`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
           {
             label: `reference`,
             imageData: `image/png;base64,${pngBase64}`,
@@ -320,23 +347,26 @@ describe(
       const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
         contents: Array<{ parts: unknown[] }>;
       };
-      expect(callArgs.contents?.[0]?.parts).toHaveLength(4);
+      expect(callArgs.contents?.[0]?.parts).toHaveLength(5);
       expect(callArgs.contents?.[0]?.parts?.[0]).toEqual({
-        inlineData: {
-          mimeType: `image/png`,
-          data: pngBase64,
-        },
+        text: `style:`,
       });
       expect(callArgs.contents?.[0]?.parts?.[1]).toEqual({
-        text: `reference:`,
-      });
-      expect(callArgs.contents?.[0]?.parts?.[2]).toEqual({
         inlineData: {
           mimeType: `image/png`,
           data: pngBase64,
         },
       });
+      expect(callArgs.contents?.[0]?.parts?.[2]).toEqual({
+        text: `reference:`,
+      });
       expect(callArgs.contents?.[0]?.parts?.[3]).toEqual({
+        inlineData: {
+          mimeType: `image/png`,
+          data: pngBase64,
+        },
+      });
+      expect(callArgs.contents?.[0]?.parts?.[4]).toEqual({
         text: `A landscape in oil painting style`,
       });
     });
@@ -460,11 +490,15 @@ describe.skipIf(env.geminiImageApiKey == null)(
         );
 
         const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-        const styleImageData = `image/png;base64,${pngBase64}`;
 
         const result = await generateImageReal({
           prompt: `A bright red apple on a wooden table, studio lighting`,
-          styleImageData,
+          referenceImages: [
+            {
+              label: `style`,
+              imageData: `image/png;base64,${pngBase64}`,
+            },
+          ],
         });
 
         expect(result.buffer.length).toBeGreaterThan(0);
