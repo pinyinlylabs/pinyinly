@@ -57,17 +57,22 @@ const pronunciationHintOutputSchema = z
   })
   .strict();
 
+const base64DataUriSchema = z
+  .string()
+  .max(10_000_000)
+  .regex(/^[^;]+;base64,[A-Za-z0-9+/=]+$/);
+
 const aiReferenceImageSchema = z
   .object({
-    label: z.string(),
-    imageData: z.string(), // Format: "mimeType;base64,data"
+    label: z.string().min(1).max(400),
+    imageData: base64DataUriSchema, // Format: "mimeType;base64,data"
   })
   .strict();
 
 const generateImageInputSchema = z
   .object({
-    prompt: z.string(),
-    referenceImages: z.array(aiReferenceImageSchema).optional(),
+    prompt: z.string().min(1).max(4000),
+    referenceImages: z.array(aiReferenceImageSchema).max(4).optional(),
   })
   .strict();
 
