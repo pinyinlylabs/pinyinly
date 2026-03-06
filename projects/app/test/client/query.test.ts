@@ -1,5 +1,15 @@
-import { historyPageCollection, historyPageData } from "#client/query.js";
-import type { HistoryPageCollection, HistoryPageData } from "#client/query.js";
+import type {
+  CollectionOutput,
+  HistoryPageCollection,
+  HistoryPageData,
+  SettingCollection,
+} from "#client/query.js";
+import {
+  getPrioritizedHanziWords,
+  historyPageCollection,
+  historyPageData,
+} from "#client/query.js";
+import type { Dictionary } from "#dictionary.js";
 import { loadDictionary } from "#dictionary.js";
 import { seedSkillReviews } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
@@ -180,4 +190,89 @@ function prettyData(data: HistoryPageData): string {
           .join(`\n`)}`,
     )
     .join(`\n---\n`);
+}
+
+const mockDictionary = {
+  lookupHanzi: (hanzi: string) => {
+    // Mock: "纸" has multiple hanziwords
+    if (hanzi === `纸`) {
+      return [
+        [`纸:paper` as any, { gloss: [`paper`] }],
+        [`纸:tissue` as any, { gloss: [`tissue`] }],
+      ];
+    }
+    return [];
+  },
+} as unknown as Dictionary;
+
+describe(
+  `getPrioritizedHanziWords suite` satisfies HasNameOf<
+    typeof getPrioritizedHanziWords
+  >,
+  () => {
+    baseTest(`reads prioritized words from value payload`, () => {
+      const result = getPrioritizedHanziWords(
+        [settingRow({ key: `pwi/你好:hello`, value: { w: `你好:hello` } })],
+        mockDictionary,
+      );
+
+      expect(result).toEqual([`你好:hello`]);
+    });
+
+    baseTest(`falls back to key when payload omits word field`, () => {
+      // useUserSetting strips key params from setting values, so `w` may be absent.
+      const result = getPrioritizedHanziWords(
+        [
+          settingRow({
+            key: `pwi/你好:hello`,
+            value: { c: new Date().toISOString() },
+          }),
+        ],
+        mockDictionary,
+      );
+
+      expect(result).toEqual([`你好:hello`]);
+    });
+
+    baseTest(`expands single hanzi to all its hanziwords`, () => {
+      const result = getPrioritizedHanziWords(
+        [
+          settingRow({
+            key: `pwi/纸`,
+            value: { c: new Date().toISOString() },
+          }),
+        ],
+        mockDictionary,
+      );
+
+      expect(result).toEqual([`纸:paper`, `纸:tissue`]);
+    });
+
+    baseTest(`filters unrelated keys and deduplicates words`, () => {
+      const result = getPrioritizedHanziWords(
+        [
+          settingRow({ key: `pwi/你好:hello`, value: { w: `你好:hello` } }),
+          settingRow({ key: `userName`, value: { t: `Brad` } }),
+          settingRow({
+            key: `pwi/你好:hello`,
+            value: { c: new Date().toISOString() },
+          }),
+          settingRow({ key: `pwi/再见:goodbye`, value: { w: `再见:goodbye` } }),
+        ],
+        mockDictionary,
+      );
+
+      expect(result).toEqual([`你好:hello`, `再见:goodbye`]);
+    });
+  },
+);
+
+function settingRow({
+  key,
+  value,
+}: {
+  key: string;
+  value: Record<string, unknown> | null;
+}): CollectionOutput<SettingCollection> {
+  return { key, value } as CollectionOutput<SettingCollection>;
 }

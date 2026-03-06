@@ -305,6 +305,22 @@ export function getPinyinFinalToneKeyParams(
   return { soundId, tone };
 }
 
+//
+// Priority words list
+//
+
+export const prioritizedWordItemSetting = defineUserSetting({
+  entity: r.entity(`pwi/[word]`, {
+    word: r.string().alias(`w`),
+    createdAt: r.datetime().alias(`c`),
+    note: r.string().optional().alias(`n`),
+  }),
+});
+
+export function getPrioritizedWordKeyParams(word: string) {
+  return { word };
+}
+
 /**
  * All user settings that contain image references.
  * Used for syncing assets between servers.
@@ -321,6 +337,7 @@ export const userSettingDefinitions = [
   autoCheckUserSetting,
   userNameSetting,
   quickSearchPickSetting,
+  prioritizedWordItemSetting,
   pinyinSoundNameSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,

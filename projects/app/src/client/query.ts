@@ -1,4 +1,4 @@
-import type { HanziWord, Skill, SrsStateType } from "@/data/model";
+import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
@@ -252,6 +252,50 @@ export function hanziWordsByRankData({
 export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
   const dictionary = await loadDictionary();
   return getTargetHanziWordsFromDictionary(dictionary);
+}
+
+/**
+ * Extracts HanziWord values from priority word settings.
+ * Expands single hanzi to all their hanziwords, filters invalid entries,
+ * and returns unique words.
+ */
+export function getPrioritizedHanziWords(
+  prioritySettings: CollectionOutput<SettingCollection>[],
+  dictionary: Dictionary,
+): HanziWord[] {
+  const settingPrefix = `pwi/`;
+  const words: HanziWord[] = [];
+  for (const setting of prioritySettings) {
+    if (!setting.key.startsWith(settingPrefix)) {
+      continue;
+    }
+
+    const wordFromValue = setting.value?.[`w`];
+    const wordFromKey = setting.key.slice(settingPrefix.length);
+    const word =
+      typeof wordFromValue === `string` && wordFromValue.length > 0
+        ? wordFromValue
+        : wordFromKey;
+
+    if (word.length === 0) {
+      continue;
+    }
+
+    // Check if word is a hanzi (no ':' separator) or a hanziword
+    if (word.includes(`:`) && typeof word === `string`) {
+      // It's a hanziword, use it directly
+      words.push(word as HanziWord);
+    } else if (typeof word === `string`) {
+      // It's just hanzi, expand to all hanziwords for that hanzi
+      const hanziWordPairs = dictionary.lookupHanzi(
+        word as unknown as HanziText,
+      );
+      for (const [hanziWord] of hanziWordPairs) {
+        words.push(hanziWord);
+      }
+    }
+  }
+  return words.filter(arrayFilterUnique());
 }
 
 export async function getAllTargetSkills(): Promise<Skill[]> {

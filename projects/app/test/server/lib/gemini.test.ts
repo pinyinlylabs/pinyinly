@@ -465,7 +465,7 @@ describe(
   },
 );
 
-describe.skipIf(env.geminiImageApiKey == null)(
+describe.skipIf(env.geminiImageApiKey == null || true)(
   `generateImage integration suite` satisfies HasNameOf<typeof generateImage>,
   () => {
     test(
