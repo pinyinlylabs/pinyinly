@@ -70,6 +70,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`Themes`]: lazyDemo(() => import(`../../../client/ui/Themes.demo`)),
   [`ThreeSplitLinesDown`]: lazyDemo(() => import(`../../../client/ui/ThreeSplitLinesDown.demo`)),
   [`ToggleButton`]: lazyDemo(() => import(`../../../client/ui/ToggleButton.demo`)),
+  [`Tooltip`]: lazyDemo(() => import(`../../../client/ui/Tooltip.demo`)),
   [`TutorialDialogBox`]: lazyDemo(() => import(`../../../client/ui/TutorialDialogBox.demo`)),
   [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
   [`WikiHanziCharacterDecomposition`]: lazyDemo(() => import(`../../../client/ui/WikiHanziCharacterDecomposition.demo`)),

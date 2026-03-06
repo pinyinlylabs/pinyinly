@@ -17,6 +17,7 @@ import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
+import { TooltipProvider } from "@/client/ui/TooltipProvider";
 import "@/global.css";
 import * as Sentry from "@sentry/react-native";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -70,7 +71,7 @@ function RootLayout() {
               <title>Pinyinly - Learn to read Chinese</title>
             </Head>
 
-            <AudioContextProvider>
+            <UiProviders>
               <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
                 <Stack.Screen
                   name="login"
@@ -80,12 +81,20 @@ function RootLayout() {
                   }}
                 />
               </Stack>
-            </AudioContextProvider>
+            </UiProviders>
             <SplashScreen />
           </PostHogProvider>
         </CurrentSessionStoreProvider>
       </DeviceStoreProvider>
     </PylyThemeProvider>
+  );
+}
+
+export function UiProviders({ children }: PropsWithChildren) {
+  return (
+    <AudioContextProvider>
+      <TooltipProvider>{children}</TooltipProvider>
+    </AudioContextProvider>
   );
 }
 
