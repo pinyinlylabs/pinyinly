@@ -10024,8 +10024,8 @@ __metadata:
   linkType: hard
 
 "@vercel/functions@npm:^3.0.0":
-  version: 3.4.2
-  resolution: "@vercel/functions@npm:3.4.2"
+  version: 3.4.3
+  resolution: "@vercel/functions@npm:3.4.3"
   dependencies:
     "@vercel/oidc": "npm:3.2.0"
   peerDependencies:
@@ -10033,7 +10033,7 @@ __metadata:
   peerDependenciesMeta:
     "@aws-sdk/credential-provider-web-identity":
       optional: true
-  checksum: 10c0/5cdb1c4d614f3b82d40260afb236d360ce978d747c3b5f10f31321e049f641b55a001fd50d3382ffe41c50e4a9dcf0f649e40056234018bc0abb55c15883800d
+  checksum: 10c0/35be2fca0179ca129dfb39068fd817856ab933d01274536ac278d384c2f15ef6ca5a1a732feb1e87ea1d854e21387185ad3855628e717e9be65546e73d6c514c
   languageName: node
   linkType: hard
 
