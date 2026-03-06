@@ -3237,14 +3237,14 @@ __metadata:
   linkType: hard
 
 "@floating-ui/react-native@npm:^0.10.7":
-  version: 0.10.7
-  resolution: "@floating-ui/react-native@npm:0.10.7"
+  version: 0.10.9
+  resolution: "@floating-ui/react-native@npm:0.10.9"
   dependencies:
     "@floating-ui/core": "npm:^1.0.0"
   peerDependencies:
     react: ">=16.8.0"
     react-native: ">=0.64.0"
-  checksum: 10c0/96ad4e5028a6ef9fbcb6522df26a5b13e58d0256cbf680acb793fb76423de783fda29ae9af25894bfcca9cbafa7b1655b35dd1bc2f873493599c93da293c4ff7
+  checksum: 10c0/974d10225aa2d4c622768f2dd3378d98e074952831fb016471636528a6b82aafce06d5fe5ce7a98649bed44776a4e9055c93f2087a7122a5f18ad8058b1b49cb
   languageName: node
   linkType: hard
 
