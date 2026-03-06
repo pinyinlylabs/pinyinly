@@ -1,18 +1,25 @@
 import {
   dictionaryQuery,
+  getPrioritizedHanziWords,
   isStructuralHanziQuery,
-  skillLearningGraphQuery,
+  targetSkillsQuery,
 } from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { Skill, SrsStateType } from "@/data/model";
-import { skillReviewQueue } from "@/data/skills";
 import type { LatestSkillRating } from "@/data/skills";
+import {
+  hanziWordToGlossTyped,
+  hanziWordToPinyinTyped,
+  skillLearningGraph,
+  skillReviewQueue,
+} from "@/data/skills";
+import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
 import type { PropsWithChildren } from "react";
-import { SkillQueueContext } from "./contexts";
+import { useEffect, useMemo, useState } from "react";
 import type { SkillQueueContextValue } from "./contexts";
+import { SkillQueueContext } from "./contexts";
 
 const mockable = {
   getMaxQueueItems: () => 1,
@@ -33,8 +40,8 @@ export const SkillQueueProvider = Object.assign(
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
     const db = useDb();
 
-    const { data: skillLearningGraph, isLoading: isSkillLearningGraphLoading } =
-      useQuery(skillLearningGraphQuery);
+    const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
+      useQuery(targetSkillsQuery());
     const { data: isStructuralHanzi, isLoading: isStructuralHanziLoading } =
       useQuery(isStructuralHanziQuery);
     const { data: dictionary, isLoading: isDictionaryLoading } =
@@ -50,6 +57,11 @@ export const SkillQueueProvider = Object.assign(
       useLiveQuery(
         (q) => q.from({ skillState: db.skillStateCollection }),
         [db.skillStateCollection],
+      );
+    const { data: prioritySettingsData, isLoading: isPrioritySettingsLoading } =
+      useLiveQuery(
+        (q) => q.from({ setting: db.settingCollection }),
+        [db.settingCollection],
       );
 
     const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
@@ -72,11 +84,31 @@ export const SkillQueueProvider = Object.assign(
       [latestSkillRatingsData],
     );
 
+    // Compute priority skills from settings
+    const prioritySkills = useMemo(() => {
+      const prioritizedWords = getPrioritizedHanziWords(prioritySettingsData);
+      return prioritizedWords.flatMap((w) => [
+        hanziWordToGlossTyped(w),
+        hanziWordToPinyinTyped(w),
+      ]);
+    }, [prioritySettingsData]);
+
+    // Combine base target skills with priority skills
+    const allTargetSkills = useMemo(() => {
+      if (baseTargetSkills == null) {
+        return [];
+      }
+      return [...baseTargetSkills, ...prioritySkills].filter(
+        arrayFilterUnique(),
+      );
+    }, [baseTargetSkills, prioritySkills]);
+
     useEffect(() => {
       if (
         isLatestSkillRatingsLoading ||
         isSkillStatesLoading ||
-        isSkillLearningGraphLoading ||
+        isTargetSkillsLoading ||
+        isPrioritySettingsLoading ||
         isStructuralHanziLoading ||
         isDictionaryLoading
       ) {
@@ -84,42 +116,50 @@ export const SkillQueueProvider = Object.assign(
       }
 
       if (
-        skillLearningGraph == null ||
+        allTargetSkills.length === 0 ||
         isStructuralHanzi == null ||
         dictionary == null
       ) {
         return;
       }
 
-      // Recompute the review queue when inputs are ready
-      const reviewQueue = skillReviewQueue({
-        graph: skillLearningGraph,
-        skillSrsStates,
-        latestSkillRatings,
-        now: new Date(),
-        isStructuralHanzi,
-        dictionary,
-        maxQueueItems: mockable.getMaxQueueItems(),
-      });
+      // Build graph with combined target skills and priority words
+      void (async () => {
+        const graph = await skillLearningGraph({
+          targetSkills: allTargetSkills,
+        });
 
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setSkillQueue((prev) => ({
-        loading: false,
-        reviewQueue,
-        version: prev.loading ? 0 : prev.version + 1,
-      }));
+        // Recompute the review queue when inputs are ready
+        const reviewQueue = skillReviewQueue({
+          graph,
+          skillSrsStates,
+          latestSkillRatings,
+          now: new Date(),
+          isStructuralHanzi,
+          dictionary,
+          maxQueueItems: mockable.getMaxQueueItems(),
+        });
+
+        // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+        setSkillQueue((prev) => ({
+          loading: false,
+          reviewQueue,
+          version: prev.loading ? 0 : prev.version + 1,
+        }));
+      })();
     }, [
-      isSkillLearningGraphLoading,
-      isStructuralHanzi,
-      isStructuralHanziLoading,
-      latestSkillRatingsData,
       isLatestSkillRatingsLoading,
-      skillLearningGraph,
+      isSkillStatesLoading,
+      isTargetSkillsLoading,
+      isPrioritySettingsLoading,
+      isStructuralHanziLoading,
+      isDictionaryLoading,
+      allTargetSkills,
+      isStructuralHanzi,
+      dictionary,
       skillSrsStates,
       latestSkillRatings,
-      isSkillStatesLoading,
-      isDictionaryLoading,
-      dictionary,
+      latestSkillRatingsData,
     ]);
 
     return (

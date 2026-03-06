@@ -254,6 +254,26 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
   return getTargetHanziWordsFromDictionary(dictionary);
 }
 
+/**
+ * Extracts HanziWord values from priority word settings.
+ * Filters out any invalid entries and returns unique words.
+ */
+export function getPrioritizedHanziWords(
+  prioritySettings: CollectionOutput<SettingCollection>[],
+): HanziWord[] {
+  const words: HanziWord[] = [];
+  for (const setting of prioritySettings) {
+    if (!setting.key.startsWith(`pwi/`)) {
+      continue;
+    }
+    const word = setting.value?.[`w`];
+    if (typeof word === `string`) {
+      words.push(word as HanziWord);
+    }
+  }
+  return words.filter(arrayFilterUnique());
+}
+
 export async function getAllTargetSkills(): Promise<Skill[]> {
   const hanziWords = await getAllTargetHanziWords();
   return hanziWords.flatMap((w) => [

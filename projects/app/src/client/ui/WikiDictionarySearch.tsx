@@ -1,3 +1,4 @@
+import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
 import { searchDictionaryEntries } from "@/client/ui/quickSearch";
 import { loadDictionary } from "@/dictionary";
 import { useRouter } from "expo-router";
@@ -47,25 +48,11 @@ export function WikiDictionarySearch() {
         ) : (
           <View className="gap-2">
             {results.map((result) => (
-              <Pressable
+              <SearchResultCard
                 key={result.hanziWord}
-                onPress={() => {
-                  handleSelect(result.hanzi);
-                }}
-                className={resultCardClass()}
-              >
-                <Text className="text-2xl font-semibold text-fg-loud">
-                  {result.hanzi}
-                </Text>
-                <View className="flex-1">
-                  {result.gloss == null ? null : (
-                    <Text className="text-sm text-fg">{result.gloss}</Text>
-                  )}
-                  {result.pinyin == null ? null : (
-                    <Text className="text-xs text-fg-dim">{result.pinyin}</Text>
-                  )}
-                </View>
-              </Pressable>
+                result={result}
+                onSelect={handleSelect}
+              />
             ))}
           </View>
         )
@@ -75,6 +62,54 @@ export function WikiDictionarySearch() {
         </Text>
       )}
     </View>
+  );
+}
+
+interface SearchResultCardProps {
+  result: {
+    hanzi: string;
+    hanziWord: string;
+    gloss?: string | null | undefined;
+    pinyin?: string | null | undefined;
+  };
+  onSelect: (hanzi: string) => void;
+}
+
+function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
+  const { isPriority, toggle } = usePriorityWordToggle(result.hanzi);
+
+  return (
+    <Pressable
+      onPress={() => {
+        onSelect(result.hanzi);
+      }}
+      className={resultCardClass()}
+    >
+      <Text className="text-2xl font-semibold text-fg-loud">
+        {result.hanzi}
+      </Text>
+      <View className="flex-1">
+        {result.gloss == null ? null : (
+          <Text className="text-sm text-fg">{result.gloss}</Text>
+        )}
+        {result.pinyin == null ? null : (
+          <Text className="text-xs text-fg-dim">{result.pinyin}</Text>
+        )}
+      </View>
+      <Pressable
+        onPress={(e) => {
+          e.stopPropagation();
+          toggle();
+        }}
+        className="p-2"
+      >
+        <Icon
+          icon={isPriority ? `star-filled` : `star`}
+          size={20}
+          className="text-fg-dim"
+        />
+      </Pressable>
+    </Pressable>
   );
 }
 

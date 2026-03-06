@@ -1,4 +1,5 @@
 import { intersperse } from "@/client/react";
+import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText, HskLevel } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary";
@@ -30,12 +31,22 @@ export function WikiHanziHeaderOverview({
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
+  const { isPriority, toggle } = usePriorityWordToggle(hanzi);
+
   return (
     <View className="gap-[10px] pl-4">
-      <View className="flex-row gap-1">
-        {hskLevels.map((hskLevel) => (
-          <HskLozenge hskLevel={hskLevel} key={hskLevel} />
-        ))}
+      <View className="flex-row items-center gap-1">
+        <View className="flex-1 flex-row gap-1">
+          {hskLevels.map((hskLevel) => (
+            <HskLozenge hskLevel={hskLevel} key={hskLevel} />
+          ))}
+        </View>
+        <RectButton
+          variant="bare"
+          iconStart={isPriority ? `star-filled` : `star`}
+          onPress={toggle}
+          className="opacity-70"
+        />
       </View>
       <View>
         {/* Scroll detector */}
