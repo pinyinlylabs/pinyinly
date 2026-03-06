@@ -50,6 +50,8 @@ describe(
   `generateImage suite` satisfies HasNameOf<typeof generateImage>,
   () => {
     beforeEach(() => {
+      vi.clearAllMocks();
+
       vi.mocked(genai.GoogleGenAI).mockImplementation(function (this: unknown) {
         return {
           models: {
@@ -206,6 +208,216 @@ describe(
               },
               { text: `A test prompt` },
             ],
+          },
+        ],
+      });
+    });
+
+    test(`includes reference images in the request`, async () => {
+      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
+
+      const result = await generateImage({
+        prompt: `A beautiful landscape`,
+        referenceImages: [
+          {
+            label: `sunset`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
+        ],
+      });
+
+      expect(result.buffer.length).toBeGreaterThan(0);
+      expect(result.mimeType.startsWith(`image/`)).toBe(true);
+      expect(mockGenerateContentStream).toHaveBeenCalledWith({
+        model: `gemini-2.5-flash-image`,
+        config: {
+          responseModalities: [`IMAGE`, `TEXT`],
+        },
+        contents: [
+          {
+            role: `user`,
+            parts: [
+              { text: `sunset:` },
+              {
+                inlineData: {
+                  mimeType: `image/png`,
+                  data: pngBase64,
+                },
+              },
+              { text: `A beautiful landscape` },
+            ],
+          },
+        ],
+      });
+    });
+
+    test(`includes multiple reference images in the request`, async () => {
+      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
+
+      const result = await generateImage({
+        prompt: `A beautiful landscape with mountains`,
+        referenceImages: [
+          {
+            label: `sunset`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
+          {
+            label: `mountain`,
+            imageData: `image/jpeg;base64,${pngBase64}`,
+          },
+        ],
+      });
+
+      expect(result.buffer.length).toBeGreaterThan(0);
+      expect(result.mimeType.startsWith(`image/`)).toBe(true);
+
+      const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
+        model: string;
+        contents: Array<{ parts: unknown[] }>;
+      };
+      expect(callArgs.model).toBe(`gemini-2.5-flash-image`);
+      expect(callArgs.contents?.[0]?.parts).toHaveLength(5);
+      expect(callArgs.contents?.[0]?.parts?.[0]).toEqual({
+        text: `sunset:`,
+      });
+      expect(callArgs.contents?.[0]?.parts?.[1]).toEqual({
+        inlineData: {
+          mimeType: `image/png`,
+          data: pngBase64,
+        },
+      });
+      expect(callArgs.contents?.[0]?.parts?.[2]).toEqual({
+        text: `mountain:`,
+      });
+      expect(callArgs.contents?.[0]?.parts?.[3]).toEqual({
+        inlineData: {
+          mimeType: `image/jpeg`,
+          data: pngBase64,
+        },
+      });
+      expect(callArgs.contents?.[0]?.parts?.[4]).toEqual({
+        text: `A beautiful landscape with mountains`,
+      });
+    });
+
+    test(`includes style and reference images together`, async () => {
+      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
+      const styleImageData = `image/png;base64,${pngBase64}`;
+
+      const result = await generateImage({
+        prompt: `A landscape in oil painting style`,
+        styleImageData,
+        referenceImages: [
+          {
+            label: `reference`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
+        ],
+      });
+
+      expect(result.buffer.length).toBeGreaterThan(0);
+
+      const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
+        contents: Array<{ parts: unknown[] }>;
+      };
+      expect(callArgs.contents?.[0]?.parts).toHaveLength(4);
+      expect(callArgs.contents?.[0]?.parts?.[0]).toEqual({
+        inlineData: {
+          mimeType: `image/png`,
+          data: pngBase64,
+        },
+      });
+      expect(callArgs.contents?.[0]?.parts?.[1]).toEqual({
+        text: `reference:`,
+      });
+      expect(callArgs.contents?.[0]?.parts?.[2]).toEqual({
+        inlineData: {
+          mimeType: `image/png`,
+          data: pngBase64,
+        },
+      });
+      expect(callArgs.contents?.[0]?.parts?.[3]).toEqual({
+        text: `A landscape in oil painting style`,
+      });
+    });
+
+    test(`places prompt text at the end when reference images are present`, async () => {
+      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
+
+      await generateImage({
+        prompt: `Generate something similar`,
+        referenceImages: [
+          {
+            label: `example1`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
+          {
+            label: `example2`,
+            imageData: `image/png;base64,${pngBase64}`,
+          },
+        ],
+      });
+
+      const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
+        contents: Array<{ parts: unknown[] }>;
+      };
+      const parts = callArgs.contents?.[0]?.parts ?? [];
+      const lastPart = parts[parts.length - 1];
+
+      expect(parts).toHaveLength(5); // label, image, label, image, prompt
+      expect(lastPart).toEqual({
+        text: `Generate something similar`,
+      });
+    });
+
+    test(`throws error for malformed reference image data`, async () => {
+      await expect(
+        generateImage({
+          prompt: `A test prompt`,
+          referenceImages: [
+            {
+              label: `bad-image`,
+              imageData: `not-valid-format`,
+            },
+          ],
+        }),
+      ).rejects.toThrow(
+        `Invalid reference image data format for label "bad-image"`,
+      );
+    });
+
+    test(`throws error for reference image missing base64`, async () => {
+      await expect(
+        generateImage({
+          prompt: `A test prompt`,
+          referenceImages: [
+            {
+              label: `incomplete-image`,
+              imageData: `image/png;data,xyz`,
+            },
+          ],
+        }),
+      ).rejects.toThrow(
+        `Invalid reference image data format for label "incomplete-image"`,
+      );
+    });
+
+    test(`handles empty reference images array`, async () => {
+      const result = await generateImage({
+        prompt: `A test prompt`,
+        referenceImages: [],
+      });
+
+      expect(result.buffer.length).toBeGreaterThan(0);
+      expect(mockGenerateContentStream).toHaveBeenCalledWith({
+        model: `gemini-2.5-flash-image`,
+        config: {
+          responseModalities: [`IMAGE`, `TEXT`],
+        },
+        contents: [
+          {
+            role: `user`,
+            parts: [{ text: `A test prompt` }],
           },
         ],
       });

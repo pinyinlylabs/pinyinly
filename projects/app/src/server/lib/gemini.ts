@@ -1,5 +1,6 @@
 import type { AiReferenceImage } from "@/data/model";
 import { geminiImageApiKey } from "@/util/env";
+import type { Part } from "@google/genai";
 import { GoogleGenAI } from "@google/genai";
 import { nonNullable } from "@pinyinly/lib/invariant";
 
@@ -23,10 +24,7 @@ export async function generateImage(opts: {
   const client = new GoogleGenAI({ apiKey: nonNullable(geminiImageApiKey) });
 
   // Build parts array with optional style image and reference images
-  const parts: Array<{
-    text?: string;
-    inlineData?: { mimeType: string; data: string };
-  }> = [];
+  const parts: Part[] = [];
 
   // Add style image if provided
   if (opts.styleImageData != null && opts.styleImageData.length > 0) {
@@ -49,6 +47,9 @@ export async function generateImage(opts: {
   // Add reference images if provided
   if (opts.referenceImages != null && opts.referenceImages.length > 0) {
     for (const refImage of opts.referenceImages) {
+      // Add label text before the image
+      parts.push({ text: `${refImage.label}:` });
+
       // Parse format: "mimeType;base64,data"
       const formatMatch = refImage.imageData.match(/^([^;]+);base64,(.+)$/);
       if (formatMatch && formatMatch[1] != null && formatMatch[2] != null) {
