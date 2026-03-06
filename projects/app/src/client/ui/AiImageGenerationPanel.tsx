@@ -11,6 +11,7 @@ import type {
   UserSettingImageEntity,
   UserSettingTextEntity,
 } from "@/data/userSettings";
+import { invariant } from "@pinyinly/lib/invariant";
 import { useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
@@ -63,6 +64,11 @@ export function AiImageGenerationPanel({
   // Destructure up to 3 reference images
   const [aiReferenceImage1, aiReferenceImage2, aiReferenceImage3] =
     aiReferenceImages ?? [];
+
+  invariant(
+    (aiReferenceImages?.length ?? 0) <= 3,
+    `A maximum of 3 reference images can be provided`,
+  );
 
   // Fetch reference image data using static hook calls
   const reference1ImageSetting = useUserSetting(
