@@ -57,10 +57,22 @@ const pronunciationHintOutputSchema = z
   })
   .strict();
 
+const base64DataUriSchema = z
+  .string()
+  .max(10_000_000)
+  .regex(/^[^;]+;base64,[A-Za-z0-9+/=]+$/);
+
+const aiReferenceImageSchema = z
+  .object({
+    label: z.string().min(1).max(400),
+    imageData: base64DataUriSchema, // Format: "mimeType;base64,data"
+  })
+  .strict();
+
 const generateImageInputSchema = z
   .object({
-    prompt: z.string(),
-    styleImageData: z.string().optional(),
+    prompt: z.string().min(1).max(4000),
+    referenceImages: z.array(aiReferenceImageSchema).max(4).optional(),
   })
   .strict();
 
@@ -154,12 +166,12 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
-      const { prompt, styleImageData } = opts.input;
+      const { prompt, referenceImages } = opts.input;
 
       try {
         const { buffer, mimeType } = await generateImage({
           prompt,
-          styleImageData,
+          referenceImages,
         });
         const format = resolveImageFormat(mimeType);
 

@@ -16,8 +16,10 @@ import {
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
+  pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
+  pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import type { Href } from "expo-router";
@@ -26,6 +28,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -48,52 +51,76 @@ export function WikiHanziCharacterPronunciation({
   const chart = loadPylyPinyinChart();
 
   const initialPinyinSound2 = useUserSetting(
-    pinyinSoundNameSetting,
     skipSoundSettings
-      ? { skip: true }
-      : { soundId: splitPinyin.initialSoundId },
+      ? null
+      : {
+          setting: pinyinSoundNameSetting,
+          key: { soundId: splitPinyin.initialSoundId },
+        },
   );
   const finalPinyinSound2 = useUserSetting(
-    pinyinSoundNameSetting,
-    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.finalSoundId },
+    skipSoundSettings
+      ? null
+      : {
+          setting: pinyinSoundNameSetting,
+          key: { soundId: splitPinyin.finalSoundId },
+        },
   );
   const tonePinyinSound2 = useUserSetting(
-    pinyinSoundNameSetting,
-    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.toneSoundId },
+    skipSoundSettings
+      ? null
+      : {
+          setting: pinyinSoundNameSetting,
+          key: { soundId: splitPinyin.toneSoundId },
+        },
   );
 
   const initialDescriptionSetting = useUserSetting(
-    pinyinSoundDescriptionSetting,
     skipSoundSettings
-      ? { skip: true }
-      : { soundId: splitPinyin.initialSoundId },
+      ? null
+      : {
+          setting: pinyinSoundDescriptionSetting,
+          key: { soundId: splitPinyin.initialSoundId },
+        },
   );
   const finalDescriptionSetting = useUserSetting(
-    pinyinSoundDescriptionSetting,
-    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.finalSoundId },
+    skipSoundSettings
+      ? null
+      : {
+          setting: pinyinSoundDescriptionSetting,
+          key: { soundId: splitPinyin.finalSoundId },
+        },
   );
   const toneDescriptionSetting = useUserSetting(
-    pinyinSoundDescriptionSetting,
-    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.toneSoundId },
+    skipSoundSettings
+      ? null
+      : {
+          setting: pinyinSoundDescriptionSetting,
+          key: { soundId: splitPinyin.toneSoundId },
+        },
   );
   const { aiImageStyle } = useAiImageStyleSetting();
   const finalToneDescriptionSetting = useUserSetting(
-    pinyinFinalToneDescriptionSetting,
     skipSoundSettings
-      ? { skip: true }
-      : getPinyinFinalToneKeyParams(
-          splitPinyin.finalSoundId,
-          String(splitPinyin.tone),
-        ),
+      ? null
+      : {
+          setting: pinyinFinalToneDescriptionSetting,
+          key: getPinyinFinalToneKeyParams(
+            splitPinyin.finalSoundId,
+            String(splitPinyin.tone),
+          ),
+        },
   );
   const finalToneNameSetting = useUserSetting(
-    pinyinFinalToneNameSetting,
     skipSoundSettings
-      ? { skip: true }
-      : getPinyinFinalToneKeyParams(
-          splitPinyin.finalSoundId,
-          String(splitPinyin.tone),
-        ),
+      ? null
+      : {
+          setting: pinyinFinalToneNameSetting,
+          key: getPinyinFinalToneKeyParams(
+            splitPinyin.finalSoundId,
+            String(splitPinyin.tone),
+          ),
+        },
   );
 
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
@@ -133,19 +160,39 @@ export function WikiHanziCharacterPronunciation({
     finalToneNameSetting?.value?.text ?? defaultFinalToneName;
 
   const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
-  const hintTextSetting = useUserSetting(
-    hanziPronunciationHintTextSetting,
-    hintSettingKey,
-  );
-  const hintExplanationSetting = useUserSetting(
-    hanziPronunciationHintExplanationSetting,
-    hintSettingKey,
-  );
-  const imagePromptSetting = useUserSetting(
-    hanziPronunciationHintImagePromptSetting,
-    hintSettingKey,
-  );
+  const hintTextSetting = useUserSetting({
+    setting: hanziPronunciationHintTextSetting,
+    key: hintSettingKey,
+  });
+  const hintExplanationSetting = useUserSetting({
+    setting: hanziPronunciationHintExplanationSetting,
+    key: hintSettingKey,
+  });
+  const imagePromptSetting = useUserSetting({
+    setting: hanziPronunciationHintImagePromptSetting,
+    key: hintSettingKey,
+  });
   const [showAiModal, setShowAiModal] = useState(false);
+
+  // Declarative reference images for AI generation
+  const aiReferenceImages: AiReferenceImageDeclaration[] | undefined =
+    splitPinyin == null
+      ? undefined
+      : [
+          {
+            imageSetting: pinyinSoundImageSetting,
+            imageSettingKey: { soundId: splitPinyin.initialSoundId },
+            label: initialPinyinSoundName ?? initialLabel,
+          },
+          {
+            imageSetting: pinyinFinalToneImageSetting,
+            imageSettingKey: getPinyinFinalToneKeyParams(
+              splitPinyin.finalSoundId,
+              String(splitPinyin.tone),
+            ),
+            label: finalToneName,
+          },
+        ];
 
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
@@ -292,6 +339,7 @@ export function WikiHanziCharacterPronunciation({
             enablePasteDropZone
             enableAiGeneration
             aiImageStyle={aiImageStyle}
+            aiReferenceImages={aiReferenceImages}
             initialAiPrompt={
               imagePromptSetting.value?.text ??
               ([hintTextSetting.value?.text, hintExplanationSetting.value?.text]

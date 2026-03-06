@@ -54,7 +54,7 @@ export function QuizDeckOneCorrectPairQuestion({
   const { prompt, answer, groupA, groupB, flag } = question;
 
   const autoCheck =
-    useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
+    useUserSetting({ setting: autoCheckUserSetting }).value?.enabled ?? false;
 
   const [selectedAChoice, setSelectedAChoice] =
     useState<OneCorrectPairQuestionChoice>();

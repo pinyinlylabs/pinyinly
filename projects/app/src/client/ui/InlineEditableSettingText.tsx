@@ -72,7 +72,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   sanitizeValue = defaultSanitizeValue,
 }: InlineEditableSettingTextProps<T>): ReactNode {
   "use memo";
-  const { value, setValue } = useUserSetting(setting, settingKey);
+  const { value, setValue } = useUserSetting({ setting, key: settingKey });
   const history = useUserSettingHistory(setting, settingKey);
   const defaultValueFromHook = useUserSettingTextDefaultValue(
     setting,

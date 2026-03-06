@@ -3,18 +3,41 @@ import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { getLocalImageAssetBase64 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
-import { useEffect, useState } from "react";
+import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import type { AssetId } from "@/data/model";
+import type {
+  UserSetting,
+  UserSettingImageEntity,
+  UserSettingTextEntity,
+} from "@/data/userSettings";
+import { invariant } from "@pinyinly/lib/invariant";
+import { useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
 
-import type { AssetId } from "@/data/model";
-
 type GeneratedImageFormat = `png` | `jpeg` | `webp`;
+
+/**
+ * Declarative reference to an image setting that will be lazily resolved during AI generation.
+ * Labels can be either static strings or fetched from a UserSettingTextEntity.
+ */
+export interface AiReferenceImageDeclaration {
+  imageSetting: UserSetting<UserSettingImageEntity>;
+  imageSettingKey: UserSettingKeyInput<UserSettingImageEntity>;
+  label:
+    | string
+    | {
+        setting: UserSetting<UserSettingTextEntity>;
+        key: UserSettingKeyInput<UserSettingTextEntity>;
+      };
+}
 
 export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
   aiImageStyle?: AiImageStyleKind | null;
+  aiReferenceImages?: AiReferenceImageDeclaration[];
   onImageGenerated: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
@@ -23,12 +46,12 @@ export interface AiImageGenerationPanelProps {
 export function AiImageGenerationPanel({
   initialPrompt = ``,
   aiImageStyle = null,
+  aiReferenceImages,
   onImageGenerated,
   onError,
   onSavePrompt,
 }: AiImageGenerationPanelProps) {
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [styleImageData, setStyleImageData] = useState<string | null>(null);
   const [generatedImageDataUrl, setGeneratedImageDataUrl] = useState<
     string | null
   >(null);
@@ -37,6 +60,58 @@ export function AiImageGenerationPanel({
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isLoadingStyle, setIsLoadingStyle] = useState(false);
+
+  // Destructure up to 3 reference images
+  const [aiReferenceImage1, aiReferenceImage2, aiReferenceImage3] =
+    aiReferenceImages ?? [];
+
+  invariant(
+    (aiReferenceImages?.length ?? 0) <= 3,
+    `A maximum of 3 reference images can be provided`,
+  );
+
+  // Fetch reference image data using static hook calls
+  const reference1ImageSetting = useUserSetting(
+    aiReferenceImage1 == null
+      ? null
+      : {
+          setting: aiReferenceImage1.imageSetting,
+          key: aiReferenceImage1.imageSettingKey,
+        },
+  );
+  const reference1LabelSetting = useUserSetting(
+    aiReferenceImage1 == null || typeof aiReferenceImage1.label !== `object`
+      ? null
+      : aiReferenceImage1.label,
+  );
+
+  const reference2ImageSetting = useUserSetting(
+    aiReferenceImage2 == null
+      ? null
+      : {
+          setting: aiReferenceImage2.imageSetting,
+          key: aiReferenceImage2.imageSettingKey,
+        },
+  );
+  const reference2LabelSetting = useUserSetting(
+    aiReferenceImage2 == null || typeof aiReferenceImage2.label !== `object`
+      ? null
+      : aiReferenceImage2.label,
+  );
+
+  const reference3ImageSetting = useUserSetting(
+    aiReferenceImage3 == null
+      ? null
+      : {
+          setting: aiReferenceImage3.imageSetting,
+          key: aiReferenceImage3.imageSettingKey,
+        },
+  );
+  const reference3LabelSetting = useUserSetting(
+    aiReferenceImage3 == null || typeof aiReferenceImage3.label !== `object`
+      ? null
+      : aiReferenceImage3.label,
+  );
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();
 
@@ -67,7 +142,6 @@ export function AiImageGenerationPanel({
 
       // Combine base64 data with MIME type
       const base64WithMimeType = `${result.mimeType};base64,${result.data}`;
-      setStyleImageData(base64WithMimeType);
       return base64WithMimeType;
     } catch (err) {
       console.error(`Failed to load style image:`, err);
@@ -91,28 +165,76 @@ export function AiImageGenerationPanel({
     setGeneratedImageFormat(null);
 
     try {
-      let effectiveStyleImageData: string | undefined;
-      let stylePromptText = ``;
+      // Build reference images array
+      const referenceImages: Array<{ label: string; imageData: string }> = [];
 
+      // Add style image as first reference if selected
       if (aiImageStyle != null) {
         const config = getAiImageStyleConfig(aiImageStyle);
-        stylePromptText = config.stylePrompt;
-        effectiveStyleImageData =
-          styleImageData ??
-          (await loadStyleImageData(config.assetId)) ??
-          undefined;
+        const styleImageData = await loadStyleImageData(config.assetId);
 
-        if (effectiveStyleImageData == null) {
+        if (styleImageData == null) {
           return;
+        }
+
+        referenceImages.push({
+          label: config.stylePrompt,
+          imageData: styleImageData,
+        });
+      }
+
+      // Process reference 1
+      const ref1ImageId = reference1ImageSetting?.value?.imageId;
+      if (aiReferenceImage1 != null && ref1ImageId != null) {
+        const imageData = await getLocalImageAssetBase64(ref1ImageId);
+        if (imageData != null) {
+          const label =
+            typeof aiReferenceImage1.label === `string`
+              ? aiReferenceImage1.label
+              : (reference1LabelSetting?.value?.text ?? `Reference 1`);
+          referenceImages.push({
+            label,
+            imageData: `${imageData.mimeType};base64,${imageData.data}`,
+          });
         }
       }
 
-      const fullPrompt =
-        prompt.trim() + (stylePromptText ? `\n\n${stylePromptText}` : ``);
+      // Process reference 2
+      const ref2ImageId = reference2ImageSetting?.value?.imageId;
+      if (aiReferenceImage2 != null && ref2ImageId != null) {
+        const imageData = await getLocalImageAssetBase64(ref2ImageId);
+        if (imageData != null) {
+          const label =
+            typeof aiReferenceImage2.label === `string`
+              ? aiReferenceImage2.label
+              : (reference2LabelSetting?.value?.text ?? `Reference 2`);
+          referenceImages.push({
+            label,
+            imageData: `${imageData.mimeType};base64,${imageData.data}`,
+          });
+        }
+      }
+
+      // Process reference 3
+      const ref3ImageId = reference3ImageSetting?.value?.imageId;
+      if (aiReferenceImage3 != null && ref3ImageId != null) {
+        const imageData = await getLocalImageAssetBase64(ref3ImageId);
+        if (imageData != null) {
+          const label =
+            typeof aiReferenceImage3.label === `string`
+              ? aiReferenceImage3.label
+              : (reference3LabelSetting?.value?.text ?? `Reference 3`);
+          referenceImages.push({
+            label,
+            imageData: `${imageData.mimeType};base64,${imageData.data}`,
+          });
+        }
+      }
 
       const result = await generateMutation.mutateAsync({
-        prompt: fullPrompt,
-        styleImageData: effectiveStyleImageData,
+        prompt: prompt.trim(),
+        referenceImages:
+          referenceImages.length > 0 ? referenceImages : undefined,
       });
       setGeneratedImageDataUrl(result.imageDataUrl);
       setGeneratedImageFormat(result.format);
@@ -158,37 +280,6 @@ export function AiImageGenerationPanel({
   const isProcessing =
     isGenerating || uploading || isConfirming || isLoadingStyle;
   const hasGenerated = generatedImageDataUrl != null;
-
-  useEffect(() => {
-    if (aiImageStyle == null) {
-      setStyleImageData(null);
-      return;
-    }
-
-    let isActive = true;
-
-    const preloadStyle = async () => {
-      setIsLoadingStyle(true);
-      try {
-        const styleInfo = getAiImageStyleConfig(aiImageStyle);
-        const result = await getLocalImageAssetBase64(styleInfo.assetId);
-        if (!isActive || result == null) {
-          return;
-        }
-        setStyleImageData(`${result.mimeType};base64,${result.data}`);
-      } finally {
-        if (isActive) {
-          setIsLoadingStyle(false);
-        }
-      }
-    };
-
-    void preloadStyle();
-
-    return () => {
-      isActive = false;
-    };
-  }, [aiImageStyle]);
 
   return (
     <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">

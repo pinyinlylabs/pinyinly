@@ -127,22 +127,24 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
   // Use the first meaning as the primary meaning for cover image.
   const hanziWord = hanziWordMeanings[0]?.[0];
 
-  const settingKey =
-    hanziWord == null ? ({ skip: true } as const) : { hanziWord };
+  const settingKey = hanziWord == null ? null : { hanziWord };
 
   const imagePromptSetting = useUserSetting(
-    hanziWordMeaningHintImagePromptSetting,
-    settingKey,
+    settingKey == null
+      ? null
+      : { setting: hanziWordMeaningHintImagePromptSetting, key: settingKey },
   );
 
   const explanationSetting = useUserSetting(
-    hanziWordMeaningHintExplanationSetting,
-    settingKey,
+    settingKey == null
+      ? null
+      : { setting: hanziWordMeaningHintExplanationSetting, key: settingKey },
   );
 
   const hintSetting = useUserSetting(
-    hanziWordMeaningHintTextSetting,
-    settingKey,
+    settingKey == null
+      ? null
+      : { setting: hanziWordMeaningHintTextSetting, key: settingKey },
   );
   const { aiImageStyle } = useAiImageStyleSetting();
 
@@ -238,8 +240,9 @@ function MeaningItem({
   meaning: HanziWordMeaning;
   mnemonicHint: string | undefined;
 }) {
-  const hintSetting = useUserSetting(hanziWordMeaningHintTextSetting, {
-    hanziWord,
+  const hintSetting = useUserSetting({
+    setting: hanziWordMeaningHintTextSetting,
+    key: { hanziWord },
   });
   const hintSettingTextValue =
     hintSetting.value?.text ??

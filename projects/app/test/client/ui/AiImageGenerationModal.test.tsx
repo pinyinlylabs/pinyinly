@@ -1,9 +1,17 @@
 // @vitest-environment happy-dom
 
+import { DbProvider } from "#client/ui/DbProvider.tsx";
+import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
+import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import type { AssetId } from "#data/model.js";
+import type { Rizzle } from "#data/rizzleSchema.ts";
+import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
-import type { ReactElement, ReactNode } from "react";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import type { PropsWithChildren, ReactElement, ReactNode } from "react";
+import { test as baseTest, beforeEach, describe, expect, vi } from "vitest";
+
+const testWithRizzle = baseTest.extend(rizzleFixture);
 
 type AiImageGenerationModalType = (props: {
   initialPrompt: string;
@@ -19,56 +27,62 @@ const {
   mockGetLocalImageAssetSource,
   mockUseMutation,
   mockUseImageUploader,
+  localImageAssetsMock,
+  trpcMock,
+  useImageUploaderMock,
 } = vi.hoisted(() => {
+  const mockGetAvailableLocalImageAssets = vi.fn<() => string[]>();
+  const mockGetLocalImageAssetBase64 =
+    vi.fn<() => Promise<{ data: string; mimeType: string } | undefined>>();
+  const mockGetLocalImageAssetSource = vi.fn<() => Promise<{ uri: string }>>();
+  const mockUseMutation =
+    vi.fn<
+      () => {
+        mutateAsync: (args: unknown) => Promise<unknown>;
+        isPending: boolean;
+      }
+    >();
+  const mockUseImageUploader =
+    vi.fn<
+      () => {
+        uploading: boolean;
+        uploadImageBlob: (args: unknown) => Promise<void>;
+      }
+    >();
+
   return {
-    mockGetAvailableLocalImageAssets: vi.fn<() => string[]>(),
-    mockGetLocalImageAssetBase64:
-      vi.fn<() => Promise<{ data: string; mimeType: string } | undefined>>(),
-    mockGetLocalImageAssetSource: vi.fn<() => Promise<{ uri: string }>>(),
-    mockUseMutation:
-      vi.fn<
-        () => {
-          mutateAsync: (args: unknown) => Promise<unknown>;
-          isPending: boolean;
-        }
-      >(),
-    mockUseImageUploader:
-      vi.fn<
-        () => {
-          uploading: boolean;
-          uploadImageBlob: (args: unknown) => Promise<void>;
-        }
-      >(),
+    mockGetAvailableLocalImageAssets,
+    mockGetLocalImageAssetBase64,
+    mockGetLocalImageAssetSource,
+    mockUseMutation,
+    mockUseImageUploader,
+    localImageAssetsMock: {
+      getAvailableLocalImageAssets: () => mockGetAvailableLocalImageAssets(),
+      getLocalImageAssetBase64: async () => mockGetLocalImageAssetBase64(),
+      getLocalImageAssetSource: async () => mockGetLocalImageAssetSource(),
+    },
+    trpcMock: {
+      trpc: {
+        ai: {
+          generateHintImage: {
+            useMutation: () => mockUseMutation(),
+          },
+        },
+      },
+    },
+    useImageUploaderMock: {
+      useImageUploader: () => mockUseImageUploader(),
+    },
   };
 });
-
-const localImageAssetsMock = {
-  getAvailableLocalImageAssets: () => mockGetAvailableLocalImageAssets(),
-  getLocalImageAssetBase64: async () => mockGetLocalImageAssetBase64(),
-  getLocalImageAssetSource: async () => mockGetLocalImageAssetSource(),
-};
 
 vi.mock(`@/client/assets/localImageAssets`, () => localImageAssetsMock);
 vi.mock(`@/client/assets/localImageAssets.ts`, () => localImageAssetsMock);
 vi.mock(`#client/assets/localImageAssets.ts`, () => localImageAssetsMock);
 
-const trpcMock = {
-  trpc: {
-    ai: {
-      generateHintImage: {
-        useMutation: () => mockUseMutation(),
-      },
-    },
-  },
-};
-
 vi.mock(`@/client/trpc`, () => trpcMock);
 vi.mock(`@/client/trpc.tsx`, () => trpcMock);
 vi.mock(`#client/trpc.tsx`, () => trpcMock);
-
-const useImageUploaderMock = {
-  useImageUploader: () => mockUseImageUploader(),
-};
 
 vi.mock(`@/client/ui/hooks/useImageUploader`, () => useImageUploaderMock);
 vi.mock(`@/client/ui/hooks/useImageUploader.ts`, () => useImageUploaderMock);
@@ -155,9 +169,21 @@ vi.mock(`react-native`, () => ({
   },
 }));
 
+const testContextProviders = (opts: { rizzle: Rizzle }) =>
+  function TestWrapper({ children }: PropsWithChildren) {
+    const queryClient = useNewQueryClient();
+
+    return (
+      <QueryClientProvider client={queryClient}>
+        <RizzleProvider.Context.Provider value={opts.rizzle}>
+          <DbProvider>{children}</DbProvider>
+        </RizzleProvider.Context.Provider>
+      </QueryClientProvider>
+    );
+  };
+
 describe(`AiImageGenerationModal suite`, () => {
   beforeEach(() => {
-    vi.resetModules();
     mockGetAvailableLocalImageAssets.mockReturnValue([
       `style:one`,
       `style:two`,
@@ -184,13 +210,16 @@ describe(`AiImageGenerationModal suite`, () => {
     AiImageGenerationModal = module.AiImageGenerationModal;
   });
 
-  test(`does not show style selector controls`, () => {
+  testWithRizzle(`does not show style selector controls`, ({ rizzle }) => {
+    const Wrapper = testContextProviders({ rizzle });
     render(
-      <AiImageGenerationModal
-        initialPrompt=""
-        onConfirm={vi.fn()}
-        onDismiss={vi.fn()}
-      />,
+      <Wrapper>
+        <AiImageGenerationModal
+          initialPrompt=""
+          onConfirm={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      </Wrapper>,
     );
 
     expect(screen.queryByText(`Style image`)).not.toBeInTheDocument();
@@ -198,13 +227,16 @@ describe(`AiImageGenerationModal suite`, () => {
     expect(screen.queryByText(`Available styles:`)).not.toBeInTheDocument();
   });
 
-  test(`renders image generation form`, () => {
+  testWithRizzle(`renders image generation form`, ({ rizzle }) => {
+    const Wrapper = testContextProviders({ rizzle });
     render(
-      <AiImageGenerationModal
-        initialPrompt=""
-        onConfirm={vi.fn()}
-        onDismiss={vi.fn()}
-      />,
+      <Wrapper>
+        <AiImageGenerationModal
+          initialPrompt=""
+          onConfirm={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      </Wrapper>,
     );
 
     expect(screen.getByText(`AI image generator`)).toBeInTheDocument();

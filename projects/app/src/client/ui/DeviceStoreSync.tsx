@@ -15,7 +15,8 @@ import { useEffect } from "react";
  * syncs settings for any active SessionStoreProvider.
  */
 export function DeviceStoreSync({ dbName }: { dbName: string }) {
-  const userName = useUserSetting(userNameSetting).value?.text ?? null;
+  const userName =
+    useUserSetting({ setting: userNameSetting }).value?.text ?? null;
   const { setDeviceSessionUserName } = useAuth();
 
   // Sync userName from setting to auth state (DeviceSession cache)

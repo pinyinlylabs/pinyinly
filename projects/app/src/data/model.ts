@@ -822,3 +822,12 @@ export const wikiCharacterDataSchema = z.strictObject({
 });
 
 export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
+
+/**
+ * A reference image to be included in AI generation requests.
+ * Contains a descriptive label and base64-encoded image data with MIME type.
+ */
+export interface AiReferenceImage {
+  label: string;
+  imageData: string; // Format: "mimeType;base64,data"
+}
