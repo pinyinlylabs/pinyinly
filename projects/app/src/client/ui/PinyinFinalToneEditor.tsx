@@ -158,6 +158,7 @@ function ToneTileEditor({
         <View className="gap-2 pt-2">
           <Text className="pyly-body-subheading">Image</Text>
           <InlineEditableSettingImage
+            enableAiGeneration
             setting={pinyinFinalToneImageSetting}
             settingKey={imageSettingKey}
             previewHeight={200}
