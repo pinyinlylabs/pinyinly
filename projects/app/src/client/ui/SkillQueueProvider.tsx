@@ -86,12 +86,18 @@ export const SkillQueueProvider = Object.assign(
 
     // Compute priority skills from settings
     const prioritySkills = useMemo(() => {
-      const prioritizedWords = getPrioritizedHanziWords(prioritySettingsData);
+      if (dictionary == null) {
+        return [];
+      }
+      const prioritizedWords = getPrioritizedHanziWords(
+        prioritySettingsData,
+        dictionary,
+      );
       return prioritizedWords.flatMap((w) => [
         hanziWordToGlossTyped(w),
         hanziWordToPinyinTyped(w),
       ]);
-    }, [prioritySettingsData]);
+    }, [prioritySettingsData, dictionary]);
 
     // Combine base target skills with priority skills
     const allTargetSkills = useMemo(() => {

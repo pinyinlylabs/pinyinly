@@ -2,6 +2,7 @@ import { usePriorityWordsList } from "@/client/ui/hooks/usePriorityWordsList";
 import { searchDictionaryEntries } from "@/client/ui/quickSearch";
 import { loadDictionary } from "@/dictionary";
 import { format } from "date-fns/format";
+import { useRouter } from "expo-router";
 import { use, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Icon } from "./Icon";
@@ -10,6 +11,7 @@ import { TextInputSingle } from "./TextInputSingle";
 const maxResults = 12;
 
 export function PriorityWordsList() {
+  const router = useRouter();
   const { words, isLoading, addWord, removeWord } = usePriorityWordsList();
   const dictionary = use(loadDictionary());
   const [query, setQuery] = useState(``);
@@ -119,38 +121,50 @@ export function PriorityWordsList() {
           </View>
         ) : (
           <View className="gap-2">
-            {words.map((item) => (
-              <View
-                key={item.word}
-                className={`
-                  flex-row items-center gap-3 rounded-lg border border-fg/10 bg-bg-high px-4 py-3
-                `}
-              >
-                <Text className="text-2xl font-semibold text-fg-loud">
-                  {item.word}
-                </Text>
-                <View className="flex-1 gap-1">
-                  <Text className="text-xs text-fg-dim">
-                    Added {format(item.createdAt, `MMM d, yyyy`)}
-                  </Text>
-                  {item.note == null ? null : (
-                    <Text className="text-sm text-fg">{item.note}</Text>
-                  )}
-                </View>
+            {words.map((item) => {
+              // Extract hanzi from hanziword (part before ':')
+              const hanziParts = item.word.split(`:`);
+              const hanzi = hanziParts[0] ?? item.word;
+
+              return (
                 <Pressable
+                  key={item.word}
                   onPress={() => {
-                    removeWord(item.word);
+                    router.push(`/wiki/${encodeURIComponent(hanzi)}`);
                   }}
                   className={`
-                    rounded-lg p-2
+                    flex-row items-center gap-3 rounded-lg border border-fg/10 bg-bg-high px-4 py-3
 
                     hover:bg-fg/5
                   `}
                 >
-                  <Icon icon="close" size={16} className="text-fg-dim" />
+                  <Text className="text-2xl font-semibold text-fg-loud">
+                    {item.word}
+                  </Text>
+                  <View className="flex-1 gap-1">
+                    <Text className="text-xs text-fg-dim">
+                      Added {format(item.createdAt, `MMM d, yyyy`)}
+                    </Text>
+                    {item.note == null ? null : (
+                      <Text className="text-sm text-fg">{item.note}</Text>
+                    )}
+                  </View>
+                  <Pressable
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      removeWord(item.word);
+                    }}
+                    className={`
+                      rounded-lg p-2
+
+                      hover:bg-fg/5
+                    `}
+                  >
+                    <Icon icon="close" size={16} className="text-fg-dim" />
+                  </Pressable>
                 </Pressable>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
       </View>

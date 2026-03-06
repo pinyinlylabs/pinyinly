@@ -1,4 +1,4 @@
-import type { HanziWord, Skill, SrsStateType } from "@/data/model";
+import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
@@ -256,10 +256,12 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
 
 /**
  * Extracts HanziWord values from priority word settings.
- * Filters out any invalid entries and returns unique words.
+ * Expands single hanzi to all their hanziwords, filters invalid entries,
+ * and returns unique words.
  */
 export function getPrioritizedHanziWords(
   prioritySettings: CollectionOutput<SettingCollection>[],
+  dictionary: Dictionary,
 ): HanziWord[] {
   const settingPrefix = `pwi/`;
   const words: HanziWord[] = [];
@@ -279,8 +281,18 @@ export function getPrioritizedHanziWords(
       continue;
     }
 
-    if (typeof word === `string`) {
+    // Check if word is a hanzi (no ':' separator) or a hanziword
+    if (word.includes(`:`) && typeof word === `string`) {
+      // It's a hanziword, use it directly
       words.push(word as HanziWord);
+    } else if (typeof word === `string`) {
+      // It's just hanzi, expand to all hanziwords for that hanzi
+      const hanziWordPairs = dictionary.lookupHanzi(
+        word as unknown as HanziText,
+      );
+      for (const [hanziWord] of hanziWordPairs) {
+        words.push(hanziWord);
+      }
     }
   }
   return words.filter(arrayFilterUnique());
