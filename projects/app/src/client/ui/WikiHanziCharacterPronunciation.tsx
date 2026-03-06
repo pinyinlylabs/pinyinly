@@ -52,7 +52,7 @@ export function WikiHanziCharacterPronunciation({
 
   const initialPinyinSound2 = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinSoundNameSetting,
           key: { soundId: splitPinyin.initialSoundId },
@@ -60,7 +60,7 @@ export function WikiHanziCharacterPronunciation({
   );
   const finalPinyinSound2 = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinSoundNameSetting,
           key: { soundId: splitPinyin.finalSoundId },
@@ -68,7 +68,7 @@ export function WikiHanziCharacterPronunciation({
   );
   const tonePinyinSound2 = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinSoundNameSetting,
           key: { soundId: splitPinyin.toneSoundId },
@@ -77,7 +77,7 @@ export function WikiHanziCharacterPronunciation({
 
   const initialDescriptionSetting = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinSoundDescriptionSetting,
           key: { soundId: splitPinyin.initialSoundId },
@@ -85,7 +85,7 @@ export function WikiHanziCharacterPronunciation({
   );
   const finalDescriptionSetting = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinSoundDescriptionSetting,
           key: { soundId: splitPinyin.finalSoundId },
@@ -93,7 +93,7 @@ export function WikiHanziCharacterPronunciation({
   );
   const toneDescriptionSetting = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinSoundDescriptionSetting,
           key: { soundId: splitPinyin.toneSoundId },
@@ -102,7 +102,7 @@ export function WikiHanziCharacterPronunciation({
   const { aiImageStyle } = useAiImageStyleSetting();
   const finalToneDescriptionSetting = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinFinalToneDescriptionSetting,
           key: getPinyinFinalToneKeyParams(
@@ -113,7 +113,7 @@ export function WikiHanziCharacterPronunciation({
   );
   const finalToneNameSetting = useUserSetting(
     skipSoundSettings
-      ? { skip: true }
+      ? null
       : {
           setting: pinyinFinalToneNameSetting,
           key: getPinyinFinalToneKeyParams(

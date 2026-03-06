@@ -67,7 +67,7 @@ export function AiImageGenerationPanel({
   // Fetch reference image data using static hook calls
   const reference1ImageSetting = useUserSetting(
     aiReferenceImage1 == null
-      ? { skip: true }
+      ? null
       : {
           setting: aiReferenceImage1.imageSetting,
           key: aiReferenceImage1.imageSettingKey,
@@ -75,16 +75,13 @@ export function AiImageGenerationPanel({
   );
   const reference1LabelSetting = useUserSetting(
     aiReferenceImage1 == null || typeof aiReferenceImage1.label !== `object`
-      ? { skip: true }
-      : {
-          setting: aiReferenceImage1.label.setting,
-          key: aiReferenceImage1.label.key,
-        },
+      ? null
+      : aiReferenceImage1.label,
   );
 
   const reference2ImageSetting = useUserSetting(
     aiReferenceImage2 == null
-      ? { skip: true }
+      ? null
       : {
           setting: aiReferenceImage2.imageSetting,
           key: aiReferenceImage2.imageSettingKey,
@@ -92,16 +89,13 @@ export function AiImageGenerationPanel({
   );
   const reference2LabelSetting = useUserSetting(
     aiReferenceImage2 == null || typeof aiReferenceImage2.label !== `object`
-      ? { skip: true }
-      : {
-          setting: aiReferenceImage2.label.setting,
-          key: aiReferenceImage2.label.key,
-        },
+      ? null
+      : aiReferenceImage2.label,
   );
 
   const reference3ImageSetting = useUserSetting(
     aiReferenceImage3 == null
-      ? { skip: true }
+      ? null
       : {
           setting: aiReferenceImage3.imageSetting,
           key: aiReferenceImage3.imageSettingKey,
@@ -109,11 +103,8 @@ export function AiImageGenerationPanel({
   );
   const reference3LabelSetting = useUserSetting(
     aiReferenceImage3 == null || typeof aiReferenceImage3.label !== `object`
-      ? { skip: true }
-      : {
-          setting: aiReferenceImage3.label.setting,
-          key: aiReferenceImage3.label.key,
-        },
+      ? null
+      : aiReferenceImage3.label,
   );
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();

@@ -71,7 +71,7 @@ const testContextProviders = (opts: { rizzle: Rizzle }) =>
   };
 
 testWithRizzle(`returns null when skipped`, ({ rizzle }) => {
-  const { result, unmount } = renderHook(() => useUserSetting({ skip: true }), {
+  const { result, unmount } = renderHook(() => useUserSetting(null), {
     wrapper: testContextProviders({ rizzle }),
   });
 

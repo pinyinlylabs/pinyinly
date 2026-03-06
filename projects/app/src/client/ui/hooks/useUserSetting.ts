@@ -92,31 +92,25 @@ const skippedSettingKeyInfo = {
   keyParamMarshaled: {} as Record<string, string>,
 };
 
-export type UseUserSettingSkipOptions = {
-  skip: true;
-};
-
 export type UseUserSettingWithKeyOptions<T extends UserSettingEntity> = {
-  skip?: never;
   setting: UserSettingEntityLike<T>;
   key: UserSettingKeyInput<T>;
 };
 
-export type UseUserSettingNoKeyOptions<T extends UserSettingEntity> = {
-  skip?: never;
-  setting: UserSettingEntityLike<T>;
-};
+export type UseUserSettingNoKeyOptions<T extends UserSettingEntity> =
+  keyof UserSettingKeyInput<T> extends never
+    ? {
+        setting: UserSettingEntityLike<T>;
+      }
+    : never;
 
 // Allows any combination in a union context (for ternaries)
 export type UseUserSettingOptions<T extends UserSettingEntity> =
-  | UseUserSettingSkipOptions
-  | {
-      skip?: never;
-      setting: UserSettingEntityLike<T>;
-      key?: UserSettingKeyInput<T>;
-    };
+  | null
+  | UseUserSettingWithKeyOptions<T>
+  | UseUserSettingNoKeyOptions<T>;
 
-export function useUserSetting(options: UseUserSettingSkipOptions): null;
+export function useUserSetting(options: null): null;
 export function useUserSetting<T extends UserSettingEntity>(
   options: UseUserSettingWithKeyOptions<T>,
 ): UseUserSettingResult<T>;
@@ -126,19 +120,16 @@ export function useUserSetting<T extends UserSettingEntity>(
 export function useUserSetting<T extends UserSettingEntity = RizzleAnyEntity>(
   options: UseUserSettingOptions<T>,
 ): UseUserSettingResult<T> | null;
-export function useUserSetting(options: UseUserSettingSkipOptions): null;
-export function useUserSetting<T extends UserSettingEntity>(
-  options: UseUserSettingWithKeyOptions<T>,
-): UseUserSettingResult<T>;
-export function useUserSetting<T extends UserSettingEntity>(
-  options: UseUserSettingNoKeyOptions<T>,
-): UseUserSettingResult<T>;
 export function useUserSetting<T extends UserSettingEntity>(
   options: UseUserSettingOptions<T>,
 ): UseUserSettingResult<T> | null {
-  const skip = options.skip === true;
-  const keyInput = ((skip ? null : options.key) ??
-    noKeyParams) as UserSettingKeyInput<T>;
+  const skip = options == null;
+  const keyInput =
+    options == null
+      ? (noKeyParams as UserSettingKeyInput<T>)
+      : ((`key` in options
+          ? options.key
+          : noKeyParams) as UserSettingKeyInput<T>);
   const { settingKey, keyParamAliases, keyParamMarshaled } = skip
     ? skippedSettingKeyInfo
     : getSettingKeyInfo(options.setting, keyInput);
@@ -159,7 +150,7 @@ export function useUserSetting<T extends UserSettingEntity>(
   const isLoading = result.isLoading;
   const settingData = result.data?.[0] ?? null;
   const value =
-    skip || settingData?.value == null
+    options == null || settingData?.value == null
       ? null
       : options.setting.entity.unmarshalValueSafe({
           ...keyParamMarshaled,

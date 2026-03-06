@@ -127,24 +127,23 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
   // Use the first meaning as the primary meaning for cover image.
   const hanziWord = hanziWordMeanings[0]?.[0];
 
-  const settingKey =
-    hanziWord == null ? ({ skip: true } as const) : { hanziWord };
+  const settingKey = hanziWord == null ? null : { hanziWord };
 
   const imagePromptSetting = useUserSetting(
-    settingKey.skip === true
-      ? { skip: true }
+    settingKey == null
+      ? null
       : { setting: hanziWordMeaningHintImagePromptSetting, key: settingKey },
   );
 
   const explanationSetting = useUserSetting(
-    settingKey.skip === true
-      ? { skip: true }
+    settingKey == null
+      ? null
       : { setting: hanziWordMeaningHintExplanationSetting, key: settingKey },
   );
 
   const hintSetting = useUserSetting(
-    settingKey.skip === true
-      ? { skip: true }
+    settingKey == null
+      ? null
       : { setting: hanziWordMeaningHintTextSetting, key: settingKey },
   );
   const { aiImageStyle } = useAiImageStyleSetting();
