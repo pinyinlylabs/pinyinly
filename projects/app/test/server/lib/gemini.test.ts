@@ -300,27 +300,32 @@ describe(
         model: string;
         contents: Array<{ parts: unknown[] }>;
       };
+      const firstContent = callArgs.contents[0];
+      if (firstContent == null) {
+        throw new Error(`Expected first content item to exist`);
+      }
+      const parts = firstContent.parts;
       expect(callArgs.model).toBe(`gemini-2.5-flash-image`);
-      expect(callArgs.contents?.[0]?.parts).toHaveLength(5);
-      expect(callArgs.contents?.[0]?.parts?.[0]).toEqual({
+      expect(parts).toHaveLength(5);
+      expect(parts[0]).toEqual({
         text: `sunset:`,
       });
-      expect(callArgs.contents?.[0]?.parts?.[1]).toEqual({
+      expect(parts[1]).toEqual({
         inlineData: {
           mimeType: `image/png`,
           data: pngBase64,
         },
       });
-      expect(callArgs.contents?.[0]?.parts?.[2]).toEqual({
+      expect(parts[2]).toEqual({
         text: `mountain:`,
       });
-      expect(callArgs.contents?.[0]?.parts?.[3]).toEqual({
+      expect(parts[3]).toEqual({
         inlineData: {
           mimeType: `image/jpeg`,
           data: pngBase64,
         },
       });
-      expect(callArgs.contents?.[0]?.parts?.[4]).toEqual({
+      expect(parts[4]).toEqual({
         text: `A beautiful landscape with mountains`,
       });
     });
@@ -347,26 +352,31 @@ describe(
       const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
         contents: Array<{ parts: unknown[] }>;
       };
-      expect(callArgs.contents?.[0]?.parts).toHaveLength(5);
-      expect(callArgs.contents?.[0]?.parts?.[0]).toEqual({
+      const firstContent = callArgs.contents[0];
+      if (firstContent == null) {
+        throw new Error(`Expected first content item to exist`);
+      }
+      const parts = firstContent.parts;
+      expect(parts).toHaveLength(5);
+      expect(parts[0]).toEqual({
         text: `style:`,
       });
-      expect(callArgs.contents?.[0]?.parts?.[1]).toEqual({
+      expect(parts[1]).toEqual({
         inlineData: {
           mimeType: `image/png`,
           data: pngBase64,
         },
       });
-      expect(callArgs.contents?.[0]?.parts?.[2]).toEqual({
+      expect(parts[2]).toEqual({
         text: `reference:`,
       });
-      expect(callArgs.contents?.[0]?.parts?.[3]).toEqual({
+      expect(parts[3]).toEqual({
         inlineData: {
           mimeType: `image/png`,
           data: pngBase64,
         },
       });
-      expect(callArgs.contents?.[0]?.parts?.[4]).toEqual({
+      expect(parts[4]).toEqual({
         text: `A landscape in oil painting style`,
       });
     });
@@ -391,8 +401,8 @@ describe(
       const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
         contents: Array<{ parts: unknown[] }>;
       };
-      const parts = callArgs.contents?.[0]?.parts ?? [];
-      const lastPart = parts[parts.length - 1];
+      const parts = callArgs.contents[0]?.parts ?? [];
+      const lastPart = parts.at(-1);
 
       expect(parts).toHaveLength(5); // label, image, label, image, prompt
       expect(lastPart).toEqual({

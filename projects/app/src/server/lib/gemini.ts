@@ -1,4 +1,5 @@
 import type { AiReferenceImage } from "@/data/model";
+import { parseBase64DataUri } from "@/util/base64";
 import { geminiImageApiKey } from "@/util/env";
 import type { Part } from "@google/genai";
 import { GoogleGenAI } from "@google/genai";
@@ -30,22 +31,17 @@ export async function generateImage(opts: {
       // Add label text before the image
       parts.push({ text: `${refImage.label}:` });
 
-      // Parse format: "mimeType;base64,data"
-      const formatMatch = refImage.imageData.match(/^([^;]+);base64,(.+)$/);
-      if (formatMatch && formatMatch[1] != null && formatMatch[2] != null) {
-        const mimeType = formatMatch[1];
-        const base64Data = formatMatch[2];
-        parts.push({
-          inlineData: {
-            mimeType,
-            data: base64Data,
-          },
-        });
-      } else {
-        throw new Error(
-          `Invalid reference image data format for label "${refImage.label}"`,
-        );
-      }
+      // Parse base64 data URI
+      const { mimeType, data } = parseBase64DataUri(
+        refImage.imageData,
+        refImage.label,
+      );
+      parts.push({
+        inlineData: {
+          mimeType,
+          data,
+        },
+      });
     }
   }
 
