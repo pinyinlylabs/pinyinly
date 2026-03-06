@@ -117,6 +117,11 @@ export const useDeviceStore = <T extends DeviceStoreEntity>(
   const isLoadingRef = useRef(isLoading);
   const valueRef = useRef(value);
 
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+    valueRef.current = value;
+  }, [isLoading, value]);
+
   const setValue: UseDeviceStoreSetValue<T> = useCallback(
     (updater) => {
       if (typeof updater === `function`) {

@@ -3,18 +3,40 @@ import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { getLocalImageAssetBase64 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
+import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import type { AssetId } from "@/data/model";
+import type {
+  UserSetting,
+  UserSettingImageEntity,
+  UserSettingTextEntity,
+} from "@/data/userSettings";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
 
-import type { AssetId } from "@/data/model";
-
 type GeneratedImageFormat = `png` | `jpeg` | `webp`;
+
+/**
+ * Declarative reference to an image setting that will be lazily resolved during AI generation.
+ * Labels can be either static strings or fetched from a UserSettingTextEntity.
+ */
+export interface AiReferenceImageDeclaration {
+  imageSetting: UserSetting<UserSettingImageEntity>;
+  imageSettingKey: UserSettingKeyInput<UserSettingImageEntity>;
+  label:
+    | string
+    | {
+        setting: UserSetting<UserSettingTextEntity>;
+        key: UserSettingKeyInput<UserSettingTextEntity>;
+      };
+}
 
 export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
   aiImageStyle?: AiImageStyleKind | null;
+  aiReferenceImages?: AiReferenceImageDeclaration[];
   onImageGenerated: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
@@ -23,6 +45,7 @@ export interface AiImageGenerationPanelProps {
 export function AiImageGenerationPanel({
   initialPrompt = ``,
   aiImageStyle = null,
+  aiReferenceImages,
   onImageGenerated,
   onError,
   onSavePrompt,
@@ -37,6 +60,62 @@ export function AiImageGenerationPanel({
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isLoadingStyle, setIsLoadingStyle] = useState(false);
+
+  // Destructure up to 3 reference images
+  const [aiReferenceImage1, aiReferenceImage2, aiReferenceImage3] =
+    aiReferenceImages ?? [];
+
+  // Fetch reference image data using static hook calls
+  const reference1ImageSetting = useUserSetting(
+    aiReferenceImage1 == null
+      ? { skip: true }
+      : {
+          setting: aiReferenceImage1.imageSetting,
+          key: aiReferenceImage1.imageSettingKey,
+        },
+  );
+  const reference1LabelSetting = useUserSetting(
+    aiReferenceImage1 == null || typeof aiReferenceImage1.label !== `object`
+      ? { skip: true }
+      : {
+          setting: aiReferenceImage1.label.setting,
+          key: aiReferenceImage1.label.key,
+        },
+  );
+
+  const reference2ImageSetting = useUserSetting(
+    aiReferenceImage2 == null
+      ? { skip: true }
+      : {
+          setting: aiReferenceImage2.imageSetting,
+          key: aiReferenceImage2.imageSettingKey,
+        },
+  );
+  const reference2LabelSetting = useUserSetting(
+    aiReferenceImage2 == null || typeof aiReferenceImage2.label !== `object`
+      ? { skip: true }
+      : {
+          setting: aiReferenceImage2.label.setting,
+          key: aiReferenceImage2.label.key,
+        },
+  );
+
+  const reference3ImageSetting = useUserSetting(
+    aiReferenceImage3 == null
+      ? { skip: true }
+      : {
+          setting: aiReferenceImage3.imageSetting,
+          key: aiReferenceImage3.imageSettingKey,
+        },
+  );
+  const reference3LabelSetting = useUserSetting(
+    aiReferenceImage3 == null || typeof aiReferenceImage3.label !== `object`
+      ? { skip: true }
+      : {
+          setting: aiReferenceImage3.label.setting,
+          key: aiReferenceImage3.label.key,
+        },
+  );
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();
 
@@ -107,12 +186,65 @@ export function AiImageGenerationPanel({
         }
       }
 
+      // Build reference images from fetched settings
+      const referenceImages: Array<{ label: string; imageData: string }> = [];
+
+      // Process reference 1
+      const ref1ImageId = reference1ImageSetting?.value?.imageId;
+      if (aiReferenceImage1 != null && ref1ImageId != null) {
+        const imageData = await getLocalImageAssetBase64(ref1ImageId);
+        if (imageData != null) {
+          const label =
+            typeof aiReferenceImage1.label === `string`
+              ? aiReferenceImage1.label
+              : (reference1LabelSetting?.value?.text ?? `Reference 1`);
+          referenceImages.push({
+            label,
+            imageData: `${imageData.mimeType};base64,${imageData.data}`,
+          });
+        }
+      }
+
+      // Process reference 2
+      const ref2ImageId = reference2ImageSetting?.value?.imageId;
+      if (aiReferenceImage2 != null && ref2ImageId != null) {
+        const imageData = await getLocalImageAssetBase64(ref2ImageId);
+        if (imageData != null) {
+          const label =
+            typeof aiReferenceImage2.label === `string`
+              ? aiReferenceImage2.label
+              : (reference2LabelSetting?.value?.text ?? `Reference 2`);
+          referenceImages.push({
+            label,
+            imageData: `${imageData.mimeType};base64,${imageData.data}`,
+          });
+        }
+      }
+
+      // Process reference 3
+      const ref3ImageId = reference3ImageSetting?.value?.imageId;
+      if (aiReferenceImage3 != null && ref3ImageId != null) {
+        const imageData = await getLocalImageAssetBase64(ref3ImageId);
+        if (imageData != null) {
+          const label =
+            typeof aiReferenceImage3.label === `string`
+              ? aiReferenceImage3.label
+              : (reference3LabelSetting?.value?.text ?? `Reference 3`);
+          referenceImages.push({
+            label,
+            imageData: `${imageData.mimeType};base64,${imageData.data}`,
+          });
+        }
+      }
+
       const fullPrompt =
         prompt.trim() + (stylePromptText ? `\n\n${stylePromptText}` : ``);
 
       const result = await generateMutation.mutateAsync({
         prompt: fullPrompt,
         styleImageData: effectiveStyleImageData,
+        referenceImages:
+          referenceImages.length > 0 ? referenceImages : undefined,
       });
       setGeneratedImageDataUrl(result.imageDataUrl);
       setGeneratedImageFormat(result.format);

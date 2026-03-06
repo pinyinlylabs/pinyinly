@@ -57,10 +57,18 @@ const pronunciationHintOutputSchema = z
   })
   .strict();
 
+const aiReferenceImageSchema = z
+  .object({
+    label: z.string(),
+    imageData: z.string(), // Format: "mimeType;base64,data"
+  })
+  .strict();
+
 const generateImageInputSchema = z
   .object({
     prompt: z.string(),
     styleImageData: z.string().optional(),
+    referenceImages: z.array(aiReferenceImageSchema).optional(),
   })
   .strict();
 
@@ -154,12 +162,13 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
-      const { prompt, styleImageData } = opts.input;
+      const { prompt, styleImageData, referenceImages } = opts.input;
 
       try {
         const { buffer, mimeType } = await generateImage({
           prompt,
           styleImageData,
+          referenceImages,
         });
         const format = resolveImageFormat(mimeType);
 

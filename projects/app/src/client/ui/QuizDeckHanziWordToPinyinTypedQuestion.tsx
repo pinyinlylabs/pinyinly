@@ -55,7 +55,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   const { skill, flag, answers, bannedMeaningPinyinHint } = question;
 
   const autoCheck =
-    useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
+    useUserSetting({ setting: autoCheckUserSetting }).value?.enabled ?? false;
 
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);

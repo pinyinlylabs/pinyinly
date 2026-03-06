@@ -70,9 +70,9 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
   const dictionary = use(loadDictionary());
   const r = useRizzle();
   const [query, setQuery] = useState(``);
-  const { setValue: setQuickSearchPick } = useUserSetting(
-    quickSearchPickSetting,
-  );
+  const { setValue: setQuickSearchPick } = useUserSetting({
+    setting: quickSearchPickSetting,
+  });
 
   const trimmedQuery = useDebounce(query.trim(), 200);
 

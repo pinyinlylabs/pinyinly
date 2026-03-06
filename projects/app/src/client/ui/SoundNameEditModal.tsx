@@ -47,10 +47,10 @@ function SoundNameEditModalContent({
 }) {
   const r = useRizzle();
   const pinyinSoundGroups = usePinyinSoundGroups();
-  const { setValue: setSoundName, value: currentSoundName } = useUserSetting(
-    pinyinSoundNameSetting,
-    { soundId },
-  );
+  const { setValue: setSoundName, value: currentSoundName } = useUserSetting({
+    setting: pinyinSoundNameSetting,
+    key: { soundId },
+  });
 
   const soundNameSuggestions = use(loadPinyinSoundNameSuggestions());
 

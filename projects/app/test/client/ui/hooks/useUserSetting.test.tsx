@@ -71,10 +71,9 @@ const testContextProviders = (opts: { rizzle: Rizzle }) =>
   };
 
 testWithRizzle(`returns null when skipped`, ({ rizzle }) => {
-  const { result, unmount } = renderHook(
-    () => useUserSetting(autoCheckUserSetting, { skip: true }),
-    { wrapper: testContextProviders({ rizzle }) },
-  );
+  const { result, unmount } = renderHook(() => useUserSetting({ skip: true }), {
+    wrapper: testContextProviders({ rizzle }),
+  });
 
   expect(result.current).toBeNull();
   unmount();
@@ -82,7 +81,7 @@ testWithRizzle(`returns null when skipped`, ({ rizzle }) => {
 
 testWithRizzle(`loads and updates setting values`, async ({ rizzle }) => {
   const { result, unmount } = renderHook(
-    () => useUserSetting(autoCheckUserSetting),
+    () => useUserSetting({ setting: autoCheckUserSetting }),
     {
       wrapper: testContextProviders({ rizzle }),
     },
@@ -103,7 +102,10 @@ testWithRizzle(`loads and updates setting values`, async ({ rizzle }) => {
   });
 
   act(() => {
-    result.current.setValue((prev) => ({ enabled: !(prev?.enabled ?? false) }));
+    result.current.setValue((prev) => {
+      expect(prev).toEqual({ enabled: true });
+      return { enabled: false };
+    });
   });
 
   await waitFor(() => {

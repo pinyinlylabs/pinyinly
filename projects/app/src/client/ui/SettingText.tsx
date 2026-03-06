@@ -25,7 +25,7 @@ export function SettingText<T extends UserSettingTextEntity>({
 }: SettingTextProps<T>): ReactNode {
   true satisfies IsExhaustedRest<typeof rest>;
 
-  let { value } = useUserSetting(setting, settingKey);
+  let { value } = useUserSetting({ setting, key: settingKey });
   if (value?.text.length === 0) {
     value = null;
   }

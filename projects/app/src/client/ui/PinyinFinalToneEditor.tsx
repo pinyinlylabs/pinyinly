@@ -38,8 +38,9 @@ export function PinyinFinalToneEditor({
 }: PinyinFinalToneEditorProps) {
   const chart = loadPylyPinyinChart();
   const finalLabel = chart.soundToCustomLabel[finalSoundId] ?? finalSoundId;
-  const finalNameSetting = useUserSetting(pinyinSoundNameSetting, {
-    soundId: finalSoundId,
+  const finalNameSetting = useUserSetting({
+    setting: pinyinSoundNameSetting,
+    key: { soundId: finalSoundId },
   });
   const finalName = finalNameSetting.value?.text ?? finalLabel;
   const frequencies = use(loadFinalToneFrequencies());
@@ -91,8 +92,9 @@ function ToneTileEditor({
   const toneSoundId = tone as PinyinSoundId;
 
   // Get user-set tone name, fallback to default
-  const toneNameSetting = useUserSetting(pinyinSoundNameSetting, {
-    soundId: toneSoundId,
+  const toneNameSetting = useUserSetting({
+    setting: pinyinSoundNameSetting,
+    key: { soundId: toneSoundId },
   });
   const toneName =
     toneNameSetting.value?.text ??

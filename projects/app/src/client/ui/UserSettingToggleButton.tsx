@@ -8,7 +8,7 @@ export function UserSettingToggleButton({
 }: {
   entity: UserSettingEntityLike<UserSettingToggleableEntity>;
 }) {
-  const { isLoading, value, setValue } = useUserSetting(entity);
+  const { isLoading, value, setValue } = useUserSetting({ setting: entity });
 
   return (
     <ToggleButton

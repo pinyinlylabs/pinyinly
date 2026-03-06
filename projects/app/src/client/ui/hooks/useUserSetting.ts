@@ -14,8 +14,10 @@ import type {
   RizzleType,
 } from "@/util/rizzle";
 import { keyPathVariableNames } from "@/util/rizzle";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { Flatten } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useEffect, useRef } from "react";
 import { useDb } from "./useDb";
 import { useRizzle } from "./useRizzle";
 
@@ -90,47 +92,59 @@ const skippedSettingKeyInfo = {
   keyParamMarshaled: {} as Record<string, string>,
 };
 
-export type UserSettingKeyParamsNoSkip<T extends UserSettingEntity> =
-  UserSettingKeyInput<T> & { skip?: never };
-export type UserSettingKeyParamsSkip<T extends UserSettingEntity> = {
+export type UseUserSettingSkipOptions = {
   skip: true;
-} & Partial<UserSettingKeyInput<T>>;
+};
 
+export type UseUserSettingWithKeyOptions<T extends UserSettingEntity> = {
+  skip?: never;
+  setting: UserSettingEntityLike<T>;
+  key: UserSettingKeyInput<T>;
+};
+
+export type UseUserSettingNoKeyOptions<T extends UserSettingEntity> = {
+  skip?: never;
+  setting: UserSettingEntityLike<T>;
+};
+
+// Allows any combination in a union context (for ternaries)
+export type UseUserSettingOptions<T extends UserSettingEntity> =
+  | UseUserSettingSkipOptions
+  | {
+      skip?: never;
+      setting: UserSettingEntityLike<T>;
+      key?: UserSettingKeyInput<T>;
+    };
+
+export function useUserSetting(options: UseUserSettingSkipOptions): null;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSetting: UserSettingEntityLike<T>,
-  keyParams: UserSettingKeyParamsNoSkip<T>,
+  options: UseUserSettingWithKeyOptions<T>,
 ): UseUserSettingResult<T>;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSetting: UserSettingEntityLike<T>,
-  keyParams: UserSettingKeyParamsSkip<T>,
-): null;
-export function useUserSetting<T extends UserSettingEntity>(
-  userSetting: UserSettingEntityLike<T>,
+  options: UseUserSettingNoKeyOptions<T>,
 ): UseUserSettingResult<T>;
-export function useUserSetting<T extends UserSettingEntity>(
-  userSetting: UserSettingEntityLike<T>,
-  keyParams: UserSettingKeyParamsNoSkip<T> | UserSettingKeyParamsSkip<T>,
+export function useUserSetting<T extends UserSettingEntity = RizzleAnyEntity>(
+  options: UseUserSettingOptions<T>,
 ): UseUserSettingResult<T> | null;
+export function useUserSetting(options: UseUserSettingSkipOptions): null;
 export function useUserSetting<T extends UserSettingEntity>(
-  userSetting: UserSettingEntityLike<T>,
-  keyParamsOrOptions?: UserSettingKeyInput<T> | UserSettingKeyParamsSkip<T>,
+  options: UseUserSettingWithKeyOptions<T>,
+): UseUserSettingResult<T>;
+export function useUserSetting<T extends UserSettingEntity>(
+  options: UseUserSettingNoKeyOptions<T>,
+): UseUserSettingResult<T>;
+export function useUserSetting<T extends UserSettingEntity>(
+  options: UseUserSettingOptions<T>,
 ): UseUserSettingResult<T> | null {
-  const hasOptions =
-    keyParamsOrOptions != null &&
-    typeof keyParamsOrOptions === `object` &&
-    `skip` in keyParamsOrOptions;
-  const options = hasOptions ? keyParamsOrOptions : undefined;
-  const skip = options?.skip === true;
-
-  const keyParams = skip ? null : keyParamsOrOptions;
-  const db = useDb();
-  const r = useRizzle();
-  const settingEntity = userSetting.entity;
-
-  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
+  const skip = options.skip === true;
+  const keyInput = ((skip ? null : options.key) ??
+    noKeyParams) as UserSettingKeyInput<T>;
   const { settingKey, keyParamAliases, keyParamMarshaled } = skip
     ? skippedSettingKeyInfo
-    : getSettingKeyInfo(userSetting, keyInput);
+    : getSettingKeyInfo(options.setting, keyInput);
+
+  const db = useDb();
+  const r = useRizzle();
 
   const result = useLiveQuery(
     (q) =>
@@ -145,26 +159,30 @@ export function useUserSetting<T extends UserSettingEntity>(
   const isLoading = result.isLoading;
   const settingData = result.data?.[0] ?? null;
   const value =
-    settingData?.value == null
+    skip || settingData?.value == null
       ? null
-      : settingEntity.unmarshalValueSafe({
+      : options.setting.entity.unmarshalValueSafe({
           ...keyParamMarshaled,
           ...settingData.value,
         });
 
-  const setValue: UseUserSettingSetValue<T> = (updater, options) => {
-    if (skip) {
-      return;
-    }
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  const setValue: UseUserSettingSetValue<T> = (updater, opts) => {
+    invariant(!skip, `setValue should not be called when skip is true`);
+
     if (typeof updater === `function`) {
-      updater = updater(value, isLoading);
+      updater = updater(valueRef.current, isLoading);
     }
 
     const nextValue = updater ?? null;
     const marshaledValue =
       nextValue == null
         ? null
-        : settingEntity.marshalValue({
+        : options.setting.entity.marshalValue({
             ...(keyInput as Record<string, unknown>),
             ...(nextValue as Record<string, unknown>),
           } as RizzleEntityInput<T>);
@@ -176,7 +194,7 @@ export function useUserSetting<T extends UserSettingEntity>(
               ([key]) => !keyParamAliases.includes(key),
             ),
           );
-    const skipHistory = options?.skipHistory === true;
+    const skipHistory = opts?.skipHistory === true;
 
     void r.mutate
       .setSetting({
@@ -211,17 +229,18 @@ export interface HanziWordHintOverrides {
 export function useHanziWordHintOverrides(
   hanziWord: HanziWord,
 ): HanziWordHintOverrides {
-  const hintSetting = useUserSetting(hanziWordMeaningHintTextSetting, {
-    hanziWord,
+  const hintSetting = useUserSetting({
+    setting: hanziWordMeaningHintTextSetting,
+    key: { hanziWord },
   });
-  const explanationSetting = useUserSetting(
-    hanziWordMeaningHintExplanationSetting,
-    { hanziWord },
-  );
-  const imageSetting = useUserSetting(hanziWordMeaningHintImageSetting, {
-    hanziWord,
+  const explanationSetting = useUserSetting({
+    setting: hanziWordMeaningHintExplanationSetting,
+    key: { hanziWord },
   });
-
+  const imageSetting = useUserSetting({
+    setting: hanziWordMeaningHintImageSetting,
+    key: { hanziWord },
+  });
   const hint = hintSetting.value?.text ?? undefined;
   const explanation = explanationSetting.value?.text ?? undefined;
   const imageId = imageSetting.value?.imageId ?? undefined;

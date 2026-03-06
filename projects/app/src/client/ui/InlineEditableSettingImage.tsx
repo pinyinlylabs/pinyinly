@@ -24,6 +24,7 @@ import {
   Text,
   View,
 } from "react-native";
+import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
@@ -59,6 +60,7 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
   aiImageStyle?: AiImageStyleKind | null;
+  aiReferenceImages?: AiReferenceImageDeclaration[];
   frameConstraint?: ImageFrameConstraintInput | null;
   onUploadError?: (error: string) => void;
   onSaveAiPrompt?: (prompt: string) => void;
@@ -82,12 +84,13 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   enableAiGeneration = false,
   initialAiPrompt = ``,
   aiImageStyle = null,
+  aiReferenceImages,
   frameConstraint,
   onUploadError,
   onSaveAiPrompt,
   className,
 }: InlineEditableSettingImageProps<T>) {
-  const { value, setValue } = useUserSetting(setting, settingKey);
+  const { value, setValue } = useUserSetting({ setting, key: settingKey });
   const history = useUserSettingHistory(setting, settingKey);
   const imageId = value?.imageId ?? null;
   const imageCrop = parseImageCrop(value?.imageCrop);
@@ -390,6 +393,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                   <AiImageGenerationPanel
                     initialPrompt={initialAiPrompt}
                     aiImageStyle={aiImageStyle}
+                    aiReferenceImages={aiReferenceImages}
                     onImageGenerated={(assetId) => {
                       handleAddCustomImage(assetId);
                     }}

@@ -131,18 +131,21 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
     hanziWord == null ? ({ skip: true } as const) : { hanziWord };
 
   const imagePromptSetting = useUserSetting(
-    hanziWordMeaningHintImagePromptSetting,
-    settingKey,
+    settingKey.skip === true
+      ? { skip: true }
+      : { setting: hanziWordMeaningHintImagePromptSetting, key: settingKey },
   );
 
   const explanationSetting = useUserSetting(
-    hanziWordMeaningHintExplanationSetting,
-    settingKey,
+    settingKey.skip === true
+      ? { skip: true }
+      : { setting: hanziWordMeaningHintExplanationSetting, key: settingKey },
   );
 
   const hintSetting = useUserSetting(
-    hanziWordMeaningHintTextSetting,
-    settingKey,
+    settingKey.skip === true
+      ? { skip: true }
+      : { setting: hanziWordMeaningHintTextSetting, key: settingKey },
   );
   const { aiImageStyle } = useAiImageStyleSetting();
 
@@ -238,8 +241,9 @@ function MeaningItem({
   meaning: HanziWordMeaning;
   mnemonicHint: string | undefined;
 }) {
-  const hintSetting = useUserSetting(hanziWordMeaningHintTextSetting, {
-    hanziWord,
+  const hintSetting = useUserSetting({
+    setting: hanziWordMeaningHintTextSetting,
+    key: { hanziWord },
   });
   const hintSettingTextValue =
     hintSetting.value?.text ??

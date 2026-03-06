@@ -20,7 +20,7 @@ export interface UseAiImageStyleResult {
  * Returns the normalized style ('comic' or 'realistic') plus loading state and setter.
  */
 export function useAiImageStyleSetting(): UseAiImageStyleResult {
-  const setting = useUserSetting(aiImageStyleSetting);
+  const setting = useUserSetting({ setting: aiImageStyleSetting });
   const aiImageStyle = normalizeAiImageStyleKind(setting.value?.text);
 
   const setAiImageStyle = (styleKind: AiImageStyleKind) => {
