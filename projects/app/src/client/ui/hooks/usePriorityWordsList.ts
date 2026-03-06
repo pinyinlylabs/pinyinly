@@ -34,10 +34,11 @@ export function usePriorityWordsList(): UsePriorityWordsListResult {
   );
 
   const words = useMemo(() => {
+    const settingPrefix = `pwi/`;
     const items: PriorityWordItem[] = [];
 
     for (const setting of settingsData) {
-      if (!setting.key.startsWith(`pwi/`)) {
+      if (!setting.key.startsWith(settingPrefix)) {
         continue;
       }
 
@@ -46,7 +47,12 @@ export function usePriorityWordsList(): UsePriorityWordsListResult {
         continue;
       }
 
-      const word = value[`w`];
+      const wordFromValue = value[`w`];
+      const wordFromKey = setting.key.slice(settingPrefix.length);
+      const word =
+        typeof wordFromValue === `string` && wordFromValue.length > 0
+          ? wordFromValue
+          : wordFromKey;
       const createdAt = value[`c`];
       const note = value[`n`];
 

@@ -1,5 +1,14 @@
-import { historyPageCollection, historyPageData } from "#client/query.js";
-import type { HistoryPageCollection, HistoryPageData } from "#client/query.js";
+import type {
+  CollectionOutput,
+  HistoryPageCollection,
+  HistoryPageData,
+  SettingCollection,
+} from "#client/query.js";
+import {
+  getPrioritizedHanziWords,
+  historyPageCollection,
+  historyPageData,
+} from "#client/query.js";
 import { loadDictionary } from "#dictionary.js";
 import { seedSkillReviews } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
@@ -180,4 +189,55 @@ function prettyData(data: HistoryPageData): string {
           .join(`\n`)}`,
     )
     .join(`\n---\n`);
+}
+
+describe(
+  `getPrioritizedHanziWords suite` satisfies HasNameOf<
+    typeof getPrioritizedHanziWords
+  >,
+  () => {
+    baseTest(`reads prioritized words from value payload`, () => {
+      const result = getPrioritizedHanziWords([
+        settingRow({ key: `pwi/你好:hello`, value: { w: `你好:hello` } }),
+      ]);
+
+      expect(result).toEqual([`你好:hello`]);
+    });
+
+    baseTest(`falls back to key when payload omits word field`, () => {
+      // useUserSetting strips key params from setting values, so `w` may be absent.
+      const result = getPrioritizedHanziWords([
+        settingRow({
+          key: `pwi/你好:hello`,
+          value: { c: new Date().toISOString() },
+        }),
+      ]);
+
+      expect(result).toEqual([`你好:hello`]);
+    });
+
+    baseTest(`filters unrelated keys and deduplicates words`, () => {
+      const result = getPrioritizedHanziWords([
+        settingRow({ key: `pwi/你好:hello`, value: { w: `你好:hello` } }),
+        settingRow({ key: `userName`, value: { t: `Brad` } }),
+        settingRow({
+          key: `pwi/你好:hello`,
+          value: { c: new Date().toISOString() },
+        }),
+        settingRow({ key: `pwi/再见:goodbye`, value: { w: `再见:goodbye` } }),
+      ]);
+
+      expect(result).toEqual([`你好:hello`, `再见:goodbye`]);
+    });
+  },
+);
+
+function settingRow({
+  key,
+  value,
+}: {
+  key: string;
+  value: Record<string, unknown> | null;
+}): CollectionOutput<SettingCollection> {
+  return { key, value } as CollectionOutput<SettingCollection>;
 }

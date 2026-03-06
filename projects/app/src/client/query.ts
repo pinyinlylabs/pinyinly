@@ -261,12 +261,24 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
 export function getPrioritizedHanziWords(
   prioritySettings: CollectionOutput<SettingCollection>[],
 ): HanziWord[] {
+  const settingPrefix = `pwi/`;
   const words: HanziWord[] = [];
   for (const setting of prioritySettings) {
-    if (!setting.key.startsWith(`pwi/`)) {
+    if (!setting.key.startsWith(settingPrefix)) {
       continue;
     }
-    const word = setting.value?.[`w`];
+
+    const wordFromValue = setting.value?.[`w`];
+    const wordFromKey = setting.key.slice(settingPrefix.length);
+    const word =
+      typeof wordFromValue === `string` && wordFromValue.length > 0
+        ? wordFromValue
+        : wordFromKey;
+
+    if (word.length === 0) {
+      continue;
+    }
+
     if (typeof word === `string`) {
       words.push(word as HanziWord);
     }

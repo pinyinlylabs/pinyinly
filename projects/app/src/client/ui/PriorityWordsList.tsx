@@ -1,51 +1,111 @@
 import { usePriorityWordsList } from "@/client/ui/hooks/usePriorityWordsList";
+import { searchDictionaryEntries } from "@/client/ui/quickSearch";
+import { loadDictionary } from "@/dictionary";
 import { format } from "date-fns/format";
-import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { use, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { Icon } from "./Icon";
-import { RectButton } from "./RectButton";
+import { TextInputSingle } from "./TextInputSingle";
+
+const maxResults = 12;
 
 export function PriorityWordsList() {
   const { words, isLoading, addWord, removeWord } = usePriorityWordsList();
-  const [newWord, setNewWord] = useState(``);
+  const dictionary = use(loadDictionary());
+  const [query, setQuery] = useState(``);
 
-  const handleAdd = () => {
-    const trimmed = newWord.trim();
-    if (trimmed.length === 0) {
-      return;
-    }
-    addWord(trimmed);
-    setNewWord(``);
+  const trimmedQuery = query.trim();
+  const hasQuery = trimmedQuery.length > 0;
+  const searchResults = searchDictionaryEntries(
+    dictionary.allEntries,
+    trimmedQuery,
+    {
+      limit: maxResults,
+    },
+  );
+  const existingWords = new Set(words.map((item) => item.word));
+
+  const handleAdd = (word: string) => {
+    addWord(word);
+    setQuery(``);
   };
 
   return (
     <View className="gap-6">
-      {/* Add new word section */}
       <View className="gap-3">
         <Text className="pyly-body-heading">Add a word</Text>
-        <View className="flex-row gap-2">
-          <TextInput
-            value={newWord}
-            onChangeText={setNewWord}
-            placeholder="Enter hanzi word..."
-            onSubmitEditing={handleAdd}
-            className="flex-1 rounded-lg border border-fg/10 bg-bg-high px-4 py-3 font-sans text-fg"
+        <View className="relative">
+          <Icon
+            icon="search"
+            size={16}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-fg-dim"
           />
-          <RectButton
-            variant="filled"
-            iconStart="add-circled-filled"
-            onPress={handleAdd}
-            disabled={newWord.trim().length === 0}
-          >
-            Add
-          </RectButton>
+          <TextInputSingle
+            placeholder="Search by hanzi, pinyin, or English"
+            value={query}
+            onChangeText={setQuery}
+            autoCorrect={false}
+            className="pl-10"
+          />
         </View>
+
+        {hasQuery ? (
+          searchResults.length === 0 ? (
+            <Text className="pyly-body-caption text-fg-dim">
+              No matches yet.
+            </Text>
+          ) : (
+            <View className="gap-2">
+              {searchResults.map((result) => {
+                const alreadyAdded = existingWords.has(result.hanziWord);
+                return (
+                  <Pressable
+                    key={result.hanziWord}
+                    disabled={alreadyAdded}
+                    onPress={() => {
+                      handleAdd(result.hanziWord);
+                    }}
+                    className={`
+                      flex-row items-center gap-3 rounded-xl border border-fg/10 bg-bg-high px-4
+                      py-3
+
+                      hover:bg-fg/5
+                    `}
+                  >
+                    <Text className="text-2xl font-semibold text-fg-loud">
+                      {result.hanzi}
+                    </Text>
+                    <View className="flex-1">
+                      {result.gloss == null ? null : (
+                        <Text className="text-sm text-fg">{result.gloss}</Text>
+                      )}
+                      {result.pinyin == null ? null : (
+                        <Text className="text-xs text-fg-dim">
+                          {result.pinyin}
+                        </Text>
+                      )}
+                    </View>
+                    <Icon
+                      icon={
+                        alreadyAdded
+                          ? `check-circled-filled`
+                          : `add-circled-filled`
+                      }
+                      size={20}
+                      className={alreadyAdded ? `text-fg` : `text-fg-dim`}
+                    />
+                  </Pressable>
+                );
+              })}
+            </View>
+          )
+        ) : null}
+
         <Text className="pyly-body-caption text-fg-dim">
-          Add words you encounter in daily life to prioritize them in practice.
+          Search and tap a result to add it to your priority list.
         </Text>
       </View>
 
-      {/* Words list */}
       <View className="gap-3">
         <Text className="pyly-body-heading">My Words ({words.length})</Text>
 
