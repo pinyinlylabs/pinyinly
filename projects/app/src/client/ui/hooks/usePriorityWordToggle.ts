@@ -20,7 +20,10 @@ export function usePriorityWordToggle(
   word: string,
 ): UsePriorityWordToggleResult {
   const keyParams = getPrioritizedWordKeyParams(word);
-  const setting = useUserSetting(prioritizedWordItemSetting, keyParams);
+  const setting = useUserSetting({
+    setting: prioritizedWordItemSetting,
+    key: keyParams,
+  });
 
   const isPriority = setting.value != null;
   const isLoading = setting.isLoading;
