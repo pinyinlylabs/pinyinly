@@ -1,4 +1,5 @@
 import { trpc } from "@/client/trpc";
+import { useAssetImageCacheMutation } from "@/client/ui/hooks/useAssetImageCacheMutation";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import type { AssetId } from "@/data/model";
 import type { currentSchema } from "@/data/rizzleSchema";
@@ -45,6 +46,7 @@ export function useImageUploader({
   onUploadError,
 }: ImageUploaderOptions) {
   const rep = useRizzle() as RizzleReplicache<typeof currentSchema>;
+  const { setCache } = useAssetImageCacheMutation();
   const [uploading, setUploading] = useState(false);
   const requestUploadUrl = trpc.asset.requestUploadUrl.useMutation();
   const confirmUpload = trpc.asset.confirmUpload.useMutation();
@@ -78,6 +80,16 @@ export function useImageUploader({
       }
 
       const assetId = await getArrayBufferAssetId(await blob.arrayBuffer());
+
+      try {
+        await setCache(assetId, {
+          kind: `pending`,
+          blob,
+          contentType: resolvedContentType,
+        });
+      } catch (cacheError) {
+        console.warn(`Failed to cache image blob before upload`, cacheError);
+      }
 
       await rep.mutate.initAsset({
         assetId,
@@ -118,6 +130,19 @@ export function useImageUploader({
           now: new Date(),
         });
         throw new Error(`Upload verification failed`);
+      }
+
+      try {
+        await setCache(assetId, {
+          kind: `uploaded`,
+          blob,
+          contentType: resolvedContentType,
+        });
+      } catch (cacheError) {
+        console.warn(
+          `Failed to populate HTTP cache for uploaded image`,
+          cacheError,
+        );
       }
 
       onUploadComplete(assetId);
