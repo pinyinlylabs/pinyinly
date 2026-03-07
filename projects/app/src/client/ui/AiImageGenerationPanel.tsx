@@ -1,6 +1,5 @@
 import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { getAiImageStyleConfig } from "@/client/aiImageStyle";
-import { getLocalImageAssetBase64 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
@@ -59,7 +58,6 @@ export function AiImageGenerationPanel({
     useState<GeneratedImageFormat | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [isLoadingStyle, setIsLoadingStyle] = useState(false);
 
   // Destructure up to 3 reference images
   const [aiReferenceImage1, aiReferenceImage2, aiReferenceImage3] =
@@ -126,33 +124,6 @@ export function AiImageGenerationPanel({
     },
   });
 
-  const loadStyleImageData = async (
-    assetId: AssetId,
-  ): Promise<string | null> => {
-    setIsLoadingStyle(true);
-    setError(null);
-
-    try {
-      const result = await getLocalImageAssetBase64(assetId);
-      if (result == null) {
-        setError(`Failed to load style image`);
-        onError?.(`Failed to load style image`);
-        return null;
-      }
-
-      // Combine base64 data with MIME type
-      const base64WithMimeType = `${result.mimeType};base64,${result.data}`;
-      return base64WithMimeType;
-    } catch (err) {
-      console.error(`Failed to load style image:`, err);
-      setError(`Failed to load style image`);
-      onError?.(`Failed to load style image`);
-      return null;
-    } finally {
-      setIsLoadingStyle(false);
-    }
-  };
-
   const handleGenerate = async () => {
     if (prompt.trim().length === 0) {
       setError(`Please enter a prompt`);
@@ -166,68 +137,48 @@ export function AiImageGenerationPanel({
 
     try {
       // Build reference images array
-      const referenceImages: Array<{ label: string; imageData: string }> = [];
+      const referenceImages: Array<{ label?: string; assetId: AssetId }> = [];
 
       // Add style image as first reference if selected
       if (aiImageStyle != null) {
         const config = getAiImageStyleConfig(aiImageStyle);
-        const styleImageData = await loadStyleImageData(config.assetId);
-
-        if (styleImageData == null) {
-          return;
-        }
-
         referenceImages.push({
           label: config.stylePrompt,
-          imageData: styleImageData,
+          assetId: config.assetId,
         });
       }
 
-      // Process reference 1
-      const ref1ImageId = reference1ImageSetting?.value?.imageId;
-      if (aiReferenceImage1 != null && ref1ImageId != null) {
-        const imageData = await getLocalImageAssetBase64(ref1ImageId);
-        if (imageData != null) {
-          const label =
-            typeof aiReferenceImage1.label === `string`
-              ? aiReferenceImage1.label
-              : (reference1LabelSetting?.value?.text ?? `Reference 1`);
-          referenceImages.push({
-            label,
-            imageData: `${imageData.mimeType};base64,${imageData.data}`,
-          });
-        }
-      }
+      // Process reference images
+      const referenceSettings = [
+        {
+          declaration: aiReferenceImage1,
+          imageSetting: reference1ImageSetting,
+          labelSetting: reference1LabelSetting,
+        },
+        {
+          declaration: aiReferenceImage2,
+          imageSetting: reference2ImageSetting,
+          labelSetting: reference2LabelSetting,
+        },
+        {
+          declaration: aiReferenceImage3,
+          imageSetting: reference3ImageSetting,
+          labelSetting: reference3LabelSetting,
+        },
+      ];
 
-      // Process reference 2
-      const ref2ImageId = reference2ImageSetting?.value?.imageId;
-      if (aiReferenceImage2 != null && ref2ImageId != null) {
-        const imageData = await getLocalImageAssetBase64(ref2ImageId);
-        if (imageData != null) {
+      for (const {
+        declaration,
+        imageSetting,
+        labelSetting,
+      } of referenceSettings) {
+        const refImageId = imageSetting?.value?.imageId;
+        if (declaration != null && refImageId != null) {
           const label =
-            typeof aiReferenceImage2.label === `string`
-              ? aiReferenceImage2.label
-              : (reference2LabelSetting?.value?.text ?? `Reference 2`);
-          referenceImages.push({
-            label,
-            imageData: `${imageData.mimeType};base64,${imageData.data}`,
-          });
-        }
-      }
-
-      // Process reference 3
-      const ref3ImageId = reference3ImageSetting?.value?.imageId;
-      if (aiReferenceImage3 != null && ref3ImageId != null) {
-        const imageData = await getLocalImageAssetBase64(ref3ImageId);
-        if (imageData != null) {
-          const label =
-            typeof aiReferenceImage3.label === `string`
-              ? aiReferenceImage3.label
-              : (reference3LabelSetting?.value?.text ?? `Reference 3`);
-          referenceImages.push({
-            label,
-            imageData: `${imageData.mimeType};base64,${imageData.data}`,
-          });
+            typeof declaration.label === `string`
+              ? declaration.label
+              : labelSetting?.value?.text;
+          referenceImages.push({ label, assetId: refImageId });
         }
       }
 
@@ -277,8 +228,7 @@ export function AiImageGenerationPanel({
   };
 
   const isGenerating = generateMutation.isPending;
-  const isProcessing =
-    isGenerating || uploading || isConfirming || isLoadingStyle;
+  const isProcessing = isGenerating || uploading || isConfirming;
   const hasGenerated = generatedImageDataUrl != null;
 
   return (
@@ -315,10 +265,6 @@ export function AiImageGenerationPanel({
 
       {isGenerating ? (
         <Text className="text-[14px] text-fg-dim">Generating image...</Text>
-      ) : null}
-
-      {isLoadingStyle ? (
-        <Text className="text-[14px] text-fg-dim">Loading style image...</Text>
       ) : null}
 
       {hasGenerated ? (

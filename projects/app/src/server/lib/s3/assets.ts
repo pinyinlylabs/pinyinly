@@ -1,4 +1,6 @@
 import type { AssetId } from "@/data/model";
+import type { Drizzle } from "@/server/lib/db";
+import * as schema from "@/server/pgSchema";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsS3Bucket } from "@/util/env";
 import {
@@ -8,6 +10,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { nonNullable } from "@pinyinly/lib/invariant";
+import { eq } from "drizzle-orm";
 import { z } from "zod/v4";
 import { getAssetsS3Client } from "./client";
 
@@ -168,4 +171,33 @@ export async function fetchAssetBuffer(assetId: AssetId): Promise<Buffer> {
   }
 
   return Buffer.concat(chunks);
+}
+
+/**
+ * Resolves an asset ID to base64-encoded image data with MIME type.
+ * Fetches all assets from S3 and uses database metadata for MIME type.
+ */
+export async function resolveAssetIdToBase64(
+  assetId: AssetId,
+  tx: Drizzle,
+): Promise<{ data: string; mimeType: string }> {
+  // Query asset table for MIME type
+  const assetRecord = await tx.query.asset.findFirst({
+    where: eq(schema.asset.assetId, assetId),
+  });
+
+  if (assetRecord == null) {
+    throw new Error(`Asset not found: ${assetId}`);
+  }
+
+  // Fetch the image buffer from S3
+  const buffer = await fetchAssetBuffer(assetId);
+
+  // Convert buffer to base64
+  const base64Data = buffer.toString(`base64`);
+
+  return {
+    data: base64Data,
+    mimeType: assetRecord.contentType,
+  };
 }

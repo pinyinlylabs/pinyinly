@@ -1,8 +1,10 @@
 import { assetIdSchema } from "@/data/model";
 import { requestOpenAiJson } from "@/server/lib/ai";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
+import { withDrizzle } from "@/server/lib/db";
 import { generateImage } from "@/server/lib/gemini";
 import { removeBackgroundFromImage } from "@/server/lib/openai/client";
+import { resolveAssetIdToBase64 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
@@ -57,15 +59,10 @@ const pronunciationHintOutputSchema = z
   })
   .strict();
 
-const base64DataUriSchema = z
-  .string()
-  .max(10_000_000)
-  .regex(/^[^;]+;base64,[A-Za-z0-9+/=]+$/);
-
 const aiReferenceImageSchema = z
   .object({
-    label: z.string().min(1).max(400),
-    imageData: base64DataUriSchema, // Format: "mimeType;base64,data"
+    label: z.string().min(1).max(400).optional(),
+    assetId: assetIdSchema,
   })
   .strict();
 
@@ -169,9 +166,27 @@ export const aiRouter = router({
       const { prompt, referenceImages } = opts.input;
 
       try {
+        const resolvedReferenceImages =
+          referenceImages == null
+            ? undefined
+            : await withDrizzle(async (db) => {
+                return Promise.all(
+                  referenceImages.map(async (referenceImage) => {
+                    const imageData = await resolveAssetIdToBase64(
+                      referenceImage.assetId,
+                      db,
+                    );
+                    return {
+                      label: referenceImage.label,
+                      imageData: `${imageData.mimeType};base64,${imageData.data}`,
+                    };
+                  }),
+                );
+              });
+
         const { buffer, mimeType } = await generateImage({
           prompt,
-          referenceImages,
+          referenceImages: resolvedReferenceImages,
         });
         const format = resolveImageFormat(mimeType);
 

@@ -828,6 +828,6 @@ export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
  * Contains a descriptive label and base64-encoded image data with MIME type.
  */
 export interface AiReferenceImage {
-  label: string;
+  label?: string;
   imageData: string; // Format: "mimeType;base64,data"
 }
