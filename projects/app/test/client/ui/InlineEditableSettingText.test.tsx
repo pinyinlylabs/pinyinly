@@ -12,12 +12,8 @@ const { useUserSettingHistoryMockFn } = vi.hoisted(() => ({
 }));
 
 // Mock the hooks
-vi.mock(`@/client/ui/hooks/useUserSetting`, () => ({
+vi.mock(`#client/ui/hooks/useUserSetting.ts`, () => ({
   useUserSetting: vi.fn(),
-}));
-
-vi.mock(`@/client/ui/hooks/useUserSettingHistory`, () => ({
-  useUserSettingHistory: useUserSettingHistoryMockFn,
 }));
 
 vi.mock(`#client/ui/hooks/useUserSettingHistory.ts`, () => ({
