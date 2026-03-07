@@ -20,12 +20,11 @@ mc alias set local http://127.0.0.1:9000 miniodev miniodev
 mc mb --ignore-existing local/pinyinly-assets
 # Allow public read access
 mc anonymous set download local/pinyinly-assets
-# Configure CORS for local web uploads (http://localhost:8081 and http://localhost:8082)
+# Configure CORS for local web uploads (e.g. http://localhost:8081)
 cat <<'EOF' | mc cors set local/pinyinly-assets -
 <CORSConfiguration>
   <CORSRule>
-    <AllowedOrigin>http://localhost:8081</AllowedOrigin>
-    <AllowedOrigin>http://localhost:8082</AllowedOrigin>
+    <AllowedOrigin>*</AllowedOrigin>
     <AllowedMethod>GET</AllowedMethod>
     <AllowedMethod>PUT</AllowedMethod>
     <AllowedMethod>POST</AllowedMethod>
