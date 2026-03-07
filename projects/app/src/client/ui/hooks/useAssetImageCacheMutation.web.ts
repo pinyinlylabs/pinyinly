@@ -74,18 +74,50 @@ async function withStore<T>(
     const transaction = db.transaction(STORE_NAME, mode);
     const store = transaction.objectStore(STORE_NAME);
     const request = fn(store);
+    let result: T | null = null;
+    let settled = false;
+
+    const resolveOnce = (value: T | null) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      resolve(value);
+    };
+
+    const rejectOnce = (error: Error) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      reject(error);
+    };
 
     request.onsuccess = () => {
-      resolve((request.result as T | undefined) ?? null);
+      result = (request.result as T | undefined) ?? null;
     };
 
     request.onerror = () => {
-      reject(request.error ?? new Error(`Asset image cache request failed`));
+      rejectOnce(
+        request.error ?? new Error(`Asset image cache request failed`),
+      );
+    };
+
+    transaction.oncomplete = () => {
+      resolveOnce(result);
     };
 
     transaction.onerror = () => {
-      reject(
+      rejectOnce(
         transaction.error ?? new Error(`Asset image cache transaction failed`),
+      );
+    };
+
+    transaction.onabort = () => {
+      rejectOnce(
+        transaction.error ?? new Error(`Asset image cache transaction aborted`),
       );
     };
   });
@@ -147,8 +179,15 @@ export function useAssetImageCacheMutation(): AssetImageCacheMutationResult {
     await deleteAssetImageBlobFromCache(assetId);
   };
 
+  const clearCache: AssetImageCacheMutationResult[`clearCache`] = async (
+    assetId,
+  ) => {
+    await deleteAssetImageBlobFromCache(assetId);
+  };
+
   return {
     setCache,
+    clearCache,
   };
 }
 

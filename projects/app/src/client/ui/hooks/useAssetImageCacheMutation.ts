@@ -13,14 +13,19 @@ export type SetAssetImageCacheFunction = (
   imageData: AssetImageCacheData,
 ) => Promise<void>;
 
+export type ClearAssetImageCacheFunction = (assetId: AssetId) => Promise<void>;
+
 export interface AssetImageCacheMutationResult {
   setCache: SetAssetImageCacheFunction;
+  clearCache: ClearAssetImageCacheFunction;
 }
 
 export function useAssetImageCacheMutation(): AssetImageCacheMutationResult {
   return {
     // oxlint-disable-next-line no-empty-function
     setCache: async () => {},
+    // oxlint-disable-next-line no-empty-function
+    clearCache: async () => {},
   };
 }
 
