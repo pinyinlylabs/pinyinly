@@ -255,7 +255,7 @@ tasks:
     preset: watcher
 
   devMinio:
-    command: minio server ./.minio --console-address :9001
+    command: minio server ./.minio --console-address :9001 --license ~/minio/minio.license
     preset: watcher
     env:
       MINIO_ROOT_USER: miniodev
