@@ -1,14 +1,11 @@
-import {
-  getLocalImageAssetSource,
-  isLocalImageAssetId,
-} from "@/client/assets/localImageAssets";
+import { useAssetImageCacheQuery } from "@/client/ui/hooks/useAssetImageCacheQuery";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
 import { Image } from "react-native";
 
@@ -24,131 +21,80 @@ export function useAssetImageMeta(
   initialImageHeight?: number | null,
 ): AssetImageMetaResult {
   const db = useDb();
-  const { data: assetData } = useLiveQuery(
+  const { data: asset } = useLiveQuery(
     (q) =>
       q
         .from({ asset: db.assetCollection })
-        .where(({ asset }) => eq(asset.assetId, assetId)),
+        .where(({ asset }) => eq(asset.assetId, assetId))
+        .findOne(),
     [db.assetCollection, assetId],
   );
-  const asset = assetData[0] ?? null;
-
-  const [localSource, setLocalSource] = useState<Awaited<
-    ReturnType<typeof getLocalImageAssetSource>
-  > | null>(null);
-  const [localSourceChecked, setLocalSourceChecked] = useState(false);
-  const [imageSize, setImageSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(
+  const cachedImageSource = useAssetImageCacheQuery(assetId);
+  const cacheUri =
+    cachedImageSource != null &&
+    typeof cachedImageSource === `object` &&
+    `uri` in cachedImageSource &&
+    typeof cachedImageSource.uri === `string`
+      ? cachedImageSource.uri
+      : null;
+  const initialImageSize =
     initialImageWidth != null && initialImageHeight != null
       ? { width: initialImageWidth, height: initialImageHeight }
-      : null,
-  );
-
-  const isLocalAsset = isLocalImageAssetId(assetId);
+      : null;
+  const [imageSizeState, setImageSizeState] = useState<{
+    assetId: AssetId;
+    imageSize: {
+      width: number;
+      height: number;
+    } | null;
+  }>({
+    assetId,
+    imageSize: initialImageSize,
+  });
+  const imageSize =
+    imageSizeState.assetId === assetId
+      ? imageSizeState.imageSize
+      : initialImageSize;
   const assetKey =
-    !isLocalAsset && asset?.status === AssetStatusKind.Uploaded
+    asset?.status === AssetStatusKind.Uploaded
       ? getBucketObjectKeyForId(assetId)
       : null;
-
-  const hasClearedLocalRef = useRef(false);
-  useEffect(() => {
-    if (hasClearedLocalRef.current) {
-      return;
-    }
-
-    hasClearedLocalRef.current = true;
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setLocalSource(null);
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setLocalSourceChecked(false);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const source = await getLocalImageAssetSource(assetId);
-      if (cancelled as boolean) {
-        return;
-      }
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setLocalSource(source ?? null);
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setLocalSourceChecked(true);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [assetId]);
 
   useEffect(() => {
     if (imageSize != null) {
       return;
     }
 
-    if (localSource != null) {
-      if (typeof Image.resolveAssetSource === `function`) {
-        const resolved = Image.resolveAssetSource(
-          localSource as Parameters<typeof Image.resolveAssetSource>[0],
-        );
-        // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-        setImageSize({ width: resolved.width, height: resolved.height });
-        return;
-      }
+    const sourceUri =
+      cacheUri ?? (assetKey == null ? null : `${assetsCdnBaseUrl}${assetKey}`);
 
-      const localSourceUri =
-        typeof localSource === `string`
-          ? localSource
-          : typeof localSource === `object` &&
-              `uri` in localSource &&
-              typeof (localSource as { uri?: unknown }).uri === `string`
-            ? (localSource as { uri: string }).uri
-            : null;
-
-      if (localSourceUri != null) {
-        Image.getSize(
-          localSourceUri,
-          (width, height) => {
-            setImageSize({ width, height });
-          },
-          () => {
-            setImageSize(null);
-          },
-        );
-      }
-
+    if (sourceUri == null) {
       return;
     }
 
-    if (assetKey == null) {
-      return;
-    }
-
-    const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
     Image.getSize(
-      imageUrl,
+      sourceUri,
       (width, height) => {
-        setImageSize({ width, height });
+        setImageSizeState({
+          assetId,
+          imageSize: { width, height },
+        });
       },
       () => {
-        setImageSize(null);
+        setImageSizeState({
+          assetId,
+          imageSize: null,
+        });
       },
     );
-  }, [assetKey, imageSize, localSource]);
+  }, [assetId, assetKey, cacheUri, imageSize]);
 
-  if (localSource != null) {
+  if (cachedImageSource != null) {
     return {
       status: imageSize == null ? `loading` : `ready`,
       imageSize,
-      imageSource: localSource as ImageSourcePropType,
+      imageSource: cachedImageSource as ImageSourcePropType,
     };
-  }
-
-  if (isLocalAsset && !localSourceChecked) {
-    return { status: `loading`, imageSize: null, imageSource: null };
   }
 
   if (asset == null) {

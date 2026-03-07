@@ -1,7 +1,4 @@
-import {
-  getLocalImageAssetSource,
-  isLocalImageAssetId,
-} from "@/client/assets/localImageAssets";
+import { useAssetImageCacheQuery } from "@/client/ui/hooks/useAssetImageCacheQuery";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
@@ -18,10 +15,6 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
    * The asset ID (not the full key).
    */
   assetId: AssetId;
-  /**
-   * Optional userId (ignored for content-addressed assets).
-   */
-  userId?: string;
 }
 
 /**
@@ -36,66 +29,36 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
  */
 export function AssetImage({
   assetId,
-  userId: _userId,
   contentFit = `cover`,
   ...imageProps
 }: AssetImageProps) {
   const db = useDb();
-  const { data: assetData } = useLiveQuery(
+  const { data: asset } = useLiveQuery(
     (q) =>
       q
         .from({ asset: db.assetCollection })
-        .where(({ asset }) => eq(asset.assetId, assetId)),
+        .where(({ asset }) => eq(asset.assetId, assetId))
+        .findOne(),
     [db.assetCollection, assetId],
   );
-  const asset = assetData[0] ?? null;
   const [imageError, setImageError] = useState(false);
-  const [localSource, setLocalSource] = useState<Awaited<
-    ReturnType<typeof getLocalImageAssetSource>
-  > | null>(null);
-  const [localSourceChecked, setLocalSourceChecked] = useState(false);
-  const isLocalAsset = isLocalImageAssetId(assetId);
+  const cachedImageSource = useAssetImageCacheQuery(assetId);
 
   useEffect(() => {
-    let cancelled = false;
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setLocalSource(null);
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setLocalSourceChecked(false);
-
-    void (async () => {
-      const source = await getLocalImageAssetSource(assetId);
-      if (cancelled as boolean) {
-        return;
-      }
-      setLocalSource(source ?? null);
-      setLocalSourceChecked(true);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    setImageError(false);
   }, [assetId]);
 
-  if (localSource != null && !imageError) {
+  if (cachedImageSource != null && !imageError) {
     return (
       <ExpoImage
         {...imageProps}
-        source={localSource}
+        source={cachedImageSource}
         contentFit={contentFit}
         transition={200}
         onError={() => {
           setImageError(true);
         }}
       />
-    );
-  }
-
-  if (isLocalAsset && !localSourceChecked) {
-    return (
-      <View className="size-full items-center justify-center bg-fg/5">
-        <ActivityIndicator size="small" className="text-fg" />
-      </View>
     );
   }
 
