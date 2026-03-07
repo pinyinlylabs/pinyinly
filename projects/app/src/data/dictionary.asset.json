@@ -2265,6 +2265,7 @@
   ["椅:chair",{"gloss":["chair"],"pinyin":["yǐ"],"pos":"n"}],
   ["椅子:chair",{"gloss":["chair"],"hsk":"2","pinyin":["yǐ zi"],"pos":"n"}],
   ["植物:plant",{"gloss":["plant","vegetation"],"hsk":"4","pinyin":["zhí wù"]}],
+  ["椰子:coconut",{"gloss":["coconut"],"pinyin":["yē zi"],"pos":"n"}],
   ["楚:clear",{"gloss":["clear"],"pinyin":["chu"],"pos":"adj"}],
   ["楼:building",{"gloss":["building","floor"],"hsk":"1","pinyin":["lóu"],"pos":"n"}],
   ["楼上:upstairs",{"gloss":["upstairs"],"hsk":"1","pinyin":["lóu shàng"],"pos":"n"}],
