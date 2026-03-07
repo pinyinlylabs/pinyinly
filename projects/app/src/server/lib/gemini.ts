@@ -28,8 +28,10 @@ export async function generateImage(opts: {
   // Add reference images if provided
   if (opts.referenceImages != null && opts.referenceImages.length > 0) {
     for (const refImage of opts.referenceImages) {
-      // Add label text before the image
-      parts.push({ text: `${refImage.label}:` });
+      if (refImage.label != null && refImage.label.length > 0) {
+        // Add label text before the image
+        parts.push({ text: `${refImage.label}:` });
+      }
 
       // Parse base64 data URI
       const { mimeType, data } = parseBase64DataUri(
