@@ -43,7 +43,7 @@ export function WikiHanziHeaderOverview({
         </View>
         <RectButton
           variant="bare"
-          iconStart={isPriority ? `star-filled` : `star`}
+          iconStart={isPriority ? `bookmark-filled` : `bookmark`}
           onPress={toggle}
           className="opacity-70"
         />

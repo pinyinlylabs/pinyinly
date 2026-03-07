@@ -104,7 +104,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         className="p-2"
       >
         <Icon
-          icon={isPriority ? `star-filled` : `star`}
+          icon={isPriority ? `bookmark-filled` : `bookmark`}
           size={20}
           className="text-fg-dim"
         />
