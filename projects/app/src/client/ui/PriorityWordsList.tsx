@@ -104,19 +104,19 @@ export function PriorityWordsList() {
         ) : null}
 
         <Text className="pyly-body-caption text-fg-dim">
-          Search and tap a result to add it to your priority list.
+          Search and tap a result to add it to your bookmarks.
         </Text>
       </View>
 
       <View className="gap-3">
-        <Text className="pyly-body-heading">My Words ({words.length})</Text>
+        <Text className="pyly-body-heading">Bookmarks ({words.length})</Text>
 
         {isLoading ? (
           <Text className="pyly-body-caption text-fg-dim">Loading...</Text>
         ) : words.length === 0 ? (
           <View className="rounded-lg bg-fg/5 p-6">
             <Text className="pyly-body text-center text-fg-dim">
-              No priority words yet. Add words above to get started!
+              No bookmarks yet. Add words above to get started!
             </Text>
           </View>
         ) : (

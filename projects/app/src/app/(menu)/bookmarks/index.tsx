@@ -1,15 +1,15 @@
 import { PriorityWordsList } from "@/client/ui/PriorityWordsList";
 import { Text, View } from "react-native";
 
-export default function MyWordsPage() {
+export default function BookmarksPage() {
   return (
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="pyly-body-title">My Words</Text>
+        <Text className="pyly-body-title">Bookmarks</Text>
       </View>
 
-      {/* Priority words list */}
+      {/* Bookmarks list */}
       <PriorityWordsList />
     </View>
   );
