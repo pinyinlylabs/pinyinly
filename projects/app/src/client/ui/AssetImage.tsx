@@ -18,10 +18,6 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
    * The asset ID (not the full key).
    */
   assetId: AssetId;
-  /**
-   * Optional userId (ignored for content-addressed assets).
-   */
-  userId?: string;
 }
 
 /**
@@ -36,7 +32,6 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
  */
 export function AssetImage({
   assetId,
-  userId: _userId,
   contentFit = `cover`,
   ...imageProps
 }: AssetImageProps) {
