@@ -261,6 +261,14 @@ tasks:
       MINIO_ROOT_USER: miniodev
       MINIO_ROOT_PASSWORD: miniodev
 
+  dictionary:
+    command: tsx --tsconfig tsconfig.node.json ./bin/dictionary.tsx
+    preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
+
   formatAssetJson:
     command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts
     preset: watcher
@@ -303,14 +311,6 @@ tasks:
 
   generateWikiCharacterStrokes:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateWikiCharacterStrokes.ts
-    preset: watcher
-    options:
-      envFile: .env.local
-    env:
-      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
-
-  generateWordDictionary:
-    command: tsx --tsconfig tsconfig.node.json ./bin/generateWordDictionary.tsx
     preset: watcher
     options:
       envFile: .env.local
