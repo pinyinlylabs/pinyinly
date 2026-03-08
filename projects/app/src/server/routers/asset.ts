@@ -1,8 +1,7 @@
-import { assetIdSchema } from "@/data/model";
+import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
 import { getImageSettingKeyPatterns } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import {
-  ALLOWED_IMAGE_TYPES,
   createPresignedReadUrl,
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
@@ -38,7 +37,7 @@ export const assetRouter = router({
           /**
            * MIME type of the file being uploaded.
            */
-          contentType: z.enum(ALLOWED_IMAGE_TYPES),
+          contentType: allowedImageMimeTypeEnum,
           /**
            * Size of the file in bytes.
            */
@@ -143,7 +142,7 @@ export const assetRouter = router({
         .object({
           assetId: assetIdSchema,
           contentLength: z.number().int().positive(),
-          contentType: z.enum(ALLOWED_IMAGE_TYPES),
+          contentType: allowedImageMimeTypeEnum,
         })
         .strict(),
     )

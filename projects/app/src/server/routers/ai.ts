@@ -1,10 +1,9 @@
 import { assetIdSchema } from "@/data/model";
 import { requestOpenAiJson } from "@/server/lib/ai";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
-import { withDrizzle } from "@/server/lib/db";
 import { generateImage } from "@/server/lib/gemini";
 import { removeBackgroundFromImage } from "@/server/lib/openai/client";
-import { resolveAssetIdToBase64 } from "@/server/lib/s3/assets";
+import { fetchAssetBase64 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
@@ -169,20 +168,18 @@ export const aiRouter = router({
         const resolvedReferenceImages =
           referenceImages == null
             ? undefined
-            : await withDrizzle(async (db) => {
-                return Promise.all(
-                  referenceImages.map(async (referenceImage) => {
-                    const imageData = await resolveAssetIdToBase64(
-                      referenceImage.assetId,
-                      db,
-                    );
-                    return {
-                      label: referenceImage.label,
-                      imageData: `${imageData.mimeType};base64,${imageData.data}`,
-                    };
-                  }),
-                );
-              });
+            : await Promise.all(
+                referenceImages.map(async (referenceImage) => {
+                  const imageData = await fetchAssetBase64(
+                    referenceImage.assetId,
+                  );
+                  return {
+                    label: referenceImage.label,
+                    data: imageData.data,
+                    mimeType: imageData.mimeType,
+                  };
+                }),
+              );
 
         const { buffer, mimeType } = await generateImage({
           prompt,

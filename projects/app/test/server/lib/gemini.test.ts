@@ -99,7 +99,8 @@ describe(
         referenceImages: [
           {
             label: `style`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
         ],
       });
@@ -138,7 +139,8 @@ describe(
         referenceImages: [
           {
             label: `style`,
-            imageData: `image/jpeg;base64,${jpegBase64}`,
+            data: jpegBase64,
+            mimeType: `image/jpeg`,
           },
         ],
       });
@@ -168,38 +170,6 @@ describe(
       });
     });
 
-    test(`throws error for malformed style image data`, async () => {
-      await expect(
-        generateImage({
-          prompt: `A test prompt`,
-          referenceImages: [
-            {
-              label: `style`,
-              imageData: `not-a-valid-format`,
-            },
-          ],
-        }),
-      ).rejects.toThrow(
-        `Invalid reference image data format for label "style"`,
-      );
-    });
-
-    test(`throws error for missing base64 in style image data`, async () => {
-      await expect(
-        generateImage({
-          prompt: `A test prompt`,
-          referenceImages: [
-            {
-              label: `style`,
-              imageData: `image/png;data,xyz`,
-            },
-          ],
-        }),
-      ).rejects.toThrow(
-        `Invalid reference image data format for label "style"`,
-      );
-    });
-
     test(`properly separates mime type from base64 data`, async () => {
       const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
 
@@ -208,7 +178,8 @@ describe(
         referenceImages: [
           {
             label: `style`,
-            imageData: `image/webp;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/webp`,
           },
         ],
       });
@@ -246,7 +217,8 @@ describe(
         referenceImages: [
           {
             label: `sunset`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
         ],
       });
@@ -284,11 +256,13 @@ describe(
         referenceImages: [
           {
             label: `sunset`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
           {
             label: `mountain`,
-            imageData: `image/jpeg;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/jpeg`,
           },
         ],
       });
@@ -338,11 +312,13 @@ describe(
         referenceImages: [
           {
             label: `style`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
           {
             label: `reference`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
         ],
       });
@@ -389,11 +365,13 @@ describe(
         referenceImages: [
           {
             label: `example1`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
           {
             label: `example2`,
-            imageData: `image/png;base64,${pngBase64}`,
+            data: pngBase64,
+            mimeType: `image/png`,
           },
         ],
       });
@@ -408,38 +386,6 @@ describe(
       expect(lastPart).toEqual({
         text: `Generate something similar`,
       });
-    });
-
-    test(`throws error for malformed reference image data`, async () => {
-      await expect(
-        generateImage({
-          prompt: `A test prompt`,
-          referenceImages: [
-            {
-              label: `bad-image`,
-              imageData: `not-valid-format`,
-            },
-          ],
-        }),
-      ).rejects.toThrow(
-        `Invalid reference image data format for label "bad-image"`,
-      );
-    });
-
-    test(`throws error for reference image missing base64`, async () => {
-      await expect(
-        generateImage({
-          prompt: `A test prompt`,
-          referenceImages: [
-            {
-              label: `incomplete-image`,
-              imageData: `image/png;data,xyz`,
-            },
-          ],
-        }),
-      ).rejects.toThrow(
-        `Invalid reference image data format for label "incomplete-image"`,
-      );
     });
 
     test(`handles empty reference images array`, async () => {
@@ -506,7 +452,8 @@ describe.skipIf(env.geminiImageApiKey == null || true)(
           referenceImages: [
             {
               label: `style`,
-              imageData: `image/png;base64,${pngBase64}`,
+              data: pngBase64,
+              mimeType: `image/png`,
             },
           ],
         });

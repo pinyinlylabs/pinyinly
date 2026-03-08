@@ -1,29 +1,18 @@
 import { trpc } from "@/client/trpc";
 import { useAssetImageCacheMutation } from "@/client/ui/hooks/useAssetImageCacheMutation";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import type { AssetId } from "@/data/model";
+import type { AllowedImageMimeType, AssetId } from "@/data/model";
+import { allowedImageMimeTypeEnum } from "@/data/model";
 import type { currentSchema } from "@/data/rizzleSchema";
 import { getArrayBufferAssetId } from "@/util/assetId";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 
-export type AllowedImageType =
-  | `image/jpeg`
-  | `image/png`
-  | `image/webp`
-  | `image/gif`;
-
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
-const allowedImageTypes: AllowedImageType[] = [
-  `image/jpeg`,
-  `image/png`,
-  `image/webp`,
-  `image/gif`,
-];
 
-function isAllowedImageType(value: string): value is AllowedImageType {
-  return allowedImageTypes.includes(value as AllowedImageType);
+function isAllowedImageType(value: string): value is AllowedImageMimeType {
+  return allowedImageMimeTypeEnum.safeParse(value).success;
 }
 
 interface ImageUploaderOptions {
