@@ -6,13 +6,12 @@ import {
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
 } from "@/data/userSettings";
-import { nanoid } from "@/util/nanoid";
 import { useCallback } from "react";
 import { useUserSetting } from "./useUserSetting";
 
 export interface UseUserHanziMeaningOptions {
   hanzi: HanziText;
-  meaningKey?: string;
+  meaningKey: string;
 }
 
 export interface AddUserMeaningOptions {
@@ -56,11 +55,8 @@ export interface UseUserHanziMeaningReturn {
  */
 export function useUserHanziMeaning({
   hanzi,
-  meaningKey: providedMeaningKey,
+  meaningKey,
 }: UseUserHanziMeaningOptions): UseUserHanziMeaningReturn {
-  // Generate a meaningKey if not provided (for creating new meanings)
-  const meaningKey = providedMeaningKey ?? `u_${nanoid()}`;
-
   const keyParams = getUserHanziMeaningKeyParams(hanzi, meaningKey);
 
   const glossSetting = useUserSetting({
