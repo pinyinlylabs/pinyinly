@@ -1,6 +1,6 @@
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type { HanziText, PinyinUnit } from "@/data/model";
+import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
@@ -26,16 +26,20 @@ import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
+import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
+import { Tooltip } from "./Tooltip";
 import { WikiTitledBox } from "./WikiTitledBox";
+import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
+import { parseImageCrop } from "./imageCrop";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -226,6 +230,7 @@ export function WikiHanziCharacterPronunciation({
             <View className="flex-row gap-4">
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
+                  soundId={splitPinyin.initialSoundId}
                   href={`/sounds/${splitPinyin.initialSoundId}`}
                   label={initialLabel}
                   name={initialPinyinSoundName ?? null}
@@ -233,6 +238,7 @@ export function WikiHanziCharacterPronunciation({
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
+                  soundId={splitPinyin.finalSoundId}
                   href={`/sounds/${splitPinyin.finalSoundId}`}
                   label={finalLabel}
                   name={null}
@@ -240,6 +246,7 @@ export function WikiHanziCharacterPronunciation({
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
+                  soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
                   label={
                     <>
@@ -405,14 +412,30 @@ export function WikiHanziCharacterPronunciation({
 }
 
 function SoundLinkBlock({
+  soundId,
   href,
   label,
   name,
 }: {
+  soundId: PinyinSoundId;
   href: Href;
   label: ReactNode;
   name: string | null;
 }) {
+  const soundImageSetting = useUserSetting({
+    setting: pinyinSoundImageSetting,
+    key: { soundId },
+  });
+  const isPointerHoverCapable = usePointerHoverCapability();
+  const soundImage = soundImageSetting.value;
+  const soundImageCrop = parseImageCrop(soundImage?.imageCrop);
+
+  const nameLink = (
+    <Link href={href} className={soundNameClass()}>
+      {name}
+    </Link>
+  );
+
   return (
     <View className="w-full items-center gap-1">
       <Link href={href} className={soundNameClass({ className: `text-fg/50` })}>
@@ -421,9 +444,26 @@ function SoundLinkBlock({
       {name == null ? null : (
         <>
           <DownArrow />
-          <Link href={href} className={soundNameClass()}>
-            {name}
-          </Link>
+          {!isPointerHoverCapable || soundImage?.imageId == null ? (
+            nameLink
+          ) : (
+            <Tooltip placement="top" sideOffset={6}>
+              <Tooltip.Trigger asChild>
+                <Pressable>{nameLink}</Pressable>
+              </Tooltip.Trigger>
+              <Tooltip.Content className="p-1">
+                <View className="size-20 overflow-hidden rounded-md bg-fg-bg5">
+                  <FramedAssetImage
+                    assetId={soundImage.imageId}
+                    crop={soundImageCrop}
+                    imageWidth={soundImage.imageWidth}
+                    imageHeight={soundImage.imageHeight}
+                    className="size-full"
+                  />
+                </View>
+              </Tooltip.Content>
+            </Tooltip>
+          )}
         </>
       )}
     </View>
