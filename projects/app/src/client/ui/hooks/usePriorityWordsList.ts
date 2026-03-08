@@ -16,7 +16,7 @@ export interface PriorityWordItem {
 export interface UsePriorityWordsListResult {
   words: PriorityWordItem[];
   isLoading: boolean;
-  addWord: (word: string, note?: string) => void;
+  addWord: (word: string, options?: { note?: string }) => void;
   removeWord: (word: string) => void;
 }
 
@@ -72,14 +72,14 @@ export function usePriorityWordsList(): UsePriorityWordsListResult {
     return items;
   }, [settingsData]);
 
-  const addWord = (word: string, note?: string) => {
+  const addWord = (word: string, options?: { note?: string }) => {
     const keyParams = getPrioritizedWordKeyParams(word);
     const settingKey = prioritizedWordItemSetting.entity.marshalKey(keyParams);
 
     const value = prioritizedWordItemSetting.entity.marshalValue({
       word,
       createdAt: new Date(),
-      note: note ?? undefined,
+      note: options?.note ?? undefined,
     });
 
     void r.mutate.setSetting({

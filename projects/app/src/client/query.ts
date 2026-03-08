@@ -9,6 +9,7 @@ import {
   rankRules,
   skillLearningGraph,
 } from "@/data/skills";
+import { userHanziMeaningDefs } from "@/data/userSettings";
 import type { Dictionary } from "@/dictionary";
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
@@ -33,6 +34,7 @@ import {
   gte,
   isNull,
   isUndefined,
+  like,
   or,
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
@@ -394,11 +396,254 @@ export type SettingHistoryCollection = Collection<
   string
 >;
 
+export interface UserDictionaryEntry {
+  hanzi: HanziText;
+  meaningKey: string;
+  gloss: string;
+  pinyin?: string;
+  note?: string;
+}
+
+export type UserDictionaryCollection = Collection<UserDictionaryEntry, string>;
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
 // oxlint-disable-next-line typescript/no-explicit-any
 export type CollectionKey<T> = T extends Collection<any, infer K> ? K : never;
+
+// Extract field codes from entity definitions to avoid hard-coding
+const USER_MEANING_FIELD_CODES = new Set(
+  userHanziMeaningDefs.map((def) => {
+    const keyPath = def.entity._def.keyPath;
+    const lastSlash = keyPath.lastIndexOf(`/`);
+    return keyPath.slice(lastSlash + 1);
+  }),
+);
+
+function parseUserMeaningSettingKey(key: string):
+  | {
+      hanzi: HanziText;
+      meaningKey: string;
+      field: `g` | `p` | `n`;
+      rowKey: string;
+    }
+  | undefined {
+  // Key format: uhm/[hanzi]/[meaningKey]/[field]
+  const parts = key.split(`/`);
+  if (parts.length !== 4) {
+    return undefined;
+  }
+
+  const [prefix, hanziRaw, meaningKey, fieldRaw] = parts;
+  if (
+    prefix !== `uhm` ||
+    hanziRaw == null ||
+    hanziRaw.length === 0 ||
+    meaningKey == null ||
+    meaningKey.length === 0
+  ) {
+    return undefined;
+  }
+
+  // Validate field code against entity definitions
+  if (fieldRaw == null || !USER_MEANING_FIELD_CODES.has(fieldRaw)) {
+    return undefined;
+  }
+
+  const hanzi = hanziRaw as HanziText;
+  return {
+    hanzi,
+    meaningKey,
+    field: fieldRaw as `g` | `p` | `n`,
+    rowKey: `${hanzi}:${meaningKey}`,
+  };
+}
+
+function getSettingTextValue(value: unknown): string | undefined {
+  if (typeof value !== `object` || value == null) {
+    return undefined;
+  }
+
+  const text = (value as { t?: unknown }).t;
+  if (typeof text !== `string` || text.length === 0) {
+    return undefined;
+  }
+
+  return text;
+}
+
+function userDictionaryCollectionOptions({
+  settingCollection,
+}: {
+  settingCollection: SettingCollection;
+}): CollectionConfig<UserDictionaryEntry, string> {
+  const userMeaningSettings = createLiveQueryCollection((q) =>
+    q
+      .from({ setting: settingCollection })
+      .where(({ setting }) => like(setting.key, `uhm/%`)),
+  );
+
+  type UserDictionaryDraft = Omit<UserDictionaryEntry, `gloss`> & {
+    gloss?: string;
+  };
+
+  const draftsByKey = new Map<string, UserDictionaryDraft>();
+
+  const materialize = (
+    draft: UserDictionaryDraft | undefined,
+  ): UserDictionaryEntry | undefined => {
+    if (draft?.gloss == null || draft.gloss.length === 0) {
+      return undefined;
+    }
+
+    return {
+      hanzi: draft.hanzi,
+      meaningKey: draft.meaningKey,
+      gloss: draft.gloss,
+      pinyin: draft.pinyin,
+      note: draft.note,
+    };
+  };
+
+  return {
+    id: `userDictionary`,
+    sync: {
+      rowUpdateMode: `full`,
+      sync: (params) => {
+        const { begin, write, commit, collection } = params;
+
+        const markReadyOnce = memoize0(() => {
+          params.markReady();
+        });
+        const markReadyTimeout = setTimeout(() => {
+          markReadyOnce();
+        }, 5000);
+
+        const onChanges = (
+          changes: Array<
+            CollectionOutput<typeof userMeaningSettings>
+          > extends never
+            ? never
+            : Parameters<
+                  typeof userMeaningSettings.subscribeChanges
+                >[0] extends (c: infer TChanges) => void
+              ? TChanges
+              : never,
+        ) => {
+          try {
+            begin();
+
+            const changedRowKeys = new Set<string>();
+
+            for (const change of changes) {
+              const setting =
+                change.type === `delete`
+                  ? (change.previousValue ?? change.value)
+                  : change.value;
+              const parsed = parseUserMeaningSettingKey(setting.key);
+              if (parsed == null) {
+                continue;
+              }
+
+              const text = getSettingTextValue(setting.value);
+              const draft =
+                draftsByKey.get(parsed.rowKey) ??
+                ({
+                  hanzi: parsed.hanzi,
+                  meaningKey: parsed.meaningKey,
+                } satisfies UserDictionaryDraft);
+
+              if (change.type === `delete`) {
+                if (parsed.field === `g`) {
+                  delete draft.gloss;
+                } else if (parsed.field === `p`) {
+                  delete draft.pinyin;
+                } else {
+                  delete draft.note;
+                }
+              } else if (parsed.field === `g`) {
+                draft.gloss = text;
+              } else if (parsed.field === `p`) {
+                draft.pinyin = text;
+              } else {
+                draft.note = text;
+              }
+
+              const hasAnyField =
+                draft.gloss != null ||
+                draft.pinyin != null ||
+                draft.note != null;
+              if (hasAnyField) {
+                draftsByKey.set(parsed.rowKey, draft);
+              } else {
+                draftsByKey.delete(parsed.rowKey);
+              }
+
+              changedRowKeys.add(parsed.rowKey);
+            }
+
+            for (const rowKey of changedRowKeys) {
+              const existing = collection.get(rowKey);
+              const next = materialize(draftsByKey.get(rowKey));
+
+              if (existing == null && next != null) {
+                write({ type: `insert`, value: next });
+                continue;
+              }
+
+              if (existing != null && next == null) {
+                write({ type: `delete`, value: existing });
+                continue;
+              }
+
+              if (
+                existing != null &&
+                next != null &&
+                (existing.gloss !== next.gloss ||
+                  existing.pinyin !== next.pinyin ||
+                  existing.note !== next.note)
+              ) {
+                write({ type: `update`, value: next });
+              }
+            }
+
+            commit();
+          } finally {
+            markReadyOnce();
+          }
+        };
+
+        let subscription:
+          | ReturnType<typeof userMeaningSettings.subscribeChanges>
+          | undefined;
+        let isDisposed = false;
+
+        void userMeaningSettings
+          .preload()
+          .then(() => {
+            if (isDisposed) {
+              return;
+            }
+
+            subscription = userMeaningSettings.subscribeChanges(onChanges, {
+              includeInitialState: true,
+            });
+          })
+          .catch((error: unknown) => {
+            console.error(`userDictionary preload failed`, error);
+          });
+
+        return () => {
+          isDisposed = true;
+          clearTimeout(markReadyTimeout);
+          subscription?.unsubscribe();
+        };
+      },
+    },
+    getKey: (item) => `${item.hanzi}:${item.meaningKey}`,
+  };
+}
 
 export const rizzleCollectionOptions = <
   RizzleEntity extends RizzleAnyEntity,
@@ -609,6 +854,7 @@ export interface Db {
   assetCollection: AssetCollection;
   settingCollection: SettingCollection;
   settingHistoryCollection: SettingHistoryCollection;
+  userDictionary: UserDictionaryCollection;
   skillStateCollection: SkillStateCollection;
   skillRatingCollection: SkillRatingCollection;
   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
@@ -697,10 +943,15 @@ export function makeDb(rizzle: Rizzle): Db {
     }),
   );
 
+  const userDictionary: UserDictionaryCollection = createCollection(
+    userDictionaryCollectionOptions({ settingCollection }),
+  );
+
   return {
     assetCollection,
     settingCollection,
     settingHistoryCollection,
+    userDictionary,
     hanziGlossMistakeCollection,
     hanziPinyinMistakeCollection,
     latestSkillRatingsCollection,
