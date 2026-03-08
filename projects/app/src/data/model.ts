@@ -826,21 +826,14 @@ export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
 /**
  * Allowed image MIME types for uploads and AI generation.
  */
-export type AllowedImageMimeType =
-  | `image/jpeg`
-  | `image/png`
-  | `image/webp`
-  | `image/gif`;
-
-/**
- * Zod schema for allowed image MIME types.
- */
 export const allowedImageMimeTypeEnum = z.enum([
   `image/jpeg`,
   `image/png`,
   `image/webp`,
   `image/gif`,
 ]);
+
+export type AllowedImageMimeType = z.infer<typeof allowedImageMimeTypeEnum>;
 
 /**
  * A reference image to be included in AI generation requests.
