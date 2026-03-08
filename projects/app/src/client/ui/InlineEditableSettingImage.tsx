@@ -159,9 +159,6 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
 
   const handleAddCustomImage = (assetId: AssetId) => {
     setValue({ imageId: assetId } as UserSettingEntityInput<T>);
-    if (frameAspectRatio != null) {
-      setInlineEditorAssetId(assetId);
-    }
     setIsPickerOpen(false);
   };
 
