@@ -351,7 +351,7 @@ export const userHanziMeaningNoteSetting = defineUserSetting({
 });
 
 export function getUserHanziMeaningKeyParams(
-  hanzi: string,
+  hanzi: HanziText,
   meaningKey: string,
 ) {
   return { hanzi, meaningKey };
@@ -362,7 +362,7 @@ export function getUserHanziMeaningKeyParams(
  * Matches all settings under uhm/[hanzi]/* (gloss, pinyin, and note).
  * Convention: All user hanzi meaning entities must use the keyPrefix `uhm/[hanzi]/`
  */
-export function userHanziSettingLike(hanzi: string): string {
+export function userHanziSettingLike(hanzi: HanziText): string {
   return `${userHanziMeaningGlossSetting.entity.keyPrefix}${hanzi}/%`;
 }
 

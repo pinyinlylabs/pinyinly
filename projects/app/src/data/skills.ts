@@ -251,11 +251,12 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 
       // Make sure it's valid to learn pinyin for this hanzi word.
       const meaning = dictionary.lookupHanziWord(hanziWord);
-      if (meaning?.pinyin == null) {
-        // For user-added words without pinyin, we can't generate this skill.
-        // Return empty dependencies to skip this skill type.
-        break;
-      }
+      invariant(
+        meaning?.pinyin != null,
+        `SkillKind.HanziWordToPinyinTyped skill requires a hanzi word with pinyin.` satisfies HasNameOf<
+          typeof SkillKind.HanziWordToPinyinTyped
+        >,
+      );
 
       // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
       // is useful to create a mnemonic to remember the pronunciation.

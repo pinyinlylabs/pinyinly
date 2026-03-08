@@ -12,6 +12,7 @@ import {
   userHanziSettingLike,
 } from "#data/userSettings.ts";
 import { describe, expect, test } from "vitest";
+import { 汉 } from "./helpers";
 
 describe(`imageSettings`, () => {
   test(`contains all image setting entities`, () => {
@@ -89,9 +90,7 @@ describe(
 );
 
 describe(
-  `userHanziMeaningSettings` satisfies HasNameOf<
-    typeof userHanziMeaningGlossSetting
-  >,
+  `userHanziMeaningDefs` satisfies HasNameOf<typeof userHanziMeaningDefs>,
   () => {
     test(`all user hanzi meaning entities follow uhm/[hanzi]/ convention`, () => {
       const hanziPrefix = `uhm/`;
@@ -120,7 +119,7 @@ describe(
   `userHanziSettingLike` satisfies HasNameOf<typeof userHanziSettingLike>,
   () => {
     test(`returns SQL LIKE pattern for querying by hanzi`, () => {
-      const hanzi = `好`;
+      const hanzi = 汉`好`;
       const pattern = userHanziSettingLike(hanzi);
       const expectedPattern = `${userHanziMeaningGlossSetting.entity.keyPrefix}${hanzi}/%`;
 
@@ -128,7 +127,7 @@ describe(
     });
 
     test(`pattern matches all three user meaning types (g, p, n)`, () => {
-      const hanzi = `测试`;
+      const hanzi = 汉`测试`;
       const meaningKey = `u_abc123def456`;
       const pattern = userHanziSettingLike(hanzi);
 
@@ -170,7 +169,7 @@ describe(
     });
 
     test(`pattern has no parameter placeholders`, () => {
-      const pattern = userHanziSettingLike(`好`);
+      const pattern = userHanziSettingLike(汉`好`);
 
       expect(pattern).not.toContain(`[`);
       expect(pattern).not.toContain(`]`);

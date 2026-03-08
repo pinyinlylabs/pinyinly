@@ -61,11 +61,12 @@ export function WikiUserMeanings({ hanzi }: WikiUserMeaningsProps) {
 }
 
 function AddMeaningButton({ hanzi }: { hanzi: HanziText }) {
-  const meaningKey = `u_${nanoid()}`;
+  const [meaningKey, setMeaningKey] = useState(() => `u_${nanoid()}`);
   const { set } = useUserHanziMeaning({ hanzi, meaningKey });
 
   const handleAdd = useCallback(() => {
     set({ gloss: `New meaning` });
+    setMeaningKey(`u_${nanoid()}`); // Generate a new meaningKey for the next addition
   }, [set]);
 
   return (

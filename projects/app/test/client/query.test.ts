@@ -17,7 +17,7 @@ import {
 } from "#data/userSettings.ts";
 import type { Dictionary } from "#dictionary.js";
 import { loadDictionary } from "#dictionary.js";
-import { seedSkillReviews } from "#test/data/helpers.ts";
+import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
 import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import {
@@ -280,8 +280,8 @@ describe(`userDictionaryCollectionOptions`, () => {
     db,
     rizzle,
   }) => {
-    const meaningA = getUserHanziMeaningKeyParams(`好`, `u_meaningA`);
-    const meaningB = getUserHanziMeaningKeyParams(`好`, `u_meaningB`);
+    const meaningA = getUserHanziMeaningKeyParams(汉`好`, `u_meaningA`);
+    const meaningB = getUserHanziMeaningKeyParams(汉`好`, `u_meaningB`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(meaningA),
@@ -340,7 +340,7 @@ describe(`userDictionaryCollectionOptions`, () => {
   });
 
   test(`adds pinyin field after gloss`, async ({ db, rizzle }) => {
-    const keyParams = getUserHanziMeaningKeyParams(`行`, `u_walk`);
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
@@ -381,7 +381,7 @@ describe(`userDictionaryCollectionOptions`, () => {
   });
 
   test(`adds note field after gloss`, async ({ db, rizzle }) => {
-    const keyParams = getUserHanziMeaningKeyParams(`行`, `u_walk`);
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
@@ -414,7 +414,7 @@ describe(`userDictionaryCollectionOptions`, () => {
   });
 
   test(`updates gloss field`, async ({ db, rizzle }) => {
-    const keyParams = getUserHanziMeaningKeyParams(`行`, `u_walk`);
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
@@ -447,7 +447,7 @@ describe(`userDictionaryCollectionOptions`, () => {
   });
 
   test(`updates pinyin field`, async ({ db, rizzle }) => {
-    const keyParams = getUserHanziMeaningKeyParams(`行`, `u_walk`);
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
@@ -489,7 +489,7 @@ describe(`userDictionaryCollectionOptions`, () => {
   });
 
   test(`updates note field`, async ({ db, rizzle }) => {
-    const keyParams = getUserHanziMeaningKeyParams(`行`, `u_walk`);
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
@@ -531,7 +531,7 @@ describe(`userDictionaryCollectionOptions`, () => {
   });
 
   test(`removes row when gloss is deleted`, async ({ db, rizzle }) => {
-    const keyParams = getUserHanziMeaningKeyParams(`里`, `u_inside`);
+    const keyParams = getUserHanziMeaningKeyParams(汉`里`, `u_inside`);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
