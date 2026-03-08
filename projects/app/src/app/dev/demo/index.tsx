@@ -38,7 +38,6 @@ export const demos: Record<string, FunctionComponent> = {
   [`Icon`]: lazyDemo(() => import(`../../../client/ui/Icon.demo`)),
   [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
   [`ImagePasteDropZone`]: lazyDemo(() => import(`../../../client/ui/ImagePasteDropZone.demo`)),
-  [`ImageUploadButton`]: lazyDemo(() => import(`../../../client/ui/ImageUploadButton.demo`)),
   [`InlineEditableSettingImage`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingImage.demo`)),
   [`InlineEditableSettingText`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingText.demo`)),
   [`MenuDictionarySearch`]: lazyDemo(() => import(`../../../client/ui/MenuDictionarySearch.demo`)),
