@@ -3,9 +3,10 @@
 import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
 import type { UseDeviceStoreResult } from "#client/ui/hooks/useDeviceStore.ts";
 import { useDeviceStore } from "#client/ui/hooks/useDeviceStore.ts";
+import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import type { HanziWord } from "#data/model.ts";
 import { r } from "#util/rizzle.ts";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { act } from "react";
@@ -54,7 +55,7 @@ baseTest(`useDeviceStore setValue types`, () => {
 
 const testContextProviders = () =>
   function TestWrapper({ children }: PropsWithChildren) {
-    const queryClient = new QueryClient();
+    const queryClient = useNewQueryClient();
 
     return (
       <QueryClientProvider client={queryClient}>
