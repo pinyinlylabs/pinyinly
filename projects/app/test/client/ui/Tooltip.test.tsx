@@ -3,7 +3,7 @@
 import { Tooltip } from "#client/ui/Tooltip.tsx";
 import { TooltipProvider } from "#client/ui/TooltipProvider.tsx";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { describe, expect, test, vi } from "vitest";
 
 // Mock @floating-ui/react-native
@@ -105,9 +105,9 @@ describe(`Tooltip suite` satisfies HasNameOf<typeof Tooltip>, () => {
     render(
       <Tooltip defaultOpen>
         <Tooltip.Trigger asChild>
-          <View>
+          <Pressable>
             <Text onPress={onPress}>Custom trigger</Text>
-          </View>
+          </Pressable>
         </Tooltip.Trigger>
         <Tooltip.Content>
           <Text>Content</Text>
@@ -120,6 +120,32 @@ describe(`Tooltip suite` satisfies HasNameOf<typeof Tooltip>, () => {
 
     fireEvent.click(trigger);
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  test(`asChild accepts trigger-like child props`, () => {
+    const triggerElement = (
+      <Tooltip>
+        <Tooltip.Trigger asChild>
+          <Pressable>
+            <Text>Valid trigger</Text>
+          </Pressable>
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+          <Text>Content</Text>
+        </Tooltip.Content>
+      </Tooltip>
+    );
+
+    expect(triggerElement).toBeDefined();
+  });
+
+  test(`asChild requires a single React element at type level`, () => {
+    const invalidTriggerElement = (
+      // @ts-expect-error Tooltip.Trigger asChild does not accept string children
+      <Tooltip.Trigger asChild>{`Invalid trigger`}</Tooltip.Trigger>
+    );
+
+    expect(invalidTriggerElement).toBeDefined();
   });
 
   test(`throws error when Tooltip.Trigger is used outside Tooltip`, () => {

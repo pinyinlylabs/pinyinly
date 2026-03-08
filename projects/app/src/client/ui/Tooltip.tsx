@@ -170,15 +170,48 @@ export interface TooltipTriggerProps {
   className?: string;
 }
 
-export type TooltipTriggerFullProps = TooltipTriggerProps &
-  Omit<PropsOf<typeof Pressable>, `children`>;
+type TooltipTriggerPressableProps = Omit<PropsOf<typeof Pressable>, `children`>;
+
+type TooltipTriggerHandlerPropNames =
+  | `onHoverIn`
+  | `onHoverOut`
+  | `onFocus`
+  | `onBlur`
+  | `onPress`
+  | `ref`;
+
+type HasTooltipTriggerHandlerProps<TProps> =
+  TooltipTriggerHandlerPropNames extends keyof TProps ? true : false;
+
+type TooltipTriggerDefaultProps = TooltipTriggerProps &
+  TooltipTriggerPressableProps & {
+    asChild?: false;
+  };
+
+type TooltipTriggerAsChildProps<TChildProps extends object> =
+  TooltipTriggerProps &
+    TooltipTriggerPressableProps & {
+      asChild: true;
+      children: ReactElement<TChildProps> &
+        (HasTooltipTriggerHandlerProps<TChildProps> extends true
+          ? unknown
+          : never);
+    };
+
+type TooltipTriggerImplProps = TooltipTriggerProps &
+  TooltipTriggerPressableProps;
+
+function TooltipTrigger(props: TooltipTriggerDefaultProps): ReactElement;
+function TooltipTrigger<TChildProps extends object>(
+  props: TooltipTriggerAsChildProps<TChildProps>,
+): ReactElement;
 
 function TooltipTrigger({
   asChild = false,
   children,
   className,
   ...pressableProps
-}: TooltipTriggerFullProps) {
+}: TooltipTriggerImplProps) {
   const { openWithDelay, close, toggleWithTouch, setReference } =
     useTooltipContext();
 
