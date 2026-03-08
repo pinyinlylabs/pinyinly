@@ -9,9 +9,15 @@ import {
   historyPageCollection,
   historyPageData,
 } from "#client/query.js";
+import {
+  getUserHanziMeaningKeyParams,
+  userHanziMeaningGlossSetting,
+  userHanziMeaningNoteSetting,
+  userHanziMeaningPinyinSetting,
+} from "#data/userSettings.ts";
 import type { Dictionary } from "#dictionary.js";
 import { loadDictionary } from "#dictionary.js";
-import { seedSkillReviews } from "#test/data/helpers.ts";
+import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
 import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import {
@@ -266,6 +272,299 @@ describe(
     });
   },
 );
+
+describe(`userDictionaryCollectionOptions`, () => {
+  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+
+  test(`builds rows from user hanzi meaning settings`, async ({
+    db,
+    rizzle,
+  }) => {
+    const meaningA = getUserHanziMeaningKeyParams(汉`好`, `u_meaningA`);
+    const meaningB = getUserHanziMeaningKeyParams(汉`好`, `u_meaningB`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(meaningA),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...meaningA,
+        text: `good`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningPinyinSetting.entity.marshalKey(meaningA),
+      value: userHanziMeaningPinyinSetting.entity.marshalValue({
+        ...meaningA,
+        text: `hǎo`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningNoteSetting.entity.marshalKey(meaningA),
+      value: userHanziMeaningNoteSetting.entity.marshalValue({
+        ...meaningA,
+        text: `common adjective`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(meaningB),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...meaningB,
+        text: `to like`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await db.userDictionary.preload();
+
+    expect(db.userDictionary.get(`好:u_meaningA`)).toEqual({
+      hanzi: `好`,
+      meaningKey: `u_meaningA`,
+      gloss: `good`,
+      pinyin: `hǎo`,
+      note: `common adjective`,
+    });
+    expect(db.userDictionary.get(`好:u_meaningB`)).toEqual({
+      hanzi: `好`,
+      meaningKey: `u_meaningB`,
+      gloss: `to like`,
+      pinyin: undefined,
+      note: undefined,
+    });
+  });
+
+  test(`adds pinyin field after gloss`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `to walk`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.userDictionary.preload();
+
+    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
+      hanzi: `行`,
+      meaningKey: `u_walk`,
+      gloss: `to walk`,
+      pinyin: undefined,
+      note: undefined,
+    });
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningPinyinSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningPinyinSetting.entity.marshalValue({
+        ...keyParams,
+        text: `xíng`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
+      hanzi: `行`,
+      meaningKey: `u_walk`,
+      gloss: `to walk`,
+      pinyin: `xíng`,
+      note: undefined,
+    });
+  });
+
+  test(`adds note field after gloss`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `to walk`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.userDictionary.preload();
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningNoteSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningNoteSetting.entity.marshalValue({
+        ...keyParams,
+        text: `common verb`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
+      hanzi: `行`,
+      meaningKey: `u_walk`,
+      gloss: `to walk`,
+      pinyin: undefined,
+      note: `common verb`,
+    });
+  });
+
+  test(`updates gloss field`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `to walk`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.userDictionary.preload();
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `to go on foot`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
+      hanzi: `行`,
+      meaningKey: `u_walk`,
+      gloss: `to go on foot`,
+      pinyin: undefined,
+      note: undefined,
+    });
+  });
+
+  test(`updates pinyin field`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `to walk`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningPinyinSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningPinyinSetting.entity.marshalValue({
+        ...keyParams,
+        text: `xíng`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.userDictionary.preload();
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningPinyinSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningPinyinSetting.entity.marshalValue({
+        ...keyParams,
+        text: `háng`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
+      hanzi: `行`,
+      meaningKey: `u_walk`,
+      gloss: `to walk`,
+      pinyin: `háng`,
+      note: undefined,
+    });
+  });
+
+  test(`updates note field`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`行`, `u_walk`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `to walk`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningNoteSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningNoteSetting.entity.marshalValue({
+        ...keyParams,
+        text: `common verb`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.userDictionary.preload();
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningNoteSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningNoteSetting.entity.marshalValue({
+        ...keyParams,
+        text: `HSK 1 verb`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
+      hanzi: `行`,
+      meaningKey: `u_walk`,
+      gloss: `to walk`,
+      pinyin: undefined,
+      note: `HSK 1 verb`,
+    });
+  });
+
+  test(`removes row when gloss is deleted`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`里`, `u_inside`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `inside`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningPinyinSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningPinyinSetting.entity.marshalValue({
+        ...keyParams,
+        text: `lǐ`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await db.userDictionary.preload();
+    expect(db.userDictionary.get(`里:u_inside`)).not.toBeUndefined();
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: null,
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    expect(db.userDictionary.get(`里:u_inside`)).toBeUndefined();
+  });
+});
 
 function settingRow({
   key,

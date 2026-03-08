@@ -306,7 +306,7 @@ export function getPinyinFinalToneKeyParams(
 }
 
 //
-// Priority words list
+// Priority words list (bookmarking)
 //
 
 export const prioritizedWordItemSetting = defineUserSetting({
@@ -321,6 +321,51 @@ export function getPrioritizedWordKeyParams(word: string) {
   return { word };
 }
 
+//
+// User-defined hanzi meanings
+// Each field is stored as a separate setting to enable use of InlineEditableSettingText
+//
+
+export const userHanziMeaningGlossSetting = defineUserSetting({
+  entity: r.entity(`uhm/[hanzi]/[meaningKey]/g`, {
+    hanzi: r.string().alias(`h`),
+    meaningKey: r.string().alias(`m`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
+export const userHanziMeaningPinyinSetting = defineUserSetting({
+  entity: r.entity(`uhm/[hanzi]/[meaningKey]/p`, {
+    hanzi: r.string().alias(`h`),
+    meaningKey: r.string().alias(`m`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
+export const userHanziMeaningNoteSetting = defineUserSetting({
+  entity: r.entity(`uhm/[hanzi]/[meaningKey]/n`, {
+    hanzi: r.string().alias(`h`),
+    meaningKey: r.string().alias(`m`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
+export function getUserHanziMeaningKeyParams(
+  hanzi: HanziText,
+  meaningKey: string,
+) {
+  return { hanzi, meaningKey };
+}
+
+/**
+ * Returns a SQL LIKE pattern for querying all user hanzi meaning settings for a given hanzi.
+ * Matches all settings under uhm/[hanzi]/* (gloss, pinyin, and note).
+ * Convention: All user hanzi meaning entities must use the keyPrefix `uhm/[hanzi]/`
+ */
+export function userHanziSettingLike(hanzi: HanziText): string {
+  return `${userHanziMeaningGlossSetting.entity.keyPrefix}${hanzi}/%`;
+}
+
 /**
  * All user settings that contain image references.
  * Used for syncing assets between servers.
@@ -332,12 +377,21 @@ export const imageSettingDefs = [
   pinyinFinalToneImageSetting,
 ] as const satisfies readonly UserSetting[];
 
+export const userHanziMeaningDefs = [
+  userHanziMeaningGlossSetting,
+  userHanziMeaningPinyinSetting,
+  userHanziMeaningNoteSetting,
+] as const satisfies readonly UserSetting[];
+
 export const userSettingDefinitions = [
   aiImageStyleSetting,
   autoCheckUserSetting,
   userNameSetting,
   quickSearchPickSetting,
   prioritizedWordItemSetting,
+  userHanziMeaningGlossSetting,
+  userHanziMeaningPinyinSetting,
+  userHanziMeaningNoteSetting,
   pinyinSoundNameSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,

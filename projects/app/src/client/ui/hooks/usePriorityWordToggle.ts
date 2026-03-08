@@ -8,7 +8,7 @@ export interface UsePriorityWordToggleResult {
   isPriority: boolean;
   isLoading: boolean;
   toggle: () => void;
-  add: () => void;
+  add: (options?: { note?: string }) => void;
   remove: () => void;
 }
 
@@ -28,11 +28,11 @@ export function usePriorityWordToggle(
   const isPriority = setting.value != null;
   const isLoading = setting.isLoading;
 
-  const add = () => {
+  const add = (options?: { note?: string }) => {
     setting.setValue({
       word,
       createdAt: new Date(),
-      note: undefined,
+      note: options?.note,
     });
   };
 

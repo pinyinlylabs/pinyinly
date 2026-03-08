@@ -1,22 +1,57 @@
 import { hskLevelToNumber } from "@/data/hsk";
-import type { HanziText } from "@/data/model";
-import { loadDictionary } from "@/dictionary";
+import type { HanziText, PinyinText } from "@/data/model";
+import type { HanziWordWithMeaning } from "@/dictionary";
+import { buildHanziWord, loadDictionary } from "@/dictionary";
 import {
   arrayFilterUnique,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { use } from "react";
 import { Text, View } from "react-native";
+import { useDb } from "./hooks/useDb";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
 import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
+import { WikiUserMeanings } from "./WikiUserMeanings";
 
 export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
   const dictionary = use(loadDictionary());
-  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
+  const db = useDb();
+
+  const { data: userDictionaryData } = useLiveQuery(
+    (q) =>
+      q
+        .from({ dictionary: db.userDictionary })
+        .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
+    [db.userDictionary, hanzi],
+  );
+
+  const dictionaryMeanings = dictionary.lookupHanzi(hanzi);
+
+  const userMeaningEntries: HanziWordWithMeaning[] = userDictionaryData.map(
+    (userMeaning) => {
+      const hanziWord = buildHanziWord(hanzi, userMeaning.meaningKey);
+
+      return [
+        hanziWord,
+        {
+          gloss: [userMeaning.gloss],
+          pinyin:
+            userMeaning.pinyin == null
+              ? null
+              : [userMeaning.pinyin as PinyinText],
+          hsk: undefined,
+        },
+      ];
+    },
+  );
+
+  const hanziWordMeanings = [...dictionaryMeanings, ...userMeaningEntries];
+
   const hskLevels = hanziWordMeanings
     .map(([_, meaning]) => meaning.hsk)
     .filter((x) => x != null)
@@ -41,6 +76,8 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
 
       <PylyMdxComponents>
         <View className="flex-1 gap-6 bg-bg py-7">
+          <WikiUserMeanings hanzi={hanzi} />
+
           <WikiMdxHanziMeaning hanzi={hanzi} />
         </View>
       </PylyMdxComponents>
