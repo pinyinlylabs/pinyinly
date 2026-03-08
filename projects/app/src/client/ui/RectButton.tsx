@@ -27,10 +27,6 @@ export type RectButtonProps = {
   iconStart?: IconName;
   iconEnd?: IconName;
   iconSize?: IconProps[`size`];
-  /**
-   * @deprecated Use a `variant` to control styling or use a different component.
-   */
-  rawChildren?: boolean;
 } & Pick<
   PropsOf<typeof Pressable>,
   keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
@@ -45,8 +41,6 @@ export function RectButton({
   iconStart,
   iconEnd,
   iconSize,
-  // oxlint-disable-next-line typescript/no-deprecated
-  rawChildren = false,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
@@ -56,13 +50,12 @@ export function RectButton({
 
   const flat = pressed || disabled;
   const textClassName = extractTextClasses(className);
-  const content = rawChildren ? (
-    children
-  ) : children == null ? null : (
-    <Text className={textClass({ variant, class: textClassName })}>
-      {children}
-    </Text>
-  );
+  const content =
+    children == null ? null : (
+      <Text className={textClass({ variant, class: textClassName })}>
+        {children}
+      </Text>
+    );
 
   const pressable = (
     <Pressable
