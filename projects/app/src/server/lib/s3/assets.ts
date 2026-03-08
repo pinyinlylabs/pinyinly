@@ -1,6 +1,5 @@
-import type { AssetId } from "@/data/model";
-import type { Drizzle } from "@/server/lib/db";
-import * as schema from "@/server/pgSchema";
+import type { AllowedImageMimeType, AssetId } from "@/data/model";
+import { sniffImageMimeTypeFromBuffer } from "@/server/lib/image";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsS3Bucket } from "@/util/env";
 import {
@@ -9,28 +8,13 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { nonNullable } from "@pinyinly/lib/invariant";
-import { eq } from "drizzle-orm";
-import { z } from "zod/v4";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { getAssetsS3Client } from "./client";
 
 /**
  * Maximum file size for user uploads (5MB).
  */
 export const MAX_ASSET_SIZE_BYTES = 5 * 1024 * 1024;
-
-/**
- * Zod schema for allowed image MIME types.
- */
-export const imageTypeEnum = z.enum([
-  `image/jpeg`,
-  `image/png`,
-  `image/webp`,
-  `image/gif`,
-]);
-
-export type AllowedImageType = z.infer<typeof imageTypeEnum>;
-export const ALLOWED_IMAGE_TYPES = imageTypeEnum.options;
 
 /**
  * Presigned URL expiration time in seconds (15 minutes).
@@ -54,7 +38,7 @@ export interface PresignedUploadUrlResult {
  */
 export async function createPresignedUploadUrl(opts: {
   assetId: AssetId;
-  contentType: AllowedImageType;
+  contentType: AllowedImageMimeType;
   contentLength: number;
 }): Promise<PresignedUploadUrlResult> {
   const { assetId, contentType, contentLength } = opts;
@@ -63,10 +47,6 @@ export async function createPresignedUploadUrl(opts: {
     throw new Error(
       `File size ${contentLength} exceeds maximum ${MAX_ASSET_SIZE_BYTES} bytes`,
     );
-  }
-
-  if (!ALLOWED_IMAGE_TYPES.includes(contentType)) {
-    throw new Error(`Content type ${contentType} is not allowed`);
   }
 
   const client = getAssetsS3Client();
@@ -175,29 +155,25 @@ export async function fetchAssetBuffer(assetId: AssetId): Promise<Buffer> {
 
 /**
  * Resolves an asset ID to base64-encoded image data with MIME type.
- * Fetches all assets from S3 and uses database metadata for MIME type.
+ * Fetches the asset from S3 and infers MIME type by sniffing image bytes.
  */
-export async function resolveAssetIdToBase64(
+export async function fetchAssetBase64(
   assetId: AssetId,
-  tx: Drizzle,
-): Promise<{ data: string; mimeType: string }> {
-  // Query asset table for MIME type
-  const assetRecord = await tx.query.asset.findFirst({
-    where: eq(schema.asset.assetId, assetId),
-  });
-
-  if (assetRecord == null) {
-    throw new Error(`Asset not found: ${assetId}`);
-  }
-
+): Promise<{ data: string; mimeType: AllowedImageMimeType }> {
   // Fetch the image buffer from S3
   const buffer = await fetchAssetBuffer(assetId);
+  const mimeType = sniffImageMimeTypeFromBuffer(buffer);
+
+  invariant(
+    mimeType != null,
+    `Unsupported or unrecognized image format for asset ${assetId}`,
+  );
 
   // Convert buffer to base64
   const base64Data = buffer.toString(`base64`);
 
   return {
     data: base64Data,
-    mimeType: assetRecord.contentType,
+    mimeType,
   };
 }

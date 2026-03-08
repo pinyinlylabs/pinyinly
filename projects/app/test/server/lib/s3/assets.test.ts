@@ -1,13 +1,16 @@
+import * as imageModule from "#server/lib/image.ts";
 import {
   createPresignedUploadUrl,
+  fetchAssetBase64,
   MAX_ASSET_SIZE_BYTES,
-  resolveAssetIdToBase64,
 } from "#server/lib/s3/assets.ts";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+const mockS3Send = vi.fn();
+
 vi.mock(`#server/lib/s3/client.ts`, () => ({
   getAssetsS3Client: vi.fn(() => ({
-    send: vi.fn().mockResolvedValue({}),
+    send: mockS3Send,
   })),
 }));
 
@@ -18,6 +21,14 @@ vi.mock(`@aws-sdk/s3-request-presigner`, () => ({
 vi.mock(`#util/env.ts`, () => ({
   assetsS3Bucket: `test-bucket`,
 }));
+
+vi.mock(`#server/lib/image.ts`, () => ({
+  sniffImageMimeTypeFromBuffer: vi.fn(),
+}));
+
+const mockSniffImageMimeType = vi.mocked(
+  imageModule.sniffImageMimeTypeFromBuffer,
+);
 
 describe(
   `createPresignedUploadUrl` satisfies HasNameOf<
@@ -32,17 +43,6 @@ describe(
           contentLength: MAX_ASSET_SIZE_BYTES + 1,
         }),
       ).rejects.toThrow(/exceeds maximum/);
-    });
-
-    test(`throws error for invalid content type`, async () => {
-      await expect(
-        createPresignedUploadUrl({
-          assetId: `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`,
-          // @ts-expect-error Testing invalid content type
-          contentType: `application/pdf`,
-          contentLength: 1024,
-        }),
-      ).rejects.toThrow(/is not allowed/);
     });
 
     test(`accepts valid parameters`, async () => {
@@ -62,26 +62,35 @@ describe(
 );
 
 describe(
-  `resolveAssetIdToBase64 suite` satisfies HasNameOf<
-    typeof resolveAssetIdToBase64
-  >,
+  `fetchAssetBase64 suite` satisfies HasNameOf<typeof fetchAssetBase64>,
   () => {
     beforeEach(() => {
       vi.restoreAllMocks();
+      mockS3Send.mockReset();
+      mockSniffImageMimeType.mockReset();
     });
 
-    test(`throws when asset cannot be resolved from database`, async () => {
-      const tx = {
-        query: {
-          asset: {
-            findFirst: vi.fn().mockResolvedValue(null),
-          },
-        },
-      };
+    test(`uses sniffImageMimeTypeFromBuffer to detect mime type`, async () => {
+      const buffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+      mockS3Send.mockResolvedValueOnce({ Body: [buffer] });
+      mockSniffImageMimeType.mockReturnValueOnce(`image/png`);
+
+      const result = await fetchAssetBase64(`sha256/test-asset-id` as never);
+
+      expect(mockSniffImageMimeType).toHaveBeenCalledWith(buffer);
+      expect(result.mimeType).toBe(`image/png`);
+      expect(result.data).toBe(buffer.toString(`base64`));
+    });
+
+    test(`throws when sniffImageMimeTypeFromBuffer returns null`, async () => {
+      mockS3Send.mockResolvedValueOnce({
+        Body: [Buffer.from([0x00, 0x11, 0x22])],
+      });
+      mockSniffImageMimeType.mockReturnValueOnce(null);
 
       await expect(
-        resolveAssetIdToBase64(`sha256/missing-asset-id` as never, tx as never),
-      ).rejects.toThrow(`Asset not found`);
+        fetchAssetBase64(`sha256/unknown-asset-id` as never),
+      ).rejects.toThrow(`Unsupported or unrecognized image format`);
     });
   },
 );

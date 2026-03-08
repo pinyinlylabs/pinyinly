@@ -1,5 +1,4 @@
 import type { AiReferenceImage } from "@/data/model";
-import { parseBase64DataUri } from "@/util/base64";
 import { geminiImageApiKey } from "@/util/env";
 import type { Part } from "@google/genai";
 import { GoogleGenAI } from "@google/genai";
@@ -33,15 +32,10 @@ export async function generateImage(opts: {
         parts.push({ text: `${refImage.label}:` });
       }
 
-      // Parse base64 data URI
-      const { mimeType, data } = parseBase64DataUri(
-        refImage.imageData,
-        refImage.label,
-      );
       parts.push({
         inlineData: {
-          mimeType,
-          data,
+          mimeType: refImage.mimeType,
+          data: refImage.data,
         },
       });
     }

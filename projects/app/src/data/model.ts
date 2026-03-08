@@ -824,10 +824,23 @@ export const wikiCharacterDataSchema = z.strictObject({
 export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
 
 /**
+ * Allowed image MIME types for uploads and AI generation.
+ */
+export const allowedImageMimeTypeEnum = z.enum([
+  `image/jpeg`,
+  `image/png`,
+  `image/webp`,
+  `image/gif`,
+]);
+
+export type AllowedImageMimeType = z.infer<typeof allowedImageMimeTypeEnum>;
+
+/**
  * A reference image to be included in AI generation requests.
- * Contains a descriptive label and base64-encoded image data with MIME type.
+ * Contains a descriptive label, base64-encoded image data, and MIME type.
  */
 export interface AiReferenceImage {
   label?: string;
-  imageData: string; // Format: "mimeType;base64,data"
+  data: string; // Base64-encoded image data
+  mimeType: AllowedImageMimeType;
 }

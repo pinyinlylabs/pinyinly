@@ -76,16 +76,10 @@ const {
   };
 });
 
-vi.mock(`@/client/assets/localImageAssets`, () => localImageAssetsMock);
-vi.mock(`@/client/assets/localImageAssets.ts`, () => localImageAssetsMock);
 vi.mock(`#client/assets/localImageAssets.ts`, () => localImageAssetsMock);
 
-vi.mock(`@/client/trpc`, () => trpcMock);
-vi.mock(`@/client/trpc.tsx`, () => trpcMock);
 vi.mock(`#client/trpc.tsx`, () => trpcMock);
 
-vi.mock(`@/client/ui/hooks/useImageUploader`, () => useImageUploaderMock);
-vi.mock(`@/client/ui/hooks/useImageUploader.ts`, () => useImageUploaderMock);
 vi.mock(`#client/ui/hooks/useImageUploader.ts`, () => useImageUploaderMock);
 
 const pageSheetModalMock = {
@@ -96,8 +90,6 @@ const pageSheetModalMock = {
   }) => <div>{children({ dismiss: vi.fn() })}</div>,
 };
 
-vi.mock(`@/client/ui/PageSheetModal`, () => pageSheetModalMock);
-vi.mock(`@/client/ui/PageSheetModal.tsx`, () => pageSheetModalMock);
 vi.mock(`#client/ui/PageSheetModal.tsx`, () => pageSheetModalMock);
 
 const rectButtonMock = {
@@ -116,8 +108,6 @@ const rectButtonMock = {
   ),
 };
 
-vi.mock(`@/client/ui/RectButton`, () => rectButtonMock);
-vi.mock(`@/client/ui/RectButton.tsx`, () => rectButtonMock);
 vi.mock(`#client/ui/RectButton.tsx`, () => rectButtonMock);
 
 const textInputSingleMock = {
@@ -137,8 +127,6 @@ const textInputSingleMock = {
   ),
 };
 
-vi.mock(`@/client/ui/TextInputSingle`, () => textInputSingleMock);
-vi.mock(`@/client/ui/TextInputSingle.tsx`, () => textInputSingleMock);
 vi.mock(`#client/ui/TextInputSingle.tsx`, () => textInputSingleMock);
 
 vi.mock(`react-native`, () => ({

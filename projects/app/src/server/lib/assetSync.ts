@@ -1,7 +1,7 @@
 import type { AssetId } from "@/data/model";
-import { AssetStatusKind } from "@/data/model";
+import { AssetStatusKind, allowedImageMimeTypeEnum } from "@/data/model";
 import { withDrizzle } from "@/server/lib/db";
-import { imageTypeEnum, verifyObjectExists } from "@/server/lib/s3/assets";
+import { verifyObjectExists } from "@/server/lib/s3/assets";
 import type { AppRouter } from "@/server/routers/_app";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsS3Bucket } from "@/util/env";
@@ -118,7 +118,9 @@ export async function uploadAssetToRemote(
   const buffer = Buffer.from(bytes);
 
   // Validate content type is one of the allowed types
-  const contentTypeResult = imageTypeEnum.safeParse(contentTypeFromStorage);
+  const contentTypeResult = allowedImageMimeTypeEnum.safeParse(
+    contentTypeFromStorage,
+  );
   if (!contentTypeResult.success) {
     throw new Error(
       `Invalid content type for upload: ${contentTypeFromStorage}`,
