@@ -6,8 +6,8 @@
  * build time.
  */
 
-import type { WikiRegistryEntry } from "./wikiRegistry.util";
-import { lazyMdx } from "./wikiRegistry.util";
+import type { WikiRegistryEntry } from "./wikiRegistry.utils";
+import { lazyMdx } from "./wikiRegistry.utils";
 
 // prettier-ignore
 export const _wikiRegistry: Record<string, WikiRegistryEntry> = {
