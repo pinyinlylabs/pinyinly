@@ -1,6 +1,6 @@
 import { openaiApiKey } from "#util/env.js";
 import { mkdir, writeFile } from "@pinyinly/lib/fs";
-import { invariant } from "@pinyinly/lib/invariant";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import OpenAI from "openai";
@@ -153,12 +153,9 @@ async function generateWikiSpeech(
     console.log(`Base filename: ${baseFileName}`);
   }
 
-  invariant(
-    openaiApiKey != null,
-    `PYLY_OPENAI_API_KEY environment variable is not set`,
-  );
-
-  const openai = new OpenAI();
+  const openai = new OpenAI({
+    apiKey: nonNullable(openaiApiKey),
+  });
   const createdFiles: string[] = [];
 
   for (const voice of voices) {
