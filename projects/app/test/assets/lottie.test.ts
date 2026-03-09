@@ -1,8 +1,8 @@
 // pyly-not-src-test
 
-import { projectRoot } from "#test/helpers.ts";
-import { Animation, MatteMode, ShapeLayer } from "@lottiefiles/lottie-js";
+import { projectRoot } from "#bin/util/paths.ts";
 import type { Shape } from "@lottiefiles/lottie-js";
+import { Animation, MatteMode, ShapeLayer } from "@lottiefiles/lottie-js";
 import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";

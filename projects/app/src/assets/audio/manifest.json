@@ -10,10 +10,14 @@
     "../../client/wiki/上/shang4-echo.m4a":{"duration":0.54,"hash":"acd22f050f8057ec05be746e668fea6d9457a4a0bdfe25a2c95cd1b3699502b7","sprite":0,"start":3.17},
     "../../client/wiki/上/shang4-nova.m4a":{"duration":0.64,"hash":"7255d25477fc16db0f148c832bcc84cf5a059716125b55d0036bcd8085248519","sprite":0,"start":4.71},
     "pinyin/-ang1-alloy.m4a":{"duration":2.45,"hash":"de59d45aaf6d37b51a6f28f2a079ec4e146391e7496c2f93c7c491cc8fffd591","sprite":1,"start":0},
-    "pinyin/-ang2-alloy.m4a":{"duration":2.45,"hash":"de59d45aaf6d37b51a6f28f2a079ec4e146391e7496c2f93c7c491cc8fffd591","sprite":1,"start":3.45}
+    "pinyin/-ang2-alloy.m4a":{"duration":2.45,"hash":"de59d45aaf6d37b51a6f28f2a079ec4e146391e7496c2f93c7c491cc8fffd591","sprite":1,"start":3.45},
+    "pinyin/bang1-nova.m4a":{"duration":1.97,"hash":"190dcc9705fe7f481c5422ad1754e70a666dea54fcb1e3b4c61b37370ec5c6b9","sprite":1,"start":6.9},
+    "pinyin/bang1-shimmer.m4a":{"duration":1.32,"hash":"d1c4e6f7184f160d6f25ea2f86a814eca7a8e7aec1840ad97df9acd3bc3575a6","sprite":1,"start":9.870022675736962},
+    "pinyin/bang4-nova.m4a":{"duration":0.72,"hash":"018c9279cb3d8fdb32e9c8c9ee989b12f0b258ee650511049c751e356f0eedd8","sprite":1,"start":12.19},
+    "pinyin/bang4-shimmer.m4a":{"duration":0.96,"hash":"fc7fe28a75d9a413648fef0f098952c4b3e45b4212b99df8cc4be78cb3b08397","sprite":1,"start":13.910022675736961}
   },
   "spriteFiles":[
     "wiki-上-e1194957dc18.m4a",
-    "pinyin-ce37427a64b4.m4a"
+    "pinyin-bb94c068dcf0.m4a"
   ]
 }

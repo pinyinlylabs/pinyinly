@@ -317,8 +317,8 @@ tasks:
     env:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
-  generateWikiSpeech:
-    command: tsx --tsconfig tsconfig.node.json ./bin/generateWikiSpeech.ts
+  generateSpeech:
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateSpeech.ts
     preset: watcher
     options:
       envFile: .env.local

@@ -5,7 +5,6 @@ import {
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
-import { partOfSpeechSchema } from "#data/model.ts";
 import type {
   HanziCharacter,
   HanziText,
@@ -13,6 +12,12 @@ import type {
   IdsNode,
   PinyinText,
 } from "#data/model.ts";
+import { partOfSpeechSchema } from "#data/model.ts";
+import type {
+  DictionaryJson,
+  HanziWordMeaning,
+  HanziWordWithMeaning,
+} from "#dictionary.ts";
 import {
   allHanziCharacters,
   buildHanziWord,
@@ -22,16 +27,6 @@ import {
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "#dictionary.ts";
-import type {
-  DictionaryJson,
-  HanziWordMeaning,
-  HanziWordWithMeaning,
-} from "#dictionary.ts";
-import {
-  readDictionaryJson,
-  upsertHanziWordMeaning,
-  writeDictionaryJson,
-} from "#test/helpers.ts";
 import { Alert, Select } from "@inkjs/ui";
 import {
   emptyArray,
@@ -50,11 +45,16 @@ import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Spinner from "ink-spinner";
 import TextInput from "ink-text-input";
-import { Children, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { Children, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
+import {
+  readDictionaryJson,
+  upsertHanziWordMeaning,
+  writeDictionaryJson,
+} from "./util/dictionary.ts";
 import {
   dongChineseData,
   getDongChineseGloss,

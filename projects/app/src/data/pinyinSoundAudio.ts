@@ -3,11 +3,21 @@ import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 
 type ToneId = `1` | `2` | `3` | `4` | `5`;
 
-const audioSourceById: Record<string, PylyAudioSource> = {
+// Strategy:
+// Use a full pinyin unit example (e.g. bāng / bàng) for each sound page,
+// rather than trying to play isolated partial sound units.
+const soundAudioSourceById: Record<string, PylyAudioSource> = {
   // oxlint-disable-next-line import/no-commonjs
-  "-ang1": require(`../assets/audio/pinyin/-ang1-alloy.m4a`),
+  "b-": require(`../assets/audio/pinyin/bang1-nova.m4a`),
   // oxlint-disable-next-line import/no-commonjs
-  "-ang2": require(`../assets/audio/pinyin/-ang2-alloy.m4a`),
+  "-ang": require(`../assets/audio/pinyin/bang1-nova.m4a`),
+};
+
+const finalToneAudioSourceById: Record<string, PylyAudioSource> = {
+  // oxlint-disable-next-line import/no-commonjs
+  "-ang1": require(`../assets/audio/pinyin/bang1-nova.m4a`),
+  // oxlint-disable-next-line import/no-commonjs
+  "-ang4": require(`../assets/audio/pinyin/bang4-nova.m4a`),
 };
 
 export function buildPinyinFinalToneAudioId(
@@ -20,7 +30,7 @@ export function buildPinyinFinalToneAudioId(
 export function getPinyinSoundAudioSource(
   soundId: PinyinSoundId,
 ): PylyAudioSource {
-  return audioSourceById[soundId] ?? null;
+  return soundAudioSourceById[soundId] ?? null;
 }
 
 export function getPinyinFinalToneAudioSource(
@@ -28,5 +38,9 @@ export function getPinyinFinalToneAudioSource(
   tone: ToneId,
 ): PylyAudioSource {
   const audioId = buildPinyinFinalToneAudioId(finalSoundId, tone);
-  return audioSourceById[audioId] ?? null;
+  return (
+    finalToneAudioSourceById[audioId] ??
+    soundAudioSourceById[finalSoundId] ??
+    null
+  );
 }

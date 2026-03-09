@@ -1,7 +1,7 @@
+import { projectRoot } from "#bin/util/paths.ts";
 import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import { expect, test } from "vitest";
-import { projectRoot } from "./helpers.ts";
 
 test(
   `projectRoot is correct` satisfies HasNameOf<typeof projectRoot>,

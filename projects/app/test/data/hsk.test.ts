@@ -1,3 +1,9 @@
+import {
+  readDictionaryJson,
+  upsertHanziWordMeaning,
+  writeDictionaryJson,
+} from "#bin/util/dictionary.ts";
+import { dataDir } from "#bin/util/paths.ts";
 import type { HanziText, partOfSpeechSchema } from "#data/model.js";
 import { HskLevel, PartOfSpeech } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.js";
@@ -7,12 +13,6 @@ import {
   hanziFromHanziWord,
   loadDictionary,
 } from "#dictionary.js";
-import {
-  dataDir,
-  readDictionaryJson,
-  upsertHanziWordMeaning,
-  writeDictionaryJson,
-} from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { toCamelCase } from "#util/unicode.js";
 import { memoize0, memoize1 } from "@pinyinly/lib/collections";

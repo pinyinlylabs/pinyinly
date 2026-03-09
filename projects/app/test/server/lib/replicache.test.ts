@@ -1,6 +1,6 @@
+import { projectRoot } from "#bin/util/paths.ts";
 import { currentSchema as schema } from "#data/rizzleSchema.ts";
 import { fetchMutations, pull, push } from "#server/lib/replicache.ts";
-import { projectRoot } from "#test/helpers.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { globSync } from "@pinyinly/lib/fs";
 import path from "node:path";

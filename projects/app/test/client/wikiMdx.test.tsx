@@ -1,6 +1,7 @@
 // pyly-not-src-test
 // @vitest-environment happy-dom
 
+import { projectRoot } from "#bin/util/paths.ts";
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
@@ -8,7 +9,6 @@ import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { registry_ForTesting } from "#client/wiki.js";
 import type { Rizzle } from "#data/rizzleSchema.ts";
-import { projectRoot } from "#test/helpers.ts";
 import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
 import { QueryClientProvider } from "@tanstack/react-query";

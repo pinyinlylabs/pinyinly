@@ -7,6 +7,7 @@
     "noop": "echo 1"
   },
   "imports": {
+    "#bin/*": "./bin/*",
     "#test/*": "./test/*",
     "#*.js": "./src/*.js",
     "#*.json": "./src/*.json",
