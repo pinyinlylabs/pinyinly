@@ -75,7 +75,7 @@ function MultipleMeanings({
           with <Text className="pyly-bold">different pronunciations</Text>
         </>
       )}
-      :
+      .
     </Text>
   );
 }
