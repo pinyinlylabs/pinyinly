@@ -1,6 +1,8 @@
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
@@ -16,15 +18,18 @@ import {
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { loadFinalToneFrequencies } from "@/dictionary";
+import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import { use } from "react";
 import { Text, View } from "react-native";
 
 const TONE_IDS = [`1`, `2`, `3`, `4`, `5`] as const;
+type ToneId = (typeof TONE_IDS)[number];
 
 interface PinyinFinalToneEditorProps {
   finalSoundId: PinyinSoundId;
   focusedTone?: string | null;
   onToneLayout?: (tone: string, layoutY: number) => void;
+  toneAudioSourceByTone?: Partial<Record<ToneId, PylyAudioSource>>;
 }
 
 /**
@@ -35,6 +40,7 @@ export function PinyinFinalToneEditor({
   finalSoundId,
   focusedTone,
   onToneLayout,
+  toneAudioSourceByTone,
 }: PinyinFinalToneEditorProps) {
   const chart = loadPylyPinyinChart();
   const finalLabel = chart.soundToCustomLabel[finalSoundId] ?? finalSoundId;
@@ -65,6 +71,7 @@ export function PinyinFinalToneEditor({
             isFocused={focusedTone === tone}
             onToneLayout={onToneLayout}
             frequency={finalFrequencies?.get(Number(tone)) ?? 0}
+            toneAudioSource={toneAudioSourceByTone?.[tone] ?? null}
           />
         ))}
       </View>
@@ -79,6 +86,7 @@ interface ToneTileEditorProps {
   isFocused: boolean;
   onToneLayout?: (tone: string, layoutY: number) => void;
   frequency: number;
+  toneAudioSource: PylyAudioSource;
 }
 
 function ToneTileEditor({
@@ -88,7 +96,9 @@ function ToneTileEditor({
   isFocused,
   onToneLayout,
   frequency,
+  toneAudioSource,
 }: ToneTileEditorProps) {
+  const playTone = useSoundEffect(toneAudioSource);
   const toneSoundId = tone as PinyinSoundId;
 
   // Get user-set tone name, fallback to default
@@ -129,6 +139,15 @@ function ToneTileEditor({
           )}
           :
         </Text>
+        {toneAudioSource == null ? null : (
+          <RectButton
+            variant="bare2"
+            iconStart="speaker-2"
+            onPressIn={playTone}
+          >
+            Play
+          </RectButton>
+        )}
         <InlineEditableSettingText
           variant="body"
           setting={pinyinFinalToneNameSetting}
