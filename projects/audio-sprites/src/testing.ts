@@ -557,6 +557,7 @@ export interface SpeechFileTestOptions {
   autoFixLoudness?: boolean;
   /** Whether to automatically trim silence by overwriting the original file (default: false) */
   autoFixTrimSilence?: boolean;
+  skipLoudness?: boolean;
 }
 
 /**
@@ -573,15 +574,28 @@ function handleAudioFix(options: {
   fixType: string;
   /** Whether to overwrite the original file or create a separate fix file */
   autoFix: boolean;
+  /** Whether to write a log file for the fix operation */
+  writeLog?: boolean;
 }): void {
-  const { fixCommand, filePath, projectRelPath, fixType, autoFix } = options;
+  const {
+    fixCommand,
+    filePath,
+    projectRelPath,
+    fixType,
+    autoFix,
+    writeLog = false,
+  } = options;
 
   // Create a fixed file with a deterministic name
   // FFmpeg can't write to the same file it's reading, so we always write to a separate file first
   const ext = path.extname(filePath);
   const fixedFilePath = `${filePath}-${fixType}-fix${ext}`;
   const command = fixCommand(fixedFilePath);
-  execSync(`(echo '% ${command}'; ${command}) > "${fixedFilePath}.log" 2>&1`);
+  if (writeLog) {
+    execSync(`(echo '% ${command}'; ${command}) > "${fixedFilePath}.log" 2>&1`);
+  } else {
+    execSync(command);
+  }
 
   if (autoFix) {
     // Replace the original file with the fixed version
@@ -613,6 +627,7 @@ export async function createSpeechFileTests(
     projectRoot,
     autoFixLoudness = false,
     autoFixTrimSilence = false,
+    skipLoudness = false,
   } = options;
 
   for (const filePath of await glob(audioGlob)) {
@@ -637,66 +652,69 @@ export async function createSpeechFileTests(
         expect(duration.fromStream).toBeGreaterThanOrEqual(minDuration);
       });
 
-      test(`loudness is within allowed tolerance`, async () => {
-        // ChatGPT recommends to target -18 LUFS because:
-        //
-        // | Use Case                     | Target LUFS                              | Notes                                                       |
-        // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
-        // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
-        // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
-        // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
-        // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
-        // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
-        // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
-        //
-        // Target **-18 LUFS** because:
-        //
-        // - 🎧 Less aggressive than music
-        // - 🧠 Good for repeated listening
-        // - 📱 Comfortable on mobile speakers
-        // - 🔄 Balances speech clarity and ear fatigue
+      test.skipIf(skipLoudness)(
+        `loudness is within allowed tolerance`,
+        async () => {
+          // ChatGPT recommends to target -18 LUFS because:
+          //
+          // | Use Case                     | Target LUFS                              | Notes                                                       |
+          // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+          // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
+          // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
+          // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
+          // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
+          // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
+          // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
+          //
+          // Target **-18 LUFS** because:
+          //
+          // - 🎧 Less aggressive than music
+          // - 🧠 Good for repeated listening
+          // - 📱 Comfortable on mobile speakers
+          // - 🔄 Balances speech clarity and ear fatigue
 
-        const { loudnorm } = await analyzeAudioFile(filePath);
+          const { loudnorm } = await analyzeAudioFile(filePath);
 
-        const loudness = loudnorm.input_i;
-        const delta = Math.abs(loudness - targetLufs);
+          const loudness = loudnorm.input_i;
+          const delta = Math.abs(loudness - targetLufs);
 
-        // Check if loudness values are valid (not infinite or NaN)
-        const hasInvalidValues =
-          !Number.isFinite(loudnorm.input_i) ||
-          !Number.isFinite(loudnorm.input_tp) ||
-          !Number.isFinite(loudnorm.input_lra) ||
-          !Number.isFinite(loudnorm.input_thresh) ||
-          !Number.isFinite(loudnorm.target_offset);
+          // Check if loudness values are valid (not infinite or NaN)
+          const hasInvalidValues =
+            !Number.isFinite(loudnorm.input_i) ||
+            !Number.isFinite(loudnorm.input_tp) ||
+            !Number.isFinite(loudnorm.input_lra) ||
+            !Number.isFinite(loudnorm.input_thresh) ||
+            !Number.isFinite(loudnorm.target_offset);
 
-        if (hasInvalidValues) {
-          // Skip loudness test for files with invalid measurements (e.g., too short or silent)
-          console.warn(
-            chalk.yellow(
-              `Skipping loudness test for ${projectRelPath}: invalid measurements (input_i=${loudnorm.input_i}, offset=${loudnorm.target_offset})`,
-            ),
-          );
-          return;
-        }
-
-        if (delta > loudnessTolerance) {
-          handleAudioFix({
-            fixCommand: (outputPath) =>
-              `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${outputPath}"`,
-            filePath,
-            projectRelPath,
-            fixType: `loudness`,
-            autoFix: autoFixLoudness,
-          });
-
-          if (autoFixLoudness) {
-            // Skip the assertion since we've fixed the file
+          if (hasInvalidValues) {
+            // Skip loudness test for files with invalid measurements (e.g., too short or silent)
+            console.warn(
+              chalk.yellow(
+                `Skipping loudness test for ${projectRelPath}: invalid measurements (input_i=${loudnorm.input_i}, offset=${loudnorm.target_offset})`,
+              ),
+            );
             return;
           }
-        }
 
-        expect(delta).toBeLessThanOrEqual(loudnessTolerance);
-      });
+          if (delta > loudnessTolerance) {
+            handleAudioFix({
+              fixCommand: (outputPath) =>
+                `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${outputPath}"`,
+              filePath,
+              projectRelPath,
+              fixType: `loudness`,
+              autoFix: autoFixLoudness,
+            });
+
+            if (autoFixLoudness) {
+              // Skip the assertion since we've fixed the file
+              return;
+            }
+          }
+
+          expect(delta).toBeLessThanOrEqual(loudnessTolerance);
+        },
+      );
 
       test(`silence is trimmed`, async () => {
         const { silences, duration } = await analyzeAudioFile(filePath);

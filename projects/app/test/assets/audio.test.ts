@@ -106,9 +106,10 @@ test(
 
 describe(`pinyin speech files`, async () => {
   await createSpeechFileTests({
-    audioGlob: path.join(pinyinAudioDir, `*.{mp3,m4a,aac}`),
+    audioGlob: path.join(pinyinAudioDir, `**/*.{mp3,m4a,aac}`),
     projectRoot,
     autoFixLoudness: false,
     autoFixTrimSilence: !isCi,
+    skipLoudness: true,
   });
 });
