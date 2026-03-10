@@ -89,7 +89,7 @@ describe(`generateSpeech` satisfies HasNameOf<typeof generateSpeech>, () => {
       expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns false when OpenAI call fails`, async () => {
+    test(`throws when OpenAI call fails`, async () => {
       const mockOpenAI = {
         audio: {
           speech: {
@@ -98,7 +98,7 @@ describe(`generateSpeech` satisfies HasNameOf<typeof generateSpeech>, () => {
         },
       } as unknown as GenerateSpeechOptions[`openai`];
 
-      const ok = await generateSpeech({
+      const result = generateSpeech({
         phrase: `你好`,
         voice: `nova`,
         outputDir: TEST_OUTPUT_DIR,
@@ -106,7 +106,7 @@ describe(`generateSpeech` satisfies HasNameOf<typeof generateSpeech>, () => {
         openai: mockOpenAI,
       });
 
-      expect(ok).toBe(false);
+      await expect(result).rejects.toThrow();
     });
   });
 });
