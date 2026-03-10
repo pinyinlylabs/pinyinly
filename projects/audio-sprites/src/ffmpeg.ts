@@ -15,24 +15,44 @@ export const getFfmpegVersion = memoize0(async () => {
   return stdout;
 });
 
-const stringNumberSchema = z.string().pipe(z.coerce.number());
+export const stringifiedNumberSchema = z.string().transform((val, ctx) => {
+  // Handle special ffmpeg infinity values that appear for extremely quiet or problematic audio
+  const trimmed = val.trim();
+  if (trimmed === `-inf` || trimmed === `-Infinity`) {
+    return -Infinity;
+  }
+  if (trimmed === `inf` || trimmed === `Infinity`) {
+    return Infinity;
+  }
+
+  // Parse as number
+  const num = Number(val);
+  if (!Number.isFinite(num)) {
+    ctx.addIssue({
+      code: `custom`,
+      message: `Value "${val}" could not be parsed as a finite number (got ${String(num)})`,
+    });
+    return z.NEVER;
+  }
+  return num;
+});
 
 const loudnormSchema = z.object({
-  input_i: stringNumberSchema,
-  input_tp: stringNumberSchema,
-  input_lra: stringNumberSchema,
-  input_thresh: stringNumberSchema,
-  output_i: stringNumberSchema,
-  output_tp: stringNumberSchema,
-  output_lra: stringNumberSchema,
-  output_thresh: stringNumberSchema,
+  input_i: stringifiedNumberSchema,
+  input_tp: stringifiedNumberSchema,
+  input_lra: stringifiedNumberSchema,
+  input_thresh: stringifiedNumberSchema,
+  output_i: stringifiedNumberSchema,
+  output_tp: stringifiedNumberSchema,
+  output_lra: stringifiedNumberSchema,
+  output_thresh: stringifiedNumberSchema,
   normalization_type: z.string(),
-  target_offset: stringNumberSchema,
+  target_offset: stringifiedNumberSchema,
 });
 
 const astatsSchema = z
   .object({
-    "Number of samples": stringNumberSchema,
+    "Number of samples": stringifiedNumberSchema,
   })
   .loose();
 
@@ -62,8 +82,26 @@ function extractLoudnorm(output: string) {
     `Failed to extract JSON from ffmpeg output: \n${output}`,
   );
 
-  const parsed = loudnormSchema.parse(JSON.parse(json));
-  return parsed;
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(json);
+  } catch (error) {
+    throw new Error(
+      `Failed to parse extracted JSON: ${json}\nError: ${String(error)}`,
+    );
+  }
+
+  try {
+    return loudnormSchema.parse(parsedJson);
+  } catch (error) {
+    // Log the raw data to help debug sporadic parsing failures
+    console.error(`Failed to validate loudnorm data:`);
+    console.error(`Raw JSON string:`, json);
+    console.error(`Parsed JSON:`, JSON.stringify(parsedJson, null, 2));
+    throw new Error(
+      `Failed to validate loudnorm data: ${JSON.stringify(parsedJson, null, 2)}\nError: ${String(error)}`,
+    );
+  }
 }
 
 const containerDataSchema = z.object({

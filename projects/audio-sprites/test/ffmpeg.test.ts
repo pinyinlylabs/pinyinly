@@ -3,6 +3,7 @@ import {
   generateSpriteCommand,
   parseFfmpegOutput,
   parseTimestampToSeconds,
+  stringifiedNumberSchema,
 } from "#ffmpeg.ts";
 import { loadManifest } from "#manifestRead.ts";
 import { saveManifest, syncManifestWithFilesystem } from "#manifestWrite.ts";
@@ -18,6 +19,53 @@ const execFileAsync = promisify(execFile);
 
 const fixturesDir = path.join(import.meta.dirname, `fixtures`);
 const outputsDir = path.join(fixturesDir, `outputs`);
+
+describe(
+  `stringifiedNumberSchema suite` satisfies HasNameOf<
+    typeof stringifiedNumberSchema
+  >,
+  () => {
+    test(`parses regular numeric strings`, () => {
+      expect(stringifiedNumberSchema.parse(`123`)).toBe(123);
+      expect(stringifiedNumberSchema.parse(`-17.33`)).toBe(-17.33);
+      expect(stringifiedNumberSchema.parse(`0.00`)).toBe(0);
+      expect(stringifiedNumberSchema.parse(`-3.49`)).toBe(-3.49);
+    });
+
+    test(`handles -inf and -Infinity strings`, () => {
+      expect(stringifiedNumberSchema.parse(`-inf`)).toBe(-Infinity);
+      expect(stringifiedNumberSchema.parse(`-Infinity`)).toBe(-Infinity);
+    });
+
+    test(`handles inf and Infinity strings`, () => {
+      expect(stringifiedNumberSchema.parse(`inf`)).toBe(Infinity);
+      expect(stringifiedNumberSchema.parse(`Infinity`)).toBe(Infinity);
+    });
+
+    test(`trims whitespace before parsing`, () => {
+      expect(stringifiedNumberSchema.parse(`  -inf  `)).toBe(-Infinity);
+      expect(stringifiedNumberSchema.parse(`  123  `)).toBe(123);
+      expect(stringifiedNumberSchema.parse(`\t-17.33\n`)).toBe(-17.33);
+    });
+
+    test(`rejects NaN strings`, () => {
+      expect(() => stringifiedNumberSchema.parse(`NaN`)).toThrow();
+    });
+
+    test(`parses empty strings as zero`, () => {
+      // Empty strings coerce to 0, which is a valid finite number
+      expect(stringifiedNumberSchema.parse(``)).toBe(0);
+      expect(stringifiedNumberSchema.parse(`   `)).toBe(0);
+    });
+
+    test(`rejects non-numeric strings`, () => {
+      expect(() => stringifiedNumberSchema.parse(`abc`)).toThrow(
+        /could not be parsed as a finite number/,
+      );
+      expect(() => stringifiedNumberSchema.parse(`1.2.3`)).toThrow();
+    });
+  },
+);
 
 test(
   `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,
@@ -100,6 +148,26 @@ describe(
         `Invalid time format: invalid`,
       );
     });
+  },
+);
+
+test(
+  `parseFfmpegOutput handles infinity values from quiet audio` satisfies HasNameOf<
+    typeof parseFfmpegOutput
+  >,
+  () => {
+    // Regression test for sporadic NaN errors when ffmpeg outputs "-inf" or "inf"
+    // for extremely quiet/silent audio files
+    const result = parseFfmpegOutput(outputExampleWithInfinity);
+
+    // Infinity values should be parsed as JavaScript Infinity/-Infinity
+    expect(result.loudnorm.input_i).toBe(-Infinity);
+    expect(result.loudnorm.output_i).toBe(-Infinity);
+    expect(result.loudnorm.target_offset).toBe(Infinity);
+
+    // Other fields should parse normally
+    expect(result.loudnorm.input_tp).toBe(-53.95);
+    expect(result.loudnorm.input_lra).toBe(0);
   },
 );
 
@@ -205,6 +273,28 @@ Output #0, null, to 'pipe:':
 }
 [out#0/null @ 0x13af3a800] video:0KiB audio:264KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
 size=N/A time=00:00:00.70 bitrate=N/A speed=45.9x    
+`;
+
+const outputExampleWithInfinity = `ffmpeg version 7.1.1 Copyright (c) 2000-2025 the FFmpeg developers
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'pinyin/zhen1-nova.m4a':
+  Duration: 00:00:00.69, start: 0.000000, bitrate: 81 kb/s
+  Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 96000 Hz, mono, fltp, 68 kb/s (default)
+[Parsed_astats_0 @ 0x13af3f8e0] Channel: 1
+[Parsed_astats_0 @ 0x13af3f8e0] Number of samples: 67584
+[Parsed_loudnorm_1 @ 0x13af3fa20] 
+{
+	"input_i" : "-inf",
+	"input_tp" : "-53.95",
+	"input_lra" : "0.00",
+	"input_thresh" : "-70.00",
+	"output_i" : "-inf",
+	"output_tp" : "-2.00",
+	"output_lra" : "0.00",
+	"output_thresh" : "-70.00",
+	"normalization_type" : "linear",
+	"target_offset" : "inf"
+}
+size=N/A time=00:00:00.70 bitrate=N/A speed=45.9x
 `;
 
 describe(
