@@ -3296,15 +3296,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google/genai@npm:^0.10.0":
-  version: 0.10.0
-  resolution: "@google/genai@npm:0.10.0"
+"@google/genai@npm:^0.15.0":
+  version: 0.15.0
+  resolution: "@google/genai@npm:0.15.0"
   dependencies:
     google-auth-library: "npm:^9.14.2"
     ws: "npm:^8.18.0"
     zod: "npm:^3.22.4"
     zod-to-json-schema: "npm:^3.22.4"
-  checksum: 10c0/89a80eebdd053f2643fb977b939c3de1ece6889549f7d030b81a21dae0e0e0750233e453dafe665f8d337c642b4ba7a2f19b06bc270f3e2de8aeb803af1851d1
+  peerDependencies:
+    "@modelcontextprotocol/sdk": ^1.11.0
+  checksum: 10c0/b51e4cdabb2dfcb8d7340b7cf1be0e8b2311f68a852f93a114f510c7fb31604690c6ea15955686e04a658d2030316ee60962aeb9545867ca493f180623cf34b0
   languageName: node
   linkType: hard
 
@@ -6236,7 +6238,7 @@ __metadata:
     "@expo/metro-runtime": "npm:~6.1.2"
     "@floating-ui/react-native": "npm:^0.10.7"
     "@formatjs/intl-segmenter": "npm:^11.7.12"
-    "@google/genai": "npm:^0.10.0"
+    "@google/genai": "npm:^0.15.0"
     "@inkjs/ui": "npm:^2.0.0"
     "@inngest/eslint-plugin": "npm:^0.0.7"
     "@inngest/middleware-sentry": "npm:^0.1.1"
