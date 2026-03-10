@@ -1,3 +1,4 @@
+import { upsertHanziWordMeaning } from "#bin/util/dictionary.ts";
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText, HanziWord } from "#data/model.ts";
 import { PartOfSpeech } from "#data/model.ts";
@@ -37,7 +38,6 @@ import {
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "./data/helpers.ts";
-import { upsertHanziWordMeaning } from "./helpers.ts";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group

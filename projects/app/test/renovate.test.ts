@@ -1,10 +1,10 @@
 // pyly-not-src-test
 
+import { workspaceRoot } from "#bin/util/paths.ts";
 import * as fs from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { workspaceRoot } from "./helpers";
 
 const configPath = path.resolve(workspaceRoot, `renovate.json5`);
 

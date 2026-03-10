@@ -9,7 +9,7 @@ import {
   pinyinSoundNameSuggestionsSchema,
 } from "#dictionary.js";
 import type { loadPinyinSoundNameSuggestions } from "#dictionary.js";
-import { dataDir } from "#test/helpers.ts";
+import { dataDir } from "./util/paths.ts";
 import {
   deepTransform,
   merge,

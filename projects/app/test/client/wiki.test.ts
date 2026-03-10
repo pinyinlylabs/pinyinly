@@ -1,3 +1,4 @@
+import { dataDir, projectRoot, wikiDir } from "#bin/util/paths.ts";
 import {
   characterStrokeCount,
   componentToString,
@@ -18,7 +19,7 @@ import {
   loadCharacters,
   loadDictionary,
 } from "#dictionary.js";
-import { dataDir, getFonts, projectRoot, wikiDir } from "#test/helpers.ts";
+import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";

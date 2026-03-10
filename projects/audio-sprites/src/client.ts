@@ -20,7 +20,11 @@ export function isAudioSpriteSource(
 export function resolveAudioSource(source: PylyAudioSource): {
   uri: string;
   range?: [start: number, duration: number];
-} {
+} | null {
+  if (source == null) {
+    return null;
+  }
+
   if (isAudioSpriteSource(source)) {
     let uri;
     if (typeof source.asset === `string`) {

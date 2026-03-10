@@ -2,6 +2,7 @@ import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
@@ -19,6 +20,10 @@ import {
   getPinyinSoundLabel,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
+import {
+  getPinyinFinalToneAudioSource,
+  getPinyinSoundAudioSource,
+} from "@/data/pinyinSoundAudio";
 import {
   hanziPronunciationHintTextSetting,
   pinyinSoundDescriptionSetting,
@@ -48,6 +53,24 @@ export default function SoundIdPage() {
     useState(false);
 
   const label = getPinyinSoundLabel(id, chart);
+  const soundAudioSource = getPinyinSoundAudioSource(id);
+  const playSound = useSoundEffect(soundAudioSource);
+
+  const tone1AudioSource = id.startsWith(`-`)
+    ? getPinyinFinalToneAudioSource(id, `1`)
+    : null;
+  const tone2AudioSource = id.startsWith(`-`)
+    ? getPinyinFinalToneAudioSource(id, `2`)
+    : null;
+  const tone3AudioSource = id.startsWith(`-`)
+    ? getPinyinFinalToneAudioSource(id, `3`)
+    : null;
+  const tone4AudioSource = id.startsWith(`-`)
+    ? getPinyinFinalToneAudioSource(id, `4`)
+    : null;
+  const tone5AudioSource = id.startsWith(`-`)
+    ? getPinyinFinalToneAudioSource(id, `5`)
+    : null;
 
   useEffect(() => {
     if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
@@ -85,6 +108,15 @@ export default function SoundIdPage() {
             variant="bare2"
             iconStart="pencil"
           />
+          {soundAudioSource == null ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="speaker-2"
+              onPressIn={playSound}
+            >
+              Play
+            </RectButton>
+          )}
         </View>
 
         <View className="gap-10">
@@ -127,6 +159,13 @@ export default function SoundIdPage() {
                 return;
               }
               setToneAnchorY(layoutY);
+            }}
+            toneAudioSourceByTone={{
+              1: tone1AudioSource,
+              2: tone2AudioSource,
+              3: tone3AudioSource,
+              4: tone4AudioSource,
+              5: tone5AudioSource,
             }}
           />
         )}

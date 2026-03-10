@@ -19,6 +19,9 @@
   "include": ["**/*"],
   "references": [
     {
+      "path": "../bin"
+    },
+    {
       "path": "../src"
     },
     {

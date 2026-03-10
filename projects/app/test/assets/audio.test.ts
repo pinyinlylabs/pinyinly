@@ -1,7 +1,7 @@
 // pyly-not-src-test
 import "#assets/audio/manifest.json";
 
-import { projectRoot } from "#test/helpers.ts";
+import { projectRoot } from "#bin/util/paths.ts";
 import { isCi } from "#util/env.ts";
 import { testSprites } from "@pinyinly/audio-sprites/testing";
 import path from "node:path";

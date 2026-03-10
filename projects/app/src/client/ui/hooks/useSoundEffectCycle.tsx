@@ -1,7 +1,8 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
-import { resolveAudioSource } from "@pinyinly/audio-sprites/client";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
+import { resolveAudioSource } from "@pinyinly/audio-sprites/client";
+import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { use, useState } from "react";
 import { Platform } from "react-native";
 import { useFetchAudioBuffers } from "./useFetchAudioBuffer";
@@ -30,7 +31,10 @@ const useSoundEffectCycleWebApi: UseSoundEffectCycle = (sources) => {
 
   // De-duplicate URIs so that we don't make any duplicate queries to
   // react-query, otherwise it will log a warning.
-  const uniqueUris = [...new Set(resolvedSources.map((source) => source.uri))];
+  const uniqueUris = resolvedSources
+    .filter((source): source is NonNullable<typeof source> => source != null)
+    .map((source) => source.uri)
+    .filter(arrayFilterUnique());
   const audioBuffers = useFetchAudioBuffers(uniqueUris);
 
   const uriToAudioBuffer = new Map<string, AudioBuffer | null>(

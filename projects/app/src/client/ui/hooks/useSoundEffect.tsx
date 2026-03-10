@@ -1,10 +1,10 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
+import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import {
   isAudioSpriteSource,
   resolveAudioSource,
 } from "@pinyinly/audio-sprites/client";
-import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import { useAudioPlayer } from "expo-audio";
 import { use } from "react";
 import { Platform } from "react-native";
@@ -28,12 +28,19 @@ const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
 // that sound effects don't take Audio Focus and take control of the media keys
 // on the OS.
 const useSoundEffectWebApi: UseSoundEffect = (src) => {
-  const { uri, range: [start, duration] = [] } = resolveAudioSource(src);
+  const resolved = resolveAudioSource(src);
+  const uri = resolved?.uri;
+  const [start, duration] = resolved?.range ?? [];
 
   const audioContext = use(AudioContextProvider.Context);
-  const { data: audioBuffer } = useFetchAudioBuffer(uri);
+  const { data: audioBuffer } = useFetchAudioBuffer(uri ?? null);
 
   const play = useEventCallback(() => {
+    // No-op if source is null
+    if (resolved == null) {
+      return;
+    }
+
     if (audioBuffer != null && audioContext != null) {
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
