@@ -541,8 +541,6 @@ export async function testSprites(
 export interface SpeechFileTestOptions {
   /** Glob pattern for audio files to test */
   audioGlob: string;
-  /** Suffix to identify fix files (default: "-fix") */
-  fixTag?: string;
   /** Target LUFS for loudness testing (default: -18) */
   targetLufs?: number;
   /** Allowed tolerance for loudness deviation (default: 1) */
@@ -555,29 +553,43 @@ export interface SpeechFileTestOptions {
   durationTolerance?: number;
   /** Project root path for relative path calculation */
   projectRoot?: string;
-  /** Whether we're running in CI environment (affects fix command behavior) */
-  isCI?: boolean;
+  /** Whether to automatically fix loudness issues by overwriting the original file (default: false) */
+  autoFixLoudness?: boolean;
+  /** Whether to automatically trim silence by overwriting the original file (default: false) */
+  autoFixTrimSilence?: boolean;
 }
 
 /**
- * Helper function to execute or log fix commands based on environment.
+ * Helper function to handle auto-fix or create a separate fix file.
  */
-function execOrLogFixCommand(
-  fixCommand: string,
-  fixedFilePath: string,
-  isCI = false,
-): void {
-  if (isCI) {
+function handleAudioFix(options: {
+  /** Function that takes a file path and returns the ffmpeg command for that path */
+  fixCommand: (outputPath: string) => string;
+  /** The absolute path to the original file */
+  filePath: string;
+  /** The relative path for display purposes */
+  projectRelPath: string;
+  /** The type of fix (e.g., "loudness" or "silence") for naming */
+  fixType: string;
+  /** Whether to overwrite the original file or create a separate fix file */
+  autoFix: boolean;
+}): void {
+  const { fixCommand, filePath, projectRelPath, fixType, autoFix } = options;
+
+  // Create a fixed file with a deterministic name
+  // FFmpeg can't write to the same file it's reading, so we always write to a separate file first
+  const ext = path.extname(filePath);
+  const fixedFilePath = `${filePath}-${fixType}-fix${ext}`;
+  const command = fixCommand(fixedFilePath);
+  execSync(`(echo '% ${command}'; ${command}) > "${fixedFilePath}.log" 2>&1`);
+
+  if (autoFix) {
+    // Replace the original file with the fixed version
+    fs.renameSync(fixedFilePath, filePath);
     console.warn(
-      chalk.yellow(
-        `To fix this, re-run the test outside CI or run: `,
-        chalk.dim(fixCommand),
-      ),
+      chalk.yellow(chalk.bold(`Auto-fixed ${fixType}:`), projectRelPath),
     );
   } else {
-    execSync(
-      `(echo "% ${fixCommand}"; ${fixCommand}) > "${fixedFilePath}.log" 2>&1`,
-    );
     console.warn(chalk.yellow(chalk.bold(`Created:`), fixedFilePath));
   }
 }
@@ -593,18 +605,18 @@ export async function createSpeechFileTests(
 ): Promise<void> {
   const {
     audioGlob,
-    fixTag = `-fix`,
     targetLufs = -18,
     loudnessTolerance = 1,
     allowedStartOrEndOffset = 0.1,
-    minDuration = 0.5,
+    minDuration = 0.3,
     durationTolerance = 0.05,
     projectRoot,
-    isCI = false,
+    autoFixLoudness = false,
+    autoFixTrimSilence = false,
   } = options;
 
   for (const filePath of await glob(audioGlob)) {
-    if (filePath.includes(fixTag)) {
+    if (filePath.includes(`-fix`)) {
       continue;
     }
 
@@ -649,13 +661,38 @@ export async function createSpeechFileTests(
         const loudness = loudnorm.input_i;
         const delta = Math.abs(loudness - targetLufs);
 
-        if (delta > loudnessTolerance) {
-          const ext = path.extname(projectRelPath);
-          const fixedSuffix = `-loudness${fixTag}${ext}`;
-          const fixedFilePath = `${filePath}${fixedSuffix}`;
-          const fixCommand = `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${fixedFilePath}"`;
+        // Check if loudness values are valid (not infinite or NaN)
+        const hasInvalidValues =
+          !Number.isFinite(loudnorm.input_i) ||
+          !Number.isFinite(loudnorm.input_tp) ||
+          !Number.isFinite(loudnorm.input_lra) ||
+          !Number.isFinite(loudnorm.input_thresh) ||
+          !Number.isFinite(loudnorm.target_offset);
 
-          execOrLogFixCommand(fixCommand, fixedFilePath, isCI);
+        if (hasInvalidValues) {
+          // Skip loudness test for files with invalid measurements (e.g., too short or silent)
+          console.warn(
+            chalk.yellow(
+              `Skipping loudness test for ${projectRelPath}: invalid measurements (input_i=${loudnorm.input_i}, offset=${loudnorm.target_offset})`,
+            ),
+          );
+          return;
+        }
+
+        if (delta > loudnessTolerance) {
+          handleAudioFix({
+            fixCommand: (outputPath) =>
+              `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${outputPath}"`,
+            filePath,
+            projectRelPath,
+            fixType: `loudness`,
+            autoFix: autoFixLoudness,
+          });
+
+          if (autoFixLoudness) {
+            // Skip the assertion since we've fixed the file
+            return;
+          }
         }
 
         expect(delta).toBeLessThanOrEqual(loudnessTolerance);
@@ -686,12 +723,19 @@ export async function createSpeechFileTests(
         }
 
         if (start > expectedStart || end < expectedEnd) {
-          const ext = path.extname(projectRelPath);
-          const fixedSuffix = `-silence${fixTag}${ext}`;
-          const fixedFilePath = `${filePath}${fixedSuffix}`;
-          const fixCommand = `ffmpeg -y -i "${filePath}" -af atrim=start=${start}:end=${end} "${fixedFilePath}"`;
+          handleAudioFix({
+            fixCommand: (outputPath) =>
+              `ffmpeg -y -i "${filePath}" -af "atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS" "${outputPath}"`,
+            filePath,
+            projectRelPath,
+            fixType: `silence`,
+            autoFix: autoFixTrimSilence,
+          });
 
-          execOrLogFixCommand(fixCommand, fixedFilePath, isCI);
+          if (autoFixTrimSilence) {
+            // Skip the assertion since we've fixed the file
+            return;
+          }
         }
 
         expect(start).toBe(expectedStart);

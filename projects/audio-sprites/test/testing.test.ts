@@ -781,7 +781,7 @@ describe(
           minDuration: 1,
           durationTolerance: 0.1,
           projectRoot: `/test/project`,
-          isCI: true,
+          isCi: true,
         });
       }).not.toThrow();
     });

@@ -1,5 +1,7 @@
 import { openaiApiKey } from "#util/env.ts";
-import { existsSync, mkdir, writeFile } from "@pinyinly/lib/fs";
+import { nanoid } from "#util/nanoid.ts";
+import { regExpEscape } from "#util/regExp.ts";
+import { existsSync, mkdir, readdir, writeFile } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -18,6 +20,7 @@ export const AVAILABLE_VOICES = [
   `shimmer`,
 ] as const;
 export type Voice = (typeof AVAILABLE_VOICES)[number];
+export type AudioFileFormat = `mp3` | `m4a`;
 
 // Voice-specific instructions for better pronunciation
 const VOICE_INSTRUCTIONS: Record<Voice, string> = {
@@ -37,12 +40,22 @@ export interface GenerateSpeechOptions {
   voice: Voice;
   outputDir?: string;
   speed?: number;
-  format?: `mp3` | `m4a`;
+  format?: AudioFileFormat;
   baseFileName?: string;
   /** If true, only check which files exist without generating */
   check?: boolean;
   /** Optional OpenAI instance for testing */
   openai?: OpenAI;
+  /** Override instructions for the voice model (e.g., tone-specific prompts) */
+  instructions?: string;
+  /** Number of samples to generate (defaults to 1). Set > 1 to get multiple samples with nanoid suffixes */
+  samples?: number;
+}
+
+const GENERATED_SAMPLES_DIRNAME = `generated`;
+
+function getGeneratedOutputDir(outputDir: string): string {
+  return path.join(outputDir, GENERATED_SAMPLES_DIRNAME);
 }
 
 /**
@@ -52,10 +65,50 @@ function buildOutputFilePath(
   outputDir: string,
   baseFileName: string,
   voice: Voice,
-  format: `mp3` | `m4a`,
+  format: AudioFileFormat,
+  sampleSuffix: string,
 ): string {
   const extension = format === `m4a` ? `m4a` : `mp3`;
-  return path.join(outputDir, `${baseFileName}-${voice}.${extension}`);
+  const suffix = `-${sampleSuffix}`;
+  return path.join(outputDir, `${baseFileName}-${voice}${suffix}.${extension}`);
+}
+
+/**
+ * Returns true if at least one matching file exists.
+ *
+ * Supported patterns:
+ * - base file: {base}-{voice}.{ext}
+ * - sampled file: {base}-{voice}-{suffix}.{ext}
+ *
+ * Looks in both outputDir and outputDir/generated.
+ */
+async function hasAtLeastOneSample(
+  outputDir: string,
+  baseFileName: string,
+  voice: Voice,
+  format: AudioFileFormat,
+): Promise<boolean> {
+  const extension = format === `m4a` ? `m4a` : `mp3`;
+  const escapedBase = regExpEscape(baseFileName);
+  const escapedVoice = regExpEscape(voice);
+  const fileNamePattern = new RegExp(
+    `^${escapedBase}-${escapedVoice}(?:-[^.]+)?\\.${extension}$`,
+  );
+
+  const candidateDirs = [outputDir, getGeneratedOutputDir(outputDir)];
+
+  for (const dir of candidateDirs) {
+    if (!existsSync(dir)) {
+      continue;
+    }
+
+    const files = await readdir(dir);
+    if (files.some((name) => fileNamePattern.test(name))) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 async function generateAudioFile(
@@ -63,8 +116,9 @@ async function generateAudioFile(
   text: string,
   voice: Voice,
   speed: number,
+  instructionOverride?: string,
 ): Promise<Buffer> {
-  const instruction = VOICE_INSTRUCTIONS[voice];
+  const instruction = instructionOverride ?? VOICE_INSTRUCTIONS[voice];
 
   const response = await openai.audio.speech.create({
     model: `gpt-4o-mini-tts`,
@@ -102,30 +156,19 @@ function convertMp3ToM4a(mp3Path: string, m4aPath: string): void {
 
 async function saveAudioFile(
   audioBuffer: Buffer,
-  outputDir: string,
-  baseFileName: string,
-  voice: Voice,
-  format: `mp3` | `m4a`,
+  outputPath: string,
+  format: AudioFileFormat,
 ): Promise<string> {
-  // Save as mp3 first
-  const mp3FilePath = buildOutputFilePath(
-    outputDir,
-    baseFileName,
-    voice,
-    `mp3`,
-  );
+  // Save as mp3 first (or as temporary input before m4a conversion)
+  const mp3FilePath =
+    format === `mp3` ? outputPath : outputPath.replace(/\.m4a$/u, `.tmp.mp3`);
 
   await mkdir(path.dirname(mp3FilePath), { recursive: true });
   await writeFile(mp3FilePath, audioBuffer);
 
   if (format === `m4a`) {
-    // Convert to m4a
-    const m4aFilePath = buildOutputFilePath(
-      outputDir,
-      baseFileName,
-      voice,
-      `m4a`,
-    );
+    // Convert temporary mp3 to target m4a path
+    const m4aFilePath = outputPath;
 
     try {
       convertMp3ToM4a(mp3FilePath, m4aFilePath);
@@ -160,6 +203,8 @@ export async function generateSpeech(
     speed = 1,
     format = `m4a`,
     check = false,
+    instructions: instructionOverride,
+    samples = 1,
   } = options;
 
   // Use provided base filename or generate from phrase
@@ -168,15 +213,9 @@ export async function generateSpeech(
     options.baseFileName ??
     phrase.replaceAll(/[^\u4E00-\u9FFF\wāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜÜ]/g, ``);
 
-  // Check mode: return whether the expected file already exists
+  // Check mode: return whether at least one matching file already exists
   if (check) {
-    const filePath = buildOutputFilePath(
-      outputDir,
-      baseFileName,
-      voice,
-      format,
-    );
-    return existsSync(filePath);
+    return hasAtLeastOneSample(outputDir, baseFileName, voice, format);
   }
 
   const openai =
@@ -185,7 +224,29 @@ export async function generateSpeech(
       apiKey: nonNullable(openaiApiKey),
     });
 
-  const audioBuffer = await generateAudioFile(openai, phrase, voice, speed);
-  await saveAudioFile(audioBuffer, outputDir, baseFileName, voice, format);
+  const generatedOutputDir = getGeneratedOutputDir(outputDir);
+
+  // Generate the specified number of samples
+  for (let i = 0; i < samples; i++) {
+    const audioBuffer = await generateAudioFile(
+      openai,
+      phrase,
+      voice,
+      speed,
+      instructionOverride,
+    );
+
+    // Always suffix generated files and keep them under generated/
+    const sampleSuffix = nanoid();
+    const outputPath = buildOutputFilePath(
+      generatedOutputDir,
+      baseFileName,
+      voice,
+      format,
+      sampleSuffix,
+    );
+    await saveAudioFile(audioBuffer, outputPath, format);
+  }
+
   return true;
 }

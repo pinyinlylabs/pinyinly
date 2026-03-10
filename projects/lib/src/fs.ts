@@ -15,6 +15,7 @@ import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
 // oxlint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 export {
   access,
   mkdir,
@@ -28,11 +29,13 @@ export {
 } from "node:fs/promises";
 
 // oxlint-disable-next-line eslint/no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 export {
   createReadStream,
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   unlinkSync,
@@ -129,6 +132,7 @@ export function writeUtf8FileIfChangedSync(
   return hasDiff;
 }
 
+// oxlint-disable-next-line no-restricted-imports
 // oxlint-disable-next-line no-restricted-imports
 export { glob, globSync } from "glob";
 

@@ -165,8 +165,18 @@ interface Silence {
 }
 
 function extractSilenceDetection(output: string) {
-  const silences: Silence[] = [];
+  const rawSilences: Silence[] = [];
   let start: number | null = null;
+
+  // Some files retain a non-zero stream start timestamp after trimming.
+  // Shift detected silence times so callers get timeline values that match
+  // metadata-aware playback tools (e.g. macOS Quick Look).
+  const containerStartMatch =
+    /Duration: .+?, start: (?<start>.+?), bitrate: .+?$/gms.exec(output);
+  const parsedStart = Number.parseFloat(
+    containerStartMatch?.groups?.[`start`] ?? `0`,
+  );
+  const timeOffset = Number.isFinite(parsedStart) ? parsedStart : 0;
 
   const matches = output.matchAll(/^\[silencedetect @ .+?\] (.+?)$/gm);
   for (const [, message] of matches) {
@@ -190,7 +200,7 @@ function extractSilenceDetection(output: string) {
       invariant(silenceEnd != null);
       invariant(silenceDuration != null);
 
-      silences.push({
+      rawSilences.push({
         start,
         end: Number.parseFloat(silenceEnd),
         duration: Number.parseFloat(silenceDuration),
@@ -198,6 +208,39 @@ function extractSilenceDetection(output: string) {
       start = null;
       continue;
     }
+  }
+
+  if (timeOffset <= 0) {
+    return rawSilences;
+  }
+
+  const silences: Silence[] = [];
+  let hasLeadingFromStream = false;
+
+  for (const silence of rawSilences) {
+    if (silence.start === 0) {
+      hasLeadingFromStream = true;
+      silences.push({
+        start: 0,
+        end: silence.end + timeOffset,
+        duration: silence.end + timeOffset,
+      });
+      continue;
+    }
+
+    silences.push({
+      start: silence.start + timeOffset,
+      end: silence.end + timeOffset,
+      duration: silence.duration,
+    });
+  }
+
+  if (!hasLeadingFromStream) {
+    silences.unshift({
+      start: 0,
+      end: timeOffset,
+      duration: timeOffset,
+    });
   }
 
   return silences;

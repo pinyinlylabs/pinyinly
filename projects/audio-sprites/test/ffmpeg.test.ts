@@ -508,23 +508,73 @@ describe(
 );
 
 describe(`Integration tests with real ffmpeg`, () => {
-  test(`analyzeAudioFile works with real audio files`, async () => {
-    const audioPath = path.join(import.meta.dirname, `fixtures/audio1.mp3`);
+  describe(
+    `analyzeAudioFile` satisfies HasNameOf<typeof analyzeAudioFile>,
+    () => {
+      test(`works with real audio files`, async () => {
+        const audioPath = path.join(import.meta.dirname, `fixtures/audio1.mp3`);
 
-    const result = await analyzeAudioFile(audioPath);
+        const result = await analyzeAudioFile(audioPath);
 
-    expect(result).toMatchObject({
-      duration: {
-        fromStream: expect.any(Number) as number,
-        fromContainer: expect.any(Number) as number,
-      },
-      astats: expect.any(Object) as object,
-      loudnorm: expect.any(Object) as object,
-    });
+        expect(result).toMatchObject({
+          duration: {
+            fromStream: expect.any(Number) as number,
+            fromContainer: expect.any(Number) as number,
+          },
+          astats: expect.any(Object) as object,
+          loudnorm: expect.any(Object) as object,
+        });
 
-    // Check that the duration is close to the expected 1.2 seconds
-    expect(result.duration.fromStream).toBeCloseTo(1.2, 1);
-  });
+        // Check that the duration is close to the expected 1.2 seconds
+        expect(result.duration.fromStream).toBeCloseTo(1.2, 1);
+      });
+
+      test(`regression test, reports leading silence from t=0 on metadata-aware timeline for non-zero-start-metadata.m4a`, async () => {
+        // This fixture has non-zero stream start metadata. Leading silence
+        // should include that offset and therefore start at t=0.
+        const filePath = path.join(fixturesDir, `non-zero-start-metadata.m4a`);
+
+        const result = await analyzeAudioFile(filePath);
+
+        // Verify we detected silence
+        expect(result.silences.length).toBeGreaterThan(0);
+
+        // Find the first silence segment.
+        const leadingSilence = result.silences[0];
+
+        expect(
+          leadingSilence,
+          `Expected to detect silence at the beginning of the file`,
+        ).toBeDefined();
+
+        // For this fixture, ffprobe reports ~0.744s start_time. The leading
+        // silence should start at 0 and include that offset.
+        expect(leadingSilence?.start).toBe(0);
+        expect(leadingSilence?.end).toBeGreaterThan(0.74);
+        expect(leadingSilence?.end).toBeLessThan(0.85);
+        expect(leadingSilence?.duration).toBeGreaterThan(0.74);
+        expect(leadingSilence?.duration).toBeLessThan(0.85);
+
+        // Log results for debugging if needed
+        // console.log('Detected silences:', result.silences);
+      });
+
+      test(`silence detection parameters are correctly applied`, async () => {
+        // Test that the configured minimum duration threshold (0.01s) is respected.
+        const filePath = path.join(fixturesDir, `non-zero-start-metadata.m4a`);
+
+        const result = await analyzeAudioFile(filePath);
+
+        // All detected silences should meet minimum duration of 0.01s
+        for (const silence of result.silences) {
+          expect(
+            silence.duration,
+            `Silence duration ${silence.duration}s at ${silence.start}s should be >= 0.01s`,
+          ).toBeGreaterThanOrEqual(0.01);
+        }
+      });
+    },
+  );
 
   test(`generateSpriteCommand produces working ffmpeg command`, async () => {
     const outputPath = path.join(fixturesDir, `test-sprite.m4a`);

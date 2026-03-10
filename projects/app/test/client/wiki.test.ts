@@ -47,7 +47,8 @@ describe(`speech files`, async () => {
   await createSpeechFileTests({
     audioGlob: path.join(wikiDir, `**/*.{mp3,m4a,aac}`),
     projectRoot,
-    isCI: isCi,
+    autoFixLoudness: false,
+    autoFixTrimSilence: false,
   });
 });
 
