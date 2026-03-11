@@ -55,9 +55,9 @@ describe(
         createMeaning({
           meaningKey: `walk`,
           gloss: `to walk`,
-          pinyin: `xing2`,
+          pinyin: `xíng`,
         }),
-        createMeaning({ meaningKey: `row`, gloss: `row`, pinyin: `hang2` }),
+        createMeaning({ meaningKey: `row`, gloss: `row`, pinyin: `háng` }),
       ]);
 
       expect(result).toBeNull();
