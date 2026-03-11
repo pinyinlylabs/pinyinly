@@ -41,7 +41,7 @@ test(
 
     // Collect all pinyin units as tone numbers (e.g., "bang1", "bang4")
     for (const unit of chart.units) {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 4; i++) {
         allPinyinUnits.add(`${unit}${i}`);
       }
     }

@@ -774,14 +774,12 @@ describe(
       expect(() => {
         void createSpeechFileTests({
           audioGlob: `/test/project/audio/*.{m4a,aac}`,
-          fixTag: `-fixed`,
           targetLufs: -16,
           loudnessTolerance: 2,
           allowedStartOrEndOffset: 0.2,
           minDuration: 1,
           durationTolerance: 0.1,
           projectRoot: `/test/project`,
-          isCi: true,
         });
       }).not.toThrow();
     });
