@@ -184,6 +184,7 @@ describe(
         `hǎohao3. nü nvnu: nǖ 【nv1nu:1hao3】`,
         `hǎohǎo. nü nünü nǖ 【nǖnǖhǎo】`,
       ],
+      [`ong1 ong2 ong3 ong4 ong5`, `ōng óng ǒng òng ong`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinText(input as PinyinUnit)).toEqual(expected);
     });

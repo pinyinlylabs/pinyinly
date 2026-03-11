@@ -616,7 +616,7 @@ export const pinyinUnitPattern = (() => {
     `(?:[nljqx]i${a}ng${consonantEnd})|` +
     `(?:(?:[zcs]h?|[dtnlgkhrjqxy])u${a}n${consonantEnd})|` +
     `(?:(?:[zcs]h|[gkh])u${a}i)|` +
-    `(?:(?:[zc]h?|[rdtnlgkhsy])${o}ng${consonantEnd})|` +
+    `(?:(?:[zc]h?|[rdtnlgkhsy])?${o}ng${consonantEnd})|` +
     `(?:(?:[zcs]h?|[rbpmfdtnlgkhw])?${e}ng${consonantEnd})|` +
     `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}ng${consonantEnd})|` +
     `(?:[bpmdtnljqxy]${i}ng${consonantEnd})|` +
