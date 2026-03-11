@@ -125,6 +125,13 @@ describe(
       [`jiang5`, `jiang`],
       [`r`, `r`],
 
+      // "ong" (rare sound but important in some contexts)
+      [`ong1`, `ōng`],
+      [`ong2`, `óng`],
+      [`ong3`, `ǒng`],
+      [`ong4`, `òng`],
+      [`ong5`, `ong`],
+
       // Leaves diacritic forms as-is
       [`hǎo`, `hǎo`],
       [`nü`, `nü`],
@@ -568,6 +575,16 @@ describe(`pyly pinyin chart`, async () => {
     expect(chartSoundIds).toEqual(
       new Set(Object.keys(defaultPinyinSoundInstructions)),
     );
+  });
+
+  test(`.units don't have invalid entries`, async () => {
+    const chart = loadPylyPinyinChart();
+
+    const invalids = [`i`];
+
+    for (const invalid of invalids) {
+      expect.soft(chart.units).not.toContain(invalid);
+    }
   });
 
   test(`standard tests`, async () => {
