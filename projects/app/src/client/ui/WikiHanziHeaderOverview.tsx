@@ -3,6 +3,7 @@ import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText, HskLevel } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary";
+import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -32,6 +33,7 @@ export function WikiHanziHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const { isPriority, toggle } = usePriorityWordToggle(hanzi);
+  const uniquePinyins = pinyins?.filter(arrayFilterUnique());
 
   return (
     <View className="gap-[10px] pl-4">
@@ -61,10 +63,10 @@ export function WikiHanziHeaderOverview({
         </Text>
       </View>
       <View className="gap-1">
-        {pinyins == null ? null : (
+        {uniquePinyins == null ? null : (
           <View className="flex-row gap-1">
             {intersperse(
-              pinyins.map((pinyin, i) => (
+              uniquePinyins.map((pinyin, i) => (
                 <Text className="font-sans text-[16px] text-fg-dim" key={i}>
                   {pinyin}
                 </Text>
