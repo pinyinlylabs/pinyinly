@@ -586,35 +586,47 @@ describe(`pyly pinyin chart`, async () => {
       new Set(Object.keys(defaultPinyinSoundInstructions)),
     );
     for (const soundId of chartSoundIds) {
+      const examples = defaultPinyinSoundExamples[soundId];
       expect(
-        defaultPinyinSoundExamples[soundId],
+        examples,
         `defaultPinyinSoundExamples is missing sound ID: ${soundId}`,
       ).toBeDefined();
+      if (examples == null) {
+        continue;
+      }
+      expect(
+        examples.length,
+        `defaultPinyinSoundExamples must include at least one example for sound ID: ${soundId}`,
+      ).toBeGreaterThan(0);
     }
   });
 
   test(`sound examples align with sound IDs`, async () => {
     const chart = loadPylyPinyinChart();
 
-    for (const [rawSoundId, pinyin] of Object.entries(
+    for (const [rawSoundId, pinyins] of Object.entries(
       defaultPinyinSoundExamples,
     )) {
       const soundId = rawSoundId as keyof typeof defaultPinyinSoundExamples;
-      const parts = splitPinyinUnitWithChart(pinyin, chart);
-      expect(parts).not.toBeNull();
+      expect(pinyins.length).toBeGreaterThan(0);
 
-      if (parts == null) {
-        continue;
-      }
+      for (const pinyin of pinyins) {
+        const parts = splitPinyinUnitWithChart(pinyin, chart);
+        expect(parts).not.toBeNull();
 
-      expect(pinyin).toEqual(normalizePinyinUnit(pinyin));
+        if (parts == null) {
+          continue;
+        }
 
-      if (/^[1-5]$/.test(soundId)) {
-        expect(parts.tone).toEqual(Number(soundId));
-      } else if (soundId.startsWith(`-`)) {
-        expect(parts.finalSoundId).toEqual(soundId);
-      } else {
-        expect(parts.initialSoundId).toEqual(soundId);
+        expect(pinyin).toEqual(normalizePinyinUnit(pinyin));
+
+        if (/^[1-5]$/.test(soundId)) {
+          expect(parts.tone).toEqual(Number(soundId));
+        } else if (soundId.startsWith(`-`)) {
+          expect(parts.finalSoundId).toEqual(soundId);
+        } else {
+          expect(parts.initialSoundId).toEqual(soundId);
+        }
       }
     }
   });
