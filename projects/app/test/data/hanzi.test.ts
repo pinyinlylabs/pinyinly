@@ -9,6 +9,8 @@ import {
   makeHorizontalMergeCharacterIdsTransform,
   makeVerticalMergeCharacterIdsTransform,
   mapIdsNodeLeafs,
+  matchAllHanziCharacters,
+  matchAllHanziCharactersWithIndexes,
   parseIds,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
@@ -340,6 +342,50 @@ describe(
       const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
       for (const x of invalid) {
         expect(isHanziCharacter(x)).toBe(false);
+      }
+    });
+  },
+);
+
+const hanziWithIndexesFixtures: [string, (number | string)[]][] = [
+  [``, []],
+  [`abc!?`, []],
+  [`你`, [0, `你`]],
+  [`你好`, [0, `你`, 1, `好`]],
+  [`你·好`, [0, `你`, 2, `好`]],
+  [`abc你好！`, [3, `你`, 4, `好`]],
+  [`😀你a好`, [2, `你`, 4, `好`]],
+  [`𠮷野家`, [0, `𠮷`, 2, `野`, 3, `家`]],
+];
+
+describe(
+  `matchAllHanziCharacters suite` satisfies HasNameOf<
+    typeof matchAllHanziCharacters
+  >,
+  () => {
+    test(`fixtures`, () => {
+      for (const [input, expected] of hanziWithIndexesFixtures) {
+        const actual = matchAllHanziCharacters(input);
+        expect([input, actual]).toEqual([
+          input,
+          expected
+            // strip out the indexes to re-use the same fixture data
+            .filter((_, i) => i % 2 === 1),
+        ]);
+      }
+    });
+  },
+);
+
+describe(
+  `matchAllHanziCharactersWithIndexes suite` satisfies HasNameOf<
+    typeof matchAllHanziCharactersWithIndexes
+  >,
+  () => {
+    test(`fixtures`, () => {
+      for (const [input, expected] of hanziWithIndexesFixtures) {
+        const actual = matchAllHanziCharactersWithIndexes(input);
+        expect([input, actual]).toEqual([input, expected]);
       }
     });
   },

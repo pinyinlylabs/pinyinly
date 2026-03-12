@@ -7,7 +7,11 @@ import type {
 } from "@/data/model";
 import { IdsOperator, idsOperatorSchema } from "@/data/model";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { characterCount, splitCharacters } from "@/util/unicode";
+import {
+  characterCount,
+  isCjkUnifiedIdeograph,
+  splitCharacters,
+} from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 
@@ -604,6 +608,41 @@ export function* walkIdsNodeLeafs<T>(ids: IdsNode<T>): Generator<T> {
 
 export function splitHanziText(hanziText: HanziText): HanziCharacter[] {
   return splitCharacters(hanziText) as HanziCharacter[];
+}
+
+/**
+ * Find all hanzi characters in a string.
+ */
+export function matchAllHanziCharacters(input: string): string[] {
+  const result = [];
+  for (const segment of splitCharacters(input)) {
+    if (isCjkUnifiedIdeograph(segment)) {
+      result.push(segment);
+    }
+  }
+  return result;
+}
+
+/**
+ * Find all hanzi characters in a string.
+ *
+ * @returns An array of alternating index and matched character pairs.
+ */
+export function matchAllHanziCharactersWithIndexes(
+  input: string,
+): (string | number)[] {
+  const tokens = [];
+  let index = 0;
+
+  for (const segment of splitCharacters(input)) {
+    if (isCjkUnifiedIdeograph(segment)) {
+      tokens.push(index, segment);
+    }
+
+    index += segment.length;
+  }
+
+  return tokens;
 }
 
 export function strokeCountToCharacter(strokeCount: number): string {
