@@ -26,6 +26,7 @@ import {
   deepReadonly,
   emptyArray,
   mapArrayAdd,
+  mapSetAdd,
   memoize0,
   memoize1,
 } from "@pinyinly/lib/collections";
@@ -379,6 +380,41 @@ export const loadDictionary = memoize0(
       }
     }
 
+    const getPinyinUnitToHanziMap = memoize0(() => {
+      const map = new Map<PinyinUnit, Set<HanziCharacter>>();
+
+      for (const [hanziWord, meaning] of dictionaryJson) {
+        if (meaning.pinyin == null) {
+          continue;
+        }
+
+        const hanzi = hanziFromHanziWord(hanziWord);
+        const hanziCharacters = splitHanziText(hanzi);
+
+        for (const pinyin of meaning.pinyin) {
+          const pinyinUnits = matchAllPinyinUnits(pinyin).map((p) =>
+            normalizePinyinUnit(p),
+          );
+
+          invariant(
+            hanziCharacters.length === pinyinUnits.length,
+            `expected same number of hanzi characters as pinyin units: "%o" / "%o"`,
+            hanzi,
+            pinyin,
+          );
+
+          for (let i = 0; i < pinyinUnits.length; i++) {
+            const hanziCharacter = nonNullable(hanziCharacters[i]);
+            const pinyinUnit2 = nonNullable(pinyinUnits[i]);
+
+            mapSetAdd(map, pinyinUnit2, hanziCharacter);
+          }
+        }
+      }
+
+      return new Map([...map.entries()].map(([k, v]) => [k, [...v]]));
+    });
+
     return {
       lookupHanzi(hanzi: HanziText) {
         return hanziMap.get(hanzi) ?? emptyArray;
@@ -390,40 +426,9 @@ export const loadDictionary = memoize0(
         return glossMap.get(gloss) ?? emptyArray;
       },
       lookupPinyinUnit(pinyinUnit: PinyinUnit) {
-        const result = new Set<HanziCharacter>();
+        const pinyinUnitToHanziMap = getPinyinUnitToHanziMap();
 
-        for (const [hanziWord, meaning] of dictionaryJson) {
-          if (meaning.pinyin == null) {
-            continue;
-          }
-
-          const hanzi = hanziFromHanziWord(hanziWord);
-          const hanziCharacters = splitHanziText(hanzi);
-
-          for (const pinyin of meaning.pinyin) {
-            const pinyinUnits = matchAllPinyinUnits(pinyin).map((p) =>
-              normalizePinyinUnit(p),
-            );
-
-            invariant(
-              hanziCharacters.length === pinyinUnits.length,
-              `expected same number of hanzi characters as pinyin units: "%o" / "%o"`,
-              hanzi,
-              pinyin,
-            );
-
-            for (let i = 0; i < pinyinUnits.length; i++) {
-              const hanziCharacter = nonNullable(hanziCharacters[i]);
-              const pinyinUnit2 = nonNullable(pinyinUnits[i]);
-
-              if (pinyinUnit === pinyinUnit2) {
-                result.add(hanziCharacter);
-              }
-            }
-          }
-        }
-
-        return [...result];
+        return pinyinUnitToHanziMap.get(pinyinUnit) ?? emptyArray;
       },
       allEntries: [...dictionaryJson.entries()],
       allHanziWords: [...dictionaryJson.keys()],

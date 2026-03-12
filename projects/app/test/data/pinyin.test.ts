@@ -1,6 +1,7 @@
 import type { PinyinUnit } from "#data/model.js";
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
+  defaultPinyinSoundExamples,
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
@@ -318,6 +319,7 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`nǐhǎo`, [0, `nǐ`, 2, `hǎo`]],
   [`nǐ·hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u00B7 MIDDLE DOT
   [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
+  [`jiànguò`, [0, `jiàn`, 4, `guò`]],
   // Sentences
   [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
   [`Bù yīhuǐ'er`, [0, `Bù`, 3, `yī`, 5, `huǐ`, 9, `er`]],
@@ -576,6 +578,38 @@ describe(`pyly pinyin chart`, async () => {
     expect(chartSoundIds).toEqual(
       new Set(Object.keys(defaultPinyinSoundInstructions)),
     );
+    for (const soundId of chartSoundIds) {
+      expect(
+        defaultPinyinSoundExamples[soundId],
+        `defaultPinyinSoundExamples is missing sound ID: ${soundId}`,
+      ).toBeDefined();
+    }
+  });
+
+  test(`sound examples align with sound IDs`, async () => {
+    const chart = loadPylyPinyinChart();
+
+    for (const [rawSoundId, pinyin] of Object.entries(
+      defaultPinyinSoundExamples,
+    )) {
+      const soundId = rawSoundId as keyof typeof defaultPinyinSoundExamples;
+      const parts = splitPinyinUnitWithChart(pinyin, chart);
+      expect(parts).not.toBeNull();
+
+      if (parts == null) {
+        continue;
+      }
+
+      expect(pinyin).toEqual(normalizePinyinUnit(pinyin));
+
+      if (/^[1-5]$/.test(soundId)) {
+        expect(parts.tone).toEqual(Number(soundId));
+      } else if (soundId.startsWith(`-`)) {
+        expect(parts.finalSoundId).toEqual(soundId);
+      } else {
+        expect(parts.initialSoundId).toEqual(soundId);
+      }
+    }
   });
 
   test(`.units don't have invalid entries`, async () => {
