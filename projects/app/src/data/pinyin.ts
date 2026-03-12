@@ -607,7 +607,7 @@ export const pinyinUnitPattern = (() => {
   const u = `(?:u|ū|ú|ǔ|ù)`;
   const v = `(?:ü|ǖ|ǘ|ǚ|ǜ|v|u:)`;
 
-  const consonantEnd = `(?!${a}${e}${i}${o}${u}${v})`;
+  const consonantEnd = `(?!${a}|${e}|${i}|${o}|${u}|${v})`;
 
   return (
     `(?:` +
