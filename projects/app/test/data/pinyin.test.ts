@@ -320,6 +320,13 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`nǐ·hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u00B7 MIDDLE DOT
   [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
   [`jiànguò`, [0, `jiàn`, 4, `guò`]],
+  [`píngguǒ`, [0, `píng`, 4, `guǒ`]],
+  [`yīnggāi`, [0, `yīng`, 4, `gāi`]],
+  [`ying1gai1`, [0, `ying1`, 5, `gai1`]],
+  [`Yīnggāi`, [0, `Yīng`, 4, `gāi`]],
+  [`xī'ān`, [0, `xī`, 3, `ān`]],
+  [`xi1'an1`, [0, `xi1`, 4, `an1`]],
+  [`Xi1'an1`, [0, `Xi1`, 4, `an1`]],
   // Sentences
   [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
   [`Bù yīhuǐ'er`, [0, `Bù`, 3, `yī`, 5, `huǐ`, 9, `er`]],
