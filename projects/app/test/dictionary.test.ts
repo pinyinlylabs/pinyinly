@@ -1303,7 +1303,7 @@ describe(`lookupPinyinUnit suite`, async () => {
     const dict = await loadDictionary();
 
     // Test with 'ma' which should appear in multi-character words
-    const maResults = dict.lookupPinyinUnit(`ma` as any);
+    const maResults = dict.lookupPinyinUnit(`ma` as PinyinUnit);
     expect(maResults.length).toBeGreaterThan(0);
 
     // Verify that results contain single characters (not multi-character words)
