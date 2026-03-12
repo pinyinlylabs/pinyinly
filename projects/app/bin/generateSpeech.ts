@@ -72,13 +72,15 @@ async function main() {
 
         const outcomes: Array<{ voice: Voice; ok: boolean }> = [];
         for (const voice of voices) {
+          const baseFileName = argv.baseFilename ?? argv.phrase;
+
           const ok = await generateSpeech({
             phrase: argv.phrase,
             voice,
             outputDir: argv.outputDir,
             speed: argv.speed,
             format: argv.format as `mp3` | `m4a`,
-            baseFileName: argv.baseFilename,
+            fileNameParts: [baseFileName, `:voice:`],
             check: argv.check,
           });
           outcomes.push({ voice, ok });

@@ -22,6 +22,15 @@ export const AVAILABLE_VOICES = [
 export type Voice = (typeof AVAILABLE_VOICES)[number];
 export type AudioFileFormat = `mp3` | `m4a`;
 
+export type FileNamePartToken = `:voice:` | `:id:`;
+
+export interface FileNamePartType {
+  text: string;
+  key: boolean;
+}
+
+export type FileNamePart = string | FileNamePartType;
+
 // Voice-specific instructions for better pronunciation
 const VOICE_INSTRUCTIONS: Record<Voice, string> = {
   alloy: `You are a teaching Mandarin Chinese. Pronounce the words clearly and crisply.`,
@@ -41,7 +50,7 @@ export interface GenerateSpeechOptions {
   outputDir?: string;
   speed?: number;
   format?: AudioFileFormat;
-  baseFileName?: string;
+  fileNameParts: readonly FileNamePart[];
   /** If true, only check which files exist without generating */
   check?: boolean;
   /** Optional OpenAI instance for testing */
@@ -54,6 +63,89 @@ export interface GenerateSpeechOptions {
 
 const GENERATED_SAMPLES_DIRNAME = `generated`;
 
+function hasIdToken(fileNameParts: readonly FileNamePart[]): boolean {
+  return fileNameParts.some((part) => {
+    const text = typeof part === `string` ? part : part.text;
+    return text.includes(`:id:`);
+  });
+}
+
+function withAutoIdPart(
+  fileNameParts: readonly FileNamePart[],
+): readonly FileNamePart[] {
+  if (hasIdToken(fileNameParts)) {
+    return fileNameParts;
+  }
+
+  return [...fileNameParts, `:id:`];
+}
+
+function normalizeFileNamePart(part: FileNamePart): Required<FileNamePartType> {
+  const normalizedPart: Required<FileNamePartType> =
+    typeof part === `string`
+      ? {
+          text: part,
+          key: part !== `:id:`,
+        }
+      : {
+          text: part.text,
+          key: part.key,
+        };
+
+  if (normalizedPart.key && normalizedPart.text.includes(`:id:`)) {
+    throw new Error(`Invalid fileNameParts: ':id:' cannot be part of key=true`);
+  }
+
+  return normalizedPart;
+}
+
+/**
+ * Render a file base name from parts by replacing dynamic tokens.
+ */
+export function renderFileNameParts(
+  fileNameParts: readonly FileNamePart[],
+  options: { voice: Voice; id: string },
+): string {
+  return fileNameParts
+    .map((part) => normalizeFileNamePart(part))
+    .map((part) =>
+      part.text
+        .replaceAll(`:voice:`, options.voice)
+        .replaceAll(`:id:`, options.id),
+    )
+    .join(`-`);
+}
+
+/**
+ * Build a filename regexp where non-key parts become wildcards.
+ */
+export function buildFileNameCheckRegExp(
+  fileNameParts: readonly FileNamePart[],
+  voice: Voice,
+  format: AudioFileFormat,
+): RegExp {
+  const extension = format === `m4a` ? `m4a` : `mp3`;
+  const componentPatterns = fileNameParts.map((part) => {
+    const normalizedPart = normalizeFileNamePart(part);
+
+    if (!normalizedPart.key) {
+      return `[^-]+?`;
+    }
+
+    let text = normalizedPart.text;
+
+    if (text === `:voice:`) {
+      text = voice;
+    }
+
+    return regExpEscape(text);
+  });
+
+  return new RegExp(
+    `^${componentPatterns.join(`-`)}${regExpEscape(`.${extension}`)}$`,
+  );
+}
+
 function getGeneratedOutputDir(outputDir: string): string {
   return path.join(outputDir, GENERATED_SAMPLES_DIRNAME);
 }
@@ -63,14 +155,11 @@ function getGeneratedOutputDir(outputDir: string): string {
  */
 function buildOutputFilePath(
   outputDir: string,
-  baseFileName: string,
-  voice: Voice,
+  fileName: string,
   format: AudioFileFormat,
-  sampleSuffix: string,
 ): string {
   const extension = format === `m4a` ? `m4a` : `mp3`;
-  const suffix = `-${sampleSuffix}`;
-  return path.join(outputDir, `${baseFileName}-${voice}${suffix}.${extension}`);
+  return path.join(outputDir, `${fileName}.${extension}`);
 }
 
 /**
@@ -84,15 +173,14 @@ function buildOutputFilePath(
  */
 async function hasAtLeastOneSample(
   outputDir: string,
-  baseFileName: string,
+  fileNameParts: readonly FileNamePart[],
   voice: Voice,
   format: AudioFileFormat,
 ): Promise<boolean> {
-  const extension = format === `m4a` ? `m4a` : `mp3`;
-  const escapedBase = regExpEscape(baseFileName);
-  const escapedVoice = regExpEscape(voice);
-  const fileNamePattern = new RegExp(
-    `^${escapedBase}-${escapedVoice}(?:-[^.]+)?\\.${extension}$`,
+  const fileNamePattern = buildFileNameCheckRegExp(
+    fileNameParts,
+    voice,
+    format,
   );
 
   const candidateDirs = [outputDir, getGeneratedOutputDir(outputDir)];
@@ -202,20 +290,22 @@ export async function generateSpeech(
     outputDir = `./wiki-audio`,
     speed = 1,
     format = `m4a`,
+    fileNameParts,
     check = false,
     instructions: instructionOverride,
     samples = 1,
   } = options;
 
-  // Use provided base filename or generate from phrase
-  // Keep pinyin characters (including tone marks) and word characters
-  const baseFileName =
-    options.baseFileName ??
-    phrase.replaceAll(/[^\u4E00-\u9FFF\wāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜÜ]/g, ``);
+  const effectiveFileNameParts = withAutoIdPart(fileNameParts);
 
   // Check mode: return whether at least one matching file already exists
   if (check) {
-    return hasAtLeastOneSample(outputDir, baseFileName, voice, format);
+    return hasAtLeastOneSample(
+      outputDir,
+      effectiveFileNameParts,
+      voice,
+      format,
+    );
   }
 
   const openai =
@@ -236,14 +326,12 @@ export async function generateSpeech(
       instructionOverride,
     );
 
-    // Always suffix generated files and keep them under generated/
-    const sampleSuffix = nanoid();
+    const id = nanoid();
+    const fileName = renderFileNameParts(effectiveFileNameParts, { voice, id });
     const outputPath = buildOutputFilePath(
       generatedOutputDir,
-      baseFileName,
-      voice,
+      fileName,
       format,
-      sampleSuffix,
     );
     await saveAudioFile(audioBuffer, outputPath, format);
   }
