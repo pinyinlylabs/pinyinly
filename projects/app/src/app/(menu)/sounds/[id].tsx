@@ -92,6 +92,13 @@ export default function SoundIdPage() {
             <Text className="text-center font-cursive text-2xl text-fg">
               {label}
             </Text>
+            {soundAudioSource == null ? null : (
+              <RectButton
+                variant="bare2"
+                iconStart="speaker-2"
+                onPressIn={playSound}
+              />
+            )}
           </View>
           <InlineEditableSettingText
             variant="title"
@@ -99,11 +106,7 @@ export default function SoundIdPage() {
             settingKey={{ soundId: id }}
             placeholder="Name this sound"
           />
-          {examplePinyins.length === 0 ? null : (
-            <Text className="pyly-body text-fg-dim">
-              Example pinyin: {examplePinyins.join(`, `)}
-            </Text>
-          )}
+
           <RectButton
             onPress={() => {
               setIsEditSoundNameModalOpen(true);
@@ -111,16 +114,15 @@ export default function SoundIdPage() {
             variant="bare2"
             iconStart="pencil"
           />
-          {soundAudioSource == null ? null : (
-            <RectButton
-              variant="bare2"
-              iconStart="speaker-2"
-              onPressIn={playSound}
-            >
-              Play
-            </RectButton>
-          )}
         </View>
+
+        {examplePinyins.length === 0 ? null : (
+          <View className="my-5 flex-row items-center gap-4">
+            <Text className="pyly-body text-fg-dim">
+              Example pinyin: {examplePinyins.join(`, `)}
+            </Text>
+          </View>
+        )}
 
         <View className="gap-10">
           <WikiTitledBox title="Pronunciation">
