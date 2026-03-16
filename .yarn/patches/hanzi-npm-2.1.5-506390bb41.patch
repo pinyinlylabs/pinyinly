@@ -148,3 +148,15 @@ index fd97088eeb16ddbb06e13d32aff7e0ddda651ea8..f2936a37558fc8eacba92af875eaa3b2
  exports.start = start;
  exports.decompose = hanzi.decompose;
  exports.decomposeMany = hanzi.decomposeMany;
+diff --git a/lib/dictionary.js b/lib/dictionary.js
+index 9ea307a025b6a095df7032992144e18d911b250a..d2f79385b655da06aaa77ffe53f589e607e56fef 100644
+--- a/lib/dictionary.js
++++ b/lib/dictionary.js
+@@ -560,6 +560,7 @@ PinyinSyllable.prototype.final = function() {
+ };
+ 
+ exports.start = start;
++exports.dictionarysimplified = dictionarysimplified;
+ exports.definitionLookup = definitionLookup;
+ exports.dictionarySearch = dictionarySearch;
+ exports.getExamples = getExamples;

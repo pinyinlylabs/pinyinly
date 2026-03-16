@@ -14995,8 +14995,8 @@ __metadata:
 
 "hanzi@patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch":
   version: 2.1.5
-  resolution: "hanzi@patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch::version=2.1.5&hash=083ec2"
-  checksum: 10c0/99356b6beaf66c34c67ee26dc76c4cc4dc7c8326ae9b71c87319a0608a579b389b74c9af5f339167a183a577f3d8c8edc4b9094f84e649e6b0970f86bd70c8de
+  resolution: "hanzi@patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch::version=2.1.5&hash=d91f75"
+  checksum: 10c0/dd22d676d6b7d756d6ecbe2919809ef569d7fc1e22cf0c2f5a09889483b3fcbd2064819f8ccf71e82dbd7d25ec230af96f55f07246928f9bd0b4beb3a49edc9c
   languageName: node
   linkType: hard
 
