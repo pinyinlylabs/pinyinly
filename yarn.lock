@@ -6318,6 +6318,7 @@ __metadata:
     expo-updates: "npm:~29.0.15"
     fontkit: "npm:^2.0.4"
     globals: "npm:^16.0.0"
+    hanzi: "patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch"
     happy-dom: "npm:^20.0.0"
     ink: "patch:ink@npm%3A5.2.1#~/.yarn/patches/ink-npm-5.2.1-41d086a4b7.patch"
     ink-link: "npm:^4.1.0"
@@ -14982,6 +14983,20 @@ __metadata:
   bin:
     handlebars: bin/handlebars
   checksum: 10c0/7aff423ea38a14bb379316f3857fe0df3c5d66119270944247f155ba1f08e07a92b340c58edaa00cfe985c21508870ee5183e0634dcb53dd405f35c93ef7f10d
+  languageName: node
+  linkType: hard
+
+"hanzi@npm:2.1.5":
+  version: 2.1.5
+  resolution: "hanzi@npm:2.1.5"
+  checksum: 10c0/ee79e6bc0a2f79f5a9286d25429e0de23954e16be798ef452b4ccc73a089d5f04b63c109f64c0b2b869b0ee150836649e9db7f908bcf3ef5d3080a369365e2d0
+  languageName: node
+  linkType: hard
+
+"hanzi@patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch":
+  version: 2.1.5
+  resolution: "hanzi@patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch::version=2.1.5&hash=083ec2"
+  checksum: 10c0/99356b6beaf66c34c67ee26dc76c4cc4dc7c8326ae9b71c87319a0608a579b389b74c9af5f339167a183a577f3d8c8edc4b9094f84e649e6b0970f86bd70c8de
   languageName: node
   linkType: hard
 
