@@ -429,6 +429,7 @@ describe(
       [`kèi`, null],
       [`hào`, `号`],
       [`chǎng`, `场`],
+      [`cōng`, `葱`],
     ] as [PinyinUnit, HanziCharacter | null][])(
       `%s → %s`,
       async ([pinyinUnit, hanziCharacter]) => {
