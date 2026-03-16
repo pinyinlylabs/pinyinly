@@ -1,4 +1,4 @@
-import { PriorityWordsList } from "@/client/ui/PriorityWordsList";
+import { BookmarksList } from "@/client/ui/BookmarksList";
 import { Text, View } from "react-native";
 
 export default function BookmarksPage() {
@@ -10,7 +10,7 @@ export default function BookmarksPage() {
       </View>
 
       {/* Bookmarks list */}
-      <PriorityWordsList />
+      <BookmarksList />
     </View>
   );
 }

@@ -9,7 +9,7 @@ import { TextInputSingle } from "./TextInputSingle";
 
 const maxResults = 12;
 
-export function PriorityWordsList() {
+export function BookmarksList() {
   const router = useRouter();
   const { words, isLoading, addWord, removeWord } = usePriorityWordsList();
   const [query, setQuery] = useState(``);
