@@ -1,10 +1,4 @@
-import { isHanziCharacter } from "#data/hanzi.ts";
-import {
-  MistakeKind,
-  QuestionFlagKind,
-  SkillKind,
-  SrsKind,
-} from "#data/model.ts";
+import { isHanziCharacter, splitHanziText } from "#data/hanzi.ts";
 import type {
   HanziCharacter,
   HanziGlossMistakeType,
@@ -14,22 +8,43 @@ import type {
   HanziWordSkill,
   MistakeType,
   PinyinText,
+  PinyinUnit,
   Skill,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
 } from "#data/model.ts";
+import {
+  MistakeKind,
+  QuestionFlagKind,
+  SkillKind,
+  SrsKind,
+} from "#data/model.ts";
+import {
+  loadPylyPinyinChart,
+  matchAllPinyinUnits,
+  normalizePinyinUnit,
+} from "#data/pinyin.js";
 import type { Rizzle } from "#data/rizzleSchema.js";
-import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
 import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
+import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
+import { loadDictionary } from "#dictionary.js";
 import { emojiToRating } from "#test/helpers.ts";
-import { nextReview } from "#util/fsrs.ts";
 import type { Rating } from "#util/fsrs.ts";
+import { nextReview } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.js";
 import { splitN } from "#util/unicode.js";
+import {
+  inverseSortComparator,
+  mapSetAdd,
+  memoize0,
+  sortComparatorNumber,
+} from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
+// oxlint-disable-next-line no-restricted-imports
+import * as hanzijs from "hanzi";
 import type { DeepReadonly } from "ts-essentials";
 import { vi } from "vitest";
 
@@ -471,4 +486,165 @@ export async function seedSkillReviews(
       }
     }
   }
+}
+
+export function getBestHanziCharacterForPinyinUnit(
+  pinyinUnit: PinyinUnit,
+): HanziCharacter | null {
+  const hanziJsLookup = getHanziJsLookup();
+
+  for (const [hanzi] of hanziJsLookup.get(pinyinUnit) ?? []) {
+    if (exampleHanziToSkip.has(hanzi)) {
+      continue;
+    }
+
+    if (isBadPair(pinyinUnit, hanzi)) {
+      continue;
+    }
+
+    return hanzi;
+  }
+
+  return null;
+}
+
+const getHanziJsLookup = memoize0(() => {
+  hanzijs.start();
+
+  const map = new Map<PinyinUnit, Set<HanziCharacter>>();
+  for (const [key, entries] of Object.entries(hanzijs.dictionarysimplified)) {
+    for (const entry of entries) {
+      const hanziCharacters = splitHanziText(entry.simplified as HanziText);
+      const pinyinUnits = matchAllPinyinUnits(entry.pinyin).map((p) =>
+        normalizePinyinUnit(p),
+      );
+
+      if (hanziCharacters.length !== pinyinUnits.length) {
+        console.warn(
+          `Mismatch in lengths for key ${key}: ${hanziCharacters.length} hanzi characters vs ${pinyinUnits.length} pinyin units`,
+        );
+        continue;
+      }
+
+      for (let i = 0; i < hanziCharacters.length; i++) {
+        const hanziCharacter = nonNullable(hanziCharacters[i]);
+        const pinyinUnit = nonNullable(pinyinUnits[i]);
+
+        mapSetAdd(map, pinyinUnit, hanziCharacter);
+      }
+    }
+  }
+
+  const withCounts = new Map<
+    PinyinUnit,
+    ReadonlyArray<readonly [hanzi: HanziCharacter, count: number]>
+  >(
+    [...map].map(([pinyinUnit, hanziSet]) => [
+      pinyinUnit,
+      [...hanziSet]
+        .map((h) => {
+          const freq = hanzijs.getCharacterFrequency(h);
+          const count = typeof freq === `string` ? 0 : Number(freq.count);
+
+          return [h, count] as const;
+        })
+        .toSorted(
+          inverseSortComparator(sortComparatorNumber(([, count]) => count)),
+        ),
+    ]),
+  );
+
+  return withCounts;
+});
+
+const exampleHanziToSkip = new Set(`彳 屮 啊`.split(` `));
+
+const badPairs = new Set([
+  `chán 单`,
+  `là 落`,
+  `zǎng 驵`,
+  `zèng 综`,
+  `zhāi 侧`,
+  `zòng 从`,
+  `tóu 亠`,
+  `shǎi 色`,
+  `rǒu 肉`,
+  `rèng 芿`,
+  `rōng 茸`,
+  `rāng 嚷`,
+  `ōu 区`,
+  `òu 呕`,
+  `nè 疒`,
+  `fà 发`,
+  `lěi 累`,
+  `lóu 楼`,
+  `èn 嗯`,
+  `chòng 冲`,
+  `cào 草`,
+  `cī 差`,
+  `ē 阿`,
+  `ǒ 嚄`,
+  `ó 哦`,
+]);
+
+function isBadPair(pinyinUnit: PinyinUnit, hanzi: HanziCharacter): boolean {
+  const pair = `${pinyinUnit} ${hanzi}`;
+  return badPairs.has(pair);
+}
+
+export function getPinyinUnits(): readonly PinyinUnit[] {
+  const chart = loadPylyPinyinChart();
+  const allPinyinUnits: PinyinUnit[] = [];
+  for (const unit of chart.units) {
+    for (let i = 1; i <= 4; i++) {
+      allPinyinUnits.push(normalizePinyinUnit(`${unit}${i}`));
+    }
+  }
+  return allPinyinUnits;
+}
+
+async function pickExampleHanziForPinyinUnit(
+  pinyinUnit: PinyinUnit,
+): Promise<HanziCharacter | null> {
+  // Use hanzijs data first:
+
+  const fromHanzijs = getBestHanziCharacterForPinyinUnit(pinyinUnit);
+  if (fromHanzijs != null) {
+    return fromHanzijs;
+  }
+
+  // Then fallback to pinyinly dictionary data:
+
+  const dictionary = await loadDictionary();
+
+  const hanziCharacters = dictionary.lookupPinyinUnit(pinyinUnit);
+
+  for (const candidate of hanziCharacters) {
+    if (exampleHanziToSkip.has(candidate)) {
+      continue;
+    }
+    if (isBadPair(pinyinUnit, candidate)) {
+      continue;
+    }
+
+    return candidate;
+  }
+
+  return null;
+}
+
+export async function getPinyinUnitToHanziCharacter(): Promise<
+  ReadonlyMap<PinyinUnit, HanziCharacter>
+> {
+  const allPinyinUnits = getPinyinUnits();
+  const pinyinUnitToHanzi = new Map<PinyinUnit, HanziCharacter>();
+
+  for (const pinyinUnit of allPinyinUnits) {
+    const hanzi = await pickExampleHanziForPinyinUnit(pinyinUnit);
+    if (hanzi != null) {
+      pinyinUnitToHanzi.set(pinyinUnit, hanzi);
+    }
+  }
+
+  return pinyinUnitToHanzi;
 }

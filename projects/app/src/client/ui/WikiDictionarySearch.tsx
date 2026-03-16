@@ -1,8 +1,7 @@
 import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
-import { searchDictionaryEntries } from "@/client/ui/quickSearch";
-import { loadDictionary } from "@/dictionary";
+import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
 import { useRouter } from "expo-router";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { Icon } from "./Icon";
@@ -12,14 +11,14 @@ const maxResults = 24;
 
 export function WikiDictionarySearch() {
   const router = useRouter();
-  const dictionary = use(loadDictionary());
   const [query, setQuery] = useState(``);
 
   const trimmedQuery = query.trim();
   const hasQuery = trimmedQuery.length > 0;
-  const results = searchDictionaryEntries(dictionary.allEntries, trimmedQuery, {
-    limit: maxResults,
-  });
+  const results = useQuickSearch(trimmedQuery, { limit: maxResults });
+  const displayResults = results.filter(
+    (result) => result.kind !== `pinyinSound`,
+  );
 
   const handleSelect = (hanzi: string) => {
     router.push(`/wiki/${encodeURIComponent(hanzi)}`);
@@ -43,13 +42,17 @@ export function WikiDictionarySearch() {
       </View>
 
       {hasQuery ? (
-        results.length === 0 ? (
+        displayResults.length === 0 ? (
           <Text className="pyly-body-caption text-fg-dim">No matches yet.</Text>
         ) : (
           <View className="gap-2">
-            {results.map((result) => (
+            {displayResults.map((result) => (
               <SearchResultCard
-                key={result.hanziWord}
+                key={
+                  result.kind === `wikiDirect`
+                    ? `wikiDirect:${result.hanzi}`
+                    : result.hanziWord
+                }
                 result={result}
                 onSelect={handleSelect}
               />
@@ -67,8 +70,9 @@ export function WikiDictionarySearch() {
 
 interface SearchResultCardProps {
   result: {
+    kind: `hanziWord` | `wikiDirect` | `pinyinSound`;
     hanzi: string;
-    hanziWord: string;
+    hanziWord?: string;
     gloss?: string | null | undefined;
     pinyin?: string | null | undefined;
   };
@@ -77,6 +81,7 @@ interface SearchResultCardProps {
 
 function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
   const { isPriority, toggle } = usePriorityWordToggle(result.hanzi);
+  const showBookmark = result.kind === `hanziWord`;
 
   return (
     <Pressable
@@ -89,26 +94,30 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         {result.hanzi}
       </Text>
       <View className="flex-1">
-        {result.gloss == null ? null : (
+        {result.kind === `wikiDirect` ? (
+          <Text className="text-sm text-fg">Open wiki page</Text>
+        ) : result.gloss == null ? null : (
           <Text className="text-sm text-fg">{result.gloss}</Text>
         )}
-        {result.pinyin == null ? null : (
+        {result.kind !== `hanziWord` || result.pinyin == null ? null : (
           <Text className="text-xs text-fg-dim">{result.pinyin}</Text>
         )}
       </View>
-      <Pressable
-        onPress={(e) => {
-          e.stopPropagation();
-          toggle();
-        }}
-        className="p-2"
-      >
-        <Icon
-          icon={isPriority ? `bookmark-filled` : `bookmark`}
-          size={20}
-          className="text-fg-dim"
-        />
-      </Pressable>
+      {showBookmark ? (
+        <Pressable
+          onPress={(e) => {
+            e.stopPropagation();
+            toggle();
+          }}
+          className="p-2"
+        >
+          <Icon
+            icon={isPriority ? `bookmark-filled` : `bookmark`}
+            size={20}
+            className="text-fg-dim"
+          />
+        </Pressable>
+      ) : null}
     </Pressable>
   );
 }

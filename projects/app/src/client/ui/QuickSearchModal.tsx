@@ -19,23 +19,26 @@ import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import { use, useState } from "react";
 import type { ViewProps } from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import type { QuickSearchResult } from "./hooks/useQuickSearch";
+import { useQuickSearch } from "./hooks/useQuickSearch";
 import { useRizzle } from "./hooks/useRizzle";
 import { useUserSetting } from "./hooks/useUserSetting";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import { Icon } from "./Icon";
 import { PageSheetModal } from "./PageSheetModal";
-import type { QuickSearchResult } from "./quickSearch";
-import { searchDictionaryEntries } from "./quickSearch";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
 
 function quickSearchObjectIdForResult(
   result: QuickSearchResult,
-): PinyinlyObjectId {
+): PinyinlyObjectId | null {
   switch (result.kind) {
     case `hanziWord`:
       return hanziWordPinyinlyObjectId(result.hanziWord);
+
+    case `wikiDirect`:
+      return null;
 
     case `pinyinSound`:
       return pinyinSoundIdPinyinlyObjectId(result.pinyinSoundId);
@@ -67,7 +70,6 @@ export function QuickSearchModal({
 }
 
 function ModalContent({ onDismiss }: { onDismiss: () => void }) {
-  const dictionary = use(loadDictionary());
   const r = useRizzle();
   const [query, setQuery] = useState(``);
   const { setValue: setQuickSearchPick } = useUserSetting({
@@ -77,10 +79,15 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
   const trimmedQuery = useDebounce(query.trim(), 200);
 
   const hasQuery = trimmedQuery.length > 0;
-  const results = searchDictionaryEntries(dictionary.allEntries, trimmedQuery);
+  const results = useQuickSearch(trimmedQuery);
 
   const onSelectResult = (result: QuickSearchResult) => {
-    setQuickSearchPick({ objectId: quickSearchObjectIdForResult(result) });
+    const objectId = quickSearchObjectIdForResult(result);
+
+    if (objectId != null) {
+      setQuickSearchPick({ objectId });
+    }
+
     onDismiss();
   };
 
@@ -113,31 +120,39 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
         </Pressable>
       </View>
 
-      {hasQuery === false ? (
-        <RecentQueries
-          onRemove={onRemoveRecent}
-          onSelect={() => {
-            // Don't re-add recent items to the recent history when selecting
-            // them, otherwise we end up with duplicates.
-            onDismiss();
-          }}
-        />
-      ) : results.length === 0 ? (
-        <NoResults
-          query={trimmedQuery}
-          onChangeQuery={(query) => {
-            setQuery(query);
-          }}
-        />
-      ) : (
-        results.map((result) => (
-          <SearchResultItem
-            key={result.hanziWord}
-            result={result}
-            onSelect={onSelectResult}
+      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
+        {hasQuery === false ? (
+          <RecentQueries
+            onRemove={onRemoveRecent}
+            onSelect={() => {
+              // Don't re-add recent items to the recent history when selecting
+              // them, otherwise we end up with duplicates.
+              onDismiss();
+            }}
           />
-        ))
-      )}
+        ) : results.length === 0 ? (
+          <NoResults
+            query={trimmedQuery}
+            onChangeQuery={(query) => {
+              setQuery(query);
+            }}
+          />
+        ) : (
+          results.map((result) => (
+            <SearchResultItem
+              key={
+                result.kind === `wikiDirect`
+                  ? `wikiDirect:${result.hanzi}`
+                  : result.kind === `hanziWord`
+                    ? result.hanziWord
+                    : result.pinyinSoundId
+              }
+              result={result}
+              onSelect={onSelectResult}
+            />
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -164,6 +179,26 @@ function SearchResultItem({
             gloss={result.gloss}
             pinyin={result.pinyin}
           />
+        </ResultItem>
+      );
+
+    case `wikiDirect`:
+      return (
+        <ResultItem
+          id={result}
+          href={`/wiki/${encodeURIComponent(result.hanzi)}`}
+          onPress={() => {
+            onSelect(result);
+          }}
+        >
+          <View className="gap-0.5">
+            <View className="flex-1 flex-row items-center gap-2">
+              <Text className="text-lg font-normal text-fg-loud">
+                {result.hanzi}
+              </Text>
+              <Text className="text-sm text-fg">Open wiki page</Text>
+            </View>
+          </View>
         </ResultItem>
       );
 

@@ -1,5 +1,6 @@
 // pyly-not-src-test
 
+import type { HanziCharacter, PinyinUnit } from "#data/model.js";
 import { MistakeKind } from "#data/model.js";
 import { fsrsIsStable, Rating } from "#util/fsrs.ts";
 import { describe, expect, test, vi } from "vitest";
@@ -7,6 +8,7 @@ import type { HistoryCommand } from "./helpers.ts";
 import {
   date,
   fsrsSrsState,
+  getBestHanziCharacterForPinyinUnit,
   parseDurationShorthand,
   parseHistoryCommand,
   parseRelativeTimeShorthand,
@@ -259,5 +261,54 @@ describe(
         parseHistoryCommand(`⚠️ xx` as HistoryCommand),
       ).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid operation: ⚠️]`);
     });
+  },
+);
+
+test(
+  `getBestHanziCharacterForPinyinUnit` satisfies HasNameOf<
+    typeof getBestHanziCharacterForPinyinUnit
+  >,
+  () => {
+    expect(
+      getBestHanziCharacterForPinyinUnit(`niǔ` as PinyinUnit),
+    ).toMatchInlineSnapshot(`"纽"`);
+
+    const regressionTests = [
+      `chán 单`,
+      `là 落`,
+      `zǎng 驵`,
+      `zèng 综`,
+      `zhāi 侧`,
+      `zòng 从`,
+      `tóu 亠`,
+      `shǎi 色`,
+      `rǒu 肉`,
+      `rèng 芿`,
+      `rōng 茸`,
+      `rāng 嚷`,
+      `ōu 区`,
+      `òu 呕`,
+      `nè 疒`,
+      `fà 发`,
+      `lěi 累`,
+      `lóu 楼`,
+      `èn 嗯`,
+      `chòng 冲`,
+      `cào 草`,
+      `cī 差`,
+      `ē 阿`,
+      `ǒ 嚄`,
+      `ó 哦`,
+      `dū 都`,
+    ].map((x) => x.split(` `) as [PinyinUnit, HanziCharacter]);
+
+    for (const [pinyinUnit, expectedHanzi] of regressionTests) {
+      expect
+        .soft(
+          getBestHanziCharacterForPinyinUnit(pinyinUnit),
+          `${pinyinUnit} should not be ${expectedHanzi}`,
+        )
+        .not.toBe(expectedHanzi);
+    }
   },
 );

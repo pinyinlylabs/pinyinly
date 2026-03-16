@@ -1,3 +1,4 @@
+import type { DictionarySearchEntry } from "@/client/query";
 import type {
   HanziText,
   HanziWord,
@@ -10,16 +11,28 @@ import {
   normalizePinyinUnit,
   splitPinyinUnitTone,
 } from "@/data/pinyin";
-import { hanziFromHanziWord } from "@/dictionary";
+import { useLiveQuery } from "@tanstack/react-db";
+import { useDb } from "./useDb";
 
-export type QuickSearchResultKind = `hanziWord` | `pinyinSound`;
+export type QuickSearchResultKind = `hanziWord` | `wikiDirect` | `pinyinSound`;
+
+export type QuickSearchDictionaryResultSourceKind = `builtIn` | `user`;
 
 export type QuickSearchHanziWordResult = {
   kind: `hanziWord`;
+  sourceKind: QuickSearchDictionaryResultSourceKind;
   hanziWord: HanziWord;
   hanzi: HanziText;
+  meaningKey: string;
   gloss?: string;
   pinyin?: PinyinText;
+  sortKey: string;
+  score: number;
+};
+
+export type QuickSearchWikiDirectResult = {
+  kind: `wikiDirect`;
+  hanzi: HanziText;
   sortKey: string;
   score: number;
 };
@@ -33,12 +46,8 @@ export type QuickSearchPinyinSoundResult = {
 
 export type QuickSearchResult =
   | QuickSearchHanziWordResult
+  | QuickSearchWikiDirectResult
   | QuickSearchPinyinSoundResult;
-
-type DictionaryEntries = readonly [
-  HanziWord,
-  { gloss: readonly string[]; pinyin?: readonly PinyinText[] | null },
-][];
 
 type DictionarySearchOptions = {
   limit?: number;
@@ -47,7 +56,7 @@ type DictionarySearchOptions = {
 const hanziQueryRegex = /[\u3400-\u9FFF]/;
 
 export function quickSearch(
-  entries: DictionaryEntries,
+  entries: readonly DictionarySearchEntry[],
   query: string,
   options: DictionarySearchOptions = {},
 ): readonly QuickSearchResult[] {
@@ -61,7 +70,7 @@ export function quickSearch(
   const queryPinyin = normalizePinyinForSearch(lowerQuery);
   const limit = Math.max(1, options.limit ?? 10);
 
-  return findHanziWordMatches(
+  const results = findHanziWordMatches(
     entries,
     {
       query: trimmedQuery,
@@ -71,37 +80,28 @@ export function quickSearch(
     },
     limit,
   );
-}
 
-export function searchDictionaryEntries(
-  entries: DictionaryEntries,
-  query: string,
-  options: DictionarySearchOptions = {},
-): readonly QuickSearchHanziWordResult[] {
-  const trimmedQuery = query.trim();
-  if (trimmedQuery.length === 0) {
-    return [];
+  if (
+    hasHanziQuery &&
+    !results.some(
+      (result) => result.hanzi === trimmedQuery && result.score <= 1,
+    )
+  ) {
+    const wikiDirectResult: QuickSearchWikiDirectResult = {
+      kind: `wikiDirect`,
+      hanzi: trimmedQuery as HanziText,
+      sortKey: trimmedQuery,
+      score: 2,
+    };
+
+    return [wikiDirectResult, ...results].slice(0, limit);
   }
 
-  const lowerQuery = trimmedQuery.toLowerCase();
-  const hasHanziQuery = hanziQueryRegex.test(trimmedQuery);
-  const queryPinyin = normalizePinyinForSearch(lowerQuery);
-  const limit = Math.max(1, options.limit ?? 10);
-
-  return findHanziWordMatches(
-    entries,
-    {
-      query: trimmedQuery,
-      lowerQuery,
-      hasHanziQuery,
-      queryPinyin,
-    },
-    limit,
-  );
+  return results;
 }
 
 function findHanziWordMatches(
-  entries: DictionaryEntries,
+  entries: readonly DictionarySearchEntry[],
   params: {
     query: string;
     lowerQuery: string;
@@ -113,9 +113,11 @@ function findHanziWordMatches(
   const { query, lowerQuery, hasHanziQuery, queryPinyin } = params;
   const resultsByWord = new Map<HanziWord, QuickSearchHanziWordResult>();
 
-  for (const [hanziWord, meaning] of entries) {
-    const hanzi = hanziFromHanziWord(hanziWord);
+  for (const entry of entries) {
+    const { hanziWord, hanzi } = entry;
     let bestScore: number | null = null;
+    let bestGloss: string | undefined;
+    let bestPinyin: PinyinText | undefined;
 
     if (hasHanziQuery) {
       const hanziScore = scoreMatch(hanzi, query, 0);
@@ -124,18 +126,32 @@ function findHanziWordMatches(
       }
     }
 
-    for (const gloss of meaning.gloss) {
+    for (const gloss of entry.gloss) {
       const glossScore = scoreMatch(gloss.toLowerCase(), lowerQuery, 10);
-      if (glossScore != null) {
-        bestScore = pickBestScore(bestScore, glossScore);
+      if (glossScore == null) {
+        continue;
+      }
+
+      if (bestScore == null || glossScore < bestScore) {
+        bestScore = glossScore;
+        bestGloss = gloss;
       }
     }
 
-    if (meaning.pinyin != null) {
-      for (const pinyin of meaning.pinyin) {
-        const pinyinScore = scorePinyinMatch(pinyin, queryPinyin, 20);
-        if (pinyinScore != null) {
-          bestScore = pickBestScore(bestScore, pinyinScore);
+    if (entry.pinyin != null) {
+      for (const pinyin of entry.pinyin) {
+        const pinyinScore = scorePinyinMatch(
+          pinyin as PinyinText,
+          queryPinyin,
+          20,
+        );
+        if (pinyinScore == null) {
+          continue;
+        }
+
+        if (bestScore == null || pinyinScore < bestScore) {
+          bestScore = pinyinScore;
+          bestPinyin = pinyin as PinyinText;
         }
       }
     }
@@ -145,17 +161,19 @@ function findHanziWordMatches(
     }
 
     const existing = resultsByWord.get(hanziWord);
-    const score = existing ? Math.min(existing.score, bestScore) : bestScore;
-
-    resultsByWord.set(hanziWord, {
-      kind: `hanziWord`,
-      hanziWord,
-      hanzi,
-      gloss: meaning.gloss[0],
-      pinyin: meaning.pinyin?.[0] ?? undefined,
-      score,
-      sortKey: hanzi,
-    });
+    if (existing == null || bestScore < existing.score) {
+      resultsByWord.set(hanziWord, {
+        kind: `hanziWord`,
+        sourceKind: entry.sourceKind,
+        hanziWord,
+        hanzi,
+        meaningKey: entry.meaningKey,
+        gloss: bestGloss ?? entry.gloss[0],
+        pinyin: bestPinyin ?? (entry.pinyin?.[0] as PinyinText | undefined),
+        score: bestScore,
+        sortKey: hanzi,
+      });
+    }
   }
 
   return [...resultsByWord.values()]
@@ -236,4 +254,23 @@ function scorePinyinMatch(
 
 function collapseWhitespace(value: string): string {
   return value.replaceAll(/\s+/g, ``);
+}
+
+/**
+ * Searches the dictionary collection against `query` and returns matching
+ * results. Encapsulates the TanStack DB live-query and `quickSearch` call so
+ * that callers don't have to repeat the boilerplate. When TanStack DB gains
+ * server-side filtering support the optimisation can be applied here without
+ * touching any call sites.
+ */
+export function useQuickSearch(
+  query: string,
+  options: DictionarySearchOptions = {},
+): readonly QuickSearchResult[] {
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) => q.from({ entry: db.dictionarySearch }),
+    [db.dictionarySearch],
+  );
+  return quickSearch(dictionarySearchEntries, query, options);
 }

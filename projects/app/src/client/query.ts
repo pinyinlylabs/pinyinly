@@ -11,7 +11,13 @@ import {
 } from "@/data/skills";
 import { userHanziMeaningDefs } from "@/data/userSettings";
 import type { Dictionary } from "@/dictionary";
-import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
+import {
+  buildHanziWord,
+  getIsStructuralHanzi,
+  hanziFromHanziWord,
+  loadDictionary,
+  meaningKeyFromHanziWord,
+} from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type {
@@ -406,6 +412,29 @@ export interface UserDictionaryEntry {
 
 export type UserDictionaryCollection = Collection<UserDictionaryEntry, string>;
 
+export type DictionarySearchSourceKind = `builtIn` | `user`;
+
+export interface DictionarySearchEntry {
+  id: string;
+  sourceKind: DictionarySearchSourceKind;
+  hanzi: HanziText;
+  meaningKey: string;
+  hanziWord: HanziWord;
+  gloss: string[];
+  pinyin?: string[];
+  note?: string;
+}
+
+export type BuiltInDictionarySearchCollection = Collection<
+  DictionarySearchEntry,
+  string
+>;
+
+export type DictionarySearchCollection = Collection<
+  DictionarySearchEntry,
+  string
+>;
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
@@ -645,6 +674,247 @@ function userDictionaryCollectionOptions({
   };
 }
 
+function builtInDictionarySearchCollectionOptions(): CollectionConfig<
+  DictionarySearchEntry,
+  string
+> {
+  return staticCollectionOptions<DictionarySearchEntry, string>({
+    id: `builtInDictionarySearch`,
+    queryFn: async () => {
+      const dictionary = await loadDictionary();
+      const entries: DictionarySearchEntry[] = [];
+
+      for (const [hanziWord, meaning] of dictionary.allEntries) {
+        const gloss = meaning.gloss.filter((item) => item.length > 0);
+        if (gloss.length === 0) {
+          continue;
+        }
+
+        const pinyin = meaning.pinyin?.filter((item) => item.length > 0);
+
+        const hanzi = hanziFromHanziWord(hanziWord);
+        const meaningKey = meaningKeyFromHanziWord(hanziWord);
+
+        entries.push({
+          id: `builtIn:${hanziWord}`,
+          sourceKind: `builtIn`,
+          hanzi,
+          meaningKey,
+          hanziWord,
+          gloss,
+          pinyin,
+        });
+      }
+
+      return entries;
+    },
+    getKey: (item) => item.id,
+  });
+}
+
+function mapUserMeaningToDictionarySearchEntry(
+  userEntry: UserDictionaryEntry,
+): DictionarySearchEntry {
+  const hanziWord = buildHanziWord(userEntry.hanzi, userEntry.meaningKey);
+  const pinyin =
+    userEntry.pinyin == null || userEntry.pinyin.length === 0
+      ? undefined
+      : [userEntry.pinyin];
+
+  return {
+    id: `user:${hanziWord}`,
+    sourceKind: `user`,
+    hanzi: userEntry.hanzi,
+    meaningKey: userEntry.meaningKey,
+    hanziWord,
+    gloss: [userEntry.gloss],
+    pinyin,
+    note: userEntry.note,
+  };
+}
+
+function areStringArraysEqual(
+  a: string[] | undefined,
+  b: string[] | undefined,
+) {
+  if (a === b) {
+    return true;
+  }
+
+  if (a == null || b == null || a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function dictionarySearchCollectionOptions({
+  builtInDictionarySearch,
+  userDictionary,
+}: {
+  builtInDictionarySearch: BuiltInDictionarySearchCollection;
+  userDictionary: UserDictionaryCollection;
+}): CollectionConfig<DictionarySearchEntry, string> {
+  const builtInRows = createLiveQueryCollection((q) =>
+    q.from({ entry: builtInDictionarySearch }),
+  );
+
+  const userRows = createLiveQueryCollection((q) =>
+    q.from({ entry: userDictionary }),
+  );
+
+  return {
+    id: `dictionarySearch`,
+    sync: {
+      rowUpdateMode: `full`,
+      sync: (params) => {
+        const { begin, write, commit, collection } = params;
+
+        const markReadyOnce = memoize0(() => {
+          params.markReady();
+        });
+        const markReadyTimeout = setTimeout(() => {
+          markReadyOnce();
+        }, 5000);
+
+        const applyRow = (next: DictionarySearchEntry | undefined) => {
+          if (next == null) {
+            return;
+          }
+
+          const existing = collection.get(next.id);
+
+          if (existing == null) {
+            write({ type: `insert`, value: next });
+            return;
+          }
+
+          if (
+            existing.sourceKind !== next.sourceKind ||
+            existing.hanzi !== next.hanzi ||
+            existing.meaningKey !== next.meaningKey ||
+            existing.hanziWord !== next.hanziWord ||
+            !areStringArraysEqual(existing.gloss, next.gloss) ||
+            !areStringArraysEqual(existing.pinyin, next.pinyin) ||
+            existing.note !== next.note
+          ) {
+            write({ type: `update`, value: next });
+          }
+        };
+
+        const deleteRow = (id: string) => {
+          const existing = collection.get(id);
+          if (existing != null) {
+            write({ type: `delete`, value: existing });
+          }
+        };
+
+        type BuiltInChanges =
+          Array<CollectionOutput<typeof builtInRows>> extends never
+            ? never
+            : Parameters<typeof builtInRows.subscribeChanges>[0] extends (
+                  changes: infer TChanges,
+                ) => void
+              ? TChanges
+              : never;
+
+        type UserChanges =
+          Array<CollectionOutput<typeof userRows>> extends never
+            ? never
+            : Parameters<typeof userRows.subscribeChanges>[0] extends (
+                  changes: infer TChanges,
+                ) => void
+              ? TChanges
+              : never;
+
+        const onBuiltInChanges = (changes: BuiltInChanges) => {
+          try {
+            begin();
+
+            for (const change of changes) {
+              if (change.type === `delete`) {
+                const previous = change.previousValue ?? change.value;
+                deleteRow(previous.id);
+                continue;
+              }
+
+              applyRow(change.value);
+            }
+
+            commit();
+          } finally {
+            markReadyOnce();
+          }
+        };
+
+        const onUserChanges = (changes: UserChanges) => {
+          try {
+            begin();
+
+            for (const change of changes) {
+              if (change.type === `delete`) {
+                const previous = change.previousValue ?? change.value;
+                const id = `user:${buildHanziWord(previous.hanzi, previous.meaningKey)}`;
+                deleteRow(id);
+                continue;
+              }
+
+              applyRow(mapUserMeaningToDictionarySearchEntry(change.value));
+            }
+
+            commit();
+          } finally {
+            markReadyOnce();
+          }
+        };
+
+        let builtInSubscription:
+          | ReturnType<typeof builtInRows.subscribeChanges>
+          | undefined;
+        let userSubscription:
+          | ReturnType<typeof userRows.subscribeChanges>
+          | undefined;
+        let isDisposed = false;
+
+        void Promise.all([builtInRows.preload(), userRows.preload()])
+          .then(() => {
+            if (isDisposed) {
+              return;
+            }
+
+            builtInSubscription = builtInRows.subscribeChanges(
+              onBuiltInChanges,
+              {
+                includeInitialState: true,
+              },
+            );
+
+            userSubscription = userRows.subscribeChanges(onUserChanges, {
+              includeInitialState: true,
+            });
+          })
+          .catch((error: unknown) => {
+            console.error(`dictionarySearch preload failed`, error);
+          });
+
+        return () => {
+          isDisposed = true;
+          clearTimeout(markReadyTimeout);
+          builtInSubscription?.unsubscribe();
+          userSubscription?.unsubscribe();
+        };
+      },
+    },
+    getKey: (item) => item.id,
+  };
+}
+
 export const rizzleCollectionOptions = <
   RizzleEntity extends RizzleAnyEntity,
   TKey extends string | number = string | number,
@@ -854,7 +1124,9 @@ export interface Db {
   assetCollection: AssetCollection;
   settingCollection: SettingCollection;
   settingHistoryCollection: SettingHistoryCollection;
+  builtInDictionarySearch: BuiltInDictionarySearchCollection;
   userDictionary: UserDictionaryCollection;
+  dictionarySearch: DictionarySearchCollection;
   skillStateCollection: SkillStateCollection;
   skillRatingCollection: SkillRatingCollection;
   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
@@ -947,8 +1219,20 @@ export function makeDb(rizzle: Rizzle): Db {
     userDictionaryCollectionOptions({ settingCollection }),
   );
 
+  const builtInDictionarySearch: BuiltInDictionarySearchCollection =
+    createCollection(builtInDictionarySearchCollectionOptions());
+
+  const dictionarySearch: DictionarySearchCollection = createCollection(
+    dictionarySearchCollectionOptions({
+      builtInDictionarySearch,
+      userDictionary,
+    }),
+  );
+
   return {
     assetCollection,
+    builtInDictionarySearch,
+    dictionarySearch,
     settingCollection,
     settingHistoryCollection,
     userDictionary,

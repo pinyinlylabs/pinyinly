@@ -1,9 +1,8 @@
 import { usePriorityWordsList } from "@/client/ui/hooks/usePriorityWordsList";
-import { searchDictionaryEntries } from "@/client/ui/quickSearch";
-import { loadDictionary } from "@/dictionary";
+import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
 import { format } from "date-fns/format";
 import { useRouter } from "expo-router";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Icon } from "./Icon";
 import { TextInputSingle } from "./TextInputSingle";
@@ -13,17 +12,13 @@ const maxResults = 12;
 export function PriorityWordsList() {
   const router = useRouter();
   const { words, isLoading, addWord, removeWord } = usePriorityWordsList();
-  const dictionary = use(loadDictionary());
   const [query, setQuery] = useState(``);
 
   const trimmedQuery = query.trim();
   const hasQuery = trimmedQuery.length > 0;
-  const searchResults = searchDictionaryEntries(
-    dictionary.allEntries,
-    trimmedQuery,
-    {
-      limit: maxResults,
-    },
+  const searchResults = useQuickSearch(trimmedQuery, { limit: maxResults });
+  const addableSearchResults = searchResults.filter(
+    (result) => result.kind === `hanziWord`,
   );
   const existingWords = new Set(words.map((item) => item.word));
 
@@ -52,13 +47,13 @@ export function PriorityWordsList() {
         </View>
 
         {hasQuery ? (
-          searchResults.length === 0 ? (
+          addableSearchResults.length === 0 ? (
             <Text className="pyly-body-caption text-fg-dim">
               No matches yet.
             </Text>
           ) : (
             <View className="gap-2">
-              {searchResults.map((result) => {
+              {addableSearchResults.map((result) => {
                 const alreadyAdded = existingWords.has(result.hanziWord);
                 return (
                   <Pressable
