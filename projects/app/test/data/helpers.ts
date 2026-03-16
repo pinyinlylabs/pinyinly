@@ -1,4 +1,8 @@
-import { isHanziCharacter, splitHanziText } from "#data/hanzi.ts";
+import {
+  isHanziCharacter,
+  matchAllHanziCharacters,
+  splitHanziText,
+} from "#data/hanzi.ts";
 import type {
   HanziCharacter,
   HanziGlossMistakeType,
@@ -27,18 +31,13 @@ import {
 import type { Rizzle } from "#data/rizzleSchema.js";
 import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
 import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
-import { loadDictionary } from "#dictionary.js";
+import { hanziFromHanziWord, loadDictionary } from "#dictionary.js";
 import { emojiToRating } from "#test/helpers.ts";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.js";
 import { splitN } from "#util/unicode.js";
-import {
-  inverseSortComparator,
-  mapSetAdd,
-  memoize0,
-  sortComparatorNumber,
-} from "@pinyinly/lib/collections";
+import { memoize0 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { Duration } from "date-fns";
@@ -488,12 +487,44 @@ export async function seedSkillReviews(
   }
 }
 
-export function getBestHanziCharacterForPinyinUnit(
-  pinyinUnit: PinyinUnit,
-): HanziCharacter | null {
-  const hanziJsLookup = getHanziJsLookup();
+export type ExampleHanziCandidateType = {
+  hanzi: HanziCharacter;
+  usageCount: number;
+  totalUsageCount: number;
+  usageShare: number;
+  characterFrequency: number;
+};
 
-  for (const [hanzi] of hanziJsLookup.get(pinyinUnit) ?? []) {
+type PinyinUsageIndexType = {
+  byHanzi: ReadonlyMap<HanziCharacter, ReadonlyMap<PinyinUnit, number>>;
+  byPinyinUnit: ReadonlyMap<PinyinUnit, ReadonlyMap<HanziCharacter, number>>;
+};
+
+const ensureHanziJsStarted = memoize0(() => {
+  hanzijs.start();
+});
+
+const getKnownPinyinUnitSet = memoize0(() => {
+  return new Set<PinyinUnit>(getPinyinUnits());
+});
+
+function getHanziCharacterFrequency(hanzi: HanziCharacter): number {
+  ensureHanziJsStarted();
+  const freq = hanzijs.getCharacterFrequency(hanzi);
+  return typeof freq === `string` ? 0 : Number(freq.count);
+}
+
+export function rankExampleHanziCandidates(
+  pinyinUnit: PinyinUnit,
+  usageIndex: PinyinUsageIndexType,
+): readonly ExampleHanziCandidateType[] {
+  const candidates = new Map<HanziCharacter, ExampleHanziCandidateType>();
+  const counts = usageIndex.byPinyinUnit.get(pinyinUnit);
+  if (counts == null) {
+    return [];
+  }
+
+  for (const [hanzi, usageCount] of counts) {
     if (exampleHanziToSkip.has(hanzi)) {
       continue;
     }
@@ -502,19 +533,36 @@ export function getBestHanziCharacterForPinyinUnit(
       continue;
     }
 
-    return hanzi;
+    const totalUsageCount = getTotalPinyinUsageCountForHanzi(usageIndex, hanzi);
+
+    candidates.set(hanzi, {
+      hanzi,
+      usageCount,
+      totalUsageCount,
+      usageShare: usageCount / totalUsageCount,
+      characterFrequency: getHanziCharacterFrequency(hanzi),
+    });
   }
 
-  return null;
+  return [...candidates.values()].toSorted((a, b) => {
+    return (
+      b.usageShare - a.usageShare ||
+      b.usageCount - a.usageCount ||
+      b.characterFrequency - a.characterFrequency ||
+      a.hanzi.localeCompare(b.hanzi)
+    );
+  });
 }
 
-const getHanziJsLookup = memoize0(() => {
-  hanzijs.start();
+const getHanziJsPinyinUsageCounts = memoize0(() => {
+  ensureHanziJsStarted();
 
-  const map = new Map<PinyinUnit, Set<HanziCharacter>>();
+  const usageIndex = createPinyinUsageIndex();
   for (const [key, entries] of Object.entries(hanzijs.dictionarysimplified)) {
     for (const entry of entries) {
-      const hanziCharacters = splitHanziText(entry.simplified as HanziText);
+      const hanziCharacters = matchAllHanziCharacters(
+        entry.simplified as HanziText,
+      );
       const pinyinUnits = matchAllPinyinUnits(entry.pinyin).map((p) =>
         normalizePinyinUnit(p),
       );
@@ -530,61 +578,213 @@ const getHanziJsLookup = memoize0(() => {
         const hanziCharacter = nonNullable(hanziCharacters[i]);
         const pinyinUnit = nonNullable(pinyinUnits[i]);
 
-        mapSetAdd(map, pinyinUnit, hanziCharacter);
+        incrementPinyinUsageCount(usageIndex, pinyinUnit, hanziCharacter);
       }
     }
   }
 
-  const withCounts = new Map<
-    PinyinUnit,
-    ReadonlyArray<readonly [hanzi: HanziCharacter, count: number]>
-  >(
-    [...map].map(([pinyinUnit, hanziSet]) => [
-      pinyinUnit,
-      [...hanziSet]
-        .map((h) => {
-          const freq = hanzijs.getCharacterFrequency(h);
-          const count = typeof freq === `string` ? 0 : Number(freq.count);
+  return usageIndex;
+});
 
-          return [h, count] as const;
-        })
-        .toSorted(
-          inverseSortComparator(sortComparatorNumber(([, count]) => count)),
-        ),
-    ]),
+const getDictionaryPinyinUsageCounts = memoize0(async () => {
+  const dictionary = await loadDictionary();
+  const usageIndex = createPinyinUsageIndex();
+
+  for (const [hanziWord, meaning] of dictionary.allEntries) {
+    if (meaning.pinyin == null) {
+      continue;
+    }
+
+    const hanziCharacters = splitHanziText(hanziFromHanziWord(hanziWord));
+
+    for (const pinyin of meaning.pinyin) {
+      const pinyinUnits = matchAllPinyinUnits(pinyin).map((unit) =>
+        normalizePinyinUnit(unit),
+      );
+
+      invariant(
+        hanziCharacters.length === pinyinUnits.length,
+        `expected same number of hanzi characters as pinyin units: "%o" / "%o"`,
+        hanziWord,
+        pinyin,
+      );
+
+      for (let i = 0; i < pinyinUnits.length; i++) {
+        const hanziCharacter = nonNullable(hanziCharacters[i]);
+        const pinyinUnit = nonNullable(pinyinUnits[i]);
+
+        incrementPinyinUsageCount(usageIndex, pinyinUnit, hanziCharacter);
+      }
+    }
+  }
+
+  return usageIndex;
+});
+
+const getMergedPinyinUsageCounts = memoize0(async () => {
+  const usageIndex = createPinyinUsageIndex();
+  mergePinyinUsageIndex(usageIndex, getHanziJsPinyinUsageCounts());
+  mergePinyinUsageIndex(usageIndex, await getDictionaryPinyinUsageCounts());
+  return usageIndex;
+});
+
+const getHanziBestPinyinUsageCounts = memoize0(async () => {
+  return buildHanziBestPinyinUsageIndex(await getMergedPinyinUsageCounts());
+});
+
+function buildHanziBestPinyinUsageIndex(usageIndex: PinyinUsageIndexType): {
+  byHanzi: Map<HanziCharacter, Map<PinyinUnit, number>>;
+  byPinyinUnit: Map<PinyinUnit, Map<HanziCharacter, number>>;
+} {
+  const bestPinyinUsageIndex = createPinyinUsageIndex();
+
+  for (const [hanzi, pinyinCounts] of usageIndex.byHanzi) {
+    if (exampleHanziToSkip.has(hanzi)) {
+      continue;
+    }
+
+    const bestPinyin = pickBestPinyinForHanzi(hanzi, pinyinCounts);
+    if (bestPinyin == null) {
+      continue;
+    }
+
+    incrementPinyinUsageCount(
+      bestPinyinUsageIndex,
+      bestPinyin.pinyinUnit,
+      hanzi,
+      bestPinyin.usageCount,
+    );
+  }
+
+  return bestPinyinUsageIndex;
+}
+
+function pickBestPinyinForHanzi(
+  hanzi: HanziCharacter,
+  pinyinCounts: ReadonlyMap<PinyinUnit, number>,
+): { pinyinUnit: PinyinUnit; usageCount: number } | null {
+  const knownPinyinUnits = getKnownPinyinUnitSet();
+  const totalUsageCount = [...pinyinCounts.values()].reduce(
+    (sum, count) => sum + count,
+    0,
   );
 
-  return withCounts;
-});
+  if (totalUsageCount === 0) {
+    return null;
+  }
+
+  const rankedPinyinUnits = [...pinyinCounts.entries()]
+    .filter(
+      ([pinyinUnit]) =>
+        knownPinyinUnits.has(pinyinUnit) && !isBadPair(pinyinUnit, hanzi),
+    )
+    .map(([pinyinUnit, usageCount]) => ({
+      pinyinUnit,
+      usageCount,
+      usageShare: usageCount / totalUsageCount,
+    }))
+    .toSorted((a, b) => {
+      return (
+        b.usageShare - a.usageShare ||
+        b.usageCount - a.usageCount ||
+        a.pinyinUnit.localeCompare(b.pinyinUnit)
+      );
+    });
+
+  const best = rankedPinyinUnits[0];
+  if (best == null) {
+    return null;
+  }
+
+  return {
+    pinyinUnit: best.pinyinUnit,
+    usageCount: best.usageCount,
+  };
+}
+
+function createPinyinUsageIndex(): {
+  byHanzi: Map<HanziCharacter, Map<PinyinUnit, number>>;
+  byPinyinUnit: Map<PinyinUnit, Map<HanziCharacter, number>>;
+} {
+  return {
+    byHanzi: new Map<HanziCharacter, Map<PinyinUnit, number>>(),
+    byPinyinUnit: new Map<PinyinUnit, Map<HanziCharacter, number>>(),
+  };
+}
+
+function incrementPinyinUsageCount(
+  usageIndex: {
+    byHanzi: Map<HanziCharacter, Map<PinyinUnit, number>>;
+    byPinyinUnit: Map<PinyinUnit, Map<HanziCharacter, number>>;
+  },
+  pinyinUnit: PinyinUnit,
+  hanziCharacter: HanziCharacter,
+  amount = 1,
+): void {
+  incrementNestedCount(
+    usageIndex.byPinyinUnit,
+    pinyinUnit,
+    hanziCharacter,
+    amount,
+  );
+  incrementNestedCount(usageIndex.byHanzi, hanziCharacter, pinyinUnit, amount);
+}
+
+function incrementNestedCount<TKey1, TKey2>(
+  map: Map<TKey1, Map<TKey2, number>>,
+  key1: TKey1,
+  key2: TKey2,
+  amount = 1,
+): void {
+  let counts = map.get(key1);
+  if (counts == null) {
+    counts = new Map<TKey2, number>();
+    map.set(key1, counts);
+  }
+
+  counts.set(key2, (counts.get(key2) ?? 0) + amount);
+}
+
+function mergePinyinUsageIndex(
+  into: {
+    byHanzi: Map<HanziCharacter, Map<PinyinUnit, number>>;
+    byPinyinUnit: Map<PinyinUnit, Map<HanziCharacter, number>>;
+  },
+  from: PinyinUsageIndexType,
+): void {
+  for (const [hanziCharacter, pinyinCounts] of from.byHanzi) {
+    for (const [pinyinUnit, count] of pinyinCounts) {
+      incrementPinyinUsageCount(into, pinyinUnit, hanziCharacter, count);
+    }
+  }
+}
+
+function getTotalPinyinUsageCountForHanzi(
+  usageIndex: PinyinUsageIndexType,
+  hanzi: HanziCharacter,
+): number {
+  return [...(usageIndex.byHanzi.get(hanzi)?.values() ?? [])].reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+}
 
 const exampleHanziToSkip = new Set(`彳 屮 啊`.split(` `));
 
-const badPairs = new Set([
-  `chán 单`,
-  `là 落`,
+const badPairs = new Set<string>([
   `zǎng 驵`,
-  `zèng 综`,
-  `zhāi 侧`,
-  `zòng 从`,
-  `tóu 亠`,
   `shǎi 色`,
   `rǒu 肉`,
   `rèng 芿`,
-  `rōng 茸`,
   `rāng 嚷`,
-  `ōu 区`,
-  `òu 呕`,
   `nè 疒`,
-  `fà 发`,
-  `lěi 累`,
-  `lóu 楼`,
-  `èn 嗯`,
-  `chòng 冲`,
-  `cào 草`,
-  `cī 差`,
-  `ē 阿`,
   `ǒ 嚄`,
   `ó 哦`,
+  `dū 都`,
+  `hè 和`,
+  `lěi 累`,
+  `lēi 勒`,
+  `lóu 楼`,
 ]);
 
 function isBadPair(pinyinUnit: PinyinUnit, hanzi: HanziCharacter): boolean {
@@ -603,34 +803,12 @@ export function getPinyinUnits(): readonly PinyinUnit[] {
   return allPinyinUnits;
 }
 
-async function pickExampleHanziForPinyinUnit(
+export async function pickExampleHanziForPinyinUnit(
   pinyinUnit: PinyinUnit,
 ): Promise<HanziCharacter | null> {
-  // Use hanzijs data first:
+  const usageIndex = await getHanziBestPinyinUsageCounts();
 
-  const fromHanzijs = getBestHanziCharacterForPinyinUnit(pinyinUnit);
-  if (fromHanzijs != null) {
-    return fromHanzijs;
-  }
-
-  // Then fallback to pinyinly dictionary data:
-
-  const dictionary = await loadDictionary();
-
-  const hanziCharacters = dictionary.lookupPinyinUnit(pinyinUnit);
-
-  for (const candidate of hanziCharacters) {
-    if (exampleHanziToSkip.has(candidate)) {
-      continue;
-    }
-    if (isBadPair(pinyinUnit, candidate)) {
-      continue;
-    }
-
-    return candidate;
-  }
-
-  return null;
+  return rankExampleHanziCandidates(pinyinUnit, usageIndex)[0]?.hanzi ?? null;
 }
 
 export async function getPinyinUnitToHanziCharacter(): Promise<
@@ -647,4 +825,21 @@ export async function getPinyinUnitToHanziCharacter(): Promise<
   }
 
   return pinyinUnitToHanzi;
+}
+
+export async function getHanziCharacterToPinyinUnit(): Promise<
+  ReadonlyMap<HanziCharacter, PinyinUnit>
+> {
+  const pinyinUnitToHanzi = await getPinyinUnitToHanziCharacter();
+  const hanziToPinyinUnit = new Map<HanziCharacter, PinyinUnit>();
+
+  for (const [pinyinUnit, hanzi] of pinyinUnitToHanzi) {
+    if (hanziToPinyinUnit.has(hanzi)) {
+      continue;
+    }
+
+    hanziToPinyinUnit.set(hanzi, pinyinUnit);
+  }
+
+  return hanziToPinyinUnit;
 }

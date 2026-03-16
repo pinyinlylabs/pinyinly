@@ -8,6 +8,7 @@ import type { HistoryCommand } from "./helpers.ts";
 import {
   date,
   fsrsSrsState,
+  getHanziCharacterToPinyinUnit,
   parseDurationShorthand,
   parseHistoryCommand,
   parseRelativeTimeShorthand,
@@ -294,12 +295,13 @@ test(
     };
 
     expect(
-      rankExampleHanziCandidates(`niǔ` as PinyinUnit, [
+      rankExampleHanziCandidates(
+        `niǔ` as PinyinUnit,
         usageIndex([
           [
             `纽` as HanziCharacter,
             [
-              [`niǔ` as PinyinUnit, 2],
+              [`niǔ` as PinyinUnit, 6],
               [`chǒu` as PinyinUnit, 1],
             ],
           ],
@@ -310,10 +312,6 @@ test(
               [`niú` as PinyinUnit, 5],
             ],
           ],
-          [`彳` as HanziCharacter, [[`niǔ` as PinyinUnit, 99]]],
-        ]),
-        usageIndex([
-          [`纽` as HanziCharacter, [[`niǔ` as PinyinUnit, 4]]],
           [
             `钮` as HanziCharacter,
             [
@@ -321,104 +319,138 @@ test(
               [`niú` as PinyinUnit, 10],
             ],
           ],
+          [`彳` as HanziCharacter, [[`niǔ` as PinyinUnit, 99]]],
         ]),
-      ]).map(({ hanzi, usageCount, sourceCount }) => ({
+      ).map(({ hanzi, usageCount }) => ({
         hanzi,
         usageCount,
-        sourceCount,
       })),
     ).toMatchInlineSnapshot(`
       [
         {
           "hanzi": "纽",
-          "sourceCount": 2,
           "usageCount": 6,
         },
         {
           "hanzi": "扭",
-          "sourceCount": 1,
           "usageCount": 5,
         },
         {
           "hanzi": "钮",
-          "sourceCount": 1,
           "usageCount": 3,
         },
       ]
     `);
 
     expect(
-      rankExampleHanziCandidates(`niǔ` as PinyinUnit, [
+      rankExampleHanziCandidates(
+        `niǔ` as PinyinUnit,
         usageIndex([
           [
             `纽` as HanziCharacter,
             [
-              [`niǔ` as PinyinUnit, 2],
+              [`niǔ` as PinyinUnit, 3],
               [`chǒu` as PinyinUnit, 1],
             ],
           ],
           [`扭` as HanziCharacter, [[`niǔ` as PinyinUnit, 3]]],
         ]),
-        usageIndex([[`纽` as HanziCharacter, [[`niǔ` as PinyinUnit, 1]]]]),
-      ])
+      )
         .slice(0, 2)
-        .map(({ hanzi, usageCount, sourceCount, usageShare }) => ({
+        .map(({ hanzi, usageCount, usageShare }) => ({
           hanzi,
           usageCount,
-          sourceCount,
           usageShare,
         })),
     ).toEqual([
-      { hanzi: `扭`, usageCount: 3, sourceCount: 1, usageShare: 1 },
-      { hanzi: `纽`, usageCount: 3, sourceCount: 2, usageShare: 0.75 },
+      { hanzi: `扭`, usageCount: 3, usageShare: 1 },
+      { hanzi: `纽`, usageCount: 3, usageShare: 0.75 },
     ]);
   },
 );
 
-test(
+describe(
   `pickExampleHanziForPinyinUnit` satisfies HasNameOf<
     typeof pickExampleHanziForPinyinUnit
   >,
+  () => {
+    test.for([
+      [`chán`, `单`],
+      [`là`, `落`],
+      [`zǎng`, `驵`],
+      [`zèng`, `综`],
+      [`zhāi`, `侧`],
+      [`zòng`, `从`],
+      [`tóu`, `亠`],
+      [`shǎi`, `色`],
+      [`rǒu`, `肉`],
+      [`rèng`, `芿`],
+      [`rōng`, `茸`],
+      [`rāng`, `嚷`],
+      [`ōu`, `区`],
+      [`òu`, `呕`],
+      [`nè`, `疒`],
+      [`fà`, `发`],
+      [`lěi`, `累`],
+      [`lóu`, `楼`],
+      [`èn`, `嗯`],
+      [`chòng`, `冲`],
+      [`cào`, `草`],
+      [`cī`, `差`],
+      [`ē`, `阿`],
+      [`ǒ`, `嚄`],
+      [`ó`, `哦`],
+      [`dū`, `都`],
+      [`gèn`, `亘`],
+      [`hè`, `和`],
+      [`hòng`, `哄`],
+      [`jū`, `据`],
+      [`juān`, `圈`],
+      [`kān`, `看`],
+      [`kè`, `可`],
+      [`lēi`, `勒`],
+      [`lòng`, `弄`],
+      [`mán`, `埋`],
+    ] as [PinyinUnit, HanziCharacter][])(
+      `%s does not → %s`,
+      async ([pinyinUnit, hanziCharacter]) => {
+        const picked = await pickExampleHanziForPinyinUnit(pinyinUnit);
+        expect(picked).not.toBe(hanziCharacter);
+      },
+    );
+
+    test.for([
+      [`gōu`, `钩`],
+      // kei is not a valid Mandarin syllable in any t
+      [`hāi`, null],
+      [`kēi`, null],
+      [`kéi`, null],
+      [`kěi`, null],
+      [`kèi`, null],
+      [`hào`, `号`],
+      [`chǎng`, `场`],
+    ] as [PinyinUnit, HanziCharacter | null][])(
+      `%s → %s`,
+      async ([pinyinUnit, hanziCharacter]) => {
+        const picked = await pickExampleHanziForPinyinUnit(pinyinUnit);
+        expect(picked).toBe(hanziCharacter);
+      },
+    );
+  },
+);
+
+test(
+  `getHanziCharacterToPinyinUnit` satisfies HasNameOf<
+    typeof getHanziCharacterToPinyinUnit
+  >,
   async () => {
-    const regressionTests = [
-      `chán 单`,
-      `là 落`,
-      `zǎng 驵`,
-      `zèng 综`,
-      `zhāi 侧`,
-      `zòng 从`,
-      `tóu 亠`,
-      `shǎi 色`,
-      `rǒu 肉`,
-      `rèng 芿`,
-      `rōng 茸`,
-      `rāng 嚷`,
-      `ōu 区`,
-      `òu 呕`,
-      `nè 疒`,
-      `fà 发`,
-      `lěi 累`,
-      `lóu 楼`,
-      `èn 嗯`,
-      `chòng 冲`,
-      `cào 草`,
-      `cī 差`,
-      `ē 阿`,
-      `ǒ 嚄`,
-      `ó 哦`,
-      `dū 都`,
-    ].map((x) => x.split(` `) as [PinyinUnit, HanziCharacter]);
+    const map = await getHanziCharacterToPinyinUnit();
 
-    for (const [pinyinUnit, expectedHanzi] of regressionTests) {
-      const picked = await pickExampleHanziForPinyinUnit(pinyinUnit);
-
-      expect
-        .soft(picked, `${pinyinUnit} should not be ${expectedHanzi}`)
-        .not.toBe(expectedHanzi);
-    }
-
-    expect(
-      await pickExampleHanziForPinyinUnit(`bǔ` as PinyinUnit),
-    ).toMatchInlineSnapshot(`"捕"`);
+    expect(map.get(`亘` as HanziCharacter)).toMatchInlineSnapshot(`"gèn"`);
+    expect(map.get(`捕` as HanziCharacter)).toMatchInlineSnapshot(`undefined`);
+    expect(map.get(`句` as HanziCharacter)).toMatchInlineSnapshot(`undefined`);
+    expect(map.get(`哈` as HanziCharacter)).toMatchInlineSnapshot(`"hā"`);
+    expect(map.get(`咳` as HanziCharacter)).toMatchInlineSnapshot(`undefined`);
+    expect(map.get(`厂` as HanziCharacter)).toMatchInlineSnapshot(`undefined`);
   },
 );

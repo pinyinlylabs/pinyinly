@@ -15,6 +15,7 @@ import {
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
+import type { HanziCharacter } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉, 汉字 } from "./helpers.ts";
@@ -347,32 +348,37 @@ describe(
   },
 );
 
-const hanziWithIndexesFixtures: [string, (number | string)[]][] = [
+const hanziWithIndexesFixtures = [
   [``, []],
   [`abc!?`, []],
   [`你`, [0, `你`]],
+  [`老`, [0, `老`]],
+  [`蘭`, [0, `蘭`]],
+  [`盧`, [0, `盧`]],
+  [`老`, [0, `老`]],
+  [`不`, [0, `不`]],
+  [`練`, [0, `練`]],
+  [`識`, [0, `識`]],
+  [`兀`, [0, `兀`]],
   [`你好`, [0, `你`, 1, `好`]],
   [`你·好`, [0, `你`, 2, `好`]],
   [`abc你好！`, [3, `你`, 4, `好`]],
   [`😀你a好`, [2, `你`, 4, `好`]],
   [`𠮷野家`, [0, `𠮷`, 2, `野`, 3, `家`]],
-];
-
+] as [string, (number | HanziCharacter)[]][];
 describe(
   `matchAllHanziCharacters suite` satisfies HasNameOf<
     typeof matchAllHanziCharacters
   >,
   () => {
-    test(`fixtures`, () => {
-      for (const [input, expected] of hanziWithIndexesFixtures) {
-        const actual = matchAllHanziCharacters(input);
-        expect([input, actual]).toEqual([
-          input,
-          expected
-            // strip out the indexes to re-use the same fixture data
-            .filter((_, i) => i % 2 === 1),
-        ]);
-      }
+    test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
+      const actual = matchAllHanziCharacters(input);
+      expect([input, actual]).toEqual([
+        input,
+        expected
+          // strip out the indexes to re-use the same fixture data
+          .filter((_, i) => i % 2 === 1),
+      ]);
     });
   },
 );
@@ -382,11 +388,9 @@ describe(
     typeof matchAllHanziCharactersWithIndexes
   >,
   () => {
-    test(`fixtures`, () => {
-      for (const [input, expected] of hanziWithIndexesFixtures) {
-        const actual = matchAllHanziCharactersWithIndexes(input);
-        expect([input, actual]).toEqual([input, expected]);
-      }
+    test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
+      const actual = matchAllHanziCharactersWithIndexes(input);
+      expect([input, actual]).toEqual([input, expected]);
     });
   },
 );

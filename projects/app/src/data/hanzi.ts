@@ -9,7 +9,7 @@ import { IdsOperator, idsOperatorSchema } from "@/data/model";
 import { parseIndexRanges } from "@/util/indexRanges";
 import {
   characterCount,
-  isCjkUnifiedIdeograph,
+  isHanziIdeograph,
   splitCharacters,
 } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -613,11 +613,11 @@ export function splitHanziText(hanziText: HanziText): HanziCharacter[] {
 /**
  * Find all hanzi characters in a string.
  */
-export function matchAllHanziCharacters(input: string): string[] {
-  const result = [];
+export function matchAllHanziCharacters(input: string): HanziCharacter[] {
+  const result: HanziCharacter[] = [];
   for (const segment of splitCharacters(input)) {
-    if (isCjkUnifiedIdeograph(segment)) {
-      result.push(segment);
+    if (isHanziIdeograph(segment)) {
+      result.push(segment as HanziCharacter);
     }
   }
   return result;
@@ -630,13 +630,13 @@ export function matchAllHanziCharacters(input: string): string[] {
  */
 export function matchAllHanziCharactersWithIndexes(
   input: string,
-): (string | number)[] {
+): (HanziCharacter | number)[] {
   const tokens = [];
   let index = 0;
 
   for (const segment of splitCharacters(input)) {
-    if (isCjkUnifiedIdeograph(segment)) {
-      tokens.push(index, segment);
+    if (isHanziIdeograph(segment)) {
+      tokens.push(index, segment as HanziCharacter);
     }
 
     index += segment.length;
