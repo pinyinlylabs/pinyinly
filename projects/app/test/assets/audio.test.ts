@@ -2,14 +2,25 @@
 import "#assets/audio/manifest.json";
 
 import { pinyinAudioDir, projectRoot } from "#bin/util/paths.ts";
-import type { Voice } from "#bin/util/speech.ts";
+import type { FileNamePart, Voice } from "#bin/util/speech.ts";
 import { generateSpeech } from "#bin/util/speech.ts";
-import { loadPylyPinyinChart, normalizePinyinText } from "#data/pinyin.js";
+import type { PinyinSoundId } from "#data/model.ts";
+import {
+  defaultPinyinSoundInstructions,
+  normalizePinyinUnit,
+  splitPinyinUnitTone,
+} from "#data/pinyin.js";
+import {
+  getPinyinUnits,
+  getPinyinUnitToHanziCharacter,
+} from "#test/data/helpers.ts";
+import "#types/hanzi.d.ts";
 import { isCi } from "#util/env.ts";
 import {
   createSpeechFileTests,
   testSprites,
 } from "@pinyinly/audio-sprites/testing";
+// oxlint-disable-next-line no-restricted-imports
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -20,96 +31,611 @@ test(`test sprites`, async () => {
   expect(result.needsRegeneration).toBe(false);
 });
 
-// Tone-specific instructions for better pronunciation
-const TONE_INSTRUCTIONS: Record<number, string> = {
-  1: `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the pinyin using the first tone (High/Level — High and flat pitch, similar to a high, sustained musical note).`,
-  2: `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the pinyin using the second tone (Rising — Starts mid-range and rises high, similar to the intonation of a question like "Huh?" or "What?").`,
-  3: `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the pinyin using the third tone (Falling-Rising — Starts low, dips to a lower pitch, then rises slightly. Often described as a low, dipping tone).`,
-  4: `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the pinyin using the fourth tone (Falling — Starts high and drops sharply, sounding quick, strong, and abrupt, like an angry command).`,
-  5: `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the pinyin using the neutral tone (Light — Short and light with no specific pitch contour, usually used on grammatical particles or the second syllable of certain words).`,
-};
+describe(`pinyin sounds`, () => {
+  test(
+    `should have audio files for all pinyin units`,
+    {
+      // In local dev don't timeout, since we want to be able to generate
+      // missing files. In CI, use the default timeout to avoid hanging
+      // indefinitely.
+      timeout: isCi ? undefined : Infinity,
+    },
+    async () => {
+      const VOICE: Voice = `nova`;
 
-test(
-  `should have audio files for all pinyin units`,
-  { timeout: 600_000 },
-  async () => {
-    const VOICE: Voice = `nova`;
+      const pinyinUnitToHanziCharacter = await getPinyinUnitToHanziCharacter();
 
-    // Get all pinyin units from the chart
-    const chart = loadPylyPinyinChart();
-    const allPinyinUnits = new Set<string>();
+      const missingItems: {
+        hanzi: string;
+        pinyin: string;
+      }[] = [];
 
-    // Collect all pinyin units as tone numbers (e.g., "bang1", "bang4")
-    for (const unit of chart.units) {
-      for (let i = 1; i <= 4; i++) {
-        allPinyinUnits.add(`${unit}${i}`);
-      }
-    }
+      for (const pinyin of getPinyinUnits()) {
+        const hanzi = pinyinUnitToHanziCharacter.get(pinyin);
 
-    // Check which files are missing for all pinyin units
-    const allMissingItems: string[] = [];
+        // Skip pinyin units that don't have hanzi examples, there's another
+        // test that checks that all pinyin units have hanzi examples, so this
+        // should be caught there.
+        if (hanzi == null) {
+          continue;
+        }
 
-    for (const pinyinUnit of allPinyinUnits) {
-      const normalized = normalizePinyinText(pinyinUnit);
-      const exists = await generateSpeech({
-        phrase: normalized,
-        voice: VOICE,
-        outputDir: pinyinAudioDir,
-        baseFileName: pinyinUnit,
-        format: `m4a`,
-        check: true,
-      });
-      if (!exists) {
-        allMissingItems.push(pinyinUnit);
-      }
-    }
+        const exists = await generateSpeech({
+          phrase: hanzi,
+          voice: VOICE,
+          outputDir: pinyinAudioDir,
+          fileNameParts: buildAudioFileNameParts(pinyin, hanzi),
+          format: `m4a`,
+          check: true,
+        });
 
-    if (allMissingItems.length > 0) {
-      if (isCi) {
-        expect(
-          allMissingItems,
-          `Missing pinyin audio items. Run locally to generate them.`,
-        ).toEqual([]);
-      } else {
-        // Locally, generate only the missing pinyin items with tone-specific instructions
-        for (const pinyinUnit of allMissingItems) {
-          const normalized = normalizePinyinText(pinyinUnit);
-          // Extract tone number from the end of the pinyin unit (1-5)
-          const toneMatch = pinyinUnit.match(/(\d)$/);
-          const toneNumber = toneMatch ? Number.parseInt(toneMatch[1]!, 10) : 1;
-          const instructions = TONE_INSTRUCTIONS[toneNumber];
-
-          // oxlint-disable-next-line no-console
-          console.log(
-            `generating audio for missing item in ${pinyinAudioDir}: ${pinyinUnit}`,
-          );
-          const ok = await generateSpeech({
-            phrase: normalized,
-            voice: VOICE,
-            outputDir: pinyinAudioDir,
-            baseFileName: pinyinUnit,
-            format: `m4a`,
-            instructions,
-            samples: 5,
-          });
-          expect
-            .soft(
-              ok,
-              `Failed to generate audio for missing item in ${pinyinAudioDir}: ${pinyinUnit}`,
-            )
-            .toBe(true);
+        if (!exists) {
+          missingItems.push({ hanzi, pinyin });
         }
       }
-    }
-  },
-);
 
-describe(`pinyin speech files`, async () => {
-  await createSpeechFileTests({
-    audioGlob: path.join(pinyinAudioDir, `**/*.{mp3,m4a,aac}`),
-    projectRoot,
-    autoFixLoudness: false,
-    autoFixTrimSilence: !isCi,
-    skipLoudness: true,
+      if (missingItems.length > 0) {
+        if (isCi) {
+          expect(
+            missingItems,
+            `Missing pinyin audio items. Run locally to generate them.`,
+          ).toEqual([]);
+        } else {
+          for (const item of missingItems) {
+            const normalized = normalizePinyinUnit(item.pinyin);
+            const { tone } = splitPinyinUnitTone(normalized);
+            const instructions = buildToneInstructions(normalized, tone);
+
+            // oxlint-disable-next-line no-console
+            console.log(
+              `generating audio for missing item in ${pinyinAudioDir}: ${item.pinyin} (${item.hanzi})\n
+ - Instructions: ${instructions}\n
+ - Prompt: ${item.hanzi}`,
+            );
+
+            const ok = await generateSpeech({
+              phrase: item.hanzi,
+              voice: VOICE,
+              outputDir: pinyinAudioDir,
+              fileNameParts: buildAudioFileNameParts(item.pinyin, item.hanzi),
+              format: `m4a`,
+              instructions: instructions,
+              samples: 5,
+            });
+
+            expect
+              .soft(
+                ok,
+                `Failed to generate audio for missing item in ${pinyinAudioDir}: ${item.pinyin}`,
+              )
+              .toBe(true);
+          }
+        }
+      }
+    },
+  );
+
+  describe(`audio quality`, async () => {
+    await createSpeechFileTests({
+      audioGlob: path.join(pinyinAudioDir, `**/*.{mp3,m4a,aac}`),
+      projectRoot,
+      autoFixLoudness: false,
+      autoFixTrimSilence: !isCi,
+      skipLoudness: true,
+    });
   });
+
+  test(`all pinyin units have hanzi examples`, async () => {
+    const pinyinUnits = new Set(getPinyinUnits());
+    const pinyinUnitsWithHanzi = new Set(
+      (await getPinyinUnitToHanziCharacter()).keys(),
+    );
+
+    const missing = pinyinUnits.symmetricDifference(pinyinUnitsWithHanzi);
+
+    // Incrementally reduce this list to zero to increase coverage of sounds
+    // that can be played.
+    expect(missing).toMatchInlineSnapshot(`
+      Set {
+        "ǎ",
+        "à",
+        "ê",
+        "ēr",
+        "ǎng",
+        "én",
+        "ěn",
+        "ōng",
+        "óng",
+        "ǒng",
+        "òng",
+        "ēng",
+        "éng",
+        "ěng",
+        "èng",
+        "óu",
+        "ó",
+        "ǒ",
+        "zhēi",
+        "zhéi",
+        "zhěi",
+        "zhèi",
+        "zhán",
+        "zhén",
+        "zháng",
+        "zhéng",
+        "zhóng",
+        "ché",
+        "chǎi",
+        "chào",
+        "shái",
+        "shǎi",
+        "shēi",
+        "shěi",
+        "shèi",
+        "shán",
+        "sháng",
+        "rī",
+        "rí",
+        "rǐ",
+        "rē",
+        "ré",
+        "rāo",
+        "rōu",
+        "rǒu",
+        "rān",
+        "ràn",
+        "rēn",
+        "rāng",
+        "rěng",
+        "rèng",
+        "ròng",
+        "zí",
+        "zà",
+        "zē",
+        "zě",
+        "zái",
+        "zēi",
+        "zěi",
+        "zèi",
+        "zóu",
+        "zēn",
+        "zén",
+        "záng",
+        "zǎng",
+        "zéng",
+        "zěng",
+        "zóng",
+        "cá",
+        "cà",
+        "cē",
+        "cé",
+        "cě",
+        "cēi",
+        "céi",
+        "cěi",
+        "cèi",
+        "cōu",
+        "cóu",
+        "cǒu",
+        "cěn",
+        "cèn",
+        "cǎng",
+        "càng",
+        "cěng",
+        "cǒng",
+        "còng",
+        "sí",
+        "sá",
+        "sē",
+        "sé",
+        "sě",
+        "sái",
+        "sǎi",
+        "sēi",
+        "séi",
+        "sěi",
+        "sèi",
+        "sáo",
+        "sóu",
+        "sán",
+        "sén",
+        "sěn",
+        "sèn",
+        "sáng",
+        "séng",
+        "sěng",
+        "sèng",
+        "sóng",
+        "béi",
+        "bán",
+        "bén",
+        "báng",
+        "pǎ",
+        "pěi",
+        "pòu",
+        "pǎn",
+        "pěn",
+        "pūn",
+        "pún",
+        "pǔn",
+        "pùn",
+        "mē",
+        "mé",
+        "mě",
+        "mè",
+        "māi",
+        "mēi",
+        "měn",
+        "màng",
+        "fāi",
+        "fái",
+        "fǎi",
+        "fài",
+        "fōu",
+        "fòu",
+        "fiāo",
+        "fiáo",
+        "fiǎo",
+        "fiào",
+        "fō",
+        "fǒ",
+        "fò",
+        "dě",
+        "dái",
+        "dēi",
+        "déi",
+        "dèi",
+        "dáo",
+        "dóu",
+        "dán",
+        "dēn",
+        "dén",
+        "děn",
+        "dèn",
+        "dáng",
+        "déng",
+        "dóng",
+        "tá",
+        "tē",
+        "té",
+        "tě",
+        "tǎi",
+        "téi",
+        "těi",
+        "tèi",
+        "tēng",
+        "těng",
+        "tèng",
+        "nē",
+        "né",
+        "ně",
+        "nāi",
+        "nái",
+        "nēi",
+        "néi",
+        "nōu",
+        "nóu",
+        "nǒu",
+        "nēn",
+        "nén",
+        "něn",
+        "nēng",
+        "něng",
+        "nèng",
+        "nōng",
+        "nǒng",
+        "lō",
+        "ló",
+        "lǒ",
+        "lò",
+        "lē",
+        "lé",
+        "lě",
+        "lāi",
+        "lǎi",
+        "lān",
+        "lēn",
+        "lén",
+        "lěn",
+        "lèn",
+        "gái",
+        "gēi",
+        "géi",
+        "gèi",
+        "gáo",
+        "góu",
+        "gán",
+        "gáng",
+        "géng",
+        "gīn",
+        "gín",
+        "gǐn",
+        "gìn",
+        "gīng",
+        "gíng",
+        "gǐng",
+        "gìng",
+        "góng",
+        "ká",
+        "kà",
+        "kái",
+        "kéi",
+        "kěi",
+        "kèi",
+        "káo",
+        "kóu",
+        "kán",
+        "kēn",
+        "kén",
+        "kǎng",
+        "kéng",
+        "kěng",
+        "kèng",
+        "kiū",
+        "kiú",
+        "kiǔ",
+        "kiù",
+        "kiāng",
+        "kiáng",
+        "kiǎng",
+        "kiàng",
+        "kóng",
+        "hě",
+        "héi",
+        "hěi",
+        "hèi",
+        "hēn",
+        "hǎng",
+        "hěng",
+        "yué",
+        "nǖ",
+        "nǘ",
+        "nüē",
+        "nüé",
+        "nüě",
+        "lǖ",
+        "lüē",
+        "lüé",
+        "lüě",
+        "lüān",
+        "lüán",
+        "lüǎn",
+        "lüàn",
+        "lǖn",
+        "lǘn",
+        "lǚn",
+        "lǜn",
+        "juè",
+        "juán",
+        "jún",
+        "jǔn",
+        "quě",
+        "qǔn",
+        "qùn",
+        "xǔn",
+        "wó",
+        "wái",
+        "wéng",
+        "mū",
+        "duí",
+        "duǐ",
+        "duán",
+        "dún",
+        "duāng",
+        "duáng",
+        "duǎng",
+        "duàng",
+        "nū",
+        "nuō",
+        "nuǒ",
+        "nuī",
+        "nuí",
+        "nuǐ",
+        "nuì",
+        "nuān",
+        "nuán",
+        "nuàn",
+        "nūn",
+        "nǔn",
+        "nùn",
+        "luān",
+        "lǔn",
+        "gú",
+        "guá",
+        "guái",
+        "guí",
+        "guán",
+        "gūn",
+        "gún",
+        "guáng",
+        "kú",
+        "kuá",
+        "kuō",
+        "kuó",
+        "kuǒ",
+        "kuāi",
+        "kuái",
+        "kuán",
+        "kuàn",
+        "kún",
+        "huǎ",
+        "huāi",
+        "huǎi",
+        "hǔn",
+        "zhuá",
+        "zhuà",
+        "zhuǒ",
+        "zhuò",
+        "zhuái",
+        "zhuí",
+        "zhuǐ",
+        "zhuán",
+        "zhún",
+        "zhùn",
+        "zhuáng",
+        "chuá",
+        "chuǎ",
+        "chuà",
+        "chuó",
+        "chuǒ",
+        "chuǐ",
+        "chùn",
+        "shuá",
+        "shuó",
+        "shuǒ",
+        "shuái",
+        "shuī",
+        "shuán",
+        "shuǎn",
+        "shūn",
+        "shún",
+        "shuáng",
+        "shuàng",
+        "rū",
+        "ruā",
+        "ruá",
+        "ruǎ",
+        "ruà",
+        "ruō",
+        "ruó",
+        "ruǒ",
+        "ruī",
+        "ruān",
+        "ruàn",
+        "rūn",
+        "rǔn",
+        "zù",
+        "zuí",
+        "zuán",
+        "zún",
+        "cuí",
+        "cuǎn",
+        "sǔ",
+        "suó",
+        "suò",
+        "suán",
+        "suǎn",
+        "sún",
+        "sùn",
+        "yó",
+        "yǒ",
+        "yò",
+        "yāi",
+        "yái",
+        "yǎi",
+        "yài",
+        "biáo",
+        "bián",
+        "bín",
+        "bǐn",
+        "biāng",
+        "biáng",
+        "biǎng",
+        "biàng",
+        "bíng",
+        "piā",
+        "piá",
+        "piǎ",
+        "pià",
+        "pié",
+        "piè",
+        "pǐng",
+        "pìng",
+        "mié",
+        "miě",
+        "miū",
+        "miú",
+        "miǔ",
+        "miān",
+        "mīn",
+        "mìn",
+        "mīng",
+        "diā",
+        "diá",
+        "dià",
+        "diě",
+        "diè",
+        "diáo",
+        "diú",
+        "diǔ",
+        "diù",
+        "dián",
+        "dīn",
+        "dín",
+        "dǐn",
+        "dìn",
+        "diāng",
+        "diáng",
+        "diǎng",
+        "diàng",
+        "díng",
+        "tié",
+        "niā",
+        "niá",
+        "niǎ",
+        "nià",
+        "niě",
+        "niāo",
+        "niáo",
+        "nīn",
+        "nǐn",
+        "nìn",
+        "niāng",
+        "niǎng",
+        "nīng",
+        "liā",
+        "liá",
+        "lià",
+        "lié",
+        "liān",
+        "liāng",
+        "jián",
+        "jín",
+        "jiáng",
+        "jíng",
+        "jióng",
+        "jiòng",
+        "qiá",
+        "qiù",
+        "qiǒng",
+        "qiòng",
+        "xiǎ",
+        "xiú",
+        "xín",
+        "xiǒng",
+      }
+    `);
+  });
+
+  const TONE_DESCRIPTION_BY_NUMBER: Record<number, string> = {
+    1: `the first tone (${defaultPinyinSoundInstructions[`1` as PinyinSoundId]} — High and flat pitch, similar to a high, sustained musical note)`,
+    2: `the second tone (${defaultPinyinSoundInstructions[`2` as PinyinSoundId]} — Starts mid-range and rises high, similar to the intonation of a question like "Huh?" or "What?")`,
+    3: `the third tone (${defaultPinyinSoundInstructions[`3` as PinyinSoundId]} — Starts low, dips to a lower pitch, then rises slightly. Often described as a low, dipping tone)`,
+    4: `the fourth tone (${defaultPinyinSoundInstructions[`4` as PinyinSoundId]} — Starts high and drops sharply, sounding quick, strong, and abrupt, like an angry command)`,
+    5: `the neutral tone (${defaultPinyinSoundInstructions[`5` as PinyinSoundId]} — Short and light with no specific pitch contour, usually used on grammatical particles or the second syllable of certain words)`,
+  };
+
+  function buildAudioFileNameParts(
+    pinyinUnit: string,
+    hanzi: string,
+  ): FileNamePart[] {
+    return [
+      { text: pinyinUnit, key: true },
+      { text: hanzi, key: false },
+      { text: `:voice:`, key: true },
+    ] as const;
+  }
+
+  function buildToneInstructions(
+    normalizedPinyin: string,
+    toneNumber: number,
+  ): string {
+    const toneDescription = TONE_DESCRIPTION_BY_NUMBER[toneNumber];
+    expect(
+      toneDescription,
+      `missing tone description for ${toneNumber}`,
+    ).toBeTypeOf(`string`);
+
+    return `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the character using "${normalizedPinyin}" ${toneDescription}.`;
+  }
 });
