@@ -31,8 +31,10 @@ export function isHanziIdeograph(char: string): boolean {
 
   return (
     codePoint != null &&
-    // CJK Unified Ideographs U+4E00 to U+9FFF
-    ((codePoint >= 0x4e_00 && codePoint <= 0x9f_ff) ||
+    // CJK ideographic number zero U+3007
+    (codePoint === 0x30_07 ||
+      // CJK Unified Ideographs U+4E00 to U+9FFF
+      (codePoint >= 0x4e_00 && codePoint <= 0x9f_ff) ||
       // CJK Unified Ideographs Extension A U+3400 to U+4DBF
       (codePoint >= 0x34_00 && codePoint <= 0x4d_bf) ||
       // CJK Unified Ideographs Extension B U+20000 to U+2A6DF
