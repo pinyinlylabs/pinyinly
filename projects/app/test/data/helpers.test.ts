@@ -411,8 +411,20 @@ describe(
       [`lēi`, `勒`],
       [`lòng`, `弄`],
       [`mán`, `埋`],
+      [`gā`, `夹`],
+      [`gá`, `嘎`],
+      [`dū`, `都`],
+      [`duī`, `追`],
+      [`duó`, `度`],
+      [`fěi`, `菲`],
+      [`fù`, `服`],
+      [`gà`, `界`],
+      [`gān`, `间`],
+      [`gě`, `个`],
+      [`háng`, `行`],
+      [`sào`, `扫`],
     ] as [PinyinUnit, HanziCharacter][])(
-      `%s does not → %s`,
+      `Expected NOT to match: %s → %s`,
       async ([pinyinUnit, hanziCharacter]) => {
         const picked = await pickExampleHanziForPinyinUnit(pinyinUnit);
         expect(picked).not.toBe(hanziCharacter);
@@ -431,7 +443,7 @@ describe(
       [`chǎng`, `场`],
       [`cōng`, `葱`],
     ] as [PinyinUnit, HanziCharacter | null][])(
-      `%s → %s`,
+      `Expected match: %s → %s`,
       async ([pinyinUnit, hanziCharacter]) => {
         const picked = await pickExampleHanziForPinyinUnit(pinyinUnit);
         expect(picked).toBe(hanziCharacter);

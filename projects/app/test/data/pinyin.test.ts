@@ -200,6 +200,11 @@ describe(
     test.for([
       [`niú`, [`niu`, 2]],
       [`hǎo`, [`hao`, 3]],
+      [`m̄`, [`m`, 1]],
+      [`ḿ`, [`m`, 2]],
+      [`m̌`, [`m`, 3]],
+      [`m̀`, [`m`, 4]],
+      [`m`, [`m`, 5]],
       [`nǖ`, [`nü`, 1]],
       [`nǘ`, [`nü`, 2]],
       [`nǚ`, [`nü`, 3]],
@@ -221,6 +226,11 @@ describe(
     test.for([
       [`niú`, { tonelessUnit: `niu`, tone: 2 }],
       [`hǎo`, { tonelessUnit: `hao`, tone: 3 }],
+      [`m̄`, { tonelessUnit: `m`, tone: 1 }],
+      [`ḿ`, { tonelessUnit: `m`, tone: 2 }],
+      [`m̌`, { tonelessUnit: `m`, tone: 3 }],
+      [`m̀`, { tonelessUnit: `m`, tone: 4 }],
+      [`m`, { tonelessUnit: `m`, tone: 5 }],
       [`nǖ`, { tonelessUnit: `nü`, tone: 1 }],
       [`nǘ`, { tonelessUnit: `nü`, tone: 2 }],
       [`nǚ`, { tonelessUnit: `nü`, tone: 3 }],
@@ -314,6 +324,8 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`ni3`, [0, `ni3`]],
   [`ni4`, [0, `ni4`]],
   [`ni5`, [0, `ni5`]],
+  [`ḿ`, [0, `ḿ`]],
+  [`Ḿ`, [0, `Ḿ`]],
   [`r`, [0, `r`]],
   // Words
   [`nǐhǎo`, [0, `nǐ`, 2, `hǎo`]],
@@ -349,6 +361,7 @@ describe(
         `ni3`,
         `ni4`,
         `ni5`,
+        `ḿ`,
       ];
       const regex = new RegExp(pinyinUnitPattern);
       for (const text of valid) {
