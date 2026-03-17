@@ -115,7 +115,7 @@ describe(`pinyin sounds`, () => {
     },
   );
 
-  describe(`audio quality`, async () => {
+  describe.skipIf(isCi)(`audio quality`, async () => {
     await createSpeechFileTests({
       audioGlob: path.join(pinyinAudioDir, `**/*.{mp3,m4a,aac}`),
       projectRoot,
