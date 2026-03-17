@@ -557,9 +557,32 @@ export function rankExampleHanziCandidates(
 const getHanziJsPinyinUsageCounts = memoize0(() => {
   ensureHanziJsStarted();
 
+  const entrySimplifiedToSkip = new Set([
+    `傻Ｂ`,
+    `卡拉ＯＫ`,
+    `牛Ｂ`,
+    `美国５１区`,
+    `装Ｂ`,
+    `Ａ咖`,
+    `Ａ片`,
+    `ＡＡ制`,
+    `ＤＮＡ亲子鉴定`,
+    `ＤＮＡ鉴定`,
+    `ｅ仔`,
+  ]);
+
   const usageIndex = createPinyinUsageIndex();
   for (const [key, entries] of Object.entries(hanzijs.dictionarysimplified)) {
     for (const entry of entries) {
+      // Skip bad entries that mix non-Hanzi characters or have other issues.
+      if (entrySimplifiedToSkip.has(entry.simplified)) {
+        continue;
+      }
+      // Unknown pinyin marker
+      if (entry.pinyin.startsWith(`xx`)) {
+        continue;
+      }
+
       const hanziCharacters = matchAllHanziCharacters(
         entry.simplified as HanziText,
       );
