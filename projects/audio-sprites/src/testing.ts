@@ -560,6 +560,8 @@ export interface SpeechFileTestOptions {
   skipLoudness?: boolean;
 }
 
+const fixTag = `-fix`;
+
 /**
  * Helper function to handle auto-fix or create a separate fix file.
  */
@@ -589,7 +591,7 @@ function handleAudioFix(options: {
   // Create a fixed file with a deterministic name
   // FFmpeg can't write to the same file it's reading, so we always write to a separate file first
   const ext = path.extname(filePath);
-  const fixedFilePath = `${filePath}-${fixType}-fix${ext}`;
+  const fixedFilePath = `${filePath}-${fixType}${fixTag}${ext}`;
   const command = fixCommand(fixedFilePath);
   if (writeLog) {
     execSync(`(echo '% ${command}'; ${command}) > "${fixedFilePath}.log" 2>&1`);
@@ -631,7 +633,7 @@ export async function createSpeechFileTests(
   } = options;
 
   for (const filePath of await glob(audioGlob)) {
-    if (filePath.includes(`-fix`)) {
+    if (filePath.includes(fixTag)) {
       continue;
     }
 
