@@ -33,6 +33,8 @@ export function isHanziIdeograph(char: string): boolean {
     codePoint != null &&
     // CJK ideographic number zero U+3007
     (codePoint === 0x30_07 ||
+      // Kangxi Radicals U+2F00 to U+2FDF
+      (codePoint >= 0x2f_00 && codePoint <= 0x2f_df) ||
       // CJK Unified Ideographs U+4E00 to U+9FFF
       (codePoint >= 0x4e_00 && codePoint <= 0x9f_ff) ||
       // CJK Unified Ideographs Extension A U+3400 to U+4DBF

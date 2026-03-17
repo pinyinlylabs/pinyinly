@@ -353,6 +353,7 @@ const hanziWithIndexesFixtures = [
   [`abc!?`, []],
   [`你`, [0, `你`]],
   [`〇`, [0, `〇`]],
+  [`⿔`, [0, `⿔`]],
   [`老`, [0, `老`]],
   [`蘭`, [0, `蘭`]],
   [`盧`, [0, `盧`]],
@@ -366,6 +367,7 @@ const hanziWithIndexesFixtures = [
   [`abc你好！`, [3, `你`, 4, `好`]],
   [`😀你a好`, [2, `你`, 4, `好`]],
   [`abc〇！`, [3, `〇`]],
+  [`abc⿔！`, [3, `⿔`]],
   [`𠮷野家`, [0, `𠮷`, 2, `野`, 3, `家`]],
 ] as [string, (number | HanziCharacter)[]][];
 describe(
