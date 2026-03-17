@@ -501,7 +501,9 @@ type PinyinUsageIndexType = {
 };
 
 const ensureHanziJsStarted = memoize0(() => {
+  const spy = vi.spyOn(console, `log`).mockImplementation(() => {});
   hanzijs.start();
+  spy.mockRestore();
 });
 
 const getKnownPinyinUnitSet = memoize0(() => {
