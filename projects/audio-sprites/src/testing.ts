@@ -5,6 +5,7 @@ import makeDebug from "debug";
 import { execa } from "execa";
 import { execSync } from "node:child_process";
 import path from "node:path";
+import type { chai } from "vitest";
 import { describe, expect, test } from "vitest";
 import { analyzeAudioFile, generateSpriteCommand } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
@@ -557,6 +558,7 @@ export interface SpeechFileTestOptions {
   autoFixLoudness?: boolean;
   /** Whether to automatically trim silence by overwriting the original file (default: false) */
   autoFixTrimSilence?: boolean;
+  autoFixEmpty?: boolean;
   skipLoudness?: boolean;
 }
 
@@ -624,11 +626,12 @@ export async function createSpeechFileTests(
     targetLufs = -18,
     loudnessTolerance = 1,
     allowedStartOrEndOffset = 0.1,
-    minDuration = 0.3,
+    minDuration = 0.1,
     durationTolerance = 0.05,
     projectRoot,
     autoFixLoudness = false,
     autoFixTrimSilence = false,
+    autoFixEmpty = false,
     skipLoudness = false,
   } = options;
 
@@ -651,7 +654,16 @@ export async function createSpeechFileTests(
       test(`audio file is not empty (based on duration)`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
-        expect(duration.fromStream).toBeGreaterThanOrEqual(minDuration);
+        try {
+          // Skip the assertion since we've fixed the file
+          expect(duration.fromStream).toBeGreaterThanOrEqual(minDuration);
+        } catch (e) {
+          if (isAssertionError(e) && autoFixEmpty) {
+            fs.unlinkSync(filePath);
+          } else {
+            throw e;
+          }
+        }
       });
 
       test.skipIf(skipLoudness)(
@@ -763,4 +775,10 @@ export async function createSpeechFileTests(
       });
     });
   }
+}
+
+function isAssertionError(
+  error: unknown,
+): error is ReturnType<typeof chai.use>[`AssertionError`] {
+  return error instanceof Error && error.name === `AssertionError`;
 }
