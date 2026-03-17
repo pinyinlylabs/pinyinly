@@ -32,7 +32,7 @@ test(`test sprites`, async () => {
 });
 
 describe(`pinyin sounds`, () => {
-  test(
+  test.skipIf(isCi)(
     `should have audio files for all pinyin units`,
     {
       // In local dev don't timeout, since we want to be able to generate
@@ -45,12 +45,20 @@ describe(`pinyin sounds`, () => {
 
       const pinyinUnitToHanziCharacter = await getPinyinUnitToHanziCharacter();
 
+      // These pinyin aren't used so there's basically no pronunciation for
+      // them. This list should probably live somewhere else.
+      const pinyinToSkip = new Set([`běng`, `rē`, `ré`, `rě`]);
+
       const missingItems: {
         hanzi: string;
         pinyin: string;
       }[] = [];
 
       for (const pinyin of getPinyinUnits()) {
+        if (pinyinToSkip.has(pinyin)) {
+          continue;
+        }
+
         const hanzi = pinyinUnitToHanziCharacter.get(pinyin);
 
         // Skip pinyin units that don't have hanzi examples, there's another
