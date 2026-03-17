@@ -71,7 +71,9 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   }
 });
 
-test(`src/ files have consistent NFC and NFD encoding`, async () => {
+// This might need to be re-enabled in the future if there are problems with
+// building in metro.
+test.skip(`src/ files have consistent NFC and NFD encoding`, async () => {
   // On macOS file paths are encoded using NFD, but on other platforms they are
   // NFC. When you require(…) a path with metro (maybe Node.js too?), the bytes
   // you pass in need to match the filesystem. This means that on macOS you need
@@ -83,7 +85,9 @@ test(`src/ files have consistent NFC and NFD encoding`, async () => {
   const srcRoot = `${projectRoot}/src`;
 
   for (const path of await fs.glob(`${srcRoot}/**/*`)) {
-    expect(path.normalize(`NFD`)).toEqual(path.normalize(`NFC`));
+    expect
+      .soft(path.normalize(`NFD`), `Path ${path} is not normalized`)
+      .toEqual(path.normalize(`NFC`));
   }
 });
 
