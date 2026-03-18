@@ -79,6 +79,7 @@ export function gitGlobSync(
     {
       cwd,
       encoding: `utf8`,
+      stdio: ["pipe", "pipe", "ignore"], // ignore stderr to silence warnings from git
     },
   );
 
