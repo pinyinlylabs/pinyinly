@@ -14,7 +14,7 @@ export interface TooltipProviderContextValue {
 }
 
 const defaultDelayDuration = 500;
-const defaultSkipDelayDuration = 1000;
+const defaultSkipDelayDuration = 500;
 
 const TooltipProviderContext =
   createContext<TooltipProviderContextValue | null>(null);
