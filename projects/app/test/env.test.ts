@@ -73,8 +73,8 @@ test(`tests/ tree mirrors src/ tree`, async () => {
 
 test(`src/ file paths are tracked consistently in git (using NFC encoding instead of NFD)`, async () => {
   // - NFC = Normalization Form Composed
-	// - NFD = Normalization Form Decomposed
-  // 
+  // - NFD = Normalization Form Decomposed
+  //
   // On macOS file paths are encoded using NFD (decomposed i.e. e + ◌́), but on
   // Linux they are stored as raw bytes, and in git they're tracked as raw
   // bytes, so if they happen to be committed as NFC (composed i.e. é) then on
@@ -89,14 +89,14 @@ test(`src/ file paths are tracked consistently in git (using NFC encoding instea
   //
   // > NFC is the safer repo/tooling convention because it is the more common
   // > “portable interchange” form across:
-  // > 
+  // >
   // > - source code strings
   // > - generated code
   // > - JSON
   // > - Git policies
   // > - Linux/Windows environments
   // > - most Unicode text handling outside macOS filesystem quirks
-  // > 
+  // >
   // > NFD is mostly attractive because macOS filesystems tend to present names
   // > in decomposed form, but that is a local filesystem behavior, not a great
   // > universal project convention.
