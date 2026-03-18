@@ -214,7 +214,7 @@ const rule: Rule.RuleModule = {
             }
 
             // Get matching files
-            files = fs.globSync(globPattern, { cwd: targetDir }).sort();
+            files = fs.gitGlobSync(globPattern, { cwd: targetDir }).sort();
           } catch (error: unknown) {
             const errorMessage =
               error !== null && typeof error === `object` && `message` in error

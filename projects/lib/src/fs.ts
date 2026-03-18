@@ -1,4 +1,7 @@
 // oxlint-disable-next-line no-restricted-imports
+import { execFileSync } from "node:child_process";
+
+// oxlint-disable-next-line no-restricted-imports
 import { readFileSync, writeFileSync } from "node:fs";
 
 // oxlint-disable-next-line no-restricted-imports
@@ -15,7 +18,6 @@ import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
 // oxlint-disable-next-line no-restricted-imports
-// oxlint-disable-next-line no-restricted-imports
 export {
   access,
   mkdir,
@@ -28,7 +30,6 @@ export {
   writeFile,
 } from "node:fs/promises";
 
-// oxlint-disable-next-line eslint/no-restricted-imports
 // oxlint-disable-next-line eslint/no-restricted-imports
 export {
   createReadStream,
@@ -53,6 +54,38 @@ export function grepSync(globPattern: string, substring: string): string[] {
     }
   }
   return matches;
+}
+
+export function gitGlobSync(
+  globPattern: string,
+  options?: {
+    cwd?: string;
+  },
+): string[] {
+  const cwd = options?.cwd ?? process.cwd();
+
+  const pathSpec = `:(glob)${globPattern.replaceAll(`\\`, `/`)}`;
+  const output = execFileSync(
+    `git`,
+    [
+      `ls-files`,
+      `-z`,
+      `--cached`,
+      `--others`,
+      `--exclude-standard`,
+      `--`,
+      pathSpec,
+    ],
+    {
+      cwd,
+      encoding: `utf8`,
+    },
+  );
+
+  return output
+    .split(`\0`)
+    .filter((relativePath) => relativePath.length > 0)
+    .sort();
 }
 
 export async function writeJsonFileIfChanged(
@@ -132,7 +165,6 @@ export function writeUtf8FileIfChangedSync(
   return hasDiff;
 }
 
-// oxlint-disable-next-line no-restricted-imports
 // oxlint-disable-next-line no-restricted-imports
 export { glob, globSync } from "glob";
 
