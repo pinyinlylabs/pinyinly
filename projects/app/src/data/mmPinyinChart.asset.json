@@ -10,7 +10,7 @@
     "s-": "si sa se sai sei sao sou san sen sang seng",
     "b-": "ba bai bei bao ban ben bang beng bo",
     "p-": "pa pai pei pao pou pan pen pang peng po pun",
-    "m-": "ma me mai mei mao mou man men mang meng mo",
+    "m-": "ma me mai mei mao mou man men mang meng mo m",
     "f-": "fa fai fei fou fan fen fang feng fiao fo",
     "d-": "da de dai dei dao dou dan den dang deng dong",
     "t-": "ta te tai tei tao tou tan tang teng tong",
@@ -66,7 +66,7 @@
     "-e": "e me de te ne le ge ke he re ze ce ye se ê zhe che she bie pie mie die tie nie lie jie qie xie jue que xue yue nüe lüe",
     "-a": "a pa ma fa da ta na la ga ka ha za ca sa ba ya pia dia nia lia jia qia xia wa gua kua hua zhua chua shua rua cha zha sha",
     "-o": "o yo wo bo po mo fo duo tuo nuo luo guo kuo huo zhuo chuo shuo ruo zuo cuo suo lo",
-    "-∅": "er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü"
+    "-∅": "er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü m"
   },
   "groups": [
     {

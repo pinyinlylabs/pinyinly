@@ -108,7 +108,10 @@ describe(
 
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinFinal(hanziWord);
-        await hanziWordToPinyinFinalQuestionOrThrow(skill, null);
+        await expect(
+          hanziWordToPinyinFinalQuestionOrThrow(skill, null),
+          `Failed for hanziWord: ${hanziWord}`,
+        ).resolves.not.toThrow();
       }
     });
   },

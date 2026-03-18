@@ -5,7 +5,7 @@ import type {
   PinyinUnit,
 } from "@/data/model";
 import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import z from "zod/v4";
 
@@ -81,7 +81,7 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
       } else if (isPinyinVowel(char)) {
         if (isPinyinVowel(nextChar)) {
           // oxlint-disable-next-line typescript/no-non-null-assertion
-          result += toneMap[char][5]! + toneMap[nextChar][tone]!;
+          result += toneMap[char][5] + toneMap[nextChar][tone]!;
           i++;
         } else {
           // oxlint-disable-next-line typescript/no-non-null-assertion
@@ -93,7 +93,7 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
     }
 
     // oxlint-disable-next-line typescript/no-non-null-assertion
-    result += isPinyinVowel(char) ? toneMap[char][5]! : char;
+    result += isPinyinVowel(char) ? toneMap[char][5] : char;
   }
   return result as PinyinUnit;
 });
@@ -117,22 +117,27 @@ export const normalizePinyinUnitForHintKey = memoize1(
 );
 
 const toneMap = {
-  a: `_āáǎàa`,
-  e: `_ēéěèe`,
-  i: `_īíǐìi`,
-  o: `_ōóǒòo`,
-  u: `_ūúǔùu`,
+  a: [`_`, `ā`, `á`, `ǎ`, `à`, `a`],
+  e: [`_`, `ē`, `é`, `ě`, `è`, `e`],
+  i: [`_`, `ī`, `í`, `ǐ`, `ì`, `i`],
+  o: [`_`, `ō`, `ó`, `ǒ`, `ò`, `o`],
+  u: [`_`, `ū`, `ú`, `ǔ`, `ù`, `u`],
   // The order of `ü` and `v` is significant.
-  ü: `_ǖǘǚǜü`,
-  v: `_ǖǘǚǜü`,
+  ü: [`_`, `ǖ`, `ǘ`, `ǚ`, `ǜ`, `ü`],
+  v: [`_`, `ǖ`, `ǘ`, `ǚ`, `ǜ`, `ü`],
+  // Special case for m, which can take a tone in some dialects and is sometimes
+  // used as a placeholder for erhua syllables.
+  m: [`_`, `m̄`, `ḿ`, `m̌`, `m̀`, `m`],
   // fake pinyin, but used for distractors
-  ï: `_ïḯîìi`,
+  ï: [`_`, `ï`, `ḯ`, `î`, `ì`, `i`],
 } as const;
+
+const vowels = [`a`, `e`, `i`, `o`, `u`, `ü`, `v`, `ï`];
 
 const isPinyinVowel = (
   char: string | null | undefined,
 ): char is `a` | `e` | `i` | `ï` | `o` | `u` | `ü` =>
-  char != null && char in toneMap;
+  char != null && vowels.includes(char);
 
 export const splitPinyinUnitTone = memoize1(function splitPinyinUnitTone(
   unit: PinyinUnit,
@@ -142,8 +147,7 @@ export const splitPinyinUnitTone = memoize1(function splitPinyinUnitTone(
 } {
   for (const [key, value] of Object.entries(toneMap)) {
     for (let tone = 1; tone <= 4; tone++) {
-      const char = value[tone];
-      invariant(char != null);
+      const char = nonNullable(value[tone]);
 
       const index = unit.indexOf(char);
       if (index !== -1) {
@@ -188,18 +192,16 @@ export function splitPinyinUnitWithChart(
 ): Readonly<SplitPinyinUnit> | null {
   const { tonelessUnit, tone } = splitPinyinUnitTone(pinyinUnit);
 
-  const initialSoundId = chart.unitToInitialSound[tonelessUnit];
-  const finalSoundId = chart.unitToFinalSound[tonelessUnit];
-
-  if (initialSoundId == null || finalSoundId == null) {
+  const parts = splitTonelessPinyinUnitWithChart(tonelessUnit, chart);
+  if (parts == null) {
     return null;
   }
 
   const toneSoundId = `${tone}` as PinyinSoundId;
 
   return {
-    initialSoundId,
-    finalSoundId,
+    initialSoundId: parts.initialSoundId,
+    finalSoundId: parts.finalSoundId,
     toneSoundId,
     tone,
     tonelessUnit,
@@ -295,7 +297,7 @@ export const loadPylyPinyinChart = memoize0(() =>
       "s-": `si sa se sai sei sao sou san sen sang seng song`,
       "b-": `ba bai bei bao ban ben bang beng bo`,
       "p-": `pa pai pei pao pou pan pen pang peng po pun`,
-      "m-": `ma me mai mei mao mou man men mang meng mo`,
+      "m-": `ma me mai mei mao mou man men mang meng mo m`,
       "f-": `fa fai fei fou fan fen fang feng fiao fo`,
       "d-": `da de dai dei dao dou dan den dang deng dong`,
       "t-": `ta te tai tei tao tou tan tang teng tong`,
@@ -357,7 +359,7 @@ export const loadPylyPinyinChart = memoize0(() =>
       "-e": `e me de te ne le ge ke he re ze ce ye se ê zhe che she bie pie mie die tie nie lie jie qie xie jue que xue yue nüe lüe`,
       "-a": `a pa ma fa da ta na la ga ka ha za ca sa ba ya pia dia nia lia jia qia xia wa gua kua hua zhua chua shua rua cha zha sha`,
       "-o": `o yo wo bo po mo fo duo tuo nuo luo guo kuo huo zhuo chuo shuo ruo zuo cuo suo lo`,
-      "-∅": `er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü`,
+      "-∅": `er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü m`,
     },
     labels: {
       // Using square brackets to indicate optional characters, other systems
@@ -607,7 +609,7 @@ export const pinyinUnitPattern = (() => {
   const u = `(?:u|ū|ú|ǔ|ù)`;
   const v = `(?:ü|ǖ|ǘ|ǚ|ǜ|v|u:)`;
 
-  const consonantEnd = `(?!${a}${e}${i}${o}${u}${v})`;
+  const consonantEnd = `(?!${a}|${e}|${i}|${o}|${u}|${v})`;
 
   return (
     `(?:` +
@@ -616,7 +618,7 @@ export const pinyinUnitPattern = (() => {
     `(?:[nljqx]i${a}ng${consonantEnd})|` +
     `(?:(?:[zcs]h?|[dtnlgkhrjqxy])u${a}n${consonantEnd})|` +
     `(?:(?:[zcs]h|[gkh])u${a}i)|` +
-    `(?:(?:[zc]h?|[rdtnlgkhsy])${o}ng${consonantEnd})|` +
+    `(?:(?:[zc]h?|[rdtnlgkhsy])?${o}ng${consonantEnd})|` +
     `(?:(?:[zcs]h?|[rbpmfdtnlgkhw])?${e}ng${consonantEnd})|` +
     `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}ng${consonantEnd})|` +
     `(?:[bpmdtnljqxy]${i}ng${consonantEnd})|` +
@@ -645,6 +647,7 @@ export const pinyinUnitPattern = (() => {
     `(?:(?:[zcs]h?|[rmdtnlgkhy])${e})|` +
     `(?:[bpmfwyl]?${o})|` +
     `(?:(?:[zcs]h|[bpmfdtnlgkhzcswy])?${a})|` +
+    `(?:m|m̄|ḿ|m̌|m̀)|` +
     `(?:r${consonantEnd})` +
     `)` +
     `[0-5]?`
@@ -764,6 +767,82 @@ export const defaultPinyinSoundInstructions = {
   "-ong": `Like **“ong”** in *song* — starts like \`o\`, ends with soft \`ng\`.`,
   "-∅": `No final — the syllable ends with the initial only (e.g. *ba*, *di*).`,
 } as Record<PinyinSoundId, string>;
+
+export const defaultPinyinSoundExamples = {
+  "1": [`mā`, `yī`],
+  "2": [`má`, `lí`],
+  "3": [`mǎ`, `nǐ`],
+  "4": [`mà`, `qù`],
+  "5": [`ma`, `de`],
+  "∅-": [`āi`, `ōu`],
+  "b-": [`bā`, `bó`],
+  "p-": [`pā`, `pén`],
+  "m-": [`mā`, `mò`],
+  "f-": [`fā`, `fēng`],
+  "d-": [`dā`, `dōng`],
+  "t-": [`tā`, `tóng`],
+  "n-": [`nā`, `nóng`],
+  "l-": [`lā`, `lóng`],
+  "g-": [`gā`, `gōng`],
+  "k-": [`kā`, `kǒng`],
+  "h-": [`hā`, `hóng`],
+  "zh-": [`zhī`, `zhōng`],
+  "ch-": [`chī`, `cháng`],
+  "sh-": [`shī`, `shàng`],
+  "r-": [`rì`, `rén`],
+  "z-": [`zī`, `zōng`],
+  "c-": [`cī`, `cóng`],
+  "s-": [`sī`, `sòng`],
+  "y-": [`yī`, `yǒng`],
+  "bi-": [`bī`, `biǎo`],
+  "pi-": [`pī`, `pián`],
+  "mi-": [`mī`, `miào`],
+  "di-": [`dī`, `diǎn`],
+  "ti-": [`tī`, `tiáo`],
+  "ni-": [`nǐ`, `niáng`],
+  "li-": [`lǐ`, `liáng`],
+  "ji-": [`jī`, `jiǒng`],
+  "qi-": [`qī`, `qiáng`],
+  "xi-": [`xī`, `xiōng`],
+  "w-": [`wū`, `wǎng`],
+  "bu-": [`bù`, `bū`],
+  "pu-": [`pǔ`, `pū`],
+  "mu-": [`mù`, `mū`],
+  "fu-": [`fū`, `fù`],
+  "du-": [`dū`, `duò`],
+  "tu-": [`tū`, `tuán`],
+  "nu-": [`nǔ`, `nuó`],
+  "lu-": [`lù`, `luán`],
+  "gu-": [`gū`, `guāng`],
+  "ku-": [`kù`, `kuǎi`],
+  "hu-": [`hū`, `huáng`],
+  "zhu-": [`zhū`, `zhuàng`],
+  "chu-": [`chū`, `chuán`],
+  "shu-": [`shū`, `shuài`],
+  "ru-": [`rú`, `ruò`],
+  "zu-": [`zú`, `zuǐ`],
+  "cu-": [`cù`, `cuì`],
+  "su-": [`sū`, `suǒ`],
+  "yu-": [`yǔ`, `yuè`],
+  "nü-": [`nǚ`, `nüè`],
+  "lü-": [`lǜ`, `lüán`],
+  "ju-": [`jū`, `jué`],
+  "qu-": [`qù`, `quán`],
+  "xu-": [`xū`, `xuě`],
+  "-a": [`ā`, `pá`],
+  "-ai": [`āi`, `hái`],
+  "-an": [`ān`, `shān`],
+  "-ang": [`āng`, `liáng`],
+  "-ao": [`āo`, `jiǎo`],
+  "-e": [`ē`, `shè`],
+  "-ei": [`ēi`, `wéi`],
+  "-en": [`ēn`, `rén`],
+  "-eng": [`ēng`, `chéng`],
+  "-o": [`ō`, `duō`],
+  "-ou": [`ōu`, `zhōu`],
+  "-ong": [`ōng`, `zhōng`],
+  "-∅": [`zī`, `shì`],
+} as Record<PinyinSoundId, readonly [PinyinUnit, ...PinyinUnit[]]>;
 
 /**
  * Count the number of units in a pinyin string. Handles both

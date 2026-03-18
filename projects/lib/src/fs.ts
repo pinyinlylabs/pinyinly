@@ -2,10 +2,17 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 // oxlint-disable-next-line no-restricted-imports
-import { readFile, stat, writeFile } from "node:fs/promises";
+import {
+  readFile,
+  readdir as readdirRaw,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 
 // oxlint-disable-next-line no-restricted-imports
-import { globSync } from "glob";
+import { glob as globRaw, globSync as globSyncRaw } from "glob";
+// oxlint-disable-next-line no-restricted-imports
+import type { GlobOptionsWithFileTypesUnset } from "glob";
 
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
@@ -18,7 +25,6 @@ import { jsonStringifyShallowIndent } from "./json.ts";
 export {
   access,
   mkdir,
-  readdir,
   readFile,
   rename,
   rm,
@@ -33,6 +39,7 @@ export {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   unlinkSync,
@@ -50,6 +57,40 @@ export function grepSync(globPattern: string, substring: string): string[] {
     }
   }
   return matches;
+}
+
+function normalizeGlobResultsToNfc(paths: string[]): string[] {
+  return paths.map((filePath) => filePath.normalize(`NFC`));
+}
+
+function withFriendlyGlobDefaults(
+  options?: GlobOptionsWithFileTypesUnset,
+): GlobOptionsWithFileTypesUnset {
+  return {
+    posix: true,
+    ...options,
+  };
+}
+
+export async function glob(
+  pattern: string | string[],
+  options?: GlobOptionsWithFileTypesUnset,
+): Promise<string[]> {
+  const paths = await globRaw(pattern, withFriendlyGlobDefaults(options));
+  return normalizeGlobResultsToNfc(paths);
+}
+
+export function globSync(
+  pattern: string | string[],
+  options?: GlobOptionsWithFileTypesUnset,
+): string[] {
+  const paths = globSyncRaw(pattern, withFriendlyGlobDefaults(options));
+  return normalizeGlobResultsToNfc(paths);
+}
+
+export async function readdir(path: string): Promise<string[]> {
+  const result = await readdirRaw(path);
+  return normalizeGlobResultsToNfc(result);
 }
 
 export async function writeJsonFileIfChanged(
@@ -128,9 +169,6 @@ export function writeUtf8FileIfChangedSync(
 
   return hasDiff;
 }
-
-// oxlint-disable-next-line no-restricted-imports
-export { glob, globSync } from "glob";
 
 export function makeFsDbCache<K, V>(
   scriptFilename: string,

@@ -1,18 +1,16 @@
-import { loadDictionary } from "@/dictionary";
 import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
 import { useRouter } from "expo-router";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { useQuickSearch } from "./hooks/useQuickSearch";
 import { Icon } from "./Icon";
 import { Portal } from "./Portal";
-import { searchDictionaryEntries } from "./quickSearch";
 import { TextInputSingle } from "./TextInputSingle";
 
 const gap = 8;
 
 export function MenuDictionarySearch() {
   const router = useRouter();
-  const dictionary = use(loadDictionary());
   const [query, setQuery] = useState(``);
   const [isFocused, setIsFocused] = useState(false);
   const [blurTimeoutId, setBlurTimeoutId] = useState<
@@ -30,7 +28,10 @@ export function MenuDictionarySearch() {
 
   const trimmedQuery = query.trim();
   const hasQuery = trimmedQuery.length > 0;
-  const results = searchDictionaryEntries(dictionary.allEntries, trimmedQuery);
+  const results = useQuickSearch(trimmedQuery);
+  const displayResults = results.filter(
+    (result) => result.kind !== `pinyinSound`,
+  );
 
   const showResults = hasQuery && isFocused;
 
@@ -82,14 +83,18 @@ export function MenuDictionarySearch() {
             style={floatingStyles}
             className="shadow-lg overflow-hidden rounded-xl border border-fg/10 bg-bg-high"
           >
-            {results.length === 0 ? (
+            {displayResults.length === 0 ? (
               <View className="px-3 py-2">
                 <Text className="text-sm text-fg-dim">No matches</Text>
               </View>
             ) : (
-              results.map((result) => (
+              displayResults.map((result) => (
                 <Pressable
-                  key={result.hanziWord}
+                  key={
+                    result.kind === `wikiDirect`
+                      ? `wikiDirect:${result.hanzi}`
+                      : result.hanziWord
+                  }
                   onPress={() => {
                     handleSelect(result.hanzi);
                   }}
@@ -103,14 +108,16 @@ export function MenuDictionarySearch() {
                     {result.hanzi}
                   </Text>
                   <View className="flex-1">
-                    {result.gloss == null ? null : (
+                    {result.kind === `hanziWord` && result.gloss != null ? (
                       <Text className="text-sm text-fg">{result.gloss}</Text>
-                    )}
-                    {result.pinyin == null ? null : (
+                    ) : result.kind === `wikiDirect` ? (
+                      <Text className="text-sm text-fg">Open wiki page</Text>
+                    ) : null}
+                    {result.kind === `hanziWord` && result.pinyin != null ? (
                       <Text className="text-xs text-fg-dim">
                         {result.pinyin}
                       </Text>
-                    )}
+                    ) : null}
                   </View>
                 </Pressable>
               ))

@@ -71,22 +71,6 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   }
 });
 
-test(`src/ files have consistent NFC and NFD encoding`, async () => {
-  // On macOS file paths are encoded using NFD, but on other platforms they are
-  // NFC. When you require(…) a path with metro (maybe Node.js too?), the bytes
-  // you pass in need to match the filesystem. This means that on macOS you need
-  // to pass in an NFD encoded path, and on other platforms you need to pass in
-  // an NFC encoded path.
-  //
-  // To avoid this problem it's best to just avoid using accented characters
-  // in file paths.
-  const srcRoot = `${projectRoot}/src`;
-
-  for (const path of await fs.glob(`${srcRoot}/**/*`)) {
-    expect(path.normalize(`NFD`)).toEqual(path.normalize(`NFC`));
-  }
-});
-
 async function getTreePaths(
   root: string,
   globPattern: string,

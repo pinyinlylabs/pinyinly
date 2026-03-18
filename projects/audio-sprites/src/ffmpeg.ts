@@ -15,24 +15,44 @@ export const getFfmpegVersion = memoize0(async () => {
   return stdout;
 });
 
-const stringNumberSchema = z.string().pipe(z.coerce.number());
+export const stringifiedNumberSchema = z.string().transform((val, ctx) => {
+  // Handle special ffmpeg infinity values that appear for extremely quiet or problematic audio
+  const trimmed = val.trim();
+  if (trimmed === `-inf` || trimmed === `-Infinity`) {
+    return -Infinity;
+  }
+  if (trimmed === `inf` || trimmed === `Infinity`) {
+    return Infinity;
+  }
+
+  // Parse as number
+  const num = Number(val);
+  if (!Number.isFinite(num)) {
+    ctx.addIssue({
+      code: `custom`,
+      message: `Value "${val}" could not be parsed as a finite number (got ${String(num)})`,
+    });
+    return z.NEVER;
+  }
+  return num;
+});
 
 const loudnormSchema = z.object({
-  input_i: stringNumberSchema,
-  input_tp: stringNumberSchema,
-  input_lra: stringNumberSchema,
-  input_thresh: stringNumberSchema,
-  output_i: stringNumberSchema,
-  output_tp: stringNumberSchema,
-  output_lra: stringNumberSchema,
-  output_thresh: stringNumberSchema,
+  input_i: stringifiedNumberSchema,
+  input_tp: stringifiedNumberSchema,
+  input_lra: stringifiedNumberSchema,
+  input_thresh: stringifiedNumberSchema,
+  output_i: stringifiedNumberSchema,
+  output_tp: stringifiedNumberSchema,
+  output_lra: stringifiedNumberSchema,
+  output_thresh: stringifiedNumberSchema,
   normalization_type: z.string(),
-  target_offset: stringNumberSchema,
+  target_offset: stringifiedNumberSchema,
 });
 
 const astatsSchema = z
   .object({
-    "Number of samples": stringNumberSchema,
+    "Number of samples": stringifiedNumberSchema,
   })
   .loose();
 
@@ -62,8 +82,26 @@ function extractLoudnorm(output: string) {
     `Failed to extract JSON from ffmpeg output: \n${output}`,
   );
 
-  const parsed = loudnormSchema.parse(JSON.parse(json));
-  return parsed;
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(json);
+  } catch (error) {
+    throw new Error(
+      `Failed to parse extracted JSON: ${json}\nError: ${String(error)}`,
+    );
+  }
+
+  try {
+    return loudnormSchema.parse(parsedJson);
+  } catch (error) {
+    // Log the raw data to help debug sporadic parsing failures
+    console.error(`Failed to validate loudnorm data:`);
+    console.error(`Raw JSON string:`, json);
+    console.error(`Parsed JSON:`, JSON.stringify(parsedJson, null, 2));
+    throw new Error(
+      `Failed to validate loudnorm data: ${JSON.stringify(parsedJson, null, 2)}\nError: ${String(error)}`,
+    );
+  }
 }
 
 const containerDataSchema = z.object({
@@ -127,8 +165,18 @@ interface Silence {
 }
 
 function extractSilenceDetection(output: string) {
-  const silences: Silence[] = [];
+  const rawSilences: Silence[] = [];
   let start: number | null = null;
+
+  // Some files retain a non-zero stream start timestamp after trimming.
+  // Shift detected silence times so callers get timeline values that match
+  // metadata-aware playback tools (e.g. macOS Quick Look).
+  const containerStartMatch =
+    /Duration: .+?, start: (?<start>.+?), bitrate: .+?$/gms.exec(output);
+  const parsedStart = Number.parseFloat(
+    containerStartMatch?.groups?.[`start`] ?? `0`,
+  );
+  const timeOffset = Number.isFinite(parsedStart) ? parsedStart : 0;
 
   const matches = output.matchAll(/^\[silencedetect @ .+?\] (.+?)$/gm);
   for (const [, message] of matches) {
@@ -152,7 +200,7 @@ function extractSilenceDetection(output: string) {
       invariant(silenceEnd != null);
       invariant(silenceDuration != null);
 
-      silences.push({
+      rawSilences.push({
         start,
         end: Number.parseFloat(silenceEnd),
         duration: Number.parseFloat(silenceDuration),
@@ -160,6 +208,39 @@ function extractSilenceDetection(output: string) {
       start = null;
       continue;
     }
+  }
+
+  if (timeOffset <= 0) {
+    return rawSilences;
+  }
+
+  const silences: Silence[] = [];
+  let hasLeadingFromStream = false;
+
+  for (const silence of rawSilences) {
+    if (silence.start === 0) {
+      hasLeadingFromStream = true;
+      silences.push({
+        start: 0,
+        end: silence.end + timeOffset,
+        duration: silence.end + timeOffset,
+      });
+      continue;
+    }
+
+    silences.push({
+      start: silence.start + timeOffset,
+      end: silence.end + timeOffset,
+      duration: silence.duration,
+    });
+  }
+
+  if (!hasLeadingFromStream) {
+    silences.unshift({
+      start: 0,
+      end: timeOffset,
+      duration: timeOffset,
+    });
   }
 
   return silences;

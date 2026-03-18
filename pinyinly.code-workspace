@@ -5,16 +5,20 @@
     },
   ],
   "settings": {
+    "[markdown]": {
+      "editor.defaultFormatter": "oxc.oxc-vscode",
+    },
     "[git-commit]": {
       "editor.rulers": [80],
     },
     "editor.defaultFormatter": "oxc.oxc-vscode",
-    "typescript.tsdk": "node_modules/typescript/lib",
     "editor.codeActionsOnSave": {
-      "source.fixAll.oxc": "always",
+      // Disabled until https://github.com/microsoft/typescript-go/pull/2331#issuecomment-4080425624 is fixed.
+      "source.organizeImports": "never",
+      "source.removeUnusedImports": "always",
+      // These work okay.
+      "source.fixAll": "always",
       "source.formatDocument": "always",
-      "source.fixAll.eslint": "always",
-      "source.organizeImports": "always",
     },
     "eslint.useFlatConfig": true,
     "eslint.workingDirectories": [
@@ -23,9 +27,8 @@
     ],
     // Allow loading ESLint rules written in TypeScript directly
     "eslint.runtime": "node_modules/.bin/tsx",
-    "[markdown]": {
-      "editor.defaultFormatter": "oxc.oxc-vscode",
-    },
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
+    "js/ts.experimental.useTsgo": true,
     "tailwindCSS.experimental.classRegex": [
       // https://github.com/paolotiu/tailwind-intellisense-regex-list?tab=readme-ov-file#tailwind-variants
       ["tv\\({([^]*?)}\\)", "[\"'`]([^\"'`]*)[\"'`]"],
@@ -47,7 +50,6 @@
       "**/.react-email/**",
     ],
     "tailwindCSS.validate": false,
-    "typescript.experimental.useTsgo": true,
     "chat.tools.terminal.autoApprove": {
       "/^moon run [\\w-]+:\\w+/": true,
     },

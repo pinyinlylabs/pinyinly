@@ -42,6 +42,23 @@ export const generateSpriteAssignments = (
   return assignments;
 };
 
+export const findUnmatchedFiles = (
+  files: string[],
+  rules: SpriteRule[],
+): string[] => {
+  return files.filter(
+    (filePath) => applyRulesWithRule(filePath, rules) == null,
+  );
+};
+
+export const formatUnmatchedFilesError = (unmatchedFiles: string[]): string => {
+  return [
+    `Found audio files that do not match any sprite rule:`,
+    ...unmatchedFiles.map((filePath) => `- ${filePath}`),
+    `Add or update a manifest rule so every included file matches a sprite.`,
+  ].join(`\n`);
+};
+
 /**
  * Calculate frame-aligned start time for audio segments.
  * Audio segments should start at sample boundaries to avoid playback artifacts.
@@ -126,6 +143,11 @@ export const recomputeManifest = async (
 
   const manifestDir = path.dirname(manifestPath);
   const inputFiles = await getInputFiles(manifest, manifestPath);
+  const unmatchedFiles = findUnmatchedFiles(inputFiles, manifest.rules);
+
+  if (unmatchedFiles.length > 0) {
+    throw new Error(formatUnmatchedFilesError(unmatchedFiles));
+  }
 
   const updatedSegments: Record<string, SpriteSegment> = {};
 
@@ -184,17 +206,18 @@ export const recomputeManifest = async (
     }
 
     // Apply rules to determine sprite name and get the matched rule
-    const ruleResult = applyRulesWithRule(relativePath, manifest.rules);
-    const spriteName = ruleResult?.spriteName ?? `unmatched`;
-    const matchedRule = ruleResult?.rule;
+    const ruleResult = nonNullable(
+      applyRulesWithRule(relativePath, manifest.rules),
+      `Expected sprite rule match for ${relativePath}`,
+    );
+    const spriteName = ruleResult.spriteName;
+    const matchedRule = ruleResult.rule;
 
     // Add to sprite segments map
     if (!spriteToSegments.has(spriteName)) {
       spriteToIndex.set(spriteName, spriteToSegments.size);
       spriteToSegments.set(spriteName, []);
-      if (matchedRule) {
-        spriteToRule.set(spriteName, matchedRule);
-      }
+      spriteToRule.set(spriteName, matchedRule);
     }
     const segments = nonNullable(spriteToSegments.get(spriteName));
     const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
@@ -364,9 +387,7 @@ export const resolveIncludePatterns = async (
       const files = globSync(pattern, {
         cwd: manifestDir,
         fs: await import(`node:fs`),
-        posix: true, // Use posix-style paths for consistency
       });
-
       allFiles.push(...files);
     } catch (error) {
       console.warn(`Failed to resolve glob pattern "${pattern}":`, error);

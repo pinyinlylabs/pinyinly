@@ -263,6 +263,34 @@ describe(
       expect(updatedManifest.segments).toEqual({});
     });
 
+    test(`should throw when an included file does not match any sprite rule`, async () => {
+      vol.fromJSON({
+        "/project/audio/wiki/hello.m4a": `content1`,
+        "/project/audio/other/unmatched.m4a": `content2`,
+        "/project/manifest.json": JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `audio/wiki/.*\\.m4a`,
+              sprite: `wiki`,
+            },
+          ],
+          outDir: `sprites`,
+        } satisfies SpriteManifest),
+      });
+
+      await expect(
+        recomputeManifest(
+          loadManifest(`/project/manifest.json`)!,
+          `/project/manifest.json`,
+        ),
+      ).rejects.toThrow(
+        `Found audio files that do not match any sprite rule:\n- audio/other/unmatched.m4a\nAdd or update a manifest rule so every included file matches a sprite.`,
+      );
+    });
+
     test(`should generate sprite file hash from multiple input files in same sprite`, async () => {
       vol.fromJSON({
         "/project/audio/wiki/hello/greeting.m4a": `hello greeting content`,

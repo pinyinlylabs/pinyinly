@@ -9,10 +9,13 @@ import {
   makeHorizontalMergeCharacterIdsTransform,
   makeVerticalMergeCharacterIdsTransform,
   mapIdsNodeLeafs,
+  matchAllHanziCharacters,
+  matchAllHanziCharactersWithIndexes,
   parseIds,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
+import type { HanziCharacter } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉, 汉字 } from "./helpers.ts";
@@ -341,6 +344,57 @@ describe(
       for (const x of invalid) {
         expect(isHanziCharacter(x)).toBe(false);
       }
+    });
+  },
+);
+
+const hanziWithIndexesFixtures = [
+  [``, []],
+  [`abc!?`, []],
+  [`你`, [0, `你`]],
+  [`〇`, [0, `〇`]],
+  [`⿔`, [0, `⿔`]],
+  [`老`, [0, `老`]],
+  [`蘭`, [0, `蘭`]],
+  [`盧`, [0, `盧`]],
+  [`老`, [0, `老`]],
+  [`不`, [0, `不`]],
+  [`練`, [0, `練`]],
+  [`識`, [0, `識`]],
+  [`兀`, [0, `兀`]],
+  [`你好`, [0, `你`, 1, `好`]],
+  [`你·好`, [0, `你`, 2, `好`]],
+  [`abc你好！`, [3, `你`, 4, `好`]],
+  [`😀你a好`, [2, `你`, 4, `好`]],
+  [`abc〇！`, [3, `〇`]],
+  [`abc⿔！`, [3, `⿔`]],
+  [`𠮷野家`, [0, `𠮷`, 2, `野`, 3, `家`]],
+] as [string, (number | HanziCharacter)[]][];
+describe(
+  `matchAllHanziCharacters suite` satisfies HasNameOf<
+    typeof matchAllHanziCharacters
+  >,
+  () => {
+    test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
+      const actual = matchAllHanziCharacters(input);
+      expect([input, actual]).toEqual([
+        input,
+        expected
+          // strip out the indexes to re-use the same fixture data
+          .filter((_, i) => i % 2 === 1),
+      ]);
+    });
+  },
+);
+
+describe(
+  `matchAllHanziCharactersWithIndexes suite` satisfies HasNameOf<
+    typeof matchAllHanziCharactersWithIndexes
+  >,
+  () => {
+    test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
+      const actual = matchAllHanziCharactersWithIndexes(input);
+      expect([input, actual]).toEqual([input, expected]);
     });
   },
 );

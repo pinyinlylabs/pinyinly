@@ -239,15 +239,19 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(x.kind === `pinyin`);
       invariant(hanziOrPinyinUnitCount(x) === 1);
 
-      const { initialSoundId, tone } = splitPinyinUnitOrThrow(
-        x.value as PinyinUnit,
-      );
+      const { initialSoundId } = splitPinyinUnitOrThrow(x.value as PinyinUnit);
       // This is the first letter of the sound ID (NOT the first letter of the
       // pinyin). The difference here is for the "null" initial ∅-. In this case
       // we allow choices that actually have a different first letter, as long
       // as their pinyin split initial ID is `∅-`.
       const fuzzyInitialId = nonNullable(initialSoundId[0]);
-      return `${fuzzyInitialId}…${tone}`;
+
+      // Note: the tone does not need to be the same for all distractors, just
+      // the correct answer needs to have the same tone as the distractors. This
+      // is because in non-strict mode we allow distractors with different
+      // tones.
+
+      return fuzzyInitialId;
     }),
   );
 

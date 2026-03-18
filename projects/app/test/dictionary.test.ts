@@ -1,6 +1,11 @@
 import { upsertHanziWordMeaning } from "#bin/util/dictionary.ts";
 import { splitHanziText } from "#data/hanzi.ts";
-import type { HanziCharacter, HanziText, HanziWord } from "#data/model.ts";
+import type {
+  HanziCharacter,
+  HanziText,
+  HanziWord,
+  PinyinUnit,
+} from "#data/model.ts";
 import { PartOfSpeech } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
@@ -1249,6 +1254,80 @@ describe(
     );
   },
 );
+
+describe(`lookupPinyinUnit suite`, async () => {
+  test(`returns array of HanziCharacters for a given PinyinUnit`, async () => {
+    const dict = await loadDictionary();
+
+    // Common pinyin unit 'ma' should have matches
+    const maResults = dict.lookupPinyinUnit(`ma` as PinyinUnit);
+    expect(Array.isArray(maResults)).toBe(true);
+    expect(maResults.length).toBeGreaterThan(0);
+  });
+
+  test(`returns empty array for pinyin units with no matches`, async () => {
+    const dict = await loadDictionary();
+
+    // Using a very unlikely pinyin unit combination
+    const results = dict.lookupPinyinUnit(`zz` as PinyinUnit);
+    expect(results).toEqual([]);
+  });
+
+  test(`returns unique HanziCharacters (no duplicates)`, async () => {
+    const dict = await loadDictionary();
+
+    const results = dict.lookupPinyinUnit(`ma` as PinyinUnit);
+    const uniqueResults = new Set(results);
+
+    // All results should be unique
+    expect(uniqueResults.size).toBe(results.length);
+  });
+
+  test(`returns valid HanziCharacters from dictionary`, async () => {
+    const dict = await loadDictionary();
+    const allDictionaryHanzi = new Set(
+      dict.allHanziWords.flatMap((hanziWord) =>
+        splitHanziText(hanziFromHanziWord(hanziWord)),
+      ),
+    );
+
+    const results = dict.lookupPinyinUnit(`ma` as PinyinUnit);
+
+    // All results should be valid hanzi characters from the dictionary
+    for (const hanziChar of results) {
+      expect(allDictionaryHanzi.has(hanziChar)).toBe(true);
+    }
+  });
+
+  test(`matches pinyin units correctly across multi-character words`, async () => {
+    const dict = await loadDictionary();
+
+    // Test with 'ma' which should appear in multi-character words
+    const maResults = dict.lookupPinyinUnit(`ma` as PinyinUnit);
+    expect(maResults.length).toBeGreaterThan(0);
+
+    // Verify that results contain single characters (not multi-character words)
+    for (const char of maResults) {
+      expect(char.length).toBe(1);
+    }
+  });
+
+  test(`different pinyin units return different results`, async () => {
+    const dict = await loadDictionary();
+
+    const maResults = dict.lookupPinyinUnit(`ma` as PinyinUnit);
+    const niResults = dict.lookupPinyinUnit(`ni` as PinyinUnit);
+
+    // Results should be different sets
+    const maSet = new Set(maResults);
+    const niSet = new Set(niResults);
+
+    // They should not be identical
+    expect(
+      maSet.size === niSet.size && maResults.length === niResults.length,
+    ).not.toBe(true);
+  });
+});
 
 describe(
   `parsePartOfSpeech suite` satisfies HasNameOf<typeof parsePartOfSpeech>,

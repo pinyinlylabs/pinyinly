@@ -1,6 +1,7 @@
 import type { PinyinUnit } from "#data/model.js";
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
+  defaultPinyinSoundExamples,
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
@@ -125,6 +126,13 @@ describe(
       [`jiang5`, `jiang`],
       [`r`, `r`],
 
+      // "ong" (rare sound but important in some contexts)
+      [`ong1`, `ōng`],
+      [`ong2`, `óng`],
+      [`ong3`, `ǒng`],
+      [`ong4`, `òng`],
+      [`ong5`, `ong`],
+
       // Leaves diacritic forms as-is
       [`hǎo`, `hǎo`],
       [`nü`, `nü`],
@@ -177,6 +185,7 @@ describe(
         `hǎohao3. nü nvnu: nǖ 【nv1nu:1hao3】`,
         `hǎohǎo. nü nünü nǖ 【nǖnǖhǎo】`,
       ],
+      [`ong1 ong2 ong3 ong4 ong5`, `ōng óng ǒng òng ong`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinText(input as PinyinUnit)).toEqual(expected);
     });
@@ -191,6 +200,11 @@ describe(
     test.for([
       [`niú`, [`niu`, 2]],
       [`hǎo`, [`hao`, 3]],
+      [`m̄`, [`m`, 1]],
+      [`ḿ`, [`m`, 2]],
+      [`m̌`, [`m`, 3]],
+      [`m̀`, [`m`, 4]],
+      [`m`, [`m`, 5]],
       [`nǖ`, [`nü`, 1]],
       [`nǘ`, [`nü`, 2]],
       [`nǚ`, [`nü`, 3]],
@@ -212,6 +226,11 @@ describe(
     test.for([
       [`niú`, { tonelessUnit: `niu`, tone: 2 }],
       [`hǎo`, { tonelessUnit: `hao`, tone: 3 }],
+      [`m̄`, { tonelessUnit: `m`, tone: 1 }],
+      [`ḿ`, { tonelessUnit: `m`, tone: 2 }],
+      [`m̌`, { tonelessUnit: `m`, tone: 3 }],
+      [`m̀`, { tonelessUnit: `m`, tone: 4 }],
+      [`m`, { tonelessUnit: `m`, tone: 5 }],
       [`nǖ`, { tonelessUnit: `nü`, tone: 1 }],
       [`nǘ`, { tonelessUnit: `nü`, tone: 2 }],
       [`nǚ`, { tonelessUnit: `nü`, tone: 3 }],
@@ -305,11 +324,21 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`ni3`, [0, `ni3`]],
   [`ni4`, [0, `ni4`]],
   [`ni5`, [0, `ni5`]],
+  [`ḿ`, [0, `ḿ`]],
+  [`Ḿ`, [0, `Ḿ`]],
   [`r`, [0, `r`]],
   // Words
   [`nǐhǎo`, [0, `nǐ`, 2, `hǎo`]],
   [`nǐ·hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u00B7 MIDDLE DOT
   [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
+  [`jiànguò`, [0, `jiàn`, 4, `guò`]],
+  [`píngguǒ`, [0, `píng`, 4, `guǒ`]],
+  [`yīnggāi`, [0, `yīng`, 4, `gāi`]],
+  [`ying1gai1`, [0, `ying1`, 5, `gai1`]],
+  [`Yīnggāi`, [0, `Yīng`, 4, `gāi`]],
+  [`xī'ān`, [0, `xī`, 3, `ān`]],
+  [`xi1'an1`, [0, `xi1`, 4, `an1`]],
+  [`Xi1'an1`, [0, `Xi1`, 4, `an1`]],
   // Sentences
   [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
   [`Bù yīhuǐ'er`, [0, `Bù`, 3, `yī`, 5, `huǐ`, 9, `er`]],
@@ -332,6 +361,7 @@ describe(
         `ni3`,
         `ni4`,
         `ni5`,
+        `ḿ`,
       ];
       const regex = new RegExp(pinyinUnitPattern);
       for (const text of valid) {
@@ -568,6 +598,60 @@ describe(`pyly pinyin chart`, async () => {
     expect(chartSoundIds).toEqual(
       new Set(Object.keys(defaultPinyinSoundInstructions)),
     );
+    for (const soundId of chartSoundIds) {
+      const examples = defaultPinyinSoundExamples[soundId];
+      expect(
+        examples,
+        `defaultPinyinSoundExamples is missing sound ID: ${soundId}`,
+      ).toBeDefined();
+      if (examples == null) {
+        continue;
+      }
+      expect(
+        examples.length,
+        `defaultPinyinSoundExamples must include at least one example for sound ID: ${soundId}`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  test(`sound examples align with sound IDs`, async () => {
+    const chart = loadPylyPinyinChart();
+
+    for (const [rawSoundId, pinyins] of Object.entries(
+      defaultPinyinSoundExamples,
+    )) {
+      const soundId = rawSoundId as keyof typeof defaultPinyinSoundExamples;
+      expect(pinyins.length).toBeGreaterThan(0);
+
+      for (const pinyin of pinyins) {
+        const parts = splitPinyinUnitWithChart(pinyin, chart);
+        expect(parts).not.toBeNull();
+
+        if (parts == null) {
+          continue;
+        }
+
+        expect(pinyin).toEqual(normalizePinyinUnit(pinyin));
+
+        if (/^[1-5]$/.test(soundId)) {
+          expect(parts.tone).toEqual(Number(soundId));
+        } else if (soundId.startsWith(`-`)) {
+          expect(parts.finalSoundId).toEqual(soundId);
+        } else {
+          expect(parts.initialSoundId).toEqual(soundId);
+        }
+      }
+    }
+  });
+
+  test(`.units don't have invalid entries`, async () => {
+    const chart = loadPylyPinyinChart();
+
+    const invalids = [`i`];
+
+    for (const invalid of invalids) {
+      expect.soft(chart.units).not.toContain(invalid);
+    }
   });
 
   test(`standard tests`, async () => {

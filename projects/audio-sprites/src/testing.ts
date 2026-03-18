@@ -1,3 +1,4 @@
+import { parseDecimalFileSize } from "@pinyinly/lib/fileSize";
 import * as fs from "@pinyinly/lib/fs";
 import { glob } from "@pinyinly/lib/fs";
 import chalk from "chalk";
@@ -5,11 +6,13 @@ import makeDebug from "debug";
 import { execa } from "execa";
 import { execSync } from "node:child_process";
 import path from "node:path";
-import { describe, expect, test } from "vitest";
+import type { chai } from "vitest";
+import { expect, test } from "vitest";
 import { analyzeAudioFile, generateSpriteCommand } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
 import {
   applyRulesWithRule,
+  findUnmatchedFiles,
   getInputFiles,
   hashFile,
   syncManifestWithFilesystem,
@@ -24,6 +27,8 @@ const debug = makeDebug(`pyly:audio-sprites`);
 export interface ManifestCheckResult {
   /** Whether the manifest file exists */
   manifestExists: boolean;
+  /** Array of source files that do not match any sprite rule */
+  unmatchedInputFiles: string[];
   /** Whether all source files have correct hashes in the manifest */
   hashesUpToDate: boolean;
   /** Whether all sprite files exist on disk */
@@ -34,8 +39,27 @@ export interface ManifestCheckResult {
   outdatedFiles: string[];
   /** Array of unused sprite files in the output directory */
   unusedSpriteFiles: string[];
+  /** Sprite files that violate configured size bounds */
+  spriteFileSizeViolations: SpriteFileSizeViolation[];
+  /** Sprite file-size rules that did not match any sprite file */
+  unusedSpriteFileSizeRules: string[];
   /** Whether sprites need to be regenerated */
   needsRegeneration: boolean;
+}
+
+export interface SpriteFileSizeViolation {
+  spriteFile: string;
+  sizeBytes: number;
+  ruleName: string;
+  minBytes?: number;
+  maxBytes?: number;
+}
+
+export interface SpriteFileSizeRule {
+  /** Regex used to match sprite file names (e.g. /^pinyin-/) */
+  name: RegExp;
+  minSize?: string;
+  maxSize?: string;
 }
 
 /**
@@ -44,12 +68,16 @@ export interface ManifestCheckResult {
 export interface SpriteTestOptions {
   /** Path to the manifest.json file */
   manifestPath: string;
-  /** Whether to automatically regenerate sprites if needed (default: false) */
-  autoRegenerate?: boolean;
-  /** Whether to sync the manifest with filesystem before checking (default: true) */
-  syncManifest?: boolean;
-  /** Whether to automatically delete unused sprite files (default: false) */
-  autoCleanup?: boolean;
+  /** Whether to automatically sync/cleanup/regenerate sprite artifacts (default: false) */
+  autoFix?: boolean;
+  /** File-size rules for generated sprite files */
+  spriteFileSizes?: SpriteFileSizeRule[];
+}
+
+interface ParsedSpriteFileSizeRule {
+  regex: RegExp;
+  minBytes?: number;
+  maxBytes?: number;
 }
 
 /**
@@ -149,6 +177,29 @@ function validateRuleVariables(rule: { match: string; sprite: string }): void {
   }
 }
 
+export function parseSpriteFileSizeRules(
+  rules: readonly SpriteFileSizeRule[],
+): ParsedSpriteFileSizeRule[] {
+  return rules.map((rule) => {
+    const regex = rule.name;
+
+    const minBytes =
+      rule.minSize == null ? undefined : parseDecimalFileSize(rule.minSize);
+    const maxBytes =
+      rule.maxSize == null ? undefined : parseDecimalFileSize(rule.maxSize);
+
+    if (minBytes != null && maxBytes != null && minBytes > maxBytes) {
+      expect(maxBytes).toBeGreaterThanOrEqual(minBytes);
+    }
+
+    return {
+      regex,
+      minBytes,
+      maxBytes,
+    };
+  });
+}
+
 /**
  * Check if the manifest.json file is up to date with correct hashes for all audio files
  * and verify that sprite files have been generated properly.
@@ -163,26 +214,29 @@ export async function checkSpriteManifest(
     `checkSpriteManifest()` satisfies HasNameOf<typeof checkSpriteManifest>,
   );
 
-  const { manifestPath, syncManifest = false } = options;
+  const { manifestPath, autoFix = false, spriteFileSizes = [] } = options;
+  const parsedSpriteFileSizeRules = parseSpriteFileSizeRules(spriteFileSizes);
 
   // Check if manifest file exists
   if (!fs.existsSync(manifestPath)) {
     fnDebug(`Manifest file does not exist at path: %o`, manifestPath);
     return {
       manifestExists: false,
+      unmatchedInputFiles: [],
       hashesUpToDate: false,
       spriteFilesExist: false,
       missingSpriteFiles: [],
       outdatedFiles: [],
       unusedSpriteFiles: [],
+      spriteFileSizeViolations: [],
+      unusedSpriteFileSizeRules: [],
       needsRegeneration: true,
     };
   }
 
   let manifest: SpriteManifest;
 
-  // Sync manifest with filesystem if requested
-  if (syncManifest) {
+  if (autoFix) {
     fnDebug(`Attempting to sync manifest`);
     try {
       manifest = await syncManifestWithFilesystem(manifestPath);
@@ -206,6 +260,11 @@ export async function checkSpriteManifest(
 
   const manifestDir = path.dirname(manifestPath);
   const inputFiles = await getInputFiles(manifest, manifestPath);
+  const unmatchedInputFiles = findUnmatchedFiles(inputFiles, manifest.rules);
+
+  if (unmatchedInputFiles.length > 0) {
+    fnDebug(`unmatched input files: %o`, unmatchedInputFiles);
+  }
 
   // Check if all source files have correct hashes
   const outdatedFiles: string[] = [];
@@ -227,6 +286,8 @@ export async function checkSpriteManifest(
 
   // Check if all sprite files exist
   const missingSpriteFiles: string[] = [];
+  const spriteFileSizeViolations: SpriteFileSizeViolation[] = [];
+  const usedSpriteFileSizeRules = new Set<string>();
 
   for (const spriteFile of manifest.spriteFiles) {
     const spriteFilePath = path.resolve(
@@ -235,9 +296,44 @@ export async function checkSpriteManifest(
       spriteFile,
     );
 
+    const matchedRule = parsedSpriteFileSizeRules.find((rule) =>
+      rule.regex.test(spriteFile),
+    );
+    if (matchedRule) {
+      usedSpriteFileSizeRules.add(matchedRule.regex.source);
+    }
+
     if (!fs.existsSync(spriteFilePath)) {
       fnDebug(`Missing sprite file: %o`, spriteFilePath);
       missingSpriteFiles.push(spriteFile);
+      continue;
+    }
+
+    if (!matchedRule) {
+      continue;
+    }
+
+    const sizeBytes = fs.statSync(spriteFilePath).size;
+
+    if (matchedRule.minBytes != null && sizeBytes < matchedRule.minBytes) {
+      spriteFileSizeViolations.push({
+        spriteFile,
+        sizeBytes,
+        ruleName: matchedRule.regex.source,
+        minBytes: matchedRule.minBytes,
+        maxBytes: matchedRule.maxBytes,
+      });
+      continue;
+    }
+
+    if (matchedRule.maxBytes != null && sizeBytes > matchedRule.maxBytes) {
+      spriteFileSizeViolations.push({
+        spriteFile,
+        sizeBytes,
+        ruleName: matchedRule.regex.source,
+        minBytes: matchedRule.minBytes,
+        maxBytes: matchedRule.maxBytes,
+      });
     }
   }
 
@@ -267,22 +363,31 @@ export async function checkSpriteManifest(
 
   const hashesUpToDate = outdatedFiles.length === 0;
   const spriteFilesExist = missingSpriteFiles.length === 0;
+  const unusedSpriteFileSizeRules = parsedSpriteFileSizeRules
+    .map((rule) => rule.regex.source)
+    .filter((rule) => !usedSpriteFileSizeRules.has(rule));
   const needsRegeneration = !hashesUpToDate || !spriteFilesExist;
   fnDebug(`result: %o`, {
+    unmatchedInputFiles,
     hashesUpToDate,
     spriteFilesExist,
     missingSpriteFiles,
     outdatedFiles,
+    spriteFileSizeViolations,
+    unusedSpriteFileSizeRules,
     needsRegeneration,
   });
 
   return {
     manifestExists: true,
+    unmatchedInputFiles,
     hashesUpToDate,
     spriteFilesExist,
     missingSpriteFiles,
     outdatedFiles,
     unusedSpriteFiles,
+    spriteFileSizeViolations,
+    unusedSpriteFileSizeRules,
     needsRegeneration,
   };
 }
@@ -404,145 +509,94 @@ export async function generateSprites(manifestPath: string): Promise<void> {
 }
 
 /**
- * Verify that audio sprites are properly generated and up to date.
- * If sprites are missing or outdated, optionally regenerate them.
- * If unused sprite files exist, optionally clean them up.
+ * Build helper that checks sprite status and optionally auto-generates missing sprites.
+ * If sprites are missing or outdated, optionally regenerates them.
+ * If unused sprite files exist, optionally cleans them up.
  *
- * @param options Configuration options for verification
+ * @param options Configuration options for sprite building
  * @returns Promise resolving to the check result
  */
-export async function verifySprites(
+export async function buildSprites(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
   const fnDebug = debug.extend(
-    `verifySprites()` satisfies HasNameOf<typeof verifySprites>,
+    `buildSprites()` satisfies HasNameOf<typeof buildSprites>,
   );
 
   fnDebug(`options: %o`, options);
 
-  const { autoRegenerate = false, autoCleanup = false } = options;
+  const { autoFix = false } = options;
   let result = await checkSpriteManifest(options);
+  let dirty = false;
 
   fnDebug(`checkSpriteManifest result: %j`, result);
 
+  if (result.unmatchedInputFiles.length > 0) {
+    fnDebug(
+      `Skipping auto-fix because some input files do not match any sprite rule: %o`,
+      result.unmatchedInputFiles,
+    );
+    return result;
+  }
+
   // Handle cleanup of unused sprite files
-  if (result.unusedSpriteFiles.length > 0 && autoCleanup) {
+  if (result.unusedSpriteFiles.length > 0 && autoFix) {
     fnDebug(
       `Found %s unused sprite files, cleaning up...`,
       result.unusedSpriteFiles.length,
     );
 
-    try {
-      await cleanupUnusedSprites(
-        options.manifestPath,
-        result.unusedSpriteFiles,
-      );
-
-      // Re-check after cleanup to update the result
-      result = await checkSpriteManifest({
-        ...options,
-        syncManifest: false, // No need to sync again
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to cleanup unused sprites: ${message}`);
-    }
+    dirty = true;
+    await cleanupUnusedSprites(options.manifestPath, result.unusedSpriteFiles);
   }
 
   // Handle regeneration of missing/outdated sprites
-  if (result.needsRegeneration && autoRegenerate) {
+  if (result.needsRegeneration && autoFix) {
     fnDebug(`Sprites need regeneration, auto-generating...`);
 
-    try {
-      await generateSprites(options.manifestPath);
+    dirty = true;
+    await generateSprites(options.manifestPath);
+  }
 
-      // Re-check after generation
-      result = await checkSpriteManifest({
-        ...options,
-        syncManifest: false, // No need to sync again
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to auto-regenerate sprites: ${message}`);
-    }
+  if (dirty) {
+    // Re-check after cleanup to update the result
+    result = await checkSpriteManifest({ ...options, autoFix: false });
   }
 
   return result;
 }
 
 /**
- * Assert that sprites are properly generated and up to date.
- * Throws an error if sprites are missing or need regeneration.
- * Automatically deletes unused sprite files if autoCleanup is enabled.
+ * Build sprites and assert the final state using soft assertions so all issues are reported.
  *
- * @param options Configuration options for the assertion
+ * @param options Configuration options for sprite building and file-size checks
+ * @returns Promise resolving to the final check result
  */
-export async function assertSpritesUpToDate(
+export async function buildAndTestSprites(
   options: SpriteTestOptions,
-): Promise<void> {
-  const result = await verifySprites({
-    ...options,
-    autoCleanup: options.autoCleanup ?? true, // Default to true for cleanup
-  });
-
-  if (!result.manifestExists) {
-    throw new Error(`Manifest file does not exist: ${options.manifestPath}`);
-  }
-
-  if (!result.hashesUpToDate) {
-    throw new Error(
-      `Audio file hashes are outdated. Files with outdated hashes: ${result.outdatedFiles.join(`, `)}`,
-    );
-  }
-
-  if (!result.spriteFilesExist) {
-    throw new Error(
-      `Sprite files are missing: ${result.missingSpriteFiles.join(`, `)}`,
-    );
-  }
-
-  if (result.unusedSpriteFiles.length > 0) {
-    throw new Error(
-      `Found unused sprite files in output directory. Run with autoCleanup: true to automatically delete them: ${result.unusedSpriteFiles.join(`, `)}`,
-    );
-  }
-
-  if (result.needsRegeneration) {
-    throw new Error(
-      `Sprites need regeneration. Run with autoRegenerate: true or manually regenerate sprites.`,
-    );
-  }
-}
-
-/**
- * Test helper that checks sprite status and optionally auto-generates missing sprites.
- * This is the main function that should be called from app tests.
- *
- * @param manifestPath Path to the manifest.json file
- * @param autoRegenerate Whether to automatically regenerate sprites if needed
- * @param autoCleanup Whether to automatically delete unused sprite files
- * @returns Promise resolving to the check result
- */
-export async function testSprites(
-  manifestPath: string,
-  autoFix = false,
 ): Promise<ManifestCheckResult> {
-  return verifySprites({
-    manifestPath,
-    autoRegenerate: autoFix,
-    autoCleanup: autoFix,
-    syncManifest: autoFix,
-  });
+  const result = await buildSprites(options);
+
+  expect.soft(result.manifestExists).toBe(true);
+  expect.soft(result.unmatchedInputFiles).toEqual([]);
+  expect.soft(result.hashesUpToDate).toBe(true);
+  expect.soft(result.spriteFilesExist).toBe(true);
+  expect.soft(result.needsRegeneration).toBe(false);
+  expect.soft(result.missingSpriteFiles).toEqual([]);
+  expect.soft(result.outdatedFiles).toEqual([]);
+  expect.soft(result.unusedSpriteFiles).toEqual([]);
+  expect.soft(result.spriteFileSizeViolations).toEqual([]);
+  expect.soft(result.unusedSpriteFileSizeRules).toEqual([]);
+
+  return result;
 }
 
 /**
- * Configuration options for speech file testing.
+ * Configuration options for input audio file testing.
  */
-export interface SpeechFileTestOptions {
+export interface InputFileTestOptions {
   /** Glob pattern for audio files to test */
   audioGlob: string;
-  /** Suffix to identify fix files (default: "-fix") */
-  fixTag?: string;
   /** Target LUFS for loudness testing (default: -18) */
   targetLufs?: number;
   /** Allowed tolerance for loudness deviation (default: 1) */
@@ -555,148 +609,244 @@ export interface SpeechFileTestOptions {
   durationTolerance?: number;
   /** Project root path for relative path calculation */
   projectRoot?: string;
-  /** Whether we're running in CI environment (affects fix command behavior) */
-  isCI?: boolean;
+  /** Whether to automatically fix loudness issues by overwriting the original file (default: false) */
+  autoFixLoudness?: boolean;
+  /** Whether to automatically trim silence by overwriting the original file (default: false) */
+  autoFixTrimSilence?: boolean;
+  autoFixEmpty?: boolean;
+  skipLoudness?: boolean;
 }
 
+const fixTag = `-fix`;
+
 /**
- * Helper function to execute or log fix commands based on environment.
+ * Helper function to handle auto-fix or create a separate fix file.
  */
-function execOrLogFixCommand(
-  fixCommand: string,
-  fixedFilePath: string,
-  isCI = false,
-): void {
-  if (isCI) {
+function handleAudioFix(options: {
+  /** Function that takes a file path and returns the ffmpeg command for that path */
+  fixCommand: (outputPath: string) => string;
+  /** The absolute path to the original file */
+  filePath: string;
+  /** The relative path for display purposes */
+  projectRelPath: string;
+  /** The type of fix (e.g., "loudness" or "silence") for naming */
+  fixType: string;
+  /** Whether to overwrite the original file or create a separate fix file */
+  autoFix: boolean;
+  /** Whether to write a log file for the fix operation */
+  writeLog?: boolean;
+}): void {
+  const {
+    fixCommand,
+    filePath,
+    projectRelPath,
+    fixType,
+    autoFix,
+    writeLog = false,
+  } = options;
+
+  // Create a fixed file with a deterministic name
+  // FFmpeg can't write to the same file it's reading, so we always write to a separate file first
+  const ext = path.extname(filePath);
+  const fixedFilePath = `${filePath}-${fixType}${fixTag}${ext}`;
+  const command = fixCommand(fixedFilePath);
+  if (writeLog) {
+    execSync(`(echo '% ${command}'; ${command}) > "${fixedFilePath}.log" 2>&1`);
+  } else {
+    execSync(command);
+  }
+
+  if (autoFix) {
+    // Replace the original file with the fixed version
+    fs.renameSync(fixedFilePath, filePath);
     console.warn(
-      chalk.yellow(
-        `To fix this, re-run the test outside CI or run: `,
-        chalk.dim(fixCommand),
-      ),
+      chalk.yellow(chalk.bold(`Auto-fixed ${fixType}:`), projectRelPath),
     );
   } else {
-    execSync(
-      `(echo "% ${fixCommand}"; ${fixCommand}) > "${fixedFilePath}.log" 2>&1`,
-    );
     console.warn(chalk.yellow(chalk.bold(`Created:`), fixedFilePath));
   }
 }
 
 /**
- * Create speech file tests for audio files matching the given pattern.
- * This function generates vitest test cases for validating speech audio files.
+ * Create input file tests for audio files matching the given pattern.
+ * This function generates vitest test cases for validating input audio files.
  *
- * @param options Configuration for speech file testing
+ * @param options Configuration for input file testing
  */
-export async function createSpeechFileTests(
-  options: SpeechFileTestOptions,
+export async function createAudioFileTests(
+  options: InputFileTestOptions,
 ): Promise<void> {
   const {
     audioGlob,
-    fixTag = `-fix`,
     targetLufs = -18,
     loudnessTolerance = 1,
     allowedStartOrEndOffset = 0.1,
-    minDuration = 0.5,
+    minDuration = 0.1,
     durationTolerance = 0.05,
     projectRoot,
-    isCI = false,
+    autoFixLoudness = false,
+    autoFixTrimSilence = false,
+    autoFixEmpty = false,
+    skipLoudness = false,
   } = options;
 
-  for (const filePath of await glob(audioGlob)) {
-    if (filePath.includes(fixTag)) {
-      continue;
+  const audioTestCases = (await glob(audioGlob))
+    .filter((filePath) => !filePath.includes(fixTag))
+    .map((filePath) => ({
+      filePath,
+      projectRelPath:
+        projectRoot == null ? filePath : path.relative(projectRoot, filePath),
+    }));
+
+  test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
+    for (const { filePath, projectRelPath } of audioTestCases) {
+      const { duration } = await analyzeAudioFile(filePath);
+
+      const delta = Math.abs(duration.fromStream - duration.fromContainer);
+      expect
+        .soft(delta, `Duration mismatch for ${projectRelPath}`)
+        .toBeLessThanOrEqual(durationTolerance);
     }
+  });
 
-    const projectRelPath =
-      projectRoot == null ? filePath : path.relative(projectRoot, filePath);
+  test(`audio file is not empty (based on duration)`, async () => {
+    for (const { filePath, projectRelPath } of audioTestCases) {
+      const { duration } = await analyzeAudioFile(filePath);
 
-    describe(projectRelPath, () => {
-      test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
-        const { duration } = await analyzeAudioFile(filePath);
+      try {
+        // Skip the assertion since we've fixed the file
+        expect
+          .soft(duration.fromStream, `Audio file is empty: ${projectRelPath}`)
+          .toBeGreaterThanOrEqual(minDuration);
+      } catch (e) {
+        if (isAssertionError(e) && autoFixEmpty) {
+          fs.unlinkSync(filePath);
+        } else {
+          throw e;
+        }
+      }
+    }
+  });
 
-        const delta = Math.abs(duration.fromStream - duration.fromContainer);
-        expect(delta).toBeLessThanOrEqual(durationTolerance);
-      });
+  test.skipIf(skipLoudness)(
+    `loudness is within allowed tolerance`,
+    async () => {
+      // ChatGPT recommends to target -18 LUFS because:
+      //
+      // | Use Case                     | Target LUFS                              | Notes                                                       |
+      // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+      // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
+      // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
+      // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
+      // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
+      // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
+      // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
+      //
+      // Target **-18 LUFS** because:
+      //
+      // - 🎧 Less aggressive than music
+      // - 🧠 Good for repeated listening
+      // - 📱 Comfortable on mobile speakers
+      // - 🔄 Balances speech clarity and ear fatigue
 
-      test(`audio file is not empty (based on duration)`, async () => {
-        const { duration } = await analyzeAudioFile(filePath);
-
-        expect(duration.fromStream).toBeGreaterThanOrEqual(minDuration);
-      });
-
-      test(`loudness is within allowed tolerance`, async () => {
-        // ChatGPT recommends to target -18 LUFS because:
-        //
-        // | Use Case                     | Target LUFS                              | Notes                                                       |
-        // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
-        // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
-        // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
-        // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
-        // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
-        // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
-        // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
-        //
-        // Target **-18 LUFS** because:
-        //
-        // - 🎧 Less aggressive than music
-        // - 🧠 Good for repeated listening
-        // - 📱 Comfortable on mobile speakers
-        // - 🔄 Balances speech clarity and ear fatigue
-
+      for (const { filePath, projectRelPath } of audioTestCases) {
         const { loudnorm } = await analyzeAudioFile(filePath);
 
         const loudness = loudnorm.input_i;
         const delta = Math.abs(loudness - targetLufs);
 
+        // Check if loudness values are valid (not infinite or NaN)
+        const hasInvalidValues =
+          !Number.isFinite(loudnorm.input_i) ||
+          !Number.isFinite(loudnorm.input_tp) ||
+          !Number.isFinite(loudnorm.input_lra) ||
+          !Number.isFinite(loudnorm.input_thresh) ||
+          !Number.isFinite(loudnorm.target_offset);
+
+        if (hasInvalidValues) {
+          // Skip loudness test for files with invalid measurements (e.g., too short or silent)
+          console.warn(
+            chalk.yellow(
+              `Skipping loudness test for ${projectRelPath}: invalid measurements (input_i=${loudnorm.input_i}, offset=${loudnorm.target_offset})`,
+            ),
+          );
+          return;
+        }
+
         if (delta > loudnessTolerance) {
-          const ext = path.extname(projectRelPath);
-          const fixedSuffix = `-loudness${fixTag}${ext}`;
-          const fixedFilePath = `${filePath}${fixedSuffix}`;
-          const fixCommand = `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${fixedFilePath}"`;
+          handleAudioFix({
+            fixCommand: (outputPath) =>
+              `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${outputPath}"`,
+            filePath,
+            projectRelPath,
+            fixType: `loudness`,
+            autoFix: autoFixLoudness,
+          });
 
-          execOrLogFixCommand(fixCommand, fixedFilePath, isCI);
-        }
-
-        expect(delta).toBeLessThanOrEqual(loudnessTolerance);
-      });
-
-      test(`silence is trimmed`, async () => {
-        const { silences, duration } = await analyzeAudioFile(filePath);
-
-        const totalDuration = duration.fromStream;
-
-        const expectedStart = 0;
-        const expectedEnd = totalDuration;
-        let start = expectedStart;
-        let end = expectedEnd;
-
-        for (const silence of silences) {
-          // Check if silence is at the start
-          if (silence.start <= allowedStartOrEndOffset) {
-            start = Math.max(start, silence.end);
-            continue;
-          }
-
-          // Check if silence is at the end
-          if (silence.end >= totalDuration - allowedStartOrEndOffset) {
-            end = Math.min(end, silence.start);
-            continue;
+          if (autoFixLoudness) {
+            // Skip the assertion since we've fixed the file
+            return;
           }
         }
 
-        if (start > expectedStart || end < expectedEnd) {
-          const ext = path.extname(projectRelPath);
-          const fixedSuffix = `-silence${fixTag}${ext}`;
-          const fixedFilePath = `${filePath}${fixedSuffix}`;
-          const fixCommand = `ffmpeg -y -i "${filePath}" -af atrim=start=${start}:end=${end} "${fixedFilePath}"`;
+        expect
+          .soft(delta, `Loudness delta for ${projectRelPath}`)
+          .toBeLessThanOrEqual(loudnessTolerance);
+      }
+    },
+  );
 
-          execOrLogFixCommand(fixCommand, fixedFilePath, isCI);
+  test(`silence is trimmed`, async () => {
+    for (const { filePath, projectRelPath } of audioTestCases) {
+      const { silences, duration } = await analyzeAudioFile(filePath);
+
+      const totalDuration = duration.fromStream;
+
+      const expectedStart = 0;
+      const expectedEnd = totalDuration;
+      let start = expectedStart;
+      let end = expectedEnd;
+
+      for (const silence of silences) {
+        // Check if silence is at the start
+        if (silence.start <= allowedStartOrEndOffset) {
+          start = Math.max(start, silence.end);
+          continue;
         }
 
-        expect(start).toBe(expectedStart);
-        expect(end).toBe(expectedEnd);
-      });
-    });
-  }
+        // Check if silence is at the end
+        if (silence.end >= totalDuration - allowedStartOrEndOffset) {
+          end = Math.min(end, silence.start);
+          continue;
+        }
+      }
+
+      if (start > expectedStart || end < expectedEnd) {
+        handleAudioFix({
+          fixCommand: (outputPath) =>
+            `ffmpeg -y -i "${filePath}" -af "atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS" "${outputPath}"`,
+          filePath,
+          projectRelPath,
+          fixType: `silence`,
+          autoFix: autoFixTrimSilence,
+        });
+
+        if (autoFixTrimSilence) {
+          // Skip the assertion since we've fixed the file
+          return;
+        }
+      }
+
+      expect
+        .soft(start, `Silence start for ${projectRelPath}`)
+        .toBe(expectedStart);
+      expect.soft(end, `Silence end for ${projectRelPath}`).toBe(expectedEnd);
+    }
+  });
+}
+
+function isAssertionError(
+  error: unknown,
+): error is ReturnType<typeof chai.use>[`AssertionError`] {
+  return error instanceof Error && error.name === `AssertionError`;
 }

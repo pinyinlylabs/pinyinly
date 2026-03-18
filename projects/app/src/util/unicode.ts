@@ -26,6 +26,40 @@ export function isCjkUnifiedIdeograph(char: string): boolean {
   );
 }
 
+export function isHanziIdeograph(char: string): boolean {
+  const codePoint = char.codePointAt(0);
+
+  return (
+    codePoint != null &&
+    // CJK ideographic number zero U+3007
+    (codePoint === 0x30_07 ||
+      // Kangxi Radicals U+2F00 to U+2FDF
+      (codePoint >= 0x2f_00 && codePoint <= 0x2f_df) ||
+      // CJK Unified Ideographs U+4E00 to U+9FFF
+      (codePoint >= 0x4e_00 && codePoint <= 0x9f_ff) ||
+      // CJK Unified Ideographs Extension A U+3400 to U+4DBF
+      (codePoint >= 0x34_00 && codePoint <= 0x4d_bf) ||
+      // CJK Unified Ideographs Extension B U+20000 to U+2A6DF
+      (codePoint >= 0x2_00_00 && codePoint <= 0x2_a6_df) ||
+      // CJK Unified Ideographs Extension C U+2A700 to U+2B73F
+      (codePoint >= 0x2_a7_00 && codePoint <= 0x2_b7_3f) ||
+      // CJK Unified Ideographs Extension D U+2B740 to U+2B81F
+      (codePoint >= 0x2_b7_40 && codePoint <= 0x2_b8_1f) ||
+      // CJK Unified Ideographs Extension E U+2B820 to U+2CEAF
+      (codePoint >= 0x2_b8_20 && codePoint <= 0x2_ce_af) ||
+      // CJK Unified Ideographs Extension F U+2CEB0 to U+2EBEF
+      (codePoint >= 0x2_ce_b0 && codePoint <= 0x2_eb_ef) ||
+      // CJK Unified Ideographs Extension G U+30000 to U+3134F
+      (codePoint >= 0x3_00_00 && codePoint <= 0x3_13_4f) ||
+      // CJK Unified Ideographs Extension H U+31350 to U+323AF
+      (codePoint >= 0x3_13_50 && codePoint <= 0x3_23_af) ||
+      // CJK Compatibility Ideographs U+F900 to U+FAFF
+      (codePoint >= 0xf9_00 && codePoint <= 0xfa_ff) ||
+      // CJK Compatibility Ideographs Supplement U+2F800 to U+2FA1F
+      (codePoint >= 0x2_f8_00 && codePoint <= 0x2_fa_1f))
+  );
+}
+
 export function isNotCjkUnifiedIdeograph(char: string): boolean {
   return !isCjkUnifiedIdeograph(char);
 }

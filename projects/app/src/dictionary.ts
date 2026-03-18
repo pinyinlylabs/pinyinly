@@ -21,15 +21,16 @@ import {
   pinyinSoundIdSchema,
   pinyinTextSchema,
 } from "@/data/model";
-import { matchAllPinyinUnits } from "@/data/pinyin";
+import { matchAllPinyinUnits, normalizePinyinUnit } from "@/data/pinyin";
 import {
   deepReadonly,
   emptyArray,
   mapArrayAdd,
+  mapSetAdd,
   memoize0,
   memoize1,
 } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
@@ -297,26 +298,30 @@ export const loadKangXiRadicalsStrokes = memoize0(async () =>
 );
 
 /**
+ * The type of the dictionary index returned by {@link loadDictionary}.
+ */
+export interface Dictionary {
+  lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
+  lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
+  lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
+  lookupPinyinUnit(pinyinUnit: PinyinUnit): readonly HanziCharacter[];
+  allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
+  allHanziWords: readonly HanziWord[];
+  hsk1HanziWords: readonly HanziWord[];
+  hsk2HanziWords: readonly HanziWord[];
+  hsk3HanziWords: readonly HanziWord[];
+  hsk4HanziWords: readonly HanziWord[];
+  hsk5HanziWords: readonly HanziWord[];
+  hsk6HanziWords: readonly HanziWord[];
+  hsk7To9HanziWords: readonly HanziWord[];
+}
+
+/**
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
  * hanzi word meanings. Useful when building learning graphs.
  */
 export const loadDictionary = memoize0(
-  async (): Promise<
-    Readonly<{
-      lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
-      lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
-      lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
-      allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
-      allHanziWords: readonly HanziWord[];
-      hsk1HanziWords: readonly HanziWord[];
-      hsk2HanziWords: readonly HanziWord[];
-      hsk3HanziWords: readonly HanziWord[];
-      hsk4HanziWords: readonly HanziWord[];
-      hsk5HanziWords: readonly HanziWord[];
-      hsk6HanziWords: readonly HanziWord[];
-      hsk7To9HanziWords: readonly HanziWord[];
-    }>
-  > => {
+  async (): Promise<Readonly<Dictionary>> => {
     const hanziMap = new Map<string, HanziWordWithMeaning[]>();
     const glossMap = new Map<string, HanziWordWithMeaning[]>();
     const dictionaryJson = await loadDictionaryJson();
@@ -375,6 +380,41 @@ export const loadDictionary = memoize0(
       }
     }
 
+    const getPinyinUnitToHanziMap = memoize0(() => {
+      const map = new Map<PinyinUnit, Set<HanziCharacter>>();
+
+      for (const [hanziWord, meaning] of dictionaryJson) {
+        if (meaning.pinyin == null) {
+          continue;
+        }
+
+        const hanzi = hanziFromHanziWord(hanziWord);
+        const hanziCharacters = splitHanziText(hanzi);
+
+        for (const pinyin of meaning.pinyin) {
+          const pinyinUnits = matchAllPinyinUnits(pinyin).map((p) =>
+            normalizePinyinUnit(p),
+          );
+
+          invariant(
+            hanziCharacters.length === pinyinUnits.length,
+            `expected same number of hanzi characters as pinyin units: "%o" / "%o"`,
+            hanzi,
+            pinyin,
+          );
+
+          for (let i = 0; i < pinyinUnits.length; i++) {
+            const hanziCharacter = nonNullable(hanziCharacters[i]);
+            const pinyinUnit2 = nonNullable(pinyinUnits[i]);
+
+            mapSetAdd(map, pinyinUnit2, hanziCharacter);
+          }
+        }
+      }
+
+      return new Map([...map.entries()].map(([k, v]) => [k, [...v]]));
+    });
+
     return {
       lookupHanzi(hanzi: HanziText) {
         return hanziMap.get(hanzi) ?? emptyArray;
@@ -384,6 +424,11 @@ export const loadDictionary = memoize0(
       },
       lookupGloss(gloss: string) {
         return glossMap.get(gloss) ?? emptyArray;
+      },
+      lookupPinyinUnit(pinyinUnit: PinyinUnit) {
+        const pinyinUnitToHanziMap = getPinyinUnitToHanziMap();
+
+        return pinyinUnitToHanziMap.get(pinyinUnit) ?? emptyArray;
       },
       allEntries: [...dictionaryJson.entries()],
       allHanziWords: [...dictionaryJson.keys()],
@@ -397,11 +442,6 @@ export const loadDictionary = memoize0(
     };
   },
 );
-
-/**
- * The type of the dictionary index returned by {@link loadDictionary}.
- */
-export type Dictionary = Awaited<ReturnType<typeof loadDictionary>>;
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   loadKangXiRadicalsStrokes().then((x) => x.get(strokes) ?? null);

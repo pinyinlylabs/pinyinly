@@ -16,14 +16,12 @@ import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
+  defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import {
-  getPinyinFinalToneAudioSource,
-  getPinyinSoundAudioSource,
-} from "@/data/pinyinSoundAudio";
+import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
   hanziPronunciationHintTextSetting,
   pinyinSoundDescriptionSetting,
@@ -53,24 +51,24 @@ export default function SoundIdPage() {
     useState(false);
 
   const label = getPinyinSoundLabel(id, chart);
-  const soundAudioSource = getPinyinSoundAudioSource(id);
+  const examplePinyins = defaultPinyinSoundExamples[id] ?? [];
+  const audioSourcesByPinyinMap = getAudioSourcesByPinyinMap();
+  let soundAudioSource = null;
+  for (const examplePinyin of examplePinyins) {
+    const audioSources = audioSourcesByPinyinMap.get(examplePinyin);
+    if (audioSources?.[0] != null) {
+      soundAudioSource = audioSources[0];
+      break;
+    }
+  }
+
   const playSound = useSoundEffect(soundAudioSource);
 
-  const tone1AudioSource = id.startsWith(`-`)
-    ? getPinyinFinalToneAudioSource(id, `1`)
-    : null;
-  const tone2AudioSource = id.startsWith(`-`)
-    ? getPinyinFinalToneAudioSource(id, `2`)
-    : null;
-  const tone3AudioSource = id.startsWith(`-`)
-    ? getPinyinFinalToneAudioSource(id, `3`)
-    : null;
-  const tone4AudioSource = id.startsWith(`-`)
-    ? getPinyinFinalToneAudioSource(id, `4`)
-    : null;
-  const tone5AudioSource = id.startsWith(`-`)
-    ? getPinyinFinalToneAudioSource(id, `5`)
-    : null;
+  const tone1AudioSource = id.startsWith(`-`) ? null : null;
+  const tone2AudioSource = id.startsWith(`-`) ? null : null;
+  const tone3AudioSource = id.startsWith(`-`) ? null : null;
+  const tone4AudioSource = id.startsWith(`-`) ? null : null;
+  const tone5AudioSource = id.startsWith(`-`) ? null : null;
 
   useEffect(() => {
     if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
@@ -94,6 +92,13 @@ export default function SoundIdPage() {
             <Text className="text-center font-cursive text-2xl text-fg">
               {label}
             </Text>
+            {soundAudioSource == null ? null : (
+              <RectButton
+                variant="bare2"
+                iconStart="speaker-2"
+                onPressIn={playSound}
+              />
+            )}
           </View>
           <InlineEditableSettingText
             variant="title"
@@ -101,6 +106,7 @@ export default function SoundIdPage() {
             settingKey={{ soundId: id }}
             placeholder="Name this sound"
           />
+
           <RectButton
             onPress={() => {
               setIsEditSoundNameModalOpen(true);
@@ -108,16 +114,15 @@ export default function SoundIdPage() {
             variant="bare2"
             iconStart="pencil"
           />
-          {soundAudioSource == null ? null : (
-            <RectButton
-              variant="bare2"
-              iconStart="speaker-2"
-              onPressIn={playSound}
-            >
-              Play
-            </RectButton>
-          )}
         </View>
+
+        {examplePinyins.length === 0 ? null : (
+          <View className="my-5 flex-row items-center gap-4">
+            <Text className="pyly-body text-fg-dim">
+              Example pinyin: {examplePinyins.join(`, `)}
+            </Text>
+          </View>
+        )}
 
         <View className="gap-10">
           <WikiTitledBox title="Pronunciation">
