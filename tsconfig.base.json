@@ -4,6 +4,7 @@
     "allowImportingTsExtensions": true,
     "checkJs": true,
     "erasableSyntaxOnly": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noPropertyAccessFromIndexSignature": true,
