@@ -7,11 +7,12 @@ import { execa } from "execa";
 import { execSync } from "node:child_process";
 import path from "node:path";
 import type { chai } from "vitest";
-import { describe, expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { analyzeAudioFile, generateSpriteCommand } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
 import {
   applyRulesWithRule,
+  findUnmatchedFiles,
   getInputFiles,
   hashFile,
 } from "./manifestWrite.ts";
@@ -25,6 +26,8 @@ const debug = makeDebug(`pyly:audio-sprites`);
 export interface ManifestCheckResult {
   /** Whether the manifest file exists */
   manifestExists: boolean;
+  /** Array of source files that do not match any sprite rule */
+  unmatchedInputFiles: string[];
   /** Whether all source files have correct hashes in the manifest */
   hashesUpToDate: boolean;
   /** Whether all sprite files exist on disk */
@@ -218,6 +221,7 @@ export async function checkSpriteManifest(
     fnDebug(`Manifest file does not exist at path: %o`, manifestPath);
     return {
       manifestExists: false,
+      unmatchedInputFiles: [],
       hashesUpToDate: false,
       spriteFilesExist: false,
       missingSpriteFiles: [],
@@ -243,6 +247,11 @@ export async function checkSpriteManifest(
 
   const manifestDir = path.dirname(manifestPath);
   const inputFiles = await getInputFiles(manifest, manifestPath);
+  const unmatchedInputFiles = findUnmatchedFiles(inputFiles, manifest.rules);
+
+  if (unmatchedInputFiles.length > 0) {
+    fnDebug(`unmatched input files: %o`, unmatchedInputFiles);
+  }
 
   // Check if all source files have correct hashes
   const outdatedFiles: string[] = [];
@@ -346,6 +355,7 @@ export async function checkSpriteManifest(
     .filter((rule) => !usedSpriteFileSizeRules.has(rule));
   const needsRegeneration = !hashesUpToDate || !spriteFilesExist;
   fnDebug(`result: %o`, {
+    unmatchedInputFiles,
     hashesUpToDate,
     spriteFilesExist,
     missingSpriteFiles,
@@ -357,6 +367,7 @@ export async function checkSpriteManifest(
 
   return {
     manifestExists: true,
+    unmatchedInputFiles,
     hashesUpToDate,
     spriteFilesExist,
     missingSpriteFiles,
@@ -506,6 +517,14 @@ export async function buildSprites(
 
   fnDebug(`checkSpriteManifest result: %j`, result);
 
+  if (result.unmatchedInputFiles.length > 0) {
+    fnDebug(
+      `Skipping auto-fix because some input files do not match any sprite rule: %o`,
+      result.unmatchedInputFiles,
+    );
+    return result;
+  }
+
   // Handle cleanup of unused sprite files
   if (result.unusedSpriteFiles.length > 0 && autoFix) {
     fnDebug(
@@ -563,6 +582,7 @@ export async function buildAndTestSprites(
   const result = await buildSprites(options);
 
   expect.soft(result.manifestExists).toBe(true);
+  expect.soft(result.unmatchedInputFiles).toEqual([]);
   expect.soft(result.hashesUpToDate).toBe(true);
   expect.soft(result.spriteFilesExist).toBe(true);
   expect.soft(result.needsRegeneration).toBe(false);
@@ -682,140 +702,151 @@ export async function createAudioFileTests(
         projectRoot == null ? filePath : path.relative(projectRoot, filePath),
     }));
 
-  describe.for(audioTestCases)(
-    `$projectRelPath`,
-    ({ filePath, projectRelPath }) => {
-      test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
-        const { duration } = await analyzeAudioFile(filePath);
+  test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
+    for (const { filePath, projectRelPath } of audioTestCases) {
+      const { duration } = await analyzeAudioFile(filePath);
 
-        const delta = Math.abs(duration.fromStream - duration.fromContainer);
-        expect(delta).toBeLessThanOrEqual(durationTolerance);
-      });
+      const delta = Math.abs(duration.fromStream - duration.fromContainer);
+      expect
+        .soft(delta, `Duration mismatch for ${projectRelPath}`)
+        .toBeLessThanOrEqual(durationTolerance);
+    }
+  });
 
-      test(`audio file is not empty (based on duration)`, async () => {
-        const { duration } = await analyzeAudioFile(filePath);
+  test(`audio file is not empty (based on duration)`, async () => {
+    for (const { filePath, projectRelPath } of audioTestCases) {
+      const { duration } = await analyzeAudioFile(filePath);
 
-        try {
-          // Skip the assertion since we've fixed the file
-          expect(duration.fromStream).toBeGreaterThanOrEqual(minDuration);
-        } catch (e) {
-          if (isAssertionError(e) && autoFixEmpty) {
-            fs.unlinkSync(filePath);
-          } else {
-            throw e;
-          }
+      try {
+        // Skip the assertion since we've fixed the file
+        expect
+          .soft(duration.fromStream, `Audio file is empty: ${projectRelPath}`)
+          .toBeGreaterThanOrEqual(minDuration);
+      } catch (e) {
+        if (isAssertionError(e) && autoFixEmpty) {
+          fs.unlinkSync(filePath);
+        } else {
+          throw e;
         }
-      });
+      }
+    }
+  });
 
-      test.skipIf(skipLoudness)(
-        `loudness is within allowed tolerance`,
-        async () => {
-          // ChatGPT recommends to target -18 LUFS because:
-          //
-          // | Use Case                     | Target LUFS                              | Notes                                                       |
-          // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
-          // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
-          // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
-          // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
-          // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
-          // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
-          // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
-          //
-          // Target **-18 LUFS** because:
-          //
-          // - 🎧 Less aggressive than music
-          // - 🧠 Good for repeated listening
-          // - 📱 Comfortable on mobile speakers
-          // - 🔄 Balances speech clarity and ear fatigue
+  test.skipIf(skipLoudness)(
+    `loudness is within allowed tolerance`,
+    async () => {
+      // ChatGPT recommends to target -18 LUFS because:
+      //
+      // | Use Case                     | Target LUFS                              | Notes                                                       |
+      // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+      // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
+      // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
+      // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
+      // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
+      // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
+      // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
+      //
+      // Target **-18 LUFS** because:
+      //
+      // - 🎧 Less aggressive than music
+      // - 🧠 Good for repeated listening
+      // - 📱 Comfortable on mobile speakers
+      // - 🔄 Balances speech clarity and ear fatigue
 
-          const { loudnorm } = await analyzeAudioFile(filePath);
+      for (const { filePath, projectRelPath } of audioTestCases) {
+        const { loudnorm } = await analyzeAudioFile(filePath);
 
-          const loudness = loudnorm.input_i;
-          const delta = Math.abs(loudness - targetLufs);
+        const loudness = loudnorm.input_i;
+        const delta = Math.abs(loudness - targetLufs);
 
-          // Check if loudness values are valid (not infinite or NaN)
-          const hasInvalidValues =
-            !Number.isFinite(loudnorm.input_i) ||
-            !Number.isFinite(loudnorm.input_tp) ||
-            !Number.isFinite(loudnorm.input_lra) ||
-            !Number.isFinite(loudnorm.input_thresh) ||
-            !Number.isFinite(loudnorm.target_offset);
+        // Check if loudness values are valid (not infinite or NaN)
+        const hasInvalidValues =
+          !Number.isFinite(loudnorm.input_i) ||
+          !Number.isFinite(loudnorm.input_tp) ||
+          !Number.isFinite(loudnorm.input_lra) ||
+          !Number.isFinite(loudnorm.input_thresh) ||
+          !Number.isFinite(loudnorm.target_offset);
 
-          if (hasInvalidValues) {
-            // Skip loudness test for files with invalid measurements (e.g., too short or silent)
-            console.warn(
-              chalk.yellow(
-                `Skipping loudness test for ${projectRelPath}: invalid measurements (input_i=${loudnorm.input_i}, offset=${loudnorm.target_offset})`,
-              ),
-            );
-            return;
-          }
-
-          if (delta > loudnessTolerance) {
-            handleAudioFix({
-              fixCommand: (outputPath) =>
-                `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${outputPath}"`,
-              filePath,
-              projectRelPath,
-              fixType: `loudness`,
-              autoFix: autoFixLoudness,
-            });
-
-            if (autoFixLoudness) {
-              // Skip the assertion since we've fixed the file
-              return;
-            }
-          }
-
-          expect(delta).toBeLessThanOrEqual(loudnessTolerance);
-        },
-      );
-
-      test(`silence is trimmed`, async () => {
-        const { silences, duration } = await analyzeAudioFile(filePath);
-
-        const totalDuration = duration.fromStream;
-
-        const expectedStart = 0;
-        const expectedEnd = totalDuration;
-        let start = expectedStart;
-        let end = expectedEnd;
-
-        for (const silence of silences) {
-          // Check if silence is at the start
-          if (silence.start <= allowedStartOrEndOffset) {
-            start = Math.max(start, silence.end);
-            continue;
-          }
-
-          // Check if silence is at the end
-          if (silence.end >= totalDuration - allowedStartOrEndOffset) {
-            end = Math.min(end, silence.start);
-            continue;
-          }
+        if (hasInvalidValues) {
+          // Skip loudness test for files with invalid measurements (e.g., too short or silent)
+          console.warn(
+            chalk.yellow(
+              `Skipping loudness test for ${projectRelPath}: invalid measurements (input_i=${loudnorm.input_i}, offset=${loudnorm.target_offset})`,
+            ),
+          );
+          return;
         }
 
-        if (start > expectedStart || end < expectedEnd) {
+        if (delta > loudnessTolerance) {
           handleAudioFix({
             fixCommand: (outputPath) =>
-              `ffmpeg -y -i "${filePath}" -af "atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS" "${outputPath}"`,
+              `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${outputPath}"`,
             filePath,
             projectRelPath,
-            fixType: `silence`,
-            autoFix: autoFixTrimSilence,
+            fixType: `loudness`,
+            autoFix: autoFixLoudness,
           });
 
-          if (autoFixTrimSilence) {
+          if (autoFixLoudness) {
             // Skip the assertion since we've fixed the file
             return;
           }
         }
 
-        expect(start).toBe(expectedStart);
-        expect(end).toBe(expectedEnd);
-      });
+        expect
+          .soft(delta, `Loudness delta for ${projectRelPath}`)
+          .toBeLessThanOrEqual(loudnessTolerance);
+      }
     },
   );
+
+  test(`silence is trimmed`, async () => {
+    for (const { filePath, projectRelPath } of audioTestCases) {
+      const { silences, duration } = await analyzeAudioFile(filePath);
+
+      const totalDuration = duration.fromStream;
+
+      const expectedStart = 0;
+      const expectedEnd = totalDuration;
+      let start = expectedStart;
+      let end = expectedEnd;
+
+      for (const silence of silences) {
+        // Check if silence is at the start
+        if (silence.start <= allowedStartOrEndOffset) {
+          start = Math.max(start, silence.end);
+          continue;
+        }
+
+        // Check if silence is at the end
+        if (silence.end >= totalDuration - allowedStartOrEndOffset) {
+          end = Math.min(end, silence.start);
+          continue;
+        }
+      }
+
+      if (start > expectedStart || end < expectedEnd) {
+        handleAudioFix({
+          fixCommand: (outputPath) =>
+            `ffmpeg -y -i "${filePath}" -af "atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS" "${outputPath}"`,
+          filePath,
+          projectRelPath,
+          fixType: `silence`,
+          autoFix: autoFixTrimSilence,
+        });
+
+        if (autoFixTrimSilence) {
+          // Skip the assertion since we've fixed the file
+          return;
+        }
+      }
+
+      expect
+        .soft(start, `Silence start for ${projectRelPath}`)
+        .toBe(expectedStart);
+      expect.soft(end, `Silence end for ${projectRelPath}`).toBe(expectedEnd);
+    }
+  });
 }
 
 function isAssertionError(

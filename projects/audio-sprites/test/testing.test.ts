@@ -186,6 +186,31 @@ describe(
       expect(result.needsRegeneration).toBe(true);
     });
 
+    test(`reports input files that do not match any sprite rule`, async () => {
+      const manifestWithUnmatchedInput = {
+        ...sampleManifest,
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `audio/wiki/.*\\.m4a`,
+            sprite: `wiki`,
+          },
+        ],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithUnmatchedInput),
+        "/test/audio/wiki/matched.m4a": `matched audio content`,
+        "/test/audio/other/unmatched.m4a": `unmatched audio content`,
+      });
+
+      const result = await checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+      });
+
+      expect(result.unmatchedInputFiles).toEqual([`audio/other/unmatched.m4a`]);
+    });
+
     test(`throws when sprite template references missing named capture group`, async () => {
       const manifestWithInvalidRule = {
         ...sampleManifest,
