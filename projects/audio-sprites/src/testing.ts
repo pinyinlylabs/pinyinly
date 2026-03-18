@@ -1,3 +1,4 @@
+import { parseDecimalFileSize } from "@pinyinly/lib/fileSize";
 import * as fs from "@pinyinly/lib/fs";
 import { glob } from "@pinyinly/lib/fs";
 import chalk from "chalk";
@@ -13,7 +14,6 @@ import {
   applyRulesWithRule,
   getInputFiles,
   hashFile,
-  syncManifestWithFilesystem,
 } from "./manifestWrite.ts";
 import type { AudioFileInfo, SpriteManifest } from "./types.ts";
 
@@ -35,8 +35,27 @@ export interface ManifestCheckResult {
   outdatedFiles: string[];
   /** Array of unused sprite files in the output directory */
   unusedSpriteFiles: string[];
+  /** Sprite files that violate configured size bounds */
+  spriteFileSizeViolations: SpriteFileSizeViolation[];
+  /** Sprite file-size rules that did not match any sprite file */
+  unusedSpriteFileSizeRules: string[];
   /** Whether sprites need to be regenerated */
   needsRegeneration: boolean;
+}
+
+export interface SpriteFileSizeViolation {
+  spriteFile: string;
+  sizeBytes: number;
+  ruleName: string;
+  minBytes?: number;
+  maxBytes?: number;
+}
+
+export interface SpriteFileSizeRule {
+  /** Regex used to match sprite file names (e.g. /^pinyin-/) */
+  name: RegExp;
+  minSize?: string;
+  maxSize?: string;
 }
 
 /**
@@ -45,12 +64,16 @@ export interface ManifestCheckResult {
 export interface SpriteTestOptions {
   /** Path to the manifest.json file */
   manifestPath: string;
-  /** Whether to automatically regenerate sprites if needed (default: false) */
-  autoRegenerate?: boolean;
-  /** Whether to sync the manifest with filesystem before checking (default: true) */
-  syncManifest?: boolean;
-  /** Whether to automatically delete unused sprite files (default: false) */
-  autoCleanup?: boolean;
+  /** Whether to automatically sync/cleanup/regenerate sprite artifacts (default: false) */
+  autoFix?: boolean;
+  /** File-size rules for generated sprite files */
+  spriteFileSizes?: SpriteFileSizeRule[];
+}
+
+interface ParsedSpriteFileSizeRule {
+  regex: RegExp;
+  minBytes?: number;
+  maxBytes?: number;
 }
 
 /**
@@ -150,6 +173,29 @@ function validateRuleVariables(rule: { match: string; sprite: string }): void {
   }
 }
 
+export function parseSpriteFileSizeRules(
+  rules: readonly SpriteFileSizeRule[],
+): ParsedSpriteFileSizeRule[] {
+  return rules.map((rule) => {
+    const regex = rule.name;
+
+    const minBytes =
+      rule.minSize == null ? undefined : parseDecimalFileSize(rule.minSize);
+    const maxBytes =
+      rule.maxSize == null ? undefined : parseDecimalFileSize(rule.maxSize);
+
+    if (minBytes != null && maxBytes != null && minBytes > maxBytes) {
+      expect(maxBytes).toBeGreaterThanOrEqual(minBytes);
+    }
+
+    return {
+      regex,
+      minBytes,
+      maxBytes,
+    };
+  });
+}
+
 /**
  * Check if the manifest.json file is up to date with correct hashes for all audio files
  * and verify that sprite files have been generated properly.
@@ -164,7 +210,8 @@ export async function checkSpriteManifest(
     `checkSpriteManifest()` satisfies HasNameOf<typeof checkSpriteManifest>,
   );
 
-  const { manifestPath, syncManifest = false } = options;
+  const { manifestPath, spriteFileSizes = [] } = options;
+  const parsedSpriteFileSizeRules = parseSpriteFileSizeRules(spriteFileSizes);
 
   // Check if manifest file exists
   if (!fs.existsSync(manifestPath)) {
@@ -176,29 +223,18 @@ export async function checkSpriteManifest(
       missingSpriteFiles: [],
       outdatedFiles: [],
       unusedSpriteFiles: [],
+      spriteFileSizeViolations: [],
+      unusedSpriteFileSizeRules: [],
       needsRegeneration: true,
     };
   }
 
-  let manifest: SpriteManifest;
-
-  // Sync manifest with filesystem if requested
-  if (syncManifest) {
-    fnDebug(`Attempting to sync manifest`);
-    try {
-      manifest = await syncManifestWithFilesystem(manifestPath);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to sync manifest: ${message}`);
-    }
-  } else {
-    fnDebug(`Reading manifest from %o`, manifestPath);
-    const loadedManifest = loadManifest(manifestPath);
-    if (!loadedManifest) {
-      throw new Error(`Failed to load manifest from ${manifestPath}`);
-    }
-    manifest = loadedManifest;
+  fnDebug(`Reading manifest from %o`, manifestPath);
+  const loadedManifest = loadManifest(manifestPath);
+  if (!loadedManifest) {
+    throw new Error(`Failed to load manifest from ${manifestPath}`);
   }
+  const manifest: SpriteManifest = loadedManifest;
 
   // Validate that all sprite template variables have corresponding named capture groups
   for (const rule of manifest.rules) {
@@ -228,6 +264,8 @@ export async function checkSpriteManifest(
 
   // Check if all sprite files exist
   const missingSpriteFiles: string[] = [];
+  const spriteFileSizeViolations: SpriteFileSizeViolation[] = [];
+  const usedSpriteFileSizeRules = new Set<string>();
 
   for (const spriteFile of manifest.spriteFiles) {
     const spriteFilePath = path.resolve(
@@ -236,9 +274,44 @@ export async function checkSpriteManifest(
       spriteFile,
     );
 
+    const matchedRule = parsedSpriteFileSizeRules.find((rule) =>
+      rule.regex.test(spriteFile),
+    );
+    if (matchedRule) {
+      usedSpriteFileSizeRules.add(matchedRule.regex.source);
+    }
+
     if (!fs.existsSync(spriteFilePath)) {
       fnDebug(`Missing sprite file: %o`, spriteFilePath);
       missingSpriteFiles.push(spriteFile);
+      continue;
+    }
+
+    if (!matchedRule) {
+      continue;
+    }
+
+    const sizeBytes = fs.statSync(spriteFilePath).size;
+
+    if (matchedRule.minBytes != null && sizeBytes < matchedRule.minBytes) {
+      spriteFileSizeViolations.push({
+        spriteFile,
+        sizeBytes,
+        ruleName: matchedRule.regex.source,
+        minBytes: matchedRule.minBytes,
+        maxBytes: matchedRule.maxBytes,
+      });
+      continue;
+    }
+
+    if (matchedRule.maxBytes != null && sizeBytes > matchedRule.maxBytes) {
+      spriteFileSizeViolations.push({
+        spriteFile,
+        sizeBytes,
+        ruleName: matchedRule.regex.source,
+        minBytes: matchedRule.minBytes,
+        maxBytes: matchedRule.maxBytes,
+      });
     }
   }
 
@@ -268,12 +341,17 @@ export async function checkSpriteManifest(
 
   const hashesUpToDate = outdatedFiles.length === 0;
   const spriteFilesExist = missingSpriteFiles.length === 0;
+  const unusedSpriteFileSizeRules = parsedSpriteFileSizeRules
+    .map((rule) => rule.regex.source)
+    .filter((rule) => !usedSpriteFileSizeRules.has(rule));
   const needsRegeneration = !hashesUpToDate || !spriteFilesExist;
   fnDebug(`result: %o`, {
     hashesUpToDate,
     spriteFilesExist,
     missingSpriteFiles,
     outdatedFiles,
+    spriteFileSizeViolations,
+    unusedSpriteFileSizeRules,
     needsRegeneration,
   });
 
@@ -284,6 +362,8 @@ export async function checkSpriteManifest(
     missingSpriteFiles,
     outdatedFiles,
     unusedSpriteFiles,
+    spriteFileSizeViolations,
+    unusedSpriteFileSizeRules,
     needsRegeneration,
   };
 }
@@ -405,29 +485,29 @@ export async function generateSprites(manifestPath: string): Promise<void> {
 }
 
 /**
- * Verify that audio sprites are properly generated and up to date.
- * If sprites are missing or outdated, optionally regenerate them.
- * If unused sprite files exist, optionally clean them up.
+ * Build helper that checks sprite status and optionally auto-generates missing sprites.
+ * If sprites are missing or outdated, optionally regenerates them.
+ * If unused sprite files exist, optionally cleans them up.
  *
- * @param options Configuration options for verification
+ * @param options Configuration options for sprite building
  * @returns Promise resolving to the check result
  */
-export async function verifySprites(
+export async function buildSprites(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
   const fnDebug = debug.extend(
-    `verifySprites()` satisfies HasNameOf<typeof verifySprites>,
+    `buildSprites()` satisfies HasNameOf<typeof buildSprites>,
   );
 
   fnDebug(`options: %o`, options);
 
-  const { autoRegenerate = false, autoCleanup = false } = options;
+  const { autoFix = false } = options;
   let result = await checkSpriteManifest(options);
 
   fnDebug(`checkSpriteManifest result: %j`, result);
 
   // Handle cleanup of unused sprite files
-  if (result.unusedSpriteFiles.length > 0 && autoCleanup) {
+  if (result.unusedSpriteFiles.length > 0 && autoFix) {
     fnDebug(
       `Found %s unused sprite files, cleaning up...`,
       result.unusedSpriteFiles.length,
@@ -442,7 +522,7 @@ export async function verifySprites(
       // Re-check after cleanup to update the result
       result = await checkSpriteManifest({
         ...options,
-        syncManifest: false, // No need to sync again
+        autoFix: false,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -451,7 +531,7 @@ export async function verifySprites(
   }
 
   // Handle regeneration of missing/outdated sprites
-  if (result.needsRegeneration && autoRegenerate) {
+  if (result.needsRegeneration && autoFix) {
     fnDebug(`Sprites need regeneration, auto-generating...`);
 
     try {
@@ -460,7 +540,7 @@ export async function verifySprites(
       // Re-check after generation
       result = await checkSpriteManifest({
         ...options,
-        syncManifest: false, // No need to sync again
+        autoFix: false,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -472,74 +552,33 @@ export async function verifySprites(
 }
 
 /**
- * Assert that sprites are properly generated and up to date.
- * Throws an error if sprites are missing or need regeneration.
- * Automatically deletes unused sprite files if autoCleanup is enabled.
+ * Build sprites and assert the final state using soft assertions so all issues are reported.
  *
- * @param options Configuration options for the assertion
+ * @param options Configuration options for sprite building and file-size checks
+ * @returns Promise resolving to the final check result
  */
-export async function assertSpritesUpToDate(
+export async function buildAndTestSprites(
   options: SpriteTestOptions,
-): Promise<void> {
-  const result = await verifySprites({
-    ...options,
-    autoCleanup: options.autoCleanup ?? true, // Default to true for cleanup
-  });
-
-  if (!result.manifestExists) {
-    throw new Error(`Manifest file does not exist: ${options.manifestPath}`);
-  }
-
-  if (!result.hashesUpToDate) {
-    throw new Error(
-      `Audio file hashes are outdated. Files with outdated hashes: ${result.outdatedFiles.join(`, `)}`,
-    );
-  }
-
-  if (!result.spriteFilesExist) {
-    throw new Error(
-      `Sprite files are missing: ${result.missingSpriteFiles.join(`, `)}`,
-    );
-  }
-
-  if (result.unusedSpriteFiles.length > 0) {
-    throw new Error(
-      `Found unused sprite files in output directory. Run with autoCleanup: true to automatically delete them: ${result.unusedSpriteFiles.join(`, `)}`,
-    );
-  }
-
-  if (result.needsRegeneration) {
-    throw new Error(
-      `Sprites need regeneration. Run with autoRegenerate: true or manually regenerate sprites.`,
-    );
-  }
-}
-
-/**
- * Test helper that checks sprite status and optionally auto-generates missing sprites.
- * This is the main function that should be called from app tests.
- *
- * @param manifestPath Path to the manifest.json file
- * @param autoRegenerate Whether to automatically regenerate sprites if needed
- * @param autoCleanup Whether to automatically delete unused sprite files
- * @returns Promise resolving to the check result
- */
-export async function testSprites(
-  manifestPath: string,
-  autoFix = false,
 ): Promise<ManifestCheckResult> {
-  return verifySprites({
-    manifestPath,
-    autoRegenerate: autoFix,
-    autoCleanup: autoFix,
-    syncManifest: autoFix,
-  });
+  const result = await buildSprites(options);
+
+  expect.soft(result.manifestExists).toBe(true);
+  expect.soft(result.hashesUpToDate).toBe(true);
+  expect.soft(result.spriteFilesExist).toBe(true);
+  expect.soft(result.needsRegeneration).toBe(false);
+  expect.soft(result.missingSpriteFiles).toEqual([]);
+  expect.soft(result.outdatedFiles).toEqual([]);
+  expect.soft(result.unusedSpriteFiles).toEqual([]);
+  expect.soft(result.spriteFileSizeViolations).toEqual([]);
+  expect.soft(result.unusedSpriteFileSizeRules).toEqual([]);
+
+  return result;
 }
 
 /**
- * Configuration options for speech file testing.
+ * Configuration options for input audio file testing.
  */
-export interface SpeechFileTestOptions {
+export interface InputFileTestOptions {
   /** Glob pattern for audio files to test */
   audioGlob: string;
   /** Target LUFS for loudness testing (default: -18) */
@@ -613,13 +652,13 @@ function handleAudioFix(options: {
 }
 
 /**
- * Create speech file tests for audio files matching the given pattern.
- * This function generates vitest test cases for validating speech audio files.
+ * Create input file tests for audio files matching the given pattern.
+ * This function generates vitest test cases for validating input audio files.
  *
- * @param options Configuration for speech file testing
+ * @param options Configuration for input file testing
  */
-export async function createSpeechFileTests(
-  options: SpeechFileTestOptions,
+export async function createAudioFileTests(
+  options: InputFileTestOptions,
 ): Promise<void> {
   const {
     audioGlob,
@@ -635,15 +674,17 @@ export async function createSpeechFileTests(
     skipLoudness = false,
   } = options;
 
-  for (const filePath of await glob(audioGlob)) {
-    if (filePath.includes(fixTag)) {
-      continue;
-    }
+  const audioTestCases = (await glob(audioGlob))
+    .filter((filePath) => !filePath.includes(fixTag))
+    .map((filePath) => ({
+      filePath,
+      projectRelPath:
+        projectRoot == null ? filePath : path.relative(projectRoot, filePath),
+    }));
 
-    const projectRelPath =
-      projectRoot == null ? filePath : path.relative(projectRoot, filePath);
-
-    describe(projectRelPath, () => {
+  describe.for(audioTestCases)(
+    `$projectRelPath`,
+    ({ filePath, projectRelPath }) => {
       test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
@@ -773,8 +814,8 @@ export async function createSpeechFileTests(
         expect(start).toBe(expectedStart);
         expect(end).toBe(expectedEnd);
       });
-    });
-  }
+    },
+  );
 }
 
 function isAssertionError(

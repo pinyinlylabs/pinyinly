@@ -22,7 +22,7 @@ import {
 import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
-import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
+import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
   memoize1,
@@ -44,7 +44,7 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 
 describe(`speech files`, async () => {
-  await createSpeechFileTests({
+  await createAudioFileTests({
     audioGlob: path.join(wikiDir, `**/*.{mp3,m4a,aac}`),
     projectRoot,
     autoFixLoudness: false,

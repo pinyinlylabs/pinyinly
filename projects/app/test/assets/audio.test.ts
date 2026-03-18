@@ -17,8 +17,8 @@ import {
 import "#types/hanzi.d.ts";
 import { isCi } from "#util/env.ts";
 import {
-  createSpeechFileTests,
-  testSprites,
+  buildAndTestSprites,
+  createAudioFileTests,
 } from "@pinyinly/audio-sprites/testing";
 // oxlint-disable-next-line no-restricted-imports
 import path from "node:path";
@@ -26,9 +26,11 @@ import { describe, expect, test } from "vitest";
 
 test(`test sprites`, async () => {
   const manifestPath = path.join(projectRoot, `src/assets/audio/manifest.json`);
-  const result = await testSprites(manifestPath, !isCi);
-
-  expect(result.needsRegeneration).toBe(false);
+  await buildAndTestSprites({
+    manifestPath,
+    autoFix: !isCi,
+    spriteFileSizes: [{ name: /^pinyin-/, minSize: `50kB`, maxSize: `3MB` }],
+  });
 });
 
 describe(`pinyin sounds`, () => {
@@ -123,8 +125,8 @@ describe(`pinyin sounds`, () => {
     },
   );
 
-  describe.skipIf(isCi)(`audio quality`, async () => {
-    await createSpeechFileTests({
+  describe.skipIf(isCi)(`speech source files`, async () => {
+    await createAudioFileTests({
       audioGlob: path.join(pinyinAudioDir, `**/*.{mp3,m4a,aac}`),
       projectRoot,
       autoFixLoudness: false,
