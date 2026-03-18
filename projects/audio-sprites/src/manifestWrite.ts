@@ -387,9 +387,7 @@ export const resolveIncludePatterns = async (
       const files = globSync(pattern, {
         cwd: manifestDir,
         fs: await import(`node:fs`),
-        posix: true, // Use posix-style paths for consistency
       });
-
       allFiles.push(...files);
     } catch (error) {
       console.warn(`Failed to resolve glob pattern "${pattern}":`, error);

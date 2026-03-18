@@ -1,5 +1,6 @@
 import type * as FfmpegModule from "#ffmpeg.ts";
 import { hashFileContent } from "#manifestWrite.ts";
+import * as manifestWrite from "#manifestWrite.ts";
 import {
   buildAndTestSprites,
   buildSprites,
@@ -467,6 +468,74 @@ describe(
         }),
       ).rejects.toThrow(/greater than or equal|to be >=/i);
     });
+
+    test(`syncs manifest when autoFix is enabled`, async () => {
+      const syncedManifest: SpriteManifest = {
+        ...sampleManifest,
+        segments: {
+          "audio1.m4a": {
+            sprite: 0,
+            start: 0,
+            duration: 1.5,
+            hash: hashFileContent(`audio one`),
+          },
+        },
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(sampleManifest),
+        "/test/audio1.m4a": `audio one`,
+      });
+
+      const syncSpy = vi
+        .spyOn(manifestWrite, `syncManifestWithFilesystem`)
+        .mockResolvedValue(syncedManifest);
+
+      await checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+        autoFix: true,
+      });
+
+      expect(syncSpy).toHaveBeenCalledWith(`/test/manifest.json`);
+    });
+
+    test(`does not sync manifest when autoFix is disabled`, async () => {
+      const audioContent1 = `fake audio content`;
+      const audioContent2 = `fake audio content 2`;
+
+      const manifestWithCorrectHashes = {
+        ...sampleManifest,
+        segments: {
+          "audio1.m4a": {
+            sprite: 0,
+            start: 0,
+            duration: 1.5,
+            hash: hashFileContent(audioContent1),
+          },
+          "audio2.m4a": {
+            sprite: 0,
+            start: 2.5,
+            duration: 1.5,
+            hash: hashFileContent(audioContent2),
+          },
+        },
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+        "/test/sprites/sprite-1.m4a": `sprite content`,
+        "/test/audio1.m4a": audioContent1,
+        "/test/audio2.m4a": audioContent2,
+      });
+
+      const syncSpy = vi.spyOn(manifestWrite, `syncManifestWithFilesystem`);
+
+      await checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+      });
+
+      expect(syncSpy).not.toHaveBeenCalled();
+    });
   },
 );
 
@@ -612,6 +681,10 @@ describe(
         "/test/audio2.m4a": audioContent2,
       });
 
+      vi.spyOn(manifestWrite, `syncManifestWithFilesystem`).mockResolvedValue(
+        manifestWithCorrectHashes,
+      );
+
       // Verify unused files are detected first
       const beforeCleanup = await checkSpriteManifest({
         manifestPath: `/test/manifest.json`,
@@ -711,6 +784,36 @@ describe(`buildSprites` satisfies HasNameOf<typeof buildSprites>, () => {
     });
 
     expect(result.spriteFileSizeViolations).toHaveLength(1);
+  });
+
+  test(`passes autoFix through so check path syncs manifest`, async () => {
+    const syncedManifest: SpriteManifest = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(`audio one`),
+        },
+      },
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(sampleManifest),
+      "/test/audio1.m4a": `audio one`,
+    });
+
+    const syncSpy = vi
+      .spyOn(manifestWrite, `syncManifestWithFilesystem`)
+      .mockResolvedValue(syncedManifest);
+
+    await buildSprites({
+      manifestPath: `/test/manifest.json`,
+      autoFix: true,
+    });
+
+    expect(syncSpy).toHaveBeenCalledWith(`/test/manifest.json`);
   });
 });
 

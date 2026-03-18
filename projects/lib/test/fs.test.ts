@@ -1,76 +1,73 @@
-import { gitGlobSync } from "#fs.ts";
-import * as fs from "@pinyinly/lib/fs";
-import { execFileSync } from "node:child_process";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { afterEach, describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
-function git(cwd: string, args: string[]): string {
-  return execFileSync(`git`, args, { cwd, encoding: `utf8` }).trim();
-}
+const { globRawMock, globSyncRawMock, readdirRawMock } = vi.hoisted(() => {
+  return {
+    globRawMock: vi.fn(),
+    globSyncRawMock: vi.fn(),
+    readdirRawMock: vi.fn(),
+  };
+});
 
-describe(`gitGlobSync` satisfies HasNameOf<typeof gitGlobSync>, () => {
-  const tempDirs: string[] = [];
+vi.mock(`glob`, () => {
+  return {
+    glob: globRawMock,
+    globSync: globSyncRawMock,
+  };
+});
 
-  function createTempDir() {
-    const uniqueName = `pinyinly-lib-fs-test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const tempDir = path.join(tmpdir(), uniqueName);
-    fs.mkdirSync(tempDir, { recursive: true });
-    tempDirs.push(tempDir);
-    return tempDir;
-  }
+vi.mock(`node:fs/promises`, async () => {
+  const actual = await vi.importActual(`node:fs/promises`);
 
-  afterEach(() => {
-    for (const dir of tempDirs) {
-      fs.rmSync(dir, { force: true, recursive: true });
-    }
-    tempDirs.length = 0;
+  return {
+    ...actual,
+    readdir: readdirRawMock,
+  };
+});
+
+const fs = await import(`#fs.ts`);
+
+describe(`glob wrapper` satisfies HasNameOf<typeof fs.glob>, () => {
+  test(`normalizes results to NFC and defaults posix to true`, async () => {
+    globRawMock.mockResolvedValue([`a/e\u0301.mp3`]);
+
+    const result = await fs.glob(`**/*.mp3`);
+
+    expect(globRawMock).toHaveBeenCalledWith(`**/*.mp3`, { posix: true });
+    expect(result).toEqual([`a/é.mp3`]);
   });
 
-  test(`matches tracked and untracked files while excluding ignored files`, () => {
-    const tempDir = createTempDir();
+  test(`allows explicit options to override defaults`, async () => {
+    globRawMock.mockResolvedValue([`b/e\u0301.mp3`]);
 
-    git(tempDir, [`init`]);
-    git(tempDir, [`config`, `user.email`, `test@example.com`]);
-    git(tempDir, [`config`, `user.name`, `Test User`]);
+    await fs.glob(`**/*.mp3`, { cwd: `/tmp`, posix: false });
 
-    const iconsDir = path.join(tempDir, `icons`);
-    fs.mkdirSync(iconsDir, { recursive: true });
-    fs.writeFileSync(path.join(tempDir, `.gitignore`), `ignored.svg\n`, `utf8`);
-    fs.writeFileSync(path.join(iconsDir, `tracked.svg`), `tracked`, `utf8`);
-    fs.writeFileSync(path.join(iconsDir, `untracked.svg`), `untracked`, `utf8`);
-    fs.writeFileSync(path.join(iconsDir, `ignored.svg`), `ignored`, `utf8`);
-
-    git(tempDir, [`add`, `.gitignore`, `icons/tracked.svg`]);
-
-    expect(gitGlobSync(`*.svg`, { cwd: iconsDir })).toEqual([
-      `tracked.svg`,
-      `untracked.svg`,
-    ]);
+    expect(globRawMock).toHaveBeenCalledWith(`**/*.mp3`, {
+      cwd: `/tmp`,
+      posix: false,
+    });
   });
+});
 
-  test(`supports recursive patterns relative to cwd`, () => {
-    const tempDir = createTempDir();
+describe(`globSync wrapper` satisfies HasNameOf<typeof fs.globSync>, () => {
+  test(`normalizes results to NFC and defaults posix to true`, () => {
+    globSyncRawMock.mockReturnValue([`c/e\u0301.mp3`]);
 
-    git(tempDir, [`init`]);
-    git(tempDir, [`config`, `user.email`, `test@example.com`]);
-    git(tempDir, [`config`, `user.name`, `Test User`]);
+    const result = fs.globSync(`**/*.mp3`);
 
-    const rootDir = path.join(tempDir, `assets`);
-    const nestedDir = path.join(rootDir, `nested`);
-    const deepDir = path.join(nestedDir, `deep`);
-    fs.mkdirSync(deepDir, { recursive: true });
+    expect(globSyncRawMock).toHaveBeenCalledWith(`**/*.mp3`, {
+      posix: true,
+    });
+    expect(result).toEqual([`c/é.mp3`]);
+  });
+});
 
-    fs.writeFileSync(path.join(rootDir, `a.svg`), `a`, `utf8`);
-    fs.writeFileSync(path.join(nestedDir, `b.svg`), `b`, `utf8`);
-    fs.writeFileSync(path.join(deepDir, `c.svg`), `c`, `utf8`);
+describe(`readdir wrapper` satisfies HasNameOf<typeof fs.readdir>, () => {
+  test(`normalizes results to NFC`, async () => {
+    readdirRawMock.mockResolvedValue([`d/e\u0301.mp3`]);
 
-    git(tempDir, [`add`, `assets/a.svg`, `assets/nested/b.svg`]);
+    const result = await fs.readdir(`/tmp/out`);
 
-    expect(gitGlobSync(`**/*.svg`, { cwd: rootDir })).toEqual([
-      `a.svg`,
-      `nested/b.svg`,
-      `nested/deep/c.svg`,
-    ]);
+    expect(readdirRawMock).toHaveBeenCalledWith(`/tmp/out`);
+    expect(result).toEqual([`d/é.mp3`]);
   });
 });

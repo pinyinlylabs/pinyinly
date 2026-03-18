@@ -15,6 +15,7 @@ import {
   findUnmatchedFiles,
   getInputFiles,
   hashFile,
+  syncManifestWithFilesystem,
 } from "./manifestWrite.ts";
 import type { AudioFileInfo, SpriteManifest } from "./types.ts";
 
@@ -213,7 +214,7 @@ export async function checkSpriteManifest(
     `checkSpriteManifest()` satisfies HasNameOf<typeof checkSpriteManifest>,
   );
 
-  const { manifestPath, spriteFileSizes = [] } = options;
+  const { manifestPath, autoFix = false, spriteFileSizes = [] } = options;
   const parsedSpriteFileSizeRules = parseSpriteFileSizeRules(spriteFileSizes);
 
   // Check if manifest file exists
@@ -233,12 +234,24 @@ export async function checkSpriteManifest(
     };
   }
 
-  fnDebug(`Reading manifest from %o`, manifestPath);
-  const loadedManifest = loadManifest(manifestPath);
-  if (!loadedManifest) {
-    throw new Error(`Failed to load manifest from ${manifestPath}`);
+  let manifest: SpriteManifest;
+
+  if (autoFix) {
+    fnDebug(`Attempting to sync manifest`);
+    try {
+      manifest = await syncManifestWithFilesystem(manifestPath);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to sync manifest: ${message}`);
+    }
+  } else {
+    fnDebug(`Reading manifest from %o`, manifestPath);
+    const loadedManifest = loadManifest(manifestPath);
+    if (!loadedManifest) {
+      throw new Error(`Failed to load manifest from ${manifestPath}`);
+    }
+    manifest = loadedManifest;
   }
-  const manifest: SpriteManifest = loadedManifest;
 
   // Validate that all sprite template variables have corresponding named capture groups
   for (const rule of manifest.rules) {
@@ -514,6 +527,7 @@ export async function buildSprites(
 
   const { autoFix = false } = options;
   let result = await checkSpriteManifest(options);
+  let dirty = false;
 
   fnDebug(`checkSpriteManifest result: %j`, result);
 
@@ -532,39 +546,21 @@ export async function buildSprites(
       result.unusedSpriteFiles.length,
     );
 
-    try {
-      await cleanupUnusedSprites(
-        options.manifestPath,
-        result.unusedSpriteFiles,
-      );
-
-      // Re-check after cleanup to update the result
-      result = await checkSpriteManifest({
-        ...options,
-        autoFix: false,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to cleanup unused sprites: ${message}`);
-    }
+    dirty = true;
+    await cleanupUnusedSprites(options.manifestPath, result.unusedSpriteFiles);
   }
 
   // Handle regeneration of missing/outdated sprites
   if (result.needsRegeneration && autoFix) {
     fnDebug(`Sprites need regeneration, auto-generating...`);
 
-    try {
-      await generateSprites(options.manifestPath);
+    dirty = true;
+    await generateSprites(options.manifestPath);
+  }
 
-      // Re-check after generation
-      result = await checkSpriteManifest({
-        ...options,
-        autoFix: false,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to auto-regenerate sprites: ${message}`);
-    }
+  if (dirty) {
+    // Re-check after cleanup to update the result
+    result = await checkSpriteManifest({ ...options, autoFix: false });
   }
 
   return result;
