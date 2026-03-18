@@ -71,22 +71,40 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   }
 });
 
-// This might need to be re-enabled in the future if there are problems with
-// building in metro.
-test.skip(`src/ files have consistent NFC and NFD encoding`, async () => {
-  // On macOS file paths are encoded using NFD, but on other platforms they are
-  // NFC. When you require(…) a path with metro (maybe Node.js too?), the bytes
-  // you pass in need to match the filesystem. This means that on macOS you need
-  // to pass in an NFD encoded path, and on other platforms you need to pass in
-  // an NFC encoded path.
+test(`src/ file paths are tracked consistently in git (using NFC encoding instead of NFD)`, async () => {
+  // - NFC = Normalization Form Composed
+	// - NFD = Normalization Form Decomposed
+  // 
+  // On macOS file paths are encoded using NFD (decomposed i.e. e + ◌́), but on
+  // Linux they are stored as raw bytes, and in git they're tracked as raw
+  // bytes, so if they happen to be committed as NFC (composed i.e. é) then on
+  // Linux (in CI) they'll end up with a different filename than on macOS. When
+  // you require(…) a path with metro (maybe Node.js too?), the bytes you pass
+  // in need to match the filesystem. On macOS it normalizes the filename you
+  // pass (e.g. to require(…)), but on other platforms you need to pass in an
+  // exact match.
   //
-  // To avoid this problem it's best to just avoid using accented characters
-  // in file paths.
+  // To make things a bit more predictable we make sure all file paths are NFC.
+  // Here's what ChatGPT had to say:
+  //
+  // > NFC is the safer repo/tooling convention because it is the more common
+  // > “portable interchange” form across:
+  // > 
+  // > - source code strings
+  // > - generated code
+  // > - JSON
+  // > - Git policies
+  // > - Linux/Windows environments
+  // > - most Unicode text handling outside macOS filesystem quirks
+  // > 
+  // > NFD is mostly attractive because macOS filesystems tend to present names
+  // > in decomposed form, but that is a local filesystem behavior, not a great
+  // > universal project convention.
   const srcRoot = `${projectRoot}/src`;
 
-  for (const path of await fs.glob(`${srcRoot}/**/*`)) {
+  for (const path of fs.gitGlobSync(`**/*`, { cwd: srcRoot })) {
     expect
-      .soft(path.normalize(`NFD`), `Path ${path} is not normalized`)
+      .soft(path, `Path ${path} is not normalized to NFC`)
       .toEqual(path.normalize(`NFC`));
   }
 });
