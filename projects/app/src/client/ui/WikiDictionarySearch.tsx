@@ -8,7 +8,9 @@ import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { useDb } from "./hooks/useDb";
 import { Icon } from "./Icon";
+import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
+import { Tooltip } from "./Tooltip";
 
 const maxResults = 24;
 
@@ -102,19 +104,24 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         ) : null}
       </View>
       {showBookmark ? (
-        <Pressable
-          onPress={(e) => {
-            e.stopPropagation();
-            toggle();
-          }}
-          className="p-2"
-        >
-          <Icon
-            icon={isPriority ? `bookmark-filled` : `bookmark`}
-            size={20}
-            className="text-fg-dim"
-          />
-        </Pressable>
+        <Tooltip>
+          <Tooltip.Trigger asChild>
+            <RectButton
+              variant="bare2"
+              iconStart={isPriority ? `bookmark-filled` : `bookmark`}
+              iconSize={20}
+              className="text-fg-dim"
+              onPress={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                toggle();
+              }}
+            />
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            <Text className="text-sm text-fg">Bookmark</Text>
+          </Tooltip.Content>
+        </Tooltip>
       ) : null}
     </Pressable>
   );
