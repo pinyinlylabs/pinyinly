@@ -1,5 +1,5 @@
+import type { DictionarySearchEntry } from "@/client/query";
 import type { HanziCharacter } from "@/data/model";
-import type { HanziWordMeaning, HanziWordWithMeaning } from "@/dictionary";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { Text } from "react-native";
 
@@ -8,12 +8,12 @@ export function WikiHanziCharacterMeanings({
   meanings,
 }: {
   hanzi: HanziCharacter;
-  meanings: readonly HanziWordWithMeaning[];
+  meanings: readonly DictionarySearchEntry[];
 }) {
   if (meanings.length > 1) {
     return <MultipleMeanings hanzi={hanzi} meanings={meanings} />;
-  } else if (meanings.length === 1 && meanings[0]?.[1] != null) {
-    return <SingleMeaning hanzi={hanzi} meaning={meanings[0][1]} />;
+  } else if (meanings.length === 1 && meanings[0] != null) {
+    return <SingleMeaning hanzi={hanzi} meaning={meanings[0]} />;
   }
 
   return null;
@@ -24,7 +24,7 @@ function SingleMeaning({
   meaning,
 }: {
   hanzi: HanziCharacter;
-  meaning: HanziWordMeaning;
+  meaning: DictionarySearchEntry;
 }) {
   const gloss = meaning.gloss[0];
   const pinyin = meaning.pinyin?.[0];
@@ -50,10 +50,10 @@ function MultipleMeanings({
   meanings,
 }: {
   hanzi: HanziCharacter;
-  meanings: readonly HanziWordWithMeaning[];
+  meanings: readonly DictionarySearchEntry[];
 }) {
   const pinyins = meanings
-    .map(([, meaning]) => meaning.pinyin?.[0])
+    .map((meaning) => meaning.pinyin?.[0])
     .filter((x) => x != null)
     .filter(arrayFilterUnique());
 

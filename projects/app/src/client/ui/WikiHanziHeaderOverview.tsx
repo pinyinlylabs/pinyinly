@@ -1,8 +1,8 @@
 import { intersperse } from "@/client/react";
 import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
+import type { DictionarySearchEntry } from "@/client/query";
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText, HskLevel } from "@/data/model";
-import type { HanziWordWithMeaning } from "@/dictionary";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { useState } from "react";
@@ -16,7 +16,7 @@ export interface WikiHanziHeaderOverviewDataProps {
   glosses: readonly string[] | undefined;
   hanzi: HanziText;
   pinyins: readonly string[] | undefined;
-  meanings: readonly HanziWordWithMeaning[] | undefined;
+  meanings: readonly DictionarySearchEntry[] | undefined;
 }
 
 export function WikiHanziHeaderOverview({
@@ -94,7 +94,7 @@ function ExpandableGlosses({
 }: {
   hanzi: HanziText;
   glosses: readonly string[];
-  meanings: readonly HanziWordWithMeaning[] | undefined;
+  meanings: readonly DictionarySearchEntry[] | undefined;
 }) {
   const [expanded, setExpanded] = useState(false);
 

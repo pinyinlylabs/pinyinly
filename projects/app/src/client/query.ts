@@ -1,4 +1,10 @@
-import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
+import type {
+  HanziText,
+  HanziWord,
+  HskLevel,
+  Skill,
+  SrsStateType,
+} from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
@@ -422,6 +428,7 @@ export interface DictionarySearchEntry {
   hanziWord: HanziWord;
   gloss: string[];
   pinyin?: string[];
+  hsk?: HskLevel;
   note?: string;
 }
 
@@ -703,6 +710,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           hanziWord,
           gloss,
           pinyin,
+          hsk: meaning.hsk,
         });
       }
 
@@ -729,6 +737,7 @@ function mapUserMeaningToDictionarySearchEntry(
     hanziWord,
     gloss: [userEntry.gloss],
     pinyin,
+    hsk: undefined,
     note: userEntry.note,
   };
 }
@@ -802,6 +811,7 @@ function dictionarySearchCollectionOptions({
             existing.hanziWord !== next.hanziWord ||
             !areStringArraysEqual(existing.gloss, next.gloss) ||
             !areStringArraysEqual(existing.pinyin, next.pinyin) ||
+            existing.hsk !== next.hsk ||
             existing.note !== next.note
           ) {
             write({ type: `update`, value: next });
