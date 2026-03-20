@@ -4,31 +4,41 @@ import { tv } from "tailwind-variants";
 export function Lozenge({
   children,
   color,
+  size = `md`,
 }: {
   children: string;
   color: `blue`;
+  size?: `sm` | `md`;
 }) {
   return (
-    <View className={lozengeContainerClass({ color })}>
-      <Text className={lozengeTextClass({ color })}>{children}</Text>
+    <View className={lozengeContainerClass({ color, size })}>
+      <Text className={lozengeTextClass({ color, size })}>{children}</Text>
     </View>
   );
 }
 
 const lozengeContainerClass = tv({
-  base: `self-start rounded-md border px-2 py-1`,
+  base: `rounded-md border`,
   variants: {
     color: {
       blue: `border-lozenge-blue-border bg-lozenge-blue-bg`,
+    },
+    size: {
+      sm: `px-1.5 py-0.5`,
+      md: `px-2 py-1`,
     },
   },
 });
 
 const lozengeTextClass = tv({
-  base: `font-sans text-[12px] font-semibold`,
+  base: `font-sans font-semibold`,
   variants: {
     color: {
       blue: `text-lozenge-blue-fg`,
+    },
+    size: {
+      sm: `text-[10px]`,
+      md: `text-[12px]`,
     },
   },
 });

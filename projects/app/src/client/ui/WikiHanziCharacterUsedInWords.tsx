@@ -1,10 +1,10 @@
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
 import { Link } from "expo-router";
-import { use } from "react";
 import { isHanziCharacter } from "@/data/hanzi";
-import type { HanziText, HanziWord } from "@/data/model";
+import type { HanziText, HanziWord, HskLevel } from "@/data/model";
 import { and, eq, like, not, useLiveQuery } from "@tanstack/react-db";
 import { Pressable, Text, View } from "react-native";
+import { HskLozenge } from "./HskLozenge";
 import { Icon } from "./Icon";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
@@ -23,7 +23,12 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziCharacterCount, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
-        .select(({ entry }) => ({ hanziWord: entry.hanziWord }))
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          hsk: entry.hsk,
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+        }))
         .distinct()
         .limit(maxUsedInWords),
     [db.dictionarySearch, hanzi],
@@ -33,34 +38,45 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
     return null;
   }
 
-  const hanziWords = dictionarySearchEntries.map((entry) => entry.hanziWord);
-
-  if (hanziWords.length === 0) {
+  if (dictionarySearchEntries.length === 0) {
     return null;
   }
 
   return (
     <WikiTitledBox title="Used in words" className="mx-4">
       <View className="gap-1 p-3">
-        <CompactWordRows hanziWords={hanziWords} />
+        <CompactWordRows dictionarySearchEntries={dictionarySearchEntries} />
       </View>
     </WikiTitledBox>
   );
 }
 
-function CompactWordRows({ hanziWords }: { hanziWords: readonly HanziWord[] }) {
-  const dictionary = use(loadDictionary());
-
-  return hanziWords.map((hanziWord) => {
-    const hanzi = hanziFromHanziWord(hanziWord);
-    const meaning = dictionary.lookupHanziWord(hanziWord);
-    const pinyin = meaning?.pinyin?.[0];
-    const gloss = meaning?.gloss[0];
+function CompactWordRows({
+  dictionarySearchEntries,
+}: {
+  dictionarySearchEntries: readonly {
+    hanziWord: HanziWord;
+    hsk?: HskLevel;
+    gloss: string[];
+    pinyin?: string[];
+  }[];
+}) {
+  return dictionarySearchEntries.map((entry) => {
+    const hanzi = hanziFromHanziWord(entry.hanziWord);
+    const pinyin = entry.pinyin?.[0];
+    const gloss = entry.gloss[0];
 
     return (
-      <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={hanziWord}>
-        <Pressable className="flex-row items-center py-1.5">
-          <View className="flex-row items-baseline gap-2">
+      <Link
+        href={`/wiki/${encodeURIComponent(hanzi)}`}
+        asChild
+        key={entry.hanziWord}
+      >
+        <Pressable className="flex flex-row items-center gap-2 py-1.5">
+          {entry.hsk == null ? null : (
+            <HskLozenge hskLevel={entry.hsk} size="sm" />
+          )}
+          <View className="flex-1 flex-row items-center gap-2">
             <Text className="text-lg font-normal text-fg-loud">{hanzi}</Text>
             {pinyin == null ? null : (
               <Text className="text-xs text-fg-dim">{pinyin}</Text>
