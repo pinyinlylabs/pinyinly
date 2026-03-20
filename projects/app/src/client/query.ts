@@ -8,6 +8,7 @@ import type {
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
+import { hskLevelToNumber } from "@/data/hsk";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -24,6 +25,7 @@ import {
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import { matchAllHanziCharacters } from "@/data/hanzi";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type {
@@ -429,7 +431,9 @@ export interface DictionarySearchEntry {
   gloss: string[];
   pinyin?: string[];
   hsk?: HskLevel;
+  hskSortKey: number;
   note?: string;
+  hanziCharacterCount: number;
 }
 
 export type BuiltInDictionarySearchCollection = Collection<
@@ -711,6 +715,8 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           gloss,
           pinyin,
           hsk: meaning.hsk,
+          hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
+          hanziCharacterCount: matchAllHanziCharacters(hanzi).length,
         });
       }
 
@@ -738,8 +744,14 @@ function mapUserMeaningToDictionarySearchEntry(
     gloss: [userEntry.gloss],
     pinyin,
     hsk: undefined,
+    hskSortKey: dictionarySearchHskSortKey(),
     note: userEntry.note,
+    hanziCharacterCount: matchAllHanziCharacters(userEntry.hanzi).length,
   };
+}
+
+function dictionarySearchHskSortKey(hsk?: HskLevel): number {
+  return hsk == null ? Number.POSITIVE_INFINITY : hskLevelToNumber(hsk);
 }
 
 function areStringArraysEqual(
@@ -812,6 +824,7 @@ function dictionarySearchCollectionOptions({
             !areStringArraysEqual(existing.gloss, next.gloss) ||
             !areStringArraysEqual(existing.pinyin, next.pinyin) ||
             existing.hsk !== next.hsk ||
+            existing.hskSortKey !== next.hskSortKey ||
             existing.note !== next.note
           ) {
             write({ type: `update`, value: next });

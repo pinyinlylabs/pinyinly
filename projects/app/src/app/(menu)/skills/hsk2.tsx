@@ -1,4 +1,4 @@
-import { GroupedHanziWordTiles } from "@/client/ui/GroupedHanziWordTiles";
+import { GroupedHanziWords } from "@/client/ui/GroupedHanziWords";
 import { loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { Text, View } from "react-native";
@@ -12,7 +12,7 @@ export default function SkillsHsk2Page() {
         <Text className="pyly-body-title">HSK 2</Text>
       </View>
 
-      <GroupedHanziWordTiles hanziWords={dictionary.hsk2HanziWords} />
+      <GroupedHanziWords hanziWords={dictionary.hsk2HanziWords} />
     </View>
   );
 }

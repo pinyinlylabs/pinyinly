@@ -64,5 +64,7 @@ function makeEntry({
     hanziWord,
     gloss,
     pinyin,
+    hskSortKey: Number.POSITIVE_INFINITY,
+    hanziCharacterCount: hanzi.length,
   };
 }

@@ -1,5 +1,6 @@
 import type {
   CollectionOutput,
+  DictionarySearchEntry,
   HistoryPageCollection,
   HistoryPageData,
   SettingCollection,
@@ -9,6 +10,7 @@ import {
   historyPageCollection,
   historyPageData,
 } from "#client/query.js";
+import { matchAllHanziCharacters } from "#data/hanzi.ts";
 import {
   getUserHanziMeaningKeyParams,
   userHanziMeaningGlossSetting,
@@ -575,3 +577,105 @@ function settingRow({
 }): CollectionOutput<SettingCollection> {
   return { key, value } as CollectionOutput<SettingCollection>;
 }
+
+describe(`dictionarySearch hanziCharacterCount`, () => {
+  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+
+  test(`computes hanziCharacterCount for single character entries`, async ({
+    db,
+  }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    // Find entries with single characters
+    const singleCharEntries = entries.filter(
+      (e: DictionarySearchEntry) =>
+        matchAllHanziCharacters(e.hanzi).length === 1,
+    );
+    expect(singleCharEntries.length).toBeGreaterThan(0);
+
+    // All single character entries should have hanziCharacterCount of 1
+    for (const entry of singleCharEntries) {
+      expect(entry.hanziCharacterCount).toBe(1);
+    }
+  });
+
+  test(`computes hanziCharacterCount for multi-character entries`, async ({
+    db,
+  }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    // Find entries with multi-character words
+    const multiCharEntries = entries.filter(
+      (e: DictionarySearchEntry) => matchAllHanziCharacters(e.hanzi).length > 1,
+    );
+    expect(multiCharEntries.length).toBeGreaterThan(0);
+
+    // Multi-character entries should have hanziCharacterCount matching the number of hanzi characters
+    for (const entry of multiCharEntries) {
+      expect(entry.hanziCharacterCount).toBe(
+        matchAllHanziCharacters(entry.hanzi).length,
+      );
+    }
+  });
+
+  test(`includes hanziCharacterCount in user entries`, async ({
+    db,
+    rizzle,
+  }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`里`, `u_inside`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `inside`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await db.dictionarySearch.preload();
+    const userEntries = db.dictionarySearch.toArray.filter(
+      (e: DictionarySearchEntry) => e.sourceKind === `user`,
+    );
+
+    expect(userEntries.length).toBeGreaterThan(0);
+    for (const entry of userEntries) {
+      expect(entry.hanziCharacterCount).toBeGreaterThan(0);
+    }
+  });
+
+  test(`includes hskSortKey for built-in and user entries`, async ({
+    db,
+    rizzle,
+  }) => {
+    await db.builtInDictionarySearch.preload();
+    const builtInEntry = db.builtInDictionarySearch.toArray.find(
+      (e: DictionarySearchEntry) => e.hsk != null,
+    );
+
+    expect(builtInEntry).toBeDefined();
+    expect(builtInEntry?.hskSortKey).toBeGreaterThan(0);
+
+    const keyParams = getUserHanziMeaningKeyParams(汉`里`, `u_inside`);
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `inside`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await db.dictionarySearch.preload();
+    const userEntry = db.dictionarySearch.toArray.find(
+      (e: DictionarySearchEntry) => e.sourceKind === `user`,
+    );
+
+    expect(userEntry).toBeDefined();
+    expect(userEntry?.hskSortKey).toBe(Number.POSITIVE_INFINITY);
+  });
+});
