@@ -1,9 +1,12 @@
 import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
 import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
+import type { HanziWord } from "@/data/model";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { useDb } from "./hooks/useDb";
 import { Icon } from "./Icon";
 import { TextInputSingle } from "./TextInputSingle";
 
@@ -72,9 +75,7 @@ interface SearchResultCardProps {
   result: {
     kind: `hanziWord` | `wikiDirect` | `pinyinSound`;
     hanzi: string;
-    hanziWord?: string;
-    gloss?: string | null | undefined;
-    pinyin?: string | null | undefined;
+    hanziWord?: HanziWord;
   };
   onSelect: (hanzi: string) => void;
 }
@@ -96,12 +97,9 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
       <View className="flex-1">
         {result.kind === `wikiDirect` ? (
           <Text className="text-sm text-fg">Open wiki page</Text>
-        ) : result.gloss == null ? null : (
-          <Text className="text-sm text-fg">{result.gloss}</Text>
-        )}
-        {result.kind !== `hanziWord` || result.pinyin == null ? null : (
-          <Text className="text-xs text-fg-dim">{result.pinyin}</Text>
-        )}
+        ) : result.kind === `hanziWord` && result.hanziWord != null ? (
+          <HanziWordSearchMeta hanziWord={result.hanziWord} />
+        ) : null}
       </View>
       {showBookmark ? (
         <Pressable
@@ -119,6 +117,30 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         </Pressable>
       ) : null}
     </Pressable>
+  );
+}
+
+function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
+  const db = useDb();
+  const { data: dictionaryEntry } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanziWord, hanziWord))
+        .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
+        .findOne(),
+    [db.dictionarySearch, hanziWord],
+  );
+
+  return (
+    <>
+      {dictionaryEntry?.gloss[0] == null ? null : (
+        <Text className="text-sm text-fg">{dictionaryEntry.gloss[0]}</Text>
+      )}
+      {dictionaryEntry?.pinyin?.[0] == null ? null : (
+        <Text className="text-xs text-fg-dim">{dictionaryEntry.pinyin[0]}</Text>
+      )}
+    </>
   );
 }
 

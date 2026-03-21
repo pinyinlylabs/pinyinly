@@ -1,6 +1,11 @@
 import { pickSoundUsageExamplesForEntries } from "#client/ui/soundUsageExamples.ts";
-import type { HanziWord, PinyinSoundId, PinyinText } from "#data/model.js";
-import type { HanziWordMeaning } from "#dictionary.ts";
+import type { DictionarySearchEntry } from "#client/query.ts";
+import type {
+  HanziText,
+  HanziWord,
+  PinyinSoundId,
+  PinyinText,
+} from "#data/model.js";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -93,9 +98,10 @@ describe(
 
 function makeEntry(
   hanziWord: HanziWord,
-  meaning: Pick<HanziWordMeaning, `gloss` | `pinyin`>,
-): [HanziWord, HanziWordMeaning] {
-  return [hanziWord, meaning];
+  meaning: Pick<DictionarySearchEntry, `gloss` | `pinyin`>,
+): Pick<DictionarySearchEntry, `hanziWord` | `hanzi` | `gloss` | `pinyin`> {
+  const hanzi = hanziWord.split(`:`)[0] as HanziText;
+  return { hanziWord, hanzi, ...meaning };
 }
 
 function pinyin(

@@ -1,7 +1,15 @@
-import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
+import type {
+  HanziText,
+  HanziWord,
+  HskLevel,
+  PinyinText,
+  Skill,
+  SrsStateType,
+} from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
+import { hskLevelToNumber } from "@/data/hsk";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -18,6 +26,7 @@ import {
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import { matchAllHanziCharacters } from "@/data/hanzi";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type {
@@ -406,7 +415,7 @@ export interface UserDictionaryEntry {
   hanzi: HanziText;
   meaningKey: string;
   gloss: string;
-  pinyin?: string;
+  pinyin?: PinyinText;
   note?: string;
 }
 
@@ -421,8 +430,12 @@ export interface DictionarySearchEntry {
   meaningKey: string;
   hanziWord: HanziWord;
   gloss: string[];
-  pinyin?: string[];
+  glossCount: number;
+  pinyin?: PinyinText[];
+  hsk?: HskLevel;
+  hskSortKey: number;
   note?: string;
+  hanziCharacterCount: number;
 }
 
 export type BuiltInDictionarySearchCollection = Collection<
@@ -594,7 +607,7 @@ function userDictionaryCollectionOptions({
               } else if (parsed.field === `g`) {
                 draft.gloss = text;
               } else if (parsed.field === `p`) {
-                draft.pinyin = text;
+                draft.pinyin = text as PinyinText | undefined;
               } else {
                 draft.note = text;
               }
@@ -702,7 +715,11 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           meaningKey,
           hanziWord,
           gloss,
+          glossCount: gloss.length,
           pinyin,
+          hsk: meaning.hsk,
+          hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
+          hanziCharacterCount: matchAllHanziCharacters(hanzi).length,
         });
       }
 
@@ -728,9 +745,17 @@ function mapUserMeaningToDictionarySearchEntry(
     meaningKey: userEntry.meaningKey,
     hanziWord,
     gloss: [userEntry.gloss],
+    glossCount: 1,
     pinyin,
+    hsk: undefined,
+    hskSortKey: dictionarySearchHskSortKey(),
     note: userEntry.note,
+    hanziCharacterCount: matchAllHanziCharacters(userEntry.hanzi).length,
   };
+}
+
+function dictionarySearchHskSortKey(hsk?: HskLevel): number {
+  return hsk == null ? Number.POSITIVE_INFINITY : hskLevelToNumber(hsk);
 }
 
 function areStringArraysEqual(
@@ -801,7 +826,10 @@ function dictionarySearchCollectionOptions({
             existing.meaningKey !== next.meaningKey ||
             existing.hanziWord !== next.hanziWord ||
             !areStringArraysEqual(existing.gloss, next.gloss) ||
+            existing.glossCount !== next.glossCount ||
             !areStringArraysEqual(existing.pinyin, next.pinyin) ||
+            existing.hsk !== next.hsk ||
+            existing.hskSortKey !== next.hskSortKey ||
             existing.note !== next.note
           ) {
             write({ type: `update`, value: next });

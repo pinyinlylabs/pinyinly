@@ -1,4 +1,4 @@
-import type { PinyinlyObjectId } from "@/data/model";
+import type { HanziWord, PinyinlyObjectId } from "@/data/model";
 import {
   assetIdFromPinyinlyObjectId,
   assetIdPinyinlyObjectIdKind,
@@ -13,15 +13,17 @@ import {
   soundIdFromPinyinlyObjectId,
 } from "@/data/model";
 import { quickSearchPickSetting } from "@/data/userSettings";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDebounce } from "@uidotdev/usehooks";
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
-import { use, useState } from "react";
+import { useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import type { QuickSearchResult } from "./hooks/useQuickSearch";
 import { useQuickSearch } from "./hooks/useQuickSearch";
+import { useDb } from "./hooks/useDb";
 import { useRizzle } from "./hooks/useRizzle";
 import { useUserSetting } from "./hooks/useUserSetting";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
@@ -174,11 +176,7 @@ function SearchResultItem({
             onSelect(result);
           }}
         >
-          <HanziWordResultContent
-            hanzi={result.hanzi}
-            gloss={result.gloss}
-            pinyin={result.pinyin}
-          />
+          <HanziWordResultContent hanziWord={result.hanziWord} />
         </ResultItem>
       );
 
@@ -210,15 +208,22 @@ function SearchResultItem({
   }
 }
 
-function HanziWordResultContent({
-  hanzi,
-  gloss,
-  pinyin,
-}: {
-  hanzi: string;
-  gloss?: string;
-  pinyin?: string;
-}) {
+function HanziWordResultContent({ hanziWord }: { hanziWord: HanziWord }) {
+  const db = useDb();
+  const { data: dictionaryEntry } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanziWord, hanziWord))
+        .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
+        .findOne(),
+    [db.dictionarySearch, hanziWord],
+  );
+
+  const hanzi = hanziFromHanziWord(hanziWord);
+  const gloss = dictionaryEntry?.gloss[0];
+  const pinyin = dictionaryEntry?.pinyin?.[0];
+
   return (
     <View className="gap-0.5">
       <View className="flex-1 flex-row items-center gap-2">
@@ -241,9 +246,6 @@ function RecentQueries({
   onRemove: (id: string) => void;
   onSelect: () => void;
 }) {
-  const dictionary = use(loadDictionary());
-  const dictionaryEntriesByWord = new Map(dictionary.allEntries);
-
   const quickSearchHistory = useUserSettingHistory(quickSearchPickSetting);
   const items = quickSearchHistory.entries;
 
@@ -281,22 +283,15 @@ function RecentQueries({
               return null;
             }
 
-            const dictionaryEntry = dictionaryEntriesByWord.get(hanziWord);
-            const hanzi = hanziFromHanziWord(hanziWord);
-
             return (
               <ResultItem
                 key={item.id}
                 id={item.id}
                 onRemove={onRemove}
                 onPress={onSelect}
-                href={`/wiki/${encodeURIComponent(hanzi)}`}
+                href={`/wiki/${encodeURIComponent(hanziFromHanziWord(hanziWord))}`}
               >
-                <HanziWordResultContent
-                  hanzi={hanzi}
-                  gloss={dictionaryEntry?.gloss[0]}
-                  pinyin={dictionaryEntry?.pinyin?.[0]}
-                />
+                <HanziWordResultContent hanziWord={hanziWord} />
               </ResultItem>
             );
           }

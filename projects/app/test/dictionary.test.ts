@@ -4,6 +4,7 @@ import type {
   HanziCharacter,
   HanziText,
   HanziWord,
+  PinyinText,
   PinyinUnit,
 } from "#data/model.ts";
 import { PartOfSpeech } from "#data/model.ts";
@@ -26,6 +27,7 @@ import {
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
   meaningKeyFromHanziWord,
+  oneUnitPinyinListOrNull,
   oneUnitPinyinOrNull,
   parsePartOfSpeech,
 } from "#dictionary.ts";
@@ -1228,6 +1230,28 @@ describe(
       expect(isStructuralHanzi(`丿` as HanziText)).toBe(true);
       expect(isStructuralHanzi(`八` as HanziText)).toBe(false);
     });
+  },
+);
+
+describe(
+  `oneUnitPinyinListOrNull suite` satisfies HasNameOf<
+    typeof oneUnitPinyinListOrNull
+  >,
+  () => {
+    test.for([
+      [undefined, null],
+      [null, null],
+      [[], null],
+      [[`nīhǎo`], null],
+      [[拼音`nī hǎo`], null],
+      [[拼音`nī`], `nī`],
+      [[拼音`hǎo`], `hǎo`],
+    ] as [readonly PinyinText[] | null | undefined, string | null][])(
+      `%s → %s`,
+      ([input, expected]) => {
+        expect(oneUnitPinyinListOrNull(input)).toBe(expected);
+      },
+    );
   },
 );
 

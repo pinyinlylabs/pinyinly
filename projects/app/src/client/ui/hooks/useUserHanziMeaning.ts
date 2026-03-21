@@ -122,7 +122,7 @@ export function useUserHanziMeaning({
           hanzi,
           meaningKey,
           gloss: glossSetting.value.text,
-          pinyin: pinyinSetting.value?.text,
+          pinyin: pinyinSetting.value?.text as PinyinText | undefined,
           note: noteSetting.value?.text,
         };
 

@@ -1,28 +1,24 @@
+import type { DictionarySearchEntry } from "@/client/query";
 import { isHanziCharacter } from "@/data/hanzi";
-import type {
-  HanziText,
-  HanziWord,
-  PinyinSoundId,
-  PinyinUnit,
-} from "@/data/model";
-import { splitPinyinUnit } from "@/data/pinyin";
-import type { HanziWordMeaning } from "@/dictionary";
-import { hanziFromHanziWord, oneUnitPinyinOrNull } from "@/dictionary";
-import type { DeepReadonly } from "ts-essentials";
+import type { HanziText, PinyinSoundId } from "@/data/model";
+import {
+  isFinalSoundId,
+  isInitialSoundId,
+  splitPinyinUnit,
+} from "@/data/pinyin";
+import { oneUnitPinyinListOrNull } from "@/dictionary";
 
-export interface SoundUsageExample {
-  hanziWord: HanziWord;
-  hanzi: HanziText;
-  pinyin: PinyinUnit;
-  gloss: string;
-}
+export type SoundUsageExample = Pick<
+  DictionarySearchEntry,
+  `hanziWord` | `hanzi` | `gloss` | `pinyin`
+>;
 
 export function pickSoundUsageExamplesForEntries({
   allEntries,
   limit,
   soundId,
 }: {
-  allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
+  allEntries: readonly SoundUsageExample[];
   limit: number;
   soundId: PinyinSoundId;
 }): SoundUsageExample[] {
@@ -33,14 +29,14 @@ export function pickSoundUsageExamplesForEntries({
   const seenHanzi = new Set<HanziText>();
   const result: SoundUsageExample[] = [];
 
-  for (const [hanziWord, meaning] of allEntries) {
-    const hanzi = hanziFromHanziWord(hanziWord);
+  for (const entry of allEntries) {
+    const { hanzi, gloss: glosses, pinyin: pinyinList } = entry;
 
     if (!isHanziCharacter(hanzi) || seenHanzi.has(hanzi)) {
       continue;
     }
 
-    const pinyin = oneUnitPinyinOrNull(meaning);
+    const pinyin = oneUnitPinyinListOrNull(pinyinList);
     if (pinyin == null) {
       continue;
     }
@@ -58,13 +54,13 @@ export function pickSoundUsageExamplesForEntries({
       continue;
     }
 
-    const gloss = meaning.gloss[0];
+    const gloss = glosses[0];
     if (gloss == null || gloss.length === 0) {
       continue;
     }
 
     seenHanzi.add(hanzi);
-    result.push({ hanzi, hanziWord, pinyin, gloss });
+    result.push(entry);
 
     if (result.length >= limit) {
       return result;
@@ -72,12 +68,4 @@ export function pickSoundUsageExamplesForEntries({
   }
 
   return result;
-}
-
-function isInitialSoundId(soundId: PinyinSoundId): boolean {
-  return soundId.endsWith(`-`);
-}
-
-function isFinalSoundId(soundId: PinyinSoundId): boolean {
-  return soundId.startsWith(`-`);
 }

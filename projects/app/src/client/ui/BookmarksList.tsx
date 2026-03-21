@@ -1,9 +1,12 @@
 import { usePriorityWordsList } from "@/client/ui/hooks/usePriorityWordsList";
 import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
+import type { HanziWord } from "@/data/model";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { format } from "date-fns/format";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { useDb } from "./hooks/useDb";
 import { Icon } from "./Icon";
 import { TextInputSingle } from "./TextInputSingle";
 
@@ -73,14 +76,7 @@ export function BookmarksList() {
                       {result.hanzi}
                     </Text>
                     <View className="flex-1">
-                      {result.gloss == null ? null : (
-                        <Text className="text-sm text-fg">{result.gloss}</Text>
-                      )}
-                      {result.pinyin == null ? null : (
-                        <Text className="text-xs text-fg-dim">
-                          {result.pinyin}
-                        </Text>
-                      )}
+                      <HanziWordSearchMeta hanziWord={result.hanziWord} />
                     </View>
                     <Icon
                       icon={
@@ -164,5 +160,29 @@ export function BookmarksList() {
         )}
       </View>
     </View>
+  );
+}
+
+function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
+  const db = useDb();
+  const { data: dictionaryEntry } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanziWord, hanziWord))
+        .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
+        .findOne(),
+    [db.dictionarySearch, hanziWord],
+  );
+
+  return (
+    <>
+      {dictionaryEntry?.gloss[0] == null ? null : (
+        <Text className="text-sm text-fg">{dictionaryEntry.gloss[0]}</Text>
+      )}
+      {dictionaryEntry?.pinyin?.[0] == null ? null : (
+        <Text className="text-xs text-fg-dim">{dictionaryEntry.pinyin[0]}</Text>
+      )}
+    </>
   );
 }

@@ -11,6 +11,7 @@ import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
+import { useDb } from "@/client/ui/hooks/useDb";
 import type { SoundUsageExample } from "@/client/ui/soundUsageExamples";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
@@ -19,8 +20,10 @@ import {
   defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
+  isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
+import { oneUnitPinyinListOrNull } from "@/dictionary";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
   hanziPronunciationHintTextSetting,
@@ -29,9 +32,9 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
-import { loadDictionary } from "@/dictionary";
+import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
 import { useLocalSearchParams } from "expo-router";
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -198,9 +201,27 @@ function SoundUsageExamplesSection({
 }: {
   pinyinSoundId: PinyinSoundId;
 }) {
-  const dictionary = use(loadDictionary());
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) =>
+          and(eq(entry.hanziCharacterCount, 1), gte(entry.glossCount, 1)),
+        )
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          hanzi: entry.hanzi,
+          gloss: entry.gloss,
+          glossCount: entry.glossCount,
+          pinyin: entry.pinyin,
+        })),
+    [db.dictionarySearch],
+  );
   const usageExamples = pickSoundUsageExamplesForEntries({
-    allEntries: dictionary.allEntries,
+    allEntries: dictionarySearchEntries,
     limit: 5,
     soundId: pinyinSoundId,
   });
@@ -234,24 +255,27 @@ function SoundUsageExamplesSection({
 }
 
 function SoundUsageExampleRow({ example }: { example: SoundUsageExample }) {
+  const pinyin = oneUnitPinyinListOrNull(example.pinyin);
+  const gloss = example.gloss[0];
+
+  if (pinyin == null || gloss == null || gloss.length === 0) {
+    return null;
+  }
+
   return (
     <View className="gap-1 rounded-lg border border-fg/10 bg-bg p-3">
       <Text className="pyly-body-title">
         <HanziWordRefText hanziWord={example.hanziWord} gloss={false} />
-        <Text className="text-fg-dim"> {example.pinyin}</Text>
+        <Text className="text-fg-dim"> {pinyin}</Text>
       </Text>
-      <Text className="pyly-body text-fg-dim">{example.gloss}</Text>
+      <Text className="pyly-body text-fg-dim">{gloss}</Text>
       <SettingText
         setting={hanziPronunciationHintTextSetting}
-        settingKey={{ hanzi: example.hanzi, pinyin: example.pinyin }}
+        settingKey={{ hanzi: example.hanzi, pinyin }}
         className="pyly-body text-xs italic text-fg-dim/80"
       />
     </View>
   );
-}
-
-function isInitialOrFinalSoundId(soundId: PinyinSoundId): boolean {
-  return soundId.endsWith(`-`) || soundId.startsWith(`-`);
 }
 
 function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {

@@ -1,3 +1,4 @@
+import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
@@ -7,15 +8,11 @@ import {
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/data/userSettings";
-import type { HanziWordMeaning } from "@/dictionary";
-import {
-  glossOrThrow,
-  loadDictionary,
-  meaningKeyFromHanziWord,
-} from "@/dictionary";
+import { meaningKeyFromHanziWord } from "@/dictionary";
+import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { parseIndexRanges } from "@/util/indexRanges";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
-import { use } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
@@ -25,6 +22,7 @@ import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useAiImageStyleSetting } from "./hooks/useAiImageStyleSetting";
+import { useDb } from "./hooks/useDb";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
@@ -34,7 +32,30 @@ export function WikiHanziCharacterDecomposition({
   characterData,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
-  const dictionary = use(loadDictionary());
+  const db = useDb();
+
+  const hanziList = useMemo(
+    () =>
+      characterData.mnemonic
+        ? ([...walkIdsNodeLeafs(characterData.mnemonic.components)]
+            .map((c) => c.hanzi)
+            .filter((h) => h != null) as HanziText[])
+        : ([] as HanziText[]),
+    [characterData.mnemonic],
+  );
+
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => inArray(entry.hanzi, hanziList))
+        .select(({ entry }) => ({ hanzi: entry.hanzi, gloss: entry.gloss })),
+    [db.dictionarySearch, hanziList],
+  );
+
+  const glossByHanzi = new Map<string, string>(
+    dictionarySearchEntries.map((entry) => [entry.hanzi, entry.gloss[0] ?? ``]),
+  );
 
   if (characterData.mnemonic && Array.isArray(characterData.strokes)) {
     for (const [i, visualComponent] of [
@@ -44,10 +65,7 @@ export function WikiHanziCharacterDecomposition({
         visualComponent.label ??
         (visualComponent.hanzi == null
           ? null
-          : dictionary
-              .lookupHanzi(visualComponent.hanzi)
-              .map(([, meaning]) => meaning.gloss[0])
-              .join(` / `));
+          : (glossByHanzi.get(visualComponent.hanzi) ?? null));
       componentsElements.push(
         <View className="flex-1 items-center gap-2" key={i}>
           <View className="flex-row items-center gap-2">
@@ -121,11 +139,24 @@ export function WikiHanziCharacterDecomposition({
 }
 
 function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
-  const dictionary = use(loadDictionary());
-  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
-
-  // Use the first meaning as the primary meaning for cover image.
-  const hanziWord = hanziWordMeanings[0]?.[0];
+  const db = useDb();
+  const { data: hanziWordMeanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          gloss: entry.gloss,
+        })),
+    [db.dictionarySearch, hanzi],
+  );
+  const hanziWord = hanziWordMeanings[0]?.hanziWord;
+  const meaning = hanziWordMeanings.find(
+    (item) => item.hanziWord === hanziWord,
+  );
 
   const settingKey = hanziWord == null ? null : { hanziWord };
 
@@ -156,8 +187,6 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
     return null;
   }
 
-  const meaning = dictionary.lookupHanziWord(hanziWord);
-
   return (
     <InlineEditableSettingImage
       setting={hanziWordMeaningHintImageSetting}
@@ -175,7 +204,7 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
           .join(` - `) ||
           (meaning == null
             ? `Create an image for ${hanzi}`
-            : `Create an image representing ${glossOrThrow(hanziWord, meaning)}`))
+            : `Create an image representing ${meaning.gloss[0] ?? hanzi}`))
       }
       frameConstraint={{ aspectRatio: 2 }}
       onUploadError={handleUploadError}
@@ -198,8 +227,22 @@ function MeaningsSection({
     | readonly { readonly meaningKey: string; readonly hint: string }[]
     | undefined;
 }) {
-  const dictionary = use(loadDictionary());
-  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
+  const db = useDb();
+  const { data: hanziWordMeanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+          hsk: entry.hsk,
+        })),
+    [db.dictionarySearch, hanzi],
+  );
 
   // If hanzi is not in dictionary, don't show this section
   if (hanziWordMeanings.length === 0) {
@@ -211,7 +254,8 @@ function MeaningsSection({
       <Text className="pyly-body-heading">{hanzi} meanings</Text>
 
       <View className="gap-3">
-        {hanziWordMeanings.map(([hanziWord, meaning]) => {
+        {hanziWordMeanings.map((entry) => {
+          const { hanziWord } = entry;
           const meaningKey = meaningKeyFromHanziWord(hanziWord);
           // Match mnemonic hint by meaningKey
           const matchedHint = mnemonicHints?.find(
@@ -221,7 +265,7 @@ function MeaningsSection({
             <MeaningItem
               key={hanziWord}
               hanziWord={hanziWord}
-              meaning={meaning}
+              meaning={entry}
               mnemonicHint={matchedHint?.hint}
             />
           );
@@ -237,7 +281,7 @@ function MeaningItem({
   mnemonicHint,
 }: {
   hanziWord: HanziWord;
-  meaning: HanziWordMeaning;
+  meaning: Pick<DictionarySearchEntry, `gloss` | `pinyin` | `hsk`>;
   mnemonicHint: string | undefined;
 }) {
   const hintSetting = useUserSetting({

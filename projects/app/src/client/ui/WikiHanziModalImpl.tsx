@@ -1,19 +1,18 @@
 import { hskLevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
-import { loadDictionary } from "@/dictionary";
 import {
   arrayFilterUnique,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { use } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { CloseButton } from "./CloseButton";
-import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiHanziBody } from "./WikiHanziBody";
 import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
 import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
-import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
+import { useDb } from "./hooks/useDb";
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -22,18 +21,25 @@ export function WikiHanziModalImpl({
   hanzi: HanziText;
   onDismiss: () => void;
 }) {
-  const dictionary = use(loadDictionary());
-  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
-  const hskLevels = hanziWordMeanings
-    .map(([_, meaning]) => meaning.hsk)
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi)),
+    [db.dictionarySearch, hanzi],
+  );
+
+  const hskLevels = dictionarySearchEntries
+    .map((entry) => entry.hsk)
     .filter((x) => x != null)
     .filter(arrayFilterUnique())
     .sort(sortComparatorNumber(hskLevelToNumber));
-  const pinyins = hanziWordMeanings
-    .map(([_, meaning]) => meaning.pinyin?.[0])
+  const pinyins = dictionarySearchEntries
+    .map((entry) => entry.pinyin?.[0])
     .filter((x) => x != null);
-  const glosses = hanziWordMeanings
-    .map(([_, meaning]) => meaning.gloss[0])
+  const glosses = dictionarySearchEntries
+    .map((entry) => entry.gloss[0])
     .filter((x) => x != null);
 
   return (
@@ -50,15 +56,11 @@ export function WikiHanziModalImpl({
         pinyins={pinyins}
         hskLevels={hskLevels}
         glosses={glosses}
-        meanings={hanziWordMeanings}
+        meanings={dictionarySearchEntries}
         onDismiss={onDismiss}
       />
 
-      <PylyMdxComponents>
-        <View className="flex-1 gap-6 bg-bg py-7">
-          <WikiMdxHanziMeaning hanzi={hanzi} />
-        </View>
-      </PylyMdxComponents>
+      <WikiHanziBody hanzi={hanzi} />
     </ScrollView>
   );
 }
