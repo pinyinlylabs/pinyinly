@@ -1,5 +1,5 @@
 import { intersperse } from "@/client/react";
-import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
+import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import type { HanziText, HskLevel } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
@@ -28,7 +28,7 @@ export function WikiHanziHeaderOverview({
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
-  const { isPriority, toggle } = usePriorityWordToggle(hanzi);
+  const { isPriority, toggle } = useBookmarkToggle(hanzi);
   const uniquePinyins = pinyins?.filter(arrayFilterUnique());
 
   return (

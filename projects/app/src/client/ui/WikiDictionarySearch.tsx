@@ -1,4 +1,4 @@
-import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
+import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
 import type { HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -83,7 +83,7 @@ interface SearchResultCardProps {
 }
 
 function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
-  const { isPriority, toggle } = usePriorityWordToggle(result.hanzi);
+  const { isPriority, toggle } = useBookmarkToggle(result.hanzi);
   const showBookmark = result.kind === `hanziWord`;
 
   return (
