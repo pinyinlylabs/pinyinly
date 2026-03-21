@@ -283,6 +283,18 @@ export const splitPinyinUnitOrThrow = memoize1(function splitPinyinUnitOrThrow(
   return parts;
 });
 
+export function isInitialSoundId(soundId: PinyinSoundId): boolean {
+  return soundId.endsWith(`-`);
+}
+
+export function isFinalSoundId(soundId: PinyinSoundId): boolean {
+  return soundId.startsWith(`-`);
+}
+
+export function isInitialOrFinalSoundId(soundId: PinyinSoundId): boolean {
+  return isInitialSoundId(soundId) || isFinalSoundId(soundId);
+}
+
 export const loadPylyPinyinChart = memoize0(() =>
   buildPinyinChart({
     items: {

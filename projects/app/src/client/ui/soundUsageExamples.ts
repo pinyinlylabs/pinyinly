@@ -1,3 +1,4 @@
+import type { DictionarySearchEntry } from "@/client/query";
 import { isHanziCharacter } from "@/data/hanzi";
 import type {
   HanziText,
@@ -5,10 +6,12 @@ import type {
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
-import { splitPinyinUnit } from "@/data/pinyin";
-import type { HanziWordMeaning } from "@/dictionary";
-import { hanziFromHanziWord, oneUnitPinyinOrNull } from "@/dictionary";
-import type { DeepReadonly } from "ts-essentials";
+import {
+  isFinalSoundId,
+  isInitialSoundId,
+  splitPinyinUnit,
+} from "@/data/pinyin";
+import { oneUnitPinyinListOrNull } from "@/dictionary";
 
 export interface SoundUsageExample {
   hanziWord: HanziWord;
@@ -22,7 +25,10 @@ export function pickSoundUsageExamplesForEntries({
   limit,
   soundId,
 }: {
-  allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
+  allEntries: readonly Pick<
+    DictionarySearchEntry,
+    `hanziWord` | `hanzi` | `gloss` | `pinyin`
+  >[];
   limit: number;
   soundId: PinyinSoundId;
 }): SoundUsageExample[] {
@@ -33,14 +39,14 @@ export function pickSoundUsageExamplesForEntries({
   const seenHanzi = new Set<HanziText>();
   const result: SoundUsageExample[] = [];
 
-  for (const [hanziWord, meaning] of allEntries) {
-    const hanzi = hanziFromHanziWord(hanziWord);
+  for (const entry of allEntries) {
+    const { hanziWord, hanzi, gloss: glosses, pinyin: pinyinList } = entry;
 
     if (!isHanziCharacter(hanzi) || seenHanzi.has(hanzi)) {
       continue;
     }
 
-    const pinyin = oneUnitPinyinOrNull(meaning);
+    const pinyin = oneUnitPinyinListOrNull(pinyinList);
     if (pinyin == null) {
       continue;
     }
@@ -58,7 +64,7 @@ export function pickSoundUsageExamplesForEntries({
       continue;
     }
 
-    const gloss = meaning.gloss[0];
+    const gloss = glosses[0];
     if (gloss == null || gloss.length === 0) {
       continue;
     }
@@ -72,12 +78,4 @@ export function pickSoundUsageExamplesForEntries({
   }
 
   return result;
-}
-
-function isInitialSoundId(soundId: PinyinSoundId): boolean {
-  return soundId.endsWith(`-`);
-}
-
-function isFinalSoundId(soundId: PinyinSoundId): boolean {
-  return soundId.startsWith(`-`);
 }

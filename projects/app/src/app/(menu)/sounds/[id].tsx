@@ -11,6 +11,7 @@ import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
+import { useDb } from "@/client/ui/hooks/useDb";
 import type { SoundUsageExample } from "@/client/ui/soundUsageExamples";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
@@ -19,6 +20,7 @@ import {
   defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
+  isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
@@ -29,9 +31,9 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
-import { loadDictionary } from "@/dictionary";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useLocalSearchParams } from "expo-router";
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -198,9 +200,24 @@ function SoundUsageExamplesSection({
 }: {
   pinyinSoundId: PinyinSoundId;
 }) {
-  const dictionary = use(loadDictionary());
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanziCharacterCount, 1))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          hanzi: entry.hanzi,
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+        })),
+    [db.dictionarySearch],
+  );
   const usageExamples = pickSoundUsageExamplesForEntries({
-    allEntries: dictionary.allEntries,
+    allEntries: dictionarySearchEntries,
     limit: 5,
     soundId: pinyinSoundId,
   });
@@ -248,10 +265,6 @@ function SoundUsageExampleRow({ example }: { example: SoundUsageExample }) {
       />
     </View>
   );
-}
-
-function isInitialOrFinalSoundId(soundId: PinyinSoundId): boolean {
-  return soundId.endsWith(`-`) || soundId.startsWith(`-`);
 }
 
 function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
