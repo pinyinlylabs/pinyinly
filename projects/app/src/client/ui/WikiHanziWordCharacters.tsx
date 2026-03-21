@@ -2,7 +2,7 @@ import { matchAllHanziCharacters } from "@/data/hanzi";
 import type { HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { View } from "react-native";
-import { CompactWordRows } from "./WikiHanziCharacterUsedInWords";
+import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
