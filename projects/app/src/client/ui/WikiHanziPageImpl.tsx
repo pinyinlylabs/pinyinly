@@ -42,7 +42,6 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
         hanzi={hanzi}
         pinyins={pinyins}
         glosses={glosses}
-        meanings={dictionarySearchEntries}
         hskLevels={hskLevels}
       />
 
@@ -56,7 +55,6 @@ function Header({
   pinyins,
   hanzi,
   hskLevels,
-  meanings,
   ...rest
 }: WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
@@ -74,7 +72,6 @@ function Header({
         hskLevels={hskLevels}
         pinyins={pinyins}
         glosses={glosses}
-        meanings={meanings}
         hanziScrollRef={ref}
       />
     </>

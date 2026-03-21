@@ -56,7 +56,6 @@ export function WikiHanziModalImpl({
         pinyins={pinyins}
         hskLevels={hskLevels}
         glosses={glosses}
-        meanings={dictionarySearchEntries}
         onDismiss={onDismiss}
       />
 
@@ -71,7 +70,6 @@ function Header({
   hanzi,
   hskLevels,
   onDismiss,
-  meanings,
   ...rest
 }: {
   onDismiss: () => void;
@@ -115,7 +113,6 @@ function Header({
         hskLevels={hskLevels}
         pinyins={pinyins}
         glosses={glosses}
-        meanings={meanings}
         hanziScrollRef={ref}
       />
     </>
