@@ -2,6 +2,7 @@ import type {
   HanziText,
   HanziWord,
   HskLevel,
+  PinyinText,
   Skill,
   SrsStateType,
 } from "@/data/model";
@@ -414,7 +415,7 @@ export interface UserDictionaryEntry {
   hanzi: HanziText;
   meaningKey: string;
   gloss: string;
-  pinyin?: string;
+  pinyin?: PinyinText;
   note?: string;
 }
 
@@ -429,7 +430,7 @@ export interface DictionarySearchEntry {
   meaningKey: string;
   hanziWord: HanziWord;
   gloss: string[];
-  pinyin?: string[];
+  pinyin?: PinyinText[];
   hsk?: HskLevel;
   hskSortKey: number;
   note?: string;
@@ -605,7 +606,7 @@ function userDictionaryCollectionOptions({
               } else if (parsed.field === `g`) {
                 draft.gloss = text;
               } else if (parsed.field === `p`) {
-                draft.pinyin = text;
+                draft.pinyin = text as PinyinText | undefined;
               } else {
                 draft.note = text;
               }

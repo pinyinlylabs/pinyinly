@@ -1,8 +1,11 @@
 import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
+import type { HanziWord } from "@/data/model";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useQuickSearch } from "./hooks/useQuickSearch";
+import { useDb } from "./hooks/useDb";
 import { Icon } from "./Icon";
 import { Portal } from "./Portal";
 import { TextInputSingle } from "./TextInputSingle";
@@ -108,16 +111,12 @@ export function MenuDictionarySearch() {
                     {result.hanzi}
                   </Text>
                   <View className="flex-1">
-                    {result.kind === `hanziWord` && result.gloss != null ? (
-                      <Text className="text-sm text-fg">{result.gloss}</Text>
-                    ) : result.kind === `wikiDirect` ? (
-                      <Text className="text-sm text-fg">Open wiki page</Text>
-                    ) : null}
-                    {result.kind === `hanziWord` && result.pinyin != null ? (
-                      <Text className="text-xs text-fg-dim">
-                        {result.pinyin}
-                      </Text>
-                    ) : null}
+                    {result.kind === `hanziWord` ? (
+                      <HanziWordSearchMeta hanziWord={result.hanziWord} />
+                    ) : (
+                      (result.kind satisfies `wikiDirect`,
+                      (<Text className="text-sm text-fg">Open wiki page</Text>))
+                    )}
                   </View>
                 </Pressable>
               ))
@@ -126,5 +125,29 @@ export function MenuDictionarySearch() {
         </Portal>
       ) : null}
     </View>
+  );
+}
+
+function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
+  const db = useDb();
+  const { data: dictionaryEntry } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanziWord, hanziWord))
+        .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
+        .findOne(),
+    [db.dictionarySearch, hanziWord],
+  );
+
+  return (
+    <>
+      {dictionaryEntry?.gloss[0] == null ? null : (
+        <Text className="text-sm text-fg">{dictionaryEntry.gloss[0]}</Text>
+      )}
+      {dictionaryEntry?.pinyin?.[0] == null ? null : (
+        <Text className="text-xs text-fg-dim">{dictionaryEntry.pinyin[0]}</Text>
+      )}
+    </>
   );
 }

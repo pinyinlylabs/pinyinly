@@ -1,12 +1,14 @@
 import { parsePylymark } from "@/data/pylymark";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
 import { splitCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
+import { useLiveQuery } from "@tanstack/react-db";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
-import { use } from "react";
 import { Text } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { HanziWordLink } from "./HanziWordLink";
+import { useDb } from "./hooks/useDb";
 
 interface Clock {
   ms: number;
@@ -31,7 +33,30 @@ export const PylymarkTypewriter = ({
   delay?: number;
   onAnimateEnd?: () => void;
 }) => {
-  const dict = use(loadDictionary());
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          gloss: entry.gloss,
+        })),
+    [db.dictionarySearch],
+  );
+  const dictionaryEntriesByWord = useMemo(() => {
+    const entriesByWord = new Map<string, { gloss: string[] }>();
+    for (const entry of dictionarySearchEntries) {
+      if (!entriesByWord.has(entry.hanziWord)) {
+        entriesByWord.set(entry.hanziWord, {
+          gloss: entry.gloss,
+        });
+      }
+    }
+    return entriesByWord;
+  }, [dictionarySearchEntries]);
   const parsed = parsePylymark(source);
 
   const clock: Clock = {
@@ -50,7 +75,7 @@ export const PylymarkTypewriter = ({
     switch (node.type) {
       case `hanziWord`: {
         let text: string = hanziFromHanziWord(node.hanziWord);
-        const meaning = dict.lookupHanziWord(node.hanziWord);
+        const meaning = dictionaryEntriesByWord.get(node.hanziWord);
         const gloss = meaning?.gloss.at(0);
         if (node.showGloss && gloss != null) {
           text += ` ${gloss}`;

@@ -1,12 +1,8 @@
 import type { HanziWord } from "@/data/model";
-import {
-  glossOrThrow,
-  hanziFromHanziWord,
-  loadDictionary,
-  pinyinOrThrow,
-} from "@/dictionary";
-import { use } from "react";
+import { hanziFromHanziWord } from "@/dictionary";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { HanziWordLink } from "./HanziWordLink";
+import { useDb } from "./hooks/useDb";
 
 export const HanziWordRefText = ({
   hanziWord,
@@ -23,8 +19,16 @@ export const HanziWordRefText = ({
   gloss?: boolean | string;
   showPinyin?: boolean;
 }) => {
-  const dictionary = use(loadDictionary());
-  const meaning = dictionary.lookupHanziWord(hanziWord);
+  const db = useDb();
+  const { data: meaning } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanziWord, hanziWord))
+        .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
+        .findOne(),
+    [db.dictionarySearch, hanziWord],
+  );
 
   let text = ``;
 
@@ -34,7 +38,7 @@ export const HanziWordRefText = ({
 
   // Convert `gloss: true` into the actual gloss string.
   if (gloss === true && meaning != null && meaning.gloss.length > 0) {
-    gloss = glossOrThrow(hanziWord, meaning);
+    gloss = meaning.gloss[0] ?? false;
   }
 
   if (typeof gloss === `string`) {
@@ -50,7 +54,7 @@ export const HanziWordRefText = ({
     if (appending) {
       text += ` (`;
     }
-    text += pinyinOrThrow(hanziWord, meaning);
+    text += meaning.pinyin[0] ?? ``;
     if (appending) {
       text += `)`;
     }

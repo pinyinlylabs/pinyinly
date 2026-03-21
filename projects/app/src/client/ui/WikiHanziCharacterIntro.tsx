@@ -1,10 +1,12 @@
-import type { PinyinUnit, WikiCharacterData } from "@/data/model";
-import { loadDictionary } from "@/dictionary";
-import { use } from "react";
+import type { DictionarySearchEntry } from "@/client/query";
+import type { WikiCharacterData } from "@/data/model";
+import { hanziFromHanziWord } from "@/dictionary";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
-import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
+import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
+import { useDb } from "./hooks/useDb";
 
 interface WikiHanziCharacterIntroProps {
   characterData: WikiCharacterData;
@@ -13,20 +15,33 @@ interface WikiHanziCharacterIntroProps {
 export function WikiHanziCharacterIntro({
   characterData,
 }: WikiHanziCharacterIntroProps) {
-  const dictionary = use(loadDictionary());
-  const meanings = dictionary.lookupHanzi(characterData.hanzi);
+  const db = useDb();
+  const { data: meanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, characterData.hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+        })),
+    [db.dictionarySearch, characterData.hanzi],
+  );
   const pronunciation = getSharedPrimaryPronunciation(meanings);
+  const firstMeaning = meanings[0];
 
   return (
     <>
       <WikiHanziCharacterDecomposition characterData={characterData} />
 
-      {pronunciation == null ? null : (
+      {pronunciation == null || firstMeaning == null ? null : (
         <>
           <View className="h-2" />
           <OnePronunciation
-            hanzi={characterData.hanzi}
-            gloss={pronunciation.gloss}
+            meaning={firstMeaning}
             pinyinUnit={pronunciation.pinyinUnit}
           />
         </>
@@ -36,15 +51,20 @@ export function WikiHanziCharacterIntro({
 }
 
 function OnePronunciation({
-  gloss,
-  hanzi,
+  meaning,
   pinyinUnit,
 }: {
-  gloss: string;
-  hanzi: WikiCharacterData[`hanzi`];
-  pinyinUnit: PinyinUnit;
+  meaning: Pick<DictionarySearchEntry, `hanziWord` | `gloss` | `pinyin`>;
+  pinyinUnit: NonNullable<
+    ReturnType<typeof getSharedPrimaryPronunciation>
+  >[`pinyinUnit`];
 }) {
-  return (
+  const { hanziWord } = meaning;
+
+  const gloss = meaning.gloss[0];
+  const hanzi = hanziFromHanziWord(hanziWord);
+
+  return gloss == null ? null : (
     <WikiHanziCharacterPronunciation
       gloss={gloss}
       hanzi={hanzi}

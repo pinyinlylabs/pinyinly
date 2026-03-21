@@ -5,21 +5,31 @@ import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToPinyinTypedQuestionOrThrow } from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordToPinyinTyped } from "@/data/skills";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
-import { use } from "react";
+import { hanziFromHanziWord } from "@/dictionary";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { View } from "react-native";
+import { useDb } from "./hooks/useDb";
 
 export default () => {
+  const db = useDb();
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
   const skill = hanziWordToPinyinTyped(hanziWord);
-  const dictionary = use(loadDictionary());
-  const meanings = dictionary.lookupHanzi(hanziFromHanziWord(hanziWord));
+  const { data: meanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanziFromHanziWord(hanziWord)))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .select(({ entry }) => ({ hanziWord: entry.hanziWord }))
+        .distinct(),
+    [db.dictionarySearch, hanziWord],
+  );
   const flag =
     meanings.length > 1
       ? {
           kind: QuestionFlagKind.OtherAnswer,
           previousHanziWords: meanings
-            .map(([h]) => h)
+            .map((entry) => entry.hanziWord)
             .filter((h) => h !== hanziWord),
         }
       : null;

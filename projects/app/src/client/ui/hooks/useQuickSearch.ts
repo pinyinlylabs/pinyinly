@@ -24,8 +24,6 @@ export type QuickSearchHanziWordResult = {
   hanziWord: HanziWord;
   hanzi: HanziText;
   meaningKey: string;
-  gloss?: string;
-  pinyin?: PinyinText;
   sortKey: string;
   score: number;
 };
@@ -116,8 +114,6 @@ function findHanziWordMatches(
   for (const entry of entries) {
     const { hanziWord, hanzi } = entry;
     let bestScore: number | null = null;
-    let bestGloss: string | undefined;
-    let bestPinyin: PinyinText | undefined;
 
     if (hasHanziQuery) {
       const hanziScore = scoreMatch(hanzi, query, 0);
@@ -134,24 +130,18 @@ function findHanziWordMatches(
 
       if (bestScore == null || glossScore < bestScore) {
         bestScore = glossScore;
-        bestGloss = gloss;
       }
     }
 
     if (entry.pinyin != null) {
       for (const pinyin of entry.pinyin) {
-        const pinyinScore = scorePinyinMatch(
-          pinyin as PinyinText,
-          queryPinyin,
-          20,
-        );
+        const pinyinScore = scorePinyinMatch(pinyin, queryPinyin, 20);
         if (pinyinScore == null) {
           continue;
         }
 
         if (bestScore == null || pinyinScore < bestScore) {
           bestScore = pinyinScore;
-          bestPinyin = pinyin as PinyinText;
         }
       }
     }
@@ -168,8 +158,6 @@ function findHanziWordMatches(
         hanziWord,
         hanzi,
         meaningKey: entry.meaningKey,
-        gloss: bestGloss ?? entry.gloss[0],
-        pinyin: bestPinyin ?? (entry.pinyin?.[0] as PinyinText | undefined),
         score: bestScore,
         sortKey: hanzi,
       });

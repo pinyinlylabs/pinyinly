@@ -1,11 +1,11 @@
 import type { HanziText, PinyinText } from "@/data/model";
-import { loadDictionary } from "@/dictionary";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { Icon } from "./Icon";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
+import { useDb } from "./hooks/useDb";
 
 export const NewSkillModalContentNewWord = ({
   hanzi,
@@ -14,13 +14,25 @@ export const NewSkillModalContentNewWord = ({
   hanzi: HanziText;
   onDismiss: () => void;
 }) => {
-  const dictionary = use(loadDictionary());
-  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+        })),
+    [db.dictionarySearch, hanzi],
+  );
 
   let pinyin: PinyinText | undefined;
-  for (const [, meaning] of hanziWordMeanings) {
-    if (meaning.pinyin != null) {
-      const mainPinyin = meaning.pinyin[0];
+  for (const entry of dictionarySearchEntries) {
+    if (entry.pinyin != null) {
+      const mainPinyin = entry.pinyin[0];
       if (mainPinyin != null) {
         pinyin = mainPinyin;
         break;
@@ -34,9 +46,9 @@ export const NewSkillModalContentNewWord = ({
   }
 
   const glosses =
-    hanziWordMeanings.length === 1
-      ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
-      : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
+    dictionarySearchEntries.length === 1
+      ? dictionarySearchEntries[0]?.gloss.join(`, `)
+      : dictionarySearchEntries.map((entry) => entry.gloss[0]).join(`, `);
 
   return (
     <ScrollView

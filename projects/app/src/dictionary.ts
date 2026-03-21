@@ -566,7 +566,13 @@ export function hanziFromHanziOrHanziWord(
 export function oneUnitPinyinOrNull(
   meaning: DeepReadonly<HanziWordMeaning> | null,
 ): PinyinUnit | null {
-  const pinyin = meaning?.pinyin?.[0];
+  return oneUnitPinyinListOrNull(meaning?.pinyin);
+}
+
+export function oneUnitPinyinListOrNull(
+  pinyinList: readonly PinyinText[] | null | undefined,
+): PinyinUnit | null {
+  const pinyin = pinyinList?.[0];
 
   if (pinyin != null) {
     const units = matchAllPinyinUnits(pinyin);
