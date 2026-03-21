@@ -316,7 +316,7 @@ export function WikiHanziCharacterPronunciation({
         </View>
 
         <View className="flex-row items-center justify-between">
-          <Text className="text-[13px] text-fg-dim">
+          <Text className="font-sans text-[13px] text-fg-dim">
             Want help brainstorming a hint?
           </Text>
           <RectButton
@@ -333,7 +333,7 @@ export function WikiHanziCharacterPronunciation({
         <View className="gap-2 pt-2">
           <View className="gap-1">
             <Text className="pyly-body-subheading">Choose an image</Text>
-            <Text className="text-[14px] text-fg-dim">
+            <Text className="font-sans text-[14px] text-fg-dim">
               Pick the image that should appear on the wiki page
             </Text>
           </View>

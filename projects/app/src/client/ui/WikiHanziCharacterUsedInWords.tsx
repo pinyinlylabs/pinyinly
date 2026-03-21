@@ -77,15 +77,17 @@ function CompactWordRows({
             <HskLozenge hskLevel={entry.hsk} size="sm" />
           )}
           <View className="flex-1 flex-row items-center gap-2">
-            <Text className="text-lg font-normal text-fg-loud">{hanzi}</Text>
+            <Text className="font-sans text-lg font-normal text-fg-loud">
+              {hanzi}
+            </Text>
             {pinyin == null ? null : (
-              <Text className="text-xs text-fg-dim">{pinyin}</Text>
+              <Text className="font-sans text-xs text-fg-dim">{pinyin}</Text>
             )}
           </View>
 
           {gloss == null ? null : (
             <Text
-              className="ml-4 flex-1 text-right text-sm text-fg"
+              className="ml-4 flex-1 text-right font-sans text-sm text-fg"
               numberOfLines={2}
             >
               {gloss}
