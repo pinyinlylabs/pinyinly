@@ -23,6 +23,7 @@ import {
   isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
+import { oneUnitPinyinListOrNull } from "@/dictionary";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
   hanziPronunciationHintTextSetting,
@@ -31,7 +32,7 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
-import { eq, useLiveQuery } from "@tanstack/react-db";
+import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -205,13 +206,16 @@ function SoundUsageExamplesSection({
     (q) =>
       q
         .from({ entry: db.dictionarySearch })
-        .where(({ entry }) => eq(entry.hanziCharacterCount, 1))
+        .where(({ entry }) =>
+          and(eq(entry.hanziCharacterCount, 1), gte(entry.glossCount, 1)),
+        )
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
         .select(({ entry }) => ({
           hanziWord: entry.hanziWord,
           hanzi: entry.hanzi,
           gloss: entry.gloss,
+          glossCount: entry.glossCount,
           pinyin: entry.pinyin,
         })),
     [db.dictionarySearch],
@@ -251,16 +255,23 @@ function SoundUsageExamplesSection({
 }
 
 function SoundUsageExampleRow({ example }: { example: SoundUsageExample }) {
+  const pinyin = oneUnitPinyinListOrNull(example.pinyin);
+  const gloss = example.gloss[0];
+
+  if (pinyin == null || gloss == null || gloss.length === 0) {
+    return null;
+  }
+
   return (
     <View className="gap-1 rounded-lg border border-fg/10 bg-bg p-3">
       <Text className="pyly-body-title">
         <HanziWordRefText hanziWord={example.hanziWord} gloss={false} />
-        <Text className="text-fg-dim"> {example.pinyin}</Text>
+        <Text className="text-fg-dim"> {pinyin}</Text>
       </Text>
-      <Text className="pyly-body text-fg-dim">{example.gloss}</Text>
+      <Text className="pyly-body text-fg-dim">{gloss}</Text>
       <SettingText
         setting={hanziPronunciationHintTextSetting}
-        settingKey={{ hanzi: example.hanzi, pinyin: example.pinyin }}
+        settingKey={{ hanzi: example.hanzi, pinyin }}
         className="pyly-body text-xs italic text-fg-dim/80"
       />
     </View>

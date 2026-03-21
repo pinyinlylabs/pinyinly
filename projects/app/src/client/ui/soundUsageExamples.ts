@@ -1,11 +1,6 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { isHanziCharacter } from "@/data/hanzi";
-import type {
-  HanziText,
-  HanziWord,
-  PinyinSoundId,
-  PinyinUnit,
-} from "@/data/model";
+import type { HanziText, PinyinSoundId } from "@/data/model";
 import {
   isFinalSoundId,
   isInitialSoundId,
@@ -13,22 +8,17 @@ import {
 } from "@/data/pinyin";
 import { oneUnitPinyinListOrNull } from "@/dictionary";
 
-export interface SoundUsageExample {
-  hanziWord: HanziWord;
-  hanzi: HanziText;
-  pinyin: PinyinUnit;
-  gloss: string;
-}
+export type SoundUsageExample = Pick<
+  DictionarySearchEntry,
+  `hanziWord` | `hanzi` | `gloss` | `pinyin`
+>;
 
 export function pickSoundUsageExamplesForEntries({
   allEntries,
   limit,
   soundId,
 }: {
-  allEntries: readonly Pick<
-    DictionarySearchEntry,
-    `hanziWord` | `hanzi` | `gloss` | `pinyin`
-  >[];
+  allEntries: readonly SoundUsageExample[];
   limit: number;
   soundId: PinyinSoundId;
 }): SoundUsageExample[] {
@@ -40,7 +30,7 @@ export function pickSoundUsageExamplesForEntries({
   const result: SoundUsageExample[] = [];
 
   for (const entry of allEntries) {
-    const { hanziWord, hanzi, gloss: glosses, pinyin: pinyinList } = entry;
+    const { hanzi, gloss: glosses, pinyin: pinyinList } = entry;
 
     if (!isHanziCharacter(hanzi) || seenHanzi.has(hanzi)) {
       continue;
@@ -70,7 +60,7 @@ export function pickSoundUsageExamplesForEntries({
     }
 
     seenHanzi.add(hanzi);
-    result.push({ hanzi, hanziWord, pinyin, gloss });
+    result.push(entry);
 
     if (result.length >= limit) {
       return result;

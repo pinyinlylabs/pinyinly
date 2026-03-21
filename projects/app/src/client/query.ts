@@ -430,6 +430,7 @@ export interface DictionarySearchEntry {
   meaningKey: string;
   hanziWord: HanziWord;
   gloss: string[];
+  glossCount: number;
   pinyin?: PinyinText[];
   hsk?: HskLevel;
   hskSortKey: number;
@@ -714,6 +715,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           meaningKey,
           hanziWord,
           gloss,
+          glossCount: gloss.length,
           pinyin,
           hsk: meaning.hsk,
           hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
@@ -743,6 +745,7 @@ function mapUserMeaningToDictionarySearchEntry(
     meaningKey: userEntry.meaningKey,
     hanziWord,
     gloss: [userEntry.gloss],
+    glossCount: 1,
     pinyin,
     hsk: undefined,
     hskSortKey: dictionarySearchHskSortKey(),
@@ -823,6 +826,7 @@ function dictionarySearchCollectionOptions({
             existing.meaningKey !== next.meaningKey ||
             existing.hanziWord !== next.hanziWord ||
             !areStringArraysEqual(existing.gloss, next.gloss) ||
+            existing.glossCount !== next.glossCount ||
             !areStringArraysEqual(existing.pinyin, next.pinyin) ||
             existing.hsk !== next.hsk ||
             existing.hskSortKey !== next.hskSortKey ||

@@ -63,6 +63,7 @@ function makeEntry({
     meaningKey,
     hanziWord,
     gloss,
+    glossCount: gloss.length,
     pinyin,
     hskSortKey: Number.POSITIVE_INFINITY,
     hanziCharacterCount: hanzi.length,

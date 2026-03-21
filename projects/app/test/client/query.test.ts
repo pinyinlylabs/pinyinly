@@ -678,4 +678,39 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
     expect(userEntry).toBeDefined();
     expect(userEntry?.hskSortKey).toBe(Number.POSITIVE_INFINITY);
   });
+
+  test(`includes glossCount for built-in entries`, async ({ db }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    expect(entries.length).toBeGreaterThan(0);
+    for (const entry of entries) {
+      expect(entry.glossCount).toBe(entry.gloss.length);
+      expect(entry.glossCount).toBeGreaterThan(0);
+    }
+  });
+
+  test(`includes glossCount for user entries`, async ({ db, rizzle }) => {
+    const keyParams = getUserHanziMeaningKeyParams(汉`里`, `u_inside`);
+
+    await rizzle.mutate.setSetting({
+      key: userHanziMeaningGlossSetting.entity.marshalKey(keyParams),
+      value: userHanziMeaningGlossSetting.entity.marshalValue({
+        ...keyParams,
+        text: `inside`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await db.dictionarySearch.preload();
+    const userEntries = db.dictionarySearch.toArray.filter(
+      (e: DictionarySearchEntry) => e.sourceKind === `user`,
+    );
+
+    expect(userEntries.length).toBeGreaterThan(0);
+    for (const entry of userEntries) {
+      expect(entry.glossCount).toBe(1);
+    }
+  });
 });
