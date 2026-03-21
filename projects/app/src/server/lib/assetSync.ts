@@ -1,6 +1,8 @@
 import type { AssetId } from "@/data/model";
-import { AssetStatusKind, allowedImageMimeTypeEnum } from "@/data/model";
+import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
+import { getImageSettingKeyPatterns } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
+import * as schema from "@/server/pgSchema";
 import { verifyObjectExists } from "@/server/lib/s3/assets";
 import type { AppRouter } from "@/server/routers/_app";
 import { getBucketObjectKeyForId } from "@/util/assetId";
@@ -8,29 +10,81 @@ import { assetsS3Bucket } from "@/util/env";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { TRPCClient } from "@trpc/client";
+import { and, eq, or, sql } from "drizzle-orm";
 import { getAssetsS3Client } from "./s3/client";
+
+export async function listReferencedAssetIdsForUser(
+  userId: string,
+): Promise<AssetId[]> {
+  const keyPatterns = getImageSettingKeyPatterns();
+
+  const referencedAssetIds = await withDrizzle(async (db) => {
+    const keyConditions = keyPatterns.map(
+      (pattern) => sql`${schema.userSetting.key} LIKE ${pattern}`,
+    );
+    const historyKeyConditions = keyPatterns.map(
+      (pattern) => sql`${schema.userSettingHistory.key} LIKE ${pattern}`,
+    );
+
+    const currentSettings = await db
+      .select({
+        assetId: sql<string | null>`${schema.userSetting.value}->>'t'`,
+      })
+      .from(schema.userSetting)
+      .where(
+        and(
+          eq(schema.userSetting.userId, userId),
+          or(...keyConditions),
+          sql`${schema.userSetting.value}->>'t' IS NOT NULL`,
+        ),
+      );
+
+    const historicalSettings = await db
+      .select({
+        assetId: sql<string | null>`${schema.userSettingHistory.value}->>'t'`,
+      })
+      .from(schema.userSettingHistory)
+      .where(
+        and(
+          eq(schema.userSettingHistory.userId, userId),
+          or(...historyKeyConditions),
+          sql`${schema.userSettingHistory.value}->>'t' IS NOT NULL`,
+        ),
+      );
+
+    const allAssetIds = new Set<string>();
+    for (const { assetId } of currentSettings) {
+      if (assetId != null && assetId.length > 0) {
+        allAssetIds.add(assetId);
+      }
+    }
+    for (const { assetId } of historicalSettings) {
+      if (assetId != null && assetId.length > 0) {
+        allAssetIds.add(assetId);
+      }
+    }
+
+    return Array.from(allAssetIds);
+  });
+
+  return referencedAssetIds
+    .map((assetId) => assetIdSchema.safeParse(assetId).data)
+    .filter((assetId) => assetId != null);
+}
 
 /**
  * List all asset files that exist in local storage for a user.
  * Uses the DB as the source of truth, then verifies storage exists.
  */
 export async function listAssetFiles(userId: string): Promise<AssetId[]> {
-  const assetRows = await withDrizzle((db) =>
-    db.query.asset.findMany({
-      where: (t, { and, eq }) =>
-        and(eq(t.userId, userId), eq(t.status, AssetStatusKind.Uploaded)),
-      columns: {
-        assetId: true,
-      },
-    }),
-  );
+  const referencedAssetIds = await listReferencedAssetIdsForUser(userId);
 
-  if (assetRows.length === 0) {
+  if (referencedAssetIds.length === 0) {
     return [];
   }
 
   const assetIds = await Promise.all(
-    assetRows.map(async ({ assetId }) => {
+    referencedAssetIds.map(async (assetId) => {
       const result = await verifyObjectExists(getBucketObjectKeyForId(assetId));
       return result.exists ? assetId : null;
     }),
