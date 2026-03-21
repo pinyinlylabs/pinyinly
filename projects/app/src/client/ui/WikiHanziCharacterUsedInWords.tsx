@@ -51,7 +51,7 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
   );
 }
 
-function CompactWordRows({
+export function CompactWordRows({
   dictionarySearchEntries,
 }: {
   dictionarySearchEntries: readonly {

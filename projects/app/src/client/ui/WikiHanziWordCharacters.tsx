@@ -1,60 +1,55 @@
 import { matchAllHanziCharacters } from "@/data/hanzi";
-import type { HanziCharacter, HanziText } from "@/data/model";
-import { eq, useLiveQuery } from "@tanstack/react-db";
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import type { HanziText } from "@/data/model";
+import { inArray, useLiveQuery } from "@tanstack/react-db";
+import { View } from "react-native";
+import { CompactWordRows } from "./WikiHanziCharacterUsedInWords";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
+import { arrayFilterUnique } from "@pinyinly/lib/collections";
 
 export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
+  const db = useDb();
   const characters = matchAllHanziCharacters(hanzi);
+  const { data: entries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => inArray(entry.hanzi, characters))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          hanzi: entry.hanzi,
+          hsk: entry.hsk,
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+        })),
+    [characters, db.dictionarySearch],
+  );
 
   if (characters.length < 2) {
     return null;
   }
 
+  const entriesByHanzi = new Map(
+    entries.map((entry) => [entry.hanzi, entry] as const),
+  );
+  const dictionarySearchEntries = characters
+    .filter(arrayFilterUnique())
+    .flatMap((char) => {
+      const entry = entriesByHanzi.get(char);
+      return entry == null ? [] : [entry];
+    });
+
+  if (dictionarySearchEntries.length === 0) {
+    return null;
+  }
+
   return (
     <WikiTitledBox title="Characters" className="mx-4">
-      <View className="flex-row flex-wrap gap-2 p-4">
-        {characters.map((char) => (
-          <CharacterTile key={char} char={char} />
-        ))}
+      <View className="gap-1 p-3">
+        <CompactWordRows dictionarySearchEntries={dictionarySearchEntries} />
       </View>
     </WikiTitledBox>
-  );
-}
-
-function CharacterTile({ char }: { char: HanziCharacter }) {
-  const db = useDb();
-  const { data: entries } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.dictionarySearch })
-        .where(({ entry }) => eq(entry.hanzi, char)),
-    [db.dictionarySearch, char],
-  );
-
-  const pinyin = entries[0]?.pinyin?.[0];
-  const gloss = entries[0]?.gloss[0];
-
-  return (
-    <Link href={`/wiki/${encodeURIComponent(char)}`} asChild>
-      <View className="min-w-[72px] flex-1 items-center gap-1 rounded-lg bg-fg/5 p-3">
-        <Text className="font-sans text-[32px] font-semibold leading-none text-fg-loud">
-          {char}
-        </Text>
-        {pinyin == null ? null : (
-          <Text className="font-sans text-xs text-fg-dim">{pinyin}</Text>
-        )}
-        {gloss == null ? null : (
-          <Text
-            className="text-center font-sans text-xs text-fg"
-            numberOfLines={2}
-          >
-            {gloss}
-          </Text>
-        )}
-      </View>
-    </Link>
   );
 }
