@@ -1,7 +1,5 @@
 import { intersperse } from "@/client/react";
 import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
-import type { DictionarySearchEntry } from "@/client/query";
-import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText, HskLevel } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
@@ -9,14 +7,13 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 import { HskLozenge } from "./HskLozenge";
 import { RectButton } from "./RectButton";
-import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";
+import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 
 export interface WikiHanziHeaderOverviewDataProps {
   hskLevels: readonly HskLevel[];
   glosses: readonly string[] | undefined;
   hanzi: HanziText;
   pinyins: readonly string[] | undefined;
-  meanings: readonly DictionarySearchEntry[] | undefined;
 }
 
 export function WikiHanziHeaderOverview({
@@ -24,7 +21,6 @@ export function WikiHanziHeaderOverview({
   hanzi,
   pinyins,
   glosses,
-  meanings,
   hanziScrollRef,
   ...rest
 }: {
@@ -76,11 +72,7 @@ export function WikiHanziHeaderOverview({
           </View>
         )}
         {glosses == null ? null : (
-          <ExpandableGlosses
-            hanzi={hanzi}
-            glosses={glosses}
-            meanings={meanings}
-          />
+          <ExpandableGlosses hanzi={hanzi} glosses={glosses} />
         )}
       </View>
     </View>
@@ -90,44 +82,42 @@ export function WikiHanziHeaderOverview({
 function ExpandableGlosses({
   hanzi,
   glosses,
-  meanings,
 }: {
   hanzi: HanziText;
   glosses: readonly string[];
-  meanings: readonly DictionarySearchEntry[] | undefined;
 }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <>
       <View className="flex-row items-center gap-1">
-        <Text>
-          {intersperse(
-            glosses.map((gloss, i) => (
-              <Text className="font-sans text-[16px] text-fg-loud" key={i}>
-                {gloss}
-              </Text>
-            )),
-            <Text className="text-fg">; </Text>,
-          )}
-        </Text>
-
-        {meanings == null || !isHanziCharacter(hanzi) ? null : (
-          <RectButton
-            iconStart={expanded ? `chevron-up-circled` : `chevron-down-circled`}
-            onPress={() => {
-              setExpanded((value) => !value);
-            }}
-            variant="bare"
-            className="opacity-70"
-          />
-        )}
-      </View>
-      {meanings == null || !isHanziCharacter(hanzi) || !expanded ? null : (
-        <View className="mt-2 rounded-lg bg-fg/5 p-4">
-          <WikiHanziCharacterMeanings hanzi={hanzi} meanings={meanings} />
+        <View className="flex-1">
+          <Text>
+            {intersperse(
+              glosses.map((gloss, i) => (
+                <Text className="font-sans text-[16px] text-fg-loud" key={i}>
+                  {gloss}
+                </Text>
+              )),
+              <Text className="text-fg">; </Text>,
+            )}
+          </Text>
         </View>
-      )}
+
+        <RectButton
+          iconStart={expanded ? `chevron-up-circled` : `chevron-down-circled`}
+          onPress={() => {
+            setExpanded((value) => !value);
+          }}
+          variant="bare"
+          className="opacity-70"
+        />
+      </View>
+      {expanded ? (
+        <View className="mt-2 rounded-lg bg-fg/5 p-4">
+          <WikiHanziMeaningsPanel hanzi={hanzi} />
+        </View>
+      ) : null}
     </>
   );
 }

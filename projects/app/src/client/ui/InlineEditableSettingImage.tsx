@@ -566,7 +566,7 @@ function HintImagePreview({
         className={`w-full items-center justify-center bg-fg-bg5`}
         style={aspectRatio == null ? { height } : { aspectRatio }}
       >
-        <Text className="text-xs text-fg-dim">No image selected</Text>
+        <Text className="font-sans text-xs text-fg-dim">No image selected</Text>
       </View>
     );
   }
