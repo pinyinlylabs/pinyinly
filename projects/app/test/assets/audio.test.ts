@@ -647,6 +647,7 @@ describe(`pinyin sounds`, () => {
         "lià",
         "lié",
         "liě",
+        "liāo",
         "liān",
         "liāng",
         "jián",

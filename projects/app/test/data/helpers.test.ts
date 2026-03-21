@@ -433,6 +433,9 @@ describe(
         `gá 噶`,
         `hāi 嗨`,
         `huī 灰`,
+        `liǎo 了`,
+        `liāo 蹽`,
+        `lòng 衖`,
       ].map((x) => x.split(` `) as [PinyinUnit, HanziCharacter]),
     )(
       `Expected NOT to match: %s → %s`,
