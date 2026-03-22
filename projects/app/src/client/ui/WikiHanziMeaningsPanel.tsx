@@ -50,10 +50,10 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
     <View className="gap-4">
       <View className="flex-row items-center justify-between gap-3">
         <View className="gap-1">
-          <Text className="text-[15px] font-semibold text-fg-loud">
+          <Text className="font-sans text-[15px] font-semibold text-fg-loud">
             Meanings
           </Text>
-          <Text className="text-[13px] text-fg-dim">
+          <Text className="font-sans text-[13px] text-fg-dim">
             Built-in definitions stay read-only. Your meanings can be edited.
           </Text>
         </View>
@@ -66,7 +66,9 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
       </View>
 
       {builtInMeanings.length === 0 && userMeanings.length === 0 ? (
-        <Text className="text-[14px] text-fg-dim">No meanings yet.</Text>
+        <Text className="font-sans text-[14px] text-fg-dim">
+          No meanings yet.
+        </Text>
       ) : (
         <View className="gap-3">
           {builtInMeanings.map((meaning, index) => (
@@ -148,16 +150,20 @@ function DictionaryMeaningListItem({
       <View className="gap-3 rounded-xl border border-fg/10 bg-bg p-4">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1 gap-1">
-            <Text className="text-[16px] font-semibold text-fg-loud">
+            <Text className="font-sans text-[16px] font-semibold text-fg-loud">
               {primaryGloss}
             </Text>
             {primaryPinyin == null ? null : (
-              <Text className="text-[13px] text-fg-dim">{primaryPinyin}</Text>
+              <Text className="font-sans text-[13px] text-fg-dim">
+                {primaryPinyin}
+              </Text>
             )}
           </View>
 
           <View className="rounded-full bg-fg/5 px-2 py-1">
-            <Text className="text-[11px] font-medium uppercase tracking-[0.4px] text-fg-dim">
+            <Text
+              className={`font-sans text-[11px] font-medium uppercase tracking-[0.4px] text-fg-dim`}
+            >
               Built-in
             </Text>
           </View>
@@ -304,7 +310,9 @@ function MeaningListItemFrame({
   return (
     <View className="flex-row items-start gap-3">
       <View className="w-6 items-center pt-4">
-        <Text className="text-[13px] font-semibold text-fg-dim">{index}.</Text>
+        <Text className="font-sans text-[13px] font-semibold text-fg-dim">
+          {index}.
+        </Text>
       </View>
       <View className="flex-1">{children}</View>
     </View>
@@ -320,7 +328,7 @@ function EditableField({
 }) {
   return (
     <View className="gap-1">
-      <Text className="text-[12px] font-medium uppercase text-fg-dim">
+      <Text className="font-sans text-[12px] font-medium uppercase text-fg-dim">
         {label}
       </Text>
       {children}
@@ -331,10 +339,12 @@ function EditableField({
 function LabeledText({ children, label }: { children: string; label: string }) {
   return (
     <View className="gap-1">
-      <Text className="text-[12px] font-medium uppercase text-fg-dim">
+      <Text className="font-sans text-[12px] font-medium uppercase text-fg-dim">
         {label}
       </Text>
-      <Text className="text-[13px] leading-5 text-fg-dim">{children}</Text>
+      <Text className="font-sans text-[13px] leading-5 text-fg-dim">
+        {children}
+      </Text>
     </View>
   );
 }

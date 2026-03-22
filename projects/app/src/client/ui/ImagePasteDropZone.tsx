@@ -150,21 +150,23 @@ export function ImagePasteDropZone({
               resizeMode="cover"
             />
           </View>
-          <Text className="text-[12px] text-fg-dim">
+          <Text className="font-sans text-[12px] text-fg-dim">
             {uploading ? `Uploading...` : `Pasted preview`}
           </Text>
         </View>
       ) : uploading ? (
         <View className="flex-row items-center gap-2">
           <ActivityIndicator size="small" className="text-fg" />
-          <Text className="text-[13px] text-fg">Uploading image...</Text>
+          <Text className="font-sans text-[13px] text-fg">
+            Uploading image...
+          </Text>
         </View>
       ) : (
         <View className="items-center gap-1">
-          <Text className="text-[13px] text-fg">
+          <Text className="font-sans text-[13px] text-fg">
             Click to upload or paste an image anytime
           </Text>
-          <Text className="text-[12px] text-fg-dim">Web only</Text>
+          <Text className="font-sans text-[12px] text-fg-dim">Web only</Text>
         </View>
       )}
     </Pressable>

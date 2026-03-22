@@ -91,7 +91,7 @@ function ExpandableGlosses({
   return (
     <>
       <View className="flex-row items-center gap-1">
-        <View className="flex-1">
+        <View>
           <Text>
             {intersperse(
               glosses.map((gloss, i) => (

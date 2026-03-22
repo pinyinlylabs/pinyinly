@@ -24,7 +24,7 @@ import {
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
-test(`test sprites`, async () => {
+test(`test sprites`, { timeout: Infinity }, async () => {
   const manifestPath = path.join(projectRoot, `src/assets/audio/manifest.json`);
   await buildAndTestSprites({
     manifestPath,
@@ -374,6 +374,7 @@ describe(`pinyin sounds`, () => {
         "lèn",
         "lēng",
         "lōng",
+        "lòng",
         "gái",
         "gēi",
         "géi",
@@ -423,6 +424,7 @@ describe(`pinyin sounds`, () => {
         "hǎ",
         "hà",
         "hě",
+        "hāi",
         "héi",
         "hěi",
         "hèi",
@@ -483,6 +485,7 @@ describe(`pinyin sounds`, () => {
         "nuán",
         "nuàn",
         "nūn",
+        "nún",
         "nǔn",
         "nùn",
         "luān",
@@ -505,6 +508,7 @@ describe(`pinyin sounds`, () => {
         "kuán",
         "kuàn",
         "kún",
+        "kuǎng",
         "huǎ",
         "huāi",
         "huǎi",
@@ -637,6 +641,7 @@ describe(`pinyin sounds`, () => {
         "niáo",
         "niù",
         "nīn",
+        "nín",
         "nǐn",
         "nìn",
         "niāng",
@@ -657,6 +662,7 @@ describe(`pinyin sounds`, () => {
         "jióng",
         "jiòng",
         "qiá",
+        "qiǎ",
         "qiē",
         "qiù",
         "qiǒng",

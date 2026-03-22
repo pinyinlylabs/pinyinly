@@ -6,7 +6,10 @@ import type {
   UserSettingEntityOutput,
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
-import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import {
+  getSettingKeyInfo,
+  useUserSetting,
+} from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
 import type { ReactElement } from "react";
@@ -64,6 +67,8 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   frameConstraint?: ImageFrameConstraintInput | null;
   onUploadError?: (error: string) => void;
   onSaveAiPrompt?: (prompt: string) => void;
+  onChangeImageId?: (imageId: AssetId | null) => void;
+  readonly?: boolean;
   className?: string;
 }
 
@@ -88,6 +93,8 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   frameConstraint,
   onUploadError,
   onSaveAiPrompt,
+  onChangeImageId,
+  readonly = false,
   className,
 }: InlineEditableSettingImageProps<T>) {
   const { value, setValue } = useUserSetting({ setting, key: settingKey });
@@ -108,6 +115,22 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
   const isPointerHoverCapable = usePointerHoverCapability();
   const isInlineRepositioning = inlineEditorAssetId != null;
+
+  if (readonly) {
+    if (imageId == null) {
+      return null;
+    }
+    return (
+      <View className={className}>
+        <HintImagePreview
+          assetId={imageId}
+          imageMeta={{ imageId, crop: imageCrop, imageWidth, imageHeight }}
+          height={previewHeight}
+          aspectRatio={frameAspectRatio}
+        />
+      </View>
+    );
+  }
 
   const historyImageAssetIds: AssetId[] = [];
   const imageMetaById = new Map<AssetId, ImageMeta>();
@@ -146,9 +169,15 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     ]),
   );
 
+  const setSettingValue = (nextValue: UserSettingEntityInput<T> | null) => {
+    setHoveredHintImageId(null);
+    setValue(nextValue);
+    onChangeImageId?.(nextValue?.imageId ?? null);
+  };
+
   const handleSelectHintImage = (assetId: AssetId) => {
     const meta = imageMetaById.get(assetId);
-    setValue({
+    setSettingValue({
       imageId: assetId,
       imageCrop: imageCropValueFromCrop(meta?.crop),
       imageWidth: meta?.imageWidth ?? undefined,
@@ -157,9 +186,8 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     setIsPickerOpen(false);
   };
 
-  const handleAddCustomImage = (assetId: AssetId) => {
-    setValue({ imageId: assetId } as UserSettingEntityInput<T>);
-    setIsPickerOpen(false);
+  const handleUseImage = (assetId: AssetId) => {
+    setSettingValue({ imageId: assetId } as UserSettingEntityInput<T>);
   };
 
   const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
@@ -174,8 +202,13 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const canEditCrop = frameAspectRatio != null && imageId != null;
   const shouldShowPreviewButtons = !isInlineRepositioning;
   const shouldShowPickerPanel = isPickerOpen;
+  const { settingKey: aiPlaygroundStorageKey } = getSettingKeyInfo(
+    setting,
+    settingKey,
+  );
+  const defaultPickerTab = enableAiGeneration ? `create` : `upload`;
   const handleRemoveBackgroundApply = (next: RemoveBackgroundApplyInput) => {
-    setValue({
+    setSettingValue({
       imageId: next.imageId,
       imageCrop: imageCropValueFromCrop(next.imageCrop ?? null),
       imageWidth: next.imageWidth ?? undefined,
@@ -195,7 +228,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
           setInlineEditorAssetId(null);
         }}
         onSave={(result: InlineImageRepositionResult) => {
-          setValue({
+          setSettingValue({
             imageId: inlineEditorAssetId,
             imageCrop: imageCropValueFromCrop(result.crop),
             imageWidth: result.imageWidth,
@@ -226,27 +259,28 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 className={
                   isPointerHoverCapable
                     ? `
-                      pointer-events-none absolute inset-x-3 bottom-3 flex-row items-center
-                      justify-end gap-2 opacity-0
+                      pointer-events-none absolute inset-x-3 top-3 items-end opacity-0
 
                       group-hover:pointer-events-auto group-hover:opacity-100
                     `
-                    : `absolute inset-x-3 bottom-3 flex-row items-center justify-end gap-2`
+                    : `absolute inset-x-3 top-3 items-end`
                 }
               >
-                <RectButton
-                  variant="bare"
-                  onPress={() => {
-                    setIsPickerOpen((current) => !current);
-                  }}
-                >
-                  Change
-                </RectButton>
-                {canEditCrop ? (
-                  <RectButton variant="bare" disabled>
-                    Reposition
+                <View className="shrink flex-row items-center gap-2 rounded bg-bg/80">
+                  <RectButton
+                    variant="bare"
+                    onPress={() => {
+                      setIsPickerOpen((current) => !current);
+                    }}
+                  >
+                    Change
                   </RectButton>
-                ) : null}
+                  {canEditCrop ? (
+                    <RectButton variant="bare" disabled>
+                      Reposition
+                    </RectButton>
+                  ) : null}
+                </View>
               </View>
             ) : null}
           </View>
@@ -277,41 +311,42 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                       className={
                         isPointerHoverCapable
                           ? `
-                            pointer-events-none absolute inset-x-3 bottom-3 flex-row items-center
-                            justify-end gap-2 opacity-0
+                            pointer-events-none absolute inset-x-3 top-3 items-end opacity-0
 
                             group-hover:pointer-events-auto group-hover:opacity-100
                           `
-                          : `absolute inset-x-3 bottom-3 flex-row items-center justify-end gap-2`
+                          : `absolute inset-x-3 top-3 items-end`
                       }
                     >
-                      <RectButton
-                        variant="bare"
-                        onPress={() => {
-                          setIsPickerOpen((current) => !current);
-                        }}
-                      >
-                        Change
-                      </RectButton>
-                      {canEditCrop ? (
+                      <View className="shrink flex-row items-center gap-2 rounded bg-bg/80">
                         <RectButton
-                          variant="bare"
+                          variant="bare2"
                           onPress={() => {
-                            setInlineEditorAssetId(imageId);
+                            setIsPickerOpen((current) => !current);
                           }}
                         >
-                          Reposition
+                          Change
                         </RectButton>
-                      ) : null}
-                      <RectButton
-                        variant="bare"
-                        onPress={() => {
-                          void removeBackground();
-                        }}
-                        disabled={!canRemove || isRemoving}
-                      >
-                        Remove Background
-                      </RectButton>
+                        {canEditCrop ? (
+                          <RectButton
+                            variant="bare2"
+                            onPress={() => {
+                              setInlineEditorAssetId(imageId);
+                            }}
+                          >
+                            Reposition
+                          </RectButton>
+                        ) : null}
+                        <RectButton
+                          variant="bare2"
+                          onPress={() => {
+                            void removeBackground();
+                          }}
+                          disabled={!canRemove || isRemoving}
+                        >
+                          Remove Background
+                        </RectButton>
+                      </View>
                     </View>
                   ) : null}
                 </View>
@@ -337,7 +372,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
         {shouldShowPickerPanel ? (
           <View className="gap-3">
             {enableAiGeneration ? (
-              <Tabs defaultValue="upload" className="mx-1 gap-2">
+              <Tabs defaultValue={defaultPickerTab} className="mx-1 gap-2">
                 <Tabs.List className="flex-row gap-1">
                   <Tabs.Trigger value="create" className="flex-1">
                     Create
@@ -381,7 +416,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                   ) : null}
                   {enablePasteDropZone ? (
                     <ImagePasteDropZone
-                      onUploadComplete={handleAddCustomImage}
+                      onUploadComplete={handleUseImage}
                       onUploadError={onUploadError}
                     />
                   ) : null}
@@ -391,8 +426,9 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                     initialPrompt={initialAiPrompt}
                     aiImageStyle={aiImageStyle}
                     aiReferenceImages={aiReferenceImages}
-                    onImageGenerated={(assetId) => {
-                      handleAddCustomImage(assetId);
+                    playgroundStorageKey={aiPlaygroundStorageKey}
+                    onChangeImage={(assetId) => {
+                      handleUseImage(assetId);
                     }}
                     onError={onUploadError}
                     onSavePrompt={onSaveAiPrompt}
@@ -434,7 +470,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 ) : null}
                 {enablePasteDropZone ? (
                   <ImagePasteDropZone
-                    onUploadComplete={handleAddCustomImage}
+                    onUploadComplete={handleUseImage}
                     onUploadError={onUploadError}
                   />
                 ) : null}

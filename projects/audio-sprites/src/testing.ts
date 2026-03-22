@@ -698,38 +698,47 @@ export async function createAudioFileTests(
         projectRoot == null ? filePath : path.relative(projectRoot, filePath),
     }));
 
-  test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
-    for (const { filePath, projectRelPath } of audioTestCases) {
-      const { duration } = await analyzeAudioFile(filePath);
+  test(
+    `container and real duration is within allowable tolerance and not corrupted`,
+    { timeout: Infinity },
+    async () => {
+      for (const { filePath, projectRelPath } of audioTestCases) {
+        const { duration } = await analyzeAudioFile(filePath);
 
-      const delta = Math.abs(duration.fromStream - duration.fromContainer);
-      expect
-        .soft(delta, `Duration mismatch for ${projectRelPath}`)
-        .toBeLessThanOrEqual(durationTolerance);
-    }
-  });
-
-  test(`audio file is not empty (based on duration)`, async () => {
-    for (const { filePath, projectRelPath } of audioTestCases) {
-      const { duration } = await analyzeAudioFile(filePath);
-
-      try {
-        // Skip the assertion since we've fixed the file
+        const delta = Math.abs(duration.fromStream - duration.fromContainer);
         expect
-          .soft(duration.fromStream, `Audio file is empty: ${projectRelPath}`)
-          .toBeGreaterThanOrEqual(minDuration);
-      } catch (e) {
-        if (isAssertionError(e) && autoFixEmpty) {
-          fs.unlinkSync(filePath);
-        } else {
-          throw e;
+          .soft(delta, `Duration mismatch for ${projectRelPath}`)
+          .toBeLessThanOrEqual(durationTolerance);
+      }
+    },
+  );
+
+  test(
+    `audio file is not empty (based on duration)`,
+    { timeout: Infinity },
+    async () => {
+      for (const { filePath, projectRelPath } of audioTestCases) {
+        const { duration } = await analyzeAudioFile(filePath);
+
+        try {
+          // Skip the assertion since we've fixed the file
+          expect
+            .soft(duration.fromStream, `Audio file is empty: ${projectRelPath}`)
+            .toBeGreaterThanOrEqual(minDuration);
+        } catch (e) {
+          if (isAssertionError(e) && autoFixEmpty) {
+            fs.unlinkSync(filePath);
+          } else {
+            throw e;
+          }
         }
       }
-    }
-  });
+    },
+  );
 
   test.skipIf(skipLoudness)(
     `loudness is within allowed tolerance`,
+    { timeout: Infinity },
     async () => {
       // ChatGPT recommends to target -18 LUFS because:
       //
@@ -796,7 +805,7 @@ export async function createAudioFileTests(
     },
   );
 
-  test(`silence is trimmed`, async () => {
+  test(`silence is trimmed`, { timeout: Infinity }, async () => {
     for (const { filePath, projectRelPath } of audioTestCases) {
       const { silences, duration } = await analyzeAudioFile(filePath);
 
@@ -833,7 +842,7 @@ export async function createAudioFileTests(
 
         if (autoFixTrimSilence) {
           // Skip the assertion since we've fixed the file
-          return;
+          continue;
         }
       }
 

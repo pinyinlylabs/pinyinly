@@ -2,21 +2,54 @@ import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
+import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
+import { aiImagePlaygroundSetting } from "@/data/userSettings";
 import type {
   UserSetting,
   UserSettingImageEntity,
   UserSettingTextEntity,
 } from "@/data/userSettings";
+import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
+import { AssetImage } from "./AssetImage";
 import { RectButton } from "./RectButton";
-import { TextInputSingle } from "./TextInputSingle";
+import { TextInputMulti } from "./TextInputMulti";
+import { Tooltip } from "./Tooltip";
 
 type GeneratedImageFormat = `png` | `jpeg` | `webp`;
+
+type AiImagePlaygroundRole = `user` | `assistant`;
+
+interface AiImagePlaygroundMessage {
+  id: string;
+  role: AiImagePlaygroundRole;
+  text?: string;
+  assetId?: AssetId;
+  createdAtIso: string;
+}
+
+interface AiImagePlaygroundThread {
+  id: string;
+  title: string;
+  draftPrompt: string;
+  createdAtIso: string;
+  updatedAtIso: string;
+  messages: AiImagePlaygroundMessage[];
+}
+
+interface AiImagePlaygroundStateV1 {
+  version: 1;
+  activeThreadId: string | null;
+  threads: AiImagePlaygroundThread[];
+}
+
+const MAX_AI_PLAYGROUND_THREADS = 12;
+const MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD = 40;
 
 /**
  * Declarative reference to an image setting that will be lazily resolved during AI generation.
@@ -37,7 +70,8 @@ export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
   aiImageStyle?: AiImageStyleKind | null;
   aiReferenceImages?: AiReferenceImageDeclaration[];
-  onImageGenerated: (assetId: AssetId) => void;
+  playgroundStorageKey: string;
+  onChangeImage: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
 }
@@ -46,18 +80,45 @@ export function AiImageGenerationPanel({
   initialPrompt = ``,
   aiImageStyle = null,
   aiReferenceImages,
-  onImageGenerated,
+  playgroundStorageKey,
+  onChangeImage,
   onError,
   onSavePrompt,
 }: AiImageGenerationPanelProps) {
-  const [prompt, setPrompt] = useState(initialPrompt);
-  const [generatedImageDataUrl, setGeneratedImageDataUrl] = useState<
-    string | null
-  >(null);
-  const [generatedImageFormat, setGeneratedImageFormat] =
-    useState<GeneratedImageFormat | null>(null);
+  const playgroundSettingResult = useUserSetting({
+    setting: aiImagePlaygroundSetting,
+    key: { settingKey: playgroundStorageKey },
+  });
+
+  const [playgroundState, setPlaygroundState] =
+    useState<AiImagePlaygroundStateV1>(() =>
+      createInitialPlaygroundState(initialPrompt),
+    );
+  const [isLoadedFromSetting, setIsLoadedFromSetting] = useState(false);
+  const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
+  const [previewImageByMessageId, setPreviewImageByMessageId] = useState<
+    Record<string, { imageDataUrl: string; format: GeneratedImageFormat }>
+  >({});
   const [error, setError] = useState<string | null>(null);
-  const [isConfirming, setIsConfirming] = useState(false);
+  const timelineScrollRef = useRef<ScrollView>(null);
+  const hasScrolledInitiallyRef = useRef(false);
+  const previousActiveThreadIdRef = useRef<string | null>(null);
+  const previousMessageCountRef = useRef(0);
+  const playgroundSettingLoading = playgroundSettingResult.isLoading;
+  const playgroundSettingText = playgroundSettingResult.value?.text;
+
+  useEffect(() => {
+    if (playgroundSettingLoading) {
+      return;
+    }
+
+    const parsed = parseAiImagePlaygroundState(
+      playgroundSettingText,
+      initialPrompt,
+    );
+    setPlaygroundState(parsed);
+    setIsLoadedFromSetting(true);
+  }, [initialPrompt, playgroundSettingLoading, playgroundSettingText]);
 
   // Destructure up to 3 reference images
   const [aiReferenceImage1, aiReferenceImage2, aiReferenceImage3] =
@@ -112,83 +173,287 @@ export function AiImageGenerationPanel({
   );
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();
+  const isPointerHoverCapable = usePointerHoverCapability();
 
   const { uploading, uploadImageBlob } = useImageUploader({
-    onUploadComplete: (assetId) => {
-      onImageGenerated(assetId);
+    onUploadComplete: () => {
+      setError(null);
     },
     onUploadError: (errorMessage) => {
       setError(errorMessage);
       onError?.(errorMessage);
-      setIsConfirming(false);
     },
   });
 
+  const persistPlaygroundState = (nextState: AiImagePlaygroundStateV1) => {
+    playgroundSettingResult.setValue(
+      {
+        settingKey: playgroundStorageKey,
+        text: JSON.stringify(nextState),
+      },
+      { skipHistory: true },
+    );
+  };
+
+  const updatePlaygroundState = (
+    updater: (prev: AiImagePlaygroundStateV1) => AiImagePlaygroundStateV1,
+  ) => {
+    setPlaygroundState((prev) => {
+      const next = updater(prev);
+      persistPlaygroundState(next);
+      return next;
+    });
+  };
+
+  const activeThread =
+    playgroundState.threads.find(
+      (thread) => thread.id === playgroundState.activeThreadId,
+    ) ??
+    playgroundState.threads[0] ??
+    null;
+
+  const activeThreadLatestAssistantImageAssetId =
+    activeThread?.messages
+      .slice()
+      .reverse()
+      .find(
+        (message) => message.role === `assistant` && message.assetId != null,
+      )?.assetId ?? null;
+  const activeThreadId = activeThread?.id ?? null;
+  const activeThreadMessageCount = activeThread?.messages.length ?? 0;
+
+  const contextReferenceEntries: Array<{ label: string; assetId: AssetId }> =
+    [];
+
+  if (aiImageStyle != null) {
+    const styleConfig = getAiImageStyleConfig(aiImageStyle);
+    contextReferenceEntries.push({
+      label: styleConfig.stylePrompt,
+      assetId: styleConfig.assetId,
+    });
+  }
+
+  const referenceSettings = [
+    {
+      declaration: aiReferenceImage1,
+      imageSetting: reference1ImageSetting,
+      labelSetting: reference1LabelSetting,
+    },
+    {
+      declaration: aiReferenceImage2,
+      imageSetting: reference2ImageSetting,
+      labelSetting: reference2LabelSetting,
+    },
+    {
+      declaration: aiReferenceImage3,
+      imageSetting: reference3ImageSetting,
+      labelSetting: reference3LabelSetting,
+    },
+  ];
+
+  for (const { declaration, imageSetting, labelSetting } of referenceSettings) {
+    const refImageId = imageSetting?.value?.imageId;
+    if (declaration == null || refImageId == null) {
+      continue;
+    }
+    const label =
+      typeof declaration.label === `string`
+        ? declaration.label
+        : labelSetting?.value?.text;
+    contextReferenceEntries.push({
+      label: (label ?? `Reference image`).trim(),
+      assetId: refImageId,
+    });
+  }
+
+  if (activeThreadLatestAssistantImageAssetId != null) {
+    contextReferenceEntries.push({
+      label: `Previous generated image from this chat`,
+      assetId: activeThreadLatestAssistantImageAssetId,
+    });
+  }
+
+  useEffect(() => {
+    if (!isLoadedFromSetting || activeThreadId == null) {
+      return;
+    }
+
+    const currentThreadId = activeThreadId;
+    const currentMessageCount = activeThreadMessageCount;
+    const previousThreadId = previousActiveThreadIdRef.current;
+    const previousMessageCount = previousMessageCountRef.current;
+
+    if (!hasScrolledInitiallyRef.current) {
+      timelineScrollRef.current?.scrollToEnd({ animated: false });
+      hasScrolledInitiallyRef.current = true;
+    } else if (
+      previousThreadId === currentThreadId &&
+      currentMessageCount > previousMessageCount
+    ) {
+      timelineScrollRef.current?.scrollToEnd({ animated: true });
+    }
+
+    previousActiveThreadIdRef.current = currentThreadId;
+    previousMessageCountRef.current = currentMessageCount;
+  }, [isLoadedFromSetting, activeThreadId, activeThreadMessageCount]);
+
+  const handleCreateThread = () => {
+    updatePlaygroundState((prev) => {
+      const nextThreadIndex = prev.threads.length + 1;
+      const nextThread = createThread(
+        initialPrompt,
+        `Idea ${String(nextThreadIndex)}`,
+      );
+      const nextThreads = [...prev.threads, nextThread].slice(
+        -MAX_AI_PLAYGROUND_THREADS,
+      );
+
+      return {
+        ...prev,
+        activeThreadId: nextThread.id,
+        threads: nextThreads,
+      };
+    });
+    setError(null);
+  };
+
+  const handleSelectThread = (threadId: string) => {
+    updatePlaygroundState((prev) => ({
+      ...prev,
+      activeThreadId: threadId,
+    }));
+    setError(null);
+  };
+
+  const handleDraftPromptChange = (nextPrompt: string) => {
+    if (activeThread == null) {
+      return;
+    }
+
+    updatePlaygroundState((prev) => ({
+      ...prev,
+      threads: prev.threads.map((thread) =>
+        thread.id === activeThread.id
+          ? {
+              ...thread,
+              draftPrompt: nextPrompt,
+              updatedAtIso: new Date().toISOString(),
+            }
+          : thread,
+      ),
+    }));
+  };
+
+  const uploadGeneratedImage = async (
+    imageDataUrl: string,
+    format: GeneratedImageFormat,
+  ): Promise<AssetId> => {
+    const response = await fetch(imageDataUrl);
+    const blob = await response.blob();
+    const assetId = await uploadImageBlob({
+      blob,
+      contentType: `image/${format}`,
+    });
+    if (assetId == null) {
+      throw new Error(`Upload failed`);
+    }
+    return assetId;
+  };
+
   const handleGenerate = async () => {
-    if (prompt.trim().length === 0) {
-      setError(`Please enter a prompt`);
-      onError?.(`Please enter a prompt`);
+    const prompt = activeThread?.draftPrompt.trim() ?? ``;
+    if (activeThread == null || prompt.length === 0) {
+      const promptError = `Please enter a prompt`;
+      setError(promptError);
+      onError?.(promptError);
       return;
     }
 
     setError(null);
-    setGeneratedImageDataUrl(null);
-    setGeneratedImageFormat(null);
+
+    const nowIso = new Date().toISOString();
+    const userMessageId = nanoid();
+    const assistantMessageId = nanoid();
+
+    updatePlaygroundState((prev) => ({
+      ...prev,
+      threads: prev.threads.map((thread) => {
+        if (thread.id !== activeThread.id) {
+          return thread;
+        }
+
+        const nextMessages = [
+          ...thread.messages,
+          {
+            id: userMessageId,
+            role: `user` as const,
+            text: prompt,
+            createdAtIso: nowIso,
+          },
+        ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
+
+        return {
+          ...thread,
+          title:
+            thread.title.trim().length === 0
+              ? buildThreadTitleFromPrompt(prompt)
+              : thread.title,
+          draftPrompt: ``,
+          updatedAtIso: nowIso,
+          messages: nextMessages,
+        };
+      }),
+    }));
+
+    onSavePrompt?.(prompt);
 
     try {
-      // Build reference images array
-      const referenceImages: Array<{ label?: string; assetId: AssetId }> = [];
-
-      // Add style image as first reference if selected
-      if (aiImageStyle != null) {
-        const config = getAiImageStyleConfig(aiImageStyle);
-        referenceImages.push({
-          label: config.stylePrompt,
-          assetId: config.assetId,
-        });
-      }
-
-      // Process reference images
-      const referenceSettings = [
-        {
-          declaration: aiReferenceImage1,
-          imageSetting: reference1ImageSetting,
-          labelSetting: reference1LabelSetting,
-        },
-        {
-          declaration: aiReferenceImage2,
-          imageSetting: reference2ImageSetting,
-          labelSetting: reference2LabelSetting,
-        },
-        {
-          declaration: aiReferenceImage3,
-          imageSetting: reference3ImageSetting,
-          labelSetting: reference3LabelSetting,
-        },
-      ];
-
-      for (const {
-        declaration,
-        imageSetting,
-        labelSetting,
-      } of referenceSettings) {
-        const refImageId = imageSetting?.value?.imageId;
-        if (declaration != null && refImageId != null) {
-          const label =
-            typeof declaration.label === `string`
-              ? declaration.label
-              : labelSetting?.value?.text;
-          referenceImages.push({ label, assetId: refImageId });
-        }
-      }
-
       const result = await generateMutation.mutateAsync({
-        prompt: prompt.trim(),
+        prompt,
         referenceImages:
-          referenceImages.length > 0 ? referenceImages : undefined,
+          contextReferenceEntries.length > 0
+            ? contextReferenceEntries
+            : undefined,
       });
-      setGeneratedImageDataUrl(result.imageDataUrl);
-      setGeneratedImageFormat(result.format);
+
+      const assetId = await uploadGeneratedImage(
+        result.imageDataUrl,
+        result.format,
+      );
+
+      setPreviewImageByMessageId((prev) => ({
+        ...prev,
+        [assistantMessageId]: {
+          imageDataUrl: result.imageDataUrl,
+          format: result.format,
+        },
+      }));
+
+      updatePlaygroundState((prev) => ({
+        ...prev,
+        threads: prev.threads.map((thread) => {
+          if (thread.id !== activeThread.id) {
+            return thread;
+          }
+
+          const nextMessages = [
+            ...thread.messages,
+            {
+              id: assistantMessageId,
+              role: `assistant` as const,
+              text: `Generated image`,
+              assetId,
+              createdAtIso: new Date().toISOString(),
+            },
+          ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
+
+          return {
+            ...thread,
+            updatedAtIso: new Date().toISOString(),
+            messages: nextMessages,
+          };
+        }),
+      }));
     } catch (err) {
       console.error(`AI image generation failed:`, err);
       const errorMsg = `Unable to generate image right now.`;
@@ -197,105 +462,389 @@ export function AiImageGenerationPanel({
     }
   };
 
-  const handleConfirm = async () => {
-    if (generatedImageDataUrl == null || generatedImageFormat == null) {
-      return;
-    }
-
-    setIsConfirming(true);
-    setError(null);
-
-    try {
-      // Convert data URL to blob
-      const response = await fetch(generatedImageDataUrl);
-      const blob = await response.blob();
-
-      // Save prompt if callback provided
-      onSavePrompt?.(prompt.trim());
-
-      // Upload to S3
-      await uploadImageBlob({
-        blob,
-        contentType: `image/${generatedImageFormat}`,
-      });
-    } catch (err) {
-      console.error(`Failed to confirm image:`, err);
-      const errorMsg = `Failed to save image`;
-      setError(errorMsg);
-      onError?.(errorMsg);
-      setIsConfirming(false);
-    }
-  };
-
   const isGenerating = generateMutation.isPending;
-  const isProcessing = isGenerating || uploading || isConfirming;
-  const hasGenerated = generatedImageDataUrl != null;
+  const isProcessing = isGenerating || uploading;
 
   return (
-    <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
-      <View className="gap-1">
-        <Text className="pyly-body-subheading">Image prompt</Text>
-        <Text className="text-[14px] text-fg-dim">
-          Describe the image you want to generate
-        </Text>
-      </View>
-
-      <TextInputSingle
-        value={prompt}
-        onChangeText={setPrompt}
-        placeholder="Describe the image..."
-        editable={!isProcessing}
-      />
-
-      <View className="flex-row items-center justify-end gap-2">
-        <RectButton
-          variant="filled"
-          onPress={() => {
-            void handleGenerate();
-          }}
-          disabled={isProcessing || prompt.trim().length === 0}
-        >
-          {hasGenerated ? `Regenerate` : `Generate`}
-        </RectButton>
-      </View>
-
-      {error == null ? null : (
-        <Text className="text-[14px] text-[crimson]">{error}</Text>
-      )}
-
-      {isGenerating ? (
-        <Text className="text-[14px] text-fg-dim">Generating image...</Text>
-      ) : null}
-
-      {hasGenerated ? (
-        <View className="gap-2">
-          <Text className="pyly-body-subheading">Preview</Text>
-          <View className="items-center rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
-            <Image
-              source={{ uri: generatedImageDataUrl }}
-              style={{ width: 300, height: 150 }}
-              resizeMode="contain"
-            />
+    <View className="h-[560px] p-4">
+      <View className="h-full flex-row items-stretch gap-4">
+        <View className="h-full w-[180px] shrink-0 gap-2">
+          <View className="flex-row items-center justify-between">
+            <Text className="pyly-body-subheading">Chats</Text>
+            <RectButton
+              variant="bare2"
+              iconStart="add"
+              iconSize={16}
+              onPress={handleCreateThread}
+              disabled={isProcessing || !isLoadedFromSetting}
+            >
+              New
+            </RectButton>
           </View>
-          <Text className="text-[13px] text-fg-dim">
-            Review the image and click Generate to save it, or Regenerate to try
-            again with the same or different prompt.
-          </Text>
-          <RectButton
-            variant="filled"
-            onPress={() => {
-              void handleConfirm();
-            }}
-            disabled={isProcessing}
-          >
-            Generate
-          </RectButton>
-        </View>
-      ) : null}
 
-      {isConfirming || uploading ? (
-        <Text className="text-[14px] text-fg-dim">Saving image...</Text>
-      ) : null}
-    </ScrollView>
+          <ScrollView
+            className="flex-1"
+            contentContainerClassName="items-start gap-2 pb-2"
+          >
+            {playgroundState.threads.map((thread) => {
+              const isActive = thread.id === activeThread?.id;
+              return (
+                <RectButton
+                  key={thread.id}
+                  variant="bare2"
+                  onPress={() => {
+                    handleSelectThread(thread.id);
+                  }}
+                  disabled={isProcessing}
+                  className={
+                    isActive
+                      ? `justify-start self-start opacity-100`
+                      : `justify-start self-start opacity-80`
+                  }
+                >
+                  {thread.title}
+                </RectButton>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        <View className="w-px self-stretch bg-fg-bg10" />
+
+        <View className="h-full min-w-0 flex-1 gap-3">
+          {isLoadedFromSetting ? null : (
+            <Text className="font-sans text-[13px] text-fg-dim">
+              Loading chats...
+            </Text>
+          )}
+
+          <View className="min-h-0 flex-1 gap-2">
+            <ScrollView
+              ref={timelineScrollRef}
+              className="flex-1"
+              contentContainerClassName="gap-6 pb-2"
+            >
+              {activeThread == null || activeThread.messages.length === 0 ? (
+                <Text className="font-sans text-[14px] text-fg-dim">
+                  Start by entering a prompt below.
+                </Text>
+              ) : (
+                activeThread.messages.map((message) => {
+                  const previewImage =
+                    previewImageByMessageId[message.id] ?? null;
+                  return (
+                    <View
+                      key={message.id}
+                      className={
+                        message.role === `user`
+                          ? `ml-2 rounded-lg bg-sky/10 p-3`
+                          : `mr-2`
+                      }
+                    >
+                      {message.role !== `assistant` &&
+                      message.text != null &&
+                      message.text.length > 0 ? (
+                        <Text className="font-sans text-[14px] text-fg">
+                          {message.text}
+                        </Text>
+                      ) : null}
+                      {previewImage == null &&
+                      message.assetId == null ? null : (
+                        <View className="gap-2">
+                          <View className="group relative w-[280px]">
+                            {previewImage == null ? (
+                              message.assetId == null ? null : (
+                                <AssetImage
+                                  assetId={message.assetId}
+                                  className="h-[140px] w-[280px] rounded-md"
+                                  contentFit="contain"
+                                />
+                              )
+                            ) : (
+                              <Image
+                                source={{ uri: previewImage.imageDataUrl }}
+                                style={{
+                                  width: 280,
+                                  height: 140,
+                                  borderRadius: 8,
+                                }}
+                                resizeMode="contain"
+                              />
+                            )}
+
+                            {message.role === `assistant` &&
+                            message.assetId != null ? (
+                              <View
+                                className={
+                                  isPointerHoverCapable
+                                    ? `
+                                      pointer-events-none absolute inset-x-3 top-3 items-start
+                                      opacity-0
+
+                                      group-hover:pointer-events-auto group-hover:opacity-100
+                                    `
+                                    : `absolute inset-x-3 top-3 items-start`
+                                }
+                              >
+                                <RectButton
+                                  variant="bare2"
+                                  className="rounded bg-bg/80 text-[12px]"
+                                  onPress={() => {
+                                    if (message.assetId == null) {
+                                      return;
+                                    }
+                                    onChangeImage(message.assetId);
+                                  }}
+                                  disabled={isProcessing}
+                                >
+                                  Use image
+                                </RectButton>
+                              </View>
+                            ) : null}
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })
+              )}
+            </ScrollView>
+          </View>
+
+          <View className="gap-1 pt-3">
+            <View
+              className={
+                isPromptInputFocused
+                  ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
+                  : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
+              }
+            >
+              <TextInputMulti
+                value={activeThread?.draftPrompt ?? ``}
+                onChangeText={handleDraftPromptChange}
+                placeholder="Describe how to create or modify the image in this chat"
+                className="rounded-none bg-transparent p-0 text-[13px] leading-5"
+                editable={
+                  isLoadedFromSetting && !isProcessing && activeThread != null
+                }
+                onFocus={() => {
+                  setIsPromptInputFocused(true);
+                }}
+                onBlur={() => {
+                  setIsPromptInputFocused(false);
+                }}
+              />
+
+              <View className="flex-row items-center justify-between gap-2">
+                <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
+                  {contextReferenceEntries.map((entry) => (
+                    <Tooltip
+                      key={`${entry.assetId}-${entry.label}`}
+                      placement="top"
+                      sideOffset={6}
+                    >
+                      <Tooltip.Trigger className="rounded border border-fg-bg10">
+                        <AssetImage
+                          assetId={entry.assetId}
+                          className="size-9 rounded"
+                          contentFit="cover"
+                        />
+                      </Tooltip.Trigger>
+                      <Tooltip.Content className="gap-2 p-2">
+                        <AssetImage
+                          assetId={entry.assetId}
+                          className="h-[110px] w-[180px] rounded border border-fg-bg10"
+                          contentFit="cover"
+                        />
+                        <Text className="font-sans text-[12px] uppercase text-fg-dim">
+                          Prompt context
+                        </Text>
+                        <Text className="font-sans text-[13px] text-fg-dim">
+                          {entry.label}
+                        </Text>
+                      </Tooltip.Content>
+                    </Tooltip>
+                  ))}
+                </View>
+
+                <RectButton
+                  variant="bare2"
+                  onPress={() => {
+                    void handleGenerate();
+                  }}
+                  disabled={
+                    !isLoadedFromSetting ||
+                    isProcessing ||
+                    activeThread == null ||
+                    activeThread.draftPrompt.trim().length === 0
+                  }
+                >
+                  {isGenerating ? `Generating...` : `Send`}
+                </RectButton>
+              </View>
+            </View>
+
+            {error == null ? null : (
+              <Text className="font-sans text-[14px] text-[crimson]">
+                {error}
+              </Text>
+            )}
+
+            {uploading ? (
+              <Text className="font-sans text-[14px] text-fg-dim">
+                Uploading generated image...
+              </Text>
+            ) : null}
+          </View>
+        </View>
+      </View>
+    </View>
   );
+}
+
+function createThread(
+  initialPrompt: string,
+  title: string,
+): AiImagePlaygroundThread {
+  const nowIso = new Date().toISOString();
+  return {
+    id: nanoid(),
+    title,
+    draftPrompt: initialPrompt,
+    createdAtIso: nowIso,
+    updatedAtIso: nowIso,
+    messages: [],
+  };
+}
+
+function createInitialPlaygroundState(
+  initialPrompt: string,
+): AiImagePlaygroundStateV1 {
+  const firstThread = createThread(initialPrompt, `Idea 1`);
+  return {
+    version: 1,
+    activeThreadId: firstThread.id,
+    threads: [firstThread],
+  };
+}
+
+function buildThreadTitleFromPrompt(prompt: string): string {
+  const trimmed = prompt.trim();
+  if (trimmed.length === 0) {
+    return `Untitled`;
+  }
+  if (trimmed.length <= 24) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, 24)}...`;
+}
+
+function parseAiImagePlaygroundState(
+  raw: string | null | undefined,
+  initialPrompt: string,
+): AiImagePlaygroundStateV1 {
+  if (raw == null || raw.trim().length === 0) {
+    return createInitialPlaygroundState(initialPrompt);
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as {
+      version?: unknown;
+      activeThreadId?: unknown;
+      threads?: unknown;
+    };
+
+    if (parsed.version !== 1 || !Array.isArray(parsed.threads)) {
+      return createInitialPlaygroundState(initialPrompt);
+    }
+
+    const threads: AiImagePlaygroundThread[] = [];
+
+    for (const threadValue of parsed.threads) {
+      if (typeof threadValue !== `object` || threadValue == null) {
+        continue;
+      }
+
+      const threadObject = threadValue as Record<string, unknown>;
+      if (
+        typeof threadObject[`id`] !== `string` ||
+        typeof threadObject[`title`] !== `string` ||
+        typeof threadObject[`createdAtIso`] !== `string` ||
+        typeof threadObject[`updatedAtIso`] !== `string`
+      ) {
+        continue;
+      }
+
+      const draftPrompt =
+        typeof threadObject[`draftPrompt`] === `string`
+          ? threadObject[`draftPrompt`]
+          : ``;
+
+      const rawMessages = Array.isArray(threadObject[`messages`])
+        ? threadObject[`messages`]
+        : [];
+
+      const messages: AiImagePlaygroundMessage[] = [];
+      for (const messageValue of rawMessages) {
+        if (typeof messageValue !== `object` || messageValue == null) {
+          continue;
+        }
+
+        const messageObject = messageValue as Record<string, unknown>;
+        if (
+          typeof messageObject[`id`] !== `string` ||
+          (messageObject[`role`] !== `user` &&
+            messageObject[`role`] !== `assistant`) ||
+          typeof messageObject[`createdAtIso`] !== `string`
+        ) {
+          continue;
+        }
+
+        messages.push({
+          id: messageObject[`id`],
+          role: messageObject[`role`],
+          text:
+            typeof messageObject[`text`] === `string`
+              ? messageObject[`text`]
+              : undefined,
+          assetId:
+            typeof messageObject[`assetId`] === `string`
+              ? (messageObject[`assetId`] as AssetId)
+              : undefined,
+          createdAtIso: messageObject[`createdAtIso`],
+        });
+      }
+
+      threads.push({
+        id: threadObject[`id`],
+        title: threadObject[`title`],
+        draftPrompt,
+        createdAtIso: threadObject[`createdAtIso`],
+        updatedAtIso: threadObject[`updatedAtIso`],
+        messages: messages.slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD),
+      });
+    }
+
+    if (threads.length === 0) {
+      return createInitialPlaygroundState(initialPrompt);
+    }
+
+    const activeThreadId =
+      typeof parsed.activeThreadId === `string` &&
+      threads.some((thread) => thread.id === parsed.activeThreadId)
+        ? parsed.activeThreadId
+        : (threads[0]?.id ?? null);
+
+    if (activeThreadId == null) {
+      return createInitialPlaygroundState(initialPrompt);
+    }
+
+    return {
+      version: 1,
+      activeThreadId,
+      threads: threads.slice(-MAX_AI_PLAYGROUND_THREADS),
+    };
+  } catch {
+    return createInitialPlaygroundState(initialPrompt);
+  }
 }

@@ -127,6 +127,13 @@ export const aiImageStyleSetting = defineUserSetting({
   defaultValue: () => ({ text: `comic` }),
 });
 
+export const aiImagePlaygroundSetting = defineUserSetting({
+  entity: r.entity(`aiip/[settingKey]`, {
+    settingKey: r.string().alias(`k`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
 // Sounds
 
 export const pinyinSoundNameSetting = defineUserSetting({
@@ -385,6 +392,7 @@ export const userHanziMeaningDefs = [
 
 export const userSettingDefinitions = [
   aiImageStyleSetting,
+  aiImagePlaygroundSetting,
   autoCheckUserSetting,
   userNameSetting,
   quickSearchPickSetting,
