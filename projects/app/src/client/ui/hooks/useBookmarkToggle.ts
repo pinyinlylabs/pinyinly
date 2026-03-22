@@ -4,7 +4,7 @@ import {
   prioritizedWordItemSetting,
 } from "@/data/userSettings";
 
-export interface UsePriorityWordToggleResult {
+export interface UseBookmarkToggleResult {
   isPriority: boolean;
   isLoading: boolean;
   toggle: () => void;
@@ -16,9 +16,7 @@ export interface UsePriorityWordToggleResult {
  * Hook to toggle a word's priority status.
  * Provides isPriority state and toggle/add/remove functions.
  */
-export function usePriorityWordToggle(
-  word: string,
-): UsePriorityWordToggleResult {
+export function useBookmarkToggle(word: string): UseBookmarkToggleResult {
   const keyParams = getPrioritizedWordKeyParams(word);
   const setting = useUserSetting({
     setting: prioritizedWordItemSetting,

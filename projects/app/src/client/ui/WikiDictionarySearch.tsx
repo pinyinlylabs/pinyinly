@@ -1,4 +1,4 @@
-import { usePriorityWordToggle } from "@/client/ui/hooks/usePriorityWordToggle";
+import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
 import type { HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -8,7 +8,9 @@ import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { useDb } from "./hooks/useDb";
 import { Icon } from "./Icon";
+import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
+import { Tooltip } from "./Tooltip";
 
 const maxResults = 24;
 
@@ -81,7 +83,7 @@ interface SearchResultCardProps {
 }
 
 function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
-  const { isPriority, toggle } = usePriorityWordToggle(result.hanzi);
+  const { isPriority, toggle } = useBookmarkToggle(result.hanzi);
   const showBookmark = result.kind === `hanziWord`;
 
   return (
@@ -102,19 +104,24 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         ) : null}
       </View>
       {showBookmark ? (
-        <Pressable
-          onPress={(e) => {
-            e.stopPropagation();
-            toggle();
-          }}
-          className="p-2"
-        >
-          <Icon
-            icon={isPriority ? `bookmark-filled` : `bookmark`}
-            size={20}
-            className="text-fg-dim"
-          />
-        </Pressable>
+        <Tooltip>
+          <Tooltip.Trigger asChild>
+            <RectButton
+              variant="bare2"
+              iconStart={isPriority ? `bookmark-filled` : `bookmark`}
+              iconSize={20}
+              className="text-fg-dim"
+              onPress={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                toggle();
+              }}
+            />
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            <Text className="text-sm text-fg">Bookmark</Text>
+          </Tooltip.Content>
+        </Tooltip>
       ) : null}
     </Pressable>
   );
