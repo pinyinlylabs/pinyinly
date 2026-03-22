@@ -3,6 +3,7 @@
 export const iconRegistry = {
   // <pyly-glob-template glob="../../assets/icons/*.svg" template="  [`${filenameWithoutExt}`]: require(`${path}`),">
   [`add-circled-filled`]: require(`../../assets/icons/add-circled-filled.svg`),
+  [`add`]: require(`../../assets/icons/add.svg`),
   [`alarm-filled`]: require(`../../assets/icons/alarm-filled.svg`),
   [`alarm`]: require(`../../assets/icons/alarm.svg`),
   [`arrow-down`]: require(`../../assets/icons/arrow-down.svg`),
@@ -32,6 +33,7 @@ export const iconRegistry = {
   [`close`]: require(`../../assets/icons/close.svg`),
   [`document`]: require(`../../assets/icons/document.svg`),
   [`dumbbell`]: require(`../../assets/icons/dumbbell.svg`),
+  [`expand`]: require(`../../assets/icons/expand.svg`),
   [`flag-1`]: require(`../../assets/icons/flag-1.svg`),
   [`flag`]: require(`../../assets/icons/flag.svg`),
   [`flame-filled`]: require(`../../assets/icons/flame-filled.svg`),

@@ -1,6 +1,8 @@
+import type { DictionarySearchEntry } from "@/client/query";
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
+import { hanziFromHanziWord } from "@/dictionary";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
@@ -22,6 +24,7 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
@@ -38,15 +41,59 @@ import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { Tooltip } from "./Tooltip";
 import { WikiTitledBox } from "./WikiTitledBox";
+import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
+import { useDb } from "./hooks/useDb";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { parseImageCrop } from "./imageCrop";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
+}: {
+  hanzi: HanziText;
+}) {
+  const db = useDb();
+  const { data: meanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          hanziWord: entry.hanziWord,
+          gloss: entry.gloss,
+          pinyin: entry.pinyin,
+        })),
+    [db.dictionarySearch, hanzi],
+  );
+  const pronunciation = getSharedPrimaryPronunciation(meanings);
+  const firstMeaning = meanings[0];
+
+  if (pronunciation == null || firstMeaning == null) {
+    return null;
+  }
+
+  const gloss = firstMeaning.gloss[0];
+
+  if (gloss == null) {
+    return null;
+  }
+
+  return (
+    <WikiHanziCharacterPronunciationBox
+      gloss={gloss}
+      hanzi={hanziFromHanziWord(firstMeaning.hanziWord)}
+      pinyinUnit={pronunciation.pinyinUnit}
+    />
+  );
+}
+
+export function WikiHanziCharacterPronunciationBox({
+  hanzi,
   pinyinUnit,
   gloss,
 }: {
-  gloss: string;
+  gloss: Pick<DictionarySearchEntry, `gloss`>[`gloss`][number];
   hanzi: HanziText;
   pinyinUnit: PinyinUnit;
 }) {
@@ -172,11 +219,30 @@ export function WikiHanziCharacterPronunciation({
     setting: hanziPronunciationHintExplanationSetting,
     key: hintSettingKey,
   });
+  const hintImageSetting = useUserSetting({
+    setting: hanziPronunciationHintImageSetting,
+    key: hintSettingKey,
+  });
   const imagePromptSetting = useUserSetting({
     setting: hanziPronunciationHintImagePromptSetting,
     key: hintSettingKey,
   });
   const [showAiModal, setShowAiModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
+  const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
+
+  const hintText = hintTextSetting.value?.text ?? ``;
+  const hintExplanation = hintExplanationSetting.value?.text ?? ``;
+  const hintImage = hintImageSetting.value;
+  const hasHintContent = hintText.length > 0 || hintExplanation.length > 0;
+  const hasImageContent = hintImage?.imageId != null;
+  const isHintSectionVisible = isEditMode
+    ? (showHintEditor ?? hasHintContent)
+    : hasHintContent;
+  const isImageSectionVisible = isEditMode
+    ? (showImageEditor ?? hasImageContent)
+    : hasImageContent;
 
   // Declarative reference images for AI generation
   const aiReferenceImages: AiReferenceImageDeclaration[] | undefined =
@@ -203,7 +269,20 @@ export function WikiHanziCharacterPronunciation({
   };
 
   return (
-    <WikiTitledBox title="Remember the pronunciation" className="mx-4 mt-4">
+    <WikiTitledBox
+      title="Remember the pronunciation"
+      className="mx-4 mt-4"
+      headerAction={
+        <RectButton
+          variant="bare2"
+          onPress={() => {
+            setIsEditMode((current) => !current);
+          }}
+        >
+          {isEditMode ? `Done` : `Change`}
+        </RectButton>
+      }
+    >
       <View className="gap-4 p-4">
         <Text className="pyly-body">
           <Text className="pyly-bold">{hanzi}</Text> is pronounced{` `}
@@ -272,13 +351,16 @@ export function WikiHanziCharacterPronunciation({
           </View>
         </View>
       )}
-      {__DEV__ ? (
+      {isEditMode ? (
         <View className="flex-row items-start gap-4 p-4">
           <RectButton
             variant="bare2"
             iconStart="keyboard"
             iconSize={20}
             className="opacity-80"
+            onPress={() => {
+              setShowHintEditor((current) => !(current ?? hasHintContent));
+            }}
           >
             Add hint
           </RectButton>
@@ -287,84 +369,156 @@ export function WikiHanziCharacterPronunciation({
             iconStart="photos-filled"
             iconSize={20}
             className="opacity-80"
+            onPress={() => {
+              setShowImageEditor((current) => !(current ?? hasImageContent));
+            }}
           >
             Add image
           </RectButton>
         </View>
       ) : null}
 
-      <View className="gap-4 p-4">
-        <Text className="pyly-body-subheading">Your pronunciation hint</Text>
+      {isHintSectionVisible || isImageSectionVisible ? (
+        <View className="gap-4 p-4">
+          {isHintSectionVisible ? (
+            isEditMode ? (
+              <>
+                <Text className="pyly-body-subheading">
+                  Your pronunciation hint
+                </Text>
 
-        <View className="gap-2">
-          <InlineEditableSettingText
-            variant="hint"
-            setting={hanziPronunciationHintTextSetting}
-            settingKey={hintSettingKey}
-            placeholder="Add a hint"
-            renderDisplay={(value) => <Pylymark source={value} />}
-          />
+                <View className="gap-2">
+                  <InlineEditableSettingText
+                    variant="hint"
+                    setting={hanziPronunciationHintTextSetting}
+                    settingKey={hintSettingKey}
+                    placeholder="Add a hint"
+                    renderDisplay={(value) => <Pylymark source={value} />}
+                    onSaveValue={(nextHintText) => {
+                      const nextHintTextLength = nextHintText?.length ?? 0;
+                      const currentExplanationLength =
+                        hintExplanationSetting.value?.text.length ?? 0;
+                      if (
+                        nextHintTextLength === 0 &&
+                        currentExplanationLength === 0
+                      ) {
+                        setShowHintEditor(false);
+                      } else {
+                        setShowHintEditor(true);
+                      }
+                    }}
+                  />
 
-          <InlineEditableSettingText
-            variant="hintExplanation"
-            setting={hanziPronunciationHintExplanationSetting}
-            settingKey={hintSettingKey}
-            placeholder="Add an explanation"
-            multiline
-            renderDisplay={(value) => <Pylymark source={value} />}
-          />
+                  <InlineEditableSettingText
+                    variant="hintExplanation"
+                    setting={hanziPronunciationHintExplanationSetting}
+                    settingKey={hintSettingKey}
+                    placeholder="Add an explanation"
+                    multiline
+                    renderDisplay={(value) => <Pylymark source={value} />}
+                    onSaveValue={(nextExplanation) => {
+                      const nextExplanationLength =
+                        nextExplanation?.length ?? 0;
+                      const currentHintTextLength =
+                        hintTextSetting.value?.text.length ?? 0;
+                      if (
+                        currentHintTextLength === 0 &&
+                        nextExplanationLength === 0
+                      ) {
+                        setShowHintEditor(false);
+                      } else {
+                        setShowHintEditor(true);
+                      }
+                    }}
+                  />
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                  <Text className="font-sans text-[13px] text-fg-dim">
+                    Want help brainstorming a hint?
+                  </Text>
+                  <RectButton
+                    variant="bare"
+                    onPress={() => {
+                      setShowAiModal(true);
+                    }}
+                    disabled={splitPinyin == null}
+                  >
+                    Use AI
+                  </RectButton>
+                </View>
+              </>
+            ) : (
+              <View className="gap-2">
+                <Text className="pyly-body-subheading">
+                  Your pronunciation hint
+                </Text>
+                {hintText.length > 0 ? <Pylymark source={hintText} /> : null}
+                {hintExplanation.length > 0 ? (
+                  <Pylymark source={hintExplanation} />
+                ) : null}
+              </View>
+            )
+          ) : null}
+
+          {isImageSectionVisible ? (
+            isEditMode ? (
+              <View className="gap-2 pt-2">
+                <View className="gap-1">
+                  <Text className="pyly-body-subheading">Choose an image</Text>
+                  <Text className="font-sans text-[14px] text-fg-dim">
+                    Pick the image that should appear on the wiki page
+                  </Text>
+                </View>
+
+                <InlineEditableSettingImage
+                  setting={hanziPronunciationHintImageSetting}
+                  settingKey={hintSettingKey}
+                  previewHeight={200}
+                  tileSize={64}
+                  enablePasteDropZone
+                  enableAiGeneration
+                  aiImageStyle={aiImageStyle}
+                  aiReferenceImages={aiReferenceImages}
+                  initialAiPrompt={
+                    imagePromptSetting.value?.text ??
+                    ([hintText, hintExplanation]
+                      .filter((v) => v.length > 0)
+                      .join(` - `) ||
+                      `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`)
+                  }
+                  frameConstraint={{ aspectRatio: 2 }}
+                  onUploadError={handleUploadError}
+                  onSaveAiPrompt={(prompt) => {
+                    imagePromptSetting.setValue({
+                      ...getHanziPronunciationHintKeyParams(hanzi, pinyinUnit),
+                      text: prompt,
+                    });
+                  }}
+                  onChangeImageId={(nextImageId) => {
+                    if (nextImageId == null) {
+                      setShowImageEditor(false);
+                    } else {
+                      setShowImageEditor(true);
+                    }
+                  }}
+                />
+              </View>
+            ) : hintImage?.imageId == null ? null : (
+              <View className="gap-2 pt-2">
+                <Text className="pyly-body-subheading">Your image</Text>
+                <InlineEditableSettingImage
+                  readonly
+                  setting={hanziPronunciationHintImageSetting}
+                  settingKey={hintSettingKey}
+                  previewHeight={200}
+                  frameConstraint={{ aspectRatio: 2 }}
+                />
+              </View>
+            )
+          ) : null}
         </View>
-
-        <View className="flex-row items-center justify-between">
-          <Text className="font-sans text-[13px] text-fg-dim">
-            Want help brainstorming a hint?
-          </Text>
-          <RectButton
-            variant="bare"
-            onPress={() => {
-              setShowAiModal(true);
-            }}
-            disabled={splitPinyin == null}
-          >
-            Use AI
-          </RectButton>
-        </View>
-
-        <View className="gap-2 pt-2">
-          <View className="gap-1">
-            <Text className="pyly-body-subheading">Choose an image</Text>
-            <Text className="font-sans text-[14px] text-fg-dim">
-              Pick the image that should appear on the wiki page
-            </Text>
-          </View>
-
-          <InlineEditableSettingImage
-            setting={hanziPronunciationHintImageSetting}
-            settingKey={hintSettingKey}
-            previewHeight={200}
-            tileSize={64}
-            enablePasteDropZone
-            enableAiGeneration
-            aiImageStyle={aiImageStyle}
-            aiReferenceImages={aiReferenceImages}
-            initialAiPrompt={
-              imagePromptSetting.value?.text ??
-              ([hintTextSetting.value?.text, hintExplanationSetting.value?.text]
-                .filter((v) => v != null && v.length > 0)
-                .join(` - `) ||
-                `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`)
-            }
-            frameConstraint={{ aspectRatio: 2 }}
-            onUploadError={handleUploadError}
-            onSaveAiPrompt={(prompt) => {
-              imagePromptSetting.setValue({
-                ...getHanziPronunciationHintKeyParams(hanzi, pinyinUnit),
-                text: prompt,
-              });
-            }}
-          />
-        </View>
-      </View>
+      ) : null}
 
       {showAiModal && splitPinyin != null ? (
         <AiPronunciationHintModal
@@ -389,6 +543,7 @@ export function WikiHanziCharacterPronunciation({
           toneNumber={splitPinyin.tone}
           finalToneScene={{ description: finalToneSceneDescription }}
           onApplyHint={({ text, explanation }) => {
+            setShowHintEditor(true);
             hintTextSetting.setValue({
               hanzi,
               pinyin: hintSettingKey.pinyin,

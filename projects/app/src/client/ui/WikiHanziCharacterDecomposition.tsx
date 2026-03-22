@@ -11,7 +11,7 @@ import {
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
@@ -20,6 +20,7 @@ import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
+import { RectButton } from "./RectButton";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useAiImageStyleSetting } from "./hooks/useAiImageStyleSetting";
 import { useDb } from "./hooks/useDb";
@@ -31,6 +32,7 @@ interface WikiHanziCharacterDecompositionProps {
 export function WikiHanziCharacterDecomposition({
   characterData,
 }: WikiHanziCharacterDecompositionProps) {
+  const [isEditMode, setIsEditMode] = useState(false);
   const componentsElements: ReactNode[] = [];
   const db = useDb();
 
@@ -93,7 +95,20 @@ export function WikiHanziCharacterDecomposition({
   }
 
   return (
-    <WikiTitledBox title="Recognize the character" className="mx-4 mt-4">
+    <WikiTitledBox
+      title="Recognize the character"
+      className="mx-4 mt-4"
+      headerAction={
+        <RectButton
+          variant="bare2"
+          onPress={() => {
+            setIsEditMode((current) => !current);
+          }}
+        >
+          {isEditMode ? `Done` : `Change`}
+        </RectButton>
+      }
+    >
       <View className="gap-4 p-4 pb-0">
         {componentsElements.length > 0 ? (
           <>
@@ -126,19 +141,24 @@ export function WikiHanziCharacterDecomposition({
         ) : null}
       </View>
 
-      <View className="my-4 w-full">
-        <CoverImageSection hanzi={characterData.hanzi} />
-      </View>
+      <CoverImageSection hanzi={characterData.hanzi} isEditMode={isEditMode} />
 
       <MeaningsSection
         hanzi={characterData.hanzi}
         mnemonicHints={characterData.mnemonic?.hints}
+        isEditMode={isEditMode}
       />
     </WikiTitledBox>
   );
 }
 
-function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
+function CoverImageSection({
+  hanzi,
+  isEditMode,
+}: {
+  hanzi: HanziText;
+  isEditMode: boolean;
+}) {
   const db = useDb();
   const { data: hanziWordMeanings } = useLiveQuery(
     (q) =>
@@ -189,6 +209,7 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
 
   return (
     <InlineEditableSettingImage
+      readonly={!isEditMode}
       setting={hanziWordMeaningHintImageSetting}
       settingKey={{ hanziWord }}
       presetImageIds={/* TODO */ []}
@@ -214,6 +235,7 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
           text: prompt,
         });
       }}
+      className="my-4 w-full"
     />
   );
 }
@@ -221,11 +243,13 @@ function CoverImageSection({ hanzi }: { hanzi: HanziText }) {
 function MeaningsSection({
   hanzi,
   mnemonicHints,
+  isEditMode,
 }: {
   hanzi: HanziText;
   mnemonicHints:
     | readonly { readonly meaningKey: string; readonly hint: string }[]
     | undefined;
+  isEditMode: boolean;
 }) {
   const db = useDb();
   const { data: hanziWordMeanings } = useLiveQuery(
@@ -267,6 +291,7 @@ function MeaningsSection({
               hanziWord={hanziWord}
               meaning={entry}
               mnemonicHint={matchedHint?.hint}
+              isEditMode={isEditMode}
             />
           );
         })}
@@ -279,13 +304,19 @@ function MeaningItem({
   hanziWord,
   meaning,
   mnemonicHint,
+  isEditMode,
 }: {
   hanziWord: HanziWord;
   meaning: Pick<DictionarySearchEntry, `gloss` | `pinyin` | `hsk`>;
   mnemonicHint: string | undefined;
+  isEditMode: boolean;
 }) {
   const hintSetting = useUserSetting({
     setting: hanziWordMeaningHintTextSetting,
+    key: { hanziWord },
+  });
+  const explanationSetting = useUserSetting({
+    setting: hanziWordMeaningHintExplanationSetting,
     key: { hanziWord },
   });
   const hintSettingTextValue =
@@ -295,6 +326,8 @@ function MeaningItem({
   const displayHint = hintSettingTextValue ?? mnemonicHint ?? null;
   const hasCustomHint = (hintSettingTextValue ?? ``).trim().length > 0;
   const hasHint = displayHint != null && displayHint.length > 0;
+  const explanationText = explanationSetting.value?.text ?? null;
+  const hasExplanation = (explanationText ?? ``).trim().length > 0;
 
   // Display glosses: first one bold, rest dim and semicolon-separated
   const primaryGloss = meaning.gloss[0];
@@ -311,37 +344,49 @@ function MeaningItem({
           ) : null}
         </Text>
       </View>
-      <View className="gap-2 pl-7">
-        <InlineEditableSettingText
-          variant="hint"
-          setting={hanziWordMeaningHintTextSetting}
-          settingKey={{ hanziWord }}
-          placeholder="Add a hint"
-          // oxlint-disable-next-line typescript/no-deprecated
-          defaultValue={displayHint ?? ``}
-          maxLength={80}
-          multiline
-          showCounterAtRatio={0.8}
-          overLimitMessage="Keep hints under 80 characters. Move extra detail to the explanation."
-          renderDisplay={(value) => <Pylymark source={value} />}
-        />
-
-        {hasCustomHint ? (
+      {isEditMode || hasHint ? (
+        <View className={isEditMode ? `gap-2 pl-7` : `gap-1 pl-7`}>
           <InlineEditableSettingText
-            variant="hintExplanation"
-            setting={hanziWordMeaningHintExplanationSetting}
+            variant="hint"
+            setting={hanziWordMeaningHintTextSetting}
             settingKey={{ hanziWord }}
-            placeholder="Add an explanation"
+            readonly={!isEditMode}
+            placeholder="Add a hint"
+            // oxlint-disable-next-line typescript/no-deprecated
+            defaultValue={displayHint ?? ``}
+            maxLength={80}
             multiline
-            renderDisplay={(value) => <Pylymark source={value} />}
+            showCounterAtRatio={0.8}
+            overLimitMessage="Keep hints under 80 characters. Move extra detail to the explanation."
+            renderDisplay={(value) => (
+              <Text className="text-fg-dim">
+                <Pylymark source={value} />
+              </Text>
+            )}
           />
-        ) : null}
-      </View>
-      {hasHint ? null : (
+
+          {(isEditMode ? hasCustomHint : hasExplanation) ? (
+            <InlineEditableSettingText
+              variant="hintExplanation"
+              setting={hanziWordMeaningHintExplanationSetting}
+              settingKey={{ hanziWord }}
+              readonly={!isEditMode}
+              placeholder="Add an explanation"
+              multiline
+              renderDisplay={(value) => (
+                <Text className="text-fg-dim">
+                  <Pylymark source={value} />
+                </Text>
+              )}
+            />
+          ) : null}
+        </View>
+      ) : null}
+      {isEditMode && !hasHint ? (
         <Text className="pyly-body-caption pl-7 text-fg-dim">
           Add a hint to make this meaning easier to recognize.
         </Text>
-      )}
+      ) : null}
     </View>
   );
 }

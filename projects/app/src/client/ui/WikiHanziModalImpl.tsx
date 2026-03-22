@@ -9,6 +9,7 @@ import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { ScrollView, Text, View } from "react-native";
 import { CloseButton } from "./CloseButton";
+import { RectButton } from "./RectButton";
 import { WikiHanziBody } from "./WikiHanziBody";
 import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
 import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
@@ -17,9 +18,11 @@ import { useDb } from "./hooks/useDb";
 export function WikiHanziModalImpl({
   hanzi,
   onDismiss,
+  onExpand,
 }: {
   hanzi: HanziText;
   onDismiss: () => void;
+  onExpand: () => void;
 }) {
   const db = useDb();
   const { data: dictionarySearchEntries } = useLiveQuery(
@@ -57,6 +60,7 @@ export function WikiHanziModalImpl({
         hskLevels={hskLevels}
         glosses={glosses}
         onDismiss={onDismiss}
+        onExpand={onExpand}
       />
 
       <WikiHanziBody hanzi={hanzi} />
@@ -70,9 +74,11 @@ function Header({
   hanzi,
   hskLevels,
   onDismiss,
+  onExpand,
   ...rest
 }: {
   onDismiss: () => void;
+  onExpand: () => void;
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -83,12 +89,10 @@ function Header({
   return (
     <>
       <View className="sticky top-0 z-10">
-        <View
-          className={`
-            sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4
-          `}
-        >
-          <CloseButton onPress={onDismiss} />
+        <View className="sticky top-0 z-10 h-[56px] flex-row items-center bg-bg/90 px-4">
+          <View className="w-20 items-start">
+            <CloseButton onPress={onDismiss} />
+          </View>
 
           <View className="flex-1 content-center items-center">
             <Text
@@ -102,8 +106,10 @@ function Header({
             </Text>
           </View>
 
-          <View className="invisible">
-            <CloseButton onPress={onDismiss} />
+          <View className="w-20 items-end">
+            <RectButton variant="bare" onPress={onExpand} iconStart="expand">
+              Expand
+            </RectButton>
           </View>
         </View>
       </View>

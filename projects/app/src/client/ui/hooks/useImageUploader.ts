@@ -46,9 +46,9 @@ export function useImageUploader({
   }: {
     blob: Blob;
     contentType?: string | null;
-  }): Promise<void> => {
+  }): Promise<AssetId | null> => {
     if (uploading) {
-      return;
+      return null;
     }
 
     setUploading(true);
@@ -136,6 +136,7 @@ export function useImageUploader({
       }
 
       onUploadComplete(assetId);
+      return assetId;
     } catch (error) {
       if (assetId != null) {
         try {
@@ -153,6 +154,7 @@ export function useImageUploader({
       onUploadError?.(message);
 
       console.error(`Image upload failed:`, error);
+      return null;
     } finally {
       setUploading(false);
     }
@@ -160,11 +162,11 @@ export function useImageUploader({
 
   const uploadImagePickerAsset = async (
     asset: ImagePicker.ImagePickerAsset,
-  ): Promise<void> => {
+  ): Promise<AssetId | null> => {
     const response = await fetch(asset.uri);
     const blob = await response.blob();
     const contentType = asset.mimeType ?? blob.type;
-    await uploadImageBlob({ blob, contentType });
+    return uploadImageBlob({ blob, contentType });
   };
 
   return { uploading, uploadImageBlob, uploadImagePickerAsset };
