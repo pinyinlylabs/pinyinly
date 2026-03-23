@@ -1,7 +1,6 @@
 import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
-import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
@@ -15,13 +14,11 @@ import type {
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { RectButton } from "./RectButton";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
-
-type GeneratedImageFormat = `png` | `jpeg` | `webp`;
 
 type AiImagePlaygroundRole = `user` | `assistant`;
 
@@ -100,9 +97,6 @@ export function AiImageGenerationPanel({
       createInitialPlaygroundState(initialPrompt),
     );
   const [isLoadedFromSetting, setIsLoadedFromSetting] = useState(false);
-  const [previewImageByMessageId, setPreviewImageByMessageId] = useState<
-    Record<string, { imageDataUrl: string; format: GeneratedImageFormat }>
-  >({});
   const [error, setError] = useState<string | null>(null);
   const timelineScrollRef = useRef<ScrollView>(null);
   const hasScrolledInitiallyRef = useRef(false);
@@ -178,16 +172,6 @@ export function AiImageGenerationPanel({
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();
   const isPointerHoverCapable = usePointerHoverCapability();
-
-  const { uploading, uploadImageBlob } = useImageUploader({
-    onUploadComplete: () => {
-      setError(null);
-    },
-    onUploadError: (errorMessage) => {
-      setError(errorMessage);
-      onError?.(errorMessage);
-    },
-  });
 
   const persistPlaygroundState = (nextState: AiImagePlaygroundStateV1) => {
     playgroundSettingResult.setValue(
@@ -347,22 +331,6 @@ export function AiImageGenerationPanel({
     }));
   };
 
-  const uploadGeneratedImage = async (
-    imageDataUrl: string,
-    format: GeneratedImageFormat,
-  ): Promise<AssetId> => {
-    const response = await fetch(imageDataUrl);
-    const blob = await response.blob();
-    const assetId = await uploadImageBlob({
-      blob,
-      contentType: `image/${format}`,
-    });
-    if (assetId == null) {
-      throw new Error(`Upload failed`);
-    }
-    return assetId;
-  };
-
   const handleGenerate = async (draftPrompt: string) => {
     const prompt = draftPrompt.trim();
     if (activeThread == null || prompt.length === 0) {
@@ -419,19 +387,6 @@ export function AiImageGenerationPanel({
             : undefined,
       });
 
-      const assetId = await uploadGeneratedImage(
-        result.imageDataUrl,
-        result.format,
-      );
-
-      setPreviewImageByMessageId((prev) => ({
-        ...prev,
-        [assistantMessageId]: {
-          imageDataUrl: result.imageDataUrl,
-          format: result.format,
-        },
-      }));
-
       updatePlaygroundState((prev) => ({
         ...prev,
         threads: prev.threads.map((thread) => {
@@ -445,7 +400,7 @@ export function AiImageGenerationPanel({
               id: assistantMessageId,
               role: `assistant` as const,
               text: `Generated image`,
-              assetId,
+              assetId: result.assetId,
               createdAtIso: new Date().toISOString(),
             },
           ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
@@ -466,7 +421,7 @@ export function AiImageGenerationPanel({
   };
 
   const isGenerating = generateMutation.isPending;
-  const isProcessing = isGenerating || uploading;
+  const isProcessing = isGenerating;
 
   return (
     <View className="h-[560px] p-4">
@@ -533,81 +488,25 @@ export function AiImageGenerationPanel({
                 </Text>
               ) : (
                 activeThread.messages.map((message) => {
-                  const previewImage =
-                    previewImageByMessageId[message.id] ?? null;
+                  if (message.role === `user`) {
+                    return (
+                      <AiImageUserMessage
+                        key={message.id}
+                        message={message}
+                        className="ml-2"
+                      />
+                    );
+                  }
+
                   return (
-                    <View
+                    <AiImageAssistantMessage
                       key={message.id}
-                      className={
-                        message.role === `user`
-                          ? `ml-2 rounded-lg bg-sky/10 p-3`
-                          : `mr-2`
-                      }
-                    >
-                      {message.role !== `assistant` &&
-                      message.text != null &&
-                      message.text.length > 0 ? (
-                        <Text className="font-sans text-[14px] text-fg">
-                          {message.text}
-                        </Text>
-                      ) : null}
-                      {previewImage == null &&
-                      message.assetId == null ? null : (
-                        <View className="gap-2">
-                          <View className="group relative w-[280px]">
-                            {previewImage == null ? (
-                              message.assetId == null ? null : (
-                                <AssetImage
-                                  assetId={message.assetId}
-                                  className="h-[140px] w-[280px] rounded-md"
-                                  contentFit="contain"
-                                />
-                              )
-                            ) : (
-                              <Image
-                                source={{ uri: previewImage.imageDataUrl }}
-                                style={{
-                                  width: 280,
-                                  height: 140,
-                                  borderRadius: 8,
-                                }}
-                                resizeMode="contain"
-                              />
-                            )}
-
-                            {message.role === `assistant` &&
-                            message.assetId != null ? (
-                              <View
-                                className={
-                                  isPointerHoverCapable
-                                    ? `
-                                      pointer-events-none absolute inset-x-3 top-3 items-start
-                                      opacity-0
-
-                                      group-hover:pointer-events-auto group-hover:opacity-100
-                                    `
-                                    : `absolute inset-x-3 top-3 items-start`
-                                }
-                              >
-                                <RectButton
-                                  variant="bare2"
-                                  className="rounded bg-bg/80 text-[12px]"
-                                  onPress={() => {
-                                    if (message.assetId == null) {
-                                      return;
-                                    }
-                                    onChangeImage(message.assetId);
-                                  }}
-                                  disabled={isProcessing}
-                                >
-                                  Use image
-                                </RectButton>
-                              </View>
-                            ) : null}
-                          </View>
-                        </View>
-                      )}
-                    </View>
+                      message={message}
+                      isPointerHoverCapable={isPointerHoverCapable}
+                      isProcessing={isProcessing}
+                      onChangeImage={onChangeImage}
+                      className="mr-2"
+                    />
                   );
                 })
               )}
@@ -634,14 +533,102 @@ export function AiImageGenerationPanel({
                 {error}
               </Text>
             )}
-
-            {uploading ? (
-              <Text className="font-sans text-[14px] text-fg-dim">
-                Uploading generated image...
-              </Text>
-            ) : null}
           </View>
         </View>
+      </View>
+    </View>
+  );
+}
+
+function AiImageUserMessage({
+  message,
+  className,
+}: {
+  message: AiImagePlaygroundMessage;
+  className?: string;
+}) {
+  return (
+    <View
+      className={`
+        rounded-lg bg-sky/10 p-3
+
+        ${className ?? ``}
+      `}
+    >
+      {message.text != null && message.text.length > 0 ? (
+        <Text className="font-sans text-sm font-medium text-fg">
+          {message.text}
+        </Text>
+      ) : null}
+      {message.assetId == null ? null : (
+        <View className="gap-2">
+          <View className="w-[280px]">
+            <AssetImage
+              assetId={message.assetId}
+              className="h-[140px] w-[280px] rounded-md"
+              contentFit="contain"
+            />
+          </View>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function AiImageAssistantMessage({
+  message,
+  isPointerHoverCapable,
+  isProcessing,
+  onChangeImage,
+  className,
+}: {
+  message: AiImagePlaygroundMessage;
+  isPointerHoverCapable: boolean;
+  isProcessing: boolean;
+  onChangeImage: (assetId: AssetId) => void;
+  className?: string;
+}) {
+  const assistantAssetId = message.assetId;
+
+  return message.assetId == null ? null : (
+    <View
+      className={`
+        gap-2
+
+        ${className ?? ``}
+      `}
+    >
+      <View className="group relative w-[280px]">
+        <AssetImage
+          assetId={message.assetId}
+          className="h-[140px] w-[280px] rounded-md"
+          contentFit="contain"
+        />
+
+        {assistantAssetId == null ? null : (
+          <View
+            className={
+              isPointerHoverCapable
+                ? `
+                  pointer-events-none absolute inset-x-3 top-3 items-start opacity-0
+
+                  group-hover:pointer-events-auto group-hover:opacity-100
+                `
+                : `absolute inset-x-3 top-3 items-start`
+            }
+          >
+            <RectButton
+              variant="bare2"
+              className="rounded bg-bg/80 text-[12px]"
+              onPress={() => {
+                onChangeImage(assistantAssetId);
+              }}
+              disabled={isProcessing}
+            >
+              Use image
+            </RectButton>
+          </View>
+        )}
       </View>
     </View>
   );

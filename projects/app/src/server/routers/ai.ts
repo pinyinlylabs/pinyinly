@@ -74,8 +74,7 @@ const generateImageInputSchema = z
 
 const generateImageOutputSchema = z
   .object({
-    imageDataUrl: z.string(),
-    format: z.enum([`png`, `jpeg`, `webp`]),
+    assetId: assetIdSchema,
   })
   .strict();
 
@@ -163,6 +162,7 @@ export const aiRouter = router({
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
       const { prompt, referenceImages } = opts.input;
+      const { userId } = opts.ctx.session;
 
       try {
         const resolvedReferenceImages =
@@ -185,13 +185,16 @@ export const aiRouter = router({
           prompt,
           referenceImages: resolvedReferenceImages,
         });
-        const format = resolveImageFormat(mimeType);
 
-        // Convert buffer to data URL for client preview
-        const base64 = buffer.toString(`base64`);
-        const imageDataUrl = `data:${mimeType};base64,${base64}`;
+        const imageArrayBuffer = Uint8Array.from(buffer).buffer;
 
-        return { imageDataUrl, format };
+        const assetId = await createAssetFromBuffer(
+          userId,
+          imageArrayBuffer,
+          mimeType,
+        );
+
+        return { assetId };
       } catch (error) {
         console.error(`Failed to generate hint image:`, error);
         throw new TRPCError({
@@ -235,23 +238,3 @@ export const aiRouter = router({
       }
     }),
 });
-
-function resolveImageFormat(mimeType: string): `png` | `jpeg` | `webp` {
-  switch (mimeType) {
-    case `image/png`: {
-      return `png`;
-    }
-    case `image/jpeg`: {
-      return `jpeg`;
-    }
-    case `image/webp`: {
-      return `webp`;
-    }
-    default: {
-      throw new TRPCError({
-        code: `INTERNAL_SERVER_ERROR`,
-        message: `Unsupported image format: ${mimeType}`,
-      });
-    }
-  }
-}
