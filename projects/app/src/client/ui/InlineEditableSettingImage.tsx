@@ -200,7 +200,8 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       ? null
       : (imageMetaById.get(inlineEditorAssetId) ?? null);
   const canEditCrop = frameAspectRatio != null && imageId != null;
-  const shouldShowPreviewButtons = !isInlineRepositioning;
+  const shouldShowPreviewButtons = !isInlineRepositioning && !isPickerOpen;
+  const shouldShowPickerDoneButton = !isInlineRepositioning && isPickerOpen;
   const shouldShowPickerPanel = isPickerOpen;
   const { settingKey: aiPlaygroundStorageKey } = getSettingKeyInfo(
     setting,
@@ -254,6 +255,19 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 aspectRatio={frameAspectRatio}
               />
             )}
+            {shouldShowPickerDoneButton ? (
+              <View className="absolute inset-x-3 top-3 items-end">
+                <ButtonGroup>
+                  <ButtonGroup.Button
+                    onPress={() => {
+                      setIsPickerOpen(false);
+                    }}
+                  >
+                    Done
+                  </ButtonGroup.Button>
+                </ButtonGroup>
+              </View>
+            ) : null}
             {shouldShowPreviewButtons ? (
               <View
                 className={
@@ -269,7 +283,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 <ButtonGroup>
                   <ButtonGroup.Button
                     onPress={() => {
-                      setIsPickerOpen((current) => !current);
+                      setIsPickerOpen(true);
                     }}
                   >
                     Change
@@ -303,6 +317,19 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                       aspectRatio={frameAspectRatio}
                     />
                   )}
+                  {shouldShowPickerDoneButton ? (
+                    <View className="absolute inset-x-3 top-3 items-end">
+                      <ButtonGroup>
+                        <ButtonGroup.Button
+                          onPress={() => {
+                            setIsPickerOpen(false);
+                          }}
+                        >
+                          Done
+                        </ButtonGroup.Button>
+                      </ButtonGroup>
+                    </View>
+                  ) : null}
                   {shouldShowPreviewButtons ? (
                     <View
                       className={
@@ -318,7 +345,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                       <ButtonGroup>
                         <ButtonGroup.Button
                           onPress={() => {
-                            setIsPickerOpen((current) => !current);
+                            setIsPickerOpen(true);
                           }}
                         >
                           Change
