@@ -28,6 +28,7 @@ interface AiImagePlaygroundMessage {
   role: AiImagePlaygroundRole;
   text?: string;
   assetId?: AssetId;
+  contextReferenceEntries?: AiImageContextReferenceEntry[];
   createdAtIso: string;
 }
 
@@ -360,6 +361,10 @@ export function AiImageGenerationPanel({
             id: userMessageId,
             role: `user` as const,
             text: prompt,
+            contextReferenceEntries: contextReferenceEntries.map((entry) => ({
+              assetId: entry.assetId,
+              label: entry.label,
+            })),
             createdAtIso: nowIso,
           },
         ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
@@ -548,28 +553,64 @@ function AiImageUserMessage({
   message: AiImagePlaygroundMessage;
   className?: string;
 }) {
-  return (
-    <View
-      className={`
-        rounded-lg bg-sky/20 px-3 py-2
+  const contextEntries = message.contextReferenceEntries ?? [];
 
-        ${className ?? ``}
-      `}
-    >
-      {message.text != null && message.text.length > 0 ? (
-        <Text className="font-sans text-sm font-medium leading-snug text-fg">
-          {message.text}
-        </Text>
-      ) : null}
-      {message.assetId == null ? null : (
-        <View className="gap-2">
-          <View className="w-full max-w-[560px]">
-            <AssetImage
-              assetId={message.assetId}
-              className="aspect-[2/1] max-h-[320px] w-full rounded-md"
-              contentFit="contain"
-            />
+  return (
+    <View className="gap-1">
+      <View
+        className={`
+          rounded-lg bg-sky/20 px-3 py-2
+
+          ${className ?? ``}
+        `}
+      >
+        {message.text != null && message.text.length > 0 ? (
+          <Text className="font-sans text-sm font-medium leading-snug text-fg">
+            {message.text}
+          </Text>
+        ) : null}
+        {message.assetId == null ? null : (
+          <View className="gap-2">
+            <View className="w-full max-w-[560px]">
+              <AssetImage
+                assetId={message.assetId}
+                className="aspect-[2/1] max-h-[320px] w-full rounded-md"
+                contentFit="contain"
+              />
+            </View>
           </View>
+        )}
+      </View>
+      {contextEntries.length === 0 ? null : (
+        <View className="flex-row flex-wrap items-center justify-end gap-1 px-3">
+          {contextEntries.map((entry, index) => (
+            <Tooltip
+              key={`${entry.assetId}-${entry.label}-${String(index)}`}
+              placement="top"
+              sideOffset={6}
+            >
+              <Tooltip.Trigger>
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="size-6 rounded"
+                  contentFit="cover"
+                />
+              </Tooltip.Trigger>
+              <Tooltip.Content className="gap-2 p-2">
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
+                  contentFit="cover"
+                />
+                <Text className="font-sans text-[12px] uppercase text-fg-dim">
+                  Message context
+                </Text>
+                <Text className="font-sans text-[13px] text-fg-dim">
+                  {entry.label}
+                </Text>
+              </Tooltip.Content>
+            </Tooltip>
+          ))}
         </View>
       )}
     </View>
@@ -876,6 +917,9 @@ function parseAiImagePlaygroundState(
             typeof messageObject[`assetId`] === `string`
               ? (messageObject[`assetId`] as AssetId)
               : undefined,
+          contextReferenceEntries: parseMessageContextReferenceEntries(
+            messageObject[`contextReferenceEntries`],
+          ),
           createdAtIso: messageObject[`createdAtIso`],
         });
       }
@@ -912,4 +956,35 @@ function parseAiImagePlaygroundState(
   } catch {
     return createInitialPlaygroundState(initialPrompt);
   }
+}
+
+function parseMessageContextReferenceEntries(
+  value: unknown,
+): AiImageContextReferenceEntry[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const entries: AiImageContextReferenceEntry[] = [];
+
+  for (const item of value) {
+    if (typeof item !== `object` || item == null) {
+      continue;
+    }
+
+    const objectItem = item as Record<string, unknown>;
+    if (
+      typeof objectItem[`assetId`] !== `string` ||
+      typeof objectItem[`label`] !== `string`
+    ) {
+      continue;
+    }
+
+    entries.push({
+      assetId: objectItem[`assetId`] as AssetId,
+      label: objectItem[`label`],
+    });
+  }
+
+  return entries.length > 0 ? entries : undefined;
 }
