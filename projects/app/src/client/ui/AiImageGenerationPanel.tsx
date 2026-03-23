@@ -76,6 +76,11 @@ export interface AiImageGenerationPanelProps {
   onSavePrompt?: (prompt: string) => void;
 }
 
+interface AiImageContextReferenceEntry {
+  label: string;
+  assetId: AssetId;
+}
+
 export function AiImageGenerationPanel({
   initialPrompt = ``,
   aiImageStyle = null,
@@ -95,7 +100,6 @@ export function AiImageGenerationPanel({
       createInitialPlaygroundState(initialPrompt),
     );
   const [isLoadedFromSetting, setIsLoadedFromSetting] = useState(false);
-  const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
   const [previewImageByMessageId, setPreviewImageByMessageId] = useState<
     Record<string, { imageDataUrl: string; format: GeneratedImageFormat }>
   >({});
@@ -222,8 +226,7 @@ export function AiImageGenerationPanel({
   const activeThreadId = activeThread?.id ?? null;
   const activeThreadMessageCount = activeThread?.messages.length ?? 0;
 
-  const contextReferenceEntries: Array<{ label: string; assetId: AssetId }> =
-    [];
+  const contextReferenceEntries: AiImageContextReferenceEntry[] = [];
 
   if (aiImageStyle != null) {
     const styleConfig = getAiImageStyleConfig(aiImageStyle);
@@ -325,7 +328,7 @@ export function AiImageGenerationPanel({
     setError(null);
   };
 
-  const handleDraftPromptChange = (nextPrompt: string) => {
+  const handlePersistDraftPrompt = (nextPrompt: string) => {
     if (activeThread == null) {
       return;
     }
@@ -360,8 +363,8 @@ export function AiImageGenerationPanel({
     return assetId;
   };
 
-  const handleGenerate = async () => {
-    const prompt = activeThread?.draftPrompt.trim() ?? ``;
+  const handleGenerate = async (draftPrompt: string) => {
+    const prompt = draftPrompt.trim();
     if (activeThread == null || prompt.length === 0) {
       const promptError = `Please enter a prompt`;
       setError(promptError);
@@ -612,77 +615,19 @@ export function AiImageGenerationPanel({
           </View>
 
           <View className="gap-1 pt-3">
-            <View
-              className={
-                isPromptInputFocused
-                  ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
-                  : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
+            <AiImagePromptComposer
+              key={activeThread?.id ?? `no-active-thread`}
+              draftPrompt={activeThread?.draftPrompt ?? ``}
+              editable={
+                isLoadedFromSetting && !isProcessing && activeThread != null
               }
-            >
-              <TextInputMulti
-                value={activeThread?.draftPrompt ?? ``}
-                onChangeText={handleDraftPromptChange}
-                placeholder="Describe how to create or modify the image in this chat"
-                className="max-h-80 rounded-none bg-transparent p-0 text-[13px] leading-5"
-                editable={
-                  isLoadedFromSetting && !isProcessing && activeThread != null
-                }
-                onFocus={() => {
-                  setIsPromptInputFocused(true);
-                }}
-                onBlur={() => {
-                  setIsPromptInputFocused(false);
-                }}
-              />
-
-              <View className="flex-row items-center justify-between gap-2">
-                <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
-                  {contextReferenceEntries.map((entry) => (
-                    <Tooltip
-                      key={`${entry.assetId}-${entry.label}`}
-                      placement="top"
-                      sideOffset={6}
-                    >
-                      <Tooltip.Trigger className="rounded border border-fg-bg10">
-                        <AssetImage
-                          assetId={entry.assetId}
-                          className="size-9 rounded"
-                          contentFit="cover"
-                        />
-                      </Tooltip.Trigger>
-                      <Tooltip.Content className="gap-2 p-2">
-                        <AssetImage
-                          assetId={entry.assetId}
-                          className="h-[110px] w-[180px] rounded border border-fg-bg10"
-                          contentFit="cover"
-                        />
-                        <Text className="font-sans text-[12px] uppercase text-fg-dim">
-                          Prompt context
-                        </Text>
-                        <Text className="font-sans text-[13px] text-fg-dim">
-                          {entry.label}
-                        </Text>
-                      </Tooltip.Content>
-                    </Tooltip>
-                  ))}
-                </View>
-
-                <RectButton
-                  variant="bare2"
-                  onPress={() => {
-                    void handleGenerate();
-                  }}
-                  disabled={
-                    !isLoadedFromSetting ||
-                    isProcessing ||
-                    activeThread == null ||
-                    activeThread.draftPrompt.trim().length === 0
-                  }
-                >
-                  {isGenerating ? `Generating...` : `Send`}
-                </RectButton>
-              </View>
-            </View>
+              isGenerating={isGenerating}
+              isLoadedFromSetting={isLoadedFromSetting}
+              isProcessing={isProcessing}
+              contextReferenceEntries={contextReferenceEntries}
+              onPersistDraftPrompt={handlePersistDraftPrompt}
+              onGenerate={handleGenerate}
+            />
 
             {error == null ? null : (
               <Text className="font-sans text-[14px] text-[crimson]">
@@ -697,6 +642,136 @@ export function AiImageGenerationPanel({
             ) : null}
           </View>
         </View>
+      </View>
+    </View>
+  );
+}
+
+function AiImagePromptComposer({
+  draftPrompt: initialDraftPrompt,
+  editable,
+  isGenerating,
+  isLoadedFromSetting,
+  isProcessing,
+  contextReferenceEntries,
+  onPersistDraftPrompt,
+  onGenerate,
+}: {
+  draftPrompt: string;
+  editable: boolean;
+  isGenerating: boolean;
+  isLoadedFromSetting: boolean;
+  isProcessing: boolean;
+  contextReferenceEntries: AiImageContextReferenceEntry[];
+  onPersistDraftPrompt: (prompt: string) => void;
+  onGenerate: (prompt: string) => Promise<void>;
+}) {
+  const [draftPrompt, setDraftPrompt] = useState(initialDraftPrompt);
+  const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
+  const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
+
+  const persistDraftPrompt = (nextDraftPrompt: string) => {
+    if (lastPersistedDraftPromptRef.current === nextDraftPrompt) {
+      return;
+    }
+
+    lastPersistedDraftPromptRef.current = nextDraftPrompt;
+    onPersistDraftPrompt(nextDraftPrompt);
+  };
+
+  useEffect(() => {
+    if (!editable) {
+      return;
+    }
+
+    if (lastPersistedDraftPromptRef.current === draftPrompt) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      lastPersistedDraftPromptRef.current = draftPrompt;
+      onPersistDraftPrompt(draftPrompt);
+    }, 250);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [draftPrompt, editable, onPersistDraftPrompt]);
+
+  const canSend =
+    isLoadedFromSetting && !isProcessing && draftPrompt.trim().length > 0;
+
+  return (
+    <View
+      className={
+        isPromptInputFocused
+          ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
+          : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
+      }
+    >
+      <TextInputMulti
+        value={draftPrompt}
+        onChangeText={setDraftPrompt}
+        placeholder="Describe how to create or modify the image in this chat"
+        className="max-h-80 rounded-none bg-transparent p-0 text-sm font-medium leading-5"
+        editable={editable}
+        onFocus={() => {
+          setIsPromptInputFocused(true);
+        }}
+        onBlur={() => {
+          setIsPromptInputFocused(false);
+          persistDraftPrompt(draftPrompt);
+        }}
+      />
+
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
+          {contextReferenceEntries.map((entry) => (
+            <Tooltip
+              key={`${entry.assetId}-${entry.label}`}
+              placement="top"
+              sideOffset={6}
+            >
+              <Tooltip.Trigger className="rounded border border-fg-bg10">
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="size-9 rounded"
+                  contentFit="cover"
+                />
+              </Tooltip.Trigger>
+              <Tooltip.Content className="gap-2 p-2">
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
+                  contentFit="cover"
+                />
+                <Text className="font-sans text-[12px] uppercase text-fg-dim">
+                  Prompt context
+                </Text>
+                <Text className="font-sans text-[13px] text-fg-dim">
+                  {entry.label}
+                </Text>
+              </Tooltip.Content>
+            </Tooltip>
+          ))}
+        </View>
+
+        <RectButton
+          variant="bare2"
+          onPress={() => {
+            if (!canSend) {
+              return;
+            }
+
+            const nextPrompt = draftPrompt;
+            setDraftPrompt(``);
+            lastPersistedDraftPromptRef.current = ``;
+            void onGenerate(nextPrompt);
+          }}
+          disabled={!canSend}
+        >
+          {isGenerating ? `Generating...` : `Send`}
+        </RectButton>
       </View>
     </View>
   );
