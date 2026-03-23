@@ -1,6 +1,6 @@
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { Ref } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -16,6 +16,20 @@ interface TextInputMultiProps extends Omit<
 
 export function TextInputMulti(props: TextInputMultiProps) {
   const innerRef = useRef<TextInput>(null);
+
+  const adjustHeight = () => {
+    if (typeof window === `undefined`) {
+      return;
+    }
+
+    const element = innerRef.current as HTMLTextAreaElement | null;
+    if (!element || element.tagName !== `TEXTAREA`) {
+      return;
+    }
+
+    element.style.height = `auto`;
+    element.style.height = `${Math.max(element.scrollHeight, 60)}px`;
+  };
 
   // On web, auto-resize the textarea to fit content
   useEffect(() => {
@@ -33,17 +47,16 @@ export function TextInputMulti(props: TextInputMultiProps) {
       return;
     }
 
-    const adjustHeight = () => {
-      textarea.style.height = `auto`;
-      textarea.style.height = `${Math.max(textarea.scrollHeight, 60)}px`;
-    };
-
     adjustHeight();
     textarea.addEventListener(`input`, adjustHeight);
     return () => {
       textarea.removeEventListener(`input`, adjustHeight);
     };
   }, []);
+
+  useLayoutEffect(() => {
+    adjustHeight();
+  }, [props.value]);
 
   return (
     <TextInput
