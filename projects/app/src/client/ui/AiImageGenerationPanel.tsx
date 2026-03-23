@@ -623,7 +623,7 @@ export function AiImageGenerationPanel({
                 value={activeThread?.draftPrompt ?? ``}
                 onChangeText={handleDraftPromptChange}
                 placeholder="Describe how to create or modify the image in this chat"
-                className="rounded-none bg-transparent p-0 text-[13px] leading-5"
+                className="max-h-80 rounded-none bg-transparent p-0 text-[13px] leading-5"
                 editable={
                   isLoadedFromSetting && !isProcessing && activeThread != null
                 }
