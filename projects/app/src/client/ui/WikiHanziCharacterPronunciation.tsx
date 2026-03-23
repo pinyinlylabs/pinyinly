@@ -351,30 +351,34 @@ export function WikiHanziCharacterPronunciationBox({
           </View>
         </View>
       )}
-      {isEditMode ? (
+      {isEditMode && (!isHintSectionVisible || !isImageSectionVisible) ? (
         <View className="flex-row items-start gap-4 p-4">
-          <RectButton
-            variant="bare2"
-            iconStart="keyboard"
-            iconSize={20}
-            className="opacity-80"
-            onPress={() => {
-              setShowHintEditor((current) => !(current ?? hasHintContent));
-            }}
-          >
-            Add hint
-          </RectButton>
-          <RectButton
-            variant="bare2"
-            iconStart="photos-filled"
-            iconSize={20}
-            className="opacity-80"
-            onPress={() => {
-              setShowImageEditor((current) => !(current ?? hasImageContent));
-            }}
-          >
-            Add image
-          </RectButton>
+          {isHintSectionVisible ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="keyboard"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                setShowHintEditor(true);
+              }}
+            >
+              Add hint
+            </RectButton>
+          )}
+          {isImageSectionVisible ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="photos-filled"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                setShowImageEditor(true);
+              }}
+            >
+              Add image
+            </RectButton>
+          )}
         </View>
       ) : null}
 
