@@ -424,9 +424,9 @@ export function AiImageGenerationPanel({
   const isProcessing = isGenerating;
 
   return (
-    <View className="h-[560px] p-4">
+    <View className="h-[460px]">
       <View className="h-full flex-row items-stretch gap-4">
-        <View className="h-full w-[180px] shrink-0 gap-2">
+        <View className="h-full w-[120px] shrink-0 gap-2">
           <View className="flex-row items-center justify-between">
             <Text className="pyly-body-subheading">Chats</Text>
             <RectButton
@@ -480,7 +480,7 @@ export function AiImageGenerationPanel({
             <ScrollView
               ref={timelineScrollRef}
               className="flex-1"
-              contentContainerClassName="gap-6 pb-2"
+              contentContainerClassName="gap-6 py-10 px-3"
             >
               {activeThread == null || activeThread.messages.length === 0 ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
@@ -493,7 +493,7 @@ export function AiImageGenerationPanel({
                       <AiImageUserMessage
                         key={message.id}
                         message={message}
-                        className="ml-2"
+                        className="ml-8"
                       />
                     );
                   }
@@ -513,7 +513,7 @@ export function AiImageGenerationPanel({
             </ScrollView>
           </View>
 
-          <View className="gap-1 pt-3">
+          <View className="gap-1">
             <AiImagePromptComposer
               key={activeThread?.id ?? `no-active-thread`}
               draftPrompt={activeThread?.draftPrompt ?? ``}
@@ -550,22 +550,22 @@ function AiImageUserMessage({
   return (
     <View
       className={`
-        rounded-lg bg-sky/10 p-3
+        rounded-lg bg-sky/20 px-3 py-2
 
         ${className ?? ``}
       `}
     >
       {message.text != null && message.text.length > 0 ? (
-        <Text className="font-sans text-sm font-medium text-fg">
+        <Text className="font-sans text-sm font-medium leading-snug text-fg">
           {message.text}
         </Text>
       ) : null}
       {message.assetId == null ? null : (
         <View className="gap-2">
-          <View className="w-[280px]">
+          <View className="w-full max-w-[560px]">
             <AssetImage
               assetId={message.assetId}
-              className="h-[140px] w-[280px] rounded-md"
+              className="aspect-[2/1] max-h-[320px] w-full rounded-md"
               contentFit="contain"
             />
           </View>
@@ -588,9 +588,13 @@ function AiImageAssistantMessage({
   onChangeImage: (assetId: AssetId) => void;
   className?: string;
 }) {
-  const assistantAssetId = message.assetId;
+  const { assetId } = message;
 
-  return message.assetId == null ? null : (
+  if (assetId == null) {
+    return null;
+  }
+
+  return (
     <View
       className={`
         gap-2
@@ -598,37 +602,35 @@ function AiImageAssistantMessage({
         ${className ?? ``}
       `}
     >
-      <View className="group relative w-[280px]">
+      <View className="group relative w-full max-w-[560px]">
         <AssetImage
-          assetId={message.assetId}
-          className="h-[140px] w-[280px] rounded-md"
-          contentFit="contain"
+          assetId={assetId}
+          className="aspect-[2/1] max-h-[320px] w-full rounded-lg"
+          contentFit="fill"
         />
 
-        {assistantAssetId == null ? null : (
-          <View
-            className={
-              isPointerHoverCapable
-                ? `
-                  pointer-events-none absolute inset-x-3 top-3 items-start opacity-0
+        <View
+          className={
+            isPointerHoverCapable
+              ? `
+                pointer-events-none absolute inset-x-3 top-3 items-start opacity-0
 
-                  group-hover:pointer-events-auto group-hover:opacity-100
-                `
-                : `absolute inset-x-3 top-3 items-start`
-            }
+                group-hover:pointer-events-auto group-hover:opacity-100
+              `
+              : `absolute inset-x-3 top-3 items-start`
+          }
+        >
+          <RectButton
+            variant="bare2"
+            className="rounded bg-bg/80 text-[12px]"
+            onPress={() => {
+              onChangeImage(assetId);
+            }}
+            disabled={isProcessing}
           >
-            <RectButton
-              variant="bare2"
-              className="rounded bg-bg/80 text-[12px]"
-              onPress={() => {
-                onChangeImage(assistantAssetId);
-              }}
-              disabled={isProcessing}
-            >
-              Use image
-            </RectButton>
-          </View>
-        )}
+            Use image
+          </RectButton>
+        </View>
       </View>
     </View>
   );
