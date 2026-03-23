@@ -16,6 +16,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
+import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
@@ -431,7 +432,7 @@ export function AiImageGenerationPanel({
             <Text className="pyly-body-subheading">Chats</Text>
             <RectButton
               variant="bare2"
-              iconStart="add"
+              iconStart="plus"
               iconSize={16}
               onPress={handleCreateThread}
               disabled={isProcessing || !isLoadedFromSetting}
@@ -620,16 +621,16 @@ function AiImageAssistantMessage({
               : `absolute inset-x-3 top-3 items-start`
           }
         >
-          <RectButton
-            variant="bare2"
-            className="rounded bg-bg/80 text-[12px]"
-            onPress={() => {
-              onChangeImage(assetId);
-            }}
-            disabled={isProcessing}
-          >
-            Use image
-          </RectButton>
+          <ButtonGroup>
+            <ButtonGroup.Button
+              onPress={() => {
+                onChangeImage(assetId);
+              }}
+              disabled={isProcessing}
+            >
+              Use image
+            </ButtonGroup.Button>
+          </ButtonGroup>
         </View>
       </View>
     </View>

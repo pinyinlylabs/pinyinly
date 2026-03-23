@@ -29,9 +29,9 @@ import {
 } from "react-native";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
+import { ButtonGroup } from "./ButtonGroup";
 import { FramedAssetImage } from "./ImageFrame";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
-import { RectButton } from "./RectButton";
 import { Tabs } from "./Tabs";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
@@ -266,21 +266,18 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                     : `absolute inset-x-3 top-3 items-end`
                 }
               >
-                <View className="shrink flex-row items-center gap-2 rounded bg-bg/80">
-                  <RectButton
-                    variant="bare"
+                <ButtonGroup>
+                  <ButtonGroup.Button
                     onPress={() => {
                       setIsPickerOpen((current) => !current);
                     }}
                   >
                     Change
-                  </RectButton>
+                  </ButtonGroup.Button>
                   {canEditCrop ? (
-                    <RectButton variant="bare" disabled>
-                      Reposition
-                    </RectButton>
+                    <ButtonGroup.Button disabled>Reposition</ButtonGroup.Button>
                   ) : null}
-                </View>
+                </ButtonGroup>
               </View>
             ) : null}
           </View>
@@ -318,35 +315,32 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                           : `absolute inset-x-3 top-3 items-end`
                       }
                     >
-                      <View className="shrink flex-row items-center gap-2 rounded bg-bg/80">
-                        <RectButton
-                          variant="bare2"
+                      <ButtonGroup>
+                        <ButtonGroup.Button
                           onPress={() => {
                             setIsPickerOpen((current) => !current);
                           }}
                         >
                           Change
-                        </RectButton>
+                        </ButtonGroup.Button>
                         {canEditCrop ? (
-                          <RectButton
-                            variant="bare2"
+                          <ButtonGroup.Button
                             onPress={() => {
                               setInlineEditorAssetId(imageId);
                             }}
                           >
                             Reposition
-                          </RectButton>
+                          </ButtonGroup.Button>
                         ) : null}
-                        <RectButton
-                          variant="bare2"
+                        <ButtonGroup.Button
                           onPress={() => {
                             void removeBackground();
                           }}
                           disabled={!canRemove || isRemoving}
                         >
                           Remove Background
-                        </RectButton>
-                      </View>
+                        </ButtonGroup.Button>
+                      </ButtonGroup>
                     </View>
                   ) : null}
                 </View>
@@ -856,9 +850,8 @@ function InlineImageRepositionFrame({
         </View>
       </View>
       <View className="absolute inset-x-3 bottom-3 flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <RectButton
-            variant="outline"
+        <ButtonGroup>
+          <ButtonGroup.Button
             onPress={() => {
               const nextRect = getZoomedImageCropRect(
                 cropRect,
@@ -868,11 +861,10 @@ function InlineImageRepositionFrame({
               );
               onCropRectChange(nextRect);
             }}
-          >
-            -
-          </RectButton>
-          <RectButton
-            variant="outline"
+            iconStart="minus"
+            iconSize={20}
+          />
+          <ButtonGroup.Button
             onPress={() => {
               const nextRect = getZoomedImageCropRect(
                 cropRect,
@@ -882,23 +874,20 @@ function InlineImageRepositionFrame({
               );
               onCropRectChange(nextRect);
             }}
-          >
-            +
-          </RectButton>
-        </View>
-        <View className="flex-row items-center gap-2">
-          <RectButton variant="outline" onPress={onCancel}>
-            Cancel
-          </RectButton>
-          <RectButton
-            variant="filled"
+            iconStart="plus"
+            iconSize={20}
+          />
+        </ButtonGroup>
+        <ButtonGroup>
+          <ButtonGroup.Button onPress={onCancel}>Cancel</ButtonGroup.Button>
+          <ButtonGroup.Button
             onPress={() => {
               onSave(cropRect);
             }}
           >
             Save position
-          </RectButton>
-        </View>
+          </ButtonGroup.Button>
+        </ButtonGroup>
       </View>
     </View>
   );
