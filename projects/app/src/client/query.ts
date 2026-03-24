@@ -343,7 +343,11 @@ export const fetchAudioBufferQuery = (
   audioContext: AudioContext | null,
 ) =>
   queryOptions({
-    queryKey: [`fetchAudioBuffer`, uri] as const,
+    queryKey: [
+      `fetchAudioBuffer`,
+      audioContext == null ? `audioContext == null` : `audioContext != null`,
+      uri,
+    ] as const,
     queryFn:
       uri == null || audioContext == null
         ? (skipToken as never)
