@@ -88,15 +88,11 @@ export function AssetImage({
 
   if (asset == null) {
     // Asset not found in TanStack DB yet
-    return (
-      <AssetImageShimmer className={className} style={style as ViewStyle} />
-    );
+    return <ShimmerRect className={className} style={style as ViewStyle} />;
   }
 
   if (asset.status === AssetStatusKind.Pending) {
-    return (
-      <AssetImageShimmer className={className} style={style as ViewStyle} />
-    );
+    return <ShimmerRect className={className} style={style as ViewStyle} />;
   }
 
   if (asset.status === AssetStatusKind.Failed || hasImageError) {
@@ -133,17 +129,4 @@ export function AssetImage({
       }}
     />
   );
-}
-
-interface AssetImageShimmerProps {
-  className?: string;
-  style?: ViewStyle;
-}
-
-/**
- * Animated shimmer placeholder for AssetImage while loading.
- * Shows a horizontal sweep gradient animation across the container.
- */
-function AssetImageShimmer({ className, style }: AssetImageShimmerProps) {
-  return <ShimmerRect className={className} style={style} />;
 }
