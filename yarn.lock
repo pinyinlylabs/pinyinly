@@ -15601,8 +15601,8 @@ __metadata:
   linkType: hard
 
 "inngest@npm:^3.39.1":
-  version: 3.52.6
-  resolution: "inngest@npm:3.52.6"
+  version: 3.52.7
+  resolution: "inngest@npm:3.52.7"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.2.3"
     "@inngest/ai": "npm:^0.1.3"
@@ -15663,7 +15663,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/a1e1825d332f475642aa8caa5dd00428e5a841eb6f92b137f9416ba162bb1f77ffcd67055f79f4dfa8dd4e6ba4294e170d6252683b5b61e0ab2adc237c2c76d2
+  checksum: 10c0/4595eb6ebc9bc933767bbf6d9afc73a7ced02a4d79f60f7af8266cf9bd4cf4b3e1c14485d8d25657b4e4f5ef0dfbe5fa2fad7b89f184efefbf3aeb8cebe21379
   languageName: node
   linkType: hard
 
