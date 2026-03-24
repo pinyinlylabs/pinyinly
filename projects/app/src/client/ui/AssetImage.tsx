@@ -1,20 +1,26 @@
 import { useAssetImageCacheQuery } from "@/client/ui/hooks/useAssetImageCacheQuery";
 import { useDb } from "@/client/ui/hooks/useDb";
+import { ShimmerRect } from "@/client/ui/ShimmerRect";
 import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import type { ImageProps as ExpoImageProps } from "expo-image";
+import type { ImageProps as ExpoImageProps, ImageStyle } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
+import { Text, View } from "react-native";
 
-interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
+interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
   /**
    * The asset ID (not the full key).
    */
   assetId: AssetId;
+  debugAssetStatus?: AssetStatusKind;
+  debugErrorMessage?: string | null;
+  debugImageError?: boolean;
+  style?: StyleProp<Pick<ImageStyle, `width` | `height` | `transform`>>;
 }
 
 /**
@@ -30,10 +36,15 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
 export function AssetImage({
   assetId,
   contentFit = `cover`,
-  ...imageProps
+  className,
+  style,
+  debugAssetStatus,
+  debugErrorMessage,
+  debugImageError = false,
+  ...restImageProps
 }: AssetImageProps) {
   const db = useDb();
-  const { data: asset } = useLiveQuery(
+  const { data: liveAsset } = useLiveQuery(
     (q) =>
       q
         .from({ asset: db.assetCollection })
@@ -41,18 +52,31 @@ export function AssetImage({
         .findOne(),
     [db.assetCollection, assetId],
   );
+
   const [imageError, setImageError] = useState(false);
   const cachedImageSource = useAssetImageCacheQuery(assetId);
+  const asset =
+    debugAssetStatus == null
+      ? liveAsset
+      : {
+          ...liveAsset,
+          assetId,
+          errorMessage: debugErrorMessage ?? null,
+          status: debugAssetStatus,
+        };
+  const hasImageError = imageError || debugImageError;
 
   useEffect(() => {
     setImageError(false);
   }, [assetId]);
 
-  if (cachedImageSource != null && !imageError) {
+  if (cachedImageSource != null && !hasImageError) {
     return (
       <ExpoImage
-        {...imageProps}
+        {...restImageProps}
         source={cachedImageSource}
+        className={className}
+        style={style}
         contentFit={contentFit}
         transition={200}
         onError={() => {
@@ -65,24 +89,26 @@ export function AssetImage({
   if (asset == null) {
     // Asset not found in TanStack DB yet
     return (
-      <View className="size-full items-center justify-center bg-fg/5">
-        <ActivityIndicator size="small" className="text-fg" />
-      </View>
+      <AssetImageShimmer className={className} style={style as ViewStyle} />
     );
   }
 
   if (asset.status === AssetStatusKind.Pending) {
     return (
-      <View className="size-full items-center justify-center bg-fg/5">
-        <ActivityIndicator size="small" className="text-fg" />
-        <Text className="mt-1 text-xs text-fg-dim">Uploading...</Text>
-      </View>
+      <AssetImageShimmer className={className} style={style as ViewStyle} />
     );
   }
 
-  if (asset.status === AssetStatusKind.Failed || imageError) {
+  if (asset.status === AssetStatusKind.Failed || hasImageError) {
     return (
-      <View className="size-full items-center justify-center bg-red/10">
+      <View
+        className={`
+          items-center justify-center bg-red/10
+
+          ${className ?? ``}
+        `}
+        style={style as ViewStyle}
+      >
         <Text className="text-xs text-red">
           {asset.errorMessage ?? `Failed to load`}
         </Text>
@@ -96,8 +122,10 @@ export function AssetImage({
 
   return (
     <ExpoImage
-      {...imageProps}
+      {...restImageProps}
       source={{ uri: imageUrl }}
+      className={className}
+      style={style}
       contentFit={contentFit}
       transition={200}
       onError={() => {
@@ -105,4 +133,17 @@ export function AssetImage({
       }}
     />
   );
+}
+
+interface AssetImageShimmerProps {
+  className?: string;
+  style?: ViewStyle;
+}
+
+/**
+ * Animated shimmer placeholder for AssetImage while loading.
+ * Shows a horizontal sweep gradient animation across the container.
+ */
+function AssetImageShimmer({ className, style }: AssetImageShimmerProps) {
+  return <ShimmerRect className={className} style={style} />;
 }
