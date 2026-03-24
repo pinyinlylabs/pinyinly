@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ViewStyle } from "react-native";
+import type { ViewProps } from "react-native";
 import { View } from "react-native";
 import Reanimated, {
   Easing,
@@ -11,7 +11,7 @@ import Reanimated, {
 
 interface ShimmerRectProps {
   className?: string;
-  style?: ViewStyle;
+  style?: ViewProps[`style`];
 }
 
 const shimmerWidthMinPx = 96;
