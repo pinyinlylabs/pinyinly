@@ -833,6 +833,8 @@ const badPairs = new Set<string>([
   `rún 瞤`,
   `qǐn 笉`,
   `tiè 呫`,
+  `xǐn 伈`,
+  `tǔn 氽`,
 ]);
 
 function isBadPair(pinyinUnit: PinyinUnit, hanzi: HanziCharacter): boolean {
