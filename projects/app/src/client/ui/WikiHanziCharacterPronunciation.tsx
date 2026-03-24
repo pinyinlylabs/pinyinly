@@ -351,88 +351,91 @@ export function WikiHanziCharacterPronunciationBox({
           </View>
         </View>
       )}
-      {isEditMode ? (
+      {isEditMode && (!isHintSectionVisible || !isImageSectionVisible) ? (
         <View className="flex-row items-start gap-4 p-4">
-          <RectButton
-            variant="bare2"
-            iconStart="keyboard"
-            iconSize={20}
-            className="opacity-80"
-            onPress={() => {
-              setShowHintEditor((current) => !(current ?? hasHintContent));
-            }}
-          >
-            Add hint
-          </RectButton>
-          <RectButton
-            variant="bare2"
-            iconStart="photos-filled"
-            iconSize={20}
-            className="opacity-80"
-            onPress={() => {
-              setShowImageEditor((current) => !(current ?? hasImageContent));
-            }}
-          >
-            Add image
-          </RectButton>
+          {isHintSectionVisible ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="keyboard"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                setShowHintEditor(true);
+              }}
+            >
+              Add hint
+            </RectButton>
+          )}
+          {isImageSectionVisible ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="photos-filled"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                setShowImageEditor(true);
+              }}
+            >
+              Add image
+            </RectButton>
+          )}
         </View>
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
         <View className="gap-4 p-4">
           {isHintSectionVisible ? (
-            isEditMode ? (
-              <>
-                <Text className="pyly-body-subheading">
-                  Your pronunciation hint
-                </Text>
+            <View className="gap-2">
+              <Text className="pyly-body-subheading">
+                Your pronunciation hint
+              </Text>
 
-                <View className="gap-2">
-                  <InlineEditableSettingText
-                    variant="hint"
-                    setting={hanziPronunciationHintTextSetting}
-                    settingKey={hintSettingKey}
-                    placeholder="Add a hint"
-                    renderDisplay={(value) => <Pylymark source={value} />}
-                    onSaveValue={(nextHintText) => {
-                      const nextHintTextLength = nextHintText?.length ?? 0;
-                      const currentExplanationLength =
-                        hintExplanationSetting.value?.text.length ?? 0;
-                      if (
-                        nextHintTextLength === 0 &&
-                        currentExplanationLength === 0
-                      ) {
-                        setShowHintEditor(false);
-                      } else {
-                        setShowHintEditor(true);
-                      }
-                    }}
-                  />
+              <InlineEditableSettingText
+                readonly={!isEditMode}
+                variant="hint"
+                setting={hanziPronunciationHintTextSetting}
+                settingKey={hintSettingKey}
+                placeholder="Add a hint"
+                renderDisplay={(value) => <Pylymark source={value} />}
+                onSaveValue={(nextHintText) => {
+                  const nextHintTextLength = nextHintText?.length ?? 0;
+                  const currentExplanationLength =
+                    hintExplanationSetting.value?.text.length ?? 0;
+                  if (
+                    nextHintTextLength === 0 &&
+                    currentExplanationLength === 0
+                  ) {
+                    setShowHintEditor(false);
+                  } else {
+                    setShowHintEditor(true);
+                  }
+                }}
+              />
 
-                  <InlineEditableSettingText
-                    variant="hintExplanation"
-                    setting={hanziPronunciationHintExplanationSetting}
-                    settingKey={hintSettingKey}
-                    placeholder="Add an explanation"
-                    multiline
-                    renderDisplay={(value) => <Pylymark source={value} />}
-                    onSaveValue={(nextExplanation) => {
-                      const nextExplanationLength =
-                        nextExplanation?.length ?? 0;
-                      const currentHintTextLength =
-                        hintTextSetting.value?.text.length ?? 0;
-                      if (
-                        currentHintTextLength === 0 &&
-                        nextExplanationLength === 0
-                      ) {
-                        setShowHintEditor(false);
-                      } else {
-                        setShowHintEditor(true);
-                      }
-                    }}
-                  />
-                </View>
+              <InlineEditableSettingText
+                readonly={!isEditMode}
+                variant="hintExplanation"
+                setting={hanziPronunciationHintExplanationSetting}
+                settingKey={hintSettingKey}
+                placeholder="Add an explanation"
+                multiline
+                renderDisplay={(value) => <Pylymark source={value} />}
+                onSaveValue={(nextExplanation) => {
+                  const nextExplanationLength = nextExplanation?.length ?? 0;
+                  const currentHintTextLength =
+                    hintTextSetting.value?.text.length ?? 0;
+                  if (
+                    currentHintTextLength === 0 &&
+                    nextExplanationLength === 0
+                  ) {
+                    setShowHintEditor(false);
+                  } else {
+                    setShowHintEditor(true);
+                  }
+                }}
+              />
 
+              {isEditMode ? (
                 <View className="flex-row items-center justify-between">
                   <Text className="font-sans text-[13px] text-fg-dim">
                     Want help brainstorming a hint?
@@ -447,18 +450,8 @@ export function WikiHanziCharacterPronunciationBox({
                     Use AI
                   </RectButton>
                 </View>
-              </>
-            ) : (
-              <View className="gap-2">
-                <Text className="pyly-body-subheading">
-                  Your pronunciation hint
-                </Text>
-                {hintText.length > 0 ? <Pylymark source={hintText} /> : null}
-                {hintExplanation.length > 0 ? (
-                  <Pylymark source={hintExplanation} />
-                ) : null}
-              </View>
-            )
+              ) : null}
+            </View>
           ) : null}
 
           {isImageSectionVisible ? (

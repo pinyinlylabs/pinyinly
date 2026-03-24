@@ -1,7 +1,6 @@
 import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
-import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
@@ -15,13 +14,12 @@ import type {
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
+import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
-
-type GeneratedImageFormat = `png` | `jpeg` | `webp`;
 
 type AiImagePlaygroundRole = `user` | `assistant`;
 
@@ -30,6 +28,7 @@ interface AiImagePlaygroundMessage {
   role: AiImagePlaygroundRole;
   text?: string;
   assetId?: AssetId;
+  contextReferenceEntries?: AiImageContextReferenceEntry[];
   createdAtIso: string;
 }
 
@@ -76,6 +75,11 @@ export interface AiImageGenerationPanelProps {
   onSavePrompt?: (prompt: string) => void;
 }
 
+interface AiImageContextReferenceEntry {
+  label: string;
+  assetId: AssetId;
+}
+
 export function AiImageGenerationPanel({
   initialPrompt = ``,
   aiImageStyle = null,
@@ -95,10 +99,6 @@ export function AiImageGenerationPanel({
       createInitialPlaygroundState(initialPrompt),
     );
   const [isLoadedFromSetting, setIsLoadedFromSetting] = useState(false);
-  const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
-  const [previewImageByMessageId, setPreviewImageByMessageId] = useState<
-    Record<string, { imageDataUrl: string; format: GeneratedImageFormat }>
-  >({});
   const [error, setError] = useState<string | null>(null);
   const timelineScrollRef = useRef<ScrollView>(null);
   const hasScrolledInitiallyRef = useRef(false);
@@ -175,16 +175,6 @@ export function AiImageGenerationPanel({
   const generateMutation = trpc.ai.generateHintImage.useMutation();
   const isPointerHoverCapable = usePointerHoverCapability();
 
-  const { uploading, uploadImageBlob } = useImageUploader({
-    onUploadComplete: () => {
-      setError(null);
-    },
-    onUploadError: (errorMessage) => {
-      setError(errorMessage);
-      onError?.(errorMessage);
-    },
-  });
-
   const persistPlaygroundState = (nextState: AiImagePlaygroundStateV1) => {
     playgroundSettingResult.setValue(
       {
@@ -222,8 +212,7 @@ export function AiImageGenerationPanel({
   const activeThreadId = activeThread?.id ?? null;
   const activeThreadMessageCount = activeThread?.messages.length ?? 0;
 
-  const contextReferenceEntries: Array<{ label: string; assetId: AssetId }> =
-    [];
+  const contextReferenceEntries: AiImageContextReferenceEntry[] = [];
 
   if (aiImageStyle != null) {
     const styleConfig = getAiImageStyleConfig(aiImageStyle);
@@ -325,7 +314,7 @@ export function AiImageGenerationPanel({
     setError(null);
   };
 
-  const handleDraftPromptChange = (nextPrompt: string) => {
+  const handlePersistDraftPrompt = (nextPrompt: string) => {
     if (activeThread == null) {
       return;
     }
@@ -344,24 +333,8 @@ export function AiImageGenerationPanel({
     }));
   };
 
-  const uploadGeneratedImage = async (
-    imageDataUrl: string,
-    format: GeneratedImageFormat,
-  ): Promise<AssetId> => {
-    const response = await fetch(imageDataUrl);
-    const blob = await response.blob();
-    const assetId = await uploadImageBlob({
-      blob,
-      contentType: `image/${format}`,
-    });
-    if (assetId == null) {
-      throw new Error(`Upload failed`);
-    }
-    return assetId;
-  };
-
-  const handleGenerate = async () => {
-    const prompt = activeThread?.draftPrompt.trim() ?? ``;
+  const handleGenerate = async (draftPrompt: string) => {
+    const prompt = draftPrompt.trim();
     if (activeThread == null || prompt.length === 0) {
       const promptError = `Please enter a prompt`;
       setError(promptError);
@@ -388,6 +361,10 @@ export function AiImageGenerationPanel({
             id: userMessageId,
             role: `user` as const,
             text: prompt,
+            contextReferenceEntries: contextReferenceEntries.map((entry) => ({
+              assetId: entry.assetId,
+              label: entry.label,
+            })),
             createdAtIso: nowIso,
           },
         ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
@@ -416,19 +393,6 @@ export function AiImageGenerationPanel({
             : undefined,
       });
 
-      const assetId = await uploadGeneratedImage(
-        result.imageDataUrl,
-        result.format,
-      );
-
-      setPreviewImageByMessageId((prev) => ({
-        ...prev,
-        [assistantMessageId]: {
-          imageDataUrl: result.imageDataUrl,
-          format: result.format,
-        },
-      }));
-
       updatePlaygroundState((prev) => ({
         ...prev,
         threads: prev.threads.map((thread) => {
@@ -442,7 +406,7 @@ export function AiImageGenerationPanel({
               id: assistantMessageId,
               role: `assistant` as const,
               text: `Generated image`,
-              assetId,
+              assetId: result.assetId,
               createdAtIso: new Date().toISOString(),
             },
           ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
@@ -463,17 +427,17 @@ export function AiImageGenerationPanel({
   };
 
   const isGenerating = generateMutation.isPending;
-  const isProcessing = isGenerating || uploading;
+  const isProcessing = isGenerating;
 
   return (
-    <View className="h-[560px] p-4">
+    <View className="h-[460px]">
       <View className="h-full flex-row items-stretch gap-4">
-        <View className="h-full w-[180px] shrink-0 gap-2">
+        <View className="h-full w-[120px] shrink-0 gap-2">
           <View className="flex-row items-center justify-between">
             <Text className="pyly-body-subheading">Chats</Text>
             <RectButton
               variant="bare2"
-              iconStart="add"
+              iconStart="plus"
               iconSize={16}
               onPress={handleCreateThread}
               disabled={isProcessing || !isLoadedFromSetting}
@@ -522,7 +486,7 @@ export function AiImageGenerationPanel({
             <ScrollView
               ref={timelineScrollRef}
               className="flex-1"
-              contentContainerClassName="gap-6 pb-2"
+              contentContainerClassName="gap-6 py-10 px-3"
             >
               {activeThread == null || activeThread.messages.length === 0 ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
@@ -530,173 +494,315 @@ export function AiImageGenerationPanel({
                 </Text>
               ) : (
                 activeThread.messages.map((message) => {
-                  const previewImage =
-                    previewImageByMessageId[message.id] ?? null;
+                  if (message.role === `user`) {
+                    return (
+                      <AiImageUserMessage
+                        key={message.id}
+                        message={message}
+                        className="ml-8"
+                      />
+                    );
+                  }
+
                   return (
-                    <View
+                    <AiImageAssistantMessage
                       key={message.id}
-                      className={
-                        message.role === `user`
-                          ? `ml-2 rounded-lg bg-sky/10 p-3`
-                          : `mr-2`
-                      }
-                    >
-                      {message.role !== `assistant` &&
-                      message.text != null &&
-                      message.text.length > 0 ? (
-                        <Text className="font-sans text-[14px] text-fg">
-                          {message.text}
-                        </Text>
-                      ) : null}
-                      {previewImage == null &&
-                      message.assetId == null ? null : (
-                        <View className="gap-2">
-                          <View className="group relative w-[280px]">
-                            {previewImage == null ? (
-                              message.assetId == null ? null : (
-                                <AssetImage
-                                  assetId={message.assetId}
-                                  className="h-[140px] w-[280px] rounded-md"
-                                  contentFit="contain"
-                                />
-                              )
-                            ) : (
-                              <Image
-                                source={{ uri: previewImage.imageDataUrl }}
-                                style={{
-                                  width: 280,
-                                  height: 140,
-                                  borderRadius: 8,
-                                }}
-                                resizeMode="contain"
-                              />
-                            )}
-
-                            {message.role === `assistant` &&
-                            message.assetId != null ? (
-                              <View
-                                className={
-                                  isPointerHoverCapable
-                                    ? `
-                                      pointer-events-none absolute inset-x-3 top-3 items-start
-                                      opacity-0
-
-                                      group-hover:pointer-events-auto group-hover:opacity-100
-                                    `
-                                    : `absolute inset-x-3 top-3 items-start`
-                                }
-                              >
-                                <RectButton
-                                  variant="bare2"
-                                  className="rounded bg-bg/80 text-[12px]"
-                                  onPress={() => {
-                                    if (message.assetId == null) {
-                                      return;
-                                    }
-                                    onChangeImage(message.assetId);
-                                  }}
-                                  disabled={isProcessing}
-                                >
-                                  Use image
-                                </RectButton>
-                              </View>
-                            ) : null}
-                          </View>
-                        </View>
-                      )}
-                    </View>
+                      message={message}
+                      isPointerHoverCapable={isPointerHoverCapable}
+                      isProcessing={isProcessing}
+                      onChangeImage={onChangeImage}
+                      className="mr-2"
+                    />
                   );
                 })
               )}
             </ScrollView>
           </View>
 
-          <View className="gap-1 pt-3">
-            <View
-              className={
-                isPromptInputFocused
-                  ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
-                  : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
+          <View className="gap-1">
+            <AiImagePromptComposer
+              key={activeThread?.id ?? `no-active-thread`}
+              draftPrompt={activeThread?.draftPrompt ?? ``}
+              editable={
+                isLoadedFromSetting && !isProcessing && activeThread != null
               }
-            >
-              <TextInputMulti
-                value={activeThread?.draftPrompt ?? ``}
-                onChangeText={handleDraftPromptChange}
-                placeholder="Describe how to create or modify the image in this chat"
-                className="rounded-none bg-transparent p-0 text-[13px] leading-5"
-                editable={
-                  isLoadedFromSetting && !isProcessing && activeThread != null
-                }
-                onFocus={() => {
-                  setIsPromptInputFocused(true);
-                }}
-                onBlur={() => {
-                  setIsPromptInputFocused(false);
-                }}
-              />
-
-              <View className="flex-row items-center justify-between gap-2">
-                <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
-                  {contextReferenceEntries.map((entry) => (
-                    <Tooltip
-                      key={`${entry.assetId}-${entry.label}`}
-                      placement="top"
-                      sideOffset={6}
-                    >
-                      <Tooltip.Trigger className="rounded border border-fg-bg10">
-                        <AssetImage
-                          assetId={entry.assetId}
-                          className="size-9 rounded"
-                          contentFit="cover"
-                        />
-                      </Tooltip.Trigger>
-                      <Tooltip.Content className="gap-2 p-2">
-                        <AssetImage
-                          assetId={entry.assetId}
-                          className="h-[110px] w-[180px] rounded border border-fg-bg10"
-                          contentFit="cover"
-                        />
-                        <Text className="font-sans text-[12px] uppercase text-fg-dim">
-                          Prompt context
-                        </Text>
-                        <Text className="font-sans text-[13px] text-fg-dim">
-                          {entry.label}
-                        </Text>
-                      </Tooltip.Content>
-                    </Tooltip>
-                  ))}
-                </View>
-
-                <RectButton
-                  variant="bare2"
-                  onPress={() => {
-                    void handleGenerate();
-                  }}
-                  disabled={
-                    !isLoadedFromSetting ||
-                    isProcessing ||
-                    activeThread == null ||
-                    activeThread.draftPrompt.trim().length === 0
-                  }
-                >
-                  {isGenerating ? `Generating...` : `Send`}
-                </RectButton>
-              </View>
-            </View>
+              isGenerating={isGenerating}
+              isLoadedFromSetting={isLoadedFromSetting}
+              isProcessing={isProcessing}
+              contextReferenceEntries={contextReferenceEntries}
+              onPersistDraftPrompt={handlePersistDraftPrompt}
+              onGenerate={handleGenerate}
+            />
 
             {error == null ? null : (
               <Text className="font-sans text-[14px] text-[crimson]">
                 {error}
               </Text>
             )}
-
-            {uploading ? (
-              <Text className="font-sans text-[14px] text-fg-dim">
-                Uploading generated image...
-              </Text>
-            ) : null}
           </View>
         </View>
+      </View>
+    </View>
+  );
+}
+
+function AiImageUserMessage({
+  message,
+  className,
+}: {
+  message: AiImagePlaygroundMessage;
+  className?: string;
+}) {
+  const contextEntries = message.contextReferenceEntries ?? [];
+
+  return (
+    <View className="gap-1">
+      <View
+        className={`
+          rounded-lg bg-sky/20 px-3 py-2
+
+          ${className ?? ``}
+        `}
+      >
+        {message.text != null && message.text.length > 0 ? (
+          <Text className="font-sans text-sm font-medium leading-snug text-fg">
+            {message.text}
+          </Text>
+        ) : null}
+        {message.assetId == null ? null : (
+          <View className="gap-2">
+            <View className="w-full max-w-[560px]">
+              <AssetImage
+                assetId={message.assetId}
+                className="aspect-[2/1] max-h-[320px] w-full rounded-md"
+                contentFit="contain"
+              />
+            </View>
+          </View>
+        )}
+      </View>
+      {contextEntries.length === 0 ? null : (
+        <View className="flex-row flex-wrap items-center justify-end gap-1 px-3">
+          {contextEntries.map((entry, index) => (
+            <Tooltip
+              key={`${entry.assetId}-${entry.label}-${String(index)}`}
+              placement="top"
+              sideOffset={6}
+            >
+              <Tooltip.Trigger>
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="size-6 rounded"
+                  contentFit="cover"
+                />
+              </Tooltip.Trigger>
+              <Tooltip.Content className="gap-2 p-2">
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
+                  contentFit="cover"
+                />
+                <Text className="font-sans text-[12px] uppercase text-fg-dim">
+                  Message context
+                </Text>
+                <Text className="font-sans text-[13px] text-fg-dim">
+                  {entry.label}
+                </Text>
+              </Tooltip.Content>
+            </Tooltip>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function AiImageAssistantMessage({
+  message,
+  isPointerHoverCapable,
+  isProcessing,
+  onChangeImage,
+  className,
+}: {
+  message: AiImagePlaygroundMessage;
+  isPointerHoverCapable: boolean;
+  isProcessing: boolean;
+  onChangeImage: (assetId: AssetId) => void;
+  className?: string;
+}) {
+  const { assetId } = message;
+
+  if (assetId == null) {
+    return null;
+  }
+
+  return (
+    <View
+      className={`
+        gap-2
+
+        ${className ?? ``}
+      `}
+    >
+      <View className="group relative w-full max-w-[560px]">
+        <AssetImage
+          assetId={assetId}
+          className="aspect-[2/1] max-h-[320px] w-full rounded-lg"
+          contentFit="fill"
+        />
+
+        <View
+          className={
+            isPointerHoverCapable
+              ? `
+                pointer-events-none absolute inset-x-3 top-3 items-start opacity-0
+
+                group-hover:pointer-events-auto group-hover:opacity-100
+              `
+              : `absolute inset-x-3 top-3 items-start`
+          }
+        >
+          <ButtonGroup>
+            <ButtonGroup.Button
+              onPress={() => {
+                onChangeImage(assetId);
+              }}
+              disabled={isProcessing}
+            >
+              Use image
+            </ButtonGroup.Button>
+          </ButtonGroup>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function AiImagePromptComposer({
+  draftPrompt: initialDraftPrompt,
+  editable,
+  isGenerating,
+  isLoadedFromSetting,
+  isProcessing,
+  contextReferenceEntries,
+  onPersistDraftPrompt,
+  onGenerate,
+}: {
+  draftPrompt: string;
+  editable: boolean;
+  isGenerating: boolean;
+  isLoadedFromSetting: boolean;
+  isProcessing: boolean;
+  contextReferenceEntries: AiImageContextReferenceEntry[];
+  onPersistDraftPrompt: (prompt: string) => void;
+  onGenerate: (prompt: string) => Promise<void>;
+}) {
+  const [draftPrompt, setDraftPrompt] = useState(initialDraftPrompt);
+  const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
+  const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
+
+  const persistDraftPrompt = (nextDraftPrompt: string) => {
+    if (lastPersistedDraftPromptRef.current === nextDraftPrompt) {
+      return;
+    }
+
+    lastPersistedDraftPromptRef.current = nextDraftPrompt;
+    onPersistDraftPrompt(nextDraftPrompt);
+  };
+
+  useEffect(() => {
+    if (!editable) {
+      return;
+    }
+
+    if (lastPersistedDraftPromptRef.current === draftPrompt) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      lastPersistedDraftPromptRef.current = draftPrompt;
+      onPersistDraftPrompt(draftPrompt);
+    }, 250);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [draftPrompt, editable, onPersistDraftPrompt]);
+
+  const canSend =
+    isLoadedFromSetting && !isProcessing && draftPrompt.trim().length > 0;
+
+  return (
+    <View
+      className={
+        isPromptInputFocused
+          ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
+          : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
+      }
+    >
+      <TextInputMulti
+        value={draftPrompt}
+        onChangeText={setDraftPrompt}
+        placeholder="Describe how to create or modify the image in this chat"
+        className="max-h-80 rounded-none bg-transparent p-0 text-sm font-medium leading-5"
+        editable={editable}
+        onFocus={() => {
+          setIsPromptInputFocused(true);
+        }}
+        onBlur={() => {
+          setIsPromptInputFocused(false);
+          persistDraftPrompt(draftPrompt);
+        }}
+      />
+
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
+          {contextReferenceEntries.map((entry) => (
+            <Tooltip
+              key={`${entry.assetId}-${entry.label}`}
+              placement="top"
+              sideOffset={6}
+            >
+              <Tooltip.Trigger className="rounded border border-fg-bg10">
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="size-9 rounded"
+                  contentFit="cover"
+                />
+              </Tooltip.Trigger>
+              <Tooltip.Content className="gap-2 p-2">
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
+                  contentFit="cover"
+                />
+                <Text className="font-sans text-[12px] uppercase text-fg-dim">
+                  Prompt context
+                </Text>
+                <Text className="font-sans text-[13px] text-fg-dim">
+                  {entry.label}
+                </Text>
+              </Tooltip.Content>
+            </Tooltip>
+          ))}
+        </View>
+
+        <RectButton
+          variant="bare2"
+          onPress={() => {
+            if (!canSend) {
+              return;
+            }
+
+            const nextPrompt = draftPrompt;
+            setDraftPrompt(``);
+            lastPersistedDraftPromptRef.current = ``;
+            void onGenerate(nextPrompt);
+          }}
+          disabled={!canSend}
+        >
+          {isGenerating ? `Generating...` : `Send`}
+        </RectButton>
       </View>
     </View>
   );
@@ -811,6 +917,9 @@ function parseAiImagePlaygroundState(
             typeof messageObject[`assetId`] === `string`
               ? (messageObject[`assetId`] as AssetId)
               : undefined,
+          contextReferenceEntries: parseMessageContextReferenceEntries(
+            messageObject[`contextReferenceEntries`],
+          ),
           createdAtIso: messageObject[`createdAtIso`],
         });
       }
@@ -847,4 +956,35 @@ function parseAiImagePlaygroundState(
   } catch {
     return createInitialPlaygroundState(initialPrompt);
   }
+}
+
+function parseMessageContextReferenceEntries(
+  value: unknown,
+): AiImageContextReferenceEntry[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const entries: AiImageContextReferenceEntry[] = [];
+
+  for (const item of value) {
+    if (typeof item !== `object` || item == null) {
+      continue;
+    }
+
+    const objectItem = item as Record<string, unknown>;
+    if (
+      typeof objectItem[`assetId`] !== `string` ||
+      typeof objectItem[`label`] !== `string`
+    ) {
+      continue;
+    }
+
+    entries.push({
+      assetId: objectItem[`assetId`] as AssetId,
+      label: objectItem[`label`],
+    });
+  }
+
+  return entries.length > 0 ? entries : undefined;
 }

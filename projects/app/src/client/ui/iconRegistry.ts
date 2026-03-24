@@ -3,7 +3,6 @@
 export const iconRegistry = {
   // <pyly-glob-template glob="../../assets/icons/*.svg" template="  [`${filenameWithoutExt}`]: require(`${path}`),">
   [`add-circled-filled`]: require(`../../assets/icons/add-circled-filled.svg`),
-  [`add`]: require(`../../assets/icons/add.svg`),
   [`alarm-filled`]: require(`../../assets/icons/alarm-filled.svg`),
   [`alarm`]: require(`../../assets/icons/alarm.svg`),
   [`arrow-down`]: require(`../../assets/icons/arrow-down.svg`),
@@ -53,10 +52,12 @@ export const iconRegistry = {
   [`menu`]: require(`../../assets/icons/menu.svg`),
   [`message-bubble-filled`]: require(`../../assets/icons/message-bubble-filled.svg`),
   [`message-text`]: require(`../../assets/icons/message-text.svg`),
+  [`minus`]: require(`../../assets/icons/minus.svg`),
   [`note-2`]: require(`../../assets/icons/note-2.svg`),
   [`pencil`]: require(`../../assets/icons/pencil.svg`),
   [`photos-filled`]: require(`../../assets/icons/photos-filled.svg`),
   [`plant-filled`]: require(`../../assets/icons/plant-filled.svg`),
+  [`plus`]: require(`../../assets/icons/plus.svg`),
   [`profile-filled`]: require(`../../assets/icons/profile-filled.svg`),
   [`profile`]: require(`../../assets/icons/profile.svg`),
   [`puzzle`]: require(`../../assets/icons/puzzle.svg`),

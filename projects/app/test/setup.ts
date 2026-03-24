@@ -86,6 +86,7 @@ vi.mock(`react-native-reanimated`, () => {
     interpolateColor: null,
     default: {
       createAnimatedComponent: (x: Component) => x,
+      View,
     },
   };
 });

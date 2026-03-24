@@ -87,27 +87,31 @@ test(`hsk word lists match vendor data`, async () => {
   const completeHskVocabulary = await loadCompleteHskVocabulary();
   const dictionary = await loadDictionary();
 
-  const vendorHsk1Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-1`),
-  );
-  const vendorHsk2Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-2`),
-  );
-  const vendorHsk3Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-3`),
-  );
-  const vendorHsk4Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-4`),
-  );
-  const vendorHsk5Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-5`),
-  );
-  const vendorHsk6Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-6`),
-  );
-  const vendorHsk7To9Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-7`),
-  );
+  const vendorHsk1Items = [];
+  const vendorHsk2Items = [];
+  const vendorHsk3Items = [];
+  const vendorHsk4Items = [];
+  const vendorHsk5Items = [];
+  const vendorHsk6Items = [];
+  const vendorHsk7To9Items = [];
+
+  for (const item of completeHskVocabulary) {
+    if (item.level.includes(`new-1`)) {
+      vendorHsk1Items.push(item);
+    } else if (item.level.includes(`new-2`)) {
+      vendorHsk2Items.push(item);
+    } else if (item.level.includes(`new-3`)) {
+      vendorHsk3Items.push(item);
+    } else if (item.level.includes(`new-4`)) {
+      vendorHsk4Items.push(item);
+    } else if (item.level.includes(`new-5`)) {
+      vendorHsk5Items.push(item);
+    } else if (item.level.includes(`new-6`)) {
+      vendorHsk6Items.push(item);
+    } else if (item.level.includes(`new-7`)) {
+      vendorHsk7To9Items.push(item);
+    }
+  }
 
   for (const [hskLevel, vendorList, localList] of [
     [HskLevel[1], vendorHsk1Items, dictionary.hsk1HanziWords],
