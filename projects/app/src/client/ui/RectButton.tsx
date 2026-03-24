@@ -44,6 +44,7 @@ export function RectButton({
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
+  const iconOnly = children == null && (iconStart != null || iconEnd != null);
 
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -90,6 +91,7 @@ export function RectButton({
           flat,
           variant,
           disabled,
+          iconOnly,
           hoveredOrPressed: pressed || hovered,
           className,
         })}
@@ -220,6 +222,9 @@ const roundedRectClass = tv({
     disabled: {
       true: `cursor-default select-none opacity-30`,
     },
+    iconOnly: {
+      true: ``,
+    },
   },
   compoundVariants: [
     // Filled
@@ -280,6 +285,13 @@ const roundedRectClass = tv({
       hoveredOrPressed: true,
       class: `bg-fg/10`,
     },
+    // Icon-only: reduce horizontal padding to match vertical for a square appearance
+    { variant: `filled`, iconOnly: true, class: `px-2` },
+    { variant: `outline`, iconOnly: true, class: `px-2` },
+    { variant: `option`, iconOnly: true, class: `px-2` },
+    { variant: `bare`, iconOnly: true, class: `px-1` },
+    { variant: `bare2`, iconOnly: true, class: `px-1` },
+    { variant: `rounded`, iconOnly: true, class: `px-2` },
   ],
 });
 
