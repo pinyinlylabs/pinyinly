@@ -80,6 +80,12 @@
     "unicorn/no-thenable": "deny",
     "unicorn/no-empty-file": "deny",
     "unicorn/no-await-in-promise-methods": "deny",
+    // This doesn't make sense in some cases like adding something to a readonly
+    // Set() because to add something to a set you'd have to create a new array
+    // first and spread in the old values and append the new value, so it
+    // creates an extra Array first rather than just putting the items into the
+    // Set and then adding the new item.
+    "unicorn/no-immediate-mutation": "off",
     "unicorn/numeric-separators-style": [
       "error",
       {
