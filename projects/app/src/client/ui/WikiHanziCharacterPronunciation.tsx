@@ -498,16 +498,13 @@ export function WikiHanziCharacterPronunciationBox({
                 />
               </View>
             ) : hintImage?.imageId == null ? null : (
-              <View className="gap-2 pt-2">
-                <Text className="pyly-body-subheading">Your image</Text>
-                <InlineEditableSettingImage
-                  readonly
-                  setting={hanziPronunciationHintImageSetting}
-                  settingKey={hintSettingKey}
-                  previewHeight={200}
-                  frameConstraint={{ aspectRatio: 2 }}
-                />
-              </View>
+              <InlineEditableSettingImage
+                readonly
+                setting={hanziPronunciationHintImageSetting}
+                settingKey={hintSettingKey}
+                previewHeight={200}
+                frameConstraint={{ aspectRatio: 2 }}
+              />
             )
           ) : null}
         </View>
