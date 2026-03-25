@@ -4,6 +4,34 @@ import { invariant } from "./invariant.ts";
 
 export const deepReadonly = <T>(value: T) => value as DeepReadonly<T>;
 
+export function setToggle<T>(prev: ReadonlySet<T>, value: T): Set<T> {
+  const next = new Set(prev);
+  if (next.has(value)) {
+    next.delete(value);
+  } else {
+    next.add(value);
+  }
+  return next;
+}
+
+export function setAdd<T>(prev: ReadonlySet<T>, value: T): ReadonlySet<T> {
+  if (!prev.has(value)) {
+    const next = new Set(prev);
+    next.add(value);
+    return next;
+  }
+  return prev;
+}
+
+export function setDelete<T>(prev: ReadonlySet<T>, value: T): ReadonlySet<T> {
+  if (prev.has(value)) {
+    const next = new Set(prev);
+    next.delete(value);
+    return next;
+  }
+  return prev;
+}
+
 export async function iterTake<T>(
   iter: AsyncIterableIterator<T>,
   limit: number,
