@@ -7,14 +7,12 @@ applyTo: "projects/app/**"
 The wiki content is stored in MDX files within the `src/client/wiki/` directory. The structure
 follows this pattern:
 
-- `src/client/wiki/{hanzi}/~{meaningKey}/meaning.mdx` - Contains the meaning/definition of a word
-  - Where `{hanzi}` is the Chinese character or word
-  - And `{meaningKey}` is the English identifier that corresponds to the concept from HanziWord in
-    the docs
+- `src/client/wiki/[hanzi]/meaning.mdx` - Contains the meaning/definition of a word
+  - Where `[hanzi]` is the Chinese character or word
 
 Example:
 
-- `src/client/wiki/一/~one/meaning.mdx` - Contains the definition for "一" when it means "one"
+- `src/client/wiki/一/meaning.mdx` - Contains the definition for "一"
 
 When modifying or adding wiki content:
 
