@@ -56,6 +56,7 @@ import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
+import { BTreeIndex } from "@tanstack/db";
 
 type ExpressionLike = Parameters<typeof isUndefined>[0];
 const isNullish = (value: ExpressionLike) =>
@@ -796,6 +797,8 @@ function dictionarySearchCollectionOptions({
 
   return {
     id: `dictionarySearch`,
+    autoIndex: `eager`,
+    defaultIndexType: BTreeIndex,
     sync: {
       rowUpdateMode: `full`,
       sync: (params) => {
