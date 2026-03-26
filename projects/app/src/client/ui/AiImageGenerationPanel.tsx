@@ -915,18 +915,11 @@ function AiImageUserMessage({
                   contentFit="cover"
                 />
               </Tooltip.Trigger>
-              <Tooltip.Content className="gap-2 p-2">
-                <AssetImage
-                  assetId={entry.assetId}
-                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
-                  contentFit="cover"
+              <Tooltip.Content variant="custom">
+                <ImageReferenceTooltipContent
+                  imageAssetId={entry.assetId}
+                  prompt={entry.label}
                 />
-                <Text className="font-sans text-[12px] uppercase text-fg-dim">
-                  Message context
-                </Text>
-                <Text className="font-sans text-[13px] text-fg-dim">
-                  {entry.label}
-                </Text>
               </Tooltip.Content>
             </Tooltip>
           ))}
@@ -1232,26 +1225,14 @@ function AiImagePromptComposer({
                     </View>
                   </Pressable>
                 </Tooltip.Trigger>
-                <Tooltip.Content className="gap-2 p-2">
-                  {previewAssetId == null ? null : (
-                    <AssetImage
-                      assetId={previewAssetId}
-                      className="h-[110px] w-[180px] rounded border border-fg-bg10"
-                      contentFit="cover"
-                    />
-                  )}
-                  <Text className="font-sans text-[12px] uppercase text-fg-dim">
-                    Prompt context
-                  </Text>
-                  <Text className="font-sans text-[13px] text-fg-dim">
-                    {promptContextLabelByReferenceId.get(reference.id) ??
-                      reference.label}
-                  </Text>
-                  {fallbackReference == null ? null : (
-                    <Text className="font-sans text-[12px] text-fg-dim">
-                      {fallbackUsageLabelByPrimaryId.get(reference.id)}
-                    </Text>
-                  )}
+                <Tooltip.Content variant="custom">
+                  <ImageReferenceTooltipContent
+                    imageAssetId={previewAssetId}
+                    prompt={
+                      promptContextLabelByReferenceId.get(reference.id) ??
+                      reference.label
+                    }
+                  />
                 </Tooltip.Content>
               </Tooltip>
             );
@@ -1296,6 +1277,34 @@ function AiImagePromptComposer({
         >
           {isGenerating ? `Generating...` : `Send`}
         </RectButton>
+      </View>
+    </View>
+  );
+}
+
+function ImageReferenceTooltipContent({
+  imageAssetId,
+  prompt,
+}: {
+  imageAssetId: AssetId | null;
+  prompt: string | null;
+}) {
+  return (
+    <View className="w-[320px] overflow-hidden rounded-lg bg-bg">
+      {imageAssetId == null ? null : (
+        <AssetImage
+          assetId={imageAssetId}
+          className="h-[160px] w-[320px]"
+          contentFit="cover"
+        />
+      )}
+      <View className="gap-2 px-3 py-2">
+        {prompt == null ? null : (
+          <Text className="font-mono text-xs text-fg">{prompt}</Text>
+        )}
+        <Text className="font-sans text-xs text-fg-dim">
+          Image and caption included in the prompt
+        </Text>
       </View>
     </View>
   );
