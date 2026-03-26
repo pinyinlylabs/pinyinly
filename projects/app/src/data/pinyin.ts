@@ -286,10 +286,10 @@ export const splitPinyinUnitOrThrow = memoize1(function splitPinyinUnitOrThrow(
 export type PinyinUnitPartType = `initial` | `final` | `tone`;
 
 export function getPinyinUnitPartLabel(
-  chart: DeepReadonly<PinyinChart>,
   pinyinUnit: PinyinUnit,
   part: PinyinUnitPartType,
 ): string {
+  const chart = loadPylyPinyinChart();
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
   if (splitPinyin == null) {
@@ -306,24 +306,16 @@ export function getPinyinUnitPartLabel(
   return chart.soundToCustomLabel[soundId] ?? soundId;
 }
 
-export function getInitialSoundLabel(
-  chart: DeepReadonly<PinyinChart>,
-  pinyinUnit: PinyinUnit,
-): string {
-  return getPinyinUnitPartLabel(chart, pinyinUnit, `initial`);
+export function getInitialSoundLabel(pinyinUnit: PinyinUnit): string {
+  return getPinyinUnitPartLabel(pinyinUnit, `initial`);
 }
 
-export function getFinalSoundLabel(
-  chart: DeepReadonly<PinyinChart>,
-  pinyinUnit: PinyinUnit,
-): string {
-  return getPinyinUnitPartLabel(chart, pinyinUnit, `final`);
+export function getFinalSoundLabel(pinyinUnit: PinyinUnit): string {
+  return getPinyinUnitPartLabel(pinyinUnit, `final`);
 }
 
-export function getToneSoundLabel(
-  chart: DeepReadonly<PinyinChart>,
-  pinyinUnit: PinyinUnit,
-): string | null {
+export function getToneSoundLabel(pinyinUnit: PinyinUnit): string | null {
+  const chart = loadPylyPinyinChart();
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
   if (splitPinyin == null) {

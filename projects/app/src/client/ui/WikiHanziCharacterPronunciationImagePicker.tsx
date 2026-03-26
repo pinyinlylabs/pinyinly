@@ -8,7 +8,6 @@ import {
   getFinalSoundLabel,
   getInitialSoundLabel,
   getToneSoundLabel,
-  loadPylyPinyinChart,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
@@ -39,7 +38,6 @@ export function WikiHanziCharacterPronunciationImagePicker({
   onChangeImageId: (nextImageId: string | null) => void;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const chart = loadPylyPinyinChart();
   const { aiImageStyle } = useAiImageStyleSetting();
   const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
   const imagePromptSetting = useUserSetting({
@@ -80,8 +78,8 @@ export function WikiHanziCharacterPronunciationImagePicker({
         },
   );
 
-  const initialLabel = getInitialSoundLabel(chart, pinyinUnit);
-  const finalLabel = getFinalSoundLabel(chart, pinyinUnit);
+  const initialLabel = getInitialSoundLabel(pinyinUnit);
+  const finalLabel = getFinalSoundLabel(pinyinUnit);
   const toneDefaultName =
     splitPinyin == null
       ? ``
@@ -92,7 +90,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
   const finalDisplayName = finalPinyinSoundSetting?.value?.text ?? finalLabel;
   const toneDisplayName =
     tonePinyinSoundSetting?.value?.text ??
-    getToneSoundLabel(chart, pinyinUnit) ??
+    getToneSoundLabel(pinyinUnit) ??
     toneDefaultName;
   const defaultFinalToneName = getDefaultFinalToneName({
     finalName: finalDisplayName,
