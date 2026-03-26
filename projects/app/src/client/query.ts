@@ -567,15 +567,11 @@ function userDictionaryCollectionOptions({
         }, 5000);
 
         const onChanges = (
-          changes: Array<
-            CollectionOutput<typeof userMeaningSettings>
-          > extends never
-            ? never
-            : Parameters<
-                  typeof userMeaningSettings.subscribeChanges
-                >[0] extends (c: infer TChanges) => void
-              ? TChanges
-              : never,
+          changes: Parameters<
+            typeof userMeaningSettings.subscribeChanges
+          >[0] extends (c: infer TChanges) => void
+            ? TChanges
+            : never,
         ) => {
           try {
             begin();
@@ -759,7 +755,7 @@ function mapUserMeaningToDictionarySearchEntry(
 }
 
 function dictionarySearchHskSortKey(hsk?: HskLevel): number {
-  return hsk == null ? Number.POSITIVE_INFINITY : hskLevelToNumber(hsk);
+  return hsk == null ? 9999 : hskLevelToNumber(hsk);
 }
 
 function areStringArraysEqual(
@@ -847,23 +843,17 @@ function dictionarySearchCollectionOptions({
           }
         };
 
-        type BuiltInChanges =
-          Array<CollectionOutput<typeof builtInRows>> extends never
-            ? never
-            : Parameters<typeof builtInRows.subscribeChanges>[0] extends (
-                  changes: infer TChanges,
-                ) => void
-              ? TChanges
-              : never;
+        type BuiltInChanges = Parameters<
+          typeof builtInRows.subscribeChanges
+        >[0] extends (changes: infer TChanges) => void
+          ? TChanges
+          : never;
 
-        type UserChanges =
-          Array<CollectionOutput<typeof userRows>> extends never
-            ? never
-            : Parameters<typeof userRows.subscribeChanges>[0] extends (
-                  changes: infer TChanges,
-                ) => void
-              ? TChanges
-              : never;
+        type UserChanges = Parameters<
+          typeof userRows.subscribeChanges
+        >[0] extends (changes: infer TChanges) => void
+          ? TChanges
+          : never;
 
         const onBuiltInChanges = (changes: BuiltInChanges) => {
           try {
@@ -871,8 +861,8 @@ function dictionarySearchCollectionOptions({
 
             for (const change of changes) {
               if (change.type === `delete`) {
-                const previous = change.previousValue ?? change.value;
-                deleteRow(previous.id);
+                const id = change.previousValue?.id ?? change.value.id;
+                deleteRow(id);
                 continue;
               }
 
@@ -922,9 +912,7 @@ function dictionarySearchCollectionOptions({
 
             builtInSubscription = builtInRows.subscribeChanges(
               onBuiltInChanges,
-              {
-                includeInitialState: true,
-              },
+              { includeInitialState: true },
             );
 
             userSubscription = userRows.subscribeChanges(onUserChanges, {
@@ -1059,11 +1047,11 @@ export const staticCollectionOptions = <
 
           commit();
         })
-        .finally(() => {
-          markReady();
-        })
         .catch((error: unknown) => {
           console.error(`staticCollection(id=${collection.id}) error:`, error);
+        })
+        .finally(() => {
+          markReady();
         });
 
       return () => {
