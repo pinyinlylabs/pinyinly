@@ -5,13 +5,15 @@ export function Lozenge({
   children,
   color,
   size = `md`,
+  className,
 }: {
   children: string;
   color: `blue`;
   size?: `sm` | `md`;
+  className?: string;
 }) {
   return (
-    <View className={lozengeContainerClass({ color, size })}>
+    <View className={lozengeContainerClass({ color, size, className })}>
       <Text className={lozengeTextClass({ color, size })}>{children}</Text>
     </View>
   );

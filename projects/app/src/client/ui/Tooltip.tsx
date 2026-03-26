@@ -269,9 +269,14 @@ function TooltipTrigger({
 export interface TooltipContentProps {
   children?: ReactNode;
   className?: string;
+  variant?: `custom` | `default`;
 }
 
-function TooltipContent({ children, className }: TooltipContentProps) {
+function TooltipContent({
+  children,
+  className,
+  variant = `default`,
+}: TooltipContentProps) {
   const {
     isOpen,
     contentId,
@@ -293,6 +298,7 @@ function TooltipContent({ children, className }: TooltipContentProps) {
       className={tooltipContentClass({
         isInitializingPosition,
         className,
+        variant,
       })}
     >
       {children}
@@ -308,11 +314,15 @@ export const Tooltip = Object.assign(TooltipRoot, {
 });
 
 const tooltipContentClass = tv({
-  base: `shadow-lg max-w-[320px] rounded-md border border-fg/15 bg-bg-high px-3 py-2`,
+  base: `shadow-lg`,
   variants: {
     isInitializingPosition: {
       true: `invisible`,
       false: `visible`,
+    },
+    variant: {
+      default: `max-w-[320px] rounded-md border border-fg/15 bg-bg-high px-3 py-2`,
+      custom: ``,
     },
   },
 });
