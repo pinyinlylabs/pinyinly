@@ -1,12 +1,13 @@
 import type { DictionarySearchEntry } from "@/client/query";
-import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
-import { hanziFromHanziWord } from "@/dictionary";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
   getDefaultFinalToneName,
+  getFinalSoundLabel,
+  getInitialSoundLabel,
+  getToneSoundLabel,
   loadPylyPinyinChart,
   splitPinyinUnit,
 } from "@/data/pinyin";
@@ -14,11 +15,9 @@ import {
   getHanziPronunciationHintKeyParams,
   getPinyinFinalToneKeyParams,
   hanziPronunciationHintExplanationSetting,
-  hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
@@ -31,7 +30,6 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
@@ -40,6 +38,7 @@ import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { Tooltip } from "./Tooltip";
+import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacterPronunciationImagePicker";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
 import { useDb } from "./hooks/useDb";
@@ -82,7 +81,7 @@ export function WikiHanziCharacterPronunciation({
   return (
     <WikiHanziCharacterPronunciationBox
       gloss={gloss}
-      hanzi={hanziFromHanziWord(firstMeaning.hanziWord)}
+      hanzi={hanzi}
       pinyinUnit={pronunciation.pinyinUnit}
     />
   );
@@ -93,16 +92,15 @@ export function WikiHanziCharacterPronunciationBox({
   pinyinUnit,
   gloss,
 }: {
-  gloss: Pick<DictionarySearchEntry, `gloss`>[`gloss`][number];
+  gloss: DictionarySearchEntry[`gloss`][number];
   hanzi: HanziText;
   pinyinUnit: PinyinUnit;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const skipSoundSettings = splitPinyin == null;
   const chart = loadPylyPinyinChart();
 
   const initialPinyinSound2 = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinSoundNameSetting,
@@ -110,7 +108,7 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const finalPinyinSound2 = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinSoundNameSetting,
@@ -118,7 +116,7 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const tonePinyinSound2 = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinSoundNameSetting,
@@ -127,7 +125,7 @@ export function WikiHanziCharacterPronunciationBox({
   );
 
   const initialDescriptionSetting = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinSoundDescriptionSetting,
@@ -135,7 +133,7 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const finalDescriptionSetting = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinSoundDescriptionSetting,
@@ -143,16 +141,15 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const toneDescriptionSetting = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinSoundDescriptionSetting,
           key: { soundId: splitPinyin.toneSoundId },
         },
   );
-  const { aiImageStyle } = useAiImageStyleSetting();
   const finalToneDescriptionSetting = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinFinalToneDescriptionSetting,
@@ -163,7 +160,7 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const finalToneNameSetting = useUserSetting(
-    skipSoundSettings
+    splitPinyin == null
       ? null
       : {
           setting: pinyinFinalToneNameSetting,
@@ -173,7 +170,6 @@ export function WikiHanziCharacterPronunciationBox({
           ),
         },
   );
-
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
   const finalPinyinSoundName = finalPinyinSound2?.value?.text;
   const tonePinyinSoundName = tonePinyinSound2?.value?.text;
@@ -185,16 +181,8 @@ export function WikiHanziCharacterPronunciationBox({
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
 
-  const initialLabel =
-    splitPinyin == null
-      ? ``
-      : (chart.soundToCustomLabel[splitPinyin.initialSoundId] ??
-        splitPinyin.initialSoundId);
-  const finalLabel =
-    splitPinyin == null
-      ? ``
-      : (chart.soundToCustomLabel[splitPinyin.finalSoundId] ??
-        splitPinyin.finalSoundId);
+  const initialLabel = getInitialSoundLabel(chart, pinyinUnit);
+  const finalLabel = getFinalSoundLabel(chart, pinyinUnit);
   const toneDefaultName =
     splitPinyin == null
       ? ``
@@ -202,7 +190,10 @@ export function WikiHanziCharacterPronunciationBox({
         defaultPinyinSoundInstructions[splitPinyin.toneSoundId] ??
         String(splitPinyin.tone));
   const finalDisplayName = finalPinyinSoundName ?? finalLabel;
-  const toneDisplayName = tonePinyinSoundName ?? toneDefaultName;
+  const toneDisplayName =
+    tonePinyinSoundName ??
+    getToneSoundLabel(chart, pinyinUnit) ??
+    toneDefaultName;
   const defaultFinalToneName = getDefaultFinalToneName({
     finalName: finalDisplayName,
     toneName: toneDisplayName,
@@ -223,10 +214,6 @@ export function WikiHanziCharacterPronunciationBox({
     setting: hanziPronunciationHintImageSetting,
     key: hintSettingKey,
   });
-  const imagePromptSetting = useUserSetting({
-    setting: hanziPronunciationHintImagePromptSetting,
-    key: hintSettingKey,
-  });
   const [showAiModal, setShowAiModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
@@ -243,30 +230,6 @@ export function WikiHanziCharacterPronunciationBox({
   const isImageSectionVisible = isEditMode
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
-
-  // Declarative reference images for AI generation
-  const aiReferenceImages: AiReferenceImageDeclaration[] | undefined =
-    splitPinyin == null
-      ? undefined
-      : [
-          {
-            imageSetting: pinyinSoundImageSetting,
-            imageSettingKey: { soundId: splitPinyin.initialSoundId },
-            label: initialPinyinSoundName ?? initialLabel,
-          },
-          {
-            imageSetting: pinyinFinalToneImageSetting,
-            imageSettingKey: getPinyinFinalToneKeyParams(
-              splitPinyin.finalSoundId,
-              String(splitPinyin.tone),
-            ),
-            label: finalToneName,
-          },
-        ];
-
-  const handleUploadError = (error: string) => {
-    console.error(`Upload error:`, error);
-  };
 
   return (
     <WikiTitledBox
@@ -456,47 +419,18 @@ export function WikiHanziCharacterPronunciationBox({
 
           {isImageSectionVisible ? (
             isEditMode ? (
-              <View className="gap-2 pt-2">
-                <View className="gap-1">
-                  <Text className="pyly-body-subheading">Choose an image</Text>
-                  <Text className="font-sans text-[14px] text-fg-dim">
-                    Pick the image that should appear on the wiki page
-                  </Text>
-                </View>
-
-                <InlineEditableSettingImage
-                  setting={hanziPronunciationHintImageSetting}
-                  settingKey={hintSettingKey}
-                  previewHeight={200}
-                  tileSize={64}
-                  enablePasteDropZone
-                  enableAiGeneration
-                  aiImageStyle={aiImageStyle}
-                  aiReferenceImages={aiReferenceImages}
-                  initialAiPrompt={
-                    imagePromptSetting.value?.text ??
-                    ([hintText, hintExplanation]
-                      .filter((v) => v.length > 0)
-                      .join(` - `) ||
-                      `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`)
+              <WikiHanziCharacterPronunciationImagePicker
+                gloss={gloss}
+                hanzi={hanzi}
+                pinyinUnit={pinyinUnit}
+                onChangeImageId={(nextImageId) => {
+                  if (nextImageId == null) {
+                    setShowImageEditor(false);
+                  } else {
+                    setShowImageEditor(true);
                   }
-                  frameConstraint={{ aspectRatio: 2 }}
-                  onUploadError={handleUploadError}
-                  onSaveAiPrompt={(prompt) => {
-                    imagePromptSetting.setValue({
-                      ...getHanziPronunciationHintKeyParams(hanzi, pinyinUnit),
-                      text: prompt,
-                    });
-                  }}
-                  onChangeImageId={(nextImageId) => {
-                    if (nextImageId == null) {
-                      setShowImageEditor(false);
-                    } else {
-                      setShowImageEditor(true);
-                    }
-                  }}
-                />
-              </View>
+                }}
+              />
             ) : hintImage?.imageId == null ? null : (
               <InlineEditableSettingImage
                 readonly

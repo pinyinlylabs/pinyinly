@@ -283,6 +283,56 @@ export const splitPinyinUnitOrThrow = memoize1(function splitPinyinUnitOrThrow(
   return parts;
 });
 
+export type PinyinUnitPartType = `initial` | `final` | `tone`;
+
+export function getPinyinUnitPartLabel(
+  chart: DeepReadonly<PinyinChart>,
+  pinyinUnit: PinyinUnit,
+  part: PinyinUnitPartType,
+): string {
+  const splitPinyin = splitPinyinUnit(pinyinUnit);
+
+  if (splitPinyin == null) {
+    return ``;
+  }
+
+  const soundId: PinyinSoundId =
+    part === `initial`
+      ? splitPinyin.initialSoundId
+      : part === `final`
+        ? splitPinyin.finalSoundId
+        : splitPinyin.toneSoundId;
+
+  return chart.soundToCustomLabel[soundId] ?? soundId;
+}
+
+export function getInitialSoundLabel(
+  chart: DeepReadonly<PinyinChart>,
+  pinyinUnit: PinyinUnit,
+): string {
+  return getPinyinUnitPartLabel(chart, pinyinUnit, `initial`);
+}
+
+export function getFinalSoundLabel(
+  chart: DeepReadonly<PinyinChart>,
+  pinyinUnit: PinyinUnit,
+): string {
+  return getPinyinUnitPartLabel(chart, pinyinUnit, `final`);
+}
+
+export function getToneSoundLabel(
+  chart: DeepReadonly<PinyinChart>,
+  pinyinUnit: PinyinUnit,
+): string | null {
+  const splitPinyin = splitPinyinUnit(pinyinUnit);
+
+  if (splitPinyin == null) {
+    return null;
+  }
+
+  return chart.soundToCustomLabel[splitPinyin.toneSoundId] ?? null;
+}
+
 export function isInitialSoundId(soundId: PinyinSoundId): boolean {
   return soundId.endsWith(`-`);
 }

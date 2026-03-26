@@ -38,7 +38,7 @@ export type PinyinFinalAssociationSkill =
   | `pfa:${string}:${string}`;
 
 /**
- * A static ID for the different components of a pinyin sound, including the
+ * A static ID for the different components/atoms of a pinyin sound, i.e. the
  * initial, final, and tone.
  *
  * - Initials: suffixed with `-`.
