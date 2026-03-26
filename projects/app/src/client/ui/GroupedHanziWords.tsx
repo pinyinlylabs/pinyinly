@@ -4,6 +4,7 @@ import { useLiveQuery, inArray } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useDb } from "./hooks/useDb";
+import type { Mutable } from "@pinyinly/lib/types";
 
 export function GroupedHanziWords({
   hanziWords,
@@ -15,7 +16,9 @@ export function GroupedHanziWords({
     (q) =>
       q
         .from({ entry: db.dictionarySearch })
-        .where(({ entry }) => inArray(entry.hanziWord, hanziWords))
+        .where(({ entry }) =>
+          inArray(entry.hanziWord, hanziWords as Mutable<typeof hanziWords>),
+        )
         // Then by character count
         .orderBy(({ entry }) => entry.hanziCharacterCount, `asc`)
         // Sort lexically first (lowest priority)
