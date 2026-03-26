@@ -311,13 +311,17 @@ export function AiImageGenerationPanel({
     playgroundState.threads[0] ??
     null;
 
-  const activeThreadLatestAssistantImageAssetId =
+  const latestAssistantImageMessage =
     activeThread?.messages
       .slice()
       .reverse()
       .find(
         (message) => message.role === `assistant` && message.assetId != null,
-      )?.assetId ?? null;
+      ) ?? null;
+  const activeThreadLatestAssistantImageAssetId =
+    latestAssistantImageMessage?.assetId ?? null;
+  const activeThreadLatestAssistantImageMessageId =
+    latestAssistantImageMessage?.id ?? null;
   const activeThreadId = activeThread?.id ?? null;
   const activeThreadMessageCount = activeThread?.messages.length ?? 0;
   const styleReferenceConfig =
@@ -416,6 +420,10 @@ export function AiImageGenerationPanel({
   const [disabledReferenceIds, setDisabledReferenceIds] = useState<
     ReadonlySet<string>
   >(() => new Set());
+  const [
+    selectedTimelineMessageIdsForNextPrompt,
+    setSelectedTimelineMessageIdsForNextPrompt,
+  ] = useState<ReadonlySet<string>>(() => new Set());
 
   const resetReferenceSelection = () => {
     setAddedReferenceIds(new Set());
@@ -423,8 +431,16 @@ export function AiImageGenerationPanel({
     setDisabledReferenceIds(new Set());
   };
 
+  const resetOneTimeTimelineContextSelection = () => {
+    setSelectedTimelineMessageIdsForNextPrompt(new Set());
+  };
+
   useEffect(() => {
     resetReferenceSelection();
+  }, [activeThreadId]);
+
+  useEffect(() => {
+    resetOneTimeTimelineContextSelection();
   }, [activeThreadId]);
 
   const rowReferences = allReferences.filter((reference) => {
@@ -469,6 +485,15 @@ export function AiImageGenerationPanel({
   }
 
   const contextReferenceEntries: AiImageContextReferenceEntry[] = [];
+  const seenContextReferenceAssetIds = new Set<AssetId>();
+  const appendContextReferenceEntry = (entry: AiImageContextReferenceEntry) => {
+    if (seenContextReferenceAssetIds.has(entry.assetId)) {
+      return;
+    }
+
+    seenContextReferenceAssetIds.add(entry.assetId);
+    contextReferenceEntries.push(entry);
+  };
   const promptContextLabelByReferenceId = new Map<string, string>();
 
   const fallbackForPrimaryById = new Map<string, AiResolvedReference>();
@@ -482,7 +507,7 @@ export function AiImageGenerationPanel({
     }
 
     if (reference.assetId != null) {
-      contextReferenceEntries.push({
+      appendContextReferenceEntry({
         label: reference.label,
         assetId: reference.assetId,
       });
@@ -506,7 +531,7 @@ export function AiImageGenerationPanel({
     if (fallbackMatch?.assetId != null) {
       const promptContextLabel =
         fallbackMatch.fallbackHintLabel ?? fallbackMatch.label;
-      contextReferenceEntries.push({
+      appendContextReferenceEntry({
         label: promptContextLabel,
         assetId: fallbackMatch.assetId,
       });
@@ -533,11 +558,43 @@ export function AiImageGenerationPanel({
     if (disabledReferenceIds.has(reference.id) || reference.assetId == null) {
       continue;
     }
-    contextReferenceEntries.push({
+    appendContextReferenceEntry({
       label: reference.label,
       assetId: reference.assetId,
     });
     promptContextLabelByReferenceId.set(reference.id, reference.label);
+  }
+
+  const selectedTimelineContextMessages =
+    activeThread?.messages.filter(
+      (message) =>
+        message.role === `assistant` &&
+        message.assetId != null &&
+        selectedTimelineMessageIdsForNextPrompt.has(message.id) &&
+        message.id !== activeThreadLatestAssistantImageMessageId,
+    ) ?? [];
+
+  const oneTimeTimelineContextEntries: AiImageContextReferenceEntry[] =
+    selectedTimelineContextMessages.flatMap((message) =>
+      message.assetId == null
+        ? []
+        : [
+            {
+              label: `Earlier generated image from this chat`,
+              assetId: message.assetId,
+            },
+          ],
+    );
+
+  for (const message of selectedTimelineContextMessages) {
+    if (message.assetId == null) {
+      continue;
+    }
+
+    appendContextReferenceEntry({
+      label: `Earlier generated image from this chat`,
+      assetId: message.assetId,
+    });
   }
 
   useEffect(() => {
@@ -662,6 +719,7 @@ export function AiImageGenerationPanel({
 
     onSavePrompt?.(prompt);
     resetReferenceSelection();
+    resetOneTimeTimelineContextSelection();
 
     try {
       const result = await generateMutation.mutateAsync({
@@ -710,6 +768,12 @@ export function AiImageGenerationPanel({
 
   const toggleReferenceDisabled = (referenceId: string) => {
     setDisabledReferenceIds((prev) => setToggle(prev, referenceId));
+  };
+
+  const toggleOneTimeTimelineContextSelection = (messageId: string) => {
+    setSelectedTimelineMessageIdsForNextPrompt((prev) =>
+      setToggle(prev, messageId),
+    );
   };
 
   const setReferenceVisibleInRow = (referenceId: string, visible: boolean) => {
@@ -813,9 +877,18 @@ export function AiImageGenerationPanel({
                     <AiImageAssistantMessage
                       key={message.id}
                       message={message}
+                      canToggleOneTimeContext={
+                        message.id !== activeThreadLatestAssistantImageMessageId
+                      }
+                      isSelectedForOneTimeContext={selectedTimelineMessageIdsForNextPrompt.has(
+                        message.id,
+                      )}
                       isPointerHoverCapable={isPointerHoverCapable}
                       isProcessing={isProcessing}
                       onChangeImage={onChangeImage}
+                      onToggleOneTimeContextSelection={
+                        toggleOneTimeTimelineContextSelection
+                      }
                       assignmentReferenceOptions={assignmentReferenceOptions}
                       onAssignImageToReference={assignGeneratedImageToReference}
                       className="mr-2"
@@ -847,6 +920,7 @@ export function AiImageGenerationPanel({
               promptContextLabelByReferenceId={promptContextLabelByReferenceId}
               missingReferenceLabels={missingReferenceLabels}
               missingPromptActions={missingPromptActions}
+              oneTimeTimelineContextEntries={oneTimeTimelineContextEntries}
               onToggleReferenceDisabled={toggleReferenceDisabled}
               onSetReferenceVisibleInRow={setReferenceVisibleInRow}
               onPersistDraftPrompt={handlePersistDraftPrompt}
@@ -931,17 +1005,23 @@ function AiImageUserMessage({
 
 function AiImageAssistantMessage({
   message,
+  canToggleOneTimeContext,
+  isSelectedForOneTimeContext,
   isPointerHoverCapable,
   isProcessing,
   onChangeImage,
+  onToggleOneTimeContextSelection,
   assignmentReferenceOptions,
   onAssignImageToReference,
   className,
 }: {
   message: AiImagePlaygroundMessage;
+  canToggleOneTimeContext: boolean;
+  isSelectedForOneTimeContext: boolean;
   isPointerHoverCapable: boolean;
   isProcessing: boolean;
   onChangeImage: (assetId: AssetId) => void;
+  onToggleOneTimeContextSelection: (messageId: string) => void;
   assignmentReferenceOptions: AiResolvedReference[];
   onAssignImageToReference: (assetId: AssetId, referenceId: string) => void;
   className?: string;
@@ -979,6 +1059,18 @@ function AiImageAssistantMessage({
           }
         >
           <ButtonGroup>
+            {canToggleOneTimeContext ? (
+              <ButtonGroup.Button
+                onPress={() => {
+                  onToggleOneTimeContextSelection(message.id);
+                }}
+                disabled={isProcessing}
+              >
+                {isSelectedForOneTimeContext
+                  ? `Remove from context`
+                  : `Add to context`}
+              </ButtonGroup.Button>
+            ) : null}
             <ButtonGroup.Button
               onPress={() => {
                 onChangeImage(assetId);
@@ -1060,6 +1152,7 @@ function AiImagePromptComposer({
   promptContextLabelByReferenceId,
   missingReferenceLabels,
   missingPromptActions,
+  oneTimeTimelineContextEntries,
   onPersistDraftPrompt,
   onToggleReferenceDisabled,
   onSetReferenceVisibleInRow,
@@ -1081,6 +1174,7 @@ function AiImagePromptComposer({
   promptContextLabelByReferenceId: Map<string, string>;
   missingReferenceLabels: string[];
   missingPromptActions: AiQuickPromptAction[];
+  oneTimeTimelineContextEntries: AiImageContextReferenceEntry[];
   onPersistDraftPrompt: (prompt: string) => void;
   onToggleReferenceDisabled: (referenceId: string) => void;
   onSetReferenceVisibleInRow: (referenceId: string, visible: boolean) => void;
@@ -1237,6 +1331,28 @@ function AiImagePromptComposer({
               </Tooltip>
             );
           })}
+
+          {oneTimeTimelineContextEntries.map((entry, index) => (
+            <Tooltip
+              key={`${entry.assetId}-${entry.label}-one-time-${String(index)}`}
+              placement="top"
+              sideOffset={6}
+            >
+              <Tooltip.Trigger>
+                <AssetImage
+                  assetId={entry.assetId}
+                  className="size-9 rounded border border-fg-bg10"
+                  contentFit="cover"
+                />
+              </Tooltip.Trigger>
+              <Tooltip.Content variant="custom">
+                <ImageReferenceTooltipContent
+                  imageAssetId={entry.assetId}
+                  prompt={entry.label}
+                />
+              </Tooltip.Content>
+            </Tooltip>
+          ))}
 
           {missingReferenceLabels.length === 0 &&
           fallbackUsageLabelByPrimaryId.size === 0 ? null : (

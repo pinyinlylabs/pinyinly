@@ -8,7 +8,6 @@ import {
   getFinalSoundLabel,
   getInitialSoundLabel,
   getToneSoundLabel,
-  loadPylyPinyinChart,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
@@ -97,7 +96,6 @@ export function WikiHanziCharacterPronunciationBox({
   pinyinUnit: PinyinUnit;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const chart = loadPylyPinyinChart();
 
   const initialPinyinSound2 = useUserSetting(
     splitPinyin == null
@@ -181,8 +179,8 @@ export function WikiHanziCharacterPronunciationBox({
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
 
-  const initialLabel = getInitialSoundLabel(chart, pinyinUnit);
-  const finalLabel = getFinalSoundLabel(chart, pinyinUnit);
+  const initialLabel = getInitialSoundLabel(pinyinUnit);
+  const finalLabel = getFinalSoundLabel(pinyinUnit);
   const toneDefaultName =
     splitPinyin == null
       ? ``
@@ -191,9 +189,7 @@ export function WikiHanziCharacterPronunciationBox({
         String(splitPinyin.tone));
   const finalDisplayName = finalPinyinSoundName ?? finalLabel;
   const toneDisplayName =
-    tonePinyinSoundName ??
-    getToneSoundLabel(chart, pinyinUnit) ??
-    toneDefaultName;
+    tonePinyinSoundName ?? getToneSoundLabel(pinyinUnit) ?? toneDefaultName;
   const defaultFinalToneName = getDefaultFinalToneName({
     finalName: finalDisplayName,
     toneName: toneDisplayName,
