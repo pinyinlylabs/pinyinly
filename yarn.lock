@@ -14992,8 +14992,8 @@ __metadata:
   linkType: hard
 
 "happy-dom@npm:^20.0.0":
-  version: 20.8.7
-  resolution: "happy-dom@npm:20.8.7"
+  version: 20.8.9
+  resolution: "happy-dom@npm:20.8.9"
   dependencies:
     "@types/node": "npm:>=20.0.0"
     "@types/whatwg-mimetype": "npm:^3.0.2"
@@ -15001,7 +15001,7 @@ __metadata:
     entities: "npm:^7.0.1"
     whatwg-mimetype: "npm:^3.0.0"
     ws: "npm:^8.18.3"
-  checksum: 10c0/2983895da50972585a284d4996e3d32e4b95f1fd4c880ceedc5a27f4165883153952b3e03c004d0a0e15c3777eeaf738da005495b2351ceb4e9b826ccc0fb529
+  checksum: 10c0/12fe9b85891b1289935b2a4f726e2839e7c92e3f55401bd20cb5500763dd994364645acaab20a754fd90d5e1b2ffdf734b39a32ea02704c3e3ee0c4d30cf958e
   languageName: node
   linkType: hard
 
