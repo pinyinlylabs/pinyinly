@@ -447,6 +447,8 @@ describe(
         `rún 瞤`,
         `qǐn 笉`,
         `tiè 呫`,
+        `xǐn 伈`,
+        `tǔn 氽`,
       ].map((x) => x.split(` `) as [PinyinUnit, HanziCharacter]),
     )(
       `Expected NOT to match: %s → %s`,

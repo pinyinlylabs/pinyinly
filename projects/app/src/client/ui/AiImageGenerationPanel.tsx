@@ -1,11 +1,14 @@
 import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
+import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
+import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import { aiImagePlaygroundSetting } from "@/data/userSettings";
+import { setAdd, setDelete, setToggle } from "@pinyinly/lib/collections";
 import type {
   UserSetting,
   UserSettingImageEntity,
@@ -14,7 +17,7 @@ import type {
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
@@ -49,12 +52,16 @@ interface AiImagePlaygroundStateV1 {
 
 const MAX_AI_PLAYGROUND_THREADS = 12;
 const MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD = 40;
+const MAX_AI_REFERENCE_IMAGES = 8;
+
+type AiReferenceImageKind = `actor` | `location` | `other`;
 
 /**
  * Declarative reference to an image setting that will be lazily resolved during AI generation.
  * Labels can be either static strings or fetched from a UserSettingTextEntity.
  */
 export interface AiReferenceImageDeclaration {
+  id?: string;
   imageSetting: UserSetting<UserSettingImageEntity>;
   imageSettingKey: UserSettingKeyInput<UserSettingImageEntity>;
   label:
@@ -63,6 +70,12 @@ export interface AiReferenceImageDeclaration {
         setting: UserSetting<UserSettingTextEntity>;
         key: UserSettingKeyInput<UserSettingTextEntity>;
       };
+  kind?: AiReferenceImageKind;
+  defaultVisibleInRow?: boolean;
+  fallbackForId?: string;
+  fallbackOrder?: number;
+  fallbackHintLabel?: string;
+  missingPromptPrefill?: string;
 }
 
 export interface AiImageGenerationPanelProps {
@@ -78,6 +91,25 @@ export interface AiImageGenerationPanelProps {
 interface AiImageContextReferenceEntry {
   label: string;
   assetId: AssetId;
+}
+
+interface AiResolvedReference {
+  id: string;
+  label: string;
+  kind: AiReferenceImageKind;
+  assetId: AssetId | null;
+  defaultVisibleInRow: boolean;
+  fallbackForId: string | null;
+  fallbackOrder: number;
+  fallbackHintLabel: string | null;
+  missingPromptPrefill: string | null;
+  setImage: ((assetId: AssetId) => void) | null;
+}
+
+interface AiQuickPromptAction {
+  id: string;
+  label: string;
+  prompt: string;
 }
 
 export function AiImageGenerationPanel({
@@ -120,16 +152,23 @@ export function AiImageGenerationPanel({
     setIsLoadedFromSetting(true);
   }, [initialPrompt, playgroundSettingLoading, playgroundSettingText]);
 
-  // Destructure up to 3 reference images
-  const [aiReferenceImage1, aiReferenceImage2, aiReferenceImage3] =
-    aiReferenceImages ?? [];
+  // Destructure up to 8 reference images with static hooks
+  const [
+    aiReferenceImage1,
+    aiReferenceImage2,
+    aiReferenceImage3,
+    aiReferenceImage4,
+    aiReferenceImage5,
+    aiReferenceImage6,
+    aiReferenceImage7,
+    aiReferenceImage8,
+  ] = aiReferenceImages ?? [];
 
   invariant(
-    (aiReferenceImages?.length ?? 0) <= 3,
-    `A maximum of 3 reference images can be provided`,
+    (aiReferenceImages?.length ?? 0) <= MAX_AI_REFERENCE_IMAGES,
+    `A maximum of ${String(MAX_AI_REFERENCE_IMAGES)} reference images can be provided`,
   );
 
-  // Fetch reference image data using static hook calls
   const reference1ImageSetting = useUserSetting(
     aiReferenceImage1 == null
       ? null
@@ -172,6 +211,76 @@ export function AiImageGenerationPanel({
       : aiReferenceImage3.label,
   );
 
+  const reference4ImageSetting = useUserSetting(
+    aiReferenceImage4 == null
+      ? null
+      : {
+          setting: aiReferenceImage4.imageSetting,
+          key: aiReferenceImage4.imageSettingKey,
+        },
+  );
+  const reference4LabelSetting = useUserSetting(
+    aiReferenceImage4 == null || typeof aiReferenceImage4.label !== `object`
+      ? null
+      : aiReferenceImage4.label,
+  );
+
+  const reference5ImageSetting = useUserSetting(
+    aiReferenceImage5 == null
+      ? null
+      : {
+          setting: aiReferenceImage5.imageSetting,
+          key: aiReferenceImage5.imageSettingKey,
+        },
+  );
+  const reference5LabelSetting = useUserSetting(
+    aiReferenceImage5 == null || typeof aiReferenceImage5.label !== `object`
+      ? null
+      : aiReferenceImage5.label,
+  );
+
+  const reference6ImageSetting = useUserSetting(
+    aiReferenceImage6 == null
+      ? null
+      : {
+          setting: aiReferenceImage6.imageSetting,
+          key: aiReferenceImage6.imageSettingKey,
+        },
+  );
+  const reference6LabelSetting = useUserSetting(
+    aiReferenceImage6 == null || typeof aiReferenceImage6.label !== `object`
+      ? null
+      : aiReferenceImage6.label,
+  );
+
+  const reference7ImageSetting = useUserSetting(
+    aiReferenceImage7 == null
+      ? null
+      : {
+          setting: aiReferenceImage7.imageSetting,
+          key: aiReferenceImage7.imageSettingKey,
+        },
+  );
+  const reference7LabelSetting = useUserSetting(
+    aiReferenceImage7 == null || typeof aiReferenceImage7.label !== `object`
+      ? null
+      : aiReferenceImage7.label,
+  );
+
+  const reference8ImageSetting = useUserSetting(
+    aiReferenceImage8 == null
+      ? null
+      : {
+          setting: aiReferenceImage8.imageSetting,
+          key: aiReferenceImage8.imageSettingKey,
+        },
+  );
+  const reference8LabelSetting = useUserSetting(
+    aiReferenceImage8 == null || typeof aiReferenceImage8.label !== `object`
+      ? null
+      : aiReferenceImage8.label,
+  );
+
   const generateMutation = trpc.ai.generateHintImage.useMutation();
   const isPointerHoverCapable = usePointerHoverCapability();
 
@@ -202,63 +311,289 @@ export function AiImageGenerationPanel({
     playgroundState.threads[0] ??
     null;
 
-  const activeThreadLatestAssistantImageAssetId =
+  const latestAssistantImageMessage =
     activeThread?.messages
       .slice()
       .reverse()
       .find(
         (message) => message.role === `assistant` && message.assetId != null,
-      )?.assetId ?? null;
+      ) ?? null;
+  const activeThreadLatestAssistantImageAssetId =
+    latestAssistantImageMessage?.assetId ?? null;
+  const activeThreadLatestAssistantImageMessageId =
+    latestAssistantImageMessage?.id ?? null;
   const activeThreadId = activeThread?.id ?? null;
   const activeThreadMessageCount = activeThread?.messages.length ?? 0;
-
-  const contextReferenceEntries: AiImageContextReferenceEntry[] = [];
-
-  if (aiImageStyle != null) {
-    const styleConfig = getAiImageStyleConfig(aiImageStyle);
-    contextReferenceEntries.push({
-      label: styleConfig.stylePrompt,
-      assetId: styleConfig.assetId,
-    });
-  }
+  const styleReferenceConfig =
+    aiImageStyle == null ? null : getAiImageStyleConfig(aiImageStyle);
 
   const referenceSettings = [
     {
       declaration: aiReferenceImage1,
       imageSetting: reference1ImageSetting,
       labelSetting: reference1LabelSetting,
+      fallbackId: `reference-1`,
     },
     {
       declaration: aiReferenceImage2,
       imageSetting: reference2ImageSetting,
       labelSetting: reference2LabelSetting,
+      fallbackId: `reference-2`,
     },
     {
       declaration: aiReferenceImage3,
       imageSetting: reference3ImageSetting,
       labelSetting: reference3LabelSetting,
+      fallbackId: `reference-3`,
+    },
+    {
+      declaration: aiReferenceImage4,
+      imageSetting: reference4ImageSetting,
+      labelSetting: reference4LabelSetting,
+      fallbackId: `reference-4`,
+    },
+    {
+      declaration: aiReferenceImage5,
+      imageSetting: reference5ImageSetting,
+      labelSetting: reference5LabelSetting,
+      fallbackId: `reference-5`,
+    },
+    {
+      declaration: aiReferenceImage6,
+      imageSetting: reference6ImageSetting,
+      labelSetting: reference6LabelSetting,
+      fallbackId: `reference-6`,
+    },
+    {
+      declaration: aiReferenceImage7,
+      imageSetting: reference7ImageSetting,
+      labelSetting: reference7LabelSetting,
+      fallbackId: `reference-7`,
+    },
+    {
+      declaration: aiReferenceImage8,
+      imageSetting: reference8ImageSetting,
+      labelSetting: reference8LabelSetting,
+      fallbackId: `reference-8`,
     },
   ];
 
-  for (const { declaration, imageSetting, labelSetting } of referenceSettings) {
-    const refImageId = imageSetting?.value?.imageId;
-    if (declaration == null || refImageId == null) {
+  const allReferences: AiResolvedReference[] = [];
+  for (const item of referenceSettings) {
+    const declaration = item.declaration;
+    if (declaration == null) {
       continue;
     }
+    const settingResult = item.imageSetting;
+
     const label =
       typeof declaration.label === `string`
         ? declaration.label
-        : labelSetting?.value?.text;
-    contextReferenceEntries.push({
+        : item.labelSetting?.value?.text;
+    const id = (declaration.id ?? item.fallbackId).trim();
+
+    allReferences.push({
+      id: id.length > 0 ? id : item.fallbackId,
       label: (label ?? `Reference image`).trim(),
-      assetId: refImageId,
+      kind: declaration.kind ?? `other`,
+      assetId: item.imageSetting?.value?.imageId ?? null,
+      defaultVisibleInRow: declaration.defaultVisibleInRow ?? true,
+      fallbackForId: declaration.fallbackForId ?? null,
+      fallbackOrder: declaration.fallbackOrder ?? 0,
+      fallbackHintLabel: declaration.fallbackHintLabel ?? null,
+      missingPromptPrefill: declaration.missingPromptPrefill ?? null,
+      setImage:
+        settingResult == null
+          ? null
+          : (assetId: AssetId) => {
+              settingResult.setValue({ imageId: assetId });
+            },
     });
   }
 
+  const [addedReferenceIds, setAddedReferenceIds] = useState<
+    ReadonlySet<string>
+  >(() => new Set());
+  const [removedReferenceIds, setRemovedReferenceIds] = useState<
+    ReadonlySet<string>
+  >(() => new Set());
+  const [disabledReferenceIds, setDisabledReferenceIds] = useState<
+    ReadonlySet<string>
+  >(() => new Set());
+  const [
+    selectedTimelineMessageIdsForNextPrompt,
+    setSelectedTimelineMessageIdsForNextPrompt,
+  ] = useState<ReadonlySet<string>>(() => new Set());
+
+  const resetReferenceSelection = () => {
+    setAddedReferenceIds(new Set());
+    setRemovedReferenceIds(new Set());
+    setDisabledReferenceIds(new Set());
+  };
+
+  const resetOneTimeTimelineContextSelection = () => {
+    setSelectedTimelineMessageIdsForNextPrompt(new Set());
+  };
+
+  useEffect(() => {
+    resetReferenceSelection();
+  }, [activeThreadId]);
+
+  useEffect(() => {
+    resetOneTimeTimelineContextSelection();
+  }, [activeThreadId]);
+
+  const rowReferences = allReferences.filter((reference) => {
+    if (removedReferenceIds.has(reference.id)) {
+      return false;
+    }
+    return reference.defaultVisibleInRow || addedReferenceIds.has(reference.id);
+  });
+
+  const assignmentReferenceOptions = allReferences.filter(
+    (reference) => reference.kind === `actor` || reference.kind === `location`,
+  );
+
+  const fixedRowReferences: AiResolvedReference[] = [];
+  if (styleReferenceConfig != null) {
+    fixedRowReferences.push({
+      id: `style-reference`,
+      label: styleReferenceConfig.stylePrompt,
+      kind: `other`,
+      assetId: styleReferenceConfig.assetId,
+      defaultVisibleInRow: true,
+      fallbackForId: null,
+      fallbackOrder: 0,
+      fallbackHintLabel: null,
+      missingPromptPrefill: null,
+      setImage: null,
+    });
+  }
   if (activeThreadLatestAssistantImageAssetId != null) {
-    contextReferenceEntries.push({
+    fixedRowReferences.push({
+      id: `latest-chat-image-reference`,
       label: `Previous generated image from this chat`,
+      kind: `other`,
       assetId: activeThreadLatestAssistantImageAssetId,
+      defaultVisibleInRow: true,
+      fallbackForId: null,
+      fallbackOrder: 0,
+      fallbackHintLabel: null,
+      missingPromptPrefill: null,
+      setImage: null,
+    });
+  }
+
+  const contextReferenceEntries: AiImageContextReferenceEntry[] = [];
+  const seenContextReferenceAssetIds = new Set<AssetId>();
+  const appendContextReferenceEntry = (entry: AiImageContextReferenceEntry) => {
+    if (seenContextReferenceAssetIds.has(entry.assetId)) {
+      return;
+    }
+
+    seenContextReferenceAssetIds.add(entry.assetId);
+    contextReferenceEntries.push(entry);
+  };
+  const promptContextLabelByReferenceId = new Map<string, string>();
+
+  const fallbackForPrimaryById = new Map<string, AiResolvedReference>();
+  const fallbackUsageLabelByPrimaryId = new Map<string, string>();
+  const missingPromptActions: AiQuickPromptAction[] = [];
+  const missingReferenceLabels: string[] = [];
+
+  for (const reference of rowReferences) {
+    if (disabledReferenceIds.has(reference.id)) {
+      continue;
+    }
+
+    if (reference.assetId != null) {
+      appendContextReferenceEntry({
+        label: reference.label,
+        assetId: reference.assetId,
+      });
+      promptContextLabelByReferenceId.set(reference.id, reference.label);
+      continue;
+    }
+
+    const fallbackCandidates = allReferences
+      .filter(
+        (candidate) =>
+          candidate.fallbackForId === reference.id &&
+          !removedReferenceIds.has(candidate.id) &&
+          !disabledReferenceIds.has(candidate.id),
+      )
+      .sort((a, b) => a.fallbackOrder - b.fallbackOrder);
+
+    const fallbackMatch = fallbackCandidates.find(
+      (candidate) => candidate.assetId != null,
+    );
+
+    if (fallbackMatch?.assetId != null) {
+      const promptContextLabel =
+        fallbackMatch.fallbackHintLabel ?? fallbackMatch.label;
+      appendContextReferenceEntry({
+        label: promptContextLabel,
+        assetId: fallbackMatch.assetId,
+      });
+      promptContextLabelByReferenceId.set(reference.id, promptContextLabel);
+      fallbackForPrimaryById.set(reference.id, fallbackMatch);
+      fallbackUsageLabelByPrimaryId.set(
+        reference.id,
+        `${reference.label}: using ${promptContextLabel}`,
+      );
+      continue;
+    }
+
+    missingReferenceLabels.push(reference.label);
+    if (reference.missingPromptPrefill != null) {
+      missingPromptActions.push({
+        id: reference.id,
+        label: `Draft prompt for ${reference.label}`,
+        prompt: reference.missingPromptPrefill,
+      });
+    }
+  }
+
+  for (const reference of fixedRowReferences) {
+    if (disabledReferenceIds.has(reference.id) || reference.assetId == null) {
+      continue;
+    }
+    appendContextReferenceEntry({
+      label: reference.label,
+      assetId: reference.assetId,
+    });
+    promptContextLabelByReferenceId.set(reference.id, reference.label);
+  }
+
+  const selectedTimelineContextMessages =
+    activeThread?.messages.filter(
+      (message) =>
+        message.role === `assistant` &&
+        message.assetId != null &&
+        selectedTimelineMessageIdsForNextPrompt.has(message.id) &&
+        message.id !== activeThreadLatestAssistantImageMessageId,
+    ) ?? [];
+
+  const oneTimeTimelineContextEntries: AiImageContextReferenceEntry[] =
+    selectedTimelineContextMessages.flatMap((message) =>
+      message.assetId == null
+        ? []
+        : [
+            {
+              label: `Earlier generated image from this chat`,
+              assetId: message.assetId,
+            },
+          ],
+    );
+
+  for (const message of selectedTimelineContextMessages) {
+    if (message.assetId == null) {
+      continue;
+    }
+
+    appendContextReferenceEntry({
+      label: `Earlier generated image from this chat`,
+      assetId: message.assetId,
     });
   }
 
@@ -383,6 +718,8 @@ export function AiImageGenerationPanel({
     }));
 
     onSavePrompt?.(prompt);
+    resetReferenceSelection();
+    resetOneTimeTimelineContextSelection();
 
     try {
       const result = await generateMutation.mutateAsync({
@@ -428,6 +765,38 @@ export function AiImageGenerationPanel({
 
   const isGenerating = generateMutation.isPending;
   const isProcessing = isGenerating;
+
+  const toggleReferenceDisabled = (referenceId: string) => {
+    setDisabledReferenceIds((prev) => setToggle(prev, referenceId));
+  };
+
+  const toggleOneTimeTimelineContextSelection = (messageId: string) => {
+    setSelectedTimelineMessageIdsForNextPrompt((prev) =>
+      setToggle(prev, messageId),
+    );
+  };
+
+  const setReferenceVisibleInRow = (referenceId: string, visible: boolean) => {
+    if (visible) {
+      setRemovedReferenceIds((prev) => setDelete(prev, referenceId));
+      setAddedReferenceIds((prev) => setAdd(prev, referenceId));
+      return;
+    }
+
+    setRemovedReferenceIds((prev) => setAdd(prev, referenceId));
+    setAddedReferenceIds((prev) => setDelete(prev, referenceId));
+    setDisabledReferenceIds((prev) => setDelete(prev, referenceId));
+  };
+
+  const assignGeneratedImageToReference = (
+    assetId: AssetId,
+    referenceId: string,
+  ) => {
+    const targetReference = assignmentReferenceOptions.find(
+      (reference) => reference.id === referenceId,
+    );
+    targetReference?.setImage?.(assetId);
+  };
 
   return (
     <View className="h-[460px]">
@@ -508,9 +877,20 @@ export function AiImageGenerationPanel({
                     <AiImageAssistantMessage
                       key={message.id}
                       message={message}
+                      canToggleOneTimeContext={
+                        message.id !== activeThreadLatestAssistantImageMessageId
+                      }
+                      isSelectedForOneTimeContext={selectedTimelineMessageIdsForNextPrompt.has(
+                        message.id,
+                      )}
                       isPointerHoverCapable={isPointerHoverCapable}
                       isProcessing={isProcessing}
                       onChangeImage={onChangeImage}
+                      onToggleOneTimeContextSelection={
+                        toggleOneTimeTimelineContextSelection
+                      }
+                      assignmentReferenceOptions={assignmentReferenceOptions}
+                      onAssignImageToReference={assignGeneratedImageToReference}
                       className="mr-2"
                     />
                   );
@@ -527,9 +907,22 @@ export function AiImageGenerationPanel({
                 isLoadedFromSetting && !isProcessing && activeThread != null
               }
               isGenerating={isGenerating}
+              isPointerHoverCapable={isPointerHoverCapable}
               isLoadedFromSetting={isLoadedFromSetting}
               isProcessing={isProcessing}
-              contextReferenceEntries={contextReferenceEntries}
+              references={allReferences}
+              fixedRowReferences={fixedRowReferences}
+              rowReferences={rowReferences}
+              removedReferenceIds={removedReferenceIds}
+              disabledReferenceIds={disabledReferenceIds}
+              fallbackForPrimaryById={fallbackForPrimaryById}
+              fallbackUsageLabelByPrimaryId={fallbackUsageLabelByPrimaryId}
+              promptContextLabelByReferenceId={promptContextLabelByReferenceId}
+              missingReferenceLabels={missingReferenceLabels}
+              missingPromptActions={missingPromptActions}
+              oneTimeTimelineContextEntries={oneTimeTimelineContextEntries}
+              onToggleReferenceDisabled={toggleReferenceDisabled}
+              onSetReferenceVisibleInRow={setReferenceVisibleInRow}
               onPersistDraftPrompt={handlePersistDraftPrompt}
               onGenerate={handleGenerate}
             />
@@ -596,18 +989,11 @@ function AiImageUserMessage({
                   contentFit="cover"
                 />
               </Tooltip.Trigger>
-              <Tooltip.Content className="gap-2 p-2">
-                <AssetImage
-                  assetId={entry.assetId}
-                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
-                  contentFit="cover"
+              <Tooltip.Content variant="custom">
+                <ImageReferenceTooltipContent
+                  imageAssetId={entry.assetId}
+                  prompt={entry.label}
                 />
-                <Text className="font-sans text-[12px] uppercase text-fg-dim">
-                  Message context
-                </Text>
-                <Text className="font-sans text-[13px] text-fg-dim">
-                  {entry.label}
-                </Text>
               </Tooltip.Content>
             </Tooltip>
           ))}
@@ -619,15 +1005,25 @@ function AiImageUserMessage({
 
 function AiImageAssistantMessage({
   message,
+  canToggleOneTimeContext,
+  isSelectedForOneTimeContext,
   isPointerHoverCapable,
   isProcessing,
   onChangeImage,
+  onToggleOneTimeContextSelection,
+  assignmentReferenceOptions,
+  onAssignImageToReference,
   className,
 }: {
   message: AiImagePlaygroundMessage;
+  canToggleOneTimeContext: boolean;
+  isSelectedForOneTimeContext: boolean;
   isPointerHoverCapable: boolean;
   isProcessing: boolean;
   onChangeImage: (assetId: AssetId) => void;
+  onToggleOneTimeContextSelection: (messageId: string) => void;
+  assignmentReferenceOptions: AiResolvedReference[];
+  onAssignImageToReference: (assetId: AssetId, referenceId: string) => void;
   className?: string;
 }) {
   const { assetId } = message;
@@ -663,6 +1059,18 @@ function AiImageAssistantMessage({
           }
         >
           <ButtonGroup>
+            {canToggleOneTimeContext ? (
+              <ButtonGroup.Button
+                onPress={() => {
+                  onToggleOneTimeContextSelection(message.id);
+                }}
+                disabled={isProcessing}
+              >
+                {isSelectedForOneTimeContext
+                  ? `Remove from context`
+                  : `Add to context`}
+              </ButtonGroup.Button>
+            ) : null}
             <ButtonGroup.Button
               onPress={() => {
                 onChangeImage(assetId);
@@ -671,9 +1079,58 @@ function AiImageAssistantMessage({
             >
               Use image
             </ButtonGroup.Button>
+            {assignmentReferenceOptions.length === 0 ? null : (
+              <FloatingMenuModal
+                menu={
+                  <AiImageAssignMenu
+                    assetId={assetId}
+                    options={assignmentReferenceOptions}
+                    onAssignImageToReference={onAssignImageToReference}
+                  />
+                }
+              >
+                <ButtonGroup.Button
+                  disabled={isProcessing}
+                  iconStart="chevron-down"
+                  iconSize={16}
+                />
+              </FloatingMenuModal>
+            )}
           </ButtonGroup>
         </View>
       </View>
+    </View>
+  );
+}
+
+function AiImageAssignMenu({
+  assetId,
+  options,
+  onAssignImageToReference,
+  onRequestClose,
+}: {
+  assetId: AssetId;
+  options: AiResolvedReference[];
+  onAssignImageToReference: (assetId: AssetId, referenceId: string) => void;
+} & FloatingMenuModalMenuProps) {
+  return (
+    <View className="min-w-[220px] gap-1 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+        Assign generated image
+      </Text>
+      {options.map((option) => (
+        <RectButton
+          key={option.id}
+          variant="bare2"
+          onPress={() => {
+            onAssignImageToReference(assetId, option.id);
+            onRequestClose?.();
+          }}
+          className="justify-start"
+        >
+          {option.label}
+        </RectButton>
+      ))}
     </View>
   );
 }
@@ -682,19 +1139,45 @@ function AiImagePromptComposer({
   draftPrompt: initialDraftPrompt,
   editable,
   isGenerating,
+  isPointerHoverCapable,
   isLoadedFromSetting,
   isProcessing,
-  contextReferenceEntries,
+  references,
+  fixedRowReferences,
+  rowReferences,
+  removedReferenceIds,
+  disabledReferenceIds,
+  fallbackForPrimaryById,
+  fallbackUsageLabelByPrimaryId,
+  promptContextLabelByReferenceId,
+  missingReferenceLabels,
+  missingPromptActions,
+  oneTimeTimelineContextEntries,
   onPersistDraftPrompt,
+  onToggleReferenceDisabled,
+  onSetReferenceVisibleInRow,
   onGenerate,
 }: {
   draftPrompt: string;
   editable: boolean;
   isGenerating: boolean;
+  isPointerHoverCapable: boolean;
   isLoadedFromSetting: boolean;
   isProcessing: boolean;
-  contextReferenceEntries: AiImageContextReferenceEntry[];
+  references: AiResolvedReference[];
+  fixedRowReferences: AiResolvedReference[];
+  rowReferences: AiResolvedReference[];
+  removedReferenceIds: ReadonlySet<string>;
+  disabledReferenceIds: ReadonlySet<string>;
+  fallbackForPrimaryById: Map<string, AiResolvedReference>;
+  fallbackUsageLabelByPrimaryId: Map<string, string>;
+  promptContextLabelByReferenceId: Map<string, string>;
+  missingReferenceLabels: string[];
+  missingPromptActions: AiQuickPromptAction[];
+  oneTimeTimelineContextEntries: AiImageContextReferenceEntry[];
   onPersistDraftPrompt: (prompt: string) => void;
+  onToggleReferenceDisabled: (referenceId: string) => void;
+  onSetReferenceVisibleInRow: (referenceId: string, visible: boolean) => void;
   onGenerate: (prompt: string) => Promise<void>;
 }) {
   const [draftPrompt, setDraftPrompt] = useState(initialDraftPrompt);
@@ -732,6 +1215,24 @@ function AiImagePromptComposer({
   const canSend =
     isLoadedFromSetting && !isProcessing && draftPrompt.trim().length > 0;
 
+  const displayedRowReferences = [
+    ...fixedRowReferences,
+    ...rowReferences.filter((reference) => {
+      if (reference.assetId != null) {
+        return true;
+      }
+
+      const fallbackReference = fallbackForPrimaryById.get(reference.id);
+      return fallbackReference?.assetId != null;
+    }),
+  ];
+
+  const applyQuickPrompt = (prompt: string) => {
+    setDraftPrompt((prev) =>
+      prev.trim().length === 0 ? prompt : `${prev}\n${prompt}`,
+    );
+  };
+
   return (
     <View
       className={
@@ -757,34 +1258,123 @@ function AiImagePromptComposer({
 
       <View className="flex-row items-center justify-between gap-2">
         <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
-          {contextReferenceEntries.map((entry) => (
+          <FloatingMenuModal
+            menu={
+              <ReferencePickerMenu
+                references={references}
+                rowReferences={rowReferences}
+                removedReferenceIds={removedReferenceIds}
+                disabledReferenceIds={disabledReferenceIds}
+                fallbackUsageLabelByPrimaryId={fallbackUsageLabelByPrimaryId}
+                onSetReferenceVisibleInRow={onSetReferenceVisibleInRow}
+              />
+            }
+          >
+            <RectButton variant="bare2" iconStart="plus" iconSize={20} />
+          </FloatingMenuModal>
+
+          {displayedRowReferences.map((reference) => {
+            const isDisabled = disabledReferenceIds.has(reference.id);
+            const fallbackReference = fallbackForPrimaryById.get(reference.id);
+            const hasImage = reference.assetId != null;
+            const previewAssetId = hasImage
+              ? reference.assetId
+              : (fallbackReference?.assetId ?? null);
+
+            return (
+              <Tooltip key={reference.id} placement="top" sideOffset={6}>
+                <Tooltip.Trigger asChild>
+                  <Pressable
+                    onPress={() => {
+                      onToggleReferenceDisabled(reference.id);
+                    }}
+                    className={
+                      isDisabled
+                        ? `group relative rounded border border-fg-bg10 opacity-45`
+                        : `group relative rounded border border-fg-bg10`
+                    }
+                  >
+                    {previewAssetId == null ? null : (
+                      <AssetImage
+                        assetId={previewAssetId}
+                        className="size-9 rounded"
+                        contentFit="cover"
+                      />
+                    )}
+
+                    <View
+                      className={
+                        isPointerHoverCapable && !isDisabled
+                          ? `
+                            absolute right-1 top-0.5 rounded bg-bg/80 px-1 opacity-0
+
+                            group-hover:opacity-100
+                          `
+                          : `absolute right-1 top-0.5 rounded bg-bg/80 px-1`
+                      }
+                    >
+                      <Text className="font-sans text-[10px] text-fg">
+                        {isDisabled ? `☐` : `☑`}
+                      </Text>
+                    </View>
+                  </Pressable>
+                </Tooltip.Trigger>
+                <Tooltip.Content variant="custom">
+                  <ImageReferenceTooltipContent
+                    imageAssetId={previewAssetId}
+                    prompt={
+                      promptContextLabelByReferenceId.get(reference.id) ??
+                      reference.label
+                    }
+                  />
+                </Tooltip.Content>
+              </Tooltip>
+            );
+          })}
+
+          {oneTimeTimelineContextEntries.map((entry, index) => (
             <Tooltip
-              key={`${entry.assetId}-${entry.label}`}
+              key={`${entry.assetId}-${entry.label}-one-time-${String(index)}`}
               placement="top"
               sideOffset={6}
             >
-              <Tooltip.Trigger className="rounded border border-fg-bg10">
+              <Tooltip.Trigger>
                 <AssetImage
                   assetId={entry.assetId}
-                  className="size-9 rounded"
+                  className="size-9 rounded border border-fg-bg10"
                   contentFit="cover"
                 />
               </Tooltip.Trigger>
-              <Tooltip.Content className="gap-2 p-2">
-                <AssetImage
-                  assetId={entry.assetId}
-                  className="h-[110px] w-[180px] rounded border border-fg-bg10"
-                  contentFit="cover"
+              <Tooltip.Content variant="custom">
+                <ImageReferenceTooltipContent
+                  imageAssetId={entry.assetId}
+                  prompt={entry.label}
                 />
-                <Text className="font-sans text-[12px] uppercase text-fg-dim">
-                  Prompt context
-                </Text>
-                <Text className="font-sans text-[13px] text-fg-dim">
-                  {entry.label}
-                </Text>
               </Tooltip.Content>
             </Tooltip>
           ))}
+
+          {missingReferenceLabels.length === 0 &&
+          fallbackUsageLabelByPrimaryId.size === 0 ? null : (
+            <FloatingMenuModal
+              menu={
+                <MissingReferenceWarningMenu
+                  missingReferenceLabels={missingReferenceLabels}
+                  fallbackUsageLabels={Array.from(
+                    fallbackUsageLabelByPrimaryId.values(),
+                  )}
+                  quickActions={missingPromptActions}
+                  onApplyQuickPrompt={applyQuickPrompt}
+                />
+              }
+            >
+              <RectButton
+                variant="bare2"
+                iconStart="circle-warning"
+                className={`[--color-fg:var(--color-warning)]`}
+              />
+            </FloatingMenuModal>
+          )}
         </View>
 
         <RectButton
@@ -804,6 +1394,182 @@ function AiImagePromptComposer({
           {isGenerating ? `Generating...` : `Send`}
         </RectButton>
       </View>
+    </View>
+  );
+}
+
+function ImageReferenceTooltipContent({
+  imageAssetId,
+  prompt,
+}: {
+  imageAssetId: AssetId | null;
+  prompt: string | null;
+}) {
+  return (
+    <View className="w-[320px] overflow-hidden rounded-lg bg-bg">
+      {imageAssetId == null ? null : (
+        <AssetImage
+          assetId={imageAssetId}
+          className="h-[160px] w-[320px]"
+          contentFit="cover"
+        />
+      )}
+      <View className="gap-2 px-3 py-2">
+        {prompt == null ? null : (
+          <Text className="font-mono text-xs text-fg">{prompt}</Text>
+        )}
+        <Text className="font-sans text-xs text-fg-dim">
+          Image and caption included in the prompt
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function ReferencePickerMenu({
+  references,
+  rowReferences,
+  removedReferenceIds,
+  disabledReferenceIds,
+  fallbackUsageLabelByPrimaryId,
+  onSetReferenceVisibleInRow,
+}: {
+  references: AiResolvedReference[];
+  rowReferences: AiResolvedReference[];
+  removedReferenceIds: ReadonlySet<string>;
+  disabledReferenceIds: ReadonlySet<string>;
+  fallbackUsageLabelByPrimaryId: Map<string, string>;
+  onSetReferenceVisibleInRow: (referenceId: string, visible: boolean) => void;
+} & FloatingMenuModalMenuProps) {
+  const rowIds = new Set(rowReferences.map((reference) => reference.id));
+
+  return (
+    <View className="min-w-[290px] max-w-[360px] gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+        Reference images
+      </Text>
+
+      {references.map((reference) => {
+        const isInRow = rowIds.has(reference.id);
+        const isDisabled = disabledReferenceIds.has(reference.id);
+        const isRemoved = removedReferenceIds.has(reference.id);
+        const status =
+          reference.assetId == null
+            ? `Missing`
+            : isRemoved
+              ? `Removed from row`
+              : isInRow
+                ? `In row`
+                : `Available`;
+
+        const roleLabel =
+          reference.kind === `actor`
+            ? `Actor`
+            : reference.kind === `location`
+              ? `Location`
+              : `Reference`;
+
+        return (
+          <View
+            key={reference.id}
+            className="rounded-lg border border-fg-bg10 p-2"
+          >
+            <View className="flex-row items-center justify-between gap-2">
+              <View className="min-w-0 flex-1 gap-0.5">
+                <Text className="font-sans text-[13px] text-fg">
+                  {reference.label}
+                </Text>
+                <Text className="font-sans text-[11px] text-fg-dim">
+                  {roleLabel} • {status}
+                  {isDisabled ? ` • Disabled in prompt` : ``}
+                </Text>
+                {fallbackUsageLabelByPrimaryId.has(reference.id) ? (
+                  <Text className="font-sans text-[11px] text-fg-dim">
+                    {fallbackUsageLabelByPrimaryId.get(reference.id)}
+                  </Text>
+                ) : null}
+              </View>
+
+              <RectButton
+                variant="bare2"
+                onPress={() => {
+                  onSetReferenceVisibleInRow(reference.id, !isInRow);
+                }}
+              >
+                {isInRow ? `Remove` : `Add`}
+              </RectButton>
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function MissingReferenceWarningMenu({
+  missingReferenceLabels,
+  fallbackUsageLabels,
+  quickActions,
+  onApplyQuickPrompt,
+  onRequestClose,
+}: {
+  missingReferenceLabels: string[];
+  fallbackUsageLabels: string[];
+  quickActions: AiQuickPromptAction[];
+  onApplyQuickPrompt: (prompt: string) => void;
+} & FloatingMenuModalMenuProps) {
+  return (
+    <View className="min-w-[300px] max-w-[360px] gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+        Reference status
+      </Text>
+
+      {missingReferenceLabels.length === 0 ? null : (
+        <View className="gap-1">
+          <Text className="font-sans text-[12px] text-fg">
+            Missing references
+          </Text>
+          {missingReferenceLabels.map((label) => (
+            <Text key={label} className="font-sans text-[12px] text-fg-dim">
+              • {label}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      {fallbackUsageLabels.length === 0 ? null : (
+        <View className="gap-1">
+          <Text className="font-sans text-[12px] text-fg">
+            Fallbacks in use
+          </Text>
+          {fallbackUsageLabels.map((label) => (
+            <Text key={label} className="font-sans text-[12px] text-fg-dim">
+              • {label}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      {quickActions.length === 0 ? null : (
+        <View className="gap-1 pt-1">
+          <Text className="font-sans text-[12px] text-fg">
+            Quick prompt actions
+          </Text>
+          {quickActions.map((action) => (
+            <RectButton
+              key={action.id}
+              variant="bare2"
+              className="justify-start"
+              onPress={() => {
+                onApplyQuickPrompt(action.prompt);
+                onRequestClose?.();
+              }}
+            >
+              {action.label}
+            </RectButton>
+          ))}
+        </View>
+      )}
     </View>
   );
 }

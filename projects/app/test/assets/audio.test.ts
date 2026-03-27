@@ -473,6 +473,7 @@ describe(`pinyin sounds`, () => {
         "duáng",
         "duǎng",
         "duàng",
+        "tǔn",
         "tùn",
         "nū",
         "nuō",
@@ -670,6 +671,7 @@ describe(`pinyin sounds`, () => {
         "xiǎ",
         "xiú",
         "xín",
+        "xǐn",
         "xiǒng",
       }
     `);

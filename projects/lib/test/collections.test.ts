@@ -13,6 +13,9 @@ import {
   objectInvert,
   objectMap,
   objectMapToArray,
+  setAdd,
+  setDelete,
+  setToggle,
   sortComparatorNumber,
   sortComparatorString,
 } from "#collections.ts";
@@ -30,6 +33,58 @@ typeChecks(`type checks only`, () => {
 
   // @ts-expect-error without arguments it only works on string elements
   [1, 2].sort(sortComparatorString());
+});
+
+describe(`setToggle suite` satisfies HasNameOf<typeof setToggle>, () => {
+  test(`adds missing value`, () => {
+    const prev = new Set([1, 2]);
+    const next = setToggle(prev, 3);
+
+    expect(next).toEqual(new Set([1, 2, 3]));
+    expect(next).not.toBe(prev);
+  });
+
+  test(`removes existing value`, () => {
+    const prev = new Set([1, 2]);
+    const next = setToggle(prev, 2);
+
+    expect(next).toEqual(new Set([1]));
+    expect(next).not.toBe(prev);
+  });
+});
+
+describe(`setAdd suite` satisfies HasNameOf<typeof setAdd>, () => {
+  test(`adds missing value and returns new set`, () => {
+    const prev = new Set([1, 2]);
+    const next = setAdd(prev, 3);
+
+    expect(next).toEqual(new Set([1, 2, 3]));
+    expect(next).not.toBe(prev);
+  });
+
+  test(`returns same set when value already exists`, () => {
+    const prev = new Set([1, 2]);
+    const next = setAdd(prev, 2);
+
+    expect(next).toBe(prev);
+  });
+});
+
+describe(`setDelete suite` satisfies HasNameOf<typeof setDelete>, () => {
+  test(`deletes existing value and returns new set`, () => {
+    const prev = new Set([1, 2]);
+    const next = setDelete(prev, 2);
+
+    expect(next).toEqual(new Set([1]));
+    expect(next).not.toBe(prev);
+  });
+
+  test(`returns same set when value does not exist`, () => {
+    const prev = new Set([1, 2]);
+    const next = setDelete(prev, 3);
+
+    expect(next).toBe(prev);
+  });
 });
 
 test(

@@ -325,20 +325,32 @@ describe(`userDictionaryCollectionOptions`, () => {
 
     await db.userDictionary.preload();
 
-    expect(db.userDictionary.get(`好:u_meaningA`)).toEqual({
-      hanzi: `好`,
-      meaningKey: `u_meaningA`,
-      gloss: `good`,
-      pinyin: `hǎo`,
-      note: `common adjective`,
-    });
-    expect(db.userDictionary.get(`好:u_meaningB`)).toEqual({
-      hanzi: `好`,
-      meaningKey: `u_meaningB`,
-      gloss: `to like`,
-      pinyin: undefined,
-      note: undefined,
-    });
+    expect(db.userDictionary.get(`好:u_meaningA`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "好:u_meaningA",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "good",
+        "hanzi": "好",
+        "meaningKey": "u_meaningA",
+        "note": "common adjective",
+        "pinyin": "hǎo",
+      }
+    `);
+    expect(db.userDictionary.get(`好:u_meaningB`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "好:u_meaningB",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to like",
+        "hanzi": "好",
+        "meaningKey": "u_meaningB",
+        "note": undefined,
+        "pinyin": undefined,
+      }
+    `);
   });
 
   test(`adds pinyin field after gloss`, async ({ db, rizzle }) => {
@@ -355,13 +367,19 @@ describe(`userDictionaryCollectionOptions`, () => {
     });
     await db.userDictionary.preload();
 
-    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
-      hanzi: `行`,
-      meaningKey: `u_walk`,
-      gloss: `to walk`,
-      pinyin: undefined,
-      note: undefined,
-    });
+    expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "行:u_walk",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to walk",
+        "hanzi": "行",
+        "meaningKey": "u_walk",
+        "note": undefined,
+        "pinyin": undefined,
+      }
+    `);
 
     await rizzle.mutate.setSetting({
       key: userHanziMeaningPinyinSetting.entity.marshalKey(keyParams),
@@ -373,13 +391,19 @@ describe(`userDictionaryCollectionOptions`, () => {
       skipHistory: true,
     });
 
-    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
-      hanzi: `行`,
-      meaningKey: `u_walk`,
-      gloss: `to walk`,
-      pinyin: `xíng`,
-      note: undefined,
-    });
+    expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "行:u_walk",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to walk",
+        "hanzi": "行",
+        "meaningKey": "u_walk",
+        "note": undefined,
+        "pinyin": "xíng",
+      }
+    `);
   });
 
   test(`adds note field after gloss`, async ({ db, rizzle }) => {
@@ -406,13 +430,19 @@ describe(`userDictionaryCollectionOptions`, () => {
       skipHistory: true,
     });
 
-    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
-      hanzi: `行`,
-      meaningKey: `u_walk`,
-      gloss: `to walk`,
-      pinyin: undefined,
-      note: `common verb`,
-    });
+    expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "行:u_walk",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to walk",
+        "hanzi": "行",
+        "meaningKey": "u_walk",
+        "note": "common verb",
+        "pinyin": undefined,
+      }
+    `);
   });
 
   test(`updates gloss field`, async ({ db, rizzle }) => {
@@ -439,13 +469,19 @@ describe(`userDictionaryCollectionOptions`, () => {
       skipHistory: true,
     });
 
-    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
-      hanzi: `行`,
-      meaningKey: `u_walk`,
-      gloss: `to go on foot`,
-      pinyin: undefined,
-      note: undefined,
-    });
+    expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "行:u_walk",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to go on foot",
+        "hanzi": "行",
+        "meaningKey": "u_walk",
+        "note": undefined,
+        "pinyin": undefined,
+      }
+    `);
   });
 
   test(`updates pinyin field`, async ({ db, rizzle }) => {
@@ -481,13 +517,19 @@ describe(`userDictionaryCollectionOptions`, () => {
       skipHistory: true,
     });
 
-    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
-      hanzi: `行`,
-      meaningKey: `u_walk`,
-      gloss: `to walk`,
-      pinyin: `háng`,
-      note: undefined,
-    });
+    expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "行:u_walk",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to walk",
+        "hanzi": "行",
+        "meaningKey": "u_walk",
+        "note": undefined,
+        "pinyin": "háng",
+      }
+    `);
   });
 
   test(`updates note field`, async ({ db, rizzle }) => {
@@ -523,13 +565,19 @@ describe(`userDictionaryCollectionOptions`, () => {
       skipHistory: true,
     });
 
-    expect(db.userDictionary.get(`行:u_walk`)).toEqual({
-      hanzi: `行`,
-      meaningKey: `u_walk`,
-      gloss: `to walk`,
-      pinyin: undefined,
-      note: `HSK 1 verb`,
-    });
+    expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
+      {
+        "$collectionId": "userDictionary",
+        "$key": "行:u_walk",
+        "$origin": "remote",
+        "$synced": true,
+        "gloss": "to walk",
+        "hanzi": "行",
+        "meaningKey": "u_walk",
+        "note": "HSK 1 verb",
+        "pinyin": undefined,
+      }
+    `);
   });
 
   test(`removes row when gloss is deleted`, async ({ db, rizzle }) => {
@@ -676,7 +724,7 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
     );
 
     expect(userEntry).toBeDefined();
-    expect(userEntry?.hskSortKey).toBe(Number.POSITIVE_INFINITY);
+    expect(userEntry?.hskSortKey).toBe(9999);
   });
 
   test(`includes glossCount for built-in entries`, async ({ db }) => {

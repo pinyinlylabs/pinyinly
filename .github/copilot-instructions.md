@@ -9,8 +9,7 @@
   `expo-audio-sprites`, `emails`, and more.
 - **App** (`projects/app/`): Expo, with TypeScript throughout. Key subdirs:
   - `src/`: Application source code
-  - `src/client/wiki/`: MDX-based wiki content, organized as
-    `src/client/wiki/{hanzi}/~{meaningKey}/meaning.mdx`
+  - `src/client/wiki/`: MDX-based wiki content
   - `bin/`: Build and data scripts
   - `drizzle/`: SQL migrations for Drizzle ORM
 - **Audio Sprites Metro Plugin** (`projects/expo-audio-sprites/`): Rule-based audio sprite
@@ -34,8 +33,8 @@ After making code changes, automatically verify the changes by running
   stable `meaning-key` (see `word-representation.instructions.md`).
 - **Skill Kinds:** See `skill-kinds.instructions.md` for all supported skill types and Hanzi ID
   format.
-- **Wiki Content:** Add/modify MDX files in `src/client/wiki/{hanzi}/~{meaningKey}/meaning.mdx`.
-  Content is auto-loaded.
+- **Wiki Content:** Add/modify MDX files in `src/client/wiki/[hanzi]/meaning.mdx`. Content is
+  auto-loaded.
 - **Tests:** Mirror `src/` structure in `test/` (e.g., `src/util/date.ts` →
   `test/util/date.test.ts`).
 

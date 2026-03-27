@@ -184,8 +184,20 @@ export default () => (
     <LittlePrimaryHeader title="icons" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="bare" childrenClassName="gap-2">
+      <ExampleStack title="with text" childrenClassName="gap-2">
         <RectButtonIconExamples />
+      </ExampleStack>
+    </View>
+
+    <LittlePrimaryHeader title="icon-only" />
+
+    <View className="flex-row flex-wrap">
+      <ExampleStack title="normal" childrenClassName="flex-row gap-2">
+        <RectButtonIconOnlyExamples />
+      </ExampleStack>
+
+      <ExampleStack title="disabled" childrenClassName="flex-row gap-2">
+        <RectButtonIconOnlyExamples disabled />
       </ExampleStack>
     </View>
   </View>
@@ -208,6 +220,19 @@ const RectButtonVariants = (props: Partial<PropsOf<typeof RectButton>>) => (
     <RectButton variant="rounded" {...props}>
       Rounded
     </RectButton>
+  </>
+);
+
+const RectButtonIconOnlyExamples = (
+  props: Partial<PropsOf<typeof RectButton>>,
+) => (
+  <>
+    <RectButton variant="filled" iconStart="check" {...props} />
+    <RectButton variant="outline" iconStart="check" {...props} />
+    <RectButton variant="option" iconStart="check" {...props} />
+    <RectButton variant="bare" iconStart="check" {...props} />
+    <RectButton variant="bare2" iconStart="check" {...props} />
+    <RectButton variant="rounded" iconStart="check" {...props} />
   </>
 );
 
