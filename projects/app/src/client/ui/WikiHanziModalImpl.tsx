@@ -107,7 +107,7 @@ function Header({
           </View>
 
           <View className="w-20 items-end">
-            <RectButton variant="bare" onPress={onExpand} iconStart="expand">
+            <RectButton variant="bare" onPress={onExpand} iconStart="size">
               Expand
             </RectButton>
           </View>

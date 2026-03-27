@@ -70,6 +70,7 @@ export const iconRegistry = {
   [`settings`]: require(`../../assets/icons/settings.svg`),
   [`show`]: require(`../../assets/icons/show.svg`),
   [`shuffle`]: require(`../../assets/icons/shuffle.svg`),
+  [`size`]: require(`../../assets/icons/size.svg`),
   [`smile-circled`]: require(`../../assets/icons/smile-circled.svg`),
   [`speaker-2`]: require(`../../assets/icons/speaker-2.svg`),
   [`star-filled`]: require(`../../assets/icons/star-filled.svg`),

@@ -108,7 +108,7 @@ export function WikiHanziCharacterDecomposition({
         </RectButton>
       }
     >
-      <View className="gap-4 p-4 pb-0">
+      <View className="gap-4 p-4">
         {componentsElements.length > 0 ? (
           <>
             <Text className="pyly-body">
