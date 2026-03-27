@@ -54,6 +54,7 @@ export const iconRegistry = {
   [`message-text`]: require(`../../assets/icons/message-text.svg`),
   [`minus`]: require(`../../assets/icons/minus.svg`),
   [`note-2`]: require(`../../assets/icons/note-2.svg`),
+  [`open`]: require(`../../assets/icons/open.svg`),
   [`pencil`]: require(`../../assets/icons/pencil.svg`),
   [`photos-filled`]: require(`../../assets/icons/photos-filled.svg`),
   [`plant-filled`]: require(`../../assets/icons/plant-filled.svg`),

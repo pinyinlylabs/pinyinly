@@ -1,6 +1,7 @@
 import type { HanziText } from "@/data/model";
 import { View } from "react-native";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiHanziExternalResources } from "./WikiHanziExternalResources";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
 import { WikiHanziCharacterUsedInWords } from "./WikiHanziCharacterUsedInWords";
 import { WikiHanziWordCharacters } from "./WikiHanziWordCharacters";
@@ -17,6 +18,8 @@ export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
         <WikiHanziCharacterPronunciation hanzi={hanzi} />
 
         <WikiHanziCharacterUsedInWords hanzi={hanzi} />
+
+        <WikiHanziExternalResources hanzi={hanzi} />
       </View>
     </PylyMdxComponents>
   );
