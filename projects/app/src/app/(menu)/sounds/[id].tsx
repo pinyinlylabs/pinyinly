@@ -1,6 +1,6 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
+import { CompactWordRows } from "@/client/ui/CompactWordRows";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
-import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -12,7 +12,6 @@ import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
 import { useDb } from "@/client/ui/hooks/useDb";
-import type { SoundUsageExample } from "@/client/ui/soundUsageExamples";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
@@ -23,10 +22,8 @@ import {
   isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import { oneUnitPinyinListOrNull } from "@/dictionary";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
-  hanziPronunciationHintTextSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundImageSetting,
@@ -217,6 +214,7 @@ function SoundUsageExamplesSection({
           gloss: entry.gloss,
           glossCount: entry.glossCount,
           pinyin: entry.pinyin,
+          hsk: entry.hsk,
         })),
     [db.dictionarySearch],
   );
@@ -230,51 +228,18 @@ function SoundUsageExamplesSection({
     return null;
   }
 
-  return (
+  return usageExamples.length === 0 ? null : (
     <WikiTitledBox title="Usage examples" className="mt-10">
       <View className="gap-4 p-4">
-        <Text className="pyly-body text-fg-dim">
-          Characters that use this sound. Open any character to inspect its wiki
-          page.
-        </Text>
-
-        {usageExamples.length === 0 ? (
-          <Text className="pyly-body text-fg-dim">
-            No single-character examples found yet for this sound.
-          </Text>
-        ) : (
-          <View className="gap-2">
-            {usageExamples.map((example) => (
-              <SoundUsageExampleRow key={example.hanziWord} example={example} />
-            ))}
-          </View>
-        )}
+        <CompactWordRows
+          dictionarySearchEntries={usageExamples.map((entry) => ({
+            ...entry,
+            pinyin: entry.pinyin ?? null,
+            hsk: entry.hsk ?? null,
+          }))}
+        />
       </View>
     </WikiTitledBox>
-  );
-}
-
-function SoundUsageExampleRow({ example }: { example: SoundUsageExample }) {
-  const pinyin = oneUnitPinyinListOrNull(example.pinyin);
-  const gloss = example.gloss[0];
-
-  if (pinyin == null || gloss == null || gloss.length === 0) {
-    return null;
-  }
-
-  return (
-    <View className="gap-1 rounded-lg border border-fg/10 bg-bg p-3">
-      <Text className="pyly-body-title">
-        <HanziWordRefText hanziWord={example.hanziWord} gloss={false} />
-        <Text className="text-fg-dim"> {pinyin}</Text>
-      </Text>
-      <Text className="pyly-body text-fg-dim">{gloss}</Text>
-      <SettingText
-        setting={hanziPronunciationHintTextSetting}
-        settingKey={{ hanzi: example.hanzi, pinyin }}
-        className="pyly-body text-xs italic text-fg-dim/80"
-      />
-    </View>
   );
 }
 
