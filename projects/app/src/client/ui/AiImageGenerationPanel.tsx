@@ -948,7 +948,7 @@ function AiImageUserMessage({
   const contextEntries = message.contextReferenceEntries ?? [];
 
   return (
-    <View className="gap-1">
+    <View className="gap-1.5">
       <View
         className={`
           rounded-lg bg-sky/20 px-3 py-2
@@ -974,7 +974,7 @@ function AiImageUserMessage({
         )}
       </View>
       {contextEntries.length === 0 ? null : (
-        <View className="flex-row flex-wrap items-center justify-end gap-1 px-3">
+        <View className="flex-row flex-wrap items-center justify-end gap-1">
           {contextEntries.map((entry, index) => (
             <Tooltip
               key={`${entry.assetId}-${entry.label}-${String(index)}`}
@@ -984,7 +984,7 @@ function AiImageUserMessage({
               <Tooltip.Trigger>
                 <AssetImage
                   assetId={entry.assetId}
-                  className="size-6 rounded"
+                  className="size-9 rounded"
                   contentFit="cover"
                 />
               </Tooltip.Trigger>
