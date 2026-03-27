@@ -1,4 +1,3 @@
-import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
 import type {
   UserSettingEntityInput,
@@ -62,7 +61,6 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   enablePasteDropZone?: boolean;
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
-  aiImageStyle?: AiImageStyleKind | null;
   aiReferenceImages?: AiReferenceImageDeclaration[];
   frameConstraint?: ImageFrameConstraintInput | null;
   onUploadError?: (error: string) => void;
@@ -88,7 +86,6 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   enablePasteDropZone = false,
   enableAiGeneration = false,
   initialAiPrompt = ``,
-  aiImageStyle = null,
   aiReferenceImages,
   frameConstraint,
   onUploadError,
@@ -445,7 +442,6 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 <Tabs.Content value="create">
                   <AiImageGenerationPanel
                     initialPrompt={initialAiPrompt}
-                    aiImageStyle={aiImageStyle}
                     aiReferenceImages={aiReferenceImages}
                     playgroundStorageKey={aiPlaygroundStorageKey}
                     onChangeImage={(assetId) => {

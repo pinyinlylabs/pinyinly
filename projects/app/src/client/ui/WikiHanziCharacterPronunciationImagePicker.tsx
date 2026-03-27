@@ -1,4 +1,3 @@
-import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import {
@@ -38,7 +37,6 @@ export function WikiHanziCharacterPronunciationImagePicker({
   onChangeImageId: (nextImageId: string | null) => void;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const { aiImageStyle } = useAiImageStyleSetting();
   const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
   const imagePromptSetting = useUserSetting({
     setting: hanziPronunciationHintImagePromptSetting,
@@ -236,7 +234,6 @@ export function WikiHanziCharacterPronunciationImagePicker({
         tileSize={64}
         enablePasteDropZone
         enableAiGeneration
-        aiImageStyle={aiImageStyle}
         aiReferenceImages={aiReferenceImages}
         initialAiPrompt={
           imagePromptSetting.value?.text ??

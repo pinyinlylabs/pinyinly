@@ -1,8 +1,8 @@
-import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { getAiImageStyleConfig } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
+import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
@@ -80,7 +80,6 @@ export interface AiReferenceImageDeclaration {
 
 export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
-  aiImageStyle?: AiImageStyleKind | null;
   aiReferenceImages?: AiReferenceImageDeclaration[];
   playgroundStorageKey: string;
   onChangeImage: (assetId: AssetId) => void;
@@ -114,13 +113,13 @@ interface AiQuickPromptAction {
 
 export function AiImageGenerationPanel({
   initialPrompt = ``,
-  aiImageStyle = null,
   aiReferenceImages,
   playgroundStorageKey,
   onChangeImage,
   onError,
   onSavePrompt,
 }: AiImageGenerationPanelProps) {
+  const { aiImageStyle } = useAiImageStyleSetting();
   const playgroundSettingResult = useUserSetting({
     setting: aiImagePlaygroundSetting,
     key: { settingKey: playgroundStorageKey },

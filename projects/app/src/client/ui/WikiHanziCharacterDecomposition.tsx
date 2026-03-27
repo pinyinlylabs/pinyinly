@@ -22,7 +22,6 @@ import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { WikiTitledBox } from "./WikiTitledBox";
-import { useAiImageStyleSetting } from "./hooks/useAiImageStyleSetting";
 import { useDb } from "./hooks/useDb";
 
 interface WikiHanziCharacterDecompositionProps {
@@ -197,8 +196,6 @@ function CoverImageSection({
       ? null
       : { setting: hanziWordMeaningHintTextSetting, key: settingKey },
   );
-  const { aiImageStyle } = useAiImageStyleSetting();
-
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
   };
@@ -217,7 +214,6 @@ function CoverImageSection({
       tileSize={64}
       enablePasteDropZone
       enableAiGeneration
-      aiImageStyle={aiImageStyle}
       initialAiPrompt={
         imagePromptSetting?.value?.text ??
         ([hintSetting?.value?.text, explanationSetting?.value?.text]
