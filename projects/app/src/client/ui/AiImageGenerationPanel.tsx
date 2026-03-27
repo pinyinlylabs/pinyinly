@@ -890,7 +890,7 @@ export function AiImageGenerationPanel({
                       }
                       assignmentReferenceOptions={assignmentReferenceOptions}
                       onAssignImageToReference={assignGeneratedImageToReference}
-                      className="mr-2"
+                      className="mr-8"
                     />
                   );
                 })
@@ -948,7 +948,7 @@ function AiImageUserMessage({
   const contextEntries = message.contextReferenceEntries ?? [];
 
   return (
-    <View className="gap-1.5">
+    <View className="items-end gap-1.5">
       <View
         className={`
           rounded-lg bg-sky/20 px-3 py-2
