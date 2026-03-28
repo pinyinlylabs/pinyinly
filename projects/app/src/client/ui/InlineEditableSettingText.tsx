@@ -218,6 +218,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       .filter(Boolean)
       .join(` `),
   });
+  const editContainerClassName = editContainer({ variant });
   const displayTextClassName = displayTextStyle({
     variant,
     class: displayClassName,
@@ -259,11 +260,13 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       {isEditing ? (
         <View
           ref={containerRef}
-          className={
+          className={[
+            `relative rounded-md bg-bg-high`,
             isInputFocused
-              ? `relative rounded-xl border border-blue bg-bg-high px-3 py-2`
-              : `relative rounded-xl border border-fg-bg10 bg-bg-high px-3 py-2`
-          }
+              ? `outline outline-1 outline-blue outline-offset-0`
+              : `outline-none`,
+            editContainerClassName,
+          ].join(` `)}
         >
           {multiline ? (
             <TextInputMulti
@@ -450,6 +453,17 @@ const displayContainer = tv({
 
         group-hover:bg-fg-bg10
       `,
+    },
+  },
+});
+
+const editContainer = tv({
+  variants: {
+    variant: {
+      body: `-mx-2 px-2 py-1`,
+      hint: `-mx-2 px-2 py-1`,
+      hintExplanation: `-mx-2 px-2 py-1`,
+      title: `-mx-1 px-1 py-0.5`,
     },
   },
 });
