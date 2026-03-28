@@ -11,9 +11,7 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  getHanziPronunciationHintKeyParams,
   getPinyinFinalToneKeyParams,
-  hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
@@ -41,7 +39,9 @@ import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacter
 import { WikiTitledBox } from "./WikiTitledBox";
 import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
 import { useDb } from "./hooks/useDb";
+import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
+import { composeHintText, hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
 export function WikiHanziCharacterPronunciation({
@@ -197,15 +197,8 @@ export function WikiHanziCharacterPronunciationBox({
   const finalToneName =
     finalToneNameSetting?.value?.text ?? defaultFinalToneName;
 
-  const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
-  const hintTextSetting = useUserSetting({
-    setting: hanziPronunciationHintTextSetting,
-    key: hintSettingKey,
-  });
-  const hintExplanationSetting = useUserSetting({
-    setting: hanziPronunciationHintExplanationSetting,
-    key: hintSettingKey,
-  });
+  const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
+  const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
     setting: hanziPronunciationHintImageSetting,
     key: hintSettingKey,
@@ -215,10 +208,8 @@ export function WikiHanziCharacterPronunciationBox({
   const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
   const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
 
-  const hintText = hintTextSetting.value?.text ?? ``;
-  const hintExplanation = hintExplanationSetting.value?.text ?? ``;
   const hintImage = hintImageSetting.value;
-  const hasHintContent = hintText.length > 0 || hintExplanation.length > 0;
+  const hasHintContent = pronunciationHint.hasText;
   const hasImageContent = hintImage?.imageId != null;
   const isHintSectionVisible = isEditMode
     ? (showHintEditor ?? hasHintContent)
@@ -354,39 +345,16 @@ export function WikiHanziCharacterPronunciationBox({
                 variant="hint"
                 setting={hanziPronunciationHintTextSetting}
                 settingKey={hintSettingKey}
-                placeholder="Add a hint"
-                renderDisplay={(value) => <Pylymark source={value} />}
+                placeholder="Add a hint on the first line. Add details after a blank line."
+                multiline
+                maxLength={80}
+                showCounterAtRatio={0.8}
+                counterLength={hintFirstLineLength}
+                overLimitMessage="Keep the first line under 80 characters. Add details after a blank line."
+                renderDisplay={(value) => <MergedHintDisplay value={value} />}
                 onSaveValue={(nextHintText) => {
                   const nextHintTextLength = nextHintText?.length ?? 0;
-                  const currentExplanationLength =
-                    hintExplanationSetting.value?.text.length ?? 0;
-                  if (
-                    nextHintTextLength === 0 &&
-                    currentExplanationLength === 0
-                  ) {
-                    setShowHintEditor(false);
-                  } else {
-                    setShowHintEditor(true);
-                  }
-                }}
-              />
-
-              <InlineEditableSettingText
-                readonly={!isEditMode}
-                variant="hintExplanation"
-                setting={hanziPronunciationHintExplanationSetting}
-                settingKey={hintSettingKey}
-                placeholder="Add an explanation"
-                multiline
-                renderDisplay={(value) => <Pylymark source={value} />}
-                onSaveValue={(nextExplanation) => {
-                  const nextExplanationLength = nextExplanation?.length ?? 0;
-                  const currentHintTextLength =
-                    hintTextSetting.value?.text.length ?? 0;
-                  if (
-                    currentHintTextLength === 0 &&
-                    nextExplanationLength === 0
-                  ) {
+                  if (nextHintTextLength === 0) {
                     setShowHintEditor(false);
                   } else {
                     setShowHintEditor(true);
@@ -463,19 +431,9 @@ export function WikiHanziCharacterPronunciationBox({
           toneNumber={splitPinyin.tone}
           finalToneScene={{ description: finalToneSceneDescription }}
           onApplyHint={({ text, explanation }) => {
-            setShowHintEditor(true);
-            hintTextSetting.setValue({
-              hanzi,
-              pinyin: hintSettingKey.pinyin,
-              text,
-            });
-            if (explanation != null && explanation.length > 0) {
-              hintExplanationSetting.setValue({
-                hanzi,
-                pinyin: hintSettingKey.pinyin,
-                text: explanation,
-              });
-            }
+            const mergedHintText = composeHintText(text, explanation);
+            pronunciationHint.setText(mergedHintText);
+            setShowHintEditor((mergedHintText ?? ``).trim().length > 0);
           }}
           onDismiss={() => {
             setShowAiModal(false);
@@ -483,6 +441,26 @@ export function WikiHanziCharacterPronunciationBox({
         />
       ) : null}
     </WikiTitledBox>
+  );
+}
+
+function MergedHintDisplay({ value }: { value: string }) {
+  const parsed = parseHintText(value);
+
+  if (parsed.hint.length === 0 && parsed.description == null) {
+    return null;
+  }
+
+  return (
+    <>
+      <Pylymark source={parsed.hint} />
+      {parsed.description == null ? null : (
+        <Text className="text-fg-dim">
+          {` `}
+          <Pylymark source={parsed.description} />
+        </Text>
+      )}
+    </>
   );
 }
 

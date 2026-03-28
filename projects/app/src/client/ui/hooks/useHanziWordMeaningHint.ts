@@ -47,8 +47,11 @@ export function useHanziWordMeaningHint(
 
   const hintTextValue = getTextSettingValue(hintSetting?.value);
   const explanationText = explanationSetting?.value?.text ?? null;
-  const mergedHintText =
-    composeHintText(hintTextValue, explanationText) ?? hintTextValue;
+  const parsedHintTextValue = parseHintText(hintTextValue);
+  const hasInlineDescription = parsedHintTextValue.description != null;
+  const mergedHintText = hasInlineDescription
+    ? hintTextValue
+    : (composeHintText(hintTextValue, explanationText) ?? hintTextValue);
   const parsedHint = parseHintText(mergedHintText);
   const hint = parsedHint.hint.length > 0 ? parsedHint.hint : undefined;
   const explanation = parsedHint.description ?? undefined;
@@ -63,22 +66,31 @@ export function useHanziWordMeaningHint(
       return;
     }
 
-    const migratedHintText = composeHintText(hintTextValue, explanationText);
-    if (migratedHintText == null || migratedHintText === hintTextValue) {
+    const hasLegacyExplanation = (explanationText ?? ``).trim().length > 0;
+
+    if (!hasLegacyExplanation) {
       return;
     }
 
-    hintSetting.setValue({
-      hanziWord,
-      text: migratedHintText,
-    });
-
-    if ((explanationText ?? ``).trim().length > 0) {
+    // The new hint text already contains an inline description. Only clear legacy setting.
+    if (hasInlineDescription) {
       explanationSetting.setValue(null);
+      return;
     }
+
+    const migratedHintText = composeHintText(hintTextValue, explanationText);
+    if (migratedHintText != null && migratedHintText !== hintTextValue) {
+      hintSetting.setValue({
+        hanziWord,
+        text: migratedHintText,
+      });
+    }
+
+    explanationSetting.setValue(null);
   }, [
     explanationSetting,
     explanationText,
+    hasInlineDescription,
     hanziWord,
     hintSetting,
     hintTextValue,
