@@ -41,7 +41,11 @@ import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
 import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
-import { composeHintText, hintFirstLineLength, parseHintText } from "./hintText";
+import {
+  composeHintText,
+  hintFirstLineLength,
+  parseHintText,
+} from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
 export function WikiHanziCharacterPronunciation({
