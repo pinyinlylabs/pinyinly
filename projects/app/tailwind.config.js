@@ -137,11 +137,17 @@ const config = {
           "0%": { opacity: `0` },
           "100%": { opacity: `1` },
         },
+
+        shimmerText: {
+          "0%": { "background-position": `100% 0` },
+          "100%": { "background-position": `-100% 0` },
+        },
       },
 
       animation: {
         hoscillate: `hoscillate 1s ease-in-out infinite`,
         fadein: `fadein 0.25s ease-in forwards`,
+        shimmerText: `shimmerText 2s linear infinite`,
       },
     },
   },
