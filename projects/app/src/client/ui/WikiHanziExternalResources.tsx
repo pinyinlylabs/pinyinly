@@ -19,6 +19,14 @@ const externalResources = [
     singleCharacterOnly: false,
   },
   {
+    name: `HanziHero`,
+    getHref: (hanzi: HanziText) =>
+      isHanziCharacter(hanzi)
+        ? `https://hanzihero.com/simplified/characters/${encodeURIComponent(hanzi)}`
+        : `https://hanzihero.com/simplified/words/${encodeURIComponent(hanzi)}`,
+    singleCharacterOnly: false,
+  },
+  {
     name: `Wiktionary`,
     getHref: (hanzi: HanziText) =>
       `https://en.wiktionary.org/wiki/${encodeURIComponent(hanzi)}`,
