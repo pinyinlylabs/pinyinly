@@ -10,12 +10,9 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  getHanziPronunciationHintKeyParams,
   getPinyinFinalToneKeyParams,
-  hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
   pinyinSoundImageSetting,
@@ -24,6 +21,7 @@ import {
 import { Text, View } from "react-native";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
+import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 
 export function WikiHanziCharacterPronunciationImagePicker({
   gloss,
@@ -37,17 +35,10 @@ export function WikiHanziCharacterPronunciationImagePicker({
   onChangeImageId: (nextImageId: string | null) => void;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
+  const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
+  const hintSettingKey = pronunciationHint.settingKey;
   const imagePromptSetting = useUserSetting({
     setting: hanziPronunciationHintImagePromptSetting,
-    key: hintSettingKey,
-  });
-  const hintTextSetting = useUserSetting({
-    setting: hanziPronunciationHintTextSetting,
-    key: hintSettingKey,
-  });
-  const hintExplanationSetting = useUserSetting({
-    setting: hanziPronunciationHintExplanationSetting,
     key: hintSettingKey,
   });
 
@@ -108,9 +99,6 @@ export function WikiHanziCharacterPronunciationImagePicker({
   );
   const finalToneName =
     finalToneNameSetting?.value?.text ?? defaultFinalToneName;
-
-  const hintText = hintTextSetting.value?.text ?? ``;
-  const hintExplanation = hintExplanationSetting.value?.text ?? ``;
 
   const finalToneName1Setting = useUserSetting(
     splitPinyin == null
@@ -237,10 +225,8 @@ export function WikiHanziCharacterPronunciationImagePicker({
         aiReferenceImages={aiReferenceImages}
         initialAiPrompt={
           imagePromptSetting.value?.text ??
-          ([hintText, hintExplanation]
-            .filter((value) => value.length > 0)
-            .join(` - `) ||
-            `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`)
+          pronunciationHint.text ??
+          `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`
         }
         frameConstraint={{ aspectRatio: 2 }}
         onUploadError={(error) => {

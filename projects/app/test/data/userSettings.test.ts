@@ -9,12 +9,20 @@ import {
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
+  userSettingDefinitions,
   userHanziSettingLike,
 } from "#data/userSettings.ts";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers";
 
-describe(`imageSettings`, () => {
+function expectUniqueSettingKeyPaths(
+  settings: readonly { entity: { _def: { keyPath: string } } }[],
+) {
+  const keyPaths = settings.map((setting) => setting.entity._def.keyPath);
+  expect(new Set(keyPaths).size).toBe(keyPaths.length);
+}
+
+describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
   test(`contains all image setting entities`, () => {
     expect(imageSettingDefs).toHaveLength(4);
     expect(imageSettingDefs).toContain(pinyinSoundImageSetting);
@@ -33,6 +41,15 @@ describe(`imageSettings`, () => {
       expect(valueShape).toHaveProperty(`imageId`);
     }
   });
+
+  test(
+    `imageSettingDefs has unique entries` satisfies HasNameOf<
+      typeof imageSettingDefs
+    >,
+    () => {
+      expectUniqueSettingKeyPaths(imageSettingDefs);
+    },
+  );
 });
 
 describe(
@@ -111,6 +128,19 @@ describe(
       for (const keyPath of keyPaths) {
         expect(keyPath.startsWith(`uhm/[hanzi]/[meaningKey]/`)).toBe(true);
       }
+    });
+
+    test(`userHanziMeaningDefs has unique entries`, () => {
+      expectUniqueSettingKeyPaths(userHanziMeaningDefs);
+    });
+  },
+);
+
+describe(
+  `userSettingDefinitions` satisfies HasNameOf<typeof userSettingDefinitions>,
+  () => {
+    test(`has unique entries`, () => {
+      expectUniqueSettingKeyPaths(userSettingDefinitions);
     });
   },
 );

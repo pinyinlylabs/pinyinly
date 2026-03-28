@@ -21,6 +21,7 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
         .orderBy(({ entry }) => entry.hanziCharacterCount, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
         .select(({ entry }) => ({
+          hanzi: entry.hanzi,
           hanziWord: entry.hanziWord,
           hsk: entry.hsk,
           gloss: entry.gloss,

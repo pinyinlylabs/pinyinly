@@ -60,6 +60,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`QuizQueueButton`]: lazyDemo(() => import(`../../../client/ui/QuizQueueButton.demo`)),
   [`RectButton`]: lazyDemo(() => import(`../../../client/ui/RectButton.demo`)),
   [`ShimmerRect`]: lazyDemo(() => import(`../../../client/ui/ShimmerRect.demo`)),
+  [`ShimmerText`]: lazyDemo(() => import(`../../../client/ui/ShimmerText.demo`)),
   [`ShootingStars`]: lazyDemo(() => import(`../../../client/ui/ShootingStars.demo`)),
   [`SkillTile`]: lazyDemo(() => import(`../../../client/ui/SkillTile.demo`)),
   [`Tabs`]: lazyDemo(() => import(`../../../client/ui/Tabs.demo`)),

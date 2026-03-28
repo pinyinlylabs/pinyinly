@@ -1,6 +1,7 @@
+import { mergeRefs } from "@/client/react";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { Ref } from "react";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -11,25 +12,27 @@ interface TextInputMultiProps extends Omit<
 > {
   disabled?: boolean;
   placeholder: string | undefined;
+  autoResizeMinHeight?: number;
   ref?: Ref<TextInput>;
 }
 
-export function TextInputMulti(props: TextInputMultiProps) {
-  const innerRef = useRef<TextInput>(null);
+export function TextInputMulti({ ref, ...props }: TextInputMultiProps) {
+  const inputRef = useRef<TextInput>(null);
+  const autoResizeMinHeight = props.autoResizeMinHeight ?? 60;
 
-  const adjustHeight = () => {
+  const adjustHeight = useCallback(() => {
     if (typeof window === `undefined`) {
       return;
     }
 
-    const element = innerRef.current as HTMLTextAreaElement | null;
+    const element = inputRef.current as HTMLTextAreaElement | null;
     if (!element || element.tagName !== `TEXTAREA`) {
       return;
     }
 
     element.style.height = `auto`;
-    element.style.height = `${Math.max(element.scrollHeight, 60)}px`;
-  };
+    element.style.height = `${Math.max(element.scrollHeight, autoResizeMinHeight)}px`;
+  }, [autoResizeMinHeight]);
 
   // On web, auto-resize the textarea to fit content
   useEffect(() => {
@@ -37,7 +40,7 @@ export function TextInputMulti(props: TextInputMultiProps) {
       return;
     } // Skip on native
 
-    const element = innerRef.current as HTMLTextAreaElement | null;
+    const element = inputRef.current as HTMLTextAreaElement | null;
     if (!element) {
       return;
     } // Not a textarea
@@ -52,16 +55,16 @@ export function TextInputMulti(props: TextInputMultiProps) {
     return () => {
       textarea.removeEventListener(`input`, adjustHeight);
     };
-  }, []);
+  }, [adjustHeight]);
 
   useLayoutEffect(() => {
     adjustHeight();
-  }, [props.value]);
+  }, [adjustHeight, props.value]);
 
   return (
     <TextInput
-      ref={innerRef}
       {...props}
+      ref={mergeRefs(ref, inputRef)}
       multiline
       // @ts-expect-error `dataSet` isn't a standard prop in react-native, but it exists for react-native-web
       // since https://github.com/necolas/react-native-web/releases/tag/0.13.0

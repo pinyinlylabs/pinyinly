@@ -413,20 +413,9 @@ export const userSettingDefinitions = [
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
-  hanziWordMeaningHintExplanationSetting,
-  hanziWordMeaningHintImagePromptSetting,
-  hanziWordMeaningHintImageSetting,
-  hanziWordMeaningHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
-  quickSearchPickSetting,
 ] as const satisfies readonly UserSetting[];
 
 function userSettingPrefixFromKey(settingKey: string): string {

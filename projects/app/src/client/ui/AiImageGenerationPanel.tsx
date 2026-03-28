@@ -21,6 +21,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
+import { ShimmerText } from "./ShimmerText";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
 
@@ -861,39 +862,50 @@ export function AiImageGenerationPanel({
                   Start by entering a prompt below.
                 </Text>
               ) : (
-                activeThread.messages.map((message) => {
-                  if (message.role === `user`) {
+                <>
+                  {activeThread.messages.map((message) => {
+                    if (message.role === `user`) {
+                      return (
+                        <AiImageUserMessage
+                          key={message.id}
+                          message={message}
+                          className="ml-8"
+                        />
+                      );
+                    }
+
                     return (
-                      <AiImageUserMessage
+                      <AiImageAssistantMessage
                         key={message.id}
                         message={message}
-                        className="ml-8"
+                        canToggleOneTimeContext={
+                          message.id !==
+                          activeThreadLatestAssistantImageMessageId
+                        }
+                        isSelectedForOneTimeContext={selectedTimelineMessageIdsForNextPrompt.has(
+                          message.id,
+                        )}
+                        isPointerHoverCapable={isPointerHoverCapable}
+                        isProcessing={isProcessing}
+                        onChangeImage={onChangeImage}
+                        onToggleOneTimeContextSelection={
+                          toggleOneTimeTimelineContextSelection
+                        }
+                        assignmentReferenceOptions={assignmentReferenceOptions}
+                        onAssignImageToReference={
+                          assignGeneratedImageToReference
+                        }
+                        className="mr-8"
                       />
                     );
-                  }
+                  })}
 
-                  return (
-                    <AiImageAssistantMessage
-                      key={message.id}
-                      message={message}
-                      canToggleOneTimeContext={
-                        message.id !== activeThreadLatestAssistantImageMessageId
-                      }
-                      isSelectedForOneTimeContext={selectedTimelineMessageIdsForNextPrompt.has(
-                        message.id,
-                      )}
-                      isPointerHoverCapable={isPointerHoverCapable}
-                      isProcessing={isProcessing}
-                      onChangeImage={onChangeImage}
-                      onToggleOneTimeContextSelection={
-                        toggleOneTimeTimelineContextSelection
-                      }
-                      assignmentReferenceOptions={assignmentReferenceOptions}
-                      onAssignImageToReference={assignGeneratedImageToReference}
-                      className="mr-2"
-                    />
-                  );
-                })
+                  {isGenerating ? (
+                    <ShimmerText className="font-sans text-base">
+                      Working...
+                    </ShimmerText>
+                  ) : null}
+                </>
               )}
             </ScrollView>
           </View>
@@ -905,7 +917,6 @@ export function AiImageGenerationPanel({
               editable={
                 isLoadedFromSetting && !isProcessing && activeThread != null
               }
-              isGenerating={isGenerating}
               isPointerHoverCapable={isPointerHoverCapable}
               isLoadedFromSetting={isLoadedFromSetting}
               isProcessing={isProcessing}
@@ -948,7 +959,7 @@ function AiImageUserMessage({
   const contextEntries = message.contextReferenceEntries ?? [];
 
   return (
-    <View className="gap-1">
+    <View className="items-end gap-1.5">
       <View
         className={`
           rounded-lg bg-sky/20 px-3 py-2
@@ -974,7 +985,7 @@ function AiImageUserMessage({
         )}
       </View>
       {contextEntries.length === 0 ? null : (
-        <View className="flex-row flex-wrap items-center justify-end gap-1 px-3">
+        <View className="flex-row flex-wrap items-center justify-end gap-1">
           {contextEntries.map((entry, index) => (
             <Tooltip
               key={`${entry.assetId}-${entry.label}-${String(index)}`}
@@ -984,7 +995,7 @@ function AiImageUserMessage({
               <Tooltip.Trigger>
                 <AssetImage
                   assetId={entry.assetId}
-                  className="size-6 rounded"
+                  className="size-9 rounded"
                   contentFit="cover"
                 />
               </Tooltip.Trigger>
@@ -1137,7 +1148,6 @@ function AiImageAssignMenu({
 function AiImagePromptComposer({
   draftPrompt: initialDraftPrompt,
   editable,
-  isGenerating,
   isPointerHoverCapable,
   isLoadedFromSetting,
   isProcessing,
@@ -1159,7 +1169,6 @@ function AiImagePromptComposer({
 }: {
   draftPrompt: string;
   editable: boolean;
-  isGenerating: boolean;
   isPointerHoverCapable: boolean;
   isLoadedFromSetting: boolean;
   isProcessing: boolean;
@@ -1390,7 +1399,7 @@ function AiImagePromptComposer({
           }}
           disabled={!canSend}
         >
-          {isGenerating ? `Generating...` : `Send`}
+          Send
         </RectButton>
       </View>
     </View>

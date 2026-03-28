@@ -1,31 +1,29 @@
-import { hanziFromHanziWord } from "@/dictionary";
 import type { DictionarySearchEntry } from "@/client/query";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { HskLozenge } from "./HskLozenge";
 import { Icon } from "./Icon";
 
-export type CompactWordRowsEntry = Pick<
-  DictionarySearchEntry,
-  `hanziWord` | `hsk` | `gloss` | `pinyin`
->;
+export interface CompactWordRowsEntry {
+  hanzi: DictionarySearchEntry[`hanzi`];
+  hanziWord: DictionarySearchEntry[`hanziWord`] | undefined | null;
+  hsk: DictionarySearchEntry[`hsk`] | undefined | null;
+  gloss: DictionarySearchEntry[`gloss`] | undefined | null;
+  pinyin: DictionarySearchEntry[`pinyin`] | undefined | null;
+}
 
 export function CompactWordRows({
   dictionarySearchEntries,
 }: {
   dictionarySearchEntries: readonly CompactWordRowsEntry[];
 }) {
-  return dictionarySearchEntries.map((entry) => {
-    const hanzi = hanziFromHanziWord(entry.hanziWord);
+  return dictionarySearchEntries.map((entry, i) => {
+    const hanzi = entry.hanzi;
     const pinyin = entry.pinyin?.[0];
-    const gloss = entry.gloss[0];
+    const gloss = entry.gloss?.[0];
 
     return (
-      <Link
-        href={`/wiki/${encodeURIComponent(hanzi)}`}
-        asChild
-        key={entry.hanziWord}
-      >
+      <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={i}>
         <Pressable className="flex flex-row items-center gap-2 py-1.5">
           {entry.hsk == null ? null : (
             <HskLozenge hskLevel={entry.hsk} size="sm" />
