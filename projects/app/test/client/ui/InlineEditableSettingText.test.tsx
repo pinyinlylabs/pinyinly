@@ -243,6 +243,33 @@ describe(`InlineEditableSettingText`, () => {
     });
   });
 
+  test(`does not clear an unchanged existing value that matches defaultValue`, async () => {
+    setupTest({
+      currentValue: `Default Name`,
+      defaultValue: `Default Name`,
+    });
+
+    render(
+      <InlineEditableSettingText
+        setting={mockSetting}
+        settingKey={{ id: `test` }}
+        placeholder="Enter text"
+        // oxlint-disable-next-line typescript/no-deprecated
+        defaultValue="Default Name"
+      />,
+    );
+
+    const displayText = screen.getByText(`Default Name`);
+    fireEvent.click(displayText);
+
+    const input = screen.getByDisplayValue(`Default Name`);
+    fireEvent.keyDown(input, { key: `Enter`, code: `Enter` });
+
+    await waitFor(() => {
+      expect(mockSetValue).not.toHaveBeenCalled();
+    });
+  });
+
   test(`handles whitespace trimming correctly`, async () => {
     setupTest({ currentValue: null, defaultValue: `Default Name` });
 

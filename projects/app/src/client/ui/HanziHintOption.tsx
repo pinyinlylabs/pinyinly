@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
+import { parseHintText } from "./hintText";
 import { Icon } from "./Icon";
 import { Pylymark } from "./Pylymark";
 
@@ -30,6 +31,9 @@ export function HanziHintOption({
   footer,
 }: HanziHintOptionProps) {
   const shouldShowImages = imageIds != null && imageIds.length > 0;
+  const parsedHint = parseHintText(hint);
+  const displayHint = parsedHint.hint;
+  const displayDescription = explanation ?? parsedHint.description;
 
   return (
     <Pressable onPress={onPress}>
@@ -67,13 +71,14 @@ export function HanziHintOption({
           </View>
         ) : null}
         <Text className="text-[14px] font-semibold text-fg-loud">
-          <Pylymark source={hint} />
+          <Pylymark source={displayHint} />
+          {displayDescription == null ? null : (
+            <Text className="font-normal text-fg-dim">
+              {` `}
+              <Pylymark source={displayDescription} />
+            </Text>
+          )}
         </Text>
-        {explanation != null && (
-          <Text className="text-[14px] text-fg">
-            <Pylymark source={explanation} />
-          </Text>
-        )}
         {shouldShowImages ? <HintThumbnailRow imageIds={imageIds} /> : null}
         {footer}
       </View>

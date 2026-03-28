@@ -15,6 +15,7 @@ import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
+import { TextInputMulti } from "./TextInputMulti";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
 export type InlineEditableSettingTextVariant =
@@ -39,6 +40,7 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   maxLength?: number;
   showCounterAtRatio?: number;
   overLimitMessage?: string;
+  counterLength?: (value: string) => number;
   displayClassName?: string;
   emptyClassName?: string;
   inputClassName?: string;
@@ -66,6 +68,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   maxLength,
   showCounterAtRatio = 0.8,
   overLimitMessage,
+  counterLength,
   displayClassName,
   emptyClassName,
   inputClassName,
@@ -89,6 +92,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const sanitizedDefaultValue = sanitizeValue(fallbackValue);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const [draft, setDraft] = useState(displayValue);
   const containerRef = useRef<View>(null);
   const inputRef = useRef<TextInput>(null);
@@ -96,6 +100,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   useEffect(() => {
     if (!isEditing) {
       setDraft(displayValue);
+      setIsInputFocused(false);
     }
   }, [displayValue, isEditing]);
 
@@ -107,6 +112,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     const exitEditMode = () => {
       saveDraftValue(
         draft,
+        currentValue,
         sanitizeValue,
         sanitizedDefaultValue,
         setValue,
@@ -160,6 +166,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       document.removeEventListener(`touchstart`, handleClickOutside);
     };
   }, [
+    currentValue,
     draft,
     isEditing,
     onSaveValue,
@@ -182,6 +189,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       setIsEditing(false);
       saveDraftValue(
         draft,
+        currentValue,
         sanitizeValue,
         sanitizedDefaultValue,
         setValue,
@@ -219,14 +227,18 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     class: emptyClassName,
   });
   const inputTextClassName = inputText({ variant, class: inputClassName });
+  const multilineInputClassName = multiline
+    ? `${inputTextClassName} max-h-80 rounded-none bg-transparent p-0`
+    : inputTextClassName;
   const counterThreshold =
     maxLength == null ? null : Math.ceil(maxLength * showCounterAtRatio);
+  const currentLength = counterLength?.(draft) ?? draft.length;
   const showCounter =
     maxLength != null &&
     counterThreshold != null &&
-    draft.length >= counterThreshold;
-  const isAtLimit = maxLength != null && draft.length >= maxLength;
-  const isTooLong = maxLength != null && draft.length > maxLength;
+    currentLength >= counterThreshold;
+  const isAtLimit = maxLength != null && currentLength >= maxLength;
+  const isTooLong = maxLength != null && currentLength > maxLength;
 
   if (readonly) {
     if (!hasDisplayValue) {
@@ -245,18 +257,50 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   return (
     <View>
       {isEditing ? (
-        <View ref={containerRef} className="relative">
-          <TextInput
-            ref={inputRef}
-            autoFocus
-            multiline={multiline}
-            value={draft}
-            onChangeText={setDraft}
-            onKeyPress={handleKeyPress}
-            placeholder={placeholder}
-            className={inputTextClassName}
-            style={showHistoryButton ? { paddingRight: 32 } : undefined}
-          />
+        <View
+          ref={containerRef}
+          className={
+            isInputFocused
+              ? `relative rounded-xl border border-blue bg-bg-high px-3 py-2`
+              : `relative rounded-xl border border-fg-bg10 bg-bg-high px-3 py-2`
+          }
+        >
+          {multiline ? (
+            <TextInputMulti
+              ref={inputRef}
+              autoFocus
+              autoResizeMinHeight={34}
+              value={draft}
+              onChangeText={setDraft}
+              onKeyPress={handleKeyPress}
+              onFocus={() => {
+                setIsInputFocused(true);
+              }}
+              onBlur={() => {
+                setIsInputFocused(false);
+              }}
+              placeholder={placeholder}
+              className={multilineInputClassName}
+              style={showHistoryButton ? { paddingRight: 32 } : undefined}
+            />
+          ) : (
+            <TextInput
+              ref={inputRef}
+              autoFocus
+              value={draft}
+              onChangeText={setDraft}
+              onKeyPress={handleKeyPress}
+              onFocus={() => {
+                setIsInputFocused(true);
+              }}
+              onBlur={() => {
+                setIsInputFocused(false);
+              }}
+              placeholder={placeholder}
+              className={inputTextClassName}
+              style={showHistoryButton ? { paddingRight: 32 } : undefined}
+            />
+          )}
           {showCounter ? (
             <View className="mt-1 flex-row items-center justify-between gap-2">
               {overLimitMessage == null ? (
@@ -287,10 +331,10 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                       : `text-right text-[11px] text-fg-dim`
                   }
                 >
-                  {draft.length}/{maxLength}
+                  {currentLength}/{maxLength}
                 </Text>
                 <ProgressPieIcon
-                  progress={maxLength == 0 ? 0 : draft.length / maxLength}
+                  progress={maxLength == 0 ? 0 : currentLength / maxLength}
                   warn={isAtLimit}
                   size={12}
                 />
@@ -345,12 +389,20 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
 
 function saveDraftValue<T extends UserSettingTextEntity>(
   draft: string,
+  currentValue: string,
   sanitizeValue: (value: string) => string | null,
   sanitizedDefaultValue: string | null,
   setValue: (value: UserSettingEntityInput<T> | null) => void,
   onSaveValue?: (value: string | null) => void,
 ) {
   const sanitized = sanitizeValue(draft);
+  const sanitizedCurrentValue = sanitizeValue(currentValue);
+  const isUnchanged = sanitized === sanitizedCurrentValue;
+
+  if (isUnchanged && currentValue.length > 0) {
+    return;
+  }
+
   const isDefaultValue =
     sanitized != null && sanitizedDefaultValue != null
       ? sanitized === sanitizedDefaultValue

@@ -1,9 +1,9 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {
-  hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
@@ -23,6 +23,7 @@ import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
+import { hintFirstLineLength, parseHintText } from "./hintText";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
@@ -185,17 +186,8 @@ function CoverImageSection({
       : { setting: hanziWordMeaningHintImagePromptSetting, key: settingKey },
   );
 
-  const explanationSetting = useUserSetting(
-    settingKey == null
-      ? null
-      : { setting: hanziWordMeaningHintExplanationSetting, key: settingKey },
-  );
+  const hintState = useHanziWordMeaningHint(hanziWord);
 
-  const hintSetting = useUserSetting(
-    settingKey == null
-      ? null
-      : { setting: hanziWordMeaningHintTextSetting, key: settingKey },
-  );
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
   };
@@ -216,12 +208,10 @@ function CoverImageSection({
       enableAiGeneration
       initialAiPrompt={
         imagePromptSetting?.value?.text ??
-        ([hintSetting?.value?.text, explanationSetting?.value?.text]
-          .filter((v) => v != null && v.length > 0)
-          .join(` - `) ||
-          (meaning == null
-            ? `Create an image for ${hanzi}`
-            : `Create an image representing ${meaning.gloss[0] ?? hanzi}`))
+        hintState.text ??
+        (meaning == null
+          ? `Create an image for ${hanzi}`
+          : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
       }
       frameConstraint={{ aspectRatio: 2 }}
       onUploadError={handleUploadError}
@@ -307,23 +297,10 @@ function MeaningItem({
   mnemonicHint: string | undefined;
   isEditMode: boolean;
 }) {
-  const hintSetting = useUserSetting({
-    setting: hanziWordMeaningHintTextSetting,
-    key: { hanziWord },
-  });
-  const explanationSetting = useUserSetting({
-    setting: hanziWordMeaningHintExplanationSetting,
-    key: { hanziWord },
-  });
-  const hintSettingTextValue =
-    hintSetting.value?.text ??
-    (hintSetting.value as { t?: string } | null)?.t ??
-    null;
-  const displayHint = hintSettingTextValue ?? mnemonicHint ?? null;
-  const hasCustomHint = (hintSettingTextValue ?? ``).trim().length > 0;
-  const hasHint = displayHint != null && displayHint.length > 0;
-  const explanationText = explanationSetting.value?.text ?? null;
-  const hasExplanation = (explanationText ?? ``).trim().length > 0;
+  const hintState = useHanziWordMeaningHint(hanziWord);
+  const displayHint = hintState.text ?? mnemonicHint ?? null;
+  const hasCustomHint = hintState.hasText;
+  const hasHint = (displayHint ?? ``).trim().length > 0;
 
   // Display glosses: first one bold, rest dim and semicolon-separated
   const primaryGloss = meaning.gloss[0];
@@ -347,35 +324,16 @@ function MeaningItem({
             setting={hanziWordMeaningHintTextSetting}
             settingKey={{ hanziWord }}
             readonly={!isEditMode}
-            placeholder="Add a hint"
+            placeholder="Add a hint on the first line. Add details after a blank line."
             // oxlint-disable-next-line typescript/no-deprecated
             defaultValue={displayHint ?? ``}
             maxLength={80}
             multiline
             showCounterAtRatio={0.8}
-            overLimitMessage="Keep hints under 80 characters. Move extra detail to the explanation."
-            renderDisplay={(value) => (
-              <Text className="text-fg-dim">
-                <Pylymark source={value} />
-              </Text>
-            )}
+            counterLength={hintFirstLineLength}
+            overLimitMessage="Keep the first line under 80 characters. Add details after a blank line."
+            renderDisplay={(value) => <MergedHintDisplay value={value} />}
           />
-
-          {(isEditMode ? hasCustomHint : hasExplanation) ? (
-            <InlineEditableSettingText
-              variant="hintExplanation"
-              setting={hanziWordMeaningHintExplanationSetting}
-              settingKey={{ hanziWord }}
-              readonly={!isEditMode}
-              placeholder="Add an explanation"
-              multiline
-              renderDisplay={(value) => (
-                <Text className="text-fg-dim">
-                  <Pylymark source={value} />
-                </Text>
-              )}
-            />
-          ) : null}
         </View>
       ) : null}
       {isEditMode && !hasHint ? (
@@ -384,6 +342,26 @@ function MeaningItem({
         </Text>
       ) : null}
     </View>
+  );
+}
+
+function MergedHintDisplay({ value }: { value: string }) {
+  const parsed = parseHintText(value);
+
+  if (parsed.hint.length === 0 && parsed.description == null) {
+    return null;
+  }
+
+  return (
+    <>
+      <Pylymark source={parsed.hint} />
+      {parsed.description == null ? null : (
+        <Text className="text-fg-dim">
+          {` `}
+          <Pylymark source={parsed.description} />
+        </Text>
+      )}
+    </>
   );
 }
 
