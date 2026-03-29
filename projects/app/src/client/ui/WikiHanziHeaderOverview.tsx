@@ -1,4 +1,5 @@
 import { intersperse } from "@/client/react";
+import { MenuContext } from "@/client/ui/MenuContext";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import type { HanziText, HskLevel } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
@@ -21,11 +22,8 @@ export function WikiHanziHeaderOverview({
   hanzi,
   pinyins,
   glosses,
-  hanziScrollRef,
   ...rest
-}: {
-  hanziScrollRef: (node: Element | null) => void;
-} & WikiHanziHeaderOverviewDataProps) {
+}: WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
   const { isPriority, toggle } = useBookmarkToggle(hanzi);
@@ -47,13 +45,7 @@ export function WikiHanziHeaderOverview({
         />
       </View>
       <View>
-        {/* Scroll detector */}
-        <View
-          className="h-0 w-full"
-          ref={(el) => {
-            hanziScrollRef(el as Element | null);
-          }}
-        />
+        <MenuContext.TitleScrollTrigger title={hanzi} />
         <Text className="font-sans text-[48px] font-semibold text-fg-loud">
           {hanzi}
         </Text>

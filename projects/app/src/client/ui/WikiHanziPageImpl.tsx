@@ -4,13 +4,9 @@ import {
   arrayFilterUnique,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
-import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { Text, View } from "react-native";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziBody } from "./WikiHanziBody";
-import type { WikiHanziHeaderOverviewDataProps } from "./WikiHanziHeaderOverview";
 import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
 
 export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
@@ -38,7 +34,7 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
 
   return (
     <>
-      <Header
+      <WikiHanziHeaderOverview
         hanzi={hanzi}
         pinyins={pinyins}
         glosses={glosses}
@@ -47,55 +43,5 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
 
       <WikiHanziBody hanzi={hanzi} />
     </>
-  );
-}
-
-function Header({
-  glosses,
-  pinyins,
-  hanzi,
-  hskLevels,
-  ...rest
-}: WikiHanziHeaderOverviewDataProps) {
-  true satisfies IsExhaustedRest<typeof rest>;
-
-  const [ref, entry] = useIntersectionObserver();
-
-  const showHeaderHanziTile = entry != null && !entry.isIntersecting;
-
-  return (
-    <>
-      <StickyScrollHeader hanzi={hanzi} show={showHeaderHanziTile} />
-
-      <WikiHanziHeaderOverview
-        hanzi={hanzi}
-        hskLevels={hskLevels}
-        pinyins={pinyins}
-        glosses={glosses}
-        hanziScrollRef={ref}
-      />
-    </>
-  );
-}
-
-function StickyScrollHeader({ hanzi, show }: { hanzi: string; show: boolean }) {
-  return (
-    <View className="sticky top-0 z-10">
-      <View
-        className={`sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4`}
-      >
-        <View className="flex-1 content-center items-center">
-          <Text
-            className={`
-              text-3xl text-fg-loud
-
-              ${show ? `opacity-100 transition-opacity` : `opacity-0`}
-            `}
-          >
-            {hanzi}
-          </Text>
-        </View>
-      </View>
-    </View>
   );
 }

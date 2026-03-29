@@ -6,8 +6,8 @@ import {
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { MenuContext } from "./MenuContext";
 import { CloseButton } from "./CloseButton";
 import { RectButton } from "./RectButton";
 import { WikiHanziBody } from "./WikiHanziBody";
@@ -46,25 +46,27 @@ export function WikiHanziModalImpl({
     .filter((x) => x != null);
 
   return (
-    <ScrollView
-      className={
-        // Use a linear gradient on the background so that rubber band
-        // scrolling showing the correct color at the top and bottom.
-        `h-screen`
-      }
-      contentContainerClassName="pb-10 min-h-full"
-    >
-      <Header
-        hanzi={hanzi}
-        pinyins={pinyins}
-        hskLevels={hskLevels}
-        glosses={glosses}
-        onDismiss={onDismiss}
-        onExpand={onExpand}
-      />
+    <MenuContext>
+      <ScrollView
+        className={
+          // Use a linear gradient on the background so that rubber band
+          // scrolling showing the correct color at the top and bottom.
+          `h-screen`
+        }
+        contentContainerClassName="pb-10 min-h-full"
+      >
+        <Header
+          hanzi={hanzi}
+          pinyins={pinyins}
+          hskLevels={hskLevels}
+          glosses={glosses}
+          onDismiss={onDismiss}
+          onExpand={onExpand}
+        />
 
-      <WikiHanziBody hanzi={hanzi} />
-    </ScrollView>
+        <WikiHanziBody hanzi={hanzi} />
+      </ScrollView>
+    </MenuContext>
   );
 }
 
@@ -82,10 +84,6 @@ function Header({
 } & WikiHanziHeaderOverviewDataProps) {
   true satisfies IsExhaustedRest<typeof rest>;
 
-  const [ref, entry] = useIntersectionObserver();
-
-  const showHeaderHanziTile = entry != null && !entry.isIntersecting;
-
   return (
     <>
       <View className="sticky top-0 z-10">
@@ -95,15 +93,7 @@ function Header({
           </View>
 
           <View className="flex-1 content-center items-center">
-            <Text
-              className={`
-                font-sans text-3xl text-fg-loud
-
-                ${showHeaderHanziTile ? `opacity-100 transition-opacity` : `opacity-0`}
-              `}
-            >
-              {hanzi}
-            </Text>
+            <MenuContext.TitleText className="font-sans text-3xl text-fg-loud" />
           </View>
 
           <View className="w-20 items-end">
@@ -119,7 +109,6 @@ function Header({
         hskLevels={hskLevels}
         pinyins={pinyins}
         glosses={glosses}
-        hanziScrollRef={ref}
       />
     </>
   );
