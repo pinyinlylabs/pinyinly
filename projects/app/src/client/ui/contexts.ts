@@ -23,6 +23,25 @@ export const AudioContextContext = createContext<AudioContext | null>(null);
 
 export const RizzleContext = createContext<Rizzle | null>(null);
 
+export interface MenuHeaderTitleScrollTriggerState {
+  id: string;
+  title: string;
+  top: number | null;
+}
+
+export interface MenuHeaderContextValue {
+  title: string | null;
+  showTitle: boolean;
+  upsertTitleScrollTriggerState: (
+    state: MenuHeaderTitleScrollTriggerState,
+  ) => void;
+  removeTitleScrollTriggerState: (id: string) => void;
+}
+
+export const MenuHeaderContext = createContext<MenuHeaderContextValue | null>(
+  null,
+);
+
 export type SkillQueueContextValue = DeepReadonly<
   | {
       loading: false;

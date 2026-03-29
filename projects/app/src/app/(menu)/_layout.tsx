@@ -1,12 +1,14 @@
+import { MenuHeaderContext } from "@/client/ui/contexts";
 import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { Icon } from "@/client/ui/Icon";
+import { MenuContext } from "@/client/ui/MenuContext";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
 import type { Href } from "expo-router";
 import { Link, Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
-import { Fragment, useLayoutEffect, useState } from "react";
+import { Fragment, use, useLayoutEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -25,6 +27,14 @@ function isNavItemActive(pathname: string, href: string): boolean {
 }
 
 export default function MenuLayout() {
+  return (
+    <MenuContext>
+      <MenuLayoutContent />
+    </MenuContext>
+  );
+}
+
+function MenuLayoutContent() {
   return (
     <View
       className={`
@@ -137,7 +147,68 @@ export default function MenuLayout() {
         ></View>
       </ScrollView>
 
+      <DesktopFloatingTitle />
+
       <StatusBar style="auto" />
+    </View>
+  );
+}
+
+function DesktopFloatingTitle() {
+  const title = use(MenuHeaderContext)?.title;
+
+  if (title == null) {
+    return null;
+  }
+
+  return (
+    <View
+      className={`
+        hidden
+
+        sm:flex
+      `}
+      style={{
+        position: `fixed`,
+        left: 0,
+        right: 0,
+        top: 0,
+        zIndex: 20,
+      }}
+    >
+      <View className="pointer-events-none size-full flex-row">
+        <View
+          className={`
+            hidden
+
+            sm:flex sm:min-w-[240px]
+
+            menu-lg:flex-1
+          `}
+        ></View>
+
+        <View
+          className={`
+            flex-1
+
+            menu-lg:w-[600px] menu-lg:max-w-[600px] menu-lg:flex-none
+          `}
+        >
+          <View className="h-[56px] items-center justify-center bg-bg/90">
+            <MenuContext.TitleText className="font-sans text-3xl text-fg-loud" />
+          </View>
+        </View>
+
+        <View
+          className={`
+            hidden
+
+            sm:flex
+
+            menu-lg:flex-1
+          `}
+        ></View>
+      </View>
     </View>
   );
 }
@@ -225,7 +296,6 @@ function MobileNavTrigger() {
         >
           <View className="size-full bg-bg">
             <MobileTopMenu
-              title="Menu"
               rightButton={
                 <Pressable
                   onPress={() => {
@@ -338,12 +408,10 @@ const MobileNavSubtleItem = ({ name, href }: NavItemProps) => {
 
 function MobileTopMenu({
   leftButton,
-  title,
   rightButton,
   className,
 }: {
   leftButton?: React.ReactNode;
-  title?: string;
   rightButton?: React.ReactNode;
   className?: string;
 }) {
@@ -357,7 +425,7 @@ function MobileTopMenu({
     >
       <View className="w-[32px] shrink">{leftButton ?? null}</View>
       <View className="flex-1 items-center">
-        <Text className="pyly-body-heading">{title}</Text>
+        <MenuContext.TitleText className="font-sans text-3xl text-fg-loud" />
       </View>
       <View className="w-[32px] shrink">{rightButton ?? null}</View>
     </View>

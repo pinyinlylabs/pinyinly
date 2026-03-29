@@ -40,6 +40,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`ImagePasteDropZone`]: lazyDemo(() => import(`../../../client/ui/ImagePasteDropZone.demo`)),
   [`InlineEditableSettingImage`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingImage.demo`)),
   [`InlineEditableSettingText`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingText.demo`)),
+  [`MenuContext`]: lazyDemo(() => import(`../../../client/ui/MenuContext.demo`)),
   [`MenuDictionarySearch`]: lazyDemo(() => import(`../../../client/ui/MenuDictionarySearch.demo`)),
   [`NewSkillModal`]: lazyDemo(() => import(`../../../client/ui/NewSkillModal.demo`)),
   [`NewSkillModalContentNewPronunciation`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewPronunciation.demo`)),
