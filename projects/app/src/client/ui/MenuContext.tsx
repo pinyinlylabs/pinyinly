@@ -1,6 +1,7 @@
 import { MenuHeaderContext } from "@/client/ui/contexts";
 import type { MenuHeaderTitleScrollTriggerState } from "@/client/ui/contexts";
 import { maxK } from "@pinyinly/lib/collections";
+import { NavigationContext } from "@react-navigation/native";
 import type { PropsWithChildren } from "react";
 import { use, useEffect, useId, useLayoutEffect, useState } from "react";
 import type { TextProps } from "react-native";
@@ -59,10 +60,40 @@ function MenuContextRoot({ children }: PropsWithChildren) {
 function MenuContextTitleScrollTrigger({ title }: { title: string }) {
   const { removeTitleScrollTriggerState, upsertTitleScrollTriggerState } =
     useMenuContextOrThrow();
+  const navigation = use(NavigationContext);
   const id = useId();
   const [element, setElement] = useState<Element | null>(null);
+  const [isFocused, setIsFocused] = useState(
+    () => navigation?.isFocused() ?? true,
+  );
 
   useEffect(() => {
+    if (navigation == null) {
+      return;
+    }
+
+    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+    setIsFocused(navigation.isFocused());
+
+    const unsubscribeFocus = navigation.addListener(`focus`, () => {
+      setIsFocused(true);
+    });
+    const unsubscribeBlur = navigation.addListener(`blur`, () => {
+      setIsFocused(false);
+    });
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+    };
+  }, [navigation]);
+
+  useEffect(() => {
+    if (!isFocused) {
+      removeTitleScrollTriggerState(id);
+      return;
+    }
+
     if (element == null || typeof window === `undefined`) {
       return;
     }
@@ -128,7 +159,14 @@ function MenuContextTitleScrollTrigger({ title }: { title: string }) {
       document.removeEventListener(`visibilitychange`, scheduleMeasure);
       resizeObserver?.disconnect();
     };
-  }, [element, id, title, upsertTitleScrollTriggerState]);
+  }, [
+    element,
+    id,
+    isFocused,
+    removeTitleScrollTriggerState,
+    title,
+    upsertTitleScrollTriggerState,
+  ]);
 
   useLayoutEffect(() => {
     return () => {
