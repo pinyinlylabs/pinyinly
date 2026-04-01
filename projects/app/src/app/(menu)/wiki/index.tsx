@@ -1,3 +1,4 @@
+import { BookmarksList } from "@/client/ui/BookmarksList";
 import { WikiDictionarySearch } from "@/client/ui/WikiDictionarySearch";
 import { Text, View } from "react-native";
 
@@ -13,6 +14,8 @@ export default function WikiIndexPage() {
       </View>
 
       <WikiDictionarySearch />
+
+      <BookmarksList showSeeAllLink limit={10} />
     </View>
   );
 }

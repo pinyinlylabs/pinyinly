@@ -1,15 +1,15 @@
 import { BookmarksList } from "@/client/ui/BookmarksList";
-import { Text, View } from "react-native";
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
+import { View } from "react-native";
 
 export default function BookmarksPage() {
   return (
-    <View className="gap-5">
-      {/* Header */}
-      <View>
-        <Text className="pyly-body-title">Bookmarks</Text>
-      </View>
+    <View className="gap-3">
+      <Breadcrumbs>
+        <Breadcrumbs.Item href="/wiki">Wiki</Breadcrumbs.Item>
+        <Breadcrumbs.Item href="/bookmarks">Bookmarks</Breadcrumbs.Item>
+      </Breadcrumbs>
 
-      {/* Bookmarks list */}
       <BookmarksList />
     </View>
   );

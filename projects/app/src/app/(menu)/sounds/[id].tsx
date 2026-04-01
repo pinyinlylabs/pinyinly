@@ -1,6 +1,6 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { CompactWordRows } from "@/client/ui/CompactWordRows";
-import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -257,28 +257,24 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
   );
 
   return (
-    <View className="flex-row items-center gap-1">
-      <RectButton href="/sounds" variant="bare2" iconSize={20}>
-        Sounds
-      </RectButton>
+    <Breadcrumbs>
+      <Breadcrumbs.Item href="/sounds">Sounds</Breadcrumbs.Item>
+
       {pinyinSoundGroupId == null ? null : (
-        <>
-          <Text className="text-fg-dim">/</Text>
-          <RectButton href="/sounds" variant="bare2" iconSize={20}>
-            <SettingText
-              setting={pinyinSoundGroupNameSetting}
-              settingKey={{ soundGroupId: pinyinSoundGroupId }}
-            />
-          </RectButton>
-        </>
+        <Breadcrumbs.Item href="/sounds">
+          <SettingText
+            setting={pinyinSoundGroupNameSetting}
+            settingKey={{ soundGroupId: pinyinSoundGroupId }}
+          />
+        </Breadcrumbs.Item>
       )}
-      <Text className="text-fg-dim">/</Text>
+
       {pinyinSoundGroup == null ? (
-        <RectButton variant="bare2">
+        <Breadcrumbs.Item>
           <PinyinSoundNameText pinyinSoundId={pinyinSoundId} />
-        </RectButton>
+        </Breadcrumbs.Item>
       ) : (
-        <FloatingMenuModal
+        <Breadcrumbs.Item
           menu={
             <SiblingSoundMenu
               sounds={pinyinSoundGroup.sounds}
@@ -286,12 +282,10 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
             />
           }
         >
-          <RectButton iconEnd="chevron-up-down" variant="bare2" iconSize={16}>
-            <PinyinSoundNameText pinyinSoundId={pinyinSoundId} />
-          </RectButton>
-        </FloatingMenuModal>
+          <PinyinSoundNameText pinyinSoundId={pinyinSoundId} />
+        </Breadcrumbs.Item>
       )}
-    </View>
+    </Breadcrumbs>
   );
 }
 

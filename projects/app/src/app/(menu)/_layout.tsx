@@ -451,7 +451,6 @@ const navItems: NavGroup[] = [
     primary: true,
     items: [
       { name: `Wiki`, href: `/wiki` as const },
-      { name: `Bookmarks`, href: `/bookmarks` },
       { name: `Sounds`, href: `/sounds` as const },
       { name: `Skills`, href: `/skills` },
       { name: `History`, href: `/history` },
