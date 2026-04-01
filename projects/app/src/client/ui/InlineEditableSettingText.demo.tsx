@@ -23,7 +23,6 @@ export default () => {
           settingKey={hintSettingKey}
           placeholder="Add a hint"
           renderDisplay={(value) => <Pylymark source={value} />}
-          variant="hint"
         />
 
         <InlineEditableSettingText
@@ -32,7 +31,6 @@ export default () => {
           placeholder="Add an explanation"
           multiline
           renderDisplay={(value) => <Pylymark source={value} />}
-          variant="hintExplanation"
         />
       </View>
     </View>
