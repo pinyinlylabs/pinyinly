@@ -64,15 +64,17 @@ export function BookmarksList({
                     hover:bg-fg/5
                   `}
                 >
-                  <Text className="text-2xl font-semibold text-fg-loud">
+                  <Text className="font-sans text-2xl font-semibold text-fg-loud">
                     {item.word}
                   </Text>
                   <View className="flex-1 gap-1">
-                    <Text className="text-xs text-fg-dim">
+                    <Text className="font-sans text-xs text-fg-dim">
                       Added {format(item.createdAt, `MMM d, yyyy`)}
                     </Text>
                     {item.note == null ? null : (
-                      <Text className="text-sm text-fg">{item.note}</Text>
+                      <Text className="font-sans text-sm text-fg">
+                        {item.note}
+                      </Text>
                     )}
                   </View>
                   <Pressable

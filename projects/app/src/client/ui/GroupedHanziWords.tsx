@@ -45,15 +45,19 @@ export function GroupedHanziWords({
               hover:bg-fg/5
             `}
           >
-            <Text className="text-2xl font-semibold text-fg-loud">
+            <Text className="font-sans text-2xl font-semibold text-fg-loud">
               {entry.hanzi}
             </Text>
             <View className="flex-1">
               {entry.gloss[0] == null ? null : (
-                <Text className="text-sm text-fg">{entry.gloss[0]}</Text>
+                <Text className="font-sans text-sm text-fg">
+                  {entry.gloss[0]}
+                </Text>
               )}
               {entry.pinyin?.[0] == null ? null : (
-                <Text className="text-xs text-fg-dim">{entry.pinyin[0]}</Text>
+                <Text className="font-sans text-xs text-fg-dim">
+                  {entry.pinyin[0]}
+                </Text>
               )}
             </View>
           </Pressable>

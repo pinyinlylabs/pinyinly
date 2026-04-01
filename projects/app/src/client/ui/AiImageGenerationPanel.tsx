@@ -1,5 +1,10 @@
-import { getAiImageStyleConfig } from "@/client/aiImageStyle";
+import {
+  aiImageStyleConfigs,
+  getAiImageStyleConfig,
+} from "@/client/aiImageStyle";
+import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { trpc } from "@/client/trpc";
+import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
@@ -33,6 +38,7 @@ interface AiImagePlaygroundMessage {
   text?: string;
   assetId?: AssetId;
   contextReferenceEntries?: AiImageContextReferenceEntry[];
+  styleContextDebug?: AiImageStyleContextDebug;
   createdAtIso: string;
 }
 
@@ -90,6 +96,14 @@ export interface AiImageGenerationPanelProps {
 
 interface AiImageContextReferenceEntry {
   label: string;
+  assetId: AssetId;
+  sourceId?: string;
+}
+
+interface AiImageStyleContextDebug {
+  kind: AiImageStyleKind;
+  label: string;
+  prompt: string;
   assetId: AssetId;
 }
 
@@ -326,6 +340,13 @@ export function AiImageGenerationPanel({
   const activeThreadMessageCount = activeThread?.messages.length ?? 0;
   const styleReferenceConfig =
     aiImageStyle == null ? null : getAiImageStyleConfig(aiImageStyle);
+  const styleDisplayLabel =
+    styleReferenceConfig == null
+      ? null
+      : getAiImageStyleDisplayLabel(
+          styleReferenceConfig.kind,
+          styleReferenceConfig.label,
+        );
 
   const referenceSettings = [
     {
@@ -510,6 +531,7 @@ export function AiImageGenerationPanel({
       appendContextReferenceEntry({
         label: reference.label,
         assetId: reference.assetId,
+        sourceId: reference.id,
       });
       promptContextLabelByReferenceId.set(reference.id, reference.label);
       continue;
@@ -534,6 +556,7 @@ export function AiImageGenerationPanel({
       appendContextReferenceEntry({
         label: promptContextLabel,
         assetId: fallbackMatch.assetId,
+        sourceId: reference.id,
       });
       promptContextLabelByReferenceId.set(reference.id, promptContextLabel);
       fallbackForPrimaryById.set(reference.id, fallbackMatch);
@@ -561,6 +584,7 @@ export function AiImageGenerationPanel({
     appendContextReferenceEntry({
       label: reference.label,
       assetId: reference.assetId,
+      sourceId: reference.id,
     });
     promptContextLabelByReferenceId.set(reference.id, reference.label);
   }
@@ -594,8 +618,28 @@ export function AiImageGenerationPanel({
     appendContextReferenceEntry({
       label: `Earlier generated image from this chat`,
       assetId: message.assetId,
+      sourceId: `timeline-context`,
     });
   }
+
+  const userMessageContextReferenceEntries = contextReferenceEntries.filter(
+    (entry) => entry.sourceId !== `style-reference`,
+  );
+
+  const styleContextDebug: AiImageStyleContextDebug | undefined =
+    styleReferenceConfig == null
+      ? undefined
+      : {
+          kind: styleReferenceConfig.kind,
+          label:
+            styleDisplayLabel ??
+            getAiImageStyleDisplayLabel(
+              styleReferenceConfig.kind,
+              styleReferenceConfig.label,
+            ),
+          prompt: styleReferenceConfig.stylePrompt,
+          assetId: styleReferenceConfig.assetId,
+        };
 
   useEffect(() => {
     if (!isLoadedFromSetting || activeThreadId == null) {
@@ -696,10 +740,14 @@ export function AiImageGenerationPanel({
             id: userMessageId,
             role: `user` as const,
             text: prompt,
-            contextReferenceEntries: contextReferenceEntries.map((entry) => ({
-              assetId: entry.assetId,
-              label: entry.label,
-            })),
+            contextReferenceEntries: userMessageContextReferenceEntries.map(
+              (entry) => ({
+                assetId: entry.assetId,
+                label: entry.label,
+                sourceId: entry.sourceId,
+              }),
+            ),
+            styleContextDebug,
             createdAtIso: nowIso,
           },
         ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
@@ -726,7 +774,10 @@ export function AiImageGenerationPanel({
         prompt,
         referenceImages:
           contextReferenceEntries.length > 0
-            ? contextReferenceEntries
+            ? contextReferenceEntries.map((entry) => ({
+                assetId: entry.assetId,
+                label: entry.label,
+              }))
             : undefined,
       });
 
@@ -956,7 +1007,22 @@ function AiImageUserMessage({
   message: AiImagePlaygroundMessage;
   className?: string;
 }) {
+  const { aiImageStyle } = useAiImageStyleSetting();
   const contextEntries = message.contextReferenceEntries ?? [];
+  const messageStyleLabel = message.styleContextDebug?.label ?? null;
+
+  const currentStyleConfig =
+    aiImageStyle == null ? null : getAiImageStyleConfig(aiImageStyle);
+  const currentStyleLabel =
+    currentStyleConfig == null
+      ? null
+      : getAiImageStyleDisplayLabel(
+          currentStyleConfig.kind,
+          currentStyleConfig.label,
+        );
+
+  const shouldShowStyleLabel =
+    messageStyleLabel != null && messageStyleLabel !== currentStyleLabel;
 
   return (
     <View className="items-end gap-1.5">
@@ -984,29 +1050,39 @@ function AiImageUserMessage({
           </View>
         )}
       </View>
-      {contextEntries.length === 0 ? null : (
+      {!shouldShowStyleLabel && contextEntries.length === 0 ? null : (
         <View className="flex-row flex-wrap items-center justify-end gap-1">
-          {contextEntries.map((entry, index) => (
-            <Tooltip
-              key={`${entry.assetId}-${entry.label}-${String(index)}`}
-              placement="top"
-              sideOffset={6}
-            >
-              <Tooltip.Trigger>
-                <AssetImage
-                  assetId={entry.assetId}
-                  className="size-9 rounded"
-                  contentFit="cover"
-                />
-              </Tooltip.Trigger>
-              <Tooltip.Content variant="custom">
-                <ImageReferenceTooltipContent
-                  imageAssetId={entry.assetId}
-                  prompt={entry.label}
-                />
-              </Tooltip.Content>
-            </Tooltip>
-          ))}
+          {shouldShowStyleLabel ? (
+            <Text className="font-sans text-xs text-fg-dim">
+              {messageStyleLabel}
+            </Text>
+          ) : null}
+          {contextEntries.length === 0 ? null : (
+            <>
+              {shouldShowStyleLabel ? <View className="flex-1 grow" /> : null}
+              {contextEntries.map((entry, index) => (
+                <Tooltip
+                  key={`${entry.assetId}-${entry.label}-${String(index)}`}
+                  placement="top"
+                  sideOffset={6}
+                >
+                  <Tooltip.Trigger>
+                    <AssetImage
+                      assetId={entry.assetId}
+                      className="size-9 rounded"
+                      contentFit="cover"
+                    />
+                  </Tooltip.Trigger>
+                  <Tooltip.Content variant="custom">
+                    <ImageReferenceTooltipContent
+                      imageAssetId={entry.assetId}
+                      prompt={entry.label}
+                    />
+                  </Tooltip.Content>
+                </Tooltip>
+              ))}
+            </>
+          )}
         </View>
       )}
     </View>
@@ -1188,6 +1264,18 @@ function AiImagePromptComposer({
   onSetReferenceVisibleInRow: (referenceId: string, visible: boolean) => void;
   onGenerate: (prompt: string) => Promise<void>;
 }) {
+  const { aiImageStyle, setAiImageStyle } = useAiImageStyleSetting();
+  const selectedStyleKind = aiImageStyle;
+  const selectedStyleConfig =
+    aiImageStyle == null ? null : getAiImageStyleConfig(aiImageStyle);
+  const selectedStyleLabel =
+    selectedStyleConfig == null
+      ? null
+      : getAiImageStyleDisplayLabel(
+          selectedStyleConfig.kind,
+          selectedStyleConfig.label,
+        );
+
   const [draftPrompt, setDraftPrompt] = useState(initialDraftPrompt);
   const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
   const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
@@ -1224,7 +1312,9 @@ function AiImagePromptComposer({
     isLoadedFromSetting && !isProcessing && draftPrompt.trim().length > 0;
 
   const displayedRowReferences = [
-    ...fixedRowReferences,
+    ...fixedRowReferences.filter(
+      (reference) => reference.id !== `style-reference`,
+    ),
     ...rowReferences.filter((reference) => {
       if (reference.assetId != null) {
         return true;
@@ -1266,6 +1356,35 @@ function AiImagePromptComposer({
 
       <View className="flex-row items-center justify-between gap-2">
         <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <RectButton
+                variant="bareDim"
+                iconEnd="chevron-down"
+                iconSize={16}
+                className="justify-start"
+              >
+                {selectedStyleLabel ?? `Style`}
+              </RectButton>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Label>Style</DropdownMenu.Label>
+              <DropdownMenu.Separator />
+              <DropdownMenu.RadioGroup
+                value={selectedStyleKind ?? ``}
+                onValueChange={(nextStyleKind) => {
+                  setAiImageStyle(nextStyleKind as AiImageStyleKind);
+                }}
+              >
+                {aiImageStyleConfigs.map((config) => (
+                  <DropdownMenu.RadioItem key={config.kind} value={config.kind}>
+                    {getAiImageStyleDisplayLabel(config.kind, config.label)}
+                  </DropdownMenu.RadioItem>
+                ))}
+              </DropdownMenu.RadioGroup>
+            </DropdownMenu.Content>
+          </DropdownMenu>
+
           <FloatingMenuModal
             menu={
               <ReferencePickerMenu
@@ -1694,6 +1813,9 @@ function parseAiImagePlaygroundState(
           contextReferenceEntries: parseMessageContextReferenceEntries(
             messageObject[`contextReferenceEntries`],
           ),
+          styleContextDebug: parseMessageStyleContextDebug(
+            messageObject[`styleContextDebug`],
+          ),
           createdAtIso: messageObject[`createdAtIso`],
         });
       }
@@ -1757,8 +1879,48 @@ function parseMessageContextReferenceEntries(
     entries.push({
       assetId: objectItem[`assetId`] as AssetId,
       label: objectItem[`label`],
+      sourceId:
+        typeof objectItem[`sourceId`] === `string`
+          ? objectItem[`sourceId`]
+          : undefined,
     });
   }
 
   return entries.length > 0 ? entries : undefined;
+}
+
+function parseMessageStyleContextDebug(
+  value: unknown,
+): AiImageStyleContextDebug | undefined {
+  if (typeof value !== `object` || value == null) {
+    return undefined;
+  }
+
+  const objectValue = value as Record<string, unknown>;
+  if (
+    typeof objectValue[`kind`] !== `string` ||
+    typeof objectValue[`label`] !== `string` ||
+    typeof objectValue[`prompt`] !== `string` ||
+    typeof objectValue[`assetId`] !== `string`
+  ) {
+    return undefined;
+  }
+
+  if (objectValue[`kind`] !== `comic` && objectValue[`kind`] !== `realistic`) {
+    return undefined;
+  }
+
+  return {
+    kind: objectValue[`kind`],
+    label: objectValue[`label`],
+    prompt: objectValue[`prompt`],
+    assetId: objectValue[`assetId`] as AssetId,
+  };
+}
+
+function getAiImageStyleDisplayLabel(
+  kind: AiImageStyleKind,
+  fallbackLabel: string,
+): string {
+  return kind === `comic` ? `Illustration` : fallbackLabel;
 }

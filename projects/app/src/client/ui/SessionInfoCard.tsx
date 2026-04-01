@@ -72,12 +72,18 @@ function SessionInfoCardInner({
       {/* Header with name and active indicator */}
       <View className="flex-row items-center justify-between">
         <View className="flex-1 gap-1">
-          <Text className="text-base font-semibold text-fg">{displayName}</Text>
-          <Text className="text-sm text-fg-dim">{authMethodBadge}</Text>
+          <Text className="font-sans text-base font-semibold text-fg">
+            {displayName}
+          </Text>
+          <Text className="font-sans text-sm text-fg-dim">
+            {authMethodBadge}
+          </Text>
         </View>
         {isActive && (
           <View className="rounded-full bg-fg px-3 py-1">
-            <Text className="text-xs font-semibold text-bg">Current</Text>
+            <Text className="font-sans text-xs font-semibold text-bg">
+              Current
+            </Text>
           </View>
         )}
       </View>
@@ -85,7 +91,7 @@ function SessionInfoCardInner({
       {/* Details */}
       {showDetails === true && (
         <View className="gap-1">
-          <Text className="text-sm text-fg-dim">
+          <Text className="font-sans text-sm text-fg-dim">
             {skillCount}
             {` `}
             {typeof skillCount === `number` && skillCount === 1
@@ -93,7 +99,7 @@ function SessionInfoCardInner({
               : `skills`}
           </Text>
           {session.lastActive && (
-            <Text className="text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-fg-dim">
               Last active: {new Date(session.lastActive).toLocaleDateString()}
             </Text>
           )}

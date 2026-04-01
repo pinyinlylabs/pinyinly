@@ -87,7 +87,7 @@ function SoundNameEditModalContent({
         <RectButton variant="bare" onPress={onDismiss}>
           Close
         </RectButton>
-        <Text className="text-[17px] font-semibold text-fg-loud">
+        <Text className="font-sans text-[17px] font-semibold text-fg-loud">
           Edit sound name
         </Text>
         <View className="w-12" />
@@ -98,7 +98,7 @@ function SoundNameEditModalContent({
         <View className="gap-4">
           {/* Text input */}
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-fg-dim">
+            <Text className="font-sans text-sm font-semibold text-fg-dim">
               Sound name
             </Text>
             <InlineEditableSettingText
@@ -159,7 +159,7 @@ function SoundNameEditModalContent({
                             Use
                           </Text>
                         </RectButton>
-                        <Text className="font-bold text-fg">
+                        <Text className="font-sans font-bold text-fg">
                           <Text
                             className={
                               currentSoundName?.text === name
@@ -171,7 +171,7 @@ function SoundNameEditModalContent({
                           </Text>
 
                           {` `}
-                          <Text className="text-sm font-normal text-fg-dim">
+                          <Text className="font-sans text-sm font-normal text-fg-dim">
                             {nameDescription}
                           </Text>
                         </Text>

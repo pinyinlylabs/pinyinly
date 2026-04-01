@@ -134,7 +134,9 @@ export function QuizDeckOneCorrectPairQuestion({
 
       {flag == null ? null : <QuizFlagText flag={flag} />}
       <View>
-        <Text className="text-xl font-bold text-fg-loud">{prompt}</Text>
+        <Text className="font-sans text-xl font-bold text-fg-loud">
+          {prompt}
+        </Text>
       </View>
       <View className="flex-1 justify-center py-4">
         <View

@@ -60,7 +60,7 @@ function CountLozenge({
       entering={ZoomIn.easing(Easing.quad)}
       className={countLozengePillClass({ mode, className })}
     >
-      <Text className="text-[10px] font-bold tabular-nums text-bg">
+      <Text className="font-sans text-[10px] font-bold tabular-nums text-bg">
         {countText}
       </Text>
     </Reanimated.View>

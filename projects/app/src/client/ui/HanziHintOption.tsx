@@ -41,7 +41,7 @@ export function HanziHintOption({
         {isUser === true ? (
           <View className="mb-1 flex-row items-center gap-2">
             <View className="rounded-full bg-purple/20 px-2 py-0.5">
-              <Text className="text-[11px] font-medium text-purple">
+              <Text className="font-sans text-[11px] font-medium text-purple">
                 Your hint
               </Text>
             </View>
@@ -70,7 +70,7 @@ export function HanziHintOption({
             )}
           </View>
         ) : null}
-        <Text className="text-[14px] font-semibold text-fg-loud">
+        <Text className="font-sans text-[14px] font-semibold text-fg-loud">
           <Pylymark source={displayHint} />
           {displayDescription == null ? null : (
             <Text className="font-normal text-fg-dim">

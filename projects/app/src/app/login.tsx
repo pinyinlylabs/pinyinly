@@ -21,10 +21,10 @@ export default function LoginPage() {
         <View className="items-center justify-center gap-8 px-6 py-12">
           {/* Header */}
           <View className="max-w-lg gap-2 text-center">
-            <Text className="text-3xl font-bold text-fg">
+            <Text className="font-sans text-3xl font-bold text-fg">
               Welcome to Pinyinly
             </Text>
-            <Text className="text-base text-fg-dim">
+            <Text className="font-sans text-base text-fg-dim">
               Learn to read, write, and speak Mandarin Chinese with spaced
               repetition.
             </Text>
@@ -35,8 +35,10 @@ export default function LoginPage() {
             className={`w-full max-w-lg gap-4 rounded-lg border bg-bg-high p-6`}
           >
             <View className="gap-2">
-              <Text className="text-lg font-semibold text-fg">New here?</Text>
-              <Text className="text-sm text-fg-dim">
+              <Text className="font-sans text-lg font-semibold text-fg">
+                New here?
+              </Text>
+              <Text className="font-sans text-sm text-fg-dim">
                 Create an account to start learning.
               </Text>
             </View>
@@ -50,7 +52,7 @@ export default function LoginPage() {
                 }}
                 redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
               />
-              <Text className="text-center text-xs text-fg-dim">
+              <Text className="text-center font-sans text-xs text-fg-dim">
                 Sign up with your Apple ID
               </Text>
             </View>
@@ -77,7 +79,7 @@ export default function LoginPage() {
               >
                 Create account with Passkey
               </RectButton>
-              <Text className="text-center text-xs text-fg-dim">
+              <Text className="text-center font-sans text-xs text-fg-dim">
                 Or use a passkey (fingerprint, face, or security key)
               </Text>
             </View>
@@ -88,10 +90,10 @@ export default function LoginPage() {
             className={`w-full max-w-lg gap-4 rounded-lg border bg-bg-high p-6`}
           >
             <View className="gap-2">
-              <Text className="text-lg font-semibold text-fg">
+              <Text className="font-sans text-lg font-semibold text-fg">
                 Already have an account?
               </Text>
-              <Text className="text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-fg-dim">
                 Sign in to continue learning.
               </Text>
             </View>
@@ -107,7 +109,7 @@ export default function LoginPage() {
               >
                 Log in with Passkey
               </RectButton>
-              <Text className="text-center text-xs text-fg-dim">
+              <Text className="text-center font-sans text-xs text-fg-dim">
                 Use your saved passkey to sign in
               </Text>
             </View>
@@ -133,7 +135,7 @@ export default function LoginPage() {
   // iOS and other platforms: Return to original focused UI
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
-      <Text className="font-bold text-fg">Sign up</Text>
+      <Text className="font-sans font-bold text-fg">Sign up</Text>
       <View className="gap-2">
         <View className="flex-row gap-2 border-y">
           <TextInputSingle
@@ -157,7 +159,7 @@ export default function LoginPage() {
         </View>
       </View>
 
-      <Text className="font-bold text-fg">Log in</Text>
+      <Text className="font-sans font-bold text-fg">Log in</Text>
       <View className="gap-2">
         <View className="flex-row gap-2 border-y">
           <RectButton
@@ -225,9 +227,9 @@ function SkillCount() {
   const count = result.data.length;
 
   return result.isLoading ? (
-    <Text className="text-fg">Loading…</Text>
+    <Text className="font-sans text-fg">Loading…</Text>
   ) : (
-    <Text className="text-fg">{count} words</Text>
+    <Text className="font-sans text-fg">{count} words</Text>
   );
 }
 
@@ -254,7 +256,7 @@ function DevToolsSection({
 
   const content = (
     <>
-      <Text className="font-bold text-fg">Dev: Session List</Text>
+      <Text className="font-sans font-bold text-fg">Dev: Session List</Text>
       <View className="gap-2">
         {auth.data?.allDeviceSessions.map((x, i) => (
           <SessionStoreProvider key={i} dbName={x.replicacheDbName}>
@@ -265,13 +267,25 @@ function DevToolsSection({
               }
             >
               <View className={styled ? undefined : `flex-1`}>
-                <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+                <Text
+                  className={
+                    styled ? `font-sans text-sm text-fg` : `font-sans text-fg`
+                  }
+                >
                   Skill count: <SkillCount />
                 </Text>
-                <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+                <Text
+                  className={
+                    styled ? `font-sans text-sm text-fg` : `font-sans text-fg`
+                  }
+                >
                   Session ID: {x.serverSessionId}
                 </Text>
-                <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+                <Text
+                  className={
+                    styled ? `font-sans text-sm text-fg` : `font-sans text-fg`
+                  }
+                >
                   DB name: {x.replicacheDbName}
                 </Text>
               </View>
@@ -288,10 +302,14 @@ function DevToolsSection({
           </SessionStoreProvider>
         ))}
       </View>
-      <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+      <Text
+        className={styled ? `font-sans text-sm text-fg` : `font-sans text-fg`}
+      >
         Active Session ID: {auth.data?.activeDeviceSession.serverSessionId}
       </Text>
-      <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+      <Text
+        className={styled ? `font-sans text-sm text-fg` : `font-sans text-fg`}
+      >
         Active DB name: {auth.data?.activeDeviceSession.replicacheDbName}
       </Text>
       <ServerSessionIdLoginForm />

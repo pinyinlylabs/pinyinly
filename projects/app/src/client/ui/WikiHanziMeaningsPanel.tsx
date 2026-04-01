@@ -220,22 +220,28 @@ function EditableUserMeaningListItem({
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1 gap-1">
             <View className="flex-row items-center gap-2">
-              <Text className="text-[16px] font-semibold text-fg-loud">
+              <Text className="font-sans text-[16px] font-semibold text-fg-loud">
                 {value.gloss}
               </Text>
               <View className="rounded-full bg-cyan/10 px-2 py-1">
-                <Text className="text-[11px] font-medium uppercase tracking-[0.4px] text-cyan">
+                <Text
+                  className={`
+                    font-sans text-[11px] font-medium uppercase tracking-[0.4px] text-cyan
+                  `}
+                >
                   Yours
                 </Text>
               </View>
             </View>
 
             {value.pinyin == null || value.pinyin.length === 0 ? null : (
-              <Text className="text-[13px] text-fg-dim">{value.pinyin}</Text>
+              <Text className="font-sans text-[13px] text-fg-dim">
+                {value.pinyin}
+              </Text>
             )}
 
             {value.note == null || value.note.length === 0 ? null : (
-              <Text className="text-[13px] leading-5 text-fg-dim">
+              <Text className="font-sans text-[13px] leading-5 text-fg-dim">
                 {value.note}
               </Text>
             )}

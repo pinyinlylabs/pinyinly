@@ -15,7 +15,7 @@ export default () => (
             <RectButton variant="outline">Hover me</RectButton>
           </Tooltip.Trigger>
           <Tooltip.Content>
-            <Text className="text-sm text-fg">Save changes</Text>
+            <Text className="font-sans text-sm text-fg">Save changes</Text>
           </Tooltip.Content>
         </Tooltip>
       </ExampleStack>
@@ -26,7 +26,9 @@ export default () => (
             <RectButton variant="rounded" iconStart="help-circled" />
           </Tooltip.Trigger>
           <Tooltip.Content className="border-cyanold/40 bg-cyanold/10">
-            <Text className="text-sm font-bold text-fg">Helpful hint</Text>
+            <Text className="font-sans text-sm font-bold text-fg">
+              Helpful hint
+            </Text>
           </Tooltip.Content>
         </Tooltip>
       </ExampleStack>
@@ -48,8 +50,12 @@ export default () => (
                 <Icon icon="document" />
               </View>
               <View>
-                <Text className="text-sm font-bold text-fg">Draft.pdf</Text>
-                <Text className="text-xs text-fg-dim">Updated 2 mins ago</Text>
+                <Text className="font-sans text-sm font-bold text-fg">
+                  Draft.pdf
+                </Text>
+                <Text className="font-sans text-xs text-fg-dim">
+                  Updated 2 mins ago
+                </Text>
               </View>
             </View>
           </Tooltip.Content>

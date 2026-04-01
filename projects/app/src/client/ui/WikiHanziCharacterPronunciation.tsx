@@ -456,11 +456,11 @@ function MergedHintDisplay({ value }: { value: string }) {
 
   return (
     <>
-      <Text className="font-semibold">
+      <Text className="font-sans font-semibold">
         <Pylymark source={parsed.hint} />
       </Text>
       {parsed.description == null ? null : (
-        <Text className="font-normal text-fg-dim">
+        <Text className="font-sans font-normal text-fg-dim">
           {` `}
           <Pylymark source={parsed.description} />
         </Text>

@@ -111,5 +111,5 @@ const flagIconClass = tv({
 });
 
 const flagTextClass = tv({
-  base: `font-bold uppercase text-fg`,
+  base: `font-sans font-bold uppercase text-fg`,
 });

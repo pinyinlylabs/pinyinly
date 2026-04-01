@@ -56,7 +56,7 @@ export function PinyinSoundTile({
             {decoration}
           </Text>
         )}
-        <Text className="text-2xl leading-none text-fg">{label}</Text>
+        <Text className="font-sans text-2xl leading-none text-fg">{label}</Text>
       </View>
       {name == null ? (
         <Text

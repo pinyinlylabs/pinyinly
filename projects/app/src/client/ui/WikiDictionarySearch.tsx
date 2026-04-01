@@ -93,12 +93,12 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
       }}
       className={resultCardClass()}
     >
-      <Text className="text-2xl font-semibold text-fg-loud">
+      <Text className="font-sans text-2xl font-semibold text-fg-loud">
         {result.hanzi}
       </Text>
       <View className="flex-1">
         {result.kind === `wikiDirect` ? (
-          <Text className="text-sm text-fg">Open wiki page</Text>
+          <Text className="font-sans text-sm text-fg">Open wiki page</Text>
         ) : result.kind === `hanziWord` && result.hanziWord != null ? (
           <HanziWordSearchMeta hanziWord={result.hanziWord} />
         ) : null}
@@ -119,7 +119,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
             />
           </Tooltip.Trigger>
           <Tooltip.Content>
-            <Text className="text-sm text-fg">Bookmark</Text>
+            <Text className="font-sans text-sm text-fg">Bookmark</Text>
           </Tooltip.Content>
         </Tooltip>
       ) : null}
@@ -142,10 +142,14 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
   return (
     <>
       {dictionaryEntry?.gloss[0] == null ? null : (
-        <Text className="text-sm text-fg">{dictionaryEntry.gloss[0]}</Text>
+        <Text className="font-sans text-sm text-fg">
+          {dictionaryEntry.gloss[0]}
+        </Text>
       )}
       {dictionaryEntry?.pinyin?.[0] == null ? null : (
-        <Text className="text-xs text-fg-dim">{dictionaryEntry.pinyin[0]}</Text>
+        <Text className="font-sans text-xs text-fg-dim">
+          {dictionaryEntry.pinyin[0]}
+        </Text>
       )}
     </>
   );

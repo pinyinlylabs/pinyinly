@@ -87,7 +87,7 @@ export function AiPronunciationHintModal({
             <RectButton variant="bare" onPress={dismiss}>
               Cancel
             </RectButton>
-            <Text className="text-[17px] font-semibold text-fg-loud">
+            <Text className="font-sans text-[17px] font-semibold text-fg-loud">
               AI hint creator
             </Text>
             <RectButton
@@ -104,7 +104,7 @@ export function AiPronunciationHintModal({
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
             <View className="gap-1">
               <Text className="pyly-body-subheading">Context</Text>
-              <Text className="text-[14px] text-fg-dim">
+              <Text className="font-sans text-[14px] text-fg-dim">
                 The AI uses your sound characters and scene descriptions to
                 craft a pronunciation hint.
               </Text>
@@ -127,19 +127,21 @@ export function AiPronunciationHintModal({
             </View>
 
             {error == null ? null : (
-              <Text className="text-[14px] text-[crimson]">{error}</Text>
+              <Text className="font-sans text-[14px] text-[crimson]">
+                {error}
+              </Text>
             )}
 
             <View className="gap-2">
               <Text className="pyly-body-subheading">Suggestions</Text>
               {isGenerating ? (
-                <Text className="text-[14px] text-fg-dim">
+                <Text className="font-sans text-[14px] text-fg-dim">
                   Generating hints...
                 </Text>
               ) : null}
 
               {suggestions == null ? (
-                <Text className="text-[14px] text-fg-dim">
+                <Text className="font-sans text-[14px] text-fg-dim">
                   Press Generate to get AI suggestions.
                 </Text>
               ) : (
@@ -150,7 +152,7 @@ export function AiPronunciationHintModal({
                       className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3"
                     >
                       <View className="flex-row items-center justify-between">
-                        <Text className="text-[13px] text-fg-dim">
+                        <Text className="font-sans text-[13px] text-fg-dim">
                           Confidence: {formatConfidence(suggestion.confidence)}
                         </Text>
                         <RectButton
@@ -170,7 +172,7 @@ export function AiPronunciationHintModal({
                         <Pylymark source={suggestion.hint} />
                       </Text>
                       {suggestion.explanation == null ? null : (
-                        <Text className="text-[13px] text-fg-dim">
+                        <Text className="font-sans text-[13px] text-fg-dim">
                           {suggestion.explanation}
                         </Text>
                       )}
@@ -189,8 +191,10 @@ export function AiPronunciationHintModal({
 function HintContextRow({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-start gap-2">
-      <Text className="w-[90px] text-[13px] text-fg-dim">{label}</Text>
-      <Text className="flex-1 text-[13px] text-fg">{value}</Text>
+      <Text className="w-[90px] font-sans text-[13px] text-fg-dim">
+        {label}
+      </Text>
+      <Text className="flex-1 font-sans text-[13px] text-fg">{value}</Text>
     </View>
   );
 }

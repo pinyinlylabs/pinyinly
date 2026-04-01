@@ -55,8 +55,10 @@ export function PinyinFinalToneEditor({
   return (
     <View className="space-y-8">
       <View>
-        <Text className="text-lg font-semibold text-fg">Tone Details</Text>
-        <Text className="mt-1 text-sm text-fg-dim">
+        <Text className="font-sans text-lg font-semibold text-fg">
+          Tone Details
+        </Text>
+        <Text className="mt-1 font-sans text-sm text-fg-dim">
           Add descriptions and images for each tone position within this final.
         </Text>
       </View>
@@ -132,7 +134,7 @@ function ToneTileEditor({
       }}
     >
       <View className="mb-4 flex-row flex-wrap items-baseline gap-2">
-        <Text className="text-base font-medium text-fg">
+        <Text className="font-sans text-base font-medium text-fg">
           Tone {tone}
           {frequency > 0 && (
             <Text className="text-sm text-fg-dim"> ({frequency})</Text>

@@ -88,7 +88,9 @@ export function MenuDictionarySearch() {
           >
             {displayResults.length === 0 ? (
               <View className="px-3 py-2">
-                <Text className="text-sm text-fg-dim">No matches</Text>
+                <Text className="font-sans text-sm text-fg-dim">
+                  No matches
+                </Text>
               </View>
             ) : (
               displayResults.map((result) => (
@@ -107,7 +109,7 @@ export function MenuDictionarySearch() {
                     hover:bg-fg/5
                   `}
                 >
-                  <Text className="text-lg font-semibold text-fg-loud">
+                  <Text className="font-sans text-lg font-semibold text-fg-loud">
                     {result.hanzi}
                   </Text>
                   <View className="flex-1">
@@ -115,7 +117,11 @@ export function MenuDictionarySearch() {
                       <HanziWordSearchMeta hanziWord={result.hanziWord} />
                     ) : (
                       (result.kind satisfies `wikiDirect`,
-                      (<Text className="text-sm text-fg">Open wiki page</Text>))
+                      (
+                        <Text className="font-sans text-sm text-fg">
+                          Open wiki page
+                        </Text>
+                      ))
                     )}
                   </View>
                 </Pressable>
@@ -143,10 +149,14 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
   return (
     <>
       {dictionaryEntry?.gloss[0] == null ? null : (
-        <Text className="text-sm text-fg">{dictionaryEntry.gloss[0]}</Text>
+        <Text className="font-sans text-sm text-fg">
+          {dictionaryEntry.gloss[0]}
+        </Text>
       )}
       {dictionaryEntry?.pinyin?.[0] == null ? null : (
-        <Text className="text-xs text-fg-dim">{dictionaryEntry.pinyin[0]}</Text>
+        <Text className="font-sans text-xs text-fg-dim">
+          {dictionaryEntry.pinyin[0]}
+        </Text>
       )}
     </>
   );

@@ -12,7 +12,7 @@ export default () => {
           </View>
         }
       >
-        <Text className="text-fg">Menu trigger</Text>
+        <Text className="font-sans text-fg">Menu trigger</Text>
       </FloatingMenuModal>
     </View>
   );

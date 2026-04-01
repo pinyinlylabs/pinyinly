@@ -27,7 +27,7 @@ export const HanziText = ({
 };
 
 const hanziText = tv({
-  base: `text-2xl/none text-fg`,
+  base: `font-sans text-2xl/none text-fg`,
 
   variants: {
     small: {
@@ -50,7 +50,7 @@ export const PinyinText = ({
 };
 
 const pinyinText = tv({
-  base: `text-base/none text-fg-dim`,
+  base: `font-sans text-base/none text-fg-dim`,
   variants: {
     small: {
       true: `text-xs/none`,
