@@ -119,7 +119,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
         <View>
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
-            <Text className="text-xl font-bold text-fg-loud">
+            <Text className="font-sans text-xl font-bold text-fg-loud">
               {flag?.kind === QuestionFlagKind.OtherAnswer
                 ? `What is the other pronunciation?`
                 : `What sound does this make?`}
@@ -130,7 +130,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           {hanziCharacters.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
-                <Text className="text-[80px] font-medium text-fg-loud">
+                <Text className="font-sans text-[80px] font-medium text-fg-loud">
                   {hanzi}
                 </Text>
               </View>

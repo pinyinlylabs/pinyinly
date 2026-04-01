@@ -64,7 +64,7 @@ export function QuickSearchModal({
     <PageSheetModal
       onDismiss={onDismiss}
       devUiSnapshotMode={devUiSnapshotMode}
-      suspenseFallback={<Text className="text-fg-dim">Loading…</Text>}
+      suspenseFallback={<Text className="font-sans text-fg-dim">Loading…</Text>}
     >
       {({ dismiss }) => <ModalContent onDismiss={dismiss} />}
     </PageSheetModal>
@@ -118,7 +118,7 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
             onDismiss();
           }}
         >
-          <Text className="text-[8px] text-fg">ESC</Text>
+          <Text className="font-sans text-[8px] text-fg">ESC</Text>
         </Pressable>
       </View>
 
@@ -191,10 +191,10 @@ function SearchResultItem({
         >
           <View className="gap-0.5">
             <View className="flex-1 flex-row items-center gap-2">
-              <Text className="text-lg font-normal text-fg-loud">
+              <Text className="font-sans text-lg font-normal text-fg-loud">
                 {result.hanzi}
               </Text>
-              <Text className="text-sm text-fg">Open wiki page</Text>
+              <Text className="font-sans text-sm text-fg">Open wiki page</Text>
             </View>
           </View>
         </ResultItem>
@@ -227,13 +227,15 @@ function HanziWordResultContent({ hanziWord }: { hanziWord: HanziWord }) {
   return (
     <View className="gap-0.5">
       <View className="flex-1 flex-row items-center gap-2">
-        <Text className="text-lg font-normal text-fg-loud">{hanzi}</Text>
+        <Text className="font-sans text-lg font-normal text-fg-loud">
+          {hanzi}
+        </Text>
         {gloss == null ? null : (
-          <Text className="text-sm text-fg">{gloss}</Text>
+          <Text className="font-sans text-sm text-fg">{gloss}</Text>
         )}
       </View>
       {pinyin == null ? null : (
-        <Text className="text-xs text-fg-dim">{pinyin}</Text>
+        <Text className="font-sans text-xs text-fg-dim">{pinyin}</Text>
       )}
     </View>
   );
@@ -261,7 +263,7 @@ function RecentQueries({
 
   return (
     <View className="">
-      <Text className="px-5 pb-4 pt-6 text-base font-semibold uppercase text-fg">
+      <Text className="px-5 pb-4 pt-6 font-sans text-base font-semibold uppercase text-fg">
         Recent
       </Text>
       {items.map((item) => {
@@ -312,10 +314,10 @@ function RecentQueries({
               >
                 <View className="gap-0.5">
                   <View className="flex-1 flex-row items-center gap-2">
-                    <Text className="text-lg font-normal text-fg-loud">
+                    <Text className="font-sans text-lg font-normal text-fg-loud">
                       {soundId}
                     </Text>
-                    <Text className="text-sm text-fg">Sound</Text>
+                    <Text className="font-sans text-sm text-fg">Sound</Text>
                   </View>
                 </View>
               </ResultItem>
@@ -338,10 +340,10 @@ function RecentQueries({
               >
                 <View className="gap-0.5">
                   <View className="flex-1 flex-row items-center gap-2">
-                    <Text className="text-lg font-normal text-fg-loud">
+                    <Text className="font-sans text-lg font-normal text-fg-loud">
                       {skillId}
                     </Text>
-                    <Text className="text-sm text-fg">Skill</Text>
+                    <Text className="font-sans text-sm text-fg">Skill</Text>
                   </View>
                 </View>
               </ResultItem>
@@ -364,10 +366,10 @@ function RecentQueries({
               >
                 <View className="gap-0.5">
                   <View className="flex-1 flex-row items-center gap-2">
-                    <Text className="text-lg font-normal text-fg-loud">
+                    <Text className="font-sans text-lg font-normal text-fg-loud">
                       {assetId}
                     </Text>
-                    <Text className="text-sm text-fg">Asset</Text>
+                    <Text className="font-sans text-sm text-fg">Asset</Text>
                   </View>
                 </View>
               </ResultItem>

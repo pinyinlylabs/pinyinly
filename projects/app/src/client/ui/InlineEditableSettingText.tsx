@@ -545,8 +545,8 @@ function InlineEditableSettingHistoryMenu({
               hover:bg-fg-bg10
             `}
           >
-            <Text className="text-[14px] text-fg">{entry.value}</Text>
-            <Text className="text-[12px] text-fg-dim">
+            <Text className="font-sans text-[14px] text-fg">{entry.value}</Text>
+            <Text className="font-sans text-[12px] text-fg-dim">
               {formatRelativeTime(entry.createdAt)}
             </Text>
           </View>

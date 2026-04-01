@@ -42,5 +42,5 @@ export const Countdown = ({ date }: { date: Date }) => {
     };
   }, [date, updateValue]);
 
-  return <Text className={`font-bold text-fg`}>⏱️ {value}</Text>;
+  return <Text className={`font-sans font-bold text-fg`}>⏱️ {value}</Text>;
 };

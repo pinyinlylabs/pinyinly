@@ -43,24 +43,30 @@ export function QuizDeckResultToast({
             {rating === Rating.Easy ? (
               <View className="flex-row items-center gap-[8px]">
                 <Icon size={32} icon="check-circled-filled" />
-                <Text className="text-2xl font-bold text-fg">Perfect!</Text>
+                <Text className="font-sans text-2xl font-bold text-fg">
+                  Perfect!
+                </Text>
               </View>
             ) : rating === Rating.Good ? (
               <View className="flex-row items-center gap-[8px]">
                 <Icon size={32} icon="check-circled-filled" />
-                <Text className="text-2xl font-bold text-fg">Nice!</Text>
+                <Text className="font-sans text-2xl font-bold text-fg">
+                  Nice!
+                </Text>
               </View>
             ) : rating === Rating.Hard ? (
               <>
                 <View className="flex-row items-center gap-[8px]">
                   <Icon size={32} icon="meh-circled" />
                   <FloatingMenuModal menu={<UndoAnswerMenu onUndo={onUndo} />}>
-                    <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">
+                    <Text
+                      className={`pyly-ref pyly-ref-2xl font-sans text-2xl font-bold text-fg`}
+                    >
                       Too slow
                     </Text>
                   </FloatingMenuModal>
                 </View>
-                <Text className="text-lg/none text-fg">
+                <Text className="font-sans text-lg/none text-fg">
                   Keep practicing and you’ll get faster!
                 </Text>
               </>
@@ -73,16 +79,16 @@ export function QuizDeckResultToast({
                     <FloatingMenuModal
                       menu={<UndoAnswerMenu onUndo={onUndo} />}
                     >
-                      <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">
+                      <Text className="pyly-ref pyly-ref-2xl font-sans text-2xl font-bold text-fg">
                         Incorrect
                       </Text>
                     </FloatingMenuModal>
                   </View>
-                  <Text className="text-xl/none font-medium text-fg">
+                  <Text className="font-sans text-xl/none font-medium text-fg">
                     Correct answer:
                   </Text>
 
-                  <Text className="text-fg">
+                  <Text className="font-sans text-fg">
                     <SkillAnswerText skill={skill} />
                   </Text>
                 </>

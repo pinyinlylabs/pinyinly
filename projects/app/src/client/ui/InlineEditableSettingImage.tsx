@@ -570,7 +570,7 @@ function InlineImageRepositionEditor({
         style={containerStyle}
       >
         <ActivityIndicator size="small" className="text-fg" />
-        <Text className="mt-2 text-[12px] text-fg-dim">
+        <Text className="mt-2 font-sans text-[12px] text-fg-dim">
           {imageMeta.status === `error`
             ? `Failed to load image`
             : `Loading image`}
@@ -721,7 +721,9 @@ function InlineImageRepositionFrame({
       />
       <View className="pointer-events-none absolute inset-0 items-center justify-center">
         <View className="rounded-md bg-bg/70 px-3 py-1">
-          <Text className="text-[12px] text-fg">Drag image to reposition</Text>
+          <Text className="font-sans text-[12px] text-fg">
+            Drag image to reposition
+          </Text>
         </View>
       </View>
       <View className="absolute inset-x-3 bottom-3 flex-row items-center justify-between">

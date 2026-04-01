@@ -33,7 +33,7 @@ export default function AccountsSettingsPage() {
       {/* Header */}
       <View>
         <Text className="pyly-body-title">Accounts</Text>
-        <Text className="text-sm text-fg-dim">
+        <Text className="font-sans text-sm text-fg-dim">
           Switch between accounts or add a new one
         </Text>
       </View>

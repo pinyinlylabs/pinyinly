@@ -78,7 +78,7 @@ export default () => {
         </RectButton>
       </View>
 
-      <Text className="text-[13px] text-fg-dim">
+      <Text className="font-sans text-[13px] text-fg-dim">
         Selected: {selectedHint === presetHint ? `preset` : `user`} | Last
         action: {lastAction}
       </Text>

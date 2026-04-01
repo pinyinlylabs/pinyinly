@@ -105,7 +105,7 @@ export function AssetImage({
         `}
         style={style as ViewStyle}
       >
-        <Text className="text-xs text-red">
+        <Text className="font-sans text-xs text-red">
           {asset.errorMessage ?? `Failed to load`}
         </Text>
       </View>

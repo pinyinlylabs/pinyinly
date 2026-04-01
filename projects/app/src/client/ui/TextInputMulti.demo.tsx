@@ -19,7 +19,7 @@ export default () => {
           numberOfLines={3}
           style={{ minHeight: 80 }}
         />
-        <Text className="text-[12px] text-fg-dim">
+        <Text className="font-sans text-[12px] text-fg-dim">
           Characters: {text.length}
         </Text>
       </ExampleStack>
@@ -32,7 +32,7 @@ export default () => {
           numberOfLines={6}
           style={{ minHeight: 160 }}
         />
-        <Text className="text-[12px] text-fg-dim">
+        <Text className="font-sans text-[12px] text-fg-dim">
           Characters: {text2.length}
         </Text>
       </ExampleStack>

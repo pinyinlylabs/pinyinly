@@ -28,7 +28,7 @@ export default function ProfileSettingsPage() {
   if (auth.data == null) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="text-fg">Loading...</Text>
+        <Text className="font-sans text-fg">Loading...</Text>
       </View>
     );
   }
@@ -42,7 +42,9 @@ export default function ProfileSettingsPage() {
 
       {/* Current Account */}
       <View className="gap-3">
-        <Text className="text-sm font-semibold text-fg">Current Account</Text>
+        <Text className="font-sans text-sm font-semibold text-fg">
+          Current Account
+        </Text>
         <SessionInfoCard
           session={auth.data.activeDeviceSession}
           isActive={true}
@@ -53,7 +55,7 @@ export default function ProfileSettingsPage() {
       {/* Account Name Editor */}
       {isAuthenticated && (
         <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
-          <Text className="text-sm text-fg-dim">Account Name</Text>
+          <Text className="font-sans text-sm text-fg-dim">Account Name</Text>
           <InlineEditableSettingText
             variant="body"
             setting={userNameSetting}
@@ -61,7 +63,7 @@ export default function ProfileSettingsPage() {
             placeholder="Enter account name"
             displayClassName="text-base"
           />
-          <Text className="text-xs text-fg-dim/60">
+          <Text className="font-sans text-xs text-fg-dim/60">
             Updated automatically across your devices
           </Text>
         </View>
@@ -69,14 +71,16 @@ export default function ProfileSettingsPage() {
 
       {/* Account Management */}
       <View className="gap-3 rounded-lg border bg-bg-high p-4">
-        <Text className="text-sm text-fg-dim">Account Management</Text>
+        <Text className="font-sans text-sm text-fg-dim">
+          Account Management
+        </Text>
 
         {isAuthenticated ? (
           <>
-            <Text className="text-base font-semibold text-fg">
+            <Text className="font-sans text-base font-semibold text-fg">
               You&apos;re signed in
             </Text>
-            <Text className="text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-fg-dim">
               Your progress is synced across your devices.
             </Text>
             <View className="gap-2">
@@ -88,10 +92,10 @@ export default function ProfileSettingsPage() {
           </>
         ) : (
           <>
-            <Text className="text-base font-semibold text-fg">
+            <Text className="font-sans text-base font-semibold text-fg">
               Not signed in
             </Text>
-            <Text className="text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-fg-dim">
               Create an account to save your progress and sync across devices.
             </Text>
             <View className="gap-2">

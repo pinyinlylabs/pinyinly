@@ -58,7 +58,7 @@ export function AllHintsModal({
             <RectButton variant="bare" onPress={dismiss}>
               Cancel
             </RectButton>
-            <Text className="text-[17px] font-semibold text-fg-loud">
+            <Text className="font-sans text-[17px] font-semibold text-fg-loud">
               Hint gallery
             </Text>
             <RectButton
@@ -81,12 +81,12 @@ export function AllHintsModal({
           {/* Scrollable content */}
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
             <View className="gap-2">
-              <Text className="text-[13px] font-medium text-fg-dim">
+              <Text className="font-sans text-[13px] font-medium text-fg-dim">
                 Preview
               </Text>
               {previewHint == null ? (
                 <View className="rounded-lg border-2 border-dashed border-fg/20 p-4">
-                  <Text className="text-[14px] text-fg-dim">
+                  <Text className="font-sans text-[14px] text-fg-dim">
                     Select a system hint to preview it here.
                   </Text>
                 </View>
@@ -102,14 +102,14 @@ export function AllHintsModal({
                 />
               )}
               {currentHint != null && initialPresetHint == null ? (
-                <Text className="text-[12px] text-fg-dim">
+                <Text className="font-sans text-[12px] text-fg-dim">
                   You are currently using a custom hint.
                 </Text>
               ) : null}
             </View>
 
             <View className="gap-2">
-              <Text className="text-[13px] font-medium text-fg-dim">
+              <Text className="font-sans text-[13px] font-medium text-fg-dim">
                 System hints
               </Text>
               {presetHints.map((h, index) => {

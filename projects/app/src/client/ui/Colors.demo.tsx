@@ -72,7 +72,7 @@ export default () => {
           `}
         >
           <View>
-            <Text className="invisible text-xs">Colors</Text>
+            <Text className="invisible font-sans text-xs">Colors</Text>
           </View>
           {bgColors.map((bgColor) => (
             <View key={bgColor} className={`h-9 justify-center`}>

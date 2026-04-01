@@ -71,7 +71,7 @@ function AddCustomHintModalContent({
         <RectButton variant="bare" onPress={onDismiss}>
           Cancel
         </RectButton>
-        <Text className="text-[17px] font-semibold text-fg-loud">
+        <Text className="font-sans text-[17px] font-semibold text-fg-loud">
           {isEditing ? `Edit hint` : `Create hint`}
         </Text>
         <RectButton
@@ -96,7 +96,9 @@ function AddCustomHintModalContent({
       <ScrollView className="flex-1">
         <View className="gap-4 p-4">
           <View className="gap-2">
-            <Text className="text-[14px] font-medium text-fg">Your hint</Text>
+            <Text className="font-sans text-[14px] font-medium text-fg">
+              Your hint
+            </Text>
             <TextInputMulti
               placeholder="Enter a hint that helps you remember..."
               value={hint}
@@ -149,7 +151,7 @@ function AddCustomHintModalContent({
           {showExplanation && canShowExplanation ? (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <Text className="text-[14px] font-medium text-fg">
+                <Text className="font-sans text-[14px] font-medium text-fg">
                   Explanation (optional)
                 </Text>
                 <Pressable
@@ -176,7 +178,7 @@ function AddCustomHintModalContent({
               }}
               className="flex-row items-center gap-1.5"
             >
-              <Text className="text-[14px] text-cyan">
+              <Text className="font-sans text-[14px] text-cyan">
                 Add explanation (optional)
               </Text>
             </Pressable>
