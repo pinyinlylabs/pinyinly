@@ -148,7 +148,7 @@ export default () => (
             </View>
           </Tabs.Content>
           <Tabs.Content value="help" className="mt-3">
-            <View className="rounded-lg border border-fg/10 bg-fg/5 p-4 font-sans">
+            <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
               <Text className="font-sans text-base font-bold text-fg">
                 Help
               </Text>
