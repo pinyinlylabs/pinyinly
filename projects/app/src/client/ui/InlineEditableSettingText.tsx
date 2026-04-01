@@ -18,11 +18,7 @@ import { RectButton } from "./RectButton";
 import { TextInputMulti } from "./TextInputMulti";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
-export type InlineEditableSettingTextVariant =
-  | `body`
-  | `hint`
-  | `hintExplanation`
-  | `title`;
+export type InlineEditableSettingTextVariant = `body` | `title`;
 
 interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   variant?: InlineEditableSettingTextVariant;
@@ -438,16 +434,6 @@ const displayContainer = tv({
 
         group-hover:bg-fg-bg10
       `,
-      hint: `
-        -mx-2 rounded-md px-2 py-1
-
-        group-hover:bg-fg-bg10
-      `,
-      hintExplanation: `
-        -mx-2 rounded-md px-2 py-1
-
-        group-hover:bg-fg-bg10
-      `,
       title: `
         -mx-1 rounded-md px-1 py-0.5
 
@@ -461,8 +447,6 @@ const editContainer = tv({
   variants: {
     variant: {
       body: `-mx-2 px-2 py-1`,
-      hint: `-mx-2 px-2 py-1`,
-      hintExplanation: `-mx-2 px-2 py-1`,
       title: `-mx-1 px-1 py-0.5`,
     },
   },
@@ -473,8 +457,6 @@ const displayTextStyle = tv({
   variants: {
     variant: {
       body: `pyly-body text-[14px] text-fg`,
-      hint: `pyly-body text-[14px] font-semibold text-fg-loud`,
-      hintExplanation: `pyly-body text-[14px] text-fg`,
       title: `text-3xl font-bold text-fg`,
     },
   },
@@ -485,8 +467,6 @@ const emptyTextStyle = tv({
   variants: {
     variant: {
       body: `pyly-body text-[14px] text-fg-dim`,
-      hint: `pyly-body text-[14px] font-semibold text-fg-dim`,
-      hintExplanation: `pyly-body text-[14px] text-fg-dim`,
       title: `select-none text-3xl text-fg/20`,
     },
   },
@@ -497,8 +477,6 @@ const inputText = tv({
   variants: {
     variant: {
       body: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
-      hint: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] font-semibold text-fg-loud`,
-      hintExplanation: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
       title: `rounded-md bg-bg-high px-1 py-0.5 text-3xl font-bold text-fg`,
     },
   },

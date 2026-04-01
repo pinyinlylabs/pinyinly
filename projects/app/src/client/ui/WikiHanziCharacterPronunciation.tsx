@@ -346,7 +346,6 @@ export function WikiHanziCharacterPronunciationBox({
 
               <InlineEditableSettingText
                 readonly={!isEditMode}
-                variant="hint"
                 setting={hanziPronunciationHintTextSetting}
                 settingKey={hintSettingKey}
                 placeholder="Add a hint on the first line. Add details after a blank line."
@@ -457,9 +456,11 @@ function MergedHintDisplay({ value }: { value: string }) {
 
   return (
     <>
-      <Pylymark source={parsed.hint} />
+      <Text className="font-semibold">
+        <Pylymark source={parsed.hint} />
+      </Text>
       {parsed.description == null ? null : (
-        <Text className="text-fg-dim">
+        <Text className="font-normal text-fg-dim">
           {` `}
           <Pylymark source={parsed.description} />
         </Text>

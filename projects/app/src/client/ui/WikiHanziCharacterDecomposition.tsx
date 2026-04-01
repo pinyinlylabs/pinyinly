@@ -320,7 +320,6 @@ function MeaningItem({
       {isEditMode || hasHint ? (
         <View className={isEditMode ? `gap-2 pl-7` : `gap-1 pl-7`}>
           <InlineEditableSettingText
-            variant="hint"
             setting={hanziWordMeaningHintTextSetting}
             settingKey={{ hanziWord }}
             readonly={!isEditMode}
@@ -354,9 +353,11 @@ function MergedHintDisplay({ value }: { value: string }) {
 
   return (
     <>
-      <Pylymark source={parsed.hint} />
+      <Text className="font-semibold">
+        <Pylymark source={parsed.hint} />
+      </Text>
       {parsed.description == null ? null : (
-        <Text className="text-fg-dim">
+        <Text className="font-normal text-fg-dim">
           {` `}
           <Pylymark source={parsed.description} />
         </Text>
