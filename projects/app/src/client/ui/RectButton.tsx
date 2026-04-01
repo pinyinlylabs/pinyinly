@@ -16,6 +16,7 @@ export type ButtonVariant =
   | `option`
   | `bare`
   | `bare2`
+  | `bareDim`
   | `rounded`;
 
 export type RectButtonProps = {
@@ -51,12 +52,9 @@ export function RectButton({
 
   const flat = pressed || disabled;
   const textClassName = extractTextClasses(className);
+  const fullTextClass = textClass({ variant, class: textClassName });
   const content =
-    children == null ? null : (
-      <Text className={textClass({ variant, class: textClassName })}>
-        {children}
-      </Text>
-    );
+    children == null ? null : <Text className={fullTextClass}>{children}</Text>;
 
   const pressable = (
     <Pressable
@@ -103,13 +101,13 @@ export function RectButton({
             {iconStart == null ? null : (
               <Icon
                 icon={iconStart}
-                className={textClassName}
+                className={fullTextClass}
                 size={iconSize}
               />
             )}
             {content}
             {iconEnd == null ? null : (
-              <Icon icon={iconEnd} className={textClassName} size={iconSize} />
+              <Icon icon={iconEnd} className={fullTextClass} size={iconSize} />
             )}
           </View>
         )}
@@ -148,6 +146,7 @@ const pressableClass = tv({
       `,
       bare: `transition-transform`,
       bare2: `transition-transform`,
+      bareDim: `transition-transform`,
       rounded: `rounded-full transition-transform`,
     },
     inFlexRowParent: {
@@ -195,6 +194,11 @@ const pressableClass = tv({
       disabled: false,
       class: `active:scale-[98%]`,
     },
+    {
+      variant: `bareDim`,
+      disabled: false,
+      class: `active:scale-[98%]`,
+    },
   ],
 });
 
@@ -211,6 +215,7 @@ const roundedRectClass = tv({
       option: `rounded-xl border border-fg/20 px-3 py-2`,
       bare: `px-2 py-1`,
       bare2: `rounded px-2 py-1`,
+      bareDim: `rounded px-2 py-1`,
       rounded: `rounded-full border border-fg/20 px-4 py-2`,
     },
     hoveredOrPressed: {
@@ -285,12 +290,19 @@ const roundedRectClass = tv({
       hoveredOrPressed: true,
       class: `bg-fg/10`,
     },
+    // BareDim
+    {
+      variant: `bareDim`,
+      hoveredOrPressed: true,
+      class: `bg-fg/10`,
+    },
     // Icon-only: reduce horizontal padding to match vertical for a square appearance
     { variant: `filled`, iconOnly: true, class: `px-2` },
     { variant: `outline`, iconOnly: true, class: `px-2` },
     { variant: `option`, iconOnly: true, class: `px-2` },
     { variant: `bare`, iconOnly: true, class: `px-1` },
     { variant: `bare2`, iconOnly: true, class: `px-1` },
+    { variant: `bareDim`, iconOnly: true, class: `px-1` },
     { variant: `rounded`, iconOnly: true, class: `px-2` },
   ],
 });
@@ -303,6 +315,7 @@ const textClass = tv({
       option: `font-sans text-base/snug font-medium text-fg`,
       bare: `font-sans text-sm/normal font-bold uppercase text-fg`,
       bare2: `font-sans text-sm/normal font-bold uppercase text-fg`,
+      bareDim: `font-sans text-sm/normal font-semibold uppercase text-fg-dim`,
       rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
     },
   },
@@ -348,6 +361,7 @@ const iconLayoutClass = tv({
     variant: {
       bare: `gap-2`,
       bare2: `gap-2`,
+      bareDim: `gap-2`,
       filled: ``,
       outline: ``,
       option: ``,

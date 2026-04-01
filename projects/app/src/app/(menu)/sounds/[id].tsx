@@ -1,6 +1,7 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { CompactWordRows } from "@/client/ui/CompactWordRows";
+import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -298,19 +299,20 @@ function SiblingSoundMenu({
   currentSoundId: PinyinSoundId;
 } & FloatingMenuModalMenuProps) {
   return (
-    <View className="max-h-60 items-start overflow-y-scroll rounded-xl bg-bg-high p-3">
+    <DropdownMenu.Content
+      className="max-h-60 items-start overflow-y-scroll"
+      onRequestClose={onRequestClose}
+    >
       {sounds.map((soundId) => (
-        <RectButton
+        <DropdownMenu.Item
           key={soundId}
           href={`/sounds/${soundId}`}
-          variant="bare2"
-          onPress={onRequestClose}
           iconEnd={soundId === currentSoundId ? `check` : undefined}
           iconSize={16}
         >
           <PinyinSoundNameText pinyinSoundId={soundId} />
-        </RectButton>
+        </DropdownMenu.Item>
       ))}
-    </View>
+    </DropdownMenu.Content>
   );
 }
