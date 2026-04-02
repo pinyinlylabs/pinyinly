@@ -35,144 +35,142 @@ const mockable = {
  * The queue is automatically invalidated when the underlying Replicache data
  * changes, ensuring it stays up-to-date with user progress.
  */
-export const SkillQueueProvider = Object.assign(
-  function SkillQueueProvider({ children }: PropsWithChildren) {
-    "use memo"; // Object.assign(…) wrapped components aren't inferred.
-    const db = useDb();
+function SkillQueueProvider({ children }: PropsWithChildren) {
+  "use memo";
+  const db = useDb();
 
-    const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
-      useQuery(targetSkillsQuery());
-    const { data: isStructuralHanzi, isLoading: isStructuralHanziLoading } =
-      useQuery(isStructuralHanziQuery);
-    const { data: dictionary, isLoading: isDictionaryLoading } =
-      useQuery(dictionaryQuery);
-    const {
-      data: latestSkillRatingsData,
-      isLoading: isLatestSkillRatingsLoading,
-    } = useLiveQuery(
-      (q) => q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
-      [db.latestSkillRatingsCollection],
+  const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
+    useQuery(targetSkillsQuery());
+  const { data: isStructuralHanzi, isLoading: isStructuralHanziLoading } =
+    useQuery(isStructuralHanziQuery);
+  const { data: dictionary, isLoading: isDictionaryLoading } =
+    useQuery(dictionaryQuery);
+  const {
+    data: latestSkillRatingsData,
+    isLoading: isLatestSkillRatingsLoading,
+  } = useLiveQuery(
+    (q) => q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
+    [db.latestSkillRatingsCollection],
+  );
+  const { data: skillStateData, isLoading: isSkillStatesLoading } =
+    useLiveQuery(
+      (q) => q.from({ skillState: db.skillStateCollection }),
+      [db.skillStateCollection],
     );
-    const { data: skillStateData, isLoading: isSkillStatesLoading } =
-      useLiveQuery(
-        (q) => q.from({ skillState: db.skillStateCollection }),
-        [db.skillStateCollection],
-      );
-    const { data: prioritySettingsData, isLoading: isPrioritySettingsLoading } =
-      useLiveQuery(
-        (q) => q.from({ setting: db.settingCollection }),
-        [db.settingCollection],
-      );
-
-    const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
-      loading: true,
-    });
-
-    const skillSrsStates = useMemo(
-      () =>
-        new Map<Skill, SrsStateType>(
-          skillStateData.map((x) => [x.skill, x.srs]),
-        ),
-      [skillStateData],
+  const { data: prioritySettingsData, isLoading: isPrioritySettingsLoading } =
+    useLiveQuery(
+      (q) => q.from({ setting: db.settingCollection }),
+      [db.settingCollection],
     );
 
-    const latestSkillRatings = useMemo(
-      () =>
-        new Map<Skill, LatestSkillRating>(
-          latestSkillRatingsData.map((x) => [x.skill, x]),
-        ),
-      [latestSkillRatingsData],
-    );
+  const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
+    loading: true,
+  });
 
-    // Compute priority skills from settings
-    const prioritySkills = useMemo(() => {
-      if (dictionary == null) {
-        return [];
-      }
-      const prioritizedWords = getPrioritizedHanziWords(
-        prioritySettingsData,
-        dictionary,
-      );
-      return prioritizedWords.flatMap((w) => [
-        hanziWordToGlossTyped(w),
-        hanziWordToPinyinTyped(w),
-      ]);
-    }, [prioritySettingsData, dictionary]);
+  const skillSrsStates = useMemo(
+    () =>
+      new Map<Skill, SrsStateType>(skillStateData.map((x) => [x.skill, x.srs])),
+    [skillStateData],
+  );
 
-    // Combine base target skills with priority skills
-    const allTargetSkills = useMemo(() => {
-      if (baseTargetSkills == null) {
-        return [];
-      }
-      return [...baseTargetSkills, ...prioritySkills].filter(
-        arrayFilterUnique(),
-      );
-    }, [baseTargetSkills, prioritySkills]);
+  const latestSkillRatings = useMemo(
+    () =>
+      new Map<Skill, LatestSkillRating>(
+        latestSkillRatingsData.map((x) => [x.skill, x]),
+      ),
+    [latestSkillRatingsData],
+  );
 
-    useEffect(() => {
-      if (
-        isLatestSkillRatingsLoading ||
-        isSkillStatesLoading ||
-        isTargetSkillsLoading ||
-        isPrioritySettingsLoading ||
-        isStructuralHanziLoading ||
-        isDictionaryLoading
-      ) {
-        return;
-      }
-
-      if (
-        allTargetSkills.length === 0 ||
-        isStructuralHanzi == null ||
-        dictionary == null
-      ) {
-        return;
-      }
-
-      // Build graph with combined target skills and priority words
-      void (async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: allTargetSkills,
-        });
-
-        // Recompute the review queue when inputs are ready
-        const reviewQueue = skillReviewQueue({
-          graph,
-          skillSrsStates,
-          latestSkillRatings,
-          now: new Date(),
-          isStructuralHanzi,
-          dictionary,
-          maxQueueItems: mockable.getMaxQueueItems(),
-        });
-
-        // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-        setSkillQueue((prev) => ({
-          loading: false,
-          reviewQueue,
-          version: prev.loading ? 0 : prev.version + 1,
-        }));
-      })();
-    }, [
-      isLatestSkillRatingsLoading,
-      isSkillStatesLoading,
-      isTargetSkillsLoading,
-      isPrioritySettingsLoading,
-      isStructuralHanziLoading,
-      isDictionaryLoading,
-      allTargetSkills,
-      isStructuralHanzi,
+  // Compute priority skills from settings
+  const prioritySkills = useMemo(() => {
+    if (dictionary == null) {
+      return [];
+    }
+    const prioritizedWords = getPrioritizedHanziWords(
+      prioritySettingsData,
       dictionary,
-      skillSrsStates,
-      latestSkillRatings,
-      latestSkillRatingsData,
-    ]);
-
-    return (
-      <SkillQueueContext.Provider value={skillQueue}>
-        {children}
-      </SkillQueueContext.Provider>
     );
-  },
-  { Context: SkillQueueContext, mockable },
-);
+    return prioritizedWords.flatMap((w) => [
+      hanziWordToGlossTyped(w),
+      hanziWordToPinyinTyped(w),
+    ]);
+  }, [prioritySettingsData, dictionary]);
+
+  // Combine base target skills with priority skills
+  const allTargetSkills = useMemo(() => {
+    if (baseTargetSkills == null) {
+      return [];
+    }
+    return [...baseTargetSkills, ...prioritySkills].filter(arrayFilterUnique());
+  }, [baseTargetSkills, prioritySkills]);
+
+  useEffect(() => {
+    if (
+      isLatestSkillRatingsLoading ||
+      isSkillStatesLoading ||
+      isTargetSkillsLoading ||
+      isPrioritySettingsLoading ||
+      isStructuralHanziLoading ||
+      isDictionaryLoading
+    ) {
+      return;
+    }
+
+    if (
+      allTargetSkills.length === 0 ||
+      isStructuralHanzi == null ||
+      dictionary == null
+    ) {
+      return;
+    }
+
+    // Build graph with combined target skills and priority words
+    void (async () => {
+      const graph = await skillLearningGraph({
+        targetSkills: allTargetSkills,
+      });
+
+      // Recompute the review queue when inputs are ready
+      const reviewQueue = skillReviewQueue({
+        graph,
+        skillSrsStates,
+        latestSkillRatings,
+        now: new Date(),
+        isStructuralHanzi,
+        dictionary,
+        maxQueueItems: mockable.getMaxQueueItems(),
+      });
+
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+      setSkillQueue((prev) => ({
+        loading: false,
+        reviewQueue,
+        version: prev.loading ? 0 : prev.version + 1,
+      }));
+    })();
+  }, [
+    isLatestSkillRatingsLoading,
+    isSkillStatesLoading,
+    isTargetSkillsLoading,
+    isPrioritySettingsLoading,
+    isStructuralHanziLoading,
+    isDictionaryLoading,
+    allTargetSkills,
+    isStructuralHanzi,
+    dictionary,
+    skillSrsStates,
+    latestSkillRatings,
+    latestSkillRatingsData,
+  ]);
+
+  return (
+    <SkillQueueContext.Provider value={skillQueue}>
+      {children}
+    </SkillQueueContext.Provider>
+  );
+}
+
+SkillQueueProvider.Context = SkillQueueContext;
+SkillQueueProvider.mockable = mockable;
+
+export { SkillQueueProvider };

@@ -6,28 +6,29 @@ import { AudioContextContext } from "./contexts";
  * An audio context provider so that the AudioContext can be cleaned up
  * gracefully on unmount (useful in dev mode).
  */
-export const AudioContextProvider = Object.assign(
-  function AudioContextProvider({ children }: PropsWithChildren) {
-    "use memo"; // Object.assign(…) wrapped components aren't inferred.
-    const [audioContext] = useState(() => new AudioContext());
+function AudioContextProvider({ children }: PropsWithChildren) {
+  "use memo";
+  const [audioContext] = useState(() => new AudioContext());
 
-    // Clean up the audio context on unmount. This is useful in development mode
-    // to avoid "AudioContext was not allowed to start" errors when the app is
-    // reloaded. In production, the audio context will be created once and
-    // reused.
-    useEffect(() => {
-      return () => {
-        audioContext.close().catch((error: unknown) => {
-          console.error(`Failed to close audio context`, error);
-        });
-      };
-    }, [audioContext]);
+  // Clean up the audio context on unmount. This is useful in development mode
+  // to avoid "AudioContext was not allowed to start" errors when the app is
+  // reloaded. In production, the audio context will be created once and
+  // reused.
+  useEffect(() => {
+    return () => {
+      audioContext.close().catch((error: unknown) => {
+        console.error(`Failed to close audio context`, error);
+      });
+    };
+  }, [audioContext]);
 
-    return (
-      <AudioContextContext.Provider value={audioContext}>
-        {children}
-      </AudioContextContext.Provider>
-    );
-  },
-  { Context: AudioContextContext },
-);
+  return (
+    <AudioContextContext.Provider value={audioContext}>
+      {children}
+    </AudioContextContext.Provider>
+  );
+}
+
+AudioContextProvider.Context = AudioContextContext;
+
+export { AudioContextProvider };

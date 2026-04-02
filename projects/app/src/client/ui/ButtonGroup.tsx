@@ -27,7 +27,7 @@ export interface ButtonGroupProps {
   defaultButtonVariant?: ButtonVariant;
 }
 
-function ButtonGroupRoot({
+function ButtonGroup({
   children,
   className,
   defaultButtonVariant = `bare2`,
@@ -54,9 +54,9 @@ function ButtonGroupButton({
   );
 }
 
-export const ButtonGroup = Object.assign(ButtonGroupRoot, {
-  Button: ButtonGroupButton,
-});
+ButtonGroup.Button = ButtonGroupButton;
+
+export { ButtonGroup };
 
 const buttonGroupClass = tv({
   base: `shrink flex-row items-center rounded bg-bg/90 p-0.5`,

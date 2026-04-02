@@ -63,7 +63,7 @@ export interface TooltipProps {
   sideOffset?: number;
 }
 
-function TooltipRoot({
+function Tooltip({
   children,
   defaultOpen = false,
   placement = `top`,
@@ -308,10 +308,10 @@ function TooltipContent({
   return Platform.OS === `web` ? <Portal>{content}</Portal> : content;
 }
 
-export const Tooltip = Object.assign(TooltipRoot, {
-  Trigger: TooltipTrigger,
-  Content: TooltipContent,
-});
+Tooltip.Trigger = TooltipTrigger;
+Tooltip.Content = TooltipContent;
+
+export { Tooltip };
 
 const tooltipContentClass = tv({
   base: `shadow-lg`,
