@@ -112,22 +112,21 @@ export interface TabsProps {
   children?: ReactNode;
 }
 
-export const Tabs = Object.assign(
-  function Tabs({ defaultValue, className, children }: TabsProps) {
-    const [value, setValue] = useState(defaultValue);
+function Tabs({ defaultValue, className, children }: TabsProps) {
+  const [value, setValue] = useState(defaultValue);
 
-    return (
-      <TabsContext.Provider value={{ value, onChange: setValue }}>
-        <View className={className}>{children}</View>
-      </TabsContext.Provider>
-    );
-  },
-  {
-    List: TabsList,
-    Trigger: TabsTrigger,
-    Content: TabsContent,
-  },
-);
+  return (
+    <TabsContext.Provider value={{ value, onChange: setValue }}>
+      <View className={className}>{children}</View>
+    </TabsContext.Provider>
+  );
+}
+
+Tabs.List = TabsList;
+Tabs.Trigger = TabsTrigger;
+Tabs.Content = TabsContent;
+
+export { Tabs };
 
 const tabsListClass = tv({
   base: `rounded-lg bg-fg/5 p-1`,

@@ -11,126 +11,127 @@ import type { HTTPRequestInfo, PullResponseV1 } from "replicache";
 import { RizzleContext } from "./contexts";
 import { kvStore } from "./replicacheOptions";
 
-export const RizzleProvider = Object.assign(
-  function RizzleProvider({
-    children,
-    dbName,
-    serverSessionId,
-  }: React.PropsWithChildren<{ dbName: string; serverSessionId?: string }>) {
-    "use memo"; // Object.assign(…) wrapped components aren't inferred.
-    // Pull out stable references to the mutate functions to avoid reinstanciating
-    // replicache each time the mutation state changes (e.g. pending -> success).
-    const { mutateAsync: pushMutate } = trpc.replicache.push.useMutation();
-    const { mutateAsync: pullMutate } = trpc.replicache.pull.useMutation();
+function RizzleProvider({
+  children,
+  dbName,
+  serverSessionId,
+}: React.PropsWithChildren<{ dbName: string; serverSessionId?: string }>) {
+  "use memo";
+  // Pull out stable references to the mutate functions to avoid reinstanciating
+  // replicache each time the mutation state changes (e.g. pending -> success).
+  const { mutateAsync: pushMutate } = trpc.replicache.push.useMutation();
+  const { mutateAsync: pullMutate } = trpc.replicache.pull.useMutation();
 
-    const isAuthenticated = serverSessionId != null;
-    const rizzle = useMemo(() => {
-      const rizzle = r.replicache(
-        {
-          name: dbName,
-          kvStore,
-          // No need for a custom logSink here, just using normal console.*
-          // functions are fine because `Sentry.captureConsoleIntegration`
-          // captures them. See
-          // https://docs.sentry.io/platforms/javascript/configuration/integrations/captureconsole/
-          logSinks: undefined,
-          pusher: isAuthenticated
-            ? async (requestBody, requestId) => {
-                invariant(requestBody.pushVersion === 1);
+  const isAuthenticated = serverSessionId != null;
+  const rizzle = useMemo(() => {
+    const rizzle = r.replicache(
+      {
+        name: dbName,
+        kvStore,
+        // No need for a custom logSink here, just using normal console.*
+        // functions are fine because `Sentry.captureConsoleIntegration`
+        // captures them. See
+        // https://docs.sentry.io/platforms/javascript/configuration/integrations/captureconsole/
+        logSinks: undefined,
+        pusher: isAuthenticated
+          ? async (requestBody, requestId) => {
+              invariant(requestBody.pushVersion === 1);
 
-                Sentry.getActiveSpan()?.setAttribute(
-                  `replicache.requestId`,
-                  requestId,
-                );
+              Sentry.getActiveSpan()?.setAttribute(
+                `replicache.requestId`,
+                requestId,
+              );
 
-                const response = pushMutate({
-                  // Map ID to Id to match this project's naming conventions.
-                  clientGroupId: requestBody.clientGroupID,
-                  mutations: requestBody.mutations.map(
-                    ({ clientID: clientId, ...rest }) => ({
-                      ...rest,
-                      clientId,
-                    }),
-                  ),
-                  profileId: requestBody.profileID,
-                  pushVersion: requestBody.pushVersion,
-                  schemaVersion: requestBody.schemaVersion,
-                });
+              const response = pushMutate({
+                // Map ID to Id to match this project's naming conventions.
+                clientGroupId: requestBody.clientGroupID,
+                mutations: requestBody.mutations.map(
+                  ({ clientID: clientId, ...rest }) => ({
+                    ...rest,
+                    clientId,
+                  }),
+                ),
+                profileId: requestBody.profileID,
+                pushVersion: requestBody.pushVersion,
+                schemaVersion: requestBody.schemaVersion,
+              });
 
-                return trpcToReplicache(response);
-              }
-            : undefined,
-          puller: isAuthenticated
-            ? async (requestBody, requestId) => {
-                invariant(requestBody.pullVersion === 1);
-                const cookie = cookieSchema.parse(requestBody.cookie);
-                invariant(typeof requestBody.cookie === `object`);
+              return trpcToReplicache(response);
+            }
+          : undefined,
+        puller: isAuthenticated
+          ? async (requestBody, requestId) => {
+              invariant(requestBody.pullVersion === 1);
+              const cookie = cookieSchema.parse(requestBody.cookie);
+              invariant(typeof requestBody.cookie === `object`);
 
-                Sentry.getActiveSpan()?.setAttribute(
-                  `replicache.requestId`,
-                  requestId,
-                );
+              Sentry.getActiveSpan()?.setAttribute(
+                `replicache.requestId`,
+                requestId,
+              );
 
-                const response = pullMutate({
-                  // Map ID to Id to match this project's naming conventions.
-                  clientGroupId: requestBody.clientGroupID,
-                  cookie,
-                  profileId: requestBody.profileID,
-                  pullVersion: requestBody.pullVersion,
-                  schemaVersion: requestBody.schemaVersion,
-                }).then((r): PullResponseV1 => {
-                  // More casing conventions mapping.
-                  if (`error` in r) {
-                    return r;
-                  }
+              const response = pullMutate({
+                // Map ID to Id to match this project's naming conventions.
+                clientGroupId: requestBody.clientGroupID,
+                cookie,
+                profileId: requestBody.profileID,
+                pullVersion: requestBody.pullVersion,
+                schemaVersion: requestBody.schemaVersion,
+              }).then((r): PullResponseV1 => {
+                // More casing conventions mapping.
+                if (`error` in r) {
+                  return r;
+                }
 
-                  if (r.partial) {
-                    setTimeout(() => {
-                      if (!rizzle.replicache.closed) {
-                        rizzle.replicache
-                          .pull({ now: true })
-                          .catch((error: unknown) => {
-                            console.error(
-                              `Error pulling after partial pull`,
-                              error,
-                            );
-                          });
-                      }
-                    }, 0);
-                  }
+                if (r.partial) {
+                  setTimeout(() => {
+                    if (!rizzle.replicache.closed) {
+                      rizzle.replicache
+                        .pull({ now: true })
+                        .catch((error: unknown) => {
+                          console.error(
+                            `Error pulling after partial pull`,
+                            error,
+                          );
+                        });
+                    }
+                  }, 0);
+                }
 
-                  return {
-                    lastMutationIDChanges: r.lastMutationIdChanges,
-                    patch: r.patch,
-                    cookie: r.cookie,
-                  };
-                });
+                return {
+                  lastMutationIDChanges: r.lastMutationIdChanges,
+                  patch: r.patch,
+                  cookie: r.cookie,
+                };
+              });
 
-                return trpcToReplicache(response);
-              }
-            : undefined,
-        },
-        currentSchema,
-        mutators,
-      );
-      return rizzle;
-    }, [dbName, isAuthenticated, pushMutate, pullMutate]);
-
-    // Reset state when
-    useEffect(() => {
-      return () => {
-        // Close the previous Replicache instance to avoid it making requests
-        // using the wrong session.
-        void rizzle.replicache.close();
-      };
-    }, [rizzle]);
-
-    return (
-      <RizzleContext.Provider value={rizzle}>{children}</RizzleContext.Provider>
+              return trpcToReplicache(response);
+            }
+          : undefined,
+      },
+      currentSchema,
+      mutators,
     );
-  },
-  { Context: RizzleContext },
-);
+    return rizzle;
+  }, [dbName, isAuthenticated, pushMutate, pullMutate]);
+
+  // Reset state when
+  useEffect(() => {
+    return () => {
+      // Close the previous Replicache instance to avoid it making requests
+      // using the wrong session.
+      void rizzle.replicache.close();
+    };
+  }, [rizzle]);
+
+  return (
+    <RizzleContext.Provider value={rizzle}>{children}</RizzleContext.Provider>
+  );
+}
+
+RizzleProvider.Context = RizzleContext;
+
+export { RizzleProvider };
 
 async function trpcToReplicache<T>(responsePromise: Promise<T>): Promise<{
   response?: T;

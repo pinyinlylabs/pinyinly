@@ -41,14 +41,13 @@ export function reactInvariant<P>(
   component: FunctionComponent<P>,
   invariantFn: (props: P) => void,
 ): typeof component {
-  return Object.assign(
-    // oxlint-disable-next-line typescript/promise-function-async
-    (props: P) => {
+  const wrapped = // oxlint-disable-next-line typescript/promise-function-async
+    ((props: P) => {
       invariantFn(props);
       return component(props);
-    },
-    { displayName: component.displayName },
-  ) as typeof component;
+    }) as typeof component;
+  wrapped.displayName = component.displayName;
+  return wrapped;
 }
 
 export function pickChildren<

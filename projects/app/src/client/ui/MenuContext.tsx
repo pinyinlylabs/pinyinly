@@ -18,7 +18,7 @@ function useMenuContextOrThrow() {
   return context;
 }
 
-function MenuContextRoot({ children }: PropsWithChildren) {
+function MenuContext({ children }: PropsWithChildren) {
   const [titleScrollTriggerStates, setTitleScrollTriggerStates] = useState<
     readonly MenuHeaderTitleScrollTriggerState[]
   >([]);
@@ -219,10 +219,10 @@ function MenuContextTitleText({
   );
 }
 
-export const MenuContext = Object.assign(MenuContextRoot, {
-  TitleText: MenuContextTitleText,
-  TitleScrollTrigger: MenuContextTitleScrollTrigger,
-});
+MenuContext.TitleText = MenuContextTitleText;
+MenuContext.TitleScrollTrigger = MenuContextTitleScrollTrigger;
+
+export { MenuContext };
 
 const titleTextClass = tv({
   base: `transition-opacity`,
