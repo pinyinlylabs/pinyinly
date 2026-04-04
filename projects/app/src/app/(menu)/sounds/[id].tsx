@@ -21,6 +21,7 @@ import {
   defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
+  isFinalSoundId,
   isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
@@ -80,11 +81,11 @@ export default function SoundIdPage() {
 
   const playSound = useSoundEffect(soundAudioSource);
 
-  const tone1AudioSource = id.startsWith(`-`) ? null : null;
-  const tone2AudioSource = id.startsWith(`-`) ? null : null;
-  const tone3AudioSource = id.startsWith(`-`) ? null : null;
-  const tone4AudioSource = id.startsWith(`-`) ? null : null;
-  const tone5AudioSource = id.startsWith(`-`) ? null : null;
+  const tone1AudioSource = isFinalSoundId(id) ? null : null;
+  const tone2AudioSource = isFinalSoundId(id) ? null : null;
+  const tone3AudioSource = isFinalSoundId(id) ? null : null;
+  const tone4AudioSource = isFinalSoundId(id) ? null : null;
+  const tone5AudioSource = isFinalSoundId(id) ? null : null;
 
   useEffect(() => {
     if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
@@ -193,7 +194,7 @@ export default function SoundIdPage() {
         </View>
 
         {/* Final-tone details editor for finals */}
-        {id.startsWith(`-`) && (
+        {isFinalSoundId(id) && (
           <PinyinFinalToneEditor
             finalSoundId={id}
             focusedTone={focusedTone}

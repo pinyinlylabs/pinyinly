@@ -7,6 +7,7 @@ import {
   defaultPinyinSoundGroupThemes,
   defaultPinyinSoundInstructions,
   getDefaultFinalToneName,
+  isFinalSoundId,
   loadHhPinyinChart,
   loadHmmPinyinChart,
   loadMmPinyinChart,
@@ -635,7 +636,7 @@ describe(`pyly pinyin chart`, async () => {
 
         if (/^[1-5]$/.test(soundId)) {
           expect(parts.tone).toEqual(Number(soundId));
-        } else if (soundId.startsWith(`-`)) {
+        } else if (isFinalSoundId(soundId)) {
           expect(parts.finalSoundId).toEqual(soundId);
         } else {
           expect(parts.initialSoundId).toEqual(soundId);
