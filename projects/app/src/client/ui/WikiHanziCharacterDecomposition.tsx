@@ -204,7 +204,6 @@ function CoverImageSection({
       presetImageIds={/* TODO */ []}
       previewHeight={200}
       tileSize={64}
-      enablePasteDropZone
       enableAiGeneration
       initialAiPrompt={
         imagePromptSetting?.value?.text ??

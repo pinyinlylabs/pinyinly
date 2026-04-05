@@ -220,7 +220,6 @@ export function WikiHanziCharacterPronunciationImagePicker({
         settingKey={hintSettingKey}
         previewHeight={200}
         tileSize={64}
-        enablePasteDropZone
         enableAiGeneration
         aiReferenceImages={aiReferenceImages}
         initialAiPrompt={

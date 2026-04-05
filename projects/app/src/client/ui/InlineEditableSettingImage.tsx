@@ -30,7 +30,6 @@ import { ButtonGroup } from "./ButtonGroup";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { FramedAssetImage } from "./ImageFrame";
-import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import type {
@@ -56,7 +55,6 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   includeHistory?: boolean;
   previewHeight?: number;
   tileSize?: number;
-  enablePasteDropZone?: boolean;
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
   aiReferenceImages?: AiReferenceImageDeclaration[];
@@ -81,7 +79,6 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   includeHistory = true,
   previewHeight = 200,
   tileSize = 64,
-  enablePasteDropZone = false,
   enableAiGeneration = false,
   initialAiPrompt = ``,
   aiReferenceImages,
@@ -396,23 +393,15 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 onSavePrompt={onSaveAiPrompt}
               />
             ) : (
-              <>
-                <InlineEditableSettingImageHistoryGrid
-                  imageIdsToShow={imageIdsToShow}
-                  imageId={imageId}
-                  hoveredHintImageId={hoveredHintImageId}
-                  imageMetaById={imageMetaById}
-                  tileSize={tileSize}
-                  onHoverImage={setHoveredHintImageId}
-                  onSelectImage={handleSelectHintImage}
-                />
-                {enablePasteDropZone ? (
-                  <ImagePasteDropZone
-                    onUploadComplete={handleUseImage}
-                    onUploadError={onUploadError}
-                  />
-                ) : null}
-              </>
+              <InlineEditableSettingImageHistoryGrid
+                imageIdsToShow={imageIdsToShow}
+                imageId={imageId}
+                hoveredHintImageId={hoveredHintImageId}
+                imageMetaById={imageMetaById}
+                tileSize={tileSize}
+                onHoverImage={setHoveredHintImageId}
+                onSelectImage={handleSelectHintImage}
+              />
             )}
           </View>
         ) : null}
