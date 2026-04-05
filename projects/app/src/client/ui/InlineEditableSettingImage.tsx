@@ -27,9 +27,9 @@ import {
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { ButtonGroup } from "./ButtonGroup";
+import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
+import { FloatingMenuModal } from "./FloatingMenuModal";
 import { FramedAssetImage } from "./ImageFrame";
-import { ImagePasteDropZone } from "./ImagePasteDropZone";
-import { Tabs } from "./Tabs";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
 import type {
@@ -55,7 +55,6 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   includeHistory?: boolean;
   previewHeight?: number;
   tileSize?: number;
-  enablePasteDropZone?: boolean;
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
   aiReferenceImages?: AiReferenceImageDeclaration[];
@@ -80,7 +79,6 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   includeHistory = true,
   previewHeight = 200,
   tileSize = 64,
-  enablePasteDropZone = false,
   enableAiGeneration = false,
   initialAiPrompt = ``,
   aiReferenceImages,
@@ -197,11 +195,11 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const shouldShowPreviewButtons = !isInlineRepositioning && !isPickerOpen;
   const shouldShowPickerDoneButton = !isInlineRepositioning && isPickerOpen;
   const shouldShowPickerPanel = isPickerOpen;
+  const canShowHistoryMenu = imageIdsToShow.length > 0;
   const { settingKey: aiPlaygroundStorageKey } = getSettingKeyInfo(
     setting,
     settingKey,
   );
-  const defaultPickerTab = enableAiGeneration ? `create` : `upload`;
   const inlineEditor =
     inlineEditorAssetId == null ? null : (
       <InlineImageRepositionEditor
@@ -244,6 +242,26 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
             {shouldShowPickerDoneButton ? (
               <View className="absolute inset-x-3 top-3 items-end">
                 <ButtonGroup>
+                  {canShowHistoryMenu ? (
+                    <FloatingMenuModal
+                      menu={
+                        <InlineEditableSettingImageHistoryMenu
+                          imageIdsToShow={imageIdsToShow}
+                          imageId={imageId}
+                          hoveredHintImageId={hoveredHintImageId}
+                          imageMetaById={imageMetaById}
+                          tileSize={tileSize}
+                          onHoverImage={setHoveredHintImageId}
+                          onSelectImage={handleSelectHintImage}
+                        />
+                      }
+                    >
+                      <ButtonGroup.Button
+                        iconStart="time-circled"
+                        iconSize={16}
+                      />
+                    </FloatingMenuModal>
+                  ) : null}
                   <ButtonGroup.Button
                     onPress={() => {
                       setIsPickerOpen(false);
@@ -296,6 +314,26 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
             {shouldShowPickerDoneButton ? (
               <View className="absolute inset-x-3 top-3 items-end">
                 <ButtonGroup>
+                  {canShowHistoryMenu ? (
+                    <FloatingMenuModal
+                      menu={
+                        <InlineEditableSettingImageHistoryMenu
+                          imageIdsToShow={imageIdsToShow}
+                          imageId={imageId}
+                          hoveredHintImageId={hoveredHintImageId}
+                          imageMetaById={imageMetaById}
+                          tileSize={tileSize}
+                          onHoverImage={setHoveredHintImageId}
+                          onSelectImage={handleSelectHintImage}
+                        />
+                      }
+                    >
+                      <ButtonGroup.Button
+                        iconStart="time-circled"
+                        iconSize={16}
+                      />
+                    </FloatingMenuModal>
+                  ) : null}
                   <ButtonGroup.Button
                     onPress={() => {
                       setIsPickerOpen(false);
@@ -344,112 +382,124 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
         {shouldShowPickerPanel ? (
           <View className="gap-3">
             {enableAiGeneration ? (
-              <Tabs defaultValue={defaultPickerTab} className="mx-1 gap-2">
-                <Tabs.List className="flex-row gap-1">
-                  <Tabs.Trigger value="create" className="flex-1">
-                    Create
-                  </Tabs.Trigger>
-                  <Tabs.Trigger value="upload" className="flex-1">
-                    Upload
-                  </Tabs.Trigger>
-                </Tabs.List>
-
-                <Tabs.Content value="upload" className="gap-3">
-                  {imageIdsToShow.length > 0 ? (
-                    <View className="flex-row flex-wrap gap-2">
-                      {imageIdsToShow.map((assetId) => {
-                        const isSelected = assetId === imageId;
-                        const isHovered = assetId === hoveredHintImageId;
-                        const meta = imageMetaById.get(assetId) ?? null;
-                        return (
-                          <Pressable
-                            key={assetId}
-                            onPress={() => {
-                              handleSelectHintImage(assetId);
-                            }}
-                            onHoverIn={() => {
-                              setHoveredHintImageId(assetId);
-                            }}
-                            onHoverOut={() => {
-                              setHoveredHintImageId(null);
-                            }}
-                          >
-                            <HintImageTile
-                              assetId={assetId}
-                              imageMeta={meta}
-                              isSelected={isSelected}
-                              isHovered={isHovered}
-                              size={tileSize}
-                            />
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  ) : null}
-                  {enablePasteDropZone ? (
-                    <ImagePasteDropZone
-                      onUploadComplete={handleUseImage}
-                      onUploadError={onUploadError}
-                    />
-                  ) : null}
-                </Tabs.Content>
-                <Tabs.Content value="create">
-                  <AiImageGenerationPanel
-                    initialPrompt={initialAiPrompt}
-                    aiReferenceImages={aiReferenceImages}
-                    playgroundStorageKey={aiPlaygroundStorageKey}
-                    onChangeImage={(assetId) => {
-                      handleUseImage(assetId);
-                    }}
-                    onError={onUploadError}
-                    onSavePrompt={onSaveAiPrompt}
-                  />
-                </Tabs.Content>
-              </Tabs>
+              <AiImageGenerationPanel
+                initialPrompt={initialAiPrompt}
+                aiReferenceImages={aiReferenceImages}
+                playgroundStorageKey={aiPlaygroundStorageKey}
+                onChangeImage={(assetId) => {
+                  handleUseImage(assetId);
+                }}
+                onError={onUploadError}
+                onSavePrompt={onSaveAiPrompt}
+              />
             ) : (
-              <>
-                {imageIdsToShow.length > 0 ? (
-                  <View className="flex-row flex-wrap gap-2">
-                    {imageIdsToShow.map((assetId) => {
-                      const isSelected = assetId === imageId;
-                      const isHovered = assetId === hoveredHintImageId;
-                      const meta = imageMetaById.get(assetId) ?? null;
-                      return (
-                        <Pressable
-                          key={assetId}
-                          onPress={() => {
-                            handleSelectHintImage(assetId);
-                          }}
-                          onHoverIn={() => {
-                            setHoveredHintImageId(assetId);
-                          }}
-                          onHoverOut={() => {
-                            setHoveredHintImageId(null);
-                          }}
-                        >
-                          <HintImageTile
-                            assetId={assetId}
-                            imageMeta={meta}
-                            isSelected={isSelected}
-                            isHovered={isHovered}
-                            size={tileSize}
-                          />
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                ) : null}
-                {enablePasteDropZone ? (
-                  <ImagePasteDropZone
-                    onUploadComplete={handleUseImage}
-                    onUploadError={onUploadError}
-                  />
-                ) : null}
-              </>
+              <InlineEditableSettingImageHistoryGrid
+                imageIdsToShow={imageIdsToShow}
+                imageId={imageId}
+                hoveredHintImageId={hoveredHintImageId}
+                imageMetaById={imageMetaById}
+                tileSize={tileSize}
+                onHoverImage={setHoveredHintImageId}
+                onSelectImage={handleSelectHintImage}
+              />
             )}
           </View>
         ) : null}
       </View>
+    </View>
+  );
+}
+
+function InlineEditableSettingImageHistoryMenu({
+  imageIdsToShow,
+  imageId,
+  hoveredHintImageId,
+  imageMetaById,
+  tileSize,
+  onHoverImage,
+  onSelectImage,
+  onRequestClose,
+}: {
+  imageIdsToShow: readonly AssetId[];
+  imageId: AssetId | null;
+  hoveredHintImageId: AssetId | null;
+  imageMetaById: ReadonlyMap<AssetId, ImageMeta>;
+  tileSize: number;
+  onHoverImage: (assetId: AssetId | null) => void;
+  onSelectImage: (assetId: AssetId) => void;
+} & FloatingMenuModalMenuProps) {
+  return (
+    <View className="max-w-[420px] gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+        History
+      </Text>
+      <InlineEditableSettingImageHistoryGrid
+        imageIdsToShow={imageIdsToShow}
+        imageId={imageId}
+        hoveredHintImageId={hoveredHintImageId}
+        imageMetaById={imageMetaById}
+        tileSize={tileSize}
+        onHoverImage={onHoverImage}
+        onSelectImage={(assetId) => {
+          onSelectImage(assetId);
+          onRequestClose?.();
+        }}
+      />
+    </View>
+  );
+}
+
+function InlineEditableSettingImageHistoryGrid({
+  imageIdsToShow,
+  imageId,
+  hoveredHintImageId,
+  imageMetaById,
+  tileSize,
+  onHoverImage,
+  onSelectImage,
+}: {
+  imageIdsToShow: readonly AssetId[];
+  imageId: AssetId | null;
+  hoveredHintImageId: AssetId | null;
+  imageMetaById: ReadonlyMap<AssetId, ImageMeta>;
+  tileSize: number;
+  onHoverImage: (assetId: AssetId | null) => void;
+  onSelectImage: (assetId: AssetId) => void;
+}) {
+  if (imageIdsToShow.length === 0) {
+    return null;
+  }
+
+  return (
+    <View className="flex-row flex-wrap gap-2">
+      {imageIdsToShow.map((assetId) => {
+        const isSelected = assetId === imageId;
+        const isHovered = assetId === hoveredHintImageId;
+        const meta = imageMetaById.get(assetId) ?? null;
+
+        return (
+          <Pressable
+            key={assetId}
+            onPress={() => {
+              onSelectImage(assetId);
+            }}
+            onHoverIn={() => {
+              onHoverImage(assetId);
+            }}
+            onHoverOut={() => {
+              onHoverImage(null);
+            }}
+          >
+            <HintImageTile
+              assetId={assetId}
+              imageMeta={meta}
+              isSelected={isSelected}
+              isHovered={isHovered}
+              size={tileSize}
+            />
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
