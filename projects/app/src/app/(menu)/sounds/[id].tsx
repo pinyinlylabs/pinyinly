@@ -13,6 +13,7 @@ import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
 import { useDb } from "@/client/ui/hooks/useDb";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
@@ -20,6 +21,7 @@ import {
   defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
+  isFinalSoundId,
   isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
@@ -50,6 +52,20 @@ export default function SoundIdPage() {
   const [toneAnchorY, setToneAnchorY] = useState<number | null>(null);
   const [isEditSoundNameModalOpen, setIsEditSoundNameModalOpen] =
     useState(false);
+  const [isMnemonicStoryRoleEditMode, setIsMnemonicStoryRoleEditMode] =
+    useState(false);
+
+  const mnemonicDescriptionSetting = useUserSetting({
+    setting: pinyinSoundDescriptionSetting,
+    key: { soundId: id },
+  });
+  const mnemonicImageSetting = useUserSetting({
+    setting: pinyinSoundImageSetting,
+    key: { soundId: id },
+  });
+  const hasMnemonicContent =
+    (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
+    mnemonicImageSetting.value?.imageId != null;
 
   const label = getPinyinSoundLabel(id, chart);
   const examplePinyins = defaultPinyinSoundExamples[id] ?? [];
@@ -65,11 +81,11 @@ export default function SoundIdPage() {
 
   const playSound = useSoundEffect(soundAudioSource);
 
-  const tone1AudioSource = id.startsWith(`-`) ? null : null;
-  const tone2AudioSource = id.startsWith(`-`) ? null : null;
-  const tone3AudioSource = id.startsWith(`-`) ? null : null;
-  const tone4AudioSource = id.startsWith(`-`) ? null : null;
-  const tone5AudioSource = id.startsWith(`-`) ? null : null;
+  const tone1AudioSource = isFinalSoundId(id) ? null : null;
+  const tone2AudioSource = isFinalSoundId(id) ? null : null;
+  const tone3AudioSource = isFinalSoundId(id) ? null : null;
+  const tone4AudioSource = isFinalSoundId(id) ? null : null;
+  const tone5AudioSource = isFinalSoundId(id) ? null : null;
 
   useEffect(() => {
     if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
@@ -134,29 +150,51 @@ export default function SoundIdPage() {
             </View>
           </WikiTitledBox>
 
-          <WikiTitledBox title="Mnemonic story role">
+          <WikiTitledBox
+            title="Mnemonic story role"
+            headerAction={
+              <RectButton
+                variant="bare2"
+                onPress={() => {
+                  setIsMnemonicStoryRoleEditMode((current) => !current);
+                }}
+              >
+                {isMnemonicStoryRoleEditMode ? `Done` : `Change`}
+              </RectButton>
+            }
+          >
             <View className="gap-4 p-4">
-              <InlineEditableSettingText
-                setting={pinyinSoundDescriptionSetting}
-                settingKey={{ soundId: id }}
-                placeholder="Add a description to help with mnemonic generation…"
-                multiline
-              />
-              <InlineEditableSettingImage
-                setting={pinyinSoundImageSetting}
-                settingKey={{ soundId: id }}
-                enableAiGeneration
-                previewHeight={200}
-                tileSize={64}
-                enablePasteDropZone
-                frameConstraint={{ aspectRatio: 1 }}
-              />
+              {!isMnemonicStoryRoleEditMode && !hasMnemonicContent ? (
+                <Text className="pyly-body text-fg-dim">
+                  No description or image
+                </Text>
+              ) : (
+                <>
+                  <InlineEditableSettingText
+                    setting={pinyinSoundDescriptionSetting}
+                    settingKey={{ soundId: id }}
+                    placeholder="Add a description to help with mnemonic generation…"
+                    readonly={!isMnemonicStoryRoleEditMode}
+                    multiline
+                  />
+                  <InlineEditableSettingImage
+                    setting={pinyinSoundImageSetting}
+                    settingKey={{ soundId: id }}
+                    readonly={!isMnemonicStoryRoleEditMode}
+                    enableAiGeneration
+                    previewHeight={200}
+                    tileSize={64}
+                    enablePasteDropZone
+                    frameConstraint={{ aspectRatio: 1 }}
+                  />
+                </>
+              )}
             </View>
           </WikiTitledBox>
         </View>
 
         {/* Final-tone details editor for finals */}
-        {id.startsWith(`-`) && (
+        {isFinalSoundId(id) && (
           <PinyinFinalToneEditor
             finalSoundId={id}
             focusedTone={focusedTone}

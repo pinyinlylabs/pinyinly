@@ -560,7 +560,7 @@ function buildPinyinChart(
     const soundId = _soundId as PinyinSoundId;
     sounds.add(soundId);
 
-    const destination = soundId.startsWith(`-`)
+    const destination = isFinalSoundId(soundId)
       ? unitToFinalSound
       : unitToInitialSound;
     const soundUnits = unitsSpaceSeparated.split(` `);
