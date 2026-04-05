@@ -665,34 +665,6 @@ export function AiImageGenerationPanel({
     previousMessageCountRef.current = currentMessageCount;
   }, [isLoadedFromSetting, activeThreadId, activeThreadMessageCount]);
 
-  const handleCreateThread = () => {
-    updatePlaygroundState((prev) => {
-      const nextThreadIndex = prev.threads.length + 1;
-      const nextThread = createThread(
-        initialPrompt,
-        `Idea ${String(nextThreadIndex)}`,
-      );
-      const nextThreads = [...prev.threads, nextThread].slice(
-        -MAX_AI_PLAYGROUND_THREADS,
-      );
-
-      return {
-        ...prev,
-        activeThreadId: nextThread.id,
-        threads: nextThreads,
-      };
-    });
-    setError(null);
-  };
-
-  const handleSelectThread = (threadId: string) => {
-    updatePlaygroundState((prev) => ({
-      ...prev,
-      activeThreadId: threadId,
-    }));
-    setError(null);
-  };
-
   const handlePersistDraftPrompt = (nextPrompt: string) => {
     if (activeThread == null) {
       return;
@@ -852,49 +824,6 @@ export function AiImageGenerationPanel({
   return (
     <View className="h-[460px]">
       <View className="h-full flex-row items-stretch gap-4">
-        <View className="h-full w-[120px] shrink-0 gap-2">
-          <View className="flex-row items-center justify-between">
-            <Text className="pyly-body-subheading">Chats</Text>
-            <RectButton
-              variant="bare2"
-              iconStart="plus"
-              iconSize={16}
-              onPress={handleCreateThread}
-              disabled={isProcessing || !isLoadedFromSetting}
-            >
-              New
-            </RectButton>
-          </View>
-
-          <ScrollView
-            className="flex-1"
-            contentContainerClassName="items-start gap-2 pb-2"
-          >
-            {playgroundState.threads.map((thread) => {
-              const isActive = thread.id === activeThread?.id;
-              return (
-                <RectButton
-                  key={thread.id}
-                  variant="bare2"
-                  onPress={() => {
-                    handleSelectThread(thread.id);
-                  }}
-                  disabled={isProcessing}
-                  className={
-                    isActive
-                      ? `justify-start self-start opacity-100`
-                      : `justify-start self-start opacity-80`
-                  }
-                >
-                  {thread.title}
-                </RectButton>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-        <View className="w-px self-stretch bg-fg-bg10" />
-
         <View className="h-full min-w-0 flex-1 gap-3">
           {isLoadedFromSetting ? null : (
             <Text className="font-sans text-[13px] text-fg-dim">
