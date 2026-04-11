@@ -37,7 +37,7 @@ import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { Tooltip } from "./Tooltip";
 import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacterPronunciationImagePicker";
 import { WikiTitledBox } from "./WikiTitledBox";
-import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
+import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation.utils";
 import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";

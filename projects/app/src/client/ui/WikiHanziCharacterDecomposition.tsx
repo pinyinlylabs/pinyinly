@@ -1,7 +1,8 @@
+import { getWikiCharacterData } from "@/client/wiki";
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
-import { walkIdsNodeLeafs } from "@/data/hanzi";
+import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {
   hanziWordMeaningHintImagePromptSetting,
@@ -11,7 +12,7 @@ import {
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { useMemo, useState } from "react";
+import { use, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
@@ -25,11 +26,26 @@ import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
 import { hintFirstLineLength, parseHintText } from "./hintText";
 
+export function WikiHanziCharacterDecomposition({
+  hanzi,
+}: {
+  hanzi: HanziText;
+}) {
+  if (!isHanziCharacter(hanzi)) {
+    return null;
+  }
+  const characterData = use(getWikiCharacterData(hanzi));
+  if (characterData == null) {
+    return null;
+  }
+  return <WikiHanziCharacterDecompositionBox characterData={characterData} />;
+}
+
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
 }
 
-export function WikiHanziCharacterDecomposition({
+export function WikiHanziCharacterDecompositionBox({
   characterData,
 }: WikiHanziCharacterDecompositionProps) {
   const [isEditMode, setIsEditMode] = useState(false);

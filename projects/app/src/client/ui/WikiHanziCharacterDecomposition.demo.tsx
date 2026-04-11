@@ -1,17 +1,17 @@
 import type { HanziCharacter, WikiCharacterData } from "@/data/model";
 import { View } from "react-native";
-import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
+import { WikiHanziCharacterDecompositionBox } from "./WikiHanziCharacterDecomposition";
 import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
 
 export default () => {
   return (
     <View className="max-w-[500px] flex-1 gap-2">
       <DemoBetaFeaturesKnob />
-      <WikiHanziCharacterDecomposition characterData={characterData} />
+      <WikiHanziCharacterDecompositionBox characterData={characterData} />
 
       <LittlePrimaryHeader title="No mnemonic" />
 
-      <WikiHanziCharacterDecomposition
+      <WikiHanziCharacterDecompositionBox
         characterData={{
           ...characterData,
 

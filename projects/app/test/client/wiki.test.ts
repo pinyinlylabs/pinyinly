@@ -97,21 +97,6 @@ describe(`/meaning.mdx files`, async () => {
     }
   });
 
-  test(`should contain a <WikiHanziCharacterIntro>`, () => {
-    for (const { hanzi, hasMdx, getMdx } of data) {
-      if (isHanziCharacter(hanzi) && hasMdx()) {
-        const mdx = getMdx();
-        const match = [...mdx.matchAll(/<WikiHanziCharacterIntro\s+/g)];
-        expect
-          .soft(
-            match.length,
-            `${hanzi} MDX does not have exactly one <WikiHanziCharacterIntro> component`,
-          )
-          .toEqual(1);
-      }
-    }
-  });
-
   test(`should export characterData when character.json exists`, () => {
     for (const { hanzi, hasMdx, getMdx, hasCharacterData } of data) {
       if (!hasMdx()) {
