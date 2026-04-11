@@ -279,8 +279,9 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           }
         }
       } else {
-        // Otherwise, it's a single character, and can learn the tone first.
-        deps.push(hanziWordToPinyinTone(hanziWord));
+        // Otherwise, it's a single character, and can learn the full pinyin
+        // after the initial/final split skills.
+        deps.push(hanziWordToPinyinFinal(hanziWord));
       }
       break;
     }
@@ -336,7 +337,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       deps.push(
         hanziWordToPinyinInitial(hanziWord),
         hanziWordToPinyinFinal(hanziWord),
-        hanziWordToPinyinTone(hanziWord),
+        hanziWordToPinyinTyped(hanziWord),
       );
       break;
     }
@@ -497,16 +498,6 @@ export const rankRules: RankRules = [
       { skill: SkillKind.HanziWordToGloss, stability },
       { skill: SkillKind.HanziWordToPinyinInitial, stability },
       { skill: SkillKind.HanziWordToPinyinFinal, stability },
-      { skill: SkillKind.HanziWordToPinyinTone, stability },
-    ],
-  },
-  {
-    rank: 4,
-    goals: [
-      { skill: SkillKind.HanziWordToGloss, stability },
-      { skill: SkillKind.HanziWordToPinyinInitial, stability },
-      { skill: SkillKind.HanziWordToPinyinFinal, stability },
-      { skill: SkillKind.HanziWordToPinyinTone, stability },
       { skill: SkillKind.HanziWordToPinyinTyped, stability },
     ],
   },
