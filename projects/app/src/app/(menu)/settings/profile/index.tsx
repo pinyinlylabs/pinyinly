@@ -1,3 +1,4 @@
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useAuth } from "@/client/auth";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
@@ -38,6 +39,7 @@ export default function ProfileSettingsPage() {
       {/* Header */}
       <View>
         <Text className="pyly-body-title">Account</Text>
+        <HeaderTitleProvider.ScrollTrigger title="Account" />
       </View>
 
       {/* Current Account */}

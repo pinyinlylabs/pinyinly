@@ -1,5 +1,5 @@
-import { MenuHeaderContext } from "@/client/ui/contexts";
-import type { MenuHeaderTitleScrollTriggerState } from "@/client/ui/contexts";
+import { HeaderTitleContext } from "@/client/ui/contexts";
+import type { HeaderTitleScrollTriggerState } from "@/client/ui/contexts";
 import { maxK } from "@pinyinly/lib/collections";
 import { NavigationContext } from "@react-navigation/native";
 import type { PropsWithChildren } from "react";
@@ -8,19 +8,19 @@ import type { TextProps } from "react-native";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
-function useMenuContextOrThrow() {
-  const context = use(MenuHeaderContext);
+function useHeaderTitleContextOrThrow() {
+  const context = use(HeaderTitleContext);
   if (context == null) {
     throw new Error(
-      `MenuContext compound components must be used within a MenuContext`,
+      `HeaderTitleProvider compound components must be used within a HeaderTitleProvider`,
     );
   }
   return context;
 }
 
-function MenuContext({ children }: PropsWithChildren) {
+function HeaderTitleProvider({ children }: PropsWithChildren) {
   const [titleScrollTriggerStates, setTitleScrollTriggerStates] = useState<
-    readonly MenuHeaderTitleScrollTriggerState[]
+    readonly HeaderTitleScrollTriggerState[]
   >([]);
 
   const activeTitleScrollTriggerState = maxK(
@@ -35,7 +35,7 @@ function MenuContext({ children }: PropsWithChildren) {
   const showTitle = activeTitleScrollTriggerState != null;
 
   return (
-    <MenuHeaderContext.Provider
+    <HeaderTitleContext.Provider
       value={{
         title,
         showTitle,
@@ -53,13 +53,13 @@ function MenuContext({ children }: PropsWithChildren) {
       }}
     >
       {children}
-    </MenuHeaderContext.Provider>
+    </HeaderTitleContext.Provider>
   );
 }
 
-function MenuContextTitleScrollTrigger({ title }: { title: string }) {
+function HeaderTitleProviderScrollTrigger({ title }: { title: string }) {
   const { removeTitleScrollTriggerState, upsertTitleScrollTriggerState } =
-    useMenuContextOrThrow();
+    useHeaderTitleContextOrThrow();
   const navigation = use(NavigationContext);
   const id = useId();
   const [element, setElement] = useState<Element | null>(null);
@@ -201,12 +201,12 @@ function findNearestScrollContainer(element: Element): Element | null {
   return null;
 }
 
-function MenuContextTitleText({
+function HeaderTitleProviderTitleText({
   className,
 }: {
   className?: TextProps[`className`];
 }) {
-  const { title, showTitle } = useMenuContextOrThrow();
+  const { title, showTitle } = useHeaderTitleContextOrThrow();
 
   if (title == null) {
     return null;
@@ -219,10 +219,10 @@ function MenuContextTitleText({
   );
 }
 
-MenuContext.TitleText = MenuContextTitleText;
-MenuContext.TitleScrollTrigger = MenuContextTitleScrollTrigger;
+HeaderTitleProvider.TitleText = HeaderTitleProviderTitleText;
+HeaderTitleProvider.ScrollTrigger = HeaderTitleProviderScrollTrigger;
 
-export { MenuContext };
+export { HeaderTitleProvider };
 
 const titleTextClass = tv({
   base: `transition-opacity`,

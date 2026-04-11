@@ -1,3 +1,4 @@
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useAuth } from "@/client/auth";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
@@ -33,6 +34,7 @@ export default function AccountsSettingsPage() {
       {/* Header */}
       <View>
         <Text className="pyly-body-title">Accounts</Text>
+        <HeaderTitleProvider.ScrollTrigger title="Accounts" />
         <Text className="font-sans text-sm text-fg-dim">
           Switch between accounts or add a new one
         </Text>

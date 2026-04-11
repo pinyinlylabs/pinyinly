@@ -7,7 +7,7 @@ import {
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { ScrollView, View } from "react-native";
-import { MenuContext } from "./MenuContext";
+import { HeaderTitleProvider } from "./HeaderTitleProvider";
 import { CloseButton } from "./CloseButton";
 import { RectButton } from "./RectButton";
 import { WikiHanziBody } from "./WikiHanziBody";
@@ -46,7 +46,7 @@ export function WikiHanziModalImpl({
     .filter((x) => x != null);
 
   return (
-    <MenuContext>
+    <HeaderTitleProvider>
       <ScrollView
         className={
           // Use a linear gradient on the background so that rubber band
@@ -66,7 +66,7 @@ export function WikiHanziModalImpl({
 
         <WikiHanziBody hanzi={hanzi} />
       </ScrollView>
-    </MenuContext>
+    </HeaderTitleProvider>
   );
 }
 
@@ -93,7 +93,7 @@ function Header({
           </View>
 
           <View className="flex-1 content-center items-center">
-            <MenuContext.TitleText className="font-sans text-3xl text-fg-loud" />
+            <HeaderTitleProvider.TitleText className="font-sans text-3xl text-fg-loud" />
           </View>
 
           <View className="w-20 items-end">
