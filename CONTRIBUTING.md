@@ -13,7 +13,7 @@ Install Minio for local S3-compatible storage:
 
 ```sh
 brew install minio/aistor/minio
-brew install minio-mc
+brew install minio/aistor/mc
 # Create a `local` alias for mc
 mc alias set local http://127.0.0.1:9000 miniodev miniodev
 # Create the bucket
