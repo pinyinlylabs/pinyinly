@@ -14,9 +14,9 @@ export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
       <View className="flex-1 gap-6 bg-bg py-7">
         <WikiHanziWordCharacters hanzi={hanzi} />
 
-        <WikiHanziCharacterPronunciation hanzi={hanzi} />
-
         <WikiHanziCharacterDecomposition hanzi={hanzi} />
+
+        <WikiHanziCharacterPronunciation hanzi={hanzi} />
 
         <WikiHanziCharacterUsedInWords hanzi={hanzi} />
 
