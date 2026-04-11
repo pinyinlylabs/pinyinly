@@ -49,7 +49,7 @@ export function WikiHanziExternalResources({ hanzi }: { hanzi: HanziText }) {
   }
 
   return (
-    <WikiTitledBox title="External resources" className="mx-4">
+    <WikiTitledBox title="External resources">
       <View className="gap-2 p-3">
         {links.map((link) => (
           <Pressable

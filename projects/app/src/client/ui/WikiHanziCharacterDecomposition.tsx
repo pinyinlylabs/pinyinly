@@ -97,7 +97,7 @@ export function WikiHanziCharacterDecomposition({
   return (
     <WikiTitledBox
       title="Recognize the character"
-      className="mx-4 mt-4"
+      className="mt-4"
       headerAction={
         <RectButton
           variant="bare2"

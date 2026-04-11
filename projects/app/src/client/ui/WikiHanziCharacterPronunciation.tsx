@@ -225,7 +225,7 @@ export function WikiHanziCharacterPronunciationBox({
   return (
     <WikiTitledBox
       title="Remember the pronunciation"
-      className="mx-4 mt-4"
+      className="mt-4"
       headerAction={
         <RectButton
           variant="bare2"

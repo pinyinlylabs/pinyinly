@@ -30,7 +30,7 @@ export function WikiHanziHeaderOverview({
   const uniquePinyins = pinyins?.filter(arrayFilterUnique());
 
   return (
-    <View className="gap-[10px] pl-4">
+    <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row gap-1">
           {hskLevels.map((hskLevel) => (
