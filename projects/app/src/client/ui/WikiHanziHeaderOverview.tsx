@@ -1,5 +1,5 @@
 import { intersperse } from "@/client/react";
-import { MenuContext } from "@/client/ui/MenuContext";
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import type { HanziText, HskLevel } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
@@ -30,7 +30,7 @@ export function WikiHanziHeaderOverview({
   const uniquePinyins = pinyins?.filter(arrayFilterUnique());
 
   return (
-    <View className="gap-[10px] pl-4">
+    <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row gap-1">
           {hskLevels.map((hskLevel) => (
@@ -45,7 +45,7 @@ export function WikiHanziHeaderOverview({
         />
       </View>
       <View>
-        <MenuContext.TitleScrollTrigger title={hanzi} />
+        <HeaderTitleProvider.ScrollTrigger title={hanzi} />
         <Text className="font-sans text-[48px] font-semibold text-fg-loud">
           {hanzi}
         </Text>

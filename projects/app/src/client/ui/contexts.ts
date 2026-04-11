@@ -23,22 +23,20 @@ export const AudioContextContext = createContext<AudioContext | null>(null);
 
 export const RizzleContext = createContext<Rizzle | null>(null);
 
-export interface MenuHeaderTitleScrollTriggerState {
+export interface HeaderTitleScrollTriggerState {
   id: string;
   title: string;
   top: number | null;
 }
 
-export interface MenuHeaderContextValue {
+export interface HeaderTitleContextValue {
   title: string | null;
   showTitle: boolean;
-  upsertTitleScrollTriggerState: (
-    state: MenuHeaderTitleScrollTriggerState,
-  ) => void;
+  upsertTitleScrollTriggerState: (state: HeaderTitleScrollTriggerState) => void;
   removeTitleScrollTriggerState: (id: string) => void;
 }
 
-export const MenuHeaderContext = createContext<MenuHeaderContextValue | null>(
+export const HeaderTitleContext = createContext<HeaderTitleContextValue | null>(
   null,
 );
 

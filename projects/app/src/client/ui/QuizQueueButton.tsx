@@ -1,6 +1,10 @@
 import type { SkillReviewQueue } from "@/data/skills";
+import { breakpoints } from "@/client/ui/breakpoints";
+import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
+import { MobileNavMenu } from "@/client/ui/MobileNavMenu";
 import { Link } from "expo-router";
-import { Text } from "react-native";
+import { useState } from "react";
+import { Pressable, Text } from "react-native";
 import Reanimated, { Easing, ZoomIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { Icon } from "./Icon";
@@ -13,21 +17,18 @@ export function QuizQueueButton({
     `overDueCount` | `dueCount` | `newContentCount`
   > | null;
 }) {
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const visualViewport = useVisualViewportSize();
+  const isSm = visualViewport != null && visualViewport.width >= breakpoints.sm;
   const queueCount =
     queueStats == null
       ? null
       : queueStats.overDueCount +
         queueStats.dueCount +
         queueStats.newContentCount;
-  return (
-    <Link
-      href="/history"
-      className={`
-        relative size-[32px] flex-row justify-center
 
-        md:justify-start
-      `}
-    >
+  const buttonContent = (
+    <>
       <Icon size={32} className="self-center text-fg" icon="inbox-filled" />
       {queueStats == null || queueCount == null ? null : queueCount > 0 ? (
         <CountLozenge
@@ -41,6 +42,33 @@ export function QuizQueueButton({
           }
         />
       ) : null}
+    </>
+  );
+
+  if (visualViewport != null && !isSm) {
+    return (
+      <>
+        <Pressable
+          onPress={() => {
+            setIsMobileNavOpen(true);
+          }}
+          className={queueButtonClass()}
+        >
+          {buttonContent}
+        </Pressable>
+        <MobileNavMenu
+          isOpen={isMobileNavOpen}
+          onClose={() => {
+            setIsMobileNavOpen(false);
+          }}
+        />
+      </>
+    );
+  }
+
+  return (
+    <Link href="/history" className={queueButtonClass()}>
+      {buttonContent}
     </Link>
   );
 }
@@ -82,4 +110,12 @@ const countLozengePillClass = tv({
   defaultVariants: {
     mode: `overdue`,
   },
+});
+
+const queueButtonClass = tv({
+  base: `
+    relative size-[32px] flex-row justify-center
+
+    md:justify-start
+  `,
 });

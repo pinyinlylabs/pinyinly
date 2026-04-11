@@ -211,9 +211,8 @@ for (const character of allCharacters) {
     if (!existsSync(mdxFile)) {
       writeFileSync(
         mdxFile,
-        `import data from "./character.json";
-
-<WikiHanziCharacterIntro characterData={data} />
+        `import characterData from "./character.json";
+export { characterData };
 `,
       );
       debug(`wrote meaning.mdx for %O`, character);

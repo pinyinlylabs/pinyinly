@@ -1,15 +1,16 @@
-import { MenuHeaderContext } from "@/client/ui/contexts";
-import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
+import { HeaderTitleContext } from "@/client/ui/contexts";
 import { Icon } from "@/client/ui/Icon";
-import { MenuContext } from "@/client/ui/MenuContext";
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { MobileNavMenu } from "@/client/ui/MobileNavMenu";
+import { navItems } from "@/client/ui/navItems";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
 import type { Href } from "expo-router";
 import { Link, Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
-import { Fragment, use, useLayoutEffect, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Fragment, use, useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 /**
@@ -28,9 +29,9 @@ function isNavItemActive(pathname: string, href: string): boolean {
 
 export default function MenuLayout() {
   return (
-    <MenuContext>
+    <HeaderTitleProvider>
       <MenuLayoutContent />
-    </MenuContext>
+    </HeaderTitleProvider>
   );
 }
 
@@ -44,17 +45,15 @@ function MenuLayoutContent() {
       `}
     >
       {/* Mobile header nav */}
-      <MobileTopMenu
-        className="sm:hidden"
-        leftButton={
-          <Link href="/learn">
-            <Icon icon="close" size={32} />
-          </Link>
-        }
-        rightButton={<MobileNavTrigger />}
-      />
+      <MobileTopMenu className="sm:hidden" rightButton={<MobileNavTrigger />} />
 
-      <ScrollView contentContainerClassName="py-safe-offset-5 px-safe-or-4 flex-row">
+      <ScrollView
+        contentContainerClassName={`
+          sm:py-safe-offset-5
+
+          px-safe-or-4 flex-row
+        `}
+      >
         {/* Left side */}
         <View
           className={`
@@ -155,7 +154,7 @@ function MenuLayoutContent() {
 }
 
 function DesktopFloatingTitle() {
-  const title = use(MenuHeaderContext)?.title;
+  const title = use(HeaderTitleContext)?.title;
 
   if (title == null) {
     return null;
@@ -195,7 +194,7 @@ function DesktopFloatingTitle() {
           `}
         >
           <View className="h-[56px] items-center justify-center bg-bg/90">
-            <MenuContext.TitleText className="font-sans text-3xl text-fg-loud" />
+            <HeaderTitleProvider.TitleText className="pyly-body-title" />
           </View>
         </View>
 
@@ -261,21 +260,6 @@ const DesktopNavSubtleItem = ({ name, href }: NavItemProps) => {
 
 function MobileNavTrigger() {
   const [isOpen, setIsOpen] = useState(false);
-  const pathName = usePathname();
-
-  const visualViewport = useVisualViewportSize();
-  const isSm = visualViewport != null && visualViewport.width >= 640;
-  useLayoutEffect(() => {
-    if (isSm) {
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setIsOpen(false);
-    }
-  }, [isSm]);
-
-  useLayoutEffect(() => {
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setIsOpen(false);
-  }, [pathName]);
 
   return (
     <>
@@ -286,133 +270,23 @@ function MobileNavTrigger() {
       >
         <Icon icon="menu" size={32} />
       </Pressable>
-      {isOpen ? (
-        <Modal
-          presentationStyle="fullScreen"
-          transparent={true}
-          onRequestClose={() => {
-            setIsOpen(false);
-          }}
-        >
-          <View className="size-full bg-bg">
-            <MobileTopMenu
-              rightButton={
-                <Pressable
-                  onPress={() => {
-                    setIsOpen(false);
-                  }}
-                >
-                  <Icon icon="close" size={32} />
-                </Pressable>
-              }
-            />
-            <View className="size-full gap-8 px-4 pb-6">
-              {navItems
-                .filter((section) => section.primary === true)
-                .map((section, sectionIndex) => (
-                  <MobileNavGroup key={sectionIndex} title={section.title}>
-                    {section.items.map((item, itemIndex) => (
-                      <MobileNavItem
-                        key={itemIndex}
-                        name={item.name}
-                        href={item.href}
-                      />
-                    ))}
-                  </MobileNavGroup>
-                ))}
-
-              <View className="items-start px-4">
-                {navItems
-                  .filter((section) => section.primary !== true)
-                  .map((section, sectionIndex) => (
-                    <Fragment key={sectionIndex}>
-                      {sectionIndex === 0 ? null : (
-                        <View className="invisible h-[40px]" />
-                      )}
-                      {section.items.map((item, itemIndex) => (
-                        <MobileNavSubtleItem
-                          key={itemIndex}
-                          name={item.name}
-                          href={item.href}
-                        />
-                      ))}
-                    </Fragment>
-                  ))}
-              </View>
-            </View>
-          </View>
-        </Modal>
-      ) : null}
+      <MobileNavMenu
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+      />
     </>
   );
 }
-
-function MobileNavGroup({
-  children,
-  title,
-}: {
-  children: ReactNode;
-  title?: string;
-}) {
-  return (
-    <View className="gap-2.5">
-      {title == null ? null : (
-        <View className="px-4">
-          <Text className="pyly-body-dt">{title}</Text>
-        </View>
-      )}
-      <View className="gap-0.5 overflow-hidden rounded-xl">{children}</View>
-    </View>
-  );
-}
-
-const MobileNavItem = ({ name, href }: NavItemProps) => {
-  const pathname = usePathname();
-  const isActive = isNavItemActive(pathname, href as string);
-
-  return (
-    <Link href={href} asChild>
-      <Pressable
-        className={`
-          flex-row bg-bg-high py-2.5 pl-4 pr-3
-
-          hover:bg-fg/10
-        `}
-      >
-        <Text className="pyly-button-outline">{name}</Text>
-        <View className="flex-1 items-end">
-          {isActive ? <Icon icon="check" size={24} /> : null}
-        </View>
-      </Pressable>
-    </Link>
-  );
-};
-
-const MobileNavSubtleItem = ({ name, href }: NavItemProps) => {
-  return (
-    <Link href={href} asChild>
-      <Pressable>
-        <Text
-          className={`
-            font-sans text-sm/[32px] font-bold uppercase text-fg-dim
-
-            hover:text-fg
-          `}
-        >
-          {name}
-        </Text>
-      </Pressable>
-    </Link>
-  );
-};
 
 function MobileTopMenu({
   leftButton,
   rightButton,
   className,
 }: {
-  leftButton?: React.ReactNode;
-  rightButton?: React.ReactNode;
+  leftButton?: ReactNode;
+  rightButton?: ReactNode;
   className?: string;
 }) {
   return (
@@ -425,7 +299,7 @@ function MobileTopMenu({
     >
       <View className="w-[32px] shrink">{leftButton ?? null}</View>
       <View className="flex-1 items-center">
-        <MenuContext.TitleText className="font-sans text-3xl text-fg-loud" />
+        <HeaderTitleProvider.TitleText className="pyly-body-title" />
       </View>
       <View className="w-[32px] shrink">{rightButton ?? null}</View>
     </View>
@@ -444,42 +318,3 @@ const buttonContainerClass = tv({
     },
   },
 });
-
-const navItems: NavGroup[] = [
-  {
-    title: `Learning`,
-    primary: true,
-    items: [
-      { name: `Wiki`, href: `/wiki` as const },
-      { name: `Sounds`, href: `/sounds` as const },
-      { name: `Skills`, href: `/skills` },
-      { name: `History`, href: `/history` },
-    ] satisfies NavItem[],
-  },
-  {
-    title: `Settings`,
-    primary: true,
-    items: [
-      { name: `Profile`, href: `/settings/profile` },
-      { name: `Accounts`, href: `/settings/accounts` },
-      { name: `Appearance`, href: `/settings/appearance` },
-    ] satisfies NavItem[],
-  },
-  {
-    items: [
-      { name: `Developer`, href: `/settings/developer` },
-      { name: `Acknowledgements`, href: `/acknowledgements` },
-    ] satisfies NavItem[],
-  },
-];
-
-interface NavItem {
-  name: string;
-  href: Href;
-}
-
-interface NavGroup {
-  title?: string;
-  items: NavItem[];
-  primary?: boolean;
-}

@@ -1,15 +1,15 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
-import { MenuContext } from "@/client/ui/MenuContext";
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { ScrollView, Text, View } from "react-native";
 
-export default function MenuContextDemo() {
+export default function HeaderTitleProviderDemo() {
   return (
     <View className="flex-1 gap-4">
-      <LittlePrimaryHeader title="MenuContext Title Scroll Trigger" />
+      <LittlePrimaryHeader title="HeaderTitleProvider Title Scroll Trigger" />
 
       <View className="flex-row flex-wrap">
         <ExampleStack title="Large sections" showFrame>
-          <MenuContextScrollDemo
+          <HeaderTitleProviderScrollDemo
             sections={[
               {
                 title: `Character`,
@@ -32,7 +32,7 @@ export default function MenuContextDemo() {
         </ExampleStack>
 
         <ExampleStack title="Dense trigger changes" showFrame>
-          <MenuContextScrollDemo
+          <HeaderTitleProviderScrollDemo
             sections={[
               {
                 title: `Overview`,
@@ -59,7 +59,7 @@ export default function MenuContextDemo() {
   );
 }
 
-function MenuContextScrollDemo({
+function HeaderTitleProviderScrollDemo({
   sections,
   compact = false,
 }: {
@@ -68,7 +68,7 @@ function MenuContextScrollDemo({
 }) {
   return (
     <View className="h-[560px] w-[420px] overflow-hidden rounded-lg border border-fg/10 bg-bg">
-      <MenuContext>
+      <HeaderTitleProvider>
         <View
           className={`
             sticky top-0 z-10 h-[52px] flex-row items-center border-b border-fg/10 bg-bg/95 px-4
@@ -77,7 +77,7 @@ function MenuContextScrollDemo({
           <Text className="pyly-body text-fg-dim">Floating title:</Text>
           <View className="w-2" />
           <View className="flex-1">
-            <MenuContext.TitleText className="pyly-body-heading text-fg-loud" />
+            <HeaderTitleProvider.TitleText className="pyly-body-heading text-fg-loud" />
           </View>
         </View>
 
@@ -92,7 +92,7 @@ function MenuContextScrollDemo({
           {sections.map((section) => (
             <View key={section.title} className="gap-3">
               <Text className="pyly-body-heading">{section.title}</Text>
-              <MenuContext.TitleScrollTrigger title={section.title} />
+              <HeaderTitleProvider.ScrollTrigger title={section.title} />
 
               <Text className="pyly-body text-fg-dim">{section.summary}</Text>
 
@@ -106,7 +106,7 @@ function MenuContextScrollDemo({
             </View>
           ))}
         </ScrollView>
-      </MenuContext>
+      </HeaderTitleProvider>
     </View>
   );
 }

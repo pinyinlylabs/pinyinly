@@ -96,6 +96,7 @@ beforeEach(() => {
   failAssetUploadMock.mockReset();
   getArrayBufferAssetIdMock.mockReset();
   vi.restoreAllMocks();
+  vi.spyOn(console, `error`).mockImplementation(() => undefined);
 });
 
 afterEach(() => {

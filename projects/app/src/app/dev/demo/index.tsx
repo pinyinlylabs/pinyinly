@@ -36,12 +36,12 @@ export const demos: Record<string, FunctionComponent> = {
   [`HanziHintOption`]: lazyDemo(() => import(`../../../client/ui/HanziHintOption.demo`)),
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
   [`HanziTile`]: lazyDemo(() => import(`../../../client/ui/HanziTile.demo`)),
+  [`HeaderTitleProvider`]: lazyDemo(() => import(`../../../client/ui/HeaderTitleProvider.demo`)),
   [`Icon`]: lazyDemo(() => import(`../../../client/ui/Icon.demo`)),
   [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
   [`ImagePasteDropZone`]: lazyDemo(() => import(`../../../client/ui/ImagePasteDropZone.demo`)),
   [`InlineEditableSettingImage`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingImage.demo`)),
   [`InlineEditableSettingText`]: lazyDemo(() => import(`../../../client/ui/InlineEditableSettingText.demo`)),
-  [`MenuContext`]: lazyDemo(() => import(`../../../client/ui/MenuContext.demo`)),
   [`MenuDictionarySearch`]: lazyDemo(() => import(`../../../client/ui/MenuDictionarySearch.demo`)),
   [`NewSkillModal`]: lazyDemo(() => import(`../../../client/ui/NewSkillModal.demo`)),
   [`NewSkillModalContentNewPronunciation`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewPronunciation.demo`)),
@@ -77,7 +77,6 @@ export const demos: Record<string, FunctionComponent> = {
   [`TutorialDialogBox`]: lazyDemo(() => import(`../../../client/ui/TutorialDialogBox.demo`)),
   [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
   [`WikiHanziCharacterDecomposition`]: lazyDemo(() => import(`../../../client/ui/WikiHanziCharacterDecomposition.demo`)),
-  [`WikiHanziCharacterIntro`]: lazyDemo(() => import(`../../../client/ui/WikiHanziCharacterIntro.demo`)),
   [`WikiHanziModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziModal.demo`)),
 // </pyly-glob-template>
 };

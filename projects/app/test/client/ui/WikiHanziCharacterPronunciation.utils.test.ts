@@ -1,4 +1,4 @@
-import { getSharedPrimaryPronunciation } from "#client/ui/WikiHanziCharacterIntro.utils.ts";
+import { getSharedPrimaryPronunciation } from "#client/ui/WikiHanziCharacterPronunciation.utils.ts";
 import type { DictionarySearchEntry } from "#client/query.ts";
 import type { PinyinText } from "#data/model.ts";
 import { describe, expect, test } from "vitest";

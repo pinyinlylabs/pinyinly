@@ -320,12 +320,11 @@ describe(
         `
       hp:儿:son
         he:儿:son
-        hpt:儿:son
-          hpf:儿:son
-            hpi:儿:son
-              he:儿:son
-                he:丿:slash
-                he:乚:hidden
+        hpf:儿:son
+          hpi:儿:son
+            he:儿:son
+              he:丿:slash
+              he:乚:hidden
       `,
       );
     });
@@ -1518,8 +1517,6 @@ describe(
                   "hpi:几:howMany (🟥 BLOCKED)",
                   "hpf:几:table (🟥 BLOCKED)",
                   "hpf:几:howMany (🟥 BLOCKED)",
-                  "hpt:几:table (🟥 BLOCKED)",
-                  "hpt:几:howMany (🟥 BLOCKED)",
                 ]
               `);
             },
@@ -1554,8 +1551,6 @@ describe(
                   "hpi:几:howMany (🟥 BLOCKED)",
                   "hpf:几:table (🟥 BLOCKED)",
                   "hpf:几:howMany (🟥 BLOCKED)",
-                  "hpt:几:table (🟥 BLOCKED)",
-                  "hpt:几:howMany (🟥 BLOCKED)",
                   "hp:几:table (🟥 BLOCKED)",
                 ]
               `);
@@ -1690,9 +1685,6 @@ describe(
                 "hpf:儿:son (🟥 BLOCKED)",
                 "hpf:点:oClock (🟥 BLOCKED)",
                 "hpf:一:one (🟥 BLOCKED)",
-                "hpt:儿:son (🟥 BLOCKED)",
-                "hpt:点:oClock (🟥 BLOCKED)",
-                "hpt:一:one (🟥 BLOCKED)",
                 "hp:儿:son (🟥 BLOCKED)",
                 "hp:点:oClock (🟥 BLOCKED)",
                 "hp:一:one (🟥 BLOCKED)",
@@ -1724,7 +1716,6 @@ describe(
                   "he:一:one (🌱 NEW SKILL)",
                   "hpi:一:one (🟥 BLOCKED)",
                   "hpf:一:one (🟥 BLOCKED)",
-                  "hpt:一:one (🟥 BLOCKED)",
                   "hp:一:one (🟥 BLOCKED)",
                 ]
               `);
@@ -1745,12 +1736,11 @@ describe(
                   "he:一:one",
                   "hpi:一:one (🌱 NEW SKILL)",
                   "hpf:一:one (🟥 BLOCKED)",
-                  "hpt:一:one (🟥 BLOCKED)",
                   "hp:一:one (🟥 BLOCKED)",
                 ]
               `);
               expect(queue).toMatchObject({
-                blockedCount: 3,
+                blockedCount: 2,
                 dueCount: 1,
                 newContentCount: 1,
                 newDifficultyCount: 0,
@@ -1775,12 +1765,11 @@ describe(
                   "he:一:one",
                   "hpi:一:one",
                   "hpf:一:one (📈 NEW DIFFICULTY)",
-                  "hpt:一:one (🟥 BLOCKED)",
                   "hp:一:one (🟥 BLOCKED)",
                 ]
               `);
               expect(queue).toMatchObject({
-                blockedCount: 2,
+                blockedCount: 1,
                 dueCount: 2,
                 newContentCount: 0,
                 newDifficultyCount: 1,
@@ -2025,7 +2014,7 @@ describe(
         },
         {
           rank: 3,
-          goals: [{ skill: SkillKind.HanziWordToPinyinTone, stability: 50 }],
+          goals: [{ skill: SkillKind.HanziWordToPinyinTyped, stability: 50 }],
         },
       ];
 
@@ -2148,7 +2137,7 @@ describe(
           "he:一:one": 50,
           "hpi:一:one": 50,
           "hpf:一:one": 50,
-          "hpt:一:one": 20,
+          "hp:一:one": 20,
         });
 
         const result = getHanziWordRank({

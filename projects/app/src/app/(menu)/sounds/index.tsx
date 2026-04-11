@@ -1,3 +1,4 @@
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { parseImageCrop } from "@/client/ui/imageCrop";
@@ -89,6 +90,7 @@ export default function SoundsPage() {
     <View className="gap-10">
       <View>
         <Text className="pyly-body-title">Sounds</Text>
+        <HeaderTitleProvider.ScrollTrigger title="Sounds" />
       </View>
 
       {pinyinSoundGroupsQuery.data.map(({ id, sounds }) => {

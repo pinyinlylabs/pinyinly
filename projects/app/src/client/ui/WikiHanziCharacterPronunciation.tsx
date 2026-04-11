@@ -37,7 +37,7 @@ import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { Tooltip } from "./Tooltip";
 import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacterPronunciationImagePicker";
 import { WikiTitledBox } from "./WikiTitledBox";
-import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterIntro.utils";
+import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation.utils";
 import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
@@ -225,7 +225,7 @@ export function WikiHanziCharacterPronunciationBox({
   return (
     <WikiTitledBox
       title="Remember the pronunciation"
-      className="mx-4 mt-4"
+      className="mt-4"
       headerAction={
         <RectButton
           variant="bare2"

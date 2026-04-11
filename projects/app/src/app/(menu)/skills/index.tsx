@@ -1,3 +1,4 @@
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import {
   dictionaryQuery,
   getTargetHanziWordsFromDictionary,
@@ -35,6 +36,7 @@ export default function SkillsPage() {
       {/* Header */}
       <View>
         <Text className="pyly-body-title">Skills</Text>
+        <HeaderTitleProvider.ScrollTrigger title="Skills" />
       </View>
 
       {/* Rank groups */}
