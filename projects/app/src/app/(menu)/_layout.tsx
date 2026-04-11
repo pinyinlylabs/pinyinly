@@ -47,7 +47,13 @@ function MenuLayoutContent() {
       {/* Mobile header nav */}
       <MobileTopMenu className="sm:hidden" rightButton={<MobileNavTrigger />} />
 
-      <ScrollView contentContainerClassName="py-safe-offset-5 px-safe-or-4 flex-row">
+      <ScrollView
+        contentContainerClassName={`
+          sm:py-safe-offset-5
+
+          px-safe-or-4 flex-row
+        `}
+      >
         {/* Left side */}
         <View
           className={`
