@@ -28,6 +28,7 @@ runs:
   steps:
     - id: moon-query
       run: |
+        set -o pipefail
         ALL_AFFECTED=$(moon query tasks --json --affected | jq '.tasks.[].[] | .target')
         echo ALL_AFFECTED=$ALL_AFFECTED;
         MATCH=$(echo $ALL_AFFECTED | jq --raw-output 'select(. == "'"$TARGET"'")')
