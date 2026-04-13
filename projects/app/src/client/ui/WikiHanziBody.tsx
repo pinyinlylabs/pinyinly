@@ -17,11 +17,11 @@ export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
 
         <WikiHanziCharacterDecomposition hanzi={hanzi} />
 
-        <WikiHanziCharacterUsedAsComponent hanzi={hanzi} />
-
         <WikiHanziCharacterPronunciation hanzi={hanzi} />
 
         <WikiHanziCharacterUsedInWords hanzi={hanzi} />
+
+        <WikiHanziCharacterUsedAsComponent hanzi={hanzi} />
 
         <WikiMdxHanziMeaning hanzi={hanzi} />
 
