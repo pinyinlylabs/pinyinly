@@ -48,7 +48,8 @@ This document reflects the current asset upload implementation in `projects/app`
 ## tRPC endpoints
 
 - `asset.requestUploadUrl`: returns `{ uploadUrl, assetKey }`.
-- `asset.confirmUpload`: verifies storage object, returns `{ success, contentType?, contentLength? }`.
+- `asset.confirmUpload`: verifies storage object, returns
+  `{ success, contentType?, contentLength? }`.
 - `asset.getDownloadUrl`: presigned read URL for existing object.
 - `asset.getUploadUrl`: presigned upload URL for remote sync.
 - `asset.listAssetBucketUserFiles`: returns user-referenced asset IDs.
@@ -56,7 +57,8 @@ This document reflects the current asset upload implementation in `projects/app`
 ## Replicache entity and mutators
 
 - Entity key: `a/[assetId]`.
-- Fields: `assetId`, `status`, `contentType`, `contentLength`, `createdAt`, `uploadedAt`, `errorMessage`.
+- Fields: `assetId`, `status`, `contentType`, `contentLength`, `createdAt`, `uploadedAt`,
+  `errorMessage`.
 - Mutators:
   - `initAsset`
   - `confirmAssetUpload`

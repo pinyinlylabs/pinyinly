@@ -1,30 +1,14 @@
 import { trpc } from "@/client/trpc";
-import type { HanziText, PinyinUnit } from "@/data/model";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
-export type PronunciationSoundDetails = {
-  soundId: string;
-  name?: string | null;
-  description?: string | null;
-};
-
-export type PronunciationSceneDetails = {
-  description?: string | null;
-};
-
 export interface AiPronunciationHintModalProps {
-  hanzi: HanziText;
-  pinyinUnit: PinyinUnit;
-  gloss: string;
-  initial: PronunciationSoundDetails | null;
-  final: PronunciationSoundDetails | null;
-  tone: PronunciationSoundDetails | null;
-  toneNumber: number | null;
-  finalToneScene: PronunciationSceneDetails | null;
+  leadCharacter: { name: string; bio?: string };
+  location: { name: string; description?: string };
+  cue: { word: string; meaning?: string };
   onApplyHint: (hint: { text: string; explanation?: string | null }) => void;
   onDismiss: () => void;
 }
@@ -36,14 +20,9 @@ type HintSuggestion = {
 };
 
 export function AiPronunciationHintModal({
-  hanzi,
-  pinyinUnit,
-  gloss,
-  initial,
-  final,
-  tone,
-  toneNumber,
-  finalToneScene,
+  leadCharacter,
+  location,
+  cue,
   onApplyHint,
   onDismiss,
 }: AiPronunciationHintModalProps) {
@@ -57,14 +36,9 @@ export function AiPronunciationHintModal({
 
     try {
       const result = await generateMutation.mutateAsync({
-        hanzi,
-        pinyin: pinyinUnit,
-        gloss,
-        initial,
-        final,
-        tone,
-        toneNumber,
-        finalToneScene,
+        leadCharacter,
+        location,
+        cue,
         count: 4,
       });
       setSuggestions(result.suggestions);
@@ -105,24 +79,23 @@ export function AiPronunciationHintModal({
             <View className="gap-1">
               <Text className="pyly-body-subheading">Context</Text>
               <Text className="font-sans text-[14px] text-fg-dim">
-                The AI uses your sound characters and scene descriptions to
-                craft a pronunciation hint.
+                The AI uses your story ingredients to craft a pronunciation
+                hint.
               </Text>
             </View>
 
             <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
-              <HintContextRow label="Hanzi" value={hanzi} />
-              <HintContextRow label="Pinyin" value={pinyinUnit} />
-              <HintContextRow label="Gloss" value={gloss} />
               <HintContextRow
-                label="Initial"
-                value={formatSoundDetails(initial)}
+                label="Lead"
+                value={formatRole(leadCharacter.name, leadCharacter.bio)}
               />
-              <HintContextRow label="Final" value={formatSoundDetails(final)} />
-              <HintContextRow label="Tone" value={formatSoundDetails(tone)} />
               <HintContextRow
-                label="Tone scene"
-                value={formatSceneDetails(finalToneScene, toneNumber)}
+                label="Location"
+                value={formatRole(location.name, location.description)}
+              />
+              <HintContextRow
+                label="Cue"
+                value={formatRole(cue.word, cue.meaning)}
               />
             </View>
 
@@ -199,47 +172,14 @@ function HintContextRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function formatSoundDetails(details: PronunciationSoundDetails | null) {
-  if (details == null) {
-    return `Not set`;
-  }
-
-  const name = cleanText(details.name) ?? details.soundId;
-  const description = cleanText(details.description);
-
-  if (description == null) {
-    return name;
-  }
-
-  return `${name} - ${description}`;
-}
-
-function formatSceneDetails(
-  scene: PronunciationSceneDetails | null,
-  toneNumber: number | null,
-) {
-  const description = cleanText(scene?.description);
-  if (description == null) {
-    return toneNumber == null ? `Not set` : `Tone ${toneNumber}: Not set`;
-  }
-
-  if (toneNumber == null) {
-    return description;
-  }
-
-  return `Tone ${toneNumber}: ${description}`;
+function formatRole(name: string, description?: string) {
+  return description != null && description.trim().length > 0
+    ? `${name} — ${description}`
+    : name;
 }
 
 function formatConfidence(value: number) {
   const normalized = Number.isFinite(value) ? value : 0;
   const clamped = Math.max(0, Math.min(1, normalized));
   return `${Math.round(clamped * 100)}%`;
-}
-
-function cleanText(value?: string | null) {
-  if (value == null) {
-    return null;
-  }
-  const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
 }

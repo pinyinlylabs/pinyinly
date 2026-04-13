@@ -134,22 +134,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const finalDescriptionSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundDescriptionSetting,
-          key: { soundId: splitPinyin.finalSoundId },
-        },
-  );
-  const toneDescriptionSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundDescriptionSetting,
-          key: { soundId: splitPinyin.toneSoundId },
-        },
-  );
   const finalToneDescriptionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -178,8 +162,6 @@ export function WikiHanziCharacterPronunciationBox({
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
-  const finalSoundDescription = finalDescriptionSetting?.value?.text ?? null;
-  const toneSoundDescription = toneDescriptionSetting?.value?.text ?? null;
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
 
@@ -375,7 +357,9 @@ export function WikiHanziCharacterPronunciationBox({
                     onPress={() => {
                       setShowAiModal(true);
                     }}
-                    disabled={splitPinyin == null}
+                    disabled={
+                      splitPinyin == null || initialPinyinSoundName == null
+                    }
                   >
                     Use AI
                   </RectButton>
@@ -411,28 +395,17 @@ export function WikiHanziCharacterPronunciationBox({
         </View>
       ) : null}
 
-      {showAiModal && splitPinyin != null ? (
+      {showAiModal && splitPinyin != null && initialPinyinSoundName != null ? (
         <AiPronunciationHintModal
-          hanzi={hanzi}
-          pinyinUnit={pinyinUnit}
-          gloss={gloss}
-          initial={{
-            soundId: splitPinyin.initialSoundId,
-            name: initialPinyinSoundName ?? null,
-            description: initialSoundDescription,
+          leadCharacter={{
+            name: initialPinyinSoundName,
+            bio: initialSoundDescription ?? undefined,
           }}
-          final={{
-            soundId: splitPinyin.finalSoundId,
-            name: finalPinyinSoundName ?? null,
-            description: finalSoundDescription,
+          location={{
+            name: finalToneName,
+            description: finalToneSceneDescription ?? undefined,
           }}
-          tone={{
-            soundId: splitPinyin.toneSoundId,
-            name: tonePinyinSoundName ?? null,
-            description: toneSoundDescription,
-          }}
-          toneNumber={splitPinyin.tone}
-          finalToneScene={{ description: finalToneSceneDescription }}
+          cue={{ word: gloss }}
           onApplyHint={({ text, explanation }) => {
             const mergedHintText = composeHintText(text, explanation);
             pronunciationHint.setText(mergedHintText);
