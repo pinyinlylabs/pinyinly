@@ -52,7 +52,6 @@ export const inngest = new Inngest({
     "replicache/retry-mutations": z.object({
       startMutationRecordId: z.string(),
     }),
-    "migrateAssetIds/manual": z.never(),
     "test/hello.world.email": z.never(),
     "test/fn": z.never(),
     "test/crypto": z.never(),
