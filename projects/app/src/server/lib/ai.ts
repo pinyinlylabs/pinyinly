@@ -21,8 +21,6 @@ export function openAiZodResponseFormat(
 export async function requestOpenAiJson<Schema extends z.ZodType>(opts: {
   system: string;
   user: string;
-  temperature?: number;
-  maxTokens?: number;
   schema: Schema;
 }): Promise<z.infer<Schema>> {
   const client = getOpenAIClient();

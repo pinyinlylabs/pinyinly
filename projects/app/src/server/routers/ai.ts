@@ -132,8 +132,6 @@ export const aiRouter = router({
         const data = await requestOpenAiJson({
           system,
           user,
-          temperature: 0.7,
-          maxTokens: 700,
           schema: pronunciationHintOutputSchema,
         });
 
