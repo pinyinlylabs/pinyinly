@@ -119,15 +119,15 @@ export default () => {
             assetId={failedAssetId}
             className="size-14 rounded-lg"
             contentFit="cover"
-            debugAssetStatus={AssetStatusKind.Failed}
-            debugErrorMessage="Upload verification failed"
+            demoAssetStatus={AssetStatusKind.Failed}
+            demoErrorMessage="Upload verification failed"
           />
           <AssetImage
             assetId={failedAssetId}
             className="h-[110px] w-[180px] rounded-md"
             contentFit="cover"
-            debugAssetStatus={AssetStatusKind.Failed}
-            debugErrorMessage="Upload verification failed"
+            demoAssetStatus={AssetStatusKind.Failed}
+            demoErrorMessage="Upload verification failed"
           />
         </ExampleStack>
 
@@ -139,15 +139,15 @@ export default () => {
             assetId={uploadedMissingAssetId}
             className="aspect-[2/1] w-full rounded-lg"
             contentFit="fill"
-            debugAssetStatus={AssetStatusKind.Uploaded}
-            debugImageError
+            demoAssetStatus={AssetStatusKind.Uploaded}
+            demoImageError
           />
           <AssetImage
             assetId={uploadedMissingAssetId}
             className="aspect-[2/1] max-h-[220px] w-full rounded-lg"
             contentFit="contain"
-            debugAssetStatus={AssetStatusKind.Uploaded}
-            debugImageError
+            demoAssetStatus={AssetStatusKind.Uploaded}
+            demoImageError
           />
         </ExampleStack>
       </View>
