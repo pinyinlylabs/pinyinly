@@ -18,11 +18,17 @@ import {
   skillLearningGraph,
 } from "@/data/skills";
 import { userHanziMeaningDefs } from "@/data/userSettings";
-import type { Dictionary } from "@/dictionary";
+import type {
+  CharacterComponentUsageEntry,
+  CharacterDecompositionEntry,
+  Dictionary,
+} from "@/dictionary";
 import {
+  buildCharacterComponentUsageEntries,
   buildHanziWord,
   getIsStructuralHanzi,
   hanziFromHanziWord,
+  loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
@@ -453,6 +459,16 @@ export type DictionarySearchCollection = Collection<
   string
 >;
 
+export type CharacterDecompositionCollection = Collection<
+  CharacterDecompositionEntry,
+  HanziText
+>;
+
+export type CharacterComponentUsageCollection = Collection<
+  CharacterComponentUsageEntry,
+  HanziText
+>;
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
@@ -730,6 +746,23 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
   });
 }
 
+function characterDecompositionCollectionOptions(): CollectionConfig<
+  CharacterDecompositionEntry,
+  HanziText
+> {
+  return staticCollectionOptions<CharacterDecompositionEntry, HanziText>({
+    id: `characterDecomposition`,
+    queryFn: async () => {
+      const entries = await loadBuiltinCharacterDecompositionEntries();
+      return entries.map((entry) => ({
+        hanzi: entry.hanzi,
+        decompositionIds: entry.decompositionIds,
+      }));
+    },
+    getKey: (item) => item.hanzi,
+  });
+}
+
 function mapUserMeaningToDictionarySearchEntry(
   userEntry: UserDictionaryEntry,
 ): DictionarySearchEntry {
@@ -760,8 +793,8 @@ function dictionarySearchHskSortKey(hsk?: HskLevel): number {
 }
 
 function areStringArraysEqual(
-  a: string[] | undefined,
-  b: string[] | undefined,
+  a: readonly string[] | undefined,
+  b: readonly string[] | undefined,
 ) {
   if (a === b) {
     return true;
@@ -1150,6 +1183,8 @@ export interface Db {
   builtInDictionarySearch: BuiltInDictionarySearchCollection;
   userDictionary: UserDictionaryCollection;
   dictionarySearch: DictionarySearchCollection;
+  characterDecomposition: CharacterDecompositionCollection;
+  characterComponentUsage: CharacterComponentUsageCollection;
   skillStateCollection: SkillStateCollection;
   skillRatingCollection: SkillRatingCollection;
   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
@@ -1252,9 +1287,110 @@ export function makeDb(rizzle: Rizzle): Db {
     }),
   );
 
+  const characterDecomposition: CharacterDecompositionCollection =
+    createCollection(characterDecompositionCollectionOptions());
+
+  const characterComponentUsage: CharacterComponentUsageCollection =
+    createCollection({
+      id: `characterComponentUsage`,
+      sync: {
+        rowUpdateMode: `full`,
+        sync: (params) => {
+          const { begin, write, commit, collection } = params;
+
+          const markReadyOnce = memoize0(() => {
+            params.markReady();
+          });
+          const markReadyTimeout = setTimeout(() => {
+            markReadyOnce();
+          }, 5000);
+
+          const decompositionRows = createLiveQueryCollection((q) =>
+            q.from({ entry: characterDecomposition }),
+          );
+
+          const applyRows = async () => {
+            const nextRows = await buildCharacterComponentUsageEntries(
+              decompositionRows.toArray.map((entry) => ({
+                hanzi: entry.hanzi,
+                decompositionIds: entry.decompositionIds,
+              })),
+            );
+
+            const nextByKey = new Map(
+              nextRows.map((row) => [row.component, row]),
+            );
+
+            begin();
+
+            for (const existing of collection.toArray) {
+              if (!nextByKey.has(existing.component)) {
+                write({ type: `delete`, value: existing });
+              }
+            }
+
+            for (const next of nextRows) {
+              const existing = collection.get(next.component);
+
+              if (existing == null) {
+                write({ type: `insert`, value: next });
+                continue;
+              }
+
+              if (
+                !areStringArraysEqual(existing.usedInHanzi, next.usedInHanzi)
+              ) {
+                write({ type: `update`, value: next });
+              }
+            }
+
+            commit();
+            markReadyOnce();
+          };
+
+          let subscription:
+            | ReturnType<typeof decompositionRows.subscribeChanges>
+            | undefined;
+          let isDisposed = false;
+
+          void decompositionRows
+            .preload()
+            .then(async () => {
+              if (isDisposed) {
+                return;
+              }
+
+              await applyRows();
+
+              subscription = decompositionRows.subscribeChanges(() => {
+                void applyRows().catch((error: unknown) => {
+                  console.error(
+                    `characterComponentUsage recompute failed`,
+                    error,
+                  );
+                });
+              });
+            })
+            .catch((error: unknown) => {
+              console.error(`characterComponentUsage preload failed`, error);
+              markReadyOnce();
+            });
+
+          return () => {
+            isDisposed = true;
+            clearTimeout(markReadyTimeout);
+            subscription?.unsubscribe();
+          };
+        },
+      },
+      getKey: (item) => item.component,
+    });
+
   return {
     assetCollection,
     builtInDictionarySearch,
+    characterComponentUsage,
+    characterDecomposition,
     dictionarySearch,
     settingCollection,
     settingHistoryCollection,

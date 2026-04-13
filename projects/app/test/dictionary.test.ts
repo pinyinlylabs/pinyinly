@@ -18,6 +18,8 @@ import {
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
+  loadCharacterComponentUsageEntries,
+  loadBuiltinCharacterDecompositionEntries,
   loadCharacters,
   loadDictionary,
   loadHanziWordMigrations,
@@ -1393,3 +1395,21 @@ describe(
     );
   },
 );
+
+describe(`character decomposition loaders`, () => {
+  test(`includes decomposition rows from characters data`, async () => {
+    const entries = await loadBuiltinCharacterDecompositionEntries();
+    const shuo = entries.find((entry) => entry.hanzi === 汉`说`);
+
+    expect(shuo).toBeDefined();
+    expect(shuo?.decompositionIds).toBe(`⿰讠兑`);
+  });
+
+  test(`builds reverse usage for direct component leaves`, async () => {
+    const entries = await loadCharacterComponentUsageEntries();
+    const duiUsage = entries.find((entry) => entry.component === 汉`兑`);
+
+    expect(duiUsage).toBeDefined();
+    expect(duiUsage?.usedInHanzi).toContain(汉`说`);
+  });
+});
