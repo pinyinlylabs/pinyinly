@@ -1,15 +1,13 @@
 import { useAssetImageCacheQuery } from "@/client/ui/hooks/useAssetImageCacheQuery";
-import { useDb } from "@/client/ui/hooks/useDb";
 import { ShimmerRect } from "@/client/ui/ShimmerRect";
 import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
-import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { ImageProps as ExpoImageProps, ImageStyle } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
 import { useEffect, useState } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import type { StyleProp } from "react-native";
 import { Text, View } from "react-native";
 
 interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
@@ -28,10 +26,8 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
  *
  * Constructs the CDN URL from EXPO_PUBLIC_ASSETS_CDN_BASE_URL + asset key
  * (blob/{assetId}, where assetId is algorithm-prefixed).
- * Queries TanStack DB for the asset status and shows appropriate states:
- * - Pending: Loading indicator
- * - Uploaded: Display image
- * - Failed: Error message
+ * Renders cached pending/uploaded blobs when available, otherwise falls back
+ * to the CDN URL.
  */
 export function AssetImage({
   assetId,
@@ -41,92 +37,72 @@ export function AssetImage({
   demoAssetStatus,
   demoErrorMessage,
   demoImageError = false,
+  onLoadStart,
+  onLoadEnd,
+  onError,
   ...restImageProps
 }: AssetImageProps) {
-  const db = useDb();
-  const { data: liveAsset } = useLiveQuery(
-    (q) =>
-      q
-        .from({ asset: db.assetCollection })
-        .where(({ asset }) => eq(asset.assetId, assetId))
-        .findOne(),
-    [db.assetCollection, assetId],
-  );
-
   const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const cachedImageSource = useAssetImageCacheQuery(assetId);
-  const asset =
-    demoAssetStatus == null
-      ? liveAsset
-      : {
-          ...liveAsset,
-          assetId,
-          errorMessage: demoErrorMessage ?? null,
-          status: demoAssetStatus,
-        };
   const hasImageError = imageError || demoImageError;
+  const imageUrl = `${assetsCdnBaseUrl}${getBucketObjectKeyForId(assetId)}`;
+  const source =
+    cachedImageSource != null && !hasImageError
+      ? cachedImageSource
+      : { uri: imageUrl };
 
   useEffect(() => {
     setImageError(false);
+    setIsLoading(true);
   }, [assetId]);
 
-  if (cachedImageSource != null && !hasImageError) {
-    return (
-      <ExpoImage
-        {...restImageProps}
-        source={cachedImageSource}
-        className={className}
-        style={style}
-        contentFit={contentFit}
-        transition={200}
-        onError={() => {
-          setImageError(true);
-        }}
-      />
-    );
-  }
-
-  if (asset == null) {
-    // Asset not found in TanStack DB yet
-    return <ShimmerRect className={className} style={style as ViewStyle} />;
-  }
-
-  if (asset.status === AssetStatusKind.Pending) {
-    return <ShimmerRect className={className} style={style as ViewStyle} />;
-  }
-
-  if (asset.status === AssetStatusKind.Failed || hasImageError) {
-    return (
-      <View
-        className={`
-          items-center justify-center bg-red/10
-
-          ${className ?? ``}
-        `}
-        style={style as ViewStyle}
-      >
-        <Text className="font-sans text-xs text-red">
-          {asset.errorMessage ?? `Failed to load`}
-        </Text>
-      </View>
-    );
-  }
-
-  const assetKey = getBucketObjectKeyForId(assetId);
-
-  const imageUrl = `${assetsCdnBaseUrl}${assetKey}`;
+  const showFailedOverlay =
+    demoAssetStatus === AssetStatusKind.Failed || hasImageError;
+  const showLoadingOverlay =
+    demoAssetStatus === AssetStatusKind.Pending ||
+    (isLoading && !showFailedOverlay);
 
   return (
-    <ExpoImage
-      {...restImageProps}
-      source={{ uri: imageUrl }}
-      className={className}
+    <View
+      className={`
+        relative overflow-hidden
+
+        ${className ?? ``}
+      `}
       style={style}
-      contentFit={contentFit}
-      transition={200}
-      onError={() => {
-        setImageError(true);
-      }}
-    />
+    >
+      <ExpoImage
+        {...restImageProps}
+        source={source}
+        className="size-full"
+        contentFit={contentFit}
+        transition={200}
+        onLoadStart={() => {
+          setIsLoading(true);
+          onLoadStart?.();
+        }}
+        onLoadEnd={() => {
+          setIsLoading(false);
+          onLoadEnd?.();
+        }}
+        onError={(event) => {
+          setImageError(true);
+          onError?.(event);
+        }}
+      />
+
+      {showLoadingOverlay ? (
+        <ShimmerRect className="absolute inset-0 size-full" />
+      ) : null}
+
+      {showFailedOverlay ? (
+        <View className="absolute inset-0 size-full items-center justify-center bg-red/10">
+          <Text className="font-sans text-xs text-red">
+            {demoErrorMessage ?? `Failed to load`}
+          </Text>
+        </View>
+      ) : null}
+    </View>
   );
 }

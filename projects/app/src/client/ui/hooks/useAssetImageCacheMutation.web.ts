@@ -170,7 +170,7 @@ export function useAssetImageCacheMutation(): AssetImageCacheMutationResult {
     assetId,
     imageData,
   ) => {
-    if (imageData.kind === `pending`) {
+    if (imageData.kind === `notUploaded`) {
       await setAssetImageBlobInCache(assetId, imageData.blob);
       return;
     }

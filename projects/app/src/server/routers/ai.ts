@@ -229,7 +229,6 @@ export const aiRouter = router({
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
       const { prompt, referenceImages } = opts.input;
-      const { userId } = opts.ctx.session;
 
       try {
         const resolvedReferenceImages =
@@ -255,11 +254,7 @@ export const aiRouter = router({
 
         const imageArrayBuffer = Uint8Array.from(buffer).buffer;
 
-        const assetId = await createAssetFromBuffer(
-          userId,
-          imageArrayBuffer,
-          mimeType,
-        );
+        const assetId = await createAssetFromBuffer(imageArrayBuffer, mimeType);
 
         return { assetId };
       } catch (error) {

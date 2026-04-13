@@ -103,7 +103,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-test(`clears pending cache when upload fails after assetId is computed`, async () => {
+test(`clears notUploaded cache when upload fails after assetId is computed`, async () => {
   const useImageUploader = await importUseImageUploader();
   const onUploadComplete = vi.fn();
   const onUploadError = vi.fn();
@@ -127,14 +127,14 @@ test(`clears pending cache when upload fails after assetId is computed`, async (
 
   expect(setCacheMock).toHaveBeenCalledWith(
     assetId,
-    expect.objectContaining({ kind: `pending` }),
+    expect.objectContaining({ kind: `notUploaded` }),
   );
   expect(clearCacheMock).toHaveBeenCalledWith(assetId);
   expect(onUploadError).toHaveBeenCalledWith(`request failed`);
   expect(onUploadComplete).not.toHaveBeenCalled();
 });
 
-test(`does not clear pending cache on successful upload flow`, async () => {
+test(`does not clear notUploaded cache on successful upload flow`, async () => {
   const useImageUploader = await importUseImageUploader();
   const onUploadComplete = vi.fn();
   const onUploadError = vi.fn();
@@ -167,7 +167,7 @@ test(`does not clear pending cache on successful upload flow`, async () => {
   expect(setCacheMock).toHaveBeenNthCalledWith(
     1,
     assetId,
-    expect.objectContaining({ kind: `pending` }),
+    expect.objectContaining({ kind: `notUploaded` }),
   );
   expect(setCacheMock).toHaveBeenNthCalledWith(
     2,

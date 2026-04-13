@@ -3,7 +3,7 @@ import type { AssetId } from "@/data/model";
 type CacheListener = () => void;
 
 export interface AssetImageCacheData {
-  kind: `pending` | `uploaded`;
+  kind: `notUploaded` | `uploaded`;
   blob: Blob;
   contentType: string;
 }

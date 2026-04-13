@@ -9,7 +9,7 @@ import type {
   Skill,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import { v12 as schema } from "@/data/rizzleSchema";
+import { v14 as schema } from "@/data/rizzleSchema";
 import { getUserSettingHistoryLimitFromKey } from "@/data/userSettings";
 import type { Drizzle, Xmin } from "@/server/lib/db";
 import {
@@ -134,49 +134,6 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         nextReviewForOtherSkillMistake(skillState.srs, now),
       ]),
     });
-  },
-  async setPinyinSoundName(db, userId, { soundId, name, now }) {
-    const updatedAt = now;
-    const createdAt = now;
-    const value = name == null ? null : { t: name };
-
-    await db
-      .insert(s.userSetting)
-      .values([{ userId, key: `psn.${soundId}`, value, updatedAt, createdAt }])
-      .onConflictDoUpdate({
-        target: [s.userSetting.userId, s.userSetting.key],
-        set: { value, updatedAt },
-      });
-  },
-  async setPinyinSoundGroupName(db, userId, { soundGroupId, name, now }) {
-    const updatedAt = now;
-    const createdAt = now;
-    const value = name == null ? null : { t: name };
-
-    await db
-      .insert(s.userSetting)
-      .values([
-        { userId, key: `psgn.${soundGroupId}`, value, updatedAt, createdAt },
-      ])
-      .onConflictDoUpdate({
-        target: [s.userSetting.userId, s.userSetting.key],
-        set: { value, updatedAt },
-      });
-  },
-  async setPinyinSoundGroupTheme(db, userId, { soundGroupId, theme, now }) {
-    const updatedAt = now;
-    const createdAt = now;
-    const value = theme == null ? null : { t: theme };
-
-    await db
-      .insert(s.userSetting)
-      .values([
-        { userId, key: `psgt.${soundGroupId}`, value, updatedAt, createdAt },
-      ])
-      .onConflictDoUpdate({
-        target: [s.userSetting.userId, s.userSetting.key],
-        set: { value, updatedAt },
-      });
   },
   async setSetting(db, userId, { key, value, now, skipHistory, historyId }) {
     const updatedAt = now;
@@ -306,15 +263,6 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
     for (const skill of affectedSkills) {
       await updateSkillState(db, skill, userId);
     }
-  },
-  async initAsset(_db, _userId, _args) {
-    // No-op for legacy schema compatibility.
-  },
-  async confirmAssetUpload(_db, _userId, _args) {
-    // No-op for legacy schema compatibility.
-  },
-  async failAssetUpload(_db, _userId, _args) {
-    // No-op for legacy schema compatibility.
   },
 };
 
@@ -1022,12 +970,11 @@ type EntityState = {
 }[];
 
 type EntitiesState = Record<CvrNamespace, EntityState>;
-type ComputeEntitiesStateResult = EntitiesState & { asset: EntityState };
 
 export async function computeEntitiesState(
   db: Drizzle,
   userId: string,
-): Promise<ComputeEntitiesStateResult> {
+): Promise<EntitiesState> {
   return startSpan({ name: computeEntitiesState.name }, async () => {
     const subQueries = syncEntities.map(
       (syncEntity) =>
@@ -1053,11 +1000,7 @@ export async function computeEntitiesState(
 
     const [result] = await query;
 
-    return {
-      ...nonNullable(result),
-      // Keep legacy v12 API shape stable even though asset syncing is removed.
-      asset: [],
-    };
+    return nonNullable(result);
   });
 }
 
