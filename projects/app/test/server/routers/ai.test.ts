@@ -1,4 +1,7 @@
-import { buildPronunciationHintPrompt } from "#server/routers/ai.ts";
+import {
+  buildPronunciationHintPrompt,
+  buildSubLocationDescriptionPrompt,
+} from "#server/routers/ai.ts";
 import { openAiZodResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
@@ -118,6 +121,61 @@ describe(
       expect(result.json_schema.name).toBe(`simple_string`);
       expect(result.json_schema.schema).toBeDefined();
       expect(typeof result.json_schema.schema).toBe(`object`);
+    });
+  },
+);
+
+describe(
+  `buildSubLocationDescriptionPrompt` satisfies HasNameOf<
+    typeof buildSubLocationDescriptionPrompt
+  >,
+  () => {
+    test(`minimal input`, () => {
+      const result = buildSubLocationDescriptionPrompt({
+        location: `Gong Cha bathroom`,
+        count: 4,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create vivid sublocation descriptions for Mandarin pronunciation mnemonic scenes.
+        Each description should help someone instantly picture a specific place.
+        Prefer concrete sensory details over abstract words.
+        Use visual anchors like objects, textures, lighting, signage, sounds, or smells.
+        Keep each description to 1-2 sentences and avoid dictionary-style definitions.
+        Make suggestions distinct from one another and easy to remember.",
+          "user": "Sublocation: Gong Cha bathroom
+
+        Generate 4 distinct sublocation descriptions for this exact place.
+        Each suggestion must reference the sublocation name exactly as written: Gong Cha bathroom.
+        Good suggestions are specific, visual, unusual, and easy to replay mentally.
+        Bad suggestions are generic, flat, or mostly abstract adjectives.",
+        }
+      `);
+    });
+
+    test(`different count`, () => {
+      const result = buildSubLocationDescriptionPrompt({
+        location: `Gong Cha bathroom`,
+        count: 3,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create vivid sublocation descriptions for Mandarin pronunciation mnemonic scenes.
+        Each description should help someone instantly picture a specific place.
+        Prefer concrete sensory details over abstract words.
+        Use visual anchors like objects, textures, lighting, signage, sounds, or smells.
+        Keep each description to 1-2 sentences and avoid dictionary-style definitions.
+        Make suggestions distinct from one another and easy to remember.",
+          "user": "Sublocation: Gong Cha bathroom
+
+        Generate 3 distinct sublocation descriptions for this exact place.
+        Each suggestion must reference the sublocation name exactly as written: Gong Cha bathroom.
+        Good suggestions are specific, visual, unusual, and easy to replay mentally.
+        Bad suggestions are generic, flat, or mostly abstract adjectives.",
+        }
+      `);
     });
   },
 );
