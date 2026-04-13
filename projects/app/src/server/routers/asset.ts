@@ -19,7 +19,6 @@ export const assetRouter = router({
    * The client should:
    * 1. Call this endpoint to get an upload URL
    * 2. Upload the file directly to S3 using the presigned URL
-   * 3. Upload the file directly to S3 using the returned URL
    */
   requestUploadUrl: authedProcedure
     .input(
