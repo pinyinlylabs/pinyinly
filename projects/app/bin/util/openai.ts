@@ -5,11 +5,9 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
 import path from "node:path";
 import OpenAI from "openai";
-import type {
-  ChatCompletionCreateParamsNonStreaming,
-  ResponseFormatJSONSchema,
-} from "openai/resources/index.mjs";
-import { z } from "zod/v4";
+import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
+import type { z } from "zod/v4";
+import { openAiZodResponseFormat } from "#server/lib/ai.js";
 
 export const openAiWithFsDbCache = async (
   body: ChatCompletionCreateParamsNonStreaming,
@@ -73,7 +71,7 @@ export function makeSimpleAiClient(fsDbCache: FsDbCache) {
           await systemRoleMessageWithProjectContext(docs),
           { role: `user`, content: userMessage },
         ],
-        response_format: zodResponseFormat(schema, `result_shape`),
+        response_format: openAiZodResponseFormat(schema, `result_shape`),
       },
       { fsDbCache, openai },
     );
@@ -118,18 +116,5 @@ async function systemRoleMessageWithProjectContext(
   return {
     role: `system`,
     content: messageLines.join(`\n`),
-  };
-}
-
-export function zodResponseFormat(
-  zodObject: z.ZodType,
-  name: string,
-): ResponseFormatJSONSchema {
-  return {
-    type: `json_schema`,
-    json_schema: {
-      schema: z.toJSONSchema(zodObject, { unrepresentable: `any` }),
-      name,
-    },
   };
 }

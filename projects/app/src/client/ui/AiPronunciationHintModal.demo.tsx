@@ -1,7 +1,6 @@
 import { trpc } from "@/client/trpc";
 import { AiPronunciationHintModal } from "@/client/ui/AiPronunciationHintModal";
 import { RectButton } from "@/client/ui/RectButton";
-import type { HanziText, PinyinUnit } from "@/data/model";
 import type { AppRouter } from "@/server/routers/_app";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { TRPCLink } from "@trpc/client";
@@ -93,26 +92,12 @@ export default () => {
 
           {isOpen ? (
             <AiPronunciationHintModal
-              hanzi={`好` as HanziText}
-              pinyinUnit={`hao3` as PinyinUnit}
-              gloss="good"
-              initial={{
-                soundId: `h`,
-                name: `Hero`,
-                description: `a helmeted hero`,
+              leadCharacter={{ name: `Hero`, bio: `a helmeted hero` }}
+              location={{
+                name: `Owl Slide`,
+                description: `a wind-swept cliff ledge`,
               }}
-              final={{
-                soundId: `ao`,
-                name: `Owl`,
-                description: `a wide-eyed owl`,
-              }}
-              tone={{
-                soundId: `3`,
-                name: `Slide`,
-                description: `a slow sliding board`,
-              }}
-              toneNumber={3}
-              finalToneScene={{ description: `a wind-swept cliff ledge` }}
+              cue={{ word: `good` }}
               onApplyHint={({ text, explanation }) => {
                 setLastHint(text);
                 setLastExplanation(explanation ?? null);

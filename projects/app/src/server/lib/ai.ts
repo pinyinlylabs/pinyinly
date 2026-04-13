@@ -1,53 +1,47 @@
-import { openaiApiKey } from "@/util/env";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { getOpenAIClient } from "@/server/lib/openai/client";
+import type {
+  ChatCompletionCreateParamsNonStreaming,
+  ResponseFormatJSONSchema,
+} from "openai/resources/index.mjs";
+import { z } from "zod/v4";
 
-type OpenAiChatResponse = {
-  choices?: Array<{
-    message?: {
-      content?: string | null;
-    } | null;
-  }>;
-};
+export function openAiZodResponseFormat(
+  zodObject: z.ZodType,
+  name: string,
+): ResponseFormatJSONSchema {
+  return {
+    type: `json_schema`,
+    json_schema: {
+      schema: z.toJSONSchema(zodObject, { unrepresentable: `any` }),
+      name,
+    },
+  };
+}
 
-export async function requestOpenAiJson<T>(opts: {
+export async function requestOpenAiJson<Schema extends z.ZodType>(opts: {
   system: string;
   user: string;
-  temperature?: number;
-  maxTokens?: number;
-}): Promise<T> {
-  const apiKey = nonNullable(openaiApiKey);
+  schema: Schema;
+}): Promise<z.infer<Schema>> {
+  const client = getOpenAIClient();
 
-  const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
-    method: `POST`,
-    headers: {
-      "Content-Type": `application/json`,
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: `gpt-4.1-mini`,
-      temperature: opts.temperature ?? 0.6,
-      max_tokens: opts.maxTokens ?? 600,
-      response_format: { type: `json_object` },
-      messages: [
-        { role: `system`, content: opts.system },
-        { role: `user`, content: opts.user },
-      ],
-    }),
-  });
+  const body: ChatCompletionCreateParamsNonStreaming = {
+    model: `gpt-5-mini`,
+    response_format: openAiZodResponseFormat(opts.schema, `result_shape`),
+    messages: [
+      { role: `system`, content: opts.system },
+      { role: `user`, content: opts.user },
+    ],
+  };
 
-  if (!response.ok) {
-    const bodyText = await response.text().catch(() => ``);
-    throw new Error(
-      `OpenAI request failed (${response.status}): ${bodyText.slice(0, 500)}`,
-    );
-  }
+  const completion = await client.chat.completions.create(body);
 
-  const data = (await response.json()) as OpenAiChatResponse;
-  const content = data.choices?.[0]?.message?.content ?? ``;
+  const message = completion.choices[0]?.message;
+  const content = message?.content ?? ``;
 
   if (content.length === 0) {
     throw new Error(`OpenAI response was empty`);
   }
 
-  return JSON.parse(content) as T;
+  return opts.schema.parse(JSON.parse(content));
 }

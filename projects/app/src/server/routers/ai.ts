@@ -7,37 +7,24 @@ import { authedProcedure, router } from "@/server/lib/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
-type SoundDetails = {
-  soundId: string;
-  name?: string | null;
-  description?: string | null;
-};
-
-const soundDetailsSchema = z
-  .object({
-    soundId: z.string(),
-    name: z.string().nullable().optional(),
-    description: z.string().nullable().optional(),
-  })
-  .strict();
-
-const sceneDetailsSchema = z
-  .object({
-    description: z.string().nullable().optional(),
-  })
-  .strict();
-
 const pronunciationHintInputSchema = z
   .object({
-    hanzi: z.string(),
-    pinyin: z.string(),
-    gloss: z.string(),
-    initial: soundDetailsSchema.nullable(),
-    final: soundDetailsSchema.nullable(),
-    tone: soundDetailsSchema.nullable(),
-    toneNumber: z.number().int().min(1).max(5).nullable(),
-    finalToneScene: sceneDetailsSchema.nullable(),
-    count: z.number().int().min(1).max(6).optional(),
+    leadCharacter: z
+      .object({ name: z.string().min(1), bio: z.string().optional() })
+      .strict(),
+    location: z
+      .object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+      })
+      .strict(),
+    cue: z
+      .object({
+        word: z.string().min(1),
+        meaning: z.string().optional(),
+      })
+      .strict(),
+    count: z.number().int().min(1).max(6),
   })
   .strict();
 
@@ -77,21 +64,54 @@ const generateImageOutputSchema = z
   })
   .strict();
 
-function cleanText(value?: string | null) {
-  if (value == null) {
-    return null;
-  }
-  const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
-}
+export function buildPronunciationHintPrompt({
+  leadCharacter,
+  location,
+  cue,
+  count,
+}: {
+  leadCharacter: { name: string; bio?: string };
+  location: { name: string; description?: string };
+  cue: { word: string; meaning?: string };
+  count: number;
+}): { system: string; user: string } {
+  const system = [
+    `You create short pronunciation mnemonic story ideas for Mandarin learners.`,
+    `Invent vivid, memorable mini-scenes using a character, a location, and a keyword.`,
+    `The goal is to create a scene that is easy to picture and easy to remember.`,
+    `Each scene should feel like a tiny absurd sketch or striking mental snapshot.`,
+    `Always clearly include the named character and location.`,
+    `Use the keyword as light inspiration for what happens, but do not turn the result into a definition.`,
+    `If extra character or location details are provided, use them to make the story more specific.`,
+    `Keep each hint to 1-2 sentences.`,
+    `Prefer visual, unusual, and memorable situations over generic ones.`,
+  ].join(`\n`);
 
-function summarizeSound(details: SoundDetails | null) {
-  if (details == null) {
-    return `(missing)`;
-  }
-  const name = cleanText(details.name) ?? details.soundId;
-  const description = cleanText(details.description);
-  return description == null ? name : `${name} - ${description}`;
+  const optionalLines = [
+    leadCharacter.bio == null
+      ? null
+      : `Lead character bio: ${leadCharacter.bio}`,
+    location.description == null
+      ? null
+      : `Location description: ${location.description}`,
+    cue.meaning == null ? null : `Cue meaning: ${cue.meaning}`,
+  ].filter((line): line is string => line != null);
+
+  const user = [
+    `Story ingredients:`,
+    `- Lead character: ${leadCharacter.name}`,
+    `- Location: ${location.name}`,
+    `- Cue: ${cue.word}`,
+    ...(optionalLines.length > 0 ? [``, ...optionalLines] : []),
+    ``,
+    `Generate ${count} distinct mnemonic story ideas.`,
+    `Each suggestion must explicitly include the character and location by name.`,
+    `Use the keyword as light inspiration for the central action, object, or conflict.`,
+    `Good suggestions are specific, visual, unusual, and easy to replay mentally.`,
+    `Bad suggestions are generic, flat, or mostly just a definition.`,
+  ].join(`\n`);
+
+  return { system, user };
 }
 
 export const aiRouter = router({
@@ -99,54 +119,23 @@ export const aiRouter = router({
     .input(pronunciationHintInputSchema)
     .output(pronunciationHintOutputSchema)
     .mutation(async (opts) => {
-      const {
-        hanzi,
-        pinyin,
-        gloss,
-        initial,
-        final,
-        tone,
-        toneNumber,
-        finalToneScene,
-      } = opts.input;
-      const count = opts.input.count ?? 4;
+      const { leadCharacter, location, cue, count } = opts.input;
 
-      const finalToneDescription = cleanText(finalToneScene?.description);
-
-      const system =
-        `You write short pronunciation mnemonic hints for Mandarin learners. ` +
-        `Each hint should be 1-2 sentences, vivid, and easy to remember. ` +
-        `Always tie the hint to the user's chosen character names and scene details. ` +
-        `Avoid explaining meaning; focus on sound. ` +
-        `Do not mention pinyin letters or tone numbers directly. ` +
-        `Return only JSON with the requested shape.`;
-
-      const user = [
-        `Hanzi: ${hanzi}`,
-        `Pinyin: ${pinyin}`,
-        `Gloss (context only): ${gloss}`,
-        `Initial character: ${summarizeSound(initial)}`,
-        `Final character: ${summarizeSound(final)}`,
-        `Tone character: ${summarizeSound(tone)}`,
-        `Tone number: ${toneNumber ?? `(missing)`}`,
-        `Final+tone scene: ${finalToneDescription ?? `(missing)`}`,
-        ``,
-        `Generate ${count} distinct hints.`,
-        `Each hint must reference the initial, final, and tone characters by name.`,
-        `If a scene description exists, include it as the location of the action.`,
-        `Return JSON: { suggestions: [{ hint, explanation, confidence }] }`,
-        `Confidence is a number from 0 to 1.`,
-      ].join(`\n`);
+      const { system, user } = buildPronunciationHintPrompt({
+        leadCharacter,
+        location,
+        cue,
+        count,
+      });
 
       try {
-        const data = await requestOpenAiJson<unknown>({
+        const data = await requestOpenAiJson({
           system,
           user,
-          temperature: 0.7,
-          maxTokens: 700,
+          schema: pronunciationHintOutputSchema,
         });
 
-        return pronunciationHintOutputSchema.parse(data);
+        return data;
       } catch (error) {
         console.error(`Failed to generate pronunciation hints:`, error);
         throw new TRPCError({

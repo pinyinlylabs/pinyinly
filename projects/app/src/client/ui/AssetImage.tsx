@@ -17,9 +17,9 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
    * The asset ID (not the full key).
    */
   assetId: AssetId;
-  debugAssetStatus?: AssetStatusKind;
-  debugErrorMessage?: string | null;
-  debugImageError?: boolean;
+  demoAssetStatus?: AssetStatusKind;
+  demoErrorMessage?: string | null;
+  demoImageError?: boolean;
   style?: StyleProp<Pick<ImageStyle, `width` | `height` | `transform`>>;
 }
 
@@ -38,9 +38,9 @@ export function AssetImage({
   contentFit = `cover`,
   className,
   style,
-  debugAssetStatus,
-  debugErrorMessage,
-  debugImageError = false,
+  demoAssetStatus,
+  demoErrorMessage,
+  demoImageError = false,
   ...restImageProps
 }: AssetImageProps) {
   const db = useDb();
@@ -56,15 +56,15 @@ export function AssetImage({
   const [imageError, setImageError] = useState(false);
   const cachedImageSource = useAssetImageCacheQuery(assetId);
   const asset =
-    debugAssetStatus == null
+    demoAssetStatus == null
       ? liveAsset
       : {
           ...liveAsset,
           assetId,
-          errorMessage: debugErrorMessage ?? null,
-          status: debugAssetStatus,
+          errorMessage: demoErrorMessage ?? null,
+          status: demoAssetStatus,
         };
-  const hasImageError = imageError || debugImageError;
+  const hasImageError = imageError || demoImageError;
 
   useEffect(() => {
     setImageError(false);
