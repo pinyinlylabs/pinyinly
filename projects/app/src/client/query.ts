@@ -18,7 +18,11 @@ import {
   skillLearningGraph,
 } from "@/data/skills";
 import { userHanziMeaningDefs } from "@/data/userSettings";
-import type { Dictionary } from "@/dictionary";
+import type {
+  CharacterComponentUsageEntry,
+  CharacterDecompositionEntry,
+  Dictionary,
+} from "@/dictionary";
 import {
   buildCharacterComponentUsageEntries,
   buildHanziWord,
@@ -455,20 +459,10 @@ export type DictionarySearchCollection = Collection<
   string
 >;
 
-export interface CharacterDecompositionEntry {
-  hanzi: HanziText;
-  decompositionIds: string;
-}
-
 export type CharacterDecompositionCollection = Collection<
   CharacterDecompositionEntry,
   HanziText
 >;
-
-export interface CharacterComponentUsageEntry {
-  component: HanziText;
-  usedInHanzi: readonly HanziText[];
-}
 
 export type CharacterComponentUsageCollection = Collection<
   CharacterComponentUsageEntry,
