@@ -88,11 +88,11 @@ export function AssetImage({
 
   if (asset == null) {
     // Asset not found in TanStack DB yet
-    return <ShimmerRect className={className} style={style as ViewStyle} />;
+    return <ShimmerRect className={className} style={style} />;
   }
 
   if (asset.status === AssetStatusKind.Pending) {
-    return <ShimmerRect className={className} style={style as ViewStyle} />;
+    return <ShimmerRect className={className} style={style} />;
   }
 
   if (asset.status === AssetStatusKind.Failed || hasImageError) {
