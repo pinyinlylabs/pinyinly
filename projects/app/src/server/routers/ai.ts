@@ -44,6 +44,29 @@ const pronunciationHintOutputSchema = z
   })
   .strict();
 
+const subLocationDescriptionInputSchema = z
+  .object({
+    location: z.string().min(1),
+    count: z.number().int().min(1).max(6),
+  })
+  .strict();
+
+const subLocationDescriptionOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            description: z.string(),
+            explanation: z.string().nullable().optional(),
+            confidence: z.number().min(0).max(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 const aiReferenceImageSchema = z
   .object({
     label: z.string().min(1).max(400).optional(),
@@ -114,6 +137,34 @@ export function buildPronunciationHintPrompt({
   return { system, user };
 }
 
+export function buildSubLocationDescriptionPrompt({
+  location,
+  count,
+}: {
+  location: string;
+  count: number;
+}): { system: string; user: string } {
+  const system = [
+    `You create vivid sublocation descriptions for Mandarin pronunciation mnemonic scenes.`,
+    `Each description should help someone instantly picture a specific place.`,
+    `Prefer concrete sensory details over abstract words.`,
+    `Use visual anchors like objects, textures, lighting, signage, sounds, or smells.`,
+    `Keep each description to 1-2 sentences and avoid dictionary-style definitions.`,
+    `Make suggestions distinct from one another and easy to remember.`,
+  ].join(`\n`);
+
+  const user = [
+    `Sublocation: ${location}`,
+    ``,
+    `Generate ${count} distinct sublocation descriptions for this exact place.`,
+    `Each suggestion must reference the sublocation name exactly as written: ${location}.`,
+    `Good suggestions are specific, visual, unusual, and easy to replay mentally.`,
+    `Bad suggestions are generic, flat, or mostly abstract adjectives.`,
+  ].join(`\n`);
+
+  return { system, user };
+}
+
 export const aiRouter = router({
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
@@ -141,6 +192,34 @@ export const aiRouter = router({
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate hints`,
+        });
+      }
+    }),
+
+  generateSubLocationDescriptions: authedProcedure
+    .input(subLocationDescriptionInputSchema)
+    .output(subLocationDescriptionOutputSchema)
+    .mutation(async (opts) => {
+      const { location, count } = opts.input;
+
+      const { system, user } = buildSubLocationDescriptionPrompt({
+        location,
+        count,
+      });
+
+      try {
+        const data = await requestOpenAiJson({
+          system,
+          user,
+          schema: subLocationDescriptionOutputSchema,
+        });
+
+        return data;
+      } catch (error) {
+        console.error(`Failed to generate sublocation descriptions:`, error);
+        throw new TRPCError({
+          code: `INTERNAL_SERVER_ERROR`,
+          message: `Unable to generate descriptions`,
         });
       }
     }),

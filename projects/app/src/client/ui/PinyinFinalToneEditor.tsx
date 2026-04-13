@@ -1,5 +1,6 @@
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { AiSubLocationDescriptionModal } from "@/client/ui/AiSubLocationDescriptionModal";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
@@ -19,7 +20,7 @@ import {
 } from "@/data/userSettings";
 import { loadFinalToneFrequencies } from "@/dictionary";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
-import { use } from "react";
+import { use, useState } from "react";
 import { Text, View } from "react-native";
 
 const TONE_IDS = [`1`, `2`, `3`, `4`, `5`] as const;
@@ -121,6 +122,17 @@ function ToneTileEditor({
 
   const descriptionSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
   const imageSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
+  const finalToneNameSetting = useUserSetting({
+    setting: pinyinFinalToneNameSetting,
+    key: descriptionSettingKey,
+  });
+  const descriptionSetting = useUserSetting({
+    setting: pinyinFinalToneDescriptionSetting,
+    key: descriptionSettingKey,
+  });
+  const finalToneLocationName =
+    finalToneNameSetting.value?.text ?? defaultFinalToneName;
+  const [showAiModal, setShowAiModal] = useState(false);
 
   return (
     <View
@@ -173,6 +185,19 @@ function ToneTileEditor({
             placeholder="Describe what this tone position looks like..."
             multiline
           />
+          <View className="mt-2 flex-row items-center justify-between">
+            <Text className="font-sans text-[13px] text-fg-dim">
+              Need help making this sublocation more vivid?
+            </Text>
+            <RectButton
+              variant="bare"
+              onPress={() => {
+                setShowAiModal(true);
+              }}
+            >
+              Use AI
+            </RectButton>
+          </View>
         </View>
 
         {/* Image Uploader */}
@@ -188,6 +213,23 @@ function ToneTileEditor({
           />
         </View>
       </View>
+
+      {showAiModal ? (
+        <AiSubLocationDescriptionModal
+          location={finalToneLocationName}
+          onApplyDescription={(description) => {
+            descriptionSetting.setValue({
+              soundId: finalSoundId,
+              tone,
+              text: description,
+            });
+            setShowAiModal(false);
+          }}
+          onDismiss={() => {
+            setShowAiModal(false);
+          }}
+        />
+      ) : null}
     </View>
   );
 }
