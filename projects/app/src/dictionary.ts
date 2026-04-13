@@ -153,6 +153,100 @@ export const loadCharacters = memoize0(async function loadCharacters() {
     .parse(await import(`./data/characters.asset.json`).then((x) => x.default));
 });
 
+export interface CharacterDecompositionEntry {
+  hanzi: HanziText;
+  decompositionIds: string;
+}
+
+export const loadBuiltinCharacterDecompositionEntries = memoize0(
+  async function loadBuiltinCharacterDecompositionEntries() {
+    const characters = await loadCharacters();
+    const entries: CharacterDecompositionEntry[] = [];
+
+    for (const [hanzi, data] of characters.entries()) {
+      if (data.decomposition == null) {
+        continue;
+      }
+
+      entries.push({
+        hanzi: hanzi,
+        decompositionIds: data.decomposition,
+      });
+    }
+
+    entries.sort((a, b) => a.hanzi.localeCompare(b.hanzi));
+
+    return deepReadonly(entries);
+  },
+);
+
+export interface CharacterComponentUsageEntry {
+  component: HanziText;
+  usedInHanzi: readonly HanziText[];
+}
+
+export async function buildCharacterComponentUsageEntries(
+  decompositionEntries: readonly CharacterDecompositionEntry[],
+): Promise<readonly CharacterComponentUsageEntry[]> {
+  const characters = await loadCharacters();
+
+  const canonicalizeCharacter = (character: HanziCharacter) => {
+    let canonical = character;
+    let characterData = characters.get(canonical);
+
+    while (characterData?.canonicalForm != null) {
+      canonical = characterData.canonicalForm;
+      characterData = characters.get(canonical);
+    }
+
+    return canonical;
+  };
+
+  const componentUsage = new Map<HanziText, Set<HanziText>>();
+
+  for (const { hanzi, decompositionIds } of decompositionEntries) {
+    let idsNode;
+    try {
+      idsNode = parseIds(decompositionIds);
+    } catch (error) {
+      console.error(
+        `failed parsing decomposition for ${hanzi}: ${decompositionIds}`,
+        error,
+      );
+      continue;
+    }
+
+    for (const leaf of walkIdsNodeLeafs(idsNode)) {
+      if (strokeCountPlaceholderOrNull(leaf) != null) {
+        continue;
+      }
+
+      const leafCharacter = leaf as HanziCharacter;
+      const canonicalLeaf = canonicalizeCharacter(leafCharacter);
+
+      mapSetAdd(componentUsage, leafCharacter, hanzi);
+      mapSetAdd(componentUsage, canonicalLeaf, hanzi);
+    }
+  }
+
+  return deepReadonly(
+    [...componentUsage]
+      .map(([component, usedIn]) => ({
+        component,
+        usedInHanzi: [...usedIn].sort((a, b) => a.localeCompare(b)),
+      }))
+      .sort((a, b) => a.component.localeCompare(b.component)),
+  );
+}
+
+export const loadCharacterComponentUsageEntries = memoize0(
+  async function loadCharacterComponentUsageEntries() {
+    const decompositionEntries =
+      await loadBuiltinCharacterDecompositionEntries();
+    return buildCharacterComponentUsageEntries(decompositionEntries);
+  },
+);
+
 export const wordListSchema = z.array(hanziWordSchema);
 
 export const loadKangXiRadicalsHanziWords = memoize0(
