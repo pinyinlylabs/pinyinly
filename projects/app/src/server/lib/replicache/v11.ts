@@ -4,12 +4,11 @@ import {
   skillsToReReviewForHanziPinyinMistake,
 } from "@/data/mistakes";
 import type {
-  AssetId,
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
   Skill,
 } from "@/data/model";
-import { AssetStatusKind, MistakeKind } from "@/data/model";
+import { MistakeKind } from "@/data/model";
 import { v11 as schema } from "@/data/rizzleSchema";
 import type { Drizzle, Xmin } from "@/server/lib/db";
 import {
@@ -255,45 +254,14 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
       await updateSkillState(db, skill, userId);
     }
   },
-  async initAsset(db, userId, { assetId, contentType, contentLength, now }) {
-    await db.insert(s.asset).values([
-      {
-        userId,
-        assetId: assetId as AssetId,
-        status: AssetStatusKind.Pending,
-        contentType,
-        contentLength,
-        createdAt: now,
-      },
-    ]);
+  async initAsset(_db, _userId, _args) {
+    // No-op for legacy schema compatibility.
   },
-  async confirmAssetUpload(db, userId, { assetId, now }) {
-    await db
-      .update(s.asset)
-      .set({
-        status: AssetStatusKind.Uploaded,
-        uploadedAt: now,
-      })
-      .where(
-        and(
-          eq(s.asset.userId, userId),
-          eq(s.asset.assetId, assetId as AssetId),
-        ),
-      );
+  async confirmAssetUpload(_db, _userId, _args) {
+    // No-op for legacy schema compatibility.
   },
-  async failAssetUpload(db, userId, { assetId, errorMessage }) {
-    await db
-      .update(s.asset)
-      .set({
-        status: AssetStatusKind.Failed,
-        errorMessage,
-      })
-      .where(
-        and(
-          eq(s.asset.userId, userId),
-          eq(s.asset.assetId, assetId as AssetId),
-        ),
-      );
+  async failAssetUpload(_db, _userId, _args) {
+    // No-op for legacy schema compatibility.
   },
 };
 
@@ -516,7 +484,6 @@ export async function pull(
 }
 
 type CvrNamespace =
-  | `asset`
   | `skillState`
   | `skillRating`
   | `hanziGlossMistake`
@@ -582,29 +549,6 @@ type PatchOpsUnhydrated = Partial<
 >;
 
 const syncEntities = [
-  makeSyncEntity(
-    `asset`,
-    schema.asset,
-    (assetId, e) => e.marshalKey({ assetId }),
-    (db, ids) =>
-      db.query.asset.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.asset.id,
-              key: s.asset.assetId,
-              xmin: pgXmin(s.asset),
-            }),
-          ).as(`assetVersions`),
-        })
-        .from(s.asset)
-        .where(eq(s.asset.userId, userId))
-        .as(`assetVersions`),
-  ),
   makeSyncEntity(
     `skillState`,
     schema.skillState,
@@ -1002,11 +946,12 @@ type EntityState = {
 }[];
 
 type EntitiesState = Record<CvrNamespace, EntityState>;
+type ComputeEntitiesStateResult = EntitiesState & { asset: EntityState };
 
 export async function computeEntitiesState(
   db: Drizzle,
   userId: string,
-): Promise<EntitiesState> {
+): Promise<ComputeEntitiesStateResult> {
   return startSpan({ name: computeEntitiesState.name }, async () => {
     const subQueries = syncEntities.map(
       (syncEntity) =>
@@ -1032,7 +977,11 @@ export async function computeEntitiesState(
 
     const [result] = await query;
 
-    return nonNullable(result);
+    return {
+      ...nonNullable(result),
+      // Keep legacy v11 API shape stable even though asset syncing is removed.
+      asset: [],
+    };
   });
 }
 

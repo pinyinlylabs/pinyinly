@@ -923,7 +923,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
 
   test(`unchanged entities are preserved`, async () => {
     const prevCvr: CvrEntities = {
-      asset: { x0: `0` },
       hanziGlossMistake: { x1: `1` },
       hanziPinyinMistake: { x2: `2` },
       skillState: { x6: `6` },
@@ -931,7 +930,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
       setting: { x8: `8` },
     };
     const entitiesState: EntitiesState = {
-      asset: [{ id: `x0`, xmin: `0` }],
       hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
       hanziPinyinMistake: [{ id: `x2`, xmin: `2` }],
       skillState: [{ id: `x6`, xmin: `6` }],
@@ -942,7 +940,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
       nextCvrEntities: prevCvr,
       partial: false,
       patchOpsUnhydrated: {
-        asset: { delKeys: [], putIds: [] },
         hanziGlossMistake: { delKeys: [], putIds: [] },
         hanziPinyinMistake: { delKeys: [], putIds: [] },
         skillState: { delKeys: [], putIds: [] },

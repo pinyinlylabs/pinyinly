@@ -1,11 +1,8 @@
 import { trpc } from "@/client/trpc";
 import { useAssetImageCacheMutation } from "@/client/ui/hooks/useAssetImageCacheMutation";
-import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import type { AllowedImageMimeType, AssetId } from "@/data/model";
 import { allowedImageMimeTypeEnum } from "@/data/model";
-import type { currentSchema } from "@/data/rizzleSchema";
 import { getArrayBufferAssetId } from "@/util/assetId";
-import type { RizzleReplicache } from "@/util/rizzle";
 import type * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 
@@ -24,21 +21,18 @@ interface ImageUploaderOptions {
  * Hook for uploading images to S3 storage via presigned URLs.
  *
  * Flow:
- * 1. Optimistically create pending asset in Replicache
+ * 1. Optimistically cache notUploaded blob locally
  * 2. Request presigned upload URL from server
  * 3. Upload image directly to S3
- * 4. Confirm upload in Replicache
- * 5. Verify upload on server
+ * 4. Promote cache entry to uploaded
  */
 export function useImageUploader({
   onUploadComplete,
   onUploadError,
 }: ImageUploaderOptions) {
-  const rep = useRizzle() as RizzleReplicache<typeof currentSchema>;
   const { setCache, clearCache } = useAssetImageCacheMutation();
   const [uploading, setUploading] = useState(false);
   const requestUploadUrl = trpc.asset.requestUploadUrl.useMutation();
-  const confirmUpload = trpc.asset.confirmUpload.useMutation();
 
   const uploadImageBlob = async ({
     blob,
@@ -71,22 +65,17 @@ export function useImageUploader({
 
       assetId = await getArrayBufferAssetId(await blob.arrayBuffer());
 
+      // Optimistic local availability: cache the selected blob before any
+      // network request so the UI can render immediately.
       try {
         await setCache(assetId, {
-          kind: `pending`,
+          kind: `notUploaded`,
           blob,
           contentType: resolvedContentType,
         });
       } catch (cacheError) {
         console.warn(`Failed to cache image blob before upload`, cacheError);
       }
-
-      await rep.mutate.initAsset({
-        assetId,
-        contentType: resolvedContentType,
-        contentLength,
-        now: new Date(),
-      });
 
       const { uploadUrl } = await requestUploadUrl.mutateAsync({
         assetId,
@@ -106,22 +95,8 @@ export function useImageUploader({
         throw new Error(`Upload failed: ${uploadResponse.statusText}`);
       }
 
-      await rep.mutate.confirmAssetUpload({
-        assetId,
-        now: new Date(),
-      });
-
-      const { success } = await confirmUpload.mutateAsync({ assetId });
-
-      if (!success) {
-        await rep.mutate.failAssetUpload({
-          assetId,
-          errorMessage: `Upload verification failed`,
-          now: new Date(),
-        });
-        throw new Error(`Upload verification failed`);
-      }
-
+      // Promote cache entry after successful upload. This warms the HTTP cache
+      // for CDN URL fetches and clears the temporary notUploaded blob entry.
       try {
         await setCache(assetId, {
           kind: `uploaded`,

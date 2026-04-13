@@ -1,4 +1,4 @@
-import { v12 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
+import { v14 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import { pgXmin } from "#server/lib/db.ts";
 import {
@@ -7,7 +7,7 @@ import {
   pull,
   push,
   retryMutation,
-} from "#server/lib/replicache/v12.ts";
+} from "#server/lib/replicache/v14.ts";
 import type { CvrEntities } from "#server/pgSchema.ts";
 import * as s from "#server/pgSchema.ts";
 import { createUser, txTest } from "#test/server/lib/dbHelpers.ts";
@@ -822,7 +822,6 @@ describe(
 
       txTest(`works for non-existant user and client group`, async ({ tx }) => {
         await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
-          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           skillState: [],
@@ -836,7 +835,6 @@ describe(
         const user = await createUser(tx);
 
         await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
-          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           skillState: [],
@@ -872,7 +870,6 @@ describe(
         invariant(user1SkillState != null);
 
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           skillRating: [],
@@ -909,7 +906,6 @@ describe(
         invariant(user1SkillRating != null);
 
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           skillRating: [user1SkillRating],

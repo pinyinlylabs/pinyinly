@@ -138,6 +138,11 @@ export const rSrsState = memoize0(function rSrsParams() {
 });
 
 /**
+ * # v14 change log
+ *
+ * - **Breaking**: removed asset entity/mutators (`asset`, `initAsset`,
+ *   `confirmAssetUpload`, `failAssetUpload`).
+ *
  * # v13 change log
  *
  * - **Breaking**: removed pinyin sound entities/mutators in favor of user settings.
@@ -554,9 +559,14 @@ export const v13 = {
   version: `13`,
 };
 
-export const currentSchema = v13;
+export const v14 = {
+  ...omit(v13, [`asset`, `initAsset`, `confirmAssetUpload`, `failAssetUpload`]),
+  version: `14`,
+};
 
-export const supportedSchemas = [v13] as const;
+export const currentSchema = v14;
+
+export const supportedSchemas = [v14] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 

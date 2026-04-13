@@ -407,11 +407,6 @@ export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
  */
 export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
-export type AssetCollection = Collection<
-  RizzleEntityOutput<typeof currentSchema.asset>,
-  string
->;
-
 export type SettingCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.setting>,
   string
@@ -1177,7 +1172,6 @@ export const latestSkillRatingCollectionOptions = ({
 });
 
 export interface Db {
-  assetCollection: AssetCollection;
   settingCollection: SettingCollection;
   settingHistoryCollection: SettingHistoryCollection;
   builtInDictionarySearch: BuiltInDictionarySearchCollection;
@@ -1245,15 +1239,6 @@ export function makeDb(rizzle: Rizzle): Db {
 
   const latestSkillRatingsCollection: LatestSkillRatingsCollection =
     createCollection(latestSkillRatingCollectionOptions({ rizzle }));
-
-  const assetCollection: AssetCollection = createCollection(
-    rizzleCollectionOptions({
-      id: `asset`,
-      rizzle,
-      entity: currentSchema.asset,
-      getKey: (item) => item.assetId,
-    }),
-  );
 
   const settingCollection: SettingCollection = createCollection(
     rizzleCollectionOptions({
@@ -1387,7 +1372,6 @@ export function makeDb(rizzle: Rizzle): Db {
     });
 
   return {
-    assetCollection,
     builtInDictionarySearch,
     characterComponentUsage,
     characterDecomposition,

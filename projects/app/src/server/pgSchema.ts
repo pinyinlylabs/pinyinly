@@ -5,7 +5,6 @@ import * as pg from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 import {
   pgAssetId,
-  pgAssetStatusKind,
   pgBase64url,
   pgFsrsRating,
   pgHanziOrHanziWord,
@@ -210,14 +209,17 @@ export const hanziPinyinMistake = schema.table(
 );
 
 /**
- * User-uploaded assets (images for mnemonics).
+ * Best-effort UI hints for uploads in progress.
  *
- * Assets are immutable once uploaded - they cannot be modified, only created.
- * The asset file is stored in S3 at path: blob/{assetId}
- * where assetId is algorithm-prefixed (e.g., sha256/<base64url-hash>).
+ * A row is created when the frontend requests an upload URL for an asset.
+ * This is only a transient hint to reduce "not found" flicker while upload
+ * is in flight.
+ *
+ * Source of truth for asset existence is S3, not this table.
+ * Rows are automatically expired by a scheduled cleanup job.
  */
-export const asset = schema.table(
-  `asset`,
+export const assetPendingUpload = schema.table(
+  `assetPendingUpload`,
   {
     id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
     userId: pg
@@ -226,35 +228,14 @@ export const asset = schema.table(
       .notNull(),
     /**
      * Client-generated asset ID (algorithm-prefixed, e.g., sha256/<base64url>).
-     * Used as the S3 object key suffix.
      */
-    assetId: pgAssetId(`assetId`).notNull().unique(),
-    /**
-     * Upload status: pending, uploaded, or failed.
-     */
-    status: pgAssetStatusKind(`status`).notNull(),
-    /**
-     * MIME type of the asset (e.g. image/jpeg, image/png).
-     */
-    contentType: pg.text(`contentType`).notNull(),
-    /**
-     * File size in bytes.
-     */
-    contentLength: pg.integer(`contentLength`).notNull(),
-    /**
-     * When the asset record was created.
-     */
+    assetId: pgAssetId(`assetId`).notNull(),
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-    /**
-     * When the upload was confirmed (status changed to uploaded).
-     */
-    uploadedAt: pg.timestamp(`uploadedAt`),
-    /**
-     * Error message if the upload failed.
-     */
-    errorMessage: pg.text(`errorMessage`),
   },
-  (t) => [pg.index().on(t.userId)],
+  (t) => [
+    pg.unique().on(t.userId, t.assetId),
+    pg.index().on(t.userId, t.createdAt),
+  ],
 );
 
 /**

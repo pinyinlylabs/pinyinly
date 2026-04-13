@@ -11,6 +11,7 @@ import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
+import { subMinutes } from "date-fns/subMinutes";
 import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
 import * as Crypto from "expo-crypto";
 import { EventSchemas, Inngest, RetryAfterError } from "inngest";
@@ -34,7 +35,8 @@ import {
   pushChunked,
   updateRemoteSyncClientLastMutationId,
 } from "./replicache";
-import { retryMutation as retryMutationV13 } from "./replicache/v12";
+import { retryMutation as retryMutationV12 } from "./replicache/v12";
+import { retryMutation as retryMutationV14 } from "./replicache/v14";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
@@ -67,6 +69,41 @@ const devTestThrowRootError = inngest.createFunction(
   { event: `test/throw-root-error` },
   () => {
     throw new Error(`test error`);
+  },
+);
+
+const assetPendingUploadGarbageCollection = inngest.createFunction(
+  {
+    id: `assetPendingUploadGarbageCollection`,
+    singleton: { mode: `skip` },
+  },
+  {
+    cron: `* * * * *`,
+  },
+  async ({ step, logger }) => {
+    const cutoff = subMinutes(new Date(), 30);
+
+    const deletedRowCount = await step.run(
+      `delete stale assetPendingUpload rows`,
+      async () =>
+        withDrizzle(async (db) => {
+          const deletedRows = await db
+            .delete(s.assetPendingUpload)
+            .where(lt(s.assetPendingUpload.createdAt, cutoff))
+            .returning({ id: s.assetPendingUpload.id });
+
+          return deletedRows.length;
+        }),
+    );
+
+    logger.info(
+      `assetPendingUpload GC: deleted ${deletedRowCount} stale rows older than ${cutoff.toISOString()}`,
+    );
+
+    return {
+      deletedRowCount,
+      cutoff: cutoff.toISOString(),
+    };
   },
 );
 
@@ -828,8 +865,11 @@ const retryFailedMutations = inngest.createFunction(
                 // Route to the correct schema version's retryMutation
                 const result = await (async () => {
                   switch (schemaVersion) {
+                    case `14`: {
+                      return retryMutationV14(db, mutationRecord.id);
+                    }
                     case `13`: {
-                      return retryMutationV13(db, mutationRecord.id);
+                      return retryMutationV12(db, mutationRecord.id);
                     }
                     default: {
                       return {
@@ -1103,6 +1143,7 @@ export const functions = [
   dataIntegrityDictionary,
   helloWorldEmail,
   migrateHanziWords,
+  assetPendingUploadGarbageCollection,
   pgFullVacuumGarbageCollection,
   replicacheGarbageCollection,
   retryFailedMutations,

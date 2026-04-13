@@ -1,17 +1,16 @@
 import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
 import { listReferencedAssetIdsForUser } from "@/server/lib/assetSync";
+import { withDrizzle } from "@/server/lib/db";
 import {
   createPresignedReadUrl,
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
   verifyObjectExists,
 } from "@/server/lib/s3/assets";
+import * as schema from "@/server/pgSchema";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { z } from "zod/v4";
-
-const assetStatusSchema = z.enum([`pending`, `uploaded`, `failed`]);
-export type AssetStatus = z.infer<typeof assetStatusSchema>;
 
 export const assetRouter = router({
   /**
@@ -20,7 +19,7 @@ export const assetRouter = router({
    * The client should:
    * 1. Call this endpoint to get an upload URL
    * 2. Upload the file directly to S3 using the presigned URL
-   * 3. Call `confirmUpload` to mark the asset as uploaded
+   * 3. Upload the file directly to S3 using the returned URL
    */
   requestUploadUrl: authedProcedure
     .input(
@@ -51,7 +50,28 @@ export const assetRouter = router({
         .strict(),
     )
     .mutation(async (opts) => {
+      const { userId } = opts.ctx.session;
       const { assetId, contentType, contentLength } = opts.input;
+
+      const now = new Date();
+      await withDrizzle((db) =>
+        db
+          .insert(schema.assetPendingUpload)
+          .values({
+            userId,
+            assetId,
+            createdAt: now,
+          })
+          .onConflictDoUpdate({
+            target: [
+              schema.assetPendingUpload.userId,
+              schema.assetPendingUpload.assetId,
+            ],
+            set: {
+              createdAt: now,
+            },
+          }),
+      );
 
       const result = await createPresignedUploadUrl({
         assetId,
@@ -60,42 +80,6 @@ export const assetRouter = router({
       });
 
       return result;
-    }),
-
-  /**
-   * Confirm that an asset has been successfully uploaded to S3.
-   *
-   * This verifies the asset exists in storage and returns its metadata.
-   * The client should call this after successfully uploading via the presigned URL.
-   */
-  confirmUpload: authedProcedure
-    .input(
-      z
-        .object({
-          assetId: assetIdSchema,
-        })
-        .strict(),
-    )
-    .output(
-      z
-        .object({
-          success: z.boolean(),
-          contentType: z.string().optional(),
-          contentLength: z.number().optional(),
-        })
-        .strict(),
-    )
-    .mutation(async (opts) => {
-      const { assetId } = opts.input;
-
-      const assetKey = getBucketObjectKeyForId(assetId);
-      const result = await verifyObjectExists(assetKey);
-
-      return {
-        success: result.exists,
-        contentType: result.contentType,
-        contentLength: result.contentLength,
-      };
     }),
 
   /**
