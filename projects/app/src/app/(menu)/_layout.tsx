@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 /**
  * Check if a pathname should highlight a navigation item.
@@ -161,7 +162,9 @@ function DesktopFloatingTitle() {
   }
 
   return (
-    <View
+    <Reanimated.View
+      entering={FadeIn.duration(100)}
+      exiting={FadeOut.duration(100)}
       className={`
         hidden
 
@@ -188,12 +191,22 @@ function DesktopFloatingTitle() {
 
         <View
           className={`
-            flex-1
+            relative flex-1
 
             menu-lg:w-[600px] menu-lg:max-w-[600px] menu-lg:flex-none
           `}
         >
-          <View className="h-[56px] items-center justify-center bg-bg/90">
+          <View className="relative h-[56px] items-center justify-center">
+            <View
+              className={`
+                absolute -inset-x-2 -bottom-10 top-0 bg-bg/90 backdrop-blur-sm
+
+                [-webkit-mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+
+                [mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+              `}
+            />
+
             <HeaderTitleProvider.TitleText className="pyly-body-title" />
           </View>
         </View>
@@ -208,7 +221,7 @@ function DesktopFloatingTitle() {
           `}
         ></View>
       </View>
-    </View>
+    </Reanimated.View>
   );
 }
 
