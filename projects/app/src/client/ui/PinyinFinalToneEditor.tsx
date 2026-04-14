@@ -124,6 +124,7 @@ function ToneTileEditor({
   });
   const finalToneLocationName =
     finalToneNameSetting.value?.text ?? defaultFinalToneName;
+  const [isEditMode, setIsEditMode] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
   const toneLabel =
     frequency > 0 ? `Tone ${tone} (${frequency})` : `Tone ${tone}`;
@@ -134,6 +135,12 @@ function ToneTileEditor({
       className={`
         ${isFocused ? `border-cyan` : `border-fg-bg10`}
       `}
+      onEditingChange={(nextIsEditMode) => {
+        setIsEditMode(nextIsEditMode);
+        if (!nextIsEditMode) {
+          setShowAiModal(false);
+        }
+      }}
       onLayout={(event) => {
         onToneLayout?.(tone, event.nativeEvent.layout.y);
       }}
@@ -153,6 +160,7 @@ function ToneTileEditor({
             variant="body"
             setting={pinyinFinalToneNameSetting}
             settingKey={descriptionSettingKey}
+            readonly={!isEditMode}
             placeholder="Name this tone location"
             // oxlint-disable-next-line typescript/no-deprecated
             defaultValue={defaultFinalToneName}
@@ -167,20 +175,22 @@ function ToneTileEditor({
           enableAiGeneration
           setting={pinyinFinalToneImageSetting}
           settingKey={imageSettingKey}
+          readonly={!isEditMode}
           previewHeight={200}
           tileSize={64}
           frameConstraint={{ aspectRatio: 2 }}
         />
 
         {/* Description Field */}
-        <View>
-          <InlineEditableSettingText
-            variant="body"
-            setting={pinyinFinalToneDescriptionSetting}
-            settingKey={descriptionSettingKey}
-            placeholder="Describe what this tone position looks like..."
-            multiline
-          />
+        <InlineEditableSettingText
+          variant="body"
+          setting={pinyinFinalToneDescriptionSetting}
+          settingKey={descriptionSettingKey}
+          readonly={!isEditMode}
+          placeholder="Describe what this tone position looks like..."
+          multiline
+        />
+        {isEditMode ? (
           <View className="mt-2 flex-row items-center justify-between">
             <Text className="font-sans text-[13px] text-fg-dim">
               Need help making this sublocation more vivid?
@@ -194,9 +204,9 @@ function ToneTileEditor({
               Use AI
             </RectButton>
           </View>
-        </View>
+        ) : null}
 
-        {showAiModal ? (
+        {showAiModal && isEditMode ? (
           <AiSubLocationDescriptionModal
             label={finalToneLocationName}
             location={finalName}
