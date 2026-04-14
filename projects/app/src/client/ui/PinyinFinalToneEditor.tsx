@@ -216,7 +216,9 @@ function ToneTileEditor({
 
       {showAiModal ? (
         <AiSubLocationDescriptionModal
-          location={finalToneLocationName}
+          label={finalToneLocationName}
+          location={finalName}
+          sublocation={toneName}
           onApplyDescription={(description) => {
             descriptionSetting.setValue({
               soundId: finalSoundId,
