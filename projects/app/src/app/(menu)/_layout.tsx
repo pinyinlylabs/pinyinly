@@ -180,7 +180,7 @@ function DesktopFloatingTitle() {
           className={`
             hidden
 
-            sm:flex sm:min-w-[240px]
+            sm:flex sm:min-w-[240px] sm:pr-[32px]
 
             menu-lg:flex-1
           `}
