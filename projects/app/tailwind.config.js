@@ -62,10 +62,45 @@ const config = {
         fg: `rgb(from var(--color-on-fg) r g b / calc(alpha * <alpha-value>))`,
       },
       lozenge: {
+        emerald: {
+          bg: `rgb(from var(--color-lozenge-emerald-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-emerald-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-emerald-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+        cyan: {
+          bg: `rgb(from var(--color-lozenge-cyan-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-cyan-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-cyan-border) r g b / calc(alpha * <alpha-value>))`,
+        },
         blue: {
           bg: `rgb(from var(--color-lozenge-blue-bg) r g b / calc(alpha * <alpha-value>))`,
           fg: `rgb(from var(--color-lozenge-blue-fg) r g b / calc(alpha * <alpha-value>))`,
           border: `rgb(from var(--color-lozenge-blue-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+        violet: {
+          bg: `rgb(from var(--color-lozenge-violet-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-violet-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-violet-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+        fuchsia: {
+          bg: `rgb(from var(--color-lozenge-fuchsia-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-fuchsia-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-fuchsia-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+        rose: {
+          bg: `rgb(from var(--color-lozenge-rose-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-rose-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-rose-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+        orange: {
+          bg: `rgb(from var(--color-lozenge-orange-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-orange-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-orange-border) r g b / calc(alpha * <alpha-value>))`,
+        },
+        amber: {
+          bg: `rgb(from var(--color-lozenge-amber-bg) r g b / calc(alpha * <alpha-value>))`,
+          fg: `rgb(from var(--color-lozenge-amber-fg) r g b / calc(alpha * <alpha-value>))`,
+          border: `rgb(from var(--color-lozenge-amber-border) r g b / calc(alpha * <alpha-value>))`,
         },
       },
 

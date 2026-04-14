@@ -283,12 +283,111 @@
     --color-theme-placeholder-panel-fg-loud: #898989;
     --color-theme-placeholder-panel-on-fg: #1a1d1e;
 
-    --color-lozenge-blue-bg: rgba(2, 131, 245, 0);
-    --color-lozenge-blue-fg: rgba(2, 131, 245, 1);
-    --color-lozenge-blue-border: rgba(2, 131, 245, 1);
+    --color-lozenge-emerald-bg: color-mix(
+      in oklab,
+      var(--color-emerald) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-emerald-fg: var(--color-emerald);
+    --color-lozenge-emerald-border: color-mix(
+      in oklab,
+      var(--color-emerald) 60%,
+      var(--color-bg)
+    );
+
+    --color-lozenge-blue-bg: color-mix(
+      in oklab,
+      var(--color-blue) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-blue-fg: var(--color-blue);
+    --color-lozenge-blue-border: color-mix(
+      in oklab,
+      var(--color-blue) 60%,
+      var(--color-bg)
+    );
+
+    --color-lozenge-cyan-bg: color-mix(
+      in oklab,
+      var(--color-cyan) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-cyan-fg: var(--color-cyan);
+    --color-lozenge-cyan-border: color-mix(
+      in oklab,
+      var(--color-cyan) 60%,
+      var(--color-bg)
+    );
+
+    --color-lozenge-violet-bg: color-mix(
+      in oklab,
+      var(--color-violet) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-violet-fg: var(--color-violet);
+    --color-lozenge-violet-border: color-mix(
+      in oklab,
+      var(--color-violet) 60%,
+      var(--color-bg)
+    );
+    --color-lozenge-fuchsia-bg: color-mix(
+      in oklab,
+      var(--color-fuchsia) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-fuchsia-fg: var(--color-fuchsia);
+    --color-lozenge-fuchsia-border: color-mix(
+      in oklab,
+      var(--color-fuchsia) 60%,
+      var(--color-bg)
+    );
+    --color-lozenge-rose-bg: color-mix(
+      in oklab,
+      var(--color-rose) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-rose-fg: var(--color-rose);
+    --color-lozenge-rose-border: color-mix(
+      in oklab,
+      var(--color-rose) 60%,
+      var(--color-bg)
+    );
+    --color-lozenge-orange-bg: color-mix(
+      in oklab,
+      var(--color-orange) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-orange-fg: var(--color-orange);
+    --color-lozenge-orange-border: color-mix(
+      in oklab,
+      var(--color-orange) 60%,
+      var(--color-bg)
+    );
+    --color-lozenge-amber-bg: color-mix(
+      in oklab,
+      var(--color-amber) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-amber-fg: var(--color-amber);
+    --color-lozenge-amber-border: color-mix(
+      in oklab,
+      var(--color-amber) 60%,
+      var(--color-bg)
+    );
   }
 
   .pyly-color-scheme-light {
+    --color-lozenge-emerald-bg: color-mix(
+      in oklab,
+      var(--color-emerald) 0%,
+      var(--color-bg)
+    );
+    --color-lozenge-emerald-fg: var(--color-emerald);
+    --color-lozenge-emerald-border: color-mix(
+      in oklab,
+      var(--color-emerald) 60%,
+      var(--color-bg)
+    );
     --color-red: var(--color-red-light);
     --color-orange: var(--color-orange-light);
     --color-amber: var(--color-amber-light);
@@ -369,9 +468,83 @@
     --color-theme-placeholder-panel-fg-loud: #6c6c6c;
     --color-theme-placeholder-panel-on-fg: #ffffff;
 
-    --color-lozenge-blue-bg: rgba(228, 244, 255, 1);
-    --color-lozenge-blue-fg: rgba(2, 131, 245, 1);
-    --color-lozenge-blue-border: rgba(174, 220, 255, 1);
+    --color-lozenge-blue-bg: color-mix(
+      in oklab,
+      var(--color-blue) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-blue-fg: var(--color-blue);
+    --color-lozenge-blue-border: color-mix(
+      in oklab,
+      var(--color-blue) 50%,
+      var(--color-bg)
+    );
+    --color-lozenge-cyan-bg: color-mix(
+      in oklab,
+      var(--color-cyan) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-cyan-fg: var(--color-cyan);
+    --color-lozenge-cyan-border: color-mix(
+      in oklab,
+      var(--color-cyan) 50%,
+      var(--color-bg)
+    );
+    --color-lozenge-violet-bg: color-mix(
+      in oklab,
+      var(--color-violet) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-violet-fg: var(--color-violet);
+    --color-lozenge-violet-border: color-mix(
+      in oklab,
+      var(--color-violet) 50%,
+      var(--color-bg)
+    );
+    --color-lozenge-fuchsia-bg: color-mix(
+      in oklab,
+      var(--color-fuchsia) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-fuchsia-fg: var(--color-fuchsia);
+    --color-lozenge-fuchsia-border: color-mix(
+      in oklab,
+      var(--color-fuchsia) 50%,
+      var(--color-bg)
+    );
+    --color-lozenge-rose-bg: color-mix(
+      in oklab,
+      var(--color-rose) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-rose-fg: var(--color-rose);
+    --color-lozenge-rose-border: color-mix(
+      in oklab,
+      var(--color-rose) 50%,
+      var(--color-bg)
+    );
+    --color-lozenge-orange-bg: color-mix(
+      in oklab,
+      var(--color-orange) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-orange-fg: var(--color-orange);
+    --color-lozenge-orange-border: color-mix(
+      in oklab,
+      var(--color-orange) 50%,
+      var(--color-bg)
+    );
+    --color-lozenge-amber-bg: color-mix(
+      in oklab,
+      var(--color-amber) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-amber-fg: var(--color-amber);
+    --color-lozenge-amber-border: color-mix(
+      in oklab,
+      var(--color-amber) 50%,
+      var(--color-bg)
+    );
   }
 
   /* declare MDX component clases */
