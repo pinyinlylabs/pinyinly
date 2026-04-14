@@ -181,28 +181,28 @@ export default function SoundIdPage() {
               )}
             </View>
           </WikiTitledBox>
-        </View>
 
-        {/* Final-tone details editor for finals */}
-        {isFinalSoundId(id) && (
-          <PinyinFinalToneEditor
-            finalSoundId={id}
-            focusedTone={focusedTone}
-            onToneLayout={(tone, layoutY) => {
-              if (tone !== focusedTone) {
-                return;
-              }
-              setToneAnchorY(layoutY);
-            }}
-            toneAudioSourceByTone={{
-              1: tone1AudioSource,
-              2: tone2AudioSource,
-              3: tone3AudioSource,
-              4: tone4AudioSource,
-              5: tone5AudioSource,
-            }}
-          />
-        )}
+          {/* Final-tone details editor for finals */}
+          {isFinalSoundId(id) && (
+            <PinyinFinalToneEditor
+              finalSoundId={id}
+              focusedTone={focusedTone}
+              onToneLayout={(tone, layoutY) => {
+                if (tone !== focusedTone) {
+                  return;
+                }
+                setToneAnchorY(layoutY);
+              }}
+              toneAudioSourceByTone={{
+                1: tone1AudioSource,
+                2: tone2AudioSource,
+                3: tone3AudioSource,
+                4: tone4AudioSource,
+                5: tone5AudioSource,
+              }}
+            />
+          )}
+        </View>
 
         <SoundUsageExamplesSection pinyinSoundId={id} />
 

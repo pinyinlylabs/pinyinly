@@ -10,12 +10,14 @@ export function WikiTitledBox({
   className,
   headerCustomAction,
   onEditingChange,
+  onLayout,
 }: {
   title: string;
   children: React.ReactNode;
   className?: ViewProps[`className`];
   headerCustomAction?: React.ReactNode;
   onEditingChange?: (isEditing: boolean) => void;
+  onLayout?: ViewProps[`onLayout`];
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const headerAction =
@@ -44,7 +46,7 @@ export function WikiTitledBox({
     ));
 
   return (
-    <View className={containerClass({ className })}>
+    <View className={containerClass({ className })} onLayout={onLayout}>
       <View className="flex-row items-center">
         <Text className="pyly-body-subheading flex-1">{title}</Text>
         {headerAction}

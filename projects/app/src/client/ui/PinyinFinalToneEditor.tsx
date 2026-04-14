@@ -4,6 +4,7 @@ import { AiSubLocationDescriptionModal } from "@/client/ui/AiSubLocationDescript
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
+import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
@@ -55,15 +56,6 @@ export function PinyinFinalToneEditor({
 
   return (
     <View className="space-y-8">
-      <View>
-        <Text className="font-sans text-lg font-semibold text-fg">
-          Tone Details
-        </Text>
-        <Text className="mt-1 font-sans text-sm text-fg-dim">
-          Add descriptions and images for each tone position within this final.
-        </Text>
-      </View>
-
       <View className="space-y-6">
         {TONE_IDS.map((tone) => (
           <ToneTileEditor
@@ -133,49 +125,53 @@ function ToneTileEditor({
   const finalToneLocationName =
     finalToneNameSetting.value?.text ?? defaultFinalToneName;
   const [showAiModal, setShowAiModal] = useState(false);
+  const toneLabel =
+    frequency > 0 ? `Tone ${tone} (${frequency})` : `Tone ${tone}`;
 
   return (
-    <View
+    <WikiTitledBox
+      title={toneLabel}
       className={`
-        rounded-lg border bg-fg-bg5 p-4
-
         ${isFocused ? `border-cyan` : `border-fg-bg10`}
       `}
       onLayout={(event) => {
         onToneLayout?.(tone, event.nativeEvent.layout.y);
       }}
     >
-      <View className="mb-4 flex-row flex-wrap items-baseline gap-2">
-        <Text className="font-sans text-base font-medium text-fg">
-          Tone {tone}
-          {frequency > 0 && (
-            <Text className="text-sm text-fg-dim"> ({frequency})</Text>
+      <View className="gap-2 p-3">
+        <View className="ml-2 flex-row flex-wrap items-baseline gap-2">
+          {toneAudioSource == null ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="speaker-2"
+              onPressIn={playTone}
+            >
+              Play
+            </RectButton>
           )}
-          :
-        </Text>
-        {toneAudioSource == null ? null : (
-          <RectButton
-            variant="bare2"
-            iconStart="speaker-2"
-            onPressIn={playTone}
-          >
-            Play
-          </RectButton>
-        )}
-        <InlineEditableSettingText
-          variant="body"
-          setting={pinyinFinalToneNameSetting}
-          settingKey={descriptionSettingKey}
-          placeholder="Name this tone location"
-          // oxlint-disable-next-line typescript/no-deprecated
-          defaultValue={defaultFinalToneName}
-          displayClassName="text-base font-medium text-fg"
-          emptyClassName="text-base font-medium text-fg-dim"
-          inputClassName="text-base font-medium text-fg"
-        />
-      </View>
+          <InlineEditableSettingText
+            variant="body"
+            setting={pinyinFinalToneNameSetting}
+            settingKey={descriptionSettingKey}
+            placeholder="Name this tone location"
+            // oxlint-disable-next-line typescript/no-deprecated
+            defaultValue={defaultFinalToneName}
+            displayClassName="text-base font-medium text-fg"
+            emptyClassName="text-base font-medium text-fg-dim"
+            inputClassName="text-base font-medium text-fg"
+          />
+        </View>
 
-      <View className="space-y-4">
+        {/* Image Uploader */}
+        <InlineEditableSettingImage
+          enableAiGeneration
+          setting={pinyinFinalToneImageSetting}
+          settingKey={imageSettingKey}
+          previewHeight={200}
+          tileSize={64}
+          frameConstraint={{ aspectRatio: 2 }}
+        />
+
         {/* Description Field */}
         <View>
           <InlineEditableSettingText
@@ -200,38 +196,25 @@ function ToneTileEditor({
           </View>
         </View>
 
-        {/* Image Uploader */}
-        <View className="gap-2 pt-2">
-          <Text className="pyly-body-subheading">Image</Text>
-          <InlineEditableSettingImage
-            enableAiGeneration
-            setting={pinyinFinalToneImageSetting}
-            settingKey={imageSettingKey}
-            previewHeight={200}
-            tileSize={64}
-            frameConstraint={{ aspectRatio: 2 }}
+        {showAiModal ? (
+          <AiSubLocationDescriptionModal
+            label={finalToneLocationName}
+            location={finalName}
+            sublocation={toneName}
+            onApplyDescription={(description) => {
+              descriptionSetting.setValue({
+                soundId: finalSoundId,
+                tone,
+                text: description,
+              });
+              setShowAiModal(false);
+            }}
+            onDismiss={() => {
+              setShowAiModal(false);
+            }}
           />
-        </View>
+        ) : null}
       </View>
-
-      {showAiModal ? (
-        <AiSubLocationDescriptionModal
-          label={finalToneLocationName}
-          location={finalName}
-          sublocation={toneName}
-          onApplyDescription={(description) => {
-            descriptionSetting.setValue({
-              soundId: finalSoundId,
-              tone,
-              text: description,
-            });
-            setShowAiModal(false);
-          }}
-          onDismiss={() => {
-            setShowAiModal(false);
-          }}
-        />
-      ) : null}
-    </View>
+    </WikiTitledBox>
   );
 }
