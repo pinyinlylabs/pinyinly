@@ -259,7 +259,7 @@ function SoundUsageExamplesSection({
 
   return usageExamples.length === 0 ? null : (
     <WikiTitledBox title="Usage examples" className="mt-10">
-      <View className="gap-4 p-4">
+      <View className="p-4">
         <CompactWordRows
           dictionarySearchEntries={usageExamples.map((entry) => ({
             ...entry,

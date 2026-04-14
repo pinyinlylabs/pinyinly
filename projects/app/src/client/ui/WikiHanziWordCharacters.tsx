@@ -56,7 +56,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
 
   return (
     <WikiTitledBox title="Characters">
-      <View className="gap-1 p-3">
+      <View className="p-3">
         <CompactWordRows dictionarySearchEntries={entries} />
       </View>
     </WikiTitledBox>

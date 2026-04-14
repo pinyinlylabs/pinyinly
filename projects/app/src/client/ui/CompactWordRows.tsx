@@ -17,38 +17,48 @@ export function CompactWordRows({
 }: {
   dictionarySearchEntries: readonly CompactWordRowsEntry[];
 }) {
-  return dictionarySearchEntries.map((entry, i) => {
-    const hanzi = entry.hanzi;
-    const pinyin = entry.pinyin?.[0];
-    const gloss = entry.gloss?.[0];
+  return (
+    <View className="-my-1.5 gap-1">
+      {dictionarySearchEntries.map((entry, i) => {
+        const hanzi = entry.hanzi;
+        const pinyin = entry.pinyin?.[0];
+        const gloss = entry.gloss?.[0];
 
-    return (
-      <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={i}>
-        <Pressable className="flex flex-row items-center gap-2 py-1.5">
-          {entry.hsk == null ? null : (
-            <HskLozenge hskLevel={entry.hsk} size="sm" />
-          )}
-          <View className="flex-1 flex-row items-center gap-2">
-            <Text className="font-sans text-lg font-normal text-fg-loud">
-              {hanzi}
-            </Text>
-            {pinyin == null ? null : (
-              <Text className="font-sans text-sm text-fg-dim">{pinyin}</Text>
-            )}
-          </View>
+        return (
+          <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={i}>
+            <Pressable className="flex flex-row items-center gap-2 py-1.5">
+              {entry.hsk == null ? null : (
+                <HskLozenge hskLevel={entry.hsk} size="sm" />
+              )}
+              <View className="flex-1 flex-row items-center gap-2">
+                <Text className="font-sans text-lg font-normal text-fg-loud">
+                  {hanzi}
+                </Text>
+                {pinyin == null ? null : (
+                  <Text className="font-sans text-sm text-fg-dim">
+                    {pinyin}
+                  </Text>
+                )}
+              </View>
 
-          {gloss == null ? null : (
-            <Text
-              className="ml-4 flex-1 text-right font-sans text-sm text-fg"
-              numberOfLines={2}
-            >
-              {gloss}
-            </Text>
-          )}
+              {gloss == null ? null : (
+                <Text
+                  className="ml-4 flex-1 text-right font-sans text-sm text-fg"
+                  numberOfLines={2}
+                >
+                  {gloss}
+                </Text>
+              )}
 
-          <Icon icon="chevron-right" size={12} className="ml-2 text-fg-dim" />
-        </Pressable>
-      </Link>
-    );
-  });
+              <Icon
+                icon="chevron-right"
+                size={12}
+                className="ml-2 text-fg-dim"
+              />
+            </Pressable>
+          </Link>
+        );
+      })}
+    </View>
+  );
 }
