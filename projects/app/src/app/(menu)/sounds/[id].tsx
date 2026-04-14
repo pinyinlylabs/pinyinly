@@ -152,16 +152,7 @@ export default function SoundIdPage() {
 
           <WikiTitledBox
             title="Mnemonic story role"
-            headerAction={
-              <RectButton
-                variant="bare2"
-                onPress={() => {
-                  setIsMnemonicStoryRoleEditMode((current) => !current);
-                }}
-              >
-                {isMnemonicStoryRoleEditMode ? `Done` : `Change`}
-              </RectButton>
-            }
+            onEditingChange={setIsMnemonicStoryRoleEditMode}
           >
             <View className="gap-4 p-4">
               {!isMnemonicStoryRoleEditMode && !hasMnemonicContent ? (

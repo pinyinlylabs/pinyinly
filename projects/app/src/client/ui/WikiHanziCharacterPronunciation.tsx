@@ -208,16 +208,7 @@ export function WikiHanziCharacterPronunciationBox({
     <WikiTitledBox
       title="Remember the pronunciation"
       className="mt-4"
-      headerAction={
-        <RectButton
-          variant="bare2"
-          onPress={() => {
-            setIsEditMode((current) => !current);
-          }}
-        >
-          {isEditMode ? `Done` : `Change`}
-        </RectButton>
-      }
+      onEditingChange={setIsEditMode}
     >
       <View className="gap-4 p-4">
         <Text className="pyly-body">
