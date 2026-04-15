@@ -181,6 +181,7 @@ export function buildSubLocationDescriptionPrompt({
     `Each suggestion must:`,
     `- Clearly reflect both the Location and the Sublocation`,
     `- Describe stable, always-true aspects of the place`,
+    `- Return only the descriptive fragment itself, don't prefix with the place label`,
     `- Avoid time of day, weather, or temporary events`,
     `- Avoid actions or specific story moments`,
     `- Be easy to visualize and reuse in different mnemonic scenes`,

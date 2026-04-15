@@ -141,15 +141,10 @@ describe(
       expect(result).toMatchInlineSnapshot(`
         {
           "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
-
         Your goal is to define a stable mental image of a place that can be reused across many stories.
-
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
-
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
-
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
-
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
           "user": "Location: Lawson
         Sublocation: Outside
@@ -159,6 +154,7 @@ describe(
         Each suggestion must:
         - Clearly reflect both the Location and the Sublocation
         - Describe stable, always-true aspects of the place
+        - Return only the descriptive fragment itself, don't prefix with the place label
         - Avoid time of day, weather, or temporary events
         - Avoid actions or specific story moments
         - Be easy to visualize and reuse in different mnemonic scenes
@@ -182,15 +178,10 @@ describe(
       expect(result).toMatchInlineSnapshot(`
         {
           "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
-
         Your goal is to define a stable mental image of a place that can be reused across many stories.
-
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
-
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
-
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
-
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
           "user": "Location: Lawson
         Sublocation: Outside
@@ -203,6 +194,7 @@ describe(
         Each suggestion must:
         - Clearly reflect both the Location and the Sublocation
         - Describe stable, always-true aspects of the place
+        - Return only the descriptive fragment itself, don't prefix with the place label
         - Avoid time of day, weather, or temporary events
         - Avoid actions or specific story moments
         - Be easy to visualize and reuse in different mnemonic scenes
@@ -224,15 +216,10 @@ describe(
       expect(result).toMatchInlineSnapshot(`
         {
           "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
-
         Your goal is to define a stable mental image of a place that can be reused across many stories.
-
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
-
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
-
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
-
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
           "user": "Location: Gong Cha
         Sublocation: bathroom
@@ -242,6 +229,7 @@ describe(
         Each suggestion must:
         - Clearly reflect both the Location and the Sublocation
         - Describe stable, always-true aspects of the place
+        - Return only the descriptive fragment itself, don't prefix with the place label
         - Avoid time of day, weather, or temporary events
         - Avoid actions or specific story moments
         - Be easy to visualize and reuse in different mnemonic scenes
