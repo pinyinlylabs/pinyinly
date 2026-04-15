@@ -46,7 +46,11 @@ const pronunciationHintOutputSchema = z
 
 const subLocationDescriptionInputSchema = z
   .object({
+    label: z.string().min(1),
     location: z.string().min(1),
+    locationNotes: z.string().optional(),
+    sublocation: z.string().min(1),
+    sublocationNotes: z.string().optional(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
@@ -138,28 +142,52 @@ export function buildPronunciationHintPrompt({
 }
 
 export function buildSubLocationDescriptionPrompt({
+  label,
   location,
+  locationNotes,
+  sublocation,
+  sublocationNotes,
   count,
 }: {
+  label: string;
   location: string;
+  locationNotes?: string;
+  sublocation: string;
+  sublocationNotes?: string;
   count: number;
 }): { system: string; user: string } {
   const system = [
-    `You create vivid sublocation descriptions for Mandarin pronunciation mnemonic scenes.`,
-    `Each description should help someone instantly picture a specific place.`,
-    `Prefer concrete sensory details over abstract words.`,
-    `Use visual anchors like objects, textures, lighting, signage, sounds, or smells.`,
-    `Keep each description to 1-2 sentences and avoid dictionary-style definitions.`,
-    `Make suggestions distinct from one another and easy to remember.`,
+    `You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.`,
+    `Your goal is to define a stable mental image of a place that can be reused across many stories.`,
+    `You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.`,
+    `Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.`,
+    `Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.`,
+    `Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.`,
   ].join(`\n`);
 
+  const optionalLines = [
+    locationNotes == null ? null : `Location notes: ${locationNotes}`,
+    sublocationNotes == null ? null : `Sublocation notes: ${sublocationNotes}`,
+  ].filter((line): line is string => line != null);
+
   const user = [
-    `Sublocation: ${location}`,
+    `Location: ${location}`,
+    `Sublocation: ${sublocation}`,
+    ...(optionalLines.length > 0 ? [``] : []),
+    ...optionalLines,
     ``,
-    `Generate ${count} distinct sublocation descriptions for this exact place.`,
-    `Each suggestion must reference the sublocation name exactly as written: ${location}.`,
-    `Good suggestions are specific, visual, unusual, and easy to replay mentally.`,
-    `Bad suggestions are generic, flat, or mostly abstract adjectives.`,
+    `Generate ${count} distinct reusable location descriptions for this exact combined place: ${label}`,
+    ``,
+    `Each suggestion must:`,
+    `- Clearly reflect both the Location and the Sublocation`,
+    `- Describe stable, always-true aspects of the place`,
+    `- Return only the descriptive fragment itself, don't prefix with the place label`,
+    `- Avoid time of day, weather, or temporary events`,
+    `- Avoid actions or specific story moments`,
+    `- Be easy to visualize and reuse in different mnemonic scenes`,
+    ``,
+    `Good suggestions feel like a reusable mental stage.`,
+    `Bad suggestions feel like a one-time scene.`,
   ].join(`\n`);
 
   return { system, user };
@@ -200,10 +228,21 @@ export const aiRouter = router({
     .input(subLocationDescriptionInputSchema)
     .output(subLocationDescriptionOutputSchema)
     .mutation(async (opts) => {
-      const { location, count } = opts.input;
+      const {
+        label,
+        location,
+        locationNotes,
+        sublocation,
+        sublocationNotes,
+        count,
+      } = opts.input;
 
       const { system, user } = buildSubLocationDescriptionPrompt({
+        label,
         location,
+        locationNotes,
+        sublocation,
+        sublocationNotes,
         count,
       });
 

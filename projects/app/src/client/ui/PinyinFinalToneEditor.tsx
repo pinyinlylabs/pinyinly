@@ -4,12 +4,14 @@ import { AiSubLocationDescriptionModal } from "@/client/ui/AiSubLocationDescript
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
+import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
   getDefaultFinalToneName,
   loadPylyPinyinChart,
+  normalizePinyinUnit,
 } from "@/data/pinyin";
 import {
   getPinyinFinalToneKeyParams,
@@ -52,17 +54,46 @@ export function PinyinFinalToneEditor({
   const finalName = finalNameSetting.value?.text ?? finalLabel;
   const frequencies = use(loadFinalToneFrequencies());
   const finalFrequencies = frequencies.get(finalSoundId);
+  const finalLabelWithoutPrefix = finalLabel.startsWith(`-`)
+    ? finalLabel.slice(1)
+    : finalLabel;
+  const maxToneCount = Math.max(
+    1,
+    ...TONE_IDS.map((tone) => finalFrequencies?.get(Number(tone)) ?? 0),
+  );
+  const toneHistogramRows = TONE_IDS.map((tone) => ({
+    tone,
+    pinyinLabel: `-${normalizePinyinUnit(`${finalLabelWithoutPrefix}${tone}`)}`,
+    count: finalFrequencies?.get(Number(tone)) ?? 0,
+  }));
 
   return (
     <View className="space-y-8">
-      <View>
-        <Text className="font-sans text-lg font-semibold text-fg">
-          Tone Details
-        </Text>
-        <Text className="mt-1 font-sans text-sm text-fg-dim">
-          Add descriptions and images for each tone position within this final.
-        </Text>
-      </View>
+      <WikiTitledBox title="Tone Histogram">
+        <View className="gap-2 p-3">
+          {toneHistogramRows.map(({ tone, pinyinLabel, count }) => (
+            <View key={tone} className="gap-1">
+              <View className="flex-row items-baseline justify-between">
+                <View className="flex-row items-baseline gap-2">
+                  <Text className="font-sans text-sm text-fg">
+                    {pinyinLabel}
+                  </Text>
+                  <Text className="font-sans text-xs text-fg-dim">
+                    Tone {tone}
+                  </Text>
+                </View>
+                <Text className="font-sans text-xs text-fg-dim">{count}</Text>
+              </View>
+              <View className="h-2 rounded-full bg-fg/10">
+                <View
+                  className="h-2 rounded-full bg-cyan"
+                  style={{ width: `${(count / maxToneCount) * 100}%` }}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+      </WikiTitledBox>
 
       <View className="space-y-6">
         {TONE_IDS.map((tone) => (
@@ -73,7 +104,6 @@ export function PinyinFinalToneEditor({
             tone={tone}
             isFocused={focusedTone === tone}
             onToneLayout={onToneLayout}
-            frequency={finalFrequencies?.get(Number(tone)) ?? 0}
             toneAudioSource={toneAudioSourceByTone?.[tone] ?? null}
           />
         ))}
@@ -88,7 +118,6 @@ interface ToneTileEditorProps {
   tone: string;
   isFocused: boolean;
   onToneLayout?: (tone: string, layoutY: number) => void;
-  frequency: number;
   toneAudioSource: PylyAudioSource;
 }
 
@@ -98,7 +127,6 @@ function ToneTileEditor({
   tone,
   isFocused,
   onToneLayout,
-  frequency,
   toneAudioSource,
 }: ToneTileEditorProps) {
   const playTone = useSoundEffect(toneAudioSource);
@@ -132,59 +160,72 @@ function ToneTileEditor({
   });
   const finalToneLocationName =
     finalToneNameSetting.value?.text ?? defaultFinalToneName;
+  const [isEditMode, setIsEditMode] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
+  const toneLabel = `Tone ${tone} (${toneName})`;
 
   return (
-    <View
+    <WikiTitledBox
+      title={toneLabel}
       className={`
-        rounded-lg border bg-fg-bg5 p-4
-
         ${isFocused ? `border-cyan` : `border-fg-bg10`}
       `}
+      onEditingChange={(nextIsEditMode) => {
+        setIsEditMode(nextIsEditMode);
+        if (!nextIsEditMode) {
+          setShowAiModal(false);
+        }
+      }}
       onLayout={(event) => {
         onToneLayout?.(tone, event.nativeEvent.layout.y);
       }}
     >
-      <View className="mb-4 flex-row flex-wrap items-baseline gap-2">
-        <Text className="font-sans text-base font-medium text-fg">
-          Tone {tone}
-          {frequency > 0 && (
-            <Text className="text-sm text-fg-dim"> ({frequency})</Text>
+      <View className="gap-2 p-3">
+        <View className="ml-2 flex-row flex-wrap items-baseline gap-2">
+          {toneAudioSource == null ? null : (
+            <RectButton
+              variant="bare2"
+              iconStart="speaker-2"
+              onPressIn={playTone}
+            >
+              Play
+            </RectButton>
           )}
-          :
-        </Text>
-        {toneAudioSource == null ? null : (
-          <RectButton
-            variant="bare2"
-            iconStart="speaker-2"
-            onPressIn={playTone}
-          >
-            Play
-          </RectButton>
-        )}
-        <InlineEditableSettingText
-          variant="body"
-          setting={pinyinFinalToneNameSetting}
-          settingKey={descriptionSettingKey}
-          placeholder="Name this tone location"
-          // oxlint-disable-next-line typescript/no-deprecated
-          defaultValue={defaultFinalToneName}
-          displayClassName="text-base font-medium text-fg"
-          emptyClassName="text-base font-medium text-fg-dim"
-          inputClassName="text-base font-medium text-fg"
-        />
-      </View>
-
-      <View className="space-y-4">
-        {/* Description Field */}
-        <View>
           <InlineEditableSettingText
             variant="body"
-            setting={pinyinFinalToneDescriptionSetting}
+            setting={pinyinFinalToneNameSetting}
             settingKey={descriptionSettingKey}
-            placeholder="Describe what this tone position looks like..."
-            multiline
+            readonly={!isEditMode}
+            placeholder="Name this tone location"
+            // oxlint-disable-next-line typescript/no-deprecated
+            defaultValue={defaultFinalToneName}
+            displayClassName="text-base font-medium text-fg"
+            emptyClassName="text-base font-medium text-fg-dim"
+            inputClassName="text-base font-medium text-fg"
           />
+        </View>
+
+        {/* Image Uploader */}
+        <InlineEditableSettingImage
+          enableAiGeneration
+          setting={pinyinFinalToneImageSetting}
+          settingKey={imageSettingKey}
+          readonly={!isEditMode}
+          previewHeight={200}
+          tileSize={64}
+          frameConstraint={{ aspectRatio: 2 }}
+        />
+
+        {/* Description Field */}
+        <InlineEditableSettingText
+          variant="body"
+          setting={pinyinFinalToneDescriptionSetting}
+          settingKey={descriptionSettingKey}
+          readonly={!isEditMode}
+          placeholder="Describe what this tone position looks like..."
+          multiline
+        />
+        {isEditMode ? (
           <View className="mt-2 flex-row items-center justify-between">
             <Text className="font-sans text-[13px] text-fg-dim">
               Need help making this sublocation more vivid?
@@ -198,38 +239,27 @@ function ToneTileEditor({
               Use AI
             </RectButton>
           </View>
-        </View>
+        ) : null}
 
-        {/* Image Uploader */}
-        <View className="gap-2 pt-2">
-          <Text className="pyly-body-subheading">Image</Text>
-          <InlineEditableSettingImage
-            enableAiGeneration
-            setting={pinyinFinalToneImageSetting}
-            settingKey={imageSettingKey}
-            previewHeight={200}
-            tileSize={64}
-            frameConstraint={{ aspectRatio: 2 }}
+        {showAiModal && isEditMode ? (
+          <AiSubLocationDescriptionModal
+            label={finalToneLocationName}
+            location={finalName}
+            sublocation={toneName}
+            onApplyDescription={(description) => {
+              descriptionSetting.setValue({
+                soundId: finalSoundId,
+                tone,
+                text: description,
+              });
+              setShowAiModal(false);
+            }}
+            onDismiss={() => {
+              setShowAiModal(false);
+            }}
           />
-        </View>
+        ) : null}
       </View>
-
-      {showAiModal ? (
-        <AiSubLocationDescriptionModal
-          location={finalToneLocationName}
-          onApplyDescription={(description) => {
-            descriptionSetting.setValue({
-              soundId: finalSoundId,
-              tone,
-              text: description,
-            });
-            setShowAiModal(false);
-          }}
-          onDismiss={() => {
-            setShowAiModal(false);
-          }}
-        />
-      ) : null}
-    </View>
+    </WikiTitledBox>
   );
 }

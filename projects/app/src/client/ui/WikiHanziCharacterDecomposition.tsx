@@ -21,7 +21,6 @@ import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
-import { RectButton } from "./RectButton";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
 import { hintFirstLineLength, parseHintText } from "./hintText";
@@ -114,16 +113,7 @@ export function WikiHanziCharacterDecompositionBox({
     <WikiTitledBox
       title="Recognize the character"
       className="mt-4"
-      headerAction={
-        <RectButton
-          variant="bare2"
-          onPress={() => {
-            setIsEditMode((current) => !current);
-          }}
-        >
-          {isEditMode ? `Done` : `Change`}
-        </RectButton>
-      }
+      onEditingChange={setIsEditMode}
     >
       <View className="gap-4 p-4">
         {componentsElements.length > 0 ? (

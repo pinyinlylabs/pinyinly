@@ -15,6 +15,7 @@ export type ButtonVariant =
   | `outline`
   | `option`
   | `bare`
+  | `barePrimary`
   | `bare2`
   | `bareDim`
   | `rounded`;
@@ -46,6 +47,7 @@ export function RectButton({
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
   const iconOnly = children == null && (iconStart != null || iconEnd != null);
+  const resolvedIconSize = iconSize ?? iconSizeByVariant[variant];
 
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -102,12 +104,16 @@ export function RectButton({
               <Icon
                 icon={iconStart}
                 className={fullTextClass}
-                size={iconSize}
+                size={resolvedIconSize}
               />
             )}
             {content}
             {iconEnd == null ? null : (
-              <Icon icon={iconEnd} className={fullTextClass} size={iconSize} />
+              <Icon
+                icon={iconEnd}
+                className={fullTextClass}
+                size={resolvedIconSize}
+              />
             )}
           </View>
         )}
@@ -123,6 +129,10 @@ export function RectButton({
     </Link>
   );
 }
+
+const iconSizeByVariant: Partial<Record<ButtonVariant, IconProps[`size`]>> = {
+  bareDim: 20,
+};
 
 const pressableClass = tv({
   base: `web:transition-all`,
@@ -145,6 +155,7 @@ const pressableClass = tv({
         focus-visible:outline-sky/75
       `,
       bare: `transition-transform`,
+      barePrimary: `transition-transform`,
       bare2: `transition-transform`,
       bareDim: `transition-transform`,
       rounded: `rounded-full transition-transform`,
@@ -195,6 +206,11 @@ const pressableClass = tv({
       class: `active:scale-[98%]`,
     },
     {
+      variant: `barePrimary`,
+      disabled: false,
+      class: `active:scale-[98%]`,
+    },
+    {
       variant: `bareDim`,
       disabled: false,
       class: `active:scale-[98%]`,
@@ -214,6 +230,7 @@ const roundedRectClass = tv({
       outline: `rounded-xl border-2 border-fg/20 px-4 py-2`,
       option: `rounded-xl border border-fg/20 px-3 py-2`,
       bare: `px-2 py-1`,
+      barePrimary: `rounded bg-blue px-2 py-1`,
       bare2: `rounded px-2 py-1`,
       bareDim: `rounded px-2 py-1`,
       rounded: `rounded-full border border-fg/20 px-4 py-2`,
@@ -290,6 +307,13 @@ const roundedRectClass = tv({
       hoveredOrPressed: true,
       class: `bg-fg/10`,
     },
+    // BarePrimary
+    {
+      variant: `barePrimary`,
+      disabled: false,
+      hoveredOrPressed: true,
+      class: `bg-blue/90`,
+    },
     // BareDim
     {
       variant: `bareDim`,
@@ -301,6 +325,7 @@ const roundedRectClass = tv({
     { variant: `outline`, iconOnly: true, class: `px-2` },
     { variant: `option`, iconOnly: true, class: `px-2` },
     { variant: `bare`, iconOnly: true, class: `px-1` },
+    { variant: `barePrimary`, iconOnly: true, class: `px-1` },
     { variant: `bare2`, iconOnly: true, class: `px-1` },
     { variant: `bareDim`, iconOnly: true, class: `px-1` },
     { variant: `rounded`, iconOnly: true, class: `px-2` },
@@ -314,6 +339,7 @@ const textClass = tv({
       outline: `pyly-button-outline`,
       option: `font-sans text-base/snug font-medium text-fg`,
       bare: `font-sans text-sm/normal font-bold uppercase text-fg`,
+      barePrimary: `font-sans text-sm/normal font-semibold uppercase text-bg`,
       bare2: `font-sans text-sm/normal font-bold uppercase text-fg`,
       bareDim: `font-sans text-sm/normal font-semibold uppercase text-fg-dim`,
       rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
@@ -360,6 +386,7 @@ const iconLayoutClass = tv({
   variants: {
     variant: {
       bare: `gap-2`,
+      barePrimary: `gap-2`,
       bare2: `gap-2`,
       bareDim: `gap-2`,
       filled: ``,

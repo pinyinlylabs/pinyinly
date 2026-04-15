@@ -130,50 +130,112 @@ describe(
     typeof buildSubLocationDescriptionPrompt
   >,
   () => {
-    test(`minimal input`, () => {
+    test(`minimal input (no optional notes)`, () => {
       const result = buildSubLocationDescriptionPrompt({
-        location: `Gong Cha bathroom`,
+        label: `Outside Lawson`,
+        location: `Lawson`,
+        sublocation: `Outside`,
         count: 4,
       });
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create vivid sublocation descriptions for Mandarin pronunciation mnemonic scenes.
-        Each description should help someone instantly picture a specific place.
-        Prefer concrete sensory details over abstract words.
-        Use visual anchors like objects, textures, lighting, signage, sounds, or smells.
-        Keep each description to 1-2 sentences and avoid dictionary-style definitions.
-        Make suggestions distinct from one another and easy to remember.",
-          "user": "Sublocation: Gong Cha bathroom
+          "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+        Your goal is to define a stable mental image of a place that can be reused across many stories.
+        You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+        Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
+        Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
+        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
+          "user": "Location: Lawson
+        Sublocation: Outside
 
-        Generate 4 distinct sublocation descriptions for this exact place.
-        Each suggestion must reference the sublocation name exactly as written: Gong Cha bathroom.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly abstract adjectives.",
+        Generate 4 distinct reusable location descriptions for this exact combined place: Outside Lawson
+
+        Each suggestion must:
+        - Clearly reflect both the Location and the Sublocation
+        - Describe stable, always-true aspects of the place
+        - Return only the descriptive fragment itself, don't prefix with the place label
+        - Avoid time of day, weather, or temporary events
+        - Avoid actions or specific story moments
+        - Be easy to visualize and reuse in different mnemonic scenes
+
+        Good suggestions feel like a reusable mental stage.
+        Bad suggestions feel like a one-time scene.",
+        }
+      `);
+    });
+
+    test(`full input (all optional notes set)`, () => {
+      const result = buildSubLocationDescriptionPrompt({
+        label: `Outside Lawson`,
+        location: `Lawson`,
+        locationNotes: `The famous Japanese convenience chain store.`,
+        sublocation: `Outside`,
+        sublocationNotes: `Street view of the store front.`,
+        count: 4,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+        Your goal is to define a stable mental image of a place that can be reused across many stories.
+        You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+        Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
+        Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
+        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
+          "user": "Location: Lawson
+        Sublocation: Outside
+
+        Location notes: The famous Japanese convenience chain store.
+        Sublocation notes: Street view of the store front.
+
+        Generate 4 distinct reusable location descriptions for this exact combined place: Outside Lawson
+
+        Each suggestion must:
+        - Clearly reflect both the Location and the Sublocation
+        - Describe stable, always-true aspects of the place
+        - Return only the descriptive fragment itself, don't prefix with the place label
+        - Avoid time of day, weather, or temporary events
+        - Avoid actions or specific story moments
+        - Be easy to visualize and reuse in different mnemonic scenes
+
+        Good suggestions feel like a reusable mental stage.
+        Bad suggestions feel like a one-time scene.",
         }
       `);
     });
 
     test(`different count`, () => {
       const result = buildSubLocationDescriptionPrompt({
-        location: `Gong Cha bathroom`,
+        label: `Gong Cha bathroom`,
+        location: `Gong Cha`,
+        sublocation: `bathroom`,
         count: 3,
       });
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create vivid sublocation descriptions for Mandarin pronunciation mnemonic scenes.
-        Each description should help someone instantly picture a specific place.
-        Prefer concrete sensory details over abstract words.
-        Use visual anchors like objects, textures, lighting, signage, sounds, or smells.
-        Keep each description to 1-2 sentences and avoid dictionary-style definitions.
-        Make suggestions distinct from one another and easy to remember.",
-          "user": "Sublocation: Gong Cha bathroom
+          "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+        Your goal is to define a stable mental image of a place that can be reused across many stories.
+        You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+        Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
+        Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
+        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
+          "user": "Location: Gong Cha
+        Sublocation: bathroom
 
-        Generate 3 distinct sublocation descriptions for this exact place.
-        Each suggestion must reference the sublocation name exactly as written: Gong Cha bathroom.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly abstract adjectives.",
+        Generate 3 distinct reusable location descriptions for this exact combined place: Gong Cha bathroom
+
+        Each suggestion must:
+        - Clearly reflect both the Location and the Sublocation
+        - Describe stable, always-true aspects of the place
+        - Return only the descriptive fragment itself, don't prefix with the place label
+        - Avoid time of day, weather, or temporary events
+        - Avoid actions or specific story moments
+        - Be easy to visualize and reuse in different mnemonic scenes
+
+        Good suggestions feel like a reusable mental stage.
+        Bad suggestions feel like a one-time scene.",
         }
       `);
     });

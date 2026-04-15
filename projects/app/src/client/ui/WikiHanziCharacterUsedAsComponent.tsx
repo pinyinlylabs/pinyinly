@@ -65,7 +65,7 @@ export function WikiHanziCharacterUsedAsComponent({
 
   return (
     <WikiTitledBox title="Used as component in">
-      <View className="gap-1 p-3">
+      <View className="p-3">
         <CompactWordRows dictionarySearchEntries={entries} />
       </View>
     </WikiTitledBox>

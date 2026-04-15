@@ -152,16 +152,7 @@ export default function SoundIdPage() {
 
           <WikiTitledBox
             title="Mnemonic story role"
-            headerAction={
-              <RectButton
-                variant="bare2"
-                onPress={() => {
-                  setIsMnemonicStoryRoleEditMode((current) => !current);
-                }}
-              >
-                {isMnemonicStoryRoleEditMode ? `Done` : `Change`}
-              </RectButton>
-            }
+            onEditingChange={setIsMnemonicStoryRoleEditMode}
           >
             <View className="gap-4 p-4">
               {!isMnemonicStoryRoleEditMode && !hasMnemonicContent ? (
@@ -190,28 +181,28 @@ export default function SoundIdPage() {
               )}
             </View>
           </WikiTitledBox>
-        </View>
 
-        {/* Final-tone details editor for finals */}
-        {isFinalSoundId(id) && (
-          <PinyinFinalToneEditor
-            finalSoundId={id}
-            focusedTone={focusedTone}
-            onToneLayout={(tone, layoutY) => {
-              if (tone !== focusedTone) {
-                return;
-              }
-              setToneAnchorY(layoutY);
-            }}
-            toneAudioSourceByTone={{
-              1: tone1AudioSource,
-              2: tone2AudioSource,
-              3: tone3AudioSource,
-              4: tone4AudioSource,
-              5: tone5AudioSource,
-            }}
-          />
-        )}
+          {/* Final-tone details editor for finals */}
+          {isFinalSoundId(id) && (
+            <PinyinFinalToneEditor
+              finalSoundId={id}
+              focusedTone={focusedTone}
+              onToneLayout={(tone, layoutY) => {
+                if (tone !== focusedTone) {
+                  return;
+                }
+                setToneAnchorY(layoutY);
+              }}
+              toneAudioSourceByTone={{
+                1: tone1AudioSource,
+                2: tone2AudioSource,
+                3: tone3AudioSource,
+                4: tone4AudioSource,
+                5: tone5AudioSource,
+              }}
+            />
+          )}
+        </View>
 
         <SoundUsageExamplesSection pinyinSoundId={id} />
 
@@ -268,7 +259,7 @@ function SoundUsageExamplesSection({
 
   return usageExamples.length === 0 ? null : (
     <WikiTitledBox title="Usage examples" className="mt-10">
-      <View className="gap-4 p-4">
+      <View className="p-4">
         <CompactWordRows
           dictionarySearchEntries={usageExamples.map((entry) => ({
             ...entry,

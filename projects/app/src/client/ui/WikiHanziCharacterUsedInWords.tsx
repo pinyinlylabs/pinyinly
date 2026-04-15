@@ -42,7 +42,7 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
 
   return (
     <WikiTitledBox title="Used in words">
-      <View className="gap-1 p-3">
+      <View className="p-3">
         <CompactWordRows dictionarySearchEntries={dictionarySearchEntries} />
       </View>
     </WikiTitledBox>

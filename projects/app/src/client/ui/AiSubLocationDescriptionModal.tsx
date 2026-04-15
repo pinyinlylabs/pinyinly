@@ -6,7 +6,11 @@ import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 export interface AiSubLocationDescriptionModalProps {
+  label: string;
   location: string;
+  locationNotes?: string;
+  sublocation: string;
+  sublocationNotes?: string;
   onApplyDescription: (description: string) => void;
   onDismiss: () => void;
 }
@@ -18,7 +22,11 @@ type DescriptionSuggestion = {
 };
 
 export function AiSubLocationDescriptionModal({
+  label,
   location,
+  locationNotes,
+  sublocation,
+  sublocationNotes,
   onApplyDescription,
   onDismiss,
 }: AiSubLocationDescriptionModalProps) {
@@ -35,7 +43,11 @@ export function AiSubLocationDescriptionModal({
 
     try {
       const result = await generateMutation.mutateAsync({
+        label,
         location,
+        locationNotes,
+        sublocation,
+        sublocationNotes,
         count: 4,
       });
       setSuggestions(result.suggestions);
@@ -82,7 +94,18 @@ export function AiSubLocationDescriptionModal({
             </View>
 
             <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
-              <ContextRow label="Sublocation" value={location} />
+              <ContextRow label="Combined place" value={label} />
+              <ContextRow label="Location" value={location} />
+              {locationNotes == null ? null : (
+                <ContextRow label="Location notes" value={locationNotes} />
+              )}
+              <ContextRow label="Sublocation" value={sublocation} />
+              {sublocationNotes == null ? null : (
+                <ContextRow
+                  label="Sublocation notes"
+                  value={sublocationNotes}
+                />
+              )}
             </View>
 
             {error == null ? null : (
