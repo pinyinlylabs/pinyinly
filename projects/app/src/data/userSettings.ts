@@ -297,6 +297,14 @@ export const pinyinFinalToneDescriptionSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const pinyinFinalToneViewpointSetting = defineUserSetting({
+  entity: r.entity(`pftv/[soundId]/[tone]`, {
+    soundId: rPinyinSoundId().alias(`s`),
+    tone: r.string().alias(`n`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
 export const pinyinFinalToneImageSetting = defineUserSetting({
   entity: r.entity(`pfti/[soundId]/[tone]`, {
     soundId: rPinyinSoundId().alias(`s`),
@@ -414,6 +422,7 @@ export const userSettingDefinitions = [
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   pinyinFinalToneDescriptionSetting,
+  pinyinFinalToneViewpointSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
 ] as const satisfies readonly UserSetting[];

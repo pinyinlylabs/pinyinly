@@ -5,7 +5,7 @@ import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 import { useAutoFocusRef } from "./hooks/useAutoFocusRef";
 
-type TextInputVariant = `bare` | `flat`;
+export type TextInputVariant = `bare` | `flat`;
 
 interface TextInputSingleProps extends Omit<
   PropsOf<typeof TextInput>,

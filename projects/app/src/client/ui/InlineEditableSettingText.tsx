@@ -9,7 +9,8 @@ import type { UserSettingTextEntity } from "@/data/userSettings";
 import { formatRelativeTime } from "@/util/date";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import type { TextInput } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
@@ -17,6 +18,7 @@ import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
 import { TextInputMulti } from "./TextInputMulti";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
+import { TextInputSingle } from "./TextInputSingle";
 
 export type InlineEditableSettingTextVariant = `body` | `title`;
 
@@ -280,10 +282,11 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
               }}
               placeholder={placeholder}
               className={multilineInputClassName}
+              variant="bare"
               style={showHistoryButton ? { paddingRight: 32 } : undefined}
             />
           ) : (
-            <TextInput
+            <TextInputSingle
               ref={inputRef}
               autoFocus
               value={draft}
@@ -297,6 +300,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
               }}
               placeholder={placeholder}
               className={inputTextClassName}
+              variant="bare"
               style={showHistoryButton ? { paddingRight: 32 } : undefined}
             />
           )}
@@ -476,7 +480,7 @@ const inputText = tv({
   base: `text-left`,
   variants: {
     variant: {
-      body: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
+      body: `pyly-body rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
       title: `rounded-md bg-bg-high px-1 py-0.5 text-3xl font-bold text-fg`,
     },
   },

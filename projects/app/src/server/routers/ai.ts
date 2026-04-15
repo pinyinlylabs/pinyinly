@@ -50,7 +50,7 @@ const subLocationDescriptionInputSchema = z
     location: z.string().min(1),
     locationNotes: z.string().optional(),
     sublocation: z.string().min(1),
-    sublocationNotes: z.string().optional(),
+    viewpoint: z.string().optional(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
@@ -171,14 +171,14 @@ export function buildSubLocationDescriptionPrompt({
   location,
   locationNotes,
   sublocation,
-  sublocationNotes,
+  viewpoint,
   count,
 }: {
   label: string;
   location: string;
   locationNotes?: string;
   sublocation: string;
-  sublocationNotes?: string;
+  viewpoint?: string;
   count: number;
 }): { system: string; user: string } {
   const system = [
@@ -192,7 +192,7 @@ export function buildSubLocationDescriptionPrompt({
 
   const optionalLines = [
     locationNotes == null ? null : `Location notes: ${locationNotes}`,
-    sublocationNotes == null ? null : `Sublocation notes: ${sublocationNotes}`,
+    viewpoint == null ? null : `Viewpoint: ${viewpoint}`,
   ].filter((line): line is string => line != null);
 
   const user = [
@@ -205,6 +205,7 @@ export function buildSubLocationDescriptionPrompt({
     ``,
     `Each suggestion must:`,
     `- Clearly reflect both the Location and the Sublocation`,
+    `- If a Viewpoint is provided, ensure the description matches that perspective`,
     `- Describe stable, always-true aspects of the place`,
     `- Return only the descriptive fragment itself, don't prefix with the place label`,
     `- Avoid time of day, weather, or temporary events`,
@@ -302,21 +303,15 @@ export const aiRouter = router({
     .input(subLocationDescriptionInputSchema)
     .output(subLocationDescriptionOutputSchema)
     .mutation(async (opts) => {
-      const {
-        label,
-        location,
-        locationNotes,
-        sublocation,
-        sublocationNotes,
-        count,
-      } = opts.input;
+      const { label, location, locationNotes, sublocation, viewpoint, count } =
+        opts.input;
 
       const { system, user } = buildSubLocationDescriptionPrompt({
         label,
         location,
         locationNotes,
         sublocation,
-        sublocationNotes,
+        viewpoint,
         count,
       });
 
