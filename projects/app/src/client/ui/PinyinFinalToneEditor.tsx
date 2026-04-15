@@ -11,6 +11,7 @@ import {
   defaultToneNames,
   getDefaultFinalToneName,
   loadPylyPinyinChart,
+  normalizePinyinUnit,
 } from "@/data/pinyin";
 import {
   getPinyinFinalToneKeyParams,
@@ -53,9 +54,47 @@ export function PinyinFinalToneEditor({
   const finalName = finalNameSetting.value?.text ?? finalLabel;
   const frequencies = use(loadFinalToneFrequencies());
   const finalFrequencies = frequencies.get(finalSoundId);
+  const finalLabelWithoutPrefix = finalLabel.startsWith(`-`)
+    ? finalLabel.slice(1)
+    : finalLabel;
+  const maxToneCount = Math.max(
+    1,
+    ...TONE_IDS.map((tone) => finalFrequencies?.get(Number(tone)) ?? 0),
+  );
+  const toneHistogramRows = TONE_IDS.map((tone) => ({
+    tone,
+    pinyinLabel: `-${normalizePinyinUnit(`${finalLabelWithoutPrefix}${tone}`)}`,
+    count: finalFrequencies?.get(Number(tone)) ?? 0,
+  }));
 
   return (
     <View className="space-y-8">
+      <WikiTitledBox title="Tone Histogram">
+        <View className="gap-2 p-3">
+          {toneHistogramRows.map(({ tone, pinyinLabel, count }) => (
+            <View key={tone} className="gap-1">
+              <View className="flex-row items-baseline justify-between">
+                <View className="flex-row items-baseline gap-2">
+                  <Text className="font-sans text-sm text-fg">
+                    {pinyinLabel}
+                  </Text>
+                  <Text className="font-sans text-xs text-fg-dim">
+                    Tone {tone}
+                  </Text>
+                </View>
+                <Text className="font-sans text-xs text-fg-dim">{count}</Text>
+              </View>
+              <View className="h-2 rounded-full bg-fg/10">
+                <View
+                  className="h-2 rounded-full bg-cyan"
+                  style={{ width: `${(count / maxToneCount) * 100}%` }}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+      </WikiTitledBox>
+
       <View className="space-y-6">
         {TONE_IDS.map((tone) => (
           <ToneTileEditor
@@ -65,7 +104,6 @@ export function PinyinFinalToneEditor({
             tone={tone}
             isFocused={focusedTone === tone}
             onToneLayout={onToneLayout}
-            frequency={finalFrequencies?.get(Number(tone)) ?? 0}
             toneAudioSource={toneAudioSourceByTone?.[tone] ?? null}
           />
         ))}
@@ -80,7 +118,6 @@ interface ToneTileEditorProps {
   tone: string;
   isFocused: boolean;
   onToneLayout?: (tone: string, layoutY: number) => void;
-  frequency: number;
   toneAudioSource: PylyAudioSource;
 }
 
@@ -90,7 +127,6 @@ function ToneTileEditor({
   tone,
   isFocused,
   onToneLayout,
-  frequency,
   toneAudioSource,
 }: ToneTileEditorProps) {
   const playTone = useSoundEffect(toneAudioSource);
@@ -126,8 +162,7 @@ function ToneTileEditor({
     finalToneNameSetting.value?.text ?? defaultFinalToneName;
   const [isEditMode, setIsEditMode] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
-  const toneLabel =
-    frequency > 0 ? `Tone ${tone} (${frequency})` : `Tone ${tone}`;
+  const toneLabel = `Tone ${tone} (${toneName})`;
 
   return (
     <WikiTitledBox
