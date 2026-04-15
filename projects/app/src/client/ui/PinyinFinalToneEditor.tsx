@@ -18,6 +18,8 @@ import {
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
+  pinyinFinalToneViewpointSetting,
+  pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { loadFinalToneFrequencies } from "@/dictionary";
@@ -158,6 +160,14 @@ function ToneTileEditor({
     setting: pinyinFinalToneDescriptionSetting,
     key: descriptionSettingKey,
   });
+  const viewpointSetting = useUserSetting({
+    setting: pinyinFinalToneViewpointSetting,
+    key: descriptionSettingKey,
+  });
+  const locationDescriptionSetting = useUserSetting({
+    setting: pinyinSoundDescriptionSetting,
+    key: { soundId: finalSoundId },
+  });
   const finalToneLocationName =
     finalToneNameSetting.value?.text ?? defaultFinalToneName;
   const [isEditMode, setIsEditMode] = useState(false);
@@ -216,6 +226,15 @@ function ToneTileEditor({
           frameConstraint={{ aspectRatio: 2 }}
         />
 
+        <InlineEditableSettingText
+          variant="body"
+          setting={pinyinFinalToneViewpointSetting}
+          settingKey={descriptionSettingKey}
+          readonly={!isEditMode}
+          placeholder="From where are you viewing this scene? (for example, At the bottom of the stairs looking up)"
+          multiline
+        />
+
         {/* Description Field */}
         <InlineEditableSettingText
           variant="body"
@@ -245,7 +264,9 @@ function ToneTileEditor({
           <AiSubLocationDescriptionModal
             label={finalToneLocationName}
             location={finalName}
+            locationNotes={locationDescriptionSetting.value?.text ?? ``}
             sublocation={toneName}
+            viewpoint={viewpointSetting.value?.text ?? ``}
             onApplyDescription={(description) => {
               descriptionSetting.setValue({
                 soundId: finalSoundId,

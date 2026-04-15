@@ -16,6 +16,7 @@ import {
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneNameSetting,
+  pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
@@ -145,6 +146,17 @@ export function WikiHanziCharacterPronunciationBox({
           ),
         },
   );
+  const finalToneViewpointSetting = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinFinalToneViewpointSetting,
+          key: getPinyinFinalToneKeyParams(
+            splitPinyin.finalSoundId,
+            String(splitPinyin.tone),
+          ),
+        },
+  );
   const finalToneNameSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -164,6 +176,18 @@ export function WikiHanziCharacterPronunciationBox({
     initialDescriptionSetting?.value?.text ?? null;
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
+  const finalToneSceneViewpoint =
+    finalToneViewpointSetting?.value?.text ?? null;
+  const finalToneLocationDescription = [
+    finalToneSceneDescription == null || finalToneSceneDescription.length === 0
+      ? null
+      : `Description: ${finalToneSceneDescription}`,
+    finalToneSceneViewpoint == null || finalToneSceneViewpoint.length === 0
+      ? null
+      : `Viewpoint: ${finalToneSceneViewpoint}`,
+  ]
+    .filter((value): value is string => value != null)
+    .join(` `);
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
@@ -394,7 +418,10 @@ export function WikiHanziCharacterPronunciationBox({
           }}
           location={{
             name: finalToneName,
-            description: finalToneSceneDescription ?? undefined,
+            description:
+              finalToneLocationDescription.length === 0
+                ? undefined
+                : finalToneLocationDescription,
           }}
           cue={{ word: gloss }}
           onApplyHint={({ text, explanation }) => {
