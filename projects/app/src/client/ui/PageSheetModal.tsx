@@ -205,9 +205,9 @@ const WebImpl = ({
   const content = (
     <Reanimated.View
       className={`
-        size-full overflow-hidden bg-bg
+        w-full flex-1 overflow-hidden rounded-t-2xl bg-bg shadow-[0_20px_60px_rgba(0,0,0,0.55)]
 
-        sm:max-h-[80vh] sm:w-[500px] sm:rounded-xl
+        sm:max-h-[80vh] sm:w-[500px] sm:flex-none sm:rounded-xl
       `}
       style={[animatedContentStyle]}
     >
@@ -229,9 +229,9 @@ const WebImpl = ({
     >
       <ReanimatedPressable
         className={`
-          absolute size-full cursor-auto items-center justify-center
+          absolute size-full cursor-auto items-center justify-start pt-5
 
-          sm:p-4
+          sm:justify-center sm:p-4
         `}
         style={[animatedBackgroundStyle]}
         onPressIn={onBackgroundPressIn}

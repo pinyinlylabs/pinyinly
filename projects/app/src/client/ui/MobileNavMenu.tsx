@@ -7,8 +7,9 @@ import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { ReactNode } from "react";
 import { useLayoutEffect, useRef } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { HeaderTitleProvider } from "./HeaderTitleProvider";
+import { PageSheetModal } from "./PageSheetModal";
 
 interface MobileNavMenuProps {
   isOpen: boolean;
@@ -55,70 +56,68 @@ export function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
 
   return (
     <HeaderTitleProvider>
-      <Modal
-        presentationStyle="fullScreen"
-        transparent={true}
-        onRequestClose={onClose}
-      >
-        <View className="size-full bg-bg">
-          <View className="flex-row px-4 py-3">
-            <View className="w-[32px] shrink" />
-            <View className="flex-1 items-center">
-              <HeaderTitleProvider.TitleText className={`pyly-body-title`} />
+      <PageSheetModal onDismiss={onClose} suspenseFallback={null}>
+        {({ dismiss }) => (
+          <View className="size-full bg-bg">
+            <View className="flex-row px-4 py-3">
+              <View className="w-[32px] shrink" />
+              <View className="flex-1 items-center">
+                <HeaderTitleProvider.TitleText className={`pyly-body-title`} />
+              </View>
+              <View className="w-[32px] shrink">
+                <Pressable onPress={dismiss}>
+                  <Icon icon="close" size={32} />
+                </Pressable>
+              </View>
             </View>
-            <View className="w-[32px] shrink">
-              <Pressable onPress={onClose}>
-                <Icon icon="close" size={32} />
-              </Pressable>
-            </View>
-          </View>
-          <ScrollView
-            className="flex-1"
-            contentContainerClassName="gap-8 px-4 pb-6"
-            keyboardShouldPersistTaps="handled"
-          >
-            <View>
-              <Text className="pyly-body-title">Menu</Text>
-              <HeaderTitleProvider.ScrollTrigger title="Menu" />
-            </View>
-            <QuickSearchButton className="place-self-stretch" />
-            {navItems
-              .filter((section) => section.primary === true)
-              .map((section, sectionIndex) => (
-                <MobileNavGroup key={sectionIndex} title={section.title}>
-                  {section.items.map((item, itemIndex) => (
-                    <MobileNavItem
-                      key={itemIndex}
-                      name={item.name}
-                      href={item.href}
-                      onNavigate={onClose}
-                    />
-                  ))}
-                </MobileNavGroup>
-              ))}
-
-            <View className="items-start px-4">
+            <ScrollView
+              className="flex-1"
+              contentContainerClassName="gap-8 px-4 pb-6"
+              keyboardShouldPersistTaps="handled"
+            >
+              <View>
+                <Text className="pyly-body-title">Menu</Text>
+                <HeaderTitleProvider.ScrollTrigger title="Menu" />
+              </View>
+              <QuickSearchButton className="place-self-stretch" />
               {navItems
-                .filter((section) => section.primary !== true)
+                .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
-                  <View key={sectionIndex}>
-                    {sectionIndex === 0 ? null : (
-                      <View className="invisible h-[40px]" />
-                    )}
+                  <MobileNavGroup key={sectionIndex} title={section.title}>
                     {section.items.map((item, itemIndex) => (
-                      <MobileNavSubtleItem
+                      <MobileNavItem
                         key={itemIndex}
                         name={item.name}
                         href={item.href}
-                        onNavigate={onClose}
+                        onNavigate={dismiss}
                       />
                     ))}
-                  </View>
+                  </MobileNavGroup>
                 ))}
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
+
+              <View className="items-start px-4">
+                {navItems
+                  .filter((section) => section.primary !== true)
+                  .map((section, sectionIndex) => (
+                    <View key={sectionIndex}>
+                      {sectionIndex === 0 ? null : (
+                        <View className="invisible h-[40px]" />
+                      )}
+                      {section.items.map((item, itemIndex) => (
+                        <MobileNavSubtleItem
+                          key={itemIndex}
+                          name={item.name}
+                          href={item.href}
+                          onNavigate={dismiss}
+                        />
+                      ))}
+                    </View>
+                  ))}
+              </View>
+            </ScrollView>
+          </View>
+        )}
+      </PageSheetModal>
     </HeaderTitleProvider>
   );
 }

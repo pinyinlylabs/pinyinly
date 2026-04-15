@@ -169,7 +169,7 @@ function MenuLayoutContent() {
       <MobileFloatingTitle
         className="sm:hidden"
         isBackgroundVisible={isMobileTopMenuBackgroundVisible}
-        rightButton={<MobileNavTrigger />}
+        rightButton={<MobileNavMenuTrigger />}
       />
 
       <DesktopFloatingTitle />
@@ -296,7 +296,7 @@ const DesktopNavSubtleItem = ({ name, href }: NavItemProps) => {
   );
 };
 
-function MobileNavTrigger() {
+function MobileNavMenuTrigger() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
