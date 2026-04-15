@@ -111,6 +111,7 @@ function MenuLayoutContent() {
                         key={itemIndex}
                         name={item.name}
                         href={item.href}
+                        lozenge={item.lozenge}
                       />
                     ))}
                   </Fragment>
@@ -134,6 +135,7 @@ function MenuLayoutContent() {
                         key={itemIndex}
                         name={item.name}
                         href={item.href}
+                        lozenge={undefined}
                       />
                     ))}
                   </Fragment>
@@ -261,18 +263,22 @@ function DesktopNavGroupTitle({ name }: { name: string }) {
 interface NavItemProps {
   name: string;
   href: Href;
+  lozenge: ReactNode;
 }
 
-const DesktopNavItem = ({ name, href }: NavItemProps) => {
+const DesktopNavItem = ({ name, href, lozenge }: NavItemProps) => {
   const pathname = usePathname();
   const isActive = isNavItemActive(pathname, href as string);
 
   return (
     <Link href={href} asChild>
       <Pressable className={buttonContainerClass({ isFocused: isActive })}>
-        <Text className="font-sans text-sm/normal font-bold uppercase text-fg">
-          {name}
-        </Text>
+        <View className="relative flex-row items-center gap-2">
+          <Text className="font-sans text-sm/normal font-bold uppercase text-fg">
+            {name}
+          </Text>
+          {lozenge}
+        </View>
       </Pressable>
     </Link>
   );

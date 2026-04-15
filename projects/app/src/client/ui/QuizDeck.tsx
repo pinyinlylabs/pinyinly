@@ -259,9 +259,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         className={`mb-[20px] w-full max-w-[600px] flex-row items-center gap-3 self-center px-4`}
       >
         <QuizProgressBar progress={quizProgress.progress} />
-        {skillQueue.loading ? null : (
-          <QuizQueueButton queueStats={skillQueue.reviewQueue} />
-        )}
+        <QuizQueueButton />
       </View>
 
       <NavigationIndependentTree>

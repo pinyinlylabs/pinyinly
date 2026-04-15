@@ -89,6 +89,7 @@ export function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
                         key={itemIndex}
                         name={item.name}
                         href={item.href}
+                        lozenge={item.lozenge}
                         onNavigate={dismiss}
                       />
                     ))}
@@ -144,10 +145,12 @@ function MobileNavGroup({
 function MobileNavItem({
   name,
   href,
+  lozenge,
   onNavigate,
 }: {
   name: string;
   href: Href;
+  lozenge: ReactNode;
   onNavigate: () => void;
 }) {
   const pathname = usePathname();
@@ -163,7 +166,10 @@ function MobileNavItem({
           hover:bg-fg/10
         `}
       >
-        <Text className="pyly-button-outline">{name}</Text>
+        <View className="relative flex-row items-center gap-2">
+          <Text className="pyly-button-outline">{name}</Text>
+          {lozenge}
+        </View>
         <View className="flex-1 items-end">
           {isActive ? <Icon icon="check" size={24} /> : null}
         </View>
