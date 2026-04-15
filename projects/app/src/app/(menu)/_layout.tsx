@@ -10,6 +10,7 @@ import { Link, Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -37,6 +38,21 @@ export default function MenuLayout() {
 }
 
 function MenuLayoutContent() {
+  const [
+    isMobileTopMenuBackgroundVisible,
+    setIsMobileTopMenuBackgroundVisible,
+  ] = useState(false);
+
+  function handleMenuScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    const shouldShowBackground = event.nativeEvent.contentOffset.y > 8;
+    setIsMobileTopMenuBackgroundVisible((prev) => {
+      if (prev === shouldShowBackground) {
+        return prev;
+      }
+      return shouldShowBackground;
+    });
+  }
+
   return (
     <View
       className={`
@@ -46,10 +62,12 @@ function MenuLayoutContent() {
       `}
     >
       {/* Mobile header nav */}
-      <MobileTopMenu className="sm:hidden" rightButton={<MobileNavTrigger />} />
-
       <ScrollView
+        onScroll={handleMenuScroll}
+        scrollEventThrottle={16}
         contentContainerClassName={`
+          pt-safe-offset-[56px]
+
           sm:py-safe-offset-5
 
           px-safe-or-4 flex-row
@@ -146,6 +164,13 @@ function MenuLayoutContent() {
           `}
         ></View>
       </ScrollView>
+
+      {/* Mobile header nav */}
+      <MobileFloatingTitle
+        className="sm:hidden"
+        isBackgroundVisible={isMobileTopMenuBackgroundVisible}
+        rightButton={<MobileNavTrigger />}
+      />
 
       <DesktopFloatingTitle />
 
@@ -293,29 +318,58 @@ function MobileNavTrigger() {
   );
 }
 
-function MobileTopMenu({
+function MobileFloatingTitle({
   leftButton,
   rightButton,
+  isBackgroundVisible,
   className,
 }: {
   leftButton?: ReactNode;
   rightButton?: ReactNode;
+  isBackgroundVisible: boolean;
   className?: string;
 }) {
   return (
-    <View
+    <Reanimated.View
+      entering={FadeIn.duration(100)}
+      exiting={FadeOut.duration(100)}
       className={`
-        flex-row px-4 py-3
+        pointer-events-none
 
         ${className ?? ``}
       `}
+      style={{
+        position: `fixed`,
+        left: 0,
+        right: 0,
+        top: 0,
+        zIndex: 20,
+      }}
     >
-      <View className="w-[32px] shrink">{leftButton ?? null}</View>
-      <View className="flex-1 items-center">
-        <HeaderTitleProvider.TitleText className="pyly-body-title" />
+      <View className="pointer-events-none pt-safe-offset-2 px-safe-or-4">
+        {isBackgroundVisible ? (
+          <Reanimated.View
+            entering={FadeIn.duration(100)}
+            exiting={FadeOut.duration(100)}
+            className={`
+              absolute -inset-x-2 -bottom-4 top-0 bg-bg/90 backdrop-blur-sm
+
+              [-webkit-mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+
+              [mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+            `}
+          />
+        ) : null}
+
+        <View className="pointer-events-auto h-[56px] flex-row items-center">
+          <View className="w-[32px] shrink">{leftButton ?? null}</View>
+          <View className="flex-1 items-center justify-center">
+            <HeaderTitleProvider.TitleText className="pyly-body-title" />
+          </View>
+          <View className="w-[32px] shrink">{rightButton ?? null}</View>
+        </View>
       </View>
-      <View className="w-[32px] shrink">{rightButton ?? null}</View>
-    </View>
+    </Reanimated.View>
   );
 }
 
