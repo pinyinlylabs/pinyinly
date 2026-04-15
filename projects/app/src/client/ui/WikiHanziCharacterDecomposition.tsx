@@ -5,6 +5,7 @@ import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHi
 import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {
+  hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
@@ -259,34 +260,82 @@ function MeaningsSection({
     [db.dictionarySearch, hanzi],
   );
 
-  // If hanzi is not in dictionary, don't show this section
+  const userHintSettingKeys = hanziWordMeanings.flatMap((entry) => {
+    const key = { hanziWord: entry.hanziWord };
+    return [
+      hanziWordMeaningHintTextSetting.entity.marshalKey(key),
+      hanziWordMeaningHintExplanationSetting.entity.marshalKey(key),
+    ];
+  });
+
+  const { data: userHintSettings } = useLiveQuery(
+    (q) =>
+      userHintSettingKeys.length === 0
+        ? null
+        : q
+            .from({ setting: db.settingCollection })
+            .where(({ setting }) => inArray(setting.key, userHintSettingKeys)),
+    [db.settingCollection, userHintSettingKeys],
+  );
+
+  const userHintKeysWithContent = new Set(
+    (userHintSettings ?? [])
+      .filter((s) => hasSettingText(s.value))
+      .map((s) => s.key),
+  );
+
   if (hanziWordMeanings.length === 0) {
     return null;
   }
 
+  function meaningHasHint(entry: (typeof hanziWordMeanings)[number]): boolean {
+    const meaningKey = meaningKeyFromHanziWord(entry.hanziWord);
+    if (mnemonicHints?.some((h) => h.meaningKey === meaningKey) === true) {
+      return true;
+    }
+    const textKey = hanziWordMeaningHintTextSetting.entity.marshalKey({
+      hanziWord: entry.hanziWord,
+    });
+    const explanationKey =
+      hanziWordMeaningHintExplanationSetting.entity.marshalKey({
+        hanziWord: entry.hanziWord,
+      });
+    return (
+      userHintKeysWithContent.has(textKey) ||
+      userHintKeysWithContent.has(explanationKey)
+    );
+  }
+
+  const visibleMeanings = isEditMode
+    ? hanziWordMeanings
+    : hanziWordMeanings.filter(meaningHasHint);
+
   return (
     <View className="gap-4 p-4">
-      <Text className="pyly-body-heading">{hanzi} meanings</Text>
-
-      <View className="gap-3">
-        {hanziWordMeanings.map((entry) => {
-          const { hanziWord } = entry;
-          const meaningKey = meaningKeyFromHanziWord(hanziWord);
-          // Match mnemonic hint by meaningKey
-          const matchedHint = mnemonicHints?.find(
-            (h) => h.meaningKey === meaningKey,
-          );
-          return (
-            <MeaningItem
-              key={hanziWord}
-              hanziWord={hanziWord}
-              meaning={entry}
-              mnemonicHint={matchedHint?.hint}
-              isEditMode={isEditMode}
-            />
-          );
-        })}
-      </View>
+      {visibleMeanings.length === 0 ? (
+        <Text className="pyly-body-caption text-fg-dim">
+          Think of a story connecting the components to the meaning. Tap Change
+          to add one.
+        </Text>
+      ) : (
+        <View className="gap-3">
+          {visibleMeanings.map((entry) => {
+            const meaningKey = meaningKeyFromHanziWord(entry.hanziWord);
+            const mnemonicHint = mnemonicHints?.find(
+              (h) => h.meaningKey === meaningKey,
+            )?.hint;
+            return (
+              <MeaningItem
+                key={entry.hanziWord}
+                hanziWord={entry.hanziWord}
+                meaning={entry}
+                mnemonicHint={mnemonicHint}
+                isEditMode={isEditMode}
+              />
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
@@ -340,13 +389,27 @@ function MeaningItem({
           />
         </View>
       ) : null}
-      {isEditMode && !hasHint ? (
+      {hasHint ? null : (
         <Text className="pyly-body-caption pl-7 text-fg-dim">
           Add a hint to make this meaning easier to recognize.
         </Text>
-      ) : null}
+      )}
     </View>
   );
+}
+
+function hasSettingText(value: unknown): boolean {
+  if (typeof value !== `object` || value == null) {
+    return false;
+  }
+  const record = value as { text?: unknown; t?: unknown };
+  const text =
+    typeof record.text === `string`
+      ? record.text
+      : typeof record.t === `string`
+        ? record.t
+        : null;
+  return text != null && text.trim().length > 0;
 }
 
 function MergedHintDisplay({ value }: { value: string }) {

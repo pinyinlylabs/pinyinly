@@ -1,8 +1,11 @@
+import { QuizQueueLozenge } from "@/client/ui/QuizQueueLozenge";
 import type { Href } from "expo-router";
+import type { ReactNode } from "react";
 
 export interface NavItem {
   name: string;
   href: Href;
+  lozenge?: ReactNode;
 }
 
 export interface NavGroup {
@@ -16,7 +19,11 @@ export const navItems: NavGroup[] = [
     title: `Learning`,
     primary: true,
     items: [
-      { name: `Practice`, href: `/learn` },
+      {
+        name: `Practice`,
+        href: `/learn`,
+        lozenge: <QuizQueueLozenge />,
+      },
       { name: `Wiki`, href: `/wiki` },
       { name: `Sounds`, href: `/sounds` },
       { name: `Skills`, href: `/skills` },
