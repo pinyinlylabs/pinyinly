@@ -1260,6 +1260,33 @@ function AiImagePromptComposer({
     );
   };
 
+  const submitPrompt = () => {
+    if (!canSend) {
+      return;
+    }
+
+    const nextPrompt = draftPrompt;
+    setDraftPrompt(``);
+    lastPersistedDraftPromptRef.current = ``;
+    void onGenerate(nextPrompt);
+  };
+
+  const handlePromptInputKeyPress = (event: {
+    nativeEvent: { key: string; shiftKey?: boolean };
+    preventDefault: () => void;
+  }) => {
+    const isShiftPressed = event.nativeEvent.shiftKey === true;
+
+    if (event.nativeEvent.key === `Enter`) {
+      if (isShiftPressed) {
+        return;
+      }
+
+      event.preventDefault();
+      submitPrompt();
+    }
+  };
+
   return (
     <View
       className={
@@ -1271,6 +1298,7 @@ function AiImagePromptComposer({
       <TextInputMulti
         value={draftPrompt}
         onChangeText={setDraftPrompt}
+        onKeyPress={handlePromptInputKeyPress}
         placeholder="Describe how to create or modify the image in this chat"
         className="max-h-80 rounded-none bg-transparent p-0 text-sm font-medium leading-5"
         editable={editable}
@@ -1433,20 +1461,7 @@ function AiImagePromptComposer({
           )}
         </View>
 
-        <RectButton
-          variant="bare2"
-          onPress={() => {
-            if (!canSend) {
-              return;
-            }
-
-            const nextPrompt = draftPrompt;
-            setDraftPrompt(``);
-            lastPersistedDraftPromptRef.current = ``;
-            void onGenerate(nextPrompt);
-          }}
-          disabled={!canSend}
-        >
+        <RectButton variant="bare2" onPress={submitPrompt} disabled={!canSend}>
           Send
         </RectButton>
       </View>
