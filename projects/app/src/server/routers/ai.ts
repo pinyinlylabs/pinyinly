@@ -71,6 +71,22 @@ const subLocationDescriptionOutputSchema = z
   })
   .strict();
 
+const leadCharacterDescriptionOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            description: z.string(),
+            explanation: z.string().nullable().optional(),
+            confidence: z.number().min(0).max(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 const leadCharacterDescriptionInputSchema = z
   .object({
     name: z.string().min(1),
@@ -323,7 +339,7 @@ export const aiRouter = router({
 
   generateLeadCharacterDescriptions: authedProcedure
     .input(leadCharacterDescriptionInputSchema)
-    .output(subLocationDescriptionOutputSchema)
+    .output(leadCharacterDescriptionOutputSchema)
     .mutation(async (opts) => {
       const { name, sound, existingDescription, count } = opts.input;
 
@@ -338,7 +354,7 @@ export const aiRouter = router({
         const data = await requestOpenAiJson({
           system,
           user,
-          schema: subLocationDescriptionOutputSchema,
+          schema: leadCharacterDescriptionOutputSchema,
         });
 
         return data;
