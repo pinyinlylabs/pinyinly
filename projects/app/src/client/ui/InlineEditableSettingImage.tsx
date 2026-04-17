@@ -10,7 +10,7 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type {
   LayoutChangeEvent,
   PanResponderInstance,
@@ -24,6 +24,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Circle, Defs, Mask, Rect, Svg } from "react-native-svg";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { ButtonGroup } from "./ButtonGroup";
@@ -702,6 +703,7 @@ function InlineImageRepositionFrame({
   onSave: (nextRect: ImageCropRect) => void;
   onCropRectChange: (rect: ImageCropRect) => void;
 }) {
+  const circleMaskId = useId().replaceAll(`:`, ``);
   const [frameSize, setFrameSize] = useState<{
     width: number;
     height: number;
@@ -777,11 +779,7 @@ function InlineImageRepositionFrame({
 
   return (
     <View
-      className={`
-        relative w-full overflow-hidden
-
-        ${frameShape === `circle` ? `rounded-full` : ``}
-      `}
+      className="relative w-full"
       style={containerStyle}
       onLayout={(event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
@@ -796,16 +794,32 @@ function InlineImageRepositionFrame({
         crop={{ kind: `rect`, rect: cropRect }}
         imageWidth={imageSize.width}
         imageHeight={imageSize.height}
-        frameShape={frameShape}
+        frameShape={frameShape === `circle` ? `rect` : frameShape}
         className="size-full"
       />
-      <View
-        className={
-          frameShape === `circle`
-            ? `pointer-events-none absolute inset-0 rounded-full border-2 border-fg/50`
-            : `pointer-events-none absolute inset-0 border border-fg/20`
-        }
-      />
+      {frameShape === `circle` ? (
+        <View className="pointer-events-none absolute inset-0">
+          <Svg width="100%" height="100%">
+            <Defs>
+              <Mask id={circleMaskId}>
+                <Rect x="0" y="0" width="100%" height="100%" fill="white" />
+                <Circle cx="50%" cy="50%" r="50%" fill="black" />
+              </Mask>
+            </Defs>
+            <Rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="rgba(0, 0, 0, 0.35)"
+              mask={`url(#${circleMaskId})`}
+            />
+          </Svg>
+          <View className="absolute inset-0 rounded-full border-2 border-fg/60" />
+        </View>
+      ) : (
+        <View className="pointer-events-none absolute inset-0 border border-fg/20" />
+      )}
       <View
         className="absolute inset-0"
         style={

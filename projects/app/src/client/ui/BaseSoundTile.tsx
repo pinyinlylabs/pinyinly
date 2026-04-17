@@ -1,13 +1,12 @@
 import type { AssetId, PinyinSoundId } from "@/data/model";
-import { isInitialSoundId } from "@/data/pinyin";
 import { nullIfEmpty } from "@/util/unicode";
-import type { IsExhaustedRest } from "@pinyinly/lib/types";
+import type { ViewProps } from "react-native";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { FramedAssetImage } from "./ImageFrame";
-import type { ImageCrop } from "./imageCrop";
+import type { ImageCrop, ImageFrameShape } from "./imageCrop";
 
-interface PinyinSoundProps {
+export interface PinyinSoundTileProps extends ViewProps {
   id: PinyinSoundId;
   label: string;
   name: string | null;
@@ -19,24 +18,39 @@ interface PinyinSoundProps {
   } | null;
 }
 
-export function PinyinSoundTile({
-  id,
-  name,
-  label,
+interface BaseSoundTileProps {
+  decoration?: string | null;
+  frameShape: ImageFrameShape;
+  image: PinyinSoundTileProps[`image`];
+  label: string;
+  name: string | null;
+  size: `rect` | `square`;
+}
+
+type BaseSoundTileViewProps = Omit<
+  PinyinSoundTileProps,
+  `id` | `image` | `label` | `name`
+>;
+
+export function BaseSoundTile({
+  className,
+  decoration = null,
+  frameShape,
   image,
+  label,
+  name,
+  size,
   ...props
-}: PinyinSoundProps) {
-  true satisfies IsExhaustedRest<typeof props>;
-
-  const decoration = decorationForSound(id);
-  const frameShape = isInitialSoundId(id) ? `circle` : `rect`;
-
+}: BaseSoundTileProps & BaseSoundTileViewProps) {
   return (
     <View
       {...props}
-      className={tileClass({
-        hasAssociation: nullIfEmpty(name) != null,
-      })}
+      className={
+        tileClass({
+          hasAssociation: nullIfEmpty(name) != null,
+          size,
+        }) + (className == null ? `` : ` ${className}`)
+      }
     >
       {image == null ? null : (
         <View className="absolute inset-0">
@@ -53,9 +67,7 @@ export function PinyinSoundTile({
       )}
       <View className="items-center">
         {decoration == null ? null : (
-          <Text
-            className={`-top-4 h-0 pt-2 text-4xl font-normal leading-none text-fg/20`}
-          >
+          <Text className="-top-4 h-0 pt-2 text-4xl font-normal leading-none text-fg/20">
             {decoration}
           </Text>
         )}
@@ -82,7 +94,7 @@ export function PinyinSoundTile({
 
 const tileClass = tv({
   base: `
-    relative h-28 w-24 items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high p-2
+    relative items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high p-2
 
     hover:bg-cyan/20
   `,
@@ -90,28 +102,9 @@ const tileClass = tv({
     hasAssociation: {
       true: ``,
     },
+    size: {
+      rect: `h-28 w-24`,
+      square: `size-28`,
+    },
   },
 });
-
-function decorationForSound(soundId: PinyinSoundId): string | null {
-  switch (soundId) {
-    case `1`: {
-      return `¯`;
-    }
-    case `2`: {
-      return `´`;
-    }
-    case `3`: {
-      return `ˇ`;
-    }
-    case `4`: {
-      return `\``;
-    }
-    case `5`: {
-      return ``;
-    }
-    default: {
-      return null;
-    }
-  }
-}
