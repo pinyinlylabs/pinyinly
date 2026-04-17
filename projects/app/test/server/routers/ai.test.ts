@@ -1,4 +1,5 @@
 import {
+  buildLeadCharacterDescriptionPrompt,
   buildPronunciationHintPrompt,
   buildSubLocationDescriptionPrompt,
 } from "#server/routers/ai.ts";
@@ -236,6 +237,84 @@ describe(
 
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
+        }
+      `);
+    });
+  },
+);
+
+describe(
+  `buildLeadCharacterDescriptionPrompt` satisfies HasNameOf<
+    typeof buildLeadCharacterDescriptionPrompt
+  >,
+  () => {
+    test(`minimal input (no existing description)`, () => {
+      const result = buildLeadCharacterDescriptionPrompt({
+        name: `Marcus`,
+        sound: `m`,
+        count: 4,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
+        Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
+        Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
+        Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
+        Make characters feel like real people with depth—avoid generic or flat descriptions.
+        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.",
+          "user": "Character: Marcus
+        Associated pinyin sound: m
+
+        Generate 4 distinct character personality descriptions for this character.
+
+        Each suggestion must:
+        - Describe a unique, memorable personality or trait
+        - Feel like a real person with specific quirks or depth
+        - Be distinct from other suggestions
+        - Return only the descriptive fragment itself, don't prefix with the character name
+        - Be easy to visualize and reuse in different mnemonic stories
+        - NOT be a definition or encyclopedia-style description
+
+        Good suggestions feel like a vivid character profile.
+        Bad suggestions feel generic, flat, or encyclopedia-like.",
+        }
+      `);
+    });
+
+    test(`full input (with existing description)`, () => {
+      const result = buildLeadCharacterDescriptionPrompt({
+        name: `Marcus`,
+        sound: `m`,
+        existingDescription: `A tech entrepreneur with a sharp sense of humor`,
+        count: 3,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
+        Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
+        Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
+        Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
+        Make characters feel like real people with depth—avoid generic or flat descriptions.
+        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.",
+          "user": "Character: Marcus
+        Associated pinyin sound: m
+
+        Existing description: A tech entrepreneur with a sharp sense of humor
+
+        Generate 3 distinct character personality descriptions for this character.
+
+        Each suggestion must:
+        - Describe a unique, memorable personality or trait
+        - Feel like a real person with specific quirks or depth
+        - Be distinct from other suggestions
+        - Return only the descriptive fragment itself, don't prefix with the character name
+        - Be easy to visualize and reuse in different mnemonic stories
+        - NOT be a definition or encyclopedia-style description
+
+        Good suggestions feel like a vivid character profile.
+        Bad suggestions feel generic, flat, or encyclopedia-like.",
         }
       `);
     });

@@ -71,6 +71,31 @@ const subLocationDescriptionOutputSchema = z
   })
   .strict();
 
+const leadCharacterDescriptionOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            description: z.string(),
+            explanation: z.string().nullable().optional(),
+            confidence: z.number().min(0).max(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+const leadCharacterDescriptionInputSchema = z
+  .object({
+    name: z.string().min(1),
+    sound: z.string().min(1),
+    existingDescription: z.string().optional(),
+    count: z.number().int().min(1).max(6),
+  })
+  .strict();
+
 const aiReferenceImageSchema = z
   .object({
     label: z.string().min(1).max(400).optional(),
@@ -193,6 +218,55 @@ export function buildSubLocationDescriptionPrompt({
   return { system, user };
 }
 
+export function buildLeadCharacterDescriptionPrompt({
+  name,
+  sound,
+  existingDescription,
+  count,
+}: {
+  name: string;
+  sound: string;
+  existingDescription?: string;
+  count: number;
+}): { system: string; user: string } {
+  const system = [
+    `You create vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.`,
+    `Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.`,
+    `Each character bio should feel distinct, specific, and reusable across many mnemonic stories.`,
+    `Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.`,
+    `Make characters feel like real people with depth—avoid generic or flat descriptions.`,
+    `Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.`,
+  ].join(`\n`);
+
+  const optionalLines = [
+    existingDescription == null
+      ? null
+      : `Existing description: ${existingDescription}`,
+  ].filter((line): line is string => line != null);
+
+  const user = [
+    `Character: ${name}`,
+    `Associated pinyin sound: ${sound}`,
+    ...(optionalLines.length > 0 ? [``] : []),
+    ...optionalLines,
+    ``,
+    `Generate ${count} distinct character personality descriptions for this character.`,
+    ``,
+    `Each suggestion must:`,
+    `- Describe a unique, memorable personality or trait`,
+    `- Feel like a real person with specific quirks or depth`,
+    `- Be distinct from other suggestions`,
+    `- Return only the descriptive fragment itself, don't prefix with the character name`,
+    `- Be easy to visualize and reuse in different mnemonic stories`,
+    `- NOT be a definition or encyclopedia-style description`,
+    ``,
+    `Good suggestions feel like a vivid character profile.`,
+    `Bad suggestions feel generic, flat, or encyclopedia-like.`,
+  ].join(`\n`);
+
+  return { system, user };
+}
+
 export const aiRouter = router({
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
@@ -256,6 +330,36 @@ export const aiRouter = router({
         return data;
       } catch (error) {
         console.error(`Failed to generate sublocation descriptions:`, error);
+        throw new TRPCError({
+          code: `INTERNAL_SERVER_ERROR`,
+          message: `Unable to generate descriptions`,
+        });
+      }
+    }),
+
+  generateLeadCharacterDescriptions: authedProcedure
+    .input(leadCharacterDescriptionInputSchema)
+    .output(leadCharacterDescriptionOutputSchema)
+    .mutation(async (opts) => {
+      const { name, sound, existingDescription, count } = opts.input;
+
+      const { system, user } = buildLeadCharacterDescriptionPrompt({
+        name,
+        sound,
+        existingDescription,
+        count,
+      });
+
+      try {
+        const data = await requestOpenAiJson({
+          system,
+          user,
+          schema: leadCharacterDescriptionOutputSchema,
+        });
+
+        return data;
+      } catch (error) {
+        console.error(`Failed to generate lead character descriptions:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate descriptions`,
