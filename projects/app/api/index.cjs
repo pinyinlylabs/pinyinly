@@ -4,11 +4,16 @@ const { captureConsoleIntegration } = require(`@sentry/core`);
 // const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);
 
 Sentry.init({
+  enableLogs: true,
   enabled: process.env.PYLY_SENTRY_ENABLED !== `false`,
   debug: process.env.PYLY_SENTRY_DEBUG === `true`,
   dsn: process.env.SENTRY_DSN, // Must be provided at runtime.
   integrations: [
     captureConsoleIntegration({ levels: [`warn`, `error`] }),
+    Sentry.pinoIntegration({
+      error: { levels: [`error`, `warn`] },
+      log: { levels: [`info`] },
+    }),
     // If there's an unhandled rejection then crash the process rather than
     // hanging indefinitely as this is more suitable for serverless environments.
     Sentry.onUnhandledRejectionIntegration({ mode: `strict` }),

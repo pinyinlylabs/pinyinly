@@ -15,6 +15,8 @@ import { subMinutes } from "date-fns/subMinutes";
 import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
 import * as Crypto from "expo-crypto";
 import { EventSchemas, Inngest, RetryAfterError } from "inngest";
+import pino from "pino";
+import pretty from "pino-pretty";
 import * as postmark from "postmark";
 import z from "zod/v4";
 import {
@@ -38,9 +40,22 @@ import {
 import { retryMutation as retryMutationV12 } from "./replicache/v12";
 import { retryMutation as retryMutationV14 } from "./replicache/v14";
 
+const inngestLogger = pino(
+  { name: `inngest` },
+  process.env.NODE_ENV === `development`
+    ? pretty({
+        colorize: true,
+        ignore: `pid,hostname`,
+        translateTime: `SYS:standard`,
+        minimumLevel: `debug`,
+      })
+    : undefined,
+);
+
 // Create a client to send and receive events
 export const inngest = new Inngest({
   id: `my-app`,
+  logger: inngestLogger,
   middleware: [sentryMiddleware()],
   schemas: new EventSchemas().fromSchema({
     "asset/sync-upload": z.object({
@@ -96,9 +111,15 @@ const assetPendingUploadGarbageCollection = inngest.createFunction(
         }),
     );
 
-    logger.info(
-      `assetPendingUpload GC: deleted ${deletedRowCount} stale rows older than ${cutoff.toISOString()}`,
-    );
+    if (deletedRowCount > 0) {
+      logger.info(
+        {
+          cutoff: cutoff,
+          deletedRowCount,
+        },
+        `Deleted stale assetPendingUpload rows`,
+      );
+    }
 
     return {
       deletedRowCount,
@@ -120,17 +141,19 @@ const devTestThrowStepError = inngest.createFunction(
 const devTestLogRootError = inngest.createFunction(
   { id: `test-log-root-error` },
   { event: `test/log-root-error` },
-  () => {
-    console.error(new Error(`test error`));
+  ({ logger }) => {
+    const error = new Error(`test error`);
+    logger.error({ err: error }, `test error`);
   },
 );
 
 const devTestLogStepError = inngest.createFunction(
   { id: `test-log-step-error` },
   { event: `test/log-step-error` },
-  async ({ step }) => {
+  async ({ step, logger }) => {
     await step.run(`log error`, () => {
-      console.error(new Error(`test error`));
+      const error = new Error(`test error`);
+      logger.error({ err: error }, `test error`);
     });
   },
 );
@@ -361,7 +384,7 @@ const syncRemotePush = inngest.createFunction(
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
   },
-  async ({ step }) => {
+  async ({ step, logger }) => {
     await onlineOrRetryLater();
 
     // Find all sync rules
@@ -440,9 +463,13 @@ const syncRemotePush = inngest.createFunction(
 
               // Check for errors (VersionNotSupportedResponse or ClientStateNotFoundResponse)
               if (result != null) {
-                console.error(
-                  `Error pushing mutations to remote for clientId=${clientId}, remoteSyncId=${remoteSync.id}:`,
-                  result,
+                logger.error(
+                  {
+                    clientId,
+                    remoteSyncId: remoteSync.id,
+                    result,
+                  },
+                  `Error pushing mutations to remote`,
                 );
                 // Don't update lastSyncedMutationIds - will retry on next sync
                 return lastSyncedMutationId; // Return current value unchanged
@@ -486,7 +513,7 @@ const syncRemotePull = inngest.createFunction(
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
   },
-  async ({ step }) => {
+  async ({ step, logger }) => {
     await onlineOrRetryLater();
 
     // Find all sync rules
@@ -561,7 +588,16 @@ const syncRemotePull = inngest.createFunction(
               );
 
               if (result != null) {
-                console.error(`Error applying remote mutations for:`, result);
+                logger.error(
+                  {
+                    clientGroupId,
+                    remoteProfileId: remoteSync.remoteProfileId,
+                    result,
+                    schemaVersion,
+                    userId: remoteSync.userId,
+                  },
+                  `Error applying remote mutations`,
+                );
               }
             }
           },
@@ -574,7 +610,7 @@ const syncRemotePull = inngest.createFunction(
 const dataIntegrityDictionary = inngest.createFunction(
   { id: `dataIntegrityDictionary` },
   { cron: `30 * * * *` },
-  async ({ step }) => {
+  async ({ step, logger }) => {
     const dict = await loadDictionary();
 
     await step.run(`check skillRating.skill`, async () => {
@@ -591,9 +627,12 @@ const dataIntegrityDictionary = inngest.createFunction(
       ).then((x) => x.map((r) => r.skill));
 
       if (unknownSkills.length > 0) {
-        console.error(
-          `unknown hanzi word in skillRating.skill:`,
-          unknownSkills,
+        logger.error(
+          {
+            skillColumn: `skillRating.skill`,
+            unknownSkills,
+          },
+          `Unknown hanzi word skills found`,
         );
       }
 
@@ -614,7 +653,13 @@ const dataIntegrityDictionary = inngest.createFunction(
       ).then((x) => x.map((r) => r.skill));
 
       if (unknownSkills.length > 0) {
-        console.error(`unknown hanzi word in skillState.skill:`, unknownSkills);
+        logger.error(
+          {
+            skillColumn: `skillState.skill`,
+            unknownSkills,
+          },
+          `Unknown hanzi word skills found`,
+        );
       }
 
       return unknownSkills;
@@ -821,7 +866,13 @@ const retryFailedMutations = inngest.createFunction(
     });
 
     if (`error` in mutationChain) {
-      logger.error(mutationChain.error);
+      logger.error(
+        {
+          error: mutationChain.error,
+          startMutationRecordId,
+        },
+        `Failed to fetch mutation chain`,
+      );
       return {
         success: false,
         error: mutationChain.error,
@@ -842,7 +893,13 @@ const retryFailedMutations = inngest.createFunction(
       };
     }
 
-    logger.info(`Retrying ${mutations.length} failed mutations`);
+    logger.info(
+      {
+        mutationCount: mutations.length,
+        startMutationRecordId,
+      },
+      `Retrying failed mutations`,
+    );
 
     // Process mutations in batches
     const batchSize = 10;
@@ -882,9 +939,15 @@ const retryFailedMutations = inngest.createFunction(
                 })();
 
                 if (!result.success) {
-                  console.error(
-                    `Failed to retry mutation ${mutationRecord.mutationId}: ${result.error}`,
-                    result.stack,
+                  logger.error(
+                    {
+                      error: result.error,
+                      mutationId: mutationRecord.mutationId,
+                      mutationRecordId: mutationRecord.id,
+                      schemaVersion,
+                      stack: result.stack,
+                    },
+                    `Failed to retry mutation`,
                   );
 
                   return {
@@ -914,8 +977,12 @@ const retryFailedMutations = inngest.createFunction(
         stopped = true;
         failedAtMutationId = batchResult.failedAtMutationId;
         logger.error(
-          `Stopped at mutation ${String(failedAtMutationId)}: ${batchResult.error}`,
-          batchResult.stack,
+          {
+            error: batchResult.error,
+            failedAtMutationId,
+            stack: batchResult.stack,
+          },
+          `Stopped retrying mutations due to retry failure`,
         );
       }
     }
@@ -1005,7 +1072,12 @@ const syncAssetBlobs = inngest.createFunction(
 
         if (toUpload.length > 0 || toDownload.length > 0) {
           logger.info(
-            `Asset sync for ${remoteSync.id}: ${toUpload.length} to upload, ${toDownload.length} to download`,
+            {
+              remoteSyncId: remoteSync.id,
+              toDownloadCount: toDownload.length,
+              toUploadCount: toUpload.length,
+            },
+            `Calculated asset sync delta`,
           );
         }
 
@@ -1026,8 +1098,8 @@ const syncAssetBlobs = inngest.createFunction(
         }
       } catch (error) {
         logger.error(
-          `Error during asset blob sync for remote sync ${remoteSync.id}:`,
-          error,
+          { err: error, remoteSyncId: remoteSync.id },
+          `Error during asset blob sync`,
         );
       }
     }
@@ -1061,7 +1133,10 @@ const syncAssetBlobUpload = inngest.createFunction(
     );
 
     if (remoteSync == null) {
-      logger.error(`Remote sync rule ${remoteSyncId} not found`);
+      logger.error(
+        { assetId, remoteSyncId },
+        `Remote sync rule not found for upload`,
+      );
       return;
     }
 
@@ -1073,13 +1148,11 @@ const syncAssetBlobUpload = inngest.createFunction(
         );
       });
 
-      logger.info(
-        `Successfully uploaded asset ${assetId} for remote sync ${remoteSyncId}`,
-      );
+      logger.info({ assetId, remoteSyncId }, `Successfully uploaded asset`);
     } catch (error) {
       logger.error(
-        `Failed to upload asset ${assetId} for remote sync ${remoteSyncId}:`,
-        error,
+        { assetId, err: error, remoteSyncId },
+        `Failed to upload asset`,
       );
       throw error;
     }
@@ -1113,7 +1186,10 @@ const syncAssetBlobDownload = inngest.createFunction(
     );
 
     if (remoteSync == null) {
-      logger.error(`Remote sync rule ${remoteSyncId} not found`);
+      logger.error(
+        { assetId, remoteSyncId },
+        `Remote sync rule not found for download`,
+      );
       return;
     }
 
@@ -1125,13 +1201,11 @@ const syncAssetBlobDownload = inngest.createFunction(
         );
       });
 
-      logger.info(
-        `Successfully downloaded asset ${assetId} for remote sync ${remoteSyncId}`,
-      );
+      logger.info({ assetId, remoteSyncId }, `Successfully downloaded asset`);
     } catch (error) {
       logger.error(
-        `Failed to download asset ${assetId} for remote sync ${remoteSyncId}:`,
-        error,
+        { assetId, err: error, remoteSyncId },
+        `Failed to download asset`,
       );
       throw error;
     }

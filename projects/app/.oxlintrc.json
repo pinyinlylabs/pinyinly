@@ -44,6 +44,14 @@
         "react/only-export-components": "off",
         "unicorn/no-anonymous-default-export": "off"
       }
+    },
+    {
+      "files": ["src/server/lib/inngest.ts"],
+      "rules": {
+        // Inngest handlers receive a logger in function context. Use that logger
+        // for structured object-first logging instead of console.* calls.
+        "no-console": "deny"
+      }
     }
   ],
   "env": {
