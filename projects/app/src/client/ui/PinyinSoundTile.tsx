@@ -1,4 +1,5 @@
 import type { AssetId, PinyinSoundId } from "@/data/model";
+import { isInitialSoundId } from "@/data/pinyin";
 import { nullIfEmpty } from "@/util/unicode";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { Text, View } from "react-native";
@@ -28,6 +29,7 @@ export function PinyinSoundTile({
   true satisfies IsExhaustedRest<typeof props>;
 
   const decoration = decorationForSound(id);
+  const frameShape = isInitialSoundId(id) ? `circle` : `rect`;
 
   return (
     <View
@@ -43,6 +45,7 @@ export function PinyinSoundTile({
             crop={image.crop}
             imageWidth={image.imageWidth}
             imageHeight={image.imageHeight}
+            frameShape={frameShape}
             className="size-full"
           />
           <View className="absolute inset-0 bg-bg-high/70" />

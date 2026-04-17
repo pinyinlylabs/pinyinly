@@ -8,6 +8,7 @@ import {
   getFinalSoundLabel,
   getInitialSoundLabel,
   getToneSoundLabel,
+  isInitialSoundId,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
@@ -206,7 +207,6 @@ export function WikiHanziCharacterPronunciationBox({
   });
   const finalToneName =
     finalToneNameSetting?.value?.text ?? defaultFinalToneName;
-
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -478,6 +478,7 @@ function SoundLinkBlock({
   const isPointerHoverCapable = usePointerHoverCapability();
   const soundImage = soundImageSetting.value;
   const soundImageCrop = parseImageCrop(soundImage?.imageCrop);
+  const frameShape = isInitialSoundId(soundId) ? `circle` : `rect`;
 
   const nameLink = (
     <Link href={href} className={soundNameClass()}>
@@ -501,12 +502,19 @@ function SoundLinkBlock({
                 <Pressable>{nameLink}</Pressable>
               </Tooltip.Trigger>
               <Tooltip.Content className="p-1">
-                <View className="size-20 overflow-hidden rounded-md bg-fg-bg5">
+                <View
+                  className={`
+                    size-20 overflow-hidden bg-fg-bg5
+
+                    ${frameShape === `circle` ? `rounded-full` : `rounded-md`}
+                  `}
+                >
                   <FramedAssetImage
                     assetId={soundImage.imageId}
                     crop={soundImageCrop}
                     imageWidth={soundImage.imageWidth}
                     imageHeight={soundImage.imageHeight}
+                    frameShape={frameShape}
                     className="size-full"
                   />
                 </View>

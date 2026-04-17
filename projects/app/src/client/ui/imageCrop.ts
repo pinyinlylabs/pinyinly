@@ -17,6 +17,8 @@ export interface ImageFrameConstraintInput {
   aspectRatio?: number;
 }
 
+export type ImageFrameShape = `rect` | `circle`;
+
 // Pixel-space types for crop geometry calculations
 export type CornerHandle =
   | `topLeft`

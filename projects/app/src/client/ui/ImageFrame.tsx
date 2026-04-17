@@ -3,13 +3,14 @@ import { useState } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { View } from "react-native";
 import { AssetImage } from "./AssetImage";
-import type { ImageCrop } from "./imageCrop";
+import type { ImageCrop, ImageFrameShape } from "./imageCrop";
 
 interface FramedAssetImageProps {
   assetId: AssetId;
   crop?: ImageCrop | null;
   imageWidth?: number | null;
   imageHeight?: number | null;
+  frameShape?: ImageFrameShape;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export function FramedAssetImage({
   crop,
   imageWidth,
   imageHeight,
+  frameShape = `rect`,
   className,
 }: FramedAssetImageProps) {
   const [frameSize, setFrameSize] = useState<{
@@ -28,12 +30,18 @@ export function FramedAssetImage({
   const hasCropData =
     crop?.kind === `rect` && imageWidth != null && imageHeight != null;
 
-  if (!hasCropData) {
-    return <AssetImage assetId={assetId} className={className} />;
-  }
+  const rect = hasCropData ? crop.rect : null;
+  const shapeClassName = frameShape === `circle` ? `rounded-full` : ``;
+  const wrapperClassName =
+    `relative overflow-hidden ${shapeClassName} ${className ?? ``}`.trim();
 
-  const rect = crop.rect;
-  const wrapperClassName = `relative overflow-hidden ${className ?? ``}`.trim();
+  if (!hasCropData || rect == null) {
+    return (
+      <View className={wrapperClassName}>
+        <AssetImage assetId={assetId} className="size-full" />
+      </View>
+    );
+  }
 
   return (
     <View
