@@ -1,4 +1,5 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
+import { AiLeadCharacterDescriptionModal } from "@/client/ui/AiLeadCharacterDescriptionModal";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { CompactWordRows } from "@/client/ui/CompactWordRows";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
@@ -182,7 +183,10 @@ function MnemonicStoryRoleSection({
   pinyinSoundId: PinyinSoundId;
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
   const isFinalSound = isFinalSoundId(pinyinSoundId);
+  const chart = loadPylyPinyinChart();
+  const soundLabel = getPinyinSoundLabel(pinyinSoundId, chart);
   const mnemonicDescriptionSetting = useUserSetting({
     setting: pinyinSoundDescriptionSetting,
     key: { soundId: pinyinSoundId },
@@ -191,6 +195,11 @@ function MnemonicStoryRoleSection({
     setting: pinyinSoundImageSetting,
     key: { soundId: pinyinSoundId },
   });
+  const characterNameSetting = useUserSetting({
+    setting: pinyinSoundNameSetting,
+    key: { soundId: pinyinSoundId },
+  });
+  const characterName = characterNameSetting.value?.text ?? soundLabel;
   const hasMnemonicContent =
     (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
     mnemonicImageSetting.value?.imageId != null;
@@ -202,13 +211,30 @@ function MnemonicStoryRoleSection({
           <Text className="pyly-body text-fg-dim">No description or image</Text>
         ) : (
           <>
-            <InlineEditableSettingText
-              setting={pinyinSoundDescriptionSetting}
-              settingKey={{ soundId: pinyinSoundId }}
-              placeholder="Add a description to help with mnemonic generation…"
-              readonly={!isEditMode}
-              multiline
-            />
+            <View className="gap-2">
+              <InlineEditableSettingText
+                setting={pinyinSoundDescriptionSetting}
+                settingKey={{ soundId: pinyinSoundId }}
+                placeholder="Add a description to help with mnemonic generation…"
+                readonly={!isEditMode}
+                multiline
+              />
+              {isEditMode && !isFinalSound ? (
+                <View className="flex-row items-center justify-between">
+                  <Text className="font-sans text-[13px] text-fg-dim">
+                    Need help making this character memorable?
+                  </Text>
+                  <RectButton
+                    variant="bare"
+                    onPress={() => {
+                      setShowAiModal(true);
+                    }}
+                  >
+                    Use AI
+                  </RectButton>
+                </View>
+              ) : null}
+            </View>
             <InlineEditableSettingImage
               setting={pinyinSoundImageSetting}
               settingKey={{ soundId: pinyinSoundId }}
@@ -224,6 +250,24 @@ function MnemonicStoryRoleSection({
           </>
         )}
       </View>
+
+      {showAiModal && isEditMode && !isFinalSound ? (
+        <AiLeadCharacterDescriptionModal
+          characterName={characterName}
+          sound={soundLabel}
+          existingDescription={mnemonicDescriptionSetting.value?.text}
+          onApplyDescription={(description) => {
+            mnemonicDescriptionSetting.setValue({
+              soundId: pinyinSoundId,
+              text: description,
+            });
+            setShowAiModal(false);
+          }}
+          onDismiss={() => {
+            setShowAiModal(false);
+          }}
+        />
+      ) : null}
     </WikiTitledBox>
   );
 }
