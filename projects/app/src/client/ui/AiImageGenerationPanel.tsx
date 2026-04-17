@@ -8,6 +8,8 @@ import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
+import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
+import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
@@ -22,6 +24,7 @@ import type {
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
+import type { TextInput } from "react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
@@ -60,6 +63,10 @@ interface AiImagePlaygroundStateV1 {
 const MAX_AI_PLAYGROUND_THREADS = 12;
 const MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD = 40;
 const MAX_AI_REFERENCE_IMAGES = 8;
+const AI_IMAGE_BUBBLE_MAX_WIDTH = 400;
+const AI_IMAGE_BUBBLE_MAX_HEIGHT = 320;
+const AI_IMAGE_BUBBLE_FALLBACK_WIDTH = 400;
+const AI_IMAGE_BUBBLE_FALLBACK_HEIGHT = 280;
 
 type AiReferenceImageKind = `actor` | `location` | `other`;
 
@@ -105,6 +112,11 @@ interface AiImageStyleContextDebug {
   label: string;
   prompt: string;
   assetId: AssetId;
+}
+
+interface PasteImageUploadInput {
+  blob: Blob;
+  contentType: string | null;
 }
 
 interface AiResolvedReference {
@@ -297,6 +309,18 @@ export function AiImageGenerationPanel({
 
   const generateMutation = trpc.ai.generateHintImage.useMutation();
   const isPointerHoverCapable = usePointerHoverCapability();
+  const {
+    uploading: isUploadingPastedImage,
+    uploadImageBlob: uploadPastedImageBlob,
+  } = useImageUploader({
+    onUploadComplete: () => {
+      // uploadImageBlob returns the uploaded assetId; caller appends timeline message.
+    },
+    onUploadError: (message) => {
+      setError(message);
+      onError?.(message);
+    },
+  });
 
   const persistPlaygroundState = (nextState: AiImagePlaygroundStateV1) => {
     playgroundSettingResult.setValue(
@@ -325,17 +349,13 @@ export function AiImageGenerationPanel({
     playgroundState.threads[0] ??
     null;
 
-  const latestAssistantImageMessage =
+  const latestImageMessage =
     activeThread?.messages
       .slice()
       .reverse()
-      .find(
-        (message) => message.role === `assistant` && message.assetId != null,
-      ) ?? null;
-  const activeThreadLatestAssistantImageAssetId =
-    latestAssistantImageMessage?.assetId ?? null;
-  const activeThreadLatestAssistantImageMessageId =
-    latestAssistantImageMessage?.id ?? null;
+      .find((message) => message.assetId != null) ?? null;
+  const activeThreadLatestImageAssetId = latestImageMessage?.assetId ?? null;
+  const activeThreadLatestImageMessageId = latestImageMessage?.id ?? null;
   const activeThreadId = activeThread?.id ?? null;
   const activeThreadMessageCount = activeThread?.messages.length ?? 0;
   const styleReferenceConfig =
@@ -490,12 +510,12 @@ export function AiImageGenerationPanel({
       setImage: null,
     });
   }
-  if (activeThreadLatestAssistantImageAssetId != null) {
+  if (activeThreadLatestImageAssetId != null) {
     fixedRowReferences.push({
       id: `latest-chat-image-reference`,
-      label: `Previous generated image from this chat`,
+      label: `Previous image from this chat`,
       kind: `other`,
-      assetId: activeThreadLatestAssistantImageAssetId,
+      assetId: activeThreadLatestImageAssetId,
       defaultVisibleInRow: true,
       fallbackForId: null,
       fallbackOrder: 0,
@@ -592,10 +612,9 @@ export function AiImageGenerationPanel({
   const selectedTimelineContextMessages =
     activeThread?.messages.filter(
       (message) =>
-        message.role === `assistant` &&
         message.assetId != null &&
         selectedTimelineMessageIdsForNextPrompt.has(message.id) &&
-        message.id !== activeThreadLatestAssistantImageMessageId,
+        message.id !== activeThreadLatestImageMessageId,
     ) ?? [];
 
   const oneTimeTimelineContextEntries: AiImageContextReferenceEntry[] =
@@ -682,6 +701,53 @@ export function AiImageGenerationPanel({
           : thread,
       ),
     }));
+  };
+
+  const appendUserImageMessageToThread = (
+    threadId: string,
+    assetId: AssetId,
+  ) => {
+    const nowIso = new Date().toISOString();
+
+    updatePlaygroundState((prev) => ({
+      ...prev,
+      threads: prev.threads.map((thread) => {
+        if (thread.id !== threadId) {
+          return thread;
+        }
+
+        return {
+          ...thread,
+          updatedAtIso: nowIso,
+          messages: [
+            ...thread.messages,
+            {
+              id: nanoid(),
+              role: `user` as const,
+              assetId,
+              createdAtIso: nowIso,
+            },
+          ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD),
+        };
+      }),
+    }));
+  };
+
+  const handleUploadPastedImage = async (
+    threadId: string,
+    input: PasteImageUploadInput,
+  ) => {
+    setError(null);
+    const uploadedAssetId = await uploadPastedImageBlob({
+      blob: input.blob,
+      contentType: input.contentType,
+    });
+
+    if (uploadedAssetId == null) {
+      return;
+    }
+
+    appendUserImageMessageToThread(threadId, uploadedAssetId);
   };
 
   const handleGenerate = async (draftPrompt: string) => {
@@ -787,7 +853,7 @@ export function AiImageGenerationPanel({
   };
 
   const isGenerating = generateMutation.isPending;
-  const isProcessing = isGenerating;
+  const isProcessing = isGenerating || isUploadingPastedImage;
 
   const toggleReferenceDisabled = (referenceId: string) => {
     setDisabledReferenceIds((prev) => setToggle(prev, referenceId));
@@ -849,6 +915,18 @@ export function AiImageGenerationPanel({
                         <AiImageUserMessage
                           key={message.id}
                           message={message}
+                          canToggleOneTimeContext={
+                            message.assetId != null &&
+                            message.id !== activeThreadLatestImageMessageId
+                          }
+                          isSelectedForOneTimeContext={selectedTimelineMessageIdsForNextPrompt.has(
+                            message.id,
+                          )}
+                          isProcessing={isProcessing}
+                          onChangeImage={onChangeImage}
+                          onToggleOneTimeContextSelection={
+                            toggleOneTimeTimelineContextSelection
+                          }
                           className="ml-8"
                         />
                       );
@@ -859,8 +937,7 @@ export function AiImageGenerationPanel({
                         key={message.id}
                         message={message}
                         canToggleOneTimeContext={
-                          message.id !==
-                          activeThreadLatestAssistantImageMessageId
+                          message.id !== activeThreadLatestImageMessageId
                         }
                         isSelectedForOneTimeContext={selectedTimelineMessageIdsForNextPrompt.has(
                           message.id,
@@ -914,6 +991,12 @@ export function AiImageGenerationPanel({
               onToggleReferenceDisabled={toggleReferenceDisabled}
               onSetReferenceVisibleInRow={setReferenceVisibleInRow}
               onPersistDraftPrompt={handlePersistDraftPrompt}
+              onUploadPastedImage={(input) => {
+                if (activeThread == null) {
+                  return;
+                }
+                void handleUploadPastedImage(activeThread.id, input);
+              }}
               onGenerate={handleGenerate}
             />
 
@@ -929,11 +1012,125 @@ export function AiImageGenerationPanel({
   );
 }
 
+interface AiImageContentProps {
+  assetId: AssetId;
+  messageId: string;
+  canToggleOneTimeContext: boolean;
+  isSelectedForOneTimeContext: boolean;
+  isProcessing: boolean;
+  onChangeImage: (assetId: AssetId) => void;
+  onToggleOneTimeContextSelection: (messageId: string) => void;
+  isPointerHoverCapable?: boolean;
+  assignmentReferenceOptions?: AiResolvedReference[];
+  onAssignImageToReference?: (assetId: AssetId, referenceId: string) => void;
+}
+
+function AiImageContent({
+  assetId,
+  messageId,
+  canToggleOneTimeContext,
+  isSelectedForOneTimeContext,
+  isProcessing,
+  onChangeImage,
+  onToggleOneTimeContextSelection,
+  isPointerHoverCapable = false,
+  assignmentReferenceOptions = [],
+  onAssignImageToReference,
+}: AiImageContentProps) {
+  const imageMeta = useAssetImageMeta(assetId);
+  const imageDisplaySize = getContainedImageDisplaySize({
+    imageSize: imageMeta.imageSize,
+    maxWidth: AI_IMAGE_BUBBLE_MAX_WIDTH,
+    maxHeight: AI_IMAGE_BUBBLE_MAX_HEIGHT,
+    fallbackWidth: AI_IMAGE_BUBBLE_FALLBACK_WIDTH,
+    fallbackHeight: AI_IMAGE_BUBBLE_FALLBACK_HEIGHT,
+  });
+
+  return (
+    <View
+      className="group relative"
+      style={{
+        width: imageDisplaySize.width,
+        maxWidth: AI_IMAGE_BUBBLE_MAX_WIDTH,
+        aspectRatio: imageDisplaySize.width / imageDisplaySize.height,
+      }}
+    >
+      <AssetImage
+        assetId={assetId}
+        className="size-full rounded-lg"
+        contentFit="contain"
+      />
+      <View
+        className={
+          isPointerHoverCapable
+            ? `
+              pointer-events-none absolute inset-x-3 top-3 items-start opacity-0
+
+              group-hover:pointer-events-auto group-hover:opacity-100
+            `
+            : `absolute inset-x-3 top-3 items-start`
+        }
+      >
+        <ButtonGroup>
+          {canToggleOneTimeContext ? (
+            <ButtonGroup.Button
+              onPress={() => {
+                onToggleOneTimeContextSelection(messageId);
+              }}
+              disabled={isProcessing}
+            >
+              {isSelectedForOneTimeContext
+                ? `Remove from context`
+                : `Add to context`}
+            </ButtonGroup.Button>
+          ) : null}
+          <ButtonGroup.Button
+            onPress={() => {
+              onChangeImage(assetId);
+            }}
+            disabled={isProcessing}
+          >
+            Use image
+          </ButtonGroup.Button>
+          {assignmentReferenceOptions.length === 0 ||
+          onAssignImageToReference == null ? null : (
+            <FloatingMenuModal
+              menu={
+                <AiImageAssignMenu
+                  assetId={assetId}
+                  options={assignmentReferenceOptions}
+                  onAssignImageToReference={onAssignImageToReference}
+                />
+              }
+            >
+              <ButtonGroup.Button
+                disabled={isProcessing}
+                iconStart="chevron-down"
+                iconSize={16}
+              />
+            </FloatingMenuModal>
+          )}
+        </ButtonGroup>
+      </View>
+    </View>
+  );
+}
+
 function AiImageUserMessage({
   message,
+  canToggleOneTimeContext,
+  isSelectedForOneTimeContext,
+  isProcessing,
+  onChangeImage,
+  onToggleOneTimeContextSelection,
   className,
 }: {
   message: AiImagePlaygroundMessage;
+  canToggleOneTimeContext: boolean;
+  isSelectedForOneTimeContext: boolean;
+  isProcessing: boolean;
+  onChangeImage: (assetId: AssetId) => void;
+  onToggleOneTimeContextSelection: (messageId: string) => void;
   className?: string;
 }) {
   const { aiImageStyle } = useAiImageStyleSetting();
@@ -954,29 +1151,30 @@ function AiImageUserMessage({
     messageStyleLabel != null && messageStyleLabel !== currentStyleLabel;
 
   return (
-    <View className="items-end gap-1.5">
-      <View
-        className={`
-          rounded-lg bg-sky/20 px-3 py-2
+    <View
+      className={`
+        items-end gap-1.5
 
-          ${className ?? ``}
-        `}
-      >
+        ${className ?? ``}
+      `}
+    >
+      <View className="max-w-[560px] rounded-lg bg-sky/20 p-2">
         {message.text != null && message.text.length > 0 ? (
-          <Text className="font-sans text-sm font-medium leading-snug text-fg">
+          <Text className="px-3 font-sans text-sm font-medium leading-snug text-fg">
             {message.text}
           </Text>
         ) : null}
         {message.assetId == null ? null : (
-          <View className="gap-2">
-            <View className="w-full max-w-[560px]">
-              <AssetImage
-                assetId={message.assetId}
-                className="aspect-[2/1] max-h-[320px] w-full rounded-md"
-                contentFit="contain"
-              />
-            </View>
-          </View>
+          <AiImageContent
+            assetId={message.assetId}
+            messageId={message.id}
+            canToggleOneTimeContext={canToggleOneTimeContext}
+            isSelectedForOneTimeContext={isSelectedForOneTimeContext}
+            isProcessing={isProcessing}
+            onChangeImage={onChangeImage}
+            onToggleOneTimeContextSelection={onToggleOneTimeContextSelection}
+            isPointerHoverCapable={true}
+          />
         )}
       </View>
       {!shouldShowStyleLabel && contextEntries.length === 0 ? null : (
@@ -1055,65 +1253,18 @@ function AiImageAssistantMessage({
         ${className ?? ``}
       `}
     >
-      <View className="group relative w-full max-w-[560px]">
-        <AssetImage
-          assetId={assetId}
-          className="aspect-[2/1] max-h-[320px] w-full rounded-lg"
-          contentFit="fill"
-        />
-
-        <View
-          className={
-            isPointerHoverCapable
-              ? `
-                pointer-events-none absolute inset-x-3 top-3 items-start opacity-0
-
-                group-hover:pointer-events-auto group-hover:opacity-100
-              `
-              : `absolute inset-x-3 top-3 items-start`
-          }
-        >
-          <ButtonGroup>
-            {canToggleOneTimeContext ? (
-              <ButtonGroup.Button
-                onPress={() => {
-                  onToggleOneTimeContextSelection(message.id);
-                }}
-                disabled={isProcessing}
-              >
-                {isSelectedForOneTimeContext
-                  ? `Remove from context`
-                  : `Add to context`}
-              </ButtonGroup.Button>
-            ) : null}
-            <ButtonGroup.Button
-              onPress={() => {
-                onChangeImage(assetId);
-              }}
-              disabled={isProcessing}
-            >
-              Use image
-            </ButtonGroup.Button>
-            {assignmentReferenceOptions.length === 0 ? null : (
-              <FloatingMenuModal
-                menu={
-                  <AiImageAssignMenu
-                    assetId={assetId}
-                    options={assignmentReferenceOptions}
-                    onAssignImageToReference={onAssignImageToReference}
-                  />
-                }
-              >
-                <ButtonGroup.Button
-                  disabled={isProcessing}
-                  iconStart="chevron-down"
-                  iconSize={16}
-                />
-              </FloatingMenuModal>
-            )}
-          </ButtonGroup>
-        </View>
-      </View>
+      <AiImageContent
+        assetId={assetId}
+        messageId={message.id}
+        canToggleOneTimeContext={canToggleOneTimeContext}
+        isSelectedForOneTimeContext={isSelectedForOneTimeContext}
+        isProcessing={isProcessing}
+        onChangeImage={onChangeImage}
+        onToggleOneTimeContextSelection={onToggleOneTimeContextSelection}
+        isPointerHoverCapable={isPointerHoverCapable}
+        assignmentReferenceOptions={assignmentReferenceOptions}
+        onAssignImageToReference={onAssignImageToReference}
+      />
     </View>
   );
 }
@@ -1168,6 +1319,7 @@ function AiImagePromptComposer({
   missingPromptActions,
   oneTimeTimelineContextEntries,
   onPersistDraftPrompt,
+  onUploadPastedImage,
   onToggleReferenceDisabled,
   onSetReferenceVisibleInRow,
   onGenerate,
@@ -1189,6 +1341,7 @@ function AiImagePromptComposer({
   missingPromptActions: AiQuickPromptAction[];
   oneTimeTimelineContextEntries: AiImageContextReferenceEntry[];
   onPersistDraftPrompt: (prompt: string) => void;
+  onUploadPastedImage: (input: PasteImageUploadInput) => void;
   onToggleReferenceDisabled: (referenceId: string) => void;
   onSetReferenceVisibleInRow: (referenceId: string, visible: boolean) => void;
   onGenerate: (prompt: string) => Promise<void>;
@@ -1208,6 +1361,7 @@ function AiImagePromptComposer({
   const [draftPrompt, setDraftPrompt] = useState(initialDraftPrompt);
   const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
   const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
+  const promptInputRef = useRef<TextInput>(null);
 
   const persistDraftPrompt = (nextDraftPrompt: string) => {
     if (lastPersistedDraftPromptRef.current === nextDraftPrompt) {
@@ -1236,6 +1390,53 @@ function AiImagePromptComposer({
       clearTimeout(timeoutId);
     };
   }, [draftPrompt, editable, onPersistDraftPrompt]);
+
+  useEffect(() => {
+    if (typeof window === `undefined`) {
+      return;
+    }
+
+    const inputElement = promptInputRef.current as HTMLTextAreaElement | null;
+    if (inputElement == null || inputElement.tagName !== `TEXTAREA`) {
+      return;
+    }
+
+    const handlePaste = (event: ClipboardEvent) => {
+      const clipboardData = event.clipboardData;
+      const items = clipboardData?.items ? Array.from(clipboardData.items) : [];
+      const fileItem = items.find(
+        (item) => item.kind === `file` && item.type.startsWith(`image/`),
+      );
+      const fileFromItems = fileItem?.getAsFile() ?? null;
+      const fileFromFiles = clipboardData?.files
+        ? Array.from(clipboardData.files).find((file) =>
+            file.type.startsWith(`image/`),
+          )
+        : null;
+      const file = fileFromItems ?? fileFromFiles;
+
+      if (file == null) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (!editable || isProcessing) {
+        return;
+      }
+
+      onUploadPastedImage({
+        blob: file,
+        contentType: file.type,
+      });
+    };
+
+    inputElement.addEventListener(`paste`, handlePaste);
+
+    return () => {
+      inputElement.removeEventListener(`paste`, handlePaste);
+    };
+  }, [editable, isProcessing, onUploadPastedImage]);
 
   const canSend =
     isLoadedFromSetting && !isProcessing && draftPrompt.trim().length > 0;
@@ -1296,6 +1497,7 @@ function AiImagePromptComposer({
       }
     >
       <TextInputMulti
+        ref={promptInputRef}
         value={draftPrompt}
         onChangeText={setDraftPrompt}
         onKeyPress={handlePromptInputKeyPress}
@@ -1867,4 +2069,40 @@ function getAiImageStyleDisplayLabel(
   fallbackLabel: string,
 ): string {
   return kind === `comic` ? `Illustration` : fallbackLabel;
+}
+
+function getContainedImageDisplaySize({
+  imageSize,
+  maxWidth,
+  maxHeight,
+  fallbackWidth,
+  fallbackHeight,
+}: {
+  imageSize: { width: number; height: number } | null;
+  maxWidth: number;
+  maxHeight: number;
+  fallbackWidth: number;
+  fallbackHeight: number;
+}): { width: number; height: number } {
+  if (
+    imageSize == null ||
+    imageSize.width <= 0 ||
+    imageSize.height <= 0 ||
+    !Number.isFinite(imageSize.width) ||
+    !Number.isFinite(imageSize.height)
+  ) {
+    return {
+      width: fallbackWidth,
+      height: fallbackHeight,
+    };
+  }
+
+  const widthScale = maxWidth / imageSize.width;
+  const heightScale = maxHeight / imageSize.height;
+  const scale = Math.min(widthScale, heightScale);
+
+  return {
+    width: Math.max(1, Math.round(imageSize.width * scale)),
+    height: Math.max(1, Math.round(imageSize.height * scale)),
+  };
 }
