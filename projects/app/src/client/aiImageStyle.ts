@@ -19,7 +19,7 @@ export const aiImageStyleConfigs = [
   {
     kind: `comic`,
     label: `Comic`,
-    assetId: `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw` as AssetId,
+    assetId: `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw`,
     thumbnailCropRect: {
       x: 0.37,
       y: 0.2,
@@ -31,7 +31,7 @@ export const aiImageStyleConfigs = [
   {
     kind: `realistic`,
     label: `Realistic`,
-    assetId: `sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU` as AssetId,
+    assetId: `sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU`,
     thumbnailCropRect: {
       x: 0.24,
       y: 0.18,
