@@ -6,6 +6,7 @@ import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { PinyinFinalToneImagePicker } from "@/client/ui/PinyinFinalToneImagePicker";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
 import { Pylymark } from "@/client/ui/Pylymark";
@@ -46,26 +47,13 @@ export default function SoundIdPage() {
   const id = rawId as PinyinSoundId;
   const focusedTone = typeof rawTone === `string` ? rawTone : null;
   const chart = loadPylyPinyinChart();
+  const isFinalSound = isFinalSoundId(id);
 
   const scrollRef = useRef<ScrollView>(null);
   const hasScrolledRef = useRef(false);
   const [toneAnchorY, setToneAnchorY] = useState<number | null>(null);
   const [isEditSoundNameModalOpen, setIsEditSoundNameModalOpen] =
     useState(false);
-  const [isMnemonicStoryRoleEditMode, setIsMnemonicStoryRoleEditMode] =
-    useState(false);
-
-  const mnemonicDescriptionSetting = useUserSetting({
-    setting: pinyinSoundDescriptionSetting,
-    key: { soundId: id },
-  });
-  const mnemonicImageSetting = useUserSetting({
-    setting: pinyinSoundImageSetting,
-    key: { soundId: id },
-  });
-  const hasMnemonicContent =
-    (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
-    mnemonicImageSetting.value?.imageId != null;
 
   const label = getPinyinSoundLabel(id, chart);
   const examplePinyins = defaultPinyinSoundExamples[id] ?? [];
@@ -81,11 +69,11 @@ export default function SoundIdPage() {
 
   const playSound = useSoundEffect(soundAudioSource);
 
-  const tone1AudioSource = isFinalSoundId(id) ? null : null;
-  const tone2AudioSource = isFinalSoundId(id) ? null : null;
-  const tone3AudioSource = isFinalSoundId(id) ? null : null;
-  const tone4AudioSource = isFinalSoundId(id) ? null : null;
-  const tone5AudioSource = isFinalSoundId(id) ? null : null;
+  const tone1AudioSource = isFinalSound ? null : null;
+  const tone2AudioSource = isFinalSound ? null : null;
+  const tone3AudioSource = isFinalSound ? null : null;
+  const tone4AudioSource = isFinalSound ? null : null;
+  const tone5AudioSource = isFinalSound ? null : null;
 
   useEffect(() => {
     if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
@@ -150,40 +138,10 @@ export default function SoundIdPage() {
             </View>
           </WikiTitledBox>
 
-          <WikiTitledBox
-            title="Mnemonic story role"
-            onEditingChange={setIsMnemonicStoryRoleEditMode}
-          >
-            <View className="gap-4 p-4">
-              {!isMnemonicStoryRoleEditMode && !hasMnemonicContent ? (
-                <Text className="pyly-body text-fg-dim">
-                  No description or image
-                </Text>
-              ) : (
-                <>
-                  <InlineEditableSettingText
-                    setting={pinyinSoundDescriptionSetting}
-                    settingKey={{ soundId: id }}
-                    placeholder="Add a description to help with mnemonic generation…"
-                    readonly={!isMnemonicStoryRoleEditMode}
-                    multiline
-                  />
-                  <InlineEditableSettingImage
-                    setting={pinyinSoundImageSetting}
-                    settingKey={{ soundId: id }}
-                    readonly={!isMnemonicStoryRoleEditMode}
-                    enableAiGeneration
-                    previewHeight={200}
-                    tileSize={64}
-                    frameConstraint={{ aspectRatio: 1 }}
-                  />
-                </>
-              )}
-            </View>
-          </WikiTitledBox>
+          <MnemonicStoryRoleSection pinyinSoundId={id} />
 
           {/* Final-tone details editor for finals */}
-          {isFinalSoundId(id) && (
+          {isFinalSound && (
             <PinyinFinalToneEditor
               finalSoundId={id}
               focusedTone={focusedTone}
@@ -215,6 +173,58 @@ export default function SoundIdPage() {
         />
       </View>
     </ScrollView>
+  );
+}
+
+function MnemonicStoryRoleSection({
+  pinyinSoundId,
+}: {
+  pinyinSoundId: PinyinSoundId;
+}) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const isFinalSound = isFinalSoundId(pinyinSoundId);
+  const mnemonicDescriptionSetting = useUserSetting({
+    setting: pinyinSoundDescriptionSetting,
+    key: { soundId: pinyinSoundId },
+  });
+  const mnemonicImageSetting = useUserSetting({
+    setting: pinyinSoundImageSetting,
+    key: { soundId: pinyinSoundId },
+  });
+  const hasMnemonicContent =
+    (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
+    mnemonicImageSetting.value?.imageId != null;
+
+  return (
+    <WikiTitledBox title="Mnemonic story role" onEditingChange={setIsEditMode}>
+      <View className="gap-4 p-4">
+        {!isEditMode && !hasMnemonicContent ? (
+          <Text className="pyly-body text-fg-dim">No description or image</Text>
+        ) : (
+          <>
+            <InlineEditableSettingText
+              setting={pinyinSoundDescriptionSetting}
+              settingKey={{ soundId: pinyinSoundId }}
+              placeholder="Add a description to help with mnemonic generation…"
+              readonly={!isEditMode}
+              multiline
+            />
+            <InlineEditableSettingImage
+              setting={pinyinSoundImageSetting}
+              settingKey={{ soundId: pinyinSoundId }}
+              readonly={!isEditMode}
+              enableAiGeneration
+              previewHeight={200}
+              tileSize={64}
+              frameConstraint={{ aspectRatio: 1 }}
+            />
+            {isFinalSound && isEditMode ? (
+              <PinyinFinalToneImagePicker finalSoundId={pinyinSoundId} />
+            ) : null}
+          </>
+        )}
+      </View>
+    </WikiTitledBox>
   );
 }
 
