@@ -1,4 +1,4 @@
-import type { AssetId, PinyinSoundId } from "@/data/model";
+import type { AssetId } from "@/data/model";
 import { nullIfEmpty } from "@/util/unicode";
 import type { ViewProps } from "react-native";
 import { Text, View } from "react-native";
@@ -7,7 +7,6 @@ import { FramedAssetImage } from "./ImageFrame";
 import type { ImageCrop, ImageFrameShape } from "./imageCrop";
 
 export interface PinyinSoundTileProps extends ViewProps {
-  id: PinyinSoundId;
   label: string;
   name: string | null;
   image: {
@@ -94,7 +93,7 @@ export function BaseSoundTile({
 
 const tileClass = tv({
   base: `
-    relative items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high p-2
+    relative w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high p-2
 
     hover:bg-cyan/20
   `,
@@ -103,8 +102,8 @@ const tileClass = tv({
       true: ``,
     },
     size: {
-      rect: `h-28 w-24`,
-      square: `size-28`,
+      rect: `h-28`,
+      square: `h-28`,
     },
   },
 });

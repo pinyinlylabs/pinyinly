@@ -14,7 +14,8 @@ export function InitialSoundTile({
     <View
       {...props}
       className={
-        `w-28 items-center gap-2.5` + (className == null ? `` : ` ${className}`)
+        `w-full items-center gap-2.5` +
+        (className == null ? `` : ` ${className}`)
       }
     >
       <View className="relative size-28 overflow-hidden rounded-full bg-bg-high">

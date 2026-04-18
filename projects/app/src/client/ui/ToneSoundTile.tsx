@@ -26,12 +26,12 @@ function decorationForSound(soundId: PinyinSoundId): string | null {
 }
 
 export function ToneSoundTile({
-  id,
+  soundId,
   label,
   name,
   image,
   ...props
-}: PinyinSoundTileProps) {
+}: PinyinSoundTileProps & { soundId: PinyinSoundId }) {
   return (
     <BaseSoundTile
       {...props}
@@ -40,7 +40,7 @@ export function ToneSoundTile({
       image={image}
       frameShape="rect"
       size="square"
-      decoration={decorationForSound(id)}
+      decoration={decorationForSound(soundId)}
     />
   );
 }

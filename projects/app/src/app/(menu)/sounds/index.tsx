@@ -132,34 +132,36 @@ export default function SoundsPage() {
                 inputClassName="text-fg"
               />
             </View>
-            <View className="flex-row flex-wrap gap-3.5">
+            <View
+              className={`grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-3.5`}
+            >
               {sounds.map((soundId) => {
                 const sound = pinyinSounds.get(soundId);
                 return sound == null ? null : (
-                  <Link key={soundId} href={`/sounds/${soundId}`} asChild>
-                    {isInitialSoundId(soundId) ? (
-                      <InitialSoundTile
-                        id={soundId}
-                        label={sound.label}
-                        name={sound.name}
-                        image={sound.image}
-                      />
-                    ) : isFinalSoundId(soundId) ? (
-                      <FinalSoundTile
-                        id={soundId}
-                        label={sound.label}
-                        name={sound.name}
-                        image={sound.image}
-                      />
-                    ) : (
-                      <ToneSoundTile
-                        id={soundId}
-                        label={sound.label}
-                        name={sound.name}
-                        image={sound.image}
-                      />
-                    )}
-                  </Link>
+                  <View key={soundId}>
+                    <Link href={`/sounds/${soundId}`} asChild>
+                      {isInitialSoundId(soundId) ? (
+                        <InitialSoundTile
+                          label={sound.label}
+                          name={sound.name}
+                          image={sound.image}
+                        />
+                      ) : isFinalSoundId(soundId) ? (
+                        <FinalSoundTile
+                          label={sound.label}
+                          name={sound.name}
+                          image={sound.image}
+                        />
+                      ) : (
+                        <ToneSoundTile
+                          soundId={soundId}
+                          label={sound.label}
+                          name={sound.name}
+                          image={sound.image}
+                        />
+                      )}
+                    </Link>
+                  </View>
                 );
               })}
             </View>
