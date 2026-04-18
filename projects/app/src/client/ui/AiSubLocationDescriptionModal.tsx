@@ -8,9 +8,9 @@ import { RectButton } from "./RectButton";
 export interface AiSubLocationDescriptionModalProps {
   label: string;
   location: string;
-  locationNotes?: string;
+  locationNotes: string;
   sublocation: string;
-  sublocationNotes?: string;
+  viewpoint: string;
   onApplyDescription: (description: string) => void;
   onDismiss: () => void;
 }
@@ -26,7 +26,7 @@ export function AiSubLocationDescriptionModal({
   location,
   locationNotes,
   sublocation,
-  sublocationNotes,
+  viewpoint,
   onApplyDescription,
   onDismiss,
 }: AiSubLocationDescriptionModalProps) {
@@ -45,9 +45,9 @@ export function AiSubLocationDescriptionModal({
       const result = await generateMutation.mutateAsync({
         label,
         location,
-        locationNotes,
+        locationNotes: locationNotes === `` ? undefined : locationNotes,
         sublocation,
-        sublocationNotes,
+        viewpoint: viewpoint === `` ? undefined : viewpoint,
         count: 4,
       });
       setSuggestions(result.suggestions);
@@ -96,16 +96,9 @@ export function AiSubLocationDescriptionModal({
             <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
               <ContextRow label="Combined place" value={label} />
               <ContextRow label="Location" value={location} />
-              {locationNotes == null ? null : (
-                <ContextRow label="Location notes" value={locationNotes} />
-              )}
+              <ContextRow label="Location notes" value={locationNotes} />
               <ContextRow label="Sublocation" value={sublocation} />
-              {sublocationNotes == null ? null : (
-                <ContextRow
-                  label="Sublocation notes"
-                  value={sublocationNotes}
-                />
-              )}
+              <ContextRow label="Viewpoint" value={viewpoint} />
             </View>
 
             {error == null ? null : (
@@ -173,7 +166,15 @@ function ContextRow({ label, value }: { label: string; value: string }) {
       <Text className="w-[90px] font-sans text-[13px] text-fg-dim">
         {label}
       </Text>
-      <Text className="flex-1 font-sans text-[13px] text-fg">{value}</Text>
+      <Text
+        className={`
+          flex-1 font-sans text-[13px]
+
+          ${value === `` ? `text-fg-dim` : `text-fg`}
+        `}
+      >
+        {value === `` ? `—` : value}
+      </Text>
     </View>
   );
 }

@@ -1,15 +1,23 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { useDb } from "@/client/ui/hooks/useDb";
+import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { parseImageCrop } from "@/client/ui/imageCrop";
+import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
-import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
-import type { AssetId } from "@/data/model";
-import { loadPylyPinyinChart } from "@/data/pinyin";
+import { ToneSoundTile } from "@/client/ui/ToneSoundTile";
+import {
+  isFinalSoundId,
+  isInitialSoundId,
+  loadPylyPinyinChart,
+} from "@/data/pinyin";
 import {
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
+  pinyinSoundImageSetting,
   pinyinSoundImageSettingKey,
+  pinyinSoundNameSetting,
   pinyinSoundNameSettingKey,
 } from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
@@ -45,41 +53,50 @@ export default function SoundsPage() {
   );
 
   const settingsByKey = new Map(
-    settings.map((setting) => [
-      setting.key,
-      // TODO: get rid of this unsafe casting
-      setting.value as {
-        t?: AssetId;
-        c?: unknown;
-        w?: number;
-        ht?: number;
-      } | null,
-    ]),
+    settings.map((setting) => [setting.key, setting.value]),
   );
 
   const pinyinSounds = new Map(
     chart.soundIds.map((soundId) => {
-      const nameValueData = settingsByKey.get(
-        pinyinSoundNameSettingKey(soundId),
-      )?.t;
-      const imageValueData = settingsByKey.get(
-        pinyinSoundImageSettingKey(soundId),
+      const { keyParamMarshaled: nameKeyParamMarshaled } = getSettingKeyInfo(
+        pinyinSoundNameSetting,
+        { soundId },
       );
-      const imageId = imageValueData?.t ?? null;
+      const { keyParamMarshaled: imageKeyParamMarshaled } = getSettingKeyInfo(
+        pinyinSoundImageSetting,
+        { soundId },
+      );
+      const nameValueData = pinyinSoundNameSetting.entity.unmarshalValueSafe(
+        settingsByKey.get(pinyinSoundNameSettingKey(soundId)) == null
+          ? null
+          : {
+              ...nameKeyParamMarshaled,
+              ...settingsByKey.get(pinyinSoundNameSettingKey(soundId)),
+            },
+      );
+      const imageValueData = pinyinSoundImageSetting.entity.unmarshalValueSafe(
+        settingsByKey.get(pinyinSoundImageSettingKey(soundId)) == null
+          ? null
+          : {
+              ...imageKeyParamMarshaled,
+              ...settingsByKey.get(pinyinSoundImageSettingKey(soundId)),
+            },
+      );
+      const imageId = imageValueData?.imageId ?? null;
 
       return [
         soundId,
         {
-          name: nameValueData ?? null,
+          name: nameValueData?.text ?? null,
           label: chart.soundToCustomLabel[soundId] ?? soundId,
           image:
             imageId == null
               ? null
               : {
                   assetId: imageId,
-                  crop: parseImageCrop(imageValueData?.c),
-                  imageWidth: imageValueData?.w ?? null,
-                  imageHeight: imageValueData?.ht ?? null,
+                  crop: parseImageCrop(imageValueData?.imageCrop),
+                  imageWidth: imageValueData?.imageWidth ?? null,
+                  imageHeight: imageValueData?.imageHeight ?? null,
                 },
         },
       ];
@@ -115,18 +132,36 @@ export default function SoundsPage() {
                 inputClassName="text-fg"
               />
             </View>
-            <View className="flex-row flex-wrap gap-3.5">
+            <View
+              className={`grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-3.5`}
+            >
               {sounds.map((soundId) => {
                 const sound = pinyinSounds.get(soundId);
                 return sound == null ? null : (
-                  <Link key={soundId} href={`/sounds/${soundId}`} asChild>
-                    <PinyinSoundTile
-                      id={soundId}
-                      label={sound.label}
-                      name={sound.name}
-                      image={sound.image}
-                    />
-                  </Link>
+                  <View key={soundId}>
+                    <Link href={`/sounds/${soundId}`} asChild>
+                      {isInitialSoundId(soundId) ? (
+                        <InitialSoundTile
+                          label={sound.label}
+                          name={sound.name}
+                          image={sound.image}
+                        />
+                      ) : isFinalSoundId(soundId) ? (
+                        <FinalSoundTile
+                          label={sound.label}
+                          name={sound.name}
+                          image={sound.image}
+                        />
+                      ) : (
+                        <ToneSoundTile
+                          soundId={soundId}
+                          label={sound.label}
+                          name={sound.name}
+                          image={sound.image}
+                        />
+                      )}
+                    </Link>
+                  </View>
                 );
               })}
             </View>

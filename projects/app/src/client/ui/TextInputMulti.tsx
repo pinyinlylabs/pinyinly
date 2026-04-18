@@ -4,6 +4,7 @@ import type { Ref } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
+import type { TextInputVariant } from "./TextInputSingle";
 
 interface TextInputMultiProps extends Omit<
   PropsOf<typeof TextInput>,
@@ -14,9 +15,14 @@ interface TextInputMultiProps extends Omit<
   placeholder: string | undefined;
   autoResizeMinHeight?: number;
   ref?: Ref<TextInput>;
+  variant?: TextInputVariant;
 }
 
-export function TextInputMulti({ ref, ...props }: TextInputMultiProps) {
+export function TextInputMulti({
+  variant = `flat`,
+  ref,
+  ...props
+}: TextInputMultiProps) {
   const inputRef = useRef<TextInput>(null);
   const autoResizeMinHeight = props.autoResizeMinHeight ?? 60;
 
@@ -76,6 +82,7 @@ export function TextInputMulti({ ref, ...props }: TextInputMultiProps) {
       className={inputClass({
         textAlign: props.textAlign,
         className: props.className,
+        variant,
       })}
     />
   );
@@ -83,9 +90,7 @@ export function TextInputMulti({ ref, ...props }: TextInputMultiProps) {
 
 const inputClass = tv({
   base: `
-    pyly-body-input resize-none rounded-xl bg-bg-high px-4 py-3 outline-none
-
-    placeholder:text-fg/30
+    resize-none
 
     web:block
   `,
@@ -94,6 +99,18 @@ const inputClass = tv({
       left: `text-left`,
       center: `text-center`,
       right: `text-right`,
+    },
+    variant: {
+      bare: `
+        font-sans text-sm font-medium text-fg outline-none
+
+        placeholder:text-fg-dim
+      `,
+      flat: `
+        pyly-body-input rounded-xl bg-bg-high px-4 py-3 outline-none
+
+        placeholder:text-fg/30
+      `,
     },
   },
 });

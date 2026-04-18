@@ -4,6 +4,8 @@ import { createAssetFromBuffer } from "@/server/lib/createAsset";
 import { generateImage } from "@/server/lib/gemini";
 import { fetchAssetBase64 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
+import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
@@ -50,7 +52,7 @@ const subLocationDescriptionInputSchema = z
     location: z.string().min(1),
     locationNotes: z.string().optional(),
     sublocation: z.string().min(1),
-    sublocationNotes: z.string().optional(),
+    viewpoint: z.string().optional(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
@@ -107,6 +109,7 @@ const generateImageInputSchema = z
   .object({
     prompt: z.string().min(1).max(4000),
     referenceImages: z.array(aiReferenceImageSchema).max(4).optional(),
+    aspectRatio: z.enum(geminiImageAspectRatios).optional(),
   })
   .strict();
 
@@ -171,14 +174,14 @@ export function buildSubLocationDescriptionPrompt({
   location,
   locationNotes,
   sublocation,
-  sublocationNotes,
+  viewpoint,
   count,
 }: {
   label: string;
   location: string;
   locationNotes?: string;
   sublocation: string;
-  sublocationNotes?: string;
+  viewpoint?: string;
   count: number;
 }): { system: string; user: string } {
   const system = [
@@ -192,7 +195,7 @@ export function buildSubLocationDescriptionPrompt({
 
   const optionalLines = [
     locationNotes == null ? null : `Location notes: ${locationNotes}`,
-    sublocationNotes == null ? null : `Sublocation notes: ${sublocationNotes}`,
+    viewpoint == null ? null : `Viewpoint: ${viewpoint}`,
   ].filter((line): line is string => line != null);
 
   const user = [
@@ -205,6 +208,7 @@ export function buildSubLocationDescriptionPrompt({
     ``,
     `Each suggestion must:`,
     `- Clearly reflect both the Location and the Sublocation`,
+    `- If a Viewpoint is provided, ensure the description matches that perspective`,
     `- Describe stable, always-true aspects of the place`,
     `- Return only the descriptive fragment itself, don't prefix with the place label`,
     `- Avoid time of day, weather, or temporary events`,
@@ -302,21 +306,15 @@ export const aiRouter = router({
     .input(subLocationDescriptionInputSchema)
     .output(subLocationDescriptionOutputSchema)
     .mutation(async (opts) => {
-      const {
-        label,
-        location,
-        locationNotes,
-        sublocation,
-        sublocationNotes,
-        count,
-      } = opts.input;
+      const { label, location, locationNotes, sublocation, viewpoint, count } =
+        opts.input;
 
       const { system, user } = buildSubLocationDescriptionPrompt({
         label,
         location,
         locationNotes,
         sublocation,
-        sublocationNotes,
+        viewpoint,
         count,
       });
 
@@ -371,7 +369,8 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
-      const { prompt, referenceImages } = opts.input;
+      const { prompt, referenceImages, aspectRatio, ...rest } = opts.input;
+      true satisfies IsExhaustedRest<typeof rest>;
 
       try {
         const resolvedReferenceImages =
@@ -393,6 +392,7 @@ export const aiRouter = router({
         const { buffer, mimeType } = await generateImage({
           prompt,
           referenceImages: resolvedReferenceImages,
+          aspectRatio,
         });
 
         const imageArrayBuffer = Uint8Array.from(buffer).buffer;

@@ -10,7 +10,9 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
-import { useEffect, useRef, useState } from "react";
+import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
+import { getGeminiImageAspectRatioValue } from "@/util/geminiImageAspectRatio";
+import { useEffect, useId, useRef, useState } from "react";
 import type {
   LayoutChangeEvent,
   PanResponderInstance,
@@ -24,6 +26,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Circle, Defs, Mask, Rect, Svg } from "react-native-svg";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";
 import { ButtonGroup } from "./ButtonGroup";
@@ -32,11 +35,7 @@ import { FloatingMenuModal } from "./FloatingMenuModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
-import type {
-  ImageCrop,
-  ImageCropRect,
-  ImageFrameConstraintInput,
-} from "./imageCrop";
+import type { ImageCrop, ImageCropRect, ImageFrameShape } from "./imageCrop";
 import {
   clampImageCropRectPosition,
   createCenteredCropRect,
@@ -44,7 +43,6 @@ import {
   getZoomedImageCropRect,
   imageCropValueFromCrop,
   parseImageCrop,
-  resolveFrameAspectRatio,
 } from "./imageCrop";
 import { useAssetImageMeta } from "./useAssetImageMeta";
 
@@ -58,7 +56,8 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
   aiReferenceImages?: AiReferenceImageDeclaration[];
-  frameConstraint?: ImageFrameConstraintInput | null;
+  aspectRatio?: GeminiImageAspectRatio | null;
+  frameShape?: ImageFrameShape;
   onUploadError?: (error: string) => void;
   onSaveAiPrompt?: (prompt: string) => void;
   onChangeImageId?: (imageId: AssetId | null) => void;
@@ -82,7 +81,8 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   enableAiGeneration = false,
   initialAiPrompt = ``,
   aiReferenceImages,
-  frameConstraint,
+  aspectRatio,
+  frameShape = `rect`,
   onUploadError,
   onSaveAiPrompt,
   onChangeImageId,
@@ -104,7 +104,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const [inlineEditorAssetId, setInlineEditorAssetId] =
     useState<AssetId | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
+  const frameAspectRatio = getGeminiImageAspectRatioValue(aspectRatio);
   const isPointerHoverCapable = usePointerHoverCapability();
   const isInlineRepositioning = inlineEditorAssetId != null;
 
@@ -119,6 +119,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
           imageMeta={{ imageId, crop: imageCrop, imageWidth, imageHeight }}
           height={previewHeight}
           aspectRatio={frameAspectRatio}
+          frameShape={frameShape}
         />
       </View>
     );
@@ -209,6 +210,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
         initialImageWidth={inlineEditorMeta?.imageWidth ?? null}
         initialImageHeight={inlineEditorMeta?.imageHeight ?? null}
         height={previewHeight}
+        frameShape={frameShape}
         onCancel={() => {
           setInlineEditorAssetId(null);
         }}
@@ -237,6 +239,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 imageMeta={previewMeta}
                 height={previewHeight}
                 aspectRatio={frameAspectRatio}
+                frameShape={frameShape}
               />
             )}
             {shouldShowPickerDoneButton ? (
@@ -251,6 +254,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                           hoveredHintImageId={hoveredHintImageId}
                           imageMetaById={imageMetaById}
                           tileSize={tileSize}
+                          frameShape={frameShape}
                           onHoverImage={setHoveredHintImageId}
                           onSelectImage={handleSelectHintImage}
                         />
@@ -309,6 +313,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 imageMeta={previewMeta}
                 height={previewHeight}
                 aspectRatio={frameAspectRatio}
+                frameShape={frameShape}
               />
             )}
             {shouldShowPickerDoneButton ? (
@@ -323,6 +328,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                           hoveredHintImageId={hoveredHintImageId}
                           imageMetaById={imageMetaById}
                           tileSize={tileSize}
+                          frameShape={frameShape}
                           onHoverImage={setHoveredHintImageId}
                           onSelectImage={handleSelectHintImage}
                         />
@@ -386,6 +392,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 initialPrompt={initialAiPrompt}
                 aiReferenceImages={aiReferenceImages}
                 playgroundStorageKey={aiPlaygroundStorageKey}
+                aspectRatio={aspectRatio ?? undefined}
                 onChangeImage={(assetId) => {
                   handleUseImage(assetId);
                 }}
@@ -399,6 +406,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 hoveredHintImageId={hoveredHintImageId}
                 imageMetaById={imageMetaById}
                 tileSize={tileSize}
+                frameShape={frameShape}
                 onHoverImage={setHoveredHintImageId}
                 onSelectImage={handleSelectHintImage}
               />
@@ -416,6 +424,7 @@ function InlineEditableSettingImageHistoryMenu({
   hoveredHintImageId,
   imageMetaById,
   tileSize,
+  frameShape,
   onHoverImage,
   onSelectImage,
   onRequestClose,
@@ -425,6 +434,7 @@ function InlineEditableSettingImageHistoryMenu({
   hoveredHintImageId: AssetId | null;
   imageMetaById: ReadonlyMap<AssetId, ImageMeta>;
   tileSize: number;
+  frameShape: ImageFrameShape;
   onHoverImage: (assetId: AssetId | null) => void;
   onSelectImage: (assetId: AssetId) => void;
 } & FloatingMenuModalMenuProps) {
@@ -439,6 +449,7 @@ function InlineEditableSettingImageHistoryMenu({
         hoveredHintImageId={hoveredHintImageId}
         imageMetaById={imageMetaById}
         tileSize={tileSize}
+        frameShape={frameShape}
         onHoverImage={onHoverImage}
         onSelectImage={(assetId) => {
           onSelectImage(assetId);
@@ -455,6 +466,7 @@ function InlineEditableSettingImageHistoryGrid({
   hoveredHintImageId,
   imageMetaById,
   tileSize,
+  frameShape,
   onHoverImage,
   onSelectImage,
 }: {
@@ -463,6 +475,7 @@ function InlineEditableSettingImageHistoryGrid({
   hoveredHintImageId: AssetId | null;
   imageMetaById: ReadonlyMap<AssetId, ImageMeta>;
   tileSize: number;
+  frameShape: ImageFrameShape;
   onHoverImage: (assetId: AssetId | null) => void;
   onSelectImage: (assetId: AssetId) => void;
 }) {
@@ -496,6 +509,7 @@ function InlineEditableSettingImageHistoryGrid({
               isSelected={isSelected}
               isHovered={isHovered}
               size={tileSize}
+              frameShape={frameShape}
             />
           </Pressable>
         );
@@ -509,16 +523,24 @@ function HintImagePreview({
   imageMeta,
   height,
   aspectRatio,
+  frameShape,
 }: {
   assetId: AssetId | null;
   imageMeta: ImageMeta | null;
   height: number;
   aspectRatio: number | null;
+  frameShape: ImageFrameShape;
 }) {
+  const shapeClassName = frameShape === `circle` ? `rounded-full` : ``;
+
   if (assetId == null) {
     return (
       <View
-        className={`w-full items-center justify-center bg-fg-bg5`}
+        className={`
+          w-full items-center justify-center bg-fg-bg5
+
+          ${shapeClassName}
+        `}
         style={aspectRatio == null ? { height } : { aspectRatio }}
       >
         <Text className="font-sans text-xs text-fg-dim">No image selected</Text>
@@ -528,7 +550,11 @@ function HintImagePreview({
 
   return (
     <View
-      className="w-full overflow-hidden bg-fg-bg5"
+      className={`
+        w-full overflow-hidden bg-fg-bg5
+
+        ${shapeClassName}
+      `}
       style={aspectRatio == null ? { height } : { aspectRatio }}
     >
       <FramedAssetImage
@@ -536,6 +562,7 @@ function HintImagePreview({
         crop={imageMeta?.crop}
         imageWidth={imageMeta?.imageWidth ?? null}
         imageHeight={imageMeta?.imageHeight ?? null}
+        frameShape={frameShape}
         className="size-full"
       />
     </View>
@@ -549,6 +576,7 @@ function InlineImageRepositionEditor({
   initialImageWidth,
   initialImageHeight,
   height,
+  frameShape,
   onCancel,
   onSave,
 }: {
@@ -558,6 +586,7 @@ function InlineImageRepositionEditor({
   initialImageWidth: number | null;
   initialImageHeight: number | null;
   height: number;
+  frameShape: ImageFrameShape;
   onCancel: () => void;
   onSave: (result: InlineImageRepositionResult) => void;
 }) {
@@ -635,6 +664,7 @@ function InlineImageRepositionEditor({
       cropRect={effectiveCropRect}
       imageSize={imageSize}
       frameAspectRatio={frameAspectRatio}
+      frameShape={frameShape}
       containerStyle={containerStyle}
       onCancel={onCancel}
       onSave={(nextRect) => {
@@ -654,6 +684,7 @@ function InlineImageRepositionFrame({
   cropRect,
   imageSize,
   frameAspectRatio,
+  frameShape,
   containerStyle,
   onCancel,
   onSave,
@@ -663,11 +694,13 @@ function InlineImageRepositionFrame({
   cropRect: ImageCropRect;
   imageSize: { width: number; height: number };
   frameAspectRatio: number | null;
+  frameShape: ImageFrameShape;
   containerStyle: { height?: number; aspectRatio?: number };
   onCancel: () => void;
   onSave: (nextRect: ImageCropRect) => void;
   onCropRectChange: (rect: ImageCropRect) => void;
 }) {
+  const circleMaskId = useId().replaceAll(`:`, ``);
   const [frameSize, setFrameSize] = useState<{
     width: number;
     height: number;
@@ -743,7 +776,7 @@ function InlineImageRepositionFrame({
 
   return (
     <View
-      className="relative w-full overflow-hidden"
+      className="relative w-full"
       style={containerStyle}
       onLayout={(event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
@@ -758,8 +791,32 @@ function InlineImageRepositionFrame({
         crop={{ kind: `rect`, rect: cropRect }}
         imageWidth={imageSize.width}
         imageHeight={imageSize.height}
+        frameShape={frameShape === `circle` ? `rect` : frameShape}
         className="size-full"
       />
+      {frameShape === `circle` ? (
+        <View className="pointer-events-none absolute inset-0">
+          <Svg width="100%" height="100%">
+            <Defs>
+              <Mask id={circleMaskId}>
+                <Rect x="0" y="0" width="100%" height="100%" fill="white" />
+                <Circle cx="50%" cy="50%" r="50%" fill="black" />
+              </Mask>
+            </Defs>
+            <Rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="rgba(0, 0, 0, 0.35)"
+              mask={`url(#${circleMaskId})`}
+            />
+          </Svg>
+          <View className="absolute inset-0 rounded-full border-2 border-fg/60" />
+        </View>
+      ) : (
+        <View className="pointer-events-none absolute inset-0 border border-fg/20" />
+      )}
       <View
         className="absolute inset-0"
         style={
@@ -826,12 +883,14 @@ function HintImageTile({
   isSelected,
   isHovered,
   size,
+  frameShape,
 }: {
   assetId: AssetId;
   imageMeta: ImageMeta | null;
   isSelected: boolean;
   isHovered: boolean;
   size: number;
+  frameShape: ImageFrameShape;
 }) {
   const tileMeta = useAssetImageMeta(
     assetId,
@@ -846,7 +905,11 @@ function HintImageTile({
   return (
     <View className="relative" style={{ height: size, width: size }}>
       <View
-        className="overflow-hidden rounded-md bg-fg-bg5"
+        className={`
+          overflow-hidden bg-fg-bg5
+
+          ${frameShape === `circle` ? `rounded-full` : `rounded-md`}
+        `}
         style={{ height: size, width: size }}
       >
         <FramedAssetImage
@@ -854,16 +917,29 @@ function HintImageTile({
           crop={imageMeta?.crop}
           imageWidth={resolvedImageWidth}
           imageHeight={resolvedImageHeight}
+          frameShape={frameShape}
           className="size-full"
         />
       </View>
       <View
         className={
           isSelected
-            ? `absolute inset-0 rounded-md border-2 border-blue`
+            ? `
+              absolute inset-0 border-2 border-blue
+
+              ${frameShape === `circle` ? `rounded-full` : `rounded-md`}
+            `
             : isHovered
-              ? `absolute inset-0 rounded-md border-2 border-cyan/40`
-              : `absolute inset-0 rounded-md border border-fg/10`
+              ? `
+                absolute inset-0 border-2 border-cyan/40
+
+                ${frameShape === `circle` ? `rounded-full` : `rounded-md`}
+              `
+              : `
+                absolute inset-0 border border-fg/10
+
+                ${frameShape === `circle` ? `rounded-full` : `rounded-md`}
+              `
         }
         pointerEvents="none"
       />

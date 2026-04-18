@@ -24,6 +24,7 @@ import {
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
   isFinalSoundId,
+  isInitialSoundId,
   isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
@@ -242,7 +243,8 @@ function MnemonicStoryRoleSection({
               enableAiGeneration
               previewHeight={200}
               tileSize={64}
-              frameConstraint={{ aspectRatio: 1 }}
+              frameShape={isInitialSoundId(pinyinSoundId) ? `circle` : `rect`}
+              aspectRatio={isInitialSoundId(pinyinSoundId) ? `1:1` : `16:9`}
             />
             {isFinalSound && isEditMode ? (
               <PinyinFinalToneImagePicker finalSoundId={pinyinSoundId} />

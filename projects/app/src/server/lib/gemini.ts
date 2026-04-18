@@ -1,4 +1,5 @@
 import type { AiReferenceImage } from "@/data/model";
+import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { geminiImageApiKey } from "@/util/env";
 import type { Part } from "@google/genai";
 import { GoogleGenAI } from "@google/genai";
@@ -18,6 +19,7 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 export async function generateImage(opts: {
   prompt: string;
   referenceImages?: AiReferenceImage[];
+  aspectRatio?: GeminiImageAspectRatio;
 }): Promise<{ buffer: Buffer; mimeType: string }> {
   const client = new GoogleGenAI({ apiKey: nonNullable(geminiImageApiKey) });
 
@@ -48,6 +50,9 @@ export async function generateImage(opts: {
     model: `gemini-2.5-flash-image`,
     config: {
       responseModalities: [`IMAGE`, `TEXT`],
+      imageConfig: {
+        aspectRatio: opts.aspectRatio,
+      },
     },
     contents: [
       {

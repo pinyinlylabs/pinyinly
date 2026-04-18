@@ -154,6 +154,7 @@ describe(
 
         Each suggestion must:
         - Clearly reflect both the Location and the Sublocation
+        - If a Viewpoint is provided, ensure the description matches that perspective
         - Describe stable, always-true aspects of the place
         - Return only the descriptive fragment itself, don't prefix with the place label
         - Avoid time of day, weather, or temporary events
@@ -166,13 +167,13 @@ describe(
       `);
     });
 
-    test(`full input (all optional notes set)`, () => {
+    test(`full input (all optional notes and viewpoint set)`, () => {
       const result = buildSubLocationDescriptionPrompt({
         label: `Outside Lawson`,
         location: `Lawson`,
         locationNotes: `The famous Japanese convenience chain store.`,
         sublocation: `Outside`,
-        sublocationNotes: `Street view of the store front.`,
+        viewpoint: `At eye level looking at the storefront`,
         count: 4,
       });
 
@@ -188,12 +189,13 @@ describe(
         Sublocation: Outside
 
         Location notes: The famous Japanese convenience chain store.
-        Sublocation notes: Street view of the store front.
+        Viewpoint: At eye level looking at the storefront
 
         Generate 4 distinct reusable location descriptions for this exact combined place: Outside Lawson
 
         Each suggestion must:
         - Clearly reflect both the Location and the Sublocation
+        - If a Viewpoint is provided, ensure the description matches that perspective
         - Describe stable, always-true aspects of the place
         - Return only the descriptive fragment itself, don't prefix with the place label
         - Avoid time of day, weather, or temporary events
@@ -229,6 +231,7 @@ describe(
 
         Each suggestion must:
         - Clearly reflect both the Location and the Sublocation
+        - If a Viewpoint is provided, ensure the description matches that perspective
         - Describe stable, always-true aspects of the place
         - Return only the descriptive fragment itself, don't prefix with the place label
         - Avoid time of day, weather, or temporary events

@@ -8,6 +8,7 @@ import {
   getFinalSoundLabel,
   getInitialSoundLabel,
   getToneSoundLabel,
+  isInitialSoundId,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
@@ -16,6 +17,7 @@ import {
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneNameSetting,
+  pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
@@ -145,6 +147,17 @@ export function WikiHanziCharacterPronunciationBox({
           ),
         },
   );
+  const finalToneViewpointSetting = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinFinalToneViewpointSetting,
+          key: getPinyinFinalToneKeyParams(
+            splitPinyin.finalSoundId,
+            String(splitPinyin.tone),
+          ),
+        },
+  );
   const finalToneNameSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -164,6 +177,18 @@ export function WikiHanziCharacterPronunciationBox({
     initialDescriptionSetting?.value?.text ?? null;
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
+  const finalToneSceneViewpoint =
+    finalToneViewpointSetting?.value?.text ?? null;
+  const finalToneLocationDescription = [
+    finalToneSceneDescription == null || finalToneSceneDescription.length === 0
+      ? null
+      : `Description: ${finalToneSceneDescription}`,
+    finalToneSceneViewpoint == null || finalToneSceneViewpoint.length === 0
+      ? null
+      : `Viewpoint: ${finalToneSceneViewpoint}`,
+  ]
+    .filter((value): value is string => value != null)
+    .join(` `);
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
@@ -182,7 +207,6 @@ export function WikiHanziCharacterPronunciationBox({
   });
   const finalToneName =
     finalToneNameSetting?.value?.text ?? defaultFinalToneName;
-
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -379,7 +403,7 @@ export function WikiHanziCharacterPronunciationBox({
                 setting={hanziPronunciationHintImageSetting}
                 settingKey={hintSettingKey}
                 previewHeight={200}
-                frameConstraint={{ aspectRatio: 2 }}
+                aspectRatio={`16:9`}
               />
             )
           ) : null}
@@ -394,7 +418,10 @@ export function WikiHanziCharacterPronunciationBox({
           }}
           location={{
             name: finalToneName,
-            description: finalToneSceneDescription ?? undefined,
+            description:
+              finalToneLocationDescription.length === 0
+                ? undefined
+                : finalToneLocationDescription,
           }}
           cue={{ word: gloss }}
           onApplyHint={({ text, explanation }) => {
@@ -451,6 +478,7 @@ function SoundLinkBlock({
   const isPointerHoverCapable = usePointerHoverCapability();
   const soundImage = soundImageSetting.value;
   const soundImageCrop = parseImageCrop(soundImage?.imageCrop);
+  const frameShape = isInitialSoundId(soundId) ? `circle` : `rect`;
 
   const nameLink = (
     <Link href={href} className={soundNameClass()}>
@@ -474,12 +502,19 @@ function SoundLinkBlock({
                 <Pressable>{nameLink}</Pressable>
               </Tooltip.Trigger>
               <Tooltip.Content className="p-1">
-                <View className="size-20 overflow-hidden rounded-md bg-fg-bg5">
+                <View
+                  className={`
+                    size-20 overflow-hidden bg-fg-bg5
+
+                    ${frameShape === `circle` ? `rounded-full` : `rounded-md`}
+                  `}
+                >
                   <FramedAssetImage
                     assetId={soundImage.imageId}
                     crop={soundImageCrop}
                     imageWidth={soundImage.imageWidth}
                     imageHeight={soundImage.imageHeight}
+                    frameShape={frameShape}
                     className="size-full"
                   />
                 </View>

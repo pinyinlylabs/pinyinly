@@ -377,17 +377,6 @@
   }
 
   .pyly-color-scheme-light {
-    --color-lozenge-emerald-bg: color-mix(
-      in oklab,
-      var(--color-emerald) 0%,
-      var(--color-bg)
-    );
-    --color-lozenge-emerald-fg: var(--color-emerald);
-    --color-lozenge-emerald-border: color-mix(
-      in oklab,
-      var(--color-emerald) 60%,
-      var(--color-bg)
-    );
     --color-red: var(--color-red-light);
     --color-orange: var(--color-orange-light);
     --color-amber: var(--color-amber-light);
@@ -468,6 +457,18 @@
     --color-theme-placeholder-panel-fg-loud: #6c6c6c;
     --color-theme-placeholder-panel-on-fg: #ffffff;
 
+    --color-lozenge-emerald-bg: color-mix(
+      in oklab,
+      var(--color-emerald) 5%,
+      var(--color-bg)
+    );
+    --color-lozenge-emerald-fg: var(--color-emerald);
+    --color-lozenge-emerald-border: color-mix(
+      in oklab,
+      var(--color-emerald) 50%,
+      var(--color-bg)
+    );
+
     --color-lozenge-blue-bg: color-mix(
       in oklab,
       var(--color-blue) 5%,
@@ -479,6 +480,7 @@
       var(--color-blue) 50%,
       var(--color-bg)
     );
+
     --color-lozenge-cyan-bg: color-mix(
       in oklab,
       var(--color-cyan) 5%,
@@ -490,6 +492,7 @@
       var(--color-cyan) 50%,
       var(--color-bg)
     );
+
     --color-lozenge-violet-bg: color-mix(
       in oklab,
       var(--color-violet) 5%,
@@ -501,6 +504,7 @@
       var(--color-violet) 50%,
       var(--color-bg)
     );
+
     --color-lozenge-fuchsia-bg: color-mix(
       in oklab,
       var(--color-fuchsia) 5%,
@@ -512,6 +516,7 @@
       var(--color-fuchsia) 50%,
       var(--color-bg)
     );
+
     --color-lozenge-rose-bg: color-mix(
       in oklab,
       var(--color-rose) 5%,
@@ -523,6 +528,7 @@
       var(--color-rose) 50%,
       var(--color-bg)
     );
+
     --color-lozenge-orange-bg: color-mix(
       in oklab,
       var(--color-orange) 5%,
@@ -534,6 +540,7 @@
       var(--color-orange) 50%,
       var(--color-bg)
     );
+
     --color-lozenge-amber-bg: color-mix(
       in oklab,
       var(--color-amber) 5%,
