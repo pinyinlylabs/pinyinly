@@ -194,7 +194,7 @@ const config = {
     // (this list is taken from https://github.com/nativewind/nativewind/blob/main/packages/nativewind/src/tailwind/native.ts)
     preflight: false,
     borderOpacity: false,
-    boxShadow: false,
+    boxShadow: true,
     caretColor: false,
     divideOpacity: false,
     fill: true,

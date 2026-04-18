@@ -531,7 +531,7 @@ function InlineEditableSettingHistoryMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <ScrollView
-      className="shadow-lg max-h-[400px] w-[300px] rounded-xl bg-bg-high"
+      className="max-h-[400px] w-[300px] rounded-xl bg-bg-high shadow-lg"
       contentContainerClassName="gap-1 p-2"
     >
       {entries.map((entry) => (
