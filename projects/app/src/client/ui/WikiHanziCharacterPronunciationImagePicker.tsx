@@ -227,7 +227,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
           pronunciationHint.text ??
           `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`
         }
-        frameConstraint={{ aspectRatio: 2 }}
+        aspectRatio={`16:9`}
         onUploadError={(error) => {
           console.error(`Upload error:`, error);
         }}

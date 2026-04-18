@@ -10,6 +10,8 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
+import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
+import { getGeminiImageAspectRatioValue } from "@/util/geminiImageAspectRatio";
 import { useEffect, useId, useRef, useState } from "react";
 import type {
   LayoutChangeEvent,
@@ -33,12 +35,7 @@ import { FloatingMenuModal } from "./FloatingMenuModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { useUserSettingHistory } from "./hooks/useUserSettingHistory";
-import type {
-  ImageCrop,
-  ImageCropRect,
-  ImageFrameConstraintInput,
-  ImageFrameShape,
-} from "./imageCrop";
+import type { ImageCrop, ImageCropRect, ImageFrameShape } from "./imageCrop";
 import {
   clampImageCropRectPosition,
   createCenteredCropRect,
@@ -46,7 +43,6 @@ import {
   getZoomedImageCropRect,
   imageCropValueFromCrop,
   parseImageCrop,
-  resolveFrameAspectRatio,
 } from "./imageCrop";
 import { useAssetImageMeta } from "./useAssetImageMeta";
 
@@ -60,7 +56,7 @@ interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   enableAiGeneration?: boolean;
   initialAiPrompt?: string;
   aiReferenceImages?: AiReferenceImageDeclaration[];
-  frameConstraint?: ImageFrameConstraintInput | null;
+  aspectRatio?: GeminiImageAspectRatio | null;
   frameShape?: ImageFrameShape;
   onUploadError?: (error: string) => void;
   onSaveAiPrompt?: (prompt: string) => void;
@@ -85,7 +81,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   enableAiGeneration = false,
   initialAiPrompt = ``,
   aiReferenceImages,
-  frameConstraint,
+  aspectRatio,
   frameShape = `rect`,
   onUploadError,
   onSaveAiPrompt,
@@ -108,7 +104,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const [inlineEditorAssetId, setInlineEditorAssetId] =
     useState<AssetId | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
+  const frameAspectRatio = getGeminiImageAspectRatioValue(aspectRatio);
   const isPointerHoverCapable = usePointerHoverCapability();
   const isInlineRepositioning = inlineEditorAssetId != null;
 
@@ -396,6 +392,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                 initialPrompt={initialAiPrompt}
                 aiReferenceImages={aiReferenceImages}
                 playgroundStorageKey={aiPlaygroundStorageKey}
+                aspectRatio={aspectRatio ?? undefined}
                 onChangeImage={(assetId) => {
                   handleUseImage(assetId);
                 }}

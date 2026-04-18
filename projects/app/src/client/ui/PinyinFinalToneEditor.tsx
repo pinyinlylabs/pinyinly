@@ -223,7 +223,7 @@ function ToneTileEditor({
           readonly={!isEditMode}
           previewHeight={200}
           tileSize={64}
-          frameConstraint={{ aspectRatio: 2 }}
+          aspectRatio={`16:9`}
         />
 
         <InlineEditableSettingText

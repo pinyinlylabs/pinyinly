@@ -15,6 +15,7 @@ import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import { aiImagePlaygroundSetting } from "@/data/userSettings";
+import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { setAdd, setDelete, setToggle } from "@pinyinly/lib/collections";
 import type {
   UserSetting,
@@ -96,6 +97,7 @@ export interface AiImageGenerationPanelProps {
   initialPrompt?: string;
   aiReferenceImages?: AiReferenceImageDeclaration[];
   playgroundStorageKey: string;
+  aspectRatio?: GeminiImageAspectRatio;
   onChangeImage: (assetId: AssetId) => void;
   onError?: (message: string) => void;
   onSavePrompt?: (prompt: string) => void;
@@ -142,6 +144,7 @@ export function AiImageGenerationPanel({
   initialPrompt = ``,
   aiReferenceImages,
   playgroundStorageKey,
+  aspectRatio,
   onChangeImage,
   onError,
   onSavePrompt,
@@ -810,6 +813,7 @@ export function AiImageGenerationPanel({
     try {
       const result = await generateMutation.mutateAsync({
         prompt,
+        aspectRatio,
         referenceImages:
           contextReferenceEntries.length > 0
             ? contextReferenceEntries.map((entry) => ({

@@ -244,7 +244,7 @@ function MnemonicStoryRoleSection({
               previewHeight={200}
               tileSize={64}
               frameShape={isInitialSoundId(pinyinSoundId) ? `circle` : `rect`}
-              frameConstraint={{ aspectRatio: 1 }}
+              aspectRatio={isInitialSoundId(pinyinSoundId) ? `1:1` : `16:9`}
             />
             {isFinalSound && isEditMode ? (
               <PinyinFinalToneImagePicker finalSoundId={pinyinSoundId} />

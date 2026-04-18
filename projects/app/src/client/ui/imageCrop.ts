@@ -11,12 +11,6 @@ export type ImageCrop =
   | { kind: `none` }
   | { kind: `rect`; rect: ImageCropRect };
 
-export interface ImageFrameConstraintInput {
-  width?: number;
-  height?: number;
-  aspectRatio?: number;
-}
-
 export type ImageFrameShape = `rect` | `circle`;
 
 // Pixel-space types for crop geometry calculations
@@ -36,28 +30,6 @@ export interface Rect {
 export interface Size {
   width: number;
   height: number;
-}
-
-export function resolveFrameAspectRatio(
-  constraint: ImageFrameConstraintInput | null | undefined,
-): number | null {
-  if (constraint == null) {
-    return null;
-  }
-
-  if (isFiniteNumber(constraint.aspectRatio) && constraint.aspectRatio > 0) {
-    return constraint.aspectRatio;
-  }
-
-  if (isFiniteNumber(constraint.width) && isFiniteNumber(constraint.height)) {
-    if (constraint.height === 0) {
-      return null;
-    }
-
-    return constraint.width / constraint.height;
-  }
-
-  return null;
 }
 
 export function parseImageCrop(value: unknown): ImageCrop {

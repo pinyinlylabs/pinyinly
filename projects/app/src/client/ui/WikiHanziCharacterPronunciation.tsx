@@ -403,7 +403,7 @@ export function WikiHanziCharacterPronunciationBox({
                 setting={hanziPronunciationHintImageSetting}
                 settingKey={hintSettingKey}
                 previewHeight={200}
-                frameConstraint={{ aspectRatio: 2 }}
+                aspectRatio={`16:9`}
               />
             )
           ) : null}

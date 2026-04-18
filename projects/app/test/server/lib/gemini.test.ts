@@ -74,20 +74,32 @@ describe(
 
       expect(result.buffer.length).toBeGreaterThan(0);
       expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream).toHaveBeenCalledWith({
-        model: `gemini-2.5-flash-image`,
-        config: {
-          responseModalities: [`IMAGE`, `TEXT`],
-        },
-        contents: [
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
           {
-            role: `user`,
-            parts: [
-              { text: `A bright red apple on a wooden table, studio lighting` },
+            "config": {
+              "imageConfig": {
+                "aspectRatio": undefined,
+              },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "A bright red apple on a wooden table, studio lighting",
+                  },
+                ],
+                "role": "user",
+              },
             ],
+            "model": "gemini-2.5-flash-image",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test(`returns image data with style image`, async () => {
@@ -107,27 +119,41 @@ describe(
 
       expect(result.buffer.length).toBeGreaterThan(0);
       expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream).toHaveBeenCalledWith({
-        model: `gemini-2.5-flash-image`,
-        config: {
-          responseModalities: [`IMAGE`, `TEXT`],
-        },
-        contents: [
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
           {
-            role: `user`,
-            parts: [
-              { text: `style:` },
-              {
-                inlineData: {
-                  mimeType: `image/png`,
-                  data: pngBase64,
-                },
+            "config": {
+              "imageConfig": {
+                "aspectRatio": undefined,
               },
-              { text: `A bright red apple on a wooden table, studio lighting` },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "style:",
+                  },
+                  {
+                    "inlineData": {
+                      "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                      "mimeType": "image/png",
+                    },
+                  },
+                  {
+                    "text": "A bright red apple on a wooden table, studio lighting",
+                  },
+                ],
+                "role": "user",
+              },
             ],
+            "model": "gemini-2.5-flash-image",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test(`handles style image with JPEG format`, async () => {
@@ -147,27 +173,41 @@ describe(
 
       expect(result.buffer.length).toBeGreaterThan(0);
       expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream).toHaveBeenCalledWith({
-        model: `gemini-2.5-flash-image`,
-        config: {
-          responseModalities: [`IMAGE`, `TEXT`],
-        },
-        contents: [
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
           {
-            role: `user`,
-            parts: [
-              { text: `style:` },
-              {
-                inlineData: {
-                  mimeType: `image/jpeg`,
-                  data: jpegBase64,
-                },
+            "config": {
+              "imageConfig": {
+                "aspectRatio": undefined,
               },
-              { text: `A bright red apple on a wooden table, studio lighting` },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "style:",
+                  },
+                  {
+                    "inlineData": {
+                      "data": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8VAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=",
+                      "mimeType": "image/jpeg",
+                    },
+                  },
+                  {
+                    "text": "A bright red apple on a wooden table, studio lighting",
+                  },
+                ],
+                "role": "user",
+              },
             ],
+            "model": "gemini-2.5-flash-image",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test(`properly separates mime type from base64 data`, async () => {
@@ -186,27 +226,41 @@ describe(
 
       expect(result.buffer.length).toBeGreaterThan(0);
       expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream).toHaveBeenCalledWith({
-        model: `gemini-2.5-flash-image`,
-        config: {
-          responseModalities: [`IMAGE`, `TEXT`],
-        },
-        contents: [
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
           {
-            role: `user`,
-            parts: [
-              { text: `style:` },
-              {
-                inlineData: {
-                  mimeType: `image/webp`,
-                  data: pngBase64,
-                },
+            "config": {
+              "imageConfig": {
+                "aspectRatio": undefined,
               },
-              { text: `A test prompt` },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "style:",
+                  },
+                  {
+                    "inlineData": {
+                      "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                      "mimeType": "image/webp",
+                    },
+                  },
+                  {
+                    "text": "A test prompt",
+                  },
+                ],
+                "role": "user",
+              },
             ],
+            "model": "gemini-2.5-flash-image",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test(`includes reference images in the request`, async () => {
@@ -225,27 +279,41 @@ describe(
 
       expect(result.buffer.length).toBeGreaterThan(0);
       expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream).toHaveBeenCalledWith({
-        model: `gemini-2.5-flash-image`,
-        config: {
-          responseModalities: [`IMAGE`, `TEXT`],
-        },
-        contents: [
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
           {
-            role: `user`,
-            parts: [
-              { text: `sunset:` },
-              {
-                inlineData: {
-                  mimeType: `image/png`,
-                  data: pngBase64,
-                },
+            "config": {
+              "imageConfig": {
+                "aspectRatio": undefined,
               },
-              { text: `A beautiful landscape` },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "sunset:",
+                  },
+                  {
+                    "inlineData": {
+                      "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                      "mimeType": "image/png",
+                    },
+                  },
+                  {
+                    "text": "A beautiful landscape",
+                  },
+                ],
+                "role": "user",
+              },
             ],
+            "model": "gemini-2.5-flash-image",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test(`includes multiple reference images in the request`, async () => {
@@ -395,18 +463,32 @@ describe(
       });
 
       expect(result.buffer.length).toBeGreaterThan(0);
-      expect(mockGenerateContentStream).toHaveBeenCalledWith({
-        model: `gemini-2.5-flash-image`,
-        config: {
-          responseModalities: [`IMAGE`, `TEXT`],
-        },
-        contents: [
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
           {
-            role: `user`,
-            parts: [{ text: `A test prompt` }],
+            "config": {
+              "imageConfig": {
+                "aspectRatio": undefined,
+              },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "A test prompt",
+                  },
+                ],
+                "role": "user",
+              },
+            ],
+            "model": "gemini-2.5-flash-image",
           },
-        ],
-      });
+        ]
+      `);
     });
   },
 );

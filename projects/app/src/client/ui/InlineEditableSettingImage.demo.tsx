@@ -20,7 +20,7 @@ export default () => {
           settingKey={hintSettingKey}
           previewHeight={200}
           tileSize={64}
-          frameConstraint={{ aspectRatio: 2 }}
+          aspectRatio={`16:9`}
           onUploadError={(error) => {
             console.error(`Upload error:`, error);
           }}

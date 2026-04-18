@@ -4,6 +4,8 @@ import { createAssetFromBuffer } from "@/server/lib/createAsset";
 import { generateImage } from "@/server/lib/gemini";
 import { fetchAssetBase64 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
+import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
@@ -107,6 +109,7 @@ const generateImageInputSchema = z
   .object({
     prompt: z.string().min(1).max(4000),
     referenceImages: z.array(aiReferenceImageSchema).max(4).optional(),
+    aspectRatio: z.enum(geminiImageAspectRatios).optional(),
   })
   .strict();
 
@@ -366,7 +369,8 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async (opts) => {
-      const { prompt, referenceImages } = opts.input;
+      const { prompt, referenceImages, aspectRatio, ...rest } = opts.input;
+      true satisfies IsExhaustedRest<typeof rest>;
 
       try {
         const resolvedReferenceImages =
@@ -388,6 +392,7 @@ export const aiRouter = router({
         const { buffer, mimeType } = await generateImage({
           prompt,
           referenceImages: resolvedReferenceImages,
+          aspectRatio,
         });
 
         const imageArrayBuffer = Uint8Array.from(buffer).buffer;
