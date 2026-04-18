@@ -102,6 +102,42 @@ describe(
       `);
     });
 
+    test(`includes aspect ratio in the request config`, async () => {
+      const result = await generateImage({
+        prompt: `A bright red apple on a wooden table, studio lighting`,
+        aspectRatio: `1:1`,
+      });
+
+      expect(result.buffer.length).toBeGreaterThan(0);
+      expect(result.mimeType.startsWith(`image/`)).toBe(true);
+      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
+        [
+          {
+            "config": {
+              "imageConfig": {
+                "aspectRatio": "1:1",
+              },
+              "responseModalities": [
+                "IMAGE",
+                "TEXT",
+              ],
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "A bright red apple on a wooden table, studio lighting",
+                  },
+                ],
+                "role": "user",
+              },
+            ],
+            "model": "gemini-2.5-flash-image",
+          },
+        ]
+      `);
+    });
+
     test(`returns image data with style image`, async () => {
       // Create a minimal valid PNG base64 (1x1 transparent pixel)
       const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
