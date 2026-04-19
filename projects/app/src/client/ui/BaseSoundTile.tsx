@@ -62,6 +62,13 @@ export function BaseSoundTile({
             className="size-full"
           />
           <View className="absolute inset-0 bg-bg-high/70" />
+          <View
+            className={`
+              absolute inset-0 border border-transparent transition-colors duration-150
+
+              group-hover:border-fg/10
+            `}
+          />
         </View>
       )}
       <View className="items-center">
@@ -93,9 +100,10 @@ export function BaseSoundTile({
 
 const tileClass = tv({
   base: `
-    relative w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high p-2
+    group relative w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high
+    p-2 transition-colors duration-150
 
-    hover:bg-cyan/20
+    hover:bg-fg/5
   `,
   variants: {
     hasAssociation: {

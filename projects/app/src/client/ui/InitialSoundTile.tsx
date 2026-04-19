@@ -14,10 +14,17 @@ export function InitialSoundTile({
     <View
       {...props}
       className={
-        `w-full items-center` + (className == null ? `` : ` ${className}`)
+        `group w-full items-center` + (className == null ? `` : ` ${className}`)
       }
     >
-      <View className="relative z-10 -mb-0.5 size-28 overflow-hidden rounded-full bg-bg-high shadow">
+      <View
+        className={`
+          relative z-10 -mb-0.5 size-28 overflow-hidden rounded-full border border-transparent
+          bg-bg-high shadow transition-colors duration-150
+
+          group-hover:border-fg/10
+        `}
+      >
         {image == null ? null : (
           <FramedAssetImage
             assetId={image.assetId}
@@ -33,6 +40,9 @@ export function InitialSoundTile({
       <View
         className={`
           relative z-0 max-w-full flex-row items-center gap-2 rounded-xl bg-bg-high px-3 py-2
+          transition-all duration-150
+
+          group-hover:brightness-105
         `}
       >
         <Text

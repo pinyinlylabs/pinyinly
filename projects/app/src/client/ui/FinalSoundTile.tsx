@@ -14,11 +14,17 @@ export function FinalSoundTile({
     <View
       {...props}
       className={
-        `w-full overflow-hidden rounded-xl bg-bg-high shadow` +
+        `group w-full overflow-hidden rounded-xl bg-bg-high shadow` +
         (className == null ? `` : ` ${className}`)
       }
     >
-      <View className="h-28 w-full">
+      <View
+        className={`
+          h-28 w-full border border-transparent transition-colors duration-150
+
+          group-hover:border-fg/10
+        `}
+      >
         {image == null ? null : (
           <FramedAssetImage
             assetId={image.assetId}
@@ -31,10 +37,16 @@ export function FinalSoundTile({
         )}
       </View>
 
-      <View className="flex-row items-center gap-2 px-3 py-2">
+      <View
+        className={`
+          flex-row items-center gap-2 px-3 py-2 transition-colors duration-150
+
+          group-hover:bg-fg/5
+        `}
+      >
         <Text
           className={
-            `text-base/none font-medium text-fg` +
+            `text-base/tighter font-medium text-fg` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}
