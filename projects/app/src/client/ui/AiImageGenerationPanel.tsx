@@ -8,6 +8,7 @@ import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
+import { useImageDropTarget } from "@/client/ui/hooks/useImageDropTarget";
 import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
@@ -27,6 +28,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
@@ -1366,6 +1368,10 @@ function AiImagePromptComposer({
   const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
   const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
   const promptInputRef = useRef<TextInput>(null);
+  const { imageDropTargetRef, isImageDragOver } = useImageDropTarget({
+    disabled: !editable || isProcessing,
+    onUploadPastedImage,
+  });
 
   const persistDraftPrompt = (nextDraftPrompt: string) => {
     if (lastPersistedDraftPromptRef.current === nextDraftPrompt) {
@@ -1494,11 +1500,11 @@ function AiImagePromptComposer({
 
   return (
     <View
-      className={
-        isPromptInputFocused
-          ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
-          : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
-      }
+      ref={imageDropTargetRef}
+      className={composerContainerClass({
+        isDragOver: isImageDragOver,
+        isPromptInputFocused,
+      })}
     >
       <TextInputMulti
         ref={promptInputRef}
@@ -1674,6 +1680,20 @@ function AiImagePromptComposer({
     </View>
   );
 }
+
+const composerContainerClass = tv({
+  base: `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`,
+  variants: {
+    isPromptInputFocused: {
+      true: `border-blue`,
+      false: ``,
+    },
+    isDragOver: {
+      true: `border-blue bg-blue/10`,
+      false: ``,
+    },
+  },
+});
 
 function ImageReferenceTooltipContent({
   imageAssetId,
