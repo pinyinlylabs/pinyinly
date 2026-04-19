@@ -8973,7 +8973,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/db@npm:0.6.0, @tanstack/db@npm:^0.6.0":
+"@tanstack/db@npm:0.6.0":
   version: 0.6.0
   resolution: "@tanstack/db@npm:0.6.0"
   dependencies:
@@ -8983,6 +8983,19 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/4feaad9fe311b32ef28f53a486947c50bb7fd12c77f22095a788d68328074b195a78a2ffea20f554061b3979290397e38ebcaa7a689744bc99bb19ef3313be70
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:^0.6.0":
+  version: 0.6.5
+  resolution: "@tanstack/db@npm:0.6.5"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.18"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/1119613907da4a5a78fd8c1cc707bbc7ac69389258fd77d2418ac60ccf32a2b62240a12c85c8df5a744984bbd4dc7d9d46abd76f25e0bc38d4b1a0553f6a8824
   languageName: node
   linkType: hard
 
