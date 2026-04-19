@@ -14,11 +14,10 @@ export function InitialSoundTile({
     <View
       {...props}
       className={
-        `w-full items-center gap-2.5` +
-        (className == null ? `` : ` ${className}`)
+        `w-full items-center` + (className == null ? `` : ` ${className}`)
       }
     >
-      <View className="relative size-28 overflow-hidden rounded-full bg-bg-high">
+      <View className="relative z-10 -mb-0.5 size-28 overflow-hidden rounded-full bg-bg-high shadow">
         {image == null ? null : (
           <FramedAssetImage
             assetId={image.assetId}
@@ -31,28 +30,23 @@ export function InitialSoundTile({
         )}
       </View>
 
-      <View className="w-full items-center rounded-lg bg-bg-high px-2 py-1.5">
-        <Text className="font-sans text-2xl leading-none text-fg">{label}</Text>
-      </View>
-
-      {name == null ? (
-        <Text
-          className="select-none overflow-visible leading-none text-fg/20"
-          numberOfLines={1}
-        >
-          _____
-        </Text>
-      ) : (
+      <View
+        className={`
+          relative z-0 max-w-full flex-row items-center gap-2 rounded-xl bg-bg-high px-3 py-2
+        `}
+      >
         <Text
           className={
-            `overflow-visible leading-none text-fg-dim` +
+            `text-base/none text-fg font-medium` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}
         >
-          {name}
+          {name ?? `_____`}
         </Text>
-      )}
+
+        <Text className="font-sans text-sm/none text-fg-dim">{label}</Text>
+      </View>
     </View>
   );
 }

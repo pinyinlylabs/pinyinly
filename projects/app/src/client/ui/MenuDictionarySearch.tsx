@@ -84,7 +84,7 @@ export function MenuDictionarySearch() {
             ref={setFloating}
             collapsable={false}
             style={floatingStyles}
-            className="shadow-lg overflow-hidden rounded-xl border border-fg/10 bg-bg-high"
+            className="overflow-hidden rounded-xl border border-fg/10 bg-bg-high shadow-lg"
           >
             {displayResults.length === 0 ? (
               <View className="px-3 py-2">
