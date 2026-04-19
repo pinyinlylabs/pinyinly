@@ -8986,6 +8986,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db@npm:0.6.5":
+  version: 0.6.5
+  resolution: "@tanstack/db@npm:0.6.5"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.18"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/1119613907da4a5a78fd8c1cc707bbc7ac69389258fd77d2418ac60ccf32a2b62240a12c85c8df5a744984bbd4dc7d9d46abd76f25e0bc38d4b1a0553f6a8824
+  languageName: node
+  linkType: hard
+
 "@tanstack/eslint-plugin-query@npm:^5.95.2":
   version: 5.95.2
   resolution: "@tanstack/eslint-plugin-query@npm:5.95.2"
@@ -9016,15 +9029,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^1.0.31":
-  version: 1.0.31
-  resolution: "@tanstack/query-db-collection@npm:1.0.31"
+  version: 1.0.36
+  resolution: "@tanstack/query-db-collection@npm:1.0.36"
   dependencies:
     "@standard-schema/spec": "npm:^1.1.0"
-    "@tanstack/db": "npm:0.6.0"
+    "@tanstack/db": "npm:0.6.5"
   peerDependencies:
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/0a36669ebdcc798690db66d9e64827689e98ad30aaa1147a417001c9aadd1d557d1e2ffe4c895e4dd0b0cb05f535f658fc55be54d64b117c97b7063e3e5f8a24
+  checksum: 10c0/eccfa66cf3d7a9c5f5ef97109652c79531013f42fdb7285bb3481a5ba95659d1d50fde3a1cefd40a8e9be03f2c1d952d5f0e99dff422e08eebd9ea01b6703dd5
   languageName: node
   linkType: hard
 
