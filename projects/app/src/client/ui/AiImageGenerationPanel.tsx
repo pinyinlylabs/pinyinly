@@ -8,6 +8,7 @@ import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
+import { useImageDropTarget } from "@/client/ui/hooks/useImageDropTarget";
 import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
 import { useImageUploader } from "@/client/ui/hooks/useImageUploader";
 import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapability";
@@ -27,6 +28,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
@@ -34,7 +36,7 @@ import { ShimmerText } from "./ShimmerText";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
 
-type AiImagePlaygroundRole = `user` | `assistant`;
+type AiImagePlaygroundRole = `user` | `assistant` | `error`;
 
 interface AiImagePlaygroundMessage {
   id: string;
@@ -43,7 +45,17 @@ interface AiImagePlaygroundMessage {
   assetId?: AssetId;
   contextReferenceEntries?: AiImageContextReferenceEntry[];
   styleContextDebug?: AiImageStyleContextDebug;
+  failedUserMessageId?: string;
+  failedPrompt?: string;
+  failedReferenceEntries?: AiImageContextReferenceEntry[];
   createdAtIso: string;
+}
+
+interface AiGenerationRequestPayload {
+  threadId: string;
+  userMessageId: string;
+  prompt: string;
+  referenceEntries: AiImageContextReferenceEntry[];
 }
 
 interface AiImagePlaygroundThread {
@@ -160,7 +172,6 @@ export function AiImageGenerationPanel({
       createInitialPlaygroundState(initialPrompt),
     );
   const [isLoadedFromSetting, setIsLoadedFromSetting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const timelineScrollRef = useRef<ScrollView>(null);
   const hasScrolledInitiallyRef = useRef(false);
   const previousActiveThreadIdRef = useRef<string | null>(null);
@@ -320,7 +331,6 @@ export function AiImageGenerationPanel({
       // uploadImageBlob returns the uploaded assetId; caller appends timeline message.
     },
     onUploadError: (message) => {
-      setError(message);
       onError?.(message);
     },
   });
@@ -736,11 +746,138 @@ export function AiImageGenerationPanel({
     }));
   };
 
+  const clearErrorMessagesForUserMessage = (
+    threadId: string,
+    userMessageId: string,
+  ) => {
+    updatePlaygroundState((prev) => ({
+      ...prev,
+      threads: prev.threads.map((thread) => {
+        if (thread.id !== threadId) {
+          return thread;
+        }
+
+        return {
+          ...thread,
+          messages: thread.messages.filter(
+            (message) =>
+              !(
+                message.role === `error` &&
+                message.failedUserMessageId === userMessageId
+              ),
+          ),
+        };
+      }),
+    }));
+  };
+
+  const appendErrorMessageToThread = ({
+    threadId,
+    userMessageId,
+    prompt,
+    referenceEntries,
+    errorMessage,
+  }: {
+    threadId: string;
+    userMessageId: string;
+    prompt: string;
+    referenceEntries: AiImageContextReferenceEntry[];
+    errorMessage: string;
+  }) => {
+    const nowIso = new Date().toISOString();
+
+    updatePlaygroundState((prev) => ({
+      ...prev,
+      threads: prev.threads.map((thread) => {
+        if (thread.id !== threadId) {
+          return thread;
+        }
+
+        return {
+          ...thread,
+          updatedAtIso: nowIso,
+          messages: [
+            ...thread.messages,
+            {
+              id: nanoid(),
+              role: `error` as const,
+              text: errorMessage,
+              failedUserMessageId: userMessageId,
+              failedPrompt: prompt,
+              failedReferenceEntries: referenceEntries,
+              createdAtIso: nowIso,
+            },
+          ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD),
+        };
+      }),
+    }));
+  };
+
+  const runGenerationRequest = async ({
+    threadId,
+    userMessageId,
+    prompt,
+    referenceEntries,
+  }: AiGenerationRequestPayload) => {
+    try {
+      const result = await generateMutation.mutateAsync({
+        prompt,
+        aspectRatio,
+        referenceImages:
+          referenceEntries.length > 0
+            ? referenceEntries.map((entry) => ({
+                assetId: entry.assetId,
+                label: entry.label,
+              }))
+            : undefined,
+      });
+
+      const nowIso = new Date().toISOString();
+      clearErrorMessagesForUserMessage(threadId, userMessageId);
+
+      updatePlaygroundState((prev) => ({
+        ...prev,
+        threads: prev.threads.map((thread) => {
+          if (thread.id !== threadId) {
+            return thread;
+          }
+
+          const nextMessages = [
+            ...thread.messages,
+            {
+              id: nanoid(),
+              role: `assistant` as const,
+              text: `Generated image`,
+              assetId: result.assetId,
+              createdAtIso: nowIso,
+            },
+          ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
+
+          return {
+            ...thread,
+            updatedAtIso: nowIso,
+            messages: nextMessages,
+          };
+        }),
+      }));
+    } catch (err) {
+      console.error(`AI image generation failed:`, err);
+      const errorMsg = `Unable to generate image right now.`;
+      appendErrorMessageToThread({
+        threadId,
+        userMessageId,
+        prompt,
+        referenceEntries,
+        errorMessage: errorMsg,
+      });
+      onError?.(errorMsg);
+    }
+  };
+
   const handleUploadPastedImage = async (
     threadId: string,
     input: PasteImageUploadInput,
   ) => {
-    setError(null);
     const uploadedAssetId = await uploadPastedImageBlob({
       blob: input.blob,
       contentType: input.contentType,
@@ -757,16 +894,19 @@ export function AiImageGenerationPanel({
     const prompt = draftPrompt.trim();
     if (activeThread == null || prompt.length === 0) {
       const promptError = `Please enter a prompt`;
-      setError(promptError);
       onError?.(promptError);
       return;
     }
 
-    setError(null);
-
     const nowIso = new Date().toISOString();
     const userMessageId = nanoid();
-    const assistantMessageId = nanoid();
+    const requestReferenceEntries = userMessageContextReferenceEntries.map(
+      (entry) => ({
+        assetId: entry.assetId,
+        label: entry.label,
+        sourceId: entry.sourceId,
+      }),
+    );
 
     updatePlaygroundState((prev) => ({
       ...prev,
@@ -781,13 +921,7 @@ export function AiImageGenerationPanel({
             id: userMessageId,
             role: `user` as const,
             text: prompt,
-            contextReferenceEntries: userMessageContextReferenceEntries.map(
-              (entry) => ({
-                assetId: entry.assetId,
-                label: entry.label,
-                sourceId: entry.sourceId,
-              }),
-            ),
+            contextReferenceEntries: requestReferenceEntries,
             styleContextDebug,
             createdAtIso: nowIso,
           },
@@ -810,50 +944,51 @@ export function AiImageGenerationPanel({
     resetReferenceSelection();
     resetOneTimeTimelineContextSelection();
 
-    try {
-      const result = await generateMutation.mutateAsync({
-        prompt,
-        aspectRatio,
-        referenceImages:
-          contextReferenceEntries.length > 0
-            ? contextReferenceEntries.map((entry) => ({
-                assetId: entry.assetId,
-                label: entry.label,
-              }))
-            : undefined,
-      });
+    await runGenerationRequest({
+      threadId: activeThread.id,
+      userMessageId,
+      prompt,
+      referenceEntries: requestReferenceEntries,
+    });
+  };
 
-      updatePlaygroundState((prev) => ({
-        ...prev,
-        threads: prev.threads.map((thread) => {
-          if (thread.id !== activeThread.id) {
-            return thread;
-          }
-
-          const nextMessages = [
-            ...thread.messages,
-            {
-              id: assistantMessageId,
-              role: `assistant` as const,
-              text: `Generated image`,
-              assetId: result.assetId,
-              createdAtIso: new Date().toISOString(),
-            },
-          ].slice(-MAX_AI_PLAYGROUND_MESSAGES_PER_THREAD);
-
-          return {
-            ...thread,
-            updatedAtIso: new Date().toISOString(),
-            messages: nextMessages,
-          };
-        }),
-      }));
-    } catch (err) {
-      console.error(`AI image generation failed:`, err);
-      const errorMsg = `Unable to generate image right now.`;
-      setError(errorMsg);
-      onError?.(errorMsg);
+  const handleRetryFailedGeneration = (errorMessageId: string) => {
+    if (activeThread == null) {
+      return;
     }
+
+    const errorMessage = activeThread.messages.find(
+      (message) => message.id === errorMessageId && message.role === `error`,
+    );
+    if (errorMessage == null || errorMessage.failedUserMessageId == null) {
+      return;
+    }
+
+    const failedUserMessageId = errorMessage.failedUserMessageId;
+    const failedUserMessage = activeThread.messages.find(
+      (message) =>
+        message.id === failedUserMessageId && message.role === `user`,
+    );
+
+    const retryPrompt =
+      errorMessage.failedPrompt ?? failedUserMessage?.text ?? ``;
+    const trimmedRetryPrompt = retryPrompt.trim();
+    if (trimmedRetryPrompt.length === 0) {
+      return;
+    }
+
+    const retryReferenceEntries =
+      errorMessage.failedReferenceEntries ??
+      failedUserMessage?.contextReferenceEntries ??
+      [];
+
+    clearErrorMessagesForUserMessage(activeThread.id, failedUserMessageId);
+    void runGenerationRequest({
+      threadId: activeThread.id,
+      userMessageId: failedUserMessageId,
+      prompt: trimmedRetryPrompt,
+      referenceEntries: retryReferenceEntries,
+    });
   };
 
   const isGenerating = generateMutation.isPending;
@@ -936,6 +1071,18 @@ export function AiImageGenerationPanel({
                       );
                     }
 
+                    if (message.role === `error`) {
+                      return (
+                        <AiImageErrorMessage
+                          key={message.id}
+                          message={message}
+                          isProcessing={isProcessing}
+                          onRetry={handleRetryFailedGeneration}
+                          className="mr-8"
+                        />
+                      );
+                    }
+
                     return (
                       <AiImageAssistantMessage
                         key={message.id}
@@ -1003,12 +1150,6 @@ export function AiImageGenerationPanel({
               }}
               onGenerate={handleGenerate}
             />
-
-            {error == null ? null : (
-              <Text className="font-sans text-[14px] text-[crimson]">
-                {error}
-              </Text>
-            )}
           </View>
         </View>
       </View>
@@ -1220,6 +1361,44 @@ function AiImageUserMessage({
   );
 }
 
+function AiImageErrorMessage({
+  message,
+  isProcessing,
+  onRetry,
+  className,
+}: {
+  message: AiImagePlaygroundMessage;
+  isProcessing: boolean;
+  onRetry: (messageId: string) => void;
+  className?: string;
+}) {
+  return (
+    <View
+      className={`
+        items-start gap-2
+
+        ${className ?? ``}
+      `}
+    >
+      <View className="max-w-[560px] gap-2 rounded-lg border border-fg-bg10 bg-bg-high p-3">
+        <Text className="font-sans text-sm text-[crimson]">
+          {message.text ?? `Unable to generate image right now.`}
+        </Text>
+        <RectButton
+          variant="bare2"
+          onPress={() => {
+            onRetry(message.id);
+          }}
+          disabled={isProcessing}
+          className="justify-start"
+        >
+          Retry
+        </RectButton>
+      </View>
+    </View>
+  );
+}
+
 function AiImageAssistantMessage({
   message,
   canToggleOneTimeContext,
@@ -1366,6 +1545,10 @@ function AiImagePromptComposer({
   const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
   const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
   const promptInputRef = useRef<TextInput>(null);
+  const { imageDropTargetRef, isImageDragOver } = useImageDropTarget({
+    disabled: !editable || isProcessing,
+    onUploadPastedImage,
+  });
 
   const persistDraftPrompt = (nextDraftPrompt: string) => {
     if (lastPersistedDraftPromptRef.current === nextDraftPrompt) {
@@ -1494,11 +1677,11 @@ function AiImagePromptComposer({
 
   return (
     <View
-      className={
-        isPromptInputFocused
-          ? `gap-2 rounded-xl border border-blue bg-bg-high px-4 py-3`
-          : `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`
-      }
+      ref={imageDropTargetRef}
+      className={composerContainerClass({
+        isDragOver: isImageDragOver,
+        isPromptInputFocused,
+      })}
     >
       <TextInputMulti
         ref={promptInputRef}
@@ -1674,6 +1857,20 @@ function AiImagePromptComposer({
     </View>
   );
 }
+
+const composerContainerClass = tv({
+  base: `gap-2 rounded-xl border border-fg-bg10 bg-bg-high px-4 py-3`,
+  variants: {
+    isPromptInputFocused: {
+      true: `border-blue`,
+      false: ``,
+    },
+    isDragOver: {
+      true: `border-blue bg-blue/10`,
+      false: ``,
+    },
+  },
+});
 
 function ImageReferenceTooltipContent({
   imageAssetId,
@@ -1940,10 +2137,15 @@ function parseAiImagePlaygroundState(
         }
 
         const messageObject = messageValue as Record<string, unknown>;
+        const role =
+          messageObject[`role`] === `user` ||
+          messageObject[`role`] === `assistant` ||
+          messageObject[`role`] === `error`
+            ? messageObject[`role`]
+            : null;
         if (
           typeof messageObject[`id`] !== `string` ||
-          (messageObject[`role`] !== `user` &&
-            messageObject[`role`] !== `assistant`) ||
+          role == null ||
           typeof messageObject[`createdAtIso`] !== `string`
         ) {
           continue;
@@ -1951,7 +2153,7 @@ function parseAiImagePlaygroundState(
 
         messages.push({
           id: messageObject[`id`],
-          role: messageObject[`role`],
+          role,
           text:
             typeof messageObject[`text`] === `string`
               ? messageObject[`text`]
@@ -1965,6 +2167,17 @@ function parseAiImagePlaygroundState(
           ),
           styleContextDebug: parseMessageStyleContextDebug(
             messageObject[`styleContextDebug`],
+          ),
+          failedUserMessageId:
+            typeof messageObject[`failedUserMessageId`] === `string`
+              ? messageObject[`failedUserMessageId`]
+              : undefined,
+          failedPrompt:
+            typeof messageObject[`failedPrompt`] === `string`
+              ? messageObject[`failedPrompt`]
+              : undefined,
+          failedReferenceEntries: parseMessageContextReferenceEntries(
+            messageObject[`failedReferenceEntries`],
           ),
           createdAtIso: messageObject[`createdAtIso`],
         });
