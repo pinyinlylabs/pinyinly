@@ -52,7 +52,7 @@
     "@tanstack/react-query-devtools": "^5.95.2",
     "@trpc/client": "11.7.2",
     "@trpc/react-query": "11.7.2",
-    "@trpc/server": "11.7.2",
+    "@trpc/server": "11.8.0",
     "@types/apple-signin-api": "^1.5.3",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/functions": "^3.0.0",
