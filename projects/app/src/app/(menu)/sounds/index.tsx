@@ -111,6 +111,11 @@ export default function SoundsPage() {
       </View>
 
       {pinyinSoundGroupsQuery.data.map(({ id, sounds }) => {
+        const firstSoundId = sounds[0];
+        const gridClass =
+          firstSoundId != null && isFinalSoundId(firstSoundId)
+            ? `grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5`
+            : `grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-3.5`;
         return (
           <View key={id} className="gap-4">
             <View className="flex-row items-center gap-2">
@@ -132,36 +137,32 @@ export default function SoundsPage() {
                 inputClassName="text-fg"
               />
             </View>
-            <View
-              className={`grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-3.5`}
-            >
+            <View className={gridClass}>
               {sounds.map((soundId) => {
                 const sound = pinyinSounds.get(soundId);
                 return sound == null ? null : (
-                  <View key={soundId}>
-                    <Link href={`/sounds/${soundId}`} asChild>
-                      {isInitialSoundId(soundId) ? (
-                        <InitialSoundTile
-                          label={sound.label}
-                          name={sound.name}
-                          image={sound.image}
-                        />
-                      ) : isFinalSoundId(soundId) ? (
-                        <FinalSoundTile
-                          label={sound.label}
-                          name={sound.name}
-                          image={sound.image}
-                        />
-                      ) : (
-                        <ToneSoundTile
-                          soundId={soundId}
-                          label={sound.label}
-                          name={sound.name}
-                          image={sound.image}
-                        />
-                      )}
-                    </Link>
-                  </View>
+                  <Link key={soundId} href={`/sounds/${soundId}`} asChild>
+                    {isInitialSoundId(soundId) ? (
+                      <InitialSoundTile
+                        label={sound.label}
+                        name={sound.name}
+                        image={sound.image}
+                      />
+                    ) : isFinalSoundId(soundId) ? (
+                      <FinalSoundTile
+                        label={sound.label}
+                        name={sound.name}
+                        image={sound.image}
+                      />
+                    ) : (
+                      <ToneSoundTile
+                        soundId={soundId}
+                        label={sound.label}
+                        name={sound.name}
+                        image={sound.image}
+                      />
+                    )}
+                  </Link>
                 );
               })}
             </View>
