@@ -46,9 +46,9 @@ function dispatchDragEvent(
 
 describe(`useImageDropTarget`, () => {
   test(`sets drag over state on enter and clears on leave`, () => {
-    const onUploadPastedImage = vi.fn();
+    const onUploadImage = vi.fn();
     const { result } = renderHook(() =>
-      useImageDropTarget({ disabled: false, onUploadPastedImage }),
+      useImageDropTarget({ disabled: false, onUploadImage }),
     );
 
     const target = document.createElement(`div`);
@@ -74,9 +74,9 @@ describe(`useImageDropTarget`, () => {
   });
 
   test(`uploads first image file on drop when enabled`, () => {
-    const onUploadPastedImage = vi.fn();
+    const onUploadImage = vi.fn();
     const { result } = renderHook(() =>
-      useImageDropTarget({ disabled: false, onUploadPastedImage }),
+      useImageDropTarget({ disabled: false, onUploadImage }),
     );
 
     const target = document.createElement(`div`);
@@ -91,8 +91,8 @@ describe(`useImageDropTarget`, () => {
       dispatchDragEvent(target, `drop`, dataTransfer);
     });
 
-    expect(onUploadPastedImage).toHaveBeenCalledTimes(1);
-    expect(onUploadPastedImage).toHaveBeenCalledWith({
+    expect(onUploadImage).toHaveBeenCalledTimes(1);
+    expect(onUploadImage).toHaveBeenCalledWith({
       blob: imageFile,
       contentType: `image/png`,
     });
@@ -100,9 +100,9 @@ describe(`useImageDropTarget`, () => {
   });
 
   test(`does not upload when disabled`, () => {
-    const onUploadPastedImage = vi.fn();
+    const onUploadImage = vi.fn();
     const { result } = renderHook(() =>
-      useImageDropTarget({ disabled: true, onUploadPastedImage }),
+      useImageDropTarget({ disabled: true, onUploadImage }),
     );
 
     const target = document.createElement(`div`);
@@ -116,13 +116,13 @@ describe(`useImageDropTarget`, () => {
       dispatchDragEvent(target, `drop`, dataTransfer);
     });
 
-    expect(onUploadPastedImage).not.toHaveBeenCalled();
+    expect(onUploadImage).not.toHaveBeenCalled();
   });
 
   test(`detaches listeners from previous element when ref is rebound`, () => {
-    const onUploadPastedImage = vi.fn();
+    const onUploadImage = vi.fn();
     const { result } = renderHook(() =>
-      useImageDropTarget({ disabled: false, onUploadPastedImage }),
+      useImageDropTarget({ disabled: false, onUploadImage }),
     );
 
     const firstTarget = document.createElement(`div`);
@@ -138,12 +138,12 @@ describe(`useImageDropTarget`, () => {
       dispatchDragEvent(firstTarget, `drop`, dataTransfer);
     });
 
-    expect(onUploadPastedImage).toHaveBeenCalledTimes(0);
+    expect(onUploadImage).toHaveBeenCalledTimes(0);
 
     act(() => {
       dispatchDragEvent(secondTarget, `drop`, dataTransfer);
     });
 
-    expect(onUploadPastedImage).toHaveBeenCalledTimes(1);
+    expect(onUploadImage).toHaveBeenCalledTimes(1);
   });
 });

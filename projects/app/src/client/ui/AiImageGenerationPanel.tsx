@@ -1142,7 +1142,7 @@ export function AiImageGenerationPanel({
               onToggleReferenceDisabled={toggleReferenceDisabled}
               onSetReferenceVisibleInRow={setReferenceVisibleInRow}
               onPersistDraftPrompt={handlePersistDraftPrompt}
-              onUploadPastedImage={(input) => {
+              onUploadImage={(input) => {
                 if (activeThread == null) {
                   return;
                 }
@@ -1502,7 +1502,7 @@ function AiImagePromptComposer({
   missingPromptActions,
   oneTimeTimelineContextEntries,
   onPersistDraftPrompt,
-  onUploadPastedImage,
+  onUploadImage,
   onToggleReferenceDisabled,
   onSetReferenceVisibleInRow,
   onGenerate,
@@ -1524,7 +1524,7 @@ function AiImagePromptComposer({
   missingPromptActions: AiQuickPromptAction[];
   oneTimeTimelineContextEntries: AiImageContextReferenceEntry[];
   onPersistDraftPrompt: (prompt: string) => void;
-  onUploadPastedImage: (input: PasteImageUploadInput) => void;
+  onUploadImage: (input: PasteImageUploadInput) => void;
   onToggleReferenceDisabled: (referenceId: string) => void;
   onSetReferenceVisibleInRow: (referenceId: string, visible: boolean) => void;
   onGenerate: (prompt: string) => Promise<void>;
@@ -1547,7 +1547,7 @@ function AiImagePromptComposer({
   const promptInputRef = useRef<TextInput>(null);
   const { imageDropTargetRef, isImageDragOver } = useImageDropTarget({
     disabled: !editable || isProcessing,
-    onUploadPastedImage,
+    onUploadImage,
   });
 
   const persistDraftPrompt = (nextDraftPrompt: string) => {
@@ -1612,7 +1612,7 @@ function AiImagePromptComposer({
         return;
       }
 
-      onUploadPastedImage({
+      onUploadImage({
         blob: file,
         contentType: file.type,
       });
@@ -1623,7 +1623,7 @@ function AiImagePromptComposer({
     return () => {
       inputElement.removeEventListener(`paste`, handlePaste);
     };
-  }, [editable, isProcessing, onUploadPastedImage]);
+  }, [editable, isProcessing, onUploadImage]);
 
   const canSend =
     isLoadedFromSetting && !isProcessing && draftPrompt.trim().length > 0;
