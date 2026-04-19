@@ -3,10 +3,7 @@ import type { View } from "react-native";
 
 interface UseImageDropTargetProps {
   disabled: boolean;
-  onUploadPastedImage: (input: {
-    blob: Blob;
-    contentType: string | null;
-  }) => void;
+  onUploadImage: (input: { blob: Blob; contentType: string | null }) => void;
 }
 
 interface UseImageDropTargetResult {
@@ -16,7 +13,7 @@ interface UseImageDropTargetResult {
 
 export function useImageDropTarget({
   disabled,
-  onUploadPastedImage,
+  onUploadImage,
 }: UseImageDropTargetProps): UseImageDropTargetResult {
   const [isDragOver, setIsDragOver] = useState(false);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -34,10 +31,10 @@ export function useImageDropTarget({
     disabledRef.current = disabled;
   }, [disabled]);
 
-  const onUploadPastedImageRef = useRef(onUploadPastedImage);
+  const onUploadImageRef = useRef(onUploadImage);
   useEffect(() => {
-    onUploadPastedImageRef.current = onUploadPastedImage;
-  }, [onUploadPastedImage]);
+    onUploadImageRef.current = onUploadImage;
+  }, [onUploadImage]);
 
   const targetRef = useCallback((viewInstance: View | null) => {
     cleanupRef.current?.();
@@ -106,7 +103,7 @@ export function useImageDropTarget({
         return;
       }
 
-      onUploadPastedImageRef.current({ blob: file, contentType: file.type });
+      onUploadImageRef.current({ blob: file, contentType: file.type });
     };
 
     dropTargetElement.addEventListener(`dragenter`, handleDragEnter);
