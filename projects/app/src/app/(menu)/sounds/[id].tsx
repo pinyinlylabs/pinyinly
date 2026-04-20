@@ -3,6 +3,7 @@ import { AiLeadCharacterDescriptionModal } from "@/client/ui/AiLeadCharacterDesc
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { CompactWordRows } from "@/client/ui/CompactWordRows";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
+import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -93,6 +94,8 @@ export default function SoundIdPage() {
     <ScrollView ref={scrollRef}>
       <View className="w-full max-w-[800px] self-center pb-2 px-safe pt-safe">
         <Breadcrumb pinyinSoundId={id} />
+
+        <HeaderTitleProvider.ScrollTrigger title={label} />
 
         <View className="my-5 flex-row items-center gap-4">
           <View className={pinyinPartBox()}>
