@@ -92,7 +92,7 @@ export default function SoundIdPage() {
 
   return (
     <ScrollView ref={scrollRef}>
-      <View className="w-full max-w-[800px] self-center pb-2 px-safe pt-safe">
+      <View className="w-full self-center pb-2 px-safe pt-safe">
         <Breadcrumb pinyinSoundId={id} />
 
         <HeaderTitleProvider.ScrollTrigger title={label} />

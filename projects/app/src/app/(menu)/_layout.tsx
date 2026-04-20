@@ -210,7 +210,7 @@ function DesktopFloatingTitle() {
           className={`
             hidden
 
-            sm:flex sm:min-w-[240px] sm:pr-[32px]
+            sm:flex sm:min-w-[240px] sm:pr-[32px] sm:ml-safe-or-4
 
             menu-lg:flex-1
           `}
@@ -242,7 +242,7 @@ function DesktopFloatingTitle() {
           className={`
             hidden
 
-            sm:flex
+            sm:flex sm:mr-safe-or-4
 
             menu-lg:flex-1
           `}
