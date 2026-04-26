@@ -4,10 +4,6 @@ import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { RectButton } from "./RectButton";
 
-interface ExpandableOverflowType {
-  collapsedMaxHeight: number;
-}
-
 export function WikiTitledBox({
   title,
   children,
@@ -15,7 +11,7 @@ export function WikiTitledBox({
   className,
   headerCustomAction,
   onEditingChange,
-  expandableOverflow,
+  collapsedMaxHeight,
   onLayout,
 }: {
   title: string;
@@ -24,12 +20,12 @@ export function WikiTitledBox({
   className?: ViewProps[`className`];
   headerCustomAction?: React.ReactNode;
   onEditingChange?: (isEditing: boolean) => void;
-  expandableOverflow?: ExpandableOverflowType;
+  collapsedMaxHeight?: number;
   onLayout?: ViewProps[`onLayout`];
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const isOverflowExpandable = expandableOverflow != null;
+  const isOverflowExpandable = collapsedMaxHeight != null;
   const headerAction =
     headerCustomAction ??
     (onEditingChange == null ? null : isEditing ? (
@@ -66,50 +62,46 @@ export function WikiTitledBox({
         {isOverflowExpandable ? (
           <>
             {isExpanded ? null : (
-              <View className="absolute inset-x-0 bottom-2 z-10 items-center">
-                <RectButton
-                  variant="bareDim"
-                  iconStart="chevron-down-circled"
-                  onPress={() => {
-                    setIsExpanded(true);
-                  }}
-                >
-                  Expand
-                </RectButton>
-              </View>
+              <>
+                <View
+                  className={`
+                    pointer-events-none absolute inset-x-0 bottom-2 z-10 h-20 backdrop-blur-sm
+
+                    [mask-image:linear-gradient(to_bottom,transparent,black_45%,black)]
+                  `}
+                />
+                <View className="absolute inset-x-0 bottom-2 z-10 items-center">
+                  <RectButton
+                    variant="bareDim"
+                    iconStart="chevron-down-circled"
+                    onPress={() => {
+                      setIsExpanded(true);
+                    }}
+                  >
+                    Expand
+                  </RectButton>
+                </View>
+              </>
             )}
 
             <View className="relative">
               <View
                 testID={contentTestID}
-                className="overflow-hidden"
+                className={`
+                  overflow-hidden rounded-t-lg
+
+                  ${
+                    isExpanded
+                      ? ``
+                      : `[mask-image:linear-gradient(to_bottom,black,black_55%,transparent)]`
+                  }
+                `}
                 style={
-                  isExpanded
-                    ? undefined
-                    : { maxHeight: expandableOverflow.collapsedMaxHeight }
+                  isExpanded ? undefined : { maxHeight: collapsedMaxHeight }
                 }
               >
                 {children}
               </View>
-
-              {isExpanded ? null : (
-                <View
-                  className={`
-                    pointer-events-none absolute inset-x-0 bottom-0 h-20 overflow-hidden
-                    rounded-b-lg
-                  `}
-                >
-                  <View
-                    className={`
-                      absolute inset-0 bg-bg-high/80 backdrop-blur-sm
-
-                      [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_55%,black)]
-
-                      [mask-image:linear-gradient(to_bottom,transparent,black_55%,black)]
-                    `}
-                  />
-                </View>
-              )}
             </View>
 
             {isExpanded ? (

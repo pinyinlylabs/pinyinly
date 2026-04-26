@@ -17,9 +17,7 @@ export function WikiAiExplanation({ hanzi }: { hanzi: HanziText }) {
     <WikiTitledBox
       title="AI explanation"
       contentTestID="wiki-ai-explanation-content"
-      expandableOverflow={{
-        collapsedMaxHeight,
-      }}
+      collapsedMaxHeight={collapsedMaxHeight}
     >
       <View className="p-4">
         <WikiMdxHanziMeaning hanzi={hanzi} />
