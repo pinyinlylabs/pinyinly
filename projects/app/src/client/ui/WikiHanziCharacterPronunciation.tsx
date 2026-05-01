@@ -368,7 +368,7 @@ export function WikiHanziCharacterPronunciationBox({
                     Want help brainstorming a hint?
                   </Text>
                   <RectButton
-                    variant="bare"
+                    variant="bare2"
                     onPress={() => {
                       setShowAiModal(true);
                     }}

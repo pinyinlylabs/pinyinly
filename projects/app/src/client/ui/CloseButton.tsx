@@ -10,7 +10,7 @@ export const CloseButton = ({
 }) => {
   return (
     <RectButton
-      variant="bare"
+      variant="bare2"
       iconStart="close"
       iconSize={32}
       onPress={onPress}

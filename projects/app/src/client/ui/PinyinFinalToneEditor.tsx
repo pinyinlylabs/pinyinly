@@ -250,7 +250,7 @@ function ToneTileEditor({
               Need help making this sublocation more vivid?
             </Text>
             <RectButton
-              variant="bare"
+              variant="bare2"
               onPress={() => {
                 setShowAiModal(true);
               }}

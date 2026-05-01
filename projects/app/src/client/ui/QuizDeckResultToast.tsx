@@ -142,7 +142,7 @@ function UndoAnswerMenu({
 
   return (
     <View className="rounded-xl bg-bg-high px-4 py-3">
-      <RectButton variant="bare" onPress={handleUndo}>
+      <RectButton variant="bare2" onPress={handleUndo}>
         Undo answer
       </RectButton>
     </View>

@@ -119,7 +119,7 @@ function AddMeaningButton({
 
   return (
     <RectButton
-      variant="bare"
+      variant="bare2"
       iconStart="add-circled-filled"
       iconSize={16}
       onPress={() => {
@@ -257,7 +257,7 @@ function EditableUserMeaningListItem({
               {isEditing ? `Done` : `Edit`}
             </RectButton>
             <RectButton
-              variant="bare"
+              variant="bare2"
               iconStart="close"
               iconSize={16}
               className="text-fg-dim"

@@ -86,7 +86,7 @@ function MenuLayoutContent() {
           <View className="sticky items-end top-safe-offset-5">
             <View className="mb-5 h-[32px] justify-center pr-4">
               <Link href="/learn" asChild>
-                <RectButton variant="bare" iconStart="arrow-return-left">
+                <RectButton variant="bare2" iconStart="arrow-return-left">
                   Back to practice
                 </RectButton>
               </Link>

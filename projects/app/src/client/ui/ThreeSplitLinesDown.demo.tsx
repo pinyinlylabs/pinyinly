@@ -21,7 +21,7 @@ export default () => {
         </ExampleStack>
         <View className="shrink flex-row">
           <RectButton
-            variant="bare"
+            variant="bare2"
             onPress={() => {
               setGrowth((prev) => prev - 5);
             }}
@@ -29,7 +29,7 @@ export default () => {
             Shrink
           </RectButton>
           <RectButton
-            variant="bare"
+            variant="bare2"
             onPress={() => {
               setGrowth((prev) => prev + 5);
             }}

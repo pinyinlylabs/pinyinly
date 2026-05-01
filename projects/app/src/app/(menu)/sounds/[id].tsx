@@ -229,7 +229,7 @@ function MnemonicStoryRoleSection({
                     Need help making this character memorable?
                   </Text>
                   <RectButton
-                    variant="bare"
+                    variant="bare2"
                     onPress={() => {
                       setShowAiModal(true);
                     }}

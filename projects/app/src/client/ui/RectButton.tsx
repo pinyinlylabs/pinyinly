@@ -14,7 +14,6 @@ export type ButtonVariant =
   | `filled`
   | `outline`
   | `option`
-  | `bare`
   | `barePrimary`
   | `bare2`
   | `bareDim`

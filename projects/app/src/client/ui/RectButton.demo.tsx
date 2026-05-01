@@ -214,9 +214,6 @@ const RectButtonVariants = (props: Partial<PropsOf<typeof RectButton>>) => (
     <RectButton variant="option" {...props}>
       Option
     </RectButton>
-    <RectButton variant="bare" {...props}>
-      Bare
-    </RectButton>
     <RectButton variant="barePrimary" {...props}>
       Bare Primary
     </RectButton>
@@ -239,9 +236,8 @@ const RectButtonIconOnlyExamples = (
     <RectButton variant="filled" iconStart="check" {...props} />
     <RectButton variant="outline" iconStart="check" {...props} />
     <RectButton variant="option" iconStart="check" {...props} />
-    <RectButton variant="bare" iconStart="check" {...props} />
-    <RectButton variant="barePrimary" iconStart="check" {...props} />
     <RectButton variant="bare2" iconStart="check" {...props} />
+    <RectButton variant="barePrimary" iconStart="check" {...props} />
     <RectButton variant="bareDim" iconStart="check" {...props} />
     <RectButton variant="rounded" iconStart="check" {...props} />
   </>
@@ -249,13 +245,13 @@ const RectButtonIconOnlyExamples = (
 
 const RectButtonIconExamples = () => (
   <>
-    <RectButton variant="bare" iconStart="arrow-return-left">
+    <RectButton variant="bare2" iconStart="arrow-return-left">
       Back
     </RectButton>
-    <RectButton variant="bare" iconEnd="check">
+    <RectButton variant="bare2" iconEnd="check">
       Done
     </RectButton>
-    <RectButton variant="bare" iconStart="menu" iconEnd="close">
+    <RectButton variant="bare2" iconStart="menu" iconEnd="close">
       Toggle
     </RectButton>
   </>
