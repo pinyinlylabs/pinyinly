@@ -358,7 +358,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 }
               >
                 <RectButton
-                  variant="bare2"
+                  variant="bare"
                   iconStart="time-circled"
                   iconSize={16}
                   className={`text-fg-dim`}

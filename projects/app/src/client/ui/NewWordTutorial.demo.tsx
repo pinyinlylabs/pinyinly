@@ -19,7 +19,7 @@ export default () => {
       <View className="flex-row gap-2">
         {([`splash`, `deps`] as const).map((step) => (
           <RectButton
-            variant="bare2"
+            variant="bare"
             key={step}
             onPress={() => {
               setInitialStep(step);
@@ -30,7 +30,7 @@ export default () => {
         ))}
 
         <RectButton
-          variant="bare2"
+          variant="bare"
           onPress={() => {
             setRerenderCount((prev) => prev + 1);
           }}

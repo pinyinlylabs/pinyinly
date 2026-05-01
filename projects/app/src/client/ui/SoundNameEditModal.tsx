@@ -84,7 +84,7 @@ function SoundNameEditModalContent({
     <View className="flex-1 bg-bg">
       {/* Header */}
       <View className="flex-row items-center justify-between border-b border-fg/10 px-4 py-3">
-        <RectButton variant="bare2" onPress={onDismiss}>
+        <RectButton variant="bare" onPress={onDismiss}>
           Close
         </RectButton>
         <Text className="font-sans text-[17px] font-semibold text-fg-loud">
@@ -135,7 +135,7 @@ function SoundNameEditModalContent({
                               });
                             }
                           }}
-                          variant="bare2"
+                          variant="bare"
                         >
                           Use theme
                         </RectButton>
@@ -147,7 +147,7 @@ function SoundNameEditModalContent({
                           onPress={() => {
                             setSoundName({ soundId, text: name });
                           }}
-                          variant="bare2"
+                          variant="bare"
                         >
                           <Text
                             className={`

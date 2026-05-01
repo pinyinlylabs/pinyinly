@@ -38,7 +38,7 @@ export function WikiHanziHeaderOverview({
           ))}
         </View>
         <RectButton
-          variant="bare2"
+          variant="bare"
           iconStart={isPriority ? `bookmark-filled` : `bookmark`}
           onPress={toggle}
           className="opacity-70"
@@ -101,7 +101,7 @@ function ExpandableGlosses({
           onPress={() => {
             setExpanded((value) => !value);
           }}
-          variant="bare2"
+          variant="bare"
           className="opacity-70"
         />
       </View>

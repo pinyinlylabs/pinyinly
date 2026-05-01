@@ -1385,7 +1385,7 @@ function AiImageErrorMessage({
           {message.text ?? `Unable to generate image right now.`}
         </Text>
         <RectButton
-          variant="bare2"
+          variant="bare"
           onPress={() => {
             onRetry(message.id);
           }}
@@ -1470,7 +1470,7 @@ function AiImageAssignMenu({
       {options.map((option) => (
         <RectButton
           key={option.id}
-          variant="bare2"
+          variant="bare"
           onPress={() => {
             onAssignImageToReference(assetId, option.id);
             onRequestClose?.();
@@ -1743,7 +1743,7 @@ function AiImagePromptComposer({
               />
             }
           >
-            <RectButton variant="bare2" iconStart="plus" iconSize={20} />
+            <RectButton variant="bare" iconStart="plus" iconSize={20} />
           </FloatingMenuModal>
 
           {displayedRowReferences.map((reference) => {
@@ -1842,7 +1842,7 @@ function AiImagePromptComposer({
               }
             >
               <RectButton
-                variant="bare2"
+                variant="bare"
                 iconStart="circle-warning"
                 className={`[--color-fg:var(--color-warning)]`}
               />
@@ -1850,7 +1850,7 @@ function AiImagePromptComposer({
           )}
         </View>
 
-        <RectButton variant="bare2" onPress={submitPrompt} disabled={!canSend}>
+        <RectButton variant="bare" onPress={submitPrompt} disabled={!canSend}>
           Send
         </RectButton>
       </View>
@@ -1965,7 +1965,7 @@ function ReferencePickerMenu({
               </View>
 
               <RectButton
-                variant="bare2"
+                variant="bare"
                 onPress={() => {
                   onSetReferenceVisibleInRow(reference.id, !isInRow);
                 }}
@@ -2032,7 +2032,7 @@ function MissingReferenceWarningMenu({
           {quickActions.map((action) => (
             <RectButton
               key={action.id}
-              variant="bare2"
+              variant="bare"
               className="justify-start"
               onPress={() => {
                 onApplyQuickPrompt(action.prompt);

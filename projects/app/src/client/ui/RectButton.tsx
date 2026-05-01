@@ -15,7 +15,7 @@ export type ButtonVariant =
   | `outline`
   | `option`
   | `barePrimary`
-  | `bare2`
+  | `bare`
   | `bareDim`
   | `rounded`;
 

@@ -8,7 +8,7 @@ export default () => {
       <FloatingMenuModal
         menu={
           <View className="rounded-xl bg-bg-high px-4 py-3">
-            <RectButton variant="bare2">Reference</RectButton>
+            <RectButton variant="bare">Reference</RectButton>
           </View>
         }
       >

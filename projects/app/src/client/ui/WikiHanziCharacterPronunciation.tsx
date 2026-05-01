@@ -306,7 +306,7 @@ export function WikiHanziCharacterPronunciationBox({
         <View className="flex-row items-start gap-4 p-4">
           {isHintSectionVisible ? null : (
             <RectButton
-              variant="bare2"
+              variant="bare"
               iconStart="keyboard"
               iconSize={20}
               className="opacity-80"
@@ -319,7 +319,7 @@ export function WikiHanziCharacterPronunciationBox({
           )}
           {isImageSectionVisible ? null : (
             <RectButton
-              variant="bare2"
+              variant="bare"
               iconStart="photos-filled"
               iconSize={20}
               className="opacity-80"
@@ -368,7 +368,7 @@ export function WikiHanziCharacterPronunciationBox({
                     Want help brainstorming a hint?
                   </Text>
                   <RectButton
-                    variant="bare2"
+                    variant="bare"
                     onPress={() => {
                       setShowAiModal(true);
                     }}

@@ -58,14 +58,14 @@ export function AiPronunciationHintModal({
       {({ dismiss }) => (
         <View className="flex-1 bg-bg">
           <View className="flex-row items-center justify-between border-b border-fg/10 px-4 py-3">
-            <RectButton variant="bare2" onPress={dismiss}>
+            <RectButton variant="bare" onPress={dismiss}>
               Cancel
             </RectButton>
             <Text className="font-sans text-[17px] font-semibold text-fg-loud">
               AI hint creator
             </Text>
             <RectButton
-              variant="bare2"
+              variant="bare"
               onPress={() => {
                 void handleGenerate();
               }}
@@ -129,7 +129,7 @@ export function AiPronunciationHintModal({
                           Confidence: {formatConfidence(suggestion.confidence)}
                         </Text>
                         <RectButton
-                          variant="bare2"
+                          variant="bare"
                           onPress={() => {
                             onApplyHint({
                               text: suggestion.hint,

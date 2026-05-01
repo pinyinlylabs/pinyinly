@@ -16,7 +16,7 @@ function BreadcrumbsItem({ children, href, menu }: BreadcrumbsItemProps) {
   const trigger = (
     <RectButton
       href={menu == null ? href : undefined}
-      variant="bare2"
+      variant="bare"
       iconSize={16}
       iconEnd={menu == null ? undefined : `chevron-up-down`}
     >
