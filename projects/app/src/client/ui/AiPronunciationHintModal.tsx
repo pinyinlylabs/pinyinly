@@ -146,7 +146,7 @@ export function AiPronunciationHintModal({
                       </Text>
                       {suggestion.explanation == null ? null : (
                         <Text className="font-sans text-[13px] text-fg-dim">
-                          {suggestion.explanation}
+                          <Pylymark source={suggestion.explanation} />
                         </Text>
                       )}
                     </View>

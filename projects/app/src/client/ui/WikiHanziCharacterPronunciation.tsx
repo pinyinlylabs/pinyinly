@@ -1,11 +1,7 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type {
-  HanziText,
-  PartOfSpeech,
-  PinyinSoundId,
-  PinyinUnit,
-} from "@/data/model";
+import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
+import { PartOfSpeech } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
@@ -621,57 +617,56 @@ function buildCueMeaningContext({
     partOfSpeechText == null
       ? null
       : `intended sense part of speech: ${partOfSpeechText}`,
-    `intended sense: ${cueWord}`,
     additionalGloss.length === 0
       ? null
       : `related glosses: ${additionalGloss.join(`; `)}`,
-  ].filter((piece): piece is string => piece != null);
+  ].filter((x) => x != null);
 
   return pieces.length === 0 ? undefined : pieces.join(`. `);
 }
 
 function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
   switch (partOfSpeech) {
-    case `debug--Noun (名)`: {
+    case PartOfSpeech.Noun: {
       return `noun`;
     }
-    case `debug--Verb (动)`: {
+    case PartOfSpeech.Verb: {
       return `verb`;
     }
-    case `debug--Adjective (形)`: {
+    case PartOfSpeech.Adjective: {
       return `adjective`;
     }
-    case `debug--Adverb (副)`: {
+    case PartOfSpeech.Adverb: {
       return `adverb`;
     }
-    case `debug--Pronoun (代)`: {
+    case PartOfSpeech.Pronoun: {
       return `pronoun`;
     }
-    case `debug--Numeral (数)`: {
+    case PartOfSpeech.Numeral: {
       return `numeral`;
     }
-    case `debug--MeasureWordOrClassifier (量)`: {
+    case PartOfSpeech.MeasureWordOrClassifier: {
       return `measure word or classifier`;
     }
-    case `debug--Preposition (介)`: {
+    case PartOfSpeech.Preposition: {
       return `preposition`;
     }
-    case `debug--Conjunction (连)`: {
+    case PartOfSpeech.Conjunction: {
       return `conjunction`;
     }
-    case `debug--AuxiliaryWordOrParticle (助)`: {
+    case PartOfSpeech.AuxiliaryWordOrParticle: {
       return `auxiliary word or particle`;
     }
-    case `debug--Interjection (叹)`: {
+    case PartOfSpeech.Interjection: {
       return `interjection`;
     }
-    case `debug--Prefix (前缀)`: {
+    case PartOfSpeech.Prefix: {
       return `prefix`;
     }
-    case `debug--Suffix (后缀)`: {
+    case PartOfSpeech.Suffix: {
       return `suffix`;
     }
-    case `debug--Phonetic (拟声)`: {
+    case PartOfSpeech.Phonetic: {
       return `phonetic`;
     }
   }
