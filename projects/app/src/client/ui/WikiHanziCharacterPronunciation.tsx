@@ -1,6 +1,7 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
+import { PartOfSpeech } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
@@ -66,6 +67,7 @@ export function WikiHanziCharacterPronunciation({
         .select(({ entry }) => ({
           hanziWord: entry.hanziWord,
           gloss: entry.gloss,
+          pos: entry.pos,
           pinyin: entry.pinyin,
         })),
     [db.dictionarySearch, hanzi],
@@ -83,9 +85,16 @@ export function WikiHanziCharacterPronunciation({
     return null;
   }
 
+  const cueMeaning = buildCueMeaningContext({
+    cueWord: gloss,
+    gloss: firstMeaning.gloss,
+    partOfSpeech: firstMeaning.pos,
+  });
+
   return (
     <WikiHanziCharacterPronunciationBox
       gloss={gloss}
+      cueMeaning={cueMeaning}
       hanzi={hanzi}
       pinyinUnit={pronunciation.pinyinUnit}
     />
@@ -96,8 +105,10 @@ export function WikiHanziCharacterPronunciationBox({
   hanzi,
   pinyinUnit,
   gloss,
+  cueMeaning,
 }: {
   gloss: DictionarySearchEntry[`gloss`][number];
+  cueMeaning?: string;
   hanzi: HanziText;
   pinyinUnit: PinyinUnit;
 }) {
@@ -423,7 +434,7 @@ export function WikiHanziCharacterPronunciationBox({
                 ? undefined
                 : finalToneLocationDescription,
           }}
-          cue={{ word: gloss }}
+          cue={{ word: gloss, meaning: cueMeaning }}
           onApplyHint={({ text, explanation }) => {
             const mergedHintText = composeHintText(text, explanation);
             pronunciationHint.setText(mergedHintText);
@@ -578,6 +589,85 @@ function ordinalSuffix(n: number): string {
     }
     default: {
       return `th`;
+    }
+  }
+}
+
+function buildCueMeaningContext({
+  cueWord,
+  gloss,
+  partOfSpeech,
+}: {
+  cueWord: string;
+  gloss: readonly string[];
+  partOfSpeech?: PartOfSpeech;
+}) {
+  const normalizedCueWord = cueWord.trim().toLowerCase();
+  const additionalGloss = gloss
+    .map((item) => item.trim())
+    .filter(
+      (item) => item.length > 0 && item.toLowerCase() !== normalizedCueWord,
+    )
+    .slice(0, 3);
+
+  const partOfSpeechText =
+    partOfSpeech == null ? null : formatPartOfSpeech(partOfSpeech);
+
+  const pieces = [
+    partOfSpeechText == null
+      ? null
+      : `intended sense part of speech: ${partOfSpeechText}`,
+    additionalGloss.length === 0
+      ? null
+      : `related glosses: ${additionalGloss.join(`; `)}`,
+  ].filter((x) => x != null);
+
+  return pieces.length === 0 ? undefined : pieces.join(`. `);
+}
+
+function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
+  switch (partOfSpeech) {
+    case PartOfSpeech.Noun: {
+      return `noun`;
+    }
+    case PartOfSpeech.Verb: {
+      return `verb`;
+    }
+    case PartOfSpeech.Adjective: {
+      return `adjective`;
+    }
+    case PartOfSpeech.Adverb: {
+      return `adverb`;
+    }
+    case PartOfSpeech.Pronoun: {
+      return `pronoun`;
+    }
+    case PartOfSpeech.Numeral: {
+      return `numeral`;
+    }
+    case PartOfSpeech.MeasureWordOrClassifier: {
+      return `measure word or classifier`;
+    }
+    case PartOfSpeech.Preposition: {
+      return `preposition`;
+    }
+    case PartOfSpeech.Conjunction: {
+      return `conjunction`;
+    }
+    case PartOfSpeech.AuxiliaryWordOrParticle: {
+      return `auxiliary word or particle`;
+    }
+    case PartOfSpeech.Interjection: {
+      return `interjection`;
+    }
+    case PartOfSpeech.Prefix: {
+      return `prefix`;
+    }
+    case PartOfSpeech.Suffix: {
+      return `suffix`;
+    }
+    case PartOfSpeech.Phonetic: {
+      return `phonetic`;
     }
   }
 }

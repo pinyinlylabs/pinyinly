@@ -2,6 +2,7 @@ import type {
   HanziText,
   HanziWord,
   HskLevel,
+  PartOfSpeech,
   PinyinText,
   Skill,
   SrsStateType,
@@ -437,6 +438,7 @@ export interface DictionarySearchEntry {
   hanziWord: HanziWord;
   gloss: string[];
   glossCount: number;
+  pos?: PartOfSpeech;
   pinyin?: PinyinText[];
   hsk?: HskLevel;
   hskSortKey: number;
@@ -728,6 +730,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           hanziWord,
           gloss,
           glossCount: gloss.length,
+          pos: meaning.pos,
           pinyin,
           hsk: meaning.hsk,
           hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
@@ -775,6 +778,7 @@ function mapUserMeaningToDictionarySearchEntry(
     hanziWord,
     gloss: [userEntry.gloss],
     glossCount: 1,
+    pos: undefined,
     pinyin,
     hsk: undefined,
     hskSortKey: dictionarySearchHskSortKey(),
@@ -858,6 +862,7 @@ function dictionarySearchCollectionOptions({
             existing.hanziWord !== next.hanziWord ||
             !areStringArraysEqual(existing.gloss, next.gloss) ||
             existing.glossCount !== next.glossCount ||
+            existing.pos !== next.pos ||
             !areStringArraysEqual(existing.pinyin, next.pinyin) ||
             existing.hsk !== next.hsk ||
             existing.hskSortKey !== next.hskSortKey ||
