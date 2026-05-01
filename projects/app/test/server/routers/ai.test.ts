@@ -28,6 +28,7 @@ describe(
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
         Always clearly include the named character and location.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
+        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
         Prefer visual, unusual, and memorable situations over generic ones.",
@@ -39,6 +40,7 @@ describe(
         Generate 3 distinct mnemonic story ideas.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.
+        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.",
         }
@@ -67,6 +69,7 @@ describe(
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
         Always clearly include the named character and location.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
+        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
         Prefer visual, unusual, and memorable situations over generic ones.",
@@ -82,6 +85,7 @@ describe(
         Generate 4 distinct mnemonic story ideas.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.
+        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.",
         }

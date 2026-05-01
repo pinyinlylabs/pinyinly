@@ -1,6 +1,11 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
+import type {
+  HanziText,
+  PartOfSpeech,
+  PinyinSoundId,
+  PinyinUnit,
+} from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
@@ -66,6 +71,7 @@ export function WikiHanziCharacterPronunciation({
         .select(({ entry }) => ({
           hanziWord: entry.hanziWord,
           gloss: entry.gloss,
+          pos: entry.pos,
           pinyin: entry.pinyin,
         })),
     [db.dictionarySearch, hanzi],
@@ -83,9 +89,16 @@ export function WikiHanziCharacterPronunciation({
     return null;
   }
 
+  const cueMeaning = buildCueMeaningContext({
+    cueWord: gloss,
+    gloss: firstMeaning.gloss,
+    partOfSpeech: firstMeaning.pos,
+  });
+
   return (
     <WikiHanziCharacterPronunciationBox
       gloss={gloss}
+      cueMeaning={cueMeaning}
       hanzi={hanzi}
       pinyinUnit={pronunciation.pinyinUnit}
     />
@@ -96,8 +109,10 @@ export function WikiHanziCharacterPronunciationBox({
   hanzi,
   pinyinUnit,
   gloss,
+  cueMeaning,
 }: {
   gloss: DictionarySearchEntry[`gloss`][number];
+  cueMeaning?: string;
   hanzi: HanziText;
   pinyinUnit: PinyinUnit;
 }) {
@@ -423,7 +438,7 @@ export function WikiHanziCharacterPronunciationBox({
                 ? undefined
                 : finalToneLocationDescription,
           }}
-          cue={{ word: gloss }}
+          cue={{ word: gloss, meaning: cueMeaning }}
           onApplyHint={({ text, explanation }) => {
             const mergedHintText = composeHintText(text, explanation);
             pronunciationHint.setText(mergedHintText);
@@ -578,6 +593,86 @@ function ordinalSuffix(n: number): string {
     }
     default: {
       return `th`;
+    }
+  }
+}
+
+function buildCueMeaningContext({
+  cueWord,
+  gloss,
+  partOfSpeech,
+}: {
+  cueWord: string;
+  gloss: readonly string[];
+  partOfSpeech?: PartOfSpeech;
+}) {
+  const normalizedCueWord = cueWord.trim().toLowerCase();
+  const additionalGloss = gloss
+    .map((item) => item.trim())
+    .filter(
+      (item) => item.length > 0 && item.toLowerCase() !== normalizedCueWord,
+    )
+    .slice(0, 3);
+
+  const partOfSpeechText =
+    partOfSpeech == null ? null : formatPartOfSpeech(partOfSpeech);
+
+  const pieces = [
+    partOfSpeechText == null
+      ? null
+      : `intended sense part of speech: ${partOfSpeechText}`,
+    `intended sense: ${cueWord}`,
+    additionalGloss.length === 0
+      ? null
+      : `related glosses: ${additionalGloss.join(`; `)}`,
+  ].filter((piece): piece is string => piece != null);
+
+  return pieces.length === 0 ? undefined : pieces.join(`. `);
+}
+
+function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
+  switch (partOfSpeech) {
+    case `debug--Noun (名)`: {
+      return `noun`;
+    }
+    case `debug--Verb (动)`: {
+      return `verb`;
+    }
+    case `debug--Adjective (形)`: {
+      return `adjective`;
+    }
+    case `debug--Adverb (副)`: {
+      return `adverb`;
+    }
+    case `debug--Pronoun (代)`: {
+      return `pronoun`;
+    }
+    case `debug--Numeral (数)`: {
+      return `numeral`;
+    }
+    case `debug--MeasureWordOrClassifier (量)`: {
+      return `measure word or classifier`;
+    }
+    case `debug--Preposition (介)`: {
+      return `preposition`;
+    }
+    case `debug--Conjunction (连)`: {
+      return `conjunction`;
+    }
+    case `debug--AuxiliaryWordOrParticle (助)`: {
+      return `auxiliary word or particle`;
+    }
+    case `debug--Interjection (叹)`: {
+      return `interjection`;
+    }
+    case `debug--Prefix (前缀)`: {
+      return `prefix`;
+    }
+    case `debug--Suffix (后缀)`: {
+      return `suffix`;
+    }
+    case `debug--Phonetic (拟声)`: {
+      return `phonetic`;
     }
   }
 }
