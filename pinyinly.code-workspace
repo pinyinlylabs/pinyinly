@@ -63,5 +63,6 @@
       "class:list",
       ".*ClassName",
     ],
+    "typescript.native-preview.tsdk": "./node_modules/@typescript/native-preview",
   },
 }

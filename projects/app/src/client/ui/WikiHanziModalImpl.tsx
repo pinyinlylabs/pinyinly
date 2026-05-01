@@ -111,8 +111,6 @@ function Header({
             className={`
               pointer-events-none absolute -inset-x-2 -bottom-10 top-0 bg-bg/90 backdrop-blur-sm
 
-              [-webkit-mask-image:linear-gradient(to_top,transparent,black_50%,black)]
-
               [mask-image:linear-gradient(to_top,transparent,black_50%,black)]
             `}
           />
