@@ -312,8 +312,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 <Text
                   className={
                     isTooLong
-                      ? `text-[12px] text-fg`
-                      : `text-[12px] text-fg-dim`
+                      ? `font-sans text-[12px] text-fg`
+                      : `font-sans text-[12px] text-fg-dim`
                   }
                   style={
                     isTooLong ? { color: `var(--color-warning)` } : undefined
