@@ -220,9 +220,6 @@ const RectButtonVariants = (props: Partial<PropsOf<typeof RectButton>>) => (
     <RectButton variant="barePrimary" {...props}>
       Bare Primary
     </RectButton>
-    <RectButton variant="bare2" {...props}>
-      Bare2
-    </RectButton>
     <RectButton variant="bareDim" {...props}>
       Bare Dim
     </RectButton>
@@ -241,7 +238,6 @@ const RectButtonIconOnlyExamples = (
     <RectButton variant="option" iconStart="check" {...props} />
     <RectButton variant="bare" iconStart="check" {...props} />
     <RectButton variant="barePrimary" iconStart="check" {...props} />
-    <RectButton variant="bare2" iconStart="check" {...props} />
     <RectButton variant="bareDim" iconStart="check" {...props} />
     <RectButton variant="rounded" iconStart="check" {...props} />
   </>

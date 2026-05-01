@@ -249,7 +249,7 @@ function EditableUserMeaningListItem({
 
           <View className="flex-row items-center gap-1">
             <RectButton
-              variant="bare2"
+              variant="bare"
               iconStart="pencil"
               iconSize={16}
               onPress={isEditing ? onDoneEditing : onEdit}

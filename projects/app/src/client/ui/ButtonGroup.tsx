@@ -30,7 +30,7 @@ export interface ButtonGroupProps {
 function ButtonGroup({
   children,
   className,
-  defaultButtonVariant = `bare2`,
+  defaultButtonVariant = `bare`,
 }: ButtonGroupProps) {
   return (
     <ButtonGroupContext.Provider value={{ defaultButtonVariant }}>

@@ -7,10 +7,10 @@ import { View } from "react-native";
 function DemoMenu({ onRequestClose }: FloatingMenuModalMenuProps) {
   return (
     <View className="items-start rounded-xl bg-bg-high p-2">
-      <RectButton variant="bare2" onPress={onRequestClose}>
+      <RectButton variant="bare" onPress={onRequestClose}>
         Item one
       </RectButton>
-      <RectButton variant="bare2" onPress={onRequestClose}>
+      <RectButton variant="bare" onPress={onRequestClose}>
         Item two
       </RectButton>
     </View>

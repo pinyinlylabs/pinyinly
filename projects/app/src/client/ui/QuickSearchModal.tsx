@@ -416,7 +416,7 @@ function ResultItem<T>({
 
       {onRemove == null ? null : (
         <RectButton
-          variant="bare2"
+          variant="bare"
           iconStart="close"
           iconSize={24}
           className="text-fg-dim"

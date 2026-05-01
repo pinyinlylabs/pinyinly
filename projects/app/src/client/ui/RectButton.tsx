@@ -14,9 +14,8 @@ export type ButtonVariant =
   | `filled`
   | `outline`
   | `option`
-  | `bare`
   | `barePrimary`
-  | `bare2`
+  | `bare`
   | `bareDim`
   | `rounded`;
 
@@ -154,9 +153,8 @@ const pressableClass = tv({
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
         focus-visible:outline-sky/75
       `,
-      bare: `transition-transform`,
       barePrimary: `transition-transform`,
-      bare2: `transition-transform`,
+      bare: `transition-transform`,
       bareDim: `transition-transform`,
       rounded: `rounded-full transition-transform`,
     },
@@ -192,17 +190,6 @@ const pressableClass = tv({
     {
       variant: `bare`,
       disabled: false,
-      class: `
-        opacity-75
-
-        hover:opacity-100
-
-        active:scale-95
-      `,
-    },
-    {
-      variant: `bare2`,
-      disabled: false,
       class: `active:scale-[98%]`,
     },
     {
@@ -229,9 +216,8 @@ const roundedRectClass = tv({
       filled: `rounded-xl border-bg/20 bg-fg/95 px-4 py-2`,
       outline: `rounded-xl border-2 border-fg/20 px-4 py-2`,
       option: `rounded-xl border border-fg/20 px-3 py-2`,
-      bare: `px-2 py-1`,
       barePrimary: `rounded bg-blue px-2 py-1`,
-      bare2: `rounded px-2 py-1`,
+      bare: `rounded px-2 py-1`,
       bareDim: `rounded px-2 py-1`,
       rounded: `rounded-full border border-fg/20 px-4 py-2`,
     },
@@ -301,9 +287,9 @@ const roundedRectClass = tv({
       hoveredOrPressed: true,
       class: `border-fg/30`,
     },
-    // Bare2
+    // Bare
     {
-      variant: `bare2`,
+      variant: `bare`,
       hoveredOrPressed: true,
       class: `bg-fg/10`,
     },
@@ -324,9 +310,8 @@ const roundedRectClass = tv({
     { variant: `filled`, iconOnly: true, class: `px-2` },
     { variant: `outline`, iconOnly: true, class: `px-2` },
     { variant: `option`, iconOnly: true, class: `px-2` },
-    { variant: `bare`, iconOnly: true, class: `px-1` },
     { variant: `barePrimary`, iconOnly: true, class: `px-1` },
-    { variant: `bare2`, iconOnly: true, class: `px-1` },
+    { variant: `bare`, iconOnly: true, class: `px-1` },
     { variant: `bareDim`, iconOnly: true, class: `px-1` },
     { variant: `rounded`, iconOnly: true, class: `px-2` },
   ],
@@ -340,7 +325,6 @@ const textClass = tv({
       option: `font-sans text-base/snug font-medium text-fg`,
       bare: `font-sans text-sm/normal font-bold uppercase text-fg`,
       barePrimary: `font-sans text-sm/normal font-semibold uppercase text-bg`,
-      bare2: `font-sans text-sm/normal font-bold uppercase text-fg`,
       bareDim: `font-sans text-sm/normal font-semibold uppercase text-fg-dim`,
       rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
     },
@@ -385,9 +369,8 @@ const iconLayoutClass = tv({
   base: `flex-row items-center`,
   variants: {
     variant: {
-      bare: `gap-2`,
       barePrimary: `gap-2`,
-      bare2: `gap-2`,
+      bare: `gap-2`,
       bareDim: `gap-2`,
       filled: ``,
       outline: ``,

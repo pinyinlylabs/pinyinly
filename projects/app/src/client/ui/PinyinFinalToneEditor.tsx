@@ -194,7 +194,7 @@ function ToneTileEditor({
         <View className="ml-2 flex-row flex-wrap items-baseline gap-2">
           {toneAudioSource == null ? null : (
             <RectButton
-              variant="bare2"
+              variant="bare"
               iconStart="speaker-2"
               onPressIn={playTone}
             >

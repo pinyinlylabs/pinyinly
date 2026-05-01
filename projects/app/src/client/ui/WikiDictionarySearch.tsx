@@ -107,7 +107,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         <Tooltip>
           <Tooltip.Trigger asChild>
             <RectButton
-              variant="bare2"
+              variant="bare"
               iconStart={isPriority ? `bookmark-filled` : `bookmark`}
               iconSize={20}
               className="text-fg-dim"

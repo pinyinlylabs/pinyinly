@@ -166,7 +166,7 @@ function DropdownMenuRadioItem({
 
   return (
     <RectButton
-      variant="bare2"
+      variant="bare"
       className={
         className == null
           ? `justify-start`
@@ -210,7 +210,7 @@ function DropdownMenuItem({
   return (
     <RectButton
       href={href}
-      variant="bare2"
+      variant="bare"
       className={
         className == null
           ? `justify-start`

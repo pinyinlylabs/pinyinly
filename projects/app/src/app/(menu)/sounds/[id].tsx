@@ -104,7 +104,7 @@ export default function SoundIdPage() {
             </Text>
             {soundAudioSource == null ? null : (
               <RectButton
-                variant="bare2"
+                variant="bare"
                 iconStart="speaker-2"
                 onPressIn={playSound}
               />
@@ -121,7 +121,7 @@ export default function SoundIdPage() {
             onPress={() => {
               setIsEditSoundNameModalOpen(true);
             }}
-            variant="bare2"
+            variant="bare"
             iconStart="pencil"
           />
         </View>
