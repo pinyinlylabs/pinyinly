@@ -214,21 +214,6 @@ export const dictionaryQuery = queryOptions({
   structuralSharing: false,
 });
 
-export const skillLearningGraphQuery = queryOptions({
-  queryKey: [`skillLearningGraph`],
-  queryFn: async ({ client }) => {
-    await devToolsSlowQuerySleepIfEnabled();
-
-    const targetSkills = await client.ensureQueryData(targetSkillsQuery());
-    const graph = await skillLearningGraph({ targetSkills });
-    return graph;
-  },
-  networkMode: `offlineFirst`,
-  retry: false,
-  structuralSharing: false,
-  throwOnError: true,
-});
-
 export function getTargetHanziWordsFromDictionary(
   dictionary: Dictionary,
 ): HanziWord[] {
