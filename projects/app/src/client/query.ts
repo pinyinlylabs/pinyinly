@@ -471,6 +471,12 @@ export type CollectionOutput<T> =
   T extends Collection<infer U, any> ? U : never;
 // oxlint-disable-next-line typescript/no-explicit-any
 export type CollectionKey<T> = T extends Collection<any, infer K> ? K : never;
+export type CollectionChanges<T extends { subscribeChanges: unknown }> =
+  T[`subscribeChanges`] extends (...args: infer TArgs) => unknown
+    ? TArgs[0] extends (changes: infer TChanges) => void
+      ? TChanges
+      : never
+    : never;
 
 // Extract field codes from entity definitions to avoid hard-coding
 const USER_MEANING_FIELD_CODES = new Set(
@@ -581,11 +587,7 @@ function userDictionaryCollectionOptions({
         }, 5000);
 
         const onChanges = (
-          changes: Parameters<
-            typeof userMeaningSettings.subscribeChanges
-          >[0] extends (c: infer TChanges) => void
-            ? TChanges
-            : never,
+          changes: CollectionChanges<typeof userMeaningSettings>,
         ) => {
           try {
             begin();
@@ -879,17 +881,9 @@ function dictionarySearchCollectionOptions({
           }
         };
 
-        type BuiltInChanges = Parameters<
-          typeof builtInRows.subscribeChanges
-        >[0] extends (changes: infer TChanges) => void
-          ? TChanges
-          : never;
+        type BuiltInChanges = CollectionChanges<typeof builtInRows>;
 
-        type UserChanges = Parameters<
-          typeof userRows.subscribeChanges
-        >[0] extends (changes: infer TChanges) => void
-          ? TChanges
-          : never;
+        type UserChanges = CollectionChanges<typeof userRows>;
 
         const onBuiltInChanges = (changes: BuiltInChanges) => {
           try {
