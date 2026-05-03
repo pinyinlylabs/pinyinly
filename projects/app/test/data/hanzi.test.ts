@@ -12,6 +12,8 @@ import {
   matchAllHanziCharacters,
   matchAllHanziCharactersWithIndexes,
   parseIds,
+  parseIdsStrict,
+  parseIdsStrictOrNull,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
@@ -281,6 +283,52 @@ test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 });
+
+test(
+  `parseIdsStrict parses valid IDS and trims whitespace` satisfies HasNameOf<
+    typeof parseIdsStrict
+  >,
+  () => {
+    expect(parseIdsStrict(`  ⿰讠兑  `)).toMatchInlineSnapshot(`
+      [
+        "⿰",
+        "讠",
+        "兑",
+      ]
+    `);
+  },
+);
+
+test(
+  `parseIdsStrict throws for empty input` satisfies HasNameOf<
+    typeof parseIdsStrict
+  >,
+  () => {
+    expect(() => parseIdsStrict(`   `)).toThrow(`IDS decomposition is empty`);
+  },
+);
+
+test(
+  `parseIdsStrict throws when IDS has trailing content` satisfies HasNameOf<
+    typeof parseIdsStrict
+  >,
+  () => {
+    expect(() => parseIdsStrict(`⿰讠兑X`)).toThrow(
+      `IDS decomposition has trailing content at character index 3`,
+    );
+  },
+);
+
+test(
+  `parseIdsStrictOrNull returns null for invalid IDS` satisfies HasNameOf<
+    typeof parseIdsStrictOrNull
+  >,
+  () => {
+    expect(parseIdsStrictOrNull(``)).toBeNull();
+    expect(parseIdsStrictOrNull(`⿰讠兑X`)).toBeNull();
+    expect(parseIdsStrictOrNull(`⿰讠兑`)).not.toBeNull();
+  },
+);
 
 test(
   `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,

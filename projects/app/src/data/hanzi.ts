@@ -386,6 +386,32 @@ export function parseIds(
   return char;
 }
 
+export function parseIdsStrict(idsRaw: string): IdsNode<string> {
+  const ids = idsRaw.trim();
+  if (ids.length === 0) {
+    throw new Error(`IDS decomposition is empty`);
+  }
+
+  const cursor = { index: 0 };
+  const parsed = parseIds(ids, cursor);
+
+  if (cursor.index !== ids.length) {
+    throw new Error(
+      `IDS decomposition has trailing content at character index ${cursor.index}`,
+    );
+  }
+
+  return parsed;
+}
+
+export function parseIdsStrictOrNull(idsRaw: string): IdsNode<string> | null {
+  try {
+    return parseIdsStrict(idsRaw);
+  } catch {
+    return null;
+  }
+}
+
 export function strokeCountPlaceholderOrNull(
   charOrCharPoint: string | number,
 ): number | undefined {
