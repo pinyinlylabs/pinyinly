@@ -398,8 +398,7 @@ function MeaningsSection({
     <View className="gap-4 p-4">
       {visibleMeanings.length === 0 ? (
         <Text className="pyly-body-caption text-fg-dim">
-          Think of a story connecting the components to the meaning. Tap Change
-          to add one.
+          Think of a story connecting the components to the meaning.
         </Text>
       ) : (
         <View className="gap-3">
