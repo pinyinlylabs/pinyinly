@@ -489,6 +489,12 @@ describe(`character.json files`, async () => {
                 characterData.mnemonic.components,
                 componentToString,
               ),
+        decompositionStrokes:
+          characterData.mnemonic == null
+            ? undefined
+            : [...walkIdsNodeLeafs(characterData.mnemonic.components)].map(
+                (leaf) => leaf.strokes,
+              ),
         componentFormOf: characterData.componentFormOf,
         isStructural: characterData.isStructural,
         canonicalForm: characterData.canonicalForm,

@@ -10,15 +10,23 @@ import {
   historyPageCollection,
   historyPageData,
 } from "#client/query.js";
+import type { HanziText } from "#data/model.ts";
 import { matchAllHanziCharacters } from "#data/hanzi.ts";
 import {
+  getUserWikiCharacterDecompositionKeyParams,
+  userWikiCharacterDecompositionSetting,
   getUserHanziMeaningKeyParams,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
 } from "#data/userSettings.ts";
 import type { Dictionary } from "#dictionary.js";
-import { loadDictionary } from "#dictionary.js";
+import type { WikiCharacterDecomposition } from "#data/model.js";
+import {
+  decompositionComponentsToIds,
+  loadDictionary,
+  parseIdsToDecompositionComponents,
+} from "#dictionary.js";
 import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
 import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
@@ -625,6 +633,114 @@ function settingRow({
 }): CollectionOutput<SettingCollection> {
   return { key, value } as CollectionOutput<SettingCollection>;
 }
+
+describe(`characterDecomposition overrides`, () => {
+  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+
+  function getDecompositionStringFor(
+    db: {
+      characterDecompositionCollection: {
+        get: (
+          hanzi: HanziText,
+        ) =>
+          | { decompositionComponents: WikiCharacterDecomposition }
+          | undefined;
+      };
+    },
+    hanzi: HanziText,
+  ) {
+    const components =
+      db.characterDecompositionCollection.get(hanzi)?.decompositionComponents;
+    return components == null ? null : decompositionComponentsToIds(components);
+  }
+
+  test(`applies valid override and falls back on delete`, async ({
+    db,
+    rizzle,
+  }) => {
+    await db.characterDecompositionCollection.preload();
+
+    expect(getDecompositionStringFor(db, 汉`说`)).toBe(`⿰讠兑`);
+
+    const keyParams = getUserWikiCharacterDecompositionKeyParams(汉`说`);
+
+    await rizzle.mutate.setSetting({
+      key: userWikiCharacterDecompositionSetting.entity.marshalKey(keyParams),
+      value: userWikiCharacterDecompositionSetting.entity.marshalValue({
+        ...keyParams,
+        components: parseIdsToDecompositionComponents(`⿰言兑`),
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await vi.waitFor(() => {
+      expect(getDecompositionStringFor(db, 汉`说`)).toBe(`⿰言兑`);
+    });
+
+    await rizzle.mutate.setSetting({
+      key: userWikiCharacterDecompositionSetting.entity.marshalKey(keyParams),
+      value: null,
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await vi.waitFor(() => {
+      expect(getDecompositionStringFor(db, 汉`说`)).toBe(`⿰讠兑`);
+    });
+  });
+
+  test(`ignores invalid override values`, async ({ db, rizzle }) => {
+    await db.characterDecompositionCollection.preload();
+
+    const keyParams = getUserWikiCharacterDecompositionKeyParams(汉`说`);
+
+    await rizzle.mutate.setSetting({
+      key: userWikiCharacterDecompositionSetting.entity.marshalKey(keyParams),
+      value: userWikiCharacterDecompositionSetting.entity.marshalValue({
+        ...keyParams,
+        components: `⿰讠`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await vi.waitFor(() => {
+      expect(getDecompositionStringFor(db, 汉`说`)).toBe(`⿰讠兑`);
+    });
+  });
+
+  test(`recomputes component usage from merged decomposition`, async ({
+    db,
+    rizzle,
+  }) => {
+    await db.characterComponentUsage.preload();
+
+    expect(db.characterComponentUsage.get(汉`讠`)?.usedInHanzi).toContain(
+      汉`说`,
+    );
+
+    const keyParams = getUserWikiCharacterDecompositionKeyParams(汉`说`);
+    await rizzle.mutate.setSetting({
+      key: userWikiCharacterDecompositionSetting.entity.marshalKey(keyParams),
+      value: userWikiCharacterDecompositionSetting.entity.marshalValue({
+        ...keyParams,
+        components: parseIdsToDecompositionComponents(`⿰言兑`),
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+
+    await vi.waitFor(() => {
+      expect(db.characterComponentUsage.get(汉`言`)?.usedInHanzi).toContain(
+        汉`说`,
+      );
+      expect(db.characterComponentUsage.get(汉`讠`)?.usedInHanzi).not.toContain(
+        汉`说`,
+      );
+    });
+  });
+});
 
 describe(`dictionarySearch hanziCharacterCount`, () => {
   const test = baseTest.extend(rizzleFixture).extend(dbFixture);

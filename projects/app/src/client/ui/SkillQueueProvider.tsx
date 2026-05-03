@@ -62,6 +62,13 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       (q) => q.from({ setting: db.settingCollection }),
       [db.settingCollection],
     );
+  const {
+    data: characterDecompositionData,
+    isLoading: isCharacterDecompositionLoading,
+  } = useLiveQuery(
+    (q) => q.from({ decomposition: db.characterDecompositionCollection }),
+    [db.characterDecompositionCollection],
+  );
 
   const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
     loading: true,
@@ -111,7 +118,8 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       isTargetSkillsLoading ||
       isPrioritySettingsLoading ||
       isStructuralHanziLoading ||
-      isDictionaryLoading
+      isDictionaryLoading ||
+      isCharacterDecompositionLoading
     ) {
       return;
     }
@@ -128,6 +136,7 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     void (async () => {
       const graph = await skillLearningGraph({
         targetSkills: allTargetSkills,
+        decompositionData: characterDecompositionData,
       });
 
       // Recompute the review queue when inputs are ready
@@ -155,12 +164,14 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     isPrioritySettingsLoading,
     isStructuralHanziLoading,
     isDictionaryLoading,
+    isCharacterDecompositionLoading,
     allTargetSkills,
     isStructuralHanzi,
     dictionary,
     skillSrsStates,
     latestSkillRatings,
     latestSkillRatingsData,
+    characterDecompositionData,
   ]);
 
   return (

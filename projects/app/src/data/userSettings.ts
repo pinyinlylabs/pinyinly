@@ -235,6 +235,18 @@ export const hanziWordMeaningHintImagePromptSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const userWikiCharacterDecompositionSetting = defineUserSetting({
+  entity: r.entity(`cdo/[hanzi]`, {
+    hanzi: r.string().alias(`h`),
+    components: r.json().optional().alias(`c`),
+  }),
+  historyLimit: 20,
+});
+
+export function getUserWikiCharacterDecompositionKeyParams(hanzi: HanziText) {
+  return { hanzi };
+}
+
 export const hanziPronunciationHintTextSetting = defineUserSetting({
   entity: r.entity(`hpht/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
@@ -399,32 +411,33 @@ export const userHanziMeaningDefs = [
 ] as const satisfies readonly UserSetting[];
 
 export const userSettingDefinitions = [
-  aiImageStyleSetting,
   aiImagePlaygroundSetting,
+  aiImageStyleSetting,
   autoCheckUserSetting,
-  userNameSetting,
-  quickSearchPickSetting,
-  prioritizedWordItemSetting,
-  userHanziMeaningGlossSetting,
-  userHanziMeaningPinyinSetting,
-  userHanziMeaningNoteSetting,
-  pinyinSoundNameSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundImageSetting,
-  hanziWordMeaningHintTextSetting,
-  hanziWordMeaningHintExplanationSetting,
-  hanziWordMeaningHintImageSetting,
-  hanziWordMeaningHintImagePromptSetting,
-  hanziPronunciationHintTextSetting,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
+  hanziPronunciationHintTextSetting,
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImagePromptSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziWordMeaningHintTextSetting,
   pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneViewpointSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
+  pinyinFinalToneViewpointSetting,
+  pinyinSoundDescriptionSetting,
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupThemeSetting,
+  pinyinSoundImageSetting,
+  pinyinSoundNameSetting,
+  prioritizedWordItemSetting,
+  quickSearchPickSetting,
+  userHanziMeaningGlossSetting,
+  userHanziMeaningNoteSetting,
+  userHanziMeaningPinyinSetting,
+  userNameSetting,
+  userWikiCharacterDecompositionSetting,
 ] as const satisfies readonly UserSetting[];
 
 function userSettingPrefixFromKey(settingKey: string): string {

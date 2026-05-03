@@ -33,7 +33,7 @@
   ],
   [
     "〢",
-    {"decomposition":"⿰丨丨"}
+    {"decomposition":"⿰丨丨","decompositionStrokes":["",""]}
   ],
   [
     "コ",
@@ -53,55 +53,55 @@
   ],
   [
     "丁",
-    {"decomposition":"⿱一亅"}
+    {"decomposition":"⿱一亅","decompositionStrokes":["0","1"]}
   ],
   [
     "丂",
-    {"decomposition":"⿱一㇉"}
+    {"decomposition":"⿱一㇉","decompositionStrokes":["0","1"]}
   ],
   [
     "七",
-    {"decomposition":"⿻㇀乚"}
+    {"decomposition":"⿻㇀乚","decompositionStrokes":["0","1"]}
   ],
   [
     "丄",
-    {"decomposition":"⿱丨一"}
+    {"decomposition":"⿱丨一","decompositionStrokes":["0","1"]}
   ],
   [
     "丅",
-    {"decomposition":"⿱一丨"}
+    {"decomposition":"⿱一丨","decompositionStrokes":["",""]}
   ],
   [
     "丆",
-    {"decomposition":"⿱一丿","isStructural":true}
+    {"decomposition":"⿱一丿","decompositionStrokes":["",""],"isStructural":true}
   ],
   [
     "万",
-    {"decomposition":"⿱一⿰丿𠃌"}
+    {"decomposition":"⿱一⿰丿𠃌","decompositionStrokes":["0","1","2"]}
   ],
   [
     "丈",
-    {"decomposition":"⿻一又"}
+    {"decomposition":"⿻一又","decompositionStrokes":["0","1-2"]}
   ],
   [
     "三",
-    {"decomposition":"⿱一二"}
+    {"decomposition":"⿱一二","decompositionStrokes":["0","1-2"]}
   ],
   [
     "上",
-    {"decomposition":"⿱⺊一"}
+    {"decomposition":"⿱⺊一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "下",
-    {"decomposition":"⿱一卜"}
+    {"decomposition":"⿱一卜","decompositionStrokes":["0","1-2"]}
   ],
   [
     "丌",
-    {"decomposition":"⿱一⿰丿丨"}
+    {"decomposition":"⿱一⿰丿丨","decompositionStrokes":["0","1","2"]}
   ],
   [
     "卄",
-    {"decomposition":"⿻十丨"}
+    {"decomposition":"⿻十丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "𫝀",
@@ -109,43 +109,43 @@
   ],
   [
     "不",
-    {"decomposition":"⿱一③"}
+    {"decomposition":"⿱一③","decompositionStrokes":["0","1-3"]}
   ],
   [
     "与",
-    {"decomposition":"⿹②一"}
+    {"decomposition":"⿹②一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "专",
-    {"decomposition":"⿻③一"}
+    {"decomposition":"⿻③一","decompositionStrokes":["0,2-3","1"]}
   ],
   [
     "且",
-    {"decomposition":"⿱月一"}
+    {"decomposition":"⿱月一","decompositionStrokes":["0-3","4"]}
   ],
   [
     "世",
-    {"decomposition":"⿻廿①"}
+    {"decomposition":"⿻廿①","decompositionStrokes":["0-3","4"]}
   ],
   [
     "丙",
-    {"decomposition":"⿱一内"}
+    {"decomposition":"⿱一内","decompositionStrokes":["0","1-4"]}
   ],
   [
     "业",
-    {"decomposition":"⿱④一"}
+    {"decomposition":"⿱④一","decompositionStrokes":["0-3","4"]}
   ],
   [
     "东",
-    {"decomposition":"⿻七小"}
+    {"decomposition":"⿻七小","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "𠀎",
-    {"decomposition":"⿱井一"}
+    {"decomposition":"⿱井一","decompositionStrokes":["",""]}
   ],
   [
     "𠀐",
-    {"decomposition":"⿱中一"}
+    {"decomposition":"⿱中一","decompositionStrokes":["",""]}
   ],
   [
     "𫠣",
@@ -153,15 +153,15 @@
   ],
   [
     "两",
-    {"decomposition":"⿱一⿻从冂"}
+    {"decomposition":"⿱一⿻从冂","decompositionStrokes":["0","3-6","1-2"]}
   ],
   [
     "丽",
-    {"decomposition":"⿱一⑥"}
+    {"decomposition":"⿱一⑥","decompositionStrokes":["0","1-6"]}
   ],
   [
     "並",
-    {"decomposition":"⿱丷亚"}
+    {"decomposition":"⿱丷亚","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "丨",
@@ -169,15 +169,15 @@
   ],
   [
     "丩",
-    {"decomposition":"⿰①丨"}
+    {"decomposition":"⿰①丨","decompositionStrokes":["0","1"]}
   ],
   [
     "个",
-    {"decomposition":"⿱人丨"}
+    {"decomposition":"⿱人丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "丫",
-    {"decomposition":"⿱丷丨"}
+    {"decomposition":"⿱丷丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "㐄",
@@ -185,11 +185,11 @@
   ],
   [
     "中",
-    {"decomposition":"⿻口丨"}
+    {"decomposition":"⿻口丨","decompositionStrokes":["0-2","3"]}
   ],
   [
     "丰",
-    {"decomposition":"⿻三丨"}
+    {"decomposition":"⿻三丨","decompositionStrokes":["0-2","3"]}
   ],
   [
     "𠁣",
@@ -201,31 +201,31 @@
   ],
   [
     "⺀",
-    {"decomposition":"⿱丶丶"}
+    {"decomposition":"⿱丶丶","decompositionStrokes":["0","1"]}
   ],
   [
     "丷",
-    {"componentFormOf":"八","decomposition":"⿰丶①","isStructural":true}
+    {"componentFormOf":"八","decomposition":"⿰丶①","decompositionStrokes":["0","1"],"isStructural":true}
   ],
   [
     "丸",
-    {"decomposition":"⿻九丶"}
+    {"decomposition":"⿻九丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "义",
-    {"decomposition":"⿶乂丶"}
+    {"decomposition":"⿶乂丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "为",
-    {"decomposition":"⿻丶⿴力丶"}
+    {"decomposition":"⿻丶⿴力丶","decompositionStrokes":["0","1-2","3"]}
   ],
   [
     "主",
-    {"decomposition":"⿱丶王"}
+    {"decomposition":"⿱丶王","decompositionStrokes":["0","1-4"]}
   ],
   [
     "举",
-    {"decomposition":"⿱兴③"}
+    {"decomposition":"⿱兴③","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "丿",
@@ -241,11 +241,11 @@
   ],
   [
     "乂",
-    {"decomposition":"⿻丿乀"}
+    {"decomposition":"⿻丿乀","decompositionStrokes":["0","1"]}
   ],
   [
     "乃",
-    {"decomposition":"⿹𠄎丿"}
+    {"decomposition":"⿹𠄎丿","decompositionStrokes":["0","1"]}
   ],
   [
     "㐅",
@@ -261,7 +261,7 @@
   ],
   [
     "𠂈",
-    {"decomposition":"⿰𠃋丿"}
+    {"decomposition":"⿰𠃋丿","decompositionStrokes":["",""]}
   ],
   [
     "𠂉",
@@ -273,51 +273,51 @@
   ],
   [
     "久",
-    {"decomposition":"⿻勹①"}
+    {"decomposition":"⿻勹①","decompositionStrokes":["0-1","2"]}
   ],
   [
     "乇",
-    {"decomposition":"⿱丿七"}
+    {"decomposition":"⿱丿七","decompositionStrokes":["0","1-2"]}
   ],
   [
     "么",
-    {"decomposition":"⿱丿厶"}
+    {"decomposition":"⿱丿厶","decompositionStrokes":["0","1-2"]}
   ],
   [
     "𠂋",
-    {"decomposition":"⿸𠂆一"}
+    {"decomposition":"⿸𠂆一","decompositionStrokes":["",""]}
   ],
   [
     "尹",
-    {"decomposition":"⿻一尸"}
+    {"decomposition":"⿻一尸","decompositionStrokes":["1","0,2-3"]}
   ],
   [
     "𠂒",
-    {"decomposition":"𠂒"}
+    {"decomposition":"𠂒","decompositionStrokes":[""]}
   ],
   [
     "乍",
-    {"decomposition":"⿸丿⿻下一"}
+    {"decomposition":"⿸丿⿻下一","decompositionStrokes":["0","1-3","4"]}
   ],
   [
     "乐",
-    {"decomposition":"⿻⿱丿①小"}
+    {"decomposition":"⿻⿱丿①小","decompositionStrokes":["0","1","2-4"]}
   ],
   [
     "乔",
-    {"decomposition":"⿱夭⿰丿丨"}
+    {"decomposition":"⿱夭⿰丿丨","decompositionStrokes":["0-3","4","5"]}
   ],
   [
     "𠂢",
-    {"decomposition":"⿸𠂆④"}
+    {"decomposition":"⿸𠂆④","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "𠂤",
-    {"decomposition":"⿱丿㠯"}
+    {"decomposition":"⿱丿㠯","decompositionStrokes":["",""]}
   ],
   [
     "𠂭",
-    {"decomposition":"⿻㐅⿳丶⿰丶丶丶"}
+    {"decomposition":"⿻㐅⿳丶⿰丶丶丶","decompositionStrokes":["","","","",""]}
   ],
   [
     "乙",
@@ -349,7 +349,7 @@
   ],
   [
     "九",
-    {"decomposition":"⿻丿⺄"}
+    {"decomposition":"⿻丿⺄","decompositionStrokes":["0","1"]}
   ],
   [
     "龴",
@@ -357,15 +357,15 @@
   ],
   [
     "乞",
-    {"decomposition":"⿱𠂉乙"}
+    {"decomposition":"⿱𠂉乙","decompositionStrokes":["0-1","2"]}
   ],
   [
     "也",
-    {"decomposition":"⿻②乚"}
+    {"decomposition":"⿻②乚","decompositionStrokes":["0-1","2"]}
   ],
   [
     "习",
-    {"decomposition":"⿹𠃌冫"}
+    {"decomposition":"⿹𠃌冫","decompositionStrokes":["0","1-2"]}
   ],
   [
     "𠃓",
@@ -373,7 +373,7 @@
   ],
   [
     "书",
-    {"decomposition":"⿻③丨"}
+    {"decomposition":"⿻③丨","decompositionStrokes":["0-1,3","2"]}
   ],
   [
     "𠃛",
@@ -385,11 +385,11 @@
   ],
   [
     "买",
-    {"decomposition":"⿱乛头"}
+    {"decomposition":"⿱乛头","decompositionStrokes":["0","1-5"]}
   ],
   [
     "乱",
-    {"decomposition":"⿰舌乚"}
+    {"decomposition":"⿰舌乚","decompositionStrokes":["0-5","6"]}
   ],
   [
     "亅",
@@ -401,7 +401,7 @@
   ],
   [
     "了",
-    {"decomposition":"⿱乛亅"}
+    {"decomposition":"⿱乛亅","decompositionStrokes":["0","1"]}
   ],
   [
     "𠄎",
@@ -409,115 +409,115 @@
   ],
   [
     "𠄐",
-    {"decomposition":"⿱乛亅"}
+    {"decomposition":"⿱乛亅","decompositionStrokes":["",""]}
   ],
   [
     "亇",
-    {"decomposition":"⿱𠂊亅"}
+    {"decomposition":"⿱𠂊亅","decompositionStrokes":["",""]}
   ],
   [
     "予",
-    {"decomposition":"⿱龴𠄐"}
+    {"decomposition":"⿱龴𠄐","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "争",
-    {"decomposition":"⿳⺈彐亅"}
+    {"decomposition":"⿳⺈彐亅","decompositionStrokes":["0-1","2-4","5"]}
   ],
   [
     "事",
-    {"decomposition":"⿻⿳一口彐亅"}
+    {"decomposition":"⿻⿳一口彐亅","decompositionStrokes":["0","1-3","4-6","7"]}
   ],
   [
     "二",
-    {"decomposition":"⿱一一"}
+    {"decomposition":"⿱一一","decompositionStrokes":["0","1"]}
   ],
   [
     "亍",
-    {"decomposition":"⿱一丁"}
+    {"decomposition":"⿱一丁","decompositionStrokes":["0","1-2"]}
   ],
   [
     "于",
-    {"decomposition":"⿻二亅"}
+    {"decomposition":"⿻二亅","decompositionStrokes":["0-1","2"]}
   ],
   [
     "云",
-    {"decomposition":"⿱二厶"}
+    {"decomposition":"⿱二厶","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "互",
-    {"decomposition":"⿱一彑"}
+    {"decomposition":"⿱一彑","decompositionStrokes":["0","1-3"]}
   ],
   [
     "五",
-    {"decomposition":"⿱一𫝀"}
+    {"decomposition":"⿱一𫝀","decompositionStrokes":["0","1-3"]}
   ],
   [
     "井",
-    {"decomposition":"⿻二②"}
+    {"decomposition":"⿻二②","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "亘",
-    {"decomposition":"⿱一旦"}
+    {"decomposition":"⿱一旦","decompositionStrokes":["0","1-5"]}
   ],
   [
     "亚",
-    {"decomposition":"⿱一业"}
+    {"decomposition":"⿱一业","decompositionStrokes":["0","1-5"]}
   ],
   [
     "些",
-    {"decomposition":"⿱此二"}
+    {"decomposition":"⿱此二","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "亠",
-    {"decomposition":"⿱丶一"}
+    {"decomposition":"⿱丶一","decompositionStrokes":["0","1"]}
   ],
   [
     "亡",
-    {"decomposition":"⿱亠𠃊"}
+    {"decomposition":"⿱亠𠃊","decompositionStrokes":["0-1","2"]}
   ],
   [
     "交",
-    {"decomposition":"⿱亠父"}
+    {"decomposition":"⿱亠父","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "亥",
-    {"decomposition":"⿳亠𠂈人"}
+    {"decomposition":"⿳亠𠂈人","decompositionStrokes":["0-1","2-3","4-5"]}
   ],
   [
     "亦",
-    {"decomposition":"⿱亠④"}
+    {"decomposition":"⿱亠④","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "产",
-    {"decomposition":"⿱立厂"}
+    {"decomposition":"⿱立厂","decompositionStrokes":["0-4","4-5"]}
   ],
   [
     "㐫",
-    {"decomposition":"⿱亠凶"}
+    {"decomposition":"⿱亠凶","decompositionStrokes":["",""]}
   ],
   [
     "㐬",
-    {"decomposition":"⿱𠫓𫶧"}
+    {"decomposition":"⿱𠫓𫶧","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "享",
-    {"decomposition":"⿳亠口子"}
+    {"decomposition":"⿳亠口子","decompositionStrokes":["0-1","2-4","5-7"]}
   ],
   [
     "京",
-    {"decomposition":"⿳亠口小"}
+    {"decomposition":"⿳亠口小","decompositionStrokes":["0-1","2-4","5-7"]}
   ],
   [
     "亭",
-    {"decomposition":"⿱⿳亠口冖丁"}
+    {"decomposition":"⿱⿳亠口冖丁","decompositionStrokes":["0-1","2-4","5-6","7-8"]}
   ],
   [
     "亮",
-    {"decomposition":"⿳亠口⿱冖几"}
+    {"decomposition":"⿳亠口⿱冖几","decompositionStrokes":["0-1","2-4","5-6","7-8"]}
   ],
   [
     "亲",
-    {"decomposition":"⿱立朩"}
+    {"decomposition":"⿱立朩","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "人",
@@ -529,283 +529,283 @@
   ],
   [
     "亼",
-    {"decomposition":"⿱人一"}
+    {"decomposition":"⿱人一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "亽",
-    {"decomposition":"⿱人丶"}
+    {"decomposition":"⿱人丶","decompositionStrokes":["",""]}
   ],
   [
     "亾",
-    {"decomposition":"⿺𠃊人"}
+    {"decomposition":"⿺𠃊人","decompositionStrokes":["2","0-1"]}
   ],
   [
     "亿",
-    {"decomposition":"⿰亻乙"}
+    {"decomposition":"⿰亻乙","decompositionStrokes":["0-1","2"]}
   ],
   [
     "什",
-    {"decomposition":"⿰亻十"}
+    {"decomposition":"⿰亻十","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "仅",
-    {"decomposition":"⿰亻又"}
+    {"decomposition":"⿰亻又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "今",
-    {"decomposition":"⿱亽㇇"}
+    {"decomposition":"⿱亽㇇","decompositionStrokes":["0-2","3"]}
   ],
   [
     "介",
-    {"decomposition":"⿱人⿰丿丨"}
+    {"decomposition":"⿱人⿰丿丨","decompositionStrokes":["0-1","2","3"]}
   ],
   [
     "仌",
-    {"decomposition":"⿱人人"}
+    {"decomposition":"⿱人人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "仍",
-    {"decomposition":"⿰亻乃"}
+    {"decomposition":"⿰亻乃","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "从",
-    {"decomposition":"⿰人人"}
+    {"decomposition":"⿰人人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "仑",
-    {"decomposition":"⿱人匕"}
+    {"decomposition":"⿱人匕","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "仓",
-    {"decomposition":"⿱人㔾"}
+    {"decomposition":"⿱人㔾","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "他",
-    {"decomposition":"⿰亻也"}
+    {"decomposition":"⿰亻也","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "付",
-    {"decomposition":"⿰亻寸"}
+    {"decomposition":"⿰亻寸","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "代",
-    {"decomposition":"⿰亻弋"}
+    {"decomposition":"⿰亻弋","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "令",
-    {"decomposition":"⿱亽龴"}
+    {"decomposition":"⿱亽龴","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "以",
-    {"decomposition":"⿰②人"}
+    {"decomposition":"⿰②人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "们",
-    {"decomposition":"⿰亻门"}
+    {"decomposition":"⿰亻门","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "件",
-    {"decomposition":"⿰亻牛"}
+    {"decomposition":"⿰亻牛","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "价",
-    {"decomposition":"⿰亻介"}
+    {"decomposition":"⿰亻介","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "任",
-    {"decomposition":"⿰亻壬"}
+    {"decomposition":"⿰亻壬","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "份",
-    {"decomposition":"⿰亻分"}
+    {"decomposition":"⿰亻分","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "休",
-    {"decomposition":"⿰亻木"}
+    {"decomposition":"⿰亻木","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "众",
-    {"decomposition":"⿱人从"}
+    {"decomposition":"⿱人从","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "优",
-    {"decomposition":"⿰亻尤"}
+    {"decomposition":"⿰亻尤","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "会",
-    {"decomposition":"⿱人云"}
+    {"decomposition":"⿱人云","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "伟",
-    {"decomposition":"⿰亻韦"}
+    {"decomposition":"⿰亻韦","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "传",
-    {"decomposition":"⿰亻专"}
+    {"decomposition":"⿰亻专","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "伤",
-    {"decomposition":"⿰亻⿱𠂉力"}
+    {"decomposition":"⿰亻⿱𠂉力","decompositionStrokes":["0-1","2-3","4-5"]}
   ],
   [
     "似",
-    {"decomposition":"⿰亻以"}
+    {"decomposition":"⿰亻以","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "但",
-    {"decomposition":"⿰亻旦"}
+    {"decomposition":"⿰亻旦","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "位",
-    {"decomposition":"⿰亻立"}
+    {"decomposition":"⿰亻立","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "低",
-    {"decomposition":"⿰亻氐"}
+    {"decomposition":"⿰亻氐","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "住",
-    {"decomposition":"⿰亻主"}
+    {"decomposition":"⿰亻主","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "体",
-    {"decomposition":"⿰亻本"}
+    {"decomposition":"⿰亻本","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "何",
-    {"decomposition":"⿰亻可"}
+    {"decomposition":"⿰亻可","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "余",
-    {"decomposition":"⿱亼朩"}
+    {"decomposition":"⿱亼朩","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "作",
-    {"decomposition":"⿰亻乍"}
+    {"decomposition":"⿰亻乍","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "你",
-    {"decomposition":"⿰亻尔"}
+    {"decomposition":"⿰亻尔","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "佥",
-    {"decomposition":"⿳亼𭕄一"}
+    {"decomposition":"⿳亼𭕄一","decompositionStrokes":["0-2","3-5","6"]}
   ],
   [
     "使",
-    {"decomposition":"⿰亻吏"}
+    {"decomposition":"⿰亻吏","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "來",
-    {"decomposition":"⿻木从"}
+    {"decomposition":"⿻木从","decompositionStrokes":["0,5-7","1-4"]}
   ],
   [
     "例",
-    {"decomposition":"⿰亻列"}
+    {"decomposition":"⿰亻列","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "便",
-    {"decomposition":"⿰亻更"}
+    {"decomposition":"⿰亻更","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "保",
-    {"decomposition":"⿰亻呆"}
+    {"decomposition":"⿰亻呆","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "俞",
-    {"decomposition":"⿱亼刖"}
+    {"decomposition":"⿱亼刖","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "信",
-    {"decomposition":"⿰亻言"}
+    {"decomposition":"⿰亻言","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "修",
-    {"decomposition":"⿲亻丨⿱夂彡"}
+    {"decomposition":"⿲亻丨⿱夂彡","decompositionStrokes":["0-1","2","3-5","6-8"]}
   ],
   [
     "倒",
-    {"decomposition":"⿰亻到"}
+    {"decomposition":"⿰亻到","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "候",
-    {"decomposition":"⿲亻丨⿱ュ矢"}
+    {"decomposition":"⿲亻丨⿱ュ矢","decompositionStrokes":["0-1","2","3-4","5-9"]}
   ],
   [
     "借",
-    {"decomposition":"⿰亻昔"}
+    {"decomposition":"⿰亻昔","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "值",
-    {"decomposition":"⿰亻直"}
+    {"decomposition":"⿰亻直","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "假",
-    {"decomposition":"⿰亻叚"}
+    {"decomposition":"⿰亻叚","decompositionStrokes":["0-1","2-10"]}
   ],
   [
     "做",
-    {"decomposition":"⿰亻故"}
+    {"decomposition":"⿰亻故","decompositionStrokes":["0-1","2-10"]}
   ],
   [
     "停",
-    {"decomposition":"⿰亻亭"}
+    {"decomposition":"⿰亻亭","decompositionStrokes":["0-1","2-10"]}
   ],
   [
     "健",
-    {"decomposition":"⿰亻建"}
+    {"decomposition":"⿰亻建","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "像",
-    {"decomposition":"⿰亻象"}
+    {"decomposition":"⿰亻象","decompositionStrokes":["0-1","2-12"]}
   ],
   [
     "儿",
-    {"decomposition":"⿰丿乚"}
+    {"decomposition":"⿰丿乚","decompositionStrokes":["0","1"]}
   ],
   [
     "兀",
-    {"decomposition":"⿱一儿"}
+    {"decomposition":"⿱一儿","decompositionStrokes":["0","1-2"]}
   ],
   [
     "允",
-    {"decomposition":"⿱厶儿"}
+    {"decomposition":"⿱厶儿","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "元",
-    {"decomposition":"⿱一兀"}
+    {"decomposition":"⿱一兀","decompositionStrokes":["0","1-3"]}
   ],
   [
     "兄",
-    {"decomposition":"⿱口儿"}
+    {"decomposition":"⿱口儿","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "充",
-    {"decomposition":"⿱亠允"}
+    {"decomposition":"⿱亠允","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "兆",
-    {"decomposition":"⿻儿④"}
+    {"decomposition":"⿻儿④","decompositionStrokes":["0,3","1-2,4-5"]}
   ],
   [
     "先",
-    {"decomposition":"⿱⺧儿"}
+    {"decomposition":"⿱⺧儿","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "光",
-    {"decomposition":"⿱⺌兀"}
+    {"decomposition":"⿱⺌兀","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "克",
-    {"decomposition":"⿱十兄"}
+    {"decomposition":"⿱十兄","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "免",
-    {"decomposition":"⿳⺈口儿"}
+    {"decomposition":"⿳⺈口儿","decompositionStrokes":["0-1","2-4","5-6"]}
   ],
   [
     "兑",
-    {"decomposition":"⿱丷兄"}
+    {"decomposition":"⿱丷兄","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "入",
@@ -813,7 +813,7 @@
   ],
   [
     "全",
-    {"decomposition":"⿱人王"}
+    {"decomposition":"⿱人王","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "八",
@@ -821,47 +821,47 @@
   ],
   [
     "公",
-    {"decomposition":"⿱八厶"}
+    {"decomposition":"⿱八厶","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "六",
-    {"decomposition":"⿱亠八"}
+    {"decomposition":"⿱亠八","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "兰",
-    {"decomposition":"⿱丷三"}
+    {"decomposition":"⿱丷三","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "共",
-    {"decomposition":"⿱龷八"}
+    {"decomposition":"⿱龷八","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "关",
-    {"decomposition":"⿱丷天"}
+    {"decomposition":"⿱丷天","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "兴",
-    {"decomposition":"⿳𭕄一八"}
+    {"decomposition":"⿳𭕄一八","decompositionStrokes":["0-2","3","4-5"]}
   ],
   [
     "其",
-    {"decomposition":"⿳甘一八"}
+    {"decomposition":"⿳甘一八","decompositionStrokes":["0-4","5","6-7"]}
   ],
   [
     "具",
-    {"decomposition":"⿳目一八"}
+    {"decomposition":"⿳目一八","decompositionStrokes":["0-4","5","6-7"]}
   ],
   [
     "典",
-    {"decomposition":"⿱曲八"}
+    {"decomposition":"⿱曲八","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "养",
-    {"decomposition":"⿱⺶介"}
+    {"decomposition":"⿱⺶介","decompositionStrokes":["0-5","5-8"]}
   ],
   [
     "冂",
-    {"decomposition":"⿰丨𠃌"}
+    {"decomposition":"⿰丨𠃌","decompositionStrokes":["0","1"]}
   ],
   [
     "⺆",
@@ -869,31 +869,31 @@
   ],
   [
     "𠔼",
-    {"decomposition":"⿵冂一"}
+    {"decomposition":"⿵冂一","decompositionStrokes":["",""]}
   ],
   [
     "冃",
-    {"decomposition":"⿵冂二"}
+    {"decomposition":"⿵冂二","decompositionStrokes":["",""]}
   ],
   [
     "内",
-    {"decomposition":"⿻冂人"}
+    {"decomposition":"⿻冂人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "円",
-    {"decomposition":"⿵冂丄"}
+    {"decomposition":"⿵冂丄","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "冈",
-    {"decomposition":"⿵冂㐅"}
+    {"decomposition":"⿵冂㐅","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "冉",
-    {"decomposition":"⿻冂土"}
+    {"decomposition":"⿻冂土","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "冋",
-    {"decomposition":"⿵冂口"}
+    {"decomposition":"⿵冂口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "𠕁",
@@ -901,23 +901,23 @@
   ],
   [
     "再",
-    {"decomposition":"⿱一冉"}
+    {"decomposition":"⿱一冉","decompositionStrokes":["0","1-5"]}
   ],
   [
     "冏",
-    {"decomposition":"⿵冂㕣"}
+    {"decomposition":"⿵冂㕣","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "𠕒",
-    {"decomposition":"⿻巾⿱丷八"}
+    {"decomposition":"⿻巾⿱丷八","decompositionStrokes":["","",""]}
   ],
   [
     "冒",
-    {"decomposition":"⿱冃目"}
+    {"decomposition":"⿱冃目","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "最",
-    {"decomposition":"⿱日取"}
+    {"decomposition":"⿱日取","decompositionStrokes":["0-3","4-11"]}
   ],
   [
     "冖",
@@ -925,55 +925,55 @@
   ],
   [
     "㓁",
-    {"decomposition":"⿱冖儿"}
+    {"decomposition":"⿱冖儿","decompositionStrokes":["",""]}
   ],
   [
     "写",
-    {"decomposition":"⿱冖与"}
+    {"decomposition":"⿱冖与","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "农",
-    {"decomposition":"⿻冖𧘇"}
+    {"decomposition":"⿻冖𧘇","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "冫",
-    {"decomposition":"⿱丶①"}
+    {"decomposition":"⿱丶①","decompositionStrokes":["0","1"]}
   ],
   [
     "冬",
-    {"decomposition":"⿱夂⺀"}
+    {"decomposition":"⿱夂⺀","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "决",
-    {"decomposition":"⿰冫夬"}
+    {"decomposition":"⿰冫夬","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "况",
-    {"decomposition":"⿰冫兄"}
+    {"decomposition":"⿰冫兄","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "冷",
-    {"decomposition":"⿰冫令"}
+    {"decomposition":"⿰冫令","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "净",
-    {"decomposition":"⿰冫争"}
+    {"decomposition":"⿰冫争","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "准",
-    {"decomposition":"⿰冫隹"}
+    {"decomposition":"⿰冫隹","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "凉",
-    {"decomposition":"⿰冫京"}
+    {"decomposition":"⿰冫京","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "几",
-    {"decomposition":"⿰丿乙"}
+    {"decomposition":"⿰丿乙","decompositionStrokes":["0","1"]}
   ],
   [
     "凡",
-    {"decomposition":"⿵几丶"}
+    {"decomposition":"⿵几丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "凵",
@@ -981,23 +981,23 @@
   ],
   [
     "凶",
-    {"decomposition":"⿶凵㐅"}
+    {"decomposition":"⿶凵㐅","decompositionStrokes":["2-3","0-1"]}
   ],
   [
     "出",
-    {"decomposition":"⿱屮凵"}
+    {"decomposition":"⿱屮凵","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "𠚍",
-    {"decomposition":"⿶凵𠂭"}
+    {"decomposition":"⿶凵𠂭","decompositionStrokes":["",""]}
   ],
   [
     "𠚕",
-    {"decomposition":"⿶凵⿳从一从"}
+    {"decomposition":"⿶凵⿳从一从","decompositionStrokes":["","","",""]}
   ],
   [
     "刀",
-    {"decomposition":"⿹𠃌丿"}
+    {"decomposition":"⿹𠃌丿","decompositionStrokes":["0","1"]}
   ],
   [
     "⺈",
@@ -1005,159 +1005,159 @@
   ],
   [
     "刂",
-    {"componentFormOf":"刀","decomposition":"⿰丨亅"}
+    {"componentFormOf":"刀","decomposition":"⿰丨亅","decompositionStrokes":["0","1"]}
   ],
   [
     "分",
-    {"decomposition":"⿱八刀"}
+    {"decomposition":"⿱八刀","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "切",
-    {"decomposition":"⿰七刀"}
+    {"decomposition":"⿰七刀","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "刍",
-    {"decomposition":"⿱⺈彐"}
+    {"decomposition":"⿱⺈彐","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "划",
-    {"decomposition":"⿰戈刂"}
+    {"decomposition":"⿰戈刂","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "刖",
-    {"decomposition":"⿰月刂"}
+    {"decomposition":"⿰月刂","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "列",
-    {"decomposition":"⿰歹刂"}
+    {"decomposition":"⿰歹刂","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "刚",
-    {"decomposition":"⿰冈刂"}
+    {"decomposition":"⿰冈刂","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "创",
-    {"decomposition":"⿰仓刂"}
+    {"decomposition":"⿰仓刂","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "初",
-    {"decomposition":"⿰衤刀"}
+    {"decomposition":"⿰衤刀","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "判",
-    {"decomposition":"⿰半刂"}
+    {"decomposition":"⿰半刂","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "利",
-    {"decomposition":"⿰禾刂"}
+    {"decomposition":"⿰禾刂","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "别",
-    {"decomposition":"⿰另刂"}
+    {"decomposition":"⿰另刂","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "到",
-    {"decomposition":"⿰至刂"}
+    {"decomposition":"⿰至刂","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "制",
-    {"decomposition":"⿰⿱牛巾刂"}
+    {"decomposition":"⿰⿱牛巾刂","decompositionStrokes":["0-2,5","3-5","6-7"]}
   ],
   [
     "刻",
-    {"decomposition":"⿰亥刂"}
+    {"decomposition":"⿰亥刂","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "前",
-    {"decomposition":"⿱䒑刖"}
+    {"decomposition":"⿱䒑刖","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "剧",
-    {"decomposition":"⿰居刂"}
+    {"decomposition":"⿰居刂","decompositionStrokes":["0-7","8-9"]}
   ],
   [
     "副",
-    {"decomposition":"⿰畐刂"}
+    {"decomposition":"⿰畐刂","decompositionStrokes":["0-8","9-10"]}
   ],
   [
     "力",
-    {"decomposition":"⿻丿𠃌"}
+    {"decomposition":"⿻丿𠃌","decompositionStrokes":["1","0"]}
   ],
   [
     "办",
-    {"decomposition":"⿻力八"}
+    {"decomposition":"⿻力八","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "功",
-    {"decomposition":"⿰工力"}
+    {"decomposition":"⿰工力","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "加",
-    {"decomposition":"⿰力口"}
+    {"decomposition":"⿰力口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "务",
-    {"decomposition":"⿱夂力"}
+    {"decomposition":"⿱夂力","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "动",
-    {"decomposition":"⿰云力"}
+    {"decomposition":"⿰云力","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "助",
-    {"decomposition":"⿰且力"}
+    {"decomposition":"⿰且力","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "努",
-    {"decomposition":"⿱奴力"}
+    {"decomposition":"⿱奴力","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "势",
-    {"decomposition":"⿱执力"}
+    {"decomposition":"⿱执力","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "勹",
-    {"decomposition":"⿰丿①"}
+    {"decomposition":"⿰丿①","decompositionStrokes":["0","1"]}
   ],
   [
     "勺",
-    {"decomposition":"⿹勹丶"}
+    {"decomposition":"⿹勹丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "勿",
-    {"decomposition":"⿹勹⿰丿丿"}
+    {"decomposition":"⿹勹⿰丿丿","decompositionStrokes":["0-1","2","3"]}
   ],
   [
     "匃",
-    {"decomposition":"⿹勹亾"}
+    {"decomposition":"⿹勹亾","decompositionStrokes":["",""]}
   ],
   [
     "包",
-    {"decomposition":"⿹勹巳"}
+    {"decomposition":"⿹勹巳","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "匕",
-    {"decomposition":"⿺乚丿"}
+    {"decomposition":"⿺乚丿","decompositionStrokes":["0","1"]}
   ],
   [
     "𠤎",
-    {"decomposition":"⿻乚丿"}
+    {"decomposition":"⿻乚丿","decompositionStrokes":["",""]}
   ],
   [
     "化",
-    {"decomposition":"⿰亻𠤎"}
+    {"decomposition":"⿰亻𠤎","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "𫧇",
-    {"decomposition":"⿱匕匕"}
+    {"decomposition":"⿱匕匕","decompositionStrokes":["",""]}
   ],
   [
     "北",
-    {"decomposition":"⿰③匕"}
+    {"decomposition":"⿰③匕","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "匚",
-    {"decomposition":"⿱一①"}
+    {"decomposition":"⿱一①","decompositionStrokes":["0","1"]}
   ],
   [
     "匸",
@@ -1165,95 +1165,95 @@
   ],
   [
     "区",
-    {"decomposition":"⿷匚㐅"}
+    {"decomposition":"⿷匚㐅","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "医",
-    {"decomposition":"⿷匚矢"}
+    {"decomposition":"⿷匚矢","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "十",
-    {"decomposition":"⿻一丨"}
+    {"decomposition":"⿻一丨","decompositionStrokes":["0","1"]}
   ],
   [
     "千",
-    {"decomposition":"⿱丿十"}
+    {"decomposition":"⿱丿十","decompositionStrokes":["0","1-2"]}
   ],
   [
     "卅",
-    {"decomposition":"⿻一川"}
+    {"decomposition":"⿻一川","decompositionStrokes":["0","1-3"]}
   ],
   [
     "升",
-    {"decomposition":"⿱丿廾"}
+    {"decomposition":"⿱丿廾","decompositionStrokes":["0","1-3"]}
   ],
   [
     "午",
-    {"decomposition":"⿻丿干"}
+    {"decomposition":"⿻丿干","decompositionStrokes":["0","1-3"]}
   ],
   [
     "半",
-    {"decomposition":"⿱丷⿻二丨"}
+    {"decomposition":"⿱丷⿻二丨","decompositionStrokes":["0-1","2-3","4"]}
   ],
   [
     "卌",
-    {"decomposition":"⿻一④"}
+    {"decomposition":"⿻一④","decompositionStrokes":["0","1-4"]}
   ],
   [
     "华",
-    {"decomposition":"⿱化十"}
+    {"decomposition":"⿱化十","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "卑",
-    {"decomposition":"⿱⿻白丿十"}
+    {"decomposition":"⿱⿻白丿十","decompositionStrokes":["0-4","5","6-7"]}
   ],
   [
     "卓",
-    {"decomposition":"⿱⺊早"}
+    {"decomposition":"⿱⺊早","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "单",
-    {"decomposition":"⿱丷⿻甲一"}
+    {"decomposition":"⿱丷⿻甲一","decompositionStrokes":["0-1","2-5,7","6"]}
   ],
   [
     "卖",
-    {"decomposition":"⿱十买"}
+    {"decomposition":"⿱十买","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "𠦝",
-    {"decomposition":"⿱十早"}
+    {"decomposition":"⿱十早","decompositionStrokes":["",""]}
   ],
   [
     "南",
-    {"decomposition":"⿱十⿵冂𢆉"}
+    {"decomposition":"⿱十⿵冂𢆉","decompositionStrokes":["0-1","2-3","4-8"]}
   ],
   [
     "卜",
-    {"decomposition":"⿰丨丶"}
+    {"decomposition":"⿰丨丶","decompositionStrokes":["0","1"]}
   ],
   [
     "⺊",
-    {"canonicalForm":"卜","decomposition":"⿰丨丶"}
+    {"canonicalForm":"卜","decomposition":"⿰丨丶","decompositionStrokes":["0","1"]}
   ],
   [
     "占",
-    {"decomposition":"⿱⺊口"}
+    {"decomposition":"⿱⺊口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "卡",
-    {"decomposition":"⿱上卜"}
+    {"decomposition":"⿱上卜","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "卤",
-    {"decomposition":"⿱⺊龱"}
+    {"decomposition":"⿱⺊龱","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "卩",
-    {"decomposition":"⿰丨𠃌"}
+    {"decomposition":"⿰丨𠃌","decompositionStrokes":["1","0"]}
   ],
   [
     "卫",
-    {"decomposition":"⿱卩一"}
+    {"decomposition":"⿱卩一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "㔾",
@@ -1265,19 +1265,19 @@
   ],
   [
     "卬",
-    {"decomposition":"⿰②卩"}
+    {"decomposition":"⿰②卩","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "印",
-    {"decomposition":"⿰③卩"}
+    {"decomposition":"⿰③卩","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "危",
-    {"decomposition":"⿸厃㔾"}
+    {"decomposition":"⿸厃㔾","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "却",
-    {"decomposition":"⿰去卩"}
+    {"decomposition":"⿰去卩","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "厂",
@@ -1289,23 +1289,23 @@
   ],
   [
     "厃",
-    {"decomposition":"⿱⺈厂"}
+    {"decomposition":"⿱⺈厂","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "厄",
-    {"decomposition":"⿸厂㔾"}
+    {"decomposition":"⿸厂㔾","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "历",
-    {"decomposition":"⿸厂力"}
+    {"decomposition":"⿸厂力","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "压",
-    {"decomposition":"⿸厂圡"}
+    {"decomposition":"⿸厂圡","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "原",
-    {"decomposition":"⿰厂泉"}
+    {"decomposition":"⿰厂泉","decompositionStrokes":["0-1","1-9"]}
   ],
   [
     "厶",
@@ -1313,19 +1313,19 @@
   ],
   [
     "𠫓",
-    {"decomposition":"⿻一厶"}
+    {"decomposition":"⿻一厶","decompositionStrokes":["",""]}
   ],
   [
     "𠫔",
-    {"decomposition":"⿱一厶"}
+    {"decomposition":"⿱一厶","decompositionStrokes":["",""]}
   ],
   [
     "去",
-    {"decomposition":"⿱土厶"}
+    {"decomposition":"⿱土厶","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "参",
-    {"decomposition":"⿳厶大彡"}
+    {"decomposition":"⿳厶大彡","decompositionStrokes":["0-1","2-4","5-7"]}
   ],
   [
     "又",
@@ -1333,411 +1333,411 @@
   ],
   [
     "及",
-    {"decomposition":"⿻①又"}
+    {"decomposition":"⿻①又","decompositionStrokes":["0","1-2"]}
   ],
   [
     "友",
-    {"decomposition":"⿸𠂇又"}
+    {"decomposition":"⿸𠂇又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "双",
-    {"decomposition":"⿰又又"}
+    {"decomposition":"⿰又又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "反",
-    {"decomposition":"⿸𠂆又"}
+    {"decomposition":"⿸𠂆又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "𠬝",
-    {"decomposition":"⿸卩又"}
+    {"decomposition":"⿸卩又","decompositionStrokes":["",""]}
   ],
   [
     "发",
-    {"decomposition":"⿸③又"}
+    {"decomposition":"⿸③又","decompositionStrokes":["0-1,4","2-3"]}
   ],
   [
     "取",
-    {"decomposition":"⿰耳又"}
+    {"decomposition":"⿰耳又","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "受",
-    {"decomposition":"⿳爫冖又"}
+    {"decomposition":"⿳爫冖又","decompositionStrokes":["0-3","4-5","6-7"]}
   ],
   [
     "变",
-    {"decomposition":"⿱亦又"}
+    {"decomposition":"⿱亦又","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "叚",
-    {"decomposition":"⿰⑤⿱コ又"}
+    {"decomposition":"⿰⑤⿱コ又","decompositionStrokes":["0-4","5-6","7-8"]}
   ],
   [
     "口",
-    {"decomposition":"口"}
+    {"decomposition":"口","decompositionStrokes":["0-2"]}
   ],
   [
     "𠮛",
-    {"decomposition":"⿱一口"}
+    {"decomposition":"⿱一口","decompositionStrokes":["",""]}
   ],
   [
     "𫩏",
-    {"decomposition":"⿴囗丨"}
+    {"decomposition":"⿴囗丨","decompositionStrokes":["",""]}
   ],
   [
     "古",
-    {"decomposition":"⿱十口"}
+    {"decomposition":"⿱十口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "句",
-    {"decomposition":"⿹勹口"}
+    {"decomposition":"⿹勹口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "另",
-    {"decomposition":"⿱口力"}
+    {"decomposition":"⿱口力","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "叩",
-    {"decomposition":"⿰口卩"}
+    {"decomposition":"⿰口卩","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "只",
-    {"decomposition":"⿱口八"}
+    {"decomposition":"⿱口八","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "叫",
-    {"decomposition":"⿰口丩"}
+    {"decomposition":"⿰口丩","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "召",
-    {"decomposition":"⿱刀口"}
+    {"decomposition":"⿱刀口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "可",
-    {"decomposition":"⿹丁口"}
+    {"decomposition":"⿹丁口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "台",
-    {"decomposition":"⿱厶口"}
+    {"decomposition":"⿱厶口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "史",
-    {"decomposition":"⿻口乂"}
+    {"decomposition":"⿻口乂","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "右",
-    {"decomposition":"⿸𠂇口"}
+    {"decomposition":"⿸𠂇口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "号",
-    {"decomposition":"⿱口丂"}
+    {"decomposition":"⿱口丂","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "司",
-    {"decomposition":"⿹𠃌𠮛"}
+    {"decomposition":"⿹𠃌𠮛","decompositionStrokes":["0","1-4"]}
   ],
   [
     "叹",
-    {"decomposition":"⿰口又"}
+    {"decomposition":"⿰口又","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "㕣",
-    {"decomposition":"⿱八口"}
+    {"decomposition":"⿱八口","decompositionStrokes":["",""]}
   ],
   [
     "𠮦",
-    {"decomposition":"⿱丷口"}
+    {"decomposition":"⿱丷口","decompositionStrokes":["",""]}
   ],
   [
     "吂",
-    {"decomposition":"⿱亡口"}
+    {"decomposition":"⿱亡口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "吃",
-    {"decomposition":"⿰口乞"}
+    {"decomposition":"⿰口乞","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "各",
-    {"decomposition":"⿱夂口"}
+    {"decomposition":"⿱夂口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "吅",
-    {"decomposition":"⿰口口"}
+    {"decomposition":"⿰口口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "合",
-    {"decomposition":"⿱亼口"}
+    {"decomposition":"⿱亼口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "吉",
-    {"decomposition":"⿱士口"}
+    {"decomposition":"⿱士口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "同",
-    {"decomposition":"⿵冂𠮛"}
+    {"decomposition":"⿵冂𠮛","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "名",
-    {"decomposition":"⿱夕口"}
+    {"decomposition":"⿱夕口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "后",
-    {"decomposition":"⿸𠂋口"}
+    {"decomposition":"⿸𠂋口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "吏",
-    {"decomposition":"⿻一史"}
+    {"decomposition":"⿻一史","decompositionStrokes":["0","1-5"]}
   ],
   [
     "向",
-    {"decomposition":"⿱丿冋"}
+    {"decomposition":"⿱丿冋","decompositionStrokes":["0","1-5"]}
   ],
   [
     "吕",
-    {"decomposition":"⿱口口"}
+    {"decomposition":"⿱口口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "吗",
-    {"decomposition":"⿰口马"}
+    {"decomposition":"⿰口马","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "𠮷",
-    {"decomposition":"⿱土口"}
+    {"decomposition":"⿱土口","decompositionStrokes":["",""]}
   ],
   [
     "君",
-    {"decomposition":"⿸尹口"}
+    {"decomposition":"⿸尹口","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "否",
-    {"decomposition":"⿱不口"}
+    {"decomposition":"⿱不口","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "吧",
-    {"decomposition":"⿰口巴"}
+    {"decomposition":"⿰口巴","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "听",
-    {"decomposition":"⿰口斤"}
+    {"decomposition":"⿰口斤","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "吴",
-    {"decomposition":"⿱口天"}
+    {"decomposition":"⿱口天","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "吵",
-    {"decomposition":"⿰口少"}
+    {"decomposition":"⿰口少","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "吹",
-    {"decomposition":"⿰口欠"}
+    {"decomposition":"⿰口欠","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "吾",
-    {"decomposition":"⿱五口"}
+    {"decomposition":"⿱五口","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "呆",
-    {"decomposition":"⿱口木"}
+    {"decomposition":"⿱口木","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "呈",
-    {"decomposition":"⿱口王"}
+    {"decomposition":"⿱口王","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "告",
-    {"decomposition":"⿱⺧口"}
+    {"decomposition":"⿱⺧口","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "员",
-    {"decomposition":"⿱口贝"}
+    {"decomposition":"⿱口贝","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "呢",
-    {"decomposition":"⿰口尼"}
+    {"decomposition":"⿰口尼","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "周",
-    {"decomposition":"⿵⺆𠮷"}
+    {"decomposition":"⿵⺆𠮷","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "味",
-    {"decomposition":"⿰口未"}
+    {"decomposition":"⿰口未","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "命",
-    {"decomposition":"⿱亼叩"}
+    {"decomposition":"⿱亼叩","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "咅",
-    {"decomposition":"⿱立口"}
+    {"decomposition":"⿱立口","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "和",
-    {"decomposition":"⿰禾口"}
+    {"decomposition":"⿰禾口","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "咖",
-    {"decomposition":"⿰口加"}
+    {"decomposition":"⿰口加","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "𫩠",
-    {"decomposition":"⿱龸口"}
+    {"decomposition":"⿱龸口","decompositionStrokes":["",""]}
   ],
   [
     "咱",
-    {"decomposition":"⿰口自"}
+    {"decomposition":"⿰口自","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "咸",
-    {"decomposition":"⿵戊𠮛"}
+    {"decomposition":"⿵戊𠮛","decompositionStrokes":["0-1,6-8","2-5"]}
   ],
   [
     "品",
-    {"decomposition":"⿱口吅"}
+    {"decomposition":"⿱口吅","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "哈",
-    {"decomposition":"⿰口合"}
+    {"decomposition":"⿰口合","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "响",
-    {"decomposition":"⿰口向"}
+    {"decomposition":"⿰口向","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "𠱠",
-    {"decomposition":"⿲口口口"}
+    {"decomposition":"⿲口口口","decompositionStrokes":["","",""]}
   ],
   [
     "哥",
-    {"decomposition":"⿱可可"}
+    {"decomposition":"⿱可可","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "哪",
-    {"decomposition":"⿰口那"}
+    {"decomposition":"⿰口那","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "哭",
-    {"decomposition":"⿱吅犬"}
+    {"decomposition":"⿱吅犬","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "唐",
-    {"decomposition":"⿸广⿱肀口"}
+    {"decomposition":"⿸广⿱肀口","decompositionStrokes":["0-2","3-6","7-9"]}
   ],
   [
     "唱",
-    {"decomposition":"⿰口昌"}
+    {"decomposition":"⿰口昌","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "商",
-    {"decomposition":"⿳亠丷冏"}
+    {"decomposition":"⿳亠丷冏","decompositionStrokes":["0-1","2-3","4-10"]}
   ],
   [
     "啊",
-    {"decomposition":"⿰口阿"}
+    {"decomposition":"⿰口阿","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "啡",
-    {"decomposition":"⿰口非"}
+    {"decomposition":"⿰口非","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "啤",
-    {"decomposition":"⿰口卑"}
+    {"decomposition":"⿰口卑","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "啬",
-    {"decomposition":"⿱⿻土丷回"}
+    {"decomposition":"⿱⿻土丷回","decompositionStrokes":["0-1,4","2-3","5-10"]}
   ],
   [
     "喂",
-    {"decomposition":"⿰口畏"}
+    {"decomposition":"⿰口畏","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "善",
-    {"decomposition":"⿳羊䒑口"}
+    {"decomposition":"⿳羊䒑口","decompositionStrokes":["0-5","6-8","9-11"]}
   ],
   [
     "喊",
-    {"decomposition":"⿰口咸"}
+    {"decomposition":"⿰口咸","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "喜",
-    {"decomposition":"⿱壴口"}
+    {"decomposition":"⿱壴口","decompositionStrokes":["0-8","9-11"]}
   ],
   [
     "喝",
-    {"decomposition":"⿰口曷"}
+    {"decomposition":"⿰口曷","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "喿",
-    {"decomposition":"⿱品木"}
+    {"decomposition":"⿱品木","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "嘴",
-    {"decomposition":"⿰口觜"}
+    {"decomposition":"⿰口觜","decompositionStrokes":["0-2","3-15"]}
   ],
   [
     "器",
-    {"decomposition":"⿳吅犬吅"}
+    {"decomposition":"⿳吅犬吅","decompositionStrokes":["0-5","6-9","10-15"]}
   ],
   [
     "囗",
-    {"decomposition":"⿱冂一"}
+    {"decomposition":"⿱冂一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "四",
-    {"decomposition":"⿴囗儿"}
+    {"decomposition":"⿴囗儿","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "龱",
-    {"decomposition":"⿴囗㐅","isStructural":true}
+    {"decomposition":"⿴囗㐅","decompositionStrokes":["",""],"isStructural":true}
   ],
   [
     "𠁤",
-    {"decomposition":"⿻儿口"}
+    {"decomposition":"⿻儿口","decompositionStrokes":["",""]}
   ],
   [
     "回",
-    {"decomposition":"⿴囗口"}
+    {"decomposition":"⿴囗口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "因",
-    {"decomposition":"⿴囗大"}
+    {"decomposition":"⿴囗大","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "团",
-    {"decomposition":"⿴囗才"}
+    {"decomposition":"⿴囗才","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "囬",
-    {"decomposition":"⿴囗④"}
+    {"decomposition":"⿴囗④","decompositionStrokes":["","3-6"]}
   ],
   [
     "园",
-    {"decomposition":"⿴囗元"}
+    {"decomposition":"⿴囗元","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "困",
-    {"decomposition":"⿴囗木"}
+    {"decomposition":"⿴囗木","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "围",
-    {"decomposition":"⿴囗韦"}
+    {"decomposition":"⿴囗韦","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "国",
-    {"decomposition":"⿴囗玉"}
+    {"decomposition":"⿴囗玉","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "图",
-    {"decomposition":"⿴囗冬"}
+    {"decomposition":"⿴囗冬","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "土",
-    {"decomposition":"⿱十一"}
+    {"decomposition":"⿱十一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "圡",
-    {"decomposition":"⿷土丶"}
+    {"decomposition":"⿷土丶","decompositionStrokes":["",""]}
   ],
   [
     "龶",
@@ -1745,99 +1745,99 @@
   ],
   [
     "圣",
-    {"decomposition":"⿱又土"}
+    {"decomposition":"⿱又土","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "在",
-    {"decomposition":"⿸③土"}
+    {"decomposition":"⿸③土","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "圭",
-    {"decomposition":"⿱土土"}
+    {"decomposition":"⿱土土","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "地",
-    {"decomposition":"⿰土也"}
+    {"decomposition":"⿰土也","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "场",
-    {"decomposition":"⿰土𠃓"}
+    {"decomposition":"⿰土𠃓","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "坏",
-    {"decomposition":"⿰土不"}
+    {"decomposition":"⿰土不","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "坐",
-    {"decomposition":"⿻土从"}
+    {"decomposition":"⿻土从","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "块",
-    {"decomposition":"⿰土夬"}
+    {"decomposition":"⿰土夬","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "坚",
-    {"decomposition":"⿱⿰〢又土"}
+    {"decomposition":"⿱⿰〢又土","decompositionStrokes":["0-1","2-3","4-6"]}
   ],
   [
     "垂",
-    {"decomposition":"⿻⿱②士卄"}
+    {"decomposition":"⿻⿱②士卄","decompositionStrokes":["0-1","2,6-7","3-5"]}
   ],
   [
     "城",
-    {"decomposition":"⿰土成"}
+    {"decomposition":"⿰土成","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "基",
-    {"decomposition":"⿱其土"}
+    {"decomposition":"⿱其土","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "堂",
-    {"decomposition":"⿱𫩠土"}
+    {"decomposition":"⿱𫩠土","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "境",
-    {"decomposition":"⿰土竟"}
+    {"decomposition":"⿰土竟","decompositionStrokes":["0-2","3-13"]}
   ],
   [
     "墙",
-    {"decomposition":"⿰土啬"}
+    {"decomposition":"⿰土啬","decompositionStrokes":["0-2","3-13"]}
   ],
   [
     "增",
-    {"decomposition":"⿰土曾"}
+    {"decomposition":"⿰土曾","decompositionStrokes":["0-2","3-14"]}
   ],
   [
     "士",
-    {"decomposition":"⿱十一"}
+    {"decomposition":"⿱十一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "壬",
-    {"decomposition":"⿱丿士"}
+    {"decomposition":"⿱丿士","decompositionStrokes":["0","1-3"]}
   ],
   [
     "壮",
-    {"decomposition":"⿰丬士"}
+    {"decomposition":"⿰丬士","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "声",
-    {"decomposition":"⿱士𠃜"}
+    {"decomposition":"⿱士𠃜","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "壴",
-    {"decomposition":"⿱十豆"}
+    {"decomposition":"⿱十豆","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "夂",
-    {"decomposition":"⿻丿又"}
+    {"decomposition":"⿻丿又","decompositionStrokes":["0","1-2"]}
   ],
   [
     "处",
-    {"decomposition":"⿺夂卜"}
+    {"decomposition":"⿺夂卜","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "备",
-    {"decomposition":"⿱夂田"}
+    {"decomposition":"⿱夂田","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "夊",
@@ -1845,87 +1845,87 @@
   ],
   [
     "复",
-    {"decomposition":"⿳𠂉日夂"}
+    {"decomposition":"⿳𠂉日夂","decompositionStrokes":["0-1","2-5","6-8"]}
   ],
   [
     "夏",
-    {"decomposition":"⿱𦣻夂"}
+    {"decomposition":"⿱𦣻夂","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "夕",
-    {"decomposition":"⿴𠂊丶"}
+    {"decomposition":"⿴𠂊丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "外",
-    {"decomposition":"⿰夕卜"}
+    {"decomposition":"⿰夕卜","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "夗",
-    {"decomposition":"⿰夕㔾"}
+    {"decomposition":"⿰夕㔾","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "多",
-    {"decomposition":"⿱夕夕"}
+    {"decomposition":"⿱夕夕","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "夜",
-    {"decomposition":"⿱亠⿰亻"}
+    {"decomposition":"⿱亠⿰亻","decompositionStrokes":["0-1","2-3","4-7"]}
   ],
   [
     "够",
-    {"decomposition":"⿰句多"}
+    {"decomposition":"⿰句多","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "大",
-    {"decomposition":"⿻一人"}
+    {"decomposition":"⿻一人","decompositionStrokes":["0","1-2"]}
   ],
   [
     "天",
-    {"decomposition":"⿱一大"}
+    {"decomposition":"⿱一大","decompositionStrokes":["0","1-3"]}
   ],
   [
     "太",
-    {"decomposition":"⿵大丶"}
+    {"decomposition":"⿵大丶","decompositionStrokes":["0-2","3"]}
   ],
   [
     "夫",
-    {"decomposition":"⿻二人"}
+    {"decomposition":"⿻二人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "夬",
-    {"decomposition":"⿻大①"}
+    {"decomposition":"⿻大①","decompositionStrokes":["1-3","0"]}
   ],
   [
     "夭",
-    {"decomposition":"⿱丿大"}
+    {"decomposition":"⿱丿大","decompositionStrokes":["0","1-3"]}
   ],
   [
     "央",
-    {"decomposition":"⿻冂大"}
+    {"decomposition":"⿻冂大","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "失",
-    {"decomposition":"⿰丿夫"}
+    {"decomposition":"⿰丿夫","decompositionStrokes":["0","1-4"]}
   ],
   [
     "头",
-    {"decomposition":"⿻⺀大"}
+    {"decomposition":"⿻⺀大","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "𡗗",
-    {"decomposition":"⿻三人"}
+    {"decomposition":"⿻三人","decompositionStrokes":["",""]}
   ],
   [
     "奂",
-    {"decomposition":"⿱⺈央"}
+    {"decomposition":"⿱⺈央","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "奇",
-    {"decomposition":"⿱大可"}
+    {"decomposition":"⿱大可","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "套",
-    {"decomposition":"⿱大镸"}
+    {"decomposition":"⿱大镸","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "女",
@@ -1933,171 +1933,171 @@
   ],
   [
     "奴",
-    {"decomposition":"⿰女又"}
+    {"decomposition":"⿰女又","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "奶",
-    {"decomposition":"⿰女乃"}
+    {"decomposition":"⿰女乃","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "她",
-    {"decomposition":"⿰女也"}
+    {"decomposition":"⿰女也","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "好",
-    {"decomposition":"⿰女子"}
+    {"decomposition":"⿰女子","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "如",
-    {"decomposition":"⿰女口"}
+    {"decomposition":"⿰女口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "妈",
-    {"decomposition":"⿰女马"}
+    {"decomposition":"⿰女马","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "妹",
-    {"decomposition":"⿰女未"}
+    {"decomposition":"⿰女未","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "妾",
-    {"decomposition":"⿱立女"}
+    {"decomposition":"⿱立女","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "始",
-    {"decomposition":"⿰女台"}
+    {"decomposition":"⿰女台","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "姐",
-    {"decomposition":"⿰女且"}
+    {"decomposition":"⿰女且","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "姑",
-    {"decomposition":"⿰女古"}
+    {"decomposition":"⿰女古","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "姓",
-    {"decomposition":"⿰女生"}
+    {"decomposition":"⿰女生","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "娘",
-    {"decomposition":"⿰女良"}
+    {"decomposition":"⿰女良","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "婚",
-    {"decomposition":"⿰女昏"}
+    {"decomposition":"⿰女昏","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "媒",
-    {"decomposition":"⿰女某"}
+    {"decomposition":"⿰女某","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "子",
-    {"decomposition":"⿻了一"}
+    {"decomposition":"⿻了一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "字",
-    {"decomposition":"⿱宀子"}
+    {"decomposition":"⿱宀子","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "存",
-    {"decomposition":"⿸③子"}
+    {"decomposition":"⿸③子","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "孝",
-    {"decomposition":"⿸耂子"}
+    {"decomposition":"⿸耂子","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "学",
-    {"decomposition":"⿳𭕄冖子"}
+    {"decomposition":"⿳𭕄冖子","decompositionStrokes":["0-2","3-4","5-7"]}
   ],
   [
     "孩",
-    {"decomposition":"⿰子亥"}
+    {"decomposition":"⿰子亥","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "孰",
-    {"decomposition":"⿰享丸"}
+    {"decomposition":"⿰享丸","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "宀",
-    {"decomposition":"⿱丶冖"}
+    {"decomposition":"⿱丶冖","decompositionStrokes":["0","1-2"]}
   ],
   [
     "它",
-    {"decomposition":"⿱宀匕"}
+    {"decomposition":"⿱宀匕","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "安",
-    {"decomposition":"⿱宀女"}
+    {"decomposition":"⿱宀女","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "完",
-    {"decomposition":"⿱宀元"}
+    {"decomposition":"⿱宀元","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "𫲸",
-    {"decomposition":"⿱宀丰"}
+    {"decomposition":"⿱宀丰","decompositionStrokes":["",""]}
   ],
   [
     "官",
-    {"decomposition":"⿱宀㠯"}
+    {"decomposition":"⿱宀㠯","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "定",
-    {"decomposition":"⿱宀𤴓"}
+    {"decomposition":"⿱宀𤴓","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "宛",
-    {"decomposition":"⿱宀夗"}
+    {"decomposition":"⿱宀夗","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "宜",
-    {"decomposition":"⿱宀且"}
+    {"decomposition":"⿱宀且","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "实",
-    {"decomposition":"⿱宀头"}
+    {"decomposition":"⿱宀头","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "客",
-    {"decomposition":"⿱宀各"}
+    {"decomposition":"⿱宀各","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "宣",
-    {"decomposition":"⿱宀亘"}
+    {"decomposition":"⿱宀亘","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "室",
-    {"decomposition":"⿱宀至"}
+    {"decomposition":"⿱宀至","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "害",
-    {"decomposition":"⿱𫲸口"}
+    {"decomposition":"⿱𫲸口","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "家",
-    {"decomposition":"⿱宀豕"}
+    {"decomposition":"⿱宀豕","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "容",
-    {"decomposition":"⿱宀谷"}
+    {"decomposition":"⿱宀谷","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "𡨄",
-    {"decomposition":"⿳宀𠀎八"}
+    {"decomposition":"⿳宀𠀎八","decompositionStrokes":["","",""]}
   ],
   [
     "寅",
-    {"decomposition":"⿱宀⿳一由八"}
+    {"decomposition":"⿱宀⿳一由八","decompositionStrokes":["0-2","3","4-8","9-10"]}
   ],
   [
     "富",
-    {"decomposition":"⿱宀畐"}
+    {"decomposition":"⿱宀畐","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "察",
-    {"decomposition":"⿱宀祭"}
+    {"decomposition":"⿱宀祭","decompositionStrokes":["0-2","3-13"]}
   ],
   [
     "寸",
@@ -2105,39 +2105,39 @@
   ],
   [
     "对",
-    {"decomposition":"⿰又寸"}
+    {"decomposition":"⿰又寸","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "寺",
-    {"decomposition":"⿱土寸"}
+    {"decomposition":"⿱土寸","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "导",
-    {"decomposition":"⿱巳寸"}
+    {"decomposition":"⿱巳寸","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "𪧷",
-    {"decomposition":"⿱夕寸"}
+    {"decomposition":"⿱夕寸","decompositionStrokes":["",""]}
   ],
   [
     "㝵",
-    {"decomposition":"⿱旦寸"}
+    {"decomposition":"⿱旦寸","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "封",
-    {"decomposition":"⿰圭寸"}
+    {"decomposition":"⿰圭寸","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "将",
-    {"decomposition":"⿰丬𪧷"}
+    {"decomposition":"⿰丬𪧷","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "射",
-    {"decomposition":"⿰身寸"}
+    {"decomposition":"⿰身寸","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "小",
-    {"decomposition":"⿻亅八"}
+    {"decomposition":"⿻亅八","decompositionStrokes":["0","1-2"]}
   ],
   [
     "⺌",
@@ -2153,91 +2153,91 @@
   ],
   [
     "少",
-    {"decomposition":"⿱小丿"}
+    {"decomposition":"⿱小丿","decompositionStrokes":["0-2","3"]}
   ],
   [
     "尔",
-    {"decomposition":"⿱⺈小"}
+    {"decomposition":"⿱⺈小","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "龸",
-    {"decomposition":"⿱⺌冖"}
+    {"decomposition":"⿱⺌冖","decompositionStrokes":["",""]}
   ],
   [
     "尢",
-    {"decomposition":"⿸②乚"}
+    {"decomposition":"⿸②乚","decompositionStrokes":["0-1","2"]}
   ],
   [
     "尤",
-    {"decomposition":"⿺尢丶"}
+    {"decomposition":"⿺尢丶","decompositionStrokes":["0-2","3"]}
   ],
   [
     "就",
-    {"decomposition":"⿰京尤"}
+    {"decomposition":"⿰京尤","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "尸",
-    {"decomposition":"⿰丿②"}
+    {"decomposition":"⿰丿②","decompositionStrokes":["2","0-1"]}
   ],
   [
     "尺",
-    {"decomposition":"⿸尸乚"}
+    {"decomposition":"⿸尸乚","decompositionStrokes":["0-2","3"]}
   ],
   [
     "尼",
-    {"decomposition":"⿸尸匕"}
+    {"decomposition":"⿸尸匕","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "尽",
-    {"decomposition":"⿱尺⺀"}
+    {"decomposition":"⿱尺⺀","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "层",
-    {"decomposition":"⿸尸云"}
+    {"decomposition":"⿸尸云","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "居",
-    {"decomposition":"⿸尸古"}
+    {"decomposition":"⿸尸古","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "屋",
-    {"decomposition":"⿸尸至"}
+    {"decomposition":"⿸尸至","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "展",
-    {"decomposition":"⿸尸⿱龷④"}
+    {"decomposition":"⿸尸⿱龷④","decompositionStrokes":["0-2","3-6","6-9"]}
   ],
   [
     "属",
-    {"decomposition":"⿸尸禹"}
+    {"decomposition":"⿸尸禹","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "屮",
-    {"decomposition":"⿻凵丨"}
+    {"decomposition":"⿻凵丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "𡳾",
-    {"decomposition":"⿻凵乚"}
+    {"decomposition":"⿻凵乚","decompositionStrokes":["",""]}
   ],
   [
     "屯",
-    {"decomposition":"⿻一𡳾"}
+    {"decomposition":"⿻一𡳾","decompositionStrokes":["0","1-3"]}
   ],
   [
     "山",
-    {"decomposition":"⿶凵丨"}
+    {"decomposition":"⿶凵丨","decompositionStrokes":["1-2","0"]}
   ],
   [
     "岁",
-    {"decomposition":"⿱山夕"}
+    {"decomposition":"⿱山夕","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "巛",
-    {"decomposition":"⿲𡿨𡿨𡿨"}
+    {"decomposition":"⿲𡿨𡿨𡿨","decompositionStrokes":["0","1","2"]}
   ],
   [
     "川",
-    {"decomposition":"⿲丿丨丨"}
+    {"decomposition":"⿲丿丨丨","decompositionStrokes":["0","1","2"]}
   ],
   [
     "𡿨",
@@ -2245,7 +2245,7 @@
   ],
   [
     "𫶧",
-    {"decomposition":"⿴儿丨"}
+    {"decomposition":"⿴儿丨","decompositionStrokes":["",""]}
   ],
   [
     "工",
@@ -2253,27 +2253,27 @@
   ],
   [
     "左",
-    {"decomposition":"⿸𠂇工"}
+    {"decomposition":"⿸𠂇工","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "巧",
-    {"decomposition":"⿰工丂"}
+    {"decomposition":"⿰工丂","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "𢀖",
-    {"decomposition":"⿱ス工"}
+    {"decomposition":"⿱ス工","decompositionStrokes":["",""]}
   ],
   [
     "巩",
-    {"decomposition":"⿰工凡"}
+    {"decomposition":"⿰工凡","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "差",
-    {"decomposition":"⿸羊工"}
+    {"decomposition":"⿸羊工","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "己",
-    {"decomposition":"⿱②乚"}
+    {"decomposition":"⿱②乚","decompositionStrokes":["0-1","2"]}
   ],
   [
     "已",
@@ -2281,67 +2281,67 @@
   ],
   [
     "巳",
-    {"decomposition":"⿻乚②"}
+    {"decomposition":"⿻乚②","decompositionStrokes":["2","0-1"]}
   ],
   [
     "巴",
-    {"decomposition":"⿻巳①"}
+    {"decomposition":"⿻巳①","decompositionStrokes":["0,2-3","1"]}
   ],
   [
     "㠯",
-    {"decomposition":"⿻己②"}
+    {"decomposition":"⿻己②","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "巾",
-    {"decomposition":"⿻冂丨"}
+    {"decomposition":"⿻冂丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "帀",
-    {"decomposition":"⿱一巾"}
+    {"decomposition":"⿱一巾","decompositionStrokes":["0","1-3"]}
   ],
   [
     "币",
-    {"decomposition":"⿱丿巾"}
+    {"decomposition":"⿱丿巾","decompositionStrokes":["0","1-3"]}
   ],
   [
     "市",
-    {"decomposition":"⿱亠巾"}
+    {"decomposition":"⿱亠巾","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "布",
-    {"decomposition":"⿸𠂇巾"}
+    {"decomposition":"⿸𠂇巾","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "师",
-    {"decomposition":"⿰刂帀"}
+    {"decomposition":"⿰刂帀","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "希",
-    {"decomposition":"⿱㐅布"}
+    {"decomposition":"⿱㐅布","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "㡀",
-    {"decomposition":"⿻丷⿻巾八"}
+    {"decomposition":"⿻丷⿻巾八","decompositionStrokes":["","",""]}
   ],
   [
     "带",
-    {"decomposition":"⿳卅冖巾"}
+    {"decomposition":"⿳卅冖巾","decompositionStrokes":["0-3","4-5","6-8"]}
   ],
   [
     "帮",
-    {"decomposition":"⿱邦巾"}
+    {"decomposition":"⿱邦巾","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "常",
-    {"decomposition":"⿱𫩠巾"}
+    {"decomposition":"⿱𫩠巾","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "干",
-    {"decomposition":"⿱一十"}
+    {"decomposition":"⿱一十","decompositionStrokes":["0","1-2"]}
   ],
   [
     "平",
-    {"decomposition":"⿻干丷"}
+    {"decomposition":"⿻干丷","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "𢆉",
@@ -2349,71 +2349,71 @@
   ],
   [
     "年",
-    {"decomposition":"⿱𠂉④"}
+    {"decomposition":"⿱𠂉④","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "并",
-    {"decomposition":"⿱丷开"}
+    {"decomposition":"⿱丷开","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "幸",
-    {"decomposition":"⿱土𢆉"}
+    {"decomposition":"⿱土𢆉","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "乡",
-    {"decomposition":"幺"}
+    {"decomposition":"幺","decompositionStrokes":["0-2"]}
   ],
   [
     "幺",
-    {"decomposition":"⿰②丶"}
+    {"decomposition":"⿰②丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "广",
-    {"decomposition":"⿱丶厂"}
+    {"decomposition":"⿱丶厂","decompositionStrokes":["0","1-2"]}
   ],
   [
     "庄",
-    {"decomposition":"⿸广土"}
+    {"decomposition":"⿸广土","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "庆",
-    {"decomposition":"⿸广大"}
+    {"decomposition":"⿸广大","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "床",
-    {"decomposition":"⿸广木"}
+    {"decomposition":"⿸广木","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "库",
-    {"decomposition":"⿸广车"}
+    {"decomposition":"⿸广车","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "应",
-    {"decomposition":"⿸广⿱𭕄一"}
+    {"decomposition":"⿸广⿱𭕄一","decompositionStrokes":["0-2","3-5","6"]}
   ],
   [
     "底",
-    {"decomposition":"⿸广氐"}
+    {"decomposition":"⿸广氐","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "店",
-    {"decomposition":"⿸广占"}
+    {"decomposition":"⿸广占","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "度",
-    {"decomposition":"⿸广⿱廿又"}
+    {"decomposition":"⿸广⿱廿又","decompositionStrokes":["0-2","3-6","7-8"]}
   ],
   [
     "座",
-    {"decomposition":"⿸广坐"}
+    {"decomposition":"⿸广坐","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "庭",
-    {"decomposition":"⿸广廷"}
+    {"decomposition":"⿸广廷","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "康",
-    {"decomposition":"⿸广隶"}
+    {"decomposition":"⿸广隶","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "廴",
@@ -2421,39 +2421,39 @@
   ],
   [
     "廷",
-    {"decomposition":"⿺廴壬"}
+    {"decomposition":"⿺廴壬","decompositionStrokes":["4-5","0-3"]}
   ],
   [
     "建",
-    {"decomposition":"⿺廴聿"}
+    {"decomposition":"⿺廴聿","decompositionStrokes":["6-7","0-5"]}
   ],
   [
     "廾",
-    {"decomposition":"⿻一⿰丿丨"}
+    {"decomposition":"⿻一⿰丿丨","decompositionStrokes":["0","1","2"]}
   ],
   [
     "廿",
-    {"decomposition":"⿻廾一"}
+    {"decomposition":"⿻廾一","decompositionStrokes":["0-2","3"]}
   ],
   [
     "开",
-    {"decomposition":"⿱一廾"}
+    {"decomposition":"⿱一廾","decompositionStrokes":["0","1-3"]}
   ],
   [
     "弄",
-    {"decomposition":"⿱王廾"}
+    {"decomposition":"⿱王廾","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "弋",
-    {"decomposition":"⿺𫠠丶"}
+    {"decomposition":"⿺𫠠丶","decompositionStrokes":["0-1","2"]}
   ],
   [
     "𫠠",
-    {"decomposition":"⿻一乚"}
+    {"decomposition":"⿻一乚","decompositionStrokes":["",""]}
   ],
   [
     "式",
-    {"decomposition":"⿹弋工"}
+    {"decomposition":"⿹弋工","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "弓",
@@ -2461,83 +2461,83 @@
   ],
   [
     "弔",
-    {"decomposition":"⿻弓丨"}
+    {"decomposition":"⿻弓丨","decompositionStrokes":["0-2","3"]}
   ],
   [
     "弗",
-    {"decomposition":"⿻弓⿰丿丨"}
+    {"decomposition":"⿻弓⿰丿丨","decompositionStrokes":["0-2","3","4"]}
   ],
   [
     "𢎨",
-    {"decomposition":"⿹弔丿"}
+    {"decomposition":"⿹弔丿","decompositionStrokes":["",""]}
   ],
   [
     "弟",
-    {"decomposition":"⿱丷𢎨"}
+    {"decomposition":"⿱丷𢎨","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "张",
-    {"decomposition":"⿰弓长"}
+    {"decomposition":"⿰弓长","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "强",
-    {"decomposition":"⿰弓虽"}
+    {"decomposition":"⿰弓虽","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "彐",
-    {"decomposition":"⿼コ一"}
+    {"decomposition":"⿼コ一","decompositionStrokes":["0,2","1"]}
   ],
   [
     "彑",
-    {"decomposition":"⿱②一"}
+    {"decomposition":"⿱②一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "当",
-    {"decomposition":"⿱⺌彐"}
+    {"decomposition":"⿱⺌彐","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "录",
-    {"decomposition":"⿱彐氺"}
+    {"decomposition":"⿱彐氺","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "彡",
-    {"decomposition":"⿳丿丿丿"}
+    {"decomposition":"⿳丿丿丿","decompositionStrokes":["0","1","2"]}
   ],
   [
     "形",
-    {"decomposition":"⿰开彡"}
+    {"decomposition":"⿰开彡","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "彦",
-    {"decomposition":"⿸产彡"}
+    {"decomposition":"⿸产彡","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "彩",
-    {"decomposition":"⿰采彡"}
+    {"decomposition":"⿰采彡","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "影",
-    {"decomposition":"⿰景彡"}
+    {"decomposition":"⿰景彡","decompositionStrokes":["0-11","12-14"]}
   ],
   [
     "彳",
-    {"decomposition":"⿱②丨"}
+    {"decomposition":"⿱②丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "往",
-    {"decomposition":"⿰彳主"}
+    {"decomposition":"⿰彳主","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "待",
-    {"decomposition":"⿰彳寺"}
+    {"decomposition":"⿰彳寺","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "很",
-    {"decomposition":"⿰彳艮"}
+    {"decomposition":"⿰彳艮","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "得",
-    {"decomposition":"⿰彳㝵"}
+    {"decomposition":"⿰彳㝵","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "心",
@@ -2545,155 +2545,155 @@
   ],
   [
     "忄",
-    {"componentFormOf":"心","decomposition":"⿻八丨","isStructural":true}
+    {"componentFormOf":"心","decomposition":"⿻八丨","decompositionStrokes":["0-1","2"],"isStructural":true}
   ],
   [
     "必",
-    {"decomposition":"⿻心丿"}
+    {"decomposition":"⿻心丿","decompositionStrokes":["0-3","4"]}
   ],
   [
     "志",
-    {"decomposition":"⿱士心"}
+    {"decomposition":"⿱士心","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "忘",
-    {"decomposition":"⿱亡心"}
+    {"decomposition":"⿱亡心","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "忙",
-    {"decomposition":"⿰忄亡"}
+    {"decomposition":"⿰忄亡","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "快",
-    {"decomposition":"⿰忄夬"}
+    {"decomposition":"⿰忄夬","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "念",
-    {"decomposition":"⿱今心"}
+    {"decomposition":"⿱今心","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "忽",
-    {"decomposition":"⿱勿心"}
+    {"decomposition":"⿱勿心","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "态",
-    {"decomposition":"⿱太心"}
+    {"decomposition":"⿱太心","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "怎",
-    {"decomposition":"⿱乍心"}
+    {"decomposition":"⿱乍心","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "怕",
-    {"decomposition":"⿰忄白"}
+    {"decomposition":"⿰忄白","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "思",
-    {"decomposition":"⿱田心"}
+    {"decomposition":"⿱田心","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "急",
-    {"decomposition":"⿱刍心"}
+    {"decomposition":"⿱刍心","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "性",
-    {"decomposition":"⿰忄生"}
+    {"decomposition":"⿰忄生","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "怪",
-    {"decomposition":"⿰忄圣"}
+    {"decomposition":"⿰忄圣","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "总",
-    {"decomposition":"⿱𠮦心"}
+    {"decomposition":"⿱𠮦心","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "恐",
-    {"decomposition":"⿱巩心"}
+    {"decomposition":"⿱巩心","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "息",
-    {"decomposition":"⿱自心"}
+    {"decomposition":"⿱自心","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "您",
-    {"decomposition":"⿱你心"}
+    {"decomposition":"⿱你心","decompositionStrokes":["0-6","7-10"]}
   ],
   [
     "情",
-    {"decomposition":"⿰忄青"}
+    {"decomposition":"⿰忄青","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "惯",
-    {"decomposition":"⿰忄贯"}
+    {"decomposition":"⿰忄贯","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "想",
-    {"decomposition":"⿱相心"}
+    {"decomposition":"⿱相心","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "意",
-    {"decomposition":"⿱音心"}
+    {"decomposition":"⿱音心","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "感",
-    {"decomposition":"⿱咸心"}
+    {"decomposition":"⿱咸心","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "愿",
-    {"decomposition":"⿸原心"}
+    {"decomposition":"⿸原心","decompositionStrokes":["0-9","10-13"]}
   ],
   [
     "慢",
-    {"decomposition":"⿰忄曼"}
+    {"decomposition":"⿰忄曼","decompositionStrokes":["0-2","3-13"]}
   ],
   [
     "懂",
-    {"decomposition":"⿰忄董"}
+    {"decomposition":"⿰忄董","decompositionStrokes":["0-2","3-14"]}
   ],
   [
     "戈",
-    {"decomposition":"⿻弋丿"}
+    {"decomposition":"⿻弋丿","decompositionStrokes":["0-2","3"]}
   ],
   [
     "戉",
-    {"decomposition":"⿰①戈"}
+    {"decomposition":"⿰①戈","decompositionStrokes":["1","0,2-4"]}
   ],
   [
     "戊",
-    {"decomposition":"⿰丿戈"}
+    {"decomposition":"⿰丿戈","decompositionStrokes":["1","0,2-4"]}
   ],
   [
     "戋",
-    {"decomposition":"⿻戈一"}
+    {"decomposition":"⿻戈一","decompositionStrokes":["1-4","0"]}
   ],
   [
     "戌",
-    {"decomposition":"⿵戊一"}
+    {"decomposition":"⿵戊一","decompositionStrokes":["0-1,3-5","2"]}
   ],
   [
     "戏",
-    {"decomposition":"⿰又戈"}
+    {"decomposition":"⿰又戈","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "成",
-    {"decomposition":"⿵戊𠃌"}
+    {"decomposition":"⿵戊𠃌","decompositionStrokes":["0-1,3-5","2"]}
   ],
   [
     "我",
-    {"decomposition":"⿰手戈"}
+    {"decomposition":"⿰手戈","decompositionStrokes":["0-3","1,4-6"]}
   ],
   [
     "或",
-    {"decomposition":"⿹戈⿱口一"}
+    {"decomposition":"⿹戈⿱口一","decompositionStrokes":["0,5-7","1-3","4"]}
   ],
   [
     "戶",
-    {"decomposition":"⿱丿尸"}
+    {"decomposition":"⿱丿尸","decompositionStrokes":["0","1-3"]}
   ],
   [
     "户",
-    {"decomposition":"⿱丶尸"}
+    {"decomposition":"⿱丶尸","decompositionStrokes":["0","1-3"]}
   ],
   [
     "戸",
@@ -2701,15 +2701,15 @@
   ],
   [
     "房",
-    {"decomposition":"⿸户方"}
+    {"decomposition":"⿸户方","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "所",
-    {"decomposition":"⿰戶斤"}
+    {"decomposition":"⿰戶斤","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "扁",
-    {"decomposition":"⿸户𠕁"}
+    {"decomposition":"⿸户𠕁","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "手",
@@ -2717,11 +2717,11 @@
   ],
   [
     "扌",
-    {"componentFormOf":"手","decomposition":"⿻二亅"}
+    {"componentFormOf":"手","decomposition":"⿻二亅","decompositionStrokes":["0,2","1"]}
   ],
   [
     "才",
-    {"decomposition":"⿻丆亅"}
+    {"decomposition":"⿻丆亅","decompositionStrokes":["0,2","1"]}
   ],
   [
     "龵",
@@ -2729,223 +2729,223 @@
   ],
   [
     "打",
-    {"decomposition":"⿰扌丁"}
+    {"decomposition":"⿰扌丁","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "执",
-    {"decomposition":"⿰扌丸"}
+    {"decomposition":"⿰扌丸","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "批",
-    {"decomposition":"⿰扌比"}
+    {"decomposition":"⿰扌比","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "找",
-    {"decomposition":"⿰扌戈"}
+    {"decomposition":"⿰扌戈","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "技",
-    {"decomposition":"⿰扌支"}
+    {"decomposition":"⿰扌支","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "把",
-    {"decomposition":"⿰扌巴"}
+    {"decomposition":"⿰扌巴","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "抓",
-    {"decomposition":"⿰扌爪"}
+    {"decomposition":"⿰扌爪","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "护",
-    {"decomposition":"⿰扌户"}
+    {"decomposition":"⿰扌户","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "报",
-    {"decomposition":"⿰扌𠬝"}
+    {"decomposition":"⿰扌𠬝","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "拉",
-    {"decomposition":"⿰扌立"}
+    {"decomposition":"⿰扌立","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "拍",
-    {"decomposition":"⿰扌白"}
+    {"decomposition":"⿰扌白","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "拿",
-    {"decomposition":"⿱合手"}
+    {"decomposition":"⿱合手","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "持",
-    {"decomposition":"⿰扌寺"}
+    {"decomposition":"⿰扌寺","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "挂",
-    {"decomposition":"⿰扌圭"}
+    {"decomposition":"⿰扌圭","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "指",
-    {"decomposition":"⿰扌旨"}
+    {"decomposition":"⿰扌旨","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "按",
-    {"decomposition":"⿰扌安"}
+    {"decomposition":"⿰扌安","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "挺",
-    {"decomposition":"⿰扌廷"}
+    {"decomposition":"⿰扌廷","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "换",
-    {"decomposition":"⿰扌奂"}
+    {"decomposition":"⿰扌奂","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "据",
-    {"decomposition":"⿰扌居"}
+    {"decomposition":"⿰扌居","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "掉",
-    {"decomposition":"⿰扌卓"}
+    {"decomposition":"⿰扌卓","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "排",
-    {"decomposition":"⿰扌非"}
+    {"decomposition":"⿰扌非","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "接",
-    {"decomposition":"⿰扌妾"}
+    {"decomposition":"⿰扌妾","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "推",
-    {"decomposition":"⿰扌隹"}
+    {"decomposition":"⿰扌隹","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "提",
-    {"decomposition":"⿰扌是"}
+    {"decomposition":"⿰扌是","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "握",
-    {"decomposition":"⿰扌屋"}
+    {"decomposition":"⿰扌屋","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "搬",
-    {"decomposition":"⿰扌般"}
+    {"decomposition":"⿰扌般","decompositionStrokes":["0-2","3-12"]}
   ],
   [
     "播",
-    {"decomposition":"⿰扌番"}
+    {"decomposition":"⿰扌番","decompositionStrokes":["0-2","3-14"]}
   ],
   [
     "支",
-    {"decomposition":"⿱十又"}
+    {"decomposition":"⿱十又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "攴",
-    {"decomposition":"⿱⺊又"}
+    {"decomposition":"⿱⺊又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "攵",
-    {"componentFormOf":"攴","decomposition":"⿱②乂"}
+    {"componentFormOf":"攴","decomposition":"⿱②乂","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "收",
-    {"decomposition":"⿰丩攵"}
+    {"decomposition":"⿰丩攵","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "改",
-    {"decomposition":"⿰己攵"}
+    {"decomposition":"⿰己攵","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "放",
-    {"decomposition":"⿰方攵"}
+    {"decomposition":"⿰方攵","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "故",
-    {"decomposition":"⿰古攵"}
+    {"decomposition":"⿰古攵","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "效",
-    {"decomposition":"⿰交攵"}
+    {"decomposition":"⿰交攵","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "救",
-    {"decomposition":"⿰求攵"}
+    {"decomposition":"⿰求攵","decompositionStrokes":["0-6","7-10"]}
   ],
   [
     "敕",
-    {"decomposition":"⿰束攵"}
+    {"decomposition":"⿰束攵","decompositionStrokes":["0-6","7-10"]}
   ],
   [
     "教",
-    {"decomposition":"⿰孝攵"}
+    {"decomposition":"⿰孝攵","decompositionStrokes":["0-6","7-10"]}
   ],
   [
     "敢",
-    {"decomposition":"⿰⿱ュ耳攵"}
+    {"decomposition":"⿰⿱ュ耳攵","decompositionStrokes":["0-1","1-6","7-10"]}
   ],
   [
     "散",
-    {"decomposition":"⿰⿱龷月攵"}
+    {"decomposition":"⿰⿱龷月攵","decompositionStrokes":["0-3","4-7","8-11"]}
   ],
   [
     "敬",
-    {"decomposition":"⿰苟攵"}
+    {"decomposition":"⿰苟攵","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "数",
-    {"decomposition":"⿰娄攵"}
+    {"decomposition":"⿰娄攵","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "整",
-    {"decomposition":"⿱敕正"}
+    {"decomposition":"⿱敕正","decompositionStrokes":["0-10","11-15"]}
   ],
   [
     "文",
-    {"decomposition":"⿱亠乂"}
+    {"decomposition":"⿱亠乂","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "斗",
-    {"decomposition":"⿻十②"}
+    {"decomposition":"⿻十②","decompositionStrokes":["2-3","0-1"]}
   ],
   [
     "斤",
-    {"decomposition":"⿸𠂆丅"}
+    {"decomposition":"⿸𠂆丅","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "斥",
-    {"decomposition":"⿻斤丶"}
+    {"decomposition":"⿻斤丶","decompositionStrokes":["0-3","4"]}
   ],
   [
     "断",
-    {"decomposition":"⿰⿺𠃊米斤"}
+    {"decomposition":"⿰⿺𠃊米斤","decompositionStrokes":["6","0-5","7-10"]}
   ],
   [
     "新",
-    {"decomposition":"⿰亲斤"}
+    {"decomposition":"⿰亲斤","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "方",
-    {"decomposition":"⿱亠⿰丿𠃌"}
+    {"decomposition":"⿱亠⿰丿𠃌","decompositionStrokes":["0-1","2","3"]}
   ],
   [
     "斿",
-    {"decomposition":"⿰方⿱𠂉子"}
+    {"decomposition":"⿰方⿱𠂉子","decompositionStrokes":["0-3","4-5","6-8"]}
   ],
   [
     "旁",
-    {"decomposition":"⿱⿳亠丷冖方"}
+    {"decomposition":"⿱⿳亠丷冖方","decompositionStrokes":["0-1","2-3","4-5","6-9"]}
   ],
   [
     "旅",
-    {"decomposition":"⿰方⿱𠂉④"}
+    {"decomposition":"⿰方⿱𠂉④","decompositionStrokes":["0-3","4-5","6-9"]}
   ],
   [
     "族",
-    {"decomposition":"⿰方⿱𠂉矢"}
+    {"decomposition":"⿰方⿱𠂉矢","decompositionStrokes":["0-3","4-5","6-10"]}
   ],
   [
     "无",
-    {"decomposition":"⿱一尢"}
+    {"decomposition":"⿱一尢","decompositionStrokes":["0","1-3"]}
   ],
   [
     "旡",
@@ -2953,163 +2953,163 @@
   ],
   [
     "既",
-    {"decomposition":"⿰⑤旡"}
+    {"decomposition":"⿰⑤旡","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "日",
-    {"decomposition":"⿴口一"}
+    {"decomposition":"⿴口一","decompositionStrokes":["0-1,3","2"]}
   ],
   [
     "旦",
-    {"decomposition":"⿱日一"}
+    {"decomposition":"⿱日一","decompositionStrokes":["0-3","4"]}
   ],
   [
     "旧",
-    {"decomposition":"⿰丨日"}
+    {"decomposition":"⿰丨日","decompositionStrokes":["0","1-4"]}
   ],
   [
     "旨",
-    {"decomposition":"⿱匕日"}
+    {"decomposition":"⿱匕日","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "早",
-    {"decomposition":"⿱日十"}
+    {"decomposition":"⿱日十","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "时",
-    {"decomposition":"⿰日寸"}
+    {"decomposition":"⿰日寸","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "昌",
-    {"decomposition":"⿱日日"}
+    {"decomposition":"⿱日日","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "明",
-    {"decomposition":"⿰日月"}
+    {"decomposition":"⿰日月","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "昏",
-    {"decomposition":"⿱氏日"}
+    {"decomposition":"⿱氏日","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "易",
-    {"decomposition":"⿱日勿"}
+    {"decomposition":"⿱日勿","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "昔",
-    {"decomposition":"⿱龷日"}
+    {"decomposition":"⿱龷日","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "星",
-    {"decomposition":"⿱日生"}
+    {"decomposition":"⿱日生","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "春",
-    {"decomposition":"⿱𡗗日"}
+    {"decomposition":"⿱𡗗日","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "昨",
-    {"decomposition":"⿰日乍"}
+    {"decomposition":"⿰日乍","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "昭",
-    {"decomposition":"⿰日召"}
+    {"decomposition":"⿰日召","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "是",
-    {"decomposition":"⿱日𤴓"}
+    {"decomposition":"⿱日𤴓","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "昷",
-    {"decomposition":"⿱日皿"}
+    {"decomposition":"⿱日皿","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "显",
-    {"decomposition":"⿱日业"}
+    {"decomposition":"⿱日业","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "𭥴",
-    {"decomposition":"⿱⿴囗⺌日"}
+    {"decomposition":"⿱⿴囗⺌日","decompositionStrokes":["","",""]}
   ],
   [
     "晚",
-    {"decomposition":"⿰日免"}
+    {"decomposition":"⿰日免","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "晨",
-    {"decomposition":"⿱日辰"}
+    {"decomposition":"⿱日辰","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "普",
-    {"decomposition":"⿱並日"}
+    {"decomposition":"⿱並日","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "景",
-    {"decomposition":"⿱日京"}
+    {"decomposition":"⿱日京","decompositionStrokes":["0-3","4-11"]}
   ],
   [
     "晴",
-    {"decomposition":"⿰日青"}
+    {"decomposition":"⿰日青","decompositionStrokes":["0-3","4-11"]}
   ],
   [
     "暖",
-    {"decomposition":"⿰日爰"}
+    {"decomposition":"⿰日爰","decompositionStrokes":["0-3","4-12"]}
   ],
   [
     "曰",
-    {"decomposition":"⿴口一"}
+    {"decomposition":"⿴口一","decompositionStrokes":["0-1,3","2"]}
   ],
   [
     "曲",
-    {"decomposition":"⿶由丨"}
+    {"decomposition":"⿶由丨","decompositionStrokes":["0-3,5","4"]}
   ],
   [
     "更",
-    {"decomposition":"⿱一⿻日乂"}
+    {"decomposition":"⿱一⿻日乂","decompositionStrokes":["0","1-4","5-6"]}
   ],
   [
     "曷",
-    {"decomposition":"⿱日匃"}
+    {"decomposition":"⿱日匃","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "曼",
-    {"decomposition":"⿳日罒又"}
+    {"decomposition":"⿳日罒又","decompositionStrokes":["0-3","4-8","9-10"]}
   ],
   [
     "曾",
-    {"decomposition":"⿱丷𭥴"}
+    {"decomposition":"⿱丷𭥴","decompositionStrokes":["0-1","2-11"]}
   ],
   [
     "月",
-    {"componentFormOf":"肉","decomposition":"⿵冂二"}
+    {"componentFormOf":"肉","decomposition":"⿵冂二","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "有",
-    {"decomposition":"⿸𠂇月"}
+    {"decomposition":"⿸𠂇月","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "朋",
-    {"decomposition":"⿰月月"}
+    {"decomposition":"⿰月月","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "服",
-    {"decomposition":"⿰月𠬝"}
+    {"decomposition":"⿰月𠬝","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "望",
-    {"decomposition":"⿱⿰亡月王"}
+    {"decomposition":"⿱⿰亡月王","decompositionStrokes":["0-2","3-6","7-10"]}
   ],
   [
     "朝",
-    {"decomposition":"⿰𠦝月"}
+    {"decomposition":"⿰𠦝月","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "期",
-    {"decomposition":"⿰其月"}
+    {"decomposition":"⿰其月","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "木",
-    {"decomposition":"⿻十八"}
+    {"decomposition":"⿻十八","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "朩",
@@ -3117,159 +3117,159 @@
   ],
   [
     "未",
-    {"decomposition":"⿻一木"}
+    {"decomposition":"⿻一木","decompositionStrokes":["0","1-4"]}
   ],
   [
     "末",
-    {"decomposition":"⿻木一"}
+    {"decomposition":"⿻木一","decompositionStrokes":["1-4","0"]}
   ],
   [
     "本",
-    {"decomposition":"⿱木一"}
+    {"decomposition":"⿱木一","decompositionStrokes":["0-3","4"]}
   ],
   [
     "术",
-    {"decomposition":"⿺木丶"}
+    {"decomposition":"⿺木丶","decompositionStrokes":["0-3","4"]}
   ],
   [
     "机",
-    {"decomposition":"⿰木几"}
+    {"decomposition":"⿰木几","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "杂",
-    {"decomposition":"⿱九朩"}
+    {"decomposition":"⿱九朩","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "李",
-    {"decomposition":"⿱木子"}
+    {"decomposition":"⿱木子","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "材",
-    {"decomposition":"⿰木才"}
+    {"decomposition":"⿰木才","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "村",
-    {"decomposition":"⿰木寸"}
+    {"decomposition":"⿰木寸","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "束",
-    {"decomposition":"⿻木口"}
+    {"decomposition":"⿻木口","decompositionStrokes":["0,4-6","1-3"]}
   ],
   [
     "条",
-    {"decomposition":"⿱夂朩"}
+    {"decomposition":"⿱夂朩","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "来",
-    {"decomposition":"⿻一米"}
+    {"decomposition":"⿻一米","decompositionStrokes":["0","1-6"]}
   ],
   [
     "极",
-    {"decomposition":"⿰木及"}
+    {"decomposition":"⿰木及","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "杯",
-    {"decomposition":"⿰木不"}
+    {"decomposition":"⿰木不","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "杲",
-    {"decomposition":"⿱日木"}
+    {"decomposition":"⿱日木","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "板",
-    {"decomposition":"⿰木反"}
+    {"decomposition":"⿰木反","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "林",
-    {"decomposition":"⿰木木"}
+    {"decomposition":"⿰木木","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "果",
-    {"decomposition":"⿻日木"}
+    {"decomposition":"⿻日木","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "架",
-    {"decomposition":"⿱加木"}
+    {"decomposition":"⿱加木","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "某",
-    {"decomposition":"⿱甘木"}
+    {"decomposition":"⿱甘木","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "查",
-    {"decomposition":"⿱木旦"}
+    {"decomposition":"⿱木旦","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "标",
-    {"decomposition":"⿰木示"}
+    {"decomposition":"⿰木示","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "树",
-    {"decomposition":"⿰木对"}
+    {"decomposition":"⿰木对","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "校",
-    {"decomposition":"⿰木交"}
+    {"decomposition":"⿰木交","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "样",
-    {"decomposition":"⿰木羊"}
+    {"decomposition":"⿰木羊","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "根",
-    {"decomposition":"⿰木艮"}
+    {"decomposition":"⿰木艮","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "格",
-    {"decomposition":"⿰木各"}
+    {"decomposition":"⿰木各","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "桌",
-    {"decomposition":"⿱⺊杲"}
+    {"decomposition":"⿱⺊杲","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "桥",
-    {"decomposition":"⿰木乔"}
+    {"decomposition":"⿰木乔","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "检",
-    {"decomposition":"⿰木佥"}
+    {"decomposition":"⿰木佥","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "椅",
-    {"decomposition":"⿰木奇"}
+    {"decomposition":"⿰木奇","decompositionStrokes":["0-3","4-11"]}
   ],
   [
     "楚",
-    {"decomposition":"⿱林疋"}
+    {"decomposition":"⿱林疋","decompositionStrokes":["0-7","8-12"]}
   ],
   [
     "楼",
-    {"decomposition":"⿰木娄"}
+    {"decomposition":"⿰木娄","decompositionStrokes":["0-3","4-12"]}
   ],
   [
     "概",
-    {"decomposition":"⿰木既"}
+    {"decomposition":"⿰木既","decompositionStrokes":["0-3","4-12"]}
   ],
   [
     "欠",
-    {"decomposition":"⿱⺈人"}
+    {"decomposition":"⿱⺈人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "次",
-    {"decomposition":"⿰冫欠"}
+    {"decomposition":"⿰冫欠","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "欢",
-    {"decomposition":"⿰又欠"}
+    {"decomposition":"⿰又欠","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "歌",
-    {"decomposition":"⿰哥欠"}
+    {"decomposition":"⿰哥欠","decompositionStrokes":["0-9","10-13"]}
   ],
   [
     "止",
-    {"decomposition":"⿻上丨"}
+    {"decomposition":"⿻上丨","decompositionStrokes":["0-1,3","2"]}
   ],
   [
     "龰",
@@ -3281,43 +3281,43 @@
   ],
   [
     "正",
-    {"decomposition":"⿱一止"}
+    {"decomposition":"⿱一止","decompositionStrokes":["0","1-4"]}
   ],
   [
     "此",
-    {"decomposition":"⿰止匕"}
+    {"decomposition":"⿰止匕","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "步",
-    {"decomposition":"⿱止𣥂"}
+    {"decomposition":"⿱止𣥂","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "武",
-    {"decomposition":"⿹⿶弋一止"}
+    {"decomposition":"⿹⿶弋一止","decompositionStrokes":["1,6-7","0","2-5"]}
   ],
   [
     "歹",
-    {"decomposition":"⿱一夕"}
+    {"decomposition":"⿱一夕","decompositionStrokes":["0","1-3"]}
   ],
   [
     "歺",
-    {"decomposition":"⿱⺊夕"}
+    {"decomposition":"⿱⺊夕","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "死",
-    {"decomposition":"⿸歹匕"}
+    {"decomposition":"⿸歹匕","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "𣦼",
-    {"decomposition":"⿰歺又"}
+    {"decomposition":"⿰歺又","decompositionStrokes":["",""]}
   ],
   [
     "殳",
-    {"decomposition":"⿱几又"}
+    {"decomposition":"⿱几又","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "段",
-    {"decomposition":"⿰⑤殳"}
+    {"decomposition":"⿰⑤殳","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "毋",
@@ -3325,7 +3325,7 @@
   ],
   [
     "毌",
-    {"decomposition":"⿻②十"}
+    {"decomposition":"⿻②十","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "母",
@@ -3333,15 +3333,15 @@
   ],
   [
     "每",
-    {"decomposition":"⿱𠂉母"}
+    {"decomposition":"⿱𠂉母","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "比",
-    {"decomposition":"⿰匕匕"}
+    {"decomposition":"⿰匕匕","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "毛",
-    {"decomposition":"⿻乇一"}
+    {"decomposition":"⿻乇一","decompositionStrokes":["0-1,3","2"]}
   ],
   [
     "氏",
@@ -3349,19 +3349,19 @@
   ],
   [
     "氐",
-    {"decomposition":"⿱氏丶"}
+    {"decomposition":"⿱氏丶","decompositionStrokes":["0-3","4"]}
   ],
   [
     "民",
-    {"decomposition":"⿻巳⿻一㇂"}
+    {"decomposition":"⿻巳⿻一㇂","decompositionStrokes":["0-2","3","4"]}
   ],
   [
     "气",
-    {"decomposition":"⿳𠂉一乁"}
+    {"decomposition":"⿳𠂉一乁","decompositionStrokes":["0-1","2","3"]}
   ],
   [
     "水",
-    {"decomposition":"⿲㇇亅⿺乀丿"}
+    {"decomposition":"⿲㇇亅⿺乀丿","decompositionStrokes":["0","1","2","3"]}
   ],
   [
     "氵",
@@ -3369,147 +3369,147 @@
   ],
   [
     "氺",
-    {"componentFormOf":"水","decomposition":"⿻亅④"}
+    {"componentFormOf":"水","decomposition":"⿻亅④","decompositionStrokes":["0","1-4"]}
   ],
   [
     "永",
-    {"decomposition":"⿱①水"}
+    {"decomposition":"⿱①水","decompositionStrokes":["0","1-4"]}
   ],
   [
     "氾",
-    {"decomposition":"⿰氵㔾"}
+    {"decomposition":"⿰氵㔾","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "汁",
-    {"decomposition":"⿰氵十"}
+    {"decomposition":"⿰氵十","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "求",
-    {"decomposition":"⿺⿻一氺丶"}
+    {"decomposition":"⿺⿻一氺丶","decompositionStrokes":["0","1-5","6"]}
   ],
   [
     "汉",
-    {"decomposition":"⿰氵又"}
+    {"decomposition":"⿰氵又","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "汤",
-    {"decomposition":"⿰氵𠃓"}
+    {"decomposition":"⿰氵𠃓","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "汽",
-    {"decomposition":"⿰氵气"}
+    {"decomposition":"⿰氵气","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "沙",
-    {"decomposition":"⿰氵少"}
+    {"decomposition":"⿰氵少","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "没",
-    {"decomposition":"⿰氵殳"}
+    {"decomposition":"⿰氵殳","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "河",
-    {"decomposition":"⿰氵可"}
+    {"decomposition":"⿰氵可","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "油",
-    {"decomposition":"⿰氵由"}
+    {"decomposition":"⿰氵由","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "泉",
-    {"decomposition":"⿱白水"}
+    {"decomposition":"⿱白水","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "法",
-    {"decomposition":"⿰氵去"}
+    {"decomposition":"⿰氵去","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "注",
-    {"decomposition":"⿰氵主"}
+    {"decomposition":"⿰氵主","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "泳",
-    {"decomposition":"⿰氵永"}
+    {"decomposition":"⿰氵永","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "洗",
-    {"decomposition":"⿰氵先"}
+    {"decomposition":"⿰氵先","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "洛",
-    {"decomposition":"⿰氵各"}
+    {"decomposition":"⿰氵各","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "活",
-    {"decomposition":"⿰氵舌"}
+    {"decomposition":"⿰氵舌","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "派",
-    {"decomposition":"⿰氵𠂢"}
+    {"decomposition":"⿰氵𠂢","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "流",
-    {"decomposition":"⿰氵㐬"}
+    {"decomposition":"⿰氵㐬","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "济",
-    {"decomposition":"⿰氵齐"}
+    {"decomposition":"⿰氵齐","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "浪",
-    {"decomposition":"⿰氵良"}
+    {"decomposition":"⿰氵良","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "海",
-    {"decomposition":"⿰氵每"}
+    {"decomposition":"⿰氵每","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "消",
-    {"decomposition":"⿰氵肖"}
+    {"decomposition":"⿰氵肖","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "深",
-    {"decomposition":"⿰氵罙"}
+    {"decomposition":"⿰氵罙","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "清",
-    {"decomposition":"⿰氵青"}
+    {"decomposition":"⿰氵青","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "温",
-    {"decomposition":"⿰氵昷"}
+    {"decomposition":"⿰氵昷","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "渴",
-    {"decomposition":"⿰氵曷"}
+    {"decomposition":"⿰氵曷","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "游",
-    {"decomposition":"⿰氵斿"}
+    {"decomposition":"⿰氵斿","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "湖",
-    {"decomposition":"⿰氵胡"}
+    {"decomposition":"⿰氵胡","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "满",
-    {"decomposition":"⿰氵𬜯"}
+    {"decomposition":"⿰氵𬜯","decompositionStrokes":["0-2","3-12"]}
   ],
   [
     "漂",
-    {"decomposition":"⿰氵票"}
+    {"decomposition":"⿰氵票","decompositionStrokes":["0-2","3-13"]}
   ],
   [
     "演",
-    {"decomposition":"⿰氵寅"}
+    {"decomposition":"⿰氵寅","decompositionStrokes":["0-2","3-13"]}
   ],
   [
     "澡",
-    {"decomposition":"⿰氵喿"}
+    {"decomposition":"⿰氵喿","decompositionStrokes":["0-2","3-15"]}
   ],
   [
     "火",
-    {"decomposition":"⿱八人"}
+    {"decomposition":"⿱八人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "灬",
@@ -3517,91 +3517,91 @@
   ],
   [
     "灯",
-    {"decomposition":"⿰火丁"}
+    {"decomposition":"⿰火丁","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "炎",
-    {"decomposition":"⿱火火"}
+    {"decomposition":"⿱火火","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "点",
-    {"decomposition":"⿱占灬"}
+    {"decomposition":"⿱占灬","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "烈",
-    {"decomposition":"⿱列灬"}
+    {"decomposition":"⿱列灬","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "烟",
-    {"decomposition":"⿰火因"}
+    {"decomposition":"⿰火因","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "烦",
-    {"decomposition":"⿰火页"}
+    {"decomposition":"⿰火页","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "热",
-    {"decomposition":"⿱执灬"}
+    {"decomposition":"⿱执灬","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "焦",
-    {"decomposition":"⿱隹灬"}
+    {"decomposition":"⿱隹灬","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "然",
-    {"decomposition":"⿱肰灬"}
+    {"decomposition":"⿱肰灬","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "照",
-    {"decomposition":"⿱昭灬"}
+    {"decomposition":"⿱昭灬","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "熟",
-    {"decomposition":"⿱孰灬"}
+    {"decomposition":"⿱孰灬","decompositionStrokes":["0-10","11-14"]}
   ],
   [
     "爪",
-    {"decomposition":"⿵③丨"}
+    {"decomposition":"⿵③丨","decompositionStrokes":["0-1,3","2"]}
   ],
   [
     "爫",
-    {"componentFormOf":"爪","decomposition":"⿱丿𭕄"}
+    {"componentFormOf":"爪","decomposition":"⿱丿𭕄","decompositionStrokes":["0","1-3"]}
   ],
   [
     "爬",
-    {"decomposition":"⿺爪巴"}
+    {"decomposition":"⿺爪巴","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "爰",
-    {"decomposition":"⿳爫一友"}
+    {"decomposition":"⿳爫一友","decompositionStrokes":["0-3","4","5-8"]}
   ],
   [
     "爱",
-    {"decomposition":"⿳爫冖友"}
+    {"decomposition":"⿳爫冖友","decompositionStrokes":["0-3","4-5","6-9"]}
   ],
   [
     "父",
-    {"decomposition":"⿱八乂"}
+    {"decomposition":"⿱八乂","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "爷",
-    {"decomposition":"⿱父卩"}
+    {"decomposition":"⿱父卩","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "爸",
-    {"decomposition":"⿱父巴"}
+    {"decomposition":"⿱父巴","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "爻",
-    {"decomposition":"⿱㐅乂"}
+    {"decomposition":"⿱㐅乂","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "丬",
-    {"componentFormOf":"爿","decomposition":"⿰冫丨"}
+    {"componentFormOf":"爿","decomposition":"⿰冫丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "爿",
-    {"decomposition":"⿹丩厂"}
+    {"decomposition":"⿹丩厂","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "片",
@@ -3609,7 +3609,7 @@
   ],
   [
     "牌",
-    {"decomposition":"⿰片卑"}
+    {"decomposition":"⿰片卑","decompositionStrokes":["0-3","4-11"]}
   ],
   [
     "牙",
@@ -3625,19 +3625,19 @@
   ],
   [
     "𭷔",
-    {"decomposition":"⿱刀牛"}
+    {"decomposition":"⿱刀牛","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "物",
-    {"decomposition":"⿰牛勿"}
+    {"decomposition":"⿰牛勿","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "特",
-    {"decomposition":"⿰牛寺"}
+    {"decomposition":"⿰牛寺","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "犬",
-    {"decomposition":"⿻大丶"}
+    {"decomposition":"⿻大丶","decompositionStrokes":["0-2","3"]}
   ],
   [
     "犭",
@@ -3645,63 +3645,63 @@
   ],
   [
     "状",
-    {"decomposition":"⿰丬犬"}
+    {"decomposition":"⿰丬犬","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "狗",
-    {"decomposition":"⿰犭句"}
+    {"decomposition":"⿰犭句","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "猪",
-    {"decomposition":"⿰犭者"}
+    {"decomposition":"⿰犭者","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "猫",
-    {"decomposition":"⿰犭苗"}
+    {"decomposition":"⿰犭苗","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "玄",
-    {"decomposition":"⿱亠幺"}
+    {"decomposition":"⿱亠幺","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "玉",
-    {"decomposition":"⿷王丶"}
+    {"decomposition":"⿷王丶","decompositionStrokes":["0-3","4"]}
   ],
   [
     "王",
-    {"decomposition":"⿱一土"}
+    {"decomposition":"⿱一土","decompositionStrokes":["0","1-3"]}
   ],
   [
     "玨",
-    {"decomposition":"⿰王王"}
+    {"decomposition":"⿰王王","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "玩",
-    {"decomposition":"⿰王元"}
+    {"decomposition":"⿰王元","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "环",
-    {"decomposition":"⿰王不"}
+    {"decomposition":"⿰王不","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "现",
-    {"decomposition":"⿰王见"}
+    {"decomposition":"⿰王见","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "班",
-    {"decomposition":"⿴玨刂"}
+    {"decomposition":"⿴玨刂","decompositionStrokes":["0-3,6-9","4-5"]}
   ],
   [
     "球",
-    {"decomposition":"⿰王求"}
+    {"decomposition":"⿰王求","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "理",
-    {"decomposition":"⿰王里"}
+    {"decomposition":"⿰王里","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "瓜",
-    {"decomposition":"⿵③厶"}
+    {"decomposition":"⿵③厶","decompositionStrokes":["0-1,4","2-3"]}
   ],
   [
     "瓦",
@@ -3709,331 +3709,331 @@
   ],
   [
     "瓶",
-    {"decomposition":"⿰并瓦"}
+    {"decomposition":"⿰并瓦","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "甘",
-    {"decomposition":"⿵卄二"}
+    {"decomposition":"⿵卄二","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "甜",
-    {"decomposition":"⿰舌甘"}
+    {"decomposition":"⿰舌甘","decompositionStrokes":["0-5","6-10"]}
   ],
   [
     "生",
-    {"decomposition":"⿻𠂉土"}
+    {"decomposition":"⿻𠂉土","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "用",
-    {"decomposition":"⿵冂⿻二丨"}
+    {"decomposition":"⿵冂⿻二丨","decompositionStrokes":["0-1","2-3","4"]}
   ],
   [
     "甬",
-    {"decomposition":"⿱龴用"}
+    {"decomposition":"⿱龴用","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "田",
-    {"decomposition":"⿵冂土"}
+    {"decomposition":"⿵冂土","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "由",
-    {"decomposition":"⿱丨日"}
+    {"decomposition":"⿱丨日","decompositionStrokes":["3","0-2,4"]}
   ],
   [
     "甲",
-    {"decomposition":"⿻冂③"}
+    {"decomposition":"⿻冂③","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "申",
-    {"decomposition":"⿻日丨"}
+    {"decomposition":"⿻日丨","decompositionStrokes":["0-3","4"]}
   ],
   [
     "电",
-    {"decomposition":"⿻日乚"}
+    {"decomposition":"⿻日乚","decompositionStrokes":["0-3","4"]}
   ],
   [
     "甶",
-    {"decomposition":"⿱丿田"}
+    {"decomposition":"⿱丿田","decompositionStrokes":["",""]}
   ],
   [
     "男",
-    {"decomposition":"⿱田力"}
+    {"decomposition":"⿱田力","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "画",
-    {"decomposition":"⿱一⿶凵田"}
+    {"decomposition":"⿱一⿶凵田","decompositionStrokes":["0","6-7","1-5"]}
   ],
   [
     "畀",
-    {"decomposition":"⿱田丌"}
+    {"decomposition":"⿱田丌","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "界",
-    {"decomposition":"⿱田介"}
+    {"decomposition":"⿱田介","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "畏",
-    {"decomposition":"⿱田④"}
+    {"decomposition":"⿱田④","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "畐",
-    {"decomposition":"⿱𠮛田"}
+    {"decomposition":"⿱𠮛田","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "留",
-    {"decomposition":"⿱⿰③刀田"}
+    {"decomposition":"⿱⿰③刀田","decompositionStrokes":["0-2","3-4","5-9"]}
   ],
   [
     "番",
-    {"decomposition":"⿱釆田"}
+    {"decomposition":"⿱釆田","decompositionStrokes":["0-6","7-11"]}
   ],
   [
     "疋",
-    {"decomposition":"⿱㇖龰"}
+    {"decomposition":"⿱㇖龰","decompositionStrokes":["0","1-4"]}
   ],
   [
     "𤴓",
-    {"decomposition":"⿱一龰"}
+    {"decomposition":"⿱一龰","decompositionStrokes":["",""]}
   ],
   [
     "疒",
-    {"decomposition":"⿻广冫"}
+    {"decomposition":"⿻广冫","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "疼",
-    {"decomposition":"⿸疒冬"}
+    {"decomposition":"⿸疒冬","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "病",
-    {"decomposition":"⿸疒丙"}
+    {"decomposition":"⿸疒丙","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "痛",
-    {"decomposition":"⿸疒甬"}
+    {"decomposition":"⿸疒甬","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "癶",
-    {"decomposition":"⿰②③"}
+    {"decomposition":"⿰②③","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "白",
-    {"decomposition":"⿻①日"}
+    {"decomposition":"⿻①日","decompositionStrokes":["0","1-4"]}
   ],
   [
     "百",
-    {"decomposition":"⿱一白"}
+    {"decomposition":"⿱一白","decompositionStrokes":["0","1-5"]}
   ],
   [
     "的",
-    {"decomposition":"⿰白勺"}
+    {"decomposition":"⿰白勺","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "皮",
-    {"decomposition":"⿸②⿱丨又"}
+    {"decomposition":"⿸②⿱丨又","decompositionStrokes":["0-1","2","3-4"]}
   ],
   [
     "皿",
-    {"decomposition":"⿱④一"}
+    {"decomposition":"⿱④一","decompositionStrokes":["0-3","4"]}
   ],
   [
     "监",
-    {"decomposition":"⿱⿰〢⿱𠂉丶皿"}
+    {"decomposition":"⿱⿰〢⿱𠂉丶皿","decompositionStrokes":["0-1","2-3","4","5-9"]}
   ],
   [
     "目",
-    {"decomposition":"⿴口二"}
+    {"decomposition":"⿴口二","decompositionStrokes":["0-1,4","2-3"]}
   ],
   [
     "直",
-    {"decomposition":"⿳十目一"}
+    {"decomposition":"⿳十目一","decompositionStrokes":["0-1","2-6","7"]}
   ],
   [
     "𥃲",
-    {"decomposition":"⿱目廾"}
+    {"decomposition":"⿱目廾","decompositionStrokes":["",""]}
   ],
   [
     "相",
-    {"decomposition":"⿰木目"}
+    {"decomposition":"⿰木目","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "省",
-    {"decomposition":"⿱少目"}
+    {"decomposition":"⿱少目","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "看",
-    {"decomposition":"⿱龵目"}
+    {"decomposition":"⿱龵目","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "真",
-    {"decomposition":"⿱十具"}
+    {"decomposition":"⿱十具","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "眼",
-    {"decomposition":"⿰目艮"}
+    {"decomposition":"⿰目艮","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "着",
-    {"decomposition":"⿸羊目"}
+    {"decomposition":"⿸羊目","decompositionStrokes":["0-5","6-10"]}
   ],
   [
     "睛",
-    {"decomposition":"⿰目青"}
+    {"decomposition":"⿰目青","decompositionStrokes":["0-4","5-12"]}
   ],
   [
     "睡",
-    {"decomposition":"⿰目垂"}
+    {"decomposition":"⿰目垂","decompositionStrokes":["0-4","5-12"]}
   ],
   [
     "矛",
-    {"decomposition":"⿱龴⿹𠄐丿"}
+    {"decomposition":"⿱龴⿹𠄐丿","decompositionStrokes":["0-1","2-3","4"]}
   ],
   [
     "矢",
-    {"decomposition":"⿱𠂉大"}
+    {"decomposition":"⿱𠂉大","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "知",
-    {"decomposition":"⿰矢口"}
+    {"decomposition":"⿰矢口","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "短",
-    {"decomposition":"⿰矢豆"}
+    {"decomposition":"⿰矢豆","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "石",
-    {"decomposition":"⿸丆口"}
+    {"decomposition":"⿸丆口","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "破",
-    {"decomposition":"⿰石皮"}
+    {"decomposition":"⿰石皮","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "础",
-    {"decomposition":"⿰石出"}
+    {"decomposition":"⿰石出","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "确",
-    {"decomposition":"⿰石角"}
+    {"decomposition":"⿰石角","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "碗",
-    {"decomposition":"⿰石宛"}
+    {"decomposition":"⿰石宛","decompositionStrokes":["0-4","5-12"]}
   ],
   [
     "碰",
-    {"decomposition":"⿰石並"}
+    {"decomposition":"⿰石並","decompositionStrokes":["0-4","5-12"]}
   ],
   [
     "示",
-    {"decomposition":"⿱二小"}
+    {"decomposition":"⿱二小","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "礻",
-    {"componentFormOf":"示","decomposition":"⿱②卜"}
+    {"componentFormOf":"示","decomposition":"⿱②卜","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "礼",
-    {"decomposition":"⿰礻乚"}
+    {"decomposition":"⿰礻乚","decompositionStrokes":["0-3","4"]}
   ],
   [
     "社",
-    {"decomposition":"⿰礻土"}
+    {"decomposition":"⿰礻土","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "视",
-    {"decomposition":"⿰礻见"}
+    {"decomposition":"⿰礻见","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "祝",
-    {"decomposition":"⿰礻兄"}
+    {"decomposition":"⿰礻兄","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "神",
-    {"decomposition":"⿰礻申"}
+    {"decomposition":"⿰礻申","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "票",
-    {"decomposition":"⿱覀示"}
+    {"decomposition":"⿱覀示","decompositionStrokes":["0-5","6-10"]}
   ],
   [
     "祭",
-    {"decomposition":"⿱⿰⺼又示"}
+    {"decomposition":"⿱⿰⺼又示","decompositionStrokes":["0-3","4-5","6-10"]}
   ],
   [
     "福",
-    {"decomposition":"⿰礻畐"}
+    {"decomposition":"⿰礻畐","decompositionStrokes":["0-3","4-12"]}
   ],
   [
     "禸",
-    {"decomposition":"⿻冂厶"}
+    {"decomposition":"⿻冂厶","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "禹",
-    {"decomposition":"⿻④禸"}
+    {"decomposition":"⿻④禸","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "离",
-    {"decomposition":"⿱㐫禸"}
+    {"decomposition":"⿱㐫禸","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "禾",
-    {"decomposition":"⿱丿木"}
+    {"decomposition":"⿱丿木","decompositionStrokes":["0","1-4"]}
   ],
   [
     "秋",
-    {"decomposition":"⿰禾火"}
+    {"decomposition":"⿰禾火","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "种",
-    {"decomposition":"⿰禾中"}
+    {"decomposition":"⿰禾中","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "科",
-    {"decomposition":"⿰禾斗"}
+    {"decomposition":"⿰禾斗","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "租",
-    {"decomposition":"⿰禾且"}
+    {"decomposition":"⿰禾且","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "积",
-    {"decomposition":"⿰禾只"}
+    {"decomposition":"⿰禾只","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "称",
-    {"decomposition":"⿰禾尔"}
+    {"decomposition":"⿰禾尔","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "程",
-    {"decomposition":"⿰禾呈"}
+    {"decomposition":"⿰禾呈","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "穴",
-    {"decomposition":"⿱宀八"}
+    {"decomposition":"⿱宀八","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "空",
-    {"decomposition":"⿱穴工"}
+    {"decomposition":"⿱穴工","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "穿",
-    {"decomposition":"⿱穴牙"}
+    {"decomposition":"⿱穴牙","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "突",
-    {"decomposition":"⿱穴犬"}
+    {"decomposition":"⿱穴犬","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "立",
-    {"decomposition":"⿱亠䒑"}
+    {"decomposition":"⿱亠䒑","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "站",
-    {"decomposition":"⿰立占"}
+    {"decomposition":"⿰立占","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "竹",
-    {"decomposition":"⿰亇亇"}
+    {"decomposition":"⿰亇亇","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "𥫗",
@@ -4041,203 +4041,203 @@
   ],
   [
     "笑",
-    {"decomposition":"⿱𥫗夭"}
+    {"decomposition":"⿱𥫗夭","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "笔",
-    {"decomposition":"⿱𥫗毛"}
+    {"decomposition":"⿱𥫗毛","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "第",
-    {"decomposition":"⿱𥫗𢎨"}
+    {"decomposition":"⿱𥫗𢎨","decompositionStrokes":["0-5","6-10"]}
   ],
   [
     "等",
-    {"decomposition":"⿱𥫗寺"}
+    {"decomposition":"⿱𥫗寺","decompositionStrokes":["0-5","6-11"]}
   ],
   [
     "答",
-    {"decomposition":"⿱𥫗合"}
+    {"decomposition":"⿱𥫗合","decompositionStrokes":["0-5","6-11"]}
   ],
   [
     "筷",
-    {"decomposition":"⿱𥫗快"}
+    {"decomposition":"⿱𥫗快","decompositionStrokes":["0-5","6-12"]}
   ],
   [
     "简",
-    {"decomposition":"⿱𥫗间"}
+    {"decomposition":"⿱𥫗间","decompositionStrokes":["0-5","6-12"]}
   ],
   [
     "算",
-    {"decomposition":"⿳𥫗目廾"}
+    {"decomposition":"⿳𥫗目廾","decompositionStrokes":["0-5","6-10","11-13"]}
   ],
   [
     "管",
-    {"decomposition":"⿱𥫗官"}
+    {"decomposition":"⿱𥫗官","decompositionStrokes":["0-5","6-13"]}
   ],
   [
     "箱",
-    {"decomposition":"⿱𥫗相"}
+    {"decomposition":"⿱𥫗相","decompositionStrokes":["0-5","6-14"]}
   ],
   [
     "篇",
-    {"decomposition":"⿱𥫗扁"}
+    {"decomposition":"⿱𥫗扁","decompositionStrokes":["0-5","6-14"]}
   ],
   [
     "篮",
-    {"decomposition":"⿱𥫗监"}
+    {"decomposition":"⿱𥫗监","decompositionStrokes":["0-5","6-15"]}
   ],
   [
     "米",
-    {"decomposition":"⿱丷木"}
+    {"decomposition":"⿱丷木","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "娄",
-    {"decomposition":"⿱米女"}
+    {"decomposition":"⿱米女","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "类",
-    {"decomposition":"⿱米大"}
+    {"decomposition":"⿱米大","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "精",
-    {"decomposition":"⿰米青"}
+    {"decomposition":"⿰米青","decompositionStrokes":["0-5","6-13"]}
   ],
   [
     "糖",
-    {"decomposition":"⿰米唐"}
+    {"decomposition":"⿰米唐","decompositionStrokes":["0-5","6-15"]}
   ],
   [
     "糸",
-    {"decomposition":"⿱幺小"}
+    {"decomposition":"⿱幺小","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "糹",
-    {"componentFormOf":"糸","decomposition":"⿱幺③"}
+    {"componentFormOf":"糸","decomposition":"⿱幺③","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "纟",
-    {"componentFormOf":"糸","decomposition":"⿱②一"}
+    {"componentFormOf":"糸","decomposition":"⿱②一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "系",
-    {"decomposition":"⿱丿糸"}
+    {"decomposition":"⿱丿糸","decompositionStrokes":["0","1-6"]}
   ],
   [
     "红",
-    {"decomposition":"⿰纟工"}
+    {"decomposition":"⿰纟工","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "约",
-    {"decomposition":"⿰纟勺"}
+    {"decomposition":"⿰纟勺","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "级",
-    {"decomposition":"⿰纟及"}
+    {"decomposition":"⿰纟及","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "纪",
-    {"decomposition":"⿰纟己"}
+    {"decomposition":"⿰纟己","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "紧",
-    {"decomposition":"⿱⿰〢又糸"}
+    {"decomposition":"⿱⿰〢又糸","decompositionStrokes":["0-1","2-3","4-9"]}
   ],
   [
     "纸",
-    {"decomposition":"⿰纟氏"}
+    {"decomposition":"⿰纟氏","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "累",
-    {"decomposition":"⿱田糸"}
+    {"decomposition":"⿱田糸","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "线",
-    {"decomposition":"⿰纟戋"}
+    {"decomposition":"⿰纟戋","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "练",
-    {"decomposition":"⿰纟𫠣"}
+    {"decomposition":"⿰纟𫠣","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "组",
-    {"decomposition":"⿰纟且"}
+    {"decomposition":"⿰纟且","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "终",
-    {"decomposition":"⿰纟冬"}
+    {"decomposition":"⿰纟冬","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "绍",
-    {"decomposition":"⿰纟召"}
+    {"decomposition":"⿰纟召","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "经",
-    {"decomposition":"⿰纟𢀖"}
+    {"decomposition":"⿰纟𢀖","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "结",
-    {"decomposition":"⿰纟吉"}
+    {"decomposition":"⿰纟吉","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "给",
-    {"decomposition":"⿰纟合"}
+    {"decomposition":"⿰纟合","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "绝",
-    {"decomposition":"⿰纟色"}
+    {"decomposition":"⿰纟色","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "继",
-    {"decomposition":"⿰纟⿺𠃊米"}
+    {"decomposition":"⿰纟⿺𠃊米","decompositionStrokes":["0-2","3","4-9"]}
   ],
   [
     "绩",
-    {"decomposition":"⿰纟责"}
+    {"decomposition":"⿰纟责","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "续",
-    {"decomposition":"⿰纟卖"}
+    {"decomposition":"⿰纟卖","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "绿",
-    {"decomposition":"⿰纟录"}
+    {"decomposition":"⿰纟录","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "缶",
-    {"decomposition":"⿶凵午"}
+    {"decomposition":"⿶凵午","decompositionStrokes":["4-5","0-3"]}
   ],
   [
     "缺",
-    {"decomposition":"⿰缶夬"}
+    {"decomposition":"⿰缶夬","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "网",
-    {"decomposition":"⿵冂⿰㐅㐅"}
+    {"decomposition":"⿵冂⿰㐅㐅","decompositionStrokes":["0-1","2-3","4-5"]}
   ],
   [
     "罒",
-    {"decomposition":"⿻口②"}
+    {"decomposition":"⿻口②","decompositionStrokes":["0-1,4","2-3"]}
   ],
   [
     "⺳",
-    {"decomposition":"⿱冖八"}
+    {"decomposition":"⿱冖八","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "𦉪",
-    {"decomposition":"⿵冂儿"}
+    {"decomposition":"⿵冂儿","decompositionStrokes":["",""]}
   ],
   [
     "𦉫",
-    {"decomposition":"⿵冂⿰丨丨"}
+    {"decomposition":"⿵冂⿰丨丨","decompositionStrokes":["","",""]}
   ],
   [
     "罙",
-    {"decomposition":"⿱⺳木"}
+    {"decomposition":"⿱⺳木","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "羊",
-    {"decomposition":"⿻兰丨"}
+    {"decomposition":"⿻兰丨","decompositionStrokes":["0-4","5"]}
   ],
   [
     "⺶",
@@ -4245,67 +4245,67 @@
   ],
   [
     "𦍌",
-    {"componentFormOf":"羊","decomposition":"⿱䒑土"}
+    {"componentFormOf":"羊","decomposition":"⿱䒑土","decompositionStrokes":["",""]}
   ],
   [
     "美",
-    {"decomposition":"⿱𦍌大"}
+    {"decomposition":"⿱𦍌大","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "群",
-    {"decomposition":"⿰君羊"}
+    {"decomposition":"⿰君羊","decompositionStrokes":["0-6","7-12"]}
   ],
   [
     "羽",
-    {"decomposition":"⿰习习"}
+    {"decomposition":"⿰习习","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "老",
-    {"decomposition":"⿸耂匕"}
+    {"decomposition":"⿸耂匕","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "耂",
-    {"componentFormOf":"老","decomposition":"⿻土丿"}
+    {"componentFormOf":"老","decomposition":"⿻土丿","decompositionStrokes":["0-2","3"]}
   ],
   [
     "考",
-    {"decomposition":"⿸耂丂"}
+    {"decomposition":"⿸耂丂","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "者",
-    {"decomposition":"⿸耂日"}
+    {"decomposition":"⿸耂日","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "而",
-    {"decomposition":"⿱一𦓐"}
+    {"decomposition":"⿱一𦓐","decompositionStrokes":["0","1-5"]}
   ],
   [
     "𦓐",
-    {"decomposition":"⿱丿𦉫"}
+    {"decomposition":"⿱丿𦉫","decompositionStrokes":["",""]}
   ],
   [
     "耒",
-    {"decomposition":"⿻一未"}
+    {"decomposition":"⿻一未","decompositionStrokes":["0","1-5"]}
   ],
   [
     "耳",
-    {"decomposition":"⿴㔿二"}
+    {"decomposition":"⿴㔿二","decompositionStrokes":["0-2,5","3-4"]}
   ],
   [
     "职",
-    {"decomposition":"⿰耳只"}
+    {"decomposition":"⿰耳只","decompositionStrokes":["0-5","6-10"]}
   ],
   [
     "联",
-    {"decomposition":"⿰耳关"}
+    {"decomposition":"⿰耳关","decompositionStrokes":["0-5","6-11"]}
   ],
   [
     "聿",
-    {"decomposition":"⿻肀二"}
+    {"decomposition":"⿻肀二","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "肀",
-    {"decomposition":"⿻彐丨"}
+    {"decomposition":"⿻彐丨","decompositionStrokes":["0-2","3"]}
   ],
   [
     "⺺",
@@ -4313,43 +4313,43 @@
   ],
   [
     "肉",
-    {"decomposition":"⿵冂仌"}
+    {"decomposition":"⿵冂仌","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "⺼",
-    {"componentFormOf":"肉","decomposition":"⿵⺆冫"}
+    {"componentFormOf":"肉","decomposition":"⿵⺆冫","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "䏍",
-    {"decomposition":"⿱厶月"}
+    {"decomposition":"⿱厶月","decompositionStrokes":["",""]}
   ],
   [
     "肖",
-    {"decomposition":"⿱⺌月"}
+    {"decomposition":"⿱⺌月","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "肰",
-    {"decomposition":"⿰⺼犬"}
+    {"decomposition":"⿰⺼犬","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "育",
-    {"decomposition":"⿱𠫓月"}
+    {"decomposition":"⿱𠫓月","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "背",
-    {"decomposition":"⿱北月"}
+    {"decomposition":"⿱北月","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "胖",
-    {"decomposition":"⿰月半"}
+    {"decomposition":"⿰月半","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "胜",
-    {"decomposition":"⿰月生"}
+    {"decomposition":"⿰月生","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "胡",
-    {"decomposition":"⿰古月"}
+    {"decomposition":"⿰古月","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "𦚏",
@@ -4357,67 +4357,67 @@
   ],
   [
     "能",
-    {"decomposition":"⿰䏍𫧇"}
+    {"decomposition":"⿰䏍𫧇","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "脏",
-    {"decomposition":"⿰月庄"}
+    {"decomposition":"⿰月庄","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "脑",
-    {"decomposition":"⿰月㐫"}
+    {"decomposition":"⿰月㐫","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "脚",
-    {"decomposition":"⿰月却"}
+    {"decomposition":"⿰月却","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "脸",
-    {"decomposition":"⿰月佥"}
+    {"decomposition":"⿰月佥","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "腿",
-    {"decomposition":"⿰月退"}
+    {"decomposition":"⿰月退","decompositionStrokes":["0-3","4-12"]}
   ],
   [
     "臣",
-    {"decomposition":"⿷匚⿻⿱丨丨②"}
+    {"decomposition":"⿷匚⿻⿱丨丨②","decompositionStrokes":["0,5","1","4","2-3"]}
   ],
   [
     "自",
-    {"decomposition":"⿱丶目"}
+    {"decomposition":"⿱丶目","decompositionStrokes":["0","1-5"]}
   ],
   [
     "𦣻",
-    {"decomposition":"⿱一自"}
+    {"decomposition":"⿱一自","decompositionStrokes":["",""]}
   ],
   [
     "至",
-    {"decomposition":"⿱𠫔土"}
+    {"decomposition":"⿱𠫔土","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "臼",
-    {"decomposition":"⿰彐彐"}
+    {"decomposition":"⿰彐彐","decompositionStrokes":["0-2,5","3-5"]}
   ],
   [
     "舌",
-    {"decomposition":"⿱千口"}
+    {"decomposition":"⿱千口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "舍",
-    {"decomposition":"⿱人舌"}
+    {"decomposition":"⿱人舌","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "舒",
-    {"decomposition":"⿰舍予"}
+    {"decomposition":"⿰舍予","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "舛",
-    {"decomposition":"⿰夕㐄"}
+    {"decomposition":"⿰夕㐄","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "舞",
-    {"decomposition":"⿱⿳𠂉卌一舛"}
+    {"decomposition":"⿱⿳𠂉卌一舛","decompositionStrokes":["0-1","2-6","7","8-13"]}
   ],
   [
     "舟",
@@ -4425,159 +4425,159 @@
   ],
   [
     "般",
-    {"decomposition":"⿰舟殳"}
+    {"decomposition":"⿰舟殳","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "船",
-    {"decomposition":"⿰舟⿱几口"}
+    {"decomposition":"⿰舟⿱几口","decompositionStrokes":["0-5","6-7","8-10"]}
   ],
   [
     "艮",
-    {"decomposition":"⿱日③"}
+    {"decomposition":"⿱日③","decompositionStrokes":["0-3","3-5"]}
   ],
   [
     "良",
-    {"decomposition":"⿱丶艮"}
+    {"decomposition":"⿱丶艮","decompositionStrokes":["0","1-6"]}
   ],
   [
     "色",
-    {"decomposition":"⿱⺈巴"}
+    {"decomposition":"⿱⺈巴","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "艸",
-    {"decomposition":"⿰屮屮"}
+    {"decomposition":"⿰屮屮","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "艹",
-    {"componentFormOf":"艸","decomposition":"⿻十丨"}
+    {"componentFormOf":"艸","decomposition":"⿻十丨","decompositionStrokes":["0-1","2"]}
   ],
   [
     "䒑",
-    {"decomposition":"⿱丷一"}
+    {"decomposition":"⿱丷一","decompositionStrokes":["",""]}
   ],
   [
     "艺",
-    {"decomposition":"⿱艹乙"}
+    {"decomposition":"⿱艹乙","decompositionStrokes":["0-2","3"]}
   ],
   [
     "龷",
-    {"decomposition":"⿱卄一"}
+    {"decomposition":"⿱卄一","decompositionStrokes":["",""]}
   ],
   [
     "节",
-    {"decomposition":"⿱艹卩"}
+    {"decomposition":"⿱艹卩","decompositionStrokes":["0-2","3-4"]}
   ],
   [
     "𫇦",
-    {"decomposition":"⿱艹冖"}
+    {"decomposition":"⿱艹冖","decompositionStrokes":["",""]}
   ],
   [
     "花",
-    {"decomposition":"⿱艹化"}
+    {"decomposition":"⿱艹化","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "苗",
-    {"decomposition":"⿱艹田"}
+    {"decomposition":"⿱艹田","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "苟",
-    {"decomposition":"⿱艹句"}
+    {"decomposition":"⿱艹句","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "苦",
-    {"decomposition":"⿱艹古"}
+    {"decomposition":"⿱艹古","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "英",
-    {"decomposition":"⿱艹央"}
+    {"decomposition":"⿱艹央","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "苹",
-    {"decomposition":"⿱艹平"}
+    {"decomposition":"⿱艹平","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "范",
-    {"decomposition":"⿱艹氾"}
+    {"decomposition":"⿱艹氾","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "茶",
-    {"decomposition":"⿳艹人朩"}
+    {"decomposition":"⿳艹人朩","decompositionStrokes":["0-2","3-4","5-8"]}
   ],
   [
     "草",
-    {"decomposition":"⿱艹早"}
+    {"decomposition":"⿱艹早","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "药",
-    {"decomposition":"⿱艹约"}
+    {"decomposition":"⿱艹约","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "𬜯",
-    {"decomposition":"⿱艹两"}
+    {"decomposition":"⿱艹两","decompositionStrokes":["",""]}
   ],
   [
     "菜",
-    {"decomposition":"⿱艹采"}
+    {"decomposition":"⿱艹采","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "营",
-    {"decomposition":"⿳艹冖吕"}
+    {"decomposition":"⿳艹冖吕","decompositionStrokes":["0-2","3-4","5-10"]}
   ],
   [
     "落",
-    {"decomposition":"⿱艹洛"}
+    {"decomposition":"⿱艹洛","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "董",
-    {"decomposition":"⿱艹重"}
+    {"decomposition":"⿱艹重","decompositionStrokes":["0-2","3-11"]}
   ],
   [
     "蓝",
-    {"decomposition":"⿱艹监"}
+    {"decomposition":"⿱艹监","decompositionStrokes":["0-2","3-12"]}
   ],
   [
     "蕉",
-    {"decomposition":"⿱艹焦"}
+    {"decomposition":"⿱艹焦","decompositionStrokes":["0-2","3-14"]}
   ],
   [
     "虍",
-    {"componentFormOf":"虎","decomposition":"⿱⺊⿸厂七"}
+    {"componentFormOf":"虎","decomposition":"⿱⺊⿸厂七","decompositionStrokes":["0-1","2-3","4-5"]}
   ],
   [
     "虎",
-    {"decomposition":"⿸虍几"}
+    {"decomposition":"⿸虍几","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "虫",
-    {"decomposition":"⿱中𠂉"}
+    {"decomposition":"⿱中𠂉","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "䖝",
-    {"decomposition":"⿱丿虫"}
+    {"decomposition":"⿱丿虫","decompositionStrokes":["",""]}
   ],
   [
     "虽",
-    {"decomposition":"⿱口虫"}
+    {"decomposition":"⿱口虫","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "蛋",
-    {"decomposition":"⿱疋虫"}
+    {"decomposition":"⿱疋虫","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "血",
-    {"decomposition":"⿱丿皿"}
+    {"decomposition":"⿱丿皿","decompositionStrokes":["0","1-5"]}
   ],
   [
     "行",
-    {"decomposition":"⿰彳亍"}
+    {"decomposition":"⿰彳亍","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "街",
-    {"decomposition":"⿲彳圭亍"}
+    {"decomposition":"⿲彳圭亍","decompositionStrokes":["0-2","3-8","9-11"]}
   ],
   [
     "衣",
-    {"decomposition":"⿱亠𧘇"}
+    {"decomposition":"⿱亠𧘇","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "衤",
@@ -4589,35 +4589,35 @@
   ],
   [
     "补",
-    {"decomposition":"⿰衤卜"}
+    {"decomposition":"⿰衤卜","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "表",
-    {"decomposition":"⿱龶𧘇"}
+    {"decomposition":"⿱龶𧘇","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "衫",
-    {"decomposition":"⿰衤彡"}
+    {"decomposition":"⿰衤彡","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "衬",
-    {"decomposition":"⿰衤寸"}
+    {"decomposition":"⿰衤寸","decompositionStrokes":["0-4","5-7"]}
   ],
   [
     "被",
-    {"decomposition":"⿰衤皮"}
+    {"decomposition":"⿰衤皮","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "装",
-    {"decomposition":"⿱壮衣"}
+    {"decomposition":"⿱壮衣","decompositionStrokes":["0-5","6-11"]}
   ],
   [
     "裙",
-    {"decomposition":"⿰衤君"}
+    {"decomposition":"⿰衤君","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "裤",
-    {"decomposition":"⿰衤库"}
+    {"decomposition":"⿰衤库","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "襾",
@@ -4625,51 +4625,51 @@
   ],
   [
     "西",
-    {"decomposition":"⿻兀囗"}
+    {"decomposition":"⿻兀囗","decompositionStrokes":["0,3-4","1-2,5"]}
   ],
   [
     "覀",
-    {"decomposition":"⿱一⿻口⿰丨丨"}
+    {"decomposition":"⿱一⿻口⿰丨丨","decompositionStrokes":["0","1-2,5","3","4"]}
   ],
   [
     "要",
-    {"decomposition":"⿱覀女"}
+    {"decomposition":"⿱覀女","decompositionStrokes":["0-5","6-8"]}
   ],
   [
     "見",
-    {"decomposition":"⿱目儿"}
+    {"decomposition":"⿱目儿","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "见",
-    {"decomposition":"⿵冂儿"}
+    {"decomposition":"⿵冂儿","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "观",
-    {"decomposition":"⿰又见"}
+    {"decomposition":"⿰又见","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "规",
-    {"decomposition":"⿰夫见"}
+    {"decomposition":"⿰夫见","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "觉",
-    {"decomposition":"⿳𭕄冖见"}
+    {"decomposition":"⿳𭕄冖见","decompositionStrokes":["0-2","3-4","5-8"]}
   ],
   [
     "角",
-    {"decomposition":"⿱⺈用"}
+    {"decomposition":"⿱⺈用","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "觜",
-    {"decomposition":"⿱此角"}
+    {"decomposition":"⿱此角","decompositionStrokes":["0-5","6-12"]}
   ],
   [
     "解",
-    {"decomposition":"⿰角𭷔"}
+    {"decomposition":"⿰角𭷔","decompositionStrokes":["0-6","7-12"]}
   ],
   [
     "言",
-    {"decomposition":"⿱亠⿱二口"}
+    {"decomposition":"⿱亠⿱二口","decompositionStrokes":["0-1","2-3","4-6"]}
   ],
   [
     "訁",
@@ -4681,143 +4681,143 @@
   ],
   [
     "计",
-    {"decomposition":"⿰讠十"}
+    {"decomposition":"⿰讠十","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "订",
-    {"decomposition":"⿰讠丁"}
+    {"decomposition":"⿰讠丁","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "认",
-    {"decomposition":"⿰讠人"}
+    {"decomposition":"⿰讠人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "讨",
-    {"decomposition":"⿰讠寸"}
+    {"decomposition":"⿰讠寸","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "让",
-    {"decomposition":"⿰讠上"}
+    {"decomposition":"⿰讠上","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "训",
-    {"decomposition":"⿰讠川"}
+    {"decomposition":"⿰讠川","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "议",
-    {"decomposition":"⿰讠义"}
+    {"decomposition":"⿰讠义","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "记",
-    {"decomposition":"⿰讠己"}
+    {"decomposition":"⿰讠己","decompositionStrokes":["0-1","2-4"]}
   ],
   [
     "讲",
-    {"decomposition":"⿰讠井"}
+    {"decomposition":"⿰讠井","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "许",
-    {"decomposition":"⿰讠午"}
+    {"decomposition":"⿰讠午","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "论",
-    {"decomposition":"⿰讠仑"}
+    {"decomposition":"⿰讠仑","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "设",
-    {"decomposition":"⿰讠殳"}
+    {"decomposition":"⿰讠殳","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "访",
-    {"decomposition":"⿰讠方"}
+    {"decomposition":"⿰讠方","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "证",
-    {"decomposition":"⿰讠正"}
+    {"decomposition":"⿰讠正","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "评",
-    {"decomposition":"⿰讠平"}
+    {"decomposition":"⿰讠平","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "识",
-    {"decomposition":"⿰讠只"}
+    {"decomposition":"⿰讠只","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "诉",
-    {"decomposition":"⿰讠斥"}
+    {"decomposition":"⿰讠斥","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "词",
-    {"decomposition":"⿰讠司"}
+    {"decomposition":"⿰讠司","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "试",
-    {"decomposition":"⿰讠式"}
+    {"decomposition":"⿰讠式","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "话",
-    {"decomposition":"⿰讠舌"}
+    {"decomposition":"⿰讠舌","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "该",
-    {"decomposition":"⿰讠亥"}
+    {"decomposition":"⿰讠亥","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "语",
-    {"decomposition":"⿰讠吾"}
+    {"decomposition":"⿰讠吾","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "误",
-    {"decomposition":"⿰讠吴"}
+    {"decomposition":"⿰讠吴","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "说",
-    {"decomposition":"⿰讠兑"}
+    {"decomposition":"⿰讠兑","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "请",
-    {"decomposition":"⿰讠青"}
+    {"decomposition":"⿰讠青","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "读",
-    {"decomposition":"⿰讠卖"}
+    {"decomposition":"⿰讠卖","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "课",
-    {"decomposition":"⿰讠果"}
+    {"decomposition":"⿰讠果","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "谁",
-    {"decomposition":"⿰讠隹"}
+    {"decomposition":"⿰讠隹","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "调",
-    {"decomposition":"⿰讠周"}
+    {"decomposition":"⿰讠周","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "谈",
-    {"decomposition":"⿰讠炎"}
+    {"decomposition":"⿰讠炎","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "谢",
-    {"decomposition":"⿰讠射"}
+    {"decomposition":"⿰讠射","decompositionStrokes":["0-1","2-11"]}
   ],
   [
     "警",
-    {"decomposition":"⿱敬言"}
+    {"decomposition":"⿱敬言","decompositionStrokes":["0-11","12-18"]}
   ],
   [
     "谷",
-    {"decomposition":"⿳八人口"}
+    {"decomposition":"⿳八人口","decompositionStrokes":["0-1","2-3","4-6"]}
   ],
   [
     "豆",
-    {"decomposition":"⿱𠮛䒑"}
+    {"decomposition":"⿱𠮛䒑","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "豕",
-    {"decomposition":"⿱一𧰨"}
+    {"decomposition":"⿱一𧰨","decompositionStrokes":["0","1-6"]}
   ],
   [
     "𧰨",
@@ -4825,103 +4825,103 @@
   ],
   [
     "象",
-    {"decomposition":"⿳⺈口豕"}
+    {"decomposition":"⿳⺈口豕","decompositionStrokes":["0-1","2-4","4-10"]}
   ],
   [
     "豸",
-    {"decomposition":"⿱爫③"}
+    {"decomposition":"⿱爫③","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "貝",
-    {"decomposition":"⿱目八"}
+    {"decomposition":"⿱目八","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "贝",
-    {"decomposition":"⿵冂人"}
+    {"decomposition":"⿵冂人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "负",
-    {"decomposition":"⿱⺈贝"}
+    {"decomposition":"⿱⺈贝","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "责",
-    {"decomposition":"⿱龶贝"}
+    {"decomposition":"⿱龶贝","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "贯",
-    {"decomposition":"⿱毌贝"}
+    {"decomposition":"⿱毌贝","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "贵",
-    {"decomposition":"⿱𠀐贝"}
+    {"decomposition":"⿱𠀐贝","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "费",
-    {"decomposition":"⿱弗贝"}
+    {"decomposition":"⿱弗贝","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "资",
-    {"decomposition":"⿱次贝"}
+    {"decomposition":"⿱次贝","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "赛",
-    {"decomposition":"⿱𡨄贝"}
+    {"decomposition":"⿱𡨄贝","decompositionStrokes":["0-9","10-13"]}
   ],
   [
     "赢",
-    {"decomposition":"⿳亡口⿲月贝凡"}
+    {"decomposition":"⿳亡口⿲月贝凡","decompositionStrokes":["0-2","3-5","6-9","10-13","14-16"]}
   ],
   [
     "赤",
-    {"decomposition":"⿱土④"}
+    {"decomposition":"⿱土④","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "走",
-    {"decomposition":"⿱土龰"}
+    {"decomposition":"⿱土龰","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "赶",
-    {"decomposition":"⿺走干"}
+    {"decomposition":"⿺走干","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "起",
-    {"decomposition":"⿺走巳"}
+    {"decomposition":"⿺走巳","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "超",
-    {"decomposition":"⿺走召"}
+    {"decomposition":"⿺走召","decompositionStrokes":["0-6","7-11"]}
   ],
   [
     "越",
-    {"decomposition":"⿺走戉"}
+    {"decomposition":"⿺走戉","decompositionStrokes":["0-6","7-11"]}
   ],
   [
     "足",
-    {"decomposition":"⿱口龰"}
+    {"decomposition":"⿱口龰","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "𧾷",
-    {"componentFormOf":"足","decomposition":"⿱口止"}
+    {"componentFormOf":"足","decomposition":"⿱口止","decompositionStrokes":["",""]}
   ],
   [
     "跑",
-    {"decomposition":"⿰𧾷包"}
+    {"decomposition":"⿰𧾷包","decompositionStrokes":["0-6","7-11"]}
   ],
   [
     "跟",
-    {"decomposition":"⿰𧾷艮"}
+    {"decomposition":"⿰𧾷艮","decompositionStrokes":["0-6","7-12"]}
   ],
   [
     "路",
-    {"decomposition":"⿰𧾷各"}
+    {"decomposition":"⿰𧾷各","decompositionStrokes":["0-6","7-12"]}
   ],
   [
     "跳",
-    {"decomposition":"⿰𧾷兆"}
+    {"decomposition":"⿰𧾷兆","decompositionStrokes":["0-6","7-12"]}
   ],
   [
     "身",
-    {"decomposition":"⿻𨈑丿"}
+    {"decomposition":"⿻𨈑丿","decompositionStrokes":["0-5","6"]}
   ],
   [
     "𨈑",
@@ -4929,39 +4929,39 @@
   ],
   [
     "车",
-    {"decomposition":"⿻七十"}
+    {"decomposition":"⿻七十","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "转",
-    {"decomposition":"⿰车专"}
+    {"decomposition":"⿰车专","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "轻",
-    {"decomposition":"⿰车𢀖"}
+    {"decomposition":"⿰车𢀖","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "较",
-    {"decomposition":"⿰车交"}
+    {"decomposition":"⿰车交","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "辆",
-    {"decomposition":"⿰车两"}
+    {"decomposition":"⿰车两","decompositionStrokes":["0-3","4-10"]}
   ],
   [
     "输",
-    {"decomposition":"⿰车俞"}
+    {"decomposition":"⿰车俞","decompositionStrokes":["0-3","4-12"]}
   ],
   [
     "辛",
-    {"decomposition":"⿱立十"}
+    {"decomposition":"⿱立十","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "辰",
-    {"decomposition":"⿸厂⿱一④"}
+    {"decomposition":"⿸厂⿱一④","decompositionStrokes":["0-1","2","3-6"]}
   ],
   [
     "辵",
-    {"decomposition":"⿱彡龰"}
+    {"decomposition":"⿱彡龰","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "辶",
@@ -4969,155 +4969,155 @@
   ],
   [
     "边",
-    {"decomposition":"⿺辶力"}
+    {"decomposition":"⿺辶力","decompositionStrokes":["2-4","0-1"]}
   ],
   [
     "达",
-    {"decomposition":"⿺辶大"}
+    {"decomposition":"⿺辶大","decompositionStrokes":["3-5","0-2"]}
   ],
   [
     "过",
-    {"decomposition":"⿺辶寸"}
+    {"decomposition":"⿺辶寸","decompositionStrokes":["3-5","0-2"]}
   ],
   [
     "迎",
-    {"decomposition":"⿺辶卬"}
+    {"decomposition":"⿺辶卬","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "运",
-    {"decomposition":"⿺辶云"}
+    {"decomposition":"⿺辶云","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "近",
-    {"decomposition":"⿺辶斤"}
+    {"decomposition":"⿺辶斤","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "还",
-    {"decomposition":"⿺辶不"}
+    {"decomposition":"⿺辶不","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "这",
-    {"decomposition":"⿺辶文"}
+    {"decomposition":"⿺辶文","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "进",
-    {"decomposition":"⿺辶井"}
+    {"decomposition":"⿺辶井","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "远",
-    {"decomposition":"⿺辶元"}
+    {"decomposition":"⿺辶元","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "连",
-    {"decomposition":"⿺辶车"}
+    {"decomposition":"⿺辶车","decompositionStrokes":["4-6","0-3"]}
   ],
   [
     "迶",
-    {"decomposition":"⿺辶有","isStructural":true}
+    {"decomposition":"⿺辶有","decompositionStrokes":["6-8","0-5"],"isStructural":true}
   ],
   [
     "迷",
-    {"decomposition":"⿺辶米"}
+    {"decomposition":"⿺辶米","decompositionStrokes":["6-8","0-5"]}
   ],
   [
     "追",
-    {"decomposition":"⿺辶𠂤"}
+    {"decomposition":"⿺辶𠂤","decompositionStrokes":["6-8","0-5"]}
   ],
   [
     "退",
-    {"decomposition":"⿺辶艮"}
+    {"decomposition":"⿺辶艮","decompositionStrokes":["6-8","0-5"]}
   ],
   [
     "送",
-    {"decomposition":"⿺辶关"}
+    {"decomposition":"⿺辶关","decompositionStrokes":["6-8","0-5"]}
   ],
   [
     "适",
-    {"decomposition":"⿺辶舌"}
+    {"decomposition":"⿺辶舌","decompositionStrokes":["6-8","0-5"]}
   ],
   [
     "选",
-    {"decomposition":"⿺辶先"}
+    {"decomposition":"⿺辶先","decompositionStrokes":["6-8","0-5"]}
   ],
   [
     "通",
-    {"decomposition":"⿺辶甬"}
+    {"decomposition":"⿺辶甬","decompositionStrokes":["7-9","0-6"]}
   ],
   [
     "速",
-    {"decomposition":"⿺辶束"}
+    {"decomposition":"⿺辶束","decompositionStrokes":["7-9","0-6"]}
   ],
   [
     "造",
-    {"decomposition":"⿺辶告"}
+    {"decomposition":"⿺辶告","decompositionStrokes":["7-9","0-6"]}
   ],
   [
     "遍",
-    {"decomposition":"⿺辶扁"}
+    {"decomposition":"⿺辶扁","decompositionStrokes":["9-11","0-8"]}
   ],
   [
     "道",
-    {"decomposition":"⿺辶首"}
+    {"decomposition":"⿺辶首","decompositionStrokes":["9-11","0-8"]}
   ],
   [
     "邑",
-    {"decomposition":"⿱口巴"}
+    {"decomposition":"⿱口巴","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "那",
-    {"decomposition":"⿰⿻刀二阝"}
+    {"decomposition":"⿰⿻刀二阝","decompositionStrokes":["0,3","1-2","4-5"]}
   ],
   [
     "邦",
-    {"decomposition":"⿰丰阝"}
+    {"decomposition":"⿰丰阝","decompositionStrokes":["0-3","4-5"]}
   ],
   [
     "邮",
-    {"decomposition":"⿰由阝"}
+    {"decomposition":"⿰由阝","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "部",
-    {"decomposition":"⿰咅阝"}
+    {"decomposition":"⿰咅阝","decompositionStrokes":["0-7","8-9"]}
   ],
   [
     "都",
-    {"decomposition":"⿰者阝"}
+    {"decomposition":"⿰者阝","decompositionStrokes":["0-7","8-9"]}
   ],
   [
     "酉",
-    {"decomposition":"⿻兀日"}
+    {"decomposition":"⿻兀日","decompositionStrokes":["0,3-4","1-2,5-6"]}
   ],
   [
     "配",
-    {"decomposition":"⿰酉己"}
+    {"decomposition":"⿰酉己","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "酒",
-    {"decomposition":"⿰氵酉"}
+    {"decomposition":"⿰氵酉","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "釆",
-    {"decomposition":"⿱丿米"}
+    {"decomposition":"⿱丿米","decompositionStrokes":["0","1-6"]}
   ],
   [
     "采",
-    {"decomposition":"⿱爫木"}
+    {"decomposition":"⿱爫木","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "里",
-    {"decomposition":"⿻甲二"}
+    {"decomposition":"⿻甲二","decompositionStrokes":["0-4","5-6"]}
   ],
   [
     "重",
-    {"decomposition":"⿱千里"}
+    {"decomposition":"⿱千里","decompositionStrokes":["0-1,6","2-8"]}
   ],
   [
     "量",
-    {"decomposition":"⿱旦里"}
+    {"decomposition":"⿱旦里","decompositionStrokes":["0-4","5-11"]}
   ],
   [
     "金",
-    {"decomposition":"⿱人⿻王丷"}
+    {"decomposition":"⿱人⿻王丷","decompositionStrokes":["0-1","2-4,7","5-6"]}
   ],
   [
     "釒",
@@ -5129,147 +5129,147 @@
   ],
   [
     "钟",
-    {"decomposition":"⿰钅中"}
+    {"decomposition":"⿰钅中","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "钱",
-    {"decomposition":"⿰钅戋"}
+    {"decomposition":"⿰钅戋","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "铁",
-    {"decomposition":"⿰钅失"}
+    {"decomposition":"⿰钅失","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "银",
-    {"decomposition":"⿰钅艮"}
+    {"decomposition":"⿰钅艮","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "错",
-    {"decomposition":"⿰钅昔"}
+    {"decomposition":"⿰钅昔","decompositionStrokes":["0-4","5-12"]}
   ],
   [
     "長",
-    {"decomposition":"⿱④⑤"}
+    {"decomposition":"⿱④⑤","decompositionStrokes":["0-3","4-8"]}
   ],
   [
     "镸",
-    {"componentFormOf":"長","decomposition":"⿱④𠫔"}
+    {"componentFormOf":"長","decomposition":"⿱④𠫔","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "长",
-    {"decomposition":"⿻③一"}
+    {"decomposition":"⿻③一","decompositionStrokes":["0,2-3","1"]}
   ],
   [
     "門",
-    {"decomposition":"⿰𠁣𠃛"}
+    {"decomposition":"⿰𠁣𠃛","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "门",
-    {"decomposition":"⿰⿱丶丨①"}
+    {"decomposition":"⿰⿱丶丨①","decompositionStrokes":["0","1","2"]}
   ],
   [
     "问",
-    {"decomposition":"⿵门口"}
+    {"decomposition":"⿵门口","decompositionStrokes":["0-2","3-5"]}
   ],
   [
     "间",
-    {"decomposition":"⿵门日"}
+    {"decomposition":"⿵门日","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "闻",
-    {"decomposition":"⿵门耳"}
+    {"decomposition":"⿵门耳","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "阜",
-    {"decomposition":"⿱𠂤十"}
+    {"decomposition":"⿱𠂤十","decompositionStrokes":["0-5","6-7"]}
   ],
   [
     "阝",
-    {"decomposition":"⿻丨①"}
+    {"decomposition":"⿻丨①","decompositionStrokes":["1","0"]}
   ],
   [
     "队",
-    {"decomposition":"⿰阝人"}
+    {"decomposition":"⿰阝人","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "防",
-    {"decomposition":"⿰阝方"}
+    {"decomposition":"⿰阝方","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "阳",
-    {"decomposition":"⿰阝日"}
+    {"decomposition":"⿰阝日","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "阴",
-    {"decomposition":"⿰阝月"}
+    {"decomposition":"⿰阝月","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "阿",
-    {"decomposition":"⿰阝可"}
+    {"decomposition":"⿰阝可","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "际",
-    {"decomposition":"⿰阝示"}
+    {"decomposition":"⿰阝示","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "院",
-    {"decomposition":"⿰阝完"}
+    {"decomposition":"⿰阝完","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "除",
-    {"decomposition":"⿰阝余"}
+    {"decomposition":"⿰阝余","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "险",
-    {"decomposition":"⿰阝佥"}
+    {"decomposition":"⿰阝佥","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "随",
-    {"decomposition":"⿰阝迶"}
+    {"decomposition":"⿰阝迶","decompositionStrokes":["0-1","2-10"]}
   ],
   [
     "隶",
-    {"decomposition":"⿱⺺氺"}
+    {"decomposition":"⿱⺺氺","decompositionStrokes":["0-3","3-7"]}
   ],
   [
     "隹",
-    {"decomposition":"⿰亻⑥"}
+    {"decomposition":"⿰亻⑥","decompositionStrokes":["0-1","2-7"]}
   ],
   [
     "难",
-    {"decomposition":"⿰又隹"}
+    {"decomposition":"⿰又隹","decompositionStrokes":["0-1","2-9"]}
   ],
   [
     "集",
-    {"decomposition":"⿱隹木"}
+    {"decomposition":"⿱隹木","decompositionStrokes":["0-7","8-11"]}
   ],
   [
     "雨",
-    {"decomposition":"⿱一𠕒"}
+    {"decomposition":"⿱一𠕒","decompositionStrokes":["0","1-7"]}
   ],
   [
     "雪",
-    {"decomposition":"⿱雨彐"}
+    {"decomposition":"⿱雨彐","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "零",
-    {"decomposition":"⿱雨令"}
+    {"decomposition":"⿱雨令","decompositionStrokes":["0-7","8-12"]}
   ],
   [
     "需",
-    {"decomposition":"⿱雨而"}
+    {"decomposition":"⿱雨而","decompositionStrokes":["0-7","8-13"]}
   ],
   [
     "靑",
-    {"decomposition":"⿱龶円"}
+    {"decomposition":"⿱龶円","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "青",
-    {"decomposition":"⿱龶月"}
+    {"decomposition":"⿱龶月","decompositionStrokes":["0-3","4-7"]}
   ],
   [
     "静",
-    {"decomposition":"⿰青争"}
+    {"decomposition":"⿰青争","decompositionStrokes":["0-7","8-13"]}
   ],
   [
     "非",
@@ -5277,87 +5277,87 @@
   ],
   [
     "靠",
-    {"decomposition":"⿱告非"}
+    {"decomposition":"⿱告非","decompositionStrokes":["0-6","7-14"]}
   ],
   [
     "面",
-    {"decomposition":"⿱丆囬"}
+    {"decomposition":"⿱丆囬","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "革",
-    {"decomposition":"⿱廿⿻口十"}
+    {"decomposition":"⿱廿⿻口十","decompositionStrokes":["0-3","4-6","7-8"]}
   ],
   [
     "鞋",
-    {"decomposition":"⿰革圭"}
+    {"decomposition":"⿰革圭","decompositionStrokes":["0-8","9-14"]}
   ],
   [
     "韋",
-    {"decomposition":"⿳𫝀口㐄"}
+    {"decomposition":"⿳𫝀口㐄","decompositionStrokes":["0-2","3-5","6-8"]}
   ],
   [
     "韦",
-    {"decomposition":"⿻三丨"}
+    {"decomposition":"⿻三丨","decompositionStrokes":["0-2","3"]}
   ],
   [
     "韭",
-    {"decomposition":"⿱非一"}
+    {"decomposition":"⿱非一","decompositionStrokes":["0-7","8"]}
   ],
   [
     "音",
-    {"decomposition":"⿱立日"}
+    {"decomposition":"⿱立日","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "竟",
-    {"decomposition":"⿱音儿"}
+    {"decomposition":"⿱音儿","decompositionStrokes":["0-8","9-10"]}
   ],
   [
     "章",
-    {"decomposition":"⿱立早"}
+    {"decomposition":"⿱立早","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "页",
-    {"decomposition":"⿱丆贝"}
+    {"decomposition":"⿱丆贝","decompositionStrokes":["0-1","2-5"]}
   ],
   [
     "顺",
-    {"decomposition":"⿰川页"}
+    {"decomposition":"⿰川页","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "须",
-    {"decomposition":"⿰彡页"}
+    {"decomposition":"⿰彡页","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "顾",
-    {"decomposition":"⿰厄页"}
+    {"decomposition":"⿰厄页","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "顿",
-    {"decomposition":"⿰屯页"}
+    {"decomposition":"⿰屯页","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "预",
-    {"decomposition":"⿰予页"}
+    {"decomposition":"⿰予页","decompositionStrokes":["0-3","4-9"]}
   ],
   [
     "领",
-    {"decomposition":"⿰令页"}
+    {"decomposition":"⿰令页","decompositionStrokes":["0-4","5-10"]}
   ],
   [
     "题",
-    {"decomposition":"⿺是页"}
+    {"decomposition":"⿺是页","decompositionStrokes":["0-8","9-14"]}
   ],
   [
     "颜",
-    {"decomposition":"⿰彦页"}
+    {"decomposition":"⿰彦页","decompositionStrokes":["0-8","9-14"]}
   ],
   [
     "風",
-    {"decomposition":"⿵几䖝"}
+    {"decomposition":"⿵几䖝","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "风",
-    {"decomposition":"⿵几㐅"}
+    {"decomposition":"⿵几㐅","decompositionStrokes":["0-1","2-3"]}
   ],
   [
     "飞",
@@ -5365,195 +5365,195 @@
   ],
   [
     "食",
-    {"decomposition":"⿱人良"}
+    {"decomposition":"⿱人良","decompositionStrokes":["0-1","2-8"]}
   ],
   [
     "饣",
-    {"decomposition":"⿱②乚"}
+    {"decomposition":"⿱②乚","decompositionStrokes":["0-1","2"]}
   ],
   [
     "饭",
-    {"decomposition":"⿰饣反"}
+    {"decomposition":"⿰饣反","decompositionStrokes":["0-2","3-6"]}
   ],
   [
     "饱",
-    {"decomposition":"⿰饣包"}
+    {"decomposition":"⿰饣包","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "饺",
-    {"decomposition":"⿰饣交"}
+    {"decomposition":"⿰饣交","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "餐",
-    {"decomposition":"⿱𣦼食"}
+    {"decomposition":"⿱𣦼食","decompositionStrokes":["0-6","7-15"]}
   ],
   [
     "饿",
-    {"decomposition":"⿰饣我"}
+    {"decomposition":"⿰饣我","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "馆",
-    {"decomposition":"⿰饣官"}
+    {"decomposition":"⿰饣官","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "首",
-    {"decomposition":"⿱䒑自"}
+    {"decomposition":"⿱䒑自","decompositionStrokes":["0-2","3-8"]}
   ],
   [
     "香",
-    {"decomposition":"⿱禾日"}
+    {"decomposition":"⿱禾日","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "馬",
-    {"decomposition":"⿹⑥灬"}
+    {"decomposition":"⿹⑥灬","decompositionStrokes":["0-5","6-9"]}
   ],
   [
     "马",
-    {"decomposition":"⿹②一"}
+    {"decomposition":"⿹②一","decompositionStrokes":["0-1","2"]}
   ],
   [
     "验",
-    {"decomposition":"⿰马佥"}
+    {"decomposition":"⿰马佥","decompositionStrokes":["0-2","3-9"]}
   ],
   [
     "骑",
-    {"decomposition":"⿰马奇"}
+    {"decomposition":"⿰马奇","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "骨",
-    {"decomposition":"⿱⑤月"}
+    {"decomposition":"⿱⑤月","decompositionStrokes":["0-4","5-8"]}
   ],
   [
     "高",
-    {"decomposition":"⿳亠口冋"}
+    {"decomposition":"⿳亠口冋","decompositionStrokes":["0-1","2-4","5-9"]}
   ],
   [
     "髟",
-    {"decomposition":"⿰镸彡"}
+    {"decomposition":"⿰镸彡","decompositionStrokes":["0-6","7-9"]}
   ],
   [
     "鬥",
-    {"decomposition":"⿰𩰋𩰊"}
+    {"decomposition":"⿰𩰋𩰊","decompositionStrokes":["0-4","5-9"]}
   ],
   [
     "𩰊",
-    {"canonicalForm":"𩰋","decomposition":"𩰊"}
+    {"canonicalForm":"𩰋","decomposition":"𩰊","decompositionStrokes":[""]}
   ],
   [
     "𩰋",
-    {"decomposition":"𩰋"}
+    {"decomposition":"𩰋","decompositionStrokes":[""]}
   ],
   [
     "鬯",
-    {"decomposition":"⿱𠚍匕"}
+    {"decomposition":"⿱𠚍匕","decompositionStrokes":["0-7","8-9"]}
   ],
   [
     "鬲",
-    {"decomposition":"⿱𠮛⿵冂⿱丷丅"}
+    {"decomposition":"⿱𠮛⿵冂⿱丷丅","decompositionStrokes":["0-3","4-5","6-7","8-9"]}
   ],
   [
     "鬼",
-    {"decomposition":"⿱甶⿺儿厶"}
+    {"decomposition":"⿱甶⿺儿厶","decompositionStrokes":["0-5","5-6","7-8"]}
   ],
   [
     "魚",
-    {"decomposition":"⿳⺈田灬"}
+    {"decomposition":"⿳⺈田灬","decompositionStrokes":["0-1","2-6","7-10"]}
   ],
   [
     "鱼",
-    {"decomposition":"⿳⺈田一"}
+    {"decomposition":"⿳⺈田一","decompositionStrokes":["0-1","2-6","7"]}
   ],
   [
     "鳥",
-    {"decomposition":"⿹⑦灬"}
+    {"decomposition":"⿹⑦灬","decompositionStrokes":["0-6","7-10"]}
   ],
   [
     "鸟",
-    {"decomposition":"⿹④一"}
+    {"decomposition":"⿹④一","decompositionStrokes":["0-3","4"]}
   ],
   [
     "鸡",
-    {"decomposition":"⿰又鸟"}
+    {"decomposition":"⿰又鸟","decompositionStrokes":["0-1","2-6"]}
   ],
   [
     "鹵",
-    {"decomposition":"⿱⺊⿴囗𠂭"}
+    {"decomposition":"⿱⺊⿴囗𠂭","decompositionStrokes":["0-1","2-3,10","4-9"]}
   ],
   [
     "鹿",
-    {"decomposition":"⿸广⿱覀比"}
+    {"decomposition":"⿸广⿱覀比","decompositionStrokes":["0-2","1,3-6","7-10"]}
   ],
   [
     "麥",
-    {"decomposition":"⿱來夂"}
+    {"decomposition":"⿱來夂","decompositionStrokes":["0-7","8-10"]}
   ],
   [
     "麦",
-    {"decomposition":"⿱龶夂"}
+    {"decomposition":"⿱龶夂","decompositionStrokes":["0-3","4-6"]}
   ],
   [
     "麻",
-    {"decomposition":"⿸广林"}
+    {"decomposition":"⿸广林","decompositionStrokes":["0-2","3-10"]}
   ],
   [
     "黃",
-    {"decomposition":"⿱廿⿳一由八"}
+    {"decomposition":"⿱廿⿳一由八","decompositionStrokes":["0-3","4","5-9","10-11"]}
   ],
   [
     "黄",
-    {"decomposition":"⿳龷由八"}
+    {"decomposition":"⿳龷由八","decompositionStrokes":["0-3","4-8","9-10"]}
   ],
   [
     "黍",
-    {"decomposition":"⿳禾人氺"}
+    {"decomposition":"⿳禾人氺","decompositionStrokes":["0-4","5-6","7-11"]}
   ],
   [
     "黑",
-    {"decomposition":"⿳⑤土灬"}
+    {"decomposition":"⿳⑤土灬","decompositionStrokes":["0-4","5-7","8-11"]}
   ],
   [
     "黹",
-    {"decomposition":"⿱业㡀"}
+    {"decomposition":"⿱业㡀","decompositionStrokes":["0-4","4-11"]}
   ],
   [
     "黾",
-    {"decomposition":"⿱口电"}
+    {"decomposition":"⿱口电","decompositionStrokes":["0-2","3-7"]}
   ],
   [
     "鼎",
-    {"decomposition":"⿶⿰片片目"}
+    {"decomposition":"⿶⿰片片目","decompositionStrokes":["5-7","8-11","0-4"]}
   ],
   [
     "鼓",
-    {"decomposition":"⿰壴支"}
+    {"decomposition":"⿰壴支","decompositionStrokes":["0-8","9-12"]}
   ],
   [
     "鼠",
-    {"decomposition":"⿱臼⑦"}
+    {"decomposition":"⿱臼⑦","decompositionStrokes":["0-5","6-12"]}
   ],
   [
     "鼻",
-    {"decomposition":"⿱自畀"}
+    {"decomposition":"⿱自畀","decompositionStrokes":["0-5","6-13"]}
   ],
   [
     "齊",
-    {"decomposition":"⿱⿱亠⿲刀丫③⿲丿二丨"}
+    {"decomposition":"⿱⿱亠⿲刀丫③⿲丿二丨","decompositionStrokes":["0-1","5-6","2-4","7-9","10","12-13","11"]}
   ],
   [
     "齐",
-    {"decomposition":"⿱文⿰丿丨"}
+    {"decomposition":"⿱文⿰丿丨","decompositionStrokes":["0-3","4","5"]}
   ],
   [
     "齒",
-    {"decomposition":"⿱止𠚕"}
+    {"decomposition":"⿱止𠚕","decompositionStrokes":["0-3","4-14"]}
   ],
   [
     "龍",
-    {"decomposition":"⿰𦚏⑦"}
+    {"decomposition":"⿰𦚏⑦","decompositionStrokes":["0-8","9-15"]}
   ],
   [
     "龙",
-    {"decomposition":"⿻尤丿"}
+    {"decomposition":"⿻尤丿","decompositionStrokes":["0-3","4"]}
   ],
   [
     "龜",
@@ -5561,7 +5561,7 @@
   ],
   [
     "龠",
-    {"decomposition":"⿳亼𠱠𠕁"}
+    {"decomposition":"⿳亼𠱠𠕁","decompositionStrokes":["0-2","3-11","12-16"]}
   ],
   [
     "",
