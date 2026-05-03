@@ -16,19 +16,19 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 
 // Type-safe accessor functions
-export function getOperator<T>(ids: Readonly<IdsNode<T>>): string {
+export function getOperator<T>(ids: IdsNode<T>): string {
   // oxlint-disable-next-line typescript/no-unsafe-return
   return Array.isArray(ids) ? ids[0] : `Leaf`;
 }
 
 export function isAboveToBelowNode<T>(
-  ids: Readonly<IdsNode<T>>,
+  ids: IdsNode<T>,
 ): ids is [typeof IdsOperator.AboveToBelow, IdsNode<T>, IdsNode<T>] {
   return getOperator(ids) === IdsOperator.AboveToBelow;
 }
 
 export function isAboveToMiddleAndBelowNode<T>(
-  ids: Readonly<IdsNode<T>>,
+  ids: IdsNode<T>,
 ): ids is [
   typeof IdsOperator.AboveToMiddleAndBelow,
   IdsNode<T>,
@@ -39,13 +39,13 @@ export function isAboveToMiddleAndBelowNode<T>(
 }
 
 export function isLeftToRightNode<T>(
-  ids: Readonly<IdsNode<T>>,
+  ids: IdsNode<T>,
 ): ids is [typeof IdsOperator.LeftToRight, IdsNode<T>, IdsNode<T>] {
   return getOperator(ids) === IdsOperator.LeftToRight;
 }
 
 export function isLeftToMiddleToRightNode<T>(
-  ids: Readonly<IdsNode<T>>,
+  ids: IdsNode<T>,
 ): ids is [
   typeof IdsOperator.LeftToMiddleToRight,
   IdsNode<T>,
@@ -55,7 +55,7 @@ export function isLeftToMiddleToRightNode<T>(
   return getOperator(ids) === IdsOperator.LeftToMiddleToRight;
 }
 
-export function isLeafNode<T>(ids: Readonly<IdsNode<T>>): ids is T {
+export function isLeafNode<T>(ids: IdsNode<T>): ids is T {
   return !Array.isArray(ids);
 }
 
