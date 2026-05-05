@@ -1,32 +1,32 @@
 import { getWikiCharacterData } from "@/client/wiki";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
-  componentToString,
-  idsNodeToString,
-  isHanziCharacter,
-  isLeafNode,
+    componentToString,
+    idsNodeToString,
+    isHanziCharacter,
+    isLeafNode,
 } from "@/data/hanzi";
 import type {
-  HanziCharacter,
-  HanziText,
-  IdsNode,
-  WikiCharacterComponent,
-  WikiCharacterDecomposition,
+    HanziCharacter,
+    HanziText,
+    IdsNode,
+    WikiCharacterComponent,
+    WikiCharacterDecomposition,
 } from "@/data/model";
 import { IdsOperator, wikiCharacterDecompositionSchema } from "@/data/model";
 import { userWikiCharacterDecompositionSetting } from "@/data/userSettings";
 import { decompositionComponentsToIds } from "@/dictionary";
 import { parseIndexRanges, normalizeIndexRanges } from "@/util/indexRanges";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { use, useState, Suspense } from "react";
+import { use, useEffect, useState, Suspense } from "react";
 import type { ReactNode } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View, Image } from "react-native";
 import { G, Svg } from "react-native-svg";
 import { DropdownMenu } from "./DropdownMenu";
-import type { HanziCharacterColor } from "./HanziCharacter.utils";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
+import { useHanziVisualSuggestions } from "./hooks/useHanziVisualSuggestions";
 import { PathCss } from "./svg";
 import { useDb } from "./hooks/useDb";
 
@@ -52,38 +52,6 @@ const visualOperators = [
 
 type VisualOperator = (typeof visualOperators)[number];
 
-const overflowDragMime = `application/x-pinyinly-overflow-cell`;
-
-const leafCellClassName = `min-h-28 min-w-24 flex-1 gap-2 bg-bg p-3`;
-
-// Full class strings must be literal so NativeWind includes them in the bundle.
-const colorSwatchClass: Record<HanziCharacterColor, string> = {
-  fg: `bg-fg`,
-  blue: `bg-blue`,
-  yellow: `bg-yellow`,
-  amber: `bg-amber`,
-  cyanold: `bg-cyanold`,
-};
-
-const colorTextClass: Record<HanziCharacterColor, string> = {
-  fg: `text-fg`,
-  blue: `text-blue`,
-  yellow: `text-yellow`,
-  amber: `text-amber`,
-  cyanold: `text-cyanold`,
-};
-
-const visualOperatorLabels: Record<VisualOperator, string> = {
-  [IdsOperator.LeftToRight]: `Left / Right`,
-  [IdsOperator.AboveToBelow]: `Top / Bottom`,
-  [IdsOperator.LeftToMiddleToRight]: `Left / Mid / Right`,
-  [IdsOperator.AboveToMiddleAndBelow]: `Top / Mid / Bottom`,
-  [IdsOperator.FullSurround]: `Full Surround`,
-  [IdsOperator.SurroundFromAbove]: `Surround from Top`,
-  [IdsOperator.SurroundFromBelow]: `Surround from Bottom`,
-  [IdsOperator.SurroundFromLeft]: `Surround from Left`,
-};
-
 function isVisualOperator(value: string): value is VisualOperator {
   return visualOperators.includes(value as VisualOperator);
 }
@@ -105,24 +73,26 @@ function arityForOperator(operator: VisualOperator): 2 | 3 {
   }
 }
 
-function nestableChildIndices(operator: VisualOperator): readonly number[] {
-  switch (operator) {
-    case IdsOperator.LeftToRight:
-    case IdsOperator.AboveToBelow: {
-      return [1, 2];
-    }
-    case IdsOperator.LeftToMiddleToRight:
-    case IdsOperator.AboveToMiddleAndBelow: {
-      return [1, 2, 3];
-    }
-    case IdsOperator.FullSurround:
-    case IdsOperator.SurroundFromAbove:
-    case IdsOperator.SurroundFromBelow:
-    case IdsOperator.SurroundFromLeft: {
-      return [2];
-    }
-  }
-}
+const overflowDragMime = `application/x-pinyinly-overflow-cell`;
+
+const leafCellClassName = `flex-1 gap-2 p-3`;
+
+// Full class strings must be literal so NativeWind includes them in the bundle.
+const colorSwatchClass = {
+  fg: `bg-fg`,
+  blue: `bg-blue`,
+  yellow: `bg-yellow`,
+  amber: `bg-amber`,
+  cyanold: `bg-cyanold`,
+} as const;
+
+const colorTextClass = {
+  fg: `text-fg`,
+  blue: `text-blue`,
+  yellow: `text-yellow`,
+  amber: `text-amber`,
+  cyanold: `text-cyanold`,
+} as const;
 
 function getOverrideComponents(
   value: UserWikiCharacterDecompositionValue,
@@ -294,7 +264,7 @@ function StrokePicker({
   );
 
   return (
-    <Svg viewBox="0 0 1024 1024" className="size-40 shrink-0">
+    <Svg viewBox="0 0 1024 1024" className="size-20 shrink-0">
       <G transform="scale(1, -1) translate(0, -900)">
         {strokePaths.map((d, i) => {
           const isSelected = selectedStrokes.has(i);
@@ -328,6 +298,156 @@ function StrokePicker({
         })}
       </G>
     </Svg>
+  );
+}
+
+function HanziVisualSuggestionsPanel({
+  strokePaths,
+  selectedStrokeIndexes,
+  onSelect,
+}: {
+  strokePaths: readonly string[] | null;
+  selectedStrokeIndexes: readonly number[];
+  onSelect: (hanzi: HanziCharacter) => void;
+}) {
+  const [isBitmapNudgingActive, setIsBitmapNudgingActive] = useState(false);
+  const [bitmapOffsetX, setBitmapOffsetX] = useState(0);
+  const [bitmapOffsetY, setBitmapOffsetY] = useState(0);
+
+  const suggestionsState = useHanziVisualSuggestions({
+    strokePaths,
+    selectedStrokeIndexes,
+    pixelOffsetX: bitmapOffsetX,
+    pixelOffsetY: bitmapOffsetY,
+    limit: 6,
+    debounceMs: 320,
+  });
+
+  useEffect(() => {
+    if (
+      Platform.OS !== `web` ||
+      !isBitmapNudgingActive ||
+      typeof window === `undefined`
+    ) {
+      return;
+    }
+
+    const handleArrowNudge = (event: KeyboardEvent) => {
+      if (event.key === `Escape`) {
+        setIsBitmapNudgingActive(false);
+        return;
+      }
+
+      switch (event.key) {
+        case `ArrowLeft`:
+          event.preventDefault();
+          setBitmapOffsetX((value) => value - 1);
+          return;
+        case `ArrowRight`:
+          event.preventDefault();
+          setBitmapOffsetX((value) => value + 1);
+          return;
+        case `ArrowUp`:
+          event.preventDefault();
+          setBitmapOffsetY((value) => value - 1);
+          return;
+        case `ArrowDown`:
+          event.preventDefault();
+          setBitmapOffsetY((value) => value + 1);
+          return;
+        default:
+          return;
+      }
+    };
+
+    window.addEventListener(`keydown`, handleArrowNudge);
+    return () => {
+      window.removeEventListener(`keydown`, handleArrowNudge);
+    };
+  }, [isBitmapNudgingActive]);
+
+  if (selectedStrokeIndexes.length === 0) {
+    return null;
+  }
+
+  if (suggestionsState.kind === `idle`) {
+    return null;
+  }
+
+  return (
+    <View className="gap-2">
+      {suggestionsState.kind === `loading` ? (
+        <Text className="pyly-body-caption text-fg-dim">
+          Finding matches...
+        </Text>
+      ) : null}
+
+      {suggestionsState.kind === `unsupported` ? (
+        <Text className="pyly-body-caption text-fg-dim">
+          {suggestionsState.message}
+        </Text>
+      ) : null}
+
+      {suggestionsState.kind === `error` ? (
+        <Text className="pyly-body-caption text-warning">
+          {suggestionsState.message}
+        </Text>
+      ) : null}
+
+      {suggestionsState.kind === `success` ? (
+        <View className="flex-row">
+          <View className="gap-1">
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                setIsBitmapNudgingActive(true);
+              }}
+              className={
+                isBitmapNudgingActive
+                  ? `self-start rounded border border-blue p-0.5`
+                  : `self-start rounded border border-transparent p-0.5`
+              }
+            >
+              <Image
+                source={{ uri: suggestionsState.debugBitmapUrl }}
+                style={{ width: 96, height: 96 }}
+                resizeMode="stretch"
+              />
+            </Pressable>
+          </View>
+          {suggestionsState.suggestions.length === 0 ? (
+            <Text className="pyly-body-caption text-fg-dim">
+              No close matches yet.
+            </Text>
+          ) : (
+            <View className="flex-row flex-wrap gap-2">
+              {suggestionsState.suggestions.map((suggestion) => (
+                <Pressable
+                  key={suggestion.hanzi}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    onSelect(suggestion.hanzi);
+                  }}
+                  className={`
+                    rounded-md border border-fg/20 bg-bg-high px-2 py-1
+
+                    hover:bg-fg/5
+                  `}
+                >
+                  <Text className="font-sans text-xs text-fg">
+                    {suggestion.hanzi}
+                    {` `}
+                    <Text className="text-fg-dim">
+                      {Math.round(suggestion.score * 100)}%
+                    </Text>
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -525,10 +645,74 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
     setHanziInputByPath({});
   };
 
+  const getNodeAtPath = (
+    root: WikiCharacterDecomposition,
+    path: readonly number[],
+  ): WikiCharacterDecomposition | null => {
+    let current: WikiCharacterDecomposition = root;
+
+    for (const nextIndex of path) {
+      if (isLeafNode(current)) {
+        return null;
+      }
+
+      if (nextIndex <= 0 || nextIndex >= current.length) {
+        return null;
+      }
+
+      const child = current[nextIndex];
+      if (child == null) {
+        return null;
+      }
+
+      current = child as WikiCharacterDecomposition;
+    }
+
+    return current;
+  };
+
+  const applyLayoutAtPath = (
+    targetPath: readonly number[],
+    nextLayout: `leaf` | VisualOperator,
+  ) => {
+    if (draftComponents == null) {
+      return;
+    }
+
+    const targetNode = getNodeAtPath(draftComponents, targetPath);
+    if (targetNode == null) {
+      return;
+    }
+
+    if (nextLayout === `leaf`) {
+      if (isLeafNode(targetNode)) {
+        return;
+      }
+
+      const { leaf: nextLeaf, overflowLeafs } = flattenNodeToLeaf(targetNode);
+      if (overflowLeafs.length > 0) {
+        setDraftOverflow((current) => [...current, ...overflowLeafs]);
+      }
+
+      replaceDraftNodeAtPath(targetPath, nextLeaf);
+      return;
+    }
+
+    const { nextNode, overflowLeafs } = buildRootForOperator(
+      nextLayout,
+      targetNode,
+    );
+    if (overflowLeafs.length > 0) {
+      setDraftOverflow((current) => [...current, ...overflowLeafs]);
+    }
+
+    replaceDraftNodeAtPath(targetPath, nextNode);
+  };
+
   const renderNode = (
     node: WikiCharacterDecomposition,
     path: readonly number[] = [],
-    isNestable = false,
+    isRootLayout = false,
   ): ReactNode => {
     if (isLeafNode(node)) {
       const leaf = node;
@@ -538,6 +722,53 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
       const pathKey = path.join(`.`);
       const isDropTarget = dropTargetPathKey === pathKey;
       const hanziInputValue = hanziInputByPath[pathKey] ?? leaf.hanzi ?? ``;
+      const selectedStrokeIndexes = parseIndexRanges(leaf.strokes);
+      const layoutTargetPath = path;
+      const layoutTargetNode =
+        draftComponents == null
+          ? null
+          : getNodeAtPath(draftComponents, layoutTargetPath);
+      const currentLayoutValue =
+        layoutTargetNode == null || isLeafNode(layoutTargetNode)
+          ? `leaf`
+          : layoutTargetNode[0];
+
+      const getLeafHanziSizeClass = (): string => {
+        // Keep all possible classes as literals so NativeWind can include them.
+        const sizeTiers = [
+          `text-6xl`,
+          `text-5xl`,
+          `text-4xl`,
+          `text-3xl`,
+          `text-2xl`,
+          `text-xl`,
+        ] as const;
+
+        if (path.length === 0) {
+          return sizeTiers[0];
+        }
+
+        const parentPath = path.slice(0, -1);
+        const parentNode =
+          draftComponents == null ? null : getNodeAtPath(draftComponents, parentPath);
+
+        let baseTier = 0;
+        if (parentNode != null && !isLeafNode(parentNode)) {
+          const parentOperator = parentNode[0];
+          if (
+            isVisualOperator(parentOperator) &&
+            arityForOperator(parentOperator) === 3
+          ) {
+            baseTier = 1;
+          }
+        }
+
+        const depthPenalty = Math.max(0, path.length - 1);
+        const tier = Math.min(sizeTiers.length - 1, baseTier + depthPenalty);
+        return sizeTiers[tier] ?? `text-xl`;
+      };
+
+      const leafHanziSizeClass = getLeafHanziSizeClass();
 
       const webDropTargetProps: Record<string, unknown> =
         Platform.OS === `web`
@@ -606,7 +837,7 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
             }
           : {};
 
-      return (
+      const leafEditor = (
         <DropdownMenu>
           <DropdownMenu.Trigger>
             <Pressable
@@ -616,53 +847,17 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
                 hover:bg-fg/5 hover:opacity-100
 
                 ${isDropTarget ? `bg-blue/10` : ``}
+
+                size-full
+
                 ${leafCellClassName}
               `}
               {...(webDropTargetProps as object)}
             >
-              {isNestable ? (
-                <View className="absolute right-3 top-3">
-                  <DropdownMenu>
-                    <DropdownMenu.Trigger>
-                      <RectButton variant="bareDim">{`□`}</RectButton>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content>
-                      <DropdownMenu.RadioGroup
-                        value="leaf"
-                        onValueChange={(v) => {
-                          if (isVisualOperator(v)) {
-                            const { nextNode, overflowLeafs } =
-                              buildRootForOperator(v, leaf);
-                            if (overflowLeafs.length > 0) {
-                              setDraftOverflow((current) => [
-                                ...current,
-                                ...overflowLeafs,
-                              ]);
-                            }
-                            replaceDraftNodeAtPath(path, nextNode);
-                          }
-                        }}
-                      >
-                        <DropdownMenu.RadioItem value="leaf">
-                          {`□ Single cell`}
-                        </DropdownMenu.RadioItem>
-                        {visualOperators.map((op) => (
-                          <DropdownMenu.RadioItem key={op} value={op}>
-                            {`${op} ${visualOperatorLabels[op]}`}
-                          </DropdownMenu.RadioItem>
-                        ))}
-                      </DropdownMenu.RadioGroup>
-                    </DropdownMenu.Content>
-                  </DropdownMenu>
-                </View>
-              ) : null}
-              {leaf.hanzi == null ? (
-                <Text className="text-2xl text-fg/30">{`字`}</Text>
-              ) : (
+              {leaf.hanzi == null ? null : (
                 <Text
                   className={`
-                    text-2xl
-
+                    ${leafHanziSizeClass}
                     ${colorTextClass[currentColor]}
                   `}
                 >
@@ -681,6 +876,14 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
                 setHanziInputByPath((current) => ({
                   ...current,
                   [pathKey]: value,
+                }));
+
+                // Keep the cell preview in sync while typing. Some menu-close
+                // paths don't reliably fire onEndEditing for nested cells.
+                const committed = getCommittedHanziFromInput(value);
+                updateDraftAtPath(path, (previous) => ({
+                  ...previous,
+                  hanzi: committed,
                 }));
               }}
               onEndEditing={(event) => {
@@ -702,26 +905,44 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
               <>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Label>Strokes</DropdownMenu.Label>
-                <Suspense fallback={null}>
-                  <StrokePicker
-                    strokePaths={strokePaths}
-                    selectedStrokes={new Set(parseIndexRanges(leaf.strokes))}
-                    onToggle={(i) => {
-                      const current = new Set(parseIndexRanges(leaf.strokes));
-                      if (current.has(i)) {
-                        current.delete(i);
-                      } else {
-                        current.add(i);
-                      }
-                      updateDraftAtPath(path, (previous) => ({
-                        ...previous,
-                        strokes: normalizeIndexRanges(
-                          [...current].sort((a, b) => a - b).join(`,`),
-                        ),
-                      }));
-                    }}
-                  />
-                </Suspense>
+                <View className="mt-1 flex-row items-start gap-3">
+                  <Suspense fallback={null}>
+                    <StrokePicker
+                      strokePaths={strokePaths}
+                      selectedStrokes={new Set(selectedStrokeIndexes)}
+                      onToggle={(i) => {
+                        const current = new Set(selectedStrokeIndexes);
+                        if (current.has(i)) {
+                          current.delete(i);
+                        } else {
+                          current.add(i);
+                        }
+                        updateDraftAtPath(path, (previous) => ({
+                          ...previous,
+                          strokes: normalizeIndexRanges(
+                            [...current].sort((a, b) => a - b).join(`,`),
+                          ),
+                        }));
+                      }}
+                    />
+                  </Suspense>
+                  <View className="min-w-0 flex-1">
+                    <HanziVisualSuggestionsPanel
+                      strokePaths={strokePaths}
+                      selectedStrokeIndexes={selectedStrokeIndexes}
+                      onSelect={(selectedHanzi) => {
+                        updateDraftAtPath(path, (previous) => ({
+                          ...previous,
+                          hanzi: selectedHanzi,
+                        }));
+                        setHanziInputByPath((current) => ({
+                          ...current,
+                          [pathKey]: selectedHanzi,
+                        }));
+                      }}
+                    />
+                  </View>
+                </View>
               </>
             )}
             <DropdownMenu.Separator />
@@ -742,7 +963,7 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
                     }}
                     className={
                       isSelected
-                        ? `size-9 items-center justify-center rounded-md border-2 border-blue bg-bg`
+                        ? `size-9 items-center justify-center rounded-md border border-blue bg-bg`
                         : `
                           size-9 items-center justify-center rounded-md border border-fg/20 bg-bg
 
@@ -758,15 +979,118 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
                 );
               })}
             </View>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Label>Layout</DropdownMenu.Label>
+            <View className="mt-1 flex-row flex-wrap gap-2">
+              <Pressable
+                onPress={(event) => {
+                  event.stopPropagation();
+                  applyLayoutAtPath(layoutTargetPath, `leaf`);
+                }}
+                className={
+                  currentLayoutValue === `leaf`
+                    ? `size-9 items-center justify-center rounded-md border border-blue bg-bg`
+                    : `
+                      size-9 items-center justify-center rounded-md border border-fg/20 bg-bg
+
+                      hover:bg-fg/5
+                    `
+                }
+              >
+                <Text className="pyly-body-caption text-fg">{`□`}</Text>
+              </Pressable>
+
+              {visualOperators.map((op) => (
+                <Pressable
+                  key={op}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    applyLayoutAtPath(layoutTargetPath, op);
+                  }}
+                  className={
+                    currentLayoutValue === op
+                      ? `size-9 items-center justify-center rounded-md border border-blue bg-bg`
+                      : `
+                        size-9 items-center justify-center rounded-md border border-fg/20 bg-bg
+
+                        hover:bg-fg/5
+                      `
+                  }
+                >
+                  <Text className="pyly-body-caption text-fg">{op}</Text>
+                </Pressable>
+              ))}
+            </View>
           </DropdownMenu.Content>
         </DropdownMenu>
+      );
+
+      if (!isRootLayout) {
+        return leafEditor;
+      }
+
+      return (
+        <View className="relative size-full">
+          <View className="size-full rounded-xl border-2 border-solid border-fg-bg60">
+            {leafEditor}
+          </View>
+          <View
+            className={`absolute bottom-[-10px] left-1/2 z-20 -translate-x-1/2`}
+          >
+            <DropdownMenu>
+              <DropdownMenu.Trigger>
+                <Pressable
+                  className={`
+                    flex-row items-center gap-1 rounded bg-fg-bg80 px-1.5 py-0.5
+
+                    hover:bg-fg-bg90
+                  `}
+                >
+                  <Text className="pyly-body-caption text-on-fg">{`□`}</Text>
+                  <Text className="pyly-body-caption text-on-fg">{`▾`}</Text>
+                </Pressable>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content>
+                <View className="flex-row flex-wrap gap-1 p-1">
+                  <Pressable
+                    onPress={(event) => {
+                      event.stopPropagation();
+                      applyLayoutAtPath(path, `leaf`);
+                    }}
+                    className="size-7 items-center justify-center rounded border border-blue bg-bg"
+                  >
+                    <Text className="pyly-body-caption text-fg">{`□`}</Text>
+                  </Pressable>
+                  {visualOperators.map((op) => (
+                    <Pressable
+                      key={op}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        applyLayoutAtPath(path, op);
+                      }}
+                      className={`
+                        size-7 items-center justify-center rounded border border-fg/20 bg-bg
+
+                        hover:bg-fg/5
+                      `}
+                    >
+                      <Text className="pyly-body-caption text-fg">{op}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </DropdownMenu.Content>
+            </DropdownMenu>
+          </View>
+        </View>
       );
     }
 
     const [operator, ...children] = node;
     if (!isVisualOperator(operator)) {
       return (
-        <View className="gap-2 rounded-xl border border-danger/30 bg-danger/10 p-3">
+        <View
+          className={`size-full gap-2 rounded-xl border border-danger/30 bg-danger/10 p-3`}
+        >
           <Text className="pyly-body-caption text-danger">
             Operator {operator} is not supported in the visual editor yet.
           </Text>
@@ -781,194 +1105,232 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
     for (const [index, child] of children.entries()) {
       const childIndex = index + 1;
       childElements.push(
-        renderNode(
-          child as WikiCharacterDecomposition,
-          [...path, childIndex],
-          nestableChildIndices(operator).includes(childIndex),
-        ),
+        renderNode(child as WikiCharacterDecomposition, [...path, childIndex]),
       );
     }
 
-    const title = `${operator} ${visualOperatorLabels[operator]}`;
-
-    const titleRow = (
+    const renderParentLayoutToolbar = () => (
       <View
-        className={`
-          flex-row items-center justify-between border-b-2 border-dashed border-fg/40 px-3 py-2
-        `}
+        className={`absolute bottom-[-10px] left-1/2 z-20 -translate-x-1/2`}
       >
-        {isNestable ? (
-          <DropdownMenu>
-            <DropdownMenu.Trigger>
-              <RectButton variant="bareDim">{title}</RectButton>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
-              <DropdownMenu.RadioGroup
-                value={operator}
-                onValueChange={(v) => {
-                  if (v === `leaf`) {
-                    const { leaf, overflowLeafs } = flattenNodeToLeaf(node);
-                    if (overflowLeafs.length > 0) {
-                      setDraftOverflow((current) => [
-                        ...current,
-                        ...overflowLeafs,
-                      ]);
-                    }
-                    replaceDraftNodeAtPath(path, leaf);
-                  } else if (isVisualOperator(v)) {
-                    const { nextNode, overflowLeafs } = buildRootForOperator(
-                      v,
-                      node,
-                    );
-                    if (overflowLeafs.length > 0) {
-                      setDraftOverflow((current) => [
-                        ...current,
-                        ...overflowLeafs,
-                      ]);
-                    }
-                    replaceDraftNodeAtPath(path, nextNode);
-                  }
+        <DropdownMenu>
+          <DropdownMenu.Trigger>
+            <Pressable
+              className={`
+                flex-row items-center gap-1 rounded bg-fg-bg80 px-1.5 py-0.5
+
+                hover:bg-fg-bg90
+              `}
+            >
+              <Text className="pyly-body-caption text-on-fg">{operator}</Text>
+              <Text className="pyly-body-caption text-on-fg">{`▾`}</Text>
+            </Pressable>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <View className="flex-row flex-wrap gap-1 p-1">
+              <Pressable
+                onPress={(event) => {
+                  event.stopPropagation();
+                  applyLayoutAtPath(path, `leaf`);
                 }}
+                className={`
+                  size-7 items-center justify-center rounded border border-fg/20 bg-bg
+
+                  hover:bg-fg/5
+                `}
               >
-                <DropdownMenu.RadioItem value="leaf">
-                  {`□ Single cell`}
-                </DropdownMenu.RadioItem>
-                {visualOperators.map((op) => (
-                  <DropdownMenu.RadioItem key={op} value={op}>
-                    {`${op} ${visualOperatorLabels[op]}`}
-                  </DropdownMenu.RadioItem>
-                ))}
-              </DropdownMenu.RadioGroup>
-            </DropdownMenu.Content>
-          </DropdownMenu>
-        ) : (
-          <Text className="pyly-body-caption text-fg-dim">{title}</Text>
-        )}
+                <Text className="pyly-body-caption text-fg">{`□`}</Text>
+              </Pressable>
+              {visualOperators.map((op) => (
+                <Pressable
+                  key={op}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    applyLayoutAtPath(path, op);
+                  }}
+                  className={
+                    operator === op
+                      ? `size-7 items-center justify-center rounded border border-blue bg-bg`
+                      : `
+                        size-7 items-center justify-center rounded border border-fg/20 bg-bg
+
+                        hover:bg-fg/5
+                      `
+                  }
+                >
+                  <Text className="pyly-body-caption text-fg">{op}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </DropdownMenu.Content>
+        </DropdownMenu>
       </View>
     );
 
+    const withParentLayoutToolbar = (content: ReactNode): ReactNode => (
+      <View
+        className={isRootLayout ? `relative size-full` : `relative m-2 grow`}
+      >
+        {content}
+        {renderParentLayoutToolbar()}
+      </View>
+    );
+
+    const outerLayoutBorderClass = isRootLayout
+      ? `border-2 border-solid border-fg-bg60`
+      : `border border-dashed border-fg-bg40`;
+
     if (operator === IdsOperator.LeftToRight) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
-          <View className="flex-row">
-            <View className="flex-1 border-r-2 border-dashed border-fg/40 p-1">
-              {childElements[0]}
-            </View>
-            <View className="flex-1 p-1">{childElements[1]}</View>
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full flex-row rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
+          <View className="flex-1 border-r border-dashed border-fg-bg40">
+            {childElements[0]}
           </View>
-        </View>
+          <View className="flex-1">{childElements[1]}</View>
+        </View>,
       );
     }
 
     if (operator === IdsOperator.AboveToBelow) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
-          <View>
-            <View className="border-b-2 border-dashed border-fg/40 p-1">
-              {childElements[0]}
-            </View>
-            <View className="p-1">{childElements[1]}</View>
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
+          <View className="flex-1 border-b border-dashed border-fg-bg40">
+            {childElements[0]}
           </View>
-        </View>
+          <View className="flex-1">{childElements[1]}</View>
+        </View>,
       );
     }
 
     if (operator === IdsOperator.LeftToMiddleToRight) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
-          <View className="flex-row">
-            <View className="flex-1 border-r-2 border-dashed border-fg/40 p-1">
-              {childElements[0]}
-            </View>
-            <View className="flex-1 border-r-2 border-dashed border-fg/40 p-1">
-              {childElements[1]}
-            </View>
-            <View className="flex-1 p-1">{childElements[2]}</View>
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full flex-row rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
+          <View className="flex-1 border-r border-dashed border-fg-bg40">
+            {childElements[0]}
           </View>
-        </View>
+          <View className="flex-1 border-r border-dashed border-fg-bg40">
+            {childElements[1]}
+          </View>
+          <View className="flex-1">{childElements[2]}</View>
+        </View>,
       );
     }
 
     if (operator === IdsOperator.AboveToMiddleAndBelow) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
-          <View>
-            <View className="border-b-2 border-dashed border-fg/40 p-1">
-              {childElements[0]}
-            </View>
-            <View className="border-b-2 border-dashed border-fg/40 p-1">
-              {childElements[1]}
-            </View>
-            <View className="p-1">{childElements[2]}</View>
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
+          <View className="flex-1 border-b border-dashed border-fg-bg40">
+            {childElements[0]}
           </View>
-        </View>
+          <View className="flex-1 border-b border-dashed border-fg-bg40">
+            {childElements[1]}
+          </View>
+          <View className="flex-1">{childElements[2]}</View>
+        </View>,
       );
     }
 
     if (operator === IdsOperator.FullSurround) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
           <View>
-            <View className="border-b-2 border-dashed border-fg/40 p-1">
+            <View className="border-b border-dashed border-fg-bg40 p-1">
               {childElements[0]}
             </View>
             <View className="mx-8 p-1">{childElements[1]}</View>
           </View>
-        </View>
+        </View>,
       );
     }
 
     if (operator === IdsOperator.SurroundFromAbove) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
           <View>
-            <View className="border-b-2 border-dashed border-fg/40 p-1">
+            <View className="border-b border-dashed border-fg-bg40 p-1">
               {childElements[0]}
             </View>
             <View className="mx-6 p-1">{childElements[1]}</View>
           </View>
-        </View>
+        </View>,
       );
     }
 
     if (operator === IdsOperator.SurroundFromBelow) {
-      return (
-        <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-          {titleRow}
+      return withParentLayoutToolbar(
+        <View
+          className={`
+            size-full rounded-xl
+
+            ${outerLayoutBorderClass}
+          `}
+        >
           <View>
-            <View className="mx-6 border-b-2 border-dashed border-fg/40 p-1">
+            <View className="mx-6 border-b border-dashed border-fg-bg40 p-1">
               {childElements[1]}
             </View>
             <View className="p-1">{childElements[0]}</View>
           </View>
-        </View>
+        </View>,
       );
     }
 
-    return (
-      <View className="overflow-hidden rounded-xl border-2 border-dashed border-fg/40">
-        {titleRow}
+    return withParentLayoutToolbar(
+      <View
+        className={`
+          size-full rounded-xl
+
+          ${outerLayoutBorderClass}
+        `}
+      >
         <View className="flex-row">
-          <View className="min-w-16 flex-1 border-r-2 border-dashed border-fg/40 p-1">
+          <View className="min-w-16 flex-1 border-r border-dashed border-fg-bg40 p-1">
             {childElements[0]}
           </View>
           <View className="flex-[2] p-1">{childElements[1]}</View>
         </View>
-      </View>
+      </View>,
     );
   };
 
   return (
     <View className="gap-3 rounded-xl border border-fg/10 bg-bg-high p-3">
-      <Text className="pyly-body-caption text-fg-dim">
-        Choose a base decomposition, then edit each cell visually.
-      </Text>
       <View className="flex-row flex-wrap gap-2">
         {builtInOptions.map((option, index) => {
           const isSelected = option.ids === draftIds;
@@ -991,19 +1353,13 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
           No decomposition available for this character.
         </Text>
       ) : (
-        renderNode(draftComponents, [], true)
+        <View className="mb-2 self-start" style={{ width: 250, height: 250 }}>
+          {renderNode(draftComponents, [], true)}
+        </View>
       )}
 
-      <View className="gap-2 rounded-xl border border-fg/10 bg-bg p-3">
-        <Text className="pyly-body-caption text-fg-dim">Overflow cells</Text>
-        <Text className="pyly-body-caption text-fg-dim/80">
-          Extra cells are kept here while editing. Drag them back into the grid.
-        </Text>
-        {draftOverflow.length === 0 ? (
-          <Text className="pyly-body-caption text-fg-dim">
-            No overflow cells.
-          </Text>
-        ) : (
+      {draftOverflow.length === 0 ? null : (
+        <View className={`gap-2 rounded-xl border border-fg/10 p-3`}>
           <View className="flex-row flex-wrap gap-2">
             {draftOverflow.map((overflowLeaf, index) => {
               const currentColor = hanziCharacterColorSchema
@@ -1048,14 +1404,14 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
                       ${colorTextClass[currentColor]}
                     `}
                   >
-                    {overflowLeaf.hanzi ?? `字`}
+                    {overflowLeaf.hanzi ?? ``}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
-        )}
-      </View>
+        </View>
+      )}
 
       {draftValidationError == null ? null : (
         <Text className="pyly-body-caption text-danger">
