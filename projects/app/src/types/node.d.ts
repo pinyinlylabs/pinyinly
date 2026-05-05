@@ -19,7 +19,16 @@ declare global {
     //
     // NOTE: these MUST be relative paths, see above.
     (
-      id: `.${string}.${`ttf` | `otf` | `svg` | `png` | `jpg` | `riv` | `lottie.json`}`,
+      id: `.${string}.${
+        | `bin`
+        | `jpg`
+        | `lottie.json`
+        | `onnx`
+        | `otf`
+        | `png`
+        | `riv`
+        | `svg`
+        | `ttf`}`,
     ): RnRequireSource;
     (id: `.${string}.mp3`): AudioSource;
     (id: `.${string}.m4a`): AudioSpriteSource | AudioSource;

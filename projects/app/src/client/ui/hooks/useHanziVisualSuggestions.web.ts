@@ -11,10 +11,8 @@ import type {
   HanziVisualSuggestionsState,
   UseHanziVisualSuggestionsParams,
 } from "./useHanziVisualSuggestions";
+import { Asset } from "expo-asset";
 
-const defaultModelUrl = `/hanzi-visual/sketch-encoder.onnx`;
-const defaultEmbeddingsBinUrl = `/hanzi-visual/sketch-embeddings.bin`;
-const defaultEmbeddingsMetaUrl = `/hanzi-visual/sketch-embeddings-meta.json`;
 const queryImageSize = 32;
 const ortScriptUrl = `https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js`;
 const ortWasmBaseUrl = `https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/`;
@@ -93,21 +91,30 @@ async function loadOrtRuntime(): Promise<OrtRuntime> {
   return ortRuntimePromise;
 }
 
+function uriFromRequireSource(source: RnRequireSource): string {
+  const uri =
+    typeof source === `string` ? source : Asset.fromModule(source).uri;
+  return uri;
+}
+
 async function loadBinaryIndex(
-  binUrl: string,
-  metaUrl: string,
+  binSrc: RnRequireSource,
+  metaSrc: RnRequireSource,
   allowedCharacters: ReadonlySet<string>,
 ): Promise<FlatHanziVisualIndex> {
+  const binUri = uriFromRequireSource(binSrc);
+  const metaUri = uriFromRequireSource(metaSrc);
+
   const [binResponse, metaResponse] = await Promise.all([
-    fetch(binUrl),
-    fetch(metaUrl),
+    fetch(binUri),
+    fetch(metaUri),
   ]);
 
   if (!binResponse.ok) {
-    throw new Error(`Failed to load embedding vectors from ${binUrl}`);
+    throw new Error(`Failed to load embedding vectors from ${binUri}`);
   }
   if (!metaResponse.ok) {
-    throw new Error(`Failed to load embedding metadata from ${metaUrl}`);
+    throw new Error(`Failed to load embedding metadata from ${metaUri}`);
   }
 
   const [buffer, meta] = await Promise.all([
@@ -229,14 +236,15 @@ async function loadRuntimeContext(): Promise<RuntimeContext> {
     ]);
 
     const index = await loadBinaryIndex(
-      defaultEmbeddingsBinUrl,
-      defaultEmbeddingsMetaUrl,
+      require(`../../../ocr/vectors.bin`),
+      require(`../../../ocr/vectorsMeta.json.bin`),
       dictionaryCharacters,
     );
 
-    const session = await ortRuntime.InferenceSession.create(defaultModelUrl, {
-      executionProviders: [`wasm`],
-    });
+    const session = await ortRuntime.InferenceSession.create(
+      uriFromRequireSource(require(`../../../ocr/encoder.onnx`)),
+      { executionProviders: [`wasm`] },
+    );
 
     return {
       index,

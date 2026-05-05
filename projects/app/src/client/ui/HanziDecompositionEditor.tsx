@@ -1,17 +1,17 @@
 import { getWikiCharacterData } from "@/client/wiki";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
-    componentToString,
-    idsNodeToString,
-    isHanziCharacter,
-    isLeafNode,
+  componentToString,
+  idsNodeToString,
+  isHanziCharacter,
+  isLeafNode,
 } from "@/data/hanzi";
 import type {
-    HanziCharacter,
-    HanziText,
-    IdsNode,
-    WikiCharacterComponent,
-    WikiCharacterDecomposition,
+  HanziCharacter,
+  HanziText,
+  IdsNode,
+  WikiCharacterComponent,
+  WikiCharacterDecomposition,
 } from "@/data/model";
 import { IdsOperator, wikiCharacterDecompositionSchema } from "@/data/model";
 import { userWikiCharacterDecompositionSetting } from "@/data/userSettings";
@@ -750,7 +750,9 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
 
         const parentPath = path.slice(0, -1);
         const parentNode =
-          draftComponents == null ? null : getNodeAtPath(draftComponents, parentPath);
+          draftComponents == null
+            ? null
+            : getNodeAtPath(draftComponents, parentPath);
 
         let baseTier = 0;
         if (parentNode != null && !isLeafNode(parentNode)) {

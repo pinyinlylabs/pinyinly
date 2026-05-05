@@ -32,6 +32,10 @@ config = {
       ...(config.resolver?.assetExts ?? []),
       // Add Rive support.
       `riv`,
+      // ML models
+      `onnx`,
+      // ML model vectors
+      `bin`,
     ],
     unstable_enablePackageExports: true,
   },
