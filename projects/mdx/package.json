@@ -24,7 +24,7 @@
     "vite": "*"
   },
   "devDependencies": {
-    "@expo/metro-config": "^54.0.11",
+    "@expo/metro-config": "patch:@expo/metro-config@npm%3A54.0.11#~/.yarn/patches/@expo-metro-config-npm-54.0.11-3408ac3adc.patch",
     "@pinyinly/eslint-rules": "workspace:*",
     "@pinyinly/lib": "workspace:*",
     "@types/debug": "^4 <=4.3.x",
