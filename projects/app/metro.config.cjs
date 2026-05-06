@@ -5,7 +5,6 @@ const { withAudioSprites } = require(`@pinyinly/audio-sprites/metro`);
 const { withSlimWikiRegistryResolver } = require(
   `./src/metro/withSlimWikiRegistryResolver`,
 );
-
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
 // TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
@@ -36,6 +35,8 @@ config = {
       `onnx`,
       // ML model vectors
       `bin`,
+      // WebAssembly
+      `wasm`,
     ],
     unstable_enablePackageExports: true,
   },

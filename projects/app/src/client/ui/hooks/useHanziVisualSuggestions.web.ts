@@ -14,22 +14,6 @@ import type {
 import { Asset } from "expo-asset";
 
 const queryImageSize = 32;
-const ortScriptUrl = `https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js`;
-const ortWasmBaseUrl = `https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/`;
-
-type OrtRuntime = {
-  env?: {
-    wasm?: {
-      wasmPaths?: string;
-    };
-  };
-  InferenceSession: typeof InferenceSession;
-  Tensor: new (
-    type: `float32`,
-    data: Float32Array | readonly number[],
-    dims?: readonly number[],
-  ) => Tensor;
-};
 
 interface RuntimeContext {
   index: FlatHanziVisualIndex;
@@ -38,58 +22,6 @@ interface RuntimeContext {
 }
 
 let runtimePromise: Promise<RuntimeContext> | null = null;
-let ortRuntimePromise: Promise<OrtRuntime> | null = null;
-
-async function loadOrtRuntime(): Promise<OrtRuntime> {
-  if (ortRuntimePromise != null) {
-    return ortRuntimePromise;
-  }
-
-  ortRuntimePromise = (async () => {
-    const globalWithOrt = globalThis as typeof globalThis & {
-      ort?: unknown;
-    };
-
-    const applyWasmPath = (runtime: OrtRuntime) => {
-      const wasm = runtime.env?.wasm;
-      if (wasm != null) {
-        wasm.wasmPaths = ortWasmBaseUrl;
-      }
-    };
-
-    if (globalWithOrt.ort != null) {
-      const runtime = globalWithOrt.ort as OrtRuntime;
-      applyWasmPath(runtime);
-      return runtime;
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement(`script`);
-      script.src = ortScriptUrl;
-      script.async = true;
-      script.onload = () => {
-        resolve();
-      };
-      script.onerror = () => {
-        reject(new Error(`Failed to load ONNX Runtime Web script`));
-      };
-      document.head.append(script);
-    });
-
-    if (globalWithOrt.ort == null) {
-      throw new Error(`ONNX Runtime Web did not initialize global ort`);
-    }
-
-    const runtime = globalWithOrt.ort as OrtRuntime;
-    applyWasmPath(runtime);
-    return runtime;
-  })().catch((error: unknown) => {
-    ortRuntimePromise = null;
-    throw error;
-  });
-
-  return ortRuntimePromise;
-}
 
 function uriFromRequireSource(source: RnRequireSource): string {
   const uri =
@@ -230,10 +162,17 @@ async function loadRuntimeContext(): Promise<RuntimeContext> {
   }
 
   runtimePromise = (async () => {
-    const [ortRuntime, dictionaryCharacters] = await Promise.all([
-      loadOrtRuntime(),
-      loadDictionaryCharacterSet(),
-    ]);
+    const ort = require(
+      `onnxruntime-web/wasm`,
+    ) as typeof import("onnxruntime-web/wasm");
+    ort.env.debug = true;
+    ort.env.logLevel = `verbose`;
+    ort.env.wasm.wasmPaths = {
+      wasm: `/vendor/ort-wasm-simd-threaded.wasm`,
+      mjs: `/vendor/ort-wasm-simd-threaded.mjs`,
+    };
+
+    const dictionaryCharacters = await loadDictionaryCharacterSet();
 
     const index = await loadBinaryIndex(
       require(`../../../ocr/vectors.bin`),
@@ -241,7 +180,7 @@ async function loadRuntimeContext(): Promise<RuntimeContext> {
       dictionaryCharacters,
     );
 
-    const session = await ortRuntime.InferenceSession.create(
+    const session = await ort.InferenceSession.create(
       uriFromRequireSource(require(`../../../ocr/encoder.onnx`)),
       { executionProviders: [`wasm`] },
     );
@@ -250,7 +189,7 @@ async function loadRuntimeContext(): Promise<RuntimeContext> {
       index,
       session,
       makeTensor(data: Float32Array, dims: readonly number[]) {
-        return new ortRuntime.Tensor(`float32`, data, dims);
+        return new ort.Tensor(`float32`, data, dims);
       },
     };
   })().catch((error: unknown) => {

@@ -120,7 +120,6 @@ vi.mock(`@floating-ui/react-native`, () => {
 // Avoid pulling in expo-sqlite, as it crashes vitest.
 vi.mock(
   `../src/client/ui/replicacheOptions.ts`,
-  // oxlint-disable-next-line typescript-eslint(consistent-type-imports)
   (): typeof import("../src/client/ui/replicacheOptions.ts") => ({
     kvStore: {
       create: vi.fn(),
