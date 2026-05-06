@@ -29,7 +29,7 @@ test(`test sprites`, { timeout: Infinity }, async () => {
   await buildAndTestSprites({
     manifestPath,
     autoFix: !isCi,
-    spriteFileSizes: [{ name: /^pinyin-/, minSize: `50kB`, maxSize: `3MB` }],
+    spriteFileSizes: [{ name: /^pinyin-/u, minSize: `50kB`, maxSize: `3MB` }],
   });
 });
 
