@@ -1980,7 +1980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electric-sql/pglite@npm:^0.4.0":
+"@electric-sql/pglite@npm:^0.4.5":
   version: 0.4.5
   resolution: "@electric-sql/pglite@npm:0.4.5"
   checksum: 10c0/f1877f7f59fc27e4af9576f6c847a9c6ea4dd095d86e09142ca0a6fa99fcd32ec84d23172e3ef784533b51c5ff94bf0388814e5623bf47e4e9ec880468a30fc7
@@ -6260,7 +6260,7 @@ __metadata:
     "@aws-sdk/s3-request-presigner": "npm:3.982.0"
     "@aws-sdk/util-endpoints": "npm:3.982.0"
     "@babel/core": "npm:^7.20.0"
-    "@electric-sql/pglite": "npm:^0.4.0"
+    "@electric-sql/pglite": "npm:^0.4.5"
     "@eslint/eslintrc": "npm:^3.3.0"
     "@expo/html-elements": "patch:@expo/html-elements@npm%3A0.13.8#~/.yarn/patches/@expo-html-elements-npm-0.13.8-bd9c25d778.patch"
     "@expo/metro-runtime": "npm:~6.1.2"
