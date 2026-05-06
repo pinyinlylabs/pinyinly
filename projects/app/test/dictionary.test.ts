@@ -12,6 +12,7 @@ import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
+  decompositionComponentsToIds,
   decomposeHanzi,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
@@ -32,6 +33,7 @@ import {
   oneUnitPinyinListOrNull,
   oneUnitPinyinOrNull,
   parsePartOfSpeech,
+  parseIdsToDecompositionComponents,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -590,6 +592,7 @@ test(`dictionary contains entries for decomposition`, async () => {
   >();
   const dictionary = await loadDictionary();
   const characters = await loadCharacters();
+  const decompositionData = await loadBuiltinCharacterDecompositionEntries();
 
   const allHanzi = dictionary.allHanziWords.map((hanziWord) =>
     hanziFromHanziWord(hanziWord),
@@ -602,7 +605,10 @@ test(`dictionary contains entries for decomposition`, async () => {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
-      for (const component of await decomposeHanzi(character)) {
+      for (const component of await decomposeHanzi(
+        character,
+        decompositionData,
+      )) {
         if (characters.get(component)?.canonicalForm != null) {
           // The character is a pointer to another character, so it itself
           // doesn't need a dictionary entry.
@@ -1402,7 +1408,30 @@ describe(`character decomposition loaders`, () => {
     const shuo = entries.find((entry) => entry.hanzi === 汉`说`);
 
     expect(shuo).toBeDefined();
-    expect(shuo?.decompositionIds).toBe(`⿰讠兑`);
+    expect(
+      shuo == null
+        ? null
+        : decompositionComponentsToIds(shuo.decompositionComponents),
+    ).toBe(`⿰讠兑`);
+  });
+
+  test(`decomposeHanzi supports decomposition overrides`, async () => {
+    const overrideComponents = parseIdsToDecompositionComponents(`⿰言兑`);
+    expect(overrideComponents).not.toBeNull();
+    if (overrideComponents == null) {
+      throw new Error(`Expected valid decomposition components`);
+    }
+
+    const components = await decomposeHanzi(汉`说`, [
+      {
+        hanzi: 汉`说`,
+        decompositionComponents: overrideComponents,
+      },
+    ]);
+
+    expect(components).toContain(汉`言`);
+    expect(components).toContain(汉`兑`);
+    expect(components).not.toContain(汉`讠`);
   });
 
   test(`builds reverse usage for direct component leaves`, async () => {

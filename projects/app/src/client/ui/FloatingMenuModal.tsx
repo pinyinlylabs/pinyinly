@@ -66,19 +66,26 @@ export function FloatingMenuModal(props: {
           activeOpacity={1}
           testID="tooltip-modal-backdrop"
         >
-          <View
-            ref={setFloating}
-            collapsable={false}
-            style={floatingStyles}
-            className={isInitializing ? `invisible` : undefined}
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(event) => {
+              event.stopPropagation();
+            }}
           >
-            {cloneElement(
-              props.menu,
-              mergeProps(props.menu.props, {
-                onRequestClose: handleDismiss,
-              }),
-            )}
-          </View>
+            <View
+              ref={setFloating}
+              collapsable={false}
+              style={floatingStyles}
+              className={isInitializing ? `invisible` : undefined}
+            >
+              {cloneElement(
+                props.menu,
+                mergeProps(props.menu.props, {
+                  onRequestClose: handleDismiss,
+                }),
+              )}
+            </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
     </>

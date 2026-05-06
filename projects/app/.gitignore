@@ -5,6 +5,9 @@
 /ios
 /android
 
+# Vendored files
+/public/vendor
+
 # Inngest
 /.inngest
 

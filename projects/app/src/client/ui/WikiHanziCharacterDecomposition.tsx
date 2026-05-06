@@ -3,7 +3,12 @@ import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
 import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
-import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
+import type {
+  HanziText,
+  HanziWord,
+  WikiCharacterComponent,
+  WikiCharacterData,
+} from "@/data/model";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
@@ -13,10 +18,11 @@ import {
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { use, useMemo, useState } from "react";
+import { use, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
+import { HanziDecompositionEditor } from "./HanziDecompositionEditor";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
@@ -45,6 +51,12 @@ interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
 }
 
+function hasStrokeRanges(
+  components: readonly WikiCharacterComponent[],
+): boolean {
+  return components.some((component) => component.strokes.trim().length > 0);
+}
+
 export function WikiHanziCharacterDecompositionBox({
   characterData,
 }: WikiHanziCharacterDecompositionProps) {
@@ -52,33 +64,72 @@ export function WikiHanziCharacterDecompositionBox({
   const componentsElements: ReactNode[] = [];
   const db = useDb();
 
-  const hanziList = useMemo(
-    () =>
-      characterData.mnemonic
-        ? ([...walkIdsNodeLeafs(characterData.mnemonic.components)]
-            .map((c) => c.hanzi)
-            .filter((h) => h != null) as HanziText[])
-        : ([] as HanziText[]),
-    [characterData.mnemonic],
-  );
-
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: selectedDecomposition } = useLiveQuery(
     (q) =>
       q
+        .from({ entry: db.characterDecompositionCollection })
+        .where(({ entry }) => eq(entry.hanzi, characterData.hanzi))
+        .select(({ entry }) => ({
+          decompositionComponents: entry.decompositionComponents,
+        }))
+        .findOne(),
+    [db.characterDecompositionCollection, characterData.hanzi],
+  );
+
+  const selectedComponents =
+    selectedDecomposition?.decompositionComponents == null
+      ? undefined
+      : [...walkIdsNodeLeafs(selectedDecomposition.decompositionComponents)];
+
+  const strokeSvgs = Array.isArray(characterData.strokes)
+    ? characterData.strokes
+    : null;
+
+  const showStrokeHighlights =
+    selectedComponents != null &&
+    hasStrokeRanges(selectedComponents) &&
+    strokeSvgs != null;
+
+  const hanziList: HanziText[] = [];
+  if (selectedComponents != null) {
+    for (const component of selectedComponents) {
+      if (component.hanzi != null) {
+        hanziList.push(component.hanzi);
+      }
+    }
+  }
+  const dedupedHanziListKey = [...new Set(hanziList)].join(`|`);
+
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) => {
+      if (dedupedHanziListKey.length === 0) {
+        return null;
+      }
+
+      const dedupedHanziList = dedupedHanziListKey
+        .split(`|`)
+        .filter((item): item is HanziText => item.length > 0);
+
+      return q
         .from({ entry: db.dictionarySearch })
-        .where(({ entry }) => inArray(entry.hanzi, hanziList))
-        .select(({ entry }) => ({ hanzi: entry.hanzi, gloss: entry.gloss })),
-    [db.dictionarySearch, hanziList],
+        .where(({ entry }) => inArray(entry.hanzi, dedupedHanziList))
+        .select(({ entry }) => ({
+          hanzi: entry.hanzi,
+          gloss: entry.gloss,
+        }));
+    },
+    [db.dictionarySearch, dedupedHanziListKey],
   );
 
   const glossByHanzi = new Map<string, string>(
-    dictionarySearchEntries.map((entry) => [entry.hanzi, entry.gloss[0] ?? ``]),
+    (dictionarySearchEntries ?? []).map((entry) => [
+      entry.hanzi,
+      entry.gloss[0] ?? ``,
+    ]),
   );
 
-  if (characterData.mnemonic && Array.isArray(characterData.strokes)) {
-    for (const [i, visualComponent] of [
-      ...walkIdsNodeLeafs(characterData.mnemonic.components),
-    ].entries()) {
+  if (showStrokeHighlights) {
+    for (const [i, visualComponent] of selectedComponents.entries()) {
       const label =
         visualComponent.label ??
         (visualComponent.hanzi == null
@@ -92,7 +143,7 @@ export function WikiHanziCharacterDecompositionBox({
               highlightColor={hanziCharacterColorSafeSchema.parse(
                 visualComponent.color,
               )}
-              strokesData={characterData.strokes}
+              strokesData={strokeSvgs}
               highlightStrokes={parseIndexRanges(visualComponent.strokes)}
             />
           </View>
@@ -108,6 +159,33 @@ export function WikiHanziCharacterDecompositionBox({
         </View>,
       );
     }
+  } else if (selectedComponents != null) {
+    for (const [i, component] of selectedComponents.entries()) {
+      if (component.hanzi == null) {
+        continue;
+      }
+
+      const hanzi = component.hanzi;
+      const label = glossByHanzi.get(hanzi) ?? null;
+
+      componentsElements.push(
+        <View
+          className="flex-1 items-center gap-2"
+          key={`component:${i}:${hanzi}`}
+        >
+          <View
+            className={`min-w-12 rounded-xl border border-fg/20 bg-bg-high px-3 py-2`}
+          >
+            <Text className="pyly-body text-center text-lg">{hanzi}</Text>
+          </View>
+          <Text className="pyly-body text-center">
+            <HanziLink hanzi={hanzi}>
+              {hanzi} {label}
+            </HanziLink>
+          </Text>
+        </View>,
+      );
+    }
   }
 
   return (
@@ -117,6 +195,10 @@ export function WikiHanziCharacterDecompositionBox({
       onEditingChange={setIsEditMode}
     >
       <View className="gap-4 p-4">
+        {isEditMode ? (
+          <HanziDecompositionEditor hanzi={characterData.hanzi} />
+        ) : null}
+
         {componentsElements.length > 0 ? (
           <>
             <Text className="pyly-body">
@@ -124,7 +206,9 @@ export function WikiHanziCharacterDecompositionBox({
               <Text className="pyly-bold">{characterData.hanzi}</Text> to help:
             </Text>
 
-            <View className="flex-row gap-5">{componentsElements}</View>
+            <View className="flex-row flex-wrap gap-5">
+              {componentsElements}
+            </View>
           </>
         ) : Array.isArray(characterData.strokes) ? (
           <>
@@ -314,8 +398,7 @@ function MeaningsSection({
     <View className="gap-4 p-4">
       {visibleMeanings.length === 0 ? (
         <Text className="pyly-body-caption text-fg-dim">
-          Think of a story connecting the components to the meaning. Tap Change
-          to add one.
+          Think of a story connecting the components to the meaning.
         </Text>
       ) : (
         <View className="gap-3">

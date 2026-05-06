@@ -3,8 +3,10 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 // oxlint-disable-next-line no-restricted-imports
 import {
+  copyFile,
   readFile,
   readdir as readdirRaw,
+  mkdir,
   stat,
   writeFile,
 } from "node:fs/promises";
@@ -20,6 +22,7 @@ import isEqual from "lodash/isEqual.js";
 import { DatabaseSync } from "node:sqlite";
 import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
+import path from "node:path";
 
 // oxlint-disable-next-line no-restricted-imports
 export {
@@ -35,6 +38,7 @@ export {
 
 // oxlint-disable-next-line eslint/no-restricted-imports
 export {
+  copyFile,
   createReadStream,
   existsSync,
   mkdirSync,
@@ -168,6 +172,23 @@ export function writeUtf8FileIfChangedSync(
   }
 
   return hasDiff;
+}
+
+export async function copyFileIfChanged(
+  srcPath: string,
+  destPath: string,
+): Promise<boolean> {
+  const srcContent = await readFile(srcPath);
+  try {
+    const destContent = await readFile(destPath);
+    if (srcContent.compare(destContent) === 0) {
+      return false;
+    }
+  } catch {}
+
+  await mkdir(path.dirname(destPath), { recursive: true });
+  await copyFile(srcPath, destPath);
+  return true;
 }
 
 export function makeFsDbCache<K, V>(

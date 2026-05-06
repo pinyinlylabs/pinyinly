@@ -17,11 +17,15 @@ import {
   randomPickSkillsForReview,
   rankRules,
   skillKindFromSkill,
-  skillLearningGraph,
+  skillLearningGraph as skillLearningGraphInner,
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
-import { getIsStructuralHanzi, loadDictionary } from "#dictionary.ts";
+import {
+  getIsStructuralHanzi,
+  loadBuiltinCharacterDecompositionEntries,
+  loadDictionary,
+} from "#dictionary.ts";
 import type { HistoryCommand } from "#test/data/helpers.ts";
 import {
   fsrsSrsState,
@@ -36,10 +40,23 @@ import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+type CharacterDecompositionData = Awaited<
+  ReturnType<typeof loadBuiltinCharacterDecompositionEntries>
+>;
+
 const skillTest = test.extend<{
+  decompositionData: CharacterDecompositionData;
   isStructuralHanzi: Awaited<ReturnType<typeof getIsStructuralHanzi>>;
   dictionary: Awaited<ReturnType<typeof loadDictionary>>;
 }>({
+  decompositionData: [
+    async ({}, use) => {
+      const decompositionData =
+        await loadBuiltinCharacterDecompositionEntries();
+      await use(decompositionData);
+    },
+    { scope: `worker` },
+  ],
   isStructuralHanzi: [
     async ({}, use) => {
       const isStructuralHanzi = await getIsStructuralHanzi();
@@ -56,26 +73,51 @@ const skillTest = test.extend<{
   ],
 });
 
+async function skillLearningGraph(options: {
+  targetSkills: Skill[];
+  decompositionData: CharacterDecompositionData;
+}) {
+  return skillLearningGraphInner(options);
+}
+
 describe(
   `skillLearningGraph suite` satisfies HasNameOf<typeof skillLearningGraph>,
   () => {
-    test(`no targets gives an empty graph`, async () => {
-      await expect(skillLearningGraph({ targetSkills: [] })).resolves.toEqual(
-        new Map(),
-      );
-    });
+    skillTest(
+      `no targets gives an empty graph`,
+      async ({ decompositionData }) => {
+        await expect(
+          skillLearningGraph({
+            decompositionData,
+            targetSkills: [],
+          }),
+        ).resolves.toEqual(new Map());
+      },
+    );
 
-    test(`includes the target skill in the graph`, async () => {
-      const skill = `he:我:i`;
+    skillTest(
+      `includes the target skill in the graph`,
+      async ({ decompositionData }) => {
+        const skill = `he:我:i`;
 
-      const graph = await skillLearningGraph({ targetSkills: [skill] });
+        const graph = await skillLearningGraph({
+          decompositionData,
+          targetSkills: [skill],
+        });
 
-      expect(graph.keys()).toContain(`he:我:i`);
-    });
+        expect(graph.keys()).toContain(`he:我:i`);
+      },
+    );
 
-    test(`includes decomposition dependencies when learning 好`, async () => {
-      await expect(skillLearningGraph({ targetSkills: [`he:好:good`] }))
-        .resolves.toMatchInlineSnapshot(`
+    skillTest(
+      `includes decomposition dependencies when learning 好`,
+      async ({ decompositionData }) => {
+        await expect(
+          skillLearningGraph({
+            decompositionData,
+            targetSkills: [`he:好:good`],
+          }),
+        ).resolves.toMatchInlineSnapshot(`
         Map {
           "he:好:good" => {
             "dependencies": Set {
@@ -111,60 +153,65 @@ describe(
           },
         }
       `);
-    });
+      },
+    );
 
-    test(`includes multiple levels of decomposition for a character`, async () => {
-      await expect(
-        skillLearningGraph({
-          targetSkills: [`he:外:outside`],
-        }),
-      ).resolves.toEqual(
-        new Map([
-          [
-            `he:外:outside`,
-            {
-              skill: `he:外:outside`,
-              dependencies: new Set([`he:夕:evening`, `he:卜:divine`]),
-            },
-          ],
-          [
-            `he:夕:evening`,
-            {
-              skill: `he:夕:evening`,
-              dependencies: new Set([`he:丶:dot`, `he:𠂊:hands`]),
-            },
-          ],
-          [
-            `he:丶:dot`,
-            {
-              skill: `he:丶:dot`,
-              dependencies: new Set([]),
-            },
-          ],
-          [
-            `he:丨:line`,
-            {
-              skill: `he:丨:line`,
-              dependencies: new Set(),
-            },
-          ],
-          [
-            `he:卜:divine`,
-            {
-              skill: `he:卜:divine`,
-              dependencies: new Set([`he:丨:line`, `he:丶:dot`]),
-            },
-          ],
-          [
-            `he:𠂊:hands`,
-            {
-              skill: `he:𠂊:hands`,
-              dependencies: new Set([]),
-            },
-          ],
-        ]),
-      );
-    });
+    skillTest(
+      `includes multiple levels of decomposition for a character`,
+      async ({ decompositionData }) => {
+        await expect(
+          skillLearningGraph({
+            decompositionData,
+            targetSkills: [`he:外:outside`],
+          }),
+        ).resolves.toEqual(
+          new Map([
+            [
+              `he:外:outside`,
+              {
+                skill: `he:外:outside`,
+                dependencies: new Set([`he:夕:evening`, `he:卜:divine`]),
+              },
+            ],
+            [
+              `he:夕:evening`,
+              {
+                skill: `he:夕:evening`,
+                dependencies: new Set([`he:丶:dot`, `he:𠂊:hands`]),
+              },
+            ],
+            [
+              `he:丶:dot`,
+              {
+                skill: `he:丶:dot`,
+                dependencies: new Set([]),
+              },
+            ],
+            [
+              `he:丨:line`,
+              {
+                skill: `he:丨:line`,
+                dependencies: new Set(),
+              },
+            ],
+            [
+              `he:卜:divine`,
+              {
+                skill: `he:卜:divine`,
+                dependencies: new Set([`he:丨:line`, `he:丶:dot`]),
+              },
+            ],
+            [
+              `he:𠂊:hands`,
+              {
+                skill: `he:𠂊:hands`,
+                dependencies: new Set([]),
+              },
+            ],
+          ]),
+        );
+      },
+    );
 
     type TextGraph = Map</* id */ string, /* children */ Set<string>>;
 
@@ -293,12 +340,15 @@ describe(
       );
     }
 
-    test(`supports multi-character words`, async () => {
-      assertLearningGraphEqual(
-        await skillLearningGraph({
-          targetSkills: [`he:一下儿:aBit`],
-        }),
-        `
+    skillTest(
+      `supports multi-character words`,
+      async ({ decompositionData }) => {
+        assertLearningGraphEqual(
+          await skillLearningGraph({
+            decompositionData,
+            targetSkills: [`he:一下儿:aBit`],
+          }),
+          `
       he:一下儿:aBit
         he:一:one
         he:下:below
@@ -311,13 +361,19 @@ describe(
         he:丿:slash
         he:乚:hidden
       `,
-      );
-    });
+        );
+      },
+    );
 
-    test(`supports HanziWordToPinyin dependency chain`, async () => {
-      assertLearningGraphEqual(
-        await skillLearningGraph({ targetSkills: [`hp:儿:son`] }),
-        `
+    skillTest(
+      `supports HanziWordToPinyin dependency chain`,
+      async ({ decompositionData }) => {
+        assertLearningGraphEqual(
+          await skillLearningGraph({
+            decompositionData,
+            targetSkills: [`hp:儿:son`],
+          }),
+          `
       hp:儿:son
         he:儿:son
         hpf:儿:son
@@ -326,30 +382,40 @@ describe(
               he:丿:slash
               he:乚:hidden
       `,
-      );
-    });
+        );
+      },
+    );
 
-    test(`works for hsk words`, async () => {
-      const dictionary = await loadDictionary();
-      await skillLearningGraph({
-        targetSkills: [
-          ...dictionary.hsk1HanziWords,
-          ...dictionary.hsk2HanziWords,
-          ...dictionary.hsk3HanziWords,
-        ].map((w) => hanziWordToGloss(w)),
-      });
-    });
+    skillTest(
+      `works for hsk words`,
+      async ({ decompositionData, dictionary }) => {
+        await skillLearningGraph({
+          decompositionData,
+          targetSkills: [
+            ...dictionary.hsk1HanziWords,
+            ...dictionary.hsk2HanziWords,
+            ...dictionary.hsk3HanziWords,
+          ].map((w) => hanziWordToGloss(w)),
+        });
+      },
+    );
 
-    test(`learns the word form of component-form first`, async () => {
-      assertLearningGraphEqual(
-        await skillLearningGraph({ targetSkills: [`he:汉:chinese`] }),
-        `
+    skillTest(
+      `learns the word form of component-form first`,
+      async ({ decompositionData }) => {
+        assertLearningGraphEqual(
+          await skillLearningGraph({
+            decompositionData,
+            targetSkills: [`he:汉:chinese`],
+          }),
+          `
         he:汉:chinese
           he:又:again
           he:氵:water
         `,
-      );
-    });
+        );
+      },
+    );
 
     test.todo(`splits words into characters`);
   },
@@ -360,8 +426,9 @@ describe(
   () => {
     skillTest(
       `no target skills or skill states gives an empty queue`,
-      async ({ isStructuralHanzi, dictionary }) => {
+      async ({ decompositionData, isStructuralHanzi, dictionary }) => {
         const graph = await skillLearningGraph({
+          decompositionData,
           targetSkills: [],
         });
         expect(
@@ -387,8 +454,9 @@ describe(
 
     skillTest(
       `no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`,
-      async ({ isStructuralHanzi, dictionary }) => {
+      async ({ decompositionData, isStructuralHanzi, dictionary }) => {
         const graph = await skillLearningGraph({
+          decompositionData,
           targetSkills: [],
         });
         const queue = skillReviewQueue({
@@ -418,8 +486,9 @@ describe(
 
     skillTest(
       `introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`,
-      async ({ isStructuralHanzi, dictionary }) => {
+      async ({ decompositionData, isStructuralHanzi, dictionary }) => {
         const graph = await skillLearningGraph({
+          decompositionData,
           targetSkills: [`he:刀:knife`],
         });
 
@@ -457,8 +526,9 @@ describe(
 
     skillTest(
       `new words are introduced before new radicals, because they are more immediately useful`,
-      async ({ isStructuralHanzi, dictionary }) => {
+      async ({ decompositionData, isStructuralHanzi, dictionary }) => {
         const graph = await skillLearningGraph({
+          decompositionData,
           targetSkills: [`he:丿:slash`, `he:人:person`, `he:𠃌:radical`],
         });
 
@@ -557,19 +627,22 @@ describe(
         typeof SkillKind.HanziWordToGloss
       >,
       () => {
-        skillTest(`works for 好`, async ({ isStructuralHanzi, dictionary }) => {
-          const graph = await skillLearningGraph({
-            targetSkills: [`he:好:good`],
-          });
-          const queue = skillReviewQueue({
-            graph,
-            skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanzi,
-            dictionary,
-          });
+        skillTest(
+          `works for 好`,
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
+            const graph = await skillLearningGraph({
+              decompositionData,
+              targetSkills: [`he:好:good`],
+            });
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map(),
+              latestSkillRatings: latestSkillRatings(),
+              isStructuralHanzi,
+              dictionary,
+            });
 
-          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
               "he:一:one (🌱 NEW SKILL)",
               "he:女:woman (🌱 NEW SKILL)",
@@ -579,12 +652,14 @@ describe(
               "he:好:good (🟥 BLOCKED)",
             ]
           `);
-        });
+          },
+        );
 
         skillTest(
           `learns the word form of component-form first`,
-          async ({ isStructuralHanzi, dictionary }) => {
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`he:汉:chinese`],
             });
 
@@ -607,24 +682,27 @@ describe(
           },
         );
 
-        test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
-          vi.useFakeTimers({ toFake: [`Date`] });
+        skillTest(
+          `incorrect answers in a quiz don't get scheduled prematurely`,
+          async ({ decompositionData }) => {
+            vi.useFakeTimers({ toFake: [`Date`] });
 
-          // There was a bug where "wrong answers" were being scheduled for review
-          // even though they'd never been introduced yet. This is a regression test
-          // against that scenario.
+            // There was a bug where "wrong answers" were being scheduled for review
+            // even though they'd never been introduced yet. This is a regression test
+            // against that scenario.
 
-          const queue = await simulateSkillReviews({
-            targetSkills: [`he:分:divide`],
-            history: [
-              // first question is he:八:eight but they get it wrong. 𠃌 is one of the
-              // wrong choices they submit so it's also marked wrong.
-              `❌hanziGloss 八 radical`,
-              `💤 1h`, // wait past he:𠃌:radical due date
-            ],
-          });
+            const queue = await simulateSkillReviews({
+              decompositionData,
+              targetSkills: [`he:分:divide`],
+              history: [
+                // first question is he:八:eight but they get it wrong. 𠃌 is one of the
+                // wrong choices they submit so it's also marked wrong.
+                `❌hanziGloss 八 radical`,
+                `💤 1h`, // wait past he:𠃌:radical due date
+              ],
+            });
 
-          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
               "he:八:eight (🌱 NEW SKILL)",
               "he:丿:slash (🌱 NEW SKILL)",
@@ -634,26 +712,30 @@ describe(
             ]
           `);
 
-          // Make sure 𠃌 didn't jump the queue before 八 because it hasn't been
-          // introduced yet, instead they should have to answer 八 again.
-          const 𠃌Index = queue.items.findIndex(
-            ({ skill }) => skill === `he:𠃌:radical`,
-          );
-          const 八Index = queue.items.findIndex(
-            ({ skill }) => skill === `he:八:eight`,
-          );
+            // Make sure 𠃌 didn't jump the queue before 八 because it hasn't been
+            // introduced yet, instead they should have to answer 八 again.
+            const 𠃌Index = queue.items.findIndex(
+              ({ skill }) => skill === `he:𠃌:radical`,
+            );
+            const 八Index = queue.items.findIndex(
+              ({ skill }) => skill === `he:八:eight`,
+            );
 
-          // he:八:eight should be scheduled before he:𠃌:radical
-          expect(𠃌Index).toBeGreaterThan(八Index);
-        });
+            // he:八:eight should be scheduled before he:𠃌:radical
+            expect(𠃌Index).toBeGreaterThan(八Index);
+          },
+        );
 
-        test(`learns new skills before not-due skills (stable sorted to maintain graph order)`, async () => {
-          const queue = await simulateSkillReviews({
-            targetSkills: [`he:分:divide`],
-            history: [`🟡 he:丿:slash`, `💤 1m`],
-          });
+        skillTest(
+          `learns new skills before not-due skills (stable sorted to maintain graph order)`,
+          async ({ decompositionData }) => {
+            const queue = await simulateSkillReviews({
+              decompositionData,
+              targetSkills: [`he:分:divide`],
+              history: [`🟡 he:丿:slash`, `💤 1m`],
+            });
 
-          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
               "he:八:eight (🌱 NEW SKILL)",
               "he:𠃌:radical (🌱 NEW SKILL)",
@@ -662,195 +744,226 @@ describe(
               "he:分:divide (🟥 BLOCKED)",
             ]
           `);
-        });
+          },
+        );
 
-        test(`skills unblock dependant skills when they become stable enough`, async () => {
-          vi.useFakeTimers({ toFake: [`Date`] });
+        skillTest(
+          `skills unblock dependant skills when they become stable enough`,
+          async ({ decompositionData }) => {
+            vi.useFakeTimers({ toFake: [`Date`] });
 
-          const targetSkills: Skill[] = [`he:刀:knife`];
-          const history: HistoryCommand[] = [];
+            const targetSkills: Skill[] = [`he:刀:knife`];
+            const history: HistoryCommand[] = [];
 
-          {
-            const queue = await simulateSkillReviews({
-              targetSkills,
-              history,
-            });
-            // `he:刀:knife` starts blocked
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // `he:刀:knife` starts blocked
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:丿:slash (🌱 NEW SKILL)",
                 "he:𠃌:radical (🌱 NEW SKILL)",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
-          }
+            }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
+            history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
 
-          {
-            const queue = await simulateSkillReviews({
-              targetSkills,
-              history,
-            });
-            // Still blocked, but the other two skills aren't new anymore.
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // Still blocked, but the other two skills aren't new anymore.
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:𠃌:radical",
                 "he:丿:slash",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
-          }
+            }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
+            history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
 
-          {
-            const queue = await simulateSkillReviews({
-              targetSkills,
-              history,
-            });
-            // Still growing in stability but still blocked.
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // Still growing in stability but still blocked.
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:丿:slash",
                 "he:𠃌:radical",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
-          }
+            }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
+            history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
 
-          {
-            const queue = await simulateSkillReviews({
-              targetSkills,
-              history,
-            });
-            // Still growing in stability but still blocked.
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // Still growing in stability but still blocked.
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:𠃌:radical",
                 "he:丿:slash",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
-          }
+            }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash`, `💤 10s`, `🟢 he:𠃌:radical`);
-
-          {
-            const queue = await simulateSkillReviews({
-              targetSkills,
-              history,
-            });
-            // Now unblocked because the dependencies are stable enough.
-            expect(prettyQueue(queue)).toContainEqual(
-              `he:刀:knife (🌱 NEW SKILL)`,
+            history.push(
+              `💤 1d`,
+              `🟢 he:丿:slash`,
+              `💤 10s`,
+              `🟢 he:𠃌:radical`,
             );
-          }
-        });
 
-        test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
-          vi.useFakeTimers({ toFake: [`Date`] });
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // Now unblocked because the dependencies are stable enough.
+              expect(prettyQueue(queue)).toContainEqual(
+                `he:刀:knife (🌱 NEW SKILL)`,
+              );
+            }
+          },
+        );
 
-          const targetSkills: Skill[] = [`he:分:divide`];
-          const history: HistoryCommand[] = [
-            `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
-            `💤 5s`,
-            `🟡 he:𠃌:radical`, // Then answer it correctly.
-            `💤 5s`,
-            `🟡 he:刀:knife`,
-            `💤 5s`,
-            `🟡 he:八:eight`,
-            `💤 5s`,
-            `🟡 he:分:divide`,
-            `💤 5s`,
-            `🟡 he:丿:slash`,
-          ];
+        skillTest(
+          `doesn't get stuck reviewing the same skill after all due skills are done`,
+          async ({ decompositionData }) => {
+            vi.useFakeTimers({ toFake: [`Date`] });
 
-          let queue = await simulateSkillReviews({ targetSkills, history });
-          let review1 = queue.items[0];
+            const targetSkills: Skill[] = [`he:分:divide`];
+            const history: HistoryCommand[] = [
+              `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
+              `💤 5s`,
+              `🟡 he:𠃌:radical`, // Then answer it correctly.
+              `💤 5s`,
+              `🟡 he:刀:knife`,
+              `💤 5s`,
+              `🟡 he:八:eight`,
+              `💤 5s`,
+              `🟡 he:分:divide`,
+              `💤 5s`,
+              `🟡 he:丿:slash`,
+            ];
 
-          // If he:𠃌:radical is the next review, then answer it correctly and
-          // move to the next item in the queue.
-          if (review1?.skill === `he:𠃌:radical`) {
-            history.push(`💤 5s`, `🟡 he:𠃌:radical`);
-            queue = await simulateSkillReviews({ targetSkills, history });
-            review1 = queue.items[0];
-          }
-
-          // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
-          expect([review1?.skill]).not.toEqual([`he:𠃌:radical`]);
-          expect(queue.items.map(({ skill }) => skill)).toContain(
-            `he:𠃌:radical`,
-          );
-        });
-
-        test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
-          vi.useFakeTimers({ toFake: [`Date`] });
-
-          const targetSkills: Skill[] = [`he:刀:knife`];
-          const history: HistoryCommand[] = [
-            `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
-            `💤 1h`, // Wait a short time so we can test that it's actually scheduled first again (base case).
-          ];
-
-          {
-            const queue = await simulateSkillReviews({
+            let queue = await simulateSkillReviews({
+              decompositionData,
               targetSkills,
               history,
             });
-            // he:丿:slash and he:𠃌:radical should come later because he:刀:knife is due.
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            let review1 = queue.items[0];
+
+            // If he:𠃌:radical is the next review, then answer it correctly and
+            // move to the next item in the queue.
+            if (review1?.skill === `he:𠃌:radical`) {
+              history.push(`💤 5s`, `🟡 he:𠃌:radical`);
+              queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              review1 = queue.items[0];
+            }
+
+            // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
+            expect([review1?.skill]).not.toEqual([`he:𠃌:radical`]);
+            expect(queue.items.map(({ skill }) => skill)).toContain(
+              `he:𠃌:radical`,
+            );
+          },
+        );
+
+        skillTest(
+          `skills that are stale (heavily over-due and not stable) are treated as new skills`,
+          async ({ decompositionData }) => {
+            vi.useFakeTimers({ toFake: [`Date`] });
+
+            const targetSkills: Skill[] = [`he:刀:knife`];
+            const history: HistoryCommand[] = [
+              `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
+              `💤 1h`, // Wait a short time so we can test that it's actually scheduled first again (base case).
+            ];
+
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // he:丿:slash and he:𠃌:radical should come later because he:刀:knife is due.
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:刀:knife (⚠️ RETRY)",
                 "he:丿:slash (🌱 NEW SKILL)",
                 "he:𠃌:radical (🌱 NEW SKILL)",
               ]
             `);
-            expect(queue).toMatchObject({
-              blockedCount: 0,
-              retryCount: 1,
-              dueCount: 0,
-              overDueCount: 0,
-              newContentCount: 2,
-              newDifficultyCount: 0,
-            });
-          }
+              expect(queue).toMatchObject({
+                blockedCount: 0,
+                retryCount: 1,
+                dueCount: 0,
+                overDueCount: 0,
+                newContentCount: 2,
+                newDifficultyCount: 0,
+              });
+            }
 
-          history.push(`💤 100d`); // Wait a long time without reviewing it, so it's essentially stale.
+            history.push(`💤 100d`); // Wait a long time without reviewing it, so it's essentially stale.
 
-          {
-            const queue = await simulateSkillReviews({
-              targetSkills,
-              history,
-            });
-            // he:刀:knife comes last because it's "stale" and reset to new.
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            {
+              const queue = await simulateSkillReviews({
+                decompositionData,
+                targetSkills,
+                history,
+              });
+              // he:刀:knife comes last because it's "stale" and reset to new.
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:丿:slash (🌱 NEW SKILL)",
                 "he:𠃌:radical (🌱 NEW SKILL)",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
-            expect(queue).toMatchObject({
-              blockedCount: 1,
-              retryCount: 0,
-              dueCount: 0,
-              overDueCount: 0,
-              newContentCount: 2,
-              newDifficultyCount: 0,
-            });
-          }
-        });
+              expect(queue).toMatchObject({
+                blockedCount: 1,
+                retryCount: 0,
+                dueCount: 0,
+                overDueCount: 0,
+                newContentCount: 2,
+                newDifficultyCount: 0,
+              });
+            }
+          },
+        );
 
         describe(`retry logic`, () => {
           skillTest(
             `skills that were just failed should stay first in queue (so you retry it immediately)`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               vi.useFakeTimers({ toFake: [`Date`] });
 
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
@@ -888,10 +1001,11 @@ describe(
 
           skillTest(
             `failed skills that are not introduced are not promoted`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               vi.useFakeTimers({ toFake: [`Date`] });
 
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
@@ -926,10 +1040,11 @@ describe(
 
           skillTest(
             `multiple failed skills are prioritised in most-recent first`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               vi.useFakeTimers({ toFake: [`Date`] });
 
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
@@ -1000,10 +1115,11 @@ describe(
         describe(`pronunciation skill prioritization after successful hanzi-to-english`, () => {
           skillTest(
             `prioritizes pronunciation skill after successful he: review if user has reached rank 1`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               vi.useFakeTimers({ toFake: [`Date`] });
 
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [
                   `he:好:good`,
                   `hp:好:good`,
@@ -1057,8 +1173,9 @@ describe(
 
           skillTest(
             `does not prioritize pronunciation skill if user has not reached rank 1`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [
                   `he:好:good`,
                   `hp:好:good`,
@@ -1094,8 +1211,9 @@ describe(
 
           skillTest(
             `does not prioritize if no recent successful he: review`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [
                   `he:好:good`,
                   `hp:好:good`,
@@ -1140,8 +1258,9 @@ describe(
 
           skillTest(
             `prioritizes pronunciation skill even when it's in not-due section`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`he:好:good`, `hp:好:good`, `he:人:person`],
               });
 
@@ -1185,8 +1304,9 @@ describe(
 
         skillTest(
           `prioritises due skills with highest value (rather than most over-due)`,
-          async ({ dictionary }) => {
+          async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`he:分:divide`],
             });
 
@@ -1222,8 +1342,9 @@ describe(
 
         skillTest(
           `schedules new skills in dependency order`,
-          async ({ dictionary }) => {
+          async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`he:分:divide`],
             });
 
@@ -1248,8 +1369,9 @@ describe(
 
         skillTest(
           `schedules skill reviews in order of due, and then deterministic random`,
-          async ({ isStructuralHanzi, dictionary }) => {
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`he:分:divide`, `he:一:one`],
             });
 
@@ -1288,8 +1410,9 @@ describe(
 
         skillTest(
           `throttles the number of new skills in the queue`,
-          async ({ isStructuralHanzi, dictionary }) => {
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [
                 `he:分:divide`,
                 `he:一:one`,
@@ -1372,8 +1495,9 @@ describe(
 
           skillTest(
             `two meanings`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`het:好:good`, `het:好:like`],
               });
               const queue = skillReviewQueue({
@@ -1410,8 +1534,9 @@ describe(
 
           skillTest(
             `three meanings`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`het:任:any`, `het:任:appoint`, `het:任:duty`],
               });
               const queue = skillReviewQueue({
@@ -1450,8 +1575,9 @@ describe(
 
           skillTest(
             `doesn't ask follow-up questions for skills that aren't introduced, even if they're in the graph`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`het:任:any`, `het:任:appoint`],
               });
               const queue = skillReviewQueue({
@@ -1487,8 +1613,9 @@ describe(
 
           skillTest(
             `two pronunciations`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`hp:几:howMany`, `hp:几:table`],
               });
               const queue = skillReviewQueue({
@@ -1524,8 +1651,9 @@ describe(
 
           skillTest(
             `doesn't ask follow-up questions for skills that aren't introduced, even if they're in the graph`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`hp:几:howMany`, `hp:几:table`],
               });
               const queue = skillReviewQueue({
@@ -1559,10 +1687,11 @@ describe(
 
           skillTest(
             `doesn't queue reactive OtherAnswer if meanings share the same pinyin (e.g., 点:oClock and 点:point both use diǎn)`,
-            async ({ isStructuralHanzi, dictionary }) => {
+            async ({ decompositionData, isStructuralHanzi, dictionary }) => {
               // Both 点:oClock and 点:point have the same pinyin "diǎn"
               // so answering one should NOT trigger an OtherAnswer reactive question
               const graph = await skillLearningGraph({
+                decompositionData,
                 targetSkills: [`hp:点:oClock`, `hp:点:point`],
               });
               const queue = skillReviewQueue({
@@ -1602,8 +1731,9 @@ describe(
       () => {
         skillTest(
           `doesn't learn pinyin for all constituents of a single character`,
-          async ({ isStructuralHanzi, dictionary }) => {
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`hp:好:good`],
             });
             const queue = skillReviewQueue({
@@ -1622,8 +1752,9 @@ describe(
 
         skillTest(
           `learns the pinyin for each character in multi-character words`,
-          async ({ isStructuralHanzi, dictionary }) => {
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`hp:一样:same`],
             });
 
@@ -1654,8 +1785,9 @@ describe(
 
         skillTest(
           `schedules new skills in dependency order`,
-          async ({ dictionary }) => {
+          async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`hp:一点儿:aLittle`],
             });
 
@@ -1697,8 +1829,9 @@ describe(
 
         skillTest(
           `treats non-introduced skills as "not stable" and won't dependant skills`,
-          async ({ isStructuralHanzi, dictionary }) => {
+          async ({ decompositionData, isStructuralHanzi, dictionary }) => {
             const graph = await skillLearningGraph({
+              decompositionData,
               targetSkills: [`hp:一:one`],
             });
 
@@ -2713,9 +2846,11 @@ function latestSkillRatings(
  * simulated reviews.
  */
 async function simulateSkillReviews({
+  decompositionData,
   targetSkills,
   history,
 }: {
+  decompositionData: CharacterDecompositionData;
   targetSkills: Skill[];
   history: HistoryCommand[];
 }): Promise<SkillReviewQueue> {
@@ -2728,7 +2863,10 @@ async function simulateSkillReviews({
   await seedSkillHistory(rizzle, history);
 
   // Now compute the skill review queue using data from replicache.
-  const graph = await skillLearningGraph({ targetSkills });
+  const graph = await skillLearningGraph({
+    decompositionData,
+    targetSkills,
+  });
 
   // Calculate input dependencies.
   const skillSrsStates = new Map<Skill, SrsStateType>();

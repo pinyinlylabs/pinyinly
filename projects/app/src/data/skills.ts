@@ -1,4 +1,8 @@
-import type { Dictionary, HanziWordWithMeaning } from "@/dictionary";
+import type {
+  CharacterDecompositionEntry,
+  Dictionary,
+  HanziWordWithMeaning,
+} from "@/dictionary";
 import {
   decomposeHanzi,
   hanziFromHanziWord,
@@ -67,6 +71,7 @@ export type SkillLearningGraph = Map<Skill, Node>;
 
 export async function skillLearningGraph(options: {
   targetSkills: Skill[];
+  decompositionData: readonly CharacterDecompositionEntry[];
 }): Promise<SkillLearningGraph> {
   const graph: SkillLearningGraph = new Map();
 
@@ -76,7 +81,10 @@ export async function skillLearningGraph(options: {
       return;
     }
 
-    const dependencies = await skillDependencies(skill);
+    const dependencies = await skillDependencies(
+      skill,
+      options.decompositionData,
+    );
 
     const node: Node = { skill, dependencies: new Set(dependencies) };
     graph.set(skill, node);
@@ -180,7 +188,10 @@ export const finalFromPinyinFinalAssociationSkill = (
   return final;
 };
 
-export async function skillDependencies(skill: Skill): Promise<Skill[]> {
+export async function skillDependencies(
+  skill: Skill,
+  decompositionData: readonly CharacterDecompositionEntry[],
+): Promise<Skill[]> {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
   const characters = await loadCharacters();
@@ -200,7 +211,10 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Learn the components of a hanzi word first.
-      for (let hanziCharacter of await decomposeHanzi(hanzi)) {
+      for (let hanziCharacter of await decomposeHanzi(
+        hanzi,
+        decompositionData,
+      )) {
         // Use the canonical form of the character.
         {
           let hanziCharacterData = characters.get(hanziCharacter);

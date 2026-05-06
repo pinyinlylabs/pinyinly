@@ -746,7 +746,7 @@ export function buildIdsNodeSchema<T extends z.ZodType>(
 }
 
 // TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
+export const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
   wikiCharacterComponentSchema,
 );
 

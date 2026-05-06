@@ -94,6 +94,7 @@
     "moti": "^0.30.0",
     "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
     "nativewind": "patch:nativewind@npm%3A4.1.23#~/.yarn/patches/nativewind-npm-4.1.23-ea5a3f1461.patch",
+    "onnxruntime-web": "^1.25.1",
     "oslo": "^1.2.1",
     "pg": "^8.14.0",
     "pg-protocol": "^1.8.0",

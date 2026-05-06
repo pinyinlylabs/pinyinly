@@ -1,0 +1,13 @@
+diff --git a/build/transform-worker/collect-dependencies.js b/build/transform-worker/collect-dependencies.js
+index 820f8be5589f705bf1f3ae74758330df2ee9103f..63b8087ce6cc940f09814e5013d7075df0d4960e 100644
+--- a/build/transform-worker/collect-dependencies.js
++++ b/build/transform-worker/collect-dependencies.js
+@@ -55,7 +55,7 @@ const debug = require('debug')('expo:metro:collect-dependencies');
+ const MAGIC_IMPORT_COMMENTS = [
+     '@metro-ignore',
+     // Add support for Webpack ignore comment which is used in many different React libraries.
+-    'webpackIgnore: true',
++    'webpackIgnore: true', 'webpackIgnore:true',
+ ];
+ // asserts non-null
+ function nullthrows(x, message) {

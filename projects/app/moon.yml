@@ -115,6 +115,7 @@ tasks:
     deps:
       - ~:codegenEslint
       - ~:codegenExpoRouterTypes
+      - ~:codegenPublicVendor
 
   codegenEslint:
     description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
@@ -152,6 +153,16 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+
+  codegenPublicVendor:
+    command: tsx --tsconfig tsconfig.node.json ./bin/codegenPublicVendor.ts
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"
+    outputs:
+      - "public/vendor/**/*"
 
   dbCheck:
     command: drizzle-kit check

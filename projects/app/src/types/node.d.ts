@@ -14,15 +14,25 @@ declare global {
      */
     (id: `@/${string}`): never;
 
-    // Support for asset files. Anything that starts with a dot and ends with a
-    // known extension.
+    // Support for asset files.
     //
-    // NOTE: these MUST be relative paths, see above.
+    // NOTE: these MUST not be aliased paths, see above. Use module exports or
+    // relative paths.
     (
-      id: `.${string}.${`ttf` | `otf` | `svg` | `png` | `jpg` | `riv` | `lottie.json`}`,
+      id: `${string}.${
+        | `bin`
+        | `jpg`
+        | `lottie.json`
+        | `onnx`
+        | `otf`
+        | `png`
+        | `riv`
+        | `svg`
+        | `ttf`
+        | `wasm`}`,
     ): RnRequireSource;
-    (id: `.${string}.mp3`): AudioSource;
-    (id: `.${string}.m4a`): AudioSpriteSource | AudioSource;
+    (id: `${string}.mp3`): AudioSource;
+    (id: `${string}.m4a`): AudioSpriteSource | AudioSource;
   }
 
   namespace NodeJS {
