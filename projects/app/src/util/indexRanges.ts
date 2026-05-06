@@ -5,7 +5,7 @@
 export function parseIndexRanges(ranges: string): number[] {
   const result: number[] = [];
   for (const part of ranges.split(`,`)) {
-    const rangeMatch = /^(\d+)-(\d+)$/.exec(part);
+    const rangeMatch = /^(\d+)-(\d+)$/u.exec(part);
     if (rangeMatch) {
       const start = Number(rangeMatch[1]);
       const end = Number(rangeMatch[2]);

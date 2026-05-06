@@ -29,7 +29,7 @@ const rule: Rule.RuleModule = {
           // Match the opening tag and capture attributes
           // This regex needs to handle > characters within attribute values
           const openTagMatch =
-            /<pyly-glob-template((?:\s+[a-zA-Z0-9_-]+\s*=\s*"(?:[^"\\]|\\.)*")*)\s*>/.exec(
+            /<pyly-glob-template((?:\s+[a-zA-Z0-9_-]+\s*=\s*"(?:[^"\\]|\\.)*")*)\s*>/u.exec(
               comment.value,
             );
           if (!openTagMatch) {
@@ -44,7 +44,7 @@ const rule: Rule.RuleModule = {
             // Match all key="value" pairs, handling escaped quotes
             const attributePairs = [
               ...attributes.matchAll(
-                /([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g,
+                /([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/gu,
               ),
             ];
             // oxlint-disable-next-line typescript/no-unsafe-assignment
@@ -55,7 +55,7 @@ const rule: Rule.RuleModule = {
             const keys = Object.keys(attributeMap);
             // Remove all matched key="value" pairs from the string
             const cleanedAttributes = attributes
-              .replaceAll(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g, ``)
+              .replaceAll(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/gu, ``)
               .trim();
             // Only allow glob and template attributes
             const validAttributes = new Set([`glob`, `template`]);
@@ -229,7 +229,7 @@ const rule: Rule.RuleModule = {
 
           // Build the expected lines using the template
           const generatedLines = files.map((f) => {
-            let requirePath = globDir.replace(/\/$/, ``);
+            let requirePath = globDir.replace(/\/$/u, ``);
             // oxlint-disable-next-line no-negated-condition
             requirePath = requirePath !== `` ? `${requirePath}/${f}` : f;
             // Only add ./ if not already relative (doesn't start with ./ or ../)
@@ -243,10 +243,10 @@ const rule: Rule.RuleModule = {
             // Get filename without extension (for variable names)
             const filenameWithoutExtension = path
               .basename(f)
-              .replace(/\.[^/.]+$/, ``);
+              .replace(/\.[^/.]+$/u, ``);
 
             // Get path without extension (for $pathWithoutExt compatibility)
-            const pathWithoutExtension = requirePath.replace(/\.[^/.]+$/, ``);
+            const pathWithoutExtension = requirePath.replace(/\.[^/.]+$/u, ``);
 
             // Get parent directory name (last directory in the path)
             const parentDir = path.basename(path.dirname(requirePath));
@@ -255,7 +255,7 @@ const rule: Rule.RuleModule = {
             const relPath = f;
 
             // Get relative path without extension
-            const relPathWithoutExt = f.replace(/\.[^/.]+$/, ``);
+            const relPathWithoutExt = f.replace(/\.[^/.]+$/u, ``);
 
             // Create context for evaluating expressions
             const context = {
@@ -272,7 +272,7 @@ const rule: Rule.RuleModule = {
 
             // First try to handle as expression evaluation (safer than eval)
             result = result.replaceAll(
-              /\$\{([^}]+)\}/g,
+              /\$\{([^}]+)\}/gu,
               (match, expr: string) => {
                 try {
                   // Create a function with the context variables as arguments

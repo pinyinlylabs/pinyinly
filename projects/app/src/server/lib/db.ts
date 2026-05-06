@@ -110,6 +110,7 @@ export async function withRetriableTransaction<R>(
     }
   } while (attempt++);
 
+  // oxlint-disable-next-line no-unreachable
   invariant(
     false,
     `unexpected code path reached, transaction failed maximum number of times but did not throw error`,

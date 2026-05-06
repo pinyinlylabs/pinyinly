@@ -120,9 +120,9 @@ test(`hanzi word meaning-key lint`, async () => {
 
   const isViolating = (x: string) =>
     // no "measure word" or "radical"
-    /measure ?word| radical/i.exec(x) != null ||
+    /measure ?word| radical/iu.exec(x) != null ||
     // only allow english alphabet
-    !/^[a-zA-Z]+$/.test(x);
+    !/^[a-zA-Z]+$/u.test(x);
 
   const violations = new Set(
     dict.allHanziWords.filter((hanziWord) =>
@@ -272,15 +272,15 @@ test(`hanzi word meaning gloss lint`, async () => {
       const label = `${hanziWord} gloss "${gloss}"`;
 
       // Symbols
-      expect.soft(gloss, `${label} commas`).not.toMatch(/,/);
-      expect.soft(gloss, `${label} semicolons`).not.toMatch(/;/);
+      expect.soft(gloss, `${label} commas`).not.toMatch(/,/u);
+      expect.soft(gloss, `${label} semicolons`).not.toMatch(/;/u);
       // TODO: re-enable these later
       // expect.soft(gloss, `${label} parenthesis`).not.toMatch(/\(/);
 
       // No banned words
       expect
         .soft(gloss, `${label} banned words`)
-        .not.toMatch(/measure ?word|radical|particle/i);
+        .not.toMatch(/measure ?word|radical|particle/iu);
     }
 
     // Rules for the primary gloss
@@ -290,7 +290,7 @@ test(`hanzi word meaning gloss lint`, async () => {
 
       const maxWords = 5;
       expect
-        .soft(gloss.match(/[^\s]+/g)?.length ?? 0, `${label} word count`)
+        .soft(gloss.match(/[^\s]+/gu)?.length ?? 0, `${label} word count`)
         .toBeLessThanOrEqual(maxWords);
     }
 
@@ -508,10 +508,10 @@ test(`zod schemas are compatible with OpenAI API`, async () => {
     );
 
     // `z.array(…).min(…) is not supported by OpenAI API`,
-    expect(jsonSchema).not.toMatch(/"minItems":/g);
+    expect(jsonSchema).not.toMatch(/"minItems":/gu);
 
     // `z.array(…).max(…) is not supported by OpenAI API`,
-    expect(jsonSchema).not.toMatch(/"maxItems":/g);
+    expect(jsonSchema).not.toMatch(/"maxItems":/gu);
   }
 
   assertCompatible(hanziWordMeaningSchema);

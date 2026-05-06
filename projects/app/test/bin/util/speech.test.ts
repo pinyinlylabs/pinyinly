@@ -200,7 +200,7 @@ describe(`generateSpeech` satisfies HasNameOf<typeof generateSpeech>, () => {
       expect(existsSync(generatedDir)).toBe(true);
       const files = await readdir(generatedDir);
       expect(files).toHaveLength(1);
-      expect(files[0]).toMatch(/^你好-nova-[^.]+\.mp3$/);
+      expect(files[0]).toMatch(/^你好-nova-[^.]+\.mp3$/u);
       expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
@@ -232,7 +232,7 @@ describe(`generateSpeech` satisfies HasNameOf<typeof generateSpeech>, () => {
       const files = await readdir(generatedDir);
       expect(files).toHaveLength(2);
       expect(
-        files.every((name) => /^ni3hao3-nova-[^.]+\.mp3$/.test(name)),
+        files.every((name) => /^ni3hao3-nova-[^.]+\.mp3$/u.test(name)),
       ).toBe(true);
       expect(mockCreate).toHaveBeenCalledTimes(2);
     });

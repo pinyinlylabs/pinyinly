@@ -157,7 +157,7 @@ export function splitN(str: string, sep: string, n: number): string[] {
 
 export function toCamelCase(text: string) {
   return text
-    .split(/\s+/)
+    .split(/\s+/u)
     .map((word, index) =>
       index === 0
         ? word.toLowerCase()

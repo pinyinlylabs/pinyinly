@@ -282,7 +282,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           >
             <Stack.Screen
               name="loading"
-              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
+              // oxlint-disable-next-line react/no-children-prop
               children={() => {
                 return (
                   <Reanimated.View
@@ -298,7 +298,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             />
             <Stack.Screen
               name="chill"
-              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
+              // oxlint-disable-next-line react/no-children-prop
               children={() => {
                 return (
                   <View className="gap-2">
@@ -339,7 +339,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             />
             <Stack.Screen
               name="question"
-              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
+              // oxlint-disable-next-line react/no-children-prop
               children={({
                 route: {
                   params: { question },

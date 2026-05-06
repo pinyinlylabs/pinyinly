@@ -364,7 +364,7 @@ describe(
         `ni5`,
         `ḿ`,
       ];
-      const regex = new RegExp(pinyinUnitPattern);
+      const regex = new RegExp(pinyinUnitPattern, `u`);
       for (const text of valid) {
         const match = regex.exec(text);
         expect(match?.at(0)).toEqual(text);
@@ -634,7 +634,7 @@ describe(`pyly pinyin chart`, async () => {
 
         expect(pinyin).toEqual(normalizePinyinUnit(pinyin));
 
-        if (/^[1-5]$/.test(soundId)) {
+        if (/^[1-5]$/u.test(soundId)) {
           expect(parts.tone).toEqual(Number(soundId));
         } else if (isFinalSoundId(soundId)) {
           expect(parts.finalSoundId).toEqual(soundId);

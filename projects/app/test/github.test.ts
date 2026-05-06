@@ -29,7 +29,7 @@ test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
     `utf8`,
   );
   const expoPublicEnvVars = envLocalSample
-    .match(/^EXPO_PUBLIC_[A-Z_]+=/gm)
+    .match(/^EXPO_PUBLIC_[A-Z_]+=/gmu)
     ?.map((line) => line.split(`=`)[0]);
 
   const expectedEnvVars = new Set(expoPublicEnvVars);

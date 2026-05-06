@@ -110,7 +110,7 @@ export function gradeHanziToPinyinTypedQuestion(
   // If there were no syllables found (e.g. the user entered some invalid pinyin
   // like "x x") then still have a go at parsing it.
   if (actualUnits.length === 0) {
-    actualUnits = userAnswer.split(/\s+/g).filter((x) => x.length > 0);
+    actualUnits = userAnswer.split(/\s+/gu).filter((x) => x.length > 0);
   }
 
   // Put the skill we're testing first.
@@ -121,8 +121,8 @@ export function gradeHanziToPinyinTypedQuestion(
   for (const { skill, pinyin: pinyinOptions } of answers) {
     for (const pinyin of pinyinOptions) {
       // Normalize both answers by removing spaces for comparison
-      const normalizedPinyin = pinyin.replaceAll(/\s+/g, ``);
-      const normalizedUserAnswer = userAnswer.replaceAll(/\s+/g, ``);
+      const normalizedPinyin = pinyin.replaceAll(/\s+/gu, ``);
+      const normalizedUserAnswer = userAnswer.replaceAll(/\s+/gu, ``);
       const isCorrect = normalizedPinyin === normalizedUserAnswer;
 
       if (isCorrect) {

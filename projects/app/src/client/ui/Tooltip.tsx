@@ -249,6 +249,7 @@ function TooltipTrigger({
       );
     }
 
+    // oxlint-disable-next-line react/no-clone-element
     return cloneElement(
       child as ReactElement<Omit<PropsOf<typeof Pressable>, `children`>>,
       mergeProps(

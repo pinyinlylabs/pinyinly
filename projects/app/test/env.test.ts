@@ -46,8 +46,8 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   for (const testRelPath of testRelPaths) {
     const srcRelPath = [
       // Look for both .ts or .tsx source files.
-      testRelPath.replace(/\.test(-d)?\.tsx?$/, `.ts`),
-      testRelPath.replace(/\.test(-d)?\.tsx?$/, `.tsx`),
+      testRelPath.replace(/\.test(-d)?\.tsx?$/u, `.ts`),
+      testRelPath.replace(/\.test(-d)?\.tsx?$/u, `.tsx`),
     ].find((x) => srcRelPathsSet.has(x));
     const isStandalone = await isStandaloneTestFile(
       path.resolve(testRoot, testRelPath),
@@ -88,5 +88,5 @@ async function getTreePaths(
  */
 async function isStandaloneTestFile(testPath: string): Promise<boolean> {
   const contents = await fs.readFile(testPath, `utf8`);
-  return /\/\/\s+pyly-not-src-test/m.test(contents);
+  return /\/\/\s+pyly-not-src-test/mu.test(contents);
 }

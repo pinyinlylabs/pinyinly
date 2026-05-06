@@ -42,7 +42,7 @@ describe(
           contentType: `image/jpeg`,
           contentLength: MAX_ASSET_SIZE_BYTES + 1,
         }),
-      ).rejects.toThrow(/exceeds maximum/);
+      ).rejects.toThrow(/exceeds maximum/u);
     });
 
     test(`accepts valid parameters`, async () => {

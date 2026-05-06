@@ -1,7 +1,7 @@
 import type { Plugin } from "vite";
 
 export function viteMockAssetPlugin(): Plugin {
-  const re = /\.(m4a|mp3|wav|ogg|jpe?g|png|gif|svg)$/i;
+  const re = /\.(m4a|mp3|wav|ogg|jpe?g|png|gif|svg)$/iu;
   const prefix = `\0asset-mock:`;
 
   return {

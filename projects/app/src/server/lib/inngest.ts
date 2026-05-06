@@ -620,7 +620,7 @@ const dataIntegrityDictionary = inngest.createFunction(
           .from(s.skillRating)
           .where(
             notInArray(
-              substring(s.skillRating.skill, /^\w+:(.+)$/),
+              substring(s.skillRating.skill, /^\w+:(.+)$/u),
               dict.allHanziWords,
             ),
           ),
@@ -646,7 +646,7 @@ const dataIntegrityDictionary = inngest.createFunction(
           .from(s.skillState)
           .where(
             notInArray(
-              substring(s.skillState.skill, /^\w+:(.+)$/),
+              substring(s.skillState.skill, /^\w+:(.+)$/u),
               dict.allHanziWords,
             ),
           ),

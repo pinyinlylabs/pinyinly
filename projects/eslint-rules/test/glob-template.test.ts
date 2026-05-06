@@ -349,7 +349,7 @@ ruleTester.run(`glob-template`, globTemplate, {
       code: missingFileCode,
       filename,
       errors: [
-        { message: /Generated code is out of sync with files matching/ },
+        { message: /Generated code is out of sync with files matching/u },
       ],
       output: expectedOutput,
     },
@@ -357,7 +357,7 @@ ruleTester.run(`glob-template`, globTemplate, {
       code: missingFileCodeCustomTemplate,
       filename,
       errors: [
-        { message: /Generated code is out of sync with files matching/ },
+        { message: /Generated code is out of sync with files matching/u },
       ],
       output: expectedOutputCustomTemplate,
     },
@@ -365,7 +365,7 @@ ruleTester.run(`glob-template`, globTemplate, {
       code: missingFileObjectLiteral,
       filename,
       errors: [
-        { message: /Generated code is out of sync with files matching/ },
+        { message: /Generated code is out of sync with files matching/u },
       ],
       output: expectedOutputObjectLiteral,
     },
@@ -373,7 +373,7 @@ ruleTester.run(`glob-template`, globTemplate, {
       code: missingFileTopLevel,
       filename,
       errors: [
-        { message: /Generated code is out of sync with files matching/ },
+        { message: /Generated code is out of sync with files matching/u },
       ],
       output: expectedOutputTopLevel,
     },
@@ -381,7 +381,7 @@ ruleTester.run(`glob-template`, globTemplate, {
       code: extraFileCode,
       filename,
       errors: [
-        { message: /Generated code is out of sync with files matching/ },
+        { message: /Generated code is out of sync with files matching/u },
       ],
       output: expectedOutput,
     },
@@ -389,44 +389,44 @@ ruleTester.run(`glob-template`, globTemplate, {
       code: missingFileWithQuotesInTemplate,
       filename,
       errors: [
-        { message: /Generated code is out of sync with files matching/ },
+        { message: /Generated code is out of sync with files matching/u },
       ],
       output: expectedOutputWithQuotesInTemplate,
     },
     {
       code: invalidNoGlob,
       filename,
-      errors: [{ message: /must have glob and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/u }],
     },
     {
       code: invalidNoTemplate,
       filename,
-      errors: [{ message: /must have glob and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/u }],
     },
     {
       code: invalidTemplateOnly,
       filename,
-      errors: [{ message: /must have glob and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/u }],
     },
     {
       code: invalidExtraAttribute,
       filename,
-      errors: [{ message: /must have glob and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/u }],
     },
     {
       code: invalidWrongAttribute,
       filename,
-      errors: [{ message: /must have glob and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/u }],
     },
     {
       code: invalidNonexistentDir,
       filename,
-      errors: [{ message: /Could not process glob pattern/ }],
+      errors: [{ message: /Could not process glob pattern/u }],
     },
     {
       code: invalidFileInsteadOfDir,
       filename,
-      errors: [{ message: /Could not process glob pattern/ }],
+      errors: [{ message: /Could not process glob pattern/u }],
     },
   ],
 });

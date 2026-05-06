@@ -111,11 +111,11 @@ describe(`schema test coverage`, () => {
     const testFiles = globSync(`v*.test.ts`, { cwd: testDir });
 
     const schemaVersions = schemaFiles
-      .map((f) => f.match(/v(\d+)\.ts/)?.[1])
+      .map((f) => f.match(/v(\d+)\.ts/u)?.[1])
       .filter((v): v is string => v != null);
 
     const testedVersions = testFiles
-      .map((f) => f.match(/v(\d+)\.test\.ts/)?.[1])
+      .map((f) => f.match(/v(\d+)\.test\.ts/u)?.[1])
       .filter((v): v is string => v != null);
 
     const missingTestVersions = schemaVersions.filter(

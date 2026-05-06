@@ -208,19 +208,19 @@ export function getDongChinesePronunciation(
 }
 
 function cleanGloss(gloss: string): string {
-  return gloss.replaceAll(/^to /g, ``);
+  return gloss.replaceAll(/^to /gu, ``);
 }
 
 export function getDongChineseMeaningKey(
   record: DongChineseRecord,
 ): string | undefined {
   return getDongChineseGloss(record)?.[0]
-    ?.replaceAll(/^a /g, ``)
-    .replaceAll(/ ([a-z])/g, (_, c: string) => c.toUpperCase());
+    ?.replaceAll(/^a /gu, ``)
+    .replaceAll(/ ([a-z])/gu, (_, c: string) => c.toUpperCase());
 }
 
 export function getDongChineseGloss(
   record: DongChineseRecord,
 ): string[] | undefined {
-  return record.gloss?.split(/[,;] ?/g).map((x) => cleanGloss(x));
+  return record.gloss?.split(/[,;] ?/gu).map((x) => cleanGloss(x));
 }

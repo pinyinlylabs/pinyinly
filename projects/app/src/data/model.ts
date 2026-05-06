@@ -69,7 +69,7 @@ export type AssetId =
   | `sha256/${string}`;
 export const assetIdSchema = z
   .string()
-  .regex(/^sha256\/[A-Za-z0-9_-]{43}$/, `Invalid AssetId format`)
+  .regex(/^sha256\/[A-Za-z0-9_-]{43}$/u, `Invalid AssetId format`)
   .pipe(z.custom<AssetId>());
 
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;

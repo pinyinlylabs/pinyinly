@@ -3,5 +3,5 @@
  * @param pattern
  */
 export function regExpEscape(pattern: string): string {
-  return pattern.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+  return pattern.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 }

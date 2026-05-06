@@ -57,7 +57,7 @@ export const 时 = date;
 export const parseDurationShorthand = (shorthand: string): Duration => {
   const result: Duration = {};
 
-  const regex = /(-|\+)?(\d+)([\w])/g;
+  const regex = /(-|\+)?(\d+)([\w])/gu;
   for (const match of shorthand.matchAll(regex)) {
     const [, sign, multiple, unit] = match;
     const scalar = (sign === `-` ? -1 : 1) * Number(multiple);
@@ -294,7 +294,7 @@ export function parseHistoryCommand(
     case `🟠`: {
       const rating = emojiToRating(op);
 
-      // oxlint-disable-next-line eslint(prefer-const)
+      // oxlint-disable-next-line prefer-const
       let [skill, skillArgs] = splitN(opArgs!, ` `, 1) as [Skill, string?];
       const event: HistoryEventSkillReview = {
         kind: `skillReview`,
@@ -309,7 +309,7 @@ export function parseHistoryCommand(
           case SkillKind.HanziWordToGlossTyped: {
             skill = skill as HanziWordSkill;
             // `❌ he:刀:knife (刀→legs)`,
-            const match = /^\((?:(.+)→)?(.+)\)$/.exec(skillArgs);
+            const match = /^\((?:(.+)→)?(.+)\)$/u.exec(skillArgs);
             invariant(match != null, `invalid mistake format ${skillArgs}`);
             const gloss = nonNullable(match[2], `gloss match missing`);
             const hanziOrHanziWord =
@@ -333,7 +333,7 @@ export function parseHistoryCommand(
           case SkillKind.HanziWordToPinyinTone: {
             skill = skill as HanziWordSkill;
             // `❌ he:刀:knife (刀→legs)`,
-            const match = /^\((?:(.+)→)?(.+?)\)$/.exec(skillArgs);
+            const match = /^\((?:(.+)→)?(.+?)\)$/u.exec(skillArgs);
             invariant(match != null, `invalid mistake format ${skillArgs}`);
             const pinyin = match[2] as PinyinText;
             const hanziOrHanziWord =

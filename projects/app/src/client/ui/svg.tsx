@@ -21,7 +21,7 @@ const PathCssRn = cssInterop(Path, {
   },
 });
 
-const PathCssWeb = ({
+export const PathCssWeb = ({
   strokeDasharray,
   onPress,
   onHoverIn,
@@ -50,7 +50,7 @@ const PathCssWeb = ({
   );
 };
 
-const PathCssNative = ({
+export const PathCssNative = ({
   onHoverIn: _onHoverIn,
   onHoverOut: _onHoverOut,
   ...props
@@ -58,6 +58,7 @@ const PathCssNative = ({
   return <PathCssRn {...props} />;
 };
 
+// oxlint-disable-next-line react/only-export-components
 export const PathCss = Platform.select<React.ComponentType<PathCssProps>>({
   web: PathCssWeb,
   default: PathCssNative,

@@ -16,7 +16,7 @@ const configPath = path.resolve(workspaceRoot, `renovate.json5`);
 function evaluateJsStringLiteral(literal: string): string {
   // oxlint-disable-next-line typescript/no-implied-eval
   const fn = new Function(`return (${literal});`);
-  // oxlint-disable-next-line typescript-eslint(no-unsafe-call)
+  // oxlint-disable-next-line typescript/no-unsafe-call
   const val = fn() as unknown;
   if (typeof val !== `string`) {
     throw new TypeError(`Expected string literal, got ${typeof val}`);
@@ -26,7 +26,7 @@ function evaluateJsStringLiteral(literal: string): string {
 
 describe(`Renovate regex @pyly-test samples`, () => {
   const src = fs.readFileSync(configPath, `utf8`);
-  const lines = src.split(/\r?\n/);
+  const lines = src.split(/\r?\n/u);
   type Case = {
     lineNo: number;
     sample: string;
@@ -41,7 +41,7 @@ describe(`Renovate regex @pyly-test samples`, () => {
     expectedGroups: Record<string, string>;
   } {
     // Parse: "input string" key1=value1 key2=value2
-    const quotedStringMatch = /^"([^"]*)"/.exec(testContent.trim());
+    const quotedStringMatch = /^"([^"]*)"/u.exec(testContent.trim());
     if (!quotedStringMatch) {
       throw new Error(
         `Expected quoted string at start of test line: ${testContent}`,
@@ -54,7 +54,7 @@ describe(`Renovate regex @pyly-test samples`, () => {
     const expectedGroups: Record<string, string> = {};
     if (remainder) {
       // Parse key=value pairs
-      const pairs = remainder.split(/\s+/);
+      const pairs = remainder.split(/\s+/u);
       for (const pair of pairs) {
         const [key, value] = pair.split(`=`, 2);
         invariant(key != null);
@@ -70,7 +70,7 @@ describe(`Renovate regex @pyly-test samples`, () => {
   for (let i = 0; i < lines.length; i++) {
     const line = nonNullable(lines[i]);
     // Match either // @pyly-test: ... or /* @pyly-test: ... */ on a single line
-    const m = /@pyly-test:\s*(.+?)\s*(?:\*\/)?\s*$/.exec(line);
+    const m = /@pyly-test:\s*(.+?)\s*(?:\*\/)?\s*$/u.exec(line);
     if (!m) {
       continue;
     }
@@ -85,7 +85,7 @@ describe(`Renovate regex @pyly-test samples`, () => {
     let j = i + 1;
     while (j < lines.length) {
       const nextLine = nonNullable(lines[j]);
-      const nextMatch = /@pyly-test:\s*(.+?)\s*(?:\*\/)?\s*$/.exec(nextLine);
+      const nextMatch = /@pyly-test:\s*(.+?)\s*(?:\*\/)?\s*$/u.exec(nextLine);
       if (nextMatch) {
         const nextTestContent = nonNullable(nextMatch[1]);
         const nextParsed = parseTestLine(nextTestContent);
@@ -103,7 +103,7 @@ describe(`Renovate regex @pyly-test samples`, () => {
       invariant(next != null);
       if (next.length > 0) {
         // Find first string literal token on the line: "..." or '...' or `...`
-        const lit = /(["'`])(?:\\.|(?!\1).)*\1/.exec(next);
+        const lit = /(["'`])(?:\\.|(?!\1).)*\1/u.exec(next);
         if (!lit) {
           throw new Error(
             `Expected a string literal containing the regex on line ${j + 1}`,
@@ -133,7 +133,7 @@ describe(`Renovate regex @pyly-test samples`, () => {
   for (const c of cases) {
     test(`matches sample on line ${c.lineNo}: ${c.sample}`, () => {
       const pattern = evaluateJsStringLiteral(c.regexLiteral); // unescape to raw pattern
-      const re = new RegExp(pattern);
+      const re = new RegExp(pattern, `u`);
       const match = re.exec(c.sample);
 
       if (!match) {

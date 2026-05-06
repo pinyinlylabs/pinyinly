@@ -600,7 +600,7 @@ export class RizzleEntity<
     const valueType = object(shape);
 
     // "aw[f]fefe[g]" -> ["aw", "fefe", ""]
-    const filler: readonly string[] = keyPath.split(/\[.+?\]/);
+    const filler: readonly string[] = keyPath.split(/\[.+?\]/u);
     invariant(filler.length > 0);
     const interpolateKey = (
       keyInput: Partial<EntityKeyType<S, KeyPath>[`_input`]>,
@@ -1435,7 +1435,7 @@ export const keyPathVariableNames = <T extends string>(
 ): ExtractVariableNames<T>[] => {
   return (
     key
-      .match(/\[(.+?)\]/g)
+      .match(/\[(.+?)\]/gu)
       ?.map((key) => key.slice(1, -1) as ExtractVariableNames<T>) ?? []
   );
 };
