@@ -29,7 +29,7 @@
     "@pinyinly/lib": "workspace:*",
     "@types/debug": "^4 <=4.3.x",
     "@types/node": "22.x",
-    "@typescript-eslint/parser": "^8.36.0",
+    "@typescript-eslint/parser": "^8.59.2",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "eslint": "^9.13.0",
     "eslint-plugin-import": "^2.31.0",

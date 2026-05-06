@@ -151,7 +151,7 @@
     "@types/react": "19.1.x",
     "@types/react-dom": "19.1.x",
     "@types/ws": "^8 <=8.17.x",
-    "@typescript-eslint/utils": "^8.26.0",
+    "@typescript-eslint/utils": "^8.59.2",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "@vitejs/plugin-react": "^5.0.0",
     "babel-plugin-react-compiler": "1.0.0",
