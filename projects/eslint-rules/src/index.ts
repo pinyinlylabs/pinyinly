@@ -23,7 +23,7 @@ export const plugin: ESLint.Plugin = {
   },
 };
 
-// oxlint-disable-next-line eslint-plugin-import(no-default-export)
+// oxlint-disable-next-line import/no-default-export
 export default plugin;
 
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;

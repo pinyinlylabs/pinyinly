@@ -56,7 +56,7 @@ interface NameOfTypeResult {
 function extractSymbolName(typeText: string): string | null {
   // Match patterns like "typeof Symbol" or "typeof Foo.Bar" and extract the full path
   const typeofMatch =
-    /typeof\s+([a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*)/.exec(
+    /typeof\s+([a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*)/u.exec(
       typeText,
     );
   if (typeofMatch?.[1] !== undefined) {
@@ -64,7 +64,7 @@ function extractSymbolName(typeText: string): string | null {
   }
 
   // Match patterns like "MyInterface" or "MyClass" (just the type name)
-  const typeMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)$/.exec(typeText);
+  const typeMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)$/u.exec(typeText);
   if (typeMatch?.[1] !== undefined) {
     return typeMatch[1];
   }
@@ -77,7 +77,7 @@ function extractSymbolName(typeText: string): string | null {
  */
 function getNameOfTypeText(typeAnnotationText: string): NameOfTypeResult {
   // Look for HasNameOf<...> pattern first
-  const hasNameOfMatch = /HasNameOf\s*<([^>]+)>/.exec(typeAnnotationText);
+  const hasNameOfMatch = /HasNameOf\s*<([^>]+)>/u.exec(typeAnnotationText);
   if (hasNameOfMatch) {
     return {
       typeText: hasNameOfMatch[1]?.trim() ?? null,
@@ -86,7 +86,7 @@ function getNameOfTypeText(typeAnnotationText: string): NameOfTypeResult {
   }
 
   // Look for NameOf<...> pattern
-  const nameOfMatch = /NameOf\s*<([^>]+)>/.exec(typeAnnotationText);
+  const nameOfMatch = /NameOf\s*<([^>]+)>/u.exec(typeAnnotationText);
   if (nameOfMatch) {
     return {
       typeText: nameOfMatch[1]?.trim() ?? null,
@@ -256,7 +256,7 @@ const rule: Rule.RuleModule = {
                 } else {
                   // Try to intelligently insert the symbol name
                   const words = actualString
-                    .split(/\s+/)
+                    .split(/\s+/u)
                     .filter((word: string) => word.length > 0);
 
                   // Words that should be preserved (test-related words)

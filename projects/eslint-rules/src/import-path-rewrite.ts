@@ -74,7 +74,7 @@ const rule: Rule.RuleModule = {
 
     // Convert string patterns to RegExp objects
     const rewriteRules: RewriteRule[] = patterns.map((pattern) => ({
-      regex: new RegExp(pattern.from),
+      regex: new RegExp(pattern.from, `u`),
       replacement: pattern.to,
     }));
 

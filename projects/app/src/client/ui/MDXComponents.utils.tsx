@@ -1,4 +1,4 @@
-// eslint-disable eslint-plugin-react(only-export-components)
+// oxlint-disable react/only-export-components
 
 // Adaptation from https://github.com/EvanBacon/expo-mdx/blob/6f27605c23400ed42d014dcef77ba11244d08f82/packages/mdx/src/
 import * as html from "@expo/html-elements";
@@ -28,7 +28,6 @@ export function Img({
 /* Lint CSS classes */
 const ctl = (classes: string) => classes;
 
-// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 export const defaultMdxComponents = {
   h1: makeHeading(1, { className: ctl(`pyly-mdx-h1`) }),
   h2: makeHeading(2, { className: ctl(`pyly-mdx-h2`) }),

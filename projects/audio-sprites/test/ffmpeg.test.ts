@@ -15,6 +15,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, test } from "vitest";
 
+// oxlint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 const fixturesDir = path.join(import.meta.dirname, `fixtures`);
@@ -60,7 +61,7 @@ describe(
 
     test(`rejects non-numeric strings`, () => {
       expect(() => stringifiedNumberSchema.parse(`abc`)).toThrow(
-        /could not be parsed as a finite number/,
+        /could not be parsed as a finite number/u,
       );
       expect(() => stringifiedNumberSchema.parse(`1.2.3`)).toThrow();
     });
@@ -805,7 +806,7 @@ describe(`Integration tests with real ffmpeg`, () => {
         duration: expect.any(Number) as number,
       });
       expect(segment.duration).toBeGreaterThan(0);
-      expect(segment.hash).toMatch(/^[a-f0-9]{64}$/); // SHA-256 hash
+      expect(segment.hash).toMatch(/^[a-f0-9]{64}$/u); // SHA-256 hash
     }
 
     // Verify durations match expected values (approximately)

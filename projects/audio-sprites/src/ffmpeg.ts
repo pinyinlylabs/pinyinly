@@ -74,7 +74,7 @@ function extractLoudnorm(output: string) {
   //         "target_offset" : "0.04"
   // }
   // ```
-  const match = /^\[Parsed_loudnorm_.+?(^\{.+?^\})/gms.exec(output);
+  const match = /^\[Parsed_loudnorm_.+?(^\{.+?^\})/gmsu.exec(output);
 
   const json = match?.[1];
   invariant(
@@ -123,7 +123,7 @@ function extractAstats(output: string) {
   const rawData: Record<string, unknown> = {};
   for (const [, key, value] of output.matchAll(
     // e.g. [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
-    /^\[Parsed_astats_.+?\] (?<key>.+?): (?<value>.+?)$/gm,
+    /^\[Parsed_astats_.+?\] (?<key>.+?): (?<value>.+?)$/gmu,
   )) {
     invariant(key != null && value != null);
     rawData[key] = value;
@@ -133,14 +133,14 @@ function extractAstats(output: string) {
 
 function extractDuration(output: string) {
   const containerData =
-    /Duration: (?<duration>.+?), start: (?<start>.+?), bitrate: (?<bitrate>.+?)$/gms.exec(
+    /Duration: (?<duration>.+?), start: (?<start>.+?), bitrate: (?<bitrate>.+?)$/gmsu.exec(
       output,
     );
   const container = containerDataSchema.parse(containerData?.groups);
 
-  const inputSteamData = /^Input #0.+?\n(?:^  .+?\n)+/gm.exec(output)?.[0];
+  const inputSteamData = /^Input #0.+?\n(?:^  .+?\n)+/gmu.exec(output)?.[0];
   invariant(inputSteamData != null, `Failed to extract input stream data`);
-  const inputStreamSampleRateHz = /Stream #0.+, (\d+) Hz,/.exec(
+  const inputStreamSampleRateHz = /Stream #0.+, (\d+) Hz,/u.exec(
     inputSteamData,
   )?.[1];
   invariant(
@@ -172,16 +172,16 @@ function extractSilenceDetection(output: string) {
   // Shift detected silence times so callers get timeline values that match
   // metadata-aware playback tools (e.g. macOS Quick Look).
   const containerStartMatch =
-    /Duration: .+?, start: (?<start>.+?), bitrate: .+?$/gms.exec(output);
+    /Duration: .+?, start: (?<start>.+?), bitrate: .+?$/gmsu.exec(output);
   const parsedStart = Number.parseFloat(
     containerStartMatch?.groups?.[`start`] ?? `0`,
   );
   const timeOffset = Number.isFinite(parsedStart) ? parsedStart : 0;
 
-  const matches = output.matchAll(/^\[silencedetect @ .+?\] (.+?)$/gm);
+  const matches = output.matchAll(/^\[silencedetect @ .+?\] (.+?)$/gmu);
   for (const [, message] of matches) {
     invariant(message != null);
-    const silenceStartMatch = /silence_start: ([\d.]+)/g.exec(message);
+    const silenceStartMatch = /silence_start: ([\d.]+)/gu.exec(message);
     if (silenceStartMatch) {
       const silenceStart = silenceStartMatch[1];
       invariant(silenceStart != null);
@@ -191,7 +191,7 @@ function extractSilenceDetection(output: string) {
     }
 
     const silenceEndMatch =
-      /silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/g.exec(message);
+      /silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/gu.exec(message);
     if (silenceEndMatch) {
       invariant(start != null);
 
@@ -252,7 +252,7 @@ function extractSilenceDetection(output: string) {
  * @returns number of seconds as a float
  */
 export function parseTimestampToSeconds(timeStr: string): number {
-  const match = /^(?<hh>\d+):(?<mm>\d+):(?<ss>\d+(?:\.\d+)?)$/.exec(timeStr);
+  const match = /^(?<hh>\d+):(?<mm>\d+):(?<ss>\d+(?:\.\d+)?)$/u.exec(timeStr);
 
   if (!match?.groups) {
     throw new Error(`Invalid time format: ${timeStr}`);

@@ -1,9 +1,8 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { expect, test } from "vitest";
 
-const testDir = path.dirname(fileURLToPath(import.meta.url));
+const testDir = import.meta.dirname;
 const workspaceRoot = path.resolve(testDir, `../../..`);
 
 function gitLsFilesSync(cwd: string): string[] {

@@ -285,7 +285,7 @@ describe(
 
     test(`produces object ID with correct prefix`, () => {
       const objectId = hanziWordPinyinlyObjectId(`多:many` as HanziWord);
-      expect(objectId).toMatch(/^hw\//);
+      expect(objectId).toMatch(/^hw\//u);
     });
 
     test(`preserves hanzi word with colons`, () => {
@@ -307,7 +307,7 @@ describe(
 
     test(`produces object ID with correct prefix`, () => {
       const objectId = skillPinyinlyObjectId(`het:多:many` as Skill);
-      expect(objectId).toMatch(/^sk\//);
+      expect(objectId).toMatch(/^sk\//u);
     });
 
     test(`handles all skill type prefixes`, () => {
@@ -344,7 +344,7 @@ describe(
 
     test(`produces object ID with correct prefix`, () => {
       const objectId = pinyinSoundIdPinyinlyObjectId(`-ang` as PinyinSoundId);
-      expect(objectId).toMatch(/^ps\//);
+      expect(objectId).toMatch(/^ps\//u);
     });
 
     test(`handles various sound ID formats`, () => {
@@ -380,7 +380,7 @@ describe(
       const objectId = assetIdPinyinlyObjectId(
         `sha256/${`0`.repeat(43)}` as AssetId,
       );
-      expect(objectId).toMatch(/^a\//);
+      expect(objectId).toMatch(/^a\//u);
     });
 
     test(`produces correct ID length`, () => {

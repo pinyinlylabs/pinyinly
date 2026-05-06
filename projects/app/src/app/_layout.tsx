@@ -114,5 +114,5 @@ function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
 }
 
 // Wrap the Root Layout route component with `Sentry.wrap` to capture gesture info and profiling data.
-// oxlint-disable-next-line eslint-plugin-react(only-export-components)
+// oxlint-disable-next-line react/only-export-components
 export default Sentry.wrap(RootLayout);

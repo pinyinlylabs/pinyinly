@@ -327,14 +327,14 @@ test(`hsk word lists match vendor data`, async () => {
               // Take only the first part of the meaning before semicolon/comma
               // and remove any parenthetical content and non-alphabetic chars
               const firstMeaning = nonNullable(form.meanings[0])
-                .split(/[;,]/)[0]!
-                .replaceAll(/\([^)]*\)/g, ``)
-                .replaceAll(/[^a-zA-Z\s]/g, ``)
+                .split(/[;,]/u)[0]!
+                .replaceAll(/\([^)]*\)/gu, ``)
+                .replaceAll(/[^a-zA-Z\s]/gu, ``)
                 .trim();
 
               // Shorten meaning keys while keeping essential meaning
               // These only need to be unique within the hanzi namespace
-              const words = firstMeaning.split(/\s+/);
+              const words = firstMeaning.split(/\s+/u);
 
               // Remove leading "to" if there are other words after it
               if (words.length > 1 && words[0]?.toLowerCase() === `to`) {
@@ -619,12 +619,12 @@ function parseHskTsvLine(line: string) {
 
   // Split by pipes (both regular | and fullwidth ｜)
   function splitVariants(text: string): string[] {
-    return text.split(/[|｜]/).map((s) => s.trim());
+    return text.split(/[|｜]/u).map((s) => s.trim());
   }
 
   // Extract main and hint from parentheses
   function extractHint(text: string): { main: string; hint?: string } {
-    const match = /^([^(（]*)(?:[((（]([^)）]*)[))）])?/.exec(text);
+    const match = /^([^(（]*)(?:[((（]([^)）]*)[))）])?/u.exec(text);
     if (match) {
       const main = match[1]?.trim() ?? text;
       const hint = match[2]?.trim();
@@ -738,7 +738,7 @@ async function guessHanziGlosses(hanzi: HanziText): Promise<string[] | null> {
 }
 
 function splitTsvMeanings(text: string): string[] {
-  return text.split(/[;]+\s+/).map((s) => s.trim());
+  return text.split(/[;]+\s+/u).map((s) => s.trim());
 }
 
 function guessMeaningKey(meanings: readonly string[]): string {
@@ -770,7 +770,7 @@ function guessMeaningKey(meanings: readonly string[]): string {
   function cleanWord(word: string): string {
     return word
       .toLowerCase()
-      .replaceAll(/[’']/g, ``)
+      .replaceAll(/[’']/gu, ``)
       .trim();
   }
 
@@ -781,8 +781,8 @@ function guessMeaningKey(meanings: readonly string[]): string {
   // First pass: Collect all standalone single-word meanings (not phrases)
   const standaloneSingleWords: string[] = [];
   for (const meaning of meanings) {
-    const cleanMeaning = meaning.replaceAll(/\([^)]*\)/g, ``).trim();
-    const words = cleanMeaning.split(/\s+/).filter((w) => w.length > 0);
+    const cleanMeaning = meaning.replaceAll(/\([^)]*\)/gu, ``).trim();
+    const words = cleanMeaning.split(/\s+/u).filter((w) => w.length > 0);
 
     // If this meaning is a single word and not a filler, collect it
     if (words.length === 1 && !isFillerWord(words[0]!)) {
@@ -805,8 +805,8 @@ function guessMeaningKey(meanings: readonly string[]): string {
   // If no standalone words, collect all words from all meanings
   const allWords: string[] = [];
   for (const meaning of meanings) {
-    const cleanMeaning = meaning.replaceAll(/\([^)]*\)/g, ``).trim();
-    const words = cleanMeaning.split(/\s+/);
+    const cleanMeaning = meaning.replaceAll(/\([^)]*\)/gu, ``).trim();
+    const words = cleanMeaning.split(/\s+/u);
     allWords.push(...words);
   }
 

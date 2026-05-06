@@ -53,7 +53,9 @@ let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
   vol.reset();
   vi.restoreAllMocks();
-  consoleWarnSpy = vi.spyOn(console, `warn`).mockImplementation(() => null);
+  consoleWarnSpy = vi
+    .spyOn(console, `warn`)
+    .mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -94,7 +96,7 @@ describe(
   () => {
     test(`parses regex and min/max sizes`, () => {
       const result = parseSpriteFileSizeRules([
-        { name: /^pinyin-/, minSize: `50kB`, maxSize: `3MB` },
+        { name: /^pinyin-/u, minSize: `50kB`, maxSize: `3MB` },
       ]);
 
       expect(result).toMatchInlineSnapshot(`
@@ -102,20 +104,20 @@ describe(
           {
             "maxBytes": 3000000,
             "minBytes": 50000,
-            "regex": /\\^pinyin-/,
+            "regex": /\\^pinyin-/u,
           },
         ]
       `);
     });
 
     test(`accepts regex objects directly`, () => {
-      expect(parseSpriteFileSizeRules([{ name: /^sprite-/, minSize: `1kB` }]))
+      expect(parseSpriteFileSizeRules([{ name: /^sprite-/u, minSize: `1kB` }]))
         .toMatchInlineSnapshot(`
           [
             {
               "maxBytes": undefined,
               "minBytes": 1000,
-              "regex": /\\^sprite-/,
+              "regex": /\\^sprite-/u,
             },
           ]
         `);
@@ -124,14 +126,16 @@ describe(
     test(`throws for invalid range`, () => {
       expect(() =>
         parseSpriteFileSizeRules([
-          { name: /^sprite-/, minSize: `2MB`, maxSize: `1MB` },
+          { name: /^sprite-/u, minSize: `2MB`, maxSize: `1MB` },
         ]),
-      ).toThrow(/greater than or equal|to be >=/i);
+      ).toThrow(/greater than or equal|to be >=/iu);
     });
 
     test(`throws for invalid size text`, () => {
       expect(() =>
-        parseSpriteFileSizeRules([{ name: /^sprite-/, minSize: `not-a-size` }]),
+        parseSpriteFileSizeRules([
+          { name: /^sprite-/u, minSize: `not-a-size` },
+        ]),
       ).toThrow(`Invalid file size "not-a-size"`);
     });
   },
@@ -351,7 +355,7 @@ describe(
 
       const result = await checkSpriteManifest({
         manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^sprite-/, minSize: `20B` }],
+        spriteFileSizes: [{ name: /^sprite-/u, minSize: `20B` }],
       });
 
       expect(result.unusedSpriteFileSizeRules).toEqual([]);
@@ -399,7 +403,7 @@ describe(
 
       const result = await checkSpriteManifest({
         manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^sprite-/, maxSize: `19B` }],
+        spriteFileSizes: [{ name: /^sprite-/u, maxSize: `19B` }],
       });
 
       expect(result.unusedSpriteFileSizeRules).toEqual([]);
@@ -447,7 +451,7 @@ describe(
 
       const result = await checkSpriteManifest({
         manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^wiki-/, minSize: `1MB` }],
+        spriteFileSizes: [{ name: /^wiki-/u, minSize: `1MB` }],
       });
 
       expect(result.spriteFileSizeViolations).toEqual([]);
@@ -463,10 +467,10 @@ describe(
         checkSpriteManifest({
           manifestPath: `/test/manifest.json`,
           spriteFileSizes: [
-            { name: /^sprite-/, minSize: `2MB`, maxSize: `1MB` },
+            { name: /^sprite-/u, minSize: `2MB`, maxSize: `1MB` },
           ],
         }),
-      ).rejects.toThrow(/greater than or equal|to be >=/i);
+      ).rejects.toThrow(/greater than or equal|to be >=/iu);
     });
 
     test(`syncs manifest when autoFix is enabled`, async () => {
@@ -739,7 +743,7 @@ describe(
 
       const result = await buildAndTestSprites({
         manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^sprite-/, minSize: `1B`, maxSize: `20B` }],
+        spriteFileSizes: [{ name: /^sprite-/u, minSize: `1B`, maxSize: `20B` }],
       });
 
       expect(result.spriteFileSizeViolations).toEqual([]);
@@ -780,7 +784,7 @@ describe(`buildSprites` satisfies HasNameOf<typeof buildSprites>, () => {
 
     const result = await buildSprites({
       manifestPath: `/test/manifest.json`,
-      spriteFileSizes: [{ name: /^sprite-/, minSize: `20B` }],
+      spriteFileSizes: [{ name: /^sprite-/u, minSize: `20B` }],
     });
 
     expect(result.spriteFileSizeViolations).toHaveLength(1);

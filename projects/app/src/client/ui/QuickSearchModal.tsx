@@ -376,9 +376,6 @@ function RecentQueries({
             );
           }
 
-          case null:
-            return null;
-
           default:
             kind satisfies never;
         }

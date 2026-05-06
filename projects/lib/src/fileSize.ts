@@ -18,7 +18,7 @@ const BINARY_UNIT_TO_MULTIPLIER = {
  */
 export function parseDecimalFileSize(input: string): number {
   const normalizedInput = input.trim();
-  const match = /^(?<value>\d+(?:\.\d+)?)\s*(?<unit>(?:[kmg]i?)?b)$/i.exec(
+  const match = /^(?<value>\d+(?:\.\d+)?)\s*(?<unit>(?:[kmg]i?)?b)$/iu.exec(
     normalizedInput,
   );
 

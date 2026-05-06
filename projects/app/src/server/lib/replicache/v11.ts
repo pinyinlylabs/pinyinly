@@ -734,7 +734,9 @@ async function hydratePatches(
   for (const syncEntity of syncEntities) {
     const delKeys =
       entityPatchesUnhydrated[syncEntity.cvrNamespace]?.delKeys ?? [];
-    pendingOps.push(delKeys.map((key) => ({ op: `del` as const, key })));
+    pendingOps.push(
+      Promise.resolve(delKeys.map((key) => ({ op: `del` as const, key }))),
+    );
 
     const putIds =
       entityPatchesUnhydrated[syncEntity.cvrNamespace]?.putIds ?? [];

@@ -84,13 +84,13 @@ const rule: Rule.RuleModule = {
      */
     function removeDisallowedClasses(value: string): string {
       return value
-        .split(/\s+/)
+        .split(/\s+/u)
         .filter((cls) => !disallowedClasses.has(cls))
         .join(` `);
     }
 
     function checkString(value: string, node: Literal | TemplateLiteral): void {
-      const classNames = value.split(/\s+/);
+      const classNames = value.split(/\s+/u);
       for (const className of classNames) {
         if (disallowedClasses.has(className)) {
           const customMessage = disallowedClasses.get(className);

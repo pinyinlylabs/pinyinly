@@ -125,7 +125,7 @@ export function isHanziWordToPinyinSkillKind(skillKind: SkillKind): boolean {
 }
 
 export const skillKindFromSkill = (skill: Skill): SkillKind => {
-  const result = /^(.+?):/.exec(skill);
+  const result = /^(.+?):/u.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
   const [, marshaledSkillKind] = result;
@@ -135,7 +135,7 @@ export const skillKindFromSkill = (skill: Skill): SkillKind => {
 };
 
 export const hanziWordFromSkill = (skill: HanziWordSkill): HanziWord => {
-  const result = /^(.+?):(.+)$/.exec(skill);
+  const result = /^(.+?):(.+)$/u.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
   const [, marshaledSkillKind, hanziWord] = result;
@@ -165,7 +165,7 @@ export const isHanziWordToPinyinTypedSkill = (
 export const initialFromPinyinInitialAssociationSkill = (
   skill: PinyinInitialAssociationSkill,
 ): string => {
-  const result = /^(.+?):(.+)$/.exec(skill);
+  const result = /^(.+?):(.+)$/u.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
   const [, marshaledSkillKind, initial] = result;
@@ -178,7 +178,7 @@ export const initialFromPinyinInitialAssociationSkill = (
 export const finalFromPinyinFinalAssociationSkill = (
   skill: PinyinFinalAssociationSkill,
 ): string => {
-  const result = /^(.+?):(.+)$/.exec(skill);
+  const result = /^(.+?):(.+)$/u.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
   const [, marshaledSkillKind, final] = result;

@@ -11,7 +11,7 @@ export function parseBase64DataUri(
   dataUri: string,
   label?: string,
 ): { mimeType: string; data: string } {
-  const formatMatch = dataUri.match(/^([^;]+);base64,(.+)$/);
+  const formatMatch = dataUri.match(/^([^;]+);base64,(.+)$/u);
   if (formatMatch && formatMatch[1] != null && formatMatch[2] != null) {
     return {
       mimeType: formatMatch[1],

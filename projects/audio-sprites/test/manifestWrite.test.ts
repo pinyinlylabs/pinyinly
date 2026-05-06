@@ -167,7 +167,7 @@ describe(
       for (const [filePath, segmentData] of Object.entries(
         updatedManifest.segments,
       )) {
-        expect(filePath).toMatch(/\.m4a$/); // Should be file path, not hash
+        expect(filePath).toMatch(/\.m4a$/u); // Should be file path, not hash
         expect(segmentData.sprite).toBe(0);
         expect(segmentData.duration).toBe(1.5);
         expect(segmentData.hash).toHaveLength(64); // SHA-256 hash length
@@ -331,8 +331,8 @@ describe(
 
       // The wiki-hello sprite should be generated from combining hashes of both hello files
       // The hash should be deterministic based on the content of both files
-      expect(wikiHelloSprite).toMatch(/^wiki-hello-[a-f0-9]{12}\.m4a$/);
-      expect(wikiWorldSprite).toMatch(/^wiki-world-[a-f0-9]{12}\.m4a$/);
+      expect(wikiHelloSprite).toMatch(/^wiki-hello-[a-f0-9]{12}\.m4a$/u);
+      expect(wikiWorldSprite).toMatch(/^wiki-world-[a-f0-9]{12}\.m4a$/u);
 
       // Verify segments are assigned to correct sprites
       const segments = Object.values(updatedManifest.segments);
@@ -388,8 +388,7 @@ describe(
       expect(updatedManifest1.spriteFiles).toHaveLength(1);
 
       const spriteFile = updatedManifest1.spriteFiles[0];
-      expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
-
+      expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
       // The sprite should contain both files
       const segments = Object.values(updatedManifest1.segments);
       expect(segments).toHaveLength(2);
@@ -426,8 +425,7 @@ describe(
 
       // The sprite filename should be deterministic and based on file order (a.m4a then z.m4a)
       // This should be consistent regardless of the content hash values
-      expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
-
+      expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
       // Verify files are in correct order in segments
       const segments = Object.entries(updatedManifest.segments).sort(
         sortComparatorString(([x]) => x),
@@ -625,8 +623,8 @@ describe(
       expect(spriteFile128k).toBeDefined();
       expect(spriteFile256k).toBeDefined();
       expect(spriteFile128k).not.toBe(spriteFile256k);
-      expect(spriteFile128k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
-      expect(spriteFile256k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
+      expect(spriteFile128k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
+      expect(spriteFile256k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
     });
   },
 );

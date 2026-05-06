@@ -381,11 +381,11 @@ export function getZoomedImageCropRect(
   let nextWidth = rectPx.width * zoomFactor;
   let nextHeight = rectPx.height * zoomFactor;
 
+  nextWidth = clamp(nextWidth, minSizePx, imageSize.width);
+
   if (frameAspectRatio == null) {
-    nextWidth = clamp(nextWidth, minSizePx, imageSize.width);
     nextHeight = clamp(nextHeight, minSizePx, imageSize.height);
   } else {
-    nextWidth = clamp(nextWidth, minSizePx, imageSize.width);
     nextHeight = nextWidth / frameAspectRatio;
 
     if (nextHeight > imageSize.height) {

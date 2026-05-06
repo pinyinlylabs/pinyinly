@@ -356,7 +356,7 @@ const extractTextClasses = (className?: string) => {
   }
 
   const classes = className
-    .split(/\s+/)
+    .split(/\s+/u)
     .filter((classToken) =>
       textClassPrefixList.some((prefix) => classToken.startsWith(prefix)),
     )

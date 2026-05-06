@@ -31,7 +31,7 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
         mutations: [],
       });
 
-      await expect(result).rejects.toThrow(/transaction_isolation/);
+      await expect(result).rejects.toThrow(/transaction_isolation/u);
     });
   });
 
@@ -290,7 +290,7 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
         cookie: null,
       });
 
-      await expect(result).rejects.toThrow(/transaction_isolation/);
+      await expect(result).rejects.toThrow(/transaction_isolation/u);
     });
   });
 

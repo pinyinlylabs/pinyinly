@@ -95,7 +95,7 @@ describe(
 
       // Each pattern should end with '%' for SQL LIKE matching
       for (const pattern of patterns) {
-        expect(pattern).toMatch(/%$/);
+        expect(pattern).toMatch(/%$/u);
       }
 
       // Each pattern should have extracted the prefix before '[' correctly
@@ -184,7 +184,7 @@ describe(
         userHanziMeaningNoteSetting.entity.marshalKey(keyParams);
 
       // Validate pattern format
-      expect(pattern).toMatch(/^uhm\/.*\/%$/);
+      expect(pattern).toMatch(/^uhm\/.*\/%$/u);
 
       // Ensure keyPath-derived keys and marshalKey keys agree
       expect(glossKey).toBe(marshaledGlossKey);

@@ -16,39 +16,6 @@ type DropdownMenuDescriptorElement = ReactElement<{
   children?: unknown;
 }>;
 
-function DropdownMenuRoot({ children }: PropsWithChildren) {
-  let triggerElement: DropdownMenuTriggerElement | null = null;
-  let contentElement: ReactElement<FloatingMenuModalMenuProps> | null = null;
-
-  for (const child of Children.toArray(children)) {
-    if (!isValidElement(child)) {
-      continue;
-    }
-
-    const element = child as DropdownMenuDescriptorElement;
-
-    if (element.type === DropdownMenuTrigger) {
-      triggerElement = element.props.children as DropdownMenuTriggerElement;
-      continue;
-    }
-
-    if (element.type === DropdownMenuContent) {
-      contentElement = element as ReactElement<FloatingMenuModalMenuProps>;
-      continue;
-    }
-  }
-
-  if (triggerElement == null || contentElement == null) {
-    return null;
-  }
-
-  return (
-    <FloatingMenuModal menu={contentElement}>
-      {triggerElement}
-    </FloatingMenuModal>
-  );
-}
-
 function DropdownMenuTrigger({
   children,
 }: {
@@ -233,12 +200,44 @@ function DropdownMenuItem({
   );
 }
 
-export const DropdownMenu = Object.assign(DropdownMenuRoot, {
-  Trigger: DropdownMenuTrigger,
-  Content: DropdownMenuContent,
-  Label: DropdownMenuLabel,
-  Separator: DropdownMenuSeparator,
-  RadioGroup: DropdownMenuRadioGroup,
-  RadioItem: DropdownMenuRadioItem,
-  Item: DropdownMenuItem,
-});
+export function DropdownMenu({ children }: PropsWithChildren) {
+  let triggerElement: DropdownMenuTriggerElement | null = null;
+  let contentElement: ReactElement<FloatingMenuModalMenuProps> | null = null;
+
+  for (const child of Children.toArray(children)) {
+    if (!isValidElement(child)) {
+      continue;
+    }
+
+    const element = child as DropdownMenuDescriptorElement;
+
+    if (element.type === DropdownMenuTrigger) {
+      triggerElement = element.props.children as DropdownMenuTriggerElement;
+      continue;
+    }
+
+    if (element.type === DropdownMenuContent) {
+      contentElement = element as ReactElement<FloatingMenuModalMenuProps>;
+      continue;
+    }
+  }
+
+  if (triggerElement == null || contentElement == null) {
+    return null;
+  }
+
+  return (
+    <FloatingMenuModal menu={contentElement}>
+      {triggerElement}
+    </FloatingMenuModal>
+  );
+}
+
+DropdownMenu.Trigger = DropdownMenuTrigger;
+DropdownMenu.Trigger = DropdownMenuTrigger;
+DropdownMenu.Content = DropdownMenuContent;
+DropdownMenu.Label = DropdownMenuLabel;
+DropdownMenu.Separator = DropdownMenuSeparator;
+DropdownMenu.RadioGroup = DropdownMenuRadioGroup;
+DropdownMenu.RadioItem = DropdownMenuRadioItem;
+DropdownMenu.Item = DropdownMenuItem;

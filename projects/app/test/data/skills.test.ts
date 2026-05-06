@@ -247,7 +247,7 @@ describe(
       const parentStack: { id: string; indent: number }[] = [];
 
       for (const line of lines) {
-        const res = /^(\s*)(.+?)(\s*\/\/.+)?$/.exec(line);
+        const res = /^(\s*)(.+?)(\s*\/\/.+)?$/u.exec(line);
         invariant(res != null);
         const [, indentText, id, _comment] = res;
         invariant(indentText != null);

@@ -93,7 +93,7 @@ export const rPinyinSoundGroupId = brandedString<PinyinSoundGroupId>;
 export const rSpaceSeparatedString = memoize0(function rSpaceSeparatedString() {
   return RizzleCustom.create<readonly string[], string, readonly string[]>(
     z.array(z.string()).transform((x) => x.join(` `)),
-    z.string().transform((x) => x.split(/ +/) as readonly string[]),
+    z.string().transform((x) => x.split(/ +/u) as readonly string[]),
   );
 });
 

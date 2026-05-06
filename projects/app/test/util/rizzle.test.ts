@@ -483,7 +483,7 @@ test(`entity() key marshaling`, async () => {
   expect(aliased.marshalKey({ id: `1` })).toEqual(`posts/1`);
 
   // @ts-expect-error missing `id` key
-  expect(() => aliased.marshalKey({})).toThrow(/missing/);
+  expect(() => aliased.marshalKey({})).toThrow(/missing/u);
 });
 
 test(`entity() alias duplicates`, async () => {
@@ -492,14 +492,14 @@ test(`entity() alias duplicates`, async () => {
       id: r.string().alias(`x`),
       foo: r.string().alias(`x`),
     }),
-  ).toThrow(/alias conflict/);
+  ).toThrow(/alias conflict/u);
 
   expect(() =>
     r.entity(`posts/[id]`, {
       id: r.string(),
       foo: r.string().alias(`id`),
     }),
-  ).toThrow(/alias conflict/);
+  ).toThrow(/alias conflict/u);
 });
 
 test(`entity() .has()`, async () => {
@@ -1312,13 +1312,13 @@ describe(`replicache() entity()`, async () => {
   test(`.set() only exposed to mutators`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
-        // oxlint-disable-next-line eslint(no-unused-expressions)
+        // oxlint-disable-next-line no-unused-expressions
         db.text.set;
       },
     });
 
     // @ts-expect-error set() is not exposed on the query object
-    // oxlint-disable-next-line eslint(no-unused-expressions)
+    // oxlint-disable-next-line no-unused-expressions
     db.query.text.set;
   });
 

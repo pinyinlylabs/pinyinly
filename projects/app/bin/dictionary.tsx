@@ -224,7 +224,7 @@ const HanziWordEditor = ({
                 .map((x) =>
                   x
                     // Make sure any double spaces are replaced with a single, this is assumed by rPinyinPronunciation
-                    .replaceAll(/ +/g, ` `)
+                    .replaceAll(/ +/gu, ` `)
                     // Remove leading and trailing spaces
                     .trim(),
                 )
@@ -873,7 +873,7 @@ async function generateHanziWordResults(
   return res;
 }
 
-const DictionaryPicker = ({
+export const DictionaryPicker = ({
   readonly = false,
   onSubmit,
   onCancel,
@@ -1031,10 +1031,8 @@ const DictionaryPicker = ({
                     result.hanziWord,
                     result.meaning,
                   );
-                  newResults.push(result.hanziWord);
-                } else {
-                  newResults.push(result.hanziWord);
                 }
+                newResults.push(result.hanziWord);
 
                 setLocation({
                   type: `bulkCreateTriage`,
@@ -1150,7 +1148,7 @@ const MultiLinePasteInput = ({
   const [text, setText] = useState<string>();
 
   const lines = useMemo(
-    () => text?.split(/\n\r|\r/g).map((x) => x.trim()),
+    () => text?.split(/\n\r|\r/gu).map((x) => x.trim()),
     [text],
   );
 

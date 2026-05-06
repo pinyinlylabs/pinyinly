@@ -21,9 +21,9 @@
     "@pinyinly/eslint-rules": "workspace:*",
     "@types/lodash": "4.17.x",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
-    "oxfmt": "^0.31.0",
-    "oxlint": "^1.51.0",
-    "oxlint-tsgolint": "^0.16.0",
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
+    "oxlint-tsgolint": "^0.22.1",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "vitest": "^4.0.18"
   },

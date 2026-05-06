@@ -197,7 +197,7 @@ export function makeFsDbCache<K, V>(
   parentDebug?: Debugger,
 ) {
   const debug = parentDebug?.extend(`makeFsDbCache`);
-  const dbLocation = scriptFilename.replace(/\.[^.]+$/, `.cache.db`);
+  const dbLocation = scriptFilename.replace(/\.[^.]+$/u, `.cache.db`);
   debug?.(`using db: ${dbLocation}`);
   const db = new DatabaseSync(dbLocation);
 

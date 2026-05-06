@@ -209,7 +209,7 @@ function validateStrokeRanges(ranges: string): string | null {
     return null;
   }
 
-  if (!/^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/.test(ranges)) {
+  if (!/^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/u.test(ranges)) {
     return `Strokes must be comma-separated indexes/ranges, e.g. 0,1-3`;
   }
 

@@ -2,7 +2,7 @@ import { transform } from "#transformer.ts";
 import { describe, expect, test } from "vitest";
 
 function getJsxContent(source: string) {
-  const match = /function _createMdxContent\((?:.+?)return (.*?);$/ms.exec(
+  const match = /function _createMdxContent\((?:.+?)return (.*?);$/msu.exec(
     source,
   );
   if (!match) {
@@ -266,7 +266,7 @@ console.log("hello")
     expect(result.src).not.toContain(`require(`);
 
     // Should use the same import variable for the same module path
-    const image1Matches = result.src.match(/__mdx_import_assets_image1_0/g);
+    const image1Matches = result.src.match(/__mdx_import_assets_image1_0/gu);
     expect(image1Matches).toHaveLength(3); // Once in import, twice in usage
 
     // Check that imports are at the top of the module

@@ -51,7 +51,7 @@ type DictionarySearchOptions = {
   limit?: number;
 };
 
-const hanziQueryRegex = /[\u3400-\u9FFF]/;
+const hanziQueryRegex = /[\u3400-\u9FFF]/u;
 
 export function quickSearch(
   entries: readonly DictionarySearchEntry[],
@@ -241,7 +241,7 @@ function scorePinyinMatch(
 }
 
 function collapseWhitespace(value: string): string {
-  return value.replaceAll(/\s+/g, ``);
+  return value.replaceAll(/\s+/gu, ``);
 }
 
 /**

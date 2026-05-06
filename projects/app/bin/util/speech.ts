@@ -143,6 +143,7 @@ export function buildFileNameCheckRegExp(
 
   return new RegExp(
     `^${componentPatterns.join(`-`)}${regExpEscape(`.${extension}`)}$`,
+    `u`,
   );
 }
 

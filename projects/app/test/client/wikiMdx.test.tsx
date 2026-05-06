@@ -110,7 +110,7 @@ describe(`mdx files exist and are valid`, async () => {
 
       // Check that file follows expected naming convention
       // Accept various MDX file types in the wiki structure
-      expect(relativePath).toMatch(/src\/client\/wiki\/.+\/.+\.mdx$/);
+      expect(relativePath).toMatch(/src\/client\/wiki\/.+\/.+\.mdx$/u);
     }
   });
 });

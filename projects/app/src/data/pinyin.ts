@@ -708,7 +708,7 @@ export const pinyinUnitPattern = (() => {
   );
 })();
 
-const matchAllPinyinRegExp = new RegExp(pinyinUnitPattern, `ig`);
+const matchAllPinyinRegExp = new RegExp(pinyinUnitPattern, `igu`);
 
 /**
  * Find all pinyin units in a string, matches both diacritic and numeric
@@ -912,5 +912,5 @@ export function pinyinUnitCount(pinyin: string): number {
   const matches = matchAllPinyinUnits(trimmed);
   // Fallback to space-splitting if regex doesn't match (handles edge cases
   // where the pinyin regex may not recognize all valid units)
-  return matches.length > 0 ? matches.length : trimmed.split(/\s+/).length;
+  return matches.length > 0 ? matches.length : trimmed.split(/\s+/u).length;
 }

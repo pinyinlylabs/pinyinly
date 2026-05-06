@@ -345,7 +345,7 @@ const parsePosPattern = new RegExp(
       `(?<phonetic>Phonetic|拟声|pho)`,
     ].join(`|`) +
     `)$`,
-  `i`,
+  `iu`,
 );
 
 export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
@@ -626,7 +626,7 @@ export const isHanziWord = memoize1(function isHanziWord(
 export const hanziFromHanziWord = memoize1(function hanziFromHanziWord(
   hanziWord: HanziWord,
 ): HanziText {
-  const result = /^(.+?):/.exec(hanziWord);
+  const result = /^(.+?):/u.exec(hanziWord);
   invariant(result != null, `couldn't parse HanziWord ${hanziWord}`);
 
   const [, hanzi] = result;

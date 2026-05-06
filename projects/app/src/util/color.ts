@@ -33,14 +33,16 @@ const hexPattern = String.raw`#(?:[a-f0-9]{6}|[a-f0-9]{3})`;
 // - rgb(<scalar> <scalar> <scalar> / <scalar>)
 const rgbRegex = new RegExp(
   `rgb\\(${spacePattern}*(${scalarPattern})${spacePattern}+(${scalarPattern})${spacePattern}+(${scalarPattern})(?:${spacePattern}*\\/${spacePattern}*(${scalarPattern}))?${spacePattern}*\\)`,
+  `u`,
 );
 // One of:
 // - rgb(from <hex> r g b)
 // - rgb(from <hex> r g b / <scalar>)
 const rgbRelativeRegex = new RegExp(
   `rgb\\(${spacePattern}*from${spacePattern}+(${hexPattern})${spacePattern}+r${spacePattern}+g${spacePattern}+b(?:${spacePattern}*\\/${spacePattern}*(${scalarPattern}))?${spacePattern}*\\)`,
+  `u`,
 );
-const rgbHexRegex = new RegExp(`^${hexPattern}$`);
+const rgbHexRegex = new RegExp(`^${hexPattern}$`, `u`);
 
 export function parseCssColorOrThrow(color: string): ColorRGBA {
   // CSS colour keywords/functions are case-insensitive.

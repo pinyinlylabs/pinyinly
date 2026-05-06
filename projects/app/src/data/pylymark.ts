@@ -53,7 +53,7 @@ export function parsePylymark(value: string): PylymarkNode[] {
   const nodes: PylymarkNode[] = [];
 
   // Regex patterns for HanziWord, Bold, Italic, and Mark
-  const regex = /{([^:]+):(-)?([^}]+)}|\*\*(.+?)\*\*|\*(.+?)\*|==(.+?)==/g;
+  const regex = /\{([^:]+):(-)?([^}]+)\}|\*\*(.+?)\*\*|\*(.+?)\*|==(.+?)==/gu;
   let match;
   let lastIndex = 0;
 

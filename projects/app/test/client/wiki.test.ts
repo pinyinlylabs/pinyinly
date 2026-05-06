@@ -113,7 +113,7 @@ describe(`/meaning.mdx files`, async () => {
           mdx,
           `${hanzi} MDX has character.json but does not export characterData`,
         )
-        .toMatch(/export\s*\{\s*characterData\s*\}/);
+        .toMatch(/export\s*\{\s*characterData\s*\}/u);
     }
   });
 });
@@ -277,7 +277,7 @@ describe(`character.json files`, async () => {
       `\uD840 \uD841 \uD842 \uD843 \uD845 \uD846 \uD847 \uD848 \uD84E \uD853 \uD856 \uD858 \uD85A \uD85D \uD85F \uD86A`,
       `\uD86C \uD86D \uD86E \uD86F \uD871 \uD875 \uD876 \uD877 \uDC20 \uDC60 \uDC8B \uDCB8 \uDCFB \uDD3C \uDD44 \uDD9D`,
       `\uDDBC \uDDD7 \uDDE6 \uDE04 \uDE27 \uDE60 \uDED3 \uDED4 \uDED7 \uDF4C \uDFA6 \uDFB7 \uDFE8`,
-    ].flatMap((x) => x.split(/\s+/g))) {
+    ].flatMap((x) => x.split(/\s+/gu))) {
       bannedCharacters.add(char);
     }
 

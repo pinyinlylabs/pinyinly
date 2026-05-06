@@ -40,7 +40,7 @@ const getTemplate = (rawMdxString: string): string => {
       // This allows `_provideComponents()` to return a `Proxy` object and provide better
       // debugging for missing components.
       .replace(
-        /const _components = \{.+?\}/ms,
+        /const _components = \{.+?\}/msu,
         `const _components = Object.assign(Object.create(_provideComponents()), props.components)`,
       )
       // Delete all the default implement safe guards because Proxy will be used instead.
@@ -53,7 +53,7 @@ const getTemplate = (rawMdxString: string): string => {
       //
       // <nothing>
       .replaceAll(
-        /if \(!([\w.]+)\) _missingMdxReference\("([\w.]+)", true\);\s*/gs,
+        /if \(!([\w.]+)\) _missingMdxReference\("([\w.]+)", true\);\s*/gsu,
         ``,
       )
   );
@@ -64,7 +64,7 @@ const getTemplate = (rawMdxString: string): string => {
  */
 function jsxSourceAttributePlugin({
   matchLocalAsset,
-  matchAttributeName = (name) => /(src|source)$/i.test(name),
+  matchAttributeName = (name) => /(src|source)$/iu.test(name),
 }: {
   matchLocalAsset: (url: string) => boolean;
   matchAttributeName?: (name: string) => boolean;
@@ -123,12 +123,12 @@ function hoistRequiresPlugin() {
     function generateVariableName(modulePath: string): string {
       // Create a base name from the module path
       const basename = modulePath
-        .replace(/^[./@]+/, ``) // Remove leading ./ @ characters
-        .replace(/\.[^.]*$/, ``) // Remove file extension
-        .replaceAll(/[^a-zA-Z0-9]/g, `_`) // Replace non-alphanumeric with underscore
-        .replace(/^(\d)/, `_$1`) // Prefix with underscore if starts with digit
-        .replaceAll(/_{2,}/g, `_`) // Collapse multiple underscores
-        .replaceAll(/^_+|_+$/g, ``); // Remove leading/trailing underscores
+        .replace(/^[./@]+/u, ``) // Remove leading ./ @ characters
+        .replace(/\.[^.]*$/u, ``) // Remove file extension
+        .replaceAll(/[^a-zA-Z0-9]/gu, `_`) // Replace non-alphanumeric with underscore
+        .replace(/^(\d)/u, `_$1`) // Prefix with underscore if starts with digit
+        .replaceAll(/_{2,}/gu, `_`) // Collapse multiple underscores
+        .replaceAll(/^_+|_+$/gu, ``); // Remove leading/trailing underscores
 
       const candidateName = basename || `asset`;
       let variableName = `__mdx_import_${candidateName}_${importCounter++}`;
@@ -236,10 +236,10 @@ function hoistRequiresPlugin() {
 
 /** Function to determine if a file should be transformed */
 const matchFile = (properties: MetroBabelTransformerProperties) =>
-  /\.mdx?$/.test(properties.filename);
+  /\.mdx?$/u.test(properties.filename);
 
 /** Function to determine if an asset URL is local */
-const matchLocalAsset = (url: string) => /^[.@]/.test(url);
+const matchLocalAsset = (url: string) => /^[.@]/u.test(url);
 
 /**
  * Creates an MDX transformer for Metro bundler

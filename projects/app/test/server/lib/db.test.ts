@@ -23,7 +23,7 @@ describe(`substring suite` satisfies HasNameOf<typeof substring>, () => {
 
     expect(
       tx
-        .select({ text: substring(table.col, /^\w+:(.+)$/) })
+        .select({ text: substring(table.col, /^\w+:(.+)$/u) })
         .from(table)
         .toSQL(),
     ).toEqual({
@@ -37,7 +37,7 @@ describe(`substring suite` satisfies HasNameOf<typeof substring>, () => {
 
     expect(
       await tx
-        .select({ text: substring(s.user.id, /^\w+:(.+)$/) })
+        .select({ text: substring(s.user.id, /^\w+:(.+)$/u) })
         .from(s.user),
     ).toEqual([{ text: `bar` }]);
   });

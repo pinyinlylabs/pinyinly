@@ -338,7 +338,7 @@ export const applyRulesWithRule = (
 ): { spriteName: string; rule: SpriteRule } | undefined => {
   for (const rule of rules) {
     try {
-      const regex = new RegExp(rule.match);
+      const regex = new RegExp(rule.match, `u`);
       const match = regex.exec(filePath);
 
       if (match) {

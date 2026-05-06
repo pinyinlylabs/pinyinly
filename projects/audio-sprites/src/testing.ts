@@ -122,7 +122,7 @@ export async function cleanupUnusedSprites(
 function validateRuleVariables(rule: { match: string; sprite: string }): void {
   // Extract variables from sprite template (${varName} format)
   const templateVariables = new Set<string>();
-  const templateVariableMatches = rule.sprite.matchAll(/\$\{([^}]+)\}/g);
+  const templateVariableMatches = rule.sprite.matchAll(/\$\{([^}]+)\}/gu);
   for (const match of templateVariableMatches) {
     const variable = match[1];
     if (variable != null && variable.length > 0) {
@@ -139,11 +139,11 @@ function validateRuleVariables(rule: { match: string; sprite: string }): void {
   let namedGroups: Set<string>;
   try {
     // Validate regex is syntactically correct
-    new RegExp(rule.match);
+    new RegExp(rule.match, `u`);
 
     // Use the regex source to find named groups
     namedGroups = new Set<string>();
-    const namedGroupMatches = rule.match.matchAll(/\(\?<([^>]+)>/g);
+    const namedGroupMatches = rule.match.matchAll(/\(\?<([^>]+)>/gu);
     for (const match of namedGroupMatches) {
       const groupName = match[1];
       if (groupName != null && groupName.length > 0) {
@@ -345,7 +345,7 @@ export async function checkSpriteManifest(
     try {
       const allFilesInOutDir = await fs.readdir(outDirPath);
       const expectedSpriteFiles = new Set(manifest.spriteFiles);
-      const audioFilePattern = /\.(m4a|mp3|wav|aac|ogg)$/i;
+      const audioFilePattern = /\.(m4a|mp3|wav|aac|ogg)$/iu;
 
       for (const file of allFilesInOutDir) {
         // Only consider audio files and check if they're not in the expected set
