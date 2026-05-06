@@ -6482,7 +6482,7 @@ __metadata:
     inngest: "npm:^3.39.1"
     jose: "npm:^6.0.11"
     lodash: "npm:^4.17.21"
-    lottie-react-native: "npm:7.3.1"
+    lottie-react-native: "npm:7.3.6"
     lucia: "npm:^3.2.0"
     moti: "npm:^0.30.0"
     nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
@@ -17170,11 +17170,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lottie-react-native@npm:7.3.1":
-  version: 7.3.1
-  resolution: "lottie-react-native@npm:7.3.1"
+"lottie-react-native@npm:7.3.6":
+  version: 7.3.6
+  resolution: "lottie-react-native@npm:7.3.6"
   peerDependencies:
-    "@lottiefiles/dotlottie-react": ^0.6.5
+    "@lottiefiles/dotlottie-react": ^0.13.5
     react: "*"
     react-native: ">=0.46"
     react-native-windows: ">=0.63.x"
@@ -17183,7 +17183,7 @@ __metadata:
       optional: true
     react-native-windows:
       optional: true
-  checksum: 10c0/0cc257fbb054a0489f11b9785ba3a0408946648b7db55ca335ee86fbbb95662f89f94dd70190f928f479f94a1f1bce729f789842fdbd130d8a3661d61c94a021
+  checksum: 10c0/1e3c0d0e763f0021c14bc85f90a9fe45ad4fa446db8961c3153507b271b1029b9095656924a553dafdff6987120d220c054772ff5efaf002b2eb567fe74e3533
   languageName: node
   linkType: hard
 

@@ -89,7 +89,7 @@
     "inngest": "^3.39.1",
     "jose": "^6.0.11",
     "lodash": "^4.17.21",
-    "lottie-react-native": "7.3.1",
+    "lottie-react-native": "7.3.6",
     "lucia": "^3.2.0",
     "moti": "^0.30.0",
     "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
