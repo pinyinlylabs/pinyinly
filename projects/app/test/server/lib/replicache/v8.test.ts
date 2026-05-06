@@ -17,10 +17,10 @@ import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 
 describe(`push suite` satisfies HasNameOf<typeof push>, () => {
-  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   describe(`database transaction isolation level`, () => {
-    txTest.scoped({ pgConfig: { isolationLevel: `read committed` } });
+    txTest.override({ pgConfig: { isolationLevel: `read committed` } });
 
     txTest(`fails when using the default`, async ({ tx }) => {
       const result = push(tx, `1`, {
@@ -276,10 +276,10 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
 });
 
 describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
-  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   describe(`database transaction isolation level`, () => {
-    txTest.scoped({ pgConfig: { isolationLevel: `read committed` } });
+    txTest.override({ pgConfig: { isolationLevel: `read committed` } });
 
     txTest(`fails when using the default`, async ({ tx }) => {
       const result = pull(tx, `xxx`, {
@@ -812,7 +812,7 @@ describe(
   `computeEntitiesState suite` satisfies HasNameOf<typeof computeEntitiesState>,
   () => {
     describe(`schema ${schema.version}`, () => {
-      txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+      txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
       txTest(`works for non-existant user and client group`, async ({ tx }) => {
         await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({

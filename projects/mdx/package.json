@@ -37,8 +37,8 @@
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
     "oxlint-tsgolint": "^0.22.1",
-    "ts-essentials": "^10.1.1",
+    "ts-essentials": "^10.2.0",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.5"
   }
 }

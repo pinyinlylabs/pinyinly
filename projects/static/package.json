@@ -6,7 +6,7 @@
     "@types/yargs": "^17 <=17.x",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "oxfmt": "^0.48.0",
-    "tsx": "^4.15.7",
+    "tsx": "^4.21.0",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "yargs": "^18.0.0"
   }

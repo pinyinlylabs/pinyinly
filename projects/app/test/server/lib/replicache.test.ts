@@ -8,7 +8,7 @@ import { describe, expect, test } from "vitest";
 import { createUser, txTest } from "./dbHelpers.ts";
 
 describe(`push suite` satisfies HasNameOf<typeof push>, () => {
-  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   txTest(`returns correct error for invalid schema version`, async ({ tx }) => {
     const result = await push(tx, `1`, {
@@ -27,7 +27,7 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
 });
 
 describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
-  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   txTest(`returns correct error for invalid schema version`, async ({ tx }) => {
     const result = await pull(tx, `5`, {
@@ -48,7 +48,7 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
 describe(
   `fetchMutations suite` satisfies HasNameOf<typeof fetchMutations>,
   () => {
-    txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
     txTest(`works for non-existant user and client group`, async ({ tx }) => {
       const clientGroupId = nanoid();

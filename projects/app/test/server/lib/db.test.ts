@@ -16,7 +16,7 @@ function typeChecks(..._args: unknown[]) {
 }
 
 describe(`substring suite` satisfies HasNameOf<typeof substring>, () => {
-  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   txTest(`static query`, async ({ tx }) => {
     const table = pg.pgTable(`tbl`, { col: pg.text() });
@@ -46,7 +46,7 @@ describe(`substring suite` satisfies HasNameOf<typeof substring>, () => {
 describe(
   `pgBatchUpdate suite` satisfies HasNameOf<typeof pgBatchUpdate>,
   () => {
-    txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
     txTest(`no updates should be no-op`, async ({ tx }) => {
       const result = await pgBatchUpdate(tx, {
