@@ -9021,6 +9021,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db@npm:0.6.5":
+  version: 0.6.5
+  resolution: "@tanstack/db@npm:0.6.5"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.18"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/1119613907da4a5a78fd8c1cc707bbc7ac69389258fd77d2418ac60ccf32a2b62240a12c85c8df5a744984bbd4dc7d9d46abd76f25e0bc38d4b1a0553f6a8824
+  languageName: node
+  linkType: hard
+
 "@tanstack/eslint-plugin-query@npm:^5.95.2":
   version: 5.95.2
   resolution: "@tanstack/eslint-plugin-query@npm:5.95.2"
@@ -9071,14 +9084,14 @@ __metadata:
   linkType: hard
 
 "@tanstack/react-db@npm:^0.1.78":
-  version: 0.1.78
-  resolution: "@tanstack/react-db@npm:0.1.78"
+  version: 0.1.83
+  resolution: "@tanstack/react-db@npm:0.1.83"
   dependencies:
-    "@tanstack/db": "npm:0.6.0"
+    "@tanstack/db": "npm:0.6.5"
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10c0/b6b4379beb5ebe3cc645f4ea040b3c2cf3de2ab7c14dff16720c473057edac125d93a70425c393c8556dfae77b8c60715f6c70b264d22f0e842ccd515a804992
+  checksum: 10c0/1a9f3f4d32c9cd5e476eef44c80927e92ce60164004e6add9e5e6402301a5dc304062e0ecd09c2f146b5dca6b43dbae9c48929db548ff1f4fae13d28e2083d4c
   languageName: node
   linkType: hard
 
