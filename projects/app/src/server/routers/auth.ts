@@ -220,7 +220,7 @@ export const authRouter = router({
         expectedRPID: RP_ID,
       });
 
-      if (!verification.verified || verification.registrationInfo == null) {
+      if (!verification.verified) {
         return { verified: false };
       }
 
@@ -340,7 +340,7 @@ export const authRouter = router({
           expectedRPID: RP_ID,
           credential: {
             id: authPasskey.id,
-            publicKey: authPasskey.publicKey,
+            publicKey: Buffer.from(authPasskey.publicKey),
             counter: authPasskey.counter,
             transports: authPasskey.transports ?? undefined,
           },
