@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 test(`throws when used outside of SkillQueueProvider`, () => {
-  expect(() => renderHook(useSkillQueue)).toThrowError(
+  expect(() => renderHook(useSkillQueue)).toThrow(
     `useSkillQueue must be used within a SkillQueueProvider`,
   );
 });

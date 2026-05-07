@@ -9,7 +9,7 @@ describe(
     typeof getImageSettingKeyPatterns
   >,
   () => {
-    txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
+    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
     txTest(
       `finds assets referenced in user settings with JSON ->> operator`,

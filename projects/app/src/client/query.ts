@@ -563,6 +563,8 @@ function userDictionaryCollectionOptions({
   };
 
   return {
+    autoIndex: `eager`,
+    defaultIndexType: BTreeIndex,
     id: `userDictionary`,
     sync: {
       rowUpdateMode: `full`,
@@ -851,6 +853,8 @@ function userCharacterDecompositionCollectionOptions({
   );
 
   return {
+    autoIndex: `eager`,
+    defaultIndexType: BTreeIndex,
     id: `userCharacterDecomposition`,
     sync: {
       rowUpdateMode: `full`,
@@ -973,6 +977,8 @@ function characterDecompositionCollectionOptions({
   const userByHanzi = new Map<HanziText, CharacterDecompositionEntry>();
 
   return {
+    autoIndex: `eager`,
+    defaultIndexType: BTreeIndex,
     id: `characterDecomposition`,
     sync: {
       rowUpdateMode: `full`,
@@ -1218,9 +1224,9 @@ function dictionarySearchCollectionOptions({
   );
 
   return {
-    id: `dictionarySearch`,
     autoIndex: `eager`,
     defaultIndexType: BTreeIndex,
+    id: `dictionarySearch`,
     sync: {
       rowUpdateMode: `full`,
       sync: (params) => {
@@ -1367,6 +1373,8 @@ export const rizzleCollectionOptions = <
   entity: RizzleEntity;
   getKey: (item: RizzleEntityOutput<RizzleEntity>) => TKey;
 }): CollectionConfig<RizzleEntityOutput<RizzleEntity>, TKey> => ({
+  autoIndex: `eager`,
+  defaultIndexType: BTreeIndex,
   id,
   sync: {
     rowUpdateMode: `full`,
@@ -1443,6 +1451,8 @@ export const staticCollectionOptions = <
   queryFn: (signal?: AbortSignal) => Promise<T[]>;
   getKey: (item: T) => TKey;
 }): CollectionConfig<T, TKey> => ({
+  autoIndex: `eager`,
+  defaultIndexType: BTreeIndex,
   id,
   sync: {
     sync: (params) => {
@@ -1485,6 +1495,8 @@ export const latestSkillRatingCollectionOptions = ({
 }: {
   rizzle: Rizzle;
 }): CollectionConfig<SkillRating, Skill> => ({
+  autoIndex: `eager`,
+  defaultIndexType: BTreeIndex,
   id: `latestSkillRatings`,
   sync: {
     rowUpdateMode: `full`,
@@ -1681,6 +1693,8 @@ export function makeDb(rizzle: Rizzle): Db {
 
   const characterComponentUsage: CharacterComponentUsageCollection =
     createCollection({
+      autoIndex: `eager`,
+      defaultIndexType: BTreeIndex,
       id: `characterComponentUsage`,
       sync: {
         rowUpdateMode: `full`,
