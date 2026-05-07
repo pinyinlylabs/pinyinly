@@ -1,0 +1,17 @@
+{
+  "decompositions": [
+    [
+      "⿲",
+      { "hanzi": "王", "strokes": "" },
+      { "hanzi": "②", "strokes": "" },
+      { "hanzi": "王", "strokes": "" }
+    ]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿴",
+      { "hanzi": "玨", "strokes": "0-3,6-9" },
+      { "hanzi": "刂", "strokes": "4-5" }
+    ]
+  }
+}

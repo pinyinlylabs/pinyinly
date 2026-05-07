@@ -1,0 +1,16 @@
+{
+  "mnemonic": {
+    "components": [
+      "⿰",
+      { "hanzi": "戶", "label": "door", "strokes": "0-3" },
+      { "hanzi": "斤", "label": "resembles an axe", "strokes": "4-7" }
+    ],
+    "hints": [
+      {
+        "explanation": "A true place you can call your own is where you've put up a door (戶) to mark your space and keep an axe (斤) handy by the entrance for wood, work, and protection.",
+        "hint": "A **door** with an **axe** nearby marks your **place**.",
+        "meaningKey": "place"
+      }
+    ]
+  }
+}

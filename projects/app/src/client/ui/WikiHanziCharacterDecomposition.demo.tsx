@@ -7,23 +7,11 @@ export default () => {
   return (
     <View className="max-w-[500px] flex-1 gap-2">
       <DemoBetaFeaturesKnob />
-      <WikiHanziCharacterDecompositionBox
-        hanzi={characterData.hanzi}
-        characterData={characterData}
-      />
+      <WikiHanziCharacterDecompositionBox hanzi={characterData.hanzi} />
 
       <LittlePrimaryHeader title="No mnemonic" />
 
-      <WikiHanziCharacterDecompositionBox
-        hanzi={characterData.hanzi}
-        characterData={{
-          ...characterData,
-
-          mnemonic: {
-            components: characterData.mnemonic.components,
-          },
-        }}
-      />
+      <WikiHanziCharacterDecompositionBox hanzi={characterData.hanzi} />
     </View>
   );
 };

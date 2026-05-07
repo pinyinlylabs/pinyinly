@@ -1,0 +1,12 @@
+{
+  "decompositions": [
+    ["⿴", { "hanzi": "二", "strokes": "" }, { "hanzi": "日", "strokes": "" }]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿱",
+      { "hanzi": "一", "strokes": "0" },
+      { "hanzi": "旦", "strokes": "1-5" }
+    ]
+  }
+}

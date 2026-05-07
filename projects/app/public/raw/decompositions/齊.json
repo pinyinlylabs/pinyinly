@@ -1,0 +1,23 @@
+{
+  "mnemonic": {
+    "components": [
+      "⿱",
+      [
+        "⿱",
+        { "hanzi": "亠", "strokes": "0-1" },
+        [
+          "⿲",
+          { "hanzi": "刀", "strokes": "5-6" },
+          { "hanzi": "丫", "strokes": "2-4" },
+          { "strokes": "7-9" }
+        ]
+      ],
+      [
+        "⿲",
+        { "hanzi": "丿", "strokes": "10" },
+        { "hanzi": "二", "strokes": "12-13" },
+        { "hanzi": "丨", "strokes": "11" }
+      ]
+    ]
+  }
+}

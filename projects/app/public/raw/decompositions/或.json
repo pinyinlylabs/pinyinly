@@ -1,0 +1,13 @@
+{
+  "mnemonic": {
+    "components": [
+      "⿹",
+      { "hanzi": "戈", "strokes": "0,5-7" },
+      [
+        "⿱",
+        { "hanzi": "口", "strokes": "1-3" },
+        { "hanzi": "一", "strokes": "4" }
+      ]
+    ]
+  }
+}

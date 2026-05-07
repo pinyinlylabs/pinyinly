@@ -1,0 +1,20 @@
+{
+  "decompositions": [
+    [
+      "⿱",
+      [
+        "⿱",
+        { "hanzi": "亠", "strokes": "" },
+        { "hanzi": "丷", "strokes": "" }
+      ],
+      { "hanzi": "厂", "strokes": "" }
+    ]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿱",
+      { "hanzi": "立", "strokes": "0-4" },
+      { "hanzi": "厂", "strokes": "4-5" }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "decompositions": [
+    [
+      "⿱",
+      { "hanzi": "吂", "strokes": "" },
+      [
+        "⿲",
+        { "hanzi": "月", "strokes": "" },
+        { "hanzi": "贝", "strokes": "" },
+        { "hanzi": "凡", "strokes": "" }
+      ]
+    ]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿳",
+      { "hanzi": "亡", "strokes": "0-2" },
+      { "hanzi": "口", "strokes": "3-5" },
+      [
+        "⿲",
+        { "hanzi": "月", "strokes": "6-9" },
+        { "hanzi": "贝", "strokes": "10-13" },
+        { "hanzi": "凡", "strokes": "14-16" }
+      ]
+    ]
+  }
+}
