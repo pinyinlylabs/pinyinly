@@ -4065,12 +4065,9 @@ __metadata:
   linkType: hard
 
 "@neondatabase/serverless@npm:^1.0.0":
-  version: 1.0.2
-  resolution: "@neondatabase/serverless@npm:1.0.2"
-  dependencies:
-    "@types/node": "npm:^22.15.30"
-    "@types/pg": "npm:^8.8.0"
-  checksum: 10c0/21998f959f8645b6118e677e9433cec1e9d357111d8c414fda74e4c4c67b33054c652cf9b636a50fcfe8b7a5542ca817cc15ecb513c09ccae8ad8279ac806dfa
+  version: 1.1.0
+  resolution: "@neondatabase/serverless@npm:1.1.0"
+  checksum: 10c0/ba24391bd53f94b76a817c9bfd09f91259024119b51e64192f2f97f627253d4370699e051d73918352e71fb93ae4575177ca1f5b38f2c27fcf5dc1adda70c677
   languageName: node
   linkType: hard
 
@@ -9797,7 +9794,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:22.x, @types/node@npm:^22.10.5, @types/node@npm:^22.15.30":
+"@types/node@npm:22.x, @types/node@npm:^22.10.5":
   version: 22.19.17
   resolution: "@types/node@npm:22.19.17"
   dependencies:
