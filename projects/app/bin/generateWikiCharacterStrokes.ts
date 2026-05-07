@@ -10,7 +10,6 @@ import {
   mkdirSync,
   readFileSync,
   updateJsonFileKey,
-  writeFileSync,
 } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
@@ -131,7 +130,6 @@ for (const character of allCharacters) {
   }
 
   const dataFile = path.join(characterWikiDir, `character.json`);
-  const mdxFile = path.join(characterWikiDir, `meaning.mdx`);
   const indentLevels = 2;
 
   if (await updateJsonFileKey(dataFile, `hanzi`, character, indentLevels)) {
@@ -203,19 +201,6 @@ for (const character of allCharacters) {
 
         debug(`wrote mnemonic for %O`, character);
       }
-    }
-  }
-
-  {
-    // Make sure there's a meaning.mdx file
-    if (!existsSync(mdxFile)) {
-      writeFileSync(
-        mdxFile,
-        `import characterData from "./character.json";
-export { characterData };
-`,
-      );
-      debug(`wrote meaning.mdx for %O`, character);
     }
   }
 }
