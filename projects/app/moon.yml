@@ -108,8 +108,10 @@ tasks:
     preset: watcher
     options:
       envFile: .env.local
+      mutex: expo-export # reduce IO contention
     env:
-      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
+      EXPO_ATLAS: "true"
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   codegen:
     deps:
