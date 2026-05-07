@@ -3915,35 +3915,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lottiefiles/dotlottie-react@npm:^0.13.5":
-  version: 0.13.5
-  resolution: "@lottiefiles/dotlottie-react@npm:0.13.5"
-  dependencies:
-    "@lottiefiles/dotlottie-web": "npm:0.44.0"
-  peerDependencies:
-    react: ^17 || ^18 || ^19
-  checksum: 10c0/fd6f47a7308eb6b584e06e50e36a80258efe542019118a7b0d4f66b1016837ed4cba92ba6183a44ac7f951ae270baa4662ce725181ccf2edcc93081b85d148bc
-  languageName: node
-  linkType: hard
-
-"@lottiefiles/dotlottie-web@npm:0.44.0":
-  version: 0.44.0
-  resolution: "@lottiefiles/dotlottie-web@npm:0.44.0"
-  checksum: 10c0/b6454236b3310ca46bc9751041dbab29742a6fd45f6e1f3452bca2217f668b91c4d0ebd55bb99ef98a79a8e4bb52db51721f352b8a1c010447152241d0ac974e
-  languageName: node
-  linkType: hard
-
-"@lottiefiles/lottie-js@npm:^0.4.2":
-  version: 0.4.2
-  resolution: "@lottiefiles/lottie-js@npm:0.4.2"
-  dependencies:
-    cross-fetch: "npm:^3.0.6"
-    typedoc-github-wiki-theme: "npm:0.2.0"
-    typedoc-plugin-markdown: "npm:3.6.1"
-  checksum: 10c0/e2675f098679afd68f5a50fe076a9504b4aa8d57a4c26a3cf7dd3ed079def53aaa3c8f925ad19eb94b137cd2ec6fa275b87d10dd0ef96b2fa526f7398e72f24a
-  languageName: node
-  linkType: hard
-
 "@lucia-auth/adapter-drizzle@npm:^1.1.0":
   version: 1.1.0
   resolution: "@lucia-auth/adapter-drizzle@npm:1.1.0"
@@ -6387,8 +6358,6 @@ __metadata:
     "@inkjs/ui": "npm:^2.0.0"
     "@inngest/eslint-plugin": "npm:^0.0.7"
     "@inngest/middleware-sentry": "npm:^0.1.1"
-    "@lottiefiles/dotlottie-react": "npm:^0.13.5"
-    "@lottiefiles/lottie-js": "npm:^0.4.2"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
     "@mdx-js/mdx": "npm:^3.1.0"
     "@neondatabase/serverless": "npm:^1.0.0"
@@ -6492,7 +6461,6 @@ __metadata:
     inngest: "npm:^3.54.2"
     jose: "npm:^6.2.3"
     lodash: "npm:^4.18.1"
-    lottie-react-native: "npm:7.3.6"
     lucia: "npm:^3.2.2"
     moti: "npm:^0.30.0"
     nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
@@ -12104,7 +12072,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.0.6, cross-fetch@npm:^3.1.5":
+"cross-fetch@npm:^3.1.5":
   version: 3.2.0
   resolution: "cross-fetch@npm:3.2.0"
   dependencies:
@@ -15332,24 +15300,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"handlebars@npm:^4.7.7":
-  version: 4.7.8
-  resolution: "handlebars@npm:4.7.8"
-  dependencies:
-    minimist: "npm:^1.2.5"
-    neo-async: "npm:^2.6.2"
-    source-map: "npm:^0.6.1"
-    uglify-js: "npm:^3.1.4"
-    wordwrap: "npm:^1.0.0"
-  dependenciesMeta:
-    uglify-js:
-      optional: true
-  bin:
-    handlebars: bin/handlebars
-  checksum: 10c0/7aff423ea38a14bb379316f3857fe0df3c5d66119270944247f155ba1f08e07a92b340c58edaa00cfe985c21508870ee5183e0634dcb53dd405f35c93ef7f10d
-  languageName: node
-  linkType: hard
-
 "hanzi@npm:2.1.5":
   version: 2.1.5
   resolution: "hanzi@npm:2.1.5"
@@ -17192,23 +17142,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lottie-react-native@npm:7.3.6":
-  version: 7.3.6
-  resolution: "lottie-react-native@npm:7.3.6"
-  peerDependencies:
-    "@lottiefiles/dotlottie-react": ^0.13.5
-    react: "*"
-    react-native: ">=0.46"
-    react-native-windows: ">=0.63.x"
-  peerDependenciesMeta:
-    "@lottiefiles/dotlottie-react":
-      optional: true
-    react-native-windows:
-      optional: true
-  checksum: 10c0/1e3c0d0e763f0021c14bc85f90a9fe45ad4fa446db8961c3153507b271b1029b9095656924a553dafdff6987120d220c054772ff5efaf002b2eb567fe74e3533
-  languageName: node
-  linkType: hard
-
 "lru-cache@npm:^10.0.1, lru-cache@npm:^10.2.0":
   version: 10.4.3
   resolution: "lru-cache@npm:10.4.3"
@@ -18689,7 +18622,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:^1.2.6":
+"minimist@npm:^1.2.0, minimist@npm:^1.2.6":
   version: 1.2.8
   resolution: "minimist@npm:1.2.8"
   checksum: 10c0/19d3fcdca050087b84c2029841a093691a91259a47def2f18222f41e7645a0b7c44ef4b40e88a1e58a40c84d2ef0ee6047c55594d298146d0eb3f6b737c20ce6
@@ -18939,13 +18872,6 @@ __metadata:
   version: 0.6.4
   resolution: "negotiator@npm:0.6.4"
   checksum: 10c0/3e677139c7fb7628a6f36335bf11a885a62c21d5390204590a1a214a5631fcbe5ea74ef6a610b60afe84b4d975cbe0566a23f20ee17c77c73e74b80032108dea
-  languageName: node
-  linkType: hard
-
-"neo-async@npm:^2.6.2":
-  version: 2.6.2
-  resolution: "neo-async@npm:2.6.2"
-  checksum: 10c0/c2f5a604a54a8ec5438a342e1f356dff4bc33ccccdb6dc668d94fe8e5eccfc9d2c2eea6064b0967a767ba63b33763f51ccf2cd2441b461a7322656c1f06b3f5d
   languageName: node
   linkType: hard
 
@@ -23312,27 +23238,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc-github-wiki-theme@npm:0.2.0":
-  version: 0.2.0
-  resolution: "typedoc-github-wiki-theme@npm:0.2.0"
-  peerDependencies:
-    typedoc: ">=0.20.0"
-    typedoc-plugin-markdown: ">=3.4.0"
-  checksum: 10c0/9f203cc7787aefe0e86fbbe7cf3afd6c7029f9c458be6f03a6f0e9d703cbc3ce5c5b6e1a9f77377583f0f77c19769f7055ef94d704b7fa95721a4286ed7dcfdb
-  languageName: node
-  linkType: hard
-
-"typedoc-plugin-markdown@npm:3.6.1":
-  version: 3.6.1
-  resolution: "typedoc-plugin-markdown@npm:3.6.1"
-  dependencies:
-    handlebars: "npm:^4.7.7"
-  peerDependencies:
-    typedoc: ">=0.20.0"
-  checksum: 10c0/a5e91914654998432decad7d720deb70e7665f1a4f68fec516838864474b77722cbd5d8d9e17877cda8f2095cc17fc125926244dc6b8a246a7ad786a11903e19
-  languageName: node
-  linkType: hard
-
 "typescript-eslint@npm:^8.59.2":
   version: 8.59.2
   resolution: "typescript-eslint@npm:8.59.2"
@@ -23418,15 +23323,6 @@ __metadata:
   version: 16.0.1
   resolution: "ucd-full@npm:16.0.1"
   checksum: 10c0/2517dd9c1a964aaddfc41d1578785e40c1be48c64dbcb2d9a4a88b208d93c812210133c8eaef511578a6f4e05c0d24ad5cbd82b3af8c6e6e31b46c7f45af222a
-  languageName: node
-  linkType: hard
-
-"uglify-js@npm:^3.1.4":
-  version: 3.19.3
-  resolution: "uglify-js@npm:3.19.3"
-  bin:
-    uglifyjs: bin/uglifyjs
-  checksum: 10c0/83b0a90eca35f778e07cad9622b80c448b6aad457c9ff8e568afed978212b42930a95f9e1be943a1ffa4258a3340fbb899f41461131c05bb1d0a9c303aed8479
   languageName: node
   linkType: hard
 
@@ -24260,13 +24156,6 @@ __metadata:
   version: 6.3.4
   resolution: "wonka@npm:6.3.4"
   checksum: 10c0/77329eea673da07717476e1b8f1a22f1e1a4f261bb9a58fa446c03d3da13dbd5b254664f8aded5928d953f33ee5b399a17a4f70336e8b236e478209c0e78cda4
-  languageName: node
-  linkType: hard
-
-"wordwrap@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "wordwrap@npm:1.0.0"
-  checksum: 10c0/7ed2e44f3c33c5c3e3771134d2b0aee4314c9e49c749e37f464bf69f2bcdf0cbf9419ca638098e2717cff4875c47f56a007532f6111c3319f557a2ca91278e92
   languageName: node
   linkType: hard
 

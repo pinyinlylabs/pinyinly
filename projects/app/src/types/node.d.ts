@@ -22,7 +22,6 @@ declare global {
       id: `${string}.${
         | `bin`
         | `jpg`
-        | `lottie.json`
         | `onnx`
         | `otf`
         | `png`
