@@ -222,7 +222,6 @@ function MnemonicStoryRoleSection({
                   setting={pinyinSoundNameArticleSetting}
                   settingKey={{ soundId: pinyinSoundId }}
                   placeholder="Article (e.g. the, a)"
-                  readonly={!isEditMode}
                 />
               ) : null}
               <InlineEditableSettingText
