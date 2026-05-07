@@ -20,8 +20,10 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
     [db.dictionarySearch, hanzi],
   );
 
-  const hskLevels = dictionarySearchEntries
-    .map((entry) => entry.hsk)
+  const hskLevels = [
+    ...dictionarySearchEntries.map((entry) => entry.hsk),
+    ...dictionarySearchEntries.map((entry) => entry.hskFirstAppearance),
+  ]
     .filter((x) => x != null)
     .filter(arrayFilterUnique())
     .sort(sortComparatorNumber(hskLevelToNumber));
