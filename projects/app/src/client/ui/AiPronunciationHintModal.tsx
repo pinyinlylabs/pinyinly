@@ -6,7 +6,7 @@ import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 export interface AiPronunciationHintModalProps {
-  leadCharacter: { name: string; bio?: string };
+  leadCharacter: { name: string; bio?: string; article?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   onApplyHint: (hint: { text: string; explanation?: string | null }) => void;

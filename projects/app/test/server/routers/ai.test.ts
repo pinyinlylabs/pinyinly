@@ -27,6 +27,7 @@ describe(
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
         Always clearly include the named character and location.
+        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
         When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
@@ -70,6 +71,7 @@ describe(
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
         Always clearly include the named character and location.
+        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
         When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
@@ -86,6 +88,46 @@ describe(
         Cue meaning: to use; to employ
 
         Generate 4 distinct mnemonic story ideas.
+        Each suggestion must explicitly include the character and location by name.
+        Use the keyword as light inspiration for the central action, object, or conflict.
+        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
+        Good suggestions are specific, visual, unusual, and easy to replay mentally.
+        Bad suggestions are generic, flat, or mostly just a definition.
+        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        }
+      `);
+    });
+
+    test(`lead character with article`, () => {
+      const result = buildPronunciationHintPrompt({
+        leadCharacter: { name: `seal`, article: `the` },
+        location: { name: `River Stage bathroom` },
+        cue: { word: `color` },
+        count: 2,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create short pronunciation mnemonic story ideas for Mandarin learners.
+        Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
+        The goal is to create a scene that is easy to picture and easy to remember.
+        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
+        Always clearly include the named character and location.
+        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
+        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
+        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
+        If extra character or location details are provided, use them to make the story more specific.
+        Keep each hint to 1-2 sentences.
+        Prefer visual, unusual, and memorable situations over generic ones.",
+          "user": "Story ingredients:
+        - Lead character: the seal
+        - Location: River Stage bathroom
+        - Cue: color
+
+        Lead character article: always write "the seal", not "seal" alone
+
+        Generate 2 distinct mnemonic story ideas.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.
         If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.

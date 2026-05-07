@@ -129,7 +129,7 @@ export function buildPronunciationHintPrompt({
   cue,
   count,
 }: {
-  leadCharacter: { name: string; bio?: string };
+  leadCharacter: { name: string; bio?: string; article?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   count: number;
@@ -140,6 +140,7 @@ export function buildPronunciationHintPrompt({
     `The goal is to create a scene that is easy to picture and easy to remember.`,
     `Each scene should feel like a tiny absurd sketch or striking mental snapshot.`,
     `Always clearly include the named character and location.`,
+    `When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.`,
     `Use the keyword as light inspiration for what happens, but do not turn the result into a definition.`,
     `When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.`,
     `When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).`,
@@ -148,10 +149,18 @@ export function buildPronunciationHintPrompt({
     `Prefer visual, unusual, and memorable situations over generic ones.`,
   ].join(`\n`);
 
+  const characterRef =
+    leadCharacter.article == null
+      ? leadCharacter.name
+      : `${leadCharacter.article} ${leadCharacter.name}`;
+
   const optionalLines = [
     leadCharacter.bio == null
       ? null
       : `Lead character bio: ${leadCharacter.bio}`,
+    leadCharacter.article == null
+      ? null
+      : `Lead character article: always write "${characterRef}", not "${leadCharacter.name}" alone`,
     location.description == null
       ? null
       : `Location description: ${location.description}`,
@@ -160,7 +169,7 @@ export function buildPronunciationHintPrompt({
 
   const user = [
     `Story ingredients:`,
-    `- Lead character: ${leadCharacter.name}`,
+    `- Lead character: ${characterRef}`,
     `- Location: ${location.name}`,
     `- Cue: ${cue.word}`,
     ...(optionalLines.length > 0 ? [``, ...optionalLines] : []),

@@ -170,6 +170,13 @@ export const pinyinSoundDescriptionSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const pinyinSoundNameArticleSetting = defineUserSetting({
+  entity: r.entity(`psna/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
 export const pinyinSoundImageSetting = defineUserSetting({
   entity: r.entity(`psi/[soundId]`, {
     soundId: rPinyinSoundId().alias(`i`),
