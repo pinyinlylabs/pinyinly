@@ -3,6 +3,7 @@ import { hanziSvgPathsQuery } from "@/client/query";
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
+import { composeHintText } from "@/client/ui/hintText";
 import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
 import type {
   HanziCharacter as HanziCharacterType,
@@ -24,6 +25,8 @@ import { parseIndexRanges } from "@/util/indexRanges";
 import { use, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
+import { AiMeaningHintModal } from "./AiMeaningHintModal";
+import type { MeaningHintComponent } from "./AiMeaningHintModal";
 import { HanziCharacter } from "./HanziCharacter";
 import { HanziDecompositionEditor } from "./HanziDecompositionEditor";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
@@ -31,6 +34,7 @@ import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
+import { RectButton } from "./RectButton";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
 import { hintFirstLineLength, parseHintText } from "./hintText";
@@ -134,6 +138,16 @@ export function WikiHanziCharacterDecompositionBox({
       entry.hanzi,
       entry.gloss[0] ?? ``,
     ]),
+  );
+
+  const defaultMnemonicComponents =
+    characterData.mnemonic?.components == null
+      ? undefined
+      : [...walkIdsNodeLeafs(characterData.mnemonic.components)];
+  const componentsForAi = selectedComponents ?? defaultMnemonicComponents;
+  const meaningAiComponents = aiMeaningComponents(
+    componentsForAi,
+    glossByHanzi,
   );
 
   if (showStrokeHighlights) {
@@ -243,6 +257,7 @@ export function WikiHanziCharacterDecompositionBox({
       <MeaningsSection
         hanzi={hanzi}
         mnemonicHints={characterData.mnemonic?.hints}
+        aiComponents={meaningAiComponents}
         isEditMode={isEditMode}
       />
     </WikiTitledBox>
@@ -325,12 +340,14 @@ function CoverImageSection({
 function MeaningsSection({
   hanzi,
   mnemonicHints,
+  aiComponents,
   isEditMode,
 }: {
   hanzi: HanziText;
   mnemonicHints:
     | readonly { readonly meaningKey: string; readonly hint: string }[]
     | undefined;
+  aiComponents: readonly MeaningHintComponent[];
   isEditMode: boolean;
 }) {
   const db = useDb();
@@ -416,9 +433,11 @@ function MeaningsSection({
             return (
               <MeaningItem
                 key={entry.hanziWord}
+                hanzi={hanzi}
                 hanziWord={entry.hanziWord}
                 meaning={entry}
                 mnemonicHint={mnemonicHint}
+                aiComponents={aiComponents}
                 isEditMode={isEditMode}
               />
             );
@@ -430,17 +449,26 @@ function MeaningsSection({
 }
 
 function MeaningItem({
+  hanzi,
   hanziWord,
   meaning,
   mnemonicHint,
+  aiComponents,
   isEditMode,
 }: {
+  hanzi: HanziText;
   hanziWord: HanziWord;
   meaning: Pick<DictionarySearchEntry, `gloss` | `pinyin` | `hsk`>;
   mnemonicHint: string | undefined;
+  aiComponents: readonly MeaningHintComponent[];
   isEditMode: boolean;
 }) {
+  const [showAiModal, setShowAiModal] = useState(false);
   const hintState = useHanziWordMeaningHint(hanziWord);
+  const hintSetting = useUserSetting({
+    setting: hanziWordMeaningHintTextSetting,
+    key: { hanziWord },
+  });
   const displayHint = hintState.text ?? mnemonicHint ?? null;
   const hasCustomHint = hintState.hasText;
   const hasHint = (displayHint ?? ``).trim().length > 0;
@@ -462,12 +490,28 @@ function MeaningItem({
       </View>
       {isEditMode || hasHint ? (
         <View className={isEditMode ? `gap-2 pl-7` : `gap-1 pl-7`}>
+          {isEditMode ? (
+            <View className="flex-row items-center justify-between">
+              <Text className="font-sans text-[13px] text-fg-dim">
+                Want help brainstorming a hint?
+              </Text>
+              <RectButton
+                variant="bare"
+                onPress={() => {
+                  setShowAiModal(true);
+                }}
+              >
+                Use AI
+              </RectButton>
+            </View>
+          ) : null}
+
           <InlineEditableSettingText
             setting={hanziWordMeaningHintTextSetting}
             settingKey={{ hanziWord }}
             readonly={!isEditMode}
             placeholder="Add a hint on the first line. Add details after a blank line."
-            // oxlint-disable-next-line typescript/no-deprecated
+            /* oxlint-disable-next-line typescript/no-deprecated */
             defaultValue={displayHint ?? ``}
             maxLength={80}
             multiline
@@ -476,6 +520,31 @@ function MeaningItem({
             overLimitMessage="Keep the first line under 80 characters. Add details after a blank line."
             renderDisplay={(value) => <MergedHintDisplay value={value} />}
           />
+
+          {showAiModal ? (
+            <AiMeaningHintModal
+              hanzi={hanzi}
+              meaning={{
+                hanziWord,
+                glosses: meaning.gloss,
+              }}
+              components={aiComponents}
+              onApplyHint={({ text, explanation }) => {
+                const mergedHintText = composeHintText(text, explanation);
+                hintSetting.setValue(
+                  mergedHintText == null
+                    ? null
+                    : {
+                        hanziWord,
+                        text: mergedHintText,
+                      },
+                );
+              }}
+              onDismiss={() => {
+                setShowAiModal(false);
+              }}
+            />
+          ) : null}
         </View>
       ) : null}
       {hasHint ? null : (
@@ -485,6 +554,38 @@ function MeaningItem({
       )}
     </View>
   );
+}
+
+function aiMeaningComponents(
+  components: readonly WikiCharacterComponent[] | undefined,
+  glossByHanzi: ReadonlyMap<string, string>,
+): readonly MeaningHintComponent[] {
+  if (components == null) {
+    return [];
+  }
+
+  return components
+    .map((component) => {
+      const meaning =
+        component.hanzi == null ? undefined : glossByHanzi.get(component.hanzi);
+      const cleanedMeaning =
+        meaning == null || meaning.trim().length === 0 ? undefined : meaning;
+
+      return {
+        hanzi: component.hanzi,
+        label: component.label,
+        meaning: cleanedMeaning,
+        strokes:
+          component.strokes.trim().length === 0 ? undefined : component.strokes,
+      };
+    })
+    .filter((component) => {
+      return (
+        component.hanzi != null ||
+        component.label != null ||
+        component.meaning != null
+      );
+    });
 }
 
 function hasSettingText(value: unknown): boolean {
