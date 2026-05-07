@@ -900,7 +900,12 @@ export function AiImageGenerationPanel({
 
     const nowIso = new Date().toISOString();
     const userMessageId = nanoid();
-    const requestReferenceEntries = userMessageContextReferenceEntries.map(
+    const requestReferenceEntries = contextReferenceEntries.map((entry) => ({
+      assetId: entry.assetId,
+      label: entry.label,
+      sourceId: entry.sourceId,
+    }));
+    const chatContextReferenceEntries = userMessageContextReferenceEntries.map(
       (entry) => ({
         assetId: entry.assetId,
         label: entry.label,
@@ -921,7 +926,7 @@ export function AiImageGenerationPanel({
             id: userMessageId,
             role: `user` as const,
             text: prompt,
-            contextReferenceEntries: requestReferenceEntries,
+            contextReferenceEntries: chatContextReferenceEntries,
             styleContextDebug,
             createdAtIso: nowIso,
           },
@@ -1305,7 +1310,7 @@ function AiImageUserMessage({
     >
       <View className="max-w-[560px] rounded-lg bg-sky/20 p-2">
         {message.text != null && message.text.length > 0 ? (
-          <Text className="px-3 font-sans text-sm font-medium leading-snug text-fg">
+          <Text className="mx-1 font-sans text-sm font-medium leading-snug text-fg">
             {message.text}
           </Text>
         ) : null}
