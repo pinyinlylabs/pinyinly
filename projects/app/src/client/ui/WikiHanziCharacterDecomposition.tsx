@@ -575,8 +575,6 @@ function aiMeaningComponents(
         hanzi: component.hanzi,
         label: component.label,
         meaning: cleanedMeaning,
-        strokes:
-          component.strokes.trim().length === 0 ? undefined : component.strokes,
       };
     })
     .filter((component) => {

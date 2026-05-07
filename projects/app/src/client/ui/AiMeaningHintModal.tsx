@@ -17,7 +17,6 @@ export interface MeaningHintComponent {
   hanzi?: string;
   label?: string;
   meaning?: string;
-  strokes?: string;
 }
 
 type HintSuggestion = {

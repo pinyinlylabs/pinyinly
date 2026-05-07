@@ -70,7 +70,6 @@ const meaningHintInputSchema = z
             hanzi: z.string().min(1).max(2).optional(),
             label: z.string().min(1).optional(),
             meaning: z.string().min(1).optional(),
-            strokes: z.string().min(1).optional(),
           })
           .strict(),
       )
@@ -241,7 +240,6 @@ export function buildMeaningHintPrompt({
     hanzi?: string;
     label?: string;
     meaning?: string;
-    strokes?: string;
   }[];
   count: number;
 }): { system: string; user: string } {
@@ -263,7 +261,6 @@ export function buildMeaningHintPrompt({
       component.hanzi == null ? null : `hanzi: ${component.hanzi}`,
       component.label == null ? null : `label: ${component.label}`,
       component.meaning == null ? null : `meaning: ${component.meaning}`,
-      component.strokes == null ? null : `strokes: ${component.strokes}`,
     ].filter((part): part is string => part != null);
 
     return `- Component ${index + 1}: ${parts.join(` | `)}`;

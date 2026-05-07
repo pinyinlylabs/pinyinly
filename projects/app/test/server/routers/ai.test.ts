@@ -190,7 +190,6 @@ describe(
             hanzi: `子`,
             label: `child`,
             meaning: `child`,
-            strokes: `0-2`,
           },
         ],
         count: 4,
@@ -212,7 +211,7 @@ describe(
 
         Component context:
         - Component 1: hanzi: 女 | meaning: woman
-        - Component 2: hanzi: 子 | label: child | meaning: child | strokes: 0-2
+        - Component 2: hanzi: 子 | label: child | meaning: child
 
         Generate 4 distinct mnemonic hints.
         Each suggestion should help a learner recall the target meaning from the character's components.
