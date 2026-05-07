@@ -7,10 +7,12 @@ const { withSlimWikiRegistryResolver } = require(
 );
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
-/** @type Record<string, string> */
-const moduleAliases = {
+/** @type Record<string, { moduleName?: string; platform?: string }> */
+const resolverOverrides = {
   // See https://community.apollographql.com/t/cannot-destructure-property-extends-of-tslib-default-as-it-is-undefined/9501/2
-  tslib: `tslib/tslib.es6.js`,
+  [`tslib`]: { moduleName: `tslib/tslib.es6.js` },
+  // Avoid the Node.js version which uses import("node:diagnostics_channel").
+  [`lru-cache`]: { platform: `web` },
 };
 
 // TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
@@ -47,8 +49,8 @@ config = {
     resolveRequest: (context, moduleName, platform) => {
       return context.resolveRequest(
         context,
-        moduleAliases[moduleName] ?? moduleName,
-        platform,
+        resolverOverrides[moduleName]?.moduleName ?? moduleName,
+        resolverOverrides[moduleName]?.platform ?? platform,
       );
     },
     unstable_enablePackageExports: true,
