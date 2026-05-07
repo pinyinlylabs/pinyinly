@@ -7,6 +7,12 @@ const { withSlimWikiRegistryResolver } = require(
 );
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
+/** @type Record<string, string> */
+const moduleAliases = {
+  // See https://community.apollographql.com/t/cannot-destructure-property-extends-of-tslib-default-as-it-is-undefined/9501/2
+  tslib: "tslib/tslib.es6.js",
+};
+
 // TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
 // from `expo/metro-config`.
 let config = getSentryExpoConfig(__dirname);
@@ -38,6 +44,13 @@ config = {
       // WebAssembly
       `wasm`,
     ],
+    resolveRequest: (context, moduleName, platform) => {
+      return context.resolveRequest(
+        context,
+        moduleAliases[moduleName] ?? moduleName,
+        platform,
+      );
+    },
     unstable_enablePackageExports: true,
   },
 };

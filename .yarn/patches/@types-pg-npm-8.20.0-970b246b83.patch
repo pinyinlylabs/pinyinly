@@ -1,0 +1,13 @@
+diff --git a/index.d.ts b/index.d.ts
+index cc91d102ff7a9b2059ecea5ec654f35bdb8d6b7e..5f560802922a42b6fb4d17c5d9d3e3f15d74935a 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -345,7 +345,7 @@ import * as Pg from ".";
+ 
+ export const native: typeof Pg | null;
+ 
+-export { DatabaseError } from "pg-protocol";
++export type { DatabaseError } from "pg-protocol";
+ export { TypeOverrides };
+ import TypeOverrides = require("./lib/type-overrides");
+ 

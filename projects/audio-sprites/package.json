@@ -18,7 +18,7 @@
     "chalk": "^5.5.0",
     "debug": "^4.3.7",
     "execa": "^9.6.0",
-    "lru-cache": "^11.1.0",
+    "lru-cache": "^11.3.6",
     "zod": "^3.25.76"
   },
   "peerDependencies": {
@@ -34,12 +34,12 @@
     "eslint": "^9.13.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-unicorn": "^60.0.0",
-    "memfs": "^4.36.0",
+    "memfs": "^4.57.2",
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
     "oxlint-tsgolint": "^0.22.1",
     "ts-essentials": "^10.2.0",
-    "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.5"
   }
 }
