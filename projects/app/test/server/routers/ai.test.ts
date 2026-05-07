@@ -163,7 +163,6 @@ describe(
         Keep each hint to 1-2 sentences.
         Prefer unusual but clear imagery over generic definitions.",
           "user": "Character: 好
-        Meaning target (hanzi word): 好
         Primary gloss: good
 
         Generate 3 distinct mnemonic hints.
@@ -208,7 +207,6 @@ describe(
         Keep each hint to 1-2 sentences.
         Prefer unusual but clear imagery over generic definitions.",
           "user": "Character: 好
-        Meaning target (hanzi word): 好
         Primary gloss: good
         Additional glosses: well; fine
 

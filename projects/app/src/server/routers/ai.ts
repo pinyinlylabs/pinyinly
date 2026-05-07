@@ -271,7 +271,6 @@ export function buildMeaningHintPrompt({
 
   const user = [
     `Character: ${hanzi}`,
-    `Meaning target (hanzi word): ${meaning.hanziWord}`,
     `Primary gloss: ${primaryGloss}`,
     ...(extraGlosses.length === 0
       ? []
