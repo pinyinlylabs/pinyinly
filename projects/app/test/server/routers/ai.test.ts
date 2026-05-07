@@ -1,5 +1,6 @@
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintPrompt,
   buildPronunciationHintPrompt,
   buildSubLocationDescriptionPrompt,
 } from "#server/routers/ai.ts";
@@ -132,6 +133,91 @@ describe(
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        }
+      `);
+    });
+  },
+);
+
+describe(
+  `buildMeaningHintPrompt` satisfies HasNameOf<typeof buildMeaningHintPrompt>,
+  () => {
+    test(`minimal input (no component context)`, () => {
+      const result = buildMeaningHintPrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`],
+        },
+        count: 3,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create short meaning-recognition mnemonic hints for Mandarin learners.
+        Your job is to help the learner remember what a Hanzi means using its visual components.
+        Use the provided component details as the core building blocks of each hint.
+        Write vivid, concrete, and memorable mini-scenes or mental images.
+        Focus on meaning recall, not pronunciation.
+        Avoid historical or etymological claims unless directly supported by the provided component context.
+        Keep each hint to 1-2 sentences.
+        Prefer unusual but clear imagery over generic definitions.",
+          "user": "Character: 好
+        Primary gloss: good
+
+        Generate 3 distinct mnemonic hints.
+        Each suggestion should help a learner recall the target meaning from the character's components.
+        Do not write a plain dictionary definition.
+        Do not introduce pronunciation guidance.
+        If component context is provided, ground the hint in those components explicitly.",
+        }
+      `);
+    });
+
+    test(`full input (with component context)`, () => {
+      const result = buildMeaningHintPrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`, `well`, `fine`],
+        },
+        components: [
+          {
+            hanzi: `女`,
+            meaning: `woman`,
+          },
+          {
+            hanzi: `子`,
+            label: `child`,
+            meaning: `child`,
+          },
+        ],
+        count: 4,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You create short meaning-recognition mnemonic hints for Mandarin learners.
+        Your job is to help the learner remember what a Hanzi means using its visual components.
+        Use the provided component details as the core building blocks of each hint.
+        Write vivid, concrete, and memorable mini-scenes or mental images.
+        Focus on meaning recall, not pronunciation.
+        Avoid historical or etymological claims unless directly supported by the provided component context.
+        Keep each hint to 1-2 sentences.
+        Prefer unusual but clear imagery over generic definitions.",
+          "user": "Character: 好
+        Primary gloss: good
+        Additional glosses: well; fine
+
+        Component context:
+        - Component 1: hanzi: 女 | meaning: woman
+        - Component 2: hanzi: 子 | label: child | meaning: child
+
+        Generate 4 distinct mnemonic hints.
+        Each suggestion should help a learner recall the target meaning from the character's components.
+        Do not write a plain dictionary definition.
+        Do not introduce pronunciation guidance.
+        If component context is provided, ground the hint in those components explicitly.",
         }
       `);
     });

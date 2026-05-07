@@ -54,6 +54,47 @@ const pronunciationHintOutputSchema = z
   })
   .strict();
 
+const meaningHintInputSchema = z
+  .object({
+    hanzi: z.string().min(1).max(2),
+    meaning: z
+      .object({
+        hanziWord: z.string().min(1),
+        glosses: z.array(z.string().min(1)).min(1).max(12),
+      })
+      .strict(),
+    components: z
+      .array(
+        z
+          .object({
+            hanzi: z.string().min(1).max(2).optional(),
+            label: z.string().min(1).optional(),
+            meaning: z.string().min(1).optional(),
+          })
+          .strict(),
+      )
+      .max(12)
+      .optional(),
+    count: z.number().int().min(1).max(6),
+  })
+  .strict();
+
+const meaningHintOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            hint: z.string(),
+            explanation: z.string().nullable().optional(),
+            confidence: z.number().min(0).max(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 const subLocationDescriptionInputSchema = z
   .object({
     label: z.string().min(1),
@@ -187,6 +228,64 @@ export function buildPronunciationHintPrompt({
   return { system, user };
 }
 
+export function buildMeaningHintPrompt({
+  hanzi,
+  meaning,
+  components,
+  count,
+}: {
+  hanzi: string;
+  meaning: { hanziWord: string; glosses: string[] };
+  components?: {
+    hanzi?: string;
+    label?: string;
+    meaning?: string;
+  }[];
+  count: number;
+}): { system: string; user: string } {
+  const system = [
+    `You create short meaning-recognition mnemonic hints for Mandarin learners.`,
+    `Your job is to help the learner remember what a Hanzi means using its visual components.`,
+    `Use the provided component details as the core building blocks of each hint.`,
+    `Write vivid, concrete, and memorable mini-scenes or mental images.`,
+    `Focus on meaning recall, not pronunciation.`,
+    `Avoid historical or etymological claims unless directly supported by the provided component context.`,
+    `Keep each hint to 1-2 sentences.`,
+    `Prefer unusual but clear imagery over generic definitions.`,
+  ].join(`\n`);
+
+  const primaryGloss = meaning.glosses[0] ?? ``;
+  const extraGlosses = meaning.glosses.slice(1);
+  const formattedComponents = (components ?? []).map((component, index) => {
+    const parts = [
+      component.hanzi == null ? null : `hanzi: ${component.hanzi}`,
+      component.label == null ? null : `label: ${component.label}`,
+      component.meaning == null ? null : `meaning: ${component.meaning}`,
+    ].filter((part): part is string => part != null);
+
+    return `- Component ${index + 1}: ${parts.join(` | `)}`;
+  });
+
+  const user = [
+    `Character: ${hanzi}`,
+    `Primary gloss: ${primaryGloss}`,
+    ...(extraGlosses.length === 0
+      ? []
+      : [`Additional glosses: ${extraGlosses.join(`; `)}`]),
+    ...(formattedComponents.length === 0
+      ? []
+      : [``, `Component context:`, ...formattedComponents]),
+    ``,
+    `Generate ${count} distinct mnemonic hints.`,
+    `Each suggestion should help a learner recall the target meaning from the character's components.`,
+    `Do not write a plain dictionary definition.`,
+    `Do not introduce pronunciation guidance.`,
+    `If component context is provided, ground the hint in those components explicitly.`,
+  ].join(`\n`);
+
+  return { system, user };
+}
+
 export function buildSubLocationDescriptionPrompt({
   label,
   location,
@@ -313,6 +412,36 @@ export const aiRouter = router({
         return data;
       } catch (error) {
         console.error(`Failed to generate pronunciation hints:`, error);
+        throw new TRPCError({
+          code: `INTERNAL_SERVER_ERROR`,
+          message: `Unable to generate hints`,
+        });
+      }
+    }),
+
+  generateMeaningHints: authedProcedure
+    .input(meaningHintInputSchema)
+    .output(meaningHintOutputSchema)
+    .mutation(async (opts) => {
+      const { hanzi, meaning, components, count } = opts.input;
+
+      const { system, user } = buildMeaningHintPrompt({
+        hanzi,
+        meaning,
+        components,
+        count,
+      });
+
+      try {
+        const data = await requestOpenAiJson({
+          system,
+          user,
+          schema: meaningHintOutputSchema,
+        });
+
+        return data;
+      } catch (error) {
+        console.error(`Failed to generate meaning hints:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate hints`,
