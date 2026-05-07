@@ -10,7 +10,7 @@ const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 /** @type Record<string, string> */
 const moduleAliases = {
   // See https://community.apollographql.com/t/cannot-destructure-property-extends-of-tslib-default-as-it-is-undefined/9501/2
-  tslib: "tslib/tslib.es6.js",
+  tslib: `tslib/tslib.es6.js`,
 };
 
 // TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
