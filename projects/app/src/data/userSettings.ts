@@ -170,12 +170,25 @@ export const pinyinSoundDescriptionSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const pinyinSoundNameArticleSetting = defineUserSetting({
+  entity: r.entity(`psna/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
 export const pinyinSoundImageSetting = defineUserSetting({
   entity: r.entity(`psi/[soundId]`, {
     soundId: rPinyinSoundId().alias(`i`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
 });
+
+export function pinyinSoundNameArticleSettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinSoundNameArticleSetting.entity.marshalKey({ soundId });
+}
 
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundNameSetting.entity.marshalKey({ soundId });

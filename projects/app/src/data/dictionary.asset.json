@@ -2813,7 +2813,7 @@
   ["窗台:sill",{"gloss":["window sill","window ledge"],"hsk":"4","pinyin":["chuāng tái"]}],
   ["窗子:window",{"gloss":["window"],"hsk":"4","pinyin":["chuāng zi"]}],
   ["窗户:window",{"gloss":["window"],"hsk":"4","pinyin":["chuāng hu"]}],
-  ["立:stand",{"gloss":["stand","rise"],"pinyin":["lì"],"pos":"v"}],
+  ["立:stand",{"gloss":["stand","rise"],"hsk":"5","pinyin":["lì"],"pos":"v"}],
   ["立刻:immediately",{"gloss":["immediately","right away"],"hsk":"3","pinyin":["lì kè"],"pos":"adv"}],
   ["立即:immediately",{"gloss":["immediately"],"hsk":"4","pinyin":["lì jí"]}],
   ["站:stand",{"gloss":["stand"],"hsk":"1","pinyin":["zhàn"],"pos":"v"}],

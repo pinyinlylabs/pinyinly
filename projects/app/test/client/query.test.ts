@@ -878,3 +878,71 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
     }
   });
 });
+
+describe(`dictionarySearch hskFirstAppearance`, () => {
+  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+
+  test(`is defined for single-char entries that have an hsk level`, async ({
+    db,
+  }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    const singleCharWithHsk = entries.filter(
+      (e: DictionarySearchEntry) =>
+        e.hanziCharacterCount === 1 && e.hsk != null,
+    );
+    expect(singleCharWithHsk.length).toBeGreaterThan(0);
+
+    for (const entry of singleCharWithHsk) {
+      expect(entry.hskFirstAppearance).toBeDefined();
+    }
+  });
+
+  test(`is lower than hsk when character appears in an earlier-level word`, async ({
+    db,
+  }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    // 立 is HSK5 as a standalone word, but appears in 成立 (HSK3), so
+    // hskFirstAppearance should be lower than hsk.
+    const liEntry = entries.find(
+      (e: DictionarySearchEntry) => e.hanzi === `立` && e.hsk === `5`,
+    );
+    expect(liEntry).toBeDefined();
+    expect(liEntry?.hskFirstAppearance).toBeDefined();
+    expect(Number(liEntry?.hskFirstAppearance)).toBeLessThan(
+      Number(liEntry?.hsk),
+    );
+  });
+
+  test(`equals hsk for multi-character entries`, async ({ db }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    const multiCharWithHsk = entries.filter(
+      (e: DictionarySearchEntry) => e.hanziCharacterCount > 1 && e.hsk != null,
+    );
+    expect(multiCharWithHsk.length).toBeGreaterThan(0);
+
+    for (const entry of multiCharWithHsk) {
+      expect(entry.hskFirstAppearance).toBe(entry.hsk);
+    }
+  });
+
+  test(`is undefined for multi-character entries without hsk`, async ({
+    db,
+  }) => {
+    await db.builtInDictionarySearch.preload();
+    const entries = db.builtInDictionarySearch.toArray;
+
+    const noHskEntries = entries.filter(
+      (e: DictionarySearchEntry) => e.hsk == null && e.hanziCharacterCount > 1,
+    );
+
+    for (const entry of noHskEntries) {
+      expect(entry.hskFirstAppearance, entry.hanzi).toBeUndefined();
+    }
+  });
+});

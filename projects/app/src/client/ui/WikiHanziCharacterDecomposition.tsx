@@ -1,9 +1,11 @@
 import { getWikiCharacterData } from "@/client/wiki";
+import { hanziSvgPathsQuery } from "@/client/query";
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
 import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
 import type {
+  HanziCharacter as HanziCharacterType,
   HanziText,
   HanziWord,
   WikiCharacterComponent,
@@ -17,6 +19,7 @@ import {
 } from "@/data/userSettings";
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
+import { useQuery } from "@tanstack/react-query";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { use, useState } from "react";
 import type { ReactNode } from "react";
@@ -44,10 +47,16 @@ export function WikiHanziCharacterDecomposition({
   if (characterData == null) {
     return null;
   }
-  return <WikiHanziCharacterDecompositionBox characterData={characterData} />;
+  return (
+    <WikiHanziCharacterDecompositionBox
+      hanzi={hanzi}
+      characterData={characterData}
+    />
+  );
 }
 
 interface WikiHanziCharacterDecompositionProps {
+  hanzi: HanziCharacterType;
   characterData: WikiCharacterData;
 }
 
@@ -58,6 +67,7 @@ function hasStrokeRanges(
 }
 
 export function WikiHanziCharacterDecompositionBox({
+  hanzi,
   characterData,
 }: WikiHanziCharacterDecompositionProps) {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -68,12 +78,12 @@ export function WikiHanziCharacterDecompositionBox({
     (q) =>
       q
         .from({ entry: db.characterDecompositionCollection })
-        .where(({ entry }) => eq(entry.hanzi, characterData.hanzi))
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
         .select(({ entry }) => ({
           decompositionComponents: entry.decompositionComponents,
         }))
         .findOne(),
-    [db.characterDecompositionCollection, characterData.hanzi],
+    [db.characterDecompositionCollection, hanzi],
   );
 
   const selectedComponents =
@@ -81,9 +91,7 @@ export function WikiHanziCharacterDecompositionBox({
       ? undefined
       : [...walkIdsNodeLeafs(selectedDecomposition.decompositionComponents)];
 
-  const strokeSvgs = Array.isArray(characterData.strokes)
-    ? characterData.strokes
-    : null;
+  const { data: strokeSvgs } = useQuery(hanziSvgPathsQuery(hanzi));
 
   const showStrokeHighlights =
     selectedComponents != null &&
@@ -195,26 +203,24 @@ export function WikiHanziCharacterDecompositionBox({
       onEditingChange={setIsEditMode}
     >
       <View className="gap-4 p-4">
-        {isEditMode ? (
-          <HanziDecompositionEditor hanzi={characterData.hanzi} />
-        ) : null}
+        {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}
 
         {componentsElements.length > 0 ? (
           <>
             <Text className="pyly-body">
               Use the components of{` `}
-              <Text className="pyly-bold">{characterData.hanzi}</Text> to help:
+              <Text className="pyly-bold">{hanzi}</Text> to help:
             </Text>
 
             <View className="flex-row flex-wrap gap-5">
               {componentsElements}
             </View>
           </>
-        ) : Array.isArray(characterData.strokes) ? (
+        ) : strokeSvgs == null ? null : (
           <>
             <Text className="pyly-body">
               What does{` `}
-              <Text className="pyly-bold">{characterData.hanzi}</Text>
+              <Text className="pyly-bold">{hanzi}</Text>
               {` `}
               resemble?
             </Text>
@@ -222,20 +228,20 @@ export function WikiHanziCharacterDecompositionBox({
             <View className="flex-1 items-center">
               <HanziCharacter
                 className="size-12"
-                strokesData={characterData.strokes}
+                strokesData={strokeSvgs}
                 highlightStrokes={parseIndexRanges(
-                  `0-${characterData.strokes.length - 1}`,
+                  `0-${strokeSvgs.length - 1}`,
                 )}
               />
             </View>
           </>
-        ) : null}
+        )}
       </View>
 
-      <CoverImageSection hanzi={characterData.hanzi} isEditMode={isEditMode} />
+      <CoverImageSection hanzi={hanzi} isEditMode={isEditMode} />
 
       <MeaningsSection
-        hanzi={characterData.hanzi}
+        hanzi={hanzi}
         mnemonicHints={characterData.mnemonic?.hints}
         isEditMode={isEditMode}
       />

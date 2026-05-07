@@ -1,4 +1,5 @@
 import { getWikiCharacterData } from "@/client/wiki";
+import { hanziSvgPathsQuery } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
   componentToString,
@@ -18,6 +19,7 @@ import { userWikiCharacterDecompositionSetting } from "@/data/userSettings";
 import { decompositionComponentsToIds } from "@/dictionary";
 import { parseIndexRanges, normalizeIndexRanges } from "@/util/indexRanges";
 import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useQuery } from "@tanstack/react-query";
 import { use, useEffect, useState, Suspense } from "react";
 import type { ReactNode } from "react";
 import { Platform, Pressable, Text, View, Image } from "react-native";
@@ -453,9 +455,10 @@ function HanziVisualSuggestionsPanel({
 
 export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
   const characterData = use(getWikiCharacterData(hanzi));
-  const strokePaths = Array.isArray(characterData?.strokes)
-    ? characterData.strokes
-    : null;
+  const { data: strokePathsData } = useQuery(
+    hanziSvgPathsQuery(isHanziCharacter(hanzi) ? hanzi : null),
+  );
+  const strokePaths = strokePathsData ?? null;
   const db = useDb();
   const userWikiCharacterDecomposition = useUserSetting({
     setting: userWikiCharacterDecompositionSetting,

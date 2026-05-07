@@ -24,7 +24,7 @@ export function QuickSearchButton({
         <View className="flex-row items-center gap-2">
           <Icon icon="search" size={16} className="text-fg-dim" />
           <Text className="font-sans text-sm font-medium text-fg-dim">
-            Quick search…
+            Search…
           </Text>
         </View>
 
@@ -43,8 +43,7 @@ export function QuickSearchButton({
 
 const pressableClass = tv({
   base: `
-    flex-row items-center justify-between gap-6 rounded-md bg-bg-high px-3 py-2 outline outline-1
-    -outline-offset-1 outline-fg/5
+    flex-row items-center justify-between gap-6 rounded-xl bg-bg-high px-3 py-2
 
     hover:bg-fg/20
   `,

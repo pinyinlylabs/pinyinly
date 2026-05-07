@@ -34,6 +34,7 @@ import {
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundImageSetting,
+  pinyinSoundNameArticleSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
@@ -216,6 +217,13 @@ function MnemonicStoryRoleSection({
         ) : (
           <>
             <View className="gap-2">
+              {isEditMode ? (
+                <InlineEditableSettingText
+                  setting={pinyinSoundNameArticleSetting}
+                  settingKey={{ soundId: pinyinSoundId }}
+                  placeholder="Article (e.g. the, a)"
+                />
+              ) : null}
               <InlineEditableSettingText
                 setting={pinyinSoundDescriptionSetting}
                 settingKey={{ soundId: pinyinSoundId }}

@@ -1,4 +1,5 @@
 import type {
+  HanziCharacter,
   HanziText,
   HanziWord,
   HskLevel,
@@ -66,6 +67,8 @@ import {
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
+import { Platform } from "react-native";
+import { z } from "zod/v4";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 import { BTreeIndex } from "@tanstack/db";
@@ -336,6 +339,47 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
     staleTime: Infinity,
   });
 
+const strokeSvgArraySchema = z.array(z.string());
+
+export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
+  queryOptions({
+    queryKey: [`hanziSvgPaths`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async ({ signal }): Promise<string[] | null> => {
+            const response = await fetch(
+              `/raw/svgs/${encodeURIComponent(hanzi)}.json`,
+              { signal },
+            );
+            if (!response.ok) {
+              return null;
+            }
+
+            const json = (await response.json()) as unknown;
+            const result = strokeSvgArraySchema.safeParse(json);
+            return result.success ? result.data : null;
+          },
+    staleTime: Infinity,
+  });
+
+export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter | null) =>
+  queryOptions({
+    queryKey: [`hanziSvgPaths`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async (): Promise<string[] | null> => {
+            return null;
+          },
+    staleTime: Infinity,
+  });
+
+export const hanziSvgPathsQuery = Platform.select({
+  web: hanziSvgPathsQueryWeb,
+  default: hanziSvgPathsQueryNative,
+});
+
 export const fetchAudioBufferQuery = (
   uri: string | null,
   audioContext: AudioContext | null,
@@ -432,6 +476,13 @@ export interface DictionarySearchEntry {
   pinyin?: PinyinText[];
   hsk?: HskLevel;
   hskSortKey: number;
+  /**
+   * The lowest HSK level at which this character first appears — either as a
+   * standalone word or as part of another word. For single-character entries
+   * this may be lower than `hsk`. For multi-character entries this equals
+   * `hsk`.
+   */
+  hskFirstAppearance?: HskLevel;
   note?: string;
   hanziCharacterCount: number;
 }
@@ -705,6 +756,25 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
       const dictionary = await loadDictionary();
       const entries: DictionarySearchEntry[] = [];
 
+      // Build a map of each character to the minimum HSK level it appears in
+      // across all words (including multi-character words it's part of).
+      const charMinHskMap = new Map<string, HskLevel>();
+      for (const [hanziWord, meaning] of dictionary.allEntries) {
+        if (meaning.hsk == null) {
+          continue;
+        }
+        const hanzi = hanziFromHanziWord(hanziWord);
+        for (const char of matchAllHanziCharacters(hanzi)) {
+          const existing = charMinHskMap.get(char);
+          if (
+            existing == null ||
+            hskLevelToNumber(meaning.hsk) < hskLevelToNumber(existing)
+          ) {
+            charMinHskMap.set(char, meaning.hsk);
+          }
+        }
+      }
+
       for (const [hanziWord, meaning] of dictionary.allEntries) {
         const gloss = meaning.gloss.filter((item) => item.length > 0);
         if (gloss.length === 0) {
@@ -715,6 +785,12 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
 
         const hanzi = hanziFromHanziWord(hanziWord);
         const meaningKey = meaningKeyFromHanziWord(hanziWord);
+        const hanziChars = matchAllHanziCharacters(hanzi);
+        const hanziCharacterCount = hanziChars.length;
+        const hskFirstAppearance =
+          hanziCharacterCount === 1
+            ? charMinHskMap.get(hanzi as string)
+            : meaning.hsk;
 
         entries.push({
           id: `builtIn:${hanziWord}`,
@@ -728,7 +804,8 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           pinyin,
           hsk: meaning.hsk,
           hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
-          hanziCharacterCount: matchAllHanziCharacters(hanzi).length,
+          hskFirstAppearance,
+          hanziCharacterCount,
         });
       }
 
