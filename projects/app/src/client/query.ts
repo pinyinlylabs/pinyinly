@@ -1,4 +1,5 @@
 import type {
+  HanziCharacter,
   HanziText,
   HanziWord,
   HskLevel,
@@ -66,6 +67,8 @@ import {
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
+import { Platform } from "react-native";
+import { z } from "zod/v4";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 import { BTreeIndex } from "@tanstack/db";
@@ -335,6 +338,47 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
           },
     staleTime: Infinity,
   });
+
+const strokeSvgArraySchema = z.array(z.string());
+
+export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
+  queryOptions({
+    queryKey: [`hanziSvgPaths`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async ({ signal }): Promise<string[] | null> => {
+            const response = await fetch(
+              `/raw/svgs/${encodeURIComponent(hanzi)}.json`,
+              { signal },
+            );
+            if (!response.ok) {
+              return null;
+            }
+
+            const json = (await response.json()) as unknown;
+            const result = strokeSvgArraySchema.safeParse(json);
+            return result.success ? result.data : null;
+          },
+    staleTime: Infinity,
+  });
+
+export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter | null) =>
+  queryOptions({
+    queryKey: [`hanziSvgPaths`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async (): Promise<string[] | null> => {
+            return null;
+          },
+    staleTime: Infinity,
+  });
+
+export const hanziSvgPathsQuery = Platform.select({
+  web: hanziSvgPathsQueryWeb,
+  default: hanziSvgPathsQueryNative,
+});
 
 export const fetchAudioBufferQuery = (
   uri: string | null,

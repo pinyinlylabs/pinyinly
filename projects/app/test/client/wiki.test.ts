@@ -32,7 +32,10 @@ import {
 import {
   existsSync,
   glob,
+  mkdir,
+  readdir,
   readFileSync,
+  rm,
   writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import {
@@ -119,6 +122,13 @@ describe(`/meaning.mdx files`, async () => {
 });
 
 describe(`character.json files`, async () => {
+  const characterStrokeSvgsDir = path.join(
+    projectRoot,
+    `public`,
+    `raw`,
+    `svgs`,
+  );
+
   const getCharacterData = memoize1(
     (character: string): WikiCharacterData | undefined => {
       const filePath = path.join(wikiDir, character, `character.json`);
@@ -513,5 +523,57 @@ describe(`character.json files`, async () => {
 
     const actual = await loadCharacters();
     expect(expected).toEqual(actual);
+  });
+
+  test(`consistency with public/raw/svgs/*.json`, async () => {
+    const expected = new Map<HanziText, string[]>();
+
+    for (const { character, characterData } of characterFiles) {
+      if (Array.isArray(characterData.strokes)) {
+        expected.set(character, characterData.strokes);
+      }
+    }
+
+    if (!isCi) {
+      await mkdir(characterStrokeSvgsDir, { recursive: true });
+
+      const expectedFileNames = new Set(
+        [...expected.keys()].map((character) => `${character}.json`),
+      );
+
+      for (const fileName of await readdir(characterStrokeSvgsDir)) {
+        if (!fileName.endsWith(`.json`) || expectedFileNames.has(fileName)) {
+          continue;
+        }
+
+        await rm(path.join(characterStrokeSvgsDir, fileName));
+      }
+
+      for (const [character, strokes] of expected.entries()) {
+        await writeJsonFileIfChanged(
+          path.join(characterStrokeSvgsDir, `${character}.json`),
+          strokes,
+          2,
+        );
+      }
+    }
+
+    const actualFileNames = (await readdir(characterStrokeSvgsDir))
+      .filter((fileName) => fileName.endsWith(`.json`))
+      .sort(sortComparatorString((x) => x));
+    const expectedFileNames = [...expected.keys()]
+      .map((character) => `${character}.json`)
+      .sort(sortComparatorString((x) => x));
+
+    expect(actualFileNames).toEqual(expectedFileNames);
+
+    for (const fileName of actualFileNames) {
+      const character = fileName.slice(0, -`.json`.length) as HanziText;
+      const actual = JSON.parse(
+        readFileSync(path.join(characterStrokeSvgsDir, fileName), `utf-8`),
+      ) as unknown;
+
+      expect(actual).toEqual(nonNullable(expected.get(character)));
+    }
   });
 });
