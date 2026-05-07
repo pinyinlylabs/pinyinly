@@ -12,7 +12,11 @@ import { z } from "zod/v4";
 const pronunciationHintInputSchema = z
   .object({
     leadCharacter: z
-      .object({ name: z.string().min(1), bio: z.string().optional() })
+      .object({
+        name: z.string().min(1),
+        bio: z.string().optional(),
+        article: z.string().optional(),
+      })
       .strict(),
     location: z
       .object({
@@ -150,7 +154,7 @@ export function buildPronunciationHintPrompt({
   ].join(`\n`);
 
   const characterRef =
-    leadCharacter.article == null
+    leadCharacter.article == null || leadCharacter.article.trim() === ``
       ? leadCharacter.name
       : `${leadCharacter.article} ${leadCharacter.name}`;
 
@@ -158,9 +162,6 @@ export function buildPronunciationHintPrompt({
     leadCharacter.bio == null
       ? null
       : `Lead character bio: ${leadCharacter.bio}`,
-    leadCharacter.article == null
-      ? null
-      : `Lead character article: always write "${characterRef}", not "${leadCharacter.name}" alone`,
     location.description == null
       ? null
       : `Location description: ${location.description}`,

@@ -125,8 +125,6 @@ describe(
         - Location: River Stage bathroom
         - Cue: color
 
-        Lead character article: always write "the seal", not "seal" alone
-
         Generate 2 distinct mnemonic story ideas.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.

@@ -184,6 +184,12 @@ export const pinyinSoundImageSetting = defineUserSetting({
   }) satisfies UserSettingImageEntity,
 });
 
+export function pinyinSoundNameArticleSettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinSoundNameArticleSetting.entity.marshalKey({ soundId });
+}
+
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundNameSetting.entity.marshalKey({ soundId });
 }
