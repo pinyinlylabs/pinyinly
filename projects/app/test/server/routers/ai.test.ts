@@ -31,6 +31,7 @@ describe(
         When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
         When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
@@ -62,6 +63,7 @@ describe(
           description: `A cramped, slightly sticky bathroom with bubble tea posters`,
         },
         cue: { word: `use`, meaning: `to use; to employ` },
+        creativeDirection: `Play it as a surreal heist-comedy beat with one unforgettable prop.`,
         count: 4,
       });
 
@@ -75,6 +77,7 @@ describe(
         When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
         When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
@@ -87,6 +90,7 @@ describe(
         Lead character bio: Ethan Klein — loud, expressive, chaotic
         Location description: A cramped, slightly sticky bathroom with bubble tea posters
         Cue meaning: to use; to employ
+        Creative direction: Play it as a surreal heist-comedy beat with one unforgettable prop.
 
         Generate 4 distinct mnemonic story ideas.
         Each suggestion must explicitly include the character and location by name.
@@ -117,6 +121,7 @@ describe(
         When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
         Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
         When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.

@@ -30,6 +30,7 @@ const pronunciationHintInputSchema = z
         meaning: z.string().optional(),
       })
       .strict(),
+    creativeDirection: z.string().max(500).optional(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
@@ -172,11 +173,13 @@ export function buildPronunciationHintPrompt({
   leadCharacter,
   location,
   cue,
+  creativeDirection,
   count,
 }: {
   leadCharacter: { name: string; bio?: string; article?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
+  creativeDirection?: string;
   count: number;
 }): { system: string; user: string } {
   const system = [
@@ -188,6 +191,7 @@ export function buildPronunciationHintPrompt({
     `When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.`,
     `Use the keyword as light inspiration for what happens, but do not turn the result into a definition.`,
     `When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.`,
+    `When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.`,
     `When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).`,
     `If extra character or location details are provided, use them to make the story more specific.`,
     `Keep each hint to 1-2 sentences.`,
@@ -207,6 +211,9 @@ export function buildPronunciationHintPrompt({
       ? null
       : `Location description: ${location.description}`,
     cue.meaning == null ? null : `Cue meaning: ${cue.meaning}`,
+    creativeDirection == null
+      ? null
+      : `Creative direction: ${creativeDirection}`,
   ].filter((line): line is string => line != null);
 
   const user = [
@@ -393,12 +400,14 @@ export const aiRouter = router({
     .input(pronunciationHintInputSchema)
     .output(pronunciationHintOutputSchema)
     .mutation(async (opts) => {
-      const { leadCharacter, location, cue, count } = opts.input;
+      const { leadCharacter, location, cue, creativeDirection, count } =
+        opts.input;
 
       const { system, user } = buildPronunciationHintPrompt({
         leadCharacter,
         location,
         cue,
+        creativeDirection,
         count,
       });
 
