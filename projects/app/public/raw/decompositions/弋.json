@@ -1,0 +1,9 @@
+{
+  "mnemonic": {
+    "components": [
+      "⿺",
+      { "hanzi": "𫠠", "label": "a man falling backwards", "strokes": "0-1" },
+      { "hanzi": "丶", "label": "a bullet", "strokes": "2" }
+    ]
+  }
+}

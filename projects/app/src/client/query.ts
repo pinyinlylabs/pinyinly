@@ -9,7 +9,10 @@ import type {
   SrsStateType,
   WikiCharacterDecomposition,
 } from "@/data/model";
-import { wikiCharacterDecompositionSchema } from "@/data/model";
+import {
+  wikiCharacterDataSchema,
+  wikiCharacterDecompositionSchema,
+} from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
@@ -378,6 +381,56 @@ export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter | null) =>
 export const hanziSvgPathsQuery = Platform.select({
   web: hanziSvgPathsQueryWeb,
   default: hanziSvgPathsQueryNative,
+});
+
+const characterDecompositionDataSchema = wikiCharacterDataSchema.pick({
+  decompositions: true,
+  mnemonic: true,
+});
+
+export type CharacterDecompositionData = z.infer<
+  typeof characterDecompositionDataSchema
+>;
+
+export const characterDecompositionQueryWeb = (hanzi: HanziCharacter | null) =>
+  queryOptions({
+    queryKey: [`characterDecomposition`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async ({ signal }): Promise<CharacterDecompositionData | null> => {
+            const response = await fetch(
+              `/raw/decompositions/${encodeURIComponent(hanzi)}.json`,
+              { signal },
+            );
+            if (!response.ok) {
+              return null;
+            }
+
+            const json = (await response.json()) as unknown;
+            const result = characterDecompositionDataSchema.safeParse(json);
+            return result.success ? result.data : null;
+          },
+    staleTime: Infinity,
+  });
+
+export const characterDecompositionQueryNative = (
+  hanzi: HanziCharacter | null,
+) =>
+  queryOptions({
+    queryKey: [`characterDecomposition`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async (): Promise<CharacterDecompositionData | null> => {
+            return null;
+          },
+    staleTime: Infinity,
+  });
+
+export const characterDecompositionQuery = Platform.select({
+  web: characterDecompositionQueryWeb,
+  default: characterDecompositionQueryNative,
 });
 
 export const fetchAudioBufferQuery = (

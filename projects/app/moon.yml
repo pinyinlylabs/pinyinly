@@ -72,7 +72,7 @@ tasks:
     script: |
       mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
-      yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
+      expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
     deps:
       - ~:codegen
     inputs:
@@ -87,6 +87,7 @@ tasks:
       - "@group(buildVercelExpoOutdir)"
     env:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"
 
   buildVercelExpoSentry:
     script: |
@@ -103,7 +104,7 @@ tasks:
 
   buildBillOfMaterials:
     script: |
-      yarn expo export &&
+      expo export &&
       tsx --tsconfig tsconfig.node.json ./bin/buildBillOfMaterials.ts
     preset: watcher
     options:
@@ -112,6 +113,7 @@ tasks:
     env:
       EXPO_ATLAS: "true"
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"
 
   codegen:
     deps:
@@ -144,7 +146,7 @@ tasks:
 
   codegenExpoRouterTypes:
     # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
-    command: yarn expo customize tsconfig.json
+    command: expo customize tsconfig.json
     inputs:
       - "@group(expoCliEnv)"
       - "*.*"
@@ -155,6 +157,7 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"
 
   codegenPublicVendor:
     command: tsx --tsconfig tsconfig.node.json ./bin/codegenPublicVendor.ts
@@ -250,7 +253,7 @@ tasks:
     preset: server
 
   devExpo:
-    command: yarn expo start
+    command: expo start
     preset: watcher
     options:
       # There's a memory leak that causes it to crash after a while, so we just
@@ -262,6 +265,7 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"
 
   devInngest:
     command: npx -y inngest-cli@1.19.1 dev
@@ -281,6 +285,18 @@ tasks:
       envFile: .env.local
     env:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
+
+  expoAtlas:
+    script: |
+      expo export -p web &&
+      npx expo-atlas .expo/atlas.jsonl
+    preset: watcher
+    options:
+      envFile: .env.local
+      mutex: expo-export # reduce IO contention
+    env:
+      EXPO_ATLAS: "true"
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   formatAssetJson:
     command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts

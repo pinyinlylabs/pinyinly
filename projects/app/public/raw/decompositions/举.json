@@ -1,0 +1,16 @@
+{
+  "decompositions": [
+    [
+      "⿱",
+      { "hanzi": "兴", "strokes": "" },
+      ["⿻", { "hanzi": "二", "strokes": "" }, { "hanzi": "丨", "strokes": "" }]
+    ]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿱",
+      { "hanzi": "兴", "strokes": "0-5" },
+      { "strokes": "6-8" }
+    ]
+  }
+}

@@ -1,5 +1,7 @@
-import { getWikiCharacterData } from "@/client/wiki";
-import { hanziSvgPathsQuery } from "@/client/query";
+import {
+  characterDecompositionQuery,
+  hanziSvgPathsQuery,
+} from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
   componentToString,
@@ -20,7 +22,7 @@ import { decompositionComponentsToIds } from "@/dictionary";
 import { parseIndexRanges, normalizeIndexRanges } from "@/util/indexRanges";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
-import { use, useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import type { ReactNode } from "react";
 import { Platform, Pressable, Text, View, Image } from "react-native";
 import { G, Svg } from "react-native-svg";
@@ -454,9 +456,11 @@ function HanziVisualSuggestionsPanel({
 }
 
 export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
-  const characterData = use(getWikiCharacterData(hanzi));
   const { data: strokePathsData } = useQuery(
     hanziSvgPathsQuery(isHanziCharacter(hanzi) ? hanzi : null),
+  );
+  const { data: mnemonicData } = useQuery(
+    characterDecompositionQuery(isHanziCharacter(hanzi) ? hanzi : null),
   );
   const strokePaths = strokePathsData ?? null;
   const db = useDb();
@@ -469,9 +473,9 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
   );
 
   const mnemonicIds =
-    characterData?.mnemonic == null
+    mnemonicData?.mnemonic?.components == null
       ? null
-      : idsNodeToString(characterData.mnemonic.components, componentToString);
+      : idsNodeToString(mnemonicData.mnemonic.components, componentToString);
 
   const builtInOptions: DecompositionOption[] = [];
   const seenBuiltInIds = new Set<string>();
@@ -492,11 +496,11 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
     builtInOptions.push({ ids, components });
   };
 
-  if (mnemonicIds != null && characterData?.mnemonic != null) {
-    pushBuiltInOption(mnemonicIds, characterData.mnemonic.components);
+  if (mnemonicIds != null && mnemonicData?.mnemonic?.components != null) {
+    pushBuiltInOption(mnemonicIds, mnemonicData.mnemonic.components);
   }
 
-  for (const decomposition of characterData?.decompositions ?? []) {
+  for (const decomposition of mnemonicData?.decompositions ?? []) {
     const ids = idsNodeToString(decomposition, componentToString);
     pushBuiltInOption(ids, decomposition);
   }

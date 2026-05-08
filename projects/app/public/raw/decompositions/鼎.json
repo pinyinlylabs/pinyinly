@@ -1,0 +1,13 @@
+{
+  "mnemonic": {
+    "components": [
+      "⿶",
+      [
+        "⿰",
+        { "hanzi": "片", "strokeDiff": -1, "strokes": "5-7" },
+        { "hanzi": "片", "strokes": "8-11" }
+      ],
+      { "hanzi": "目", "strokes": "0-4" }
+    ]
+  }
+}

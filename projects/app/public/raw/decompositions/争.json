@@ -1,0 +1,25 @@
+{
+  "decompositions": [
+    [
+      "⿱",
+      { "hanzi": "𠂊", "strokes": "" },
+      [
+        "⿻",
+        [
+          "⿻",
+          { "hanzi": "コ", "strokes": "" },
+          { "hanzi": "一", "strokes": "" }
+        ],
+        { "hanzi": "亅", "strokes": "" }
+      ]
+    ]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿳",
+      { "hanzi": "⺈", "strokes": "0-1" },
+      { "hanzi": "彐", "strokes": "2-4" },
+      { "hanzi": "亅", "strokes": "5" }
+    ]
+  }
+}

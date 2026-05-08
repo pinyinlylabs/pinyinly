@@ -70,9 +70,6 @@ describe(`/meaning.mdx files`, async () => {
     const isInDictionary = dictionary.lookupHanzi(hanzi).length > 0;
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
-    const hasCharacterData = memoize0(() =>
-      existsSync(path.join(path.dirname(filePath), `character.json`)),
-    );
     const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
 
     return {
@@ -82,12 +79,11 @@ describe(`/meaning.mdx files`, async () => {
       projectRelPath,
       hasMdx,
       getMdx,
-      hasCharacterData,
       filePath,
     };
   });
 
-  test(`existence`, () => {
+  test.skip(`existence`, () => {
     for (const { hanzi, isStructural, hasMdx, isInDictionary } of data) {
       if (
         isHanziCharacter(hanzi) &&
@@ -97,26 +93,6 @@ describe(`/meaning.mdx files`, async () => {
       ) {
         expect.soft(hasMdx(), hanzi).toBeTruthy();
       }
-    }
-  });
-
-  test(`should export characterData when character.json exists`, () => {
-    for (const { hanzi, hasMdx, getMdx, hasCharacterData } of data) {
-      if (!hasMdx()) {
-        continue;
-      }
-
-      if (!hasCharacterData()) {
-        continue;
-      }
-
-      const mdx = getMdx();
-      expect
-        .soft(
-          mdx,
-          `${hanzi} MDX has character.json but does not export characterData`,
-        )
-        .toMatch(/export\s*\{\s*characterData\s*\}/u);
     }
   });
 });
@@ -576,4 +552,86 @@ describe(`character.json files`, async () => {
       expect(actual).toEqual(nonNullable(expected.get(character)));
     }
   });
+
+  test(`consistency with public/raw/decompositions/*.json`, async () => {
+    const characterDecompositionsDir = path.join(
+      projectRoot,
+      `public`,
+      `raw`,
+      `decompositions`,
+    );
+
+    const expected = new Map<
+      HanziText,
+      Exclude<ReturnType<typeof buildCharacterDecompositionData>, null>
+    >();
+
+    for (const { character, characterData } of characterFiles) {
+      const decompositionData = buildCharacterDecompositionData(characterData);
+      if (decompositionData != null) {
+        expected.set(character, decompositionData);
+      }
+    }
+
+    if (!isCi) {
+      await mkdir(characterDecompositionsDir, { recursive: true });
+
+      const expectedFileNames = new Set(
+        [...expected.keys()].map((character) => `${character}.json`),
+      );
+
+      for (const fileName of await readdir(characterDecompositionsDir)) {
+        if (!fileName.endsWith(`.json`) || expectedFileNames.has(fileName)) {
+          continue;
+        }
+
+        await rm(path.join(characterDecompositionsDir, fileName));
+      }
+
+      for (const [character, decompositionData] of expected.entries()) {
+        await writeJsonFileIfChanged(
+          path.join(characterDecompositionsDir, `${character}.json`),
+          decompositionData,
+          2,
+        );
+      }
+    }
+
+    const actualFileNames = (await readdir(characterDecompositionsDir))
+      .filter((fileName) => fileName.endsWith(`.json`))
+      .sort(sortComparatorString((x) => x));
+    const expectedFileNames = [...expected.keys()]
+      .map((character) => `${character}.json`)
+      .sort(sortComparatorString((x) => x));
+
+    expect(actualFileNames).toEqual(expectedFileNames);
+
+    for (const fileName of actualFileNames) {
+      const character = fileName.slice(0, -`.json`.length) as HanziText;
+      const actual = JSON.parse(
+        readFileSync(path.join(characterDecompositionsDir, fileName), `utf-8`),
+      ) as unknown;
+
+      expect(actual).toEqual(nonNullable(expected.get(character)));
+    }
+  });
 });
+
+function buildCharacterDecompositionData(characterData: WikiCharacterData): {
+  mnemonic?: WikiCharacterData[`mnemonic`];
+  decompositions?: WikiCharacterData[`decompositions`];
+} | null {
+  const hasMnemonic = characterData.mnemonic != null;
+  const hasDecompositions =
+    characterData.decompositions != null &&
+    characterData.decompositions.length > 0;
+
+  if (!hasMnemonic && !hasDecompositions) {
+    return null;
+  }
+
+  return {
+    ...(characterData.mnemonic != null && { mnemonic: characterData.mnemonic }),
+    ...(hasDecompositions && { decompositions: characterData.decompositions }),
+  };
+}

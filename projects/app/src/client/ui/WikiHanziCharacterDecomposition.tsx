@@ -1,6 +1,8 @@
-import { getWikiCharacterData } from "@/client/wiki";
-import { hanziSvgPathsQuery } from "@/client/query";
 import type { DictionarySearchEntry } from "@/client/query";
+import {
+  characterDecompositionQuery,
+  hanziSvgPathsQuery,
+} from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
 import { composeHintText } from "@/client/ui/hintText";
@@ -10,7 +12,6 @@ import type {
   HanziText,
   HanziWord,
   WikiCharacterComponent,
-  WikiCharacterData,
 } from "@/data/model";
 import {
   hanziWordMeaningHintExplanationSetting,
@@ -22,7 +23,7 @@ import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { use, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { AiMeaningHintModal } from "./AiMeaningHintModal";
@@ -47,21 +48,11 @@ export function WikiHanziCharacterDecomposition({
   if (!isHanziCharacter(hanzi)) {
     return null;
   }
-  const characterData = use(getWikiCharacterData(hanzi));
-  if (characterData == null) {
-    return null;
-  }
-  return (
-    <WikiHanziCharacterDecompositionBox
-      hanzi={hanzi}
-      characterData={characterData}
-    />
-  );
+  return <WikiHanziCharacterDecompositionBox hanzi={hanzi} />;
 }
 
 interface WikiHanziCharacterDecompositionProps {
   hanzi: HanziCharacterType;
-  characterData: WikiCharacterData;
 }
 
 function hasStrokeRanges(
@@ -72,7 +63,6 @@ function hasStrokeRanges(
 
 export function WikiHanziCharacterDecompositionBox({
   hanzi,
-  characterData,
 }: WikiHanziCharacterDecompositionProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const componentsElements: ReactNode[] = [];
@@ -96,6 +86,8 @@ export function WikiHanziCharacterDecompositionBox({
       : [...walkIdsNodeLeafs(selectedDecomposition.decompositionComponents)];
 
   const { data: strokeSvgs } = useQuery(hanziSvgPathsQuery(hanzi));
+
+  const { data: mnemonicData } = useQuery(characterDecompositionQuery(hanzi));
 
   const showStrokeHighlights =
     selectedComponents != null &&
@@ -141,9 +133,9 @@ export function WikiHanziCharacterDecompositionBox({
   );
 
   const defaultMnemonicComponents =
-    characterData.mnemonic?.components == null
+    mnemonicData?.mnemonic?.components == null
       ? undefined
-      : [...walkIdsNodeLeafs(characterData.mnemonic.components)];
+      : [...walkIdsNodeLeafs(mnemonicData.mnemonic.components)];
   const componentsForAi = selectedComponents ?? defaultMnemonicComponents;
   const meaningAiComponents = aiMeaningComponents(
     componentsForAi,
@@ -256,7 +248,7 @@ export function WikiHanziCharacterDecompositionBox({
 
       <MeaningsSection
         hanzi={hanzi}
-        mnemonicHints={characterData.mnemonic?.hints}
+        mnemonicHints={mnemonicData?.mnemonic?.hints}
         aiComponents={meaningAiComponents}
         isEditMode={isEditMode}
       />

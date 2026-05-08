@@ -1,0 +1,12 @@
+{
+  "decompositions": [
+    ["⿱", { "hanzi": "𦍌", "strokes": "" }, { "hanzi": "介", "strokes": "" }]
+  ],
+  "mnemonic": {
+    "components": [
+      "⿱",
+      { "hanzi": "⺶", "strokes": "0-5" },
+      { "hanzi": "介", "strokes": "5-8" }
+    ]
+  }
+}
