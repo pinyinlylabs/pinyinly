@@ -1,7 +1,9 @@
 // pyly-not-src-test
 import "#assets/audio/manifest.json";
+import "#assets/audio/manifest.pinyin.json";
 
-import { pinyinAudioDir, projectRoot } from "#bin/util/paths.ts";
+import { audioDir, pinyinAudioDir, projectRoot } from "#bin/util/paths.ts";
+import { sortComparatorString } from "@pinyinly/lib/collections";
 import type { FileNamePart, Voice } from "#bin/util/speech.ts";
 import { generateSpeech } from "#bin/util/speech.ts";
 import type { PinyinSoundId } from "#data/model.ts";
@@ -20,9 +22,11 @@ import {
   buildAndTestSprites,
   createAudioFileTests,
 } from "@pinyinly/audio-sprites/testing";
+import { readFile, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 // oxlint-disable-next-line no-restricted-imports
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import { z } from "zod/v4";
 
 test(`test sprites`, { timeout: Infinity }, async () => {
   const manifestPath = path.join(projectRoot, `src/assets/audio/manifest.json`);
@@ -31,6 +35,31 @@ test(`test sprites`, { timeout: Infinity }, async () => {
     autoFix: !isCi,
     spriteFileSizes: [{ name: /^pinyin-/u, minSize: `50kB`, maxSize: `3MB` }],
   });
+});
+
+test(`pinyin runtime manifest matches source sprite manifest`, async () => {
+  const sourceManifestPath = path.join(audioDir, `manifest.json`);
+  const runtimeManifestPath = path.join(audioDir, `manifest.pinyin.json`);
+
+  const sourceManifest = sourceSpriteManifestSchema.parse(
+    JSON.parse(await readFile(sourceManifestPath, `utf8`)) as unknown,
+  );
+  const expectedRuntimeManifest =
+    buildPinyinSoundRuntimeManifest(sourceManifest);
+
+  if (!isCi) {
+    await writeJsonFileIfChanged(
+      runtimeManifestPath,
+      expectedRuntimeManifest,
+      2,
+    );
+  }
+
+  const runtimeManifest = pinyinSoundRuntimeManifestSchema.parse(
+    JSON.parse(await readFile(runtimeManifestPath, `utf8`)) as unknown,
+  );
+
+  expect(runtimeManifest).toEqual(expectedRuntimeManifest);
 });
 
 describe(`pinyin sounds`, () => {
@@ -709,3 +738,154 @@ describe(`pinyin sounds`, () => {
     return `You are teaching Chinese pronunciation, focusing on the different tones in Chinese. Pronounce the character using "${normalizedPinyin}" ${toneDescription}.`;
   }
 });
+
+const sourceSpriteSegmentSchema = z.object({
+  sprite: z.number().int().min(0),
+  start: z.number().min(0),
+  duration: z.number().min(0),
+});
+
+const sourceSpriteManifestSchema = z.object({
+  spriteFiles: z.array(z.string()),
+  segments: z.record(z.string(), sourceSpriteSegmentSchema),
+});
+
+const pinyinSoundRuntimeManifestSchema = z.object({
+  spriteFiles: z.array(z.string()),
+  segments: z.record(z.string(), z.string()),
+});
+
+type SourceSpriteManifest = z.infer<typeof sourceSpriteManifestSchema>;
+type PinyinSoundRuntimeManifest = z.infer<
+  typeof pinyinSoundRuntimeManifestSchema
+>;
+
+const PINYIN_SEGMENT_PREFIX = `pinyin/`;
+const DECIMAL_PLACES = 2;
+const DECIMAL_MULTIPLIER = 10 ** DECIMAL_PLACES;
+
+function roundDownToDecimals(value: number): number {
+  return Math.floor(value * DECIMAL_MULTIPLIER) / DECIMAL_MULTIPLIER;
+}
+
+function roundUpToDecimals(value: number): number {
+  return Math.ceil(value * DECIMAL_MULTIPLIER) / DECIMAL_MULTIPLIER;
+}
+
+function encodeRuntimeSegment(
+  runtimeSpriteIndex: number,
+  clips: readonly [number, number][],
+): string {
+  const encodedClips = clips
+    .map(([start, duration]) => `${start}-${duration}`)
+    .join(`,`);
+
+  return `${runtimeSpriteIndex}:${encodedClips}`;
+}
+
+function getPinyinFromRelativeAudioPath(relativePath: string): string | null {
+  if (!relativePath.startsWith(PINYIN_SEGMENT_PREFIX)) {
+    return null;
+  }
+
+  const fileName = relativePath.slice(PINYIN_SEGMENT_PREFIX.length);
+  if (!fileName.endsWith(`.m4a`)) {
+    return null;
+  }
+
+  const pinyinSeparator = fileName.indexOf(`-`);
+  if (pinyinSeparator <= 0) {
+    return null;
+  }
+
+  return fileName.slice(0, pinyinSeparator);
+}
+
+function buildPinyinSoundRuntimeManifest(
+  sourceManifest: SourceSpriteManifest,
+): PinyinSoundRuntimeManifest {
+  const pinyinSegments = Object.entries(sourceManifest.segments)
+    .filter(
+      ([relativePath]) => getPinyinFromRelativeAudioPath(relativePath) != null,
+    )
+    .sort(sortComparatorString(([relativePath]) => relativePath));
+
+  const sourceSpriteIndexes = [
+    ...new Set(pinyinSegments.map(([, segment]) => segment.sprite)),
+  ].sort((a, b) => a - b);
+
+  const runtimeSpriteFiles: string[] = [];
+  const runtimeSpriteIndexBySourceSpriteIndex = new Map<number, number>();
+
+  for (const sourceSpriteIndex of sourceSpriteIndexes) {
+    const sourceSpriteFileName = sourceManifest.spriteFiles[sourceSpriteIndex];
+    if (sourceSpriteFileName == null) {
+      throw new Error(
+        `Missing sprite filename for source sprite index ${sourceSpriteIndex}`,
+      );
+    }
+
+    const runtimeSpriteIndex = runtimeSpriteFiles.length;
+    runtimeSpriteFiles.push(sourceSpriteFileName);
+    runtimeSpriteIndexBySourceSpriteIndex.set(
+      sourceSpriteIndex,
+      runtimeSpriteIndex,
+    );
+  }
+
+  const segmentsByPinyin = new Map<string, [number, Array<[number, number]>]>();
+
+  for (const [relativePath, sourceSegment] of pinyinSegments) {
+    const pinyin = getPinyinFromRelativeAudioPath(relativePath);
+    if (pinyin == null) {
+      continue;
+    }
+
+    const runtimeSpriteIndex = runtimeSpriteIndexBySourceSpriteIndex.get(
+      sourceSegment.sprite,
+    );
+    if (runtimeSpriteIndex == null) {
+      throw new Error(
+        `Missing runtime sprite index mapping for source sprite index ${sourceSegment.sprite}`,
+      );
+    }
+
+    const clip: [number, number] = [
+      roundDownToDecimals(sourceSegment.start),
+      roundUpToDecimals(sourceSegment.duration),
+    ];
+
+    const existing = segmentsByPinyin.get(pinyin);
+    if (existing == null) {
+      segmentsByPinyin.set(pinyin, [runtimeSpriteIndex, [clip]]);
+      continue;
+    }
+
+    const [existingRuntimeSpriteIndex, clips] = existing;
+    if (existingRuntimeSpriteIndex !== runtimeSpriteIndex) {
+      throw new Error(
+        `Pinyin "${pinyin}" spans multiple sprites (${existingRuntimeSpriteIndex} and ${runtimeSpriteIndex}).`,
+      );
+    }
+
+    clips.push(clip);
+  }
+
+  const runtimeSegments = Object.fromEntries(
+    [...segmentsByPinyin.entries()]
+      .sort(sortComparatorString(([pinyin]) => pinyin))
+      .map(([pinyin, [runtimeSpriteIndex, clips]]) => {
+        const sortedClips = [...clips].sort(
+          ([startA]: [number, number], [startB]: [number, number]) =>
+            startA - startB,
+        );
+
+        return [pinyin, encodeRuntimeSegment(runtimeSpriteIndex, sortedClips)];
+      }),
+  );
+
+  return pinyinSoundRuntimeManifestSchema.parse({
+    spriteFiles: runtimeSpriteFiles,
+    segments: runtimeSegments,
+  });
+}
