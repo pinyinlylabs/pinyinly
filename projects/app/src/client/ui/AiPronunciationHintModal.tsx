@@ -4,6 +4,7 @@ import { ScrollView, Text, View } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import { TextInputMulti } from "./TextInputMulti";
 
 export interface AiPronunciationHintModalProps {
   leadCharacter: { name: string; bio?: string; article?: string };
@@ -26,8 +27,10 @@ export function AiPronunciationHintModal({
   onApplyHint,
   onDismiss,
 }: AiPronunciationHintModalProps) {
+  const creativeDirectionMaxLength = 500;
   const [suggestions, setSuggestions] = useState<HintSuggestion[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [creativeDirection, setCreativeDirection] = useState(``);
 
   const generateMutation = trpc.ai.generatePronunciationHints.useMutation();
 
@@ -35,10 +38,15 @@ export function AiPronunciationHintModal({
     setError(null);
 
     try {
+      const trimmedCreativeDirection = creativeDirection.trim();
       const result = await generateMutation.mutateAsync({
         leadCharacter,
         location,
         cue,
+        creativeDirection:
+          trimmedCreativeDirection === ``
+            ? undefined
+            : trimmedCreativeDirection,
         count: 4,
       });
       setSuggestions(result.suggestions);
@@ -102,6 +110,24 @@ export function AiPronunciationHintModal({
                 label="Cue"
                 value={formatRole(cue.word, cue.meaning)}
               />
+            </View>
+
+            <View className="gap-2">
+              <Text className="pyly-body-subheading">Creative direction</Text>
+              <Text className="font-sans text-[14px] text-fg-dim">
+                Optional: steer tone, style, or scene direction like a creative
+                director.
+              </Text>
+              <TextInputMulti
+                value={creativeDirection}
+                onChangeText={setCreativeDirection}
+                placeholder="Example: surreal and playful, like a tiny heist comedy with one striking visual moment"
+                maxLength={creativeDirectionMaxLength}
+                autoResizeMinHeight={90}
+              />
+              <Text className="font-sans text-[12px] text-fg-dim">
+                {creativeDirection.length}/{creativeDirectionMaxLength}
+              </Text>
             </View>
 
             {error == null ? null : (
