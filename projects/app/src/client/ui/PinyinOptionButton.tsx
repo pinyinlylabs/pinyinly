@@ -1,6 +1,5 @@
 import type { PropsOf } from "@pinyinly/lib/types";
 import { Text } from "react-native";
-import { tv } from "tailwind-variants";
 import { RectButton } from "./RectButton";
 
 interface PinyinOptionButtonProps extends Omit<
@@ -15,7 +14,6 @@ interface PinyinOptionButtonProps extends Omit<
 export function PinyinOptionButton({
   pinyin,
   shortcutKey,
-  className,
   onPress,
   ...props
 }: PinyinOptionButtonProps) {
@@ -23,7 +21,6 @@ export function PinyinOptionButton({
     <RectButton
       {...props}
       variant="option"
-      className={buttonClass({ className })}
       onPress={() => {
         onPress?.(pinyin);
       }}
@@ -51,11 +48,8 @@ export function PinyinOptionButton({
       <Text className="font-sans text-base/snug font-medium text-fg">
         {pinyin}
       </Text>
+      {` `}
       <Text className="font-sans text-sm/snug text-fg-dim">{shortcutKey}</Text>
     </RectButton>
   );
 }
-
-const buttonClass = tv({
-  base: `flex-row gap-2`,
-});

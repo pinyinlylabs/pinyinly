@@ -87,7 +87,12 @@ export function AiPronunciationHintModal({
             <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
               <HintContextRow
                 label="Lead"
-                value={formatRole(leadCharacter.name, leadCharacter.bio)}
+                value={formatRole(
+                  leadCharacter.article == null
+                    ? leadCharacter.name
+                    : `${leadCharacter.article} ${leadCharacter.name}`,
+                  leadCharacter.bio,
+                )}
               />
               <HintContextRow
                 label="Location"
