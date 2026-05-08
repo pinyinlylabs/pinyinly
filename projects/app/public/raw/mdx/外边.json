@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The external side of something."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

@@ -1,0 +1,10 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Usage Examples"}],"depth":2,"type":"heading"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"等待"}],"type":"strong"},{"type":"text","value":" (děng dài) - \"wait; await\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"待会儿"}],"type":"strong"},{"type":"text","value":" (dài huì er) - \"in a little while; wait a moment\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"对待"}],"type":"strong"},{"type":"text","value":" (duì dài) - \"treat; handle; deal with\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"接待"}],"type":"strong"},{"type":"text","value":" (jiē dài) - \"receive; welcome; host\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Context"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"待 reflects important Chinese social values:"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"Emphasizes proper treatment and courtesy toward others"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Shows the importance of patience and respectful waiting"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Essential for hospitality and social interactions"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Represents the balance between action and appropriate restraint"}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"}
+  ],
+  "type":"root"
+}

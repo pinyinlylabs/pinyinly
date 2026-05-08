@@ -1,0 +1,283 @@
+{
+  "children": [
+    {
+      "children": [{ "type": "text", "value": "Core Meaning & Usage" }],
+      "depth": 2,
+      "type": "heading"
+    },
+    {
+      "children": [
+        {
+          "type": "text",
+          "value": "一 represents the fundamental concept of "
+        },
+        {
+          "children": [
+            {
+              "type": "text",
+              "value": "unity, singularity, and the number one"
+            }
+          ],
+          "type": "strong"
+        },
+        { "type": "text", "value": ". It's used:" }
+      ],
+      "type": "paragraph"
+    },
+    {
+      "children": [
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "As a number" }],
+                  "type": "strong"
+                },
+                {
+                  "type": "text",
+                  "value": ": 一个苹果 (yī gè píngguǒ) - \"one apple\""
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "As \"a/an\"" }],
+                  "type": "strong"
+                },
+                {
+                  "type": "text",
+                  "value": ": 一本书 (yī běn shū) - \"a book\""
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "In compounds" }],
+                  "type": "strong"
+                },
+                {
+                  "type": "text",
+                  "value": ": 一起 (yīqǐ) - \"together\" (literally \"one together\")"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "For emphasis" }],
+                  "type": "strong"
+                },
+                {
+                  "type": "text",
+                  "value": ": 一定 (yīdìng) - \"definitely\" (literally \"one fixed\")"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        }
+      ],
+      "ordered": true,
+      "spread": false,
+      "start": 1,
+      "type": "list"
+    },
+    {
+      "children": [{ "type": "text", "value": "Examples" }],
+      "depth": 2,
+      "type": "heading"
+    },
+    {
+      "children": [
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "一天" }],
+                  "type": "strong"
+                },
+                { "type": "text", "value": " (yī tiān) - \"one day\"" }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "一点" }],
+                  "type": "strong"
+                },
+                { "type": "text", "value": " (yī diǎn) - \"a little bit\"" }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "一直" }],
+                  "type": "strong"
+                },
+                {
+                  "type": "text",
+                  "value": " (yīzhí) - \"straight; all along\""
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [{ "type": "text", "value": "第一" }],
+                  "type": "strong"
+                },
+                { "type": "text", "value": " (dì yī) - \"first; number one\"" }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        }
+      ],
+      "ordered": false,
+      "spread": false,
+      "start": null,
+      "type": "list"
+    },
+    {
+      "children": [{ "type": "text", "value": "Learning Notes" }],
+      "depth": 2,
+      "type": "heading"
+    },
+    {
+      "children": [
+        {
+          "type": "text",
+          "value": "一 is fundamental to Chinese - it appears in countless words and is essential for:"
+        }
+      ],
+      "type": "paragraph"
+    },
+    {
+      "children": [
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Counting and numbers" }],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Measure words (一个, 一本, 一只, etc.)"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Time expressions" }],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [
+                { "type": "text", "value": "Creating compound meanings" }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        }
+      ],
+      "ordered": false,
+      "spread": false,
+      "start": null,
+      "type": "list"
+    },
+    {
+      "children": [
+        {
+          "type": "text",
+          "value": "The tone changes in some combinations (e.g., 一个 is pronounced \"yí gè\" not \"yī gè\"), but this is\nlearned naturally through practice."
+        }
+      ],
+      "type": "paragraph"
+    }
+  ],
+  "type": "root"
+}

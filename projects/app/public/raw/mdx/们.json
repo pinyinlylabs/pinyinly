@@ -1,0 +1,7 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Quick Reference"}],"depth":2,"type":"heading"},
+    {"align":[],"children":[{"children":[{"children":[{"type":"text","value":"Aspect"}],"type":"tableCell"},{"children":[{"type":"text","value":"Info"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"Pinyin"}],"type":"tableCell"},{"children":[{"type":"text","value":"men (neutral tone)"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"Core meaning"}],"type":"tableCell"},{"children":[{"type":"text","value":"plural suffix for people"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"Part of speech"}],"type":"tableCell"},{"children":[{"type":"text","value":"particle/suffix"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"Tone"}],"type":"tableCell"},{"children":[{"type":"text","value":"neutral/light tone"}],"type":"tableCell"}],"type":"tableRow"}],"type":"table"}
+  ],
+  "type":"root"
+}

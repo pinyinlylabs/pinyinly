@@ -344,6 +344,13 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
 
 const strokeSvgArraySchema = z.array(z.string());
 
+const wikiMdastRootSchema = z.looseObject({
+  type: z.literal(`root`),
+  children: z.array(z.unknown()),
+});
+
+export type WikiMdastRoot = z.infer<typeof wikiMdastRootSchema>;
+
 export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
   queryOptions({
     queryKey: [`hanziSvgPaths`, hanzi] as const,
@@ -381,6 +388,45 @@ export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter | null) =>
 export const hanziSvgPathsQuery = Platform.select({
   web: hanziSvgPathsQueryWeb,
   default: hanziSvgPathsQueryNative,
+});
+
+export const wikiMdxQueryWeb = (hanzi: HanziText | null) =>
+  queryOptions({
+    queryKey: [`wikiMdx`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async ({ signal }): Promise<WikiMdastRoot | null> => {
+            const response = await fetch(
+              `/raw/mdx/${encodeURIComponent(hanzi)}.json`,
+              { signal },
+            );
+            if (!response.ok) {
+              return null;
+            }
+
+            const json = (await response.json()) as unknown;
+            const result = wikiMdastRootSchema.safeParse(json);
+            return result.success ? result.data : null;
+          },
+    staleTime: Infinity,
+  });
+
+export const wikiMdxQueryNative = (hanzi: HanziText | null) =>
+  queryOptions({
+    queryKey: [`wikiMdx`, hanzi] as const,
+    queryFn:
+      hanzi == null
+        ? skipToken
+        : async (): Promise<WikiMdastRoot | null> => {
+            return null;
+          },
+    staleTime: Infinity,
+  });
+
+export const wikiMdxQuery = Platform.select({
+  web: wikiMdxQueryWeb,
+  default: wikiMdxQueryNative,
 });
 
 const characterDecompositionDataSchema = wikiCharacterDataSchema.pick({

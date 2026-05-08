@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A unit of time equal to 60 seconds or one 60th of an hour."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

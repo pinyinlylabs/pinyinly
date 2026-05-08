@@ -1,0 +1,10 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Usage Examples"}],"depth":2,"type":"heading"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"预习"}],"type":"strong"},{"type":"text","value":" (yù xí) - \"preview; prepare lessons in advance\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"预报"}],"type":"strong"},{"type":"text","value":" (yù bào) - \"forecast; predict; advance report\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"预定"}],"type":"strong"},{"type":"text","value":" (yù dìng) - \"reserve; book in advance\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"预防"}],"type":"strong"},{"type":"text","value":" (yù fáng) - \"prevent; take preventive measures\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Context"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"预 emphasizes the Chinese cultural value of preparation and foresight:"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"Reflects the importance of planning and being ready"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Common in educational contexts (预习 - preparing lessons)"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Essential for weather, medical, and business planning"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Shows respect for future consequences and responsibility"}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"}
+  ],
+  "type":"root"
+}

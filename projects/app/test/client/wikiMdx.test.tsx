@@ -1,120 +1,68 @@
-// pyly-not-src-test
 // @vitest-environment happy-dom
 
+// pyly-not-src-test
+
 import { projectRoot } from "#bin/util/paths.ts";
-import { DbProvider } from "#client/ui/DbProvider.tsx";
-import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
-import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
+import type { WikiMdastRoot } from "#client/query.ts";
+import { MDXComponents } from "#client/ui/MDXComponents.tsx";
+import { MdastContent } from "#client/ui/MdastContent.tsx";
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
-import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
-import { registry_ForTesting } from "#client/wiki.js";
-import type { Rizzle } from "#data/rizzleSchema.ts";
-import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import {
+  CustomComponent,
+  CustomWrapper,
+  Separator,
+} from "#client/ui/demo/mdx/helpers.tsx";
+import templateMdastJson from "#client/ui/demo/mdx/template.mdast.json";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { render, waitForElementToBeRemoved } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import path from "node:path";
-import type { PropsWithChildren } from "react";
-import { Suspense as ReactSuspense } from "react";
-import { test as baseTest, describe, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 
-const test = baseTest.extend(rizzleFixture);
+const templateMdast = templateMdastJson as WikiMdastRoot;
 
-const testProviders = (rizzle: Rizzle) =>
-  function TestProviders({ children }: PropsWithChildren) {
-    const queryClient = useNewQueryClient();
-    return (
-      <QueryClientProvider client={queryClient}>
-        <RizzleProvider.Context.Provider value={rizzle}>
-          <DbProvider>
-            <DeviceStoreProvider>{children}</DeviceStoreProvider>
-          </DbProvider>
-        </RizzleProvider.Context.Provider>
-      </QueryClientProvider>
-    );
-  };
-
-// Registry approach - tests pre-compiled components with faithful Metro behavior
-describe(`mdx rendering (via registry)`, () => {
-  // Dynamic import to avoid issues if registry doesn't exist
-  test(`registry loads successfully`, async () => {
-    try {
-      expect(registry_ForTesting).toBeDefined();
-      expect(Object.keys(registry_ForTesting).length).toBeGreaterThan(0);
-    } catch (error) {
-      // If registry doesn't exist, skip this test
-      console.warn(`Registry not available, skipping registry tests:`, error);
-    }
-  });
-
-  // TODO: expand this to cover all .mdx files, maybe only in CI
-  const entries = Object.entries(registry_ForTesting).slice(0, 3);
-
-  for (const [path, entry] of entries) {
-    const Component = entry.component;
-    // Test a sample of the registry entries - ensures faithful production behavior
-    test(
-      `${path} component renders correctly`,
-      { timeout: 10000, retry: 2 },
-      async ({ rizzle }) => {
-        const Providers = testProviders(rizzle);
-        const element = (
-          <Providers>
-            <ReactSuspense fallback={<div data-testid="suspense-fallback" />}>
-              <PylyMdxComponents>
-                <Component />
-              </PylyMdxComponents>
-            </ReactSuspense>
-          </Providers>
-        );
-
-        const { queryByTestId } = render(element);
-
-        // Wait for component to load - handle race condition where fallback might not be rendered
-        const fallback = queryByTestId(`suspense-fallback`);
-
-        // If fallback exists, wait for it to be removed; otherwise just wait a tick to ensure rendering is complete
-        if (fallback) {
-          await waitForElementToBeRemoved(fallback);
-        }
-
-        // Render again to make sure there are no errors thrown.
-        render(element);
-      },
-    );
-  }
-});
-
-// Direct file approach - tests Metro transformation fidelity
 describe(`mdx files exist and are valid`, async () => {
   const mdxFiles = await glob(
     path.join(projectRoot, `src/client/wiki/**/*.mdx`),
   );
 
   test(`finds MDX files`, () => {
-    expect(mdxFiles.length).toBeGreaterThan(100); // Ensure we have a good number of files
+    expect(mdxFiles.length).toBeGreaterThan(100);
   });
 
-  test(`sample MDX files have expected structure`, async () => {
-    // Test a sample for performance
+  test(`sample MDX files have expected structure`, () => {
     const sampleFiles = mdxFiles.slice(0, 20);
 
     for (const filePath of sampleFiles) {
       const content = readFileSync(filePath, `utf8`);
-
-      // Basic validation - should contain markdown-like content
-      const hasContent = content.trim().length > 0;
       const relativePath = path.relative(projectRoot, filePath);
 
-      expect(hasContent, `File ${relativePath} should have content`).toBe(true);
-
-      // Check that file follows expected naming convention
-      // Accept various MDX file types in the wiki structure
+      expect(
+        content.trim().length > 0,
+        `File ${relativePath} should have content`,
+      ).toBe(true);
       expect(relativePath).toMatch(/src\/client\/wiki\/.+\/.+\.mdx$/u);
     }
   });
 });
 
-test(`test`, () => {
-  expect(true).toBe(true);
+describe(`mdast rendering`, () => {
+  test(`renders generated template mdast from local json fixture`, () => {
+    render(
+      <PylyMdxComponents>
+        <MDXComponents
+          components={{
+            CustomComponent,
+            CustomWrapper,
+            Separator,
+          }}
+        >
+          <MdastContent root={templateMdast} />
+        </MDXComponents>
+      </PylyMdxComponents>,
+    );
+
+    expect(screen.getByText(`Heading 1`)).toBeInTheDocument();
+    expect(screen.getByText(`highlighted text`)).toBeInTheDocument();
+    expect(screen.getByText(`Hello from CustomComponent`)).toBeInTheDocument();
+  });
 });

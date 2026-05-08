@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A brief message sent from one person to another."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

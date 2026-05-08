@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Indicates an action that happened very recently."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Indicates an action currently taking place."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

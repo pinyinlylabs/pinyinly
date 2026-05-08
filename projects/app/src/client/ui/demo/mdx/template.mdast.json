@@ -1,0 +1,450 @@
+{
+  "children": [
+    {
+      "attributes": [
+        { "name": "title", "type": "mdxJsxAttribute", "value": "Body text" }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "children": [
+        { "type": "text", "value": "Body text with " },
+        { "children": [{ "type": "text", "value": "bold" }], "type": "strong" },
+        { "type": "text", "value": " and " },
+        {
+          "children": [{ "type": "text", "value": "italic" }],
+          "type": "emphasis"
+        },
+        { "type": "text", "value": " and " },
+        { "type": "inlineCode", "value": "inline code" },
+        { "type": "text", "value": " and " },
+        {
+          "children": [{ "type": "text", "value": "highlighted text" }],
+          "type": "mark"
+        },
+        { "type": "text", "value": "." }
+      ],
+      "type": "paragraph"
+    },
+    {
+      "attributes": [
+        { "name": "title", "type": "mdxJsxAttribute", "value": "Headings" }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "children": [{ "type": "text", "value": "Heading 1" }],
+      "depth": 1,
+      "type": "heading"
+    },
+    {
+      "children": [{ "type": "text", "value": "Heading 2" }],
+      "depth": 2,
+      "type": "heading"
+    },
+    {
+      "children": [{ "type": "text", "value": "Heading 3" }],
+      "depth": 3,
+      "type": "heading"
+    },
+    {
+      "children": [{ "type": "text", "value": "Heading 4" }],
+      "depth": 4,
+      "type": "heading"
+    },
+    {
+      "children": [{ "type": "text", "value": "Heading 5" }],
+      "depth": 5,
+      "type": "heading"
+    },
+    {
+      "children": [{ "type": "text", "value": "Heading 6" }],
+      "depth": 6,
+      "type": "heading"
+    },
+    {
+      "attributes": [
+        { "name": "title", "type": "mdxJsxAttribute", "value": "Ordered list" }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "children": [
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "First item" }],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Second item" }],
+              "type": "paragraph"
+            },
+            {
+              "children": [
+                {
+                  "checked": null,
+                  "children": [
+                    {
+                      "children": [{ "type": "text", "value": "Nested first" }],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "spread": false,
+                  "type": "listItem"
+                },
+                {
+                  "checked": null,
+                  "children": [
+                    {
+                      "children": [
+                        { "type": "text", "value": "Nested second" }
+                      ],
+                      "type": "paragraph"
+                    },
+                    {
+                      "children": [
+                        {
+                          "checked": null,
+                          "children": [
+                            {
+                              "children": [
+                                { "type": "text", "value": "Nested third" }
+                              ],
+                              "type": "paragraph"
+                            }
+                          ],
+                          "spread": false,
+                          "type": "listItem"
+                        }
+                      ],
+                      "ordered": true,
+                      "spread": false,
+                      "start": 1,
+                      "type": "list"
+                    }
+                  ],
+                  "spread": false,
+                  "type": "listItem"
+                }
+              ],
+              "ordered": true,
+              "spread": false,
+              "start": 1,
+              "type": "list"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Third item" }],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        }
+      ],
+      "ordered": true,
+      "spread": false,
+      "start": 1,
+      "type": "list"
+    },
+    {
+      "attributes": [
+        {
+          "name": "title",
+          "type": "mdxJsxAttribute",
+          "value": "Unordered list"
+        }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "children": [
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "First item" }],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Second item" }],
+              "type": "paragraph"
+            },
+            {
+              "children": [
+                {
+                  "checked": null,
+                  "children": [
+                    {
+                      "children": [{ "type": "text", "value": "Nested first" }],
+                      "type": "paragraph"
+                    },
+                    {
+                      "children": [
+                        {
+                          "checked": null,
+                          "children": [
+                            {
+                              "children": [
+                                { "type": "text", "value": "Nested second" }
+                              ],
+                              "type": "paragraph"
+                            }
+                          ],
+                          "spread": false,
+                          "type": "listItem"
+                        }
+                      ],
+                      "ordered": false,
+                      "spread": false,
+                      "start": null,
+                      "type": "list"
+                    }
+                  ],
+                  "spread": false,
+                  "type": "listItem"
+                }
+              ],
+              "ordered": false,
+              "spread": false,
+              "start": null,
+              "type": "list"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        },
+        {
+          "checked": null,
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Third item" }],
+              "type": "paragraph"
+            }
+          ],
+          "spread": false,
+          "type": "listItem"
+        }
+      ],
+      "ordered": false,
+      "spread": false,
+      "start": null,
+      "type": "list"
+    },
+    {
+      "attributes": [
+        {
+          "name": "title",
+          "type": "mdxJsxAttribute",
+          "value": "Horizontal rule"
+        }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    { "type": "thematicBreak" },
+    {
+      "attributes": [
+        { "name": "title", "type": "mdxJsxAttribute", "value": "Tables" }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "align": ["left", "center", "right"],
+      "children": [
+        {
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Left align" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "Center" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "Right align" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "Normal" }],
+              "type": "tableCell"
+            }
+          ],
+          "type": "tableRow"
+        },
+        {
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Pinyin" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "mù" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "1" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "1" }],
+              "type": "tableCell"
+            }
+          ],
+          "type": "tableRow"
+        },
+        {
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Core meaning" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [
+                { "type": "text", "value": "tree; wood; timber; wooden" }
+              ],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "2" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "2" }],
+              "type": "tableCell"
+            }
+          ],
+          "type": "tableRow"
+        },
+        {
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Part of speech" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "noun" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "3" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "3" }],
+              "type": "tableCell"
+            }
+          ],
+          "type": "tableRow"
+        },
+        {
+          "children": [
+            {
+              "children": [{ "type": "text", "value": "Tone" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "fourth tone" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "4" }],
+              "type": "tableCell"
+            },
+            {
+              "children": [{ "type": "text", "value": "4" }],
+              "type": "tableCell"
+            }
+          ],
+          "type": "tableRow"
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "attributes": [
+        {
+          "name": "title",
+          "type": "mdxJsxAttribute",
+          "value": "Custom leaf components"
+        }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "attributes": [],
+      "children": [],
+      "name": "CustomComponent",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "attributes": [
+        {
+          "name": "title",
+          "type": "mdxJsxAttribute",
+          "value": "Custom wrapper components"
+        }
+      ],
+      "children": [],
+      "name": "Separator",
+      "type": "mdxJsxFlowElement"
+    },
+    {
+      "children": [
+        { "type": "text", "value": "Some " },
+        {
+          "attributes": [],
+          "children": [
+            { "type": "text", "value": "normal and " },
+            {
+              "children": [{ "type": "text", "value": "bold" }],
+              "type": "strong"
+            },
+            { "type": "text", "value": " content" }
+          ],
+          "name": "CustomWrapper",
+          "type": "mdxJsxTextElement"
+        },
+        { "type": "text", "value": " wrapped in a custom component." }
+      ],
+      "type": "paragraph"
+    }
+  ],
+  "type": "root"
+}

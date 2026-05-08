@@ -1,0 +1,12 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Usage Examples"}],"depth":2,"type":"heading"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"不是"}],"type":"strong"},{"type":"text","value":" (bù shì) - \"is not; am not; are not\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"不好"}],"type":"strong"},{"type":"text","value":" (bù hǎo) - \"not good; bad\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"不知道"}],"type":"strong"},{"type":"text","value":" (bù zhī dào) - \"don't know\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"不用"}],"type":"strong"},{"type":"text","value":" (bù yòng) - \"don't need to; no need\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Grammar Notes"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"不 is the primary negation word in Chinese:"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"Used to negate verbs, adjectives, and other parts of speech"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Pronunciation changes to bú (second tone) before fourth-tone words"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Essential for forming negative statements and questions"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Can be used alone as \"no\" or combined with other words"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Foundation for understanding Chinese sentence structure and grammar"}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Context"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"不 represents the Chinese way of expressing disagreement politely and clearly, essential for all\ncommunication and decision-making."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A sentence or a string of words."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}
