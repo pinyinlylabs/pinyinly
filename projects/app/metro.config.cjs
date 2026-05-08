@@ -1,7 +1,6 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
 const { withNativeWind } = require(`nativewind/metro`);
 const { withMdx } = require(`@pinyinly/mdx/metro`);
-const { withAudioSprites } = require(`@pinyinly/audio-sprites/metro`);
 const { withSlimWikiRegistryResolver } = require(
   `./src/metro/withSlimWikiRegistryResolver`,
 );
@@ -58,11 +57,6 @@ config = {
 };
 
 config = withSlimWikiRegistryResolver(config);
-
-config = withAudioSprites(config, {
-  manifestPath: `./src/assets/audio/manifest.json`,
-  cachePath: `./.cache/audio-sprites`,
-});
 
 config = withNativeWind(config, {
   input: `./src/global.css`,
