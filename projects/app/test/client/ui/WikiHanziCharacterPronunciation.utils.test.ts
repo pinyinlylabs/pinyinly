@@ -44,7 +44,7 @@ describe(
       });
     });
 
-    test(`returns null when meanings have different pinyin`, () => {
+    test(`returns first meaning pronunciation when meanings have different pinyin`, () => {
       const result = getSharedPrimaryPronunciation([
         createMeaning({
           gloss: `to walk`,
@@ -53,7 +53,23 @@ describe(
         createMeaning({ gloss: `row`, pinyin: `háng` }),
       ]);
 
-      expect(result).toBeNull();
+      expect(result).toStrictEqual({
+        gloss: `to walk`,
+        pinyinUnit: `xíng`,
+      });
+    });
+
+    test(`returns first valid meaning when top meaning has no pinyin`, () => {
+      const result = getSharedPrimaryPronunciation([
+        createMeaning({ gloss: `first` }),
+        createMeaning({ gloss: `child`, pinyin: `zǐ` }),
+        createMeaning({ gloss: `suffix`, pinyin: `zi` }),
+      ]);
+
+      expect(result).toStrictEqual({
+        gloss: `child`,
+        pinyinUnit: `zǐ`,
+      });
     });
 
     test(`returns null when no meaning has both gloss and pinyin`, () => {

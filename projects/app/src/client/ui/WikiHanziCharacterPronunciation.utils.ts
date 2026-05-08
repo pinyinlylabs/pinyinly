@@ -28,12 +28,5 @@ export function getSharedPrimaryPronunciation(
     return null;
   }
 
-  const uniquePinyins = new Set(candidates.map((x) => x.pinyinUnit));
-
-  if (uniquePinyins.size === 1) {
-    const firstCandidate = candidates[0];
-    return firstCandidate ?? null;
-  }
-
-  return null;
+  return candidates[0] ?? null;
 }
