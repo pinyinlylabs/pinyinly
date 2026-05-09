@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The day of the week before Monday and following Saturday."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

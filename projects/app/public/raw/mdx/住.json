@@ -1,0 +1,17 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Usage Examples"}],"depth":2,"type":"heading"},
+    {"align":[],"children":[{"children":[{"children":[{"type":"text","value":"Chinese"}],"type":"tableCell"},{"children":[{"type":"text","value":"Pinyin"}],"type":"tableCell"},{"children":[{"type":"text","value":"English"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"我住在北京"}],"type":"tableCell"},{"children":[{"type":"text","value":"wǒ zhù zài běijīng"}],"type":"tableCell"},{"children":[{"type":"text","value":"I live in Beijing"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"你住哪儿？"}],"type":"tableCell"},{"children":[{"type":"text","value":"nǐ zhù nǎr?"}],"type":"tableCell"},{"children":[{"type":"text","value":"Where do you live?"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"住房"}],"type":"tableCell"},{"children":[{"type":"text","value":"zhùfáng"}],"type":"tableCell"},{"children":[{"type":"text","value":"housing; residence"}],"type":"tableCell"}],"type":"tableRow"},{"children":[{"children":[{"type":"text","value":"住宿"}],"type":"tableCell"},{"children":[{"type":"text","value":"zhùsù"}],"type":"tableCell"},{"children":[{"type":"text","value":"accommodation; lodging"}],"type":"tableCell"}],"type":"tableRow"}],"type":"table"},
+    {"children":[{"type":"text","value":"Grammar Patterns"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"住 + 在 + place"}],"depth":3,"type":"heading"},
+    {"children":[{"children":[{"type":"text","value":"Pattern"}],"type":"strong"},{"type":"text","value":": 住在 + location"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"他住在上海 (tā zhù zài shànghǎi) - \"He lives in Shanghai\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"我们住在学校附近 (wǒmen zhù zài xuéxiào fùjìn) - \"We live near the school\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"住 + duration"}],"depth":3,"type":"heading"},
+    {"children":[{"children":[{"type":"text","value":"Pattern"}],"type":"strong"},{"type":"text","value":": 住 + time expression"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"住了三年 (zhùle sān nián) - \"lived for three years\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"住一个月 (zhù yí gè yuè) - \"live for one month\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Context"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"In Chinese culture, where one lives (住) is closely tied to family, stability, and social status.\nThe concept of 住 encompasses not just physical dwelling but also belonging to a community and\nestablishing roots."}],"type":"paragraph"},
+    {"children":[{"type":"text","value":"Traditional Chinese architecture emphasized the 住 concept through courtyard houses (四合院) where\nmultiple generations would 住 together, reinforcing family bonds and hierarchy."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

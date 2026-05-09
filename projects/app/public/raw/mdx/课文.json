@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The text of a lesson in a textbook."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

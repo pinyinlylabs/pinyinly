@@ -1,0 +1,13 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Dual Meanings"}],"depth":2,"type":"heading"},
+    {"children":[{"children":[{"type":"text","value":"As \"leather\":"}],"type":"strong"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"皮革"}],"type":"strong"},{"type":"text","value":" (pí gé) - \"leather; hide\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"革制品"}],"type":"strong"},{"type":"text","value":" (gé zhì pǐn) - \"leather goods\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"children":[{"type":"text","value":"As \"reform/revolutionize\":"}],"type":"strong"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"改革"}],"type":"strong"},{"type":"text","value":" (gǎi gé) - \"reform; transformation\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"革命"}],"type":"strong"},{"type":"text","value":" (gé mìng) - \"revolution\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Context"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"革 connects physical and social transformation:"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"The leather-making process symbolizes improvement and refinement"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Extended metaphorically to mean political and social reform"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Reflects the Chinese concept that change requires careful process and skill"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Important in both traditional crafts and modern political discourse"}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"}
+  ],
+  "type":"root"
+}

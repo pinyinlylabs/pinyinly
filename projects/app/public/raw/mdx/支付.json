@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Indicates the action of making a payment."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

@@ -1,22 +1,27 @@
 # @pinyinly/mdx
 
-Metro transformer for MDX files in Expo projects.
+Shared MDX processing utilities for Pinyinly projects.
 
 ## Usage
 
-Add to your `metro.config.js`:
+Create an AST processor:
 
-```javascript
-const { withMdx } = require("@pinyinly/mdx/metro");
+```typescript
+import { createMdxAstProcessor } from "@pinyinly/mdx/processor";
 
-let config = getDefaultConfig(__dirname);
-config = withMdx(config);
-module.exports = config;
+const processor = createMdxAstProcessor();
+
+const parsed = processor.parse({
+  value: `==highlighted text==`,
+  path: `example.mdx`,
+});
+
+const transformedTree = await processor.run(parsed);
 ```
 
 ## Features
 
-- Transform MDX files to React components
-- Support for local asset imports (images, etc.)
-- Custom MDX component provider support
-- Remark plugin support
+- Canonical MDX processor configuration shared across code paths
+- Flexible marker support (`==highlighted text==`)
+- GFM support
+- Vite plugin support via `@pinyinly/mdx/vite`

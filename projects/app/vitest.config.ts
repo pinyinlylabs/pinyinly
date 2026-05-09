@@ -1,4 +1,3 @@
-import { viteMdxPlugin } from "@pinyinly/mdx/vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
@@ -31,7 +30,7 @@ export default defineConfig({
       "react-native": `react-native-web`,
     },
   },
-  plugins: [viteMdxPlugin(), tsconfigPaths(), react()],
+  plugins: [tsconfigPaths(), react()],
   define: {
     __DEV__: `true`,
     "process.env.EXPO_OS": JSON.stringify(`web`),

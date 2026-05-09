@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A student who attends primary school."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

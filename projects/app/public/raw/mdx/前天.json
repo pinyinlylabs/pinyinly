@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The day before the current day."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

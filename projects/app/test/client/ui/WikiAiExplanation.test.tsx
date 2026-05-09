@@ -1,24 +1,28 @@
 // @vitest-environment happy-dom
 
 import { render, screen, fireEvent } from "@testing-library/react";
-import { Text } from "react-native";
 import type { HanziText } from "#data/model.ts";
 import { describe, expect, test, vi } from "vitest";
 import { WikiAiExplanation } from "#client/ui/WikiAiExplanation.tsx";
 
 const collapsedMaxHeight = 320;
 
-const { getWikiMdxHanziMeaningMock } = vi.hoisted(() => ({
-  getWikiMdxHanziMeaningMock: vi.fn(),
+const { useQueryMock } = vi.hoisted(() => ({
+  useQueryMock: vi.fn(),
 }));
 
-vi.mock(`#client/wiki.ts`, () => ({
-  getWikiMdxHanziMeaning: getWikiMdxHanziMeaningMock,
-}));
+vi.mock(`@tanstack/react-query`, async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+
+  return {
+    ...actual,
+    useQuery: useQueryMock,
+  };
+});
 
 describe(`WikiAiExplanation`, () => {
   test(`renders nothing when no wiki MDX exists`, () => {
-    getWikiMdxHanziMeaningMock.mockReturnValue(undefined);
+    useQueryMock.mockReturnValue({ data: null });
     const hanzi = `你` as HanziText;
 
     const { container } = render(<WikiAiExplanation hanzi={hanzi} />);
@@ -27,8 +31,16 @@ describe(`WikiAiExplanation`, () => {
   });
 
   test(`starts collapsed and toggles to full content`, () => {
-    getWikiMdxHanziMeaningMock.mockReturnValue(function MeaningMdx() {
-      return <Text>Generated explanation</Text>;
+    useQueryMock.mockReturnValue({
+      data: {
+        type: `root`,
+        children: [
+          {
+            type: `paragraph`,
+            children: [{ type: `text`, value: `Generated explanation` }],
+          },
+        ],
+      },
     });
     const hanzi = `你` as HanziText;
 

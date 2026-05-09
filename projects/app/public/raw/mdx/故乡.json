@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The town or city where one was born or grew up."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The date on which an event took place in a previous year."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

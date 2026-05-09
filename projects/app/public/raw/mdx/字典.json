@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A reference book containing words and their meanings."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

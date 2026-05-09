@@ -1,0 +1,10 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Usage Examples"}],"depth":2,"type":"heading"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"写信"}],"type":"strong"},{"type":"text","value":" (xiě xìn) - \"write a letter\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"收到信"}],"type":"strong"},{"type":"text","value":" (shōu dào xìn) - \"receive a letter\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"信件"}],"type":"strong"},{"type":"text","value":" (xìn jiàn) - \"correspondence; mail\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"回信"}],"type":"strong"},{"type":"text","value":" (huí xìn) - \"reply to a letter\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Context"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"信 as \"letter\" reflects traditional Chinese communication:"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"type":"text","value":"Letters were formal and respectful forms of communication"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Connected to the concept of trust (same character for \"believe\")"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Important for maintaining relationships across distances"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Now extends to modern forms like email and messages"}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"}
+  ],
+  "type":"root"
+}

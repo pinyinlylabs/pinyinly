@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A newspaper that is published every day."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

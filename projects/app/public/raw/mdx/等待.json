@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"To remain in a state until an expected event occurs."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

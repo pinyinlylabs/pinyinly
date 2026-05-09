@@ -1,9 +1,5 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
 const { withNativeWind } = require(`nativewind/metro`);
-const { withMdx } = require(`@pinyinly/mdx/metro`);
-const { withSlimWikiRegistryResolver } = require(
-  `./src/metro/withSlimWikiRegistryResolver`,
-);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
 /** @type Record<string, { moduleName?: string; platform?: string }> */
@@ -56,16 +52,12 @@ config = {
   },
 };
 
-config = withSlimWikiRegistryResolver(config);
-
 config = withNativeWind(config, {
   input: `./src/global.css`,
   inlineRem: 16,
   // @ts-expect-error this is overriden, see https://github.com/nativewind/nativewind/pull/1371
   getCSSForPlatform: undefined,
 });
-
-config = withMdx(config);
 
 // Doing Sentry last is probably important so that the hashed debug IDs are
 // based on the final content of the final and aren't stripped by any other

@@ -1,3 +1,5 @@
+// pyly-not-src-test
+
 import { dataDir, projectRoot, wikiDir } from "#bin/util/paths.ts";
 import {
   characterStrokeCount,

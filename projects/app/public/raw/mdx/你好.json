@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A common greeting used to say hello or hi."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

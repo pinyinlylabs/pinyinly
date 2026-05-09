@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"The cost of a ticket to an event or journey."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

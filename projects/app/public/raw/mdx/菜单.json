@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"A list of dishes available in a restaurant."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

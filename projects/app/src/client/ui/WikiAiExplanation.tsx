@@ -1,5 +1,6 @@
-import { getWikiMdxHanziMeaning } from "@/client/wiki";
+import { wikiMdxQuery } from "@/client/query";
 import type { HanziText } from "@/data/model";
+import { useQuery } from "@tanstack/react-query";
 import { View } from "react-native";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 import { WikiTitledBox } from "./WikiTitledBox";
@@ -7,9 +8,9 @@ import { WikiTitledBox } from "./WikiTitledBox";
 const collapsedMaxHeight = 320;
 
 export function WikiAiExplanation({ hanzi }: { hanzi: HanziText }) {
-  const hasMeaningMdx = getWikiMdxHanziMeaning(hanzi) != null;
+  const { data: mdastRoot } = useQuery(wikiMdxQuery(hanzi));
 
-  if (!hasMeaningMdx) {
+  if (mdastRoot == null) {
     return null;
   }
 

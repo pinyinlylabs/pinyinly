@@ -1,0 +1,6 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Indicates the action of taking a seat."}],"type":"paragraph"}
+  ],
+  "type":"root"
+}

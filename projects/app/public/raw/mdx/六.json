@@ -1,0 +1,10 @@
+{
+  "children":[
+    {"children":[{"type":"text","value":"Usage Examples"}],"depth":2,"type":"heading"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"六天"}],"type":"strong"},{"type":"text","value":" (liù tiān) - \"six days\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"六月"}],"type":"strong"},{"type":"text","value":" (liù yuè) - \"June\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"第六"}],"type":"strong"},{"type":"text","value":" (dì liù) - \"sixth\""}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"六十"}],"type":"strong"},{"type":"text","value":" (liù shí) - \"sixty\""}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"},
+    {"children":[{"type":"text","value":"Cultural Notes"}],"depth":2,"type":"heading"},
+    {"children":[{"type":"text","value":"Six is considered very auspicious in Chinese culture:"}],"type":"paragraph"},
+    {"children":[{"checked":null,"children":[{"children":[{"children":[{"type":"text","value":"六六大顺"}],"type":"strong"},{"type":"text","value":" (liù liù dà shùn) - \"may everything go smoothly\" (common blessing)"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Represents harmony and good fortune"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Often used in wedding dates and important celebrations"}],"type":"paragraph"}],"spread":false,"type":"listItem"},{"checked":null,"children":[{"children":[{"type":"text","value":"Associated with smooth progress and success"}],"type":"paragraph"}],"spread":false,"type":"listItem"}],"ordered":false,"spread":false,"start":null,"type":"list"}
+  ],
+  "type":"root"
+}
