@@ -41,6 +41,8 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/metro-cache
+
       - uses: ./.github/actions/moon-affected
         id: moon-dbMigrate-query
         with:
