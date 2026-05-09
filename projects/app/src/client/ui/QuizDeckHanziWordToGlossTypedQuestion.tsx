@@ -40,7 +40,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   const { skill, flag, bannedMeaningPrimaryGlossHint } = question;
 
   const userAnswerRef = useRef(``);
-  const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
+  const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
 
   const [startTime] = useState(() => Date.now());
@@ -80,7 +80,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
       submitButton={
         <QuizSubmitButton
           autoFocus={grade != null}
-          isUserAnswerProvided={!userAnswerEmpty}
+          isUserAnswerProvided={!isUserAnswerEmpty}
           rating={grade?.rating}
           onPress={() => {
             submit();
@@ -131,7 +131,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
         disabled={grade != null}
         onChangeValue={(text) => {
           userAnswerRef.current = text.trim();
-          setUserAnswerEmpty(text.trim().length === 0);
+          setIsUserAnswerEmpty(text.trim().length === 0);
         }}
         hintText={
           bannedMeaningPrimaryGlossHint.length > 0 ? (
@@ -152,7 +152,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={grade == null ? `default` : ratingToInputState(grade.rating)}
+        state={ratingToInputState(isUserAnswerEmpty, grade?.rating)}
         placeholder="Type in English"
         autoCorrect
       />

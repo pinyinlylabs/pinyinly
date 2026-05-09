@@ -58,7 +58,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
     useUserSetting({ setting: autoCheckUserSetting }).value?.enabled ?? false;
 
   const userAnswerRef = useRef(``);
-  const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
+  const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
 
   const [startTime] = useState(() => Date.now());
@@ -98,7 +98,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
       submitButton={
         <QuizSubmitButton
           autoFocus={grade != null}
-          isUserAnswerProvided={!userAnswerEmpty}
+          isUserAnswerProvided={!isUserAnswerEmpty}
           rating={grade?.rating}
           onPress={() => {
             submit();
@@ -149,7 +149,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
         disabled={grade != null}
         onChangeText={(text, suggestionAccepted) => {
           userAnswerRef.current = text;
-          setUserAnswerEmpty(text.trim().length === 0);
+          setIsUserAnswerEmpty(text.trim().length === 0);
 
           if (
             autoCheck &&
@@ -182,7 +182,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={grade == null ? `default` : ratingToInputState(grade.rating)}
+        state={ratingToInputState(isUserAnswerEmpty, grade?.rating)}
       />
     </Skeleton>
   );
