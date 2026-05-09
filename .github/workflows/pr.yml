@@ -43,13 +43,21 @@ jobs:
 
       - uses: ./.github/actions/metro-cache
 
+      - name: debug proto / pnpm
+        run: proto debug config
+        working-directory: projects/app/api
+
+      - name: debug pnpm install
+        run: pnpm install
+        working-directory: projects/app/api
+
       - uses: ./.github/actions/moon-affected
         id: moon-dbMigrate-query
         with:
           target: app:dbMigrate
 
       - run: moon run app:dbMigrate --color --affected --remote
-        if: steps.moon-dbMigrate-query.target-affected
+        if: steps.moon-dbMigrate-query.outputs.target-affected == 'true'
         env:
           DATABASE_URL: ${{ steps.create-neon-branch.outputs.db_url }}
 
@@ -60,7 +68,7 @@ jobs:
 
       - name: 🚀 Deploy to Vercel (preview)
         run: moon run app:deployVercel --color --affected --remote
-        if: steps.moon-deployVercel-query.target-affected
+        if: steps.moon-deployVercel-query.outputs.target-affected == 'true'
         env:
           EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
@@ -96,7 +104,7 @@ jobs:
 
       - name: 🚀 Deploy to Vercel (preview)
         run: moon run static:deploy --color --affected --remote
-        if: steps.moon-deploy-query.target-affected
+        if: steps.moon-deploy-query.outputs.target-affected == 'true'
         env:
           PYLY_VERCEL_PREVIEW: ""
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

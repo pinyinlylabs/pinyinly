@@ -7,10 +7,10 @@
 #       target: app:deploy
 #
 #   - run: yarn install
-#     if: steps.moon-deploy-query.target-affected
+#     if: steps.moon-deploy-query.outputs.target-affected == 'true'
 #
 #   - run: moon run app:deploy --color --affected --remote
-#     if: steps.moon-deploy-query.target-affected
+#     if: steps.moon-deploy-query.outputs.target-affected == 'true'
 
 name: moon-affected
 description: Query Moon's `--affected` knowledge
