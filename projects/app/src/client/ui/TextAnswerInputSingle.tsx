@@ -89,7 +89,7 @@ export const TextAnswerInputSingle = ({
               onSubmit();
             }
           }}
-          placeholder={placeholder}
+          placeholder={state === `default` ? placeholder : undefined}
           textAlign="center"
           ref={inputRef}
           value={text}
@@ -103,7 +103,7 @@ export const TextAnswerInputSingle = ({
 };
 
 const inputClass = tv({
-  base: `self-stretch border-2 border-transparent`,
+  base: `self-stretch border-[3px] border-transparent`,
   variants: {
     styled: {
       true: `border-fg bg-fg/10 text-fg`,

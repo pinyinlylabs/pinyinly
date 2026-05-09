@@ -22,17 +22,19 @@ interface QuizSubmitButtonProps extends Pick<
   `onPress` | `ref`
 > {
   autoFocus?: boolean;
-  disabled: boolean;
+  isUserAnswerProvided: boolean;
   rating: Rating | null | undefined;
 }
 
 export const QuizSubmitButton = ({
   autoFocus = false,
-  disabled,
+  isUserAnswerProvided,
   rating,
   onPress,
   ref,
 }: QuizSubmitButtonProps) => {
+  const disabled = rating == null && !isUserAnswerProvided;
+
   let text;
 
   switch (rating) {

@@ -26,12 +26,10 @@ import { useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { Text, View } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
 import { PinyinOptionButton } from "./PinyinOptionButton";
-import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
-import { QuizSubmitButton } from "./QuizSubmitButton";
+import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
 import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
 import { ratingToInputState } from "./TextAnswerInputSingle.utils";
@@ -58,7 +56,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
     useUserSetting({ setting: autoCheckUserSetting }).value?.enabled ?? false;
 
   const userAnswerRef = useRef(``);
-  const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
+  const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
 
   const [startTime] = useState(() => Date.now());
@@ -85,26 +83,13 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   };
 
   return (
-    <Skeleton
-      toast={
-        grade == null ? null : (
-          <QuizDeckResultToast
-            skill={skill}
-            rating={grade.rating}
-            onUndo={onUndo}
-          />
-        )
-      }
-      submitButton={
-        <QuizSubmitButton
-          autoFocus={grade != null}
-          disabled={userAnswerEmpty}
-          rating={grade?.rating}
-          onPress={() => {
-            submit();
-          }}
-        />
-      }
+    <QuizDeckQuestionSkeleton
+      grade={grade}
+      isUserAnswerProvided={!isUserAnswerEmpty}
+      onSubmit={submit}
+      onUndo={onUndo}
+      showIdkButton
+      skill={skill}
     >
       <View
         className={
@@ -149,7 +134,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
         disabled={grade != null}
         onChangeText={(text, suggestionAccepted) => {
           userAnswerRef.current = text;
-          setUserAnswerEmpty(text.trim().length === 0);
+          setIsUserAnswerEmpty(text.trim().length === 0);
 
           if (
             autoCheck &&
@@ -182,9 +167,9 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={grade == null ? `default` : ratingToInputState(grade.rating)}
+        state={ratingToInputState(isUserAnswerEmpty, grade?.rating)}
       />
-    </Skeleton>
+    </QuizDeckQuestionSkeleton>
   );
 }
 
@@ -290,44 +275,3 @@ const hiddenPlaceholderOptions = (
     <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
   </>
 );
-
-const Skeleton = ({
-  children,
-  toast,
-  submitButton,
-}: {
-  children: ReactNode;
-  toast: ReactNode | null;
-  submitButton: ReactNode;
-}) => {
-  const insets = useSafeAreaInsets();
-  const submitButtonHeight = 44;
-  const submitButtonInsetBottom = insets.bottom + 20;
-
-  return (
-    <>
-      <View
-        className="flex-1 px-4"
-        style={{ paddingBottom: submitButtonInsetBottom }}
-      >
-        {children}
-        <View
-          // Placeholder to reserve space for the submit button that's absolute
-          // positioned.
-          className="mt-[5px]"
-          style={{ height: submitButtonHeight }}
-        />
-      </View>
-      {toast}
-      <View
-        className="absolute inset-x-4 flex-row items-stretch"
-        style={{
-          bottom: submitButtonInsetBottom,
-          height: submitButtonHeight,
-        }}
-      >
-        {submitButton}
-      </View>
-    </>
-  );
-};

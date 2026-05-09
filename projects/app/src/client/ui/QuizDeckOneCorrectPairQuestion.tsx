@@ -15,14 +15,11 @@ import {
 import { autoCheckUserSetting } from "@/data/userSettings";
 import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
-import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NewSkillModal } from "./NewSkillModal";
-import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
-import { QuizSubmitButton } from "./QuizSubmitButton";
+import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { TextAnswerButton } from "./TextAnswerButton";
 import type {
   TextAnswerButtonFontSize,
@@ -36,6 +33,10 @@ import { WikiHanziModal } from "./WikiHanziModal";
 
 const buttonThickness = 4;
 const gap = 12;
+
+function nowMs() {
+  return Date.now();
+}
 
 export function QuizDeckOneCorrectPairQuestion({
   question,
@@ -76,7 +77,7 @@ export function QuizDeckOneCorrectPairQuestion({
     aChoice: OneCorrectPairQuestionChoice,
     bChoice: OneCorrectPairQuestionChoice,
   ) => {
-    const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
+    const durationMs = (timer.endTime ?? nowMs()) - timer.startTime;
     const grade = gradeOneCorrectPairQuestion(
       answer,
       aChoice,
@@ -100,33 +101,22 @@ export function QuizDeckOneCorrectPairQuestion({
   );
 
   return (
-    <Skeleton
-      toast={
-        grade == null ? null : (
-          <QuizDeckResultToast
-            rating={grade.rating}
-            skill={answer.skill}
-            onUndo={onUndo}
-          />
-        )
+    <QuizDeckQuestionSkeleton
+      grade={grade}
+      isUserAnswerProvided={
+        selectedAChoice !== undefined && selectedBChoice !== undefined
       }
-      submitButton={
-        <QuizSubmitButton
-          disabled={
-            selectedAChoice === undefined || selectedBChoice === undefined
-          }
-          rating={grade?.rating}
-          onPress={() => {
-            if (selectedAChoice == null || selectedBChoice == null) {
-              return;
-            } else if (grade == null) {
-              submitChoices(selectedAChoice, selectedBChoice);
-            } else {
-              onNext();
-            }
-          }}
-        />
-      }
+      onSubmit={() => {
+        if (selectedAChoice == null || selectedBChoice == null) {
+          return;
+        } else if (grade == null) {
+          submitChoices(selectedAChoice, selectedBChoice);
+        } else {
+          onNext();
+        }
+      }}
+      onUndo={onUndo}
+      skill={answer.skill}
     >
       {flag?.kind === QuestionFlagKind.NewSkill ? (
         <NewSkillModal passivePresentation skill={question.answer.skill} />
@@ -242,45 +232,9 @@ export function QuizDeckOneCorrectPairQuestion({
           </View>
         </View>
       </View>
-    </Skeleton>
+    </QuizDeckQuestionSkeleton>
   );
 }
-
-const Skeleton = ({
-  children,
-  toast,
-  submitButton,
-}: {
-  children: ReactNode;
-  toast: ReactNode | null;
-  submitButton: ReactNode;
-}) => {
-  const insets = useSafeAreaInsets();
-  const submitButtonHeight = 44;
-  const submitButtonInsetBottom = insets.bottom + 20;
-  const contentInsetBottom = submitButtonInsetBottom + 5 + submitButtonHeight;
-
-  return (
-    <>
-      <View
-        className="flex-1 px-4"
-        style={{ paddingBottom: contentInsetBottom }}
-      >
-        {children}
-      </View>
-      {toast}
-      <View
-        className="absolute inset-x-4 flex-row items-stretch"
-        style={{
-          bottom: submitButtonInsetBottom,
-          height: submitButtonHeight,
-        }}
-      >
-        {submitButton}
-      </View>
-    </>
-  );
-};
 
 const ChoiceButton = ({
   state,
