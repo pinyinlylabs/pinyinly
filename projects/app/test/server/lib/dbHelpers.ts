@@ -68,7 +68,6 @@ export const txTest = test
   })
   .extend<{ tx: Transaction; pgConfig?: PgTransactionConfig }>({
     pgConfig: async ({}, use) => {
-      // oxlint-disable-next-line eslint-plugin-unicorn(no-useless-undefined)
       await use(undefined);
     },
     tx: async ({ db, pgConfig }, use) => {

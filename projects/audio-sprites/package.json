@@ -33,7 +33,6 @@
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "eslint": "^9.13.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-unicorn": "^60.0.0",
     "memfs": "^4.57.2",
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
