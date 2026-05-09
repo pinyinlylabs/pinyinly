@@ -31,7 +31,7 @@ jobs:
 
       - name: 🚀 Migrate database
         run: moon run app:dbMigrate --color --affected --remote
-        # if: steps.moon-dbMigrate-query.target-affected
+        if: steps.moon-dbMigrate-query.outputs.target-affected == 'true'
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: 🚀 Deploy to Vercel (production)
         run: moon run app:deployVercel --color --affected --remote
-        # if: steps.moon-deployVercel-query.target-affected
+        if: steps.moon-deployVercel-query.outputs.target-affected == 'true'
         env:
           EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
@@ -85,7 +85,7 @@ jobs:
 
       - name: 🚀 Deploy to Vercel (production)
         run: moon run static:deploy --color --affected --remote
-        if: steps.moon-deploy-query.target-affected
+        if: steps.moon-deploy-query.outputs.target-affected == 'true'
         env:
           PYLY_VERCEL_PROD: ""
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -109,7 +109,7 @@ jobs:
 
       - name: 🚀 Build and deploy
         run: moon run app:deployEasUpdate --color --affected --remote
-        # if: steps.moon-deployEasUpdate-query.target-affected
+        if: steps.moon-deployEasUpdate-query.outputs.target-affected == 'true'
         env:
           EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
