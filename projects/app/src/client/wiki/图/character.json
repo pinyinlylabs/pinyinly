@@ -3,8 +3,8 @@
   "mnemonic": {
     "components": [
       "⿴",
-      { "hanzi": "囗", "strokes": "0-2" },
-      { "hanzi": "冬", "strokes": "3-7" }
+      { "hanzi": "囗", "strokes": "0-1,7" },
+      { "hanzi": "冬", "strokes": "2-6" }
     ]
   },
   "strokes": [
