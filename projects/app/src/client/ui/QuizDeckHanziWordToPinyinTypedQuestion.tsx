@@ -98,7 +98,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
       submitButton={
         <QuizSubmitButton
           autoFocus={grade != null}
-          disabled={userAnswerEmpty}
+          isUserAnswerProvided={!userAnswerEmpty}
           rating={grade?.rating}
           onPress={() => {
             submit();

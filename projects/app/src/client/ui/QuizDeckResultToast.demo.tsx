@@ -64,7 +64,10 @@ export default () => {
                     height: submitButtonHeight,
                   }}
                 >
-                  <QuizSubmitButton rating={rating} disabled={false} />
+                  <QuizSubmitButton
+                    rating={rating}
+                    isUserAnswerProvided={false}
+                  />
                 </View>
               </View>
             </View>

@@ -112,8 +112,8 @@ export function QuizDeckOneCorrectPairQuestion({
       }
       submitButton={
         <QuizSubmitButton
-          disabled={
-            selectedAChoice === undefined || selectedBChoice === undefined
+          isUserAnswerProvided={
+            selectedAChoice !== undefined && selectedBChoice !== undefined
           }
           rating={grade?.rating}
           onPress={() => {
