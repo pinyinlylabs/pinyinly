@@ -385,6 +385,14 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
 export const hanziWordMeaningSchema = z
   .object({
     gloss: z.array(z.string()),
+    freq: z
+      .number()
+      .min(0)
+      .max(1)
+      .describe(
+        `normalized meaning frequency where higher means more common usage`,
+      )
+      .optional(),
     pinyin: z
       .array(pinyinTextSchema)
       .describe(

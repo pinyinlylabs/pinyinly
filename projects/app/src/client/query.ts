@@ -569,6 +569,7 @@ export interface DictionarySearchEntry {
   hanzi: HanziText;
   meaningKey: string;
   hanziWord: HanziWord;
+  freq?: number;
   gloss: string[];
   glossCount: number;
   pos?: PartOfSpeech;
@@ -897,6 +898,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           hanzi,
           meaningKey,
           hanziWord,
+          freq: meaning.freq,
           gloss,
           glossCount: gloss.length,
           pos: meaning.pos,
