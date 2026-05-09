@@ -25,8 +25,8 @@ workspace:
 tasks:
   build:
     deps:
-      - buildEasUpdate
-      - buildVercel
+      - ~:buildEasUpdate
+      - ~:buildVercel
     options:
       runInCI: false
 
@@ -189,15 +189,15 @@ tasks:
 
   deploy:
     deps:
-      - deployEasUpdate
-      - deployVercel
+      - ~:deployEasUpdate
+      - ~:deployVercel
     options:
       runInCI: false
 
   deployEasUpdate:
     deps:
-      - deployEasUpdateEas
-      - deployEasUpdateSentry
+      - ~:deployEasUpdateEas
+      - ~:deployEasUpdateSentry
     options:
       persistent: false
       runInCI: false
@@ -205,7 +205,7 @@ tasks:
   deployEasUpdateEas:
     command: npx -y eas-cli@18.10.0 update --skip-bundler --input-dir @group(buildEasUpdateOutdir) --auto --non-interactive
     deps:
-      - buildEasUpdate
+      - ~:buildEasUpdate
     options:
       persistent: false
       runInCI: false
@@ -213,27 +213,27 @@ tasks:
   deployEasUpdateSentry:
     command: npx -y sentry-expo-upload-sourcemaps @group(buildEasUpdateOutdir)
     deps:
-      - buildEasUpdate
+      - ~:buildEasUpdate
     options:
       persistent: false
       runInCI: false
 
   deployVercel:
     deps:
-      - deployVercelVercel
-      - deployVercelSentry
+      - ~:deployVercelVercel
+      - ~:deployVercelSentry
     options:
       persistent: false
       runInCI: false
 
   deployVercelVercel:
     deps:
-      - buildVercel
+      - ~:buildVercel
 
   deployVercelSentry:
     command: npx -y @sentry/cli@3.4.1 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
     deps:
-      - buildVercel
+      - ~:buildVercel
     options:
       persistent: false
       runInCI: false
@@ -241,15 +241,15 @@ tasks:
   dev:
     command: noop
     deps:
-      - devExpo
-      - devServices
+      - ~:devExpo
+      - ~:devServices
     preset: server
 
   devServices:
     command: noop
     deps:
-      - devInngest
-      - devMinio
+      - ~:devInngest
+      - ~:devMinio
     preset: server
 
   devExpo:

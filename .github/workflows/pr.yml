@@ -118,7 +118,7 @@ jobs:
 
       - uses: ./.github/actions/metro-cache
 
-      - run: moon ci --color
+      - run: moon ci --color :typecheck :lint :test :fmt
         env:
           # Exclude wiki content during CI builds to avoid bundling 3000+ MDX files.
           # Wiki is lazy-loaded, so users won't be affected—preview will just show no wiki.
