@@ -89,7 +89,7 @@ export const TextAnswerInputSingle = ({
               onSubmit();
             }
           }}
-          placeholder={placeholder}
+          placeholder={state === `default` ? placeholder : undefined}
           textAlign="center"
           ref={inputRef}
           value={text}
