@@ -69,6 +69,43 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await loadDictionary();
 });
 
+test(`hanzi word meaning schema accepts optional freq`, () => {
+  const parsed = hanziWordMeaningSchema.parse({
+    gloss: [`long`],
+    pinyin: [`cháng`],
+    freq: 0.8,
+  });
+
+  expect(parsed.freq).toBe(0.8);
+});
+
+test(`hanzi word meaning schema allows missing freq`, () => {
+  const parsed = hanziWordMeaningSchema.parse({
+    gloss: [`long`],
+    pinyin: [`cháng`],
+  });
+
+  expect(parsed.freq).toBeUndefined();
+});
+
+test(`hanzi word meaning schema enforces normalized freq bounds`, () => {
+  expect(() =>
+    hanziWordMeaningSchema.parse({
+      gloss: [`long`],
+      pinyin: [`cháng`],
+      freq: -0.1,
+    }),
+  ).toThrow();
+
+  expect(() =>
+    hanziWordMeaningSchema.parse({
+      gloss: [`long`],
+      pinyin: [`cháng`],
+      freq: 1.1,
+    }),
+  ).toThrow();
+});
+
 test(`hanzi word meaning-keys are not too similar`, async () => {
   const dict = await loadDictionary();
 

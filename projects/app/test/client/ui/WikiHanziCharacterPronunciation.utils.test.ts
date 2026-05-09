@@ -6,13 +6,16 @@ import { describe, expect, test } from "vitest";
 function createMeaning({
   gloss,
   pinyin,
+  freq,
 }: {
   gloss: string;
   pinyin?: string;
-}): Pick<DictionarySearchEntry, `gloss` | `pinyin`> {
+  freq?: number;
+}): Pick<DictionarySearchEntry, `gloss` | `pinyin` | `freq`> {
   return {
     gloss: [gloss],
     pinyin: pinyin == null ? undefined : [pinyin as PinyinText],
+    freq,
   };
 }
 
@@ -56,6 +59,18 @@ describe(
       expect(result).toStrictEqual({
         gloss: `to walk`,
         pinyinUnit: `xíng`,
+      });
+    });
+
+    test(`returns pronunciation for first item after freq-prioritized ordering`, () => {
+      const result = getSharedPrimaryPronunciation([
+        createMeaning({ gloss: `long`, pinyin: `cháng`, freq: 0.9 }),
+        createMeaning({ gloss: `grow`, pinyin: `zhǎng`, freq: 0.6 }),
+      ]);
+
+      expect(result).toStrictEqual({
+        gloss: `long`,
+        pinyinUnit: `cháng`,
       });
     });
 
