@@ -43,14 +43,6 @@ jobs:
 
       - uses: ./.github/actions/metro-cache
 
-      - name: debug proto / pnpm
-        run: proto debug config
-        working-directory: projects/app/api
-
-      - name: debug pnpm install
-        run: pnpm install
-        working-directory: projects/app/api
-
       - uses: ./.github/actions/moon-affected
         id: moon-dbMigrate-query
         with:
