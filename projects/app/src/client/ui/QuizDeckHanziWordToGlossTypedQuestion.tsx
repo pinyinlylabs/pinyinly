@@ -12,12 +12,9 @@ import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useRef, useState } from "react";
-import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
-import { QuizSubmitButton } from "./QuizSubmitButton";
+import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
 import { ratingToInputState } from "./TextAnswerInputSingle.utils";
 
@@ -67,26 +64,13 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   };
 
   return (
-    <Skeleton
-      toast={
-        grade == null ? null : (
-          <QuizDeckResultToast
-            skill={skill}
-            rating={grade.rating}
-            onUndo={onUndo}
-          />
-        )
-      }
-      submitButton={
-        <QuizSubmitButton
-          autoFocus={grade != null}
-          isUserAnswerProvided={!isUserAnswerEmpty}
-          rating={grade?.rating}
-          onPress={() => {
-            submit();
-          }}
-        />
-      }
+    <QuizDeckQuestionSkeleton
+      grade={grade}
+      isUserAnswerProvided={!isUserAnswerEmpty}
+      onSubmit={submit}
+      onUndo={onUndo}
+      showIdkButton
+      skill={skill}
     >
       <View
         className={
@@ -156,47 +140,6 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
         placeholder="Type in English"
         autoCorrect
       />
-    </Skeleton>
+    </QuizDeckQuestionSkeleton>
   );
 }
-
-const Skeleton = ({
-  children,
-  toast,
-  submitButton,
-}: {
-  children: ReactNode;
-  toast: ReactNode | null;
-  submitButton: ReactNode;
-}) => {
-  const insets = useSafeAreaInsets();
-  const submitButtonHeight = 44;
-  const submitButtonInsetBottom = insets.bottom + 20;
-
-  return (
-    <>
-      <View
-        className="flex-1 px-4"
-        style={{ paddingBottom: submitButtonInsetBottom }}
-      >
-        {children}
-        <View
-          // Placeholder to reserve space for the submit button that's absolute
-          // positioned.
-          className="mt-[5px]"
-          style={{ height: submitButtonHeight }}
-        />
-      </View>
-      {toast}
-      <View
-        className="absolute inset-x-4 flex-row items-stretch"
-        style={{
-          bottom: submitButtonInsetBottom,
-          height: submitButtonHeight,
-        }}
-      >
-        {submitButton}
-      </View>
-    </>
-  );
-};
