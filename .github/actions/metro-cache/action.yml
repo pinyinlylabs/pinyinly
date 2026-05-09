@@ -10,15 +10,12 @@ runs:
       with:
         result-encoding: string
         script: |
-          const os = require('os');
-          const path = require('path');
+          const os = require('node:os');
+          const path = require('node:path');
           return path.join(os.tmpdir(), 'metro-cache');
 
     - name: Restore Metro cache
       uses: actions/cache@v5
       with:
         path: ${{ steps.metro-cache-dir-path.outputs.result }}
-        key: ${{ runner.os }}-metro-cache-${{ github.ref }}
-        restore-keys: |
-          ${{ runner.os }}-metro-cache-${{ github.base_ref }}
-          ${{ runner.os }}-metro-cache-
+        key: metro-cache-${{ runner.os }}-${{ hashFiles('yarn.lock', 'projects/app/metro.config.*') }}

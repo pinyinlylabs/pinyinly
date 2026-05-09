@@ -116,6 +116,8 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/metro-cache
+
       - run: moon ci --color
         env:
           # Exclude wiki content during CI builds to avoid bundling 3000+ MDX files.
