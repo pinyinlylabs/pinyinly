@@ -64,7 +64,7 @@ tasks:
     # Copy to final destination.
     command: rsync -a --delete @group(buildVercelExpoSentryOutdir) @group(buildVercelOutdir)
     deps:
-      - buildVercelExpoSentry
+      - ~:buildVercelExpoSentry
     outputs:
       - "@group(buildVercelOutdir)"
 
@@ -94,7 +94,7 @@ tasks:
       rsync -a --delete @group(buildVercelExpoOutdir) @group(buildVercelExpoSentryOutdir) &&
       npx -y @sentry/cli@3.4.1 sourcemaps inject @group(buildVercelExpoSentryOutdir)
     deps:
-      - buildVercelExpo
+      - ~:buildVercelExpo
     inputs:
       - "@group(sentryCliEnv)"
     options:
