@@ -1,6 +1,6 @@
 jq = "1.8.1" # renovate: datasource=github-releases depName=jqlang/jq extractVersion=^jq-(?<version>.*)$
 moon = "1.41.8" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
-pnpm = "9.15.9" # Keep in sync with projects/app/api/package.json#packageManager
+pnpm = "9.15.9" # Keep in sync with projects/app/api/package.json#packageManager otherwise `vercel build` fails
 
 [plugins]
 jq = "https://raw.githubusercontent.com/appthrust/proto-toml-plugins/main/jq/plugin.toml"
