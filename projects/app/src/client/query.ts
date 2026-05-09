@@ -35,14 +35,13 @@ import type {
 import {
   buildCharacterComponentUsageEntries,
   buildHanziWord,
-  decompositionComponentsToIds,
   getIsStructuralHanzi,
   hanziFromHanziWord,
   loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
-import { matchAllHanziCharacters, walkIdsNodeLeafs } from "@/data/hanzi";
+import { matchAllHanziCharacters } from "@/data/hanzi";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type {
@@ -70,6 +69,7 @@ import {
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
+import isEqual from "lodash/isEqual";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
 import type { DeviceStoreEntity } from "./deviceStore";
@@ -801,9 +801,7 @@ function userDictionaryCollectionOptions({
               if (
                 existing != null &&
                 next != null &&
-                (existing.gloss !== next.gloss ||
-                  existing.pinyin !== next.pinyin ||
-                  existing.note !== next.note)
+                !isEqual(existing, next)
               ) {
                 write({ type: `update`, value: next });
               }
@@ -975,45 +973,6 @@ function parseUserWikiCharacterDecompositionValue(
   return null;
 }
 
-function areCharacterDecompositionComponentsEqual(
-  a: WikiCharacterDecomposition | undefined,
-  b: WikiCharacterDecomposition | undefined,
-): boolean {
-  if (a === b) {
-    return true;
-  }
-
-  if (a == null || b == null) {
-    return false;
-  }
-
-  if (decompositionComponentsToIds(a) !== decompositionComponentsToIds(b)) {
-    return false;
-  }
-
-  const aLeafs = [...walkIdsNodeLeafs(a)];
-  const bLeafs = [...walkIdsNodeLeafs(b)];
-  if (aLeafs.length !== bLeafs.length) {
-    return false;
-  }
-
-  for (let i = 0; i < aLeafs.length; i += 1) {
-    const left = aLeafs[i];
-    const right = bLeafs[i];
-    if (
-      left?.hanzi !== right?.hanzi ||
-      left?.label !== right?.label ||
-      left?.strokes !== right?.strokes ||
-      left?.strokeDiff !== right?.strokeDiff ||
-      left?.color !== right?.color
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 function userCharacterDecompositionCollectionOptions({
   settingCollection,
 }: {
@@ -1097,7 +1056,7 @@ function userCharacterDecompositionCollectionOptions({
               }
 
               if (
-                !areCharacterDecompositionComponentsEqual(
+                !isEqual(
                   existing.decompositionComponents,
                   next.decompositionComponents,
                 )
@@ -1195,7 +1154,7 @@ function characterDecompositionCollectionOptions({
           }
 
           if (
-            !areCharacterDecompositionComponentsEqual(
+            !isEqual(
               existing.decompositionComponents,
               next.decompositionComponents,
             )
@@ -1365,27 +1324,6 @@ function dictionarySearchHskSortKey(hsk?: HskLevel): number {
   return hsk == null ? 9999 : hskLevelToNumber(hsk);
 }
 
-function areStringArraysEqual(
-  a: readonly string[] | undefined,
-  b: readonly string[] | undefined,
-) {
-  if (a === b) {
-    return true;
-  }
-
-  if (a == null || b == null || a.length !== b.length) {
-    return false;
-  }
-
-  for (let i = 0; i < a.length; i += 1) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 function dictionarySearchCollectionOptions({
   builtInDictionarySearch,
   userDictionary,
@@ -1429,19 +1367,7 @@ function dictionarySearchCollectionOptions({
             return;
           }
 
-          if (
-            existing.sourceKind !== next.sourceKind ||
-            existing.hanzi !== next.hanzi ||
-            existing.meaningKey !== next.meaningKey ||
-            existing.hanziWord !== next.hanziWord ||
-            !areStringArraysEqual(existing.gloss, next.gloss) ||
-            existing.glossCount !== next.glossCount ||
-            existing.pos !== next.pos ||
-            !areStringArraysEqual(existing.pinyin, next.pinyin) ||
-            existing.hsk !== next.hsk ||
-            existing.hskSortKey !== next.hskSortKey ||
-            existing.note !== next.note
-          ) {
+          if (!isEqual(existing, next)) {
             write({ type: `update`, value: next });
           }
         };
@@ -1914,9 +1840,7 @@ export function makeDb(rizzle: Rizzle): Db {
                 continue;
               }
 
-              if (
-                !areStringArraysEqual(existing.usedInHanzi, next.usedInHanzi)
-              ) {
+              if (!isEqual(existing.usedInHanzi, next.usedInHanzi)) {
                 write({ type: `update`, value: next });
               }
             }
