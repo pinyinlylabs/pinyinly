@@ -63,7 +63,10 @@ export function WikiHanziCharacterPronunciation({
       q
         .from({ entry: db.dictionarySearch })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
-        .orderBy(({ entry }) => entry.freq, `desc`)
+        .orderBy(({ entry }) => entry.freq, {
+          direction: `desc`,
+          nulls: `last`,
+        })
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
         .select(({ entry }) => ({
