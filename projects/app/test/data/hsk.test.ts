@@ -440,6 +440,33 @@ test(`hanziword freq match vendor data`, async () => {
       }
       continue;
     }
+  }
+
+  if (dict != null && shouldWriteDictionary) {
+    await writeDictionaryJson(dict);
+  }
+}, 600_000);
+
+test.skip(`hanziword freq create missing entries`, async () => {
+  const completeHskVocabulary = await loadCompleteHskVocabulary();
+  const dictionary = await loadDictionary();
+
+  const dict = isCi ? undefined : await readDictionaryJson();
+  let shouldWriteDictionary = false;
+
+  for (const vendorItem of completeHskVocabulary) {
+    const vendorHanzi = vendorItem.simplified;
+    const normalizedFreq = 1 / vendorItem.frequency;
+
+    const dictionaryItems = dictionary.lookupHanzi(vendorHanzi);
+
+    if (dictionaryItems.length > 0) {
+      continue;
+    }
+
+    if (isCi || dict == null) {
+      continue;
+    }
 
     const hasOneMeaning = vendorItem.forms.length === 1;
     const disambiguationHintBucket: DisambiguationHintBucket =
