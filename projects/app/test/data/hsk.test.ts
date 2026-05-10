@@ -20,6 +20,7 @@ import { readFile } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import type { DisambiguationHintBucket } from "./completeHskVocabulary.ts";
 import {
   disambiguationHints,
   loadCompleteHskVocabulary,
@@ -227,15 +228,15 @@ test(`hsk word lists match vendor data`, async () => {
             }
           } else {
             const hasOneMeaning = vendorItem.forms.length === 1;
+            const disambiguationHintBucket: DisambiguationHintBucket =
+              disambiguationHints[vendorHanzi] ?? {};
             const meaningsList = vendorItem.forms
               .map((f) => f.meanings.join(`, `))
               .join(` | `);
             expect
               .soft(
                 hasOneMeaning ||
-                  disambiguationHints.some(
-                    (item) => hanziFromHanziWord(item[0]) === vendorHanzi,
-                  ),
+                  Object.keys(disambiguationHintBucket).length > 0,
                 `${hskLevel} ${vendorHanzi} has multiple meanings and no disambiguation override: [${meaningsList}]`,
               )
               .toBe(true);
@@ -300,65 +301,66 @@ test(`hsk word lists match vendor data`, async () => {
               await writeDictionaryJson(dict);
             } else {
               // multiple meanings, check the hints
-              for (const item of disambiguationHints) {
-                const [hanziWord, _formMeaningText, primaryGloss, explicitPos] =
-                  item;
-                if (hanziFromHanziWord(hanziWord) === vendorHanzi) {
-                  const form = resolveDisambiguationHintForm(vendorItem, item);
-                  const vendorPos = vendorItem.pos.filter((p) => p !== `nr`);
+              for (const [meaningKey, hint] of Object.entries(
+                disambiguationHintBucket,
+              )) {
+                const { primaryGloss, pos: explicitPos } = hint;
+                const hanziWord = buildHanziWord(vendorHanzi, meaningKey);
+                const form = resolveDisambiguationHintForm(
+                  vendorItem,
+                  hanziWord,
+                  hint,
+                );
+                const vendorPos = vendorItem.pos.filter((p) => p !== `nr`);
 
-                  if (
-                    explicitPos != null &&
-                    !vendorItem.pos.includes(explicitPos)
-                  ) {
-                    expect
-                      .soft(
-                        false,
-                        `${vendorHanzi} disambiguation pos ${explicitPos} not found in vendor pos: ${vendorPos.join(`, `)}`,
-                      )
-                      .toBe(true);
-                    continue;
-                  }
-
-                  if (explicitPos == null && vendorPos.length !== 1) {
-                    expect
-                      .soft(
-                        false,
-                        `${vendorHanzi} has ambiguous POS, define pos`,
-                      )
-                      .toBe(true);
-                    continue;
-                  }
-
-                  const newHanziWord = hanziWord;
-
-                  const newPos = parsePos(explicitPos ?? vendorPos[0]!);
-                  if (newPos == null) {
-                    expect
-                      .soft(
-                        false,
-                        `unable to determine part of speech for ${vendorHanzi} (${vendorItem.pos[0]!})`,
-                      )
-                      .toBe(true);
-                    continue;
-                  }
-                  const newDictionaryMeaning: HanziWordMeaning = {
-                    gloss:
-                      primaryGloss == null
-                        ? form.meanings
-                        : [primaryGloss, ...form.meanings],
-                    pinyin: [form.transcriptions.pinyin],
-                    pos: newPos,
-                  };
-
-                  const dict = await readDictionaryJson();
-                  upsertHanziWordMeaning(
-                    dict,
-                    newHanziWord,
-                    newDictionaryMeaning,
-                  );
-                  await writeDictionaryJson(dict);
+                if (
+                  explicitPos != null &&
+                  !vendorItem.pos.includes(explicitPos)
+                ) {
+                  expect
+                    .soft(
+                      false,
+                      `${vendorHanzi} disambiguation pos ${explicitPos} not found in vendor pos: ${vendorPos.join(`, `)}`,
+                    )
+                    .toBe(true);
+                  continue;
                 }
+
+                if (explicitPos == null && vendorPos.length !== 1) {
+                  expect
+                    .soft(false, `${vendorHanzi} has ambiguous POS, define pos`)
+                    .toBe(true);
+                  continue;
+                }
+
+                const newHanziWord = hanziWord;
+
+                const newPos = parsePos(explicitPos ?? vendorPos[0]!);
+                if (newPos == null) {
+                  expect
+                    .soft(
+                      false,
+                      `unable to determine part of speech for ${vendorHanzi} (${vendorItem.pos[0]!})`,
+                    )
+                    .toBe(true);
+                  continue;
+                }
+                const newDictionaryMeaning: HanziWordMeaning = {
+                  gloss:
+                    primaryGloss == null
+                      ? form.meanings
+                      : [primaryGloss, ...form.meanings],
+                  pinyin: [form.transcriptions.pinyin],
+                  pos: newPos,
+                };
+
+                const dict = await readDictionaryJson();
+                upsertHanziWordMeaning(
+                  dict,
+                  newHanziWord,
+                  newDictionaryMeaning,
+                );
+                await writeDictionaryJson(dict);
               }
             }
           }
@@ -420,17 +422,30 @@ test(`hanziword freq match vendor data`, async () => {
     }
 
     if (dictionaryItems.length > 0) {
-      for (const [hanziWord] of dictionaryItems) {
-        upsertHanziWordMeaning(dict, hanziWord, { freq: normalizedFreq });
+      for (const [hanziWord, meaning] of dictionaryItems) {
+        const hasMatchingFreq =
+          meaning.freq != null &&
+          Math.abs(meaning.freq - normalizedFreq) < 1e-12;
+        if (hasMatchingFreq) {
+          continue;
+        }
+
+        const existingMeaning = dict.get(hanziWord);
+        if (existingMeaning == null) {
+          continue;
+        }
+
+        dict.set(hanziWord, { ...existingMeaning, freq: normalizedFreq });
+        shouldWriteDictionary = true;
       }
-      shouldWriteDictionary = true;
       continue;
     }
 
     const hasOneMeaning = vendorItem.forms.length === 1;
-    const hasDisambiguationHint = disambiguationHints.some(
-      (item) => hanziFromHanziWord(item[0]) === vendorHanzi,
-    );
+    const disambiguationHintBucket: DisambiguationHintBucket =
+      disambiguationHints[vendorHanzi] ?? {};
+    const hasDisambiguationHint =
+      Object.keys(disambiguationHintBucket).length > 0;
 
     if (!hasOneMeaning && !hasDisambiguationHint) {
       // Skip words with multiple forms that don't have a disambiguation hint yet.
@@ -451,22 +466,11 @@ test(`hanziword freq match vendor data`, async () => {
       continue;
     }
 
-    for (const [
-      hanziWord,
-      formMeaningText,
-      primaryGloss,
-      explicitPos,
-    ] of disambiguationHints) {
-      if (hanziFromHanziWord(hanziWord) !== vendorHanzi) {
-        continue;
-      }
+    for (const [meaningKey, hint] of Object.entries(disambiguationHintBucket)) {
+      const { primaryGloss, pos: explicitPos } = hint;
+      const hanziWord = buildHanziWord(vendorHanzi, meaningKey);
 
-      const form = resolveDisambiguationHintForm(vendorItem, [
-        hanziWord,
-        formMeaningText,
-        primaryGloss,
-        explicitPos,
-      ]);
+      const form = resolveDisambiguationHintForm(vendorItem, hanziWord, hint);
 
       const vendorPos = vendorItem.pos.filter((p) => p !== `nr`);
       if (explicitPos != null && !vendorItem.pos.includes(explicitPos)) {

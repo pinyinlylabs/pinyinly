@@ -6,8 +6,13 @@ import {
 } from "#data/model.ts";
 import type { HanziWord } from "#data/model.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
+import {
+  fetchWithFsDbCache,
+  makeFsDbCache,
+  readFileSync,
+} from "@pinyinly/lib/fs";
 import { z } from "zod/v4";
+import path from "node:path";
 
 const fsDbCache = makeFsDbCache(import.meta.filename);
 
@@ -125,108 +130,61 @@ export type CompleteHskVocabularyItem = z.infer<
 
 export type CompleteHskVocabularyPos = CompleteHskVocabularyItem[`pos`][number];
 
-export type DisambiguationHint = [
-  hanziWord: HanziWord,
-  formMeaningText: string,
-  primaryGloss?: string,
-  pos?: CompleteHskVocabularyPos,
-];
+export interface DisambiguationHintMatch {
+  meaning: string;
+}
 
-export const disambiguationHints: DisambiguationHint[] = [
-  [`老公:husband`, `(coll.) husband`, `husband`],
-  [`獲:obtain`, `to obtain`, `to obtain`],
-  [`冲:rush`, `thoroughfare`, `to rush`],
-  [`刺:thorn`, `thorn`, `thorn`, `n`],
-  [`刺:stab`, `thorn`, `to stab`, `v`],
-  [`诗:poem`, `poem`],
-  [`大爷:uncle`, `(coll.) father's older brother`, `father's older brother`],
-  [`尽快:asap`, `as quickly as possible; as soon as possible`, `ASAP`],
-  [`粗:coarse`, `coarse`, undefined, `a`],
-  [`大方:generous`, `generous`],
-  [`冰:ice`, `ice`],
-  [`网络:network`, `network (computing, telecommunications, transport etc)`],
-  [`土地:land`, `land`],
-  [`大陆:mainland`, `continent; mainland`],
-  [`伙:partner`, `companion`, undefined, `n`],
-  [`局:office`, `office`, undefined, `n`],
-  [`针:needle`, `needle`, `needle`, `n`],
-  [`却:but`, `but`],
-  [`辣:spicy`, `hot (spicy)`, undefined, `a`],
-  [`尺:ruler`, `a Chinese foot`, `ruler`, `n`],
-  [`树林:woods`, `woods`],
-  [`浅:shallow`, `shallow`, undefined, `a`],
-  [`孙子:grandson`, `grandson`, undefined, `n`],
-  [`薄:thin`, `thin`],
-  [`戴:toWear`, `to put on or wear (glasses, hat, gloves etc)`, `to wear`],
-  [`盖:lid`, `lid`, `lid`, `n`],
-  [`盖:cover`, `lid`, `to cover`, `v`],
-  [`官:official`, `government official`],
-  [`归:toReturn`, `to return`],
-  [`季:season`, `season`, undefined, `n`],
-  [`江:river`, `river`],
-  [`宽:wide`, `wide`],
-  [`密:dense`, `secret`, undefined, `a`],
-  [`闪:toFlash`, `to dodge`],
-  [`帅:handsome`, `(bound form) commander-in-chief`, `handsome`, `a`],
-  [`松:loose`, `loose`, undefined, `a`],
-  [`咸:salty`, `salted`],
-  [`项:item`, `back of neck`, `item`, `n`],
-  [`严:strict`, `tight (closely sealed)`, undefined, `a`],
-  [`摇:toShake`, `to shake`],
-  [`遇:toMeet`, `to meet`],
-  [`刷:toBrush`, `to brush`, undefined, `v`],
-  [`挑:toChoose`, `to carry on a shoulder pole`],
-  [`倒车:transfer`, `to change buses, trains etc`, undefined, `v`],
-  [`倒车:reverse`, `to reverse (a vehicle)`, undefined, `v`],
-  [`圈:circle`, `circle; ring; loop`, undefined, `n`],
-  [`圈:surround`, `circle; ring; loop`, undefined, `v`],
-  [`降:fall`, `to drop`],
-  [`摸:feel`, `to feel with the hand`],
-  [`汇:remit`, `to remit`, undefined, `v`],
-  [`汇报:report`, `to collect information and report back`, undefined, `v`],
-  [`卷:roll`, `roll`, `to roll up`, `v`],
-  [`卷:chapter`, `scroll`, `chapter`, `n`],
-  [`折:break`, `to break`, undefined, `v`],
-  [`扫:sweep`, `to sweep`],
-  [`翻:flip`, `to turn over`],
-  [`转动:rotate`, `to rotate (about an axis)`, `to rotate`, `v`],
-  [`了解:understand`, `to understand`, undefined, `v`],
-  [`俩:two`, `two (colloquial equivalent of 两个)`, `two`],
-  [`伞:umbrella`, `umbrella`],
-  [`晒:dry`, `(of the sun) to shine on`, `to sun`, `v`],
-  [`阳台:balcony`, `balcony`],
-  [`暗:dark`, `dark`, undefined, `a`],
-  [`宝:treasure`, `jewel`, `treasure`, `n`],
-  [`宝:precious`, `jewel`, `precious`, `a`],
-  [`湿:wet`, `moist`, undefined, `a`],
-  [`恶心:gross`, `nausea`, `disgusting`, `a`],
-  [`闹:noisy`, `noisy`, `noisy`, `a`],
-  [`闹:disturb`, `noisy`, `to make noise`, `v`],
-  [`获:catch`, `(literary) to catch; to capture`],
-  [`收获:harvest`, `to harvest`, undefined, `v`],
-  [`鲜:fresh`, `fresh`, undefined, `a`],
-  [`词汇:vocabulary`, `vocabulary`],
-  [`大众:people`, `the masses`, undefined, `n`],
-  [`妻子:wife`, `wife`],
-  [`延长:prolong`, `to prolong`, undefined, `v`],
-  [`资源:resources`, `natural resource (such as water or minerals)`],
-  [`人家:family`, `household`, undefined, `n`],
-];
+export interface DisambiguationHint {
+  match: DisambiguationHintMatch;
+  primaryGloss?: string;
+  pos?: CompleteHskVocabularyPos;
+}
+
+export type DisambiguationHintBucket = Record<string, DisambiguationHint>;
+
+export type DisambiguationHintsByHanzi = Partial<
+  Record<string, DisambiguationHintBucket>
+>;
+
+const disambiguationHintSchema = z
+  .object({
+    match: z
+      .object({
+        meaning: z.string(),
+      })
+      .strict(),
+    primaryGloss: z.string().optional(),
+    pos: completeHskVocabularyItemSchema.shape.pos.element.optional(),
+  })
+  .strict();
+
+const disambiguationHintsSchema = z.record(
+  z.string(),
+  z.record(z.string(), disambiguationHintSchema),
+);
+
+export const disambiguationHints = disambiguationHintsSchema.parse(
+  JSON.parse(
+    readFileSync(
+      path.join(import.meta.dirname, `completeHskVocabulary.mapping.json`),
+      `utf8`,
+    ),
+  ),
+) as DisambiguationHintsByHanzi;
 
 export function resolveDisambiguationHintForm(
   item: CompleteHskVocabularyItem,
+  hanziWord: HanziWord,
   hint: DisambiguationHint,
 ): CompleteHskVocabularyItem[`forms`][number] {
-  const [hanziWord, formMeaningText] = hint;
-  const matches = item.forms.filter((form) =>
-    form.meanings.includes(formMeaningText),
-  );
+  const { meaning } = hint.match;
+  const matches = item.forms.filter((form) => form.meanings.includes(meaning));
 
   if (matches.length !== 1) {
     const candidateMeanings = item.forms.map((form) => form.meanings);
 
     throw new Error(
-      `${hanziWord} disambiguation hint '${formMeaningText}' matched ${matches.length} forms; candidate meanings: ${JSON.stringify(candidateMeanings)}`,
+      `${hanziWord} disambiguation hint '${meaning}' matched ${matches.length} forms; candidate meanings: ${JSON.stringify(candidateMeanings)}`,
     );
   }
 

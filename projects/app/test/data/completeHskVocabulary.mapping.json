@@ -1,0 +1,601 @@
+{
+  "老公": {
+    "husband": {
+      "primaryGloss": "husband",
+      "match": {
+        "meaning": "(coll.) husband"
+      }
+    }
+  },
+  "獲": {
+    "obtain": {
+      "primaryGloss": "to obtain",
+      "match": {
+        "meaning": "to obtain"
+      }
+    }
+  },
+  "冲": {
+    "rush": {
+      "primaryGloss": "to rush",
+      "match": {
+        "meaning": "thoroughfare"
+      }
+    }
+  },
+  "刺": {
+    "thorn": {
+      "primaryGloss": "thorn",
+      "pos": "n",
+      "match": {
+        "meaning": "thorn"
+      }
+    },
+    "stab": {
+      "primaryGloss": "to stab",
+      "pos": "v",
+      "match": {
+        "meaning": "thorn"
+      }
+    }
+  },
+  "诗": {
+    "poem": {
+      "match": {
+        "meaning": "poem"
+      }
+    }
+  },
+  "大爷": {
+    "uncle": {
+      "primaryGloss": "father's older brother",
+      "match": {
+        "meaning": "(coll.) father's older brother"
+      }
+    }
+  },
+  "尽快": {
+    "asap": {
+      "primaryGloss": "ASAP",
+      "match": {
+        "meaning": "as quickly as possible; as soon as possible"
+      }
+    }
+  },
+  "粗": {
+    "coarse": {
+      "pos": "a",
+      "match": {
+        "meaning": "coarse"
+      }
+    }
+  },
+  "大方": {
+    "generous": {
+      "match": {
+        "meaning": "generous"
+      }
+    }
+  },
+  "冰": {
+    "ice": {
+      "match": {
+        "meaning": "ice"
+      }
+    }
+  },
+  "网络": {
+    "network": {
+      "match": {
+        "meaning": "network (computing, telecommunications, transport etc)"
+      }
+    }
+  },
+  "土地": {
+    "land": {
+      "match": {
+        "meaning": "land"
+      }
+    }
+  },
+  "大陆": {
+    "mainland": {
+      "match": {
+        "meaning": "continent; mainland"
+      }
+    }
+  },
+  "伙": {
+    "partner": {
+      "pos": "n",
+      "match": {
+        "meaning": "companion"
+      }
+    }
+  },
+  "局": {
+    "office": {
+      "pos": "n",
+      "match": {
+        "meaning": "office"
+      }
+    }
+  },
+  "针": {
+    "needle": {
+      "primaryGloss": "needle",
+      "pos": "n",
+      "match": {
+        "meaning": "needle"
+      }
+    }
+  },
+  "却": {
+    "but": {
+      "match": {
+        "meaning": "but"
+      }
+    }
+  },
+  "辣": {
+    "spicy": {
+      "pos": "a",
+      "match": {
+        "meaning": "hot (spicy)"
+      }
+    }
+  },
+  "尺": {
+    "ruler": {
+      "primaryGloss": "ruler",
+      "pos": "n",
+      "match": {
+        "meaning": "a Chinese foot"
+      }
+    }
+  },
+  "树林": {
+    "woods": {
+      "match": {
+        "meaning": "woods"
+      }
+    }
+  },
+  "浅": {
+    "shallow": {
+      "pos": "a",
+      "match": {
+        "meaning": "shallow"
+      }
+    }
+  },
+  "孙子": {
+    "grandson": {
+      "pos": "n",
+      "match": {
+        "meaning": "grandson"
+      }
+    }
+  },
+  "薄": {
+    "thin": {
+      "match": {
+        "meaning": "thin"
+      }
+    }
+  },
+  "戴": {
+    "toWear": {
+      "primaryGloss": "to wear",
+      "match": {
+        "meaning": "to put on or wear (glasses, hat, gloves etc)"
+      }
+    }
+  },
+  "盖": {
+    "lid": {
+      "primaryGloss": "lid",
+      "pos": "n",
+      "match": {
+        "meaning": "lid"
+      }
+    },
+    "cover": {
+      "primaryGloss": "to cover",
+      "pos": "v",
+      "match": {
+        "meaning": "lid"
+      }
+    }
+  },
+  "官": {
+    "official": {
+      "match": {
+        "meaning": "government official"
+      }
+    }
+  },
+  "归": {
+    "toReturn": {
+      "match": {
+        "meaning": "to return"
+      }
+    }
+  },
+  "季": {
+    "season": {
+      "pos": "n",
+      "match": {
+        "meaning": "season"
+      }
+    }
+  },
+  "江": {
+    "river": {
+      "match": {
+        "meaning": "river"
+      }
+    }
+  },
+  "宽": {
+    "wide": {
+      "match": {
+        "meaning": "wide"
+      }
+    }
+  },
+  "密": {
+    "dense": {
+      "pos": "a",
+      "match": {
+        "meaning": "secret"
+      }
+    }
+  },
+  "闪": {
+    "toFlash": {
+      "match": {
+        "meaning": "to dodge"
+      }
+    }
+  },
+  "帅": {
+    "handsome": {
+      "primaryGloss": "handsome",
+      "pos": "a",
+      "match": {
+        "meaning": "(bound form) commander-in-chief"
+      }
+    }
+  },
+  "松": {
+    "loose": {
+      "pos": "a",
+      "match": {
+        "meaning": "loose"
+      }
+    }
+  },
+  "咸": {
+    "salty": {
+      "match": {
+        "meaning": "salted"
+      }
+    }
+  },
+  "项": {
+    "item": {
+      "primaryGloss": "item",
+      "pos": "n",
+      "match": {
+        "meaning": "back of neck"
+      }
+    }
+  },
+  "严": {
+    "strict": {
+      "pos": "a",
+      "match": {
+        "meaning": "tight (closely sealed)"
+      }
+    }
+  },
+  "摇": {
+    "toShake": {
+      "match": {
+        "meaning": "to shake"
+      }
+    }
+  },
+  "遇": {
+    "toMeet": {
+      "match": {
+        "meaning": "to meet"
+      }
+    }
+  },
+  "刷": {
+    "toBrush": {
+      "pos": "v",
+      "match": {
+        "meaning": "to brush"
+      }
+    }
+  },
+  "挑": {
+    "toChoose": {
+      "match": {
+        "meaning": "to carry on a shoulder pole"
+      }
+    }
+  },
+  "倒车": {
+    "transfer": {
+      "pos": "v",
+      "match": {
+        "meaning": "to change buses, trains etc"
+      }
+    },
+    "reverse": {
+      "pos": "v",
+      "match": {
+        "meaning": "to reverse (a vehicle)"
+      }
+    }
+  },
+  "圈": {
+    "circle": {
+      "pos": "n",
+      "match": {
+        "meaning": "circle; ring; loop"
+      }
+    },
+    "surround": {
+      "pos": "v",
+      "match": {
+        "meaning": "circle; ring; loop"
+      }
+    }
+  },
+  "降": {
+    "fall": {
+      "match": {
+        "meaning": "to drop"
+      }
+    }
+  },
+  "摸": {
+    "feel": {
+      "match": {
+        "meaning": "to feel with the hand"
+      }
+    }
+  },
+  "汇": {
+    "remit": {
+      "pos": "v",
+      "match": {
+        "meaning": "to remit"
+      }
+    }
+  },
+  "汇报": {
+    "report": {
+      "pos": "v",
+      "match": {
+        "meaning": "to collect information and report back"
+      }
+    }
+  },
+  "卷": {
+    "roll": {
+      "primaryGloss": "to roll up",
+      "pos": "v",
+      "match": {
+        "meaning": "roll"
+      }
+    },
+    "chapter": {
+      "primaryGloss": "chapter",
+      "pos": "n",
+      "match": {
+        "meaning": "scroll"
+      }
+    }
+  },
+  "折": {
+    "break": {
+      "pos": "v",
+      "match": {
+        "meaning": "to break"
+      }
+    }
+  },
+  "扫": {
+    "sweep": {
+      "match": {
+        "meaning": "to sweep"
+      }
+    }
+  },
+  "翻": {
+    "flip": {
+      "match": {
+        "meaning": "to turn over"
+      }
+    }
+  },
+  "转动": {
+    "rotate": {
+      "primaryGloss": "to rotate",
+      "pos": "v",
+      "match": {
+        "meaning": "to rotate (about an axis)"
+      }
+    }
+  },
+  "了解": {
+    "understand": {
+      "pos": "v",
+      "match": {
+        "meaning": "to understand"
+      }
+    }
+  },
+  "俩": {
+    "two": {
+      "primaryGloss": "two",
+      "match": {
+        "meaning": "two (colloquial equivalent of 两个)"
+      }
+    }
+  },
+  "伞": {
+    "umbrella": {
+      "match": {
+        "meaning": "umbrella"
+      }
+    }
+  },
+  "晒": {
+    "dry": {
+      "primaryGloss": "to sun",
+      "pos": "v",
+      "match": {
+        "meaning": "(of the sun) to shine on"
+      }
+    }
+  },
+  "阳台": {
+    "balcony": {
+      "match": {
+        "meaning": "balcony"
+      }
+    }
+  },
+  "暗": {
+    "dark": {
+      "pos": "a",
+      "match": {
+        "meaning": "dark"
+      }
+    }
+  },
+  "宝": {
+    "treasure": {
+      "primaryGloss": "treasure",
+      "pos": "n",
+      "match": {
+        "meaning": "jewel"
+      }
+    },
+    "precious": {
+      "primaryGloss": "precious",
+      "pos": "a",
+      "match": {
+        "meaning": "jewel"
+      }
+    }
+  },
+  "湿": {
+    "wet": {
+      "pos": "a",
+      "match": {
+        "meaning": "moist"
+      }
+    }
+  },
+  "恶心": {
+    "gross": {
+      "primaryGloss": "disgusting",
+      "pos": "a",
+      "match": {
+        "meaning": "nausea"
+      }
+    }
+  },
+  "闹": {
+    "noisy": {
+      "primaryGloss": "noisy",
+      "pos": "a",
+      "match": {
+        "meaning": "noisy"
+      }
+    },
+    "disturb": {
+      "primaryGloss": "to make noise",
+      "pos": "v",
+      "match": {
+        "meaning": "noisy"
+      }
+    }
+  },
+  "获": {
+    "catch": {
+      "match": {
+        "meaning": "(literary) to catch; to capture"
+      }
+    }
+  },
+  "收获": {
+    "harvest": {
+      "pos": "v",
+      "match": {
+        "meaning": "to harvest"
+      }
+    }
+  },
+  "鲜": {
+    "fresh": {
+      "pos": "a",
+      "match": {
+        "meaning": "fresh"
+      }
+    }
+  },
+  "词汇": {
+    "vocabulary": {
+      "match": {
+        "meaning": "vocabulary"
+      }
+    }
+  },
+  "大众": {
+    "people": {
+      "pos": "n",
+      "match": {
+        "meaning": "the masses"
+      }
+    }
+  },
+  "妻子": {
+    "wife": {
+      "match": {
+        "meaning": "wife"
+      }
+    }
+  },
+  "延长": {
+    "prolong": {
+      "pos": "v",
+      "match": {
+        "meaning": "to prolong"
+      }
+    }
+  },
+  "资源": {
+    "resources": {
+      "match": {
+        "meaning": "natural resource (such as water or minerals)"
+      }
+    }
+  },
+  "人家": {
+    "family": {
+      "pos": "n",
+      "match": {
+        "meaning": "household"
+      }
+    }
+  }
+}
