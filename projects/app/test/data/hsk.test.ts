@@ -23,7 +23,8 @@ import { describe, expect, test } from "vitest";
 import {
   disambiguationHints,
   loadCompleteHskVocabulary,
-  parseVendorPos,
+  parsePos,
+  resolveDisambiguationHintForm,
 } from "./completeHskVocabulary.ts";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
 
@@ -232,7 +233,9 @@ test(`hsk word lists match vendor data`, async () => {
             expect
               .soft(
                 hasOneMeaning ||
-                  disambiguationHints.some((item) => item[0] === vendorHanzi),
+                  disambiguationHints.some(
+                    (item) => hanziFromHanziWord(item[0]) === vendorHanzi,
+                  ),
                 `${hskLevel} ${vendorHanzi} has multiple meanings and no disambiguation override: [${meaningsList}]`,
               )
               .toBe(true);
@@ -298,16 +301,24 @@ test(`hsk word lists match vendor data`, async () => {
             } else {
               // multiple meanings, check the hints
               for (const item of disambiguationHints) {
-                const [
-                  hanzi,
-                  formIndex,
-                  meaningKey,
-                  primaryGloss,
-                  explicitPos,
-                ] = item;
-                if (hanzi === vendorHanzi) {
-                  const form = vendorItem.forms[formIndex]!;
+                const [hanziWord, _formMeaningText, primaryGloss, explicitPos] =
+                  item;
+                if (hanziFromHanziWord(hanziWord) === vendorHanzi) {
+                  const form = resolveDisambiguationHintForm(vendorItem, item);
                   const vendorPos = vendorItem.pos.filter((p) => p !== `nr`);
+
+                  if (
+                    explicitPos != null &&
+                    !vendorItem.pos.includes(explicitPos)
+                  ) {
+                    expect
+                      .soft(
+                        false,
+                        `${vendorHanzi} disambiguation pos ${explicitPos} not found in vendor pos: ${vendorPos.join(`, `)}`,
+                      )
+                      .toBe(true);
+                    continue;
+                  }
 
                   if (explicitPos == null && vendorPos.length !== 1) {
                     expect
@@ -319,9 +330,9 @@ test(`hsk word lists match vendor data`, async () => {
                     continue;
                   }
 
-                  const newHanziWord = buildHanziWord(vendorHanzi, meaningKey);
+                  const newHanziWord = hanziWord;
 
-                  const newPos = explicitPos ?? parseVendorPos(vendorPos[0]!);
+                  const newPos = parsePos(explicitPos ?? vendorPos[0]!);
                   if (newPos == null) {
                     expect
                       .soft(
@@ -418,7 +429,7 @@ test(`hanziword freq match vendor data`, async () => {
 
     const hasOneMeaning = vendorItem.forms.length === 1;
     const hasDisambiguationHint = disambiguationHints.some(
-      (item) => item[0] === vendorHanzi,
+      (item) => hanziFromHanziWord(item[0]) === vendorHanzi,
     );
 
     if (!hasOneMeaning && !hasDisambiguationHint) {
@@ -441,28 +452,33 @@ test(`hanziword freq match vendor data`, async () => {
     }
 
     for (const [
-      hanzi,
-      formIndex,
-      meaningKey,
+      hanziWord,
+      formMeaningText,
       primaryGloss,
       explicitPos,
     ] of disambiguationHints) {
-      if (hanzi !== vendorHanzi) {
+      if (hanziFromHanziWord(hanziWord) !== vendorHanzi) {
         continue;
       }
 
-      const form = vendorItem.forms[formIndex];
-      if (form == null) {
+      const form = resolveDisambiguationHintForm(vendorItem, [
+        hanziWord,
+        formMeaningText,
+        primaryGloss,
+        explicitPos,
+      ]);
+
+      const vendorPos = vendorItem.pos.filter((p) => p !== `nr`);
+      if (explicitPos != null && !vendorItem.pos.includes(explicitPos)) {
         expect
           .soft(
             false,
-            `${vendorHanzi} disambiguation form index ${formIndex} is out of range`,
+            `${vendorHanzi} disambiguation pos ${explicitPos} not found in vendor pos: ${vendorPos.join(`, `)}`,
           )
           .toBe(true);
         continue;
       }
 
-      const vendorPos = vendorItem.pos.filter((p) => p !== `nr`);
       if (explicitPos == null && vendorPos.length !== 1) {
         expect
           .soft(false, `${vendorHanzi} has ambiguous POS, define pos`)
@@ -470,7 +486,7 @@ test(`hanziword freq match vendor data`, async () => {
         continue;
       }
 
-      const pos = explicitPos ?? parseVendorPos(vendorPos[0]!);
+      const pos = parsePos(explicitPos ?? vendorPos[0]!);
       if (pos == null) {
         expect
           .soft(
@@ -481,7 +497,7 @@ test(`hanziword freq match vendor data`, async () => {
         continue;
       }
 
-      upsertHanziWordMeaning(dict, buildHanziWord(vendorHanzi, meaningKey), {
+      upsertHanziWordMeaning(dict, hanziWord, {
         gloss:
           primaryGloss == null
             ? form.meanings
