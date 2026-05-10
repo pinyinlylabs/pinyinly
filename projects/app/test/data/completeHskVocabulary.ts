@@ -2,10 +2,17 @@ import {
   hanziCharacterSchema,
   hanziTextSchema,
   pinyinTextSchema,
+  PartOfSpeech,
 } from "#data/model.ts";
+import type { HanziWord } from "#data/model.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
+import {
+  fetchWithFsDbCache,
+  makeFsDbCache,
+  readFileSync,
+} from "@pinyinly/lib/fs";
 import { z } from "zod/v4";
+import path from "node:path";
 
 const fsDbCache = makeFsDbCache(import.meta.filename);
 
@@ -120,6 +127,92 @@ export const completeHskVocabularyItemSchema = z
 export type CompleteHskVocabularyItem = z.infer<
   typeof completeHskVocabularyItemSchema
 >;
+
+export type CompleteHskVocabularyPos = CompleteHskVocabularyItem[`pos`][number];
+
+export interface DisambiguationHintMatch {
+  meaning: string;
+}
+
+export interface DisambiguationHint {
+  match: DisambiguationHintMatch;
+  primaryGloss?: string;
+  pos?: CompleteHskVocabularyPos;
+}
+
+export type DisambiguationHintBucket = Record<string, DisambiguationHint>;
+
+export type DisambiguationHintsByHanzi = Partial<
+  Record<string, DisambiguationHintBucket>
+>;
+
+const disambiguationHintSchema = z
+  .object({
+    match: z
+      .object({
+        meaning: z.string(),
+      })
+      .strict(),
+    primaryGloss: z.string().optional(),
+    pos: completeHskVocabularyItemSchema.shape.pos.element.optional(),
+  })
+  .strict();
+
+const disambiguationHintsSchema = z.record(
+  z.string(),
+  z.record(z.string(), disambiguationHintSchema),
+);
+
+export const disambiguationHints = disambiguationHintsSchema.parse(
+  JSON.parse(
+    readFileSync(
+      path.join(import.meta.dirname, `completeHskVocabulary.mapping.json`),
+      `utf8`,
+    ),
+  ),
+) as DisambiguationHintsByHanzi;
+
+export function resolveDisambiguationHintForm(
+  item: CompleteHskVocabularyItem,
+  hanziWord: HanziWord,
+  hint: DisambiguationHint,
+): CompleteHskVocabularyItem[`forms`][number] {
+  const { meaning } = hint.match;
+  const matches = item.forms.filter((form) => form.meanings.includes(meaning));
+
+  if (matches.length !== 1) {
+    const candidateMeanings = item.forms.map((form) => form.meanings);
+
+    throw new Error(
+      `${hanziWord} disambiguation hint '${meaning}' matched ${matches.length} forms; candidate meanings: ${JSON.stringify(candidateMeanings)}`,
+    );
+  }
+
+  return matches[0]!;
+}
+
+export function parsePos(posText: string): PartOfSpeech | undefined {
+  switch (posText) {
+    case `n`: {
+      return PartOfSpeech.Noun;
+    }
+    case `v`: {
+      return PartOfSpeech.Verb;
+    }
+    case `a`: {
+      return PartOfSpeech.Adjective;
+    }
+    case `d`: {
+      return PartOfSpeech.Adverb;
+    }
+    case `m`: {
+      return PartOfSpeech.Numeral;
+    }
+    default: {
+      return undefined;
+    }
+  }
+}
 
 export const loadCompleteHskVocabulary = memoize0(async () => {
   const rawJson = await fetchWithFsDbCache(
