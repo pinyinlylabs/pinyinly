@@ -7,9 +7,11 @@
     "/.yarn/releases",
     "/projects/app/drizzle/meta",
     "/projects/app/.vercel",
+    "/projects/app/public/raw/**/*.json",
     "/projects/app/src/assets/**/*.svg",
     "/projects/app/src/assets/**/*.json",
-    "/projects/app/public/raw/**/*.json",
+    "/projects/app/test/assets/**/*.json",
+    "/projects/app/test/data/completeHskVocabulary.mapping.json",
     "/projects/*/dist",
     "*.asset.json",
     "*.m4a"

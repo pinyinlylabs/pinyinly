@@ -109,6 +109,18 @@ export async function writeJsonFileIfChanged(
   );
 }
 
+export async function fmtJsonFile(
+  path: string,
+  indentLevels = 2,
+): Promise<void> {
+  const encoding = `utf-8`;
+  const content = JSON.parse(await readFile(path, { encoding })) as object;
+
+  await writeFile(path, jsonStringifyShallowIndent(content, indentLevels), {
+    encoding: `utf-8`,
+  });
+}
+
 export async function updateJsonFileKey(
   path: string,
   key: string,
