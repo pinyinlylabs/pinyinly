@@ -738,7 +738,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "⺀ via 冬, 头[HSK2], 尽",
       "⺄ via 九[HSK1]",
       "⺆ via 周[HSK2]",
-      "⺈ via 争[HSK3], 免, 欠, 色[HSK4], 角[HSK2], 象, 负, 鱼[HSK2]",
+      "⺈ via 争[HSK3], 免, 欠, 色[HSK4], 角[HSK2], 象, 负, 饣, 鱼[HSK2]",
       "⺧ via 先[HSK1], 告",
       "⺶ via 养[HSK2]",
       "⺺ via 隶",
