@@ -3,7 +3,7 @@ import {
   buildMeaningHintPrompt,
   buildPronunciationHintPrompt,
   buildSubLocationDescriptionPrompt,
-} from "#server/routers/ai.ts";
+} from "#util/prompts.ts";
 import { openAiZodResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
