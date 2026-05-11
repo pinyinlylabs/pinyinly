@@ -23,6 +23,7 @@ type HintSuggestion = {
   hint: string;
   explanation?: string | null;
   confidence: number;
+  strategyLabel: string;
 };
 
 export function AiMeaningHintModal({
@@ -131,9 +132,20 @@ export function AiMeaningHintModal({
                       className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3"
                     >
                       <View className="flex-row items-center justify-between">
-                        <Text className="font-sans text-[13px] text-fg-dim">
-                          Confidence: {formatConfidence(suggestion.confidence)}
-                        </Text>
+                        <View className="flex-row items-center gap-2">
+                          <Text className="font-sans text-[13px] text-fg-dim">
+                            Confidence:{` `}
+                            {formatConfidence(suggestion.confidence)}
+                          </Text>
+                          <Text
+                            className={`
+                              rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold
+                              uppercase tracking-wide text-fg-dim
+                            `}
+                          >
+                            {suggestion.strategyLabel}
+                          </Text>
+                        </View>
                         <RectButton
                           variant="bare"
                           onPress={() => {
