@@ -1,11 +1,11 @@
 import {
-  buildLeadCharacterDescriptionPrompt,
-  buildMeaningHintLogicalPrompt,
-  buildMeaningHintPrompt,
-  buildPronunciationHintPrompt,
-  buildSubLocationDescriptionPrompt,
+    buildLeadCharacterDescriptionPrompt,
+    buildMeaningHintLogicalPrompt,
+    buildMeaningHintPrompt,
+    buildPronunciationHintPrompt,
+    buildSubLocationDescriptionPrompt,
+    renderPromptTemplate,
 } from "#util/prompts.ts";
-import * as promptsModule from "#util/prompts.ts";
 import { openAiZodResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
@@ -336,12 +336,10 @@ describe(
 );
 
 describe(
-  `applyTemplateVariables` satisfies HasNameOf<
-    typeof promptsModule.applyTemplateVariables
-  >,
+  `renderPromptTemplate` satisfies HasNameOf<typeof renderPromptTemplate>,
   () => {
     test(`replaces known placeholders including internal newlines`, () => {
-      const result = promptsModule.applyTemplateVariables(
+      const result = renderPromptTemplate(
         `A {{ adjective }} template with:\n{{ payload }}`,
         {
           adjective: `helpful`,
@@ -353,21 +351,15 @@ describe(
     });
 
     test(`supports placeholder names with surrounding whitespace`, () => {
-      const result = promptsModule.applyTemplateVariables(
-        `Count: {{   count   }}`,
-        {
-          count: `4`,
-        },
-      );
+      const result = renderPromptTemplate(`Count: {{   count   }}`, {
+        count: `4`,
+      });
 
       expect(result).toBe(`Count: 4`);
     });
 
     test(`replaces unknown placeholders with empty string`, () => {
-      const result = promptsModule.applyTemplateVariables(
-        `Start {{ missing }} end`,
-        {},
-      );
+      const result = renderPromptTemplate(`Start {{ missing }} end`, {});
 
       expect(result).toBe(`Start  end`);
     });
