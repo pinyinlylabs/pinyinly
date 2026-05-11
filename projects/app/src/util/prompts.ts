@@ -1,3 +1,5 @@
+import { z } from "zod/v4";
+
 export function buildPronunciationHintPrompt({
   leadCharacter,
   location,
@@ -64,21 +66,44 @@ export function buildPronunciationHintPrompt({
   return { system, user };
 }
 
-export function buildMeaningHintPrompt({
+export function applyTemplateVariables(
+  template: string,
+  variables: Record<string, string>,
+): string {
+  return template.replaceAll(
+    /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/gu,
+    (_, key: string) => {
+      return variables[key] ?? ``;
+    },
+  );
+}
+
+export const meaningHintComponentSchema = z.object({
+  hanzi: z.string().optional(),
+  label: z.string().optional(),
+  meaning: z.string().optional(),
+});
+
+export const meaningHintPromptInputSchema = z.object({
+  hanzi: z.string(),
+  meaning: z.object({
+    hanziWord: z.string(),
+    glosses: z.array(z.string()),
+  }),
+  components: z.array(meaningHintComponentSchema).optional(),
+  count: z.number(),
+});
+
+export type MeaningHintPromptInput = z.infer<
+  typeof meaningHintPromptInputSchema
+>;
+
+export const buildMeaningHintPrompt = ({
   hanzi,
   meaning,
   components,
   count,
-}: {
-  hanzi: string;
-  meaning: { hanziWord: string; glosses: string[] };
-  components?: {
-    hanzi?: string;
-    label?: string;
-    meaning?: string;
-  }[];
-  count: number;
-}): { system: string; user: string } {
+}: MeaningHintPromptInput): { system: string; user: string } => {
   const system = [
     `You create short meaning-recognition mnemonic hints for Mandarin learners.`,
     `Your job is to help the learner remember what a Hanzi means using its visual components.`,
@@ -120,7 +145,65 @@ export function buildMeaningHintPrompt({
   ].join(`\n`);
 
   return { system, user };
-}
+};
+buildMeaningHintPrompt.strategy = `visual`;
+
+export const buildMeaningHintLogicalPrompt = ({
+  hanzi,
+  meaning,
+  components,
+  count,
+}: MeaningHintPromptInput): { system: string; user: string } => {
+  const primaryGloss = meaning.glosses[0] ?? ``;
+  const disambiguation = meaning.glosses.slice(1).join(`; `);
+
+  const data = {
+    targetCharacter: {
+      hanzi,
+      gloss: primaryGloss,
+      ...(disambiguation === `` ? {} : { disambiguation }),
+    },
+    components: (components ?? []).map((component) => {
+      return {
+        ...(component.hanzi == null ? {} : { hanzi: component.hanzi }),
+        ...(component.meaning == null && component.label == null
+          ? {}
+          : { gloss: component.meaning ?? component.label }),
+      };
+    }),
+  };
+
+  const systemTemplate = `
+You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
+
+Rules:
+- Keep mnemonics realistic, intuitive, concrete and memorable.
+- Keep mnemonics short, 1-2 sentences is optimal.
+- Leverage the logical connection between the components to explain the target character.
+- The disambiguation values are form/meaning guidance only, do not include them directly in the hint.
+- Anchor on the exact gloss values, don't use them as a base stem for derivative words.
+- Only focus on meaning recall, not pronunciation.
+- Avoid introducing unnecessary elements that could distract from the core elements.
+- Put the hanzi after each gloss in parenthesis: <gloss> (<hanzi>)
+`.trim();
+
+  const userTemplate = `
+Generate {{ count }} distinct mnemonic hints:
+
+<data>
+{{ data }}
+</data>
+`.trim();
+
+  const system = applyTemplateVariables(systemTemplate, {});
+  const user = applyTemplateVariables(userTemplate, {
+    count: String(count),
+    data: JSON.stringify(data, null, 2),
+  });
+
+  return { system, user };
+};
+buildMeaningHintLogicalPrompt.strategy = `logical`;
 
 export function buildSubLocationDescriptionPrompt({
   label,

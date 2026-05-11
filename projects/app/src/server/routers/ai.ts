@@ -10,6 +10,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
   buildPronunciationHintPrompt,
   buildSubLocationDescriptionPrompt,
@@ -86,6 +87,22 @@ const meaningHintInputSchema = z
   })
   .strict();
 
+const meaningHintRawOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            hint: z.string(),
+            explanation: z.string().nullable().optional(),
+            confidence: z.number().min(0).max(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 const meaningHintOutputSchema = z
   .object({
     suggestions: z
@@ -95,6 +112,7 @@ const meaningHintOutputSchema = z
             hint: z.string(),
             explanation: z.string().nullable().optional(),
             confidence: z.number().min(0).max(1),
+            strategyLabel: z.string(),
           })
           .strict(),
       )
@@ -214,28 +232,51 @@ export const aiRouter = router({
     .mutation(async (opts) => {
       const { hanzi, meaning, components, count } = opts.input;
 
-      const { system, user } = buildMeaningHintPrompt({
-        hanzi,
-        meaning,
-        components,
-        count,
-      });
+      const strategyPlans = [
+        buildMeaningHintPrompt,
+        buildMeaningHintLogicalPrompt,
+      ];
 
-      try {
-        const data = await requestOpenAiJson({
-          system,
-          user,
-          schema: meaningHintOutputSchema,
-        });
+      const strategyResults = await Promise.all(
+        strategyPlans.map(async (buildPrompt) => {
+          const strategyLabel = buildPrompt.strategy;
+          const { system, user } = buildPrompt({
+            hanzi,
+            meaning,
+            components,
+            count,
+          });
 
-        return data;
-      } catch (error) {
-        console.error(`Failed to generate meaning hints:`, error);
+          try {
+            const data = await requestOpenAiJson({
+              system,
+              user,
+              schema: meaningHintRawOutputSchema,
+            });
+
+            return data.suggestions.map((suggestion) => ({
+              ...suggestion,
+              strategyLabel,
+            }));
+          } catch (error) {
+            console.error(
+              `Failed to generate ${strategyLabel} meaning hints:`,
+              error,
+            );
+            return [];
+          }
+        }),
+      );
+
+      const suggestions = strategyResults.flat();
+      if (suggestions.length === 0) {
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate hints`,
         });
       }
+
+      return { suggestions };
     }),
 
   generateSubLocationDescriptions: authedProcedure

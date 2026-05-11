@@ -2,6 +2,7 @@ import { trpc } from "@/client/trpc";
 import { AiMeaningHintModal } from "@/client/ui/AiMeaningHintModal";
 import { RectButton } from "@/client/ui/RectButton";
 import type { AppRouter } from "@/server/routers/_app";
+import { meaningHintPromptInputSchema } from "@/util/prompts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
@@ -13,21 +14,25 @@ const mockSuggestions = [
     hint: `A smiling woman holds a child while both stand in bright morning sunlight, making the whole scene feel ==good==.`,
     explanation: `Woman + child combine into a warm image that maps to "good".`,
     confidence: 0.89,
+    strategyLabel: `visual`,
   },
   {
     hint: `A woman points to a child who just helped a friend, and everyone says this is what being ==good== looks like.`,
     explanation: `The two components are tied directly to the target meaning.`,
     confidence: 0.82,
+    strategyLabel: `visual`,
   },
   {
     hint: `Picture woman and child together sharing food with a stranger; that clear image locks in the meaning ==good==.`,
     explanation: `Simple component story anchored to one meaning.`,
     confidence: 0.75,
+    strategyLabel: `logical`,
   },
   {
     hint: `A woman and child clean up a messy room together, turning chaos into something ==good== and orderly.`,
     explanation: `Component pair forms an easy-to-replay meaning cue.`,
     confidence: 0.66,
+    strategyLabel: `logical`,
   },
 ];
 
@@ -52,6 +57,19 @@ const mockAiLink: TRPCLink<AppRouter> =
 const queryClient = new QueryClient();
 const trpcClient = trpc.createClient({
   links: [mockAiLink],
+});
+
+const demoMeaningHintInput = meaningHintPromptInputSchema.parse({
+  hanzi: `好`,
+  meaning: {
+    hanziWord: `好`,
+    glosses: [`good`, `well`, `fine`],
+  },
+  components: [
+    { hanzi: `女`, meaning: `woman` },
+    { hanzi: `子`, meaning: `child` },
+  ],
+  count: 4,
 });
 
 export default () => {
@@ -92,15 +110,9 @@ export default () => {
 
           {isOpen ? (
             <AiMeaningHintModal
-              hanzi={`好`}
-              meaning={{
-                hanziWord: `好`,
-                glosses: [`good`, `well`, `fine`],
-              }}
-              components={[
-                { hanzi: `女`, meaning: `woman` },
-                { hanzi: `子`, meaning: `child` },
-              ]}
+              hanzi={demoMeaningHintInput.hanzi}
+              meaning={demoMeaningHintInput.meaning}
+              components={demoMeaningHintInput.components ?? []}
               onApplyHint={({ text, explanation }) => {
                 setLastHint(text);
                 setLastExplanation(explanation ?? null);

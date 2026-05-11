@@ -1,9 +1,11 @@
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
   buildPronunciationHintPrompt,
   buildSubLocationDescriptionPrompt,
 } from "#util/prompts.ts";
+import * as promptsModule from "#util/prompts.ts";
 import { openAiZodResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
@@ -225,6 +227,149 @@ describe(
         If component context is provided, ground the hint in those components explicitly.",
         }
       `);
+    });
+  },
+);
+
+describe(
+  `buildMeaningHintLogicalPrompt` satisfies HasNameOf<
+    typeof buildMeaningHintLogicalPrompt
+  >,
+  () => {
+    test(`minimal input (no component context)`, () => {
+      const result = buildMeaningHintLogicalPrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`],
+        },
+        count: 3,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
+
+        Rules:
+        - Keep mnemonics realistic, intuitive, concrete and memorable.
+        - Keep mnemonics short, 1-2 sentences is optimal.
+        - Leverage the logical connection between the components to explain the target character.
+        - The disambiguation values are form/meaning guidance only, do not include them directly in the hint.
+        - Anchor on the exact gloss values, don't use them as a base stem for derivative words.
+        - Only focus on meaning recall, not pronunciation.
+        - Avoid introducing unnecessary elements that could distract from the core elements.
+        - Put the hanzi after each gloss in parenthesis: <gloss> (<hanzi>)",
+          "user": "Generate 3 distinct mnemonic hints:
+
+        <data>
+        {
+          "targetCharacter": {
+            "hanzi": "好",
+            "gloss": "good"
+          },
+          "components": []
+        }
+        </data>",
+        }
+      `);
+    });
+
+    test(`full input (with component context)`, () => {
+      const result = buildMeaningHintLogicalPrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`, `well`, `fine`],
+        },
+        components: [
+          {
+            hanzi: `女`,
+            meaning: `woman`,
+          },
+          {
+            hanzi: `子`,
+            label: `child`,
+            meaning: `child`,
+          },
+        ],
+        count: 4,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "system": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
+
+        Rules:
+        - Keep mnemonics realistic, intuitive, concrete and memorable.
+        - Keep mnemonics short, 1-2 sentences is optimal.
+        - Leverage the logical connection between the components to explain the target character.
+        - The disambiguation values are form/meaning guidance only, do not include them directly in the hint.
+        - Anchor on the exact gloss values, don't use them as a base stem for derivative words.
+        - Only focus on meaning recall, not pronunciation.
+        - Avoid introducing unnecessary elements that could distract from the core elements.
+        - Put the hanzi after each gloss in parenthesis: <gloss> (<hanzi>)",
+          "user": "Generate 4 distinct mnemonic hints:
+
+        <data>
+        {
+          "targetCharacter": {
+            "hanzi": "好",
+            "gloss": "good",
+            "disambiguation": "well; fine"
+          },
+          "components": [
+            {
+              "hanzi": "女",
+              "gloss": "woman"
+            },
+            {
+              "hanzi": "子",
+              "gloss": "child"
+            }
+          ]
+        }
+        </data>",
+        }
+      `);
+    });
+  },
+);
+
+describe(
+  `applyTemplateVariables` satisfies HasNameOf<
+    typeof promptsModule.applyTemplateVariables
+  >,
+  () => {
+    test(`replaces known placeholders including internal newlines`, () => {
+      const result = promptsModule.applyTemplateVariables(
+        `A {{ adjective }} template with:\n{{ payload }}`,
+        {
+          adjective: `helpful`,
+          payload: `line 1\nline 2`,
+        },
+      );
+
+      expect(result).toBe(`A helpful template with:\nline 1\nline 2`);
+    });
+
+    test(`supports placeholder names with surrounding whitespace`, () => {
+      const result = promptsModule.applyTemplateVariables(
+        `Count: {{   count   }}`,
+        {
+          count: `4`,
+        },
+      );
+
+      expect(result).toBe(`Count: 4`);
+    });
+
+    test(`replaces unknown placeholders with empty string`, () => {
+      const result = promptsModule.applyTemplateVariables(
+        `Start {{ missing }} end`,
+        {},
+      );
+
+      expect(result).toBe(`Start  end`);
     });
   },
 );
