@@ -1,10 +1,10 @@
 import {
-    buildLeadCharacterDescriptionPrompt,
-    buildMeaningHintLogicalPrompt,
-    buildMeaningHintPrompt,
-    buildPronunciationHintPrompt,
-    buildSubLocationDescriptionPrompt,
-    renderPromptTemplate,
+  buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintLogicalPrompt,
+  buildMeaningHintPrompt,
+  buildPronunciationHintPrompt,
+  buildSubLocationDescriptionPrompt,
+  renderPromptTemplate,
 } from "#util/prompts.ts";
 import { openAiZodResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
@@ -25,7 +25,7 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create short pronunciation mnemonic story ideas for Mandarin learners.
+          "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
@@ -37,19 +37,28 @@ describe(
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
-        Prefer visual, unusual, and memorable situations over generic ones.",
-          "user": "Story ingredients:
-        - Lead character: Ethan
-        - Location: Gong Cha bathroom
-        - Cue: use
-
-        Generate 3 distinct mnemonic story ideas.
+        Prefer visual, unusual, and memorable situations over generic ones.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.
         If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+          "user": "Generate 3 distinct mnemonic story ideas.
+
+        <data>
+        {
+          "leadCharacter": {
+            "name": "Ethan"
+          },
+          "location": {
+            "name": "Gong Cha bathroom"
+          },
+          "cue": {
+            "word": "use"
+          }
+        }
+        </data>",
         }
       `);
     });
@@ -71,7 +80,7 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create short pronunciation mnemonic story ideas for Mandarin learners.
+          "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
@@ -83,24 +92,32 @@ describe(
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
-        Prefer visual, unusual, and memorable situations over generic ones.",
-          "user": "Story ingredients:
-        - Lead character: Ethan
-        - Location: Gong Cha bathroom
-        - Cue: use
-
-        Lead character bio: Ethan Klein — loud, expressive, chaotic
-        Location description: A cramped, slightly sticky bathroom with bubble tea posters
-        Cue meaning: to use; to employ
-        Creative direction: Play it as a surreal heist-comedy beat with one unforgettable prop.
-
-        Generate 4 distinct mnemonic story ideas.
+        Prefer visual, unusual, and memorable situations over generic ones.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.
         If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+          "user": "Generate 4 distinct mnemonic story ideas.
+
+        <data>
+        {
+          "leadCharacter": {
+            "name": "Ethan",
+            "bio": "Ethan Klein — loud, expressive, chaotic"
+          },
+          "location": {
+            "name": "Gong Cha bathroom",
+            "description": "A cramped, slightly sticky bathroom with bubble tea posters"
+          },
+          "cue": {
+            "word": "use",
+            "meaning": "to use; to employ"
+          },
+          "creativeDirection": "Play it as a surreal heist-comedy beat with one unforgettable prop."
+        }
+        </data>",
         }
       `);
     });
@@ -115,7 +132,7 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create short pronunciation mnemonic story ideas for Mandarin learners.
+          "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
@@ -127,19 +144,29 @@ describe(
         When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         If extra character or location details are provided, use them to make the story more specific.
         Keep each hint to 1-2 sentences.
-        Prefer visual, unusual, and memorable situations over generic ones.",
-          "user": "Story ingredients:
-        - Lead character: the seal
-        - Location: River Stage bathroom
-        - Cue: color
-
-        Generate 2 distinct mnemonic story ideas.
+        Prefer visual, unusual, and memorable situations over generic ones.
         Each suggestion must explicitly include the character and location by name.
         Use the keyword as light inspiration for the central action, object, or conflict.
         If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+          "user": "Generate 2 distinct mnemonic story ideas.
+
+        <data>
+        {
+          "leadCharacter": {
+            "name": "seal",
+            "article": "the"
+          },
+          "location": {
+            "name": "River Stage bathroom"
+          },
+          "cue": {
+            "word": "color"
+          }
+        }
+        </data>",
         }
       `);
     });
@@ -161,22 +188,30 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create short meaning-recognition mnemonic hints for Mandarin learners.
+          "system": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
         Your job is to help the learner remember what a Hanzi means using its visual components.
         Use the provided component details as the core building blocks of each hint.
         Write vivid, concrete, and memorable mini-scenes or mental images.
         Focus on meaning recall, not pronunciation.
         Avoid historical or etymological claims unless directly supported by the provided component context.
         Keep each hint to 1-2 sentences.
-        Prefer unusual but clear imagery over generic definitions.",
-          "user": "Character: 好
-        Primary gloss: good
-
-        Generate 3 distinct mnemonic hints.
+        Prefer unusual but clear imagery over generic definitions.
         Each suggestion should help a learner recall the target meaning from the character's components.
         Do not write a plain dictionary definition.
         Do not introduce pronunciation guidance.
         If component context is provided, ground the hint in those components explicitly.",
+          "user": "Generate 3 distinct mnemonic hints.
+        <data>
+        {
+          "hanzi": "好",
+          "meaning": {
+            "hanziWord": "好",
+            "glosses": [
+              "good"
+            ]
+          }
+        }
+        </data>",
         }
       `);
     });
@@ -204,27 +239,43 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create short meaning-recognition mnemonic hints for Mandarin learners.
+          "system": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
         Your job is to help the learner remember what a Hanzi means using its visual components.
         Use the provided component details as the core building blocks of each hint.
         Write vivid, concrete, and memorable mini-scenes or mental images.
         Focus on meaning recall, not pronunciation.
         Avoid historical or etymological claims unless directly supported by the provided component context.
         Keep each hint to 1-2 sentences.
-        Prefer unusual but clear imagery over generic definitions.",
-          "user": "Character: 好
-        Primary gloss: good
-        Additional glosses: well; fine
-
-        Component context:
-        - Component 1: hanzi: 女 | meaning: woman
-        - Component 2: hanzi: 子 | label: child | meaning: child
-
-        Generate 4 distinct mnemonic hints.
+        Prefer unusual but clear imagery over generic definitions.
         Each suggestion should help a learner recall the target meaning from the character's components.
         Do not write a plain dictionary definition.
         Do not introduce pronunciation guidance.
         If component context is provided, ground the hint in those components explicitly.",
+          "user": "Generate 4 distinct mnemonic hints.
+        <data>
+        {
+          "hanzi": "好",
+          "meaning": {
+            "hanziWord": "好",
+            "glosses": [
+              "good",
+              "well",
+              "fine"
+            ]
+          },
+          "components": [
+            {
+              "hanzi": "女",
+              "meaning": "woman"
+            },
+            {
+              "hanzi": "子",
+              "label": "child",
+              "meaning": "child"
+            }
+          ]
+        }
+        </data>",
         }
       `);
     });
@@ -417,28 +468,30 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+          "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
-        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
-          "user": "Location: Lawson
-        Sublocation: Outside
-
-        Generate 4 distinct reusable location descriptions for this exact combined place: Outside Lawson
-
-        Each suggestion must:
-        - Clearly reflect both the Location and the Sublocation
-        - If a Viewpoint is provided, ensure the description matches that perspective
-        - Describe stable, always-true aspects of the place
-        - Return only the descriptive fragment itself, don't prefix with the place label
-        - Avoid time of day, weather, or temporary events
-        - Avoid actions or specific story moments
-        - Be easy to visualize and reuse in different mnemonic scenes
-
+        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
+        Each suggestion must clearly reflect both the Location and the Sublocation.
+        If a Viewpoint is provided, ensure the description matches that perspective.
+        Describe stable, always-true aspects of the place.
+        Return only the descriptive fragment itself, don't prefix with the place label.
+        Avoid time of day, weather, or temporary events.
+        Avoid actions or specific story moments.
+        Be easy to visualize and reuse in different mnemonic scenes.
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
+          "user": "Generate 4 distinct reusable location descriptions for this exact combined place.
+
+        <data>
+        {
+          "label": "Outside Lawson",
+          "location": "Lawson",
+          "sublocation": "Outside"
+        }
+        </data>",
         }
       `);
     });
@@ -455,31 +508,32 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+          "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
-        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
-          "user": "Location: Lawson
-        Sublocation: Outside
-
-        Location notes: The famous Japanese convenience chain store.
-        Viewpoint: At eye level looking at the storefront
-
-        Generate 4 distinct reusable location descriptions for this exact combined place: Outside Lawson
-
-        Each suggestion must:
-        - Clearly reflect both the Location and the Sublocation
-        - If a Viewpoint is provided, ensure the description matches that perspective
-        - Describe stable, always-true aspects of the place
-        - Return only the descriptive fragment itself, don't prefix with the place label
-        - Avoid time of day, weather, or temporary events
-        - Avoid actions or specific story moments
-        - Be easy to visualize and reuse in different mnemonic scenes
-
+        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
+        Each suggestion must clearly reflect both the Location and the Sublocation.
+        If a Viewpoint is provided, ensure the description matches that perspective.
+        Describe stable, always-true aspects of the place.
+        Return only the descriptive fragment itself, don't prefix with the place label.
+        Avoid time of day, weather, or temporary events.
+        Avoid actions or specific story moments.
+        Be easy to visualize and reuse in different mnemonic scenes.
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
+          "user": "Generate 4 distinct reusable location descriptions for this exact combined place.
+
+        <data>
+        {
+          "label": "Outside Lawson",
+          "location": "Lawson",
+          "sublocation": "Outside",
+          "locationNotes": "The famous Japanese convenience chain store.",
+          "viewpoint": "At eye level looking at the storefront"
+        }
+        </data>",
         }
       `);
     });
@@ -494,28 +548,30 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+          "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
-        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.",
-          "user": "Location: Gong Cha
-        Sublocation: bathroom
-
-        Generate 3 distinct reusable location descriptions for this exact combined place: Gong Cha bathroom
-
-        Each suggestion must:
-        - Clearly reflect both the Location and the Sublocation
-        - If a Viewpoint is provided, ensure the description matches that perspective
-        - Describe stable, always-true aspects of the place
-        - Return only the descriptive fragment itself, don't prefix with the place label
-        - Avoid time of day, weather, or temporary events
-        - Avoid actions or specific story moments
-        - Be easy to visualize and reuse in different mnemonic scenes
-
+        Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
+        Each suggestion must clearly reflect both the Location and the Sublocation.
+        If a Viewpoint is provided, ensure the description matches that perspective.
+        Describe stable, always-true aspects of the place.
+        Return only the descriptive fragment itself, don't prefix with the place label.
+        Avoid time of day, weather, or temporary events.
+        Avoid actions or specific story moments.
+        Be easy to visualize and reuse in different mnemonic scenes.
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
+          "user": "Generate 3 distinct reusable location descriptions for this exact combined place.
+
+        <data>
+        {
+          "label": "Gong Cha bathroom",
+          "location": "Gong Cha",
+          "sublocation": "bathroom"
+        }
+        </data>",
         }
       `);
     });
@@ -536,27 +592,28 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
+          "system": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
         Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
         Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
         Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
         Make characters feel like real people with depth—avoid generic or flat descriptions.
-        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.",
-          "user": "Character: Marcus
-        Associated pinyin sound: m
-
-        Generate 4 distinct character personality descriptions for this character.
-
-        Each suggestion must:
-        - Describe a unique, memorable personality or trait
-        - Feel like a real person with specific quirks or depth
-        - Be distinct from other suggestions
-        - Return only the descriptive fragment itself, don't prefix with the character name
-        - Be easy to visualize and reuse in different mnemonic stories
-        - NOT be a definition or encyclopedia-style description
-
+        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.
+        Each suggestion must describe a unique, memorable personality or trait.
+        Each suggestion should feel like a real person with specific quirks or depth.
+        Each suggestion should be distinct from other suggestions.
+        Return only the descriptive fragment itself, don't prefix with the character name.
+        Be easy to visualize and reuse in different mnemonic stories.
+        Do not write a definition or encyclopedia-style description.
         Good suggestions feel like a vivid character profile.
         Bad suggestions feel generic, flat, or encyclopedia-like.",
+          "user": "Generate 4 distinct character personality descriptions for this character.
+
+        <data>
+        {
+          "name": "Marcus",
+          "sound": "m"
+        }
+        </data>",
         }
       `);
     });
@@ -571,29 +628,29 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "system": "You create vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
+          "system": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
         Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
         Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
         Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
         Make characters feel like real people with depth—avoid generic or flat descriptions.
-        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.",
-          "user": "Character: Marcus
-        Associated pinyin sound: m
-
-        Existing description: A tech entrepreneur with a sharp sense of humor
-
-        Generate 3 distinct character personality descriptions for this character.
-
-        Each suggestion must:
-        - Describe a unique, memorable personality or trait
-        - Feel like a real person with specific quirks or depth
-        - Be distinct from other suggestions
-        - Return only the descriptive fragment itself, don't prefix with the character name
-        - Be easy to visualize and reuse in different mnemonic stories
-        - NOT be a definition or encyclopedia-style description
-
+        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.
+        Each suggestion must describe a unique, memorable personality or trait.
+        Each suggestion should feel like a real person with specific quirks or depth.
+        Each suggestion should be distinct from other suggestions.
+        Return only the descriptive fragment itself, don't prefix with the character name.
+        Be easy to visualize and reuse in different mnemonic stories.
+        Do not write a definition or encyclopedia-style description.
         Good suggestions feel like a vivid character profile.
         Bad suggestions feel generic, flat, or encyclopedia-like.",
+          "user": "Generate 3 distinct character personality descriptions for this character.
+
+        <data>
+        {
+          "name": "Marcus",
+          "sound": "m",
+          "existingDescription": "A tech entrepreneur with a sharp sense of humor"
+        }
+        </data>",
         }
       `);
     });
