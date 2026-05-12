@@ -8,6 +8,7 @@ import { WikiHanziExternalResources } from "./WikiHanziExternalResources";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
 import { WikiHanziCharacterUsedInWords } from "./WikiHanziCharacterUsedInWords";
 import { WikiHanziRelatedMeanings } from "./WikiHanziRelatedMeanings";
+import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
 import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
 import { WikiHanziWordCharacters } from "./WikiHanziWordCharacters";
 
@@ -26,6 +27,8 @@ export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
         <WikiHanziCharacterUsedInWords hanzi={hanzi} />
 
         <WikiHanziRelatedMeanings hanzi={hanzi} />
+
+        <WikiHanziSamePronunciation hanzi={hanzi} />
 
         <WikiHanziCharacterUsedAsComponent hanzi={hanzi} />
 
