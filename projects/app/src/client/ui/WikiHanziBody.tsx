@@ -8,12 +8,15 @@ import { WikiHanziExternalResources } from "./WikiHanziExternalResources";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
 import { WikiHanziCharacterUsedInWords } from "./WikiHanziCharacterUsedInWords";
 import { WikiHanziRelatedMeanings } from "./WikiHanziRelatedMeanings";
+import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
 import { WikiHanziWordCharacters } from "./WikiHanziWordCharacters";
 
 export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-6 bg-bg py-7">
+        <WikiHanziHeaderOverview hanzi={hanzi} />
+
         <WikiHanziWordCharacters hanzi={hanzi} />
 
         <WikiHanziCharacterDecomposition hanzi={hanzi} />

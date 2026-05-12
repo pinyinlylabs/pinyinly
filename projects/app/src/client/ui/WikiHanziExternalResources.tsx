@@ -27,6 +27,18 @@ const externalResources = [
     singleCharacterOnly: false,
   },
   {
+    name: `MDBG`,
+    getHref: (hanzi: HanziText) =>
+      `https://www.mdbg.net/chinese/dictionary?page=worddict&email=&wdrst=0&wdqb=${encodeURIComponent(hanzi)}`,
+    singleCharacterOnly: false,
+  },
+  {
+    name: `Unihan Database`,
+    getHref: (hanzi: HanziText) =>
+      `https://www.unicode.org/cgi-bin/GetUnihanData.pl?codepoint=${encodeURIComponent(hanzi)}`,
+    singleCharacterOnly: true,
+  },
+  {
     name: `Wiktionary`,
     getHref: (hanzi: HanziText) =>
       `https://en.wiktionary.org/wiki/${encodeURIComponent(hanzi)}`,
