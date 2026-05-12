@@ -1,11 +1,5 @@
-import { hskLevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
-import {
-  arrayFilterUnique,
-  sortComparatorNumber,
-} from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
-import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { ScrollView, View } from "react-native";
@@ -13,8 +7,6 @@ import { HeaderTitleProvider } from "./HeaderTitleProvider";
 import { CloseButton } from "./CloseButton";
 import { RectButton } from "./RectButton";
 import { WikiHanziBody } from "./WikiHanziBody";
-import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
-import { useDb } from "./hooks/useDb";
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -25,26 +17,6 @@ export function WikiHanziModalImpl({
   onDismiss: () => void;
   onExpand: () => void;
 }) {
-  const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.dictionarySearch })
-        .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionarySearch, hanzi],
-  );
-
-  const hskLevels = dictionarySearchEntries
-    .map((entry) => entry.hsk)
-    .filter((x) => x != null)
-    .filter(arrayFilterUnique())
-    .sort(sortComparatorNumber(hskLevelToNumber));
-  const pinyins = dictionarySearchEntries
-    .map((entry) => entry.pinyin?.[0])
-    .filter((x) => x != null);
-  const glosses = dictionarySearchEntries
-    .map((entry) => entry.gloss[0])
-    .filter((x) => x != null);
   const [isHeaderBackgroundVisible, setIsHeaderBackgroundVisible] =
     useState(false);
 
@@ -77,13 +49,6 @@ export function WikiHanziModalImpl({
         />
 
         <View className="px-safe-or-4">
-          <WikiHanziHeaderOverview
-            hanzi={hanzi}
-            hskLevels={hskLevels}
-            pinyins={pinyins}
-            glosses={glosses}
-          />
-
           <WikiHanziBody hanzi={hanzi} />
         </View>
       </ScrollView>

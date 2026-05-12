@@ -1,33 +1,54 @@
 import { intersperse } from "@/client/react";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
-import type { HanziText, HskLevel } from "@/data/model";
-import { arrayFilterUnique } from "@pinyinly/lib/collections";
+import { hskLevelToNumber } from "@/data/hsk";
+import type { HanziText } from "@/data/model";
+import {
+  arrayFilterUnique,
+  sortComparatorNumber,
+} from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { HskLozenge } from "./HskLozenge";
 import { RectButton } from "./RectButton";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
-
-export interface WikiHanziHeaderOverviewDataProps {
-  hskLevels: readonly HskLevel[];
-  glosses: readonly string[] | undefined;
-  hanzi: HanziText;
-  pinyins: readonly string[] | undefined;
-}
+import { useDb } from "./hooks/useDb";
 
 export function WikiHanziHeaderOverview({
-  hskLevels,
   hanzi,
-  pinyins,
-  glosses,
   ...rest
-}: WikiHanziHeaderOverviewDataProps) {
+}: {
+  hanzi: HanziText;
+}) {
   true satisfies IsExhaustedRest<typeof rest>;
 
+  const db = useDb();
+  const { data: dictionarySearchEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi)),
+    [db.dictionarySearch, hanzi],
+  );
+
+  const hskLevels = [
+    ...dictionarySearchEntries.map((entry) => entry.hsk),
+    ...dictionarySearchEntries.map((entry) => entry.hskFirstAppearance),
+  ]
+    .filter((x) => x != null)
+    .filter(arrayFilterUnique())
+    .sort(sortComparatorNumber(hskLevelToNumber));
+  const pinyins = dictionarySearchEntries
+    .map((entry) => entry.pinyin?.[0])
+    .filter((x) => x != null);
+  const glosses = dictionarySearchEntries
+    .map((entry) => entry.gloss[0])
+    .filter((x) => x != null);
+
   const { isPriority, toggle } = useBookmarkToggle(hanzi);
-  const uniquePinyins = pinyins?.filter(arrayFilterUnique());
+  const uniquePinyins = pinyins.filter(arrayFilterUnique());
 
   return (
     <View className="gap-[10px]">
@@ -51,7 +72,7 @@ export function WikiHanziHeaderOverview({
         </Text>
       </View>
       <View className="gap-1">
-        {uniquePinyins == null ? null : (
+        {uniquePinyins.length === 0 ? null : (
           <View className="flex-row gap-1">
             {intersperse(
               uniquePinyins.map((pinyin, i) => (
@@ -63,7 +84,7 @@ export function WikiHanziHeaderOverview({
             )}
           </View>
         )}
-        {glosses == null ? null : (
+        {glosses.length === 0 ? null : (
           <ExpandableGlosses hanzi={hanzi} glosses={glosses} />
         )}
       </View>
