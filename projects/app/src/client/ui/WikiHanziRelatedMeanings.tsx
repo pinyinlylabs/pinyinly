@@ -41,7 +41,7 @@ export function WikiHanziRelatedMeanings({ hanzi }: { hanzi: HanziText }) {
   }
 
   return (
-    <WikiTitledBox title="Similar meaning to">
+    <WikiTitledBox title="Similar in meaning">
       <View className="gap-4 p-3">
         <CompactWordRows dictionarySearchEntries={relatedWordRows} />
       </View>
