@@ -54,7 +54,6 @@ const pronunciationHintOutputSchema = z
                 `The mnemonic story text. When the cue word appears in the story, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
               ),
             explanation: z.string().nullable().optional(),
-            confidence: z.number().min(0).max(1),
           })
           .strict(),
       )
@@ -95,7 +94,6 @@ const meaningHintRawOutputSchema = z
           .object({
             hint: z.string(),
             explanation: z.string().nullable().optional(),
-            confidence: z.number().min(0).max(1),
           })
           .strict(),
       )
@@ -111,7 +109,6 @@ const meaningHintOutputSchema = z
           .object({
             hint: z.string(),
             explanation: z.string().nullable().optional(),
-            confidence: z.number().min(0).max(1),
             strategyLabel: z.string(),
           })
           .strict(),
@@ -139,7 +136,6 @@ const subLocationDescriptionOutputSchema = z
           .object({
             description: z.string(),
             explanation: z.string().nullable().optional(),
-            confidence: z.number().min(0).max(1),
           })
           .strict(),
       )
@@ -155,7 +151,6 @@ const leadCharacterDescriptionOutputSchema = z
           .object({
             description: z.string(),
             explanation: z.string().nullable().optional(),
-            confidence: z.number().min(0).max(1),
           })
           .strict(),
       )
