@@ -127,7 +127,7 @@ function ExpandableGlosses({
         />
       </View>
       {expanded ? (
-        <View className="mt-2 rounded-lg bg-fg/5 p-4">
+        <View className="mt-2">
           <WikiHanziMeaningsPanel hanzi={hanzi} />
         </View>
       ) : null}
