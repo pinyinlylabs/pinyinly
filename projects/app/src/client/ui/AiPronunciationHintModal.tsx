@@ -17,7 +17,6 @@ export interface AiPronunciationHintModalProps {
 type HintSuggestion = {
   hint: string;
   explanation?: string | null;
-  confidence: number;
 };
 
 export function AiPronunciationHintModal({
@@ -152,10 +151,7 @@ export function AiPronunciationHintModal({
                       key={`${index}-${suggestion.hint}`}
                       className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3"
                     >
-                      <View className="flex-row items-center justify-between">
-                        <Text className="font-sans text-[13px] text-fg-dim">
-                          Confidence: {formatConfidence(suggestion.confidence)}
-                        </Text>
+                      <View className="flex-row items-center justify-end">
                         <RectButton
                           variant="bare"
                           onPress={() => {
@@ -250,10 +246,4 @@ function buildPronunciationHintContextData({
       ? {}
       : { creativeDirection: trimmedCreativeDirection }),
   };
-}
-
-function formatConfidence(value: number) {
-  const normalized = Number.isFinite(value) ? value : 0;
-  const clamped = Math.max(0, Math.min(1, normalized));
-  return `${Math.round(clamped * 100)}%`;
 }

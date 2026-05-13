@@ -426,7 +426,6 @@ describe(
           .array(
             z.object({
               hint: z.string(),
-              confidence: z.number().min(0).max(1),
             }),
           )
           .min(1),

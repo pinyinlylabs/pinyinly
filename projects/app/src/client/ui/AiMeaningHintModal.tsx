@@ -22,7 +22,6 @@ export interface MeaningHintComponent {
 type HintSuggestion = {
   hint: string;
   explanation?: string | null;
-  confidence: number;
   strategyLabel: string;
 };
 
@@ -138,20 +137,14 @@ export function AiMeaningHintModal({
                       className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3"
                     >
                       <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center gap-2">
-                          <Text className="font-sans text-[13px] text-fg-dim">
-                            Confidence:{` `}
-                            {formatConfidence(suggestion.confidence)}
-                          </Text>
-                          <Text
-                            className={`
-                              rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold
-                              uppercase tracking-wide text-fg-dim
-                            `}
-                          >
-                            {suggestion.strategyLabel}
-                          </Text>
-                        </View>
+                        <Text
+                          className={`
+                            rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold
+                            uppercase tracking-wide text-fg-dim
+                          `}
+                        >
+                          {suggestion.strategyLabel}
+                        </Text>
                         <RectButton
                           variant="bare"
                           onPress={() => {
@@ -228,10 +221,4 @@ function buildMeaningHintContextData({
     },
     components: components.map((component) => ({ ...component })),
   };
-}
-
-function formatConfidence(value: number) {
-  const normalized = Number.isFinite(value) ? value : 0;
-  const clamped = Math.max(0, Math.min(1, normalized));
-  return `${Math.round(clamped * 100)}%`;
 }
