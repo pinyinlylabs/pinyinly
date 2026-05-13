@@ -14,11 +14,18 @@ interface TextInputSingleProps extends Omit<
   // exclude multiline props since this is a single-line input
   | `multiline`
   | `numberOfLines`
+  // excluded so the JSDoc can be redefined
+  | `autoFocus`
 > {
   disabled?: boolean;
   placeholder: string | undefined;
   ref?: Ref<TextInput>;
   variant?: TextInputVariant;
+  /**
+   * @warning this does not work on mobile Safari, inputs must be focused
+   * manually by the user.
+   */
+  autoFocus?: boolean | undefined;
 }
 
 export function TextInputSingle({
