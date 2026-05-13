@@ -9,7 +9,6 @@ import type { ImageCrop } from "./imageCrop";
 
 interface ToneSoundTileProps extends ViewProps {
   soundId: PinyinSoundId;
-  label: string;
   name: string | null;
   image: {
     assetId: AssetId;
@@ -22,7 +21,6 @@ interface ToneSoundTileProps extends ViewProps {
 export function ToneSoundTile({
   className,
   soundId,
-  label,
   name,
   image,
   ...props
@@ -65,9 +63,11 @@ export function ToneSoundTile({
             {decoration}
           </Text>
         )}
-        <Text className="font-sans text-2xl leading-none text-fg">{label}</Text>
+        <Text className="font-sans text-2xl leading-none text-fg">
+          {tone == null ? null : <ToneLabelText tone={tone} />}
+        </Text>
       </View>
-      {tone == null ? (
+      {name == null ? (
         <Text
           className="select-none overflow-visible leading-none text-fg/20"
           numberOfLines={1}
@@ -75,7 +75,12 @@ export function ToneSoundTile({
           _____
         </Text>
       ) : (
-        <ToneLabelText tone={tone} />
+        <Text
+          className="overflow-visible leading-none text-fg-dim"
+          numberOfLines={1}
+        >
+          {name}
+        </Text>
       )}
     </View>
   );

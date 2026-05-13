@@ -2,10 +2,10 @@ import { Text } from "react-native";
 
 export function ToneLabelText({ tone }: { tone: number }) {
   return (
-    <Text className="font-sans text-fg-dim">
+    <>
       {tone}
       <Text className="align-super text-[10px]">{ordinalSuffix(tone)}</Text>
-    </Text>
+    </>
   );
 }
 
