@@ -57,7 +57,10 @@ export function AiMeaningHintModal({
 
     try {
       const result = await generateMutation.mutateAsync(requestInput);
-      setSuggestions(result.suggestions);
+      setSuggestions((prevSuggestions) => [
+        ...(prevSuggestions ?? []),
+        ...result.suggestions,
+      ]);
     } catch (err) {
       console.error(`AI meaning hint generation failed:`, err);
       setError(`Unable to generate hints right now.`);
@@ -178,7 +181,7 @@ export function AiMeaningHintModal({
                     void handleGenerate();
                   }}
                 >
-                  Regenerate
+                  Generate more
                 </RectButton>
               ) : null}
             </View>
