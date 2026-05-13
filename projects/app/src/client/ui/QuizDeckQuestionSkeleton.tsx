@@ -66,8 +66,8 @@ export function QuizDeckQuestionSkeleton({
         >
           <RectButton
             variant="bareDim"
-            disabled={grade != null}
             onPress={onSubmit}
+            className={grade == null ? undefined : `invisible`}
           >
             I don&apos;t know
           </RectButton>

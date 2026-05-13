@@ -470,22 +470,30 @@ describe(`character.json files`, async () => {
 
     for (const { character, characterData } of characterFiles) {
       expected.set(character, {
-        decomposition:
-          characterData.mnemonic == null
-            ? undefined
-            : idsNodeToString(
+        ...(characterData.mnemonic == null
+          ? {}
+          : {
+              decomposition: idsNodeToString(
                 characterData.mnemonic.components,
                 componentToString,
               ),
-        decompositionStrokes:
-          characterData.mnemonic == null
-            ? undefined
-            : [...walkIdsNodeLeafs(characterData.mnemonic.components)].map(
-                (leaf) => leaf.strokes,
-              ),
-        componentFormOf: characterData.componentFormOf,
-        isStructural: characterData.isStructural,
-        canonicalForm: characterData.canonicalForm,
+            }),
+        ...(characterData.mnemonic == null
+          ? {}
+          : {
+              decompositionStrokes: [
+                ...walkIdsNodeLeafs(characterData.mnemonic.components),
+              ].map((leaf) => leaf.strokes),
+            }),
+        ...(characterData.componentFormOf === undefined
+          ? {}
+          : { componentFormOf: characterData.componentFormOf }),
+        ...(characterData.isStructural === undefined
+          ? {}
+          : { isStructural: characterData.isStructural }),
+        ...(characterData.canonicalForm === undefined
+          ? {}
+          : { canonicalForm: characterData.canonicalForm }),
       });
     }
 

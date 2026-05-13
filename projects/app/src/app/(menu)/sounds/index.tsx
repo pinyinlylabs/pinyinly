@@ -157,7 +157,6 @@ export default function SoundsPage() {
                     ) : (
                       <ToneSoundTile
                         soundId={soundId}
-                        label={sound.label}
                         name={sound.name}
                         image={sound.image}
                       />

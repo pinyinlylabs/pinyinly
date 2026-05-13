@@ -38,6 +38,7 @@ import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
+import { ToneLabelText } from "./ToneLabelText";
 import { Tooltip } from "./Tooltip";
 import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacterPronunciationImagePicker";
 import { WikiTitledBox } from "./WikiTitledBox";
@@ -305,14 +306,7 @@ export function WikiHanziCharacterPronunciationBox({
                 <SoundLinkBlock
                   soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
-                  label={
-                    <>
-                      {splitPinyin.tone}
-                      <Text className="align-super text-[10px]">
-                        {ordinalSuffix(splitPinyin.tone)}
-                      </Text>
-                    </>
-                  }
+                  label={<ToneLabelText tone={splitPinyin.tone} />}
                   name={null}
                 />
               </View>
@@ -588,26 +582,6 @@ function FinalToneForkedArrow() {
 
 function DownArrow() {
   return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
-}
-
-function ordinalSuffix(n: number): string {
-  if (n >= 11 && n <= 13) {
-    return `th`;
-  }
-  switch (n % 10) {
-    case 1: {
-      return `st`;
-    }
-    case 2: {
-      return `nd`;
-    }
-    case 3: {
-      return `rd`;
-    }
-    default: {
-      return `th`;
-    }
-  }
 }
 
 function buildCueMeaningContext({
