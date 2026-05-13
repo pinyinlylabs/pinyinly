@@ -347,7 +347,7 @@
   ["优良:fine",{"freq":0.00009409993413004611,"gloss":["fine","good","first-rate"],"hsk":"4","pinyin":["yōu liáng"]}],
   ["伙:partner",{"freq":0.00024324981756263683,"gloss":["companion","partner","group","classifier for groups of people","to combine","together"],"hsk":"4","pinyin":["huǒ"],"pos":"n"}],
   ["伙伴:partner",{"freq":0.00037064492216456633,"gloss":["partner","companion","comrade"],"hsk":"4","pinyin":["huǒ bàn"]}],
-  ["会:can",{"freq":0.043478260869565216,"gloss":["can","be able to"],"hsk":"1","pinyin":["huì"],"pos":"v"}],
+  ["会:can",{"freq":0.043478260869565216,"gloss":["able to","can"],"hsk":"1","pinyin":["huì"],"pos":"v"}],
   ["会:meeting",{"freq":0.043478260869565216,"gloss":["meeting","gathering"],"hsk":"1","pinyin":["huì"],"pos":"n"}],
   ["会员:member",{"freq":0.0002486325211337643,"gloss":["member","membership"],"hsk":"3","pinyin":["huì yuán"],"pos":"n"}],
   ["会计:accountant",{"freq":0.00023342670401493932,"gloss":["accountant","accountancy","accounting"],"hsk":"4","pinyin":["kuài jì"]}],
