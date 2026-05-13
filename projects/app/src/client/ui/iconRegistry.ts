@@ -53,6 +53,7 @@ export const iconRegistry = {
   [`message-bubble-filled`]: require(`../../assets/icons/message-bubble-filled.svg`),
   [`message-text`]: require(`../../assets/icons/message-text.svg`),
   [`minus`]: require(`../../assets/icons/minus.svg`),
+  [`more-horizontal`]: require(`../../assets/icons/more-horizontal.svg`),
   [`note-2`]: require(`../../assets/icons/note-2.svg`),
   [`open`]: require(`../../assets/icons/open.svg`),
   [`pencil`]: require(`../../assets/icons/pencil.svg`),
