@@ -78,6 +78,7 @@ export const iconRegistry = {
   [`time-circled`]: require(`../../assets/icons/time-circled.svg`),
   [`tone`]: require(`../../assets/icons/tone.svg`),
   [`translate`]: require(`../../assets/icons/translate.svg`),
+  [`trash`]: require(`../../assets/icons/trash.svg`),
   [`trending-down`]: require(`../../assets/icons/trending-down.svg`),
   [`trending-up`]: require(`../../assets/icons/trending-up.svg`),
   [`undo`]: require(`../../assets/icons/undo.svg`),
