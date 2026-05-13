@@ -1,7 +1,20 @@
 import { nullIfEmpty } from "@/util/unicode";
+import type { ViewProps } from "react-native";
 import { Text, View } from "react-native";
-import type { PinyinSoundTileProps } from "./BaseSoundTile";
 import { FramedAssetImage } from "./ImageFrame";
+import type { AssetId } from "@/data/model";
+import type { ImageCrop } from "./imageCrop";
+
+interface InitialSoundTileProps extends ViewProps {
+  label: string;
+  name: string | null;
+  image: {
+    assetId: AssetId;
+    crop: ImageCrop;
+    imageWidth: number | null;
+    imageHeight: number | null;
+  } | null;
+}
 
 export function InitialSoundTile({
   className,
@@ -9,7 +22,7 @@ export function InitialSoundTile({
   name,
   image,
   ...props
-}: PinyinSoundTileProps) {
+}: InitialSoundTileProps) {
   return (
     <View
       {...props}
