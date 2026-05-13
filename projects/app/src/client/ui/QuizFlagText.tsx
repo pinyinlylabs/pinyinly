@@ -48,6 +48,19 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
       );
     }
     case QuestionFlagKind.Overdue: {
+      const formattedOverdueDuration = formatDuration(
+        intervalToDuration(flag.interval),
+        {
+          format: [`years`, `months`, `weeks`, `days`, `hours`, `minutes`],
+          zero: false,
+          delimiter: `, `,
+        },
+      );
+      const overdueBy =
+        formattedOverdueDuration.length > 0
+          ? formattedOverdueDuration.split(`, `)[0]
+          : `1 minute`;
+
       return (
         <View
           className={flagViewClass({
@@ -57,20 +70,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
           <Icon className={flagIconClass()} icon="alarm" />
           <Text className={flagTextClass()}>
             Overdue by{` `}
-            {
-              formatDuration(intervalToDuration(flag.interval), {
-                format: [
-                  `years`,
-                  `months`,
-                  `weeks`,
-                  `days`,
-                  `hours`,
-                  `minutes`,
-                ],
-                zero: false,
-                delimiter: `, `,
-              }).split(`, `)[0]
-            }
+            {overdueBy}
           </Text>
         </View>
       );
