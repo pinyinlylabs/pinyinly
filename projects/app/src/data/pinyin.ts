@@ -529,7 +529,7 @@ export function getDefaultFinalToneName({
 }
 
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
-  [`tones`, `__u-`, `__-`, `__i-`, `__ue-`, `.-`, `-__`].map((id, index) => [
+  [`__u-`, `__-`, `__i-`, `__ue-`, `.-`, `-__`, `tones`].map((id, index) => [
     id,
     index,
   ]),
