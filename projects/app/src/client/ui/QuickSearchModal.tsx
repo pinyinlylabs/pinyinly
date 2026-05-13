@@ -113,12 +113,12 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
           variant="bare"
         />
         <Pressable
-          className="rounded bg-fg/10 p-1.5"
+          className="rounded bg-fg/10 px-1.5 py-1"
           onPress={() => {
             onDismiss();
           }}
         >
-          <Text className="font-sans text-[8px] text-fg">ESC</Text>
+          <Text className="font-sans text-sm text-fg">ESC</Text>
         </Pressable>
       </View>
 
