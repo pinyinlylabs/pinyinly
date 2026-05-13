@@ -1,4 +1,3 @@
-import { matchAllHanziCharacters } from "@/data/hanzi";
 import type { HanziText } from "@/data/model";
 import {
   createCollection,
@@ -12,6 +11,7 @@ import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { useMemo } from "react";
+import { getCharacterItemsForWord } from "./WikiHanziWordCharacters.utils";
 
 export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
   const db = useDb();
@@ -20,9 +20,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
     () =>
       createCollection(
         localOnlyCollectionOptions({
-          initialData: matchAllHanziCharacters(hanzi).map((char) => ({
-            hanzi: char,
-          })),
+          initialData: getCharacterItemsForWord(hanzi),
           getKey: (item) => item.hanzi,
         }),
       ),
@@ -36,7 +34,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
         .join({ entry: db.dictionarySearch }, ({ character, entry }) =>
           eq(character.hanzi, entry.hanzi),
         )
-        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ character }) => character.position, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
         .select(({ entry, character }) => ({
           hanzi: character.hanzi,
