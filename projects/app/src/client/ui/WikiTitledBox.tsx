@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ViewProps } from "react-native";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { WikiEditButton } from "./WikiEditButton";
 import { RectButton } from "./RectButton";
 
 export function WikiTitledBox({
@@ -28,27 +29,15 @@ export function WikiTitledBox({
   const isOverflowExpandable = collapsedMaxHeight != null;
   const headerAction =
     headerCustomAction ??
-    (onEditingChange == null ? null : isEditing ? (
-      <RectButton
-        variant="barePrimary"
+    (onEditingChange == null ? null : (
+      <WikiEditButton
+        editing={isEditing}
         onPress={() => {
-          setIsEditing(false);
-          onEditingChange(false);
+          const next = !isEditing;
+          setIsEditing(next);
+          onEditingChange(next);
         }}
-      >
-        Done
-      </RectButton>
-    ) : (
-      <RectButton
-        variant="bareDim"
-        iconStart="pencil"
-        onPress={() => {
-          setIsEditing(true);
-          onEditingChange(true);
-        }}
-      >
-        Edit
-      </RectButton>
+      />
     ));
 
   return (

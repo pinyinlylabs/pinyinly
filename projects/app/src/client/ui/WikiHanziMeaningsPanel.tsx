@@ -13,6 +13,8 @@ import { nanoid } from "@/util/nanoid";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
 import { Text, View } from "react-native";
+import { FloatingMenuModal } from "./FloatingMenuModal";
+import { WikiEditButton } from "./WikiEditButton";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { RectButton } from "./RectButton";
 import { useDb } from "./hooks/useDb";
@@ -48,43 +50,24 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
 
   return (
     <View className="gap-4">
-      <View className="flex-row items-center justify-between gap-3">
-        <View className="gap-1">
-          <Text className="font-sans text-[15px] font-semibold text-fg-loud">
-            Meanings
-          </Text>
-          <Text className="font-sans text-[13px] text-fg-dim">
-            Built-in definitions stay read-only. Your meanings can be edited.
-          </Text>
-        </View>
-        <AddMeaningButton
-          hanzi={hanzi}
-          onAddMeaning={(meaningKey) => {
-            setEditingMeaningKey(meaningKey);
-          }}
-        />
-      </View>
-
       {builtInMeanings.length === 0 && userMeanings.length === 0 ? (
-        <Text className="font-sans text-[14px] text-fg-dim">
+        <Text className="font-sans text-base text-fg-dim">
           No meanings yet.
         </Text>
       ) : (
         <View className="gap-3">
-          {builtInMeanings.map((meaning, index) => (
+          {builtInMeanings.map((meaning) => (
             <DictionaryMeaningListItem
               key={`${meaning.sourceKind}:${meaning.id}`}
-              index={index + 1}
               meaning={meaning}
             />
           ))}
 
-          {userMeanings.map((meaning, index) => (
+          {userMeanings.map((meaning) => (
             <EditableUserMeaningListItem
               key={meaning.meaningKey}
               hanzi={hanzi}
               meaning={meaning}
-              index={builtInMeanings.length + index + 1}
               isEditing={editingMeaningKey === meaning.meaningKey}
               onEdit={() => {
                 setEditingMeaningKey(meaning.meaningKey);
@@ -103,6 +86,15 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
           ))}
         </View>
       )}
+
+      <View className="flex-row justify-start">
+        <AddMeaningButton
+          hanzi={hanzi}
+          onAddMeaning={(meaningKey) => {
+            setEditingMeaningKey(meaningKey);
+          }}
+        />
+      </View>
     </View>
   );
 }
@@ -119,7 +111,7 @@ function AddMeaningButton({
 
   return (
     <RectButton
-      variant="bare"
+      variant="bareDim"
       iconStart="add-circled-filled"
       iconSize={16}
       onPress={() => {
@@ -134,63 +126,41 @@ function AddMeaningButton({
 }
 
 function DictionaryMeaningListItem({
-  index,
   meaning,
 }: {
-  index: number;
   meaning: DictionarySearchEntry;
 }) {
-  const primaryGloss = meaning.gloss[0] ?? ``;
-  const secondaryGlosses = meaning.gloss.slice(1);
   const primaryPinyin = meaning.pinyin?.[0];
   const secondaryPinyins = meaning.pinyin?.slice(1) ?? [];
 
   return (
-    <MeaningListItemFrame index={index}>
-      <View className="gap-3 rounded-xl border border-fg/10 bg-bg p-4">
-        <View className="flex-row items-start justify-between gap-3">
-          <View className="flex-1 gap-1">
-            <Text className="font-sans text-[16px] font-semibold text-fg-loud">
-              {primaryGloss}
-            </Text>
-            {primaryPinyin == null ? null : (
-              <Text className="font-sans text-[13px] text-fg-dim">
-                {primaryPinyin}
-              </Text>
-            )}
-          </View>
-
-          <View className="rounded-full bg-fg/5 px-2 py-1">
-            <Text
-              className={`font-sans text-[11px] font-medium uppercase tracking-[0.4px] text-fg-dim`}
-            >
-              Built-in
-            </Text>
-          </View>
+    <View className="gap-3">
+      <View className="flex-row items-start gap-3">
+        <View className="flex-1">
+          <MeaningCoreText
+            hanzi={meaning.hanzi}
+            pinyin={primaryPinyin}
+            glosses={meaning.gloss}
+          />
         </View>
-
-        {secondaryGlosses.length === 0 ? null : (
-          <LabeledText label="Also">{secondaryGlosses.join(`; `)}</LabeledText>
-        )}
-
-        {secondaryPinyins.length === 0 ? null : (
-          <LabeledText label="Other pinyin">
-            {secondaryPinyins.join(`; `)}
-          </LabeledText>
-        )}
-
-        {meaning.note == null || meaning.note.length === 0 ? null : (
-          <LabeledText label="Note">{meaning.note}</LabeledText>
-        )}
       </View>
-    </MeaningListItemFrame>
+
+      {secondaryPinyins.length === 0 ? null : (
+        <LabeledText label="Other pinyin">
+          {secondaryPinyins.join(`; `)}
+        </LabeledText>
+      )}
+
+      {meaning.note == null || meaning.note.length === 0 ? null : (
+        <LabeledText label="Note">{meaning.note}</LabeledText>
+      )}
+    </View>
   );
 }
 
 function EditableUserMeaningListItem({
   hanzi,
   meaning,
-  index,
   isEditing,
   onDoneEditing,
   onEdit,
@@ -198,7 +168,6 @@ function EditableUserMeaningListItem({
 }: {
   hanzi: HanziText;
   meaning: UserDictionaryEntry;
-  index: number;
   isEditing: boolean;
   onDoneEditing: () => void;
   onEdit: () => void;
@@ -214,83 +183,55 @@ function EditableUserMeaningListItem({
     return null;
   }
 
+  const customBadge = (
+    <View className="self-center rounded-full bg-cyan/10 px-2 py-1">
+      <Text
+        className={`font-sans text-[11px] font-medium uppercase tracking-[0.4px] text-cyan`}
+      >
+        Custom
+      </Text>
+    </View>
+  );
+
   return (
-    <MeaningListItemFrame index={index}>
-      <View className="gap-3 rounded-xl border border-fg/10 bg-bg p-4">
-        <View className="flex-row items-start justify-between gap-3">
-          <View className="flex-1 gap-1">
-            <View className="flex-row items-center gap-2">
-              <Text className="font-sans text-[16px] font-semibold text-fg-loud">
-                {value.gloss}
-              </Text>
-              <View className="rounded-full bg-cyan/10 px-2 py-1">
-                <Text
-                  className={`
-                    font-sans text-[11px] font-medium uppercase tracking-[0.4px] text-cyan
-                  `}
-                >
-                  Yours
+    <View className="gap-3">
+      <View className="flex-row items-start justify-between gap-3">
+        <View className="flex-1 gap-2">
+          {isEditing ? (
+            <View className="gap-1">
+              <View className="flex-row flex-wrap items-baseline gap-4">
+                <Text className="font-sans text-base font-normal text-fg-loud">
+                  {meaning.hanzi}
                 </Text>
+                <InlineEditableSettingText
+                  variant="body"
+                  setting={userHanziMeaningPinyinSetting}
+                  settingKey={keyParams}
+                  placeholder="Add pinyin (optional)"
+                />
+                {customBadge}
+              </View>
+              <View className="ml-4">
+                <InlineEditableSettingText
+                  variant="body"
+                  setting={userHanziMeaningGlossSetting}
+                  settingKey={keyParams}
+                  placeholder="Enter meaning..."
+                  multiline
+                />
               </View>
             </View>
-
-            {value.pinyin == null || value.pinyin.length === 0 ? null : (
-              <Text className="font-sans text-[13px] text-fg-dim">
-                {value.pinyin}
-              </Text>
-            )}
-
-            {value.note == null || value.note.length === 0 ? null : (
-              <Text className="font-sans text-[13px] leading-5 text-fg-dim">
-                {value.note}
-              </Text>
-            )}
-          </View>
-
-          <View className="flex-row items-center gap-1">
-            <RectButton
-              variant="bare"
-              iconStart="pencil"
-              iconSize={16}
-              onPress={isEditing ? onDoneEditing : onEdit}
-            >
-              {isEditing ? `Done` : `Edit`}
-            </RectButton>
-            <RectButton
-              variant="bare"
-              iconStart="close"
-              iconSize={16}
-              className="text-fg-dim"
-              onPress={() => {
-                onRemoved();
-                remove();
-              }}
+          ) : (
+            <MeaningCoreText
+              hanzi={meaning.hanzi}
+              pinyin={value.pinyin}
+              glosses={[value.gloss]}
+              trailingBadge={customBadge}
             />
-          </View>
-        </View>
+          )}
 
-        {isEditing ? (
-          <View className="gap-3 border-t border-fg/10 pt-3">
-            <EditableField label="Meaning">
-              <InlineEditableSettingText
-                variant="body"
-                setting={userHanziMeaningGlossSetting}
-                settingKey={keyParams}
-                placeholder="Enter meaning..."
-                multiline
-              />
-            </EditableField>
-
-            <EditableField label="Pinyin">
-              <InlineEditableSettingText
-                variant="body"
-                setting={userHanziMeaningPinyinSetting}
-                settingKey={keyParams}
-                placeholder="Add pinyin (optional)"
-              />
-            </EditableField>
-
-            <EditableField label="Note">
+          {isEditing ? (
+            <View className="ml-4">
               <InlineEditableSettingText
                 variant="body"
                 setting={userHanziMeaningNoteSetting}
@@ -298,46 +239,94 @@ function EditableUserMeaningListItem({
                 placeholder="Add a note (optional)"
                 multiline
               />
-            </EditableField>
-          </View>
-        ) : null}
-      </View>
-    </MeaningListItemFrame>
-  );
-}
+            </View>
+          ) : value.note == null || value.note.length === 0 ? null : (
+            <LabeledText label="Note">{value.note}</LabeledText>
+          )}
+        </View>
 
-function MeaningListItemFrame({
-  children,
-  index,
-}: {
-  children: React.ReactNode;
-  index: number;
-}) {
-  return (
-    <View className="flex-row items-start gap-3">
-      <View className="w-6 items-center pt-4">
-        <Text className="font-sans text-[13px] font-semibold text-fg-dim">
-          {index}.
-        </Text>
+        <View className="flex-row items-center gap-1">
+          {isEditing ? (
+            <FloatingMenuModal
+              menu={
+                <MeaningOptionsMenu
+                  onDelete={() => {
+                    onRemoved();
+                    remove();
+                  }}
+                />
+              }
+            >
+              <RectButton
+                variant="bareDim"
+                iconStart="more-horizontal"
+                iconSize={16}
+              />
+            </FloatingMenuModal>
+          ) : null}
+          <WikiEditButton
+            editing={isEditing}
+            onPress={isEditing ? onDoneEditing : onEdit}
+          />
+        </View>
       </View>
-      <View className="flex-1">{children}</View>
     </View>
   );
 }
 
-function EditableField({
-  children,
-  label,
+function MeaningOptionsMenu({
+  onDelete,
+  onRequestClose,
 }: {
-  children: React.ReactNode;
-  label: string;
+  onDelete: () => void;
+  onRequestClose?: () => void;
 }) {
   return (
+    <View className="rounded-xl bg-bg-high px-4 py-3">
+      <RectButton
+        variant="bare"
+        onPress={() => {
+          onDelete();
+          onRequestClose?.();
+        }}
+      >
+        Delete meaning
+      </RectButton>
+    </View>
+  );
+}
+
+function MeaningCoreText({
+  glosses,
+  hanzi,
+  pinyin,
+  trailingBadge,
+}: {
+  glosses: string[];
+  hanzi: HanziText;
+  pinyin?: string;
+  trailingBadge?: React.ReactNode;
+}) {
+  const primaryGloss = glosses[0] ?? ``;
+  const secondaryGlosses = glosses.slice(1);
+
+  return (
     <View className="gap-1">
-      <Text className="font-sans text-[12px] font-medium uppercase text-fg-dim">
-        {label}
+      <View className="flex-row flex-wrap items-baseline gap-4">
+        <Text className="font-sans text-base font-normal text-fg-loud">
+          {hanzi}
+        </Text>
+        {pinyin == null || pinyin.length === 0 ? null : (
+          <Text className="font-sans text-base text-fg-dim">{pinyin}</Text>
+        )}
+        {trailingBadge}
+      </View>
+      <Text className="ml-4 font-sans text-base leading-6">
+        <Text className="text-fg-loud">{primaryGloss}</Text>
+        {secondaryGlosses.length === 0 ? null : (
+          <Text className="text-fg-dim">{`; ${secondaryGlosses.join(`; `)}`}</Text>
+        )}
       </Text>
-      {children}
     </View>
   );
 }
@@ -345,10 +334,10 @@ function EditableField({
 function LabeledText({ children, label }: { children: string; label: string }) {
   return (
     <View className="gap-1">
-      <Text className="font-sans text-[12px] font-medium uppercase text-fg-dim">
+      <Text className="font-sans text-base font-medium uppercase text-fg-dim">
         {label}
       </Text>
-      <Text className="font-sans text-[13px] leading-5 text-fg-dim">
+      <Text className="font-sans text-base leading-6 text-fg-dim">
         {children}
       </Text>
     </View>
