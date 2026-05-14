@@ -1786,6 +1786,7 @@ export function makeDb(rizzle: Rizzle): Db {
       userDictionary,
     }),
   );
+  dictionarySearch.createIndex((row) => row.hanzi);
 
   const characterDecompositionCollection: CharacterDecompositionCollection =
     createCollection(
