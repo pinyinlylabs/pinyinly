@@ -103,7 +103,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
       ) : (
         <ScrollView
           className="flex-1"
-          contentContainerClassName="gap-8 px-4 pb-6"
+          contentContainerClassName="gap-8 px-4 pb-6 pt-4"
           keyboardShouldPersistTaps="handled"
         >
           {navItems
