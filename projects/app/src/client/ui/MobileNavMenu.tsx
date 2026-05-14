@@ -57,6 +57,7 @@ export function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
 
   return (
     <HeaderTitleProvider>
+      <HeaderTitleProvider.DefaultTitle title="Menu" />
       <PageSheetModal onDismiss={onClose} suspenseFallback={null}>
         {({ dismiss }) => <NavMenuContent dismiss={dismiss} />}
       </PageSheetModal>
@@ -105,10 +106,6 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
           contentContainerClassName="gap-8 px-4 pb-6"
           keyboardShouldPersistTaps="handled"
         >
-          <View>
-            <Text className="pyly-body-title">Menu</Text>
-            <HeaderTitleProvider.ScrollTrigger title="Menu" />
-          </View>
           {navItems
             .filter((section) => section.primary === true)
             .map((section, sectionIndex) => (

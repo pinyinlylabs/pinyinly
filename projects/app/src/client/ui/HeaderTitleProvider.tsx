@@ -22,6 +22,7 @@ function HeaderTitleProvider({ children }: PropsWithChildren) {
   const [titleScrollTriggerStates, setTitleScrollTriggerStates] = useState<
     readonly HeaderTitleScrollTriggerState[]
   >([]);
+  const [defaultTitle, setDefaultTitle] = useState<string | null>(null);
 
   const activeTitleScrollTriggerState = maxK(
     titleScrollTriggerStates.filter(
@@ -31,14 +32,17 @@ function HeaderTitleProvider({ children }: PropsWithChildren) {
     (state) => state.top ?? Number.NEGATIVE_INFINITY,
   )[0];
 
-  const title = activeTitleScrollTriggerState?.title ?? null;
-  const showTitle = activeTitleScrollTriggerState != null;
+  const title = activeTitleScrollTriggerState?.title ?? defaultTitle;
+  const showTitle =
+    activeTitleScrollTriggerState != null || defaultTitle != null;
 
   return (
     <HeaderTitleContext.Provider
       value={{
         title,
         showTitle,
+        defaultTitle,
+        setDefaultTitle,
         upsertTitleScrollTriggerState: (state) => {
           setTitleScrollTriggerStates((current) => {
             const next = current.filter((item) => item.id !== state.id);
@@ -219,8 +223,22 @@ function HeaderTitleProviderTitleText({
   );
 }
 
+function HeaderTitleProviderDefaultTitle({ title }: { title: string }) {
+  const { setDefaultTitle } = useHeaderTitleContextOrThrow();
+
+  useLayoutEffect(() => {
+    setDefaultTitle(title);
+    return () => {
+      setDefaultTitle(null);
+    };
+  }, [title, setDefaultTitle]);
+
+  return null;
+}
+
 HeaderTitleProvider.TitleText = HeaderTitleProviderTitleText;
 HeaderTitleProvider.ScrollTrigger = HeaderTitleProviderScrollTrigger;
+HeaderTitleProvider.DefaultTitle = HeaderTitleProviderDefaultTitle;
 
 export { HeaderTitleProvider };
 
