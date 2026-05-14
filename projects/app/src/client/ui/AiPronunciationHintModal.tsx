@@ -180,7 +180,7 @@ export function AiPronunciationHintModal({
 
               {hasSettledGeneration && !isGenerating ? (
                 <RectButton
-                  variant="outline"
+                  variant="bareDim"
                   onPress={() => {
                     void handleGenerate();
                   }}

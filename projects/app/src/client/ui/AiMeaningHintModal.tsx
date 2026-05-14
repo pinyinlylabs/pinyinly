@@ -206,7 +206,7 @@ export function AiMeaningHintModal({
 
               {hasSettledGeneration && !isGenerating ? (
                 <RectButton
-                  variant="outline"
+                  variant="bareDim"
                   onPress={() => {
                     void handleGenerate();
                   }}
