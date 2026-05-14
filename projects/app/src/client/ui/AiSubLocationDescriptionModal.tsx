@@ -1,9 +1,12 @@
 import { trpc } from "@/client/trpc";
-import { useState } from "react";
+import { buildSubLocationDescriptionPrompt } from "@/util/prompts";
+import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { AiPromptPreview } from "./AiPromptPreview";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import { memoize0 } from "@pinyinly/lib/collections";
 
 export interface AiSubLocationDescriptionModalProps {
   label: string;
@@ -37,18 +40,22 @@ export function AiSubLocationDescriptionModal({
   const generateMutation =
     trpc.ai.generateSubLocationDescriptions.useMutation();
 
+  const requestInput = {
+    label,
+    location,
+    locationNotes: locationNotes === `` ? undefined : locationNotes,
+    sublocation,
+    viewpoint: viewpoint === `` ? undefined : viewpoint,
+    count: 4,
+  };
+
+  const subLocationPrompt = buildSubLocationDescriptionPrompt(requestInput);
+
   const handleGenerate = async () => {
     setError(null);
 
     try {
-      const result = await generateMutation.mutateAsync({
-        label,
-        location,
-        locationNotes: locationNotes === `` ? undefined : locationNotes,
-        sublocation,
-        viewpoint: viewpoint === `` ? undefined : viewpoint,
-        count: 4,
-      });
+      const result = await generateMutation.mutateAsync(requestInput);
       setSuggestions(result.suggestions);
     } catch (err) {
       console.error(`AI sublocation description generation failed:`, err);
@@ -57,6 +64,11 @@ export function AiSubLocationDescriptionModal({
   };
 
   const isGenerating = generateMutation.isPending;
+
+  const initialHandleGenerateRef = useRef(memoize0(handleGenerate));
+  useEffect(() => {
+    void initialHandleGenerateRef.current();
+  }, [initialHandleGenerateRef]);
 
   return (
     <PageSheetModal
@@ -84,22 +96,6 @@ export function AiSubLocationDescriptionModal({
           </View>
 
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
-            <View className="gap-1">
-              <Text className="pyly-body-subheading">Context</Text>
-              <Text className="font-sans text-[14px] text-fg-dim">
-                The AI uses your sublocation to propose vivid, memorable scene
-                descriptions.
-              </Text>
-            </View>
-
-            <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
-              <ContextRow label="Combined place" value={label} />
-              <ContextRow label="Location" value={location} />
-              <ContextRow label="Location notes" value={locationNotes} />
-              <ContextRow label="Sublocation" value={sublocation} />
-              <ContextRow label="Viewpoint" value={viewpoint} />
-            </View>
-
             {error == null ? null : (
               <Text className="font-sans text-[14px] text-[crimson]">
                 {error}
@@ -149,28 +145,18 @@ export function AiSubLocationDescriptionModal({
                 </View>
               )}
             </View>
+            <AiPromptPreview
+              description="Prompt text generated from the same builder used by AI description generation."
+              sections={[
+                {
+                  system: subLocationPrompt.system,
+                  user: subLocationPrompt.user,
+                },
+              ]}
+            />
           </ScrollView>
         </View>
       )}
     </PageSheetModal>
-  );
-}
-
-function ContextRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="flex-row items-start gap-2">
-      <Text className="w-[90px] font-sans text-[13px] text-fg-dim">
-        {label}
-      </Text>
-      <Text
-        className={`
-          flex-1 font-sans text-[13px]
-
-          ${value === `` ? `text-fg-dim` : `text-fg`}
-        `}
-      >
-        {value === `` ? `—` : value}
-      </Text>
-    </View>
   );
 }
