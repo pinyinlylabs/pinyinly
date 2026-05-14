@@ -1,9 +1,9 @@
 import { HeaderTitleContext } from "@/client/ui/contexts";
 import type { HeaderTitleScrollTriggerState } from "@/client/ui/contexts";
+import { useIsAppFocused } from "@/client/ui/hooks/useIsAppFocused";
 import { maxK } from "@pinyinly/lib/collections";
-import { NavigationContext } from "@react-navigation/native";
 import type { PropsWithChildren } from "react";
-import { use, useEffect, useId, useLayoutEffect, useState } from "react";
+import { use, useId, useLayoutEffect, useState } from "react";
 import type { TextProps } from "react-native";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -64,35 +64,11 @@ function HeaderTitleProvider({ children }: PropsWithChildren) {
 function HeaderTitleProviderScrollTrigger({ title }: { title: string }) {
   const { removeTitleScrollTriggerState, upsertTitleScrollTriggerState } =
     useHeaderTitleContextOrThrow();
-  const navigation = use(NavigationContext);
   const id = useId();
   const [element, setElement] = useState<Element | null>(null);
-  const [isFocused, setIsFocused] = useState(
-    () => navigation?.isFocused() ?? true,
-  );
+  const isFocused = useIsAppFocused();
 
-  useEffect(() => {
-    if (navigation == null) {
-      return;
-    }
-
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    setIsFocused(navigation.isFocused());
-
-    const unsubscribeFocus = navigation.addListener(`focus`, () => {
-      setIsFocused(true);
-    });
-    const unsubscribeBlur = navigation.addListener(`blur`, () => {
-      setIsFocused(false);
-    });
-
-    return () => {
-      unsubscribeFocus();
-      unsubscribeBlur();
-    };
-  }, [navigation]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isFocused) {
       removeTitleScrollTriggerState(id);
       return;
@@ -193,10 +169,7 @@ function findNearestScrollContainer(element: Element): Element | null {
   while (current != null) {
     const style = getComputedStyle(current);
     const overflowY = style.overflowY;
-    if (
-      (overflowY === `auto` || overflowY === `scroll`) &&
-      current.scrollHeight > current.clientHeight
-    ) {
+    if (overflowY === `auto` || overflowY === `scroll`) {
       return current;
     }
     current = current.parentElement;
