@@ -68,6 +68,7 @@ export function WikiHanziExternalResources({ hanzi }: { hanzi: HanziText }) {
             key={link.name}
             href={link.href as `https://${string}`}
             target="_blank"
+            rel="noopener noreferrer nofollow"
             className={`
               my-1 w-1/2 items-center text-fg-dim
 
