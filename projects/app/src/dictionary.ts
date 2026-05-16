@@ -382,6 +382,14 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
   return undefined;
 }
 
+export const cedictReferenceSchema = z
+  .string()
+  .regex(/^[^|]+\|[^|]+\|[^|]+\|.+\|[^|]+$/u, {
+    message: `CE-DICT reference must follow the format traditional|simplified|pinyin|gloss|fingerprint`,
+  });
+
+export type CedictReference = z.infer<typeof cedictReferenceSchema>;
+
 export const hanziWordMeaningSchema = z
   .object({
     gloss: z.array(z.string()),
@@ -405,6 +413,9 @@ export const hanziWordMeaningSchema = z
       .transform((x) => parsePartOfSpeech(x))
       .optional(),
     hsk: hskLevelSchema.optional(),
+    cedict: cedictReferenceSchema
+      .describe(`reference to the corresponding CE-DICT entry and sense`)
+      .optional(),
   })
   .strict();
 

@@ -8,7 +8,11 @@ import type {
   PinyinUnit,
 } from "#data/model.ts";
 import { PartOfSpeech } from "#data/model.ts";
-import { pinyinUnitCount } from "#data/pinyin.js";
+import {
+  matchAllPinyinUnits,
+  normalizePinyinText,
+  pinyinUnitCount,
+} from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
@@ -48,7 +52,11 @@ import {
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
+import { findCedictSenseById, loadCedictV2 } from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
+import { fmtJsonFile } from "@pinyinly/lib/fs";
+import { dictionaryFilePath } from "#bin/util/paths.ts";
+import { isCi } from "#util/env.js";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -86,6 +94,55 @@ test(`hanzi word meaning schema allows missing freq`, () => {
   });
 
   expect(parsed.freq).toBeUndefined();
+});
+
+test(`hanzi word meaning schema accepts optional cedict reference`, () => {
+  const parsed = hanziWordMeaningSchema.parse({
+    gloss: [`one`],
+    pinyin: [`yī`],
+    cedict: `一|一|yi1|one|abc1234`,
+  });
+
+  expect(parsed.cedict).toBe(`一|一|yi1|one|abc1234`);
+});
+
+test(`hanzi word meaning schema accepts cedict reference when gloss contains a pipe`, () => {
+  const parsed = hanziWordMeaningSchema.parse({
+    gloss: [`variant`],
+    pinyin: [`xuán`],
+    cedict: `㻽|㻽|xuan2|variant of 璿|璇[xuan2]|abc1234`,
+  });
+
+  expect(parsed.cedict).toBe(`㻽|㻽|xuan2|variant of 璿|璇[xuan2]|abc1234`);
+});
+
+test(`hanzi word meaning schema rejects cedict references missing fingerprint`, () => {
+  expect(() =>
+    hanziWordMeaningSchema.parse({
+      gloss: [`one`],
+      pinyin: [`yī`],
+      cedict: `traditional|simplified|pinyin|gloss`,
+    }),
+  ).toThrow();
+});
+
+test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async () => {
+  const dict = await loadDictionary();
+  const missing: string[] = [];
+
+  for (const [hanziWord, meaning] of dict.allEntries) {
+    if (meaning.cedict == null) {
+      continue;
+    }
+
+    const resolvedSense = await findCedictSenseById(meaning.cedict);
+    if (resolvedSense == null) {
+      missing.push(`${hanziWord} -> ${meaning.cedict}`);
+    }
+  }
+
+  missing.sort((a, b) => a.localeCompare(b));
+  expect(missing).toEqual([]);
 });
 
 test(`hanzi word meaning schema enforces normalized freq bounds`, () => {
@@ -383,6 +440,56 @@ test(`hanzi word meaning pinyin lint`, async () => {
     const unitCounts = pinyin?.map((p) => pinyinUnitCount(p)) ?? [];
     expect.soft(new Set(unitCounts).size, hanziWord).not.toBeGreaterThan(1);
   }
+});
+
+test(`dictionary pinyin matches CE-DICT pinyin usage`, async () => {
+  const dict = await loadDictionary();
+  const cedict = await loadCedictV2();
+
+  const normalizePinyinForComparison = (text: string): string =>
+    matchAllPinyinUnits(normalizePinyinText(text).replaceAll(`'`, ` `))
+      .join(``)
+      .toLowerCase()
+      .normalize(`NFD`)
+      .replaceAll(/\p{M}+/gu, ``);
+
+  const cedictPinyinByHanzi = new Map<string, Set<string>>();
+  for (const entry of cedict) {
+    const normalizedPinyin = normalizePinyinForComparison(entry.pinyin);
+    mapSetAdd(cedictPinyinByHanzi, entry.simplified, normalizedPinyin);
+    mapSetAdd(cedictPinyinByHanzi, entry.traditional, normalizedPinyin);
+  }
+
+  const mismatches: string[] = [];
+  for (const [hanziWord, meaning] of dict.allEntries) {
+    if (meaning.pinyin == null || meaning.pinyin.length === 0) {
+      continue;
+    }
+
+    const hanzi = hanziFromHanziWord(hanziWord);
+    const cedictPinyin = cedictPinyinByHanzi.get(hanzi);
+    if (cedictPinyin == null || cedictPinyin.size === 0) {
+      continue;
+    }
+
+    for (const pinyinText of meaning.pinyin) {
+      const normalizedPinyin = normalizePinyinForComparison(pinyinText);
+      if (!cedictPinyin.has(normalizedPinyin)) {
+        mismatches.push(
+          `${hanziWord} uses "${normalizedPinyin}" but CE-DICT has [${[...cedictPinyin].join(`, `)}]`,
+        );
+      }
+    }
+  }
+
+  mismatches.sort((a, b) => a.localeCompare(b));
+
+  expect(mismatches).toMatchInlineSnapshot(`
+    [
+      "然而:however uses "raner" but CE-DICT has [aner]",
+      "纟:silk uses "mi" but CE-DICT has [si]",
+    ]
+  `);
 });
 
 test(`hanzi words are unique on (primary gloss, primary pinyin)`, async () => {
