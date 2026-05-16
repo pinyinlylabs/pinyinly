@@ -1,8 +1,7 @@
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText } from "@/data/model";
-import { Linking, Pressable, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
-import { WikiTitledBox } from "./WikiTitledBox";
+import { Link } from "expo-router";
+import { Text, View } from "react-native";
 import { Icon } from "./Icon";
 
 const externalResources = [
@@ -61,27 +60,27 @@ export function WikiHanziExternalResources({ hanzi }: { hanzi: HanziText }) {
   }
 
   return (
-    <WikiTitledBox title="External resources">
-      <View className="gap-2 p-3">
+    <View className="mt-10 gap-2">
+      <Text className="pyly-body-subheading">External resources</Text>
+      <View className="flex-row flex-wrap">
         {links.map((link) => (
-          <Pressable
+          <Link
             key={link.name}
-            onPress={() => {
-              Linking.openURL(link.href).catch((err: unknown) => {
-                console.error(`Failed to open URL: ${link.href}`, err);
-              });
-            }}
-            className="flex-row items-center gap-1"
+            href={link.href as `https://${string}`}
+            target="_blank"
+            className={`
+              my-1 w-1/2 items-center text-fg-dim
+
+              hover:text-fg
+            `}
           >
-            <Text className={resourceLinkClass()}>{link.name}</Text>
+            <Text className={`mr-1 font-sans text-base font-normal`}>
+              {link.name}
+            </Text>
             <Icon icon="open" size={16} />
-          </Pressable>
+          </Link>
         ))}
       </View>
-    </WikiTitledBox>
+    </View>
   );
 }
-
-const resourceLinkClass = tv({
-  base: `pyly-body pyly-ref`,
-});
