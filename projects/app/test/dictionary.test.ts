@@ -618,6 +618,10 @@ describe(
   },
 );
 
+test.skipIf(isCi)(`dictionary.asset.json has correct formatting`, async () => {
+  await fmtJsonFile(dictionaryFilePath, 1);
+});
+
 test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<
     HanziCharacter,
