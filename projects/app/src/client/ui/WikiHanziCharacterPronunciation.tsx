@@ -210,13 +210,13 @@ export function WikiHanziCharacterPronunciationBox({
   const finalToneLocationDescription = [
     finalToneSceneDescription == null || finalToneSceneDescription.length === 0
       ? null
-      : `Description: ${finalToneSceneDescription}`,
+      : finalToneSceneDescription,
     finalToneSceneViewpoint == null || finalToneSceneViewpoint.length === 0
       ? null
-      : `Viewpoint: ${finalToneSceneViewpoint}`,
+      : finalToneSceneViewpoint,
   ]
     .filter((value): value is string => value != null)
-    .join(` `);
+    .join(`\n`);
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);

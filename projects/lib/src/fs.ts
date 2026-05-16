@@ -116,9 +116,10 @@ export async function fmtJsonFile(
   const encoding = `utf-8`;
   const content = JSON.parse(await readFile(path, { encoding })) as object;
 
-  await writeFile(path, jsonStringifyShallowIndent(content, indentLevels), {
-    encoding: `utf-8`,
-  });
+  await writeUtf8FileIfChanged(
+    path,
+    jsonStringifyShallowIndent(content, indentLevels),
+  );
 }
 
 export async function updateJsonFileKey(

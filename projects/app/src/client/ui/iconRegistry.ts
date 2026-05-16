@@ -30,6 +30,7 @@ export const iconRegistry = {
   [`circle-warning`]: require(`../../assets/icons/circle-warning.svg`),
   [`close-circled-filled`]: require(`../../assets/icons/close-circled-filled.svg`),
   [`close`]: require(`../../assets/icons/close.svg`),
+  [`copy`]: require(`../../assets/icons/copy.svg`),
   [`document`]: require(`../../assets/icons/document.svg`),
   [`dumbbell`]: require(`../../assets/icons/dumbbell.svg`),
   [`expand`]: require(`../../assets/icons/expand.svg`),

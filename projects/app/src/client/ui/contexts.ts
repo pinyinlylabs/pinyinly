@@ -32,6 +32,8 @@ export interface HeaderTitleScrollTriggerState {
 export interface HeaderTitleContextValue {
   title: string | null;
   showTitle: boolean;
+  defaultTitle: string | null;
+  setDefaultTitle: (title: string | null) => void;
   upsertTitleScrollTriggerState: (state: HeaderTitleScrollTriggerState) => void;
   removeTitleScrollTriggerState: (id: string) => void;
 }

@@ -23,12 +23,12 @@ export function QuickSearchButton({
       >
         <View className="flex-row items-center gap-2">
           <Icon icon="search" size={16} className="text-fg-dim" />
-          <Text className="font-sans text-sm font-medium text-fg-dim">
+          <Text className="font-sans text-base font-medium text-fg-dim">
             Search…
           </Text>
         </View>
 
-        <Text className="font-sans text-xs font-semibold text-fg-dim">⌘K</Text>
+        <Text className="font-sans text-sm font-semibold text-fg-dim">⌘ K</Text>
       </Pressable>
       {isModalOpen ? (
         <QuickSearchModal

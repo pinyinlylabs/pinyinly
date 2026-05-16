@@ -17,11 +17,26 @@ const useAutoFocusRefWeb: UseAutoFocusRef = (autoFocus) => {
 
   useLayoutEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const retryInterval = 100;
+    const expiration = Date.now() + 5000;
+
+    function focusOrRetry() {
+      if (inputRef.current == null) {
+        schedule();
+      } else {
+        inputRef.current.focus();
+      }
+    }
+
+    function schedule() {
+      if (Date.now() < expiration) {
+        // Retry focusing for up to 5 seconds, in case the input isn't mounted yet.
+        timer = setTimeout(focusOrRetry, retryInterval);
+      }
+    }
 
     if (autoFocus === true) {
-      timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 200);
+      schedule();
     }
 
     return () => {

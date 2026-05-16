@@ -31,7 +31,7 @@ export function QuizDeckQuestionSkeleton({
   const insets = useSafeAreaInsets();
   const submitButtonHeight = 44;
   const idkButtonHeight = showIdkButton ? 28 : 0;
-  const idkButtonGap = showIdkButton ? 8 : 0;
+  const idkButtonGap = showIdkButton ? 16 : 0;
   const submitButtonInsetBottom = insets.bottom + 20;
 
   return (
@@ -62,13 +62,10 @@ export function QuizDeckQuestionSkeleton({
           style={{
             bottom: submitButtonInsetBottom + submitButtonHeight + idkButtonGap,
             height: idkButtonHeight,
+            visibility: grade == null ? `visible` : `hidden`,
           }}
         >
-          <RectButton
-            variant="bareDim"
-            onPress={onSubmit}
-            className={grade == null ? undefined : `invisible`}
-          >
+          <RectButton variant="bareDim" onPress={onSubmit}>
             I don&apos;t know
           </RectButton>
         </View>

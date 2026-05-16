@@ -1,6 +1,8 @@
 import { trpc } from "@/client/trpc";
+import { buildLeadCharacterDescriptionPrompt } from "@/util/prompts";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { AiPromptPreview } from "./AiPromptPreview";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -32,6 +34,13 @@ export function AiLeadCharacterDescriptionModal({
 
   const generateMutation =
     trpc.ai.generateLeadCharacterDescriptions.useMutation();
+
+  const leadCharacterPrompt = buildLeadCharacterDescriptionPrompt({
+    name: characterName,
+    sound,
+    existingDescription,
+    count: 4,
+  });
 
   const handleGenerate = async () => {
     setError(null);
@@ -77,24 +86,15 @@ export function AiLeadCharacterDescriptionModal({
           </View>
 
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
-            <View className="gap-1">
-              <Text className="pyly-body-subheading">Context</Text>
-              <Text className="font-sans text-[14px] text-fg-dim">
-                The AI uses your character to propose vivid, memorable
-                personality descriptions.
-              </Text>
-            </View>
-
-            <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
-              <ContextRow label="Character name" value={characterName} />
-              <ContextRow label="Sound" value={sound} />
-              {existingDescription == null ? null : (
-                <ContextRow
-                  label="Existing description"
-                  value={existingDescription}
-                />
-              )}
-            </View>
+            <AiPromptPreview
+              description="Prompt text generated from the same builder used by AI description generation."
+              sections={[
+                {
+                  system: leadCharacterPrompt.system,
+                  user: leadCharacterPrompt.user,
+                },
+              ]}
+            />
 
             {error == null ? null : (
               <Text className="font-sans text-[14px] text-[crimson]">
@@ -148,16 +148,5 @@ export function AiLeadCharacterDescriptionModal({
         </View>
       )}
     </PageSheetModal>
-  );
-}
-
-function ContextRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="flex-row items-start gap-2">
-      <Text className="w-[90px] font-sans text-[13px] text-fg-dim">
-        {label}
-      </Text>
-      <Text className="flex-1 font-sans text-[13px] text-fg">{value}</Text>
-    </View>
   );
 }

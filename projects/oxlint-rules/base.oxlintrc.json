@@ -411,6 +411,12 @@
         // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
         "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
       }
+    },
+    {
+      "files": ["*.test.*"],
+      "rules": {
+        "typescript/no-non-null-asserted-optional-chain": "off"
+      }
     }
   ]
 }
