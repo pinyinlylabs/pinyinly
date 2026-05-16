@@ -332,6 +332,10 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`nǐhǎo`, [0, `nǐ`, 2, `hǎo`]],
   [`nǐ·hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u00B7 MIDDLE DOT
   [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
+  [`fǎnér`, [0, `fǎn`, 3, `ér`]],
+  [`nǚér`, [0, `nǚ`, 2, `ér`]],
+  [`yòuér`, [0, `yòu`, 3, `ér`]],
+  [`ránér`, [0, `rán`, 3, `ér`]],
   [`jiànguò`, [0, `jiàn`, 4, `guò`]],
   [`píngguǒ`, [0, `píng`, 4, `guǒ`]],
   [`yīnggāi`, [0, `yīng`, 4, `gāi`]],
@@ -726,6 +730,7 @@ describe(
       [拼音`hǎo`, 1],
       [拼音`nǐ hǎo`, 2],
       [拼音`nǐ  hǎo`, 2],
+      [拼音`fǎnér`, 2],
       [拼音`māma`, 2],
       [拼音`nǐ hǎo māma`, 4],
       [拼音``, 0],

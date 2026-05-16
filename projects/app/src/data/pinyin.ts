@@ -664,6 +664,7 @@ export const pinyinUnitPattern = (() => {
   const v = `(?:ü|ǖ|ǘ|ǚ|ǜ|v|u:)`;
 
   const consonantEnd = `(?!${a}|${e}|${i}|${o}|${u}|${v})`;
+  const erBoundary = `(?=${e}r${consonantEnd})`;
 
   return (
     `(?:` +
@@ -689,7 +690,9 @@ export const pinyinUnitPattern = (() => {
     `(?:(?:[zcs]h?|[rdtgkh])u${i})|` +
     `(?:(?:[zcs]h?|[rdtnlgkh])u${o})|` +
     `(?:(?:[zcs]h|[rgkh])u${a})|` +
+    `(?:(?:[zcs]h?|[rbpmfdngkhw])?${e}n${erBoundary})|` +
     `(?:(?:[zcs]h?|[rbpmfdngkhw])?${e}n${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}n${erBoundary})|` +
     `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}n${consonantEnd})|` +
     `(?:(?:[zcs]h?|[rpmfdtnlgkhy])?${o}u)|` +
     `(?:(?:[zcs]h?|[rbpmdtnlgkhy])?${a}o)|` +
