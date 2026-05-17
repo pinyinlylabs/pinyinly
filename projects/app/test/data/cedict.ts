@@ -6,6 +6,14 @@ import path from "node:path";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
 
+export interface CedictIdParamsType {
+  traditional: string;
+  simplified: string;
+  pinyinRaw: string;
+  firstGloss: string;
+  fingerprint: string;
+}
+
 export interface CedictV2SenseType {
   senseId: string;
   glosses: string[];
@@ -148,17 +156,17 @@ export async function findCedictEntryById(
     return bySenseId;
   }
 
-  const compactReference = parseCedictPrimaryKey(cedictId);
-  if (compactReference == null) {
+  const cedictIdParams = parseCedictId(cedictId);
+  if (cedictIdParams == null) {
     return null;
   }
 
   const candidates =
-    indexes.entriesByTraditional.get(compactReference.traditional) ?? [];
+    indexes.entriesByTraditional.get(cedictIdParams.traditional) ?? [];
   const fullyMatchedCandidates = candidates.filter(
     (entry) =>
-      entry.simplified === compactReference.simplified &&
-      entry.pinyinRaw === compactReference.pinyinRaw,
+      entry.simplified === cedictIdParams.simplified &&
+      entry.pinyinRaw === cedictIdParams.pinyinRaw,
   );
 
   if (fullyMatchedCandidates.length === 1) {
@@ -193,20 +201,10 @@ export function buildCedictSenseId(
 
   invariant(
     pinyinRawNormalized.includes(`|`) === false,
-    `pinyin cannot contain | character`,
-  );
-  invariant(
-    firstGloss.includes(`|`) === false,
-    `glosses cannot contain | character`,
+    `pinyin ${pinyinRawNormalized} cannot contain | character`,
   );
 
   return `${traditionalNormalized}|${simplifiedNormalized}|${pinyinRawNormalized}|${firstGloss}|${fingerprint}`;
-}
-
-interface CedictPrimaryKeyType {
-  traditional: string;
-  simplified: string;
-  pinyinRaw: string;
 }
 
 const getCedictLookupIndexes = memoize0(async () => {
@@ -237,13 +235,19 @@ const getCedictLookupIndexes = memoize0(async () => {
   };
 });
 
-function parseCedictPrimaryKey(cedictId: string): CedictPrimaryKeyType | null {
-  const [traditional, simplified, pinyinRaw, meaningKey, ...rest] =
-    cedictId.split(`|`);
-
-  if (rest.length > 0) {
+export function parseCedictId(cedictId: string): CedictIdParamsType | null {
+  const match = cedictId.match(
+    /^(?<traditional>.+?)\|(?<simplified>.+?)\|(?<pinyinRaw>.+?)\|(?<firstGloss>.+?)\|(?<fingerprint>[a-z0-9]+)$/u,
+  );
+  if (match == null) {
     return null;
   }
+
+  const traditional = match.groups?.[`traditional`];
+  const simplified = match.groups?.[`simplified`];
+  const pinyinRaw = match.groups?.[`pinyinRaw`];
+  const firstGloss = match.groups?.[`firstGloss`];
+  const fingerprint = match.groups?.[`fingerprint`];
 
   if (
     traditional == null ||
@@ -252,8 +256,10 @@ function parseCedictPrimaryKey(cedictId: string): CedictPrimaryKeyType | null {
     simplified.length === 0 ||
     pinyinRaw == null ||
     pinyinRaw.length === 0 ||
-    meaningKey == null ||
-    meaningKey.length === 0
+    firstGloss == null ||
+    firstGloss.length === 0 ||
+    fingerprint == null ||
+    fingerprint.length === 0
   ) {
     return null;
   }
@@ -261,12 +267,10 @@ function parseCedictPrimaryKey(cedictId: string): CedictPrimaryKeyType | null {
   return {
     traditional,
     simplified,
-    pinyinRaw: pinyinRaw,
+    pinyinRaw,
+    firstGloss,
+    fingerprint,
   };
-}
-
-function normalize(text: string): string {
-  return text.normalize(`NFKC`);
 }
 
 // FNV-1a, returned as a compact base36 suffix.

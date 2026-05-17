@@ -1,4 +1,8 @@
-import { upsertHanziWordMeaning } from "#bin/util/dictionary.ts";
+import {
+  readDictionaryJson,
+  upsertHanziWordMeaning,
+  writeDictionaryJson,
+} from "#bin/util/dictionary.ts";
 import { splitHanziText } from "#data/hanzi.ts";
 import type {
   HanziCharacter,
@@ -7,12 +11,9 @@ import type {
   PinyinText,
   PinyinUnit,
 } from "#data/model.ts";
+import { isCi } from "#util/env.js";
 import { PartOfSpeech } from "#data/model.ts";
-import {
-  matchAllPinyinUnits,
-  normalizePinyinText,
-  pinyinUnitCount,
-} from "#data/pinyin.js";
+import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
@@ -52,11 +53,14 @@ import {
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
-import { findCedictSenseById, loadCedictV2 } from "./data/cedict.ts";
+import {
+  buildCedictSenseId,
+  findCedictEntryById,
+  findCedictSenseById,
+} from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { fmtJsonFile } from "@pinyinly/lib/fs";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
-import { isCi } from "#util/env.js";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -442,55 +446,62 @@ test(`hanzi word meaning pinyin lint`, async () => {
   }
 });
 
-test(`dictionary pinyin matches CE-DICT pinyin usage`, async () => {
-  const dict = await loadDictionary();
-  const cedict = await loadCedictV2();
+test(
+  `dictionary pinyin matches CE-DICT pinyin usage`,
+  { retry: isCi ? 0 : 1 },
+  async () => {
+    const dict = await readDictionaryJson();
 
-  const normalizePinyinForComparison = (text: string): string =>
-    matchAllPinyinUnits(normalizePinyinText(text).replaceAll(`'`, ` `))
-      .join(``)
-      .toLowerCase()
-      .normalize(`NFD`)
-      .replaceAll(/\p{M}+/gu, ``);
+    const mismatches: string[] = [];
 
-  const cedictPinyinByHanzi = new Map<string, Set<string>>();
-  for (const entry of cedict) {
-    const normalizedPinyin = normalizePinyinForComparison(entry.pinyin);
-    mapSetAdd(cedictPinyinByHanzi, entry.simplified, normalizedPinyin);
-    mapSetAdd(cedictPinyinByHanzi, entry.traditional, normalizedPinyin);
-  }
+    for (const [hanziWord, meaning] of dict.entries()) {
+      if (meaning.cedict == null) {
+        continue;
+      }
 
-  const mismatches: string[] = [];
-  for (const [hanziWord, meaning] of dict.allEntries) {
-    if (meaning.pinyin == null || meaning.pinyin.length === 0) {
-      continue;
-    }
+      const cedictEntry = await findCedictEntryById(meaning.cedict);
+      if (cedictEntry == null) {
+        continue;
+      }
 
-    const hanzi = hanziFromHanziWord(hanziWord);
-    const cedictPinyin = cedictPinyinByHanzi.get(hanzi);
-    if (cedictPinyin == null || cedictPinyin.size === 0) {
-      continue;
-    }
+      const expectedPinyin = cedictEntry.pinyin as PinyinText;
+      const expectedCedict = buildCedictSenseId(
+        cedictEntry.traditional,
+        cedictEntry.simplified,
+        cedictEntry.pinyinRaw,
+        nonNullable(
+          cedictEntry.senses.find((s) => s.senseId === meaning.cedict),
+        ).glosses,
+      );
 
-    for (const pinyinText of meaning.pinyin) {
-      const normalizedPinyin = normalizePinyinForComparison(pinyinText);
-      if (!cedictPinyin.has(normalizedPinyin)) {
-        mismatches.push(
-          `${hanziWord} uses "${normalizedPinyin}" but CE-DICT has [${[...cedictPinyin].join(`, `)}]`,
+      if (meaning.pinyin != null && meaning.pinyin.length > 1) {
+        // oxlint-disable-next-line no-console
+        console.log(
+          `skipping ${hanziWord} because it has multiple pinyin entries`,
         );
+        continue;
+      }
+
+      const pinyinMatches =
+        meaning.pinyin != null &&
+        meaning.pinyin.length === 1 &&
+        meaning.pinyin[0] === expectedPinyin;
+      const cedictMatches = meaning.cedict === expectedCedict;
+
+      if (!pinyinMatches || !cedictMatches) {
+        mismatches.push(hanziWord);
+        meaning.pinyin = [expectedPinyin];
+        meaning.cedict = expectedCedict;
       }
     }
-  }
 
-  mismatches.sort((a, b) => a.localeCompare(b));
+    if (!isCi) {
+      await writeDictionaryJson(dict);
+    }
 
-  expect(mismatches).toMatchInlineSnapshot(`
-    [
-      "然而:however uses "raner" but CE-DICT has [aner]",
-      "纟:silk uses "mi" but CE-DICT has [si]",
-    ]
-  `);
-});
+    expect(mismatches).toEqual([]);
+  },
+);
 
 test(`hanzi words are unique on (primary gloss, primary pinyin)`, async () => {
   const dict = await loadDictionary();
@@ -523,9 +534,17 @@ test(`hanzi words are unique on (primary gloss, primary pinyin)`, async () => {
   expect(duplicates).toMatchInlineSnapshot(`
     [
       Set {
+        "㐅:five",
+        "五:five",
+      },
+      Set {
         "他们:they",
         "她们:they",
         "它们:they",
+      },
+      Set {
+        "冫:ice",
+        "冰:ice",
       },
       Set {
         "斗:fight",

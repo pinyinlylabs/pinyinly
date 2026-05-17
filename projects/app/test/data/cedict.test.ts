@@ -7,6 +7,7 @@ import {
   loadCedictV2,
   parseCedictV2Line,
   parseCedictV2Text,
+  parseCedictId,
 } from "./cedict";
 
 describe(`parseCedictV2Line`, () => {
@@ -159,7 +160,7 @@ describe(`findCedictEntryById`, () => {
   });
 
   test(`resolves compact dictionary v2 references`, async () => {
-    const resolved = await findCedictEntryById(`一|一|yi1|one`);
+    const resolved = await findCedictEntryById(`一|一|yi1|one|abc123`);
     expect(resolved).toMatchObject({
       traditional: `一`,
       simplified: `一`,
@@ -176,6 +177,42 @@ describe(`findCedictEntryById`, () => {
     ).resolves.toBeNull();
     await expect(findCedictEntryById(`行|行|xing2`)).resolves.toBeNull();
     await expect(findCedictEntryById(``)).resolves.toBeNull();
+  });
+});
+
+describe(`parseCedictId`, () => {
+  test(`parses valid ids`, () => {
+    const id = `一|一|yi1|one|abc123`;
+    const parsed = parseCedictId(id);
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "fingerprint": "abc123",
+        "firstGloss": "one",
+        "pinyinRaw": "yi1",
+        "simplified": "一",
+        "traditional": "一",
+      }
+    `);
+  });
+
+  test(`parses valid id with | in the gloss`, () => {
+    const id = `一|一|yi1|one ref 一|一[foo]|abc123`;
+    const parsed = parseCedictId(id);
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "fingerprint": "abc123",
+        "firstGloss": "one ref 一|一[foo]",
+        "pinyinRaw": "yi1",
+        "simplified": "一",
+        "traditional": "一",
+      }
+    `);
+  });
+
+  test(`returns null for invalid ids`, () => {
+    expect(parseCedictId(`not a valid id`)).toBeNull();
+    expect(parseCedictId(``)).toBeNull();
+    expect(parseCedictId(`一|一|yi1|one`)).toBeNull();
   });
 });
 
