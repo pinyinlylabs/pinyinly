@@ -39,15 +39,34 @@ describe(`parseCedictV2Line`, () => {
   });
 
   test(`parses slash-separated senses and semicolon-separated glosses`, () => {
-    const line = `3D打印 3D打印 [[san1-D da3yin4]] /to 3D print; 3D printing/`;
+    const line = `3D打印 3D打印 [[san1-D da3yin4]] /to 3D print; 3D printing/sense 2/sense 3A; sense 3B/`;
 
     const parsed = parseCedictV2Line(line);
     expect(parsed).not.toBeNull();
-    expect(parsed?.senses).toMatchObject([
-      {
-        glosses: [`to 3D print`, `3D printing`],
-      },
-    ]);
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "to 3D print",
+            "3D printing",
+          ],
+          "senseId": "3D打印|3D打印|san1-D da3yin4|to 3D print|14nll3j",
+        },
+        {
+          "glosses": [
+            "sense 2",
+          ],
+          "senseId": "3D打印|3D打印|san1-D da3yin4|sense 2|14p52jv",
+        },
+        {
+          "glosses": [
+            "sense 3A",
+            "sense 3B",
+          ],
+          "senseId": "3D打印|3D打印|san1-D da3yin4|sense 3A|1ipg8fn",
+        },
+      ]
+    `);
   });
 
   test(`throws for malformed lines in strict mode`, () => {
