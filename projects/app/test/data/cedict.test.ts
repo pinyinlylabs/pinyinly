@@ -167,15 +167,6 @@ describe(`findCedictEntryById`, () => {
     });
   });
 
-  test(`resolves compact dictionary refs with v token for umlaut-u pinyin`, async () => {
-    const resolved = await findCedictEntryById(`䶊|衄|nv4|bloodNose`);
-    expect(resolved).toMatchObject({
-      traditional: `䶊`,
-      simplified: `衄`,
-      pinyinRaw: `nu:4`,
-    });
-  });
-
   test(`returns null for unknown ids`, async () => {
     await expect(
       findCedictEntryById(`不存在|不存在|bu4cun2zai4|nope`),

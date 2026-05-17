@@ -1,7 +1,7 @@
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
@@ -148,7 +148,7 @@ export async function findCedictEntryById(
     return bySenseId;
   }
 
-  const compactReference = parseCompactDictionaryCedictReference(cedictId);
+  const compactReference = parseCedictPrimaryKey(cedictId);
   if (compactReference == null) {
     return null;
   }
@@ -158,8 +158,7 @@ export async function findCedictEntryById(
   const fullyMatchedCandidates = candidates.filter(
     (entry) =>
       entry.simplified === compactReference.simplified &&
-      compactPinyinTokenFromRaw(entry.pinyinRaw) ===
-        compactReference.pinyinToken,
+      entry.pinyinRaw === compactReference.pinyinRaw,
   );
 
   if (fullyMatchedCandidates.length === 1) {
@@ -186,18 +185,28 @@ export function buildCedictSenseId(
   pinyinRaw: string,
   glosses: string[],
 ): string {
-  const anchorGloss = nonNullable(glosses[0]);
+  const traditionalNormalized = traditional.normalize(`NFKC`);
+  const simplifiedNormalized = simplified.normalize(`NFKC`);
+  const pinyinRawNormalized = pinyinRaw.normalize(`NFKC`);
+  const firstGloss = nonNullable(glosses[0]);
   const fingerprint = hashString(glosses.join(`;`));
 
-  return `${normalize(traditional)}|${normalize(
-    simplified,
-  )}|${compactPinyinTokenFromRaw(pinyinRaw)}|${anchorGloss}|${fingerprint}`;
+  invariant(
+    pinyinRawNormalized.includes(`|`) === false,
+    `pinyin cannot contain | character`,
+  );
+  invariant(
+    firstGloss.includes(`|`) === false,
+    `glosses cannot contain | character`,
+  );
+
+  return `${traditionalNormalized}|${simplifiedNormalized}|${pinyinRawNormalized}|${firstGloss}|${fingerprint}`;
 }
 
-interface CompactDictionaryCedictReferenceType {
+interface CedictPrimaryKeyType {
   traditional: string;
   simplified: string;
-  pinyinToken: string;
+  pinyinRaw: string;
 }
 
 const getCedictLookupIndexes = memoize0(async () => {
@@ -228,11 +237,9 @@ const getCedictLookupIndexes = memoize0(async () => {
   };
 });
 
-function parseCompactDictionaryCedictReference(
-  reference: string,
-): CompactDictionaryCedictReferenceType | null {
-  const [traditional, simplified, pinyinToken, meaningKey, ...rest] =
-    reference.split(`|`);
+function parseCedictPrimaryKey(cedictId: string): CedictPrimaryKeyType | null {
+  const [traditional, simplified, pinyinRaw, meaningKey, ...rest] =
+    cedictId.split(`|`);
 
   if (rest.length > 0) {
     return null;
@@ -243,8 +250,8 @@ function parseCompactDictionaryCedictReference(
     traditional.length === 0 ||
     simplified == null ||
     simplified.length === 0 ||
-    pinyinToken == null ||
-    pinyinToken.length === 0 ||
+    pinyinRaw == null ||
+    pinyinRaw.length === 0 ||
     meaningKey == null ||
     meaningKey.length === 0
   ) {
@@ -254,14 +261,8 @@ function parseCompactDictionaryCedictReference(
   return {
     traditional,
     simplified,
-    pinyinToken: compactPinyinTokenFromRaw(pinyinToken),
+    pinyinRaw: pinyinRaw,
   };
-}
-
-function compactPinyinTokenFromRaw(pinyinRaw: string): string {
-  // Compact CE-DICT refs use separators in the outer structure, so represent umlaut-u tokens
-  // with "v" instead of the CE-DICT "u:" convention.
-  return normalize(pinyinRaw).replaceAll(`u:`, `v`).replaceAll(`U:`, `V`);
 }
 
 function normalize(text: string): string {
