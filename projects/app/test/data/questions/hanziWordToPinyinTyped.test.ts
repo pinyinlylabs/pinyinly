@@ -103,7 +103,7 @@ describe(
     });
 
     test(`throws if the hanzi word has no pinyin`, async () => {
-      const skill = hanziWordToPinyinTyped(`亼:assemble`); // 亼:assemble has no pinyin
+      const skill = hanziWordToPinyinTyped(`𭕄:fingers`); // 𭕄:fingers has no pinyin
       await expect(
         hanziWordToPinyinTypedQuestionOrThrow(skill, null),
       ).rejects.toThrow();

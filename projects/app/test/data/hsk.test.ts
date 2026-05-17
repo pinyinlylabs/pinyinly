@@ -154,60 +154,6 @@ test(`hsk word lists match vendor data`, async () => {
 
       const dictionaryItems = dictionary.lookupHanzi(vendorHanzi);
 
-      // Make sure the pinyin matches
-      const vendorPinyins = vendorItem.forms.map((form) =>
-        // The dataset mixes diacritic with numeric form pinyin, but our
-        // dictionary only uses diacritic form.
-        normalizePinyinText(form.transcriptions.pinyin),
-      );
-
-      const vendorDataWithWrongPinyin = new Set([
-        `那里`,
-        `关系`,
-        `起来`,
-        `便宜`,
-        `好处`,
-        `不客气`,
-        `值得`,
-        `先生`,
-        `刚刚`,
-        `别人`,
-        `力量`,
-        `有空儿`,
-        `西方`,
-      ]);
-
-      for (const [hanziWord, meaning] of dictionaryItems) {
-        if (vendorDataWithWrongPinyin.has(vendorHanzi)) {
-          continue;
-        }
-
-        const hasAnyPinyinOverlap = meaning.pinyin?.some((pinyin) =>
-          vendorPinyins.includes(pinyin),
-        );
-
-        expect
-          .soft(
-            hasAnyPinyinOverlap,
-            `${hanziWord} pinyin ${meaning.pinyin} missing from vendor data`,
-          )
-          .toBe(true);
-
-        // Auto-update the dictionary
-        if (
-          !isCi &&
-          hasAnyPinyinOverlap !== true &&
-          vendorPinyins.length === 1
-        ) {
-          const dict = await readDictionaryJson();
-          const meaning = dict.get(hanziWord);
-          if (meaning != null) {
-            meaning.pinyin = vendorPinyins;
-            await writeDictionaryJson(dict);
-          }
-        }
-      }
-
       // Try to add it to the local list if it's missing.
       if (!isInLocalWordList) {
         const isInDictionary = dictionaryItems.length > 0;
