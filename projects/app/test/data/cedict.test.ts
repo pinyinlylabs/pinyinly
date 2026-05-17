@@ -7,6 +7,7 @@ import {
   loadCedictV2,
   parseCedictV2Line,
   parseCedictV2Text,
+  parseCedictId,
 } from "./cedict";
 
 describe(`parseCedictV2Line`, () => {
@@ -38,15 +39,34 @@ describe(`parseCedictV2Line`, () => {
   });
 
   test(`parses slash-separated senses and semicolon-separated glosses`, () => {
-    const line = `3D打印 3D打印 [[san1-D da3yin4]] /to 3D print; 3D printing/`;
+    const line = `3D打印 3D打印 [[san1-D da3yin4]] /to 3D print; 3D printing/sense 2/sense 3A; sense 3B/`;
 
     const parsed = parseCedictV2Line(line);
     expect(parsed).not.toBeNull();
-    expect(parsed?.senses).toMatchObject([
-      {
-        glosses: [`to 3D print`, `3D printing`],
-      },
-    ]);
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "to 3D print",
+            "3D printing",
+          ],
+          "senseId": "3D打印|3D打印|san1-D da3yin4|to 3D print|14nll3j",
+        },
+        {
+          "glosses": [
+            "sense 2",
+          ],
+          "senseId": "3D打印|3D打印|san1-D da3yin4|sense 2|14p52jv",
+        },
+        {
+          "glosses": [
+            "sense 3A",
+            "sense 3B",
+          ],
+          "senseId": "3D打印|3D打印|san1-D da3yin4|sense 3A|1ipg8fn",
+        },
+      ]
+    `);
   });
 
   test(`throws for malformed lines in strict mode`, () => {
@@ -159,20 +179,11 @@ describe(`findCedictEntryById`, () => {
   });
 
   test(`resolves compact dictionary v2 references`, async () => {
-    const resolved = await findCedictEntryById(`一|一|yi1|one`);
+    const resolved = await findCedictEntryById(`一|一|yi1|one|abc123`);
     expect(resolved).toMatchObject({
       traditional: `一`,
       simplified: `一`,
       pinyinRaw: `yi1`,
-    });
-  });
-
-  test(`resolves compact dictionary refs with v token for umlaut-u pinyin`, async () => {
-    const resolved = await findCedictEntryById(`䶊|衄|nv4|bloodNose`);
-    expect(resolved).toMatchObject({
-      traditional: `䶊`,
-      simplified: `衄`,
-      pinyinRaw: `nu:4`,
     });
   });
 
@@ -185,6 +196,42 @@ describe(`findCedictEntryById`, () => {
     ).resolves.toBeNull();
     await expect(findCedictEntryById(`行|行|xing2`)).resolves.toBeNull();
     await expect(findCedictEntryById(``)).resolves.toBeNull();
+  });
+});
+
+describe(`parseCedictId`, () => {
+  test(`parses valid ids`, () => {
+    const id = `一|一|yi1|one|abc123`;
+    const parsed = parseCedictId(id);
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "fingerprint": "abc123",
+        "firstGloss": "one",
+        "pinyinRaw": "yi1",
+        "simplified": "一",
+        "traditional": "一",
+      }
+    `);
+  });
+
+  test(`parses valid id with | in the gloss`, () => {
+    const id = `一|一|yi1|one ref 一|一[foo]|abc123`;
+    const parsed = parseCedictId(id);
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "fingerprint": "abc123",
+        "firstGloss": "one ref 一|一[foo]",
+        "pinyinRaw": "yi1",
+        "simplified": "一",
+        "traditional": "一",
+      }
+    `);
+  });
+
+  test(`returns null for invalid ids`, () => {
+    expect(parseCedictId(`not a valid id`)).toBeNull();
+    expect(parseCedictId(``)).toBeNull();
+    expect(parseCedictId(`一|一|yi1|one`)).toBeNull();
   });
 });
 

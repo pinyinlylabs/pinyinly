@@ -1,10 +1,18 @@
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
+
+export interface CedictIdParamsType {
+  traditional: string;
+  simplified: string;
+  pinyinRaw: string;
+  firstGloss: string;
+  fingerprint: string;
+}
 
 export interface CedictV2SenseType {
   senseId: string;
@@ -148,18 +156,17 @@ export async function findCedictEntryById(
     return bySenseId;
   }
 
-  const compactReference = parseCompactDictionaryCedictReference(cedictId);
-  if (compactReference == null) {
+  const cedictIdParams = parseCedictId(cedictId);
+  if (cedictIdParams == null) {
     return null;
   }
 
   const candidates =
-    indexes.entriesByTraditional.get(compactReference.traditional) ?? [];
+    indexes.entriesByTraditional.get(cedictIdParams.traditional) ?? [];
   const fullyMatchedCandidates = candidates.filter(
     (entry) =>
-      entry.simplified === compactReference.simplified &&
-      compactPinyinTokenFromRaw(entry.pinyinRaw) ===
-        compactReference.pinyinToken,
+      entry.simplified === cedictIdParams.simplified &&
+      entry.pinyinRaw === cedictIdParams.pinyinRaw,
   );
 
   if (fullyMatchedCandidates.length === 1) {
@@ -186,18 +193,18 @@ export function buildCedictSenseId(
   pinyinRaw: string,
   glosses: string[],
 ): string {
-  const anchorGloss = nonNullable(glosses[0]);
+  const traditionalNormalized = traditional.normalize(`NFKC`);
+  const simplifiedNormalized = simplified.normalize(`NFKC`);
+  const pinyinRawNormalized = pinyinRaw.normalize(`NFKC`);
+  const firstGloss = nonNullable(glosses[0]);
   const fingerprint = hashString(glosses.join(`;`));
 
-  return `${normalize(traditional)}|${normalize(
-    simplified,
-  )}|${compactPinyinTokenFromRaw(pinyinRaw)}|${anchorGloss}|${fingerprint}`;
-}
+  invariant(
+    pinyinRawNormalized.includes(`|`) === false,
+    `pinyin ${pinyinRawNormalized} cannot contain | character`,
+  );
 
-interface CompactDictionaryCedictReferenceType {
-  traditional: string;
-  simplified: string;
-  pinyinToken: string;
+  return `${traditionalNormalized}|${simplifiedNormalized}|${pinyinRawNormalized}|${firstGloss}|${fingerprint}`;
 }
 
 const getCedictLookupIndexes = memoize0(async () => {
@@ -228,25 +235,31 @@ const getCedictLookupIndexes = memoize0(async () => {
   };
 });
 
-function parseCompactDictionaryCedictReference(
-  reference: string,
-): CompactDictionaryCedictReferenceType | null {
-  const [traditional, simplified, pinyinToken, meaningKey, ...rest] =
-    reference.split(`|`);
-
-  if (rest.length > 0) {
+export function parseCedictId(cedictId: string): CedictIdParamsType | null {
+  const match = cedictId.match(
+    /^(?<traditional>.+?)\|(?<simplified>.+?)\|(?<pinyinRaw>.+?)\|(?<firstGloss>.+?)\|(?<fingerprint>[a-z0-9]+)$/u,
+  );
+  if (match == null) {
     return null;
   }
+
+  const traditional = match.groups?.[`traditional`];
+  const simplified = match.groups?.[`simplified`];
+  const pinyinRaw = match.groups?.[`pinyinRaw`];
+  const firstGloss = match.groups?.[`firstGloss`];
+  const fingerprint = match.groups?.[`fingerprint`];
 
   if (
     traditional == null ||
     traditional.length === 0 ||
     simplified == null ||
     simplified.length === 0 ||
-    pinyinToken == null ||
-    pinyinToken.length === 0 ||
-    meaningKey == null ||
-    meaningKey.length === 0
+    pinyinRaw == null ||
+    pinyinRaw.length === 0 ||
+    firstGloss == null ||
+    firstGloss.length === 0 ||
+    fingerprint == null ||
+    fingerprint.length === 0
   ) {
     return null;
   }
@@ -254,18 +267,10 @@ function parseCompactDictionaryCedictReference(
   return {
     traditional,
     simplified,
-    pinyinToken: compactPinyinTokenFromRaw(pinyinToken),
+    pinyinRaw,
+    firstGloss,
+    fingerprint,
   };
-}
-
-function compactPinyinTokenFromRaw(pinyinRaw: string): string {
-  // Compact CE-DICT refs use separators in the outer structure, so represent umlaut-u tokens
-  // with "v" instead of the CE-DICT "u:" convention.
-  return normalize(pinyinRaw).replaceAll(`u:`, `v`).replaceAll(`U:`, `V`);
-}
-
-function normalize(text: string): string {
-  return text.normalize(`NFKC`);
 }
 
 // FNV-1a, returned as a compact base36 suffix.
