@@ -1,14 +1,15 @@
 // pyly-not-src-test
 import { describe, expect, test } from "vitest";
 import {
-    buildCedictSenseId,
-    findCedictEntryById,
-    findCedictSenseById,
-    loadCedictV2,
-    parseCedictV2Line,
-    parseCedictV2Text,
-    parseCedictId,
-    transformCedictV2Entry,
+  buildCedictSenseId,
+  parseCedictV2EditsText,
+  findCedictEntryById,
+  findCedictSenseById,
+  loadCedictV2,
+  parseCedictV2Line,
+  parseCedictV2Text,
+  parseCedictId,
+  transformCedictV2Entry,
 } from "./cedict";
 
 describe(`parseCedictV2Line`, () => {
@@ -105,6 +106,253 @@ describe(`parseCedictV2Line`, () => {
     expect(
       parseCedictV2Line(`not a cedict line`, { strict: false }),
     ).toBeNull();
+  });
+
+  test(`applies replacement edits before sense parsing`, () => {
+    const edits = parseCedictV2EditsText(
+      [`小二 小二 [[xiao3'er4]]`, `/old sense 1/ /new sense 1/`, ``].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(
+      `小二 小二 [[xiao3'er4]] /old sense 1/old sense 2/`,
+      { edits },
+    );
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "new sense 1",
+          ],
+        },
+        {
+          "glosses": [
+            "old sense 2",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`applies replacement edits that split one sense into multiple senses`, () => {
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/one,two/ /one/two/`, ``].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(`示例 示例 [[shi4li4]] /one,two/three/`, {
+      edits,
+    });
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "one",
+          ],
+        },
+        {
+          "glosses": [
+            "two",
+          ],
+        },
+        {
+          "glosses": [
+            "three",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`applies deletion edits before sense parsing`, () => {
+    const edits = parseCedictV2EditsText(
+      [`小二 小二 [[xiao3'er4]]`, `/old sense 1/ //`, ``].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(
+      `小二 小二 [[xiao3'er4]] /old sense 1/old sense 2/`,
+      { edits },
+    );
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "old sense 2",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`throws in strict mode when edits do not match`, () => {
+    const edits = parseCedictV2EditsText(
+      [`小二 小二 [[xiao3'er4]]`, `/missing sense/ /new sense/`, ``].join(`\n`),
+    );
+
+    expect(() =>
+      parseCedictV2Line(`小二 小二 [[xiao3'er4]] /old sense 1/`, {
+        edits,
+      }),
+    ).toThrow(`edits rule did not match sense: missing sense`);
+  });
+
+  test(`skips unmatched edits in lenient mode`, () => {
+    const edits = parseCedictV2EditsText(
+      [`小二 小二 [[xiao3'er4]]`, `/missing sense/ /new sense/`, ``].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(`小二 小二 [[xiao3'er4]] /old sense 1/`, {
+      strict: false,
+      edits,
+    });
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "old sense 1",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`throws when one edits rule matches multiple senses`, () => {
+    const edits = parseCedictV2EditsText(
+      [`小二 小二 [[xiao3'er4]]`, `/same sense/ /new sense/`, ``].join(`\n`),
+    );
+
+    expect(() =>
+      parseCedictV2Line(`小二 小二 [[xiao3'er4]] /same sense/same sense/`, {
+        edits,
+      }),
+    ).toThrow(`edits rule matched multiple senses: same sense`);
+  });
+});
+
+describe(`parseCedictV2EditsText`, () => {
+  test(`gracefully parses an empty edits file`, () => {
+    const parsed = parseCedictV2EditsText(``);
+
+    expect(parsed.entriesByKey.size).toBe(0);
+    expect([...parsed.entriesByKey.values()]).toEqual([]);
+  });
+
+  test(`parses valid edits blocks`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `小二 小二 [[xiao3'er4]]`,
+        `/old sense 1/ /new sense 1/`,
+        `/old sense 2/ //`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(parsed.entriesByKey.size).toBe(1);
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toMatchInlineSnapshot(`
+      {
+        "pinyin": "xiao3'er4",
+        "rules": [
+          {
+            "newSense": "new sense 1",
+            "oldSense": "old sense 1",
+          },
+          {
+            "newSense": "",
+            "oldSense": "old sense 2",
+          },
+        ],
+        "simplified": "小二",
+        "traditional": "小二",
+      }
+    `);
+  });
+
+  test(`parses replacement values containing slash separators`, () => {
+    const parsed = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/one,two/ /one/two/`, ``].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry?.rules).toEqual([
+      { oldSense: `one,two`, newSense: `one/two` },
+    ]);
+  });
+
+  test(`parses multiple edit blocks for different entries`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `小二 小二 [[xiao3'er4]]`,
+        `/old sense 1/ /new sense 1/`,
+        ``,
+        `三更 三更 [[san1geng1]]`,
+        `/midnight/ /late night/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(parsed.entriesByKey.size).toBe(2);
+
+    const entries = [...parsed.entriesByKey.values()];
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "pinyin": "xiao3'er4",
+          "rules": [
+            {
+              "newSense": "new sense 1",
+              "oldSense": "old sense 1",
+            },
+          ],
+          "simplified": "小二",
+          "traditional": "小二",
+        },
+        {
+          "pinyin": "san1geng1",
+          "rules": [
+            {
+              "newSense": "late night",
+              "oldSense": "midnight",
+            },
+          ],
+          "simplified": "三更",
+          "traditional": "三更",
+        },
+      ]
+    `);
+  });
+
+  test(`throws on malformed header lines`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [`小二 小二 [xiao3'er4]`, `/old/ /new/`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid edits header line (line 1)`);
+  });
+
+  test(`throws on malformed rule lines`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [`小二 小二 [[xiao3'er4]]`, `/old/ new`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid edits rule line (line 2)`);
+  });
+
+  test(`throws on duplicate edit blocks`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `/old sense 1/ /new sense 1/`,
+          ``,
+          `小二 小二 [[xiao3'er4]]`,
+          `/old sense 2/ /new sense 2/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate edit block for 小二 小二 [[xiao3'er4]] (line 4)`);
   });
 });
 

@@ -38,6 +38,23 @@ export interface TransformedCedictV2SenseType {
 export interface ParseCedictV2LineOptionsType {
   lineNumber?: number;
   strict?: boolean;
+  edits?: CedictV2EditsType;
+}
+
+export interface CedictV2EditRuleType {
+  oldSense: string;
+  newSense: string;
+}
+
+export interface CedictV2EntryEditsType {
+  traditional: string;
+  simplified: string;
+  pinyin: PinyinNumericText;
+  rules: CedictV2EditRuleType[];
+}
+
+export interface CedictV2EditsType {
+  entriesByKey: Map<string, CedictV2EntryEditsType>;
 }
 
 /**
@@ -87,22 +104,30 @@ export function parseCedictV2Line(
     throw new Error(formatParseError(`invalid CC-CEDICT v2 line`, options));
   }
 
-  const senses = definitionBody
+  let senses = definitionBody
     .split(`/`)
     .map((sense) => sense.trim())
-    .filter((sense) => sense.length > 0)
-    .map((sense): CedictV2SenseType => {
-      const glosses = sense
-        .split(`;`)
-        .map((gloss) => gloss.trim())
-        .filter((gloss) => gloss.length > 0);
+    .filter((sense) => sense.length > 0);
 
-      return {
-        glosses: glosses,
-      };
-    });
+  const entryEdits = options.edits?.entriesByKey.get(
+    buildCedictV2EditEntryKey(traditional, simplified, pinyin),
+  );
+  if (entryEdits != null) {
+    senses = applyCedictEntryEdits(senses, entryEdits, options);
+  }
 
-  if (senses.length === 0) {
+  const parsedSenses = senses.map((sense): CedictV2SenseType => {
+    const glosses = sense
+      .split(`;`)
+      .map((gloss) => gloss.trim())
+      .filter((gloss) => gloss.length > 0);
+
+    return {
+      glosses: glosses,
+    };
+  });
+
+  if (parsedSenses.length === 0) {
     if (!strict) {
       return null;
     }
@@ -114,7 +139,75 @@ export function parseCedictV2Line(
     traditional,
     simplified,
     pinyin: pinyin as PinyinNumericText,
-    senses,
+    senses: parsedSenses,
+  };
+}
+
+export function parseCedictV2EditsText(text: string): CedictV2EditsType {
+  const lines = text.split(/\r?\n/u);
+  const entriesByKey = new Map<string, CedictV2EntryEditsType>();
+  let i = 0;
+
+  while (i < lines.length) {
+    const currentLine = lines[i];
+    const lineNumber = i + 1;
+    const trimmed = currentLine?.trim() ?? ``;
+
+    if (trimmed.length === 0) {
+      i += 1;
+      continue;
+    }
+
+    const header = parseCedictV2EditHeader(trimmed, lineNumber);
+    i += 1;
+
+    const rules: CedictV2EditRuleType[] = [];
+
+    while (i < lines.length) {
+      const ruleLine = lines[i];
+      const ruleLineNumber = i + 1;
+      const ruleTrimmed = ruleLine?.trim() ?? ``;
+
+      if (ruleTrimmed.length === 0) {
+        i += 1;
+        break;
+      }
+
+      rules.push(parseCedictV2EditRule(ruleTrimmed, ruleLineNumber));
+      i += 1;
+    }
+
+    if (rules.length === 0) {
+      throw new Error(
+        formatCedictEditsParseError(`edit block has no rules`, lineNumber),
+      );
+    }
+
+    const key = buildCedictV2EditEntryKey(
+      header.traditional,
+      header.simplified,
+      header.pinyin,
+    );
+
+    if (entriesByKey.has(key)) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `duplicate edit block for ${header.traditional} ${header.simplified} [[${header.pinyin}]]`,
+          lineNumber,
+        ),
+      );
+    }
+
+    entriesByKey.set(key, {
+      traditional: header.traditional,
+      simplified: header.simplified,
+      pinyin: header.pinyin,
+      rules,
+    });
+  }
+
+  return {
+    entriesByKey,
   };
 }
 
@@ -272,6 +365,7 @@ export function parseCedictV2Text(
     const parsedLine = parseCedictV2Line(line, {
       strict: options.strict,
       lineNumber,
+      edits: options.edits,
     });
 
     return parsedLine == null ? [] : [parsedLine];
@@ -279,11 +373,20 @@ export function parseCedictV2Text(
 }
 
 export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
-  const text = await readFile(
-    path.join(import.meta.dirname, `cedict_ts-2.u8`),
+  const filename = `cedict_ts-2.u8`;
+
+  const dataText = await readFile(
+    path.join(import.meta.dirname, filename),
     `utf8`,
   );
-  return parseCedictV2Text(text, { strict: true });
+
+  const editsText = await readFile(
+    path.join(import.meta.dirname, `${filename}.edits`),
+    `utf8`,
+  );
+
+  const edits = parseCedictV2EditsText(editsText);
+  return parseCedictV2Text(dataText, { strict: true, edits });
 });
 
 export async function findCedictEntryById(
@@ -439,4 +542,141 @@ function formatParseError(
   }
 
   return `${message} (line ${options.lineNumber})`;
+}
+
+function buildCedictV2EditEntryKey(
+  traditional: string,
+  simplified: string,
+  pinyin: string,
+): string {
+  return `${traditional.normalize(`NFKC`)}|${simplified.normalize(`NFKC`)}|${pinyin.normalize(`NFKC`)}`;
+}
+
+function parseCedictV2EditHeader(
+  line: string,
+  lineNumber: number,
+): { traditional: string; simplified: string; pinyin: PinyinNumericText } {
+  const match = line.match(/^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]$/u);
+  if (match == null) {
+    throw new Error(
+      formatCedictEditsParseError(`invalid edits header line`, lineNumber),
+    );
+  }
+
+  const traditional = match[1];
+  const simplified = match[2];
+  const pinyin = match[3];
+  if (traditional == null || simplified == null || pinyin == null) {
+    throw new Error(
+      formatCedictEditsParseError(`invalid edits header line`, lineNumber),
+    );
+  }
+
+  return {
+    traditional,
+    simplified,
+    pinyin: pinyin as PinyinNumericText,
+  };
+}
+
+function parseCedictV2EditRule(
+  line: string,
+  lineNumber: number,
+): CedictV2EditRuleType {
+  const match = line.match(
+    /^\/(?<oldSense>[^/]*)\/\s+(?<replacement>\/\/|\/.*\/)$/u,
+  );
+  if (match == null) {
+    throw new Error(
+      formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+    );
+  }
+
+  const oldSense = match.groups?.[`oldSense`]?.trim();
+  const replacement = match.groups?.[`replacement`];
+  if (oldSense == null || replacement == null || oldSense.length === 0) {
+    throw new Error(
+      formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+    );
+  }
+
+  if (replacement === `//`) {
+    return {
+      oldSense,
+      newSense: ``,
+    };
+  }
+
+  const replacementContent = replacement.slice(1, -1).trim();
+  return {
+    oldSense,
+    newSense: replacementContent,
+  };
+}
+
+function applyCedictEntryEdits(
+  senses: string[],
+  entryEdits: CedictV2EntryEditsType,
+  options: ParseCedictV2LineOptionsType,
+): string[] {
+  const nextSenses = [...senses];
+
+  for (const rule of entryEdits.rules) {
+    const matchIndexes = nextSenses
+      .map((sense, index) => (sense === rule.oldSense ? index : -1))
+      .filter((index) => index >= 0);
+
+    if (matchIndexes.length === 0) {
+      if (options.strict ?? true) {
+        throw new Error(
+          formatParseError(
+            `edits rule did not match sense: ${rule.oldSense}`,
+            options,
+          ),
+        );
+      }
+
+      continue;
+    }
+
+    if (matchIndexes.length > 1) {
+      throw new Error(
+        formatParseError(
+          `edits rule matched multiple senses: ${rule.oldSense}`,
+          options,
+        ),
+      );
+    }
+
+    const [matchIndex] = matchIndexes;
+    if (matchIndex == null) {
+      continue;
+    }
+
+    if (rule.newSense.length === 0) {
+      nextSenses.splice(matchIndex, 1);
+      continue;
+    }
+
+    const replacementSenses = rule.newSense
+      .split(`/`)
+      .map((sense) => sense.trim())
+      .filter((sense) => sense.length > 0);
+
+    if (replacementSenses.length === 0) {
+      nextSenses.splice(matchIndex, 1);
+      continue;
+    }
+
+    nextSenses.splice(matchIndex, 1, ...replacementSenses);
+  }
+
+  return nextSenses;
+}
+
+function formatCedictEditsParseError(
+  message: string,
+  lineNumber: number,
+): string {
+  return `${message} (line ${lineNumber})`;
 }
