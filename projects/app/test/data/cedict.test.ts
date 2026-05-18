@@ -1,14 +1,14 @@
 // pyly-not-src-test
 import { describe, expect, test } from "vitest";
 import {
-  buildCedictSenseId,
-  findCedictEntryById,
-  findCedictSenseById,
-  loadCedictV2,
-  parseCedictV2Line,
-  parseCedictV2Text,
-  parseCedictId,
-  transformCedictV2Entry,
+    buildCedictSenseId,
+    findCedictEntryById,
+    findCedictSenseById,
+    loadCedictV2,
+    parseCedictV2Line,
+    parseCedictV2Text,
+    parseCedictId,
+    transformCedictV2Entry,
 } from "./cedict";
 
 describe(`parseCedictV2Line`, () => {
@@ -163,7 +163,7 @@ describe(`transformCedictV2Entry`, () => {
     `);
   });
 
-  test(`does not extract non-standalone also-pr text`, () => {
+  test(`extracts inline also-pr pronunciation and cleans glosses`, () => {
     const line = `外面 外面 [[wai4mian4]] /outside (also pr. [wai4 mian5] for this sense)/surface/exterior/`;
     const parsed = parseCedictV2Line(line);
     expect(parsed).not.toBeNull();
@@ -173,10 +173,11 @@ describe(`transformCedictV2Entry`, () => {
       [
         {
           "glosses": [
-            "outside (also pr. [wai4 mian5] for this sense)",
+            "outside",
           ],
           "pinyin": [
             "wàimiàn",
+            "wài mian",
           ],
           "pinyinNumeric": "wai4mian4",
           "senseId": "外面|外面|wai4mian4|outside (also pr. [wai4 mian5] for this sense)|1csvbac",
@@ -189,6 +190,7 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "pinyin": [
             "wàimiàn",
+            "wài mian",
           ],
           "pinyinNumeric": "wai4mian4",
           "senseId": "外面|外面|wai4mian4|surface|0717zzw",
@@ -201,6 +203,7 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "pinyin": [
             "wàimiàn",
+            "wài mian",
           ],
           "pinyinNumeric": "wai4mian4",
           "senseId": "外面|外面|wai4mian4|exterior|1ubvrqb",

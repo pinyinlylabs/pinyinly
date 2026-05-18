@@ -123,27 +123,51 @@ export function transformCedictV2Entry(
 ): TransformedCedictV2SenseType[] {
   const alternativePinyin = new Set<string>();
 
-  const transformedSenses = entry.senses.flatMap((sense): string[][] => {
-    const transformedGlosses = sense.glosses.flatMap((gloss): string[] => {
-      const alternativePinyinForGloss =
-        extractAlsoPronunciationSensePinyin(gloss);
-      if (alternativePinyinForGloss == null) {
-        return [gloss];
+  const transformedSenses = entry.senses.flatMap(
+    (sense): Array<{ original: string[]; cleaned: string[] }> => {
+      const processedGlosses = sense.glosses.flatMap(
+        (gloss): Array<{ original: string; cleaned: string } | null> => {
+          // First try inline extraction (e.g., "outside (also pr. [wai4 mian5] for this sense)")
+          const inlineExtraction =
+            extractInlineAlsoPronunciationAndCleanGloss(gloss);
+          if (inlineExtraction != null) {
+            for (const alternative of inlineExtraction.alternativePinyin) {
+              alternativePinyin.add(alternative);
+            }
+            return [
+              { original: gloss, cleaned: inlineExtraction.cleanedGloss },
+            ];
+          }
+
+          // Then try standalone extraction (e.g., "also pr. [san1 jin1]" as entire sense)
+          const alternativePinyinForGloss =
+            extractAlsoPronunciationSensePinyin(gloss);
+          if (alternativePinyinForGloss == null) {
+            return [{ original: gloss, cleaned: gloss }];
+          }
+
+          for (const alternative of alternativePinyinForGloss) {
+            alternativePinyin.add(alternative);
+          }
+
+          return [];
+        },
+      );
+
+      if (processedGlosses.length === 0) {
+        return [];
       }
 
-      for (const alternative of alternativePinyinForGloss) {
-        alternativePinyin.add(alternative);
-      }
+      const originalGlosses = processedGlosses
+        .map((g) => g?.original)
+        .filter((g): g is string => g != null);
+      const cleanedGlosses = processedGlosses
+        .map((g) => g?.cleaned)
+        .filter((g): g is string => g != null);
 
-      return [];
-    });
-
-    if (transformedGlosses.length === 0) {
-      return [];
-    }
-
-    return [transformedGlosses];
-  });
+      return [{ original: originalGlosses, cleaned: cleanedGlosses }];
+    },
+  );
 
   const transformedPinyin = [
     normalizePinyinText(entry.pinyin),
@@ -152,19 +176,60 @@ export function transformCedictV2Entry(
     ),
   ].filter(arrayFilterUnique());
 
-  return transformedSenses.map((glosses) => ({
+  return transformedSenses.map((glossPair) => ({
     senseId: buildCedictSenseId(
       entry.traditional,
       entry.simplified,
       entry.pinyin,
-      glosses,
+      glossPair.original,
     ),
     traditional: entry.traditional,
     simplified: entry.simplified,
     pinyinNumeric: entry.pinyin,
     pinyin: transformedPinyin,
-    glosses,
+    glosses: glossPair.cleaned,
   }));
+}
+
+function extractInlineAlsoPronunciationAndCleanGloss(
+  gloss: string,
+): { cleanedGloss: string; alternativePinyin: string[] } | null {
+  // Match inline patterns like "(also pr. [wai4 mian5] for this sense)"
+  // This captures one or more "[pinyinNumeric]" blocks within parentheses with "also pr."
+  const match = gloss.match(
+    /\s*\((?:[^[\]]*?\s+)?(?:also|alternatively)\s+pr\.(?:\s+[^[\]]*)?(?:\s*\[[^\]]+\])+[^)]*\)\s*/iu,
+  );
+  if (match == null) {
+    return null;
+  }
+
+  const inlinePattern = match[0];
+  const bracketMatches = [
+    ...inlinePattern.matchAll(/\[(?<pinyinNumeric>[^\]]+)\]/gu),
+  ];
+  if (bracketMatches.length === 0) {
+    return null;
+  }
+
+  const alternativePinyin = bracketMatches
+    .map((item) => item.groups?.[`pinyinNumeric`]?.trim())
+    .filter((item): item is string => item != null && item.length > 0);
+
+  if (alternativePinyin.length === 0) {
+    return null;
+  }
+
+  const cleanedGloss = gloss.replace(inlinePattern, ``).trim();
+
+  // Only return if we actually removed something and have content left
+  if (cleanedGloss.length === 0) {
+    return null; // It was a standalone pattern, not inline
+  }
+
+  return {
+    cleanedGloss,
+    alternativePinyin,
+  };
 }
 
 function extractAlsoPronunciationSensePinyin(sense: string): string[] | null {
