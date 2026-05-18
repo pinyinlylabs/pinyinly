@@ -19,15 +19,13 @@ export interface CedictIdParamsType {
   fingerprint: string;
 }
 
-export interface CedictV2SenseType {
-  glosses: string[];
-}
-
 export interface CedictV2EntryType {
   traditional: string;
   simplified: string;
   pinyin: PinyinNumericText;
-  senses: CedictV2SenseType[];
+  senses: {
+    glosses: string[];
+  }[];
 }
 
 export interface TransformedCedictV2SenseType {
@@ -122,7 +120,7 @@ export function parseCedictV2Line(
     senses = applyCedictEntryEdits(senses, entryEdits, options);
   }
 
-  const parsedSenses = senses.map((sense): CedictV2SenseType => {
+  const parsedSenses = senses.map((sense) => {
     const glosses = sense
       .split(`;`)
       .map((gloss) => gloss.trim())
