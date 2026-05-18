@@ -1,5 +1,6 @@
+import type { PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
-import { memoize0 } from "@pinyinly/lib/collections";
+import { arrayFilterUnique, memoize0 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
@@ -9,22 +10,29 @@ import path from "node:path";
 export interface CedictIdParamsType {
   traditional: string;
   simplified: string;
-  pinyinRaw: string;
+  pinyin: PinyinNumericText;
   firstGloss: string;
   fingerprint: string;
 }
 
 export interface CedictV2SenseType {
-  senseId: string;
   glosses: string[];
 }
 
 export interface CedictV2EntryType {
   traditional: string;
   simplified: string;
-  pinyinRaw: string;
-  pinyin: string;
+  pinyin: PinyinNumericText;
   senses: CedictV2SenseType[];
+}
+
+export interface TransformedCedictV2SenseType {
+  senseId: string;
+  traditional: string;
+  simplified: string;
+  pinyinNumeric: PinyinNumericText;
+  pinyin: PinyinText[];
+  glosses: string[];
 }
 
 export interface ParseCedictV2LineOptionsType {
@@ -63,13 +71,13 @@ export function parseCedictV2Line(
 
   const traditional = match[1];
   const simplified = match[2];
-  const pinyinRaw = match[3];
+  const pinyin = match[3];
   const definitionBody = match[4];
 
   if (
     traditional == null ||
     simplified == null ||
-    pinyinRaw == null ||
+    pinyin == null ||
     definitionBody == null
   ) {
     if (!strict) {
@@ -89,15 +97,7 @@ export function parseCedictV2Line(
         .map((gloss) => gloss.trim())
         .filter((gloss) => gloss.length > 0);
 
-      const senseId = buildCedictSenseId(
-        traditional,
-        simplified,
-        pinyinRaw,
-        glosses,
-      );
-
       return {
-        senseId,
         glosses: glosses,
       };
     });
@@ -113,10 +113,89 @@ export function parseCedictV2Line(
   return {
     traditional,
     simplified,
-    pinyinRaw,
-    pinyin: normalizePinyinText(pinyinRaw),
+    pinyin: pinyin as PinyinNumericText,
     senses,
   };
+}
+
+export function transformCedictV2Entry(
+  entry: CedictV2EntryType,
+): TransformedCedictV2SenseType[] {
+  const alternativePinyin = new Set<string>();
+
+  const transformedSenses = entry.senses.flatMap((sense): string[][] => {
+    const transformedGlosses = sense.glosses.flatMap((gloss): string[] => {
+      const alternativePinyinForGloss =
+        extractAlsoPronunciationSensePinyin(gloss);
+      if (alternativePinyinForGloss == null) {
+        return [gloss];
+      }
+
+      for (const alternative of alternativePinyinForGloss) {
+        alternativePinyin.add(alternative);
+      }
+
+      return [];
+    });
+
+    if (transformedGlosses.length === 0) {
+      return [];
+    }
+
+    return [transformedGlosses];
+  });
+
+  const transformedPinyin = [
+    normalizePinyinText(entry.pinyin),
+    ...[...alternativePinyin].map((alternative) =>
+      normalizePinyinText(alternative),
+    ),
+  ].filter(arrayFilterUnique());
+
+  return transformedSenses.map((glosses) => ({
+    senseId: buildCedictSenseId(
+      entry.traditional,
+      entry.simplified,
+      entry.pinyin,
+      glosses,
+    ),
+    traditional: entry.traditional,
+    simplified: entry.simplified,
+    pinyinNumeric: entry.pinyin,
+    pinyin: transformedPinyin,
+    glosses,
+  }));
+}
+
+function extractAlsoPronunciationSensePinyin(sense: string): string[] | null {
+  const match = sense.match(/^(?:\([^)]*\)\s*)*also pr\.\s*(?<tail>.+)$/iu);
+  if (match == null) {
+    return null;
+  }
+
+  const tail = match.groups?.[`tail`];
+  if (tail == null) {
+    return null;
+  }
+
+  const bracketMatches = [...tail.matchAll(/\[(?<pinyinNumeric>[^\]]+)\]/gu)];
+  if (bracketMatches.length === 0) {
+    return null;
+  }
+
+  const remainder = tail
+    .replaceAll(/\[[^\]]+\]/gu, ` `)
+    .replaceAll(/\b(?:or|and|etc\.?)\b/giu, ` `)
+    .replaceAll(/[^a-z0-9\s]/giu, ` `)
+    .trim();
+
+  if (remainder.length > 0) {
+    return null;
+  }
+
+  return bracketMatches
+    .map((item) => item.groups?.[`pinyinNumeric`]?.trim())
+    .filter((item): item is string => item != null && item.length > 0);
 }
 
 export function parseCedictV2Text(
@@ -166,7 +245,7 @@ export async function findCedictEntryById(
   const fullyMatchedCandidates = candidates.filter(
     (entry) =>
       entry.simplified === cedictIdParams.simplified &&
-      entry.pinyinRaw === cedictIdParams.pinyinRaw,
+      entry.pinyin === cedictIdParams.pinyin,
   );
 
   if (fullyMatchedCandidates.length === 1) {
@@ -178,7 +257,7 @@ export async function findCedictEntryById(
 
 export async function findCedictSenseById(
   cedictSenseId: string,
-): Promise<CedictV2SenseType | null> {
+): Promise<TransformedCedictV2SenseType | null> {
   if (cedictSenseId.length === 0) {
     return null;
   }
@@ -190,32 +269,33 @@ export async function findCedictSenseById(
 export function buildCedictSenseId(
   traditional: string,
   simplified: string,
-  pinyinRaw: string,
+  pinyinNumeric: string,
   glosses: string[],
 ): string {
   const traditionalNormalized = traditional.normalize(`NFKC`);
   const simplifiedNormalized = simplified.normalize(`NFKC`);
-  const pinyinRawNormalized = pinyinRaw.normalize(`NFKC`);
+  const pinyinNumericNormalized = pinyinNumeric.normalize(`NFKC`);
   const firstGloss = nonNullable(glosses[0]);
   const fingerprint = hashString(glosses.join(`;`));
 
   invariant(
-    pinyinRawNormalized.includes(`|`) === false,
-    `pinyin ${pinyinRawNormalized} cannot contain | character`,
+    pinyinNumericNormalized.includes(`|`) === false,
+    `pinyin ${pinyinNumericNormalized} cannot contain | character`,
   );
 
-  return `${traditionalNormalized}|${simplifiedNormalized}|${pinyinRawNormalized}|${firstGloss}|${fingerprint}`;
+  return `${traditionalNormalized}|${simplifiedNormalized}|${pinyinNumericNormalized}|${firstGloss}|${fingerprint}`;
 }
 
 const getCedictLookupIndexes = memoize0(async () => {
   const entries = await loadCedictV2();
 
   const entriesBySenseId = new Map<string, CedictV2EntryType>();
-  const sensesBySenseId = new Map<string, CedictV2SenseType>();
+  const sensesBySenseId = new Map<string, TransformedCedictV2SenseType>();
   const entriesByTraditional = new Map<string, CedictV2EntryType[]>();
 
   for (const entry of entries) {
-    for (const sense of entry.senses) {
+    const transformedSenses = transformCedictV2Entry(entry);
+    for (const sense of transformedSenses) {
       entriesBySenseId.set(sense.senseId, entry);
       sensesBySenseId.set(sense.senseId, sense);
     }
@@ -237,7 +317,7 @@ const getCedictLookupIndexes = memoize0(async () => {
 
 export function parseCedictId(cedictId: string): CedictIdParamsType | null {
   const match = cedictId.match(
-    /^(?<traditional>.+?)\|(?<simplified>.+?)\|(?<pinyinRaw>.+?)\|(?<firstGloss>.+?)\|(?<fingerprint>[a-z0-9]+)$/u,
+    /^(?<traditional>.+?)\|(?<simplified>.+?)\|(?<pinyin>.+?)\|(?<firstGloss>.+?)\|(?<fingerprint>[a-z0-9]+)$/u,
   );
   if (match == null) {
     return null;
@@ -245,7 +325,7 @@ export function parseCedictId(cedictId: string): CedictIdParamsType | null {
 
   const traditional = match.groups?.[`traditional`];
   const simplified = match.groups?.[`simplified`];
-  const pinyinRaw = match.groups?.[`pinyinRaw`];
+  const pinyin = match.groups?.[`pinyin`];
   const firstGloss = match.groups?.[`firstGloss`];
   const fingerprint = match.groups?.[`fingerprint`];
 
@@ -254,8 +334,8 @@ export function parseCedictId(cedictId: string): CedictIdParamsType | null {
     traditional.length === 0 ||
     simplified == null ||
     simplified.length === 0 ||
-    pinyinRaw == null ||
-    pinyinRaw.length === 0 ||
+    pinyin == null ||
+    pinyin.length === 0 ||
     firstGloss == null ||
     firstGloss.length === 0 ||
     fingerprint == null ||
@@ -267,7 +347,7 @@ export function parseCedictId(cedictId: string): CedictIdParamsType | null {
   return {
     traditional,
     simplified,
-    pinyinRaw,
+    pinyin: pinyin as PinyinNumericText,
     firstGloss,
     fingerprint,
   };

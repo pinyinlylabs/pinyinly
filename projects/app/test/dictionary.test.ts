@@ -53,11 +53,7 @@ import {
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
-import {
-  buildCedictSenseId,
-  findCedictEntryById,
-  findCedictSenseById,
-} from "./data/cedict.ts";
+import { findCedictSenseById } from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { fmtJsonFile } from "@pinyinly/lib/fs";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
@@ -459,20 +455,18 @@ test(
         continue;
       }
 
-      const cedictEntry = await findCedictEntryById(meaning.cedict);
-      if (cedictEntry == null) {
+      const cedictSense = await findCedictSenseById(meaning.cedict);
+      expect
+        .soft(
+          cedictSense,
+          `${hanziWord} CE-DICT sense "${meaning.cedict}" should exist`,
+        )
+        .not.toBeNull();
+      if (cedictSense == null) {
         continue;
       }
 
-      const expectedPinyin = cedictEntry.pinyin as PinyinText;
-      const expectedCedict = buildCedictSenseId(
-        cedictEntry.traditional,
-        cedictEntry.simplified,
-        cedictEntry.pinyinRaw,
-        nonNullable(
-          cedictEntry.senses.find((s) => s.senseId === meaning.cedict),
-        ).glosses,
-      );
+      const expectedPinyin = cedictSense.pinyin;
 
       if (meaning.pinyin != null && meaning.pinyin.length > 1) {
         // oxlint-disable-next-line no-console
@@ -485,13 +479,11 @@ test(
       const pinyinMatches =
         meaning.pinyin != null &&
         meaning.pinyin.length === 1 &&
-        meaning.pinyin[0] === expectedPinyin;
-      const cedictMatches = meaning.cedict === expectedCedict;
+        meaning.pinyin[0] === expectedPinyin[0];
 
-      if (!pinyinMatches || !cedictMatches) {
+      if (!pinyinMatches) {
         mismatches.push(hanziWord);
-        meaning.pinyin = [expectedPinyin];
-        meaning.cedict = expectedCedict;
+        meaning.pinyin = expectedPinyin;
       }
     }
 

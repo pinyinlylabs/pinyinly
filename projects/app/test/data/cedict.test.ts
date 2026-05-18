@@ -8,6 +8,7 @@ import {
   parseCedictV2Line,
   parseCedictV2Text,
   parseCedictId,
+  transformCedictV2Entry,
 } from "./cedict";
 
 describe(`parseCedictV2Line`, () => {
@@ -22,18 +23,46 @@ describe(`parseCedictV2Line`, () => {
     expect(parsed).not.toBeNull();
     expect(parsed).toMatchInlineSnapshot(`
       {
-        "pinyin": "yāo yāo líng",
-        "pinyinRaw": "yao1 yao1 ling2",
+        "pinyin": "yao1 yao1 ling2",
         "senses": [
           {
             "glosses": [
               "the emergency number for law enforcement in Mainland China and Taiwan",
             ],
-            "senseId": "110|110|yao1 yao1 ling2|the emergency number for law enforcement in Mainland China and Taiwan|11k77yo",
           },
         ],
         "simplified": "110",
         "traditional": "110",
+      }
+    `);
+  });
+
+  test(`keeps standalone also-pr pronunciation senses in syntax parse`, () => {
+    const line = `三更 三更 [[san1geng1]] /third of the five night watch periods 23:00-01:00 (old)/midnight/also pr. [san1 jin1]/`;
+
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "pinyin": "san1geng1",
+        "senses": [
+          {
+            "glosses": [
+              "third of the five night watch periods 23:00-01:00 (old)",
+            ],
+          },
+          {
+            "glosses": [
+              "midnight",
+            ],
+          },
+          {
+            "glosses": [
+              "also pr. [san1 jin1]",
+            ],
+          },
+        ],
+        "simplified": "三更",
+        "traditional": "三更",
       }
     `);
   });
@@ -50,20 +79,17 @@ describe(`parseCedictV2Line`, () => {
             "to 3D print",
             "3D printing",
           ],
-          "senseId": "3D打印|3D打印|san1-D da3yin4|to 3D print|14nll3j",
         },
         {
           "glosses": [
             "sense 2",
           ],
-          "senseId": "3D打印|3D打印|san1-D da3yin4|sense 2|14p52jv",
         },
         {
           "glosses": [
             "sense 3A",
             "sense 3B",
           ],
-          "senseId": "3D打印|3D打印|san1-D da3yin4|sense 3A|1ipg8fn",
         },
       ]
     `);
@@ -80,7 +106,9 @@ describe(`parseCedictV2Line`, () => {
       parseCedictV2Line(`not a cedict line`, { strict: false }),
     ).toBeNull();
   });
+});
 
+describe(`buildCedictSenseId`, () => {
   test(`builds deterministic sense id bases`, () => {
     const parsed = parseCedictV2Line(`行 行 [[xing2]] /to walk;to travel/`);
     expect(parsed).not.toBeNull();
@@ -88,11 +116,99 @@ describe(`parseCedictV2Line`, () => {
     const senseId = buildCedictSenseId(
       parsed?.traditional!,
       parsed?.simplified!,
-      parsed?.pinyinRaw!,
+      parsed?.pinyin!,
       parsed!.senses[0]?.glosses ?? [],
     );
 
     expect(senseId).toBe(`行|行|xing2|to walk|1t265rt`);
+  });
+});
+
+describe(`transformCedictV2Entry`, () => {
+  test(`extracts standalone also-pr pronunciation senses`, () => {
+    const line = `三更 三更 [[san1geng1]] /third of the five night watch periods 23:00-01:00 (old)/midnight/also pr. [san1 jin1]/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "third of the five night watch periods 23:00-01:00 (old)",
+          ],
+          "pinyin": [
+            "sāngēng",
+            "sān jīn",
+          ],
+          "pinyinNumeric": "san1geng1",
+          "senseId": "三更|三更|san1geng1|third of the five night watch periods 23:00-01:00 (old)|0mn8832",
+          "simplified": "三更",
+          "traditional": "三更",
+        },
+        {
+          "glosses": [
+            "midnight",
+          ],
+          "pinyin": [
+            "sāngēng",
+            "sān jīn",
+          ],
+          "pinyinNumeric": "san1geng1",
+          "senseId": "三更|三更|san1geng1|midnight|01l7toh",
+          "simplified": "三更",
+          "traditional": "三更",
+        },
+      ]
+    `);
+  });
+
+  test(`does not extract non-standalone also-pr text`, () => {
+    const line = `外面 外面 [[wai4mian4]] /outside (also pr. [wai4 mian5] for this sense)/surface/exterior/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed).toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "outside (also pr. [wai4 mian5] for this sense)",
+          ],
+          "pinyin": [
+            "wàimiàn",
+          ],
+          "pinyinNumeric": "wai4mian4",
+          "senseId": "外面|外面|wai4mian4|outside (also pr. [wai4 mian5] for this sense)|1csvbac",
+          "simplified": "外面",
+          "traditional": "外面",
+        },
+        {
+          "glosses": [
+            "surface",
+          ],
+          "pinyin": [
+            "wàimiàn",
+          ],
+          "pinyinNumeric": "wai4mian4",
+          "senseId": "外面|外面|wai4mian4|surface|0717zzw",
+          "simplified": "外面",
+          "traditional": "外面",
+        },
+        {
+          "glosses": [
+            "exterior",
+          ],
+          "pinyin": [
+            "wàimiàn",
+          ],
+          "pinyinNumeric": "wai4mian4",
+          "senseId": "外面|外面|wai4mian4|exterior|1ubvrqb",
+          "simplified": "外面",
+          "traditional": "外面",
+        },
+      ]
+    `);
   });
 });
 
@@ -112,8 +228,10 @@ describe(`parseCedictV2Text`, () => {
     ].join(`\n`);
 
     const [first, second] = parseCedictV2Text(input);
-    expect(first?.senses[0]?.senseId).toContain(`行|行|xing2|`);
-    expect(second?.senses[0]?.senseId).toContain(`行|行|xing2|`);
+    const firstSenseId = transformCedictV2Entry(first!)[0]?.senseId;
+    const secondSenseId = transformCedictV2Entry(second!)[0]?.senseId;
+    expect(firstSenseId).toContain(`行|行|xing2|`);
+    expect(secondSenseId).toContain(`行|行|xing2|`);
   });
 
   test(`adds collision suffix to duplicate sense id bases`, () => {
@@ -121,10 +239,11 @@ describe(`parseCedictV2Text`, () => {
       `行 行 [[xing2]] /to go;to walk/to go;to travel/`,
     );
 
-    expect(entry?.senses).toHaveLength(2);
-    expect(entry?.senses[0]?.senseId).toContain(`|to go|`);
-    expect(entry?.senses[1]?.senseId).toContain(`|to go|`);
-    expect(entry?.senses[0]?.senseId).not.toBe(entry?.senses[1]?.senseId);
+    const transformed = transformCedictV2Entry(entry!);
+    expect(transformed).toHaveLength(2);
+    expect(transformed[0]?.senseId).toContain(`|to go|`);
+    expect(transformed[1]?.senseId).toContain(`|to go|`);
+    expect(transformed[0]?.senseId).not.toBe(transformed[1]?.senseId);
   });
 });
 
@@ -137,7 +256,6 @@ describe(`loadCedictV2`, () => {
     expect(first).toBeDefined();
     expect(typeof first?.traditional).toBe(`string`);
     expect(typeof first?.simplified).toBe(`string`);
-    expect(typeof first?.pinyinRaw).toBe(`string`);
     expect(typeof first?.pinyin).toBe(`string`);
     expect(first?.senses.length ?? 0).toBeGreaterThan(0);
   });
@@ -148,7 +266,7 @@ describe(`findCedictEntryById`, () => {
     const [entry] = await loadCedictV2();
     expect(entry).toBeDefined();
 
-    const originalSenseId = entry!.senses[0]?.senseId;
+    const originalSenseId = transformCedictV2Entry(entry!)[0]?.senseId;
     expect(originalSenseId).toBeDefined();
 
     const resolvedSense = await findCedictSenseById(originalSenseId!);
@@ -157,24 +275,25 @@ describe(`findCedictEntryById`, () => {
     const resolvedEntry = await findCedictEntryById(originalSenseId!);
     expect(resolvedEntry).toBeDefined();
 
-    const syntheticLine = `${resolvedEntry!.traditional} ${resolvedEntry!.simplified} [[${resolvedEntry!.pinyinRaw}]] /${resolvedSense!.glosses.join(`;`)}/`;
+    const syntheticLine = `${resolvedEntry!.traditional} ${resolvedEntry!.simplified} [[${resolvedEntry!.pinyin}]] /${resolvedSense!.glosses.join(`;`)}/`;
     const reparsed = parseCedictV2Line(syntheticLine);
     expect(reparsed).not.toBeNull();
 
-    const rebuiltSenseId = reparsed!.senses[0]?.senseId;
+    const rebuiltSenseId = transformCedictV2Entry(reparsed!)[0]?.senseId;
     expect(rebuiltSenseId).toBe(originalSenseId);
   });
 
   test(`resolves entries by sense id`, async () => {
     const [entry] = await loadCedictV2();
     expect(entry).toBeDefined();
-    expect(entry?.senses[0]?.senseId).toBeDefined();
+    const transformed = transformCedictV2Entry(entry!);
+    expect(transformed[0]?.senseId).toBeDefined();
 
-    const resolved = await findCedictEntryById(entry!.senses[0]!.senseId);
+    const resolved = await findCedictEntryById(transformed[0]!.senseId);
     expect(resolved).toMatchObject({
       traditional: entry!.traditional,
       simplified: entry!.simplified,
-      pinyinRaw: entry!.pinyinRaw,
+      pinyin: entry!.pinyin,
     });
   });
 
@@ -183,7 +302,7 @@ describe(`findCedictEntryById`, () => {
     expect(resolved).toMatchObject({
       traditional: `一`,
       simplified: `一`,
-      pinyinRaw: `yi1`,
+      pinyin: `yi1`,
     });
   });
 
@@ -207,7 +326,7 @@ describe(`parseCedictId`, () => {
       {
         "fingerprint": "abc123",
         "firstGloss": "one",
-        "pinyinRaw": "yi1",
+        "pinyin": "yi1",
         "simplified": "一",
         "traditional": "一",
       }
@@ -221,7 +340,7 @@ describe(`parseCedictId`, () => {
       {
         "fingerprint": "abc123",
         "firstGloss": "one ref 一|一[foo]",
-        "pinyinRaw": "yi1",
+        "pinyin": "yi1",
         "simplified": "一",
         "traditional": "一",
       }
@@ -240,13 +359,14 @@ describe(`findCedictSenseById`, () => {
     const [entry] = await loadCedictV2();
     expect(entry).toBeDefined();
 
-    const senseId = entry?.senses[0]?.senseId;
+    const transformed = transformCedictV2Entry(entry!);
+    const senseId = transformed[0]?.senseId;
     expect(senseId).toBeDefined();
 
     const resolved = await findCedictSenseById(senseId!);
     expect(resolved).toMatchObject({
       senseId,
-      glosses: entry?.senses[0]?.glosses,
+      glosses: transformed[0]?.glosses,
     });
   });
 
