@@ -306,7 +306,7 @@ export type HanziWord =
   | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
- * A single pinyin unit (e.g. `hǎo`). This should not include numeric
+ * A single pinyin diacritic unit (e.g. `hǎo`). This should not include numeric
  * notation, use `normalizePinyin__` functions to convert numeric to diacritic
  * forms.
  *
@@ -315,6 +315,8 @@ export type HanziWord =
  */
 export type PinyinUnit = string & z.$brand<`PinyinUnit`>;
 
+export type PinyinText = PinyinUnit | (string & z.$brand<`PinyinText`>);
+
 /**
  * A single pinyin unit in numeric tone form (e.g. `hao3`).
  *
@@ -322,8 +324,9 @@ export type PinyinUnit = string & z.$brand<`PinyinUnit`>;
  * would be two units: `ni3` and `hao3`.
  */
 export type PinyinNumericUnit = string & z.$brand<`PinyinNumericUnit`>;
-
-export type PinyinText = PinyinUnit | (string & z.$brand<`PinyinText`>);
+export type PinyinNumericText =
+  | PinyinNumericUnit
+  | (string & z.$brand<`PinyinNumericText`>);
 
 /**
  * Space-separated pinyin units, used for efficient storage.
