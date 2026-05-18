@@ -1,7 +1,11 @@
 import type { PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
-import { arrayFilterUnique, memoize0 } from "@pinyinly/lib/collections";
-import { readFile, writeFile } from "@pinyinly/lib/fs";
+import {
+  arrayFilterUnique,
+  mapArrayAdd,
+  memoize0,
+} from "@pinyinly/lib/collections";
+import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 
@@ -475,10 +479,9 @@ export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
     strict: true,
     edits,
   });
-  await writeFile(
+  await writeUtf8FileIfChanged(
     path.join(import.meta.dirname, `${filename}.out`),
     outputText,
-    `utf8`,
   );
 
   return parseCedictV2Text(outputText, { strict: true });
@@ -493,26 +496,23 @@ export async function findCedictEntryById(
 
   const indexes = await getCedictLookupIndexes();
 
-  const bySenseId = indexes.entriesBySenseId.get(cedictId);
-  if (bySenseId != null) {
-    return bySenseId;
-  }
-
   const cedictIdParams = parseCedictId(cedictId);
   if (cedictIdParams == null) {
     return null;
   }
 
-  const candidates =
-    indexes.entriesByTraditional.get(cedictIdParams.traditional) ?? [];
-  const fullyMatchedCandidates = candidates.filter(
-    (entry) =>
-      entry.simplified === cedictIdParams.simplified &&
-      entry.pinyin === cedictIdParams.pinyin,
+  const candidates = findCedictEntryCandidatesByParams(indexes, cedictIdParams);
+
+  if (candidates.length === 1) {
+    return candidates[0] ?? null;
+  }
+
+  const matchedCandidates = candidates.filter((entry) =>
+    transformCedictV2Entry(entry).some((sense) => sense.senseId === cedictId),
   );
 
-  if (fullyMatchedCandidates.length === 1) {
-    return fullyMatchedCandidates[0] ?? null;
+  if (matchedCandidates.length > 0) {
+    return matchedCandidates.at(-1) ?? null;
   }
 
   return null;
@@ -525,8 +525,47 @@ export async function findCedictSenseById(
     return null;
   }
 
+  const cedictIdParams = parseCedictId(cedictSenseId);
+  if (cedictIdParams == null) {
+    return null;
+  }
+
   const indexes = await getCedictLookupIndexes();
-  return indexes.sensesBySenseId.get(cedictSenseId) ?? null;
+  const candidates = findCedictEntryCandidatesByParams(indexes, cedictIdParams);
+
+  let resolvedSense: TransformedCedictV2SenseType | null = null;
+  for (const entry of candidates) {
+    const matchedSense = transformCedictV2Entry(entry).find(
+      (sense) => sense.senseId === cedictSenseId,
+    );
+    if (matchedSense == null) {
+      continue;
+    }
+
+    resolvedSense = matchedSense;
+  }
+
+  return resolvedSense;
+}
+
+export async function findCedictSenseIdCandidatesById(
+  cedictSenseId: string,
+): Promise<string[]> {
+  if (cedictSenseId.length === 0) {
+    return [];
+  }
+
+  const cedictIdParams = parseCedictId(cedictSenseId);
+  if (cedictIdParams == null) {
+    return [];
+  }
+
+  const indexes = await getCedictLookupIndexes();
+  const candidates = findCedictEntryCandidatesByParams(indexes, cedictIdParams);
+
+  return candidates.flatMap((entry) =>
+    transformCedictV2Entry(entry).map((sense) => sense.senseId),
+  );
 }
 
 export function buildCedictSenseId(
@@ -552,31 +591,30 @@ export function buildCedictSenseId(
 const getCedictLookupIndexes = memoize0(async () => {
   const entries = await loadCedictV2();
 
-  const entriesBySenseId = new Map<string, CedictV2EntryType>();
-  const sensesBySenseId = new Map<string, TransformedCedictV2SenseType>();
   const entriesByTraditional = new Map<string, CedictV2EntryType[]>();
 
   for (const entry of entries) {
-    const transformedSenses = transformCedictV2Entry(entry);
-    for (const sense of transformedSenses) {
-      entriesBySenseId.set(sense.senseId, entry);
-      sensesBySenseId.set(sense.senseId, sense);
-    }
-
-    const existingByTraditional = entriesByTraditional.get(entry.traditional);
-    if (existingByTraditional == null) {
-      entriesByTraditional.set(entry.traditional, [entry]);
-    } else {
-      existingByTraditional.push(entry);
-    }
+    mapArrayAdd(entriesByTraditional, entry.traditional, entry);
   }
 
   return {
-    entriesBySenseId,
-    sensesBySenseId,
     entriesByTraditional,
   };
 });
+
+function findCedictEntryCandidatesByParams(
+  indexes: { entriesByTraditional: Map<string, CedictV2EntryType[]> },
+  cedictIdParams: CedictIdParamsType,
+): CedictV2EntryType[] {
+  const candidates =
+    indexes.entriesByTraditional.get(cedictIdParams.traditional) ?? [];
+
+  return candidates.filter(
+    (entry) =>
+      entry.simplified === cedictIdParams.simplified &&
+      entry.pinyin === cedictIdParams.pinyin,
+  );
+}
 
 export function parseCedictId(cedictId: string): CedictIdParamsType | null {
   const match = cedictId.match(

@@ -53,7 +53,10 @@ import {
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
-import { findCedictSenseById } from "./data/cedict.ts";
+import {
+  findCedictSenseById,
+  findCedictSenseIdCandidatesById,
+} from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { fmtJsonFile } from "@pinyinly/lib/fs";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
@@ -128,7 +131,6 @@ test(`hanzi word meaning schema rejects cedict references missing fingerprint`, 
 
 test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async () => {
   const dict = await loadDictionary();
-  const missing: string[] = [];
 
   for (const [hanziWord, meaning] of dict.allEntries) {
     if (meaning.cedict == null) {
@@ -137,12 +139,12 @@ test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async (
 
     const resolvedSense = await findCedictSenseById(meaning.cedict);
     if (resolvedSense == null) {
-      missing.push(`${hanziWord} -> ${meaning.cedict}`);
+      const candidates = await findCedictSenseIdCandidatesById(meaning.cedict);
+      expect
+        .soft(candidates.join(`\n`), `hanziWord: ${hanziWord}`)
+        .toContain(meaning.cedict);
     }
   }
-
-  missing.sort((a, b) => a.localeCompare(b));
-  expect(missing).toEqual([]);
 });
 
 test(`hanzi word meaning schema enforces normalized freq bounds`, () => {
@@ -456,13 +458,8 @@ test(
       }
 
       const cedictSense = await findCedictSenseById(meaning.cedict);
-      expect
-        .soft(
-          cedictSense,
-          `${hanziWord} CE-DICT sense "${meaning.cedict}" should exist`,
-        )
-        .not.toBeNull();
       if (cedictSense == null) {
+        // assertion thrown in another test, so just skip this case here to avoid noise
         continue;
       }
 

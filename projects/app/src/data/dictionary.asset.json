@@ -1,5 +1,5 @@
 [
-  ["一:one",{"cedict":"一|一|yi1|one|1fnfegf","freq":0.047619047619047616,"gloss":["one","single"],"hsk":"1","pinyin":["yī"],"pos":"n"}],
+  ["一:one",{"cedict":"一|一|yi1|one (also pr. [yao1])|16e2i55","freq":0.047619047619047616,"gloss":["one","single"],"hsk":"1","pinyin":["yī"],"pos":"n"}],
   ["一下儿:aBit",{"cedict":"一下兒|一下儿|yi1xia4r5|erhua form of 一下[yi1xia4]|0qli58n","freq":0.000001,"gloss":["a bit","a little while"],"hsk":"1","pinyin":["yīxiàr"],"pos":"adv"}],
   ["一些:some",{"cedict":"一些|一些|yi1xie1|some|0wz2w8v","freq":0.0053475935828877,"gloss":["some","a few"],"hsk":"1","pinyin":["yīxiē"],"pos":"n"}],
   ["一会儿:aWhile",{"cedict":"一會兒|一会儿|yi1hui4r5|a while|1dzf995","freq":0.00045310376076121433,"gloss":["a while","a short time"],"hsk":"1","pinyin":["yīhuìr"],"pos":"n"}],
@@ -1167,7 +1167,7 @@
   ["外汇:forex",{"cedict":"外匯|外汇|wai4hui4|foreign (currency) exchange|0utebp8","freq":0.00006517630189663039,"gloss":["foreign (currency) exchange"],"hsk":"4","pinyin":["wàihuì"]}],
   ["外语:foreignLanguage",{"cedict":"外語|外语|wai4yu3|foreign language|18y9ayn","freq":0.00008961376467425397,"gloss":["foreign language"],"hsk":"1","pinyin":["wàiyǔ"],"pos":"n"}],
   ["外边:outside",{"cedict":"外邊|外边|wai4bian5|outside|1i9dl1g","freq":0.00008117542008279893,"gloss":["outside"],"hsk":"1","pinyin":["wàibian"],"pos":"n"}],
-  ["外面:outside",{"cedict":"外面|外面|wai4mian4|outside (also pr. [wai4 mian5] for this sense)|1csvbac","freq":0.0007396449704142012,"gloss":["outside"],"hsk":"3","pinyin":["wàimiàn"],"pos":"n"}],
+  ["外面:outside",{"cedict":"外面|外面|wai4mian4|outside (also pr. [wai4mian5])|19tf02v","freq":0.0007396449704142012,"gloss":["outside"],"hsk":"3","pinyin":["wàimiàn"],"pos":"n"}],
   ["多:many",{"cedict":"多|多|duo1|many|0m3fn9y","freq":0.0125,"gloss":["many","much","more"],"hsk":"1","pinyin":["duō"],"pos":"adj"}],
   ["多久:howLong",{"cedict":"多久|多久|duo1jiu3|(of time) how long?|022u4yr","freq":0.0004306632213608958,"gloss":["how long"],"hsk":"2","pinyin":["duōjiǔ"],"pos":"adv"}],
   ["多么:how",{"cedict":"多麼|多么|duo1me5|how (wonderful etc)|04j38ai","freq":0.0005154639175257732,"gloss":["how","what"],"hsk":"2","pinyin":["duōme"],"pos":"adv"}],
