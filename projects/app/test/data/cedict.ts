@@ -1,7 +1,7 @@
 import type { PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { arrayFilterUnique, memoize0 } from "@pinyinly/lib/collections";
-import { readFile } from "@pinyinly/lib/fs";
+import { readFile, writeFile } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 
@@ -57,6 +57,8 @@ export interface CedictV2EditsType {
   entriesByKey: Map<string, CedictV2EntryEditsType>;
 }
 
+const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]\s+\/(.*)\/$/u;
+
 /**
  * Parses a single CC-CEDICT v2 line.
  *
@@ -77,7 +79,7 @@ export function parseCedictV2Line(
     return null;
   }
 
-  const match = line.match(/^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]\s+\/(.*)\/$/u);
+  const match = line.match(CEDICT_V2_LINE_REGEXP);
   if (match == null) {
     if (!strict) {
       return null;
@@ -209,6 +211,88 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
   return {
     entriesByKey,
   };
+}
+
+export function applyCedictV2EditsToText(
+  text: string,
+  options: ParseCedictV2LineOptionsType = {},
+): string {
+  const strict = options.strict ?? true;
+
+  return text
+    .split(/\r?\n/u)
+    .map((line, i) => {
+      const lineNumber = i + 1;
+      const trimmed = line.trim();
+
+      if (
+        trimmed.length === 0 ||
+        trimmed.startsWith(`#`) ||
+        trimmed.startsWith(`%`)
+      ) {
+        return line;
+      }
+
+      const match = line.match(CEDICT_V2_LINE_REGEXP);
+      if (match == null) {
+        if (strict) {
+          throw new Error(
+            formatParseError(`invalid CC-CEDICT v2 line`, { lineNumber }),
+          );
+        }
+
+        return line;
+      }
+
+      const traditional = match[1];
+      const simplified = match[2];
+      const pinyin = match[3];
+      const definitionBody = match[4];
+
+      if (
+        traditional == null ||
+        simplified == null ||
+        pinyin == null ||
+        definitionBody == null
+      ) {
+        if (strict) {
+          throw new Error(
+            formatParseError(`invalid CC-CEDICT v2 line`, { lineNumber }),
+          );
+        }
+
+        return line;
+      }
+
+      let senses = definitionBody
+        .split(`/`)
+        .map((sense) => sense.trim())
+        .filter((sense) => sense.length > 0);
+
+      const entryEdits = options.edits?.entriesByKey.get(
+        buildCedictV2EditEntryKey(traditional, simplified, pinyin),
+      );
+      if (entryEdits != null) {
+        senses = applyCedictEntryEdits(senses, entryEdits, {
+          ...options,
+          lineNumber,
+          strict,
+        });
+      }
+
+      if (senses.length === 0) {
+        if (strict) {
+          throw new Error(
+            formatParseError(`line has no senses`, { lineNumber }),
+          );
+        }
+
+        return line;
+      }
+
+      return `${traditional} ${simplified} [[${pinyin}]] /${senses.join(`/`)}/`;
+    })
+    .join(`\n`);
 }
 
 export function transformCedictV2Entry(
@@ -386,7 +470,18 @@ export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
   );
 
   const edits = parseCedictV2EditsText(editsText);
-  return parseCedictV2Text(dataText, { strict: true, edits });
+
+  const outputText = applyCedictV2EditsToText(dataText, {
+    strict: true,
+    edits,
+  });
+  await writeFile(
+    path.join(import.meta.dirname, `${filename}.out`),
+    outputText,
+    `utf8`,
+  );
+
+  return parseCedictV2Text(outputText, { strict: true });
 });
 
 export async function findCedictEntryById(

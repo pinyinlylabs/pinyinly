@@ -1,6 +1,7 @@
 // pyly-not-src-test
 import { describe, expect, test } from "vitest";
 import {
+  applyCedictV2EditsToText,
   buildCedictSenseId,
   parseCedictV2EditsText,
   findCedictEntryById,
@@ -353,6 +354,34 @@ describe(`parseCedictV2EditsText`, () => {
         ].join(`\n`),
       ),
     ).toThrow(`duplicate edit block for 小二 小二 [[xiao3'er4]] (line 4)`);
+  });
+});
+
+describe(`applyCedictV2EditsToText`, () => {
+  test(`renders final cedict text with applied edits`, () => {
+    const input = [
+      `# comment`,
+      `示例 示例 [[shi4li4]] /one,two/three/`,
+      `小二 小二 [[xiao3'er4]] /old sense 1/old sense 2/`,
+    ].join(`\n`);
+
+    const edits = parseCedictV2EditsText(
+      [
+        `示例 示例 [[shi4li4]]`,
+        `/one,two/ /one/two/`,
+        ``,
+        `小二 小二 [[xiao3'er4]]`,
+        `/old sense 1/ /new sense 1/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    expect(output).toMatchInlineSnapshot(`
+      "# comment
+      示例 示例 [[shi4li4]] /one/two/three/
+      小二 小二 [[xiao3'er4]] /new sense 1/old sense 2/"
+    `);
   });
 });
 
