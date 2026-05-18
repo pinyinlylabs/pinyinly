@@ -36,6 +36,7 @@ export interface TransformedCedictV2SenseType {
   pinyin: PinyinText[];
   glosses: string[];
   classifiers?: string[];
+  tags?: string[];
 }
 
 export interface ParseCedictV2LineOptionsType {
@@ -61,6 +62,59 @@ export interface CedictV2EditsType {
 }
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]\s+\/(.*)\/$/u;
+
+interface CedictSenseTagDefinitionType {
+  tag: string;
+  /** Raw regex string matching the tag marker in a gloss (e.g. `\\(idiom\\)`). */
+  pattern: string;
+  /**
+   * Which position(s) in a gloss to scan for this tag marker.
+   * Defaults to `'both'`.
+   */
+  position?: `start` | `end` | `both`;
+}
+
+/**
+ * Registry of sense tag patterns. Add entries here to support new tag markers.
+ * Patterns are matched at the start or end of individual gloss strings.
+ */
+const CEDICT_SENSE_TAG_DEFINITIONS: readonly CedictSenseTagDefinitionType[] = [
+  { tag: `idiom`, pattern: `\\(idiom\\)` },
+  { tag: `figurative`, pattern: `\\(fig\\.\\)` },
+  { tag: `literary`, pattern: `lit\\.`, position: `start` },
+];
+
+const cedictSenseTagLookup: ReadonlyArray<{ tag: string; re: RegExp }> =
+  CEDICT_SENSE_TAG_DEFINITIONS.map((d) => ({
+    tag: d.tag,
+    re: new RegExp(`^(?:${d.pattern})$`, `iu`),
+  }));
+
+const cedictSenseTagStartPatterns = CEDICT_SENSE_TAG_DEFINITIONS.filter(
+  (d) => (d.position ?? `both`) !== `end`,
+).map((d) => `(?:${d.pattern})`);
+
+const cedictSenseTagEndPatterns = CEDICT_SENSE_TAG_DEFINITIONS.filter(
+  (d) => (d.position ?? `both`) !== `start`,
+).map((d) => `(?:${d.pattern})`);
+
+// Global: finds all tag markers anywhere in a string
+const cedictSenseTagGlobalRe = new RegExp(
+  CEDICT_SENSE_TAG_DEFINITIONS.map((d) => `(?:${d.pattern})`).join(`|`),
+  `igu`,
+);
+
+// Non-global: detects a tag marker at the start of a gloss
+const cedictSenseTagAtStartRe = new RegExp(
+  `^(?:${cedictSenseTagStartPatterns.join(`|`)})\\s*`,
+  `iu`,
+);
+
+// Non-global: detects a tag marker at the end of a gloss
+const cedictSenseTagAtEndRe = new RegExp(
+  `\\s*(?:${cedictSenseTagEndPatterns.join(`|`)})$`,
+  `iu`,
+);
 
 /**
  * Parses a single CC-CEDICT v2 line.
@@ -226,76 +280,27 @@ export function applyCedictV2EditsToText(
     .split(/\r?\n/u)
     .map((line, i) => {
       const lineNumber = i + 1;
-      const trimmed = line.trim();
+      const parsedLine = parseCedictV2Line(line, {
+        strict,
+        lineNumber,
+        edits: options.edits,
+      });
 
-      if (
-        trimmed.length === 0 ||
-        trimmed.startsWith(`#`) ||
-        trimmed.startsWith(`%`)
-      ) {
+      if (parsedLine == null) {
         return line;
       }
 
-      const match = line.match(CEDICT_V2_LINE_REGEXP);
-      if (match == null) {
-        if (strict) {
-          throw new Error(
-            formatParseError(`invalid CC-CEDICT v2 line`, { lineNumber }),
-          );
-        }
-
-        return line;
-      }
-
-      const traditional = match[1];
-      const simplified = match[2];
-      const pinyin = match[3];
-      const definitionBody = match[4];
-
-      if (
-        traditional == null ||
-        simplified == null ||
-        pinyin == null ||
-        definitionBody == null
-      ) {
-        if (strict) {
-          throw new Error(
-            formatParseError(`invalid CC-CEDICT v2 line`, { lineNumber }),
-          );
-        }
-
-        return line;
-      }
-
-      let senses = definitionBody
-        .split(`/`)
-        .map((sense) => sense.trim())
-        .filter((sense) => sense.length > 0);
-
-      const entryEdits = options.edits?.entriesByKey.get(
-        buildCedictV2EditEntryKey(traditional, simplified, pinyin),
-      );
-      if (entryEdits != null) {
-        senses = applyCedictEntryEdits(senses, entryEdits, {
-          ...options,
-          lineNumber,
-          strict,
-        });
-      }
-
-      if (senses.length === 0) {
-        if (strict) {
-          throw new Error(
-            formatParseError(`line has no senses`, { lineNumber }),
-          );
-        }
-
-        return line;
-      }
-
-      return `${traditional} ${simplified} [[${pinyin}]] /${senses.join(`/`)}/`;
+      return serializeCedictV2Entry(parsedLine);
     })
     .join(`\n`);
+}
+
+function serializeCedictV2Entry(entry: CedictV2EntryType): string {
+  const senses = entry.senses.map((sense) =>
+    sense.glosses.map((gloss) => normalizeTagsInGloss(gloss.trim())).join(`; `),
+  );
+
+  return `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] /${senses.join(`/`)}/`;
 }
 
 export function transformCedictV2Entry(
@@ -307,6 +312,7 @@ export function transformCedictV2Entry(
   const transformedSenses = entry.senses.flatMap((sense) => {
     const inlineAlternativePinyin = new Set<string>();
     const inlineClassifiers = new Set<string>();
+    const senseTags: string[] = [];
     const originalGlosses: string[] = [];
     const cleanedGlosses: string[] = [];
 
@@ -330,6 +336,16 @@ export function transformCedictV2Entry(
           inlineAlternativePinyin.add(alternative);
         }
         cleanedGloss = inlineExtraction.cleanedGloss;
+      }
+
+      const tagExtraction = extractSenseTagsFromGloss(cleanedGloss);
+      if (tagExtraction != null) {
+        for (const tag of tagExtraction.tags) {
+          if (!senseTags.includes(tag)) {
+            senseTags.push(tag);
+          }
+        }
+        cleanedGloss = tagExtraction.cleanedGloss;
       }
 
       if (cleanedGloss.length === 0) {
@@ -368,6 +384,7 @@ export function transformCedictV2Entry(
         cleaned: cleanedGlosses,
         inlineAlternativePinyin: [...inlineAlternativePinyin],
         inlineClassifiers: [...inlineClassifiers],
+        senseTags,
       },
     ];
   });
@@ -403,8 +420,77 @@ export function transformCedictV2Entry(
       ...(transformedClassifiers.length === 0
         ? {}
         : { classifiers: transformedClassifiers }),
+      ...(glossPair.senseTags.length === 0
+        ? {}
+        : { tags: glossPair.senseTags }),
     };
   });
+}
+
+function getTagNameForMarker(marker: string): string | null {
+  const trimmed = marker.trim();
+  for (const { tag, re } of cedictSenseTagLookup) {
+    if (re.test(trimmed)) {
+      return tag;
+    }
+  }
+  return null;
+}
+
+/**
+ * Detects registered tag markers at the start or end of a gloss.
+ * Returns the semantic tag names (in text order) and the cleaned gloss with
+ * markers removed. Returns null when no tags are found.
+ */
+function extractSenseTagsFromGloss(
+  gloss: string,
+): { tags: string[]; cleanedGloss: string } | null {
+  const tags: string[] = [];
+  let cleaned = gloss;
+
+  const startMatch = cleaned.match(cedictSenseTagAtStartRe);
+  if (startMatch != null) {
+    const tag = getTagNameForMarker(startMatch[0]);
+    if (tag != null) {
+      tags.push(tag);
+      cleaned = cleaned.slice(startMatch[0].length).trim();
+    }
+  }
+
+  const endMatch = cleaned.match(cedictSenseTagAtEndRe);
+  if (endMatch != null) {
+    const tag = getTagNameForMarker(endMatch[0]);
+    if (tag != null) {
+      tags.push(tag);
+      cleaned = cleaned.slice(0, cleaned.length - endMatch[0].length).trim();
+    }
+  }
+
+  return tags.length === 0 ? null : { tags, cleanedGloss: cleaned };
+}
+
+/**
+ * Normalizes tag markers in a gloss for output in the .out file.
+ * Collects all tag markers anywhere in the gloss (in text order), removes
+ * them, and prepends them to the cleaned text.
+ */
+function normalizeTagsInGloss(gloss: string): string {
+  const markers: string[] = [];
+  const cleaned = gloss
+    .replace(cedictSenseTagGlobalRe, (match) => {
+      markers.push(match);
+      return ``;
+    })
+    .replaceAll(/\s{2,}/gu, ` `)
+    .trim();
+
+  if (markers.length === 0) {
+    return gloss;
+  }
+
+  return cleaned.length === 0
+    ? markers.join(` `)
+    : `${markers.join(` `)} ${cleaned}`;
 }
 
 function extractInlineClassifierAndCleanGloss(

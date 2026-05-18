@@ -508,7 +508,7 @@ describe(`transformCedictV2Entry`, () => {
     expect(parsed).not.toBeNull();
 
     const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`])))
+    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`, `tags`])))
       .toMatchInlineSnapshot(`
       [
         {
@@ -524,7 +524,10 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "glosses": [
             "a body of specialized knowledge",
-            "(fig.) any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
+            "any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
+          ],
+          "tags": [
+            "figurative",
           ],
         },
       ]
@@ -579,6 +582,185 @@ describe(`transformCedictV2Entry`, () => {
         },
       ]
     `);
+  });
+});
+
+describe(`transformCedictV2Entry tag extraction`, () => {
+  test(`extracts idiom tag from gloss ending with (idiom)`, () => {
+    const line = `應天承運 应天承运 [[ying4tian1cheng2yun4]] /lit. to respond to heaven and suit the times (idiom)/the Divine Right of kings/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "to respond to heaven and suit the times",
+          ],
+          "tags": [
+            "literary",
+            "idiom",
+          ],
+        },
+        {
+          "glosses": [
+            "the Divine Right of kings",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`extracts idiom tag from gloss starting with (idiom)`, () => {
+    const line = `示例 示例 [[shi4li4]] /(idiom) used as a proverb; second gloss/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "used as a proverb",
+            "second gloss",
+          ],
+          "tags": [
+            "idiom",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`extracts figurative tag from gloss starting with (fig.)`, () => {
+    const line = `示例 示例 [[shi4li4]] /(fig.) used in a figurative sense/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "used in a figurative sense",
+          ],
+          "tags": [
+            "figurative",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`extracts literary tag from gloss starting with lit.`, () => {
+    const line = `示例 示例 [[shi4li4]] /lit. to walk on clouds/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "to walk on clouds",
+          ],
+          "tags": [
+            "literary",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`does not extract literary tag when lit. appears at end of gloss`, () => {
+    const line = `示例 示例 [[shi4li4]] /taken lit./`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "taken lit.",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`accumulates tags from multiple glosses in text order`, () => {
+    const line = `示例 示例 [[shi4li4]] /example (idiom); (fig.) figurative use/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "example",
+            "figurative use",
+          ],
+          "tags": [
+            "idiom",
+            "figurative",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`drops gloss that consists solely of a tag marker`, () => {
+    const line = `示例 示例 [[shi4li4]] /normal gloss; (idiom)/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "normal gloss",
+          ],
+          "tags": [
+            "idiom",
+          ],
+        },
+      ]
+    `);
+  });
+});
+
+describe(`applyCedictV2EditsToText tag normalization`, () => {
+  test(`moves tag from end of gloss to start in .out output`, () => {
+    const input = `示例 示例 [[shi4li4]] /example text (idiom); more text/`;
+    const output = applyCedictV2EditsToText(input);
+    expect(output).toBe(
+      `示例 示例 [[shi4li4]] /(idiom) example text; more text/`,
+    );
+  });
+
+  test(`moves tag from middle of gloss to start in .out output`, () => {
+    const input = `示例 示例 [[shi4li4]] /lit. to do something (idiom); to achieve a result/`;
+    const output = applyCedictV2EditsToText(input);
+    expect(output).toBe(
+      `示例 示例 [[shi4li4]] /lit. (idiom) to do something; to achieve a result/`,
+    );
+  });
+
+  test(`preserves gloss without tags unchanged`, () => {
+    const input = `示例 示例 [[shi4li4]] /plain gloss/`;
+    const output = applyCedictV2EditsToText(input);
+    expect(output).toBe(`示例 示例 [[shi4li4]] /plain gloss/`);
   });
 });
 
