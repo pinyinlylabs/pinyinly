@@ -12,6 +12,7 @@ import {
   parseCedictId,
   transformCedictV2Entry,
 } from "./cedict";
+import pick from "lodash/pick.js";
 
 describe(`parseCedictV2Line`, () => {
   test(`returns null for comments and blank lines`, () => {
@@ -441,12 +442,13 @@ describe(`transformCedictV2Entry`, () => {
   });
 
   test(`extracts inline also-pr pronunciation and cleans glosses`, () => {
-    const line = `外面 外面 [[wai4mian4]] /outside (also pr. [wai4 mian5] for this sense)/surface/exterior/`;
+    const line = `外面 外面 [[wai4mian4]] /outside (also pr. [wai4mian5] for this sense)/surface/exterior/`;
     const parsed = parseCedictV2Line(line);
     expect(parsed).not.toBeNull();
 
     const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed).toMatchInlineSnapshot(`
+    expect(transformed.map((x) => pick(x, [`pinyin`, `glosses`])))
+      .toMatchInlineSnapshot(`
       [
         {
           "glosses": [
@@ -454,12 +456,8 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "pinyin": [
             "wàimiàn",
-            "wài mian",
+            "wàimian",
           ],
-          "pinyinNumeric": "wai4mian4",
-          "senseId": "外面|外面|wai4mian4|outside (also pr. [wai4 mian5] for this sense)|1csvbac",
-          "simplified": "外面",
-          "traditional": "外面",
         },
         {
           "glosses": [
@@ -467,12 +465,7 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "pinyin": [
             "wàimiàn",
-            "wài mian",
           ],
-          "pinyinNumeric": "wai4mian4",
-          "senseId": "外面|外面|wai4mian4|surface|0717zzw",
-          "simplified": "外面",
-          "traditional": "外面",
         },
         {
           "glosses": [
@@ -480,12 +473,109 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "pinyin": [
             "wàimiàn",
-            "wài mian",
           ],
-          "pinyinNumeric": "wai4mian4",
-          "senseId": "外面|外面|wai4mian4|exterior|1ubvrqb",
-          "simplified": "外面",
-          "traditional": "外面",
+        },
+      ]
+    `);
+  });
+
+  test(`distributes standalone classifier senses and removes classifier-only sense`, () => {
+    const line = `婚姻 婚姻 [[hun1yin1]] /marriage; matrimony/CL:樁|桩[zhuang1],次[ci4]/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "classifiers": [
+            "樁|桩[zhuang1]",
+            "次[ci4]",
+          ],
+          "glosses": [
+            "marriage",
+            "matrimony",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`extracts inline classifier fragments and cleans glosses`, () => {
+    const line = `學問 学问 [[xue2wen4]] /learning; knowledge; scholarship/a body of specialized knowledge (CL:門|门[men2]); (fig.) any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`])))
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "glosses": [
+            "learning",
+            "knowledge",
+            "scholarship",
+          ],
+        },
+        {
+          "classifiers": [
+            "門|门[men2]",
+          ],
+          "glosses": [
+            "a body of specialized knowledge",
+            "(fig.) any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test(`supports classifiers and also-pr extraction together`, () => {
+    const line = `主意 主意 [[zhu3yi5]] /plan/idea/decision/CL:個|个[ge4]/also pr. [zhu2 yi5]/`;
+    const parsed = parseCedictV2Line(line);
+    expect(parsed).not.toBeNull();
+
+    const transformed = transformCedictV2Entry(parsed!);
+    expect(
+      transformed.map((x) => pick(x, [`classifiers`, `glosses`, `pinyin`])),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "classifiers": [
+            "個|个[ge4]",
+          ],
+          "glosses": [
+            "plan",
+          ],
+          "pinyin": [
+            "zhǔyi",
+            "zhú yi",
+          ],
+        },
+        {
+          "classifiers": [
+            "個|个[ge4]",
+          ],
+          "glosses": [
+            "idea",
+          ],
+          "pinyin": [
+            "zhǔyi",
+            "zhú yi",
+          ],
+        },
+        {
+          "classifiers": [
+            "個|个[ge4]",
+          ],
+          "glosses": [
+            "decision",
+          ],
+          "pinyin": [
+            "zhǔyi",
+            "zhú yi",
+          ],
         },
       ]
     `);

@@ -35,6 +35,7 @@ export interface TransformedCedictV2SenseType {
   pinyinNumeric: PinyinNumericText;
   pinyin: PinyinText[];
   glosses: string[];
+  classifiers?: string[];
 }
 
 export interface ParseCedictV2LineOptionsType {
@@ -300,74 +301,179 @@ export function applyCedictV2EditsToText(
 export function transformCedictV2Entry(
   entry: CedictV2EntryType,
 ): TransformedCedictV2SenseType[] {
-  const alternativePinyin = new Set<string>();
+  const standaloneAlternativePinyin = new Set<string>();
+  const standaloneClassifiers = new Set<string>();
 
-  const transformedSenses = entry.senses.flatMap(
-    (sense): Array<{ original: string[]; cleaned: string[] }> => {
-      const processedGlosses = sense.glosses.flatMap(
-        (gloss): Array<{ original: string; cleaned: string } | null> => {
-          // First try inline extraction (e.g., "outside (also pr. [wai4 mian5] for this sense)")
-          const inlineExtraction =
-            extractInlineAlsoPronunciationAndCleanGloss(gloss);
-          if (inlineExtraction != null) {
-            for (const alternative of inlineExtraction.alternativePinyin) {
-              alternativePinyin.add(alternative);
-            }
-            return [
-              { original: gloss, cleaned: inlineExtraction.cleanedGloss },
-            ];
-          }
+  const transformedSenses = entry.senses.flatMap((sense) => {
+    const inlineAlternativePinyin = new Set<string>();
+    const inlineClassifiers = new Set<string>();
+    const originalGlosses: string[] = [];
+    const cleanedGlosses: string[] = [];
 
-          // Then try standalone extraction (e.g., "also pr. [san1 jin1]" as entire sense)
-          const alternativePinyinForGloss =
-            extractAlsoPronunciationSensePinyin(gloss);
-          if (alternativePinyinForGloss == null) {
-            return [{ original: gloss, cleaned: gloss }];
-          }
+    for (const gloss of sense.glosses) {
+      let cleanedGloss = gloss;
 
-          for (const alternative of alternativePinyinForGloss) {
-            alternativePinyin.add(alternative);
-          }
-
-          return [];
-        },
-      );
-
-      if (processedGlosses.length === 0) {
-        return [];
+      const inlineClassifierExtraction =
+        extractInlineClassifierAndCleanGloss(cleanedGloss);
+      if (inlineClassifierExtraction != null) {
+        for (const classifier of inlineClassifierExtraction.classifiers) {
+          inlineClassifiers.add(classifier);
+        }
+        cleanedGloss = inlineClassifierExtraction.cleanedGloss;
       }
 
-      const originalGlosses = processedGlosses
-        .map((g) => g?.original)
-        .filter((g): g is string => g != null);
-      const cleanedGlosses = processedGlosses
-        .map((g) => g?.cleaned)
-        .filter((g): g is string => g != null);
+      // First try inline extraction (e.g., "outside (also pr. [wai4 mian5] for this sense)")
+      const inlineExtraction =
+        extractInlineAlsoPronunciationAndCleanGloss(cleanedGloss);
+      if (inlineExtraction != null) {
+        for (const alternative of inlineExtraction.alternativePinyin) {
+          inlineAlternativePinyin.add(alternative);
+        }
+        cleanedGloss = inlineExtraction.cleanedGloss;
+      }
 
-      return [{ original: originalGlosses, cleaned: cleanedGlosses }];
-    },
+      if (cleanedGloss.length === 0) {
+        continue;
+      }
+
+      const classifiersForGloss = extractClassifierSenseRefs(cleanedGloss);
+      if (classifiersForGloss != null) {
+        for (const classifier of classifiersForGloss) {
+          standaloneClassifiers.add(classifier);
+        }
+        continue;
+      }
+
+      // Then try standalone extraction (e.g., "also pr. [san1 jin1]" as entire sense)
+      const alternativePinyinForGloss =
+        extractAlsoPronunciationSensePinyin(cleanedGloss);
+      if (alternativePinyinForGloss != null) {
+        for (const alternative of alternativePinyinForGloss) {
+          standaloneAlternativePinyin.add(alternative);
+        }
+        continue;
+      }
+
+      originalGlosses.push(gloss);
+      cleanedGlosses.push(cleanedGloss);
+    }
+
+    if (cleanedGlosses.length === 0) {
+      return [];
+    }
+
+    return [
+      {
+        original: originalGlosses,
+        cleaned: cleanedGlosses,
+        inlineAlternativePinyin: [...inlineAlternativePinyin],
+        inlineClassifiers: [...inlineClassifiers],
+      },
+    ];
+  });
+
+  return transformedSenses.map((glossPair) => {
+    const transformedPinyin = [
+      normalizePinyinText(entry.pinyin),
+      ...[...standaloneAlternativePinyin].map((alternative) =>
+        normalizePinyinText(alternative),
+      ),
+      ...glossPair.inlineAlternativePinyin.map((alternative) =>
+        normalizePinyinText(alternative),
+      ),
+    ].filter(arrayFilterUnique());
+
+    const transformedClassifiers = [
+      ...standaloneClassifiers,
+      ...glossPair.inlineClassifiers,
+    ].filter(arrayFilterUnique());
+
+    return {
+      senseId: buildCedictSenseId(
+        entry.traditional,
+        entry.simplified,
+        entry.pinyin,
+        glossPair.original,
+      ),
+      traditional: entry.traditional,
+      simplified: entry.simplified,
+      pinyinNumeric: entry.pinyin,
+      pinyin: transformedPinyin,
+      glosses: glossPair.cleaned,
+      ...(transformedClassifiers.length === 0
+        ? {}
+        : { classifiers: transformedClassifiers }),
+    };
+  });
+}
+
+function extractInlineClassifierAndCleanGloss(
+  gloss: string,
+): { cleanedGloss: string; classifiers: string[] } | null {
+  const matches = [...gloss.matchAll(/\(\s*CL:\s*(?<refs>[^)]+)\)\s*/giu)];
+  if (matches.length === 0) {
+    return null;
+  }
+
+  const classifiers = matches.flatMap((match) =>
+    parseCedictClassifierRefs(match.groups?.[`refs`]),
   );
+  if (classifiers.length === 0) {
+    return null;
+  }
 
-  const transformedPinyin = [
-    normalizePinyinText(entry.pinyin),
-    ...[...alternativePinyin].map((alternative) =>
-      normalizePinyinText(alternative),
-    ),
-  ].filter(arrayFilterUnique());
+  const cleanedGloss = gloss
+    .replaceAll(/\(\s*CL:\s*[^)]+\)\s*/giu, ` `)
+    .replaceAll(/\s+/gu, ` `)
+    .replaceAll(/\s+([,.;:!?])/gu, `$1`)
+    .trim();
 
-  return transformedSenses.map((glossPair) => ({
-    senseId: buildCedictSenseId(
-      entry.traditional,
-      entry.simplified,
-      entry.pinyin,
-      glossPair.original,
-    ),
-    traditional: entry.traditional,
-    simplified: entry.simplified,
-    pinyinNumeric: entry.pinyin,
-    pinyin: transformedPinyin,
-    glosses: glossPair.cleaned,
-  }));
+  return {
+    cleanedGloss,
+    classifiers,
+  };
+}
+
+function extractClassifierSenseRefs(sense: string): string[] | null {
+  const directMatch = sense.match(/^\s*CL:\s*(?<refs>.+?)\s*$/iu);
+  if (directMatch != null) {
+    const refs = parseCedictClassifierRefs(directMatch.groups?.[`refs`]);
+    if (refs.length > 0) {
+      return refs;
+    }
+  }
+
+  const wrappedMatch = sense.match(/^\s*\(\s*CL:\s*(?<refs>[^)]+)\s*\)\s*$/iu);
+  if (wrappedMatch == null) {
+    return null;
+  }
+
+  const refs = parseCedictClassifierRefs(wrappedMatch.groups?.[`refs`]);
+  return refs.length === 0 ? null : refs;
+}
+
+function parseCedictClassifierRefs(rawRefs: string | undefined): string[] {
+  if (rawRefs == null) {
+    return [];
+  }
+
+  return rawRefs
+    .split(`,`)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+    .filter((item) => {
+      const match = item.match(/^(?<word>[^,\s]+?)\[(?<pinyin>[^\]]+)\]$/u);
+      if (match == null) {
+        return false;
+      }
+
+      const word = match.groups?.[`word`];
+      if (word == null || word.length === 0) {
+        return false;
+      }
+
+      return word.split(`|`).every((part) => part.length > 0);
+    });
 }
 
 function extractInlineAlsoPronunciationAndCleanGloss(
