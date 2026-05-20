@@ -1,5 +1,6 @@
 import type { PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
+import { regExpEscape } from "#util/regExp.js";
 import {
   arrayFilterUnique,
   mapArrayAdd,
@@ -23,9 +24,7 @@ export interface CedictV2EntryType {
   traditional: string;
   simplified: string;
   pinyin: PinyinNumericText;
-  senses: {
-    glosses: string[];
-  }[];
+  senses: string[];
 }
 
 export interface TransformedCedictV2SenseType {
@@ -63,58 +62,337 @@ export interface CedictV2EditsType {
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]\s+\/(.*)\/$/u;
 
-interface CedictSenseTagDefinitionType {
-  tag: string;
-  /** Raw regex string matching the tag marker in a gloss (e.g. `\\(idiom\\)`). */
-  pattern: string;
-  /**
-   * Which position(s) in a gloss to scan for this tag marker.
-   * Defaults to `'both'`.
-   */
-  position?: `start` | `end` | `both`;
-}
-
-/**
- * Registry of sense tag patterns. Add entries here to support new tag markers.
- * Patterns are matched at the start or end of individual gloss strings.
- */
-const CEDICT_SENSE_TAG_DEFINITIONS: readonly CedictSenseTagDefinitionType[] = [
-  { tag: `idiom`, pattern: `\\(idiom\\)` },
-  { tag: `figurative`, pattern: `\\(fig\\.\\)` },
-  { tag: `literary`, pattern: `lit\\.`, position: `start` },
+const domainTags = [
+  `ACG`,
+  `accounting`,
+  `acoustics`,
+  `acrobatics`,
+  `aerospace`,
+  `agriculture`,
+  `anatomy`,
+  `angling`,
+  `animals`,
+  `archaeology`,
+  `archeology`,
+  `archery`,
+  `architecture`,
+  `astronautics`,
+  `astronomy`,
+  `athletics`,
+  `automotive`,
+  `aviation`,
+  `ballet`,
+  `banking`,
+  `baseball`,
+  `basketball`,
+  `basketwork`,
+  `BDSM`,
+  `beer`,
+  `biochemistry`,
+  `biogeography`,
+  `biology`,
+  `biotechnology`,
+  `bird`,
+  `botany`,
+  `boxing`,
+  `brand`,
+  `broadcasting`,
+  `Buddhism`,
+  `Buddhist`,
+  `business`,
+  `calligraphy`,
+  `Cant.`,
+  `Cantonese`,
+  `cartography`,
+  `Catholicism`,
+  `chemical`,
+  `chemistry`,
+  `Chinese`,
+  `Christianity`,
+  `cinema`,
+  `cinematography`,
+  `commerce`,
+  `communications`,
+  `computer`,
+  `computing`,
+  `Confucianism`,
+  `constellation`,
+  `cookery`,
+  `cooking`,
+  `cosmetics`,
+  `cryptography`,
+  `cuisine`,
+  `currency`,
+  `Daoism`,
+  `dating`,
+  `deferential`,
+  `dentistry`,
+  `dinosaur`,
+  `divination`,
+  `diving`,
+  `ecology`,
+  `economics`,
+  `education`,
+  `electricity`,
+  `electromagnetism`,
+  `electronics`,
+  `embryology`,
+  `engineering`,
+  `entomology`,
+  `epidemiology`,
+  `expletive`,
+  `fandom`,
+  `fashion`,
+  `fencing`,
+  `filmmaking`,
+  `finance`,
+  `fitness`,
+  `flying`,
+  `food`,
+  `football`,
+  `forestry`,
+  `gaming`,
+  `genetic`,
+  `genetics`,
+  `geography`,
+  `geology`,
+  `geometry`,
+  `geopolitics`,
+  `geotectonics`,
+  `golf`,
+  `government`,
+  `grammar`,
+  `gymnastics`,
+  `hairstyle`,
+  `historical`,
+  `HK`,
+  `Hong Kong`,
+  `horticulture`,
+  `humor`,
+  `humorous`,
+  `hydrology`,
+  `ichthyology`,
+  `immunology`,
+  `information`,
+  `Internet slang`,
+  `Islam`,
+  `Japan`,
+  `journalism`,
+  `law`,
+  `lexicography`,
+  `linguistics`,
+  `logistics`,
+  `mahjong`,
+  `Malaysia`,
+  `mammology`,
+  `manufacturing`,
+  `Maoism`,
+  `marketing`,
+  `math`,
+  `math.`,
+  `mathematical`,
+  `measurement`,
+  `mechanics`,
+  `med`,
+  `med.`,
+  `medical`,
+  `medicine`,
+  `metallurgy`,
+  `metalwork`,
+  `meteorology`,
+  `microbiology`,
+  `military`,
+  `mineralogy`,
+  `mining`,
+  `Mohism`,
+  `music`,
+  `mycology`,
+  `mythology`,
+  `neologism`,
+  `neuroscience`,
+  `obstetrics`,
+  `oceanography`,
+  `opera`,
+  `optics`,
+  `ornithology`,
+  `orthodontics`,
+  `orthography`,
+  `painting`,
+  `perfumery`,
+  `petrochemistry`,
+  `pharm.`,
+  `pharmacology`,
+  `philately`,
+  `philosophy`,
+  `phonetic`,
+  `phonetics`,
+  `phonology`,
+  `photography`,
+  `physics`,
+  `physiognomy`,
+  `physiology`,
+  `political`,
+  `politically`,
+  `politics`,
+  `PRC`,
+  `printing`,
+  `psychological`,
+  `psychology`,
+  `publishing`,
+  `radiography`,
+  `religion`,
+  `religious`,
+  `retail`,
+  `retailer`,
+  `retailing`,
+  `rocketry`,
+  `science`,
+  `seafood`,
+  `seismology`,
+  `semantics`,
+  `Shanghainese`,
+  `Shinto`,
+  `Singapore`,
+  `soccer`,
+  `software`,
+  `sports`,
+  `sport`,
+  `stationery`,
+  `statistics`,
+  `surname`,
+  `surveying`,
+  `Taiwan`,
+  `Taoism`,
+  `TCM`,
+  `technology`,
+  `telecommunications`,
+  `telephony`,
+  `textiles`,
+  `theater`,
+  `thermodynamics`,
+  `time`,
+  `transportation`,
+  `Tw`,
+  `typesetting`,
+  `typography`,
+  `vulgar`,
+  `watchmaking`,
+  `weaving`,
+  `zoology`,
 ];
 
-const cedictSenseTagLookup: ReadonlyArray<{ tag: string; re: RegExp }> =
-  CEDICT_SENSE_TAG_DEFINITIONS.map((d) => ({
-    tag: d.tag,
-    re: new RegExp(`^(?:${d.pattern})$`, `iu`),
-  }));
+const genericTags = [
+  `abbr.`,
+  `adj.`,
+  `adjective`,
+  `ancient`,
+  `arch.`,
+  `archaic`,
+  `article`,
+  `attributive`,
+  `bound form`,
+  `classical`,
+  `classifier`,
+  `coll.`,
+  `colloquial`,
+  `color`,
+  `conjunction`,
+  `contemporary`,
+  `courteous`,
+  `dated`,
+  `derog.`,
+  `derogatory`,
+  `dialect`,
+  `disparaging`,
+  `euphemism`,
+  `fig.`,
+  `figuratively`,
+  `formal`,
+  `grammatical`,
+  `greeting`,
+  `honorific`,
+  `idiom`,
+  `imperative`,
+  `informal`,
+  `insult`,
+  `intensifier`,
+  `interj`,
+  `interj.`,
+  `interjection`,
+  `intransitive`,
+  `jocular`,
+  `jokingly`,
+  `lit.`,
+  `literary`,
+  `loanword`,
+  `maxim`,
+  `metaphorical`,
+  `metonym`,
+  `modern`,
+  `name`,
+  `offensive`,
+  `old`,
+  `onom.`,
+  `orig.`,
+  `originally`,
+  `pejorative`,
+  `polite`,
+  `prefix`,
+  `pronoun`,
+  `proverb`,
+  `punctuation`,
+  `rare`,
+  `reduplicated`,
+  `respectful`,
+  `rhetorical`,
+  `rude`,
+  `saying`,
+  `slang`,
+  `specifier`,
+  `suffix`,
+  `technical`,
+  `verb`,
+];
 
-const cedictSenseTagStartPatterns = CEDICT_SENSE_TAG_DEFINITIONS.filter(
-  (d) => (d.position ?? `both`) !== `end`,
-).map((d) => `(?:${d.pattern})`);
+const tagAliases: Record<string, string> = {
+  [`adj.`]: `adjective`,
+  [`arch.`]: `archaic`,
+  [`Cant.`]: `Cantonese`,
+  [`derog.`]: `derogatory`,
+  [`humorous`]: `humor`,
+  [`Hong Kong`]: `HK`,
+  [`math`]: `math.`,
+  [`mathematical`]: `math.`,
+  [`med`]: `medical`,
+  [`med.`]: `medical`,
+  [`medicine`]: `medical`,
+  [`originally`]: `orig.`,
+  [`pharm.`]: `pharmacology`,
+  [`political`]: `politics`,
+  [`politically`]: `politics`,
+  [`religious`]: `religion`,
+  [`sports`]: `sport`,
+  [`interj`]: `interj.`,
+  [`interjection`]: `interj.`,
+  [`literary`]: `lit.`,
+  [`colloquial`]: `coll.`,
+  [`figuratively`]: `fig.`,
+};
 
-const cedictSenseTagEndPatterns = CEDICT_SENSE_TAG_DEFINITIONS.filter(
-  (d) => (d.position ?? `both`) !== `start`,
-).map((d) => `(?:${d.pattern})`);
+const genericAbbrTags = genericTags.filter((t) => t.endsWith(`.`));
 
-// Global: finds all tag markers anywhere in a string
-const cedictSenseTagGlobalRe = new RegExp(
-  CEDICT_SENSE_TAG_DEFINITIONS.map((d) => `(?:${d.pattern})`).join(`|`),
-  `igu`,
-);
+const tagsPatterns =
+  `(?:` +
+  // domains in parentheses, e.g. "(sports)"
+  `\\((?<domain>${domainTags.map((d) => regExpEscape(d)).join(`|`)})\\)|` +
+  // tags in parentheses, e.g. "(sports)", "(coll.)", "(idiom)"
+  `\\((?<tag>${genericTags.map((t) => regExpEscape(t)).join(`|`)})\\)|` +
+  // abbr tags, e.g. onom., coll., fig.
+  `(?<tag>${genericAbbrTags.map((t) => regExpEscape(t)).join(`|`)})` +
+  `)`;
 
-// Non-global: detects a tag marker at the start of a gloss
-const cedictSenseTagAtStartRe = new RegExp(
-  `^(?:${cedictSenseTagStartPatterns.join(`|`)})\\s*`,
-  `iu`,
-);
-
-// Non-global: detects a tag marker at the end of a gloss
-const cedictSenseTagAtEndRe = new RegExp(
-  `\\s*(?:${cedictSenseTagEndPatterns.join(`|`)})$`,
-  `iu`,
-);
+const tagsAtStartRe = new RegExp(`^(?:${tagsPatterns})\\s*`, `u`);
+const tagsAtEndRe = new RegExp(`\\s*(?:${tagsPatterns})$`, `u`);
 
 /**
  * Parses a single CC-CEDICT v2 line.
@@ -175,18 +453,7 @@ export function parseCedictV2Line(
     senses = applyCedictEntryEdits(senses, entryEdits, options);
   }
 
-  const parsedSenses = senses.map((sense) => {
-    const glosses = sense
-      .split(`;`)
-      .map((gloss) => gloss.trim())
-      .filter((gloss) => gloss.length > 0);
-
-    return {
-      glosses: glosses,
-    };
-  });
-
-  if (parsedSenses.length === 0) {
+  if (senses.length === 0) {
     if (!strict) {
       return null;
     }
@@ -198,7 +465,7 @@ export function parseCedictV2Line(
     traditional,
     simplified,
     pinyin: pinyin as PinyinNumericText,
-    senses: parsedSenses,
+    senses,
   };
 }
 
@@ -212,7 +479,7 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
     const lineNumber = i + 1;
     const trimmed = currentLine?.trim() ?? ``;
 
-    if (trimmed.length === 0) {
+    if (trimmed.length === 0 || trimmed.startsWith(`#`)) {
       i += 1;
       continue;
     }
@@ -296,11 +563,120 @@ export function applyCedictV2EditsToText(
 }
 
 function serializeCedictV2Entry(entry: CedictV2EntryType): string {
-  const senses = entry.senses.map((sense) =>
-    sense.glosses.map((gloss) => normalizeTagsInGloss(gloss.trim())).join(`; `),
-  );
+  const senses = entry.senses
+    .map((sense) => serializeCedictV2Sense(parseCedictV2Sense(sense)))
+    .filter((sense): sense is string => sense != null && sense.length > 0);
 
   return `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] /${senses.join(`/`)}/`;
+}
+
+interface ParsedCedictSenseGlossType {
+  originalGloss: string;
+  cleanedGloss: string;
+}
+
+interface ParsedCedictSenseType {
+  tags: string[];
+  glosses: ParsedCedictSenseGlossType[];
+  inlineClassifiers: string[];
+  inlineAlternativePinyin: string[];
+  standaloneClassifiers: string[];
+}
+
+export function parseCedictV2Sense(
+  sense: CedictV2EntryType[`senses`][number],
+): ParsedCedictSenseType {
+  const tags: string[] = [];
+  const glosses: ParsedCedictSenseGlossType[] = [];
+  const inlineClassifiers: string[] = [];
+  const inlineAlternativePinyin: string[] = [];
+  const standaloneClassifiers: string[] = [];
+
+  for (const gloss of sense
+    .split(`;`)
+    .map((gloss) => gloss.trim())
+    .filter((gloss) => gloss.length > 0)) {
+    let cleanedGloss = gloss;
+
+    const tagExtraction = extractSenseTagsFromGloss(cleanedGloss);
+    if (tagExtraction != null) {
+      for (const tag of tagExtraction.tags) {
+        if (!tags.includes(tag)) {
+          tags.push(tag);
+        }
+      }
+      cleanedGloss = tagExtraction.cleanedGloss;
+    }
+
+    const inlineClassifierExtraction =
+      extractInlineClassifierAndCleanGloss(cleanedGloss);
+    if (inlineClassifierExtraction != null) {
+      for (const classifier of inlineClassifierExtraction.classifiers) {
+        if (!inlineClassifiers.includes(classifier)) {
+          inlineClassifiers.push(classifier);
+        }
+      }
+      cleanedGloss = inlineClassifierExtraction.cleanedGloss;
+    }
+
+    const inlineAlternativePinyinExtraction =
+      extractInlineAlsoPronunciationAndCleanGloss(cleanedGloss);
+    if (inlineAlternativePinyinExtraction != null) {
+      for (const alternative of inlineAlternativePinyinExtraction.alternativePinyin) {
+        if (!inlineAlternativePinyin.includes(alternative)) {
+          inlineAlternativePinyin.push(alternative);
+        }
+      }
+      cleanedGloss = inlineAlternativePinyinExtraction.cleanedGloss;
+    }
+
+    const classifiersForGloss = extractClassifierSenseRefs(cleanedGloss);
+    if (classifiersForGloss != null) {
+      for (const classifier of classifiersForGloss) {
+        if (!standaloneClassifiers.includes(classifier)) {
+          standaloneClassifiers.push(classifier);
+        }
+      }
+      continue;
+    }
+
+    if (cleanedGloss.length === 0) {
+      continue;
+    }
+
+    glosses.push({
+      originalGloss: gloss,
+      cleanedGloss,
+    });
+  }
+
+  return {
+    tags,
+    glosses,
+    inlineClassifiers,
+    inlineAlternativePinyin,
+    standaloneClassifiers,
+  };
+}
+
+export function serializeCedictV2Sense(
+  parsedSense: ParsedCedictSenseType,
+): string | null {
+  const tagsPrefix = parsedSense.tags.map((tag) => `{${tag}}`).join(` `);
+
+  if (parsedSense.glosses.length === 0) {
+    return tagsPrefix.length === 0 ? null : tagsPrefix;
+  }
+
+  const serializedGlosses = parsedSense.glosses.map((x) => x.cleanedGloss);
+  if (tagsPrefix.length > 0) {
+    const firstGloss = serializedGlosses[0];
+    if (firstGloss != null) {
+      serializedGlosses[0] = `${tagsPrefix} ${firstGloss}`;
+    }
+  }
+
+  return serializedGlosses.join(`; `);
 }
 
 export function transformCedictV2Entry(
@@ -310,53 +686,22 @@ export function transformCedictV2Entry(
   const standaloneClassifiers = new Set<string>();
 
   const transformedSenses = entry.senses.flatMap((sense) => {
-    const inlineAlternativePinyin = new Set<string>();
-    const inlineClassifiers = new Set<string>();
-    const senseTags: string[] = [];
+    const parsedSense = parseCedictV2Sense(sense);
+    for (const classifier of parsedSense.standaloneClassifiers) {
+      standaloneClassifiers.add(classifier);
+    }
+    const inlineAlternativePinyin = new Set<string>(
+      parsedSense.inlineAlternativePinyin,
+    );
+    const inlineClassifiers = new Set<string>(parsedSense.inlineClassifiers);
+    const senseTags: string[] = [...parsedSense.tags];
     const originalGlosses: string[] = [];
     const cleanedGlosses: string[] = [];
 
-    for (const gloss of sense.glosses) {
-      let cleanedGloss = gloss;
-
-      const inlineClassifierExtraction =
-        extractInlineClassifierAndCleanGloss(cleanedGloss);
-      if (inlineClassifierExtraction != null) {
-        for (const classifier of inlineClassifierExtraction.classifiers) {
-          inlineClassifiers.add(classifier);
-        }
-        cleanedGloss = inlineClassifierExtraction.cleanedGloss;
-      }
-
-      // First try inline extraction (e.g., "outside (also pr. [wai4 mian5] for this sense)")
-      const inlineExtraction =
-        extractInlineAlsoPronunciationAndCleanGloss(cleanedGloss);
-      if (inlineExtraction != null) {
-        for (const alternative of inlineExtraction.alternativePinyin) {
-          inlineAlternativePinyin.add(alternative);
-        }
-        cleanedGloss = inlineExtraction.cleanedGloss;
-      }
-
-      const tagExtraction = extractSenseTagsFromGloss(cleanedGloss);
-      if (tagExtraction != null) {
-        for (const tag of tagExtraction.tags) {
-          if (!senseTags.includes(tag)) {
-            senseTags.push(tag);
-          }
-        }
-        cleanedGloss = tagExtraction.cleanedGloss;
-      }
+    for (const parsedGloss of parsedSense.glosses) {
+      const cleanedGloss = parsedGloss.cleanedGloss;
 
       if (cleanedGloss.length === 0) {
-        continue;
-      }
-
-      const classifiersForGloss = extractClassifierSenseRefs(cleanedGloss);
-      if (classifiersForGloss != null) {
-        for (const classifier of classifiersForGloss) {
-          standaloneClassifiers.add(classifier);
-        }
         continue;
       }
 
@@ -370,7 +715,7 @@ export function transformCedictV2Entry(
         continue;
       }
 
-      originalGlosses.push(gloss);
+      originalGlosses.push(parsedGloss.originalGloss);
       cleanedGlosses.push(cleanedGloss);
     }
 
@@ -427,16 +772,6 @@ export function transformCedictV2Entry(
   });
 }
 
-function getTagNameForMarker(marker: string): string | null {
-  const trimmed = marker.trim();
-  for (const { tag, re } of cedictSenseTagLookup) {
-    if (re.test(trimmed)) {
-      return tag;
-    }
-  }
-  return null;
-}
-
 /**
  * Detects registered tag markers at the start or end of a gloss.
  * Returns the semantic tag names (in text order) and the cleaned gloss with
@@ -448,49 +783,71 @@ function extractSenseTagsFromGloss(
   const tags: string[] = [];
   let cleaned = gloss;
 
-  const startMatch = cleaned.match(cedictSenseTagAtStartRe);
-  if (startMatch != null) {
-    const tag = getTagNameForMarker(startMatch[0]);
-    if (tag != null) {
-      tags.push(tag);
-      cleaned = cleaned.slice(startMatch[0].length).trim();
+  for (;;) {
+    const startMatch = cleaned.match(tagsAtStartRe);
+    if (startMatch == null) {
+      break;
     }
+
+    let tag;
+
+    if (startMatch.groups?.[`tag`] != null) {
+      tag = startMatch.groups[`tag`];
+      tag = tagAliases[tag] ?? tag;
+    }
+
+    if (startMatch.groups?.[`domain`] != null) {
+      tag = startMatch.groups[`domain`];
+      tag = tagAliases[tag] ?? tag;
+      tag = `D:${tag}`;
+    }
+
+    invariant(
+      tag != null,
+      `tag was null, startMatch = '%s', cleaned = '%s'`,
+      startMatch,
+      cleaned,
+    );
+
+    if (!tags.includes(tag)) {
+      tags.push(tag);
+    }
+
+    cleaned = cleaned.slice(startMatch[0].length).trim();
   }
 
-  const endMatch = cleaned.match(cedictSenseTagAtEndRe);
-  if (endMatch != null) {
-    const tag = getTagNameForMarker(endMatch[0]);
-    if (tag != null) {
-      tags.push(tag);
-      cleaned = cleaned.slice(0, cleaned.length - endMatch[0].length).trim();
+  for (;;) {
+    const endMatch = cleaned.match(tagsAtEndRe);
+    if (endMatch == null) {
+      break;
     }
+    let tag;
+    if (endMatch.groups?.[`tag`] != null) {
+      tag = endMatch.groups[`tag`];
+      tag = tagAliases[tag] ?? tag;
+    }
+
+    if (endMatch.groups?.[`domain`] != null) {
+      tag = endMatch.groups[`domain`];
+      tag = tagAliases[tag] ?? tag;
+      tag = `D:${tag}`;
+    }
+
+    invariant(
+      tag != null,
+      `tag was null, endMatch = '%s', cleaned = '%s'`,
+      endMatch,
+      cleaned,
+    );
+
+    if (!tags.includes(tag)) {
+      tags.push(tag);
+    }
+
+    cleaned = cleaned.slice(0, cleaned.length - endMatch[0].length).trim();
   }
 
   return tags.length === 0 ? null : { tags, cleanedGloss: cleaned };
-}
-
-/**
- * Normalizes tag markers in a gloss for output in the .out file.
- * Collects all tag markers anywhere in the gloss (in text order), removes
- * them, and prepends them to the cleaned text.
- */
-function normalizeTagsInGloss(gloss: string): string {
-  const markers: string[] = [];
-  const cleaned = gloss
-    .replace(cedictSenseTagGlobalRe, (match) => {
-      markers.push(match);
-      return ``;
-    })
-    .replaceAll(/\s{2,}/gu, ` `)
-    .trim();
-
-  if (markers.length === 0) {
-    return gloss;
-  }
-
-  return cleaned.length === 0
-    ? markers.join(` `)
-    : `${markers.join(` `)} ${cleaned}`;
 }
 
 function extractInlineClassifierAndCleanGloss(

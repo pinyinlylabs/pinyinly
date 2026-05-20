@@ -1689,7 +1689,7 @@
   ["忽视:neglect",{"cedict":"忽視|忽视|hu1shi4|to neglect|0ljx9fw","freq":0.00019920318725099602,"gloss":["to neglect","to overlook","to disregard","to ignore"],"hsk":"4","pinyin":["hūshì"]}],
   ["怀念:miss",{"cedict":"懷念|怀念|huai2nian4|to cherish the memory of|01h4jl7","freq":0.0002726281352235551,"gloss":["to cherish the memory of","to think of","to reminisce"],"hsk":"4","pinyin":["huáiniàn"]}],
   ["怀疑:doubt",{"cedict":"懷疑|怀疑|huai2yi2|to doubt (sth)|192l4b0","freq":0.0005672149744753262,"gloss":["to doubt (sth)","to be skeptical of","to have one's doubts","to harbor suspicions","to suspect that"],"hsk":"4","pinyin":["huáiyí"]}],
-  ["态:manner",{"cedict":"態|态|tai4|(bound form)|0ryhovo","gloss":["manner"],"pinyin":["tài"],"pos":"n"}],
+  ["态:manner",{"cedict":"態|态|tai4|state|0xckdti","gloss":["manner"],"pinyin":["tài"],"pos":"n"}],
   ["态度:attitude",{"cedict":"態度|态度|tai4du5|attitude|131oqcv","freq":0.0006071645415907711,"gloss":["attitude","manner","approach"],"hsk":"2","pinyin":["tài dù","tài du"],"pos":"n"}],
   ["怎:how",{"cedict":"怎|怎|zen3|how|00hmg7h","gloss":["what? why? how?"],"pinyin":["zěn"],"pos":"adv"}],
   ["怎么:how",{"freq":0.0078125,"gloss":["how"],"hsk":"1","pinyin":["zěn me"],"pos":"pron"}],

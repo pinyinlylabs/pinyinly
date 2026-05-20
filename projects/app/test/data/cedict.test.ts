@@ -11,6 +11,8 @@ import {
   parseCedictV2Text,
   parseCedictId,
   transformCedictV2Entry,
+  serializeCedictV2Sense,
+  parseCedictV2Sense,
 } from "./cedict";
 import pick from "lodash/pick.js";
 
@@ -28,11 +30,7 @@ describe(`parseCedictV2Line`, () => {
       {
         "pinyin": "yao1 yao1 ling2",
         "senses": [
-          {
-            "glosses": [
-              "the emergency number for law enforcement in Mainland China and Taiwan",
-            ],
-          },
+          "the emergency number for law enforcement in Mainland China and Taiwan",
         ],
         "simplified": "110",
         "traditional": "110",
@@ -48,21 +46,9 @@ describe(`parseCedictV2Line`, () => {
       {
         "pinyin": "san1geng1",
         "senses": [
-          {
-            "glosses": [
-              "third of the five night watch periods 23:00-01:00 (old)",
-            ],
-          },
-          {
-            "glosses": [
-              "midnight",
-            ],
-          },
-          {
-            "glosses": [
-              "also pr. [san1 jin1]",
-            ],
-          },
+          "third of the five night watch periods 23:00-01:00 (old)",
+          "midnight",
+          "also pr. [san1 jin1]",
         ],
         "simplified": "三更",
         "traditional": "三更",
@@ -77,23 +63,9 @@ describe(`parseCedictV2Line`, () => {
     expect(parsed).not.toBeNull();
     expect(parsed?.senses).toMatchInlineSnapshot(`
       [
-        {
-          "glosses": [
-            "to 3D print",
-            "3D printing",
-          ],
-        },
-        {
-          "glosses": [
-            "sense 2",
-          ],
-        },
-        {
-          "glosses": [
-            "sense 3A",
-            "sense 3B",
-          ],
-        },
+        "to 3D print; 3D printing",
+        "sense 2",
+        "sense 3A; sense 3B",
       ]
     `);
   });
@@ -122,16 +94,8 @@ describe(`parseCedictV2Line`, () => {
 
     expect(parsed?.senses).toMatchInlineSnapshot(`
       [
-        {
-          "glosses": [
-            "new sense 1",
-          ],
-        },
-        {
-          "glosses": [
-            "old sense 2",
-          ],
-        },
+        "new sense 1",
+        "old sense 2",
       ]
     `);
   });
@@ -147,21 +111,9 @@ describe(`parseCedictV2Line`, () => {
 
     expect(parsed?.senses).toMatchInlineSnapshot(`
       [
-        {
-          "glosses": [
-            "one",
-          ],
-        },
-        {
-          "glosses": [
-            "two",
-          ],
-        },
-        {
-          "glosses": [
-            "three",
-          ],
-        },
+        "one",
+        "two",
+        "three",
       ]
     `);
   });
@@ -178,11 +130,7 @@ describe(`parseCedictV2Line`, () => {
 
     expect(parsed?.senses).toMatchInlineSnapshot(`
       [
-        {
-          "glosses": [
-            "old sense 2",
-          ],
-        },
+        "old sense 2",
       ]
     `);
   });
@@ -211,11 +159,7 @@ describe(`parseCedictV2Line`, () => {
 
     expect(parsed?.senses).toMatchInlineSnapshot(`
       [
-        {
-          "glosses": [
-            "old sense 1",
-          ],
-        },
+        "old sense 1",
       ]
     `);
   });
@@ -391,11 +335,14 @@ describe(`buildCedictSenseId`, () => {
     const parsed = parseCedictV2Line(`行 行 [[xing2]] /to walk;to travel/`);
     expect(parsed).not.toBeNull();
 
+    const parsedSense = parseCedictV2Sense(parsed!.senses[0]!);
+    const glosses = parsedSense.glosses.map((g) => g.originalGloss);
+
     const senseId = buildCedictSenseId(
       parsed?.traditional!,
       parsed?.simplified!,
       parsed?.pinyin!,
-      parsed!.senses[0]?.glosses ?? [],
+      glosses,
     );
 
     expect(senseId).toBe(`行|行|xing2|to walk|1t265rt`);
@@ -413,7 +360,7 @@ describe(`transformCedictV2Entry`, () => {
       [
         {
           "glosses": [
-            "third of the five night watch periods 23:00-01:00 (old)",
+            "third of the five night watch periods 23:00-01:00",
           ],
           "pinyin": [
             "sāngēng",
@@ -422,6 +369,9 @@ describe(`transformCedictV2Entry`, () => {
           "pinyinNumeric": "san1geng1",
           "senseId": "三更|三更|san1geng1|third of the five night watch periods 23:00-01:00 (old)|0mn8832",
           "simplified": "三更",
+          "tags": [
+            "old",
+          ],
           "traditional": "三更",
         },
         {
@@ -527,7 +477,7 @@ describe(`transformCedictV2Entry`, () => {
             "any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
           ],
           "tags": [
-            "figurative",
+            "fig.",
           ],
         },
       ]
@@ -585,175 +535,332 @@ describe(`transformCedictV2Entry`, () => {
   });
 });
 
-describe(`transformCedictV2Entry tag extraction`, () => {
-  test(`extracts idiom tag from gloss ending with (idiom)`, () => {
-    const line = `應天承運 应天承运 [[ying4tian1cheng2yun4]] /lit. to respond to heaven and suit the times (idiom)/the Divine Right of kings/`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
+describe(`parseCedictV2Line tag extraction`, () => {
+  test.for([
+    // suffix tag
+    [`gloss (suffix)`, `{suffix} gloss`],
+    // new domains
+    [`(ACG) gloss`, `{D:ACG} gloss`],
+    [`(accounting) gloss`, `{D:accounting} gloss`],
+    [`(acoustics) gloss`, `{D:acoustics} gloss`],
+    [`(acrobatics) gloss`, `{D:acrobatics} gloss`],
+    [`(aerospace) gloss`, `{D:aerospace} gloss`],
+    [`(agriculture) gloss`, `{D:agriculture} gloss`],
+    [`(anatomy) gloss`, `{D:anatomy} gloss`],
+    [`(angling) gloss`, `{D:angling} gloss`],
+    [`(animals) gloss`, `{D:animals} gloss`],
+    [`(archaeology) gloss`, `{D:archaeology} gloss`],
+    [`(archeology) gloss`, `{D:archeology} gloss`],
+    [`(archery) gloss`, `{D:archery} gloss`],
+    [`(architecture) gloss`, `{D:architecture} gloss`],
+    [`(astronautics) gloss`, `{D:astronautics} gloss`],
+    [`(astronomy) gloss`, `{D:astronomy} gloss`],
+    [`(athletics) gloss`, `{D:athletics} gloss`],
+    [`(automotive) gloss`, `{D:automotive} gloss`],
+    [`(aviation) gloss`, `{D:aviation} gloss`],
+    [`(ballet) gloss`, `{D:ballet} gloss`],
+    [`(banking) gloss`, `{D:banking} gloss`],
+    [`(baseball) gloss`, `{D:baseball} gloss`],
+    [`(basketball) gloss`, `{D:basketball} gloss`],
+    [`(basketwork) gloss`, `{D:basketwork} gloss`],
+    [`(BDSM) gloss`, `{D:BDSM} gloss`],
+    [`(beer) gloss`, `{D:beer} gloss`],
+    [`(biochemistry) gloss`, `{D:biochemistry} gloss`],
+    [`(biogeography) gloss`, `{D:biogeography} gloss`],
+    [`(biology) gloss`, `{D:biology} gloss`],
+    [`(biotechnology) gloss`, `{D:biotechnology} gloss`],
+    [`(bird) gloss`, `{D:bird} gloss`],
+    [`(botany) gloss`, `{D:botany} gloss`],
+    [`(boxing) gloss`, `{D:boxing} gloss`],
+    [`(brand) gloss`, `{D:brand} gloss`],
+    [`(broadcasting) gloss`, `{D:broadcasting} gloss`],
+    [`(Buddhism) gloss`, `{D:Buddhism} gloss`],
+    [`(Buddhist) gloss`, `{D:Buddhist} gloss`],
+    [`(business) gloss`, `{D:business} gloss`],
+    [`(calligraphy) gloss`, `{D:calligraphy} gloss`],
+    [`(Cant.) gloss`, `{D:Cantonese} gloss`],
+    [`(Cantonese) gloss`, `{D:Cantonese} gloss`],
+    [`(cartography) gloss`, `{D:cartography} gloss`],
+    [`(Catholicism) gloss`, `{D:Catholicism} gloss`],
+    [`(chemical) gloss`, `{D:chemical} gloss`],
+    [`(chemistry) gloss`, `{D:chemistry} gloss`],
+    [`(Chinese) gloss`, `{D:Chinese} gloss`],
+    [`(Christianity) gloss`, `{D:Christianity} gloss`],
+    [`(cinema) gloss`, `{D:cinema} gloss`],
+    [`(cinematography) gloss`, `{D:cinematography} gloss`],
+    [`(commerce) gloss`, `{D:commerce} gloss`],
+    [`(communications) gloss`, `{D:communications} gloss`],
+    [`(computer) gloss`, `{D:computer} gloss`],
+    [`(computing) gloss`, `{D:computing} gloss`],
+    [`(Confucianism) gloss`, `{D:Confucianism} gloss`],
+    [`(constellation) gloss`, `{D:constellation} gloss`],
+    [`(cookery) gloss`, `{D:cookery} gloss`],
+    [`(cooking) gloss`, `{D:cooking} gloss`],
+    [`(cosmetics) gloss`, `{D:cosmetics} gloss`],
+    [`(cryptography) gloss`, `{D:cryptography} gloss`],
+    [`(cuisine) gloss`, `{D:cuisine} gloss`],
+    [`(currency) gloss`, `{D:currency} gloss`],
+    [`(Daoism) gloss`, `{D:Daoism} gloss`],
+    [`(dating) gloss`, `{D:dating} gloss`],
+    [`(deferential) gloss`, `{D:deferential} gloss`],
+    [`(dentistry) gloss`, `{D:dentistry} gloss`],
+    [`(dinosaur) gloss`, `{D:dinosaur} gloss`],
+    [`(divination) gloss`, `{D:divination} gloss`],
+    [`(diving) gloss`, `{D:diving} gloss`],
+    [`(ecology) gloss`, `{D:ecology} gloss`],
+    [`(economics) gloss`, `{D:economics} gloss`],
+    [`(education) gloss`, `{D:education} gloss`],
+    [`(electricity) gloss`, `{D:electricity} gloss`],
+    [`(electromagnetism) gloss`, `{D:electromagnetism} gloss`],
+    [`(electronics) gloss`, `{D:electronics} gloss`],
+    [`(embryology) gloss`, `{D:embryology} gloss`],
+    [`(engineering) gloss`, `{D:engineering} gloss`],
+    [`(entomology) gloss`, `{D:entomology} gloss`],
+    [`(epidemiology) gloss`, `{D:epidemiology} gloss`],
+    [`(expletive) gloss`, `{D:expletive} gloss`],
+    [`(fandom) gloss`, `{D:fandom} gloss`],
+    [`(fashion) gloss`, `{D:fashion} gloss`],
+    [`(fencing) gloss`, `{D:fencing} gloss`],
+    [`(filmmaking) gloss`, `{D:filmmaking} gloss`],
+    [`(finance) gloss`, `{D:finance} gloss`],
+    [`(fitness) gloss`, `{D:fitness} gloss`],
+    [`(flying) gloss`, `{D:flying} gloss`],
+    [`(food) gloss`, `{D:food} gloss`],
+    [`(football) gloss`, `{D:football} gloss`],
+    [`(forestry) gloss`, `{D:forestry} gloss`],
+    [`(gaming) gloss`, `{D:gaming} gloss`],
+    [`(genetic) gloss`, `{D:genetic} gloss`],
+    [`(genetics) gloss`, `{D:genetics} gloss`],
+    [`(geography) gloss`, `{D:geography} gloss`],
+    [`(geology) gloss`, `{D:geology} gloss`],
+    [`(geometry) gloss`, `{D:geometry} gloss`],
+    [`(geopolitics) gloss`, `{D:geopolitics} gloss`],
+    [`(geotectonics) gloss`, `{D:geotectonics} gloss`],
+    [`(golf) gloss`, `{D:golf} gloss`],
+    [`(government) gloss`, `{D:government} gloss`],
+    [`(grammar) gloss`, `{D:grammar} gloss`],
+    [`(gymnastics) gloss`, `{D:gymnastics} gloss`],
+    [`(hairstyle) gloss`, `{D:hairstyle} gloss`],
+    [`(historical) gloss`, `{D:historical} gloss`],
+    [`(HK) gloss`, `{D:HK} gloss`],
+    [`(Hong Kong) gloss`, `{D:HK} gloss`],
+    [`(horticulture) gloss`, `{D:horticulture} gloss`],
+    [`(humor) gloss`, `{D:humor} gloss`],
+    [`(humorous) gloss`, `{D:humor} gloss`],
+    [`(hydrology) gloss`, `{D:hydrology} gloss`],
+    [`(ichthyology) gloss`, `{D:ichthyology} gloss`],
+    [`(immunology) gloss`, `{D:immunology} gloss`],
+    [`(information) gloss`, `{D:information} gloss`],
+    [`(Internet slang) gloss`, `{D:Internet slang} gloss`],
+    [`(Islam) gloss`, `{D:Islam} gloss`],
+    [`(Japan) gloss`, `{D:Japan} gloss`],
+    [`(journalism) gloss`, `{D:journalism} gloss`],
+    [`(law) gloss`, `{D:law} gloss`],
+    [`(lexicography) gloss`, `{D:lexicography} gloss`],
+    [`(linguistics) gloss`, `{D:linguistics} gloss`],
+    [`(logistics) gloss`, `{D:logistics} gloss`],
+    [`(mahjong) gloss`, `{D:mahjong} gloss`],
+    [`(Malaysia) gloss`, `{D:Malaysia} gloss`],
+    [`(mammology) gloss`, `{D:mammology} gloss`],
+    [`(manufacturing) gloss`, `{D:manufacturing} gloss`],
+    [`(Maoism) gloss`, `{D:Maoism} gloss`],
+    [`(marketing) gloss`, `{D:marketing} gloss`],
+    [`(math) gloss`, `{D:math.} gloss`],
+    [`(math.) gloss`, `{D:math.} gloss`],
+    [`(mathematical) gloss`, `{D:math.} gloss`],
+    [`(measurement) gloss`, `{D:measurement} gloss`],
+    [`(mechanics) gloss`, `{D:mechanics} gloss`],
+    [`(med) gloss`, `{D:medical} gloss`],
+    [`(med.) gloss`, `{D:medical} gloss`],
+    [`(medical) gloss`, `{D:medical} gloss`],
+    [`(medicine) gloss`, `{D:medical} gloss`],
+    [`(metallurgy) gloss`, `{D:metallurgy} gloss`],
+    [`(metalwork) gloss`, `{D:metalwork} gloss`],
+    [`(meteorology) gloss`, `{D:meteorology} gloss`],
+    [`(microbiology) gloss`, `{D:microbiology} gloss`],
+    [`(military) gloss`, `{D:military} gloss`],
+    [`(mineralogy) gloss`, `{D:mineralogy} gloss`],
+    [`(mining) gloss`, `{D:mining} gloss`],
+    [`(Mohism) gloss`, `{D:Mohism} gloss`],
+    [`(music) gloss`, `{D:music} gloss`],
+    [`(mycology) gloss`, `{D:mycology} gloss`],
+    [`(mythology) gloss`, `{D:mythology} gloss`],
+    [`(neologism) gloss`, `{D:neologism} gloss`],
+    [`(neuroscience) gloss`, `{D:neuroscience} gloss`],
+    [`(obstetrics) gloss`, `{D:obstetrics} gloss`],
+    [`(oceanography) gloss`, `{D:oceanography} gloss`],
+    [`(opera) gloss`, `{D:opera} gloss`],
+    [`(optics) gloss`, `{D:optics} gloss`],
+    [`(ornithology) gloss`, `{D:ornithology} gloss`],
+    [`(orthodontics) gloss`, `{D:orthodontics} gloss`],
+    [`(orthography) gloss`, `{D:orthography} gloss`],
+    [`(painting) gloss`, `{D:painting} gloss`],
+    [`(perfumery) gloss`, `{D:perfumery} gloss`],
+    [`(petrochemistry) gloss`, `{D:petrochemistry} gloss`],
+    [`(pharm.) gloss`, `{D:pharmacology} gloss`],
+    [`(pharmacology) gloss`, `{D:pharmacology} gloss`],
+    [`(philately) gloss`, `{D:philately} gloss`],
+    [`(philosophy) gloss`, `{D:philosophy} gloss`],
+    [`(phonetic) gloss`, `{D:phonetic} gloss`],
+    [`(phonetics) gloss`, `{D:phonetics} gloss`],
+    [`(phonology) gloss`, `{D:phonology} gloss`],
+    [`(photography) gloss`, `{D:photography} gloss`],
+    [`(physics) gloss`, `{D:physics} gloss`],
+    [`(physiognomy) gloss`, `{D:physiognomy} gloss`],
+    [`(physiology) gloss`, `{D:physiology} gloss`],
+    [`(political) gloss`, `{D:politics} gloss`],
+    [`(politically) gloss`, `{D:politics} gloss`],
+    [`(politics) gloss`, `{D:politics} gloss`],
+    [`(PRC) gloss`, `{D:PRC} gloss`],
+    [`(printing) gloss`, `{D:printing} gloss`],
+    [`(psychological) gloss`, `{D:psychological} gloss`],
+    [`(psychology) gloss`, `{D:psychology} gloss`],
+    [`(publishing) gloss`, `{D:publishing} gloss`],
+    [`(radiography) gloss`, `{D:radiography} gloss`],
+    [`(religion) gloss`, `{D:religion} gloss`],
+    [`(religious) gloss`, `{D:religion} gloss`],
+    [`(retail) gloss`, `{D:retail} gloss`],
+    [`(retailer) gloss`, `{D:retailer} gloss`],
+    [`(retailing) gloss`, `{D:retailing} gloss`],
+    [`(rocketry) gloss`, `{D:rocketry} gloss`],
+    [`(science) gloss`, `{D:science} gloss`],
+    [`(seafood) gloss`, `{D:seafood} gloss`],
+    [`(seismology) gloss`, `{D:seismology} gloss`],
+    [`(semantics) gloss`, `{D:semantics} gloss`],
+    [`(Shanghainese) gloss`, `{D:Shanghainese} gloss`],
+    [`(Shinto) gloss`, `{D:Shinto} gloss`],
+    [`(Singapore) gloss`, `{D:Singapore} gloss`],
+    [`(soccer) gloss`, `{D:soccer} gloss`],
+    [`(software) gloss`, `{D:software} gloss`],
+    [`(sports) gloss`, `{D:sport} gloss`],
+    [`(sport) gloss`, `{D:sport} gloss`],
+    [`(stationery) gloss`, `{D:stationery} gloss`],
+    [`(statistics) gloss`, `{D:statistics} gloss`],
+    [`(surname) gloss`, `{D:surname} gloss`],
+    [`(surveying) gloss`, `{D:surveying} gloss`],
+    [`(Taiwan) gloss`, `{D:Taiwan} gloss`],
+    [`(Taoism) gloss`, `{D:Taoism} gloss`],
+    [`(TCM) gloss`, `{D:TCM} gloss`],
+    [`(technology) gloss`, `{D:technology} gloss`],
+    [`(telecommunications) gloss`, `{D:telecommunications} gloss`],
+    [`(telephony) gloss`, `{D:telephony} gloss`],
+    [`(textiles) gloss`, `{D:textiles} gloss`],
+    [`(theater) gloss`, `{D:theater} gloss`],
+    [`(thermodynamics) gloss`, `{D:thermodynamics} gloss`],
+    [`(time) gloss`, `{D:time} gloss`],
+    [`(transportation) gloss`, `{D:transportation} gloss`],
+    [`(Tw) gloss`, `{D:Tw} gloss`],
+    [`(typesetting) gloss`, `{D:typesetting} gloss`],
+    [`(typography) gloss`, `{D:typography} gloss`],
+    [`(vulgar) gloss`, `{D:vulgar} gloss`],
+    [`(watchmaking) gloss`, `{D:watchmaking} gloss`],
+    [`(weaving) gloss`, `{D:weaving} gloss`],
+    [`(zoology) gloss`, `{D:zoology} gloss`],
+    // non-domain tags
+    [`(abbr.) gloss`, `{abbr.} gloss`],
+    [`(adj.) gloss`, `{adjective} gloss`],
+    [`(adjective) gloss`, `{adjective} gloss`],
+    [`(ancient) gloss`, `{ancient} gloss`],
+    [`(arch.) gloss`, `{archaic} gloss`],
+    [`(archaic) gloss`, `{archaic} gloss`],
+    [`(article) gloss`, `{article} gloss`],
+    [`(attributive) gloss`, `{attributive} gloss`],
+    [`(bound form) gloss`, `{bound form} gloss`],
+    [`(classical) gloss`, `{classical} gloss`],
+    [`(classifier) gloss`, `{classifier} gloss`],
+    [`(coll.) gloss`, `{coll.} gloss`],
+    [`(colloquial) gloss`, `{coll.} gloss`],
+    [`(color) gloss`, `{color} gloss`],
+    [`(conjunction) gloss`, `{conjunction} gloss`],
+    [`(contemporary) gloss`, `{contemporary} gloss`],
+    [`(courteous) gloss`, `{courteous} gloss`],
+    [`(dated) gloss`, `{dated} gloss`],
+    [`(derog.) gloss`, `{derogatory} gloss`],
+    [`(derogatory) gloss`, `{derogatory} gloss`],
+    [`(dialect) gloss`, `{dialect} gloss`],
+    [`(disparaging) gloss`, `{disparaging} gloss`],
+    [`(euphemism) gloss`, `{euphemism} gloss`],
+    [`(fig.) gloss`, `{fig.} gloss`],
+    [`(figuratively) gloss`, `{fig.} gloss`],
+    [`(formal) gloss`, `{formal} gloss`],
+    [`(grammatical) gloss`, `{grammatical} gloss`],
+    [`(greeting) gloss`, `{greeting} gloss`],
+    [`(honorific) gloss`, `{honorific} gloss`],
+    [`(idiom) gloss`, `{idiom} gloss`],
+    [`(imperative) gloss`, `{imperative} gloss`],
+    [`(informal) gloss`, `{informal} gloss`],
+    [`(insult) gloss`, `{insult} gloss`],
+    [`(intensifier) gloss`, `{intensifier} gloss`],
+    [`(interj) gloss`, `{interj.} gloss`],
+    [`(interj.) gloss`, `{interj.} gloss`],
+    [`(interjection) gloss`, `{interj.} gloss`],
+    [`(intransitive) gloss`, `{intransitive} gloss`],
+    [`(jocular) gloss`, `{jocular} gloss`],
+    [`(jokingly) gloss`, `{jokingly} gloss`],
+    [`(lit.) gloss`, `{lit.} gloss`],
+    [`(literary) gloss`, `{lit.} gloss`],
+    [`(loanword) gloss`, `{loanword} gloss`],
+    [`(maxim) gloss`, `{maxim} gloss`],
+    [`(metaphorical) gloss`, `{metaphorical} gloss`],
+    [`(metonym) gloss`, `{metonym} gloss`],
+    [`(modern) gloss`, `{modern} gloss`],
+    [`(name) gloss`, `{name} gloss`],
+    [`(offensive) gloss`, `{offensive} gloss`],
+    [`(old) gloss`, `{old} gloss`],
+    [`(onom.) gloss`, `{onom.} gloss`],
+    [`(orig.) gloss`, `{orig.} gloss`],
+    [`(originally) gloss`, `{orig.} gloss`],
+    [`(pejorative) gloss`, `{pejorative} gloss`],
+    [`(polite) gloss`, `{polite} gloss`],
+    [`(prefix) gloss`, `{prefix} gloss`],
+    [`(pronoun) gloss`, `{pronoun} gloss`],
+    [`(proverb) gloss`, `{proverb} gloss`],
+    [`(punctuation) gloss`, `{punctuation} gloss`],
+    [`(rare) gloss`, `{rare} gloss`],
+    [`(reduplicated) gloss`, `{reduplicated} gloss`],
+    [`(respectful) gloss`, `{respectful} gloss`],
+    [`(rhetorical) gloss`, `{rhetorical} gloss`],
+    [`(rude) gloss`, `{rude} gloss`],
+    [`(saying) gloss`, `{saying} gloss`],
+    [`(slang) gloss`, `{slang} gloss`],
+    [`(specifier) gloss`, `{specifier} gloss`],
+    [`(suffix) gloss`, `{suffix} gloss`],
+    [`(technical) gloss`, `{technical} gloss`],
+    [`(verb) gloss`, `{verb} gloss`],
+    // "(lit. and fig.)
+    // [`(lit. and fig.) gloss`, `{lit.} {fig.} gloss`],
+    // extracts multiple tags
+    [
+      `(biology) (loanword) to clone; a clone`,
+      `{D:biology} {loanword} to clone; a clone`,
+    ],
+    // Accumulates tags from multiple glosses in text order
+    [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} {fig.} gloss 1; gloss 2`],
+    // Removes glosses that are solely tags
+    [`normal gloss; (idiom)`, `{idiom} normal gloss`],
+    // Unknown tags are left as-is
+    [`(horse)`, `(horse)`],
+  ] as const)(`tag fixture: %s → %s`, async ([input, expected]) => {
+    const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
 
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "to respond to heaven and suit the times",
-          ],
-          "tags": [
-            "literary",
-            "idiom",
-          ],
-        },
-        {
-          "glosses": [
-            "the Divine Right of kings",
-          ],
-        },
-      ]
-    `);
-  });
-
-  test(`extracts idiom tag from gloss starting with (idiom)`, () => {
-    const line = `示例 示例 [[shi4li4]] /(idiom) used as a proverb; second gloss/`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
-
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "used as a proverb",
-            "second gloss",
-          ],
-          "tags": [
-            "idiom",
-          ],
-        },
-      ]
-    `);
-  });
-
-  test(`extracts figurative tag from gloss starting with (fig.)`, () => {
-    const line = `示例 示例 [[shi4li4]] /(fig.) used in a figurative sense/`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
-
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "used in a figurative sense",
-          ],
-          "tags": [
-            "figurative",
-          ],
-        },
-      ]
-    `);
-  });
-
-  test(`extracts literary tag from gloss starting with lit.`, () => {
-    const line = `示例 示例 [[shi4li4]] /lit. to walk on clouds/`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
-
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "to walk on clouds",
-          ],
-          "tags": [
-            "literary",
-          ],
-        },
-      ]
-    `);
-  });
-
-  test(`does not extract literary tag when lit. appears at end of gloss`, () => {
-    const line = `示例 示例 [[shi4li4]] /taken lit./`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
-
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "taken lit.",
-          ],
-        },
-      ]
-    `);
-  });
-
-  test(`accumulates tags from multiple glosses in text order`, () => {
-    const line = `示例 示例 [[shi4li4]] /example (idiom); (fig.) figurative use/`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
-
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "example",
-            "figurative use",
-          ],
-          "tags": [
-            "idiom",
-            "figurative",
-          ],
-        },
-      ]
-    `);
-  });
-
-  test(`drops gloss that consists solely of a tag marker`, () => {
-    const line = `示例 示例 [[shi4li4]] /normal gloss; (idiom)/`;
-    const parsed = parseCedictV2Line(line);
-    expect(parsed).not.toBeNull();
-
-    const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": [
-            "normal gloss",
-          ],
-          "tags": [
-            "idiom",
-          ],
-        },
-      ]
-    `);
+    expect(actual).toBe(expected);
   });
 });
 
-describe(`applyCedictV2EditsToText tag normalization`, () => {
-  test(`moves tag from end of gloss to start in .out output`, () => {
+describe(`applyCedictV2EditsToText sense serialization`, () => {
+  test(`preserves end marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /example text (idiom); more text/`;
     const output = applyCedictV2EditsToText(input);
-    expect(output).toBe(
-      `示例 示例 [[shi4li4]] /(idiom) example text; more text/`,
+    expect(output).toMatchInlineSnapshot(
+      `"示例 示例 [[shi4li4]] /{idiom} example text; more text/"`,
     );
   });
 
-  test(`moves tag from middle of gloss to start in .out output`, () => {
+  test(`preserves middle marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /lit. to do something (idiom); to achieve a result/`;
     const output = applyCedictV2EditsToText(input);
-    expect(output).toBe(
-      `示例 示例 [[shi4li4]] /lit. (idiom) to do something; to achieve a result/`,
+    expect(output).toMatchInlineSnapshot(
+      `"示例 示例 [[shi4li4]] /{lit.} {idiom} to do something; to achieve a result/"`,
     );
   });
 
