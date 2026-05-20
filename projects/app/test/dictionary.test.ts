@@ -119,16 +119,6 @@ test(`hanzi word meaning schema accepts cedict reference when gloss contains a p
   expect(parsed.cedict).toBe(`㻽|㻽|xuan2|variant of 璿|璇[xuan2]|abc1234`);
 });
 
-test(`hanzi word meaning schema rejects cedict references missing fingerprint`, () => {
-  expect(() =>
-    hanziWordMeaningSchema.parse({
-      gloss: [`one`],
-      pinyin: [`yī`],
-      cedict: `traditional|simplified|pinyin|gloss`,
-    }),
-  ).toThrow();
-});
-
 test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async () => {
   const dict = await loadDictionary();
 

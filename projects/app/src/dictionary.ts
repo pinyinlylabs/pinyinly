@@ -382,11 +382,9 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
   return undefined;
 }
 
-export const cedictReferenceSchema = z
-  .string()
-  .regex(/^[^|]+\|[^|]+\|[^|]+\|.+\|[^|]+$/u, {
-    message: `CE-DICT reference must follow the format traditional|simplified|pinyin|gloss|fingerprint`,
-  });
+export const cedictReferenceSchema = z.string().regex(/^.+?\|.+?\|.+?\|.+$/u, {
+  message: `CE-DICT reference must follow the format traditional|simplified|pinyin|gloss`,
+});
 
 export type CedictReference = z.infer<typeof cedictReferenceSchema>;
 

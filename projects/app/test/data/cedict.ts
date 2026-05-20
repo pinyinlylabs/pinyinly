@@ -7,7 +7,7 @@ import {
   memoize0,
 } from "@pinyinly/lib/collections";
 import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
-import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
@@ -16,8 +16,7 @@ export interface CedictIdParamsType {
   traditional: string;
   simplified: string;
   pinyin: PinyinNumericText;
-  firstGloss: string;
-  fingerprint: string;
+  sense: string;
 }
 
 export interface CedictV2EntryType {
@@ -725,6 +724,7 @@ export function transformCedictV2Entry(
 
     return [
       {
+        sense,
         original: originalGlosses,
         cleaned: cleanedGlosses,
         inlineAlternativePinyin: [...inlineAlternativePinyin],
@@ -734,20 +734,20 @@ export function transformCedictV2Entry(
     ];
   });
 
-  return transformedSenses.map((glossPair) => {
+  return transformedSenses.map((transformedSense) => {
     const transformedPinyin = [
       normalizePinyinText(entry.pinyin),
       ...[...standaloneAlternativePinyin].map((alternative) =>
         normalizePinyinText(alternative),
       ),
-      ...glossPair.inlineAlternativePinyin.map((alternative) =>
+      ...transformedSense.inlineAlternativePinyin.map((alternative) =>
         normalizePinyinText(alternative),
       ),
     ].filter(arrayFilterUnique());
 
     const transformedClassifiers = [
       ...standaloneClassifiers,
-      ...glossPair.inlineClassifiers,
+      ...transformedSense.inlineClassifiers,
     ].filter(arrayFilterUnique());
 
     return {
@@ -755,19 +755,19 @@ export function transformCedictV2Entry(
         entry.traditional,
         entry.simplified,
         entry.pinyin,
-        glossPair.original,
+        transformedSense.sense,
       ),
       traditional: entry.traditional,
       simplified: entry.simplified,
       pinyinNumeric: entry.pinyin,
       pinyin: transformedPinyin,
-      glosses: glossPair.cleaned,
+      glosses: transformedSense.cleaned,
       ...(transformedClassifiers.length === 0
         ? {}
         : { classifiers: transformedClassifiers }),
-      ...(glossPair.senseTags.length === 0
+      ...(transformedSense.senseTags.length === 0
         ? {}
-        : { tags: glossPair.senseTags }),
+        : { tags: transformedSense.senseTags }),
     };
   });
 }
@@ -1043,7 +1043,7 @@ export async function findCedictEntryById(
 
   const indexes = await getCedictLookupIndexes();
 
-  const cedictIdParams = parseCedictId(cedictId);
+  const cedictIdParams = parseCedictSenseId(cedictId);
   if (cedictIdParams == null) {
     return null;
   }
@@ -1072,7 +1072,7 @@ export async function findCedictSenseById(
     return null;
   }
 
-  const cedictIdParams = parseCedictId(cedictSenseId);
+  const cedictIdParams = parseCedictSenseId(cedictSenseId);
   if (cedictIdParams == null) {
     return null;
   }
@@ -1080,19 +1080,16 @@ export async function findCedictSenseById(
   const indexes = await getCedictLookupIndexes();
   const candidates = findCedictEntryCandidatesByParams(indexes, cedictIdParams);
 
-  let resolvedSense: TransformedCedictV2SenseType | null = null;
   for (const entry of candidates) {
     const matchedSense = transformCedictV2Entry(entry).find(
       (sense) => sense.senseId === cedictSenseId,
     );
-    if (matchedSense == null) {
-      continue;
+    if (matchedSense != null) {
+      return matchedSense;
     }
-
-    resolvedSense = matchedSense;
   }
 
-  return resolvedSense;
+  return null;
 }
 
 export async function findCedictSenseIdCandidatesById(
@@ -1102,7 +1099,7 @@ export async function findCedictSenseIdCandidatesById(
     return [];
   }
 
-  const cedictIdParams = parseCedictId(cedictSenseId);
+  const cedictIdParams = parseCedictSenseId(cedictSenseId);
   if (cedictIdParams == null) {
     return [];
   }
@@ -1119,20 +1116,18 @@ export function buildCedictSenseId(
   traditional: string,
   simplified: string,
   pinyinNumeric: string,
-  glosses: string[],
+  sense: string,
 ): string {
   const traditionalNormalized = traditional.normalize(`NFKC`);
   const simplifiedNormalized = simplified.normalize(`NFKC`);
   const pinyinNumericNormalized = pinyinNumeric.normalize(`NFKC`);
-  const firstGloss = nonNullable(glosses[0]);
-  const fingerprint = hashString(glosses.join(`;`));
 
   invariant(
     pinyinNumericNormalized.includes(`|`) === false,
     `pinyin ${pinyinNumericNormalized} cannot contain | character`,
   );
 
-  return `${traditionalNormalized}|${simplifiedNormalized}|${pinyinNumericNormalized}|${firstGloss}|${fingerprint}`;
+  return `${traditionalNormalized} ${simplifiedNormalized} [[${pinyinNumericNormalized}]] /${sense}/`;
 }
 
 const getCedictLookupIndexes = memoize0(async () => {
@@ -1163,9 +1158,11 @@ function findCedictEntryCandidatesByParams(
   );
 }
 
-export function parseCedictId(cedictId: string): CedictIdParamsType | null {
-  const match = cedictId.match(
-    /^(?<traditional>.+?)\|(?<simplified>.+?)\|(?<pinyin>.+?)\|(?<firstGloss>.+?)\|(?<fingerprint>[a-z0-9]+)$/u,
+export function parseCedictSenseId(
+  cedictSenseId: string,
+): CedictIdParamsType | null {
+  const match = cedictSenseId.match(
+    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.+?)\]\] (?<sense>.+?)$/u,
   );
   if (match == null) {
     return null;
@@ -1174,8 +1171,7 @@ export function parseCedictId(cedictId: string): CedictIdParamsType | null {
   const traditional = match.groups?.[`traditional`];
   const simplified = match.groups?.[`simplified`];
   const pinyin = match.groups?.[`pinyin`];
-  const firstGloss = match.groups?.[`firstGloss`];
-  const fingerprint = match.groups?.[`fingerprint`];
+  const sense = match.groups?.[`sense`];
 
   if (
     traditional == null ||
@@ -1184,10 +1180,8 @@ export function parseCedictId(cedictId: string): CedictIdParamsType | null {
     simplified.length === 0 ||
     pinyin == null ||
     pinyin.length === 0 ||
-    firstGloss == null ||
-    firstGloss.length === 0 ||
-    fingerprint == null ||
-    fingerprint.length === 0
+    sense == null ||
+    sense.length === 0
   ) {
     return null;
   }
@@ -1196,21 +1190,8 @@ export function parseCedictId(cedictId: string): CedictIdParamsType | null {
     traditional,
     simplified,
     pinyin: pinyin as PinyinNumericText,
-    firstGloss,
-    fingerprint,
+    sense,
   };
-}
-
-// FNV-1a, returned as a compact base36 suffix.
-function hashString(value: string): string {
-  let hash = 2166136261;
-
-  for (const char of value) {
-    hash ^= char.codePointAt(0) ?? 0;
-    hash = Math.imul(hash, 16777619);
-  }
-
-  return (hash >>> 0).toString(36).padStart(7, `0`).slice(0, 7);
 }
 
 function formatParseError(

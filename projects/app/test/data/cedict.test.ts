@@ -9,7 +9,7 @@ import {
   loadCedictV2,
   parseCedictV2Line,
   parseCedictV2Text,
-  parseCedictId,
+  parseCedictSenseId,
   transformCedictV2Entry,
   serializeCedictV2Sense,
   parseCedictV2Sense,
@@ -335,17 +335,16 @@ describe(`buildCedictSenseId`, () => {
     const parsed = parseCedictV2Line(`行 行 [[xing2]] /to walk;to travel/`);
     expect(parsed).not.toBeNull();
 
-    const parsedSense = parseCedictV2Sense(parsed!.senses[0]!);
-    const glosses = parsedSense.glosses.map((g) => g.originalGloss);
-
     const senseId = buildCedictSenseId(
       parsed?.traditional!,
       parsed?.simplified!,
       parsed?.pinyin!,
-      glosses,
+      parsed!.senses[0]!,
     );
 
-    expect(senseId).toBe(`行|行|xing2|to walk|1t265rt`);
+    expect(senseId).toMatchInlineSnapshot(
+      `"行 行 [[xing2]] /to walk;to travel/"`,
+    );
   });
 });
 
@@ -367,7 +366,7 @@ describe(`transformCedictV2Entry`, () => {
             "sān jīn",
           ],
           "pinyinNumeric": "san1geng1",
-          "senseId": "三更|三更|san1geng1|third of the five night watch periods 23:00-01:00 (old)|0mn8832",
+          "senseId": "三更 三更 [[san1geng1]] /third of the five night watch periods 23:00-01:00 (old)/",
           "simplified": "三更",
           "tags": [
             "old",
@@ -383,7 +382,7 @@ describe(`transformCedictV2Entry`, () => {
             "sān jīn",
           ],
           "pinyinNumeric": "san1geng1",
-          "senseId": "三更|三更|san1geng1|midnight|01l7toh",
+          "senseId": "三更 三更 [[san1geng1]] /midnight/",
           "simplified": "三更",
           "traditional": "三更",
         },
@@ -889,20 +888,8 @@ describe(`parseCedictV2Text`, () => {
     const [first, second] = parseCedictV2Text(input);
     const firstSenseId = transformCedictV2Entry(first!)[0]?.senseId;
     const secondSenseId = transformCedictV2Entry(second!)[0]?.senseId;
-    expect(firstSenseId).toContain(`行|行|xing2|`);
-    expect(secondSenseId).toContain(`行|行|xing2|`);
-  });
-
-  test(`adds collision suffix to duplicate sense id bases`, () => {
-    const [entry] = parseCedictV2Text(
-      `行 行 [[xing2]] /to go;to walk/to go;to travel/`,
-    );
-
-    const transformed = transformCedictV2Entry(entry!);
-    expect(transformed).toHaveLength(2);
-    expect(transformed[0]?.senseId).toContain(`|to go|`);
-    expect(transformed[1]?.senseId).toContain(`|to go|`);
-    expect(transformed[0]?.senseId).not.toBe(transformed[1]?.senseId);
+    expect(firstSenseId).toContain(`行 行 [[xing2]]`);
+    expect(secondSenseId).toContain(`行 行 [[xing2]]`);
   });
 });
 
@@ -957,12 +944,22 @@ describe(`findCedictEntryById`, () => {
   });
 
   test(`resolves compact dictionary v2 references`, async () => {
-    const resolved = await findCedictEntryById(`一|一|yi1|one|abc123`);
-    expect(resolved).toMatchObject({
-      traditional: `一`,
-      simplified: `一`,
-      pinyin: `yi1`,
-    });
+    const resolved = await findCedictEntryById(`一 一 [[yi1]] one`);
+    expect(resolved).toMatchInlineSnapshot(`
+      {
+        "pinyin": "yi1",
+        "senses": [
+          "one",
+          "single",
+          "{article} a",
+          "as soon as",
+          "entire; whole; all; throughout",
+          ""one" radical in Chinese characters (Kangxi radical 1)",
+        ],
+        "simplified": "一",
+        "traditional": "一",
+      }
+    `);
   });
 
   test(`returns null for unknown ids`, async () => {
@@ -977,15 +974,14 @@ describe(`findCedictEntryById`, () => {
   });
 });
 
-describe(`parseCedictId`, () => {
+describe(`parseCedictSenseId`, () => {
   test(`parses valid ids`, () => {
-    const id = `一|一|yi1|one|abc123`;
-    const parsed = parseCedictId(id);
+    const id = `一 一 [[yi1]] one`;
+    const parsed = parseCedictSenseId(id);
     expect(parsed).toMatchInlineSnapshot(`
       {
-        "fingerprint": "abc123",
-        "firstGloss": "one",
         "pinyin": "yi1",
+        "sense": "one",
         "simplified": "一",
         "traditional": "一",
       }
@@ -993,13 +989,12 @@ describe(`parseCedictId`, () => {
   });
 
   test(`parses valid id with | in the gloss`, () => {
-    const id = `一|一|yi1|one ref 一|一[foo]|abc123`;
-    const parsed = parseCedictId(id);
+    const id = `一 一 [[yi1]] one ref 一|一[foo]`;
+    const parsed = parseCedictSenseId(id);
     expect(parsed).toMatchInlineSnapshot(`
       {
-        "fingerprint": "abc123",
-        "firstGloss": "one ref 一|一[foo]",
         "pinyin": "yi1",
+        "sense": "one ref 一|一[foo]",
         "simplified": "一",
         "traditional": "一",
       }
@@ -1007,9 +1002,9 @@ describe(`parseCedictId`, () => {
   });
 
   test(`returns null for invalid ids`, () => {
-    expect(parseCedictId(`not a valid id`)).toBeNull();
-    expect(parseCedictId(``)).toBeNull();
-    expect(parseCedictId(`一|一|yi1|one`)).toBeNull();
+    expect(parseCedictSenseId(`not a valid id`)).toBeNull();
+    expect(parseCedictSenseId(``)).toBeNull();
+    expect(parseCedictSenseId(`一|一|yi1|one|two|three`)).toBeNull();
   });
 });
 
