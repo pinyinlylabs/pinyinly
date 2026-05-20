@@ -1133,29 +1133,42 @@ export function buildCedictSenseId(
 const getCedictLookupIndexes = memoize0(async () => {
   const entries = await loadCedictV2();
 
-  const entriesByTraditional = new Map<string, CedictV2EntryType[]>();
+  const entriesBySimplified = new Map<string, CedictV2EntryType[]>();
 
   for (const entry of entries) {
-    mapArrayAdd(entriesByTraditional, entry.traditional, entry);
+    mapArrayAdd(entriesBySimplified, entry.simplified, entry);
   }
 
   return {
-    entriesByTraditional,
+    entriesBySimplified,
   };
 });
 
 function findCedictEntryCandidatesByParams(
-  indexes: { entriesByTraditional: Map<string, CedictV2EntryType[]> },
-  cedictIdParams: CedictIdParamsType,
+  indexes: { entriesBySimplified: Map<string, CedictV2EntryType[]> },
+  cedictIdParams: Pick<CedictIdParamsType, `simplified`> &
+    Partial<Pick<CedictIdParamsType, `traditional` | `pinyin`>>,
 ): CedictV2EntryType[] {
   const candidates =
-    indexes.entriesByTraditional.get(cedictIdParams.traditional) ?? [];
+    indexes.entriesBySimplified.get(cedictIdParams.simplified) ?? [];
 
-  return candidates.filter(
-    (entry) =>
-      entry.simplified === cedictIdParams.simplified &&
-      entry.pinyin === cedictIdParams.pinyin,
-  );
+  return candidates.filter((entry) => {
+    if (
+      cedictIdParams.traditional != null &&
+      entry.traditional !== cedictIdParams.traditional
+    ) {
+      return false;
+    }
+
+    if (
+      cedictIdParams.pinyin != null &&
+      entry.pinyin !== cedictIdParams.pinyin
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
 export function parseCedictSenseId(
