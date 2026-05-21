@@ -103,10 +103,10 @@ test(`hanzi word meaning schema accepts optional cedict reference`, () => {
   const parsed = hanziWordMeaningSchema.parse({
     gloss: [`one`],
     pinyin: [`yī`],
-    cedict: `一|一|yi1|one|abc1234`,
+    cedict: `一 一 [[yi1]] /one/`,
   });
 
-  expect(parsed.cedict).toBe(`一|一|yi1|one|abc1234`);
+  expect(parsed.cedict).toBe(`一 一 [[yi1]] /one/`);
 });
 
 test(`hanzi word meaning schema accepts cedict reference when gloss contains a pipe`, () => {
