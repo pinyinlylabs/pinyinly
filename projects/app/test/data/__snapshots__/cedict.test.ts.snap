@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`computeGlossesSimilarity > fixture appointment; make an appointment 1`] = `
+"(0.3) to make an appointment
+(0) to weigh in a balance or on a scale
+(0) to invite
+(0) approximately
+(0) pact
+(0) treaty
+(0) to economize
+(0) to restrict
+(0) to reduce (a fraction)
+(0) concise"
+`;

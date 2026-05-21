@@ -1,10 +1,13 @@
 // pyly-not-src-test
+import type { HanziText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 import {
   applyCedictV2EditsToText,
   buildCedictSenseId,
+  computeGlossesSimilarity,
   parseCedictV2EditsText,
   findCedictEntryById,
+  findCedictSensesForHanziWordMeaning,
   findCedictSenseById,
   loadCedictV2,
   parseCedictV2Line,
@@ -841,14 +844,11 @@ describe(`parseCedictV2Line tag extraction`, () => {
     [`normal gloss; (idiom)`, `{idiom} normal gloss`],
     // Unknown tags are left as-is
     [`(horse)`, `(horse)`],
-  ] as [string, string][])(
-    `tag fixture: %s → %s`,
-    async ([input, expected]) => {
-      const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
+  ] as [string, string][])(`fixture: %s → %s`, async ([input, expected]) => {
+    const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
 
-      expect(actual).toBe(expected);
-    },
-  );
+    expect(actual).toBe(expected);
+  });
 });
 
 describe(`applyCedictV2EditsToText sense serialization`, () => {
@@ -1034,5 +1034,249 @@ describe(`findCedictSenseById`, () => {
       null,
     );
     await expect(findCedictSenseById(``)).resolves.toBe(null);
+  });
+});
+
+describe(`findCedictSensesForHanziWordMeaning`, () => {
+  test(`ranks an exact pinyin and gloss match at the top`, async () => {
+    const entries = await loadCedictV2();
+    const entry = entries.find((x) => transformCedictV2Entry(x).length > 0);
+
+    expect(entry).toBeDefined();
+    if (entry == null) {
+      throw new Error(`expected a CE-DICT entry`);
+    }
+
+    const [sense] = transformCedictV2Entry(entry);
+    expect(sense).toBeDefined();
+    if (sense == null) {
+      throw new Error(`expected a transformed sense`);
+    }
+
+    const candidates = await findCedictSensesForHanziWordMeaning(
+      sense.simplified as HanziText,
+      [sense.pinyin[0]!],
+      [sense.glosses[0]!],
+    );
+
+    expect(candidates[0]?.senseId).toBe(sense.senseId);
+    expect(candidates[0]?.confidence ?? 0).toBeGreaterThan(0.8);
+  });
+
+  test(`returns empty candidates for unknown hanzi`, async () => {
+    const candidates = await findCedictSensesForHanziWordMeaning(
+      `🧪` as never,
+      null,
+      [`unknown`],
+    );
+
+    expect(candidates).toEqual([]);
+  });
+
+  test(`confidence is bounded and sorted descending`, async () => {
+    const entries = await loadCedictV2();
+    const entry = entries.find((x) => transformCedictV2Entry(x).length > 0);
+
+    expect(entry).toBeDefined();
+    if (entry == null) {
+      throw new Error(`expected a CE-DICT entry`);
+    }
+
+    const [sense] = transformCedictV2Entry(entry);
+    expect(sense).toBeDefined();
+    if (sense == null) {
+      throw new Error(`expected a transformed sense`);
+    }
+
+    const candidates = await findCedictSensesForHanziWordMeaning(
+      sense.simplified as HanziText,
+      [sense.pinyin[0]!],
+      [`broad gloss`],
+    );
+
+    expect(candidates.length).toBeGreaterThan(0);
+
+    for (const candidate of candidates) {
+      expect(candidate.confidence).toBeGreaterThanOrEqual(0);
+      expect(candidate.confidence).toBeLessThanOrEqual(1);
+    }
+
+    for (let i = 1; i < candidates.length; i++) {
+      expect(candidates[i - 1]!.confidence).toBeGreaterThanOrEqual(
+        candidates[i]!.confidence,
+      );
+    }
+  });
+
+  test(`matching pinyin and gloss improve confidence`, async () => {
+    const entries = await loadCedictV2();
+    const entry = entries.find((x) => transformCedictV2Entry(x).length > 0);
+
+    expect(entry).toBeDefined();
+    if (entry == null) {
+      throw new Error(`expected a CE-DICT entry`);
+    }
+
+    const [sense] = transformCedictV2Entry(entry);
+    expect(sense).toBeDefined();
+    if (sense == null) {
+      throw new Error(`expected a transformed sense`);
+    }
+
+    const strong = await findCedictSensesForHanziWordMeaning(
+      sense.simplified as HanziText,
+      [sense.pinyin[0]!],
+      [sense.glosses[0]!],
+    );
+
+    const weak = await findCedictSensesForHanziWordMeaning(
+      sense.simplified as HanziText,
+      [`zz` as never],
+      [`definitely unrelated phrase`],
+    );
+
+    expect(strong[0]?.senseId).toBe(sense.senseId);
+    expect(weak[0]).toBeDefined();
+    expect((strong[0]?.confidence ?? 0) > (weak[0]?.confidence ?? 0)).toBe(
+      true,
+    );
+  });
+});
+
+describe(`computeGlossesSimilarity`, () => {
+  test.for([
+    `to run; quick movement -> /to run; quick movement/`,
+    `to run fast -> /to run slowly/quick movement/physical movement/`,
+    `commemorate -> /to commemorate; to honor the memory of/memento; keepsake; souvenir/`,
+    `pure; simple; unmixed; genuine -> /pure/simple/unmixed/genuine/`,
+    // dictionary: 一定:certainly / CE-DICT: 一定 [[yi1ding4]]
+    `certainly; definitely -> /surely; certainly; definitely/fixed; settled/a certain ...; a given .../`,
+    // dictionary: 一致:unanimous / CE-DICT: 一致 [[yi1zhi4]]
+    `unanimous; identical; agreement -> /consistent; unanimous; in agreement/together; in unison/`,
+    // dictionary: 一般:general/common / CE-DICT: 一般 [[yi1ban1]]
+    `general; common -> /common/general/in general/same/ordinary/so-so/generally/`,
+    // dictionary: 一块儿:together / CE-DICT: 一塊 [[yi1kuai4]]
+    `together -> /together; in the same place; in company/a piece; a chunk/(fig.) (coll.) area/(coll.) one yuan; a dollar/`,
+    `appointment; make an appointment -> /to make an appointment/to weigh in a balance or on a scale/to invite/approximately/pact/treaty/to economize/to restrict/to reduce (a fraction)/concise/`,
+  ] as string[])(`sorted similarity fixture: %s`, (spec) => {
+    const [base, candidates] = spec.split(` -> `) as [string, string];
+    const baseGlosses = base.split(`; `);
+    const sorted = candidates
+      .slice(1, -1)
+      .split(`/`)
+      .map((s) => s.split(`; `))
+      .sort(
+        (a, b) =>
+          computeGlossesSimilarity(baseGlosses, b) -
+          computeGlossesSimilarity(baseGlosses, a),
+      )
+      .map((s) => s.join(`; `));
+
+    const actual = `${base} -> /${sorted.join(`/`)}/`;
+
+    expect(actual).toBe(spec);
+  });
+
+  function splitSenses(spec: string): string[][] {
+    return spec
+      .slice(1, -1)
+      .split(`/`)
+      .map((s) => s.split(`; `));
+  }
+
+  test.for([
+    [
+      `appointment; make an appointment`,
+      `/to make an appointment/to weigh in a balance or on a scale/to invite/approximately/pact/treaty/to economize/to restrict/to reduce (a fraction)/concise/`,
+    ],
+  ] as [string, string][])(`fixture %s`, ([base, candidates]) => {
+    const baseGlosses = base.split(`; `);
+
+    const actual = splitSenses(candidates)
+      .map((glosses) => {
+        const similarity = computeGlossesSimilarity(baseGlosses, glosses);
+        return { similarity, candidate: glosses.join(`; `) };
+      })
+      .sort((a, b) => b.similarity - a.similarity)
+      .map((x) => `(${x.similarity}) ${x.candidate}`)
+      .join(`\n`);
+
+    expect(actual).toMatchSnapshot();
+  });
+
+  test(`appointment fixture`, () => {
+    const baseGlosses = `appointment; make an appointment`.split(`; `);
+    const candidates = splitSenses(
+      `/to make an appointment/to weigh in a balance or on a scale/to invite/approximately/pact/treaty/to economize/to restrict/to reduce (a fraction)/concise/`,
+    );
+
+    const actual = candidates
+      .map((candidate) => {
+        const similarity = computeGlossesSimilarity(baseGlosses, candidate);
+        return { similarity, candidate };
+      })
+      .sort((a, b) => b.similarity - a.similarity)
+      .map((x) => `(${x.similarity}) ${x.candidate.join(`; `)}`)
+      .join(`\n`);
+
+    expect(actual).toMatchInlineSnapshot(`
+      "(0.3) to make an appointment
+      (0) to weigh in a balance or on a scale
+      (0) to invite
+      (0) approximately
+      (0) pact
+      (0) treaty
+      (0) to economize
+      (0) to restrict
+      (0) to reduce (a fraction)
+      (0) concise"
+    `);
+  });
+
+  test(`returns 1 for identical gloss arrays`, () => {
+    const similarity = computeGlossesSimilarity(
+      [`to run`, `quick movement`],
+      [`to run`, `quick movement`],
+    );
+
+    expect(similarity).toBe(1);
+  });
+
+  test(`returns 1 when gloss arrays match after normalization`, () => {
+    const similarity = computeGlossesSimilarity(
+      [`  To Run `, `quick   movement`],
+      [`to run`, `quick movement`],
+    );
+
+    expect(similarity).toBe(1);
+  });
+
+  test(`returns 0 for completely different glosses`, () => {
+    const similarity = computeGlossesSimilarity(
+      [`to run`, `quick movement`],
+      [`blue sky`, `ocean`],
+    );
+
+    expect(similarity).toBe(0);
+  });
+
+  test(`returns partial score for partially overlapping glosses`, () => {
+    const similarity = computeGlossesSimilarity(
+      [`to run fast`, `quick movement`],
+      [`to run slowly`, `physical movement`],
+    );
+
+    expect(similarity).toBeGreaterThan(0);
+    expect(similarity).toBeLessThan(1);
+  });
+
+  test(`treats two empty arrays as exactly the same`, () => {
+    const similarity = computeGlossesSimilarity([], []);
+    expect(similarity).toBe(1);
+  });
+
+  test(`returns 0 when only one side is empty`, () => {
+    const similarity = computeGlossesSimilarity([`test`], []);
+    expect(similarity).toBe(0);
   });
 });

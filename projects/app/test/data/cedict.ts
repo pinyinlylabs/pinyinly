@@ -1,4 +1,4 @@
-import type { PinyinNumericText, PinyinText } from "#data/model.js";
+import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { regExpEscape } from "#util/regExp.js";
 import {
@@ -35,6 +35,11 @@ export interface TransformedCedictV2SenseType {
   glosses: string[];
   classifiers?: string[];
   tags?: string[];
+}
+
+export interface CedictSenseCandidateType {
+  senseId: string;
+  confidence: number;
 }
 
 export interface ParseCedictV2LineOptionsType {
@@ -1114,6 +1119,114 @@ export async function findCedictSenseIdCandidatesById(
   );
 }
 
+export async function findCedictSensesForHanziWordMeaning(
+  hanzi: HanziText,
+  pinyin: readonly PinyinText[] | null | undefined,
+  glosses: readonly string[],
+  opts?: { indexes?: Awaited<ReturnType<typeof getCedictLookupIndexes>> },
+): Promise<CedictSenseCandidateType[]> {
+  const normalizedHanzi = hanzi.normalize(`NFKC`);
+  if (normalizedHanzi.length === 0) {
+    return [];
+  }
+
+  const indexes = opts?.indexes ?? (await getCedictLookupIndexes());
+  const candidates = new Map<string, CedictV2EntryType>();
+
+  for (const entry of indexes.entriesBySimplified.get(normalizedHanzi) ?? []) {
+    candidates.set(
+      buildCedictV2EditEntryKey(
+        entry.traditional,
+        entry.simplified,
+        entry.pinyin,
+      ),
+      entry,
+    );
+  }
+
+  if (candidates.size === 0) {
+    return [];
+  }
+
+  const normalizedInputPinyin = (pinyin ?? [])
+    .map((x) => normalizePinyinText(x))
+    .filter(arrayFilterUnique());
+  const primaryInputPinyin = normalizedInputPinyin[0] ?? null;
+  const inputPinyinSet = new Set(normalizedInputPinyin);
+
+  const normalizedInputGlosses = glosses
+    .map((x) => normalizeGlossForComparison(x))
+    .filter((x) => x.length > 0)
+    .filter(arrayFilterUnique());
+  const primaryInputGloss = normalizedInputGlosses[0] ?? null;
+  const inputGlossSet = new Set(normalizedInputGlosses);
+
+  const scoredCandidates: CedictSenseCandidateType[] = [];
+
+  for (const entry of candidates.values()) {
+    for (const sense of transformCedictV2Entry(entry)) {
+      const normalizedSenseGlosses = sense.glosses
+        .map((x) => normalizeGlossForComparison(x))
+        .filter((x) => x.length > 0)
+        .filter(arrayFilterUnique());
+
+      const normalizedSensePinyin = sense.pinyin
+        .map((x) => normalizePinyinText(x))
+        .filter(arrayFilterUnique());
+      const primarySensePinyin = normalizedSensePinyin[0] ?? null;
+
+      let confidence = 0;
+
+      if (
+        sense.simplified.normalize(`NFKC`) === normalizedHanzi ||
+        sense.traditional.normalize(`NFKC`) === normalizedHanzi
+      ) {
+        confidence += 0.2;
+      }
+
+      if (primaryInputPinyin != null && primarySensePinyin != null) {
+        if (primaryInputPinyin === primarySensePinyin) {
+          confidence += 0.3;
+        } else if (normalizedSensePinyin.some((x) => inputPinyinSet.has(x))) {
+          confidence += 0.2;
+        }
+      } else if (
+        normalizedInputPinyin.length > 0 &&
+        normalizedSensePinyin.some((x) => inputPinyinSet.has(x))
+      ) {
+        confidence += 0.2;
+      }
+
+      if (primaryInputGloss != null) {
+        if (normalizedSenseGlosses.includes(primaryInputGloss)) {
+          confidence += 0.2;
+        } else if (normalizedSenseGlosses.some((x) => inputGlossSet.has(x))) {
+          confidence += 0.1;
+        }
+      }
+
+      const glossSimilarity = computeGlossesSimilarity(
+        normalizedInputGlosses,
+        normalizedSenseGlosses,
+      );
+      confidence += glossSimilarity * 0.3;
+
+      scoredCandidates.push({
+        senseId: sense.senseId,
+        confidence: clampConfidence(confidence),
+      });
+    }
+  }
+
+  return scoredCandidates.sort((a, b) => {
+    if (b.confidence !== a.confidence) {
+      return b.confidence - a.confidence;
+    }
+
+    return a.senseId.localeCompare(b.senseId);
+  });
+}
+
 export function buildCedictSenseId(
   traditional: string,
   simplified: string,
@@ -1145,6 +1258,84 @@ const getCedictLookupIndexes = memoize0(async () => {
     entriesBySimplified,
   };
 });
+
+function normalizeGlossForComparison(gloss: string): string {
+  return gloss.toLowerCase().replaceAll(/\s+/gu, ` `).trim();
+}
+
+export function computeGlossesSimilarity(
+  glosses1: string[],
+  glosses2: string[],
+): number {
+  const normalized1 = glosses1
+    .map((x) => normalizeGlossForComparison(x))
+    .filter((x) => x.length > 0)
+    .filter(arrayFilterUnique());
+  const normalized2 = glosses2
+    .map((x) => normalizeGlossForComparison(x))
+    .filter((x) => x.length > 0)
+    .filter(arrayFilterUnique());
+
+  if (normalized1.length === 0 && normalized2.length === 0) {
+    return 1;
+  }
+
+  if (normalized1.length === 0 || normalized2.length === 0) {
+    return 0;
+  }
+
+  const glossSet1 = new Set(normalized1);
+  const glossSet2 = new Set(normalized2);
+
+  const exactOverlapCount = [...glossSet1].filter((x) =>
+    glossSet2.has(x),
+  ).length;
+  const exactUnionCount = new Set([...glossSet1, ...glossSet2]).size;
+  const exactGlossScore =
+    exactUnionCount === 0 ? 0 : exactOverlapCount / exactUnionCount;
+
+  const tokenSet1 = new Set(
+    normalized1.flatMap((x) => [...tokenizeGlossForComparison(x)]),
+  );
+  const tokenSet2 = new Set(
+    normalized2.flatMap((x) => [...tokenizeGlossForComparison(x)]),
+  );
+  const tokenScore = tokenOverlapRatio(tokenSet1, tokenSet2);
+
+  const weightedScore = exactGlossScore * 0.6 + tokenScore * 0.4;
+  return clampConfidence(weightedScore);
+}
+
+function tokenizeGlossForComparison(gloss: string): Set<string> {
+  return new Set(gloss.match(/[\p{L}\p{N}]+/gu) ?? []);
+}
+
+function tokenOverlapRatio(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) {
+    return 0;
+  }
+
+  let intersectionCount = 0;
+  for (const token of a) {
+    if (b.has(token)) {
+      intersectionCount += 1;
+    }
+  }
+
+  return intersectionCount / Math.max(a.size, b.size);
+}
+
+function clampConfidence(confidence: number): number {
+  if (confidence <= 0) {
+    return 0;
+  }
+
+  if (confidence >= 1) {
+    return 1;
+  }
+
+  return Number(confidence.toFixed(4));
+}
 
 function findCedictEntryCandidatesByParams(
   indexes: { entriesBySimplified: Map<string, CedictV2EntryType[]> },
