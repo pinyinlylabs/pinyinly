@@ -777,6 +777,7 @@ describe(`parseCedictV2Line tag extraction`, () => {
     [`(derog.) gloss`, `{derogatory} gloss`],
     [`(derogatory) gloss`, `{derogatory} gloss`],
     [`(dialect) gloss`, `{dialect} gloss`],
+    [`(directional complement) gloss`, `{directional complement} gloss`],
     [`(disparaging) gloss`, `{disparaging} gloss`],
     [`(euphemism) gloss`, `{euphemism} gloss`],
     [`(fig.) gloss`, `{fig.} gloss`],

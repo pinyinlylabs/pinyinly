@@ -302,6 +302,7 @@ const genericTags = [
   `derog.`,
   `derogatory`,
   `dialect`,
+  `directional complement`,
   `disparaging`,
   `euphemism`,
   `fig.`,
