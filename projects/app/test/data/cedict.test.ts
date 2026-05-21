@@ -356,6 +356,25 @@ describe(`parseCedictV2EditsText`, () => {
     });
   });
 
+  test(`allows comment lines in the middle of an edits block`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `車上 车上 [[che1 shang4]]`,
+        `# https://www.dong-chinese.com/wiki/车上`,
+        `+ /in a car; aboard/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `車上`,
+      simplified: `车上`,
+      pinyin: `che1 shang4`,
+      rules: [{ kind: `add`, newSense: `in a car; aboard` }],
+    });
+  });
+
   test(`parses multiple edit blocks for different entries`, () => {
     const parsed = parseCedictV2EditsText(
       [

@@ -524,6 +524,11 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
         break;
       }
 
+      if (ruleTrimmed.startsWith(`#`)) {
+        i += 1;
+        continue;
+      }
+
       rules.push(parseCedictV2EditRule(ruleTrimmed, ruleLineNumber));
       i += 1;
     }
