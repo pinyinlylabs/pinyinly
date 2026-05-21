@@ -839,11 +839,14 @@ describe(`parseCedictV2Line tag extraction`, () => {
     [`normal gloss; (idiom)`, `{idiom} normal gloss`],
     // Unknown tags are left as-is
     [`(horse)`, `(horse)`],
-  ] as const)(`tag fixture: %s → %s`, async ([input, expected]) => {
-    const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
+  ] as [string, string][])(
+    `tag fixture: %s → %s`,
+    async ([input, expected]) => {
+      const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
 
-    expect(actual).toBe(expected);
-  });
+      expect(actual).toBe(expected);
+    },
+  );
 });
 
 describe(`applyCedictV2EditsToText sense serialization`, () => {
