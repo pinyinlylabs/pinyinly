@@ -123,7 +123,7 @@ describe(`parseCedictV2Line`, () => {
 
   test(`applies merge edits that combine two senses into one`, () => {
     const edits = parseCedictV2EditsText(
-      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2; gloss 3/`, ``].join(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /gloss 2; gloss 3/`, ``].join(
         `\n`,
       ),
     );
@@ -145,7 +145,7 @@ describe(`parseCedictV2Line`, () => {
 
   test(`applies merge edits that combine three senses into one`, () => {
     const edits = parseCedictV2EditsText(
-      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2/ + /gloss 3/`, ``].join(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /gloss 2/ += /gloss 3/`, ``].join(
         `\n`,
       ),
     );
@@ -213,7 +213,7 @@ describe(`parseCedictV2Line`, () => {
 
   test(`throws in strict mode when merge edits do not match`, () => {
     const edits = parseCedictV2EditsText(
-      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /missing gloss/`, ``].join(`\n`),
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /missing gloss/`, ``].join(`\n`),
     );
 
     expect(() =>
@@ -225,7 +225,7 @@ describe(`parseCedictV2Line`, () => {
 
   test(`skips unmatched merge edits in lenient mode`, () => {
     const edits = parseCedictV2EditsText(
-      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /missing gloss/`, ``].join(`\n`),
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /missing gloss/`, ``].join(`\n`),
     );
 
     const parsed = parseCedictV2Line(
@@ -311,7 +311,7 @@ describe(`parseCedictV2EditsText`, () => {
 
   test(`parses merge rules`, () => {
     const parsed = parseCedictV2EditsText(
-      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2; gloss 3/`, ``].join(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /gloss 2; gloss 3/`, ``].join(
         `\n`,
       ),
     );
@@ -390,7 +390,7 @@ describe(`parseCedictV2EditsText`, () => {
   test(`throws on malformed merge rule lines`, () => {
     expect(() =>
       parseCedictV2EditsText(
-        [`示例 示例 [[shi4li4]]`, `/gloss 1/ + gloss 2/`, ``].join(`\n`),
+        [`示例 示例 [[shi4li4]]`, `/gloss 1/ += gloss 2/`, ``].join(`\n`),
       ),
     ).toThrow(`invalid edits rule line (line 2)`);
   });
@@ -442,7 +442,7 @@ describe(`applyCedictV2EditsToText`, () => {
     const input = `示例 示例 [[shi4li4]] /gloss 1/gloss 2; gloss 3/gloss 4/`;
 
     const edits = parseCedictV2EditsText(
-      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2; gloss 3/`, ``].join(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /gloss 2; gloss 3/`, ``].join(
         `\n`,
       ),
     );

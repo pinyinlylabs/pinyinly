@@ -1463,13 +1463,13 @@ function parseCedictV2EditRule(
   line: string,
   lineNumber: number,
 ): CedictV2EditRuleType {
-  if (line.includes(`+`)) {
+  if (line.includes(`+=`)) {
     const mergeSenseMatches = [...line.matchAll(/\/(?<sense>[^/]*)\//gu)];
     const mergeSeparators = line.replaceAll(/\/[^/]*\//gu, ``);
 
     if (
       mergeSenseMatches.length < 2 ||
-      mergeSeparators.match(/^\s*(?:\+\s*)+$/u) == null
+      mergeSeparators.match(/^\s*(?:\+=\s*)+$/u) == null
     ) {
       throw new Error(
         formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
