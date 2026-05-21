@@ -384,7 +384,7 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
 
 export const cedictReferenceSchema = z
   .string()
-  .regex(/^.+? .+? \[\[.+?\]\] \/.+\/$/u, {
+  .regex(/^.+? .+? \[\[.*?\]\] \/.+\/$/u, {
     message: `CE-DICT reference must follow the format: traditional simplified [[pinyin]] /sense/`,
   });
 

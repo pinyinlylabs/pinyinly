@@ -73,6 +73,22 @@ describe(`parseCedictV2Line`, () => {
     `);
   });
 
+  test(`parses line with empty pinyin`, () => {
+    const line = `龜 龜 [[]] /turtle/`;
+    const parsed = parseCedictV2Line(line);
+
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "pinyin": "",
+        "senses": [
+          "turtle",
+        ],
+        "simplified": "龜",
+        "traditional": "龜",
+      }
+    `);
+  });
+
   test(`throws for malformed lines in strict mode`, () => {
     expect(() =>
       parseCedictV2Line(`not a cedict line`, { lineNumber: 42 }),
@@ -326,6 +342,20 @@ describe(`parseCedictV2EditsText`, () => {
     ]);
   });
 
+  test(`parses add rules and empty-pinyin headers`, () => {
+    const parsed = parseCedictV2EditsText(
+      [`龜 龜 [[]]`, `+ /turtle/`, ``].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `龜`,
+      simplified: `龜`,
+      pinyin: ``,
+      rules: [{ kind: `add`, newSense: `turtle` }],
+    });
+  });
+
   test(`parses multiple edit blocks for different entries`, () => {
     const parsed = parseCedictV2EditsText(
       [
@@ -451,6 +481,17 @@ describe(`applyCedictV2EditsToText`, () => {
     expect(output).toBe(
       `示例 示例 [[shi4li4]] /gloss 1; gloss 2; gloss 3/gloss 4/`,
     );
+  });
+
+  test(`creates a new entry from edits when source entry is missing`, () => {
+    const input = `# comment`;
+
+    const edits = parseCedictV2EditsText(
+      [`龜 龜 [[]]`, `+ /turtle/`, ``].join(`\n`),
+    );
+
+    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    expect(output).toBe(`# comment\n龜 龜 [[]] /turtle/`);
   });
 });
 
@@ -1123,6 +1164,19 @@ describe(`parseCedictSenseId`, () => {
         "sense": "one ref 一|一[foo]",
         "simplified": "一",
         "traditional": "一",
+      }
+    `);
+  });
+
+  test(`parses valid id with empty pinyin`, () => {
+    const id = `龜 龜 [[]] turtle`;
+    const parsed = parseCedictSenseId(id);
+    expect(parsed).toMatchInlineSnapshot(`
+      {
+        "pinyin": "",
+        "sense": "turtle",
+        "simplified": "龜",
+        "traditional": "龜",
       }
     `);
   });

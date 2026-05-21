@@ -48,7 +48,7 @@ export interface ParseCedictV2LineOptionsType {
   edits?: CedictV2EditsType;
 }
 
-export type CedictV2EditRuleKind = `replace` | `merge`;
+export type CedictV2EditRuleKind = `replace` | `merge` | `add`;
 
 export interface CedictV2ReplaceEditRuleType {
   kind: `replace`;
@@ -62,9 +62,15 @@ export interface CedictV2MergeEditRuleType {
   mergedSense: string;
 }
 
+export interface CedictV2AddEditRuleType {
+  kind: `add`;
+  newSense: string;
+}
+
 export type CedictV2EditRuleType =
   | CedictV2ReplaceEditRuleType
-  | CedictV2MergeEditRuleType;
+  | CedictV2MergeEditRuleType
+  | CedictV2AddEditRuleType;
 
 export interface CedictV2EntryEditsType {
   traditional: string;
@@ -77,7 +83,7 @@ export interface CedictV2EditsType {
   entriesByKey: Map<string, CedictV2EntryEditsType>;
 }
 
-const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]\s+\/(.*)\/$/u;
+const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
 
 const domainTags = [
   `ACG`,
@@ -561,24 +567,53 @@ export function applyCedictV2EditsToText(
   options: ParseCedictV2LineOptionsType = {},
 ): string {
   const strict = options.strict ?? true;
+  const matchedEntryKeys = new Set<string>();
 
-  return text
-    .split(/\r?\n/u)
-    .map((line, i) => {
-      const lineNumber = i + 1;
-      const parsedLine = parseCedictV2Line(line, {
-        strict,
-        lineNumber,
-        edits: options.edits,
-      });
+  const outputLines = text.split(/\r?\n/u).map((line, i) => {
+    const lineNumber = i + 1;
+    const parsedLine = parseCedictV2Line(line, {
+      strict,
+      lineNumber,
+      edits: options.edits,
+    });
 
-      if (parsedLine == null) {
-        return line;
-      }
+    if (parsedLine == null) {
+      return line;
+    }
 
-      return serializeCedictV2Entry(parsedLine);
-    })
-    .join(`\n`);
+    const key = buildCedictV2EditEntryKey(
+      parsedLine.traditional,
+      parsedLine.simplified,
+      parsedLine.pinyin,
+    );
+    if (options.edits?.entriesByKey.has(key)) {
+      matchedEntryKeys.add(key);
+    }
+
+    return serializeCedictV2Entry(parsedLine);
+  });
+
+  for (const [key, entryEdits] of options.edits?.entriesByKey ?? []) {
+    if (matchedEntryKeys.has(key)) {
+      continue;
+    }
+
+    const createdSenses = applyCedictEntryEdits([], entryEdits, options);
+    if (createdSenses.length === 0) {
+      continue;
+    }
+
+    outputLines.push(
+      serializeCedictV2Entry({
+        traditional: entryEdits.traditional,
+        simplified: entryEdits.simplified,
+        pinyin: entryEdits.pinyin,
+        senses: createdSenses,
+      }),
+    );
+  }
+
+  return outputLines.join(`\n`);
 }
 
 function serializeCedictV2Entry(entry: CedictV2EntryType): string {
@@ -1381,7 +1416,7 @@ export function parseCedictSenseId(
   cedictSenseId: string,
 ): CedictIdParamsType | null {
   const match = cedictSenseId.match(
-    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.+?)\]\] (?<sense>.+?)$/u,
+    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.*?)\]\] (?<sense>.+?)$/u,
   );
   if (match == null) {
     return null;
@@ -1398,7 +1433,6 @@ export function parseCedictSenseId(
     simplified == null ||
     simplified.length === 0 ||
     pinyin == null ||
-    pinyin.length === 0 ||
     sense == null ||
     sense.length === 0
   ) {
@@ -1436,7 +1470,7 @@ function parseCedictV2EditHeader(
   line: string,
   lineNumber: number,
 ): { traditional: string; simplified: string; pinyin: PinyinNumericText } {
-  const match = line.match(/^(\S+)\s+(\S+)\s+\[\[(.+?)\]\]$/u);
+  const match = line.match(/^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]$/u);
   if (match == null) {
     throw new Error(
       formatCedictEditsParseError(`invalid edits header line`, lineNumber),
@@ -1463,6 +1497,21 @@ function parseCedictV2EditRule(
   line: string,
   lineNumber: number,
 ): CedictV2EditRuleType {
+  const addMatch = line.match(/^\+\s*\/(?<newSense>[^/]*)\/$/u);
+  if (addMatch != null) {
+    const newSense = addMatch.groups?.[`newSense`]?.trim();
+    if (newSense == null || newSense.length === 0) {
+      throw new Error(
+        formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+      );
+    }
+
+    return {
+      kind: `add`,
+      newSense,
+    };
+  }
+
   if (line.includes(`+=`)) {
     const mergeSenseMatches = [...line.matchAll(/\/(?<sense>[^/]*)\//gu)];
     const mergeSeparators = line.replaceAll(/\/[^/]*\//gu, ``);
@@ -1534,6 +1583,11 @@ function applyCedictEntryEdits(
   const nextSenses = [...senses];
 
   for (const rule of entryEdits.rules) {
+    if (rule.kind === `add`) {
+      nextSenses.push(rule.newSense);
+      continue;
+    }
+
     if (rule.kind === `merge`) {
       const matchIndexes: number[] = [];
       let shouldSkipRule = false;
