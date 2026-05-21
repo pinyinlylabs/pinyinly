@@ -48,10 +48,23 @@ export interface ParseCedictV2LineOptionsType {
   edits?: CedictV2EditsType;
 }
 
-export interface CedictV2EditRuleType {
+export type CedictV2EditRuleKind = `replace` | `merge`;
+
+export interface CedictV2ReplaceEditRuleType {
+  kind: `replace`;
   oldSense: string;
   newSense: string;
 }
+
+export interface CedictV2MergeEditRuleType {
+  kind: `merge`;
+  oldSenses: string[];
+  mergedSense: string;
+}
+
+export type CedictV2EditRuleType =
+  | CedictV2ReplaceEditRuleType
+  | CedictV2MergeEditRuleType;
 
 export interface CedictV2EntryEditsType {
   traditional: string;
@@ -1450,6 +1463,36 @@ function parseCedictV2EditRule(
   line: string,
   lineNumber: number,
 ): CedictV2EditRuleType {
+  if (line.includes(`+`)) {
+    const mergeSenseMatches = [...line.matchAll(/\/(?<sense>[^/]*)\//gu)];
+    const mergeSeparators = line.replaceAll(/\/[^/]*\//gu, ``);
+
+    if (
+      mergeSenseMatches.length < 2 ||
+      mergeSeparators.match(/^\s*(?:\+\s*)+$/u) == null
+    ) {
+      throw new Error(
+        formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+      );
+    }
+
+    const oldSenses = mergeSenseMatches
+      .map((item) => item.groups?.[`sense`]?.trim())
+      .filter((sense): sense is string => sense != null && sense.length > 0);
+
+    if (oldSenses.length !== mergeSenseMatches.length) {
+      throw new Error(
+        formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+      );
+    }
+
+    return {
+      kind: `merge`,
+      oldSenses,
+      mergedSense: oldSenses.join(`; `),
+    };
+  }
+
   const match = line.match(
     /^\/(?<oldSense>[^/]*)\/\s+(?<replacement>\/\/|\/.*\/)$/u,
   );
@@ -1469,6 +1512,7 @@ function parseCedictV2EditRule(
 
   if (replacement === `//`) {
     return {
+      kind: `replace`,
       oldSense,
       newSense: ``,
     };
@@ -1476,6 +1520,7 @@ function parseCedictV2EditRule(
 
   const replacementContent = replacement.slice(1, -1).trim();
   return {
+    kind: `replace`,
     oldSense,
     newSense: replacementContent,
   };
@@ -1489,6 +1534,64 @@ function applyCedictEntryEdits(
   const nextSenses = [...senses];
 
   for (const rule of entryEdits.rules) {
+    if (rule.kind === `merge`) {
+      const matchIndexes: number[] = [];
+      let shouldSkipRule = false;
+
+      for (const oldSense of rule.oldSenses) {
+        const matchingIndexes = nextSenses
+          .map((sense, index) => (sense === oldSense ? index : -1))
+          .filter((index) => index >= 0);
+
+        if (matchingIndexes.length === 0) {
+          if (options.strict ?? true) {
+            throw new Error(
+              formatParseError(
+                `edits rule did not match sense: ${oldSense}`,
+                options,
+              ),
+            );
+          }
+
+          shouldSkipRule = true;
+          break;
+        }
+
+        if (matchingIndexes.length > 1) {
+          throw new Error(
+            formatParseError(
+              `edits rule matched multiple senses: ${oldSense}`,
+              options,
+            ),
+          );
+        }
+
+        const [matchingIndex] = matchingIndexes;
+        if (matchingIndex != null) {
+          matchIndexes.push(matchingIndex);
+        }
+      }
+
+      if (shouldSkipRule) {
+        continue;
+      }
+
+      if (matchIndexes.length === 0) {
+        continue;
+      }
+
+      const insertIndex = Math.min(...matchIndexes);
+      const uniqueMatchIndexes = [...new Set(matchIndexes)].sort(
+        (a, b) => b - a,
+      );
+      for (const index of uniqueMatchIndexes) {
+        nextSenses.splice(index, 1);
+      }
+
+      nextSenses.splice(insertIndex, 0, rule.mergedSense);
+      continue;
+    }
+
     const matchIndexes = nextSenses
       .map((sense, index) => (sense === rule.oldSense ? index : -1))
       .filter((index) => index >= 0);

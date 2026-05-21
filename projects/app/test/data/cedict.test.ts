@@ -121,6 +121,50 @@ describe(`parseCedictV2Line`, () => {
     `);
   });
 
+  test(`applies merge edits that combine two senses into one`, () => {
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2; gloss 3/`, ``].join(
+        `\n`,
+      ),
+    );
+
+    const parsed = parseCedictV2Line(
+      `示例 示例 [[shi4li4]] /gloss 1/gloss 2; gloss 3/gloss 4/`,
+      {
+        edits,
+      },
+    );
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        "gloss 1; gloss 2; gloss 3",
+        "gloss 4",
+      ]
+    `);
+  });
+
+  test(`applies merge edits that combine three senses into one`, () => {
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2/ + /gloss 3/`, ``].join(
+        `\n`,
+      ),
+    );
+
+    const parsed = parseCedictV2Line(
+      `示例 示例 [[shi4li4]] /gloss 1/gloss 2/gloss 3/gloss 4/`,
+      {
+        edits,
+      },
+    );
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        "gloss 1; gloss 2; gloss 3",
+        "gloss 4",
+      ]
+    `);
+  });
+
   test(`applies deletion edits before sense parsing`, () => {
     const edits = parseCedictV2EditsText(
       [`小二 小二 [[xiao3'er4]]`, `/old sense 1/ //`, ``].join(`\n`),
@@ -167,6 +211,39 @@ describe(`parseCedictV2Line`, () => {
     `);
   });
 
+  test(`throws in strict mode when merge edits do not match`, () => {
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /missing gloss/`, ``].join(`\n`),
+    );
+
+    expect(() =>
+      parseCedictV2Line(`示例 示例 [[shi4li4]] /gloss 1/gloss 2/`, {
+        edits,
+      }),
+    ).toThrow(`edits rule did not match sense: missing gloss`);
+  });
+
+  test(`skips unmatched merge edits in lenient mode`, () => {
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /missing gloss/`, ``].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(
+      `示例 示例 [[shi4li4]] /gloss 1/gloss 2/`,
+      {
+        strict: false,
+        edits,
+      },
+    );
+
+    expect(parsed?.senses).toMatchInlineSnapshot(`
+      [
+        "gloss 1",
+        "gloss 2",
+      ]
+    `);
+  });
+
   test(`throws when one edits rule matches multiple senses`, () => {
     const edits = parseCedictV2EditsText(
       [`小二 小二 [[xiao3'er4]]`, `/same sense/ /new sense/`, ``].join(`\n`),
@@ -205,10 +282,12 @@ describe(`parseCedictV2EditsText`, () => {
         "pinyin": "xiao3'er4",
         "rules": [
           {
+            "kind": "replace",
             "newSense": "new sense 1",
             "oldSense": "old sense 1",
           },
           {
+            "kind": "replace",
             "newSense": "",
             "oldSense": "old sense 2",
           },
@@ -226,7 +305,24 @@ describe(`parseCedictV2EditsText`, () => {
 
     const [entry] = [...parsed.entriesByKey.values()];
     expect(entry?.rules).toEqual([
-      { oldSense: `one,two`, newSense: `one/two` },
+      { kind: `replace`, oldSense: `one,two`, newSense: `one/two` },
+    ]);
+  });
+
+  test(`parses merge rules`, () => {
+    const parsed = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2; gloss 3/`, ``].join(
+        `\n`,
+      ),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry?.rules).toEqual([
+      {
+        kind: `merge`,
+        oldSenses: [`gloss 1`, `gloss 2; gloss 3`],
+        mergedSense: `gloss 1; gloss 2; gloss 3`,
+      },
     ]);
   });
 
@@ -251,6 +347,7 @@ describe(`parseCedictV2EditsText`, () => {
           "pinyin": "xiao3'er4",
           "rules": [
             {
+              "kind": "replace",
               "newSense": "new sense 1",
               "oldSense": "old sense 1",
             },
@@ -262,6 +359,7 @@ describe(`parseCedictV2EditsText`, () => {
           "pinyin": "san1geng1",
           "rules": [
             {
+              "kind": "replace",
               "newSense": "late night",
               "oldSense": "midnight",
             },
@@ -285,6 +383,14 @@ describe(`parseCedictV2EditsText`, () => {
     expect(() =>
       parseCedictV2EditsText(
         [`小二 小二 [[xiao3'er4]]`, `/old/ new`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid edits rule line (line 2)`);
+  });
+
+  test(`throws on malformed merge rule lines`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [`示例 示例 [[shi4li4]]`, `/gloss 1/ + gloss 2/`, ``].join(`\n`),
       ),
     ).toThrow(`invalid edits rule line (line 2)`);
   });
@@ -330,6 +436,21 @@ describe(`applyCedictV2EditsToText`, () => {
       示例 示例 [[shi4li4]] /one/two/three/
       小二 小二 [[xiao3'er4]] /new sense 1/old sense 2/"
     `);
+  });
+
+  test(`renders final cedict text with applied merge edits`, () => {
+    const input = `示例 示例 [[shi4li4]] /gloss 1/gloss 2; gloss 3/gloss 4/`;
+
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/gloss 1/ + /gloss 2; gloss 3/`, ``].join(
+        `\n`,
+      ),
+    );
+
+    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    expect(output).toBe(
+      `示例 示例 [[shi4li4]] /gloss 1; gloss 2; gloss 3/gloss 4/`,
+    );
   });
 });
 
