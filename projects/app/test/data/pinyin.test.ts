@@ -142,6 +142,10 @@ describe(
       [`nǚ`, `nǚ`],
       [`nǜ`, `nǜ`],
       [`nü`, `nü`],
+
+      // Handles capital letters
+      [`Hao3`, `Hǎo`],
+      [`Ma1`, `Mā`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
     });
