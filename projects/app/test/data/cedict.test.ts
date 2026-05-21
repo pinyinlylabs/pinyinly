@@ -804,6 +804,7 @@ describe(`parseCedictV2Line tag extraction`, () => {
     [`(metonym) gloss`, `{metonym} gloss`],
     [`(modern) gloss`, `{modern} gloss`],
     [`(name) gloss`, `{name} gloss`],
+    [`(noun suffix) gloss`, `{noun suffix} gloss`],
     [`(offensive) gloss`, `{offensive} gloss`],
     [`(old) gloss`, `{old} gloss`],
     [`(onom.) gloss`, `{onom.} gloss`],

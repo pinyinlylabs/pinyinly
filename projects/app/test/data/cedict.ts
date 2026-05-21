@@ -329,6 +329,7 @@ const genericTags = [
   `metonym`,
   `modern`,
   `name`,
+  `noun suffix`,
   `offensive`,
   `old`,
   `onom.`,
