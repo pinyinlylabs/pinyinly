@@ -1,5 +1,5 @@
 // pyly-not-src-test
-import type { HanziText } from "#data/model.js";
+import type { HanziText, PinyinNumericText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 import {
   applyCedictV2EditsToText,
@@ -7,6 +7,7 @@ import {
   computeGlossesSimilarity,
   parseCedictV2EditsText,
   findCedictEntryById,
+  findCedictMigratedSenseId,
   findCedictSensesForHanziWordMeaning,
   findCedictSenseById,
   loadCedictV2,
@@ -511,6 +512,26 @@ describe(`applyCedictV2EditsToText`, () => {
 
     const output = applyCedictV2EditsToText(input, { strict: true, edits });
     expect(output).toBe(`# comment\n龜 龜 [[]] /turtle/`);
+  });
+});
+
+describe(`findCedictMigratedSenseId`, () => {
+  test(`returns the merged sense id when the old sense was merged`, async () => {
+    const migratedSenseId = await findCedictMigratedSenseId(
+      `領先 领先 [[ling3xian1]] /to lead/`,
+    );
+
+    expect(migratedSenseId).toBe(
+      `領先 领先 [[ling3xian1]] /to lead; to be in front/`,
+    );
+  });
+
+  test(`returns null when the old sense split into multiple senses`, async () => {
+    const migratedSenseId = await findCedictMigratedSenseId(
+      `嘎嘎 嘎嘎 [[ga1ga1]] /also pr. [ga1 ga5], [ga2 ga5] etc/`,
+    );
+
+    expect(migratedSenseId).toBeNull();
   });
 });
 
@@ -1130,7 +1151,7 @@ describe(`findCedictEntryById`, () => {
   });
 
   test(`resolves compact dictionary v2 references`, async () => {
-    const resolved = await findCedictEntryById(`一 一 [[yi1]] one`);
+    const resolved = await findCedictEntryById(`一 一 [[yi1]] /one/`);
     expect(resolved).toMatchInlineSnapshot(`
       {
         "pinyin": "yi1",
@@ -1162,7 +1183,7 @@ describe(`findCedictEntryById`, () => {
 
 describe(`parseCedictSenseId`, () => {
   test(`parses valid ids`, () => {
-    const id = `一 一 [[yi1]] one`;
+    const id = `一 一 [[yi1]] /one/`;
     const parsed = parseCedictSenseId(id);
     expect(parsed).toMatchInlineSnapshot(`
       {
@@ -1175,7 +1196,7 @@ describe(`parseCedictSenseId`, () => {
   });
 
   test(`parses valid id with | in the gloss`, () => {
-    const id = `一 一 [[yi1]] one ref 一|一[foo]`;
+    const id = `一 一 [[yi1]] /one ref 一|一[foo]/`;
     const parsed = parseCedictSenseId(id);
     expect(parsed).toMatchInlineSnapshot(`
       {
@@ -1188,7 +1209,7 @@ describe(`parseCedictSenseId`, () => {
   });
 
   test(`parses valid id with empty pinyin`, () => {
-    const id = `龜 龜 [[]] turtle`;
+    const id = `龜 龜 [[]] /turtle/`;
     const parsed = parseCedictSenseId(id);
     expect(parsed).toMatchInlineSnapshot(`
       {
@@ -1334,6 +1355,34 @@ describe(`findCedictSensesForHanziWordMeaning`, () => {
     expect((strong[0]?.confidence ?? 0) > (weak[0]?.confidence ?? 0)).toBe(
       true,
     );
+  });
+
+  test(`does case-sensitive pinyin matching`, async () => {
+    const indexes = {
+      entriesBySimplified: new Map([
+        [
+          `车上`,
+          [
+            {
+              traditional: `車上`,
+              simplified: `车上`,
+              pinyin: `che1shang4` as PinyinNumericText,
+              senses: [`in a car; aboard`],
+            },
+          ],
+        ],
+      ]),
+    };
+
+    const candidates = await findCedictSensesForHanziWordMeaning(
+      `车上` as HanziText,
+      [`CHE1SHANG4` as never],
+      [`in a car`, `aboard`],
+      { indexes },
+    );
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]?.confidence).toBe(0.7);
   });
 });
 

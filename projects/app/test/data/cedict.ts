@@ -567,6 +567,64 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
   };
 }
 
+const loadCedictV2Edits = memoize0(async (): Promise<CedictV2EditsType> => {
+  const filename = `cedict_ts-2.u8`;
+  const editsText = await readFile(
+    path.join(import.meta.dirname, `${filename}.edits`),
+    `utf8`,
+  );
+
+  return parseCedictV2EditsText(editsText);
+});
+
+export async function findCedictMigratedSenseId(
+  senseId: string,
+): Promise<string | null> {
+  if (senseId.length === 0) {
+    return null;
+  }
+
+  const cedictIdParams = parseCedictSenseId(senseId);
+  if (cedictIdParams == null) {
+    return null;
+  }
+
+  const parsedSenseId = parseCedictV2Line(senseId);
+  if (parsedSenseId == null) {
+    return null;
+  }
+
+  const originalGlosses = parseCedictV2Sense(cedictIdParams.sense)
+    .glosses.map((gloss) => normalizeGlossForComparison(gloss.cleanedGloss))
+    .filter((gloss) => gloss.length > 0)
+    .filter(arrayFilterUnique());
+  if (originalGlosses.length === 0) {
+    return null;
+  }
+
+  const originalGlossesSet = new Set(originalGlosses);
+
+  const indexes = await getCedictLookupIndexes();
+  const entries = findCedictEntryCandidatesByParams(indexes, cedictIdParams);
+  const migratedSenseCandidates: string[] = [];
+
+  for (const entry of entries) {
+    for (const candidateSense of transformCedictV2Entry(entry)) {
+      if (!new Set(candidateSense.glosses).isSupersetOf(originalGlossesSet)) {
+        continue;
+      }
+
+      migratedSenseCandidates.push(candidateSense.senseId);
+    }
+  }
+
+  if (migratedSenseCandidates.length !== 1) {
+    return null;
+  }
+
+  return migratedSenseCandidates[0]!;
+}
+
 export function applyCedictV2EditsToText(
   text: string,
   options: ParseCedictV2LineOptionsType = {},
@@ -591,7 +649,7 @@ export function applyCedictV2EditsToText(
       parsedLine.simplified,
       parsedLine.pinyin,
     );
-    if (options.edits?.entriesByKey.has(key)) {
+    if (options.edits?.entriesByKey.has(key) === true) {
       matchedEntryKeys.add(key);
     }
 
@@ -1075,12 +1133,7 @@ export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
     `utf8`,
   );
 
-  const editsText = await readFile(
-    path.join(import.meta.dirname, `${filename}.edits`),
-    `utf8`,
-  );
-
-  const edits = parseCedictV2EditsText(editsText);
+  const edits = await loadCedictV2Edits();
 
   const outputText = applyCedictV2EditsToText(dataText, {
     strict: true,
@@ -1421,7 +1474,7 @@ export function parseCedictSenseId(
   cedictSenseId: string,
 ): CedictIdParamsType | null {
   const match = cedictSenseId.match(
-    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.*?)\]\] (?<sense>.+?)$/u,
+    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.*?)\]\] \/(?<sense>.+?)\/$/u,
   );
   if (match == null) {
     return null;
