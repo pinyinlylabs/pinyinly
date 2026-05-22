@@ -3,8 +3,12 @@ import type { HanziText, PinyinNumericText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 import {
   applyCedictV2EditsToText,
+  buildCedictStableSenseId,
+  buildCedictV2SenseIdsText,
   buildCedictSenseId,
   computeGlossesSimilarity,
+  parseCedictStableSenseId,
+  parseCedictV2IdsText,
   parseCedictV2EditsText,
   findCedictEntryById,
   findCedictMigratedSenseId,
@@ -458,6 +462,185 @@ describe(`parseCedictV2EditsText`, () => {
         ].join(`\n`),
       ),
     ).toThrow(`duplicate edit block for 小二 小二 [[xiao3'er4]] (line 4)`);
+  });
+});
+
+describe(`parseCedictV2IdsText`, () => {
+  test(`gracefully parses an empty ids file`, () => {
+    const parsed = parseCedictV2IdsText(``);
+
+    expect(parsed.entriesByKey.size).toBe(0);
+    expect([...parsed.entriesByKey.values()]).toEqual([]);
+  });
+
+  test(`parses valid ids blocks`, () => {
+    const parsed = parseCedictV2IdsText(
+      [
+        `小二 小二 [[xiao3'er4]]`,
+        `abc12 /new sense 1/`,
+        `def34 /old sense 2/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(parsed.entriesByKey.size).toBe(1);
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `小二`,
+      simplified: `小二`,
+      pinyin: `xiao3'er4`,
+      rules: [
+        { nanoid: `abc12`, sense: `new sense 1` },
+        { nanoid: `def34`, sense: `old sense 2` },
+      ],
+    });
+  });
+
+  test(`allows comment lines in the middle of an ids block`, () => {
+    const parsed = parseCedictV2IdsText(
+      [
+        `車上 车上 [[che1 shang4]]`,
+        `# https://www.dong-chinese.com/wiki/车上`,
+        `a1B2c /in a car; aboard/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `車上`,
+      simplified: `车上`,
+      pinyin: `che1 shang4`,
+      rules: [{ nanoid: `a1B2c`, sense: `in a car; aboard` }],
+    });
+  });
+
+  test(`throws on malformed header lines`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [`小二 小二 [xiao3'er4]`, `abc12 /old/`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid edits header line (line 1)`);
+  });
+
+  test(`throws on malformed ids rule lines`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [`小二 小二 [[xiao3'er4]]`, `abc12 old sense`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid ids rule line (line 2)`);
+  });
+
+  test(`throws on duplicate ids blocks`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          ``,
+          `小二 小二 [[xiao3'er4]]`,
+          `def34 /old sense 2/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate ids block for 小二 小二 [[xiao3'er4]] (line 4)`);
+  });
+
+  test(`throws on duplicate nanoid in one block`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          `abc12 /old sense 2/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate nanoid in ids block: abc12 (line 3)`);
+  });
+
+  test(`throws on duplicate sense in one block`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          `def34 /old sense 1/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate sense in ids block: old sense 1 (line 3)`);
+  });
+
+  test(`supports empty-pinyin headers`, () => {
+    const parsed = parseCedictV2IdsText(
+      [`龜 龜 [[]]`, `abc12 /turtle/`, ``].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `龜`,
+      simplified: `龜`,
+      pinyin: ``,
+      rules: [{ nanoid: `abc12`, sense: `turtle` }],
+    });
+  });
+});
+
+describe(`buildCedictStableSenseId`, () => {
+  test(`builds simplified+nanoid ids`, () => {
+    expect(buildCedictStableSenseId(`想`, `fh4i3`)).toBe(`想:fh4i3`);
+  });
+});
+
+describe(`parseCedictStableSenseId`, () => {
+  test(`parses valid stable ids`, () => {
+    expect(parseCedictStableSenseId(`想:fh4i3`)).toEqual({
+      simplified: `想`,
+      nanoid: `fh4i3`,
+    });
+  });
+
+  test(`returns null for invalid stable ids`, () => {
+    expect(parseCedictStableSenseId(`想`)).toBeNull();
+    expect(parseCedictStableSenseId(`想:tooLong`)).toBeNull();
+    expect(parseCedictStableSenseId(`想:12-45`)).toBeNull();
+  });
+});
+
+describe(`buildCedictV2SenseIdsText`, () => {
+  test(`preserves existing ids and generates ids for missing transformed senses`, () => {
+    const entries = [
+      parseCedictV2Line(
+        `婚姻 婚姻 [[hun1yin1]] /marriage; matrimony/CL:樁|桩[zhuang1],次[ci4]/`,
+      )!,
+      parseCedictV2Line(
+        `外面 外面 [[wai4mian4]] /outside (also pr. [wai4mian5] for this sense)/surface/exterior/`,
+      )!,
+    ];
+
+    const existingIds = parseCedictV2IdsText(
+      [`婚姻 婚姻 [[hun1yin1]]`, `aaaa1 /marriage; matrimony/`, ``].join(`\n`),
+    );
+
+    const generatedIds = [`b1111`, `c2222`, `d3333`];
+    let idIndex = 0;
+
+    const output = buildCedictV2SenseIdsText(entries, existingIds, {
+      createNanoid: () => generatedIds[idIndex++] ?? `e4444`,
+    });
+
+    expect(output).toBe(
+      [
+        `婚姻 婚姻 [[hun1yin1]]`,
+        `aaaa1 /marriage; matrimony/`,
+        ``,
+        `外面 外面 [[wai4mian4]]`,
+        `b1111 /outside/`,
+        `c2222 /surface/`,
+        `d3333 /exterior/`,
+      ].join(`\n`),
+    );
   });
 });
 

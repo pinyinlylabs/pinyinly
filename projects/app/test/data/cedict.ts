@@ -1,5 +1,6 @@
 import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
+import { nanoid } from "#util/nanoid.ts";
 import { ChatPrompt, renderPromptTemplate } from "#util/prompts.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
@@ -49,6 +50,13 @@ export interface ParseCedictV2LineOptionsType {
   edits?: CedictV2EditsType;
 }
 
+export type CedictSenseId = `${string}:${string}`;
+
+export interface CedictSenseIdParamsType {
+  simplified: string;
+  nanoid: string;
+}
+
 export type CedictV2EditRuleKind = `replace` | `merge` | `add`;
 
 export interface CedictV2ReplaceEditRuleType {
@@ -83,6 +91,29 @@ export interface CedictV2EntryEditsType {
 export interface CedictV2EditsType {
   entriesByKey: Map<string, CedictV2EntryEditsType>;
 }
+
+export interface CedictV2SenseIdRuleType {
+  nanoid: string;
+  sense: string;
+}
+
+export interface CedictV2EntrySenseIdsType {
+  traditional: string;
+  simplified: string;
+  pinyin: PinyinNumericText;
+  rules: CedictV2SenseIdRuleType[];
+}
+
+export interface CedictV2SenseIdsType {
+  entriesByKey: Map<string, CedictV2EntrySenseIdsType>;
+}
+
+export interface BuildCedictV2SenseIdsTextOptionsType {
+  createNanoid?: () => string;
+}
+
+const CEDICT_V2_SENSE_NANOID_LENGTH = 5;
+const createCedictV2SenseNanoid = () => nanoid().slice(0, 5);
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
 
@@ -568,6 +599,171 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
   };
 }
 
+export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
+  const lines = text.split(/\r?\n/u);
+  const entriesByKey = new Map<string, CedictV2EntrySenseIdsType>();
+  let i = 0;
+
+  while (i < lines.length) {
+    const currentLine = lines[i];
+    const lineNumber = i + 1;
+    const trimmed = currentLine?.trim() ?? ``;
+
+    if (trimmed.length === 0 || trimmed.startsWith(`#`)) {
+      i += 1;
+      continue;
+    }
+
+    const header = parseCedictV2EditHeader(trimmed, lineNumber);
+    i += 1;
+
+    const rules: CedictV2SenseIdRuleType[] = [];
+    const seenNanoids = new Set<string>();
+    const seenSenses = new Set<string>();
+
+    while (i < lines.length) {
+      const ruleLine = lines[i];
+      const ruleLineNumber = i + 1;
+      const ruleTrimmed = ruleLine?.trim() ?? ``;
+
+      if (ruleTrimmed.length === 0) {
+        i += 1;
+        break;
+      }
+
+      if (ruleTrimmed.startsWith(`#`)) {
+        i += 1;
+        continue;
+      }
+
+      const parsedRule = parseCedictV2SenseIdRule(ruleTrimmed, ruleLineNumber);
+      if (seenNanoids.has(parsedRule.nanoid)) {
+        throw new Error(
+          formatCedictIdsParseError(
+            `duplicate nanoid in ids block: ${parsedRule.nanoid}`,
+            ruleLineNumber,
+          ),
+        );
+      }
+
+      if (seenSenses.has(parsedRule.sense)) {
+        throw new Error(
+          formatCedictIdsParseError(
+            `duplicate sense in ids block: ${parsedRule.sense}`,
+            ruleLineNumber,
+          ),
+        );
+      }
+
+      seenNanoids.add(parsedRule.nanoid);
+      seenSenses.add(parsedRule.sense);
+      rules.push(parsedRule);
+      i += 1;
+    }
+
+    if (rules.length === 0) {
+      throw new Error(
+        formatCedictIdsParseError(`ids block has no rules`, lineNumber),
+      );
+    }
+
+    const key = buildCedictV2EditEntryKey(
+      header.traditional,
+      header.simplified,
+      header.pinyin,
+    );
+
+    if (entriesByKey.has(key)) {
+      throw new Error(
+        formatCedictIdsParseError(
+          `duplicate ids block for ${header.traditional} ${header.simplified} [[${header.pinyin}]]`,
+          lineNumber,
+        ),
+      );
+    }
+
+    entriesByKey.set(key, {
+      traditional: header.traditional,
+      simplified: header.simplified,
+      pinyin: header.pinyin,
+      rules,
+    });
+  }
+
+  return {
+    entriesByKey,
+  };
+}
+
+export function buildCedictV2SenseIdsText(
+  entries: readonly CedictV2EntryType[],
+  existingIds: CedictV2SenseIdsType,
+  options: BuildCedictV2SenseIdsTextOptionsType = {},
+): string {
+  const createNanoid = options.createNanoid ?? createCedictV2SenseNanoid;
+  const usedNanoidsBySimplified = new Map<string, Set<string>>();
+
+  for (const entrySenseIds of existingIds.entriesByKey.values()) {
+    const simplifiedKey = entrySenseIds.simplified.normalize(`NFKC`);
+    const usedNanoids =
+      usedNanoidsBySimplified.get(simplifiedKey) ?? new Set<string>();
+    for (const rule of entrySenseIds.rules) {
+      usedNanoids.add(rule.nanoid);
+    }
+    usedNanoidsBySimplified.set(simplifiedKey, usedNanoids);
+  }
+
+  const outputBlocks: string[] = [];
+
+  for (const entry of entries) {
+    const senses = getCedictV2TransformSerializedSenses(entry);
+    if (senses.length === 0) {
+      continue;
+    }
+
+    const key = buildCedictV2EditEntryKey(
+      entry.traditional,
+      entry.simplified,
+      entry.pinyin,
+    );
+
+    const existingEntry = existingIds.entriesByKey.get(key);
+    const existingNanoidBySense = new Map<string, string>(
+      existingEntry?.rules.map((rule) => [rule.sense, rule.nanoid]),
+    );
+
+    const simplifiedKey = entry.simplified.normalize(`NFKC`);
+    const usedNanoids = usedNanoidsBySimplified.get(simplifiedKey) ?? new Set();
+    usedNanoidsBySimplified.set(simplifiedKey, usedNanoids);
+
+    const outputRules = senses.map((sense) => {
+      const existingNanoid = existingNanoidBySense.get(sense);
+      if (existingNanoid != null) {
+        usedNanoids.add(existingNanoid);
+        return { nanoid: existingNanoid, sense };
+      }
+
+      const generatedNanoid = generateUniqueCedictSenseNanoid({
+        createNanoid,
+        usedNanoids,
+      });
+      return {
+        nanoid: generatedNanoid,
+        sense,
+      };
+    });
+
+    const header = `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]]`;
+    const ruleLines = outputRules.map(
+      (rule) => `${rule.nanoid} /${rule.sense}/`,
+    );
+
+    outputBlocks.push([header, ...ruleLines].join(`\n`));
+  }
+
+  return outputBlocks.join(`\n\n`);
+}
+
 const loadCedictV2Edits = memoize0(async (): Promise<CedictV2EditsType> => {
   const filename = `cedict_ts-2.u8`;
   const editsText = await readFile(
@@ -576,6 +772,16 @@ const loadCedictV2Edits = memoize0(async (): Promise<CedictV2EditsType> => {
   );
 
   return parseCedictV2EditsText(editsText);
+});
+
+const loadCedictV2Ids = memoize0(async (): Promise<CedictV2SenseIdsType> => {
+  const filename = `cedict_ts-2.u8`;
+  const idsText = await readFile(
+    path.join(import.meta.dirname, `${filename}.ids`),
+    `utf8`,
+  );
+
+  return parseCedictV2IdsText(idsText);
 });
 
 export async function findCedictMigratedSenseId(
@@ -1147,6 +1353,13 @@ export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
     outputText,
   );
 
+  const ids = await loadCedictV2Ids();
+  const idsText = buildCedictV2SenseIdsText(parseCedictV2Text(outputText), ids);
+  await writeUtf8FileIfChanged(
+    path.join(import.meta.dirname, `${filename}.ids`),
+    idsText,
+  );
+
   return parseCedictV2Text(outputText, { strict: true });
 });
 
@@ -1352,6 +1565,35 @@ export function buildCedictSenseId(
   );
 
   return `${traditionalNormalized} ${simplifiedNormalized} [[${pinyinNumericNormalized}]] /${sense}/`;
+}
+
+export function buildCedictStableSenseId(
+  simplified: string,
+  nanoid: string,
+): CedictSenseId {
+  return `${simplified.normalize(`NFKC`)}:${nanoid.normalize(`NFKC`)}`;
+}
+
+export function parseCedictStableSenseId(
+  cedictSenseId: string,
+): CedictSenseIdParamsType | null {
+  const match = cedictSenseId.match(
+    /^(?<simplified>.+?):(?<nanoid>[A-Za-z0-9]{5})$/u,
+  );
+  if (match == null) {
+    return null;
+  }
+
+  const simplified = match.groups?.[`simplified`];
+  const nanoid = match.groups?.[`nanoid`];
+  if (simplified == null || simplified.length === 0 || nanoid == null) {
+    return null;
+  }
+
+  return {
+    simplified,
+    nanoid,
+  };
 }
 
 const getCedictLookupIndexes = memoize0(async () => {
@@ -1636,6 +1878,76 @@ function parseCedictV2EditRule(
   };
 }
 
+function parseCedictV2SenseIdRule(
+  line: string,
+  lineNumber: number,
+): CedictV2SenseIdRuleType {
+  const match = line.match(
+    /^(?<nanoid>[A-Za-z0-9]{5})\s+\/(?<sense>[^/]*)\/$/u,
+  );
+  if (match == null) {
+    throw new Error(
+      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+    );
+  }
+
+  const nanoid = match.groups?.[`nanoid`];
+  const sense = match.groups?.[`sense`]?.trim();
+  if (
+    nanoid == null ||
+    nanoid.length !== CEDICT_V2_SENSE_NANOID_LENGTH ||
+    sense == null ||
+    sense.length === 0
+  ) {
+    throw new Error(
+      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+    );
+  }
+
+  return {
+    nanoid,
+    sense,
+  };
+}
+
+function getCedictV2TransformSerializedSenses(
+  entry: CedictV2EntryType,
+): string[] {
+  return entry.senses
+    .map((sense) => serializeCedictV2Sense(parseCedictV2Sense(sense)))
+    .filter((sense): sense is string => sense != null && sense.length > 0);
+}
+
+function generateUniqueCedictSenseNanoid({
+  createNanoid,
+  usedNanoids,
+}: {
+  createNanoid: () => string;
+  usedNanoids: Set<string>;
+}): string {
+  for (let i = 0; i < 1000; i += 1) {
+    const next = createNanoid();
+    if (next.length !== CEDICT_V2_SENSE_NANOID_LENGTH) {
+      continue;
+    }
+
+    if (!/^[A-Za-z0-9]{5}$/u.test(next)) {
+      continue;
+    }
+
+    if (usedNanoids.has(next)) {
+      continue;
+    }
+
+    usedNanoids.add(next);
+    return next;
+  }
+
+  throw new Error(
+    `failed to generate unique 5-character CEDICT sense nanoid after 1000 attempts`,
+  );
+}
+
 function applyCedictEntryEdits(
   senses: string[],
   entryEdits: CedictV2EntryEditsType,
@@ -1760,6 +2072,13 @@ function applyCedictEntryEdits(
 }
 
 function formatCedictEditsParseError(
+  message: string,
+  lineNumber: number,
+): string {
+  return `${message} (line ${lineNumber})`;
+}
+
+function formatCedictIdsParseError(
   message: string,
   lineNumber: number,
 ): string {
