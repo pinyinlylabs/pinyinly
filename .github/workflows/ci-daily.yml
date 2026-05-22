@@ -17,6 +17,7 @@ jobs:
       - name: 🏗 Clone repo
         uses: actions/checkout@v6
         with:
+          lfs: true
           fetch-depth: 0
 
       - uses: ./.github/actions/setup-tools
