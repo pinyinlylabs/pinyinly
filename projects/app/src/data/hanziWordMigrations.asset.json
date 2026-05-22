@@ -21,5 +21,8 @@
 ["𭕄:earth","𭕄:radical"],
 ["另:bones", null],
 ["月:meat", null],
-["纪录:recordDocument", "纪录:record"]
+["纪录:recordDocument", "纪录:record"],
+["不一会儿:soon", null],
+["不太:notVery", null],
+["抽烟:smoking", "抽烟:smoke"]
 ]

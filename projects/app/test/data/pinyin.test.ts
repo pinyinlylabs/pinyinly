@@ -142,6 +142,10 @@ describe(
       [`nǚ`, `nǚ`],
       [`nǜ`, `nǜ`],
       [`nü`, `nü`],
+
+      // Handles capital letters
+      [`Hao3`, `Hǎo`],
+      [`Ma1`, `Mā`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
     });
@@ -211,6 +215,7 @@ describe(
       [`nǚ`, [`nü`, 3]],
       [`nǜ`, [`nü`, 4]],
       [`nü`, [`nü`, 5]],
+      [`Yīng`, [`Ying`, 1]],
     ] as const)(`%s → %s`, ([input, [tonelessUnit, tone]]) => {
       expect(splitPinyinUnitTone(input as PinyinUnit)).toEqual({
         tonelessUnit,
@@ -238,6 +243,7 @@ describe(
       [`nǜ`, { tonelessUnit: `nü`, tone: 4 }],
       [`nü`, { tonelessUnit: `nü`, tone: 5 }],
       [`nu`, { tonelessUnit: `nu`, tone: 5 }],
+      [`Yīng`, { tonelessUnit: `Ying`, tone: 1 }],
     ] as const)(`%s → %s`, ([input, partial]) => {
       expect(splitPinyinUnit(input as PinyinUnit)).toMatchObject(partial);
     });
@@ -338,6 +344,7 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`ránér`, [0, `rán`, 3, `ér`]],
   [`jiànguò`, [0, `jiàn`, 4, `guò`]],
   [`píngguǒ`, [0, `píng`, 4, `guǒ`]],
+  [`Yīng`, [0, `Yīng`]],
   [`yīnggāi`, [0, `yīng`, 4, `gāi`]],
   [`ying1gai1`, [0, `ying1`, 5, `gai1`]],
   [`Yīnggāi`, [0, `Yīng`, 4, `gāi`]],

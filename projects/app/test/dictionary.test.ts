@@ -54,9 +54,10 @@ import {
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import {
-  buildCedictSenseId,
-  findCedictEntryById,
+  findCedictSensesForHanziWordMeaning,
   findCedictSenseById,
+  findCedictSenseIdCandidatesById,
+  findCedictMigratedSenseId,
 } from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { fmtJsonFile } from "@pinyinly/lib/fs";
@@ -104,50 +105,121 @@ test(`hanzi word meaning schema accepts optional cedict reference`, () => {
   const parsed = hanziWordMeaningSchema.parse({
     gloss: [`one`],
     pinyin: [`yī`],
-    cedict: `一|一|yi1|one|abc1234`,
+    cedict: `一 一 [[yi1]] /one/`,
   });
 
-  expect(parsed.cedict).toBe(`一|一|yi1|one|abc1234`);
+  expect(parsed.cedict).toBe(`一 一 [[yi1]] /one/`);
 });
 
 test(`hanzi word meaning schema accepts cedict reference when gloss contains a pipe`, () => {
   const parsed = hanziWordMeaningSchema.parse({
     gloss: [`variant`],
     pinyin: [`xuán`],
-    cedict: `㻽|㻽|xuan2|variant of 璿|璇[xuan2]|abc1234`,
+    cedict: `㻽 㻽 [[xuan2]] /variant of 璿|璇[xuan2]/`,
   });
 
-  expect(parsed.cedict).toBe(`㻽|㻽|xuan2|variant of 璿|璇[xuan2]|abc1234`);
-});
-
-test(`hanzi word meaning schema rejects cedict references missing fingerprint`, () => {
-  expect(() =>
-    hanziWordMeaningSchema.parse({
-      gloss: [`one`],
-      pinyin: [`yī`],
-      cedict: `traditional|simplified|pinyin|gloss`,
-    }),
-  ).toThrow();
+  expect(parsed.cedict).toBe(`㻽 㻽 [[xuan2]] /variant of 璿|璇[xuan2]/`);
 });
 
 test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async () => {
-  const dict = await loadDictionary();
-  const missing: string[] = [];
+  const dict = await readDictionaryJson();
+  let edits = 0;
 
-  for (const [hanziWord, meaning] of dict.allEntries) {
+  for (const [hanziWord, meaning] of dict.entries()) {
     if (meaning.cedict == null) {
       continue;
     }
 
     const resolvedSense = await findCedictSenseById(meaning.cedict);
     if (resolvedSense == null) {
-      missing.push(`${hanziWord} -> ${meaning.cedict}`);
+      const migratedId = await findCedictMigratedSenseId(meaning.cedict);
+      if (migratedId == null) {
+        const candidates = await findCedictSenseIdCandidatesById(
+          meaning.cedict,
+        );
+        expect
+          .soft(candidates.join(`\n`), `hanziWord: ${hanziWord}`)
+          .toContain(meaning.cedict);
+      } else {
+        meaning.cedict = migratedId;
+        edits += 1;
+      }
     }
   }
 
-  missing.sort((a, b) => a.localeCompare(b));
-  expect(missing).toEqual([]);
+  if (!isCi && edits > 0) {
+    await writeDictionaryJson(dict);
+  }
 });
+
+test.skipIf(isCi && false)(
+  `autofill missing dictionary CE-DICT references`,
+  async () => {
+    const dict = await readDictionaryJson();
+    let edits = 0;
+    let errors = 0;
+
+    for (const [hanziWord, meaning] of dict.entries()) {
+      if (meaning.gloss.length === 0 || meaning.pinyin == null) {
+        continue;
+      }
+
+      const candidates = await findCedictSensesForHanziWordMeaning(
+        hanziFromHanziWord(hanziWord),
+        meaning.pinyin,
+        meaning.gloss,
+      );
+
+      expect
+        .soft(candidates.length, `hanziWord: ${hanziWord}`)
+        .toBeGreaterThan(0);
+
+      if (meaning.cedict != null) {
+        continue;
+      }
+
+      const possibleCandidates = candidates.filter((x) => x.confidence > 0);
+      let bestCandidate;
+
+      if (possibleCandidates.length === 1) {
+        bestCandidate = possibleCandidates[0]!;
+      }
+
+      if (possibleCandidates.length > 1) {
+        if (
+          possibleCandidates[0]!.confidence -
+            possibleCandidates[1]!.confidence <
+          0.015
+        ) {
+          // helpful debugging output
+          errors += 1;
+          expect
+            .soft(possibleCandidates, `hanziWord: ${hanziWord}`)
+            .toEqual([]);
+        } else {
+          bestCandidate = possibleCandidates[0]!;
+        }
+      }
+
+      if (bestCandidate?.senseId != null) {
+        meaning.cedict = bestCandidate.senseId;
+        edits += 1;
+
+        if (edits >= 500) {
+          // Avoid running for too long, it's better to run a few times and
+          // iteratively build up the dictionary.
+          break;
+        }
+      }
+    }
+
+    if (edits > 0) {
+      await writeDictionaryJson(dict);
+    }
+
+    expect(errors).toBe(0);
+  },
+);
 
 test(`hanzi word meaning schema enforces normalized freq bounds`, () => {
   expect(() =>
@@ -243,122 +315,125 @@ test(`hanzi word meaning pinyin lint`, async () => {
 
   expect(multiplePinyin, `hanzi words with multiple pinyin`)
     .toMatchInlineSnapshot(`
-    [
-      "似:resemble",
-      "便:convenience",
-      "兄:brother",
-      "兴:rise",
-      "具:tool",
-      "切:cut",
-      "划:row",
-      "创:begin",
-      "利:benefit",
-      "务:business",
-      "势:power",
-      "匸:hidingEnclosure",
-      "午:noon",
-      "参:participate",
-      "右边:rightSide",
-      "同:together",
-      "后面:behind",
-      "味道:taste",
-      "哥:brother",
-      "喜欢:like",
-      "回去:goBack",
-      "回来:comeBack",
-      "困难:difficult",
-      "地上:onTheGround",
-      "坐下:sitDown",
-      "基本上:basically",
-      "堂:hall",
-      "声:sound",
-      "处:place",
-      "大人:adult",
-      "大部分:majority",
-      "太阳:sun",
-      "夫:man",
-      "头发:hair",
-      "女朋友:girlfriend",
-      "姑:aunt",
-      "娘:mother",
-      "学生:student",
-      "宜:suitable",
-      "实:real",
-      "实际上:actually",
-      "害:injure",
-      "将:will",
-      "小姐:miss",
-      "小时候:childhood",
-      "尽:exhaust",
-      "展:open",
-      "巴:wish",
-      "应:should",
-      "式:style",
-      "形:form",
-      "彩:hue",
-      "态度:attitude",
-      "思:think",
-      "息:rest",
-      "情:feeling",
-      "意:thought",
-      "懂得:comprehend",
-      "打听:inquire",
-      "散:scatter",
-      "明:bright",
-      "明白:understand",
-      "晚上:evening",
-      "晨:morning",
-      "月亮:moon",
-      "有时候:sometimes",
-      "朋友:friend",
-      "服:clothes",
-      "望:gaze",
-      "材:material",
-      "格:pattern",
-      "欢:happy",
-      "氐:bottom",
-      "汉语:chineseLanguage",
-      "法:law",
-      "消息:news",
-      "清楚:clear",
-      "漂:float",
-      "烦:bother",
-      "然:yes",
-      "照顾:takeCareOf",
-      "爱人:spouse",
-      "爷:father",
-      "物:thing",
-      "理:reason",
-      "男朋友:boyfriend",
-      "相:mutual",
-      "看上去:look",
-      "看起来:seem",
-      "眼睛:eyes",
-      "睛:eyeball",
-      "视:watch",
-      "神:spirit",
-      "笑话:joke",
-      "笑话儿:joke",
-      "答:answer",
-      "经:undergo",
-      "结:knot",
-      "老太太:oldLady",
-      "老是:always",
-      "老朋友:oldFriend",
-      "落:drop",
-      "行李:luggage",
-      "衣服:clothing",
-      "觉:feel",
-      "记住:remember",
-      "识:recognize",
-      "诉:accuse",
-      "误:mistake",
-      "谢:thank",
-      "负:bear",
-      "路上:onTheRoad",
-      "还是:or",
-    ]
-  `);
+      [
+        "下面:below",
+        "似:resemble",
+        "便:convenience",
+        "兄:brother",
+        "兴:rise",
+        "具:tool",
+        "切:cut",
+        "划:row",
+        "创:begin",
+        "利:benefit",
+        "务:business",
+        "势:power",
+        "匸:hidingEnclosure",
+        "午:noon",
+        "参:participate",
+        "右边:rightSide",
+        "同:together",
+        "后面:behind",
+        "味道:taste",
+        "哥:brother",
+        "喜欢:like",
+        "回去:goBack",
+        "回来:comeBack",
+        "困难:difficult",
+        "地上:onTheGround",
+        "坐下:sitDown",
+        "基本上:basically",
+        "堂:hall",
+        "声:sound",
+        "处:place",
+        "大人:adult",
+        "大部分:majority",
+        "太阳:sun",
+        "夫:man",
+        "头发:hair",
+        "女朋友:girlfriend",
+        "好处:advantage",
+        "姑:aunt",
+        "娘:mother",
+        "学生:student",
+        "宜:suitable",
+        "实:real",
+        "实际上:actually",
+        "害:injure",
+        "将:will",
+        "小姐:miss",
+        "小时候:childhood",
+        "尽:exhaust",
+        "展:open",
+        "巴:wish",
+        "应:should",
+        "式:style",
+        "形:form",
+        "彩:hue",
+        "态度:attitude",
+        "思:think",
+        "息:rest",
+        "情:feeling",
+        "意:thought",
+        "懂得:comprehend",
+        "打听:inquire",
+        "散:scatter",
+        "明:bright",
+        "明白:understand",
+        "晚上:evening",
+        "晨:morning",
+        "月亮:moon",
+        "有时候:sometimes",
+        "朋友:friend",
+        "服:clothes",
+        "望:gaze",
+        "材:material",
+        "格:pattern",
+        "欢:happy",
+        "汉语:chineseLanguage",
+        "法:law",
+        "消息:news",
+        "清楚:clear",
+        "漂:float",
+        "烦:bother",
+        "然:yes",
+        "照顾:takeCareOf",
+        "爱人:spouse",
+        "爷:father",
+        "物:thing",
+        "理:reason",
+        "男朋友:boyfriend",
+        "相:mutual",
+        "看上去:look",
+        "看起来:seem",
+        "眼睛:eyes",
+        "睛:eyeball",
+        "视:watch",
+        "神:spirit",
+        "笑话:joke",
+        "笑话儿:joke",
+        "答:answer",
+        "经:undergo",
+        "结:knot",
+        "老太太:oldLady",
+        "老是:always",
+        "老朋友:oldFriend",
+        "落:drop",
+        "行李:luggage",
+        "衣服:clothing",
+        "觉:feel",
+        "记住:remember",
+        "识:recognize",
+        "诉:accuse",
+        "误:mistake",
+        "谢:thank",
+        "负:bear",
+        "起来:standUp",
+        "路上:onTheRoad",
+        "还是:or",
+        "里面:inside",
+      ]
+    `);
 });
 
 test(`hanzi word meaning gloss lint`, async () => {
@@ -459,20 +534,13 @@ test(
         continue;
       }
 
-      const cedictEntry = await findCedictEntryById(meaning.cedict);
-      if (cedictEntry == null) {
+      const cedictSense = await findCedictSenseById(meaning.cedict);
+      if (cedictSense == null) {
+        // assertion thrown in another test, so just skip this case here to avoid noise
         continue;
       }
 
-      const expectedPinyin = cedictEntry.pinyin as PinyinText;
-      const expectedCedict = buildCedictSenseId(
-        cedictEntry.traditional,
-        cedictEntry.simplified,
-        cedictEntry.pinyinRaw,
-        nonNullable(
-          cedictEntry.senses.find((s) => s.senseId === meaning.cedict),
-        ).glosses,
-      );
+      const expectedPinyin = cedictSense.pinyin;
 
       if (meaning.pinyin != null && meaning.pinyin.length > 1) {
         // oxlint-disable-next-line no-console
@@ -485,17 +553,15 @@ test(
       const pinyinMatches =
         meaning.pinyin != null &&
         meaning.pinyin.length === 1 &&
-        meaning.pinyin[0] === expectedPinyin;
-      const cedictMatches = meaning.cedict === expectedCedict;
+        meaning.pinyin[0] === expectedPinyin[0];
 
-      if (!pinyinMatches || !cedictMatches) {
+      if (!pinyinMatches) {
         mismatches.push(hanziWord);
-        meaning.pinyin = [expectedPinyin];
-        meaning.cedict = expectedCedict;
+        meaning.pinyin = expectedPinyin;
       }
     }
 
-    if (!isCi) {
+    if (mismatches.length > 0 && !isCi) {
       await writeDictionaryJson(dict);
     }
 
@@ -545,6 +611,10 @@ test(`hanzi words are unique on (primary gloss, primary pinyin)`, async () => {
       Set {
         "冫:ice",
         "冰:ice",
+      },
+      Set {
+        "底:bottom",
+        "氐:bottom",
       },
       Set {
         "斗:fight",

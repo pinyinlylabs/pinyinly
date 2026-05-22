@@ -168,8 +168,10 @@ export function splitTonelessPinyinUnitWithChart(
   tonelessPinyin: PinyinUnit,
   chart: DeepReadonly<PinyinChart>,
 ): Pick<SplitPinyinUnit, `initialSoundId` | `finalSoundId`> | null {
-  const initialSoundId = chart.unitToInitialSound[tonelessPinyin];
-  const finalSoundId = chart.unitToFinalSound[tonelessPinyin];
+  // Support capitalized units like "Yīng"
+  const lowerCasePinyin = tonelessPinyin.toLowerCase();
+  const initialSoundId = chart.unitToInitialSound[lowerCasePinyin];
+  const finalSoundId = chart.unitToFinalSound[lowerCasePinyin];
 
   if (initialSoundId == null || finalSoundId == null) {
     return null;

@@ -132,8 +132,10 @@ tasks:
       eslint . --config eslint-codegen.config.mjs --fix
     inputs:
       # Config files anywhere within the project
-      - "**/*.{cjs,js,mjs,json,ts,tsx}"
-      - "*.{cjs,js,mjs,json,ts,tsx}"
+      - src/data/pinyinSoundAudio.ts
+      - src/client/ui/iconRegistry.ts
+      - src/**/*.demo.tsx
+      - src/assets/**
       # Environment variables
       - "$DEBUG"
       - "$ESLINT_*"
