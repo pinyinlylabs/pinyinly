@@ -1210,11 +1210,11 @@ describe(`parseCedictSenseId`, () => {
   });
 
   test(`parses valid id with empty pinyin`, () => {
-    const id = `龜 龜 [[]] /turtle/`;
+    const id = `龜 龜 [[xx5]] /turtle/`;
     const parsed = parseCedictSenseId(id);
     expect(parsed).toMatchInlineSnapshot(`
       {
-        "pinyin": "",
+        "pinyin": "xx5",
         "sense": "turtle",
         "simplified": "龜",
         "traditional": "龜",

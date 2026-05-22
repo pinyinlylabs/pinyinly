@@ -1476,7 +1476,7 @@ export function parseCedictSenseId(
   cedictSenseId: string,
 ): CedictIdParamsType | null {
   const match = cedictSenseId.match(
-    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.*?)\]\] \/(?<sense>.+?)\/$/u,
+    /^(?<traditional>.+?) (?<simplified>.+?) \[\[(?<pinyin>.+?)\]\] \/(?<sense>.+?)\/$/u,
   );
   if (match == null) {
     return null;
