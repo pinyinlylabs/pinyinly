@@ -121,38 +121,45 @@ test(`hanzi word meaning schema accepts cedict reference when gloss contains a p
   expect(parsed.cedict).toBe(`㻽 㻽 [[xuan2]] /variant of 璿|璇[xuan2]/`);
 });
 
-test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async () => {
-  const dict = await readDictionaryJson();
-  let edits = 0;
+test(
+  `dictionary CE-DICT references resolve to existing CE-DICT senses`,
+  { retry: isCi ? 0 : 1 },
+  async () => {
+    const dict = await readDictionaryJson();
+    let edits = 0;
 
-  for (const [hanziWord, meaning] of dict.entries()) {
-    if (meaning.cedict == null) {
-      continue;
-    }
+    for (const [hanziWord, meaning] of dict.entries()) {
+      if (meaning.cedict == null) {
+        continue;
+      }
 
-    const resolvedSense = await findCedictSenseById(meaning.cedict);
-    if (resolvedSense == null) {
-      const migratedId = await findCedictMigratedSenseId(meaning.cedict);
-      if (migratedId == null) {
-        const candidates = await findCedictSenseIdCandidatesById(
-          meaning.cedict,
-        );
-        expect
-          .soft(candidates.join(`\n`), `hanziWord: ${hanziWord}`)
-          .toContain(meaning.cedict);
-      } else {
-        meaning.cedict = migratedId;
-        edits += 1;
+      const resolvedSense = await findCedictSenseById(meaning.cedict);
+      if (resolvedSense == null) {
+        const migratedId = await findCedictMigratedSenseId(meaning.cedict);
+        if (migratedId == null) {
+          const candidates = await findCedictSenseIdCandidatesById(
+            meaning.cedict,
+          );
+          expect
+            .soft(candidates.join(`\n`), `hanziWord: ${hanziWord}`)
+            .toContain(meaning.cedict);
+        } else {
+          expect
+            .soft(meaning.cedict, `hanziWord: ${hanziWord}`)
+            .toBe(migratedId);
+          meaning.cedict = migratedId;
+          edits += 1;
+        }
       }
     }
-  }
 
-  if (!isCi && edits > 0) {
-    await writeDictionaryJson(dict);
-  }
-});
+    if (!isCi && edits > 0) {
+      await writeDictionaryJson(dict);
+    }
+  },
+);
 
-test.skipIf(isCi && false)(
+test.skipIf(isCi)(
   `autofill missing dictionary CE-DICT references`,
   async () => {
     const dict = await readDictionaryJson();
