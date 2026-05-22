@@ -167,6 +167,7 @@ const domainLabels = [
   `Christianity`,
   `cinema`,
   `cinematography`,
+  `color`,
   `commerce`,
   `communications`,
   `computer`,
@@ -351,7 +352,6 @@ const genericLabels = [
   `classifier`,
   `coll.`,
   `colloquial`,
-  `color`,
   `conjunction`,
   `contemporary`,
   `courteous`,
@@ -1162,7 +1162,6 @@ function extractSenseLabelsFromGloss(
     if (startMatch.groups?.[`domain`] != null) {
       label = startMatch.groups[`domain`];
       label = labelAliases[label] ?? label;
-      label = `D:${label}`;
     }
 
     invariant(
@@ -1193,7 +1192,6 @@ function extractSenseLabelsFromGloss(
     if (endMatch.groups?.[`domain`] != null) {
       label = endMatch.groups[`domain`];
       label = labelAliases[label] ?? label;
-      label = `D:${label}`;
     }
 
     invariant(
