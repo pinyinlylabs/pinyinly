@@ -1,4 +1,12 @@
+import type { OpenAI } from "openai";
 import { z } from "zod/v4";
+
+export interface ChatPrompt {
+  model?: OpenAI.ChatModel;
+  reasoningEffort?: OpenAI.ReasoningEffort;
+  system: string;
+  user: string;
+}
 
 export function buildPronunciationHintPrompt({
   leadCharacter,
@@ -12,7 +20,7 @@ export function buildPronunciationHintPrompt({
   cue: { word: string; meaning?: string };
   creativeDirection?: string;
   count: number;
-}): { system: string; user: string } {
+}): ChatPrompt {
   const systemTemplate = `
 You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
 Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
@@ -109,7 +117,7 @@ export const buildMeaningHintPrompt = ({
   meaning,
   components,
   count,
-}: MeaningHintPromptInput): { system: string; user: string } => {
+}: MeaningHintPromptInput): ChatPrompt => {
   const systemTemplate = `
 You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
 Your job is to help the learner remember what a Hanzi means using its visual components.
@@ -168,7 +176,7 @@ export const buildMeaningHintLogicalPrompt = ({
   meaning,
   components,
   count,
-}: MeaningHintPromptInput): { system: string; user: string } => {
+}: MeaningHintPromptInput): ChatPrompt => {
   const primaryGloss = meaning.glosses[0] ?? ``;
   const disambiguation = meaning.glosses.slice(1).join(`; `);
 
@@ -234,7 +242,7 @@ export function buildSubLocationDescriptionPrompt({
   sublocation: string;
   viewpoint?: string;
   count: number;
-}): { system: string; user: string } {
+}): ChatPrompt {
   const systemTemplate = `
 You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
 Your goal is to define a stable mental image of a place that can be reused across many stories.
@@ -288,7 +296,7 @@ export function buildLeadCharacterDescriptionPrompt({
   sound: string;
   existingDescription?: string;
   count: number;
-}): { system: string; user: string } {
+}): ChatPrompt {
   const systemTemplate = `
 You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
 Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.

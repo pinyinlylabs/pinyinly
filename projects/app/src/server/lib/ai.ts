@@ -1,4 +1,5 @@
 import { getOpenAIClient } from "@/server/lib/openai/client";
+import type { OpenAI } from "openai";
 import type {
   ChatCompletionCreateParamsNonStreaming,
   ResponseFormatJSONSchema,
@@ -19,6 +20,8 @@ export function openAiZodResponseFormat(
 }
 
 export async function requestOpenAiJson<Schema extends z.ZodType>(opts: {
+  model?: OpenAI.ChatModel;
+  reasoningEffort?: OpenAI.ReasoningEffort;
   system: string;
   user: string;
   schema: Schema;
@@ -26,7 +29,8 @@ export async function requestOpenAiJson<Schema extends z.ZodType>(opts: {
   const client = getOpenAIClient();
 
   const body: ChatCompletionCreateParamsNonStreaming = {
-    model: `gpt-5-mini`,
+    model: opts.model ?? `gpt-5-mini`,
+    reasoning_effort: opts.reasoningEffort ?? null,
     response_format: openAiZodResponseFormat(opts.schema, `result_shape`),
     messages: [
       { role: `system`, content: opts.system },

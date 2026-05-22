@@ -196,16 +196,19 @@ export const aiRouter = router({
       const { leadCharacter, location, cue, creativeDirection, count } =
         opts.input;
 
-      const { system, user } = buildPronunciationHintPrompt({
-        leadCharacter,
-        location,
-        cue,
-        creativeDirection,
-        count,
-      });
+      const { system, user, model, reasoningEffort } =
+        buildPronunciationHintPrompt({
+          leadCharacter,
+          location,
+          cue,
+          creativeDirection,
+          count,
+        });
 
       try {
         const data = await requestOpenAiJson({
+          model,
+          reasoningEffort,
           system,
           user,
           schema: pronunciationHintOutputSchema,
@@ -235,7 +238,7 @@ export const aiRouter = router({
       const strategyResults = await Promise.all(
         strategyPlans.map(async (buildPrompt) => {
           const strategyLabel = buildPrompt.strategy;
-          const { system, user } = buildPrompt({
+          const { system, user, model, reasoningEffort } = buildPrompt({
             hanzi,
             meaning,
             components,
@@ -244,6 +247,8 @@ export const aiRouter = router({
 
           try {
             const data = await requestOpenAiJson({
+              model,
+              reasoningEffort,
               system,
               user,
               schema: meaningHintRawOutputSchema,
@@ -281,17 +286,20 @@ export const aiRouter = router({
       const { label, location, locationNotes, sublocation, viewpoint, count } =
         opts.input;
 
-      const { system, user } = buildSubLocationDescriptionPrompt({
-        label,
-        location,
-        locationNotes,
-        sublocation,
-        viewpoint,
-        count,
-      });
+      const { system, user, model, reasoningEffort } =
+        buildSubLocationDescriptionPrompt({
+          label,
+          location,
+          locationNotes,
+          sublocation,
+          viewpoint,
+          count,
+        });
 
       try {
         const data = await requestOpenAiJson({
+          model,
+          reasoningEffort,
           system,
           user,
           schema: subLocationDescriptionOutputSchema,
@@ -313,15 +321,18 @@ export const aiRouter = router({
     .mutation(async (opts) => {
       const { name, sound, existingDescription, count } = opts.input;
 
-      const { system, user } = buildLeadCharacterDescriptionPrompt({
-        name,
-        sound,
-        existingDescription,
-        count,
-      });
+      const { system, user, model, reasoningEffort } =
+        buildLeadCharacterDescriptionPrompt({
+          name,
+          sound,
+          existingDescription,
+          count,
+        });
 
       try {
         const data = await requestOpenAiJson({
+          model,
+          reasoningEffort,
           system,
           user,
           schema: leadCharacterDescriptionOutputSchema,
