@@ -411,7 +411,6 @@ describe(`pinyin sounds`, () => {
         "gáo",
         "góu",
         "gán",
-        "gěn",
         "gáng",
         "géng",
         "gèng",
