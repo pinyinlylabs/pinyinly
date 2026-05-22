@@ -566,6 +566,9 @@ describe(`transformCedictV2Entry`, () => {
           "glosses": [
             "third of the five night watch periods 23:00-01:00",
           ],
+          "labels": [
+            "old",
+          ],
           "pinyin": [
             "sāngēng",
             "sān jīn",
@@ -573,9 +576,6 @@ describe(`transformCedictV2Entry`, () => {
           "pinyinNumeric": "san1geng1",
           "senseId": "三更 三更 [[san1geng1]] /third of the five night watch periods 23:00-01:00 (old)/",
           "simplified": "三更",
-          "tags": [
-            "old",
-          ],
           "traditional": "三更",
         },
         {
@@ -662,8 +662,9 @@ describe(`transformCedictV2Entry`, () => {
     expect(parsed).not.toBeNull();
 
     const transformed = transformCedictV2Entry(parsed!);
-    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`, `tags`])))
-      .toMatchInlineSnapshot(`
+    expect(
+      transformed.map((x) => pick(x, [`classifiers`, `glosses`, `labels`])),
+    ).toMatchInlineSnapshot(`
       [
         {
           "glosses": [
@@ -680,7 +681,7 @@ describe(`transformCedictV2Entry`, () => {
             "a body of specialized knowledge",
             "any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
           ],
-          "tags": [
+          "labels": [
             "fig.",
           ],
         },
@@ -739,9 +740,9 @@ describe(`transformCedictV2Entry`, () => {
   });
 });
 
-describe(`parseCedictV2Line tag extraction`, () => {
+describe(`parseCedictV2Line label extraction`, () => {
   test.for([
-    // suffix tag
+    // suffix label
     [`gloss (suffix)`, `{suffix} gloss`],
     // new domains
     [`(ACG) gloss`, `{D:ACG} gloss`],
@@ -960,7 +961,7 @@ describe(`parseCedictV2Line tag extraction`, () => {
     [`(watchmaking) gloss`, `{D:watchmaking} gloss`],
     [`(weaving) gloss`, `{D:weaving} gloss`],
     [`(zoology) gloss`, `{D:zoology} gloss`],
-    // non-domain tags
+    // non-domain labels
     [`(abbr.) gloss`, `{abbr.} gloss`],
     [`(adj.) gloss`, `{adjective} gloss`],
     [`(adjective) gloss`, `{adjective} gloss`],
@@ -1035,16 +1036,16 @@ describe(`parseCedictV2Line tag extraction`, () => {
     [`(verb) gloss`, `{verb} gloss`],
     // "(lit. and fig.)
     // [`(lit. and fig.) gloss`, `{lit.} {fig.} gloss`],
-    // extracts multiple tags
+    // extracts multiple labels
     [
       `(biology) (loanword) to clone; a clone`,
       `{D:biology} {loanword} to clone; a clone`,
     ],
-    // Accumulates tags from multiple glosses in text order
+    // Accumulates labels from multiple glosses in text order
     [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} {fig.} gloss 1; gloss 2`],
-    // Removes glosses that are solely tags
+    // Removes glosses that are solely labels
     [`normal gloss; (idiom)`, `{idiom} normal gloss`],
-    // Unknown tags are left as-is
+    // Unknown labels are left as-is
     [`(horse)`, `(horse)`],
   ] as [string, string][])(`fixture: %s → %s`, async ([input, expected]) => {
     const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
@@ -1070,7 +1071,7 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
     );
   });
 
-  test(`preserves gloss without tags unchanged`, () => {
+  test(`preserves gloss without labels unchanged`, () => {
     const input = `示例 示例 [[shi4li4]] /plain gloss/`;
     const output = applyCedictV2EditsToText(input);
     expect(output).toBe(`示例 示例 [[shi4li4]] /plain gloss/`);

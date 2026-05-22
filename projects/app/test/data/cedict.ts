@@ -34,7 +34,7 @@ export interface TransformedCedictV2SenseType {
   pinyin: PinyinText[];
   glosses: string[];
   classifiers?: string[];
-  tags?: string[];
+  labels?: string[];
 }
 
 export interface CedictSenseCandidateType {
@@ -85,7 +85,7 @@ export interface CedictV2EditsType {
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
 
-const domainTags = [
+const domainLabels = [
   `ACG`,
   `accounting`,
   `acoustics`,
@@ -304,7 +304,7 @@ const domainTags = [
   `zoology`,
 ];
 
-const genericTags = [
+const genericLabels = [
   `abbr.`,
   `adj.`,
   `adjective`,
@@ -379,7 +379,7 @@ const genericTags = [
   `verb`,
 ];
 
-const tagAliases: Record<string, string> = {
+const labelAliases: Record<string, string> = {
   [`adj.`]: `adjective`,
   [`arch.`]: `archaic`,
   [`Cant.`]: `Cantonese`,
@@ -404,20 +404,20 @@ const tagAliases: Record<string, string> = {
   [`figuratively`]: `fig.`,
 };
 
-const genericAbbrTags = genericTags.filter((t) => t.endsWith(`.`));
+const genericAbbrLabels = genericLabels.filter((t) => t.endsWith(`.`));
 
-const tagsPatterns =
+const labelPatterns =
   `(?:` +
   // domains in parentheses, e.g. "(sports)"
-  `\\((?<domain>${domainTags.map((d) => regExpEscape(d)).join(`|`)})\\)|` +
-  // tags in parentheses, e.g. "(sports)", "(coll.)", "(idiom)"
-  `\\((?<tag>${genericTags.map((t) => regExpEscape(t)).join(`|`)})\\)|` +
-  // abbr tags, e.g. onom., coll., fig.
-  `(?<tag>${genericAbbrTags.map((t) => regExpEscape(t)).join(`|`)})` +
+  `\\((?<domain>${domainLabels.map((d) => regExpEscape(d)).join(`|`)})\\)|` +
+  // labels in parentheses, e.g. "(sports)", "(coll.)", "(idiom)"
+  `\\((?<label>${genericLabels.map((t) => regExpEscape(t)).join(`|`)})\\)|` +
+  // abbr labels, e.g. onom., coll., fig.
+  `(?<label>${genericAbbrLabels.map((t) => regExpEscape(t)).join(`|`)})` +
   `)`;
 
-const tagsAtStartRe = new RegExp(`^(?:${tagsPatterns})\\s*`, `u`);
-const tagsAtEndRe = new RegExp(`\\s*(?:${tagsPatterns})$`, `u`);
+const labelsAtStartRe = new RegExp(`^(?:${labelPatterns})\\s*`, `u`);
+const labelsAtEndRe = new RegExp(`\\s*(?:${labelPatterns})$`, `u`);
 
 /**
  * Parses a single CC-CEDICT v2 line.
@@ -693,7 +693,7 @@ interface ParsedCedictSenseGlossType {
 }
 
 interface ParsedCedictSenseType {
-  tags: string[];
+  labels: string[];
   glosses: ParsedCedictSenseGlossType[];
   inlineClassifiers: string[];
   inlineAlternativePinyin: string[];
@@ -703,7 +703,7 @@ interface ParsedCedictSenseType {
 export function parseCedictV2Sense(
   sense: CedictV2EntryType[`senses`][number],
 ): ParsedCedictSenseType {
-  const tags: string[] = [];
+  const labels: string[] = [];
   const glosses: ParsedCedictSenseGlossType[] = [];
   const inlineClassifiers: string[] = [];
   const inlineAlternativePinyin: string[] = [];
@@ -715,14 +715,14 @@ export function parseCedictV2Sense(
     .filter((gloss) => gloss.length > 0)) {
     let cleanedGloss = gloss;
 
-    const tagExtraction = extractSenseTagsFromGloss(cleanedGloss);
-    if (tagExtraction != null) {
-      for (const tag of tagExtraction.tags) {
-        if (!tags.includes(tag)) {
-          tags.push(tag);
+    const labelExtraction = extractSenseLabelsFromGloss(cleanedGloss);
+    if (labelExtraction != null) {
+      for (const label of labelExtraction.labels) {
+        if (!labels.includes(label)) {
+          labels.push(label);
         }
       }
-      cleanedGloss = tagExtraction.cleanedGloss;
+      cleanedGloss = labelExtraction.cleanedGloss;
     }
 
     const inlineClassifierExtraction =
@@ -768,7 +768,7 @@ export function parseCedictV2Sense(
   }
 
   return {
-    tags,
+    labels: labels,
     glosses,
     inlineClassifiers,
     inlineAlternativePinyin,
@@ -779,17 +779,19 @@ export function parseCedictV2Sense(
 export function serializeCedictV2Sense(
   parsedSense: ParsedCedictSenseType,
 ): string | null {
-  const tagsPrefix = parsedSense.tags.map((tag) => `{${tag}}`).join(` `);
+  const labelsPrefix = parsedSense.labels
+    .map((label) => `{${label}}`)
+    .join(` `);
 
   if (parsedSense.glosses.length === 0) {
-    return tagsPrefix.length === 0 ? null : tagsPrefix;
+    return labelsPrefix.length === 0 ? null : labelsPrefix;
   }
 
   const serializedGlosses = parsedSense.glosses.map((x) => x.cleanedGloss);
-  if (tagsPrefix.length > 0) {
+  if (labelsPrefix.length > 0) {
     const firstGloss = serializedGlosses[0];
     if (firstGloss != null) {
-      serializedGlosses[0] = `${tagsPrefix} ${firstGloss}`;
+      serializedGlosses[0] = `${labelsPrefix} ${firstGloss}`;
     }
   }
 
@@ -811,7 +813,7 @@ export function transformCedictV2Entry(
       parsedSense.inlineAlternativePinyin,
     );
     const inlineClassifiers = new Set<string>(parsedSense.inlineClassifiers);
-    const senseTags: string[] = [...parsedSense.tags];
+    const senseTags: string[] = [...parsedSense.labels];
     const originalGlosses: string[] = [];
     const cleanedGlosses: string[] = [];
 
@@ -847,7 +849,7 @@ export function transformCedictV2Entry(
         cleaned: cleanedGlosses,
         inlineAlternativePinyin: [...inlineAlternativePinyin],
         inlineClassifiers: [...inlineClassifiers],
-        senseTags,
+        senseLabels: senseTags,
       },
     ];
   });
@@ -883,89 +885,89 @@ export function transformCedictV2Entry(
       ...(transformedClassifiers.length === 0
         ? {}
         : { classifiers: transformedClassifiers }),
-      ...(transformedSense.senseTags.length === 0
+      ...(transformedSense.senseLabels.length === 0
         ? {}
-        : { tags: transformedSense.senseTags }),
+        : { labels: transformedSense.senseLabels }),
     };
   });
 }
 
 /**
- * Detects registered tag markers at the start or end of a gloss.
- * Returns the semantic tag names (in text order) and the cleaned gloss with
- * markers removed. Returns null when no tags are found.
+ * Detects registered labels at the start or end of a gloss. Returns the
+ * semantic labels (in text order) and the cleaned gloss with markers removed.
+ * Returns null when no labels are found.
  */
-function extractSenseTagsFromGloss(
+function extractSenseLabelsFromGloss(
   gloss: string,
-): { tags: string[]; cleanedGloss: string } | null {
-  const tags: string[] = [];
+): { labels: string[]; cleanedGloss: string } | null {
+  const labels: string[] = [];
   let cleaned = gloss;
 
   for (;;) {
-    const startMatch = cleaned.match(tagsAtStartRe);
+    const startMatch = cleaned.match(labelsAtStartRe);
     if (startMatch == null) {
       break;
     }
 
-    let tag;
+    let label;
 
-    if (startMatch.groups?.[`tag`] != null) {
-      tag = startMatch.groups[`tag`];
-      tag = tagAliases[tag] ?? tag;
+    if (startMatch.groups?.[`label`] != null) {
+      label = startMatch.groups[`label`];
+      label = labelAliases[label] ?? label;
     }
 
     if (startMatch.groups?.[`domain`] != null) {
-      tag = startMatch.groups[`domain`];
-      tag = tagAliases[tag] ?? tag;
-      tag = `D:${tag}`;
+      label = startMatch.groups[`domain`];
+      label = labelAliases[label] ?? label;
+      label = `D:${label}`;
     }
 
     invariant(
-      tag != null,
-      `tag was null, startMatch = '%s', cleaned = '%s'`,
+      label != null,
+      `label was null, startMatch = '%s', cleaned = '%s'`,
       startMatch,
       cleaned,
     );
 
-    if (!tags.includes(tag)) {
-      tags.push(tag);
+    if (!labels.includes(label)) {
+      labels.push(label);
     }
 
     cleaned = cleaned.slice(startMatch[0].length).trim();
   }
 
   for (;;) {
-    const endMatch = cleaned.match(tagsAtEndRe);
+    const endMatch = cleaned.match(labelsAtEndRe);
     if (endMatch == null) {
       break;
     }
-    let tag;
-    if (endMatch.groups?.[`tag`] != null) {
-      tag = endMatch.groups[`tag`];
-      tag = tagAliases[tag] ?? tag;
+    let label;
+    if (endMatch.groups?.[`label`] != null) {
+      label = endMatch.groups[`label`];
+      label = labelAliases[label] ?? label;
     }
 
     if (endMatch.groups?.[`domain`] != null) {
-      tag = endMatch.groups[`domain`];
-      tag = tagAliases[tag] ?? tag;
-      tag = `D:${tag}`;
+      label = endMatch.groups[`domain`];
+      label = labelAliases[label] ?? label;
+      label = `D:${label}`;
     }
 
     invariant(
-      tag != null,
-      `tag was null, endMatch = '%s', cleaned = '%s'`,
+      label != null,
+      `label was null, endMatch = '%s', cleaned = '%s'`,
       endMatch,
       cleaned,
     );
 
-    if (!tags.includes(tag)) {
-      tags.push(tag);
+    if (!labels.includes(label)) {
+      labels.push(label);
     }
 
     cleaned = cleaned.slice(0, cleaned.length - endMatch[0].length).trim();
   }
 
-  return tags.length === 0 ? null : { tags, cleanedGloss: cleaned };
+  return labels.length === 0 ? null : { labels: labels, cleanedGloss: cleaned };
 }
 
 function extractInlineClassifierAndCleanGloss(
