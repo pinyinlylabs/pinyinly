@@ -1,5 +1,6 @@
 import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
+import { ChatPrompt, renderPromptTemplate } from "#util/prompts.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
   arrayFilterUnique,
@@ -1764,3 +1765,43 @@ function formatCedictEditsParseError(
 ): string {
   return `${message} (line ${lineNumber})`;
 }
+
+export const buildCedictEntrySenseGroupingPrompt = ({
+  entry,
+}: {
+  entry: CedictV2EntryType;
+}): ChatPrompt => {
+  const data = {
+    traditional: entry.traditional,
+    simplified: entry.simplified,
+    pinyin: normalizePinyinText(entry.pinyin),
+    definition: entry.senses,
+  };
+
+  const systemTemplate = `
+You're a helpful assistant that makes improvements to dictionary entries in CC-CEDICT. Your job is fix errors in definitions, specifically the grouping of glosses into senses. Here's what the official CC-CEDICT manual says about it: (from https://cc-cedict.org/wiki/syntax_v2)
+
+> A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
+
+The most common defect is having glosses incorrectly split into separate senses, rather than being grouped into a common sense. This makes it very confusing for students trying to learn the language.
+
+Rules:
+- Do not add or remove glosses from the definition, only rearrange the grouping into senses.
+- In \`definition\`, each item is a sense made up of multiple glosses.
+`.trim();
+
+  const userTemplate = `
+Fix the following entry:
+
+<data>
+{{ data }}
+</data>
+`.trim();
+
+  const system = renderPromptTemplate(systemTemplate, {});
+  const user = renderPromptTemplate(userTemplate, {
+    data: JSON.stringify(data, null, 2),
+  });
+
+  return { system, user, model: `gpt-5-mini`, reasoningEffort: `low` };
+};
