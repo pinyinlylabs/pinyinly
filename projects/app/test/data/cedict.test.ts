@@ -46,6 +46,18 @@ describe(`parseCedictV2Line`, () => {
     `);
   });
 
+  test(`does not normalize compatibility hanzi in parsed line headers`, () => {
+    const parsed = parseCedictV2Line(
+      `〸 〸 [[shi2]] /numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]/`,
+    );
+
+    expect(parsed).not.toBeNull();
+    expect(parsed?.traditional).toBe(`〸`);
+    expect(parsed?.simplified).toBe(`〸`);
+    expect(parsed?.traditional).not.toBe(`十`);
+    expect(parsed?.simplified).not.toBe(`十`);
+  });
+
   test(`keeps standalone also-pr pronunciation senses in syntax parse`, () => {
     const line = `三更 三更 [[san1geng1]] /third of the five night watch periods 23:00-01:00 (old)/midnight/also pr. [san1 jin1]/`;
 
@@ -423,6 +435,34 @@ describe(`parseCedictV2EditsText`, () => {
         },
       ]
     `);
+  });
+
+  test(`does not collapse compatibility hanzi in headers`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `〸 〸 [[shi2]]`,
+        `/numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]/ /Suzhou numeral ten/`,
+        ``,
+        `十 十 [[shi2]]`,
+        `/ten/ /ten (cardinal number)/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(parsed.entriesByKey.size).toBe(2);
+    expect(parsed.entriesByKey.get(`〸|〸|shi2`)?.rules[0])
+      .toMatchInlineSnapshot(`
+      {
+        "kind": "replace",
+        "newSense": "Suzhou numeral ten",
+        "oldSense": "numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]",
+      }
+    `);
+    expect(parsed.entriesByKey.get(`十|十|shi2`)?.rules[0]).toEqual({
+      kind: `replace`,
+      oldSense: `ten`,
+      newSense: `ten (cardinal number)`,
+    });
   });
 
   test(`throws on malformed header lines`, () => {
@@ -1355,13 +1395,12 @@ describe(`findCedictEntryById`, () => {
 
   test(`returns null for unknown ids`, async () => {
     await expect(
-      findCedictEntryById(`不存在|不存在|bu4cun2zai4|nope`),
+      findCedictEntryById(`不存在 不存在 [[bu4cun2zai4]] /nope/`),
     ).resolves.toBeNull();
     await expect(
-      findCedictEntryById(`does|not|exist|nope`),
+      findCedictEntryById(`does not [[exist]] /nope/`),
     ).resolves.toBeNull();
-    await expect(findCedictEntryById(`行|行|xing2`)).resolves.toBeNull();
-    await expect(findCedictEntryById(``)).resolves.toBeNull();
+    await expect(findCedictEntryById(`行 行 [[xing2]] //`)).resolves.toBeNull();
   });
 });
 

@@ -1767,7 +1767,7 @@ function buildCedictV2EditEntryKey(
   simplified: string,
   pinyin: string,
 ): string {
-  return `${traditional.normalize(`NFKC`)}|${simplified.normalize(`NFKC`)}|${pinyin.normalize(`NFKC`)}`;
+  return `${traditional}|${simplified}|${pinyin}`;
 }
 
 function parseCedictV2EditHeader(
