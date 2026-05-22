@@ -834,34 +834,30 @@ export async function findCedictMigratedSenseId(
 }
 
 export function applyCedictV2EditsToText(
-  text: string,
+  entries: readonly CedictV2EntryType[],
   options: ParseCedictV2LineOptionsType = {},
 ): string {
-  const strict = options.strict ?? true;
   const matchedEntryKeys = new Set<string>();
-
-  const outputLines = text.split(/\r?\n/u).map((line, i) => {
-    const lineNumber = i + 1;
-    const parsedLine = parseCedictV2Line(line, {
-      strict,
-      lineNumber,
-      edits: options.edits,
-    });
-
-    if (parsedLine == null) {
-      return line;
-    }
-
+  const outputLines = entries.map((entry) => {
     const key = buildCedictV2EditEntryKey(
-      parsedLine.traditional,
-      parsedLine.simplified,
-      parsedLine.pinyin,
+      entry.traditional,
+      entry.simplified,
+      entry.pinyin,
     );
-    if (options.edits?.entriesByKey.has(key) === true) {
+    const entryEdits = options.edits?.entriesByKey.get(key);
+    if (entryEdits != null) {
       matchedEntryKeys.add(key);
     }
 
-    return serializeCedictV2Entry(parsedLine);
+    const nextEntry: CedictV2EntryType =
+      entryEdits == null
+        ? entry
+        : {
+            ...entry,
+            senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
+          };
+
+    return serializeCedictV2Entry(nextEntry);
   });
 
   for (const [key, entryEdits] of options.edits?.entriesByKey ?? []) {
@@ -885,6 +881,45 @@ export function applyCedictV2EditsToText(
   }
 
   return outputLines.join(`\n`);
+}
+
+export function applyCedictV2UnicodeNormalization(
+  entries: readonly CedictV2EntryType[],
+): CedictV2EntryType[] {
+  const mergedByKey = new Map<string, CedictV2EntryType>();
+  const outputEntries: CedictV2EntryType[] = [];
+
+  for (const entry of entries) {
+    const normalizedEntry: CedictV2EntryType = {
+      traditional: entry.traditional.normalize(`NFKC`),
+      simplified: entry.simplified.normalize(`NFKC`),
+      pinyin: entry.pinyin,
+      senses: entry.senses,
+    };
+
+    const key = buildCedictV2EditEntryKey(
+      normalizedEntry.traditional,
+      normalizedEntry.simplified,
+      normalizedEntry.pinyin,
+    );
+    const existingEntry = mergedByKey.get(key);
+
+    if (existingEntry == null) {
+      const createdEntry = {
+        ...normalizedEntry,
+        senses: [...normalizedEntry.senses],
+      };
+      mergedByKey.set(key, createdEntry);
+      outputEntries.push(createdEntry);
+      continue;
+    }
+
+    existingEntry.senses = [...existingEntry.senses, ...normalizedEntry.senses]
+      .filter((sense) => sense.length > 0)
+      .filter(arrayFilterUnique());
+  }
+
+  return outputEntries;
 }
 
 function serializeCedictV2Entry(entry: CedictV2EntryType): string {
@@ -1344,8 +1379,10 @@ export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
   );
 
   const edits = await loadCedictV2Edits();
+  const parsedEntries = parseCedictV2Text(dataText, { strict: true });
+  const normalizedEntries = applyCedictV2UnicodeNormalization(parsedEntries);
 
-  const outputText = applyCedictV2EditsToText(dataText, {
+  const outputText = applyCedictV2EditsToText(normalizedEntries, {
     strict: true,
     edits,
   });

@@ -3,6 +3,7 @@ import type { HanziText, PinyinNumericText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 import {
   applyCedictV2EditsToText,
+  applyCedictV2UnicodeNormalization,
   buildCedictStableSenseId,
   buildCedictV2SenseIdsText,
   buildCedictSenseId,
@@ -691,6 +692,7 @@ describe(`applyCedictV2EditsToText`, () => {
       `示例 示例 [[shi4li4]] /one,two/three/`,
       `小二 小二 [[xiao3'er4]] /old sense 1/old sense 2/`,
     ].join(`\n`);
+    const parsed = parseCedictV2Text(input, { strict: true });
 
     const edits = parseCedictV2EditsText(
       [
@@ -703,16 +705,16 @@ describe(`applyCedictV2EditsToText`, () => {
       ].join(`\n`),
     );
 
-    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
     expect(output).toMatchInlineSnapshot(`
-      "# comment
-      示例 示例 [[shi4li4]] /one/two/three/
+      "示例 示例 [[shi4li4]] /one/two/three/
       小二 小二 [[xiao3'er4]] /new sense 1/old sense 2/"
     `);
   });
 
   test(`renders final cedict text with applied merge edits`, () => {
     const input = `示例 示例 [[shi4li4]] /gloss 1/gloss 2; gloss 3/gloss 4/`;
+    const parsed = parseCedictV2Text(input, { strict: true });
 
     const edits = parseCedictV2EditsText(
       [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /gloss 2; gloss 3/`, ``].join(
@@ -720,7 +722,7 @@ describe(`applyCedictV2EditsToText`, () => {
       ),
     );
 
-    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
     expect(output).toBe(
       `示例 示例 [[shi4li4]] /gloss 1; gloss 2; gloss 3/gloss 4/`,
     );
@@ -728,13 +730,76 @@ describe(`applyCedictV2EditsToText`, () => {
 
   test(`creates a new entry from edits when source entry is missing`, () => {
     const input = `# comment`;
+    const parsed = parseCedictV2Text(input, { strict: true });
 
     const edits = parseCedictV2EditsText(
       [`龜 龜 [[]]`, `+ /turtle/`, ``].join(`\n`),
     );
 
-    const output = applyCedictV2EditsToText(input, { strict: true, edits });
-    expect(output).toBe(`# comment\n龜 龜 [[]] /turtle/`);
+    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
+    expect(output).toBe(`龜 龜 [[]] /turtle/`);
+  });
+});
+
+describe(`applyCedictV2UnicodeNormalization`, () => {
+  test(`normalizes traditional and simplified hanzi`, () => {
+    const parsedEntries = parseCedictV2Text(`〸 〸 [[shi2]] /ten/`, {
+      strict: true,
+    });
+
+    const output = applyCedictV2UnicodeNormalization(parsedEntries);
+
+    expect(output).toEqual([
+      {
+        traditional: `十`,
+        simplified: `十`,
+        pinyin: `shi2`,
+        senses: [`ten`],
+      },
+    ]);
+  });
+
+  test(`merges entries that share the same normalized key`, () => {
+    const parsedEntries = [
+      parseCedictV2Line(`〸 〸 [[shi2]] /ten old/`)!,
+      parseCedictV2Line(`十 十 [[shi2]] /ten modern/ten old/`)!,
+      parseCedictV2Line(`十 十 [[shi2]] /numeral ten/`)!,
+    ];
+
+    const output = applyCedictV2UnicodeNormalization(parsedEntries);
+
+    expect(output).toEqual([
+      {
+        traditional: `十`,
+        simplified: `十`,
+        pinyin: `shi2`,
+        senses: [`ten old`, `ten modern`, `numeral ten`],
+      },
+    ]);
+  });
+
+  test(`does not merge entries when pinyin differs`, () => {
+    const parsedEntries = [
+      parseCedictV2Line(`后 后 [[hou4]] /after/`)!,
+      parseCedictV2Line(`後 后 [[hou2]] /name pronunciation/`)!,
+    ];
+
+    const output = applyCedictV2UnicodeNormalization(parsedEntries);
+
+    expect(output).toEqual([
+      {
+        traditional: `后`,
+        simplified: `后`,
+        pinyin: `hou4`,
+        senses: [`after`],
+      },
+      {
+        traditional: `後`,
+        simplified: `后`,
+        pinyin: `hou2`,
+        senses: [`name pronunciation`],
+      },
+    ]);
   });
 });
 
@@ -1280,7 +1345,8 @@ describe(`parseCedictV2Line label extraction`, () => {
 describe(`applyCedictV2EditsToText sense serialization`, () => {
   test(`preserves end marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /example text (idiom); more text/`;
-    const output = applyCedictV2EditsToText(input);
+    const parsed = parseCedictV2Text(input, { strict: true });
+    const output = applyCedictV2EditsToText(parsed);
     expect(output).toMatchInlineSnapshot(
       `"示例 示例 [[shi4li4]] /{idiom} example text; more text/"`,
     );
@@ -1288,7 +1354,8 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
 
   test(`preserves middle marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /lit. to do something (idiom); to achieve a result/`;
-    const output = applyCedictV2EditsToText(input);
+    const parsed = parseCedictV2Text(input, { strict: true });
+    const output = applyCedictV2EditsToText(parsed);
     expect(output).toMatchInlineSnapshot(
       `"示例 示例 [[shi4li4]] /{lit.} {idiom} to do something; to achieve a result/"`,
     );
@@ -1296,7 +1363,8 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
 
   test(`preserves gloss without labels unchanged`, () => {
     const input = `示例 示例 [[shi4li4]] /plain gloss/`;
-    const output = applyCedictV2EditsToText(input);
+    const parsed = parseCedictV2Text(input, { strict: true });
+    const output = applyCedictV2EditsToText(parsed);
     expect(output).toBe(`示例 示例 [[shi4li4]] /plain gloss/`);
   });
 });
