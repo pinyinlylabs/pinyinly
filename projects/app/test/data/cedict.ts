@@ -838,27 +838,29 @@ export function applyCedictV2EditsToText(
   options: ParseCedictV2LineOptionsType = {},
 ): string {
   const matchedEntryKeys = new Set<string>();
-  const outputLines = entries.map((entry) => {
-    const key = buildCedictV2EditEntryKey(
-      entry.traditional,
-      entry.simplified,
-      entry.pinyin,
-    );
-    const entryEdits = options.edits?.entriesByKey.get(key);
-    if (entryEdits != null) {
-      matchedEntryKeys.add(key);
-    }
+  const outputLines = entries
+    .map((entry) => {
+      const key = buildCedictV2EditEntryKey(
+        entry.traditional,
+        entry.simplified,
+        entry.pinyin,
+      );
+      const entryEdits = options.edits?.entriesByKey.get(key);
+      if (entryEdits != null) {
+        matchedEntryKeys.add(key);
+      }
 
-    const nextEntry: CedictV2EntryType =
-      entryEdits == null
-        ? entry
-        : {
-            ...entry,
-            senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
-          };
+      const nextEntry: CedictV2EntryType =
+        entryEdits == null
+          ? entry
+          : {
+              ...entry,
+              senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
+            };
 
-    return serializeCedictV2Entry(nextEntry);
-  });
+      return serializeCedictV2Entry(nextEntry);
+    })
+    .filter((line): line is string => line != null);
 
   for (const [key, entryEdits] of options.edits?.entriesByKey ?? []) {
     if (matchedEntryKeys.has(key)) {
@@ -870,14 +872,15 @@ export function applyCedictV2EditsToText(
       continue;
     }
 
-    outputLines.push(
-      serializeCedictV2Entry({
-        traditional: entryEdits.traditional,
-        simplified: entryEdits.simplified,
-        pinyin: entryEdits.pinyin,
-        senses: createdSenses,
-      }),
-    );
+    const serializedCreatedEntry = serializeCedictV2Entry({
+      traditional: entryEdits.traditional,
+      simplified: entryEdits.simplified,
+      pinyin: entryEdits.pinyin,
+      senses: createdSenses,
+    });
+    if (serializedCreatedEntry != null) {
+      outputLines.push(serializedCreatedEntry);
+    }
   }
 
   return outputLines.join(`\n`);
@@ -922,10 +925,14 @@ export function applyCedictV2UnicodeNormalization(
   return outputEntries;
 }
 
-function serializeCedictV2Entry(entry: CedictV2EntryType): string {
+function serializeCedictV2Entry(entry: CedictV2EntryType): string | null {
   const senses = entry.senses
     .map((sense) => serializeCedictV2Sense(parseCedictV2Sense(sense)))
     .filter((sense): sense is string => sense != null && sense.length > 0);
+
+  if (senses.length === 0) {
+    return null;
+  }
 
   return `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] /${senses.join(`/`)}/`;
 }
@@ -933,10 +940,10 @@ function serializeCedictV2Entry(entry: CedictV2EntryType): string {
 interface ParsedCedictSenseGlossType {
   originalGloss: string;
   cleanedGloss: string;
+  labels: string[];
 }
 
 interface ParsedCedictSenseType {
-  labels: string[];
   glosses: ParsedCedictSenseGlossType[];
   inlineClassifiers: string[];
   inlineAlternativePinyin: string[];
@@ -946,7 +953,6 @@ interface ParsedCedictSenseType {
 export function parseCedictV2Sense(
   sense: CedictV2EntryType[`senses`][number],
 ): ParsedCedictSenseType {
-  const labels: string[] = [];
   const glosses: ParsedCedictSenseGlossType[] = [];
   const inlineClassifiers: string[] = [];
   const inlineAlternativePinyin: string[] = [];
@@ -957,14 +963,11 @@ export function parseCedictV2Sense(
     .map((gloss) => gloss.trim())
     .filter((gloss) => gloss.length > 0)) {
     let cleanedGloss = gloss;
+    let labelsForGloss: string[] = [];
 
     const labelExtraction = extractSenseLabelsFromGloss(cleanedGloss);
     if (labelExtraction != null) {
-      for (const label of labelExtraction.labels) {
-        if (!labels.includes(label)) {
-          labels.push(label);
-        }
-      }
+      labelsForGloss = labelExtraction.labels;
       cleanedGloss = labelExtraction.cleanedGloss;
     }
 
@@ -1007,11 +1010,11 @@ export function parseCedictV2Sense(
     glosses.push({
       originalGloss: gloss,
       cleanedGloss,
+      labels: labelsForGloss,
     });
   }
 
   return {
-    labels: labels,
     glosses,
     inlineClassifiers,
     inlineAlternativePinyin,
@@ -1022,21 +1025,20 @@ export function parseCedictV2Sense(
 export function serializeCedictV2Sense(
   parsedSense: ParsedCedictSenseType,
 ): string | null {
-  const labelsPrefix = parsedSense.labels
-    .map((label) => `{${label}}`)
-    .join(` `);
-
   if (parsedSense.glosses.length === 0) {
-    return labelsPrefix.length === 0 ? null : labelsPrefix;
+    return null;
   }
 
-  const serializedGlosses = parsedSense.glosses.map((x) => x.cleanedGloss);
-  if (labelsPrefix.length > 0) {
-    const firstGloss = serializedGlosses[0];
-    if (firstGloss != null) {
-      serializedGlosses[0] = `${labelsPrefix} ${firstGloss}`;
+  const serializedGlosses = parsedSense.glosses.map((parsedGloss) => {
+    const labelsPrefix = parsedGloss.labels
+      .map((label) => `{${label}}`)
+      .join(` `);
+    if (labelsPrefix.length === 0) {
+      return parsedGloss.cleanedGloss;
     }
-  }
+
+    return `${labelsPrefix} ${parsedGloss.cleanedGloss}`;
+  });
 
   return serializedGlosses.join(`; `);
 }
@@ -1056,12 +1058,17 @@ export function transformCedictV2Entry(
       parsedSense.inlineAlternativePinyin,
     );
     const inlineClassifiers = new Set<string>(parsedSense.inlineClassifiers);
-    const senseTags: string[] = [...parsedSense.labels];
     const originalGlosses: string[] = [];
     const cleanedGlosses: string[] = [];
 
     for (const parsedGloss of parsedSense.glosses) {
-      const cleanedGloss = parsedGloss.cleanedGloss;
+      const labelsPrefix = parsedGloss.labels
+        .map((label) => `{${label}}`)
+        .join(` `);
+      const cleanedGloss =
+        labelsPrefix.length === 0
+          ? parsedGloss.cleanedGloss
+          : `${labelsPrefix} ${parsedGloss.cleanedGloss}`;
 
       if (cleanedGloss.length === 0) {
         continue;
@@ -1092,7 +1099,6 @@ export function transformCedictV2Entry(
         cleaned: cleanedGlosses,
         inlineAlternativePinyin: [...inlineAlternativePinyin],
         inlineClassifiers: [...inlineClassifiers],
-        senseLabels: senseTags,
       },
     ];
   });
@@ -1128,9 +1134,6 @@ export function transformCedictV2Entry(
       ...(transformedClassifiers.length === 0
         ? {}
         : { classifiers: transformedClassifiers }),
-      ...(transformedSense.senseLabels.length === 0
-        ? {}
-        : { labels: transformedSense.senseLabels }),
     };
   });
 }

@@ -852,10 +852,7 @@ describe(`transformCedictV2Entry`, () => {
       [
         {
           "glosses": [
-            "third of the five night watch periods 23:00-01:00",
-          ],
-          "labels": [
-            "old",
+            "{old} third of the five night watch periods 23:00-01:00",
           ],
           "pinyin": [
             "sāngēng",
@@ -950,9 +947,8 @@ describe(`transformCedictV2Entry`, () => {
     expect(parsed).not.toBeNull();
 
     const transformed = transformCedictV2Entry(parsed!);
-    expect(
-      transformed.map((x) => pick(x, [`classifiers`, `glosses`, `labels`])),
-    ).toMatchInlineSnapshot(`
+    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`])))
+      .toMatchInlineSnapshot(`
       [
         {
           "glosses": [
@@ -967,10 +963,7 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "glosses": [
             "a body of specialized knowledge",
-            "any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
-          ],
-          "labels": [
-            "fig.",
+            "{fig.} any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
           ],
         },
       ]
@@ -1329,10 +1322,15 @@ describe(`parseCedictV2Line label extraction`, () => {
       `(biology) (loanword) to clone; a clone`,
       `{biology} {loanword} to clone; a clone`,
     ],
-    // Accumulates labels from multiple glosses in text order
-    [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} {fig.} gloss 1; gloss 2`],
-    // Removes glosses that are solely labels
-    [`normal gloss; (idiom)`, `{idiom} normal gloss`],
+    // Keeps labels attached to the gloss they came from
+    [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} gloss 1; {fig.} gloss 2`],
+    // Glosses that are solely labels are removed with no hoisting
+    [`normal gloss; (idiom)`, `normal gloss`],
+    // Domain labels stay on the specific gloss they annotate
+    [
+      `to conserve; to preserve; to keep; to store; (computing) to save (a file etc)`,
+      `to conserve; to preserve; to keep; to store; {computing} to save (a file etc)`,
+    ],
     // Unknown labels are left as-is
     [`(horse)`, `(horse)`],
   ] as [string, string][])(`fixture: %s → %s`, async ([input, expected]) => {
