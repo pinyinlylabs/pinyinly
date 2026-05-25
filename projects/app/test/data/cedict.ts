@@ -5,9 +5,9 @@ import type { ChatPrompt } from "#util/prompts.js";
 import { renderPromptTemplate } from "#util/prompts.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
-  arrayFilterUnique,
-  mapArrayAdd,
-  memoize0,
+    arrayFilterUnique,
+    mapArrayAdd,
+    memoize0,
 } from "@pinyinly/lib/collections";
 import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -114,7 +114,7 @@ export interface BuildCedictV2SenseIdsTextOptionsType {
 }
 
 const CEDICT_V2_SENSE_NANOID_LENGTH = 5;
-const createCedictV2SenseNanoid = () => nanoid().slice(0, 5);
+const createCedictV2SenseNanoid = () => nanoid().slice(0, CEDICT_V2_SENSE_NANOID_LENGTH);
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
 
