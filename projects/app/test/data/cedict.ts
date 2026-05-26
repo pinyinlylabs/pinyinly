@@ -2216,7 +2216,7 @@ export const buildCedictEntrySenseMergingPrompt = (
   entry: SenseGroupingEntryType,
 ): ChatPrompt<typeof senseGroupingEntrySchema> => {
   const systemTemplate = `
-You're a helpful assistant that makes improvements to Chinese to English dictionary entries. Your job is audit existing entries and determine if and how to simplify them by merging together some senses, or to leave them as-is.
+You're a helpful assistant that makes improvements to Chinese to English dictionary entries. Your job is to audit existing entries and determine if and how to simplify them by merging together some senses, or to leave them as-is.
 
 > A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
 
