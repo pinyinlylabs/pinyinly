@@ -7,7 +7,7 @@ import {
 } from "./cedict";
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { HarnessMetadata, JudgeContext } from "vitest-evals";
-import { requestOpenAiJson } from "#server/lib/ai.js";
+import { requestOpenAiChatJson } from "#server/lib/ai.js";
 import { normalizePinyinText } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 
@@ -21,12 +21,10 @@ export const senseGroupingHarness = createHarness<
   SenseGroupingHarnessMetadata
 >({
   name: `senseGrouping`,
-  run: async ({ input, setArtifact }) => {
+  run: async ({ input, signal }) => {
     const prompt = buildCedictEntrySenseGroupingPrompt(input);
 
-    const output = await requestOpenAiJson(prompt);
-
-    setArtifact(`question`, { input });
+    const output = await requestOpenAiChatJson(prompt, { signal });
 
     return {
       output,
@@ -96,19 +94,21 @@ describeEval(
       invariant(input != null, `failed to parse input spec`);
       invariant(expected != null, `failed to parse expected spec`);
 
-      await run(
-        {
-          traditional: input.traditional,
-          simplified: input.simplified,
-          pinyin: normalizePinyinText(input.pinyin),
-          definition: input.senses.map((s) => s.split(`; `)),
+      const entry = {
+        traditional: input.traditional,
+        simplified: input.simplified,
+        pinyin: normalizePinyinText(input.pinyin),
+        definition: input.senses.map((s) => s.split(`; `)),
+      };
+
+      // oxlint-disable-next-line no-console
+      console.log(`entry: ${JSON.stringify(entry)}`);
+
+      await run(entry, {
+        metadata: {
+          expected: expected.senses.map((x) => x.split(`; `)),
         },
-        {
-          metadata: {
-            expected: expected.senses.map((x) => x.split(`; `)),
-          },
-        },
-      );
+      });
     });
   },
 );

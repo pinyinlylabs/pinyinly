@@ -1,5 +1,5 @@
 import { assetIdSchema } from "@/data/model";
-import { requestOpenAiJson } from "@/server/lib/ai";
+import { requestOpenAiChatJson } from "@/server/lib/ai";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
 import { generateImage } from "@/server/lib/gemini";
 import { fetchAssetBase64 } from "@/server/lib/s3/assets";
@@ -128,9 +128,8 @@ export const aiRouter = router({
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
     .output(buildPronunciationHintPrompt.schema)
-    .mutation(async (opts) => {
-      const { leadCharacter, location, cue, creativeDirection, count } =
-        opts.input;
+    .mutation(async ({ input, signal }) => {
+      const { leadCharacter, location, cue, creativeDirection, count } = input;
 
       const prompt = buildPronunciationHintPrompt({
         leadCharacter,
@@ -141,7 +140,7 @@ export const aiRouter = router({
       });
 
       try {
-        const data = await requestOpenAiJson(prompt);
+        const data = await requestOpenAiChatJson(prompt, { signal });
         return data;
       } catch (error) {
         console.error(`Failed to generate pronunciation hints:`, error);
@@ -155,8 +154,8 @@ export const aiRouter = router({
   generateMeaningHints: authedProcedure
     .input(meaningHintInputSchema)
     .output(meaningHintOutputSchema)
-    .mutation(async (opts) => {
-      const { hanzi, meaning, components, count } = opts.input;
+    .mutation(async ({ input, signal }) => {
+      const { hanzi, meaning, components, count } = input;
 
       const strategyPlans = [
         buildMeaningHintPrompt,
@@ -174,7 +173,7 @@ export const aiRouter = router({
           });
 
           try {
-            const data = await requestOpenAiJson(prompt);
+            const data = await requestOpenAiChatJson(prompt, { signal });
 
             return data.suggestions.map((suggestion) => ({
               ...suggestion,
@@ -204,9 +203,9 @@ export const aiRouter = router({
   generateSubLocationDescriptions: authedProcedure
     .input(subLocationDescriptionInputSchema)
     .output(buildSubLocationDescriptionPrompt.schema)
-    .mutation(async (opts) => {
+    .mutation(async ({ input, signal }) => {
       const { label, location, locationNotes, sublocation, viewpoint, count } =
-        opts.input;
+        input;
 
       const prompt = buildSubLocationDescriptionPrompt({
         label,
@@ -218,7 +217,7 @@ export const aiRouter = router({
       });
 
       try {
-        const data = await requestOpenAiJson(prompt);
+        const data = await requestOpenAiChatJson(prompt, { signal });
         return data;
       } catch (error) {
         console.error(`Failed to generate sublocation descriptions:`, error);
@@ -232,8 +231,8 @@ export const aiRouter = router({
   generateLeadCharacterDescriptions: authedProcedure
     .input(leadCharacterDescriptionInputSchema)
     .output(buildLeadCharacterDescriptionPrompt.schema)
-    .mutation(async (opts) => {
-      const { name, sound, existingDescription, count } = opts.input;
+    .mutation(async ({ input, signal }) => {
+      const { name, sound, existingDescription, count } = input;
 
       const prompt = buildLeadCharacterDescriptionPrompt({
         name,
@@ -243,7 +242,7 @@ export const aiRouter = router({
       });
 
       try {
-        const data = await requestOpenAiJson(prompt);
+        const data = await requestOpenAiChatJson(prompt, { signal });
         return data;
       } catch (error) {
         console.error(`Failed to generate lead character descriptions:`, error);
@@ -257,8 +256,8 @@ export const aiRouter = router({
   generateHintImage: authedProcedure
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
-    .mutation(async (opts) => {
-      const { prompt, referenceImages, aspectRatio, ...rest } = opts.input;
+    .mutation(async ({ input }) => {
+      const { prompt, referenceImages, aspectRatio, ...rest } = input;
       true satisfies IsExhaustedRest<typeof rest>;
 
       try {
