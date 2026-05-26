@@ -3,8 +3,13 @@ import type { HanziText, PinyinNumericText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 import {
   applyCedictV2EditsToText,
+  applyCedictV2UnicodeNormalization,
+  buildCedictStableSenseId,
+  buildCedictV2SenseIdsText,
   buildCedictSenseId,
   computeGlossesSimilarity,
+  parseCedictStableSenseId,
+  parseCedictV2IdsText,
   parseCedictV2EditsText,
   findCedictEntryById,
   findCedictMigratedSenseId,
@@ -17,6 +22,7 @@ import {
   transformCedictV2Entry,
   serializeCedictV2Sense,
   parseCedictV2Sense,
+  nestedStringSetScorer,
 } from "./cedict";
 import pick from "lodash/pick.js";
 
@@ -40,6 +46,18 @@ describe(`parseCedictV2Line`, () => {
         "traditional": "110",
       }
     `);
+  });
+
+  test(`does not normalize compatibility hanzi in parsed line headers`, () => {
+    const parsed = parseCedictV2Line(
+      `〸 〸 [[shi2]] /numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]/`,
+    );
+
+    expect(parsed).not.toBeNull();
+    expect(parsed?.traditional).toBe(`〸`);
+    expect(parsed?.simplified).toBe(`〸`);
+    expect(parsed?.traditional).not.toBe(`十`);
+    expect(parsed?.simplified).not.toBe(`十`);
   });
 
   test(`keeps standalone also-pr pronunciation senses in syntax parse`, () => {
@@ -421,6 +439,34 @@ describe(`parseCedictV2EditsText`, () => {
     `);
   });
 
+  test(`does not collapse compatibility hanzi in headers`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `〸 〸 [[shi2]]`,
+        `/numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]/ /Suzhou numeral ten/`,
+        ``,
+        `十 十 [[shi2]]`,
+        `/ten/ /ten (cardinal number)/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(parsed.entriesByKey.size).toBe(2);
+    expect(parsed.entriesByKey.get(`〸|〸|shi2`)?.rules[0])
+      .toMatchInlineSnapshot(`
+      {
+        "kind": "replace",
+        "newSense": "Suzhou numeral ten",
+        "oldSense": "numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]",
+      }
+    `);
+    expect(parsed.entriesByKey.get(`十|十|shi2`)?.rules[0]).toEqual({
+      kind: `replace`,
+      oldSense: `ten`,
+      newSense: `ten (cardinal number)`,
+    });
+  });
+
   test(`throws on malformed header lines`, () => {
     expect(() =>
       parseCedictV2EditsText(
@@ -461,6 +507,185 @@ describe(`parseCedictV2EditsText`, () => {
   });
 });
 
+describe(`parseCedictV2IdsText`, () => {
+  test(`gracefully parses an empty ids file`, () => {
+    const parsed = parseCedictV2IdsText(``);
+
+    expect(parsed.entriesByKey.size).toBe(0);
+    expect([...parsed.entriesByKey.values()]).toEqual([]);
+  });
+
+  test(`parses valid ids blocks`, () => {
+    const parsed = parseCedictV2IdsText(
+      [
+        `小二 小二 [[xiao3'er4]]`,
+        `abc12 /new sense 1/`,
+        `def34 /old sense 2/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(parsed.entriesByKey.size).toBe(1);
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `小二`,
+      simplified: `小二`,
+      pinyin: `xiao3'er4`,
+      rules: [
+        { nanoid: `abc12`, sense: `new sense 1` },
+        { nanoid: `def34`, sense: `old sense 2` },
+      ],
+    });
+  });
+
+  test(`allows comment lines in the middle of an ids block`, () => {
+    const parsed = parseCedictV2IdsText(
+      [
+        `車上 车上 [[che1 shang4]]`,
+        `# https://www.dong-chinese.com/wiki/车上`,
+        `a1B2c /in a car; aboard/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `車上`,
+      simplified: `车上`,
+      pinyin: `che1 shang4`,
+      rules: [{ nanoid: `a1B2c`, sense: `in a car; aboard` }],
+    });
+  });
+
+  test(`throws on malformed header lines`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [`小二 小二 [xiao3'er4]`, `abc12 /old/`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid edits header line (line 1)`);
+  });
+
+  test(`throws on malformed ids rule lines`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [`小二 小二 [[xiao3'er4]]`, `abc12 old sense`, ``].join(`\n`),
+      ),
+    ).toThrow(`invalid ids rule line (line 2)`);
+  });
+
+  test(`throws on duplicate ids blocks`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          ``,
+          `小二 小二 [[xiao3'er4]]`,
+          `def34 /old sense 2/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate ids block for 小二 小二 [[xiao3'er4]] (line 4)`);
+  });
+
+  test(`throws on duplicate nanoid in one block`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          `abc12 /old sense 2/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate nanoid in ids block: abc12 (line 3)`);
+  });
+
+  test(`throws on duplicate sense in one block`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          `def34 /old sense 1/`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate sense in ids block: old sense 1 (line 3)`);
+  });
+
+  test(`supports empty-pinyin headers`, () => {
+    const parsed = parseCedictV2IdsText(
+      [`龜 龜 [[]]`, `abc12 /turtle/`, ``].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry).toEqual({
+      traditional: `龜`,
+      simplified: `龜`,
+      pinyin: ``,
+      rules: [{ nanoid: `abc12`, sense: `turtle` }],
+    });
+  });
+});
+
+describe(`buildCedictStableSenseId`, () => {
+  test(`builds simplified+nanoid ids`, () => {
+    expect(buildCedictStableSenseId(`想`, `fh4i3`)).toBe(`想:fh4i3`);
+  });
+});
+
+describe(`parseCedictStableSenseId`, () => {
+  test(`parses valid stable ids`, () => {
+    expect(parseCedictStableSenseId(`想:fh4i3`)).toEqual({
+      simplified: `想`,
+      nanoid: `fh4i3`,
+    });
+  });
+
+  test(`returns null for invalid stable ids`, () => {
+    expect(parseCedictStableSenseId(`想`)).toBeNull();
+    expect(parseCedictStableSenseId(`想:tooLong`)).toBeNull();
+    expect(parseCedictStableSenseId(`想:12-45`)).toBeNull();
+  });
+});
+
+describe(`buildCedictV2SenseIdsText`, () => {
+  test(`preserves existing ids and generates ids for missing transformed senses`, () => {
+    const entries = [
+      parseCedictV2Line(
+        `婚姻 婚姻 [[hun1yin1]] /marriage; matrimony/CL:樁|桩[zhuang1],次[ci4]/`,
+      )!,
+      parseCedictV2Line(
+        `外面 外面 [[wai4mian4]] /outside (also pr. [wai4mian5] for this sense)/surface/exterior/`,
+      )!,
+    ];
+
+    const existingIds = parseCedictV2IdsText(
+      [`婚姻 婚姻 [[hun1yin1]]`, `aaaa1 /marriage; matrimony/`, ``].join(`\n`),
+    );
+
+    const generatedIds = [`b1111`, `c2222`, `d3333`];
+    let idIndex = 0;
+
+    const output = buildCedictV2SenseIdsText(entries, existingIds, {
+      createNanoid: () => generatedIds[idIndex++] ?? `e4444`,
+    });
+
+    expect(output).toBe(
+      [
+        `婚姻 婚姻 [[hun1yin1]]`,
+        `aaaa1 /marriage; matrimony/`,
+        ``,
+        `外面 外面 [[wai4mian4]]`,
+        `b1111 /outside/`,
+        `c2222 /surface/`,
+        `d3333 /exterior/`,
+      ].join(`\n`),
+    );
+  });
+});
+
 describe(`applyCedictV2EditsToText`, () => {
   test(`renders final cedict text with applied edits`, () => {
     const input = [
@@ -468,6 +693,7 @@ describe(`applyCedictV2EditsToText`, () => {
       `示例 示例 [[shi4li4]] /one,two/three/`,
       `小二 小二 [[xiao3'er4]] /old sense 1/old sense 2/`,
     ].join(`\n`);
+    const parsed = parseCedictV2Text(input, { strict: true });
 
     const edits = parseCedictV2EditsText(
       [
@@ -480,16 +706,16 @@ describe(`applyCedictV2EditsToText`, () => {
       ].join(`\n`),
     );
 
-    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
     expect(output).toMatchInlineSnapshot(`
-      "# comment
-      示例 示例 [[shi4li4]] /one/two/three/
+      "示例 示例 [[shi4li4]] /one/two/three/
       小二 小二 [[xiao3'er4]] /new sense 1/old sense 2/"
     `);
   });
 
   test(`renders final cedict text with applied merge edits`, () => {
     const input = `示例 示例 [[shi4li4]] /gloss 1/gloss 2; gloss 3/gloss 4/`;
+    const parsed = parseCedictV2Text(input, { strict: true });
 
     const edits = parseCedictV2EditsText(
       [`示例 示例 [[shi4li4]]`, `/gloss 1/ += /gloss 2; gloss 3/`, ``].join(
@@ -497,7 +723,7 @@ describe(`applyCedictV2EditsToText`, () => {
       ),
     );
 
-    const output = applyCedictV2EditsToText(input, { strict: true, edits });
+    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
     expect(output).toBe(
       `示例 示例 [[shi4li4]] /gloss 1; gloss 2; gloss 3/gloss 4/`,
     );
@@ -505,13 +731,76 @@ describe(`applyCedictV2EditsToText`, () => {
 
   test(`creates a new entry from edits when source entry is missing`, () => {
     const input = `# comment`;
+    const parsed = parseCedictV2Text(input, { strict: true });
 
     const edits = parseCedictV2EditsText(
       [`龜 龜 [[]]`, `+ /turtle/`, ``].join(`\n`),
     );
 
-    const output = applyCedictV2EditsToText(input, { strict: true, edits });
-    expect(output).toBe(`# comment\n龜 龜 [[]] /turtle/`);
+    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
+    expect(output).toBe(`龜 龜 [[]] /turtle/`);
+  });
+});
+
+describe(`applyCedictV2UnicodeNormalization`, () => {
+  test(`normalizes traditional and simplified hanzi`, () => {
+    const parsedEntries = parseCedictV2Text(`〸 〸 [[shi2]] /ten/`, {
+      strict: true,
+    });
+
+    const output = applyCedictV2UnicodeNormalization(parsedEntries);
+
+    expect(output).toEqual([
+      {
+        traditional: `十`,
+        simplified: `十`,
+        pinyin: `shi2`,
+        senses: [`ten`],
+      },
+    ]);
+  });
+
+  test(`merges entries that share the same normalized key`, () => {
+    const parsedEntries = [
+      parseCedictV2Line(`〸 〸 [[shi2]] /ten old/`)!,
+      parseCedictV2Line(`十 十 [[shi2]] /ten modern/ten old/`)!,
+      parseCedictV2Line(`十 十 [[shi2]] /numeral ten/`)!,
+    ];
+
+    const output = applyCedictV2UnicodeNormalization(parsedEntries);
+
+    expect(output).toEqual([
+      {
+        traditional: `十`,
+        simplified: `十`,
+        pinyin: `shi2`,
+        senses: [`ten old`, `ten modern`, `numeral ten`],
+      },
+    ]);
+  });
+
+  test(`does not merge entries when pinyin differs`, () => {
+    const parsedEntries = [
+      parseCedictV2Line(`后 后 [[hou4]] /after/`)!,
+      parseCedictV2Line(`後 后 [[hou2]] /name pronunciation/`)!,
+    ];
+
+    const output = applyCedictV2UnicodeNormalization(parsedEntries);
+
+    expect(output).toEqual([
+      {
+        traditional: `后`,
+        simplified: `后`,
+        pinyin: `hou4`,
+        senses: [`after`],
+      },
+      {
+        traditional: `後`,
+        simplified: `后`,
+        pinyin: `hou2`,
+        senses: [`name pronunciation`],
+      },
+    ]);
   });
 });
 
@@ -564,10 +853,7 @@ describe(`transformCedictV2Entry`, () => {
       [
         {
           "glosses": [
-            "third of the five night watch periods 23:00-01:00",
-          ],
-          "labels": [
-            "old",
+            "{old} third of the five night watch periods 23:00-01:00",
           ],
           "pinyin": [
             "sāngēng",
@@ -662,9 +948,8 @@ describe(`transformCedictV2Entry`, () => {
     expect(parsed).not.toBeNull();
 
     const transformed = transformCedictV2Entry(parsed!);
-    expect(
-      transformed.map((x) => pick(x, [`classifiers`, `glosses`, `labels`])),
-    ).toMatchInlineSnapshot(`
+    expect(transformed.map((x) => pick(x, [`classifiers`, `glosses`])))
+      .toMatchInlineSnapshot(`
       [
         {
           "glosses": [
@@ -679,10 +964,7 @@ describe(`transformCedictV2Entry`, () => {
           ],
           "glosses": [
             "a body of specialized knowledge",
-            "any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
-          ],
-          "labels": [
-            "fig.",
+            "{fig.} any activity that demands expertise, skill or experience (e.g. gathering forensic evidence, selecting clothing, managing relationships)",
           ],
         },
       ]
@@ -745,222 +1027,222 @@ describe(`parseCedictV2Line label extraction`, () => {
     // suffix label
     [`gloss (suffix)`, `{suffix} gloss`],
     // new domains
-    [`(ACG) gloss`, `{D:ACG} gloss`],
-    [`(accounting) gloss`, `{D:accounting} gloss`],
-    [`(acoustics) gloss`, `{D:acoustics} gloss`],
-    [`(acrobatics) gloss`, `{D:acrobatics} gloss`],
-    [`(aerospace) gloss`, `{D:aerospace} gloss`],
-    [`(agriculture) gloss`, `{D:agriculture} gloss`],
-    [`(anatomy) gloss`, `{D:anatomy} gloss`],
-    [`(angling) gloss`, `{D:angling} gloss`],
-    [`(animals) gloss`, `{D:animals} gloss`],
-    [`(archaeology) gloss`, `{D:archaeology} gloss`],
-    [`(archeology) gloss`, `{D:archeology} gloss`],
-    [`(archery) gloss`, `{D:archery} gloss`],
-    [`(architecture) gloss`, `{D:architecture} gloss`],
-    [`(astronautics) gloss`, `{D:astronautics} gloss`],
-    [`(astronomy) gloss`, `{D:astronomy} gloss`],
-    [`(athletics) gloss`, `{D:athletics} gloss`],
-    [`(automotive) gloss`, `{D:automotive} gloss`],
-    [`(aviation) gloss`, `{D:aviation} gloss`],
-    [`(ballet) gloss`, `{D:ballet} gloss`],
-    [`(banking) gloss`, `{D:banking} gloss`],
-    [`(baseball) gloss`, `{D:baseball} gloss`],
-    [`(basketball) gloss`, `{D:basketball} gloss`],
-    [`(basketwork) gloss`, `{D:basketwork} gloss`],
-    [`(BDSM) gloss`, `{D:BDSM} gloss`],
-    [`(beer) gloss`, `{D:beer} gloss`],
-    [`(biochemistry) gloss`, `{D:biochemistry} gloss`],
-    [`(biogeography) gloss`, `{D:biogeography} gloss`],
-    [`(biology) gloss`, `{D:biology} gloss`],
-    [`(biotechnology) gloss`, `{D:biotechnology} gloss`],
-    [`(bird) gloss`, `{D:bird} gloss`],
-    [`(botany) gloss`, `{D:botany} gloss`],
-    [`(boxing) gloss`, `{D:boxing} gloss`],
-    [`(brand) gloss`, `{D:brand} gloss`],
-    [`(broadcasting) gloss`, `{D:broadcasting} gloss`],
-    [`(Buddhism) gloss`, `{D:Buddhism} gloss`],
-    [`(Buddhist) gloss`, `{D:Buddhist} gloss`],
-    [`(business) gloss`, `{D:business} gloss`],
-    [`(calligraphy) gloss`, `{D:calligraphy} gloss`],
-    [`(Cant.) gloss`, `{D:Cantonese} gloss`],
-    [`(Cantonese) gloss`, `{D:Cantonese} gloss`],
-    [`(cartography) gloss`, `{D:cartography} gloss`],
-    [`(Catholicism) gloss`, `{D:Catholicism} gloss`],
-    [`(chemical) gloss`, `{D:chemical} gloss`],
-    [`(chemistry) gloss`, `{D:chemistry} gloss`],
-    [`(Chinese) gloss`, `{D:Chinese} gloss`],
-    [`(Christianity) gloss`, `{D:Christianity} gloss`],
-    [`(cinema) gloss`, `{D:cinema} gloss`],
-    [`(cinematography) gloss`, `{D:cinematography} gloss`],
-    [`(commerce) gloss`, `{D:commerce} gloss`],
-    [`(communications) gloss`, `{D:communications} gloss`],
-    [`(computer) gloss`, `{D:computer} gloss`],
-    [`(computing) gloss`, `{D:computing} gloss`],
-    [`(Confucianism) gloss`, `{D:Confucianism} gloss`],
-    [`(constellation) gloss`, `{D:constellation} gloss`],
-    [`(cookery) gloss`, `{D:cookery} gloss`],
-    [`(cooking) gloss`, `{D:cooking} gloss`],
-    [`(cosmetics) gloss`, `{D:cosmetics} gloss`],
-    [`(cryptography) gloss`, `{D:cryptography} gloss`],
-    [`(cuisine) gloss`, `{D:cuisine} gloss`],
-    [`(currency) gloss`, `{D:currency} gloss`],
-    [`(Daoism) gloss`, `{D:Daoism} gloss`],
-    [`(dating) gloss`, `{D:dating} gloss`],
-    [`(deferential) gloss`, `{D:deferential} gloss`],
-    [`(dentistry) gloss`, `{D:dentistry} gloss`],
-    [`(dinosaur) gloss`, `{D:dinosaur} gloss`],
-    [`(divination) gloss`, `{D:divination} gloss`],
-    [`(diving) gloss`, `{D:diving} gloss`],
-    [`(ecology) gloss`, `{D:ecology} gloss`],
-    [`(economics) gloss`, `{D:economics} gloss`],
-    [`(education) gloss`, `{D:education} gloss`],
-    [`(electricity) gloss`, `{D:electricity} gloss`],
-    [`(electromagnetism) gloss`, `{D:electromagnetism} gloss`],
-    [`(electronics) gloss`, `{D:electronics} gloss`],
-    [`(embryology) gloss`, `{D:embryology} gloss`],
-    [`(engineering) gloss`, `{D:engineering} gloss`],
-    [`(entomology) gloss`, `{D:entomology} gloss`],
-    [`(epidemiology) gloss`, `{D:epidemiology} gloss`],
-    [`(expletive) gloss`, `{D:expletive} gloss`],
-    [`(fandom) gloss`, `{D:fandom} gloss`],
-    [`(fashion) gloss`, `{D:fashion} gloss`],
-    [`(fencing) gloss`, `{D:fencing} gloss`],
-    [`(filmmaking) gloss`, `{D:filmmaking} gloss`],
-    [`(finance) gloss`, `{D:finance} gloss`],
-    [`(fitness) gloss`, `{D:fitness} gloss`],
-    [`(flying) gloss`, `{D:flying} gloss`],
-    [`(food) gloss`, `{D:food} gloss`],
-    [`(football) gloss`, `{D:football} gloss`],
-    [`(forestry) gloss`, `{D:forestry} gloss`],
-    [`(gaming) gloss`, `{D:gaming} gloss`],
-    [`(genetic) gloss`, `{D:genetic} gloss`],
-    [`(genetics) gloss`, `{D:genetics} gloss`],
-    [`(geography) gloss`, `{D:geography} gloss`],
-    [`(geology) gloss`, `{D:geology} gloss`],
-    [`(geometry) gloss`, `{D:geometry} gloss`],
-    [`(geopolitics) gloss`, `{D:geopolitics} gloss`],
-    [`(geotectonics) gloss`, `{D:geotectonics} gloss`],
-    [`(golf) gloss`, `{D:golf} gloss`],
-    [`(government) gloss`, `{D:government} gloss`],
-    [`(grammar) gloss`, `{D:grammar} gloss`],
-    [`(gymnastics) gloss`, `{D:gymnastics} gloss`],
-    [`(hairstyle) gloss`, `{D:hairstyle} gloss`],
-    [`(historical) gloss`, `{D:historical} gloss`],
-    [`(HK) gloss`, `{D:HK} gloss`],
-    [`(Hong Kong) gloss`, `{D:HK} gloss`],
-    [`(horticulture) gloss`, `{D:horticulture} gloss`],
-    [`(humor) gloss`, `{D:humor} gloss`],
-    [`(humorous) gloss`, `{D:humor} gloss`],
-    [`(hydrology) gloss`, `{D:hydrology} gloss`],
-    [`(ichthyology) gloss`, `{D:ichthyology} gloss`],
-    [`(immunology) gloss`, `{D:immunology} gloss`],
-    [`(information) gloss`, `{D:information} gloss`],
-    [`(Internet slang) gloss`, `{D:Internet slang} gloss`],
-    [`(Islam) gloss`, `{D:Islam} gloss`],
-    [`(Japan) gloss`, `{D:Japan} gloss`],
-    [`(journalism) gloss`, `{D:journalism} gloss`],
-    [`(law) gloss`, `{D:law} gloss`],
-    [`(lexicography) gloss`, `{D:lexicography} gloss`],
-    [`(linguistics) gloss`, `{D:linguistics} gloss`],
-    [`(logistics) gloss`, `{D:logistics} gloss`],
-    [`(mahjong) gloss`, `{D:mahjong} gloss`],
-    [`(Malaysia) gloss`, `{D:Malaysia} gloss`],
-    [`(mammology) gloss`, `{D:mammology} gloss`],
-    [`(manufacturing) gloss`, `{D:manufacturing} gloss`],
-    [`(Maoism) gloss`, `{D:Maoism} gloss`],
-    [`(marketing) gloss`, `{D:marketing} gloss`],
-    [`(math) gloss`, `{D:math.} gloss`],
-    [`(math.) gloss`, `{D:math.} gloss`],
-    [`(mathematical) gloss`, `{D:math.} gloss`],
-    [`(measurement) gloss`, `{D:measurement} gloss`],
-    [`(mechanics) gloss`, `{D:mechanics} gloss`],
-    [`(med) gloss`, `{D:medical} gloss`],
-    [`(med.) gloss`, `{D:medical} gloss`],
-    [`(medical) gloss`, `{D:medical} gloss`],
-    [`(medicine) gloss`, `{D:medical} gloss`],
-    [`(metallurgy) gloss`, `{D:metallurgy} gloss`],
-    [`(metalwork) gloss`, `{D:metalwork} gloss`],
-    [`(meteorology) gloss`, `{D:meteorology} gloss`],
-    [`(microbiology) gloss`, `{D:microbiology} gloss`],
-    [`(military) gloss`, `{D:military} gloss`],
-    [`(mineralogy) gloss`, `{D:mineralogy} gloss`],
-    [`(mining) gloss`, `{D:mining} gloss`],
-    [`(Mohism) gloss`, `{D:Mohism} gloss`],
-    [`(music) gloss`, `{D:music} gloss`],
-    [`(mycology) gloss`, `{D:mycology} gloss`],
-    [`(mythology) gloss`, `{D:mythology} gloss`],
-    [`(neologism) gloss`, `{D:neologism} gloss`],
-    [`(neuroscience) gloss`, `{D:neuroscience} gloss`],
-    [`(obstetrics) gloss`, `{D:obstetrics} gloss`],
-    [`(oceanography) gloss`, `{D:oceanography} gloss`],
-    [`(opera) gloss`, `{D:opera} gloss`],
-    [`(optics) gloss`, `{D:optics} gloss`],
-    [`(ornithology) gloss`, `{D:ornithology} gloss`],
-    [`(orthodontics) gloss`, `{D:orthodontics} gloss`],
-    [`(orthography) gloss`, `{D:orthography} gloss`],
-    [`(painting) gloss`, `{D:painting} gloss`],
-    [`(perfumery) gloss`, `{D:perfumery} gloss`],
-    [`(petrochemistry) gloss`, `{D:petrochemistry} gloss`],
-    [`(pharm.) gloss`, `{D:pharmacology} gloss`],
-    [`(pharmacology) gloss`, `{D:pharmacology} gloss`],
-    [`(philately) gloss`, `{D:philately} gloss`],
-    [`(philosophy) gloss`, `{D:philosophy} gloss`],
-    [`(phonetic) gloss`, `{D:phonetic} gloss`],
-    [`(phonetics) gloss`, `{D:phonetics} gloss`],
-    [`(phonology) gloss`, `{D:phonology} gloss`],
-    [`(photography) gloss`, `{D:photography} gloss`],
-    [`(physics) gloss`, `{D:physics} gloss`],
-    [`(physiognomy) gloss`, `{D:physiognomy} gloss`],
-    [`(physiology) gloss`, `{D:physiology} gloss`],
-    [`(political) gloss`, `{D:politics} gloss`],
-    [`(politically) gloss`, `{D:politics} gloss`],
-    [`(politics) gloss`, `{D:politics} gloss`],
-    [`(PRC) gloss`, `{D:PRC} gloss`],
-    [`(printing) gloss`, `{D:printing} gloss`],
-    [`(psychological) gloss`, `{D:psychological} gloss`],
-    [`(psychology) gloss`, `{D:psychology} gloss`],
-    [`(publishing) gloss`, `{D:publishing} gloss`],
-    [`(radiography) gloss`, `{D:radiography} gloss`],
-    [`(religion) gloss`, `{D:religion} gloss`],
-    [`(religious) gloss`, `{D:religion} gloss`],
-    [`(retail) gloss`, `{D:retail} gloss`],
-    [`(retailer) gloss`, `{D:retailer} gloss`],
-    [`(retailing) gloss`, `{D:retailing} gloss`],
-    [`(rocketry) gloss`, `{D:rocketry} gloss`],
-    [`(science) gloss`, `{D:science} gloss`],
-    [`(seafood) gloss`, `{D:seafood} gloss`],
-    [`(seismology) gloss`, `{D:seismology} gloss`],
-    [`(semantics) gloss`, `{D:semantics} gloss`],
-    [`(Shanghainese) gloss`, `{D:Shanghainese} gloss`],
-    [`(Shinto) gloss`, `{D:Shinto} gloss`],
-    [`(Singapore) gloss`, `{D:Singapore} gloss`],
-    [`(soccer) gloss`, `{D:soccer} gloss`],
-    [`(software) gloss`, `{D:software} gloss`],
-    [`(sports) gloss`, `{D:sport} gloss`],
-    [`(sport) gloss`, `{D:sport} gloss`],
-    [`(stationery) gloss`, `{D:stationery} gloss`],
-    [`(statistics) gloss`, `{D:statistics} gloss`],
-    [`(surname) gloss`, `{D:surname} gloss`],
-    [`(surveying) gloss`, `{D:surveying} gloss`],
-    [`(Taiwan) gloss`, `{D:Taiwan} gloss`],
-    [`(Taoism) gloss`, `{D:Taoism} gloss`],
-    [`(TCM) gloss`, `{D:TCM} gloss`],
-    [`(technology) gloss`, `{D:technology} gloss`],
-    [`(telecommunications) gloss`, `{D:telecommunications} gloss`],
-    [`(telephony) gloss`, `{D:telephony} gloss`],
-    [`(textiles) gloss`, `{D:textiles} gloss`],
-    [`(theater) gloss`, `{D:theater} gloss`],
-    [`(thermodynamics) gloss`, `{D:thermodynamics} gloss`],
-    [`(time) gloss`, `{D:time} gloss`],
-    [`(transportation) gloss`, `{D:transportation} gloss`],
-    [`(Tw) gloss`, `{D:Tw} gloss`],
-    [`(typesetting) gloss`, `{D:typesetting} gloss`],
-    [`(typography) gloss`, `{D:typography} gloss`],
-    [`(vulgar) gloss`, `{D:vulgar} gloss`],
-    [`(watchmaking) gloss`, `{D:watchmaking} gloss`],
-    [`(weaving) gloss`, `{D:weaving} gloss`],
-    [`(zoology) gloss`, `{D:zoology} gloss`],
+    [`(ACG) gloss`, `{ACG} gloss`],
+    [`(accounting) gloss`, `{accounting} gloss`],
+    [`(acoustics) gloss`, `{acoustics} gloss`],
+    [`(acrobatics) gloss`, `{acrobatics} gloss`],
+    [`(aerospace) gloss`, `{aerospace} gloss`],
+    [`(agriculture) gloss`, `{agriculture} gloss`],
+    [`(anatomy) gloss`, `{anatomy} gloss`],
+    [`(angling) gloss`, `{angling} gloss`],
+    [`(animals) gloss`, `{animals} gloss`],
+    [`(archaeology) gloss`, `{archaeology} gloss`],
+    [`(archeology) gloss`, `{archeology} gloss`],
+    [`(archery) gloss`, `{archery} gloss`],
+    [`(architecture) gloss`, `{architecture} gloss`],
+    [`(astronautics) gloss`, `{astronautics} gloss`],
+    [`(astronomy) gloss`, `{astronomy} gloss`],
+    [`(athletics) gloss`, `{athletics} gloss`],
+    [`(automotive) gloss`, `{automotive} gloss`],
+    [`(aviation) gloss`, `{aviation} gloss`],
+    [`(ballet) gloss`, `{ballet} gloss`],
+    [`(banking) gloss`, `{banking} gloss`],
+    [`(baseball) gloss`, `{baseball} gloss`],
+    [`(basketball) gloss`, `{basketball} gloss`],
+    [`(basketwork) gloss`, `{basketwork} gloss`],
+    [`(BDSM) gloss`, `{BDSM} gloss`],
+    [`(beer) gloss`, `{beer} gloss`],
+    [`(biochemistry) gloss`, `{biochemistry} gloss`],
+    [`(biogeography) gloss`, `{biogeography} gloss`],
+    [`(biology) gloss`, `{biology} gloss`],
+    [`(biotechnology) gloss`, `{biotechnology} gloss`],
+    [`(bird) gloss`, `{bird} gloss`],
+    [`(botany) gloss`, `{botany} gloss`],
+    [`(boxing) gloss`, `{boxing} gloss`],
+    [`(brand) gloss`, `{brand} gloss`],
+    [`(broadcasting) gloss`, `{broadcasting} gloss`],
+    [`(Buddhism) gloss`, `{Buddhism} gloss`],
+    [`(Buddhist) gloss`, `{Buddhist} gloss`],
+    [`(business) gloss`, `{business} gloss`],
+    [`(calligraphy) gloss`, `{calligraphy} gloss`],
+    [`(Cant.) gloss`, `{Cantonese} gloss`],
+    [`(Cantonese) gloss`, `{Cantonese} gloss`],
+    [`(cartography) gloss`, `{cartography} gloss`],
+    [`(Catholicism) gloss`, `{Catholicism} gloss`],
+    [`(chemical) gloss`, `{chemical} gloss`],
+    [`(chemistry) gloss`, `{chemistry} gloss`],
+    [`(Chinese) gloss`, `{Chinese} gloss`],
+    [`(Christianity) gloss`, `{Christianity} gloss`],
+    [`(cinema) gloss`, `{cinema} gloss`],
+    [`(cinematography) gloss`, `{cinematography} gloss`],
+    [`(commerce) gloss`, `{commerce} gloss`],
+    [`(communications) gloss`, `{communications} gloss`],
+    [`(computer) gloss`, `{computer} gloss`],
+    [`(computing) gloss`, `{computing} gloss`],
+    [`(Confucianism) gloss`, `{Confucianism} gloss`],
+    [`(constellation) gloss`, `{constellation} gloss`],
+    [`(cookery) gloss`, `{cookery} gloss`],
+    [`(cooking) gloss`, `{cooking} gloss`],
+    [`(cosmetics) gloss`, `{cosmetics} gloss`],
+    [`(cryptography) gloss`, `{cryptography} gloss`],
+    [`(cuisine) gloss`, `{cuisine} gloss`],
+    [`(currency) gloss`, `{currency} gloss`],
+    [`(Daoism) gloss`, `{Daoism} gloss`],
+    [`(dating) gloss`, `{dating} gloss`],
+    [`(deferential) gloss`, `{deferential} gloss`],
+    [`(dentistry) gloss`, `{dentistry} gloss`],
+    [`(dinosaur) gloss`, `{dinosaur} gloss`],
+    [`(divination) gloss`, `{divination} gloss`],
+    [`(diving) gloss`, `{diving} gloss`],
+    [`(ecology) gloss`, `{ecology} gloss`],
+    [`(economics) gloss`, `{economics} gloss`],
+    [`(education) gloss`, `{education} gloss`],
+    [`(electricity) gloss`, `{electricity} gloss`],
+    [`(electromagnetism) gloss`, `{electromagnetism} gloss`],
+    [`(electronics) gloss`, `{electronics} gloss`],
+    [`(embryology) gloss`, `{embryology} gloss`],
+    [`(engineering) gloss`, `{engineering} gloss`],
+    [`(entomology) gloss`, `{entomology} gloss`],
+    [`(epidemiology) gloss`, `{epidemiology} gloss`],
+    [`(expletive) gloss`, `{expletive} gloss`],
+    [`(fandom) gloss`, `{fandom} gloss`],
+    [`(fashion) gloss`, `{fashion} gloss`],
+    [`(fencing) gloss`, `{fencing} gloss`],
+    [`(filmmaking) gloss`, `{filmmaking} gloss`],
+    [`(finance) gloss`, `{finance} gloss`],
+    [`(fitness) gloss`, `{fitness} gloss`],
+    [`(flying) gloss`, `{flying} gloss`],
+    [`(food) gloss`, `{food} gloss`],
+    [`(football) gloss`, `{football} gloss`],
+    [`(forestry) gloss`, `{forestry} gloss`],
+    [`(gaming) gloss`, `{gaming} gloss`],
+    [`(genetic) gloss`, `{genetic} gloss`],
+    [`(genetics) gloss`, `{genetics} gloss`],
+    [`(geography) gloss`, `{geography} gloss`],
+    [`(geology) gloss`, `{geology} gloss`],
+    [`(geometry) gloss`, `{geometry} gloss`],
+    [`(geopolitics) gloss`, `{geopolitics} gloss`],
+    [`(geotectonics) gloss`, `{geotectonics} gloss`],
+    [`(golf) gloss`, `{golf} gloss`],
+    [`(government) gloss`, `{government} gloss`],
+    [`(grammar) gloss`, `{grammar} gloss`],
+    [`(gymnastics) gloss`, `{gymnastics} gloss`],
+    [`(hairstyle) gloss`, `{hairstyle} gloss`],
+    [`(historical) gloss`, `{historical} gloss`],
+    [`(HK) gloss`, `{HK} gloss`],
+    [`(Hong Kong) gloss`, `{HK} gloss`],
+    [`(horticulture) gloss`, `{horticulture} gloss`],
+    [`(humor) gloss`, `{humor} gloss`],
+    [`(humorous) gloss`, `{humor} gloss`],
+    [`(hydrology) gloss`, `{hydrology} gloss`],
+    [`(ichthyology) gloss`, `{ichthyology} gloss`],
+    [`(immunology) gloss`, `{immunology} gloss`],
+    [`(information) gloss`, `{information} gloss`],
+    [`(Internet slang) gloss`, `{Internet slang} gloss`],
+    [`(Islam) gloss`, `{Islam} gloss`],
+    [`(Japan) gloss`, `{Japan} gloss`],
+    [`(journalism) gloss`, `{journalism} gloss`],
+    [`(law) gloss`, `{law} gloss`],
+    [`(lexicography) gloss`, `{lexicography} gloss`],
+    [`(linguistics) gloss`, `{linguistics} gloss`],
+    [`(logistics) gloss`, `{logistics} gloss`],
+    [`(mahjong) gloss`, `{mahjong} gloss`],
+    [`(Malaysia) gloss`, `{Malaysia} gloss`],
+    [`(mammology) gloss`, `{mammology} gloss`],
+    [`(manufacturing) gloss`, `{manufacturing} gloss`],
+    [`(Maoism) gloss`, `{Maoism} gloss`],
+    [`(marketing) gloss`, `{marketing} gloss`],
+    [`(math) gloss`, `{math.} gloss`],
+    [`(math.) gloss`, `{math.} gloss`],
+    [`(mathematical) gloss`, `{math.} gloss`],
+    [`(measurement) gloss`, `{measurement} gloss`],
+    [`(mechanics) gloss`, `{mechanics} gloss`],
+    [`(med) gloss`, `{medical} gloss`],
+    [`(med.) gloss`, `{medical} gloss`],
+    [`(medical) gloss`, `{medical} gloss`],
+    [`(medicine) gloss`, `{medical} gloss`],
+    [`(metallurgy) gloss`, `{metallurgy} gloss`],
+    [`(metalwork) gloss`, `{metalwork} gloss`],
+    [`(meteorology) gloss`, `{meteorology} gloss`],
+    [`(microbiology) gloss`, `{microbiology} gloss`],
+    [`(military) gloss`, `{military} gloss`],
+    [`(mineralogy) gloss`, `{mineralogy} gloss`],
+    [`(mining) gloss`, `{mining} gloss`],
+    [`(Mohism) gloss`, `{Mohism} gloss`],
+    [`(music) gloss`, `{music} gloss`],
+    [`(mycology) gloss`, `{mycology} gloss`],
+    [`(mythology) gloss`, `{mythology} gloss`],
+    [`(neologism) gloss`, `{neologism} gloss`],
+    [`(neuroscience) gloss`, `{neuroscience} gloss`],
+    [`(obstetrics) gloss`, `{obstetrics} gloss`],
+    [`(oceanography) gloss`, `{oceanography} gloss`],
+    [`(opera) gloss`, `{opera} gloss`],
+    [`(optics) gloss`, `{optics} gloss`],
+    [`(ornithology) gloss`, `{ornithology} gloss`],
+    [`(orthodontics) gloss`, `{orthodontics} gloss`],
+    [`(orthography) gloss`, `{orthography} gloss`],
+    [`(painting) gloss`, `{painting} gloss`],
+    [`(perfumery) gloss`, `{perfumery} gloss`],
+    [`(petrochemistry) gloss`, `{petrochemistry} gloss`],
+    [`(pharm.) gloss`, `{pharmacology} gloss`],
+    [`(pharmacology) gloss`, `{pharmacology} gloss`],
+    [`(philately) gloss`, `{philately} gloss`],
+    [`(philosophy) gloss`, `{philosophy} gloss`],
+    [`(phonetic) gloss`, `{phonetic} gloss`],
+    [`(phonetics) gloss`, `{phonetics} gloss`],
+    [`(phonology) gloss`, `{phonology} gloss`],
+    [`(photography) gloss`, `{photography} gloss`],
+    [`(physics) gloss`, `{physics} gloss`],
+    [`(physiognomy) gloss`, `{physiognomy} gloss`],
+    [`(physiology) gloss`, `{physiology} gloss`],
+    [`(political) gloss`, `{politics} gloss`],
+    [`(politically) gloss`, `{politics} gloss`],
+    [`(politics) gloss`, `{politics} gloss`],
+    [`(PRC) gloss`, `{PRC} gloss`],
+    [`(printing) gloss`, `{printing} gloss`],
+    [`(psychological) gloss`, `{psychological} gloss`],
+    [`(psychology) gloss`, `{psychology} gloss`],
+    [`(publishing) gloss`, `{publishing} gloss`],
+    [`(radiography) gloss`, `{radiography} gloss`],
+    [`(religion) gloss`, `{religion} gloss`],
+    [`(religious) gloss`, `{religion} gloss`],
+    [`(retail) gloss`, `{retail} gloss`],
+    [`(retailer) gloss`, `{retailer} gloss`],
+    [`(retailing) gloss`, `{retailing} gloss`],
+    [`(rocketry) gloss`, `{rocketry} gloss`],
+    [`(science) gloss`, `{science} gloss`],
+    [`(seafood) gloss`, `{seafood} gloss`],
+    [`(seismology) gloss`, `{seismology} gloss`],
+    [`(semantics) gloss`, `{semantics} gloss`],
+    [`(Shanghainese) gloss`, `{Shanghainese} gloss`],
+    [`(Shinto) gloss`, `{Shinto} gloss`],
+    [`(Singapore) gloss`, `{Singapore} gloss`],
+    [`(soccer) gloss`, `{soccer} gloss`],
+    [`(software) gloss`, `{software} gloss`],
+    [`(sports) gloss`, `{sport} gloss`],
+    [`(sport) gloss`, `{sport} gloss`],
+    [`(stationery) gloss`, `{stationery} gloss`],
+    [`(statistics) gloss`, `{statistics} gloss`],
+    [`(surname) gloss`, `{surname} gloss`],
+    [`(surveying) gloss`, `{surveying} gloss`],
+    [`(Taiwan) gloss`, `{Taiwan} gloss`],
+    [`(Taoism) gloss`, `{Taoism} gloss`],
+    [`(TCM) gloss`, `{TCM} gloss`],
+    [`(technology) gloss`, `{technology} gloss`],
+    [`(telecommunications) gloss`, `{telecommunications} gloss`],
+    [`(telephony) gloss`, `{telephony} gloss`],
+    [`(textiles) gloss`, `{textiles} gloss`],
+    [`(theater) gloss`, `{theater} gloss`],
+    [`(thermodynamics) gloss`, `{thermodynamics} gloss`],
+    [`(time) gloss`, `{time} gloss`],
+    [`(transportation) gloss`, `{transportation} gloss`],
+    [`(Tw) gloss`, `{Tw} gloss`],
+    [`(typesetting) gloss`, `{typesetting} gloss`],
+    [`(typography) gloss`, `{typography} gloss`],
+    [`(vulgar) gloss`, `{vulgar} gloss`],
+    [`(watchmaking) gloss`, `{watchmaking} gloss`],
+    [`(weaving) gloss`, `{weaving} gloss`],
+    [`(zoology) gloss`, `{zoology} gloss`],
     // non-domain labels
     [`(abbr.) gloss`, `{abbr.} gloss`],
     [`(adj.) gloss`, `{adjective} gloss`],
@@ -1039,12 +1321,17 @@ describe(`parseCedictV2Line label extraction`, () => {
     // extracts multiple labels
     [
       `(biology) (loanword) to clone; a clone`,
-      `{D:biology} {loanword} to clone; a clone`,
+      `{biology} {loanword} to clone; a clone`,
     ],
-    // Accumulates labels from multiple glosses in text order
-    [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} {fig.} gloss 1; gloss 2`],
-    // Removes glosses that are solely labels
-    [`normal gloss; (idiom)`, `{idiom} normal gloss`],
+    // Keeps labels attached to the gloss they came from
+    [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} gloss 1; {fig.} gloss 2`],
+    // Glosses that are solely labels are removed with no hoisting
+    [`normal gloss; (idiom)`, `normal gloss`],
+    // Domain labels stay on the specific gloss they annotate
+    [
+      `to conserve; to preserve; to keep; to store; (computing) to save (a file etc)`,
+      `to conserve; to preserve; to keep; to store; {computing} to save (a file etc)`,
+    ],
     // Unknown labels are left as-is
     [`(horse)`, `(horse)`],
   ] as [string, string][])(`fixture: %s → %s`, async ([input, expected]) => {
@@ -1057,7 +1344,8 @@ describe(`parseCedictV2Line label extraction`, () => {
 describe(`applyCedictV2EditsToText sense serialization`, () => {
   test(`preserves end marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /example text (idiom); more text/`;
-    const output = applyCedictV2EditsToText(input);
+    const parsed = parseCedictV2Text(input, { strict: true });
+    const output = applyCedictV2EditsToText(parsed);
     expect(output).toMatchInlineSnapshot(
       `"示例 示例 [[shi4li4]] /{idiom} example text; more text/"`,
     );
@@ -1065,7 +1353,8 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
 
   test(`preserves middle marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /lit. to do something (idiom); to achieve a result/`;
-    const output = applyCedictV2EditsToText(input);
+    const parsed = parseCedictV2Text(input, { strict: true });
+    const output = applyCedictV2EditsToText(parsed);
     expect(output).toMatchInlineSnapshot(
       `"示例 示例 [[shi4li4]] /{lit.} {idiom} to do something; to achieve a result/"`,
     );
@@ -1073,7 +1362,8 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
 
   test(`preserves gloss without labels unchanged`, () => {
     const input = `示例 示例 [[shi4li4]] /plain gloss/`;
-    const output = applyCedictV2EditsToText(input);
+    const parsed = parseCedictV2Text(input, { strict: true });
+    const output = applyCedictV2EditsToText(parsed);
     expect(output).toBe(`示例 示例 [[shi4li4]] /plain gloss/`);
   });
 });
@@ -1172,13 +1462,12 @@ describe(`findCedictEntryById`, () => {
 
   test(`returns null for unknown ids`, async () => {
     await expect(
-      findCedictEntryById(`不存在|不存在|bu4cun2zai4|nope`),
+      findCedictEntryById(`不存在 不存在 [[bu4cun2zai4]] /nope/`),
     ).resolves.toBeNull();
     await expect(
-      findCedictEntryById(`does|not|exist|nope`),
+      findCedictEntryById(`does not [[exist]] /nope/`),
     ).resolves.toBeNull();
-    await expect(findCedictEntryById(`行|行|xing2`)).resolves.toBeNull();
-    await expect(findCedictEntryById(``)).resolves.toBeNull();
+    await expect(findCedictEntryById(`行 行 [[xing2]] //`)).resolves.toBeNull();
   });
 });
 
@@ -1522,5 +1811,112 @@ describe(`computeGlossesSimilarity`, () => {
   test(`returns 0 when only one side is empty`, () => {
     const similarity = computeGlossesSimilarity([`test`], []);
     expect(similarity).toBe(0);
+  });
+});
+
+test(`generate eval dataset`, async () => {
+  const cedict = await loadCedictV2();
+
+  for (const x of cedict) {
+    if (x.simplified === `恶棍`) {
+      // oxlint-disable-next-line no-console
+      // console.log({
+      //   traditional: x.traditional,
+      //   simplified: x.simplified,
+      //   pinyin: normalizePinyinText(x.pinyin),
+      //   definition: x.senses.map((y) => y.split(`; `)),
+      // });
+    }
+  }
+});
+
+describe(`nestedStringSetScorer`, () => {
+  test(`different gloss order`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`, `go`, `depart`]],
+      expected: [[`depart`, `to go (in a direction)`, `go`]],
+    });
+    expect(result).toEqual({ score: 1, mismatches: new Set() });
+  });
+
+  test(`multiple senses`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`, `go`, `depart`], [`b`]],
+      expected: [
+        [`depart`, `to go (in a direction)`, `go`],
+        [`b`, `b`],
+      ],
+    });
+    expect(result).toEqual({ score: 1, mismatches: new Set() });
+  });
+
+  test(`different sense ordering`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`, `go`, `depart`], [`b`]],
+      expected: [
+        [`b`, `b`],
+        [`depart`, `to go (in a direction)`, `go`],
+      ],
+    });
+    expect(result).toEqual({ score: 1, mismatches: new Set() });
+  });
+
+  test(`mixed up glosses`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`], [`a`, `b`, `go`, `depart`]],
+      expected: [
+        [`a`, `b`],
+        [`depart`, `to go (in a direction)`, `go`],
+      ],
+    });
+    expect(result.score).toBeLessThan(1);
+    expect(result.mismatches).toMatchObject(
+      new Set([
+        {
+          actual: new Set([`to go (in a direction)`]),
+          expected: new Set([`depart`, `to go (in a direction)`, `go`]),
+        },
+        {
+          actual: new Set([`a`, `b`, `go`, `depart`]),
+          expected: new Set([`a`, `b`]),
+        },
+      ]),
+    );
+  });
+
+  test(`extra returned glosses`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`a`, `b`, `c`]],
+      expected: [[`a`, `b`]],
+    });
+    expect(result.score).toBeLessThan(1);
+    expect(result.mismatches).toMatchObject(
+      new Set([
+        {
+          actual: new Set([`a`, `b`, `c`]),
+          expected: new Set([`a`, `b`]),
+        },
+      ]),
+    );
+  });
+
+  test(`fallback matching detection`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`a`], [`x`], [`c`]],
+      expected: [[`y`], [`a`], [`c`]],
+    });
+    expect(result.score).toBeLessThan(1);
+    expect(result.mismatches).toMatchObject(
+      new Set([
+        {
+          actual: new Set([`x`]),
+          expected: new Set(),
+        },
+        {
+          actual: new Set(),
+          expected: new Set([`y`]),
+        },
+      ]),
+    );
   });
 });

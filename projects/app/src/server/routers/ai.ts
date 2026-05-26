@@ -42,25 +42,6 @@ const pronunciationHintInputSchema = z
   })
   .strict();
 
-const pronunciationHintOutputSchema = z
-  .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            hint: z
-              .string()
-              .describe(
-                `The mnemonic story text. When the cue word appears in the story, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
-              ),
-            explanation: z.string().nullable().optional(),
-          })
-          .strict(),
-      )
-      .min(1),
-  })
-  .strict();
-
 const meaningHintInputSchema = z
   .object({
     hanzi: z.string().min(1).max(2),
@@ -83,21 +64,6 @@ const meaningHintInputSchema = z
       .max(12)
       .optional(),
     count: z.number().int().min(1).max(6),
-  })
-  .strict();
-
-const meaningHintRawOutputSchema = z
-  .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            hint: z.string(),
-            explanation: z.string().nullable().optional(),
-          })
-          .strict(),
-      )
-      .min(1),
   })
   .strict();
 
@@ -125,36 +91,6 @@ const subLocationDescriptionInputSchema = z
     sublocation: z.string().min(1),
     viewpoint: z.string().optional(),
     count: z.number().int().min(1).max(6),
-  })
-  .strict();
-
-const subLocationDescriptionOutputSchema = z
-  .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            description: z.string(),
-            explanation: z.string().nullable().optional(),
-          })
-          .strict(),
-      )
-      .min(1),
-  })
-  .strict();
-
-const leadCharacterDescriptionOutputSchema = z
-  .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            description: z.string(),
-            explanation: z.string().nullable().optional(),
-          })
-          .strict(),
-      )
-      .min(1),
   })
   .strict();
 
@@ -191,12 +127,12 @@ const generateImageOutputSchema = z
 export const aiRouter = router({
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
-    .output(pronunciationHintOutputSchema)
+    .output(buildPronunciationHintPrompt.schema)
     .mutation(async (opts) => {
       const { leadCharacter, location, cue, creativeDirection, count } =
         opts.input;
 
-      const { system, user } = buildPronunciationHintPrompt({
+      const prompt = buildPronunciationHintPrompt({
         leadCharacter,
         location,
         cue,
@@ -205,12 +141,7 @@ export const aiRouter = router({
       });
 
       try {
-        const data = await requestOpenAiJson({
-          system,
-          user,
-          schema: pronunciationHintOutputSchema,
-        });
-
+        const data = await requestOpenAiJson(prompt);
         return data;
       } catch (error) {
         console.error(`Failed to generate pronunciation hints:`, error);
@@ -235,7 +166,7 @@ export const aiRouter = router({
       const strategyResults = await Promise.all(
         strategyPlans.map(async (buildPrompt) => {
           const strategyLabel = buildPrompt.strategy;
-          const { system, user } = buildPrompt({
+          const prompt = buildPrompt({
             hanzi,
             meaning,
             components,
@@ -243,11 +174,7 @@ export const aiRouter = router({
           });
 
           try {
-            const data = await requestOpenAiJson({
-              system,
-              user,
-              schema: meaningHintRawOutputSchema,
-            });
+            const data = await requestOpenAiJson(prompt);
 
             return data.suggestions.map((suggestion) => ({
               ...suggestion,
@@ -276,12 +203,12 @@ export const aiRouter = router({
 
   generateSubLocationDescriptions: authedProcedure
     .input(subLocationDescriptionInputSchema)
-    .output(subLocationDescriptionOutputSchema)
+    .output(buildSubLocationDescriptionPrompt.schema)
     .mutation(async (opts) => {
       const { label, location, locationNotes, sublocation, viewpoint, count } =
         opts.input;
 
-      const { system, user } = buildSubLocationDescriptionPrompt({
+      const prompt = buildSubLocationDescriptionPrompt({
         label,
         location,
         locationNotes,
@@ -291,12 +218,7 @@ export const aiRouter = router({
       });
 
       try {
-        const data = await requestOpenAiJson({
-          system,
-          user,
-          schema: subLocationDescriptionOutputSchema,
-        });
-
+        const data = await requestOpenAiJson(prompt);
         return data;
       } catch (error) {
         console.error(`Failed to generate sublocation descriptions:`, error);
@@ -309,11 +231,11 @@ export const aiRouter = router({
 
   generateLeadCharacterDescriptions: authedProcedure
     .input(leadCharacterDescriptionInputSchema)
-    .output(leadCharacterDescriptionOutputSchema)
+    .output(buildLeadCharacterDescriptionPrompt.schema)
     .mutation(async (opts) => {
       const { name, sound, existingDescription, count } = opts.input;
 
-      const { system, user } = buildLeadCharacterDescriptionPrompt({
+      const prompt = buildLeadCharacterDescriptionPrompt({
         name,
         sound,
         existingDescription,
@@ -321,12 +243,7 @@ export const aiRouter = router({
       });
 
       try {
-        const data = await requestOpenAiJson({
-          system,
-          user,
-          schema: leadCharacterDescriptionOutputSchema,
-        });
-
+        const data = await requestOpenAiJson(prompt);
         return data;
       } catch (error) {
         console.error(`Failed to generate lead character descriptions:`, error);

@@ -1,4 +1,17 @@
+import type { OpenAI } from "openai";
 import { z } from "zod/v4";
+
+export interface ChatPrompt<Schema extends z.ZodType> {
+  model?: OpenAI.ChatModel;
+  reasoningEffort?: OpenAI.ReasoningEffort;
+  system: string;
+  user: string;
+  /**
+   * The Zod schema describing the expected shape of the assistant's response.
+   * This is used for type inference and validation of the response data.
+   */
+  schema: Schema;
+}
 
 export function buildPronunciationHintPrompt({
   leadCharacter,
@@ -12,7 +25,7 @@ export function buildPronunciationHintPrompt({
   cue: { word: string; meaning?: string };
   creativeDirection?: string;
   count: number;
-}): { system: string; user: string } {
+}): ChatPrompt<typeof buildPronunciationHintPrompt.schema> {
   const systemTemplate = `
 You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
 Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
@@ -70,8 +83,26 @@ Generate {{ count }} distinct mnemonic story ideas.
     data: JSON.stringify(data, null, 2),
   });
 
-  return { system, user };
+  return { system, user, schema: buildPronunciationHintPrompt.schema };
 }
+buildPronunciationHintPrompt.schema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            hint: z
+              .string()
+              .describe(
+                `The mnemonic story text. When the cue word appears in the story, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
+              ),
+            explanation: z.string().nullable().optional(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
 
 export function renderPromptTemplate(
   template: string,
@@ -104,12 +135,27 @@ export type MeaningHintPromptInput = z.infer<
   typeof meaningHintPromptInputSchema
 >;
 
+const meaningHintOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            hint: z.string(),
+            explanation: z.string().nullable().optional(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 export const buildMeaningHintPrompt = ({
   hanzi,
   meaning,
   components,
   count,
-}: MeaningHintPromptInput): { system: string; user: string } => {
+}: MeaningHintPromptInput): ChatPrompt<typeof meaningHintOutputSchema> => {
   const systemTemplate = `
 You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
 Your job is to help the learner remember what a Hanzi means using its visual components.
@@ -159,16 +205,17 @@ Generate {{ count }} distinct mnemonic hints.
     data: JSON.stringify(data, null, 2),
   });
 
-  return { system, user };
+  return { system, user, schema: meaningHintOutputSchema };
 };
 buildMeaningHintPrompt.strategy = `visual`;
+buildMeaningHintPrompt.schema = meaningHintOutputSchema;
 
 export const buildMeaningHintLogicalPrompt = ({
   hanzi,
   meaning,
   components,
   count,
-}: MeaningHintPromptInput): { system: string; user: string } => {
+}: MeaningHintPromptInput): ChatPrompt<typeof meaningHintOutputSchema> => {
   const primaryGloss = meaning.glosses[0] ?? ``;
   const disambiguation = meaning.glosses.slice(1).join(`; `);
 
@@ -216,9 +263,10 @@ Generate {{ count }} distinct mnemonic hints:
     data: JSON.stringify(data, null, 2),
   });
 
-  return { system, user };
+  return { system, user, schema: meaningHintOutputSchema };
 };
 buildMeaningHintLogicalPrompt.strategy = `logical`;
+buildMeaningHintLogicalPrompt.schema = meaningHintOutputSchema;
 
 export function buildSubLocationDescriptionPrompt({
   label,
@@ -234,7 +282,7 @@ export function buildSubLocationDescriptionPrompt({
   sublocation: string;
   viewpoint?: string;
   count: number;
-}): { system: string; user: string } {
+}): ChatPrompt<typeof buildSubLocationDescriptionPrompt.schema> {
   const systemTemplate = `
 You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
 Your goal is to define a stable mental image of a place that can be reused across many stories.
@@ -275,8 +323,22 @@ Generate {{ count }} distinct reusable location descriptions for this exact comb
     data: JSON.stringify(data, null, 2),
   });
 
-  return { system, user };
+  return { system, user, schema: buildSubLocationDescriptionPrompt.schema };
 }
+buildSubLocationDescriptionPrompt.schema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            description: z.string(),
+            explanation: z.string().nullable().optional(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
 
 export function buildLeadCharacterDescriptionPrompt({
   name,
@@ -288,7 +350,7 @@ export function buildLeadCharacterDescriptionPrompt({
   sound: string;
   existingDescription?: string;
   count: number;
-}): { system: string; user: string } {
+}): ChatPrompt<typeof buildLeadCharacterDescriptionPrompt.schema> {
   const systemTemplate = `
 You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
 Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
@@ -326,5 +388,19 @@ Generate {{ count }} distinct character personality descriptions for this charac
     data: JSON.stringify(data, null, 2),
   });
 
-  return { system, user };
+  return { system, user, schema: buildLeadCharacterDescriptionPrompt.schema };
 }
+buildLeadCharacterDescriptionPrompt.schema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            description: z.string(),
+            explanation: z.string().nullable().optional(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();

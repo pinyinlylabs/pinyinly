@@ -6488,6 +6488,7 @@ __metadata:
     vite: "npm:^7.3.2"
     vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.1.5"
+    vitest-evals: "npm:^0.11.0"
     ws: "npm:^8.17.1"
     yaml: "npm:^2.7.0"
     yargs: "npm:^18.0.0"
@@ -23747,6 +23748,23 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: 10c0/74be36907e208916f18bfec81c8eba18b869f0a170f1ece0a4dcb14874d0f0e7c022fb6c2ad896e3ee6c973fe88f53ac23b4078879ada340d8b263260868b8d4
+  languageName: node
+  linkType: hard
+
+"vitest-evals@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "vitest-evals@npm:0.11.0"
+  peerDependencies:
+    ai: ">=4 <7"
+    tinyrainbow: ">=2 <4"
+    vitest: ">=4 <5"
+    zod: ">=3 <5"
+  peerDependenciesMeta:
+    ai:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/d754b4702cacdd642cbe43a65e0b7746bf4b7be0c273241192fc297a16c9c5ff07de1084edfd30aa3c8e36b97a16f17fdfcccbb2188e3939b196e3a56ad01937
   languageName: node
   linkType: hard
 

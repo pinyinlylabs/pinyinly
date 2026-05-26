@@ -1,5 +1,9 @@
+import { pinyinTextSchema } from "#data/model.js";
 import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
+import { nanoid } from "#util/nanoid.ts";
+import type { ChatPrompt } from "#util/prompts.js";
+import { renderPromptTemplate } from "#util/prompts.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
   arrayFilterUnique,
@@ -9,6 +13,7 @@ import {
 import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
+import { z } from "zod/v4";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
 
@@ -48,6 +53,13 @@ export interface ParseCedictV2LineOptionsType {
   edits?: CedictV2EditsType;
 }
 
+export type CedictSenseId = `${string}:${string}`;
+
+export interface CedictSenseIdParamsType {
+  simplified: string;
+  nanoid: string;
+}
+
 export type CedictV2EditRuleKind = `replace` | `merge` | `add`;
 
 export interface CedictV2ReplaceEditRuleType {
@@ -82,6 +94,30 @@ export interface CedictV2EntryEditsType {
 export interface CedictV2EditsType {
   entriesByKey: Map<string, CedictV2EntryEditsType>;
 }
+
+export interface CedictV2SenseIdRuleType {
+  nanoid: string;
+  sense: string;
+}
+
+export interface CedictV2EntrySenseIdsType {
+  traditional: string;
+  simplified: string;
+  pinyin: PinyinNumericText;
+  rules: CedictV2SenseIdRuleType[];
+}
+
+export interface CedictV2SenseIdsType {
+  entriesByKey: Map<string, CedictV2EntrySenseIdsType>;
+}
+
+export interface BuildCedictV2SenseIdsTextOptionsType {
+  createNanoid?: () => string;
+}
+
+const CEDICT_V2_SENSE_NANOID_LENGTH = 5;
+const createCedictV2SenseNanoid = () =>
+  nanoid().slice(0, CEDICT_V2_SENSE_NANOID_LENGTH);
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
 
@@ -134,6 +170,7 @@ const domainLabels = [
   `Christianity`,
   `cinema`,
   `cinematography`,
+  `color`,
   `commerce`,
   `communications`,
   `computer`,
@@ -318,7 +355,6 @@ const genericLabels = [
   `classifier`,
   `coll.`,
   `colloquial`,
-  `color`,
   `conjunction`,
   `contemporary`,
   `courteous`,
@@ -567,6 +603,171 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
   };
 }
 
+export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
+  const lines = text.split(/\r?\n/u);
+  const entriesByKey = new Map<string, CedictV2EntrySenseIdsType>();
+  let i = 0;
+
+  while (i < lines.length) {
+    const currentLine = lines[i];
+    const lineNumber = i + 1;
+    const trimmed = currentLine?.trim() ?? ``;
+
+    if (trimmed.length === 0 || trimmed.startsWith(`#`)) {
+      i += 1;
+      continue;
+    }
+
+    const header = parseCedictV2EditHeader(trimmed, lineNumber);
+    i += 1;
+
+    const rules: CedictV2SenseIdRuleType[] = [];
+    const seenNanoids = new Set<string>();
+    const seenSenses = new Set<string>();
+
+    while (i < lines.length) {
+      const ruleLine = lines[i];
+      const ruleLineNumber = i + 1;
+      const ruleTrimmed = ruleLine?.trim() ?? ``;
+
+      if (ruleTrimmed.length === 0) {
+        i += 1;
+        break;
+      }
+
+      if (ruleTrimmed.startsWith(`#`)) {
+        i += 1;
+        continue;
+      }
+
+      const parsedRule = parseCedictV2SenseIdRule(ruleTrimmed, ruleLineNumber);
+      if (seenNanoids.has(parsedRule.nanoid)) {
+        throw new Error(
+          formatCedictIdsParseError(
+            `duplicate nanoid in ids block: ${parsedRule.nanoid}`,
+            ruleLineNumber,
+          ),
+        );
+      }
+
+      if (seenSenses.has(parsedRule.sense)) {
+        throw new Error(
+          formatCedictIdsParseError(
+            `duplicate sense in ids block: ${parsedRule.sense}`,
+            ruleLineNumber,
+          ),
+        );
+      }
+
+      seenNanoids.add(parsedRule.nanoid);
+      seenSenses.add(parsedRule.sense);
+      rules.push(parsedRule);
+      i += 1;
+    }
+
+    if (rules.length === 0) {
+      throw new Error(
+        formatCedictIdsParseError(`ids block has no rules`, lineNumber),
+      );
+    }
+
+    const key = buildCedictV2EditEntryKey(
+      header.traditional,
+      header.simplified,
+      header.pinyin,
+    );
+
+    if (entriesByKey.has(key)) {
+      throw new Error(
+        formatCedictIdsParseError(
+          `duplicate ids block for ${header.traditional} ${header.simplified} [[${header.pinyin}]]`,
+          lineNumber,
+        ),
+      );
+    }
+
+    entriesByKey.set(key, {
+      traditional: header.traditional,
+      simplified: header.simplified,
+      pinyin: header.pinyin,
+      rules,
+    });
+  }
+
+  return {
+    entriesByKey,
+  };
+}
+
+export function buildCedictV2SenseIdsText(
+  entries: readonly CedictV2EntryType[],
+  existingIds: CedictV2SenseIdsType,
+  options: BuildCedictV2SenseIdsTextOptionsType = {},
+): string {
+  const createNanoid = options.createNanoid ?? createCedictV2SenseNanoid;
+  const usedNanoidsBySimplified = new Map<string, Set<string>>();
+
+  for (const entrySenseIds of existingIds.entriesByKey.values()) {
+    const simplifiedKey = entrySenseIds.simplified.normalize(`NFKC`);
+    const usedNanoids =
+      usedNanoidsBySimplified.get(simplifiedKey) ?? new Set<string>();
+    for (const rule of entrySenseIds.rules) {
+      usedNanoids.add(rule.nanoid);
+    }
+    usedNanoidsBySimplified.set(simplifiedKey, usedNanoids);
+  }
+
+  const outputBlocks: string[] = [];
+
+  for (const entry of entries) {
+    const senses = getCedictV2TransformSerializedSenses(entry);
+    if (senses.length === 0) {
+      continue;
+    }
+
+    const key = buildCedictV2EditEntryKey(
+      entry.traditional,
+      entry.simplified,
+      entry.pinyin,
+    );
+
+    const existingEntry = existingIds.entriesByKey.get(key);
+    const existingNanoidBySense = new Map<string, string>(
+      existingEntry?.rules.map((rule) => [rule.sense, rule.nanoid]),
+    );
+
+    const simplifiedKey = entry.simplified.normalize(`NFKC`);
+    const usedNanoids = usedNanoidsBySimplified.get(simplifiedKey) ?? new Set();
+    usedNanoidsBySimplified.set(simplifiedKey, usedNanoids);
+
+    const outputRules = senses.map((sense) => {
+      const existingNanoid = existingNanoidBySense.get(sense);
+      if (existingNanoid != null) {
+        usedNanoids.add(existingNanoid);
+        return { nanoid: existingNanoid, sense };
+      }
+
+      const generatedNanoid = generateUniqueCedictSenseNanoid({
+        createNanoid,
+        usedNanoids,
+      });
+      return {
+        nanoid: generatedNanoid,
+        sense,
+      };
+    });
+
+    const header = `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]]`;
+    const ruleLines = outputRules.map(
+      (rule) => `${rule.nanoid} /${rule.sense}/`,
+    );
+
+    outputBlocks.push([header, ...ruleLines].join(`\n`));
+  }
+
+  return outputBlocks.join(`\n\n`);
+}
+
 const loadCedictV2Edits = memoize0(async (): Promise<CedictV2EditsType> => {
   const filename = `cedict_ts-2.u8`;
   const editsText = await readFile(
@@ -575,6 +776,16 @@ const loadCedictV2Edits = memoize0(async (): Promise<CedictV2EditsType> => {
   );
 
   return parseCedictV2EditsText(editsText);
+});
+
+const loadCedictV2Ids = memoize0(async (): Promise<CedictV2SenseIdsType> => {
+  const filename = `cedict_ts-2.u8`;
+  const idsText = await readFile(
+    path.join(import.meta.dirname, `${filename}.ids`),
+    `utf8`,
+  );
+
+  return parseCedictV2IdsText(idsText);
 });
 
 export async function findCedictMigratedSenseId(
@@ -626,35 +837,33 @@ export async function findCedictMigratedSenseId(
 }
 
 export function applyCedictV2EditsToText(
-  text: string,
+  entries: readonly CedictV2EntryType[],
   options: ParseCedictV2LineOptionsType = {},
 ): string {
-  const strict = options.strict ?? true;
   const matchedEntryKeys = new Set<string>();
+  const outputLines = entries
+    .map((entry) => {
+      const key = buildCedictV2EditEntryKey(
+        entry.traditional,
+        entry.simplified,
+        entry.pinyin,
+      );
+      const entryEdits = options.edits?.entriesByKey.get(key);
+      if (entryEdits != null) {
+        matchedEntryKeys.add(key);
+      }
 
-  const outputLines = text.split(/\r?\n/u).map((line, i) => {
-    const lineNumber = i + 1;
-    const parsedLine = parseCedictV2Line(line, {
-      strict,
-      lineNumber,
-      edits: options.edits,
-    });
+      const nextEntry: CedictV2EntryType =
+        entryEdits == null
+          ? entry
+          : {
+              ...entry,
+              senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
+            };
 
-    if (parsedLine == null) {
-      return line;
-    }
-
-    const key = buildCedictV2EditEntryKey(
-      parsedLine.traditional,
-      parsedLine.simplified,
-      parsedLine.pinyin,
-    );
-    if (options.edits?.entriesByKey.has(key) === true) {
-      matchedEntryKeys.add(key);
-    }
-
-    return serializeCedictV2Entry(parsedLine);
-  });
+      return serializeCedictV2Entry(nextEntry);
+    })
+    .filter((line): line is string => line != null);
 
   for (const [key, entryEdits] of options.edits?.entriesByKey ?? []) {
     if (matchedEntryKeys.has(key)) {
@@ -666,23 +875,67 @@ export function applyCedictV2EditsToText(
       continue;
     }
 
-    outputLines.push(
-      serializeCedictV2Entry({
-        traditional: entryEdits.traditional,
-        simplified: entryEdits.simplified,
-        pinyin: entryEdits.pinyin,
-        senses: createdSenses,
-      }),
-    );
+    const serializedCreatedEntry = serializeCedictV2Entry({
+      traditional: entryEdits.traditional,
+      simplified: entryEdits.simplified,
+      pinyin: entryEdits.pinyin,
+      senses: createdSenses,
+    });
+    if (serializedCreatedEntry != null) {
+      outputLines.push(serializedCreatedEntry);
+    }
   }
 
   return outputLines.join(`\n`);
 }
 
-function serializeCedictV2Entry(entry: CedictV2EntryType): string {
+export function applyCedictV2UnicodeNormalization(
+  entries: readonly CedictV2EntryType[],
+): CedictV2EntryType[] {
+  const mergedByKey = new Map<string, CedictV2EntryType>();
+  const outputEntries: CedictV2EntryType[] = [];
+
+  for (const entry of entries) {
+    const normalizedEntry: CedictV2EntryType = {
+      traditional: entry.traditional.normalize(`NFKC`),
+      simplified: entry.simplified.normalize(`NFKC`),
+      pinyin: entry.pinyin,
+      senses: entry.senses,
+    };
+
+    const key = buildCedictV2EditEntryKey(
+      normalizedEntry.traditional,
+      normalizedEntry.simplified,
+      normalizedEntry.pinyin,
+    );
+    const existingEntry = mergedByKey.get(key);
+
+    if (existingEntry == null) {
+      const createdEntry = {
+        ...normalizedEntry,
+        senses: [...normalizedEntry.senses],
+      };
+      mergedByKey.set(key, createdEntry);
+      outputEntries.push(createdEntry);
+      continue;
+    }
+
+    existingEntry.senses = [...existingEntry.senses, ...normalizedEntry.senses]
+      .filter((sense) => sense.length > 0)
+      .filter(arrayFilterUnique());
+  }
+
+  return outputEntries;
+}
+
+function serializeCedictV2Entry(entry: CedictV2EntryType): string | null {
   const senses = entry.senses
     .map((sense) => serializeCedictV2Sense(parseCedictV2Sense(sense)))
     .filter((sense): sense is string => sense != null && sense.length > 0);
+
+  if (senses.length === 0) {
+    return null;
+  }
 
   return `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] /${senses.join(`/`)}/`;
 }
@@ -690,10 +943,10 @@ function serializeCedictV2Entry(entry: CedictV2EntryType): string {
 interface ParsedCedictSenseGlossType {
   originalGloss: string;
   cleanedGloss: string;
+  labels: string[];
 }
 
 interface ParsedCedictSenseType {
-  labels: string[];
   glosses: ParsedCedictSenseGlossType[];
   inlineClassifiers: string[];
   inlineAlternativePinyin: string[];
@@ -703,7 +956,6 @@ interface ParsedCedictSenseType {
 export function parseCedictV2Sense(
   sense: CedictV2EntryType[`senses`][number],
 ): ParsedCedictSenseType {
-  const labels: string[] = [];
   const glosses: ParsedCedictSenseGlossType[] = [];
   const inlineClassifiers: string[] = [];
   const inlineAlternativePinyin: string[] = [];
@@ -714,14 +966,11 @@ export function parseCedictV2Sense(
     .map((gloss) => gloss.trim())
     .filter((gloss) => gloss.length > 0)) {
     let cleanedGloss = gloss;
+    let labelsForGloss: string[] = [];
 
     const labelExtraction = extractSenseLabelsFromGloss(cleanedGloss);
     if (labelExtraction != null) {
-      for (const label of labelExtraction.labels) {
-        if (!labels.includes(label)) {
-          labels.push(label);
-        }
-      }
+      labelsForGloss = labelExtraction.labels;
       cleanedGloss = labelExtraction.cleanedGloss;
     }
 
@@ -764,11 +1013,11 @@ export function parseCedictV2Sense(
     glosses.push({
       originalGloss: gloss,
       cleanedGloss,
+      labels: labelsForGloss,
     });
   }
 
   return {
-    labels: labels,
     glosses,
     inlineClassifiers,
     inlineAlternativePinyin,
@@ -779,21 +1028,20 @@ export function parseCedictV2Sense(
 export function serializeCedictV2Sense(
   parsedSense: ParsedCedictSenseType,
 ): string | null {
-  const labelsPrefix = parsedSense.labels
-    .map((label) => `{${label}}`)
-    .join(` `);
-
   if (parsedSense.glosses.length === 0) {
-    return labelsPrefix.length === 0 ? null : labelsPrefix;
+    return null;
   }
 
-  const serializedGlosses = parsedSense.glosses.map((x) => x.cleanedGloss);
-  if (labelsPrefix.length > 0) {
-    const firstGloss = serializedGlosses[0];
-    if (firstGloss != null) {
-      serializedGlosses[0] = `${labelsPrefix} ${firstGloss}`;
+  const serializedGlosses = parsedSense.glosses.map((parsedGloss) => {
+    const labelsPrefix = parsedGloss.labels
+      .map((label) => `{${label}}`)
+      .join(` `);
+    if (labelsPrefix.length === 0) {
+      return parsedGloss.cleanedGloss;
     }
-  }
+
+    return `${labelsPrefix} ${parsedGloss.cleanedGloss}`;
+  });
 
   return serializedGlosses.join(`; `);
 }
@@ -813,12 +1061,17 @@ export function transformCedictV2Entry(
       parsedSense.inlineAlternativePinyin,
     );
     const inlineClassifiers = new Set<string>(parsedSense.inlineClassifiers);
-    const senseTags: string[] = [...parsedSense.labels];
     const originalGlosses: string[] = [];
     const cleanedGlosses: string[] = [];
 
     for (const parsedGloss of parsedSense.glosses) {
-      const cleanedGloss = parsedGloss.cleanedGloss;
+      const labelsPrefix = parsedGloss.labels
+        .map((label) => `{${label}}`)
+        .join(` `);
+      const cleanedGloss =
+        labelsPrefix.length === 0
+          ? parsedGloss.cleanedGloss
+          : `${labelsPrefix} ${parsedGloss.cleanedGloss}`;
 
       if (cleanedGloss.length === 0) {
         continue;
@@ -849,7 +1102,6 @@ export function transformCedictV2Entry(
         cleaned: cleanedGlosses,
         inlineAlternativePinyin: [...inlineAlternativePinyin],
         inlineClassifiers: [...inlineClassifiers],
-        senseLabels: senseTags,
       },
     ];
   });
@@ -885,9 +1137,6 @@ export function transformCedictV2Entry(
       ...(transformedClassifiers.length === 0
         ? {}
         : { classifiers: transformedClassifiers }),
-      ...(transformedSense.senseLabels.length === 0
-        ? {}
-        : { labels: transformedSense.senseLabels }),
     };
   });
 }
@@ -919,7 +1168,6 @@ function extractSenseLabelsFromGloss(
     if (startMatch.groups?.[`domain`] != null) {
       label = startMatch.groups[`domain`];
       label = labelAliases[label] ?? label;
-      label = `D:${label}`;
     }
 
     invariant(
@@ -950,7 +1198,6 @@ function extractSenseLabelsFromGloss(
     if (endMatch.groups?.[`domain`] != null) {
       label = endMatch.groups[`domain`];
       label = labelAliases[label] ?? label;
-      label = `D:${label}`;
     }
 
     invariant(
@@ -1136,14 +1383,23 @@ export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
   );
 
   const edits = await loadCedictV2Edits();
+  const parsedEntries = parseCedictV2Text(dataText, { strict: true });
+  const normalizedEntries = applyCedictV2UnicodeNormalization(parsedEntries);
 
-  const outputText = applyCedictV2EditsToText(dataText, {
+  const outputText = applyCedictV2EditsToText(normalizedEntries, {
     strict: true,
     edits,
   });
   await writeUtf8FileIfChanged(
     path.join(import.meta.dirname, `${filename}.out`),
     outputText,
+  );
+
+  const ids = await loadCedictV2Ids();
+  const idsText = buildCedictV2SenseIdsText(parseCedictV2Text(outputText), ids);
+  await writeUtf8FileIfChanged(
+    path.join(import.meta.dirname, `${filename}.ids`),
+    idsText,
   );
 
   return parseCedictV2Text(outputText, { strict: true });
@@ -1353,6 +1609,35 @@ export function buildCedictSenseId(
   return `${traditionalNormalized} ${simplifiedNormalized} [[${pinyinNumericNormalized}]] /${sense}/`;
 }
 
+export function buildCedictStableSenseId(
+  simplified: string,
+  nanoid: string,
+): CedictSenseId {
+  return `${simplified.normalize(`NFKC`)}:${nanoid.normalize(`NFKC`)}`;
+}
+
+export function parseCedictStableSenseId(
+  cedictSenseId: string,
+): CedictSenseIdParamsType | null {
+  const match = cedictSenseId.match(
+    /^(?<simplified>.+?):(?<nanoid>[A-Za-z0-9]{5})$/u,
+  );
+  if (match == null) {
+    return null;
+  }
+
+  const simplified = match.groups?.[`simplified`];
+  const nanoid = match.groups?.[`nanoid`];
+  if (simplified == null || simplified.length === 0 || nanoid == null) {
+    return null;
+  }
+
+  return {
+    simplified,
+    nanoid,
+  };
+}
+
 const getCedictLookupIndexes = memoize0(async () => {
   const entries = await loadCedictV2();
 
@@ -1523,7 +1808,7 @@ function buildCedictV2EditEntryKey(
   simplified: string,
   pinyin: string,
 ): string {
-  return `${traditional.normalize(`NFKC`)}|${simplified.normalize(`NFKC`)}|${pinyin.normalize(`NFKC`)}`;
+  return `${traditional}|${simplified}|${pinyin}`;
 }
 
 function parseCedictV2EditHeader(
@@ -1633,6 +1918,76 @@ function parseCedictV2EditRule(
     oldSense,
     newSense: replacementContent,
   };
+}
+
+function parseCedictV2SenseIdRule(
+  line: string,
+  lineNumber: number,
+): CedictV2SenseIdRuleType {
+  const match = line.match(
+    /^(?<nanoid>[A-Za-z0-9]{5})\s+\/(?<sense>[^/]*)\/$/u,
+  );
+  if (match == null) {
+    throw new Error(
+      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+    );
+  }
+
+  const nanoid = match.groups?.[`nanoid`];
+  const sense = match.groups?.[`sense`]?.trim();
+  if (
+    nanoid == null ||
+    nanoid.length !== CEDICT_V2_SENSE_NANOID_LENGTH ||
+    sense == null ||
+    sense.length === 0
+  ) {
+    throw new Error(
+      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+    );
+  }
+
+  return {
+    nanoid,
+    sense,
+  };
+}
+
+function getCedictV2TransformSerializedSenses(
+  entry: CedictV2EntryType,
+): string[] {
+  return entry.senses
+    .map((sense) => serializeCedictV2Sense(parseCedictV2Sense(sense)))
+    .filter((sense): sense is string => sense != null && sense.length > 0);
+}
+
+function generateUniqueCedictSenseNanoid({
+  createNanoid,
+  usedNanoids,
+}: {
+  createNanoid: () => string;
+  usedNanoids: Set<string>;
+}): string {
+  for (let i = 0; i < 1000; i += 1) {
+    const next = createNanoid();
+    if (next.length !== CEDICT_V2_SENSE_NANOID_LENGTH) {
+      continue;
+    }
+
+    if (!/^[A-Za-z0-9]{5}$/u.test(next)) {
+      continue;
+    }
+
+    if (usedNanoids.has(next)) {
+      continue;
+    }
+
+    usedNanoids.add(next);
+    return next;
+  }
+
+  throw new Error(
+    `failed to generate unique 5-character CEDICT sense nanoid after 1000 attempts`,
+  );
 }
 
 function applyCedictEntryEdits(
@@ -1763,4 +2118,135 @@ function formatCedictEditsParseError(
   lineNumber: number,
 ): string {
   return `${message} (line ${lineNumber})`;
+}
+
+function formatCedictIdsParseError(
+  message: string,
+  lineNumber: number,
+): string {
+  return `${message} (line ${lineNumber})`;
+}
+
+export const senseGroupingEntrySchema = z.object({
+  simplified: z.string(),
+  traditional: z.string(),
+  pinyin: pinyinTextSchema,
+  definition: z.array(z.array(z.string())),
+});
+
+export type SenseGroupingEntryType = z.infer<typeof senseGroupingEntrySchema>;
+
+export const buildCedictEntrySenseGroupingPrompt = (
+  entry: SenseGroupingEntryType,
+): ChatPrompt<typeof senseGroupingEntrySchema> => {
+  const systemTemplate = `
+You're a helpful assistant that makes improvements to dictionary entries in CC-CEDICT. Your job is fix errors in definitions, specifically the grouping of glosses into senses. Here's what the official CC-CEDICT manual says about it: (from https://cc-cedict.org/wiki/syntax_v2)
+
+> A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
+
+Rules:
+- Do not add or remove glosses, only group them into senses.
+- In \`definition\`, each item is a sense made up of multiple glosses.
+- \`{ }\` wrapped text are context labels.
+- Do not split out a gloss just because it's an idiom, consider its meaning instead.
+`.trim();
+
+  const userTemplate = `
+Fix the following entry:
+
+<data>
+{{ data }}
+</data>
+`.trim();
+
+  const system = renderPromptTemplate(systemTemplate, {});
+  const user = renderPromptTemplate(userTemplate, {
+    data: JSON.stringify(entry, null, 2),
+  });
+
+  return {
+    system,
+    user,
+    model: `gpt-5`,
+    reasoningEffort: `medium`,
+    schema: senseGroupingEntrySchema,
+  };
+};
+
+export function nestedStringSetScorer(spec: {
+  actual: SenseGroupingEntryType[`definition`];
+  expected: SenseGroupingEntryType[`definition`];
+}): {
+  score: number;
+  mismatches: Set<{ expected: Set<string>; actual: Set<string> }>;
+} {
+  const actualSenses = spec.actual.map((sense) => new Set(sense));
+  const expectedSenses = spec.expected.map((sense) => new Set(sense));
+  const expectedTotal = expectedSenses.reduce(
+    (sum, sense) => sum + sense.size,
+    0,
+  );
+  const actualTotal = actualSenses.reduce((sum, sense) => sum + sense.size, 0);
+
+  let matching = 0;
+  const usedActualSenses = new Set<number>();
+  const mismatches = new Set<{ expected: Set<string>; actual: Set<string> }>();
+  const emptySet = new Set<string>();
+
+  for (const expectedSense of expectedSenses) {
+    let bestMatchIndex = -1;
+    let bestMatchCount = 0;
+
+    for (let i = 0; i < actualSenses.length; i++) {
+      if (usedActualSenses.has(i)) {
+        continue;
+      }
+
+      let matchCount = 0;
+      for (const gloss of expectedSense) {
+        if (actualSenses[i]?.has(gloss) === true) {
+          matchCount += 1;
+        }
+      }
+
+      if (matchCount > bestMatchCount) {
+        bestMatchCount = matchCount;
+        bestMatchIndex = i;
+      }
+    }
+
+    if (bestMatchIndex > -1) {
+      usedActualSenses.add(bestMatchIndex);
+      matching += bestMatchCount;
+
+      const matchedActualSense = actualSenses[bestMatchIndex]!;
+      const isExactSenseMatch =
+        bestMatchCount === expectedSense.size &&
+        matchedActualSense.size === expectedSense.size;
+
+      if (!isExactSenseMatch) {
+        mismatches.add({
+          expected: expectedSense,
+          actual: matchedActualSense,
+        });
+      }
+    } else {
+      mismatches.add({ expected: expectedSense, actual: emptySet });
+    }
+  }
+
+  for (let i = 0; i < actualSenses.length; i++) {
+    if (usedActualSenses.has(i)) {
+      continue;
+    }
+
+    mismatches.add({ expected: emptySet, actual: actualSenses[i]! });
+  }
+
+  const denominator = expectedTotal + actualTotal - matching;
+
+  return {
+    score: denominator === 0 ? 1 : matching / denominator,
+    mismatches,
+  };
 }

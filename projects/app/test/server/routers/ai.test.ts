@@ -9,6 +9,7 @@ import {
 import { openAiZodResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
+import omit from "lodash/omit";
 
 describe(
   `buildPronunciationHintPrompt` satisfies HasNameOf<
@@ -23,7 +24,7 @@ describe(
         count: 3,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
@@ -78,7 +79,7 @@ describe(
         count: 4,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
@@ -130,7 +131,7 @@ describe(
         count: 2,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
@@ -186,7 +187,7 @@ describe(
         count: 3,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
         Your job is to help the learner remember what a Hanzi means using its visual components.
@@ -237,7 +238,7 @@ describe(
         count: 4,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
         Your job is to help the learner remember what a Hanzi means using its visual components.
@@ -297,7 +298,7 @@ describe(
         count: 3,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
 
@@ -346,7 +347,7 @@ describe(
         count: 4,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
 
@@ -465,7 +466,7 @@ describe(
         count: 4,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
@@ -505,7 +506,7 @@ describe(
         count: 4,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
@@ -545,7 +546,7 @@ describe(
         count: 3,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
@@ -589,7 +590,7 @@ describe(
         count: 4,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
         Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
@@ -625,7 +626,7 @@ describe(
         count: 3,
       });
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
           "system": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
         Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.

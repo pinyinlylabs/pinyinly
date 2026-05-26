@@ -413,7 +413,7 @@
       }
     },
     {
-      "files": ["*.test.*"],
+      "files": ["*.{test,bench,eval}.*"],
       "rules": {
         "typescript/no-non-null-asserted-optional-chain": "off"
       }

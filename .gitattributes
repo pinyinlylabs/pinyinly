@@ -2,3 +2,5 @@
 /.yarn/releases/*    binary
 /.yarn/plugins/**/*  binary
 /.pnp.*              binary linguist-generated
+projects/app/test/data/cedict_ts-2.u8.ids filter=lfs diff=lfs merge=lfs -text
+projects/app/src/data/dictionary.asset.json filter=lfs diff=lfs merge=lfs -text
