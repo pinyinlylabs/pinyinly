@@ -28,7 +28,7 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
     schema: Schema;
   },
   options?: { signal?: AbortSignal },
-): Promise<z.infer<Schema>> {
+): Promise<{ result: z.infer<Schema>; usage?: OpenAI.CompletionUsage }> {
   const client = getOpenAIClient();
 
   const body: ChatCompletionCreateParamsNonStreaming = {
@@ -52,5 +52,8 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
     throw new Error(`OpenAI response was empty`);
   }
 
-  return prompt.schema.parse(JSON.parse(content));
+  return {
+    result: prompt.schema.parse(JSON.parse(content)),
+    usage: completion.usage,
+  };
 }
