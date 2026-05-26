@@ -1,0 +1,16 @@
+tasks:
+  evals:
+    command: vitest run --config vitest.evals.config.ts
+    inputs:
+      - "$DEBUG"
+      - "$DEBUG_*"
+      - "$EXPO_*"
+      - "$PYLY_*"
+      - "**/*"
+      - "/.github/workflows" # There is a test that checks workflow environment variables.
+      - "/yarn.lock" # Dependencies can change behaviour
+    options:
+      runInCI: false
+    env:
+      NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"

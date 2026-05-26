@@ -1,3 +1,4 @@
+import { pinyinTextSchema } from "#data/model.js";
 import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -5,13 +6,14 @@ import type { ChatPrompt } from "#util/prompts.js";
 import { renderPromptTemplate } from "#util/prompts.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
-    arrayFilterUnique,
-    mapArrayAdd,
-    memoize0,
+  arrayFilterUnique,
+  mapArrayAdd,
+  memoize0,
 } from "@pinyinly/lib/collections";
 import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
+import { z } from "zod/v4";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
 
@@ -114,7 +116,8 @@ export interface BuildCedictV2SenseIdsTextOptionsType {
 }
 
 const CEDICT_V2_SENSE_NANOID_LENGTH = 5;
-const createCedictV2SenseNanoid = () => nanoid().slice(0, CEDICT_V2_SENSE_NANOID_LENGTH);
+const createCedictV2SenseNanoid = () =>
+  nanoid().slice(0, CEDICT_V2_SENSE_NANOID_LENGTH);
 
 const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
 
@@ -2124,28 +2127,28 @@ function formatCedictIdsParseError(
   return `${message} (line ${lineNumber})`;
 }
 
-export const buildCedictEntrySenseGroupingPrompt = ({
-  entry,
-}: {
-  entry: CedictV2EntryType;
-}): ChatPrompt => {
-  const data = {
-    traditional: entry.traditional,
-    simplified: entry.simplified,
-    pinyin: normalizePinyinText(entry.pinyin),
-    definition: entry.senses,
-  };
+export const senseGroupingEntrySchema = z.object({
+  simplified: z.string(),
+  traditional: z.string(),
+  pinyin: pinyinTextSchema,
+  definition: z.array(z.array(z.string())),
+});
 
+export type SenseGroupingEntryType = z.infer<typeof senseGroupingEntrySchema>;
+
+export const buildCedictEntrySenseGroupingPrompt = (
+  entry: SenseGroupingEntryType,
+): ChatPrompt<typeof senseGroupingEntrySchema> => {
   const systemTemplate = `
 You're a helpful assistant that makes improvements to dictionary entries in CC-CEDICT. Your job is fix errors in definitions, specifically the grouping of glosses into senses. Here's what the official CC-CEDICT manual says about it: (from https://cc-cedict.org/wiki/syntax_v2)
 
 > A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
 
-The most common defect is having glosses incorrectly split into separate senses, rather than being grouped into a common sense. This makes it very confusing for students trying to learn the language.
-
 Rules:
-- Do not add or remove glosses from the definition, only rearrange the grouping into senses.
+- Do not add or remove glosses, only group them into senses.
 - In \`definition\`, each item is a sense made up of multiple glosses.
+- \`{ }\` wrapped text are context labels.
+- Do not split out a gloss just because it's an idiom, consider its meaning instead.
 `.trim();
 
   const userTemplate = `
@@ -2158,8 +2161,92 @@ Fix the following entry:
 
   const system = renderPromptTemplate(systemTemplate, {});
   const user = renderPromptTemplate(userTemplate, {
-    data: JSON.stringify(data, null, 2),
+    data: JSON.stringify(entry, null, 2),
   });
 
-  return { system, user, model: `gpt-5-mini`, reasoningEffort: `low` };
+  return {
+    system,
+    user,
+    model: `gpt-5`,
+    reasoningEffort: `medium`,
+    schema: senseGroupingEntrySchema,
+  };
 };
+
+export function nestedStringSetScorer(spec: {
+  actual: SenseGroupingEntryType[`definition`];
+  expected: SenseGroupingEntryType[`definition`];
+}): {
+  score: number;
+  mismatches: Set<{ expected: Set<string>; actual: Set<string> }>;
+} {
+  const actualSenses = spec.actual.map((sense) => new Set(sense));
+  const expectedSenses = spec.expected.map((sense) => new Set(sense));
+  const expectedTotal = expectedSenses.reduce(
+    (sum, sense) => sum + sense.size,
+    0,
+  );
+  const actualTotal = actualSenses.reduce((sum, sense) => sum + sense.size, 0);
+
+  let matching = 0;
+  const usedActualSenses = new Set<number>();
+  const mismatches = new Set<{ expected: Set<string>; actual: Set<string> }>();
+  const emptySet = new Set<string>();
+
+  for (const expectedSense of expectedSenses) {
+    let bestMatchIndex = -1;
+    let bestMatchCount = 0;
+
+    for (let i = 0; i < actualSenses.length; i++) {
+      if (usedActualSenses.has(i)) {
+        continue;
+      }
+
+      let matchCount = 0;
+      for (const gloss of expectedSense) {
+        if (actualSenses[i]?.has(gloss) === true) {
+          matchCount += 1;
+        }
+      }
+
+      if (matchCount > bestMatchCount) {
+        bestMatchCount = matchCount;
+        bestMatchIndex = i;
+      }
+    }
+
+    if (bestMatchIndex > -1) {
+      usedActualSenses.add(bestMatchIndex);
+      matching += bestMatchCount;
+
+      const matchedActualSense = actualSenses[bestMatchIndex]!;
+      const isExactSenseMatch =
+        bestMatchCount === expectedSense.size &&
+        matchedActualSense.size === expectedSense.size;
+
+      if (!isExactSenseMatch) {
+        mismatches.add({
+          expected: expectedSense,
+          actual: matchedActualSense,
+        });
+      }
+    } else {
+      mismatches.add({ expected: expectedSense, actual: emptySet });
+    }
+  }
+
+  for (let i = 0; i < actualSenses.length; i++) {
+    if (usedActualSenses.has(i)) {
+      continue;
+    }
+
+    mismatches.add({ expected: emptySet, actual: actualSenses[i]! });
+  }
+
+  const denominator = expectedTotal + actualTotal - matching;
+
+  return {
+    score: denominator === 0 ? 1 : matching / denominator,
+    mismatches,
+  };
+}

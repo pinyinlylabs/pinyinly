@@ -37,17 +37,22 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   const srcRelPathsSet = new Set(srcRelPaths);
   const testRelPaths = await getTreePaths(
     testRoot,
-    `**/*.{test,test-d}.ts{,x}`,
+    `**/*.{eval,test,test-d}.ts{,x}`,
   );
 
   expect(srcRelPaths.length).toBeGreaterThan(20);
   expect(testRelPaths.length).toBeGreaterThan(20);
 
   for (const testRelPath of testRelPaths) {
+    // e.g. foo.test-d.tsx -> foo
+    const testRelPathNoExt = testRelPath.replace(
+      /\.(test(-d)?|eval)\.tsx?$/u,
+      ``,
+    );
     const srcRelPath = [
       // Look for both .ts or .tsx source files.
-      testRelPath.replace(/\.test(-d)?\.tsx?$/u, `.ts`),
-      testRelPath.replace(/\.test(-d)?\.tsx?$/u, `.tsx`),
+      `${testRelPathNoExt}.ts`,
+      `${testRelPathNoExt}.tsx`,
     ].find((x) => srcRelPathsSet.has(x));
     const isStandalone = await isStandaloneTestFile(
       path.resolve(testRoot, testRelPath),

@@ -22,6 +22,7 @@ import {
   transformCedictV2Entry,
   serializeCedictV2Sense,
   parseCedictV2Sense,
+  nestedStringSetScorer,
 } from "./cedict";
 import pick from "lodash/pick.js";
 
@@ -1810,5 +1811,112 @@ describe(`computeGlossesSimilarity`, () => {
   test(`returns 0 when only one side is empty`, () => {
     const similarity = computeGlossesSimilarity([`test`], []);
     expect(similarity).toBe(0);
+  });
+});
+
+test(`generate eval dataset`, async () => {
+  const cedict = await loadCedictV2();
+
+  for (const x of cedict) {
+    if (x.simplified === `恶棍`) {
+      // oxlint-disable-next-line no-console
+      // console.log({
+      //   traditional: x.traditional,
+      //   simplified: x.simplified,
+      //   pinyin: normalizePinyinText(x.pinyin),
+      //   definition: x.senses.map((y) => y.split(`; `)),
+      // });
+    }
+  }
+});
+
+describe(`nestedStringSetScorer`, () => {
+  test(`different gloss order`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`, `go`, `depart`]],
+      expected: [[`depart`, `to go (in a direction)`, `go`]],
+    });
+    expect(result).toEqual({ score: 1, mismatches: new Set() });
+  });
+
+  test(`multiple senses`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`, `go`, `depart`], [`b`]],
+      expected: [
+        [`depart`, `to go (in a direction)`, `go`],
+        [`b`, `b`],
+      ],
+    });
+    expect(result).toEqual({ score: 1, mismatches: new Set() });
+  });
+
+  test(`different sense ordering`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`, `go`, `depart`], [`b`]],
+      expected: [
+        [`b`, `b`],
+        [`depart`, `to go (in a direction)`, `go`],
+      ],
+    });
+    expect(result).toEqual({ score: 1, mismatches: new Set() });
+  });
+
+  test(`mixed up glosses`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`to go (in a direction)`], [`a`, `b`, `go`, `depart`]],
+      expected: [
+        [`a`, `b`],
+        [`depart`, `to go (in a direction)`, `go`],
+      ],
+    });
+    expect(result.score).toBeLessThan(1);
+    expect(result.mismatches).toMatchObject(
+      new Set([
+        {
+          actual: new Set([`to go (in a direction)`]),
+          expected: new Set([`depart`, `to go (in a direction)`, `go`]),
+        },
+        {
+          actual: new Set([`a`, `b`, `go`, `depart`]),
+          expected: new Set([`a`, `b`]),
+        },
+      ]),
+    );
+  });
+
+  test(`extra returned glosses`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`a`, `b`, `c`]],
+      expected: [[`a`, `b`]],
+    });
+    expect(result.score).toBeLessThan(1);
+    expect(result.mismatches).toMatchObject(
+      new Set([
+        {
+          actual: new Set([`a`, `b`, `c`]),
+          expected: new Set([`a`, `b`]),
+        },
+      ]),
+    );
+  });
+
+  test(`fallback matching detection`, () => {
+    const result = nestedStringSetScorer({
+      actual: [[`a`], [`x`], [`c`]],
+      expected: [[`y`], [`a`], [`c`]],
+    });
+    expect(result.score).toBeLessThan(1);
+    expect(result.mismatches).toMatchObject(
+      new Set([
+        {
+          actual: new Set([`x`]),
+          expected: new Set(),
+        },
+        {
+          actual: new Set(),
+          expected: new Set([`y`]),
+        },
+      ]),
+    );
   });
 });

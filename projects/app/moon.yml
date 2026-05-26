@@ -378,8 +378,13 @@ tasks:
     outputs:
       - "src/assets/audio/manifest.json"
       - "src/assets/audio/sprites/*.m4a"
-    env:
-      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    options:
+      envFile:
+        - .env.test.local
+
+  evals:
+    deps:
+      - ~:codegen
     options:
       envFile:
         - .env.test.local
@@ -415,6 +420,7 @@ tags:
   - vercel
   - vitest
   - vitest-bench
+  - vitest-evals
 
 dependsOn:
   - audio-sprites
