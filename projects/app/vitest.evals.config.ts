@@ -9,7 +9,7 @@ export default defineConfig({
     environment: `node`,
     reporters: [`vitest-evals/reporter`],
     include: [`test/**/*.eval.*`],
-    testTimeout: 30_000, // calling LLM can be slow
+    testTimeout: 60_000, // calling LLM can be slow
   },
   plugins: [tsconfigPaths(), react()],
   define: {

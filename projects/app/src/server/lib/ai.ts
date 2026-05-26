@@ -19,26 +19,31 @@ export function openAiZodResponseFormat(
   };
 }
 
-export async function requestOpenAiJson<Schema extends z.ZodType>(opts: {
-  model?: OpenAI.ChatModel;
-  reasoningEffort?: OpenAI.ReasoningEffort;
-  system: string;
-  user: string;
-  schema: Schema;
-}): Promise<z.infer<Schema>> {
+export async function requestOpenAiChatJson<Schema extends z.ZodType>(
+  prompt: {
+    model?: OpenAI.ChatModel;
+    reasoningEffort?: OpenAI.ReasoningEffort;
+    system: string;
+    user: string;
+    schema: Schema;
+  },
+  options?: { signal?: AbortSignal },
+): Promise<{ result: z.infer<Schema>; usage?: OpenAI.CompletionUsage }> {
   const client = getOpenAIClient();
 
   const body: ChatCompletionCreateParamsNonStreaming = {
-    model: opts.model ?? `gpt-5-mini`,
-    reasoning_effort: opts.reasoningEffort ?? null,
-    response_format: openAiZodResponseFormat(opts.schema, `result_shape`),
+    model: prompt.model ?? `gpt-5-mini`,
+    reasoning_effort: prompt.reasoningEffort ?? null,
+    response_format: openAiZodResponseFormat(prompt.schema, `result_shape`),
     messages: [
-      { role: `system`, content: opts.system },
-      { role: `user`, content: opts.user },
+      { role: `system`, content: prompt.system },
+      { role: `user`, content: prompt.user },
     ],
   };
 
-  const completion = await client.chat.completions.create(body);
+  const completion = await client.chat.completions.create(body, {
+    signal: options?.signal,
+  });
 
   const message = completion.choices[0]?.message;
   const content = message?.content ?? ``;
@@ -47,5 +52,8 @@ export async function requestOpenAiJson<Schema extends z.ZodType>(opts: {
     throw new Error(`OpenAI response was empty`);
   }
 
-  return opts.schema.parse(JSON.parse(content));
+  return {
+    result: prompt.schema.parse(JSON.parse(content)),
+    usage: completion.usage,
+  };
 }

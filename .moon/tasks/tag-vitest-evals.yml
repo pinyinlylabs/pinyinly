@@ -11,6 +11,7 @@ tasks:
       - "/yarn.lock" # Dependencies can change behaviour
     options:
       runInCI: false
+      cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchain: "node"

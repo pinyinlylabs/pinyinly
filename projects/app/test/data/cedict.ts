@@ -2173,6 +2173,83 @@ Fix the following entry:
   };
 };
 
+export const buildCedictEntrySenseGrouping2Prompt = (
+  entry: SenseGroupingEntryType,
+): ChatPrompt<typeof senseGroupingEntrySchema> => {
+  const systemTemplate = `
+You're a helpful assistant that makes improvements to Chinese to English dictionary entries. Your job is fix errors in entries, specifically how "glosses" are grouped into "senses".
+
+> A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
+
+Rules:
+- Do not add or remove glosses, only group them.
+- Each gloss must appear in only one group.
+- Always separate different meaning/concept/theme into individual groups.
+- Consider the "part of speech" for each gloss (e.g. verb, adjective, noun).
+- Text in parenthesis "()" is often a hint for how the gloss could be used in a sentence.
+- Text in braces "{}" are gloss labels.
+`.trim();
+
+  const userTemplate = `
+Fix the following entry:
+
+<data>
+{{ data }}
+</data>
+`.trim();
+
+  const system = renderPromptTemplate(systemTemplate, {});
+  const user = renderPromptTemplate(userTemplate, {
+    data: JSON.stringify(entry, null, 2),
+  });
+
+  return {
+    system,
+    user,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
+    schema: senseGroupingEntrySchema,
+  };
+};
+
+export const buildCedictEntrySenseMergingPrompt = (
+  entry: SenseGroupingEntryType,
+): ChatPrompt<typeof senseGroupingEntrySchema> => {
+  const systemTemplate = `
+You're a helpful assistant that makes improvements to Chinese to English dictionary entries. Your job is audit existing entries and determine if and how to simplify them by merging together some senses, or to leave them as-is.
+
+> A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
+
+Rules:
+- Do not add or remove glosses, only group them.
+- Do not create entirely new groups, only merge together existing ones.
+- Do not delete a group unless it's being merged with another.
+- Always separate different meaning/concept/theme into individual groups.
+- Text in parenthesis "()" is often a hint for how the gloss could be used in a sentence.
+`.trim();
+
+  const userTemplate = `
+Fix the following entry:
+
+<data>
+{{ data }}
+</data>
+`.trim();
+
+  const system = renderPromptTemplate(systemTemplate, {});
+  const user = renderPromptTemplate(userTemplate, {
+    data: JSON.stringify(entry, null, 2),
+  });
+
+  return {
+    system,
+    user,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
+    schema: senseGroupingEntrySchema,
+  };
+};
+
 export function nestedStringSetScorer(spec: {
   actual: SenseGroupingEntryType[`definition`];
   expected: SenseGroupingEntryType[`definition`];
