@@ -101,9 +101,6 @@ describeEval(
         definition: input.senses.map((s) => s.split(`; `)),
       };
 
-      // oxlint-disable-next-line no-console
-      console.log(`entry: ${JSON.stringify(entry)}`);
-
       await run(entry, {
         metadata: {
           expected: expected.senses.map((x) => x.split(`; `)),
