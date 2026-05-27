@@ -2400,19 +2400,17 @@ export function buildSenseGroupingAffinityMatrix(
   );
 
   for (const sample of samples) {
-    const sampleGroupByGloss = new Map<string, number>();
+    const sampleGroupsByGloss = new Map<string, Set<number>>();
 
     for (const [groupIndex, group] of sample.entries()) {
       for (const gloss of group) {
-        // Keep the first assignment for invalid samples where a gloss appears
-        // in multiple groups.
-        if (!sampleGroupByGloss.has(gloss)) {
-          sampleGroupByGloss.set(gloss, groupIndex);
-        }
+        const groupsForGloss = sampleGroupsByGloss.get(gloss) ?? new Set();
+        groupsForGloss.add(groupIndex);
+        sampleGroupsByGloss.set(gloss, groupsForGloss);
       }
     }
 
-    const presentIndexes = [...sampleGroupByGloss.keys()]
+    const presentIndexes = [...sampleGroupsByGloss.keys()]
       .map((gloss) => itemIndexByGloss.get(gloss))
       .filter((index): index is number => index != null)
       .sort((a, b) => a - b);
@@ -2420,16 +2418,16 @@ export function buildSenseGroupingAffinityMatrix(
     for (let i = 0; i < presentIndexes.length; i += 1) {
       const rowIndex = presentIndexes[i]!;
       const rowItem = items[rowIndex]!;
-      const rowGroup = sampleGroupByGloss.get(rowItem);
-      if (rowGroup == null) {
+      const rowGroups = sampleGroupsByGloss.get(rowItem);
+      if (rowGroups == null) {
         continue;
       }
 
       for (let j = i; j < presentIndexes.length; j += 1) {
         const colIndex = presentIndexes[j]!;
         const colItem = items[colIndex]!;
-        const colGroup = sampleGroupByGloss.get(colItem);
-        if (colGroup == null) {
+        const colGroups = sampleGroupsByGloss.get(colItem);
+        if (colGroups == null) {
           continue;
         }
 
@@ -2438,7 +2436,10 @@ export function buildSenseGroupingAffinityMatrix(
           coOccurrenceCounts[colIndex]![rowIndex]! += 1;
         }
 
-        if (rowGroup === colGroup) {
+        const isSameGroup = [...rowGroups].some((groupIndex) =>
+          colGroups.has(groupIndex),
+        );
+        if (isSameGroup) {
           sameGroupCounts[rowIndex]![colIndex]! += 1;
           if (rowIndex !== colIndex) {
             sameGroupCounts[colIndex]![rowIndex]! += 1;

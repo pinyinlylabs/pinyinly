@@ -1978,6 +1978,20 @@ describe(`buildSenseGroupingAffinityMatrix`, () => {
     }
   });
 
+  test(`handles duplicate glosses that appear in multiple groups within one sample`, () => {
+    const result = buildSenseGroupingAffinityMatrix([
+      [[`a`, `b`], [`b`, `c`]],
+      [[`a`], [`b`, `c`]],
+    ]);
+
+    expect(result.items).toEqual([`a`, `b`, `c`]);
+    expect(result.matrix).toEqual([
+      [1, 0.5, 0],
+      [0.5, 1, 1],
+      [0, 1, 1],
+    ]);
+  });
+
   test(`returns empty matrix for empty samples`, () => {
     const result = buildSenseGroupingAffinityMatrix([]);
 
