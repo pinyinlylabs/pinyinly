@@ -14,6 +14,9 @@ import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { z } from "zod/v4";
+import shuffle from "lodash/shuffle";
+import { requestOpenAiChatJson } from "#server/lib/ai.js";
+import type { OpenAI } from "openai";
 
 // download from https://cc-cedict.org/editor/editor.php?handler=Download
 
@@ -2136,6 +2139,68 @@ export const senseGroupingEntrySchema = z.object({
 
 export type SenseGroupingEntryType = z.infer<typeof senseGroupingEntrySchema>;
 
+export const buildCedictEntryGlossGroupingRandomisedPrompt = (
+  entry: SenseGroupingEntryType,
+): ChatPrompt<typeof senseGroupingEntrySchema> => {
+  const shuffledEntry = {
+    ...entry,
+    definition: shuffle(entry.definition.flat()).map((gloss) => [gloss]),
+  };
+
+  return buildCedictEntrySenseGroupingPrompt(shuffledEntry);
+};
+
+export async function sampledRegroupEntry(
+  entry: SenseGroupingEntryType,
+  opts?: { samples?: number; signal?: AbortSignal; threshold?: number },
+): Promise<{
+  result: SenseGroupingEntryType;
+  reviews: {
+    clusters: string[][];
+    glosses: ClusterGlossReviewType[];
+  };
+  usages: OpenAI.CompletionUsage[];
+}> {
+  const samples = opts?.samples ?? 5;
+  const threshold = opts?.threshold ?? 1;
+
+  const samplePrompts = Array.from({ length: samples }, () =>
+    buildCedictEntryGlossGroupingRandomisedPrompt(entry),
+  );
+
+  const sampleResponses = await Promise.all(
+    samplePrompts.map(async (prompt) =>
+      requestOpenAiChatJson(prompt, { signal: opts?.signal }),
+    ),
+  );
+
+  const definitions = sampleResponses.map(
+    (response) => response.result.definition,
+  );
+
+  const affinityMatrix = buildSenseGroupingAffinityMatrix(definitions);
+
+  const clusteredResult = clusterGlossesFromAffinityMatrix(affinityMatrix, {
+    threshold,
+  });
+
+  const resultEntry = {
+    ...entry,
+    definition: clusteredResult.clusters,
+  };
+
+  return {
+    result: resultEntry,
+    reviews: {
+      clusters: clusteredResult.clusters,
+      glosses: clusteredResult.reviewGlosses,
+    },
+    usages: sampleResponses
+      .map((response) => response.usage)
+      .filter((x) => x != null),
+  };
+}
+
 export const buildCedictEntrySenseGroupingPrompt = (
   entry: SenseGroupingEntryType,
 ): ChatPrompt<typeof senseGroupingEntrySchema> => {
@@ -2289,4 +2354,316 @@ export function nestedStringSetScorer(spec: {
     score: denominator === 0 ? 1 : matching / denominator,
     mismatches,
   };
+}
+
+export interface SenseGroupingAffinityMatrixType {
+  items: string[];
+  matrix: number[][];
+}
+
+export interface ClusterGlossesFromAffinityMatrixOptionsType {
+  threshold?: number;
+}
+
+export interface ClusterGlossesFromAffinityMatrixResultType {
+  clusters: string[][];
+  reviewGlosses: ClusterGlossReviewType[];
+}
+
+export interface ClusterGlossReviewType {
+  gloss: string;
+  clusterAffinities: number[];
+}
+
+export function buildSenseGroupingAffinityMatrix(
+  samples: readonly SenseGroupingEntryType[`definition`][],
+): SenseGroupingAffinityMatrixType {
+  const allGlosses = samples.flatMap((sample) => sample.flat());
+  const items = [...new Set(allGlosses)].sort((a, b) => a.localeCompare(b));
+
+  if (items.length === 0) {
+    return {
+      items: [],
+      matrix: [],
+    };
+  }
+
+  const itemCount = items.length;
+  const itemIndexByGloss = new Map<string, number>(
+    items.map((gloss, index) => [gloss, index]),
+  );
+  const sameGroupCounts = Array.from({ length: itemCount }, () =>
+    Array.from({ length: itemCount }, () => 0),
+  );
+  const coOccurrenceCounts = Array.from({ length: itemCount }, () =>
+    Array.from({ length: itemCount }, () => 0),
+  );
+
+  for (const sample of samples) {
+    const sampleGroupByGloss = new Map<string, number>();
+
+    for (const [groupIndex, group] of sample.entries()) {
+      for (const gloss of group) {
+        // Keep the first assignment for invalid samples where a gloss appears
+        // in multiple groups.
+        if (!sampleGroupByGloss.has(gloss)) {
+          sampleGroupByGloss.set(gloss, groupIndex);
+        }
+      }
+    }
+
+    const presentIndexes = [...sampleGroupByGloss.keys()]
+      .map((gloss) => itemIndexByGloss.get(gloss))
+      .filter((index): index is number => index != null)
+      .sort((a, b) => a - b);
+
+    for (let i = 0; i < presentIndexes.length; i += 1) {
+      const rowIndex = presentIndexes[i]!;
+      const rowItem = items[rowIndex]!;
+      const rowGroup = sampleGroupByGloss.get(rowItem);
+      if (rowGroup == null) {
+        continue;
+      }
+
+      for (let j = i; j < presentIndexes.length; j += 1) {
+        const colIndex = presentIndexes[j]!;
+        const colItem = items[colIndex]!;
+        const colGroup = sampleGroupByGloss.get(colItem);
+        if (colGroup == null) {
+          continue;
+        }
+
+        coOccurrenceCounts[rowIndex]![colIndex]! += 1;
+        if (rowIndex !== colIndex) {
+          coOccurrenceCounts[colIndex]![rowIndex]! += 1;
+        }
+
+        if (rowGroup === colGroup) {
+          sameGroupCounts[rowIndex]![colIndex]! += 1;
+          if (rowIndex !== colIndex) {
+            sameGroupCounts[colIndex]![rowIndex]! += 1;
+          }
+        }
+      }
+    }
+  }
+
+  const matrix = Array.from({ length: itemCount }, (_, rowIndex) =>
+    Array.from({ length: itemCount }, (_, colIndex) => {
+      const denominator = coOccurrenceCounts[rowIndex]![colIndex]!;
+      if (denominator === 0) {
+        return 0;
+      }
+
+      const numerator = sameGroupCounts[rowIndex]![colIndex]!;
+      return clampConfidence(numerator / denominator);
+    }),
+  );
+
+  return {
+    items,
+    matrix,
+  };
+}
+
+export function clusterGlossesFromAffinityMatrix(
+  affinityMatrix: SenseGroupingAffinityMatrixType,
+  options: ClusterGlossesFromAffinityMatrixOptionsType = {},
+): ClusterGlossesFromAffinityMatrixResultType {
+  const threshold = options.threshold ?? 0.6;
+  if (!Number.isFinite(threshold) || threshold < 0 || threshold > 1) {
+    throw new Error(
+      `cluster threshold must be a finite number between 0 and 1`,
+    );
+  }
+
+  const { items, matrix } = affinityMatrix;
+  if (matrix.length !== items.length) {
+    throw new Error(
+      `affinity matrix row count (${matrix.length}) must equal item count (${items.length})`,
+    );
+  }
+
+  for (const row of matrix) {
+    if (row.length !== items.length) {
+      throw new Error(
+        `affinity matrix must be square with each row length equal to item count (${items.length})`,
+      );
+    }
+  }
+
+  if (items.length === 0) {
+    return {
+      clusters: [],
+      reviewGlosses: [],
+    };
+  }
+
+  const clusters: number[][] = items
+    .map((_, index) => [index])
+    .sort(compareClusterIndexes);
+
+  while (clusters.length > 1) {
+    let bestPair: [number, number] | null = null;
+    let bestAffinity = -1;
+
+    for (let i = 0; i < clusters.length; i += 1) {
+      const clusterA = clusters[i]!;
+
+      for (let j = i + 1; j < clusters.length; j += 1) {
+        const clusterB = clusters[j]!;
+        const affinity = computeCompleteLinkageAffinity(
+          clusterA,
+          clusterB,
+          matrix,
+        );
+
+        if (bestPair == null || affinity > bestAffinity) {
+          bestPair = [i, j];
+          bestAffinity = affinity;
+          continue;
+        }
+
+        if (
+          affinity === bestAffinity &&
+          compareClusterIndexesPair(
+            [clusterA, clusterB],
+            [clusters[bestPair[0]]!, clusters[bestPair[1]]!],
+          ) < 0
+        ) {
+          bestPair = [i, j];
+        }
+      }
+    }
+
+    if (bestPair == null || bestAffinity < threshold) {
+      break;
+    }
+
+    const [leftIndex, rightIndex] = bestPair;
+    const mergedCluster = [
+      ...clusters[leftIndex]!,
+      ...clusters[rightIndex]!,
+    ].sort((a, b) => a - b);
+
+    const nextClusters = clusters.filter(
+      (_, index) => index !== leftIndex && index !== rightIndex,
+    );
+    nextClusters.push(mergedCluster);
+    nextClusters.sort(compareClusterIndexes);
+
+    clusters.splice(0, clusters.length, ...nextClusters);
+  }
+
+  const clusteredGlosses = clusters.map((cluster) =>
+    cluster.map((index) => items[index]!),
+  );
+
+  const clusterIndexByItem = new Map<number, number>();
+  for (const [clusterIndex, cluster] of clusters.entries()) {
+    for (const itemIndex of cluster) {
+      clusterIndexByItem.set(itemIndex, clusterIndex);
+    }
+  }
+
+  const glossClusterAffinities = items.map((_, glossIndex) =>
+    clusters.map((cluster) =>
+      clampConfidence(
+        computeCompleteLinkageAffinity([glossIndex], cluster, matrix),
+      ),
+    ),
+  );
+
+  // Flag only orphaned glosses (single-item clusters) that showed partial
+  // co-grouping with at least one other gloss.
+  const reviewGlosses = items.flatMap((gloss, rowIndex) => {
+    const clusterIndex = clusterIndexByItem.get(rowIndex);
+    if (clusterIndex == null) {
+      return [];
+    }
+
+    const clusterSize = clusters[clusterIndex]?.length ?? 0;
+    if (clusterSize !== 1) {
+      return [];
+    }
+
+    const shouldReview = matrix[rowIndex]!.some(
+      (affinity, colIndex) =>
+        rowIndex !== colIndex && affinity > 0 && affinity < 1,
+    );
+    if (!shouldReview) {
+      return [];
+    }
+
+    return [
+      {
+        gloss,
+        clusterAffinities: glossClusterAffinities[rowIndex]!,
+      },
+    ];
+  });
+
+  return {
+    clusters: clusteredGlosses,
+    reviewGlosses,
+  };
+}
+
+function computeCompleteLinkageAffinity(
+  clusterA: readonly number[],
+  clusterB: readonly number[],
+  matrix: readonly (readonly number[])[],
+): number {
+  let minAffinity = Number.POSITIVE_INFINITY;
+
+  for (const indexA of clusterA) {
+    for (const indexB of clusterB) {
+      const affinity = matrix[indexA]?.[indexB] ?? 0;
+      if (affinity < minAffinity) {
+        minAffinity = affinity;
+      }
+    }
+  }
+
+  return minAffinity === Number.POSITIVE_INFINITY ? 0 : minAffinity;
+}
+
+function compareClusterIndexes(
+  clusterA: readonly number[],
+  clusterB: readonly number[],
+): number {
+  const maxLength = Math.max(clusterA.length, clusterB.length);
+  for (let i = 0; i < maxLength; i += 1) {
+    const valueA = clusterA[i];
+    const valueB = clusterB[i];
+    if (valueA == null && valueB == null) {
+      return 0;
+    }
+
+    if (valueA == null) {
+      return -1;
+    }
+
+    if (valueB == null) {
+      return 1;
+    }
+
+    if (valueA !== valueB) {
+      return valueA - valueB;
+    }
+  }
+
+  return 0;
+}
+
+function compareClusterIndexesPair(
+  pairA: readonly [readonly number[], readonly number[]],
+  pairB: readonly [readonly number[], readonly number[]],
+): number {
+  const leftComparison = compareClusterIndexes(pairA[0], pairB[0]);
+  if (leftComparison !== 0) {
+    return leftComparison;
+  }
+
+  return compareClusterIndexes(pairA[1], pairB[1]);
 }

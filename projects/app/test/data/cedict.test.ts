@@ -4,6 +4,8 @@ import { describe, expect, test } from "vitest";
 import {
   applyCedictV2EditsToText,
   applyCedictV2UnicodeNormalization,
+  buildSenseGroupingAffinityMatrix,
+  clusterGlossesFromAffinityMatrix,
   buildCedictStableSenseId,
   buildCedictV2SenseIdsText,
   buildCedictSenseId,
@@ -1918,5 +1920,229 @@ describe(`nestedStringSetScorer`, () => {
         },
       ]),
     );
+  });
+});
+
+describe(`buildSenseGroupingAffinityMatrix`, () => {
+  test(`computes pairwise same-group affinity from sampled groupings`, () => {
+    const result = buildSenseGroupingAffinityMatrix([
+      [[`a`, `b`], [`c`]],
+      [[`a`, `b`, `c`]],
+      [[`a`], [`b`, `c`]],
+    ]);
+
+    expect(result.items).toEqual([`a`, `b`, `c`]);
+    expect(result.matrix).toEqual([
+      [1, 0.6667, 0.3333],
+      [0.6667, 1, 0.6667],
+      [0.3333, 0.6667, 1],
+    ]);
+  });
+
+  test(`ignores samples where one item is missing for pair denominator`, () => {
+    const result = buildSenseGroupingAffinityMatrix([
+      [[`a`, `b`]],
+      [[`a`], [`b`]],
+      [[`a`]],
+      [[`c`]],
+    ]);
+
+    expect(result.items).toEqual([`a`, `b`, `c`]);
+    expect(result.matrix).toEqual([
+      [1, 0.5, 0],
+      [0.5, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+
+  test(`returns deterministic item ordering and valid matrix invariants`, () => {
+    const result = buildSenseGroupingAffinityMatrix([
+      [[`z`], [`a`, `m`]],
+      [[`m`, `z`], [`a`]],
+    ]);
+
+    expect(result.items).toEqual([`a`, `m`, `z`]);
+    expect(result.matrix).toHaveLength(result.items.length);
+
+    for (let rowIndex = 0; rowIndex < result.matrix.length; rowIndex += 1) {
+      const row = result.matrix[rowIndex];
+      expect(row).toHaveLength(result.items.length);
+      expect(row?.[rowIndex]).toBe(1);
+
+      for (let colIndex = 0; colIndex < result.items.length; colIndex += 1) {
+        const affinity = row?.[colIndex] ?? -1;
+        expect(affinity).toBeGreaterThanOrEqual(0);
+        expect(affinity).toBeLessThanOrEqual(1);
+        expect(affinity).toBe(result.matrix[colIndex]?.[rowIndex]);
+      }
+    }
+  });
+
+  test(`returns empty matrix for empty samples`, () => {
+    const result = buildSenseGroupingAffinityMatrix([]);
+
+    expect(result).toEqual({
+      items: [],
+      matrix: [],
+    });
+  });
+});
+
+describe(`clusterGlossesFromAffinityMatrix`, () => {
+  test(`clusters glosses by complete-linkage affinity with threshold cut`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`, `c`],
+        matrix: [
+          [1, 0.9, 0.4],
+          [0.9, 1, 0.8],
+          [0.4, 0.8, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.clusters).toEqual([[`a`, `b`], [`c`]]);
+    expect(result.reviewGlosses).toEqual([
+      { gloss: `c`, clusterAffinities: [0.4, 1] },
+    ]);
+  });
+
+  test(`uses complete linkage instead of chaining merges`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`, `c`],
+        matrix: [
+          [1, 0.9, 0.2],
+          [0.9, 1, 0.9],
+          [0.2, 0.9, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.clusters).toEqual([[`a`, `b`], [`c`]]);
+    expect(result.reviewGlosses).toEqual([
+      { gloss: `c`, clusterAffinities: [0.2, 1] },
+    ]);
+  });
+
+  test(`is deterministic when merge affinities tie`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`, `c`, `d`],
+        matrix: [
+          [1, 0.7, 0, 0],
+          [0.7, 1, 0, 0],
+          [0, 0, 1, 0.7],
+          [0, 0, 0.7, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.clusters).toEqual([
+      [`a`, `b`],
+      [`c`, `d`],
+    ]);
+    expect(result.reviewGlosses).toEqual([]);
+  });
+
+  test(`merges when affinity equals threshold`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`],
+        matrix: [
+          [1, 0.6],
+          [0.6, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.clusters).toEqual([[`a`, `b`]]);
+    expect(result.reviewGlosses).toEqual([]);
+  });
+
+  test(`returns no merges when affinities are below threshold`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`, `c`],
+        matrix: [
+          [1, 0.59, 0.2],
+          [0.59, 1, 0.59],
+          [0.2, 0.59, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.clusters).toEqual([[`a`], [`b`], [`c`]]);
+    expect(result.reviewGlosses).toEqual([
+      { gloss: `a`, clusterAffinities: [1, 0.59, 0.2] },
+      { gloss: `b`, clusterAffinities: [0.59, 1, 0.59] },
+      { gloss: `c`, clusterAffinities: [0.2, 0.59, 1] },
+    ]);
+  });
+
+  test(`returns empty output for empty matrix`, () => {
+    expect(
+      clusterGlossesFromAffinityMatrix({
+        items: [],
+        matrix: [],
+      }),
+    ).toEqual({
+      clusters: [],
+      reviewGlosses: [],
+    });
+  });
+
+  test(`does not include glosses in review list when affinities are only 0 or 1`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`, `c`],
+        matrix: [
+          [1, 1, 0],
+          [1, 1, 0],
+          [0, 0, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.reviewGlosses).toEqual([]);
+  });
+
+  test(`throws for non-square matrix`, () => {
+    expect(() =>
+      clusterGlossesFromAffinityMatrix({
+        items: [`a`, `b`],
+        matrix: [[1, 0.7]],
+      }),
+    ).toThrow(`affinity matrix row count (1) must equal item count (2)`);
+
+    expect(() =>
+      clusterGlossesFromAffinityMatrix({
+        items: [`a`, `b`],
+        matrix: [[1, 0.7], [0.7]],
+      }),
+    ).toThrow(
+      `affinity matrix must be square with each row length equal to item count (2)`,
+    );
+  });
+
+  test(`throws for invalid threshold`, () => {
+    expect(() =>
+      clusterGlossesFromAffinityMatrix(
+        {
+          items: [`a`, `b`],
+          matrix: [
+            [1, 0.7],
+            [0.7, 1],
+          ],
+        },
+        { threshold: Number.NaN },
+      ),
+    ).toThrow(`cluster threshold must be a finite number between 0 and 1`);
   });
 });
