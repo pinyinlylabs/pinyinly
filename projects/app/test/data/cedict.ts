@@ -2140,43 +2140,6 @@ export const buildCedictEntrySenseGroupingPrompt = (
   entry: SenseGroupingEntryType,
 ): ChatPrompt<typeof senseGroupingEntrySchema> => {
   const systemTemplate = `
-You're a helpful assistant that makes improvements to dictionary entries in CC-CEDICT. Your job is fix errors in definitions, specifically the grouping of glosses into senses. Here's what the official CC-CEDICT manual says about it: (from https://cc-cedict.org/wiki/syntax_v2)
-
-> A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
-
-Rules:
-- Do not add or remove glosses, only group them into senses.
-- In \`definition\`, each item is a sense made up of multiple glosses.
-- \`{ }\` wrapped text are context labels.
-- Do not split out a gloss just because it's an idiom, consider its meaning instead.
-`.trim();
-
-  const userTemplate = `
-Fix the following entry:
-
-<data>
-{{ data }}
-</data>
-`.trim();
-
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    data: JSON.stringify(entry, null, 2),
-  });
-
-  return {
-    system,
-    user,
-    model: `gpt-5`,
-    reasoningEffort: `medium`,
-    schema: senseGroupingEntrySchema,
-  };
-};
-
-export const buildCedictEntrySenseGrouping2Prompt = (
-  entry: SenseGroupingEntryType,
-): ChatPrompt<typeof senseGroupingEntrySchema> => {
-  const systemTemplate = `
 You're a helpful assistant that makes improvements to Chinese to English dictionary entries. Your job is fix errors in entries, specifically how "glosses" are grouped into "senses".
 
 > A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
