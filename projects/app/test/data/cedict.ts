@@ -2491,6 +2491,13 @@ export function clusterGlossesFromAffinityMatrix(
   }
 
   const { items, matrix } = affinityMatrix;
+  const uniqueItemCount = new Set(items).size;
+  if (uniqueItemCount !== items.length) {
+    throw new Error(
+      `affinity matrix items must be unique; found duplicates in ${items.length} items`,
+    );
+  }
+
   if (matrix.length !== items.length) {
     throw new Error(
       `affinity matrix row count (${matrix.length}) must equal item count (${items.length})`,
@@ -2568,19 +2575,43 @@ export function clusterGlossesFromAffinityMatrix(
     clusters.splice(0, clusters.length, ...nextClusters);
   }
 
-  const clusteredGlosses = clusters.map((cluster) =>
-    cluster.map((index) => items[index]!),
-  );
+  const expandedClusters = clusters.map((cluster) => [...cluster]);
+  const clusterMembershipsByItem = new Map<number, number[]>();
 
-  const clusterIndexByItem = new Map<number, number>();
-  for (const [clusterIndex, cluster] of clusters.entries()) {
+  for (const [clusterIndex, cluster] of expandedClusters.entries()) {
     for (const itemIndex of cluster) {
-      clusterIndexByItem.set(itemIndex, clusterIndex);
+      const memberships = clusterMembershipsByItem.get(itemIndex) ?? [];
+      memberships.push(clusterIndex);
+      clusterMembershipsByItem.set(itemIndex, memberships);
     }
   }
 
+  for (const [itemIndex] of items.entries()) {
+    for (const [clusterIndex, cluster] of expandedClusters.entries()) {
+      if (cluster.includes(itemIndex)) {
+        continue;
+      }
+
+      const affinity = computeCompleteLinkageAffinity([itemIndex], cluster, matrix);
+      if (affinity < threshold) {
+        continue;
+      }
+
+      cluster.push(itemIndex);
+      cluster.sort((a, b) => a - b);
+
+      const memberships = clusterMembershipsByItem.get(itemIndex) ?? [];
+      memberships.push(clusterIndex);
+      clusterMembershipsByItem.set(itemIndex, memberships);
+    }
+  }
+
+  const clusteredGlosses = expandedClusters.map((cluster) =>
+    cluster.map((index) => items[index]!),
+  );
+
   const glossClusterAffinities = items.map((_, glossIndex) =>
-    clusters.map((cluster) =>
+    expandedClusters.map((cluster) =>
       clampConfidence(
         computeCompleteLinkageAffinity([glossIndex], cluster, matrix),
       ),
@@ -2590,12 +2621,13 @@ export function clusterGlossesFromAffinityMatrix(
   // Flag only orphaned glosses (single-item clusters) that showed partial
   // co-grouping with at least one other gloss.
   const reviewGlosses = items.flatMap((gloss, rowIndex) => {
-    const clusterIndex = clusterIndexByItem.get(rowIndex);
-    if (clusterIndex == null) {
+    const memberships = clusterMembershipsByItem.get(rowIndex) ?? [];
+    if (memberships.length !== 1) {
       return [];
     }
 
-    const clusterSize = clusters[clusterIndex]?.length ?? 0;
+    const clusterIndex = memberships[0]!;
+    const clusterSize = expandedClusters[clusterIndex]?.length ?? 0;
     if (clusterSize !== 1) {
       return [];
     }

@@ -1980,7 +1980,10 @@ describe(`buildSenseGroupingAffinityMatrix`, () => {
 
   test(`handles duplicate glosses that appear in multiple groups within one sample`, () => {
     const result = buildSenseGroupingAffinityMatrix([
-      [[`a`, `b`], [`b`, `c`]],
+      [
+        [`a`, `b`],
+        [`b`, `c`],
+      ],
       [[`a`], [`b`, `c`]],
     ]);
 
@@ -2016,10 +2019,8 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
       { threshold: 0.6 },
     );
 
-    expect(result.clusters).toEqual([[`a`, `b`], [`c`]]);
-    expect(result.reviewGlosses).toEqual([
-      { gloss: `c`, clusterAffinities: [0.4, 1] },
-    ]);
+    expect(result.clusters).toEqual([[`a`, `b`], [`b`, `c`]]);
+    expect(result.reviewGlosses).toEqual([]);
   });
 
   test(`uses complete linkage instead of chaining merges`, () => {
@@ -2035,21 +2036,19 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
       { threshold: 0.6 },
     );
 
-    expect(result.clusters).toEqual([[`a`, `b`], [`c`]]);
-    expect(result.reviewGlosses).toEqual([
-      { gloss: `c`, clusterAffinities: [0.2, 1] },
-    ]);
+    expect(result.clusters).toEqual([[`a`, `b`], [`b`, `c`]]);
+    expect(result.reviewGlosses).toEqual([]);
   });
 
-  test(`is deterministic when merge affinities tie`, () => {
+  test(`duplicates an item into every cluster that meets the threshold`, () => {
     const result = clusterGlossesFromAffinityMatrix(
       {
         items: [`a`, `b`, `c`, `d`],
         matrix: [
-          [1, 0.7, 0, 0],
-          [0.7, 1, 0, 0],
-          [0, 0, 1, 0.7],
-          [0, 0, 0.7, 1],
+          [1, 0.9, 0.2, 0.2],
+          [0.9, 1, 0.8, 0.8],
+          [0.2, 0.8, 1, 0.9],
+          [0.2, 0.8, 0.9, 1],
         ],
       },
       { threshold: 0.6 },
@@ -2057,7 +2056,7 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
 
     expect(result.clusters).toEqual([
       [`a`, `b`],
-      [`c`, `d`],
+      [`b`, `c`, `d`],
     ]);
     expect(result.reviewGlosses).toEqual([]);
   });
@@ -2097,6 +2096,24 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
       { gloss: `b`, clusterAffinities: [0.59, 1, 0.59] },
       { gloss: `c`, clusterAffinities: [0.2, 0.59, 1] },
     ]);
+  });
+
+  test(`throws when items contains duplicate gloss labels`, () => {
+    expect(() =>
+      clusterGlossesFromAffinityMatrix(
+        {
+          items: [`a`, `a`, `b`],
+          matrix: [
+            [1, 1, 0.2],
+            [1, 1, 0.2],
+            [0.2, 0.2, 1],
+          ],
+        },
+        { threshold: 0.9 },
+      ),
+    ).toThrow(
+      `affinity matrix items must be unique; found duplicates in 3 items`,
+    );
   });
 
   test(`returns empty output for empty matrix`, () => {
