@@ -2154,6 +2154,7 @@ export async function sampledRegroupEntry(
   entry: SenseGroupingEntryType,
   opts?: { samples?: number; signal?: AbortSignal; threshold?: number },
 ): Promise<{
+  affinityMatrix: SenseGroupingAffinityMatrixType;
   result: SenseGroupingEntryType;
   reviews: {
     clusters: string[][];
@@ -2190,6 +2191,7 @@ export async function sampledRegroupEntry(
   };
 
   return {
+    affinityMatrix,
     result: resultEntry,
     reviews: {
       clusters: clusteredResult.clusters,
@@ -2592,7 +2594,11 @@ export function clusterGlossesFromAffinityMatrix(
         continue;
       }
 
-      const affinity = computeCompleteLinkageAffinity([itemIndex], cluster, matrix);
+      const affinity = computeCompleteLinkageAffinity(
+        [itemIndex],
+        cluster,
+        matrix,
+      );
       if (affinity < threshold) {
         continue;
       }

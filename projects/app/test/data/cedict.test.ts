@@ -2019,7 +2019,10 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
       { threshold: 0.6 },
     );
 
-    expect(result.clusters).toEqual([[`a`, `b`], [`b`, `c`]]);
+    expect(result.clusters).toEqual([
+      [`a`, `b`],
+      [`b`, `c`],
+    ]);
     expect(result.reviewGlosses).toEqual([]);
   });
 
@@ -2036,7 +2039,10 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
       { threshold: 0.6 },
     );
 
-    expect(result.clusters).toEqual([[`a`, `b`], [`b`, `c`]]);
+    expect(result.clusters).toEqual([
+      [`a`, `b`],
+      [`b`, `c`],
+    ]);
     expect(result.reviewGlosses).toEqual([]);
   });
 
