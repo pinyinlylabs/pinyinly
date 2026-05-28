@@ -2062,8 +2062,43 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
 
     expect(result.clusters).toEqual([
       [`a`, `b`],
-      [`b`, `c`, `d`],
+      [`c`, `d`, `b`],
     ]);
+    expect(result.reviewGlosses).toEqual([]);
+  });
+
+  test(`sorts cluster items by strongest within-cluster affinity first`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`a`, `b`, `c`, `d`],
+        matrix: [
+          [1, 0.95, 0.1, 0.1],
+          [0.95, 1, 0.9, 0.9],
+          [0.1, 0.9, 1, 0.85],
+          [0.1, 0.9, 0.85, 1],
+        ],
+      },
+      { threshold: 0.05 },
+    );
+
+    expect(result.clusters).toEqual([[`b`, `c`, `d`, `a`]]);
+    expect(result.reviewGlosses).toEqual([]);
+  });
+
+  test(`uses deterministic shorter-string tie break for equal strengths`, () => {
+    const result = clusterGlossesFromAffinityMatrix(
+      {
+        items: [`bbb`, `a`, `cc`],
+        matrix: [
+          [1, 0.9, 0.9],
+          [0.9, 1, 0.9],
+          [0.9, 0.9, 1],
+        ],
+      },
+      { threshold: 0.6 },
+    );
+
+    expect(result.clusters).toEqual([[`a`, `cc`, `bbb`]]);
     expect(result.reviewGlosses).toEqual([]);
   });
 

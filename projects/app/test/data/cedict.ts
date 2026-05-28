@@ -2612,6 +2612,38 @@ export function clusterGlossesFromAffinityMatrix(
     }
   }
 
+  for (const cluster of expandedClusters) {
+    cluster.sort((indexA, indexB) => {
+      const strengthA = computeWithinClusterAffinityStrength(
+        indexA,
+        cluster,
+        matrix,
+      );
+      const strengthB = computeWithinClusterAffinityStrength(
+        indexB,
+        cluster,
+        matrix,
+      );
+      if (strengthA !== strengthB) {
+        return strengthB - strengthA;
+      }
+
+      const glossA = items[indexA] ?? ``;
+      const glossB = items[indexB] ?? ``;
+      const lengthComparison = glossA.length - glossB.length;
+      if (lengthComparison !== 0) {
+        return lengthComparison;
+      }
+
+      const glossComparison = glossA.localeCompare(glossB);
+      if (glossComparison !== 0) {
+        return glossComparison;
+      }
+
+      return indexA - indexB;
+    });
+  }
+
   const clusteredGlosses = expandedClusters.map((cluster) =>
     cluster.map((index) => items[index]!),
   );
@@ -2677,6 +2709,24 @@ function computeCompleteLinkageAffinity(
   }
 
   return minAffinity === Number.POSITIVE_INFINITY ? 0 : minAffinity;
+}
+
+function computeWithinClusterAffinityStrength(
+  itemIndex: number,
+  cluster: readonly number[],
+  matrix: readonly (readonly number[])[],
+): number {
+  const peerIndexes = cluster.filter((index) => index !== itemIndex);
+  if (peerIndexes.length === 0) {
+    return 1;
+  }
+
+  const affinitySum = peerIndexes.reduce(
+    (sum, peerIndex) => sum + (matrix[itemIndex]?.[peerIndex] ?? 0),
+    0,
+  );
+
+  return clampConfidence(affinitySum / peerIndexes.length);
 }
 
 function compareClusterIndexes(
