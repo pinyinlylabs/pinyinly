@@ -90,8 +90,7 @@ export function AiLeadCharacterDescriptionModal({
               description="Prompt text generated from the same builder used by AI description generation."
               sections={[
                 {
-                  system: leadCharacterPrompt.system,
-                  user: leadCharacterPrompt.user,
+                  messages: leadCharacterPrompt.messages,
                 },
               ]}
             />

@@ -149,8 +149,7 @@ export function AiSubLocationDescriptionModal({
               description="Prompt text generated from the same builder used by AI description generation."
               sections={[
                 {
-                  system: subLocationPrompt.system,
-                  user: subLocationPrompt.user,
+                  messages: subLocationPrompt.messages,
                 },
               ]}
             />

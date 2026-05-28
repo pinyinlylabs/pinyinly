@@ -140,8 +140,10 @@ export const aiRouter = router({
       });
 
       try {
-        const { result } = await requestOpenAiChatJson(prompt, { signal });
-        return result;
+        const { data } = await requestOpenAiChatJson(prompt, {
+          signal,
+        });
+        return data;
       } catch (error) {
         console.error(`Failed to generate pronunciation hints:`, error);
         throw new TRPCError({
@@ -173,9 +175,11 @@ export const aiRouter = router({
           });
 
           try {
-            const { result } = await requestOpenAiChatJson(prompt, { signal });
+            const { data } = await requestOpenAiChatJson(prompt, {
+              signal,
+            });
 
-            return result.suggestions.map((suggestion) => ({
+            return data.suggestions.map((suggestion) => ({
               ...suggestion,
               strategyLabel,
             }));
@@ -217,8 +221,10 @@ export const aiRouter = router({
       });
 
       try {
-        const { result } = await requestOpenAiChatJson(prompt, { signal });
-        return result;
+        const { data } = await requestOpenAiChatJson(prompt, {
+          signal,
+        });
+        return data;
       } catch (error) {
         console.error(`Failed to generate sublocation descriptions:`, error);
         throw new TRPCError({
@@ -242,8 +248,10 @@ export const aiRouter = router({
       });
 
       try {
-        const { result } = await requestOpenAiChatJson(prompt, { signal });
-        return result;
+        const { data } = await requestOpenAiChatJson(prompt, {
+          signal,
+        });
+        return data;
       } catch (error) {
         console.error(`Failed to generate lead character descriptions:`, error);
         throw new TRPCError({

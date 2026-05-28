@@ -2,7 +2,6 @@ import { pinyinTextSchema } from "#data/model.js";
 import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { nanoid } from "#util/nanoid.ts";
-import type { ChatPrompt } from "#util/prompts.js";
 import { renderPromptTemplate } from "#util/prompts.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
@@ -15,6 +14,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { z } from "zod/v4";
 import shuffle from "lodash/shuffle";
+import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
 import { requestOpenAiChatJson } from "#server/lib/ai.js";
 import type { OpenAI } from "openai";
 
@@ -2159,24 +2159,24 @@ export async function sampledRegroupEntry(
     clusters: string[][];
     glosses: ClusterGlossReviewType[];
   };
+  messages: ChatPromptMessage[];
   usages: OpenAI.CompletionUsage[];
 }> {
-  const samples = opts?.samples ?? 5;
+  const sampleCount = opts?.samples ?? 5;
   const threshold = opts?.threshold ?? 1;
 
-  const samplePrompts = Array.from({ length: samples }, () =>
+  const samplePrompts = Array.from({ length: sampleCount }, () =>
     buildCedictEntryGlossGroupingRandomisedPrompt(entry),
   );
 
-  const sampleResponses = await Promise.all(
-    samplePrompts.map(async (prompt) =>
-      requestOpenAiChatJson(prompt, { signal: opts?.signal }),
-    ),
+  const samples = await Promise.all(
+    samplePrompts.map(async (prompt) => ({
+      prompt,
+      response: await requestOpenAiChatJson(prompt, { signal: opts?.signal }),
+    })),
   );
 
-  const definitions = sampleResponses.map(
-    (response) => response.result.definition,
-  );
+  const definitions = samples.map((sample) => sample.response.data.definition);
 
   const affinityMatrix = buildSenseGroupingAffinityMatrix(definitions);
 
@@ -2195,8 +2195,12 @@ export async function sampledRegroupEntry(
       clusters: clusteredResult.clusters,
       glosses: clusteredResult.reviewGlosses,
     },
-    usages: sampleResponses
-      .map((response) => response.usage)
+    messages: samples.flatMap((sample) => [
+      ...sample.prompt.messages,
+      sample.response.message,
+    ]),
+    usages: samples
+      .map((sample) => sample.response.usage)
       .filter((x) => x != null),
   };
 }
@@ -2226,14 +2230,18 @@ Fix the following entry:
 </data>
 `.trim();
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    data: JSON.stringify(entry, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        data: JSON.stringify(entry, null, 2),
+      }),
+    },
+  ];
 
   return {
-    system,
-    user,
+    messages,
     model: `gpt-5.4`,
     reasoningEffort: `none`,
     schema: senseGroupingEntrySchema,
@@ -2264,14 +2272,18 @@ Fix the following entry:
 </data>
 `.trim();
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    data: JSON.stringify(entry, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        data: JSON.stringify(entry, null, 2),
+      }),
+    },
+  ];
 
   return {
-    system,
-    user,
+    messages,
     model: `gpt-5.4`,
     reasoningEffort: `none`,
     schema: senseGroupingEntrySchema,

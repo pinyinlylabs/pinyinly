@@ -1,10 +1,10 @@
 import { Text, View } from "react-native";
 import { RectButton } from "./RectButton";
+import type { ChatPromptMessage } from "@/server/lib/ai";
 
 export type AiPromptPreviewSectionType = {
   title?: string;
-  system: string;
-  user: string;
+  messages: ChatPromptMessage[];
 };
 
 export function AiPromptPreview({
@@ -39,8 +39,13 @@ export function AiPromptPreview({
             </Text>
           )}
 
-          <PromptTextBlock label="System" text={section.system} />
-          <PromptTextBlock label="User" text={section.user} />
+          {section.messages.map((message, messageIndex) => (
+            <PromptTextBlock
+              key={messageIndex}
+              label={message.role}
+              text={message.content}
+            />
+          ))}
         </View>
       ))}
     </View>

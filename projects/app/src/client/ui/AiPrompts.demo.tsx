@@ -1,3 +1,4 @@
+import type { ChatPromptMessage } from "@/server/lib/ai";
 import { RectButton } from "@/client/ui/RectButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import {
@@ -51,11 +52,6 @@ type LeadCharacterDescriptionInputType = {
   sound: string;
   existingDescription: string;
   countText: string;
-};
-
-type PromptResultType = {
-  system: string;
-  user: string;
 };
 
 const defaultMeaningHintInput: MeaningHintInputType = {
@@ -207,13 +203,9 @@ export default () => {
   const promptPayload =
     promptBuild.result == null
       ? ``
-      : [
-          `System`,
-          promptBuild.result.system,
-          ``,
-          `User`,
-          promptBuild.result.user,
-        ].join(`\n`);
+      : promptBuild.result
+          .map((message) => [message.role, `\n`, message.content])
+          .join(`\n\n`);
 
   return (
     <ScrollView
@@ -672,15 +664,12 @@ export default () => {
           </View>
         ) : null}
 
-        <View className="gap-2">
-          <FieldLabel text="System" />
-          <SelectableOutput text={promptBuild.result?.system ?? ``} />
-        </View>
-
-        <View className="gap-2">
-          <FieldLabel text="User" />
-          <SelectableOutput text={promptBuild.result?.user ?? ``} />
-        </View>
+        {promptBuild.result?.map((message, index) => (
+          <View className="gap-2" key={index}>
+            <FieldLabel text={message.role} />
+            <SelectableOutput text={message.content} />
+          </View>
+        ))}
       </View>
     </ScrollView>
   );
@@ -837,7 +826,7 @@ function buildCurrentPrompt(args: {
   pronunciationInput: PronunciationHintInputType;
   subLocationInput: SubLocationDescriptionInputType;
   leadCharacterInput: LeadCharacterDescriptionInputType;
-}): { result: PromptResultType | null; errors: string[] } {
+}): { result: ChatPromptMessage[] | null; errors: string[] } {
   const errors: string[] = [];
 
   if (args.mode === `meaning-hint`) {
@@ -871,7 +860,7 @@ function buildCurrentPrompt(args: {
       count: count ?? 1,
     });
 
-    return { result, errors };
+    return { result: result.messages, errors };
   }
 
   if (args.mode === `pronunciation-hint`) {
@@ -927,7 +916,7 @@ function buildCurrentPrompt(args: {
       count: count ?? 1,
     });
 
-    return { result, errors };
+    return { result: result.messages, errors };
   }
 
   if (args.mode === `sub-location-description`) {
@@ -965,7 +954,7 @@ function buildCurrentPrompt(args: {
       count: count ?? 1,
     });
 
-    return { result, errors };
+    return { result: result.messages, errors };
   }
 
   const count = parseCount(args.leadCharacterInput.countText);
@@ -993,7 +982,7 @@ function buildCurrentPrompt(args: {
     count: count ?? 1,
   });
 
-  return { result, errors };
+  return { result: result.messages, errors };
 }
 
 async function copyToClipboard(text: string): Promise<boolean> {

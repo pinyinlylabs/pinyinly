@@ -9,11 +9,11 @@ import {
 } from "./cedict";
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { HarnessMetadata, JsonValue, JudgeContext } from "vitest-evals";
+import type { ChatPrompt } from "#server/lib/ai.js";
 import { requestOpenAiChatJson } from "#server/lib/ai.js";
 import { normalizePinyinText } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
-import type { ChatPrompt } from "#util/prompts.js";
 import { z } from "zod/v4";
 
 interface SenseGroupingHarnessMetadata extends HarnessMetadata {
@@ -34,16 +34,13 @@ function createChatPromptHarness<
     run: async ({ input, signal }) => {
       const prompt = buildPrompt(input);
 
-      const { result: output, usage } = await requestOpenAiChatJson(prompt, {
+      const { data, usage } = await requestOpenAiChatJson(prompt, {
         signal,
       });
 
       return {
-        output,
-        messages: [
-          { role: `system`, content: prompt.system },
-          { role: `user`, content: prompt.user },
-        ],
+        output: data,
+        messages: prompt.messages,
         usage: {
           provider: `openai`,
           model: prompt.model,
@@ -300,6 +297,7 @@ describeEval(
           result: output,
           usages,
           reviews,
+          messages,
         } = await sampledRegroupEntry(input, {
           samples: 15,
           threshold: 0.5,
@@ -328,10 +326,7 @@ describeEval(
 
         return {
           output,
-          // messages: [
-          //   { role: `system`, content: prompt.system },
-          //   { role: `user`, content: prompt.user },
-          // ],
+          messages: messages,
           usage: {
             provider: `openai`,
             // model: prompt.model,

@@ -221,13 +221,11 @@ export function AiMeaningHintModal({
               sections={[
                 {
                   title: `Visual`,
-                  system: visualPrompt.system,
-                  user: visualPrompt.user,
+                  messages: visualPrompt.messages,
                 },
                 {
                   title: `Logical`,
-                  system: logicalPrompt.system,
-                  user: logicalPrompt.user,
+                  messages: logicalPrompt.messages,
                 },
               ]}
             />

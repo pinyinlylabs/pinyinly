@@ -6,6 +6,22 @@ import type {
 } from "openai/resources/index.mjs";
 import { z } from "zod/v4";
 
+export interface ChatPromptMessage {
+  role: `system` | `user` | `assistant`;
+  content: string;
+}
+
+export interface ChatPrompt<Schema extends z.ZodType> {
+  model?: OpenAI.ChatModel;
+  reasoningEffort?: OpenAI.ReasoningEffort;
+  messages: ChatPromptMessage[];
+  /**
+   * The Zod schema describing the expected shape of the assistant's response.
+   * This is used for type inference and validation of the response data.
+   */
+  schema: Schema;
+}
+
 export function openAiZodResponseFormat(
   zodObject: z.ZodType,
   name: string,
@@ -20,25 +36,20 @@ export function openAiZodResponseFormat(
 }
 
 export async function requestOpenAiChatJson<Schema extends z.ZodType>(
-  prompt: {
-    model?: OpenAI.ChatModel;
-    reasoningEffort?: OpenAI.ReasoningEffort;
-    system: string;
-    user: string;
-    schema: Schema;
-  },
+  prompt: ChatPrompt<Schema>,
   options?: { signal?: AbortSignal },
-): Promise<{ result: z.infer<Schema>; usage?: OpenAI.CompletionUsage }> {
+): Promise<{
+  data: z.infer<Schema>;
+  usage?: OpenAI.CompletionUsage;
+  message: ChatPromptMessage;
+}> {
   const client = getOpenAIClient();
 
   const body: ChatCompletionCreateParamsNonStreaming = {
     model: prompt.model ?? `gpt-5-mini`,
     reasoning_effort: prompt.reasoningEffort ?? null,
     response_format: openAiZodResponseFormat(prompt.schema, `result_shape`),
-    messages: [
-      { role: `system`, content: prompt.system },
-      { role: `user`, content: prompt.user },
-    ],
+    messages: prompt.messages,
   };
 
   const completion = await client.chat.completions.create(body, {
@@ -46,14 +57,18 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
   });
 
   const message = completion.choices[0]?.message;
-  const content = message?.content ?? ``;
+  if (message == null) {
+    throw new Error(`OpenAI response message was missing`);
+  }
 
+  const content = message.content ?? ``;
   if (content.length === 0) {
-    throw new Error(`OpenAI response was empty`);
+    throw new Error(`OpenAI response message content was empty`);
   }
 
   return {
-    result: prompt.schema.parse(JSON.parse(content)),
+    data: prompt.schema.parse(JSON.parse(content)),
+    message: { role: message.role, content },
     usage: completion.usage,
   };
 }
