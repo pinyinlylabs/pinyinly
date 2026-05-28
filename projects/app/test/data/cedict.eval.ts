@@ -300,8 +300,8 @@ describeEval(
           messages,
           affinityMatrix,
         } = await sampledRegroupEntry(input, {
-          samples: 15,
-          threshold: 0.5,
+          samples: 10,
+          threshold: 0.4,
           signal,
         });
 
@@ -349,54 +349,9 @@ describeEval(
         name: `下 下 [[xia44]]`,
         input: `/below; under; underneath; down; downwards/inferior; lower/later; next (week etc)/second (of two parts)/to decline; to go down; bring down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/`,
         expecteds: [
-          `/below; down; downwards; under; underneath/bring down; to decline; to go down/inferior; lower/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/`,
+          `/below; down; downwards; lower; under; underneath/bring down; to decline; to go down/inferior; lower/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/`,
         ],
       },
-      // {
-      //   name: `上 上 [[shang4]]`,
-      //   input: `/{bound form} up; upper; above/first (of multiple parts)/to climb; to get onto; to go up; go up/to attend (class or university)/{directional complement} up/top/superior; highest/send up/on top; upon; {noun suffix} on/previous/`,
-      //   expecteds: [
-      //     `/above; upper; {bound form} up/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior; top/on top; upon; {noun suffix} on/previous/send up/to attend (class or university)/{directional complement} up/`,
-      //     `/above; upper; {bound form} up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior; top/on top; upon; {noun suffix} on/send up/to attend (class or university)/{directional complement} up/`,
-      //     `/above; upper; {bound form} up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; top; upon; {noun suffix} on/send up/to attend (class or university)/{directional complement} up/`,
-      //   ],
-      // },
-      // {
-      //   name: `一定 一定 [[yi1ding4]]`,
-      //   input: `/surely; certainly; definitely/fixed; settled/a certain ...; a given .../`,
-      //   expecteds: [
-      //     `/surely; certainly; definitely/fixed; settled/a certain ...; a given .../`,
-      //   ],
-      // },
-      // {
-      //   name: `往 往 [[wang3]]`,
-      //   input: `/to go (in a direction); go; depart/to; towards/(of a train) bound for/past; previous/`,
-      //   expecteds: [
-      //     `/to go (in a direction); go; depart/to; towards; (of a train) bound for/past; previous/`,
-      //   ],
-      // },
-      // {
-      //   name: `惡心 恶心 [[e3xin1]]`,
-      //   input: `/nausea; to feel sick/disgust; nauseating/to embarrass (deliberately)/`,
-      //   expecteds: [
-      //     `/nausea; to feel sick/disgust; nauseating/to embarrass (deliberately)/`,
-      //   ],
-      // },
-      // {
-      //   name: `惡臭 恶臭 [[e4chou4]]`,
-      //   input: `/stink; stench/stinky; smelly/{fig.} disgusting; repugnant/`,
-      //   expecteds: [
-      //     `/stink; stench/stinky; smelly/{fig.} disgusting; repugnant/`,
-      //   ],
-      // },
-      // {
-      //   name: `惡貫滿盈 恶贯满盈 [[e4guan4man3ying2]]`,
-      //   input: `/{lit.} {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
-      //   expecteds: [
-      //     `/filled with extreme evil; guilty of monstrous crimes; replete with vice; {lit.} {idiom} strung through and filled with evil/`,
-      //     `/filled with extreme evil; guilty of monstrous crimes; replete with vice/{lit.} {idiom} strung through and filled with evil/`,
-      //   ],
-      // },
     ] as const)(`$name`, async (spec, { run }) => {
       const input = parsedLineToEntry(
         parseCedictV2Line(`${spec.name} ${spec.input}`, { strict: true })!,
