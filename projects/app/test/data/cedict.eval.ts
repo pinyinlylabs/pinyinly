@@ -298,6 +298,7 @@ describeEval(
           usages,
           reviews,
           messages,
+          affinityMatrix,
         } = await sampledRegroupEntry(input, {
           samples: 15,
           threshold: 0.5,
@@ -305,6 +306,7 @@ describeEval(
         });
 
         setArtifact(`reviews`, reviews as unknown as JsonValue);
+        setArtifact(`affinityMatrix`, affinityMatrix as unknown as JsonValue);
 
         const inputTokens = usages.reduce(
           (sum, usage) => sum + usage.prompt_tokens,

@@ -2604,7 +2604,6 @@ export function clusterGlossesFromAffinityMatrix(
       }
 
       cluster.push(itemIndex);
-      cluster.sort((a, b) => a - b);
 
       const memberships = clusterMembershipsByItem.get(itemIndex) ?? [];
       memberships.push(clusterIndex);
