@@ -842,9 +842,10 @@ export async function findCedictMigratedSenseId(
 export function applyCedictV2EditsToText(
   entries: readonly CedictV2EntryType[],
   options: ParseCedictV2LineOptionsType = {},
-): string {
+): CedictV2EntryType[] {
   const matchedEntryKeys = new Set<string>();
-  const outputLines = entries
+
+  const outputEntries = entries
     .map((entry) => {
       const key = buildCedictV2EditEntryKey(
         entry.traditional,
@@ -864,9 +865,9 @@ export function applyCedictV2EditsToText(
               senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
             };
 
-      return serializeCedictV2Entry(nextEntry);
+      return nextEntry.senses.length > 0 ? nextEntry : null;
     })
-    .filter((line): line is string => line != null);
+    .filter((x) => x != null);
 
   for (const [key, entryEdits] of options.edits?.entriesByKey ?? []) {
     if (matchedEntryKeys.has(key)) {
@@ -878,18 +879,15 @@ export function applyCedictV2EditsToText(
       continue;
     }
 
-    const serializedCreatedEntry = serializeCedictV2Entry({
+    outputEntries.push({
       traditional: entryEdits.traditional,
       simplified: entryEdits.simplified,
       pinyin: entryEdits.pinyin,
       senses: createdSenses,
     });
-    if (serializedCreatedEntry != null) {
-      outputLines.push(serializedCreatedEntry);
-    }
   }
 
-  return outputLines.join(`\n`);
+  return outputEntries;
 }
 
 export function applyCedictV2UnicodeNormalization(
@@ -931,14 +929,23 @@ export function applyCedictV2UnicodeNormalization(
   return outputEntries;
 }
 
-function serializeCedictV2Entry(entry: CedictV2EntryType): string | null {
+export function serializeCedictV2Entries(
+  entries: readonly CedictV2EntryType[],
+): string {
+  return entries.map((entry) => serializeCedictV2Entry(entry)).join(`\n`);
+}
+
+export function serializeCedictV2Entry(
+  entry: CedictV2EntryType,
+): string | null {
   const senses = entry.senses
     .map((sense) => serializeCedictV2Sense(parseCedictV2Sense(sense)))
     .filter((sense): sense is string => sense != null && sense.length > 0);
 
-  if (senses.length === 0) {
-    return null;
-  }
+  invariant(
+    senses.length > 0,
+    `entry has no valid senses: ${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] ${JSON.stringify(entry.senses)}`,
+  );
 
   return `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] /${senses.join(`/`)}/`;
 }
@@ -1009,10 +1016,6 @@ export function parseCedictV2Sense(
       continue;
     }
 
-    if (cleanedGloss.length === 0) {
-      continue;
-    }
-
     glosses.push({
       originalGloss: gloss,
       cleanedGloss,
@@ -1036,14 +1039,15 @@ export function serializeCedictV2Sense(
   }
 
   const serializedGlosses = parsedSense.glosses.map((parsedGloss) => {
-    const labelsPrefix = parsedGloss.labels
-      .map((label) => `{${label}}`)
-      .join(` `);
-    if (labelsPrefix.length === 0) {
-      return parsedGloss.cleanedGloss;
+    const parts: string[] = [];
+
+    parts.push(...parsedGloss.labels.map((label) => `{${label}}`));
+
+    if (parsedGloss.cleanedGloss.length > 0) {
+      parts.push(parsedGloss.cleanedGloss);
     }
 
-    return `${labelsPrefix} ${parsedGloss.cleanedGloss}`;
+    return parts.join(` `);
   });
 
   return serializedGlosses.join(`; `);
@@ -1377,33 +1381,27 @@ export function parseCedictV2Text(
   });
 }
 
-export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
-  const filename = `cedict_ts-2.u8`;
+export const cedictPath = path.join(import.meta.dirname, `cedict_ts-2.u8`);
 
-  const dataText = await readFile(
-    path.join(import.meta.dirname, filename),
-    `utf8`,
-  );
+export const migrateCedictV2WithEdits = memoize0(async (): Promise<string> => {
+  const dataText = await readFile(cedictPath, `utf8`);
 
   const edits = await loadCedictV2Edits();
   const parsedEntries = parseCedictV2Text(dataText, { strict: true });
   const normalizedEntries = applyCedictV2UnicodeNormalization(parsedEntries);
 
-  const outputText = applyCedictV2EditsToText(normalizedEntries, {
+  const editedEntries = applyCedictV2EditsToText(normalizedEntries, {
     strict: true,
     edits,
   });
-  await writeUtf8FileIfChanged(
-    path.join(import.meta.dirname, `${filename}.out`),
-    outputText,
-  );
+  return serializeCedictV2Entries(editedEntries);
+});
 
+export const loadCedictV2 = memoize0(async (): Promise<CedictV2EntryType[]> => {
+  const outputText = await migrateCedictV2WithEdits();
   const ids = await loadCedictV2Ids();
   const idsText = buildCedictV2SenseIdsText(parseCedictV2Text(outputText), ids);
-  await writeUtf8FileIfChanged(
-    path.join(import.meta.dirname, `${filename}.ids`),
-    idsText,
-  );
+  await writeUtf8FileIfChanged(`${cedictPath}.ids`, idsText);
 
   return parseCedictV2Text(outputText, { strict: true });
 });
@@ -2216,12 +2214,12 @@ You're a helpful assistant that makes improvements to Chinese to English diction
 > A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
 
 Rules:
-- Do not add or remove glosses, only group them.
-- Each gloss must appear in only one group.
-- Always separate different meaning/concept/theme into individual groups.
+- Each gloss can have multiple meanings and appear in multiple groups.
+- Do not invent or delete glosses, only arrange groups.
+- Each group must have a unique meaning/concept/theme.
 - Consider the "part of speech" for each gloss (e.g. verb, adjective, noun).
-- Text in parenthesis "()" is often a hint for how the gloss could be used in a sentence.
-- Text in braces "{}" are gloss labels.
+- Text in parenthesis "( )" are hints.
+- Text in braces "{ }" are labels.
 `.trim();
 
   const userTemplate = `

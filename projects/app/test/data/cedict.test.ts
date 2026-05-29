@@ -1,6 +1,7 @@
 // pyly-not-src-test
 import type { HanziText, PinyinNumericText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
+import type { CedictV2EntryType } from "./cedict";
 import {
   applyCedictV2EditsToText,
   applyCedictV2UnicodeNormalization,
@@ -25,8 +26,18 @@ import {
   serializeCedictV2Sense,
   parseCedictV2Sense,
   nestedStringSetScorer,
+  migrateCedictV2WithEdits,
+  serializeCedictV2Entries,
+  cedictPath,
 } from "./cedict";
 import pick from "lodash/pick.js";
+import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
+import { isCi } from "#util/env.js";
+import { loadHsk2026 } from "./hsk";
+import {
+  mergeSortComparators,
+  sortComparatorString,
+} from "@pinyinly/lib/collections";
 
 function isLikelyOverSplitCedictEntry(entry: { senses: string[] }): boolean {
   // If there's only two senses, then maybe it's just a short entry
@@ -745,7 +756,9 @@ describe(`applyCedictV2EditsToText`, () => {
       ].join(`\n`),
     );
 
-    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
+    const output = serializeCedictV2Entries(
+      applyCedictV2EditsToText(parsed, { strict: true, edits }),
+    );
     expect(output).toMatchInlineSnapshot(`
       "示例 示例 [[shi4li4]] /one/two/three/
       小二 小二 [[xiao3'er4]] /new sense 1/old sense 2/"
@@ -762,7 +775,9 @@ describe(`applyCedictV2EditsToText`, () => {
       ),
     );
 
-    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
+    const output = serializeCedictV2Entries(
+      applyCedictV2EditsToText(parsed, { strict: true, edits }),
+    );
     expect(output).toBe(
       `示例 示例 [[shi4li4]] /gloss 1; gloss 2; gloss 3/gloss 4/`,
     );
@@ -776,7 +791,9 @@ describe(`applyCedictV2EditsToText`, () => {
       [`龜 龜 [[]]`, `+ /turtle/`, ``].join(`\n`),
     );
 
-    const output = applyCedictV2EditsToText(parsed, { strict: true, edits });
+    const output = serializeCedictV2Entries(
+      applyCedictV2EditsToText(parsed, { strict: true, edits }),
+    );
     expect(output).toBe(`龜 龜 [[]] /turtle/`);
   });
 });
@@ -1364,8 +1381,7 @@ describe(`parseCedictV2Line label extraction`, () => {
     ],
     // Keeps labels attached to the gloss they came from
     [`gloss 1 (idiom); (fig.) gloss 2`, `{idiom} gloss 1; {fig.} gloss 2`],
-    // Glosses that are solely labels are removed with no hoisting
-    [`normal gloss; (idiom)`, `normal gloss`],
+    [`normal gloss; (idiom)`, `normal gloss; {idiom}`],
     // Domain labels stay on the specific gloss they annotate
     [
       `to conserve; to preserve; to keep; to store; (computing) to save (a file etc)`,
@@ -1373,6 +1389,8 @@ describe(`parseCedictV2Line label extraction`, () => {
     ],
     // Unknown labels are left as-is
     [`(horse)`, `(horse)`],
+    // Just a label
+    [`(onom.)`, `{onom.}`],
   ] as [string, string][])(`fixture: %s → %s`, async ([input, expected]) => {
     const actual = serializeCedictV2Sense(parseCedictV2Sense(input));
 
@@ -1384,7 +1402,7 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
   test(`preserves end marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /example text (idiom); more text/`;
     const parsed = parseCedictV2Text(input, { strict: true });
-    const output = applyCedictV2EditsToText(parsed);
+    const output = serializeCedictV2Entries(applyCedictV2EditsToText(parsed));
     expect(output).toMatchInlineSnapshot(
       `"示例 示例 [[shi4li4]] /{idiom} example text; more text/"`,
     );
@@ -1393,7 +1411,7 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
   test(`preserves middle marker gloss text in .out output`, () => {
     const input = `示例 示例 [[shi4li4]] /lit. to do something (idiom); to achieve a result/`;
     const parsed = parseCedictV2Text(input, { strict: true });
-    const output = applyCedictV2EditsToText(parsed);
+    const output = serializeCedictV2Entries(applyCedictV2EditsToText(parsed));
     expect(output).toMatchInlineSnapshot(
       `"示例 示例 [[shi4li4]] /{lit.} {idiom} to do something; to achieve a result/"`,
     );
@@ -1402,7 +1420,7 @@ describe(`applyCedictV2EditsToText sense serialization`, () => {
   test(`preserves gloss without labels unchanged`, () => {
     const input = `示例 示例 [[shi4li4]] /plain gloss/`;
     const parsed = parseCedictV2Text(input, { strict: true });
-    const output = applyCedictV2EditsToText(parsed);
+    const output = serializeCedictV2Entries(applyCedictV2EditsToText(parsed));
     expect(output).toBe(`示例 示例 [[shi4li4]] /plain gloss/`);
   });
 });
@@ -1482,7 +1500,7 @@ describe(`loadCedictV2`, () => {
     expect(histogramBySenseCount).toMatchInlineSnapshot(`
       {
         "03": {
-          "count": 9306,
+          "count": 9310,
           "examples": [
             "B超 B超 [[B chao1]] /B-mode ultrasonography/prenatal ultrasound scan/{abbr.} for B型超聲|B型超声[B xing2chao1sheng1]/",
             "PA PA [[P A]] /public area attendant (tasked with cleaning the public areas of a hotel)/marketing assistant/sales assistant/",
@@ -2421,4 +2439,97 @@ describe(`clusterGlossesFromAffinityMatrix`, () => {
       ),
     ).toThrow(`cluster threshold must be a finite number between 0 and 1`);
   });
+});
+
+test.skipIf(isCi)(`debug snapshots of migrated cedict data`, async () => {
+  const outputText = await migrateCedictV2WithEdits();
+  // entire dataset
+  await writeUtf8FileIfChanged(`${cedictPath}.out`, outputText);
+
+  // just HSK slices
+  const hsk2026 = await loadHsk2026();
+  const parsed = parseCedictV2Text(outputText, { strict: true });
+
+  const hsk1 = [];
+  const hsk2 = [];
+  const hsk3 = [];
+  const hsk4 = [];
+  const hsk5 = [];
+  const hsk6 = [];
+  const hsk7 = [];
+
+  const level1 = new Set(hsk2026.level1);
+  const level2 = new Set(hsk2026.level2);
+  const level3 = new Set(hsk2026.level3);
+  const level4 = new Set(hsk2026.level4);
+  const level5 = new Set(hsk2026.level5);
+  const level6 = new Set(hsk2026.level6);
+  const level7 = new Set(hsk2026.level7);
+
+  for (const entry of parsed) {
+    if (level1.has(entry.simplified)) {
+      hsk1.push(entry);
+    }
+    if (level2.has(entry.simplified)) {
+      hsk2.push(entry);
+    }
+    if (level3.has(entry.simplified)) {
+      hsk3.push(entry);
+    }
+    if (level4.has(entry.simplified)) {
+      hsk4.push(entry);
+    }
+    if (level5.has(entry.simplified)) {
+      hsk5.push(entry);
+    }
+    if (level6.has(entry.simplified)) {
+      hsk6.push(entry);
+    }
+    if (level7.has(entry.simplified)) {
+      hsk7.push(entry);
+    }
+  }
+
+  const sorter = mergeSortComparators<CedictV2EntryType>(
+    sortComparatorString((x) => x.simplified),
+    sortComparatorString((x) => x.pinyin),
+    sortComparatorString((x) => x.traditional),
+  );
+
+  hsk1.sort(sorter);
+  hsk2.sort(sorter);
+  hsk3.sort(sorter);
+  hsk4.sort(sorter);
+  hsk5.sort(sorter);
+  hsk6.sort(sorter);
+  hsk7.sort(sorter);
+
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk1.out`,
+    serializeCedictV2Entries(hsk1),
+  );
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk2.out`,
+    serializeCedictV2Entries(hsk2),
+  );
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk3.out`,
+    serializeCedictV2Entries(hsk3),
+  );
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk4.out`,
+    serializeCedictV2Entries(hsk4),
+  );
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk5.out`,
+    serializeCedictV2Entries(hsk5),
+  );
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk6.out`,
+    serializeCedictV2Entries(hsk6),
+  );
+  await writeUtf8FileIfChanged(
+    `${cedictPath}.hsk7.out`,
+    serializeCedictV2Entries(hsk7),
+  );
 });
