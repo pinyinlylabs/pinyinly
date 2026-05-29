@@ -16,7 +16,11 @@ import {
 import { isCi } from "#util/env.js";
 import { toCamelCase } from "#util/unicode.js";
 import { memoize0, memoize1 } from "@pinyinly/lib/collections";
-import { readFile } from "@pinyinly/lib/fs";
+import {
+  fmtJsonFile,
+  readFile,
+  writeJsonFileIfChanged,
+} from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
@@ -843,3 +847,49 @@ function guessMeaningKey(meanings: readonly string[]): string {
 
   return toCamelCase(shortestWord);
 }
+
+export const hsk2026FilePath = path.join(import.meta.dirname, `hsk2026.json`);
+
+test(`hsk2026.json export`, async () => {
+  const completeHskVocabulary = await loadCompleteHskVocabulary();
+
+  const hsk2026 = {
+    level1: [] as string[],
+    level2: [] as string[],
+    level3: [] as string[],
+    level4: [] as string[],
+    level5: [] as string[],
+    level6: [] as string[],
+    level7: [] as string[],
+  };
+
+  for (const x of completeHskVocabulary) {
+    if (x.level.includes(`newest-1`)) {
+      hsk2026.level1.push(x.simplified);
+    }
+    if (x.level.includes(`newest-2`)) {
+      hsk2026.level2.push(x.simplified);
+    }
+    if (x.level.includes(`newest-3`)) {
+      hsk2026.level3.push(x.simplified);
+    }
+    if (x.level.includes(`newest-4`)) {
+      hsk2026.level4.push(x.simplified);
+    }
+    if (x.level.includes(`newest-5`)) {
+      hsk2026.level5.push(x.simplified);
+    }
+    if (x.level.includes(`newest-6`)) {
+      hsk2026.level6.push(x.simplified);
+    }
+    if (x.level.includes(`newest-7`)) {
+      hsk2026.level7.push(x.simplified);
+    }
+  }
+
+  await writeJsonFileIfChanged(hsk2026FilePath, hsk2026);
+});
+
+test.skipIf(isCi)(`hsk2026.json has correct formatting`, async () => {
+  await fmtJsonFile(hsk2026FilePath, 1);
+});
