@@ -122,7 +122,7 @@ const CEDICT_V2_SENSE_NANOID_LENGTH = 5;
 const createCedictV2SenseNanoid = () =>
   nanoid().slice(0, CEDICT_V2_SENSE_NANOID_LENGTH);
 
-const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+\/(.*)\/$/u;
+const CEDICT_V2_LINE_REGEXP = /^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]\s+(\/.*\/)$/u;
 
 const domainLabels = [
   `ACG`,
@@ -451,6 +451,10 @@ const labelPatterns =
   `\\((?<domain>${domainLabels.map((d) => regExpEscape(d)).join(`|`)})\\)|` +
   // labels in parentheses, e.g. "(sports)", "(coll.)", "(idiom)"
   `\\((?<label>${genericLabels.map((t) => regExpEscape(t)).join(`|`)})\\)|` +
+  // serialized domain labels in double braces, e.g. "{{sports}}"
+  `\\{\\{(?<domain>${domainLabels.map((d) => regExpEscape(d)).join(`|`)})\\}\\}|` +
+  // serialized labels in double braces, e.g. "{{coll.}}", "{{idiom}}"
+  `\\{\\{(?<label>${genericLabels.map((t) => regExpEscape(t)).join(`|`)})\\}\\}|` +
   // abbr labels, e.g. onom., coll., fig.
   `(?<label>${genericAbbrLabels.map((t) => regExpEscape(t)).join(`|`)})` +
   `)`;
@@ -505,10 +509,7 @@ export function parseCedictV2Line(
     throw new Error(formatParseError(`invalid CC-CEDICT v2 line`, options));
   }
 
-  let senses = definitionBody
-    .split(`/`)
-    .map((sense) => sense.trim())
-    .filter((sense) => sense.length > 0);
+  let senses = splitCedictV2Definition(definitionBody);
 
   const entryEdits = options.edits?.entriesByKey.get(
     buildCedictV2EditEntryKey(traditional, simplified, pinyin),
@@ -963,6 +964,28 @@ export interface ParsedCedictSenseType {
   standaloneClassifiers: string[];
 }
 
+/**
+ * Split a sense into glosses, e.g. "a; b; c" into ["a", "b", "c"], while
+ * trimming  whitespace and filtering out empty glosses.
+ */
+export function splitCedictV2Sense(sense: string): string[] {
+  return sense
+    .split(`;`)
+    .map((gloss) => gloss.trim())
+    .filter((gloss) => gloss.length > 0);
+}
+
+/**
+ * Split a definition into senses, e.g. /a/b/ into ["a", "b"], while trimming
+ * whitespace and filtering out empty senses.
+ */
+export function splitCedictV2Definition(definition: string): string[] {
+  return definition
+    .split(`/`)
+    .map((sense) => sense.trim())
+    .filter((sense) => sense.length > 0);
+}
+
 export function parseCedictV2Sense(
   sense: CedictV2EntryType[`senses`][number],
 ): ParsedCedictSenseType {
@@ -971,10 +994,7 @@ export function parseCedictV2Sense(
   const inlineAlternativePinyin: string[] = [];
   const standaloneClassifiers: string[] = [];
 
-  for (const gloss of sense
-    .split(`;`)
-    .map((gloss) => gloss.trim())
-    .filter((gloss) => gloss.length > 0)) {
+  for (const gloss of splitCedictV2Sense(sense)) {
     let cleanedGloss = gloss;
     let labelsForGloss: string[] = [];
 
@@ -1016,6 +1036,12 @@ export function parseCedictV2Sense(
       continue;
     }
 
+    invariant(
+      !cleanedGloss.includes(`{{`) && !cleanedGloss.includes(`}}`),
+      `cleaned gloss contains double braces which are reserved for label serialization: %s`,
+      cleanedGloss,
+    );
+
     glosses.push({
       originalGloss: gloss,
       cleanedGloss,
@@ -1041,7 +1067,7 @@ export function serializeCedictV2Sense(
   const serializedGlosses = parsedSense.glosses.map((parsedGloss) => {
     const parts: string[] = [];
 
-    parts.push(...parsedGloss.labels.map((label) => `{${label}}`));
+    parts.push(...parsedGloss.labels.map((label) => `{{${label}}}`));
 
     if (parsedGloss.cleanedGloss.length > 0) {
       parts.push(parsedGloss.cleanedGloss);
@@ -1073,7 +1099,7 @@ export function transformCedictV2Entry(
 
     for (const parsedGloss of parsedSense.glosses) {
       const labelsPrefix = parsedGloss.labels
-        .map((label) => `{${label}}`)
+        .map((label) => `{{${label}}}`)
         .join(` `);
       const cleanedGloss =
         labelsPrefix.length === 0
@@ -2098,10 +2124,9 @@ function applyCedictEntryEdits(
       continue;
     }
 
-    const replacementSenses = rule.newSense
-      .split(`/`)
-      .map((sense) => sense.trim())
-      .filter((sense) => sense.length > 0);
+    const replacementSenses = splitCedictV2Definition(
+      `/` + rule.newSense + `/`,
+    );
 
     if (replacementSenses.length === 0) {
       nextSenses.splice(matchIndex, 1);

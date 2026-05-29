@@ -9,49 +9,14 @@ import {
 } from "./cedict";
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { HarnessMetadata, JsonValue, JudgeContext } from "vitest-evals";
-import type { ChatPrompt } from "#server/lib/ai.js";
-import { requestOpenAiChatJson } from "#server/lib/ai.js";
 import { normalizePinyinText } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod/v4";
 
+import { createChatPromptHarness } from "./eval";
 interface SenseGroupingHarnessMetadata extends HarnessMetadata {
   expecteds: SenseGroupingEntryType[];
-}
-
-function createChatPromptHarness<
-  TMetadata extends HarnessMetadata,
-  Schema extends z.ZodType<TOutput>,
-  TInput = unknown,
-  TOutput extends JsonValue | undefined = z.infer<Schema>,
->(
-  buildPrompt: (input: TInput) => ChatPrompt<Schema>,
-  _metadataSchema?: z.ZodType<TMetadata>,
-) {
-  return createHarness<TInput, TOutput, TMetadata>({
-    name: `chatHarness`,
-    run: async ({ input, signal }) => {
-      const prompt = buildPrompt(input);
-
-      const { data, usage } = await requestOpenAiChatJson(prompt, {
-        signal,
-      });
-
-      return {
-        output: data,
-        messages: prompt.messages,
-        usage: {
-          provider: `openai`,
-          model: prompt.model,
-          inputTokens: usage?.prompt_tokens,
-          outputTokens: usage?.completion_tokens,
-          reasoningTokens: usage?.completion_tokens_details?.reasoning_tokens,
-          totalTokens: usage?.total_tokens,
-        },
-      };
-    },
-  });
 }
 
 function formatDefinitionStable(definition: string[][]): string {
@@ -264,6 +229,13 @@ describeEval(
           `/filled with extreme evil; guilty of monstrous crimes; replete with vice/{lit.} {idiom} strung through and filled with evil/`,
         ],
       },
+      {
+        name: `長 长 [[zhang3]]`,
+        input: `/chief/head/elder/to grow/to develop/to increase/to enhance/`,
+        expecteds: [
+          `/chief; head; elder/to develop; to grow/to enhance; to increase/`,
+        ],
+      },
     ] as const)(`$name`, async (spec, { run }) => {
       const input = parsedLineToEntry(
         parseCedictV2Line(`${spec.name} ${spec.input}`, { strict: true })!,
@@ -301,7 +273,7 @@ describeEval(
           affinityMatrix,
         } = await sampledRegroupEntry(input, {
           samples: 10,
-          threshold: 0.4,
+          threshold: 0.8,
           signal,
         });
 
@@ -346,10 +318,24 @@ describeEval(
   (it) => {
     it.for([
       {
-        name: `下 下 [[xia44]]`,
+        name: `下 下 [[xia4]]`,
         input: `/below; under; underneath; down; downwards/inferior; lower/later; next (week etc)/second (of two parts)/to decline; to go down; bring down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/`,
         expecteds: [
-          `/below; down; downwards; lower; under; underneath/bring down; to decline; to go down/inferior; lower/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/`,
+          `/below; lower; under; underneath/bring down; to decline; to go down/down; downwards/inferior; lower/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/`,
+        ],
+      },
+      {
+        name: `長 长 [[chang2]]`,
+        input: `/long/{bound form} length/{bound form} strong point; forte/{bound form} to be good at/{lit.} surplus; spare (Taiwan pr. [zhang4])/`,
+        expecteds: [
+          `/long/{bound form} length/{bound form} strong point; forte/{bound form} to be good at/{lit.} surplus; spare (Taiwan pr. [zhang4])/`,
+        ],
+      },
+      {
+        name: `長 长 [[zhang3]]`,
+        input: `/chief/head/elder/to grow/to develop/to increase/to enhance/`,
+        expecteds: [
+          `/chief; head/elder/to develop; to grow/to enhance; to increase/`,
         ],
       },
     ] as const)(`$name`, async (spec, { run }) => {
