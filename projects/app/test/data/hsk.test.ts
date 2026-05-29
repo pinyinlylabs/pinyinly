@@ -32,6 +32,7 @@ import {
   resolveDisambiguationHintForm,
 } from "./completeHskVocabulary.ts";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
+import { hsk2026FilePath } from "./hsk.ts";
 
 test.skip(`all ivankraHsk30 items are in the dictionary`, async () => {
   const ivankraHsk30 = await loadIvankraHsk30();
@@ -848,9 +849,7 @@ function guessMeaningKey(meanings: readonly string[]): string {
   return toCamelCase(shortestWord);
 }
 
-export const hsk2026FilePath = path.join(import.meta.dirname, `hsk2026.json`);
-
-test(`hsk2026.json export`, async () => {
+test.skipIf(isCi)(`hsk2026.json export`, async () => {
   const completeHskVocabulary = await loadCompleteHskVocabulary();
 
   const hsk2026 = {

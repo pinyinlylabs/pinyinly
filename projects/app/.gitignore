@@ -6,7 +6,7 @@
 /android
 
 # Generated files
-/test/data/cedict_ts-2.u8.out
+/test/data/cedict_ts-2.u8*.out
 
 # Vendored files
 /public/vendor

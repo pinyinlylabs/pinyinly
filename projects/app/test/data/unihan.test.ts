@@ -1,3 +1,5 @@
+// pyly-not-src-test
+
 import { describe, expect, test } from "vitest";
 import {
   parseUnihanDefinition,
