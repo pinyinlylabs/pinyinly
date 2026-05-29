@@ -26,7 +26,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
@@ -45,7 +47,10 @@ describe(
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
-          "user": "Generate 3 distinct mnemonic story ideas.
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct mnemonic story ideas.
 
         <data>
         {
@@ -60,6 +65,9 @@ describe(
           }
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -81,7 +89,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
@@ -100,7 +110,10 @@ describe(
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
-          "user": "Generate 4 distinct mnemonic story ideas.
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 distinct mnemonic story ideas.
 
         <data>
         {
@@ -119,6 +132,9 @@ describe(
           "creativeDirection": "Play it as a surreal heist-comedy beat with one unforgettable prop."
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -133,7 +149,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
         The goal is to create a scene that is easy to picture and easy to remember.
         Each scene should feel like a tiny absurd sketch or striking mental snapshot.
@@ -152,7 +170,10 @@ describe(
         Good suggestions are specific, visual, unusual, and easy to replay mentally.
         Bad suggestions are generic, flat, or mostly just a definition.
         Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
-          "user": "Generate 2 distinct mnemonic story ideas.
+              "role": "system",
+            },
+            {
+              "content": "Generate 2 distinct mnemonic story ideas.
 
         <data>
         {
@@ -168,6 +189,9 @@ describe(
           }
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -189,7 +213,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
         Your job is to help the learner remember what a Hanzi means using its visual components.
         Use the provided component details as the core building blocks of each hint.
         Write vivid, concrete, and memorable mini-scenes or mental images.
@@ -201,7 +227,10 @@ describe(
         Do not write a plain dictionary definition.
         Do not introduce pronunciation guidance.
         If component context is provided, ground the hint in those components explicitly.",
-          "user": "Generate 3 distinct mnemonic hints.
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct mnemonic hints.
         <data>
         {
           "hanzi": "好",
@@ -213,6 +242,9 @@ describe(
           }
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -240,7 +272,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
         Your job is to help the learner remember what a Hanzi means using its visual components.
         Use the provided component details as the core building blocks of each hint.
         Write vivid, concrete, and memorable mini-scenes or mental images.
@@ -252,7 +286,10 @@ describe(
         Do not write a plain dictionary definition.
         Do not introduce pronunciation guidance.
         If component context is provided, ground the hint in those components explicitly.",
-          "user": "Generate 4 distinct mnemonic hints.
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 distinct mnemonic hints.
         <data>
         {
           "hanzi": "好",
@@ -277,6 +314,9 @@ describe(
           ]
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -300,7 +340,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
 
         Rules:
         - Keep mnemonics realistic, intuitive, concrete and memorable.
@@ -311,7 +353,10 @@ describe(
         - Only focus on meaning recall, not pronunciation.
         - Avoid introducing unnecessary elements that could distract from the core elements.
         - Put the hanzi after each gloss in parenthesis: <gloss> (<hanzi>)",
-          "user": "Generate 3 distinct mnemonic hints:
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct mnemonic hints:
 
         <data>
         {
@@ -322,6 +367,9 @@ describe(
           "components": []
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -349,7 +397,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
 
         Rules:
         - Keep mnemonics realistic, intuitive, concrete and memorable.
@@ -360,7 +410,10 @@ describe(
         - Only focus on meaning recall, not pronunciation.
         - Avoid introducing unnecessary elements that could distract from the core elements.
         - Put the hanzi after each gloss in parenthesis: <gloss> (<hanzi>)",
-          "user": "Generate 4 distinct mnemonic hints:
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 distinct mnemonic hints:
 
         <data>
         {
@@ -381,6 +434,9 @@ describe(
           ]
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -468,7 +524,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
@@ -483,7 +541,10 @@ describe(
         Be easy to visualize and reuse in different mnemonic scenes.
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
-          "user": "Generate 4 distinct reusable location descriptions for this exact combined place.
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 distinct reusable location descriptions for this exact combined place.
 
         <data>
         {
@@ -492,6 +553,9 @@ describe(
           "sublocation": "Outside"
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -508,7 +572,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
@@ -523,7 +589,10 @@ describe(
         Be easy to visualize and reuse in different mnemonic scenes.
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
-          "user": "Generate 4 distinct reusable location descriptions for this exact combined place.
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 distinct reusable location descriptions for this exact combined place.
 
         <data>
         {
@@ -534,6 +603,9 @@ describe(
           "viewpoint": "At eye level looking at the storefront"
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -548,7 +620,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
         You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
@@ -563,7 +637,10 @@ describe(
         Be easy to visualize and reuse in different mnemonic scenes.
         Good suggestions feel like a reusable mental stage.
         Bad suggestions feel like a one-time scene.",
-          "user": "Generate 3 distinct reusable location descriptions for this exact combined place.
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct reusable location descriptions for this exact combined place.
 
         <data>
         {
@@ -572,6 +649,9 @@ describe(
           "sublocation": "bathroom"
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -592,7 +672,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
         Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
         Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
         Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
@@ -606,7 +688,10 @@ describe(
         Do not write a definition or encyclopedia-style description.
         Good suggestions feel like a vivid character profile.
         Bad suggestions feel generic, flat, or encyclopedia-like.",
-          "user": "Generate 4 distinct character personality descriptions for this character.
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 distinct character personality descriptions for this character.
 
         <data>
         {
@@ -614,6 +699,9 @@ describe(
           "sound": "m"
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
@@ -628,7 +716,9 @@ describe(
 
       expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
         {
-          "system": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
         Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
         Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
         Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
@@ -642,7 +732,10 @@ describe(
         Do not write a definition or encyclopedia-style description.
         Good suggestions feel like a vivid character profile.
         Bad suggestions feel generic, flat, or encyclopedia-like.",
-          "user": "Generate 3 distinct character personality descriptions for this character.
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct character personality descriptions for this character.
 
         <data>
         {
@@ -651,6 +744,9 @@ describe(
           "existingDescription": "A tech entrepreneur with a sharp sense of humor"
         }
         </data>",
+              "role": "user",
+            },
+          ],
         }
       `);
     });
