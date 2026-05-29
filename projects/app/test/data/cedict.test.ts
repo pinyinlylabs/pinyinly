@@ -28,6 +28,43 @@ import {
 } from "./cedict";
 import pick from "lodash/pick.js";
 
+function isLikelyOverSplitCedictEntry(entry: { senses: string[] }): boolean {
+  // If there's only two senses, then maybe it's just a short entry
+  if (entry.senses.length <= 2) {
+    return false;
+  }
+
+  const parsedSenses = entry.senses.map((sense) => parseCedictV2Sense(sense));
+
+  if (parsedSenses.every((sense) => sense.glosses.length === 1)) {
+    return true;
+  }
+
+  return false;
+}
+
+describe(`isLikelyOverSplitCedictEntry`, () => {
+  test.for([
+    // true likely over-split gloss-only senses
+    `✅ 長 长 [[zhang3]] /chief/head/elder/to grow/to develop/to increase/to enhance/`,
+    `✅ 示例 示例 [[shi4li4]] /chief/head/to grow/very long descriptive phrase here/`,
+    // false when entry has fewer than four senses
+    `❌ 惡心 恶心 [[e3xin1]] /nausea/disgust/`,
+    // returns false when any sense already groups glosses with semicolons
+    `❌ 婚姻 婚姻 [[hun1yin1]] /marriage; matrimony/union/relationship/status/`,
+  ])(`%s`, (spec) => {
+    const prefix = spec.slice(0, 2);
+    expect(prefix).toBeOneOf([`✅ `, `❌ `]);
+
+    const line = spec.slice(2).trim();
+    const expected = prefix === `✅ `;
+
+    const parsed = parseCedictV2Line(line, { strict: true });
+
+    expect(isLikelyOverSplitCedictEntry(parsed!)).toBe(expected);
+  });
+});
+
 describe(`parseCedictV2Line`, () => {
   test(`returns null for comments and blank lines`, () => {
     expect(parseCedictV2Line(`# CC-CEDICT`)).toBeNull();
@@ -1404,6 +1441,173 @@ describe(`loadCedictV2`, () => {
     expect(typeof first?.simplified).toBe(`string`);
     expect(typeof first?.pinyin).toBe(`string`);
     expect(first?.senses.length ?? 0).toBeGreaterThan(0);
+  });
+
+  test(`baseline histogram for likely over-split definitions by sense count`, async () => {
+    const items = await loadCedictV2();
+
+    const histogram = new Map<number, { count: number; examples: string[] }>();
+    for (const entry of items) {
+      if (!isLikelyOverSplitCedictEntry(entry)) {
+        continue;
+      }
+
+      const senseCount = entry.senses.length;
+      const bucket = histogram.get(senseCount) ?? { count: 0, examples: [] };
+      bucket.count += 1;
+
+      if (bucket.examples.length < 3) {
+        bucket.examples.push(
+          `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]] /${entry.senses.join(`/`)}/`,
+        );
+      }
+
+      histogram.set(senseCount, bucket);
+    }
+
+    const maxDigits = Math.max(
+      1,
+      ...[...histogram.keys()].map((senseCount) => String(senseCount).length),
+    );
+
+    const histogramBySenseCount = Object.fromEntries(
+      [...histogram.entries()]
+        .sort(([a], [b]) => a - b)
+        .map(([senseCount, bucket]) => [
+          String(senseCount).padStart(maxDigits, `0`),
+          bucket,
+        ]),
+    );
+
+    expect(histogramBySenseCount).toMatchInlineSnapshot(`
+      {
+        "03": {
+          "count": 9306,
+          "examples": [
+            "B超 B超 [[B chao1]] /B-mode ultrasonography/prenatal ultrasound scan/{abbr.} for B型超聲|B型超声[B xing2chao1sheng1]/",
+            "PA PA [[P A]] /public area attendant (tasked with cleaning the public areas of a hotel)/marketing assistant/sales assistant/",
+            "P民 P民 [[P min2]] /{slang} shitizen/commoner/hoi polloi/",
+          ],
+        },
+        "04": {
+          "count": 3449,
+          "examples": [
+            "□ □ [[biang4]] /{Tw} {coll.} cool/awesome/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/often written as ㄅㄧㄤˋ/",
+            "ㄅㄧㄤˋ ㄅㄧㄤˋ [[xx5xx5xx5xx5]] /{Tw} {coll.} cool/awesome/pr. [biang4]/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/",
+            "一乾二淨 一干二净 [[yi1gan1'er4jing4]] /{idiom} thoroughly/completely/one and all/very clean/",
+          ],
+        },
+        "05": {
+          "count": 1351,
+          "examples": [
+            "PK PK [[P K]] /{slang} to take on/to challenge/to go head to head/showdown/comparison/",
+            "㗂 㗂 [[sheng3]] /variant of 省[sheng3]/tight-lipped/to examine/to watch/to scour (esp. Cantonese)/",
+            "一個蘿蔔一個坑 一个萝卜一个坑 [[yi1ge4luo2bo5yi1ge4keng1]] /{lit.} {idiom} every turnip to its hole/{fig.} each person has his own position/each to his own/horses for courses/every kettle has its lid/",
+          ],
+        },
+        "06": {
+          "count": 603,
+          "examples": [
+            "一套 一套 [[yi1tao4]] /suit/a set/a collection/of the same kind/the same old stuff/set pattern of behavior/",
+            "一旦 一旦 [[yi1dan4]] /in case (sth happens)/if/once (sth happens, then...)/when/in a short time/in one day/",
+            "一時 一时 [[yi1shi2]] /a period of time/a while/for a short while/temporary/momentary/at the same time/",
+          ],
+        },
+        "07": {
+          "count": 314,
+          "examples": [
+            "一般 一般 [[yi1ban1]] /same/ordinary/so-so/common/general/generally/in general/",
+            "丁 丁 [[ding1]] /male adult/the 4th of the 10 Heavenly Stems 天干[tian1gan1]/fourth (used like "4" or "D")/small cube of meat or vegetable/{lit.} to encounter/{archaic} ancient Chinese compass point: 195°/{chemistry} butyl/",
+            "上邊 上边 [[shang4bian5]] /the top/above/overhead/upwards/the top margin/above-mentioned/those higher up/",
+          ],
+        },
+        "08": {
+          "count": 138,
+          "examples": [
+            "一頭 一头 [[yi1tou2]] /one head/a head full of sth/one end (of a stick)/one side/headlong/directly/rapidly/simultaneously/",
+            "不是味兒 不是味儿 [[bu4shi4wei4r5]] /not the right flavor/not quite right/a bit off/fishy/queer/amiss/feel bad/be upset/",
+            "不足 不足 [[bu4zu2]] /insufficient/lacking/deficiency/not enough/inadequate/not worth/cannot/should not/",
+          ],
+        },
+        "09": {
+          "count": 82,
+          "examples": [
+            "一世 一世 [[yi1shi4]] /generation/period of 30 years/one's whole lifetime/lifelong/age/era/times/the whole world/the First (of numbered European kings)/",
+            "世 世 [[shi4]] /life/age/generation/era/world/lifetime/epoch/descendant/noble/",
+            "並 并 [[bing4]] /and/furthermore/also/together with/(not) at all/simultaneously/to combine/to join/to merge/",
+          ],
+        },
+        "10": {
+          "count": 39,
+          "examples": [
+            "不含糊 不含糊 [[bu4han2hu5]] /unambiguous/unequivocal/explicit/prudent/cautious/not negligent/unafraid/unhesitating/really good/extraordinary/",
+            "任 任 [[ren4]] /to assign/to appoint/to take up a post/office/responsibility/to let/to allow/to give free rein to/no matter (how, what etc)/classifier for terms served in office, or for spouses, girlfriends etc (as in 前任男友)/",
+            "信 信 [[xin4]] /letter/mail/to trust/to believe/to profess faith in/truthful/confidence/trust/at will/at random/",
+          ],
+        },
+        "11": {
+          "count": 28,
+          "examples": [
+            "下 下 [[xia4]] /down/downwards/below/lower/later/next (week etc)/second (of two parts)/to decline/to go down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/",
+            "串 串 [[chuan4]] /to string together/to skewer/to connect wrongly/to gang up/to rove/string/bunch/skewer/classifier for things that are strung together, or in a bunch, or in a row: string of, bunch of, series of/to make a swift or abrupt linear movement (like a bead on an abacus)/to move across/",
+            "亂 乱 [[luan4]] /in confusion or disorder/in a confused state of mind/disorder/upheaval/riot/illicit sexual relations/to throw into disorder/to mix up/indiscriminate/random/arbitrary/",
+          ],
+        },
+        "12": {
+          "count": 25,
+          "examples": [
+            "令 令 [[ling4]] /to order/to command/an order/warrant/writ/to cause/to make sth happen/virtuous/honorific title/season/{old} government position/type of short song or poem/",
+            "凜 凛 [[lin3]] /cold/to shiver with cold/to tremble with fear/afraid/apprehensive/strict/stern/severe/austere/awe-inspiring/imposing/majestic/",
+            "凡 凡 [[fan2]] /ordinary/commonplace/mundane/temporal/of the material world (as opposed to supernatural or immortal levels)/every/all/whatever/altogether/gist/outline/note of Chinese musical scale/",
+          ],
+        },
+        "13": {
+          "count": 10,
+          "examples": [
+            "具 具 [[ju4]] /tool/device/utensil/equipment/instrument/talent/ability/to possess/to have/to provide/to furnish/to state/classifier for devices, coffins, dead bodies/",
+            "包 包 [[bao1]] /to cover/to wrap/to hold/to include/to take charge of/to contract (to or for)/package/wrapper/container/bag/to hold or embrace/bundle/packet/",
+            "委 委 [[wei3]] /to entrust/to cast aside/to shift (blame etc)/to accumulate/roundabout/winding/dejected/listless/committee member/council/end/actually/certainly/",
+          ],
+        },
+        "14": {
+          "count": 8,
+          "examples": [
+            "去 去 [[qu4]] /to go/to go to (a place)/(of a time etc) last/just passed/to send/to remove/to get rid of/to reduce/to be apart from in space or time/{euphemism} to die/to play (a part)/(when used either before or after a verb) to go in order to do sth/(after a verb of motion indicates movement away from the speaker)/(used after certain verbs to indicate detachment or separation)/",
+            "復 复 [[fu4]] /to go and return/to return/to resume/to return to a normal or original state/to repeat/again/to recover/to restore/to turn over/to reply/to answer/to reply to a letter/to retaliate/to carry out/",
+            "快 快 [[kuai4]] /rapid/quick/speed/rate/soon/almost/to make haste/clever/sharp (of knives or wits)/forthright/plainspoken/gratified/pleased/pleasant/",
+          ],
+        },
+        "15": {
+          "count": 8,
+          "examples": [
+            "勝 胜 [[sheng4]] /victory/success/to beat/to defeat/to surpass/victorious/superior to/to get the better of/better than/surpassing/superb (of vista)/beautiful (scenery)/wonderful (view)/(Taiwan pr. [sheng1]) able to bear/equal to (a task)/",
+            "方 方 [[fang1]] /square/{math.} power or involution/upright/honest/fair and square/direction/side/party (to a contract, dispute etc)/place/method/{medical} prescription/just when/only or just/classifier for square things/{abbr.} for square or cubic meter/",
+            "毛 毛 [[mao2]] /hair/feather/down/wool/mildew/mold/coarse or semifinished/young/raw/careless/unthinking/nervous/scared/(of currency) to devalue or depreciate/classifier for Chinese fractional monetary unit ( = 角[jiao3] , = one-tenth of a yuan or 10 fen 分[fen1])/",
+          ],
+        },
+        "16": {
+          "count": 3,
+          "examples": [
+            "套 套 [[tao4]] /to cover/to encase/cover/sheath/to overlap/to interleave/to model after/to copy/formula/harness/loop of rope/{fig.} to fish for/to obtain slyly/classifier for sets, collections/bend (of a river or mountain range, in place names)/tau (Greek letter Ττ)/",
+            "帶 带 [[dai4]] /band/belt/girdle/ribbon/tire/area/zone/region/to wear/to carry/to take along/to bear (i.e. to have)/to lead/to bring/to look after/to raise/",
+            "當 当 [[dang1]] /to be/to act as/manage/withstand/when/during/ought/should/match equally/equal/same/obstruct/just at (a time or place)/on the spot/right/just at/",
+          ],
+        },
+        "17": {
+          "count": 2,
+          "examples": [
+            "掉 掉 [[diao4]] /to fall/to drop/to lag behind/to lose/to go missing/to reduce/fall (in prices)/to lose (value, weight etc)/to wag/to swing/to turn/to change/to exchange/to swap/to show off/to shed (hair)/(used after certain verbs to express completion, fulfillment, removal etc)/",
+            "解 解 [[jie3]] /to divide/to break up/to split/to separate/to dissolve/to solve/to melt/to remove/to untie/to loosen/to open/to emancipate/to explain/to understand/to know/a solution/a dissection/",
+          ],
+        },
+        "21": {
+          "count": 1,
+          "examples": [
+            "白 白 [[bai2]] /white/snowy/pure/bright/empty/blank/plain/clear/to make clear/in vain/gratuitous/free of charge/reactionary/anti-communist/funeral/to stare coldly/to write wrong character/to state/to explain/vernacular/spoken lines in opera/",
+          ],
+        },
+      }
+    `);
   });
 });
 

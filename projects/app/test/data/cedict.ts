@@ -949,7 +949,7 @@ interface ParsedCedictSenseGlossType {
   labels: string[];
 }
 
-interface ParsedCedictSenseType {
+export interface ParsedCedictSenseType {
   glosses: ParsedCedictSenseGlossType[];
   inlineClassifiers: string[];
   inlineAlternativePinyin: string[];
