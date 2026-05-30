@@ -1,11 +1,335 @@
 #
+# abbr. fixes
+#
+
+日經 日经 [[ri4jing1]]
+/Nikkei, abbr. for Nikkei Shimbun 日本經濟新聞|日本经济新闻[Ri4ben3 Jing1ji4 Xin1wen2]/ /(abbr. for 日本經濟新聞|日本经济新闻[Ri4ben3 Jing1ji4 Xin1wen2]) Nikkei; Nikkei Shimbun/
+/abbr. for Nikkei 225 index 日經指數|日经指数[Ri4jing1zhi3shu4]/ /(abbr. for 日經指數|日经指数[Ri4jing1zhi3shu4]) Nikkei 225 index/
+
+愛優騰 爱优腾 [[Ai4 You1 Teng2]]
+/abbr. for iQiyi 愛奇藝|爱奇艺[Ai4 Qi2yi4] + Youku 優酷|优酷[You1ku4] + Tencent 騰訊|腾讯[Teng2xun4]/ /(abbr. for 愛奇藝|爱奇艺[Ai4 Qi2yi4] + 優酷|优酷[You1ku4] + 騰訊|腾讯[Teng2xun4]) iQiyi, Youku and Tencent/
+
+考紀 考纪 [[kao3ji4]]
+/(Tw) performance assessment and discipline (abbr. for 考核[kao3he2] + 紀律|纪律[ji4lu:4]), used in reference to internal review and oversight functions within political parties/ /(Tw) performance assessment and discipline (abbr. for 考核[kao3he2] + 紀律|纪律[ji4lu:4]) (used in reference to internal review and oversight functions within political parties)/
+
+馬恩列斯 马恩列斯 [[Ma3 En1 Lie4 Si1]]
+/abbr. for Marx 馬克思|马克思[Ma3ke4si1], Engels 恩格斯[En1ge2si1], Lenin 列寧|列宁[Lie4ning2] and Stalin 斯大林[Si1da4lin2]/ /(abbr. for 馬克思|马克思[Ma3ke4si1] + 恩格斯[En1ge2si1] + 列寧|列宁[Lie4ning2] + 斯大林[Si1da4lin2]) Marx, Engels, Lenin and Stalin/
+
+三圍 三围 [[san1wei2]]
+/BWH, abbr. for a woman's three measurements, namely: bust 胸圍|胸围[xiong1wei2], waist 腰圍|腰围[yao1wei2] and hip 臀圍|臀围[tun2wei2]/ /BWH; bust, waist and hip (a woman's three measurements) (abbr. for 胸圍|胸围[xiong1wei2] + 腰圍|腰围[yao1wei2] + 臀圍|臀围[tun2wei2])/
+
+港深 港深 [[Gang3 Shen1]]
+/abbr. for Hong Kong 香港[Xiang1gang3] and Shenzhen 深圳[Shen1zhen4]/ /(abbr. for 香港[Xiang1gang3] + 深圳[Shen1zhen4]) Hong Kong and Shenzhen/
+
+篇韻 篇韵 [[pian1yun4]]
+/abbr. for Yupian 玉篇[Yu4pian1] and Guangyun 廣韻|广韵[Guang3yun4]/ /(abbr. for 玉篇[Yu4pian1] + 廣韻|广韵[Guang3yun4]) Yupian and Guangyun/
+
+滬深港 沪深港 [[Hu4 Shen1 Gang3]]
+/abbr. for Shanghai 上海[Shang4hai3], Shenzhen 深圳[Shen1zhen4] and Hong Kong 香港[Xiang1gang3]/ /(abbr. for 上海[Shang4hai3] + 深圳[Shen1zhen4] + 香港[Xiang1gang3]) Shanghai, Shenzhen and Hong Kong/
+
+王楊盧駱 王杨卢骆 [[Wang2 Yang2 Lu2 Luo4]]
+/abbr. for Wang Bo 王勃[Wang2 Bo2], Yang Jiong 楊炯|杨炯[Yang2 Jiong3], Lu Zhaolin 盧照鄰|卢照邻[Lu2 Zhao4lin2], and Luo Binwang 駱賓王|骆宾王[Luo4 Bin1wang2], the Four Great Poets of the Early Tang/ /(abbr. for 王勃[Wang2 Bo2] + 楊炯|杨炯[Yang2 Jiong3] + 盧照鄰|卢照邻[Lu2 Zhao4lin2] + 駱賓王|骆宾王[Luo4 Bin1wang2]) Wang Bo, Yang Jiong, Lu Zhaolin and Luo Binwang (the Four Great Poets of the Early Tang)/
+
+楚 楚 [[Chu3]]
+/abbr. for Hubei 湖北省[Hu2bei3 Sheng3] and Hunan 湖南省[Hu2nan2 Sheng3] provinces together/ /(abbr. for 湖北省[Hu2bei3 Sheng3] + 湖南省[Hu2nan2 Sheng3]) Hubei and Hunan (provinces)/
+
+烏 乌 [[Wu1]]
+/abbr. for country names that begin with 烏|乌[wu1]: Ukraine 烏克蘭|乌克兰[Wu1ke4lan2], Uzbekistan 烏茲別克斯坦|乌兹别克斯坦[Wu1zi1bie2ke4si1tan3] etc/ /(abbr. for 烏克蘭|乌克兰[Wu1ke4lan2]) Ukraine/(abbr. for 烏茲別克斯坦|乌兹别克斯坦[Wu1zi1bie2ke4si1tan3]) Uzbekistan/
+
+衛霍 卫霍 [[Wei4 Huo4]]
+/abbr. for generals Wei Qing 衛青|卫青 and Huo Qubing 霍去病 of Western Han 西漢|西汉[Xi1 Han4], famous for their success in quelling the Xiongnu barbarian invaders/ /(abbr. for 衛青|卫青 + 霍去病) Wei Qing and Huo Qubing (generals of Western Han 西漢|西汉[Xi1 Han4] famous for their success in quelling the Xiongnu barbarian invaders)/
+
+霓裳 霓裳 [[Ni2chang2]]
+/Nichang, abbr. for the Tang Dynasty song "Raiment of Rainbows and Feathers" 霓裳羽衣曲[Ni2chang2yu3yi1qu1] or 霓裳羽衣舞[Ni2chang2yu3yi1wu3]/ /(abbr. for 霓裳羽衣曲[Ni2chang2yu3yi1qu1] or 霓裳羽衣舞[Ni2chang2yu3yi1wu3]) short title of "Raiment of Rainbows and Feathers" (a famous Tang Dynasty song)/
+
+普通高等學校招生全國統一考試 普通高等学校招生全国统一考试 [[Pu3tong1 Gao1deng3 Xue2xiao4 Zhao1sheng1 Quan2guo2 Tong3yi1 Kao3shi4]]
+/usually abbr. to 高考[gao1kao3]/ /(abbr. to 高考[gao1kao3])/
+
+塔 塔 [[ta3]]
+/pagoda (abbr. for 塔婆[ta3po2], a loanword from Sanskrit stūpa); tower; pylon (CL:座[zuo4])/ /pagoda (abbr. for 塔婆[ta3po2]) (a loanword from Sanskrit stūpa); tower; pylon (CL:座[zuo4])/
+
+普羅大眾 普罗大众 [[pu3luo2da4zhong4]]
+/abbr. for 普羅列塔利亞|普罗列塔利亚[pu3luo2lie4ta3li4ya4] plus masses/ /(abbr. for 普羅列塔利亞|普罗列塔利亚[pu3luo2lie4ta3li4ya4]) general public; the masses; ordinary people/
+/also written 無產階級|无产阶级[wu2chan3jie1ji2] in PRC Marxist theory/ /(also written 無產階級|无产阶级[wu2chan3jie1ji2]) (PRC Marxist theory)/
+
+總 总 [[zong3]]
+/(after a person's name) abbr. for 總經理|总经理[zong3jing1li3] or 總編|总编[zong3bian1] etc/ /(after a person's name) (abbr. for 總經理|总经理[zong3jing1li3],總編|总编[zong3bian1])/
+
+蘇 苏 [[Su1]]
+/abbr. for Soviet Union 蘇維埃|苏维埃[Su1wei2ai1] or 蘇聯|苏联[Su1lian2]/ /(abbr. for 蘇維埃|苏维埃[Su1wei2ai1],蘇聯|苏联[Su1lian2]) Soviet Union/
+/abbr. for Jiangsu 江蘇|江苏[Jiang1su1]/ /(abbr. for 江蘇|江苏[Jiang1su1]) Jiangsu/
+/abbr. for Suzhou 蘇州|苏州[Su1zhou1]/ /(abbr. for 蘇州|苏州[Su1zhou1]) Suzhou/
+
+高考 高考 [[gao1kao3]]
+/college entrance exam (especially as abbr. for 普通高等學校招生全國統一考試|普通高等学校招生全国统一考试[Pu3tong1 Gao1deng3 Xue2xiao4 Zhao1sheng1 Quan2guo2 Tong3yi1 Kao3shi4])/ /college entrance exam (abbr. for 普通高等學校招生全國統一考試|普通高等学校招生全国统一考试[Pu3tong1 Gao1deng3 Xue2xiao4 Zhao1sheng1 Quan2guo2 Tong3yi1 Kao3shi4])/
+
+釋迦 释迦 [[Shi4jia1]]
+/the Buddha (abbr. for 釋迦牟尼|释迦牟尼[Shi4jia1mou2ni2], Shakyamuni, which means "the Sage of the Shakyas")/ /the Buddha; (abbr. for 釋迦牟尼|释迦牟尼[Shi4jia1mou2ni2]) Shakyamuni (the Sage of the Shakyas)/
+
+高壓氧 高压氧 [[gao1ya1yang3]]
+/also abbr. for 高壓氧治療|高压氧治疗[gao1ya1yang3zhi4liao2], hyperbaric therapy/ /(abbr. for 高壓氧治療|高压氧治疗[gao1ya1yang3zhi4liao2]) hyperbaric therapy/
+
+蘇聯 苏联 [[Su1lian2]]
+/abbr. for Union of Soviet Socialist Republics (USSR) 蘇維埃社會主義共和國聯盟|苏维埃社会主义共和国联盟[Su1wei2'ai1 She4hui4zhu3yi4 Gong4he2guo2 Lian2meng2]/ /(abbr. for 蘇維埃社會主義共和國聯盟|苏维埃社会主义共和国联盟[Su1wei2'ai1 She4hui4zhu3yi4 Gong4he2guo2 Lian2meng2]) Union of Soviet Socialist Republics (USSR)/
+
+剎 刹 [[cha4]]
+/Buddhist monastery, temple or shrine (abbr. for 剎多羅|刹多罗[cha4duo1luo2], Sanskrit "ksetra")/ /Buddhist monastery, temple or shrine; (abbr. for 剎多羅|刹多罗[cha4duo1luo2]) Sanskrit "ksetra"/
+
+甲流 甲流 [[jia3liu2]]
+/abbr. for 甲型H1N1流感/ /(abbr. for 甲型H1N1流感)/
+
+沽 沽 [[Gu1]]
+/abbr. for Tianjin 天津 (also 津沽)/ /(abbr. for 天津) Tianjin/(abbr. for 津沽)/
+
+莎翁 莎翁 [[Sha1weng1]]
+/slang or popular culture abbr. of 莎士比亞|莎士比亚[Sha1shi4bi3ya4]/ /(slang) (abbr. of 莎士比亞|莎士比亚[Sha1shi4bi3ya4])/
+
+齊眉 齐眉 [[qi2mei2]]
+/abbr. of idiom 舉案齊眉|举案齐眉[ju3'an4qi2mei2]/ /(idiom) (abbr. of 舉案齊眉|举案齐眉[ju3'an4qi2mei2])/
+
+低端人口 低端人口 [[di1duan1ren2kou3]]
+/derogatory-sounding abbr. for 低端產業從業人口|低端产业从业人口/ /(abbr. for 低端產業從業人口|低端产业从业人口) (derogatory)/
+
+交通大學 交通大学 [[Jiao1tong1 Da4xue2]]
+/abbr. for 上海交通大學|上海交通大学 Shanghai Jiao Tong University, 西安交通大學|西安交通大学 Xia'an Jiaotong University, 國立交通大學|国立交通大学 National Chiao Tung University (Taiwan) etc/ /(abbr. for 上海交通大學|上海交通大学) Shanghai Jiao Tong University; (abbr. for 西安交通大學|西安交通大学 Xia'an Jiaotong University); (abbr. for 國立交通大學|国立交通大学 National Chiao Tung University) (etc) (Taiwan)/
+
+不香嗎 不香吗 [[bu4xiang1ma5]]
+/(slang) would be better (abbr. for 這錢買排骨它不香嗎|这钱买排骨它不香吗[zhe4qian2mai3pai2gu3ta1bu4xiang1ma5] for that money, a pork cutlet would be more appetizing, would it not?)/ /(slang) would be better; (abbr. for 這錢買排骨它不香嗎|这钱买排骨它不香吗[zhe4qian2mai3pai2gu3ta1bu4xiang1ma5]) for that money, a pork cutlet would be more appetizing, would it not?/
+
+印支半島 印支半岛 [[Yin4-Zhi1 Ban4dao3]]
+/Indochina (abbr. for colonial term 印度支那半島|印度支那半岛[Yin4du4zhi1na4 Ban4dao3])/ /(abbr. for 印度支那半島|印度支那半岛[Yin4du4zhi1na4 Ban4dao3]) Indochina (colonial term)/
+
+CP CP [[C P]]
+/an imagined romantic relationship between two characters in fiction (or in real life) that one wishes for or fantasizes about (abbr. of "coupling")/ /an imagined romantic relationship between two characters in fiction (or in real life) that one wishes for or fantasizes about; (abbr.) "coupling"/
+
+MV MV [[M V]]
+/desirability as a partner (abbr. for "mate value")/ /desirability as a partner; (abbr.) "mate value"/
+
+PU PU [[P U]]
+/the degree of suspicion that a woman might, after she marries, cheat on her husband (abbr. for "paternity uncertainty")/ /the degree of suspicion that a woman might, after she marries, cheat on her husband; (abbr.) "paternity uncertainty"/
+
+沙 沙 [[sha1]]
+/abbr. for Tsar or Tsarist Russia/ /(abbr.) Tsar or Tsarist Russia/
+
+沙特 沙特 [[Sha1te4]]
+/abbr. for Saudi Arabia/ /(abbr.) Saudi Arabia/
+
+烏茲別克 乌兹别克 [[Wu1zi1bie2ke4]]
+/abbr. for Uzbekistan/ /(abbr.) Uzbekistan/
+
+瓊 琼 [[qiong2]]
+/abbr. for Hainan province/ /(abbr.) Hainan province/
+
+麻州 麻州 [[Ma2zhou1]]
+/abbr. for Massachusetts/ /(abbr.) Massachusetts/
+
+省港澳 省港澳 [[sheng3 Gang3 Ao4]]
+/abbr. for the economic region of Guangdong Province (or Guangzhou), Hong Kong and Macao/ /(abbr.) the economic region of Guangdong Province (or Guangzhou), Hong Kong and Macao/
+
+華 华 [[Hua2]]
+/abbr. for China/ /(abbr.) China/
+
+辣妹 辣妹 [[la4mei4]]
+/abbr. LM/ /(abbr.) LM/
+
+中南 中南 [[Zhong1 Nan2]]
+/abbr. for China-South Africa/ /(abbr.) China-South Africa/
+
+方 方 [[fang1]]
+/abbr. for square or cubic meter/ /(abbr.) square or cubic meter/
+
+巴州 巴州 [[Ba1zhou1]]
+/also abbr. for Bayingolin Mongol Autonomous Prefecture in Xinjiang/ /(abbr.) Bayingolin Mongol Autonomous Prefecture in Xinjiang/
+
+泰 泰 [[Tai4]]
+/abbr. for Thailand/ /(abbr.) Thailand/
+
+
+詩 诗 [[Shi1]]
+/abbr. for Shijing 詩經|诗经[Shi1jing1], the Book of Songs/ /(abbr. for 詩經|诗经[Shi1jing1]) Shijing, the Book of Songs/
+
+蚌 蚌 [[Beng4]]
+/abbr. for Bengbu prefecture-level City 蚌埠市[Beng4bu4 Shi4], Anhui/ /(abbr. for 蚌埠市[Beng4bu4 Shi4]) Bengbu prefecture-level City, Anhui/
+
+醬紫 酱紫 [[jiang4zi3]]
+/Internet slang abbr. for 這樣子|这样子[zhe4yang4zi5]/ /(Internet slang) (abbr. for 這樣子|这样子[zhe4yang4zi5])/
+
+閨蜜 闺蜜 [[gui1mi4]]
+/(originally written 閨密|闺密, an abbr. for 閨中密友|闺中密友)/ /(originally written 閨密|闺密) (abbr. for 閨中密友|闺中密友)/
+
+雙北 双北 [[Shuang1bei3]]
+/abbr. for Taipei City 臺北市|台北市[Tai2bei3 Shi4] and New Taipei City 新北市[Xin1bei3 Shi4] (Tw)/ /(abbr. for 臺北市|台北市[Tai2bei3 Shi4]) Taipei City (Tw)/(abbr. for 新北市[Xin1bei3 Shi4]) New Taipei City (Tw)/
+
+蘇維埃社會主義共和國聯盟 苏维埃社会主义共和国联盟 [[Su1wei2'ai1 She4hui4zhu3yi4 Gong4he2guo2 Lian2meng2]]
+/abbr. to 蘇聯|苏联[Su1lian2] Soviet Union/ /(abbr. to 蘇聯|苏联[Su1lian2]) Soviet Union/
+
+國家標準碼 国家标准码 [[guo2jia1biao1zhun3ma3]]
+/Guo Biao or GB, the standard PRC encoding, abbr. 國標碼|国标码/ /Guo Biao; GB; the standard PRC encoding; (abbr. to 國標碼|国标码)/
+
+寧 宁 [[Ning2]]
+/abbr. for Ningxia Hui Autonomous Region 寧夏回族自治區|宁夏回族自治区[Ning2xia4 Hui2zu2 Zi4zhi4qu1]/ /(abbr. for 寧夏回族自治區|宁夏回族自治区[Ning2xia4 Hui2zu2 Zi4zhi4qu1]) Ningxia Hui Autonomous Region/
+/abbr. for Nanjing 南京[Nan2jing1]/ /(abbr. for 南京[Nan2jing1]) Nanjing/
+
+巴 巴 [[Ba1]]
+/(bound form) abbr. for 巴勒斯坦[Ba1le4si1tan3] (Palestine), 巴基斯坦[Ba1ji1si1tan3] (Pakistan) or 巴西[Ba1xi1] (Brazil)/ /(bound form) (abbr. for 巴勒斯坦[Ba1le4si1tan3]) Palestine; (abbr. for 巴基斯坦[Ba1ji1si1tan3]) Pakistan; (abbr. for 巴西[Ba1xi1]) Brazil/
+
+庫工黨 库工党 [[Ku4 Gong1dang3]]
+/abbr. for Kurdistan Workers' Party 庫爾德工人黨|库尔德工人党[Ku4'er3de2 Gong1ren2dang3]/ /(abbr. for 庫爾德工人黨|库尔德工人党[Ku4'er3de2 Gong1ren2dang3]) Kurdistan Workers' Party/
+
+廈 厦 [[Xia4]]
+/abbr. for Xiamen or Amoy 廈門|厦门[Xia4men2], Fujian/ /(abbr. for 廈門|厦门[Xia4men2]) Xiamen or Amoy, Fujian/
+
+西 西 [[Xi1]]
+/abbr. for Spain 西班牙[Xi1ban1ya2]/ /(abbr. for 西班牙[Xi1ban1ya2]) Spain/
+
+津 津 [[Jin1]]
+/abbr. for Tianjin 天津[Tian1jin1]/ /(abbr. for 天津[Tian1jin1]) Tianjin/
+
+斗 斗 [[Dou3]]
+/abbr. for the Big Dipper constellation 北斗星[Bei3dou3xing1]/ /(abbr. for 北斗星[Bei3dou3xing1]) the Big Dipper constellation/
+
+新 新 [[Xin1]]
+/abbr. for Xinjiang 新疆[Xin1jiang1]/ /(abbr. for 新疆[Xin1jiang1]) Xinjiang/
+/abbr. for Singapore 新加坡[Xin1jia1po1]/ /(abbr. for 新加坡[Xin1jia1po1]) Singapore/
+
+男足 男足 [[nan2zu2]]
+/abbr. for 男子足球 men's soccer/ /(abbr. for 男子足球) men's soccer/
+/abbr. for 男子足球隊|男子足球队 men's soccer team/ /(abbr. for 男子足球隊|男子足球队) men's soccer team/
+
+暨大 暨大 [[Ji4 Da4]]
+/abbr. for Jinan University 暨南大學|暨南大学[Ji4nan2 Da4xue2]/ /(abbr. for 暨南大學|暨南大学[Ji4nan2 Da4xue2]) Jinan University/
+
+朝 朝 [[Chao2]]
+/abbr. for 朝鮮|朝鲜[Chao2xian3] Korea/ /(abbr. for 朝鮮|朝鲜[Chao2xian3]) Korea/
+
+杭 杭 [[Hang2]]
+/abbr. for Hangzhou 杭州[Hang2zhou1]/ /(abbr. for 杭州[Hang2zhou1]) Hangzhou/
+
+東伊運 东伊运 [[Dong1yi1yun4]]
+/abbr. for 東突厥斯坦伊斯蘭運動|东突厥斯坦伊斯兰运动[Dong1 Tu1jue2si1tan3 Yi1si1lan2 Yun4dong4] East Turkestan Islamic Movement (ETIM)/ /(abbr. for 東突厥斯坦伊斯蘭運動|东突厥斯坦伊斯兰运动[Dong1 Tu1jue2si1tan3 Yi1si1lan2 Yun4dong4]) East Turkestan Islamic Movement (ETIM)/
+
+桂 桂 [[Gui4]]
+/abbr. for Guangxi Autonomous Region 廣西壯族自治區|广西壮族自治区[Guang3xi1 Zhuang4zu2 Zi4zhi4qu1]/ /(abbr. for 廣西壯族自治區|广西壮族自治区[Guang3xi1 Zhuang4zu2 Zi4zhi4qu1]) Guangxi Autonomous Region/
+
+花旗 花旗 [[hua1qi2]]
+/abbr. for Citibank 花旗銀行|花旗银行/ /(abbr. for 花旗銀行|花旗银行) Citibank/
+
+湘 湘 [[Xiang1]]
+/abbr. for Hunan 湖南 province in south central China/ /(abbr. for 湖南) Hunan, province in south central China/
+/abbr. for Xiangjiang river in Hunan province/ /(abbr.) Xiangjiang river in Hunan province/
+
+津塔 津塔 [[Jin1ta3]]
+/abbr. for 天津環球金融中心|天津环球金融中心[Tian1jin1 Huan2qiu2 Jin1rong2 Zhong1xin1] Tianjin World Financial Center, skyscraper a.k.a. the Tianjin Tower/ /(abbr. for 天津環球金融中心|天津环球金融中心[Tian1jin1 Huan2qiu2 Jin1rong2 Zhong1xin1]) Tianjin World Financial Center, skyscraper a.k.a. the Tianjin Tower/
+
+梵 梵 [[Fan4]]
+/abbr. for 梵教[Fan4jiao4] Brahmanism/ /(abbr. for 梵教[Fan4jiao4]) Brahmanism/
+/abbr. for Sanskrit 梵語|梵语[Fan4yu3] or 梵文[Fan4wen2]/ /(abbr. for 梵語|梵语[Fan4yu3]) Sanskrit/(abbr. for 梵文[Fan4wen2])/ 
+
+巴 巴 [[ba1]]
+/informal abbr. for bus 巴士[ba1shi4]/ /(informal) (abbr. for 巴士[ba1shi4]) bus/
+
+黎 黎 [[Li2]]
+/abbr. for Lebanon 黎巴嫩[Li2ba1nen4]/ /(abbr. for 黎巴嫩[Li2ba1nen4]) Lebanon/
+
+菲 菲 [[Fei1]]
+/abbr. for the Philippines 菲律賓|菲律宾[Fei1lu:4bin1]/ /(abbr. for 菲律賓|菲律宾[Fei1lu:4bin1]) Philippines/
+
+蒙 蒙 [[Meng3]]
+/abbr. for Mongolia 蒙古國|蒙古国[Meng3gu3guo2]/ /(abbr. for 蒙古國|蒙古国[Meng3gu3guo2]) Mongolia/
+
+蘭 兰 [[Lan2]]
+/abbr. for Lanzhou 蘭州|兰州[Lan2zhou1], Gansu/ /(abbr. for 蘭州|兰州[Lan2zhou1]) Lanzhou, Gansu/
+
+贛 赣 [[Gan4]]
+/abbr. for Jiangxi Province 江西省[Jiang1xi1 Sheng3]/ /(abbr. for 江西省[Jiang1xi1 Sheng3]) Jiangxi Province/
+
+越 越 [[Yue4]]
+/abbr. for Vietnam 越南/ /(abbr. for 越南) Vietnam/
+
+開 开 [[kai1]]
+/abbr. for Kelvin, 開爾文|开尔文[Kai1er3wen2]/ /(abbr. for 開爾文|开尔文[Kai1er3wen2]) Kelvin/
+
+馬 马 [[Ma3]]
+/abbr. for Malaysia 馬來西亞|马来西亚[Ma3lai2xi1ya4]/ /(abbr. for 馬來西亞|马来西亚[Ma3lai2xi1ya4]) Malaysia/
+
+鄭 郑 [[Zheng4]]
+/abbr. for Zhengzhou 鄭州|郑州[Zheng4zhou1], the capital of Henan/ /(abbr. for 鄭州|郑州[Zheng4zhou1]) Zhengzhou, the capital of Henan/
+
+盧 卢 [[Lu2]]
+/abbr. for Luxembourg 盧森堡|卢森堡[Lu2sen1bao3]/ /(abbr. for 盧森堡|卢森堡[Lu2sen1bao3]) Luxembourg/
+
+石 石 [[Shi2]]
+/abbr. for Shijiazhuang 石家莊|石家庄[Shi2jia1zhuang1], the capital of Hebei/ /(abbr. for 石家莊|石家庄[Shi2jia1zhuang1]) Shijiazhuang, the capital of Hebei/
+
+福 福 [[Fu2]]
+/abbr. for Fujian province 福建省[Fu2jian4 Sheng3]/ /(abbr. for 福建省[Fu2jian4 Sheng3]) Fujian province/
+
+穗 穗 [[Sui4]]
+/abbr. for Guangzhou 廣州|广州[Guang3zhou1]/ /(abbr. for 廣州|广州[Guang3zhou1]) Guangzhou/
+
+立交 立交 [[li4jiao1]]
+/abbr. for 立體交叉|立体交叉[li4ti3jiao1cha1] overpass/ /(abbr. for 立體交叉|立体交叉[li4ti3jiao1cha1]) overpass/
+
+經 经 [[jing1]]
+/abbr. for economics 經濟|经济[jing1ji4]/ /(abbr. for 經濟|经济[jing1ji4]) economics/
+
+維 维 [[Wei2]]
+/abbr. for Uighur 維吾爾|维吾尔[Wei2wu2er3]/ /(abbr. for 維吾爾|维吾尔[Wei2wu2er3]) Uighur/
+
+珍奶 珍奶 [[zhen1nai3]]
+/abbr. for pearl milk tea 珍珠奶茶/ /(abbr. for 珍珠奶茶) pearl milk tea/
+
+揚 扬 [[Yang2]]
+/abbr. for Yangzhou 揚州|扬州[Yang2zhou1] in Jiangsu/ /(abbr. for 揚州|扬州[Yang2zhou1]) Yangzhou in Jiangsu/
+
+敘 叙 [[Xu4]]
+/abbr. for Syria 敘利亞|叙利亚[Xu4li4ya4]/ /(abbr. for 敘利亞|叙利亚[Xu4li4ya4]) Syria/
+
+京 京 [[Jing1]]
+/abbr. for Beijing 北京[Bei3jing1]/ /(abbr. for 北京[Bei3jing1]) Beijing/
+
+以 以 [[Yi3]]
+/abbr. for Israel 以色列[Yi3se4lie4]/ /(abbr. for 以色列[Yi3se4lie4]) Israel/
+
+副 副 [[fu4]]
+/abbr. for 副詞|副词 adverb/ /(abbr. for 副詞|副词) adverb/
+
+劫 劫 [[jie2]]
+/abbr. for kalpa 劫波[jie2bo1]/ /(abbr. for 劫波[jie2bo1]) kalpa/
+
+參 参 [[can1]]
+/abbr. for 參議院|参议院 Senate, Upper House/ /(abbr. for 參議院|参议院) Senate, Upper House/
+
+克國 克国 [[Ke4guo2]]
+/(Tw) abbr. for 克羅埃西亞|克罗埃西亚[Ke4luo2'ai1xi1ya4] Croatia/ /(Tw) (abbr. for 克羅埃西亞|克罗埃西亚[Ke4luo2'ai1xi1ya4]) Croatia/
+
+吶 呐 [[na5]]
+/sentence-final particle (abbr. for 呢啊[ne5'a5] or variant of 哪[na5])/ /sentence-final particle (abbr. for 呢啊[ne5'a5]) (variant of 哪[na5])/
+
+埃 埃 [[Ai1]]
+/abbr. for Egypt 埃及[Ai1ji2] or Ethiopia 埃塞俄比亞|埃塞俄比亚[Ai1sai4e2bi3ya4]/ /(abbr. for Egypt 埃及[Ai1ji2])/(abbr. for Ethiopia 埃塞俄比亞|埃塞俄比亚[Ai1sai4e2bi3ya4])/
+
+#
 # Misc changes
 #
+
+紀錄 纪录 [[ji4lu4]]
+/variant of 記錄|记录[ji4lu4] (but in Taiwan, not for the verb sense "to record")/ /(Tw) variant of 記錄|记录[ji4lu4] (not for the verb sense "to record")/
+
 巨魔 巨魔 [[ju4mo2]]
 /(Internet) troll/ /(Internet slang) troll/
 
 封禁 封禁 [[feng1jin4]]
 /(Internet) to block (a user)/ /(Internet slang) to block (a user)/
+
+掱 掱 [[pa2]]
+/variant of 扒[pa2] in 扒手[pa2shou3]/ /variant of 扒[pa2] used in 扒手[pa2shou3]/
+
+掱 掱 [[shou3]]
+/variant of 手[shou3] in 扒手[pa2shou3]/ /variant of 手[shou3] used in 扒手[pa2shou3]/
+
+崗 岗 [[gang1]]
+/variant of 岡|冈 [gang1]/ /variant of 岡|冈[gang1]/
 
 一 一 [[yi1]]
 /one/ /one (also pr. [yao1])/
@@ -216,8 +540,8 @@
 
 衫 衫 [[shan1]]
 # source: https://www.dong-chinese.com/wiki/衫
-/garment/ /garment; shirt; robe; gown; jacket with open slits in place of sleeves/
-/jacket with open slits in place of sleeves/ //
++ /shirt/
+/garment/ += /shirt/ += /jacket with open slits in place of sleeves/
 
 錶 表 [[biao3]]
 /watch (timepiece)/ /watch (timepiece); wristwatch/
@@ -231,10 +555,6 @@
 蟲 虫 [[chong2]]
 /lower form of animal life, including insects, insect larvae, worms and similar creatures/ /lower form of animal life; insect; insect larvae; worm/
 
-苹 苹 [[ping2]]
-# source: https://www.dong-chinese.com/wiki/苹
-+ /apple/
-
 花 花 [[hua1]]
 /flower/ += /blossom/
 
@@ -244,19 +564,17 @@
 /minister; statesman; official/ += /state official or subject in dynastic China/
 
 能不能 能不能 [[neng2bu4neng2]]
-+ /can or not/
 # source: https://www.dong-chinese.com/wiki/能不能
 + /is it possible to; could you; would it be possible to/
-/can or not/ += /is it possible to; could you; would it be possible to/
 
 背 背 [[bei4]]
 # source: https://www.dong-chinese.com/wiki/背
-+ /back; back side; behind/
-/back; back side; behind/ += /the back of a body or object/
++ /back (body); back side; behind/
+/back (body); back side; behind/ += /the back of a body or object/
 
 聿 聿 [[yu4]]
 # source: https://www.dong-chinese.com/wiki/聿
-+ /writing brush/
++ /(old) writing brush/
 
 聯 联 [[lian2]]
 # source: Google Translate
@@ -295,6 +613,9 @@
 畐 畐 [[fu2]]
 # source: https://www.dong-chinese.com/wiki/畐
 + /to fill/
+# source: ChatGPT
++ /full; filled; abundant/
+/to fill/ += /full; filled; abundant/
 
 眼裡 眼里 [[yan3li3]]
 # source: https://www.dong-chinese.com/wiki/眼里
@@ -313,20 +634,15 @@
 
 爿 爿 [[pan2]]
 # source: https://www.dong-chinese.com/wiki/爿
-+ /(orig.) bed/
-
-爺 爷 [[ye2]]
-# source: https://www.dong-chinese.com/wiki/爷
-+ /father/
+# source: ChatGPT
++ /(orig.) (wood) plank; split piece of wood; half of a tree trunk/
 
 照 照 [[zhao4]]
 /according to/ += /in accordance with/
 /to shine/ += /to illuminate/
 
 然 然 [[ran2]]
-# source: https://www.dong-chinese.com/wiki/然
-+ /yes/
-/correct/ += /right/ += /yes/
+/correct/ += /right/
 /so/ += /thus/
 
 熱情 热情 [[re4qing2]]
@@ -351,13 +667,16 @@
 
 氐 氐 [[di3]]
 # source: https://www.dong-chinese.com/wiki/氐
-+ /bottom/
-/foundation/ += /bottom/
+# source: ChatGPT
++ /base; root/
+# source: ChatGPT
+/foundation/ /(old) foundation/
+/(old) foundation/ += /base; root/
 
 殳 殳 [[shu1]]
-# source: https://www.dong-chinese.com/wiki/殳
-+ /weapon/
-/weapon/ += /ancient staff-like weapon made of bamboo or wood/ += /"weapon" radical in Chinese characters (Kangxi radical 79), occurring in 段, 毅, 殺 etc/
+# source: ChatGPT
++ /(old) a weapon/
+/(old) a weapon/ += /ancient staff-like weapon made of bamboo or wood/ += /"weapon" radical in Chinese characters (Kangxi radical 79), occurring in 段, 毅, 殺 etc/
 
 歹 歹 [[dai3]]
 /bad/ += /wicked/ += /evil/
@@ -365,21 +684,21 @@
 術 术 [[shu4]]
 # source: https://www.dong-chinese.com/wiki/术
 + /art; skill/
-/art; skill/ += /method/ += /technique/
+/method/ += /technique/ += /art; skill/
 
 本科 本科 [[ben3ke1]]
 /undergraduate course/ += /undergraduate (attributive)/
 
 朩 朩 [[deng3]]
-# source: https://www.dong-chinese.com/wiki/朩
-+ /rank; grade/
+# source: ChatGPT
++ /top of a tree; tree tip/
 
 期 期 [[qi1]] 
 /a period of time/ += /phase/ += /stage/ += /period/ += /term/ += /time/ += /classifier for issues of a periodical, courses of study/
 
 有勁兒 有劲儿 [[you3​jin4​r5]]
-# source: https://www.dong-chinese.com/wiki/有劲儿
-+ /strong/
+# source: ChatGPT
++ /to have strength; to be strong; to be powerful/
 
 時間 时间 [[shi2jian1]] 
 /(concept of) time/ += /(duration of) time/ += /(point in) time/
@@ -415,12 +734,10 @@
 撿便宜 捡便宜 [[jian3pian2yi2]]
 + /get a bargain; snag a deal; take (petty) advantage/
 
-持 持 [[chi2]] 
+持 持 [[chi2]]
 /to hold/ += /to grasp/ += /to support/
 /to manage/ += /to run (i.e. administer)/ += /to control/
-# source: https://www.dong-chinese.com/wiki/持
-+ /sustain/
-/sustain/ += /to persevere/ += /to maintain/
+/to persevere/ += /to maintain/
 
 折 折 [[zhe2]]
 /to break/ += /to fracture/ += /to snap/ += /to fold/
@@ -435,12 +752,8 @@
 
 戈 戈 [[ge1]]
 # source: https://www.dong-chinese.com/wiki/戈
-+ /spear; lance; halberd/
-/spear; lance; halberd/ += /dagger-axe/
-
-愿 愿 [[yuan4]]
-# source: https://www.dong-chinese.com/wiki/愿
-/honest and prudent/ /sincere; honest; virtuous; prudent/
++ /(orig.) spear; lance; halberd/
+/(orig.) spear; lance; halberd/ += /dagger-axe/
 
 感受 感受 [[gan3shou4]] 
 /to sense/ += /to feel (through the senses)/ += /to experience/
@@ -450,8 +763,6 @@
 /to move (sb)/ += /to touch (sb emotionally)/ += /moving/
 
 慣 惯 [[guan4]]
-# source: https://www.dong-chinese.com/wiki/惯
-+ /habit; custom; habitually; usually/
 /accustomed to/ += /used to/
 /indulge/ += /to spoil (a child)/
 
@@ -459,10 +770,8 @@
 /nausea/ += /to feel sick/ += /disgust/ += /nauseating/
 
 態 态 [[tai4]]
-# source: https://www.dong-chinese.com/wiki/态
-+ /manner/
 /appearance/ += /shape/ += /form/
-/manner/ += /state/ += /attitude/
+/state/ += /attitude/
 
 往 往 [[wang3]]
 /to go (in a direction)/ += /to/ += /towards/ += /(of a train) bound for/
@@ -488,14 +797,13 @@
 
 夭 夭 [[yao1]]
 # source: https://www.dong-chinese.com/wiki/夭
-+ /young; fresh-looking/
-# source: https://www.dong-chinese.com/wiki/夭
-+ /tender; gentle/
++ /(orig.) young; fresh-looking/
+# source: ChatGPT
++ /to die young; short-lived/
 
 夂 夂 [[zhi3]]
-# source: https://www.dong-chinese.com/wiki/夂
-+ /go/
-/go/ += /"walk slowly" component in Chinese characters/
+# source: ChatGPT
++ /(old) to go slowly; to come after; to come from behind/
 
 堵 堵 [[du3]]
 /to block up (a road, pipe etc)/ += /to stop up (a hole)/
@@ -522,6 +830,7 @@
 # source: https://www.dong-chinese.com/wiki/园
 + /garden/
 /garden/ += /land used for growing plants/
+/abbr. for a place ending in 園|园, such as a botanical garden 植物園|植物园, kindergarten 幼兒園|幼儿园 etc/ /(abbr. for 園|园) a place ending in 园; (abbr. for 植物園|植物园) a botanical garden; (abbr. for 幼兒園|幼儿园) kindergarten/
 
 器 器 [[qi4]]
 # source: https://www.dong-chinese.com/wiki/器
@@ -578,11 +887,10 @@
 反 反 [[fan3]]
 /contrary/ += /to oppose/ += /opposite/ += /against/ += /anti-/ += /to rebel/ += /instead/
 /in reverse/ += /inside out or upside down/ += /to reverse/
+/abbr. for 反切[fan3qie4] phonetic system/ /(abbr. for 反切[fan3qie4]) phonetic system/
 
 及 及 [[ji2]]
-# source: https://www.dong-chinese.com/wiki/及
-+ /extend; come up to/
-/extend; come up to/ += /to reach/ += /up to/ += /in time for/
+/to reach/ += /up to/ += /in time for/
 
 印 印 [[yin4]] 
 /to print/ += /to mark/ += /to engrave/
@@ -623,21 +931,8 @@
 /to understand/ += /to realize/ += /to find out/
 
 丷 丷 [[ba1]]
-# source: https://www.dong-chinese.com/wiki/丷
-+ /“ears-out” component used in some Chinese characters (e.g. U+5151 兑)/
-
-消 消 [[xiao1]]
-# source: https://www.dong-chinese.com/wiki/消
-+ /vanish; die out; melt away; to disappear; to vanish; to eliminate/
-/vanish; die out; melt away; to disappear; to vanish; to eliminate/ += /to consume; to reduce/
-
-專 专 [[zhuan1]]
-# source: https://www.dong-chinese.com/wiki/专
-+ /monopolize; take sole possession/
-# source: https://www.dong-chinese.com/wiki/专
-+ /for a particular person, occasion, purpose; special; specialized; focused on one thing; particular (to sth)/
-# source: https://www.dong-chinese.com/wiki/专
-+ /expert; concentrated/
+# source: ChatGPT
++ /(old) to divide; to separate; split apart/
 
 不太 不太 [[bu4tai4]]
 # source: https://www.dong-chinese.com/wiki/不太
@@ -1059,3 +1354,23 @@
 
 黑暗面 黑暗面 [[hei1an4mian4]]
 /(lit. and fig.) dark side/ /(lit.) (fig.) dark side/
+
+#
+# "also written" fixes
+#
+
+服侍 服侍 [[fu2shi5]]
+/also written 伏侍, see also 服事[fu2shi4]/ /also written 伏侍/see also 服事[fu2shi4]/
+
+杜鵑 杜鹃 [[du4juan1]]
+/cuckoo (Cercococcyx spp., also written 杜鵑鳥|杜鹃鸟)/ /cuckoo (Cercococcyx spp.) (also written 杜鵑鳥|杜鹃鸟)/
+/Indian azalea (Rhododendron simsii Planch, also written 杜鵑花|杜鹃花)/ /Indian azalea (Rhododendron simsii Planch) (also written 杜鵑花|杜鹃花)/
+
+神治國 神治国 [[shen2zhi4guo2]]
+/also written 神權統治|神权统治[shen2quan2tong3zhi4] or 神權政治|神权政治[shen2quan2zheng4zhi4]/ /(also written 神權統治|神权统治[shen2quan2tong3zhi4]); (also written 神權政治|神权政治[shen2quan2zheng4zhi4])/
+
+脫脫 脱脱 [[Tuo1tuo1]]
+/also written Tuoketuo 托克托/ /(also written Tuoketuo 托克托)/
+
+龐氏 庞氏 [[Pang2shi4]]
+/Pond's (brand of skin care products), also written 旁氏/ /Pond's (brand of skin care products) (also written 旁氏)/

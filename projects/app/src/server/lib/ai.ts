@@ -1,10 +1,14 @@
 import { getOpenAIClient } from "@/server/lib/openai/client";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { OpenAI } from "openai";
 import type {
   ChatCompletionCreateParamsNonStreaming,
   ResponseFormatJSONSchema,
 } from "openai/resources/index.mjs";
 import { z } from "zod/v4";
+import makeDebug from "debug";
+
+const debug = makeDebug(`pyly:ai.ts`);
 
 export interface ChatPromptMessage {
   role: `system` | `user` | `assistant`;
@@ -37,7 +41,7 @@ export function openAiZodResponseFormat(
 
 export async function requestOpenAiChatJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
-  options?: { signal?: AbortSignal },
+  options?: { signal?: AbortSignal; retries?: number },
 ): Promise<{
   data: z.infer<Schema>;
   usage?: OpenAI.CompletionUsage;
@@ -52,23 +56,42 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
     messages: prompt.messages,
   };
 
-  const completion = await client.chat.completions.create(body, {
-    signal: options?.signal,
-  });
+  for (let retries = options?.retries ?? 2; ; retries--) {
+    invariant(options?.signal?.aborted !== true, `operation aborted`);
 
-  const message = completion.choices[0]?.message;
-  if (message == null) {
-    throw new Error(`OpenAI response message was missing`);
+    const completion = await client.chat.completions.create(body, {
+      signal: options?.signal,
+    });
+
+    const message = completion.choices[0]?.message;
+    if (message == null) {
+      throw new Error(`OpenAI response message was missing`);
+    }
+
+    const content = message.content ?? ``;
+    if (content.length === 0) {
+      throw new Error(`OpenAI response message content was empty`);
+    }
+
+    let data;
+    try {
+      data = prompt.schema.parse(JSON.parse(content), { reportInput: true });
+    } catch (e) {
+      if (retries > 0) {
+        debug(
+          `OpenAI response did not match expected schema. Prompt: %o\n\nInput: %o:`,
+          prompt,
+          e,
+        );
+        continue;
+      }
+      throw e;
+    }
+
+    return {
+      data,
+      message: { role: message.role, content },
+      usage: completion.usage,
+    };
   }
-
-  const content = message.content ?? ``;
-  if (content.length === 0) {
-    throw new Error(`OpenAI response message content was empty`);
-  }
-
-  return {
-    data: prompt.schema.parse(JSON.parse(content)),
-    message: { role: message.role, content },
-    usage: completion.usage,
-  };
 }

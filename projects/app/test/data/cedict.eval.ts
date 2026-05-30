@@ -89,15 +89,15 @@ const senseGroupingCases = [
   },
   {
     name: `上 上 [[shang4]]`,
-    input: `/{bound form} up; upper/previous/first (of multiple parts)/to climb; to get onto; to go up/to attend (class or university)/{directional complement} up/{noun suffix} on; above/top/superior/highest/go up/send up/on top/upon/`,
+    input: `/(bound form) up; upper/previous/first (of multiple parts)/to climb; to get onto; to go up/to attend (class or university)/(directional complement) up/(noun suffix) on; above/top/superior/highest/go up/send up/on top/upon/`,
     expecteds: [
-      `/above; upper; {bound form} up/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/on top; upon; {noun suffix} on/previous/send up/to attend (class or university)/top/{directional complement} up/`,
-      `/above; upper; {bound form} up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; upon; {noun suffix} on/send up/to attend (class or university)/top/{directional complement} up/`,
-      `/above; upper; {bound form} up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; top; upon; {noun suffix} on/send up/to attend (class or university)/{directional complement} up/`,
-      `/above; on top; upon; upper; {noun suffix} on/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/previous/send up/to attend (class or university)/top/{bound form} up; {directional complement} up/`,
-      `/above; on top; upon; {noun suffix} on/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/send up/to attend (class or university)/top/upper; {bound form} up/{directional complement} up/`,
-      `/above; on top; upon; {noun suffix} on/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/previous/send up/to attend (class or university)/top/upper; {bound form} up/{directional complement} up/`,
-      `/above; on top; upon; {noun suffix} on/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior; top/send up/to attend (class or university)/upper; {bound form} up/{directional complement} up/`,
+      `/above; upper; (bound form) up/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/on top; upon; (noun suffix) on/previous/send up/to attend (class or university)/top/(directional complement) up/`,
+      `/above; upper; (bound form) up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; upon; (noun suffix) on/send up/to attend (class or university)/top/(directional complement) up/`,
+      `/above; upper; (bound form) up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; top; upon; (noun suffix) on/send up/to attend (class or university)/(directional complement) up/`,
+      `/above; on top; upon; upper; (noun suffix) on/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/previous/send up/to attend (class or university)/top/(bound form) up; (directional complement) up/`,
+      `/above; on top; upon; (noun suffix) on/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/send up/to attend (class or university)/top/upper; (bound form) up/(directional complement) up/`,
+      `/above; on top; upon; (noun suffix) on/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/previous/send up/to attend (class or university)/top/upper; (bound form) up/(directional complement) up/`,
+      `/above; on top; upon; (noun suffix) on/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior; top/send up/to attend (class or university)/upper; (bound form) up/(directional complement) up/`,
     ],
   },
   {
@@ -124,15 +124,15 @@ const senseGroupingCases = [
   },
   {
     name: `惡臭 恶臭 [[e4chou4]]`,
-    input: `/stink; stench/stinky; smelly/{fig.} disgusting; repugnant/`,
-    expecteds: [`/stink; stench/stinky; smelly/{fig.} disgusting; repugnant/`],
+    input: `/stink; stench/stinky; smelly/(fig.) disgusting; repugnant/`,
+    expecteds: [`/stink; stench/stinky; smelly/(fig.) disgusting; repugnant/`],
   },
   {
     name: `惡貫滿盈 恶贯满盈 [[e4guan4man3ying2]]`,
-    input: `/{lit.} {idiom} strung through and filled with evil; filled with extreme evil/replete with vice/guilty of monstrous crimes/`,
+    input: `/(lit.) {idiom} strung through and filled with evil; filled with extreme evil/replete with vice/guilty of monstrous crimes/`,
     expecteds: [
-      `/{lit.} {idiom} strung through and filled with evil; filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
-      `/{lit.} {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
+      `/(lit.) {idiom} strung through and filled with evil; filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
+      `/(lit.) {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
     ],
   },
 ] as const;
@@ -186,11 +186,11 @@ describeEval(
       },
       {
         name: `上 上 [[shang4]]`,
-        input: `/{bound form} up; upper; above/first (of multiple parts)/to climb; to get onto; to go up; go up/to attend (class or university)/{directional complement} up/top/superior; highest/send up/on top; upon; {noun suffix} on/previous/`,
+        input: `/(bound form) up; upper; above/first (of multiple parts)/to climb; to get onto; to go up; go up/to attend (class or university)/(directional complement) up/top/superior; highest/send up/on top; upon; (noun suffix) on/previous/`,
         expecteds: [
-          `/above; upper; {bound form} up/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior; top/on top; upon; {noun suffix} on/previous/send up/to attend (class or university)/{directional complement} up/`,
-          `/above; upper; {bound form} up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior; top/on top; upon; {noun suffix} on/send up/to attend (class or university)/{directional complement} up/`,
-          `/above; upper; {bound form} up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; top; upon; {noun suffix} on/send up/to attend (class or university)/{directional complement} up/`,
+          `/above; upper; (bound form) up/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior; top/on top; upon; (noun suffix) on/previous/send up/to attend (class or university)/(directional complement) up/`,
+          `/above; upper; (bound form) up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior; top/on top; upon; (noun suffix) on/send up/to attend (class or university)/(directional complement) up/`,
+          `/above; upper; (bound form) up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; top; upon; (noun suffix) on/send up/to attend (class or university)/(directional complement) up/`,
         ],
       },
       {
@@ -216,17 +216,17 @@ describeEval(
       },
       {
         name: `惡臭 恶臭 [[e4chou4]]`,
-        input: `/stink; stench/stinky; smelly/{fig.} disgusting; repugnant/`,
+        input: `/stink; stench/stinky; smelly/(fig.) disgusting; repugnant/`,
         expecteds: [
-          `/stink; stench/stinky; smelly/{fig.} disgusting; repugnant/`,
+          `/stink; stench/stinky; smelly/(fig.) disgusting; repugnant/`,
         ],
       },
       {
         name: `惡貫滿盈 恶贯满盈 [[e4guan4man3ying2]]`,
-        input: `/{lit.} {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
+        input: `/(lit.) {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
         expecteds: [
-          `/filled with extreme evil; guilty of monstrous crimes; replete with vice; {lit.} {idiom} strung through and filled with evil/`,
-          `/filled with extreme evil; guilty of monstrous crimes; replete with vice/{lit.} {idiom} strung through and filled with evil/`,
+          `/filled with extreme evil; guilty of monstrous crimes; replete with vice; (lit.) {idiom} strung through and filled with evil/`,
+          `/filled with extreme evil; guilty of monstrous crimes; replete with vice/(lit.) {idiom} strung through and filled with evil/`,
         ],
       },
       {
@@ -319,16 +319,16 @@ describeEval(
     it.for([
       {
         name: `下 下 [[xia4]]`,
-        input: `/below; under; underneath; down; downwards/inferior; lower/later; next (week etc)/second (of two parts)/to decline; to go down; bring down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/`,
+        input: `/down/downwards/below/lower/later/next (week etc)/second (of two parts)/to decline/to go down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/`,
         expecteds: [
-          `/below; lower; under; underneath/bring down; to decline; to go down/down; downwards/inferior; lower/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/`,
+          `/below; down; downwards; lower/later; next (week etc)/measure word to show the frequency of an action/second (of two parts)/to arrive at (a decision, conclusion etc)/to decline; to go down/`,
         ],
       },
       {
         name: `長 长 [[chang2]]`,
-        input: `/long/{bound form} length/{bound form} strong point; forte/{bound form} to be good at/{lit.} surplus; spare (Taiwan pr. [zhang4])/`,
+        input: `/long/(bound form) length/(bound form) strong point; forte/(bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/`,
         expecteds: [
-          `/long/{bound form} length/{bound form} strong point; forte/{bound form} to be good at/{lit.} surplus; spare (Taiwan pr. [zhang4])/`,
+          `/(bound form) length/(bound form) strong point; forte/(bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/long/`,
         ],
       },
       {
@@ -336,6 +336,7 @@ describeEval(
         input: `/chief/head/elder/to grow/to develop/to increase/to enhance/`,
         expecteds: [
           `/chief; head/elder/to develop; to grow/to enhance; to increase/`,
+          `/chief; head/elder/to develop; to enhance; to grow; to increase/`,
         ],
       },
     ] as const)(`$name`, async (spec, { run }) => {

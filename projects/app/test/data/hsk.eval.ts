@@ -1,4 +1,3 @@
-// pyly-not-src-test
 import type { CedictV2EntryType } from "./cedict";
 import {
   parseCedictV2Line,
@@ -81,21 +80,9 @@ const HskLevelJudge = createJudge(
 const hskLevelJudgeCases = [
   {
     name: `長 长 [[chang2]]`,
-    definition: `/long/(bound form) length/{{bound form}} strong point; forte/{{bound form}} to be good at/{{lit.}} surplus; spare (Taiwan pr. [zhang4])/`,
+    definition: `/long/(bound form) length/(bound form) strong point; forte/(bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/`,
     hskLevel: `2`,
     expecteds: [`/long/(bound form) length/`],
-  },
-  {
-    name: `長 长 [[chang2]]`,
-    definition: `/long/{{bound form}} length/{{bound form}} strong point; forte/{{bound form}} to be good at/{{lit.}} surplus; spare (Taiwan pr. [zhang4])/`,
-    hskLevel: `2`,
-    expecteds: [`/long/{{bound form}} length/`],
-  },
-  {
-    name: `長 长 [[chang2]]`,
-    definition: `/long/{bound form} length/{{bound form}} strong point; forte/{{bound form}} to be good at/{{lit.}} surplus; spare (Taiwan pr. [zhang4])/`,
-    hskLevel: `2`,
-    expecteds: [`/long/{bound form} length/`],
   },
 ] as const;
 

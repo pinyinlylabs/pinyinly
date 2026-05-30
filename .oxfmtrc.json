@@ -11,6 +11,7 @@
     "/projects/app/src/assets/**/*.svg",
     "/projects/app/src/assets/**/*.json",
     "/projects/app/test/assets/**/*.json",
+    "/projects/app/test/data/cedict_ts-2.u8.senseSampling.json",
     "/projects/app/test/data/completeHskVocabulary.mapping.json",
     "/projects/*/dist",
     "*.asset.json",
