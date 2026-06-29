@@ -11,7 +11,7 @@
     "/projects/app/src/assets/**/*.svg",
     "/projects/app/src/assets/**/*.json",
     "/projects/app/test/assets/**/*.json",
-    "/projects/app/test/data/completeHskVocabulary.mapping.json",
+    "/projects/app/test/data/**/*.json",
     "/projects/*/dist",
     "*.asset.json",
     "*.m4a"

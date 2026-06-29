@@ -314,18 +314,6 @@ export const loadCharacterComponentUsageEntries = memoize0(
 
 export const wordListSchema = z.array(hanziWordSchema);
 
-export const loadKangXiRadicalsHanziWords = memoize0(
-  async function loadKangXiRadicalsHanziWords() {
-    return wordListSchema
-      .transform(deepReadonly)
-      .parse(
-        await import(`./data/kangXiRadicalsHanziWords.asset.json`).then(
-          (x) => x.default,
-        ),
-      );
-  },
-);
-
 const parsePosPattern = new RegExp(
   `^(?:` +
     [
@@ -382,10 +370,12 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
   return undefined;
 }
 
+const cedictCompactReferenceRe = /^\S+\s+\S+\s+\[\[.*?\]\]\s+[A-Za-z0-9]{5}$/u;
+
 export const cedictReferenceSchema = z
   .string()
-  .regex(/^.+? .+? \[\[.*?\]\] \/.+\/$/u, {
-    message: `CE-DICT reference must follow the format: traditional simplified [[pinyin]] /sense/`,
+  .regex(cedictCompactReferenceRe, {
+    message: `CE-DICT reference must follow this format: traditional simplified [[pinyin]] NANOID`,
   });
 
 export type CedictReference = z.infer<typeof cedictReferenceSchema>;

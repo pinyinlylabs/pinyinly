@@ -193,8 +193,7 @@ export function AiPronunciationHintModal({
             <AiPromptPreview
               sections={[
                 {
-                  system: pronunciationPrompt.system,
-                  user: pronunciationPrompt.user,
+                  messages: pronunciationPrompt.messages,
                 },
               ]}
             />

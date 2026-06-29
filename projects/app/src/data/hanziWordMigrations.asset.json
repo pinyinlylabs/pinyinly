@@ -24,5 +24,10 @@
 ["纪录:recordDocument", "纪录:record"],
 ["不一会儿:soon", null],
 ["不太:notVery", null],
-["抽烟:smoking", "抽烟:smoke"]
+["抽烟:smoking", "抽烟:smoke"],
+["专:monopolize", null],
+["丷:earsOut", null],
+["爷:father", null],
+["爿:be", null],
+["苹:apple", null]
 ]

@@ -39,6 +39,6 @@
     "oxlint-tsgolint": "^0.22.1",
     "ts-essentials": "^10.2.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.7"
   }
 }

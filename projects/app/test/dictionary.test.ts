@@ -1,5 +1,6 @@
 import {
   readDictionaryJson,
+  unparseDictionaryJson,
   upsertHanziWordMeaning,
   writeDictionaryJson,
 } from "#bin/util/dictionary.ts";
@@ -13,7 +14,7 @@ import type {
 } from "#data/model.ts";
 import { isCi } from "#util/env.js";
 import { PartOfSpeech } from "#data/model.ts";
-import { pinyinUnitCount } from "#data/pinyin.js";
+import { normalizePinyinText, pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
@@ -29,7 +30,6 @@ import {
   loadCharacters,
   loadDictionary,
   loadHanziWordMigrations,
-  loadKangXiRadicalsHanziWords,
   loadKangXiRadicalsStrokes,
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
@@ -54,14 +54,14 @@ import {
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import {
-  findCedictSensesForHanziWordMeaning,
+  buildCedictSenseId,
   findCedictSenseById,
-  findCedictSenseIdCandidatesById,
-  findCedictMigratedSenseId,
+  parseCedictSenseId,
 } from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { fmtJsonFile } from "@pinyinly/lib/fs";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -105,128 +105,63 @@ test(`hanzi word meaning schema accepts optional cedict reference`, () => {
   const parsed = hanziWordMeaningSchema.parse({
     gloss: [`one`],
     pinyin: [`yī`],
-    cedict: `一 一 [[yi1]] /one/`,
+    cedict: `一 一 [[yi1]] KmCz3`,
   });
 
-  expect(parsed.cedict).toBe(`一 一 [[yi1]] /one/`);
+  expect(parsed.cedict).toBe(`一 一 [[yi1]] KmCz3`);
 });
 
 test(`hanzi word meaning schema accepts cedict reference when gloss contains a pipe`, () => {
   const parsed = hanziWordMeaningSchema.parse({
     gloss: [`variant`],
     pinyin: [`xuán`],
-    cedict: `㻽 㻽 [[xuan2]] /variant of 璿|璇[xuan2]/`,
+    cedict: `㻽 㻽 [[xuan2]] yz3yp`,
   });
 
-  expect(parsed.cedict).toBe(`㻽 㻽 [[xuan2]] /variant of 璿|璇[xuan2]/`);
+  expect(parsed.cedict).toBe(`㻽 㻽 [[xuan2]] yz3yp`);
 });
 
-test(
-  `dictionary CE-DICT references resolve to existing CE-DICT senses`,
-  { retry: isCi ? 0 : 1 },
-  async () => {
-    const dict = await readDictionaryJson();
-    let edits = 0;
+test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async () => {
+  const dict = await readDictionaryJson();
+  const migratedHanziWords: string[] = [];
 
-    for (const [hanziWord, meaning] of dict.entries()) {
-      if (meaning.cedict == null) {
-        continue;
-      }
-
-      const resolvedSense = await findCedictSenseById(meaning.cedict);
-      if (resolvedSense == null) {
-        const migratedId = await findCedictMigratedSenseId(meaning.cedict);
-        if (migratedId == null) {
-          const candidates = await findCedictSenseIdCandidatesById(
-            meaning.cedict,
-          );
-          expect
-            .soft(candidates.join(`\n`), `hanziWord: ${hanziWord}`)
-            .toContain(meaning.cedict);
-        } else {
-          expect
-            .soft(meaning.cedict, `hanziWord: ${hanziWord}`)
-            .toBe(migratedId);
-          meaning.cedict = migratedId;
-          edits += 1;
-        }
-      }
+  for (const [hanziWord, meaning] of dict.entries()) {
+    if (meaning.cedict == null) {
+      continue;
     }
 
-    if (!isCi && edits > 0) {
-      await writeDictionaryJson(dict);
-    }
-  },
-);
+    const resolvedSense = await findCedictSenseById(meaning.cedict);
+    expect
+      .soft(
+        resolvedSense,
+        `hanziWord: ${hanziWord}, senseId: ${meaning.cedict}`,
+      )
+      .not.toBeNull();
 
-test.skipIf(isCi)(
-  `autofill missing dictionary CE-DICT references`,
-  async () => {
-    const dict = await readDictionaryJson();
-    let edits = 0;
-    let errors = 0;
-
-    for (const [hanziWord, meaning] of dict.entries()) {
-      if (meaning.gloss.length === 0 || meaning.pinyin == null) {
-        continue;
-      }
-
-      const candidates = await findCedictSensesForHanziWordMeaning(
-        hanziFromHanziWord(hanziWord),
-        meaning.pinyin,
-        meaning.gloss,
-      );
-
-      expect
-        .soft(candidates.length, `hanziWord: ${hanziWord}`)
-        .toBeGreaterThan(0);
-
-      if (meaning.cedict != null) {
-        continue;
-      }
-
-      const possibleCandidates = candidates.filter((x) => x.confidence > 0);
-      let bestCandidate;
-
-      if (possibleCandidates.length === 1) {
-        bestCandidate = possibleCandidates[0]!;
-      }
-
-      if (possibleCandidates.length > 1) {
-        if (
-          possibleCandidates[0]!.confidence -
-            possibleCandidates[1]!.confidence <
-          0.015
-        ) {
-          // helpful debugging output
-          errors += 1;
-          expect
-            .soft(possibleCandidates, `hanziWord: ${hanziWord}`)
-            .toEqual([]);
-        } else {
-          bestCandidate = possibleCandidates[0]!;
-        }
-      }
-
-      if (bestCandidate?.senseId != null) {
-        meaning.cedict = bestCandidate.senseId;
-        edits += 1;
-
-        if (edits >= 500) {
-          // Avoid running for too long, it's better to run a few times and
-          // iteratively build up the dictionary.
-          break;
-        }
-      }
+    if (resolvedSense == null) {
+      continue;
     }
 
-    if (edits > 0) {
-      await writeDictionaryJson(dict);
-    }
+    const parsedSenseId = nonNullable(parseCedictSenseId(meaning.cedict));
+    const canonicalSenseId = buildCedictSenseId(
+      parsedSenseId.traditional,
+      parsedSenseId.simplified,
+      parsedSenseId.pinyin,
+      resolvedSense.id,
+    );
 
-    expect(errors).toBe(0);
-  },
-);
+    if (meaning.cedict !== canonicalSenseId) {
+      meaning.cedict = canonicalSenseId;
+      migratedHanziWords.push(hanziWord);
+    }
+  }
+
+  if (migratedHanziWords.length > 0) {
+    await expect(
+      jsonStringifyShallowIndent(unparseDictionaryJson(dict), 1),
+    ).toMatchFileSnapshot(dictionaryFilePath);
+  }
+});
 
 test(`hanzi word meaning schema enforces normalized freq bounds`, () => {
   expect(() =>
@@ -406,7 +341,6 @@ test(`hanzi word meaning pinyin lint`, async () => {
         "然:yes",
         "照顾:takeCareOf",
         "爱人:spouse",
-        "爷:father",
         "物:thing",
         "理:reason",
         "男朋友:boyfriend",
@@ -541,13 +475,15 @@ test(
         continue;
       }
 
-      const cedictSense = await findCedictSenseById(meaning.cedict);
-      if (cedictSense == null) {
+      const resolvedSense = await findCedictSenseById(meaning.cedict);
+      if (resolvedSense == null) {
         // assertion thrown in another test, so just skip this case here to avoid noise
         continue;
       }
 
-      const expectedPinyin = cedictSense.pinyin;
+      const parsedSenseId = nonNullable(parseCedictSenseId(meaning.cedict));
+
+      const expectedPinyin = normalizePinyinText(parsedSenseId.pinyin);
 
       if (meaning.pinyin != null && meaning.pinyin.length > 1) {
         // oxlint-disable-next-line no-console
@@ -560,11 +496,11 @@ test(
       const pinyinMatches =
         meaning.pinyin != null &&
         meaning.pinyin.length === 1 &&
-        meaning.pinyin[0] === expectedPinyin[0];
+        meaning.pinyin[0] === expectedPinyin;
 
       if (!pinyinMatches) {
         mismatches.push(hanziWord);
-        meaning.pinyin = expectedPinyin;
+        meaning.pinyin = [expectedPinyin];
       }
     }
 
@@ -722,7 +658,6 @@ test(`all word lists only reference valid hanzi words`, async () => {
   const dict = await loadDictionary();
 
   const wordList = [
-    ...(await loadKangXiRadicalsHanziWords()),
     ...dict.hsk1HanziWords,
     ...dict.hsk2HanziWords,
     ...dict.hsk3HanziWords,
@@ -969,11 +904,13 @@ test(`dictionary contains entries for decomposition`, async () => {
       "丅 via 斤[HSK2], 鬲",
       "丆 via 才[HSK2], 石, 面[HSK2], 页[HSK1]",
       "丈 via 丈夫[HSK4]",
+      "专 via 专业[HSK3], 专家[HSK3], 专心[HSK4], 专门[HSK3], 专题[HSK3], 传[HSK3], 转[HSK3]",
       "丙 via 病[HSK1]",
       "並 via 普, 碰[HSK2]",
-      "丩 via 叫[HSK1], 收[HSK2], 爿",
+      "丩 via 叫[HSK1], 收[HSK2]",
       "丬 via 将, 状",
       "临 via 临时[HSK4], 光临[HSK4], 面临[HSK4]",
+      "丷 via 䒑, 关[HSK1], 半[HSK1], 单[HSK4], 商, 平[HSK2], 并[HSK3], 弟[HSK1], 旁, 曾[HSK4], 米[HSK2], 金[HSK3], 鬲",
       "乀 via 乂, 水[HSK1]",
       "乁 via 气[HSK2]",
       "乇 via 毛[HSK1]",
@@ -1183,6 +1120,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "焦 via 蕉",
       "燃 via 燃料[HSK4], 燃烧[HSK4]",
       "爰 via 暖",
+      "爷 via 大爷[HSK4], 爷爷[HSK1]",
       "独 via 单独[HSK4], 独特[HSK4], 独立[HSK4], 独自[HSK4]",
       "率 via 效率[HSK4], 汇率[HSK4], 率先[HSK4]",
       "玨 via 班[HSK1]",
@@ -1235,6 +1173,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "舍 via 舒",
       "航 via 航班[HSK4], 航空[HSK4]",
       "苗 via 猫[HSK2]",
+      "苹 via 苹果[HSK3]",
       "著 via 显著[HSK4], 著作[HSK4], 著名[HSK4]",
       "董 via 懂[HSK2]",
       "虑 via 考虑[HSK4]",
@@ -1351,7 +1290,6 @@ test(`dictionary structural components list`, async () => {
     [
       "丨:line",
       "丶:dot",
-      "丷:earsOut",
       "丿:slash",
       "𠂇:hand",
       "𠂉:knife",

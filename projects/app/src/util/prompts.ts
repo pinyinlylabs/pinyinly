@@ -1,17 +1,5 @@
-import type { OpenAI } from "openai";
+import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { z } from "zod/v4";
-
-export interface ChatPrompt<Schema extends z.ZodType> {
-  model?: OpenAI.ChatModel;
-  reasoningEffort?: OpenAI.ReasoningEffort;
-  system: string;
-  user: string;
-  /**
-   * The Zod schema describing the expected shape of the assistant's response.
-   * This is used for type inference and validation of the response data.
-   */
-  schema: Schema;
-}
 
 export function buildPronunciationHintPrompt({
   leadCharacter,
@@ -77,13 +65,18 @@ Generate {{ count }} distinct mnemonic story ideas.
 </data>
 `;
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    count: String(count),
-    data: JSON.stringify(data, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
 
-  return { system, user, schema: buildPronunciationHintPrompt.schema };
+  return { messages, schema: buildPronunciationHintPrompt.schema };
 }
 buildPronunciationHintPrompt.schema = z
   .object({
@@ -199,13 +192,18 @@ Generate {{ count }} distinct mnemonic hints.
 </data>
 `;
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    count: String(count),
-    data: JSON.stringify(data, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
 
-  return { system, user, schema: meaningHintOutputSchema };
+  return { messages, schema: meaningHintOutputSchema };
 };
 buildMeaningHintPrompt.strategy = `visual`;
 buildMeaningHintPrompt.schema = meaningHintOutputSchema;
@@ -257,13 +255,18 @@ Generate {{ count }} distinct mnemonic hints:
 </data>
 `.trim();
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    count: String(count),
-    data: JSON.stringify(data, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
 
-  return { system, user, schema: meaningHintOutputSchema };
+  return { messages, schema: meaningHintOutputSchema };
 };
 buildMeaningHintLogicalPrompt.strategy = `logical`;
 buildMeaningHintLogicalPrompt.schema = meaningHintOutputSchema;
@@ -317,13 +320,18 @@ Generate {{ count }} distinct reusable location descriptions for this exact comb
 </data>
 `;
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    count: String(count),
-    data: JSON.stringify(data, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
 
-  return { system, user, schema: buildSubLocationDescriptionPrompt.schema };
+  return { messages, schema: buildSubLocationDescriptionPrompt.schema };
 }
 buildSubLocationDescriptionPrompt.schema = z
   .object({
@@ -382,13 +390,18 @@ Generate {{ count }} distinct character personality descriptions for this charac
 </data>
 `;
 
-  const system = renderPromptTemplate(systemTemplate, {});
-  const user = renderPromptTemplate(userTemplate, {
-    count: String(count),
-    data: JSON.stringify(data, null, 2),
-  });
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
 
-  return { system, user, schema: buildLeadCharacterDescriptionPrompt.schema };
+  return { messages, schema: buildLeadCharacterDescriptionPrompt.schema };
 }
 buildLeadCharacterDescriptionPrompt.schema = z
   .object({

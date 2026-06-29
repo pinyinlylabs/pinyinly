@@ -63,13 +63,11 @@ test(`pinyin runtime manifest matches source sprite manifest`, async () => {
 });
 
 describe(`pinyin sounds`, () => {
-  test.skipIf(isCi || true)(
+  test.skipIf(isCi)(
     `should have audio files for all pinyin units`,
     {
-      // In local dev don't timeout, since we want to be able to generate
-      // missing files. In CI, use the default timeout to avoid hanging
-      // indefinitely.
-      timeout: isCi ? undefined : Infinity,
+      // ffmpeg can take a long time to process audio.
+      timeout: 30 * 60 * 1000,
     },
     async () => {
       const VOICE: Voice = `nova`;
