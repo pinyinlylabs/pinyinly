@@ -71,7 +71,6 @@ const HskLevelJudge = createJudge(
           bestScore.score === 1
             ? `Exact match`
             : `Output differed:\n${diffStringsUnified(formatDefinitionStable(bestExpected), formatDefinitionStable(actual))}`,
-        output: `hello world`,
       },
     };
   },

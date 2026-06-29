@@ -70,7 +70,6 @@ const SenseGroupingJudge = createJudge(
           bestScore.score === 1
             ? `Exact match`
             : `Output differed:\n${diffStringsUnified(formatDefinitionStable(bestExpected.definition), formatDefinitionStable(output.definition))}`,
-        output: `hello world`,
       },
     };
   },
@@ -138,7 +137,7 @@ const senseGroupingCases = [
 ] as const;
 
 describeEval(
-  `buildCedictEntrySenseGroupingPrompt eval`,
+  `buildCedictEntrySenseMergingPrompt eval`,
   {
     harness: createChatPromptHarness(
       buildCedictEntrySenseMergingPrompt,
