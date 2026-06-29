@@ -7,7 +7,7 @@ import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
 
-const maxUsedAsComponent = 5;
+const maxUsedInCharacters = 5;
 
 export function WikiHanziCharacterUsedInCharacters({
   hanzi,
@@ -57,7 +57,7 @@ export function WikiHanziCharacterUsedInCharacters({
 
   const entries = (entriesWithDupes ?? [])
     .filter(arrayFilterUnique((item) => item.hanzi))
-    .slice(0, maxUsedAsComponent);
+    .slice(0, maxUsedInCharacters);
 
   if (!isSingleCharacter || entries.length === 0) {
     return null;
