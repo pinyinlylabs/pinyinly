@@ -68,6 +68,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -135,6 +137,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -192,6 +196,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -245,6 +251,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -317,6 +325,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -370,6 +380,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -437,6 +449,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -556,6 +570,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -606,6 +622,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -652,6 +670,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -702,6 +722,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
@@ -747,6 +769,8 @@ describe(
               "role": "user",
             },
           ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
         }
       `);
     });
