@@ -16,8 +16,8 @@ export interface ChatPromptMessage {
 }
 
 export interface ChatPrompt<Schema extends z.ZodType> {
-  model?: OpenAI.ChatModel;
-  reasoningEffort?: OpenAI.ReasoningEffort;
+  model: OpenAI.ChatModel;
+  reasoningEffort: OpenAI.ReasoningEffort;
   messages: ChatPromptMessage[];
   /**
    * The Zod schema describing the expected shape of the assistant's response.
@@ -50,8 +50,8 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
   const client = getOpenAIClient();
 
   const body: ChatCompletionCreateParamsNonStreaming = {
-    model: prompt.model ?? `gpt-5-mini`,
-    reasoning_effort: prompt.reasoningEffort ?? null,
+    model: prompt.model,
+    reasoning_effort: prompt.reasoningEffort,
     response_format: openAiZodResponseFormat(prompt.schema, `result_shape`),
     messages: prompt.messages,
   };

@@ -6447,7 +6447,7 @@ __metadata:
     nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
     nativewind: "patch:nativewind@npm%3A4.1.23#~/.yarn/patches/nativewind-npm-4.1.23-ea5a3f1461.patch"
     onnxruntime-web: "npm:^1.25.1"
-    openai: "npm:^6.39.0"
+    openai: "npm:^6.45.0"
     oslo: "npm:^1.2.1"
     oxfmt: "npm:^0.48.0"
     oxlint: "npm:^1.63.0"
@@ -19151,20 +19151,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openai@npm:^6.39.0":
-  version: 6.39.0
-  resolution: "openai@npm:6.39.0"
+"openai@npm:^6.45.0":
+  version: 6.45.0
+  resolution: "openai@npm:6.45.0"
   peerDependencies:
+    "@aws-sdk/credential-provider-node": ">=3.972.0 <4"
+    "@smithy/hash-node": ">=4.3.0 <5"
+    "@smithy/signature-v4": ">=5.4.0 <6"
     ws: ^8.18.0
     zod: ^3.25 || ^4.0
   peerDependenciesMeta:
+    "@aws-sdk/credential-provider-node":
+      optional: true
+    "@smithy/hash-node":
+      optional: true
+    "@smithy/signature-v4":
+      optional: true
     ws:
       optional: true
     zod:
       optional: true
-  bin:
-    openai: bin/cli
-  checksum: 10c0/cc3d07840795be58776b5a4b372d53d3acab88298022a1191cc9471bfd06401663488113ff3002b6c2b89011270969328608dccbf53100357461da71004cb385
+  checksum: 10c0/d59fdcb75d20e81f6b1d4c0a0591dfd10b8078ed6a0d2ae1abc7768efc70106a1e94ccbc9b9c01d31dcecc73285be767d7418a115647c631f4cb58202f55eafa
   languageName: node
   linkType: hard
 

@@ -76,7 +76,12 @@ Generate {{ count }} distinct mnemonic story ideas.
     },
   ];
 
-  return { messages, schema: buildPronunciationHintPrompt.schema };
+  return {
+    messages,
+    schema: buildPronunciationHintPrompt.schema,
+    model: `gpt-5-mini`,
+    reasoningEffort: `medium`,
+  };
 }
 buildPronunciationHintPrompt.schema = z
   .object({
@@ -203,7 +208,12 @@ Generate {{ count }} distinct mnemonic hints.
     },
   ];
 
-  return { messages, schema: meaningHintOutputSchema };
+  return {
+    messages,
+    schema: meaningHintOutputSchema,
+    model: `gpt-5-mini`,
+    reasoningEffort: `medium`,
+  };
 };
 buildMeaningHintPrompt.strategy = `visual`;
 buildMeaningHintPrompt.schema = meaningHintOutputSchema;
@@ -266,7 +276,12 @@ Generate {{ count }} distinct mnemonic hints:
     },
   ];
 
-  return { messages, schema: meaningHintOutputSchema };
+  return {
+    messages,
+    schema: meaningHintOutputSchema,
+    model: `gpt-5-mini`,
+    reasoningEffort: `medium`,
+  };
 };
 buildMeaningHintLogicalPrompt.strategy = `logical`;
 buildMeaningHintLogicalPrompt.schema = meaningHintOutputSchema;
@@ -331,7 +346,12 @@ Generate {{ count }} distinct reusable location descriptions for this exact comb
     },
   ];
 
-  return { messages, schema: buildSubLocationDescriptionPrompt.schema };
+  return {
+    messages,
+    schema: buildSubLocationDescriptionPrompt.schema,
+    model: `gpt-5-mini`,
+    reasoningEffort: `medium`,
+  };
 }
 buildSubLocationDescriptionPrompt.schema = z
   .object({
@@ -401,7 +421,12 @@ Generate {{ count }} distinct character personality descriptions for this charac
     },
   ];
 
-  return { messages, schema: buildLeadCharacterDescriptionPrompt.schema };
+  return {
+    messages,
+    schema: buildLeadCharacterDescriptionPrompt.schema,
+    model: `gpt-5-mini`,
+    reasoningEffort: `medium`,
+  };
 }
 buildLeadCharacterDescriptionPrompt.schema = z
   .object({

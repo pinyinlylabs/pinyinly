@@ -108,7 +108,10 @@ function ExpandableGlosses({
           <Text>
             {intersperse(
               glosses.map((gloss, i) => (
-                <Text className="font-sans text-[16px] text-fg-loud" key={i}>
+                <Text
+                  className="font-sans text-2xl font-medium text-fg-loud"
+                  key={i}
+                >
                   {gloss}
                 </Text>
               )),

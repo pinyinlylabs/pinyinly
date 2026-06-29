@@ -7,9 +7,9 @@ import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
 
-const maxUsedAsComponent = 5;
+const maxUsedInCharacters = 5;
 
-export function WikiHanziCharacterUsedAsComponent({
+export function WikiHanziCharacterUsedInCharacters({
   hanzi,
 }: {
   hanzi: HanziText;
@@ -57,14 +57,14 @@ export function WikiHanziCharacterUsedAsComponent({
 
   const entries = (entriesWithDupes ?? [])
     .filter(arrayFilterUnique((item) => item.hanzi))
-    .slice(0, maxUsedAsComponent);
+    .slice(0, maxUsedInCharacters);
 
   if (!isSingleCharacter || entries.length === 0) {
     return null;
   }
 
   return (
-    <WikiTitledBox title="Used as component in">
+    <WikiTitledBox title="Used in characters">
       <View className="p-3">
         <CompactWordRows dictionarySearchEntries={entries} />
       </View>
