@@ -1869,7 +1869,7 @@ type GlossParserType = (
   context: GlossParserContextType,
 ) => GlossParseStepType | null;
 
-export type ParsedCedictV2SenseType = { tokens: GlossTokenType[] };
+export type ParsedCedictV2GlossType = { tokens: GlossTokenType[] };
 
 /**
  * Parse a single CC-CEDICT sense into an array of structured gloss item
@@ -1879,7 +1879,7 @@ export type ParsedCedictV2SenseType = { tokens: GlossTokenType[] };
  */
 export function parseCedictV2Sense(
   sense: CedictV2EntryType[`senses`][number],
-): ParsedCedictV2SenseType[] {
+): ParsedCedictV2GlossType[] {
   return splitCedictV2Sense(sense).map((gloss) => ({
     tokens: parseCedictV2Gloss(gloss),
   }));
@@ -1894,7 +1894,7 @@ export function parseCedictV2Sense(
  * Labels are wrapped in `()`, or `{{}}` in debug mode.
  */
 export function serializeCedictV2Sense(
-  senses: ParsedCedictV2SenseType[],
+  senses: ParsedCedictV2GlossType[],
   opts?: { debug?: boolean },
 ): string | null {
   if (senses.length === 0) {

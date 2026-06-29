@@ -1,6 +1,6 @@
 // pyly-not-src-test
 import { describe, expect, test, vi } from "vitest";
-import type { CedictV2EntryType, ParsedCedictV2SenseType } from "./cedict";
+import type { CedictV2EntryType, ParsedCedictV2GlossType } from "./cedict";
 import {
   buildCedictSenseSampling,
   applyCedictV2EditsToText,
@@ -1281,7 +1281,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`groups multiple consecutive classifier items into one uses-classifier fragment`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `text`, text: `some noun` },
@@ -1296,7 +1296,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes alsoPr items`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `text`, text: `outside` },
@@ -1310,7 +1310,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes abbrFor items`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           {
@@ -1327,7 +1327,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes abbrFor free-text payloads`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           {
@@ -1344,7 +1344,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes abbrTo items`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `abbrTo`, value: `世博[Shi4bo2]` }],
       },
@@ -1354,7 +1354,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`groups multiple consecutive alsoPr items`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `alsoPr`, value: `san1geng1` },
@@ -1368,7 +1368,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes marker-specific pronunciation tokens`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `alsoPr`, value: `hui3`, marker: `taiwan` }],
       },
@@ -1377,7 +1377,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes generic pronunciation marker`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `alsoPr`, value: `biang4`, marker: `generic` }],
       },
@@ -1386,7 +1386,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`does not group consecutive alsoPr items with different markers`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `alsoPr`, value: `an1`, marker: `colloquial` },
@@ -1401,7 +1401,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes standalone variant-of`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `variantOf`, value: `餵|喂[wei4]` }],
       },
@@ -1411,7 +1411,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes old label + variant-of as old variant-of`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `label`, value: `old` },
@@ -1424,7 +1424,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes standalone see`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `see`, value: `筊杯[jiao3bei1]` }],
       },
@@ -1434,7 +1434,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`groups multiple consecutive see items`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `see`, value: `筊杯[jiao3bei1]` },
@@ -1449,7 +1449,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes inline see in parentheses`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `text`, text: `mythical animal` },
@@ -1464,7 +1464,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes standalone see also`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `seeAlso`, value: `槲樹|槲树[hu2shu4]` }],
       },
@@ -1476,7 +1476,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes inline see also in parentheses`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `text`, text: `the most handsome boy in the school` },
@@ -1491,7 +1491,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes standalone also written`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `alsoWritten`, value: `三疊紀|三叠纪` }],
       },
@@ -1503,7 +1503,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes standalone used in`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `usedIn`, value: `刺棱[ci1leng1]` }],
       },
@@ -1513,7 +1513,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes inline used in in parentheses`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `text`, text: `word` },
@@ -1528,7 +1528,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`does not special-case free-text used in as a token`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [{ kind: `text`, text: `orange peel (used in TCM)` }],
       },
@@ -1538,7 +1538,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`does not special-case "used in" text tokens`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           {
@@ -1555,7 +1555,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes classifierFor item`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           {
@@ -1586,7 +1586,7 @@ describe(`serializeCedictV2Sense`, () => {
   });
 
   test(`serializes inline classifier-for in parentheses`, () => {
-    const glosses: ParsedCedictV2SenseType[] = [
+    const glosses: ParsedCedictV2GlossType[] = [
       {
         tokens: [
           { kind: `text`, text: `word` },
