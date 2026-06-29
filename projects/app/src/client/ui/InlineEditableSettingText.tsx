@@ -460,7 +460,7 @@ const displayTextStyle = tv({
   base: `text-left`,
   variants: {
     variant: {
-      body: `pyly-body text-[14px] text-fg`,
+      body: `pyly-body text-fg`,
       title: `text-3xl font-bold text-fg`,
     },
   },
@@ -470,7 +470,7 @@ const emptyTextStyle = tv({
   base: `text-left`,
   variants: {
     variant: {
-      body: `pyly-body text-[14px] text-fg-dim`,
+      body: `pyly-body text-fg-dim`,
       title: `select-none text-3xl text-fg/20`,
     },
   },
@@ -480,7 +480,7 @@ const inputText = tv({
   base: `text-left`,
   variants: {
     variant: {
-      body: `pyly-body rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
+      body: `pyly-body rounded-md bg-bg-high px-2 py-1 text-fg`,
       title: `rounded-md bg-bg-high px-1 py-0.5 text-3xl font-bold text-fg`,
     },
   },
