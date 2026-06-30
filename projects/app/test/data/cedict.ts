@@ -1869,7 +1869,7 @@ type GlossParserType = (
   context: GlossParserContextType,
 ) => GlossParseStepType | null;
 
-export type ParsedCedictV2SenseType = { tokens: GlossTokenType[] };
+export type ParsedCedictV2GlossType = { tokens: GlossTokenType[] };
 
 /**
  * Parse a single CC-CEDICT sense into an array of structured gloss item
@@ -1879,7 +1879,7 @@ export type ParsedCedictV2SenseType = { tokens: GlossTokenType[] };
  */
 export function parseCedictV2Sense(
   sense: CedictV2EntryType[`senses`][number],
-): ParsedCedictV2SenseType[] {
+): ParsedCedictV2GlossType[] {
   return splitCedictV2Sense(sense).map((gloss) => ({
     tokens: parseCedictV2Gloss(gloss),
   }));
@@ -1894,7 +1894,7 @@ export function parseCedictV2Sense(
  * Labels are wrapped in `()`, or `{{}}` in debug mode.
  */
 export function serializeCedictV2Sense(
-  senses: ParsedCedictV2SenseType[],
+  senses: ParsedCedictV2GlossType[],
   opts?: { debug?: boolean },
 ): string | null {
   if (senses.length === 0) {
@@ -3825,6 +3825,71 @@ export async function findCedictSenseById(
   return idsRule;
 }
 
+function shouldIncludeAlsoPrMarkerForDictionary(
+  marker: GlossTokenAlsoPrType[`marker`],
+): boolean {
+  return (
+    marker == null ||
+    marker === `also` ||
+    marker === `generic` ||
+    marker === `beijing`
+  );
+}
+
+function extractDictionaryPinyinFromResolvedCedictSense(
+  resolvedSense: CedictV2SenseIdRuleType,
+  primaryPinyinNumeric: PinyinNumericText,
+): PinyinText[] {
+  const pinyins: PinyinText[] = [normalizePinyinText(primaryPinyinNumeric)];
+
+  for (const parsedGloss of parseCedictV2Sense(resolvedSense.sense)) {
+    for (const token of parsedGloss.tokens) {
+      if (token.kind !== `alsoPr`) {
+        continue;
+      }
+
+      if (!shouldIncludeAlsoPrMarkerForDictionary(token.marker)) {
+        continue;
+      }
+
+      pinyins.push(normalizePinyinText(token.value as PinyinNumericText));
+    }
+  }
+
+  // Keep first-seen order while removing duplicates.
+  const seen = new Set<PinyinText>();
+  const deduped: PinyinText[] = [];
+  for (const pinyin of pinyins) {
+    if (seen.has(pinyin)) {
+      continue;
+    }
+
+    seen.add(pinyin);
+    deduped.push(pinyin);
+  }
+
+  return deduped;
+}
+
+export async function extractDictionaryPinyinFromCedictSense(
+  cedictSenseId: string,
+): Promise<PinyinText[] | null> {
+  const resolvedSense = await mockable.findCedictSenseById(cedictSenseId);
+  if (resolvedSense == null) {
+    return null;
+  }
+
+  const parsedSenseId = parseCedictSenseId(cedictSenseId);
+  if (parsedSenseId == null) {
+    return null;
+  }
+
+  return extractDictionaryPinyinFromResolvedCedictSense(
+    resolvedSense,
+    parsedSenseId.pinyin,
+  );
+}
+
 export function buildCedictSenseId(
   traditional: string,
   simplified: string,
@@ -5484,3 +5549,7 @@ export function isLikelyOverSplitCedictEntry(
   const parsedSenses = entry.senses.map((sense) => parseCedictV2Sense(sense));
   return parsedSenses.every((glosses) => glosses.length === 1);
 }
+
+export const mockable = {
+  findCedictSenseById,
+};

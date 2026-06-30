@@ -14,7 +14,7 @@ import type {
 } from "#data/model.ts";
 import { isCi } from "#util/env.js";
 import { PartOfSpeech } from "#data/model.ts";
-import { normalizePinyinText, pinyinUnitCount } from "#data/pinyin.js";
+import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
@@ -55,6 +55,7 @@ import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import {
   buildCedictSenseId,
+  extractDictionaryPinyinFromCedictSense,
   findCedictSenseById,
   parseCedictSenseId,
 } from "./data/cedict.ts";
@@ -62,6 +63,7 @@ import { 拼音, 汉 } from "./data/helpers.ts";
 import { fmtJsonFile } from "@pinyinly/lib/fs";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
+import isEqual from "lodash/isEqual";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -258,121 +260,10 @@ test(`hanzi word meaning pinyin lint`, async () => {
   expect(multiplePinyin, `hanzi words with multiple pinyin`)
     .toMatchInlineSnapshot(`
       [
-        "下面:below",
-        "似:resemble",
-        "便:convenience",
-        "兄:brother",
-        "兴:rise",
-        "具:tool",
-        "切:cut",
-        "划:row",
-        "创:begin",
-        "利:benefit",
-        "务:business",
-        "势:power",
-        "匸:hidingEnclosure",
-        "午:noon",
-        "参:participate",
-        "右边:rightSide",
-        "同:together",
-        "后面:behind",
-        "味道:taste",
-        "哥:brother",
-        "喜欢:like",
-        "回去:goBack",
-        "回来:comeBack",
-        "困难:difficult",
-        "地上:onTheGround",
-        "坐下:sitDown",
-        "基本上:basically",
-        "堂:hall",
-        "声:sound",
-        "处:place",
-        "大人:adult",
-        "大部分:majority",
-        "太阳:sun",
-        "夫:man",
-        "头发:hair",
-        "女朋友:girlfriend",
-        "好处:advantage",
-        "姑:aunt",
-        "娘:mother",
-        "学生:student",
-        "宜:suitable",
-        "实:real",
-        "实际上:actually",
-        "害:injure",
-        "将:will",
-        "小姐:miss",
-        "小时候:childhood",
-        "尽:exhaust",
-        "展:open",
-        "巴:wish",
-        "应:should",
-        "式:style",
-        "形:form",
-        "彩:hue",
-        "态度:attitude",
-        "思:think",
-        "息:rest",
-        "情:feeling",
-        "意:thought",
-        "懂得:comprehend",
-        "打听:inquire",
-        "散:scatter",
-        "明:bright",
-        "明白:understand",
-        "晚上:evening",
-        "晨:morning",
-        "月亮:moon",
-        "有时候:sometimes",
-        "朋友:friend",
-        "服:clothes",
-        "望:gaze",
-        "材:material",
-        "格:pattern",
-        "欢:happy",
-        "汉语:chineseLanguage",
-        "法:law",
-        "消息:news",
-        "清楚:clear",
-        "漂:float",
-        "烦:bother",
-        "然:yes",
-        "照顾:takeCareOf",
-        "爱人:spouse",
-        "物:thing",
-        "理:reason",
-        "男朋友:boyfriend",
-        "相:mutual",
-        "看上去:look",
-        "看起来:seem",
-        "眼睛:eyes",
-        "睛:eyeball",
-        "视:watch",
-        "神:spirit",
-        "笑话:joke",
-        "笑话儿:joke",
-        "答:answer",
-        "经:undergo",
-        "结:knot",
-        "老太太:oldLady",
-        "老是:always",
-        "老朋友:oldFriend",
-        "落:drop",
-        "行李:luggage",
-        "衣服:clothing",
-        "觉:feel",
-        "记住:remember",
-        "识:recognize",
-        "诉:accuse",
-        "误:mistake",
-        "谢:thank",
-        "负:bear",
-        "起来:standUp",
-        "路上:onTheRoad",
-        "还是:or",
-        "里面:inside",
+        "一:one",
+        "外面:outside",
+        "夭:dieYoung",
+        "谁:who",
       ]
     `);
 });
@@ -475,32 +366,19 @@ test(
         continue;
       }
 
-      const resolvedSense = await findCedictSenseById(meaning.cedict);
-      if (resolvedSense == null) {
+      const expectedPinyin = await extractDictionaryPinyinFromCedictSense(
+        meaning.cedict,
+      );
+      if (expectedPinyin == null) {
         // assertion thrown in another test, so just skip this case here to avoid noise
         continue;
       }
 
-      const parsedSenseId = nonNullable(parseCedictSenseId(meaning.cedict));
-
-      const expectedPinyin = normalizePinyinText(parsedSenseId.pinyin);
-
-      if (meaning.pinyin != null && meaning.pinyin.length > 1) {
-        // oxlint-disable-next-line no-console
-        console.log(
-          `skipping ${hanziWord} because it has multiple pinyin entries`,
-        );
-        continue;
-      }
-
-      const pinyinMatches =
-        meaning.pinyin != null &&
-        meaning.pinyin.length === 1 &&
-        meaning.pinyin[0] === expectedPinyin;
+      const pinyinMatches = isEqual(meaning.pinyin, expectedPinyin);
 
       if (!pinyinMatches) {
         mismatches.push(hanziWord);
-        meaning.pinyin = [expectedPinyin];
+        meaning.pinyin = expectedPinyin;
       }
     }
 
