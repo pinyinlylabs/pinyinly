@@ -1,15 +1,15 @@
 import type {
-    HanziWordToGlossTypedQuestion,
-    HanziWordToGlossTypedSkill,
-    MistakeType,
-    QuestionFlagType,
-    UnsavedSkillRating,
+  HanziWordToGlossTypedQuestion,
+  HanziWordToGlossTypedSkill,
+  MistakeType,
+  QuestionFlagType,
+  UnsavedSkillRating,
 } from "@/data/model";
 import { MistakeKind, QuestionFlagKind, QuestionKind } from "@/data/model";
 import {
-    computeSkillRating,
-    hanziWordFromSkill,
-    hanziWordToGlossTyped,
+  computeSkillRating,
+  hanziWordFromSkill,
+  hanziWordToGlossTyped,
 } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { Rating } from "@/util/fsrs";
@@ -71,7 +71,7 @@ export type HanziToGlossTypedQuestionGrade =
       mistakes: MistakeType[];
     };
 
-function normalizeGlossForMatch(gloss: string): string {
+export function normalizeGlossForMatch(gloss: string): string {
   return (
     gloss
       .normalize(`NFKC`)
@@ -83,6 +83,7 @@ function normalizeGlossForMatch(gloss: string): string {
       // Treat punctuation variants (e.g. parentheses, commas, trailing hyphen)
       // as optional separators.
       .replaceAll(/[\p{P}\p{S}]+/gu, ` `)
+      .replaceAll(/^to (.+)/gu, `$1`) // Remove leading "to" for verbs.
       .replaceAll(/\s+/gu, ` `)
       .trim()
   );

@@ -2,6 +2,7 @@ import { QuestionFlagKind } from "#data/model.js";
 import {
   gradeHanziToGlossTypedQuestion,
   hanziWordToGlossTypedQuestionOrThrow,
+  normalizeGlossForMatch,
 } from "#data/questions/hanziWordToGlossTyped.ts";
 import { hanziWordToGlossTyped } from "#data/skills.js";
 import { loadDictionary } from "#dictionary.ts";
@@ -138,6 +139,30 @@ describe(
 );
 
 describe(
+  `normalizeGlossForMatch suite` satisfies HasNameOf<
+    typeof normalizeGlossForMatch
+  >,
+  () => {
+    test.for([
+      [`non`, `non-`],
+      [`un`, `un-`],
+      [`cant stand`, `can’t stand`],
+      [`cant stand`, `can't stand`],
+      [`step over obstacle`, `step (over obstacle)`],
+      [`why`, `why?`],
+      [`prepare`, `to prepare`],
+    ] as const)(
+      `accepts $1 as an answer for $0`,
+      async ([hanziWord, userGloss]) => {
+        expect(normalizeGlossForMatch(userGloss)).toEqual(
+          normalizeGlossForMatch(hanziWord),
+        );
+      },
+    );
+  },
+);
+
+describe(
   `gradeHanziToGlossTypedQuestion suite` satisfies HasNameOf<
     typeof gradeHanziToGlossTypedQuestion
   >,
@@ -145,13 +170,6 @@ describe(
     test.for([
       [`非:not`, `non-`],
       [`非:not`, `non`],
-      [`非:not`, `un-`],
-      [`非:not`, `un`],
-      [`受不了:unbearable`, `can’t stand`],
-      [`受不了:unbearable`, `can't stand`],
-      [`受不了:unbearable`, `cant stand`],
-      [`台阶:steps`, `step (over obstacle)`],
-      [`台阶:steps`, `step over obstacle`],
     ] as const)(
       `accepts $1 as an answer for $0`,
       async ([hanziWord, userGloss]) => {
