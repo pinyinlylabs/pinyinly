@@ -19,6 +19,7 @@ import {
   computeGlossesSimilarity,
   decodeCedictSenseSamplingRow,
   encodeCedictSenseSamplingRow,
+  extractDictionaryPinyinFromCedictSense,
   findCedictSenseById,
   isLikelyOverSplitCedictEntry,
   loadCedictSenseSampling,
@@ -54,6 +55,7 @@ import {
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { PinyinNumericText } from "#data/model.js";
 import * as aiModule from "#server/lib/ai.js";
+import * as cedictModule from "./cedict";
 
 describe(`isLikelyOverSplitCedictEntry`, () => {
   test.for([
@@ -3005,6 +3007,53 @@ describe(`findCedictSenseById`, () => {
       null,
     );
     await expect(findCedictSenseById(``)).resolves.toBe(null);
+  });
+});
+
+describe(`extractDictionaryPinyinFromCedictSense`, () => {
+  test(`resolves pinyin for known CE-DICT sense id`, async () => {
+    const actual = await extractDictionaryPinyinFromCedictSense(
+      `一 一 [[yi1]] KmCz3`,
+    );
+
+    expect(actual).toEqual([`yī`, `yāo`]);
+  });
+
+  test(`returns null for unknown CE-DICT sense id`, async () => {
+    await expect(
+      extractDictionaryPinyinFromCedictSense(`does|not|exist|nope`),
+    ).resolves.toBeNull();
+  });
+
+  test(`includes only primary, unmarked, generic, and Beijing pronunciations`, async () => {
+    const findCedictSenseById = vi
+      .spyOn(cedictModule.mockable, `findCedictSenseById`)
+      .mockResolvedValue({
+        id: `AbCd1`,
+        mergedIds: [],
+        sense: `(also pr. [yao1]); (pr. [yi2]); (Beijing pr. [yi4]); (Taiwan pr. [yi1]); (colloquial pr. [yi3]); (old pr. [yi5]); (ancient pr. [yi2]); (Tai-lo pr. [i2])`,
+      });
+
+    const actual = await extractDictionaryPinyinFromCedictSense(
+      `一 一 [[yi1]] AbCd1`,
+    );
+
+    expect(actual).toEqual([`yī`, `yāo`, `yí`, `yì`]);
+    expect(findCedictSenseById).toHaveBeenCalledWith(`一 一 [[yi1]] AbCd1`);
+  });
+
+  test(`returns only primary pinyin when only excluded marker pronunciations are present`, async () => {
+    vi.spyOn(cedictModule.mockable, `findCedictSenseById`).mockResolvedValue({
+      id: `AbCd1`,
+      mergedIds: [],
+      sense: `(Taiwan pr. [yao1]); (colloquial pr. [yi3]); (old pr. [yi5]); (ancient pr. [yi2]); (Tai-lo pr. [i2])`,
+    });
+
+    const actual = await extractDictionaryPinyinFromCedictSense(
+      `一 一 [[yi1]] AbCd1`,
+    );
+
+    expect(actual).toEqual([`yī`]);
   });
 });
 

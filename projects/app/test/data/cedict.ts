@@ -3825,6 +3825,71 @@ export async function findCedictSenseById(
   return idsRule;
 }
 
+function shouldIncludeAlsoPrMarkerForDictionary(
+  marker: GlossTokenAlsoPrType[`marker`],
+): boolean {
+  return (
+    marker == null ||
+    marker === `also` ||
+    marker === `generic` ||
+    marker === `beijing`
+  );
+}
+
+function extractDictionaryPinyinFromResolvedCedictSense(
+  resolvedSense: CedictV2SenseIdRuleType,
+  primaryPinyinNumeric: PinyinNumericText,
+): PinyinText[] {
+  const pinyins: PinyinText[] = [normalizePinyinText(primaryPinyinNumeric)];
+
+  for (const parsedGloss of parseCedictV2Sense(resolvedSense.sense)) {
+    for (const token of parsedGloss.tokens) {
+      if (token.kind !== `alsoPr`) {
+        continue;
+      }
+
+      if (!shouldIncludeAlsoPrMarkerForDictionary(token.marker)) {
+        continue;
+      }
+
+      pinyins.push(normalizePinyinText(token.value as PinyinNumericText));
+    }
+  }
+
+  // Keep first-seen order while removing duplicates.
+  const seen = new Set<PinyinText>();
+  const deduped: PinyinText[] = [];
+  for (const pinyin of pinyins) {
+    if (seen.has(pinyin)) {
+      continue;
+    }
+
+    seen.add(pinyin);
+    deduped.push(pinyin);
+  }
+
+  return deduped;
+}
+
+export async function extractDictionaryPinyinFromCedictSense(
+  cedictSenseId: string,
+): Promise<PinyinText[] | null> {
+  const resolvedSense = await mockable.findCedictSenseById(cedictSenseId);
+  if (resolvedSense == null) {
+    return null;
+  }
+
+  const parsedSenseId = parseCedictSenseId(cedictSenseId);
+  if (parsedSenseId == null) {
+    return null;
+  }
+
+  return extractDictionaryPinyinFromResolvedCedictSense(
+    resolvedSense,
+    parsedSenseId.pinyin,
+  );
+}
+
 export function buildCedictSenseId(
   traditional: string,
   simplified: string,
@@ -5484,3 +5549,7 @@ export function isLikelyOverSplitCedictEntry(
   const parsedSenses = entry.senses.map((sense) => parseCedictV2Sense(sense));
   return parsedSenses.every((glosses) => glosses.length === 1);
 }
+
+export const mockable = {
+  findCedictSenseById,
+};
