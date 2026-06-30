@@ -1,5 +1,8 @@
 import { QuestionFlagKind } from "#data/model.js";
-import { hanziWordToGlossTypedQuestionOrThrow } from "#data/questions/hanziWordToGlossTyped.ts";
+import {
+  gradeHanziToGlossTypedQuestion,
+  hanziWordToGlossTypedQuestionOrThrow,
+} from "#data/questions/hanziWordToGlossTyped.ts";
 import { hanziWordToGlossTyped } from "#data/skills.js";
 import { loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
@@ -131,5 +134,35 @@ describe(
         }
       `);
     });
+  },
+);
+
+describe(
+  `gradeHanziToGlossTypedQuestion suite` satisfies HasNameOf<
+    typeof gradeHanziToGlossTypedQuestion
+  >,
+  () => {
+    test.for([
+      [`非:not`, `non-`],
+      [`非:not`, `non`],
+      [`非:not`, `un-`],
+      [`非:not`, `un`],
+      [`受不了:unbearable`, `can’t stand`],
+      [`受不了:unbearable`, `can't stand`],
+      [`受不了:unbearable`, `cant stand`],
+      [`台阶:steps`, `step (over obstacle)`],
+      [`台阶:steps`, `step over obstacle`],
+    ] as const)(
+      `accepts $1 as an answer for $0`,
+      async ([hanziWord, userGloss]) => {
+        const question = await hanziWordToGlossTypedQuestionOrThrow(
+          `het:${hanziWord}`,
+          null,
+        );
+        const grade = gradeHanziToGlossTypedQuestion(question, userGloss, 1000);
+
+        expect(grade.correct).toBe(true);
+      },
+    );
   },
 );
