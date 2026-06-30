@@ -205,7 +205,6 @@ export function WikiHanziCharacterDecompositionBox({
   return (
     <WikiTitledBox
       title="Recognize the character"
-      className="mt-4"
       onEditingChange={setIsEditMode}
     >
       <View className="gap-4 p-4">

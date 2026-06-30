@@ -15,7 +15,7 @@ import { WikiHanziWordCharacters } from "./WikiHanziWordCharacters";
 export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
   return (
     <PylyMdxComponents>
-      <View className="flex-1 gap-6 bg-bg py-7">
+      <View className="flex-1 gap-10 bg-bg py-7">
         <WikiHanziHeaderOverview hanzi={hanzi} />
 
         <WikiHanziWordCharacters hanzi={hanzi} />
