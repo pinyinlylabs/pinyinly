@@ -150,7 +150,7 @@
     "@types/ws": "^8 <=8.17.x",
     "@typescript-eslint/utils": "^8.59.2",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.0.0",
     "babel-plugin-react-compiler": "1.0.0",
     "babel-plugin-transform-import-meta": "^2.3.3",
     "chalk": "^5.5.0",
