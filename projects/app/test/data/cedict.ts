@@ -604,7 +604,10 @@ export function parseCedictV2Line(
   };
 }
 
-export function parseCedictV2EditsText(text: string): CedictV2EditsType {
+export function parseCedictV2EditsText(
+  text: string,
+  sourcePath?: string,
+): CedictV2EditsType {
   const lines = text.split(/\r?\n/u);
   const entriesById = new Map<string, CedictV2EntryEditsType>();
   let i = 0;
@@ -619,7 +622,7 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
       continue;
     }
 
-    const header = parseCedictV2EditHeader(trimmed, lineNumber);
+    const header = parseCedictV2EditHeader(trimmed, lineNumber, sourcePath);
     i += 1;
 
     const rules: CedictV2EditRuleType[] = [];
@@ -639,13 +642,19 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
         continue;
       }
 
-      rules.push(parseCedictV2EditRule(ruleTrimmed, ruleLineNumber));
+      rules.push(
+        parseCedictV2EditRule(ruleTrimmed, ruleLineNumber, sourcePath),
+      );
       i += 1;
     }
 
     if (rules.length === 0) {
       throw new Error(
-        formatCedictEditsParseError(`edit block has no rules`, lineNumber),
+        formatCedictEditsParseError(
+          `edit block has no rules`,
+          lineNumber,
+          sourcePath,
+        ),
       );
     }
 
@@ -656,6 +665,7 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
         formatCedictEditsParseError(
           `duplicate edit block for ${entryId}`,
           lineNumber,
+          sourcePath,
         ),
       );
     }
@@ -673,7 +683,10 @@ export function parseCedictV2EditsText(text: string): CedictV2EditsType {
   };
 }
 
-export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
+export function parseCedictV2IdsText(
+  text: string,
+  sourcePath?: string,
+): CedictV2SenseIdsType {
   const lines = text.split(/\r?\n/u);
   const entriesByKey = new Map<string, CedictV2EntrySenseIdsType>();
   let i = 0;
@@ -688,7 +701,7 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
       continue;
     }
 
-    const header = parseCedictV2EditHeader(trimmed, lineNumber);
+    const header = parseCedictV2EditHeader(trimmed, lineNumber, sourcePath);
     i += 1;
 
     const rules: CedictV2SenseIdRuleType[] = [];
@@ -711,12 +724,17 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
         continue;
       }
 
-      const parsedRule = parseCedictV2SenseIdRule(ruleTrimmed, ruleLineNumber);
+      const parsedRule = parseCedictV2SenseIdRule(
+        ruleTrimmed,
+        ruleLineNumber,
+        sourcePath,
+      );
       if (seenIds.has(parsedRule.id)) {
         throw new Error(
           formatCedictIdsParseError(
             `duplicate ID in ids block: ${parsedRule.id}`,
             ruleLineNumber,
+            sourcePath,
           ),
         );
       }
@@ -726,6 +744,7 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
           formatCedictIdsParseError(
             `duplicate sense in ids block: ${parsedRule.sense}`,
             ruleLineNumber,
+            sourcePath,
           ),
         );
       }
@@ -735,6 +754,7 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
           formatCedictIdsParseError(
             `primary ID also listed as merged ID in ids block: ${parsedRule.id}`,
             ruleLineNumber,
+            sourcePath,
           ),
         );
       }
@@ -745,6 +765,7 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
             formatCedictIdsParseError(
               `merged ID conflicts with primary ID in ids block: ${mergedId}`,
               ruleLineNumber,
+              sourcePath,
             ),
           );
         }
@@ -755,6 +776,7 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
             formatCedictIdsParseError(
               `duplicate merged ID in ids block: ${mergedId}`,
               ruleLineNumber,
+              sourcePath,
             ),
           );
         }
@@ -770,7 +792,11 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
 
     if (rules.length === 0) {
       throw new Error(
-        formatCedictIdsParseError(`ids block has no rules`, lineNumber),
+        formatCedictIdsParseError(
+          `ids block has no rules`,
+          lineNumber,
+          sourcePath,
+        ),
       );
     }
 
@@ -781,6 +807,7 @@ export function parseCedictV2IdsText(text: string): CedictV2SenseIdsType {
         formatCedictIdsParseError(
           `duplicate ids block for ${entryId}`,
           lineNumber,
+          sourcePath,
         ),
       );
     }
@@ -992,17 +1019,25 @@ export function buildCedictV2SenseIdsText(
   };
 }
 
+function getRepoRelativePath(filePath: string): string {
+  const repoRoot = path.resolve(import.meta.dirname, `../../../../`);
+  return path.relative(repoRoot, filePath).split(path.sep).join(`/`);
+}
+
 export const loadCedictV2Edits = memoize0(
   async (): Promise<CedictV2EditsType> => {
     const editsText = await readFile(cedictEditsPath, `utf8`);
-    return parseCedictV2EditsText(editsText);
+    return parseCedictV2EditsText(
+      editsText,
+      getRepoRelativePath(cedictEditsPath),
+    );
   },
 );
 
 export const loadCedictV2Ids = memoize0(
   async (): Promise<CedictV2SenseIdsType> => {
     const idsText = await readFile(cedictIdsPath, `utf8`);
-    return parseCedictV2IdsText(idsText);
+    return parseCedictV2IdsText(idsText, getRepoRelativePath(cedictIdsPath));
   },
 );
 
@@ -4316,11 +4351,16 @@ function formatParseError(
 function parseCedictV2EditHeader(
   line: string,
   lineNumber: number,
+  sourcePath?: string,
 ): { traditional: string; simplified: string; pinyin: PinyinNumericText } {
   const match = line.match(/^(\S+)\s+(\S+)\s+\[\[(.*?)\]\]$/u);
   if (match == null) {
     throw new Error(
-      formatCedictEditsParseError(`invalid edits header line`, lineNumber),
+      formatCedictEditsParseError(
+        `invalid edits header line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4329,7 +4369,11 @@ function parseCedictV2EditHeader(
   const pinyin = match[3];
   if (traditional == null || simplified == null || pinyin == null) {
     throw new Error(
-      formatCedictEditsParseError(`invalid edits header line`, lineNumber),
+      formatCedictEditsParseError(
+        `invalid edits header line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4343,13 +4387,18 @@ function parseCedictV2EditHeader(
 function parseCedictV2EditRule(
   line: string,
   lineNumber: number,
+  sourcePath?: string,
 ): CedictV2EditRuleType {
   const addMatch = line.match(/^\+\s*\/(?<newSense>[^/]*)\/$/u);
   if (addMatch != null) {
     const newSense = addMatch.groups?.[`newSense`]?.trim();
     if (newSense == null || newSense.length === 0) {
       throw new Error(
-        formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+        formatCedictEditsParseError(
+          `invalid edits rule line`,
+          lineNumber,
+          sourcePath,
+        ),
       );
     }
 
@@ -4368,7 +4417,11 @@ function parseCedictV2EditRule(
       mergeSeparators.match(/^\s*(?:\+=\s*)+$/u) == null
     ) {
       throw new Error(
-        formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+        formatCedictEditsParseError(
+          `invalid edits rule line`,
+          lineNumber,
+          sourcePath,
+        ),
       );
     }
 
@@ -4378,7 +4431,11 @@ function parseCedictV2EditRule(
 
     if (oldSenses.length !== mergeSenseMatches.length) {
       throw new Error(
-        formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+        formatCedictEditsParseError(
+          `invalid edits rule line`,
+          lineNumber,
+          sourcePath,
+        ),
       );
     }
 
@@ -4394,7 +4451,11 @@ function parseCedictV2EditRule(
   );
   if (match == null) {
     throw new Error(
-      formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+      formatCedictEditsParseError(
+        `invalid edits rule line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4402,7 +4463,11 @@ function parseCedictV2EditRule(
   const replacement = match.groups?.[`replacement`];
   if (oldSense == null || replacement == null || oldSense.length === 0) {
     throw new Error(
-      formatCedictEditsParseError(`invalid edits rule line`, lineNumber),
+      formatCedictEditsParseError(
+        `invalid edits rule line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4425,13 +4490,18 @@ function parseCedictV2EditRule(
 function parseCedictV2SenseIdRule(
   line: string,
   lineNumber: number,
+  sourcePath?: string,
 ): CedictV2SenseIdRuleType {
   const match = line.match(
     /^(?<id>[A-Za-z0-9]{5})(?:←(?<mergedIds>[A-Za-z0-9]{5}(?:,[A-Za-z0-9]{5})*))?\s+\/(?<sense>[^/]*)\/$/u,
   );
   if (match == null) {
     throw new Error(
-      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+      formatCedictIdsParseError(
+        `invalid ids rule line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4448,7 +4518,11 @@ function parseCedictV2SenseIdRule(
     mergedIds.includes(id ?? ``)
   ) {
     throw new Error(
-      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+      formatCedictIdsParseError(
+        `invalid ids rule line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4459,7 +4533,11 @@ function parseCedictV2SenseIdRule(
     sense.length === 0
   ) {
     throw new Error(
-      formatCedictIdsParseError(`invalid ids rule line`, lineNumber),
+      formatCedictIdsParseError(
+        `invalid ids rule line`,
+        lineNumber,
+        sourcePath,
+      ),
     );
   }
 
@@ -4627,14 +4705,24 @@ function applyCedictEntryEdits(
 function formatCedictEditsParseError(
   message: string,
   lineNumber: number,
+  sourcePath?: string,
 ): string {
+  if (sourcePath != null) {
+    return `${sourcePath}:${lineNumber}: ${message}`;
+  }
+
   return `${message} (line ${lineNumber})`;
 }
 
 function formatCedictIdsParseError(
   message: string,
   lineNumber: number,
+  sourcePath?: string,
 ): string {
+  if (sourcePath != null) {
+    return `${sourcePath}:${lineNumber}: ${message}`;
+  }
+
   return `${message} (line ${lineNumber})`;
 }
 

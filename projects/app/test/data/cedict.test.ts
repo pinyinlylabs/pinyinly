@@ -611,6 +611,15 @@ describe(`parseCedictV2EditsText`, () => {
     ).toThrow(`invalid edits rule line (line 2)`);
   });
 
+  test(`formats malformed rule errors with source path`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [`小二 小二 [[xiao3'er4]]`, `/old/ new`, ``].join(`\n`),
+        `path/to/file`,
+      ),
+    ).toThrow(`path/to/file:2: invalid edits rule line`);
+  });
+
   test(`throws on malformed merge rule lines`, () => {
     expect(() =>
       parseCedictV2EditsText(
@@ -725,6 +734,15 @@ describe(`parseCedictV2IdsText`, () => {
     ).toThrow(`invalid ids rule line (line 2)`);
   });
 
+  test(`formats malformed ids rule errors with source path`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [`小二 小二 [[xiao3'er4]]`, `abc12 old sense`, ``].join(`\n`),
+        `path/to/file`,
+      ),
+    ).toThrow(`path/to/file:2: invalid ids rule line`);
+  });
+
   test(`throws on duplicate merged nanoids in one rule`, () => {
     expect(() =>
       parseCedictV2IdsText(
@@ -761,6 +779,20 @@ describe(`parseCedictV2IdsText`, () => {
         ].join(`\n`),
       ),
     ).toThrow(`duplicate ID in ids block: abc12 (line 3)`);
+  });
+
+  test(`formats duplicate nanoid errors with source path`, () => {
+    expect(() =>
+      parseCedictV2IdsText(
+        [
+          `小二 小二 [[xiao3'er4]]`,
+          `abc12 /old sense 1/`,
+          `abc12 /old sense 2/`,
+          ``,
+        ].join(`\n`),
+        `path/to/file`,
+      ),
+    ).toThrow(`path/to/file:3: duplicate ID in ids block: abc12`);
   });
 
   test(`throws on duplicate sense in one block`, () => {
@@ -2855,7 +2887,7 @@ describe(`loadCedictV2`, () => {
     expect(histogramBySenseCount).toMatchInlineSnapshot(`
       {
         "02": {
-          "count": 26158,
+          "count": 26157,
           "examples": [
             "3C 3C [[san1 C]] /computers, communications, and consumer electronics/China Compulsory Certificate (CCC)/",
             "95後 95后 [[jiu3wu3hou4]] /people born between 1995-01-01 and 1999-12-31/Gen Z (abbr. for 95後|95后[jiu3wu3hou4] + 00後|00后[ling2ling2hou4])/",
@@ -2863,7 +2895,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "03": {
-          "count": 9458,
+          "count": 9455,
           "examples": [
             "B超 B超 [[B chao1]] /B-mode ultrasonography/prenatal ultrasound scan/abbr. for B型超聲|B型超声[B xing2chao1sheng1]/",
             "PA PA [[P A]] /public area attendant (tasked with cleaning the public areas of a hotel)/marketing assistant/sales assistant/",
@@ -2871,7 +2903,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "04": {
-          "count": 3511,
+          "count": 3504,
           "examples": [
             "□ □ [[biang4]] /(Tw) (coll.) cool/awesome/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/often written as ㄅㄧㄤˋ/",
             "ㄅㄧㄤˋ ㄅㄧㄤˋ [[xx5xx5xx5xx5]] /(Tw) (coll.) cool/awesome/pr. [biang4]/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/",
@@ -2879,7 +2911,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "05": {
-          "count": 1404,
+          "count": 1402,
           "examples": [
             "PK PK [[P K]] /(slang) to take on/to challenge/to go head to head/showdown/comparison/",
             "㗂 㗂 [[sheng3]] /variant of 省[sheng3]/tight-lipped/to examine/to watch/to scour (esp. Cantonese)/",
@@ -2887,7 +2919,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "06": {
-          "count": 637,
+          "count": 634,
           "examples": [
             "一套 一套 [[yi1tao4]] /suit/a set/a collection/of the same kind/the same old stuff/set pattern of behavior/",
             "一旦 一旦 [[yi1dan4]] /in case (sth happens)/if/once (sth happens, then...)/when/in a short time/in one day/",
@@ -2895,7 +2927,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "07": {
-          "count": 336,
+          "count": 333,
           "examples": [
             "一般 一般 [[yi1ban1]] /same/ordinary/so-so/common/general/generally/in general/",
             "丁 丁 [[ding1]] /male adult/the 4th of the 10 Heavenly Stems 天干[tian1gan1]/fourth (used like "4" or "D")/small cube of meat or vegetable/(literary) to encounter/(archaic) ancient Chinese compass point: 195°/(chemistry) butyl/",
@@ -2903,7 +2935,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "08": {
-          "count": 146,
+          "count": 145,
           "examples": [
             "一頭 一头 [[yi1tou2]] /one head/a head full of sth/one end (of a stick)/one side/headlong/directly/rapidly/simultaneously/",
             "不是味兒 不是味儿 [[bu4shi4wei4r5]] /not the right flavor/not quite right/a bit off/fishy/queer/amiss/feel bad/be upset/",
@@ -3891,7 +3923,7 @@ test.skipIf(isCi)(
     let existingSampling = await loadCedictSenseSampling();
 
     const { hsk1 } = await groupCedictEntriesByHskLevel(entries);
-    const targetEntryIds = hsk1
+    const targetEntryIds = [...hsk1]
       .filter((entry) => isLikelyOverSplitCedictEntry(entry))
       .map((entry) => buildCedictV2EntryId(entry));
 

@@ -263,6 +263,7 @@ test(`hanzi word meaning pinyin lint`, async () => {
         "一:one",
         "外面:outside",
         "夭:dieYoung",
+        "花:flower",
         "谁:who",
       ]
     `);
