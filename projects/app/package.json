@@ -166,7 +166,7 @@
     "hanzi": "patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch",
     "happy-dom": "^20.9.0",
     "ink": "patch:ink@npm%3A5.2.1#~/.yarn/patches/ink-npm-5.2.1-41d086a4b7.patch",
-    "ink-link": "^4.1.0",
+    "ink-link": "^5.0.0",
     "ink-multi-select": "^2.0.0",
     "ink-select-input": "^6.2.0",
     "ink-spinner": "^5.0.0",
