@@ -71,6 +71,24 @@ export type HanziToGlossTypedQuestionGrade =
       mistakes: MistakeType[];
     };
 
+export function normalizeGlossForMatch(gloss: string): string {
+  return (
+    gloss
+      .normalize(`NFKC`)
+      .toLowerCase()
+      // Treat apostrophe variants as optional so can't == cant.
+      .replaceAll(/['’‘ʼ`´＇]/gu, ``)
+      // Normalize common negative contractions to "not".
+      // .replaceAll(/\b(?:cant|cannot|wont)\b/gu, ` not `)
+      // Treat punctuation variants (e.g. parentheses, commas, trailing hyphen)
+      // as optional separators.
+      .replaceAll(/[\p{P}\p{S}]+/gu, ` `)
+      .replaceAll(/^to (.+)/gu, `$1`) // Remove leading "to" for verbs.
+      .replaceAll(/\s+/gu, ` `)
+      .trim()
+  );
+}
+
 /**
  * Determine if the user's answer is correct, and if not returning 1 or more
  * mistakes.
@@ -80,9 +98,20 @@ export function gradeHanziToGlossTypedQuestion(
   userGloss: string,
   durationMs: number,
 ): HanziToGlossTypedQuestionGrade {
+  const normalizedUserGloss = normalizeGlossForMatch(userGloss);
+
   // Look for a correct answer.
   for (const { skill, glosses } of question.answers) {
-    if (glosses.includes(userGloss)) {
+    const matched = glosses.some((gloss) => {
+      if (gloss === userGloss) {
+        return true;
+      }
+
+      const normalizedGloss = normalizeGlossForMatch(gloss);
+      return normalizedGloss === normalizedUserGloss;
+    });
+
+    if (matched) {
       const correct = true;
       const skillRating = computeSkillRating({
         skill,
