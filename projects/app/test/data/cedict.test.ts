@@ -2895,7 +2895,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "03": {
-          "count": 9455,
+          "count": 9454,
           "examples": [
             "B超 B超 [[B chao1]] /B-mode ultrasonography/prenatal ultrasound scan/abbr. for B型超聲|B型超声[B xing2chao1sheng1]/",
             "PA PA [[P A]] /public area attendant (tasked with cleaning the public areas of a hotel)/marketing assistant/sales assistant/",
@@ -2903,7 +2903,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "04": {
-          "count": 3504,
+          "count": 3501,
           "examples": [
             "□ □ [[biang4]] /(Tw) (coll.) cool/awesome/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/often written as ㄅㄧㄤˋ/",
             "ㄅㄧㄤˋ ㄅㄧㄤˋ [[xx5xx5xx5xx5]] /(Tw) (coll.) cool/awesome/pr. [biang4]/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/",
@@ -2911,7 +2911,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "05": {
-          "count": 1402,
+          "count": 1400,
           "examples": [
             "PK PK [[P K]] /(slang) to take on/to challenge/to go head to head/showdown/comparison/",
             "㗂 㗂 [[sheng3]] /variant of 省[sheng3]/tight-lipped/to examine/to watch/to scour (esp. Cantonese)/",
@@ -2919,7 +2919,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "06": {
-          "count": 634,
+          "count": 633,
           "examples": [
             "一套 一套 [[yi1tao4]] /suit/a set/a collection/of the same kind/the same old stuff/set pattern of behavior/",
             "一旦 一旦 [[yi1dan4]] /in case (sth happens)/if/once (sth happens, then...)/when/in a short time/in one day/",
@@ -2927,7 +2927,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "07": {
-          "count": 333,
+          "count": 332,
           "examples": [
             "一般 一般 [[yi1ban1]] /same/ordinary/so-so/common/general/generally/in general/",
             "丁 丁 [[ding1]] /male adult/the 4th of the 10 Heavenly Stems 天干[tian1gan1]/fourth (used like "4" or "D")/small cube of meat or vegetable/(literary) to encounter/(archaic) ancient Chinese compass point: 195°/(chemistry) butyl/",
@@ -2935,7 +2935,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "08": {
-          "count": 145,
+          "count": 142,
           "examples": [
             "一頭 一头 [[yi1tou2]] /one head/a head full of sth/one end (of a stick)/one side/headlong/directly/rapidly/simultaneously/",
             "不是味兒 不是味儿 [[bu4shi4wei4r5]] /not the right flavor/not quite right/a bit off/fishy/queer/amiss/feel bad/be upset/",
@@ -2943,7 +2943,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "09": {
-          "count": 90,
+          "count": 88,
           "examples": [
             "一世 一世 [[yi1shi4]] /generation/period of 30 years/one's whole lifetime/lifelong/age/era/times/the whole world/the First (of numbered European kings)/",
             "世 世 [[shi4]] /life/age/generation/era/world/lifetime/epoch/descendant/noble/",
@@ -2951,7 +2951,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "10": {
-          "count": 35,
+          "count": 34,
           "examples": [
             "不含糊 不含糊 [[bu4han2hu5]] /unambiguous/unequivocal/explicit/prudent/cautious/not negligent/unafraid/unhesitating/really good/extraordinary/",
             "任 任 [[ren4]] /to assign/to appoint/to take up a post/office/responsibility/to let/to allow/to give free rein to/no matter (how, what etc)/classifier for terms served in office, or for spouses, girlfriends etc (as in 前任男友)/",
@@ -2991,7 +2991,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "15": {
-          "count": 9,
+          "count": 8,
           "examples": [
             "勝 胜 [[sheng4]] /victory/success/to beat/to defeat/to surpass/victorious/superior to/to get the better of/better than/surpassing/superb (of vista)/beautiful (scenery)/wonderful (view)/(Taiwan pr. [sheng1]) able to bear/equal to (a task)/",
             "方 方 [[fang1]] /square/power or involution (math.)/upright/honest/fair and square/direction/side/party (to a contract, dispute etc)/place/method/prescription (medicine)/just when/only or just/classifier for square things/(abbr.) square or cubic meter/",
@@ -3922,8 +3922,8 @@ test.skipIf(isCi)(
     const entries = await loadCedictV2();
     let existingSampling = await loadCedictSenseSampling();
 
-    const { hsk1 } = await groupCedictEntriesByHskLevel(entries);
-    const targetEntryIds = [...hsk1]
+    const { hsk1, hsk2 } = await groupCedictEntriesByHskLevel(entries);
+    const targetEntryIds = [...hsk1, ...hsk2]
       .filter((entry) => isLikelyOverSplitCedictEntry(entry))
       .map((entry) => buildCedictV2EntryId(entry));
 
