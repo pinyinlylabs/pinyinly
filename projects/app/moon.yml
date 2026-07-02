@@ -300,14 +300,6 @@ tasks:
       EXPO_ATLAS: "true"
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
-  formatAssetJson:
-    command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts
-    preset: watcher
-    options:
-      envFile: .env.local
-    env:
-      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
-
   generateHskWordlist:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateHskWordlist.ts
     preset: watcher

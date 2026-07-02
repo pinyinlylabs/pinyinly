@@ -13,7 +13,6 @@ import {
 } from "#dictionary.js";
 import { isCi } from "#util/env.js";
 import { toCamelCase } from "#util/unicode.js";
-import { fmtJsonFile, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { expect, test } from "vitest";
 import type { DisambiguationHintBucket } from "./completeHskVocabulary.ts";
@@ -25,6 +24,7 @@ import {
 } from "./completeHskVocabulary.ts";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
 import { hsk2026FilePath } from "./hsk.ts";
+import { fmtJsonFile, writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 test.skip(`all ivankraHsk30 items are in the dictionary`, async () => {
   const ivankraHsk30 = await loadIvankraHsk30();
@@ -606,5 +606,5 @@ test.skipIf(isCi)(`hsk2026.json export`, async () => {
 });
 
 test.skipIf(isCi)(`hsk2026.json has correct formatting`, async () => {
-  await fmtJsonFile(hsk2026FilePath, 1);
+  await fmtJsonFile(hsk2026FilePath);
 });

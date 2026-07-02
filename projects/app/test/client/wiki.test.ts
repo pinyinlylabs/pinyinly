@@ -38,13 +38,13 @@ import {
   readdir,
   readFileSync,
   rm,
-  writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import {
   invariant,
   nonNullable,
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -503,7 +503,6 @@ describe(`character.json files`, async () => {
         [...expected.entries()].sort(
           sortComparatorString(([character]) => character),
         ),
-        2,
       );
     }
 
@@ -539,7 +538,6 @@ describe(`character.json files`, async () => {
         await writeJsonFileIfChanged(
           path.join(characterStrokeSvgsDir, `${character}.json`),
           strokes,
-          2,
         );
       }
     }
@@ -602,7 +600,6 @@ describe(`character.json files`, async () => {
         await writeJsonFileIfChanged(
           path.join(characterDecompositionsDir, `${character}.json`),
           decompositionData,
-          2,
         );
       }
     }

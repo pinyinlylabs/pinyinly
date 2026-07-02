@@ -60,10 +60,9 @@ import {
   parseCedictSenseId,
 } from "./data/cedict.ts";
 import { 拼音, 汉 } from "./data/helpers.ts";
-import { fmtJsonFile } from "@pinyinly/lib/fs";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import isEqual from "lodash/isEqual";
+import { fmtJsonFile, jsonStringifyShallowIndent } from "@pinyinly/lib/jsonfmt";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -636,7 +635,7 @@ describe(
 );
 
 test.skipIf(isCi)(`dictionary.asset.json has correct formatting`, async () => {
-  await fmtJsonFile(dictionaryFilePath, 1);
+  await fmtJsonFile(dictionaryFilePath);
 });
 
 test(`dictionary contains entries for decomposition`, async () => {

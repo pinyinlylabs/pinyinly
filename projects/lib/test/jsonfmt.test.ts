@@ -1,4 +1,9 @@
-import { jsonStringifyShallowIndent } from "#json.ts";
+import {
+  getJsonIndentForFilePath,
+  jsonStringifyShallowIndent,
+} from "#jsonfmt.ts";
+import path from "node:path";
+import * as fs from "#fs.ts";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -71,6 +76,64 @@ describe(
           "foo":"bar"
         }"
       `);
+    });
+  },
+);
+
+describe(
+  `getJsonIndentForFilePath` satisfies HasNameOf<
+    typeof getJsonIndentForFilePath
+  >,
+  () => {
+    test(`falls back to 2 when config file is missing`, async () => {
+      await using resource = await fs.tempDir();
+      const filePath = path.join(resource.tempDir, `foo.json`);
+      const indent = await getJsonIndentForFilePath(filePath);
+      expect(indent).toBe(2);
+    });
+
+    test(`uses first matching rule`, async () => {
+      await using resource = await fs.tempDir();
+      await fs.writeFile(
+        path.join(resource.tempDir, `.jsonfmtrc.json`),
+        JSON.stringify(
+          {
+            rules: [
+              { files: [`**/*.json`], indent: 1 },
+              { files: [`projects/app/test/data/**/*.json`], indent: 3 },
+            ],
+          },
+          null,
+          2,
+        ),
+        `utf8`,
+      );
+
+      const filePath = path.join(
+        resource.tempDir,
+        `projects/app/test/data/example.json`,
+      );
+      const indent = await getJsonIndentForFilePath(filePath);
+      expect(indent).toBe(1);
+    });
+
+    test(`uses fallback when no rules match`, async () => {
+      await using resource = await fs.tempDir();
+      await fs.writeFile(
+        path.join(resource.tempDir, `.jsonfmtrc.json`),
+        JSON.stringify(
+          {
+            rules: [{ files: [`projects/app/test/data/**/*.json`], indent: 1 }],
+          },
+          null,
+          2,
+        ),
+        `utf8`,
+      );
+
+      const filePath = path.join(resource.tempDir, `projects/lib/package.json`);
+      const indent = await getJsonIndentForFilePath(filePath);
+      expect(indent).toBe(2);
     });
   },
 );

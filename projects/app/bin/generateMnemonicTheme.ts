@@ -15,17 +15,14 @@ import {
   merge,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import {
-  makeFsDbCache,
-  readFileWithSchema,
-  writeJsonFileIfChanged,
-} from "@pinyinly/lib/fs";
+import { makeFsDbCache, readFileWithSchema } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import { makeSimpleAiClient } from "./util/openai.js";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 const debug = makeDebug(`pyly`);
 
@@ -191,5 +188,5 @@ async function writeMnemonicThemeChoices(data: MnemonicThemeChoices) {
   // Make sure the data is valid before writing
   pinyinSoundNameSuggestionsSchema.parse(newData);
 
-  await writeJsonFileIfChanged(dataFilePath, newData, 2);
+  await writeJsonFileIfChanged(dataFilePath, newData);
 }

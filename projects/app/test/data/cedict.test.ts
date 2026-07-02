@@ -42,11 +42,7 @@ import {
   groupCedictEntriesByHskLevel,
   splitCedictV2Sense,
 } from "./cedict";
-import {
-  fmtJsonFile,
-  writeJsonFileIfChanged,
-  writeUtf8FileIfChanged,
-} from "@pinyinly/lib/fs";
+import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { isCi } from "#util/env.js";
 import {
   mergeSortComparators,
@@ -56,6 +52,7 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import type { PinyinNumericText } from "#data/model.js";
 import * as aiModule from "#server/lib/ai.js";
 import * as cedictModule from "./cedict";
+import { fmtJsonFile, writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 describe(`isLikelyOverSplitCedictEntry`, () => {
   test.for([
@@ -3936,18 +3933,14 @@ test.skipIf(isCi)(
       );
 
       const nextSamplingJson = serializeCedictSenseSamplingText(nextSampling);
-      await writeJsonFileIfChanged(
-        cedictSenseSamplingPath,
-        nextSamplingJson,
-        1,
-      );
+      await writeJsonFileIfChanged(cedictSenseSamplingPath, nextSamplingJson);
       existingSampling = nextSampling;
     }
   },
 );
 
 test(`.senseSampling.json has correct formatting`, async () => {
-  await fmtJsonFile(cedictSenseSamplingPath, 1);
+  await fmtJsonFile(cedictSenseSamplingPath);
 });
 
 test(`write cedict .ids`, async () => {

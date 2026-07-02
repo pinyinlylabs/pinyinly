@@ -9,6 +9,7 @@ import {
   mkdir,
   stat,
   writeFile,
+  rm,
 } from "node:fs/promises";
 
 // oxlint-disable-next-line no-restricted-imports
@@ -18,11 +19,10 @@ import type { GlobOptionsWithFileTypesUnset } from "glob";
 
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
-import isEqual from "lodash/isEqual.js";
 import { DatabaseSync } from "node:sqlite";
 import type { z } from "zod/v4";
-import { jsonStringifyShallowIndent } from "./json.ts";
 import path from "node:path";
+import { tmpdir } from "node:os";
 
 // oxlint-disable-next-line no-restricted-imports
 export {
@@ -95,60 +95,6 @@ export function globSync(
 export async function readdir(path: string): Promise<string[]> {
   const result = await readdirRaw(path);
   return normalizeGlobResultsToNfc(result);
-}
-
-export async function writeJsonFileIfChanged(
-  path: string,
-  content: object,
-  indentLevels?: number,
-): Promise<boolean> {
-  return writeUtf8FileIfChanged(
-    path,
-    jsonStringifyShallowIndent(content, indentLevels),
-    (a, b) => isEqual(JSON.parse(a), JSON.parse(b)),
-  );
-}
-
-export async function fmtJsonFile(
-  path: string,
-  indentLevels = 2,
-): Promise<void> {
-  const encoding = `utf-8`;
-  const content = JSON.parse(await readFile(path, { encoding })) as object;
-
-  await writeUtf8FileIfChanged(
-    path,
-    jsonStringifyShallowIndent(content, indentLevels),
-  );
-}
-
-export async function updateJsonFileKey(
-  path: string,
-  key: string,
-  value: unknown,
-  indentLevels?: number,
-): Promise<boolean> {
-  const encoding = `utf8`;
-
-  let existingData: Record<string, unknown> = {};
-  try {
-    const existingContent = await readFile(path, { encoding });
-    const parsed = JSON.parse(existingContent) as unknown;
-    if (
-      typeof parsed === `object` &&
-      parsed !== null &&
-      !Array.isArray(parsed)
-    ) {
-      existingData = parsed as Record<string, unknown>;
-    }
-  } catch {
-    // File doesn't exist or invalid JSON, start with empty object
-  }
-
-  // Update the specific key
-  const updatedData = { ...existingData, [key]: value };
-
-  return writeJsonFileIfChanged(path, updatedData, indentLevels);
 }
 
 export async function writeUtf8FileIfChanged(
@@ -287,4 +233,23 @@ export async function readFileWithSchema<Schema extends z.ZodType>(
 
   const content = await readFile(path, `utf8`);
   return schema.parse(JSON.parse(content));
+}
+
+export async function tempDir(): Promise<{
+  tempDir: string;
+  [Symbol.asyncDispose]: () => Promise<void>;
+}> {
+  const tempDir = path.join(
+    tmpdir(),
+    `pyly-tmpdir-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+
+  await mkdir(tempDir, { recursive: true });
+
+  return {
+    tempDir,
+    async [Symbol.asyncDispose]() {
+      await rm(tempDir, { recursive: true, force: true });
+    },
+  };
 }
