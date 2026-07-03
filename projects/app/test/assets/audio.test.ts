@@ -26,7 +26,7 @@ import { readFile } from "@pinyinly/lib/fs";
 // oxlint-disable-next-line no-restricted-imports
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 test(`test sprites`, { timeout: Infinity }, async () => {

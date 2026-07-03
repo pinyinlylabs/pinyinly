@@ -3,7 +3,7 @@ import { createHarness } from "vitest-evals";
 import type { HarnessMetadata, JsonValue } from "vitest-evals";
 import type { ChatPrompt } from "#server/lib/ai.js";
 import { requestOpenAiChatJson } from "#server/lib/ai.js";
-import type { z } from "zod/v4";
+import type { z } from "zod";
 
 export function createChatPromptHarness<
   TMetadata extends HarnessMetadata,

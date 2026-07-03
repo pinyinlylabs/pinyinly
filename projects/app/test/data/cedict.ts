@@ -13,8 +13,8 @@ import {
 import { readFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
-import type { ZodString } from "zod/v4";
-import { z } from "zod/v4";
+import type { ZodString } from "zod";
+import { z } from "zod";
 import shuffle from "lodash/shuffle";
 import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
 import { requestOpenAiResponseJson } from "#server/lib/ai.js";

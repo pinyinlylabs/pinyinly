@@ -1,5 +1,5 @@
 import type { AudioSource } from "expo-audio";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Audio sprite source object created by the Babel transformation.

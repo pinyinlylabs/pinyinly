@@ -16,7 +16,7 @@ import { Table } from "drizzle-orm";
 import type * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 import { base64url } from "jose";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type * as z4 from "zod/v4/core";
 
 type PgCustomColumn = s.PgCustomColumn<

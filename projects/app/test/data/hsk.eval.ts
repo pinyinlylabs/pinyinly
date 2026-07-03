@@ -10,7 +10,7 @@ import type { HarnessMetadata, JudgeContext } from "vitest-evals";
 import { normalizePinyinText } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { HskLevelJudgeEntryType, HskLevelJudgeResultType } from "./hsk";
 import { buildHskLevelJudgePrompt } from "./hsk";
 import { createChatPromptHarness } from "./eval";

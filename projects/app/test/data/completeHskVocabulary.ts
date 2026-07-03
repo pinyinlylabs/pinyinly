@@ -11,7 +11,7 @@ import {
   makeFsDbCache,
   readFileSync,
 } from "@pinyinly/lib/fs";
-import { z } from "zod/v4";
+import { z } from "zod";
 import path from "node:path";
 
 const fsDbCache = makeFsDbCache(import.meta.filename);

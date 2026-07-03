@@ -18,7 +18,7 @@ import { EventSchemas, Inngest, RetryAfterError } from "inngest";
 import pino from "pino";
 import pretty from "pino-pretty";
 import * as postmark from "postmark";
-import z from "zod/v4";
+import z from "zod";
 import {
   downloadAssetFromRemote,
   listAssetFiles,

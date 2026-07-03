@@ -8,7 +8,7 @@ import type {
 import { dictionaryJsonSchema } from "#dictionary.ts";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { readFileWithSchema } from "@pinyinly/lib/fs";
-import type { z } from "zod/v4";
+import type { z } from "zod";
 import { dictionaryFilePath } from "./paths.ts";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 

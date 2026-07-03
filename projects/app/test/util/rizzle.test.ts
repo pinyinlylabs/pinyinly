@@ -29,7 +29,7 @@ import type {
 } from "replicache";
 import { Replicache } from "replicache";
 import { describe, expect, test, vi } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { makeMockTx, testReplicacheOptions } from "./rizzleHelpers.ts";
 
 function typeChecks<_T>(..._args: unknown[]) {

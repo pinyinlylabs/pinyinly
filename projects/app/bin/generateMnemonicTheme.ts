@@ -20,7 +20,7 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { makeSimpleAiClient } from "./util/openai.js";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
@@ -173,7 +173,7 @@ async function readMnemonicThemeChoices() {
     dataFilePath,
     pinyinSoundNameSuggestionsSchema,
     new Map(),
-  );
+  ) as Promise<MnemonicThemeChoices>;
 }
 
 async function writeMnemonicThemeChoices(data: MnemonicThemeChoices) {

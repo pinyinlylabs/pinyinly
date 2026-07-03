@@ -6,7 +6,7 @@ import type {
 import { isAudioSpriteSource } from "@pinyinly/audio-sprites/client";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const pinyinSoundRuntimeManifestSchema = z.object({
   spriteFiles: z.array(z.string()),

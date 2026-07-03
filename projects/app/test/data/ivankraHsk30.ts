@@ -2,7 +2,7 @@ import { hanziTextSchema, pinyinTextSchema } from "#data/model.js";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
 import isEqual from "lodash/isEqual";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const fsDbCache = makeFsDbCache(import.meta.filename);
 

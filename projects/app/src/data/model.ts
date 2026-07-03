@@ -1,6 +1,6 @@
 import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const isString = (x: unknown): x is string => typeof x === `string`;
 

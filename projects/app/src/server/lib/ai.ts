@@ -5,7 +5,7 @@ import type {
   ChatCompletionCreateParamsNonStreaming,
   ResponseFormatJSONSchema,
 } from "openai/resources/index.mjs";
-import { z } from "zod/v4";
+import { z } from "zod";
 import makeDebug from "debug";
 
 const debug = makeDebug(`pyly:ai.ts`);

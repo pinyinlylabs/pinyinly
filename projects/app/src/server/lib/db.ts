@@ -11,7 +11,7 @@ import type {
   PgTransactionConfig,
 } from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
-import z from "zod/v4";
+import z from "zod";
 
 export type Drizzle = NodePgDatabase<typeof schema>;
 export type Transaction = Parameters<Parameters<Drizzle[`transaction`]>[0]>[0];

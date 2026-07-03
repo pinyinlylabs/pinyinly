@@ -10,7 +10,7 @@ import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { describe, expect, test, vi } from "vitest";
-import z from "zod/v4";
+import z from "zod";
 
 const expectedReviewSchema = z.object({
   stability: z.number(),

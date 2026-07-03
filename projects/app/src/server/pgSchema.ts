@@ -2,7 +2,7 @@ import * as s from "@/data/rizzleSchema";
 import { nanoid } from "@/util/nanoid";
 import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
   pgAssetId,
   pgBase64url,

@@ -7,7 +7,7 @@ import { authedProcedure, router } from "@/server/lib/trpc";
 import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
   buildLeadCharacterDescriptionPrompt,
   buildMeaningHintLogicalPrompt,

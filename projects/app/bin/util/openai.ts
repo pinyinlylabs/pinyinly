@@ -6,7 +6,7 @@ import type { Debugger } from "debug";
 import path from "node:path";
 import OpenAI from "openai";
 import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
-import type { z } from "zod/v4";
+import type { z } from "zod";
 import { openAiZodChatResponseFormat } from "#server/lib/ai.js";
 
 export const openAiWithFsDbCache = async (

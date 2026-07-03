@@ -5,7 +5,7 @@ import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import makeDebug from "debug";
 import path from "node:path";
 import resolvePackagePath from "resolve-package-path";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const debug = makeDebug(`pyly`);
 

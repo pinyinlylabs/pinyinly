@@ -16,7 +16,7 @@ import makeDebug from "debug";
 import isEqual from "lodash/isEqual.js";
 import path from "node:path";
 import yargs from "yargs";
-import z from "zod/v4";
+import z from "zod";
 
 const debug = makeDebug(`pyly`);
 

@@ -3,7 +3,7 @@ import { Rating } from "@/util/fsrs";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
-import z from "zod/v4";
+import z from "zod";
 import { ratingToThemeClass } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
 

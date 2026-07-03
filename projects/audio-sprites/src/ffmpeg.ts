@@ -3,7 +3,7 @@ import { memoize0 } from "@pinyinly/lib/collections";
 import { execaCached, getFileModTime } from "@pinyinly/lib/execaCached";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { $ } from "execa";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Helper function to get ffmpeg version for cache invalidation.

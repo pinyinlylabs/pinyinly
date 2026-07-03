@@ -4,7 +4,7 @@ import type { RizzleReplicache } from "@/util/rizzle";
 import { r, RizzleCustom } from "@/util/rizzle";
 import { memoize0 } from "@pinyinly/lib/collections";
 import omit from "lodash/omit.js";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type {
   AssetId,
   HanziText,

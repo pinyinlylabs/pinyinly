@@ -8,7 +8,7 @@ import {
 } from "#util/prompts.ts";
 import { openAiZodChatResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
 import omit from "lodash/omit";
 
 describe(

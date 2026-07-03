@@ -52,7 +52,7 @@ import {
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
   buildCedictSenseId,
   extractDictionaryPinyinFromCedictSense,

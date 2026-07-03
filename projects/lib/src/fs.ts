@@ -20,7 +20,7 @@ import type { GlobOptionsWithFileTypesUnset } from "glob";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
 import { DatabaseSync } from "node:sqlite";
-import type { z } from "zod/v4";
+import type { z } from "zod";
 import path from "node:path";
 import { tmpdir } from "node:os";
 

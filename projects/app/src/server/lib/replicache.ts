@@ -13,7 +13,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import { and, eq, gt } from "drizzle-orm";
 import chunk from "lodash/chunk";
-import type { z } from "zod/v4";
+import type { z } from "zod";
 import type { Drizzle } from "./db";
 import { withRepeatableReadTransaction } from "./db";
 import { pull as pullV13, push as pushV13 } from "./replicache/v12";

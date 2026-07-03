@@ -13,6 +13,7 @@
     "/projects/app/test/assets/**/*.json",
     "/projects/app/test/data/**/*.json",
     "/projects/*/dist",
+    "*.mdast.json",
     "*.asset.json",
     "*.m4a"
   ],
