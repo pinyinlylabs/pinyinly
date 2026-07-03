@@ -131,7 +131,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
       </View>
       <PinyinTextInputSingle
         autoFocus={!noAutoFocus}
-        disabled={grade != null}
+        editable={grade == null}
         onChangeText={(text, suggestionAccepted) => {
           userAnswerRef.current = text;
           setIsUserAnswerEmpty(text.trim().length === 0);
