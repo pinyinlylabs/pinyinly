@@ -7,7 +7,7 @@ import path from "node:path";
 import OpenAI from "openai";
 import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
 import type { z } from "zod/v4";
-import { openAiZodResponseFormat } from "#server/lib/ai.js";
+import { openAiZodChatResponseFormat } from "#server/lib/ai.js";
 
 export const openAiWithFsDbCache = async (
   body: ChatCompletionCreateParamsNonStreaming,
@@ -71,7 +71,7 @@ export function makeSimpleAiClient(fsDbCache: FsDbCache) {
           await systemRoleMessageWithProjectContext(docs),
           { role: `user`, content: userMessage },
         ],
-        response_format: openAiZodResponseFormat(schema, `result_shape`),
+        response_format: openAiZodChatResponseFormat(schema, `result_shape`),
       },
       { fsDbCache, openai },
     );

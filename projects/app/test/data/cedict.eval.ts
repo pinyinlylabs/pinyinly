@@ -191,16 +191,11 @@ describeEval(
         setArtifact(`affinityMatrix`, affinityMatrix as unknown as JsonValue);
 
         const inputTokens = usages.reduce(
-          (sum, usage) => sum + usage.prompt_tokens,
+          (sum, usage) => sum + usage.input_tokens,
           0,
         );
         const outputTokens = usages.reduce(
-          (sum, usage) => sum + usage.completion_tokens,
-          0,
-        );
-        const reasoningTokens = usages.reduce(
-          (sum, usage) =>
-            sum + (usage.completion_tokens_details?.reasoning_tokens ?? 0),
+          (sum, usage) => sum + usage.output_tokens,
           0,
         );
         const totalTokens = usages.reduce(
@@ -216,7 +211,6 @@ describeEval(
             model: model,
             inputTokens: inputTokens,
             outputTokens: outputTokens,
-            reasoningTokens: reasoningTokens,
             totalTokens: totalTokens,
           },
         };
@@ -232,13 +226,15 @@ describeEval(
         input: `/down/downwards/below/lower/later/next (week etc)/second (of two parts)/to decline/to go down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/`,
         expecteds: [
           `/below; down; downwards; lower/later; next (week etc)/measure word to show the frequency of an action/second (of two parts)/to arrive at (a decision, conclusion etc)/to decline; to go down/`,
+          `/below; down; downwards; lower/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/to decline; to go down/`,
         ],
       },
       {
         name: `長 长 [[chang2]]`,
         input: `/long/(bound form) length/(bound form) strong point; forte/(bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/`,
         expecteds: [
-          `/(bound form) length/(bound form) strong point; forte/(bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/long/`,
+          `/(bound form) length/(bound form) strong point; forte; (bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/long/`,
+          `/(bound form) length; long/(bound form) strong point; forte; (bound form) to be good at/(lit.) surplus; spare (Taiwan pr. [zhang4])/`,
         ],
       },
       {
@@ -248,6 +244,11 @@ describeEval(
           `/chief; head/elder/to develop; to grow/to enhance; to increase/`,
           `/chief; head/elder/to develop; to enhance; to grow; to increase/`,
         ],
+      },
+      {
+        name: `大衣 大衣 [[da4yi1]]`,
+        input: `/overcoat/topcoat/cloak/`,
+        expecteds: [`/cloak; overcoat; topcoat/`],
       },
     ] as const)(`$name`, async (spec, { run }) => {
       const input = parsedLineToEntry(

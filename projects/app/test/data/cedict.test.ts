@@ -2892,7 +2892,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "03": {
-          "count": 9454,
+          "count": 9453,
           "examples": [
             "B超 B超 [[B chao1]] /B-mode ultrasonography/prenatal ultrasound scan/abbr. for B型超聲|B型超声[B xing2chao1sheng1]/",
             "PA PA [[P A]] /public area attendant (tasked with cleaning the public areas of a hotel)/marketing assistant/sales assistant/",
@@ -2908,7 +2908,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "05": {
-          "count": 1400,
+          "count": 1398,
           "examples": [
             "PK PK [[P K]] /(slang) to take on/to challenge/to go head to head/showdown/comparison/",
             "㗂 㗂 [[sheng3]] /variant of 省[sheng3]/tight-lipped/to examine/to watch/to scour (esp. Cantonese)/",
@@ -2916,7 +2916,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "06": {
-          "count": 633,
+          "count": 632,
           "examples": [
             "一套 一套 [[yi1tao4]] /suit/a set/a collection/of the same kind/the same old stuff/set pattern of behavior/",
             "一旦 一旦 [[yi1dan4]] /in case (sth happens)/if/once (sth happens, then...)/when/in a short time/in one day/",
@@ -2924,11 +2924,11 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "07": {
-          "count": 332,
+          "count": 330,
           "examples": [
-            "一般 一般 [[yi1ban1]] /same/ordinary/so-so/common/general/generally/in general/",
             "丁 丁 [[ding1]] /male adult/the 4th of the 10 Heavenly Stems 天干[tian1gan1]/fourth (used like "4" or "D")/small cube of meat or vegetable/(literary) to encounter/(archaic) ancient Chinese compass point: 195°/(chemistry) butyl/",
             "上邊 上边 [[shang4bian5]] /the top/above/overhead/upwards/the top margin/above-mentioned/those higher up/",
+            "下水 下水 [[xia4shui3]] /downstream/to go into the water/to put into water/to launch (a ship)/fig. to fall into bad ways/to lead astray/to go to pot/",
           ],
         },
         "08": {
@@ -2940,7 +2940,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "09": {
-          "count": 88,
+          "count": 87,
           "examples": [
             "一世 一世 [[yi1shi4]] /generation/period of 30 years/one's whole lifetime/lifelong/age/era/times/the whole world/the First (of numbered European kings)/",
             "世 世 [[shi4]] /life/age/generation/era/world/lifetime/epoch/descendant/noble/",
@@ -2948,7 +2948,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "10": {
-          "count": 34,
+          "count": 35,
           "examples": [
             "不含糊 不含糊 [[bu4han2hu5]] /unambiguous/unequivocal/explicit/prudent/cautious/not negligent/unafraid/unhesitating/really good/extraordinary/",
             "任 任 [[ren4]] /to assign/to appoint/to take up a post/office/responsibility/to let/to allow/to give free rein to/no matter (how, what etc)/classifier for terms served in office, or for spouses, girlfriends etc (as in 前任男友)/",

@@ -17,7 +17,7 @@ import type { ZodString } from "zod/v4";
 import { z } from "zod/v4";
 import shuffle from "lodash/shuffle";
 import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
-import { requestOpenAiChatJson } from "#server/lib/ai.js";
+import { requestOpenAiResponseJson } from "#server/lib/ai.js";
 import type { OpenAI } from "openai";
 import { loadHsk2026 } from "./hsk";
 import type { Hsk2026Type } from "./hsk";
@@ -1185,7 +1185,7 @@ async function sampleSenseGroupingDefinitions(
 
   const samples = await Promise.all(
     samplePrompts.map(async (prompt) =>
-      requestOpenAiChatJson(prompt, { signal }),
+      requestOpenAiResponseJson(prompt, { signal }),
     ),
   );
 
@@ -4775,6 +4775,15 @@ export const buildCedictEntryGlossGroupingRandomisedPrompt = (
   return buildCedictEntrySenseGroupingPrompt(shuffledEntry);
 };
 
+function expectUnique<T>(array: T[]): T {
+  const unique = [...new Set(array)];
+  if (unique.length !== 1) {
+    throw new Error(`expected exactly one unique item, got ${unique.length}`);
+  }
+
+  return unique[0]!;
+}
+
 export async function sampledRegroupEntry(
   entry: SenseGroupingEntryType,
   opts?: { samples?: number; signal?: AbortSignal; threshold?: number },
@@ -4786,7 +4795,8 @@ export async function sampledRegroupEntry(
     glosses: ClusterGlossReviewType[];
   };
   messages: ChatPromptMessage[];
-  usages: OpenAI.CompletionUsage[];
+  usages: OpenAI.Responses.ResponseUsage[];
+  model?: string;
 }> {
   const sampleCount = opts?.samples ?? 5;
   const threshold = opts?.threshold ?? 1;
@@ -4829,7 +4839,9 @@ export async function sampledRegroupEntry(
   const samples = await Promise.all(
     samplePrompts.map(async (prompt) => ({
       prompt,
-      response: await requestOpenAiChatJson(prompt, { signal: opts?.signal }),
+      response: await requestOpenAiResponseJson(prompt, {
+        signal: opts?.signal,
+      }),
     })),
   );
 
@@ -4846,14 +4858,6 @@ export async function sampledRegroupEntry(
     definition: [...clusteredResult.clusters, ...partition.excludedDefinition],
   };
 
-  const models = samples
-    .map((sample) => sample.response.model)
-    .filter(arrayFilterUnique());
-  if (models.length > 1) {
-    console.warn(`multiple models used in samples: ${models.join(`, `)}`);
-  }
-  const model = models[0];
-
   return {
     affinityMatrix,
     result: resultEntry,
@@ -4861,13 +4865,11 @@ export async function sampledRegroupEntry(
       clusters: resultEntry.definition,
       glosses: clusteredResult.reviewGlosses,
     },
-    messages: samples.flatMap((sample) => [
-      ...sample.prompt.messages,
-      sample.response.message,
-    ]),
+    messages: samples.flatMap((sample) => sample.prompt.messages),
     usages: samples
       .map((sample) => sample.response.usage)
       .filter((x) => x != null),
+    model: expectUnique(samples.map((sample) => sample.response.model)),
   };
 }
 
@@ -4875,22 +4877,20 @@ export const buildCedictEntrySenseGroupingPrompt = (
   entry: SenseGroupingEntryType,
 ): ChatPrompt<typeof senseGroupingEntrySchema> => {
   const systemTemplate = `
-You're a helpful assistant that makes improvements to Chinese to English dictionary entries. Your job is fix errors in entries, specifically how "glosses" are grouped into "senses".
+You're a helpful Chinese to English dictionary editor. The dictionary is used by students learning Chinese. Your job is take a list of glosses and arrange them into senses.
 
 > A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
 
 Rules:
-- Each gloss can have multiple meanings and appear in multiple groups.
-- Do not invent or delete glosses, only arrange groups.
-- Each group must have a unique meaning/concept/theme.
-- Within each group, put good glosses first.
-- Consider the "part of speech" for each gloss (e.g. verb, adjective, noun).
-- Text in parenthesis "( )" are hints.
+- Each gloss can have multiple meanings and appear in multiple senses.
+- All glosses in the input must also be in the output, do not invent or delete glosses.
 - Keep gloss text verbatim as they appear in the input.
+- Group glosses by Chinese semantic concept, not by translation, part of speech, or by fine-grained English taxonomy.
+- For each sense, put the best gloss first.
 `.trim();
 
   const userTemplate = `
-Fix the following entry:
+Fix the following definition:
 
 <data>
 {{ data }}
