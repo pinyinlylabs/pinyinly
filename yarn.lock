@@ -8617,8 +8617,8 @@ __metadata:
   linkType: hard
 
 "@simplewebauthn/server@npm:^13.3.0":
-  version: 13.3.0
-  resolution: "@simplewebauthn/server@npm:13.3.0"
+  version: 13.3.2
+  resolution: "@simplewebauthn/server@npm:13.3.2"
   dependencies:
     "@hexagon/base64": "npm:^1.1.27"
     "@levischuck/tiny-cbor": "npm:^0.2.2"
@@ -8628,7 +8628,7 @@ __metadata:
     "@peculiar/asn1-schema": "npm:^2.6.0"
     "@peculiar/asn1-x509": "npm:^2.6.1"
     "@peculiar/x509": "npm:^1.14.3"
-  checksum: 10c0/ff85d4e6b54708ae2ea3be0dd4aa91cb9e27299281c755711caf388e0845e060bbf52b47a1ce6629faba8f5a2182c291bee22954471bbeaa8613a92738232907
+  checksum: 10c0/0be07c60235b9e605ed28c8262ccf6a9698044b0b9d28cbe407d8c72bcc9bf0f9ef6b75b46ee02a7ec534365e3428d5018be8e0e56233df91d74f87d721fe99b
   languageName: node
   linkType: hard
 
