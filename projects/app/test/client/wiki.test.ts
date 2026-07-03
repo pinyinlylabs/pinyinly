@@ -18,7 +18,6 @@ import {
   buildHanziWord,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
-  loadCharacters,
   loadDictionary,
 } from "#dictionary.js";
 import { getFonts } from "#test/helpers.ts";
@@ -497,17 +496,11 @@ describe(`character.json files`, async () => {
       });
     }
 
-    if (!isCi) {
-      await writeJsonFileIfChanged(
-        path.join(dataDir, `characters.asset.json`),
-        [...expected.entries()].sort(
-          sortComparatorString(([character]) => character),
-        ),
-      );
-    }
-
-    const actual = await loadCharacters();
-    expect(expected).toEqual(actual);
+    await expect(
+      [...expected.entries()].sort(
+        sortComparatorString(([character]) => character),
+      ),
+    ).toMatchJsonFileSnapshot(path.join(dataDir, `characters.asset.json`));
   });
 
   test(`consistency with public/raw/svgs/*.json`, async () => {
@@ -595,31 +588,14 @@ describe(`character.json files`, async () => {
 
         await rm(path.join(characterDecompositionsDir, fileName));
       }
-
-      for (const [character, decompositionData] of expected.entries()) {
-        await writeJsonFileIfChanged(
-          path.join(characterDecompositionsDir, `${character}.json`),
-          decompositionData,
-        );
-      }
     }
 
-    const actualFileNames = (await readdir(characterDecompositionsDir))
-      .filter((fileName) => fileName.endsWith(`.json`))
-      .sort(sortComparatorString((x) => x));
-    const expectedFileNames = [...expected.keys()]
-      .map((character) => `${character}.json`)
-      .sort(sortComparatorString((x) => x));
-
-    expect(actualFileNames).toEqual(expectedFileNames);
-
-    for (const fileName of actualFileNames) {
-      const character = fileName.slice(0, -`.json`.length) as HanziText;
-      const actual = JSON.parse(
-        readFileSync(path.join(characterDecompositionsDir, fileName), `utf-8`),
-      ) as unknown;
-
-      expect(actual).toEqual(nonNullable(expected.get(character)));
+    for (const [character, decompositionData] of expected.entries()) {
+      await expect
+        .soft(decompositionData, `${character} decomposition data`)
+        .toMatchJsonFileSnapshot(
+          path.join(characterDecompositionsDir, `${character}.json`),
+        );
     }
   });
 });

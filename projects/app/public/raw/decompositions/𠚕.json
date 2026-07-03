@@ -1,14 +1,5 @@
 {
-  "mnemonic": {
-    "components": [
-      "⿶",
-      { "hanzi": "凵", "strokes": "" },
-      [
-        "⿳",
-        { "hanzi": "从", "strokes": "" },
-        { "hanzi": "一", "strokes": "" },
-        { "hanzi": "从", "strokes": "" }
-      ]
-    ]
+  "mnemonic":{
+    "components":["⿶",{"hanzi":"凵","strokes":""},["⿳",{"hanzi":"从","strokes":""},{"hanzi":"一","strokes":""},{"hanzi":"从","strokes":""}]]
   }
 }

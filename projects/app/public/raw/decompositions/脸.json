@@ -1,9 +1,5 @@
 {
-  "mnemonic": {
-    "components": [
-      "⿰",
-      { "hanzi": "月", "strokes": "0-3" },
-      { "hanzi": "佥", "strokes": "4-10" }
-    ]
+  "mnemonic":{
+    "components":["⿰",{"hanzi":"月","strokes":"0-3"},{"hanzi":"佥","strokes":"4-10"}]
   }
 }

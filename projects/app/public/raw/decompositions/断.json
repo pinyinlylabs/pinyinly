@@ -1,13 +1,5 @@
 {
-  "mnemonic": {
-    "components": [
-      "⿰",
-      [
-        "⿺",
-        { "hanzi": "𠃊", "strokes": "6" },
-        { "hanzi": "米", "strokes": "0-5" }
-      ],
-      { "hanzi": "斤", "strokes": "7-10" }
-    ]
+  "mnemonic":{
+    "components":["⿰",["⿺",{"hanzi":"𠃊","strokes":"6"},{"hanzi":"米","strokes":"0-5"}],{"hanzi":"斤","strokes":"7-10"}]
   }
 }

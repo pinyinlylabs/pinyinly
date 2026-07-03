@@ -4846,6 +4846,14 @@ export async function sampledRegroupEntry(
     definition: [...clusteredResult.clusters, ...partition.excludedDefinition],
   };
 
+  const models = samples
+    .map((sample) => sample.response.model)
+    .filter(arrayFilterUnique());
+  if (models.length > 1) {
+    console.warn(`multiple models used in samples: ${models.join(`, `)}`);
+  }
+  const model = models[0];
+
   return {
     affinityMatrix,
     result: resultEntry,

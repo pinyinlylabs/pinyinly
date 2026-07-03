@@ -62,7 +62,7 @@ import {
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
 import isEqual from "lodash/isEqual";
-import { fmtJsonFile, jsonStringifyShallowIndent } from "@pinyinly/lib/jsonfmt";
+import { fmtJsonFile } from "@pinyinly/lib/jsonfmt";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -158,9 +158,9 @@ test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async (
   }
 
   if (migratedHanziWords.length > 0) {
-    await expect(
-      jsonStringifyShallowIndent(unparseDictionaryJson(dict), 1),
-    ).toMatchFileSnapshot(dictionaryFilePath);
+    await expect(unparseDictionaryJson(dict)).toMatchJsonFileSnapshot(
+      dictionaryFilePath,
+    );
   }
 });
 

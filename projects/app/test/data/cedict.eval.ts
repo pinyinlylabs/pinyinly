@@ -75,96 +75,6 @@ const SenseGroupingJudge = createJudge(
   },
 );
 
-const senseGroupingCases = [
-  {
-    name: `下 下 [[xia4]]`,
-    input: `/under/underneath/inferior/bring down/down/downwards/below/lower/later/next (week etc)/second (of two parts)/to decline/to go down/to arrive at (a decision, conclusion etc)/measure word to show the frequency of an action/`,
-    expecteds: [
-      `/below; under; underneath/bring down; to decline; to go down/down; downwards/inferior; lower/later; next (week etc)/measure word to show the frequency of an action/second (of two parts)/to arrive at (a decision, conclusion etc)/`,
-      `/below; down; downwards; lower; under; underneath/bring down; to decline; to go down/inferior/later; next (week etc)/measure word to show the frequency of an action/second (of two parts)/to arrive at (a decision, conclusion etc)/`,
-      `/below; down; downwards; lower; under; underneath/bring down/inferior/later; next (week etc); second (of two parts)/measure word to show the frequency of an action/to arrive at (a decision, conclusion etc)/to decline; to go down/`,
-      `/below; down; downwards; lower; under; underneath/bring down/inferior/later; next (week etc)/measure word to show the frequency of an action/second (of two parts)/to arrive at (a decision, conclusion etc)/to decline; to go down/`,
-    ],
-  },
-  {
-    name: `上 上 [[shang4]]`,
-    input: `/(bound form) up; upper/previous/first (of multiple parts)/to climb; to get onto; to go up/to attend (class or university)/(directional complement) up/(noun suffix) on; above/top/superior/highest/go up/send up/on top/upon/`,
-    expecteds: [
-      `/above; upper; (bound form) up/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/on top; upon; (noun suffix) on/previous/send up/to attend (class or university)/top/(directional complement) up/`,
-      `/above; upper; (bound form) up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; upon; (noun suffix) on/send up/to attend (class or university)/top/(directional complement) up/`,
-      `/above; upper; (bound form) up/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/on top; top; upon; (noun suffix) on/send up/to attend (class or university)/(directional complement) up/`,
-      `/above; on top; upon; upper; (noun suffix) on/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/previous/send up/to attend (class or university)/top/(bound form) up; (directional complement) up/`,
-      `/above; on top; upon; (noun suffix) on/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior/send up/to attend (class or university)/top/upper; (bound form) up/(directional complement) up/`,
-      `/above; on top; upon; (noun suffix) on/first (of multiple parts)/go up; to climb; to get onto; to go up/highest; superior/previous/send up/to attend (class or university)/top/upper; (bound form) up/(directional complement) up/`,
-      `/above; on top; upon; (noun suffix) on/first (of multiple parts); previous/go up; to climb; to get onto; to go up/highest; superior; top/send up/to attend (class or university)/upper; (bound form) up/(directional complement) up/`,
-    ],
-  },
-  {
-    name: `一定 一定 [[yi1ding4]]`,
-    input: `/surely; certainly; definitely/fixed; settled/a certain ...; a given .../`,
-    expecteds: [
-      `/surely; certainly; definitely/fixed; settled/a certain ...; a given .../`,
-    ],
-  },
-  {
-    name: `往 往 [[wang3]]`,
-    input: `/depart; to go (in a direction); go; previous; towards; (of a train) bound for; past; to/`,
-    expecteds: [
-      `/to go (in a direction); go; depart/to; towards; (of a train) bound for/past; previous/`,
-      `/to go (in a direction); go; depart/to; towards/(of a train) bound for/past; previous/`,
-    ],
-  },
-  {
-    name: `惡心 恶心 [[e3xin1]]`,
-    input: `/nausea; to feel sick; disgust; nauseating; to embarrass (deliberately)/`,
-    expecteds: [
-      `/nausea; to feel sick/disgust; nauseating/to embarrass (deliberately)/`,
-    ],
-  },
-  {
-    name: `惡臭 恶臭 [[e4chou4]]`,
-    input: `/stink; stench/stinky; smelly/(fig.) disgusting; repugnant/`,
-    expecteds: [`/stink; stench/stinky; smelly/(fig.) disgusting; repugnant/`],
-  },
-  {
-    name: `惡貫滿盈 恶贯满盈 [[e4guan4man3ying2]]`,
-    input: `/(lit.) {idiom} strung through and filled with evil; filled with extreme evil/replete with vice/guilty of monstrous crimes/`,
-    expecteds: [
-      `/(lit.) {idiom} strung through and filled with evil; filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
-      `/(lit.) {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
-    ],
-  },
-] as const;
-
-describeEval(
-  `buildCedictEntrySenseMergingPrompt eval`,
-  {
-    harness: createChatPromptHarness(
-      buildCedictEntrySenseMergingPrompt,
-      z.object({ expecteds: z.array(senseGroupingEntrySchema) }),
-    ),
-    judges: [SenseGroupingJudge],
-  },
-  (it) => {
-    it.for(senseGroupingCases)(`$name`, async (spec, { run }) => {
-      const input = parsedLineToEntry(
-        parseCedictV2Line(`${spec.name} ${spec.input}`, { strict: true })!,
-      );
-      const expecteds = spec.expecteds.map((s) =>
-        parsedLineToEntry(
-          parseCedictV2Line(`${spec.name} ${s}`, { strict: true })!,
-        ),
-      );
-
-      await run(input, {
-        metadata: {
-          expecteds: expecteds,
-        },
-      });
-    });
-  },
-);
-
 describeEval(
   `buildCedictEntrySenseMergingPrompt eval`,
   {
@@ -222,10 +132,10 @@ describeEval(
       },
       {
         name: `惡貫滿盈 恶贯满盈 [[e4guan4man3ying2]]`,
-        input: `/(lit.) {idiom} strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
+        input: `/(lit.) (idiom) strung through and filled with evil/filled with extreme evil; replete with vice; guilty of monstrous crimes/`,
         expecteds: [
-          `/filled with extreme evil; guilty of monstrous crimes; replete with vice; (lit.) {idiom} strung through and filled with evil/`,
-          `/filled with extreme evil; guilty of monstrous crimes; replete with vice/(lit.) {idiom} strung through and filled with evil/`,
+          `/filled with extreme evil; guilty of monstrous crimes; replete with vice; (lit.) (idiom) strung through and filled with evil/`,
+          `/filled with extreme evil; guilty of monstrous crimes; replete with vice/(lit.) (idiom) strung through and filled with evil/`,
         ],
       },
       {
@@ -270,6 +180,7 @@ describeEval(
           reviews,
           messages,
           affinityMatrix,
+          model,
         } = await sampledRegroupEntry(input, {
           samples: 10,
           threshold: 0.8,
@@ -299,10 +210,10 @@ describeEval(
 
         return {
           output,
-          messages: messages,
+          messages,
           usage: {
             provider: `openai`,
-            // model: prompt.model,
+            model: model,
             inputTokens: inputTokens,
             outputTokens: outputTokens,
             reasoningTokens: reasoningTokens,

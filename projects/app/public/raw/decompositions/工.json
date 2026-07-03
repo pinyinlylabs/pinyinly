@@ -1,9 +1,5 @@
 {
-  "decompositions": [
-    [
-      "⿱",
-      { "hanzi": "一", "strokes": "0" },
-      { "hanzi": "丄", "strokes": "1-2" }
-    ]
+  "decompositions":[
+    ["⿱",{"hanzi":"一","strokes":"0"},{"hanzi":"丄","strokes":"1-2"}]
   ]
 }

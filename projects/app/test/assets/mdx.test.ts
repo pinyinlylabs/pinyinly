@@ -1,9 +1,7 @@
 // pyly-not-src-test
 
 import { projectRoot } from "#bin/util/paths.ts";
-import { isCi } from "#util/env.ts";
 import { glob, mkdir, readFile } from "@pinyinly/lib/fs";
-import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import { createMdxAstProcessor } from "@pinyinly/mdx/processor";
 import path from "node:path";
 import { expect, test } from "vitest";
@@ -57,13 +55,7 @@ async function compileMdxFiles(
     const tree = await processor.run(treeParsed);
     const sanitizedTree = sanitizeMdast(tree);
 
-    if (!isCi) {
-      await writeJsonFileIfChanged(to, sanitizedTree as object);
-    }
-
-    const generatedJson = JSON.parse(await readFile(to, `utf8`)) as unknown;
-
-    expect(generatedJson).toEqual(sanitizedTree);
+    await expect(sanitizedTree as object).toMatchJsonFileSnapshot(to);
   }
 }
 
