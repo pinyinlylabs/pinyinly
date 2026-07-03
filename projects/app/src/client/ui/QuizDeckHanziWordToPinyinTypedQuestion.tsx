@@ -175,7 +175,8 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
 
 const PinyinTextInputSingle = ({
   autoFocus,
-  disabled,
+  disabled = false,
+  editable,
   inputRef,
   onChangeText,
   onSubmit,
@@ -183,7 +184,8 @@ const PinyinTextInputSingle = ({
   state = `default`,
 }: {
   autoFocus: boolean;
-  disabled: boolean;
+  disabled?: boolean;
+  editable?: boolean;
   inputRef?: Ref<TextInput>;
   onChangeText: (text: string, suggestionAccepted: boolean) => void;
   onSubmit: () => void;
@@ -191,8 +193,9 @@ const PinyinTextInputSingle = ({
   state?: TextAnswerInputSingleState;
 }) => {
   const [text, setText] = useState(``);
+  const isEditable = editable ?? !disabled;
 
-  const suggestions = disabled ? null : pinyinUnitSuggestions(text);
+  const suggestions = isEditable ? pinyinUnitSuggestions(text) : null;
 
   const updateText = (newText: string, suggestionAccepted: boolean) => {
     setText(newText);
@@ -228,6 +231,7 @@ const PinyinTextInputSingle = ({
       <TextAnswerInputSingle
         autoFocus={autoFocus}
         disabled={disabled}
+        editable={editable}
         inputRef={inputRef}
         onChangeValue={handleChangeText}
         onSubmit={onSubmit}

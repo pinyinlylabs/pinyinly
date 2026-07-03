@@ -27,7 +27,6 @@ import { readFile } from "@pinyinly/lib/fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { z } from "zod";
-import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 test(`test sprites`, { timeout: Infinity }, async () => {
   const manifestPath = path.join(projectRoot, `src/assets/audio/manifest.json`);
@@ -48,15 +47,9 @@ test(`pinyin runtime manifest matches source sprite manifest`, async () => {
   const expectedRuntimeManifest =
     buildPinyinSoundRuntimeManifest(sourceManifest);
 
-  if (!isCi) {
-    await writeJsonFileIfChanged(runtimeManifestPath, expectedRuntimeManifest);
-  }
-
-  const runtimeManifest = pinyinSoundRuntimeManifestSchema.parse(
-    JSON.parse(await readFile(runtimeManifestPath, `utf8`)) as unknown,
+  await expect(expectedRuntimeManifest).toMatchJsonFileSnapshot(
+    runtimeManifestPath,
   );
-
-  expect(runtimeManifest).toEqual(expectedRuntimeManifest);
 });
 
 describe(`pinyin sounds`, () => {

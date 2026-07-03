@@ -17,6 +17,11 @@ interface TextInputSingleProps extends Omit<
   // excluded so the JSDoc can be redefined
   | `autoFocus`
 > {
+  /**
+   * Controls whether the input can be edited.
+   * If undefined, it is derived from `disabled`.
+   */
+  editable?: boolean;
   disabled?: boolean;
   placeholder: string | undefined;
   ref?: Ref<TextInput>;
@@ -30,15 +35,19 @@ interface TextInputSingleProps extends Omit<
 
 export function TextInputSingle({
   variant = `flat`,
+  disabled = false,
+  editable,
   ...props
 }: TextInputSingleProps) {
   const autoFocusRef = useAutoFocusRef(props.autoFocus);
   const ref = mergeRefs(props.ref, autoFocusRef);
+  const isEditable = editable ?? !disabled;
 
   return (
     <TextInput
       {...props}
       ref={ref}
+      editable={isEditable}
       // @ts-expect-error `dataSet` isn't a standard prop in react-native, but it exists for react-native-web
       // since https://github.com/necolas/react-native-web/releases/tag/0.13.0
       dataSet={{
@@ -47,6 +56,7 @@ export function TextInputSingle({
       }}
       className={inputClass({
         textAlign: props.textAlign,
+        disabled,
         className: props.className,
         variant,
       })}
@@ -57,6 +67,10 @@ export function TextInputSingle({
 const inputClass = tv({
   base: ``,
   variants: {
+    disabled: {
+      true: `web:opacity-40`,
+      false: ``,
+    },
     textAlign: {
       left: `text-left`,
       center: `text-center`,

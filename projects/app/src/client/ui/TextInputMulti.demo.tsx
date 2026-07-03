@@ -93,7 +93,7 @@ export default () => {
               placeholder="This input is disabled"
               value="Disabled example"
               onChangeText={() => {}}
-              editable={false}
+              disabled
               variant="bare"
               numberOfLines={3}
               style={{ minHeight: 80 }}
@@ -106,6 +106,37 @@ export default () => {
             <TextInputMulti
               placeholder="This input is disabled"
               value="Disabled example"
+              onChangeText={() => {}}
+              disabled
+              variant="flat"
+              numberOfLines={3}
+              style={{ minHeight: 80 }}
+            />
+          </View>
+        </ExampleStack>
+      </View>
+
+      <LittlePrimaryHeader title="not editable" />
+      <View className="w-full flex-row gap-3">
+        <ExampleStack title="bare" childrenClassName="w-full" showFrame>
+          <View className="flex-1 gap-2">
+            <TextInputMulti
+              placeholder="This input is not editable"
+              value="Not editable example"
+              onChangeText={() => {}}
+              editable={false}
+              variant="bare"
+              numberOfLines={3}
+              style={{ minHeight: 80 }}
+            />
+          </View>
+        </ExampleStack>
+
+        <ExampleStack title="flat" childrenClassName="w-full">
+          <View className="flex-1 gap-2">
+            <TextInputMulti
+              placeholder="This input is not editable"
+              value="Not editable example"
               onChangeText={() => {}}
               editable={false}
               variant="flat"

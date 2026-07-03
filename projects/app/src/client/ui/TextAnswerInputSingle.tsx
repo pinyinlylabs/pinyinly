@@ -13,7 +13,16 @@ import { TextInputSingle } from "./TextInputSingle";
 
 export type TextAnswerInputSingleProps = {
   autoFocus?: boolean;
+  /**
+   * Legacy alias for non-editable behavior.
+   * Prefer using `editable` for new code.
+   */
   disabled?: boolean;
+  /**
+   * Controls whether the input can be edited.
+   * If undefined, it is derived from `disabled`.
+   */
+  editable?: boolean;
   inputRef?: Ref<TextInput>;
   onChangeValue: (value: string) => void;
   onSubmit: () => void;
@@ -40,6 +49,7 @@ export type TextAnswerInputSingleProps = {
 export const TextAnswerInputSingle = ({
   autoFocus = false,
   disabled = false,
+  editable,
   inputRef,
   onChangeValue,
   onSubmit,
@@ -82,6 +92,7 @@ export const TextAnswerInputSingle = ({
           autoCorrect={autoCorrect}
           className={inputClass({ styled: state !== `default` })}
           disabled={disabled}
+          editable={editable}
           onChangeText={handleChangeText}
           onKeyPress={(e) => {
             if (e.nativeEvent.key === `Enter`) {

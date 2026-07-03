@@ -52,7 +52,6 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import type { PinyinNumericText } from "#data/model.js";
 import * as aiModule from "#server/lib/ai.js";
 import * as cedictModule from "./cedict";
-import { fmtJsonFile, writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 describe(`isLikelyOverSplitCedictEntry`, () => {
   test.for([
@@ -3912,35 +3911,30 @@ describe(`cedict sense sampling cache`, () => {
   });
 });
 
-test.skipIf(isCi)(
-  `write cedict .senseSampling cache`,
-  { timeout: 5 * 60_000 },
-  async () => {
-    const entries = await loadCedictV2();
-    let existingSampling = await loadCedictSenseSampling();
+test(`write cedict .senseSampling cache`, { timeout: 5 * 60_000 }, async () => {
+  const entries = await loadCedictV2();
+  let existingSampling = await loadCedictSenseSampling();
 
-    const { hsk1, hsk2 } = await groupCedictEntriesByHskLevel(entries);
-    const targetEntryIds = [...hsk1, ...hsk2]
-      .filter((entry) => isLikelyOverSplitCedictEntry(entry))
-      .map((entry) => buildCedictV2EntryId(entry));
+  const { hsk1, hsk2 } = await groupCedictEntriesByHskLevel(entries);
+  const targetEntryIds = [...hsk1, ...hsk2]
+    .filter((entry) => isLikelyOverSplitCedictEntry(entry))
+    .map((entry) => buildCedictV2EntryId(entry));
 
-    for (const targetEntryId of targetEntryIds) {
-      const nextSampling = await buildCedictSenseSampling(
-        entries,
-        [targetEntryId],
-        existingSampling,
-        { sampleCount: 10 },
-      );
+  for (const targetEntryId of targetEntryIds) {
+    const nextSampling = await buildCedictSenseSampling(
+      entries,
+      [targetEntryId],
+      existingSampling,
+      { sampleCount: 10 },
+    );
 
-      const nextSamplingJson = serializeCedictSenseSamplingText(nextSampling);
-      await writeJsonFileIfChanged(cedictSenseSamplingPath, nextSamplingJson);
-      existingSampling = nextSampling;
-    }
-  },
-);
+    const nextSamplingJson = serializeCedictSenseSamplingText(nextSampling);
+    await expect(nextSamplingJson).toMatchJsonFileSnapshot(
+      cedictSenseSamplingPath,
+    );
 
-test(`.senseSampling.json has correct formatting`, async () => {
-  await fmtJsonFile(cedictSenseSamplingPath);
+    existingSampling = nextSampling;
+  }
 });
 
 test(`write cedict .ids`, async () => {

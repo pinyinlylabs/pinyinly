@@ -141,17 +141,6 @@ export async function getJsonIndentForFilePath(
   return defaultJsonIndent;
 }
 
-export async function fmtJsonFile(path: string): Promise<void> {
-  const encoding = `utf-8`;
-  const content = JSON.parse(await readFile(path, { encoding })) as object;
-  const indentLevels = await getJsonIndentForFilePath(path);
-
-  await writeUtf8FileIfChanged(
-    path,
-    jsonStringifyShallowIndent(content, indentLevels),
-  );
-}
-
 /**
  * Stringify an object with a fixed number of levels of indentation to make
  * diffs more readable without too much white space.
