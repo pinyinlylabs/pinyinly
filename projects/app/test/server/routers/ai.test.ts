@@ -6,9 +6,7 @@ import {
   buildSubLocationDescriptionPrompt,
   renderPromptTemplate,
 } from "#util/prompts.ts";
-import { openAiZodChatResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
-import { z } from "zod";
 import omit from "lodash/omit";
 
 describe(
@@ -484,43 +482,6 @@ describe(
       const result = renderPromptTemplate(`Start {{ missing }} end`, {});
 
       expect(result).toBe(`Start  end`);
-    });
-  },
-);
-
-describe(
-  `openAiZodResponseFormat` satisfies HasNameOf<
-    typeof openAiZodChatResponseFormat
-  >,
-  () => {
-    test(`produces valid ResponseFormatJSONSchema`, () => {
-      const schema = z.object({
-        suggestions: z
-          .array(
-            z.object({
-              hint: z.string(),
-            }),
-          )
-          .min(1),
-      });
-
-      const result = openAiZodChatResponseFormat(schema, `test_response`);
-
-      expect(result.type).toBe(`json_schema`);
-      expect(result.json_schema.name).toBe(`test_response`);
-      expect(result.json_schema.schema).toBeDefined();
-      expect(typeof result.json_schema.schema).toBe(`object`);
-    });
-
-    test(`handles simple scalar schema`, () => {
-      const schema = z.string();
-
-      const result = openAiZodChatResponseFormat(schema, `simple_string`);
-
-      expect(result.type).toBe(`json_schema`);
-      expect(result.json_schema.name).toBe(`simple_string`);
-      expect(result.json_schema.schema).toBeDefined();
-      expect(typeof result.json_schema.schema).toBe(`object`);
     });
   },
 );

@@ -21,8 +21,11 @@ import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod";
-import { makeSimpleAiClient } from "./util/openai.js";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
+import {
+  makeRequestOpenAiResponseJsonCached,
+  makeSimplePrompt,
+} from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
 
@@ -72,7 +75,8 @@ const fsDbCache = makeFsDbCache(
   `openai_chat_cache`,
   debug,
 );
-const openai = makeSimpleAiClient(fsDbCache);
+const requestOpenAiResponseJsonCached =
+  makeRequestOpenAiResponseJsonCached(fsDbCache);
 
 for (const groupId of argv.groupIds) {
   for (const theme of argv.themes) {
@@ -90,7 +94,7 @@ for (const groupId of argv.groupIds) {
       //   continue;
       // }
 
-      const r = await openai(
+      const prompt = await makeSimplePrompt(
         [],
         `
 I'm creating a mnemonic system to help people remember Pinyin initials. For each Pinyin initial I want to pick a ${themeNoun} to associate it with. (then I'll create short stories about the ${themeNoun} to help remember the pinyin). 
@@ -132,6 +136,8 @@ So based how you pronounce the first syllable can you give me 5 suitable ${theme
           ),
         }),
       );
+
+      const r = await requestOpenAiResponseJsonCached(prompt);
 
       debug(`result for ${groupId} (${theme}): %o`, r);
 

@@ -3739,7 +3739,7 @@ describe(`cedict sense sampling cache`, () => {
       },
     ];
 
-    const requestSpy = vi.spyOn(aiModule, `requestOpenAiChatJson`);
+    const requestSpy = vi.spyOn(aiModule, `requestOpenAiResponseJson`);
 
     const sampling = await buildCedictSenseSampling(
       entries,

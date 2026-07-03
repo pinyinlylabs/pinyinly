@@ -61,7 +61,10 @@ import {
   getDongChineseMeaningKey,
   getDongChinesePronunciation,
 } from "./util/dongChinese.js";
-import { makeSimpleAiClient } from "./util/openai.js";
+import {
+  makeRequestOpenAiResponseJsonCached,
+  makeSimplePrompt,
+} from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
 
@@ -85,7 +88,8 @@ const fsDbCache = makeFsDbCache(
   `openai_chat_cache`,
   debug,
 );
-const openai = makeSimpleAiClient(fsDbCache);
+const requestOpenAiResponseJsonCached =
+  makeRequestOpenAiResponseJsonCached(fsDbCache);
 
 // All root words as well as all the components of each word.
 const allWords = new Set<string>();
@@ -777,7 +781,7 @@ interface GenerateHanziWordQuery {
 }
 
 async function queryOpenAiForHanziWordResults(query: unknown) {
-  const { suggestions } = await openai(
+  const prompt = await makeSimplePrompt(
     [
       `curriculum.instructions.md`,
       `word-representation.instructions.md`,
@@ -799,6 +803,8 @@ ${JSON.stringify(query)}
       ),
     }),
   );
+
+  const { suggestions } = await requestOpenAiResponseJsonCached(prompt);
 
   return suggestions;
 }
