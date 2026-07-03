@@ -8,7 +8,7 @@ import {
 } from "@simplewebauthn/browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { deviceStoreGet } from "./deviceStore";
 import { useDeviceStore } from "./ui/hooks/useDeviceStore";
 

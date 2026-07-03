@@ -1,4 +1,8 @@
 import type { IconRegistry } from "#client/ui/iconRegistry.js";
+import {
+  getJsonIndentForFilePath,
+  jsonStringifyShallowIndent,
+} from "@pinyinly/lib/jsonfmt";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import type { Component } from "react";
 import { createElement, Fragment } from "react";
@@ -6,6 +10,38 @@ import { View } from "react-native-web";
 import { expect, vi } from "vitest";
 
 expect.extend(matchers);
+
+expect.extend({
+  async toMatchJsonFileSnapshot(received: unknown, filePath: string) {
+    if (typeof received !== `object` || received == null) {
+      return {
+        pass: false,
+        message: () =>
+          `toMatchJsonFileSnapshot expected an object or array, but received ${typeof received}`,
+      };
+    }
+
+    const indent = await getJsonIndentForFilePath(filePath);
+    const formatted = jsonStringifyShallowIndent(received, indent);
+
+    try {
+      await expect(formatted).toMatchFileSnapshot(filePath);
+      return {
+        pass: true,
+        message: () =>
+          `expected JSON not to match file snapshot at "${filePath}"`,
+      };
+    } catch (error) {
+      return {
+        pass: false,
+        message: () =>
+          error instanceof Error
+            ? error.message
+            : `JSON did not match file snapshot`,
+      };
+    }
+  },
+});
 
 // Mock expo-audio to avoid pulling in native modules, avoids:
 //

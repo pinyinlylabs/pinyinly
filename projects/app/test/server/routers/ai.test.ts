@@ -6,9 +6,9 @@ import {
   buildSubLocationDescriptionPrompt,
   renderPromptTemplate,
 } from "#util/prompts.ts";
-import { openAiZodResponseFormat } from "#server/lib/ai.ts";
+import { openAiZodChatResponseFormat } from "#server/lib/ai.ts";
 import { describe, expect, test } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
 import omit from "lodash/omit";
 
 describe(
@@ -489,7 +489,9 @@ describe(
 );
 
 describe(
-  `openAiZodResponseFormat` satisfies HasNameOf<typeof openAiZodResponseFormat>,
+  `openAiZodResponseFormat` satisfies HasNameOf<
+    typeof openAiZodChatResponseFormat
+  >,
   () => {
     test(`produces valid ResponseFormatJSONSchema`, () => {
       const schema = z.object({
@@ -502,7 +504,7 @@ describe(
           .min(1),
       });
 
-      const result = openAiZodResponseFormat(schema, `test_response`);
+      const result = openAiZodChatResponseFormat(schema, `test_response`);
 
       expect(result.type).toBe(`json_schema`);
       expect(result.json_schema.name).toBe(`test_response`);
@@ -513,7 +515,7 @@ describe(
     test(`handles simple scalar schema`, () => {
       const schema = z.string();
 
-      const result = openAiZodResponseFormat(schema, `simple_string`);
+      const result = openAiZodChatResponseFormat(schema, `simple_string`);
 
       expect(result.type).toBe(`json_schema`);
       expect(result.json_schema.name).toBe(`simple_string`);

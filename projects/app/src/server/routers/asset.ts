@@ -10,7 +10,7 @@ import {
 import * as schema from "@/server/pgSchema";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { getBucketObjectKeyForId } from "@/util/assetId";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const assetRouter = router({
   /**

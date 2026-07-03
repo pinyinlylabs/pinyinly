@@ -38,7 +38,7 @@ import {
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { DeepReadonly } from "ts-essentials";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const loadPinyinWords = memoize0(async function loadPinyinWords() {
   return z

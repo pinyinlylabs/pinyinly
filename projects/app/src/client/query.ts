@@ -71,7 +71,7 @@ import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
 import isEqual from "lodash/isEqual";
 import { Platform } from "react-native";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 import { BTreeIndex } from "@tanstack/db";

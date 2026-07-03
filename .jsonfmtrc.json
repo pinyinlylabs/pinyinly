@@ -1,0 +1,11 @@
+{
+  "rules": [
+    {
+      "files": [
+        "projects/app/test/data/**/*.json",
+        "projects/app/src/data/dictionary.asset.json"
+      ],
+      "indent": 1
+    }
+  ]
+}

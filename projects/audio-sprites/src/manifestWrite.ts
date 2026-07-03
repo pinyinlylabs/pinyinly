@@ -1,16 +1,13 @@
 import { analyzeAudioFileDuration, generateSpriteCommand } from "#ffmpeg.ts";
 import type { AudioFileInfo } from "#types.ts";
-import {
-  globSync,
-  readFileSync,
-  writeJsonFileIfChanged,
-} from "@pinyinly/lib/fs";
+import { globSync, readFileSync } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import * as crypto from "node:crypto";
 import path from "node:path";
 import { loadManifest } from "./manifestRead.ts";
 import type { SpriteManifest, SpriteRule, SpriteSegment } from "./types.ts";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 const debug = makeDebug(`pyly:audio-sprites`);
 
@@ -279,7 +276,7 @@ export const saveManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<void> => {
-  await writeJsonFileIfChanged(manifestPath, manifest, 2);
+  await writeJsonFileIfChanged(manifestPath, manifest);
 };
 
 /**

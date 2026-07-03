@@ -5,7 +5,7 @@ import {
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const fsDbCache = makeFsDbCache(import.meta.filename);
 

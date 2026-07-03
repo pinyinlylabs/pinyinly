@@ -5,7 +5,7 @@ import type {
   ChatCompletionCreateParamsNonStreaming,
   ResponseFormatJSONSchema,
 } from "openai/resources/index.mjs";
-import { z } from "zod/v4";
+import { z } from "zod";
 import makeDebug from "debug";
 
 const debug = makeDebug(`pyly:ai.ts`);
@@ -26,7 +26,7 @@ export interface ChatPrompt<Schema extends z.ZodType> {
   schema: Schema;
 }
 
-export function openAiZodResponseFormat(
+export function openAiZodChatResponseFormat(
   zodObject: z.ZodType,
   name: string,
 ): ResponseFormatJSONSchema {
@@ -39,6 +39,17 @@ export function openAiZodResponseFormat(
   };
 }
 
+export function openAiZodResponseFormat(
+  zodObject: z.ZodType,
+  name: string,
+): OpenAI.Responses.ResponseFormatTextJSONSchemaConfig {
+  return {
+    type: `json_schema`,
+    name,
+    schema: z.toJSONSchema(zodObject, { unrepresentable: `any` }),
+  };
+}
+
 export async function requestOpenAiChatJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
   options?: { signal?: AbortSignal; retries?: number },
@@ -46,13 +57,14 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
   data: z.infer<Schema>;
   usage?: OpenAI.CompletionUsage;
   message: ChatPromptMessage;
+  model: string;
 }> {
   const client = getOpenAIClient();
 
   const body: ChatCompletionCreateParamsNonStreaming = {
     model: prompt.model,
     reasoning_effort: prompt.reasoningEffort,
-    response_format: openAiZodResponseFormat(prompt.schema, `result_shape`),
+    response_format: openAiZodChatResponseFormat(prompt.schema, `result_shape`),
     messages: prompt.messages,
   };
 
@@ -92,6 +104,64 @@ export async function requestOpenAiChatJson<Schema extends z.ZodType>(
       data,
       message: { role: message.role, content },
       usage: completion.usage,
+      model: completion.model,
+    };
+  }
+}
+
+export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
+  prompt: ChatPrompt<Schema>,
+  options?: { signal?: AbortSignal; retries?: number },
+): Promise<{
+  data: z.infer<Schema>;
+  usage?: OpenAI.Responses.ResponseUsage;
+  model: string;
+}> {
+  const client = getOpenAIClient();
+
+  const body: OpenAI.Responses.ResponseCreateParamsNonStreaming = {
+    model: prompt.model,
+    reasoning: {
+      effort: prompt.reasoningEffort,
+    },
+    text: {
+      format: openAiZodResponseFormat(prompt.schema, `result_shape`),
+    },
+    input: prompt.messages,
+    store: true,
+  };
+
+  for (let retries = options?.retries ?? 2; ; retries--) {
+    invariant(options?.signal?.aborted !== true, `operation aborted`);
+
+    const response = await client.responses.create(body, {
+      signal: options?.signal,
+    });
+
+    const content = response.output_text;
+    if (content.length === 0) {
+      throw new Error(`OpenAI response output text was empty`);
+    }
+
+    let data;
+    try {
+      data = prompt.schema.parse(JSON.parse(content), { reportInput: true });
+    } catch (e) {
+      if (retries > 0) {
+        debug(
+          `OpenAI response did not match expected schema. Prompt: %o\n\nInput: %o:`,
+          prompt,
+          e,
+        );
+        continue;
+      }
+      throw e;
+    }
+
+    return {
+      data,
+      usage: response.usage,
+      model: response.model,
     };
   }
 }

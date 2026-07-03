@@ -4,7 +4,7 @@ import { renderPromptTemplate } from "#util/prompts.js";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
 import path from "node:path";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const hsk2026FilePath = path.join(import.meta.dirname, `hsk2026.json`);
 

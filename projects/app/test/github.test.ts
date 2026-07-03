@@ -4,7 +4,7 @@ import { projectRoot, workspaceRoot } from "#bin/util/paths.ts";
 import * as fs from "@pinyinly/lib/fs";
 import { expect, test } from "vitest";
 import YAML from "yaml";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const workflowSchema = z.object({
   jobs: z.record(

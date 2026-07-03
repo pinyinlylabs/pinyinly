@@ -25,7 +25,7 @@ import {
 import { and, eq } from "drizzle-orm";
 import { base64url } from "jose";
 import { parseJWT } from "oslo/jwt";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 // Define RP (Relying Party) name and ID for the WebAuthn process
 const RP_NAME = `Pinyinly`;

@@ -1,6 +1,6 @@
 import { deepReadonly, memoize0 } from "@pinyinly/lib/collections";
 import { Platform } from "react-native";
-import z from "zod/v4";
+import z from "zod";
 
 const bomSchema = z
   .array(

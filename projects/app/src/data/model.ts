@@ -1,6 +1,6 @@
 import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const isString = (x: unknown): x is string => typeof x === `string`;
 
@@ -354,8 +354,10 @@ export const hanziTextSchema = z.custom<HanziText>(isString);
 export const pylyMarkSchema = z.string();
 export const hanziWordSchema = z.custom<HanziWord>(isString);
 export const hanziCharacterSchema = z.custom<HanziCharacter>(isString);
-
-export const pinyinTextSchema = z.custom<PinyinText>(isString);
+export const pinyinTextSchema = z.string() as unknown as z.ZodCustom<
+  PinyinText,
+  PinyinText
+>;
 export const pinyinUnitSchema = z.custom<PinyinUnit>(isString);
 
 export type HanziWordSkillKind =

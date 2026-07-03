@@ -7,7 +7,7 @@ import type {
 import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
-import z from "zod/v4";
+import z from "zod";
 
 /**
  * Converts a pinyin string to use the standard diacritic tone marks instead of

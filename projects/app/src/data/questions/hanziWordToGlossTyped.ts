@@ -78,8 +78,6 @@ export function normalizeGlossForMatch(gloss: string): string {
       .toLowerCase()
       // Treat apostrophe variants as optional so can't == cant.
       .replaceAll(/['’‘ʼ`´＇]/gu, ``)
-      // Normalize common negative contractions to "not".
-      // .replaceAll(/\b(?:cant|cannot|wont)\b/gu, ` not `)
       // Treat punctuation variants (e.g. parentheses, commas, trailing hyphen)
       // as optional separators.
       .replaceAll(/[\p{P}\p{S}]+/gu, ` `)

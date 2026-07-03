@@ -49,7 +49,7 @@ import type { ReactNode } from "react";
 import { Children, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
   readDictionaryJson,
   upsertHanziWordMeaning,

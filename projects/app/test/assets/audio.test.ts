@@ -22,11 +22,12 @@ import {
   buildAndTestSprites,
   createAudioFileTests,
 } from "@pinyinly/audio-sprites/testing";
-import { readFile, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import { readFile } from "@pinyinly/lib/fs";
 // oxlint-disable-next-line no-restricted-imports
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 test(`test sprites`, { timeout: Infinity }, async () => {
   const manifestPath = path.join(projectRoot, `src/assets/audio/manifest.json`);
@@ -48,11 +49,7 @@ test(`pinyin runtime manifest matches source sprite manifest`, async () => {
     buildPinyinSoundRuntimeManifest(sourceManifest);
 
   if (!isCi) {
-    await writeJsonFileIfChanged(
-      runtimeManifestPath,
-      expectedRuntimeManifest,
-      2,
-    );
+    await writeJsonFileIfChanged(runtimeManifestPath, expectedRuntimeManifest);
   }
 
   const runtimeManifest = pinyinSoundRuntimeManifestSchema.parse(

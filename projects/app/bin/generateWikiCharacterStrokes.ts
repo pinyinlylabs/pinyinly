@@ -9,14 +9,14 @@ import {
   makeFsDbCache,
   mkdirSync,
   readFileSync,
-  updateJsonFileKey,
 } from "@pinyinly/lib/fs";
+import { updateJsonFileKey } from "@pinyinly/lib/jsonfmt";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import isEqual from "lodash/isEqual.js";
 import path from "node:path";
 import yargs from "yargs";
-import z from "zod/v4";
+import z from "zod";
 
 const debug = makeDebug(`pyly`);
 
@@ -130,21 +130,15 @@ for (const character of allCharacters) {
   }
 
   const dataFile = path.join(characterWikiDir, `character.json`);
-  const indentLevels = 2;
 
-  if (await updateJsonFileKey(dataFile, `hanzi`, character, indentLevels)) {
+  if (await updateJsonFileKey(dataFile, `hanzi`, character)) {
     debug(`wrote hanzi for %O`, character);
   }
 
   if (graphicsRecord == null) {
     debug(`no graphics data for %O`, character);
   } else if (
-    await updateJsonFileKey(
-      dataFile,
-      `strokes`,
-      graphicsRecord.strokes,
-      indentLevels,
-    )
+    await updateJsonFileKey(dataFile, `strokes`, graphicsRecord.strokes)
   ) {
     debug(`wrote strokes for %O`, character);
   }
@@ -192,12 +186,7 @@ for (const character of allCharacters) {
           ),
         };
 
-        await updateJsonFileKey(
-          dataFile,
-          `mnemonic`,
-          newMnemonic,
-          indentLevels,
-        );
+        await updateJsonFileKey(dataFile, `mnemonic`, newMnemonic);
 
         debug(`wrote mnemonic for %O`, character);
       }

@@ -7,7 +7,7 @@ import { loadCharacters } from "#dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { glob, writeFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/jsonfmt";
 import * as fontkit from "fontkit";
 import path from "node:path";
 

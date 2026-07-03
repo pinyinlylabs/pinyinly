@@ -20,7 +20,7 @@ import type {
 } from "replicache";
 import { Replicache } from "replicache";
 import type { AnyFunction } from "ts-essentials";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export interface RizzleTypeDef {
   description?: string;

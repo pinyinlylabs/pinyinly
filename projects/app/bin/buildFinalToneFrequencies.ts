@@ -8,7 +8,7 @@
 import type { PinyinSoundId, PinyinUnit } from "#data/model.ts";
 import { matchAllPinyinUnits, splitPinyinUnit } from "#data/pinyin.js";
 import { loadDictionaryJson } from "#dictionary.js";
-import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import path from "node:path";
 
 interface FinalToneCount {
@@ -112,7 +112,7 @@ async function main() {
     }
   }
 
-  await writeJsonFileIfChanged(outputPath, groupedByFinal, 1);
+  await writeJsonFileIfChanged(outputPath, groupedByFinal);
 
   console.log(`✅ Wrote frequencies to ${outputPath}`);
 }

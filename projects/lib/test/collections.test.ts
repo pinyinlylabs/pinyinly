@@ -21,7 +21,7 @@ import {
 } from "#collections.ts";
 import type { IsEqual } from "#types.ts";
 import { describe, expect, test } from "vitest";
-import type z from "zod/v4";
+import type z from "zod";
 
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
