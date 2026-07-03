@@ -1,5 +1,9 @@
 // pyly-not-src-test
 
+import {
+  getJsonIndentForFilePath,
+  jsonStringifyShallowIndent,
+} from "@pinyinly/lib/jsonfmt";
 import { workspaceRoot } from "#bin/util/paths.ts";
 import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
@@ -8,62 +12,43 @@ import { expect, test } from "vitest";
 type JsonFmtConfig = {
   rules: Array<{
     files: string[];
+    indent: number;
   }>;
 };
 
-type OxFmtConfig = {
-  ignorePatterns: string[];
-};
-
 const jsonFmtConfigPath = path.resolve(workspaceRoot, `.jsonfmtrc.json`);
-const oxFmtConfigPath = path.resolve(workspaceRoot, `.oxfmtrc.json`);
 
-test(`app json formatter rules are ignored by oxfmt`, async () => {
+test(`app json formatter rules are respected by formatted files`, async () => {
   const jsonFmtConfig = JSON.parse(
     await fs.readFile(jsonFmtConfigPath, `utf8`),
   ) as JsonFmtConfig;
-  const oxFmtConfig = JSON.parse(
-    await fs.readFile(oxFmtConfigPath, `utf8`),
-  ) as OxFmtConfig;
 
-  const appJsonRules = jsonFmtConfig.rules.flatMap((rule) => rule.files);
-
-  const appJsonRuleFiles = new Set(
+  const matchedFilePaths = new Set(
     await fs.glob(
-      appJsonRules.map((pattern) => resolveWorkspacePattern(pattern)),
+      jsonFmtConfig.rules.flatMap((rule) =>
+        rule.files.map((pattern) => resolveWorkspacePattern(pattern)),
+      ),
     ),
   );
-  const ignoredFiles = new Set(
-    await fs.glob(expandIgnorePatterns(oxFmtConfig.ignorePatterns)),
-  );
 
-  for (const filePath of appJsonRuleFiles) {
+  expect(matchedFilePaths.size).toBeGreaterThan(0);
+
+  for (const filePath of matchedFilePaths) {
+    const actualContent = await fs.readFile(filePath, `utf8`);
+    const formattedContent = jsonStringifyShallowIndent(
+      JSON.parse(actualContent) as object,
+      await getJsonIndentForFilePath(filePath),
+    );
+
     expect(
-      ignoredFiles.has(filePath),
-      `Expected ${filePath} to be ignored by .oxfmtrc.json`,
-    ).toBe(true);
+      actualContent,
+      `Expected ${filePath} to match the formatting rules in .jsonfmtrc.json`,
+    ).toBe(formattedContent);
   }
 });
 
 function resolveWorkspacePattern(pattern: string): string {
   return path.resolve(workspaceRoot, normalizeWorkspacePattern(pattern));
-}
-
-function expandIgnorePatterns(patterns: string[]): string[] {
-  const expandedPatterns: string[] = [];
-
-  for (const pattern of patterns) {
-    const normalizedPattern = normalizeWorkspacePattern(pattern);
-    expandedPatterns.push(path.resolve(workspaceRoot, normalizedPattern));
-
-    if (!normalizedPattern.includes(`/`)) {
-      expandedPatterns.push(
-        path.resolve(workspaceRoot, `**/${normalizedPattern}`),
-      );
-    }
-  }
-
-  return expandedPatterns;
 }
 
 function normalizeWorkspacePattern(pattern: string): string {
