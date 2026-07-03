@@ -13,7 +13,7 @@ import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod";
 import type { HskLevelJudgeEntryType, HskLevelJudgeResultType } from "./hsk";
 import { buildHskLevelJudgePrompt } from "./hsk";
-import { createChatPromptHarness } from "./eval";
+import { createResponsePromptHarness } from "./eval";
 
 interface HskLevelHarnessMetadata extends HarnessMetadata {
   expecteds: string[][][];
@@ -88,7 +88,7 @@ const hskLevelJudgeCases = [
 describeEval(
   `buildHskLevelJudgePrompt eval`,
   {
-    harness: createChatPromptHarness(
+    harness: createResponsePromptHarness(
       buildHskLevelJudgePrompt,
       z.object({
         expecteds: z.array(z.array(z.array(z.string()))),

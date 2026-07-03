@@ -14,7 +14,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod";
 
-import { createChatPromptHarness } from "./eval";
+import { createResponsePromptHarness } from "./eval";
 interface SenseGroupingHarnessMetadata extends HarnessMetadata {
   expecteds: SenseGroupingEntryType[];
 }
@@ -78,7 +78,7 @@ const SenseGroupingJudge = createJudge(
 describeEval(
   `buildCedictEntrySenseMergingPrompt eval`,
   {
-    harness: createChatPromptHarness(
+    harness: createResponsePromptHarness(
       buildCedictEntrySenseMergingPrompt,
       z.object({ expecteds: z.array(senseGroupingEntrySchema) }),
     ),

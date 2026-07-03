@@ -1,5 +1,5 @@
 import { assetIdSchema } from "@/data/model";
-import { requestOpenAiChatJson } from "@/server/lib/ai";
+import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
 import { generateImage } from "@/server/lib/gemini";
 import { fetchAssetBase64 } from "@/server/lib/s3/assets";
@@ -140,7 +140,7 @@ export const aiRouter = router({
       });
 
       try {
-        const { data } = await requestOpenAiChatJson(prompt, {
+        const { data } = await requestOpenAiResponseJson(prompt, {
           signal,
         });
         return data;
@@ -175,7 +175,7 @@ export const aiRouter = router({
           });
 
           try {
-            const { data } = await requestOpenAiChatJson(prompt, {
+            const { data } = await requestOpenAiResponseJson(prompt, {
               signal,
             });
 
@@ -221,7 +221,7 @@ export const aiRouter = router({
       });
 
       try {
-        const { data } = await requestOpenAiChatJson(prompt, {
+        const { data } = await requestOpenAiResponseJson(prompt, {
           signal,
         });
         return data;
@@ -248,7 +248,7 @@ export const aiRouter = router({
       });
 
       try {
-        const { data } = await requestOpenAiChatJson(prompt, {
+        const { data } = await requestOpenAiResponseJson(prompt, {
           signal,
         });
         return data;

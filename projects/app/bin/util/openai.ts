@@ -1,82 +1,46 @@
-import { openaiApiKey } from "#util/env.js";
-import type { FsDbCache } from "@pinyinly/lib/fs";
 import { readFile } from "@pinyinly/lib/fs";
-import { invariant, nonNullable } from "@pinyinly/lib/invariant";
-import type { Debugger } from "debug";
+import type { FsDbCache } from "@pinyinly/lib/fs";
+import { invariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
-import OpenAI from "openai";
-import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
+import type OpenAI from "openai";
 import type { z } from "zod";
-import { openAiZodChatResponseFormat } from "#server/lib/ai.js";
+import { requestOpenAiResponseJson } from "#server/lib/ai.js";
+import type { ChatPrompt } from "#server/lib/ai.js";
 
-export const openAiWithFsDbCache = async (
-  body: ChatCompletionCreateParamsNonStreaming,
-  ctx: {
-    fsDbCache: FsDbCache;
-    openai?: OpenAI;
-    debug?: Debugger;
-  },
-) => {
-  const openai =
-    ctx.openai ??
-    new OpenAI({
-      apiKey: nonNullable(openaiApiKey),
+export async function makeSimplePrompt<Schema extends z.ZodType>(
+  docs: string[],
+  userMessage: string,
+  schema: Schema,
+): Promise<ChatPrompt<Schema>> {
+  return {
+    model: `gpt-5` as OpenAI.ChatModel,
+    reasoningEffort: `low`,
+    messages: [
+      await systemRoleMessageWithProjectContext(docs),
+      { role: `user`, content: userMessage },
+    ],
+    schema,
+  };
+}
+
+export function makeRequestOpenAiResponseJsonCached(fsDbCache: FsDbCache) {
+  return async function requestOpenAiResponseJsonCached<
+    Schema extends z.ZodType,
+  >(prompt: ChatPrompt<Schema>): Promise<z.infer<Schema>> {
+    // Check cache first using a stable cache key
+    const cacheKey = JSON.stringify({
+      model: prompt.model,
+      messages: prompt.messages,
     });
-  const debug = ctx.debug?.extend(`openAi`);
-  const cached = ctx.fsDbCache.get(body);
-
-  if (debug?.enabled === true) {
-    for (const message of body.messages) {
-      debug(`Role: %s`, message.role);
-      if (typeof message.content === `string`) {
-        debug(`Content:\n%s`, message.content);
-      } else {
-        debug(`Content:%O`, message.content);
-      }
-      debug(``);
+    const cached = fsDbCache.get(cacheKey);
+    if (cached != null) {
+      invariant(typeof cached === `string`);
+      return prompt.schema.parse(JSON.parse(cached));
     }
-  }
 
-  if (cached == null) {
-    debug?.(`Making OpenAI chat request (not cached): %O`, body);
-    const completion = await openai.chat.completions.create(body);
-    const result = completion.choices[0]?.message.content;
-    debug?.(`OpenAI chat response: %O`, result);
-    invariant(
-      result != null,
-      `No result for OpenAI request:\n${JSON.stringify(body, null, 2)}`,
-    );
-    ctx.fsDbCache.set(body, result);
-    return result;
-  }
-  invariant(typeof cached === `string`);
-  return cached;
-};
-
-export function makeSimpleAiClient(fsDbCache: FsDbCache) {
-  const openai = new OpenAI({
-    apiKey: nonNullable(openaiApiKey),
-  });
-
-  return async function simpleOpenAiWithCache<Schema extends z.ZodType>(
-    docs: string[],
-    userMessage: string,
-    schema: Schema,
-    model = `gpt-5`,
-  ): Promise<z.infer<Schema>> {
-    const rawJson = await openAiWithFsDbCache(
-      {
-        model,
-        messages: [
-          await systemRoleMessageWithProjectContext(docs),
-          { role: `user`, content: userMessage },
-        ],
-        response_format: openAiZodChatResponseFormat(schema, `result_shape`),
-      },
-      { fsDbCache, openai },
-    );
-
-    return schema.parse(JSON.parse(rawJson));
+    const result = await requestOpenAiResponseJson(prompt);
+    fsDbCache.set(cacheKey, JSON.stringify(result.data));
+    return result.data;
   };
 }
 

@@ -1,11 +1,11 @@
 // pyly-not-src-test
 import { createHarness } from "vitest-evals";
 import type { HarnessMetadata, JsonValue } from "vitest-evals";
+import { requestOpenAiResponseJson } from "#server/lib/ai.js";
 import type { ChatPrompt } from "#server/lib/ai.js";
-import { requestOpenAiChatJson } from "#server/lib/ai.js";
 import type { z } from "zod";
 
-export function createChatPromptHarness<
+export function createResponsePromptHarness<
   TMetadata extends HarnessMetadata,
   Schema extends z.ZodType<TOutput>,
   TInput = unknown,
@@ -15,11 +15,11 @@ export function createChatPromptHarness<
   _metadataSchema?: z.ZodType<TMetadata>,
 ) {
   return createHarness<TInput, TOutput, TMetadata>({
-    name: `chatHarness`,
+    name: `responseHarness`,
     run: async ({ input, signal }) => {
       const prompt = buildPrompt(input);
 
-      const { data, usage } = await requestOpenAiChatJson(prompt, {
+      const { data, model, usage } = await requestOpenAiResponseJson(prompt, {
         signal,
       });
 
@@ -28,10 +28,9 @@ export function createChatPromptHarness<
         messages: prompt.messages,
         usage: {
           provider: `openai`,
-          model: prompt.model,
-          inputTokens: usage?.prompt_tokens,
-          outputTokens: usage?.completion_tokens,
-          reasoningTokens: usage?.completion_tokens_details?.reasoning_tokens,
+          model: model,
+          inputTokens: usage?.input_tokens,
+          outputTokens: usage?.output_tokens,
           totalTokens: usage?.total_tokens,
         },
       };
