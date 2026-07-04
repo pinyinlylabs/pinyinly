@@ -24,7 +24,6 @@ import {
 } from "./completeHskVocabulary.ts";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
 import { hsk2026FilePath } from "./hsk.ts";
-import { fmtJsonFile, writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 test.skip(`all ivankraHsk30 items are in the dictionary`, async () => {
   const ivankraHsk30 = await loadIvankraHsk30();
@@ -602,9 +601,5 @@ test.skipIf(isCi)(`hsk2026.json export`, async () => {
     }
   }
 
-  await writeJsonFileIfChanged(hsk2026FilePath, hsk2026);
-});
-
-test.skipIf(isCi)(`hsk2026.json has correct formatting`, async () => {
-  await fmtJsonFile(hsk2026FilePath);
+  await expect(hsk2026).toMatchJsonFileSnapshot(hsk2026FilePath);
 });

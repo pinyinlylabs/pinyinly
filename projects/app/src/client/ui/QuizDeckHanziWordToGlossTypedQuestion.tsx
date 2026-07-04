@@ -112,7 +112,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
       </View>
       <TextAnswerInputSingle
         autoFocus={!noAutoFocus}
-        disabled={grade != null}
+        editable={grade == null}
         onChangeValue={(text) => {
           userAnswerRef.current = text.trim();
           setIsUserAnswerEmpty(text.trim().length === 0);

@@ -89,6 +89,110 @@ export default () => {
           />
         </ExampleStack>
 
+        <ExampleStack title="Disabled + Success">
+          <TextAnswerInputSingle
+            initialValue="hello"
+            placeholder="Type your answer"
+            state="success"
+            disabled
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="Disabled + Error">
+          <TextAnswerInputSingle
+            initialValue="helo"
+            placeholder="Type your answer"
+            state="error"
+            disabled
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="Disabled + Warning">
+          <TextAnswerInputSingle
+            initialValue="hello"
+            placeholder="Type your answer"
+            state="warning"
+            disabled
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="Not editable">
+          <TextAnswerInputSingle
+            initialValue="can't edit this"
+            placeholder="Type your answer"
+            editable={false}
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="Not editable + Success">
+          <TextAnswerInputSingle
+            initialValue="hello"
+            placeholder="Type your answer"
+            state="success"
+            editable={false}
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="Not editable + Error">
+          <TextAnswerInputSingle
+            initialValue="helo"
+            placeholder="Type your answer"
+            state="error"
+            editable={false}
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="Not editable + Warning">
+          <TextAnswerInputSingle
+            initialValue="hello"
+            placeholder="Type your answer"
+            state="warning"
+            editable={false}
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
         <ExampleStack title="With auto-correct (English)">
           <TextAnswerInputSingle
             placeholder="Type in English"

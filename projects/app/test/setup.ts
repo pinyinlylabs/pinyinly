@@ -24,22 +24,13 @@ expect.extend({
     const indent = await getJsonIndentForFilePath(filePath);
     const formatted = jsonStringifyShallowIndent(received, indent);
 
-    try {
-      await expect(formatted).toMatchFileSnapshot(filePath);
-      return {
-        pass: true,
-        message: () =>
-          `expected JSON not to match file snapshot at "${filePath}"`,
-      };
-    } catch (error) {
-      return {
-        pass: false,
-        message: () =>
-          error instanceof Error
-            ? error.message
-            : `JSON did not match file snapshot`,
-      };
-    }
+    await expect(formatted).toMatchFileSnapshot(filePath);
+
+    return {
+      pass: true,
+      message: () =>
+        `expected JSON not to match file snapshot at "${filePath}"`,
+    };
   },
 });
 

@@ -43,7 +43,6 @@ import {
   nonNullable,
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
-import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -512,45 +511,26 @@ describe(`character.json files`, async () => {
       }
     }
 
-    if (!isCi) {
-      await mkdir(characterStrokeSvgsDir, { recursive: true });
+    await mkdir(characterStrokeSvgsDir, { recursive: true });
 
-      const expectedFileNames = new Set(
-        [...expected.keys()].map((character) => `${character}.json`),
-      );
+    const expectedFileNames = new Set(
+      [...expected.keys()].map((character) => `${character}.json`),
+    );
 
-      for (const fileName of await readdir(characterStrokeSvgsDir)) {
-        if (!fileName.endsWith(`.json`) || expectedFileNames.has(fileName)) {
-          continue;
-        }
-
-        await rm(path.join(characterStrokeSvgsDir, fileName));
+    for (const fileName of await readdir(characterStrokeSvgsDir)) {
+      if (!fileName.endsWith(`.json`) || expectedFileNames.has(fileName)) {
+        continue;
       }
 
-      for (const [character, strokes] of expected.entries()) {
-        await writeJsonFileIfChanged(
-          path.join(characterStrokeSvgsDir, `${character}.json`),
-          strokes,
-        );
-      }
+      await rm(path.join(characterStrokeSvgsDir, fileName));
     }
 
-    const actualFileNames = (await readdir(characterStrokeSvgsDir))
-      .filter((fileName) => fileName.endsWith(`.json`))
-      .sort(sortComparatorString((x) => x));
-    const expectedFileNames = [...expected.keys()]
-      .map((character) => `${character}.json`)
-      .sort(sortComparatorString((x) => x));
-
-    expect(actualFileNames).toEqual(expectedFileNames);
-
-    for (const fileName of actualFileNames) {
-      const character = fileName.slice(0, -`.json`.length) as HanziText;
-      const actual = JSON.parse(
-        readFileSync(path.join(characterStrokeSvgsDir, fileName), `utf-8`),
-      ) as unknown;
-
-      expect(actual).toEqual(nonNullable(expected.get(character)));
+    for (const [character, strokes] of expected.entries()) {
+      await expect
+        .soft(strokes, `${character} strokes`)
+        .toMatchJsonFileSnapshot(
+          path.join(characterStrokeSvgsDir, `${character}.json`),
+        );
     }
   });
 

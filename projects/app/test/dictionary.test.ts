@@ -62,7 +62,6 @@ import {
 import { 拼音, 汉 } from "./data/helpers.ts";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
 import isEqual from "lodash/isEqual";
-import { fmtJsonFile } from "@pinyinly/lib/jsonfmt";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -633,10 +632,6 @@ describe(
     });
   },
 );
-
-test.skipIf(isCi)(`dictionary.asset.json has correct formatting`, async () => {
-  await fmtJsonFile(dictionaryFilePath);
-});
 
 test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<

@@ -35,7 +35,7 @@ export function QuizDeckResultToast({
             className={`
               flex-1 gap-[12px] overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-[84px]
 
-              lg:mb-2 lg:rounded-xl
+              sm:mb-2 sm:rounded-xl
 
               ${ratingToThemeClass(rating)}
             `}

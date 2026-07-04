@@ -22,6 +22,16 @@ export interface ChatPrompt<Schema extends z.ZodType> {
   schema: Schema;
 }
 
+export function zodResponseFormatJson<Schema extends z.ZodType>(
+  schema: Schema,
+): OpenAI.Responses.ResponseFormatTextJSONSchemaConfig {
+  return {
+    type: `json_schema`,
+    name: `result_shape`,
+    schema: z.toJSONSchema(schema, { unrepresentable: `any` }),
+  };
+}
+
 export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
   options?: { signal?: AbortSignal; retries?: number },
@@ -38,11 +48,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       effort: prompt.reasoningEffort,
     },
     text: {
-      format: {
-        type: `json_schema`,
-        name: `result_shape`,
-        schema: z.toJSONSchema(prompt.schema, { unrepresentable: `any` }),
-      },
+      format: zodResponseFormatJson(prompt.schema),
     },
     input: prompt.messages,
     store: true,
