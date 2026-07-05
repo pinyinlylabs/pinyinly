@@ -94,7 +94,7 @@ buildPronunciationHintPrompt.schema = z
               .describe(
                 `The mnemonic story text. When the cue word appears in the story, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
               ),
-            explanation: z.string().nullable().optional(),
+            explanation: z.string().nullable(),
           })
           .strict(),
       )
@@ -140,7 +140,7 @@ const meaningHintOutputSchema = z
         z
           .object({
             hint: z.string(),
-            explanation: z.string().nullable().optional(),
+            explanation: z.string().nullable(),
           })
           .strict(),
       )
@@ -360,7 +360,7 @@ buildSubLocationDescriptionPrompt.schema = z
         z
           .object({
             description: z.string(),
-            explanation: z.string().nullable().optional(),
+            explanation: z.string().nullable(),
           })
           .strict(),
       )
@@ -435,7 +435,7 @@ buildLeadCharacterDescriptionPrompt.schema = z
         z
           .object({
             description: z.string(),
-            explanation: z.string().nullable().optional(),
+            explanation: z.string().nullable(),
           })
           .strict(),
       )
