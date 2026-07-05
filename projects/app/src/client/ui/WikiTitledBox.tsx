@@ -43,7 +43,9 @@ export function WikiTitledBox({
   return (
     <View className={containerClass({ className })} onLayout={onLayout}>
       <View className="flex-row items-center">
-        <Text className="pyly-body-subheading flex-1">{title}</Text>
+        <Text className="flex-1 font-sans text-sm/normal font-bold uppercase text-fg-dim">
+          {title}
+        </Text>
         {headerAction}
       </View>
 

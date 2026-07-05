@@ -408,33 +408,25 @@ function MeaningsSection({
     ? hanziWordMeanings
     : hanziWordMeanings.filter(meaningHasHint);
 
-  return (
-    <View className="gap-4 p-4">
-      {visibleMeanings.length === 0 ? (
-        <Text className="pyly-body-caption text-fg-dim">
-          Think of a story connecting the components to the meaning.
-        </Text>
-      ) : (
-        <View className="gap-3">
-          {visibleMeanings.map((entry) => {
-            const meaningKey = meaningKeyFromHanziWord(entry.hanziWord);
-            const mnemonicHint = mnemonicHints?.find(
-              (h) => h.meaningKey === meaningKey,
-            )?.hint;
-            return (
-              <MeaningItem
-                key={entry.hanziWord}
-                hanzi={hanzi}
-                hanziWord={entry.hanziWord}
-                meaning={entry}
-                mnemonicHint={mnemonicHint}
-                aiComponents={aiComponents}
-                isEditMode={isEditMode}
-              />
-            );
-          })}
-        </View>
-      )}
+  return visibleMeanings.length === 0 ? null : (
+    <View className="gap-3 p-4">
+      {visibleMeanings.map((entry) => {
+        const meaningKey = meaningKeyFromHanziWord(entry.hanziWord);
+        const mnemonicHint = mnemonicHints?.find(
+          (h) => h.meaningKey === meaningKey,
+        )?.hint;
+        return (
+          <MeaningItem
+            key={entry.hanziWord}
+            hanzi={hanzi}
+            hanziWord={entry.hanziWord}
+            meaning={entry}
+            mnemonicHint={mnemonicHint}
+            aiComponents={aiComponents}
+            isEditMode={isEditMode}
+          />
+        );
+      })}
     </View>
   );
 }
