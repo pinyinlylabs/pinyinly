@@ -101,7 +101,9 @@
   }
   .pyly-body.pyly-mark,
   .pyly-body .pyly-mark {
-    @apply font-semibold text-yellow;
+    @apply font-semibold text-fg-loud text-fg-loud;
+
+    @apply decoration-[3px] underline-offset-[2px];
   }
 
   /* --- */
@@ -583,6 +585,20 @@
     --color-fg: var(--color-theme-placeholder-panel-fg);
     --color-fg-dim: var(--color-theme-placeholder-panel-fg-dim);
     --color-fg-loud: var(--color-theme-placeholder-panel-fg-loud);
+  }
+
+  /* --- */
+
+  .pyly-mark {
+    text-decoration-skip-ink: none;
+
+    @apply underline decoration-currentColor/40;
+
+    /* Fix Safari bug where the underline text decoration isn't redrawn
+    correctly because Safari doesn't correctly mark the pixels as dirty on
+    hover. */
+
+    @apply hover:transform-gpu;
   }
 
   /* --- */
