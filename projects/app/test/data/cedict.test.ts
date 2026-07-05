@@ -3916,8 +3916,8 @@ test(`write cedict .senseSampling cache`, { timeout: 5 * 60_000 }, async () => {
   const entries = await loadCedictV2();
   let existingSampling = await loadCedictSenseSampling();
 
-  const { hsk1, hsk2, hsk3 } = await groupCedictEntriesByHskLevel(entries);
-  const targetEntryIds = [...hsk1, ...hsk2, ...hsk3]
+  const { hsk1, hsk2 } = await groupCedictEntriesByHskLevel(entries);
+  const targetEntryIds = [...hsk1, ...hsk2]
     .filter((entry) => isLikelyOverSplitCedictEntry(entry))
     .map((entry) => buildCedictV2EntryId(entry));
 

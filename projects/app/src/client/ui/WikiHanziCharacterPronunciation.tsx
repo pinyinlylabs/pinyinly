@@ -18,6 +18,7 @@ import {
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneNameSetting,
+  pinyinFinalToneStoryPhraseSetting,
   pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
@@ -195,6 +196,17 @@ export function WikiHanziCharacterPronunciationBox({
           ),
         },
   );
+  const finalToneStoryPhraseSetting = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinFinalToneStoryPhraseSetting,
+          key: getPinyinFinalToneKeyParams(
+            splitPinyin.finalSoundId,
+            String(splitPinyin.tone),
+          ),
+        },
+  );
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
   const finalPinyinSoundName = finalPinyinSound2?.value?.text;
   const tonePinyinSoundName = tonePinyinSound2?.value?.text;
@@ -235,6 +247,7 @@ export function WikiHanziCharacterPronunciationBox({
   });
   const finalToneName =
     finalToneNameSetting?.value?.text ?? defaultFinalToneName;
+  const finalToneStoryPhrase = finalToneStoryPhraseSetting?.value?.text;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -443,6 +456,10 @@ export function WikiHanziCharacterPronunciationBox({
               finalToneLocationDescription.length === 0
                 ? undefined
                 : finalToneLocationDescription,
+            storyPhrase:
+              finalToneStoryPhrase == null || finalToneStoryPhrase.length === 0
+                ? undefined
+                : finalToneStoryPhrase,
           }}
           cue={{ word: gloss, meaning: cueMeaning }}
           onApplyHint={({ text, explanation }) => {
