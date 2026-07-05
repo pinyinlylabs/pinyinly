@@ -9,7 +9,7 @@ export function buildPronunciationHintPrompt({
   count,
 }: {
   leadCharacter: { name: string; bio?: string; article?: string };
-  location: { name: string; description?: string; storyPhrase?: string };
+  location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   creativeDirection?: string;
   count: number;
@@ -21,7 +21,6 @@ The goal is to create a scene that is easy to picture and easy to remember.
 Each scene should feel like a tiny absurd sketch or striking mental snapshot.
 Always clearly include the named character and location.
 Keep location wording fluent and natural in second person.
-If Location.storyPhrase is provided, actively weave it into the sentence in a natural way instead of inserting it mechanically.
 When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
 Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
 When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
@@ -51,9 +50,6 @@ Format: wrap the cue word (or its inflected form) in ==word== whenever it appear
       ...(location.description == null
         ? {}
         : { description: location.description }),
-      ...(location.storyPhrase == null
-        ? {}
-        : { storyPhrase: location.storyPhrase }),
     },
     cue: {
       word: cue.word,

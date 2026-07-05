@@ -330,14 +330,6 @@ export const pinyinFinalToneViewpointSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
-export const pinyinFinalToneStoryPhraseSetting = defineUserSetting({
-  entity: r.entity(`pftsp/[soundId]/[tone]`, {
-    soundId: rPinyinSoundId().alias(`s`),
-    tone: r.string().alias(`n`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-});
-
 export const pinyinFinalToneImageSetting = defineUserSetting({
   entity: r.entity(`pfti/[soundId]/[tone]`, {
     soundId: rPinyinSoundId().alias(`s`),

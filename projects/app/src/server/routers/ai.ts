@@ -29,7 +29,6 @@ const pronunciationHintInputSchema = z
       .object({
         name: z.string().min(1),
         description: z.string().optional(),
-        storyPhrase: z.string().optional(),
       })
       .strict(),
     cue: z
