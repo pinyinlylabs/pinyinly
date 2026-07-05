@@ -4882,7 +4882,7 @@ You're a helpful Chinese to English dictionary editor. The dictionary is used by
 > A definition is made up of senses, and a sense is made up of glosses. […] Generally, glosses within a sense are synonyms and can be included to remove ambiguity, while senses represent wholly different meanings or uses of a word.
 
 Rules:
-- Each gloss can have multiple meanings and appear in multiple senses.
+- Each gloss can have multiple meanings and should usually only appear in one sense.
 - All glosses in the input must also be in the output, do not invent or delete glosses.
 - Keep gloss text verbatim as they appear in the input.
 - Group glosses by Chinese semantic concept, not by translation, part of speech, or by fine-grained English taxonomy.
