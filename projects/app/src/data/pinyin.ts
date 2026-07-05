@@ -488,20 +488,6 @@ export const defaultToneNames = {
   "5": `light and short`,
 } as Record<string, string>;
 
-// Tone names that work as prepositions/locations and read better before the final
-const prepositionToneNames = new Set([
-  `outside`,
-  `inside`,
-  `above`,
-  `below`,
-  `entry`,
-  `exit`,
-  `beyond`,
-  `within`,
-  `beside`,
-  `behind`,
-]);
-
 export function getDefaultFinalToneName({
   finalName,
   toneName,
@@ -519,15 +505,7 @@ export function getDefaultFinalToneName({
     return trimmedFinal;
   }
 
-  // Check if the tone name is a preposition-like word
-  const toneNameLower = trimmedTone.toLowerCase();
-  if (prepositionToneNames.has(toneNameLower)) {
-    // Keep original format: "Outside the River Stage"
-    return `${trimmedTone} the ${trimmedFinal}`;
-  }
-
-  // Otherwise, use final + lowercase tone: "River Stage entrance"
-  return `${trimmedFinal} ${toneNameLower}`;
+  return `${trimmedTone} of ${trimmedFinal}`;
 }
 
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
