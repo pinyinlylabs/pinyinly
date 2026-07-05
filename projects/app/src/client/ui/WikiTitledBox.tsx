@@ -43,7 +43,7 @@ export function WikiTitledBox({
   return (
     <View className={containerClass({ className })} onLayout={onLayout}>
       <View className="flex-row items-center">
-        <Text className="flex-1 font-sans text-sm/normal font-bold uppercase text-fg-dim">
+        <Text className="flex-1 font-sans text-sm/normal font-semibold uppercase text-fg-dim">
           {title}
         </Text>
         {headerAction}
