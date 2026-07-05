@@ -127,24 +127,25 @@ describe(
             {
               "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-        The goal is to create a scene that is easy to picture and easy to remember.
-        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-        Always clearly include the named character and location.
-        Keep location wording fluent and natural in second person.
-        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
         When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-        If extra character or location details are provided, use them to make the story more specific.
-        Keep each hint to 1-2 sentences.
+        If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
-        Each suggestion must explicitly include the character and location by name.
-        Use the keyword as light inspiration for the central action, object, or conflict.
-        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly just a definition.
-        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        Good endings are concrete, replayable, and mentally vivid.
+        Bad endings are generic, flat, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
               "role": "system",
             },
             {
@@ -193,24 +194,25 @@ describe(
             {
               "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-        The goal is to create a scene that is easy to picture and easy to remember.
-        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-        Always clearly include the named character and location.
-        Keep location wording fluent and natural in second person.
-        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
         When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-        If extra character or location details are provided, use them to make the story more specific.
-        Keep each hint to 1-2 sentences.
+        If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
-        Each suggestion must explicitly include the character and location by name.
-        Use the keyword as light inspiration for the central action, object, or conflict.
-        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly just a definition.
-        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        Good endings are concrete, replayable, and mentally vivid.
+        Bad endings are generic, flat, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
               "role": "system",
             },
             {
@@ -256,24 +258,25 @@ describe(
             {
               "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-        The goal is to create a scene that is easy to picture and easy to remember.
-        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-        Always clearly include the named character and location.
-        Keep location wording fluent and natural in second person.
-        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
         When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-        If extra character or location details are provided, use them to make the story more specific.
-        Keep each hint to 1-2 sentences.
+        If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
-        Each suggestion must explicitly include the character and location by name.
-        Use the keyword as light inspiration for the central action, object, or conflict.
-        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly just a definition.
-        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        Good endings are concrete, replayable, and mentally vivid.
+        Bad endings are generic, flat, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
               "role": "system",
             },
             {

@@ -457,17 +457,13 @@ function MeaningItem({
 
   // Display glosses: first one bold, rest dim and semicolon-separated
   const primaryGloss = meaning.gloss[0];
-  const secondaryGlosses = meaning.gloss.slice(1);
 
   return (
     <View className="gap-1">
       <View className="flex-row items-center gap-2">
         <Text className="font-sans text-xl/normal font-medium text-fg-loud">
           <Text className="pyly-bold">{primaryGloss}</Text>
-          {secondaryGlosses.length > 0 ? (
-            <Text className="text-fg-dim">; {secondaryGlosses.join(`; `)}</Text>
-          ) : null}
-            ⤵
+            <Text className="text-fg-dim">⤵</Text>
         </Text>
       </View>
       {isEditMode || hasHint ? (

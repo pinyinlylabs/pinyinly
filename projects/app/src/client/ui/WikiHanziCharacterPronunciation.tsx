@@ -356,11 +356,7 @@ export function WikiHanziCharacterPronunciationBox({
       {isHintSectionVisible || isImageSectionVisible ? (
         <View className="gap-4 p-4">
           {isHintSectionVisible ? (
-            <View className="gap-2">
-              <Text className="pyly-body-subheading">
-                Your pronunciation hint
-              </Text>
-
+            <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
               <InlineEditableSettingText
                 readonly={!isEditMode}
                 setting={hanziPronunciationHintTextSetting}

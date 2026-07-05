@@ -505,7 +505,15 @@ export function getDefaultFinalToneName({
     return trimmedFinal;
   }
 
-  return `${trimmedTone} of ${trimmedFinal}`;
+  const prepositionLikeToneNames = new Set([`outside`, `inside`, `entry`]);
+
+  if (prepositionLikeToneNames.has(trimmedTone.toLowerCase())) {
+    return `${trimmedTone} the ${trimmedFinal}`;
+  }
+
+  const lowerFirstTone =
+    trimmedTone.charAt(0).toLowerCase() + trimmedTone.slice(1);
+  return `${trimmedFinal} ${lowerFirstTone}`;
 }
 
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
