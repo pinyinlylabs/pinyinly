@@ -408,33 +408,25 @@ function MeaningsSection({
     ? hanziWordMeanings
     : hanziWordMeanings.filter(meaningHasHint);
 
-  return (
-    <View className="gap-4 p-4">
-      {visibleMeanings.length === 0 ? (
-        <Text className="pyly-body-caption text-fg-dim">
-          Think of a story connecting the components to the meaning.
-        </Text>
-      ) : (
-        <View className="gap-3">
-          {visibleMeanings.map((entry) => {
-            const meaningKey = meaningKeyFromHanziWord(entry.hanziWord);
-            const mnemonicHint = mnemonicHints?.find(
-              (h) => h.meaningKey === meaningKey,
-            )?.hint;
-            return (
-              <MeaningItem
-                key={entry.hanziWord}
-                hanzi={hanzi}
-                hanziWord={entry.hanziWord}
-                meaning={entry}
-                mnemonicHint={mnemonicHint}
-                aiComponents={aiComponents}
-                isEditMode={isEditMode}
-              />
-            );
-          })}
-        </View>
-      )}
+  return visibleMeanings.length === 0 ? null : (
+    <View className="gap-10 p-4 px-10">
+      {visibleMeanings.map((entry) => {
+        const meaningKey = meaningKeyFromHanziWord(entry.hanziWord);
+        const mnemonicHint = mnemonicHints?.find(
+          (h) => h.meaningKey === meaningKey,
+        )?.hint;
+        return (
+          <MeaningItem
+            key={entry.hanziWord}
+            hanzi={hanzi}
+            hanziWord={entry.hanziWord}
+            meaning={entry}
+            mnemonicHint={mnemonicHint}
+            aiComponents={aiComponents}
+            isEditMode={isEditMode}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -461,7 +453,6 @@ function MeaningItem({
     key: { hanziWord },
   });
   const displayHint = hintState.text ?? mnemonicHint ?? null;
-  const hasCustomHint = hintState.hasText;
   const hasHint = (displayHint ?? ``).trim().length > 0;
 
   // Display glosses: first one bold, rest dim and semicolon-separated
@@ -471,16 +462,16 @@ function MeaningItem({
   return (
     <View className="gap-1">
       <View className="flex-row items-center gap-2">
-        <Circle hasCustomHint={hasCustomHint} />
-        <Text className="pyly-body flex-1">
+        <Text className="font-sans text-xl/normal font-medium text-fg-loud">
           <Text className="pyly-bold">{primaryGloss}</Text>
           {secondaryGlosses.length > 0 ? (
             <Text className="text-fg-dim">; {secondaryGlosses.join(`; `)}</Text>
           ) : null}
+            ⤵
         </Text>
       </View>
       {isEditMode || hasHint ? (
-        <View className={isEditMode ? `gap-2 pl-7` : `gap-1 pl-7`}>
+        <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
           {isEditMode ? (
             <View className="flex-row items-center justify-between">
               <Text className="font-sans text-[13px] text-fg-dim">
@@ -600,7 +591,7 @@ function MergedHintDisplay({ value }: { value: string }) {
 
   return (
     <>
-      <Text className="font-semibold">
+      <Text className="font-medium">
         <Pylymark source={parsed.hint} />
       </Text>
       {parsed.description == null ? null : (
@@ -610,18 +601,6 @@ function MergedHintDisplay({ value }: { value: string }) {
         </Text>
       )}
     </>
-  );
-}
-
-function Circle({ hasCustomHint }: { hasCustomHint: boolean }) {
-  return (
-    <View
-      className={`
-        m-1 size-3 rounded-full border-2
-
-        ${hasCustomHint ? `border-cyan bg-cyan` : `border-fg-bg25`}
-      `}
-    />
   );
 }
 

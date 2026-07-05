@@ -11,7 +11,7 @@ import { memoize0 } from "@pinyinly/lib/collections";
 
 export interface AiPronunciationHintModalProps {
   leadCharacter: { name: string; bio?: string; article?: string };
-  location: { name: string; description?: string };
+  location: { name: string; description?: string; storyPhrase?: string };
   cue: { word: string; meaning?: string };
   onApplyHint: (hint: { text: string; explanation?: string | null }) => void;
   onDismiss: () => void;
@@ -50,6 +50,9 @@ export function AiPronunciationHintModal({
       ...(location.description == null
         ? {}
         : { description: location.description }),
+      ...(location.storyPhrase == null
+        ? {}
+        : { storyPhrase: location.storyPhrase }),
     },
     cue: {
       word: cue.word,

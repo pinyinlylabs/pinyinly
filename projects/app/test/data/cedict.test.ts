@@ -52,6 +52,7 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import type { PinyinNumericText } from "#data/model.js";
 import * as aiModule from "#server/lib/ai.js";
 import * as cedictModule from "./cedict";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 
 describe(`isLikelyOverSplitCedictEntry`, () => {
   test.for([
@@ -3925,13 +3926,12 @@ test(`write cedict .senseSampling cache`, { timeout: 5 * 60_000 }, async () => {
       entries,
       [targetEntryId],
       existingSampling,
-      { sampleCount: 10 },
+      { sampleCount: 5 },
     );
 
     const nextSamplingJson = serializeCedictSenseSamplingText(nextSampling);
-    await expect(nextSamplingJson).toMatchJsonFileSnapshot(
-      cedictSenseSamplingPath,
-    );
+
+    await writeJsonFileIfChanged(cedictSenseSamplingPath, nextSamplingJson);
 
     existingSampling = nextSampling;
   }

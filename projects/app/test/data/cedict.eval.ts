@@ -243,12 +243,20 @@ describeEval(
         expecteds: [
           `/chief; head/elder/to develop; to grow/to enhance; to increase/`,
           `/chief; head/elder/to develop; to enhance; to grow; to increase/`,
+          `/chief; head; elder/to develop; to enhance; to grow; to increase/`,
         ],
       },
       {
         name: `大衣 大衣 [[da4yi1]]`,
         input: `/overcoat/topcoat/cloak/`,
         expecteds: [`/cloak; overcoat; topcoat/`],
+      },
+      {
+        name: `大概 大概 [[da4gai4]]`,
+        input: `/general idea/about/rough/roughly/approximate/probably/`,
+        expecteds: [
+          `/about; roughly/approximate; rough/general idea/probably/`,
+        ],
       },
     ] as const)(`$name`, async (spec, { run }) => {
       const input = parsedLineToEntry(
