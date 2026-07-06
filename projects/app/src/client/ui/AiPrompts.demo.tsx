@@ -3,6 +3,8 @@ import { RectButton } from "@/client/ui/RectButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintLogicalPrompt,
+  buildMeaningHintCausualBridgePrompt,
   buildMeaningHintPrompt,
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
@@ -835,7 +837,7 @@ function buildCurrentPrompt(args: {
       return { result: null, errors };
     }
 
-    const result = buildMeaningHintPrompt({
+    const visual = buildMeaningHintPrompt({
       hanzi: args.meaningInput.hanzi.trim(),
       meaning: {
         hanziWord: args.meaningInput.hanziWord.trim(),
@@ -845,7 +847,54 @@ function buildCurrentPrompt(args: {
       count: count ?? 1,
     });
 
-    return { result: result.messages, errors };
+    const logical = buildMeaningHintLogicalPrompt({
+      hanzi: args.meaningInput.hanzi.trim(),
+      meaning: {
+        hanziWord: args.meaningInput.hanziWord.trim(),
+        glosses,
+      },
+      components: parseComponents(args.meaningInput.componentsText),
+      count: count ?? 1,
+    });
+
+    const causalBridge = buildMeaningHintCausualBridgePrompt({
+      hanzi: args.meaningInput.hanzi.trim(),
+      meaning: {
+        hanziWord: args.meaningInput.hanziWord.trim(),
+        glosses,
+      },
+      components: parseComponents(args.meaningInput.componentsText),
+      count: count ?? 1,
+    });
+
+    const result: ChatPromptMessage[] = [
+      {
+        role: `system`,
+        content: `[Visual]\n\n${visual.messages[0]?.content ?? ``}`,
+      },
+      {
+        role: `user`,
+        content: visual.messages[1]?.content ?? ``,
+      },
+      {
+        role: `system`,
+        content: `[Logical]\n\n${logical.messages[0]?.content ?? ``}`,
+      },
+      {
+        role: `user`,
+        content: logical.messages[1]?.content ?? ``,
+      },
+      {
+        role: `system`,
+        content: `[Causal Bridge]\n\n${causalBridge.messages[0]?.content ?? ``}`,
+      },
+      {
+        role: `user`,
+        content: causalBridge.messages[1]?.content ?? ``,
+      },
+    ];
+
+    return { result, errors };
   }
 
   if (args.mode === `pronunciation-hint`) {

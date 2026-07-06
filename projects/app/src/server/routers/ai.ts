@@ -10,6 +10,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
   buildPronunciationHintFantasyPrompt,
@@ -245,6 +246,7 @@ export const aiRouter = router({
       const strategyPlans = [
         buildMeaningHintPrompt,
         buildMeaningHintLogicalPrompt,
+        buildMeaningHintCausualBridgePrompt,
       ];
 
       const strategyResults = await Promise.all(

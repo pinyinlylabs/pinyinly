@@ -1,5 +1,6 @@
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
   buildPronunciationHintFantasyPrompt,
@@ -108,6 +109,147 @@ function collectMissingRequiredProperties(
 
   return issues;
 }
+
+describe(
+  `buildMeaningHintCausualBridgePrompt` satisfies HasNameOf<
+    typeof buildMeaningHintCausualBridgePrompt
+  >,
+  () => {
+    test(`minimal input (no component context)`, () => {
+      const result = buildMeaningHintCausualBridgePrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`],
+        },
+        count: 3,
+      });
+
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
+        {
+          "messages": [
+            {
+              "content": "You are a helpful assistant that creates short mnemonic explanations.
+
+        You will be given:
+        - A target: the concept the learner wants to remember.
+        - A list of cues: ideas the learner already knows.
+
+        Your task is to write a short explanation that uses every cue to make the target easy to remember.
+
+        Guidelines:
+        - Keep the explanation concise. One short sentence is preferred; use two only if necessary.
+        - Use plain, natural, everyday English.
+        - Prefer the simplest explanation that works.
+        - Make the target the natural consequence of the events in the explanation.
+        - Prefer a single, direct cause-and-effect relationship.
+        - Unless the cues explicitly specify another actor, use the learner (“I”) as the subject of any action.
+        - Avoid introducing intermediate concepts. Connect the cues to the target as directly as possible.
+        - Every cue should play an essential role in producing the target.
+        - Avoid unnecessary characters, objects, settings, or descriptive details.
+        - Avoid dramatic, magical, poetic, exaggerated, or theatrical language.
+        - Avoid introducing concepts that are not provided unless they are required for natural English.
+        - Avoid merely listing the concepts together. They should interact meaningfully.
+        - The explanation should feel obvious in hindsight, as though the cue naturally follows from the concepts.
+
+        The learner should be able to reconstruct the target simply by remembering how the cues interacted.
+
+        Generate multiple distinct ideas that use different relationships or perspectives rather than minor wording variations.",
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 mnemonic stories:
+
+        <data>
+        {
+          "target": "good",
+          "cues": []
+        }
+        </data>",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
+        }
+      `);
+    });
+
+    test(`full input (with component context)`, () => {
+      const result = buildMeaningHintCausualBridgePrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`, `well`, `fine`],
+        },
+        components: [
+          {
+            hanzi: `女`,
+            meaning: `woman`,
+          },
+          {
+            hanzi: `子`,
+            label: `child`,
+            meaning: `child`,
+          },
+        ],
+        count: 4,
+      });
+
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
+        {
+          "messages": [
+            {
+              "content": "You are a helpful assistant that creates short mnemonic explanations.
+
+        You will be given:
+        - A target: the concept the learner wants to remember.
+        - A list of cues: ideas the learner already knows.
+
+        Your task is to write a short explanation that uses every cue to make the target easy to remember.
+
+        Guidelines:
+        - Keep the explanation concise. One short sentence is preferred; use two only if necessary.
+        - Use plain, natural, everyday English.
+        - Prefer the simplest explanation that works.
+        - Make the target the natural consequence of the events in the explanation.
+        - Prefer a single, direct cause-and-effect relationship.
+        - Unless the cues explicitly specify another actor, use the learner (“I”) as the subject of any action.
+        - Avoid introducing intermediate concepts. Connect the cues to the target as directly as possible.
+        - Every cue should play an essential role in producing the target.
+        - Avoid unnecessary characters, objects, settings, or descriptive details.
+        - Avoid dramatic, magical, poetic, exaggerated, or theatrical language.
+        - Avoid introducing concepts that are not provided unless they are required for natural English.
+        - Avoid merely listing the concepts together. They should interact meaningfully.
+        - The explanation should feel obvious in hindsight, as though the cue naturally follows from the concepts.
+
+        The learner should be able to reconstruct the target simply by remembering how the cues interacted.
+
+        Generate multiple distinct ideas that use different relationships or perspectives rather than minor wording variations.",
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 mnemonic stories:
+
+        <data>
+        {
+          "target": "good",
+          "cues": [
+            "woman",
+            "child"
+          ]
+        }
+        </data>",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
+        }
+      `);
+    });
+  },
+);
 
 describe(
   `buildPronunciationHintFantasyPrompt` satisfies HasNameOf<
@@ -930,6 +1072,10 @@ describe(
 describe(`AI prompt schemas`, () => {
   test(`are valid for OpenAI json_schema strict object requirements`, () => {
     const schemas = [
+      [
+        `buildMeaningHintCausualBridgePrompt.schema`,
+        buildMeaningHintCausualBridgePrompt.schema,
+      ] as const,
       [
         `buildPronunciationHintFantasyPrompt.schema`,
         buildPronunciationHintFantasyPrompt.schema,

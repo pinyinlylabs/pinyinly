@@ -1,5 +1,6 @@
 import { trpc } from "@/client/trpc";
 import {
+  buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
 } from "@/util/prompts";
@@ -64,6 +65,16 @@ export function AiMeaningHintModal({
   });
 
   const logicalPrompt = buildMeaningHintLogicalPrompt({
+    hanzi,
+    meaning: {
+      hanziWord: meaning.hanziWord,
+      glosses: [...meaning.glosses],
+    },
+    components: components.map((component) => ({ ...component })),
+    count: 4,
+  });
+
+  const causalBridgePrompt = buildMeaningHintCausualBridgePrompt({
     hanzi,
     meaning: {
       hanziWord: meaning.hanziWord,
@@ -226,6 +237,10 @@ export function AiMeaningHintModal({
                 {
                   title: `Logical`,
                   messages: logicalPrompt.messages,
+                },
+                {
+                  title: `Causal Bridge`,
+                  messages: causalBridgePrompt.messages,
                 },
               ]}
             />
