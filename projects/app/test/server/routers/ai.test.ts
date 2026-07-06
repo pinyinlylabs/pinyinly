@@ -578,8 +578,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -652,8 +652,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -707,8 +707,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -776,8 +776,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });

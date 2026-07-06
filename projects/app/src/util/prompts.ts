@@ -304,8 +304,8 @@ Generate {{ count }} distinct mnemonic hints.
   return {
     messages,
     schema: meaningHintOutputSchema,
-    model: `gpt-5-mini`,
-    reasoningEffort: `medium`,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
   };
 };
 buildMeaningHintPrompt.strategy = `visual`;
@@ -372,8 +372,8 @@ Generate {{ count }} distinct mnemonic hints:
   return {
     messages,
     schema: meaningHintOutputSchema,
-    model: `gpt-5-mini`,
-    reasoningEffort: `medium`,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
   };
 };
 buildMeaningHintLogicalPrompt.strategy = `logical`;
