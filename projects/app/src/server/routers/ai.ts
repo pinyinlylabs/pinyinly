@@ -12,7 +12,8 @@ import {
   buildLeadCharacterDescriptionPrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
-  buildPronunciationHintPrompt,
+  buildPronunciationHintFantasyPrompt,
+  buildPronunciationHintRealisticPrompt,
   buildSubLocationDescriptionPrompt,
 } from "@/util/prompts";
 
@@ -37,10 +38,53 @@ const pronunciationHintInputSchema = z
         meaning: z.string().optional(),
       })
       .strict(),
-    creativeDirection: z.string().max(500).optional(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
+
+const pronunciationHintOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            hint: z.string(),
+            explanation: z.string().nullable().optional(),
+            strategyLabel: z.string(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+function containsPronunciationArtifacts(value: string): boolean {
+  // Block direct Hanzi output in hint stories.
+  if (/\p{Script=Han}/u.test(value)) {
+    return true;
+  }
+
+  // Block common pinyin tone-mark vowels and often-used u-umlaut forms.
+  if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/iu.test(value)) {
+    return true;
+  }
+
+  // Block tone-number style syllables like "ling2" when they appear as tokens.
+  if (/\b[a-z]{1,12}[1-5]\b/iu.test(value)) {
+    return true;
+  }
+
+  // Block explicit phonetics/pronunciation language from appearing in suggestions.
+  if (
+    /\b(?:pinyin|hanzi|pronunciation|phonetic|ipa|initial|final|tone|transliteration)\b/iu.test(
+      value,
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 const meaningHintInputSchema = z
   .object({
@@ -127,30 +171,69 @@ const generateImageOutputSchema = z
 export const aiRouter = router({
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
-    .output(buildPronunciationHintPrompt.schema)
+    .output(pronunciationHintOutputSchema)
     .mutation(async ({ input, signal }) => {
-      const { leadCharacter, location, cue, creativeDirection, count } = input;
+      const { leadCharacter, location, cue, count } = input;
 
-      const prompt = buildPronunciationHintPrompt({
-        leadCharacter,
-        location,
-        cue,
-        creativeDirection,
-        count,
+      const strategyPlans = [
+        buildPronunciationHintFantasyPrompt,
+        buildPronunciationHintRealisticPrompt,
+      ];
+
+      const baseCount = Math.floor(count / strategyPlans.length);
+      const remainder = count % strategyPlans.length;
+
+      const strategyCounts = strategyPlans.map((_, index) => {
+        return baseCount + (index < remainder ? 1 : 0);
       });
 
-      try {
-        const { data } = await requestOpenAiResponseJson(prompt, {
-          signal,
-        });
-        return data;
-      } catch (error) {
-        console.error(`Failed to generate pronunciation hints:`, error);
+      const strategyResults = await Promise.all(
+        strategyPlans.map(async (buildPrompt, index) => {
+          const strategyCount = strategyCounts[index] ?? 0;
+          if (strategyCount <= 0) {
+            return [];
+          }
+
+          const strategyLabel = buildPrompt.strategy;
+          const prompt = buildPrompt({
+            leadCharacter,
+            location,
+            cue,
+            count: strategyCount,
+          });
+
+          try {
+            const { data } = await requestOpenAiResponseJson(prompt, {
+              signal,
+            });
+
+            return data.suggestions
+              .filter((suggestion) => {
+                return !containsPronunciationArtifacts(suggestion.hint);
+              })
+              .map((suggestion) => ({
+                ...suggestion,
+                strategyLabel,
+              }));
+          } catch (error) {
+            console.error(
+              `Failed to generate ${strategyLabel} pronunciation hints:`,
+              error,
+            );
+            return [];
+          }
+        }),
+      );
+
+      const suggestions = strategyResults.flat();
+      if (suggestions.length === 0) {
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate hints`,
         });
       }
+
+      return { suggestions };
     }),
 
   generateMeaningHints: authedProcedure

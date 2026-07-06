@@ -12,18 +12,22 @@ const mockSuggestions = [
   {
     hint: `A Hero meets an Owl on the cliff ledge, and their voices slide together into one sound.`,
     explanation: `Hero = h-, Owl = -ao, Slide = tone 3 movement.`,
+    strategyLabel: `fantasy`,
   },
   {
     hint: `On the cliff ledge, the Hero tosses a rope to the Owl and both glide down in a long slide.`,
     explanation: `Hero + Owl + Slide in the same scene.`,
+    strategyLabel: `fantasy`,
   },
   {
     hint: `The Hero whispers to the Owl as they slowly slide along the ledge at dusk.`,
     explanation: `Hero (initial), Owl (final), Slide (tone).`,
+    strategyLabel: `realistic`,
   },
   {
     hint: `An Owl lands beside the Hero, and the ground slides under them on the cliff ledge.`,
     explanation: `All three sound cues appear in one place.`,
+    strategyLabel: `realistic`,
   },
 ];
 

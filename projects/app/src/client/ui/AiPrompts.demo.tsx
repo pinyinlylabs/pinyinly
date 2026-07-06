@@ -4,7 +4,8 @@ import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import {
   buildLeadCharacterDescriptionPrompt,
   buildMeaningHintPrompt,
-  buildPronunciationHintPrompt,
+  buildPronunciationHintFantasyPrompt,
+  buildPronunciationHintRealisticPrompt,
   buildSubLocationDescriptionPrompt,
 } from "@/util/prompts";
 import { useRef, useState } from "react";
@@ -34,7 +35,6 @@ type PronunciationHintInputType = {
   locationDescription: string;
   cueWord: string;
   cueMeaning: string;
-  creativeDirection: string;
   countText: string;
 };
 
@@ -70,7 +70,6 @@ const defaultPronunciationHintInput: PronunciationHintInputType = {
   locationDescription: `Bright tiled kitchen packed with loud appliances.`,
   cueWord: `can`,
   cueMeaning: `to be able to`,
-  creativeDirection: `Make it surreal and very visual.`,
   countText: `4`,
 };
 
@@ -119,7 +118,6 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
     locationDescription: `Ancient stacks with dusty ladders and green lamps.`,
     cueWord: `night`,
     cueMeaning: `the dark part of a day`,
-    creativeDirection: `Lean into eerie comedy.`,
     countText: `4`,
   },
   {
@@ -130,7 +128,6 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
     locationDescription: `Echoing room with metallic equipment and mirrors.`,
     cueWord: `press`,
     cueMeaning: `to push`,
-    creativeDirection: `Fast, energetic action.`,
     countText: `5`,
   },
 ];
@@ -434,18 +431,6 @@ export default () => {
                   cueMeaning: value,
                 }));
               }}
-            />
-
-            <FieldLabel text="Creative Direction (optional)" />
-            <MultilineInput
-              value={pronunciationInput.creativeDirection}
-              onChangeText={(value) => {
-                setPronunciationInput((current) => ({
-                  ...current,
-                  creativeDirection: value,
-                }));
-              }}
-              placeholder="Tone and style guidance"
             />
 
             <FieldLabel text="Count" />
@@ -883,7 +868,7 @@ function buildCurrentPrompt(args: {
       return { result: null, errors };
     }
 
-    const result = buildPronunciationHintPrompt({
+    const input = {
       leadCharacter: {
         name: args.pronunciationInput.leadName.trim(),
         article:
@@ -909,14 +894,32 @@ function buildCurrentPrompt(args: {
             ? undefined
             : args.pronunciationInput.cueMeaning.trim(),
       },
-      creativeDirection:
-        args.pronunciationInput.creativeDirection.trim().length === 0
-          ? undefined
-          : args.pronunciationInput.creativeDirection.trim(),
       count: count ?? 1,
-    });
+    };
 
-    return { result: result.messages, errors };
+    const fantasy = buildPronunciationHintFantasyPrompt(input);
+    const realistic = buildPronunciationHintRealisticPrompt(input);
+
+    const result: ChatPromptMessage[] = [
+      {
+        role: `system`,
+        content: `[Fantasy]\n\n${fantasy.messages[0]?.content ?? ``}`,
+      },
+      {
+        role: `user`,
+        content: fantasy.messages[1]?.content ?? ``,
+      },
+      {
+        role: `system`,
+        content: `[Realistic]\n\n${realistic.messages[0]?.content ?? ``}`,
+      },
+      {
+        role: `user`,
+        content: realistic.messages[1]?.content ?? ``,
+      },
+    ];
+
+    return { result, errors };
   }
 
   if (args.mode === `sub-location-description`) {

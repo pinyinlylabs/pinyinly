@@ -2,7 +2,8 @@ import {
   buildLeadCharacterDescriptionPrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
-  buildPronunciationHintPrompt,
+  buildPronunciationHintFantasyPrompt,
+  buildPronunciationHintRealisticPrompt,
   buildSubLocationDescriptionPrompt,
   renderPromptTemplate,
 } from "#util/prompts.ts";
@@ -109,12 +110,12 @@ function collectMissingRequiredProperties(
 }
 
 describe(
-  `buildPronunciationHintPrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintPrompt
+  `buildPronunciationHintFantasyPrompt` satisfies HasNameOf<
+    typeof buildPronunciationHintFantasyPrompt
   >,
   () => {
     test(`minimal input (no optional fields)`, () => {
-      const result = buildPronunciationHintPrompt({
+      const result = buildPronunciationHintFantasyPrompt({
         leadCharacter: { name: `Ethan` },
         location: { name: `Gong Cha bathroom` },
         cue: { word: `use` },
@@ -140,9 +141,13 @@ describe(
         Vary the opening words across suggestions; avoid repeating the same starter pattern.
         Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
         If cue meaning context is provided, follow that exact sense instead of other possible senses.
-        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
         If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
+        Lean into imaginative, playful, and cinematic moments.
+        Surprising details are welcome when they remain easy to picture.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
         Good endings are concrete, replayable, and mentally vivid.
         Bad endings are generic, flat, or mostly definitions.
         When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
@@ -174,7 +179,7 @@ describe(
     });
 
     test(`full input (all optional fields set)`, () => {
-      const result = buildPronunciationHintPrompt({
+      const result = buildPronunciationHintFantasyPrompt({
         leadCharacter: {
           name: `Ethan`,
           bio: `Ethan Klein — loud, expressive, chaotic`,
@@ -184,7 +189,6 @@ describe(
           description: `A cramped, slightly sticky bathroom with bubble tea posters`,
         },
         cue: { word: `use`, meaning: `to use; to employ` },
-        creativeDirection: `Play it as a surreal heist-comedy beat with one unforgettable prop.`,
         count: 4,
       });
 
@@ -207,9 +211,13 @@ describe(
         Vary the opening words across suggestions; avoid repeating the same starter pattern.
         Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
         If cue meaning context is provided, follow that exact sense instead of other possible senses.
-        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
         If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
+        Lean into imaginative, playful, and cinematic moments.
+        Surprising details are welcome when they remain easy to picture.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
         Good endings are concrete, replayable, and mentally vivid.
         Bad endings are generic, flat, or mostly definitions.
         When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
@@ -231,8 +239,7 @@ describe(
           "cue": {
             "word": "use",
             "meaning": "to use; to employ"
-          },
-          "creativeDirection": "Play it as a surreal heist-comedy beat with one unforgettable prop."
+          }
         }
         </data>",
               "role": "user",
@@ -245,7 +252,7 @@ describe(
     });
 
     test(`lead character with article`, () => {
-      const result = buildPronunciationHintPrompt({
+      const result = buildPronunciationHintFantasyPrompt({
         leadCharacter: { name: `seal`, article: `the` },
         location: { name: `River Stage bathroom` },
         cue: { word: `color` },
@@ -271,9 +278,13 @@ describe(
         Vary the opening words across suggestions; avoid repeating the same starter pattern.
         Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
         If cue meaning context is provided, follow that exact sense instead of other possible senses.
-        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
         If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
+        Lean into imaginative, playful, and cinematic moments.
+        Surprising details are welcome when they remain easy to picture.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
         Good endings are concrete, replayable, and mentally vivid.
         Bad endings are generic, flat, or mostly definitions.
         When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
@@ -293,6 +304,77 @@ describe(
           },
           "cue": {
             "word": "color"
+          }
+        }
+        </data>",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
+        }
+      `);
+    });
+  },
+);
+
+describe(
+  `buildPronunciationHintRealisticPrompt` satisfies HasNameOf<
+    typeof buildPronunciationHintRealisticPrompt
+  >,
+  () => {
+    test(`enforces realistic style constraints`, () => {
+      const result = buildPronunciationHintRealisticPrompt({
+        leadCharacter: { name: `Ethan` },
+        location: { name: `Gong Cha bathroom` },
+        cue: { word: `use` },
+        count: 3,
+      });
+
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
+        {
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+        Invent clear, grounded mini-scenes using a character, a location, and a keyword.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
+        If extra character or location details are provided, use them to make endings more specific.
+        Keep scenes realistic and plausible in everyday life.
+        Avoid supernatural, magical, dreamlike, or impossible events.
+        Avoid bizarre shock-value imagery; prefer practical, familiar actions.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
+        Good endings are concrete, replayable, mentally vivid, and believable.
+        Bad endings are generic, flat, fantastical, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct mnemonic story ideas.
+
+        <data>
+        {
+          "leadCharacter": {
+            "name": "Ethan"
+          },
+          "location": {
+            "name": "Gong Cha bathroom"
+          },
+          "cue": {
+            "word": "use"
           }
         }
         </data>",
@@ -849,8 +931,12 @@ describe(`AI prompt schemas`, () => {
   test(`are valid for OpenAI json_schema strict object requirements`, () => {
     const schemas = [
       [
-        `buildPronunciationHintPrompt.schema`,
-        buildPronunciationHintPrompt.schema,
+        `buildPronunciationHintFantasyPrompt.schema`,
+        buildPronunciationHintFantasyPrompt.schema,
+      ] as const,
+      [
+        `buildPronunciationHintRealisticPrompt.schema`,
+        buildPronunciationHintRealisticPrompt.schema,
       ] as const,
       [`buildMeaningHintPrompt.schema`, buildMeaningHintPrompt.schema] as const,
       [
