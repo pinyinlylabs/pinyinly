@@ -206,6 +206,11 @@ export function WikiHanziCharacterDecompositionBox({
     <WikiTitledBox
       title="Recognize the character"
       onEditingChange={setIsEditMode}
+      bottomCaption={
+        componentsElements.length > 0
+          ? `Using components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
+          : undefined
+      }
     >
       <View className="gap-4 p-4">
         {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}
