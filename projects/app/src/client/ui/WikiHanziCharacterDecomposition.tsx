@@ -14,6 +14,7 @@ import type {
   WikiCharacterComponent,
 } from "@/data/model";
 import {
+  hanziWordMeaningHintCaptionSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
@@ -208,7 +209,7 @@ export function WikiHanziCharacterDecompositionBox({
       onEditingChange={setIsEditMode}
       bottomCaption={
         componentsElements.length > 0
-          ? `Using components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
+          ? `Using the components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
           : undefined
       }
     >
@@ -216,16 +217,7 @@ export function WikiHanziCharacterDecompositionBox({
         {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}
 
         {componentsElements.length > 0 ? (
-          <>
-            <Text className="pyly-body">
-              Use the components of{` `}
-              <Text className="pyly-bold">{hanzi}</Text> to help:
-            </Text>
-
-            <View className="flex-row flex-wrap gap-5">
-              {componentsElements}
-            </View>
-          </>
+          <View className="flex-row flex-wrap gap-5">{componentsElements}</View>
         ) : strokeSvgs == null ? null : (
           <>
             <Text className="pyly-body">
@@ -247,6 +239,8 @@ export function WikiHanziCharacterDecompositionBox({
           </>
         )}
       </View>
+
+      <ExperimentalContent hanzi={hanzi} />
 
       <CoverImageSection hanzi={hanzi} isEditMode={isEditMode} />
 
@@ -293,8 +287,15 @@ function CoverImageSection({
       ? null
       : { setting: hanziWordMeaningHintImagePromptSetting, key: settingKey },
   );
+  const captionSetting = useUserSetting(
+    settingKey == null
+      ? null
+      : { setting: hanziWordMeaningHintCaptionSetting, key: settingKey },
+  );
 
   const hintState = useHanziWordMeaningHint(hanziWord);
+  const captionText = captionSetting?.value?.text.trim() ?? ``;
+  const hasCaption = captionText.length > 0;
 
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
@@ -305,31 +306,46 @@ function CoverImageSection({
   }
 
   return (
-    <InlineEditableSettingImage
-      readonly={!isEditMode}
-      setting={hanziWordMeaningHintImageSetting}
-      settingKey={{ hanziWord }}
-      presetImageIds={/* TODO */ []}
-      previewHeight={200}
-      tileSize={64}
-      enableAiGeneration
-      initialAiPrompt={
-        imagePromptSetting?.value?.text ??
-        hintState.text ??
-        (meaning == null
-          ? `Create an image for ${hanzi}`
-          : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
-      }
-      aspectRatio={`16:9`}
-      onUploadError={handleUploadError}
-      onSaveAiPrompt={(prompt) => {
-        imagePromptSetting?.setValue({
-          hanziWord,
-          text: prompt,
-        });
-      }}
-      className="my-4 w-full"
-    />
+    <View className="my-4 w-full gap-2">
+      <InlineEditableSettingImage
+        readonly={!isEditMode}
+        setting={hanziWordMeaningHintImageSetting}
+        settingKey={{ hanziWord }}
+        presetImageIds={/* TODO */ []}
+        previewHeight={200}
+        tileSize={64}
+        enableAiGeneration
+        initialAiPrompt={
+          imagePromptSetting?.value?.text ??
+          hintState.text ??
+          (meaning == null
+            ? `Create an image for ${hanzi}`
+            : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
+        }
+        aspectRatio={`16:9`}
+        onUploadError={handleUploadError}
+        onSaveAiPrompt={(prompt) => {
+          imagePromptSetting?.setValue({
+            hanziWord,
+            text: prompt,
+          });
+        }}
+      />
+
+      {isEditMode ? (
+        <InlineEditableSettingText
+          setting={hanziWordMeaningHintCaptionSetting}
+          settingKey={{ hanziWord }}
+          readonly={false}
+          placeholder="Add a caption for this image."
+          maxLength={120}
+        />
+      ) : hasCaption ? (
+        <Text className="pyly-body-caption text-center text-fg-dim">
+          {captionText}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 
@@ -539,6 +555,108 @@ function MeaningItem({
   );
 }
 
+function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
+  const [expandedReasonIndexes, setExpandedReasonIndexes] = useState<
+    Set<number>
+  >(() => new Set());
+
+  if (hanzi !== `表`) {
+    return null;
+  }
+
+  function toggleReason(index: number) {
+    setExpandedReasonIndexes((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
+  return (
+    <View className="gap-4 p-4 px-10">
+      <View className="gap-1">
+        <Text className="pyly-body">{experimentalData.coreIdea}</Text>
+      </View>
+
+      <View className="gap-3">
+        {experimentalData.mentalPath.map((step, index) => {
+          const linkReason = step.reason ?? null;
+          const chainIndent = 20;
+          const paddingLeft = index === 0 ? 0 : (index - 1) * chainIndent;
+          return (
+            <View
+              className="gap-0.5"
+              key={`mental:${index}`}
+              style={{ paddingLeft }}
+            >
+              {index === 0 ? (
+                <Text className="pyly-body">
+                  {renderMentalPathThought(
+                    step.thought,
+                    index === experimentalData.mentalPath.length - 1,
+                  )}
+                </Text>
+              ) : (
+                <View className="flex-row items-start gap-2">
+                  <Text className="pyly-body text-fg-dim" style={{ width: 14 }}>
+                    {`→`}
+                  </Text>
+                  <View className="min-w-0 flex-1 gap-0.5">
+                    <View className="flex-row flex-wrap items-center gap-1">
+                      <Text className="pyly-body">
+                        {renderMentalPathThought(
+                          step.thought,
+                          index === experimentalData.mentalPath.length - 1,
+                        )}
+                      </Text>
+                      {linkReason == null ? null : (
+                        <Text
+                          className="pyly-body-caption bg-bg-high text-fg-dim"
+                          onPress={() => {
+                            toggleReason(index);
+                          }}
+                          style={{
+                            borderRadius: 999,
+                            paddingHorizontal: 6,
+                            paddingVertical: 1,
+                          }}
+                        >
+                          {`•••`}
+                        </Text>
+                      )}
+                    </View>
+                    {linkReason == null ||
+                    !expandedReasonIndexes.has(index) ? null : (
+                      <Text className="pyly-body-caption text-fg-dim">
+                        {linkReason}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              )}
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function renderMentalPathThought(
+  thought: string,
+  underlineWholeText: boolean,
+): ReactNode {
+  if (underlineWholeText) {
+    return <Text className="pyly-ref">{thought}</Text>;
+  }
+
+  return thought;
+}
+
 function aiMeaningComponents(
   components: readonly WikiCharacterComponent[] | undefined,
   glossByHanzi: ReadonlyMap<string, string>,
@@ -607,3 +725,27 @@ function MergedHintDisplay({ value }: { value: string }) {
 
 // oxlint-disable-next-line unicorn/prefer-top-level-await
 const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
+
+const experimentalData = {
+  coreIdea: `A stack of ornate cloth is something you put on display, which leads naturally to showing or expressing something.`,
+  mentalPath: [
+    {
+      thought: `a stack of ornate cloth`,
+      reason: `Ornate cloth is usually meant to be displayed rather than hidden.`,
+    },
+    {
+      thought: `put it on display`,
+      reason: `Putting something on display means showing it openly.`,
+    },
+    {
+      thought: `show openly`,
+      reason: `Showing something openly easily extends to showing what you think.`,
+    },
+    {
+      thought: `to show (one's opinion); to express (one's opinion)`,
+    },
+  ],
+  scene: `A shopkeeper arranges a stack of ornate cloth and puts it on display.`,
+  strength: `strong`,
+  why: `The path is short and concrete: stacked decorative cloth suggests display, and display leads naturally to showing or expressing.`,
+};
