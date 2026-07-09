@@ -26,7 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { AiMeaningHintModal } from "./AiMeaningHintModal";
 import type { MeaningHintComponent } from "./AiMeaningHintModal";
 import { HanziCharacter } from "./HanziCharacter";
@@ -66,7 +66,14 @@ export function WikiHanziCharacterDecompositionBox({
   hanzi,
 }: WikiHanziCharacterDecompositionProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const componentsElements: ReactNode[] = [];
+  const [sourceCenterX, setSourceCenterX] = useState<number | null>(null);
+  const [componentCenterXs, setComponentCenterXs] = useState<readonly number[]>(
+    [],
+  );
+  const [componentWrapperXs, setComponentWrapperXs] = useState<
+    readonly number[]
+  >([]);
+  const componentsElements: { key: string; element: ReactNode }[] = [];
   const db = useDb();
 
   const { data: selectedDecomposition } = useLiveQuery(
@@ -126,6 +133,24 @@ export function WikiHanziCharacterDecompositionBox({
     [db.dictionarySearch, dedupedHanziListKey],
   );
 
+  const { data: primaryMeaningEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          gloss: entry.gloss,
+        })),
+    [db.dictionarySearch, hanzi],
+  );
+
+  const primaryMeaningGloss =
+    primaryMeaningEntries[0]?.gloss[0]?.trim().length === 0
+      ? null
+      : (primaryMeaningEntries[0]?.gloss[0] ?? null);
+
   const glossByHanzi = new Map<string, string>(
     (dictionarySearchEntries ?? []).map((entry) => [
       entry.hanzi,
@@ -145,34 +170,49 @@ export function WikiHanziCharacterDecompositionBox({
 
   if (showStrokeHighlights) {
     for (const [i, visualComponent] of selectedComponents.entries()) {
+      const componentIndex = componentsElements.length;
       const label =
         visualComponent.label ??
         (visualComponent.hanzi == null
           ? null
           : (glossByHanzi.get(visualComponent.hanzi) ?? null));
-      componentsElements.push(
-        <View className="flex-1 items-center gap-2" key={i}>
-          <View className="flex-row items-center gap-2">
-            <HanziCharacter
-              className="size-12"
-              highlightColor={hanziCharacterColorSafeSchema.parse(
-                visualComponent.color,
+      componentsElements.push({
+        key: `component:${i}`,
+        element: (
+          <View className="items-start gap-2">
+            <View
+              className="flex-row items-center gap-2"
+              onLayout={({ nativeEvent }) => {
+                const centerX =
+                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                setComponentCenterXs((prev) => {
+                  const next = [...prev];
+                  next[componentIndex] = centerX;
+                  return next;
+                });
+              }}
+            >
+              <HanziCharacter
+                className="size-12"
+                highlightColor={hanziCharacterColorSafeSchema.parse(
+                  visualComponent.color,
+                )}
+                strokesData={strokeSvgs}
+                highlightStrokes={parseIndexRanges(visualComponent.strokes)}
+              />
+            </View>
+            <Text className="pyly-body text-left">
+              {visualComponent.hanzi == null ? (
+                label
+              ) : (
+                <HanziLink hanzi={visualComponent.hanzi}>
+                  {visualComponent.hanzi} {label}
+                </HanziLink>
               )}
-              strokesData={strokeSvgs}
-              highlightStrokes={parseIndexRanges(visualComponent.strokes)}
-            />
+            </Text>
           </View>
-          <Text className="pyly-body text-center">
-            {visualComponent.hanzi == null ? (
-              label
-            ) : (
-              <HanziLink hanzi={visualComponent.hanzi}>
-                {visualComponent.hanzi} {label}
-              </HanziLink>
-            )}
-          </Text>
-        </View>,
-      );
+        ),
+      });
     }
   } else if (selectedComponents != null) {
     for (const [i, component] of selectedComponents.entries()) {
@@ -180,28 +220,60 @@ export function WikiHanziCharacterDecompositionBox({
         continue;
       }
 
+      const componentIndex = componentsElements.length;
       const hanzi = component.hanzi;
       const label = glossByHanzi.get(hanzi) ?? null;
 
-      componentsElements.push(
-        <View
-          className="flex-1 items-center gap-2"
-          key={`component:${i}:${hanzi}`}
-        >
-          <View
-            className={`min-w-12 rounded-xl border border-fg/20 bg-bg-high px-3 py-2`}
-          >
-            <Text className="pyly-body text-center text-lg">{hanzi}</Text>
+      componentsElements.push({
+        key: `component:${i}:${hanzi}`,
+        element: (
+          <View className="items-start gap-2">
+            <View
+              className={`min-w-12 items-center rounded-xl border border-fg/20 bg-bg-high px-3 py-2`}
+              onLayout={({ nativeEvent }) => {
+                const centerX =
+                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                setComponentCenterXs((prev) => {
+                  const next = [...prev];
+                  next[componentIndex] = centerX;
+                  return next;
+                });
+              }}
+            >
+              <Text className="pyly-body text-center text-lg">{hanzi}</Text>
+            </View>
+            <Text className="pyly-body text-left">
+              <HanziLink hanzi={hanzi}>
+                {hanzi} {label}
+              </HanziLink>
+            </Text>
           </View>
-          <Text className="pyly-body text-center">
-            <HanziLink hanzi={hanzi}>
-              {hanzi} {label}
-            </HanziLink>
-          </Text>
-        </View>,
-      );
+        ),
+      });
     }
   }
+
+  const visibleComponentCenters = componentsElements.map((_, index) => {
+    const localCenter = componentCenterXs[index];
+    const wrapperX = componentWrapperXs[index];
+    return localCenter == null || wrapperX == null
+      ? Number.NaN
+      : localCenter + wrapperX;
+  });
+  const validComponentCenters = visibleComponentCenters.filter((item) =>
+    Number.isFinite(item),
+  );
+  const hasConnector =
+    componentsElements.length > 1 &&
+    (strokeSvgs == null ? sourceCenterX != null : true) &&
+    validComponentCenters.length === componentsElements.length;
+  const sourceConnectorX = strokeSvgs == null ? sourceCenterX : 24;
+  const allCenters =
+    sourceConnectorX == null
+      ? validComponentCenters
+      : [sourceConnectorX, ...validComponentCenters];
+  const connectorMinX = allCenters.length === 0 ? 0 : Math.min(...allCenters);
+  const connectorMaxX = allCenters.length === 0 ? 0 : Math.max(...allCenters);
 
   return (
     <WikiTitledBox
@@ -217,7 +289,89 @@ export function WikiHanziCharacterDecompositionBox({
         {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}
 
         {componentsElements.length > 0 ? (
-          <View className="flex-row flex-wrap gap-5">{componentsElements}</View>
+          <View className="gap-3">
+            <View className="px-6">
+              <View className="gap-1 self-start">
+                {strokeSvgs == null ? (
+                  <View
+                    onLayout={({ nativeEvent }) => {
+                      const centerX =
+                        nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                      setSourceCenterX(centerX);
+                    }}
+                  >
+                    <Text className="pyly-body text-left text-lg">{hanzi}</Text>
+                  </View>
+                ) : (
+                  <View className="w-12">
+                    <HanziCharacter
+                      className="size-12"
+                      strokesData={strokeSvgs}
+                      highlightStrokes={parseIndexRanges(
+                        `0-${strokeSvgs.length - 1}`,
+                      )}
+                    />
+                  </View>
+                )}
+
+                {primaryMeaningGloss == null ? null : (
+                  <Text className="pyly-body-caption text-left text-fg-dim">
+                    {primaryMeaningGloss}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {hasConnector ? (
+              <View className="px-6">
+                <View className="relative h-6">
+                  <View
+                    className="absolute w-px bg-fg-dim/35"
+                    style={{ left: sourceConnectorX, top: 0, height: 10 }}
+                  />
+                  <View
+                    className="absolute h-px bg-fg-dim/35"
+                    style={{
+                      left: connectorMinX,
+                      top: 10,
+                      width: Math.max(1, connectorMaxX - connectorMinX),
+                    }}
+                  />
+                  {validComponentCenters.map((centerX, index) => {
+                    return (
+                      <View
+                        className="absolute w-px bg-fg-dim/35"
+                        key={`decomp-line:${index}`}
+                        style={{ left: centerX, top: 10, height: 14 }}
+                      />
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
+
+            <View className="px-6">
+              <View className="flex-row flex-wrap gap-5">
+                {componentsElements.map((component, index) => {
+                  return (
+                    <View
+                      key={component.key}
+                      onLayout={({ nativeEvent }) => {
+                        const wrapperX = nativeEvent.layout.x;
+                        setComponentWrapperXs((prev) => {
+                          const next = [...prev];
+                          next[index] = wrapperX;
+                          return next;
+                        });
+                      }}
+                    >
+                      {component.element}
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
         ) : strokeSvgs == null ? null : (
           <>
             <Text className="pyly-body">
@@ -341,7 +495,7 @@ function CoverImageSection({
           maxLength={120}
         />
       ) : hasCaption ? (
-        <Text className="pyly-body-caption text-center text-fg-dim">
+        <Text className="pyly-body-caption px-10 text-left text-fg-dim">
           {captionText}
         </Text>
       ) : null}
@@ -556,104 +710,141 @@ function MeaningItem({
 }
 
 function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
-  const [expandedReasonIndexes, setExpandedReasonIndexes] = useState<
-    Set<number>
-  >(() => new Set());
+  const [isPathExpanded, setIsPathExpanded] = useState(false);
 
   if (hanzi !== `表`) {
     return null;
   }
 
-  function toggleReason(index: number) {
-    setExpandedReasonIndexes((prev) => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
-    });
-  }
+  const pathSteps = experimentalData.mentalPath;
+  const hasIntermediateSteps = pathSteps.length > 2;
+  const hiddenStepCount = hasIntermediateSteps ? pathSteps.length - 2 : 0;
+  const isCollapsedWithHiddenSteps = hasIntermediateSteps && !isPathExpanded;
+
+  const firstStep = pathSteps.at(0);
+  const lastStep = pathSteps.at(-1);
 
   return (
-    <View className="gap-4 p-4 px-10">
+    <View className="gap-4 px-10 pt-4">
       <View className="gap-1">
         <Text className="pyly-body">{experimentalData.coreIdea}</Text>
       </View>
 
-      <View className="gap-3">
-        {experimentalData.mentalPath.map((step, index) => {
-          const linkReason = step.reason ?? null;
-          const chainIndent = 20;
-          const paddingLeft = index === 0 ? 0 : (index - 1) * chainIndent;
-          return (
-            <View
-              className="gap-0.5"
-              key={`mental:${index}`}
-              style={{ paddingLeft }}
-            >
-              {index === 0 ? (
-                <Text className="pyly-body">
-                  {renderMentalPathThought(
-                    step.thought,
-                    index === experimentalData.mentalPath.length - 1,
-                  )}
-                </Text>
-              ) : (
-                <View className="flex-row items-start gap-2">
-                  <Text className="pyly-body text-fg-dim" style={{ width: 14 }}>
-                    {`→`}
-                  </Text>
-                  <View className="min-w-0 flex-1 gap-0.5">
-                    <View className="flex-row flex-wrap items-center gap-1">
-                      <Text className="pyly-body">
-                        {renderMentalPathThought(
-                          step.thought,
-                          index === experimentalData.mentalPath.length - 1,
-                        )}
-                      </Text>
-                      {linkReason == null ? null : (
-                        <Text
-                          className="pyly-body-caption bg-bg-high text-fg-dim"
-                          onPress={() => {
-                            toggleReason(index);
-                          }}
-                          style={{
-                            borderRadius: 999,
-                            paddingHorizontal: 6,
-                            paddingVertical: 1,
-                          }}
-                        >
-                          {`•••`}
-                        </Text>
-                      )}
-                    </View>
-                    {linkReason == null ||
-                    !expandedReasonIndexes.has(index) ? null : (
-                      <Text className="pyly-body-caption text-fg-dim">
-                        {linkReason}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              )}
+      {isCollapsedWithHiddenSteps && firstStep != null && lastStep != null ? (
+        <View className="gap-0 pt-4">
+          <View className="min-w-0 flex-row gap-3">
+            <View className="w-3 items-center pt-2">
+              <View className="size-1.5 rounded-full bg-fg-dim" />
             </View>
-          );
-        })}
-      </View>
+            <View className="min-w-0 flex-1 gap-0.5 pb-1">
+              <View className="flex-row flex-wrap items-start justify-start gap-1">
+                <Text className="pyly-body text-left">
+                  {renderMentalPathThought(firstStep.thought)}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <Pressable
+            className="min-w-0 flex-row gap-3"
+            onPress={() => {
+              setIsPathExpanded(true);
+            }}
+          >
+            <View className="w-3 items-center">
+              <View className="h-5 w-px bg-fg-dim/35" />
+              <Text className="pyly-body-caption -mt-0.5 text-fg-dim/70">
+                {`↓`}
+              </Text>
+            </View>
+            <View className="min-w-0 flex-1 justify-center">
+              <Text className="pyly-body-caption text-left text-fg-dim/70">
+                {`Show ${hiddenStepCount} hidden steps`}
+              </Text>
+            </View>
+          </Pressable>
+
+          <View className="min-w-0 flex-row gap-3">
+            <View className="w-3 items-center pt-2">
+              <View className="size-1.5 rounded-full bg-fg-dim" />
+            </View>
+            <View className="min-w-0 flex-1 gap-0.5 pb-2">
+              <View className="flex-row flex-wrap items-start justify-start gap-1">
+                <Text className="pyly-body text-left">
+                  {renderMentalPathThought(lastStep.thought)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View className="gap-1 pt-4">
+          {pathSteps.map((step, stepIndex) => {
+            const linkReason = step.reason ?? null;
+            const isIntermediateStep =
+              stepIndex > 0 && stepIndex < pathSteps.length - 1;
+            const isLastStep = stepIndex === pathSteps.length - 1;
+
+            return (
+              <View
+                className="min-w-0 flex-row gap-3"
+                key={`mental:${stepIndex}`}
+              >
+                <Pressable
+                  className="w-3 items-center pt-2"
+                  onPress={
+                    isLastStep
+                      ? undefined
+                      : () => {
+                          setIsPathExpanded(false);
+                        }
+                  }
+                >
+                  <View
+                    className={
+                      isIntermediateStep
+                        ? `size-1.5 rounded-full bg-fg-dim/70`
+                        : `size-1.5 rounded-full bg-fg-dim`
+                    }
+                  />
+                  {isLastStep ? null : (
+                    <>
+                      <View className="mt-1 w-px flex-1 bg-fg-dim/35" />
+                      <Text className="pyly-body-caption -mt-1 text-fg-dim/70">
+                        {`↓`}
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+
+                <View className="min-w-0 flex-1 gap-0.5 pb-2">
+                  <View className="flex-row flex-wrap items-start justify-start gap-1">
+                    <Text
+                      className={
+                        isIntermediateStep
+                          ? `pyly-body text-left text-fg-dim`
+                          : `pyly-body text-left`
+                      }
+                    >
+                      {renderMentalPathThought(step.thought)}
+                    </Text>
+                  </View>
+                  {linkReason == null || !isPathExpanded ? null : (
+                    <Text className="pyly-body-caption text-left text-fg-dim">
+                      {linkReason}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
 
-function renderMentalPathThought(
-  thought: string,
-  underlineWholeText: boolean,
-): ReactNode {
-  if (underlineWholeText) {
-    return <Text className="pyly-ref">{thought}</Text>;
-  }
-
+function renderMentalPathThought(thought: string): ReactNode {
   return thought;
 }
 
@@ -742,7 +933,7 @@ const experimentalData = {
       reason: `Showing something openly easily extends to showing what you think.`,
     },
     {
-      thought: `to show (one's opinion); to express (one's opinion)`,
+      thought: `to express (one's opinion)`,
     },
   ],
   scene: `A shopkeeper arranges a stack of ornate cloth and puts it on display.`,
