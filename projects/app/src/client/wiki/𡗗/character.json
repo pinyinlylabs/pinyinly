@@ -1,7 +1,8 @@
 {
   "hanzi": "𡗗",
+  "isStructural": true,
   "mnemonic": {
-    "components": ["⿻", { "hanzi": "三" }, { "hanzi": "人" }]
+    "components": { "hanzi": "𡗗", "strokes": "0-4" }
   },
   "strokes": 5
 }
