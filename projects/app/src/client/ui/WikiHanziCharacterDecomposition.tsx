@@ -712,11 +712,12 @@ function MeaningItem({
 function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
   const [isPathExpanded, setIsPathExpanded] = useState(false);
 
-  if (hanzi !== `表`) {
+  const data = experimentalDataByHanzi[hanzi];
+  if (data == null) {
     return null;
   }
 
-  const pathSteps = experimentalData.mentalPath;
+  const pathSteps = data.mentalPath;
   const hasIntermediateSteps = pathSteps.length > 2;
   const hiddenStepCount = hasIntermediateSteps ? pathSteps.length - 2 : 0;
   const isCollapsedWithHiddenSteps = hasIntermediateSteps && !isPathExpanded;
@@ -727,7 +728,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
   return (
     <View className="gap-4 px-10 pt-4">
       <View className="gap-1">
-        <Text className="pyly-body">{experimentalData.coreIdea}</Text>
+        <Text className="pyly-body">{data.coreIdea}</Text>
       </View>
 
       {isCollapsedWithHiddenSteps && firstStep != null && lastStep != null ? (
@@ -917,26 +918,60 @@ function MergedHintDisplay({ value }: { value: string }) {
 // oxlint-disable-next-line unicorn/prefer-top-level-await
 const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
 
-const experimentalData = {
-  coreIdea: `A stack of ornate cloth is something you put on display, which leads naturally to showing or expressing something.`,
-  mentalPath: [
-    {
-      thought: `a stack of ornate cloth`,
-      reason: `Ornate cloth is usually meant to be displayed rather than hidden.`,
-    },
-    {
-      thought: `put it on display`,
-      reason: `Putting something on display means showing it openly.`,
-    },
-    {
-      thought: `show openly`,
-      reason: `Showing something openly easily extends to showing what you think.`,
-    },
-    {
-      thought: `to express (one's opinion)`,
-    },
-  ],
-  scene: `A shopkeeper arranges a stack of ornate cloth and puts it on display.`,
-  strength: `strong`,
-  why: `The path is short and concrete: stacked decorative cloth suggests display, and display leads naturally to showing or expressing.`,
+interface ExperimentalCharacterData {
+  readonly coreIdea: string;
+  readonly mentalPath: readonly {
+    readonly thought: string;
+    readonly reason?: string;
+  }[];
+  readonly scene: string;
+  readonly strength: string;
+  readonly why: string;
+}
+
+const experimentalDataByHanzi: Readonly<
+  Partial<Record<string, ExperimentalCharacterData>>
+> = {
+  表: {
+    coreIdea: `A stack of ornate cloth is something you put on display, which leads naturally to showing or expressing something.`,
+    mentalPath: [
+      {
+        thought: `a stack of ornate cloth`,
+        reason: `Ornate cloth is usually meant to be displayed rather than hidden.`,
+      },
+      {
+        thought: `put it on display`,
+        reason: `Putting something on display means showing it openly.`,
+      },
+      {
+        thought: `show openly`,
+        reason: `Showing something openly easily extends to showing what you think.`,
+      },
+      {
+        thought: `to express (one's opinion)`,
+      },
+    ],
+    scene: `A shopkeeper arranges a stack of ornate cloth and puts it on display.`,
+    strength: `strong`,
+    why: `The path is short and concrete: stacked decorative cloth suggests display, and display leads naturally to showing or expressing.`,
+  },
+  春: {
+    coreIdea: `Open hands held in the sun suggest warmer weather, which naturally brings spring.`,
+    mentalPath: [
+      {
+        thought: `open hands in the sun`,
+        reason: `People naturally picture feeling warmth from the sun on their hands.`,
+      },
+      {
+        thought: `warm day`,
+        reason: `A warm day is a familiar sign that winter is ending and spring is arriving.`,
+      },
+      {
+        thought: `spring`,
+      },
+    ],
+    scene: `I hold my open hands in the sun on a warm day, and it feels like spring.`,
+    strength: `strong`,
+    why: `This path uses a very familiar everyday experience: sunshine on your hands suggests warmer weather, which strongly cues spring.`,
+  },
 };
