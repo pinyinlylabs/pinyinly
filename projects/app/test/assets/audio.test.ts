@@ -23,7 +23,6 @@ import {
   createAudioFileTests,
 } from "@pinyinly/audio-sprites/testing";
 import { readFile } from "@pinyinly/lib/fs";
-// oxlint-disable-next-line no-restricted-imports
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { z } from "zod";

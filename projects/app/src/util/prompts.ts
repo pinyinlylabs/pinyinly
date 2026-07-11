@@ -1,44 +1,38 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { z } from "zod";
 
-export function buildPronunciationHintPrompt({
+export type PronunciationHintPromptInput = {
+  leadCharacter: { name: string; bio?: string; article?: string };
+  location: { name: string; description?: string };
+  cue: { word: string; meaning?: string };
+  count: number;
+};
+
+const pronunciationHintOutputSchema = z
+  .object({
+    suggestions: z
+      .array(
+        z
+          .object({
+            hint: z
+              .string()
+              .describe(
+                `A short story ending that continues a shared setup shown separately in the UI. When the cue word appears, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
+              ),
+            explanation: z.string().nullable(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+function buildPronunciationHintPromptData({
   leadCharacter,
   location,
   cue,
-  creativeDirection,
-  count,
-}: {
-  leadCharacter: { name: string; bio?: string; article?: string };
-  location: { name: string; description?: string; storyPhrase?: string };
-  cue: { word: string; meaning?: string };
-  creativeDirection?: string;
-  count: number;
-}): ChatPrompt<typeof buildPronunciationHintPrompt.schema> {
-  const systemTemplate = `
-You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
-Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-The goal is to create a scene that is easy to picture and easy to remember.
-Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-Always clearly include the named character and location.
-Keep location wording fluent and natural in second person.
-If Location.storyPhrase is provided, actively weave it into the sentence in a natural way instead of inserting it mechanically.
-When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
-When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-If extra character or location details are provided, use them to make the story more specific.
-Keep each hint to 1-2 sentences.
-Prefer visual, unusual, and memorable situations over generic ones.
-Each suggestion must explicitly include the character and location by name.
-Use the keyword as light inspiration for the central action, object, or conflict.
-If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-Good suggestions are specific, visual, unusual, and easy to replay mentally.
-Bad suggestions are generic, flat, or mostly just a definition.
-Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.
-`;
-
-  const data = {
+}: Omit<PronunciationHintPromptInput, `count`>) {
+  return {
     leadCharacter: {
       name: leadCharacter.name,
       ...(leadCharacter.article == null
@@ -51,16 +45,55 @@ Format: wrap the cue word (or its inflected form) in ==word== whenever it appear
       ...(location.description == null
         ? {}
         : { description: location.description }),
-      ...(location.storyPhrase == null
-        ? {}
-        : { storyPhrase: location.storyPhrase }),
     },
     cue: {
       word: cue.word,
       ...(cue.meaning == null ? {} : { meaning: cue.meaning }),
     },
-    ...(creativeDirection == null ? {} : { creativeDirection }),
   };
+}
+
+export function buildPronunciationHintFantasyPrompt({
+  leadCharacter,
+  location,
+  cue,
+  count,
+}: PronunciationHintPromptInput): ChatPrompt<
+  typeof buildPronunciationHintFantasyPrompt.schema
+> {
+  const systemTemplate = `
+You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
+The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+Return only ending-style continuations that naturally finish that setup.
+Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+Do not prefix endings with ellipsis or sentence-starter punctuation.
+Write each ending as a sentence continuation fragment that can follow the setup directly.
+Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+Keep each ending to 1 short sentence (2 at most when necessary).
+Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+Vary the opening words across suggestions; avoid repeating the same starter pattern.
+Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+If cue meaning context is provided, follow that exact sense instead of other possible senses.
+If extra character or location details are provided, use them to make endings more specific.
+Prefer visual, unusual, and memorable situations over generic ones.
+Lean into imaginative, playful, and cinematic moments.
+Surprising details are welcome when they remain easy to picture.
+Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+Only anchor the story on the lead character, the location, and the cue concept.
+Good endings are concrete, replayable, and mentally vivid.
+Bad endings are generic, flat, or mostly definitions.
+When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
+`;
+
+  const data = buildPronunciationHintPromptData({
+    leadCharacter,
+    location,
+    cue,
+  });
 
   const userTemplate = `
 Generate {{ count }} distinct mnemonic story ideas.
@@ -83,29 +116,84 @@ Generate {{ count }} distinct mnemonic story ideas.
 
   return {
     messages,
-    schema: buildPronunciationHintPrompt.schema,
+    schema: buildPronunciationHintFantasyPrompt.schema,
     model: `gpt-5-mini`,
     reasoningEffort: `medium`,
   };
 }
-buildPronunciationHintPrompt.schema = z
-  .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            hint: z
-              .string()
-              .describe(
-                `The mnemonic story text. When the cue word appears in the story, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
-              ),
-            explanation: z.string().nullable(),
-          })
-          .strict(),
-      )
-      .min(1),
-  })
-  .strict();
+buildPronunciationHintFantasyPrompt.strategy = `fantasy`;
+buildPronunciationHintFantasyPrompt.schema = pronunciationHintOutputSchema;
+
+export function buildPronunciationHintRealisticPrompt({
+  leadCharacter,
+  location,
+  cue,
+  count,
+}: PronunciationHintPromptInput): ChatPrompt<
+  typeof buildPronunciationHintRealisticPrompt.schema
+> {
+  const systemTemplate = `
+You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+Invent clear, grounded mini-scenes using a character, a location, and a keyword.
+The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+Return only ending-style continuations that naturally finish that setup.
+Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+Do not prefix endings with ellipsis or sentence-starter punctuation.
+Write each ending as a sentence continuation fragment that can follow the setup directly.
+Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+Keep each ending to 1 short sentence (2 at most when necessary).
+Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+Vary the opening words across suggestions; avoid repeating the same starter pattern.
+Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+If cue meaning context is provided, follow that exact sense instead of other possible senses.
+If extra character or location details are provided, use them to make endings more specific.
+Keep scenes realistic and plausible in everyday life.
+Avoid supernatural, magical, dreamlike, or impossible events.
+Avoid bizarre shock-value imagery; prefer practical, familiar actions.
+Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+Only anchor the story on the lead character, the location, and the cue concept.
+Good endings are concrete, replayable, mentally vivid, and believable.
+Bad endings are generic, flat, fantastical, or mostly definitions.
+When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
+`;
+
+  const data = buildPronunciationHintPromptData({
+    leadCharacter,
+    location,
+    cue,
+  });
+
+  const userTemplate = `
+Generate {{ count }} distinct mnemonic story ideas.
+
+<data>
+{{ data }}
+</data>
+`;
+
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
+
+  return {
+    messages,
+    schema: buildPronunciationHintRealisticPrompt.schema,
+    model: `gpt-5-mini`,
+    reasoningEffort: `medium`,
+  };
+}
+buildPronunciationHintRealisticPrompt.strategy = `realistic`;
+buildPronunciationHintRealisticPrompt.schema = pronunciationHintOutputSchema;
 
 export function renderPromptTemplate(
   template: string,
@@ -216,8 +304,8 @@ Generate {{ count }} distinct mnemonic hints.
   return {
     messages,
     schema: meaningHintOutputSchema,
-    model: `gpt-5-mini`,
-    reasoningEffort: `medium`,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
   };
 };
 buildMeaningHintPrompt.strategy = `visual`;
@@ -284,12 +372,90 @@ Generate {{ count }} distinct mnemonic hints:
   return {
     messages,
     schema: meaningHintOutputSchema,
-    model: `gpt-5-mini`,
-    reasoningEffort: `medium`,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
   };
 };
 buildMeaningHintLogicalPrompt.strategy = `logical`;
 buildMeaningHintLogicalPrompt.schema = meaningHintOutputSchema;
+
+export const buildMeaningHintCausualBridgePrompt = ({
+  meaning,
+  components,
+  count,
+}: MeaningHintPromptInput): ChatPrompt<typeof meaningHintOutputSchema> => {
+  const primaryGloss = meaning.glosses[0] ?? ``;
+  const cues = (components ?? []).flatMap((component) => {
+    const cue = component.meaning ?? component.label;
+    if (cue == null) {
+      return [];
+    }
+
+    return [cue];
+  });
+
+  const data = {
+    target: primaryGloss,
+    cues,
+  };
+
+  const systemTemplate = `
+You are a helpful assistant that creates short mnemonic explanations.
+
+You will be given:
+- A target: the concept the learner wants to remember.
+- A list of cues: ideas the learner already knows.
+
+Your task is to write a short explanation that uses every cue to make the target easy to remember.
+
+Guidelines:
+- Keep the explanation concise. One short sentence is preferred; use two only if necessary.
+- Use plain, natural, everyday English.
+- Prefer the simplest explanation that works.
+- Make the target the natural consequence of the events in the explanation.
+- Prefer a single, direct cause-and-effect relationship.
+- Unless the cues explicitly specify another actor, use the learner (“I”) as the subject of any action.
+- Avoid introducing intermediate concepts. Connect the cues to the target as directly as possible.
+- Every cue should play an essential role in producing the target.
+- Avoid unnecessary characters, objects, settings, or descriptive details.
+- Avoid dramatic, magical, poetic, exaggerated, or theatrical language.
+- Avoid introducing concepts that are not provided unless they are required for natural English.
+- Avoid merely listing the concepts together. They should interact meaningfully.
+- The explanation should feel obvious in hindsight, as though the cue naturally follows from the concepts.
+
+The learner should be able to reconstruct the target simply by remembering how the cues interacted.
+
+Generate multiple distinct ideas that use different relationships or perspectives rather than minor wording variations.
+`.trim();
+
+  const userTemplate = `
+Generate {{ count }} mnemonic stories:
+
+<data>
+{{ data }}
+</data>
+`.trim();
+
+  const messages: ChatPromptMessage[] = [
+    { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
+    {
+      role: `user`,
+      content: renderPromptTemplate(userTemplate, {
+        count: String(count),
+        data: JSON.stringify(data, null, 2),
+      }),
+    },
+  ];
+
+  return {
+    messages,
+    schema: meaningHintOutputSchema,
+    model: `gpt-5.4`,
+    reasoningEffort: `none`,
+  };
+};
+buildMeaningHintCausualBridgePrompt.strategy = `casual-bridge`;
+buildMeaningHintCausualBridgePrompt.schema = meaningHintOutputSchema;
 
 export function buildSubLocationDescriptionPrompt({
   label,

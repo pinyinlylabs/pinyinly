@@ -17,7 +17,6 @@ import { UnexpectedValueError } from "@pinyinly/lib/types";
 
 // Type-safe accessor functions
 export function getOperator<T>(ids: IdsNode<T>): string {
-  // oxlint-disable-next-line typescript/no-unsafe-return
   return Array.isArray(ids) ? ids[0] : `Leaf`;
 }
 

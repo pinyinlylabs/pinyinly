@@ -92,7 +92,6 @@ export const dbTest = test.extend<{ db: TestDb }>({
     const testDb = await createTestDb(annotate);
 
     try {
-      // oxlint-disable-next-line react-hooks/rules-of-hooks
       await use(testDb);
     } finally {
       // Clean up DB after the test

@@ -14,6 +14,7 @@ import type {
   WikiCharacterComponent,
 } from "@/data/model";
 import {
+  hanziWordMeaningHintCaptionSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
@@ -25,7 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { AiMeaningHintModal } from "./AiMeaningHintModal";
 import type { MeaningHintComponent } from "./AiMeaningHintModal";
 import { HanziCharacter } from "./HanziCharacter";
@@ -65,7 +66,14 @@ export function WikiHanziCharacterDecompositionBox({
   hanzi,
 }: WikiHanziCharacterDecompositionProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const componentsElements: ReactNode[] = [];
+  const [sourceCenterX, setSourceCenterX] = useState<number | null>(null);
+  const [componentCenterXs, setComponentCenterXs] = useState<readonly number[]>(
+    [],
+  );
+  const [componentWrapperXs, setComponentWrapperXs] = useState<
+    readonly number[]
+  >([]);
+  const componentsElements: { key: string; element: ReactNode }[] = [];
   const db = useDb();
 
   const { data: selectedDecomposition } = useLiveQuery(
@@ -125,6 +133,24 @@ export function WikiHanziCharacterDecompositionBox({
     [db.dictionarySearch, dedupedHanziListKey],
   );
 
+  const { data: primaryMeaningEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionarySearch })
+        .where(({ entry }) => eq(entry.hanzi, hanzi))
+        .orderBy(({ entry }) => entry.hskSortKey, `asc`)
+        .orderBy(({ entry }) => entry.hanziWord, `asc`)
+        .select(({ entry }) => ({
+          gloss: entry.gloss,
+        })),
+    [db.dictionarySearch, hanzi],
+  );
+
+  const primaryMeaningGloss =
+    primaryMeaningEntries[0]?.gloss[0]?.trim().length === 0
+      ? null
+      : (primaryMeaningEntries[0]?.gloss[0] ?? null);
+
   const glossByHanzi = new Map<string, string>(
     (dictionarySearchEntries ?? []).map((entry) => [
       entry.hanzi,
@@ -144,34 +170,49 @@ export function WikiHanziCharacterDecompositionBox({
 
   if (showStrokeHighlights) {
     for (const [i, visualComponent] of selectedComponents.entries()) {
+      const componentIndex = componentsElements.length;
       const label =
         visualComponent.label ??
         (visualComponent.hanzi == null
           ? null
           : (glossByHanzi.get(visualComponent.hanzi) ?? null));
-      componentsElements.push(
-        <View className="flex-1 items-center gap-2" key={i}>
-          <View className="flex-row items-center gap-2">
-            <HanziCharacter
-              className="size-12"
-              highlightColor={hanziCharacterColorSafeSchema.parse(
-                visualComponent.color,
+      componentsElements.push({
+        key: `component:${i}`,
+        element: (
+          <View className="items-start gap-2">
+            <View
+              className="flex-row items-center gap-2"
+              onLayout={({ nativeEvent }) => {
+                const centerX =
+                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                setComponentCenterXs((prev) => {
+                  const next = [...prev];
+                  next[componentIndex] = centerX;
+                  return next;
+                });
+              }}
+            >
+              <HanziCharacter
+                className="size-12"
+                highlightColor={hanziCharacterColorSafeSchema.parse(
+                  visualComponent.color,
+                )}
+                strokesData={strokeSvgs}
+                highlightStrokes={parseIndexRanges(visualComponent.strokes)}
+              />
+            </View>
+            <Text className="pyly-body text-left">
+              {visualComponent.hanzi == null ? (
+                label
+              ) : (
+                <HanziLink hanzi={visualComponent.hanzi}>
+                  {visualComponent.hanzi} {label}
+                </HanziLink>
               )}
-              strokesData={strokeSvgs}
-              highlightStrokes={parseIndexRanges(visualComponent.strokes)}
-            />
+            </Text>
           </View>
-          <Text className="pyly-body text-center">
-            {visualComponent.hanzi == null ? (
-              label
-            ) : (
-              <HanziLink hanzi={visualComponent.hanzi}>
-                {visualComponent.hanzi} {label}
-              </HanziLink>
-            )}
-          </Text>
-        </View>,
-      );
+        ),
+      });
     }
   } else if (selectedComponents != null) {
     for (const [i, component] of selectedComponents.entries()) {
@@ -179,55 +220,162 @@ export function WikiHanziCharacterDecompositionBox({
         continue;
       }
 
+      const componentIndex = componentsElements.length;
       const hanzi = component.hanzi;
       const label = glossByHanzi.get(hanzi) ?? null;
 
-      componentsElements.push(
-        <View
-          className="flex-1 items-center gap-2"
-          key={`component:${i}:${hanzi}`}
-        >
-          <View
-            className={`min-w-12 rounded-xl border border-fg/20 bg-bg-high px-3 py-2`}
-          >
-            <Text className="pyly-body text-center text-lg">{hanzi}</Text>
+      componentsElements.push({
+        key: `component:${i}:${hanzi}`,
+        element: (
+          <View className="items-start gap-2">
+            <View
+              className={`min-w-12 items-center rounded-xl border border-fg/20 bg-bg-high px-3 py-2`}
+              onLayout={({ nativeEvent }) => {
+                const centerX =
+                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                setComponentCenterXs((prev) => {
+                  const next = [...prev];
+                  next[componentIndex] = centerX;
+                  return next;
+                });
+              }}
+            >
+              <Text className="pyly-body text-center text-lg">{hanzi}</Text>
+            </View>
+            <Text className="pyly-body text-left">
+              <HanziLink hanzi={hanzi}>
+                {hanzi} {label}
+              </HanziLink>
+            </Text>
           </View>
-          <Text className="pyly-body text-center">
-            <HanziLink hanzi={hanzi}>
-              {hanzi} {label}
-            </HanziLink>
-          </Text>
-        </View>,
-      );
+        ),
+      });
     }
   }
+
+  const visibleComponentCenters = componentsElements.map((_, index) => {
+    const localCenter = componentCenterXs[index];
+    const wrapperX = componentWrapperXs[index];
+    return localCenter == null || wrapperX == null
+      ? Number.NaN
+      : localCenter + wrapperX;
+  });
+  const validComponentCenters = visibleComponentCenters.filter((item) =>
+    Number.isFinite(item),
+  );
+  const hasConnector =
+    componentsElements.length > 1 &&
+    (strokeSvgs == null ? sourceCenterX != null : true) &&
+    validComponentCenters.length === componentsElements.length;
+  const sourceConnectorX = strokeSvgs == null ? sourceCenterX : 24;
+  const allCenters =
+    sourceConnectorX == null
+      ? validComponentCenters
+      : [sourceConnectorX, ...validComponentCenters];
+  const connectorMinX = allCenters.length === 0 ? 0 : Math.min(...allCenters);
+  const connectorMaxX = allCenters.length === 0 ? 0 : Math.max(...allCenters);
 
   return (
     <WikiTitledBox
       title="Recognize the character"
       onEditingChange={setIsEditMode}
+      bottomCaption={
+        componentsElements.length > 0
+          ? `Using the components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
+          : undefined
+      }
     >
       <View className="gap-4 p-4">
         {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}
 
         {componentsElements.length > 0 ? (
-          <>
-            <Text className="pyly-body">
-              Use the components of{` `}
-              <Text className="pyly-bold">{hanzi}</Text> to help:
-            </Text>
+          <View className="gap-3">
+            <View className="px-6">
+              <View className="gap-1 self-start">
+                {strokeSvgs == null ? (
+                  <View
+                    onLayout={({ nativeEvent }) => {
+                      const centerX =
+                        nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                      setSourceCenterX(centerX);
+                    }}
+                  >
+                    <Text className="pyly-body text-left text-lg">{hanzi}</Text>
+                  </View>
+                ) : (
+                  <View className="w-12">
+                    <HanziCharacter
+                      className="size-12"
+                      strokesData={strokeSvgs}
+                      highlightStrokes={parseIndexRanges(
+                        `0-${strokeSvgs.length - 1}`,
+                      )}
+                    />
+                  </View>
+                )}
 
-            <View className="flex-row flex-wrap gap-5">
-              {componentsElements}
+                {primaryMeaningGloss == null ? null : (
+                  <Text className="pyly-body-caption text-left text-fg-dim">
+                    {primaryMeaningGloss}
+                  </Text>
+                )}
+              </View>
             </View>
-          </>
+
+            {hasConnector ? (
+              <View className="px-6">
+                <View className="relative h-6">
+                  <View
+                    className="absolute w-px bg-fg-dim/35"
+                    style={{ left: sourceConnectorX, top: 0, height: 10 }}
+                  />
+                  <View
+                    className="absolute h-px bg-fg-dim/35"
+                    style={{
+                      left: connectorMinX,
+                      top: 10,
+                      width: Math.max(1, connectorMaxX - connectorMinX),
+                    }}
+                  />
+                  {validComponentCenters.map((centerX, index) => {
+                    return (
+                      <View
+                        className="absolute w-px bg-fg-dim/35"
+                        key={`decomp-line:${index}`}
+                        style={{ left: centerX, top: 10, height: 14 }}
+                      />
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
+
+            <View className="px-6">
+              <View className="flex-row flex-wrap gap-5">
+                {componentsElements.map((component, index) => {
+                  return (
+                    <View
+                      key={component.key}
+                      onLayout={({ nativeEvent }) => {
+                        const wrapperX = nativeEvent.layout.x;
+                        setComponentWrapperXs((prev) => {
+                          const next = [...prev];
+                          next[index] = wrapperX;
+                          return next;
+                        });
+                      }}
+                    >
+                      {component.element}
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
         ) : strokeSvgs == null ? null : (
           <>
             <Text className="pyly-body">
-              What does{` `}
-              <Text className="pyly-bold">{hanzi}</Text>
-              {` `}
-              resemble?
+              What does <Text className="pyly-bold">{hanzi}</Text> resemble?
             </Text>
 
             <View className="flex-1 items-center">
@@ -242,6 +390,8 @@ export function WikiHanziCharacterDecompositionBox({
           </>
         )}
       </View>
+
+      <ExperimentalContent hanzi={hanzi} />
 
       <CoverImageSection hanzi={hanzi} isEditMode={isEditMode} />
 
@@ -288,8 +438,15 @@ function CoverImageSection({
       ? null
       : { setting: hanziWordMeaningHintImagePromptSetting, key: settingKey },
   );
+  const captionSetting = useUserSetting(
+    settingKey == null
+      ? null
+      : { setting: hanziWordMeaningHintCaptionSetting, key: settingKey },
+  );
 
   const hintState = useHanziWordMeaningHint(hanziWord);
+  const captionText = captionSetting?.value?.text.trim() ?? ``;
+  const hasCaption = captionText.length > 0;
 
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
@@ -300,31 +457,46 @@ function CoverImageSection({
   }
 
   return (
-    <InlineEditableSettingImage
-      readonly={!isEditMode}
-      setting={hanziWordMeaningHintImageSetting}
-      settingKey={{ hanziWord }}
-      presetImageIds={/* TODO */ []}
-      previewHeight={200}
-      tileSize={64}
-      enableAiGeneration
-      initialAiPrompt={
-        imagePromptSetting?.value?.text ??
-        hintState.text ??
-        (meaning == null
-          ? `Create an image for ${hanzi}`
-          : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
-      }
-      aspectRatio={`16:9`}
-      onUploadError={handleUploadError}
-      onSaveAiPrompt={(prompt) => {
-        imagePromptSetting?.setValue({
-          hanziWord,
-          text: prompt,
-        });
-      }}
-      className="my-4 w-full"
-    />
+    <View className="my-4 w-full gap-2">
+      <InlineEditableSettingImage
+        readonly={!isEditMode}
+        setting={hanziWordMeaningHintImageSetting}
+        settingKey={{ hanziWord }}
+        presetImageIds={/* TODO */ []}
+        previewHeight={200}
+        tileSize={64}
+        enableAiGeneration
+        initialAiPrompt={
+          imagePromptSetting?.value?.text ??
+          hintState.text ??
+          (meaning == null
+            ? `Create an image for ${hanzi}`
+            : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
+        }
+        aspectRatio={`16:9`}
+        onUploadError={handleUploadError}
+        onSaveAiPrompt={(prompt) => {
+          imagePromptSetting?.setValue({
+            hanziWord,
+            text: prompt,
+          });
+        }}
+      />
+
+      {isEditMode ? (
+        <InlineEditableSettingText
+          setting={hanziWordMeaningHintCaptionSetting}
+          settingKey={{ hanziWord }}
+          readonly={false}
+          placeholder="Add a caption for this image."
+          maxLength={120}
+        />
+      ) : hasCaption ? (
+        <Text className="pyly-body-caption px-10 text-left text-fg-dim">
+          {captionText}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 
@@ -457,17 +629,13 @@ function MeaningItem({
 
   // Display glosses: first one bold, rest dim and semicolon-separated
   const primaryGloss = meaning.gloss[0];
-  const secondaryGlosses = meaning.gloss.slice(1);
 
   return (
     <View className="gap-1">
       <View className="flex-row items-center gap-2">
         <Text className="font-sans text-xl/normal font-medium text-fg-loud">
           <Text className="pyly-bold">{primaryGloss}</Text>
-          {secondaryGlosses.length > 0 ? (
-            <Text className="text-fg-dim">; {secondaryGlosses.join(`; `)}</Text>
-          ) : null}
-            ⤵
+            <Text className="text-fg-dim">⤵</Text>
         </Text>
       </View>
       {isEditMode || hasHint ? (
@@ -538,6 +706,146 @@ function MeaningItem({
   );
 }
 
+function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
+  const [isPathExpanded, setIsPathExpanded] = useState(false);
+
+  const data = experimentalDataByHanzi[hanzi];
+  if (data == null) {
+    return null;
+  }
+
+  const pathSteps = data.mentalPath;
+  const hasIntermediateSteps = pathSteps.length > 2;
+  const hiddenStepCount = hasIntermediateSteps ? pathSteps.length - 2 : 0;
+  const isCollapsedWithHiddenSteps = hasIntermediateSteps && !isPathExpanded;
+
+  const firstStep = pathSteps.at(0);
+  const lastStep = pathSteps.at(-1);
+
+  return (
+    <View className="gap-4 px-10 pt-4">
+      <View className="gap-1">
+        <Text className="pyly-body">{data.coreIdea}</Text>
+      </View>
+
+      {isCollapsedWithHiddenSteps && firstStep != null && lastStep != null ? (
+        <View className="gap-0 pt-4">
+          <View className="min-w-0 flex-row gap-3">
+            <View className="w-3 items-center pt-2">
+              <View className="size-1.5 rounded-full bg-fg-dim" />
+            </View>
+            <View className="min-w-0 flex-1 gap-0.5 pb-1">
+              <View className="flex-row flex-wrap items-start justify-start gap-1">
+                <Text className="pyly-body text-left">
+                  {renderMentalPathThought(firstStep.thought)}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <Pressable
+            className="min-w-0 flex-row gap-3"
+            onPress={() => {
+              setIsPathExpanded(true);
+            }}
+          >
+            <View className="w-3 items-center">
+              <View className="h-5 w-px bg-fg-dim/35" />
+              <Text className="pyly-body-caption -mt-0.5 text-fg-dim/70">
+                {`↓`}
+              </Text>
+            </View>
+            <View className="min-w-0 flex-1 justify-center">
+              <Text className="pyly-body-caption text-left text-fg-dim/70">
+                {`Show ${hiddenStepCount} hidden steps`}
+              </Text>
+            </View>
+          </Pressable>
+
+          <View className="min-w-0 flex-row gap-3">
+            <View className="w-3 items-center pt-2">
+              <View className="size-1.5 rounded-full bg-fg-dim" />
+            </View>
+            <View className="min-w-0 flex-1 gap-0.5 pb-2">
+              <View className="flex-row flex-wrap items-start justify-start gap-1">
+                <Text className="pyly-body text-left">
+                  {renderMentalPathThought(lastStep.thought)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View className="gap-1 pt-4">
+          {pathSteps.map((step, stepIndex) => {
+            const linkReason = step.reason ?? null;
+            const isIntermediateStep =
+              stepIndex > 0 && stepIndex < pathSteps.length - 1;
+            const isLastStep = stepIndex === pathSteps.length - 1;
+
+            return (
+              <View
+                className="min-w-0 flex-row gap-3"
+                key={`mental:${stepIndex}`}
+              >
+                <Pressable
+                  className="w-3 items-center pt-2"
+                  onPress={
+                    isLastStep
+                      ? undefined
+                      : () => {
+                          setIsPathExpanded(false);
+                        }
+                  }
+                >
+                  <View
+                    className={
+                      isIntermediateStep
+                        ? `size-1.5 rounded-full bg-fg-dim/70`
+                        : `size-1.5 rounded-full bg-fg-dim`
+                    }
+                  />
+                  {isLastStep ? null : (
+                    <>
+                      <View className="mt-1 w-px flex-1 bg-fg-dim/35" />
+                      <Text className="pyly-body-caption -mt-1 text-fg-dim/70">
+                        {`↓`}
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+
+                <View className="min-w-0 flex-1 gap-0.5 pb-2">
+                  <View className="flex-row flex-wrap items-start justify-start gap-1">
+                    <Text
+                      className={
+                        isIntermediateStep
+                          ? `pyly-body text-left text-fg-dim`
+                          : `pyly-body text-left`
+                      }
+                    >
+                      {renderMentalPathThought(step.thought)}
+                    </Text>
+                  </View>
+                  {linkReason == null || !isPathExpanded ? null : (
+                    <Text className="pyly-body-caption text-left text-fg-dim">
+                      {linkReason}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function renderMentalPathThought(thought: string): ReactNode {
+  return thought;
+}
+
 function aiMeaningComponents(
   components: readonly WikiCharacterComponent[] | undefined,
   glossByHanzi: ReadonlyMap<string, string>,
@@ -606,3 +914,61 @@ function MergedHintDisplay({ value }: { value: string }) {
 
 // oxlint-disable-next-line unicorn/prefer-top-level-await
 const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
+
+interface ExperimentalCharacterData {
+  readonly coreIdea: string;
+  readonly mentalPath: readonly {
+    readonly thought: string;
+    readonly reason?: string;
+  }[];
+  readonly scene: string;
+  readonly strength: string;
+  readonly why: string;
+}
+
+const experimentalDataByHanzi: Readonly<
+  Partial<Record<string, ExperimentalCharacterData>>
+> = {
+  表: {
+    coreIdea: `A stack of ornate cloth is something you put on display, which leads naturally to showing or expressing something.`,
+    mentalPath: [
+      {
+        thought: `a stack of ornate cloth`,
+        reason: `Ornate cloth is usually meant to be displayed rather than hidden.`,
+      },
+      {
+        thought: `put it on display`,
+        reason: `Putting something on display means showing it openly.`,
+      },
+      {
+        thought: `show openly`,
+        reason: `Showing something openly easily extends to showing what you think.`,
+      },
+      {
+        thought: `to express (one's opinion)`,
+      },
+    ],
+    scene: `A shopkeeper arranges a stack of ornate cloth and puts it on display.`,
+    strength: `strong`,
+    why: `The path is short and concrete: stacked decorative cloth suggests display, and display leads naturally to showing or expressing.`,
+  },
+  春: {
+    coreIdea: `Open hands held in the sun suggest warmer weather, which naturally brings spring.`,
+    mentalPath: [
+      {
+        thought: `open hands in the sun`,
+        reason: `People naturally picture feeling warmth from the sun on their hands.`,
+      },
+      {
+        thought: `warm day`,
+        reason: `A warm day is a familiar sign that winter is ending and spring is arriving.`,
+      },
+      {
+        thought: `spring`,
+      },
+    ],
+    scene: `I hold my open hands in the sun on a warm day, and it feels like spring.`,
+    strength: `strong`,
+    why: `This path uses a very familiar everyday experience: sunshine on your hands suggests warmer weather, which strongly cues spring.`,
+  },
+};

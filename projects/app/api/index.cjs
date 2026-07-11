@@ -1,4 +1,3 @@
-// oxlint-disable typescript/no-deprecated
 const Sentry = require(`@sentry/node`);
 const { captureConsoleIntegration } = require(`@sentry/core`);
 // const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);
@@ -33,7 +32,7 @@ const { waitUntil } = require(`@vercel/functions`);
 
 const handler = createRequestHandler({
   // build: require(`path`).join(__dirname, `../dist/.cache/vercel-expo/server`),
-  build: require(`path`).join(__dirname, `../dist/vercel/server`),
+  build: require(`node:path`).join(__dirname, `../dist/vercel/server`),
 });
 
 /** @type {import("@expo/server/adapter/vercel").RequestHandler} */

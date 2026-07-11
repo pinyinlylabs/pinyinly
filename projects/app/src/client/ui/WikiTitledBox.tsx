@@ -8,6 +8,7 @@ import { RectButton } from "./RectButton";
 export function WikiTitledBox({
   title,
   children,
+  bottomCaption,
   contentTestID,
   className,
   headerCustomAction,
@@ -17,6 +18,7 @@ export function WikiTitledBox({
 }: {
   title: string;
   children: React.ReactNode;
+  bottomCaption?: string;
   contentTestID?: ViewProps[`testID`];
   className?: ViewProps[`className`];
   headerCustomAction?: React.ReactNode;
@@ -113,6 +115,10 @@ export function WikiTitledBox({
           <View testID={contentTestID}>{children}</View>
         )}
       </View>
+
+      {bottomCaption == null ? null : (
+        <Text className="pyly-body-caption text-fg-dim">{bottomCaption}</Text>
+      )}
     </View>
   );
 }

@@ -38,5 +38,4 @@ function RenderCounter({ counter }: { counter: React.RefObject<number> }) {
   return null;
 }
 
-// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 export const Suspense = __DEV__ ? PylyDevSuspense : ReactSuspense;

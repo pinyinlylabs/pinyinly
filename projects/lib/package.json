@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@types/debug": "^4 <=4.3.x",
-    "@types/react": "19.1.x",
+    "@types/react": "19.2.x",
     "debug": "^4.3.7",
     "execa": "^9.6.0",
     "glob": "^11.1.0",

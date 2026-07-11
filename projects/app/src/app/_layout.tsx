@@ -53,7 +53,6 @@ cssInterop(AppleAuthentication.AppleAuthenticationButton, {
   className: `style`,
 });
 
-// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
@@ -98,7 +97,6 @@ export function UiProviders({ children }: PropsWithChildren) {
   );
 }
 
-// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
   const activeDeviceSession = useAuth().data?.activeDeviceSession;
 

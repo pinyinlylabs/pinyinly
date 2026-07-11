@@ -57,5 +57,9 @@
   "env": {
     "builtin": true
   },
+  "options": {
+    "reportUnusedDisableDirectives": "deny",
+    "respectEslintDisableDirectives": false
+  },
   "ignorePatterns": ["**/*.d.ts", "src/app/dev/**"]
 }

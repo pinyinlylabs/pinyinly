@@ -127,9 +127,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
                     {gloss}
                   </Text>
                 )),
-                <Text>
-                  {` `}and{` `}
-                </Text>,
+                <Text> and </Text>,
               )}
               .
             </>

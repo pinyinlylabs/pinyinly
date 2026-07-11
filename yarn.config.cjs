@@ -431,6 +431,7 @@ module.exports = defineConfig({
       "eslint@^9.13.0": "^9 <=9.13.x",
       "eslint-plugin-tailwindcss@^3.18.0": "^3 <=3.18.x",
       "lodash@^4.18.1": "^4 <=4.18.x",
+      "react@19.2.7": "19.2.x",
       "pg@^8.20.0":
         "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
       "ws@^8.17.1": "^8 <=8.17.x",

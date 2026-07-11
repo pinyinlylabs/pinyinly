@@ -1,8 +1,10 @@
 import {
   buildLeadCharacterDescriptionPrompt,
+  buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
-  buildPronunciationHintPrompt,
+  buildPronunciationHintFantasyPrompt,
+  buildPronunciationHintRealisticPrompt,
   buildSubLocationDescriptionPrompt,
   renderPromptTemplate,
 } from "#util/prompts.ts";
@@ -109,12 +111,153 @@ function collectMissingRequiredProperties(
 }
 
 describe(
-  `buildPronunciationHintPrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintPrompt
+  `buildMeaningHintCausualBridgePrompt` satisfies HasNameOf<
+    typeof buildMeaningHintCausualBridgePrompt
+  >,
+  () => {
+    test(`minimal input (no component context)`, () => {
+      const result = buildMeaningHintCausualBridgePrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`],
+        },
+        count: 3,
+      });
+
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
+        {
+          "messages": [
+            {
+              "content": "You are a helpful assistant that creates short mnemonic explanations.
+
+        You will be given:
+        - A target: the concept the learner wants to remember.
+        - A list of cues: ideas the learner already knows.
+
+        Your task is to write a short explanation that uses every cue to make the target easy to remember.
+
+        Guidelines:
+        - Keep the explanation concise. One short sentence is preferred; use two only if necessary.
+        - Use plain, natural, everyday English.
+        - Prefer the simplest explanation that works.
+        - Make the target the natural consequence of the events in the explanation.
+        - Prefer a single, direct cause-and-effect relationship.
+        - Unless the cues explicitly specify another actor, use the learner (“I”) as the subject of any action.
+        - Avoid introducing intermediate concepts. Connect the cues to the target as directly as possible.
+        - Every cue should play an essential role in producing the target.
+        - Avoid unnecessary characters, objects, settings, or descriptive details.
+        - Avoid dramatic, magical, poetic, exaggerated, or theatrical language.
+        - Avoid introducing concepts that are not provided unless they are required for natural English.
+        - Avoid merely listing the concepts together. They should interact meaningfully.
+        - The explanation should feel obvious in hindsight, as though the cue naturally follows from the concepts.
+
+        The learner should be able to reconstruct the target simply by remembering how the cues interacted.
+
+        Generate multiple distinct ideas that use different relationships or perspectives rather than minor wording variations.",
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 mnemonic stories:
+
+        <data>
+        {
+          "target": "good",
+          "cues": []
+        }
+        </data>",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
+        }
+      `);
+    });
+
+    test(`full input (with component context)`, () => {
+      const result = buildMeaningHintCausualBridgePrompt({
+        hanzi: `好`,
+        meaning: {
+          hanziWord: `好`,
+          glosses: [`good`, `well`, `fine`],
+        },
+        components: [
+          {
+            hanzi: `女`,
+            meaning: `woman`,
+          },
+          {
+            hanzi: `子`,
+            label: `child`,
+            meaning: `child`,
+          },
+        ],
+        count: 4,
+      });
+
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
+        {
+          "messages": [
+            {
+              "content": "You are a helpful assistant that creates short mnemonic explanations.
+
+        You will be given:
+        - A target: the concept the learner wants to remember.
+        - A list of cues: ideas the learner already knows.
+
+        Your task is to write a short explanation that uses every cue to make the target easy to remember.
+
+        Guidelines:
+        - Keep the explanation concise. One short sentence is preferred; use two only if necessary.
+        - Use plain, natural, everyday English.
+        - Prefer the simplest explanation that works.
+        - Make the target the natural consequence of the events in the explanation.
+        - Prefer a single, direct cause-and-effect relationship.
+        - Unless the cues explicitly specify another actor, use the learner (“I”) as the subject of any action.
+        - Avoid introducing intermediate concepts. Connect the cues to the target as directly as possible.
+        - Every cue should play an essential role in producing the target.
+        - Avoid unnecessary characters, objects, settings, or descriptive details.
+        - Avoid dramatic, magical, poetic, exaggerated, or theatrical language.
+        - Avoid introducing concepts that are not provided unless they are required for natural English.
+        - Avoid merely listing the concepts together. They should interact meaningfully.
+        - The explanation should feel obvious in hindsight, as though the cue naturally follows from the concepts.
+
+        The learner should be able to reconstruct the target simply by remembering how the cues interacted.
+
+        Generate multiple distinct ideas that use different relationships or perspectives rather than minor wording variations.",
+              "role": "system",
+            },
+            {
+              "content": "Generate 4 mnemonic stories:
+
+        <data>
+        {
+          "target": "good",
+          "cues": [
+            "woman",
+            "child"
+          ]
+        }
+        </data>",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
+        }
+      `);
+    });
+  },
+);
+
+describe(
+  `buildPronunciationHintFantasyPrompt` satisfies HasNameOf<
+    typeof buildPronunciationHintFantasyPrompt
   >,
   () => {
     test(`minimal input (no optional fields)`, () => {
-      const result = buildPronunciationHintPrompt({
+      const result = buildPronunciationHintFantasyPrompt({
         leadCharacter: { name: `Ethan` },
         location: { name: `Gong Cha bathroom` },
         cue: { word: `use` },
@@ -127,25 +270,29 @@ describe(
             {
               "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-        The goal is to create a scene that is easy to picture and easy to remember.
-        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-        Always clearly include the named character and location.
-        Keep location wording fluent and natural in second person.
-        If Location.storyPhrase is provided, actively weave it into the sentence in a natural way instead of inserting it mechanically.
-        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
-        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-        If extra character or location details are provided, use them to make the story more specific.
-        Keep each hint to 1-2 sentences.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
+        If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
-        Each suggestion must explicitly include the character and location by name.
-        Use the keyword as light inspiration for the central action, object, or conflict.
-        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly just a definition.
-        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        Lean into imaginative, playful, and cinematic moments.
+        Surprising details are welcome when they remain easy to picture.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
+        Good endings are concrete, replayable, and mentally vivid.
+        Bad endings are generic, flat, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
               "role": "system",
             },
             {
@@ -174,7 +321,7 @@ describe(
     });
 
     test(`full input (all optional fields set)`, () => {
-      const result = buildPronunciationHintPrompt({
+      const result = buildPronunciationHintFantasyPrompt({
         leadCharacter: {
           name: `Ethan`,
           bio: `Ethan Klein — loud, expressive, chaotic`,
@@ -184,7 +331,6 @@ describe(
           description: `A cramped, slightly sticky bathroom with bubble tea posters`,
         },
         cue: { word: `use`, meaning: `to use; to employ` },
-        creativeDirection: `Play it as a surreal heist-comedy beat with one unforgettable prop.`,
         count: 4,
       });
 
@@ -194,25 +340,29 @@ describe(
             {
               "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-        The goal is to create a scene that is easy to picture and easy to remember.
-        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-        Always clearly include the named character and location.
-        Keep location wording fluent and natural in second person.
-        If Location.storyPhrase is provided, actively weave it into the sentence in a natural way instead of inserting it mechanically.
-        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
-        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-        If extra character or location details are provided, use them to make the story more specific.
-        Keep each hint to 1-2 sentences.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
+        If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
-        Each suggestion must explicitly include the character and location by name.
-        Use the keyword as light inspiration for the central action, object, or conflict.
-        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly just a definition.
-        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        Lean into imaginative, playful, and cinematic moments.
+        Surprising details are welcome when they remain easy to picture.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
+        Good endings are concrete, replayable, and mentally vivid.
+        Bad endings are generic, flat, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
               "role": "system",
             },
             {
@@ -231,8 +381,7 @@ describe(
           "cue": {
             "word": "use",
             "meaning": "to use; to employ"
-          },
-          "creativeDirection": "Play it as a surreal heist-comedy beat with one unforgettable prop."
+          }
         }
         </data>",
               "role": "user",
@@ -245,7 +394,7 @@ describe(
     });
 
     test(`lead character with article`, () => {
-      const result = buildPronunciationHintPrompt({
+      const result = buildPronunciationHintFantasyPrompt({
         leadCharacter: { name: `seal`, article: `the` },
         location: { name: `River Stage bathroom` },
         cue: { word: `color` },
@@ -258,25 +407,29 @@ describe(
             {
               "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
         Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
-        The goal is to create a scene that is easy to picture and easy to remember.
-        Each scene should feel like a tiny absurd sketch or striking mental snapshot.
-        Always clearly include the named character and location.
-        Keep location wording fluent and natural in second person.
-        If Location.storyPhrase is provided, actively weave it into the sentence in a natural way instead of inserting it mechanically.
-        When a character article is provided (e.g. "the", "a"), always refer to the character with that article (e.g. "the seal") rather than as a bare proper noun.
-        Use the keyword as light inspiration for what happens, but do not turn the result into a definition.
-        When cue meaning context is provided, treat it as authoritative and use that intended sense of the cue word.
-        When creative direction is provided, treat it as soft guidance for tone and style while still prioritizing mnemonic clarity.
-        When the cue word (or a close form of it) appears in the story text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
-        If extra character or location details are provided, use them to make the story more specific.
-        Keep each hint to 1-2 sentences.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
+        If extra character or location details are provided, use them to make endings more specific.
         Prefer visual, unusual, and memorable situations over generic ones.
-        Each suggestion must explicitly include the character and location by name.
-        Use the keyword as light inspiration for the central action, object, or conflict.
-        If cue meaning is provided, follow that exact sense instead of other possible meanings of the same word.
-        Good suggestions are specific, visual, unusual, and easy to replay mentally.
-        Bad suggestions are generic, flat, or mostly just a definition.
-        Format: wrap the cue word (or its inflected form) in ==word== whenever it appears in the story text.",
+        Lean into imaginative, playful, and cinematic moments.
+        Surprising details are welcome when they remain easy to picture.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
+        Good endings are concrete, replayable, and mentally vivid.
+        Bad endings are generic, flat, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
               "role": "system",
             },
             {
@@ -293,6 +446,77 @@ describe(
           },
           "cue": {
             "word": "color"
+          }
+        }
+        </data>",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-5-mini",
+          "reasoningEffort": "medium",
+        }
+      `);
+    });
+  },
+);
+
+describe(
+  `buildPronunciationHintRealisticPrompt` satisfies HasNameOf<
+    typeof buildPronunciationHintRealisticPrompt
+  >,
+  () => {
+    test(`enforces realistic style constraints`, () => {
+      const result = buildPronunciationHintRealisticPrompt({
+        leadCharacter: { name: `Ethan` },
+        location: { name: `Gong Cha bathroom` },
+        cue: { word: `use` },
+        count: 3,
+      });
+
+      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
+        {
+          "messages": [
+            {
+              "content": "You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
+        Invent clear, grounded mini-scenes using a character, a location, and a keyword.
+        The UI shows a shared story setup separately (for example: "In [location], [character] is...").
+        Return only ending-style continuations that naturally finish that setup.
+        Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
+        Do not prefix endings with ellipsis or sentence-starter punctuation.
+        Write each ending as a sentence continuation fragment that can follow the setup directly.
+        Write endings as participle-led continuations (for example: "watering...", "tossing...", "building...").
+        Do not include a subject or auxiliary at the start (avoid "it is...", "the character is...", or starting with just "is...").
+        Start with lowercase when grammatically possible (unless a proper noun must be capitalized).
+        Keep each ending to 1 short sentence (2 at most when necessary).
+        Start endings with a vivid action or concrete object phrase, not pronouns like "it", "he", "she", or "they".
+        Vary the opening words across suggestions; avoid repeating the same starter pattern.
+        Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
+        If cue meaning context is provided, follow that exact sense instead of other possible senses.
+        If extra character or location details are provided, use them to make endings more specific.
+        Keep scenes realistic and plausible in everyday life.
+        Avoid supernatural, magical, dreamlike, or impossible events.
+        Avoid bizarre shock-value imagery; prefer practical, familiar actions.
+        Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
+        Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
+        Only anchor the story on the lead character, the location, and the cue concept.
+        Good endings are concrete, replayable, mentally vivid, and believable.
+        Bad endings are generic, flat, fantastical, or mostly definitions.
+        When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).",
+              "role": "system",
+            },
+            {
+              "content": "Generate 3 distinct mnemonic story ideas.
+
+        <data>
+        {
+          "leadCharacter": {
+            "name": "Ethan"
+          },
+          "location": {
+            "name": "Gong Cha bathroom"
+          },
+          "cue": {
+            "word": "use"
           }
         }
         </data>",
@@ -354,8 +578,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -428,8 +652,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -483,8 +707,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -552,8 +776,8 @@ describe(
               "role": "user",
             },
           ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
         }
       `);
     });
@@ -849,8 +1073,16 @@ describe(`AI prompt schemas`, () => {
   test(`are valid for OpenAI json_schema strict object requirements`, () => {
     const schemas = [
       [
-        `buildPronunciationHintPrompt.schema`,
-        buildPronunciationHintPrompt.schema,
+        `buildMeaningHintCausualBridgePrompt.schema`,
+        buildMeaningHintCausualBridgePrompt.schema,
+      ] as const,
+      [
+        `buildPronunciationHintFantasyPrompt.schema`,
+        buildPronunciationHintFantasyPrompt.schema,
+      ] as const,
+      [
+        `buildPronunciationHintRealisticPrompt.schema`,
+        buildPronunciationHintRealisticPrompt.schema,
       ] as const,
       [`buildMeaningHintPrompt.schema`, buildMeaningHintPrompt.schema] as const,
       [

@@ -248,6 +248,13 @@ export const hanziWordMeaningHintImagePromptSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const hanziWordMeaningHintCaptionSetting = defineUserSetting({
+  entity: r.entity(`hwmhc/[hanziWord]`, {
+    hanziWord: rHanziWord().alias(`h`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+});
+
 export const userWikiCharacterDecompositionSetting = defineUserSetting({
   entity: r.entity(`cdo/[hanzi]`, {
     hanzi: r.string().alias(`h`),
@@ -324,14 +331,6 @@ export const pinyinFinalToneDescriptionSetting = defineUserSetting({
 
 export const pinyinFinalToneViewpointSetting = defineUserSetting({
   entity: r.entity(`pftv/[soundId]/[tone]`, {
-    soundId: rPinyinSoundId().alias(`s`),
-    tone: r.string().alias(`n`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-});
-
-export const pinyinFinalToneStoryPhraseSetting = defineUserSetting({
-  entity: r.entity(`pftsp/[soundId]/[tone]`, {
     soundId: rPinyinSoundId().alias(`s`),
     tone: r.string().alias(`n`),
     text: r.string().alias(`t`),
@@ -439,6 +438,7 @@ export const userSettingDefinitions = [
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
+  hanziWordMeaningHintCaptionSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,

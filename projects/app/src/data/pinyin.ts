@@ -92,7 +92,6 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
       }
     }
 
-    // oxlint-disable-next-line typescript/no-non-null-assertion
     result += isPinyinVowel(char) ? toneMap[char][5] : char;
   }
   return result as PinyinUnit;
@@ -488,20 +487,6 @@ export const defaultToneNames = {
   "5": `light and short`,
 } as Record<string, string>;
 
-// Tone names that work as prepositions/locations and read better before the final
-const prepositionToneNames = new Set([
-  `outside`,
-  `inside`,
-  `above`,
-  `below`,
-  `entry`,
-  `exit`,
-  `beyond`,
-  `within`,
-  `beside`,
-  `behind`,
-]);
-
 export function getDefaultFinalToneName({
   finalName,
   toneName,
@@ -519,15 +504,15 @@ export function getDefaultFinalToneName({
     return trimmedFinal;
   }
 
-  // Check if the tone name is a preposition-like word
-  const toneNameLower = trimmedTone.toLowerCase();
-  if (prepositionToneNames.has(toneNameLower)) {
-    // Keep original format: "Outside the River Stage"
+  const prepositionLikeToneNames = new Set([`outside`, `inside`, `entry`]);
+
+  if (prepositionLikeToneNames.has(trimmedTone.toLowerCase())) {
     return `${trimmedTone} the ${trimmedFinal}`;
   }
 
-  // Otherwise, use final + lowercase tone: "River Stage entrance"
-  return `${trimmedFinal} ${toneNameLower}`;
+  const lowerFirstTone =
+    trimmedTone.charAt(0).toLowerCase() + trimmedTone.slice(1);
+  return `${trimmedFinal} ${lowerFirstTone}`;
 }
 
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(

@@ -1,7 +1,18 @@
 {
   "hanzi": "𡗗",
+  "isStructural": true,
   "mnemonic": {
-    "components": ["⿻", { "hanzi": "三" }, { "hanzi": "人" }]
+    "components": [
+      "⿻",
+      { "hanzi": "𠂇", "strokes": "0-1" },
+      { "strokes": "2-4", "label": "more hand parts" }
+    ],
+    "hints": [
+      {
+        "meaningKey": "openHands",
+        "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out."
+      }
+    ]
   },
   "strokes": 5
 }

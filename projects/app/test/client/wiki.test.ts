@@ -178,7 +178,15 @@ describe(`character.json files`, async () => {
   });
 
   test(`characters in the dictionary with 5+ strokes have mnemonic components`, async () => {
-    const atomicCharacters = new Set([`非`, `臣`, `襾`, `舟`, `母`, `𩰋`]);
+    const atomicCharacters = new Set([
+      `非`,
+      `臣`,
+      `襾`,
+      `舟`,
+      `母`,
+      `𩰋`,
+      `𡗗`,
+    ]);
     const dictionary = await loadDictionary();
 
     for (const { character, characterData } of characterFiles) {

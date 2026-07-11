@@ -6,35 +6,35 @@ import type { ImageSource } from "expo-image";
 declare global {
   type RnRequireSource = Parameters<(typeof Asset)[`fromModule`]>[0];
 
-  interface NodeRequire {
-    /**
-     * @deprecated don't use `@/` alias in require statements because they
-     * cannot be resolved in vitest. Instead use relative paths or convert to
-     * module-level ESM imports.
-     */
-    (id: `@/${string}`): never;
-
-    // Support for asset files.
-    //
-    // NOTE: these MUST not be aliased paths, see above. Use module exports or
-    // relative paths.
-    (
-      id: `${string}.${
-        | `bin`
-        | `jpg`
-        | `onnx`
-        | `otf`
-        | `png`
-        | `riv`
-        | `svg`
-        | `ttf`
-        | `wasm`}`,
-    ): RnRequireSource;
-    (id: `${string}.mp3`): AudioSource;
-    (id: `${string}.m4a`): AudioSpriteSource | AudioSource;
-  }
-
   namespace NodeJS {
+    interface Require {
+      /**
+       * @deprecated don't use `@/` alias in require statements because they
+       * cannot be resolved in vitest. Instead use relative paths or convert to
+       * module-level ESM imports.
+       */
+      (id: `@/${string}`): never;
+
+      // Support for asset files.
+      //
+      // NOTE: these MUST not be aliased paths, see above. Use module exports or
+      // relative paths.
+      (
+        id: `${string}.${
+          | `bin`
+          | `jpg`
+          | `onnx`
+          | `otf`
+          | `png`
+          | `riv`
+          | `svg`
+          | `ttf`
+          | `wasm`}`,
+      ): RnRequireSource;
+      (id: `${string}.mp3`): AudioSource;
+      (id: `${string}.m4a`): AudioSpriteSource | AudioSource;
+    }
+
     // Necessary to avoid noPropertyAccessFromIndexSignature errors. Keep in
     // sync with `env.ts`.
     interface ProcessEnv {

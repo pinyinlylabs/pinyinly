@@ -3,10 +3,23 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  ssr: {
+    // Keep Expo packages in Vite's transform pipeline during SSR.
+    // Many Expo modules ship ESM/React Native entrypoints that break when
+    // treated as external CJS dependencies in the Node test runtime.
+    noExternal: [/^expo(?:-|$|\/)/u, /^@expo(?:-|$|\/)/u],
+  },
   test: {
     globals: true,
     watch: false,
     environment: `node`,
+    server: {
+      deps: {
+        // Match the SSR rule above for Vitest's dependency server so imports
+        // are transformed consistently in both module loading paths.
+        inline: [/^expo(?:-|$|\/)/u, /^@expo(?:-|$|\/)/u],
+      },
+    },
     setupFiles: [`./test/setup.ts`],
     fakeTimers: {
       now: 0,

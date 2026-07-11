@@ -1,4 +1,5 @@
 import { intersperse } from "@/client/react";
+import { isStructuralHanziQuery } from "@/client/query";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { hskLevelToNumber } from "@/data/hsk";
@@ -9,10 +10,12 @@ import {
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { HskLozenge } from "./HskLozenge";
 import { RectButton } from "./RectButton";
+import { StructuralLozenge } from "./StructuralLozenge";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { useDb } from "./hooks/useDb";
 
@@ -46,6 +49,8 @@ export function WikiHanziHeaderOverview({
   const glosses = dictionarySearchEntries
     .map((entry) => entry.gloss[0])
     .filter((x) => x != null);
+  const { data: isStructuralHanzi } = useQuery(isStructuralHanziQuery);
+  const isStructural = isStructuralHanzi?.(hanzi) === true;
 
   const { isPriority, toggle } = useBookmarkToggle(hanzi);
   const uniquePinyins = pinyins.filter(arrayFilterUnique());
@@ -57,6 +62,7 @@ export function WikiHanziHeaderOverview({
           {hskLevels.map((hskLevel) => (
             <HskLozenge hskLevel={hskLevel} key={hskLevel} />
           ))}
+          {isStructural ? <StructuralLozenge /> : null}
         </View>
         <RectButton
           variant="bare"

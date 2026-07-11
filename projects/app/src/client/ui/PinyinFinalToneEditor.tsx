@@ -18,7 +18,6 @@ import {
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
-  pinyinFinalToneStoryPhraseSetting,
   pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
@@ -233,15 +232,6 @@ function ToneTileEditor({
           settingKey={descriptionSettingKey}
           readonly={!isEditMode}
           placeholder="From where are you viewing this scene? (for example, At the bottom of the stairs looking up)"
-          multiline
-        />
-
-        <InlineEditableSettingText
-          variant="body"
-          setting={pinyinFinalToneStoryPhraseSetting}
-          settingKey={descriptionSettingKey}
-          readonly={!isEditMode}
-          placeholder="Optional phrase for AI hints (for example, outside your home entrance)"
           multiline
         />
 
