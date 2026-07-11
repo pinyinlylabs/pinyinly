@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { useDb } from "@/client/ui/hooks/useDb";
@@ -105,6 +106,10 @@ export default function SoundsPage() {
 
   return (
     <View className="gap-10">
+      <Breadcrumbs>
+        <Breadcrumbs.Item href="/sounds">Sounds</Breadcrumbs.Item>
+      </Breadcrumbs>
+
       <View>
         <Text className="pyly-body-title">Sounds</Text>
         <HeaderTitleProvider.ScrollTrigger title="Sounds" />
