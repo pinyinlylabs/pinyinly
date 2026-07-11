@@ -158,9 +158,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
                     {pinyin}
                   </Text>
                 )),
-                <Text>
-                  {` `}and{` `}
-                </Text>,
+                <Text> and </Text>,
               )}
               .
             </>

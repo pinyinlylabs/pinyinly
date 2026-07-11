@@ -22,7 +22,7 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "expo-audio": "~1.1.0"
+    "expo-audio": "~57.0.0"
   },
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",

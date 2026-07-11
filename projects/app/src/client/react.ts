@@ -143,9 +143,9 @@ export const mergeProps = <T extends Record<string, any>>(
       if (typeof baseValue === `function`) {
         // @ts-expect-error no overlap
         props[key] = (...args: unknown[]) => {
-          // oxlint-disable-next-line typescript/no-unsafe-call, typescript/no-unsafe-argument
+          // oxlint-disable-next-line typescript/no-unsafe-call
           overrideValue(...args);
-          // oxlint-disable-next-line typescript/no-unsafe-call, typescript/no-unsafe-argument
+          // oxlint-disable-next-line typescript/no-unsafe-call
           baseValue(...args);
         };
         continue;

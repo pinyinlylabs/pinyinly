@@ -1,7 +1,7 @@
 import { HeaderTitleContext } from "@/client/ui/contexts";
 import type { HeaderTitleScrollTriggerState } from "@/client/ui/contexts";
-import { useIsAppFocused } from "@/client/ui/hooks/useIsAppFocused";
 import { maxK } from "@pinyinly/lib/collections";
+import { useIsFocused } from "expo-router";
 import type { PropsWithChildren } from "react";
 import { use, useId, useLayoutEffect, useState } from "react";
 import type { TextProps } from "react-native";
@@ -66,7 +66,7 @@ function HeaderTitleProviderScrollTrigger({ title }: { title: string }) {
     useHeaderTitleContextOrThrow();
   const id = useId();
   const [element, setElement] = useState<Element | null>(null);
-  const isFocused = useIsAppFocused();
+  const isFocused = useIsFocused();
 
   useLayoutEffect(() => {
     if (!isFocused) {

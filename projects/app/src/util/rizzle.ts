@@ -261,11 +261,9 @@ export class RizzleIndexed<
     return this._def.innerType.getUnmarshal();
   }
   marshal(input: T[`_input`]): T[`_marshaled`] {
-    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.marshal(input);
   }
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
-    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.unmarshal(marshaled);
   }
   _getIndexes(): RizzleIndexDefinitions {

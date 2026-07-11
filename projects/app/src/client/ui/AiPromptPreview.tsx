@@ -84,11 +84,11 @@ async function copyToClipboard(text: string): Promise<boolean> {
     return false;
   }
 
-  const globalNavigator = globalThis.navigator;
-  if (typeof globalNavigator === `undefined`) {
+  if (!(`navigator` in globalThis)) {
     return false;
   }
 
+  const globalNavigator = globalThis.navigator;
   if (typeof globalNavigator.clipboard.writeText !== `function`) {
     return false;
   }

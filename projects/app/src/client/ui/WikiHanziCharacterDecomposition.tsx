@@ -375,10 +375,7 @@ export function WikiHanziCharacterDecompositionBox({
         ) : strokeSvgs == null ? null : (
           <>
             <Text className="pyly-body">
-              What does{` `}
-              <Text className="pyly-bold">{hanzi}</Text>
-              {` `}
-              resemble?
+              What does <Text className="pyly-bold">{hanzi}</Text> resemble?
             </Text>
 
             <View className="flex-1 items-center">

@@ -622,13 +622,11 @@ function InlineImageRepositionEditor({
       initialAssetIdRef.current = assetId;
       // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setCropRect(null);
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setInitialRect(defaultCropRect);
       return;
     }
 
     if (initialRect == null) {
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setInitialRect(defaultCropRect);
     }
   }, [assetId, defaultCropRect, initialRect]);
@@ -770,7 +768,6 @@ function InlineImageRepositionFrame({
       },
     });
 
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
     setMoveResponder(nextMoveResponder);
   }, [moveResponder]);
 

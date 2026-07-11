@@ -1,0 +1,32 @@
+diff --git a/src/node-haste/DependencyGraph/ModuleResolution.js b/src/node-haste/DependencyGraph/ModuleResolution.js
+index f9cd35625f34cc2539f72e656384eca248307e7c..855555691f3720015d96df86be81d5b666e5660d 100644
+--- a/src/node-haste/DependencyGraph/ModuleResolution.js
++++ b/src/node-haste/DependencyGraph/ModuleResolution.js
+@@ -86,6 +86,7 @@ class ModuleResolver {
+       doesFileExist,
+       extraNodeModules,
+       fileSystemLookup,
++      graph,
+       getPackage,
+       getPackageForModule,
+       mainFields,
+@@ -111,6 +112,7 @@ class ModuleResolver {
+             doesFileExist,
+             extraNodeModules,
+             fileSystemLookup,
++            graph,
+             getPackage,
+             getPackageForModule,
+             isESMImport: dependency.data.isESMImport,
+diff --git a/src/node-haste/DependencyGraph.js b/src/node-haste/DependencyGraph.js
+index 8222d8c69059bfb3fe444acba9f96ab2cc7bec0b..932d29e897fc048767890155f9a116c189898585 100644
+--- a/src/node-haste/DependencyGraph.js
++++ b/src/node-haste/DependencyGraph.js
+@@ -133,6 +133,7 @@ class DependencyGraph extends _events.default {
+       emptyModulePath: this._config.resolver.emptyModulePath,
+       extraNodeModules: this._config.resolver.extraNodeModules,
+       fileSystemLookup,
++      graph: this,
+       getHasteModulePath: (name, platform) =>
+         this._hasteMap.getModule(name, platform, true),
+       getHastePackagePath: (name, platform) =>

@@ -64,19 +64,14 @@
     "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "@expo/server@npm:^0.5.0": "0.5.1",
     "@expo/server@npm:^0.6.3": "0.5.1",
-    "@expo/cli@npm:54.0.19": "patch:@expo/cli@npm%3A54.0.19#~/.yarn/patches/@expo-cli-npm-54.0.19-2a1fbee7e2.patch",
-    "babel-preset-expo@npm:~54.0.8": "patch:babel-preset-expo@npm%3A54.0.8#~/.yarn/patches/babel-preset-expo-npm-54.0.8-1b48011421.patch",
-    "@react-navigation/native-stack@npm:^7.3.16": "patch:@react-navigation/native-stack@npm%3A7.8.6#~/.yarn/patches/@react-navigation-native-stack-npm-7.8.6-81168f456c.patch",
-    "@react-navigation/elements@npm:^2.8.4": "patch:@react-navigation/elements@npm%3A2.9.2#~/.yarn/patches/@react-navigation-elements-npm-2.9.2-498006ac98.patch",
-    "@react-navigation/elements@npm:^2.9.2": "patch:@react-navigation/elements@npm%3A2.9.2#~/.yarn/patches/@react-navigation-elements-npm-2.9.2-498006ac98.patch",
-    "metro@npm:0.83.2": "patch:metro@npm%3A0.83.3#~/.yarn/patches/metro-npm-0.83.3-6f86736a59.patch",
-    "metro@npm:0.83.3": "patch:metro@npm%3A0.83.3#~/.yarn/patches/metro-npm-0.83.3-6f86736a59.patch",
-    "expo-crypto@npm:~15.0.8": "patch:expo-crypto@npm%3A15.0.8#~/.yarn/patches/expo-crypto-npm-15.0.8-fd3ff49cd4.patch",
-    "@expo/metro-config@npm:54.0.11": "patch:@expo/metro-config@npm%3A54.0.11#~/.yarn/patches/@expo-metro-config-npm-54.0.11-3408ac3adc.patch",
-    "@expo/metro-config@npm:~54.0.11": "patch:@expo/metro-config@npm%3A54.0.11#~/.yarn/patches/@expo-metro-config-npm-54.0.11-3408ac3adc.patch",
     "@types/pg@npm:^8.8.0": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
     "@types/pg@npm:8.15.5": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
     "@types/pg@npm:8.15.6": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
-    "tslib@npm:^1.9.3": "^2.0.0"
+    "tslib@npm:^1.9.3": "^2.0.0",
+    "@expo/metro-config@npm:~57.0.3": "patch:@expo/metro-config@npm%3A57.0.3#~/.yarn/patches/@expo-metro-config-npm-57.0.3-4759d3a73a.patch",
+    "@expo/cli@npm:^57.0.6": "patch:@expo/cli@npm%3A57.0.6#~/.yarn/patches/@expo-cli-npm-57.0.6-6c7dce52e7.patch",
+    "babel-preset-expo@npm:~57.0.2": "patch:babel-preset-expo@npm%3A57.0.2#~/.yarn/patches/babel-preset-expo-npm-57.0.2-6935e6e94c.patch",
+    "metro@npm:0.84.4": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch",
+    "metro@npm:^0.84.3": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch"
   }
 }

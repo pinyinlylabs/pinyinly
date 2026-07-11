@@ -1,13 +1,13 @@
 diff --git a/build/src/start/server/metro/MetroBundlerDevServer.js b/build/src/start/server/metro/MetroBundlerDevServer.js
-index c41c5930ffc00f64b939812577aee66e72e81c53..f4804043f04d1ff52ddc0bb077be97b7cbfee423 100644
+index da1bb5f18b1a34ed412e37c705e866815c74a6c6..e35529d6b5f66259112988d4b2caface9a879d5f 100644
 --- a/build/src/start/server/metro/MetroBundlerDevServer.js
 +++ b/build/src/start/server/metro/MetroBundlerDevServer.js
-@@ -262,7 +262,7 @@ class MetroBundlerDevServer extends _BundlerDevServer.BundlerDevServer {
+@@ -279,7 +279,7 @@ class MetroBundlerDevServer extends _BundlerDevServer.BundlerDevServer {
              const contents = await this.bundleApiRoute(filepath, {
                  platform
              });
 -            const artifactFilename = route.page === rscPath ? (0, _metroOptions.convertPathToModuleSpecifier)(_path().default.join(outputDir, '.' + rscPath + '.js')) : (0, _metroOptions.convertPathToModuleSpecifier)(_path().default.join(outputDir, _path().default.relative(appDir, filepath.replace(/\.[tj]sx?$/, '.js'))));
 +            const artifactFilename = route.page === rscPath ? (0, _metroOptions.convertPathToModuleSpecifier)(_path().default.join(outputDir, '.' + rscPath + '.js')) : (0, _metroOptions.convertPathToModuleSpecifier)(_path().default.join(outputDir, _path().default.relative(appDir, filepath.replace(/\.[tj]sx?$/, '.cjs'))));
-             await this.exportServerRoute({
+             await this.exportServerRouteAsync({
                  contents,
                  artifactFilename,

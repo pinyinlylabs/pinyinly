@@ -5,30 +5,16 @@ import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
-import type { StackNavigationFor } from "@/client/ui/types";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
-import {
-  NavigationContainer,
-  NavigationIndependentTree,
-  useTheme,
-} from "@react-navigation/native";
-import type {
-  StackCardInterpolatedStyle,
-  StackCardInterpolationProps,
-} from "@react-navigation/stack";
-import {
-  createStackNavigator,
-  TransitionPresets,
-} from "@react-navigation/stack";
 import { Link } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import { Animated as RnAnimated, Text, View } from "react-native";
-import Reanimated, { FadeIn } from "react-native-reanimated";
+import React, { useEffect, useState } from "react";
+import { Text, useWindowDimensions, View } from "react-native";
+import Reanimated, { FadeIn, Keyframe } from "react-native-reanimated";
 import { QuizDeckHanziWordToGlossTypedQuestion } from "./QuizDeckHanziWordToGlossTypedQuestion";
 import { QuizDeckHanziWordToPinyinTypedQuestion } from "./QuizDeckHanziWordToPinyinTypedQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
@@ -36,19 +22,8 @@ import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
 
-const Stack = createStackNavigator<{
-  loading: undefined;
-  chill: undefined;
-  question: {
-    question: Question;
-  };
-}>();
-
-type Navigation = StackNavigationFor<typeof Stack>;
-
 export const QuizDeck = ({ className }: { className?: string }) => {
-  const theme = useTheme();
-  const navigationRef = useRef<Navigation>(null);
+  const { width: screenWidth } = useWindowDimensions();
   const r = useRizzle();
   const postHog = usePostHog();
 
@@ -80,7 +55,6 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       // No items in queue, clear question and stay on loading screen
       // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setQuestion(undefined);
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setQuestionVersion(undefined);
       return;
     }
@@ -142,12 +116,6 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       abortController.abort();
     };
   }, [question, questionVersion, skillQueue]);
-
-  useEffect(() => {
-    if (question != null) {
-      navigationRef.current?.replace(`question`, { question });
-    }
-  }, [question]);
 
   const playSuccessSound = useSoundEffect(
     require(`../../assets/audio/sparkle.mp3`),
@@ -253,6 +221,116 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     require(`../../assets/icons/close-circled-filled.svg`),
   );
 
+  const hasPendingReviews =
+    !skillQueue.loading && skillQueue.reviewQueue.items.length > 0;
+
+  const questionTransitionDistance =
+    screenWidth >= 768 ? 40 : Math.min(screenWidth, 360);
+  const questionEnterTransition = new Keyframe({
+    0: {
+      opacity: 0,
+      transform: [{ translateX: questionTransitionDistance }],
+    },
+    100: {
+      opacity: 1,
+      transform: [{ translateX: 0 }],
+    },
+  }).duration(220);
+  const questionExitTransition = new Keyframe({
+    0: {
+      opacity: 1,
+      transform: [{ translateX: 0 }],
+    },
+    100: {
+      opacity: 0,
+      transform: [{ translateX: -questionTransitionDistance }],
+    },
+  }).duration(220);
+
+  let screen: React.ReactNode;
+
+  if (question != null) {
+    let questionScreen: React.ReactNode;
+
+    switch (question.kind) {
+      case QuestionKind.HanziWordToGlossTyped: {
+        questionScreen = (
+          <QuizDeckHanziWordToGlossTypedQuestion
+            question={question}
+            onNext={handleNext}
+            onRating={handleRating}
+            onUndo={handleUndo}
+          />
+        );
+        break;
+      }
+      case QuestionKind.HanziWordToPinyinTyped: {
+        questionScreen = (
+          <QuizDeckHanziWordToPinyinTypedQuestion
+            question={question}
+            onNext={handleNext}
+            onRating={handleRating}
+            onUndo={handleUndo}
+          />
+        );
+        break;
+      }
+      case QuestionKind.OneCorrectPair: {
+        questionScreen = (
+          <QuizDeckOneCorrectPairQuestion
+            question={question}
+            onNext={handleNext}
+            onRating={handleRating}
+            onUndo={handleUndo}
+          />
+        );
+        break;
+      }
+    }
+
+    screen = (
+      <Reanimated.View
+        key={questionVersion ?? 0}
+        entering={questionEnterTransition}
+        exiting={questionExitTransition}
+        className="size-full"
+      >
+        {questionScreen}
+      </Reanimated.View>
+    );
+  } else if (hasPendingReviews) {
+    screen = (
+      <Reanimated.View entering={FadeIn} className="my-auto items-center">
+        <Text className="font-sans text-lg text-fg-dim">Loading</Text>
+      </Reanimated.View>
+    );
+  } else {
+    screen = (
+      <Reanimated.View
+        entering={FadeIn}
+        className="size-full justify-center gap-2"
+      >
+        <View
+          style={{
+            flex: 1,
+            gap: 16,
+            alignItems: `center`,
+            justifyContent: `center`,
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
+        >
+          <Text className="pyly-body-title">
+            👏 You’re all caught up on your reviews!
+          </Text>
+          <Link dismissTo href="/learn" asChild>
+            <RectButton>Back</RectButton>
+          </Link>
+        </View>
+      </Reanimated.View>
+    );
+  }
+
   return (
     <View className={className}>
       <View
@@ -262,178 +340,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         <QuizQueueButton />
       </View>
 
-      <NavigationIndependentTree>
-        <NavigationContainer theme={theme} documentTitle={{ enabled: false }}>
-          <Stack.Navigator
-            initialRouteName="loading"
-            screenOptions={{
-              gestureEnabled: false,
-              headerShown: false,
-              animation: `slide_from_right`,
-              ...TransitionPresets.SlideFromRightIOS,
-              cardStyleInterpolator: horizontalCardStyleInterpolator,
-            }}
-            screenListeners={({ navigation }) => ({
-              // Hack to get the navigation object.
-              state: () => {
-                navigationRef.current = navigation;
-              },
-            })}
-          >
-            <Stack.Screen
-              name="loading"
-              // oxlint-disable-next-line react/no-children-prop
-              children={() => {
-                return (
-                  <Reanimated.View
-                    entering={FadeIn}
-                    className="my-auto items-center"
-                  >
-                    <Text className="font-sans text-lg text-fg-dim">
-                      Loading
-                    </Text>
-                  </Reanimated.View>
-                );
-              }}
-            />
-            <Stack.Screen
-              name="chill"
-              // oxlint-disable-next-line react/no-children-prop
-              children={() => {
-                return (
-                  <View className="gap-2">
-                    <View
-                      style={{
-                        flex: 1,
-                        gap: 16,
-                        alignItems: `center`,
-                        justifyContent: `center`,
-                        paddingLeft: 20,
-                        paddingRight: 20,
-                      }}
-                    >
-                      <Text className="pyly-body-title">
-                        👏 You’re all caught up on your reviews!
-                      </Text>
-                      {/* {nextNotYetDueSkillState.isLoading ||
-                      nextNotYetDueSkillState.data == null ? null : (
-                        <Text className="pyly-body-fg-dim">
-                          Next review in{` `}
-                          {formatDuration(
-                            intervalToDuration(
-                              interval(
-                                new Date(),
-                                nextNotYetDueSkillState.data.srs.nextReviewAt,
-                              ),
-                            ),
-                          )}
-                        </Text>
-                      )} */}
-                      <Link dismissTo href="/learn" asChild>
-                        <RectButton>Back</RectButton>
-                      </Link>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-            <Stack.Screen
-              name="question"
-              // oxlint-disable-next-line react/no-children-prop
-              children={({
-                route: {
-                  params: { question },
-                },
-              }) => {
-                let screen: React.ReactNode;
-
-                switch (question.kind) {
-                  case QuestionKind.HanziWordToGlossTyped: {
-                    screen = (
-                      <QuizDeckHanziWordToGlossTypedQuestion
-                        question={question}
-                        onNext={handleNext}
-                        onRating={handleRating}
-                        onUndo={handleUndo}
-                      />
-                    );
-                    break;
-                  }
-                  case QuestionKind.HanziWordToPinyinTyped: {
-                    screen = (
-                      <QuizDeckHanziWordToPinyinTypedQuestion
-                        question={question}
-                        onNext={handleNext}
-                        onRating={handleRating}
-                        onUndo={handleUndo}
-                      />
-                    );
-                    break;
-                  }
-                  case QuestionKind.OneCorrectPair: {
-                    screen = (
-                      <QuizDeckOneCorrectPairQuestion
-                        question={question}
-                        onNext={handleNext}
-                        onRating={handleRating}
-                        onUndo={handleUndo}
-                      />
-                    );
-                    break;
-                  }
-                }
-
-                return (
-                  <View className="size-full max-w-[600px] flex-1 self-center">
-                    {screen}
-                  </View>
-                );
-              }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </NavigationIndependentTree>
+      <View className="size-full max-w-[600px] flex-1 self-center">
+        {screen}
+      </View>
     </View>
   );
 };
-
-function horizontalCardStyleInterpolator({
-  current,
-  next,
-  inverted,
-  layouts: { screen },
-}: StackCardInterpolationProps): StackCardInterpolatedStyle {
-  const distance =
-    screen.width >= 768
-      ? 40 // on big screens sliding the whole screen across is too distracting, so instead we just do a small slide
-      : screen.width;
-
-  const translateEntering = RnAnimated.multiply(
-    current.progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [distance, 0],
-    }),
-    inverted,
-  );
-
-  const translateExiting = next
-    ? RnAnimated.multiply(
-        next.progress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, -distance],
-        }),
-        inverted,
-      )
-    : translateEntering;
-
-  const opacity = next
-    ? RnAnimated.subtract(1, next.progress)
-    : RnAnimated.add(0, current.progress);
-
-  return {
-    cardStyle: {
-      transform: [{ translateX: translateExiting }],
-      opacity,
-    },
-  };
-}

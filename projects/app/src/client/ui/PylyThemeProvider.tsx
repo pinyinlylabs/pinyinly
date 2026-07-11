@@ -1,5 +1,4 @@
-import type { Theme as ReactNavigationTheme } from "@react-navigation/native";
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "expo-router";
 import type { ReactNode } from "react";
 import { Platform, useColorScheme, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -12,22 +11,20 @@ export function PylyThemeProvider({ children }: { children: ReactNode }) {
     <ThemeProvider
       // Even though this looks like an no-op layout—it's not, and it ensures the
       // top and bottom of the app have the correct color.
-      value={
-        {
-          dark: false,
-          colors: {
-            background: `transparent`,
-            // We should never see these colors, instead tamagui should
-            // have priority.
-            border: BUG_DETECTOR_COLOR,
-            card: BUG_DETECTOR_COLOR,
-            notification: BUG_DETECTOR_COLOR,
-            primary: BUG_DETECTOR_COLOR,
-            text: BUG_DETECTOR_COLOR,
-          },
-          fonts: DefaultTheme.fonts,
-        } satisfies ReactNavigationTheme
-      }
+      value={{
+        dark: false,
+        colors: {
+          background: `transparent`,
+          // We should never see these colors, instead tamagui should
+          // have priority.
+          border: BUG_DETECTOR_COLOR,
+          card: BUG_DETECTOR_COLOR,
+          notification: BUG_DETECTOR_COLOR,
+          primary: BUG_DETECTOR_COLOR,
+          text: BUG_DETECTOR_COLOR,
+        },
+        fonts: DefaultTheme.fonts,
+      }}
     >
       <View
         className={containerClass({ isWeb: Platform.OS === `web`, isDarkMode })}

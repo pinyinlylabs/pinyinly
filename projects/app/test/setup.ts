@@ -50,6 +50,60 @@ vi.mock(`expo-audio`, () => {
   return {};
 });
 
+vi.mock(`expo`, () => {
+  class NativeModule {}
+
+  return {
+    NativeModule,
+    isRunningInExpoGo: () => false,
+    registerWebModule: () => null,
+    requireNativeModule: () => ({}),
+    requireOptionalNativeModule: () => ({}),
+  };
+});
+
+vi.mock(`expo-crypto`, async () => {
+  const nodeCrypto = await import(`node:crypto`);
+
+  function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+    return bytes.buffer.slice(
+      bytes.byteOffset,
+      bytes.byteOffset + bytes.byteLength,
+    ) as ArrayBuffer;
+  }
+
+  return {
+    CryptoDigestAlgorithm: {
+      SHA1: `SHA1`,
+      SHA256: `SHA256`,
+      SHA384: `SHA384`,
+      SHA512: `SHA512`,
+    },
+    async digest(algorithm: string, data: string | ArrayBuffer) {
+      const hash = nodeCrypto.createHash(algorithm.toLowerCase());
+      hash.update(typeof data === `string` ? data : Buffer.from(data));
+      return toArrayBuffer(hash.digest());
+    },
+    async digestStringAsync(algorithm: string, data: string) {
+      const hash = nodeCrypto.createHash(algorithm.toLowerCase());
+      hash.update(data);
+      return hash.digest(`hex`);
+    },
+    getRandomValues<T extends ArrayBufferView>(array: T) {
+      return nodeCrypto.randomFillSync(array as unknown as Uint8Array);
+    },
+    randomUUID: () => nodeCrypto.randomUUID(),
+  };
+});
+
+vi.mock(`expo-updates`, () => {
+  return {
+    updateId: null,
+    isEmbeddedLaunch: false,
+    manifest: {},
+  };
+});
+
 // Mock react-native to use react-native-web otherwise Node will try to import
 // Flow type files and fail.
 vi.mock(`react-native`, async () => {

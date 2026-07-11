@@ -92,7 +92,6 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
       }
     }
 
-    // oxlint-disable-next-line typescript/no-non-null-assertion
     result += isPinyinVowel(char) ? toneMap[char][5] : char;
   }
   return result as PinyinUnit;

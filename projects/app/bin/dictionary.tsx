@@ -1,4 +1,3 @@
-// oxlint-disable eslint-plugin-react(only-export-components):
 import { intersperse } from "#client/react.ts";
 import {
   parseIds,
@@ -334,7 +333,6 @@ const Select2 = <T,>({
       // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setScrollIndexStart(selectedIndex);
     } else if (selectedIndex >= scrollIndexStart + visibleOptionCount) {
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setScrollIndexStart(selectedIndex - visibleOptionCount + 1);
     }
   }, [selectedIndex, scrollIndexStart, visibleOptionCount, filteredItemCount]);
@@ -366,7 +364,13 @@ const Select2 = <T,>({
             return (
               <Box key={index} gap={1}>
                 <Box width={1} flexGrow={0} flexShrink={0}>
-                  {isSelected ? <Text bold color="blue">{`❯`}</Text> : null}
+                  {isSelected ? (
+                    <Text bold color="blue">
+                      {` `}
+                      {`❯`}
+                      {` `}
+                    </Text>
+                  ) : null}
                 </Box>
                 <Box>{renderItem(item, isSelected)}</Box>
               </Box>
@@ -375,10 +379,7 @@ const Select2 = <T,>({
       </Box>
       <Text dimColor>
         Showing {Math.min(scrollIndexStart + 1, filteredItems.length)}-
-        {scrollIndexEnd}
-        {` `}
-        of{` `}
-        {filteredItems.length}
+        {scrollIndexEnd} of {filteredItems.length}
       </Text>
     </Box>
   );
@@ -1112,18 +1113,21 @@ const GenerateHanziWordOptions = ({
                 <>
                   {item.sources.includes(`openai`) ? (
                     <Text bold backgroundColor="white" color="black">
-                      {` `}OpenAI{` `}
+                      {` `}
+                      OpenAI{` `}
                     </Text>
                   ) : null}
                   {item.sources.includes(`dongChinese`) ? (
                     <Text bold backgroundColor="red" color="white">
-                      {` `}DongChinese{` `}
+                      {` `}
+                      DongChinese{` `}
                     </Text>
                   ) : null}
 
                   {item.isVerified === true ? (
                     <Text bold backgroundColor="green">
-                      {` `}verified{` `}
+                      {` `}
+                      verified{` `}
                     </Text>
                   ) : null}
                   <Text bold backgroundColor="yellow">
@@ -1281,7 +1285,7 @@ const DictionaryHanziWordEntry = ({
   const flagElement = useMemo(() => {
     const nonNullChilds = Children.map(flags, (child): ReactNode => child);
     return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
-      <Box gap={1}>{intersperse(nonNullChilds, <Text>{` `}</Text>)}</Box>
+      <Box gap={1}>{intersperse(nonNullChilds, <Text> </Text>)}</Box>
     );
   }, [flags]);
 

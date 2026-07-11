@@ -81,7 +81,6 @@ function makeMdx(
   ElementType: keyof JSX.IntrinsicElements | ComponentType,
 ): React.ComponentType {
   const { className, ...otherStaticProps } = staticProps;
-  // oxlint-disable-next-line eslint-plugin-react(only-export-components)
   function MdxComponent(props: Pick<ViewProps, `className`>) {
     return (
       <ElementType

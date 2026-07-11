@@ -1,5 +1,5 @@
 diff --git a/build/transform-worker/collect-dependencies.js b/build/transform-worker/collect-dependencies.js
-index 820f8be5589f705bf1f3ae74758330df2ee9103f..63b8087ce6cc940f09814e5013d7075df0d4960e 100644
+index 85c77442fd1bd71bf531a6e51411241ad0ec5078..15949203660b0b3fe816660825d8be7af12d1a25 100644
 --- a/build/transform-worker/collect-dependencies.js
 +++ b/build/transform-worker/collect-dependencies.js
 @@ -55,7 +55,7 @@ const debug = require('debug')('expo:metro:collect-dependencies');

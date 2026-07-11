@@ -169,7 +169,6 @@ function SoundNameEditModalContent({
                           >
                             {name}
                           </Text>
-
                           {` `}
                           <Text className="font-sans text-sm font-normal text-fg-dim">
                             {nameDescription}

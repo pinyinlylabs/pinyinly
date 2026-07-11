@@ -5,7 +5,7 @@ const devDomain =
     ? `${process.env.EXPO_TUNNEL_SUBDOMAIN}.ngrok.io`
     : null;
 
-/** @type {import('@expo/config').ExpoConfig} */
+/** @type {import('@expo/config-types').ExpoConfig} */
 export const expo = {
   name: `Pinyinly`,
   slug: `hao`,
@@ -14,15 +14,9 @@ export const expo = {
   runtimeVersion: {
     policy: `fingerprint`,
   },
-  newArchEnabled: true,
   orientation: `portrait`,
   icon: `./src/assets/icon.png`,
   userInterfaceStyle: `automatic`,
-  splash: {
-    image: `./src/assets/splash.png`,
-    resizeMode: `contain`,
-    backgroundColor: `#DE6447`,
-  },
   assetBundlePatterns: [`**/*`],
   ios: {
     config: {
@@ -139,6 +133,14 @@ export const expo = {
     [`expo-localization`],
     [`expo-router`, { origin: `https://${devDomain ?? prodDomain}` }],
     [`expo-secure-store`],
+    [
+      `expo-splash-screen`,
+      {
+        image: `./src/assets/splash.png`,
+        resizeMode: `contain`,
+        backgroundColor: `#DE6447`,
+      },
+    ],
     [`expo-sqlite`],
   ],
   experiments: {

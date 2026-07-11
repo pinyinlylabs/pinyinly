@@ -150,7 +150,6 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
         maxQueueItems: mockable.getMaxQueueItems(),
       });
 
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setSkillQueue((prev) => ({
         loading: false,
         reviewQueue,
