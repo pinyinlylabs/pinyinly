@@ -1101,7 +1101,7 @@ describe(`AI prompt schemas`, () => {
 
     const allIssues: string[] = [];
     for (const [name, schema] of schemas) {
-      const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `any` });
+      const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
       const issues = collectMissingRequiredProperties(jsonSchema);
       for (const issue of issues) {
         allIssues.push(`${name}: ${issue}`);

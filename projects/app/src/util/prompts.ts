@@ -10,20 +10,18 @@ export type PronunciationHintPromptInput = {
 
 const pronunciationHintOutputSchema = z
   .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            hint: z
-              .string()
-              .describe(
-                `A short story ending that continues a shared setup shown separately in the UI. When the cue word appears, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
-              ),
-            explanation: z.string().nullable(),
-          })
-          .strict(),
-      )
-      .min(1),
+    suggestions: z.array(
+      z
+        .object({
+          hint: z
+            .string()
+            .describe(
+              `A short story ending that continues a shared setup shown separately in the UI. When the cue word appears, wrap it in ==word== (e.g. ==can==) so it renders highlighted.`,
+            ),
+          explanation: z.string().nullable(),
+        })
+        .strict(),
+    ),
   })
   .strict();
 
@@ -228,16 +226,14 @@ export type MeaningHintPromptInput = z.infer<
 
 const meaningHintOutputSchema = z
   .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            hint: z.string(),
-            explanation: z.string().nullable(),
-          })
-          .strict(),
-      )
-      .min(1),
+    suggestions: z.array(
+      z
+        .object({
+          hint: z.string(),
+          explanation: z.string().nullable(),
+        })
+        .strict(),
+    ),
   })
   .strict();
 
@@ -526,16 +522,14 @@ Generate {{ count }} distinct reusable location descriptions for this exact comb
 }
 buildSubLocationDescriptionPrompt.schema = z
   .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            description: z.string(),
-            explanation: z.string().nullable(),
-          })
-          .strict(),
-      )
-      .min(1),
+    suggestions: z.array(
+      z
+        .object({
+          description: z.string(),
+          explanation: z.string().nullable(),
+        })
+        .strict(),
+    ),
   })
   .strict();
 
@@ -601,15 +595,13 @@ Generate {{ count }} distinct character personality descriptions for this charac
 }
 buildLeadCharacterDescriptionPrompt.schema = z
   .object({
-    suggestions: z
-      .array(
-        z
-          .object({
-            description: z.string(),
-            explanation: z.string().nullable(),
-          })
-          .strict(),
-      )
-      .min(1),
+    suggestions: z.array(
+      z
+        .object({
+          description: z.string(),
+          explanation: z.string().nullable(),
+        })
+        .strict(),
+    ),
   })
   .strict();

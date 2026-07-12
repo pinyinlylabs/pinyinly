@@ -22,19 +22,70 @@ export interface ChatPrompt<Schema extends z.ZodType> {
   schema: Schema;
 }
 
+const unsupportedOpenAiJsonSchemaKeywords = new Set([`maxItems`, `minItems`]);
+
+function formatJsonSchemaPath(path: readonly (number | string)[]): string {
+  let result = `$`;
+
+  for (const part of path) {
+    result +=
+      typeof part === `number`
+        ? `[${part}]`
+        : /^[a-zA-Z_][a-zA-Z0-9_]*$/u.test(part)
+          ? `.${part}`
+          : `[${JSON.stringify(part)}]`;
+  }
+
+  return result;
+}
+
+function assertOpenAiCompatibleJsonSchema(
+  value: unknown,
+  path: readonly (number | string)[] = [],
+): void {
+  if (value == null || typeof value !== `object`) {
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (const [index, item] of value.entries()) {
+      assertOpenAiCompatibleJsonSchema(item, [...path, index]);
+    }
+    return;
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    if (unsupportedOpenAiJsonSchemaKeywords.has(key)) {
+      throw new Error(
+        `OpenAI response format does not support JSON Schema keyword ${JSON.stringify(key)} at ${formatJsonSchemaPath([...path, key])}`,
+      );
+    }
+
+    assertOpenAiCompatibleJsonSchema(child, [...path, key]);
+  }
+}
+
+function zodToOpenAiJsonSchema<Schema extends z.ZodType>(
+  schema: Schema,
+): z.core.JSONSchema.BaseSchema {
+  const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
+  assertOpenAiCompatibleJsonSchema(jsonSchema);
+  return jsonSchema;
+}
+
 export function zodResponseFormatJson<Schema extends z.ZodType>(
   schema: Schema,
 ): OpenAI.Responses.ResponseFormatTextJSONSchemaConfig {
   return {
     type: `json_schema`,
     name: `result_shape`,
-    schema: z.toJSONSchema(schema, { unrepresentable: `any` }),
+    schema: zodToOpenAiJsonSchema(schema),
   };
 }
 
 export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
-  options?: { signal?: AbortSignal; retries?: number },
+  options?: { signal?: AbortSignal; retries?: number; store?: boolean },
 ): Promise<{
   data: z.infer<Schema>;
   usage?: OpenAI.Responses.ResponseUsage;
@@ -51,7 +102,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       format: zodResponseFormatJson(prompt.schema),
     },
     input: prompt.messages,
-    store: true,
+    store: options?.store,
   };
 
   for (let retries = options?.retries ?? 2; ; retries--) {

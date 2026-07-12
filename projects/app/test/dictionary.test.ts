@@ -52,7 +52,6 @@ import {
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
-import { z } from "zod";
 import {
   buildCedictSenseId,
   extractDictionaryPinyinFromCedictSense,
@@ -551,22 +550,6 @@ test(`all word lists only reference valid hanzi words`, async () => {
       );
     }
   }
-});
-
-test(`zod schemas are compatible with OpenAI API`, async () => {
-  function assertCompatible(schema: z.ZodType): void {
-    const jsonSchema = JSON.stringify(
-      z.toJSONSchema(schema, { unrepresentable: `any` }),
-    );
-
-    // `z.array(…).min(…) is not supported by OpenAI API`,
-    expect(jsonSchema).not.toMatch(/"minItems":/gu);
-
-    // `z.array(…).max(…) is not supported by OpenAI API`,
-    expect(jsonSchema).not.toMatch(/"maxItems":/gu);
-  }
-
-  assertCompatible(hanziWordMeaningSchema);
 });
 
 test(`hanzi uses consistent unicode characters`, async () => {
