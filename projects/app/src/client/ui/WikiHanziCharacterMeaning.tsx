@@ -5,7 +5,6 @@ import {
 } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
-import { composeHintText } from "@/client/ui/hintText";
 import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
 import type {
   HanziCharacter as HanziCharacterType,
@@ -29,30 +28,30 @@ import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { AiMeaningHintModal } from "./AiMeaningHintModal";
 import type { MeaningHintComponent } from "./AiMeaningHintModal";
+import { HanziStrokesTile } from "./HanziStrokesTile";
 import { HanziCharacter } from "./HanziCharacter";
 import { HanziDecompositionEditor } from "./HanziDecompositionEditor";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
-import { HanziLink } from "./HanziLink";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
-import { hintFirstLineLength, parseHintText } from "./hintText";
+import {
+  composeHintText,
+  hintFirstLineLength,
+  parseHintText,
+} from "./hintText";
 
-export function WikiHanziCharacterDecomposition({
-  hanzi,
-}: {
-  hanzi: HanziText;
-}) {
+export function WikiHanziCharacterMeaning({ hanzi }: { hanzi: HanziText }) {
   if (!isHanziCharacter(hanzi)) {
     return null;
   }
-  return <WikiHanziCharacterDecompositionBox hanzi={hanzi} />;
+  return <WikiHanziCharacterMeaningBox hanzi={hanzi} />;
 }
 
-interface WikiHanziCharacterDecompositionProps {
+interface WikiHanziCharacterMeaningProps {
   hanzi: HanziCharacterType;
 }
 
@@ -62,9 +61,9 @@ function hasStrokeRanges(
   return components.some((component) => component.strokes.trim().length > 0);
 }
 
-export function WikiHanziCharacterDecompositionBox({
+export function WikiHanziCharacterMeaningBox({
   hanzi,
-}: WikiHanziCharacterDecompositionProps) {
+}: WikiHanziCharacterMeaningProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [sourceCenterX, setSourceCenterX] = useState<number | null>(null);
   const [componentCenterXs, setComponentCenterXs] = useState<readonly number[]>(
@@ -179,38 +178,24 @@ export function WikiHanziCharacterDecompositionBox({
       componentsElements.push({
         key: `component:${i}`,
         element: (
-          <View className="items-start gap-2">
-            <View
-              className="flex-row items-center gap-2"
-              onLayout={({ nativeEvent }) => {
-                const centerX =
-                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
-                setComponentCenterXs((prev) => {
-                  const next = [...prev];
-                  next[componentIndex] = centerX;
-                  return next;
-                });
-              }}
-            >
-              <HanziCharacter
-                className="size-12"
-                highlightColor={hanziCharacterColorSafeSchema.parse(
-                  visualComponent.color,
-                )}
-                strokesData={strokeSvgs}
-                highlightStrokes={parseIndexRanges(visualComponent.strokes)}
-              />
-            </View>
-            <Text className="pyly-body text-left">
-              {visualComponent.hanzi == null ? (
-                label
-              ) : (
-                <HanziLink hanzi={visualComponent.hanzi}>
-                  {visualComponent.hanzi} {label}
-                </HanziLink>
-              )}
-            </Text>
-          </View>
+          <HanziStrokesTile
+            componentHanzi={visualComponent.hanzi ?? null}
+            hanzi={visualComponent.strokes.trim().length > 0 ? hanzi : null}
+            highlightColor={hanziCharacterColorSafeSchema.parse(
+              visualComponent.color,
+            )}
+            highlightStrokeRanges={visualComponent.strokes}
+            label={label}
+            onVisualLayout={(event) => {
+              const centerX =
+                event.nativeEvent.layout.x + event.nativeEvent.layout.width / 2;
+              setComponentCenterXs((prev) => {
+                const next = [...prev];
+                next[componentIndex] = centerX;
+                return next;
+              });
+            }}
+          />
         ),
       });
     }
@@ -227,27 +212,21 @@ export function WikiHanziCharacterDecompositionBox({
       componentsElements.push({
         key: `component:${i}:${hanzi}`,
         element: (
-          <View className="items-start gap-2">
-            <View
-              className={`min-w-12 items-center rounded-xl border border-fg/20 bg-bg-high px-3 py-2`}
-              onLayout={({ nativeEvent }) => {
-                const centerX =
-                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
-                setComponentCenterXs((prev) => {
-                  const next = [...prev];
-                  next[componentIndex] = centerX;
-                  return next;
-                });
-              }}
-            >
-              <Text className="pyly-body text-center text-lg">{hanzi}</Text>
-            </View>
-            <Text className="pyly-body text-left">
-              <HanziLink hanzi={hanzi}>
-                {hanzi} {label}
-              </HanziLink>
-            </Text>
-          </View>
+          <HanziStrokesTile
+            componentHanzi={hanzi}
+            hanzi={null}
+            highlightStrokeRanges=""
+            label={label}
+            onVisualLayout={(event) => {
+              const centerX =
+                event.nativeEvent.layout.x + event.nativeEvent.layout.width / 2;
+              setComponentCenterXs((prev) => {
+                const next = [...prev];
+                next[componentIndex] = centerX;
+                return next;
+              });
+            }}
+          />
         ),
       });
     }
@@ -277,7 +256,7 @@ export function WikiHanziCharacterDecompositionBox({
 
   return (
     <WikiTitledBox
-      title="Recognize the character"
+      title="Recognize the meaning"
       onEditingChange={setIsEditMode}
       bottomCaption={
         componentsElements.length > 0
