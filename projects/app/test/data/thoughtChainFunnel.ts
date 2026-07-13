@@ -47,6 +47,91 @@ export const thoughtChainFunnelSchema = z.object({
 
 export type ThoughtChainFunnelType = z.infer<typeof thoughtChainFunnelSchema>;
 
+export interface ParsedMnemonicConceptType {
+  raw: string;
+  canonicalIdentity: string;
+  contextGlosses: string[];
+}
+
+interface IndexedMnemonicConceptType extends ParsedMnemonicConceptType {
+  conceptIndex: number;
+}
+
+function normalizeMnemonicConceptText(value: string): string {
+  return value.trim().toLocaleLowerCase();
+}
+
+export function parseMnemonicConcept(value: string): ParsedMnemonicConceptType {
+  const expressions = value
+    .split(`;`)
+    .map((expression) => expression.trim())
+    .filter((expression) => expression.length > 0);
+
+  const canonicalIdentity = expressions[0];
+  if (canonicalIdentity == null) {
+    throw new Error(
+      `Invalid mnemonic concept ${JSON.stringify(value)}: expected at least one non-empty expression`,
+    );
+  }
+
+  return {
+    raw: value,
+    canonicalIdentity,
+    contextGlosses: expressions.slice(1),
+  };
+}
+
+export function parseMnemonicConcepts(
+  values: string[],
+): ParsedMnemonicConceptType[] {
+  return values.map((value) => parseMnemonicConcept(value));
+}
+
+function parseIndexedMnemonicConcepts(
+  values: string[],
+): IndexedMnemonicConceptType[] {
+  return values.map((value, conceptIndex) => ({
+    ...parseMnemonicConcept(value),
+    conceptIndex,
+  }));
+}
+
+function isRawSemicolonConcept(concept: ParsedMnemonicConceptType): boolean {
+  return concept.contextGlosses.length > 0;
+}
+
+function containsCanonicalAndContextGloss(
+  thought: string,
+  concept: ParsedMnemonicConceptType,
+): boolean {
+  const normalizedThought = normalizeMnemonicConceptText(thought);
+  const normalizedCanonical = normalizeMnemonicConceptText(
+    concept.canonicalIdentity,
+  );
+
+  if (!normalizedThought.includes(normalizedCanonical)) {
+    return false;
+  }
+
+  return concept.contextGlosses.some((gloss) => {
+    const normalizedGloss = normalizeMnemonicConceptText(gloss);
+    if (!normalizedThought.includes(normalizedGloss)) {
+      return false;
+    }
+
+    const gluePattern = new RegExp(
+      `${normalizedCanonical}\\s*(?:and|&)\\s*${normalizedGloss}|${normalizedGloss}\\s*(?:and|&)\\s*${normalizedCanonical}`,
+      `u`,
+    );
+
+    return (
+      gluePattern.test(normalizedThought) ||
+      normalizedThought === `${normalizedCanonical}/${normalizedGloss}` ||
+      normalizedThought === `${normalizedGloss}/${normalizedCanonical}`
+    );
+  });
+}
+
 /**
  * Render a compact ASCII flow diagram in a git-log-like style.
  *
@@ -55,12 +140,29 @@ export type ThoughtChainFunnelType = z.infer<typeof thoughtChainFunnelSchema>;
 export function renderThoughtChainFunnelAscii(
   thoughtFunnel: ThoughtChainFunnelType,
 ): string {
+  function formatLearnerFacingLabel(value: string): string {
+    try {
+      const parsed = parseMnemonicConcept(value);
+      if (parsed.contextGlosses.length === 0) {
+        return parsed.canonicalIdentity;
+      }
+
+      return `${parsed.canonicalIdentity} [context: ${parsed.contextGlosses.join(`, `)}]`;
+    } catch {
+      return value.trim();
+    }
+  }
+
   function formatStep(
     thought: string,
     elaboration: string | null,
     because: string | null,
   ): string {
-    const step = elaboration == null ? thought : `${thought} (${elaboration})`;
+    const normalizedThought = formatLearnerFacingLabel(thought);
+    const step =
+      elaboration == null
+        ? normalizedThought
+        : `${normalizedThought} (${elaboration})`;
     return because == null ? step : `${step} (${because})`;
   }
 
@@ -414,11 +516,32 @@ function hasFatalGuidedImaginationCriticisms(
 export const buildThoughtChainFunnelPrompt = (
   entry: ThoughtChainFunnelPromptInputType,
 ): ChatPrompt<typeof thoughtChainFunnelPromptOutputSchema> => {
+  const parsedConcepts = parseMnemonicConcepts(entry.concepts);
+
   const systemTemplate = `
 You are given:
 
 - A **target**: the final idea to remember.
 - A list of **concepts**: component ideas that must appear in the final mnemonic.
+
+Each supplied concept is a semicolon-separated string.
+
+The first expression is the canonical mnemonic identity.
+
+Any later expressions are context glosses that clarify intended meaning.
+
+Context glosses are not alternative learner-facing identities.
+
+Always use the first expression as the learner-facing concept label and thought.
+
+Use later expressions only to disambiguate meaning.
+
+Never:
+
+- output the full raw semicolon-separated string as a concept label or thought;
+- replace canonical identity with a context gloss;
+- combine canonical identity and context gloss in one thought label;
+- create separate cues or branches for context glosses.
 
 Your task is to generate one high-quality thought funnel.
 
@@ -452,8 +575,8 @@ Each supporting cue represents one remaining supplied concept.
 
 Each supporting cue must include:
 
-- \`concept\`: the exact supplied concept it represents;
-- \`cueThoughtChain\`: a thought chain beginning with that exact concept;
+- \`concept\`: the exact canonical identity it represents;
+- \`cueThoughtChain\`: a thought chain beginning with that exact canonical identity;
 - \`joinBackboneStepIndex\`: the index of the backbone step it joins.
 
 The final thought of each \`cueThoughtChain\` must exactly match the thought at \`backboneThoughtChain[joinBackboneStepIndex]\`.
@@ -688,9 +811,10 @@ Revise weak transitions.
 Before returning the funnel, verify:
 
 - the \`backboneThoughtChain\` begins with exactly one supplied concept;
+- the \`backboneThoughtChain\` begins with exactly one canonical concept identity;
 - the \`backboneThoughtChain\` ends exactly at the target;
-- each remaining supplied concept appears as exactly one supporting cue;
-- each \`cueThoughtChain\` begins with its exact supplied concept;
+- each remaining canonical concept identity appears as exactly one supporting cue;
+- each \`cueThoughtChain\` begins with its exact canonical concept identity;
 - each \`cueThoughtChain\` ends exactly at its joined backbone thought;
 - every \`joinBackboneStepIndex\` identifies a valid backbone step;
 - every concept makes a semantic or disambiguating contribution;
@@ -719,7 +843,14 @@ Generate a thought funnel for the following input:
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(
+          {
+            ...entry,
+            parsedConcepts,
+          },
+          null,
+          2,
+        ),
       }),
     },
   ];
@@ -982,6 +1113,7 @@ export const thoughtChainFunnelCriticismSchema = z.object({
     `CUE_ROOT_MISMATCH`,
     `INVALID_JOIN_INDEX`,
     `CUE_JOIN_MISMATCH`,
+    `CONCEPT_IDENTITY_MISMATCH`,
     `CONCEPT_REINTERPRETED`,
     `SEMANTIC_ERROR`,
     `REDUNDANT_STEP`,
@@ -1009,9 +1141,331 @@ export type EvaluateThoughtChainFunnelPromptOutputType = z.infer<
   typeof evaluateThoughtChainFunnelPromptOutputSchema
 >;
 
+export const thoughtChainFunnelDeterministicChecksSchema = z.object({
+  passed: z.boolean(),
+  score: z.number().min(0).max(1),
+  criticisms: z.array(thoughtChainFunnelCriticismSchema),
+});
+
+export type ThoughtChainFunnelDeterministicChecksType = z.infer<
+  typeof thoughtChainFunnelDeterministicChecksSchema
+>;
+
+function createThoughtChainFunnelCriticism(
+  criticism: Omit<
+    ThoughtChainFunnelCriticismType,
+    `cueConcept` | `stepIndex`
+  > & {
+    cueConcept?: string | null;
+    stepIndex?: number | null;
+  },
+): ThoughtChainFunnelCriticismType {
+  return {
+    cueConcept: null,
+    stepIndex: null,
+    ...criticism,
+  };
+}
+
+function pushUniqueCriticism(
+  criticisms: ThoughtChainFunnelCriticismType[],
+  criticism: ThoughtChainFunnelCriticismType,
+): void {
+  const exists = criticisms.some(
+    (entry) =>
+      entry.code === criticism.code &&
+      entry.section === criticism.section &&
+      entry.cueConcept === criticism.cueConcept &&
+      entry.stepIndex === criticism.stepIndex &&
+      entry.message === criticism.message,
+  );
+
+  if (!exists) {
+    criticisms.push(criticism);
+  }
+}
+
+function formatContextGlosses(contextGlosses: string[]): string {
+  return contextGlosses.length === 0 ? `<none>` : contextGlosses.join(`, `);
+}
+
+function formatConceptReference(concept: IndexedMnemonicConceptType): string {
+  return `concept[${concept.conceptIndex}] canonical=${JSON.stringify(concept.canonicalIdentity)} raw=${JSON.stringify(concept.raw)}`;
+}
+
+export function runThoughtChainFunnelDeterministicChecks(
+  entry: EvaluateThoughtChainFunnelPromptInputType,
+): ThoughtChainFunnelDeterministicChecksType {
+  const parsedConcepts = parseIndexedMnemonicConcepts(entry.concepts);
+  const canonicalIdentityByNormalized = new Map<
+    string,
+    IndexedMnemonicConceptType
+  >();
+  for (const concept of parsedConcepts) {
+    canonicalIdentityByNormalized.set(
+      normalizeMnemonicConceptText(concept.canonicalIdentity),
+      concept,
+    );
+  }
+
+  const contextGlossToConcepts = new Map<
+    string,
+    IndexedMnemonicConceptType[]
+  >();
+  for (const concept of parsedConcepts) {
+    for (const gloss of concept.contextGlosses) {
+      const normalizedGloss = normalizeMnemonicConceptText(gloss);
+      const existing = contextGlossToConcepts.get(normalizedGloss) ?? [];
+      existing.push(concept);
+      contextGlossToConcepts.set(normalizedGloss, existing);
+    }
+  }
+
+  const criticisms: ThoughtChainFunnelCriticismType[] = [];
+  const rootThought = entry.thoughtFunnel.backboneThoughtChain[0]?.thought;
+  const normalizedRootThought =
+    rootThought == null ? null : normalizeMnemonicConceptText(rootThought);
+
+  if (normalizedRootThought == null) {
+    pushUniqueCriticism(
+      criticisms,
+      createThoughtChainFunnelCriticism({
+        severity: `major`,
+        code: `BACKBONE_ROOT_MISMATCH`,
+        section: `funnel`,
+        message: `Backbone thought chain must include a root concept thought.`,
+      }),
+    );
+  } else if (!canonicalIdentityByNormalized.has(normalizedRootThought)) {
+    const matchedGlossConcepts =
+      contextGlossToConcepts.get(normalizedRootThought) ?? [];
+    const matchedGlossConcept = matchedGlossConcepts[0];
+    pushUniqueCriticism(
+      criticisms,
+      createThoughtChainFunnelCriticism({
+        severity: `major`,
+        code:
+          matchedGlossConcepts.length > 0
+            ? `CONCEPT_IDENTITY_MISMATCH`
+            : `BACKBONE_ROOT_MISMATCH`,
+        section: `backbone`,
+        stepIndex: 0,
+        message:
+          matchedGlossConcept == null
+            ? `Backbone root ${JSON.stringify(rootThought)} is not one of the canonical supplied concepts.`
+            : `Backbone root ${JSON.stringify(rootThought)} uses a context gloss instead of canonical identity from ${formatConceptReference(matchedGlossConcept)}.`,
+      }),
+    );
+  }
+
+  const normalizedCueConcepts = entry.thoughtFunnel.supportingCues.map((cue) =>
+    normalizeMnemonicConceptText(cue.concept),
+  );
+
+  const normalizedRoleConcepts = [
+    ...(normalizedRootThought == null ? [] : [normalizedRootThought]),
+    ...normalizedCueConcepts,
+  ];
+
+  const normalizedExpectedCanonicalConcepts = parsedConcepts.map((concept) =>
+    normalizeMnemonicConceptText(concept.canonicalIdentity),
+  );
+
+  const roleConceptCountByNormalized = new Map<string, number>();
+  for (const concept of normalizedRoleConcepts) {
+    roleConceptCountByNormalized.set(
+      concept,
+      (roleConceptCountByNormalized.get(concept) ?? 0) + 1,
+    );
+  }
+
+  const expectedConceptCountByNormalized = new Map<string, number>();
+  for (const concept of normalizedExpectedCanonicalConcepts) {
+    expectedConceptCountByNormalized.set(
+      concept,
+      (expectedConceptCountByNormalized.get(concept) ?? 0) + 1,
+    );
+  }
+
+  let conceptCoverageMismatch =
+    normalizedRoleConcepts.length !==
+    normalizedExpectedCanonicalConcepts.length;
+  for (const [concept, expectedCount] of expectedConceptCountByNormalized) {
+    if ((roleConceptCountByNormalized.get(concept) ?? 0) !== expectedCount) {
+      conceptCoverageMismatch = true;
+      break;
+    }
+  }
+  if (!conceptCoverageMismatch) {
+    for (const concept of roleConceptCountByNormalized.keys()) {
+      if (!expectedConceptCountByNormalized.has(concept)) {
+        conceptCoverageMismatch = true;
+        break;
+      }
+    }
+  }
+
+  if (conceptCoverageMismatch) {
+    pushUniqueCriticism(
+      criticisms,
+      createThoughtChainFunnelCriticism({
+        severity: `major`,
+        code: `CONCEPT_COVERAGE_MISSING`,
+        section: `funnel`,
+        message: `Expected canonical concept coverage does not match supplied concepts. expected=${JSON.stringify(parsedConcepts.map((concept) => concept.canonicalIdentity))} actual=${JSON.stringify([rootThought, ...entry.thoughtFunnel.supportingCues.map((cue) => cue.concept)])}`,
+      }),
+    );
+  }
+
+  for (const cue of entry.thoughtFunnel.supportingCues) {
+    const normalizedCueConcept = normalizeMnemonicConceptText(cue.concept);
+    const cueConceptRecord =
+      canonicalIdentityByNormalized.get(normalizedCueConcept);
+    const matchingContextGlossConcepts =
+      contextGlossToConcepts.get(normalizedCueConcept) ?? [];
+    const matchingContextGlossConcept = matchingContextGlossConcepts[0];
+
+    if (cueConceptRecord == null) {
+      pushUniqueCriticism(
+        criticisms,
+        createThoughtChainFunnelCriticism({
+          severity: `major`,
+          code:
+            matchingContextGlossConcepts.length > 0
+              ? `CONCEPT_IDENTITY_MISMATCH`
+              : `CONCEPT_COVERAGE_MISSING`,
+          section: `cue`,
+          cueConcept: cue.concept,
+          message:
+            matchingContextGlossConcept == null
+              ? `Cue concept ${JSON.stringify(cue.concept)} is not one of the canonical supplied concepts.`
+              : `Cue concept ${JSON.stringify(cue.concept)} uses a context gloss instead of canonical identity from ${formatConceptReference(matchingContextGlossConcept)}.`,
+        }),
+      );
+    }
+
+    const cueRootThought = cue.cueThoughtChain[0]?.thought;
+    if (
+      cueRootThought == null ||
+      normalizeMnemonicConceptText(cueRootThought) !== normalizedCueConcept
+    ) {
+      pushUniqueCriticism(
+        criticisms,
+        createThoughtChainFunnelCriticism({
+          severity: `major`,
+          code: `CUE_ROOT_MISMATCH`,
+          section: `cue`,
+          cueConcept: cue.concept,
+          stepIndex: 0,
+          message: `Cue root must exactly match cue concept ${JSON.stringify(cue.concept)}.`,
+        }),
+      );
+    }
+  }
+
+  const thoughtsWithLocations: Array<{
+    thought: string;
+    section: `backbone` | `cue`;
+    cueConcept: string | null;
+    stepIndex: number;
+  }> = [];
+  for (const [
+    stepIndex,
+    step,
+  ] of entry.thoughtFunnel.backboneThoughtChain.entries()) {
+    thoughtsWithLocations.push({
+      thought: step.thought,
+      section: `backbone`,
+      cueConcept: null,
+      stepIndex,
+    });
+  }
+  for (const cue of entry.thoughtFunnel.supportingCues) {
+    for (const [stepIndex, step] of cue.cueThoughtChain.entries()) {
+      thoughtsWithLocations.push({
+        thought: step.thought,
+        section: `cue`,
+        cueConcept: cue.concept,
+        stepIndex,
+      });
+    }
+  }
+
+  for (const concept of parsedConcepts) {
+    if (!isRawSemicolonConcept(concept)) {
+      continue;
+    }
+
+    const normalizedRaw = normalizeMnemonicConceptText(concept.raw);
+    const matchedRawLabel =
+      (normalizedRootThought != null &&
+        normalizedRootThought === normalizedRaw) ||
+      normalizedCueConcepts.some((cueConcept) => cueConcept === normalizedRaw);
+    if (matchedRawLabel) {
+      pushUniqueCriticism(
+        criticisms,
+        createThoughtChainFunnelCriticism({
+          severity: `major`,
+          code: `CONCEPT_IDENTITY_MISMATCH`,
+          section: `funnel`,
+          message: `Raw semicolon concept ${JSON.stringify(concept.raw)} must not be used as a learner-facing concept label; use canonical identity ${JSON.stringify(concept.canonicalIdentity)}.`,
+        }),
+      );
+    }
+
+    for (const thoughtWithLocation of thoughtsWithLocations) {
+      const normalizedThought = normalizeMnemonicConceptText(
+        thoughtWithLocation.thought,
+      );
+
+      if (normalizedThought === normalizedRaw) {
+        pushUniqueCriticism(
+          criticisms,
+          createThoughtChainFunnelCriticism({
+            severity: `major`,
+            code: `CONCEPT_IDENTITY_MISMATCH`,
+            section: thoughtWithLocation.section,
+            cueConcept: thoughtWithLocation.cueConcept,
+            stepIndex: thoughtWithLocation.stepIndex,
+            message: `Thought ${JSON.stringify(thoughtWithLocation.thought)} must not use raw semicolon concept ${JSON.stringify(concept.raw)}.`,
+          }),
+        );
+      }
+
+      if (
+        containsCanonicalAndContextGloss(thoughtWithLocation.thought, concept)
+      ) {
+        pushUniqueCriticism(
+          criticisms,
+          createThoughtChainFunnelCriticism({
+            severity: `major`,
+            code: `CONCEPT_IDENTITY_MISMATCH`,
+            section: thoughtWithLocation.section,
+            cueConcept: thoughtWithLocation.cueConcept,
+            stepIndex: thoughtWithLocation.stepIndex,
+            message: `Thought ${JSON.stringify(thoughtWithLocation.thought)} combines canonical identity ${JSON.stringify(concept.canonicalIdentity)} with context glosses (${formatContextGlosses(concept.contextGlosses)}). Use canonical identity alone for learner-facing thoughts.`,
+          }),
+        );
+      }
+    }
+  }
+
+  const majorCriticisms = criticisms.filter(
+    (criticism) => criticism.severity === `major`,
+  ).length;
+
+  return {
+    passed: majorCriticisms === 0,
+    score: majorCriticisms === 0 ? 1 : 0,
+    criticisms,
+  };
+}
+
 export const buildEvaluateThoughtChainFunnelPrompt = (
   entry: EvaluateThoughtChainFunnelPromptInputType,
 ): ChatPrompt<typeof evaluateThoughtChainFunnelPromptOutputSchema> => {
+  const parsedConcepts = parseMnemonicConcepts(entry.concepts);
+
   const systemTemplate = `
 You are evaluating the quality of a thought funnel.
 
@@ -1022,6 +1476,25 @@ You are not rewriting the funnel.
 Your job is to determine whether the funnel would be easy for a learner to understand, mentally rehearse, and later recall.
 
 ## Structural requirements
+
+Each supplied concept is a semicolon-separated string.
+
+The first expression is the canonical mnemonic identity.
+
+Any later expressions are context glosses that clarify intended meaning.
+
+Context glosses are not alternative learner-facing identities.
+
+Always treat the first expression as the learner-facing concept label and thought.
+
+Use later expressions only for disambiguation.
+
+Never output or accept:
+
+- the full raw semicolon-separated string as a learner-facing thought or concept label;
+- a context gloss used in place of canonical identity;
+- a thought that combines canonical identity and context gloss into one label;
+- context glosses as separate supplied concepts or cue branches.
 
 The \`backboneThoughtChain\` must begin with exactly one supplied concept.
 
@@ -1038,6 +1511,8 @@ Each supporting cue has \`joinBackboneStepIndex\`.
 The final thought of each \`cueThoughtChain\` must exactly match \`backboneThoughtChain[joinBackboneStepIndex].thought\`.
 
 If concept coverage is missing or duplicated, use \`CONCEPT_COVERAGE_MISSING\`.
+
+If concept identity violates canonical/context-gloss semantics, use \`CONCEPT_IDENTITY_MISMATCH\`.
 
 If the backbone root is not an exact supplied concept, use \`BACKBONE_ROOT_MISMATCH\`.
 
@@ -1198,7 +1673,14 @@ Evaluate the following thought funnel.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(
+          {
+            ...entry,
+            parsedConcepts,
+          },
+          null,
+          2,
+        ),
       }),
     },
   ];
@@ -1264,6 +1746,8 @@ export type ThoughtChainFunnelRefinementResultType = z.infer<
 export const buildRefineThoughtChainFunnelPrompt = (
   entry: RefineThoughtChainFunnelPromptInputType,
 ): ChatPrompt<typeof refineThoughtChainFunnelPromptOutputSchema> => {
+  const parsedConcepts = parseMnemonicConcepts(entry.concepts);
+
   const systemTemplate = `
 You revise thought funnels based on evaluator criticisms.
 
@@ -1293,6 +1777,22 @@ Do not make large changes merely to satisfy every criticism.
 Prefer the smallest changes that produce the largest improvement.
 
 ## Structural rules
+
+Each supplied concept is a semicolon-separated string.
+
+The first expression is canonical identity.
+
+Any later expressions are context glosses.
+
+Context glosses clarify meaning but are not learner-facing identities.
+
+Always use canonical identities as learner-facing concept labels and first thoughts.
+
+Never use raw semicolon strings as thoughts or cue labels.
+
+Never substitute a context gloss for canonical identity when fixing criticisms.
+
+Never split context glosses into separate cue concepts.
 
 The \`backboneThoughtChain\` must:
 
@@ -1446,7 +1946,14 @@ Revise the following thought funnel based on the criticisms.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(
+          {
+            ...entry,
+            parsedConcepts,
+          },
+          null,
+          2,
+        ),
       }),
     },
   ];
@@ -1480,14 +1987,27 @@ async function evaluateThoughtChainFunnel(
   entry: EvaluateThoughtChainFunnelPromptInputType,
   options: RunThoughtChainFunnelRefinementPipelineOptions,
 ): Promise<EvaluateThoughtChainFunnelPromptOutputType> {
-  const response = await requestOpenAiResponseJson(
-    buildEvaluateThoughtChainFunnelPrompt(entry),
-    {
+  const [response, deterministicChecks] = await Promise.all([
+    requestOpenAiResponseJson(buildEvaluateThoughtChainFunnelPrompt(entry), {
       signal: options.signal,
-    },
-  );
+    }),
+    Promise.resolve(runThoughtChainFunnelDeterministicChecks(entry)),
+  ]);
 
-  return response.data;
+  const modelEvaluation = response.data;
+  const criticisms = [
+    ...modelEvaluation.criticisms,
+    ...deterministicChecks.criticisms,
+  ];
+  const passed = modelEvaluation.passed && deterministicChecks.passed;
+  const score = Math.min(modelEvaluation.score, deterministicChecks.score);
+
+  return {
+    ...modelEvaluation,
+    passed,
+    score,
+    criticisms,
+  };
 }
 
 async function evaluateGuidedImaginationWithModel(

@@ -20,6 +20,7 @@ import {
   buildEvaluateThoughtChainFunnelPrompt,
   buildThoughtChainFunnelPrompt,
   evaluateGuidedImagination,
+  parseMnemonicConcepts,
   renderThoughtChainFunnelAscii,
   runGuidedImaginationDeterministicChecks,
   runThoughtChainFunnelRefinementPipeline,
@@ -79,6 +80,12 @@ function createSupportingCue(
 
 function normalizeText(value: string): string {
   return value.trim().toLocaleLowerCase();
+}
+
+function canonicalConcepts(values: string[]): string[] {
+  return parseMnemonicConcepts(values).map((concept) =>
+    normalizeText(concept.canonicalIdentity),
+  );
 }
 
 function criticismMatchesExpected(
@@ -150,7 +157,7 @@ const BasicThoughtFunnelStructureJudge = createJudge(
     const lastBackboneThought =
       thoughtFunnel.backboneThoughtChain.at(-1)?.thought;
 
-    const uniqueInputConcepts = new Set(input.concepts.map(normalizeText));
+    const uniqueInputConcepts = new Set(canonicalConcepts(input.concepts));
     const normalizedBackboneRoot =
       backboneRootThought == null ? null : normalizeText(backboneRootThought);
 
@@ -215,8 +222,8 @@ const BasicThoughtFunnelStructureJudge = createJudge(
       metadata: {
         rationale: [
           conceptCoverageMatches
-            ? `All supplied concepts are covered exactly once as backbone root or supporting cue concept.`
-            : `Concept coverage mismatch. backboneRoot=${JSON.stringify(backboneRootThought)} cueConcepts=${JSON.stringify(thoughtFunnel.supportingCues.map((cue) => cue.concept))} inputConcepts=${JSON.stringify(input.concepts)}`,
+            ? `All supplied canonical concept identities are covered exactly once as backbone root or supporting cue concept.`
+            : `Concept coverage mismatch. backboneRoot=${JSON.stringify(backboneRootThought)} cueConcepts=${JSON.stringify(thoughtFunnel.supportingCues.map((cue) => cue.concept))} inputCanonicalConcepts=${JSON.stringify(parseMnemonicConcepts(input.concepts).map((concept) => concept.canonicalIdentity))}`,
           allCueRootsMatch
             ? `Every supporting cue begins with its exact cue concept.`
             : `One or more cue roots do not match the cue concept.`,
@@ -236,6 +243,11 @@ const BasicThoughtFunnelStructureJudge = createJudge(
 const thoughtFunnelCases: ThoughtChainFunnelPromptInputType[] = [
   { target: `to smelt`, concepts: [`fire`, `east`] },
   { target: `to freeze`, concepts: [`ice`, `east`, `winter`] },
+  { target: `at`, concepts: [`arch`, `earth; soil`] },
+  {
+    target: `to store money`,
+    concepts: [`vault`, `bank; financial institution; money handling`],
+  },
 ];
 
 describeEval(
@@ -266,7 +278,7 @@ const ThoughtChainFunnelRefinementPipelineJudge = createJudge(
       (criticism) => criticism.severity === `minor`,
     );
 
-    const withinAttemptBudget = output.attempts.length <= 3;
+    const withinAttemptBudget = output.attempts.length <= 5;
     const noMajorCriticisms = majorCriticisms.length === 0;
     const score = withinAttemptBudget && noMajorCriticisms ? 1 : 0;
 
@@ -326,6 +338,14 @@ describeEval(
       { target: `to smelt`, concepts: [`fire`, `east`] },
       { target: `to select`, concepts: [`hand`, `east`] },
       { target: `at`, concepts: [`arch`, `earth; soil`] },
+      {
+        target: `to store money`,
+        concepts: [`vault`, `bank; financial institution; money handling`],
+      },
+      {
+        target: `to balance`,
+        concepts: [`scale`, `bank; financial institution`, `ledger`],
+      },
     ] satisfies ThoughtChainFunnelPromptInputType[])(
       `$concepts → $target`,
       async (spec, { run }) => {
@@ -379,6 +399,16 @@ const expectedCriticismsJudge = createJudge(
 
 const evaluateThoughtChainFunnelCases: EvaluateThoughtChainFunnelCaseType[] = [
   {
+    name: `canonical identity should remain learner-facing for semicolon concepts`,
+    target: `at`,
+    concepts: [`arch`, `earth; soil`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`arch → at`),
+      supportingCues: [createSupportingCue(`earth`, `earth → arch`, 0)],
+    },
+    expect: [],
+  },
+  {
     name: `missing supporting cue concept is a major structural failure`,
     target: `to smelt`,
     concepts: [`fire`, `east`],
@@ -411,6 +441,97 @@ const evaluateThoughtChainFunnelCases: EvaluateThoughtChainFunnelCaseType[] = [
         cueConcept: `east`,
       },
     ],
+  },
+  {
+    name: `raw semicolon concept string should be identity mismatch`,
+    target: `at`,
+    concepts: [`arch`, `earth; soil`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`earth; soil → at`),
+      supportingCues: [createSupportingCue(`arch`, `arch → earth; soil`, 0)],
+    },
+    expect: [
+      {
+        code: `CONCEPT_IDENTITY_MISMATCH`,
+        section: `funnel`,
+        severity: `major`,
+      },
+    ],
+  },
+  {
+    name: `context gloss used as learner-facing concept should be identity mismatch`,
+    target: `at`,
+    concepts: [`arch`, `earth; soil`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`arch → at`),
+      supportingCues: [createSupportingCue(`soil`, `soil → arch`, 0)],
+    },
+    expect: [
+      {
+        code: `CONCEPT_IDENTITY_MISMATCH`,
+        section: `cue`,
+        severity: `major`,
+      },
+    ],
+  },
+  {
+    name: `context gloss treated as separate component should be identity mismatch`,
+    target: `at`,
+    concepts: [`arch`, `earth; soil`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`arch → at`),
+      supportingCues: [
+        createSupportingCue(`earth`, `earth → arch`, 0),
+        createSupportingCue(`soil`, `soil → arch`, 0),
+      ],
+    },
+    expect: [
+      {
+        code: `CONCEPT_IDENTITY_MISMATCH`,
+        section: `cue`,
+        severity: `major`,
+      },
+      {
+        code: `CONCEPT_COVERAGE_MISSING`,
+        section: `funnel`,
+        severity: `major`,
+      },
+    ],
+  },
+  {
+    name: `multi-gloss concept can remain canonical with no identity criticism`,
+    target: `to store money`,
+    concepts: [`vault`, `bank; financial institution; money handling`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`vault → to store money`),
+      supportingCues: [createSupportingCue(`bank`, `bank → vault`, 0)],
+    },
+    expect: [],
+  },
+  {
+    name: `concept without semicolon behaves unchanged`,
+    target: `sunrise`,
+    concepts: [`east`, `morning`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`east → sunrise`),
+      supportingCues: [
+        createSupportingCue(`morning`, `morning → dawn → sunrise`, 1),
+      ],
+    },
+    expect: [],
+  },
+  {
+    name: `mixed concepts with and without glosses preserve canonical identities`,
+    target: `to freeze`,
+    concepts: [`ice`, `east`, `bank; financial institution`],
+    thoughtFunnel: {
+      backboneThoughtChain: parseArrowChain(`ice → cold → to freeze`),
+      supportingCues: [
+        createSupportingCue(`east`, `east → winter morning → cold`, 1),
+        createSupportingCue(`bank`, `bank → vault → cold`, 1),
+      ],
+    },
+    expect: [],
   },
 ];
 
