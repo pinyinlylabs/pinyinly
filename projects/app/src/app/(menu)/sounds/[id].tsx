@@ -39,12 +39,11 @@ import {
 } from "@/data/userSettings";
 import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SoundIdPage() {
-  "use memo";
   const { id: rawId, tone: rawTone } = useLocalSearchParams<
     `/sounds/[id]` & { tone?: string }
   >();
@@ -53,9 +52,6 @@ export default function SoundIdPage() {
   const chart = loadPylyPinyinChart();
   const isFinalSound = isFinalSoundId(id);
 
-  const scrollRef = useRef<ScrollView>(null);
-  const hasScrolledRef = useRef(false);
-  const [toneAnchorY, setToneAnchorY] = useState<number | null>(null);
   const [isEditSoundNameModalOpen, setIsEditSoundNameModalOpen] =
     useState(false);
 
@@ -79,106 +75,86 @@ export default function SoundIdPage() {
   const tone4AudioSource = isFinalSound ? null : null;
   const tone5AudioSource = isFinalSound ? null : null;
 
-  useEffect(() => {
-    if (focusedTone == null || toneAnchorY == null || hasScrolledRef.current) {
-      return;
-    }
-
-    scrollRef.current?.scrollTo({
-      y: Math.max(0, toneAnchorY - 24),
-      animated: true,
-    });
-    hasScrolledRef.current = true;
-  }, [focusedTone, toneAnchorY]);
-
   return (
-    <ScrollView ref={scrollRef}>
-      <View className="w-full self-center pb-2 px-safe pt-safe">
-        <Breadcrumb pinyinSoundId={id} />
+    <View className="w-full self-center pb-2 px-safe pt-safe">
+      <Breadcrumb pinyinSoundId={id} />
 
-        <HeaderTitleProvider.ScrollTrigger title={label} />
+      <HeaderTitleProvider.ScrollTrigger title={label} />
 
-        <View className="my-5 flex-row items-center gap-4">
-          <View className={pinyinPartBox()}>
-            <Text className="text-center font-cursive text-2xl text-fg">
-              {label}
-            </Text>
-            {soundAudioSource == null ? null : (
-              <RectButton
-                variant="bare"
-                iconStart="speaker-2"
-                onPressIn={playSound}
-              />
-            )}
-          </View>
-          <InlineEditableSettingText
-            variant="title"
-            setting={pinyinSoundNameSetting}
-            settingKey={{ soundId: id }}
-            placeholder="Name this sound"
-          />
-
-          <RectButton
-            onPress={() => {
-              setIsEditSoundNameModalOpen(true);
-            }}
-            variant="bare"
-            iconStart="pencil"
-          />
-        </View>
-
-        {examplePinyins.length === 0 ? null : (
-          <View className="my-5 flex-row items-center gap-4">
-            <Text className="pyly-body text-fg-dim">
-              Example pinyin: {examplePinyins.join(`, `)}
-            </Text>
-          </View>
-        )}
-
-        <View className="gap-10">
-          <WikiTitledBox title="Pronunciation">
-            <View className="gap-4 p-4">
-              <Text className="pyly-body">
-                <Pylymark source={defaultPinyinSoundInstructions[id] ?? ``} />
-              </Text>
-            </View>
-          </WikiTitledBox>
-
-          <MnemonicStoryRoleSection pinyinSoundId={id} />
-
-          {/* Final-tone details editor for finals */}
-          {isFinalSound && (
-            <PinyinFinalToneEditor
-              finalSoundId={id}
-              focusedTone={focusedTone}
-              onToneLayout={(tone, layoutY) => {
-                if (tone !== focusedTone) {
-                  return;
-                }
-                setToneAnchorY(layoutY);
-              }}
-              toneAudioSourceByTone={{
-                1: tone1AudioSource,
-                2: tone2AudioSource,
-                3: tone3AudioSource,
-                4: tone4AudioSource,
-                5: tone5AudioSource,
-              }}
+      <View className="my-5 flex-row items-center gap-4">
+        <View className={pinyinPartBox()}>
+          <Text className="text-center font-cursive text-2xl text-fg">
+            {label}
+          </Text>
+          {soundAudioSource == null ? null : (
+            <RectButton
+              variant="bare"
+              iconStart="speaker-2"
+              onPressIn={playSound}
             />
           )}
         </View>
+        <InlineEditableSettingText
+          variant="title"
+          setting={pinyinSoundNameSetting}
+          settingKey={{ soundId: id }}
+          placeholder="Name this sound"
+        />
 
-        <SoundUsageExamplesSection pinyinSoundId={id} />
-
-        <SoundNameEditModal
-          soundId={id}
-          isOpen={isEditSoundNameModalOpen}
-          onClose={() => {
-            setIsEditSoundNameModalOpen(false);
+        <RectButton
+          onPress={() => {
+            setIsEditSoundNameModalOpen(true);
           }}
+          variant="bare"
+          iconStart="pencil"
         />
       </View>
-    </ScrollView>
+
+      {examplePinyins.length === 0 ? null : (
+        <View className="my-5 flex-row items-center gap-4">
+          <Text className="pyly-body text-fg-dim">
+            Example pinyin: {examplePinyins.join(`, `)}
+          </Text>
+        </View>
+      )}
+
+      <View className="gap-10">
+        <WikiTitledBox title="Pronunciation">
+          <View className="gap-4 p-4">
+            <Text className="pyly-body">
+              <Pylymark source={defaultPinyinSoundInstructions[id] ?? ``} />
+            </Text>
+          </View>
+        </WikiTitledBox>
+
+        <MnemonicStoryRoleSection pinyinSoundId={id} />
+
+        {/* Final-tone details editor for finals */}
+        {isFinalSound && (
+          <PinyinFinalToneEditor
+            finalSoundId={id}
+            focusedTone={focusedTone}
+            toneAudioSourceByTone={{
+              1: tone1AudioSource,
+              2: tone2AudioSource,
+              3: tone3AudioSource,
+              4: tone4AudioSource,
+              5: tone5AudioSource,
+            }}
+          />
+        )}
+      </View>
+
+      <SoundUsageExamplesSection pinyinSoundId={id} />
+
+      <SoundNameEditModal
+        soundId={id}
+        isOpen={isEditSoundNameModalOpen}
+        onClose={() => {
+          setIsEditSoundNameModalOpen(false);
+        }}
+      />
+    </View>
   );
 }
 
