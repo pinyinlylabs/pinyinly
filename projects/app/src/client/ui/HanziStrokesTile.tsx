@@ -16,7 +16,6 @@ export function HanziStrokesTile({
   label,
   highlightStrokeRanges,
   highlightColor,
-  centerLabel = false,
   labelNumberOfLines,
   fillWidth = false,
   onVisualLayout,
@@ -26,13 +25,14 @@ export function HanziStrokesTile({
   label: string | null;
   highlightStrokeRanges: string;
   highlightColor?: HanziCharacterColor;
-  centerLabel?: boolean;
   labelNumberOfLines?: number;
   fillWidth?: boolean;
   onVisualLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const { data: strokesData } = useQuery(hanziSvgPathsQuery(hanzi));
   const hasHighlightedStrokes = highlightStrokeRanges.trim().length > 0;
+  const normalizedLabel = label?.trim() ?? ``;
+  const hasNameLabel = normalizedLabel.length > 0;
 
   return (
     <View
@@ -54,9 +54,7 @@ export function HanziStrokesTile({
       </View>
 
       <Text
-        className={
-          centerLabel ? `pyly-body w-full text-center` : `pyly-body text-left`
-        }
+        className="pyly-body w-full text-center"
         ellipsizeMode={labelNumberOfLines == null ? undefined : `tail`}
         numberOfLines={labelNumberOfLines}
       >
@@ -64,8 +62,7 @@ export function HanziStrokesTile({
           label
         ) : (
           <HanziLink hanzi={componentHanzi}>
-            {componentHanzi}
-            {label == null || label.trim().length === 0 ? `` : ` ${label}`}
+            {hasNameLabel ? normalizedLabel : componentHanzi}
           </HanziLink>
         )}
       </Text>

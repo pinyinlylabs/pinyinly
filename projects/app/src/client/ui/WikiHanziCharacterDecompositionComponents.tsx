@@ -418,7 +418,6 @@ function DecompositionTileLeaf({
         }}
       >
         <HanziStrokesTile
-          centerLabel
           componentHanzi={componentHanzi}
           fillWidth
           hanzi={highlightStrokeRanges.trim().length > 0 ? originalHanzi : null}
