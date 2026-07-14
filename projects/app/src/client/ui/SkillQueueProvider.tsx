@@ -1,7 +1,6 @@
 import {
   dictionaryQuery,
   getPrioritizedHanziWords,
-  isStructuralHanziQuery,
   targetSkillsQuery,
 } from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
@@ -41,8 +40,6 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
 
   const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
     useQuery(targetSkillsQuery());
-  const { data: isStructuralHanzi, isLoading: isStructuralHanziLoading } =
-    useQuery(isStructuralHanziQuery);
   const { data: dictionary, isLoading: isDictionaryLoading } =
     useQuery(dictionaryQuery);
   const {
@@ -117,18 +114,13 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       isSkillStatesLoading ||
       isTargetSkillsLoading ||
       isPrioritySettingsLoading ||
-      isStructuralHanziLoading ||
       isDictionaryLoading ||
       isCharacterDecompositionLoading
     ) {
       return;
     }
 
-    if (
-      allTargetSkills.length === 0 ||
-      isStructuralHanzi == null ||
-      dictionary == null
-    ) {
+    if (allTargetSkills.length === 0 || dictionary == null) {
       return;
     }
 
@@ -145,7 +137,6 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
         skillSrsStates,
         latestSkillRatings,
         now: new Date(),
-        isStructuralHanzi,
         dictionary,
         maxQueueItems: mockable.getMaxQueueItems(),
       });
@@ -161,11 +152,9 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     isSkillStatesLoading,
     isTargetSkillsLoading,
     isPrioritySettingsLoading,
-    isStructuralHanziLoading,
     isDictionaryLoading,
     isCharacterDecompositionLoading,
     allTargetSkills,
-    isStructuralHanzi,
     dictionary,
     skillSrsStates,
     latestSkillRatings,

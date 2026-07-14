@@ -22,7 +22,7 @@ import {
   buildHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
-  loadCharacters,
+  loadCharactersJson,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "#dictionary.ts";
@@ -81,7 +81,7 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-const charactersData = await loadCharacters();
+const charactersJson = await loadCharactersJson();
 const fsDbCache = makeFsDbCache(
   import.meta.filename,
   `openai_chat_cache`,
@@ -101,7 +101,7 @@ function decomp(char: HanziCharacter) {
   }
 
   allWords.add(char);
-  const ids = charactersData.get(char)?.decomposition;
+  const ids = charactersJson.get(char)?.decomposition;
   if (ids != null) {
     const idsNode = parseIds(ids) as IdsNode<HanziCharacter>;
     for (const leaf of walkIdsNodeLeafs(idsNode)) {

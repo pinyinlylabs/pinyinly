@@ -37,6 +37,7 @@ import {
   buildHanziWord,
   getIsStructuralHanzi,
   hanziFromHanziWord,
+  loadCharactersJson,
   loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
   meaningKeyFromHanziWord,
@@ -585,6 +586,7 @@ export interface DictionarySearchEntry {
   hskFirstAppearance?: HskLevel;
   note?: string;
   hanziCharacterCount: number;
+  isStructural?: boolean;
 }
 
 export type BuiltInDictionarySearchCollection = Collection<
@@ -851,8 +853,18 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
   return staticCollectionOptions<DictionarySearchEntry, string>({
     id: `builtInDictionarySearch`,
     queryFn: async () => {
-      const dictionary = await loadDictionary();
+      const [dictionary, charactersJson] = await Promise.all([
+        loadDictionary(),
+        loadCharactersJson(),
+      ]);
       const entries: DictionarySearchEntry[] = [];
+      const structuralHanzi = new Set<HanziText>();
+
+      for (const [hanzi, data] of charactersJson) {
+        if (data.isStructural != null) {
+          structuralHanzi.add(hanzi);
+        }
+      }
 
       // Build a map of each character to the minimum HSK level it appears in
       // across all words (including multi-character words it's part of).
@@ -905,6 +917,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
           hskFirstAppearance,
           hanziCharacterCount,
+          isStructural: hanziCharacterCount === 1 && structuralHanzi.has(hanzi),
         });
       }
 

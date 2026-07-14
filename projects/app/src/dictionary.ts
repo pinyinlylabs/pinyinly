@@ -152,7 +152,7 @@ export const charactersSchema = z.array(
 export type CharactersKey = z.infer<typeof charactersSchema.element>[0];
 export type CharactersValue = z.infer<typeof charactersSchema.element>[1];
 
-export const loadCharacters = memoize0(async function loadCharacters() {
+export const loadCharactersJson = memoize0(async function loadCharactersJson() {
   return charactersSchema
     .transform((x) => new Map(x))
     .transform(deepReadonly)
@@ -217,10 +217,10 @@ export interface CharacterDecompositionEntry {
 
 export const loadBuiltinCharacterDecompositionEntries = memoize0(
   async function loadBuiltinCharacterDecompositionEntries() {
-    const characters = await loadCharacters();
+    const charactersJson = await loadCharactersJson();
     const entries: CharacterDecompositionEntry[] = [];
 
-    for (const [hanzi, data] of characters.entries()) {
+    for (const [hanzi, data] of charactersJson.entries()) {
       if (data.decomposition == null) {
         continue;
       }
@@ -262,15 +262,15 @@ export interface CharacterComponentUsageEntry {
 export async function buildCharacterComponentUsageEntries(
   decompositionData: readonly CharacterDecompositionEntry[],
 ): Promise<readonly CharacterComponentUsageEntry[]> {
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
 
   const canonicalizeCharacter = (character: HanziCharacter) => {
     let canonical = character;
-    let characterData = characters.get(canonical);
+    let characterData = charactersJson.get(canonical);
 
     while (characterData?.canonicalForm != null) {
       canonical = characterData.canonicalForm;
-      characterData = characters.get(canonical);
+      characterData = charactersJson.get(canonical);
     }
 
     return canonical;
@@ -473,6 +473,7 @@ export interface Dictionary {
   lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
   lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
   lookupPinyinUnit(pinyinUnit: PinyinUnit): readonly HanziCharacter[];
+  isStructuralHanzi(hanzi: HanziText): boolean;
   allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
   allHanziWords: readonly HanziWord[];
   hsk1HanziWords: readonly HanziWord[];
@@ -492,7 +493,10 @@ export const loadDictionary = memoize0(
   async (): Promise<Readonly<Dictionary>> => {
     const hanziMap = new Map<string, HanziWordWithMeaning[]>();
     const glossMap = new Map<string, HanziWordWithMeaning[]>();
-    const dictionaryJson = await loadDictionaryJson();
+    const [dictionaryJson, charactersJson] = await Promise.all([
+      loadDictionaryJson(),
+      loadCharactersJson(),
+    ]);
     const hsk1HanziWords: HanziWord[] = [];
     const hsk2HanziWords: HanziWord[] = [];
     const hsk3HanziWords: HanziWord[] = [];
@@ -500,6 +504,13 @@ export const loadDictionary = memoize0(
     const hsk5HanziWords: HanziWord[] = [];
     const hsk6HanziWords: HanziWord[] = [];
     const hsk7To9HanziWords: HanziWord[] = [];
+    const structuralHanzi = new Set<HanziText>();
+
+    for (const [character, data] of charactersJson.entries()) {
+      if (data.isStructural != null) {
+        structuralHanzi.add(character);
+      }
+    }
 
     for (const item of dictionaryJson) {
       const [hanziWord, meaning] = item;
@@ -598,6 +609,9 @@ export const loadDictionary = memoize0(
 
         return pinyinUnitToHanziMap.get(pinyinUnit) ?? emptyArray;
       },
+      isStructuralHanzi(hanzi: HanziText) {
+        return structuralHanzi.has(hanzi);
+      },
       allEntries: [...dictionaryJson.entries()],
       allHanziWords: [...dictionaryJson.keys()],
       hsk1HanziWords,
@@ -615,9 +629,9 @@ export const lookupRadicalsByStrokes = async (strokes: number) =>
   loadKangXiRadicalsStrokes().then((x) => x.get(strokes) ?? null);
 
 export const allHanziCharacters = memoize0(async function allHanziCharacters() {
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
 
-  return new Set([...characters].map(([char]) => char));
+  return new Set( [...charactersJson].map(([char]) => char));
 });
 
 export function hanziTextFromHanziCharacter(
@@ -781,11 +795,11 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
 );
 
 export const getIsStructuralHanzi = memoize0(async () => {
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
 
   const structuralHanzi = new Set<HanziText>();
 
-  for (const [character, data] of characters.entries()) {
+  for (const [character, data] of charactersJson.entries()) {
     if (data.isStructural != null) {
       structuralHanzi.add(character);
     }
@@ -797,10 +811,10 @@ export const getIsStructuralHanzi = memoize0(async () => {
 });
 
 export const getIsComponentFormHanzi = memoize0(async () => {
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
   const componentFormHanzi = new Set<HanziText>();
 
-  for (const [character, data] of characters.entries()) {
+  for (const [character, data] of charactersJson.entries()) {
     if (data.componentFormOf != null) {
       componentFormHanzi.add(character);
     }
