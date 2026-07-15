@@ -32,30 +32,57 @@ export function InitialSoundTile({
     >
       <View
         className={`
-          relative z-10 -mb-0.5 size-28 overflow-hidden rounded-full border border-transparent
-          bg-bg-high shadow transition-colors duration-150
+          relative z-10 mb-5 size-28 transition-colors duration-150
 
           group-hover:border-fg/10
         `}
       >
-        {image == null ? null : (
-          <FramedAssetImage
-            assetId={image.assetId}
-            crop={image.crop}
-            imageWidth={image.imageWidth}
-            imageHeight={image.imageHeight}
-            frameShape="circle"
-            className="size-full"
-          />
-        )}
+        <View
+          className={`
+            size-full overflow-hidden rounded-full border border-transparent bg-bg-high shadow
+            transition-colors duration-150
+
+            group-hover:border-fg/10
+          `}
+        >
+          {image == null ? null : (
+            <FramedAssetImage
+              assetId={image.assetId}
+              crop={image.crop}
+              imageWidth={image.imageWidth}
+              imageHeight={image.imageHeight}
+              frameShape="circle"
+              className="size-full"
+              imageClassName={`
+                transition-all duration-150 saturate-0
+
+                group-hover:saturate-100
+              `}
+            />
+          )}
+        </View>
+
+        <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
+          <View
+            className={`
+              min-h-8 min-w-8 items-center justify-center rounded-full border border-fg/10
+              bg-fg-loud px-2.5 shadow transition-all duration-150
+
+              group-hover:brightness-110
+            `}
+          >
+            <Text className="font-sans text-sm/none font-semibold text-bg">
+              {label}
+            </Text>
+          </View>
+        </View>
       </View>
 
       <View
         className={`
-          relative z-0 max-w-full flex-row items-center gap-2 rounded-xl bg-bg-high px-3 py-2
-          transition-all duration-150
+          relative z-0 max-w-full rounded-xl px-3 py-2 transition-all duration-150
 
-          group-hover:brightness-105
+          group-hover:bg-bg-high/60
         `}
       >
         <Text
@@ -67,8 +94,6 @@ export function InitialSoundTile({
         >
           {name ?? `_____`}
         </Text>
-
-        <Text className="font-sans text-sm/none text-fg-dim">{label}</Text>
       </View>
     </View>
   );

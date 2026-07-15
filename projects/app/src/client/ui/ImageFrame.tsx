@@ -12,6 +12,7 @@ interface FramedAssetImageProps {
   imageHeight?: number | null;
   frameShape?: ImageFrameShape;
   className?: string;
+  imageClassName?: string;
 }
 
 export function FramedAssetImage({
@@ -21,6 +22,7 @@ export function FramedAssetImage({
   imageHeight,
   frameShape = `rect`,
   className,
+  imageClassName,
 }: FramedAssetImageProps) {
   const [frameSize, setFrameSize] = useState<{
     width: number;
@@ -38,7 +40,11 @@ export function FramedAssetImage({
   if (!hasCropData || rect == null) {
     return (
       <View className={wrapperClassName}>
-        <AssetImage assetId={assetId} className="size-full" />
+        <AssetImage
+          assetId={assetId}
+          className="size-full"
+          imageClassName={imageClassName}
+        />
       </View>
     );
   }
@@ -55,7 +61,11 @@ export function FramedAssetImage({
       }}
     >
       {frameSize == null ? (
-        <AssetImage assetId={assetId} className="size-full" />
+        <AssetImage
+          assetId={assetId}
+          className="size-full"
+          imageClassName={imageClassName}
+        />
       ) : (
         (() => {
           const rectWidthPx = rect.width * imageWidth;
@@ -78,6 +88,7 @@ export function FramedAssetImage({
           return (
             <AssetImage
               assetId={assetId}
+              imageClassName={imageClassName}
               className={`absolute left-0 top-0`}
               contentFit={`fill`}
               style={{
