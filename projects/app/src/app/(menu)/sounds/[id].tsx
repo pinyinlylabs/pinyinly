@@ -15,6 +15,7 @@ import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
+import { TextInputMulti } from "@/client/ui/TextInputMulti";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
@@ -34,6 +35,8 @@ import {
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundImageSetting,
+  pinyinSoundMnemonicIdentitySetting,
+  pinyinSoundModelSheetImageSetting,
   pinyinSoundNameArticleSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
@@ -165,6 +168,10 @@ function MnemonicStoryRoleSection({
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
+  const [mnemonicIdentityDraft, setMnemonicIdentityDraft] = useState(``);
+  const [mnemonicIdentityError, setMnemonicIdentityError] = useState<
+    string | null
+  >(null);
   const isFinalSound = isFinalSoundId(pinyinSoundId);
   const chart = loadPylyPinyinChart();
   const soundLabel = getPinyinSoundLabel(pinyinSoundId, chart);
@@ -176,20 +183,70 @@ function MnemonicStoryRoleSection({
     setting: pinyinSoundImageSetting,
     key: { soundId: pinyinSoundId },
   });
+  const mnemonicIdentitySetting = useUserSetting({
+    setting: pinyinSoundMnemonicIdentitySetting,
+    key: { soundId: pinyinSoundId },
+  });
+  const modelSheetImageSetting = useUserSetting({
+    setting: pinyinSoundModelSheetImageSetting,
+    key: { soundId: pinyinSoundId },
+  });
   const characterNameSetting = useUserSetting({
     setting: pinyinSoundNameSetting,
     key: { soundId: pinyinSoundId },
   });
   const characterName = characterNameSetting.value?.text ?? soundLabel;
+  const hasMnemonicIdentity = hasIdentityContent(
+    mnemonicIdentitySetting.value?.mnemonicIdentity,
+  );
+
+  const handleEditingChange = (editing: boolean) => {
+    setIsEditMode(editing);
+    setMnemonicIdentityError(null);
+    if (editing) {
+      setMnemonicIdentityDraft(
+        formatIdentityJson(mnemonicIdentitySetting.value?.mnemonicIdentity),
+      );
+    }
+  };
+
+  const saveMnemonicIdentityDraft = () => {
+    const trimmed = mnemonicIdentityDraft.trim();
+    if (trimmed.length === 0) {
+      mnemonicIdentitySetting.setValue(null);
+      setMnemonicIdentityError(null);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(trimmed) as unknown;
+      mnemonicIdentitySetting.setValue({
+        soundId: pinyinSoundId,
+        mnemonicIdentity: parsed,
+      });
+      setMnemonicIdentityDraft(formatIdentityJson(parsed));
+      setMnemonicIdentityError(null);
+    } catch {
+      setMnemonicIdentityError(`Invalid JSON. Fix formatting before saving.`);
+    }
+  };
+
   const hasMnemonicContent =
     (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
-    mnemonicImageSetting.value?.imageId != null;
+    mnemonicImageSetting.value?.imageId != null ||
+    modelSheetImageSetting.value?.imageId != null ||
+    hasMnemonicIdentity;
 
   return (
-    <WikiTitledBox title="Mnemonic story role" onEditingChange={setIsEditMode}>
+    <WikiTitledBox
+      title="Mnemonic story role"
+      onEditingChange={handleEditingChange}
+    >
       <View className="gap-4 p-4">
         {!isEditMode && !hasMnemonicContent ? (
-          <Text className="pyly-body text-fg-dim">No description or image</Text>
+          <Text className="pyly-body text-fg-dim">
+            No description, identity, or images
+          </Text>
         ) : (
           <>
             <View className="gap-2">
@@ -223,16 +280,97 @@ function MnemonicStoryRoleSection({
                 </View>
               ) : null}
             </View>
-            <InlineEditableSettingImage
-              setting={pinyinSoundImageSetting}
-              settingKey={{ soundId: pinyinSoundId }}
-              readonly={!isEditMode}
-              enableAiGeneration
-              previewHeight={200}
-              tileSize={64}
-              frameShape={isInitialSoundId(pinyinSoundId) ? `circle` : `rect`}
-              aspectRatio={isInitialSoundId(pinyinSoundId) ? `1:1` : `16:9`}
-            />
+            <View className="gap-2">
+              <Text className="pyly-body-caption text-fg-dim">
+                Avatar image
+              </Text>
+              <InlineEditableSettingImage
+                setting={pinyinSoundImageSetting}
+                settingKey={{ soundId: pinyinSoundId }}
+                readonly={!isEditMode}
+                enableAiGeneration
+                previewHeight={200}
+                tileSize={64}
+                frameShape={isInitialSoundId(pinyinSoundId) ? `circle` : `rect`}
+                aspectRatio={isInitialSoundId(pinyinSoundId) ? `1:1` : `16:9`}
+              />
+            </View>
+            <View className="gap-2">
+              <Text className="pyly-body-caption text-fg-dim">
+                Model sheet image
+              </Text>
+              <InlineEditableSettingImage
+                setting={pinyinSoundModelSheetImageSetting}
+                settingKey={{ soundId: pinyinSoundId }}
+                readonly={!isEditMode}
+                previewHeight={220}
+                tileSize={64}
+                enableAiGeneration
+                frameShape="rect"
+                aspectRatio="16:9"
+              />
+            </View>
+            <View className="gap-2 rounded-lg border border-fg/10 bg-bg-high p-3">
+              <Text className="pyly-body-caption text-fg-dim">
+                Mnemonic identity (JSON)
+              </Text>
+              {isEditMode ? (
+                <>
+                  <TextInputMulti
+                    variant="bare"
+                    placeholder='{"traits": ["curious"]}'
+                    autoResizeMinHeight={100}
+                    value={mnemonicIdentityDraft}
+                    onChangeText={(value) => {
+                      setMnemonicIdentityDraft(value);
+                      if (mnemonicIdentityError != null) {
+                        setMnemonicIdentityError(null);
+                      }
+                    }}
+                    className={`
+                      min-h-24 rounded-md border border-fg/15 bg-bg px-3 py-2 font-mono text-[12px]
+                    `}
+                  />
+                  <View className="flex-row flex-wrap gap-2">
+                    <RectButton
+                      variant="option"
+                      onPress={saveMnemonicIdentityDraft}
+                    >
+                      Save mnemonic identity JSON
+                    </RectButton>
+                    <RectButton
+                      variant="bareDim"
+                      onPress={() => {
+                        setMnemonicIdentityDraft(``);
+                        mnemonicIdentitySetting.setValue(null);
+                        setMnemonicIdentityError(null);
+                      }}
+                    >
+                      Clear identity
+                    </RectButton>
+                  </View>
+                  {mnemonicIdentityError == null ? (
+                    <Text className="pyly-body-caption text-fg-dim">
+                      Stored as JSON for future prompt generation.
+                    </Text>
+                  ) : (
+                    <Text className="pyly-body-caption text-danger">
+                      {mnemonicIdentityError}
+                    </Text>
+                  )}
+                </>
+              ) : hasMnemonicIdentity ? (
+                <Text className="font-mono text-[12px] text-fg">
+                  {formatIdentityJson(
+                    mnemonicIdentitySetting.value?.mnemonicIdentity,
+                  )}
+                </Text>
+              ) : (
+                <Text className="pyly-body-caption text-fg-dim">
+                  No mnemonic identity JSON
+                </Text>
+              )}
+            </View>
             {isFinalSound && isEditMode ? (
               <PinyinFinalToneImagePicker finalSoundId={pinyinSoundId} />
             ) : null}
@@ -259,6 +397,34 @@ function MnemonicStoryRoleSection({
       ) : null}
     </WikiTitledBox>
   );
+}
+
+function formatIdentityJson(value: unknown): string {
+  if (value == null) {
+    return ``;
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function hasIdentityContent(value: unknown): boolean {
+  if (value == null) {
+    return false;
+  }
+
+  if (typeof value === `string`) {
+    return value.trim().length > 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (typeof value === `object`) {
+    return Object.keys(value as Record<string, unknown>).length > 0;
+  }
+
+  return true;
 }
 
 const pinyinPartBox = tv({

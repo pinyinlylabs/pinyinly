@@ -631,7 +631,7 @@ export const lookupRadicalsByStrokes = async (strokes: number) =>
 export const allHanziCharacters = memoize0(async function allHanziCharacters() {
   const charactersJson = await loadCharactersJson();
 
-  return new Set( [...charactersJson].map(([char]) => char));
+  return new Set([...charactersJson].map(([char]) => char));
 });
 
 export function hanziTextFromHanziCharacter(

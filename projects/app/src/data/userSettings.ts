@@ -170,6 +170,13 @@ export const pinyinSoundDescriptionSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const pinyinSoundMnemonicIdentitySetting = defineUserSetting({
+  entity: r.entity(`psmi/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    mnemonicIdentity: r.json().optional().alias(`j`),
+  }),
+});
+
 export const pinyinSoundNameArticleSetting = defineUserSetting({
   entity: r.entity(`psna/[soundId]`, {
     soundId: rPinyinSoundId().alias(`i`),
@@ -179,6 +186,13 @@ export const pinyinSoundNameArticleSetting = defineUserSetting({
 
 export const pinyinSoundImageSetting = defineUserSetting({
   entity: r.entity(`psi/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    ...imageSettingFields,
+  }) satisfies UserSettingImageEntity,
+});
+
+export const pinyinSoundModelSheetImageSetting = defineUserSetting({
+  entity: r.entity(`psms/[soundId]`, {
     soundId: rPinyinSoundId().alias(`i`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
@@ -212,8 +226,20 @@ export function pinyinSoundDescriptionSettingKey(
   return pinyinSoundDescriptionSetting.entity.marshalKey({ soundId });
 }
 
+export function pinyinSoundMnemonicIdentitySettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinSoundMnemonicIdentitySetting.entity.marshalKey({ soundId });
+}
+
 export function pinyinSoundImageSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundImageSetting.entity.marshalKey({ soundId });
+}
+
+export function pinyinSoundModelSheetImageSettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinSoundModelSheetImageSetting.entity.marshalKey({ soundId });
 }
 
 //
@@ -419,6 +445,7 @@ export function userHanziSettingLike(hanzi: HanziText): string {
  */
 export const imageSettingDefs = [
   pinyinSoundImageSetting,
+  pinyinSoundModelSheetImageSetting,
   hanziWordMeaningHintImageSetting,
   hanziPronunciationHintImageSetting,
   pinyinFinalToneImageSetting,
@@ -451,6 +478,8 @@ export const userSettingDefinitions = [
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,
+  pinyinSoundMnemonicIdentitySetting,
+  pinyinSoundModelSheetImageSetting,
   pinyinSoundNameSetting,
   prioritizedWordItemSetting,
   quickSearchPickSetting,
