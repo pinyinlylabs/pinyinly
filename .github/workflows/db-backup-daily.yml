@@ -45,9 +45,9 @@ jobs:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
       - name: Upload to S3
-        run: |
-          aws s3 cp "${{ env.GZIP_NAME }}" "${{ env.UPLOAD_PATH }}" \
-            --endpoint-url ${{ env.BACKUPS_R2_ENDPOINT }}
+        run: >
+          aws s3 cp "${{ env.GZIP_NAME }}" "${{ env.UPLOAD_PATH }}"
+          --endpoint-url ${{ env.BACKUPS_R2_ENDPOINT }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.BACKUPS_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUPS_R2_SECRET_ACCESS_KEY }}
