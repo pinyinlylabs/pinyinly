@@ -14,8 +14,13 @@ vi.mock(`#server/lib/ai.js`, async () => {
 });
 
 import { requestOpenAiResponseJson } from "#server/lib/ai.js";
-import { buildPlaceSpecificationPrompt, generatePlaceSpecification, placeSpecificationSchema, runPlaceSpecificationRefinementPipeline } from './place';
-import type { PlaceEvaluationType, PlaceSpecification } from './place';
+import {
+  buildPlaceSpecificationPrompt,
+  generatePlaceSpecification,
+  placeSpecificationSchema,
+  runPlaceSpecificationRefinementPipeline,
+} from "./place";
+import type { PlaceEvaluationType, PlaceSpecification } from "./place";
 
 function makePlaceSpecification(place: string): PlaceSpecification {
   return {
