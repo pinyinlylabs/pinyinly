@@ -1,6 +1,284 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-menu-lg: 872px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  --color-bg: rgb(from var(--color-bg) r g b);
+  --color-bg-high: rgb(from var(--color-bg-high) r g b);
+  --color-fg: rgb(from var(--color-fg) r g b);
+  --color-fg-loud: rgb(from var(--color-fg-loud) r g b);
+  --color-fg-dim: rgb(from var(--color-fg-dim) r g b);
+  --color-fg-bg5: rgb(
+    from color-mix(in oklab, var(--color-fg) 5%, var(--color-bg)) r g b
+  );
+  --color-fg-bg10: rgb(
+    from color-mix(in oklab, var(--color-fg) 10%, var(--color-bg)) r g b
+  );
+  --color-fg-bg15: rgb(
+    from color-mix(in oklab, var(--color-fg) 15%, var(--color-bg)) r g b
+  );
+  --color-fg-bg20: rgb(
+    from color-mix(in oklab, var(--color-fg) 20%, var(--color-bg)) r g b
+  );
+  --color-fg-bg25: rgb(
+    from color-mix(in oklab, var(--color-fg) 25%, var(--color-bg)) r g b
+  );
+  --color-fg-bg30: rgb(
+    from color-mix(in oklab, var(--color-fg) 30%, var(--color-bg)) r g b
+  );
+  --color-fg-bg35: rgb(
+    from color-mix(in oklab, var(--color-fg) 35%, var(--color-bg)) r g b
+  );
+  --color-fg-bg40: rgb(
+    from color-mix(in oklab, var(--color-fg) 40%, var(--color-bg)) r g b
+  );
+  --color-fg-bg45: rgb(
+    from color-mix(in oklab, var(--color-fg) 45%, var(--color-bg)) r g b
+  );
+  --color-fg-bg50: rgb(
+    from color-mix(in oklab, var(--color-fg) 50%, var(--color-bg)) r g b
+  );
+  --color-fg-bg55: rgb(
+    from color-mix(in oklab, var(--color-fg) 55%, var(--color-bg)) r g b
+  );
+  --color-fg-bg60: rgb(
+    from color-mix(in oklab, var(--color-fg) 60%, var(--color-bg)) r g b
+  );
+  --color-fg-bg65: rgb(
+    from color-mix(in oklab, var(--color-fg) 65%, var(--color-bg)) r g b
+  );
+  --color-fg-bg70: rgb(
+    from color-mix(in oklab, var(--color-fg) 70%, var(--color-bg)) r g b
+  );
+  --color-fg-bg75: rgb(
+    from color-mix(in oklab, var(--color-fg) 75%, var(--color-bg)) r g b
+  );
+  --color-fg-bg80: rgb(
+    from color-mix(in oklab, var(--color-fg) 80%, var(--color-bg)) r g b
+  );
+  --color-fg-bg85: rgb(
+    from color-mix(in oklab, var(--color-fg) 85%, var(--color-bg)) r g b
+  );
+  --color-fg-bg90: rgb(
+    from color-mix(in oklab, var(--color-fg) 90%, var(--color-bg)) r g b
+  );
+  --color-fg-bg95: rgb(
+    from color-mix(in oklab, var(--color-fg) 95%, var(--color-bg)) r g b
+  );
+  --color-fg-bg100: rgb(
+    from color-mix(in oklab, var(--color-fg) 100%, var(--color-bg)) r g b
+  );
+  --color-on-fg: rgb(from var(--color-on-fg) r g b);
+
+  --color-lozenge-emerald-bg: rgb(from var(--color-lozenge-emerald-bg) r g b);
+  --color-lozenge-emerald-fg: rgb(from var(--color-lozenge-emerald-fg) r g b);
+  --color-lozenge-emerald-border: rgb(
+    from var(--color-lozenge-emerald-border) r g b
+  );
+  --color-lozenge-cyan-bg: rgb(from var(--color-lozenge-cyan-bg) r g b);
+  --color-lozenge-cyan-fg: rgb(from var(--color-lozenge-cyan-fg) r g b);
+  --color-lozenge-cyan-border: rgb(from var(--color-lozenge-cyan-border) r g b);
+  --color-lozenge-blue-bg: rgb(from var(--color-lozenge-blue-bg) r g b);
+  --color-lozenge-blue-fg: rgb(from var(--color-lozenge-blue-fg) r g b);
+  --color-lozenge-blue-border: rgb(from var(--color-lozenge-blue-border) r g b);
+  --color-lozenge-violet-bg: rgb(from var(--color-lozenge-violet-bg) r g b);
+  --color-lozenge-violet-fg: rgb(from var(--color-lozenge-violet-fg) r g b);
+  --color-lozenge-violet-border: rgb(
+    from var(--color-lozenge-violet-border) r g b
+  );
+  --color-lozenge-fuchsia-bg: rgb(from var(--color-lozenge-fuchsia-bg) r g b);
+  --color-lozenge-fuchsia-fg: rgb(from var(--color-lozenge-fuchsia-fg) r g b);
+  --color-lozenge-fuchsia-border: rgb(
+    from var(--color-lozenge-fuchsia-border) r g b
+  );
+  --color-lozenge-rose-bg: rgb(from var(--color-lozenge-rose-bg) r g b);
+  --color-lozenge-rose-fg: rgb(from var(--color-lozenge-rose-fg) r g b);
+  --color-lozenge-rose-border: rgb(from var(--color-lozenge-rose-border) r g b);
+  --color-lozenge-orange-bg: rgb(from var(--color-lozenge-orange-bg) r g b);
+  --color-lozenge-orange-fg: rgb(from var(--color-lozenge-orange-fg) r g b);
+  --color-lozenge-orange-border: rgb(
+    from var(--color-lozenge-orange-border) r g b
+  );
+  --color-lozenge-amber-bg: rgb(from var(--color-lozenge-amber-bg) r g b);
+  --color-lozenge-amber-fg: rgb(from var(--color-lozenge-amber-fg) r g b);
+  --color-lozenge-amber-border: rgb(
+    from var(--color-lozenge-amber-border) r g b
+  );
+
+  --color-cloud: rgb(from var(--color-cloud) r g b);
+  --color-red: rgb(from var(--color-red) r g b);
+  --color-orange: rgb(from var(--color-orange) r g b);
+  --color-amber: rgb(from var(--color-amber) r g b);
+  --color-yellow: rgb(from var(--color-yellow) r g b);
+  --color-lime: rgb(from var(--color-lime) r g b);
+  --color-wasabi: rgb(from var(--color-wasabi) r g b);
+  --color-green: rgb(from var(--color-green) r g b);
+  --color-emerald: rgb(from var(--color-emerald) r g b);
+  --color-teal: rgb(from var(--color-teal) r g b);
+  --color-cyan: rgb(from var(--color-cyan) r g b);
+  --color-cyanold: rgb(from var(--color-cyanold) r g b);
+  --color-sky: rgb(from var(--color-sky) r g b);
+  --color-blue: rgb(from var(--color-blue) r g b);
+  --color-indigo: rgb(from var(--color-indigo) r g b);
+  --color-violet: rgb(from var(--color-violet) r g b);
+  --color-purple: rgb(from var(--color-purple) r g b);
+  --color-fuchsia: rgb(from var(--color-fuchsia) r g b);
+  --color-pink: rgb(from var(--color-pink) r g b);
+  --color-rose: rgb(from var(--color-rose) r g b);
+  --color-brick: rgb(from var(--color-brick) r g b);
+  --color-slate: rgb(from var(--color-slate) r g b);
+  --color-gray: rgb(from var(--color-gray) r g b);
+  --color-zinc: rgb(from var(--color-zinc) r g b);
+  --color-neutral: rgb(from var(--color-neutral) r g b);
+  --color-stone: rgb(from var(--color-stone) r g b);
+
+  --color-transparent: transparent;
+  --color-danger: rgb(from var(--color-danger) r g b);
+  --color-warning: rgb(from var(--color-warning) r g b);
+  --color-success: rgb(from var(--color-success) r g b);
+  --color-currentColor: currentColor;
+
+  --font-cursive:
+    ui-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: NationalPark, MiSans, MiSansL3, PinyinlyComponents;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  --spacing-vvh: var(--vvh);
+  --spacing-vvw: var(--vvw);
+  --spacing-www-col: 988px;
+
+  --animate-hoscillate: hoscillate 1s ease-in-out infinite;
+  --animate-fadein: fadein 0.25s ease-in forwards;
+  --animate-shimmerText: shimmerText 2s linear infinite;
+
+  @keyframes hoscillate {
+    0%,
+    100% {
+      transform: translateX(-1px);
+      animation-timing-function: ease-in-out;
+    }
+    50% {
+      transform: translateX(1px);
+      animation-timing-function: ease-in-out;
+    }
+  }
+
+  @keyframes fadein {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes shimmerText {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
+}
+
+@utility pyly-ref-xs {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+@utility pyly-ref-sm {
+  text-decoration-thickness: 2.5px;
+  text-underline-offset: 2px;
+}
+
+@utility pyly-ref-base {
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+}
+
+@utility pyly-ref-lg {
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+@utility pyly-ref-xl {
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+@utility pyly-ref-2xl {
+  text-decoration-thickness: 4px;
+  text-underline-offset: 3px;
+}
+
+@utility pyly-button-outline {
+  @apply font-sans text-base/snug font-bold uppercase text-fg;
+}
+
+@utility pyly-body-title {
+  @apply font-sans text-2xl/normal tracking-tight text-fg font-semibold;
+}
+
+@utility pyly-body-heading {
+  @apply font-sans text-lg/normal tracking-tight text-fg-loud font-semibold;
+}
+
+@utility pyly-body-subheading {
+  @apply font-sans text-sm/normal text-fg-loud font-semibold uppercase;
+}
+
+@utility pyly-body-2xl {
+  @apply font-sans text-2xl/normal font-normal text-fg;
+}
+
+@utility pyly-body {
+  @apply font-sans text-base/normal text-fg font-medium;
+}
+
+@utility pyly-body-caption {
+  @apply font-sans text-sm/normal font-normal text-fg-dim;
+}
+
+@utility pyly-body-dt {
+  @apply font-sans text-xs/normal font-medium text-fg-dim uppercase;
+}
+
+@utility pyly-body-input {
+  @apply font-sans text-lg/snug font-medium text-fg;
+}
+
+@utility pyly-dev-dt {
+  @apply font-mono text-xs/normal font-normal text-fg-dim uppercase;
+}
+
+@utility font-sans {
+  /*
+  Safari tries to work out its own "bold" weight, because it's a variable
+  weight font. This disables that behaviour.
+  */
+  font-synthesis: none;
+  /*
+  Make webkit (e.g. Safari) render the font the same way as Figma
+  https://forum.figma.com/ask-the-community-7/font-in-browser-seem-bolder-than-in-the-figma-8146#post54600
+  */
+  @apply antialiased;
+}
 
 @layer components {
   /*
@@ -615,44 +893,8 @@
     @apply hover:transform-gpu;
   }
 
-  .pyly-ref-xs {
-    @apply decoration-[2px] underline-offset-[2px];
-  }
-  .pyly-ref-sm {
-    @apply decoration-[2.5px] underline-offset-[2px];
-  }
-  .pyly-ref-base {
-    @apply decoration-[3px] underline-offset-[2px];
-  }
-  .pyly-ref-lg {
-    @apply decoration-[3px] underline-offset-[3px];
-  }
-  .pyly-ref-xl {
-    @apply decoration-[3px] underline-offset-[3px];
-  }
-  .pyly-ref-2xl {
-    @apply decoration-[4px] underline-offset-[3px];
-  }
-
   .pyly-italic {
     @apply italic;
-  }
-
-  /* --- */
-
-  .font-sans {
-    /*
-    Safari tries to work out its own "bold" weight, because it's a variable
-    weight font. This disables that behaviour.
-    */
-    font-synthesis: none;
-    /*
-    Make webkit (e.g. Safari) render the font the same way as Figma
-    https://forum.figma.com/ask-the-community-7/font-in-browser-seem-bolder-than-in-the-figma-8146#post54600
-    */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-smooth: never;
   }
 
   /* --- */
@@ -967,13 +1209,225 @@ body {
   --color-tw-white: #fff;
   /* </tailwind-colors> */
 
-  @apply pyly-color-scheme-light;
-  @apply theme-default;
+  --color-red: var(--color-red-light);
+  --color-orange: var(--color-orange-light);
+  --color-amber: var(--color-amber-light);
+  --color-yellow: var(--color-yellow-light);
+  --color-lime: var(--color-lime-light);
+  --color-wasabi: var(--color-wasabi-light);
+  --color-green: var(--color-green-light);
+  --color-emerald: var(--color-emerald-light);
+  --color-teal: var(--color-teal-light);
+  --color-cyan: var(--color-cyan-light);
+  --color-cyanold: var(--color-cyanold-light);
+  --color-sky: var(--color-sky-light);
+  --color-blue: var(--color-blue-light);
+  --color-indigo: var(--color-indigo-light);
+  --color-violet: var(--color-violet-light);
+  --color-purple: var(--color-purple-light);
+  --color-fuchsia: var(--color-fuchsia-light);
+  --color-pink: var(--color-pink-light);
+  --color-rose: var(--color-rose-light);
+  --color-brick: var(--color-brick-light);
+  --color-slate: var(--color-slate-light);
+  --color-gray: var(--color-gray-light);
+  --color-zinc: var(--color-zinc-light);
+  --color-neutral: var(--color-neutral-light);
+  --color-stone: var(--color-stone-light);
+  --color-cloud: var(--color-cloud-light);
+
+  --color-success: var(--color-wasabi);
+  --color-danger: #d8373d;
+  --color-warning: #ff8904;
+
+  --color-theme-default-bg: #f8f9fa;
+  --color-theme-default-bg-high: #e1e3e4;
+  --color-theme-default-fg: #12191d;
+  --color-theme-default-fg-dim: #6c6c6c;
+  --color-theme-default-fg-loud: #000000;
+  --color-theme-default-on-fg: #ffffff;
+
+  --color-theme-danger-panel-bg: #e7e8e8;
+  --color-theme-danger-panel-bg-high: #e5d6d7;
+  --color-theme-danger-panel-fg: #d8373d;
+  --color-theme-danger-panel-fg-dim: #d55f63;
+  --color-theme-danger-panel-fg-loud: #d82128;
+  --color-theme-danger-panel-on-fg: #ffffff;
+
+  --color-theme-grass-panel-bg: #00c286;
+  --color-theme-grass-panel-bg-high: #18c892;
+  --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
+  --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
+  --color-theme-grass-panel-fg-loud: white;
+  --color-theme-grass-panel-on-fg: #00c286;
+
+  --color-theme-sky-panel-bg: var(--color-sky);
+  --color-theme-sky-panel-bg-high: #4e8ef7;
+  --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
+  --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
+  --color-theme-sky-panel-fg-loud: white;
+  --color-theme-sky-panel-on-fg: var(--color-sky);
+
+  --color-theme-success-panel-bg: #e5f9e7;
+  --color-theme-success-panel-bg-high: #cef1d0;
+  --color-theme-success-panel-fg: #00ab00;
+  --color-theme-success-panel-fg-dim: #48b948;
+  --color-theme-success-panel-fg-loud: #008e00;
+  --color-theme-success-panel-on-fg: #ffffff;
+
+  --color-theme-warning-panel-bg: #fefce8;
+  --color-theme-warning-panel-bg-high: #f9f0d1;
+  --color-theme-warning-panel-fg: #d08700;
+  --color-theme-warning-panel-fg-dim: #c3a625;
+  --color-theme-warning-panel-fg-loud: #a65f00;
+  --color-theme-warning-panel-on-fg: #ffffff;
+
+  --color-theme-placeholder-panel-bg: #ecedee;
+  --color-theme-placeholder-panel-bg-high: #ffffff;
+  --color-theme-placeholder-panel-fg: #c1c3c5;
+  --color-theme-placeholder-panel-fg-dim: #828282;
+  --color-theme-placeholder-panel-fg-loud: #6c6c6c;
+  --color-theme-placeholder-panel-on-fg: #ffffff;
+
+  --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0.05);
+  --color-lozenge-emerald-fg: var(--color-emerald);
+  --color-lozenge-emerald-border: rgb(from var(--color-emerald) r g b / 0.5);
+  --color-lozenge-blue-bg: rgb(from var(--color-blue) r g b / 0.05);
+  --color-lozenge-blue-fg: var(--color-blue);
+  --color-lozenge-blue-border: rgb(from var(--color-blue) r g b / 0.5);
+  --color-lozenge-cyan-bg: rgb(from var(--color-cyan) r g b / 0.05);
+  --color-lozenge-cyan-fg: var(--color-cyan);
+  --color-lozenge-cyan-border: rgb(from var(--color-cyan) r g b / 0.5);
+  --color-lozenge-violet-bg: rgb(from var(--color-violet) r g b / 0.05);
+  --color-lozenge-violet-fg: var(--color-violet);
+  --color-lozenge-violet-border: rgb(from var(--color-violet) r g b / 0.5);
+  --color-lozenge-fuchsia-bg: rgb(from var(--color-fuchsia) r g b / 0.05);
+  --color-lozenge-fuchsia-fg: var(--color-fuchsia);
+  --color-lozenge-fuchsia-border: rgb(from var(--color-fuchsia) r g b / 0.5);
+  --color-lozenge-rose-bg: rgb(from var(--color-rose) r g b / 0.05);
+  --color-lozenge-rose-fg: var(--color-rose);
+  --color-lozenge-rose-border: rgb(from var(--color-rose) r g b / 0.5);
+  --color-lozenge-orange-bg: rgb(from var(--color-orange) r g b / 0.05);
+  --color-lozenge-orange-fg: var(--color-orange);
+  --color-lozenge-orange-border: rgb(from var(--color-orange) r g b / 0.5);
+  --color-lozenge-amber-bg: rgb(from var(--color-amber) r g b / 0.05);
+  --color-lozenge-amber-fg: var(--color-amber);
+  --color-lozenge-amber-border: rgb(from var(--color-amber) r g b / 0.5);
+
+  --color-bg: var(--color-theme-default-bg);
+  --color-bg-high: var(--color-theme-default-bg-high);
+  --color-on-fg: var(--color-theme-default-on-fg);
+  --color-fg: var(--color-theme-default-fg);
+  --color-fg-dim: var(--color-theme-default-fg-dim);
+  --color-fg-loud: var(--color-theme-default-fg-loud);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    @apply pyly-color-scheme-dark;
+    --color-red: var(--color-red-dark);
+    --color-orange: var(--color-orange-dark);
+    --color-amber: var(--color-amber-dark);
+    --color-yellow: var(--color-yellow-dark);
+    --color-lime: var(--color-lime-dark);
+    --color-wasabi: var(--color-wasabi-dark);
+    --color-green: var(--color-green-dark);
+    --color-emerald: var(--color-emerald-dark);
+    --color-teal: var(--color-teal-dark);
+    --color-cyan: var(--color-cyan-dark);
+    --color-cyanold: var(--color-cyanold-dark);
+    --color-sky: var(--color-sky-dark);
+    --color-blue: var(--color-blue-dark);
+    --color-indigo: var(--color-indigo-dark);
+    --color-violet: var(--color-violet-dark);
+    --color-purple: var(--color-purple-dark);
+    --color-fuchsia: var(--color-fuchsia-dark);
+    --color-pink: var(--color-pink-dark);
+    --color-rose: var(--color-rose-dark);
+    --color-brick: var(--color-brick-dark);
+    --color-slate: var(--color-slate-dark);
+    --color-gray: var(--color-gray-dark);
+    --color-zinc: var(--color-zinc-dark);
+    --color-neutral: var(--color-neutral-dark);
+    --color-stone: var(--color-stone-dark);
+    --color-cloud: var(--color-cloud-dark);
+
+    --color-success: var(--color-wasabi);
+    --color-danger: #f46368;
+    --color-warning: #ffb900;
+
+    --color-theme-default-bg: #1a1d1e;
+    --color-theme-default-bg-high: #2d3031;
+    --color-theme-default-fg: #d7d8d9;
+    --color-theme-default-fg-dim: #898989;
+    --color-theme-default-fg-loud: #ffffff;
+    --color-theme-default-on-fg: #1a1d1e;
+
+    --color-theme-danger-panel-bg: #2d3031;
+    --color-theme-danger-panel-bg-high: #413435;
+    --color-theme-danger-panel-fg: #f2555a;
+    --color-theme-danger-panel-fg-dim: #db4b4f;
+    --color-theme-danger-panel-fg-loud: #ff7377;
+    --color-theme-danger-panel-on-fg: #1a1d1e;
+
+    --color-theme-grass-panel-bg: #00c286;
+    --color-theme-grass-panel-bg-high: #19c892;
+    --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
+    --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-grass-panel-fg-loud: white;
+    --color-theme-grass-panel-on-fg: #00c286;
+
+    --color-theme-sky-panel-bg: var(--color-sky);
+    --color-theme-sky-panel-bg-high: #1f6991;
+    --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
+    --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-sky-panel-fg-loud: white;
+    --color-theme-sky-panel-on-fg: var(--color-sky);
+
+    --color-theme-success-panel-bg: #193222;
+    --color-theme-success-panel-bg-high: #184525;
+    --color-theme-success-panel-fg: #13f042;
+    --color-theme-success-panel-fg-dim: #0b9d2b;
+    --color-theme-success-panel-fg-loud: #4dff73;
+    --color-theme-success-panel-on-fg: #1a1d1e;
+
+    --color-theme-warning-panel-bg: #432004;
+    --color-theme-warning-panel-bg-high: #563307;
+    --color-theme-warning-panel-fg: #ffdf20;
+    --color-theme-warning-panel-fg-dim: #c7ad1b;
+    --color-theme-warning-panel-fg-loud: #ffe962;
+    --color-theme-warning-panel-on-fg: #1a1d1e;
+
+    --color-theme-placeholder-panel-bg: #242727;
+    --color-theme-placeholder-panel-bg-high: #2d3031;
+    --color-theme-placeholder-panel-fg: #484a4b;
+    --color-theme-placeholder-panel-fg-dim: #3b3c3d;
+    --color-theme-placeholder-panel-fg-loud: #898989;
+    --color-theme-placeholder-panel-on-fg: #1a1d1e;
+
+    --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0);
+    --color-lozenge-emerald-fg: var(--color-emerald);
+    --color-lozenge-emerald-border: rgb(from var(--color-emerald) r g b / 0.6);
+    --color-lozenge-blue-bg: rgb(from var(--color-blue) r g b / 0);
+    --color-lozenge-blue-fg: var(--color-blue);
+    --color-lozenge-blue-border: rgb(from var(--color-blue) r g b / 0.6);
+    --color-lozenge-cyan-bg: rgb(from var(--color-cyan) r g b / 0);
+    --color-lozenge-cyan-fg: var(--color-cyan);
+    --color-lozenge-cyan-border: rgb(from var(--color-cyan) r g b / 0.6);
+    --color-lozenge-violet-bg: rgb(from var(--color-violet) r g b / 0);
+    --color-lozenge-violet-fg: var(--color-violet);
+    --color-lozenge-violet-border: rgb(from var(--color-violet) r g b / 0.6);
+    --color-lozenge-fuchsia-bg: rgb(from var(--color-fuchsia) r g b / 0);
+    --color-lozenge-fuchsia-fg: var(--color-fuchsia);
+    --color-lozenge-fuchsia-border: rgb(from var(--color-fuchsia) r g b / 0.6);
+    --color-lozenge-rose-bg: rgb(from var(--color-rose) r g b / 0);
+    --color-lozenge-rose-fg: var(--color-rose);
+    --color-lozenge-rose-border: rgb(from var(--color-rose) r g b / 0.6);
+    --color-lozenge-orange-bg: rgb(from var(--color-orange) r g b / 0);
+    --color-lozenge-orange-fg: var(--color-orange);
+    --color-lozenge-orange-border: rgb(from var(--color-orange) r g b / 0.6);
+    --color-lozenge-amber-bg: rgb(from var(--color-amber) r g b / 0);
+    --color-lozenge-amber-fg: var(--color-amber);
+    --color-lozenge-amber-border: rgb(from var(--color-amber) r g b / 0.6);
   }
 }
 

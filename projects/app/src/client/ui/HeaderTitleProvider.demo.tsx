@@ -67,11 +67,11 @@ function HeaderTitleProviderScrollDemo({
   compact?: boolean;
 }) {
   return (
-    <View className="h-[560px] w-[420px] overflow-hidden rounded-lg border border-fg/10 bg-bg">
+    <View className="h-140 w-105 overflow-hidden rounded-lg border border-fg/10 bg-bg">
       <HeaderTitleProvider>
         <View
           className={`
-            sticky top-0 z-10 h-[52px] flex-row items-center border-b border-fg/10 bg-bg/95 px-4
+            sticky top-0 z-10 h-13 flex-row items-center border-b border-fg/10 bg-bg/95 px-4
           `}
         >
           <Text className="pyly-body text-fg-dim">Floating title:</Text>
@@ -99,8 +99,8 @@ function HeaderTitleProviderScrollDemo({
               <View
                 className={
                   compact
-                    ? `h-[120px] rounded-lg border border-fg/10 bg-fg/5`
-                    : `h-[220px] rounded-lg border border-fg/10 bg-fg/5`
+                    ? `h-30 rounded-lg border border-fg/10 bg-fg/5`
+                    : `h-55 rounded-lg border border-fg/10 bg-fg/5`
                 }
               />
             </View>

@@ -1032,7 +1032,7 @@ export function AiImageGenerationPanel({
   };
 
   return (
-    <View className="h-[460px]">
+    <View className="h-115">
       <View className="h-full flex-row items-stretch gap-4">
         <View className="h-full min-w-0 flex-1 gap-3">
           {isLoadedFromSetting ? null : (
@@ -1045,7 +1045,7 @@ export function AiImageGenerationPanel({
             <ScrollView
               ref={timelineScrollRef}
               className="flex-1"
-              contentContainerClassName="gap-6 py-10 px-3"
+              contentContainerClassName="gap-6 px-3 py-10"
             >
               {activeThread == null || activeThread.messages.length === 0 ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
@@ -1308,9 +1308,9 @@ function AiImageUserMessage({
         ${className ?? ``}
       `}
     >
-      <View className="max-w-[560px] rounded-lg bg-sky/20 p-2">
+      <View className="max-w-140 rounded-lg bg-sky/20 p-2">
         {message.text != null && message.text.length > 0 ? (
-          <Text className="mx-1 font-sans text-sm font-medium leading-snug text-fg">
+          <Text className="mx-1 font-sans text-sm leading-snug font-medium text-fg">
             {message.text}
           </Text>
         ) : null}
@@ -1385,7 +1385,7 @@ function AiImageErrorMessage({
         ${className ?? ``}
       `}
     >
-      <View className="max-w-[560px] gap-2 rounded-lg border border-fg-bg10 bg-bg-high p-3">
+      <View className="max-w-140 gap-2 rounded-lg border border-fg-bg10 bg-bg-high p-3">
         <Text className="font-sans text-sm text-[crimson]">
           {message.text ?? `Unable to generate image right now.`}
         </Text>
@@ -1468,8 +1468,8 @@ function AiImageAssignMenu({
   onAssignImageToReference: (assetId: AssetId, referenceId: string) => void;
 } & FloatingMenuModalMenuProps) {
   return (
-    <View className="min-w-[220px] gap-1 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+    <View className="min-w-55 gap-1 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] text-fg-dim uppercase">
         Assign generated image
       </Text>
       {options.map((option) => (
@@ -1694,7 +1694,7 @@ function AiImagePromptComposer({
         onChangeText={setDraftPrompt}
         onKeyPress={handlePromptInputKeyPress}
         placeholder="Describe how to create or modify the image in this chat"
-        className="max-h-80 rounded-none bg-transparent p-0 text-sm font-medium leading-5"
+        className="max-h-80 rounded-none bg-transparent p-0 text-sm leading-5 font-medium"
         editable={editable}
         onFocus={() => {
           setIsPromptInputFocused(true);
@@ -1784,11 +1784,11 @@ function AiImagePromptComposer({
                       className={
                         isPointerHoverCapable && !isDisabled
                           ? `
-                            absolute right-1 top-0.5 rounded bg-bg/80 px-1 opacity-0
+                            absolute top-0.5 right-1 rounded bg-bg/80 px-1 opacity-0
 
                             group-hover:opacity-100
                           `
-                          : `absolute right-1 top-0.5 rounded bg-bg/80 px-1`
+                          : `absolute top-0.5 right-1 rounded bg-bg/80 px-1`
                       }
                     >
                       <Text className="font-sans text-[10px] text-fg">
@@ -1885,11 +1885,11 @@ function ImageReferenceTooltipContent({
   prompt: string | null;
 }) {
   return (
-    <View className="w-[320px] overflow-hidden rounded-lg bg-bg">
+    <View className="w-80 overflow-hidden rounded-lg bg-bg">
       {imageAssetId == null ? null : (
         <AssetImage
           assetId={imageAssetId}
-          className="h-[160px] w-[320px]"
+          className="h-40 w-80"
           contentFit="cover"
         />
       )}
@@ -1923,8 +1923,8 @@ function ReferencePickerMenu({
   const rowIds = new Set(rowReferences.map((reference) => reference.id));
 
   return (
-    <View className="min-w-[290px] max-w-[360px] gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+    <View className="max-w-90 min-w-[290px] gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] text-fg-dim uppercase">
         Reference images
       </Text>
 
@@ -1998,8 +1998,8 @@ function MissingReferenceWarningMenu({
   onApplyQuickPrompt: (prompt: string) => void;
 } & FloatingMenuModalMenuProps) {
   return (
-    <View className="min-w-[300px] max-w-[360px] gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+    <View className="max-w-90 min-w-75 gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] text-fg-dim uppercase">
         Reference status
       </Text>
 

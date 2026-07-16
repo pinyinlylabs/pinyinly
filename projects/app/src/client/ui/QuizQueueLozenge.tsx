@@ -48,7 +48,7 @@ function CountLozenge({
       entering={ZoomIn.easing(Easing.quad)}
       className={countLozengePillClass({ mode, className })}
     >
-      <Text className="font-sans text-[10px] font-bold tabular-nums text-bg">
+      <Text className="font-sans text-[10px] font-bold text-bg tabular-nums">
         {countText}
       </Text>
     </Reanimated.View>
@@ -56,7 +56,7 @@ function CountLozenge({
 }
 
 const countLozengePillClass = tv({
-  base: `flex h-[20px] min-w-[20px] items-center justify-center rounded-full px-[4px]`,
+  base: `flex h-5 min-w-5 items-center justify-center rounded-full px-1`,
   variants: {
     mode: {
       overdue: `bg-brick`,

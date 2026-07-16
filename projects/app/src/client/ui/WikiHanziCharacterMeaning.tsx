@@ -279,7 +279,7 @@ export function WikiHanziCharacterMeaningBox({
                       setSourceCenterX(centerX);
                     }}
                   >
-                    <Text className="pyly-body text-left text-lg">{hanzi}</Text>
+                    <Text className="text-left pyly-body text-lg">{hanzi}</Text>
                   </View>
                 ) : (
                   <View className="w-12">
@@ -294,7 +294,7 @@ export function WikiHanziCharacterMeaningBox({
                 )}
 
                 {primaryMeaningGloss == null ? null : (
-                  <Text className="pyly-body-caption text-left text-fg-dim">
+                  <Text className="text-left pyly-body-caption text-fg-dim">
                     {primaryMeaningGloss}
                   </Text>
                 )}
@@ -471,7 +471,7 @@ function CoverImageSection({
           maxLength={120}
         />
       ) : hasCaption ? (
-        <Text className="pyly-body-caption px-10 text-left text-fg-dim">
+        <Text className="px-10 text-left pyly-body-caption text-fg-dim">
           {captionText}
         </Text>
       ) : null}
@@ -677,7 +677,7 @@ function MeaningItem({
         </View>
       ) : null}
       {hasHint ? null : (
-        <Text className="pyly-body-caption pl-7 text-fg-dim">
+        <Text className="pl-7 pyly-body-caption text-fg-dim">
           Add a hint to make this meaning easier to recognize.
         </Text>
       )}
@@ -715,7 +715,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-1">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
-                <Text className="pyly-body text-left">
+                <Text className="text-left pyly-body">
                   {renderMentalPathThought(firstStep.thought)}
                 </Text>
               </View>
@@ -730,12 +730,12 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
           >
             <View className="w-3 items-center">
               <View className="h-5 w-px bg-fg-dim/35" />
-              <Text className="pyly-body-caption -mt-0.5 text-fg-dim/70">
+              <Text className="-mt-0.5 pyly-body-caption text-fg-dim/70">
                 {`↓`}
               </Text>
             </View>
             <View className="min-w-0 flex-1 justify-center">
-              <Text className="pyly-body-caption text-left text-fg-dim/70">
+              <Text className="text-left pyly-body-caption text-fg-dim/70">
                 {`Show ${hiddenStepCount} hidden steps`}
               </Text>
             </View>
@@ -747,7 +747,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-2">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
-                <Text className="pyly-body text-left">
+                <Text className="text-left pyly-body">
                   {renderMentalPathThought(lastStep.thought)}
                 </Text>
               </View>
@@ -787,7 +787,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                   {isLastStep ? null : (
                     <>
                       <View className="mt-1 w-px flex-1 bg-fg-dim/35" />
-                      <Text className="pyly-body-caption -mt-1 text-fg-dim/70">
+                      <Text className="-mt-1 pyly-body-caption text-fg-dim/70">
                         {`↓`}
                       </Text>
                     </>
@@ -799,15 +799,15 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                     <Text
                       className={
                         isIntermediateStep
-                          ? `pyly-body text-left text-fg-dim`
-                          : `pyly-body text-left`
+                          ? `text-left pyly-body text-fg-dim`
+                          : `text-left pyly-body`
                       }
                     >
                       {renderMentalPathThought(step.thought)}
                     </Text>
                   </View>
                   {linkReason == null || !isPathExpanded ? null : (
-                    <Text className="pyly-body-caption text-left text-fg-dim">
+                    <Text className="text-left pyly-body-caption text-fg-dim">
                       {linkReason}
                     </Text>
                   )}

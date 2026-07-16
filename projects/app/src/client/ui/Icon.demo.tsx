@@ -7,7 +7,7 @@ export default () => {
   const fewIcons = [`book`, `cart`, `flag`, `home`] as const;
 
   const allIcons = ([12, 20, 24, 32] as const).map((size, i) => (
-    <View key={i} className="max-w-[200px] flex-row flex-wrap">
+    <View key={i} className="max-w-50 flex-row flex-wrap">
       {iconNames.map((iconName, i) => (
         <Icon key={i} size={size} icon={iconName} />
       ))}
@@ -59,22 +59,14 @@ export default () => {
 
         <ExampleStack
           title="wasabi"
-          childrenClassName={`
-            gap-8
-
-            [--color-fg:var(--color-success)]
-          `}
+          childrenClassName={`gap-8 [--color-fg:var(--color-success)]`}
         >
           {allIcons}
         </ExampleStack>
 
         <ExampleStack
           title="brick"
-          childrenClassName={`
-            gap-8
-
-            [--color-fg:var(--color-danger)]
-          `}
+          childrenClassName={`gap-8 [--color-fg:var(--color-danger)]`}
         >
           {allIcons}
         </ExampleStack>

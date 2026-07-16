@@ -207,7 +207,7 @@ const WebImpl = ({
       className={`
         w-full flex-1 overflow-hidden rounded-t-2xl bg-bg shadow-[0_20px_60px_rgba(0,0,0,0.55)]
 
-        sm:max-h-[80vh] sm:w-[500px] sm:flex-none sm:rounded-xl
+        sm:max-h-[80vh] sm:w-125 sm:flex-none sm:rounded-xl
       `}
       style={[animatedContentStyle]}
     >
@@ -275,7 +275,7 @@ const IosImpl = ({ onDismiss, onDismissRequest, children }: ImplProps) => {
           // never be seen. If you see a purple line on iOS then this is the
           // cause and needs to be set more carefully.
           `
-            flex-1 pb-[72px]
+            flex-1 pb-18
 
             ${__DEV__ ? `bg-[purple]` : ``}
           `

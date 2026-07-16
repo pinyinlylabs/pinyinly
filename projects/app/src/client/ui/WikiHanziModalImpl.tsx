@@ -40,7 +40,7 @@ export function WikiHanziModalImpl({
           // scrolling showing the correct color at the top and bottom.
           `h-screen`
         }
-        contentContainerClassName="pb-10 min-h-full"
+        contentContainerClassName="min-h-full pb-10"
       >
         <Header
           onDismiss={onDismiss}
@@ -70,13 +70,12 @@ function Header({
 
   return (
     <View className="sticky top-0 z-10">
-      <View className="sticky top-0 z-10 h-[56px] flex-row items-center px-4">
+      <View className="sticky top-0 z-10 h-14 flex-row items-center px-4">
         {isBackgroundVisible ? (
           <View
             className={`
-              pointer-events-none absolute -inset-x-2 -bottom-10 top-0 bg-bg/90 backdrop-blur-sm
-
-              [mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+              pointer-events-none absolute -inset-x-2 top-0 -bottom-10 bg-bg/90
+              [mask-image:linear-gradient(to_top,transparent,black_50%,black)] backdrop-blur-sm
             `}
           />
         ) : null}

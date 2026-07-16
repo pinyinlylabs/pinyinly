@@ -8,7 +8,7 @@ export const ReferencePageBodySection = ({
   children: React.ReactNode;
 }) => {
   return (
-    <View className="gap-[4px]">
+    <View className="gap-1">
       <View>
         <Text className="font-sans text-lg text-fg-dim">{title}</Text>
       </View>

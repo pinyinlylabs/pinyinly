@@ -12,14 +12,14 @@ export const ReferencePage = ({
     <View className="flex-1 bg-bg">
       <View
         className={`
-          w-full max-w-[600px] self-center overflow-hidden
+          w-full max-w-150 self-center overflow-hidden
 
           lg:my-4 lg:rounded-t-lg
         `}
       >
         {header}
 
-        <View className="gap-[12px] p-[12px] pt-4">{body}</View>
+        <View className="gap-3 p-3 pt-4">{body}</View>
       </View>
     </View>
   );

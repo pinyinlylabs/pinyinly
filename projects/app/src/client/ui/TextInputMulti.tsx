@@ -107,7 +107,7 @@ const inputClass = tv({
         placeholder:text-fg-dim
       `,
       flat: `
-        pyly-body-input rounded-xl bg-bg-high px-4 py-3 outline-none
+        rounded-xl bg-bg-high px-4 py-3 pyly-body-input outline-none
 
         placeholder:text-fg/30
       `,

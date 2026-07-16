@@ -32,7 +32,7 @@ export function CompactWordRows({
           <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={i}>
             <Pressable className="flex flex-row items-center gap-2 py-1.5">
               {hasAnyHskLozenges ? (
-                <View className="w-[40px]">
+                <View className="w-10">
                   {entry.hsk == null ? null : (
                     <HskLozenge hskLevel={entry.hsk} size="sm" />
                   )}

@@ -61,12 +61,12 @@ export function MenuDictionarySearch() {
   };
 
   return (
-    <View className="w-[200px]">
+    <View className="w-50">
       <View ref={setReference} collapsable={false}>
         <Icon
           icon="search"
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-dim"
+          className="absolute top-1/2 left-3 -translate-y-1/2 text-fg-dim"
         />
         <TextInputSingle
           placeholder="Search dictionary"

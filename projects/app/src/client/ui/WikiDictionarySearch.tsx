@@ -35,7 +35,7 @@ export function WikiDictionarySearch() {
         <Icon
           icon="search"
           size={16}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-fg-dim"
+          className="absolute top-1/2 left-4 -translate-y-1/2 text-fg-dim"
         />
         <TextInputSingle
           placeholder="Search by hanzi, pinyin, or English"

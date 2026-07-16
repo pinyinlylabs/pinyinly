@@ -98,7 +98,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           // means only this element will remain visible when the keyboard is
           // open. It creates a clean look by completely hiding the content above
           // it.
-          `h-[200px] justify-between`
+          `h-50 justify-between`
         }
       >
         <View>

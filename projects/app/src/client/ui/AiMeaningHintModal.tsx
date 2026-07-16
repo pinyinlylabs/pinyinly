@@ -149,7 +149,7 @@ export function AiMeaningHintModal({
             <Text className="font-sans text-[17px] font-semibold text-fg-loud">
               AI meaning hint creator
             </Text>
-            <View className="w-[72px]" />
+            <View className="w-18" />
           </View>
 
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
@@ -184,7 +184,7 @@ export function AiMeaningHintModal({
                         <Text
                           className={`
                             rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold
-                            uppercase tracking-wide text-fg-dim
+                            tracking-wide text-fg-dim uppercase
                           `}
                         >
                           {suggestion.strategyLabel}

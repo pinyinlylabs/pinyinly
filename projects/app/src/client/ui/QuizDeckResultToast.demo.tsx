@@ -27,7 +27,7 @@ export default () => {
           title={skill}
           key={skill}
           showFrame
-          childrenClassName={`px-2 py-1 gap-1 self-stretch`}
+          childrenClassName={`gap-1 self-stretch px-2 py-1`}
         >
           {(
             [
@@ -41,7 +41,7 @@ export default () => {
               className={`flex-row items-center gap-2 self-stretch`}
               key={label}
             >
-              <Text className="pyly-dev-dt w-[100px]">{label}</Text>
+              <Text className="w-25 pyly-dev-dt">{label}</Text>
               <View
                 className={`
                   flex-1 self-stretch

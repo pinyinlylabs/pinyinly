@@ -207,7 +207,7 @@ export function PinyinFinalToneImagePicker({
                   />
                 </View>
                 <View className="gap-1">
-                  <Text className="font-sans text-[11px] uppercase text-fg-dim">
+                  <Text className="font-sans text-[11px] text-fg-dim uppercase">
                     {option.tones.map((tone) => `Tone ${tone}`).join(`, `)}
                   </Text>
                   <Text className="font-sans text-[13px] font-medium text-fg">

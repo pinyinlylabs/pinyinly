@@ -737,7 +737,7 @@ function MultilineInput({
       multiline
       textAlignVertical="top"
       className={`
-        min-h-[88px] rounded-xl bg-bg px-4 py-3 font-sans text-sm text-fg outline-none
+        min-h-22 rounded-xl bg-bg px-4 py-3 font-sans text-sm text-fg outline-none
 
         web:placeholder:text-fg/30
       `}

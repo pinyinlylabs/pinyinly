@@ -89,7 +89,7 @@ export function FramedAssetImage({
             <AssetImage
               assetId={assetId}
               imageClassName={imageClassName}
-              className={`absolute left-0 top-0`}
+              className={`absolute top-0 left-0`}
               contentFit={`fill`}
               style={{
                 width: styleWidth,

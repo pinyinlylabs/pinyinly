@@ -186,7 +186,7 @@ function EditableUserMeaningListItem({
   const customBadge = (
     <View className="self-center rounded-full bg-cyan/10 px-2 py-1">
       <Text
-        className={`font-sans text-[11px] font-medium uppercase tracking-[0.4px] text-cyan`}
+        className={`font-sans text-[11px] font-medium tracking-[0.4px] text-cyan uppercase`}
       >
         Custom
       </Text>
@@ -334,7 +334,7 @@ function MeaningCoreText({
 function LabeledText({ children, label }: { children: string; label: string }) {
   return (
     <View className="gap-1">
-      <Text className="font-sans text-base font-medium uppercase text-fg-dim">
+      <Text className="font-sans text-base font-medium text-fg-dim uppercase">
         {label}
       </Text>
       <Text className="font-sans text-base leading-6 text-fg-dim">

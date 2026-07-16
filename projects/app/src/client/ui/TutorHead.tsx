@@ -43,5 +43,5 @@ export const TutorHead = ({
 };
 
 const wrapperClass = tv({
-  base: `h-[100px] w-[80px]`,
+  base: `h-25 w-20`,
 });

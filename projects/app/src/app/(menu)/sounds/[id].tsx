@@ -79,7 +79,7 @@ export default function SoundIdPage() {
   const tone5AudioSource = isFinalSound ? null : null;
 
   return (
-    <View className="w-full self-center pb-2 px-safe pt-safe">
+    <View className="w-full self-center pt-safe px-safe pb-2">
       <Breadcrumb pinyinSoundId={id} />
 
       <HeaderTitleProvider.ScrollTrigger title={label} />

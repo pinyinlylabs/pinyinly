@@ -60,7 +60,7 @@ export const NewSkillModalContentNewWord = ({
           bg-[linear-gradient(to_bottom,_var(--color-theme-grass-panel-bg)_0%,_var(--color-theme-grass-panel-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
         `
       }
-      contentContainerClassName="pb-10 min-h-full"
+      contentContainerClassName="min-h-full pb-10"
     >
       <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
 
@@ -97,14 +97,14 @@ function Header({
     <>
       {/* Scroll detector */}
       <View
-        className="absolute top-[60px] h-0 w-full"
+        className="absolute top-15 h-0 w-full"
         ref={(el) => {
           ref(el as Element | null);
         }}
       />
 
-      <View className="theme-grass-panel sticky top-[-120px] z-10 h-[184px] bg-bg">
-        <View className="sticky top-1 z-10 h-[56px] flex-row items-center pl-4">
+      <View className="theme-grass-panel sticky -top-30 z-10 h-46 bg-bg">
+        <View className="sticky top-1 z-10 h-14 flex-row items-center pl-4">
           <Pressable
             onPress={onDismiss}
             className={`
@@ -122,7 +122,7 @@ function Header({
         <View className="mb-2 self-center rounded-md bg-fg-loud/10 px-2 py-1">
           <Text
             className={`
-              text-center font-sans text-[12px]/[14px] font-bold uppercase text-fg-loud
+              text-center font-sans text-[12px]/[14px] font-bold text-fg-loud uppercase
               transition-all
             `}
           >
@@ -135,7 +135,7 @@ function Header({
             className={`
               text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
 
-              ${entry?.isIntersecting === false ? `scale-[0.75]` : `scale-100`}
+              ${entry?.isIntersecting === false ? `scale-0.75` : `scale-100`}
             `}
           >
             {title}

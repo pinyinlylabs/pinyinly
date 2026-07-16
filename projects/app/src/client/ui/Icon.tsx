@@ -32,7 +32,7 @@ const imageClass = tv({
   // - `pointer-events-none` to prevent the image from being click and dragged
   // - `select-none` to not highlight with a box when it's surrounded in a text
   //   selection.
-  base: `pointer-events-none shrink select-none text-fg`,
+  base: `pointer-events-none shrink text-fg select-none`,
   variants: {
     size: {
       12: `size-[12px]`,

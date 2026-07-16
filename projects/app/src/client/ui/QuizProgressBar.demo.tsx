@@ -17,13 +17,13 @@ export default () => {
 
   return (
     <View className="w-full gap-2">
-      <View className="min-h-[32px]">
+      <View className="min-h-8">
         <QuizProgressBar progress={3} />
       </View>
-      <View className="min-h-[32px]">
+      <View className="min-h-8">
         <QuizProgressBar progress={11} />
       </View>
-      <View className="min-h-[32px]">
+      <View className="min-h-8">
         <QuizProgressBar progress={quizProgress.progress} />
       </View>
       <View className="flex-row items-start gap-4">

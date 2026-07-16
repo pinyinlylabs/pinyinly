@@ -33,7 +33,7 @@ export function QuizDeckResultToast({
         >
           <View
             className={`
-              flex-1 gap-[12px] overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-[84px]
+              flex-1 gap-3 overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-21
 
               sm:mb-2 sm:rounded-xl
 
@@ -41,14 +41,14 @@ export function QuizDeckResultToast({
             `}
           >
             {rating === Rating.Easy ? (
-              <View className="flex-row items-center gap-[8px]">
+              <View className="flex-row items-center gap-2">
                 <Icon size={32} icon="check-circled-filled" />
                 <Text className="font-sans text-2xl font-bold text-fg">
                   Perfect!
                 </Text>
               </View>
             ) : rating === Rating.Good ? (
-              <View className="flex-row items-center gap-[8px]">
+              <View className="flex-row items-center gap-2">
                 <Icon size={32} icon="check-circled-filled" />
                 <Text className="font-sans text-2xl font-bold text-fg">
                   Nice!
@@ -56,11 +56,11 @@ export function QuizDeckResultToast({
               </View>
             ) : rating === Rating.Hard ? (
               <>
-                <View className="flex-row items-center gap-[8px]">
+                <View className="flex-row items-center gap-2">
                   <Icon size={32} icon="meh-circled" />
                   <FloatingMenuModal menu={<UndoAnswerMenu onUndo={onUndo} />}>
                     <Text
-                      className={`pyly-ref pyly-ref-2xl font-sans text-2xl font-bold text-fg`}
+                      className={`pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl`}
                     >
                       Too slow
                     </Text>
@@ -74,12 +74,12 @@ export function QuizDeckResultToast({
               (invariant(rating satisfies typeof Rating.Again),
               (
                 <>
-                  <View className="flex-row items-center gap-[8px]">
+                  <View className="flex-row items-center gap-2">
                     <Icon size={32} icon="close-circled-filled" />
                     <FloatingMenuModal
                       menu={<UndoAnswerMenu onUndo={onUndo} />}
                     >
-                      <Text className="pyly-ref pyly-ref-2xl font-sans text-2xl font-bold text-fg">
+                      <Text className="pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl">
                         Incorrect
                       </Text>
                     </FloatingMenuModal>

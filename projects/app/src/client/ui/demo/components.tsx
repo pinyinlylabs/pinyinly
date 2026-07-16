@@ -26,7 +26,7 @@ export const ExampleStack = ({
   showFrame?: boolean;
 }) => (
   <View className="items-center gap-2 p-2">
-    <Text className="pyly-dev-dt text-center">{title}</Text>
+    <Text className="text-center pyly-dev-dt">{title}</Text>
     <View
       className={exampleStackChildrenClass({
         showFrame,
@@ -105,9 +105,9 @@ export const Section = ({
 
 export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
-    <View className="mb-2 mt-4 flex-row items-center gap-2">
+    <View className="mt-4 mb-2 flex-row items-center gap-2">
       <View className="h-px grow bg-bg-high" />
-      <Text className="pyly-dev-dt text-center">{title}</Text>
+      <Text className="text-center pyly-dev-dt">{title}</Text>
       <View className="h-px grow bg-bg-high" />
     </View>
   );

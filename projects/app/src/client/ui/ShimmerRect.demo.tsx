@@ -12,13 +12,13 @@ export default () => {
         </ExampleStack>
 
         <ExampleStack title="card" childrenClassName="gap-3">
-          <ShimmerRect className="h-[110px] w-[180px] rounded-md" />
-          <ShimmerRect className="h-[110px] w-[220px] rounded-md" />
+          <ShimmerRect className="h-[110px] w-45 rounded-md" />
+          <ShimmerRect className="h-[110px] w-55 rounded-md" />
         </ExampleStack>
 
-        <ExampleStack title="wide" childrenClassName="gap-3 w-[320px]">
+        <ExampleStack title="wide" childrenClassName="w-[320px] gap-3">
           <ShimmerRect className="aspect-[2/1] w-full rounded-lg" />
-          <ShimmerRect className="h-[56px] w-full rounded-lg" />
+          <ShimmerRect className="h-14 w-full rounded-lg" />
         </ExampleStack>
       </View>
     </View>

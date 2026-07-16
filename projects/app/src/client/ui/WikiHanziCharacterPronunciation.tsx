@@ -278,7 +278,7 @@ export function WikiHanziCharacterPronunciationBox({
       {splitPinyin == null ? null : (
         <View className="gap-4 p-4">
           <View className="">
-            <Text className="pyly-body text-center">
+            <Text className="text-center pyly-body">
               <Text className="pyly-bold">{pinyinUnit}</Text>
             </Text>
             <View className="px-[15%] py-2">
@@ -545,7 +545,7 @@ function SoundLinkBlock({
 }
 
 const soundNameClass = tv({
-  base: `pyly-body pyly-ref`,
+  base: `pyly-ref pyly-body`,
 });
 
 function FinalToneForkedArrow() {
@@ -576,7 +576,7 @@ function FinalToneForkedArrow() {
 }
 
 function DownArrow() {
-  return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
+  return <Text className="h-6 pyly-body text-fg/40">↓</Text>;
 }
 
 function buildCueMeaningContext({

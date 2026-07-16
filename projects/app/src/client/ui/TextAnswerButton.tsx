@@ -249,11 +249,7 @@ export function TextAnswerButton({
       <ShootingStars
         // The theme needs to be set on this explicitly because the Rive CSS
         // variable proxy doesn't handle class changes.
-        className={`
-          pointer-events-none absolute -inset-3
-
-          [--color-fg:var(--color-success)]
-        `}
+        className={`pointer-events-none absolute -inset-3 [--color-fg:var(--color-success)]`}
         play={state === `success`}
       />
       {showWikiModal && renderWikiModal != null
@@ -313,10 +309,10 @@ const pressableClass = tv({
 });
 
 const rectClass = tv({
-  base: `select-none items-center justify-center rounded-lg border-2 px-3 py-1`,
+  base: `items-center justify-center rounded-lg border-2 px-3 py-1 select-none`,
   variants: {
     disabled: {
-      true: `cursor-default select-none opacity-50`,
+      true: `cursor-default opacity-50 select-none`,
     },
     flat: {
       true: `mt-[2px]`,
@@ -397,11 +393,7 @@ const textClass = tv({
       true: ``,
     },
     hasWikiModal: {
-      true: `
-        underline decoration-currentColor/25
-
-        [text-decoration-skip-ink:none]
-      `,
+      true: `underline decoration-currentColor/25 [text-decoration-skip-ink:none]`,
     },
     state: {
       default: `text-fg-loud`,
@@ -413,40 +405,24 @@ const textClass = tv({
     },
     fontSize: {
       xl: `
-        pyly-ref-xl
+        text-xl/tight pyly-ref-xl
 
-        lg:pyly-ref-2xl
-
-        text-xl/tight
-
-        lg:text-2xl/tight
+        lg:text-2xl/tight lg:pyly-ref-2xl
       `,
       lg: `
-        pyly-ref-lg
+        text-lg/tight pyly-ref-lg
 
-        lg:pyly-ref-xl
-
-        text-lg/tight
-
-        lg:text-xl/tight
+        lg:text-xl/tight lg:pyly-ref-xl
       `,
       sm: `
-        pyly-ref-sm
+        text-sm pyly-ref-sm
 
-        lg:pyly-ref-lg
-
-        text-sm
-
-        lg:text-lg/tight
+        lg:text-lg/tight lg:pyly-ref-lg
       `,
       xs: `
-        pyly-ref-xs
+        text-xs pyly-ref-xs
 
-        lg:pyly-ref-base
-
-        text-xs
-
-        lg:text-base/tight
+        lg:text-base/tight lg:pyly-ref-base
       `,
     },
   },

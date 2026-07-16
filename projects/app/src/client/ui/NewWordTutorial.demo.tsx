@@ -12,7 +12,7 @@ export default () => {
   return (
     <View className="flex-1 items-center justify-center gap-4">
       <NewWordTutorial
-        className="h-[800px] w-[420px] rounded-xl border border-fg/20"
+        className="h-200 w-105 rounded-xl border border-fg/20"
         key={`${rerenderCount}-${initialStep ?? ``}`}
         initialStep={initialStep}
       />

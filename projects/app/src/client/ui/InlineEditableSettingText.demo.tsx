@@ -17,7 +17,7 @@ export default () => {
     <View className="gap-4">
       <DemoHanziWordKnob hanziWords={[`学:learn`, `好:good`, `看:look`]} />
 
-      <View className="w-[400px] gap-2 rounded-lg border border-fg/20 bg-fg-bg5 p-3">
+      <View className="w-100 gap-2 rounded-lg border border-fg/20 bg-fg-bg5 p-3">
         <InlineEditableSettingText
           setting={hanziWordMeaningHintTextSetting}
           settingKey={hintSettingKey}

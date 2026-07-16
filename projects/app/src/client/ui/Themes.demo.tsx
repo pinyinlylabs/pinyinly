@@ -21,7 +21,7 @@ export default () => {
           title={themeClass}
           key={themeClass}
           childrenClassName={`
-            px-2 py-1 gap-1
+            gap-1 px-2 py-1
 
             ${themeClass}
           `}
@@ -87,7 +87,7 @@ function ThemeExamples() {
         </View>
         <Text
           className={`
-            self-start rounded bg-bg-high px-2 py-1 font-sans text-[10px] font-bold leading-normal
+            self-start rounded bg-bg-high px-2 py-1 font-sans text-[10px] leading-normal font-bold
             text-fg
           `}
         >
@@ -95,7 +95,7 @@ function ThemeExamples() {
         </Text>
         <Text
           className={`
-            self-start rounded bg-fg px-2 py-1 font-sans text-[10px] font-bold leading-normal
+            self-start rounded bg-fg px-2 py-1 font-sans text-[10px] leading-normal font-bold
             text-on-fg
           `}
         >

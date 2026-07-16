@@ -47,14 +47,14 @@ export function HanziStrokesTile({
             highlightStrokes={parseIndexRanges(highlightStrokeRanges)}
           />
         ) : componentHanzi == null ? null : (
-          <Text className="pyly-body text-center text-lg">
+          <Text className="text-center pyly-body text-lg">
             {componentHanzi}
           </Text>
         )}
       </View>
 
       <Text
-        className="pyly-body w-full text-center"
+        className="w-full text-center pyly-body"
         ellipsizeMode={labelNumberOfLines == null ? undefined : `tail`}
         numberOfLines={labelNumberOfLines}
       >

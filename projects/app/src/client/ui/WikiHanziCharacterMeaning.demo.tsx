@@ -5,7 +5,7 @@ import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
 
 export default () => {
   return (
-    <View className="max-w-[500px] flex-1 gap-2">
+    <View className="max-w-125 flex-1 gap-2">
       <DemoBetaFeaturesKnob />
       <WikiHanziCharacterMeaningBox hanzi={characterData.hanzi} />
 

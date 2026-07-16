@@ -41,7 +41,7 @@ export function BookmarksList({
           <Text className="pyly-body-caption text-fg-dim">Loading...</Text>
         ) : words.length === 0 ? (
           <View className="rounded-lg bg-fg/5 p-6">
-            <Text className="pyly-body text-center text-fg-dim">
+            <Text className="text-center pyly-body text-fg-dim">
               No bookmarks yet.
             </Text>
           </View>

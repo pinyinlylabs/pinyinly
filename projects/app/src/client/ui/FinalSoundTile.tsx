@@ -28,7 +28,11 @@ export function FinalSoundTile({
       {...props}
       className={
         `group w-full overflow-hidden rounded-xl bg-bg-high shadow` +
-        (className == null ? `` : ` ${className}`)
+        (className == null
+          ? ``
+          : `
+            ${className}
+          `)
       }
     >
       <View
@@ -59,7 +63,7 @@ export function FinalSoundTile({
       >
         <Text
           className={
-            `text-base/tighter font-medium text-fg flex-1` +
+            `text-base/tighter flex-1 font-medium text-fg` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}

@@ -34,7 +34,12 @@ export function ToneSoundTile({
       className={
         tileClass({
           hasAssociation: nullIfEmpty(name) != null,
-        }) + (className == null ? `` : ` ${className}`)
+        }) +
+        (className == null
+          ? ``
+          : `
+            ${className}
+          `)
       }
     >
       {image == null ? null : (
@@ -59,7 +64,7 @@ export function ToneSoundTile({
       )}
       <View className="items-center">
         {decoration == null ? null : (
-          <Text className="-top-4 h-0 pt-2 text-4xl font-normal leading-none text-fg/20">
+          <Text className="-top-4 h-0 pt-2 text-4xl leading-none font-normal text-fg/20">
             {decoration}
           </Text>
         )}
@@ -69,7 +74,7 @@ export function ToneSoundTile({
       </View>
       {name == null ? (
         <Text
-          className="select-none overflow-visible leading-none text-fg/20"
+          className="overflow-visible leading-none text-fg/20 select-none"
           numberOfLines={1}
         >
           _____

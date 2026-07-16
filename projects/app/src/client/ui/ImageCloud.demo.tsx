@@ -5,10 +5,10 @@ export default () => {
   return (
     <>
       <ExampleStack title="415×320" showFrame>
-        <ImageCloud className="h-[320px] w-[415px]" />
+        <ImageCloud className="h-80 w-[415px]" />
       </ExampleStack>
       <ExampleStack title="300×200" showFrame>
-        <ImageCloud className="h-[200px] w-[300px]" />
+        <ImageCloud className="h-50 w-75" />
       </ExampleStack>
     </>
   );

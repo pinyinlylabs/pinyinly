@@ -439,8 +439,8 @@ function InlineEditableSettingImageHistoryMenu({
   onSelectImage: (assetId: AssetId) => void;
 } & FloatingMenuModalMenuProps) {
   return (
-    <View className="max-w-[420px] gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+    <View className="max-w-105 gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] text-fg-dim uppercase">
         History
       </Text>
       <InlineEditableSettingImageHistoryGrid

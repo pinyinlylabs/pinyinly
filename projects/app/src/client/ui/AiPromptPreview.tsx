@@ -31,8 +31,8 @@ export function AiPromptPreview({
           {section.title == null ? null : (
             <Text
               className={`
-                rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold uppercase
-                tracking-wide text-fg-dim
+                rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold tracking-wide
+                text-fg-dim uppercase
               `}
             >
               {section.title}
@@ -71,7 +71,7 @@ function PromptTextBlock({ label, text }: { label: string; text: string }) {
       </View>
       <Text
         selectable
-        className="whitespace-pre-wrap font-mono text-[13px] text-fg"
+        className="font-mono text-[13px] whitespace-pre-wrap text-fg"
       >
         {text}
       </Text>

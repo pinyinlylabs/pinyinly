@@ -27,7 +27,12 @@ export function InitialSoundTile({
     <View
       {...props}
       className={
-        `group w-full items-center` + (className == null ? `` : ` ${className}`)
+        `group w-full items-center` +
+        (className == null
+          ? ``
+          : `
+            ${className}
+          `)
       }
     >
       <View
@@ -82,7 +87,7 @@ export function InitialSoundTile({
       >
         <Text
           className={
-            `text-base/none text-fg font-medium` +
+            `text-base/none font-medium text-fg` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}

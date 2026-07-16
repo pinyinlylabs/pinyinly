@@ -13,7 +13,7 @@ export default () => {
     <View className="gap-4">
       <DemoHanziWordKnob hanziWords={[`学:learn`, `好:good`, `看:look`]} />
 
-      <View className="w-[420px] gap-2 rounded-lg border border-fg/20 bg-fg-bg5 p-3">
+      <View className="w-105 gap-2 rounded-lg border border-fg/20 bg-fg-bg5 p-3">
         <Text className="pyly-body-subheading">Inline editable image</Text>
         <InlineEditableSettingImage
           setting={hanziWordMeaningHintImageSetting}

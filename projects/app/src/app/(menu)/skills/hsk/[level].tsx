@@ -166,7 +166,7 @@ function HskSkillWordRows({
         >
           <Pressable className="flex flex-row items-center gap-2 py-1.5">
             {hasAnyHskLozenges ? (
-              <View className="w-[44px]">
+              <View className="w-11">
                 {row.hsk == null ? null : (
                   <HskLozenge hskLevel={row.hsk} size="sm" />
                 )}
@@ -191,7 +191,7 @@ function HskSkillWordRows({
               {row.gloss}
             </Text>
 
-            <View className="ml-2 w-[84px] items-end">
+            <View className="ml-2 w-21 items-end">
               <View className="relative h-1.5 w-full rounded bg-fg/10">
                 {milestonePercents.map((milestonePercent) => {
                   const milestoneProgress = milestonePercent / 100;
@@ -227,7 +227,7 @@ function HskSkillWordRows({
 }
 
 const milestoneDotClass = tv({
-  base: `absolute top-1/2 z-10 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full`,
+  base: `absolute top-1/2 z-10 size-1 -translate-1/2 rounded-full`,
   variants: {
     reached: {
       false: `bg-fg/30`,

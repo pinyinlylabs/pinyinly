@@ -334,15 +334,13 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   return (
     <View className={className}>
       <View
-        className={`mb-[20px] w-full max-w-[600px] flex-row items-center gap-3 self-center px-4`}
+        className={`mb-5 w-full max-w-150 flex-row items-center gap-3 self-center px-4`}
       >
         <QuizProgressBar progress={quizProgress.progress} />
         <QuizQueueButton />
       </View>
 
-      <View className="size-full max-w-[600px] flex-1 self-center">
-        {screen}
-      </View>
+      <View className="size-full max-w-150 flex-1 self-center">{screen}</View>
     </View>
   );
 };

@@ -5,7 +5,7 @@ import { View } from "react-native";
 import { tv } from "tailwind-variants";
 
 const screenClass = tv({
-  base: `h-[200px] w-[400px]`,
+  base: `h-50 w-100`,
 });
 
 export const NewWordIntro = ({ onNext: next }: { onNext: () => void }) => {
@@ -15,7 +15,7 @@ export const NewWordIntro = ({ onNext: next }: { onNext: () => void }) => {
       <View className="mt-auto flex-row items-end gap-4">
         <Image
           source={require(`../assets/illustrations/tutor.svg`)}
-          className="h-[94px] w-[80px] animate-fadein"
+          className="h-[94px] w-20 animate-fadein"
         />
 
         <View className="flex-1 pb-9">

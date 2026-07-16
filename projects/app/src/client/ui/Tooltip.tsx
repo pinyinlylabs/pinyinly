@@ -321,7 +321,7 @@ const tooltipContentClass = tv({
       false: `visible`,
     },
     variant: {
-      default: `max-w-[320px] rounded-md border border-fg/15 bg-bg-high px-3 py-2`,
+      default: `max-w-80 rounded-md border border-fg/15 bg-bg-high px-3 py-2`,
       custom: ``,
     },
   },

@@ -1,6 +1,6 @@
 /**
  * Tailwind screen breakpoints in pixels. These mirror the values in
- * tailwind.config.js so that JS logic can stay in sync with CSS classes.
+ * src/global.css @theme so that JS logic can stay in sync with CSS classes.
  */
 export const breakpoints = {
   sm: 640,

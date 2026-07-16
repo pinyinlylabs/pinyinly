@@ -61,7 +61,7 @@ export default () => (
 
       <ExampleStack title="text overflow" childrenClassName="flex-row">
         <ExampleStack title="tall" showFrame>
-          <View className="h-[400px] w-[120px]">
+          <View className="h-100 w-30">
             <TextAnswerButton
               className="flex-1"
               text="xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs"
@@ -88,7 +88,7 @@ export default () => (
         </ExampleStack>
 
         <ExampleStack title="short" showFrame>
-          <View className="h-[250px] w-[120px]">
+          <View className="h-[250px] w-30">
             <TextAnswerButton
               className="flex-1"
               text="xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs"
@@ -268,7 +268,7 @@ export default () => (
           key={fontSize}
           title={fontSize}
           showFrame
-          childrenClassName="w-[200px] h-[200px] items-start gap-2"
+          childrenClassName="size-[200px] items-start gap-2"
         >
           <TextAnswerButton
             state="error"

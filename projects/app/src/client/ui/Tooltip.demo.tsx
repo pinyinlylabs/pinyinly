@@ -44,7 +44,7 @@ export default () => (
               Preview
             </RectButton>
           </Tooltip.Trigger>
-          <Tooltip.Content className="min-w-[220px] gap-2">
+          <Tooltip.Content className="min-w-55 gap-2">
             <View className="flex-row items-center gap-2">
               <View className="size-8 items-center justify-center rounded bg-fg/10">
                 <Icon icon="document" />

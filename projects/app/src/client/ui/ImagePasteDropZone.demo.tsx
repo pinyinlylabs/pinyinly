@@ -10,7 +10,7 @@ export default () => {
   return (
     <View className="gap-3">
       <ExampleStack title="paste or upload" showFrame>
-        <View className="w-[320px]">
+        <View className="w-80">
           <ImagePasteDropZone
             onUploadComplete={(assetId) => {
               setLastAssetId(assetId);

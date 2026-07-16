@@ -52,12 +52,7 @@ config = {
   },
 };
 
-config = withNativeWind(config, {
-  input: `./src/global.css`,
-  inlineRem: 16,
-  // @ts-expect-error this is overriden, see https://github.com/nativewind/nativewind/pull/1371
-  getCSSForPlatform: undefined,
-});
+config = withNativeWind(config);
 
 // Doing Sentry last is probably important so that the hashed debug IDs are
 // based on the final content of the final and aren't stripped by any other

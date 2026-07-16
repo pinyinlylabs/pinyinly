@@ -326,11 +326,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 <Text
                   className={
                     isAtLimit
-                      ? `
-                        text-right text-[11px] text-fg
-
-                        [--color-fg:var(--color-warning)]
-                      `
+                      ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
                       : `text-right text-[11px] text-fg-dim`
                   }
                 >
@@ -345,7 +341,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
             </View>
           ) : null}
           {showHistoryButton ? (
-            <View className="absolute right-2 top-2">
+            <View className="absolute top-2 right-2">
               <FloatingMenuModal
                 menu={
                   <InlineEditableSettingHistoryMenu
@@ -471,7 +467,7 @@ const emptyTextStyle = tv({
   variants: {
     variant: {
       body: `pyly-body text-fg-dim`,
-      title: `select-none text-3xl text-fg/20`,
+      title: `text-3xl text-fg/20 select-none`,
     },
   },
 });
@@ -480,7 +476,7 @@ const inputText = tv({
   base: `text-left`,
   variants: {
     variant: {
-      body: `pyly-body rounded-md bg-bg-high px-2 py-1 text-fg`,
+      body: `rounded-md bg-bg-high px-2 py-1 pyly-body text-fg`,
       title: `rounded-md bg-bg-high px-1 py-0.5 text-3xl font-bold text-fg`,
     },
   },
@@ -531,7 +527,7 @@ function InlineEditableSettingHistoryMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <ScrollView
-      className="max-h-[400px] w-[300px] rounded-xl bg-bg-high shadow-lg"
+      className="max-h-100 w-75 rounded-xl bg-bg-high shadow-lg"
       contentContainerClassName="gap-1 p-2"
     >
       {entries.map((entry) => (

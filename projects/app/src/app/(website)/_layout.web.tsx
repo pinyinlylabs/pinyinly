@@ -26,7 +26,7 @@ export default function WebsiteLayout() {
     <>
       <header
         className={`
-          www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-bg
+          www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-18 justify-center border-0 bg-bg
           transition-all
 
           ${
@@ -46,7 +46,7 @@ export default function WebsiteLayout() {
           >
             <Image
               source={require(`../../assets/logo/logo-row.svg`)}
-              className="h-[40px] w-[200px] shrink self-center text-fg"
+              className="h-10 w-50 shrink self-center text-fg"
               tintColor="currentColor"
               contentFit="fill"
             />
@@ -71,7 +71,7 @@ export default function WebsiteLayout() {
         </View>
       </header>
       <ScrollView
-        contentContainerClassName="bg-[center_top_50svh] bg-no-repeat bg-contain"
+        contentContainerClassName="bg-contain bg-[center_top_50svh] bg-no-repeat"
         contentContainerStyle={{ backgroundImage: `url(${calligraphy.uri})` }}
       >
         <div className="h-px w-full" ref={ref} /* Scroll detector */ />

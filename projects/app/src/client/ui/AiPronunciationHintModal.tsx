@@ -266,7 +266,7 @@ export function AiPronunciationHintModal({
                 ) : null
               ) : (
                 <View className="rounded-lg border border-fg-bg10 bg-fg-bg5 px-3 py-2">
-                  <Text className="pyly-body pb-1">
+                  <Text className="pb-1 pyly-body">
                     <Pylymark source={storyPreamble} />
                   </Text>
 
@@ -302,13 +302,15 @@ export function AiPronunciationHintModal({
                             <View className="flex-1 gap-1">
                               <Text
                                 className={
-                                  `w-fit rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold ` +
-                                  `uppercase tracking-wide text-fg-dim`
+                                  `
+                                    w-fit rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px]
+                                    font-semibold
+                                  ` + `tracking-wide text-fg-dim uppercase`
                                 }
                               >
                                 {suggestion.strategyLabel}
                               </Text>
-                              <Text className="pyly-body flex-1">
+                              <Text className="flex-1 pyly-body">
                                 <Pylymark
                                   source={normalizePronunciationStoryEnding(
                                     suggestion.hint,
