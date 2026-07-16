@@ -40,7 +40,15 @@ import {
 import { retryMutation as retryMutationV12 } from "./replicache/v12";
 import { retryMutation as retryMutationV14 } from "./replicache/v14";
 
-const inngestLogger = pino(
+declare global {
+  var __pylyPino: pino.Logger | undefined;
+}
+
+// In development this module will be recreated multiple times, and pino will
+// cause a large memory leak if it's re-instantiated because it hooks into
+// process.on('exit') and never removes the listener. So we store it on
+// globalThis to avoid re-instantiating it.
+globalThis.__pylyPino ??= pino(
   { name: `inngest` },
   process.env.NODE_ENV === `development`
     ? pretty({
@@ -55,7 +63,7 @@ const inngestLogger = pino(
 // Create a client to send and receive events
 export const inngest = new Inngest({
   id: `my-app`,
-  logger: inngestLogger,
+  logger: globalThis.__pylyPino,
   middleware: [sentryMiddleware()],
   schemas: new EventSchemas().fromSchema({
     "asset/sync-upload": z.object({

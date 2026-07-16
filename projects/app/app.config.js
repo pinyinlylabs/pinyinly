@@ -131,7 +131,13 @@ export const expo = {
     [`expo-dev-client`, { launchMode: `most-recent` }],
     [`expo-font`],
     [`expo-localization`],
-    [`expo-router`, { origin: `https://${devDomain ?? prodDomain}` }],
+    [
+      `expo-router`,
+      {
+        origin: `https://${devDomain ?? prodDomain}`,
+        unstable_useServerMiddleware: true,
+      },
+    ],
     [`expo-secure-store`],
     [
       `expo-splash-screen`,
