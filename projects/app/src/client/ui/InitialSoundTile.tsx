@@ -52,12 +52,7 @@ export function InitialSoundTile({
               imageWidth={image.imageWidth}
               imageHeight={image.imageHeight}
               frameShape="circle"
-              className="size-full"
-              imageClassName={`
-                transition-all duration-150 saturate-0
-
-                group-hover:saturate-100
-              `}
+              className={`size-full`}
             />
           )}
         </View>
