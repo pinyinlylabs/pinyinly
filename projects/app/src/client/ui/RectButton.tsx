@@ -143,15 +143,13 @@ const pressableClass = tv({
       filled: `
         rounded-xl
 
-        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
-        focus-visible:outline-fg/75
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-fg/75
       `,
       outline: `rounded-xl`,
       option: `
         rounded-xl
 
-        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
-        focus-visible:outline-sky/75
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky/75
       `,
       barePrimary: `transition-transform`,
       bare: `transition-transform`,

@@ -4,6 +4,8 @@ import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { CompactWordRows } from "@/client/ui/CompactWordRows";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
+import type { SaveActorToDirectoryTarget } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -37,7 +39,6 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundMnemonicIdentitySetting,
   pinyinSoundModelSheetImageSetting,
-  pinyinSoundNameArticleSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
@@ -168,10 +169,13 @@ function MnemonicStoryRoleSection({
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
+  const [isSaveToOpen, setIsSaveToOpen] = useState(false);
+  const [saveToResult, setSaveToResult] = useState<string | null>(null);
   const [mnemonicIdentityDraft, setMnemonicIdentityDraft] = useState(``);
   const [mnemonicIdentityError, setMnemonicIdentityError] = useState<
     string | null
   >(null);
+  const actorDirectory = usePinyinSoundActors();
   const isFinalSound = isFinalSoundId(pinyinSoundId);
   const chart = loadPylyPinyinChart();
   const soundLabel = getPinyinSoundLabel(pinyinSoundId, chart);
@@ -237,6 +241,41 @@ function MnemonicStoryRoleSection({
     modelSheetImageSetting.value?.imageId != null ||
     hasMnemonicIdentity;
 
+  const saveToActorDirectory = (target: SaveActorToDirectoryTarget) => {
+    const actorId = actorDirectory.saveActorToDirectory({
+      target,
+      name: characterNameSetting.value?.text ?? null,
+      description: mnemonicDescriptionSetting.value?.text ?? null,
+      mnemonicIdentity: mnemonicIdentitySetting.value?.mnemonicIdentity ?? null,
+      image:
+        mnemonicImageSetting.value == null
+          ? null
+          : {
+              imageId: mnemonicImageSetting.value.imageId ?? null,
+              imageCrop: mnemonicImageSetting.value.imageCrop ?? null,
+              imageWidth: mnemonicImageSetting.value.imageWidth ?? null,
+              imageHeight: mnemonicImageSetting.value.imageHeight ?? null,
+            },
+      modelSheetImage:
+        modelSheetImageSetting.value == null
+          ? null
+          : {
+              imageId: modelSheetImageSetting.value.imageId ?? null,
+              imageCrop: modelSheetImageSetting.value.imageCrop ?? null,
+              imageWidth: modelSheetImageSetting.value.imageWidth ?? null,
+              imageHeight: modelSheetImageSetting.value.imageHeight ?? null,
+            },
+      fallbackName: soundLabel,
+    });
+
+    setIsSaveToOpen(false);
+    setSaveToResult(
+      target.kind === `new`
+        ? `Saved to new actor ${actorId}.`
+        : `Overwrote actor ${actorId}.`,
+    );
+  };
+
   return (
     <WikiTitledBox
       title="Mnemonic story role"
@@ -250,13 +289,6 @@ function MnemonicStoryRoleSection({
         ) : (
           <>
             <View className="gap-2">
-              {isEditMode ? (
-                <InlineEditableSettingText
-                  setting={pinyinSoundNameArticleSetting}
-                  settingKey={{ soundId: pinyinSoundId }}
-                  placeholder="Article (e.g. the, a)"
-                />
-              ) : null}
               <InlineEditableSettingText
                 setting={pinyinSoundDescriptionSetting}
                 settingKey={{ soundId: pinyinSoundId }}
@@ -267,7 +299,7 @@ function MnemonicStoryRoleSection({
               {isEditMode && !isFinalSound ? (
                 <View className="flex-row items-center justify-between">
                   <Text className="font-sans text-[13px] text-fg-dim">
-                    Need help making this character memorable?
+                    Need a reusable mnemonic actor profile?
                   </Text>
                   <RectButton
                     variant="bare"
@@ -277,6 +309,67 @@ function MnemonicStoryRoleSection({
                   >
                     Use AI
                   </RectButton>
+                </View>
+              ) : null}
+              {isEditMode ? (
+                <View className="gap-2 rounded-lg border border-fg/10 bg-bg-high p-3">
+                  <Text className="pyly-body-caption text-fg-dim">
+                    Actor directory
+                  </Text>
+                  <View className="flex-row flex-wrap gap-2">
+                    <RectButton
+                      variant="option"
+                      onPress={() => {
+                        setIsSaveToOpen((value) => !value);
+                      }}
+                    >
+                      Save to…
+                    </RectButton>
+                  </View>
+
+                  {isSaveToOpen ? (
+                    <View className="gap-2">
+                      <RectButton
+                        variant="option"
+                        onPress={() => {
+                          saveToActorDirectory({ kind: `new` });
+                        }}
+                      >
+                        Create new actor
+                      </RectButton>
+
+                      {actorDirectory.actors.length === 0 ? (
+                        <Text className="pyly-body-caption text-fg-dim">
+                          No existing actors to overwrite yet.
+                        </Text>
+                      ) : (
+                        actorDirectory.actors.map((actor) => (
+                          <RectButton
+                            key={actor.actorId}
+                            variant="bareDim"
+                            onPress={() => {
+                              saveToActorDirectory({
+                                kind: `existing`,
+                                actorId: actor.actorId,
+                              });
+                            }}
+                          >
+                            Overwrite{` `}
+                            {actor.name == null ||
+                            actor.name.trim().length === 0
+                              ? actor.actorId
+                              : actor.name}
+                          </RectButton>
+                        ))
+                      )}
+                    </View>
+                  ) : null}
+
+                  {saveToResult == null ? null : (
+                    <Text className="pyly-body-caption text-fg-dim">
+                      {saveToResult}
+                    </Text>
+                  )}
                 </View>
               ) : null}
             </View>
@@ -380,13 +473,15 @@ function MnemonicStoryRoleSection({
 
       {showAiModal && isEditMode && !isFinalSound ? (
         <AiLeadCharacterDescriptionModal
-          characterName={characterName}
-          sound={soundLabel}
-          existingDescription={mnemonicDescriptionSetting.value?.text}
-          onApplyDescription={(description) => {
+          identity={characterName}
+          onApplyActor={(actor) => {
             mnemonicDescriptionSetting.setValue({
               soundId: pinyinSoundId,
-              text: description,
+              text: actor.summary,
+            });
+            mnemonicIdentitySetting.setValue({
+              soundId: pinyinSoundId,
+              mnemonicIdentity: actor,
             });
             setShowAiModal(false);
           }}

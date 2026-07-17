@@ -72,6 +72,12 @@ export const assetIdSchema = z
   .regex(/^sha256\/[A-Za-z0-9_-]{43}$/u, `Invalid AssetId format`)
   .pipe(z.custom<AssetId>());
 
+/**
+ * A reusable actor record used by sound mnemonics.
+ */
+export type ActorId = string & z.$brand<`ActorId`>;
+export const actorIdSchema = z.custom<ActorId>(isString);
+
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;
 export const pinyinSoundIdPinyinlyObjectIdKind = `ps` as const;

@@ -2,7 +2,7 @@ import type { ChatPromptMessage } from "@/server/lib/ai";
 import { RectButton } from "@/client/ui/RectButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import {
-  buildLeadCharacterDescriptionPrompt,
+  buildMnemonicActorProfilePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintPrompt,
@@ -17,7 +17,7 @@ type PromptModeKind =
   | `meaning-hint`
   | `pronunciation-hint`
   | `sub-location-description`
-  | `lead-character-description`;
+  | `mnemonic-actor`;
 
 type CopyStateKind = `idle` | `copied` | `unsupported`;
 
@@ -31,7 +31,6 @@ type MeaningHintInputType = {
 
 type PronunciationHintInputType = {
   leadName: string;
-  leadArticle: string;
   leadBio: string;
   locationName: string;
   locationDescription: string;
@@ -49,11 +48,8 @@ type SubLocationDescriptionInputType = {
   countText: string;
 };
 
-type LeadCharacterDescriptionInputType = {
-  name: string;
-  sound: string;
-  existingDescription: string;
-  countText: string;
+type MnemonicActorInputType = {
+  identity: string;
 };
 
 const defaultMeaningHintInput: MeaningHintInputType = {
@@ -66,7 +62,6 @@ const defaultMeaningHintInput: MeaningHintInputType = {
 
 const defaultPronunciationHintInput: PronunciationHintInputType = {
   leadName: `seal`,
-  leadArticle: `the`,
   leadBio: `A dramatic performer who overreacts to tiny mistakes.`,
   locationName: `kitchen`,
   locationDescription: `Bright tiled kitchen packed with loud appliances.`,
@@ -84,13 +79,9 @@ const defaultSubLocationDescriptionInput: SubLocationDescriptionInputType = {
   countText: `4`,
 };
 
-const defaultLeadCharacterDescriptionInput: LeadCharacterDescriptionInputType =
-  {
-    name: `Chef Li`,
-    sound: `li`,
-    existingDescription: `Known for balancing bowls on his head while teaching.`,
-    countText: `4`,
-  };
+const defaultMnemonicActorInput: MnemonicActorInputType = {
+  identity: `Dracula`,
+};
 
 const meaningHintPresets: MeaningHintInputType[] = [
   defaultMeaningHintInput,
@@ -114,7 +105,6 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
   defaultPronunciationHintInput,
   {
     leadName: `owl`,
-    leadArticle: `an`,
     leadBio: `Always whispers secrets with intense seriousness.`,
     locationName: `library`,
     locationDescription: `Ancient stacks with dusty ladders and green lamps.`,
@@ -124,7 +114,6 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
   },
   {
     leadName: `robot`,
-    leadArticle: `a`,
     leadBio: `Talks like a motivational coach between beeps.`,
     locationName: `gym`,
     locationDescription: `Echoing room with metallic equipment and mirrors.`,
@@ -154,19 +143,13 @@ const subLocationDescriptionPresets: SubLocationDescriptionInputType[] = [
   },
 ];
 
-const leadCharacterDescriptionPresets: LeadCharacterDescriptionInputType[] = [
-  defaultLeadCharacterDescriptionInput,
+const mnemonicActorPresets: MnemonicActorInputType[] = [
+  defaultMnemonicActorInput,
   {
-    name: `Mina`,
-    sound: `mi`,
-    existingDescription: `Collects tiny clocks and times every conversation.`,
-    countText: `5`,
+    identity: `Leprechaun`,
   },
   {
-    name: `Gao`,
-    sound: `gao`,
-    existingDescription: `Climbs on chairs to make every announcement.`,
-    countText: `4`,
+    identity: `Bear`,
   },
 ];
 
@@ -186,17 +169,15 @@ export default () => {
     useState<SubLocationDescriptionInputType>(
       defaultSubLocationDescriptionInput,
     );
-  const [leadCharacterInput, setLeadCharacterInput] =
-    useState<LeadCharacterDescriptionInputType>(
-      defaultLeadCharacterDescriptionInput,
-    );
+  const [mnemonicActorInput, setMnemonicActorInput] =
+    useState<MnemonicActorInputType>(defaultMnemonicActorInput);
 
   const promptBuild = buildCurrentPrompt({
     mode,
     meaningInput,
     pronunciationInput,
     subLocationInput,
-    leadCharacterInput,
+    mnemonicActorInput,
   });
 
   const promptPayload =
@@ -245,10 +226,10 @@ export default () => {
           }}
         />
         <ModeButton
-          label="Lead Character Description"
-          active={mode === `lead-character-description`}
+          label="Mnemonic Actor"
+          active={mode === `mnemonic-actor`}
           onPress={() => {
-            setMode(`lead-character-description`);
+            setMode(`mnemonic-actor`);
             setCopyState(`idle`);
           }}
         />
@@ -359,18 +340,6 @@ export default () => {
                 setPronunciationInput((current) => ({
                   ...current,
                   leadName: value,
-                }));
-              }}
-            />
-
-            <FieldLabel text="Lead Character Article (optional)" />
-            <TextInputSingle
-              placeholder="the"
-              value={pronunciationInput.leadArticle}
-              onChangeText={(value) => {
-                setPronunciationInput((current) => ({
-                  ...current,
-                  leadArticle: value,
                 }));
               }}
             />
@@ -543,71 +512,34 @@ export default () => {
           </View>
         ) : null}
 
-        {mode === `lead-character-description` ? (
+        {mode === `mnemonic-actor` ? (
           <View className="gap-3">
             <PresetRow
-              count={leadCharacterDescriptionPresets.length}
+              count={mnemonicActorPresets.length}
               onApply={(index) => {
-                const preset = leadCharacterDescriptionPresets[index];
+                const preset = mnemonicActorPresets[index];
                 if (preset == null) {
                   return;
                 }
-                setLeadCharacterInput(preset);
+                setMnemonicActorInput(preset);
                 setCopyState(`idle`);
               }}
               onReset={() => {
-                setLeadCharacterInput(defaultLeadCharacterDescriptionInput);
+                setMnemonicActorInput(defaultMnemonicActorInput);
                 setCopyState(`idle`);
               }}
             />
 
-            <FieldLabel text="Character Name" />
+            <FieldLabel text="Actor Identity" />
             <TextInputSingle
-              placeholder="Chef Li"
-              value={leadCharacterInput.name}
+              placeholder="Dracula"
+              value={mnemonicActorInput.identity}
               onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
+                setMnemonicActorInput((current) => ({
                   ...current,
-                  name: value,
+                  identity: value,
                 }));
               }}
-            />
-
-            <FieldLabel text="Associated Pinyin Sound" />
-            <TextInputSingle
-              placeholder="li"
-              value={leadCharacterInput.sound}
-              onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
-                  ...current,
-                  sound: value,
-                }));
-              }}
-            />
-
-            <FieldLabel text="Existing Description (optional)" />
-            <MultilineInput
-              value={leadCharacterInput.existingDescription}
-              onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
-                  ...current,
-                  existingDescription: value,
-                }));
-              }}
-              placeholder="Optional existing personality cue"
-            />
-
-            <FieldLabel text="Count" />
-            <TextInputSingle
-              placeholder="4"
-              value={leadCharacterInput.countText}
-              onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
-                  ...current,
-                  countText: value,
-                }));
-              }}
-              keyboardType="number-pad"
             />
           </View>
         ) : null}
@@ -812,7 +744,7 @@ function buildCurrentPrompt(args: {
   meaningInput: MeaningHintInputType;
   pronunciationInput: PronunciationHintInputType;
   subLocationInput: SubLocationDescriptionInputType;
-  leadCharacterInput: LeadCharacterDescriptionInputType;
+  mnemonicActorInput: MnemonicActorInputType;
 }): { result: ChatPromptMessage[] | null; errors: string[] } {
   const errors: string[] = [];
 
@@ -920,10 +852,6 @@ function buildCurrentPrompt(args: {
     const input = {
       leadCharacter: {
         name: args.pronunciationInput.leadName.trim(),
-        article:
-          args.pronunciationInput.leadArticle.trim().length === 0
-            ? undefined
-            : args.pronunciationInput.leadArticle.trim(),
         bio:
           args.pronunciationInput.leadBio.trim().length === 0
             ? undefined
@@ -1009,29 +937,16 @@ function buildCurrentPrompt(args: {
     return { result: result.messages, errors };
   }
 
-  const count = parseCount(args.leadCharacterInput.countText);
-  if (args.leadCharacterInput.name.trim().length === 0) {
-    errors.push(`Character Name is required.`);
-  }
-  if (args.leadCharacterInput.sound.trim().length === 0) {
-    errors.push(`Associated Pinyin Sound is required.`);
-  }
-  if (count == null) {
-    errors.push(`Count must be a positive integer.`);
+  if (args.mnemonicActorInput.identity.trim().length === 0) {
+    errors.push(`Actor Identity is required.`);
   }
 
   if (errors.length > 0) {
     return { result: null, errors };
   }
 
-  const result = buildLeadCharacterDescriptionPrompt({
-    name: args.leadCharacterInput.name.trim(),
-    sound: args.leadCharacterInput.sound.trim(),
-    existingDescription:
-      args.leadCharacterInput.existingDescription.trim().length === 0
-        ? undefined
-        : args.leadCharacterInput.existingDescription.trim(),
-    count: count ?? 1,
+  const result = buildMnemonicActorProfilePrompt({
+    identity: args.mnemonicActorInput.identity.trim(),
   });
 
   return { result: result.messages, errors };

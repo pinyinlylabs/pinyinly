@@ -63,7 +63,7 @@ export function FinalSoundTile({
       >
         <Text
           className={
-            `text-base/tighter flex-1 font-medium text-fg` +
+            `flex-1 text-base/tight font-medium text-fg` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}

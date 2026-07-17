@@ -62,7 +62,7 @@ export const Section = ({
       <View className="flex-row" ref={ref}>
         <View
           className={`
-            pyly-color-scheme-light theme-default flex-1 bg-bg/90 p-2
+            pyly-color-scheme-light flex-1 bg-bg/90 p-2 theme-default
 
             hover:bg-bg
           `}

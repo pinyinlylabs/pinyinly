@@ -93,7 +93,7 @@ const tileClass = tv({
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
-      filled: `theme-sky-panel items-center justify-center`,
+      filled: `items-center justify-center theme-sky-panel`,
     },
     isCharacter: {
       true: ``,
@@ -118,7 +118,7 @@ const outlineClass = tv({
   variants: {
     variant: {
       outline: ``,
-      filled: `rounded-lg outline outline-1 -outline-offset-1 outline-fg-loud/10`,
+      filled: `rounded-lg outline-1 -outline-offset-1 outline-fg-loud/10`,
     },
     size: {
       "10": `rounded-md`,

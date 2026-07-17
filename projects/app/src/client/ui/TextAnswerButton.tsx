@@ -288,8 +288,8 @@ const bgAnimatedClass = tv({
 
 const pressableClass = tv({
   base: `
-    focus-visible:rounded-lg focus-visible:outline focus-visible:outline-4
-    focus-visible:outline-offset-2 focus-visible:outline-fg/75
+    focus-visible:rounded-lg focus-visible:outline-4 focus-visible:outline-offset-2
+    focus-visible:outline-fg/75
 
     web:transition-[outline-width]
   `,

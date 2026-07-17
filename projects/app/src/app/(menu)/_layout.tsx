@@ -66,7 +66,7 @@ function MenuLayoutContent() {
         onScroll={handleMenuScroll}
         scrollEventThrottle={16}
         contentContainerClassName={`
-          pt-safe-offset-[56px] flex-row px-safe-or-4
+          flex-row pt-safe-offset-14 px-safe-or-4
 
           sm:py-safe-offset-5
         `}

@@ -7,6 +7,7 @@ import type { ImageCrop } from "./imageCrop";
 
 interface InitialSoundTileProps extends ViewProps {
   label: string;
+  showLabel?: boolean;
   name: string | null;
   image: {
     assetId: AssetId;
@@ -19,6 +20,7 @@ interface InitialSoundTileProps extends ViewProps {
 export function InitialSoundTile({
   className,
   label,
+  showLabel = true,
   name,
   image,
   ...props
@@ -36,11 +38,11 @@ export function InitialSoundTile({
       }
     >
       <View
-        className={`
-          relative z-10 mb-5 size-28 transition-colors duration-150
-
-          group-hover:border-fg/10
-        `}
+        className={
+          `relative z-10 size-28 transition-colors duration-150` +
+          (showLabel ? ` mb-5` : ` mb-2`) +
+          ` group-hover:border-fg/10`
+        }
       >
         <View
           className={`
@@ -62,20 +64,22 @@ export function InitialSoundTile({
           )}
         </View>
 
-        <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
-          <View
-            className={`
-              min-h-8 min-w-8 items-center justify-center rounded-full border border-fg/10
-              bg-fg-loud px-2.5 shadow transition-all duration-150
+        {showLabel ? (
+          <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
+            <View
+              className={`
+                min-h-8 min-w-8 items-center justify-center rounded-full border border-fg/10
+                bg-fg-loud px-2.5 shadow transition-all duration-150
 
-              group-hover:brightness-110
-            `}
-          >
-            <Text className="font-sans text-sm/none font-semibold text-bg">
-              {label}
-            </Text>
+                group-hover:brightness-110
+              `}
+            >
+              <Text className="font-sans text-sm/none font-semibold text-bg">
+                {label}
+              </Text>
+            </View>
           </View>
-        </View>
+        ) : null}
       </View>
 
       <View

@@ -1,4 +1,5 @@
 import type {
+  ActorId,
   AssetId,
   HanziText,
   PinyinSoundGroupId,
@@ -12,6 +13,7 @@ import {
 } from "@/data/pinyin";
 import {
   rAssetId,
+  rActorId,
   rHanziWord,
   rPinyinlyObjectId,
   rPinyinSoundGroupId,
@@ -177,11 +179,48 @@ export const pinyinSoundMnemonicIdentitySetting = defineUserSetting({
   }),
 });
 
-export const pinyinSoundNameArticleSetting = defineUserSetting({
-  entity: r.entity(`psna/[soundId]`, {
-    soundId: rPinyinSoundId().alias(`i`),
+export const pinyinSoundActorNameSetting = defineUserSetting({
+  entity: r.entity(`psan/[actorId]`, {
+    actorId: rActorId().alias(`a`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
+  historyLimit: 20,
+});
+
+export const pinyinSoundActorDescriptionSetting = defineUserSetting({
+  entity: r.entity(`psad/[actorId]`, {
+    actorId: rActorId().alias(`a`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+  historyLimit: 20,
+});
+
+export const pinyinSoundActorMnemonicIdentitySetting = defineUserSetting({
+  entity: r.entity(`psami/[actorId]`, {
+    actorId: rActorId().alias(`a`),
+    mnemonicIdentity: r.json().optional().alias(`j`),
+  }),
+});
+
+export const pinyinSoundActorImageSetting = defineUserSetting({
+  entity: r.entity(`psai/[actorId]`, {
+    actorId: rActorId().alias(`a`),
+    ...imageSettingFields,
+  }) satisfies UserSettingImageEntity,
+});
+
+export const pinyinSoundActorModelSheetImageSetting = defineUserSetting({
+  entity: r.entity(`psams/[actorId]`, {
+    actorId: rActorId().alias(`a`),
+    ...imageSettingFields,
+  }) satisfies UserSettingImageEntity,
+});
+
+export const pinyinSoundActorSelectionSetting = defineUserSetting({
+  entity: r.entity(`psas/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    actorIds: r.json().optional().alias(`a`),
+  }),
 });
 
 export const pinyinSoundImageSetting = defineUserSetting({
@@ -197,12 +236,6 @@ export const pinyinSoundModelSheetImageSetting = defineUserSetting({
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
 });
-
-export function pinyinSoundNameArticleSettingKey(
-  soundId: PinyinSoundId,
-): string {
-  return pinyinSoundNameArticleSetting.entity.marshalKey({ soundId });
-}
 
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundNameSetting.entity.marshalKey({ soundId });
@@ -230,6 +263,38 @@ export function pinyinSoundMnemonicIdentitySettingKey(
   soundId: PinyinSoundId,
 ): string {
   return pinyinSoundMnemonicIdentitySetting.entity.marshalKey({ soundId });
+}
+
+export function pinyinSoundActorNameSettingKey(actorId: ActorId): string {
+  return pinyinSoundActorNameSetting.entity.marshalKey({ actorId });
+}
+
+export function pinyinSoundActorDescriptionSettingKey(
+  actorId: ActorId,
+): string {
+  return pinyinSoundActorDescriptionSetting.entity.marshalKey({ actorId });
+}
+
+export function pinyinSoundActorMnemonicIdentitySettingKey(
+  actorId: ActorId,
+): string {
+  return pinyinSoundActorMnemonicIdentitySetting.entity.marshalKey({ actorId });
+}
+
+export function pinyinSoundActorImageSettingKey(actorId: ActorId): string {
+  return pinyinSoundActorImageSetting.entity.marshalKey({ actorId });
+}
+
+export function pinyinSoundActorModelSheetImageSettingKey(
+  actorId: ActorId,
+): string {
+  return pinyinSoundActorModelSheetImageSetting.entity.marshalKey({ actorId });
+}
+
+export function pinyinSoundActorSelectionSettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinSoundActorSelectionSetting.entity.marshalKey({ soundId });
 }
 
 export function pinyinSoundImageSettingKey(soundId: PinyinSoundId): string {
@@ -444,6 +509,8 @@ export function userHanziSettingLike(hanzi: HanziText): string {
  * Used for syncing assets between servers.
  */
 export const imageSettingDefs = [
+  pinyinSoundActorImageSetting,
+  pinyinSoundActorModelSheetImageSetting,
   pinyinSoundImageSetting,
   pinyinSoundModelSheetImageSetting,
   hanziWordMeaningHintImageSetting,
@@ -475,6 +542,12 @@ export const userSettingDefinitions = [
   pinyinFinalToneNameSetting,
   pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
+  pinyinSoundActorDescriptionSetting,
+  pinyinSoundActorImageSetting,
+  pinyinSoundActorMnemonicIdentitySetting,
+  pinyinSoundActorModelSheetImageSetting,
+  pinyinSoundActorNameSetting,
+  pinyinSoundActorSelectionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,

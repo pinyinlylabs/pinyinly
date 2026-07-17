@@ -9,7 +9,7 @@ import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
-  buildLeadCharacterDescriptionPrompt,
+  buildMnemonicActorProfilePrompt,
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
@@ -24,7 +24,6 @@ const pronunciationHintInputSchema = z
       .object({
         name: z.string().min(1),
         bio: z.string().optional(),
-        article: z.string().optional(),
       })
       .strict(),
     location: z
@@ -139,12 +138,9 @@ const subLocationDescriptionInputSchema = z
   })
   .strict();
 
-const leadCharacterDescriptionInputSchema = z
+const mnemonicActorIdentityInputSchema = z
   .object({
-    name: z.string().min(1),
-    sound: z.string().min(1),
-    existingDescription: z.string().optional(),
-    count: z.number().int().min(1).max(6),
+    identity: z.string().min(1),
   })
   .strict();
 
@@ -319,17 +315,14 @@ export const aiRouter = router({
       }
     }),
 
-  generateLeadCharacterDescriptions: authedProcedure
-    .input(leadCharacterDescriptionInputSchema)
-    .output(buildLeadCharacterDescriptionPrompt.schema)
+  generateMnemonicActorIdentity: authedProcedure
+    .input(mnemonicActorIdentityInputSchema)
+    .output(buildMnemonicActorProfilePrompt.schema)
     .mutation(async ({ input, signal }) => {
-      const { name, sound, existingDescription, count } = input;
+      const { identity } = input;
 
-      const prompt = buildLeadCharacterDescriptionPrompt({
-        name,
-        sound,
-        existingDescription,
-        count,
+      const prompt = buildMnemonicActorProfilePrompt({
+        identity,
       });
 
       try {
@@ -338,10 +331,10 @@ export const aiRouter = router({
         });
         return data;
       } catch (error) {
-        console.error(`Failed to generate lead character descriptions:`, error);
+        console.error(`Failed to generate mnemonic actor identity:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
-          message: `Unable to generate descriptions`,
+          message: `Unable to generate mnemonic actor identity`,
         });
       }
     }),

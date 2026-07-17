@@ -103,7 +103,7 @@ function Header({
         }}
       />
 
-      <View className="theme-grass-panel sticky -top-30 z-10 h-46 bg-bg">
+      <View className="sticky -top-30 z-10 h-46 bg-bg theme-grass-panel">
         <View className="sticky top-1 z-10 h-14 flex-row items-center pl-4">
           <Pressable
             onPress={onDismiss}
@@ -135,7 +135,7 @@ function Header({
             className={`
               text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
 
-              ${entry?.isIntersecting === false ? `scale-0.75` : `scale-100`}
+              ${entry?.isIntersecting === false ? `scale-75` : `scale-100`}
             `}
           >
             {title}

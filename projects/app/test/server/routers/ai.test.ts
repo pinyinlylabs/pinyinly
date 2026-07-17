@@ -1,5 +1,5 @@
 import {
-  buildLeadCharacterDescriptionPrompt,
+  buildMnemonicActorProfilePrompt,
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
@@ -393,9 +393,9 @@ describe(
       `);
     });
 
-    test(`lead character with article`, () => {
+    test(`lead character data`, () => {
       const result = buildPronunciationHintFantasyPrompt({
-        leadCharacter: { name: `seal`, article: `the` },
+        leadCharacter: { name: `seal` },
         location: { name: `River Stage bathroom` },
         cue: { word: `color` },
         count: 2,
@@ -438,8 +438,7 @@ describe(
         <data>
         {
           "leadCharacter": {
-            "name": "seal",
-            "article": "the"
+            "name": "seal"
           },
           "location": {
             "name": "River Stage bathroom"
@@ -971,100 +970,33 @@ describe(
 );
 
 describe(
-  `buildLeadCharacterDescriptionPrompt` satisfies HasNameOf<
-    typeof buildLeadCharacterDescriptionPrompt
+  `buildMnemonicActorProfilePrompt` satisfies HasNameOf<
+    typeof buildMnemonicActorProfilePrompt
   >,
   () => {
-    test(`minimal input (no existing description)`, () => {
-      const result = buildLeadCharacterDescriptionPrompt({
-        name: `Marcus`,
-        sound: `m`,
-        count: 4,
+    test(`uses mnemonic actor system prompt and input wrapper`, () => {
+      const result = buildMnemonicActorProfilePrompt({
+        identity: `Dracula`,
       });
 
-      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
-        {
-          "messages": [
-            {
-              "content": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
-        Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
-        Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
-        Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
-        Make characters feel like real people with depth—avoid generic or flat descriptions.
-        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.
-        Each suggestion must describe a unique, memorable personality or trait.
-        Each suggestion should feel like a real person with specific quirks or depth.
-        Each suggestion should be distinct from other suggestions.
-        Return only the descriptive fragment itself, don't prefix with the character name.
-        Be easy to visualize and reuse in different mnemonic stories.
-        Do not write a definition or encyclopedia-style description.
-        Good suggestions feel like a vivid character profile.
-        Bad suggestions feel generic, flat, or encyclopedia-like.",
-              "role": "system",
-            },
-            {
-              "content": "Generate 4 distinct character personality descriptions for this character.
-
-        <data>
-        {
-          "name": "Marcus",
-          "sound": "m"
-        }
-        </data>",
-              "role": "user",
-            },
-          ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
-        }
-      `);
-    });
-
-    test(`full input (with existing description)`, () => {
-      const result = buildLeadCharacterDescriptionPrompt({
-        name: `Marcus`,
-        sound: `m`,
-        existingDescription: `A tech entrepreneur with a sharp sense of humor`,
-        count: 3,
+      expect(omit(result, [`schema`])).toMatchObject({
+        model: `gpt-5-mini`,
+        reasoningEffort: `medium`,
+        messages: [
+          {
+            role: `system`,
+            content: expect.stringContaining(
+              `You are designing a recurring mnemonic actor for a Chinese language learning system.`,
+            ),
+          },
+          {
+            role: `user`,
+            content: expect.stringContaining(`Generate a mnemonic actor for:`),
+          },
+        ],
       });
 
-      expect(omit(result, [`schema`])).toMatchInlineSnapshot(`
-        {
-          "messages": [
-            {
-              "content": "You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
-        Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
-        Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
-        Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
-        Make characters feel like real people with depth—avoid generic or flat descriptions.
-        Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.
-        Each suggestion must describe a unique, memorable personality or trait.
-        Each suggestion should feel like a real person with specific quirks or depth.
-        Each suggestion should be distinct from other suggestions.
-        Return only the descriptive fragment itself, don't prefix with the character name.
-        Be easy to visualize and reuse in different mnemonic stories.
-        Do not write a definition or encyclopedia-style description.
-        Good suggestions feel like a vivid character profile.
-        Bad suggestions feel generic, flat, or encyclopedia-like.",
-              "role": "system",
-            },
-            {
-              "content": "Generate 3 distinct character personality descriptions for this character.
-
-        <data>
-        {
-          "name": "Marcus",
-          "sound": "m",
-          "existingDescription": "A tech entrepreneur with a sharp sense of humor"
-        }
-        </data>",
-              "role": "user",
-            },
-          ],
-          "model": "gpt-5-mini",
-          "reasoningEffort": "medium",
-        }
-      `);
+      expect(result.messages[1]?.content).toContain(`"identity": "Dracula"`);
     });
   },
 );
@@ -1094,8 +1026,8 @@ describe(`AI prompt schemas`, () => {
         buildSubLocationDescriptionPrompt.schema,
       ] as const,
       [
-        `buildLeadCharacterDescriptionPrompt.schema`,
-        buildLeadCharacterDescriptionPrompt.schema,
+        `buildMnemonicActorProfilePrompt.schema`,
+        buildMnemonicActorProfilePrompt.schema,
       ] as const,
     ];
 

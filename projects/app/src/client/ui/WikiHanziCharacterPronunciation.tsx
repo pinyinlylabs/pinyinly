@@ -21,7 +21,6 @@ import {
   pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameArticleSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -154,14 +153,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const initialNameArticleSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameArticleSetting,
-          key: { soundId: splitPinyin.initialSoundId },
-        },
-  );
   const finalToneDescriptionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -201,8 +192,6 @@ export function WikiHanziCharacterPronunciationBox({
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
-  const initialSoundNameArticle =
-    initialNameArticleSetting?.value?.text ?? undefined;
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
   const finalToneSceneViewpoint =
@@ -431,7 +420,6 @@ export function WikiHanziCharacterPronunciationBox({
           leadCharacter={{
             name: initialPinyinSoundName,
             bio: initialSoundDescription ?? undefined,
-            article: initialSoundNameArticle,
           }}
           location={{
             name: finalToneName,

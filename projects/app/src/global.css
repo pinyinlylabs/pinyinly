@@ -280,6 +280,112 @@
   @apply antialiased;
 }
 
+/* 
+  
+  THEMES
+
+  */
+@utility theme-default {
+  --color-bg: var(--color-theme-default-bg);
+  --color-bg-high: var(--color-theme-default-bg-high);
+  --color-on-fg: var(--color-theme-default-on-fg);
+  --color-fg: var(--color-theme-default-fg);
+  --color-fg-dim: var(--color-theme-default-fg-dim);
+  --color-fg-loud: var(--color-theme-default-fg-loud);
+}
+
+@utility theme-danger-panel {
+  --color-bg: var(--color-theme-danger-panel-bg);
+  --color-bg-high: var(--color-theme-danger-panel-bg-high);
+  --color-on-fg: var(--color-theme-danger-panel-on-fg);
+  --color-fg: var(--color-theme-danger-panel-fg);
+  --color-fg-dim: var(--color-theme-danger-panel-fg-dim);
+  --color-fg-loud: var(--color-theme-danger-panel-fg-loud);
+}
+
+@utility theme-success-panel {
+  --color-bg: var(--color-theme-success-panel-bg);
+  --color-bg-high: var(--color-theme-success-panel-bg-high);
+  --color-on-fg: var(--color-theme-success-panel-on-fg);
+  --color-fg: var(--color-theme-success-panel-fg);
+  --color-fg-dim: var(--color-theme-success-panel-fg-dim);
+  --color-fg-loud: var(--color-theme-success-panel-fg-loud);
+}
+
+@utility theme-warning-panel {
+  --color-bg: var(--color-theme-warning-panel-bg);
+  --color-bg-high: var(--color-theme-warning-panel-bg-high);
+  --color-on-fg: var(--color-theme-warning-panel-on-fg);
+  --color-fg: var(--color-theme-warning-panel-fg);
+  --color-fg-dim: var(--color-theme-warning-panel-fg-dim);
+  --color-fg-loud: var(--color-theme-warning-panel-fg-loud);
+}
+
+@utility theme-grass-panel {
+  --color-bg: var(--color-theme-grass-panel-bg);
+  --color-bg-high: var(--color-theme-grass-panel-bg-high);
+  --color-on-fg: var(--color-theme-grass-panel-on-fg);
+  --color-fg: var(--color-theme-grass-panel-fg);
+  --color-fg-dim: var(--color-theme-grass-panel-fg-dim);
+  --color-fg-loud: var(--color-theme-grass-panel-fg-loud);
+}
+
+@utility theme-sky-panel {
+  --color-bg: var(--color-theme-sky-panel-bg);
+  --color-bg-high: var(--color-theme-sky-panel-bg-high);
+  --color-on-fg: var(--color-theme-sky-panel-on-fg);
+  --color-fg: var(--color-theme-sky-panel-fg);
+  --color-fg-dim: var(--color-theme-sky-panel-fg-dim);
+  --color-fg-loud: var(--color-theme-sky-panel-fg-loud);
+}
+
+@utility theme-placeholder-panel {
+  --color-bg: var(--color-theme-placeholder-panel-bg);
+  --color-bg-high: var(--color-theme-placeholder-panel-bg-high);
+  --color-on-fg: var(--color-theme-placeholder-panel-on-fg);
+  --color-fg: var(--color-theme-placeholder-panel-fg);
+  --color-fg-dim: var(--color-theme-placeholder-panel-fg-dim);
+  --color-fg-loud: var(--color-theme-placeholder-panel-fg-loud);
+}
+
+/* --- */
+
+@utility pyly-mark {
+  text-decoration-skip-ink: none;
+
+  @apply underline decoration-currentColor/40;
+
+  /* Fix Safari bug where the underline text decoration isn't redrawn
+    correctly because Safari doesn't correctly mark the pixels as dirty on
+    hover. */
+
+  @apply hover:transform-gpu;
+}
+
+/* --- */
+
+@utility pyly-ref {
+  text-decoration-skip-ink: none;
+
+  @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
+
+  /* Fix Safari bug where the underline text decoration isn't redrawn
+    correctly because Safari doesn't correctly mark the pixels as dirty on
+    hover. */
+
+  @apply hover:transform-gpu;
+}
+
+@utility pyly-italic {
+  @apply italic;
+}
+
+/* --- */
+
+@utility tab-size-2 {
+  tab-size: 2;
+}
+
 @layer components {
   /*
   
@@ -288,6 +394,9 @@
   */
   .pyly-button-outline {
     @apply font-sans text-base/snug font-bold uppercase text-fg;
+  }
+
+  .pyly-bold {
   }
 
   /* --- */
@@ -793,114 +902,6 @@
   }
   .pyly-mdx > ul > li > ul {
     @apply my-2;
-  }
-}
-
-@layer utilities {
-  /* 
-  
-  THEMES
-
-  */
-  .theme-default {
-    --color-bg: var(--color-theme-default-bg);
-    --color-bg-high: var(--color-theme-default-bg-high);
-    --color-on-fg: var(--color-theme-default-on-fg);
-    --color-fg: var(--color-theme-default-fg);
-    --color-fg-dim: var(--color-theme-default-fg-dim);
-    --color-fg-loud: var(--color-theme-default-fg-loud);
-  }
-
-  .theme-danger-panel {
-    --color-bg: var(--color-theme-danger-panel-bg);
-    --color-bg-high: var(--color-theme-danger-panel-bg-high);
-    --color-on-fg: var(--color-theme-danger-panel-on-fg);
-    --color-fg: var(--color-theme-danger-panel-fg);
-    --color-fg-dim: var(--color-theme-danger-panel-fg-dim);
-    --color-fg-loud: var(--color-theme-danger-panel-fg-loud);
-  }
-
-  .theme-success-panel {
-    --color-bg: var(--color-theme-success-panel-bg);
-    --color-bg-high: var(--color-theme-success-panel-bg-high);
-    --color-on-fg: var(--color-theme-success-panel-on-fg);
-    --color-fg: var(--color-theme-success-panel-fg);
-    --color-fg-dim: var(--color-theme-success-panel-fg-dim);
-    --color-fg-loud: var(--color-theme-success-panel-fg-loud);
-  }
-
-  .theme-warning-panel {
-    --color-bg: var(--color-theme-warning-panel-bg);
-    --color-bg-high: var(--color-theme-warning-panel-bg-high);
-    --color-on-fg: var(--color-theme-warning-panel-on-fg);
-    --color-fg: var(--color-theme-warning-panel-fg);
-    --color-fg-dim: var(--color-theme-warning-panel-fg-dim);
-    --color-fg-loud: var(--color-theme-warning-panel-fg-loud);
-  }
-
-  .theme-grass-panel {
-    --color-bg: var(--color-theme-grass-panel-bg);
-    --color-bg-high: var(--color-theme-grass-panel-bg-high);
-    --color-on-fg: var(--color-theme-grass-panel-on-fg);
-    --color-fg: var(--color-theme-grass-panel-fg);
-    --color-fg-dim: var(--color-theme-grass-panel-fg-dim);
-    --color-fg-loud: var(--color-theme-grass-panel-fg-loud);
-  }
-
-  .theme-sky-panel {
-    --color-bg: var(--color-theme-sky-panel-bg);
-    --color-bg-high: var(--color-theme-sky-panel-bg-high);
-    --color-on-fg: var(--color-theme-sky-panel-on-fg);
-    --color-fg: var(--color-theme-sky-panel-fg);
-    --color-fg-dim: var(--color-theme-sky-panel-fg-dim);
-    --color-fg-loud: var(--color-theme-sky-panel-fg-loud);
-  }
-
-  .theme-placeholder-panel {
-    --color-bg: var(--color-theme-placeholder-panel-bg);
-    --color-bg-high: var(--color-theme-placeholder-panel-bg-high);
-    --color-on-fg: var(--color-theme-placeholder-panel-on-fg);
-    --color-fg: var(--color-theme-placeholder-panel-fg);
-    --color-fg-dim: var(--color-theme-placeholder-panel-fg-dim);
-    --color-fg-loud: var(--color-theme-placeholder-panel-fg-loud);
-  }
-
-  /* --- */
-
-  .pyly-mark {
-    text-decoration-skip-ink: none;
-
-    @apply underline decoration-currentColor/40;
-
-    /* Fix Safari bug where the underline text decoration isn't redrawn
-    correctly because Safari doesn't correctly mark the pixels as dirty on
-    hover. */
-
-    @apply hover:transform-gpu;
-  }
-
-  /* --- */
-
-  .pyly-ref {
-    text-decoration-skip-ink: none;
-
-    @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
-
-    /* Fix Safari bug where the underline text decoration isn't redrawn
-    correctly because Safari doesn't correctly mark the pixels as dirty on
-    hover. */
-
-    @apply hover:transform-gpu;
-  }
-
-  .pyly-italic {
-    @apply italic;
-  }
-
-  /* --- */
-
-  .tab-size-2 {
-    tab-size: 2;
   }
 }
 

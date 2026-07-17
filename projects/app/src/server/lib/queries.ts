@@ -71,6 +71,9 @@ export async function getUserName(
   userId: string,
 ): Promise<string | null> {
   const settingKey = userNameSetting.entity.marshalKey({});
+  // userNameSetting has no key path params today, but keep a merged decode path
+  // so this callsite never decodes from raw value directly.
+  const keyParamMarshaled: Record<string, unknown> = {};
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
@@ -79,7 +82,10 @@ export async function getUserName(
   });
 
   if (setting?.value) {
-    const decoded = userNameSetting.entity.unmarshalValueSafe(setting.value);
+    const decoded = userNameSetting.entity.unmarshalValueSafe({
+      ...keyParamMarshaled,
+      ...setting.value,
+    });
     return decoded?.text ?? null;
   }
   return null;

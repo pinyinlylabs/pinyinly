@@ -7,6 +7,7 @@ import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { RectButton } from "@/client/ui/RectButton";
 import { ToneSoundTile } from "@/client/ui/ToneSoundTile";
 import {
   isFinalSoundId,
@@ -113,6 +114,12 @@ export default function SoundsPage() {
       <View>
         <Text className="pyly-body-title">Sounds</Text>
         <HeaderTitleProvider.ScrollTrigger title="Sounds" />
+      </View>
+
+      <View className="flex-row flex-wrap gap-2">
+        <RectButton href="/actors" variant="outline">
+          Actors
+        </RectButton>
       </View>
 
       {pinyinSoundGroupsQuery.data.map(({ id, sounds }) => {

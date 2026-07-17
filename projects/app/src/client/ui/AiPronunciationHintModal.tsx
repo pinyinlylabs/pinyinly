@@ -12,7 +12,7 @@ import { RectButton } from "./RectButton";
 import { memoize0 } from "@pinyinly/lib/collections";
 
 export interface AiPronunciationHintModalProps {
-  leadCharacter: { name: string; bio?: string; article?: string };
+  leadCharacter: { name: string; bio?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   onApplyHint: (hint: { text: string; explanation?: string | null }) => void;
@@ -75,18 +75,10 @@ function buildPronunciationStoryPreamble({
   leadCharacter,
   location,
 }: {
-  leadCharacter: { name: string; article?: string };
+  leadCharacter: { name: string };
   location: { name: string };
 }): string {
-  const normalizedArticle = leadCharacter.article?.trim() ?? ``;
-  const hasLeadingArticle = /^(?:the|a|an)\s+/iu.test(leadCharacter.name);
-  const fallbackArticle = hasLeadingArticle ? `` : `the`;
-  const articleToUse =
-    normalizedArticle.length > 0 ? normalizedArticle : fallbackArticle;
-  const characterName =
-    articleToUse.length === 0
-      ? leadCharacter.name
-      : `${articleToUse} ${leadCharacter.name}`;
+  const characterName = leadCharacter.name;
   const locationPhrase = buildLocationIntroPhrase(location.name);
 
   return `${locationPhrase}, ${characterName} is...`;
@@ -152,9 +144,6 @@ export function AiPronunciationHintModal({
   const requestInput = {
     leadCharacter: {
       name: leadCharacter.name,
-      ...(leadCharacter.article == null
-        ? {}
-        : { article: leadCharacter.article }),
       ...(leadCharacter.bio == null ? {} : { bio: leadCharacter.bio }),
     },
     location: {

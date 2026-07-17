@@ -72,7 +72,10 @@ const tailwind: ConfigWithExtendsArray = [
       "better-tailwindcss/enforce-consistent-important-position": `error`,
       "better-tailwindcss/enforce-shorthand-classes": `error`,
       "better-tailwindcss/no-conflicting-classes": `error`,
-      "better-tailwindcss/no-unknown-classes": `error`,
+      "better-tailwindcss/no-unknown-classes": [
+        `error`,
+        { detectComponentClasses: true },
+      ],
       "better-tailwindcss/no-unnecessary-whitespace": `error`,
     },
 

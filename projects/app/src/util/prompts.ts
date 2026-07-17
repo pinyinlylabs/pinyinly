@@ -2,7 +2,7 @@ import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { z } from "zod";
 
 export type PronunciationHintPromptInput = {
-  leadCharacter: { name: string; bio?: string; article?: string };
+  leadCharacter: { name: string; bio?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   count: number;
@@ -33,9 +33,6 @@ function buildPronunciationHintPromptData({
   return {
     leadCharacter: {
       name: leadCharacter.name,
-      ...(leadCharacter.article == null
-        ? {}
-        : { article: leadCharacter.article }),
       ...(leadCharacter.bio == null ? {} : { bio: leadCharacter.bio }),
     },
     location: {
@@ -533,46 +530,177 @@ buildSubLocationDescriptionPrompt.schema = z
   })
   .strict();
 
-export function buildLeadCharacterDescriptionPrompt({
-  name,
-  sound,
-  existingDescription,
-  count,
-}: {
-  name: string;
-  sound: string;
-  existingDescription?: string;
-  count: number;
-}): ChatPrompt<typeof buildLeadCharacterDescriptionPrompt.schema> {
+export type MnemonicActorPromptInputType = {
+  identity: string;
+};
+
+export const mnemonicActorProfileSchema = z
+  .object({
+    identity: z.string().min(1),
+    nickname: z.string().min(1),
+    summary: z.string().min(1),
+    identityAnchor: z.string().min(1),
+    coreTraits: z.array(z.string().min(1)),
+    obsession: z.string().min(1),
+    signatureAbility: z.string().min(1),
+    storyRole: z.string().min(1),
+    always: z.array(z.string().min(1)),
+    never: z.array(z.string().min(1)),
+    likes: z.array(z.string().min(1)),
+    dislikes: z.array(z.string().min(1)),
+    defaultMood: z.string().min(1),
+    bodyLanguage: z.string().min(1),
+    signatureExpression: z.string().min(1),
+    weakness: z.string().min(1),
+  })
+  .strict();
+
+export type MnemonicActorProfileType = z.infer<
+  typeof mnemonicActorProfileSchema
+>;
+
+export function buildMnemonicActorProfilePrompt({
+  identity,
+}: MnemonicActorPromptInputType): ChatPrompt<
+  typeof buildMnemonicActorProfilePrompt.schema
+> {
   const systemTemplate = `
-You're a helpful assistant that creates vivid, distinct character personalities for Mandarin pronunciation mnemonic palaces.
-Your goal is to define a memorable character with a unique trait, backstory, or personality that makes them unforgettable.
-Each character bio should feel distinct, specific, and reusable across many mnemonic stories.
-Focus on personality quirks, memorable traits, backstory hints, or distinctive mannerisms.
-Make characters feel like real people with depth—avoid generic or flat descriptions.
-Keep each bio to 1-2 sentences. Make them specific, visual, and easy to remember.
-Each suggestion must describe a unique, memorable personality or trait.
-Each suggestion should feel like a real person with specific quirks or depth.
-Each suggestion should be distinct from other suggestions.
-Return only the descriptive fragment itself, don't prefix with the character name.
-Be easy to visualize and reuse in different mnemonic stories.
-Do not write a definition or encyclopedia-style description.
-Good suggestions feel like a vivid character profile.
-Bad suggestions feel generic, flat, or encyclopedia-like.
+You are designing a recurring mnemonic actor for a Chinese language learning system.
+
+The input is a single actor identity, for example:
+
+- Bear
+- Fox
+- Chef
+- Skeleton
+- Leprechaun
+- Julius Caesar
+
+Your job is NOT to invent a completely new character.
+
+Instead, identify the strongest, most universally recognised mental model people already have for this identity, then compress and sharpen it into a simple recurring character that could appear consistently across hundreds of mnemonic stories.
+
+The goal is that, after seeing this actor repeatedly, a learner immediately thinks:
+
+"Yep, that's exactly what they'd do."
+
+The actor should feel like a cartoon character with one clear personality rather than a realistic person.
+
+## Design Principles
+
+- Preserve existing cultural expectations whenever possible.
+- Don't fight the stereotype-embrace it.
+- Give the actor one dominant motivation or obsession.
+- Give them one obvious strength.
+- Give them one memorable weakness.
+- Behaviours should naturally emerge from the identity.
+- Avoid unnecessary backstory or lore.
+- Keep the personality simple and highly consistent.
+- Optimise for recognition, not realism.
+- The actor should be suitable for children and adults.
+- Humour is encouraged.
+- The actor should be expressive enough that an illustrator could draw them consistently.
+
+## Nickname
+
+Create a short nickname.
+
+The nickname should feel like something friends would call the character.
+
+Prefer names that reinforce the identity.
+
+Good examples:
+
+- Bravo the Bear
+- Lucky the Leprechaun
+- Skully the Skeleton
+
+Avoid generic human first names unless they genuinely strengthen the mnemonic.
+
+## Field Guidance
+
+identity
+The original actor identity supplied as input.
+
+nickname
+A memorable recurring nickname.
+
+summary
+One sentence describing who this character is.
+
+identityAnchor
+The shortest possible description that captures the essence of the character.
+Examples:
+- Honey-loving bear.
+- Wish-granting genie.
+- Gold-hoarding leprechaun.
+- Ancient Roman emperor.
+
+coreTraits
+Three to five stable personality traits.
+
+obsession
+The one thing they care about more than anything else.
+
+signatureAbility
+The one thing they naturally do that makes stories memorable.
+
+storyRole
+How they usually move stories forward.
+Examples:
+- Solves problems using strength.
+- Creates mischief.
+- Guides others.
+- Protects people.
+- Causes unexpected chaos.
+
+always
+Things the character almost always does.
+
+never
+Things that would feel out of character.
+
+likes
+Things they naturally enjoy.
+
+dislikes
+Things they naturally avoid.
+
+defaultMood
+Their baseline emotional state.
+
+bodyLanguage
+How they physically carry themselves.
+
+signatureExpression
+Their characteristic facial expression.
+
+weakness
+A recurring flaw that creates interesting story situations.
+
+## Success Criteria
+
+A successful actor should:
+
+- be immediately recognisable
+- have a very distinctive personality
+- behave consistently across stories
+- almost write stories by themselves
+- never require the learner to remember lots of lore
+- reinforce the same mental image every time they appear
 `;
 
   const data = {
-    name,
-    sound,
-    ...(existingDescription == null ? {} : { existingDescription }),
+    identity,
   };
 
   const userTemplate = `
-Generate {{ count }} distinct character personality descriptions for this character.
+Generate a mnemonic actor for:
 
-<data>
-{{ data }}
-</data>
+<input>
+{{ input }}
+</input>
+
 `;
 
   const messages: ChatPromptMessage[] = [
@@ -580,28 +708,16 @@ Generate {{ count }} distinct character personality descriptions for this charac
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        count: String(count),
-        data: JSON.stringify(data, null, 2),
+        input: JSON.stringify(data, null, 2),
       }),
     },
   ];
 
   return {
     messages,
-    schema: buildLeadCharacterDescriptionPrompt.schema,
+    schema: buildMnemonicActorProfilePrompt.schema,
     model: `gpt-5-mini`,
     reasoningEffort: `medium`,
   };
 }
-buildLeadCharacterDescriptionPrompt.schema = z
-  .object({
-    suggestions: z.array(
-      z
-        .object({
-          description: z.string(),
-          explanation: z.string().nullable(),
-        })
-        .strict(),
-    ),
-  })
-  .strict();
+buildMnemonicActorProfilePrompt.schema = mnemonicActorProfileSchema;
