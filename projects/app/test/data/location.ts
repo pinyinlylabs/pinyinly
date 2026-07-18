@@ -4,24 +4,25 @@ import { renderPromptTemplate } from "#util/prompts.js";
 import makeDebug from "debug";
 import { z } from "zod";
 
-const debug = makeDebug(`pyly:place`);
+const debug = makeDebug(`pyly:location`);
 
 /**
- * A place specification is a canonical, reusable design brief for one fictional
- * place. It fixes five recurring experiences in a stable order so later art can
- * reuse the same location across many illustrations. The `heart` is the most
- * memorable destination for a first-time visitor, not the architectural center.
+ * A location specification is a canonical, reusable design brief for one
+ * fictional location. It fixes five recurring sets in a stable order so later
+ * art can reuse the same location across many illustrations. The `heart` is
+ * the most memorable destination for a first-time visitor, not the
+ * architectural center.
  */
 
-export const placePromptInputSchema = z
+export const locationPromptInputSchema = z
   .object({
-    place: z.string().min(1),
+    location: z.string().min(1),
   })
   .strict();
 
-export type PlacePromptInputType = z.infer<typeof placePromptInputSchema>;
+export type LocationPromptInputType = z.infer<typeof locationPromptInputSchema>;
 
-export const placeExperienceRoleSchema = z.enum([
+export const locationSetRoleSchema = z.enum([
   `arrival`,
   `heart`,
   `below`,
@@ -29,29 +30,29 @@ export const placeExperienceRoleSchema = z.enum([
   `summit`,
 ]);
 
-export type PlaceExperienceRole = z.infer<typeof placeExperienceRoleSchema>;
+export type LocationSetRole = z.infer<typeof locationSetRoleSchema>;
 
-export type PlaceExperience = {
+export type LocationSet = {
   name: string;
   designRules: string[];
   canonicalFraming: string;
   avoidFraming: string[];
 };
 
-export type PlaceSpecification = {
-  place: string;
+export type LocationSpecification = {
+  location: string;
   recognitionHooks: string[];
   designRules: string[];
-  experiences: {
-    arrival: PlaceExperience;
-    heart: PlaceExperience;
-    below: PlaceExperience;
-    ascent: PlaceExperience;
-    summit: PlaceExperience;
+  sets: {
+    arrival: LocationSet;
+    heart: LocationSet;
+    below: LocationSet;
+    ascent: LocationSet;
+    summit: LocationSet;
   };
 };
 
-const placeExperienceSchema = z
+const locationSetSchema = z
   .object({
     name: z.string().min(1),
     designRules: z.array(z.string().min(1)),
@@ -60,25 +61,25 @@ const placeExperienceSchema = z
   })
   .strict();
 
-const placeSpecificationBaseSchema = z
+const locationSpecificationBaseSchema = z
   .object({
-    place: z.string().min(1),
+    location: z.string().min(1),
     recognitionHooks: z.array(z.string().min(1)),
     designRules: z.array(z.string().min(1)),
-    experiences: z
+    sets: z
       .object({
-        arrival: placeExperienceSchema,
-        heart: placeExperienceSchema,
-        below: placeExperienceSchema,
-        ascent: placeExperienceSchema,
-        summit: placeExperienceSchema,
+        arrival: locationSetSchema,
+        heart: locationSetSchema,
+        below: locationSetSchema,
+        ascent: locationSetSchema,
+        summit: locationSetSchema,
       })
       .strict(),
   })
   .strict();
 
-function validatePlaceSpecificationShape(
-  value: z.infer<typeof placeSpecificationBaseSchema>,
+function validateLocationSpecificationShape(
+  value: z.infer<typeof locationSpecificationBaseSchema>,
   ctx: z.RefinementCtx,
 ): void {
   if (value.recognitionHooks.length < 3 || value.recognitionHooks.length > 5) {
@@ -97,30 +98,32 @@ function validatePlaceSpecificationShape(
     });
   }
 
-  for (const role of placeExperienceRoleSchema.options) {
-    const experience = value.experiences[role];
+  for (const role of locationSetRoleSchema.options) {
+    const set = value.sets[role];
 
-    if (experience.designRules.length === 0) {
+    if (set.designRules.length === 0) {
       ctx.addIssue({
         code: `custom`,
-        path: [`experiences`, role, `designRules`],
-        message: `Expected at least one design rule for experience ${role}.`,
+        path: [`sets`, role, `designRules`],
+        message: `Expected at least one design rule for set ${role}.`,
       });
     }
   }
 }
 
-export const placeSpecificationSchema =
-  placeSpecificationBaseSchema.superRefine(validatePlaceSpecificationShape);
+export const locationSpecificationSchema =
+  locationSpecificationBaseSchema.superRefine(
+    validateLocationSpecificationShape,
+  );
 
-export type PlaceSpecificationSchemaType = z.infer<
-  typeof placeSpecificationSchema
+export type LocationSpecificationSchemaType = z.infer<
+  typeof locationSpecificationSchema
 >;
 
-export const placeCriticismCodeSchema = z.enum([
+export const locationCriticismCodeSchema = z.enum([
   `NON_CANONICAL`,
   `INVENTED_LORE`,
-  `AWKWARD_EXPERIENCE`,
+  `AWKWARD_SET`,
   `WEAK_HEART`,
   `WEAK_RECOGNITION_HOOK`,
   `REDUNDANT_RULE`,
@@ -133,10 +136,10 @@ export const placeCriticismCodeSchema = z.enum([
   `OTHER`,
 ]);
 
-export type PlaceCriticismCode = z.infer<typeof placeCriticismCodeSchema>;
+export type LocationCriticismCode = z.infer<typeof locationCriticismCodeSchema>;
 
-export const placeCriticismScopeSchema = z.enum([
-  `place`,
+export const locationCriticismScopeSchema = z.enum([
+  `location`,
   `recognitionHooks`,
   `designRules`,
   `arrival`,
@@ -146,82 +149,84 @@ export const placeCriticismScopeSchema = z.enum([
   `summit`,
 ]);
 
-export type PlaceCriticismScope = z.infer<typeof placeCriticismScopeSchema>;
+export type LocationCriticismScope = z.infer<
+  typeof locationCriticismScopeSchema
+>;
 
-export const placeCriticismSchema = z
+export const locationCriticismSchema = z
   .object({
-    code: placeCriticismCodeSchema,
-    scope: placeCriticismScopeSchema,
+    code: locationCriticismCodeSchema,
+    scope: locationCriticismScopeSchema,
     severity: z.enum([`minor`, `major`]),
     message: z.string().min(1),
     recommendation: z.string().min(1),
   })
   .strict();
 
-export type PlaceCriticismType = z.infer<typeof placeCriticismSchema>;
+export type LocationCriticismType = z.infer<typeof locationCriticismSchema>;
 
-export const placeEvaluationSchema = z
+export const locationEvaluationSchema = z
   .object({
     passed: z.boolean(),
     score: z.number().min(0).max(1),
-    criticisms: z.array(placeCriticismSchema),
+    criticisms: z.array(locationCriticismSchema),
   })
   .strict();
 
-export type PlaceEvaluationType = z.infer<typeof placeEvaluationSchema>;
+export type LocationEvaluationType = z.infer<typeof locationEvaluationSchema>;
 
-export const placeSpecificationRefinementAttemptSchema = z
+export const locationSpecificationRefinementAttemptSchema = z
   .object({
     attempt: z.number().int().min(1),
-    placeSpecification: placeSpecificationSchema,
-    evaluation: placeEvaluationSchema,
+    locationSpecification: locationSpecificationSchema,
+    evaluation: locationEvaluationSchema,
   })
   .strict();
 
-export type PlaceSpecificationRefinementAttemptType = z.infer<
-  typeof placeSpecificationRefinementAttemptSchema
+export type LocationSpecificationRefinementAttemptType = z.infer<
+  typeof locationSpecificationRefinementAttemptSchema
 >;
 
-export const placeSpecificationRefinementStopReasonSchema = z.enum([
+export const locationSpecificationRefinementStopReasonSchema = z.enum([
   `no_major_criticisms`,
   `max_attempts_reached`,
 ]);
 
-export type PlaceSpecificationRefinementStopReasonType = z.infer<
-  typeof placeSpecificationRefinementStopReasonSchema
+export type LocationSpecificationRefinementStopReasonType = z.infer<
+  typeof locationSpecificationRefinementStopReasonSchema
 >;
 
-export const placeSpecificationRefinementResultSchema = z
+export const locationSpecificationRefinementResultSchema = z
   .object({
-    attempts: z.array(placeSpecificationRefinementAttemptSchema),
+    attempts: z.array(locationSpecificationRefinementAttemptSchema),
     succeeded: z.boolean(),
-    stopReason: placeSpecificationRefinementStopReasonSchema,
-    finalPlaceSpecification: placeSpecificationSchema,
-    finalEvaluation: placeEvaluationSchema,
+    stopReason: locationSpecificationRefinementStopReasonSchema,
+    finalLocationSpecification: locationSpecificationSchema,
+    finalEvaluation: locationEvaluationSchema,
   })
   .strict();
 
-export type PlaceSpecificationRefinementResultType = z.infer<
-  typeof placeSpecificationRefinementResultSchema
+export type LocationSpecificationRefinementResultType = z.infer<
+  typeof locationSpecificationRefinementResultSchema
 >;
 
-function buildPlacePromptData(entry: PlacePromptInputType) {
-  return { place: entry.place };
+function buildLocationPromptData(entry: LocationPromptInputType) {
+  return { location: entry.location };
 }
 
-export const buildPlaceSpecificationPrompt = (
-  entry: PlacePromptInputType,
-): ChatPrompt<typeof placeSpecificationSchema> => {
+export const buildLocationSpecificationPrompt = (
+  entry: LocationPromptInputType,
+): ChatPrompt<typeof locationSpecificationSchema> => {
   const systemTemplate = `
-You are an expert production designer creating the canonical design specification for a recurring fictional place.
+You are an expert production designer creating the canonical design specification for a recurring fictional location.
 
 This specification will be used by artists and image-generation models to create hundreds of illustrations over many years.
 
-Your goal is not to design a unique place or describe a single illustration.
+Your goal is not to design a unique location or describe a single illustration.
 
-Your goal is to define the version of the place that already exists in people's shared imagination.
+Your goal is to define the version of the location that already exists in people's shared imagination.
 
-Future illustrations should feel like different visits to the same place.
+Future illustrations should feel like different visits to the same location.
 
 Whenever originality and recognisability disagree, choose recognisability.
 
@@ -233,7 +238,7 @@ Prefer timeless, widely recognised interpretations over clever or unusual ones.
 
 ## Recognition hooks
 
-List the 3–5 strongest recurring visual ideas that instantly identify the place.
+List the 3–5 strongest recurring visual ideas that instantly identify the location.
 
 Hooks should be simple iconic objects, landmarks, silhouettes, or architectural features.
 
@@ -243,7 +248,7 @@ Hooks should remain meaningful across different artistic styles.
 
 ## Global design rules
 
-Write concise recurring visual rules that preserve the identity of the place.
+Write concise recurring visual rules that preserve the identity of the location.
 
 Every rule must describe something directly observable in an illustration.
 
@@ -257,17 +262,17 @@ Merge redundant rules.
 
 Avoid unnecessary specificity.
 
-## Canonical experiences
+## Canonical sets
 
-Every place has exactly five recurring experiences.
+Every location has exactly five recurring sets.
 
 ### Arrival
 
-Where visitors first enter the place.
+Where visitors first enter the location.
 
 ### Heart
 
-The highlight of visiting the place.
+The highlight of visiting the location.
 
 Imagine giving a first-time visitor a tour.
 
@@ -281,19 +286,19 @@ Choose the destination, not the hub.
 
 ### Below
 
-The canonical lower part of the place.
+The canonical lower part of the location.
 
 ### Ascent
 
-The primary upward journey through the place.
+The primary upward journey through the location.
 
 ### Summit
 
 The highest significant destination and the natural reward for completing the ascent.
 
-## Experience specification
+## Set specification
 
-For each experience:
+For each set:
 
 - use the simplest widely recognised name
 - write concise observable design rules
@@ -313,15 +318,15 @@ Before finalising, silently check:
 - every rule adds a distinct idea
 - redundant rules have been merged
 - no lore or invented proper names were introduced
-- each experience is a natural fit for the supplied place
-- the Heart is genuinely the highlight of visiting the place
-- another artist could recreate essentially the same place from the specification
+- each set is a natural fit for the supplied location
+- the Heart is genuinely the highlight of visiting the location
+- another artist could recreate essentially the same location from the specification
 
 Output only the structured result.
 `.trim();
 
   const userTemplate = `
-Generate the canonical place specification for the following input.
+Generate the canonical location specification for the following input.
 
 <data>
 {{ data }}
@@ -333,7 +338,7 @@ Generate the canonical place specification for the following input.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(buildPlacePromptData(entry), null, 2),
+        data: JSON.stringify(buildLocationPromptData(entry), null, 2),
       }),
     },
   ];
@@ -342,16 +347,16 @@ Generate the canonical place specification for the following input.
     messages,
     model: `gpt-5.4`,
     reasoningEffort: `medium`,
-    schema: placeSpecificationSchema,
+    schema: locationSpecificationSchema,
   };
 };
 
-export const buildEvaluatePlaceSpecificationPrompt = (entry: {
-  place: string;
-  placeSpecification: PlaceSpecification;
-}): ChatPrompt<typeof placeEvaluationSchema> => {
+export const buildEvaluateLocationSpecificationPrompt = (entry: {
+  location: string;
+  locationSpecification: LocationSpecification;
+}): ChatPrompt<typeof locationEvaluationSchema> => {
   const systemTemplate = `
-You are evaluating a place specification for a recurring fictional place.
+You are evaluating a location specification for a recurring fictional location.
 
 Your task is to diagnose problems in the specification.
 
@@ -363,23 +368,23 @@ You are judging whether the specification is canonical, reusable, visually coher
 
 ## Canonicality
 
-Check whether the output represents the shared, default mental image of the supplied place.
+Check whether the output represents the shared, default mental image of the supplied location.
 
 Reject invented lore, proper nouns, overly specialised variants, and arbitrary distinguishing details.
 
 Names should be simple and widely recognised.
 
-## Natural experience selection
+## Natural set selection
 
-Check whether each experience naturally exists within the place.
+Check whether each set naturally exists within the location.
 
-Reject contrived experiences that only exist to satisfy the schema.
+Reject contrived sets that only exist to satisfy the schema.
 
 The Heart must be the highlight visitors would most want to reach, not a courtyard, corridor, circulation hub, or overview chosen for architectural convenience.
 
 The Ascent should naturally lead toward the Summit.
 
-The Below experience must be meaningfully distinct from the others.
+The Below set must be meaningfully distinct from the others.
 
 ## Recognition
 
@@ -389,13 +394,13 @@ Hooks should be iconic, concise, visual, and useful across different art styles.
 
 Reject hooks that depend on arbitrary colours, materials, moods, or implementation details.
 
-Global and experience-level rules should preserve recognisability.
+Global and set-level rules should preserve recognisability.
 
 ## Distinctiveness and coherence
 
-Check whether the five experiences are visually and spatially distinct while still belonging to the same place.
+Check whether the five sets are visually and spatially distinct while still belonging to the same location.
 
-Repeated scenes should be easy to distinguish by experience.
+Repeated scenes should be easy to distinguish by set.
 
 Canonical framings should provide stable, recognisable compositions.
 
@@ -405,15 +410,15 @@ Every design rule must be directly observable.
 
 Rules should be concise and non-redundant.
 
-Reject abstract intentions, overly specific details, and repeated global rules in individual experiences.
+Reject abstract intentions, overly specific details, and repeated global rules in individual sets.
 
 ## Guest appeal and revisitability
 
-The place should be enjoyable to imagine revisiting.
+The location should be enjoyable to imagine revisiting.
 
 The Heart should have strong appeal, wonder, and story potential.
 
-Technically correct but boring or unrewarding experiences should be criticised.
+Technically correct but boring or unrewarding sets should be criticised.
 
 The Summit should feel like a satisfying payoff after the Ascent.
 
@@ -427,7 +432,7 @@ Return structured criticisms only.
 `.trim();
 
   const userTemplate = `
-Evaluate the following place specification.
+Evaluate the following location specification.
 
 <data>
 {{ data }}
@@ -448,30 +453,30 @@ Evaluate the following place specification.
     messages,
     model: `gpt-5.4`,
     reasoningEffort: `medium`,
-    schema: placeEvaluationSchema,
+    schema: locationEvaluationSchema,
   };
 };
 
-export const buildRefinePlaceSpecificationPrompt = (entry: {
-  place: string;
-  placeSpecification: PlaceSpecification;
-  criticisms: PlaceCriticismType[];
-}): ChatPrompt<typeof placeSpecificationSchema> => {
+export const buildRefineLocationSpecificationPrompt = (entry: {
+  location: string;
+  locationSpecification: LocationSpecification;
+  criticisms: LocationCriticismType[];
+}): ChatPrompt<typeof locationSpecificationSchema> => {
   const systemTemplate = `
-You revise place specifications based on evaluator criticisms.
+You revise location specifications based on evaluator criticisms.
 
 You are given:
 
-- the original place,
-- the current place specification,
+- the original location,
+- the current location specification,
 - a list of criticisms.
 
-Return one revised place specification that resolves as many criticisms as possible while preserving the strongest existing parts.
+Return one revised location specification that resolves as many criticisms as possible while preserving the strongest existing parts.
 
 Rules:
 
-- Keep the supplied place unchanged.
-- Preserve the five required experiences and their fixed order.
+- Keep the supplied location unchanged.
+- Preserve the five required sets and their fixed order.
 - Do not add new fields.
 - Do not invent lore, proper nouns, or backstory.
 - Use the simplest widely recognised names.
@@ -480,21 +485,21 @@ Rules:
 
 Fixes should be targeted.
 
-If a criticism says an experience choice is weak, replace the experience choice rather than merely editing its wording.
+If a criticism says a set choice is weak, replace the set choice rather than merely editing its wording.
 
-If a criticism says a design rule is weak, improve the rule without redesigning the whole experience.
+If a criticism says a design rule is weak, improve the rule without redesigning the whole set.
 
-If a criticism says framing is weak, fix the framing without changing the experience itself.
+If a criticism says framing is weak, fix the framing without changing the set itself.
 
 If a criticism says rules are redundant or overly specific, prune them.
 
 Do not include analysis.
 
-Return only the revised place specification.
+Return only the revised location specification.
 `.trim();
 
   const userTemplate = `
-Revise the following place specification based on the criticisms.
+Revise the following location specification based on the criticisms.
 
 <data>
 {{ data }}
@@ -515,37 +520,37 @@ Revise the following place specification based on the criticisms.
     messages,
     model: `gpt-5.4`,
     reasoningEffort: `low`,
-    schema: placeSpecificationSchema,
+    schema: locationSpecificationSchema,
   };
 };
 
-interface RunPlaceSpecificationRefinementPipelineOptions {
+interface RunLocationSpecificationRefinementPipelineOptions {
   maxAttempts?: number;
   signal?: AbortSignal;
 }
 
-function hasMajorCriticisms(evaluation: PlaceEvaluationType): boolean {
+function hasMajorCriticisms(evaluation: LocationEvaluationType): boolean {
   return evaluation.criticisms.some(
     (criticism) => criticism.severity === `major`,
   );
 }
 
-function isFundamentalFailure(evaluation: PlaceEvaluationType): boolean {
+function isFundamentalFailure(evaluation: LocationEvaluationType): boolean {
   return evaluation.criticisms.some(
     (criticism) =>
-      criticism.severity === `major` && criticism.scope === `place`,
+      criticism.severity === `major` && criticism.scope === `location`,
   );
 }
 
-async function evaluatePlaceSpecification(
+async function evaluateLocationSpecification(
   entry: {
-    place: string;
-    placeSpecification: PlaceSpecification;
+    location: string;
+    locationSpecification: LocationSpecification;
   },
-  options: RunPlaceSpecificationRefinementPipelineOptions,
-): Promise<PlaceEvaluationType> {
+  options: RunLocationSpecificationRefinementPipelineOptions,
+): Promise<LocationEvaluationType> {
   const response = await requestOpenAiResponseJson(
-    buildEvaluatePlaceSpecificationPrompt(entry),
+    buildEvaluateLocationSpecificationPrompt(entry),
     {
       signal: options.signal,
     },
@@ -555,9 +560,9 @@ async function evaluatePlaceSpecification(
 }
 
 function updateBestAttempt(
-  bestAttempt: PlaceSpecificationRefinementAttemptType | null,
-  currentAttempt: PlaceSpecificationRefinementAttemptType,
-): PlaceSpecificationRefinementAttemptType {
+  bestAttempt: LocationSpecificationRefinementAttemptType | null,
+  currentAttempt: LocationSpecificationRefinementAttemptType,
+): LocationSpecificationRefinementAttemptType {
   if (bestAttempt == null) {
     return currentAttempt;
   }
@@ -569,10 +574,10 @@ function updateBestAttempt(
   return bestAttempt;
 }
 
-export async function runPlaceSpecificationRefinementPipeline(
-  entry: PlacePromptInputType,
-  options?: RunPlaceSpecificationRefinementPipelineOptions,
-): Promise<PlaceSpecificationRefinementResultType> {
+export async function runLocationSpecificationRefinementPipeline(
+  entry: LocationPromptInputType,
+  options?: RunLocationSpecificationRefinementPipelineOptions,
+): Promise<LocationSpecificationRefinementResultType> {
   const maxAttempts = options?.maxAttempts ?? 3;
   if (!Number.isInteger(maxAttempts) || maxAttempts < 1) {
     throw new Error(
@@ -580,31 +585,31 @@ export async function runPlaceSpecificationRefinementPipeline(
     );
   }
 
-  const attempts: PlaceSpecificationRefinementAttemptType[] = [];
-  let currentPlaceSpecification: PlaceSpecification;
+  const attempts: LocationSpecificationRefinementAttemptType[] = [];
+  let currentLocationSpecification: LocationSpecification;
 
   const initialResponse = await requestOpenAiResponseJson(
-    buildPlaceSpecificationPrompt(entry),
+    buildLocationSpecificationPrompt(entry),
     {
       signal: options?.signal,
     },
   );
 
-  currentPlaceSpecification = initialResponse.data;
-  let bestAttempt: PlaceSpecificationRefinementAttemptType | null = null;
+  currentLocationSpecification = initialResponse.data;
+  let bestAttempt: LocationSpecificationRefinementAttemptType | null = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const evaluation = await evaluatePlaceSpecification(
+    const evaluation = await evaluateLocationSpecification(
       {
-        place: entry.place,
-        placeSpecification: currentPlaceSpecification,
+        location: entry.location,
+        locationSpecification: currentLocationSpecification,
       },
       { signal: options?.signal, maxAttempts },
     );
 
-    const currentAttempt: PlaceSpecificationRefinementAttemptType = {
+    const currentAttempt: LocationSpecificationRefinementAttemptType = {
       attempt,
-      placeSpecification: currentPlaceSpecification,
+      locationSpecification: currentLocationSpecification,
       evaluation,
     };
 
@@ -626,7 +631,7 @@ export async function runPlaceSpecificationRefinementPipeline(
         attempts,
         succeeded: true,
         stopReason: `no_major_criticisms`,
-        finalPlaceSpecification: currentPlaceSpecification,
+        finalLocationSpecification: currentLocationSpecification,
         finalEvaluation: evaluation,
       };
     }
@@ -638,16 +643,16 @@ export async function runPlaceSpecificationRefinementPipeline(
         attempts,
         succeeded: false,
         stopReason: `max_attempts_reached`,
-        finalPlaceSpecification: selectedAttempt.placeSpecification,
+        finalLocationSpecification: selectedAttempt.locationSpecification,
         finalEvaluation: selectedAttempt.evaluation,
       };
     }
 
     const nextPrompt = isFundamentalFailure(evaluation)
-      ? buildPlaceSpecificationPrompt(entry)
-      : buildRefinePlaceSpecificationPrompt({
-          place: entry.place,
-          placeSpecification: currentPlaceSpecification,
+      ? buildLocationSpecificationPrompt(entry)
+      : buildRefineLocationSpecificationPrompt({
+          location: entry.location,
+          locationSpecification: currentLocationSpecification,
           criticisms: evaluation.criticisms,
         });
 
@@ -655,15 +660,15 @@ export async function runPlaceSpecificationRefinementPipeline(
       signal: options?.signal,
     });
 
-    currentPlaceSpecification = nextResponse.data;
+    currentLocationSpecification = nextResponse.data;
   }
 
   throw new Error(`Unexpected pipeline state`);
 }
 
-export async function generatePlaceSpecification(
-  entry: PlacePromptInputType,
-  options?: RunPlaceSpecificationRefinementPipelineOptions,
-): Promise<PlaceSpecificationRefinementResultType> {
-  return runPlaceSpecificationRefinementPipeline(entry, options);
+export async function generateLocationSpecification(
+  entry: LocationPromptInputType,
+  options?: RunLocationSpecificationRefinementPipelineOptions,
+): Promise<LocationSpecificationRefinementResultType> {
+  return runLocationSpecificationRefinementPipeline(entry, options);
 }

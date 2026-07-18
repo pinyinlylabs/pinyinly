@@ -1,12 +1,12 @@
 // pyly-not-src-test
 import { requestOpenAiResponseJson } from "#server/lib/ai.js";
-import type { PlaceEvaluationType, PlaceSpecification } from "./place";
+import type { LocationEvaluationType, LocationSpecification } from "./location";
 import {
-  buildPlaceSpecificationPrompt,
-  generatePlaceSpecification,
-  placeSpecificationSchema,
-  runPlaceSpecificationRefinementPipeline,
-} from "./place";
+  buildLocationSpecificationPrompt,
+  generateLocationSpecification,
+  locationSpecificationSchema,
+  runLocationSpecificationRefinementPipeline,
+} from "./location";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock(`#server/lib/ai.js`, async () => {
@@ -21,12 +21,12 @@ vi.mock(`#server/lib/ai.js`, async () => {
   };
 });
 
-function makePlaceSpecification(place: string): PlaceSpecification {
+function makeLocationSpecification(location: string): LocationSpecification {
   return {
-    place,
+    location,
     recognitionHooks: [`mast`, `bow`, `anchor`],
     designRules: [`Keep the hull dominant in the composition.`],
-    experiences: {
+    sets: {
       arrival: {
         name: `dock`,
         designRules: [`Show the gangplank and mooring ropes.`],
@@ -64,8 +64,8 @@ function makePlaceSpecification(place: string): PlaceSpecification {
 function makeEvaluation(
   passed: boolean,
   score: number,
-  criticisms: PlaceEvaluationType[`criticisms`],
-): PlaceEvaluationType {
+  criticisms: LocationEvaluationType[`criticisms`],
+): LocationEvaluationType {
   return {
     passed,
     score,
@@ -83,44 +83,46 @@ function promptKind(content: string): `generator` | `evaluator` | `refiner` {
   if (content.includes(`creating the canonical design specification`)) {
     return `generator`;
   }
-  if (content.includes(`evaluating a place specification`)) {
+  if (content.includes(`evaluating a location specification`)) {
     return `evaluator`;
   }
-  if (content.includes(`You revise place specifications`)) {
+  if (content.includes(`You revise location specifications`)) {
     return `refiner`;
   }
 
   throw new Error(`Unexpected prompt kind`);
 }
 
-describe(`placeSpecificationSchema`, () => {
-  test(`accepts exactly five keyed experiences`, () => {
-    const spec = makePlaceSpecification(`Pirate ship`);
+describe(`locationSpecificationSchema`, () => {
+  test(`accepts exactly five keyed sets`, () => {
+    const spec = makeLocationSpecification(`Pirate ship`);
 
-    expect(placeSpecificationSchema.parse(spec)).toEqual(spec);
+    expect(locationSpecificationSchema.parse(spec)).toEqual(spec);
   });
 
-  test(`rejects unexpected fields inside experiences`, () => {
+  test(`rejects unexpected fields inside sets`, () => {
     const spec = {
-      ...makePlaceSpecification(`Pirate ship`),
-      experiences: {
-        ...makePlaceSpecification(`Pirate ship`).experiences,
+      ...makeLocationSpecification(`Pirate ship`),
+      sets: {
+        ...makeLocationSpecification(`Pirate ship`).sets,
         arrival: {
-          ...makePlaceSpecification(`Pirate ship`).experiences.arrival,
+          ...makeLocationSpecification(`Pirate ship`).sets.arrival,
           role: `arrival`,
         },
       },
     };
 
-    expect(() => placeSpecificationSchema.parse(spec)).toThrow(
+    expect(() => locationSpecificationSchema.parse(spec)).toThrow(
       /unrecognized_key|unrecognized_keys/u,
     );
   });
 });
 
-describe(`buildPlaceSpecificationPrompt`, () => {
-  test(`keeps the input dynamic and avoids hard-coded place examples`, () => {
-    const prompt = buildPlaceSpecificationPrompt({ place: `Pirate ship` });
+describe(`buildLocationSpecificationPrompt`, () => {
+  test(`keeps the input dynamic and avoids hard-coded location examples`, () => {
+    const prompt = buildLocationSpecificationPrompt({
+      location: `Pirate ship`,
+    });
     const system = prompt.messages.find(
       (message) => message.role === `system`,
     )?.content;
@@ -136,11 +138,11 @@ describe(`buildPlaceSpecificationPrompt`, () => {
     expect(system).not.toMatch(/\b(?:pinyin|tone|Chinese|mnemonic)\b/iu);
 
     const data = extractDataBlock(user ?? ``);
-    expect(data).toEqual({ place: `Pirate ship` });
+    expect(data).toEqual({ location: `Pirate ship` });
   });
 });
 
-describe(`runPlaceSpecificationRefinementPipeline`, () => {
+describe(`runLocationSpecificationRefinementPipeline`, () => {
   const requestMock = vi.mocked(requestOpenAiResponseJson);
 
   beforeEach(() => {
@@ -148,7 +150,7 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
   });
 
   test(`returns immediately when evaluation passes`, async () => {
-    const generated = makePlaceSpecification(`Pirate ship`);
+    const generated = makeLocationSpecification(`Pirate ship`);
 
     requestMock.mockImplementation(async (prompt) => {
       const kind = promptKind(prompt.messages[0]?.content ?? ``);
@@ -167,21 +169,23 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await generatePlaceSpecification({ place: `Pirate ship` });
+    const result = await generateLocationSpecification({
+      location: `Pirate ship`,
+    });
 
     expect(result.succeeded).toBe(true);
     expect(result.stopReason).toBe(`no_major_criticisms`);
     expect(result.attempts).toHaveLength(1);
-    expect(result.finalPlaceSpecification).toEqual(generated);
+    expect(result.finalLocationSpecification).toEqual(generated);
     expect(result.finalEvaluation.passed).toBe(true);
     expect(requestMock).toHaveBeenCalledTimes(2);
   });
 
   test(`invokes the refiner when evaluation fails`, async () => {
-    const generated = makePlaceSpecification(`Pirate ship`);
-    const refined = makePlaceSpecification(`Pirate ship`);
-    refined.experiences.heart = {
-      ...refined.experiences.heart,
+    const generated = makeLocationSpecification(`Pirate ship`);
+    const refined = makeLocationSpecification(`Pirate ship`);
+    refined.sets.heart = {
+      ...refined.sets.heart,
       name: `treasure room`,
     };
 
@@ -217,20 +221,20 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await runPlaceSpecificationRefinementPipeline({
-      place: `Pirate ship`,
+    const result = await runLocationSpecificationRefinementPipeline({
+      location: `Pirate ship`,
     });
 
     expect(result.succeeded).toBe(true);
     expect(result.attempts).toHaveLength(2);
-    expect(result.finalPlaceSpecification).toEqual(refined);
+    expect(result.finalLocationSpecification).toEqual(refined);
     expect(result.finalEvaluation.passed).toBe(true);
     expect(requestMock).toHaveBeenCalledTimes(4);
   });
 
-  test(`regenerates from scratch on a fundamental place-wide failure`, async () => {
-    const first = makePlaceSpecification(`Pirate ship`);
-    const second = makePlaceSpecification(`Pirate ship`);
+  test(`regenerates from scratch on a fundamental location-wide failure`, async () => {
+    const first = makeLocationSpecification(`Pirate ship`);
+    const second = makeLocationSpecification(`Pirate ship`);
     second.recognitionHooks[0] = `broad sail`;
 
     let callCount = 0;
@@ -263,10 +267,10 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
             data: makeEvaluation(false, 0.1, [
               {
                 code: `NON_CANONICAL`,
-                scope: `place`,
+                scope: `location`,
                 severity: `major`,
-                message: `The place reads like an arbitrary invention rather than a canonical ship.`,
-                recommendation: `Regenerate the place from the shared mental image.`,
+                message: `The location reads like an arbitrary invention rather than a canonical ship.`,
+                recommendation: `Regenerate the location from the shared mental image.`,
               },
             ]),
             model: `gpt-5.4`,
@@ -274,29 +278,29 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await runPlaceSpecificationRefinementPipeline(
+    const result = await runLocationSpecificationRefinementPipeline(
       {
-        place: `Pirate ship`,
+        location: `Pirate ship`,
       },
       { maxAttempts: 2 },
     );
 
     expect(result.succeeded).toBe(true);
     expect(result.attempts).toHaveLength(2);
-    expect(result.finalPlaceSpecification).toEqual(second);
+    expect(result.finalLocationSpecification).toEqual(second);
     expect(requestMock).toHaveBeenCalledTimes(4);
   });
 
   test(`returns the highest-scoring candidate when none pass`, async () => {
-    const first = makePlaceSpecification(`Pirate ship`);
-    const second = makePlaceSpecification(`Pirate ship`);
-    second.experiences.heart = {
-      ...second.experiences.heart,
+    const first = makeLocationSpecification(`Pirate ship`);
+    const second = makeLocationSpecification(`Pirate ship`);
+    second.sets.heart = {
+      ...second.sets.heart,
       name: `treasure room`,
     };
-    const third = makePlaceSpecification(`Pirate ship`);
-    third.experiences.heart = {
-      ...third.experiences.heart,
+    const third = makeLocationSpecification(`Pirate ship`);
+    third.sets.heart = {
+      ...third.sets.heart,
       name: `flag deck`,
     };
 
@@ -328,10 +332,10 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
               data: makeEvaluation(false, 0.7, [
                 {
                   code: `WEAK_COHERENCE`,
-                  scope: `place`,
+                  scope: `location`,
                   severity: `major`,
-                  message: `The overall place is still slightly inconsistent.`,
-                  recommendation: `Keep the place identity tighter.`,
+                  message: `The overall location is still slightly inconsistent.`,
+                  recommendation: `Keep the location identity tighter.`,
                 },
               ]),
               model: `gpt-5.4`,
@@ -360,14 +364,14 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await runPlaceSpecificationRefinementPipeline(
-      { place: `Pirate ship` },
+    const result = await runLocationSpecificationRefinementPipeline(
+      { location: `Pirate ship` },
       { maxAttempts: 3 },
     );
 
     expect(result.succeeded).toBe(false);
     expect(result.attempts).toHaveLength(3);
-    expect(result.finalPlaceSpecification).toEqual(second);
+    expect(result.finalLocationSpecification).toEqual(second);
     expect(result.finalEvaluation.score).toBe(0.7);
     expect(requestMock).toHaveBeenCalledTimes(6);
   });
