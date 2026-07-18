@@ -1,5 +1,4 @@
 import { useDb } from "@/client/ui/hooks/useDb";
-import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import {
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
@@ -44,17 +43,10 @@ export function usePinyinSoundGroups() {
       const themeKey = pinyinSoundGroupThemeSettingKey(id);
 
       const themeOverride = settings.find((s) => s.key === themeKey);
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundGroupThemeSetting,
+      const themeValueData = pinyinSoundGroupThemeSetting.decode(
         { soundGroupId: id },
+        themeOverride?.value ?? null,
       );
-
-      const themeValueData = themeOverride?.value
-        ? pinyinSoundGroupThemeSetting.entity.unmarshalValueSafe({
-            ...keyParamMarshaled,
-            ...themeOverride.value,
-          })
-        : null;
 
       result.push({
         id,

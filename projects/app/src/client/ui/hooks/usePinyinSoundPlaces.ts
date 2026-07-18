@@ -1,6 +1,5 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { AssetId, PlaceId } from "@/data/model";
 import {
@@ -19,26 +18,6 @@ import {
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
-
-function decodeSettingValueWithFallback<T>(
-  decode: (value: unknown) => T | null,
-  keyParamMarshaled: Record<string, unknown>,
-  rawValue: unknown,
-): T | null {
-  if (rawValue == null) {
-    return null;
-  }
-
-  const merged = decode({
-    ...keyParamMarshaled,
-    ...(rawValue as Record<string, unknown>),
-  });
-  if (merged != null) {
-    return merged;
-  }
-
-  return decode(rawValue);
-}
 
 export const locationSetRoles = [
   `arrival`,
@@ -200,16 +179,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
   for (const setting of settings) {
     if (setting.key.startsWith(`pspn/`)) {
       const placeId = setting.key.slice(`pspn/`.length) as PlaceId;
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationNameSetting,
-        {
-          placeId,
-        },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationNameSetting.entity.unmarshalValueSafe(input),
-        keyParamMarshaled,
+      const value = pinyinSoundLocationNameSetting.decode(
+        { placeId },
         setting.value,
       );
       if (value == null) {
@@ -223,16 +194,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
 
     if (setting.key.startsWith(`pspd/`)) {
       const placeId = setting.key.slice(`pspd/`.length) as PlaceId;
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationDescriptionSetting,
+      const value = pinyinSoundLocationDescriptionSetting.decode(
         { placeId },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationDescriptionSetting.entity.unmarshalValueSafe(
-            input,
-          ),
-        keyParamMarshaled,
         setting.value,
       );
       if (value == null) {
@@ -246,18 +209,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
 
     if (setting.key.startsWith(`pspi/`)) {
       const placeId = setting.key.slice(`pspi/`.length) as PlaceId;
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationIdentityImageSetting,
-        {
-          placeId,
-        },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationIdentityImageSetting.entity.unmarshalValueSafe(
-            input,
-          ),
-        keyParamMarshaled,
+      const value = pinyinSoundLocationIdentityImageSetting.decode(
+        { placeId },
         setting.value,
       );
       if (value == null) {
@@ -280,17 +233,11 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
         continue;
       }
 
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationSetNameSetting,
+      const value = pinyinSoundLocationSetNameSetting.decode(
         {
           placeId: keyData.placeId,
           role: keyData.role,
         },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationSetNameSetting.entity.unmarshalValueSafe(input),
-        keyParamMarshaled,
         setting.value,
       );
       if (value == null) {
@@ -309,19 +256,11 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
         continue;
       }
 
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationSetDescriptionSetting,
+      const value = pinyinSoundLocationSetDescriptionSetting.decode(
         {
           placeId: keyData.placeId,
           role: keyData.role,
         },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationSetDescriptionSetting.entity.unmarshalValueSafe(
-            input,
-          ),
-        keyParamMarshaled,
         setting.value,
       );
       if (value == null) {
@@ -340,19 +279,11 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
         continue;
       }
 
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationSetIdentityImageSetting,
+      const value = pinyinSoundLocationSetIdentityImageSetting.decode(
         {
           placeId: keyData.placeId,
           role: keyData.role,
         },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationSetIdentityImageSetting.entity.unmarshalValueSafe(
-            input,
-          ),
-        keyParamMarshaled,
         setting.value,
       );
       if (value == null) {

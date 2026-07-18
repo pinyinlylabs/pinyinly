@@ -1,6 +1,5 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { ActorId, AssetId, PinyinSoundId } from "@/data/model";
 import {
@@ -20,26 +19,6 @@ import {
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useMemo } from "react";
-
-function decodeSettingValueWithFallback<T>(
-  decode: (value: unknown) => T | null,
-  keyParamMarshaled: Record<string, unknown>,
-  rawValue: unknown,
-): T | null {
-  if (rawValue == null) {
-    return null;
-  }
-
-  const merged = decode({
-    ...keyParamMarshaled,
-    ...(rawValue as Record<string, unknown>),
-  });
-  if (merged != null) {
-    return merged;
-  }
-
-  return decode(rawValue);
-}
 
 export interface PinyinSoundActorSummary {
   actorId: ActorId;
@@ -168,14 +147,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     for (const setting of settings) {
       if (setting.key.startsWith(`psan/`)) {
         const actorId = setting.key.slice(`psan/`.length) as ActorId;
-        const { keyParamMarshaled } = getSettingKeyInfo(
-          pinyinSoundActorNameSetting,
+        const value = pinyinSoundActorNameSetting.decode(
           { actorId },
-        );
-        const value = decodeSettingValueWithFallback(
-          (input) =>
-            pinyinSoundActorNameSetting.entity.unmarshalValueSafe(input),
-          keyParamMarshaled,
           setting.value,
         );
         if (value == null) {
@@ -189,14 +162,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
       if (setting.key.startsWith(`psad/`)) {
         const actorId = setting.key.slice(`psad/`.length) as ActorId;
-        const { keyParamMarshaled } = getSettingKeyInfo(
-          pinyinSoundActorDescriptionSetting,
+        const value = pinyinSoundActorDescriptionSetting.decode(
           { actorId },
-        );
-        const value = decodeSettingValueWithFallback(
-          (input) =>
-            pinyinSoundActorDescriptionSetting.entity.unmarshalValueSafe(input),
-          keyParamMarshaled,
           setting.value,
         );
         if (value == null) {
@@ -210,14 +177,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
       if (setting.key.startsWith(`psai/`)) {
         const actorId = setting.key.slice(`psai/`.length) as ActorId;
-        const { keyParamMarshaled } = getSettingKeyInfo(
-          pinyinSoundActorImageSetting,
+        const value = pinyinSoundActorImageSetting.decode(
           { actorId },
-        );
-        const value = decodeSettingValueWithFallback(
-          (input) =>
-            pinyinSoundActorImageSetting.entity.unmarshalValueSafe(input),
-          keyParamMarshaled,
           setting.value,
         );
         if (value == null) {
@@ -248,15 +209,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
       }
 
       const soundId = setting.key.slice(`psas/`.length) as PinyinSoundId;
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundActorSelectionSetting,
+      const value = pinyinSoundActorSelectionSetting.decode(
         { soundId },
-      );
-
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundActorSelectionSetting.entity.unmarshalValueSafe(input),
-        keyParamMarshaled,
         setting.value,
       );
       if (value == null) {

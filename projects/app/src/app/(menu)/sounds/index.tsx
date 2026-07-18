@@ -6,7 +6,6 @@ import {
   getPinyinSoundPlaceDisplaySummary,
   usePinyinSoundPlaces,
 } from "@/client/ui/hooks/usePinyinSoundPlaces";
-import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
@@ -76,19 +75,15 @@ export default function SoundsPage() {
   const pinyinSounds = new Map(
     chart.soundIds.map((soundId) => {
       if (isFinalSoundId(soundId)) {
-        const { keyParamMarshaled } = getSettingKeyInfo(
-          pinyinFinalSoundPlaceSelectionSetting,
-          { soundId },
-        );
         const placeSelectionValue =
-          pinyinFinalSoundPlaceSelectionSetting.entity.unmarshalValueSafe({
-            ...keyParamMarshaled,
-            ...(settingsByKey.get(
+          pinyinFinalSoundPlaceSelectionSetting.decode(
+            { soundId },
+            settingsByKey.get(
               pinyinFinalSoundPlaceSelectionSetting.entity.marshalKey({
                 soundId,
               }),
-            ) ?? null),
-          });
+            ) ?? null,
+          );
         const selectedPlaceId = placeSelectionValue?.placeId ?? null;
         const place =
           selectedPlaceId == null
@@ -113,29 +108,13 @@ export default function SoundsPage() {
         ];
       }
 
-      const { keyParamMarshaled: nameKeyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundNameSetting,
+      const nameValueData = pinyinSoundNameSetting.decode(
         { soundId },
+        settingsByKey.get(pinyinSoundNameSettingKey(soundId)) ?? null,
       );
-      const { keyParamMarshaled: imageKeyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundImageSetting,
+      const imageValueData = pinyinSoundImageSetting.decode(
         { soundId },
-      );
-      const nameValueData = pinyinSoundNameSetting.entity.unmarshalValueSafe(
-        settingsByKey.get(pinyinSoundNameSettingKey(soundId)) == null
-          ? null
-          : {
-              ...nameKeyParamMarshaled,
-              ...settingsByKey.get(pinyinSoundNameSettingKey(soundId)),
-            },
-      );
-      const imageValueData = pinyinSoundImageSetting.entity.unmarshalValueSafe(
-        settingsByKey.get(pinyinSoundImageSettingKey(soundId)) == null
-          ? null
-          : {
-              ...imageKeyParamMarshaled,
-              ...settingsByKey.get(pinyinSoundImageSettingKey(soundId)),
-            },
+        settingsByKey.get(pinyinSoundImageSettingKey(soundId)) ?? null,
       );
       const imageId = imageValueData?.imageId ?? null;
 

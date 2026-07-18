@@ -1,14 +1,19 @@
 import {
+  decodeUserSettingValue,
+  encodeUserSettingStoredValue,
+  getUserSettingKeyInfo,
   getImageSettingKeyPatterns,
   hanziPronunciationHintImageSetting,
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
+  pinyinFinalSoundPlaceSelectionSetting,
   pinyinSoundActorImageSetting,
   pinyinSoundActorModelSheetImageSetting,
   pinyinSoundLocationIdentityImageSetting,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   pinyinSoundModelSheetImageSetting,
+  userNameSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
@@ -136,6 +141,105 @@ describe(
       for (const pattern of patterns) {
         expect(pattern).not.toContain(`[`);
       }
+    });
+  },
+);
+
+describe(
+  `getUserSettingKeyInfo` satisfies HasNameOf<typeof getUserSettingKeyInfo>,
+  () => {
+    test(`returns marshaled key metadata for keyed settings`, () => {
+      const keyInfo = getUserSettingKeyInfo(
+        pinyinFinalSoundPlaceSelectionSetting,
+        { soundId: `-a` },
+      );
+
+      expect(keyInfo.settingKey).toBe(`pfsps/-a`);
+      expect(keyInfo.keyParamAliases).toEqual([`s`]);
+      expect(keyInfo.keyParamMarshaled).toEqual({ s: `-a` });
+    });
+
+    test(`returns empty key metadata for keyless settings`, () => {
+      const keyInfo = getUserSettingKeyInfo(userNameSetting, {});
+
+      expect(keyInfo.settingKey).toBe(`userName`);
+      expect(keyInfo.keyParamAliases).toEqual([]);
+      expect(keyInfo.keyParamMarshaled).toEqual({});
+    });
+  },
+);
+
+describe(
+  `decodeUserSettingValue` satisfies HasNameOf<typeof decodeUserSettingValue>,
+  () => {
+    test(`decodes keyed setting when stored value omits key fields`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinFinalSoundPlaceSelectionSetting,
+        { soundId: `-a` },
+        { p: `place_123` },
+      );
+
+      expect(decoded).toEqual({ soundId: `-a`, placeId: `place_123` });
+    });
+
+    test(`returns null when stored value is null`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinFinalSoundPlaceSelectionSetting,
+        { soundId: `-a` },
+        null,
+      );
+
+      expect(decoded).toBeNull();
+    });
+
+    test(`returns null when stored object cannot be decoded`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinFinalSoundPlaceSelectionSetting,
+        { soundId: `-a` },
+        { notPlace: `x` },
+      );
+
+      expect(decoded).toBeNull();
+    });
+
+    test(`decodes keyless setting values directly`, () => {
+      const decoded = decodeUserSettingValue(userNameSetting, {}, { t: `Brad` });
+
+      expect(decoded).toEqual({ text: `Brad` });
+    });
+  },
+);
+
+describe(
+  `encodeUserSettingStoredValue` satisfies HasNameOf<
+    typeof encodeUserSettingStoredValue
+  >,
+  () => {
+    test(`strips key-path fields from keyed setting stored values`, () => {
+      const encoded = encodeUserSettingStoredValue(
+        pinyinFinalSoundPlaceSelectionSetting,
+        { soundId: `-a` },
+        {
+          soundId: `-a`,
+          placeId: `place_123`,
+        },
+      );
+
+      expect(encoded).toEqual({ p: `place_123` });
+    });
+
+    test(`keeps all marshaled fields for keyless settings`, () => {
+      const encoded = encodeUserSettingStoredValue(userNameSetting, {}, {
+        text: `Brad`,
+      });
+
+      expect(encoded).toEqual({ t: `Brad` });
+    });
+
+    test(`returns null when value is null`, () => {
+      const encoded = encodeUserSettingStoredValue(userNameSetting, {}, null);
+
+      expect(encoded).toBeNull();
     });
   },
 );

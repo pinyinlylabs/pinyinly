@@ -23,13 +23,15 @@ import {
 } from "@/data/rizzleSchema";
 import type {
   RizzleAnyEntity,
+  RizzleEntityInput,
+  RizzleEntityOutput,
   RizzleBoolean,
   RizzleEntity,
   RizzleType,
   RizzleTypeAlias,
   RizzleTypeDef,
 } from "@/util/rizzle";
-import { r } from "@/util/rizzle";
+import { keyPathVariableNames, r } from "@/util/rizzle";
 
 // A user setting entity that has a `text` field
 export type UserSettingTextEntity = RizzleEntity<
@@ -88,16 +90,135 @@ export type UserSettingDefaultValueFn<T extends RizzleAnyEntity> = (
 export interface UserSetting<T extends RizzleAnyEntity = RizzleAnyEntity> {
   kind: `userSetting`;
   entity: T;
+  /**
+   * Decode a stored user-setting value for a specific key.
+   *
+   * Stored setting values intentionally omit key-path fields (for example
+   * `soundId`) to reduce payload size. Callers must therefore provide the same
+   * key params used to load the row so decode can reconstruct the full
+   * marshaled object before calling the entity decoder.
+   */
+  decode(
+    keyParams: UserSettingKeyInput<T>,
+    storedValue: unknown,
+  ): RizzleEntityOutput<T> | null;
+  /**
+   * Marshal an in-memory setting value into the persisted DB payload shape.
+   *
+   * The returned object excludes fields represented in the setting key-path,
+   * so only the value-specific portion is stored in `setting.value`.
+   */
+  encodeStoredValue(
+    keyParams: UserSettingKeyInput<T>,
+    value: RizzleEntityInput<T> | null,
+  ): Record<string, unknown> | null;
   historyLimit?: number;
   defaultValue?: UserSettingDefaultValueFn<T>;
 }
 
+export function getUserSettingKeyInfo<T extends RizzleAnyEntity>(
+  userSetting: UserSetting<T>,
+  keyParams: UserSettingKeyInput<T>,
+) {
+  /**
+   * Build key metadata used by both read and write paths:
+   * - `settingKey`: encoded key-path string for DB lookup
+   * - `keyParamAliases`: marshaled field names that belong to key params
+   * - `keyParamMarshaled`: marshaled key fields used to reconstruct decode input
+   */
+  const settingEntity = userSetting.entity;
+  const settingKey = settingEntity.marshalKey(keyParams);
+  const valueShape = (
+    settingEntity._def.valueType as unknown as {
+      _def: { shape: Record<string, RizzleType> };
+    }
+  )._def.shape;
+  const keyParamNames = keyPathVariableNames(settingEntity._def.keyPath);
+  const keyParamAliases = keyParamNames.map((name) => {
+    const type = valueShape[name];
+    return type == null ? name : (type._getAlias() ?? name);
+  });
+
+  const keyParamMarshaled: Record<string, string> = {};
+  for (const name of keyParamNames) {
+    const type = valueShape[name];
+    if (type == null) {
+      continue;
+    }
+    const alias = type._getAlias() ?? name;
+    const rawValue = (keyParams as Record<string, unknown>)[name];
+    if (rawValue == null) {
+      continue;
+    }
+    keyParamMarshaled[alias] = type.marshal(rawValue) as string;
+  }
+
+  return { settingKey, keyParamAliases, keyParamMarshaled, valueShape };
+}
+
+export function decodeUserSettingValue<T extends RizzleAnyEntity>(
+  userSetting: UserSetting<T>,
+  keyParams: UserSettingKeyInput<T>,
+  storedValue: unknown,
+): RizzleEntityOutput<T> | null {
+  if (storedValue == null) {
+    return null;
+  }
+
+  const { keyParamMarshaled } = getUserSettingKeyInfo(userSetting, keyParams);
+
+  if (typeof storedValue !== `object`) {
+    // Defensive fallback: handle malformed legacy rows that are not objects.
+    return userSetting.entity.unmarshalValueSafe(storedValue);
+  }
+
+  return userSetting.entity.unmarshalValueSafe({
+    ...keyParamMarshaled,
+    ...(storedValue as Record<string, unknown>),
+  });
+}
+
+export function encodeUserSettingStoredValue<T extends RizzleAnyEntity>(
+  userSetting: UserSetting<T>,
+  keyParams: UserSettingKeyInput<T>,
+  value: RizzleEntityInput<T> | null,
+): Record<string, unknown> | null {
+  if (value == null) {
+    return null;
+  }
+
+  const { keyParamAliases } = getUserSettingKeyInfo(userSetting, keyParams);
+  const marshaledValue = userSetting.entity.marshalValue({
+    ...(keyParams as Record<string, unknown>),
+    ...(value as Record<string, unknown>),
+  } as RizzleEntityInput<T>);
+
+  if (keyParamAliases.length === 0) {
+    return marshaledValue as Record<string, unknown>;
+  }
+
+  // Persist only non-key fields; key fields are encoded in `setting.key`.
+  return Object.fromEntries(
+    Object.entries(marshaledValue as Record<string, unknown>).filter(
+      ([key]) => !keyParamAliases.includes(key),
+    ),
+  );
+}
+
 export function defineUserSetting<T extends RizzleAnyEntity>(
-  userSetting: Omit<UserSetting<T>, `kind`>,
+  userSetting: Omit<UserSetting<T>, `kind` | `decode` | `encodeStoredValue`>,
 ): UserSetting<T> {
-  return {
+  const setting = {
     kind: `userSetting`,
     ...userSetting,
+  } as Omit<UserSetting<T>, `decode` | `encodeStoredValue`>;
+
+  return {
+    ...setting,
+    decode: (keyParams, storedValue) =>
+      decodeUserSettingValue(setting as UserSetting<T>, keyParams, storedValue),
+    encodeStoredValue: (keyParams, value) =>
+      encodeUserSettingStoredValue(setting as UserSetting<T>, keyParams, value),
   };
 }
 
