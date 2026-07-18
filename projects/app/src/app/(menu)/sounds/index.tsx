@@ -129,7 +129,7 @@ export default function SoundsPage() {
         const firstSoundId = sounds[0];
         const gridClass =
           firstSoundId != null && isFinalSoundId(firstSoundId)
-            ? `grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5`
+            ? `grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5`
             : `grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-x-3.5 gap-y-6`;
         return (
           <View key={id} className="gap-4">

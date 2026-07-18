@@ -23,11 +23,13 @@ export function FinalSoundTile({
   image,
   ...props
 }: FinalSoundTileProps) {
+  const hasLabel = nullIfEmpty(label) != null;
+
   return (
     <View
       {...props}
       className={
-        `group w-full overflow-hidden rounded-xl bg-bg-high shadow` +
+        `group w-full items-center` +
         (className == null
           ? ``
           : `
@@ -37,42 +39,66 @@ export function FinalSoundTile({
     >
       <View
         className={`
-          h-28 w-full border border-transparent transition-colors duration-150
+          relative z-10 size-[180px] transition-colors duration-150
+
+          ${hasLabel ? `mb-5` : `mb-2`}
 
           group-hover:border-fg/10
         `}
       >
-        {image == null ? null : (
-          <FramedAssetImage
-            assetId={image.assetId}
-            crop={image.crop}
-            imageWidth={image.imageWidth}
-            imageHeight={image.imageHeight}
-            frameShape="rect"
-            className="size-full"
-          />
-        )}
+        <View
+          className={`
+            size-full overflow-hidden rounded-xl border border-transparent bg-bg-high shadow
+            transition-colors duration-150
+
+            group-hover:border-fg/10
+          `}
+        >
+          {image == null ? null : (
+            <FramedAssetImage
+              assetId={image.assetId}
+              crop={image.crop}
+              imageWidth={image.imageWidth}
+              imageHeight={image.imageHeight}
+              frameShape="rect"
+              className="size-full"
+            />
+          )}
+        </View>
+
+        {hasLabel ? (
+          <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
+            <View
+              className={`
+                min-h-8 min-w-8 items-center justify-center rounded-full border border-fg/10
+                bg-fg-loud px-2.5 shadow transition-all duration-150
+
+                group-hover:brightness-110
+              `}
+            >
+              <Text className="font-sans text-sm/none font-semibold text-bg">
+                {label}
+              </Text>
+            </View>
+          </View>
+        ) : null}
       </View>
 
       <View
         className={`
-          flex-row items-center gap-2 px-3 py-2 transition-colors duration-150
+          relative z-0 max-w-full rounded-xl px-3 py-2 transition-all duration-150
 
-          group-hover:bg-fg/5
+          group-hover:bg-bg-high/60
         `}
       >
         <Text
           className={
-            `flex-1 text-base/tight font-medium text-fg` +
+            `text-base/none font-medium text-fg` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}
         >
           {name ?? `_____`}
-        </Text>
-
-        <Text className="shrink-0 font-sans text-sm/none text-fg-dim">
-          {label}
         </Text>
       </View>
     </View>

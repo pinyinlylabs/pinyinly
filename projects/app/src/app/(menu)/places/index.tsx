@@ -1,4 +1,5 @@
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { RectButton } from "@/client/ui/RectButton";
 import { usePinyinSoundPlaces } from "@/client/ui/hooks/usePinyinSoundPlaces";
@@ -14,6 +15,10 @@ export default function PlacesPage() {
 
   return (
     <View className="gap-5">
+      <Breadcrumbs>
+        <Breadcrumbs.Item href="/places">Places</Breadcrumbs.Item>
+      </Breadcrumbs>
+
       <View className="gap-2">
         <Text className="pyly-body-title">Places</Text>
         <HeaderTitleProvider.ScrollTrigger title="Places" />
@@ -54,7 +59,7 @@ export default function PlacesPage() {
           </View>
         ) : null}
 
-        <View className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5">
+        <View className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-x-3.5 gap-y-6">
           {places.map((place) => {
             return (
               <Link
@@ -65,7 +70,7 @@ export default function PlacesPage() {
                 <FinalSoundTile
                   label=""
                   name={place.name}
-                  image={place.image}
+                  image={place.identityImage}
                 />
               </Link>
             );

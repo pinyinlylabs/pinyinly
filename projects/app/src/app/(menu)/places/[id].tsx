@@ -12,11 +12,11 @@ import type { PlaceId } from "@/data/model";
 import {
   getPinyinSoundPlaceSublocationKeyParams,
   pinyinSoundPlaceDescriptionSetting,
-  pinyinSoundPlaceImageSetting,
+  pinyinSoundPlaceIdentityImageSetting,
   pinyinSoundPlaceNameSetting,
   pinyinSoundPlaceSpecificationSetting,
   pinyinSoundPlaceSublocationDescriptionSetting,
-  pinyinSoundPlaceSublocationImageSetting,
+  pinyinSoundPlaceSublocationIdentityImageSetting,
   pinyinSoundPlaceSublocationNameSetting,
   pinyinSoundPlaceSublocationViewpointSetting,
 } from "@/data/userSettings";
@@ -51,6 +51,20 @@ export default function PlaceIdPage() {
 
       <HeaderTitleProvider.ScrollTrigger title={title} />
 
+      <View className="items-center">
+        <View className="w-[260px] overflow-hidden rounded-2xl">
+          <InlineEditableSettingImage
+            setting={pinyinSoundPlaceIdentityImageSetting}
+            settingKey={{ placeId }}
+            enableAiGeneration
+            frameShape="rect"
+            aspectRatio="1:1"
+            previewHeight={260}
+            tileSize={64}
+          />
+        </View>
+      </View>
+
       <View className="gap-3">
         <InlineEditableSettingText
           variant="title"
@@ -66,21 +80,6 @@ export default function PlaceIdPage() {
           multiline
         />
       </View>
-
-      <WikiTitledBox
-        title="Hero image"
-        className="rounded-lg border border-fg/10 bg-bg-high p-4"
-      >
-        <InlineEditableSettingImage
-          setting={pinyinSoundPlaceImageSetting}
-          settingKey={{ placeId }}
-          enableAiGeneration
-          frameShape="rect"
-          aspectRatio="16:9"
-          previewHeight={220}
-          tileSize={64}
-        />
-      </WikiTitledBox>
 
       <View className="gap-4">
         <Text className="pyly-body-caption text-fg-dim">Sublocations</Text>
@@ -118,7 +117,7 @@ export default function PlaceIdPage() {
                 />
 
                 <InlineEditableSettingImage
-                  setting={pinyinSoundPlaceSublocationImageSetting}
+                  setting={pinyinSoundPlaceSublocationIdentityImageSetting}
                   settingKey={settingKey}
                   enableAiGeneration
                   frameShape="rect"

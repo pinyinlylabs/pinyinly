@@ -7,8 +7,8 @@ import {
   pinyinSoundActorImageSetting,
   pinyinSoundActorModelSheetImageSetting,
   pinyinSoundImageSetting,
-  pinyinSoundPlaceImageSetting,
-  pinyinSoundPlaceSublocationImageSetting,
+  pinyinSoundPlaceIdentityImageSetting,
+  pinyinSoundPlaceSublocationIdentityImageSetting,
   pinyinSoundModelSheetImageSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
@@ -32,8 +32,10 @@ describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
     expect(imageSettingDefs).toHaveLength(9);
     expect(imageSettingDefs).toContain(pinyinSoundActorImageSetting);
     expect(imageSettingDefs).toContain(pinyinSoundActorModelSheetImageSetting);
-    expect(imageSettingDefs).toContain(pinyinSoundPlaceImageSetting);
-    expect(imageSettingDefs).toContain(pinyinSoundPlaceSublocationImageSetting);
+    expect(imageSettingDefs).toContain(pinyinSoundPlaceIdentityImageSetting);
+    expect(imageSettingDefs).toContain(
+      pinyinSoundPlaceSublocationIdentityImageSetting,
+    );
     expect(imageSettingDefs).toContain(pinyinSoundImageSetting);
     expect(imageSettingDefs).toContain(pinyinSoundModelSheetImageSetting);
     expect(imageSettingDefs).toContain(hanziWordMeaningHintImageSetting);
@@ -73,8 +75,8 @@ describe(
       expect(patterns).toHaveLength(9);
       expect(patterns).toContain(`psai/%`); // pinyinSoundActorImageSetting
       expect(patterns).toContain(`psams/%`); // pinyinSoundActorModelSheetImageSetting
-      expect(patterns).toContain(`pspi/%`); // pinyinSoundPlaceImageSetting
-      expect(patterns).toContain(`pspli/%`); // pinyinSoundPlaceSublocationImageSetting
+      expect(patterns).toContain(`pspi/%`); // pinyinSoundPlaceIdentityImageSetting
+      expect(patterns).toContain(`pspli/%`); // pinyinSoundPlaceSublocationIdentityImageSetting
       expect(patterns).toContain(`psi/%`); // pinyinSoundImageSetting
       expect(patterns).toContain(`psms/%`); // pinyinSoundModelSheetImageSetting
       expect(patterns).toContain(`hwmhi/%`); // hanziWordMeaningHintImageSetting
@@ -95,14 +97,14 @@ describe(
       );
       expect(patterns).toContain(`psams/%`);
 
-      expect(pinyinSoundPlaceImageSetting.entity._def.keyPath).toBe(
+      expect(pinyinSoundPlaceIdentityImageSetting.entity._def.keyPath).toBe(
         `pspi/[placeId]`,
       );
       expect(patterns).toContain(`pspi/%`);
 
-      expect(pinyinSoundPlaceSublocationImageSetting.entity._def.keyPath).toBe(
-        `pspli/[placeId]/[role]`,
-      );
+      expect(
+        pinyinSoundPlaceSublocationIdentityImageSetting.entity._def.keyPath,
+      ).toBe(`pspli/[placeId]/[role]`);
       expect(patterns).toContain(`pspli/%`);
 
       // Verify each pattern corresponds to its setting's key path

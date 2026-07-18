@@ -6,14 +6,14 @@ import type { AssetId, PlaceId } from "@/data/model";
 import {
   pinyinSoundPlaceDescriptionSetting,
   pinyinSoundPlaceDescriptionSettingKey,
-  pinyinSoundPlaceImageSetting,
-  pinyinSoundPlaceImageSettingKey,
+  pinyinSoundPlaceIdentityImageSetting,
+  pinyinSoundPlaceIdentityImageSettingKey,
   pinyinSoundPlaceNameSetting,
   pinyinSoundPlaceNameSettingKey,
   pinyinSoundPlaceSublocationDescriptionSetting,
   pinyinSoundPlaceSublocationDescriptionSettingKey,
-  pinyinSoundPlaceSublocationImageSetting,
-  pinyinSoundPlaceSublocationImageSettingKey,
+  pinyinSoundPlaceSublocationIdentityImageSetting,
+  pinyinSoundPlaceSublocationIdentityImageSettingKey,
   pinyinSoundPlaceSublocationNameSetting,
   pinyinSoundPlaceSublocationNameSettingKey,
   pinyinSoundPlaceSublocationViewpointSetting,
@@ -57,7 +57,7 @@ export interface PinyinSoundPlaceSublocationSummary {
   name: string | null;
   description: string | null;
   viewpoint: string | null;
-  image: {
+  identityImage: {
     assetId: AssetId;
     crop: ReturnType<typeof parseImageCrop>;
     imageWidth: number | null;
@@ -69,7 +69,7 @@ export interface PinyinSoundPlaceSummary {
   placeId: PlaceId;
   name: string | null;
   description: string | null;
-  image: {
+  identityImage: {
     assetId: AssetId;
     crop: ReturnType<typeof parseImageCrop>;
     imageWidth: number | null;
@@ -91,7 +91,7 @@ interface PlaceAccumulator {
   placeId: PlaceId;
   name: string | null;
   description: string | null;
-  image: {
+  identityImage: {
     assetId: AssetId;
     crop: ReturnType<typeof parseImageCrop>;
     imageWidth: number | null;
@@ -111,7 +111,7 @@ function createEmptySublocation(
     name: null,
     description: null,
     viewpoint: null,
-    image: null,
+    identityImage: null,
   };
 }
 
@@ -120,7 +120,7 @@ function createPlaceAccumulator(placeId: PlaceId): PlaceAccumulator {
     placeId,
     name: null,
     description: null,
-    image: null,
+    identityImage: null,
     sublocations: {
       arrival: createEmptySublocation(`arrival`),
       heart: createEmptySublocation(`heart`),
@@ -223,14 +223,14 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
     if (setting.key.startsWith(`pspi/`)) {
       const placeId = setting.key.slice(`pspi/`.length) as PlaceId;
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceImageSetting,
+        pinyinSoundPlaceIdentityImageSetting,
         {
           placeId,
         },
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceImageSetting.entity.unmarshalValueSafe(input),
+          pinyinSoundPlaceIdentityImageSetting.entity.unmarshalValueSafe(input),
         keyParamMarshaled,
         setting.value,
       );
@@ -239,7 +239,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const place = getOrCreatePlace(value.placeId);
-      place.image = {
+      place.identityImage = {
         assetId: value.imageId,
         crop: parseImageCrop(value.imageCrop),
         imageWidth: value.imageWidth ?? null,
@@ -349,7 +349,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceSublocationImageSetting,
+        pinyinSoundPlaceSublocationIdentityImageSetting,
         {
           placeId: keyData.placeId,
           role: keyData.role,
@@ -357,7 +357,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceSublocationImageSetting.entity.unmarshalValueSafe(
+          pinyinSoundPlaceSublocationIdentityImageSetting.entity.unmarshalValueSafe(
             input,
           ),
         keyParamMarshaled,
@@ -369,7 +369,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
 
       const place = getOrCreatePlace(value.placeId);
       const role = value.role as PlaceSublocationRole;
-      place.sublocations[role].image = {
+      place.sublocations[role].identityImage = {
         assetId: value.imageId,
         crop: parseImageCrop(value.imageCrop),
         imageWidth: value.imageWidth ?? null,
@@ -419,7 +419,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
         historyId: nanoid(),
       });
       void r.mutate.setSetting({
-        key: pinyinSoundPlaceSublocationImageSettingKey(placeId, role),
+        key: pinyinSoundPlaceSublocationIdentityImageSettingKey(placeId, role),
         value: null,
         now: new Date(),
         skipHistory: false,
@@ -435,7 +435,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       historyId: nanoid(),
     });
     void r.mutate.setSetting({
-      key: pinyinSoundPlaceImageSettingKey(placeId),
+      key: pinyinSoundPlaceIdentityImageSettingKey(placeId),
       value: null,
       now: new Date(),
       skipHistory: false,
