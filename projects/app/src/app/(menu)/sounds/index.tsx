@@ -120,6 +120,9 @@ export default function SoundsPage() {
         <RectButton href="/actors" variant="outline">
           Actors
         </RectButton>
+        <RectButton href="/places" variant="outline">
+          Places
+        </RectButton>
       </View>
 
       {pinyinSoundGroupsQuery.data.map(({ id, sounds }) => {

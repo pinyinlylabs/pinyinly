@@ -1,5 +1,5 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { withNativeWind } = require(`nativewind/metro`);
+const { withNativewind } = require(`nativewind/metro`);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
 /** @type Record<string, { moduleName?: string; platform?: string }> */
@@ -52,7 +52,7 @@ config = {
   },
 };
 
-config = withNativeWind(config);
+config = withNativewind(config);
 
 // Doing Sentry last is probably important so that the hashed debug IDs are
 // based on the final content of the final and aren't stripped by any other

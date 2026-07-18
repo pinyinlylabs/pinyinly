@@ -57,7 +57,7 @@ export function initMemoryLeakDetection(): void {
 
   const pylyMemoryLeakState = (globalThis.__pylyMemoryLeak ??= {});
 
-  if (!pylyMemoryLeakState.processListenerMonitorInitialized) {
+  if (pylyMemoryLeakState.processListenerMonitorInitialized !== true) {
     pylyMemoryLeakState.processListenerMonitorInitialized = true;
 
     const originalOn = process.on.bind(process);

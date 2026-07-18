@@ -31,8 +31,7 @@ export const placeExperienceRoleSchema = z.enum([
 
 export type PlaceExperienceRole = z.infer<typeof placeExperienceRoleSchema>;
 
-export type PlaceExperience<Role extends PlaceExperienceRole> = {
-  role: Role;
+export type PlaceExperience = {
   name: string;
   designRules: string[];
   canonicalFraming: string;
@@ -43,18 +42,17 @@ export type PlaceSpecification = {
   place: string;
   recognitionHooks: string[];
   designRules: string[];
-  experiences: [
-    PlaceExperience<`arrival`>,
-    PlaceExperience<`heart`>,
-    PlaceExperience<`below`>,
-    PlaceExperience<`ascent`>,
-    PlaceExperience<`summit`>,
-  ];
+  experiences: {
+    arrival: PlaceExperience;
+    heart: PlaceExperience;
+    below: PlaceExperience;
+    ascent: PlaceExperience;
+    summit: PlaceExperience;
+  };
 };
 
 const placeExperienceSchema = z
   .object({
-    role: placeExperienceRoleSchema,
     name: z.string().min(1),
     designRules: z.array(z.string().min(1)),
     canonicalFraming: z.string().min(1),
@@ -62,38 +60,20 @@ const placeExperienceSchema = z
   })
   .strict();
 
-const arrivalExperienceSchema = placeExperienceSchema.extend({
-  role: z.literal(`arrival`),
-});
-
-const heartExperienceSchema = placeExperienceSchema.extend({
-  role: z.literal(`heart`),
-});
-
-const belowExperienceSchema = placeExperienceSchema.extend({
-  role: z.literal(`below`),
-});
-
-const ascentExperienceSchema = placeExperienceSchema.extend({
-  role: z.literal(`ascent`),
-});
-
-const summitExperienceSchema = placeExperienceSchema.extend({
-  role: z.literal(`summit`),
-});
-
 const placeSpecificationBaseSchema = z
   .object({
     place: z.string().min(1),
     recognitionHooks: z.array(z.string().min(1)),
     designRules: z.array(z.string().min(1)),
-    experiences: z.tuple([
-      arrivalExperienceSchema,
-      heartExperienceSchema,
-      belowExperienceSchema,
-      ascentExperienceSchema,
-      summitExperienceSchema,
-    ]),
+    experiences: z
+      .object({
+        arrival: placeExperienceSchema,
+        heart: placeExperienceSchema,
+        below: placeExperienceSchema,
+        ascent: placeExperienceSchema,
+        summit: placeExperienceSchema,
+      })
+      .strict(),
   })
   .strict();
 
@@ -103,7 +83,7 @@ function validatePlaceSpecificationShape(
 ): void {
   if (value.recognitionHooks.length < 3 || value.recognitionHooks.length > 5) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: `custom`,
       path: [`recognitionHooks`],
       message: `Expected 3 to 5 recognition hooks.`,
     });
@@ -111,35 +91,20 @@ function validatePlaceSpecificationShape(
 
   if (value.designRules.length === 0) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: `custom`,
       path: [`designRules`],
       message: `Expected at least one global design rule.`,
     });
   }
 
-  const expectedRoles: PlaceExperienceRole[] = [
-    `arrival`,
-    `heart`,
-    `below`,
-    `ascent`,
-    `summit`,
-  ];
-
-  for (const [index, expectedRole] of expectedRoles.entries()) {
-    const experience = value.experiences[index]!;
-    if (experience.role !== expectedRole) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [`experiences`, index, `role`],
-        message: `Expected role ${JSON.stringify(expectedRole)} at index ${index}.`,
-      });
-    }
+  for (const role of placeExperienceRoleSchema.options) {
+    const experience = value.experiences[role];
 
     if (experience.designRules.length === 0) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [`experiences`, index, `designRules`],
-        message: `Expected at least one design rule for experience ${expectedRole}.`,
+        code: `custom`,
+        path: [`experiences`, role, `designRules`],
+        message: `Expected at least one design rule for experience ${role}.`,
       });
     }
   }
@@ -482,7 +447,7 @@ Evaluate the following place specification.
   return {
     messages,
     model: `gpt-5.4`,
-    reasoningEffort: `high`,
+    reasoningEffort: `medium`,
     schema: placeEvaluationSchema,
   };
 };
@@ -549,7 +514,7 @@ Revise the following place specification based on the criticisms.
   return {
     messages,
     model: `gpt-5.4`,
-    reasoningEffort: `medium`,
+    reasoningEffort: `low`,
     schema: placeSpecificationSchema,
   };
 };
@@ -667,7 +632,7 @@ export async function runPlaceSpecificationRefinementPipeline(
     }
 
     if (attempt === maxAttempts) {
-      const selectedAttempt = bestAttempt ?? currentAttempt;
+      const selectedAttempt = bestAttempt;
 
       return {
         attempts,

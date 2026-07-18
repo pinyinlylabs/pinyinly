@@ -16,7 +16,7 @@ import {
   pinyinSoundActorNameSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Text, View } from "react-native";
 
 export default function ActorIdPage() {
@@ -44,22 +44,17 @@ export default function ActorIdPage() {
     setting: pinyinSoundActorMnemonicIdentitySetting,
     key: { actorId },
   });
+  const currentIdentityDraft = formatIdentityJson(
+    mnemonicIdentitySetting.value?.mnemonicIdentity,
+  );
 
-  const [identityDraft, setIdentityDraft] = useState(``);
+  const [identityDraft, setIdentityDraft] = useState(currentIdentityDraft);
   const [identityError, setIdentityError] = useState<string | null>(null);
   const [isNameEditingEnabled, setIsNameEditingEnabled] = useState(false);
 
-  useEffect(() => {
-    setIdentityDraft(
-      formatIdentityJson(mnemonicIdentitySetting.value?.mnemonicIdentity),
-    );
-    setIdentityError(null);
-  }, [actorId, mnemonicIdentitySetting.value?.mnemonicIdentity]);
-
   const handleResetIdentityDraft = () => {
-    setIdentityDraft(
-      formatIdentityJson(mnemonicIdentitySetting.value?.mnemonicIdentity),
-    );
+    setIdentityDraft(currentIdentityDraft);
+    setIdentityError(null);
   };
 
   const saveIdentityDraft = () => {

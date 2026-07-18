@@ -1,8 +1,8 @@
 import { getOpenAIClient } from "@/server/lib/openai/client";
-import { invariant } from "@pinyinly/lib/invariant";
 import type { OpenAI } from "openai";
 import { z } from "zod";
 import makeDebug from "debug";
+import { invariant } from "@pinyinly/lib/invariant";
 
 const debug = makeDebug(`pyly:ai.ts`);
 
@@ -22,7 +22,11 @@ export interface ChatPrompt<Schema extends z.ZodType> {
   schema: Schema;
 }
 
-const unsupportedOpenAiJsonSchemaKeywords = new Set([`maxItems`, `minItems`]);
+const unsupportedOpenAiJsonSchemaKeywords = new Set([
+  `maxItems`,
+  `minItems`,
+  `prefixItems`,
+]);
 
 function formatJsonSchemaPath(path: readonly (number | string)[]): string {
   let result = `$`;
@@ -62,6 +66,17 @@ function assertOpenAiCompatibleJsonSchema(
     }
 
     assertOpenAiCompatibleJsonSchema(child, [...path, key]);
+  }
+
+  const isArraySchema =
+    `type` in value &&
+    (value.type === `array` ||
+      (Array.isArray(value.type) && value.type.includes(`array`)));
+
+  if (isArraySchema && !(`items` in value)) {
+    throw new Error(
+      `OpenAI response format requires JSON Schema arrays to define "items" at ${formatJsonSchemaPath(path)}`,
+    );
   }
 }
 

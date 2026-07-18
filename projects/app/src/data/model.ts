@@ -78,6 +78,12 @@ export const assetIdSchema = z
 export type ActorId = string & z.$brand<`ActorId`>;
 export const actorIdSchema = z.custom<ActorId>(isString);
 
+/**
+ * A reusable place record used by pinyin finals mnemonic locations.
+ */
+export type PlaceId = string & z.$brand<`PlaceId`>;
+export const placeIdSchema = z.custom<PlaceId>(isString);
+
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;
 export const pinyinSoundIdPinyinlyObjectIdKind = `ps` as const;

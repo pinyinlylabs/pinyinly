@@ -17,16 +17,20 @@ function normalized(value: string): string {
 }
 
 function isValidPlaceSpecification(spec: PlaceSpecification): boolean {
+  const experiences = spec.experiences;
+
   return (
     spec.place.trim().length > 0 &&
     spec.recognitionHooks.length >= 3 &&
     spec.recognitionHooks.length <= 5 &&
     spec.designRules.length > 0 &&
-    spec.experiences.length === 5 &&
-    [`arrival`, `heart`, `below`, `ascent`, `summit`].every(
-      (role, index) => spec.experiences[index]?.role === role,
-    ) &&
-    spec.experiences.every((experience) => experience.designRules.length > 0)
+    [
+      experiences.arrival,
+      experiences.heart,
+      experiences.below,
+      experiences.ascent,
+      experiences.summit,
+    ].every((experience) => experience.designRules.length > 0)
   );
 }
 
@@ -83,6 +87,7 @@ const PlacePipelineJudge = createJudge(
 const promptCases: PlacePromptInputType[] = [
   { place: `Pirate ship` },
   { place: `Mountain temple` },
+  { place: `Aircraft hangar` },
 ];
 
 describeEval(
@@ -121,8 +126,12 @@ describeEval(
     judges: [PlacePipelineJudge],
   },
   (it) => {
-    it.for(promptCases)(`$place`, async (spec, { run }) => {
-      await run(spec);
-    });
+    it.for(promptCases)(
+      `$place`,
+      { timeout: 3 * 60_000 },
+      async (spec, { run }) => {
+        await run(spec);
+      },
+    );
   },
 );

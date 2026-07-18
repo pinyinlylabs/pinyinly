@@ -73,5 +73,16 @@ describe(
         /"maxItems"/u,
       );
     });
+
+    test(`tuple schemas throw because OpenAI does not support prefixItems`, () => {
+      const schema = z.object({
+        experiences: z.tuple([
+          z.object({ role: z.literal(`arrival`) }),
+          z.object({ role: z.literal(`heart`) }),
+        ]),
+      });
+
+      expect(() => zodResponseFormatJson(schema)).toThrow(/"prefixItems"/u);
+    });
   },
 );

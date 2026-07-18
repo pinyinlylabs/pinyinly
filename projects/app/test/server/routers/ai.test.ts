@@ -979,22 +979,20 @@ describe(
         identity: `Dracula`,
       });
 
-      expect(omit(result, [`schema`])).toMatchObject({
-        model: `gpt-5-mini`,
-        reasoningEffort: `medium`,
-        messages: [
-          {
-            role: `system`,
-            content: expect.stringContaining(
-              `You are designing a recurring mnemonic actor for a Chinese language learning system.`,
-            ),
-          },
-          {
-            role: `user`,
-            content: expect.stringContaining(`Generate a mnemonic actor for:`),
-          },
-        ],
-      });
+      expect(result.model).toBe(`gpt-5-mini`);
+      expect(result.reasoningEffort).toBe(`medium`);
+      expect(result.messages).toHaveLength(2);
+      expect(result.messages[0]?.role).toBe(`system`);
+      expect(typeof result.messages[0]?.content).toBe(`string`);
+      expect(result.messages[1]?.role).toBe(`user`);
+      expect(typeof result.messages[1]?.content).toBe(`string`);
+
+      expect(result.messages[0]?.content).toContain(
+        `You are designing a recurring mnemonic actor for a Chinese language learning system.`,
+      );
+      expect(result.messages[1]?.content).toContain(
+        `Generate a mnemonic actor for:`,
+      );
 
       expect(result.messages[1]?.content).toContain(`"identity": "Dracula"`);
     });

@@ -220,7 +220,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
           keyParamMarshaled,
           setting.value,
         );
-        if (value == null || value.imageId == null) {
+        if (value == null) {
           continue;
         }
 

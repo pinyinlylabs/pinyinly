@@ -10,6 +10,7 @@ import type {
   AssetId,
   HanziText,
   HanziWord,
+  PlaceId,
   PinyinlyObjectId,
   PinyinSoundGroupId,
   PinyinSoundId,
@@ -87,6 +88,7 @@ const brandedString = <T extends string>() =>
 
 export const rHanziOrHanziWord = brandedString<HanziText | HanziWord>;
 export const rActorId = brandedString<ActorId>;
+export const rPlaceId = brandedString<PlaceId>;
 export const rAssetId = brandedString<AssetId>;
 export const rPinyinSoundId = brandedString<PinyinSoundId>;
 export const rPinyinlyObjectId = brandedString<PinyinlyObjectId>;

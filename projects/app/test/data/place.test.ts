@@ -1,4 +1,12 @@
 // pyly-not-src-test
+import { requestOpenAiResponseJson } from "#server/lib/ai.js";
+import type { PlaceEvaluationType, PlaceSpecification } from "./place";
+import {
+  buildPlaceSpecificationPrompt,
+  generatePlaceSpecification,
+  placeSpecificationSchema,
+  runPlaceSpecificationRefinementPipeline,
+} from "./place";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock(`#server/lib/ai.js`, async () => {
@@ -13,57 +21,43 @@ vi.mock(`#server/lib/ai.js`, async () => {
   };
 });
 
-import { requestOpenAiResponseJson } from "#server/lib/ai.js";
-import {
-  buildPlaceSpecificationPrompt,
-  generatePlaceSpecification,
-  placeSpecificationSchema,
-  runPlaceSpecificationRefinementPipeline,
-} from "./place";
-import type { PlaceEvaluationType, PlaceSpecification } from "./place";
-
 function makePlaceSpecification(place: string): PlaceSpecification {
   return {
     place,
     recognitionHooks: [`mast`, `bow`, `anchor`],
     designRules: [`Keep the hull dominant in the composition.`],
-    experiences: [
-      {
-        role: `arrival`,
+    experiences: {
+      arrival: {
         name: `dock`,
         designRules: [`Show the gangplank and mooring ropes.`],
         canonicalFraming: `View from the dock looking toward the deck entrance.`,
         avoidFraming: [`Do not frame it as a distant open-sea panorama.`],
       },
-      {
-        role: `heart`,
+      heart: {
         name: `captain's cabin`,
         designRules: [`Show the richest interior detail.`],
         canonicalFraming: `View from the doorway looking toward the captain's chair and desk.`,
         avoidFraming: [`Do not reduce it to a plain hallway.`],
       },
-      {
-        role: `below`,
+      below: {
         name: `cargo hold`,
         designRules: [`Show stacked crates and a low ceiling.`],
         canonicalFraming: `View from knee height looking into the lower hold.`,
         avoidFraming: [`Do not frame it like the main deck.`],
       },
-      {
-        role: `ascent`,
+      ascent: {
         name: `stairs`,
         designRules: [`Show the climb upward along the mast.`],
         canonicalFraming: `View from below looking up the rigging and steps.`,
         avoidFraming: [`Do not frame it as a flat side path.`],
       },
-      {
-        role: `summit`,
+      summit: {
         name: `crow's nest`,
         designRules: [`Show the tiny lookout at the top of the mast.`],
         canonicalFraming: `View from the deck looking up to the lookout platform.`,
         avoidFraming: [`Do not frame it as the same as the cabin interior.`],
       },
-    ],
+    },
   };
 }
 
@@ -100,26 +94,26 @@ function promptKind(content: string): `generator` | `evaluator` | `refiner` {
 }
 
 describe(`placeSpecificationSchema`, () => {
-  test(`accepts exactly five ordered experiences`, () => {
+  test(`accepts exactly five keyed experiences`, () => {
     const spec = makePlaceSpecification(`Pirate ship`);
 
     expect(placeSpecificationSchema.parse(spec)).toEqual(spec);
   });
 
-  test(`rejects the wrong role order`, () => {
+  test(`rejects unexpected fields inside experiences`, () => {
     const spec = {
       ...makePlaceSpecification(`Pirate ship`),
-      experiences: [
-        {
-          ...makePlaceSpecification(`Pirate ship`).experiences[0],
-          role: `heart`,
+      experiences: {
+        ...makePlaceSpecification(`Pirate ship`).experiences,
+        arrival: {
+          ...makePlaceSpecification(`Pirate ship`).experiences.arrival,
+          role: `arrival`,
         },
-        ...makePlaceSpecification(`Pirate ship`).experiences.slice(1),
-      ] as unknown as PlaceSpecification[`experiences`],
+      },
     };
 
     expect(() => placeSpecificationSchema.parse(spec)).toThrow(
-      /invalid_value/u,
+      /unrecognized_key|unrecognized_keys/u,
     );
   });
 });
@@ -157,7 +151,12 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
     const generated = makePlaceSpecification(`Pirate ship`);
 
     requestMock.mockImplementation(async (prompt) => {
-      switch (promptKind(prompt.messages[0]?.content ?? ``)) {
+      const kind = promptKind(prompt.messages[0]?.content ?? ``);
+      if (kind === `refiner`) {
+        throw new Error(`refiner should not be called when evaluation passes`);
+      }
+
+      switch (kind) {
         case `generator`:
           return { data: generated, model: `gpt-5.4` };
         case `evaluator`:
@@ -165,10 +164,6 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
             data: makeEvaluation(true, 1, []),
             model: `gpt-5.4`,
           };
-        default:
-          throw new Error(
-            `refiner should not be called when evaluation passes`,
-          );
       }
     });
 
@@ -185,8 +180,8 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
   test(`invokes the refiner when evaluation fails`, async () => {
     const generated = makePlaceSpecification(`Pirate ship`);
     const refined = makePlaceSpecification(`Pirate ship`);
-    refined.experiences[1] = {
-      ...refined.experiences[1],
+    refined.experiences.heart = {
+      ...refined.experiences.heart,
       name: `treasure room`,
     };
 
@@ -242,7 +237,14 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
 
     requestMock.mockImplementation(async (prompt) => {
       callCount += 1;
-      switch (promptKind(prompt.messages[0]?.content ?? ``)) {
+      const kind = promptKind(prompt.messages[0]?.content ?? ``);
+      if (kind === `refiner`) {
+        throw new Error(
+          `The refiner should not be called for fundamental failures.`,
+        );
+      }
+
+      switch (kind) {
         case `generator`:
           if (callCount > 1) {
             return { data: second, model: `gpt-5.4` };
@@ -269,10 +271,6 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
             ]),
             model: `gpt-5.4`,
           };
-        default:
-          throw new Error(
-            `The refiner should not be called for fundamental failures.`,
-          );
       }
     });
 
@@ -292,9 +290,15 @@ describe(`runPlaceSpecificationRefinementPipeline`, () => {
   test(`returns the highest-scoring candidate when none pass`, async () => {
     const first = makePlaceSpecification(`Pirate ship`);
     const second = makePlaceSpecification(`Pirate ship`);
-    second.experiences[1] = { ...second.experiences[1], name: `treasure room` };
+    second.experiences.heart = {
+      ...second.experiences.heart,
+      name: `treasure room`,
+    };
     const third = makePlaceSpecification(`Pirate ship`);
-    third.experiences[1] = { ...third.experiences[1], name: `flag deck` };
+    third.experiences.heart = {
+      ...third.experiences.heart,
+      name: `flag deck`,
+    };
 
     let callCount = 0;
 

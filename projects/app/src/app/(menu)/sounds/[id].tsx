@@ -251,7 +251,7 @@ function MnemonicStoryRoleSection({
         mnemonicImageSetting.value == null
           ? null
           : {
-              imageId: mnemonicImageSetting.value.imageId ?? null,
+              imageId: mnemonicImageSetting.value.imageId,
               imageCrop: mnemonicImageSetting.value.imageCrop ?? null,
               imageWidth: mnemonicImageSetting.value.imageWidth ?? null,
               imageHeight: mnemonicImageSetting.value.imageHeight ?? null,
@@ -260,7 +260,7 @@ function MnemonicStoryRoleSection({
         modelSheetImageSetting.value == null
           ? null
           : {
-              imageId: modelSheetImageSetting.value.imageId ?? null,
+              imageId: modelSheetImageSetting.value.imageId,
               imageCrop: modelSheetImageSetting.value.imageCrop ?? null,
               imageWidth: modelSheetImageSetting.value.imageWidth ?? null,
               imageHeight: modelSheetImageSetting.value.imageHeight ?? null,
