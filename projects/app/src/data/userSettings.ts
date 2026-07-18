@@ -248,6 +248,14 @@ export const pinyinSoundPlaceImageSetting = defineUserSetting({
   }) satisfies UserSettingImageEntity,
 });
 
+export const pinyinSoundPlaceSpecificationSetting = defineUserSetting({
+  entity: r.entity(`psps/[placeId]`, {
+    placeId: rPlaceId().alias(`p`),
+    text: r.string().alias(`t`),
+  }) satisfies UserSettingTextEntity,
+  historyLimit: 20,
+});
+
 export const pinyinSoundPlaceSublocationNameSetting = defineUserSetting({
   entity: r.entity(`pspln/[placeId]/[role]`, {
     placeId: rPlaceId().alias(`p`),

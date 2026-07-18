@@ -14,6 +14,7 @@ import {
   pinyinSoundPlaceDescriptionSetting,
   pinyinSoundPlaceImageSetting,
   pinyinSoundPlaceNameSetting,
+  pinyinSoundPlaceSpecificationSetting,
   pinyinSoundPlaceSublocationDescriptionSetting,
   pinyinSoundPlaceSublocationImageSetting,
   pinyinSoundPlaceSublocationNameSetting,
@@ -130,6 +131,18 @@ export default function PlaceIdPage() {
           );
         })}
       </View>
+
+      <WikiTitledBox
+        title="Place specification JSON"
+        className="rounded-lg border border-fg/10 bg-bg-high p-4"
+      >
+        <InlineEditableSettingText
+          setting={pinyinSoundPlaceSpecificationSetting}
+          settingKey={{ placeId }}
+          placeholder='{"place": "Aircraft hangar"}'
+          multiline
+        />
+      </WikiTitledBox>
     </View>
   );
 }
