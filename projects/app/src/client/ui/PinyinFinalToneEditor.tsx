@@ -1,6 +1,6 @@
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import { AiSubLocationDescriptionModal } from "@/client/ui/AiSubLocationDescriptionModal";
+import { AiLocationSetDescriptionModal } from "@/client/ui/AiLocationSetDescriptionModal";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
@@ -247,7 +247,7 @@ function ToneTileEditor({
         {isEditMode ? (
           <View className="mt-2 flex-row items-center justify-between">
             <Text className="font-sans text-[13px] text-fg-dim">
-              Need help making this sublocation more vivid?
+              Need help making this location set more vivid?
             </Text>
             <RectButton
               variant="bare"
@@ -261,11 +261,11 @@ function ToneTileEditor({
         ) : null}
 
         {showAiModal && isEditMode ? (
-          <AiSubLocationDescriptionModal
+          <AiLocationSetDescriptionModal
             label={finalToneLocationName}
             location={finalName}
             locationNotes={locationDescriptionSetting.value?.text ?? ``}
-            sublocation={toneName}
+            locationSet={toneName}
             viewpoint={viewpointSetting.value?.text ?? ``}
             onApplyDescription={(description) => {
               descriptionSetting.setValue({

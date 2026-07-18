@@ -5,7 +5,7 @@ import {
   buildMeaningHintPrompt,
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-  buildSubLocationDescriptionPrompt,
+  buildLocationSetDescriptionPrompt,
   renderPromptTemplate,
 } from "#util/prompts.ts";
 import { describe, expect, test } from "vitest";
@@ -815,15 +815,15 @@ describe(
 );
 
 describe(
-  `buildSubLocationDescriptionPrompt` satisfies HasNameOf<
-    typeof buildSubLocationDescriptionPrompt
+  `buildLocationSetDescriptionPrompt` satisfies HasNameOf<
+    typeof buildLocationSetDescriptionPrompt
   >,
   () => {
     test(`minimal input (no optional notes)`, () => {
-      const result = buildSubLocationDescriptionPrompt({
+      const result = buildLocationSetDescriptionPrompt({
         label: `Outside Lawson`,
         location: `Lawson`,
-        sublocation: `Outside`,
+        locationSet: `Outside`,
         count: 4,
       });
 
@@ -833,11 +833,11 @@ describe(
             {
               "content": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
-        You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+        You will be given a primary location and a location set within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
-        Each suggestion must clearly reflect both the Location and the Sublocation.
+        Each suggestion must clearly reflect both the Location and the Location Set.
         If a Viewpoint is provided, ensure the description matches that perspective.
         Describe stable, always-true aspects of the place.
         Return only the descriptive fragment itself, don't prefix with the place label.
@@ -855,7 +855,7 @@ describe(
         {
           "label": "Outside Lawson",
           "location": "Lawson",
-          "sublocation": "Outside"
+          "locationSet": "Outside"
         }
         </data>",
               "role": "user",
@@ -868,11 +868,11 @@ describe(
     });
 
     test(`full input (all optional notes and viewpoint set)`, () => {
-      const result = buildSubLocationDescriptionPrompt({
+      const result = buildLocationSetDescriptionPrompt({
         label: `Outside Lawson`,
         location: `Lawson`,
         locationNotes: `The famous Japanese convenience chain store.`,
-        sublocation: `Outside`,
+        locationSet: `Outside`,
         viewpoint: `At eye level looking at the storefront`,
         count: 4,
       });
@@ -883,11 +883,11 @@ describe(
             {
               "content": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
-        You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+        You will be given a primary location and a location set within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
-        Each suggestion must clearly reflect both the Location and the Sublocation.
+        Each suggestion must clearly reflect both the Location and the Location Set.
         If a Viewpoint is provided, ensure the description matches that perspective.
         Describe stable, always-true aspects of the place.
         Return only the descriptive fragment itself, don't prefix with the place label.
@@ -905,7 +905,7 @@ describe(
         {
           "label": "Outside Lawson",
           "location": "Lawson",
-          "sublocation": "Outside",
+          "locationSet": "Outside",
           "locationNotes": "The famous Japanese convenience chain store.",
           "viewpoint": "At eye level looking at the storefront"
         }
@@ -920,10 +920,10 @@ describe(
     });
 
     test(`different count`, () => {
-      const result = buildSubLocationDescriptionPrompt({
+      const result = buildLocationSetDescriptionPrompt({
         label: `Gong Cha bathroom`,
         location: `Gong Cha`,
-        sublocation: `bathroom`,
+        locationSet: `bathroom`,
         count: 3,
       });
 
@@ -933,11 +933,11 @@ describe(
             {
               "content": "You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
         Your goal is to define a stable mental image of a place that can be reused across many stories.
-        You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+        You will be given a primary location and a location set within or around it. Combine them into one clear, vivid, always-true mental setting.
         Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
-        Each suggestion must clearly reflect both the Location and the Sublocation.
+        Each suggestion must clearly reflect both the Location and the Location Set.
         If a Viewpoint is provided, ensure the description matches that perspective.
         Describe stable, always-true aspects of the place.
         Return only the descriptive fragment itself, don't prefix with the place label.
@@ -955,7 +955,7 @@ describe(
         {
           "label": "Gong Cha bathroom",
           "location": "Gong Cha",
-          "sublocation": "bathroom"
+          "locationSet": "bathroom"
         }
         </data>",
               "role": "user",
@@ -1020,8 +1020,8 @@ describe(`AI prompt schemas`, () => {
         buildMeaningHintLogicalPrompt.schema,
       ] as const,
       [
-        `buildSubLocationDescriptionPrompt.schema`,
-        buildSubLocationDescriptionPrompt.schema,
+        `buildLocationSetDescriptionPrompt.schema`,
+        buildLocationSetDescriptionPrompt.schema,
       ] as const,
       [
         `buildMnemonicActorProfilePrompt.schema`,

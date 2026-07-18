@@ -450,29 +450,29 @@ Generate {{ count }} mnemonic stories:
 buildMeaningHintCausualBridgePrompt.strategy = `casual-bridge`;
 buildMeaningHintCausualBridgePrompt.schema = meaningHintOutputSchema;
 
-export function buildSubLocationDescriptionPrompt({
+export function buildLocationSetDescriptionPrompt({
   label,
   location,
   locationNotes,
-  sublocation,
+  locationSet,
   viewpoint,
   count,
 }: {
   label: string;
   location: string;
   locationNotes?: string;
-  sublocation: string;
+  locationSet: string;
   viewpoint?: string;
   count: number;
-}): ChatPrompt<typeof buildSubLocationDescriptionPrompt.schema> {
+}): ChatPrompt<typeof buildLocationSetDescriptionPrompt.schema> {
   const systemTemplate = `
 You're a helpful assistant that creates reusable location descriptions for Mandarin pronunciation mnemonic scenes.
 Your goal is to define a stable mental image of a place that can be reused across many stories.
-You will be given a primary location and a sublocation within or around it. Combine them into one clear, vivid, always-true mental setting.
+You will be given a primary location and a location set within or around it. Combine them into one clear, vivid, always-true mental setting.
 Focus on persistent features such as layout, materials, signage, objects, textures, lighting style, and ambient sensory details.
 Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
 Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
-Each suggestion must clearly reflect both the Location and the Sublocation.
+Each suggestion must clearly reflect both the Location and the Location Set.
 If a Viewpoint is provided, ensure the description matches that perspective.
 Describe stable, always-true aspects of the place.
 Return only the descriptive fragment itself, don't prefix with the place label.
@@ -486,7 +486,7 @@ Bad suggestions feel like a one-time scene.
   const data = {
     label,
     location,
-    sublocation,
+    locationSet,
     ...(locationNotes == null ? {} : { locationNotes }),
     ...(viewpoint == null ? {} : { viewpoint }),
   };
@@ -512,12 +512,12 @@ Generate {{ count }} distinct reusable location descriptions for this exact comb
 
   return {
     messages,
-    schema: buildSubLocationDescriptionPrompt.schema,
+    schema: buildLocationSetDescriptionPrompt.schema,
     model: `gpt-5-mini`,
     reasoningEffort: `medium`,
   };
 }
-buildSubLocationDescriptionPrompt.schema = z
+buildLocationSetDescriptionPrompt.schema = z
   .object({
     suggestions: z.array(
       z

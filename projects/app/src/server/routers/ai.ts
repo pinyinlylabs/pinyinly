@@ -13,9 +13,9 @@ import {
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
+  buildLocationSetDescriptionPrompt,
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-  buildSubLocationDescriptionPrompt,
 } from "@/util/prompts";
 
 const pronunciationHintInputSchema = z
@@ -127,12 +127,12 @@ const meaningHintOutputSchema = z
   })
   .strict();
 
-const subLocationDescriptionInputSchema = z
+const locationSetDescriptionInputSchema = z
   .object({
     label: z.string().min(1),
     location: z.string().min(1),
     locationNotes: z.string().optional(),
-    sublocation: z.string().min(1),
+    locationSet: z.string().min(1),
     viewpoint: z.string().optional(),
     count: z.number().int().min(1).max(6),
   })
@@ -285,18 +285,18 @@ export const aiRouter = router({
       return { suggestions };
     }),
 
-  generateSubLocationDescriptions: authedProcedure
-    .input(subLocationDescriptionInputSchema)
-    .output(buildSubLocationDescriptionPrompt.schema)
+  generateLocationSetDescriptions: authedProcedure
+    .input(locationSetDescriptionInputSchema)
+    .output(buildLocationSetDescriptionPrompt.schema)
     .mutation(async ({ input, signal }) => {
-      const { label, location, locationNotes, sublocation, viewpoint, count } =
+      const { label, location, locationNotes, locationSet, viewpoint, count } =
         input;
 
-      const prompt = buildSubLocationDescriptionPrompt({
+      const prompt = buildLocationSetDescriptionPrompt({
         label,
         location,
         locationNotes,
-        sublocation,
+        locationSet,
         viewpoint,
         count,
       });
@@ -307,7 +307,7 @@ export const aiRouter = router({
         });
         return data;
       } catch (error) {
-        console.error(`Failed to generate sublocation descriptions:`, error);
+        console.error(`Failed to generate location set descriptions:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate descriptions`,

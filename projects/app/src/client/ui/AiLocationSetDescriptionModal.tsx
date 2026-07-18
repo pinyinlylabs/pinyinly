@@ -1,5 +1,5 @@
 import { trpc } from "@/client/trpc";
-import { buildSubLocationDescriptionPrompt } from "@/util/prompts";
+import { buildLocationSetDescriptionPrompt } from "@/util/prompts";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
@@ -8,11 +8,11 @@ import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { memoize0 } from "@pinyinly/lib/collections";
 
-export interface AiSubLocationDescriptionModalProps {
+export interface AiLocationSetDescriptionModalProps {
   label: string;
   location: string;
   locationNotes: string;
-  sublocation: string;
+  locationSet: string;
   viewpoint: string;
   onApplyDescription: (description: string) => void;
   onDismiss: () => void;
@@ -23,33 +23,33 @@ type DescriptionSuggestion = {
   explanation?: string | null;
 };
 
-export function AiSubLocationDescriptionModal({
+export function AiLocationSetDescriptionModal({
   label,
   location,
   locationNotes,
-  sublocation,
+  locationSet,
   viewpoint,
   onApplyDescription,
   onDismiss,
-}: AiSubLocationDescriptionModalProps) {
+}: AiLocationSetDescriptionModalProps) {
   const [suggestions, setSuggestions] = useState<
     DescriptionSuggestion[] | null
   >(null);
   const [error, setError] = useState<string | null>(null);
 
   const generateMutation =
-    trpc.ai.generateSubLocationDescriptions.useMutation();
+    trpc.ai.generateLocationSetDescriptions.useMutation();
 
   const requestInput = {
     label,
     location,
     locationNotes: locationNotes === `` ? undefined : locationNotes,
-    sublocation,
+    locationSet,
     viewpoint: viewpoint === `` ? undefined : viewpoint,
     count: 4,
   };
 
-  const subLocationPrompt = buildSubLocationDescriptionPrompt(requestInput);
+  const locationSetPrompt = buildLocationSetDescriptionPrompt(requestInput);
 
   const handleGenerate = async () => {
     setError(null);
@@ -58,7 +58,7 @@ export function AiSubLocationDescriptionModal({
       const result = await generateMutation.mutateAsync(requestInput);
       setSuggestions(result.suggestions);
     } catch (err) {
-      console.error(`AI sublocation description generation failed:`, err);
+      console.error(`AI location set description generation failed:`, err);
       setError(`Unable to generate descriptions right now.`);
     }
   };
@@ -82,7 +82,7 @@ export function AiSubLocationDescriptionModal({
               Cancel
             </RectButton>
             <Text className="font-sans text-[17px] font-semibold text-fg-loud">
-              AI sublocation description
+              AI location set description
             </Text>
             <RectButton
               variant="bare"
@@ -149,7 +149,7 @@ export function AiSubLocationDescriptionModal({
               description="Prompt text generated from the same builder used by AI description generation."
               sections={[
                 {
-                  messages: subLocationPrompt.messages,
+                  messages: locationSetPrompt.messages,
                 },
               ]}
             />

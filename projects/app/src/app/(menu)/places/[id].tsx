@@ -4,26 +4,26 @@ import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingIma
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import {
-  placeSublocationRoles,
+  locationSetRoles,
   usePinyinSoundPlaces,
 } from "@/client/ui/hooks/usePinyinSoundPlaces";
-import type { PlaceSublocationRole } from "@/client/ui/hooks/usePinyinSoundPlaces";
+import type { LocationSetRole } from "@/client/ui/hooks/usePinyinSoundPlaces";
 import type { PlaceId } from "@/data/model";
 import {
-  getPinyinSoundPlaceSublocationKeyParams,
-  pinyinSoundPlaceDescriptionSetting,
-  pinyinSoundPlaceIdentityImageSetting,
-  pinyinSoundPlaceNameSetting,
-  pinyinSoundPlaceSpecificationSetting,
-  pinyinSoundPlaceSublocationDescriptionSetting,
-  pinyinSoundPlaceSublocationIdentityImageSetting,
-  pinyinSoundPlaceSublocationNameSetting,
-  pinyinSoundPlaceSublocationViewpointSetting,
+  getPinyinSoundLocationSetKeyParams,
+  pinyinSoundLocationDescriptionSetting,
+  pinyinSoundLocationIdentityImageSetting,
+  pinyinSoundLocationNameSetting,
+  pinyinSoundLocationSpecificationSetting,
+  pinyinSoundLocationSetDescriptionSetting,
+  pinyinSoundLocationSetIdentityImageSetting,
+  pinyinSoundLocationSetNameSetting,
+  pinyinSoundLocationSetViewpointSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
 
-const sublocationTitles: Record<PlaceSublocationRole, string> = {
+const locationSetTitles: Record<LocationSetRole, string> = {
   arrival: `Arrival`,
   heart: `Heart`,
   below: `Below`,
@@ -54,7 +54,7 @@ export default function PlaceIdPage() {
       <View className="items-center">
         <View className="w-[260px] overflow-hidden rounded-2xl">
           <InlineEditableSettingImage
-            setting={pinyinSoundPlaceIdentityImageSetting}
+            setting={pinyinSoundLocationIdentityImageSetting}
             settingKey={{ placeId }}
             enableAiGeneration
             frameShape="rect"
@@ -68,56 +68,53 @@ export default function PlaceIdPage() {
       <View className="gap-3">
         <InlineEditableSettingText
           variant="title"
-          setting={pinyinSoundPlaceNameSetting}
+          setting={pinyinSoundLocationNameSetting}
           settingKey={{ placeId }}
-          placeholder="Place name"
+          placeholder="Location name"
         />
 
         <InlineEditableSettingText
-          setting={pinyinSoundPlaceDescriptionSetting}
+          setting={pinyinSoundLocationDescriptionSetting}
           settingKey={{ placeId }}
-          placeholder="Place description"
+          placeholder="Location description"
           multiline
         />
       </View>
 
       <View className="gap-4">
-        <Text className="pyly-body-caption text-fg-dim">Sublocations</Text>
+        <Text className="pyly-body-caption text-fg-dim">Sets</Text>
 
-        {placeSublocationRoles.map((role) => {
-          const settingKey = getPinyinSoundPlaceSublocationKeyParams(
-            placeId,
-            role,
-          );
+        {locationSetRoles.map((role) => {
+          const settingKey = getPinyinSoundLocationSetKeyParams(placeId, role);
           return (
             <WikiTitledBox
               key={role}
-              title={sublocationTitles[role]}
+              title={locationSetTitles[role]}
               className="rounded-lg border border-fg/10 bg-bg-high p-4"
             >
               <View className="gap-3 p-1">
                 <InlineEditableSettingText
-                  setting={pinyinSoundPlaceSublocationNameSetting}
+                  setting={pinyinSoundLocationSetNameSetting}
                   settingKey={settingKey}
-                  placeholder="Sublocation name"
+                  placeholder="Set name"
                 />
 
                 <InlineEditableSettingText
-                  setting={pinyinSoundPlaceSublocationViewpointSetting}
+                  setting={pinyinSoundLocationSetViewpointSetting}
                   settingKey={settingKey}
-                  placeholder="Viewpoint for this sublocation"
+                  placeholder="Viewpoint for this set"
                   multiline
                 />
 
                 <InlineEditableSettingText
-                  setting={pinyinSoundPlaceSublocationDescriptionSetting}
+                  setting={pinyinSoundLocationSetDescriptionSetting}
                   settingKey={settingKey}
-                  placeholder="Describe this sublocation"
+                  placeholder="Describe this set"
                   multiline
                 />
 
                 <InlineEditableSettingImage
-                  setting={pinyinSoundPlaceSublocationIdentityImageSetting}
+                  setting={pinyinSoundLocationSetIdentityImageSetting}
                   settingKey={settingKey}
                   enableAiGeneration
                   frameShape="rect"
@@ -132,13 +129,13 @@ export default function PlaceIdPage() {
       </View>
 
       <WikiTitledBox
-        title="Place specification JSON"
+        title="Location specification JSON"
         className="rounded-lg border border-fg/10 bg-bg-high p-4"
       >
         <InlineEditableSettingText
-          setting={pinyinSoundPlaceSpecificationSetting}
+          setting={pinyinSoundLocationSpecificationSetting}
           settingKey={{ placeId }}
-          placeholder='{"place": "Aircraft hangar"}'
+          placeholder='{"location": "Aircraft hangar"}'
           multiline
         />
       </WikiTitledBox>

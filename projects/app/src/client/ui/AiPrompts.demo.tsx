@@ -6,9 +6,9 @@ import {
   buildMeaningHintLogicalPrompt,
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintPrompt,
+  buildLocationSetDescriptionPrompt,
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-  buildSubLocationDescriptionPrompt,
 } from "@/util/prompts";
 import { useRef, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
@@ -16,7 +16,7 @@ import { ScrollView, Text, TextInput, View } from "react-native";
 type PromptModeKind =
   | `meaning-hint`
   | `pronunciation-hint`
-  | `sub-location-description`
+  | `location-set-description`
   | `mnemonic-actor`;
 
 type CopyStateKind = `idle` | `copied` | `unsupported`;
@@ -39,11 +39,11 @@ type PronunciationHintInputType = {
   countText: string;
 };
 
-type SubLocationDescriptionInputType = {
+type LocationSetDescriptionInputType = {
   label: string;
   location: string;
   locationNotes: string;
-  sublocation: string;
+  locationSet: string;
   viewpoint: string;
   countText: string;
 };
@@ -70,11 +70,11 @@ const defaultPronunciationHintInput: PronunciationHintInputType = {
   countText: `4`,
 };
 
-const defaultSubLocationDescriptionInput: SubLocationDescriptionInputType = {
+const defaultLocationSetDescriptionInput: LocationSetDescriptionInputType = {
   label: `Airport baggage carousel`,
   location: `airport`,
   locationNotes: `Large international terminal with glass walls.`,
-  sublocation: `baggage carousel area`,
+  locationSet: `baggage carousel area`,
   viewpoint: `standing at the carousel facing incoming luggage`,
   countText: `4`,
 };
@@ -123,13 +123,13 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
   },
 ];
 
-const subLocationDescriptionPresets: SubLocationDescriptionInputType[] = [
-  defaultSubLocationDescriptionInput,
+const locationSetDescriptionPresets: LocationSetDescriptionInputType[] = [
+  defaultLocationSetDescriptionInput,
   {
     label: `Train station ticket window`,
     location: `train station`,
     locationNotes: `Busy city transport hub with high ceilings.`,
-    sublocation: `ticket window`,
+    locationSet: `ticket window`,
     viewpoint: `standing in line facing the clerk window`,
     countText: `4`,
   },
@@ -137,7 +137,7 @@ const subLocationDescriptionPresets: SubLocationDescriptionInputType[] = [
     label: `School rooftop garden`,
     location: `school`,
     locationNotes: `Modern campus focused on science and arts.`,
-    sublocation: `rooftop garden`,
+    locationSet: `rooftop garden`,
     viewpoint: `near the planter beds looking toward the city`,
     countText: `3`,
   },
@@ -165,9 +165,9 @@ export default () => {
   );
   const [pronunciationInput, setPronunciationInput] =
     useState<PronunciationHintInputType>(defaultPronunciationHintInput);
-  const [subLocationInput, setSubLocationInput] =
-    useState<SubLocationDescriptionInputType>(
-      defaultSubLocationDescriptionInput,
+  const [locationSetInput, setLocationSetInput] =
+    useState<LocationSetDescriptionInputType>(
+      defaultLocationSetDescriptionInput,
     );
   const [mnemonicActorInput, setMnemonicActorInput] =
     useState<MnemonicActorInputType>(defaultMnemonicActorInput);
@@ -176,7 +176,7 @@ export default () => {
     mode,
     meaningInput,
     pronunciationInput,
-    subLocationInput,
+    locationSetInput,
     mnemonicActorInput,
   });
 
@@ -218,10 +218,10 @@ export default () => {
           }}
         />
         <ModeButton
-          label="Sub-location Description"
-          active={mode === `sub-location-description`}
+          label="Location Set Description"
+          active={mode === `location-set-description`}
           onPress={() => {
-            setMode(`sub-location-description`);
+            setMode(`location-set-description`);
             setCopyState(`idle`);
           }}
         />
@@ -419,20 +419,20 @@ export default () => {
           </View>
         ) : null}
 
-        {mode === `sub-location-description` ? (
+        {mode === `location-set-description` ? (
           <View className="gap-3">
             <PresetRow
-              count={subLocationDescriptionPresets.length}
+              count={locationSetDescriptionPresets.length}
               onApply={(index) => {
-                const preset = subLocationDescriptionPresets[index];
+                const preset = locationSetDescriptionPresets[index];
                 if (preset == null) {
                   return;
                 }
-                setSubLocationInput(preset);
+                setLocationSetInput(preset);
                 setCopyState(`idle`);
               }}
               onReset={() => {
-                setSubLocationInput(defaultSubLocationDescriptionInput);
+                setLocationSetInput(defaultLocationSetDescriptionInput);
                 setCopyState(`idle`);
               }}
             />
@@ -440,9 +440,9 @@ export default () => {
             <FieldLabel text="Combined Label" />
             <TextInputSingle
               placeholder="Airport baggage carousel"
-              value={subLocationInput.label}
+              value={locationSetInput.label}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   label: value,
                 }));
@@ -452,9 +452,9 @@ export default () => {
             <FieldLabel text="Location" />
             <TextInputSingle
               placeholder="airport"
-              value={subLocationInput.location}
+              value={locationSetInput.location}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   location: value,
                 }));
@@ -463,9 +463,9 @@ export default () => {
 
             <FieldLabel text="Location Notes (optional)" />
             <MultilineInput
-              value={subLocationInput.locationNotes}
+              value={locationSetInput.locationNotes}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   locationNotes: value,
                 }));
@@ -473,14 +473,14 @@ export default () => {
               placeholder="Optional stable context"
             />
 
-            <FieldLabel text="Sublocation" />
+            <FieldLabel text="Location Set" />
             <TextInputSingle
               placeholder="baggage carousel area"
-              value={subLocationInput.sublocation}
+              value={locationSetInput.locationSet}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
-                  sublocation: value,
+                  locationSet: value,
                 }));
               }}
             />
@@ -488,9 +488,9 @@ export default () => {
             <FieldLabel text="Viewpoint (optional)" />
             <TextInputSingle
               placeholder="standing near the conveyor"
-              value={subLocationInput.viewpoint}
+              value={locationSetInput.viewpoint}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   viewpoint: value,
                 }));
@@ -500,9 +500,9 @@ export default () => {
             <FieldLabel text="Count" />
             <TextInputSingle
               placeholder="4"
-              value={subLocationInput.countText}
+              value={locationSetInput.countText}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   countText: value,
                 }));
@@ -743,7 +743,7 @@ function buildCurrentPrompt(args: {
   mode: PromptModeKind;
   meaningInput: MeaningHintInputType;
   pronunciationInput: PronunciationHintInputType;
-  subLocationInput: SubLocationDescriptionInputType;
+  locationSetInput: LocationSetDescriptionInputType;
   mnemonicActorInput: MnemonicActorInputType;
 }): { result: ChatPromptMessage[] | null; errors: string[] } {
   const errors: string[] = [];
@@ -899,17 +899,17 @@ function buildCurrentPrompt(args: {
     return { result, errors };
   }
 
-  if (args.mode === `sub-location-description`) {
-    const count = parseCount(args.subLocationInput.countText);
+  if (args.mode === `location-set-description`) {
+    const count = parseCount(args.locationSetInput.countText);
 
-    if (args.subLocationInput.label.trim().length === 0) {
+    if (args.locationSetInput.label.trim().length === 0) {
       errors.push(`Combined Label is required.`);
     }
-    if (args.subLocationInput.location.trim().length === 0) {
+    if (args.locationSetInput.location.trim().length === 0) {
       errors.push(`Location is required.`);
     }
-    if (args.subLocationInput.sublocation.trim().length === 0) {
-      errors.push(`Sublocation is required.`);
+    if (args.locationSetInput.locationSet.trim().length === 0) {
+      errors.push(`Location set is required.`);
     }
     if (count == null) {
       errors.push(`Count must be a positive integer.`);
@@ -919,18 +919,18 @@ function buildCurrentPrompt(args: {
       return { result: null, errors };
     }
 
-    const result = buildSubLocationDescriptionPrompt({
-      label: args.subLocationInput.label.trim(),
-      location: args.subLocationInput.location.trim(),
+    const result = buildLocationSetDescriptionPrompt({
+      label: args.locationSetInput.label.trim(),
+      location: args.locationSetInput.location.trim(),
       locationNotes:
-        args.subLocationInput.locationNotes.trim().length === 0
+        args.locationSetInput.locationNotes.trim().length === 0
           ? undefined
-          : args.subLocationInput.locationNotes.trim(),
-      sublocation: args.subLocationInput.sublocation.trim(),
+          : args.locationSetInput.locationNotes.trim(),
+      locationSet: args.locationSetInput.locationSet.trim(),
       viewpoint:
-        args.subLocationInput.viewpoint.trim().length === 0
+        args.locationSetInput.viewpoint.trim().length === 0
           ? undefined
-          : args.subLocationInput.viewpoint.trim(),
+          : args.locationSetInput.viewpoint.trim(),
       count: count ?? 1,
     });
 

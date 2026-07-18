@@ -4,20 +4,20 @@ import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { AssetId, PlaceId } from "@/data/model";
 import {
-  pinyinSoundPlaceDescriptionSetting,
-  pinyinSoundPlaceDescriptionSettingKey,
-  pinyinSoundPlaceIdentityImageSetting,
-  pinyinSoundPlaceIdentityImageSettingKey,
-  pinyinSoundPlaceNameSetting,
-  pinyinSoundPlaceNameSettingKey,
-  pinyinSoundPlaceSublocationDescriptionSetting,
-  pinyinSoundPlaceSublocationDescriptionSettingKey,
-  pinyinSoundPlaceSublocationIdentityImageSetting,
-  pinyinSoundPlaceSublocationIdentityImageSettingKey,
-  pinyinSoundPlaceSublocationNameSetting,
-  pinyinSoundPlaceSublocationNameSettingKey,
-  pinyinSoundPlaceSublocationViewpointSetting,
-  pinyinSoundPlaceSublocationViewpointSettingKey,
+  pinyinSoundLocationDescriptionSetting,
+  pinyinSoundLocationDescriptionSettingKey,
+  pinyinSoundLocationIdentityImageSetting,
+  pinyinSoundLocationIdentityImageSettingKey,
+  pinyinSoundLocationNameSetting,
+  pinyinSoundLocationNameSettingKey,
+  pinyinSoundLocationSetDescriptionSetting,
+  pinyinSoundLocationSetDescriptionSettingKey,
+  pinyinSoundLocationSetIdentityImageSetting,
+  pinyinSoundLocationSetIdentityImageSettingKey,
+  pinyinSoundLocationSetNameSetting,
+  pinyinSoundLocationSetNameSettingKey,
+  pinyinSoundLocationSetViewpointSetting,
+  pinyinSoundLocationSetViewpointSettingKey,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -42,7 +42,7 @@ function decodeSettingValueWithFallback<T>(
   return decode(rawValue);
 }
 
-export const placeSublocationRoles = [
+export const locationSetRoles = [
   `arrival`,
   `heart`,
   `below`,
@@ -50,10 +50,10 @@ export const placeSublocationRoles = [
   `summit`,
 ] as const;
 
-export type PlaceSublocationRole = (typeof placeSublocationRoles)[number];
+export type LocationSetRole = (typeof locationSetRoles)[number];
 
-export interface PinyinSoundPlaceSublocationSummary {
-  role: PlaceSublocationRole;
+export interface PinyinSoundLocationSetSummary {
+  role: LocationSetRole;
   name: string | null;
   description: string | null;
   viewpoint: string | null;
@@ -65,7 +65,7 @@ export interface PinyinSoundPlaceSublocationSummary {
   } | null;
 }
 
-export interface PinyinSoundPlaceSummary {
+export interface PinyinSoundLocationSummary {
   placeId: PlaceId;
   name: string | null;
   description: string | null;
@@ -75,14 +75,11 @@ export interface PinyinSoundPlaceSummary {
     imageWidth: number | null;
     imageHeight: number | null;
   } | null;
-  sublocations: Record<
-    PlaceSublocationRole,
-    PinyinSoundPlaceSublocationSummary
-  >;
+  sets: Record<LocationSetRole, PinyinSoundLocationSetSummary>;
 }
 
 export interface UsePinyinSoundPlacesResult {
-  places: PinyinSoundPlaceSummary[];
+  places: PinyinSoundLocationSummary[];
   isLoading: boolean;
   createPlace: (name?: string) => PlaceId;
 }
@@ -97,15 +94,10 @@ interface PlaceAccumulator {
     imageWidth: number | null;
     imageHeight: number | null;
   } | null;
-  sublocations: Record<
-    PlaceSublocationRole,
-    PinyinSoundPlaceSublocationSummary
-  >;
+  sets: Record<LocationSetRole, PinyinSoundLocationSetSummary>;
 }
 
-function createEmptySublocation(
-  role: PlaceSublocationRole,
-): PinyinSoundPlaceSublocationSummary {
+function createEmptySet(role: LocationSetRole): PinyinSoundLocationSetSummary {
   return {
     role,
     name: null,
@@ -121,12 +113,12 @@ function createPlaceAccumulator(placeId: PlaceId): PlaceAccumulator {
     name: null,
     description: null,
     identityImage: null,
-    sublocations: {
-      arrival: createEmptySublocation(`arrival`),
-      heart: createEmptySublocation(`heart`),
-      below: createEmptySublocation(`below`),
-      ascent: createEmptySublocation(`ascent`),
-      summit: createEmptySublocation(`summit`),
+    sets: {
+      arrival: createEmptySet(`arrival`),
+      heart: createEmptySet(`heart`),
+      below: createEmptySet(`below`),
+      ascent: createEmptySet(`ascent`),
+      summit: createEmptySet(`summit`),
     },
   };
 }
@@ -134,7 +126,7 @@ function createPlaceAccumulator(placeId: PlaceId): PlaceAccumulator {
 function parsePlaceAndRoleFromKey(
   key: string,
   prefix: string,
-): { placeId: PlaceId; role: PlaceSublocationRole } | null {
+): { placeId: PlaceId; role: LocationSetRole } | null {
   if (!key.startsWith(prefix)) {
     return null;
   }
@@ -147,11 +139,11 @@ function parsePlaceAndRoleFromKey(
 
   const placeId = remainder.slice(0, slashIndex) as PlaceId;
   const roleRaw = remainder.slice(slashIndex + 1);
-  if (!placeSublocationRoles.includes(roleRaw as PlaceSublocationRole)) {
+  if (!locationSetRoles.includes(roleRaw as LocationSetRole)) {
     return null;
   }
 
-  return { placeId, role: roleRaw as PlaceSublocationRole };
+  return { placeId, role: roleRaw as LocationSetRole };
 }
 
 export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
@@ -180,13 +172,14 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
     if (setting.key.startsWith(`pspn/`)) {
       const placeId = setting.key.slice(`pspn/`.length) as PlaceId;
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceNameSetting,
+        pinyinSoundLocationNameSetting,
         {
           placeId,
         },
       );
       const value = decodeSettingValueWithFallback(
-        (input) => pinyinSoundPlaceNameSetting.entity.unmarshalValueSafe(input),
+        (input) =>
+          pinyinSoundLocationNameSetting.entity.unmarshalValueSafe(input),
         keyParamMarshaled,
         setting.value,
       );
@@ -202,12 +195,14 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
     if (setting.key.startsWith(`pspd/`)) {
       const placeId = setting.key.slice(`pspd/`.length) as PlaceId;
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceDescriptionSetting,
+        pinyinSoundLocationDescriptionSetting,
         { placeId },
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceDescriptionSetting.entity.unmarshalValueSafe(input),
+          pinyinSoundLocationDescriptionSetting.entity.unmarshalValueSafe(
+            input,
+          ),
         keyParamMarshaled,
         setting.value,
       );
@@ -223,14 +218,16 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
     if (setting.key.startsWith(`pspi/`)) {
       const placeId = setting.key.slice(`pspi/`.length) as PlaceId;
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceIdentityImageSetting,
+        pinyinSoundLocationIdentityImageSetting,
         {
           placeId,
         },
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceIdentityImageSetting.entity.unmarshalValueSafe(input),
+          pinyinSoundLocationIdentityImageSetting.entity.unmarshalValueSafe(
+            input,
+          ),
         keyParamMarshaled,
         setting.value,
       );
@@ -255,7 +252,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceSublocationNameSetting,
+        pinyinSoundLocationSetNameSetting,
         {
           placeId: keyData.placeId,
           role: keyData.role,
@@ -263,9 +260,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceSublocationNameSetting.entity.unmarshalValueSafe(
-            input,
-          ),
+          pinyinSoundLocationSetNameSetting.entity.unmarshalValueSafe(input),
         keyParamMarshaled,
         setting.value,
       );
@@ -274,9 +269,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const place = getOrCreatePlace(value.placeId);
-      const role = value.role as PlaceSublocationRole;
-      place.sublocations[role].name =
-        value.text.trim().length > 0 ? value.text : null;
+      const role = value.role as LocationSetRole;
+      place.sets[role].name = value.text.trim().length > 0 ? value.text : null;
       continue;
     }
 
@@ -287,7 +281,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceSublocationDescriptionSetting,
+        pinyinSoundLocationSetDescriptionSetting,
         {
           placeId: keyData.placeId,
           role: keyData.role,
@@ -295,7 +289,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceSublocationDescriptionSetting.entity.unmarshalValueSafe(
+          pinyinSoundLocationSetDescriptionSetting.entity.unmarshalValueSafe(
             input,
           ),
         keyParamMarshaled,
@@ -306,8 +300,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const place = getOrCreatePlace(value.placeId);
-      const role = value.role as PlaceSublocationRole;
-      place.sublocations[role].description = value.text;
+      const role = value.role as LocationSetRole;
+      place.sets[role].description = value.text;
       continue;
     }
 
@@ -318,7 +312,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceSublocationViewpointSetting,
+        pinyinSoundLocationSetViewpointSetting,
         {
           placeId: keyData.placeId,
           role: keyData.role,
@@ -326,7 +320,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceSublocationViewpointSetting.entity.unmarshalValueSafe(
+          pinyinSoundLocationSetViewpointSetting.entity.unmarshalValueSafe(
             input,
           ),
         keyParamMarshaled,
@@ -337,8 +331,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const place = getOrCreatePlace(value.placeId);
-      const role = value.role as PlaceSublocationRole;
-      place.sublocations[role].viewpoint = value.text;
+      const role = value.role as LocationSetRole;
+      place.sets[role].viewpoint = value.text;
       continue;
     }
 
@@ -349,7 +343,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundPlaceSublocationIdentityImageSetting,
+        pinyinSoundLocationSetIdentityImageSetting,
         {
           placeId: keyData.placeId,
           role: keyData.role,
@@ -357,7 +351,7 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       );
       const value = decodeSettingValueWithFallback(
         (input) =>
-          pinyinSoundPlaceSublocationIdentityImageSetting.entity.unmarshalValueSafe(
+          pinyinSoundLocationSetIdentityImageSetting.entity.unmarshalValueSafe(
             input,
           ),
         keyParamMarshaled,
@@ -368,8 +362,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       }
 
       const place = getOrCreatePlace(value.placeId);
-      const role = value.role as PlaceSublocationRole;
-      place.sublocations[role].identityImage = {
+      const role = value.role as LocationSetRole;
+      place.sets[role].identityImage = {
         assetId: value.imageId,
         crop: parseImageCrop(value.imageCrop),
         imageWidth: value.imageWidth ?? null,
@@ -386,8 +380,8 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
     const placeId = `place_${nanoid()}` as PlaceId;
 
     void r.mutate.setSetting({
-      key: pinyinSoundPlaceNameSettingKey(placeId),
-      value: pinyinSoundPlaceNameSetting.entity.marshalValue({
+      key: pinyinSoundLocationNameSettingKey(placeId),
+      value: pinyinSoundLocationNameSetting.entity.marshalValue({
         placeId,
         text: name,
       }),
@@ -396,30 +390,30 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       historyId: nanoid(),
     });
 
-    for (const role of placeSublocationRoles) {
+    for (const role of locationSetRoles) {
       void r.mutate.setSetting({
-        key: pinyinSoundPlaceSublocationNameSettingKey(placeId, role),
+        key: pinyinSoundLocationSetNameSettingKey(placeId, role),
         value: null,
         now: new Date(),
         skipHistory: false,
         historyId: nanoid(),
       });
       void r.mutate.setSetting({
-        key: pinyinSoundPlaceSublocationDescriptionSettingKey(placeId, role),
+        key: pinyinSoundLocationSetDescriptionSettingKey(placeId, role),
         value: null,
         now: new Date(),
         skipHistory: false,
         historyId: nanoid(),
       });
       void r.mutate.setSetting({
-        key: pinyinSoundPlaceSublocationViewpointSettingKey(placeId, role),
+        key: pinyinSoundLocationSetViewpointSettingKey(placeId, role),
         value: null,
         now: new Date(),
         skipHistory: false,
         historyId: nanoid(),
       });
       void r.mutate.setSetting({
-        key: pinyinSoundPlaceSublocationIdentityImageSettingKey(placeId, role),
+        key: pinyinSoundLocationSetIdentityImageSettingKey(placeId, role),
         value: null,
         now: new Date(),
         skipHistory: false,
@@ -428,14 +422,14 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
     }
 
     void r.mutate.setSetting({
-      key: pinyinSoundPlaceDescriptionSettingKey(placeId),
+      key: pinyinSoundLocationDescriptionSettingKey(placeId),
       value: null,
       now: new Date(),
       skipHistory: false,
       historyId: nanoid(),
     });
     void r.mutate.setSetting({
-      key: pinyinSoundPlaceIdentityImageSettingKey(placeId),
+      key: pinyinSoundLocationIdentityImageSettingKey(placeId),
       value: null,
       now: new Date(),
       skipHistory: false,
