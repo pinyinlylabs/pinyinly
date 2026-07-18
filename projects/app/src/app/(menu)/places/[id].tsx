@@ -18,7 +18,6 @@ import {
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
-  pinyinSoundLocationSetViewpointSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
@@ -97,13 +96,6 @@ export default function PlaceIdPage() {
                   setting={pinyinSoundLocationSetNameSetting}
                   settingKey={settingKey}
                   placeholder="Set name"
-                />
-
-                <InlineEditableSettingText
-                  setting={pinyinSoundLocationSetViewpointSetting}
-                  settingKey={settingKey}
-                  placeholder="Viewpoint for this set"
-                  multiline
                 />
 
                 <InlineEditableSettingText

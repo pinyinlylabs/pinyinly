@@ -838,7 +838,6 @@ describe(
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
         Each suggestion must clearly reflect both the Location and the Location Set.
-        If a Viewpoint is provided, ensure the description matches that perspective.
         Describe stable, always-true aspects of the place.
         Return only the descriptive fragment itself, don't prefix with the place label.
         Avoid time of day, weather, or temporary events.
@@ -867,13 +866,12 @@ describe(
       `);
     });
 
-    test(`full input (all optional notes and viewpoint set)`, () => {
+    test(`full input (all optional notes set)`, () => {
       const result = buildLocationSetDescriptionPrompt({
         label: `Outside Lawson`,
         location: `Lawson`,
         locationNotes: `The famous Japanese convenience chain store.`,
         locationSet: `Outside`,
-        viewpoint: `At eye level looking at the storefront`,
         count: 4,
       });
 
@@ -888,7 +886,6 @@ describe(
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
         Each suggestion must clearly reflect both the Location and the Location Set.
-        If a Viewpoint is provided, ensure the description matches that perspective.
         Describe stable, always-true aspects of the place.
         Return only the descriptive fragment itself, don't prefix with the place label.
         Avoid time of day, weather, or temporary events.
@@ -906,8 +903,7 @@ describe(
           "label": "Outside Lawson",
           "location": "Lawson",
           "locationSet": "Outside",
-          "locationNotes": "The famous Japanese convenience chain store.",
-          "viewpoint": "At eye level looking at the storefront"
+          "locationNotes": "The famous Japanese convenience chain store."
         }
         </data>",
               "role": "user",
@@ -938,7 +934,6 @@ describe(
         Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
         Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
         Each suggestion must clearly reflect both the Location and the Location Set.
-        If a Viewpoint is provided, ensure the description matches that perspective.
         Describe stable, always-true aspects of the place.
         Return only the descriptive fragment itself, don't prefix with the place label.
         Avoid time of day, weather, or temporary events.

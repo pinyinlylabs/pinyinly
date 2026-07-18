@@ -18,7 +18,6 @@ import {
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneNameSetting,
-  pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
@@ -164,17 +163,6 @@ export function WikiHanziCharacterPronunciationBox({
           ),
         },
   );
-  const finalToneViewpointSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinFinalToneViewpointSetting,
-          key: getPinyinFinalToneKeyParams(
-            splitPinyin.finalSoundId,
-            String(splitPinyin.tone),
-          ),
-        },
-  );
   const finalToneNameSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -192,20 +180,8 @@ export function WikiHanziCharacterPronunciationBox({
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
-  const finalToneSceneDescription =
+  const finalToneLocationDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
-  const finalToneSceneViewpoint =
-    finalToneViewpointSetting?.value?.text ?? null;
-  const finalToneLocationDescription = [
-    finalToneSceneDescription == null || finalToneSceneDescription.length === 0
-      ? null
-      : finalToneSceneDescription,
-    finalToneSceneViewpoint == null || finalToneSceneViewpoint.length === 0
-      ? null
-      : finalToneSceneViewpoint,
-  ]
-    .filter((value): value is string => value != null)
-    .join(`\n`);
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
@@ -424,6 +400,7 @@ export function WikiHanziCharacterPronunciationBox({
           location={{
             name: finalToneName,
             description:
+              finalToneLocationDescription == null ||
               finalToneLocationDescription.length === 0
                 ? undefined
                 : finalToneLocationDescription,

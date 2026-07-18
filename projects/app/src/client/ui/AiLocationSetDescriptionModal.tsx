@@ -13,7 +13,6 @@ export interface AiLocationSetDescriptionModalProps {
   location: string;
   locationNotes: string;
   locationSet: string;
-  viewpoint: string;
   onApplyDescription: (description: string) => void;
   onDismiss: () => void;
 }
@@ -28,7 +27,6 @@ export function AiLocationSetDescriptionModal({
   location,
   locationNotes,
   locationSet,
-  viewpoint,
   onApplyDescription,
   onDismiss,
 }: AiLocationSetDescriptionModalProps) {
@@ -45,7 +43,6 @@ export function AiLocationSetDescriptionModal({
     location,
     locationNotes: locationNotes === `` ? undefined : locationNotes,
     locationSet,
-    viewpoint: viewpoint === `` ? undefined : viewpoint,
     count: 4,
   };
 

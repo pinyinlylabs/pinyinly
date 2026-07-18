@@ -133,7 +133,6 @@ const locationSetDescriptionInputSchema = z
     location: z.string().min(1),
     locationNotes: z.string().optional(),
     locationSet: z.string().min(1),
-    viewpoint: z.string().optional(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
@@ -289,15 +288,13 @@ export const aiRouter = router({
     .input(locationSetDescriptionInputSchema)
     .output(buildLocationSetDescriptionPrompt.schema)
     .mutation(async ({ input, signal }) => {
-      const { label, location, locationNotes, locationSet, viewpoint, count } =
-        input;
+      const { label, location, locationNotes, locationSet, count } = input;
 
       const prompt = buildLocationSetDescriptionPrompt({
         label,
         location,
         locationNotes,
         locationSet,
-        viewpoint,
         count,
       });
 

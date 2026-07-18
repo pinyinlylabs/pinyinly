@@ -44,7 +44,6 @@ type LocationSetDescriptionInputType = {
   location: string;
   locationNotes: string;
   locationSet: string;
-  viewpoint: string;
   countText: string;
 };
 
@@ -75,7 +74,6 @@ const defaultLocationSetDescriptionInput: LocationSetDescriptionInputType = {
   location: `airport`,
   locationNotes: `Large international terminal with glass walls.`,
   locationSet: `baggage carousel area`,
-  viewpoint: `standing at the carousel facing incoming luggage`,
   countText: `4`,
 };
 
@@ -130,7 +128,6 @@ const locationSetDescriptionPresets: LocationSetDescriptionInputType[] = [
     location: `train station`,
     locationNotes: `Busy city transport hub with high ceilings.`,
     locationSet: `ticket window`,
-    viewpoint: `standing in line facing the clerk window`,
     countText: `4`,
   },
   {
@@ -138,7 +135,6 @@ const locationSetDescriptionPresets: LocationSetDescriptionInputType[] = [
     location: `school`,
     locationNotes: `Modern campus focused on science and arts.`,
     locationSet: `rooftop garden`,
-    viewpoint: `near the planter beds looking toward the city`,
     countText: `3`,
   },
 ];
@@ -481,18 +477,6 @@ export default () => {
                 setLocationSetInput((current) => ({
                   ...current,
                   locationSet: value,
-                }));
-              }}
-            />
-
-            <FieldLabel text="Viewpoint (optional)" />
-            <TextInputSingle
-              placeholder="standing near the conveyor"
-              value={locationSetInput.viewpoint}
-              onChangeText={(value) => {
-                setLocationSetInput((current) => ({
-                  ...current,
-                  viewpoint: value,
                 }));
               }}
             />
@@ -927,10 +911,6 @@ function buildCurrentPrompt(args: {
           ? undefined
           : args.locationSetInput.locationNotes.trim(),
       locationSet: args.locationSetInput.locationSet.trim(),
-      viewpoint:
-        args.locationSetInput.viewpoint.trim().length === 0
-          ? undefined
-          : args.locationSetInput.viewpoint.trim(),
       count: count ?? 1,
     });
 

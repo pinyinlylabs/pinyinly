@@ -274,15 +274,6 @@ export const pinyinSoundLocationSetDescriptionSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const pinyinSoundLocationSetViewpointSetting = defineUserSetting({
-  entity: r.entity(`psplv/[placeId]/[role]`, {
-    placeId: rPlaceId().alias(`p`),
-    role: r.string().alias(`r`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-  historyLimit: 20,
-});
-
 export const pinyinSoundLocationSetIdentityImageSetting = defineUserSetting({
   entity: r.entity(`pspli/[placeId]/[role]`, {
     placeId: rPlaceId().alias(`p`),
@@ -403,16 +394,6 @@ export function pinyinSoundLocationSetDescriptionSettingKey(
   role: string,
 ): string {
   return pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
-    placeId,
-    role,
-  });
-}
-
-export function pinyinSoundLocationSetViewpointSettingKey(
-  placeId: PlaceId,
-  role: string,
-): string {
-  return pinyinSoundLocationSetViewpointSetting.entity.marshalKey({
     placeId,
     role,
   });
@@ -551,14 +532,6 @@ export const pinyinFinalToneDescriptionSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
-export const pinyinFinalToneViewpointSetting = defineUserSetting({
-  entity: r.entity(`pftv/[soundId]/[tone]`, {
-    soundId: rPinyinSoundId().alias(`s`),
-    tone: r.string().alias(`n`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-});
-
 export const pinyinFinalToneImageSetting = defineUserSetting({
   entity: r.entity(`pfti/[soundId]/[tone]`, {
     soundId: rPinyinSoundId().alias(`s`),
@@ -673,7 +646,6 @@ export const userSettingDefinitions = [
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
   pinyinFinalToneNameSetting,
-  pinyinFinalToneViewpointSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundActorDescriptionSetting,
   pinyinSoundActorImageSetting,
@@ -692,7 +664,6 @@ export const userSettingDefinitions = [
   pinyinSoundMnemonicIdentitySetting,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
-  pinyinSoundLocationSetViewpointSetting,
   pinyinSoundModelSheetImageSetting,
   pinyinSoundNameSetting,
   prioritizedWordItemSetting,

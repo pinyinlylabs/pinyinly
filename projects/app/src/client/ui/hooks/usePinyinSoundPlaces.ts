@@ -16,8 +16,6 @@ import {
   pinyinSoundLocationSetIdentityImageSettingKey,
   pinyinSoundLocationSetNameSetting,
   pinyinSoundLocationSetNameSettingKey,
-  pinyinSoundLocationSetViewpointSetting,
-  pinyinSoundLocationSetViewpointSettingKey,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -56,7 +54,6 @@ export interface PinyinSoundLocationSetSummary {
   role: LocationSetRole;
   name: string | null;
   description: string | null;
-  viewpoint: string | null;
   identityImage: {
     assetId: AssetId;
     crop: ReturnType<typeof parseImageCrop>;
@@ -102,7 +99,6 @@ function createEmptySet(role: LocationSetRole): PinyinSoundLocationSetSummary {
     role,
     name: null,
     description: null,
-    viewpoint: null,
     identityImage: null,
   };
 }
@@ -305,37 +301,6 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       continue;
     }
 
-    if (setting.key.startsWith(`psplv/`)) {
-      const keyData = parsePlaceAndRoleFromKey(setting.key, `psplv/`);
-      if (keyData == null) {
-        continue;
-      }
-
-      const { keyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundLocationSetViewpointSetting,
-        {
-          placeId: keyData.placeId,
-          role: keyData.role,
-        },
-      );
-      const value = decodeSettingValueWithFallback(
-        (input) =>
-          pinyinSoundLocationSetViewpointSetting.entity.unmarshalValueSafe(
-            input,
-          ),
-        keyParamMarshaled,
-        setting.value,
-      );
-      if (value == null) {
-        continue;
-      }
-
-      const place = getOrCreatePlace(value.placeId);
-      const role = value.role as LocationSetRole;
-      place.sets[role].viewpoint = value.text;
-      continue;
-    }
-
     if (setting.key.startsWith(`pspli/`)) {
       const keyData = parsePlaceAndRoleFromKey(setting.key, `pspli/`);
       if (keyData == null) {
@@ -400,13 +365,6 @@ export function usePinyinSoundPlaces(): UsePinyinSoundPlacesResult {
       });
       void r.mutate.setSetting({
         key: pinyinSoundLocationSetDescriptionSettingKey(placeId, role),
-        value: null,
-        now: new Date(),
-        skipHistory: false,
-        historyId: nanoid(),
-      });
-      void r.mutate.setSetting({
-        key: pinyinSoundLocationSetViewpointSettingKey(placeId, role),
         value: null,
         now: new Date(),
         skipHistory: false,

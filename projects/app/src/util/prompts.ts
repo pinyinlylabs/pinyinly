@@ -455,14 +455,12 @@ export function buildLocationSetDescriptionPrompt({
   location,
   locationNotes,
   locationSet,
-  viewpoint,
   count,
 }: {
   label: string;
   location: string;
   locationNotes?: string;
   locationSet: string;
-  viewpoint?: string;
   count: number;
 }): ChatPrompt<typeof buildLocationSetDescriptionPrompt.schema> {
   const systemTemplate = `
@@ -473,7 +471,6 @@ Focus on persistent features such as layout, materials, signage, objects, textur
 Avoid time-specific or temporary details such as time of day, weather, ongoing events, or people doing actions.
 Keep each description to 1-2 sentences. Make them specific, visual, and easy to remember.
 Each suggestion must clearly reflect both the Location and the Location Set.
-If a Viewpoint is provided, ensure the description matches that perspective.
 Describe stable, always-true aspects of the place.
 Return only the descriptive fragment itself, don't prefix with the place label.
 Avoid time of day, weather, or temporary events.
@@ -488,7 +485,6 @@ Bad suggestions feel like a one-time scene.
     location,
     locationSet,
     ...(locationNotes == null ? {} : { locationNotes }),
-    ...(viewpoint == null ? {} : { viewpoint }),
   };
 
   const userTemplate = `
