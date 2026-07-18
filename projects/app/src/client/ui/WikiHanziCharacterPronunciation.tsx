@@ -1,23 +1,21 @@
 import type { DictionarySearchEntry } from "@/client/query";
+import {
+  getPinyinSoundPlaceDisplaySummary,
+  usePinyinSoundPlaces,
+} from "@/client/ui/hooks/usePinyinSoundPlaces";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
-  defaultPinyinSoundInstructions,
-  defaultToneNames,
-  getDefaultFinalToneName,
   getFinalSoundLabel,
   getInitialSoundLabel,
-  getToneSoundLabel,
   isInitialSoundId,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  getPinyinFinalToneKeyParams,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
-  pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneNameSetting,
+  pinyinFinalSoundPlaceSelectionSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
@@ -135,14 +133,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
-  const tonePinyinSound2 = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameSetting,
-          key: { soundId: splitPinyin.toneSoundId },
-        },
-  );
 
   const initialDescriptionSetting = useUserSetting(
     splitPinyin == null
@@ -152,54 +142,42 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const finalToneDescriptionSetting = useUserSetting(
+  const finalPlaceSelectionSetting = useUserSetting(
     splitPinyin == null
       ? null
       : {
-          setting: pinyinFinalToneDescriptionSetting,
-          key: getPinyinFinalToneKeyParams(
-            splitPinyin.finalSoundId,
-            String(splitPinyin.tone),
-          ),
+          setting: pinyinFinalSoundPlaceSelectionSetting,
+          key: { soundId: splitPinyin.finalSoundId },
         },
   );
-  const finalToneNameSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinFinalToneNameSetting,
-          key: getPinyinFinalToneKeyParams(
-            splitPinyin.finalSoundId,
-            String(splitPinyin.tone),
-          ),
-        },
-  );
+  const placeDirectory = usePinyinSoundPlaces();
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
   const finalPinyinSoundName = finalPinyinSound2?.value?.text;
-  const tonePinyinSoundName = tonePinyinSound2?.value?.text;
+  const selectedFinalPlaceId =
+    finalPlaceSelectionSetting?.value?.placeId ?? null;
+  const selectedFinalPlace =
+    selectedFinalPlaceId == null
+      ? null
+      : (placeDirectory.places.find(
+          (place) => place.placeId === selectedFinalPlaceId,
+        ) ?? null);
+  const selectedFinalPlaceDisplay =
+    selectedFinalPlace == null
+      ? null
+      : getPinyinSoundPlaceDisplaySummary(selectedFinalPlace);
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
-  const finalToneLocationDescription =
-    finalToneDescriptionSetting?.value?.text ?? null;
+  const finalToneLocationDescription = selectedFinalPlace?.description ?? null;
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
-  const toneDefaultName =
-    splitPinyin == null
-      ? ``
-      : (defaultToneNames[String(splitPinyin.tone)] ??
-        defaultPinyinSoundInstructions[splitPinyin.toneSoundId] ??
-        String(splitPinyin.tone));
   const finalDisplayName = finalPinyinSoundName ?? finalLabel;
-  const toneDisplayName =
-    tonePinyinSoundName ?? getToneSoundLabel(pinyinUnit) ?? toneDefaultName;
-  const defaultFinalToneName = getDefaultFinalToneName({
-    finalName: finalDisplayName,
-    toneName: toneDisplayName,
-  });
   const finalToneName =
-    finalToneNameSetting?.value?.text ?? defaultFinalToneName;
+    selectedFinalPlaceDisplay?.name == null ||
+    selectedFinalPlaceDisplay.name.trim().length === 0
+      ? finalDisplayName
+      : selectedFinalPlaceDisplay.name;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -442,7 +420,7 @@ function MergedHintDisplay({ value }: { value: string }) {
   );
 }
 
-function SoundLinkBlock({
+export function SoundLinkBlock({
   soundId,
   href,
   label,

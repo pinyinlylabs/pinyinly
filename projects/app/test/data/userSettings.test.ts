@@ -3,7 +3,6 @@ import {
   hanziPronunciationHintImageSetting,
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
-  pinyinFinalToneImageSetting,
   pinyinSoundActorImageSetting,
   pinyinSoundActorModelSheetImageSetting,
   pinyinSoundLocationIdentityImageSetting,
@@ -29,7 +28,7 @@ function expectUniqueSettingKeyPaths(
 
 describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
   test(`contains all image setting entities`, () => {
-    expect(imageSettingDefs).toHaveLength(9);
+    expect(imageSettingDefs).toHaveLength(8);
     expect(imageSettingDefs).toContain(pinyinSoundActorImageSetting);
     expect(imageSettingDefs).toContain(pinyinSoundActorModelSheetImageSetting);
     expect(imageSettingDefs).toContain(pinyinSoundLocationIdentityImageSetting);
@@ -40,7 +39,6 @@ describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
     expect(imageSettingDefs).toContain(pinyinSoundModelSheetImageSetting);
     expect(imageSettingDefs).toContain(hanziWordMeaningHintImageSetting);
     expect(imageSettingDefs).toContain(hanziPronunciationHintImageSetting);
-    expect(imageSettingDefs).toContain(pinyinFinalToneImageSetting);
   });
 
   test(`all settings have imageId field`, () => {
@@ -72,7 +70,7 @@ describe(
     test(`returns SQL LIKE patterns for all image settings`, () => {
       const patterns = getImageSettingKeyPatterns();
 
-      expect(patterns).toHaveLength(9);
+      expect(patterns).toHaveLength(8);
       expect(patterns).toContain(`psai/%`); // pinyinSoundActorImageSetting
       expect(patterns).toContain(`psams/%`); // pinyinSoundActorModelSheetImageSetting
       expect(patterns).toContain(`pspi/%`); // pinyinSoundLocationIdentityImageSetting
@@ -81,7 +79,6 @@ describe(
       expect(patterns).toContain(`psms/%`); // pinyinSoundModelSheetImageSetting
       expect(patterns).toContain(`hwmhi/%`); // hanziWordMeaningHintImageSetting
       expect(patterns).toContain(`hphi/%`); // hanziPronunciationHintImageSetting
-      expect(patterns).toContain(`pfti/%`); // pinyinFinalToneImageSetting
     });
 
     test(`patterns match the key path prefixes`, () => {
@@ -125,11 +122,6 @@ describe(
         `hphi/[hanzi]/[pinyin]`,
       );
       expect(patterns).toContain(`hphi/%`);
-
-      expect(pinyinFinalToneImageSetting.entity._def.keyPath).toBe(
-        `pfti/[soundId]/[tone]`,
-      );
-      expect(patterns).toContain(`pfti/%`);
     });
 
     test(`extracts prefix before first parameter`, () => {

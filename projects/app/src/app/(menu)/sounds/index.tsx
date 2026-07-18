@@ -2,6 +2,10 @@ import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { useDb } from "@/client/ui/hooks/useDb";
+import {
+  getPinyinSoundPlaceDisplaySummary,
+  usePinyinSoundPlaces,
+} from "@/client/ui/hooks/usePinyinSoundPlaces";
 import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { parseImageCrop } from "@/client/ui/imageCrop";
@@ -15,6 +19,7 @@ import {
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import {
+  pinyinFinalSoundPlaceSelectionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,
@@ -30,6 +35,7 @@ import { Text, View } from "react-native";
 export default function SoundsPage() {
   "use memo";
   const pinyinSoundGroupsQuery = usePinyinSoundGroups();
+  const placeDirectory = usePinyinSoundPlaces();
   const chart = loadPylyPinyinChart();
   const db = useDb();
 
@@ -41,9 +47,18 @@ export default function SoundsPage() {
     () => chart.soundIds.map((soundId) => pinyinSoundImageSettingKey(soundId)),
     [chart.soundIds],
   );
+  const finalPlaceSelectionKeys = useMemo(
+    () =>
+      chart.soundIds
+        .filter((soundId) => isFinalSoundId(soundId))
+        .map((soundId) =>
+          pinyinFinalSoundPlaceSelectionSetting.entity.marshalKey({ soundId }),
+        ),
+    [chart.soundIds],
+  );
   const relevantKeys = useMemo(
-    () => [...nameSettingKeys, ...imageSettingKeys],
-    [nameSettingKeys, imageSettingKeys],
+    () => [...nameSettingKeys, ...imageSettingKeys, ...finalPlaceSelectionKeys],
+    [nameSettingKeys, imageSettingKeys, finalPlaceSelectionKeys],
   );
 
   const { data: settings } = useLiveQuery(
@@ -60,6 +75,44 @@ export default function SoundsPage() {
 
   const pinyinSounds = new Map(
     chart.soundIds.map((soundId) => {
+      if (isFinalSoundId(soundId)) {
+        const { keyParamMarshaled } = getSettingKeyInfo(
+          pinyinFinalSoundPlaceSelectionSetting,
+          { soundId },
+        );
+        const placeSelectionValue =
+          pinyinFinalSoundPlaceSelectionSetting.entity.unmarshalValueSafe({
+            ...keyParamMarshaled,
+            ...(settingsByKey.get(
+              pinyinFinalSoundPlaceSelectionSetting.entity.marshalKey({
+                soundId,
+              }),
+            ) ?? null),
+          });
+        const selectedPlaceId = placeSelectionValue?.placeId ?? null;
+        const place =
+          selectedPlaceId == null
+            ? null
+            : (placeDirectory.places.find(
+                (entry) => entry.placeId === selectedPlaceId,
+              ) ?? null);
+        const placeDisplay =
+          place == null ? null : getPinyinSoundPlaceDisplaySummary(place);
+
+        return [
+          soundId,
+          {
+            name:
+              placeDisplay?.name == null ||
+              placeDisplay.name.trim().length === 0
+                ? selectedPlaceId
+                : placeDisplay.name,
+            label: chart.soundToCustomLabel[soundId] ?? soundId,
+            image: placeDisplay?.identityImage ?? null,
+          },
+        ];
+      }
+
       const { keyParamMarshaled: nameKeyParamMarshaled } = getSettingKeyInfo(
         pinyinSoundNameSetting,
         { soundId },

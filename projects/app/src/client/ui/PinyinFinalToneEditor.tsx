@@ -1,58 +1,21 @@
-import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
-import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import { AiLocationSetDescriptionModal } from "@/client/ui/AiLocationSetDescriptionModal";
-import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
-import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
-import { RectButton } from "@/client/ui/RectButton";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
-import {
-  defaultPinyinSoundInstructions,
-  defaultToneNames,
-  getDefaultFinalToneName,
-  loadPylyPinyinChart,
-  normalizePinyinUnit,
-} from "@/data/pinyin";
-import {
-  getPinyinFinalToneKeyParams,
-  pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneImageSetting,
-  pinyinFinalToneNameSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundNameSetting,
-} from "@/data/userSettings";
+import { loadPylyPinyinChart, normalizePinyinUnit } from "@/data/pinyin";
 import { loadFinalToneFrequencies } from "@/dictionary";
-import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
-import { use, useState } from "react";
+import { use } from "react";
 import { Text, View } from "react-native";
 
 const TONE_IDS = [`1`, `2`, `3`, `4`, `5`] as const;
-type ToneId = (typeof TONE_IDS)[number];
 
 interface PinyinFinalToneEditorProps {
   finalSoundId: PinyinSoundId;
-  focusedTone?: string | null;
-  onToneLayout?: (tone: string, layoutY: number) => void;
-  toneAudioSourceByTone?: Partial<Record<ToneId, PylyAudioSource>>;
 }
 
-/**
- * Editor for pinyin final+tone details. Renders a section with all five tones,
- * allowing the user to add descriptions and images for each tone position within a final.
- */
 export function PinyinFinalToneEditor({
   finalSoundId,
-  focusedTone,
-  onToneLayout,
-  toneAudioSourceByTone,
 }: PinyinFinalToneEditorProps) {
   const chart = loadPylyPinyinChart();
   const finalLabel = chart.soundToCustomLabel[finalSoundId] ?? finalSoundId;
-  const finalNameSetting = useUserSetting({
-    setting: pinyinSoundNameSetting,
-    key: { soundId: finalSoundId },
-  });
-  const finalName = finalNameSetting.value?.text ?? finalLabel;
   const frequencies = use(loadFinalToneFrequencies());
   const finalFrequencies = frequencies.get(finalSoundId);
   const finalLabelWithoutPrefix = finalLabel.startsWith(`-`)
@@ -69,7 +32,7 @@ export function PinyinFinalToneEditor({
   }));
 
   return (
-    <View className="space-y-8">
+    <View>
       <WikiTitledBox title="Tone Histogram">
         <View className="gap-2 p-3">
           {toneHistogramRows.map(({ tone, pinyinLabel, count }) => (
@@ -95,177 +58,6 @@ export function PinyinFinalToneEditor({
           ))}
         </View>
       </WikiTitledBox>
-
-      <View className="space-y-6">
-        {TONE_IDS.map((tone) => (
-          <ToneTileEditor
-            key={tone}
-            finalSoundId={finalSoundId}
-            finalName={finalName}
-            tone={tone}
-            isFocused={focusedTone === tone}
-            onToneLayout={onToneLayout}
-            toneAudioSource={toneAudioSourceByTone?.[tone] ?? null}
-          />
-        ))}
-      </View>
     </View>
-  );
-}
-
-interface ToneTileEditorProps {
-  finalSoundId: PinyinSoundId;
-  finalName: string;
-  tone: string;
-  isFocused: boolean;
-  onToneLayout?: (tone: string, layoutY: number) => void;
-  toneAudioSource: PylyAudioSource;
-}
-
-function ToneTileEditor({
-  finalSoundId,
-  finalName,
-  tone,
-  isFocused,
-  onToneLayout,
-  toneAudioSource,
-}: ToneTileEditorProps) {
-  const playTone = useSoundEffect(toneAudioSource);
-  const toneSoundId = tone as PinyinSoundId;
-
-  // Get user-set tone name, fallback to default
-  const toneNameSetting = useUserSetting({
-    setting: pinyinSoundNameSetting,
-    key: { soundId: toneSoundId },
-  });
-  const toneName =
-    toneNameSetting.value?.text ??
-    defaultToneNames[tone] ??
-    defaultPinyinSoundInstructions[toneSoundId] ??
-    tone;
-
-  const defaultFinalToneName = getDefaultFinalToneName({
-    finalName,
-    toneName,
-  });
-
-  const descriptionSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
-  const imageSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
-  const finalToneNameSetting = useUserSetting({
-    setting: pinyinFinalToneNameSetting,
-    key: descriptionSettingKey,
-  });
-  const descriptionSetting = useUserSetting({
-    setting: pinyinFinalToneDescriptionSetting,
-    key: descriptionSettingKey,
-  });
-  const locationDescriptionSetting = useUserSetting({
-    setting: pinyinSoundDescriptionSetting,
-    key: { soundId: finalSoundId },
-  });
-  const finalToneLocationName =
-    finalToneNameSetting.value?.text ?? defaultFinalToneName;
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [showAiModal, setShowAiModal] = useState(false);
-  const toneLabel = `Tone ${tone} (${toneName})`;
-
-  return (
-    <WikiTitledBox
-      title={toneLabel}
-      className={`
-        ${isFocused ? `border-cyan` : `border-fg-bg10`}
-      `}
-      onEditingChange={(nextIsEditMode) => {
-        setIsEditMode(nextIsEditMode);
-        if (!nextIsEditMode) {
-          setShowAiModal(false);
-        }
-      }}
-      onLayout={(event) => {
-        onToneLayout?.(tone, event.nativeEvent.layout.y);
-      }}
-    >
-      <View className="gap-2 p-3">
-        <View className="ml-2 flex-row flex-wrap items-baseline gap-2">
-          {toneAudioSource == null ? null : (
-            <RectButton
-              variant="bare"
-              iconStart="speaker-2"
-              onPressIn={playTone}
-            >
-              Play
-            </RectButton>
-          )}
-          <InlineEditableSettingText
-            variant="body"
-            setting={pinyinFinalToneNameSetting}
-            settingKey={descriptionSettingKey}
-            readonly={!isEditMode}
-            placeholder="Name this tone location"
-            // oxlint-disable-next-line typescript/no-deprecated
-            defaultValue={defaultFinalToneName}
-            displayClassName="text-base font-medium text-fg"
-            emptyClassName="text-base font-medium text-fg-dim"
-            inputClassName="text-base font-medium text-fg"
-          />
-        </View>
-
-        {/* Image Uploader */}
-        <InlineEditableSettingImage
-          enableAiGeneration
-          setting={pinyinFinalToneImageSetting}
-          settingKey={imageSettingKey}
-          readonly={!isEditMode}
-          previewHeight={200}
-          tileSize={64}
-          aspectRatio={`16:9`}
-        />
-
-        {/* Description Field */}
-        <InlineEditableSettingText
-          variant="body"
-          setting={pinyinFinalToneDescriptionSetting}
-          settingKey={descriptionSettingKey}
-          readonly={!isEditMode}
-          placeholder="Describe what this tone position looks like..."
-          multiline
-        />
-        {isEditMode ? (
-          <View className="mt-2 flex-row items-center justify-between">
-            <Text className="font-sans text-[13px] text-fg-dim">
-              Need help making this location set more vivid?
-            </Text>
-            <RectButton
-              variant="bare"
-              onPress={() => {
-                setShowAiModal(true);
-              }}
-            >
-              Use AI
-            </RectButton>
-          </View>
-        ) : null}
-
-        {showAiModal && isEditMode ? (
-          <AiLocationSetDescriptionModal
-            label={finalToneLocationName}
-            location={finalName}
-            locationNotes={locationDescriptionSetting.value?.text ?? ``}
-            locationSet={toneName}
-            onApplyDescription={(description) => {
-              descriptionSetting.setValue({
-                soundId: finalSoundId,
-                tone,
-                text: description,
-              });
-              setShowAiModal(false);
-            }}
-            onDismiss={() => {
-              setShowAiModal(false);
-            }}
-          />
-        ) : null}
-      </View>
-    </WikiTitledBox>
   );
 }

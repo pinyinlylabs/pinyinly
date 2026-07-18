@@ -81,6 +81,11 @@ export interface UsePinyinSoundPlacesResult {
   createPlace: (name?: string) => PlaceId;
 }
 
+export interface PinyinSoundPlaceDisplaySummary {
+  name: string | null;
+  identityImage: PinyinSoundLocationSummary[`identityImage`];
+}
+
 interface PlaceAccumulator {
   placeId: PlaceId;
   name: string | null;
@@ -116,6 +121,34 @@ function createPlaceAccumulator(placeId: PlaceId): PlaceAccumulator {
       ascent: createEmptySet(`ascent`),
       summit: createEmptySet(`summit`),
     },
+  };
+}
+
+export function getPinyinSoundPlaceDisplaySummary(
+  place: PinyinSoundLocationSummary,
+): PinyinSoundPlaceDisplaySummary {
+  const topLevelName = place.name?.trim() ?? ``;
+  const topLevelImage = place.identityImage;
+
+  if (topLevelName.length > 0 || topLevelImage != null) {
+    return {
+      name: topLevelName.length > 0 ? topLevelName : null,
+      identityImage: topLevelImage,
+    };
+  }
+
+  const fallbackName = locationSetRoles
+    .map((role) => place.sets[role].name?.trim() ?? ``)
+    .find((value) => value.length > 0);
+  const fallbackImage =
+    locationSetRoles
+      .map((role) => place.sets[role].identityImage)
+      .find((value) => value != null) ?? null;
+
+  return {
+    name:
+      fallbackName == null || fallbackName.length === 0 ? null : fallbackName,
+    identityImage: fallbackImage,
   };
 }
 

@@ -71,7 +71,6 @@ describe(
         `psms/%`,
         `hwmhi/%`,
         `hphi/%`,
-        `pfti/%`,
       ]);
     });
 

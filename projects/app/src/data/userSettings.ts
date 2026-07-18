@@ -225,6 +225,13 @@ export const pinyinSoundActorSelectionSetting = defineUserSetting({
   }),
 });
 
+export const pinyinFinalSoundPlaceSelectionSetting = defineUserSetting({
+  entity: r.entity(`pfsps/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`s`),
+    placeId: rPlaceId().alias(`p`),
+  }),
+});
+
 export const pinyinSoundLocationNameSetting = defineUserSetting({
   entity: r.entity(`pspn/[placeId]`, {
     placeId: rPlaceId().alias(`p`),
@@ -354,6 +361,12 @@ export function pinyinSoundActorSelectionSettingKey(
   soundId: PinyinSoundId,
 ): string {
   return pinyinSoundActorSelectionSetting.entity.marshalKey({ soundId });
+}
+
+export function pinyinFinalSoundPlaceSelectionSettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinFinalSoundPlaceSelectionSetting.entity.marshalKey({ soundId });
 }
 
 export function pinyinSoundLocationNameSettingKey(placeId: PlaceId): string {
@@ -513,41 +526,6 @@ export function getHanziPronunciationHintKeyParams(
 }
 
 //
-// Pinyin final + tone details (mnemonic locations with tone-specific imagery)
-//
-
-export const pinyinFinalToneNameSetting = defineUserSetting({
-  entity: r.entity(`pftn/[soundId]/[tone]`, {
-    soundId: rPinyinSoundId().alias(`s`),
-    tone: r.string().alias(`n`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-});
-
-export const pinyinFinalToneDescriptionSetting = defineUserSetting({
-  entity: r.entity(`pftd/[soundId]/[tone]`, {
-    soundId: rPinyinSoundId().alias(`s`),
-    tone: r.string().alias(`n`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-});
-
-export const pinyinFinalToneImageSetting = defineUserSetting({
-  entity: r.entity(`pfti/[soundId]/[tone]`, {
-    soundId: rPinyinSoundId().alias(`s`),
-    tone: r.string().alias(`n`),
-    ...imageSettingFields,
-  }) satisfies UserSettingImageEntity,
-});
-
-export function getPinyinFinalToneKeyParams(
-  soundId: PinyinSoundId,
-  tone: string,
-) {
-  return { soundId, tone };
-}
-
-//
 // Priority words list (bookmarking)
 //
 
@@ -621,7 +599,6 @@ export const imageSettingDefs = [
   pinyinSoundModelSheetImageSetting,
   hanziWordMeaningHintImageSetting,
   hanziPronunciationHintImageSetting,
-  pinyinFinalToneImageSetting,
 ] as const satisfies readonly UserSetting[];
 
 export const userHanziMeaningDefs = [
@@ -634,6 +611,7 @@ export const userSettingDefinitions = [
   aiImagePlaygroundSetting,
   aiImageStyleSetting,
   autoCheckUserSetting,
+  pinyinFinalSoundPlaceSelectionSetting,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
@@ -643,9 +621,6 @@ export const userSettingDefinitions = [
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
-  pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneImageSetting,
-  pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundActorDescriptionSetting,
   pinyinSoundActorImageSetting,

@@ -87,12 +87,12 @@ describe(
       await tx.insert(s.userSetting).values([
         {
           userId: user.id,
-          key: `pfti/a/1`,
+          key: `psi/a`,
           value: { t: assetId, c: null, w: 100, ht: 100 },
         },
         {
           userId: user.id,
-          key: `pfti/a/2`,
+          key: `psms/a`,
           value: { t: assetId, c: null, w: 100, ht: 100 },
         },
       ]);
