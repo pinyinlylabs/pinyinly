@@ -363,7 +363,6 @@ function MnemonicStoryRoleSection({
                 <View className="flex-row flex-wrap gap-2">
                   <Link href={`/places/${selectedPlace.placeId}`} asChild>
                     <FinalSoundTile
-                      label="Location"
                       name={
                         selectedPlaceDisplay?.name == null ||
                         selectedPlaceDisplay.name.trim().length === 0

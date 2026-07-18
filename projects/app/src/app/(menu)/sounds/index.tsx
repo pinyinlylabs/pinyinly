@@ -102,7 +102,7 @@ export default function SoundsPage() {
               placeDisplay.name.trim().length === 0
                 ? selectedPlaceId
                 : placeDisplay.name,
-            label: chart.soundToCustomLabel[soundId] ?? soundId,
+            badge: chart.soundToCustomLabel[soundId] ?? soundId,
             image: placeDisplay?.identityImage ?? null,
           },
         ];
@@ -122,7 +122,7 @@ export default function SoundsPage() {
         soundId,
         {
           name: nameValueData?.text ?? null,
-          label: chart.soundToCustomLabel[soundId] ?? soundId,
+          badge: chart.soundToCustomLabel[soundId] ?? soundId,
           image:
             imageId == null
               ? null
@@ -191,13 +191,13 @@ export default function SoundsPage() {
                   <Link key={soundId} href={`/sounds/${soundId}`} asChild>
                     {isInitialSoundId(soundId) ? (
                       <InitialSoundTile
-                        label={sound.label}
+                        badge={sound.badge}
                         name={sound.name}
                         image={sound.image}
                       />
                     ) : isFinalSoundId(soundId) ? (
                       <FinalSoundTile
-                        label={sound.label}
+                        badge={sound.badge}
                         name={sound.name}
                         image={sound.image}
                       />

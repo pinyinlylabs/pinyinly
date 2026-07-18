@@ -6,7 +6,7 @@ import type { AssetId } from "@/data/model";
 import type { ImageCrop } from "./imageCrop";
 
 interface FinalSoundTileProps extends ViewProps {
-  label: string;
+  badge?: string;
   name: string | null;
   image: {
     assetId: AssetId;
@@ -18,12 +18,12 @@ interface FinalSoundTileProps extends ViewProps {
 
 export function FinalSoundTile({
   className,
-  label,
+  badge,
   name,
   image,
   ...props
 }: FinalSoundTileProps) {
-  const hasLabel = nullIfEmpty(label) != null;
+  const hasBadge = nullIfEmpty(badge) != null;
 
   return (
     <View
@@ -41,7 +41,7 @@ export function FinalSoundTile({
         className={`
           relative z-10 size-[180px] transition-colors duration-150
 
-          ${hasLabel ? `mb-5` : `mb-2`}
+          ${hasBadge ? `mb-5` : `mb-2`}
 
           group-hover:border-fg/10
         `}
@@ -66,7 +66,7 @@ export function FinalSoundTile({
           )}
         </View>
 
-        {hasLabel ? (
+        {hasBadge ? (
           <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
             <View
               className={`
@@ -77,7 +77,7 @@ export function FinalSoundTile({
               `}
             >
               <Text className="font-sans text-sm/none font-semibold text-bg">
-                {label}
+                {badge}
               </Text>
             </View>
           </View>

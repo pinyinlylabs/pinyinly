@@ -59,12 +59,7 @@ export default function ActorsPage() {
             return (
               <View key={actor.actorId}>
                 <Link href={`/actors/${actor.actorId}`} asChild>
-                  <InitialSoundTile
-                    label=""
-                    showLabel={false}
-                    name={actor.name}
-                    image={actor.image}
-                  />
+                  <InitialSoundTile name={actor.name} image={actor.image} />
                 </Link>
               </View>
             );

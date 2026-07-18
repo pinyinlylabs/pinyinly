@@ -6,8 +6,7 @@ import type { AssetId } from "@/data/model";
 import type { ImageCrop } from "./imageCrop";
 
 interface InitialSoundTileProps extends ViewProps {
-  label: string;
-  showLabel?: boolean;
+  badge?: string;
   name: string | null;
   image: {
     assetId: AssetId;
@@ -19,12 +18,13 @@ interface InitialSoundTileProps extends ViewProps {
 
 export function InitialSoundTile({
   className,
-  label,
-  showLabel = true,
+  badge,
   name,
   image,
   ...props
 }: InitialSoundTileProps) {
+  const hasBadge = nullIfEmpty(badge) != null;
+
   return (
     <View
       {...props}
@@ -40,7 +40,7 @@ export function InitialSoundTile({
       <View
         className={
           `relative z-10 size-28 transition-colors duration-150` +
-          (showLabel ? ` mb-5` : ` mb-2`) +
+          (hasBadge ? ` mb-5` : ` mb-2`) +
           ` group-hover:border-fg/10`
         }
       >
@@ -64,7 +64,7 @@ export function InitialSoundTile({
           )}
         </View>
 
-        {showLabel ? (
+        {hasBadge ? (
           <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
             <View
               className={`
@@ -75,7 +75,7 @@ export function InitialSoundTile({
               `}
             >
               <Text className="font-sans text-sm/none font-semibold text-bg">
-                {label}
+                {badge}
               </Text>
             </View>
           </View>

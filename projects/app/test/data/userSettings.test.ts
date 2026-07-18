@@ -21,8 +21,12 @@ import {
   userSettingDefinitions,
   userHanziSettingLike,
 } from "#data/userSettings.ts";
+import type { PinyinSoundId, PlaceId } from "#data/model.ts";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers";
+
+const testSoundId = `-a` as PinyinSoundId;
+const testPlaceId = `place_123` as PlaceId;
 
 function expectUniqueSettingKeyPaths(
   settings: readonly { entity: { _def: { keyPath: string } } }[],
@@ -151,7 +155,7 @@ describe(
     test(`returns marshaled key metadata for keyed settings`, () => {
       const keyInfo = getUserSettingKeyInfo(
         pinyinFinalSoundPlaceSelectionSetting,
-        { soundId: `-a` },
+        { soundId: testSoundId },
       );
 
       expect(keyInfo.settingKey).toBe(`pfsps/-a`);
@@ -175,17 +179,17 @@ describe(
     test(`decodes keyed setting when stored value omits key fields`, () => {
       const decoded = decodeUserSettingValue(
         pinyinFinalSoundPlaceSelectionSetting,
-        { soundId: `-a` },
-        { p: `place_123` },
+        { soundId: testSoundId },
+        { p: testPlaceId },
       );
 
-      expect(decoded).toEqual({ soundId: `-a`, placeId: `place_123` });
+      expect(decoded).toEqual({ soundId: testSoundId, placeId: testPlaceId });
     });
 
     test(`returns null when stored value is null`, () => {
       const decoded = decodeUserSettingValue(
         pinyinFinalSoundPlaceSelectionSetting,
-        { soundId: `-a` },
+        { soundId: testSoundId },
         null,
       );
 
@@ -195,7 +199,7 @@ describe(
     test(`returns null when stored object cannot be decoded`, () => {
       const decoded = decodeUserSettingValue(
         pinyinFinalSoundPlaceSelectionSetting,
-        { soundId: `-a` },
+        { soundId: testSoundId },
         { notPlace: `x` },
       );
 
@@ -203,7 +207,11 @@ describe(
     });
 
     test(`decodes keyless setting values directly`, () => {
-      const decoded = decodeUserSettingValue(userNameSetting, {}, { t: `Brad` });
+      const decoded = decodeUserSettingValue(
+        userNameSetting,
+        {},
+        { t: `Brad` },
+      );
 
       expect(decoded).toEqual({ text: `Brad` });
     });
@@ -218,20 +226,24 @@ describe(
     test(`strips key-path fields from keyed setting stored values`, () => {
       const encoded = encodeUserSettingStoredValue(
         pinyinFinalSoundPlaceSelectionSetting,
-        { soundId: `-a` },
+        { soundId: testSoundId },
         {
-          soundId: `-a`,
-          placeId: `place_123`,
+          soundId: testSoundId,
+          placeId: testPlaceId,
         },
       );
 
-      expect(encoded).toEqual({ p: `place_123` });
+      expect(encoded).toEqual({ p: testPlaceId });
     });
 
     test(`keeps all marshaled fields for keyless settings`, () => {
-      const encoded = encodeUserSettingStoredValue(userNameSetting, {}, {
-        text: `Brad`,
-      });
+      const encoded = encodeUserSettingStoredValue(
+        userNameSetting,
+        {},
+        {
+          text: `Brad`,
+        },
+      );
 
       expect(encoded).toEqual({ t: `Brad` });
     });

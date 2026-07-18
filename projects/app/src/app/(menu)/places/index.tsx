@@ -67,11 +67,7 @@ export default function PlacesPage() {
                 href={`/places/${place.placeId}`}
                 asChild
               >
-                <FinalSoundTile
-                  label=""
-                  name={place.name}
-                  image={place.identityImage}
-                />
+                <FinalSoundTile name={place.name} image={place.identityImage} />
               </Link>
             );
           })}
