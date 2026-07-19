@@ -35,7 +35,7 @@ config = {
   // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
   resolver: {
     ...config.resolver,
-blockList: [
+    blockList: [
       // Ignore data folders of other services, to avoid Metro rebundling unnecessarily.
       /\.inngest\/.*/,
       /\.minio\/.*/,
