@@ -1,3 +1,5 @@
+import { invariant } from "@pinyinly/lib/invariant";
+
 interface PylyMemoryLeakState {
   processListenerMonitorInitialized?: boolean;
   processListenerMaxCountSeen?: Record<`exit` | `beforeExit`, number>;
@@ -12,6 +14,22 @@ const processListenerEvents = [`exit`, `beforeExit`] as const;
 
 const maxAllowedProcessListenerCount = process.getMaxListeners();
 const alwaysReportProcessListenerCountThreshold = 10;
+const mebibyte = 1024 * 1024;
+
+const ansi = {
+  reset: `\x1b[0m`,
+  bold: `\x1b[1m`,
+  fgValueGray: `\x1b[38;5;250m`,
+  fgGray: `\x1b[90m`,
+} as const;
+
+function formatMebibytes(bytes: number): string {
+  return `${Math.round(bytes / mebibyte)} MiB`;
+}
+
+function formatHeapMetric(name: string, bytes: number): string {
+  return `${ansi.fgGray}${name}=${ansi.fgValueGray}${formatMebibytes(bytes)}${ansi.reset}`;
+}
 
 function maybeWarnOnExcessiveProcessListeners(
   pylyMemoryLeakState: PylyMemoryLeakState,
@@ -50,11 +68,7 @@ function maybeWarnOnExcessiveProcessListeners(
   }
 }
 
-export function initMemoryLeakDetection(): void {
-  if (process.env.NODE_ENV !== `development`) {
-    return;
-  }
-
+export function processListenerMemoryLeakMiddleware(): void {
   const pylyMemoryLeakState = (globalThis.__pylyMemoryLeak ??= {});
 
   if (pylyMemoryLeakState.processListenerMonitorInitialized !== true) {
@@ -129,4 +143,39 @@ export function initMemoryLeakDetection(): void {
   }
 
   maybeWarnOnExcessiveProcessListeners(pylyMemoryLeakState);
+}
+
+/**
+ * Fixes https://github.com/expo/expo/issues/47938
+ */
+export function expoUpdatesMemoryLeakMiddleware(): void {
+  interface ExpoUpdatesModuleType {
+    listeners: Map<string, Set<(...args: any[]) => void>>;
+  }
+  const ExpoUpdatesModule = (globalThis.expo?.modules?.[`ExpoUpdates`] ??
+    globalThis.expo?.modules?.[`expo-updates`]) as
+    | ExpoUpdatesModuleType
+    | undefined;
+  if (ExpoUpdatesModule != null) {
+    const listeners = ExpoUpdatesModule.listeners.get(
+      `Expo.nativeUpdatesStateChangeEvent`,
+    );
+    invariant(
+      listeners instanceof Set,
+      `ExpoUpdates.listeners.get() should return a Set`,
+    );
+    listeners.clear();
+  }
+}
+
+export function expoRouterServerMemoryLoggingMiddleware(): void {
+  const { heapTotal, heapUsed, rss, external } = process.memoryUsage();
+
+  console.log(
+    `${ansi.fgGray}Server memory${ansi.reset} ` +
+      `${formatHeapMetric(`heapTotal`, heapTotal)} ` +
+      `${formatHeapMetric(`heapUsed`, heapUsed)} ` +
+      `${formatHeapMetric(`rss`, rss)} ` +
+      `${formatHeapMetric(`external`, external)}`,
+  );
 }

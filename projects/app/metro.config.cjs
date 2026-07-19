@@ -1,4 +1,4 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
+const { getDefaultConfig } = require(`expo/metro-config`);
 const { withNativewind } = require(`nativewind/metro`);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
@@ -10,9 +10,14 @@ const resolverOverrides = {
   [`lru-cache`]: { platform: `web` },
 };
 
-// TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
-// from `expo/metro-config`.
-let config = getSentryExpoConfig(__dirname);
+let config =
+  // In development Sentry causes a memory leak that eventually crashes expo.
+  process.env.NODE_ENV === `development`
+    ? /** @type {import('metro-config').MetroConfig} */ (
+        /** @type {unknown} */ (getDefaultConfig(__dirname))
+      )
+    : getSentryExpoConfig(__dirname);
+
 config = {
   ...config,
 
@@ -30,6 +35,11 @@ config = {
   // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
   resolver: {
     ...config.resolver,
+blockList: [
+      // Ignore data folders of other services, to avoid Metro rebundling unnecessarily.
+      /\.inngest\/.*/,
+      /\.minio\/.*/,
+    ].concat(config.resolver?.blockList ?? []),
     assetExts: [
       ...(config.resolver?.assetExts ?? []),
       // Add Rive support.
@@ -53,15 +63,5 @@ config = {
 };
 
 config = withNativewind(config);
-
-// Doing Sentry last is probably important so that the hashed debug IDs are
-// based on the final content of the final and aren't stripped by any other
-// processors.
-//
-// TODO: [@sentry/react-native@>7.7.0] try re-enabling
-// config = withSentryConfig(config, {
-//   annotateReactComponents: false,
-//   enableSourceContextInDevelopment: false,
-// });
 
 module.exports = config;

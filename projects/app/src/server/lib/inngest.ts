@@ -65,6 +65,7 @@ export const inngest = new Inngest({
   id: `my-app`,
   logger: globalThis.__pylyPino,
   middleware: [sentryMiddleware()],
+  isDev: process.env.NODE_ENV === `development`,
   schemas: new EventSchemas().fromSchema({
     "asset/sync-upload": z.object({
       remoteSyncId: z.string(),

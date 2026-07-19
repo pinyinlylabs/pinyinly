@@ -1,5 +1,16 @@
-import { initMemoryLeakDetection } from "@/util/memoryLeak";
+import {
+  expoRouterServerMemoryLoggingMiddleware,
+  expoUpdatesMemoryLeakMiddleware,
+  processListenerMemoryLeakMiddleware,
+} from "@/util/memoryLeak";
 
-export default function middleware() {
-  initMemoryLeakDetection();
-}
+const middleware =
+  process.env.NODE_ENV === `development`
+    ? () => {
+        processListenerMemoryLeakMiddleware();
+        expoUpdatesMemoryLeakMiddleware();
+        expoRouterServerMemoryLoggingMiddleware();
+      }
+    : () => {};
+
+export default middleware;
