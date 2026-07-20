@@ -18,10 +18,10 @@ const alwaysReportProcessListenerCountThreshold = 10;
 const mebibyte = 1024 * 1024;
 
 const ansi = {
-  reset: `\x1B[0m`,
-  bold: `\x1B[1m`,
-  fgValueGray: `\x1B[38;5;250m`,
-  fgGray: `\x1B[90m`,
+  reset: `\u001B[0m`,
+  bold: `\u001B[1m`,
+  fgValueGray: `\u001B[38;5;250m`,
+  fgGray: `\u001B[90m`,
 } as const;
 
 function formatMebibytes(bytes: number): string {
@@ -151,10 +151,9 @@ export function processListenerMemoryLeakMiddleware(): void {
  */
 export function expoUpdatesMemoryLeakMiddleware(): void {
   interface ExpoUpdatesModuleType {
-    listeners: Map<string, Set<(...args: any[]) => void>>;
+    listeners: Map<string, Set<(...args: unknown[]) => void>>;
   }
-  const ExpoUpdatesModule = (globalThis.expo?.modules?.[`ExpoUpdates`] ??
-    globalThis.expo?.modules?.[`expo-updates`]) as
+  const ExpoUpdatesModule = globalThis.expo.modules[`ExpoUpdates`] as
     | ExpoUpdatesModuleType
     | undefined;
   if (ExpoUpdatesModule != null) {
@@ -182,6 +181,7 @@ export function serverMemoryLoggingMiddleware(): void {
 
   const { heapTotal, heapUsed, rss, external } = process.memoryUsage();
 
+  // oxlint-disable-next-line no-console
   console.log(
     `${ansi.fgGray}Server memory${ansi.reset} ` +
       `${formatHeapMetric(`heapUsed`, heapUsed)} ` +
