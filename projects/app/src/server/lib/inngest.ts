@@ -238,7 +238,7 @@ const checkIsOffline = memoizeGlobalThis(`checkIsOffline`, () =>
 
     try {
       const response = await fetch(`https://cloudflare.com/cdn-cgi/trace`, {
-        method: `GET`,
+        method: `HEAD`,
         keepalive: false,
         signal: controller.signal,
         cache: `no-cache`,
