@@ -110,7 +110,7 @@ function HskSkillWordRows({
   dictionary: Dictionary | undefined;
 }) {
   const db = useDb();
-  const { data: skillStates = [] } = useLiveQuery(
+  const { data: skillStates } = useLiveQuery(
     (q) => q.from({ skillState: db.skillStateCollection }),
     [db.skillStateCollection],
   );
@@ -173,19 +173,32 @@ function HskSkillWordRows({
               </View>
             ) : null}
 
-            <View className="flex-1 flex-row items-center gap-2">
-              <Text className="font-sans text-lg font-normal text-fg-loud">
-                {row.hanzi}
-              </Text>
-              {row.pinyin == null ? null : (
-                <Text className="font-sans text-sm text-fg-dim">
-                  {row.pinyin}
+            {row.hanzi.length === 1 ? (
+              <View className="flex-1 flex-row items-center gap-3">
+                <Text className="font-sans text-3xl font-normal text-fg-loud">
+                  {row.hanzi}
                 </Text>
-              )}
-            </View>
+                {row.pinyin == null ? null : (
+                  <Text className="font-sans text-base text-fg-dim">
+                    {row.pinyin}
+                  </Text>
+                )}
+              </View>
+            ) : (
+              <View className="flex-1 gap-0">
+                <Text className="font-sans text-2xl font-normal text-fg-loud">
+                  {row.hanzi}
+                </Text>
+                {row.pinyin == null ? null : (
+                  <Text className="font-sans text-sm text-fg-dim">
+                    {row.pinyin}
+                  </Text>
+                )}
+              </View>
+            )}
 
             <Text
-              className="ml-4 flex-1 text-right font-sans text-sm text-fg"
+              className="ml-4 flex-1 text-right font-sans text-base text-fg"
               numberOfLines={2}
             >
               {row.gloss}
@@ -276,7 +289,7 @@ const rankProgressClass = tv({
   variants: {
     rank: {
       0: `bg-fg/30`,
-      1: `bg-cyan`,
+      1: `bg-fg/70`,
       2: `bg-blue`,
       3: `bg-violet`,
       4: `bg-fuchsia`,
