@@ -18,10 +18,10 @@ const alwaysReportProcessListenerCountThreshold = 10;
 const mebibyte = 1024 * 1024;
 
 const ansi = {
-  reset: `\x1b[0m`,
-  bold: `\x1b[1m`,
-  fgValueGray: `\x1b[38;5;250m`,
-  fgGray: `\x1b[90m`,
+  reset: `\x1B[0m`,
+  bold: `\x1B[1m`,
+  fgValueGray: `\x1B[38;5;250m`,
+  fgGray: `\x1B[90m`,
 } as const;
 
 function formatMebibytes(bytes: number): string {
