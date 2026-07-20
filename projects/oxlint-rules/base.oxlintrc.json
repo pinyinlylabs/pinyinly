@@ -414,5 +414,9 @@
         "typescript/no-non-null-asserted-optional-chain": "off"
       }
     }
-  ]
+  ],
+  "options": {
+    "reportUnusedDisableDirectives": "deny",
+    "respectEslintDisableDirectives": false
+  }
 }
