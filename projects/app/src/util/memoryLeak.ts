@@ -184,8 +184,8 @@ export function serverMemoryLoggingMiddleware(): void {
 
   console.log(
     `${ansi.fgGray}Server memory${ansi.reset} ` +
-      `${formatHeapMetric(`heapTotal`, heapTotal)} ` +
       `${formatHeapMetric(`heapUsed`, heapUsed)} ` +
+      `${formatHeapMetric(`heapTotal`, heapTotal)} ` +
       `${formatHeapMetric(`rss`, rss)} ` +
       `${formatHeapMetric(`external`, external)}`,
   );
