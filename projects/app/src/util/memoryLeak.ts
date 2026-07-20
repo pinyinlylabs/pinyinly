@@ -153,9 +153,13 @@ export function expoUpdatesMemoryLeakMiddleware(): void {
   interface ExpoUpdatesModuleType {
     listeners: Map<string, Set<(...args: unknown[]) => void>>;
   }
-  const ExpoUpdatesModule = globalThis.expo.modules[`ExpoUpdates`] as
+
+  const expo = globalThis.expo as typeof globalThis.expo | undefined;
+
+  const ExpoUpdatesModule = expo?.modules[`ExpoUpdates`] as
     | ExpoUpdatesModuleType
     | undefined;
+
   if (ExpoUpdatesModule != null) {
     const listeners = ExpoUpdatesModule.listeners.get(
       `Expo.nativeUpdatesStateChangeEvent`,
@@ -178,15 +182,16 @@ export function serverMemoryLoggingMiddleware(): void {
   }
 
   pylyMemoryLeakState.serverMemoryLastLogAtMs = nowMs;
+  const resources = process.getActiveResourcesInfo();
 
-  const { heapTotal, heapUsed, rss, external } = process.memoryUsage();
+  const { heapUsed, rss, arrayBuffers } = process.memoryUsage();
 
   // oxlint-disable-next-line no-console
   console.log(
     `${ansi.fgGray}Server memory${ansi.reset} ` +
       `${formatHeapMetric(`heapUsed`, heapUsed)} ` +
-      `${formatHeapMetric(`heapTotal`, heapTotal)} ` +
       `${formatHeapMetric(`rss`, rss)} ` +
-      `${formatHeapMetric(`external`, external)}`,
+      `${formatHeapMetric(`arrayBuffers`, arrayBuffers)} ` +
+      `${ansi.fgGray}resources=${ansi.fgValueGray}${resources.length}${ansi.reset} `,
   );
 }

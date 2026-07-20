@@ -11,6 +11,8 @@ const middleware =
         expoUpdatesMemoryLeakMiddleware();
         serverMemoryLoggingMiddleware();
       }
-    : () => {};
+    : () => {
+        // no-op
+      };
 
 export default middleware;
