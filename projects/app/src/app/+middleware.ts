@@ -1,5 +1,5 @@
 import {
-  expoRouterServerMemoryLoggingMiddleware,
+  serverMemoryLoggingMiddleware,
   expoUpdatesMemoryLeakMiddleware,
   processListenerMemoryLeakMiddleware,
 } from "@/util/memoryLeak";
@@ -9,7 +9,7 @@ const middleware =
     ? () => {
         processListenerMemoryLeakMiddleware();
         expoUpdatesMemoryLeakMiddleware();
-        expoRouterServerMemoryLoggingMiddleware();
+        serverMemoryLoggingMiddleware();
       }
     : () => {};
 

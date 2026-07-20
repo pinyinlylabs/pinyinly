@@ -4,6 +4,7 @@ interface PylyMemoryLeakState {
   processListenerMonitorInitialized?: boolean;
   processListenerMaxCountSeen?: Record<`exit` | `beforeExit`, number>;
   processListenerAddStackCount?: Record<string, number>;
+  serverMemoryLastLogAtMs?: number;
 }
 
 declare global {
@@ -168,7 +169,17 @@ export function expoUpdatesMemoryLeakMiddleware(): void {
   }
 }
 
-export function expoRouterServerMemoryLoggingMiddleware(): void {
+export function serverMemoryLoggingMiddleware(): void {
+  const pylyMemoryLeakState = (globalThis.__pylyMemoryLeak ??= {});
+  const nowMs = Date.now();
+  const lastLogAtMs = pylyMemoryLeakState.serverMemoryLastLogAtMs ?? 0;
+
+  if (nowMs - lastLogAtMs < 1000) {
+    return;
+  }
+
+  pylyMemoryLeakState.serverMemoryLastLogAtMs = nowMs;
+
   const { heapTotal, heapUsed, rss, external } = process.memoryUsage();
 
   console.log(
