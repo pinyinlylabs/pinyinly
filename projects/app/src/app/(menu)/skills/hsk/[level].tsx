@@ -1,6 +1,7 @@
 import { dictionaryQuery } from "@/client/query";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
+import { HanziPinyinText } from "@/client/ui/HanziPinyinText";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import type { Dictionary } from "@/dictionary";
 import type { HanziWord, Skill, SrsStateType } from "@/data/model";
@@ -173,29 +174,11 @@ function HskSkillWordRows({
               </View>
             ) : null}
 
-            {row.hanzi.length === 1 ? (
-              <View className="flex-1 flex-row items-center gap-3">
-                <Text className="font-sans text-3xl font-normal text-fg-loud">
-                  {row.hanzi}
-                </Text>
-                {row.pinyin == null ? null : (
-                  <Text className="font-sans text-base text-fg-dim">
-                    {row.pinyin}
-                  </Text>
-                )}
-              </View>
-            ) : (
-              <View className="flex-1 gap-0">
-                <Text className="font-sans text-2xl font-normal text-fg-loud">
-                  {row.hanzi}
-                </Text>
-                {row.pinyin == null ? null : (
-                  <Text className="font-sans text-sm text-fg-dim">
-                    {row.pinyin}
-                  </Text>
-                )}
-              </View>
-            )}
+            <HanziPinyinText
+              className="flex-1"
+              hanzi={row.hanzi}
+              pinyin={row.pinyin}
+            />
 
             <Text
               className="ml-4 flex-1 text-right font-sans text-base text-fg"
