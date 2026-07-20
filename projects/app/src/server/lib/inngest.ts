@@ -40,6 +40,7 @@ import {
 } from "./replicache";
 import { retryMutation as retryMutationV12 } from "./replicache/v12";
 import { retryMutation as retryMutationV14 } from "./replicache/v14";
+import throttle from "lodash/throttle";
 
 declare global {
   var __pylyPino: pino.Logger | undefined;
@@ -226,55 +227,33 @@ function createTrpcClient(url: string, sessionId: string) {
  * Check if there's an internet connection by attempting a fetch.
  * Returns false if offline, allowing sync functions to skip gracefully.
  */
-const checkIsOffline = memoizeGlobalThis(
-  `checkIsOffline`,
-  () =>
-    async function checkIsOffline(): Promise<boolean> {
-      if (globalThis.__pylyCheckIsOfflinePrev != null) {
-        const { checkedAtMs, result } = globalThis.__pylyCheckIsOfflinePrev;
-        const nowMs = Date.now();
-        if (nowMs - checkedAtMs < 30_000) {
-          return result;
-        }
-        // If the cached result is too old, fall through to re-check.
-        globalThis.__pylyCheckIsOfflinePrev = undefined;
-      }
+const checkIsOffline = memoizeGlobalThis(`checkIsOffline`, () =>
+  throttle(async function checkIsOffline(): Promise<boolean> {
+    const timeoutMs = 3000;
 
-      const timeoutMs = 3000;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => {
-        controller.abort();
-      }, timeoutMs);
-
-      try {
-        const response = await fetch(`https://cloudflare.com/cdn-cgi/trace`, {
-          method: `GET`,
-          keepalive: false,
-          signal: controller.signal,
-          cache: `no-cache`,
-          window: null,
-        });
-        // avoid memory leak
-        await response.body?.cancel();
-        const result = false;
-        globalThis.__pylyCheckIsOfflinePrev = {
-          checkedAtMs: Date.now(),
-          result,
-        };
-        return result;
-      } catch {
-        const result = true;
-        globalThis.__pylyCheckIsOfflinePrev = {
-          checkedAtMs: Date.now(),
-          result,
-        };
-        return result;
-      } finally {
-        controller.abort();
-        clearTimeout(timeout);
-      }
-    },
+    try {
+      const response = await fetch(`https://cloudflare.com/cdn-cgi/trace`, {
+        method: `GET`,
+        keepalive: false,
+        signal: controller.signal,
+        cache: `no-cache`,
+        window: null,
+      });
+      // avoid memory leak
+      await response.body?.cancel();
+      return false;
+    } catch {
+      return true;
+    } finally {
+      controller.abort();
+      clearTimeout(timeout);
+    }
+  }, 5000),
 );
 
 const replicacheGarbageCollection = inngest.createFunction(
