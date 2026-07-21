@@ -9,7 +9,7 @@ import type {
   LocationSpecificationRefinementResultType,
   LocationSpecification,
 } from "#util/prompts/location.ts";
-import { createResponsePromptHarness } from "#test/data/eval.ts";
+import { createResponsePromptHarness } from "./eval.ts";
 
 function normalized(value: string): string {
   return value.trim().toLocaleLowerCase();

@@ -5,7 +5,7 @@ import type {
   MnemonicActorPromptInputType,
   MnemonicActorProfileType,
 } from "#util/prompts/buildMnemonicActorProfilePrompt.ts";
-import { createResponsePromptHarness } from "#test/data/eval.ts";
+import { createResponsePromptHarness } from "./eval.ts";
 
 function normalized(value: string): string {
   return value.trim().toLowerCase();

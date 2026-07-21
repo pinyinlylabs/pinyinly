@@ -13,7 +13,7 @@ import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod";
 import type { HskLevelJudgeEntryType, HskLevelJudgeResultType } from "./hsk";
 import { buildHskLevelJudgePrompt } from "./hsk";
-import { createResponsePromptHarness } from "./eval";
+import { createResponsePromptHarness } from "#test/util/prompts/eval.ts";
 
 interface HskLevelHarnessMetadata extends HarnessMetadata {
   expecteds: string[][][];

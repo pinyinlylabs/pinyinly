@@ -13,8 +13,8 @@ import { normalizePinyinText } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod";
+import { createResponsePromptHarness } from "#test/util/prompts/eval.ts";
 
-import { createResponsePromptHarness } from "./eval";
 interface SenseGroupingHarnessMetadata extends HarnessMetadata {
   expecteds: SenseGroupingEntryType[];
 }

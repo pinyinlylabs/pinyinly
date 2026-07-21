@@ -37,8 +37,10 @@ config = {
     ...config.resolver,
     blockList: [
       // Ignore data folders of other services, to avoid Metro rebundling unnecessarily.
-      /\.inngest\/.*/u,
-      /\.minio\/.*/u,
+      // oxlint-disable-next-line require-unicode-regexp -- Error: Cannot combine blockList patterns, because they have different flags:
+      /\.inngest\/.*/,
+      // oxlint-disable-next-line require-unicode-regexp -- Error: Cannot combine blockList patterns, because they have different flags:
+      /\.minio\/.*/,
     ].concat(config.resolver?.blockList ?? []),
     assetExts: [
       ...(config.resolver?.assetExts ?? []),

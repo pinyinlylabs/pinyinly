@@ -24,7 +24,7 @@ import {
   runGuidedImaginationDeterministicChecks,
   runThoughtChainFunnelRefinementPipeline,
 } from "#util/prompts/thoughtChainFunnel.ts";
-import { createResponsePromptHarness } from "#test/data/eval.ts";
+import { createResponsePromptHarness } from "./eval.ts";
 
 interface ExpectedCriticismType {
   code: ThoughtChainFunnelCriticismType[`code`];

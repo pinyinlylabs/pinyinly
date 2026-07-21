@@ -11,7 +11,7 @@ import {
   buildThoughtChainPrompt,
   runThoughtChainRefinementPipeline,
 } from "#util/prompts/thoughtChain.ts";
-import { createResponsePromptHarness } from "#test/data/eval.ts";
+import { createResponsePromptHarness } from "./eval.ts";
 
 type ThoughtChainType = ThoughtChainPromptOutputType[`thoughtChains`][number];
 type ThoughtChainCriticismType =
