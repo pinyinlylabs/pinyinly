@@ -1,6 +1,6 @@
 import { pinyinTextSchema } from "#data/model.js";
 import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
-import { renderPromptTemplate } from "#util/prompts.js";
+import { renderPromptTemplate } from "#util/prompts/shared.js";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
 import path from "node:path";

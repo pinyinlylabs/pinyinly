@@ -3,7 +3,7 @@ import {
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
-} from "@/util/prompts";
+} from "@/util/prompts/meaningHint";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";

@@ -1,4 +1,3 @@
-// pyly-not-src-test
 import {
   requestOpenAiResponseJson,
   zodResponseFormatJson,
@@ -8,6 +7,7 @@ import type {
   LocationSpecification,
 } from "#util/prompts/location.ts";
 import {
+  buildLocationSetDescriptionPrompt,
   buildLocationSpecificationPrompt,
   generateLocationSpecification,
   locationSpecificationSchema,
@@ -347,6 +347,47 @@ describe(`locationSpecificationSchema`, () => {
     `);
   });
 });
+
+describe(
+  `buildLocationSetDescriptionPrompt` satisfies HasNameOf<
+    typeof buildLocationSetDescriptionPrompt
+  >,
+  () => {
+    test(`builds minimal prompt without optional notes`, () => {
+      const result = buildLocationSetDescriptionPrompt({
+        label: `Outside Lawson`,
+        location: `Lawson`,
+        locationSet: `Outside`,
+        count: 4,
+      });
+
+      expect(result.model).toBe(`gpt-5-mini`);
+      expect(result.reasoningEffort).toBe(`medium`);
+      expect(result.messages).toHaveLength(2);
+      expect(result.messages[1]?.content).toContain(
+        `Generate 4 distinct reusable location descriptions for this exact combined place.`,
+      );
+      expect(result.messages[1]?.content).not.toContain(`"locationNotes":`);
+    });
+
+    test(`includes optional notes and dynamic count`, () => {
+      const result = buildLocationSetDescriptionPrompt({
+        label: `Gong Cha bathroom`,
+        location: `Gong Cha`,
+        locationNotes: `The famous chain store bathroom.`,
+        locationSet: `bathroom`,
+        count: 3,
+      });
+
+      expect(result.messages[1]?.content).toContain(
+        `Generate 3 distinct reusable location descriptions for this exact combined place.`,
+      );
+      expect(result.messages[1]?.content).toContain(
+        `"locationNotes": "The famous chain store bathroom."`,
+      );
+    });
+  },
+);
 
 describe(`buildLocationSpecificationPrompt`, () => {
   test(`keeps the input dynamic and avoids hard-coded location examples`, () => {

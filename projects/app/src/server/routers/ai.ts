@@ -1,22 +1,24 @@
 import { assetIdSchema } from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
-import { generateImage } from "@/server/lib/gemini";
+import { requestGeminiImage } from "@/server/lib/gemini";
 import { fetchAssetBase64 } from "@/server/lib/s3/assets";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { buildLocationSetDescriptionPrompt } from "@/util/prompts/location";
 import {
-  buildMnemonicActorProfilePrompt,
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
-  buildLocationSetDescriptionPrompt,
+} from "@/util/prompts/meaningHint";
+import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-} from "@/util/prompts";
+} from "@/util/prompts/pronunciationHint";
 
 const pronunciationHintInputSchema = z
   .object({
@@ -360,8 +362,9 @@ export const aiRouter = router({
                 }),
               );
 
-        const { buffer, mimeType } = await generateImage({
-          prompt,
+        const { buffer, mimeType } = await requestGeminiImage({
+          model: `gemini-2.5-flash-image`,
+          messages: [{ role: `user`, content: prompt }],
           referenceImages: resolvedReferenceImages,
           aspectRatio,
         });

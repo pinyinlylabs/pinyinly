@@ -37,8 +37,8 @@ config = {
     ...config.resolver,
     blockList: [
       // Ignore data folders of other services, to avoid Metro rebundling unnecessarily.
-      /\.inngest\/.*/,
-      /\.minio\/.*/,
+      /\.inngest\/.*/u,
+      /\.minio\/.*/u,
     ].concat(config.resolver?.blockList ?? []),
     assetExts: [
       ...(config.resolver?.assetExts ?? []),

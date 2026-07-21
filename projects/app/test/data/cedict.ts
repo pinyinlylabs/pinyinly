@@ -2,7 +2,7 @@ import { pinyinTextSchema } from "#data/model.js";
 import type { PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { nanoid } from "#util/nanoid.ts";
-import { renderPromptTemplate } from "#util/prompts.js";
+import { renderPromptTemplate } from "#util/prompts/shared.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
   arrayFilterUnique,

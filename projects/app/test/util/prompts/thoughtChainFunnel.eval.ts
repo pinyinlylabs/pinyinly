@@ -1,4 +1,3 @@
-// pyly-not-src-test
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
 import type {
@@ -25,7 +24,7 @@ import {
   runGuidedImaginationDeterministicChecks,
   runThoughtChainFunnelRefinementPipeline,
 } from "#util/prompts/thoughtChainFunnel.ts";
-import { createResponsePromptHarness } from "./eval";
+import { createResponsePromptHarness } from "#test/data/eval.ts";
 
 interface ExpectedCriticismType {
   code: ThoughtChainFunnelCriticismType[`code`];

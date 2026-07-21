@@ -2,7 +2,7 @@ import { trpc } from "@/client/trpc";
 import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-} from "@/util/prompts";
+} from "@/util/prompts/pronunciationHint";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";

@@ -1,15 +1,17 @@
 import type { ChatPromptMessage } from "@/server/lib/ai";
 import { RectButton } from "@/client/ui/RectButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
+import { buildLocationSetDescriptionPrompt } from "@/util/prompts/location";
 import {
-  buildMnemonicActorProfilePrompt,
-  buildMeaningHintLogicalPrompt,
   buildMeaningHintCausualBridgePrompt,
+  buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
-  buildLocationSetDescriptionPrompt,
+} from "@/util/prompts/meaningHint";
+import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-} from "@/util/prompts";
+} from "@/util/prompts/pronunciationHint";
 import { useRef, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 

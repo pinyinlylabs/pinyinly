@@ -1,4 +1,3 @@
-// pyly-not-src-test
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
 import type {
@@ -12,7 +11,7 @@ import {
   buildThoughtChainPrompt,
   runThoughtChainRefinementPipeline,
 } from "#util/prompts/thoughtChain.ts";
-import { createResponsePromptHarness } from "./eval";
+import { createResponsePromptHarness } from "#test/data/eval.ts";
 
 type ThoughtChainType = ThoughtChainPromptOutputType[`thoughtChains`][number];
 type ThoughtChainCriticismType =

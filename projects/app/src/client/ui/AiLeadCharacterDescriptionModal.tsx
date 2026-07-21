@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { buildMnemonicActorProfilePrompt } from "@/util/prompts";
-import type { MnemonicActorProfileType } from "@/util/prompts";
+import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import type { MnemonicActorProfileType } from "@/util/prompts/buildMnemonicActorProfilePrompt";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";

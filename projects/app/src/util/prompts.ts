@@ -1,5 +1,24 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
+import type {
+  GeminiImageModel,
+  GeminiImageResolutionPreset,
+  GeminiImageThinkingLevel,
+  ImagePrompt,
+} from "@/server/lib/gemini";
+import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
+import type { AiReferenceImage } from "@/data/model";
 import { z } from "zod";
+
+export type ImagePromptTemplateInput = {
+  userTemplate: string;
+  variables: Record<string, string>;
+  model?: GeminiImageModel;
+  systemTemplate?: string;
+  referenceImages?: AiReferenceImage[];
+  aspectRatio?: GeminiImageAspectRatio;
+  resolution?: GeminiImageResolutionPreset;
+  thinkingLevel?: GeminiImageThinkingLevel;
+};
 
 export type PronunciationHintPromptInput = {
   leadCharacter: { name: string; bio?: string };
@@ -199,6 +218,33 @@ export function renderPromptTemplate(
     .replaceAll(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/gu, (_, key: string) => {
       return variables[key] ?? ``;
     });
+}
+
+export function buildImagePromptTemplate({
+  userTemplate,
+  variables,
+  model,
+  systemTemplate,
+  referenceImages,
+  aspectRatio,
+  resolution,
+  thinkingLevel,
+}: ImagePromptTemplateInput): ImagePrompt {
+  const userPrompt = renderPromptTemplate(userTemplate, variables);
+  const systemInstruction =
+    systemTemplate == null || systemTemplate.trim().length === 0
+      ? undefined
+      : renderPromptTemplate(systemTemplate, variables);
+
+  return {
+    model: model ?? `gemini-2.5-flash-image`,
+    ...(systemInstruction == null ? {} : { systemInstruction }),
+    messages: [{ role: `user`, content: userPrompt }],
+    ...(referenceImages == null ? {} : { referenceImages }),
+    ...(aspectRatio == null ? {} : { aspectRatio }),
+    ...(resolution == null ? {} : { resolution }),
+    ...(thinkingLevel == null ? {} : { thinkingLevel }),
+  };
 }
 
 export const meaningHintComponentSchema = z.object({

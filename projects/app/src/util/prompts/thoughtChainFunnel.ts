@@ -1,6 +1,6 @@
-import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
-import { requestOpenAiResponseJson } from "#server/lib/ai.js";
-import { renderPromptTemplate } from "#util/prompts/shared.js";
+import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
+import { requestOpenAiResponseJson } from "@/server/lib/ai";
+import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 
 export const thoughtChainFunnelPromptInputSchema = z.object({

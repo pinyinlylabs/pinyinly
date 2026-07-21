@@ -260,10 +260,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         <View
           ref={containerRef}
           className={[
-            `relative rounded-md bg-bg-high`,
-            isInputFocused
-              ? `outline outline-1 outline-blue outline-offset-0`
-              : `outline-none`,
+            `relative rounded-md bg-bg-high outline-2 outline-offset-2`,
+            isInputFocused ? `outline-blue` : `outline-transparent`,
             editContainerClassName,
           ].join(` `)}
         >

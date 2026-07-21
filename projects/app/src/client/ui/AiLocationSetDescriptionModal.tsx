@@ -1,5 +1,5 @@
 import { trpc } from "@/client/trpc";
-import { buildLocationSetDescriptionPrompt } from "@/util/prompts";
+import { buildLocationSetDescriptionPrompt } from "@/util/prompts/location";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
