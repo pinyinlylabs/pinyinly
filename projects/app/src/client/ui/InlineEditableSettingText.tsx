@@ -229,6 +229,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const multilineInputClassName = multiline
     ? `${inputTextClassName} max-h-80 rounded-none bg-transparent p-0`
     : inputTextClassName;
+  const singlelineInputClassName = `${inputTextClassName} p-0`;
   const counterThreshold =
     maxLength == null ? null : Math.ceil(maxLength * showCounterAtRatio);
   const currentLength = counterLength?.(draft) ?? draft.length;
@@ -299,7 +300,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 setIsInputFocused(false);
               }}
               placeholder={placeholder}
-              className={inputTextClassName}
+              className={singlelineInputClassName}
               variant="bare"
               style={showHistoryButton ? { paddingRight: 32 } : undefined}
             />
