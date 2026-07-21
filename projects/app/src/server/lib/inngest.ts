@@ -229,7 +229,7 @@ function createTrpcClient(url: string, sessionId: string) {
  */
 const checkIsOffline = memoizeGlobalThis(`checkIsOffline`, () =>
   throttle(async function checkIsOffline(): Promise<boolean> {
-    const timeoutMs = 3000;
+    const timeoutMs = 5000;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
