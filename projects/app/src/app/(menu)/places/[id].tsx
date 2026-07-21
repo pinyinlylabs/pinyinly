@@ -110,7 +110,7 @@ export default function PlaceIdPage() {
                   settingKey={settingKey}
                   enableAiGeneration
                   frameShape="rect"
-                  aspectRatio="16:9"
+                  aspectRatio="5:4"
                   previewHeight={200}
                   tileSize={56}
                 />
