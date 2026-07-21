@@ -1,5 +1,8 @@
 // pyly-not-src-test
-import { requestOpenAiResponseJson } from "#server/lib/ai.js";
+import {
+  requestOpenAiResponseJson,
+  zodResponseFormatJson,
+} from "#server/lib/ai.js";
 import type { LocationEvaluationType, LocationSpecification } from "./location";
 import {
   buildLocationSpecificationPrompt,
@@ -115,6 +118,230 @@ describe(`locationSpecificationSchema`, () => {
     expect(() => locationSpecificationSchema.parse(spec)).toThrow(
       /unrecognized_key|unrecognized_keys/u,
     );
+  });
+
+  test(`json schema snapshot`, () => {
+    expect(zodResponseFormatJson(locationSpecificationSchema))
+      .toMatchInlineSnapshot(`
+      {
+        "name": "result_shape",
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": {
+            "designRules": {
+              "items": {
+                "minLength": 1,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "location": {
+              "minLength": 1,
+              "type": "string",
+            },
+            "recognitionHooks": {
+              "items": {
+                "minLength": 1,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "sets": {
+              "additionalProperties": false,
+              "properties": {
+                "arrival": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "avoidFraming": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "canonicalFraming": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "designRules": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "name",
+                    "designRules",
+                    "canonicalFraming",
+                    "avoidFraming",
+                  ],
+                  "type": "object",
+                },
+                "ascent": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "avoidFraming": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "canonicalFraming": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "designRules": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "name",
+                    "designRules",
+                    "canonicalFraming",
+                    "avoidFraming",
+                  ],
+                  "type": "object",
+                },
+                "below": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "avoidFraming": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "canonicalFraming": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "designRules": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "name",
+                    "designRules",
+                    "canonicalFraming",
+                    "avoidFraming",
+                  ],
+                  "type": "object",
+                },
+                "heart": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "avoidFraming": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "canonicalFraming": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "designRules": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "name",
+                    "designRules",
+                    "canonicalFraming",
+                    "avoidFraming",
+                  ],
+                  "type": "object",
+                },
+                "summit": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "avoidFraming": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "canonicalFraming": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "designRules": {
+                      "items": {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "name",
+                    "designRules",
+                    "canonicalFraming",
+                    "avoidFraming",
+                  ],
+                  "type": "object",
+                },
+              },
+              "required": [
+                "arrival",
+                "heart",
+                "below",
+                "ascent",
+                "summit",
+              ],
+              "type": "object",
+            },
+          },
+          "required": [
+            "location",
+            "recognitionHooks",
+            "designRules",
+            "sets",
+          ],
+          "type": "object",
+        },
+        "type": "json_schema",
+      }
+    `);
   });
 });
 
