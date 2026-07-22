@@ -1,10 +1,7 @@
-import { functions, inngest } from "@/server/lib/inngest";
+import { functions, inngest as client } from "@/server/lib/inngest/index";
 import { serve } from "inngest/bun";
 
-const handler = serve({
-  client: inngest,
-  functions,
-});
+const handler = serve({ client, functions });
 
 export const GET = handler;
 export const PUT = handler;

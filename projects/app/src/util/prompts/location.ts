@@ -1,10 +1,7 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
-import makeDebug from "debug";
 import { z } from "zod";
-
-const debug = makeDebug(`pyly:location`);
 
 /**
  * A location specification is a canonical, reusable design brief for one
@@ -369,7 +366,9 @@ The canonical lower part of the location.
 
 ### Ascent
 
-The primary upward journey through the location.
+The canonical route upward within the location.
+Prefer staircases, ramps, catwalks, ladders, elevators, escalators, or other persistent architectural features that connect the lower parts of the location to its highest destination.
+Do not choose an exterior approach unless the ascent itself is one of the location's defining and most recognisable features.
 
 ### Summit
 
@@ -603,42 +602,77 @@ Revise the following location specification based on the criticisms.
   };
 };
 
-interface RunLocationSpecificationRefinementPipelineOptions {
-  maxAttempts?: number;
+interface LocationSpecificationRequestOptions {
   signal?: AbortSignal;
 }
 
-function hasMajorCriticisms(evaluation: LocationEvaluationType): boolean {
+export function hasMajorCriticisms(
+  evaluation: LocationEvaluationType,
+): boolean {
   return evaluation.criticisms.some(
     (criticism) => criticism.severity === `major`,
   );
 }
 
-function isFundamentalFailure(evaluation: LocationEvaluationType): boolean {
+export function isFundamentalFailure(
+  evaluation: LocationEvaluationType,
+): boolean {
   return evaluation.criticisms.some(
     (criticism) =>
       criticism.severity === `major` && criticism.scope === `location`,
   );
 }
 
-async function evaluateLocationSpecification(
-  entry: {
-    location: string;
-    locationSpecification: LocationSpecification;
-  },
-  options: RunLocationSpecificationRefinementPipelineOptions,
-): Promise<LocationEvaluationType> {
+export async function generateLocationSpecification(
+  entry: LocationPromptInputType,
+  options?: LocationSpecificationRequestOptions,
+): Promise<LocationSpecification> {
   const response = await requestOpenAiResponseJson(
-    buildEvaluateLocationSpecificationPrompt(entry),
+    buildLocationSpecificationPrompt(entry),
     {
-      signal: options.signal,
+      signal: options?.signal,
     },
   );
 
   return response.data;
 }
 
-function updateBestAttempt(
+export async function evaluateLocationSpecification(
+  entry: {
+    location: string;
+    locationSpecification: LocationSpecification;
+  },
+  options?: LocationSpecificationRequestOptions,
+): Promise<LocationEvaluationType> {
+  const response = await requestOpenAiResponseJson(
+    buildEvaluateLocationSpecificationPrompt(entry),
+    {
+      signal: options?.signal,
+    },
+  );
+
+  return response.data;
+}
+
+export async function refineLocationSpecification(
+  entry: {
+    location: string;
+    locationSpecification: LocationSpecification;
+    criticisms: LocationCriticismType[];
+  },
+  options?: LocationSpecificationRequestOptions,
+): Promise<LocationSpecification> {
+  const response = await requestOpenAiResponseJson(
+    buildRefineLocationSpecificationPrompt(entry),
+    {
+      signal: options?.signal,
+    },
+  );
+
+  return response.data;
+}
+
+export function updateBestAttempt(
   bestAttempt: LocationSpecificationRefinementAttemptType | null,
   currentAttempt: LocationSpecificationRefinementAttemptType,
 ): LocationSpecificationRefinementAttemptType {
@@ -651,103 +685,4 @@ function updateBestAttempt(
   }
 
   return bestAttempt;
-}
-
-export async function runLocationSpecificationRefinementPipeline(
-  entry: LocationPromptInputType,
-  options?: RunLocationSpecificationRefinementPipelineOptions,
-): Promise<LocationSpecificationRefinementResultType> {
-  const maxAttempts = options?.maxAttempts ?? 3;
-  if (!Number.isInteger(maxAttempts) || maxAttempts < 1) {
-    throw new Error(
-      `maxAttempts must be an integer greater than or equal to 1`,
-    );
-  }
-
-  const attempts: LocationSpecificationRefinementAttemptType[] = [];
-  let currentLocationSpecification: LocationSpecification;
-
-  const initialResponse = await requestOpenAiResponseJson(
-    buildLocationSpecificationPrompt(entry),
-    {
-      signal: options?.signal,
-    },
-  );
-
-  currentLocationSpecification = initialResponse.data;
-  let bestAttempt: LocationSpecificationRefinementAttemptType | null = null;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const evaluation = await evaluateLocationSpecification(
-      {
-        location: entry.location,
-        locationSpecification: currentLocationSpecification,
-      },
-      { signal: options?.signal, maxAttempts },
-    );
-
-    const currentAttempt: LocationSpecificationRefinementAttemptType = {
-      attempt,
-      locationSpecification: currentLocationSpecification,
-      evaluation,
-    };
-
-    attempts.push(currentAttempt);
-    bestAttempt = updateBestAttempt(bestAttempt, currentAttempt);
-
-    debug(
-      `attempt=%d score=%d passed=%s majorCriticisms=%d`,
-      attempt,
-      evaluation.score,
-      evaluation.passed,
-      evaluation.criticisms.filter(
-        (criticism) => criticism.severity === `major`,
-      ).length,
-    );
-
-    if (!hasMajorCriticisms(evaluation)) {
-      return {
-        attempts,
-        succeeded: true,
-        stopReason: `no_major_criticisms`,
-        finalLocationSpecification: currentLocationSpecification,
-        finalEvaluation: evaluation,
-      };
-    }
-
-    if (attempt === maxAttempts) {
-      const selectedAttempt = bestAttempt;
-
-      return {
-        attempts,
-        succeeded: false,
-        stopReason: `max_attempts_reached`,
-        finalLocationSpecification: selectedAttempt.locationSpecification,
-        finalEvaluation: selectedAttempt.evaluation,
-      };
-    }
-
-    const nextPrompt = isFundamentalFailure(evaluation)
-      ? buildLocationSpecificationPrompt(entry)
-      : buildRefineLocationSpecificationPrompt({
-          location: entry.location,
-          locationSpecification: currentLocationSpecification,
-          criticisms: evaluation.criticisms,
-        });
-
-    const nextResponse = await requestOpenAiResponseJson(nextPrompt, {
-      signal: options?.signal,
-    });
-
-    currentLocationSpecification = nextResponse.data;
-  }
-
-  throw new Error(`Unexpected pipeline state`);
-}
-
-export async function generateLocationSpecification(
-  entry: LocationPromptInputType,
-  options?: RunLocationSpecificationRefinementPipelineOptions,
-): Promise<LocationSpecificationRefinementResultType> {
-  return runLocationSpecificationRefinementPipeline(entry, options);
 }

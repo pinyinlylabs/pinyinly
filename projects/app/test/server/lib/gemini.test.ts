@@ -1,25 +1,54 @@
-import type { AiReferenceImage } from "#data/model.ts";
+import type { AssetId } from "#data/model.ts";
 import type { ImagePrompt } from "#server/lib/gemini.ts";
-import type { GeminiImageAspectRatio } from "#util/geminiImageAspectRatio.ts";
-import { requestGeminiImage } from "#server/lib/gemini.ts";
+import { createAssetFromBuffer } from "#server/lib/createAsset.ts";
+import {
+  requestGeminiImage,
+  requestGeminiImageAsAsset,
+} from "#server/lib/gemini.ts";
+import * as assets from "#server/lib/s3/assets.ts";
 import * as env from "#util/env.ts";
 import * as genai from "@google/genai";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-function buildImagePromptFromText({
+interface ReferenceEntry {
+  label?: string;
+  assetId: AssetId;
+}
+
+function buildImagePromptFromText(prompt: string): ImagePrompt {
+  return {
+    model: `gemini-2.5-flash-image`,
+    messages: [{ role: `user`, kind: `text`, content: prompt }],
+  };
+}
+
+function buildImagePromptWithReferenceMessages({
   prompt,
-  referenceImages,
-  aspectRatio,
+  references,
 }: {
   prompt: string;
-  referenceImages?: AiReferenceImage[];
-  aspectRatio?: GeminiImageAspectRatio;
+  references: ReferenceEntry[];
 }): ImagePrompt {
+  const messages: ImagePrompt[`messages`] = [];
+
+  for (const reference of references) {
+    const label = reference.label?.trim() ?? ``;
+    if (label.length > 0) {
+      messages.push({ role: `user`, kind: `text`, content: `${label}:` });
+    }
+
+    messages.push({
+      role: `user`,
+      kind: `asset`,
+      assetId: reference.assetId,
+    });
+  }
+
+  messages.push({ role: `user`, kind: `text`, content: prompt });
+
   return {
-    model: `gemini-2.5-flash-image` as const,
-    messages: [{ role: `user` as const, content: prompt }],
-    ...(referenceImages == null ? {} : { referenceImages }),
-    ...(aspectRatio == null ? {} : { aspectRatio }),
+    model: `gemini-2.5-flash-image`,
+    messages,
   };
 }
 
@@ -43,9 +72,16 @@ const { mockGenerateContentStream } = vi.hoisted(() => {
 });
 
 vi.mock(import(`@google/genai`));
+vi.mock(import(`#server/lib/createAsset.ts`));
+vi.mock(import(`#server/lib/s3/assets.ts`));
 
 const mockResponseBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
 const mockResponseMimeType = `image/png`;
+
+const assetIdOne =
+  `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` as AssetId;
+const assetIdTwo =
+  `sha256/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb` as AssetId;
 
 async function* createMockStream() {
   yield {
@@ -85,13 +121,19 @@ describe(
       vi.spyOn(env, `geminiImageApiKey`, `get`).mockReturnValue(
         `mock-api-key-for-testing`,
       );
+
+      vi.mocked(assets.fetchAssetBase64).mockResolvedValue({
+        data: mockResponseBase64,
+        mimeType: `image/png`,
+      });
+      vi.mocked(createAssetFromBuffer).mockResolvedValue(assetIdOne);
     });
 
     test(`returns image data from text prompt`, async () => {
       const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A bright red apple on a wooden table, studio lighting`,
-        }),
+        buildImagePromptFromText(
+          `A bright red apple on a wooden table, studio lighting`,
+        ),
       );
 
       expect(result.buffer.length).toBeGreaterThan(0);
@@ -123,43 +165,6 @@ describe(
       `);
     });
 
-    test(`includes aspect ratio in the request config`, async () => {
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A bright red apple on a wooden table, studio lighting`,
-          aspectRatio: `1:1`,
-        }),
-      );
-
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
-        [
-          {
-            "config": {
-              "imageConfig": {
-                "aspectRatio": "1:1",
-              },
-              "responseModalities": [
-                "IMAGE",
-              ],
-            },
-            "contents": [
-              {
-                "parts": [
-                  {
-                    "text": "A bright red apple on a wooden table, studio lighting",
-                  },
-                ],
-                "role": "user",
-              },
-            ],
-            "model": "gemini-2.5-flash-image",
-          },
-        ]
-      `);
-    });
-
     test(`maps resolution and thinking level from ImagePrompt`, async () => {
       const result = await requestGeminiImage({
         model: `gemini-2.5-flash-image`,
@@ -167,6 +172,7 @@ describe(
         messages: [
           {
             role: `user`,
+            kind: `text`,
             content: `A bright red apple on a wooden table, studio lighting`,
           },
         ],
@@ -209,416 +215,125 @@ describe(
       `);
     });
 
-    test(`forwards selected model from ImagePrompt`, async () => {
-      await requestGeminiImage({
-        model: `gemini-3.1-flash-lite-image`,
-        messages: [{ role: `user`, content: `A watercolor city skyline` }],
-      });
+    test(`resolves asset messages and preserves message order`, async () => {
+      vi.mocked(assets.fetchAssetBase64).mockImplementation(async (assetId) => {
+        if (assetId === assetIdOne) {
+          return {
+            data: `base64-one`,
+            mimeType: `image/png`,
+          };
+        }
 
-      const callArgs = mockGenerateContentStream.mock.calls.at(-1)?.[0] as {
-        model: string;
-      };
-      expect(callArgs.model).toBe(`gemini-3.1-flash-lite-image`);
-    });
-
-    test(`returns image data with style image`, async () => {
-      // Create a minimal valid PNG base64 (1x1 transparent pixel)
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A bright red apple on a wooden table, studio lighting`,
-          referenceImages: [
-            {
-              label: `style`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
-          ],
-        }),
-      );
-
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
-        [
-          {
-            "config": {
-              "imageConfig": {
-                "aspectRatio": undefined,
-              },
-              "responseModalities": [
-                "IMAGE",
-              ],
-            },
-            "contents": [
-              {
-                "parts": [
-                  {
-                    "text": "style:",
-                  },
-                  {
-                    "inlineData": {
-                      "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-                      "mimeType": "image/png",
-                    },
-                  },
-                  {
-                    "text": "A bright red apple on a wooden table, studio lighting",
-                  },
-                ],
-                "role": "user",
-              },
-            ],
-            "model": "gemini-2.5-flash-image",
-          },
-        ]
-      `);
-    });
-
-    test(`handles style image with JPEG format`, async () => {
-      // Minimal valid JPEG base64 (1x1 pixel)
-      const jpegBase64 = `/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8VAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=`;
-
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A bright red apple on a wooden table, studio lighting`,
-          referenceImages: [
-            {
-              label: `style`,
-              data: jpegBase64,
-              mimeType: `image/jpeg`,
-            },
-          ],
-        }),
-      );
-
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
-        [
-          {
-            "config": {
-              "imageConfig": {
-                "aspectRatio": undefined,
-              },
-              "responseModalities": [
-                "IMAGE",
-              ],
-            },
-            "contents": [
-              {
-                "parts": [
-                  {
-                    "text": "style:",
-                  },
-                  {
-                    "inlineData": {
-                      "data": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8VAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=",
-                      "mimeType": "image/jpeg",
-                    },
-                  },
-                  {
-                    "text": "A bright red apple on a wooden table, studio lighting",
-                  },
-                ],
-                "role": "user",
-              },
-            ],
-            "model": "gemini-2.5-flash-image",
-          },
-        ]
-      `);
-    });
-
-    test(`properly separates mime type from base64 data`, async () => {
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A test prompt`,
-          referenceImages: [
-            {
-              label: `style`,
-              data: pngBase64,
-              mimeType: `image/webp`,
-            },
-          ],
-        }),
-      );
-
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
-        [
-          {
-            "config": {
-              "imageConfig": {
-                "aspectRatio": undefined,
-              },
-              "responseModalities": [
-                "IMAGE",
-              ],
-            },
-            "contents": [
-              {
-                "parts": [
-                  {
-                    "text": "style:",
-                  },
-                  {
-                    "inlineData": {
-                      "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-                      "mimeType": "image/webp",
-                    },
-                  },
-                  {
-                    "text": "A test prompt",
-                  },
-                ],
-                "role": "user",
-              },
-            ],
-            "model": "gemini-2.5-flash-image",
-          },
-        ]
-      `);
-    });
-
-    test(`includes reference images in the request`, async () => {
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A beautiful landscape`,
-          referenceImages: [
-            {
-              label: `sunset`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
-          ],
-        }),
-      );
-
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
-        [
-          {
-            "config": {
-              "imageConfig": {
-                "aspectRatio": undefined,
-              },
-              "responseModalities": [
-                "IMAGE",
-              ],
-            },
-            "contents": [
-              {
-                "parts": [
-                  {
-                    "text": "sunset:",
-                  },
-                  {
-                    "inlineData": {
-                      "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-                      "mimeType": "image/png",
-                    },
-                  },
-                  {
-                    "text": "A beautiful landscape",
-                  },
-                ],
-                "role": "user",
-              },
-            ],
-            "model": "gemini-2.5-flash-image",
-          },
-        ]
-      `);
-    });
-
-    test(`includes multiple reference images in the request`, async () => {
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A beautiful landscape with mountains`,
-          referenceImages: [
-            {
-              label: `sunset`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
-            {
-              label: `mountain`,
-              data: pngBase64,
-              mimeType: `image/jpeg`,
-            },
-          ],
-        }),
-      );
-
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(result.mimeType.startsWith(`image/`)).toBe(true);
-
-      const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
-        model: string;
-        contents: Array<{ parts: unknown[] }>;
-      };
-      const firstContent = callArgs.contents[0];
-      if (firstContent == null) {
-        throw new Error(`Expected first content item to exist`);
-      }
-      const parts = firstContent.parts;
-      expect(callArgs.model).toBe(`gemini-2.5-flash-image`);
-      expect(parts).toHaveLength(5);
-      expect(parts[0]).toEqual({
-        text: `sunset:`,
-      });
-      expect(parts[1]).toEqual({
-        inlineData: {
-          mimeType: `image/png`,
-          data: pngBase64,
-        },
-      });
-      expect(parts[2]).toEqual({
-        text: `mountain:`,
-      });
-      expect(parts[3]).toEqual({
-        inlineData: {
+        return {
+          data: `base64-two`,
           mimeType: `image/jpeg`,
-          data: pngBase64,
-        },
+        };
       });
-      expect(parts[4]).toEqual({
-        text: `A beautiful landscape with mountains`,
-      });
-    });
-
-    test(`includes multiple reference images together`, async () => {
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
 
       const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A landscape in oil painting style`,
-          referenceImages: [
-            {
-              label: `style`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
-            {
-              label: `reference`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
+        buildImagePromptWithReferenceMessages({
+          prompt: `A beautiful landscape with mountains`,
+          references: [
+            { label: `style`, assetId: assetIdOne },
+            { label: `scene`, assetId: assetIdTwo },
           ],
         }),
       );
 
       expect(result.buffer.length).toBeGreaterThan(0);
-
-      const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
-        contents: Array<{ parts: unknown[] }>;
-      };
-      const firstContent = callArgs.contents[0];
-      if (firstContent == null) {
-        throw new Error(`Expected first content item to exist`);
-      }
-      const parts = firstContent.parts;
-      expect(parts).toHaveLength(5);
-      expect(parts[0]).toEqual({
-        text: `style:`,
-      });
-      expect(parts[1]).toEqual({
-        inlineData: {
-          mimeType: `image/png`,
-          data: pngBase64,
-        },
-      });
-      expect(parts[2]).toEqual({
-        text: `reference:`,
-      });
-      expect(parts[3]).toEqual({
-        inlineData: {
-          mimeType: `image/png`,
-          data: pngBase64,
-        },
-      });
-      expect(parts[4]).toEqual({
-        text: `A landscape in oil painting style`,
-      });
-    });
-
-    test(`places prompt text at the end when reference images are present`, async () => {
-      const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-
-      await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `Generate something similar`,
-          referenceImages: [
-            {
-              label: `example1`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
-            {
-              label: `example2`,
-              data: pngBase64,
-              mimeType: `image/png`,
-            },
-          ],
-        }),
-      );
+      expect(result.mimeType.startsWith(`image/`)).toBe(true);
+      expect(assets.fetchAssetBase64).toHaveBeenCalledTimes(2);
+      expect(assets.fetchAssetBase64).toHaveBeenNthCalledWith(1, assetIdOne);
+      expect(assets.fetchAssetBase64).toHaveBeenNthCalledWith(2, assetIdTwo);
 
       const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
         contents: Array<{ parts: unknown[] }>;
       };
       const parts = callArgs.contents[0]?.parts ?? [];
-      const lastPart = parts.at(-1);
 
-      expect(parts).toHaveLength(5); // label, image, label, image, prompt
-      expect(lastPart).toEqual({
-        text: `Generate something similar`,
-      });
+      expect(parts).toEqual([
+        { text: `style:` },
+        {
+          inlineData: {
+            mimeType: `image/png`,
+            data: `base64-one`,
+          },
+        },
+        { text: `scene:` },
+        {
+          inlineData: {
+            mimeType: `image/jpeg`,
+            data: `base64-two`,
+          },
+        },
+        { text: `A beautiful landscape with mountains` },
+      ]);
     });
 
-    test(`handles empty reference images array`, async () => {
-      const result = await requestGeminiImage(
-        buildImagePromptFromText({
-          prompt: `A test prompt`,
-          referenceImages: [],
+    test(`ignores empty text messages and keeps assets`, async () => {
+      await requestGeminiImage({
+        model: `gemini-2.5-flash-image`,
+        messages: [
+          {
+            role: `user`,
+            kind: `text`,
+            content: `   `,
+          },
+          {
+            role: `user`,
+            kind: `asset`,
+            assetId: assetIdOne,
+          },
+          {
+            role: `user`,
+            kind: `text`,
+            content: `Render with this style`,
+          },
+        ],
+      });
+
+      const callArgs = mockGenerateContentStream.mock.calls[0]?.[0] as {
+        contents: Array<{ parts: unknown[] }>;
+      };
+      const parts = callArgs.contents[0]?.parts ?? [];
+
+      expect(parts).toHaveLength(2);
+      expect(parts[0]).toEqual({
+        inlineData: {
+          mimeType: `image/png`,
+          data: mockResponseBase64,
+        },
+      });
+      expect(parts[1]).toEqual({ text: `Render with this style` });
+    });
+
+    test(`throws when all text messages are empty and no asset message exists`, async () => {
+      await expect(
+        requestGeminiImage({
+          model: `gemini-2.5-flash-image`,
+          messages: [
+            {
+              role: `user`,
+              kind: `text`,
+              content: `   `,
+            },
+          ],
         }),
+      ).rejects.toThrow(
+        `ImagePrompt requires at least one non-empty user message`,
+      );
+    });
+
+    test(`returns AssetId through requestGeminiImageAsAsset`, async () => {
+      const result = await requestGeminiImageAsAsset(
+        buildImagePromptFromText(`A bright red apple on a wooden table`),
       );
 
-      expect(result.buffer.length).toBeGreaterThan(0);
-      expect(mockGenerateContentStream.mock.lastCall).toMatchInlineSnapshot(`
-        [
-          {
-            "config": {
-              "imageConfig": {
-                "aspectRatio": undefined,
-              },
-              "responseModalities": [
-                "IMAGE",
-              ],
-            },
-            "contents": [
-              {
-                "parts": [
-                  {
-                    "text": "A test prompt",
-                  },
-                ],
-                "role": "user",
-              },
-            ],
-            "model": "gemini-2.5-flash-image",
-          },
-        ]
-      `);
+      expect(result).toBe(assetIdOne);
+      expect(createAssetFromBuffer).toHaveBeenCalledTimes(1);
+
+      const call = vi.mocked(createAssetFromBuffer).mock.calls[0];
+      expect(call?.[1]).toBe(`image/png`);
     });
   },
 );
@@ -640,40 +355,9 @@ describe.skipIf(env.geminiImageApiKey == null || true)(
         );
 
         const result = await requestGeminiImageReal(
-          buildImagePromptFromText({
-            prompt: `A bright red apple on a wooden table, studio lighting`,
-          }),
-        );
-
-        expect(result.buffer.length).toBeGreaterThan(0);
-        expect(result.mimeType.startsWith(`image/`)).toBe(true);
-      },
-    );
-
-    test(
-      `returns image data with a style image from the Gemini API`,
-      { timeout: 20000 },
-      async () => {
-        vi.doUnmock(`@google/genai`);
-        vi.doUnmock(`#util/env.ts`);
-        vi.resetModules();
-        const { requestGeminiImage: requestGeminiImageReal } = await import(
-          `#server/lib/gemini.ts`
-        );
-
-        const pngBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
-
-        const result = await requestGeminiImageReal(
-          buildImagePromptFromText({
-            prompt: `A bright red apple on a wooden table, studio lighting`,
-            referenceImages: [
-              {
-                label: `style`,
-                data: pngBase64,
-                mimeType: `image/png`,
-              },
-            ],
-          }),
+          buildImagePromptFromText(
+            `A bright red apple on a wooden table, studio lighting`,
+          ),
         );
 
         expect(result.buffer.length).toBeGreaterThan(0);

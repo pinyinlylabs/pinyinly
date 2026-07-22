@@ -1,8 +1,7 @@
-import { assetIdSchema } from "@/data/model";
+import { assetIdSchema, placeIdSchema } from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
-import { createAssetFromBuffer } from "@/server/lib/createAsset";
-import { requestGeminiImage } from "@/server/lib/gemini";
-import { fetchAssetBase64 } from "@/server/lib/s3/assets";
+import { requestGeminiImageAsAsset } from "@/server/lib/gemini";
+import { inngest } from "@/server/lib/inngest/index";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
@@ -145,17 +144,30 @@ const mnemonicActorIdentityInputSchema = z
   })
   .strict();
 
-const aiReferenceImageSchema = z
+const imagePromptTextMessageSchema = z
   .object({
-    label: z.string().min(1).max(400).optional(),
+    role: z.literal(`user`),
+    kind: z.literal(`text`),
+    content: z.string().min(1).max(4000),
+  })
+  .strict();
+
+const imagePromptAssetMessageSchema = z
+  .object({
+    role: z.literal(`user`),
+    kind: z.literal(`asset`),
     assetId: assetIdSchema,
   })
   .strict();
 
+const imagePromptMessageSchema = z.discriminatedUnion(`kind`, [
+  imagePromptTextMessageSchema,
+  imagePromptAssetMessageSchema,
+]);
+
 const generateImageInputSchema = z
   .object({
-    prompt: z.string().min(1).max(4000),
-    referenceImages: z.array(aiReferenceImageSchema).max(4).optional(),
+    messages: z.array(imagePromptMessageSchema).min(1).max(12),
     aspectRatio: z.enum(geminiImageAspectRatios).optional(),
   })
   .strict();
@@ -166,7 +178,34 @@ const generateImageOutputSchema = z
   })
   .strict();
 
+const enqueueLocationSetIdentityImagesInputSchema = z
+  .object({
+    locationId: placeIdSchema,
+  })
+  .strict();
+
+const enqueueLocationSetIdentityImagesOutputSchema = z
+  .object({
+    enqueued: z.literal(true),
+  })
+  .strict();
+
 export const aiRouter = router({
+  enqueueLocationSetIdentityImages: authedProcedure
+    .input(enqueueLocationSetIdentityImagesInputSchema)
+    .output(enqueueLocationSetIdentityImagesOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      await inngest.send({
+        name: `location-set-identity-images/generate`,
+        data: {
+          userId: ctx.session.userId,
+          locationId: input.locationId,
+        },
+      });
+
+      return { enqueued: true };
+    }),
+
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
     .output(pronunciationHintOutputSchema)
@@ -342,36 +381,15 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async ({ input }) => {
-      const { prompt, referenceImages, aspectRatio, ...rest } = input;
+      const { messages, aspectRatio, ...rest } = input;
       true satisfies IsExhaustedRest<typeof rest>;
 
       try {
-        const resolvedReferenceImages =
-          referenceImages == null
-            ? undefined
-            : await Promise.all(
-                referenceImages.map(async (referenceImage) => {
-                  const imageData = await fetchAssetBase64(
-                    referenceImage.assetId,
-                  );
-                  return {
-                    label: referenceImage.label,
-                    data: imageData.data,
-                    mimeType: imageData.mimeType,
-                  };
-                }),
-              );
-
-        const { buffer, mimeType } = await requestGeminiImage({
+        const assetId = await requestGeminiImageAsAsset({
           model: `gemini-2.5-flash-image`,
-          messages: [{ role: `user`, content: prompt }],
-          referenceImages: resolvedReferenceImages,
+          messages,
           aspectRatio,
         });
-
-        const imageArrayBuffer = Uint8Array.from(buffer).buffer;
-
-        const assetId = await createAssetFromBuffer(imageArrayBuffer, mimeType);
 
         return { assetId };
       } catch (error) {

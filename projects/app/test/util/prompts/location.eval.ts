@@ -1,14 +1,13 @@
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
-import {
-  buildLocationSpecificationPrompt,
-  runLocationSpecificationRefinementPipeline,
-} from "#util/prompts/location.ts";
+import { buildLocationSpecificationPrompt } from "#util/prompts/location.ts";
+import { runLocationSpecificationRefinementFunction } from "#server/lib/inngest/location.ts";
 import type {
   LocationPromptInputType,
   LocationSpecificationRefinementResultType,
   LocationSpecification,
 } from "#util/prompts/location.ts";
+import { InngestTestEngine } from "@inngest/test";
 import { createResponsePromptHarness } from "./eval.ts";
 
 function normalized(value: string): string {
@@ -107,13 +106,36 @@ describeEval(
     >({
       name: `locationSpecificationRefinementPipelineHarness`,
       run: async ({ input, signal }) => {
-        const output = await runLocationSpecificationRefinementPipeline(input, {
-          maxAttempts: 3,
-          signal,
+        const testEngine = new InngestTestEngine({
+          function: runLocationSpecificationRefinementFunction,
         });
 
+        const { result, error } = await testEngine.execute({
+          events: [
+            {
+              name: `inngest/function.invoked`,
+              data: {
+                location: input.location,
+                maxAttempts: 3,
+              },
+            },
+          ],
+        });
+
+        if (signal?.aborted === true) {
+          throw signal.reason instanceof Error
+            ? signal.reason
+            : new Error(`Evaluation aborted`);
+        }
+
+        if (error != null) {
+          throw error instanceof Error
+            ? error
+            : new Error(`Refinement execution failed`);
+        }
+
         return {
-          output,
+          output: result as LocationSpecificationRefinementResultType,
           messages: [],
         };
       },

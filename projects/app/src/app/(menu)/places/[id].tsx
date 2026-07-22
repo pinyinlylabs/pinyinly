@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
+import { trpc } from "@/client/trpc";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -20,7 +21,7 @@ import {
   pinyinSoundLocationSetNameSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 const locationSetTitles: Record<LocationSetRole, string> = {
   arrival: `Arrival`,
@@ -34,6 +35,8 @@ export default function PlaceIdPage() {
   const { id: rawId } = useLocalSearchParams<`/places/[id]`>();
   const placeId = (Array.isArray(rawId) ? rawId[0] : rawId) as PlaceId;
   const placeDirectory = usePinyinSoundPlaces();
+  const generateLocationSetIdentityImagesMutation =
+    trpc.ai.enqueueLocationSetIdentityImages.useMutation();
 
   const place = placeDirectory.places.find(
     (entry) => entry.placeId === placeId,
@@ -124,12 +127,34 @@ export default function PlaceIdPage() {
         title="Location specification JSON"
         className="rounded-lg border border-fg/10 bg-bg-high p-4"
       >
-        <InlineEditableSettingText
-          setting={pinyinSoundLocationSpecificationSetting}
-          settingKey={{ placeId }}
-          placeholder='{"location": "Aircraft hangar"}'
-          multiline
-        />
+        <View className="gap-3">
+          <InlineEditableSettingText
+            setting={pinyinSoundLocationSpecificationSetting}
+            settingKey={{ placeId }}
+            placeholder='{"location": "Aircraft hangar"}'
+            multiline
+          />
+
+          <Pressable
+            disabled={generateLocationSetIdentityImagesMutation.isPending}
+            onPress={() => {
+              generateLocationSetIdentityImagesMutation.mutate({
+                locationId: placeId,
+              });
+            }}
+            className="
+              items-center rounded-xl border border-fg/10 bg-fg px-4 py-3
+
+              disabled:opacity-40
+            "
+          >
+            <Text className="pyly-body text-bg">
+              {generateLocationSetIdentityImagesMutation.isPending
+                ? `Generating set images...`
+                : `Generate set images`}
+            </Text>
+          </Pressable>
+        </View>
       </WikiTitledBox>
     </View>
   );

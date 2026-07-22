@@ -85,7 +85,10 @@ describe(
       expect(result.resolution).toBe(`1K`);
       expect(result.messages).toHaveLength(1);
 
-      const content = result.messages[0]?.content ?? ``;
+      const content =
+        result.messages[0] != null && result.messages[0].kind === `text`
+          ? result.messages[0].content
+          : ``;
       expect(content).toContain(`<input>`);
       expect(content).toContain(`"location": "Haunted castle"`);
       expect(content).toContain(`"targetSet": "below"`);

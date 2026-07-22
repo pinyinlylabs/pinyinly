@@ -58,6 +58,18 @@ interface AiGenerationRequestPayload {
   referenceEntries: AiImageContextReferenceEntry[];
 }
 
+type AiImageGenerationMessage =
+  | {
+      role: `user`;
+      kind: `text`;
+      content: string;
+    }
+  | {
+      role: `user`;
+      kind: `asset`;
+      assetId: AssetId;
+    };
+
 interface AiImagePlaygroundThread {
   id: string;
   title: string;
@@ -820,16 +832,34 @@ export function AiImageGenerationPanel({
     referenceEntries,
   }: AiGenerationRequestPayload) => {
     try {
+      const messages: AiImageGenerationMessage[] = [];
+
+      for (const entry of referenceEntries) {
+        const label = entry.label.trim();
+        if (label.length > 0) {
+          messages.push({
+            role: `user`,
+            kind: `text`,
+            content: `${label}:`,
+          });
+        }
+
+        messages.push({
+          role: `user`,
+          kind: `asset`,
+          assetId: entry.assetId,
+        });
+      }
+
+      messages.push({
+        role: `user`,
+        kind: `text`,
+        content: prompt,
+      });
+
       const result = await generateMutation.mutateAsync({
-        prompt,
+        messages,
         aspectRatio,
-        referenceImages:
-          referenceEntries.length > 0
-            ? referenceEntries.map((entry) => ({
-                assetId: entry.assetId,
-                label: entry.label,
-              }))
-            : undefined,
       });
 
       const nowIso = new Date().toISOString();

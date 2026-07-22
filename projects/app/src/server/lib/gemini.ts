@@ -1,4 +1,6 @@
-import type { AiReferenceImage } from "@/data/model";
+import type { AssetId } from "@/data/model";
+import { createAssetFromBuffer } from "@/server/lib/createAsset";
+import { fetchAssetBase64 } from "@/server/lib/s3/assets";
 import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { geminiImageApiKey } from "@/util/env";
 import { memoize0 } from "@pinyinly/lib/collections";
@@ -13,10 +15,26 @@ export const geminiImageModels = [
 
 export type GeminiImageModel = (typeof geminiImageModels)[number];
 
-export interface ImagePromptMessage {
+export type ImagePromptMessageKind = `text` | `asset`;
+
+interface BaseImagePromptMessage {
   role: `user`;
+  kind: ImagePromptMessageKind;
+}
+
+export interface TextImagePromptMessage extends BaseImagePromptMessage {
+  kind: `text`;
   content: string;
 }
+
+export interface AssetImagePromptMessage extends BaseImagePromptMessage {
+  kind: `asset`;
+  assetId: AssetId;
+}
+
+export type ImagePromptMessage =
+  | TextImagePromptMessage
+  | AssetImagePromptMessage;
 
 export const geminiImageThinkingLevels = [`minimal`, `high`] as const;
 
@@ -32,7 +50,6 @@ export interface ImagePrompt {
   model: GeminiImageModel;
   systemInstruction?: string;
   messages: ImagePromptMessage[];
-  referenceImages?: AiReferenceImage[];
   aspectRatio?: GeminiImageAspectRatio;
   resolution?: GeminiImageResolutionPreset;
   thinkingLevel?: GeminiImageThinkingLevel;
@@ -51,46 +68,37 @@ function mapThinkingLevel(value: GeminiImageThinkingLevel): ThinkingLevel {
   }
 }
 
-function buildUserPrompt(messages: ImagePromptMessage[]): string {
-  const userParts: string[] = [];
-
-  for (const message of messages) {
-    const content = message.content.trim();
-    if (content.length === 0) {
-      continue;
-    }
-
-    userParts.push(content);
-  }
-
-  if (userParts.length === 0) {
-    throw new Error(`ImagePrompt requires at least one non-empty user message`);
-  }
-
-  return userParts.join(`\n\n`);
-}
-
-function buildReferenceImageParts(
-  referenceImages?: AiReferenceImage[],
-): Part[] {
-  if (referenceImages == null || referenceImages.length === 0) {
-    return [];
-  }
-
+async function buildPromptParts(
+  messages: ImagePromptMessage[],
+): Promise<Part[]> {
   const parts: Part[] = [];
 
-  for (const refImage of referenceImages) {
-    if (refImage.label != null && refImage.label.length > 0) {
-      // Labels immediately before each reference image preserve ordering context.
-      parts.push({ text: `${refImage.label}:` });
-    }
+  for (const message of messages) {
+    switch (message.kind) {
+      case `text`: {
+        const content = message.content.trim();
+        if (content.length === 0) {
+          continue;
+        }
 
-    parts.push({
-      inlineData: {
-        mimeType: refImage.mimeType,
-        data: refImage.data,
-      },
-    });
+        parts.push({ text: content });
+        break;
+      }
+      case `asset`: {
+        const imageData = await fetchAssetBase64(message.assetId);
+        parts.push({
+          inlineData: {
+            mimeType: imageData.mimeType,
+            data: imageData.data,
+          },
+        });
+        break;
+      }
+    }
+  }
+
+  if (parts.length === 0) {
+    throw new Error(`ImagePrompt requires at least one non-empty user message`);
   }
 
   return parts;
@@ -101,10 +109,8 @@ export async function requestGeminiImage(prompt: ImagePrompt): Promise<{
   mimeType: string;
 }> {
   const client = getGeminiClient();
-  const userPrompt = buildUserPrompt(prompt.messages);
   const systemInstruction = prompt.systemInstruction?.trim();
-  const parts = buildReferenceImageParts(prompt.referenceImages);
-  parts.push({ text: userPrompt });
+  const parts = await buildPromptParts(prompt.messages);
 
   const response = await client.models.generateContentStream({
     model: prompt.model,
@@ -155,4 +161,13 @@ export async function requestGeminiImage(prompt: ImagePrompt): Promise<{
   }
 
   return { buffer: Buffer.from(base64, `base64`), mimeType };
+}
+
+export async function requestGeminiImageAsAsset(
+  prompt: ImagePrompt,
+): Promise<AssetId> {
+  const { buffer, mimeType } = await requestGeminiImage(prompt);
+  const imageArrayBuffer = Uint8Array.from(buffer).buffer;
+
+  return createAssetFromBuffer(imageArrayBuffer, mimeType);
 }

@@ -10,8 +10,8 @@ import type {
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import { v14 as schema } from "@/data/rizzleSchema";
-import { getUserSettingHistoryLimitFromKey } from "@/data/userSettings";
 import type { Drizzle, Xmin } from "@/server/lib/db";
+import { setUserSetting } from "@/server/lib/userSettings";
 import {
   assertMinimumIsolationLevel,
   json_agg,
@@ -40,7 +40,6 @@ import {
   makeDrizzleMutationHandler,
   replicacheMutationSchema,
 } from "@/util/rizzle";
-import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
@@ -136,56 +135,13 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
     });
   },
   async setSetting(db, userId, { key, value, now, skipHistory, historyId }) {
-    const updatedAt = now;
-    const createdAt = now;
-    await db
-      .insert(s.userSetting)
-      .values([{ userId, key, value, updatedAt, createdAt }])
-      .onConflictDoUpdate({
-        target: [s.userSetting.userId, s.userSetting.key],
-        set: { value, updatedAt },
-      });
-
-    if (skipHistory !== true && historyId != null) {
-      await db.insert(s.userSettingHistory).values([
-        {
-          id: historyId,
-          userId,
-          key,
-          value,
-          createdAt: now,
-        },
-      ]);
-
-      const historyLimit = getUserSettingHistoryLimitFromKey(key);
-
-      const entries = await db.query.userSettingHistory.findMany({
-        where: and(
-          eq(s.userSettingHistory.userId, userId),
-          eq(s.userSettingHistory.key, key),
-        ),
-        columns: {
-          id: true,
-          createdAt: true,
-        },
-      });
-
-      const staleEntryIds = entries
-        .sort(sortComparatorDate((x) => x.createdAt))
-        .slice(0, Math.max(0, entries.length - historyLimit))
-        .map((entry) => entry.id);
-
-      if (staleEntryIds.length > 0) {
-        await db
-          .delete(s.userSettingHistory)
-          .where(
-            and(
-              eq(s.userSettingHistory.userId, userId),
-              inArray(s.userSettingHistory.id, staleEntryIds),
-            ),
-          );
-      }
-    }
+    await setUserSetting(db, userId, {
+      key,
+      value,
+      now,
+      skipHistory,
+      historyId,
+    });
   },
   async deleteSettingHistory(db, userId, { id }) {
     await db

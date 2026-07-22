@@ -1,3 +1,4 @@
+import type { AssetId } from "#data/model.js";
 import * as imageModule from "#server/lib/image.ts";
 import {
   createPresignedUploadUrl,
@@ -38,7 +39,8 @@ describe(
     test(`throws error for file size exceeding maximum`, async () => {
       await expect(
         createPresignedUploadUrl({
-          assetId: `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`,
+          assetId:
+            `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` as AssetId,
           contentType: `image/jpeg`,
           contentLength: MAX_ASSET_SIZE_BYTES + 1,
         }),
@@ -47,7 +49,8 @@ describe(
 
     test(`accepts valid parameters`, async () => {
       const result = await createPresignedUploadUrl({
-        assetId: `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`,
+        assetId:
+          `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` as AssetId,
         contentType: `image/jpeg`,
         contentLength: 1024,
       });

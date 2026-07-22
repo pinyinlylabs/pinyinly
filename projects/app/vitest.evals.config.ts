@@ -13,6 +13,7 @@ export default defineConfig({
       [`json`, { outputFile: `vitest.evals-report.json` }],
     ],
     include: [`test/**/*.eval.*`],
+    setupFiles: [`./test/setup.ts`],
     testTimeout: 60_000, // calling LLM can be slow
   },
   plugins: [tsconfigPaths(), react()],

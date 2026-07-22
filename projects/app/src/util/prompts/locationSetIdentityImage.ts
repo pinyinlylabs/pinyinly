@@ -3,8 +3,9 @@ import {
   locationSetRoleSchema,
   locationSpecificationSchema,
 } from "@/util/prompts/location";
-import { buildImagePromptTemplate } from "@/util/prompts/shared";
+import { renderPromptTemplate } from "@/util/prompts/shared";
 import { animatorMemorySketchSystemTemplate } from "@/util/prompts/imageStyles";
+import type { ImagePrompt } from "@/server/lib/gemini";
 
 export const locationSetIdentityImagePromptInputSchema = z
   .object({
@@ -23,7 +24,7 @@ export type LocationSetIdentityImagePromptInputType = z.infer<
 
 export function buildLocationSetIdentityImagePrompt(
   entry: LocationSetIdentityImagePromptInputType,
-) {
+): ImagePrompt {
   const userTemplate = `
 Create an image for one set from the supplied location specification.
 
@@ -48,14 +49,21 @@ Instructions:
 </input>
 `;
 
-  return buildImagePromptTemplate({
+  const variables = {
+    input: JSON.stringify(entry.input, null, 2),
+  };
+
+  const userPrompt = renderPromptTemplate(userTemplate, variables);
+  const systemInstruction = renderPromptTemplate(
+    animatorMemorySketchSystemTemplate,
+    variables,
+  );
+
+  return {
     model: `gemini-3.1-flash-lite-image`,
     aspectRatio: `5:4`,
     resolution: `1K`,
-    systemTemplate: animatorMemorySketchSystemTemplate,
-    userTemplate,
-    variables: {
-      input: JSON.stringify(entry.input, null, 2),
-    },
-  });
+    systemInstruction,
+    messages: [{ role: `user`, kind: `text`, content: userPrompt }],
+  };
 }

@@ -1,18 +1,19 @@
+import { runLocationSpecificationRefinementFunction } from "#server/lib/inngest/location.ts";
 import {
   requestOpenAiResponseJson,
   zodResponseFormatJson,
 } from "#server/lib/ai.js";
-import type {
-  LocationEvaluationType,
-  LocationSpecification,
-} from "#util/prompts/location.ts";
 import {
   buildLocationSetDescriptionPrompt,
   buildLocationSpecificationPrompt,
-  generateLocationSpecification,
   locationSpecificationSchema,
-  runLocationSpecificationRefinementPipeline,
 } from "#util/prompts/location.ts";
+import type {
+  LocationEvaluationType,
+  LocationSpecification,
+  LocationSpecificationRefinementResultType,
+} from "#util/prompts/location.ts";
+import { InngestTestEngine } from "@inngest/test";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock(`#server/lib/ai.js`, async () => {
@@ -416,6 +417,38 @@ describe(`buildLocationSpecificationPrompt`, () => {
 describe(`runLocationSpecificationRefinementPipeline`, () => {
   const requestMock = vi.mocked(requestOpenAiResponseJson);
 
+  async function executeRefinement(options: {
+    location: string;
+    maxAttempts?: number;
+  }): Promise<LocationSpecificationRefinementResultType> {
+    const testEngine = new InngestTestEngine({
+      function: runLocationSpecificationRefinementFunction,
+    });
+
+    const { result, error } = await testEngine.execute({
+      events: [
+        {
+          name: `location-specification-refinement/run`,
+          data:
+            options.maxAttempts == null
+              ? { location: options.location }
+              : {
+                  location: options.location,
+                  maxAttempts: options.maxAttempts,
+                },
+        },
+      ],
+    });
+
+    if (error != null) {
+      throw error instanceof Error
+        ? error
+        : new Error(`Refinement execution failed`);
+    }
+
+    return result as LocationSpecificationRefinementResultType;
+  }
+
   beforeEach(() => {
     requestMock.mockReset();
   });
@@ -440,9 +473,7 @@ describe(`runLocationSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await generateLocationSpecification({
-      location: `Pirate ship`,
-    });
+    const result = await executeRefinement({ location: `Pirate ship` });
 
     expect(result.succeeded).toBe(true);
     expect(result.stopReason).toBe(`no_major_criticisms`);
@@ -492,9 +523,7 @@ describe(`runLocationSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await runLocationSpecificationRefinementPipeline({
-      location: `Pirate ship`,
-    });
+    const result = await executeRefinement({ location: `Pirate ship` });
 
     expect(result.succeeded).toBe(true);
     expect(result.attempts).toHaveLength(2);
@@ -549,12 +578,10 @@ describe(`runLocationSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await runLocationSpecificationRefinementPipeline(
-      {
-        location: `Pirate ship`,
-      },
-      { maxAttempts: 2 },
-    );
+    const result = await executeRefinement({
+      location: `Pirate ship`,
+      maxAttempts: 2,
+    });
 
     expect(result.succeeded).toBe(true);
     expect(result.attempts).toHaveLength(2);
@@ -635,10 +662,10 @@ describe(`runLocationSpecificationRefinementPipeline`, () => {
       }
     });
 
-    const result = await runLocationSpecificationRefinementPipeline(
-      { location: `Pirate ship` },
-      { maxAttempts: 3 },
-    );
+    const result = await executeRefinement({
+      location: `Pirate ship`,
+      maxAttempts: 3,
+    });
 
     expect(result.succeeded).toBe(false);
     expect(result.attempts).toHaveLength(3);

@@ -13,7 +13,7 @@ Style:
 - No pencil.
 - No graphite.
 - No shading.
-- No watercolor.
+- No water color.
 - No thick marker pen.
 - No paint.
 - No marker.
@@ -43,4 +43,32 @@ The drawing should feel deliberately unfinished so the viewer completes the scen
 It should resemble an animator's exploratory location sketch from a sketchbook, not finished concept art.
 
 The viewer should recognize the place at a quick glance and be able to reconstruct it later from memory.
+`.trim();
+
+export const tradingCardLocationPortraitSystemTemplate = `
+You are creating the canonical portrait of a place, not a documentary scene.
+
+The image should feel like a polished trading card illustration or encyclopedia plate for a memorable fictional location.
+
+Style:
+
+- Clean, stylized illustration.
+- Timeless environment art.
+- Square composition that remains recognizable at thumbnail size.
+- One dominant focal point.
+- Strong silhouette and confident shapes.
+- Natural but slightly simplified color.
+- Restrained detail.
+- Real atmospheric depth without visual clutter.
+- Lighting should establish mood and direct attention to the focal point.
+- Background elements should support recognition without competing for attention.
+
+Avoid:
+
+- Photographic realism.
+- Text, labels, logos, symbols, or decorative borders.
+- People unless they are inseparable from the location's identity.
+- Generic stock-art compositions.
+- Tiny details that disappear at thumbnail size.
+- Wide panoramic views.
 `.trim();
