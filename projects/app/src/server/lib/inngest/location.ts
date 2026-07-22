@@ -10,6 +10,7 @@ import {
 import * as s from "@/server/pgSchema";
 import {
   buildEvaluateLocationSpecPrompt,
+  buildLocationNameSuggestionsPrompt,
   buildLocationSpecPrompt,
   buildRefineLocationSpecificationPrompt,
   hasMajorCriticisms,
@@ -38,8 +39,9 @@ import {
 import { geminiRequestImageAsAsset } from "./gemini";
 import { invariant } from "@pinyinly/lib/invariant";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
+import { buildLocationSetIdentityImagePrompt } from "@/util/prompts/locationSetIdentityImage";
 
-export const generateLocationSpecFunc = inngest.createFunction(
+export const generateLocationSpec = inngest.createFunction(
   {
     id: `location/generateLocationSpec`,
     triggers: invoke(
@@ -321,9 +323,10 @@ const populateLocationSetIdentityImage = inngest.createFunction(
       {
         function: geminiRequestImageAsAsset,
         data: {
-          prompt: buildLocationIdentityImagePrompt({
+          prompt: buildLocationSetIdentityImagePrompt({
             input: {
               locationSpec,
+              targetSet: role,
             },
           }),
         },
@@ -463,7 +466,7 @@ const populateLocationSpec = inngest.createFunction(
       );
 
       locationSpec = await step.invoke(`refine-location-spec`, {
-        function: generateLocationSpecFunc,
+        function: generateLocationSpec,
         data: {
           location: locationName,
           maxAttempts: 3,
@@ -494,11 +497,39 @@ const populateLocationSpec = inngest.createFunction(
   },
 );
 
+const runLocationNameSuggestions = inngest.createFunction(
+  {
+    id: `location/runLocationNameSuggestions`,
+    triggers: [
+      invoke(
+        z.object({
+          syllable: z.string(),
+          count: z.number().optional(),
+        }),
+      ),
+    ],
+  },
+  async ({ event, step }) => {
+    const { syllable, count = 5 } = event.data;
+
+    const prompt = buildLocationNameSuggestionsPrompt({
+      syllable,
+      count,
+    });
+
+    return step.run(`run prompt`, async () => {
+      const response = await requestOpenAiResponseJson(prompt);
+      return response.data;
+    });
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
-  generateLocationSpecFunc,
+  generateLocationSpec,
   populateLocation,
   populateLocationSetIdentityImage,
   populateLocationSetName,
   populateLocationSpec,
+  runLocationNameSuggestions,
 ];

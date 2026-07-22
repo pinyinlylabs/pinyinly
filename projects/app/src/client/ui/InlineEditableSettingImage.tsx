@@ -379,6 +379,13 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                       Reposition
                     </ButtonGroup.Button>
                   ) : null}
+                  <ButtonGroup.Button
+                    onPress={() => {
+                      setSettingValue(null);
+                    }}
+                  >
+                    Clear
+                  </ButtonGroup.Button>
                 </ButtonGroup>
               </View>
             ) : null}

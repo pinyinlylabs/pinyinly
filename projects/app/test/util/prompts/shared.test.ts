@@ -134,10 +134,19 @@ describe(
       expect(result).toBe(`Count: 4`);
     });
 
-    test(`replaces unknown placeholders with empty string`, () => {
-      const result = renderPromptTemplate(`Start {{ missing }} end`, {});
+    test(`throws when a placeholder remains unresolved`, () => {
+      expect(() => renderPromptTemplate(`Start {{ missing }} end`, {})).toThrow(
+        `Unresolved prompt template variables: missing`,
+      );
+    });
 
-      expect(result).toBe(`Start  end`);
+    test(`reports every unresolved placeholder name`, () => {
+      expect(() =>
+        renderPromptTemplate(
+          `{{ first }} and {{ second }} and {{ first }}`,
+          {},
+        ),
+      ).toThrow(`Unresolved prompt template variables: first, second, first`);
     });
   },
 );

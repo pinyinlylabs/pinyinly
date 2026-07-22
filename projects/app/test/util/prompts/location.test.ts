@@ -1,4 +1,4 @@
-import { runLocationSpecificationRefinementFunction } from "#server/lib/inngest.ts";
+import { generateLocationSpec } from "#server/lib/inngest/location.ts";
 import {
   requestOpenAiResponseJson,
   zodResponseFormatJson,
@@ -414,7 +414,7 @@ describe(`buildLocationSpecificationPrompt`, () => {
   });
 });
 
-describe(`runLocationSpecificationRefinementPipeline`, () => {
+describe(`generateLocationSpec`, () => {
   const requestMock = vi.mocked(requestOpenAiResponseJson);
 
   async function executeRefinement(options: {
@@ -422,7 +422,7 @@ describe(`runLocationSpecificationRefinementPipeline`, () => {
     maxAttempts?: number;
   }): Promise<LocationSpecificationRefinementResultType> {
     const testEngine = new InngestTestEngine({
-      function: runLocationSpecificationRefinementFunction,
+      function: generateLocationSpec,
     });
 
     const { result, error } = await testEngine.execute({
