@@ -8,7 +8,7 @@ export const assetPendingUploadGarbageCollection = inngest.createFunction(
   {
     id: `assetPendingUploadGarbageCollection`,
     singleton: { mode: `skip` },
-    triggers: [{ cron: `* * * * *` }],
+    triggers: [{ cron: `*/5 * * * *` }],
   },
   async ({ step, logger }) => {
     const cutoff = subMinutes(new Date(), 30);

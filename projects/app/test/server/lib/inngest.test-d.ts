@@ -1,4 +1,4 @@
-import { inngest } from "#server/lib/inngest/index.ts";
+import { inngest } from "#server/lib/inngest/all.ts";
 import { test } from "vitest";
 
 test(`@inngest/eslint-plugin is configured correctly`, () => {

@@ -1,4 +1,4 @@
-import { runLocationSpecificationRefinementFunction } from "#server/lib/inngest/location.ts";
+import { runLocationSpecificationRefinementFunction } from "#server/lib/inngest.ts";
 import {
   requestOpenAiResponseJson,
   zodResponseFormatJson,

@@ -10,7 +10,6 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
-import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { getGeminiImageAspectRatioValue } from "@/util/geminiImageAspectRatio";
 import { useEffect, useId, useRef, useState } from "react";
 import type {
@@ -45,6 +44,7 @@ import {
   parseImageCrop,
 } from "./imageCrop";
 import { useAssetImageMeta } from "./useAssetImageMeta";
+import type { GeminiImageAspectRatio } from "@/server/lib/gemini";
 
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   setting: UserSettingEntityLike<T>;

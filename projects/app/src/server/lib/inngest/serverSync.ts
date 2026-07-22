@@ -4,7 +4,7 @@ import { supportedSchemas } from "@/data/rizzleSchema";
 import * as s from "@/server/pgSchema";
 import { invariant } from "@pinyinly/lib/invariant";
 import { and, eq, gte } from "drizzle-orm";
-import { eventType, invoke } from "inngest";
+import { invoke } from "inngest";
 import z from "zod";
 import {
   downloadAssetFromRemote,
@@ -21,15 +21,19 @@ import {
 } from "@/server/lib/replicache";
 import { retryMutation as retryMutationV12 } from "@/server/lib/replicache/v12";
 import { retryMutation as retryMutationV14 } from "@/server/lib/replicache/v14";
-import { inngest } from "./client";
+import {
+  serverSyncAssetSyncUploadEvent,
+  inngest,
+  serverSyncAssetSyncDownloadEvent,
+} from "./client";
 import { onlineOrRetryLater, createTrpcClient } from "./shared";
 
 export const syncRemotePush = inngest.createFunction(
   {
-    id: `syncRemotePush`,
+    id: `serverSync/syncRemotePush`,
     singleton: { mode: `skip` },
     // Sync every 5 minutes
-    triggers: [{ cron: `*/5 * * * *` }],
+    triggers: [{ cron: `* * * * *` }, invoke(z.object({}))],
   },
   async ({ step, logger }) => {
     await onlineOrRetryLater();
@@ -153,10 +157,10 @@ export const syncRemotePush = inngest.createFunction(
 
 export const syncRemotePull = inngest.createFunction(
   {
-    id: `syncRemotePull`,
+    id: `serverSync/syncRemotePull`,
     singleton: { mode: `skip` },
     // Sync every 5 minutes
-    triggers: [{ cron: `*/5 * * * *` }],
+    triggers: [{ cron: `*/5 * * * *` }, invoke(z.object({}))],
   },
   async ({ step, logger }) => {
     await onlineOrRetryLater();
@@ -264,7 +268,7 @@ type RetryBatchResult =
 
 const retryFailedMutations = inngest.createFunction(
   {
-    id: `retryFailedMutations`,
+    id: `serverSync/retryFailedMutations`,
     description: `Retry failed mutations starting from a specific mutation ID and continuing through all subsequent failed mutations for the same client.`,
     triggers: [
       invoke(
@@ -470,7 +474,7 @@ const retryFailedMutations = inngest.createFunction(
 
 const syncAssetBlobs = inngest.createFunction(
   {
-    id: `syncAssetBlobs`,
+    id: `serverSync/syncAssetBlobs`,
     singleton: { mode: `skip` },
     // Sync every 5 minutes
     triggers: [{ cron: `*/5 * * * *` }],
@@ -543,18 +547,24 @@ const syncAssetBlobs = inngest.createFunction(
 
         // Fan out upload jobs
         for (const assetId of toUpload) {
-          await step.sendEvent(`emit-upload-${assetId}`, {
-            name: `asset/sync-upload`,
-            data: { remoteSyncId: remoteSync.id, assetId },
-          });
+          await step.sendEvent(
+            `emit-upload-${assetId}`,
+            serverSyncAssetSyncUploadEvent.create({
+              remoteSyncId: remoteSync.id,
+              assetId,
+            }),
+          );
         }
 
         // Fan out download jobs
         for (const assetId of toDownload) {
-          await step.sendEvent(`emit-download-${assetId}`, {
-            name: `asset/sync-download`,
-            data: { remoteSyncId: remoteSync.id, assetId },
-          });
+          await step.sendEvent(
+            `emit-download-${assetId}`,
+            serverSyncAssetSyncDownloadEvent.create({
+              remoteSyncId: remoteSync.id,
+              assetId,
+            }),
+          );
         }
       } catch (error) {
         logger.error(
@@ -568,7 +578,7 @@ const syncAssetBlobs = inngest.createFunction(
 
 const syncAssetBlobUpload = inngest.createFunction(
   {
-    id: `syncAssetBlobUpload`,
+    id: `serverSync/syncAssetBlobUpload`,
     singleton: {
       key: `event.data.remoteSyncId + "-" + event.data.assetId`,
       mode: `skip`,
@@ -577,14 +587,7 @@ const syncAssetBlobUpload = inngest.createFunction(
       limit: 5,
       period: `10s`,
     },
-    triggers: [
-      eventType(`asset/sync-upload`, {
-        schema: z.object({
-          remoteSyncId: z.string(),
-          assetId: assetIdSchema,
-        }),
-      }),
-    ],
+    triggers: [serverSyncAssetSyncUploadEvent],
   },
   async ({ event, step, logger }) => {
     await onlineOrRetryLater();
@@ -628,7 +631,7 @@ const syncAssetBlobUpload = inngest.createFunction(
 
 const syncAssetBlobDownload = inngest.createFunction(
   {
-    id: `syncAssetBlobDownload`,
+    id: `serverSync/syncAssetBlobDownload`,
     singleton: {
       key: `event.data.remoteSyncId + "-" + event.data.assetId`,
       mode: `skip`,
@@ -637,14 +640,7 @@ const syncAssetBlobDownload = inngest.createFunction(
       limit: 5,
       period: `10s`,
     },
-    triggers: [
-      eventType(`asset/sync-download`, {
-        schema: z.object({
-          remoteSyncId: z.string(),
-          assetId: assetIdSchema,
-        }),
-      }),
-    ],
+    triggers: [serverSyncAssetSyncDownloadEvent],
   },
   async ({ event, step, logger }) => {
     await onlineOrRetryLater();

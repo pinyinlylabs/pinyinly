@@ -12,7 +12,7 @@ export interface ChatPromptMessage {
 }
 
 export interface ChatPrompt<Schema extends z.ZodType> {
-  model: OpenAI.ChatModel;
+  model: OpenAI.AllModels;
   reasoningEffort: OpenAI.ReasoningEffort;
   messages: ChatPromptMessage[];
   /**
@@ -20,6 +20,7 @@ export interface ChatPrompt<Schema extends z.ZodType> {
    * This is used for type inference and validation of the response data.
    */
   schema: Schema;
+  timeout?: number;
 }
 
 const unsupportedOpenAiJsonSchemaKeywords = new Set([
@@ -125,6 +126,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
 
     const response = await client.responses.create(body, {
       signal: options?.signal,
+      ...(prompt.timeout == null ? {} : { timeout: prompt.timeout }),
     });
 
     const content = response.output_text;

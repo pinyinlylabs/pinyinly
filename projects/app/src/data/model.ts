@@ -81,6 +81,15 @@ export const actorIdSchema = z.custom<ActorId>(isString);
 export type PlaceId = string & z.$brand<`PlaceId`>;
 export const placeIdSchema = z.custom<PlaceId>(isString);
 
+export const locationSetRoleSchema = z.enum([
+  `arrival`,
+  `heart`,
+  `below`,
+  `ascent`,
+  `summit`,
+]);
+export type LocationSetRole = z.infer<typeof locationSetRoleSchema>;
+
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;
 export const pinyinSoundIdPinyinlyObjectIdKind = `ps` as const;

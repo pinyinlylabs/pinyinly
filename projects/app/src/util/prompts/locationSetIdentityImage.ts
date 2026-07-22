@@ -1,17 +1,15 @@
 import { z } from "zod";
-import {
-  locationSetRoleSchema,
-  locationSpecificationSchema,
-} from "@/util/prompts/location";
+import { locationSpecSchema } from "@/util/prompts/location";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { animatorMemorySketchSystemTemplate } from "@/util/prompts/imageStyles";
 import type { ImagePrompt } from "@/server/lib/gemini";
+import { locationSetRoleSchema } from "@/data/model";
 
 export const locationSetIdentityImagePromptInputSchema = z
   .object({
     input: z
       .object({
-        locationSpec: locationSpecificationSchema,
+        locationSpec: locationSpecSchema,
         targetSet: locationSetRoleSchema,
       })
       .strict(),

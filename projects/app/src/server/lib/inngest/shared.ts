@@ -1,7 +1,7 @@
 import type { AppRouter } from "@/server/routers/_app";
 import { httpSessionHeaderTx } from "@/util/http";
-import { createTRPCClient, httpLink } from "@trpc/client";
 import { memoizeGlobalThis } from "@pinyinly/lib/collections";
+import { createTRPCClient, httpLink } from "@trpc/client";
 import { RetryAfterError } from "inngest";
 import throttle from "lodash/throttle";
 
@@ -17,29 +17,18 @@ declare global {
  */
 export const checkIsOffline = memoizeGlobalThis(`checkIsOffline`, () =>
   throttle(async function checkIsOffline(): Promise<boolean> {
-    const timeoutMs = 5000;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => {
-      controller.abort();
-    }, timeoutMs);
-
     try {
       const response = await fetch(`https://cloudflare.com/cdn-cgi/trace`, {
         method: `HEAD`,
         keepalive: false,
-        signal: controller.signal,
+        signal: AbortSignal.timeout(10000),
         cache: `no-cache`,
-        window: null,
       });
       // avoid memory leak
       await response.body?.cancel();
       return false;
     } catch {
       return true;
-    } finally {
-      controller.abort();
-      clearTimeout(timeout);
     }
   }, 5000),
 );

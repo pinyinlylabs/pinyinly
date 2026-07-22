@@ -1,0 +1,34 @@
+diff --git a/PATCH.md b/PATCH.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..f589c3af55cdb8565ccd479e8491d97305260cc4
+--- /dev/null
++++ b/PATCH.md
+@@ -0,0 +1 @@
++Fixes https://github.com/kitten/fetch-nodeshim/issues/44
+\ No newline at end of file
+diff --git a/dist/minifetch.js b/dist/minifetch.js
+index 361300ceabcc1c93d26f140b8605461cb0f05575..5ddc023a4dba234c0f68a526edf6d36bfac01b03 100644
+--- a/dist/minifetch.js
++++ b/dist/minifetch.js
+@@ -431,7 +431,7 @@ async function _fetch(t, n) {
+   let d = n?.headers ?? (o ? t.headers : void 0);
+   const h = {
+     ...urlToHttpOptions(c),
+-    timeout: n?.connectTimeout ?? 3e4,
++    timeout: n?.connectTimeout ?? 3e5,
+     method: methodToHttpOption(o ? t.method : n?.method),
+     signal: a
+   };
+diff --git a/dist/minifetch.mjs b/dist/minifetch.mjs
+index 65258812b7a5f40405a6c1d36355a651a6b9f2df..c5e43458acf6f75d7bce8a9059f6c3e6605e97a2 100644
+--- a/dist/minifetch.mjs
++++ b/dist/minifetch.mjs
+@@ -446,7 +446,7 @@ async function _fetch(n, a) {
+   let g = a?.headers ?? (c ? n.headers : void 0);
+   const b = {
+     ...urlToHttpOptions(p),
+-    timeout: a?.connectTimeout ?? 3e4,
++    timeout: a?.connectTimeout ?? 3e5,
+     method: methodToHttpOption(c ? n.method : a?.method),
+     signal: u
+   };

@@ -1,16 +1,4 @@
-export const geminiImageAspectRatios = [
-  `1:1`,
-  `2:3`,
-  `3:2`,
-  `3:4`,
-  `4:3`,
-  `5:4`,
-  `9:16`,
-  `16:9`,
-  `21:9`,
-] as const;
-
-export type GeminiImageAspectRatio = (typeof geminiImageAspectRatios)[number];
+import type { GeminiImageAspectRatio } from "@/server/lib/gemini";
 
 export function getGeminiImageAspectRatioValue(
   value: GeminiImageAspectRatio | null | undefined,

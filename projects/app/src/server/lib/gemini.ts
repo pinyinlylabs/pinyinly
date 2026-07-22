@@ -1,7 +1,8 @@
+import { assetIdSchema } from "@/data/model";
 import type { AssetId } from "@/data/model";
+import z from "zod";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
 import { fetchAssetBase64 } from "@/server/lib/s3/assets";
-import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { geminiImageApiKey } from "@/util/env";
 import { memoize0 } from "@pinyinly/lib/collections";
 import type { Part } from "@google/genai";
@@ -46,14 +47,47 @@ export const geminiImageResolutionPresets = [`512`, `1K`] as const;
 export type GeminiImageResolutionPreset =
   (typeof geminiImageResolutionPresets)[number];
 
-export interface ImagePrompt {
-  model: GeminiImageModel;
-  systemInstruction?: string;
-  messages: ImagePromptMessage[];
-  aspectRatio?: GeminiImageAspectRatio;
-  resolution?: GeminiImageResolutionPreset;
-  thinkingLevel?: GeminiImageThinkingLevel;
-}
+export const geminiImageAspectRatioSchema = z.enum([
+  `1:1`,
+  `2:3`,
+  `3:2`,
+  `3:4`,
+  `4:3`,
+  `5:4`,
+  `9:16`,
+  `16:9`,
+  `21:9`,
+] as const);
+
+export type GeminiImageAspectRatio = z.infer<
+  typeof geminiImageAspectRatioSchema
+>;
+
+export const imagePromptSchema = z.object({
+  model: z.enum(geminiImageModels),
+  systemInstruction: z.string().optional(),
+  messages: z
+    .array(
+      z.discriminatedUnion(`kind`, [
+        z.object({
+          kind: z.literal(`text`),
+          role: z.literal(`user`),
+          content: z.string(),
+        }),
+        z.object({
+          kind: z.literal(`asset`),
+          role: z.literal(`user`),
+          assetId: assetIdSchema,
+        }),
+      ]),
+    )
+    .min(1),
+  aspectRatio: geminiImageAspectRatioSchema.optional(),
+  resolution: z.enum(geminiImageResolutionPresets).optional(),
+  thinkingLevel: z.enum(geminiImageThinkingLevels).optional(),
+});
+
+export type ImagePrompt = z.infer<typeof imagePromptSchema>;
 
 const getGeminiClient = memoize0(() => {
   return new GoogleGenAI({ apiKey: nonNullable(geminiImageApiKey) });

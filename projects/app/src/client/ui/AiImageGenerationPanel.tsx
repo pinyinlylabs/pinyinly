@@ -16,7 +16,6 @@ import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import { aiImagePlaygroundSetting } from "@/data/userSettings";
-import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { setAdd, setDelete, setToggle } from "@pinyinly/lib/collections";
 import type {
   UserSetting,
@@ -35,6 +34,7 @@ import { RectButton } from "./RectButton";
 import { ShimmerText } from "./ShimmerText";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
+import type { GeminiImageAspectRatio } from "@/server/lib/gemini";
 
 type AiImagePlaygroundRole = `user` | `assistant` | `error`;
 

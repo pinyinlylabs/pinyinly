@@ -1,9 +1,11 @@
 import { assetIdSchema, placeIdSchema } from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
-import { requestGeminiImageAsAsset } from "@/server/lib/gemini";
+import {
+  geminiImageAspectRatioSchema,
+  requestGeminiImageAsAsset,
+} from "@/server/lib/gemini";
 import { inngest } from "@/server/lib/inngest/index";
 import { authedProcedure, router } from "@/server/lib/trpc";
-import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -18,6 +20,7 @@ import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
 } from "@/util/prompts/pronunciationHint";
+import { locationPopulateLocationEvent } from "@/server/lib/inngest/client";
 
 const pronunciationHintInputSchema = z
   .object({
@@ -168,7 +171,7 @@ const imagePromptMessageSchema = z.discriminatedUnion(`kind`, [
 const generateImageInputSchema = z
   .object({
     messages: z.array(imagePromptMessageSchema).min(1).max(12),
-    aspectRatio: z.enum(geminiImageAspectRatios).optional(),
+    aspectRatio: geminiImageAspectRatioSchema.optional(),
   })
   .strict();
 
@@ -195,13 +198,12 @@ export const aiRouter = router({
     .input(enqueueLocationSetIdentityImagesInputSchema)
     .output(enqueueLocationSetIdentityImagesOutputSchema)
     .mutation(async ({ ctx, input }) => {
-      await inngest.send({
-        name: `location-set-identity-images/generate`,
-        data: {
+      await inngest.send(
+        locationPopulateLocationEvent.create({
           userId: ctx.session.userId,
           locationId: input.locationId,
-        },
-      });
+        }),
+      );
 
       return { enqueued: true };
     }),

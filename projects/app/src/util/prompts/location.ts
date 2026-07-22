@@ -1,5 +1,4 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
-import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 
@@ -48,6 +47,8 @@ export type LocationSpecification = {
     summit: LocationSet;
   };
 };
+
+export type LocationSpec = LocationSpecification;
 
 const locationSetSchema = z
   .object({
@@ -112,6 +113,8 @@ export const locationSpecificationSchema =
   locationSpecificationBaseSchema.superRefine(
     validateLocationSpecificationShape,
   );
+
+export const locationSpecSchema = locationSpecificationSchema;
 
 export type LocationSpecificationSchemaType = z.infer<
   typeof locationSpecificationSchema
@@ -184,6 +187,12 @@ export type LocationSpecificationRefinementAttemptType = z.infer<
   typeof locationSpecificationRefinementAttemptSchema
 >;
 
+export const locationSpecRefinementAttemptSchema =
+  locationSpecificationRefinementAttemptSchema;
+
+export type LocationSpecRefinementAttemptType =
+  LocationSpecificationRefinementAttemptType;
+
 export const locationSpecificationRefinementStopReasonSchema = z.enum([
   `no_major_criticisms`,
   `max_attempts_reached`,
@@ -192,6 +201,12 @@ export const locationSpecificationRefinementStopReasonSchema = z.enum([
 export type LocationSpecificationRefinementStopReasonType = z.infer<
   typeof locationSpecificationRefinementStopReasonSchema
 >;
+
+export const locationSpecRefinementStopReasonSchema =
+  locationSpecificationRefinementStopReasonSchema;
+
+export type LocationSpecRefinementStopReasonType =
+  LocationSpecificationRefinementStopReasonType;
 
 export const locationSpecificationRefinementResultSchema = z
   .object({
@@ -206,6 +221,12 @@ export const locationSpecificationRefinementResultSchema = z
 export type LocationSpecificationRefinementResultType = z.infer<
   typeof locationSpecificationRefinementResultSchema
 >;
+
+export const locationSpecRefinementResultSchema =
+  locationSpecificationRefinementResultSchema;
+
+export type LocationSpecRefinementResultType =
+  LocationSpecificationRefinementResultType;
 
 function buildLocationPromptData(entry: LocationPromptInputType) {
   return { location: entry.location };
@@ -535,6 +556,18 @@ Evaluate the following location specification.
   };
 };
 
+export const buildLocationSpecPrompt = buildLocationSpecificationPrompt;
+
+export const buildEvaluateLocationSpecPrompt = (entry: {
+  location: string;
+  locationSpec: LocationSpec;
+}): ChatPrompt<typeof locationEvaluationSchema> => {
+  return buildEvaluateLocationSpecificationPrompt({
+    location: entry.location,
+    locationSpecification: entry.locationSpec,
+  });
+};
+
 export const buildRefineLocationSpecificationPrompt = (entry: {
   location: string;
   locationSpecification: LocationSpecification;
@@ -602,10 +635,6 @@ Revise the following location specification based on the criticisms.
   };
 };
 
-interface LocationSpecificationRequestOptions {
-  signal?: AbortSignal;
-}
-
 export function hasMajorCriticisms(
   evaluation: LocationEvaluationType,
 ): boolean {
@@ -621,55 +650,6 @@ export function isFundamentalFailure(
     (criticism) =>
       criticism.severity === `major` && criticism.scope === `location`,
   );
-}
-
-export async function generateLocationSpecification(
-  entry: LocationPromptInputType,
-  options?: LocationSpecificationRequestOptions,
-): Promise<LocationSpecification> {
-  const response = await requestOpenAiResponseJson(
-    buildLocationSpecificationPrompt(entry),
-    {
-      signal: options?.signal,
-    },
-  );
-
-  return response.data;
-}
-
-export async function evaluateLocationSpecification(
-  entry: {
-    location: string;
-    locationSpecification: LocationSpecification;
-  },
-  options?: LocationSpecificationRequestOptions,
-): Promise<LocationEvaluationType> {
-  const response = await requestOpenAiResponseJson(
-    buildEvaluateLocationSpecificationPrompt(entry),
-    {
-      signal: options?.signal,
-    },
-  );
-
-  return response.data;
-}
-
-export async function refineLocationSpecification(
-  entry: {
-    location: string;
-    locationSpecification: LocationSpecification;
-    criticisms: LocationCriticismType[];
-  },
-  options?: LocationSpecificationRequestOptions,
-): Promise<LocationSpecification> {
-  const response = await requestOpenAiResponseJson(
-    buildRefineLocationSpecificationPrompt(entry),
-    {
-      signal: options?.signal,
-    },
-  );
-
-  return response.data;
 }
 
 export function updateBestAttempt(

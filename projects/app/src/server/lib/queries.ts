@@ -1,11 +1,26 @@
-import type { Skill, SrsStateType } from "@/data/model";
+import type {
+  AssetId,
+  LocationSetRole,
+  PlaceId,
+  Skill,
+  SrsStateType,
+} from "@/data/model";
 import { SrsKind } from "@/data/model";
-import { userNameSetting } from "@/data/userSettings";
+import {
+  pinyinSoundLocationSetIdentityImageSetting,
+  pinyinSoundLocationSetIdentityImageSettingKey,
+  pinyinSoundLocationSpecificationSetting,
+  userNameSetting,
+} from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
+import { locationSpecSchema } from "@/util/prompts/location";
+import { jsonCodec } from "@pinyinly/lib/zod";
+import { setUserSetting } from "./userSettings";
+import { nanoid } from "@/util/nanoid";
 
 export async function updateSkillState(
   tx: Drizzle,
@@ -109,4 +124,87 @@ export async function setUserName(
       target: [schema.userSetting.userId, schema.userSetting.key],
       set: { value: marshaledValue },
     });
+}
+
+export async function getLocationSpec(
+  db: Drizzle,
+  userId: string,
+  locationId: PlaceId,
+) {
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(
+        schema.userSetting.key,
+        pinyinSoundLocationSpecificationSetting.entity.marshalKey({
+          placeId: locationId,
+        }),
+      ),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = pinyinSoundLocationSpecificationSetting.decode(
+    { placeId: locationId },
+    setting.value,
+  );
+
+  if (decoded == null) {
+    return null;
+  }
+
+  return jsonCodec(locationSpecSchema).parse(decoded.text, {
+    reportInput: true,
+  });
+}
+
+export async function setLocationSetIdentityImage(
+  db: Drizzle,
+  userId: string,
+  locationId: PlaceId,
+  role: LocationSetRole,
+  imageId: AssetId,
+): Promise<void> {
+  await setUserSetting(db, userId, {
+    key: pinyinSoundLocationSetIdentityImageSettingKey(locationId, role),
+    value: pinyinSoundLocationSetIdentityImageSetting.entity.marshalValue({
+      placeId: locationId,
+      role,
+      imageId: imageId,
+    }),
+    now: new Date(),
+    skipHistory: false,
+    historyId: nanoid(),
+  });
+}
+
+export async function getLocationSetIdentityImage(
+  db: Drizzle,
+  userId: string,
+  locationId: PlaceId,
+  role: LocationSetRole,
+): Promise<AssetId | null> {
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(
+        schema.userSetting.key,
+        pinyinSoundLocationSetIdentityImageSettingKey(locationId, role),
+      ),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = pinyinSoundLocationSetIdentityImageSetting.decode(
+    { placeId: locationId, role },
+    setting.value,
+  );
+
+  return decoded?.imageId ?? null;
 }

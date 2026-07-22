@@ -316,30 +316,14 @@ declare global {
   var __pylyMemoizeGlobalThis: Record<string, unknown> | undefined;
 }
 
-export function memoizeGlobalThis<R>(
-  key: string,
-  factory: () => R,
-): R & { isCached: () => boolean; resetCache: () => void } {
+export function memoizeGlobalThis<R>(key: string, factory: () => R): R {
   const globalThisCache = (globalThis.__pylyMemoizeGlobalThis ??= {});
-  let cacheSet = key in globalThisCache;
-  const memoFn = function () {
-    if (cacheSet) {
-      return globalThisCache[key] as R;
-    }
-    const value = factory();
-    globalThisCache[key] = value;
-    cacheSet = true;
-    return value;
-  };
-  Object.defineProperty(memoFn, `name`, { value: `memoizeGlobalThis(${key})` });
-  return Object.assign(memoFn, {
-    isCached: () => cacheSet,
-    resetCache: () => {
-      // oxlint-disable-next-line typescript/no-dynamic-delete
-      delete globalThisCache[key];
-      cacheSet = false;
-    },
-  }) as R & { isCached: () => boolean; resetCache: () => void };
+  if (key in globalThisCache) {
+    return globalThisCache[key] as R;
+  }
+  const value = factory();
+  globalThisCache[key] = value;
+  return value;
 }
 
 /**
