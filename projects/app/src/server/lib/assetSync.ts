@@ -3,7 +3,7 @@ import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
 import { getImageSettingKeyPatterns } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import * as schema from "@/server/pgSchema";
-import { verifyObjectExists } from "@/server/lib/s3/assets";
+import { verifyObjectExists } from "@/server/lib/s3/asset";
 import type { AppRouter } from "@/server/routers/_app";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsS3Bucket } from "@/util/env";

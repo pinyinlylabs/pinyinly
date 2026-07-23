@@ -1,13 +1,15 @@
 import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
 import { listReferencedAssetIdsForUser } from "@/server/lib/assetSync";
-import { withDrizzle } from "@/server/lib/db";
 import {
   createPresignedReadUrl,
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
   verifyObjectExists,
-} from "@/server/lib/s3/assets";
-import * as schema from "@/server/pgSchema";
+} from "@/server/lib/s3/asset";
+import {
+  assetUploadRequestedEvent,
+  inngest,
+} from "@/server/lib/inngest/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { z } from "zod";
@@ -45,6 +47,7 @@ export const assetRouter = router({
         .object({
           uploadUrl: z.string(),
           assetKey: z.string(),
+          expiresAt: z.number(),
         })
         .strict(),
     )
@@ -52,31 +55,19 @@ export const assetRouter = router({
       const { userId } = opts.ctx.session;
       const { assetId, contentType, contentLength } = opts.input;
 
-      const now = new Date();
-      await withDrizzle((db) =>
-        db
-          .insert(schema.assetPendingUpload)
-          .values({
-            userId,
-            assetId,
-            createdAt: now,
-          })
-          .onConflictDoUpdate({
-            target: [
-              schema.assetPendingUpload.userId,
-              schema.assetPendingUpload.assetId,
-            ],
-            set: {
-              createdAt: now,
-            },
-          }),
-      );
-
       const result = await createPresignedUploadUrl({
         assetId,
         contentType,
         contentLength,
       });
+
+      await inngest.send(
+        assetUploadRequestedEvent.create({
+          userId,
+          assetId,
+          expiresAt: result.expiresAt,
+        }),
+      );
 
       return result;
     }),

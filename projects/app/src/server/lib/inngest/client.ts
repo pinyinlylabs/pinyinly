@@ -39,8 +39,15 @@ export const inngest = new Inngest({
   },
 });
 
-export const serverSyncAssetSyncUploadEvent = eventType(
-  `serverSync/asset-sync-upload`,
+export const serverSyncUploadAssetEvent = eventType(`serverSync/upload-asset`, {
+  schema: z.object({
+    remoteSyncId: z.string(),
+    assetId: assetIdSchema,
+  }),
+});
+
+export const serverSyncDownloadAssetEvent = eventType(
+  `serverSync/download-asset`,
   {
     schema: z.object({
       remoteSyncId: z.string(),
@@ -49,21 +56,28 @@ export const serverSyncAssetSyncUploadEvent = eventType(
   },
 );
 
-export const serverSyncAssetSyncDownloadEvent = eventType(
-  `serverSync/asset-sync-download`,
-  {
-    schema: z.object({
-      remoteSyncId: z.string(),
-      assetId: assetIdSchema,
-    }),
-  },
-);
+export const assetUploadRequestedEvent = eventType(`asset/upload.requested`, {
+  schema: z.object({
+    userId: z.string(),
+    assetId: assetIdSchema,
+    expiresAt: z.number(),
+  }),
+});
+
+export const assetUploadSucessEvent = eventType(`asset/upload.success`, {
+  schema: z.object({
+    userId: z.string(),
+    assetId: assetIdSchema,
+    contentType: z.string().optional(),
+    contentLength: z.number().optional(),
+  }),
+});
 
 export const locationPopulateLocationSetIdentityImageEvent = eventType(
   `location/populate-location-set-identity-image`,
   {
     schema: z.object({
-      userId: z.string().min(1),
+      userId: z.string(),
       locationId: placeIdSchema,
       role: locationSetRoleSchema,
     }),
@@ -74,7 +88,7 @@ export const locationPopulateLocationSetNameEvent = eventType(
   `location/populate-location-set-name`,
   {
     schema: z.object({
-      userId: z.string().min(1),
+      userId: z.string(),
       locationId: placeIdSchema,
       role: locationSetRoleSchema,
     }),
@@ -85,7 +99,7 @@ export const locationPopulateLocationSpecEvent = eventType(
   `location/populate-location-spec`,
   {
     schema: z.object({
-      userId: z.string().min(1),
+      userId: z.string(),
       locationId: placeIdSchema,
     }),
   },
@@ -95,7 +109,7 @@ export const locationPopulateLocationEvent = eventType(
   `location/populate-location`,
   {
     schema: z.object({
-      userId: z.string().min(1),
+      userId: z.string(),
       locationId: placeIdSchema,
     }),
   },

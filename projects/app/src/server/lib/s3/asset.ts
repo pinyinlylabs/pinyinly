@@ -27,6 +27,11 @@ export interface PresignedUploadUrlResult {
    * The key (path) where the asset will be stored in R2.
    */
   assetKey: string;
+  /**
+   * When the presigned URL expires (in seconds since epoch).
+   * The client must complete the upload before this time.
+   */
+  expiresAt: number;
 }
 
 /**
@@ -64,7 +69,11 @@ export async function createPresignedUploadUrl(opts: {
     expiresIn: PRESIGNED_URL_EXPIRY_SECONDS,
   });
 
-  return { uploadUrl, assetKey };
+  return {
+    uploadUrl,
+    assetKey,
+    expiresAt: Date.now() + PRESIGNED_URL_EXPIRY_SECONDS * 1000,
+  };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { functions as assetFunctions } from "./assets";
+import { functions as assetFunctions } from "./asset";
 import { functions as debugFunctions } from "./debug";
 import { functions as geminiFunctions } from "./gemini";
 import { functions as healthCheckFunctions } from "./healthCheck";

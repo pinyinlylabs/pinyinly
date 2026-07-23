@@ -12,9 +12,11 @@ This document reflects the current asset upload implementation in `projects/app`
 2. Client writes optimistic pending state via Replicache mutator `initAsset`.
 3. Client requests a presigned upload URL via `trpc.asset.requestUploadUrl`.
 4. Client uploads directly to object storage with HTTP `PUT`.
-5. Client marks upload complete via Replicache mutator `confirmAssetUpload`.
-6. Client verifies object existence via `trpc.asset.confirmUpload`.
-7. If verification fails, client marks failure via `failAssetUpload`.
+5. Backend emits `asset/pending-upload-requested` when the upload URL is created.
+6. Backend watches storage for the uploaded object and emits `asset/uploaded` once it appears.
+
+This backend lifecycle is used for remote asset sync and pending-upload cleanup. The client upload
+flow remains optimistic and storage-backed.
 
 ## Storage and IDs
 
@@ -39,7 +41,9 @@ This document reflects the current asset upload implementation in `projects/app`
 - Client upload hook: `src/client/ui/hooks/useImageUploader.ts`.
 - Asset rendering: `src/client/ui/AssetImage.tsx`.
 - tRPC router: `src/server/routers/asset.ts`.
-- S3/R2 helpers: `src/server/lib/s3/assets.ts` and `src/server/lib/s3/client.ts`.
+- S3/R2 helpers: `src/server/lib/s3/asset.ts` and `src/server/lib/s3/client.ts`.
+- Inngest asset lifecycle: `src/server/lib/inngest/assets.ts`.
+- Inngest server sync consumer: `src/server/lib/inngest/serverSync.ts`.
 - Replicache schema entity/mutators: `src/data/rizzleSchema.ts` (`v11+`, current `v13`).
 - Replicache server impl (current): `src/server/lib/replicache/v12.ts` (wired for schema `v13`).
 - DB table: `src/server/pgSchema.ts` (`asset` table).
@@ -47,12 +51,19 @@ This document reflects the current asset upload implementation in `projects/app`
 
 ## tRPC endpoints
 
-- `asset.requestUploadUrl`: returns `{ uploadUrl, assetKey }`.
-- `asset.confirmUpload`: verifies storage object, returns
-  `{ success, contentType?, contentLength? }`.
+- `asset.requestUploadUrl`: returns `{ uploadUrl, assetKey }` and enqueues the backend upload
+  lifecycle watcher.
 - `asset.getDownloadUrl`: presigned read URL for existing object.
 - `asset.getUploadUrl`: presigned upload URL for remote sync.
 - `asset.listAssetBucketUserFiles`: returns user-referenced asset IDs.
+
+## Backend lifecycle
+
+- `asset/pending-upload-requested`: starts the storage polling flow after a user asks for an upload
+  URL.
+- `asset/uploaded`: emitted once the uploaded object is visible in storage.
+- `serverSync/asset-sync-upload`: emitted for each remote sync rule that should receive the uploaded
+  asset.
 
 ## Replicache entity and mutators
 

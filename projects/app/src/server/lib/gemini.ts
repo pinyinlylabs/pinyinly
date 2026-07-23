@@ -2,7 +2,7 @@ import { assetIdSchema } from "@/data/model";
 import type { AssetId } from "@/data/model";
 import z from "zod";
 import { createAssetFromBuffer } from "@/server/lib/createAsset";
-import { fetchAssetBase64 } from "@/server/lib/s3/assets";
+import { fetchAssetBase64 } from "@/server/lib/s3/asset";
 import { geminiImageApiKey } from "@/util/env";
 import { memoize0 } from "@pinyinly/lib/collections";
 import type { Part } from "@google/genai";

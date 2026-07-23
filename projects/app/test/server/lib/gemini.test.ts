@@ -5,7 +5,7 @@ import {
   requestGeminiImage,
   requestGeminiImageAsAsset,
 } from "#server/lib/gemini.ts";
-import * as assets from "#server/lib/s3/assets.ts";
+import * as assets from "#server/lib/s3/asset.ts";
 import * as env from "#util/env.ts";
 import * as genai from "@google/genai";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -73,7 +73,7 @@ const { mockGenerateContentStream } = vi.hoisted(() => {
 
 vi.mock(import(`@google/genai`));
 vi.mock(import(`#server/lib/createAsset.ts`));
-vi.mock(import(`#server/lib/s3/assets.ts`));
+vi.mock(import(`#server/lib/s3/asset.ts`));
 
 const mockResponseBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
 const mockResponseMimeType = `image/png`;

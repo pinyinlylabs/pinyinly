@@ -16,7 +16,9 @@ import { inngest } from "./client";
 const dataIntegrityDictionary = inngest.createFunction(
   {
     id: `dataIntegrityDictionary`,
-    triggers: [{ cron: `30 * * * *` }],
+    triggers: [
+      // { cron: `30 * * * *` }
+    ],
   },
   async ({ step, logger }) => {
     const dict = await loadDictionary();
@@ -81,7 +83,9 @@ const replicacheGarbageCollection = inngest.createFunction(
     id: `replicacheGarbageCollection`,
     singleton: { mode: `skip` },
     // Run once every hour
-    triggers: [{ cron: `0 * * * *` }],
+    triggers: [
+      // { cron: `0 * * * *` }
+    ],
   },
   async ({ step }) => {
     let deletedRowCount = 0;
@@ -117,7 +121,9 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
     id: `pgFullVacuumGarbageCollection`,
     singleton: { mode: `skip` },
     // Run once every day
-    triggers: [{ cron: `0 0 * * *` }],
+    triggers: [
+      // { cron: `0 0 * * *` }
+    ],
   },
   async ({ step }) => {
     type BloatRow = {
@@ -216,7 +222,9 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
 const migrateHanziWords = inngest.createFunction(
   {
     id: `migrateHanziWords`,
-    triggers: [{ cron: `30 * * * *` }],
+    triggers: [
+      // { cron: `30 * * * *` }
+    ],
   },
   async ({ step }) => {
     const hanziWordMigrations = await loadHanziWordMigrations();

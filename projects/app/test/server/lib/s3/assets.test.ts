@@ -4,7 +4,7 @@ import {
   createPresignedUploadUrl,
   fetchAssetBase64,
   MAX_ASSET_SIZE_BYTES,
-} from "#server/lib/s3/assets.ts";
+} from "#server/lib/s3/asset.ts";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mockS3Send = vi.fn();

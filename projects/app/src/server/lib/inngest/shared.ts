@@ -36,10 +36,7 @@ export const checkIsOffline = memoizeGlobalThis(`checkIsOffline`, () =>
 export async function onlineOrRetryLater() {
   const isOffline = await checkIsOffline();
   if (isOffline) {
-    throw new RetryAfterError(
-      `No internet connection`,
-      10 * 60 * 1000 /* retry after 10 minutes */,
-    );
+    throw new RetryAfterError(`No internet connection`, `10m`);
   }
 }
 

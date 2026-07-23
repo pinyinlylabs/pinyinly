@@ -22,9 +22,10 @@ import {
 import { retryMutation as retryMutationV12 } from "@/server/lib/replicache/v12";
 import { retryMutation as retryMutationV14 } from "@/server/lib/replicache/v14";
 import {
-  serverSyncAssetSyncUploadEvent,
+  assetUploadSucessEvent,
+  serverSyncUploadAssetEvent,
   inngest,
-  serverSyncAssetSyncDownloadEvent,
+  serverSyncDownloadAssetEvent,
 } from "./client";
 import { onlineOrRetryLater, createTrpcClient } from "./shared";
 
@@ -32,8 +33,11 @@ export const syncRemotePush = inngest.createFunction(
   {
     id: `serverSync/syncRemotePush`,
     singleton: { mode: `skip` },
-    // Sync every 5 minutes
-    triggers: [{ cron: `* * * * *` }, invoke(z.object({}))],
+    triggers: [
+      // Sync every 5 minutes
+      // { cron: `* * * * *` },
+      invoke(z.object({})),
+    ],
   },
   async ({ step, logger }) => {
     await onlineOrRetryLater();
@@ -159,8 +163,11 @@ export const syncRemotePull = inngest.createFunction(
   {
     id: `serverSync/syncRemotePull`,
     singleton: { mode: `skip` },
-    // Sync every 5 minutes
-    triggers: [{ cron: `*/5 * * * *` }, invoke(z.object({}))],
+    triggers: [
+      // Sync every 5 minutes
+      // { cron: `*/5 * * * *` },
+      invoke(z.object({})),
+    ],
   },
   async ({ step, logger }) => {
     await onlineOrRetryLater();
@@ -476,8 +483,11 @@ const syncAssetBlobs = inngest.createFunction(
   {
     id: `serverSync/syncAssetBlobs`,
     singleton: { mode: `skip` },
-    // Sync every 5 minutes
-    triggers: [{ cron: `*/5 * * * *` }],
+    triggers: [
+      // Sync every 5 minutes
+      // { cron: `*/5 * * * *` },
+      invoke(z.object({})),
+    ],
   },
   async ({ step, logger }) => {
     await onlineOrRetryLater();
@@ -546,26 +556,29 @@ const syncAssetBlobs = inngest.createFunction(
         }
 
         // Fan out upload jobs
-        for (const assetId of toUpload) {
-          await step.sendEvent(
-            `emit-upload-${assetId}`,
-            serverSyncAssetSyncUploadEvent.create({
-              remoteSyncId: remoteSync.id,
-              assetId,
-            }),
-          );
+        for (const _assetId of toUpload) {
+          // await step.sendEvent(
+          //   `emit-upload-${assetId}`,
+          //   serverSyncAssetSyncUploadEvent.create({
+          //     remoteSyncId: remoteSync.id,
+          //     assetId,
+          //   }),
+          // );
         }
 
         // Fan out download jobs
-        for (const assetId of toDownload) {
-          await step.sendEvent(
-            `emit-download-${assetId}`,
-            serverSyncAssetSyncDownloadEvent.create({
-              remoteSyncId: remoteSync.id,
-              assetId,
-            }),
-          );
+        for (const _assetId of toDownload) {
+          // await step.sendEvent(
+          //   `emit-download-${assetId}`,
+          //   serverSyncAssetSyncDownloadEvent.create({
+          //     remoteSyncId: remoteSync.id,
+          //     assetId,
+          //   }),
+          // );
         }
+        logger.info(
+          `calculated ${toDownload.length} assets to download and ${toUpload.length} assets to upload`,
+        );
       } catch (error) {
         logger.error(
           { err: error, remoteSyncId: remoteSync.id },
@@ -576,9 +589,54 @@ const syncAssetBlobs = inngest.createFunction(
   },
 );
 
-const syncAssetBlobUpload = inngest.createFunction(
+const syncUploadedAssetToRemotes = inngest.createFunction(
   {
-    id: `serverSync/syncAssetBlobUpload`,
+    id: `serverSync/syncUploadedAssetToRemotes`,
+    singleton: {
+      key: `event.data.assetId`,
+      mode: `skip`,
+    },
+    triggers: [assetUploadSucessEvent],
+  },
+  async ({ event, step, logger }) => {
+    await onlineOrRetryLater();
+
+    const { userId, assetId } = event.data;
+
+    const remoteSyncs = await step.run(`findSyncRulesForUser`, async () =>
+      withDrizzle((db) =>
+        db.query.remoteSync.findMany({
+          where: eq(s.remoteSync.userId, userId),
+        }),
+      ),
+    );
+
+    if (remoteSyncs.length === 0) {
+      logger.info(
+        {
+          assetId,
+          userId,
+        },
+        `No remote sync rules found for uploaded asset`,
+      );
+      return;
+    }
+
+    for (const remoteSync of remoteSyncs) {
+      await step.sendEvent(
+        `emit-upload-${remoteSync.id}`,
+        serverSyncUploadAssetEvent.create({
+          remoteSyncId: remoteSync.id,
+          assetId,
+        }),
+      );
+    }
+  },
+);
+
+const uploadAsset = inngest.createFunction(
+  {
+    id: `serverSync/upload-asset`,
     singleton: {
       key: `event.data.remoteSyncId + "-" + event.data.assetId`,
       mode: `skip`,
@@ -587,7 +645,7 @@ const syncAssetBlobUpload = inngest.createFunction(
       limit: 5,
       period: `10s`,
     },
-    triggers: [serverSyncAssetSyncUploadEvent],
+    triggers: [serverSyncUploadAssetEvent],
   },
   async ({ event, step, logger }) => {
     await onlineOrRetryLater();
@@ -611,7 +669,7 @@ const syncAssetBlobUpload = inngest.createFunction(
     }
 
     try {
-      await step.run(`uploadAsset-${assetId}`, async () => {
+      await step.run(`upload-asset`, async () => {
         await uploadAssetToRemote(
           createTrpcClient(remoteSync.remoteUrl, remoteSync.remoteSessionId),
           assetId,
@@ -629,9 +687,9 @@ const syncAssetBlobUpload = inngest.createFunction(
   },
 );
 
-const syncAssetBlobDownload = inngest.createFunction(
+const downloadAsset = inngest.createFunction(
   {
-    id: `serverSync/syncAssetBlobDownload`,
+    id: `serverSync/download-asset`,
     singleton: {
       key: `event.data.remoteSyncId + "-" + event.data.assetId`,
       mode: `skip`,
@@ -640,7 +698,7 @@ const syncAssetBlobDownload = inngest.createFunction(
       limit: 5,
       period: `10s`,
     },
-    triggers: [serverSyncAssetSyncDownloadEvent],
+    triggers: [serverSyncDownloadAssetEvent],
   },
   async ({ event, step, logger }) => {
     await onlineOrRetryLater();
@@ -687,6 +745,7 @@ export const functions = [
   syncRemotePull,
   retryFailedMutations,
   syncAssetBlobs,
-  syncAssetBlobUpload,
-  syncAssetBlobDownload,
+  syncUploadedAssetToRemotes,
+  uploadAsset,
+  downloadAsset,
 ];
