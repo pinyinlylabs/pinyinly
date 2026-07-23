@@ -5,13 +5,13 @@ import {
 } from "#server/lib/ai.js";
 import {
   buildLocationSetDescriptionPrompt,
-  buildLocationSpecificationPrompt,
-  locationSpecificationSchema,
+  buildLocationSpecPrompt,
+  locationSpecSchema,
 } from "#util/prompts/location.ts";
 import type {
   LocationEvaluationType,
-  LocationSpecification,
-  LocationSpecificationRefinementResultType,
+  LocationSpec,
+  LocationSpecRefinementResultType,
 } from "#util/prompts/location.ts";
 import { InngestTestEngine } from "@inngest/test";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -28,7 +28,7 @@ vi.mock(`#server/lib/ai.js`, async () => {
   };
 });
 
-function makeLocationSpecification(location: string): LocationSpecification {
+function makeLocationSpec(location: string): LocationSpec {
   return {
     location,
     recognitionHooks: [`mast`, `bow`, `anchor`],
@@ -36,30 +36,35 @@ function makeLocationSpecification(location: string): LocationSpecification {
     sets: {
       arrival: {
         name: `dock`,
+        props: [],
         designRules: [`Show the gangplank and mooring ropes.`],
         canonicalFraming: `View from the dock looking toward the deck entrance.`,
         avoidFraming: [`Do not frame it as a distant open-sea panorama.`],
       },
       heart: {
         name: `captain's cabin`,
+        props: [`Desk with a map on it`],
         designRules: [`Show the richest interior detail.`],
         canonicalFraming: `View from the doorway looking toward the captain's chair and desk.`,
         avoidFraming: [`Do not reduce it to a plain hallway.`],
       },
       below: {
         name: `cargo hold`,
+        props: [`Barrels`],
         designRules: [`Show stacked crates and a low ceiling.`],
         canonicalFraming: `View from knee height looking into the lower hold.`,
         avoidFraming: [`Do not frame it like the main deck.`],
       },
       ascent: {
         name: `stairs`,
+        props: [`Handrail`],
         designRules: [`Show the climb upward along the mast.`],
         canonicalFraming: `View from below looking up the rigging and steps.`,
         avoidFraming: [`Do not frame it as a flat side path.`],
       },
       summit: {
         name: `crow's nest`,
+        props: [`Binoculars`],
         designRules: [`Show the tiny lookout at the top of the mast.`],
         canonicalFraming: `View from the deck looking up to the lookout platform.`,
         avoidFraming: [`Do not frame it as the same as the cabin interior.`],
@@ -100,33 +105,32 @@ function promptKind(content: string): `generator` | `evaluator` | `refiner` {
   throw new Error(`Unexpected prompt kind`);
 }
 
-describe(`locationSpecificationSchema`, () => {
+describe(`locationSpecSchema`, () => {
   test(`accepts exactly five keyed sets`, () => {
-    const spec = makeLocationSpecification(`Pirate ship`);
+    const spec = makeLocationSpec(`Pirate ship`);
 
-    expect(locationSpecificationSchema.parse(spec)).toEqual(spec);
+    expect(locationSpecSchema.parse(spec)).toEqual(spec);
   });
 
   test(`rejects unexpected fields inside sets`, () => {
     const spec = {
-      ...makeLocationSpecification(`Pirate ship`),
+      ...makeLocationSpec(`Pirate ship`),
       sets: {
-        ...makeLocationSpecification(`Pirate ship`).sets,
+        ...makeLocationSpec(`Pirate ship`).sets,
         arrival: {
-          ...makeLocationSpecification(`Pirate ship`).sets.arrival,
+          ...makeLocationSpec(`Pirate ship`).sets.arrival,
           role: `arrival`,
         },
       },
     };
 
-    expect(() => locationSpecificationSchema.parse(spec)).toThrow(
+    expect(() => locationSpecSchema.parse(spec)).toThrow(
       /unrecognized_key|unrecognized_keys/u,
     );
   });
 
   test(`json schema snapshot`, () => {
-    expect(zodResponseFormatJson(locationSpecificationSchema))
-      .toMatchInlineSnapshot(`
+    expect(zodResponseFormatJson(locationSpecSchema)).toMatchInlineSnapshot(`
       {
         "name": "result_shape",
         "schema": {
@@ -390,9 +394,9 @@ describe(
   },
 );
 
-describe(`buildLocationSpecificationPrompt`, () => {
+describe(`buildLocationSpecPrompt`, () => {
   test(`keeps the input dynamic and avoids hard-coded location examples`, () => {
-    const prompt = buildLocationSpecificationPrompt({
+    const prompt = buildLocationSpecPrompt({
       location: `Pirate ship`,
     });
     const system = prompt.messages.find(
@@ -420,7 +424,7 @@ describe(`generateLocationSpec`, () => {
   async function executeRefinement(options: {
     location: string;
     maxAttempts?: number;
-  }): Promise<LocationSpecificationRefinementResultType> {
+  }): Promise<LocationSpecRefinementResultType> {
     const testEngine = new InngestTestEngine({
       function: generateLocationSpec,
     });
@@ -446,7 +450,7 @@ describe(`generateLocationSpec`, () => {
         : new Error(`Refinement execution failed`);
     }
 
-    return result as LocationSpecificationRefinementResultType;
+    return result as LocationSpecRefinementResultType;
   }
 
   beforeEach(() => {
@@ -454,7 +458,7 @@ describe(`generateLocationSpec`, () => {
   });
 
   test(`returns immediately when evaluation passes`, async () => {
-    const generated = makeLocationSpecification(`Pirate ship`);
+    const generated = makeLocationSpec(`Pirate ship`);
 
     requestMock.mockImplementation(async (prompt) => {
       const kind = promptKind(prompt.messages[0]?.content ?? ``);
@@ -478,14 +482,14 @@ describe(`generateLocationSpec`, () => {
     expect(result.succeeded).toBe(true);
     expect(result.stopReason).toBe(`no_major_criticisms`);
     expect(result.attempts).toHaveLength(1);
-    expect(result.finalLocationSpecification).toEqual(generated);
+    expect(result.finalLocationSpec).toEqual(generated);
     expect(result.finalEvaluation.passed).toBe(true);
     expect(requestMock).toHaveBeenCalledTimes(2);
   });
 
   test(`invokes the refiner when evaluation fails`, async () => {
-    const generated = makeLocationSpecification(`Pirate ship`);
-    const refined = makeLocationSpecification(`Pirate ship`);
+    const generated = makeLocationSpec(`Pirate ship`);
+    const refined = makeLocationSpec(`Pirate ship`);
     refined.sets.heart = {
       ...refined.sets.heart,
       name: `treasure room`,
@@ -527,14 +531,14 @@ describe(`generateLocationSpec`, () => {
 
     expect(result.succeeded).toBe(true);
     expect(result.attempts).toHaveLength(2);
-    expect(result.finalLocationSpecification).toEqual(refined);
+    expect(result.finalLocationSpec).toEqual(refined);
     expect(result.finalEvaluation.passed).toBe(true);
     expect(requestMock).toHaveBeenCalledTimes(4);
   });
 
   test(`regenerates from scratch on a fundamental location-wide failure`, async () => {
-    const first = makeLocationSpecification(`Pirate ship`);
-    const second = makeLocationSpecification(`Pirate ship`);
+    const first = makeLocationSpec(`Pirate ship`);
+    const second = makeLocationSpec(`Pirate ship`);
     second.recognitionHooks[0] = `broad sail`;
 
     let callCount = 0;
@@ -585,18 +589,18 @@ describe(`generateLocationSpec`, () => {
 
     expect(result.succeeded).toBe(true);
     expect(result.attempts).toHaveLength(2);
-    expect(result.finalLocationSpecification).toEqual(second);
+    expect(result.finalLocationSpec).toEqual(second);
     expect(requestMock).toHaveBeenCalledTimes(4);
   });
 
   test(`returns the highest-scoring candidate when none pass`, async () => {
-    const first = makeLocationSpecification(`Pirate ship`);
-    const second = makeLocationSpecification(`Pirate ship`);
+    const first = makeLocationSpec(`Pirate ship`);
+    const second = makeLocationSpec(`Pirate ship`);
     second.sets.heart = {
       ...second.sets.heart,
       name: `treasure room`,
     };
-    const third = makeLocationSpecification(`Pirate ship`);
+    const third = makeLocationSpec(`Pirate ship`);
     third.sets.heart = {
       ...third.sets.heart,
       name: `flag deck`,
@@ -669,7 +673,7 @@ describe(`generateLocationSpec`, () => {
 
     expect(result.succeeded).toBe(false);
     expect(result.attempts).toHaveLength(3);
-    expect(result.finalLocationSpecification).toEqual(second);
+    expect(result.finalLocationSpec).toEqual(second);
     expect(result.finalEvaluation.score).toBe(0.7);
     expect(requestMock).toHaveBeenCalledTimes(6);
   });

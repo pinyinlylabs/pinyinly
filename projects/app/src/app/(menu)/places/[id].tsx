@@ -15,7 +15,7 @@ import {
   pinyinSoundLocationDescriptionSetting,
   pinyinSoundLocationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
-  pinyinSoundLocationSpecificationSetting,
+  pinyinSoundLocationSpecSetting,
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
@@ -129,7 +129,7 @@ export default function PlaceIdPage() {
       >
         <View className="gap-3">
           <InlineEditableSettingText
-            setting={pinyinSoundLocationSpecificationSetting}
+            setting={pinyinSoundLocationSpecSetting}
             settingKey={{ placeId }}
             placeholder='{"location": "Aircraft hangar"}'
             multiline

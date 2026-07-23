@@ -1,11 +1,11 @@
 import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
-import { buildLocationSpecificationPrompt } from "#util/prompts/location.ts";
+import { buildLocationSpecPrompt } from "#util/prompts/location.ts";
 import { generateLocationSpec } from "#server/lib/inngest/location.ts";
 import type {
   LocationPromptInputType,
-  LocationSpecificationRefinementResultType,
-  LocationSpecification,
+  LocationSpecRefinementResultType,
+  LocationSpec,
 } from "#util/prompts/location.ts";
 import { InngestTestEngine } from "@inngest/test";
 import { createResponsePromptHarness } from "./eval.ts";
@@ -14,7 +14,7 @@ function normalized(value: string): string {
   return value.trim().toLocaleLowerCase();
 }
 
-function isValidLocationSpecification(spec: LocationSpecification): boolean {
+function isValidLocationSpec(spec: LocationSpec): boolean {
   const sets = spec.sets;
 
   return (
@@ -28,14 +28,14 @@ function isValidLocationSpecification(spec: LocationSpecification): boolean {
   );
 }
 
-const LocationSpecificationJudge = createJudge(
-  `LocationSpecificationJudge`,
+const LocationSpecJudge = createJudge(
+  `LocationSpecJudge`,
   async ({
     input,
     output,
-  }: JudgeContext<LocationPromptInputType, LocationSpecification>) => {
+  }: JudgeContext<LocationPromptInputType, LocationSpec>) => {
     const score =
-      isValidLocationSpecification(output) &&
+      isValidLocationSpec(output) &&
       normalized(output.location) === normalized(input.location)
         ? 1
         : 0;
@@ -58,10 +58,10 @@ const LocationPipelineJudge = createJudge(
     output,
   }: JudgeContext<
     LocationPromptInputType,
-    LocationSpecificationRefinementResultType
+    LocationSpecRefinementResultType
   >) => {
-    const final = output.finalLocationSpecification;
-    const structureScore = isValidLocationSpecification(final) ? 1 : 0;
+    const final = output.finalLocationSpec;
+    const structureScore = isValidLocationSpec(final) ? 1 : 0;
     const budgetScore = output.attempts.length <= 3 ? 1 : 0;
     const locationScore = normalized(final.location).length > 0 ? 1 : 0;
 
@@ -85,10 +85,10 @@ const promptCases: LocationPromptInputType[] = [
 ];
 
 describeEval(
-  `buildLocationSpecificationPrompt eval`,
+  `buildLocationSpecPrompt eval`,
   {
-    harness: createResponsePromptHarness(buildLocationSpecificationPrompt),
-    judges: [LocationSpecificationJudge],
+    harness: createResponsePromptHarness(buildLocationSpecPrompt),
+    judges: [LocationSpecJudge],
   },
   (it) => {
     it.for(promptCases)(`$location`, async (spec, { run }) => {
@@ -98,13 +98,13 @@ describeEval(
 );
 
 describeEval(
-  `runLocationSpecificationRefinementPipeline eval`,
+  `runLocationSpecRefinementPipeline eval`,
   {
     harness: createHarness<
       LocationPromptInputType,
-      LocationSpecificationRefinementResultType
+      LocationSpecRefinementResultType
     >({
-      name: `locationSpecificationRefinementPipelineHarness`,
+      name: `locationSpecRefinementPipelineHarness`,
       run: async ({ input, signal }) => {
         const testEngine = new InngestTestEngine({
           function: generateLocationSpec,
@@ -125,7 +125,7 @@ describeEval(
         signal?.throwIfAborted();
 
         return {
-          output: result as LocationSpecificationRefinementResultType,
+          output: result as LocationSpecRefinementResultType,
           messages: [],
         };
       },

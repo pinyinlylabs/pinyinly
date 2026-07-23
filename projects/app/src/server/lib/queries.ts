@@ -9,7 +9,7 @@ import { SrsKind } from "@/data/model";
 import {
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetIdentityImageSettingKey,
-  pinyinSoundLocationSpecificationSetting,
+  pinyinSoundLocationSpecSetting,
   userNameSetting,
 } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
@@ -136,7 +136,7 @@ export async function getLocationSpec(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        pinyinSoundLocationSpecificationSetting.entity.marshalKey({
+        pinyinSoundLocationSpecSetting.entity.marshalKey({
           placeId: locationId,
         }),
       ),
@@ -147,7 +147,7 @@ export async function getLocationSpec(
     return null;
   }
 
-  const decoded = pinyinSoundLocationSpecificationSetting.decode(
+  const decoded = pinyinSoundLocationSpecSetting.decode(
     { placeId: locationId },
     setting.value,
   );

@@ -22,6 +22,7 @@ const exampleInput: LocationSetIdentityImagePromptInputType = {
       sets: {
         arrival: {
           name: `Front Gate`,
+          props: [`Wrought-iron gate`],
           designRules: [
             `A tall wrought-iron gate stands between dark stone posts or outer walls.`,
           ],
@@ -32,6 +33,7 @@ const exampleInput: LocationSetIdentityImagePromptInputType = {
         },
         heart: {
           name: `Great Hall`,
+          props: [`Long banquet table with candelabras`],
           designRules: [
             `A vast gothic hall stretches upward with pointed arches, high windows, and a shadowed ceiling.`,
           ],
@@ -42,6 +44,7 @@ const exampleInput: LocationSetIdentityImagePromptInputType = {
         },
         below: {
           name: `Dungeon`,
+          props: [`Iron bars`, `Chains`, `Stone walls`],
           designRules: [
             `Low stone chambers and narrow corridors sit beneath heavy arches or vaulted ceilings.`,
           ],
@@ -52,6 +55,7 @@ const exampleInput: LocationSetIdentityImagePromptInputType = {
         },
         ascent: {
           name: `Spiral Staircase`,
+          props: [`Stone steps`, `Wrought-iron railing`],
           designRules: [
             `A narrow stone spiral staircase winds tightly upward inside a tower.`,
           ],
@@ -60,6 +64,7 @@ const exampleInput: LocationSetIdentityImagePromptInputType = {
         },
         summit: {
           name: `Tower Top`,
+          props: [`Battlements`, `Flagpole`],
           designRules: [
             `The highest point is an open or partly ruined tower platform ringed by battlements.`,
           ],

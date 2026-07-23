@@ -30,12 +30,13 @@ export type LocationSetRole = z.infer<typeof locationSetRoleSchema>;
 
 export type LocationSet = {
   name: string;
+  props: string[];
   designRules: string[];
   canonicalFraming: string;
   avoidFraming: string[];
 };
 
-export type LocationSpecification = {
+export type LocationSpec = {
   location: string;
   recognitionHooks: string[];
   designRules: string[];
@@ -48,22 +49,21 @@ export type LocationSpecification = {
   };
 };
 
-export type LocationSpec = LocationSpecification;
-
 const locationSetSchema = z
   .object({
-    name: z.string().min(1),
-    designRules: z.array(z.string().min(1)),
-    canonicalFraming: z.string().min(1),
-    avoidFraming: z.array(z.string().min(1)),
+    name: z.string(),
+    props: z.array(z.string()),
+    designRules: z.array(z.string()),
+    canonicalFraming: z.string(),
+    avoidFraming: z.array(z.string()),
   })
   .strict();
 
-const locationSpecificationBaseSchema = z
+const locationSpecBaseSchema = z
   .object({
-    location: z.string().min(1),
-    recognitionHooks: z.array(z.string().min(1)),
-    designRules: z.array(z.string().min(1)),
+    location: z.string(),
+    recognitionHooks: z.array(z.string()),
+    designRules: z.array(z.string()),
     sets: z
       .object({
         arrival: locationSetSchema,
@@ -76,8 +76,8 @@ const locationSpecificationBaseSchema = z
   })
   .strict();
 
-function validateLocationSpecificationShape(
-  value: z.infer<typeof locationSpecificationBaseSchema>,
+function validateLocationSpecShape(
+  value: z.infer<typeof locationSpecBaseSchema>,
   ctx: z.RefinementCtx,
 ): void {
   if (value.recognitionHooks.length < 3 || value.recognitionHooks.length > 5) {
@@ -109,16 +109,11 @@ function validateLocationSpecificationShape(
   }
 }
 
-export const locationSpecificationSchema =
-  locationSpecificationBaseSchema.superRefine(
-    validateLocationSpecificationShape,
-  );
+export const locationSpecSchema = locationSpecBaseSchema.superRefine(
+  validateLocationSpecShape,
+);
 
-export const locationSpecSchema = locationSpecificationSchema;
-
-export type LocationSpecificationSchemaType = z.infer<
-  typeof locationSpecificationSchema
->;
+export type LocationSpecSchemaType = z.infer<typeof locationSpecSchema>;
 
 export const locationCriticismCodeSchema = z.enum([
   `NON_CANONICAL`,
@@ -175,58 +170,40 @@ export const locationEvaluationSchema = z
 
 export type LocationEvaluationType = z.infer<typeof locationEvaluationSchema>;
 
-export const locationSpecificationRefinementAttemptSchema = z
+export const locationSpecRefinementAttemptSchema = z
   .object({
     attempt: z.number().int().min(1),
-    locationSpecification: locationSpecificationSchema,
+    locationSpec: locationSpecSchema,
     evaluation: locationEvaluationSchema,
   })
   .strict();
 
-export type LocationSpecificationRefinementAttemptType = z.infer<
-  typeof locationSpecificationRefinementAttemptSchema
+export type LocationSpecRefinementAttemptType = z.infer<
+  typeof locationSpecRefinementAttemptSchema
 >;
 
-export const locationSpecRefinementAttemptSchema =
-  locationSpecificationRefinementAttemptSchema;
-
-export type LocationSpecRefinementAttemptType =
-  LocationSpecificationRefinementAttemptType;
-
-export const locationSpecificationRefinementStopReasonSchema = z.enum([
+export const locationSpecRefinementStopReasonSchema = z.enum([
   `no_major_criticisms`,
   `max_attempts_reached`,
 ]);
 
-export type LocationSpecificationRefinementStopReasonType = z.infer<
-  typeof locationSpecificationRefinementStopReasonSchema
+export type LocationSpecRefinementStopReasonType = z.infer<
+  typeof locationSpecRefinementStopReasonSchema
 >;
 
-export const locationSpecRefinementStopReasonSchema =
-  locationSpecificationRefinementStopReasonSchema;
-
-export type LocationSpecRefinementStopReasonType =
-  LocationSpecificationRefinementStopReasonType;
-
-export const locationSpecificationRefinementResultSchema = z
+export const locationSpecRefinementResultSchema = z
   .object({
-    attempts: z.array(locationSpecificationRefinementAttemptSchema),
+    attempts: z.array(locationSpecRefinementAttemptSchema),
     succeeded: z.boolean(),
-    stopReason: locationSpecificationRefinementStopReasonSchema,
-    finalLocationSpecification: locationSpecificationSchema,
+    stopReason: locationSpecRefinementStopReasonSchema,
+    finalLocationSpec: locationSpecSchema,
     finalEvaluation: locationEvaluationSchema,
   })
   .strict();
 
-export type LocationSpecificationRefinementResultType = z.infer<
-  typeof locationSpecificationRefinementResultSchema
+export type LocationSpecRefinementResultType = z.infer<
+  typeof locationSpecRefinementResultSchema
 >;
-
-export const locationSpecRefinementResultSchema =
-  locationSpecificationRefinementResultSchema;
-
-export type LocationSpecRefinementResultType =
-  LocationSpecificationRefinementResultType;
 
 function buildLocationPromptData(entry: LocationPromptInputType) {
   return { location: entry.location };
@@ -311,9 +288,9 @@ const locationSetDescriptionOutputSchema = z
 
 buildLocationSetDescriptionPrompt.schema = locationSetDescriptionOutputSchema;
 
-export const buildLocationSpecificationPrompt = (
+export const buildLocationSpecPrompt = (
   entry: LocationPromptInputType,
-): ChatPrompt<typeof locationSpecificationSchema> => {
+): ChatPrompt<typeof locationSpecSchema> => {
   const systemTemplate = `
 You are an expert production designer creating the canonical design specification for a recurring fictional location.
 
@@ -363,9 +340,19 @@ Avoid unnecessary specificity.
 
 Every location has exactly five recurring sets.
 
+The five sets should form a coherent traversal through the location.
+
+Each set should be a persistent and recognisable part of the location itself, not merely somewhere nearby or a route used to reach it.
+
+Prefer spaces that are inside the location or inseparably connected to it over surrounding landscape, roads, parking areas, or unrelated approach routes.
+
 ### Arrival
 
-Where visitors first enter the location.
+Where visitors first enter or reach the location itself.
+
+Choose a recognisable threshold, entrance area, gate, doorway, platform, dock, or immediately adjoining space.
+
+Do not choose a distant approach route when a stronger entrance space exists.
 
 ### Heart
 
@@ -385,11 +372,19 @@ Choose the destination, not the hub.
 
 The canonical lower part of the location.
 
+Choose a distinct lower destination rather than merely another corridor, stairway, or transitional route.
+
+Prefer a memorable room, chamber, level, enclosed area, hidden space, or environmental feature that clearly differs from the Ascent.
+
 ### Ascent
 
 The canonical route upward within the location.
+
 Prefer staircases, ramps, catwalks, ladders, elevators, escalators, or other persistent architectural features that connect the lower parts of the location to its highest destination.
+
 Do not choose an exterior approach unless the ascent itself is one of the location's defining and most recognisable features.
+
+The Ascent should read primarily as movement upward, while the Below should read as a destination.
 
 ### Summit
 
@@ -401,8 +396,43 @@ For each set:
 
 - use the simplest widely recognised name
 - write concise observable design rules
+- list 4–8 iconic props
 - define a canonical framing
 - list viewpoints that weaken recognition
+
+## Props
+
+Props are the recurring visual vocabulary available within a set.
+
+A prop may be:
+
+- a movable object
+- a fixed architectural feature
+- a mechanism
+- a fixture
+- a terrain feature
+- an environmental element
+- a decorative object with strong mnemonic value
+
+Choose props that make the set easier to recognise, imagine, and use in memorable scenes.
+
+Prefer objects or features that an actor could notice, touch, carry, climb, activate, break, avoid, hide behind, or otherwise interact with.
+
+Props should be concrete and visually distinct.
+
+Prefer iconic, widely associated elements over generic clutter.
+
+Good props reinforce the identity of the particular set, not merely the overall location.
+
+Do not list vague qualities such as darkness, danger, grandeur, age, mystery, or atmosphere as props.
+
+Do not list interchangeable background clutter unless it meaningfully supports recognition.
+
+Props are optional recurring ingredients, not a checklist. An illustration may use only the subset most useful for that scene.
+
+Avoid making every prop mandatory in every illustration.
+
+## Canonical framing
 
 The canonical framing should state:
 
@@ -410,6 +440,7 @@ The canonical framing should state:
 - what they look toward
 - what dominates the composition
 - which recognition hooks should remain visible when naturally possible
+- which set-specific props should remain visible when they strengthen recognition
 
 Before finalising, silently check:
 
@@ -418,10 +449,12 @@ Before finalising, silently check:
 - redundant rules have been merged
 - no lore or invented proper names were introduced
 - each set is a natural fit for the supplied location
+- the five sets form a coherent traversal
+- the Below and Ascent are visually and functionally distinct
 - the Heart is genuinely the highlight of visiting the location
+- each prop is concrete, visually useful, and associated with its set
+- props provide useful material for scenes without becoming mandatory clutter
 - another artist could recreate essentially the same location from the specification
-
-Output only the structured result.
 `.trim();
 
   const userTemplate = `
@@ -446,13 +479,13 @@ Generate the canonical location specification for the following input.
     messages,
     model: `gpt-5.4`,
     reasoningEffort: `medium`,
-    schema: locationSpecificationSchema,
+    schema: locationSpecSchema,
   };
 };
 
-export const buildEvaluateLocationSpecificationPrompt = (entry: {
+export const buildEvaluateLocationSpecPrompt = (entry: {
   location: string;
-  locationSpecification: LocationSpecification;
+  locationSpec: LocationSpec;
 }): ChatPrompt<typeof locationEvaluationSchema> => {
   const systemTemplate = `
 You are evaluating a location specification for a recurring fictional location.
@@ -556,23 +589,11 @@ Evaluate the following location specification.
   };
 };
 
-export const buildLocationSpecPrompt = buildLocationSpecificationPrompt;
-
-export const buildEvaluateLocationSpecPrompt = (entry: {
+export const buildRefineLocationSpecPrompt = (entry: {
   location: string;
   locationSpec: LocationSpec;
-}): ChatPrompt<typeof locationEvaluationSchema> => {
-  return buildEvaluateLocationSpecificationPrompt({
-    location: entry.location,
-    locationSpecification: entry.locationSpec,
-  });
-};
-
-export const buildRefineLocationSpecificationPrompt = (entry: {
-  location: string;
-  locationSpecification: LocationSpecification;
   criticisms: LocationCriticismType[];
-}): ChatPrompt<typeof locationSpecificationSchema> => {
+}): ChatPrompt<typeof locationSpecSchema> => {
   const systemTemplate = `
 You revise location specifications based on evaluator criticisms.
 
@@ -631,7 +652,7 @@ Revise the following location specification based on the criticisms.
     messages,
     model: `gpt-5.4`,
     reasoningEffort: `low`,
-    schema: locationSpecificationSchema,
+    schema: locationSpecSchema,
   };
 };
 
@@ -943,9 +964,9 @@ export function isFundamentalFailure(
 }
 
 export function updateBestAttempt(
-  bestAttempt: LocationSpecificationRefinementAttemptType | null,
-  currentAttempt: LocationSpecificationRefinementAttemptType,
-): LocationSpecificationRefinementAttemptType {
+  bestAttempt: LocationSpecRefinementAttemptType | null,
+  currentAttempt: LocationSpecRefinementAttemptType,
+): LocationSpecRefinementAttemptType {
   if (bestAttempt == null) {
     return currentAttempt;
   }

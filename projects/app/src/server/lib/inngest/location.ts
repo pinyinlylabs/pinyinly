@@ -3,7 +3,7 @@ import {
   pinyinSoundLocationIdentityImageSettingKey,
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationNameSettingKey,
-  pinyinSoundLocationSpecificationSetting,
+  pinyinSoundLocationSpecSetting,
   pinyinSoundLocationSetNameSetting,
   pinyinSoundLocationSetNameSettingKey,
 } from "@/data/userSettings";
@@ -12,7 +12,7 @@ import {
   buildEvaluateLocationSpecPrompt,
   buildLocationNameSuggestionsPrompt,
   buildLocationSpecPrompt,
-  buildRefineLocationSpecificationPrompt,
+  buildRefineLocationSpecPrompt,
   hasMajorCriticisms,
   locationSpecSchema,
 } from "@/util/prompts/location";
@@ -106,9 +106,9 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-refine-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildRefineLocationSpecificationPrompt({
+            buildRefineLocationSpecPrompt({
               location,
-              locationSpecification: locationSpecForRefine,
+              locationSpec: locationSpecForRefine,
               criticisms: criticismsForRefine,
             }),
           );
@@ -478,10 +478,10 @@ const populateLocationSpec = inngest.createFunction(
       await step.run(`write location specification`, async () =>
         withDrizzle(async (db) => {
           await setUserSetting(db, userId, {
-            key: pinyinSoundLocationSpecificationSetting.entity.marshalKey({
+            key: pinyinSoundLocationSpecSetting.entity.marshalKey({
               placeId: locationId,
             }),
-            value: pinyinSoundLocationSpecificationSetting.entity.marshalValue({
+            value: pinyinSoundLocationSpecSetting.entity.marshalValue({
               placeId: locationId,
               text: JSON.stringify(locationSpec),
             }),
