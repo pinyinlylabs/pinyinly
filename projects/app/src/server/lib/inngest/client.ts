@@ -81,6 +81,17 @@ export const locationPopulateLocationSetIdentityImageEvent = eventType(
   },
 );
 
+export const locationPopulateLocationSetDescriptionEvent = eventType(
+  `location/populate-location-set-description`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+    }),
+  },
+);
+
 export const locationPopulateLocationSetNameEvent = eventType(
   `location/populate-location-set-name`,
   {

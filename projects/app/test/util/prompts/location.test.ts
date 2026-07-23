@@ -4,9 +4,11 @@ import {
   zodResponseFormatJson,
 } from "#server/lib/ai.js";
 import {
+  buildPopulateLocationSetDescriptionPrompt,
   buildLocationSetDescriptionPrompt,
   buildLocationSpecPrompt,
   locationSpecSchema,
+  populateLocationSetDescriptionInputSchema,
 } from "#util/prompts/location.ts";
 import type {
   LocationEvaluationType,
@@ -390,6 +392,51 @@ describe(
       expect(result.messages[1]?.content).toContain(
         `"locationNotes": "The famous chain store bathroom."`,
       );
+    });
+  },
+);
+
+describe(
+  `buildPopulateLocationSetDescriptionPrompt` satisfies HasNameOf<
+    typeof buildPopulateLocationSetDescriptionPrompt
+  >,
+  () => {
+    test(`builds a single-description prompt from location spec and target set`, () => {
+      const result = buildPopulateLocationSetDescriptionPrompt({
+        locationSpec: makeLocationSpec(`Pirate ship`),
+        setKey: `below`,
+      });
+
+      expect(result.model).toBe(`gpt-5.5`);
+      expect(result.reasoningEffort).toBe(`low`);
+      expect(result.messages).toHaveLength(2);
+
+      const system = result.messages[0]?.content ?? ``;
+      const user = result.messages[1]?.content ?? ``;
+
+      expect(system).toContain(
+        `You are an expert guidebook writer creating an illustrated guide to a collection of famous fictional locations.`,
+      );
+      expect(system).toContain(`Write 60–100 words.`);
+      expect(system).toContain(
+        `Do not invent lore, history, characters, stories, or new architectural features.`,
+      );
+
+      expect(user).toContain(`<input>`);
+      expect(user).toContain(`"location": "Pirate ship"`);
+      expect(user).toContain(`"set": "below"`);
+      expect(user).toContain(`"name": "cargo hold"`);
+      expect(user).not.toContain(`{{ input }}`);
+    });
+
+    test(`input schema rejects unexpected fields`, () => {
+      const result = populateLocationSetDescriptionInputSchema.safeParse({
+        locationSpec: makeLocationSpec(`Pirate ship`),
+        setKey: `heart`,
+        extra: true,
+      });
+
+      expect(result.success).toBe(false);
     });
   },
 );

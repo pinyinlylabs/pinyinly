@@ -1,4 +1,6 @@
 import {
+  pinyinSoundLocationSetDescriptionSetting,
+  pinyinSoundLocationSetDescriptionSettingKey,
   pinyinSoundLocationIdentityImageSetting,
   pinyinSoundLocationIdentityImageSettingKey,
   pinyinSoundLocationNameSetting,
@@ -9,6 +11,7 @@ import {
 } from "@/data/userSettings";
 import * as s from "@/server/pgSchema";
 import {
+  buildPopulateLocationSetDescriptionPrompt,
   buildEvaluateLocationSpecPrompt,
   buildLocationNameSuggestionsPrompt,
   buildLocationSpecPrompt,
@@ -27,6 +30,7 @@ import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
   locationPopulateLocationEvent,
+  locationPopulateLocationSetDescriptionEvent,
   locationPopulateLocationSetIdentityImageEvent,
   locationPopulateLocationSetNameEvent,
   locationPopulateLocationSpecEvent,
@@ -196,6 +200,15 @@ const populateLocation = inngest.createFunction(
       `summit`,
     ] as const) {
       await step.sendEvent(
+        `emit image set populate description for ${setKey}`,
+        locationPopulateLocationSetDescriptionEvent.create({
+          locationId,
+          userId,
+          setKey,
+        }),
+      );
+
+      await step.sendEvent(
         `emit image set populate name for ${setKey}`,
         locationPopulateLocationSetNameEvent.create({
           locationId,
@@ -342,6 +355,81 @@ const populateLocationSetIdentityImage = inngest.createFunction(
           setKey,
           generatedAssetId,
         );
+      }),
+    );
+  },
+);
+
+const populateLocationSetDescription = inngest.createFunction(
+  {
+    id: `location/populateLocationSetDescription`,
+    singleton: {
+      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.setKey`,
+      mode: `skip`,
+    },
+    triggers: locationPopulateLocationSetDescriptionEvent,
+  },
+  async ({ event, step, logger }) => {
+    const { userId, locationId, setKey } = event.data;
+
+    await step.run(`read set description (${setKey})`, async () =>
+      withDrizzle(async (db) => {
+        const setting = await db.query.userSetting.findFirst({
+          where: and(
+            eq(s.userSetting.userId, userId),
+            eq(
+              s.userSetting.key,
+              pinyinSoundLocationSetDescriptionSettingKey(locationId, setKey),
+            ),
+          ),
+        });
+
+        if (setting == null) {
+          return null;
+        }
+
+        const decoded = pinyinSoundLocationSetDescriptionSetting.decode(
+          { locationId, setKey },
+          setting.value,
+        );
+
+        const currentDescription = decoded?.text ?? null;
+
+        if (
+          currentDescription != null &&
+          currentDescription.trim().length > 0
+        ) {
+          return;
+        }
+
+        const locationSpec = await getLocationSpec(db, userId, locationId);
+
+        if (locationSpec == null) {
+          logger.error(
+            { locationId, userId, setKey },
+            `Missing location specification for set description generation`,
+          );
+          return;
+        }
+
+        const response = await requestOpenAiResponseJson(
+          buildPopulateLocationSetDescriptionPrompt({
+            locationSpec,
+            setKey,
+          }),
+        );
+
+        await setUserSetting(db, userId, {
+          key: pinyinSoundLocationSetDescriptionSettingKey(locationId, setKey),
+          value: pinyinSoundLocationSetDescriptionSetting.entity.marshalValue({
+            locationId,
+            setKey,
+            text: response.data.description,
+          }),
+          now: new Date(),
+          skipHistory: false,
+          historyId: nanoid(),
+        });
       }),
     );
   },
@@ -528,6 +616,7 @@ const runLocationNameSuggestions = inngest.createFunction(
 export const functions = [
   generateLocationSpec,
   populateLocation,
+  populateLocationSetDescription,
   populateLocationSetIdentityImage,
   populateLocationSetName,
   populateLocationSpec,
