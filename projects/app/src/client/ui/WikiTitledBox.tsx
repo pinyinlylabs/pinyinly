@@ -51,7 +51,11 @@ export function WikiTitledBox({
         {headerAction}
       </View>
 
-      <View className="relative overflow-hidden rounded-lg bg-bg-high">
+      <View
+        className="
+          relative overflow-hidden rounded-lg bg-bg-high outline -outline-offset-1 outline-fg/10
+        "
+      >
         {isOverflowExpandable ? (
           <>
             {isExpanded ? null : (

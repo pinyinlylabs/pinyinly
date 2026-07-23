@@ -29,7 +29,7 @@ export function FinalSoundTile({
     <View
       {...props}
       className={
-        `group w-full items-center` +
+        `group items-center` +
         (className == null
           ? ``
           : `
@@ -86,9 +86,9 @@ export function FinalSoundTile({
 
       <View
         className={`
-          relative z-0 max-w-full rounded-xl px-3 py-2 transition-all duration-150
+          relative z-0 max-w-full rounded-lg px-3 py-2
 
-          group-hover:bg-bg-high/60
+          group-hover:bg-fg/10
         `}
       >
         <Text

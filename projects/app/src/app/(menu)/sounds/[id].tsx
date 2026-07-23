@@ -9,8 +9,8 @@ import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import type { SaveActorToDirectoryTarget } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import {
-  getPinyinSoundLocationDisplaySummary,
-  usePinyinSoundLocations,
+    getPinyinSoundLocationDisplaySummary,
+    usePinyinSoundLocations,
 } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -28,23 +28,23 @@ import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
-  defaultPinyinSoundExamples,
-  defaultPinyinSoundInstructions,
-  getPinyinSoundLabel,
-  isFinalSoundId,
-  isInitialSoundId,
-  isInitialOrFinalSoundId,
-  loadPylyPinyinChart,
+    defaultPinyinSoundExamples,
+    defaultPinyinSoundInstructions,
+    getPinyinSoundLabel,
+    isFinalSoundId,
+    isInitialSoundId,
+    isInitialOrFinalSoundId,
+    loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
-  pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundImageSetting,
-  pinyinSoundMnemonicIdentitySetting,
-  pinyinSoundModelSheetImageSetting,
-  pinyinSoundNameSetting,
+    pinyinFinalSoundLocationSelectionSetting,
+    pinyinSoundDescriptionSetting,
+    pinyinSoundGroupNameSetting,
+    pinyinSoundImageSetting,
+    pinyinSoundMnemonicIdentitySetting,
+    pinyinSoundModelSheetImageSetting,
+    pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -327,7 +327,7 @@ function MnemonicStoryRoleSection({
 
   return (
     <WikiTitledBox
-      title="Mnemonic story role"
+      title="Mnemonic identity"
       onEditingChange={handleEditingChange}
     >
       <View className="gap-4 p-4">
@@ -339,22 +339,12 @@ function MnemonicStoryRoleSection({
           </Text>
         ) : isFinalSound ? (
           <>
-            <Text className="pyly-body text-fg-dim">
-              Choose one location from your place directory for this final.
-            </Text>
-
             {selectedLocation == null ? (
               <Text className="pyly-body text-fg-dim">
                 No location selected yet.
               </Text>
             ) : (
-              <View className="gap-2 rounded-lg border border-fg/10 bg-bg-high p-3">
-                <Text className="pyly-body-subheading text-fg">
-                  {selectedPlaceDisplay?.name == null ||
-                  selectedPlaceDisplay.name.trim().length === 0
-                    ? selectedLocation.locationId
-                    : selectedPlaceDisplay.name}
-                </Text>
+              <>
                 {selectedLocation.description == null ||
                 selectedLocation.description.trim().length === 0 ? null : (
                   <Text className="pyly-body text-fg-dim">
@@ -389,7 +379,7 @@ function MnemonicStoryRoleSection({
                     </RectButton>
                   ) : null}
                 </View>
-              </View>
+              </>
             )}
 
             {isEditMode ? (

@@ -53,7 +53,7 @@ export default function LocationIdPage() {
 
       <HeaderTitleProvider.ScrollTrigger title={title} />
 
-      <View className="items-start">
+      <View className="gap-1">
         <View className="w-[260px] overflow-hidden rounded-2xl">
           <InlineEditableSettingImage
             setting={pinyinSoundLocationIdentityImageSetting}
@@ -65,22 +65,21 @@ export default function LocationIdPage() {
             tileSize={64}
           />
         </View>
-      </View>
+        <View className="flex-1 gap-0.5">
+          <InlineEditableSettingText
+            textClassName="font-sans text-3xl/10 font-bold"
+            setting={pinyinSoundLocationNameSetting}
+            settingKey={{ locationId: locationId }}
+            placeholder="Location name"
+          />
 
-      <View className="gap-0.5">
-        <InlineEditableSettingText
-          textClassName="font-sans text-3xl/10 font-bold"
-          setting={pinyinSoundLocationNameSetting}
-          settingKey={{ locationId: locationId }}
-          placeholder="Location name"
-        />
-
-        <InlineEditableSettingText
-          setting={pinyinSoundLocationDescriptionSetting}
-          settingKey={{ locationId: locationId }}
-          placeholder="Location description"
-          multiline
-        />
+          <InlineEditableSettingText
+            setting={pinyinSoundLocationDescriptionSetting}
+            settingKey={{ locationId: locationId }}
+            placeholder="Location description"
+            multiline
+          />
+        </View>
       </View>
 
       <View className="gap-20">
@@ -90,10 +89,7 @@ export default function LocationIdPage() {
             setKey,
           );
           return (
-            <WikiTitledBox
-              key={setKey}
-              title={`${locationSetTitles[setKey]} set`}
-            >
+            <WikiTitledBox key={setKey} title={locationSetTitles[setKey]}>
               <InlineEditableSettingImage
                 setting={pinyinSoundLocationSetIdentityImageSetting}
                 settingKey={settingKey}
