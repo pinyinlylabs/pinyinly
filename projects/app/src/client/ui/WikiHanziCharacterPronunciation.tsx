@@ -1,8 +1,6 @@
 import type { DictionarySearchEntry } from "@/client/query";
-import {
-  getPinyinSoundLocationDisplaySummary,
-  usePinyinSoundLocations,
-} from "@/client/ui/hooks/usePinyinSoundLocations";
+import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
+import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
@@ -125,15 +123,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const finalPinyinSound2 = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameSetting,
-          key: { soundId: splitPinyin.finalSoundId },
-        },
-  );
-
   const initialDescriptionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -152,7 +141,6 @@ export function WikiHanziCharacterPronunciationBox({
   );
   const placeDirectory = usePinyinSoundLocations();
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
-  const finalPinyinSoundName = finalPinyinSound2?.value?.text;
   const selectedFinalLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedFinalLocation =
@@ -161,10 +149,6 @@ export function WikiHanziCharacterPronunciationBox({
       : (placeDirectory.locations.find(
           (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
-  const selectedFinalPlaceDisplay =
-    selectedFinalLocation == null
-      ? null
-      : getPinyinSoundLocationDisplaySummary(selectedFinalLocation);
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
@@ -173,12 +157,14 @@ export function WikiHanziCharacterPronunciationBox({
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
-  const finalDisplayName = finalPinyinSoundName ?? finalLabel;
+  const finalToneLocationSetKey = toneToLocationSetKey(splitPinyin?.tone ?? 5);
+  const finalToneLocationSetName =
+    selectedFinalLocation?.sets[finalToneLocationSetKey].name ?? null;
   const finalToneName =
-    selectedFinalPlaceDisplay?.name == null ||
-    selectedFinalPlaceDisplay.name.trim().length === 0
-      ? finalDisplayName
-      : selectedFinalPlaceDisplay.name;
+    finalToneLocationSetName == null ||
+    finalToneLocationSetName.trim().length === 0
+      ? `Unnamed set`
+      : finalToneLocationSetName;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -521,6 +507,26 @@ function FinalToneForkedArrow() {
 
 function DownArrow() {
   return <Text className="h-6 pyly-body text-fg/40">↓</Text>;
+}
+
+function toneToLocationSetKey(tone: number): LocationSetKey {
+  switch (tone) {
+    case 1: {
+      return `arrival`;
+    }
+    case 2: {
+      return `ascent`;
+    }
+    case 3: {
+      return `heart`;
+    }
+    case 4: {
+      return `below`;
+    }
+    default: {
+      return `summit`;
+    }
+  }
 }
 
 function buildCueMeaningContext({
