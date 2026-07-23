@@ -52,9 +52,11 @@ export function WikiTitledBox({
       </View>
 
       <View
-        className="
-          relative overflow-hidden rounded-lg bg-bg-high outline -outline-offset-1 outline-fg/10
-        "
+        className={`
+          relative overflow-hidden rounded-lg bg-bg-high outline -outline-offset-1
+
+          ${isEditing ? `outline-2 outline-blue` : `outline-fg/10`}
+        `}
       >
         {isOverflowExpandable ? (
           <>
