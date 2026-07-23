@@ -78,7 +78,7 @@ const inputClass = tv({
     },
     variant: {
       bare: `
-        font-sans text-base font-medium text-fg outline-none
+        font-sans text-fg outline-none
 
         placeholder:text-fg-dim
       `,

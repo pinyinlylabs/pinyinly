@@ -109,7 +109,7 @@ export default function ActorIdPage() {
         <View className="flex-row items-center gap-2 self-start">
           {isNameEditingEnabled ? (
             <InlineEditableSettingText
-              variant="title"
+              textClassName="pyly-body-title"
               setting={pinyinSoundActorNameSetting}
               settingKey={{ actorId }}
               placeholder="Actor name"

@@ -204,16 +204,16 @@ function EditableUserMeaningListItem({
                   {meaning.hanzi}
                 </Text>
                 <InlineEditableSettingText
-                  variant="body"
                   setting={userHanziMeaningPinyinSetting}
                   settingKey={keyParams}
                   placeholder="Add pinyin (optional)"
+                  textClassName="pyly-body"
                 />
                 {customBadge}
               </View>
               <View className="ml-4">
                 <InlineEditableSettingText
-                  variant="body"
+                  textClassName="pyly-body"
                   setting={userHanziMeaningGlossSetting}
                   settingKey={keyParams}
                   placeholder="Enter meaning..."
@@ -233,7 +233,7 @@ function EditableUserMeaningListItem({
           {isEditing ? (
             <View className="ml-4">
               <InlineEditableSettingText
-                variant="body"
+                textClassName="pyly-body"
                 setting={userHanziMeaningNoteSetting}
                 settingKey={keyParams}
                 placeholder="Add a note (optional)"

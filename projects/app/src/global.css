@@ -248,7 +248,7 @@
 }
 
 @utility pyly-body {
-  @apply font-sans text-base/normal text-fg font-medium;
+  @apply font-sans text-base/normal text-fg font-normal;
 }
 
 @utility pyly-body-caption {
@@ -457,9 +457,6 @@
 
   /* --- */
 
-  .pyly-body-2xl {
-    @apply font-sans text-2xl/normal font-normal text-fg;
-  }
   .pyly-body-2xl.pyly-ref,
   .pyly-body-2xl .pyly-ref {
     @apply font-medium text-fg-loud pyly-ref-2xl;
@@ -475,9 +472,6 @@
 
   /* --- */
 
-  .pyly-body {
-    @apply font-sans text-base/normal text-fg font-medium;
-  }
   .pyly-body.pyly-ref,
   .pyly-body .pyly-ref {
     @apply text-fg-loud font-medium pyly-ref-base;
@@ -495,9 +489,6 @@
 
   /* --- */
 
-  .pyly-body-caption {
-    @apply font-sans text-sm/normal font-normal text-fg-dim;
-  }
   .pyly-body-caption.pyly-ref,
   .pyly-body-caption .pyly-ref {
     @apply text-fg font-medium pyly-ref-sm;
@@ -535,9 +526,6 @@
 
   /* --- */
 
-  .pyly-body-input {
-    @apply font-sans text-lg/snug font-medium text-fg;
-  }
   .pyly-body-input.pyly-ref,
   .pyly-body-input .pyly-ref {
     @apply text-fg-loud font-semibold pyly-ref-lg;

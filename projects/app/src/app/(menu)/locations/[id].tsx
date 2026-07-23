@@ -53,7 +53,7 @@ export default function LocationIdPage() {
 
       <HeaderTitleProvider.ScrollTrigger title={title} />
 
-      <View className="items-center">
+      <View className="items-start">
         <View className="w-[260px] overflow-hidden rounded-2xl">
           <InlineEditableSettingImage
             setting={pinyinSoundLocationIdentityImageSetting}
@@ -67,9 +67,9 @@ export default function LocationIdPage() {
         </View>
       </View>
 
-      <View className="gap-3">
+      <View className="gap-0.5">
         <InlineEditableSettingText
-          variant="title"
+          textClassName="font-sans text-3xl/10 font-bold"
           setting={pinyinSoundLocationNameSetting}
           settingKey={{ locationId: locationId }}
           placeholder="Location name"
@@ -83,42 +83,40 @@ export default function LocationIdPage() {
         />
       </View>
 
-      <View className="gap-4">
-        <Text className="pyly-body-caption text-fg-dim">Sets</Text>
-
-        {locationSetKeys.map((role) => {
+      <View className="gap-20">
+        {locationSetKeys.map((setKey) => {
           const settingKey = getPinyinSoundLocationSetKeyParams(
             locationId,
-            role,
+            setKey,
           );
           return (
             <WikiTitledBox
-              key={role}
-              title={locationSetTitles[role]}
-              className="rounded-lg border border-fg/10 bg-bg-high p-4"
+              key={setKey}
+              title={`${locationSetTitles[setKey]} set`}
             >
-              <View className="gap-3 p-1">
+              <InlineEditableSettingImage
+                setting={pinyinSoundLocationSetIdentityImageSetting}
+                settingKey={settingKey}
+                enableAiGeneration
+                frameShape="rect"
+                aspectRatio="5:4"
+                previewHeight={200}
+                tileSize={56}
+              />
+
+              <View className="mx-4 my-2">
                 <InlineEditableSettingText
                   setting={pinyinSoundLocationSetNameSetting}
                   settingKey={settingKey}
                   placeholder="Set name"
+                  textClassName="pyly-body-heading"
                 />
-
                 <InlineEditableSettingText
                   setting={pinyinSoundLocationSetDescriptionSetting}
                   settingKey={settingKey}
-                  placeholder="Describe this set"
+                  placeholder="Description"
+                  textClassName="pyly-body text-fg/80"
                   multiline
-                />
-
-                <InlineEditableSettingImage
-                  setting={pinyinSoundLocationSetIdentityImageSetting}
-                  settingKey={settingKey}
-                  enableAiGeneration
-                  frameShape="rect"
-                  aspectRatio="5:4"
-                  previewHeight={200}
-                  tileSize={56}
                 />
               </View>
             </WikiTitledBox>

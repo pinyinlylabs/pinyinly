@@ -121,7 +121,7 @@ export default function SoundIdPage() {
           )}
         </View>
         <InlineEditableSettingText
-          variant="title"
+          textClassName="pyly-body-title"
           setting={pinyinSoundNameSetting}
           settingKey={{ soundId: id }}
           placeholder="Name this sound"
