@@ -172,18 +172,14 @@ export default function SoundsPage() {
                 setting={pinyinSoundGroupNameSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Group name"
-                displayClassName="text-lg font-bold text-fg"
-                emptyClassName="text-lg font-bold text-fg/30"
-                inputClassName="text-lg font-bold text-fg"
+                textClassName="font-sans text-lg font-bold"
               />
               <Text className="font-sans text-fg-dim">({sounds.length})</Text>
               <InlineEditableSettingText
                 setting={pinyinSoundGroupThemeSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Theme"
-                displayClassName="text-fg-dim"
-                emptyClassName="text-fg-dim/70"
-                inputClassName="text-fg"
+                textClassName="font-sans text-lg font-bold"
               />
             </View>
             <View className={gridClass}>
