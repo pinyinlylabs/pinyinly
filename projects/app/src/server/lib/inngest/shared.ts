@@ -2,7 +2,7 @@ import type { AppRouter } from "@/server/routers/_app";
 import { httpSessionHeaderTx } from "@/util/http";
 import { memoizeGlobalThis } from "@pinyinly/lib/collections";
 import { createTRPCClient, httpLink } from "@trpc/client";
-import { RetryAfterError } from "inngest";
+import { RetryAfterError, fetch as inngestFetch } from "inngest";
 import throttle from "lodash/throttle";
 
 declare global {
@@ -44,6 +44,7 @@ export function createTrpcClient(url: string, sessionId: string) {
   return createTRPCClient<AppRouter>({
     links: [
       httpLink({
+        fetch: inngestFetch,
         url,
         headers() {
           return {

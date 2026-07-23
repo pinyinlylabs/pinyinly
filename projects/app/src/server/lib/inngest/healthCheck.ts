@@ -16,9 +16,7 @@ import { inngest } from "./client";
 const dataIntegrityDictionary = inngest.createFunction(
   {
     id: `dataIntegrityDictionary`,
-    triggers: [
-      // { cron: `30 * * * *` }
-    ],
+    triggers: [{ cron: `30 * * * *` }],
   },
   async ({ step, logger }) => {
     const dict = await loadDictionary();
@@ -82,9 +80,9 @@ const replicacheGarbageCollection = inngest.createFunction(
     description: `Delete old replicache data no longer used to reduce DB bloat.`,
     id: `replicacheGarbageCollection`,
     singleton: { mode: `skip` },
-    // Run once every hour
     triggers: [
-      // { cron: `0 * * * *` }
+      // Run once every hour
+      { cron: `0 * * * *` },
     ],
   },
   async ({ step }) => {
@@ -120,9 +118,9 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
     description: `Checks PostgreSQL tables for dead tuples and if VACUUM FULL is needed to reclaim space.`,
     id: `pgFullVacuumGarbageCollection`,
     singleton: { mode: `skip` },
-    // Run once every day
     triggers: [
-      // { cron: `0 0 * * *` }
+      // Run once every day
+      { cron: `0 0 * * *` },
     ],
   },
   async ({ step }) => {
@@ -222,9 +220,7 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
 const migrateHanziWords = inngest.createFunction(
   {
     id: `migrateHanziWords`,
-    triggers: [
-      // { cron: `30 * * * *` }
-    ],
+    triggers: [{ cron: `30 * * * *` }],
   },
   async ({ step }) => {
     const hanziWordMigrations = await loadHanziWordMigrations();

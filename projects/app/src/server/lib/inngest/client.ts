@@ -39,22 +39,19 @@ export const inngest = new Inngest({
   },
 });
 
-export const serverSyncUploadAssetEvent = eventType(`serverSync/upload-asset`, {
+export const serverSyncAssetPushEvent = eventType(`serverSync/asset.push`, {
   schema: z.object({
     remoteSyncId: z.string(),
     assetId: assetIdSchema,
   }),
 });
 
-export const serverSyncDownloadAssetEvent = eventType(
-  `serverSync/download-asset`,
-  {
-    schema: z.object({
-      remoteSyncId: z.string(),
-      assetId: assetIdSchema,
-    }),
-  },
-);
+export const serverSyncAssetPullEvent = eventType(`serverSync/asset.pull`, {
+  schema: z.object({
+    remoteSyncId: z.string(),
+    assetId: assetIdSchema,
+  }),
+});
 
 export const assetUploadRequestedEvent = eventType(`asset/upload.requested`, {
   schema: z.object({

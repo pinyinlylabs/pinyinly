@@ -1,5 +1,4 @@
 import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
-import { listReferencedAssetIdsForUser } from "@/server/lib/assetSync";
 import {
   createPresignedReadUrl,
   createPresignedUploadUrl,
@@ -13,6 +12,8 @@ import {
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { z } from "zod";
+
+const maxFindMissingAssetsCount = 200;
 
 export const assetRouter = router({
   /**
@@ -139,22 +140,51 @@ export const assetRouter = router({
     }),
 
   /**
-   * List all assets referenced in user settings (used for remote sync).
-   * Returns asset IDs that are actually in use by the user in their settings,
-   * avoiding the need to sync the entire bucket.
+   * Check which of the provided asset IDs are missing from storage.
+   * Uses object storage as the source of truth rather than DB references.
    */
-  listAssetBucketUserFiles: authedProcedure
-    .output(z.array(z.string()))
+  findMissingAssets: authedProcedure
+    .input(
+      z
+        .object({
+          assetIds: z.array(assetIdSchema).max(maxFindMissingAssetsCount),
+        })
+        .strict(),
+    )
+    .output(
+      z
+        .object({
+          missingAssetIds: z.array(assetIdSchema),
+        })
+        .strict(),
+    )
     .query(async (opts) => {
-      const { userId } = opts.ctx.session;
-      try {
-        const assetIds = await listReferencedAssetIdsForUser(userId);
+      const { assetIds } = opts.input;
 
-        return assetIds;
+      try {
+        const missingAssetIds: typeof assetIds = [];
+        const chunkSize = 20;
+
+        for (let i = 0; i < assetIds.length; i += chunkSize) {
+          const assetIdChunk = assetIds.slice(i, i + chunkSize);
+          const chunkResults = await Promise.all(
+            assetIdChunk.map(async (assetId) => {
+              const assetKey = getBucketObjectKeyForId(assetId);
+              const exists = await verifyObjectExists(assetKey);
+              return exists.exists ? null : assetId;
+            }),
+          );
+
+          missingAssetIds.push(
+            ...chunkResults.filter((assetId) => assetId != null),
+          );
+        }
+
+        return { missingAssetIds };
       } catch (error) {
-        console.error(`Failed to list asset references in user settings`, {
+        console.error(`Failed to check asset presence in storage`, {
+          assetIdCount: assetIds.length,
           error,
-          userId,
         });
         throw error;
       }

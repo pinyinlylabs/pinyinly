@@ -1,5 +1,4 @@
 import type { AssetId } from "@/data/model";
-import { assetIdSchema } from "@/data/model";
 import { supportedSchemas } from "@/data/rizzleSchema";
 import * as s from "@/server/pgSchema";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -9,6 +8,7 @@ import z from "zod";
 import {
   downloadAssetFromRemote,
   listAssetFiles,
+  listReferencedAssetIdsForUser,
   uploadAssetToRemote,
 } from "@/server/lib/assetSync";
 import { withDrizzle, withRepeatableReadTransaction } from "@/server/lib/db";
@@ -23,19 +23,22 @@ import { retryMutation as retryMutationV12 } from "@/server/lib/replicache/v12";
 import { retryMutation as retryMutationV14 } from "@/server/lib/replicache/v14";
 import {
   assetUploadSucessEvent,
-  serverSyncUploadAssetEvent,
+  serverSyncAssetPushEvent,
   inngest,
-  serverSyncDownloadAssetEvent,
+  serverSyncAssetPullEvent,
 } from "./client";
+import chunk from "lodash/chunk";
 import { onlineOrRetryLater, createTrpcClient } from "./shared";
 
-export const syncRemotePush = inngest.createFunction(
+const maxFindMissingAssetsCount = 200;
+
+export const replicachePush = inngest.createFunction(
   {
-    id: `serverSync/syncRemotePush`,
+    id: `serverSync/replicache.push`,
     singleton: { mode: `skip` },
     triggers: [
       // Sync every 5 minutes
-      // { cron: `* * * * *` },
+      { cron: `* * * * *` },
       invoke(z.object({})),
     ],
   },
@@ -159,13 +162,13 @@ export const syncRemotePush = inngest.createFunction(
   },
 );
 
-export const syncRemotePull = inngest.createFunction(
+export const replicachePull = inngest.createFunction(
   {
-    id: `serverSync/syncRemotePull`,
+    id: `serverSync/replicache.pull`,
     singleton: { mode: `skip` },
     triggers: [
       // Sync every 5 minutes
-      // { cron: `*/5 * * * *` },
+      { cron: `*/5 * * * *` },
       invoke(z.object({})),
     ],
   },
@@ -479,13 +482,13 @@ const retryFailedMutations = inngest.createFunction(
   },
 );
 
-const syncAssetBlobs = inngest.createFunction(
+const assetSyncAll = inngest.createFunction(
   {
-    id: `serverSync/syncAssetBlobs`,
+    id: `serverSync/syncAssets`,
     singleton: { mode: `skip` },
     triggers: [
       // Sync every 5 minutes
-      // { cron: `*/5 * * * *` },
+      { cron: `*/5 * * * *` },
       invoke(z.object({})),
     ],
   },
@@ -510,36 +513,58 @@ const syncAssetBlobs = inngest.createFunction(
 
         const localAssetsSet = new Set(localAssets);
 
-        const remoteAssets = await step.run(
-          `listRemoteAssets-${remoteSyncId}`,
-          async () => {
-            const remoteClient = createTrpcClient(
-              remoteSync.remoteUrl,
-              remoteSync.remoteSessionId,
-            );
-            const assetIds =
-              await remoteClient.asset.listAssetBucketUserFiles.query();
-            // Filter out any legacy asset IDs that don't match the expected format, to
-            // avoid syncing invalid asset IDs.
-            return assetIds
-              .map((assetId) => assetIdSchema.safeParse(assetId).data)
-              .filter((x) => x != null);
-          },
+        const referencedLocalAssets = await step.run(
+          `listReferencedLocalAssets-${remoteSyncId}`,
+          async () => listReferencedAssetIdsForUser(userId),
         );
 
-        const remoteAssetsSet = new Set(remoteAssets);
+        const missingLocalAssets = referencedLocalAssets.filter(
+          (assetId) => !localAssetsSet.has(assetId),
+        );
+
+        const remoteClient = createTrpcClient(
+          remoteSync.remoteUrl,
+          remoteSync.remoteSessionId,
+        );
+
+        const assetIdChunks = chunk(localAssets, maxFindMissingAssetsCount);
+
+        const results = await Promise.all(
+          assetIdChunks.map(async (assetIds) =>
+            remoteClient.asset.findMissingAssets.query({ assetIds }),
+          ),
+        );
+
+        const missingRemoteAssetsSet = new Set(
+          results.flatMap((result) => result.missingAssetIds),
+        );
+
+        const missingLocalAssetChunks = chunk(
+          missingLocalAssets,
+          maxFindMissingAssetsCount,
+        );
+
+        const missingLocalResults = await Promise.all(
+          missingLocalAssetChunks.map(async (assetIds) =>
+            remoteClient.asset.findMissingAssets.query({ assetIds }),
+          ),
+        );
+
+        const missingRemoteDownloadAssetsSet = new Set(
+          missingLocalResults.flatMap((result) => result.missingAssetIds),
+        );
 
         // Diff to find assets to upload and download
         const toUpload: AssetId[] = [];
         for (const id of localAssets) {
-          if (!remoteAssetsSet.has(id)) {
+          if (missingRemoteAssetsSet.has(id)) {
             toUpload.push(id);
           }
         }
 
         const toDownload: AssetId[] = [];
-        for (const id of remoteAssets) {
-          if (!localAssetsSet.has(id)) {
+        for (const id of missingLocalAssets) {
+          if (!missingRemoteDownloadAssetsSet.has(id)) {
             toDownload.push(id);
           }
         }
@@ -556,29 +581,30 @@ const syncAssetBlobs = inngest.createFunction(
         }
 
         // Fan out upload jobs
-        for (const _assetId of toUpload) {
-          // await step.sendEvent(
-          //   `emit-upload-${assetId}`,
-          //   serverSyncAssetSyncUploadEvent.create({
-          //     remoteSyncId: remoteSync.id,
-          //     assetId,
-          //   }),
-          // );
+        if (toUpload.length > 0) {
+          await step.sendEvent(
+            `emit-uploads`,
+            toUpload.map((assetId) =>
+              serverSyncAssetPushEvent.create({
+                remoteSyncId: remoteSync.id,
+                assetId,
+              }),
+            ),
+          );
         }
 
         // Fan out download jobs
-        for (const _assetId of toDownload) {
-          // await step.sendEvent(
-          //   `emit-download-${assetId}`,
-          //   serverSyncAssetSyncDownloadEvent.create({
-          //     remoteSyncId: remoteSync.id,
-          //     assetId,
-          //   }),
-          // );
+        if (toDownload.length > 0) {
+          await step.sendEvent(
+            `emit-downloads`,
+            toDownload.map((assetId) =>
+              serverSyncAssetPullEvent.create({
+                remoteSyncId: remoteSync.id,
+                assetId,
+              }),
+            ),
+          );
         }
-        logger.info(
-          `calculated ${toDownload.length} assets to download and ${toUpload.length} assets to upload`,
-        );
       } catch (error) {
         logger.error(
           { err: error, remoteSyncId: remoteSync.id },
@@ -625,7 +651,7 @@ const syncUploadedAssetToRemotes = inngest.createFunction(
     for (const remoteSync of remoteSyncs) {
       await step.sendEvent(
         `emit-upload-${remoteSync.id}`,
-        serverSyncUploadAssetEvent.create({
+        serverSyncAssetPushEvent.create({
           remoteSyncId: remoteSync.id,
           assetId,
         }),
@@ -634,9 +660,9 @@ const syncUploadedAssetToRemotes = inngest.createFunction(
   },
 );
 
-const uploadAsset = inngest.createFunction(
+const assetPush = inngest.createFunction(
   {
-    id: `serverSync/upload-asset`,
+    id: `serverSync/asset.push`,
     singleton: {
       key: `event.data.remoteSyncId + "-" + event.data.assetId`,
       mode: `skip`,
@@ -645,7 +671,7 @@ const uploadAsset = inngest.createFunction(
       limit: 5,
       period: `10s`,
     },
-    triggers: [serverSyncUploadAssetEvent],
+    triggers: [serverSyncAssetPushEvent],
   },
   async ({ event, step, logger }) => {
     await onlineOrRetryLater();
@@ -687,9 +713,9 @@ const uploadAsset = inngest.createFunction(
   },
 );
 
-const downloadAsset = inngest.createFunction(
+const assetPull = inngest.createFunction(
   {
-    id: `serverSync/download-asset`,
+    id: `serverSync/asset.pull`,
     singleton: {
       key: `event.data.remoteSyncId + "-" + event.data.assetId`,
       mode: `skip`,
@@ -698,7 +724,7 @@ const downloadAsset = inngest.createFunction(
       limit: 5,
       period: `10s`,
     },
-    triggers: [serverSyncDownloadAssetEvent],
+    triggers: [serverSyncAssetPullEvent],
   },
   async ({ event, step, logger }) => {
     await onlineOrRetryLater();
@@ -741,11 +767,11 @@ const downloadAsset = inngest.createFunction(
 );
 
 export const functions = [
-  syncRemotePush,
-  syncRemotePull,
+  replicachePush,
+  replicachePull,
   retryFailedMutations,
-  syncAssetBlobs,
+  assetSyncAll,
   syncUploadedAssetToRemotes,
-  uploadAsset,
-  downloadAsset,
+  assetPush,
+  assetPull,
 ];
