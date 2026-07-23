@@ -9,9 +9,9 @@ import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import type { SaveActorToDirectoryTarget } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import {
-  getPinyinSoundPlaceDisplaySummary,
-  usePinyinSoundPlaces,
-} from "@/client/ui/hooks/usePinyinSoundPlaces";
+  getPinyinSoundLocationDisplaySummary,
+  usePinyinSoundLocations,
+} from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -38,7 +38,7 @@ import {
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
-  pinyinFinalSoundPlaceSelectionSetting,
+  pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundImageSetting,
@@ -57,27 +57,27 @@ export default function SoundIdPage() {
   const id = rawId as PinyinSoundId;
   const chart = loadPylyPinyinChart();
   const isFinalSound = isFinalSoundId(id);
-  const placeDirectory = usePinyinSoundPlaces();
+  const placeDirectory = usePinyinSoundLocations();
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
-          setting: pinyinFinalSoundPlaceSelectionSetting,
+          setting: pinyinFinalSoundLocationSelectionSetting,
           key: { soundId: id },
         }
       : null,
   );
-  const selectedFinalPlaceId =
-    finalPlaceSelectionSetting?.value?.placeId ?? null;
-  const selectedFinalPlace =
-    selectedFinalPlaceId == null
+  const selectedFinalLocationId =
+    finalPlaceSelectionSetting?.value?.locationId ?? null;
+  const selectedFinalLocation =
+    selectedFinalLocationId == null
       ? null
-      : (placeDirectory.places.find(
-          (place) => place.placeId === selectedFinalPlaceId,
+      : (placeDirectory.locations.find(
+          (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
   const selectedFinalPlaceDisplay =
-    selectedFinalPlace == null
+    selectedFinalLocation == null
       ? null
-      : getPinyinSoundPlaceDisplaySummary(selectedFinalPlace);
+      : getPinyinSoundLocationDisplaySummary(selectedFinalLocation);
   const finalDisplayName =
     selectedFinalPlaceDisplay?.name == null ||
     selectedFinalPlaceDisplay.name.trim().length === 0
@@ -203,7 +203,7 @@ function MnemonicStoryRoleSection({
     string | null
   >(null);
   const actorDirectory = usePinyinSoundActors();
-  const placeDirectory = usePinyinSoundPlaces();
+  const placeDirectory = usePinyinSoundLocations();
   const isFinalSound = isFinalSoundId(pinyinSoundId);
   const chart = loadPylyPinyinChart();
   const soundLabel = getPinyinSoundLabel(pinyinSoundId, chart);
@@ -230,22 +230,23 @@ function MnemonicStoryRoleSection({
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
-          setting: pinyinFinalSoundPlaceSelectionSetting,
+          setting: pinyinFinalSoundLocationSelectionSetting,
           key: { soundId: pinyinSoundId },
         }
       : null,
   );
-  const selectedPlaceId = finalPlaceSelectionSetting?.value?.placeId ?? null;
-  const selectedPlace =
-    selectedPlaceId == null
+  const selectedLocationId =
+    finalPlaceSelectionSetting?.value?.locationId ?? null;
+  const selectedLocation =
+    selectedLocationId == null
       ? null
-      : (placeDirectory.places.find(
-          (place) => place.placeId === selectedPlaceId,
+      : (placeDirectory.locations.find(
+          (place) => place.locationId === selectedLocationId,
         ) ?? null);
   const selectedPlaceDisplay =
-    selectedPlace == null
+    selectedLocation == null
       ? null
-      : getPinyinSoundPlaceDisplaySummary(selectedPlace);
+      : getPinyinSoundLocationDisplaySummary(selectedLocation);
   const characterName = characterNameSetting.value?.text ?? soundLabel;
   const hasMnemonicIdentity = hasIdentityContent(
     mnemonicIdentitySetting.value?.mnemonicIdentity,
@@ -283,7 +284,7 @@ function MnemonicStoryRoleSection({
   };
 
   const hasMnemonicContent = isFinalSound
-    ? selectedPlace != null
+    ? selectedLocation != null
     : (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
       mnemonicImageSetting.value?.imageId != null ||
       modelSheetImageSetting.value?.imageId != null ||
@@ -342,7 +343,7 @@ function MnemonicStoryRoleSection({
               Choose one location from your place directory for this final.
             </Text>
 
-            {selectedPlace == null ? (
+            {selectedLocation == null ? (
               <Text className="pyly-body text-fg-dim">
                 No location selected yet.
               </Text>
@@ -351,22 +352,25 @@ function MnemonicStoryRoleSection({
                 <Text className="pyly-body-subheading text-fg">
                   {selectedPlaceDisplay?.name == null ||
                   selectedPlaceDisplay.name.trim().length === 0
-                    ? selectedPlace.placeId
+                    ? selectedLocation.locationId
                     : selectedPlaceDisplay.name}
                 </Text>
-                {selectedPlace.description == null ||
-                selectedPlace.description.trim().length === 0 ? null : (
+                {selectedLocation.description == null ||
+                selectedLocation.description.trim().length === 0 ? null : (
                   <Text className="pyly-body text-fg-dim">
-                    {selectedPlace.description}
+                    {selectedLocation.description}
                   </Text>
                 )}
                 <View className="flex-row flex-wrap gap-2">
-                  <Link href={`/places/${selectedPlace.placeId}`} asChild>
+                  <Link
+                    href={`/locations/${selectedLocation.locationId}`}
+                    asChild
+                  >
                     <FinalSoundTile
                       name={
                         selectedPlaceDisplay?.name == null ||
                         selectedPlaceDisplay.name.trim().length === 0
-                          ? selectedPlace.placeId
+                          ? selectedLocation.locationId
                           : selectedPlaceDisplay.name
                       }
                       image={selectedPlaceDisplay?.identityImage ?? null}
@@ -404,27 +408,27 @@ function MnemonicStoryRoleSection({
                 </View>
 
                 {isSelectPlaceOpen ? (
-                  placeDirectory.places.length === 0 ? (
+                  placeDirectory.locations.length === 0 ? (
                     <Text className="pyly-body-caption text-fg-dim">
                       No places in your directory yet. Create one in Places
                       first.
                     </Text>
                   ) : (
                     <View className="gap-2">
-                      {placeDirectory.places.map((place) => (
+                      {placeDirectory.locations.map((place) => (
                         <RectButton
-                          key={place.placeId}
+                          key={place.locationId}
                           variant="bareDim"
                           onPress={() => {
                             finalPlaceSelectionSetting?.setValue({
                               soundId: pinyinSoundId,
-                              placeId: place.placeId,
+                              locationId: place.locationId,
                             });
                             setIsSelectPlaceOpen(false);
                           }}
                         >
                           {place.name == null || place.name.trim().length === 0
-                            ? place.placeId
+                            ? place.locationId
                             : place.name}
                         </RectButton>
                       ))}

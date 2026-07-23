@@ -2,7 +2,7 @@ import type {
   ActorId,
   AssetId,
   HanziText,
-  PlaceId,
+  LocationId,
   PinyinSoundGroupId,
   PinyinSoundId,
   PinyinUnit,
@@ -16,7 +16,7 @@ import {
   rAssetId,
   rActorId,
   rHanziWord,
-  rPlaceId,
+  rLocationId,
   rPinyinlyObjectId,
   rPinyinSoundGroupId,
   rPinyinSoundId,
@@ -346,66 +346,66 @@ export const pinyinSoundActorSelectionSetting = defineUserSetting({
   }),
 });
 
-export const pinyinFinalSoundPlaceSelectionSetting = defineUserSetting({
+export const pinyinFinalSoundLocationSelectionSetting = defineUserSetting({
   entity: r.entity(`pfsps/[soundId]`, {
     soundId: rPinyinSoundId().alias(`s`),
-    placeId: rPlaceId().alias(`p`),
+    locationId: rLocationId().alias(`p`),
   }),
 });
 
 export const pinyinSoundLocationNameSetting = defineUserSetting({
-  entity: r.entity(`pspn/[placeId]`, {
-    placeId: rPlaceId().alias(`p`),
+  entity: r.entity(`pspn/[locationId]`, {
+    locationId: rLocationId().alias(`p`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
   historyLimit: 20,
 });
 
 export const pinyinSoundLocationDescriptionSetting = defineUserSetting({
-  entity: r.entity(`pspd/[placeId]`, {
-    placeId: rPlaceId().alias(`p`),
+  entity: r.entity(`pspd/[locationId]`, {
+    locationId: rLocationId().alias(`p`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
   historyLimit: 20,
 });
 
 export const pinyinSoundLocationIdentityImageSetting = defineUserSetting({
-  entity: r.entity(`pspi/[placeId]`, {
-    placeId: rPlaceId().alias(`p`),
+  entity: r.entity(`pspi/[locationId]`, {
+    locationId: rLocationId().alias(`p`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
 });
 
 export const pinyinSoundLocationSpecSetting = defineUserSetting({
-  entity: r.entity(`psps/[placeId]`, {
-    placeId: rPlaceId().alias(`p`),
+  entity: r.entity(`psps/[locationId]`, {
+    locationId: rLocationId().alias(`p`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
   historyLimit: 20,
 });
 
 export const pinyinSoundLocationSetNameSetting = defineUserSetting({
-  entity: r.entity(`pspln/[placeId]/[role]`, {
-    placeId: rPlaceId().alias(`p`),
-    role: r.string().alias(`r`),
+  entity: r.entity(`pspln/[locationId]/[setKey]`, {
+    locationId: rLocationId().alias(`p`),
+    setKey: r.string().alias(`r`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
   historyLimit: 20,
 });
 
 export const pinyinSoundLocationSetDescriptionSetting = defineUserSetting({
-  entity: r.entity(`pspld/[placeId]/[role]`, {
-    placeId: rPlaceId().alias(`p`),
-    role: r.string().alias(`r`),
+  entity: r.entity(`pspld/[locationId]/[setKey]`, {
+    locationId: rLocationId().alias(`p`),
+    setKey: r.string().alias(`r`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
   historyLimit: 20,
 });
 
 export const pinyinSoundLocationSetIdentityImageSetting = defineUserSetting({
-  entity: r.entity(`pspli/[placeId]/[role]`, {
-    placeId: rPlaceId().alias(`p`),
-    role: r.string().alias(`r`),
+  entity: r.entity(`pspli/[locationId]/[setKey]`, {
+    locationId: rLocationId().alias(`p`),
+    setKey: r.string().alias(`r`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
 });
@@ -484,62 +484,72 @@ export function pinyinSoundActorSelectionSettingKey(
   return pinyinSoundActorSelectionSetting.entity.marshalKey({ soundId });
 }
 
-export function pinyinFinalSoundPlaceSelectionSettingKey(
+export function pinyinFinalSoundLocationSelectionSettingKey(
   soundId: PinyinSoundId,
 ): string {
-  return pinyinFinalSoundPlaceSelectionSetting.entity.marshalKey({ soundId });
+  return pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({
+    soundId,
+  });
 }
 
-export function pinyinSoundLocationNameSettingKey(placeId: PlaceId): string {
-  return pinyinSoundLocationNameSetting.entity.marshalKey({ placeId });
+export function pinyinSoundLocationNameSettingKey(
+  locationId: LocationId,
+): string {
+  return pinyinSoundLocationNameSetting.entity.marshalKey({
+    locationId,
+  });
 }
 
 export function pinyinSoundLocationDescriptionSettingKey(
-  placeId: PlaceId,
+  locationId: LocationId,
 ): string {
-  return pinyinSoundLocationDescriptionSetting.entity.marshalKey({ placeId });
+  return pinyinSoundLocationDescriptionSetting.entity.marshalKey({
+    locationId,
+  });
 }
 
 export function pinyinSoundLocationIdentityImageSettingKey(
-  placeId: PlaceId,
+  locationId: LocationId,
 ): string {
-  return pinyinSoundLocationIdentityImageSetting.entity.marshalKey({ placeId });
+  return pinyinSoundLocationIdentityImageSetting.entity.marshalKey({
+    locationId,
+  });
 }
 
 export function getPinyinSoundLocationSetKeyParams(
-  placeId: PlaceId,
-  role: string,
+  locationId: LocationId,
+  setKey: string,
 ) {
-  return { placeId, role };
+  return { locationId, setKey };
 }
 
 export function pinyinSoundLocationSetNameSettingKey(
-  placeId: PlaceId,
-  role: string,
+  locationId: LocationId,
+  setKey: string,
 ): string {
   return pinyinSoundLocationSetNameSetting.entity.marshalKey({
-    placeId,
-    role,
+    locationId,
+    setKey,
   });
 }
 
 export function pinyinSoundLocationSetDescriptionSettingKey(
-  placeId: PlaceId,
-  role: string,
+  locationId: LocationId,
+  setKey: string,
 ): string {
   return pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
-    placeId,
-    role,
+    locationId,
+    setKey,
   });
 }
 
 export function pinyinSoundLocationSetIdentityImageSettingKey(
-  placeId: PlaceId,
-  role: string,
+  locationId: LocationId,
+  setKey: string,
 ): string {
   return pinyinSoundLocationSetIdentityImageSetting.entity.marshalKey({
-    placeId,
-    role,
+    locationId,
+    setKey,
   });
 }
 
@@ -732,7 +742,7 @@ export const userSettingDefinitions = [
   aiImagePlaygroundSetting,
   aiImageStyleSetting,
   autoCheckUserSetting,
-  pinyinFinalSoundPlaceSelectionSetting,
+  pinyinFinalSoundLocationSelectionSetting,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,

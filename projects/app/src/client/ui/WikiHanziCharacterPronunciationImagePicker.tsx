@@ -1,7 +1,7 @@
 import {
-  getPinyinSoundPlaceDisplaySummary,
-  usePinyinSoundPlaces,
-} from "@/client/ui/hooks/usePinyinSoundPlaces";
+  getPinyinSoundLocationDisplaySummary,
+  usePinyinSoundLocations,
+} from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import {
@@ -12,7 +12,7 @@ import {
 import {
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
-  pinyinFinalSoundPlaceSelectionSetting,
+  pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundImageSetting,
   pinyinSoundLocationIdentityImageSetting,
   pinyinSoundNameSetting,
@@ -34,7 +34,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
   onChangeImageId: (nextImageId: string | null) => void;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const placeDirectory = usePinyinSoundPlaces();
+  const placeDirectory = usePinyinSoundLocations();
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const imagePromptSetting = useUserSetting({
@@ -62,7 +62,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinFinalSoundPlaceSelectionSetting,
+          setting: pinyinFinalSoundLocationSelectionSetting,
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
@@ -71,18 +71,18 @@ export function WikiHanziCharacterPronunciationImagePicker({
   const finalLabel = getFinalSoundLabel(pinyinUnit);
   const initialPinyinSoundName = initialPinyinSoundSetting?.value?.text;
   const finalDisplayName = finalPinyinSoundSetting?.value?.text ?? finalLabel;
-  const selectedFinalPlaceId =
-    finalPlaceSelectionSetting?.value?.placeId ?? null;
-  const selectedFinalPlace =
-    selectedFinalPlaceId == null
+  const selectedFinalLocationId =
+    finalPlaceSelectionSetting?.value?.locationId ?? null;
+  const selectedFinalLocation =
+    selectedFinalLocationId == null
       ? null
-      : (placeDirectory.places.find(
-          (place) => place.placeId === selectedFinalPlaceId,
+      : (placeDirectory.locations.find(
+          (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
   const selectedFinalPlaceDisplay =
-    selectedFinalPlace == null
+    selectedFinalLocation == null
       ? null
-      : getPinyinSoundPlaceDisplaySummary(selectedFinalPlace);
+      : getPinyinSoundLocationDisplaySummary(selectedFinalLocation);
   const finalLocationLabel =
     selectedFinalPlaceDisplay?.name == null ||
     selectedFinalPlaceDisplay.name.trim().length === 0
@@ -102,7 +102,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
             label: initialPinyinSoundName ?? initialLabel,
             missingPromptPrefill: `Generate a clear close-up of ${initialPinyinSoundName ?? initialLabel} only, with no scene background.`,
           },
-          ...(selectedFinalPlace == null
+          ...(selectedFinalLocation == null
             ? []
             : [
                 {
@@ -110,7 +110,9 @@ export function WikiHanziCharacterPronunciationImagePicker({
                   kind: `location` as const,
                   defaultVisibleInRow: true,
                   imageSetting: pinyinSoundLocationIdentityImageSetting,
-                  imageSettingKey: { placeId: selectedFinalPlace.placeId },
+                  imageSettingKey: {
+                    locationId: selectedFinalLocation.locationId,
+                  },
                   label: finalLocationLabel,
                   missingPromptPrefill: `Generate just the scene for ${finalLocationLabel}, without ${initialPinyinSoundName ?? initialLabel}.`,
                 },

@@ -6,7 +6,7 @@ import {
   hanziPronunciationHintImageSetting,
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
-  pinyinFinalSoundPlaceSelectionSetting,
+  pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundActorImageSetting,
   pinyinSoundActorModelSheetImageSetting,
   pinyinSoundLocationIdentityImageSetting,
@@ -21,12 +21,12 @@ import {
   userSettingDefinitions,
   userHanziSettingLike,
 } from "#data/userSettings.ts";
-import type { PinyinSoundId, PlaceId } from "#data/model.ts";
+import type { PinyinSoundId, LocationId } from "#data/model.ts";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers";
 
 const testSoundId = `-a` as PinyinSoundId;
-const testPlaceId = `place_123` as PlaceId;
+const testLocationId = `place_123` as LocationId;
 
 function expectUniqueSettingKeyPaths(
   settings: readonly { entity: { _def: { keyPath: string } } }[],
@@ -104,13 +104,13 @@ describe(
       expect(patterns).toContain(`psams/%`);
 
       expect(pinyinSoundLocationIdentityImageSetting.entity._def.keyPath).toBe(
-        `pspi/[placeId]`,
+        `pspi/[locationId]`,
       );
       expect(patterns).toContain(`pspi/%`);
 
       expect(
         pinyinSoundLocationSetIdentityImageSetting.entity._def.keyPath,
-      ).toBe(`pspli/[placeId]/[role]`);
+      ).toBe(`pspli/[locationId]/[role]`);
       expect(patterns).toContain(`pspli/%`);
 
       // Verify each pattern corresponds to its setting's key path
@@ -154,7 +154,7 @@ describe(
   () => {
     test(`returns marshaled key metadata for keyed settings`, () => {
       const keyInfo = getUserSettingKeyInfo(
-        pinyinFinalSoundPlaceSelectionSetting,
+        pinyinFinalSoundLocationSelectionSetting,
         { soundId: testSoundId },
       );
 
@@ -178,17 +178,20 @@ describe(
   () => {
     test(`decodes keyed setting when stored value omits key fields`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinFinalSoundPlaceSelectionSetting,
+        pinyinFinalSoundLocationSelectionSetting,
         { soundId: testSoundId },
-        { p: testPlaceId },
+        { p: testLocationId },
       );
 
-      expect(decoded).toEqual({ soundId: testSoundId, placeId: testPlaceId });
+      expect(decoded).toEqual({
+        soundId: testSoundId,
+        locationId: testLocationId,
+      });
     });
 
     test(`returns null when stored value is null`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinFinalSoundPlaceSelectionSetting,
+        pinyinFinalSoundLocationSelectionSetting,
         { soundId: testSoundId },
         null,
       );
@@ -198,7 +201,7 @@ describe(
 
     test(`returns null when stored object cannot be decoded`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinFinalSoundPlaceSelectionSetting,
+        pinyinFinalSoundLocationSelectionSetting,
         { soundId: testSoundId },
         { notPlace: `x` },
       );
@@ -225,15 +228,15 @@ describe(
   () => {
     test(`strips key-path fields from keyed setting stored values`, () => {
       const encoded = encodeUserSettingStoredValue(
-        pinyinFinalSoundPlaceSelectionSetting,
+        pinyinFinalSoundLocationSelectionSetting,
         { soundId: testSoundId },
         {
           soundId: testSoundId,
-          placeId: testPlaceId,
+          locationId: testLocationId,
         },
       );
 
-      expect(encoded).toEqual({ p: testPlaceId });
+      expect(encoded).toEqual({ p: testLocationId });
     });
 
     test(`keeps all marshaled fields for keyless settings`, () => {

@@ -1,4 +1,4 @@
-import { assetIdSchema, placeIdSchema } from "@/data/model";
+import { assetIdSchema, locationIdSchema } from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import {
   geminiImageAspectRatioSchema,
@@ -183,7 +183,7 @@ const generateImageOutputSchema = z
 
 const enqueueLocationSetIdentityImagesInputSchema = z
   .object({
-    locationId: placeIdSchema,
+    locationId: locationIdSchema,
   })
   .strict();
 

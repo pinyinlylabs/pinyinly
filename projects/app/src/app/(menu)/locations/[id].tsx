@@ -5,11 +5,11 @@ import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingIma
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import {
-  locationSetRoles,
-  usePinyinSoundPlaces,
-} from "@/client/ui/hooks/usePinyinSoundPlaces";
-import type { LocationSetRole } from "@/client/ui/hooks/usePinyinSoundPlaces";
-import type { PlaceId } from "@/data/model";
+  locationSetKeys,
+  usePinyinSoundLocations,
+} from "@/client/ui/hooks/usePinyinSoundLocations";
+import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
+import type { LocationId } from "@/data/model";
 import {
   getPinyinSoundLocationSetKeyParams,
   pinyinSoundLocationDescriptionSetting,
@@ -23,7 +23,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
-const locationSetTitles: Record<LocationSetRole, string> = {
+const locationSetTitles: Record<LocationSetKey, string> = {
   arrival: `Arrival`,
   heart: `Heart`,
   below: `Below`,
@@ -31,15 +31,15 @@ const locationSetTitles: Record<LocationSetRole, string> = {
   summit: `Summit`,
 };
 
-export default function PlaceIdPage() {
-  const { id: rawId } = useLocalSearchParams<`/places/[id]`>();
-  const placeId = (Array.isArray(rawId) ? rawId[0] : rawId) as PlaceId;
-  const placeDirectory = usePinyinSoundPlaces();
+export default function LocationIdPage() {
+  const { id: rawId } = useLocalSearchParams<`/locations/[id]`>();
+  const locationId = (Array.isArray(rawId) ? rawId[0] : rawId) as LocationId;
+  const placeDirectory = usePinyinSoundLocations();
   const generateLocationSetIdentityImagesMutation =
     trpc.ai.enqueueLocationSetIdentityImages.useMutation();
 
-  const place = placeDirectory.places.find(
-    (entry) => entry.placeId === placeId,
+  const place = placeDirectory.locations.find(
+    (entry) => entry.locationId === locationId,
   );
   const title =
     place?.name != null && place.name.trim().length > 0 ? place.name : `Place`;
@@ -47,7 +47,7 @@ export default function PlaceIdPage() {
   return (
     <View className="w-full gap-6 self-center pt-safe px-safe pb-2">
       <Breadcrumbs>
-        <Breadcrumbs.Item href="/places">Places</Breadcrumbs.Item>
+        <Breadcrumbs.Item href="/locations">Locations</Breadcrumbs.Item>
         <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
       </Breadcrumbs>
 
@@ -57,7 +57,7 @@ export default function PlaceIdPage() {
         <View className="w-[260px] overflow-hidden rounded-2xl">
           <InlineEditableSettingImage
             setting={pinyinSoundLocationIdentityImageSetting}
-            settingKey={{ placeId }}
+            settingKey={{ locationId: locationId }}
             enableAiGeneration
             frameShape="rect"
             aspectRatio="1:1"
@@ -71,13 +71,13 @@ export default function PlaceIdPage() {
         <InlineEditableSettingText
           variant="title"
           setting={pinyinSoundLocationNameSetting}
-          settingKey={{ placeId }}
+          settingKey={{ locationId: locationId }}
           placeholder="Location name"
         />
 
         <InlineEditableSettingText
           setting={pinyinSoundLocationDescriptionSetting}
-          settingKey={{ placeId }}
+          settingKey={{ locationId: locationId }}
           placeholder="Location description"
           multiline
         />
@@ -86,8 +86,11 @@ export default function PlaceIdPage() {
       <View className="gap-4">
         <Text className="pyly-body-caption text-fg-dim">Sets</Text>
 
-        {locationSetRoles.map((role) => {
-          const settingKey = getPinyinSoundLocationSetKeyParams(placeId, role);
+        {locationSetKeys.map((role) => {
+          const settingKey = getPinyinSoundLocationSetKeyParams(
+            locationId,
+            role,
+          );
           return (
             <WikiTitledBox
               key={role}
@@ -130,7 +133,7 @@ export default function PlaceIdPage() {
         <View className="gap-3">
           <InlineEditableSettingText
             setting={pinyinSoundLocationSpecSetting}
-            settingKey={{ placeId }}
+            settingKey={{ locationId: locationId }}
             placeholder='{"location": "Aircraft hangar"}'
             multiline
           />
@@ -139,7 +142,7 @@ export default function PlaceIdPage() {
             disabled={generateLocationSetIdentityImagesMutation.isPending}
             onPress={() => {
               generateLocationSetIdentityImagesMutation.mutate({
-                locationId: placeId,
+                locationId: locationId,
               });
             }}
             className="

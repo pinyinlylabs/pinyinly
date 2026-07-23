@@ -78,17 +78,17 @@ export const actorIdSchema = z.custom<ActorId>(isString);
 /**
  * A reusable place record used by pinyin finals mnemonic locations.
  */
-export type PlaceId = string & z.$brand<`PlaceId`>;
-export const placeIdSchema = z.custom<PlaceId>(isString);
+export type LocationId = string & z.$brand<`LocationId`>;
+export const locationIdSchema = z.custom<LocationId>(isString);
 
-export const locationSetRoleSchema = z.enum([
+export const locationSetKeySchema = z.enum([
   `arrival`,
   `heart`,
   `below`,
   `ascent`,
   `summit`,
 ]);
-export type LocationSetRole = z.infer<typeof locationSetRoleSchema>;
+export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
 
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;

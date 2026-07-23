@@ -3,8 +3,8 @@ import pino from "pino";
 import pretty from "pino-pretty";
 import {
   assetIdSchema,
-  locationSetRoleSchema,
-  placeIdSchema,
+  locationSetKeySchema,
+  locationIdSchema,
 } from "@/data/model";
 import { z } from "zod";
 
@@ -75,8 +75,8 @@ export const locationPopulateLocationSetIdentityImageEvent = eventType(
   {
     schema: z.object({
       userId: z.string(),
-      locationId: placeIdSchema,
-      role: locationSetRoleSchema,
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
     }),
   },
 );
@@ -86,8 +86,8 @@ export const locationPopulateLocationSetNameEvent = eventType(
   {
     schema: z.object({
       userId: z.string(),
-      locationId: placeIdSchema,
-      role: locationSetRoleSchema,
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
     }),
   },
 );
@@ -97,7 +97,7 @@ export const locationPopulateLocationSpecEvent = eventType(
   {
     schema: z.object({
       userId: z.string(),
-      locationId: placeIdSchema,
+      locationId: locationIdSchema,
     }),
   },
 );
@@ -107,7 +107,7 @@ export const locationPopulateLocationEvent = eventType(
   {
     schema: z.object({
       userId: z.string(),
-      locationId: placeIdSchema,
+      locationId: locationIdSchema,
     }),
   },
 );

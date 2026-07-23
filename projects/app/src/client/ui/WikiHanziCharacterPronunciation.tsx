@@ -1,8 +1,8 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import {
-  getPinyinSoundPlaceDisplaySummary,
-  usePinyinSoundPlaces,
-} from "@/client/ui/hooks/usePinyinSoundPlaces";
+  getPinyinSoundLocationDisplaySummary,
+  usePinyinSoundLocations,
+} from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
@@ -15,7 +15,7 @@ import {
 import {
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
-  pinyinFinalSoundPlaceSelectionSetting,
+  pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
@@ -146,29 +146,30 @@ export function WikiHanziCharacterPronunciationBox({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinFinalSoundPlaceSelectionSetting,
+          setting: pinyinFinalSoundLocationSelectionSetting,
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
-  const placeDirectory = usePinyinSoundPlaces();
+  const placeDirectory = usePinyinSoundLocations();
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
   const finalPinyinSoundName = finalPinyinSound2?.value?.text;
-  const selectedFinalPlaceId =
-    finalPlaceSelectionSetting?.value?.placeId ?? null;
-  const selectedFinalPlace =
-    selectedFinalPlaceId == null
+  const selectedFinalLocationId =
+    finalPlaceSelectionSetting?.value?.locationId ?? null;
+  const selectedFinalLocation =
+    selectedFinalLocationId == null
       ? null
-      : (placeDirectory.places.find(
-          (place) => place.placeId === selectedFinalPlaceId,
+      : (placeDirectory.locations.find(
+          (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
   const selectedFinalPlaceDisplay =
-    selectedFinalPlace == null
+    selectedFinalLocation == null
       ? null
-      : getPinyinSoundPlaceDisplaySummary(selectedFinalPlace);
+      : getPinyinSoundLocationDisplaySummary(selectedFinalLocation);
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
-  const finalToneLocationDescription = selectedFinalPlace?.description ?? null;
+  const finalToneLocationDescription =
+    selectedFinalLocation?.description ?? null;
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);

@@ -1,7 +1,7 @@
 import type {
   AssetId,
-  LocationSetRole,
-  PlaceId,
+  LocationSetKey,
+  LocationId,
   Skill,
   SrsStateType,
 } from "@/data/model";
@@ -129,7 +129,7 @@ export async function setUserName(
 export async function getLocationSpec(
   db: Drizzle,
   userId: string,
-  locationId: PlaceId,
+  locationId: LocationId,
 ) {
   const setting = await db.query.userSetting.findFirst({
     where: and(
@@ -137,7 +137,7 @@ export async function getLocationSpec(
       eq(
         schema.userSetting.key,
         pinyinSoundLocationSpecSetting.entity.marshalKey({
-          placeId: locationId,
+          locationId: locationId,
         }),
       ),
     ),
@@ -148,7 +148,7 @@ export async function getLocationSpec(
   }
 
   const decoded = pinyinSoundLocationSpecSetting.decode(
-    { placeId: locationId },
+    { locationId: locationId },
     setting.value,
   );
 
@@ -164,15 +164,15 @@ export async function getLocationSpec(
 export async function setLocationSetIdentityImage(
   db: Drizzle,
   userId: string,
-  locationId: PlaceId,
-  role: LocationSetRole,
+  locationId: LocationId,
+  setKey: LocationSetKey,
   imageId: AssetId,
 ): Promise<void> {
   await setUserSetting(db, userId, {
-    key: pinyinSoundLocationSetIdentityImageSettingKey(locationId, role),
+    key: pinyinSoundLocationSetIdentityImageSettingKey(locationId, setKey),
     value: pinyinSoundLocationSetIdentityImageSetting.entity.marshalValue({
-      placeId: locationId,
-      role,
+      locationId: locationId,
+      setKey,
       imageId: imageId,
     }),
     now: new Date(),
@@ -184,15 +184,15 @@ export async function setLocationSetIdentityImage(
 export async function getLocationSetIdentityImage(
   db: Drizzle,
   userId: string,
-  locationId: PlaceId,
-  role: LocationSetRole,
+  locationId: LocationId,
+  setKey: LocationSetKey,
 ): Promise<AssetId | null> {
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        pinyinSoundLocationSetIdentityImageSettingKey(locationId, role),
+        pinyinSoundLocationSetIdentityImageSettingKey(locationId, setKey),
       ),
     ),
   });
@@ -202,7 +202,7 @@ export async function getLocationSetIdentityImage(
   }
 
   const decoded = pinyinSoundLocationSetIdentityImageSetting.decode(
-    { placeId: locationId, role },
+    { locationId, setKey },
     setting.value,
   );
 

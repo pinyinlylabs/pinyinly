@@ -188,7 +188,7 @@ const populateLocation = inngest.createFunction(
       },
     });
 
-    for (const role of [
+    for (const setKey of [
       `arrival`,
       `heart`,
       `below`,
@@ -196,20 +196,20 @@ const populateLocation = inngest.createFunction(
       `summit`,
     ] as const) {
       await step.sendEvent(
-        `emit image set populate name for ${role}`,
+        `emit image set populate name for ${setKey}`,
         locationPopulateLocationSetNameEvent.create({
           locationId,
           userId,
-          role,
+          setKey,
         }),
       );
 
       await step.sendEvent(
-        `emit image set populate identity image for ${role}`,
+        `emit image set populate identity image for ${setKey}`,
         locationPopulateLocationSetIdentityImageEvent.create({
           locationId,
           userId,
-          role,
+          setKey,
         }),
       );
     }
@@ -233,7 +233,7 @@ const populateLocation = inngest.createFunction(
           }
 
           const decoded = pinyinSoundLocationIdentityImageSetting.decode(
-            { placeId: locationId },
+            { locationId: locationId },
             setting.value,
           );
 
@@ -261,7 +261,7 @@ const populateLocation = inngest.createFunction(
           await setUserSetting(db, userId, {
             key: pinyinSoundLocationIdentityImageSettingKey(locationId),
             value: pinyinSoundLocationIdentityImageSetting.entity.marshalValue({
-              placeId: locationId,
+              locationId: locationId,
               imageId: generatedLocationImageAssetId,
             }),
             now: new Date(),
@@ -278,13 +278,13 @@ const populateLocationSetIdentityImage = inngest.createFunction(
   {
     id: `location/populateLocationSetIdentityImage`,
     singleton: {
-      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.role`,
+      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.setKey`,
       mode: `skip`,
     },
     triggers: locationPopulateLocationSetIdentityImageEvent,
   },
   async ({ event, step, logger }) => {
-    const { userId, locationId, role } = event.data;
+    const { userId, locationId, setKey } = event.data;
 
     const { locationSpec, existingImage } = await step.run(
       `load location specification`,
@@ -295,7 +295,7 @@ const populateLocationSetIdentityImage = inngest.createFunction(
             db,
             userId,
             locationId,
-            role,
+            setKey,
           );
 
           return {
@@ -308,7 +308,7 @@ const populateLocationSetIdentityImage = inngest.createFunction(
 
     if (locationSpec == null) {
       logger.error(
-        { locationId, userId, role },
+        { locationId, userId, setKey },
         `Missing location specification for set identity image generation`,
       );
       return;
@@ -326,7 +326,7 @@ const populateLocationSetIdentityImage = inngest.createFunction(
           prompt: buildLocationSetIdentityImagePrompt({
             input: {
               locationSpec,
-              targetSet: role,
+              targetSet: setKey,
             },
           }),
         },
@@ -339,7 +339,7 @@ const populateLocationSetIdentityImage = inngest.createFunction(
           db,
           userId,
           locationId,
-          role,
+          setKey,
           generatedAssetId,
         );
       }),
@@ -351,22 +351,22 @@ const populateLocationSetName = inngest.createFunction(
   {
     id: `location/populateLocationSetName`,
     singleton: {
-      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.role`,
+      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.setKey`,
       mode: `skip`,
     },
     triggers: locationPopulateLocationSetNameEvent,
   },
   async ({ event, step, logger }) => {
-    const { userId, locationId, role } = event.data;
+    const { userId, locationId, setKey } = event.data;
 
-    await step.run(`read set name (${role})`, async () =>
+    await step.run(`read set name (${setKey})`, async () =>
       withDrizzle(async (db) => {
         const setting = await db.query.userSetting.findFirst({
           where: and(
             eq(s.userSetting.userId, userId),
             eq(
               s.userSetting.key,
-              pinyinSoundLocationSetNameSettingKey(locationId, role),
+              pinyinSoundLocationSetNameSettingKey(locationId, setKey),
             ),
           ),
         });
@@ -376,7 +376,7 @@ const populateLocationSetName = inngest.createFunction(
         }
 
         const decoded = pinyinSoundLocationSetNameSetting.decode(
-          { placeId: locationId, role },
+          { locationId, setKey },
           setting.value,
         );
 
@@ -390,18 +390,18 @@ const populateLocationSetName = inngest.createFunction(
 
         if (locationSpec == null) {
           logger.error(
-            { locationId, userId, role },
+            { locationId, userId, setKey },
             `Missing location specification for set name generation`,
           );
           return;
         }
 
         await setUserSetting(db, userId, {
-          key: pinyinSoundLocationSetNameSettingKey(locationId, role),
+          key: pinyinSoundLocationSetNameSettingKey(locationId, setKey),
           value: pinyinSoundLocationSetNameSetting.entity.marshalValue({
-            placeId: locationId,
-            role,
-            text: locationSpec.sets[role].name,
+            locationId,
+            setKey,
+            text: locationSpec.sets[setKey].name,
           }),
           now: new Date(),
           skipHistory: false,
@@ -451,7 +451,7 @@ const populateLocationSpec = inngest.createFunction(
           }
 
           const decoded = pinyinSoundLocationNameSetting.decode(
-            { placeId: locationId },
+            { locationId: locationId },
             setting.value,
           );
 
@@ -479,10 +479,10 @@ const populateLocationSpec = inngest.createFunction(
         withDrizzle(async (db) => {
           await setUserSetting(db, userId, {
             key: pinyinSoundLocationSpecSetting.entity.marshalKey({
-              placeId: locationId,
+              locationId: locationId,
             }),
             value: pinyinSoundLocationSpecSetting.entity.marshalValue({
-              placeId: locationId,
+              locationId: locationId,
               text: JSON.stringify(locationSpec),
             }),
             now: new Date(),
