@@ -1,6 +1,7 @@
 import { dictionaryQuery } from "@/client/query";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
+import { HanziPinyinText } from "@/client/ui/HanziPinyinText";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import type { Dictionary } from "@/dictionary";
 import type { HanziWord, Skill, SrsStateType } from "@/data/model";
@@ -110,7 +111,7 @@ function HskSkillWordRows({
   dictionary: Dictionary | undefined;
 }) {
   const db = useDb();
-  const { data: skillStates = [] } = useLiveQuery(
+  const { data: skillStates } = useLiveQuery(
     (q) => q.from({ skillState: db.skillStateCollection }),
     [db.skillStateCollection],
   );
@@ -166,32 +167,27 @@ function HskSkillWordRows({
         >
           <Pressable className="flex flex-row items-center gap-2 py-1.5">
             {hasAnyHskLozenges ? (
-              <View className="w-[44px]">
+              <View className="w-11">
                 {row.hsk == null ? null : (
                   <HskLozenge hskLevel={row.hsk} size="sm" />
                 )}
               </View>
             ) : null}
 
-            <View className="flex-1 flex-row items-center gap-2">
-              <Text className="font-sans text-lg font-normal text-fg-loud">
-                {row.hanzi}
-              </Text>
-              {row.pinyin == null ? null : (
-                <Text className="font-sans text-sm text-fg-dim">
-                  {row.pinyin}
-                </Text>
-              )}
-            </View>
+            <HanziPinyinText
+              className="flex-1"
+              hanzi={row.hanzi}
+              pinyin={row.pinyin}
+            />
 
             <Text
-              className="ml-4 flex-1 text-right font-sans text-sm text-fg"
+              className="ml-4 flex-1 text-right font-sans text-base text-fg"
               numberOfLines={2}
             >
               {row.gloss}
             </Text>
 
-            <View className="ml-2 w-[84px] items-end">
+            <View className="ml-2 w-21 items-end">
               <View className="relative h-1.5 w-full rounded bg-fg/10">
                 {milestonePercents.map((milestonePercent) => {
                   const milestoneProgress = milestonePercent / 100;
@@ -227,7 +223,7 @@ function HskSkillWordRows({
 }
 
 const milestoneDotClass = tv({
-  base: `absolute top-1/2 z-10 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full`,
+  base: `absolute top-1/2 z-10 size-1 -translate-1/2 rounded-full`,
   variants: {
     reached: {
       false: `bg-fg/30`,
@@ -276,7 +272,7 @@ const rankProgressClass = tv({
   variants: {
     rank: {
       0: `bg-fg/30`,
-      1: `bg-cyan`,
+      1: `bg-fg/70`,
       2: `bg-blue`,
       3: `bg-violet`,
       4: `bg-fuchsia`,

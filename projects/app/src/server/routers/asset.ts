@@ -1,16 +1,19 @@
 import { allowedImageMimeTypeEnum, assetIdSchema } from "@/data/model";
-import { listReferencedAssetIdsForUser } from "@/server/lib/assetSync";
-import { withDrizzle } from "@/server/lib/db";
 import {
   createPresignedReadUrl,
   createPresignedUploadUrl,
   MAX_ASSET_SIZE_BYTES,
   verifyObjectExists,
-} from "@/server/lib/s3/assets";
-import * as schema from "@/server/pgSchema";
+} from "@/server/lib/s3/asset";
+import {
+  assetUploadRequestedEvent,
+  inngest,
+} from "@/server/lib/inngest/client";
 import { authedProcedure, router } from "@/server/lib/trpc";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { z } from "zod";
+
+const maxFindMissingAssetsCount = 200;
 
 export const assetRouter = router({
   /**
@@ -45,6 +48,7 @@ export const assetRouter = router({
         .object({
           uploadUrl: z.string(),
           assetKey: z.string(),
+          expiresAt: z.number(),
         })
         .strict(),
     )
@@ -52,31 +56,19 @@ export const assetRouter = router({
       const { userId } = opts.ctx.session;
       const { assetId, contentType, contentLength } = opts.input;
 
-      const now = new Date();
-      await withDrizzle((db) =>
-        db
-          .insert(schema.assetPendingUpload)
-          .values({
-            userId,
-            assetId,
-            createdAt: now,
-          })
-          .onConflictDoUpdate({
-            target: [
-              schema.assetPendingUpload.userId,
-              schema.assetPendingUpload.assetId,
-            ],
-            set: {
-              createdAt: now,
-            },
-          }),
-      );
-
       const result = await createPresignedUploadUrl({
         assetId,
         contentType,
         contentLength,
       });
+
+      await inngest.send(
+        assetUploadRequestedEvent.create({
+          userId,
+          assetId,
+          expiresAt: result.expiresAt,
+        }),
+      );
 
       return result;
     }),
@@ -148,22 +140,51 @@ export const assetRouter = router({
     }),
 
   /**
-   * List all assets referenced in user settings (used for remote sync).
-   * Returns asset IDs that are actually in use by the user in their settings,
-   * avoiding the need to sync the entire bucket.
+   * Check which of the provided asset IDs are missing from storage.
+   * Uses object storage as the source of truth rather than DB references.
    */
-  listAssetBucketUserFiles: authedProcedure
-    .output(z.array(z.string()))
+  findMissingAssets: authedProcedure
+    .input(
+      z
+        .object({
+          assetIds: z.array(assetIdSchema).max(maxFindMissingAssetsCount),
+        })
+        .strict(),
+    )
+    .output(
+      z
+        .object({
+          missingAssetIds: z.array(assetIdSchema),
+        })
+        .strict(),
+    )
     .query(async (opts) => {
-      const { userId } = opts.ctx.session;
-      try {
-        const assetIds = await listReferencedAssetIdsForUser(userId);
+      const { assetIds } = opts.input;
 
-        return assetIds;
+      try {
+        const missingAssetIds: typeof assetIds = [];
+        const chunkSize = 20;
+
+        for (let i = 0; i < assetIds.length; i += chunkSize) {
+          const assetIdChunk = assetIds.slice(i, i + chunkSize);
+          const chunkResults = await Promise.all(
+            assetIdChunk.map(async (assetId) => {
+              const assetKey = getBucketObjectKeyForId(assetId);
+              const exists = await verifyObjectExists(assetKey);
+              return exists.exists ? null : assetId;
+            }),
+          );
+
+          missingAssetIds.push(
+            ...chunkResults.filter((assetId) => assetId != null),
+          );
+        }
+
+        return { missingAssetIds };
       } catch (error) {
-        console.error(`Failed to list asset references in user settings`, {
+        console.error(`Failed to check asset presence in storage`, {
+          assetIdCount: assetIds.length,
           error,
-          userId,
         });
         throw error;
       }

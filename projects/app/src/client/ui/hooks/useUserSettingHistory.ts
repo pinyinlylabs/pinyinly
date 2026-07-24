@@ -23,10 +23,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
 } {
   const db = useDb();
   const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
-  const { settingKey, keyParamMarshaled } = getSettingKeyInfo(
-    userSetting,
-    keyInput,
-  );
+  const { settingKey } = getSettingKeyInfo(userSetting, keyInput);
   const result = useLiveQuery(
     (q) =>
       q
@@ -40,12 +37,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
       id: entry.id,
       createdAt: entry.createdAt,
       value:
-        entry.value == null
-          ? null
-          : userSetting.entity.unmarshalValueSafe({
-              ...keyParamMarshaled,
-              ...entry.value,
-            }),
+        entry.value == null ? null : userSetting.decode(keyInput, entry.value),
     }))
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 

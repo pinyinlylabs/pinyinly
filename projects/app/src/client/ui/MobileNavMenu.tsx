@@ -71,11 +71,11 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
   return (
     <View className="size-full bg-bg">
       <View className="flex-row px-4 py-3">
-        <View className="w-[32px] shrink" />
+        <View className="w-8 shrink" />
         <View className="flex-1 items-center">
           <HeaderTitleProvider.TitleText className={`pyly-body-title`} />
         </View>
-        <View className="w-[32px] shrink">
+        <View className="w-8 shrink">
           <Pressable onPress={dismiss}>
             <Icon icon="close" size={32} />
           </Pressable>
@@ -103,7 +103,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
       ) : (
         <ScrollView
           className="flex-1"
-          contentContainerClassName="gap-8 px-4 pb-6 pt-4"
+          contentContainerClassName="gap-8 px-4 pt-4 pb-6"
           keyboardShouldPersistTaps="handled"
         >
           {navItems
@@ -128,7 +128,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
               .map((section, sectionIndex) => (
                 <View key={sectionIndex}>
                   {sectionIndex === 0 ? null : (
-                    <View className="invisible h-[40px]" />
+                    <View className="invisible h-10" />
                   )}
                   {section.items.map((item, itemIndex) => (
                     <MobileNavSubtleItem
@@ -185,7 +185,7 @@ function MobileNavItem({
       <Pressable
         onPress={onNavigate}
         className={`
-          flex-row bg-bg-high py-2.5 pl-4 pr-3
+          flex-row bg-bg-high py-2.5 pr-3 pl-4
 
           hover:bg-fg/10
         `}
@@ -216,7 +216,7 @@ function MobileNavSubtleItem({
       <Pressable onPress={onNavigate}>
         <Text
           className={`
-            font-sans text-sm/[32px] font-bold uppercase text-fg-dim
+            font-sans text-sm/[32px] font-bold text-fg-dim uppercase
 
             hover:text-fg
           `}

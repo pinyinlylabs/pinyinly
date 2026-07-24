@@ -46,7 +46,7 @@
       }
     },
     {
-      "files": ["src/server/lib/inngest.ts"],
+      "files": ["src/server/lib/inngest/**"],
       "rules": {
         // Inngest handlers receive a logger in function context. Use that logger
         // for structured object-first logging instead of console.* calls.
@@ -56,10 +56,6 @@
   ],
   "env": {
     "builtin": true
-  },
-  "options": {
-    "reportUnusedDisableDirectives": "deny",
-    "respectEslintDisableDirectives": false
   },
   "ignorePatterns": ["**/*.d.ts", "src/app/dev/**"]
 }

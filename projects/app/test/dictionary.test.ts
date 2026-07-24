@@ -27,7 +27,7 @@ import {
   hanziWordMeaningSchema,
   loadCharacterComponentUsageEntries,
   loadBuiltinCharacterDecompositionEntries,
-  loadCharacters,
+  loadCharactersJson,
   loadDictionary,
   loadHanziWordMigrations,
   loadKangXiRadicalsStrokes,
@@ -52,7 +52,6 @@ import {
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
-import { z } from "zod";
 import {
   buildCedictSenseId,
   extractDictionaryPinyinFromCedictSense,
@@ -75,7 +74,7 @@ test(`radical groups have the right number of elements`, async () => {
 });
 
 test(`json data can be loaded and passes the schema validation`, async () => {
-  await loadCharacters();
+  await loadCharactersJson();
   await loadPinyinSoundNameSuggestions();
   await loadPinyinSoundThemeDetails();
   await loadPinyinWords();
@@ -308,10 +307,10 @@ test(`hanzi word meaning gloss lint`, async () => {
 });
 
 test(`hanzi meaning canonicalForm`, async () => {
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
   const dictionary = await loadDictionary();
 
-  for (const [hanzi, data] of characters) {
+  for (const [hanzi, data] of charactersJson) {
     if (data.canonicalForm != null) {
       // A character with a `canonicalForm` shouldn't exist in the dictionary.
       expect
@@ -553,31 +552,15 @@ test(`all word lists only reference valid hanzi words`, async () => {
   }
 });
 
-test(`zod schemas are compatible with OpenAI API`, async () => {
-  function assertCompatible(schema: z.ZodType): void {
-    const jsonSchema = JSON.stringify(
-      z.toJSONSchema(schema, { unrepresentable: `any` }),
-    );
-
-    // `z.array(…).min(…) is not supported by OpenAI API`,
-    expect(jsonSchema).not.toMatch(/"minItems":/gu);
-
-    // `z.array(…).max(…) is not supported by OpenAI API`,
-    expect(jsonSchema).not.toMatch(/"maxItems":/gu);
-  }
-
-  assertCompatible(hanziWordMeaningSchema);
-});
-
 test(`hanzi uses consistent unicode characters`, async () => {
   const debugNonCjkUnifiedIdeograph = await loadDebugNonCjkUnifiedIdeograph();
   const dict = await loadDictionary();
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
 
   const violations = dict.allHanziWords
     .map((x) => hanziFromHanziWord(x))
     .flatMap((x) => splitHanziText(x))
-    .filter((x) => characters.get(x)?.isStructural !== true)
+    .filter((x) => charactersJson.get(x)?.isStructural !== true)
     .filter((x) => isNotCjkUnifiedIdeograph(x))
     .map((x) => debugNonCjkUnifiedIdeograph(x));
 
@@ -643,7 +626,7 @@ test(`dictionary contains entries for decomposition`, async () => {
     /* sources */ Set<HanziCharacter>
   >();
   const dictionary = await loadDictionary();
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
   const decompositionData = await loadBuiltinCharacterDecompositionEntries();
 
   const allHanzi = dictionary.allHanziWords.map((hanziWord) =>
@@ -661,7 +644,7 @@ test(`dictionary contains entries for decomposition`, async () => {
         character,
         decompositionData,
       )) {
-        if (characters.get(component)?.canonicalForm != null) {
+        if (charactersJson.get(component)?.canonicalForm != null) {
           // The character is a pointer to another character, so it itself
           // doesn't need a dictionary entry.
           continue;

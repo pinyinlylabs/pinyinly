@@ -20,10 +20,7 @@ import { TextInputMulti } from "./TextInputMulti";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 import { TextInputSingle } from "./TextInputSingle";
 
-export type InlineEditableSettingTextVariant = `body` | `title`;
-
 interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
-  variant?: InlineEditableSettingTextVariant;
   setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
   readonly?: boolean;
@@ -39,9 +36,7 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   showCounterAtRatio?: number;
   overLimitMessage?: string;
   counterLength?: (value: string) => number;
-  displayClassName?: string;
-  emptyClassName?: string;
-  inputClassName?: string;
+  textClassName?: string;
   displayContainerClassName?: string;
   displayHoverClassName?: string;
   renderDisplay?: (value: string) => ReactNode;
@@ -55,7 +50,6 @@ const defaultSanitizeValue = (value: string) => {
 };
 
 export function InlineEditableSettingText<T extends UserSettingTextEntity>({
-  variant = `body`,
   setting,
   settingKey,
   readonly = false,
@@ -67,9 +61,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   showCounterAtRatio = 0.8,
   overLimitMessage,
   counterLength,
-  displayClassName,
-  emptyClassName,
-  inputClassName,
+  textClassName = `pyly-body`,
   displayContainerClassName,
   displayHoverClassName,
   renderDisplay,
@@ -210,25 +202,19 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const showHistoryButton =
     isEditing && draft.trim().length === 0 && historyEntries.length > 0;
 
-  const displayViewClassName = displayContainer({
-    variant,
-    class: [displayContainerClassName, displayHoverClassName]
-      .filter(Boolean)
-      .join(` `),
+  const displayViewClassName = displayContainerClass({
+    class: [displayContainerClassName, displayHoverClassName],
   });
-  const editContainerClassName = editContainer({ variant });
-  const displayTextClassName = displayTextStyle({
-    variant,
-    class: displayClassName,
+  const editContainerClassName = editContainerClass();
+  const displayTextClassName = displayTextClass({
+    class: textClassName,
   });
-  const emptyTextClassName = emptyTextStyle({
-    variant,
-    class: emptyClassName,
+  const emptyTextClassName = tv({})({
+    class: [textClassName, `select-none text-fg/20`],
   });
-  const inputTextClassName = inputText({ variant, class: inputClassName });
-  const multilineInputClassName = multiline
-    ? `${inputTextClassName} max-h-80 rounded-none bg-transparent p-0`
-    : inputTextClassName;
+  const inputTextClassName = inputTextClass({
+    class: textClassName,
+  });
   const counterThreshold =
     maxLength == null ? null : Math.ceil(maxLength * showCounterAtRatio);
   const currentLength = counterLength?.(draft) ?? draft.length;
@@ -259,10 +245,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         <View
           ref={containerRef}
           className={[
-            `relative rounded-md bg-bg-high`,
-            isInputFocused
-              ? `outline outline-1 outline-blue outline-offset-0`
-              : `outline-none`,
+            `relative rounded-md bg-bg-high outline-2 -outline-offset-2`,
+            isInputFocused ? `outline-blue` : `outline-transparent`,
             editContainerClassName,
           ].join(` `)}
         >
@@ -281,7 +265,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 setIsInputFocused(false);
               }}
               placeholder={placeholder}
-              className={multilineInputClassName}
+              className={inputTextClassName}
               variant="bare"
               style={showHistoryButton ? { paddingRight: 32 } : undefined}
             />
@@ -326,11 +310,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 <Text
                   className={
                     isAtLimit
-                      ? `
-                        text-right text-[11px] text-fg
-
-                        [--color-fg:var(--color-warning)]
-                      `
+                      ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
                       : `text-right text-[11px] text-fg-dim`
                   }
                 >
@@ -345,7 +325,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
             </View>
           ) : null}
           {showHistoryButton ? (
-            <View className="absolute right-2 top-2">
+            <View className="absolute top-2 right-2">
               <FloatingMenuModal
                 menu={
                   <InlineEditableSettingHistoryMenu
@@ -370,7 +350,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       ) : (
         <Pressable
           accessibilityRole="button"
-          className={pressable()}
+          className={pressableClass()}
           onPress={() => {
             setIsEditing(true);
           }}
@@ -419,71 +399,34 @@ function saveDraftValue<T extends UserSettingTextEntity>(
   onSaveValue?.(nextValue?.text ?? null);
 }
 
-const pressable = tv({
+const pressableClass = tv({
   base: `
     group
 
-    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-    focus-visible:outline-fg/60
+    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg/60
 
     web:transition-colors
   `,
 });
 
-const displayContainer = tv({
-  variants: {
-    variant: {
-      body: `
-        -mx-2 rounded-md px-2 py-1
+const displayContainerClass = tv({
+  base: `
+    -mx-2 rounded-md px-2 py-1
 
-        group-hover:bg-fg-bg10
-      `,
-      title: `
-        -mx-1 rounded-md px-1 py-0.5
-
-        group-hover:bg-fg-bg10
-      `,
-    },
-  },
+    group-hover:bg-fg-bg10
+  `,
 });
 
-const editContainer = tv({
-  variants: {
-    variant: {
-      body: `-mx-2 px-2 py-1`,
-      title: `-mx-1 px-1 py-0.5`,
-    },
-  },
+const editContainerClass = tv({
+  base: `-mx-2 rounded-md px-2 py-1`,
 });
 
-const displayTextStyle = tv({
-  base: `text-left`,
-  variants: {
-    variant: {
-      body: `pyly-body text-fg`,
-      title: `text-3xl font-bold text-fg`,
-    },
-  },
+const displayTextClass = tv({
+  base: `text-fg`,
 });
 
-const emptyTextStyle = tv({
-  base: `text-left`,
-  variants: {
-    variant: {
-      body: `pyly-body text-fg-dim`,
-      title: `select-none text-3xl text-fg/20`,
-    },
-  },
-});
-
-const inputText = tv({
-  base: `text-left`,
-  variants: {
-    variant: {
-      body: `pyly-body rounded-md bg-bg-high px-2 py-1 text-fg`,
-      title: `rounded-md bg-bg-high px-1 py-0.5 text-3xl font-bold text-fg`,
-    },
-  },
+const inputTextClass = tv({
+  base: `max-h-80 text-fg`,
 });
 
 type HistoryEntry = {
@@ -531,7 +474,7 @@ function InlineEditableSettingHistoryMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <ScrollView
-      className="max-h-[400px] w-[300px] rounded-xl bg-bg-high shadow-lg"
+      className="max-h-100 w-75 rounded-xl bg-bg-high shadow-lg"
       contentContainerClassName="gap-1 p-2"
     >
       {entries.map((entry) => (

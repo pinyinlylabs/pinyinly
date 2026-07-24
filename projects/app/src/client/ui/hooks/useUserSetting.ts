@@ -1,12 +1,11 @@
+import { getUserSettingKeyInfo } from "@/data/userSettings";
 import type { UserSetting } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import type {
   RizzleAnyEntity,
   RizzleEntityInput,
   RizzleEntityOutput,
-  RizzleType,
 } from "@/util/rizzle";
-import { keyPathVariableNames } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Flatten } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -44,45 +43,11 @@ export type UseUserSettingSetValue<T extends UserSettingEntity> = (
   options?: UserSettingSetOptions,
 ) => void;
 
-export function getSettingKeyInfo<T extends UserSettingEntity>(
-  userSetting: UserSetting<T>,
-  keyParams: UserSettingKeyInput<T>,
-) {
-  const settingEntity = userSetting.entity;
-  const settingKey = settingEntity.marshalKey(keyParams);
-  const valueShape = (
-    settingEntity._def.valueType as unknown as {
-      _def: { shape: Record<string, RizzleType> };
-    }
-  )._def.shape;
-  const keyParamNames = keyPathVariableNames(settingEntity._def.keyPath);
-  const keyParamAliases = keyParamNames.map((name) => {
-    const type = valueShape[name];
-    return type == null ? name : (type._getAlias() ?? name);
-  });
-
-  const keyParamMarshaled: Record<string, string> = {};
-  for (const name of keyParamNames) {
-    const type = valueShape[name];
-    if (type == null) {
-      continue;
-    }
-    const alias = type._getAlias() ?? name;
-    const rawValue = (keyParams as Record<string, unknown>)[name];
-    if (rawValue == null) {
-      continue;
-    }
-    keyParamMarshaled[alias] = type.marshal(rawValue) as string;
-  }
-
-  return { settingKey, keyParamAliases, keyParamMarshaled, valueShape };
-}
+export const getSettingKeyInfo = getUserSettingKeyInfo;
 
 export const noKeyParams = {} as const; // allow memoization inside rizzle
 const skippedSettingKeyInfo = {
   settingKey: ``,
-  keyParamAliases: [] as string[],
-  keyParamMarshaled: {} as Record<string, string>,
 };
 
 export type UseUserSettingWithKeyOptions<T extends UserSettingEntity> = {
@@ -123,7 +88,7 @@ export function useUserSetting<T extends UserSettingEntity>(
       : ((`key` in options
           ? options.key
           : noKeyParams) as UserSettingKeyInput<T>);
-  const { settingKey, keyParamAliases, keyParamMarshaled } = skip
+  const { settingKey } = skip
     ? skippedSettingKeyInfo
     : getSettingKeyInfo(options.setting, keyInput);
 
@@ -145,10 +110,7 @@ export function useUserSetting<T extends UserSettingEntity>(
   const value =
     options == null || settingData?.value == null
       ? null
-      : options.setting.entity.unmarshalValueSafe({
-          ...keyParamMarshaled,
-          ...settingData.value,
-        });
+      : options.setting.decode(keyInput, settingData.value);
 
   const valueRef = useRef(value);
   useEffect(() => {
@@ -163,21 +125,10 @@ export function useUserSetting<T extends UserSettingEntity>(
     }
 
     const nextValue = updater ?? null;
-    const marshaledValue =
-      nextValue == null
-        ? null
-        : options.setting.entity.marshalValue({
-            ...(keyInput as Record<string, unknown>),
-            ...(nextValue as Record<string, unknown>),
-          } as RizzleEntityInput<T>);
-    const strippedValue =
-      marshaledValue == null || keyParamAliases.length === 0
-        ? marshaledValue
-        : Object.fromEntries(
-            Object.entries(marshaledValue as Record<string, unknown>).filter(
-              ([key]) => !keyParamAliases.includes(key),
-            ),
-          );
+    const strippedValue = options.setting.encodeStoredValue(
+      keyInput,
+      nextValue as RizzleEntityInput<T> | null,
+    );
     const skipHistory = opts?.skipHistory === true;
 
     void r.mutate

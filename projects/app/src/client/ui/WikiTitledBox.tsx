@@ -45,22 +45,28 @@ export function WikiTitledBox({
   return (
     <View className={containerClass({ className })} onLayout={onLayout}>
       <View className="flex-row items-center">
-        <Text className="flex-1 font-sans text-sm/normal font-semibold uppercase text-fg-dim">
+        <Text className="flex-1 font-sans text-sm/normal font-semibold text-fg-dim uppercase">
           {title}
         </Text>
         {headerAction}
       </View>
 
-      <View className="relative rounded-lg bg-bg-high">
+      <View
+        className={`
+          relative overflow-hidden rounded-lg bg-bg-high outline -outline-offset-1
+
+          ${isEditing ? `outline-2 outline-blue` : `outline-fg/10`}
+        `}
+      >
         {isOverflowExpandable ? (
           <>
             {isExpanded ? null : (
               <>
                 <View
                   className={`
-                    pointer-events-none absolute inset-x-0 bottom-2 z-10 h-20 backdrop-blur-sm
-
+                    pointer-events-none absolute inset-x-0 bottom-2 z-10 h-20
                     [mask-image:linear-gradient(to_bottom,transparent,black_45%,black)]
+                    backdrop-blur-sm
                   `}
                 />
                 <View className="absolute inset-x-0 bottom-2 z-10 items-center">
@@ -98,7 +104,7 @@ export function WikiTitledBox({
             </View>
 
             {isExpanded ? (
-              <View className="px-2 pb-2 pt-1">
+              <View className="px-2 pt-1 pb-2">
                 <RectButton
                   variant="bareDim"
                   iconStart="chevron-up-circled"

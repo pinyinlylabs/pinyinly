@@ -7,7 +7,7 @@ export const Pylymark = ({ source }: { source: string }) => {
   const rendered = useMemo(() => {
     const parsed = parsePylymark(source);
     return (
-      <Text className="tab-size-2 whitespace-pre-wrap">
+      <Text className="whitespace-pre-wrap tab-size-2">
         {parsed.map((node, index) => {
           switch (node.type) {
             case `text`: {

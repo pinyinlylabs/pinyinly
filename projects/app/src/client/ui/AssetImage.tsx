@@ -18,6 +18,7 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
   demoAssetStatus?: AssetStatusKind;
   demoErrorMessage?: string | null;
   demoImageError?: boolean;
+  imageClassName?: string;
   style?: StyleProp<Pick<ImageStyle, `width` | `height` | `transform`>>;
 }
 
@@ -37,6 +38,7 @@ export function AssetImage({
   demoAssetStatus,
   demoErrorMessage,
   demoImageError = false,
+  imageClassName,
   onLoadStart,
   onLoadEnd,
   onError,
@@ -75,7 +77,7 @@ export function AssetImage({
       <ExpoImage
         {...restImageProps}
         source={source}
-        className="size-full"
+        className={`size-full ${imageClassName ?? ``}`.trim()}
         contentFit={contentFit}
         transition={200}
         onLoadStart={() => {

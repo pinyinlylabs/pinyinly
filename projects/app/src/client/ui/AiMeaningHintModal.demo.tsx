@@ -2,7 +2,7 @@ import { trpc } from "@/client/trpc";
 import { AiMeaningHintModal } from "@/client/ui/AiMeaningHintModal";
 import { RectButton } from "@/client/ui/RectButton";
 import type { AppRouter } from "@/server/routers/_app";
-import { meaningHintPromptInputSchema } from "@/util/prompts";
+import { meaningHintPromptInputSchema } from "@/util/prompts/meaningHint";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";

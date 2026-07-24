@@ -93,15 +93,15 @@ const tileClass = tv({
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
-      filled: `theme-sky-panel items-center justify-center`,
+      filled: `items-center justify-center theme-sky-panel`,
     },
     isCharacter: {
       true: ``,
     },
     size: {
-      "10": `h-[40px] rounded-md p-2`,
-      "20": `w-[80px] rounded-lg py-2`,
-      "47": `min-h-[188px] w-[188px] rounded-lg py-3`,
+      "10": `h-10 rounded-md p-2`,
+      "20": `w-20 rounded-lg py-2`,
+      "47": `min-h-47 w-47 rounded-lg py-3`,
     },
   },
   compoundVariants: [
@@ -118,7 +118,7 @@ const outlineClass = tv({
   variants: {
     variant: {
       outline: ``,
-      filled: `rounded-lg outline outline-1 -outline-offset-1 outline-fg-loud/10`,
+      filled: `rounded-lg outline-1 -outline-offset-1 outline-fg-loud/10`,
     },
     size: {
       "10": `rounded-md`,
@@ -139,8 +139,8 @@ const progressBarClass = tv({
     },
     size: {
       "10": `h-[7px]`,
-      "20": `h-[8px]`,
-      "47": `h-[12px]`,
+      "20": `h-2`,
+      "47": `h-3`,
     },
   },
 });
@@ -150,8 +150,8 @@ const progressBarMaskClass = tv({
   variants: {
     size: {
       "10": `bottom-[3px] h-[5px] rounded-b-md`,
-      "20": `bottom-[4px] h-[6px] rounded-b-md`,
-      "47": `bottom-[6px] h-[8px] rounded-b-lg`,
+      "20": `bottom-1 h-[6px] rounded-b-md`,
+      "47": `bottom-[6px] h-2 rounded-b-lg`,
     },
   },
 });
@@ -164,14 +164,13 @@ const pinyinTextClass = tv({
       // Interpolate between 10px-14px based on character count. 80px is the
       // tile width, 2px is border, 16px is the padding, 2 is glyph scale factor.
       "20": `
-        h-[24px] px-2 text-[clamp(10px,(80px-2px-16px)/var(--char-count)*2,14px)] font-light
-        leading-none
+        h-6 px-2 text-[clamp(10px,(80px-2px-16px)/var(--char-count)*2,14px)] leading-none font-light
       `,
       // Interpolate between 10px-18px based on character count. 80px is the
       // tile width, 2px is border, 16px is the padding, 2 is glyph scale factor.
       "47": `
-        h-[24px] px-2 text-[clamp(10px,(188px-2px-16px)/var(--char-count)*2,18px)] font-medium
-        leading-tight
+        h-6 px-2 text-[clamp(10px,(188px-2px-16px)/var(--char-count)*2,18px)] leading-tight
+        font-medium
       `,
     },
   },
@@ -202,14 +201,14 @@ const glossTextClass = tv({
       // Interpolate between 12px-14px based on character count. 80px is the
       // tile width, 2px is border, 8px is the padding, 3 is the number of lines.
       "20": `
-        h-8 px-2 text-[clamp(10px,(80px-2px-16px)*3/var(--char-count),14px)] font-semibold
-        leading-none
+        h-8 px-2 text-[clamp(10px,(80px-2px-16px)*3/var(--char-count),14px)] leading-none
+        font-semibold
       `,
       // Interpolate between 12px-24px based on character count. 188px is the
       // tile width, 24px is the padding, 3 is the number of lines.
       "47": `
-        h-14 px-6 text-[clamp(12px,(188px-2px-24px)*3/var(--char-count),24px)] font-bold
-        leading-tight
+        h-14 px-6 text-[clamp(12px,(188px-2px-24px)*3/var(--char-count),24px)] leading-tight
+        font-bold
       `,
     },
   },

@@ -19,9 +19,9 @@ export default function WebsitePage() {
   return (
     <>
       <View
-        className={`www-px-comfortable mb-[100px] h-screen items-center justify-center pt-[100px]`}
+        className={`www-px-comfortable mb-25 h-screen items-center justify-center pt-25`}
       >
-        <View className="mb-[100px] items-center">
+        <View className="mb-25 items-center">
           <Text
             className={`
               www-text-hero text-center
@@ -52,7 +52,7 @@ export default function WebsitePage() {
         </View>
       </View>
 
-      <View className="www-px-comfortable min-h-[500px] w-full pt-[100px]">
+      <View className="www-px-comfortable min-h-125 w-full pt-25">
         <View className="max-w-www-col gap-40 self-center">
           <View>
             <Text className="www-text-subtitle">Chinese characters</Text>

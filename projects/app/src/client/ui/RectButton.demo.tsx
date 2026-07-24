@@ -49,25 +49,25 @@ export default () => (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start" showFrame>
-        <View className="w-[120px] items-start gap-2">
+        <View className="w-30 items-start gap-2">
           <RectButtonVariants />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center" showFrame>
-        <View className="w-[120px] items-center gap-2">
+        <View className="w-30 items-center gap-2">
           <RectButtonVariants />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch" showFrame>
-        <View className="w-[120px] items-stretch gap-2">
+        <View className="w-30 items-stretch gap-2">
           <RectButtonVariants />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end" showFrame>
-        <View className="w-[120px] items-end gap-2">
+        <View className="w-30 items-end gap-2">
           <RectButtonVariants />
         </View>
       </ExampleStack>

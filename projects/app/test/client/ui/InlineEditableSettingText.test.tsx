@@ -27,6 +27,8 @@ const mockSettingEntity = {
 const mockSetting = {
   kind: `userSetting` as const,
   entity: mockSettingEntity,
+  decode: vi.fn(),
+  encodeStoredValue: vi.fn(),
 };
 
 describe(`InlineEditableSettingText`, () => {

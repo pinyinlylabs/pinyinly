@@ -1,6 +1,7 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import { HanziPinyinText } from "./HanziPinyinText";
 import { HskLozenge } from "./HskLozenge";
 import { Icon } from "./Icon";
 
@@ -32,26 +33,21 @@ export function CompactWordRows({
           <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={i}>
             <Pressable className="flex flex-row items-center gap-2 py-1.5">
               {hasAnyHskLozenges ? (
-                <View className="w-[40px]">
+                <View className="w-10">
                   {entry.hsk == null ? null : (
                     <HskLozenge hskLevel={entry.hsk} size="sm" />
                   )}
                 </View>
               ) : null}
-              <View className="flex-1 flex-row items-center gap-2">
-                <Text className="font-sans text-lg font-normal text-fg-loud">
-                  {hanzi}
-                </Text>
-                {pinyin == null ? null : (
-                  <Text className="font-sans text-sm text-fg-dim">
-                    {pinyin}
-                  </Text>
-                )}
-              </View>
+              <HanziPinyinText
+                className="flex-1"
+                hanzi={hanzi}
+                pinyin={pinyin}
+              />
 
               {gloss == null ? null : (
                 <Text
-                  className="ml-4 flex-1 text-right font-sans text-sm text-fg"
+                  className="ml-4 flex-1 text-right font-sans text-base text-fg"
                   numberOfLines={2}
                 >
                   {gloss}

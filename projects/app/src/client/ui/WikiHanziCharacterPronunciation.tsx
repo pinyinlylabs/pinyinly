@@ -1,27 +1,21 @@
 import type { DictionarySearchEntry } from "@/client/query";
+import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
+import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
-  defaultPinyinSoundInstructions,
-  defaultToneNames,
-  getDefaultFinalToneName,
   getFinalSoundLabel,
   getInitialSoundLabel,
-  getToneSoundLabel,
   isInitialSoundId,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  getPinyinFinalToneKeyParams,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
-  pinyinFinalToneDescriptionSetting,
-  pinyinFinalToneNameSetting,
-  pinyinFinalToneViewpointSetting,
+  pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameArticleSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -129,23 +123,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const finalPinyinSound2 = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameSetting,
-          key: { soundId: splitPinyin.finalSoundId },
-        },
-  );
-  const tonePinyinSound2 = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameSetting,
-          key: { soundId: splitPinyin.toneSoundId },
-        },
-  );
-
   const initialDescriptionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -154,87 +131,40 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const initialNameArticleSetting = useUserSetting(
+  const finalPlaceSelectionSetting = useUserSetting(
     splitPinyin == null
       ? null
       : {
-          setting: pinyinSoundNameArticleSetting,
-          key: { soundId: splitPinyin.initialSoundId },
+          setting: pinyinFinalSoundLocationSelectionSetting,
+          key: { soundId: splitPinyin.finalSoundId },
         },
   );
-  const finalToneDescriptionSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinFinalToneDescriptionSetting,
-          key: getPinyinFinalToneKeyParams(
-            splitPinyin.finalSoundId,
-            String(splitPinyin.tone),
-          ),
-        },
-  );
-  const finalToneViewpointSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinFinalToneViewpointSetting,
-          key: getPinyinFinalToneKeyParams(
-            splitPinyin.finalSoundId,
-            String(splitPinyin.tone),
-          ),
-        },
-  );
-  const finalToneNameSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinFinalToneNameSetting,
-          key: getPinyinFinalToneKeyParams(
-            splitPinyin.finalSoundId,
-            String(splitPinyin.tone),
-          ),
-        },
-  );
+  const placeDirectory = usePinyinSoundLocations();
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
-  const finalPinyinSoundName = finalPinyinSound2?.value?.text;
-  const tonePinyinSoundName = tonePinyinSound2?.value?.text;
+  const selectedFinalLocationId =
+    finalPlaceSelectionSetting?.value?.locationId ?? null;
+  const selectedFinalLocation =
+    selectedFinalLocationId == null
+      ? null
+      : (placeDirectory.locations.find(
+          (place) => place.locationId === selectedFinalLocationId,
+        ) ?? null);
 
   const initialSoundDescription =
     initialDescriptionSetting?.value?.text ?? null;
-  const initialSoundNameArticle =
-    initialNameArticleSetting?.value?.text ?? undefined;
-  const finalToneSceneDescription =
-    finalToneDescriptionSetting?.value?.text ?? null;
-  const finalToneSceneViewpoint =
-    finalToneViewpointSetting?.value?.text ?? null;
-  const finalToneLocationDescription = [
-    finalToneSceneDescription == null || finalToneSceneDescription.length === 0
-      ? null
-      : finalToneSceneDescription,
-    finalToneSceneViewpoint == null || finalToneSceneViewpoint.length === 0
-      ? null
-      : finalToneSceneViewpoint,
-  ]
-    .filter((value): value is string => value != null)
-    .join(`\n`);
+  const finalToneLocationDescription =
+    selectedFinalLocation?.description ?? null;
 
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
-  const toneDefaultName =
-    splitPinyin == null
-      ? ``
-      : (defaultToneNames[String(splitPinyin.tone)] ??
-        defaultPinyinSoundInstructions[splitPinyin.toneSoundId] ??
-        String(splitPinyin.tone));
-  const finalDisplayName = finalPinyinSoundName ?? finalLabel;
-  const toneDisplayName =
-    tonePinyinSoundName ?? getToneSoundLabel(pinyinUnit) ?? toneDefaultName;
-  const defaultFinalToneName = getDefaultFinalToneName({
-    finalName: finalDisplayName,
-    toneName: toneDisplayName,
-  });
+  const finalToneLocationSetKey = toneToLocationSetKey(splitPinyin?.tone ?? 5);
+  const finalToneLocationSetName =
+    selectedFinalLocation?.sets[finalToneLocationSetKey].name ?? null;
   const finalToneName =
-    finalToneNameSetting?.value?.text ?? defaultFinalToneName;
+    finalToneLocationSetName == null ||
+    finalToneLocationSetName.trim().length === 0
+      ? `Unnamed set`
+      : finalToneLocationSetName;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -278,7 +208,7 @@ export function WikiHanziCharacterPronunciationBox({
       {splitPinyin == null ? null : (
         <View className="gap-4 p-4">
           <View className="">
-            <Text className="pyly-body text-center">
+            <Text className="text-center pyly-body">
               <Text className="pyly-bold">{pinyinUnit}</Text>
             </Text>
             <View className="px-[15%] py-2">
@@ -431,11 +361,11 @@ export function WikiHanziCharacterPronunciationBox({
           leadCharacter={{
             name: initialPinyinSoundName,
             bio: initialSoundDescription ?? undefined,
-            article: initialSoundNameArticle,
           }}
           location={{
             name: finalToneName,
             description:
+              finalToneLocationDescription == null ||
               finalToneLocationDescription.length === 0
                 ? undefined
                 : finalToneLocationDescription,
@@ -477,7 +407,7 @@ function MergedHintDisplay({ value }: { value: string }) {
   );
 }
 
-function SoundLinkBlock({
+export function SoundLinkBlock({
   soundId,
   href,
   label,
@@ -545,7 +475,7 @@ function SoundLinkBlock({
 }
 
 const soundNameClass = tv({
-  base: `pyly-body pyly-ref`,
+  base: `pyly-ref pyly-body`,
 });
 
 function FinalToneForkedArrow() {
@@ -576,7 +506,27 @@ function FinalToneForkedArrow() {
 }
 
 function DownArrow() {
-  return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
+  return <Text className="h-6 pyly-body text-fg/40">↓</Text>;
+}
+
+function toneToLocationSetKey(tone: number): LocationSetKey {
+  switch (tone) {
+    case 1: {
+      return `arrival`;
+    }
+    case 2: {
+      return `ascent`;
+    }
+    case 3: {
+      return `heart`;
+    }
+    case 4: {
+      return `below`;
+    }
+    default: {
+      return `summit`;
+    }
+  }
 }
 
 function buildCueMeaningContext({

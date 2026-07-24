@@ -105,7 +105,6 @@ bench(
       graph,
       skillSrsStates,
       latestSkillRatings,
-      isStructuralHanzi: () => false,
       dictionary,
       now,
       maxQueueItems: graph.size,

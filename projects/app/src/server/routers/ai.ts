@@ -1,22 +1,26 @@
-import { assetIdSchema } from "@/data/model";
+import { assetIdSchema, locationIdSchema } from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
-import { createAssetFromBuffer } from "@/server/lib/createAsset";
-import { generateImage } from "@/server/lib/gemini";
-import { fetchAssetBase64 } from "@/server/lib/s3/assets";
+import {
+  geminiImageAspectRatioSchema,
+  requestGeminiImageAsAsset,
+} from "@/server/lib/gemini";
+import { inngest } from "@/server/lib/inngest/index";
 import { authedProcedure, router } from "@/server/lib/trpc";
-import { geminiImageAspectRatios } from "@/util/geminiImageAspectRatio";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { buildLocationSetDescriptionPrompt } from "@/util/prompts/location";
 import {
-  buildLeadCharacterDescriptionPrompt,
   buildMeaningHintCausualBridgePrompt,
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
+} from "@/util/prompts/meaningHint";
+import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-  buildSubLocationDescriptionPrompt,
-} from "@/util/prompts";
+} from "@/util/prompts/pronunciationHint";
+import { locationPopulateLocationEvent } from "@/server/lib/inngest/client";
 
 const pronunciationHintInputSchema = z
   .object({
@@ -24,7 +28,6 @@ const pronunciationHintInputSchema = z
       .object({
         name: z.string().min(1),
         bio: z.string().optional(),
-        article: z.string().optional(),
       })
       .strict(),
     location: z
@@ -128,38 +131,47 @@ const meaningHintOutputSchema = z
   })
   .strict();
 
-const subLocationDescriptionInputSchema = z
+const locationSetDescriptionInputSchema = z
   .object({
     label: z.string().min(1),
     location: z.string().min(1),
     locationNotes: z.string().optional(),
-    sublocation: z.string().min(1),
-    viewpoint: z.string().optional(),
+    locationSet: z.string().min(1),
     count: z.number().int().min(1).max(6),
   })
   .strict();
 
-const leadCharacterDescriptionInputSchema = z
+const mnemonicActorIdentityInputSchema = z
   .object({
-    name: z.string().min(1),
-    sound: z.string().min(1),
-    existingDescription: z.string().optional(),
-    count: z.number().int().min(1).max(6),
+    identity: z.string().min(1),
   })
   .strict();
 
-const aiReferenceImageSchema = z
+const imagePromptTextMessageSchema = z
   .object({
-    label: z.string().min(1).max(400).optional(),
+    role: z.literal(`user`),
+    kind: z.literal(`text`),
+    content: z.string().min(1).max(4000),
+  })
+  .strict();
+
+const imagePromptAssetMessageSchema = z
+  .object({
+    role: z.literal(`user`),
+    kind: z.literal(`asset`),
     assetId: assetIdSchema,
   })
   .strict();
 
+const imagePromptMessageSchema = z.discriminatedUnion(`kind`, [
+  imagePromptTextMessageSchema,
+  imagePromptAssetMessageSchema,
+]);
+
 const generateImageInputSchema = z
   .object({
-    prompt: z.string().min(1).max(4000),
-    referenceImages: z.array(aiReferenceImageSchema).max(4).optional(),
-    aspectRatio: z.enum(geminiImageAspectRatios).optional(),
+    messages: z.array(imagePromptMessageSchema).min(1).max(12),
+    aspectRatio: geminiImageAspectRatioSchema.optional(),
   })
   .strict();
 
@@ -169,7 +181,33 @@ const generateImageOutputSchema = z
   })
   .strict();
 
+const enqueueLocationSetIdentityImagesInputSchema = z
+  .object({
+    locationId: locationIdSchema,
+  })
+  .strict();
+
+const enqueueLocationSetIdentityImagesOutputSchema = z
+  .object({
+    enqueued: z.literal(true),
+  })
+  .strict();
+
 export const aiRouter = router({
+  enqueueLocationSetIdentityImages: authedProcedure
+    .input(enqueueLocationSetIdentityImagesInputSchema)
+    .output(enqueueLocationSetIdentityImagesOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      await inngest.send(
+        locationPopulateLocationEvent.create({
+          userId: ctx.session.userId,
+          locationId: input.locationId,
+        }),
+      );
+
+      return { enqueued: true };
+    }),
+
   generatePronunciationHints: authedProcedure
     .input(pronunciationHintInputSchema)
     .output(pronunciationHintOutputSchema)
@@ -289,19 +327,17 @@ export const aiRouter = router({
       return { suggestions };
     }),
 
-  generateSubLocationDescriptions: authedProcedure
-    .input(subLocationDescriptionInputSchema)
-    .output(buildSubLocationDescriptionPrompt.schema)
+  generateLocationSetDescriptions: authedProcedure
+    .input(locationSetDescriptionInputSchema)
+    .output(buildLocationSetDescriptionPrompt.schema)
     .mutation(async ({ input, signal }) => {
-      const { label, location, locationNotes, sublocation, viewpoint, count } =
-        input;
+      const { label, location, locationNotes, locationSet, count } = input;
 
-      const prompt = buildSubLocationDescriptionPrompt({
+      const prompt = buildLocationSetDescriptionPrompt({
         label,
         location,
         locationNotes,
-        sublocation,
-        viewpoint,
+        locationSet,
         count,
       });
 
@@ -311,7 +347,7 @@ export const aiRouter = router({
         });
         return data;
       } catch (error) {
-        console.error(`Failed to generate sublocation descriptions:`, error);
+        console.error(`Failed to generate location set descriptions:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
           message: `Unable to generate descriptions`,
@@ -319,17 +355,14 @@ export const aiRouter = router({
       }
     }),
 
-  generateLeadCharacterDescriptions: authedProcedure
-    .input(leadCharacterDescriptionInputSchema)
-    .output(buildLeadCharacterDescriptionPrompt.schema)
+  generateMnemonicActorIdentity: authedProcedure
+    .input(mnemonicActorIdentityInputSchema)
+    .output(buildMnemonicActorProfilePrompt.schema)
     .mutation(async ({ input, signal }) => {
-      const { name, sound, existingDescription, count } = input;
+      const { identity } = input;
 
-      const prompt = buildLeadCharacterDescriptionPrompt({
-        name,
-        sound,
-        existingDescription,
-        count,
+      const prompt = buildMnemonicActorProfilePrompt({
+        identity,
       });
 
       try {
@@ -338,10 +371,10 @@ export const aiRouter = router({
         });
         return data;
       } catch (error) {
-        console.error(`Failed to generate lead character descriptions:`, error);
+        console.error(`Failed to generate mnemonic actor identity:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
-          message: `Unable to generate descriptions`,
+          message: `Unable to generate mnemonic actor identity`,
         });
       }
     }),
@@ -350,35 +383,15 @@ export const aiRouter = router({
     .input(generateImageInputSchema)
     .output(generateImageOutputSchema)
     .mutation(async ({ input }) => {
-      const { prompt, referenceImages, aspectRatio, ...rest } = input;
+      const { messages, aspectRatio, ...rest } = input;
       true satisfies IsExhaustedRest<typeof rest>;
 
       try {
-        const resolvedReferenceImages =
-          referenceImages == null
-            ? undefined
-            : await Promise.all(
-                referenceImages.map(async (referenceImage) => {
-                  const imageData = await fetchAssetBase64(
-                    referenceImage.assetId,
-                  );
-                  return {
-                    label: referenceImage.label,
-                    data: imageData.data,
-                    mimeType: imageData.mimeType,
-                  };
-                }),
-              );
-
-        const { buffer, mimeType } = await generateImage({
-          prompt,
-          referenceImages: resolvedReferenceImages,
+        const assetId = await requestGeminiImageAsAsset({
+          model: `gemini-2.5-flash-image`,
+          messages,
           aspectRatio,
         });
-
-        const imageArrayBuffer = Uint8Array.from(buffer).buffer;
-
-        const assetId = await createAssetFromBuffer(imageArrayBuffer, mimeType);
 
         return { assetId };
       } catch (error) {

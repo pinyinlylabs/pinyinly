@@ -1,5 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { buildLeadCharacterDescriptionPrompt } from "@/util/prompts";
+import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import type { MnemonicActorProfileType } from "@/util/prompts/buildMnemonicActorProfilePrompt";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
@@ -8,53 +9,35 @@ import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 export interface AiLeadCharacterDescriptionModalProps {
-  characterName: string;
-  sound: string;
-  existingDescription?: string;
-  onApplyDescription: (description: string) => void;
+  identity: string;
+  onApplyActor: (actor: MnemonicActorProfileType) => void;
   onDismiss: () => void;
 }
 
-type DescriptionSuggestion = {
-  description: string;
-  explanation?: string | null;
-};
-
 export function AiLeadCharacterDescriptionModal({
-  characterName,
-  sound,
-  existingDescription,
-  onApplyDescription,
+  identity,
+  onApplyActor,
   onDismiss,
 }: AiLeadCharacterDescriptionModalProps) {
-  const [suggestions, setSuggestions] = useState<
-    DescriptionSuggestion[] | null
-  >(null);
+  const [actor, setActor] = useState<MnemonicActorProfileType | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const generateMutation =
-    trpc.ai.generateLeadCharacterDescriptions.useMutation();
+  const generateMutation = trpc.ai.generateMnemonicActorIdentity.useMutation();
 
-  const leadCharacterPrompt = buildLeadCharacterDescriptionPrompt({
-    name: characterName,
-    sound,
-    existingDescription,
-    count: 4,
+  const actorPrompt = buildMnemonicActorProfilePrompt({
+    identity,
   });
 
   const handleGenerate = async () => {
     setError(null);
     try {
       const result = await generateMutation.mutateAsync({
-        name: characterName,
-        sound,
-        existingDescription,
-        count: 4,
+        identity,
       });
-      setSuggestions(result.suggestions);
+      setActor(result);
     } catch (err) {
-      console.error(`AI lead character description generation failed:`, err);
-      setError(`Unable to generate descriptions right now.`);
+      console.error(`AI mnemonic actor generation failed:`, err);
+      setError(`Unable to generate actor profile right now.`);
     }
   };
 
@@ -72,7 +55,7 @@ export function AiLeadCharacterDescriptionModal({
               Cancel
             </RectButton>
             <Text className="font-sans text-[17px] font-semibold text-fg-loud">
-              AI character description
+              AI mnemonic actor
             </Text>
             <RectButton
               variant="bare"
@@ -87,10 +70,10 @@ export function AiLeadCharacterDescriptionModal({
 
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
             <AiPromptPreview
-              description="Prompt text generated from the same builder used by AI description generation."
+              description="Prompt text generated from the same builder used by AI actor identity generation."
               sections={[
                 {
-                  messages: leadCharacterPrompt.messages,
+                  messages: actorPrompt.messages,
                 },
               ]}
             />
@@ -102,44 +85,50 @@ export function AiLeadCharacterDescriptionModal({
             )}
 
             <View className="gap-2">
-              <Text className="pyly-body-subheading">Suggestions</Text>
+              <Text className="pyly-body-subheading">Actor profile</Text>
               {isGenerating ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
-                  Generating descriptions...
+                  Generating actor profile...
                 </Text>
               ) : null}
-              {suggestions == null ? (
+              {actor == null ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
-                  Press Generate to get AI suggestions.
+                  Press Generate to create a mnemonic actor profile.
                 </Text>
               ) : (
-                <View className="gap-3">
-                  {suggestions.map((suggestion, index) => (
-                    <View
-                      key={`${index}-${suggestion.description}`}
-                      className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3"
+                <View className="gap-3 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
+                  <View className="flex-row items-center justify-between gap-2">
+                    <Text className="pyly-body-subheading text-fg-loud">
+                      {actor.nickname}
+                    </Text>
+                    <RectButton
+                      variant="bare"
+                      onPress={() => {
+                        onApplyActor(actor);
+                        dismiss();
+                      }}
                     >
-                      <View className="flex-row items-center justify-end">
-                        <RectButton
-                          variant="bare"
-                          onPress={() => {
-                            onApplyDescription(suggestion.description);
-                            dismiss();
-                          }}
-                        >
-                          Use description
-                        </RectButton>
-                      </View>
-                      <Text className="pyly-body">
-                        <Pylymark source={suggestion.description} />
-                      </Text>
-                      {suggestion.explanation == null ? null : (
-                        <Text className="font-sans text-[13px] text-fg-dim">
-                          {suggestion.explanation}
-                        </Text>
-                      )}
-                    </View>
-                  ))}
+                      Use actor
+                    </RectButton>
+                  </View>
+                  <Text className="pyly-body-caption text-fg-dim">
+                    Identity: {actor.identity}
+                  </Text>
+                  <Text className="pyly-body">
+                    <Pylymark source={actor.summary} />
+                  </Text>
+                  <Text className="font-sans text-[13px] text-fg-dim">
+                    Anchor: {actor.identityAnchor}
+                  </Text>
+                  <Text className="font-sans text-[13px] text-fg-dim">
+                    Obsession: {actor.obsession}
+                  </Text>
+                  <Text className="font-sans text-[13px] text-fg-dim">
+                    Signature ability: {actor.signatureAbility}
+                  </Text>
+                  <Text className="font-sans text-[13px] text-fg-dim">
+                    Weakness: {actor.weakness}
+                  </Text>
                 </View>
               )}
             </View>

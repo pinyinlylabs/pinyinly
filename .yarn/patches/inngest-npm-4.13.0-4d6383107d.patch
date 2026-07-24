@@ -1,0 +1,10 @@
+diff --git a/index.d.ts b/index.d.ts
+index d50543841cf4f0f7c51507a765678c879ccde1ec..e8799bdf8d4562de94a0b9ab7bc17bd40494ec3b 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -28,3 +28,4 @@ import { version } from "./version.js";
+ import { StandardSchemaV1 } from "@standard-schema/spec";
+ export * from "@inngest/ai";
++export { InngestApi } from "./api/api.js"
+ export { type BaseContext, type ClientOptions, type ClientOptionsFromInngest, ConsoleLogger, type Context, type DurationLike, type EventMeta, type EventNameFromTrigger, type EventPayload, type EventSessionValue, type EventSessions, EventType, type ExclusiveKeys, type FailureEventArgs, type FailureEventPayload, type FinishedEventPayload, type GetFunctionInput, type GetFunctionOutput, type GetFunctionOutputRaw, type GetStepTools, type GroupTools, type GroupToolsDeps, type Handler, type HandlerWithTriggers, Inngest, InngestCommHandler, type InngestFunction, type InngestFunctionReference, type InstantLike, type IsStringLiteral, type JsonError, type LogArg, type LogLevel, type Logger, Middleware, NonRetriableError, type OutgoingOp, ProxyLogger, type Realtime, type ReceivedEventMeta, type RegisterOptions, RetryAfterError, type ScheduledTimerEventPayload, type SendEventBaseOutput, type SendEventPayload, type ServeHandlerOptions, type StandardSchemaV1, StepError, type StepFetch, type StepOptions, type StepOptionsOrId, type StrictUnion, type StrictUnionHelper, type TimeStr, type UnionKeys, type ZonedDateTimeLike, cron, dependencyInjectionMiddleware, eventType, experiment, fetch, group, headerKeys, internalEvents, invoke, isInngest, isInngestFunction, isInngestRequest, queryKeys, realtime, referenceFunction, serializeError, slugify, staticSchema, step, version, wrapStringFirstLogger };
+\ No newline at end of file

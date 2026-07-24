@@ -69,7 +69,6 @@ export function readonlyMapSet<K, V>(
     return map;
   }
   const copy = new Map(map);
-  // oxlint-disable-next-line unicorn/no-immediate-mutation
   copy.set(key, value);
   return copy;
 }
@@ -311,6 +310,20 @@ export function memoize0<R>(
       cacheSet = false;
     },
   });
+}
+
+declare global {
+  var __pylyMemoizeGlobalThis: Record<string, unknown> | undefined;
+}
+
+export function memoizeGlobalThis<R>(key: string, factory: () => R): R {
+  const globalThisCache = (globalThis.__pylyMemoizeGlobalThis ??= {});
+  if (key in globalThisCache) {
+    return globalThisCache[key] as R;
+  }
+  const value = factory();
+  globalThisCache[key] = value;
+  return value;
 }
 
 /**

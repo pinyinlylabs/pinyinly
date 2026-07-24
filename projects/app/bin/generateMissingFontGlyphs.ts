@@ -3,7 +3,7 @@ import {
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
-import { loadCharacters } from "#dictionary.ts";
+import { loadCharactersJson } from "#dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { glob, writeFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -34,9 +34,9 @@ const pingFang = pingFangCollection.fonts[0];
 invariant(pingFang != null);
 
 const allComponents = new Set<string>();
-const charactersData = await loadCharacters();
+const charactersJson = await loadCharactersJson();
 
-for (const [character, characterData] of charactersData) {
+for (const [character, characterData] of charactersJson) {
   allComponents.add(character);
   const ids = characterData.decomposition;
   invariant(

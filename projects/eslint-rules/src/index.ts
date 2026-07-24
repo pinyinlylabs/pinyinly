@@ -1,8 +1,7 @@
 import stylisticPlugin from "@stylistic/eslint-plugin";
 import type { ESLint } from "eslint";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
-import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defaults";
-import tailwindPlugin from "eslint-plugin-tailwindcss";
+import { getDefaultSelectors } from "eslint-plugin-better-tailwindcss/defaults";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.ts";
@@ -59,39 +58,40 @@ const tailwind: ConfigWithExtendsArray = [
 
     rules: {
       //
-      // tailwindcss
-      //
-
-      "tailwind/classnames-order": `error`,
-      "tailwind/enforces-negative-arbitrary-values": `error`,
-      "tailwind/enforces-shorthand": `error`,
-      "tailwind/migration-from-tailwind-2": `error`,
-      "tailwind/no-contradicting-classname": `error`,
-      "tailwind/no-custom-classname": `error`,
-      "tailwind/no-unnecessary-arbitrary-value": `error`,
-
-      //
       // better-tailwindcss
       //
 
-      "better-tailwindcss/multiline": [
+      "better-tailwindcss/enforce-consistent-class-order": `error`,
+      "better-tailwindcss/enforce-consistent-line-wrapping": [
         `error`,
         {
           printWidth: 100,
           group: `emptyLine`,
         },
       ],
+      "better-tailwindcss/enforce-consistent-important-position": `error`,
+      "better-tailwindcss/enforce-shorthand-classes": `error`,
+      "better-tailwindcss/no-conflicting-classes": `error`,
+      "better-tailwindcss/no-unknown-classes": [
+        `error`,
+        { detectComponentClasses: true },
+      ],
       "better-tailwindcss/no-unnecessary-whitespace": `error`,
     },
 
     settings: {
       "better-tailwindcss": {
-        // Tailwind 3 config
-        tailwindConfig: `tailwind.config.js`,
-        attributes: [
-          ...getDefaultAttributes(),
-          // support <ScrollView> attributes e.g. contentContainerClassName
-          `.*ClassName`,
+        // Resolve Tailwind assets from each package root.
+        cwd: `.`,
+        // Tailwind v4 CSS-first entrypoint.
+        entryPoint: `./src/global.css`,
+        selectors: [
+          ...getDefaultSelectors(),
+          {
+            kind: `attribute`,
+            // Support React Native Web attributes e.g. contentContainerClassName.
+            name: `.*ClassName`,
+          },
         ],
       },
     },
@@ -113,7 +113,6 @@ export const plugins = {
   [`@stylistic`]: stylisticPlugin as ESLint.Plugin,
   [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
   [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,
-  [`tailwind`]: tailwindPlugin as ESLint.Plugin,
 };
 
 export { defineConfig } from "eslint/config";

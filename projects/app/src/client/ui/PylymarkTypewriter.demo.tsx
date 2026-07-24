@@ -13,7 +13,7 @@ export default () => {
         ] as const
       ).map((textClass) => (
         <View className="flex-row items-center gap-2" key={textClass}>
-          <Text className="pyly-dev-dt w-[128px] text-right">{textClass}</Text>
+          <Text className="w-32 text-right pyly-dev-dt">{textClass}</Text>
           <Text
             className={`
               w-[250px]

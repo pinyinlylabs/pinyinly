@@ -13,6 +13,14 @@ The following commands should be used to test the code:
   - Run file tests: `moon run app:test -- <filename>`
   - Update snapshots: `moon run app:test -- -u`
 
+- Evals use vitest-evals. Prefer focused eval runs first to avoid slow full-suite runs:
+  - Run all evals (slow): `moon run app:evals`
+  - Run focused evals by test title: `moon run app:evals -- -t '<title substring>'`
+  - Example focused run: `moon run app:evals -- -t 'buildGuidedImaginationPrompt'`
+  - Example focused run: `moon run app:evals -- -t 'evaluateGuidedImagination'`
+  - Agent guidance: when iterating on a local change, run only the relevant eval target(s) first;
+    run broad evals only when explicitly requested or for final verification.
+
 - Lint uses oxlint and eslint:
   - Run all lint (and fix): `moon run app:lint`
   - Run file lint: `moon run app:eslint -- <filename>` or `moon run app:oxlint -- <filename>`

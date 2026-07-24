@@ -53,7 +53,7 @@ export default () => {
         <View className="relative size-[32px]">
           <DemoQuizQueueLozenge
             reviewQueue={createReviewQueue({ overDueCount: 3 })}
-            className="absolute left-[52%] top-[60%] border-2 border-solid border-bg"
+            className="absolute top-[60%] left-[52%] border-2 border-solid border-bg"
           />
         </View>
       </ExampleStack>

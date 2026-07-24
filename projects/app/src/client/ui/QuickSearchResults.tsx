@@ -220,7 +220,7 @@ function RecentQueries({
 
   return (
     <View className="">
-      <Text className="px-5 pb-4 pt-6 font-sans text-base font-semibold uppercase text-fg">
+      <Text className="px-5 pt-6 pb-4 font-sans text-base font-semibold text-fg uppercase">
         Recent
       </Text>
       {items.map((item) => {
@@ -393,13 +393,13 @@ function NoResults({
   onChangeQuery: (newQuery: string) => void;
 }) {
   return (
-    <View className="items-center px-4 pb-8 pt-10">
+    <View className="items-center px-4 pt-10 pb-8">
       <Text className="mb-10 font-sans text-lg font-medium text-fg-dim">
         No results for &quot;<Text className={`text-fg`}>{query}</Text>&quot;
       </Text>
 
       <View className="w-full items-start gap-2">
-        <Text className="font-sans text-sm font-semibold uppercase text-fg">
+        <Text className="font-sans text-sm font-semibold text-fg uppercase">
           Try searching for
         </Text>
         <View className="flex-row flex-wrap gap-2">

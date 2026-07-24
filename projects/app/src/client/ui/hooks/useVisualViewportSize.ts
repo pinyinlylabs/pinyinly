@@ -17,7 +17,7 @@ export interface VisualViewportSize {
  * it changes size (e.g. due to on-screen keyboard appearing).
  */
 export function useVisualViewportSize(): VisualViewportSize | null {
-  return useSyncExternalStore(subscribe, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 const subscribe = (onStoreChange: () => void) => {
@@ -54,6 +54,10 @@ function getSnapshot(): VisualViewportSize | null {
   const newValue = { width, height };
   snapshotCache.set(globalThis.visualViewport, newValue);
   return newValue;
+}
+
+function getServerSnapshot(): VisualViewportSize | null {
+  return null;
 }
 
 // Cache of viewport sizes. Probably overkill to use a map in case there are

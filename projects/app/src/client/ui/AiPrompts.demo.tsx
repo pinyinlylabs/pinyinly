@@ -1,23 +1,25 @@
 import type { ChatPromptMessage } from "@/server/lib/ai";
 import { RectButton } from "@/client/ui/RectButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
+import { buildLocationSetDescriptionPrompt } from "@/util/prompts/location";
 import {
-  buildLeadCharacterDescriptionPrompt,
-  buildMeaningHintLogicalPrompt,
   buildMeaningHintCausualBridgePrompt,
+  buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
+} from "@/util/prompts/meaningHint";
+import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
-  buildSubLocationDescriptionPrompt,
-} from "@/util/prompts";
+} from "@/util/prompts/pronunciationHint";
 import { useRef, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 
 type PromptModeKind =
   | `meaning-hint`
   | `pronunciation-hint`
-  | `sub-location-description`
-  | `lead-character-description`;
+  | `location-set-description`
+  | `mnemonic-actor`;
 
 type CopyStateKind = `idle` | `copied` | `unsupported`;
 
@@ -31,7 +33,6 @@ type MeaningHintInputType = {
 
 type PronunciationHintInputType = {
   leadName: string;
-  leadArticle: string;
   leadBio: string;
   locationName: string;
   locationDescription: string;
@@ -40,20 +41,16 @@ type PronunciationHintInputType = {
   countText: string;
 };
 
-type SubLocationDescriptionInputType = {
+type LocationSetDescriptionInputType = {
   label: string;
   location: string;
   locationNotes: string;
-  sublocation: string;
-  viewpoint: string;
+  locationSet: string;
   countText: string;
 };
 
-type LeadCharacterDescriptionInputType = {
-  name: string;
-  sound: string;
-  existingDescription: string;
-  countText: string;
+type MnemonicActorInputType = {
+  identity: string;
 };
 
 const defaultMeaningHintInput: MeaningHintInputType = {
@@ -66,7 +63,6 @@ const defaultMeaningHintInput: MeaningHintInputType = {
 
 const defaultPronunciationHintInput: PronunciationHintInputType = {
   leadName: `seal`,
-  leadArticle: `the`,
   leadBio: `A dramatic performer who overreacts to tiny mistakes.`,
   locationName: `kitchen`,
   locationDescription: `Bright tiled kitchen packed with loud appliances.`,
@@ -75,22 +71,17 @@ const defaultPronunciationHintInput: PronunciationHintInputType = {
   countText: `4`,
 };
 
-const defaultSubLocationDescriptionInput: SubLocationDescriptionInputType = {
+const defaultLocationSetDescriptionInput: LocationSetDescriptionInputType = {
   label: `Airport baggage carousel`,
   location: `airport`,
   locationNotes: `Large international terminal with glass walls.`,
-  sublocation: `baggage carousel area`,
-  viewpoint: `standing at the carousel facing incoming luggage`,
+  locationSet: `baggage carousel area`,
   countText: `4`,
 };
 
-const defaultLeadCharacterDescriptionInput: LeadCharacterDescriptionInputType =
-  {
-    name: `Chef Li`,
-    sound: `li`,
-    existingDescription: `Known for balancing bowls on his head while teaching.`,
-    countText: `4`,
-  };
+const defaultMnemonicActorInput: MnemonicActorInputType = {
+  identity: `Dracula`,
+};
 
 const meaningHintPresets: MeaningHintInputType[] = [
   defaultMeaningHintInput,
@@ -114,7 +105,6 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
   defaultPronunciationHintInput,
   {
     leadName: `owl`,
-    leadArticle: `an`,
     leadBio: `Always whispers secrets with intense seriousness.`,
     locationName: `library`,
     locationDescription: `Ancient stacks with dusty ladders and green lamps.`,
@@ -124,7 +114,6 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
   },
   {
     leadName: `robot`,
-    leadArticle: `a`,
     leadBio: `Talks like a motivational coach between beeps.`,
     locationName: `gym`,
     locationDescription: `Echoing room with metallic equipment and mirrors.`,
@@ -134,39 +123,31 @@ const pronunciationHintPresets: PronunciationHintInputType[] = [
   },
 ];
 
-const subLocationDescriptionPresets: SubLocationDescriptionInputType[] = [
-  defaultSubLocationDescriptionInput,
+const locationSetDescriptionPresets: LocationSetDescriptionInputType[] = [
+  defaultLocationSetDescriptionInput,
   {
     label: `Train station ticket window`,
     location: `train station`,
     locationNotes: `Busy city transport hub with high ceilings.`,
-    sublocation: `ticket window`,
-    viewpoint: `standing in line facing the clerk window`,
+    locationSet: `ticket window`,
     countText: `4`,
   },
   {
     label: `School rooftop garden`,
     location: `school`,
     locationNotes: `Modern campus focused on science and arts.`,
-    sublocation: `rooftop garden`,
-    viewpoint: `near the planter beds looking toward the city`,
+    locationSet: `rooftop garden`,
     countText: `3`,
   },
 ];
 
-const leadCharacterDescriptionPresets: LeadCharacterDescriptionInputType[] = [
-  defaultLeadCharacterDescriptionInput,
+const mnemonicActorPresets: MnemonicActorInputType[] = [
+  defaultMnemonicActorInput,
   {
-    name: `Mina`,
-    sound: `mi`,
-    existingDescription: `Collects tiny clocks and times every conversation.`,
-    countText: `5`,
+    identity: `Leprechaun`,
   },
   {
-    name: `Gao`,
-    sound: `gao`,
-    existingDescription: `Climbs on chairs to make every announcement.`,
-    countText: `4`,
+    identity: `Bear`,
   },
 ];
 
@@ -182,21 +163,19 @@ export default () => {
   );
   const [pronunciationInput, setPronunciationInput] =
     useState<PronunciationHintInputType>(defaultPronunciationHintInput);
-  const [subLocationInput, setSubLocationInput] =
-    useState<SubLocationDescriptionInputType>(
-      defaultSubLocationDescriptionInput,
+  const [locationSetInput, setLocationSetInput] =
+    useState<LocationSetDescriptionInputType>(
+      defaultLocationSetDescriptionInput,
     );
-  const [leadCharacterInput, setLeadCharacterInput] =
-    useState<LeadCharacterDescriptionInputType>(
-      defaultLeadCharacterDescriptionInput,
-    );
+  const [mnemonicActorInput, setMnemonicActorInput] =
+    useState<MnemonicActorInputType>(defaultMnemonicActorInput);
 
   const promptBuild = buildCurrentPrompt({
     mode,
     meaningInput,
     pronunciationInput,
-    subLocationInput,
-    leadCharacterInput,
+    locationSetInput,
+    mnemonicActorInput,
   });
 
   const promptPayload =
@@ -237,18 +216,18 @@ export default () => {
           }}
         />
         <ModeButton
-          label="Sub-location Description"
-          active={mode === `sub-location-description`}
+          label="Location Set Description"
+          active={mode === `location-set-description`}
           onPress={() => {
-            setMode(`sub-location-description`);
+            setMode(`location-set-description`);
             setCopyState(`idle`);
           }}
         />
         <ModeButton
-          label="Lead Character Description"
-          active={mode === `lead-character-description`}
+          label="Mnemonic Actor"
+          active={mode === `mnemonic-actor`}
           onPress={() => {
-            setMode(`lead-character-description`);
+            setMode(`mnemonic-actor`);
             setCopyState(`idle`);
           }}
         />
@@ -363,18 +342,6 @@ export default () => {
               }}
             />
 
-            <FieldLabel text="Lead Character Article (optional)" />
-            <TextInputSingle
-              placeholder="the"
-              value={pronunciationInput.leadArticle}
-              onChangeText={(value) => {
-                setPronunciationInput((current) => ({
-                  ...current,
-                  leadArticle: value,
-                }));
-              }}
-            />
-
             <FieldLabel text="Lead Character Bio (optional)" />
             <MultilineInput
               value={pronunciationInput.leadBio}
@@ -450,20 +417,20 @@ export default () => {
           </View>
         ) : null}
 
-        {mode === `sub-location-description` ? (
+        {mode === `location-set-description` ? (
           <View className="gap-3">
             <PresetRow
-              count={subLocationDescriptionPresets.length}
+              count={locationSetDescriptionPresets.length}
               onApply={(index) => {
-                const preset = subLocationDescriptionPresets[index];
+                const preset = locationSetDescriptionPresets[index];
                 if (preset == null) {
                   return;
                 }
-                setSubLocationInput(preset);
+                setLocationSetInput(preset);
                 setCopyState(`idle`);
               }}
               onReset={() => {
-                setSubLocationInput(defaultSubLocationDescriptionInput);
+                setLocationSetInput(defaultLocationSetDescriptionInput);
                 setCopyState(`idle`);
               }}
             />
@@ -471,9 +438,9 @@ export default () => {
             <FieldLabel text="Combined Label" />
             <TextInputSingle
               placeholder="Airport baggage carousel"
-              value={subLocationInput.label}
+              value={locationSetInput.label}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   label: value,
                 }));
@@ -483,9 +450,9 @@ export default () => {
             <FieldLabel text="Location" />
             <TextInputSingle
               placeholder="airport"
-              value={subLocationInput.location}
+              value={locationSetInput.location}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   location: value,
                 }));
@@ -494,9 +461,9 @@ export default () => {
 
             <FieldLabel text="Location Notes (optional)" />
             <MultilineInput
-              value={subLocationInput.locationNotes}
+              value={locationSetInput.locationNotes}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   locationNotes: value,
                 }));
@@ -504,26 +471,14 @@ export default () => {
               placeholder="Optional stable context"
             />
 
-            <FieldLabel text="Sublocation" />
+            <FieldLabel text="Location Set" />
             <TextInputSingle
               placeholder="baggage carousel area"
-              value={subLocationInput.sublocation}
+              value={locationSetInput.locationSet}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
-                  sublocation: value,
-                }));
-              }}
-            />
-
-            <FieldLabel text="Viewpoint (optional)" />
-            <TextInputSingle
-              placeholder="standing near the conveyor"
-              value={subLocationInput.viewpoint}
-              onChangeText={(value) => {
-                setSubLocationInput((current) => ({
-                  ...current,
-                  viewpoint: value,
+                  locationSet: value,
                 }));
               }}
             />
@@ -531,9 +486,9 @@ export default () => {
             <FieldLabel text="Count" />
             <TextInputSingle
               placeholder="4"
-              value={subLocationInput.countText}
+              value={locationSetInput.countText}
               onChangeText={(value) => {
-                setSubLocationInput((current) => ({
+                setLocationSetInput((current) => ({
                   ...current,
                   countText: value,
                 }));
@@ -543,71 +498,34 @@ export default () => {
           </View>
         ) : null}
 
-        {mode === `lead-character-description` ? (
+        {mode === `mnemonic-actor` ? (
           <View className="gap-3">
             <PresetRow
-              count={leadCharacterDescriptionPresets.length}
+              count={mnemonicActorPresets.length}
               onApply={(index) => {
-                const preset = leadCharacterDescriptionPresets[index];
+                const preset = mnemonicActorPresets[index];
                 if (preset == null) {
                   return;
                 }
-                setLeadCharacterInput(preset);
+                setMnemonicActorInput(preset);
                 setCopyState(`idle`);
               }}
               onReset={() => {
-                setLeadCharacterInput(defaultLeadCharacterDescriptionInput);
+                setMnemonicActorInput(defaultMnemonicActorInput);
                 setCopyState(`idle`);
               }}
             />
 
-            <FieldLabel text="Character Name" />
+            <FieldLabel text="Actor Identity" />
             <TextInputSingle
-              placeholder="Chef Li"
-              value={leadCharacterInput.name}
+              placeholder="Dracula"
+              value={mnemonicActorInput.identity}
               onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
+                setMnemonicActorInput((current) => ({
                   ...current,
-                  name: value,
+                  identity: value,
                 }));
               }}
-            />
-
-            <FieldLabel text="Associated Pinyin Sound" />
-            <TextInputSingle
-              placeholder="li"
-              value={leadCharacterInput.sound}
-              onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
-                  ...current,
-                  sound: value,
-                }));
-              }}
-            />
-
-            <FieldLabel text="Existing Description (optional)" />
-            <MultilineInput
-              value={leadCharacterInput.existingDescription}
-              onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
-                  ...current,
-                  existingDescription: value,
-                }));
-              }}
-              placeholder="Optional existing personality cue"
-            />
-
-            <FieldLabel text="Count" />
-            <TextInputSingle
-              placeholder="4"
-              value={leadCharacterInput.countText}
-              onChangeText={(value) => {
-                setLeadCharacterInput((current) => ({
-                  ...current,
-                  countText: value,
-                }));
-              }}
-              keyboardType="number-pad"
             />
           </View>
         ) : null}
@@ -737,7 +655,7 @@ function MultilineInput({
       multiline
       textAlignVertical="top"
       className={`
-        min-h-[88px] rounded-xl bg-bg px-4 py-3 font-sans text-sm text-fg outline-none
+        min-h-22 rounded-xl bg-bg px-4 py-3 font-sans text-sm text-fg outline-none
 
         web:placeholder:text-fg/30
       `}
@@ -811,8 +729,8 @@ function buildCurrentPrompt(args: {
   mode: PromptModeKind;
   meaningInput: MeaningHintInputType;
   pronunciationInput: PronunciationHintInputType;
-  subLocationInput: SubLocationDescriptionInputType;
-  leadCharacterInput: LeadCharacterDescriptionInputType;
+  locationSetInput: LocationSetDescriptionInputType;
+  mnemonicActorInput: MnemonicActorInputType;
 }): { result: ChatPromptMessage[] | null; errors: string[] } {
   const errors: string[] = [];
 
@@ -920,10 +838,6 @@ function buildCurrentPrompt(args: {
     const input = {
       leadCharacter: {
         name: args.pronunciationInput.leadName.trim(),
-        article:
-          args.pronunciationInput.leadArticle.trim().length === 0
-            ? undefined
-            : args.pronunciationInput.leadArticle.trim(),
         bio:
           args.pronunciationInput.leadBio.trim().length === 0
             ? undefined
@@ -971,17 +885,17 @@ function buildCurrentPrompt(args: {
     return { result, errors };
   }
 
-  if (args.mode === `sub-location-description`) {
-    const count = parseCount(args.subLocationInput.countText);
+  if (args.mode === `location-set-description`) {
+    const count = parseCount(args.locationSetInput.countText);
 
-    if (args.subLocationInput.label.trim().length === 0) {
+    if (args.locationSetInput.label.trim().length === 0) {
       errors.push(`Combined Label is required.`);
     }
-    if (args.subLocationInput.location.trim().length === 0) {
+    if (args.locationSetInput.location.trim().length === 0) {
       errors.push(`Location is required.`);
     }
-    if (args.subLocationInput.sublocation.trim().length === 0) {
-      errors.push(`Sublocation is required.`);
+    if (args.locationSetInput.locationSet.trim().length === 0) {
+      errors.push(`Location set is required.`);
     }
     if (count == null) {
       errors.push(`Count must be a positive integer.`);
@@ -991,47 +905,30 @@ function buildCurrentPrompt(args: {
       return { result: null, errors };
     }
 
-    const result = buildSubLocationDescriptionPrompt({
-      label: args.subLocationInput.label.trim(),
-      location: args.subLocationInput.location.trim(),
+    const result = buildLocationSetDescriptionPrompt({
+      label: args.locationSetInput.label.trim(),
+      location: args.locationSetInput.location.trim(),
       locationNotes:
-        args.subLocationInput.locationNotes.trim().length === 0
+        args.locationSetInput.locationNotes.trim().length === 0
           ? undefined
-          : args.subLocationInput.locationNotes.trim(),
-      sublocation: args.subLocationInput.sublocation.trim(),
-      viewpoint:
-        args.subLocationInput.viewpoint.trim().length === 0
-          ? undefined
-          : args.subLocationInput.viewpoint.trim(),
+          : args.locationSetInput.locationNotes.trim(),
+      locationSet: args.locationSetInput.locationSet.trim(),
       count: count ?? 1,
     });
 
     return { result: result.messages, errors };
   }
 
-  const count = parseCount(args.leadCharacterInput.countText);
-  if (args.leadCharacterInput.name.trim().length === 0) {
-    errors.push(`Character Name is required.`);
-  }
-  if (args.leadCharacterInput.sound.trim().length === 0) {
-    errors.push(`Associated Pinyin Sound is required.`);
-  }
-  if (count == null) {
-    errors.push(`Count must be a positive integer.`);
+  if (args.mnemonicActorInput.identity.trim().length === 0) {
+    errors.push(`Actor Identity is required.`);
   }
 
   if (errors.length > 0) {
     return { result: null, errors };
   }
 
-  const result = buildLeadCharacterDescriptionPrompt({
-    name: args.leadCharacterInput.name.trim(),
-    sound: args.leadCharacterInput.sound.trim(),
-    existingDescription:
-      args.leadCharacterInput.existingDescription.trim().length === 0
-        ? undefined
-        : args.leadCharacterInput.existingDescription.trim(),
-    count: count ?? 1,
+  const result = buildMnemonicActorProfilePrompt({
+    identity: args.mnemonicActorInput.identity.trim(),
   });
 
   return { result: result.messages, errors };

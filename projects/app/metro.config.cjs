@@ -1,5 +1,5 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
-const { withNativeWind } = require(`nativewind/metro`);
+const { getDefaultConfig } = require(`expo/metro-config`);
+const { withNativewind } = require(`nativewind/metro`);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
 /** @type Record<string, { moduleName?: string; platform?: string }> */
@@ -10,9 +10,14 @@ const resolverOverrides = {
   [`lru-cache`]: { platform: `web` },
 };
 
-// TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
-// from `expo/metro-config`.
-let config = getSentryExpoConfig(__dirname);
+let config =
+  // In development Sentry causes a memory leak that eventually crashes expo.
+  process.env.NODE_ENV === `development`
+    ? /** @type {import('metro-config').MetroConfig} */ (
+        /** @type {unknown} */ (getDefaultConfig(__dirname))
+      )
+    : getSentryExpoConfig(__dirname);
+
 config = {
   ...config,
 
@@ -30,6 +35,13 @@ config = {
   // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
   resolver: {
     ...config.resolver,
+    blockList: [
+      // Ignore data folders of other services, to avoid Metro rebundling unnecessarily.
+      // oxlint-disable-next-line require-unicode-regexp -- Error: Cannot combine blockList patterns, because they have different flags:
+      /\.inngest\/.*/,
+      // oxlint-disable-next-line require-unicode-regexp -- Error: Cannot combine blockList patterns, because they have different flags:
+      /\.minio\/.*/,
+    ].concat(config.resolver?.blockList ?? []),
     assetExts: [
       ...(config.resolver?.assetExts ?? []),
       // Add Rive support.
@@ -52,21 +64,6 @@ config = {
   },
 };
 
-config = withNativeWind(config, {
-  input: `./src/global.css`,
-  inlineRem: 16,
-  // @ts-expect-error this is overriden, see https://github.com/nativewind/nativewind/pull/1371
-  getCSSForPlatform: undefined,
-});
-
-// Doing Sentry last is probably important so that the hashed debug IDs are
-// based on the final content of the final and aren't stripped by any other
-// processors.
-//
-// TODO: [@sentry/react-native@>7.7.0] try re-enabling
-// config = withSentryConfig(config, {
-//   annotateReactComponents: false,
-//   enableSourceContextInDevelopment: false,
-// });
+config = withNativewind(config);
 
 module.exports = config;

@@ -15,7 +15,6 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, test } from "vitest";
 
-// oxlint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 const fixturesDir = path.join(import.meta.dirname, `fixtures`);

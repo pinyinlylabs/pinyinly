@@ -6,7 +6,7 @@ import type {
 import {
   decomposeHanzi,
   hanziFromHanziWord,
-  loadCharacters,
+  loadCharactersJson,
   loadDictionary,
 } from "@/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
@@ -194,7 +194,7 @@ export async function skillDependencies(
 ): Promise<Skill[]> {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
-  const characters = await loadCharacters();
+  const charactersJson = await loadCharactersJson();
   const dictionary = await loadDictionary();
 
   switch (skillKind) {
@@ -217,10 +217,10 @@ export async function skillDependencies(
       )) {
         // Use the canonical form of the character.
         {
-          let hanziCharacterData = characters.get(hanziCharacter);
+          let hanziCharacterData = charactersJson.get(hanziCharacter);
           while (hanziCharacterData?.canonicalForm != null) {
             hanziCharacter = hanziCharacterData.canonicalForm;
-            hanziCharacterData = characters.get(hanziCharacter);
+            hanziCharacterData = charactersJson.get(hanziCharacter);
           }
         }
 
@@ -888,7 +888,6 @@ export function skillReviewQueue({
   graph,
   skillSrsStates,
   latestSkillRatings,
-  isStructuralHanzi,
   dictionary,
   now = new Date(),
   maxQueueItems = Infinity,
@@ -896,7 +895,6 @@ export function skillReviewQueue({
   graph: SkillLearningGraph;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
-  isStructuralHanzi: (hanzi: HanziText) => boolean;
   dictionary: Dictionary;
   now?: Date;
   maxQueueItems?: number;
@@ -1059,7 +1057,9 @@ export function skillReviewQueue({
   for (const skill of learningOrderNewCandidates) {
     if (
       isHanziWordSkill(skill) &&
-      isStructuralHanzi(hanziFromHanziWord(hanziWordFromSkill(skill)))
+      dictionary.isStructuralHanzi(
+        hanziFromHanziWord(hanziWordFromSkill(skill)),
+      )
     ) {
       learningOrderNewComponentCandidates.push(skill);
     } else {

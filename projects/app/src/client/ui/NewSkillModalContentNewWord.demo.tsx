@@ -7,7 +7,7 @@ export default () => {
   const { hanzi } = useDemoHanziKnob(`好` as HanziText);
 
   return (
-    <View className="h-[600] w-[500]">
+    <View className="h-600 w-500">
       <NewSkillModalContentNewWord hanzi={hanzi} onDismiss={() => null} />
     </View>
   );

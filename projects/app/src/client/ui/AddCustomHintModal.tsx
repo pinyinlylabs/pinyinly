@@ -127,11 +127,7 @@ function AddCustomHintModalContent({
                   <Text
                     className={
                       isHintAtLimit
-                        ? `
-                          text-right text-[11px] text-fg
-
-                          [--color-fg:var(--color-warning)]
-                        `
+                        ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
                         : `text-right text-[11px] text-fg-dim`
                     }
                   >

@@ -2,7 +2,8 @@ import type { HanziText } from "@/data/model";
 import { View } from "react-native";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiAiExplanation } from "./WikiAiExplanation";
-import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
+import { WikiHanziCharacterDecompositionComponents } from "./WikiHanziCharacterDecompositionComponents";
+import { WikiHanziCharacterMeaning } from "./WikiHanziCharacterMeaning";
 import { WikiHanziCharacterUsedInCharacters } from "./WikiHanziCharacterUsedInCharacters";
 import { WikiHanziExternalResources } from "./WikiHanziExternalResources";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
@@ -20,9 +21,11 @@ export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
 
         <WikiHanziWordCharacters hanzi={hanzi} />
 
-        <WikiHanziCharacterDecomposition hanzi={hanzi} />
+        <WikiHanziCharacterMeaning hanzi={hanzi} />
 
         <WikiHanziCharacterPronunciation hanzi={hanzi} />
+
+        <WikiHanziCharacterDecompositionComponents hanzi={hanzi} />
 
         <WikiHanziCharacterUsedInCharacters hanzi={hanzi} />
 

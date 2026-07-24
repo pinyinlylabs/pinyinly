@@ -66,11 +66,9 @@ function MenuLayoutContent() {
         onScroll={handleMenuScroll}
         scrollEventThrottle={16}
         contentContainerClassName={`
-          pt-safe-offset-[56px]
+          flex-row pt-safe-offset-14 px-safe-or-4
 
           sm:py-safe-offset-5
-
-          px-safe-or-4 flex-row
         `}
       >
         {/* Left side */}
@@ -78,13 +76,13 @@ function MenuLayoutContent() {
           className={`
             hidden
 
-            sm:flex sm:min-w-[240px] sm:items-end sm:pr-[32px]
+            sm:flex sm:min-w-60 sm:items-end sm:pr-8
 
             menu-lg:flex-1
           `}
         >
-          <View className="sticky items-end top-safe-offset-5">
-            <View className="mb-5 h-[32px] justify-center pr-4">
+          <View className="sticky top-safe-offset-5 items-end">
+            <View className="mb-5 h-8 justify-center pr-4">
               <Link href="/learn" asChild>
                 <RectButton variant="bare" iconStart="arrow-return-left">
                   Back to practice
@@ -94,14 +92,14 @@ function MenuLayoutContent() {
 
             <QuickSearchButton className="mb-4 place-self-stretch" />
 
-            <View className="w-[200px] items-stretch rounded-xl bg-bg-high py-3">
+            <View className="w-50 items-stretch rounded-xl bg-bg-high py-3">
               {navItems
                 .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
                   <Fragment key={sectionIndex}>
                     {/* GAP */}
                     {sectionIndex === 0 ? null : (
-                      <View className="invisible h-[40px]" />
+                      <View className="invisible h-10" />
                     )}
                     {section.title == null ? null : (
                       <DesktopNavGroupTitle name={section.title} />
@@ -128,7 +126,7 @@ function MenuLayoutContent() {
                   <Fragment key={sectionIndex}>
                     {/* GAP */}
                     {sectionIndex === 0 ? null : (
-                      <View className="invisible h-[40px]" />
+                      <View className="invisible h-10" />
                     )}
                     {section.items.map((item, itemIndex) => (
                       <DesktopNavSubtleItem
@@ -149,7 +147,7 @@ function MenuLayoutContent() {
           className={`
             flex-1
 
-            menu-lg:w-[600px] menu-lg:max-w-[600px] menu-lg:flex-none
+            menu-lg:w-150 menu-lg:max-w-150 menu-lg:flex-none
           `}
         >
           <Stack screenOptions={{ headerShown: false }} />
@@ -210,7 +208,7 @@ function DesktopFloatingTitle() {
           className={`
             hidden
 
-            sm:flex sm:min-w-[240px] sm:pr-[32px] sm:ml-safe-or-4
+            sm:ml-safe-or-4 sm:flex sm:min-w-60 sm:pr-8
 
             menu-lg:flex-1
           `}
@@ -220,15 +218,14 @@ function DesktopFloatingTitle() {
           className={`
             relative flex-1
 
-            menu-lg:w-[600px] menu-lg:max-w-[600px] menu-lg:flex-none
+            menu-lg:w-150 menu-lg:max-w-150 menu-lg:flex-none
           `}
         >
-          <View className="relative h-[56px] items-center justify-center">
+          <View className="relative h-14 items-center justify-center">
             <View
               className={`
-                absolute -inset-x-2 -bottom-10 top-0 bg-bg/90 backdrop-blur-sm
-
-                [mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+                absolute -inset-x-2 top-0 -bottom-10 bg-bg/90
+                [mask-image:linear-gradient(to_top,transparent,black_50%,black)] backdrop-blur-sm
               `}
             />
 
@@ -240,7 +237,7 @@ function DesktopFloatingTitle() {
           className={`
             hidden
 
-            sm:flex sm:mr-safe-or-4
+            sm:mr-safe-or-4 sm:flex
 
             menu-lg:flex-1
           `}
@@ -252,7 +249,7 @@ function DesktopFloatingTitle() {
 
 function DesktopNavGroupTitle({ name }: { name: string }) {
   return (
-    <View className="h-[24px] items-end justify-center px-[24px]">
+    <View className="h-6 items-end justify-center px-6">
       <Text className="pyly-body-dt">{name}</Text>
     </View>
   );
@@ -272,7 +269,7 @@ const DesktopNavItem = ({ name, href, lozenge }: NavItemProps) => {
     <Link href={href} asChild>
       <Pressable className={buttonContainerClass({ isFocused: isActive })}>
         <View className="relative flex-row items-center gap-2">
-          <Text className="font-sans text-sm/normal font-bold uppercase text-fg">
+          <Text className="font-sans text-sm/normal font-bold text-fg uppercase">
             {name}
           </Text>
           {lozenge}
@@ -288,7 +285,7 @@ const DesktopNavSubtleItem = ({ name, href }: NavItemProps) => {
       <Pressable>
         <Text
           className={`
-            font-sans text-sm/[32px] font-bold uppercase text-fg-dim
+            font-sans text-sm/[32px] font-bold text-fg-dim uppercase
 
             hover:text-fg
           `}
@@ -356,19 +353,18 @@ function MobileFloatingTitle({
             entering={FadeIn.duration(100)}
             exiting={FadeOut.duration(100)}
             className={`
-              absolute -inset-x-2 -bottom-4 top-0 bg-bg/90 backdrop-blur-sm
-
-              [mask-image:linear-gradient(to_top,transparent,black_50%,black)]
+              absolute -inset-x-2 top-0 -bottom-4 bg-bg/90
+              [mask-image:linear-gradient(to_top,transparent,black_50%,black)] backdrop-blur-sm
             `}
           />
         ) : null}
 
-        <View className="pointer-events-auto h-[56px] flex-row items-center">
-          <View className="w-[32px] shrink">{leftButton ?? null}</View>
+        <View className="pointer-events-auto h-14 flex-row items-center">
+          <View className="w-8 shrink">{leftButton ?? null}</View>
           <View className="flex-1 items-center justify-center">
             <HeaderTitleProvider.TitleText className="pyly-body-title" />
           </View>
-          <View className="w-[32px] shrink">{rightButton ?? null}</View>
+          <View className="w-8 shrink">{rightButton ?? null}</View>
         </View>
       </View>
     </Reanimated.View>
@@ -377,7 +373,7 @@ function MobileFloatingTitle({
 
 const buttonContainerClass = tv({
   base: `
-    h-[32px] flex-row items-center justify-end px-[24px]
+    h-8 flex-row items-center justify-end px-6
 
     hover:bg-fg/5
   `,

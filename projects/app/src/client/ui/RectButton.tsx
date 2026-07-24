@@ -143,15 +143,13 @@ const pressableClass = tv({
       filled: `
         rounded-xl
 
-        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
-        focus-visible:outline-fg/75
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-fg/75
       `,
       outline: `rounded-xl`,
       option: `
         rounded-xl
 
-        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
-        focus-visible:outline-sky/75
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky/75
       `,
       barePrimary: `transition-transform`,
       bare: `transition-transform`,
@@ -170,7 +168,7 @@ const pressableClass = tv({
     {
       variant: `filled`,
       flat: true,
-      class: `pt-[4px]`,
+      class: `pt-1`,
     },
     {
       variant: `outline`,
@@ -207,7 +205,7 @@ const pressableClass = tv({
 
 const roundedRectClass = tv({
   base: `
-    box-border select-none items-center justify-center
+    box-border items-center justify-center select-none
 
     web:transition-[border-width]
   `,
@@ -228,7 +226,7 @@ const roundedRectClass = tv({
       true: ``,
     },
     disabled: {
-      true: `cursor-default select-none opacity-30`,
+      true: `cursor-default opacity-30 select-none`,
     },
     iconOnly: {
       true: ``,
@@ -320,13 +318,13 @@ const roundedRectClass = tv({
 const textClass = tv({
   variants: {
     variant: {
-      filled: `font-sans text-base/snug font-bold uppercase text-bg`,
+      filled: `font-sans text-base/snug font-bold text-bg uppercase`,
       outline: `pyly-button-outline`,
       option: `font-sans text-base/snug font-medium text-fg`,
-      bare: `font-sans text-sm/normal font-bold uppercase text-fg`,
-      barePrimary: `font-sans text-sm/normal font-semibold uppercase text-bg`,
-      bareDim: `font-sans text-sm/normal font-semibold uppercase text-fg-dim`,
-      rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
+      bare: `font-sans text-sm/normal font-bold text-fg uppercase`,
+      barePrimary: `font-sans text-sm/normal font-semibold text-bg uppercase`,
+      bareDim: `font-sans text-sm/normal font-semibold text-fg-dim uppercase`,
+      rounded: `font-sans text-[13px] font-semibold text-fg uppercase`,
     },
   },
 });

@@ -134,7 +134,7 @@ const tabsListClass = tv({
 
 const triggerInnerClass = tv({
   base: `
-    box-border select-none items-center justify-center overflow-hidden rounded-md px-4 py-2
+    box-border items-center justify-center overflow-hidden rounded-md px-4 py-2 select-none
 
     web:transition-colors
   `,
@@ -147,7 +147,7 @@ const triggerInnerClass = tv({
       true: ``,
     },
     disabled: {
-      true: `cursor-default select-none opacity-40`,
+      true: `cursor-default opacity-40 select-none`,
     },
   },
   compoundVariants: [

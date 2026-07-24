@@ -16,7 +16,7 @@ export default function DevApiPage() {
 
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
-      <View className="max-w-[600px]"></View>
+      <View className="max-w-150"></View>
       <RectButton
         onPress={() => {
           void anonymousThrowError();

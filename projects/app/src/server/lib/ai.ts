@@ -1,8 +1,8 @@
 import { getOpenAIClient } from "@/server/lib/openai/client";
-import { invariant } from "@pinyinly/lib/invariant";
 import type { OpenAI } from "openai";
 import { z } from "zod";
 import makeDebug from "debug";
+import { invariant } from "@pinyinly/lib/invariant";
 
 const debug = makeDebug(`pyly:ai.ts`);
 
@@ -12,7 +12,7 @@ export interface ChatPromptMessage {
 }
 
 export interface ChatPrompt<Schema extends z.ZodType> {
-  model: OpenAI.ChatModel;
+  model: OpenAI.AllModels;
   reasoningEffort: OpenAI.ReasoningEffort;
   messages: ChatPromptMessage[];
   /**
@@ -20,6 +20,73 @@ export interface ChatPrompt<Schema extends z.ZodType> {
    * This is used for type inference and validation of the response data.
    */
   schema: Schema;
+  timeout?: number;
+}
+
+const unsupportedOpenAiJsonSchemaKeywords = new Set([
+  `maxItems`,
+  `minItems`,
+  `prefixItems`,
+]);
+
+function formatJsonSchemaPath(path: readonly (number | string)[]): string {
+  let result = `$`;
+
+  for (const part of path) {
+    result +=
+      typeof part === `number`
+        ? `[${part}]`
+        : /^[a-zA-Z_][a-zA-Z0-9_]*$/u.test(part)
+          ? `.${part}`
+          : `[${JSON.stringify(part)}]`;
+  }
+
+  return result;
+}
+
+function assertOpenAiCompatibleJsonSchema(
+  value: unknown,
+  path: readonly (number | string)[] = [],
+): void {
+  if (value == null || typeof value !== `object`) {
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (const [index, item] of value.entries()) {
+      assertOpenAiCompatibleJsonSchema(item, [...path, index]);
+    }
+    return;
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    if (unsupportedOpenAiJsonSchemaKeywords.has(key)) {
+      throw new Error(
+        `OpenAI response format does not support JSON Schema keyword ${JSON.stringify(key)} at ${formatJsonSchemaPath([...path, key])}`,
+      );
+    }
+
+    assertOpenAiCompatibleJsonSchema(child, [...path, key]);
+  }
+
+  const isArraySchema =
+    `type` in value &&
+    (value.type === `array` ||
+      (Array.isArray(value.type) && value.type.includes(`array`)));
+
+  if (isArraySchema && !(`items` in value)) {
+    throw new Error(
+      `OpenAI response format requires JSON Schema arrays to define "items" at ${formatJsonSchemaPath(path)}`,
+    );
+  }
+}
+
+function zodToOpenAiJsonSchema<Schema extends z.ZodType>(
+  schema: Schema,
+): z.core.JSONSchema.BaseSchema {
+  const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
+  assertOpenAiCompatibleJsonSchema(jsonSchema);
+  return jsonSchema;
 }
 
 export function zodResponseFormatJson<Schema extends z.ZodType>(
@@ -28,13 +95,13 @@ export function zodResponseFormatJson<Schema extends z.ZodType>(
   return {
     type: `json_schema`,
     name: `result_shape`,
-    schema: z.toJSONSchema(schema, { unrepresentable: `any` }),
+    schema: zodToOpenAiJsonSchema(schema),
   };
 }
 
 export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
-  options?: { signal?: AbortSignal; retries?: number },
+  options?: { signal?: AbortSignal; retries?: number; store?: boolean },
 ): Promise<{
   data: z.infer<Schema>;
   usage?: OpenAI.Responses.ResponseUsage;
@@ -51,7 +118,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       format: zodResponseFormatJson(prompt.schema),
     },
     input: prompt.messages,
-    store: true,
+    store: options?.store,
   };
 
   for (let retries = options?.retries ?? 2; ; retries--) {
@@ -59,6 +126,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
 
     const response = await client.responses.create(body, {
       signal: options?.signal,
+      ...(prompt.timeout == null ? {} : { timeout: prompt.timeout }),
     });
 
     const content = response.output_text;

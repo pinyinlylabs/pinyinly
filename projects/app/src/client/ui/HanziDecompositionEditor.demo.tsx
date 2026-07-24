@@ -8,7 +8,7 @@ export default () => {
   const { hanzi } = useDemoHanziKnob(`学` as HanziText);
 
   return (
-    <View className="max-w-[520px] gap-4">
+    <View className="max-w-130 gap-4">
       <DemoHanziKnob hanzis={[`学`, `看`, `说`] as HanziText[]} />
       <HanziDecompositionEditor hanzi={hanzi} />
     </View>

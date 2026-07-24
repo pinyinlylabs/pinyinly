@@ -139,7 +139,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
 
   return (
     <View
-      className="h-[32px] w-full flex-1 overflow-x-hidden"
+      className="h-8 w-full flex-1 overflow-x-hidden"
       onLayout={handleLayout}
     >
       {metrics == null ? null : (
@@ -254,7 +254,7 @@ const MajorTickFg = ({
         style={bgAnimStyles}
       />
       <Reanimated.View
-        className="absolute left-1/2 top-1/2 rounded-full bg-[white]"
+        className="absolute top-1/2 left-1/2 rounded-full bg-[white]"
         style={dotAnimStyles}
       />
     </>
@@ -266,7 +266,7 @@ const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <Reanimated.View
-      className="absolute left-1/2 top-1/2 rounded-full bg-fg"
+      className="absolute top-1/2 left-1/2 rounded-full bg-fg"
       style={dotAnimStyles}
     />
   );

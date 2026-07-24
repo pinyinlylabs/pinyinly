@@ -1,17 +1,17 @@
 import type { HanziCharacter, WikiCharacterData } from "@/data/model";
 import { View } from "react-native";
-import { WikiHanziCharacterDecompositionBox } from "./WikiHanziCharacterDecomposition";
+import { WikiHanziCharacterMeaningBox } from "./WikiHanziCharacterMeaning";
 import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
 
 export default () => {
   return (
-    <View className="max-w-[500px] flex-1 gap-2">
+    <View className="max-w-125 flex-1 gap-2">
       <DemoBetaFeaturesKnob />
-      <WikiHanziCharacterDecompositionBox hanzi={characterData.hanzi} />
+      <WikiHanziCharacterMeaningBox hanzi={characterData.hanzi} />
 
       <LittlePrimaryHeader title="No mnemonic" />
 
-      <WikiHanziCharacterDecompositionBox hanzi={characterData.hanzi} />
+      <WikiHanziCharacterMeaningBox hanzi={characterData.hanzi} />
     </View>
   );
 };

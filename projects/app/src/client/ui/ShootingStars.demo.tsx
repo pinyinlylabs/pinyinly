@@ -43,16 +43,12 @@ export default () => {
       </View>
 
       <ExampleStack title="manual (100×50)" showFrame>
-        <ShootingStars className="h-[50px] w-[100px]" play={play} />
+        <ShootingStars className="h-[50px] w-25" play={play} />
       </ExampleStack>
 
       <ExampleStack title="manual (100×50) success" showFrame>
         <ShootingStars
-          className={`
-            h-[50px] w-[100px]
-
-            [--color-fg:var(--color-success)]
-          `}
+          className={`h-[50px] w-25 [--color-fg:var(--color-success)]`}
           play={play}
         />
       </ExampleStack>

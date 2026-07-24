@@ -68,9 +68,9 @@ describe(
 
       mockGetImageSettingKeyPatterns.mockReturnValue([
         `psi/%`,
+        `psms/%`,
         `hwmhi/%`,
         `hphi/%`,
-        `pfti/%`,
       ]);
     });
 

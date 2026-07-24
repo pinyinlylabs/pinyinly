@@ -1,10 +1,19 @@
 import {
+  decodeUserSettingValue,
+  encodeUserSettingStoredValue,
+  getUserSettingKeyInfo,
   getImageSettingKeyPatterns,
   hanziPronunciationHintImageSetting,
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
-  pinyinFinalToneImageSetting,
+  pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundActorImageSetting,
+  pinyinSoundActorModelSheetImageSetting,
+  pinyinSoundLocationIdentityImageSetting,
+  pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundImageSetting,
+  pinyinSoundModelSheetImageSetting,
+  userNameSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
@@ -12,8 +21,12 @@ import {
   userSettingDefinitions,
   userHanziSettingLike,
 } from "#data/userSettings.ts";
+import type { PinyinSoundId, LocationId } from "#data/model.ts";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers";
+
+const testSoundId = `-a` as PinyinSoundId;
+const testLocationId = `place_123` as LocationId;
 
 function expectUniqueSettingKeyPaths(
   settings: readonly { entity: { _def: { keyPath: string } } }[],
@@ -24,11 +37,17 @@ function expectUniqueSettingKeyPaths(
 
 describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
   test(`contains all image setting entities`, () => {
-    expect(imageSettingDefs).toHaveLength(4);
+    expect(imageSettingDefs).toHaveLength(8);
+    expect(imageSettingDefs).toContain(pinyinSoundActorImageSetting);
+    expect(imageSettingDefs).toContain(pinyinSoundActorModelSheetImageSetting);
+    expect(imageSettingDefs).toContain(pinyinSoundLocationIdentityImageSetting);
+    expect(imageSettingDefs).toContain(
+      pinyinSoundLocationSetIdentityImageSetting,
+    );
     expect(imageSettingDefs).toContain(pinyinSoundImageSetting);
+    expect(imageSettingDefs).toContain(pinyinSoundModelSheetImageSetting);
     expect(imageSettingDefs).toContain(hanziWordMeaningHintImageSetting);
     expect(imageSettingDefs).toContain(hanziPronunciationHintImageSetting);
-    expect(imageSettingDefs).toContain(pinyinFinalToneImageSetting);
   });
 
   test(`all settings have imageId field`, () => {
@@ -60,19 +79,48 @@ describe(
     test(`returns SQL LIKE patterns for all image settings`, () => {
       const patterns = getImageSettingKeyPatterns();
 
-      expect(patterns).toHaveLength(4);
+      expect(patterns).toHaveLength(8);
+      expect(patterns).toContain(`psai/%`); // pinyinSoundActorImageSetting
+      expect(patterns).toContain(`psams/%`); // pinyinSoundActorModelSheetImageSetting
+      expect(patterns).toContain(`pspi/%`); // pinyinSoundLocationIdentityImageSetting
+      expect(patterns).toContain(`pspli/%`); // pinyinSoundLocationSetIdentityImageSetting
       expect(patterns).toContain(`psi/%`); // pinyinSoundImageSetting
+      expect(patterns).toContain(`psms/%`); // pinyinSoundModelSheetImageSetting
       expect(patterns).toContain(`hwmhi/%`); // hanziWordMeaningHintImageSetting
       expect(patterns).toContain(`hphi/%`); // hanziPronunciationHintImageSetting
-      expect(patterns).toContain(`pfti/%`); // pinyinFinalToneImageSetting
     });
 
     test(`patterns match the key path prefixes`, () => {
       const patterns = getImageSettingKeyPatterns();
 
+      expect(pinyinSoundActorImageSetting.entity._def.keyPath).toBe(
+        `psai/[actorId]`,
+      );
+      expect(patterns).toContain(`psai/%`);
+
+      expect(pinyinSoundActorModelSheetImageSetting.entity._def.keyPath).toBe(
+        `psams/[actorId]`,
+      );
+      expect(patterns).toContain(`psams/%`);
+
+      expect(pinyinSoundLocationIdentityImageSetting.entity._def.keyPath).toBe(
+        `pspi/[locationId]`,
+      );
+      expect(patterns).toContain(`pspi/%`);
+
+      expect(
+        pinyinSoundLocationSetIdentityImageSetting.entity._def.keyPath,
+      ).toBe(`pspli/[locationId]/[setKey]`);
+      expect(patterns).toContain(`pspli/%`);
+
       // Verify each pattern corresponds to its setting's key path
       expect(pinyinSoundImageSetting.entity._def.keyPath).toBe(`psi/[soundId]`);
       expect(patterns).toContain(`psi/%`);
+
+      expect(pinyinSoundModelSheetImageSetting.entity._def.keyPath).toBe(
+        `psms/[soundId]`,
+      );
+      expect(patterns).toContain(`psms/%`);
 
       expect(hanziWordMeaningHintImageSetting.entity._def.keyPath).toBe(
         `hwmhi/[hanziWord]`,
@@ -83,11 +131,6 @@ describe(
         `hphi/[hanzi]/[pinyin]`,
       );
       expect(patterns).toContain(`hphi/%`);
-
-      expect(pinyinFinalToneImageSetting.entity._def.keyPath).toBe(
-        `pfti/[soundId]/[tone]`,
-      );
-      expect(patterns).toContain(`pfti/%`);
     });
 
     test(`extracts prefix before first parameter`, () => {
@@ -102,6 +145,116 @@ describe(
       for (const pattern of patterns) {
         expect(pattern).not.toContain(`[`);
       }
+    });
+  },
+);
+
+describe(
+  `getUserSettingKeyInfo` satisfies HasNameOf<typeof getUserSettingKeyInfo>,
+  () => {
+    test(`returns marshaled key metadata for keyed settings`, () => {
+      const keyInfo = getUserSettingKeyInfo(
+        pinyinFinalSoundLocationSelectionSetting,
+        { soundId: testSoundId },
+      );
+
+      expect(keyInfo.settingKey).toBe(`pfsps/-a`);
+      expect(keyInfo.keyParamAliases).toEqual([`s`]);
+      expect(keyInfo.keyParamMarshaled).toEqual({ s: `-a` });
+    });
+
+    test(`returns empty key metadata for keyless settings`, () => {
+      const keyInfo = getUserSettingKeyInfo(userNameSetting, {});
+
+      expect(keyInfo.settingKey).toBe(`userName`);
+      expect(keyInfo.keyParamAliases).toEqual([]);
+      expect(keyInfo.keyParamMarshaled).toEqual({});
+    });
+  },
+);
+
+describe(
+  `decodeUserSettingValue` satisfies HasNameOf<typeof decodeUserSettingValue>,
+  () => {
+    test(`decodes keyed setting when stored value omits key fields`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinFinalSoundLocationSelectionSetting,
+        { soundId: testSoundId },
+        { p: testLocationId },
+      );
+
+      expect(decoded).toEqual({
+        soundId: testSoundId,
+        locationId: testLocationId,
+      });
+    });
+
+    test(`returns null when stored value is null`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinFinalSoundLocationSelectionSetting,
+        { soundId: testSoundId },
+        null,
+      );
+
+      expect(decoded).toBeNull();
+    });
+
+    test(`returns null when stored object cannot be decoded`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinFinalSoundLocationSelectionSetting,
+        { soundId: testSoundId },
+        { notPlace: `x` },
+      );
+
+      expect(decoded).toBeNull();
+    });
+
+    test(`decodes keyless setting values directly`, () => {
+      const decoded = decodeUserSettingValue(
+        userNameSetting,
+        {},
+        { t: `Brad` },
+      );
+
+      expect(decoded).toEqual({ text: `Brad` });
+    });
+  },
+);
+
+describe(
+  `encodeUserSettingStoredValue` satisfies HasNameOf<
+    typeof encodeUserSettingStoredValue
+  >,
+  () => {
+    test(`strips key-path fields from keyed setting stored values`, () => {
+      const encoded = encodeUserSettingStoredValue(
+        pinyinFinalSoundLocationSelectionSetting,
+        { soundId: testSoundId },
+        {
+          soundId: testSoundId,
+          locationId: testLocationId,
+        },
+      );
+
+      expect(encoded).toEqual({ p: testLocationId });
+    });
+
+    test(`keeps all marshaled fields for keyless settings`, () => {
+      const encoded = encodeUserSettingStoredValue(
+        userNameSetting,
+        {},
+        {
+          text: `Brad`,
+        },
+      );
+
+      expect(encoded).toEqual({ t: `Brad` });
+    });
+
+    test(`returns null when value is null`, () => {
+      const encoded = encodeUserSettingStoredValue(userNameSetting, {}, null);
+
+      expect(encoded).toBeNull();
     });
   },
 );

@@ -6,7 +6,7 @@ import type { AssetId } from "@/data/model";
 import type { ImageCrop } from "./imageCrop";
 
 interface FinalSoundTileProps extends ViewProps {
-  label: string;
+  badge?: string;
   name: string | null;
   image: {
     assetId: AssetId;
@@ -18,57 +18,87 @@ interface FinalSoundTileProps extends ViewProps {
 
 export function FinalSoundTile({
   className,
-  label,
+  badge,
   name,
   image,
   ...props
 }: FinalSoundTileProps) {
+  const hasBadge = nullIfEmpty(badge) != null;
+
   return (
     <View
       {...props}
       className={
-        `group w-full overflow-hidden rounded-xl bg-bg-high shadow` +
-        (className == null ? `` : ` ${className}`)
+        `group items-center` +
+        (className == null
+          ? ``
+          : `
+            ${className}
+          `)
       }
     >
       <View
         className={`
-          h-28 w-full border border-transparent transition-colors duration-150
+          relative z-10 size-[180px] transition-colors duration-150
+
+          ${hasBadge ? `mb-5` : `mb-2`}
 
           group-hover:border-fg/10
         `}
       >
-        {image == null ? null : (
-          <FramedAssetImage
-            assetId={image.assetId}
-            crop={image.crop}
-            imageWidth={image.imageWidth}
-            imageHeight={image.imageHeight}
-            frameShape="rect"
-            className="size-full"
-          />
-        )}
+        <View
+          className={`
+            size-full overflow-hidden rounded-xl border border-transparent bg-bg-high shadow
+            transition-colors duration-150
+
+            group-hover:border-fg/10
+          `}
+        >
+          {image == null ? null : (
+            <FramedAssetImage
+              assetId={image.assetId}
+              crop={image.crop}
+              imageWidth={image.imageWidth}
+              imageHeight={image.imageHeight}
+              frameShape="rect"
+              className="size-full"
+            />
+          )}
+        </View>
+
+        {hasBadge ? (
+          <View className="absolute inset-x-0 -bottom-4 z-10 items-center">
+            <View
+              className={`
+                min-h-8 min-w-8 items-center justify-center rounded-full border border-fg/10
+                bg-fg-loud px-2.5 shadow transition-all duration-150
+
+                group-hover:brightness-110
+              `}
+            >
+              <Text className="font-sans text-sm/none font-semibold text-bg">
+                {badge}
+              </Text>
+            </View>
+          </View>
+        ) : null}
       </View>
 
       <View
         className={`
-          flex-row items-center gap-2 px-3 py-2 transition-colors duration-150
+          relative z-0 max-w-full rounded-lg px-3 py-2
 
-          group-hover:bg-fg/5
+          group-hover:bg-fg/10
         `}
       >
         <Text
           className={
-            `text-base/tighter font-medium text-fg flex-1` +
+            `text-base/none font-medium text-fg` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}
         >
           {name ?? `_____`}
-        </Text>
-
-        <Text className="shrink-0 font-sans text-sm/none text-fg-dim">
-          {label}
         </Text>
       </View>
     </View>

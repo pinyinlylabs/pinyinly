@@ -59,11 +59,10 @@ export default function ProfileSettingsPage() {
         <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
           <Text className="font-sans text-sm text-fg-dim">Account Name</Text>
           <InlineEditableSettingText
-            variant="body"
             setting={userNameSetting}
             settingKey={{}}
+            textClassName="pyly-body"
             placeholder="Enter account name"
-            displayClassName="text-base"
           />
           <Text className="font-sans text-xs text-fg-dim/60">
             Updated automatically across your devices

@@ -1,4 +1,4 @@
-import { cssInterop } from "nativewind";
+import { styled } from "nativewind";
 import React from "react";
 import { Platform } from "react-native";
 import type { StrokeProps } from "react-native-svg";
@@ -11,13 +11,10 @@ type PathCssProps = Pick<React.SVGProps<SVGPathElement>, `d` | `className`> &
     onHoverOut?: () => void;
   };
 
-const PathCssRn = cssInterop(Path, {
+const PathCssRn = styled(Path, {
   className: {
     target: false,
-    nativeStyleToProp: {
-      fill: true,
-      stroke: true,
-    },
+    nativeStyleToProp: { fill: true, stroke: true } as unknown as never,
   },
 });
 

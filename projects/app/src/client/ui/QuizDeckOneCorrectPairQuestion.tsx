@@ -130,7 +130,7 @@ export function QuizDeckOneCorrectPairQuestion({
       </View>
       <View className="flex-1 justify-center py-4">
         <View
-          className="flex-1 flex-row gap-[28px]"
+          className="flex-1 flex-row gap-7"
           style={{
             maxHeight:
               choiceRowCount * 80 +

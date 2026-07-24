@@ -1,11 +1,26 @@
-import type { Skill, SrsStateType } from "@/data/model";
-import { SrsKind } from "@/data/model";
-import { userNameSetting } from "@/data/userSettings";
+import type {
+  AssetId,
+  LocationSetKey,
+  LocationId,
+  LocationSpec,
+  Skill,
+  SrsStateType,
+} from "@/data/model";
+import { locationSpecSchema, SrsKind } from "@/data/model";
+import {
+  pinyinSoundLocationSetIdentityImageSetting,
+  pinyinSoundLocationSetIdentityImageSettingKey,
+  pinyinSoundLocationSpecSetting,
+  userNameSetting,
+} from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
+import { jsonCodec } from "@pinyinly/lib/zod";
+import { setUserSetting } from "./userSettings";
+import { nanoid } from "@/util/nanoid";
 
 export async function updateSkillState(
   tx: Drizzle,
@@ -79,7 +94,7 @@ export async function getUserName(
   });
 
   if (setting?.value) {
-    const decoded = userNameSetting.entity.unmarshalValueSafe(setting.value);
+    const decoded = userNameSetting.decode({}, setting.value);
     return decoded?.text ?? null;
   }
   return null;
@@ -109,4 +124,87 @@ export async function setUserName(
       target: [schema.userSetting.userId, schema.userSetting.key],
       set: { value: marshaledValue },
     });
+}
+
+export async function getLocationSpec(
+  db: Drizzle,
+  userId: string,
+  locationId: LocationId,
+): Promise<LocationSpec | null> {
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(
+        schema.userSetting.key,
+        pinyinSoundLocationSpecSetting.entity.marshalKey({
+          locationId: locationId,
+        }),
+      ),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = pinyinSoundLocationSpecSetting.decode(
+    { locationId: locationId },
+    setting.value,
+  );
+
+  if (decoded == null) {
+    return null;
+  }
+
+  return jsonCodec(locationSpecSchema).parse(decoded.text, {
+    reportInput: true,
+  });
+}
+
+export async function setLocationSetIdentityImage(
+  db: Drizzle,
+  userId: string,
+  locationId: LocationId,
+  setKey: LocationSetKey,
+  imageId: AssetId,
+): Promise<void> {
+  await setUserSetting(db, userId, {
+    key: pinyinSoundLocationSetIdentityImageSettingKey(locationId, setKey),
+    value: pinyinSoundLocationSetIdentityImageSetting.entity.marshalValue({
+      locationId: locationId,
+      setKey,
+      imageId: imageId,
+    }),
+    now: new Date(),
+    skipHistory: false,
+    historyId: nanoid(),
+  });
+}
+
+export async function getLocationSetIdentityImage(
+  db: Drizzle,
+  userId: string,
+  locationId: LocationId,
+  setKey: LocationSetKey,
+): Promise<AssetId | null> {
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(
+        schema.userSetting.key,
+        pinyinSoundLocationSetIdentityImageSettingKey(locationId, setKey),
+      ),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = pinyinSoundLocationSetIdentityImageSetting.decode(
+    { locationId, setKey },
+    setting.value,
+  );
+
+  return decoded?.imageId ?? null;
 }

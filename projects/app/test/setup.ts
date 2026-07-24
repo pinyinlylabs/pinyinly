@@ -181,7 +181,8 @@ vi.mock(`expo-image-picker`, () => {
 
 vi.mock(`nativewind`, () => {
   return {
-    cssInterop: () => null,
+    cssInterop: (x: Component) => x,
+    styled: (x: Component) => x,
     default: {
       createAnimatedComponent: (x: Component) => x,
       View,

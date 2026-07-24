@@ -16,7 +16,7 @@ export function QuizQueueButton() {
   const buttonContent = (
     <>
       <Icon size={32} className="self-center text-fg" icon="inbox-filled" />
-      <QuizQueueLozenge className="absolute left-[52%] top-[60%] border-2 border-solid border-bg" />
+      <QuizQueueLozenge className="absolute top-[60%] left-[52%] border-2 border-solid border-bg" />
     </>
   );
 

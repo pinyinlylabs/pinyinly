@@ -2,11 +2,15 @@ import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { useDb } from "@/client/ui/hooks/useDb";
-import { getSettingKeyInfo } from "@/client/ui/hooks/useUserSetting";
+import {
+  getPinyinSoundLocationDisplaySummary,
+  usePinyinSoundLocations,
+} from "@/client/ui/hooks/usePinyinSoundLocations";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { RectButton } from "@/client/ui/RectButton";
 import { ToneSoundTile } from "@/client/ui/ToneSoundTile";
 import {
   isFinalSoundId,
@@ -14,6 +18,7 @@ import {
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import {
+  pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,
@@ -29,6 +34,7 @@ import { Text, View } from "react-native";
 export default function SoundsPage() {
   "use memo";
   const pinyinSoundGroupsQuery = usePinyinSoundGroups();
+  const placeDirectory = usePinyinSoundLocations();
   const chart = loadPylyPinyinChart();
   const db = useDb();
 
@@ -40,9 +46,20 @@ export default function SoundsPage() {
     () => chart.soundIds.map((soundId) => pinyinSoundImageSettingKey(soundId)),
     [chart.soundIds],
   );
+  const finalPlaceSelectionKeys = useMemo(
+    () =>
+      chart.soundIds
+        .filter((soundId) => isFinalSoundId(soundId))
+        .map((soundId) =>
+          pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({
+            soundId,
+          }),
+        ),
+    [chart.soundIds],
+  );
   const relevantKeys = useMemo(
-    () => [...nameSettingKeys, ...imageSettingKeys],
-    [nameSettingKeys, imageSettingKeys],
+    () => [...nameSettingKeys, ...imageSettingKeys, ...finalPlaceSelectionKeys],
+    [nameSettingKeys, imageSettingKeys, finalPlaceSelectionKeys],
   );
 
   const { data: settings } = useLiveQuery(
@@ -59,29 +76,47 @@ export default function SoundsPage() {
 
   const pinyinSounds = new Map(
     chart.soundIds.map((soundId) => {
-      const { keyParamMarshaled: nameKeyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundNameSetting,
+      if (isFinalSoundId(soundId)) {
+        const placeSelectionValue =
+          pinyinFinalSoundLocationSelectionSetting.decode(
+            { soundId },
+            settingsByKey.get(
+              pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({
+                soundId,
+              }),
+            ) ?? null,
+          );
+        const selectedLocationId = placeSelectionValue?.locationId ?? null;
+        const place =
+          selectedLocationId == null
+            ? null
+            : (placeDirectory.locations.find(
+                (entry) => entry.locationId === selectedLocationId,
+              ) ?? null);
+        const placeDisplay =
+          place == null ? null : getPinyinSoundLocationDisplaySummary(place);
+
+        return [
+          soundId,
+          {
+            name:
+              placeDisplay?.name == null ||
+              placeDisplay.name.trim().length === 0
+                ? selectedLocationId
+                : placeDisplay.name,
+            badge: chart.soundToCustomLabel[soundId] ?? soundId,
+            image: placeDisplay?.identityImage ?? null,
+          },
+        ];
+      }
+
+      const nameValueData = pinyinSoundNameSetting.decode(
         { soundId },
+        settingsByKey.get(pinyinSoundNameSettingKey(soundId)) ?? null,
       );
-      const { keyParamMarshaled: imageKeyParamMarshaled } = getSettingKeyInfo(
-        pinyinSoundImageSetting,
+      const imageValueData = pinyinSoundImageSetting.decode(
         { soundId },
-      );
-      const nameValueData = pinyinSoundNameSetting.entity.unmarshalValueSafe(
-        settingsByKey.get(pinyinSoundNameSettingKey(soundId)) == null
-          ? null
-          : {
-              ...nameKeyParamMarshaled,
-              ...settingsByKey.get(pinyinSoundNameSettingKey(soundId)),
-            },
-      );
-      const imageValueData = pinyinSoundImageSetting.entity.unmarshalValueSafe(
-        settingsByKey.get(pinyinSoundImageSettingKey(soundId)) == null
-          ? null
-          : {
-              ...imageKeyParamMarshaled,
-              ...settingsByKey.get(pinyinSoundImageSettingKey(soundId)),
-            },
+        settingsByKey.get(pinyinSoundImageSettingKey(soundId)) ?? null,
       );
       const imageId = imageValueData?.imageId ?? null;
 
@@ -89,7 +124,7 @@ export default function SoundsPage() {
         soundId,
         {
           name: nameValueData?.text ?? null,
-          label: chart.soundToCustomLabel[soundId] ?? soundId,
+          badge: chart.soundToCustomLabel[soundId] ?? soundId,
           image:
             imageId == null
               ? null
@@ -115,12 +150,21 @@ export default function SoundsPage() {
         <HeaderTitleProvider.ScrollTrigger title="Sounds" />
       </View>
 
+      <View className="flex-row flex-wrap gap-2">
+        <RectButton href="/actors" variant="outline">
+          Actors
+        </RectButton>
+        <RectButton href="/locations" variant="outline">
+          Places
+        </RectButton>
+      </View>
+
       {pinyinSoundGroupsQuery.data.map(({ id, sounds }) => {
         const firstSoundId = sounds[0];
         const gridClass =
           firstSoundId != null && isFinalSoundId(firstSoundId)
-            ? `grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5`
-            : `grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-3.5`;
+            ? `grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5`
+            : `grid grid-cols-[repeat(auto-fit,minmax(112px,1fr))] gap-x-3.5 gap-y-6`;
         return (
           <View key={id} className="gap-4">
             <View className="flex-row items-center gap-2">
@@ -128,18 +172,14 @@ export default function SoundsPage() {
                 setting={pinyinSoundGroupNameSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Group name"
-                displayClassName="text-lg font-bold text-fg"
-                emptyClassName="text-lg font-bold text-fg/30"
-                inputClassName="text-lg font-bold text-fg"
+                textClassName="font-sans text-lg font-bold"
               />
               <Text className="font-sans text-fg-dim">({sounds.length})</Text>
               <InlineEditableSettingText
                 setting={pinyinSoundGroupThemeSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Theme"
-                displayClassName="text-fg-dim"
-                emptyClassName="text-fg-dim/70"
-                inputClassName="text-fg"
+                textClassName="font-sans text-lg font-bold"
               />
             </View>
             <View className={gridClass}>
@@ -149,13 +189,13 @@ export default function SoundsPage() {
                   <Link key={soundId} href={`/sounds/${soundId}`} asChild>
                     {isInitialSoundId(soundId) ? (
                       <InitialSoundTile
-                        label={sound.label}
+                        badge={sound.badge}
                         name={sound.name}
                         image={sound.image}
                       />
                     ) : isFinalSoundId(soundId) ? (
                       <FinalSoundTile
-                        label={sound.label}
+                        badge={sound.badge}
                         name={sound.name}
                         image={sound.image}
                       />

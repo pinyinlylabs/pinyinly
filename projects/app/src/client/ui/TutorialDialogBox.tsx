@@ -47,10 +47,10 @@ export const TutorialDialogBox = ({
   return (
     <ReanimatedPressable
       style={[animatedContentStyle]}
-      className="py-[14px] pl-[32px] pr-[18px]"
+      className="py-[14px] pr-[18px] pl-8"
       onPress={handlePress}
     >
-      <Text className={`pyly-body relative`}>
+      <Text className={`relative pyly-body`}>
         {speechBubbleLoaded ? (
           <PylymarkTypewriter
             source={text}
@@ -62,13 +62,13 @@ export const TutorialDialogBox = ({
           />
         ) : null}
         {/* Reserve some space for the "Next" chevron icon, so that it doesn't overlap the content of the text. */}
-        <Text className="inline-block w-[24px]"></Text>
+        <Text className="inline-block w-6"></Text>
 
         <Icon
           icon="chevron-right"
           size={24}
           className={`
-            absolute bottom-0 right-[-6px] animate-hoscillate text-fg-loud transition-opacity
+            absolute right-[-6px] bottom-0 animate-hoscillate text-fg-loud transition-opacity
             duration-300
 
             ${typewriterCompleted ? `opacity-100` : `pointer-events-none opacity-0`}

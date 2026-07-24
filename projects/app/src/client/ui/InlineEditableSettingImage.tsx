@@ -10,7 +10,6 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
-import type { GeminiImageAspectRatio } from "@/util/geminiImageAspectRatio";
 import { getGeminiImageAspectRatioValue } from "@/util/geminiImageAspectRatio";
 import { useEffect, useId, useRef, useState } from "react";
 import type {
@@ -45,6 +44,7 @@ import {
   parseImageCrop,
 } from "./imageCrop";
 import { useAssetImageMeta } from "./useAssetImageMeta";
+import type { GeminiImageAspectRatio } from "@/server/lib/gemini";
 
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   setting: UserSettingEntityLike<T>;
@@ -379,6 +379,13 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
                       Reposition
                     </ButtonGroup.Button>
                   ) : null}
+                  <ButtonGroup.Button
+                    onPress={() => {
+                      setSettingValue(null);
+                    }}
+                  >
+                    Clear
+                  </ButtonGroup.Button>
                 </ButtonGroup>
               </View>
             ) : null}
@@ -439,8 +446,8 @@ function InlineEditableSettingImageHistoryMenu({
   onSelectImage: (assetId: AssetId) => void;
 } & FloatingMenuModalMenuProps) {
   return (
-    <View className="max-w-[420px] gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] uppercase text-fg-dim">
+    <View className="max-w-105 gap-2 rounded-xl bg-bg-high p-3">
+      <Text className="font-sans text-[11px] text-fg-dim uppercase">
         History
       </Text>
       <InlineEditableSettingImageHistoryGrid

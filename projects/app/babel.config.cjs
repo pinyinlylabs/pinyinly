@@ -3,7 +3,7 @@ module.exports = function babelConfig(api) {
   api.cache.never();
 
   return {
-    presets: [`babel-preset-expo`, `nativewind/babel`],
+    presets: [`babel-preset-expo`],
     plugins: [`babel-plugin-transform-import-meta`],
   };
 };

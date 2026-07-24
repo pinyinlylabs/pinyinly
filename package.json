@@ -58,7 +58,6 @@
     "@expo/cli@npm:0.24.13": "patch:@expo/cli@npm%3A0.24.13#~/.yarn/patches/@expo-cli-npm-0.24.13-fb70ee0167.patch",
     "@expo/cli@npm:0.24.18": "patch:@expo/cli@npm%3A0.24.18#~/.yarn/patches/@expo-cli-npm-0.24.18-cea2515949.patch",
     "babel-preset-expo@npm:~13.2.3": "patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch",
-    "react-native-css-interop@npm:0.1.22": "patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch",
     "estree-walker@npm:^3.0.3": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "estree-walker@npm:^3.0.0": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
@@ -72,6 +71,7 @@
     "@expo/cli@npm:^57.0.6": "patch:@expo/cli@npm%3A57.0.6#~/.yarn/patches/@expo-cli-npm-57.0.6-6c7dce52e7.patch",
     "babel-preset-expo@npm:~57.0.2": "patch:babel-preset-expo@npm%3A57.0.2#~/.yarn/patches/babel-preset-expo-npm-57.0.2-6935e6e94c.patch",
     "metro@npm:0.84.4": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch",
-    "metro@npm:^0.84.3": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch"
+    "metro@npm:^0.84.3": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch",
+    "fetch-nodeshim@npm:^0.4.10": "patch:fetch-nodeshim@npm%3A0.4.10#~/.yarn/patches/fetch-nodeshim-npm-0.4.10-b2a583e1ca.patch"
   }
 }

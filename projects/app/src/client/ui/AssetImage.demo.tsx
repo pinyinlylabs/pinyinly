@@ -44,17 +44,17 @@ export default () => {
         <ExampleStack title="card" childrenClassName="gap-3">
           <AssetImage
             assetId={loadingAssetId}
-            className="h-[110px] w-[180px] rounded-md"
+            className="h-[110px] w-45 rounded-md"
             contentFit="cover"
           />
           <AssetImage
             assetId={loadingAssetId}
-            className="h-[110px] w-[180px] rounded-md border border-fg-bg10"
+            className="h-[110px] w-45 rounded-md border border-fg-bg10"
             contentFit="contain"
           />
         </ExampleStack>
 
-        <ExampleStack title="message" childrenClassName="gap-3 w-[320px]">
+        <ExampleStack title="message" childrenClassName="w-[320px] gap-3">
           <AssetImage
             assetId={loadingAssetId}
             className="aspect-[2/1] w-full rounded-lg"
@@ -62,7 +62,7 @@ export default () => {
           />
           <AssetImage
             assetId={loadingAssetId}
-            className="aspect-[2/1] max-h-[220px] w-full rounded-lg"
+            className="aspect-[2/1] max-h-55 w-full rounded-lg"
             contentFit="contain"
           />
         </ExampleStack>
@@ -87,17 +87,17 @@ export default () => {
         <ExampleStack title="card" childrenClassName="gap-3">
           <AssetImage
             assetId={loadedLandscapeAssetId}
-            className="h-[110px] w-[180px] rounded-md"
+            className="h-[110px] w-45 rounded-md"
             contentFit="cover"
           />
           <AssetImage
             assetId={loadedLandscapeAssetId}
-            className="h-[110px] w-[180px] rounded-md border border-fg-bg10"
+            className="h-[110px] w-45 rounded-md border border-fg-bg10"
             contentFit="contain"
           />
         </ExampleStack>
 
-        <ExampleStack title="message" childrenClassName="gap-3 w-[320px]">
+        <ExampleStack title="message" childrenClassName="w-[320px] gap-3">
           <AssetImage
             assetId={loadedLandscapeAssetId}
             className="aspect-[2/1] w-full rounded-lg"
@@ -105,7 +105,7 @@ export default () => {
           />
           <AssetImage
             assetId={loadedLandscapeAssetId}
-            className="aspect-[2/1] max-h-[220px] w-full rounded-lg"
+            className="aspect-[2/1] max-h-55 w-full rounded-lg"
             contentFit="contain"
           />
         </ExampleStack>
@@ -124,7 +124,7 @@ export default () => {
           />
           <AssetImage
             assetId={failedAssetId}
-            className="h-[110px] w-[180px] rounded-md"
+            className="h-[110px] w-45 rounded-md"
             contentFit="cover"
             demoAssetStatus={AssetStatusKind.Failed}
             demoErrorMessage="Upload verification failed"
@@ -133,7 +133,7 @@ export default () => {
 
         <ExampleStack
           title="load error fallback"
-          childrenClassName="gap-3 w-[320px]"
+          childrenClassName="w-[320px] gap-3"
         >
           <AssetImage
             assetId={uploadedMissingAssetId}
@@ -144,7 +144,7 @@ export default () => {
           />
           <AssetImage
             assetId={uploadedMissingAssetId}
-            className="aspect-[2/1] max-h-[220px] w-full rounded-lg"
+            className="aspect-[2/1] max-h-55 w-full rounded-lg"
             contentFit="contain"
             demoAssetStatus={AssetStatusKind.Uploaded}
             demoImageError
@@ -154,7 +154,7 @@ export default () => {
 
       <LittlePrimaryHeader title="layout note" />
 
-      <View className="max-w-[720px] gap-2 rounded-lg border border-fg/10 bg-fg-bg5 p-3">
+      <View className="max-w-180 gap-2 rounded-lg border border-fg/10 bg-fg-bg5 p-3">
         <Text className="pyly-body-subheading">What this demo is testing</Text>
         <Text className="pyly-body text-fg-dim">
           AssetImage now forwards its sizing props to the loading placeholder,

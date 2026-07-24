@@ -8,7 +8,7 @@ export default () => (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="Simple tabs" showFrame>
-        <Tabs defaultValue="overview" className="w-[400px]">
+        <Tabs defaultValue="overview" className="w-100">
           <Tabs.List className="flex-row gap-1">
             <Tabs.Trigger value="overview" className="flex-1">
               Overview
@@ -57,7 +57,7 @@ export default () => (
       </ExampleStack>
 
       <ExampleStack title="Two tabs (Upload/Generate)" showFrame>
-        <Tabs defaultValue="upload" className="w-[400px]">
+        <Tabs defaultValue="upload" className="w-100">
           <Tabs.List className="flex-row gap-1">
             <Tabs.Trigger value="upload" className="flex-1">
               Upload
@@ -89,7 +89,7 @@ export default () => (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="Five tabs" showFrame>
-        <Tabs defaultValue="home" className="w-[500px]">
+        <Tabs defaultValue="home" className="w-125">
           <Tabs.List className="flex-row gap-1">
             <Tabs.Trigger value="home" className="flex-1">
               Home
@@ -165,7 +165,7 @@ export default () => (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="With disabled tab" showFrame>
-        <Tabs defaultValue="tab1" className="w-[400px]">
+        <Tabs defaultValue="tab1" className="w-100">
           <Tabs.List className="flex-row gap-1">
             <Tabs.Trigger value="tab1" className="flex-1">
               Tab 1
@@ -233,7 +233,7 @@ export default () => (
       </ExampleStack>
 
       <ExampleStack title="Tabs without flex-1" showFrame>
-        <Tabs defaultValue="first" className="w-[400px]">
+        <Tabs defaultValue="first" className="w-100">
           <Tabs.List className="flex-row gap-1">
             <Tabs.Trigger value="first">First Tab</Tabs.Trigger>
             <Tabs.Trigger value="second">Second</Tabs.Trigger>
