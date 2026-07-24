@@ -7,13 +7,12 @@ import {
   buildPopulateLocationSetDescriptionPrompt,
   buildLocationSetDescriptionPrompt,
   buildLocationSpecPrompt,
-  locationSpecSchema,
+  locationSpecWithDetailSchema,
   populateLocationSetDescriptionInputSchema,
 } from "#util/prompts/location.ts";
 import type {
   LocationEvaluationType,
-  LocationSpec,
-  LocationSpecRefinementResultType,
+  LocationSpecWithDetail,
 } from "#util/prompts/location.ts";
 import { InngestTestEngine } from "@inngest/test";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -30,7 +29,7 @@ vi.mock(`#server/lib/ai.js`, async () => {
   };
 });
 
-function makeLocationSpec(location: string): LocationSpec {
+function makeLocationSpec(location: string): LocationSpecWithDetail {
   return {
     location,
     recognitionHooks: [`mast`, `bow`, `anchor`],
@@ -111,7 +110,7 @@ describe(`locationSpecSchema`, () => {
   test(`accepts exactly five keyed sets`, () => {
     const spec = makeLocationSpec(`Pirate ship`);
 
-    expect(locationSpecSchema.parse(spec)).toEqual(spec);
+    expect(locationSpecWithDetailSchema.parse(spec)).toEqual(spec);
   });
 
   test(`rejects unexpected fields inside sets`, () => {
@@ -126,13 +125,14 @@ describe(`locationSpecSchema`, () => {
       },
     };
 
-    expect(() => locationSpecSchema.parse(spec)).toThrow(
+    expect(() => locationSpecWithDetailSchema.parse(spec)).toThrow(
       /unrecognized_key|unrecognized_keys/u,
     );
   });
 
   test(`json schema snapshot`, () => {
-    expect(zodResponseFormatJson(locationSpecSchema)).toMatchInlineSnapshot(`
+    expect(zodResponseFormatJson(locationSpecWithDetailSchema))
+      .toMatchInlineSnapshot(`
       {
         "name": "result_shape",
         "schema": {
@@ -141,18 +141,15 @@ describe(`locationSpecSchema`, () => {
           "properties": {
             "designRules": {
               "items": {
-                "minLength": 1,
                 "type": "string",
               },
               "type": "array",
             },
             "location": {
-              "minLength": 1,
               "type": "string",
             },
             "recognitionHooks": {
               "items": {
-                "minLength": 1,
                 "type": "string",
               },
               "type": "array",
@@ -165,29 +162,32 @@ describe(`locationSpecSchema`, () => {
                   "properties": {
                     "avoidFraming": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "canonicalFraming": {
-                      "minLength": 1,
                       "type": "string",
                     },
                     "designRules": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "name": {
-                      "minLength": 1,
                       "type": "string",
+                    },
+                    "props": {
+                      "items": {
+                        "type": "string",
+                      },
+                      "type": "array",
                     },
                   },
                   "required": [
                     "name",
+                    "props",
                     "designRules",
                     "canonicalFraming",
                     "avoidFraming",
@@ -199,29 +199,32 @@ describe(`locationSpecSchema`, () => {
                   "properties": {
                     "avoidFraming": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "canonicalFraming": {
-                      "minLength": 1,
                       "type": "string",
                     },
                     "designRules": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "name": {
-                      "minLength": 1,
                       "type": "string",
+                    },
+                    "props": {
+                      "items": {
+                        "type": "string",
+                      },
+                      "type": "array",
                     },
                   },
                   "required": [
                     "name",
+                    "props",
                     "designRules",
                     "canonicalFraming",
                     "avoidFraming",
@@ -233,29 +236,32 @@ describe(`locationSpecSchema`, () => {
                   "properties": {
                     "avoidFraming": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "canonicalFraming": {
-                      "minLength": 1,
                       "type": "string",
                     },
                     "designRules": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "name": {
-                      "minLength": 1,
                       "type": "string",
+                    },
+                    "props": {
+                      "items": {
+                        "type": "string",
+                      },
+                      "type": "array",
                     },
                   },
                   "required": [
                     "name",
+                    "props",
                     "designRules",
                     "canonicalFraming",
                     "avoidFraming",
@@ -267,29 +273,32 @@ describe(`locationSpecSchema`, () => {
                   "properties": {
                     "avoidFraming": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "canonicalFraming": {
-                      "minLength": 1,
                       "type": "string",
                     },
                     "designRules": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "name": {
-                      "minLength": 1,
                       "type": "string",
+                    },
+                    "props": {
+                      "items": {
+                        "type": "string",
+                      },
+                      "type": "array",
                     },
                   },
                   "required": [
                     "name",
+                    "props",
                     "designRules",
                     "canonicalFraming",
                     "avoidFraming",
@@ -301,29 +310,32 @@ describe(`locationSpecSchema`, () => {
                   "properties": {
                     "avoidFraming": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "canonicalFraming": {
-                      "minLength": 1,
                       "type": "string",
                     },
                     "designRules": {
                       "items": {
-                        "minLength": 1,
                         "type": "string",
                       },
                       "type": "array",
                     },
                     "name": {
-                      "minLength": 1,
                       "type": "string",
+                    },
+                    "props": {
+                      "items": {
+                        "type": "string",
+                      },
+                      "type": "array",
                     },
                   },
                   "required": [
                     "name",
+                    "props",
                     "designRules",
                     "canonicalFraming",
                     "avoidFraming",
@@ -458,7 +470,7 @@ describe(`buildLocationSpecPrompt`, () => {
     expect(system).not.toMatch(
       /\b(?:Pirate ship|Castle|Temple|Train station)\b/u,
     );
-    expect(system).not.toMatch(/\b(?:pinyin|tone|Chinese|mnemonic)\b/iu);
+    expect(system).not.toMatch(/\b(?:pinyin|tone|Chinese)\b/iu);
 
     const data = extractDataBlock(user ?? ``);
     expect(data).toEqual({ location: `Pirate ship` });
@@ -471,7 +483,7 @@ describe(`generateLocationSpec`, () => {
   async function executeRefinement(options: {
     location: string;
     maxAttempts?: number;
-  }): Promise<LocationSpecRefinementResultType> {
+  }): Promise<LocationSpecWithDetail> {
     const testEngine = new InngestTestEngine({
       function: generateLocationSpec,
     });
@@ -479,7 +491,7 @@ describe(`generateLocationSpec`, () => {
     const { result, error } = await testEngine.execute({
       events: [
         {
-          name: `location-specification-refinement/run`,
+          name: `inngest/function.invoked`,
           data:
             options.maxAttempts == null
               ? { location: options.location }
@@ -497,7 +509,7 @@ describe(`generateLocationSpec`, () => {
         : new Error(`Refinement execution failed`);
     }
 
-    return result as LocationSpecRefinementResultType;
+    return result as LocationSpecWithDetail;
   }
 
   beforeEach(() => {
@@ -526,11 +538,7 @@ describe(`generateLocationSpec`, () => {
 
     const result = await executeRefinement({ location: `Pirate ship` });
 
-    expect(result.succeeded).toBe(true);
-    expect(result.stopReason).toBe(`no_major_criticisms`);
-    expect(result.attempts).toHaveLength(1);
-    expect(result.finalLocationSpec).toEqual(generated);
-    expect(result.finalEvaluation.passed).toBe(true);
+    expect(result).toEqual(generated);
     expect(requestMock).toHaveBeenCalledTimes(2);
   });
 
@@ -574,37 +582,28 @@ describe(`generateLocationSpec`, () => {
       }
     });
 
-    const result = await executeRefinement({ location: `Pirate ship` });
+    const result = await executeRefinement({
+      location: `Pirate ship`,
+      maxAttempts: 1,
+    });
 
-    expect(result.succeeded).toBe(true);
-    expect(result.attempts).toHaveLength(2);
-    expect(result.finalLocationSpec).toEqual(refined);
-    expect(result.finalEvaluation.passed).toBe(true);
+    expect(result).toEqual(refined);
     expect(requestMock).toHaveBeenCalledTimes(4);
   });
 
-  test(`regenerates from scratch on a fundamental location-wide failure`, async () => {
+  test(`still refines and can recover from a fundamental location-wide failure`, async () => {
     const first = makeLocationSpec(`Pirate ship`);
-    const second = makeLocationSpec(`Pirate ship`);
-    second.recognitionHooks[0] = `broad sail`;
+    const refined = makeLocationSpec(`Pirate ship`);
+    refined.recognitionHooks[0] = `broad sail`;
 
     let callCount = 0;
 
     requestMock.mockImplementation(async (prompt) => {
       callCount += 1;
       const kind = promptKind(prompt.messages[0]?.content ?? ``);
-      if (kind === `refiner`) {
-        throw new Error(
-          `The refiner should not be called for fundamental failures.`,
-        );
-      }
 
       switch (kind) {
         case `generator`:
-          if (callCount > 1) {
-            return { data: second, model: `gpt-5.4` };
-          }
-
           return { data: first, model: `gpt-5.4` };
         case `evaluator`:
           if (callCount === 4) {
@@ -626,17 +625,17 @@ describe(`generateLocationSpec`, () => {
             ]),
             model: `gpt-5.4`,
           };
+        case `refiner`:
+          return { data: refined, model: `gpt-5.4` };
       }
     });
 
     const result = await executeRefinement({
       location: `Pirate ship`,
-      maxAttempts: 2,
+      maxAttempts: 1,
     });
 
-    expect(result.succeeded).toBe(true);
-    expect(result.attempts).toHaveLength(2);
-    expect(result.finalLocationSpec).toEqual(second);
+    expect(result).toEqual(refined);
     expect(requestMock).toHaveBeenCalledTimes(4);
   });
 
@@ -715,13 +714,10 @@ describe(`generateLocationSpec`, () => {
 
     const result = await executeRefinement({
       location: `Pirate ship`,
-      maxAttempts: 3,
+      maxAttempts: 2,
     });
 
-    expect(result.succeeded).toBe(false);
-    expect(result.attempts).toHaveLength(3);
-    expect(result.finalLocationSpec).toEqual(second);
-    expect(result.finalEvaluation.score).toBe(0.7);
-    expect(requestMock).toHaveBeenCalledTimes(6);
+    expect(result).toEqual(second);
+    expect(requestMock).toHaveBeenCalledTimes(7);
   });
 });

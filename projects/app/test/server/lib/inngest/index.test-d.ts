@@ -1,4 +1,3 @@
-// pyly-not-src-test
 import { inngest } from "#server/lib/inngest/client.ts";
 import { test } from "vitest";
 

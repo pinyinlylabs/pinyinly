@@ -17,10 +17,10 @@ import {
   buildLocationSpecPrompt,
   buildRefineLocationSpecPrompt,
   hasMajorCriticisms,
-  locationSpecSchema,
 } from "@/util/prompts/location";
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
-import type { LocationSpec } from "@/util/prompts/location";
+import { locationSpecSchema } from "@/data/model";
+import type { LocationSpec } from "@/data/model";
 import { and, eq } from "drizzle-orm";
 import { invoke } from "inngest";
 import z from "zod";
@@ -62,7 +62,7 @@ export const generateLocationSpec = inngest.createFunction(
     let bestLocationSpec: LocationSpec | null = null;
     let bestScore = Number.NEGATIVE_INFINITY;
 
-    let currentLocationSpec = await step.run(
+    let currentLocationSpec: LocationSpec = await step.run(
       `location-spec-initial-generate`,
       async () => {
         const response = await requestOpenAiResponseJson(
@@ -512,7 +512,7 @@ const populateLocationSpec = inngest.createFunction(
   async ({ event, step }): Promise<LocationSpec> => {
     const { userId, locationId } = event.data;
 
-    let locationSpec = await step.run(
+    let locationSpec: LocationSpec | null = await step.run(
       `load location specification`,
       async () => {
         return withDrizzle(async (db) => {
@@ -561,7 +561,7 @@ const populateLocationSpec = inngest.createFunction(
         },
       });
 
-      locationSpecSchema.parse(locationSpec);
+      locationSpec = locationSpecSchema.parse(locationSpec);
 
       await step.run(`write location specification`, async () =>
         withDrizzle(async (db) => {

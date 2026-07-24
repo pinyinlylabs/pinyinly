@@ -1,4 +1,6 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
+import type { LocationSet, LocationSpec } from "@/data/model";
+import { locationSetKeySchema, locationSpecSchema } from "@/data/model";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 
@@ -10,46 +12,27 @@ import { z } from "zod";
  * architectural center.
  */
 
-export const locationPromptInputSchema = z
-  .object({
-    location: z.string(),
-  })
-  .strict();
-
-export type LocationPromptInputType = z.infer<typeof locationPromptInputSchema>;
-
-export const locationSetRoleSchema = z.enum([
-  `arrival`,
-  `heart`,
-  `below`,
-  `ascent`,
-  `summit`,
-]);
-
-export type LocationSetRole = z.infer<typeof locationSetRoleSchema>;
-
-export type LocationSet = {
-  name: string;
+export interface LocationSetWithDetail extends LocationSet {
   props: string[];
   designRules: string[];
   canonicalFraming: string;
   avoidFraming: string[];
-};
+}
 
-export type LocationSpec = {
+export interface LocationSpecWithDetail extends LocationSpec {
   location: string;
   recognitionHooks: string[];
   designRules: string[];
   sets: {
-    arrival: LocationSet;
-    heart: LocationSet;
-    below: LocationSet;
-    ascent: LocationSet;
-    summit: LocationSet;
+    arrival: LocationSetWithDetail;
+    heart: LocationSetWithDetail;
+    below: LocationSetWithDetail;
+    ascent: LocationSetWithDetail;
+    summit: LocationSetWithDetail;
   };
-};
+}
 
-const locationSetSchema = z
+const locationSetWithDetailSchema = z
   .object({
     name: z.string(),
     props: z.array(z.string()),
@@ -59,18 +42,18 @@ const locationSetSchema = z
   })
   .strict();
 
-const locationSpecBaseSchema = z
+const locationSpecWithDetailBaseSchema = z
   .object({
     location: z.string(),
     recognitionHooks: z.array(z.string()),
     designRules: z.array(z.string()),
     sets: z
       .object({
-        arrival: locationSetSchema,
-        heart: locationSetSchema,
-        below: locationSetSchema,
-        ascent: locationSetSchema,
-        summit: locationSetSchema,
+        arrival: locationSetWithDetailSchema,
+        heart: locationSetWithDetailSchema,
+        below: locationSetWithDetailSchema,
+        ascent: locationSetWithDetailSchema,
+        summit: locationSetWithDetailSchema,
       })
       .strict(),
   })
@@ -78,8 +61,8 @@ const locationSpecBaseSchema = z
 
 export const populateLocationSetDescriptionInputSchema = z
   .object({
-    locationSpec: locationSpecBaseSchema,
-    setKey: locationSetRoleSchema,
+    locationSpec: locationSpecSchema,
+    setKey: locationSetKeySchema,
   })
   .strict();
 
@@ -88,7 +71,7 @@ export type PopulateLocationSetDescriptionInputType = z.infer<
 >;
 
 function validateLocationSpecShape(
-  value: z.infer<typeof locationSpecBaseSchema>,
+  value: z.infer<typeof locationSpecWithDetailBaseSchema>,
   ctx: z.RefinementCtx,
 ): void {
   if (value.recognitionHooks.length < 3 || value.recognitionHooks.length > 5) {
@@ -107,7 +90,7 @@ function validateLocationSpecShape(
     });
   }
 
-  for (const role of locationSetRoleSchema.options) {
+  for (const role of locationSetKeySchema.options) {
     const set = value.sets[role];
 
     if (set.designRules.length === 0) {
@@ -120,11 +103,12 @@ function validateLocationSpecShape(
   }
 }
 
-export const locationSpecSchema = locationSpecBaseSchema.superRefine(
-  validateLocationSpecShape,
-);
+export const locationSpecWithDetailSchema =
+  locationSpecWithDetailBaseSchema.superRefine(validateLocationSpecShape);
 
-export type LocationSpecSchemaType = z.infer<typeof locationSpecSchema>;
+export type LocationSpecWithDetailSchemaType = z.infer<
+  typeof locationSpecWithDetailSchema
+>;
 
 export const locationCriticismCodeSchema = z.enum([
   `NON_CANONICAL`,
@@ -184,7 +168,7 @@ export type LocationEvaluationType = z.infer<typeof locationEvaluationSchema>;
 export const locationSpecRefinementAttemptSchema = z
   .object({
     attempt: z.number().int(),
-    locationSpec: locationSpecSchema,
+    locationSpec: locationSpecWithDetailSchema,
     evaluation: locationEvaluationSchema,
   })
   .strict();
@@ -207,7 +191,7 @@ export const locationSpecRefinementResultSchema = z
     attempts: z.array(locationSpecRefinementAttemptSchema),
     succeeded: z.boolean(),
     stopReason: locationSpecRefinementStopReasonSchema,
-    finalLocationSpec: locationSpecSchema,
+    finalLocationSpec: locationSpecWithDetailSchema,
     finalEvaluation: locationEvaluationSchema,
   })
   .strict();
@@ -215,10 +199,6 @@ export const locationSpecRefinementResultSchema = z
 export type LocationSpecRefinementResultType = z.infer<
   typeof locationSpecRefinementResultSchema
 >;
-
-function buildLocationPromptData(entry: LocationPromptInputType) {
-  return { location: entry.location };
-}
 
 export function buildLocationSetDescriptionPrompt({
   label,
@@ -427,9 +407,9 @@ You will be given:
 buildPopulateLocationSetDescriptionPrompt.schema =
   populateLocationSetDescriptionOutputSchema;
 
-export const buildLocationSpecPrompt = (
-  entry: LocationPromptInputType,
-): ChatPrompt<typeof locationSpecSchema> => {
+export const buildLocationSpecPrompt = (entry: {
+  location: string;
+}): ChatPrompt<typeof locationSpecWithDetailSchema> => {
   const systemTemplate = `
 You are an expert production designer creating the canonical design specification for a recurring fictional location.
 
@@ -609,7 +589,7 @@ Generate the canonical location specification for the following input.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(buildLocationPromptData(entry), null, 2),
+        data: JSON.stringify(entry, null, 2),
       }),
     },
   ];
@@ -618,7 +598,7 @@ Generate the canonical location specification for the following input.
     messages,
     model: `gpt-5.5`,
     reasoningEffort: `medium`,
-    schema: locationSpecSchema,
+    schema: locationSpecWithDetailSchema,
   };
 };
 

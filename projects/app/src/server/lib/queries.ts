@@ -2,10 +2,11 @@ import type {
   AssetId,
   LocationSetKey,
   LocationId,
+  LocationSpec,
   Skill,
   SrsStateType,
 } from "@/data/model";
-import { SrsKind } from "@/data/model";
+import { locationSpecSchema, SrsKind } from "@/data/model";
 import {
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetIdentityImageSettingKey,
@@ -17,7 +18,6 @@ import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
-import { locationSpecSchema } from "@/util/prompts/location";
 import { jsonCodec } from "@pinyinly/lib/zod";
 import { setUserSetting } from "./userSettings";
 import { nanoid } from "@/util/nanoid";
@@ -130,7 +130,7 @@ export async function getLocationSpec(
   db: Drizzle,
   userId: string,
   locationId: LocationId,
-) {
+): Promise<LocationSpec | null> {
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),

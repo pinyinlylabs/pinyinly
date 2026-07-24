@@ -3,18 +3,21 @@ import type { JudgeContext } from "vitest-evals";
 import { buildLocationSpecPrompt } from "#util/prompts/location.ts";
 import { generateLocationSpec } from "#server/lib/inngest/location.ts";
 import type {
-  LocationPromptInputType,
   LocationSpecRefinementResultType,
-  LocationSpec,
+  LocationSpecWithDetail,
 } from "#util/prompts/location.ts";
 import { InngestTestEngine } from "@inngest/test";
 import { createResponsePromptHarness } from "./eval.ts";
+
+type LocationPromptInput = {
+  location: string;
+};
 
 function normalized(value: string): string {
   return value.trim().toLocaleLowerCase();
 }
 
-function isValidLocationSpec(spec: LocationSpec): boolean {
+function isValidLocationSpec(spec: LocationSpecWithDetail): boolean {
   const sets = spec.sets;
 
   return (
@@ -30,13 +33,11 @@ function isValidLocationSpec(spec: LocationSpec): boolean {
 
 const LocationSpecJudge = createJudge(
   `LocationSpecJudge`,
-  async ({
-    input,
-    output,
-  }: JudgeContext<LocationPromptInputType, LocationSpec>) => {
+  async ({ input, output }: JudgeContext<LocationPromptInput, any>) => {
+    const spec = output as LocationSpecWithDetail;
     const score =
-      isValidLocationSpec(output) &&
-      normalized(output.location) === normalized(input.location)
+      isValidLocationSpec(spec) &&
+      normalized(spec.location) === normalized(input.location)
         ? 1
         : 0;
 
@@ -56,10 +57,7 @@ const LocationPipelineJudge = createJudge(
   `LocationPipelineJudge`,
   async ({
     output,
-  }: JudgeContext<
-    LocationPromptInputType,
-    LocationSpecRefinementResultType
-  >) => {
+  }: JudgeContext<LocationPromptInput, LocationSpecRefinementResultType>) => {
     const final = output.finalLocationSpec;
     const structureScore = isValidLocationSpec(final) ? 1 : 0;
     const budgetScore = output.attempts.length <= 3 ? 1 : 0;
@@ -78,7 +76,7 @@ const LocationPipelineJudge = createJudge(
   },
 );
 
-const promptCases: LocationPromptInputType[] = [
+const promptCases: LocationPromptInput[] = [
   { location: `Pirate ship` },
   { location: `Mountain temple` },
   { location: `Aircraft hangar` },
@@ -101,7 +99,7 @@ describeEval(
   `runLocationSpecRefinementPipeline eval`,
   {
     harness: createHarness<
-      LocationPromptInputType,
+      LocationPromptInput,
       LocationSpecRefinementResultType
     >({
       name: `locationSpecRefinementPipelineHarness`,

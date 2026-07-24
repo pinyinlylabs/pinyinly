@@ -90,6 +90,43 @@ export const locationSetKeySchema = z.enum([
 ]);
 export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
 
+/**
+ * Persisted location-set schema used for reading/writing user settings.
+ *
+ * Keep this permissive so older and newer saved payloads remain decodable while
+ * prompt-generation schemas can evolve independently.
+ */
+export const locationSetSchema = z
+  .object({
+    name: z.string(),
+  })
+  .loose();
+
+export type LocationSet = z.infer<typeof locationSetSchema>;
+
+/**
+ * Persisted location specification schema.
+ *
+ * Required fields are intentionally minimal to preserve backwards
+ * compatibility with older stored location-spec versions.
+ */
+export const locationSpecSchema = z
+  .object({
+    location: z.string(),
+    sets: z
+      .object({
+        arrival: locationSetSchema,
+        heart: locationSetSchema,
+        below: locationSetSchema,
+        ascent: locationSetSchema,
+        summit: locationSetSchema,
+      })
+      .strict(),
+  })
+  .loose();
+
+export type LocationSpec = z.infer<typeof locationSpecSchema>;
+
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;
 export const pinyinSoundIdPinyinlyObjectIdKind = `ps` as const;

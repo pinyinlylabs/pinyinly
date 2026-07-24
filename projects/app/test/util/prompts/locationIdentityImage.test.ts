@@ -1,9 +1,12 @@
-import {
-  buildLocationIdentityImagePrompt,
-  locationIdentityImagePromptInputSchema,
-} from "#util/prompts/locationIdentityImage.ts";
-import type { LocationIdentityImagePromptInputType } from "#util/prompts/locationIdentityImage.ts";
+import type { LocationSpec } from "#data/model.js";
+import { buildLocationIdentityImagePrompt } from "#util/prompts/locationIdentityImage.ts";
 import { describe, expect, test } from "vitest";
+
+type LocationIdentityImagePromptInputType = {
+  input: {
+    locationSpec: LocationSpec;
+  };
+};
 
 const exampleInput: LocationIdentityImagePromptInputType = {
   input: {
@@ -123,30 +126,6 @@ describe(
         `Text, labels, logos, symbols, or decorative borders.`,
       );
       expect(systemInstruction).not.toContain(`Aircraft hangar`);
-    });
-
-    test(`accepts an optional emblem`, () => {
-      const result =
-        locationIdentityImagePromptInputSchema.safeParse(exampleInput);
-
-      expect(result.success).toBe(true);
-    });
-
-    test(`is strict at top level and input level`, () => {
-      const topLevel = locationIdentityImagePromptInputSchema.safeParse({
-        ...exampleInput,
-        extra: true,
-      });
-
-      const nested = locationIdentityImagePromptInputSchema.safeParse({
-        input: {
-          ...exampleInput.input,
-          extra: true,
-        },
-      });
-
-      expect(topLevel.success).toBe(false);
-      expect(nested.success).toBe(false);
     });
   },
 );

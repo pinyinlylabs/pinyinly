@@ -9,8 +9,8 @@ import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import type { SaveActorToDirectoryTarget } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import {
-    getPinyinSoundLocationDisplaySummary,
-    usePinyinSoundLocations,
+  getPinyinSoundLocationDisplaySummary,
+  usePinyinSoundLocations,
 } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
@@ -28,23 +28,23 @@ import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
 import {
-    defaultPinyinSoundExamples,
-    defaultPinyinSoundInstructions,
-    getPinyinSoundLabel,
-    isFinalSoundId,
-    isInitialSoundId,
-    isInitialOrFinalSoundId,
-    loadPylyPinyinChart,
+  defaultPinyinSoundExamples,
+  defaultPinyinSoundInstructions,
+  getPinyinSoundLabel,
+  isFinalSoundId,
+  isInitialSoundId,
+  isInitialOrFinalSoundId,
+  loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
-    pinyinFinalSoundLocationSelectionSetting,
-    pinyinSoundDescriptionSetting,
-    pinyinSoundGroupNameSetting,
-    pinyinSoundImageSetting,
-    pinyinSoundMnemonicIdentitySetting,
-    pinyinSoundModelSheetImageSetting,
-    pinyinSoundNameSetting,
+  pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundDescriptionSetting,
+  pinyinSoundGroupNameSetting,
+  pinyinSoundImageSetting,
+  pinyinSoundMnemonicIdentitySetting,
+  pinyinSoundModelSheetImageSetting,
+  pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";

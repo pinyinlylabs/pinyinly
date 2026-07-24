@@ -1,59 +1,13 @@
-import { z } from "zod";
 import { tradingCardLocationPortraitSystemTemplate } from "@/util/prompts/imageStyles";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import type { ImagePrompt } from "@/server/lib/gemini";
-import type { AssetId } from "@/data/model";
+import type { AssetId, LocationSpec } from "@/data/model";
 
-const locationSetSchema = z
-  .object({
-    name: z.string().min(1),
-    designRules: z.array(z.string().min(1)).min(1),
-    canonicalFraming: z.string().min(1),
-    avoidFraming: z.array(z.string().min(1)),
-  })
-  .strict();
-
-const locationIdentityImageLocationSpecSchema = z
-  .object({
-    location: z.string().min(1),
-    recognitionHooks: z.array(z.string().min(1)).min(3).max(5),
-    designRules: z.array(z.string().min(1)).min(1),
-    emblem: z
-      .object({
-        subject: z.string().min(1),
-        rationale: z.string().min(1),
-      })
-      .strict()
-      .optional(),
-    sets: z
-      .object({
-        arrival: locationSetSchema,
-        heart: locationSetSchema,
-        below: locationSetSchema,
-        ascent: locationSetSchema,
-        summit: locationSetSchema,
-      })
-      .strict(),
-  })
-  .strict();
-
-export const locationIdentityImagePromptInputSchema = z
-  .object({
-    input: z
-      .object({
-        locationSpec: locationIdentityImageLocationSpecSchema,
-      })
-      .strict(),
-  })
-  .strict();
-
-export type LocationIdentityImagePromptInputType = z.infer<
-  typeof locationIdentityImagePromptInputSchema
->;
-
-export function buildLocationIdentityImagePrompt(
-  entry: LocationIdentityImagePromptInputType,
-): ImagePrompt {
+export function buildLocationIdentityImagePrompt(entry: {
+  input: {
+    locationSpec: LocationSpec;
+  };
+}): ImagePrompt {
   const userTemplate = `
 You are given a complete mnemonic location specification.
 

@@ -1,9 +1,13 @@
-import {
-  buildLocationSetIdentityImagePrompt,
-  locationSetIdentityImagePromptInputSchema,
-} from "#util/prompts/locationSetIdentityImage.ts";
-import type { LocationSetIdentityImagePromptInputType } from "#util/prompts/locationSetIdentityImage.ts";
+import type { LocationSpec } from "#data/model.js";
+import { buildLocationSetIdentityImagePrompt } from "#util/prompts/locationSetIdentityImage.ts";
 import { describe, expect, test } from "vitest";
+
+type LocationSetIdentityImagePromptInputType = {
+  input: {
+    locationSpec: LocationSpec;
+    targetSet: `arrival` | `heart` | `below` | `ascent` | `summit`;
+  };
+};
 
 const exampleInput: LocationSetIdentityImagePromptInputType = {
   input: {
@@ -106,34 +110,6 @@ describe(
       expect(systemInstruction).toContain(`No shading.`);
       expect(systemInstruction).not.toContain(`targetSet`);
       expect(systemInstruction).not.toContain(`canonical framing`);
-    });
-
-    test(`rejects invalid target set`, () => {
-      const result = locationSetIdentityImagePromptInputSchema.safeParse({
-        input: {
-          ...exampleInput.input,
-          targetSet: `attic`,
-        },
-      });
-
-      expect(result.success).toBe(false);
-    });
-
-    test(`is strict at top level and input level`, () => {
-      const topLevel = locationSetIdentityImagePromptInputSchema.safeParse({
-        ...exampleInput,
-        extra: true,
-      });
-
-      const nested = locationSetIdentityImagePromptInputSchema.safeParse({
-        input: {
-          ...exampleInput.input,
-          extra: true,
-        },
-      });
-
-      expect(topLevel.success).toBe(false);
-      expect(nested.success).toBe(false);
     });
   },
 );

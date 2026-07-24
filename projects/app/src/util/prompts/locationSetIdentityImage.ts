@@ -1,28 +1,14 @@
-import { z } from "zod";
-import { locationSpecSchema } from "@/util/prompts/location";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { animatorMemorySketchSystemTemplate } from "@/util/prompts/imageStyles";
 import type { ImagePrompt } from "@/server/lib/gemini";
-import { locationSetKeySchema } from "@/data/model";
+import type { LocationSetKey, LocationSpec } from "@/data/model";
 
-export const locationSetIdentityImagePromptInputSchema = z
-  .object({
-    input: z
-      .object({
-        locationSpec: locationSpecSchema,
-        targetSet: locationSetKeySchema,
-      })
-      .strict(),
-  })
-  .strict();
-
-export type LocationSetIdentityImagePromptInputType = z.infer<
-  typeof locationSetIdentityImagePromptInputSchema
->;
-
-export function buildLocationSetIdentityImagePrompt(
-  entry: LocationSetIdentityImagePromptInputType,
-): ImagePrompt {
+export function buildLocationSetIdentityImagePrompt(entry: {
+  input: {
+    locationSpec: LocationSpec;
+    targetSet: LocationSetKey;
+  };
+}): ImagePrompt {
   const userTemplate = `
 Create an image for one set from the supplied location specification.
 

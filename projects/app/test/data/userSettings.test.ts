@@ -110,7 +110,7 @@ describe(
 
       expect(
         pinyinSoundLocationSetIdentityImageSetting.entity._def.keyPath,
-      ).toBe(`pspli/[locationId]/[role]`);
+      ).toBe(`pspli/[locationId]/[setKey]`);
       expect(patterns).toContain(`pspli/%`);
 
       // Verify each pattern corresponds to its setting's key path
