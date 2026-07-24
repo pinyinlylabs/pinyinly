@@ -162,6 +162,19 @@
   --spacing-vvw: var(--vvw);
   --spacing-www-col: 988px;
 
+  --pyly-ref-thickness-default: 3px;
+  --pyly-ref-offset-default: 2px;
+  --pyly-ref-color-default: var(--color-fg-loud);
+  --pyly-ref-weight-default: 500;
+
+  --pyly-bold-color-default: var(--color-fg-loud);
+  --pyly-bold-weight-default: 600;
+
+  --pyly-mark-color-default: var(--color-yellow);
+  --pyly-mark-weight-default: 600;
+
+  --pyly-italic-weight-default: 400;
+
   --animate-hoscillate: hoscillate 1s ease-in-out infinite;
   --animate-fadein: fadein 0.25s ease-in forwards;
   --animate-shimmerText: shimmerText 2s linear infinite;
@@ -233,34 +246,126 @@
 
 @utility pyly-body-title {
   @apply font-sans text-2xl/normal tracking-tight text-fg font-semibold;
+
+  --pyly-ref-thickness: 4px;
+  --pyly-ref-offset: 3px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 700;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 700;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 800;
 }
 
 @utility pyly-body-heading {
   @apply font-sans text-lg/normal tracking-tight text-fg-loud font-semibold;
+
+  --pyly-ref-thickness: 3px;
+  --pyly-ref-offset: 3px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 700;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 700;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 700;
 }
 
 @utility pyly-body-subheading {
   @apply font-sans text-sm/normal text-fg-loud font-semibold uppercase;
+
+  --pyly-ref-thickness: 3px;
+  --pyly-ref-offset: 3px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 700;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 700;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 700;
 }
 
 @utility pyly-body-2xl {
   @apply font-sans text-2xl/normal font-normal text-fg;
+
+  --pyly-ref-thickness: 4px;
+  --pyly-ref-offset: 3px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 500;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 500;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 500;
 }
 
 @utility pyly-body {
   @apply font-sans text-base/normal text-fg font-normal;
+
+  --pyly-ref-thickness: 3px;
+  --pyly-ref-offset: 2px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 500;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 600;
+
+  --pyly-mark-color: var(--color-fg-loud);
+  --pyly-mark-weight: 600;
+  --pyly-mark-thickness: 3px;
+  --pyly-mark-offset: 2px;
 }
 
 @utility pyly-body-caption {
   @apply font-sans text-sm/normal font-normal text-fg-dim;
+
+  --pyly-ref-thickness: 2.5px;
+  --pyly-ref-offset: 2px;
+  --pyly-ref-color: var(--color-fg);
+  --pyly-ref-weight: 500;
+
+  --pyly-bold-color: var(--color-fg);
+  --pyly-bold-weight: 500;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 600;
+
+  --pyly-italic-weight: 300;
 }
 
 @utility pyly-body-dt {
   @apply font-sans text-xs/normal font-medium text-fg-dim uppercase;
+
+  --pyly-ref-thickness: 2px;
+  --pyly-ref-offset: 2px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 600;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 600;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 600;
 }
 
 @utility pyly-body-input {
   @apply font-sans text-lg/snug font-medium text-fg;
+
+  --pyly-ref-thickness: 3px;
+  --pyly-ref-offset: 3px;
+  --pyly-ref-color: var(--color-fg-loud);
+  --pyly-ref-weight: 600;
+
+  --pyly-bold-color: var(--color-fg-loud);
+  --pyly-bold-weight: 600;
+
+  --pyly-mark-color: var(--color-yellow);
+  --pyly-mark-weight: 600;
 }
 
 @utility pyly-dev-dt {
@@ -352,6 +457,13 @@
 
 @utility pyly-mark {
   text-decoration-skip-ink: none;
+  color: var(
+    --pyly-mark-color,
+    var(--pyly-mark-color-default, var(--color-yellow))
+  );
+  font-weight: var(--pyly-mark-weight, var(--pyly-mark-weight-default, 600));
+  text-decoration-thickness: var(--pyly-mark-thickness, from-font);
+  text-underline-offset: var(--pyly-mark-offset, auto);
 
   @apply underline decoration-currentColor/40;
 
@@ -366,6 +478,19 @@
 
 @utility pyly-ref {
   text-decoration-skip-ink: none;
+  color: var(
+    --pyly-ref-color,
+    var(--pyly-ref-color-default, var(--color-fg-loud))
+  );
+  font-weight: var(--pyly-ref-weight, var(--pyly-ref-weight-default, 500));
+  text-decoration-thickness: var(
+    --pyly-ref-thickness,
+    var(--pyly-ref-thickness-default, 3px)
+  );
+  text-underline-offset: var(
+    --pyly-ref-offset,
+    var(--pyly-ref-offset-default, 2px)
+  );
 
   @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
 
@@ -376,7 +501,20 @@
   @apply hover:transform-gpu;
 }
 
+@utility pyly-bold {
+  color: var(
+    --pyly-bold-color,
+    var(--pyly-bold-color-default, var(--color-fg-loud))
+  );
+  font-weight: var(--pyly-bold-weight, var(--pyly-bold-weight-default, 600));
+}
+
 @utility pyly-italic {
+  font-weight: var(
+    --pyly-italic-weight,
+    var(--pyly-italic-weight-default, 400)
+  );
+
   @apply italic;
 }
 
@@ -396,26 +534,11 @@
     @apply font-sans text-base/snug font-bold uppercase text-fg;
   }
 
-  .pyly-bold {
-  }
-
   /* --- */
 
   /* <pyly-body-title> */
   .pyly-body-title {
     @apply font-sans text-2xl/normal tracking-tight text-fg font-bold;
-  }
-  .pyly-body-title.pyly-ref,
-  .pyly-body-title .pyly-ref {
-    @apply leading-tight font-bold text-fg-loud pyly-ref-2xl;
-  }
-  .pyly-body-title.pyly-bold,
-  .pyly-body-title .pyly-bold {
-    @apply font-bold text-fg-loud;
-  }
-  .pyly-body-title.pyly-mark,
-  .pyly-body-title .pyly-mark {
-    @apply font-extrabold text-yellow;
   }
   /* </pyly-body-title> */
 
@@ -424,119 +547,17 @@
   .pyly-body-heading {
     @apply font-sans text-lg/normal tracking-tight text-fg-loud font-bold;
   }
-  .pyly-body-heading.pyly-ref,
-  .pyly-body-heading .pyly-ref {
-    @apply font-bold text-fg-loud pyly-ref-lg;
-  }
-  .pyly-body-heading.pyly-bold,
-  .pyly-body-heading .pyly-bold {
-    @apply font-bold text-fg-loud;
-  }
-  .pyly-body-heading.pyly-mark,
-  .pyly-body-heading .pyly-mark {
-    @apply font-bold text-yellow;
-  }
 
   /* --- */
 
   .pyly-body-subheading {
     @apply font-sans text-sm/normal text-fg-loud font-bold uppercase;
   }
-  .pyly-body-subheading.pyly-ref,
-  .pyly-body-subheading .pyly-ref {
-    @apply font-bold text-fg-loud pyly-ref-lg;
-  }
-  .pyly-body-subheading.pyly-bold,
-  .pyly-body-subheading .pyly-bold {
-    @apply font-bold text-fg-loud;
-  }
-  .pyly-body-subheading.pyly-mark,
-  .pyly-body-subheading .pyly-mark {
-    @apply font-bold text-yellow;
-  }
-
-  /* --- */
-
-  .pyly-body-2xl.pyly-ref,
-  .pyly-body-2xl .pyly-ref {
-    @apply font-medium text-fg-loud pyly-ref-2xl;
-  }
-  .pyly-body-2xl.pyly-bold,
-  .pyly-body-2xl .pyly-bold {
-    @apply font-medium text-fg-loud;
-  }
-  .pyly-body-2xl.pyly-mark,
-  .pyly-body-2xl .pyly-mark {
-    @apply font-medium text-yellow;
-  }
-
-  /* --- */
-
-  .pyly-body.pyly-ref,
-  .pyly-body .pyly-ref {
-    @apply text-fg-loud font-medium pyly-ref-base;
-  }
-  .pyly-body.pyly-bold,
-  .pyly-body .pyly-bold {
-    @apply font-semibold text-fg-loud;
-  }
-  .pyly-body.pyly-mark,
-  .pyly-body .pyly-mark {
-    @apply font-semibold text-fg-loud text-fg-loud;
-
-    @apply decoration-[3px] underline-offset-[2px];
-  }
-
-  /* --- */
-
-  .pyly-body-caption.pyly-ref,
-  .pyly-body-caption .pyly-ref {
-    @apply text-fg font-medium pyly-ref-sm;
-  }
-  .pyly-body-caption.pyly-bold,
-  .pyly-body-caption .pyly-bold {
-    @apply text-fg font-medium;
-  }
-  .pyly-body-caption.pyly-mark,
-  .pyly-body-caption .pyly-mark {
-    @apply text-yellow font-semibold;
-  }
-  .pyly-body-caption.pyly-italic,
-  .pyly-body-caption .pyly-italic {
-    @apply font-light;
-  }
 
   /* --- */
 
   .pyly-body-dt {
     @apply font-sans text-xs/normal font-medium text-fg-dim uppercase;
-  }
-  .pyly-body-dt.pyly-ref,
-  .pyly-body-dt .pyly-ref {
-    @apply text-fg-loud font-semibold pyly-ref-xs;
-  }
-  .pyly-body-dt.pyly-bold,
-  .pyly-body-dt .pyly-bold {
-    @apply font-semibold text-fg-loud;
-  }
-  .pyly-body-dt.pyly-mark,
-  .pyly-body-dt .pyly-mark {
-    @apply font-semibold text-yellow;
-  }
-
-  /* --- */
-
-  .pyly-body-input.pyly-ref,
-  .pyly-body-input .pyly-ref {
-    @apply text-fg-loud font-semibold pyly-ref-lg;
-  }
-  .pyly-body-input.pyly-bold,
-  .pyly-body-input .pyly-bold {
-    @apply font-semibold text-fg-loud;
-  }
-  .pyly-body-input.pyly-mark,
-  .pyly-body-input .pyly-mark {
-    @apply font-semibold text-yellow;
   }
 
   /* --- */
