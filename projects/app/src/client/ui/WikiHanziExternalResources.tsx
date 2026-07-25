@@ -70,7 +70,7 @@ export function WikiHanziExternalResources({ hanzi }: { hanzi: HanziText }) {
             target="_blank"
             rel="noopener noreferrer nofollow"
             className={`
-              my-1 w-1/2 items-center text-fg-dim
+              my-1 inline-flex w-1/2 items-center text-fg-dim
 
               hover:text-fg
             `}
