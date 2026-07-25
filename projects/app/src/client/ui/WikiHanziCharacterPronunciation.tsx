@@ -209,7 +209,7 @@ export function WikiHanziCharacterPronunciationBox({
       bottomCaption={`Using a story can create a memorable association between the meaning and the pronunciation that you can use until you’ve memorized it.`}
     >
       {splitPinyin == null ? null : (
-        <View className="gap-4 p-4">
+        <View className="gap-4 p-4 py-10">
           <View className="">
             <Text className="text-center font-sans text-2xl font-normal">
               <Text className="pyly-bold">{pinyinUnit}</Text>
@@ -278,7 +278,7 @@ export function WikiHanziCharacterPronunciationBox({
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
-        <View className="mt-8 gap-4">
+        <View className="gap-4">
           {isHintSectionVisible ? (
             <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
               <InlineEditableSettingText
