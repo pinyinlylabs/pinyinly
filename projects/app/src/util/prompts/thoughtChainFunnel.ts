@@ -5,7 +5,7 @@ import { z } from "zod";
 
 export const thoughtChainFunnelPromptInputSchema = z.object({
   target: z.string(),
-  concepts: z.array(z.string()).min(1),
+  concepts: z.array(z.string()),
 });
 
 export type ThoughtChainFunnelPromptInputType = z.infer<
@@ -2072,19 +2072,12 @@ export async function runThoughtChainFunnelRefinementPipeline(
   options?: RunThoughtChainFunnelRefinementPipelineOptions,
 ): Promise<ThoughtChainFunnelRefinementResultType> {
   const maxAttempts = options?.maxAttempts ?? 3;
-  if (!Number.isInteger(maxAttempts) || maxAttempts < 1) {
-    throw new Error(
-      `maxAttempts must be an integer greater than or equal to 1`,
-    );
-  }
 
   const attempts: ThoughtChainFunnelRefinementAttemptType[] = [];
 
   const initialResponse = await requestOpenAiResponseJson(
     buildThoughtChainFunnelPrompt(entry),
-    {
-      signal: options?.signal,
-    },
+    { signal: options?.signal },
   );
 
   let thoughtFunnel = initialResponse.data.thoughtFunnel;
