@@ -5,18 +5,19 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
-  getFinalSoundLabel,
-  getInitialSoundLabel,
-  isInitialSoundId,
-  splitPinyinUnit,
+    getFinalSoundLabel,
+    getInitialSoundLabel,
+    isInitialSoundId,
+    splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
-  pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
+    hanziPronunciationHintMnemonicSpecSetting,
+    hanziPronunciationHintImageSetting,
+    hanziPronunciationHintTextSetting,
+    pinyinFinalSoundLocationSelectionSetting,
+    pinyinSoundDescriptionSetting,
+    pinyinSoundImageSetting,
+    pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -28,6 +29,7 @@ import { tv } from "tailwind-variants";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
+import { InlineEditableSettingJson } from "./InlineEditableSettingJson";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -41,9 +43,9 @@ import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import {
-  composeHintText,
-  hintFirstLineLength,
-  parseHintText,
+    composeHintText,
+    hintFirstLineLength,
+    parseHintText,
 } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
@@ -165,10 +167,15 @@ export function WikiHanziCharacterPronunciationBox({
     finalToneLocationSetName.trim().length === 0
       ? `Unnamed set`
       : finalToneLocationSetName;
+  const finalLocationName = selectedFinalLocation?.name ?? null;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
     setting: hanziPronunciationHintImageSetting,
+    key: hintSettingKey,
+  });
+  const mnemonicSpecSetting = useUserSetting({
+    setting: hanziPronunciationHintMnemonicSpecSetting,
     key: hintSettingKey,
   });
   const [showAiModal, setShowAiModal] = useState(false);
@@ -179,6 +186,9 @@ export function WikiHanziCharacterPronunciationBox({
   const hintImage = hintImageSetting.value;
   const hasHintContent = pronunciationHint.hasText;
   const hasImageContent = hintImage?.imageId != null;
+  const hasMnemonicSpec = hasJsonContent(
+    mnemonicSpecSetting.value?.mnemonicSpec,
+  );
   const isHintSectionVisible = isEditMode
     ? (showHintEditor ?? hasHintContent)
     : hasHintContent;
@@ -186,29 +196,20 @@ export function WikiHanziCharacterPronunciationBox({
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
 
+  const handleEditingChange = (editing: boolean) => {
+    setIsEditMode(editing);
+  };
+
   return (
     <WikiTitledBox
       title="Remember the pronunciation"
-      onEditingChange={setIsEditMode}
+      onEditingChange={handleEditingChange}
+      bottomCaption={`Using a story can create a memorable association between the meaning and the pronunciation that you can use until you’ve memorized it.`}
     >
-      <View className="gap-4 p-4">
-        <Text className="pyly-body">
-          <Text className="pyly-bold">{hanzi}</Text> is pronounced{` `}
-          <Text className="pyly-bold">{pinyinUnit}</Text>.
-        </Text>
-
-        <Text className="pyly-body">
-          Use a story about &ldquo;
-          <Text className="pyly-bold">{gloss}</Text>
-          &rdquo; to remember the initial, the final, and the tone of{` `}
-          <Text className="pyly-bold">{pinyinUnit}</Text>.
-        </Text>
-      </View>
-
       {splitPinyin == null ? null : (
         <View className="gap-4 p-4">
           <View className="">
-            <Text className="text-center pyly-body">
+            <Text className="text-center font-sans text-2xl font-normal">
               <Text className="pyly-bold">{pinyinUnit}</Text>
             </Text>
             <View className="px-[15%] py-2">
@@ -228,7 +229,7 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.finalSoundId}
                   href={`/sounds/${splitPinyin.finalSoundId}`}
                   label={finalLabel}
-                  name={null}
+                  name={finalLocationName}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
@@ -236,18 +237,9 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
                   label={<ToneLabelText tone={splitPinyin.tone} />}
-                  name={null}
+                  name={`Below`}
                 />
               </View>
-            </View>
-            <View className="mt-3 items-center gap-2">
-              <FinalToneForkedArrow />
-              <Link
-                href={`/sounds/${splitPinyin.finalSoundId}?tone=${splitPinyin.tone}`}
-                className={soundNameClass()}
-              >
-                {finalToneName}
-              </Link>
             </View>
           </View>
         </View>
@@ -284,7 +276,7 @@ export function WikiHanziCharacterPronunciationBox({
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
-        <View className="gap-4 p-4">
+        <View className="mt-8 gap-4">
           {isHintSectionVisible ? (
             <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
               <InlineEditableSettingText
@@ -349,10 +341,25 @@ export function WikiHanziCharacterPronunciationBox({
                 setting={hanziPronunciationHintImageSetting}
                 settingKey={hintSettingKey}
                 previewHeight={200}
-                aspectRatio={`16:9`}
+                aspectRatio={`5:4`}
               />
             )
           ) : null}
+        </View>
+      ) : null}
+
+      {isEditMode ? (
+        <View className="gap-2 p-4">
+          <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
+            Mnemonic spec
+          </Text>
+          <InlineEditableSettingJson
+            setting={hanziPronunciationHintMnemonicSpecSetting}
+            settingKey={hintSettingKey}
+            readonly={!isEditMode}
+            placeholder='{"story": "A chef juggling cans"}'
+            emptyStateText="No mnemonic spec JSON"
+          />
         </View>
       ) : null}
 
@@ -405,6 +412,26 @@ function MergedHintDisplay({ value }: { value: string }) {
       )}
     </>
   );
+}
+
+function hasJsonContent(value: unknown): boolean {
+  if (value == null) {
+    return false;
+  }
+
+  if (typeof value === `string`) {
+    return value.trim().length > 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (typeof value === `object`) {
+    return Object.keys(value as Record<string, unknown>).length > 0;
+  }
+
+  return true;
 }
 
 export function SoundLinkBlock({
