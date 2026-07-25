@@ -5,19 +5,19 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
-    getFinalSoundLabel,
-    getInitialSoundLabel,
-    isInitialSoundId,
-    splitPinyinUnit,
+  getFinalSoundLabel,
+  getInitialSoundLabel,
+  isInitialSoundId,
+  splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-    hanziPronunciationHintMnemonicSpecSetting,
-    hanziPronunciationHintImageSetting,
-    hanziPronunciationHintTextSetting,
-    pinyinFinalSoundLocationSelectionSetting,
-    pinyinSoundDescriptionSetting,
-    pinyinSoundImageSetting,
-    pinyinSoundNameSetting,
+  hanziPronunciationHintMnemonicSpecSetting,
+  hanziPronunciationHintImageSetting,
+  hanziPronunciationHintTextSetting,
+  pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundDescriptionSetting,
+  pinyinSoundImageSetting,
+  pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -43,9 +43,9 @@ import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import {
-    composeHintText,
-    hintFirstLineLength,
-    parseHintText,
+  composeHintText,
+  hintFirstLineLength,
+  parseHintText,
 } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
@@ -117,12 +117,20 @@ export function WikiHanziCharacterPronunciationBox({
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
-  const initialPinyinSound2 = useUserSetting(
+  const initialPinyinSound = useUserSetting(
     splitPinyin == null
       ? null
       : {
           setting: pinyinSoundNameSetting,
           key: { soundId: splitPinyin.initialSoundId },
+        },
+  );
+  const tonePinyinSound = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinSoundNameSetting,
+          key: { soundId: splitPinyin.toneSoundId },
         },
   );
   const initialDescriptionSetting = useUserSetting(
@@ -142,7 +150,8 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const placeDirectory = usePinyinSoundLocations();
-  const initialPinyinSoundName = initialPinyinSound2?.value?.text;
+  const initialPinyinSoundName = initialPinyinSound?.value?.text;
+  const tonePinyinSoundName = tonePinyinSound?.value?.text;
   const selectedFinalLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedFinalLocation =
@@ -174,10 +183,6 @@ export function WikiHanziCharacterPronunciationBox({
     setting: hanziPronunciationHintImageSetting,
     key: hintSettingKey,
   });
-  const mnemonicSpecSetting = useUserSetting({
-    setting: hanziPronunciationHintMnemonicSpecSetting,
-    key: hintSettingKey,
-  });
   const [showAiModal, setShowAiModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
@@ -186,9 +191,6 @@ export function WikiHanziCharacterPronunciationBox({
   const hintImage = hintImageSetting.value;
   const hasHintContent = pronunciationHint.hasText;
   const hasImageContent = hintImage?.imageId != null;
-  const hasMnemonicSpec = hasJsonContent(
-    mnemonicSpecSetting.value?.mnemonicSpec,
-  );
   const isHintSectionVisible = isEditMode
     ? (showHintEditor ?? hasHintContent)
     : hasHintContent;
@@ -237,7 +239,7 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
                   label={<ToneLabelText tone={splitPinyin.tone} />}
-                  name={`Below`}
+                  name={tonePinyinSoundName ?? null}
                 />
               </View>
             </View>
@@ -414,26 +416,6 @@ function MergedHintDisplay({ value }: { value: string }) {
   );
 }
 
-function hasJsonContent(value: unknown): boolean {
-  if (value == null) {
-    return false;
-  }
-
-  if (typeof value === `string`) {
-    return value.trim().length > 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  if (typeof value === `object`) {
-    return Object.keys(value as Record<string, unknown>).length > 0;
-  }
-
-  return true;
-}
-
 export function SoundLinkBlock({
   soundId,
   href,
@@ -504,33 +486,6 @@ export function SoundLinkBlock({
 const soundNameClass = tv({
   base: `pyly-ref pyly-body`,
 });
-
-function FinalToneForkedArrow() {
-  return (
-    <View className="w-full gap-1">
-      {/* TODO: Swap in a responsive Rive animation when available. */}
-      <View className="flex-row gap-4">
-        <View className="flex-1" />
-        <View className="flex-1 items-center">
-          <DownArrow />
-        </View>
-        <View className="flex-1 items-center">
-          <DownArrow />
-        </View>
-      </View>
-      <View className="flex-row gap-4">
-        <View className="flex-1" />
-        <View className="flex-1 items-center">
-          <Text className="pyly-body text-fg/40">\\ /</Text>
-        </View>
-        <View className="flex-1" />
-      </View>
-      <View className="items-center">
-        <DownArrow />
-      </View>
-    </View>
-  );
-}
 
 function DownArrow() {
   return <Text className="h-6 pyly-body text-fg/40">↓</Text>;
