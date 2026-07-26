@@ -22,20 +22,17 @@ import {
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
-import { parseIndexRanges } from "@/util/indexRanges";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { AiMeaningHintModal } from "./AiMeaningHintModal";
 import type { MeaningHintComponent } from "./AiMeaningHintModal";
-import { HanziStrokesTile } from "./HanziStrokesTile";
-import { HanziCharacter } from "./HanziCharacter";
 import { HanziDecompositionEditor } from "./HanziDecompositionEditor";
-import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import { WikiHanziCharacterMeaningBreakdown } from "./WikiHanziCharacterMeaningBreakdown";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
 import {
@@ -55,24 +52,10 @@ interface WikiHanziCharacterMeaningProps {
   hanzi: HanziCharacterType;
 }
 
-function hasStrokeRanges(
-  components: readonly WikiCharacterComponent[],
-): boolean {
-  return components.some((component) => component.strokes.trim().length > 0);
-}
-
 export function WikiHanziCharacterMeaningBox({
   hanzi,
 }: WikiHanziCharacterMeaningProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [sourceCenterX, setSourceCenterX] = useState<number | null>(null);
-  const [componentCenterXs, setComponentCenterXs] = useState<readonly number[]>(
-    [],
-  );
-  const [componentWrapperXs, setComponentWrapperXs] = useState<
-    readonly number[]
-  >([]);
-  const componentsElements: { key: string; element: ReactNode }[] = [];
   const db = useDb();
 
   const { data: selectedDecomposition } = useLiveQuery(
@@ -95,11 +78,6 @@ export function WikiHanziCharacterMeaningBox({
   const { data: strokeSvgs } = useQuery(hanziSvgPathsQuery(hanzi));
 
   const { data: mnemonicData } = useQuery(characterDecompositionQuery(hanzi));
-
-  const showStrokeHighlights =
-    selectedComponents != null &&
-    hasStrokeRanges(selectedComponents) &&
-    strokeSvgs != null;
 
   const hanziList: HanziText[] = [];
   if (selectedComponents != null) {
@@ -167,99 +145,12 @@ export function WikiHanziCharacterMeaningBox({
     glossByHanzi,
   );
 
-  if (showStrokeHighlights) {
-    for (const [i, visualComponent] of selectedComponents.entries()) {
-      const componentIndex = componentsElements.length;
-      const label =
-        visualComponent.label ??
-        (visualComponent.hanzi == null
-          ? null
-          : (glossByHanzi.get(visualComponent.hanzi) ?? null));
-      componentsElements.push({
-        key: `component:${i}`,
-        element: (
-          <HanziStrokesTile
-            componentHanzi={visualComponent.hanzi ?? null}
-            hanzi={visualComponent.strokes.trim().length > 0 ? hanzi : null}
-            highlightColor={hanziCharacterColorSafeSchema.parse(
-              visualComponent.color,
-            )}
-            highlightStrokeRanges={visualComponent.strokes}
-            label={label}
-            onVisualLayout={(event) => {
-              const centerX =
-                event.nativeEvent.layout.x + event.nativeEvent.layout.width / 2;
-              setComponentCenterXs((prev) => {
-                const next = [...prev];
-                next[componentIndex] = centerX;
-                return next;
-              });
-            }}
-          />
-        ),
-      });
-    }
-  } else if (selectedComponents != null) {
-    for (const [i, component] of selectedComponents.entries()) {
-      if (component.hanzi == null) {
-        continue;
-      }
-
-      const componentIndex = componentsElements.length;
-      const hanzi = component.hanzi;
-      const label = glossByHanzi.get(hanzi) ?? null;
-
-      componentsElements.push({
-        key: `component:${i}:${hanzi}`,
-        element: (
-          <HanziStrokesTile
-            componentHanzi={hanzi}
-            hanzi={null}
-            highlightStrokeRanges=""
-            label={label}
-            onVisualLayout={(event) => {
-              const centerX =
-                event.nativeEvent.layout.x + event.nativeEvent.layout.width / 2;
-              setComponentCenterXs((prev) => {
-                const next = [...prev];
-                next[componentIndex] = centerX;
-                return next;
-              });
-            }}
-          />
-        ),
-      });
-    }
-  }
-
-  const visibleComponentCenters = componentsElements.map((_, index) => {
-    const localCenter = componentCenterXs[index];
-    const wrapperX = componentWrapperXs[index];
-    return localCenter == null || wrapperX == null
-      ? Number.NaN
-      : localCenter + wrapperX;
-  });
-  const validComponentCenters = visibleComponentCenters.filter((item) =>
-    Number.isFinite(item),
-  );
-  const hasConnector =
-    componentsElements.length > 1 &&
-    (strokeSvgs == null ? sourceCenterX != null : true) &&
-    validComponentCenters.length === componentsElements.length;
-  const sourceConnectorX = strokeSvgs == null ? sourceCenterX : 24;
-  const allCenters =
-    sourceConnectorX == null
-      ? validComponentCenters
-      : [sourceConnectorX, ...validComponentCenters];
-  const connectorMinX = allCenters.length === 0 ? 0 : Math.min(...allCenters);
-  const connectorMaxX = allCenters.length === 0 ? 0 : Math.max(...allCenters);
-
   return (
     <WikiTitledBox
       title="Recognize the meaning"
       onEditingChange={setIsEditMode}
       bottomCaption={
-        componentsElements.length > 0
+        selectedComponents != null && selectedComponents.length > 0
           ? `Using the components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
           : undefined
       }
@@ -267,107 +158,13 @@ export function WikiHanziCharacterMeaningBox({
       <View className="gap-4 p-4">
         {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}
 
-        {componentsElements.length > 0 ? (
-          <View className="gap-3">
-            <View className="px-6">
-              <View className="gap-1 self-start">
-                {strokeSvgs == null ? (
-                  <View
-                    onLayout={({ nativeEvent }) => {
-                      const centerX =
-                        nativeEvent.layout.x + nativeEvent.layout.width / 2;
-                      setSourceCenterX(centerX);
-                    }}
-                  >
-                    <Text className="text-left pyly-body text-lg">{hanzi}</Text>
-                  </View>
-                ) : (
-                  <View className="w-12">
-                    <HanziCharacter
-                      className="size-12"
-                      strokesData={strokeSvgs}
-                      highlightStrokes={parseIndexRanges(
-                        `0-${strokeSvgs.length - 1}`,
-                      )}
-                    />
-                  </View>
-                )}
-
-                {primaryMeaningGloss == null ? null : (
-                  <Text className="text-left pyly-body-caption text-fg-dim">
-                    {primaryMeaningGloss}
-                  </Text>
-                )}
-              </View>
-            </View>
-
-            {hasConnector ? (
-              <View className="px-6">
-                <View className="relative h-6">
-                  <View
-                    className="absolute w-px bg-fg-dim/35"
-                    style={{ left: sourceConnectorX, top: 0, height: 10 }}
-                  />
-                  <View
-                    className="absolute h-px bg-fg-dim/35"
-                    style={{
-                      left: connectorMinX,
-                      top: 10,
-                      width: Math.max(1, connectorMaxX - connectorMinX),
-                    }}
-                  />
-                  {validComponentCenters.map((centerX, index) => {
-                    return (
-                      <View
-                        className="absolute w-px bg-fg-dim/35"
-                        key={`decomp-line:${index}`}
-                        style={{ left: centerX, top: 10, height: 14 }}
-                      />
-                    );
-                  })}
-                </View>
-              </View>
-            ) : null}
-
-            <View className="px-6">
-              <View className="flex-row flex-wrap gap-5">
-                {componentsElements.map((component, index) => {
-                  return (
-                    <View
-                      key={component.key}
-                      onLayout={({ nativeEvent }) => {
-                        const wrapperX = nativeEvent.layout.x;
-                        setComponentWrapperXs((prev) => {
-                          const next = [...prev];
-                          next[index] = wrapperX;
-                          return next;
-                        });
-                      }}
-                    >
-                      {component.element}
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-          </View>
-        ) : strokeSvgs == null ? null : (
-          <>
-            <Text className="pyly-body">
-              What does <Text className="pyly-bold">{hanzi}</Text> resemble?
-            </Text>
-
-            <View className="flex-1 items-center">
-              <HanziCharacter
-                className="size-12"
-                strokesData={strokeSvgs}
-                highlightStrokes={parseIndexRanges(
-                  `0-${strokeSvgs.length - 1}`,
-                )}
-              />
-            </View>
-          </>
-        )}
+        <WikiHanziCharacterMeaningBreakdown
+          glossByHanzi={glossByHanzi}
+          hanzi={hanzi}
+          primaryMeaningGloss={primaryMeaningGloss}
+          selectedComponents={selectedComponents}
+          strokeSvgs={strokeSvgs ?? undefined}
+        />
       </View>
 
       <ExperimentalContent hanzi={hanzi} />
@@ -890,9 +687,6 @@ function MergedHintDisplay({ value }: { value: string }) {
     </>
   );
 }
-
-// oxlint-disable-next-line unicorn/prefer-top-level-await
-const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
 
 interface ExperimentalCharacterData {
   readonly coreIdea: string;

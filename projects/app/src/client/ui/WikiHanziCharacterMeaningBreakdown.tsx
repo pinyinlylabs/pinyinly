@@ -1,0 +1,243 @@
+import { parseIndexRanges } from "@/util/indexRanges";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { Text, View } from "react-native";
+import type { WikiCharacterComponent, HanziCharacter } from "@/data/model";
+import { HanziCharacter as HanziCharacterSvg } from "./HanziCharacter";
+import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
+import { HanziStrokesTile } from "./HanziStrokesTile";
+
+interface WikiHanziCharacterMeaningBreakdownProps {
+  hanzi: HanziCharacter;
+  primaryMeaningGloss: string | null;
+  selectedComponents: readonly WikiCharacterComponent[] | undefined;
+  strokeSvgs: readonly string[] | undefined;
+  glossByHanzi: ReadonlyMap<string, string>;
+}
+
+function hasStrokeRanges(
+  components: readonly WikiCharacterComponent[],
+): boolean {
+  return components.some((component) => component.strokes.trim().length > 0);
+}
+
+export function WikiHanziCharacterMeaningBreakdown({
+  hanzi,
+  primaryMeaningGloss,
+  selectedComponents,
+  strokeSvgs,
+  glossByHanzi,
+}: WikiHanziCharacterMeaningBreakdownProps) {
+  const [sourceCenterX, setSourceCenterX] = useState<number | null>(null);
+  const [componentCenterXs, setComponentCenterXs] = useState<readonly number[]>(
+    [],
+  );
+  const [componentWrapperXs, setComponentWrapperXs] = useState<
+    readonly number[]
+  >([]);
+
+  const showStrokeHighlights =
+    selectedComponents != null &&
+    hasStrokeRanges(selectedComponents) &&
+    strokeSvgs != null;
+
+  const componentsElements: { key: string; element: ReactNode }[] = [];
+
+  if (showStrokeHighlights) {
+    for (const [i, visualComponent] of selectedComponents.entries()) {
+      const componentIndex = componentsElements.length;
+      const label =
+        visualComponent.label ??
+        (visualComponent.hanzi == null
+          ? null
+          : (glossByHanzi.get(visualComponent.hanzi) ?? null));
+      componentsElements.push({
+        key: `component:${i}`,
+        element: (
+          <HanziStrokesTile
+            componentHanzi={visualComponent.hanzi ?? null}
+            hanzi={visualComponent.strokes.trim().length > 0 ? hanzi : null}
+            highlightColor={hanziCharacterColorSafeSchema.parse(
+              visualComponent.color,
+            )}
+            highlightStrokeRanges={visualComponent.strokes}
+            label={label}
+            onVisualLayout={(event) => {
+              const centerX =
+                event.nativeEvent.layout.x + event.nativeEvent.layout.width / 2;
+              setComponentCenterXs((prev) => {
+                const next = [...prev];
+                next[componentIndex] = centerX;
+                return next;
+              });
+            }}
+          />
+        ),
+      });
+    }
+  } else if (selectedComponents != null) {
+    for (const [i, component] of selectedComponents.entries()) {
+      if (component.hanzi == null) {
+        continue;
+      }
+
+      const componentIndex = componentsElements.length;
+      const componentHanzi = component.hanzi;
+      const label = glossByHanzi.get(componentHanzi) ?? null;
+
+      componentsElements.push({
+        key: `component:${i}:${componentHanzi}`,
+        element: (
+          <HanziStrokesTile
+            componentHanzi={componentHanzi}
+            hanzi={null}
+            highlightStrokeRanges=""
+            label={label}
+            onVisualLayout={(event) => {
+              const centerX =
+                event.nativeEvent.layout.x + event.nativeEvent.layout.width / 2;
+              setComponentCenterXs((prev) => {
+                const next = [...prev];
+                next[componentIndex] = centerX;
+                return next;
+              });
+            }}
+          />
+        ),
+      });
+    }
+  }
+
+  if (componentsElements.length === 0) {
+    if (strokeSvgs == null) {
+      return null;
+    }
+
+    return (
+      <>
+        <Text className="pyly-body">
+          What does <Text className="pyly-bold">{hanzi}</Text> resemble?
+        </Text>
+
+        <View className="flex-1 items-center">
+          <HanziCharacterSvg
+            className="size-12"
+            strokesData={[...strokeSvgs]}
+            highlightStrokes={parseIndexRanges(`0-${strokeSvgs.length - 1}`)}
+          />
+        </View>
+      </>
+    );
+  }
+
+  const visibleComponentCenters = componentsElements.map((_, index) => {
+    const localCenter = componentCenterXs[index];
+    const wrapperX = componentWrapperXs[index];
+    return localCenter == null || wrapperX == null
+      ? Number.NaN
+      : localCenter + wrapperX;
+  });
+  const validComponentCenters = visibleComponentCenters.filter((item) =>
+    Number.isFinite(item),
+  );
+  const hasConnector =
+    componentsElements.length > 1 &&
+    (strokeSvgs == null ? sourceCenterX != null : true) &&
+    validComponentCenters.length === componentsElements.length;
+  const sourceConnectorX = strokeSvgs == null ? sourceCenterX : 24;
+  const allCenters =
+    sourceConnectorX == null
+      ? validComponentCenters
+      : [sourceConnectorX, ...validComponentCenters];
+  const connectorMinX = allCenters.length === 0 ? 0 : Math.min(...allCenters);
+  const connectorMaxX = allCenters.length === 0 ? 0 : Math.max(...allCenters);
+
+  return (
+    <View className="gap-3">
+      <View className="px-6">
+        <View className="gap-1 self-start">
+          {strokeSvgs == null ? (
+            <View
+              onLayout={({ nativeEvent }) => {
+                const centerX =
+                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                setSourceCenterX(centerX);
+              }}
+            >
+              <Text className="text-left pyly-body text-lg">{hanzi}</Text>
+            </View>
+          ) : (
+            <View className="w-12">
+              <HanziCharacterSvg
+                className="size-12"
+                strokesData={[...strokeSvgs]}
+                highlightStrokes={parseIndexRanges(
+                  `0-${strokeSvgs.length - 1}`,
+                )}
+              />
+            </View>
+          )}
+
+          {primaryMeaningGloss == null ? null : (
+            <Text className="text-left pyly-body-caption text-fg-dim">
+              {primaryMeaningGloss}
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {hasConnector ? (
+        <View className="px-6">
+          <View className="relative h-6">
+            <View
+              className="absolute w-px bg-fg-dim/35"
+              style={{ left: sourceConnectorX, top: 0, height: 10 }}
+            />
+            <View
+              className="absolute h-px bg-fg-dim/35"
+              style={{
+                left: connectorMinX,
+                top: 10,
+                width: Math.max(1, connectorMaxX - connectorMinX),
+              }}
+            />
+            {validComponentCenters.map((centerX, index) => {
+              return (
+                <View
+                  className="absolute w-px bg-fg-dim/35"
+                  key={`decomp-line:${index}`}
+                  style={{ left: centerX, top: 10, height: 14 }}
+                />
+              );
+            })}
+          </View>
+        </View>
+      ) : null}
+
+      <View className="px-6">
+        <View className="flex-row flex-wrap gap-5">
+          {componentsElements.map((component, index) => {
+            return (
+              <View
+                key={component.key}
+                onLayout={({ nativeEvent }) => {
+                  const wrapperX = nativeEvent.layout.x;
+                  setComponentWrapperXs((prev) => {
+                    const next = [...prev];
+                    next[index] = wrapperX;
+                    return next;
+                  });
+                }}
+              >
+                {component.element}
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// oxlint-disable-next-line unicorn/prefer-top-level-await
+const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
