@@ -1,4 +1,7 @@
 {
+  "decompositions":[
+    ["⿻",{"hanzi":"田","strokes":"0-3,4[1:2]"},{"hanzi":"乚","strokes":"4"}]
+  ],
   "mnemonic":{
     "components":["⿻",{"hanzi":"日","strokes":"0-3"},{"hanzi":"乚","strokes":"4"}]
   }
