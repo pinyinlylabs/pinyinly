@@ -3,7 +3,9 @@ import {
   normalizeStrokeSpec,
   parseIndexRangesFromStrokeSpec,
   parseStrokeSpec,
+  projectStrokeSpecThroughBindings,
   strokeSpecItemCount,
+  strokeSpecToSlotBindings,
 } from "#util/strokeSpec.ts";
 import { describe, expect, test } from "vitest";
 
@@ -56,6 +58,36 @@ describe(
 
     test(`legacy numeric extraction rejects slices`, () => {
       expect(() => parseIndexRangesFromStrokeSpec(`1[0:3]`)).toThrow();
+    });
+
+    test(`expands ranges into slot bindings`, () => {
+      expect(strokeSpecToSlotBindings(`0-2,5`)).toEqual([`0`, `1`, `2`, `5`]);
+      expect(strokeSpecToSlotBindings(`1[0:2]+7[:4],9`)).toEqual([
+        `1[0:2]+7[:4]`,
+        `9`,
+      ]);
+    });
+
+    test(`projects local ranges through parent slot bindings`, () => {
+      const parentBindings = strokeSpecToSlotBindings(`1[0:2]+7[:4],9,11`);
+
+      expect(
+        projectStrokeSpecThroughBindings({
+          localStrokeSpec: `0-1`,
+          sourceSlotBindingsInOriginal: parentBindings,
+        }),
+      ).toEqual([`1[0:2]+7[:4]`, `9`]);
+    });
+
+    test(`projects grouped local unions to grouped original unions`, () => {
+      const parentBindings = strokeSpecToSlotBindings(`2,4,6`);
+
+      expect(
+        projectStrokeSpecThroughBindings({
+          localStrokeSpec: `0-1+2`,
+          sourceSlotBindingsInOriginal: parentBindings,
+        }),
+      ).toEqual([`2+4+6`]);
     });
   },
 );

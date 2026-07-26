@@ -239,3 +239,144 @@ export function parseIndexRangesFromStrokeSpec(specText: string): number[] {
 
   return result;
 }
+
+function cloneAtom(atom: StrokeSpecAtom): StrokeSpecAtom {
+  if (atom.kind === `range`) {
+    return {
+      kind: `range`,
+      start: atom.start,
+      end: atom.end,
+    };
+  }
+
+  return {
+    kind: `slice`,
+    stroke: atom.stroke,
+    from: atom.from == null ? null : { ...atom.from },
+    to: atom.to == null ? null : { ...atom.to },
+  };
+}
+
+function cloneItem(item: StrokeSpecItem): StrokeSpecItem {
+  return {
+    kind: `item`,
+    atoms: item.atoms.map(cloneAtom),
+  };
+}
+
+function singletonRangeItem(index: number): StrokeSpecItem {
+  return {
+    kind: `item`,
+    atoms: [{ kind: `range`, start: index, end: index }],
+  };
+}
+
+function isSingleRangeAtom(item: StrokeSpecItem): item is {
+  kind: `item`;
+  atoms: readonly [StrokeSpecRange];
+} {
+  return item.atoms.length === 1 && item.atoms[0]?.kind === `range`;
+}
+
+function expandItemsToSlotBindings(spec: StrokeSpec): StrokeSpecItem[] {
+  const result: StrokeSpecItem[] = [];
+
+  for (const item of spec.items) {
+    if (isSingleRangeAtom(item)) {
+      const atom = item.atoms[0];
+      for (let i = atom.start; i <= atom.end; i += 1) {
+        result.push(singletonRangeItem(i));
+      }
+      continue;
+    }
+
+    result.push(cloneItem(item));
+  }
+
+  return result;
+}
+
+function itemReferencedSlotIndexes(item: StrokeSpecItem): number[] {
+  const result: number[] = [];
+
+  for (const atom of item.atoms) {
+    if (atom.kind === `range`) {
+      for (let i = atom.start; i <= atom.end; i += 1) {
+        result.push(i);
+      }
+      continue;
+    }
+
+    result.push(atom.stroke);
+  }
+
+  return result;
+}
+
+function itemToText(item: StrokeSpecItem): string {
+  return formatStrokeSpec({
+    kind: `list`,
+    items: [item],
+  });
+}
+
+function parseItemText(itemText: string): StrokeSpecItem {
+  const parsed = parseStrokeSpec(itemText);
+  const item = parsed.items[0];
+  if (parsed.items.length !== 1 || item == null) {
+    throw new Error(`Expected a single StrokeSpec item.`);
+  }
+  return cloneItem(item);
+}
+
+export function strokeSpecToSlotBindings(specText: string): string[] {
+  const spec = parseStrokeSpec(specText);
+  return expandItemsToSlotBindings(spec).map(itemToText);
+}
+
+export function projectStrokeSpecThroughBindings({
+  localStrokeSpec,
+  sourceSlotBindingsInOriginal,
+}: {
+  localStrokeSpec: string;
+  sourceSlotBindingsInOriginal: readonly string[] | null;
+}): string[] {
+  const localSpec = parseStrokeSpec(localStrokeSpec);
+  const localItems = expandItemsToSlotBindings(localSpec);
+
+  if (sourceSlotBindingsInOriginal == null) {
+    return localItems.map(itemToText);
+  }
+
+  const projected: string[] = [];
+  for (const localItem of localItems) {
+    const referencedIndexes = itemReferencedSlotIndexes(localItem);
+    const mappedItems = referencedIndexes
+      .map((index) => sourceSlotBindingsInOriginal[index])
+      .filter((item): item is string => item != null);
+
+    if (mappedItems.length === 0) {
+      continue;
+    }
+
+    if (mappedItems.length === 1) {
+      const mappedItem = mappedItems[0];
+      if (mappedItem != null) {
+        projected.push(mappedItem);
+      }
+      continue;
+    }
+
+    const unionAtoms = mappedItems
+      .flatMap((mappedItemText) => parseItemText(mappedItemText).atoms)
+      .map(cloneAtom);
+    projected.push(
+      itemToText({
+        kind: `item`,
+        atoms: unionAtoms,
+      }),
+    );
+  }
+
+  return projected;
+}

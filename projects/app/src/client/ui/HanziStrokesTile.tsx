@@ -1,7 +1,7 @@
 import { hanziSvgPathsQuery } from "@/client/query";
 import type { HanziCharacter as HanziCharacterType } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
-import { parseIndexRanges } from "@/util/indexRanges";
+import { parseIndexRangesFromStrokeSpec } from "@/util/strokeSpec";
 import type { LayoutChangeEvent } from "react-native";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
@@ -30,7 +30,14 @@ export function HanziStrokesTile({
   onVisualLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const { data: strokesData } = useQuery(hanziSvgPathsQuery(hanzi));
-  const hasHighlightedStrokes = highlightStrokeRanges.trim().length > 0;
+  const highlightStrokes = (() => {
+    try {
+      return parseIndexRangesFromStrokeSpec(highlightStrokeRanges);
+    } catch {
+      return [];
+    }
+  })();
+  const hasHighlightedStrokes = highlightStrokes.length > 0;
   const normalizedLabel = label?.trim() ?? ``;
   const hasNameLabel = normalizedLabel.length > 0;
 
@@ -44,7 +51,7 @@ export function HanziStrokesTile({
             className="size-12"
             highlightColor={highlightColor}
             strokesData={strokesData}
-            highlightStrokes={parseIndexRanges(highlightStrokeRanges)}
+            highlightStrokes={highlightStrokes}
           />
         ) : componentHanzi == null ? null : (
           <Text className="text-center pyly-body text-lg">
