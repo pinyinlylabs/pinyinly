@@ -828,6 +828,18 @@ export const wikiCharacterDataSchema = z.strictObject({
     z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
   ]),
   /**
+   * Median points for each stroke, stored as compact strings so JSON parsing
+   * does not eagerly allocate nested point arrays.
+   *
+   * Format for each stroke: "x,y;x,y;..."
+   */
+  medians: z
+    .array(z.string())
+    .optional()
+    .describe(
+      `Stroke medians (in order), encoded as compact strings per stroke: x,y;x,y;...`,
+    ),
+  /**
    * The simplified form of this character, if it is a traditional form.
    *
    * The property is used on traditional characters because it's expected there

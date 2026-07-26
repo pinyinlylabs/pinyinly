@@ -2,6 +2,7 @@ import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { wikiCharacterDataSchema } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
+import { strokeMediansCodec } from "#util/strokeMedians.ts";
 import {
   existsSync,
   fetchWithFsDbCache,
@@ -141,6 +142,13 @@ for (const character of allCharacters) {
     await updateJsonFileKey(dataFile, `strokes`, graphicsRecord.strokes)
   ) {
     debug(`wrote strokes for %O`, character);
+  }
+
+  if (graphicsRecord != null) {
+    const encodedMedians = strokeMediansCodec.encode(graphicsRecord.medians);
+    if (await updateJsonFileKey(dataFile, `medians`, encodedMedians)) {
+      debug(`wrote medians for %O`, character);
+    }
   }
 
   {

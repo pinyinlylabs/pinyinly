@@ -23,6 +23,7 @@ import {
 import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
+import { strokeMedianCodec } from "#util/strokeMedians.ts";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -234,6 +235,41 @@ describe(`character.json files`, async () => {
             expect.soft(strokeIndices.length, character).toBeGreaterThan(0);
           }
         }
+      }
+    }
+  });
+
+  test(`stroke medians conformance`, async () => {
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.medians == null) {
+        continue;
+      }
+
+      expect
+        .soft(
+          Array.isArray(characterData.strokes),
+          `${character} medians require SVG strokes`,
+        )
+        .toBe(true);
+      if (!Array.isArray(characterData.strokes)) {
+        continue;
+      }
+
+      expect
+        .soft(
+          characterData.medians.length,
+          `${character} medians length must match strokes length`,
+        )
+        .toBe(characterData.strokes.length);
+
+      for (const [i, encodedMedian] of characterData.medians.entries()) {
+        const points = strokeMedianCodec.decode(encodedMedian);
+        expect
+          .soft(
+            points.length,
+            `${character} median ${i} should contain at least 2 points`,
+          )
+          .toBeGreaterThanOrEqual(2);
       }
     }
   });
