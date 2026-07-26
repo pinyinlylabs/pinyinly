@@ -7,5 +7,7 @@
       { "hanzi": "牛", "strokes": "2-5" }
     ]
   },
-  "strokes": 6
+  "svg": {
+    "strokes": 6
+  }
 }

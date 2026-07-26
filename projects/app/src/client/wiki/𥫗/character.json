@@ -1,5 +1,7 @@
 {
-  "hanzi": "𥫗",
   "componentFormOf": "竹",
-  "strokes": 6
+  "hanzi": "𥫗",
+  "svg": {
+    "strokes": 6
+  }
 }

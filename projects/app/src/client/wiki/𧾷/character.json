@@ -1,8 +1,10 @@
 {
-  "hanzi": "𧾷",
   "componentFormOf": "足",
+  "hanzi": "𧾷",
   "mnemonic": {
     "components": ["⿱", { "hanzi": "口" }, { "hanzi": "止" }]
   },
-  "strokes": 7
+  "svg": {
+    "strokes": 7
+  }
 }

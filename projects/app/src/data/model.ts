@@ -812,14 +812,7 @@ export const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
 
 export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
 
-/**
- * Schema for character.json files.
- */
-export const wikiCharacterDataSchema = z.strictObject({
-  /**
-   * The hanzi character represented by this character (e.g. 看).
-   */
-  hanzi: hanziCharacterSchema,
+export const wikiCharacterSvgSchema = z.strictObject({
   /**
    * Stroke information, ideally SVG paths but otherwise just the count.
    */
@@ -839,6 +832,33 @@ export const wikiCharacterDataSchema = z.strictObject({
     .describe(
       `Stroke medians (in order), encoded as compact strings per stroke: x,y;x,y;...`,
     ),
+  /**
+   * Precomputed SVG paths for slice atoms keyed by canonical StrokeSpec atom text.
+   *
+   * Example key: "4[1:2]"
+   */
+  segments: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe(
+      `Precomputed SVG segment paths keyed by canonical StrokeSpec slice atom.`,
+    ),
+});
+
+export type WikiCharacterSvg = z.infer<typeof wikiCharacterSvgSchema>;
+
+/**
+ * Schema for character.json files.
+ */
+export const wikiCharacterDataSchema = z.strictObject({
+  /**
+   * The hanzi character represented by this character (e.g. 看).
+   */
+  hanzi: hanziCharacterSchema,
+  /**
+   * SVG-related data (strokes, medians, and precomputed segment paths).
+   */
+  svg: wikiCharacterSvgSchema,
   /**
    * The simplified form of this character, if it is a traditional form.
    *

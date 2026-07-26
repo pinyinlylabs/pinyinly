@@ -1,7 +1,7 @@
 import { hanziSvgPathsQuery } from "@/client/query";
 import type { HanziCharacter as HanziCharacterType } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
-import { parseIndexRangesFromStrokeSpec } from "@/util/strokeSpec";
+import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
 import type { LayoutChangeEvent } from "react-native";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
@@ -9,6 +9,55 @@ import type { HanziCharacterColor } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
 
 type TileHanzi = Parameters<typeof HanziLink>[0][`hanzi`];
+
+type HighlightStrokeData = {
+  strokeIndexes: number[];
+  segmentPaths: string[];
+};
+
+function buildHighlightStrokeData(
+  highlightStrokeRanges: string,
+  segmentPathsByAtom: Record<string, string> | null,
+): HighlightStrokeData {
+  const strokeIndexes = new Set<number>();
+  const segmentPaths: string[] = [];
+
+  try {
+    const parsed = parseStrokeSpec(highlightStrokeRanges);
+
+    for (const item of parsed.items) {
+      for (const atom of item.atoms) {
+        if (atom.kind === `range`) {
+          for (let i = atom.start; i <= atom.end; i += 1) {
+            strokeIndexes.add(i);
+          }
+          continue;
+        }
+
+        const atomKey = formatAtom(atom);
+        const segmentPath = segmentPathsByAtom?.[atomKey];
+        if (segmentPath != null) {
+          segmentPaths.push(segmentPath);
+          continue;
+        }
+
+        // Fallback: if the segment path hasn't been generated yet,
+        // highlight the parent stroke so the UI still communicates intent.
+        strokeIndexes.add(atom.stroke);
+      }
+    }
+  } catch {
+    return {
+      strokeIndexes: [],
+      segmentPaths: [],
+    };
+  }
+
+  return {
+    strokeIndexes: [...strokeIndexes],
+    segmentPaths,
+  };
+}
 
 export function HanziStrokesTile({
   componentHanzi,
@@ -30,14 +79,15 @@ export function HanziStrokesTile({
   onVisualLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const { data: strokesData } = useQuery(hanziSvgPathsQuery(hanzi));
-  const highlightStrokes = (() => {
-    try {
-      return parseIndexRangesFromStrokeSpec(highlightStrokeRanges);
-    } catch {
-      return [];
-    }
-  })();
-  const hasHighlightedStrokes = highlightStrokes.length > 0;
+  const segmentPathsByAtom = strokesData?.segments ?? null;
+  const strokePaths = strokesData?.strokes ?? null;
+  const highlightStrokeData = buildHighlightStrokeData(
+    highlightStrokeRanges,
+    segmentPathsByAtom,
+  );
+  const hasHighlightedStrokes =
+    highlightStrokeData.strokeIndexes.length > 0 ||
+    highlightStrokeData.segmentPaths.length > 0;
   const normalizedLabel = label?.trim() ?? ``;
   const hasNameLabel = normalizedLabel.length > 0;
 
@@ -46,12 +96,13 @@ export function HanziStrokesTile({
       className={fillWidth ? `w-full items-center gap-2` : `items-start gap-2`}
     >
       <View className="min-w-12 items-center" onLayout={onVisualLayout}>
-        {strokesData != null && hasHighlightedStrokes ? (
+        {strokePaths != null && hasHighlightedStrokes ? (
           <HanziCharacter
             className="size-12"
             highlightColor={highlightColor}
-            strokesData={strokesData}
-            highlightStrokes={highlightStrokes}
+            strokesData={strokePaths}
+            highlightPaths={highlightStrokeData.segmentPaths}
+            highlightStrokes={highlightStrokeData.strokeIndexes}
           />
         ) : componentHanzi == null ? null : (
           <Text className="text-center pyly-body text-lg">

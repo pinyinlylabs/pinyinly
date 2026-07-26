@@ -157,7 +157,7 @@ function formatBound(bound: StrokeSpecBound): string {
     : `${bound.stroke}#${bound.occurrence}`;
 }
 
-function formatAtom(atom: StrokeSpecAtom): string {
+export function formatAtom(atom: StrokeSpecAtom): string {
   if (atom.kind === `range`) {
     return atom.start === atom.end
       ? `${atom.start}`

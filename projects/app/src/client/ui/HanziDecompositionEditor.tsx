@@ -452,13 +452,13 @@ function HanziVisualSuggestionsPanel({
 }
 
 export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
-  const { data: strokePathsData } = useQuery(
+  const { data: svgData } = useQuery(
     hanziSvgPathsQuery(isHanziCharacter(hanzi) ? hanzi : null),
   );
   const { data: mnemonicData } = useQuery(
     characterDecompositionQuery(isHanziCharacter(hanzi) ? hanzi : null),
   );
-  const strokePaths = strokePathsData ?? null;
+  const strokePaths = svgData?.strokes ?? null;
   const db = useDb();
   const userWikiCharacterDecomposition = useUserSetting({
     setting: userWikiCharacterDecompositionSetting,

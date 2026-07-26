@@ -1,6 +1,5 @@
 import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
-import { wikiCharacterDataSchema } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import { strokeMediansCodec } from "#util/strokeMedians.ts";
 import {
@@ -11,7 +10,7 @@ import {
   mkdirSync,
   readFileSync,
 } from "@pinyinly/lib/fs";
-import { updateJsonFileKey } from "@pinyinly/lib/jsonfmt";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import isEqual from "lodash/isEqual.js";
@@ -117,6 +116,46 @@ const allCharacters = await glob(`${wikiDir}/*`).then((ps) =>
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
+function asRecord(value: unknown): Record<string, unknown> {
+  if (typeof value === `object` && value != null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+}
+
+function readJsonRecord(filePath: string): Record<string, unknown> {
+  try {
+    const raw = JSON.parse(readFileSync(filePath, `utf-8`)) as unknown;
+    return asRecord(raw);
+  } catch {
+    return {};
+  }
+}
+
+function asStringArray(value: unknown): string[] | undefined {
+  return Array.isArray(value) && value.every((item) => typeof item === `string`)
+    ? value
+    : undefined;
+}
+
+function asStringMap(value: unknown): Record<string, string> | undefined {
+  if (typeof value !== `object` || value == null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const entries = Object.entries(value);
+  if (
+    entries.every(
+      ([key, entryValue]) =>
+        typeof key === `string` && typeof entryValue === `string`,
+    )
+  ) {
+    return value as Record<string, string>;
+  }
+
+  return undefined;
+}
+
 for (const character of allCharacters) {
   // If we're only updating specific characters, skip the rest.
   if (argv.update != null && !argv.update.includes(character)) {
@@ -132,42 +171,46 @@ for (const character of allCharacters) {
 
   const dataFile = path.join(characterWikiDir, `character.json`);
 
-  if (await updateJsonFileKey(dataFile, `hanzi`, character)) {
-    debug(`wrote hanzi for %O`, character);
-  }
+  const existingData = readJsonRecord(dataFile);
+  const existingSvg = asRecord(existingData[`svg`]);
 
   if (graphicsRecord == null) {
     debug(`no graphics data for %O`, character);
-  } else if (
-    await updateJsonFileKey(dataFile, `strokes`, graphicsRecord.strokes)
-  ) {
-    debug(`wrote strokes for %O`, character);
   }
 
-  if (graphicsRecord != null) {
-    const encodedMedians = strokeMediansCodec.encode(graphicsRecord.medians);
-    if (await updateJsonFileKey(dataFile, `medians`, encodedMedians)) {
-      debug(`wrote medians for %O`, character);
-    }
+  const nextStrokes =
+    graphicsRecord?.strokes ?? asStringArray(existingSvg[`strokes`]);
+
+  const nextMedians =
+    graphicsRecord == null
+      ? asStringArray(existingSvg[`medians`])
+      : strokeMediansCodec.encode(graphicsRecord.medians);
+
+  const nextSegments = asStringMap(existingSvg[`segments`]);
+
+  const nextData: Record<string, unknown> = {
+    ...existingData,
+    hanzi: character,
+  };
+
+  if (nextStrokes == null) {
+    debug(`missing svg.strokes for %O, leaving svg unchanged`, character);
+  } else {
+    nextData[`svg`] = {
+      ...(nextMedians == null ? {} : { medians: nextMedians }),
+      ...(nextSegments == null ? {} : { segments: nextSegments }),
+      strokes: nextStrokes,
+    };
   }
 
   {
     //
     // .mnemonic updates from dictionary.txt
     //
-    let existing;
-    try {
-      existing = wikiCharacterDataSchema.parse(
-        JSON.parse(readFileSync(dataFile, `utf-8`)),
-      );
-    } catch (error) {
-      debug(`failed to read existing data for %O: %O`, character, error);
-    }
-
     const dictionaryRecord = dictionaryDataByCharacter.get(character);
 
     if (
-      existing?.mnemonic == null &&
+      nextData[`mnemonic`] == null &&
       dictionaryRecord?.decomposition != null &&
       dictionaryRecord.decomposition !== `？`
     ) {
@@ -194,10 +237,14 @@ for (const character of allCharacters) {
           ),
         };
 
-        await updateJsonFileKey(dataFile, `mnemonic`, newMnemonic);
+        nextData[`mnemonic`] = newMnemonic;
 
         debug(`wrote mnemonic for %O`, character);
       }
     }
+  }
+
+  if (await writeJsonFileIfChanged(dataFile, nextData)) {
+    debug(`wrote character data for %O`, character);
   }
 }

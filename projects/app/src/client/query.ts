@@ -343,7 +343,12 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
     staleTime: Infinity,
   });
 
-const strokeSvgArraySchema = z.array(z.string());
+const hanziSvgDataSchema = z
+  .strictObject({
+    strokes: z.array(z.string()),
+    segments: z.record(z.string(), z.string()).optional(),
+  })
+  .describe(`SVG stroke data with optional precomputed segment paths.`);
 
 const wikiMdastRootSchema = z.looseObject({
   type: z.literal(`root`),
@@ -351,6 +356,7 @@ const wikiMdastRootSchema = z.looseObject({
 });
 
 export type WikiMdastRoot = z.infer<typeof wikiMdastRootSchema>;
+export type HanziSvgData = z.infer<typeof hanziSvgDataSchema>;
 
 export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
   queryOptions({
@@ -358,7 +364,7 @@ export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
     queryFn:
       hanzi == null
         ? skipToken
-        : async ({ signal }): Promise<string[] | null> => {
+        : async ({ signal }): Promise<HanziSvgData | null> => {
             const response = await fetch(
               `/raw/svgs/${encodeURIComponent(hanzi)}.json`,
               { signal },
@@ -368,7 +374,7 @@ export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
             }
 
             const json = (await response.json()) as unknown;
-            const result = strokeSvgArraySchema.safeParse(json);
+            const result = hanziSvgDataSchema.safeParse(json);
             return result.success ? result.data : null;
           },
     staleTime: Infinity,
@@ -380,7 +386,7 @@ export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter | null) =>
     queryFn:
       hanzi == null
         ? skipToken
-        : async (): Promise<string[] | null> => {
+        : async (): Promise<HanziSvgData | null> => {
             return null;
           },
     staleTime: Infinity,

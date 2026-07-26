@@ -75,7 +75,7 @@ export function WikiHanziCharacterMeaningBox({
       ? undefined
       : [...walkIdsNodeLeafs(selectedDecomposition.decompositionComponents)];
 
-  const { data: strokeSvgs } = useQuery(hanziSvgPathsQuery(hanzi));
+  const { data: hanziSvgPathsData } = useQuery(hanziSvgPathsQuery(hanzi));
 
   const { data: mnemonicData } = useQuery(characterDecompositionQuery(hanzi));
 
@@ -163,7 +163,7 @@ export function WikiHanziCharacterMeaningBox({
           hanzi={hanzi}
           primaryMeaningGloss={primaryMeaningGloss}
           selectedComponents={selectedComponents}
-          strokeSvgs={strokeSvgs ?? undefined}
+          strokeSvgs={hanziSvgPathsData?.strokes}
         />
       </View>
 

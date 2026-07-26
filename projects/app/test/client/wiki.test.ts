@@ -230,7 +230,7 @@ describe(`character.json files`, async () => {
             }, character)
             .not.toThrow();
 
-          if (Array.isArray(characterData.strokes)) {
+          if (Array.isArray(characterData.svg.strokes)) {
             // at least one stroke if there's SVG stroke data
             expect.soft(strokeIndices.length, character).toBeGreaterThan(0);
           }
@@ -241,28 +241,28 @@ describe(`character.json files`, async () => {
 
   test(`stroke medians conformance`, async () => {
     for (const { character, characterData } of characterFiles) {
-      if (characterData.medians == null) {
+      if (characterData.svg.medians == null) {
         continue;
       }
 
       expect
         .soft(
-          Array.isArray(characterData.strokes),
+          Array.isArray(characterData.svg.strokes),
           `${character} medians require SVG strokes`,
         )
         .toBe(true);
-      if (!Array.isArray(characterData.strokes)) {
+      if (!Array.isArray(characterData.svg.strokes)) {
         continue;
       }
 
       expect
         .soft(
-          characterData.medians.length,
+          characterData.svg.medians.length,
           `${character} medians length must match strokes length`,
         )
-        .toBe(characterData.strokes.length);
+        .toBe(characterData.svg.strokes.length);
 
-      for (const [i, encodedMedian] of characterData.medians.entries()) {
+      for (const [i, encodedMedian] of characterData.svg.medians.entries()) {
         const points = strokeMedianCodec.decode(encodedMedian);
         expect
           .soft(
@@ -364,7 +364,7 @@ describe(`character.json files`, async () => {
 
   test(`all strokes are covered by mnemonic components`, async () => {
     for (const { character, characterData } of characterFiles) {
-      if (!Array.isArray(characterData.strokes)) {
+      if (!Array.isArray(characterData.svg.strokes)) {
         // There's no point having components referencing strokes if we don't
         // have any SVG stroke paths to draw.
         continue;
@@ -425,7 +425,7 @@ describe(`character.json files`, async () => {
 
             if (
               claimedStrokeCount === 0 &&
-              !Array.isArray(characterData.strokes)
+              !Array.isArray(characterData.svg.strokes)
             ) {
               // There's no point having components referencing strokes if we don't
               // have any SVG stroke paths to draw.
@@ -547,11 +547,23 @@ describe(`character.json files`, async () => {
   });
 
   test(`consistency with public/raw/svgs/*.json`, async () => {
-    const expected = new Map<HanziText, string[]>();
+    const expected = new Map<
+      HanziText,
+      {
+        strokes: string[];
+        segments?: Record<string, string>;
+      }
+    >();
 
     for (const { character, characterData } of characterFiles) {
-      if (Array.isArray(characterData.strokes)) {
-        expected.set(character, characterData.strokes);
+      if (Array.isArray(characterData.svg.strokes)) {
+        const hasSegments =
+          characterData.svg.segments != null &&
+          Object.keys(characterData.svg.segments).length > 0;
+        expected.set(character, {
+          strokes: characterData.svg.strokes,
+          ...(hasSegments ? { segments: characterData.svg.segments } : {}),
+        });
       }
     }
 
@@ -569,9 +581,9 @@ describe(`character.json files`, async () => {
       await rm(path.join(characterStrokeSvgsDir, fileName));
     }
 
-    for (const [character, strokes] of expected.entries()) {
+    for (const [character, strokeData] of expected.entries()) {
       await expect
-        .soft(strokes, `${character} strokes`)
+        .soft(strokeData, `${character} stroke data`)
         .toMatchJsonFileSnapshot(
           path.join(characterStrokeSvgsDir, `${character}.json`),
         );

@@ -7,5 +7,7 @@
       { "hanzi": "日" }
     ]
   },
-  "strokes": 10
+  "svg": {
+    "strokes": 10
+  }
 }

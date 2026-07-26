@@ -5,10 +5,12 @@ import { PathCss } from "./svg";
 export function HanziCharacter(props: {
   strokesData: string[];
   highlightStrokes: number[];
+  highlightPaths?: readonly string[];
   highlightColor?: HanziCharacterColor;
   className?: string;
 }) {
   const highlightedStrokes = new Set(props.highlightStrokes);
+  const highlightedSegmentPaths = props.highlightPaths ?? [];
 
   return (
     <Svg
@@ -52,6 +54,14 @@ export function HanziCharacter(props: {
               strokeWidth={20}
             />
           ))}
+        {highlightedSegmentPaths.map((d, i) => (
+          <PathCss
+            key={`segment:${i}`}
+            d={d}
+            className="fill-fg-loud stroke-fg-loud"
+            strokeWidth={20}
+          />
+        ))}
       </G>
     </Svg>
   );
