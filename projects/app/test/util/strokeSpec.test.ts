@@ -1,0 +1,61 @@
+import {
+  formatStrokeSpec,
+  normalizeStrokeSpec,
+  parseIndexRangesFromStrokeSpec,
+  parseStrokeSpec,
+  strokeSpecItemCount,
+} from "#util/strokeSpec.ts";
+import { describe, expect, test } from "vitest";
+
+describe(
+  `parseStrokeSpec suite` satisfies HasNameOf<typeof parseStrokeSpec>,
+  () => {
+    test(`parses legacy ranges`, () => {
+      const spec = parseStrokeSpec(`0-2,5`);
+
+      expect(spec.items).toHaveLength(2);
+      expect(formatStrokeSpec(spec)).toBe(`0-2,5`);
+      expect(parseIndexRangesFromStrokeSpec(`0-2,5`)).toEqual([0, 1, 2, 5]);
+    });
+
+    test(`parses slice tokens`, () => {
+      expect(normalizeStrokeSpec(`1[0:3]`)).toBe(`1[0:3]`);
+      expect(normalizeStrokeSpec(`1[:3]`)).toBe(`1[:3]`);
+      expect(normalizeStrokeSpec(`1[0:]`)).toBe(`1[0:]`);
+      expect(normalizeStrokeSpec(`1[:]`)).toBe(`1`);
+    });
+
+    test(`parses occurrence selectors`, () => {
+      expect(normalizeStrokeSpec(`1[0#1:3#2]`)).toBe(`1[0#1:3#2]`);
+      expect(normalizeStrokeSpec(`1[0#0:3#0]`)).toBe(`1[0:3]`);
+    });
+
+    test(`parses grouped unions`, () => {
+      const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
+
+      expect(spec.items).toHaveLength(2);
+      expect(spec.items[0]?.atoms).toHaveLength(2);
+      expect(spec.items[1]?.atoms).toHaveLength(1);
+      expect(strokeSpecItemCount(`1[0:2]+7[:4],9`)).toBe(2);
+    });
+
+    test(`normalizes whitespace`, () => {
+      expect(normalizeStrokeSpec(`  0 - 2 , 5 `)).toBe(`0-2,5`);
+      expect(normalizeStrokeSpec(` 1[ 0 : 3 ] + 2[ :4 ] `)).toBe(
+        `1[0:3]+2[:4]`,
+      );
+    });
+
+    test(`rejects malformed input`, () => {
+      expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
+      expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`3-1`)).toThrow();
+      expect(() => parseStrokeSpec(`1++2`)).toThrow();
+    });
+
+    test(`legacy numeric extraction rejects slices`, () => {
+      expect(() => parseIndexRangesFromStrokeSpec(`1[0:3]`)).toThrow();
+    });
+  },
+);

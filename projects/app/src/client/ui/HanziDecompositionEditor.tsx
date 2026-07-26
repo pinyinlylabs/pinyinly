@@ -20,6 +20,7 @@ import { IdsOperator, wikiCharacterDecompositionSchema } from "@/data/model";
 import { userWikiCharacterDecompositionSetting } from "@/data/userSettings";
 import { decompositionComponentsToIds } from "@/dictionary";
 import { parseIndexRanges, normalizeIndexRanges } from "@/util/indexRanges";
+import { parseStrokeSpec } from "@/util/strokeSpec";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, Suspense } from "react";
@@ -213,17 +214,12 @@ function validateStrokeRanges(ranges: string): string | null {
     return null;
   }
 
-  if (!/^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/u.test(ranges)) {
-    return `Strokes must be comma-separated indexes/ranges, e.g. 0,1-3`;
-  }
-
-  for (const part of ranges.split(`,`)) {
-    const [startText, endText] = part.split(`-`);
-    const start = Number(startText);
-    const end = endText == null ? start : Number(endText);
-    if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {
-      return `Stroke ranges must be ascending, e.g. 1-3`;
-    }
+  try {
+    parseStrokeSpec(ranges);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : `Invalid stroke specification.`;
+    return `${message} Example: 0,1-3,4[1:5],7[:3]+8[2:]`;
   }
 
   return null;
