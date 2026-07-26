@@ -1,7 +1,11 @@
 {
-  "hanzi": "丷",
   "componentFormOf": "八",
+  "hanzi": "丷",
   "isStructural": true,
+  "medians": [
+    "325,530;400,480;428,438",
+    "650,592;668,572;677,549;600,474;535,422"
+  ],
   "mnemonic": {
     "components": ["⿰", { "hanzi": "丶", "strokes": "0" }, { "strokes": "1" }]
   },

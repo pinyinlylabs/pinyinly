@@ -1,5 +1,14 @@
 {
   "hanzi": "坏",
+  "medians": [
+    "116,508;139,502;188,507;345,549;395,548",
+    "230,783;282,741;283,727;273,335;253,304",
+    "92,232;148,223;407,345",
+    "414,625;445,619;478,621;598,647;801,673;883,659",
+    "639,621;665,593;669,573;615,469;583,421;524,344;440,253;358,179;284,128",
+    "558,504;578,482;601,437;608,291;597,50;609,-12",
+    "721,359;871,244;897,210;912,170"
+  ],
   "mnemonic": {
     "components": [
       "⿰",
@@ -13,10 +22,10 @@
     ],
     "hints": [
       {
-        "meaningKey": "bad",
-        "hint": "**Soil** that's **not** fertile is **bad** for crops.",
         "explanation": "If you're growing crops, everything depends on the soil (土). When the soil isn't (不) good, that's very bad news for your harvest.",
-        "imageAssetIds": ["sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A"]
+        "hint": "**Soil** that's **not** fertile is **bad** for crops.",
+        "imageAssetIds": ["sha256/llztsum5npSYNprvTIkrJDt2D5nSTTMfkPI68gWxw1A"],
+        "meaningKey": "bad"
       }
     ]
   },

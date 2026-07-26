@@ -1,5 +1,20 @@
 {
   "hanzi": "福",
+  "medians": [
+    "269,816;364,767;393,726",
+    "81,524;139,511;223,532;307,563;351,558;324,493;242,377;178,304;121,250;39,191",
+    "269,371;287,312;284,197;272,75;277,14",
+    "335,396;376,355;386,336",
+    "529,740;552,734;601,736;748,774;797,774",
+    "499,619;529,594;564,446",
+    "557,615;569,606;724,642;752,636;775,610;753,546;727,528",
+    "581,468;592,477;718,501;764,504;787,496",
+    "432,380;460,358;480,324;505,117;520,65",
+    "486,375;495,366;520,358;819,414;840,411;862,397;877,379;876,369;851,169;842,123;822,87;823,30",
+    "553,224;716,258;763,253",
+    "633,353;661,330;661,166;645,142",
+    "540,92;551,104;571,108;771,132"
+  ],
   "mnemonic": {
     "components": [
       "⿰",
@@ -18,10 +33,10 @@
     ],
     "hints": [
       {
-        "meaningKey": "blessing",
-        "hint": "**Pray** for a bountiful harvest and you'll be **blessed** with riches.",
         "explanation": "The left side shows a person praying (礻), while the right (畐) represents a field (田) with a full basket (囗). Pray for abundance and receive a blessing.",
-        "imageAssetIds": ["sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w"]
+        "hint": "**Pray** for a bountiful harvest and you'll be **blessed** with riches.",
+        "imageAssetIds": ["sha256/mr1f6r5rfHjtXhXJd7o8plSn3E7hnq9yvip22GMPy2w"],
+        "meaningKey": "blessing"
       }
     ]
   },

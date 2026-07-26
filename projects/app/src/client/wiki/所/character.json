@@ -1,5 +1,15 @@
 {
   "hanzi": "所",
+  "medians": [
+    "390,801;403,777;403,751;302,684;278,671;265,674",
+    "190,686;216,668;231,646;227,474;214,366;200,300;167,208;143,156;84,67",
+    "261,513;272,522;393,557;422,543;432,531;408,436;405,427;384,419",
+    "241,345;263,357;378,384;435,379",
+    "832,771;761,779;673,721;603,691;599,681",
+    "517,703;559,663;557,498;533,359;509,290;472,225;417,164;365,129",
+    "591,512;663,530;840,560;895,560;938,548",
+    "701,509;743,485;744,472;735,-60"
+  ],
   "mnemonic": {
     "components": [
       "⿰",
@@ -8,9 +18,9 @@
     ],
     "hints": [
       {
-        "meaningKey": "place",
+        "explanation": "A true place you can call your own is where you've put up a door (戶) to mark your space and keep an axe (斤) handy by the entrance for wood, work, and protection.",
         "hint": "A **door** with an **axe** nearby marks your **place**.",
-        "explanation": "A true place you can call your own is where you've put up a door (戶) to mark your space and keep an axe (斤) handy by the entrance for wood, work, and protection."
+        "meaningKey": "place"
       }
     ]
   },

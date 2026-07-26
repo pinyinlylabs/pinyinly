@@ -1,5 +1,16 @@
 {
   "hanzi": "看",
+  "medians": [
+    "670,784;605,805;499,761;389,730;293,713",
+    "309,602;334,595;388,595;646,648;691,648",
+    "115,437;167,429;515,490;793,521;851,515;888,504",
+    "451,723;483,697;481,687;410,484;349,355;277,243;231,188;148,106;80,56",
+    "395,374;406,327;409,264;407,160;393,37;396,-4",
+    "428,367;437,359;456,358;629,399;655,386;673,367;687,67;675,31;613,43",
+    "438,235;448,245;523,262;556,267;591,262",
+    "434,133;447,144;527,159;573,165;595,158",
+    "426,31;440,45;477,52;584,67;632,64"
+  ],
   "mnemonic": {
     "components": [
       "⿱",
@@ -8,10 +19,10 @@
     ],
     "hints": [
       {
-        "meaningKey": "see",
-        "hint": "Put your **Hand** over your **Eye** to shade it and really **SEE**!",
         "explanation": "How do you spot something far away on a sunny day? You shade your forehead with your hand to stop squinting. That's why the Hand (手) sits right on top of the Eye (目)—it's helping you look intently.",
-        "imageAssetIds": ["sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU"]
+        "hint": "Put your **Hand** over your **Eye** to shade it and really **SEE**!",
+        "imageAssetIds": ["sha256/zZ9fuhaI1zLOgsxM1ihp4OQ9wJY8Q29hkSgEOqMXqRU"],
+        "meaningKey": "see"
       }
     ]
   },
