@@ -278,7 +278,7 @@ export function WikiHanziCharacterPronunciationBox({
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
-        <View className="gap-4">
+        <View className="gap-4 bg-black/10 pt-4">
           {isHintSectionVisible ? (
             <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
               <InlineEditableSettingText
