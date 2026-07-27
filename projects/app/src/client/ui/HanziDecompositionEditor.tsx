@@ -32,7 +32,7 @@ import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { RectButton } from "./RectButton";
 import { TextInputSingle } from "./TextInputSingle";
 import { useHanziVisualSuggestions } from "./hooks/useHanziVisualSuggestions";
-import { PathCss } from "./svg";
+import { SvgPath } from "./SvgPath";
 import { useDb } from "./hooks/useDb";
 
 interface DecompositionOption {
@@ -82,7 +82,7 @@ const overflowDragMime = `application/x-pinyinly-overflow-cell`;
 
 const leafCellClassName = `flex-1 gap-2 p-3`;
 
-// Full class strings must be literal so NativeWind includes them in the bundle.
+// Full class strings must be literal so Tailwind includes them in the bundle.
 const colorSwatchClass = {
   fg: `bg-fg`,
   blue: `bg-blue`,
@@ -271,24 +271,34 @@ function StrokePicker({
           const isHovered = hoveredStrokeIndex === i;
 
           return (
-            <PathCss
+            <SvgPath
               key={i}
               d={d}
-              className={
+              fillClassName={
                 isSelected
-                  ? `fill-fg-loud stroke-fg-loud`
+                  ? `accent-fg-loud`
                   : isHovered
-                    ? `fill-fg-loud/60 stroke-fg-loud/60`
-                    : `fill-fg-bg40 stroke-fg-bg40`
+                    ? `accent-fg-loud/60`
+                    : `accent-fg-bg40`
+              }
+              strokeClassName={
+                isSelected
+                  ? `accent-fg-loud`
+                  : isHovered
+                    ? `accent-fg-loud/60`
+                    : `accent-fg-bg40`
               }
               strokeWidth={isHovered ? 24 : 20}
-              onHoverIn={() => {
-                setHoveredStrokeIndex(i);
-              }}
-              onHoverOut={() => {
-                setHoveredStrokeIndex((current) =>
-                  current === i ? null : current,
-                );
+              {...{
+                // Unsupported props.
+                onMouseEnter: () => {
+                  setHoveredStrokeIndex(i);
+                },
+                onMouseLeave: () => {
+                  setHoveredStrokeIndex((current) =>
+                    current === i ? null : current,
+                  );
+                },
               }}
               onPress={() => {
                 onToggle(i);

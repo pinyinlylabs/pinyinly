@@ -1,5 +1,5 @@
 const { getDefaultConfig } = require(`expo/metro-config`);
-const { withNativewind } = require(`nativewind/metro`);
+const { withUniwindConfig } = require(`uniwind/metro`);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
 /** @type Record<string, { moduleName?: string; platform?: string }> */
@@ -64,6 +64,6 @@ config = {
   },
 };
 
-config = withNativewind(config);
+config = withUniwindConfig(config, { cssEntryFile: `./src/global.css` });
 
 module.exports = config;

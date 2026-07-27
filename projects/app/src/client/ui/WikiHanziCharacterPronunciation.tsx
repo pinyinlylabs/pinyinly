@@ -5,19 +5,19 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
-  getFinalSoundLabel,
-  getInitialSoundLabel,
-  isInitialSoundId,
-  splitPinyinUnit,
+    getFinalSoundLabel,
+    getInitialSoundLabel,
+    isInitialSoundId,
+    splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  hanziPronunciationHintMnemonicSpecSetting,
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
-  pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
+    hanziPronunciationHintMnemonicSpecSetting,
+    hanziPronunciationHintImageSetting,
+    hanziPronunciationHintTextSetting,
+    pinyinFinalSoundLocationSelectionSetting,
+    pinyinSoundDescriptionSetting,
+    pinyinSoundImageSetting,
+    pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -43,9 +43,9 @@ import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import {
-  composeHintText,
-  hintFirstLineLength,
-  parseHintText,
+    composeHintText,
+    hintFirstLineLength,
+    parseHintText,
 } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
@@ -281,6 +281,8 @@ export function WikiHanziCharacterPronunciationBox({
         <View className="gap-4 bg-black/10 pt-4">
           {isHintSectionVisible ? (
             <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
+              <ExperimentalContent hanzi={hanzi} />
+
               <InlineEditableSettingText
                 readonly={!isEditMode}
                 setting={hanziPronunciationHintTextSetting}
@@ -484,11 +486,11 @@ export function SoundLinkBlock({
 }
 
 const soundNameClass = tv({
-  base: `pyly-ref pyly-body`,
+  base: `pyly-body pyly-ref`,
 });
 
 function DownArrow() {
-  return <Text className="h-6 pyly-body text-fg/40">↓</Text>;
+  return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
 }
 
 function toneToLocationSetKey(tone: number): LocationSetKey {
@@ -588,4 +590,48 @@ function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
       return `phonetic`;
     }
   }
+}
+
+function ExperimentalContent(props: { hanzi: HanziText }) {
+  void `leading-5 leading-6 leading-7 leading-8`;
+  
+  return props.hanzi === `电` ? (
+    <View>
+      <Text className="pyly-body leading-7">
+        <Text
+          className="
+            my-0 inline-block rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50
+            via-sky-500/50 to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+          "
+        >
+          [di-] Count Drac
+        </Text>
+        {` `}
+        counts the underground water gauges until{` `}
+        <Text
+          className="
+            my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
+            to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
+          "
+        >
+          electricity
+        </Text>
+        {` `}
+        shocks him back to one.{` `}
+        <Text className="text-fg-dim">
+          In the pyramid’s damp{` `}
+          <Text
+            className="
+              my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
+              to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+            "
+          >
+            [-àn] subterranean chamber
+          </Text>
+          , Count Drac keeps trying to count the water-gauge pillars, but
+          electricity jumps through the wet floor and shocks him back to one.
+        </Text>
+      </Text>
+    </View>
+  ) : null;
 }

@@ -18,7 +18,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <Icon className={flagIconClass()} icon="dumbbell" />
+          <Icon icon="dumbbell" />
           <Text className={flagTextClass()}>Hard question</Text>
         </View>
       );
@@ -30,7 +30,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-success)]`,
           })}
         >
-          <Icon className={flagIconClass()} icon="plant-filled" />
+          <Icon icon="plant-filled" />
           <Text className={flagTextClass()}>New skill</Text>
         </View>
       );
@@ -42,7 +42,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-warning)]`,
           })}
         >
-          <Icon className={flagIconClass()} icon="shuffle" />
+          <Icon icon="shuffle" />
           <Text className={flagTextClass()}>Other answer</Text>
         </View>
       );
@@ -67,7 +67,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <Icon className={flagIconClass()} icon="alarm" />
+          <Icon icon="alarm" />
           <Text className={flagTextClass()}>
             Overdue by{` `}
             {overdueBy}
@@ -82,7 +82,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-warning)]`,
           })}
         >
-          <Icon className={flagIconClass()} icon="repeat" />
+          <Icon icon="repeat" />
           <Text className={flagTextClass()}>Previous mistake</Text>
         </View>
       );
@@ -94,7 +94,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
             className: `[--color-fg:var(--color-danger)]`,
           })}
         >
-          <Icon className={flagIconClass()} icon="flag" />
+          <Icon icon="flag" />
           <Text className={flagTextClass()}>Weak word</Text>
         </View>
       );
@@ -104,10 +104,6 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
 
 const flagViewClass = tv({
   base: `flex-row items-center gap-1`,
-});
-
-const flagIconClass = tv({
-  base: `text-fg`,
 });
 
 const flagTextClass = tv({

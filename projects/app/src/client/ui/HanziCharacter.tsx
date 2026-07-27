@@ -1,6 +1,6 @@
 import { G, Svg } from "react-native-svg";
 import type { HanziCharacterColor } from "./HanziCharacter.utils";
-import { PathCss } from "./svg";
+import { SvgPath } from "./SvgPath";
 
 export function HanziCharacter(props: {
   strokesData: string[];
@@ -24,10 +24,11 @@ export function HanziCharacter(props: {
         {props.strokesData
           .filter((_, i) => !highlightedStrokes.has(i))
           .map((d, i) => (
-            <PathCss
+            <SvgPath
               key={i}
               d={d}
-              className="fill-fg-bg40 stroke-fg-bg40"
+              fillClassName="accent-fg-bg40"
+              strokeClassName="accent-fg-bg40"
               strokeWidth={20}
             />
           ))}
@@ -46,19 +47,21 @@ export function HanziCharacter(props: {
         {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
           .map((d, i) => (
-            <PathCss
+            <SvgPath
               key={i}
               d={d}
-              className="fill-fg-loud stroke-fg-loud"
+              fillClassName="accent-fg-loud"
+              strokeClassName="accent-fg-loud"
               // Make the character appear a bit bolder by using a thicker stroke.
               strokeWidth={20}
             />
           ))}
         {highlightedSegmentPaths.map((d, i) => (
-          <PathCss
+          <SvgPath
             key={`segment:${i}`}
             d={d}
-            className="fill-fg-loud stroke-fg-loud"
+            fillClassName="accent-fg-loud"
+            strokeClassName="accent-fg-loud"
             strokeWidth={20}
           />
         ))}

@@ -21,41 +21,10 @@ import { TooltipProvider } from "@/client/ui/TooltipProvider";
 import "@/global.css";
 import * as Sentry from "@sentry/react-native";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import * as AppleAuthentication from "expo-apple-authentication";
-import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import Head from "expo-router/head";
-import { styled } from "nativewind";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
-import { Platform } from "react-native";
-import Reanimated from "react-native-reanimated";
-
-// NativeWind adapters for third party components
-
-// https://discord.com/channels/968718419904057416/1302346762899427390/1302486905656705045
-if (Platform.OS != `web`) {
-  // This breaks on web by having errors like:
-  //
-  // styleq: height typeof 85.83886255924172 is not "string" or "null". styleq:
-  // width typeof 128 is not "string" or "null".
-  //
-  // And passing strings through results in a broken CSS class like `85% 45%`
-  // instead of "width-[85%] height-[45%]" (but these classes wouldn't work
-  // anyway because they're dynamic and wouldn't be precompiled by tailwind).
-  styled(Image, {
-    className: {
-      target: `style`,
-      nativeStyleToProp: { color: `tintColor` } as unknown as never,
-    },
-  });
-}
-// @ts-expect-error nativewind v5 preview type defs are too complex for this adapter call.
-styled(Reanimated.View, { className: `style` });
-
-styled(AppleAuthentication.AppleAuthenticationButton, {
-  className: `style`,
-});
 
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.

@@ -22,7 +22,7 @@ export function QuickSearchButton({
         className={pressableClass({ className })}
       >
         <View className="flex-row items-center gap-2">
-          <Icon icon="search" size={16} className="text-fg-dim" />
+          <Icon icon="search" size={16} tintColorClassName="accent-fg-dim" />
           <Text className="font-sans text-base font-medium text-fg-dim">
             Search…
           </Text>

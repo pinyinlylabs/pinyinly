@@ -179,17 +179,6 @@ vi.mock(`expo-image-picker`, () => {
   };
 });
 
-vi.mock(`nativewind`, () => {
-  return {
-    cssInterop: (x: Component) => x,
-    styled: (x: Component) => x,
-    default: {
-      createAnimatedComponent: (x: Component) => x,
-      View,
-    },
-  };
-});
-
 vi.mock(`@floating-ui/react-native`, () => {
   return {
     useFloating: () => null,

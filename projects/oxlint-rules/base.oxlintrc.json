@@ -117,7 +117,17 @@
           {
             "name": "react-native",
             "importNames": ["SafeAreaView"],
-            "message": "Please use \"useSafeAreaInsets\" from \"react-native-safe-area-context\" instead."
+            "message": "Use \"useSafeAreaInsets\" from \"react-native-safe-area-context\" instead."
+          },
+          {
+            "name": "expo-image",
+            "importNames": ["Image"],
+            "message": "Use \"Image\" from \"@/client/ui/Image\" instead (for Uniwind support)."
+          },
+          {
+            "name": "react-native-svg",
+            "importNames": ["Path"],
+            "message": "Use \"SvgPath\" from \"@/client/ui/SvgPath\" instead (for Uniwind support)."
           },
           {
             "name": "react",
@@ -131,48 +141,48 @@
           },
           {
             "name": "hanzi",
-            "message": "Please use @/dictionary/hanzi instead."
+            "message": "Use \"@/dictionary/hanzi\" instead."
           },
           {
             "name": "nanoid",
-            "message": "Please use @/util/nanoid instead."
+            "message": "Use \"@/util/nanoid\" instead."
           },
           {
             "name": "date-fns",
-            "message": "Please use date-fns/* instead for smaller bundle size.",
+            "message": "Use \"date-fns/*\" instead for smaller bundle size.",
             "allowTypeImports": true
           },
           {
             "name": "lodash",
-            "message": "Please use lodash/* instead for smaller bundle size."
+            "message": "Use \"lodash/*\" instead for smaller bundle size."
           },
           {
             "name": "node:assert",
-            "message": "Please use vitest instead."
+            "message": "Use \"vitest\" instead."
           },
           {
             "name": "node:assert/strict",
-            "message": "Please use vitest instead."
+            "message": "Use \"vitest\" instead."
           },
           {
             "name": "node:test",
-            "message": "Please use vitest instead."
+            "message": "Use \"vitest\" instead."
           },
           {
             "name": "glob",
-            "message": "Please use glob from @pinyinly/lib/fs instead."
+            "message": "Use \"glob\" from \"@pinyinly/lib/fs\" instead."
           },
           {
             "name": "node:fs/promises",
-            "message": "Please use @pinyinly/lib/fs instead."
+            "message": "Use \"@pinyinly/lib/fs\" instead."
           },
           {
             "name": "node:fs",
-            "message": "Please use @pinyinly/lib/fs instead."
+            "message": "Use \"@pinyinly/lib/fs\" instead."
           },
           {
             "name": "@bacons/mdx",
-            "message": "Please use @/client/mdx instead."
+            "message": "Use \"@/client/mdx\" instead."
           }
         ]
       }

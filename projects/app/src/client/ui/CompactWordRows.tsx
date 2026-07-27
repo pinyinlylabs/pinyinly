@@ -57,7 +57,8 @@ export function CompactWordRows({
               <Icon
                 icon="chevron-right"
                 size={12}
-                className="ml-2 text-fg-dim"
+                className="ml-2"
+                tintColorClassName="accent-fg-dim"
               />
             </Pressable>
           </Link>

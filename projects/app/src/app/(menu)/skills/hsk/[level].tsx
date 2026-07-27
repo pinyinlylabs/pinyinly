@@ -214,7 +214,12 @@ function HskSkillWordRows({
               </View>
             </View>
 
-            <Icon icon="chevron-right" size={12} className="ml-2 text-fg-dim" />
+            <Icon
+              icon="chevron-right"
+              size={12}
+              className="ml-2"
+              tintColorClassName="accent-fg-dim"
+            />
           </Pressable>
         </Link>
       ))}

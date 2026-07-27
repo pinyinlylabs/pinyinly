@@ -1,7 +1,7 @@
 import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import Color from "color";
-import { Image } from "expo-image";
+import { Image } from "@/client/ui/Image";
 import { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import type { ColorValue } from "react-native";

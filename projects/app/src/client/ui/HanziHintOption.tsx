@@ -54,7 +54,11 @@ export function HanziHintOption({
                 }}
                 hitSlop={8}
               >
-                <Icon size={16} icon="puzzle" className="text-fg-dim" />
+                <Icon
+                  size={16}
+                  icon="puzzle"
+                  tintColorClassName="accent-fg-dim"
+                />
               </Pressable>
             )}
             {onDelete != null && (
@@ -65,7 +69,11 @@ export function HanziHintOption({
                 }}
                 hitSlop={8}
               >
-                <Icon size={16} icon="close" className="text-fg-dim" />
+                <Icon
+                  size={16}
+                  icon="close"
+                  tintColorClassName="accent-fg-dim"
+                />
               </Pressable>
             )}
           </View>

@@ -112,7 +112,7 @@ function Header({
               active:scale-95
             `}
           >
-            <Icon icon="close" size={32} className="text-fg-loud" />
+            <Icon icon="close" size={32} tintColorClassName="accent-fg-loud" />
           </Pressable>
         </View>
 

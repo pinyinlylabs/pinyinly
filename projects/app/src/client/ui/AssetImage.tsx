@@ -4,8 +4,11 @@ import type { AssetId } from "@/data/model";
 import { AssetStatusKind } from "@/data/model";
 import { getBucketObjectKeyForId } from "@/util/assetId";
 import { assetsCdnBaseUrl } from "@/util/env";
-import type { ImageProps as ExpoImageProps, ImageStyle } from "expo-image";
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage } from "@/client/ui/Image";
+import type {
+  ImageProps as ExpoImageProps,
+  ImageStyle,
+} from "@/client/ui/Image";
 import { useEffect, useState } from "react";
 import type { StyleProp } from "react-native";
 import { Text, View } from "react-native";

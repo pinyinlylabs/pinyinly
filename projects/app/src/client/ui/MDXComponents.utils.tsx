@@ -2,7 +2,7 @@
 
 // Adaptation from https://github.com/EvanBacon/expo-mdx/blob/6f27605c23400ed42d014dcef77ba11244d08f82/packages/mdx/src/
 import * as html from "@expo/html-elements";
-import { Image } from "expo-image";
+import { Image } from "@/client/ui/Image";
 import { createContext } from "react";
 import type { ComponentType, JSX } from "react";
 import { Platform, Text, View } from "react-native";

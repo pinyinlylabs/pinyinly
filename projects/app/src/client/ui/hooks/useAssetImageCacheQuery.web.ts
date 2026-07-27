@@ -3,7 +3,7 @@ import {
   subscribeAssetImageBlobCache,
 } from "@/client/ui/hooks/useAssetImageCacheMutation";
 import type { AssetId } from "@/data/model";
-import type { ImageProps as ExpoImageProps } from "expo-image";
+import type { ImageProps as ExpoImageProps } from "@/client/ui/Image";
 import { useEffect, useState } from "react";
 import type { AssetImageCacheQueryResult } from "./useAssetImageCacheQuery";
 
