@@ -65,7 +65,7 @@ function AiImageStyleOptionCard({
             className="size-full"
           />
         </View>
-        <Text className="text-center pyly-body">{config.label}</Text>
+        <Text className="pyly-body text-center">{config.label}</Text>
       </View>
     </Pressable>
   );

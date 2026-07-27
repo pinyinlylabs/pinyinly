@@ -5,19 +5,19 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
-    getFinalSoundLabel,
-    getInitialSoundLabel,
-    isInitialSoundId,
-    splitPinyinUnit,
+  getFinalSoundLabel,
+  getInitialSoundLabel,
+  isInitialSoundId,
+  splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-    hanziPronunciationHintMnemonicSpecSetting,
-    hanziPronunciationHintImageSetting,
-    hanziPronunciationHintTextSetting,
-    pinyinFinalSoundLocationSelectionSetting,
-    pinyinSoundDescriptionSetting,
-    pinyinSoundImageSetting,
-    pinyinSoundNameSetting,
+  hanziPronunciationHintMnemonicSpecSetting,
+  hanziPronunciationHintImageSetting,
+  hanziPronunciationHintTextSetting,
+  pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundDescriptionSetting,
+  pinyinSoundImageSetting,
+  pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -43,9 +43,9 @@ import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import {
-    composeHintText,
-    hintFirstLineLength,
-    parseHintText,
+  composeHintText,
+  hintFirstLineLength,
+  parseHintText,
 } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
@@ -594,7 +594,7 @@ function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
 
 function ExperimentalContent(props: { hanzi: HanziText }) {
   void `leading-5 leading-6 leading-7 leading-8`;
-  
+
   return props.hanzi === `电` ? (
     <View>
       <Text className="pyly-body leading-7">

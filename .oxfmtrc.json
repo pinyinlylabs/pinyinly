@@ -7,6 +7,7 @@
     "/.yarn/releases",
     "/projects/app/drizzle/meta",
     "/projects/app/.vercel",
+    "/projects/app/*-env.d.ts",
     "/projects/app/public/raw/**/*.json",
     "/projects/app/src/assets/**/*.svg",
     "/projects/app/src/assets/**/*.json",

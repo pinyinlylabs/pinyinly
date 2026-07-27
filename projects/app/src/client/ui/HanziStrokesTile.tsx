@@ -105,14 +105,14 @@ export function HanziStrokesTile({
             highlightStrokes={highlightStrokeData.strokeIndexes}
           />
         ) : componentHanzi == null ? null : (
-          <Text className="text-center pyly-body text-lg">
+          <Text className="pyly-body text-center text-lg">
             {componentHanzi}
           </Text>
         )}
       </View>
 
       <Text
-        className="w-full text-center pyly-body"
+        className="pyly-body w-full text-center"
         ellipsizeMode={labelNumberOfLines == null ? undefined : `tail`}
         numberOfLines={labelNumberOfLines}
       >

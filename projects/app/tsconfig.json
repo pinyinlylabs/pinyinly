@@ -16,7 +16,7 @@
     "*",
     ".expo/types/**/*.ts",
     "src/types/**/*.ts",
-    "uniwind-types.d.ts",
+    "uniwind-env.d.ts",
     "expo-env.d.ts"
   ],
   "exclude": [],

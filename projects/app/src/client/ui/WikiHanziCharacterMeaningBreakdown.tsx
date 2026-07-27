@@ -164,7 +164,7 @@ export function WikiHanziCharacterMeaningBreakdown({
                 setSourceCenterX(centerX);
               }}
             >
-              <Text className="text-left pyly-body text-lg">{hanzi}</Text>
+              <Text className="pyly-body text-left text-lg">{hanzi}</Text>
             </View>
           ) : (
             <View className="w-12">

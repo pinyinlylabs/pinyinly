@@ -64,6 +64,9 @@ config = {
   },
 };
 
-config = withUniwindConfig(config, { cssEntryFile: `./src/global.css` });
+config = withUniwindConfig(config, {
+  cssEntryFile: `./src/global.css`,
+  dtsFile: `./uniwind-env.d.ts`,
+});
 
 module.exports = config;

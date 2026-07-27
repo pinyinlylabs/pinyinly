@@ -19,8 +19,8 @@ export function ProgressPieIcon({
     <View
       className={
         warn
-          ? `color-fg [--color-fg:var(--color-warning)]`
-          : `color-fg [--color-fg:var(--color-fg-dim)]`
+          ? `text-fg [--color-fg:var(--color-warning)]`
+          : `text-fg [--color-fg:var(--color-fg-dim)]`
       }
       style={{ width: size, height: size }}
     >

@@ -2,6 +2,7 @@ import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import { strokeMediansCodec } from "#util/strokeMedians.ts";
+import { buildSvgSegmentPaths } from "#util/strokeSegments.ts";
 import {
   existsSync,
   fetchWithFsDbCache,
@@ -156,6 +157,33 @@ function asStringMap(value: unknown): Record<string, string> | undefined {
   return undefined;
 }
 
+function collectStrokeSpecTexts(
+  value: unknown,
+  result = new Set<string>(),
+): Set<string> {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectStrokeSpecTexts(item, result);
+    }
+    return result;
+  }
+
+  if (typeof value !== `object` || value == null) {
+    return result;
+  }
+
+  const record = value as Record<string, unknown>;
+  if (typeof record[`strokes`] === `string`) {
+    result.add(record[`strokes`]);
+  }
+
+  for (const nestedValue of Object.values(record)) {
+    collectStrokeSpecTexts(nestedValue, result);
+  }
+
+  return result;
+}
+
 for (const character of allCharacters) {
   // If we're only updating specific characters, skip the rest.
   if (argv.update != null && !argv.update.includes(character)) {
@@ -186,7 +214,34 @@ for (const character of allCharacters) {
       ? asStringArray(existingSvg[`medians`])
       : strokeMediansCodec.encode(graphicsRecord.medians);
 
-  const nextSegments = asStringMap(existingSvg[`segments`]);
+  const strokeSpecTexts = [
+    ...collectStrokeSpecTexts(existingData[`decompositions`]),
+    ...collectStrokeSpecTexts(asRecord(existingData[`mnemonic`])[`components`]),
+  ];
+  const nextMediansPaths =
+    nextMedians == null
+      ? undefined
+      : strokeMediansCodec
+          .decode(nextMedians)
+          .map(
+            (medians) =>
+              `M ` +
+              medians.map((point) => `${point[0]} ${point[1]}`).join(` L `),
+          );
+  const generatedSegments =
+    nextStrokes == null || nextMedians == null
+      ? undefined
+      : buildSvgSegmentPaths(nextStrokes, nextMediansPaths, strokeSpecTexts);
+  const existingSegments = asStringMap(existingSvg[`segments`]);
+  const nextSegments =
+    generatedSegments == null
+      ? existingSegments
+      : existingSegments == null
+        ? generatedSegments
+        : {
+            ...existingSegments,
+            ...generatedSegments,
+          };
 
   const nextData: Record<string, unknown> = {
     ...existingData,
@@ -210,7 +265,7 @@ for (const character of allCharacters) {
     const dictionaryRecord = dictionaryDataByCharacter.get(character);
 
     if (
-      nextData[`mnemonic`] == null &&
+      nextData[`mnemonic`] == true &&
       dictionaryRecord?.decomposition != null &&
       dictionaryRecord.decomposition !== `？`
     ) {

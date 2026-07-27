@@ -512,7 +512,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-1">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
-                <Text className="text-left pyly-body">
+                <Text className="pyly-body text-left">
                   {renderMentalPathThought(firstStep.thought)}
                 </Text>
               </View>
@@ -544,7 +544,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-2">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
-                <Text className="text-left pyly-body">
+                <Text className="pyly-body text-left">
                   {renderMentalPathThought(lastStep.thought)}
                 </Text>
               </View>
@@ -596,8 +596,8 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                     <Text
                       className={
                         isIntermediateStep
-                          ? `text-left pyly-body text-fg-dim`
-                          : `text-left pyly-body`
+                          ? `pyly-body text-left text-fg-dim`
+                          : `pyly-body text-left`
                       }
                     >
                       {renderMentalPathThought(step.thought)}

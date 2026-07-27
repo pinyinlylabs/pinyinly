@@ -179,6 +179,12 @@ vi.mock(`expo-image-picker`, () => {
   };
 });
 
+vi.mock(`uniwind`, () => {
+  return {
+    withUniwind: (x: Component) => x,
+  };
+});
+
 vi.mock(`@floating-ui/react-native`, () => {
   return {
     useFloating: () => null,
