@@ -619,14 +619,24 @@ function ExperimentalContent(props: { hanzi: HanziText }) {
         {` `}
         shocks him back to one.{` `}
         <Text className="text-fg-dim">
-          In the pyramid’s damp{` `}
+          In the{` `}
           <Text
             className="
               my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
               to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
             "
           >
-            [-àn] subterranean chamber
+            [-an] pyramid’s
+          </Text>
+          {` `}
+          damp{` `}
+          <Text
+            className="
+              my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
+              to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+            "
+          >
+            [4<sup>th</sup>] subterranean chamber
           </Text>
           , Count Drac keeps trying to count the water-gauge pillars, but
           electricity jumps through the wet floor and shocks him back to one.
