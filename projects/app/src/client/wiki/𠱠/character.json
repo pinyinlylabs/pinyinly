@@ -8,5 +8,7 @@
       { "hanzi": "口" }
     ]
   },
-  "strokes": 9
+  "svg": {
+    "strokes": 9
+  }
 }

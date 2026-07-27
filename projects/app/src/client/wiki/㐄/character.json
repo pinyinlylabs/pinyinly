@@ -1,1 +1,6 @@
-{ "hanzi": "㐄", "strokes": 3 }
+{
+  "hanzi": "㐄",
+  "svg": {
+    "strokes": 3
+  }
+}

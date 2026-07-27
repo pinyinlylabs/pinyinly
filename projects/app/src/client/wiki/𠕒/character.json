@@ -7,5 +7,7 @@
       ["⿱", { "hanzi": "丷" }, { "hanzi": "八" }]
     ]
   },
-  "strokes": 7
+  "svg": {
+    "strokes": 7
+  }
 }

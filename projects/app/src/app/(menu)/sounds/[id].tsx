@@ -14,6 +14,7 @@ import {
 } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
+import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
@@ -21,7 +22,6 @@ import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
 import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
-import { TextInputMulti } from "@/client/ui/TextInputMulti";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
@@ -198,10 +198,6 @@ function MnemonicStoryRoleSection({
   const [isSaveToOpen, setIsSaveToOpen] = useState(false);
   const [isSelectPlaceOpen, setIsSelectPlaceOpen] = useState(false);
   const [saveToResult, setSaveToResult] = useState<string | null>(null);
-  const [mnemonicIdentityDraft, setMnemonicIdentityDraft] = useState(``);
-  const [mnemonicIdentityError, setMnemonicIdentityError] = useState<
-    string | null
-  >(null);
   const actorDirectory = usePinyinSoundActors();
   const placeDirectory = usePinyinSoundLocations();
   const isFinalSound = isFinalSoundId(pinyinSoundId);
@@ -254,33 +250,6 @@ function MnemonicStoryRoleSection({
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
-    setMnemonicIdentityError(null);
-    if (editing) {
-      setMnemonicIdentityDraft(
-        formatIdentityJson(mnemonicIdentitySetting.value?.mnemonicIdentity),
-      );
-    }
-  };
-
-  const saveMnemonicIdentityDraft = () => {
-    const trimmed = mnemonicIdentityDraft.trim();
-    if (trimmed.length === 0) {
-      mnemonicIdentitySetting.setValue(null);
-      setMnemonicIdentityError(null);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(trimmed) as unknown;
-      mnemonicIdentitySetting.setValue({
-        soundId: pinyinSoundId,
-        mnemonicIdentity: parsed,
-      });
-      setMnemonicIdentityDraft(formatIdentityJson(parsed));
-      setMnemonicIdentityError(null);
-    } catch {
-      setMnemonicIdentityError(`Invalid JSON. Fix formatting before saving.`);
-    }
   };
 
   const hasMnemonicContent = isFinalSound
@@ -549,62 +518,13 @@ function MnemonicStoryRoleSection({
               <Text className="pyly-body-caption text-fg-dim">
                 Mnemonic identity (JSON)
               </Text>
-              {isEditMode ? (
-                <>
-                  <TextInputMulti
-                    variant="bare"
-                    placeholder='{"traits": ["curious"]}'
-                    autoResizeMinHeight={100}
-                    value={mnemonicIdentityDraft}
-                    onChangeText={(value) => {
-                      setMnemonicIdentityDraft(value);
-                      if (mnemonicIdentityError != null) {
-                        setMnemonicIdentityError(null);
-                      }
-                    }}
-                    className={`
-                      min-h-24 rounded-md border border-fg/15 bg-bg px-3 py-2 font-mono text-[12px]
-                    `}
-                  />
-                  <View className="flex-row flex-wrap gap-2">
-                    <RectButton
-                      variant="option"
-                      onPress={saveMnemonicIdentityDraft}
-                    >
-                      Save mnemonic identity JSON
-                    </RectButton>
-                    <RectButton
-                      variant="bareDim"
-                      onPress={() => {
-                        setMnemonicIdentityDraft(``);
-                        mnemonicIdentitySetting.setValue(null);
-                        setMnemonicIdentityError(null);
-                      }}
-                    >
-                      Clear identity
-                    </RectButton>
-                  </View>
-                  {mnemonicIdentityError == null ? (
-                    <Text className="pyly-body-caption text-fg-dim">
-                      Stored as JSON for future prompt generation.
-                    </Text>
-                  ) : (
-                    <Text className="pyly-body-caption text-danger">
-                      {mnemonicIdentityError}
-                    </Text>
-                  )}
-                </>
-              ) : hasMnemonicIdentity ? (
-                <Text className="font-mono text-[12px] text-fg">
-                  {formatIdentityJson(
-                    mnemonicIdentitySetting.value?.mnemonicIdentity,
-                  )}
-                </Text>
-              ) : (
-                <Text className="pyly-body-caption text-fg-dim">
-                  No mnemonic identity JSON
-                </Text>
-              )}
+              <InlineEditableSettingJson
+                setting={pinyinSoundMnemonicIdentitySetting}
+                settingKey={{ soundId: pinyinSoundId }}
+                readonly={!isEditMode}
+                placeholder='{"traits": ["curious"]}'
+                emptyStateText="No mnemonic identity JSON"
+              />
             </View>
           </>
         )}
@@ -631,14 +551,6 @@ function MnemonicStoryRoleSection({
       ) : null}
     </WikiTitledBox>
   );
-}
-
-function formatIdentityJson(value: unknown): string {
-  if (value == null) {
-    return ``;
-  }
-
-  return JSON.stringify(value, null, 2);
 }
 
 function hasIdentityContent(value: unknown): boolean {

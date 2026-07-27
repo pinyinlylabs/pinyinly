@@ -1045,7 +1045,7 @@ export function componentToString(component: WikiCharacterComponent): string {
 }
 
 export function characterStrokeCount(characterData: WikiCharacterData): number {
-  return typeof characterData.strokes === `number`
-    ? characterData.strokes
-    : characterData.strokes.length;
+  return typeof characterData.svg.strokes === `number`
+    ? characterData.svg.strokes
+    : characterData.svg.strokes.length;
 }

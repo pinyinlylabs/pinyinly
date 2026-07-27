@@ -66,7 +66,8 @@ export function MenuDictionarySearch() {
         <Icon
           icon="search"
           size={16}
-          className="absolute top-1/2 left-3 -translate-y-1/2 text-fg-dim"
+          tintColorClassName="accent-fg-dim"
+          className="absolute top-1/2 left-3 -translate-y-1/2"
         />
         <TextInputSingle
           placeholder="Search dictionary"

@@ -1,8 +1,5 @@
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css";
-
-@import "nativewind/theme";
+@import "tailwindcss";
+@import "uniwind";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -304,23 +301,6 @@
   --pyly-mark-weight: 500;
 }
 
-@utility pyly-body {
-  @apply font-sans text-base/normal text-fg font-normal;
-
-  --pyly-ref-thickness: 3px;
-  --pyly-ref-offset: 2px;
-  --pyly-ref-color: var(--color-fg-loud);
-  --pyly-ref-weight: 500;
-
-  --pyly-bold-color: var(--color-fg-loud);
-  --pyly-bold-weight: 600;
-
-  --pyly-mark-color: var(--color-fg-loud);
-  --pyly-mark-weight: 600;
-  --pyly-mark-thickness: 3px;
-  --pyly-mark-offset: 2px;
-}
-
 @utility pyly-body-caption {
   @apply font-sans text-sm/normal font-normal text-fg-dim;
 
@@ -532,6 +512,27 @@
   */
   .pyly-button-outline {
     @apply font-sans text-base/snug font-bold uppercase text-fg;
+  }
+
+  /* --- */
+  .pyly-body,
+  .pyly-mdx-h5,
+  .pyly-mdx-h6,
+  .pyly-mdx-p {
+    @apply font-sans text-base/normal text-fg font-normal;
+
+    --pyly-ref-thickness: 3px;
+    --pyly-ref-offset: 2px;
+    --pyly-ref-color: var(--color-fg-loud);
+    --pyly-ref-weight: 500;
+
+    --pyly-bold-color: var(--color-fg-loud);
+    --pyly-bold-weight: 600;
+
+    --pyly-mark-color: var(--color-fg-loud);
+    --pyly-mark-weight: 600;
+    --pyly-mark-thickness: 3px;
+    --pyly-mark-offset: 2px;
   }
 
   /* --- */
@@ -869,10 +870,7 @@
   }
   .pyly-mdx-h5,
   .pyly-mdx-h6 {
-    @apply pyly-body font-bold;
-  }
-  .pyly-mdx-p {
-    @apply pyly-body;
+    @apply font-bold;
   }
   .pyly-mdx-b,
   .pyly-mdx-strong {

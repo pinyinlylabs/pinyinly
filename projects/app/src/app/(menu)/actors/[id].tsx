@@ -1,9 +1,9 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
+import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
-import { TextInputMulti } from "@/client/ui/TextInputMulti";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
@@ -40,40 +40,7 @@ export default function ActorIdPage() {
         ? actor.name
         : `Actor`;
 
-  const mnemonicIdentitySetting = useUserSetting({
-    setting: pinyinSoundActorMnemonicIdentitySetting,
-    key: { actorId },
-  });
-  const currentIdentityDraft = formatIdentityJson(
-    mnemonicIdentitySetting.value?.mnemonicIdentity,
-  );
-
-  const [identityDraft, setIdentityDraft] = useState(currentIdentityDraft);
-  const [identityError, setIdentityError] = useState<string | null>(null);
   const [isNameEditingEnabled, setIsNameEditingEnabled] = useState(false);
-
-  const handleResetIdentityDraft = () => {
-    setIdentityDraft(currentIdentityDraft);
-    setIdentityError(null);
-  };
-
-  const saveIdentityDraft = () => {
-    const trimmed = identityDraft.trim();
-    if (trimmed.length === 0) {
-      mnemonicIdentitySetting.setValue(null);
-      setIdentityError(null);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(trimmed) as unknown;
-      mnemonicIdentitySetting.setValue({ actorId, mnemonicIdentity: parsed });
-      setIdentityDraft(formatIdentityJson(parsed));
-      setIdentityError(null);
-    } catch {
-      setIdentityError(`Invalid JSON. Fix formatting before saving.`);
-    }
-  };
 
   const linkedSoundIds: PinyinSoundId[] = [];
   for (const [soundId, actorIds] of actorDirectory.soundActorIdsBySoundId) {
@@ -139,57 +106,12 @@ export default function ActorIdPage() {
         title="Mnemonic Identity"
         className="rounded-lg border border-fg/10 bg-bg-high p-4"
       >
-        <View className="gap-3">
-          <TextInputMulti
-            variant="bare"
-            placeholder='{"traits": ["curious"]}'
-            autoResizeMinHeight={120}
-            value={identityDraft}
-            onChangeText={(value) => {
-              setIdentityDraft(value);
-              if (identityError != null) {
-                setIdentityError(null);
-              }
-            }}
-            className={`
-              min-h-24 rounded-md border border-fg/15 bg-bg px-3 py-2 font-mono text-[12px]
-            `}
-          />
-
-          <View className="flex-row flex-wrap gap-2">
-            <RectButton variant="option" onPress={saveIdentityDraft}>
-              Save mnemonic identity JSON
-            </RectButton>
-            <RectButton
-              variant="bareDim"
-              onPress={() => {
-                setIdentityDraft(``);
-                mnemonicIdentitySetting.setValue(null);
-                setIdentityError(null);
-              }}
-            >
-              Clear identity
-            </RectButton>
-            <RectButton
-              variant="bareDim"
-              onPress={() => {
-                handleResetIdentityDraft();
-              }}
-            >
-              Reload current
-            </RectButton>
-          </View>
-
-          {identityError == null ? (
-            <Text className="pyly-body-caption text-fg-dim">
-              Stored as JSON for future prompt generation.
-            </Text>
-          ) : (
-            <Text className="pyly-body-caption text-danger">
-              {identityError}
-            </Text>
-          )}
-        </View>
+        <InlineEditableSettingJson
+          setting={pinyinSoundActorMnemonicIdentitySetting}
+          settingKey={{ actorId }}
+          placeholder='{"traits": ["curious"]}'
+          autoResizeMinHeight={120}
+        />
       </WikiTitledBox>
 
       <WikiTitledBox
@@ -225,12 +147,4 @@ export default function ActorIdPage() {
       </View>
     </View>
   );
-}
-
-function formatIdentityJson(value: unknown): string {
-  if (value == null) {
-    return ``;
-  }
-
-  return JSON.stringify(value, null, 2);
 }

@@ -70,7 +70,7 @@ export const NewSkillModalContentNewWord = ({
             <Icon
               icon="note-2"
               size={32}
-              className="text-[var(--color-theme-grass-panel-bg)]"
+              tintColorClassName="accent-[var(--color-theme-grass-panel-bg)]"
             />
             <Text className="pyly-body-title text-fg-loud">Meaning</Text>
           </View>
@@ -115,7 +115,7 @@ function Header({
               active:scale-95
             `}
           >
-            <Icon icon="close" size={32} className="text-fg-loud" />
+            <Icon icon="close" size={32} tintColorClassName="accent-fg-loud" />
           </Pressable>
         </View>
 

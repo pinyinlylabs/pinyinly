@@ -156,7 +156,11 @@ function AddCustomHintModalContent({
                     setExplanation(``);
                   }}
                 >
-                  <Icon size={16} icon="chevron-down" className="text-fg-dim" />
+                  <Icon
+                    size={16}
+                    icon="chevron-down"
+                    tintColorClassName="accent-fg-dim"
+                  />
                 </Pressable>
               </View>
               <TextInputMulti

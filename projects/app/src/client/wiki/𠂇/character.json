@@ -1,5 +1,7 @@
 {
   "hanzi": "𠂇",
   "isStructural": true,
-  "strokes": 2
+  "svg": {
+    "strokes": 2
+  }
 }

@@ -179,14 +179,9 @@ vi.mock(`expo-image-picker`, () => {
   };
 });
 
-vi.mock(`nativewind`, () => {
+vi.mock(`uniwind`, () => {
   return {
-    cssInterop: (x: Component) => x,
-    styled: (x: Component) => x,
-    default: {
-      createAnimatedComponent: (x: Component) => x,
-      View,
-    },
+    withUniwind: (x: Component) => x,
   };
 });
 

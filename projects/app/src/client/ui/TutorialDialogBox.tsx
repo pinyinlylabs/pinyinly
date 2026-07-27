@@ -50,7 +50,7 @@ export const TutorialDialogBox = ({
       className="py-[14px] pr-[18px] pl-8"
       onPress={handlePress}
     >
-      <Text className={`relative pyly-body`}>
+      <Text className={`pyly-body relative`}>
         {speechBubbleLoaded ? (
           <PylymarkTypewriter
             source={text}
@@ -68,11 +68,11 @@ export const TutorialDialogBox = ({
           icon="chevron-right"
           size={24}
           className={`
-            absolute right-[-6px] bottom-0 animate-hoscillate text-fg-loud transition-opacity
-            duration-300
+            absolute right-[-6px] bottom-0 animate-hoscillate transition-opacity duration-300
 
             ${typewriterCompleted ? `opacity-100` : `pointer-events-none opacity-0`}
           `}
+          tintColorClassName="accent-fg-loud"
         />
       </Text>
 

@@ -1,6 +1,6 @@
 import { TutorialDialogBox } from "@/client/ui/TutorialDialogBox";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { Image } from "expo-image";
+import { Image } from "@/client/ui/Image";
 import { View } from "react-native";
 import { tv } from "tailwind-variants";
 

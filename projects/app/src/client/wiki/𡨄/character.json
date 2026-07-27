@@ -8,5 +8,7 @@
       { "hanzi": "八" }
     ]
   },
-  "strokes": 10
+  "svg": {
+    "strokes": 10
+  }
 }

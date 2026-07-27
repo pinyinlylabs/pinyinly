@@ -1,0 +1,15 @@
+diff --git a/dist/module/hoc/withUniwind.js b/dist/module/hoc/withUniwind.js
+index 15bc966f9d8c2b1358baffc65b3e5778ceb2035e..c054649fa5c4f0714760ed3190be08f4699654c0 100644
+--- a/dist/module/hoc/withUniwind.js
++++ b/dist/module/hoc/withUniwind.js
+@@ -57,8 +57,10 @@ const withAutoUniwind = (Component) => (props) => {
+ };
+ const withManualUniwind = (Component, options) => (props) => {
+   const uniwindContext = useUniwindContext();
++  props = {...props};
+   const { generatedProps, classNames } = Object.entries(options).reduce((acc, [propName, option]) => {
+     const className = props[option.fromClassName];
++    delete props[option.fromClassName];
+     if (className === void 0) {
+       return acc;
+     }

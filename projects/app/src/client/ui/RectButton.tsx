@@ -102,7 +102,7 @@ export function RectButton({
             {iconStart == null ? null : (
               <Icon
                 icon={iconStart}
-                className={fullTextClass}
+                tintColorClassName={iconTintClass({ variant })}
                 size={resolvedIconSize}
               />
             )}
@@ -110,7 +110,7 @@ export function RectButton({
             {iconEnd == null ? null : (
               <Icon
                 icon={iconEnd}
-                className={fullTextClass}
+                tintColorClassName={iconTintClass({ variant })}
                 size={resolvedIconSize}
               />
             )}
@@ -325,6 +325,20 @@ const textClass = tv({
       barePrimary: `font-sans text-sm/normal font-semibold text-bg uppercase`,
       bareDim: `font-sans text-sm/normal font-semibold text-fg-dim uppercase`,
       rounded: `font-sans text-[13px] font-semibold text-fg uppercase`,
+    },
+  },
+});
+
+const iconTintClass = tv({
+  variants: {
+    variant: {
+      filled: `accent-bg`,
+      outline: `accent-fg`,
+      option: `accent-fg`,
+      bare: `accent-fg`,
+      barePrimary: `accent-bg`,
+      bareDim: `accent-fg-dim`,
+      rounded: `accent-fg`,
     },
   },
 });

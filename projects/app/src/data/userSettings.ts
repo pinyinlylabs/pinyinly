@@ -646,6 +646,14 @@ export const hanziPronunciationHintImagePromptSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
+export const hanziPronunciationHintMnemonicSpecSetting = defineUserSetting({
+  entity: r.entity(`hphms/[hanzi]/[pinyin]`, {
+    hanzi: r.string().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    mnemonicSpec: r.json().optional().alias(`j`),
+  }),
+});
+
 export function getHanziPronunciationHintKeyParams(
   hanzi: HanziText,
   pinyinUnit: PinyinUnit,

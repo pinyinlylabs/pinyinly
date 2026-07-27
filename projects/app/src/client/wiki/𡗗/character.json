@@ -5,14 +5,16 @@
     "components": [
       "⿻",
       { "hanzi": "𠂇", "strokes": "0-1" },
-      { "strokes": "2-4", "label": "more hand parts" }
+      { "label": "more hand parts", "strokes": "2-4" }
     ],
     "hints": [
       {
-        "meaningKey": "openHands",
-        "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out."
+        "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out.",
+        "meaningKey": "openHands"
       }
     ]
   },
-  "strokes": 5
+  "svg": {
+    "strokes": 5
+  }
 }

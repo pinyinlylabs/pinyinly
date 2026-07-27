@@ -87,7 +87,7 @@ const Audio = ({ src }: { src: PylyAudioSource }) => {
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
-      <Icon icon="speaker-2" size={24} className="text-fg-loud" />
+      <Icon icon="speaker-2" size={24} tintColorClassName="accent-fg-loud" />
     </Pressable>
   );
 };
@@ -97,7 +97,7 @@ const Speech = ({ srcs }: { srcs: PylyAudioSource[] }) => {
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
-      <Icon icon="speaker-2" size={24} className="text-fg-loud" />
+      <Icon icon="speaker-2" size={24} tintColorClassName="accent-fg-loud" />
     </Pressable>
   );
 };

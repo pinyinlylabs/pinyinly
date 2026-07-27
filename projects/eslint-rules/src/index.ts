@@ -3,6 +3,7 @@ import type { ESLint } from "eslint";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import { getDefaultSelectors } from "eslint-plugin-better-tailwindcss/defaults";
 import type { defineConfig } from "eslint/config";
+import { globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.ts";
 import { importNames as importNamesRule } from "./import-names.ts";
@@ -28,6 +29,8 @@ export default plugin;
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
 const recommended: ConfigWithExtendsArray = [
+  globalIgnores([`*-env.d.ts`]),
+
   // All files that should use TypeScript rules.
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],

@@ -40,10 +40,7 @@ test(`app json formatter rules are respected by formatted files`, async () => {
       await getJsonIndentForFilePath(filePath),
     );
 
-    expect(
-      actualContent,
-      `Expected ${filePath} to match the formatting rules in .jsonfmtrc.json`,
-    ).toBe(formattedContent);
+    await expect(formattedContent).toMatchFileSnapshot(filePath);
   }
 });
 

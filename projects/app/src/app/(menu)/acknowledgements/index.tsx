@@ -22,7 +22,7 @@ export default function AcknowledgementsPage() {
       <View className="gap-0.5">
         {billOfMaterialsEntries.map(([license, pkgNames]) => (
           <Fragment key={license}>
-            <Text className="mt-3 pyly-body">{license} License</Text>
+            <Text className="pyly-body mt-3">{license} License</Text>
             {pkgNames.map((pkgName, index) => (
               <Text key={index} className="pyly-body-caption">
                 {pkgName}

@@ -29,7 +29,7 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
   return (
     <View className="min-h-50 flex-1 bg-bg-high">
       <View className="h-12 flex-row items-center gap-2 border-b border-b-fg/10 px-4">
-        <Icon icon="search" size={20} className="text-fg-dim" />
+        <Icon icon="search" size={20} tintColorClassName="accent-fg-dim" />
         <TextInputSingle
           autoFocus
           placeholder="Search dictionary"

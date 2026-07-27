@@ -4,6 +4,7 @@ import { functions as geminiFunctions } from "./gemini";
 import { functions as healthCheckFunctions } from "./healthCheck";
 import { functions as locationFunctions } from "./location";
 import { functions as serverSyncFunctions } from "./serverSync";
+import { functions as thoughtChainFunnelFunctions } from "./thoughtChainFunnel";
 
 export const functions = [
   ...assetFunctions,
@@ -11,6 +12,7 @@ export const functions = [
   ...healthCheckFunctions,
   ...locationFunctions,
   ...serverSyncFunctions,
+  ...thoughtChainFunnelFunctions,
   ...geminiFunctions,
 ];
 

@@ -83,7 +83,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
       </View>
       <View className="px-4 py-2">
         <View className="flex-row items-center gap-2 rounded-xl bg-bg-high px-3 py-2">
-          <Icon icon="search" size={16} className="text-fg-dim" />
+          <Icon icon="search" size={16} tintColorClassName="accent-fg-dim" />
           <TextInputSingle
             placeholder="Search…"
             value={query}

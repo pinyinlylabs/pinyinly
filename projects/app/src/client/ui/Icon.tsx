@@ -1,28 +1,34 @@
-import type { ImageProps } from "expo-image";
-import { Image } from "expo-image";
+import type { ImageProps } from "@/client/ui/Image";
+import { Image } from "@/client/ui/Image";
 import { tv } from "tailwind-variants";
-import { classNameLintInvariant } from "./Icon.utils";
+import {
+  classNameLintInvariant,
+  tintColorClassNameInvariant,
+} from "./Icon.utils";
 import type { IconName } from "./iconRegistry";
 import { iconRegistry } from "./iconRegistry";
 
 export interface IconProps extends Pick<ImageProps, `className`> {
   icon: IconName;
   size?: 12 | 16 | 20 | 24 | 32;
+  tintColorClassName?: string;
 }
 
-export function Icon({ icon, className, size }: IconProps) {
-  if (__DEV__ && className != null) {
-    classNameLintInvariant(className);
+export function Icon({ icon, className, size, tintColorClassName }: IconProps) {
+  if (__DEV__) {
+    if (className != null) {
+      classNameLintInvariant(className);
+    }
+    if (tintColorClassName != null) {
+      tintColorClassNameInvariant(tintColorClassName);
+    }
   }
 
   return (
     <Image
       className={imageClass({ className, size })}
       source={iconRegistry[icon]}
-      tintColor={
-        // Use the current text color as the tint.
-        `currentColor`
-      }
+      tintColorClassName={tintColorClassName ?? `accent-fg`}
     />
   );
 }

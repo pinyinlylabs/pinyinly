@@ -812,6 +812,41 @@ export const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
 
 export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
 
+export const wikiCharacterSvgSchema = z.strictObject({
+  /**
+   * Stroke information, ideally SVG paths but otherwise just the count.
+   */
+  strokes: z.union([
+    z.number().describe(`Stroke count`),
+    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
+  ]),
+  /**
+   * Median points for each stroke, stored as compact strings so JSON parsing
+   * does not eagerly allocate nested point arrays.
+   *
+   * Format for each stroke: "x,y;x,y;..."
+   */
+  medians: z
+    .array(z.string())
+    .optional()
+    .describe(
+      `Stroke medians (in order), encoded as compact strings per stroke: x,y;x,y;...`,
+    ),
+  /**
+   * Precomputed SVG paths for slice atoms keyed by canonical StrokeSpec atom text.
+   *
+   * Example key: "4[1:2]"
+   */
+  segments: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe(
+      `Precomputed SVG segment paths keyed by canonical StrokeSpec slice atom.`,
+    ),
+});
+
+export type WikiCharacterSvg = z.infer<typeof wikiCharacterSvgSchema>;
+
 /**
  * Schema for character.json files.
  */
@@ -821,12 +856,9 @@ export const wikiCharacterDataSchema = z.strictObject({
    */
   hanzi: hanziCharacterSchema,
   /**
-   * Stroke information, ideally SVG paths but otherwise just the count.
+   * SVG-related data (strokes, medians, and precomputed segment paths).
    */
-  strokes: z.union([
-    z.number().describe(`Stroke count`),
-    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
-  ]),
+  svg: wikiCharacterSvgSchema,
   /**
    * The simplified form of this character, if it is a traditional form.
    *

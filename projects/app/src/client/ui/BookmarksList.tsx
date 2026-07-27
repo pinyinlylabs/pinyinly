@@ -41,7 +41,7 @@ export function BookmarksList({
           <Text className="pyly-body-caption text-fg-dim">Loading...</Text>
         ) : words.length === 0 ? (
           <View className="rounded-lg bg-fg/5 p-6">
-            <Text className="text-center pyly-body text-fg-dim">
+            <Text className="pyly-body text-center text-fg-dim">
               No bookmarks yet.
             </Text>
           </View>
@@ -88,7 +88,11 @@ export function BookmarksList({
                       hover:bg-fg/5
                     `}
                   >
-                    <Icon icon="close" size={16} className="text-fg-dim" />
+                    <Icon
+                      icon="close"
+                      size={16}
+                      tintColorClassName="accent-fg-dim"
+                    />
                   </Pressable>
                 </Pressable>
               );

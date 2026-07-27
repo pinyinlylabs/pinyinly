@@ -11,6 +11,7 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
+  hanziPronunciationHintMnemonicSpecSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalSoundLocationSelectionSetting,
@@ -28,6 +29,7 @@ import { tv } from "tailwind-variants";
 import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
+import { InlineEditableSettingJson } from "./InlineEditableSettingJson";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -115,12 +117,20 @@ export function WikiHanziCharacterPronunciationBox({
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
-  const initialPinyinSound2 = useUserSetting(
+  const initialPinyinSound = useUserSetting(
     splitPinyin == null
       ? null
       : {
           setting: pinyinSoundNameSetting,
           key: { soundId: splitPinyin.initialSoundId },
+        },
+  );
+  const tonePinyinSound = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinSoundNameSetting,
+          key: { soundId: splitPinyin.toneSoundId },
         },
   );
   const initialDescriptionSetting = useUserSetting(
@@ -140,7 +150,8 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const placeDirectory = usePinyinSoundLocations();
-  const initialPinyinSoundName = initialPinyinSound2?.value?.text;
+  const initialPinyinSoundName = initialPinyinSound?.value?.text;
+  const tonePinyinSoundName = tonePinyinSound?.value?.text;
   const selectedFinalLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedFinalLocation =
@@ -165,6 +176,7 @@ export function WikiHanziCharacterPronunciationBox({
     finalToneLocationSetName.trim().length === 0
       ? `Unnamed set`
       : finalToneLocationSetName;
+  const finalLocationName = selectedFinalLocation?.name ?? null;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
@@ -186,29 +198,20 @@ export function WikiHanziCharacterPronunciationBox({
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
 
+  const handleEditingChange = (editing: boolean) => {
+    setIsEditMode(editing);
+  };
+
   return (
     <WikiTitledBox
       title="Remember the pronunciation"
-      onEditingChange={setIsEditMode}
+      onEditingChange={handleEditingChange}
+      bottomCaption={`Using a story can create a memorable association between the meaning and the pronunciation that you can use until you’ve memorized it.`}
     >
-      <View className="gap-4 p-4">
-        <Text className="pyly-body">
-          <Text className="pyly-bold">{hanzi}</Text> is pronounced{` `}
-          <Text className="pyly-bold">{pinyinUnit}</Text>.
-        </Text>
-
-        <Text className="pyly-body">
-          Use a story about &ldquo;
-          <Text className="pyly-bold">{gloss}</Text>
-          &rdquo; to remember the initial, the final, and the tone of{` `}
-          <Text className="pyly-bold">{pinyinUnit}</Text>.
-        </Text>
-      </View>
-
       {splitPinyin == null ? null : (
-        <View className="gap-4 p-4">
+        <View className="gap-4 p-4 py-10">
           <View className="">
-            <Text className="text-center pyly-body">
+            <Text className="text-center font-sans text-2xl font-normal">
               <Text className="pyly-bold">{pinyinUnit}</Text>
             </Text>
             <View className="px-[15%] py-2">
@@ -228,7 +231,7 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.finalSoundId}
                   href={`/sounds/${splitPinyin.finalSoundId}`}
                   label={finalLabel}
-                  name={null}
+                  name={finalLocationName}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
@@ -236,18 +239,9 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
                   label={<ToneLabelText tone={splitPinyin.tone} />}
-                  name={null}
+                  name={tonePinyinSoundName ?? null}
                 />
               </View>
-            </View>
-            <View className="mt-3 items-center gap-2">
-              <FinalToneForkedArrow />
-              <Link
-                href={`/sounds/${splitPinyin.finalSoundId}?tone=${splitPinyin.tone}`}
-                className={soundNameClass()}
-              >
-                {finalToneName}
-              </Link>
             </View>
           </View>
         </View>
@@ -284,9 +278,11 @@ export function WikiHanziCharacterPronunciationBox({
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
-        <View className="gap-4 p-4">
+        <View className="gap-4 bg-black/10 pt-4">
           {isHintSectionVisible ? (
             <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
+              <ExperimentalContent hanzi={hanzi} />
+
               <InlineEditableSettingText
                 readonly={!isEditMode}
                 setting={hanziPronunciationHintTextSetting}
@@ -349,10 +345,25 @@ export function WikiHanziCharacterPronunciationBox({
                 setting={hanziPronunciationHintImageSetting}
                 settingKey={hintSettingKey}
                 previewHeight={200}
-                aspectRatio={`16:9`}
+                aspectRatio={`5:4`}
               />
             )
           ) : null}
+        </View>
+      ) : null}
+
+      {isEditMode ? (
+        <View className="gap-2 p-4">
+          <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
+            Mnemonic spec
+          </Text>
+          <InlineEditableSettingJson
+            setting={hanziPronunciationHintMnemonicSpecSetting}
+            settingKey={hintSettingKey}
+            readonly={!isEditMode}
+            placeholder='{"story": "A chef juggling cans"}'
+            emptyStateText="No mnemonic spec JSON"
+          />
         </View>
       ) : null}
 
@@ -475,38 +486,11 @@ export function SoundLinkBlock({
 }
 
 const soundNameClass = tv({
-  base: `pyly-ref pyly-body`,
+  base: `pyly-body pyly-ref`,
 });
 
-function FinalToneForkedArrow() {
-  return (
-    <View className="w-full gap-1">
-      {/* TODO: Swap in a responsive Rive animation when available. */}
-      <View className="flex-row gap-4">
-        <View className="flex-1" />
-        <View className="flex-1 items-center">
-          <DownArrow />
-        </View>
-        <View className="flex-1 items-center">
-          <DownArrow />
-        </View>
-      </View>
-      <View className="flex-row gap-4">
-        <View className="flex-1" />
-        <View className="flex-1 items-center">
-          <Text className="pyly-body text-fg/40">\\ /</Text>
-        </View>
-        <View className="flex-1" />
-      </View>
-      <View className="items-center">
-        <DownArrow />
-      </View>
-    </View>
-  );
-}
-
 function DownArrow() {
-  return <Text className="h-6 pyly-body text-fg/40">↓</Text>;
+  return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
 }
 
 function toneToLocationSetKey(tone: number): LocationSetKey {
@@ -606,4 +590,48 @@ function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
       return `phonetic`;
     }
   }
+}
+
+function ExperimentalContent(props: { hanzi: HanziText }) {
+  void `leading-5 leading-6 leading-7 leading-8`;
+
+  return props.hanzi === `电` ? (
+    <View>
+      <Text className="pyly-body leading-7">
+        <Text
+          className="
+            my-0 inline-block rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50
+            via-sky-500/50 to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+          "
+        >
+          [di-] Count Drac
+        </Text>
+        {` `}
+        counts the underground water gauges until{` `}
+        <Text
+          className="
+            my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
+            to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
+          "
+        >
+          electricity
+        </Text>
+        {` `}
+        shocks him back to one.{` `}
+        <Text className="text-fg-dim">
+          In the pyramid’s damp{` `}
+          <Text
+            className="
+              my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
+              to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+            "
+          >
+            [-àn] subterranean chamber
+          </Text>
+          , Count Drac keeps trying to count the water-gauge pillars, but
+          electricity jumps through the wet floor and shocks him back to one.
+        </Text>
+      </Text>
+    </View>
+  ) : null;
 }

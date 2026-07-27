@@ -1,6 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { Asset } from "expo-asset";
-import { Image } from "expo-image";
+import { Image } from "@/client/ui/Image";
 import { Platform } from "react-native";
 
 export function usePrefetchImages(...images: RnRequireSource[]) {

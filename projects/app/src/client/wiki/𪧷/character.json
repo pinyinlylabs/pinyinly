@@ -3,5 +3,7 @@
   "mnemonic": {
     "components": ["⿱", { "hanzi": "夕" }, { "hanzi": "寸" }]
   },
-  "strokes": 6
+  "svg": {
+    "strokes": 6
+  }
 }

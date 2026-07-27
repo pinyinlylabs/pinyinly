@@ -8,7 +8,11 @@ import type {
 } from "@/data/model";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
-import { normalizeIndexRanges, parseIndexRanges } from "@/util/indexRanges";
+import {
+  normalizeStrokeSpec,
+  projectStrokeSpecThroughBindings,
+  strokeSpecItemCount,
+} from "@/util/strokeSpec";
 import { useState } from "react";
 import { View } from "react-native";
 import { HanziStrokesTile } from "./HanziStrokesTile";
@@ -27,37 +31,17 @@ const decompositionGridColumnGap = 12;
 const decompositionGridRowGap = 16;
 const decompositionGridCellMinHeight = 124;
 
-function mapStrokeIndexesToOriginalHanzi({
-  localStrokeRanges,
-  sourceStrokeIndexesInOriginal,
+function mapStrokeSpecsToOriginalHanzi({
+  localStrokeSpec,
+  sourceStrokeSpecsInOriginal,
 }: {
-  localStrokeRanges: string;
-  sourceStrokeIndexesInOriginal: readonly number[] | null;
-}): number[] {
-  const localStrokeIndexes = parseIndexRanges(localStrokeRanges);
-
-  if (sourceStrokeIndexesInOriginal == null) {
-    return localStrokeIndexes;
-  }
-
-  const mappedStrokeIndexes: number[] = [];
-  for (const localStrokeIndex of localStrokeIndexes) {
-    const mappedStrokeIndex = sourceStrokeIndexesInOriginal[localStrokeIndex];
-    if (mappedStrokeIndex == null) {
-      continue;
-    }
-    mappedStrokeIndexes.push(mappedStrokeIndex);
-  }
-
-  return mappedStrokeIndexes;
-}
-
-function strokeIndexesToRanges(strokeIndexes: readonly number[]): string {
-  if (strokeIndexes.length === 0) {
-    return ``;
-  }
-
-  return normalizeIndexRanges(strokeIndexes.join(`,`));
+  localStrokeSpec: string;
+  sourceStrokeSpecsInOriginal: readonly string[] | null;
+}): string[] {
+  return projectStrokeSpecThroughBindings({
+    localStrokeSpec,
+    sourceSlotBindingsInOriginal: sourceStrokeSpecsInOriginal,
+  });
 }
 
 export function WikiHanziCharacterDecompositionComponents({
@@ -175,18 +159,18 @@ function WikiHanziCharacterDecompositionComponentsBox({
           : `${existingRanges},${leaf.strokes}`;
       rootHighlightStrokeRangesByHanzi.set(
         leaf.hanzi,
-        normalizeIndexRanges(mergedRanges),
+        normalizeStrokeSpec(mergedRanges),
       );
     }
   }
 
   const sortedTreeItems = [...decompositionTreeItems].sort((a, b) => {
     const aStrokeCount = [...walkIdsNodeLeafs(a.node)].reduce(
-      (sum, leaf) => sum + parseIndexRanges(leaf.strokes).length,
+      (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
       0,
     );
     const bStrokeCount = [...walkIdsNodeLeafs(b.node)].reduce(
-      (sum, leaf) => sum + parseIndexRanges(leaf.strokes).length,
+      (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
       0,
     );
 
@@ -236,7 +220,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
               rootHighlightStrokeRangesByHanzi={
                 rootHighlightStrokeRangesByHanzi
               }
-              sourceStrokeIndexesInOriginal={null}
+              sourceStrokeSpecsInOriginal={null}
               visitedHanzi={new Set([hanzi])}
             />
           ))}
@@ -251,7 +235,7 @@ function DecompositionTileNode({
   originalHanzi,
   glossByHanzi,
   rootHighlightStrokeRangesByHanzi,
-  sourceStrokeIndexesInOriginal,
+  sourceStrokeSpecsInOriginal,
   gridCellWidth,
   depth,
   visitedHanzi,
@@ -260,7 +244,7 @@ function DecompositionTileNode({
   originalHanzi: HanziCharacter;
   glossByHanzi: ReadonlyMap<string, string>;
   rootHighlightStrokeRangesByHanzi: ReadonlyMap<string, string>;
-  sourceStrokeIndexesInOriginal: readonly number[] | null;
+  sourceStrokeSpecsInOriginal: readonly string[] | null;
   gridCellWidth: number;
   depth: number;
   visitedHanzi: ReadonlySet<HanziCharacter>;
@@ -274,7 +258,7 @@ function DecompositionTileNode({
         leaf={node}
         originalHanzi={originalHanzi}
         rootHighlightStrokeRangesByHanzi={rootHighlightStrokeRangesByHanzi}
-        sourceStrokeIndexesInOriginal={sourceStrokeIndexesInOriginal}
+        sourceStrokeSpecsInOriginal={sourceStrokeSpecsInOriginal}
         visitedHanzi={visitedHanzi}
       />
     );
@@ -283,15 +267,15 @@ function DecompositionTileNode({
   const [, ...children] = node;
   const sortedChildren = [...children].sort((a, b) => {
     const aStrokeCount = isLeafNode(a)
-      ? parseIndexRanges(a.strokes).length
+      ? strokeSpecItemCount(a.strokes)
       : [...walkIdsNodeLeafs(a)].reduce(
-          (sum, leaf) => sum + parseIndexRanges(leaf.strokes).length,
+          (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
           0,
         );
     const bStrokeCount = isLeafNode(b)
-      ? parseIndexRanges(b.strokes).length
+      ? strokeSpecItemCount(b.strokes)
       : [...walkIdsNodeLeafs(b)].reduce(
-          (sum, leaf) => sum + parseIndexRanges(leaf.strokes).length,
+          (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
           0,
         );
 
@@ -315,7 +299,7 @@ function DecompositionTileNode({
           node={child}
           originalHanzi={originalHanzi}
           rootHighlightStrokeRangesByHanzi={rootHighlightStrokeRangesByHanzi}
-          sourceStrokeIndexesInOriginal={sourceStrokeIndexesInOriginal}
+          sourceStrokeSpecsInOriginal={sourceStrokeSpecsInOriginal}
           visitedHanzi={visitedHanzi}
         />
       ))}
@@ -328,7 +312,7 @@ function DecompositionTileLeaf({
   originalHanzi,
   glossByHanzi,
   rootHighlightStrokeRangesByHanzi,
-  sourceStrokeIndexesInOriginal,
+  sourceStrokeSpecsInOriginal,
   gridCellWidth,
   depth,
   visitedHanzi,
@@ -337,7 +321,7 @@ function DecompositionTileLeaf({
   originalHanzi: HanziCharacter;
   glossByHanzi: ReadonlyMap<string, string>;
   rootHighlightStrokeRangesByHanzi: ReadonlyMap<string, string>;
-  sourceStrokeIndexesInOriginal: readonly number[] | null;
+  sourceStrokeSpecsInOriginal: readonly string[] | null;
   gridCellWidth: number;
   depth: number;
   visitedHanzi: ReadonlySet<HanziCharacter>;
@@ -378,14 +362,12 @@ function DecompositionTileLeaf({
   const fallbackGloss = componentDictionaryEntries?.[0]?.gloss[0] ?? null;
   const label = leaf.label ?? glossByHanzi.get(componentHanzi) ?? fallbackGloss;
 
-  const localHighlightStrokeIndexesInOriginal = mapStrokeIndexesToOriginalHanzi(
-    {
-      localStrokeRanges: leaf.strokes,
-      sourceStrokeIndexesInOriginal,
-    },
-  );
-  const localHighlightStrokeRanges = strokeIndexesToRanges(
-    localHighlightStrokeIndexesInOriginal,
+  const localHighlightStrokeSpecsInOriginal = mapStrokeSpecsToOriginalHanzi({
+    localStrokeSpec: leaf.strokes,
+    sourceStrokeSpecsInOriginal,
+  });
+  const localHighlightStrokeRanges = normalizeStrokeSpec(
+    localHighlightStrokeSpecsInOriginal.join(`,`),
   );
   const rootAggregateHighlightStrokeRanges =
     rootHighlightStrokeRangesByHanzi.get(componentHanzi) ?? null;
@@ -435,7 +417,7 @@ function DecompositionTileLeaf({
           node={nextChildNode}
           originalHanzi={originalHanzi}
           rootHighlightStrokeRangesByHanzi={rootHighlightStrokeRangesByHanzi}
-          sourceStrokeIndexesInOriginal={localHighlightStrokeIndexesInOriginal}
+          sourceStrokeSpecsInOriginal={localHighlightStrokeSpecsInOriginal}
           visitedHanzi={nextVisitedHanzi}
         />
       )}

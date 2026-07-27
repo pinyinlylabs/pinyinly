@@ -14,14 +14,7 @@
     "target": "ESNext",
     "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
   },
-  "include": [
-    "../.expo/types/**/*.ts",
-    "../expo-env.d.ts",
-    "../nativewind-env.d.ts",
-    "*",
-    "**/*",
-    "**/*.json"
-  ],
+  "include": ["../.expo/types/**/*.ts", "../*.d.ts", "*", "**/*", "**/*.json"],
   "references": [
     {
       "path": "../../lib"

@@ -115,8 +115,10 @@
     "react-responsive": "^10.0.0",
     "replicache": "patch:replicache@npm%3A15.3.0#~/.yarn/patches/replicache-npm-15.3.0-abf9574e6e.patch",
     "rive-react-native": "^9.3.4",
+    "svg-path-commander": "^2.2.1",
     "tailwind-variants": "^1.0.0",
     "tailwindcss": "^4.1.12",
+    "uniwind": "patch:uniwind@npm%3A1.10.0#~/.yarn/patches/uniwind-npm-1.10.0-15f2f30a35.patch",
     "ws": "^8.17.1",
     "zod": "^4.4.3",
     "zustand": "^5.0.3"

@@ -255,7 +255,7 @@ export function AiPronunciationHintModal({
                 ) : null
               ) : (
                 <View className="rounded-lg border border-fg-bg10 bg-fg-bg5 px-3 py-2">
-                  <Text className="pb-1 pyly-body">
+                  <Text className="pyly-body pb-1">
                     <Pylymark source={storyPreamble} />
                   </Text>
 
@@ -299,7 +299,7 @@ export function AiPronunciationHintModal({
                               >
                                 {suggestion.strategyLabel}
                               </Text>
-                              <Text className="flex-1 pyly-body">
+                              <Text className="pyly-body flex-1">
                                 <Pylymark
                                   source={normalizePronunciationStoryEnding(
                                     suggestion.hint,
