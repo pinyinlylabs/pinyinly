@@ -1,7 +1,7 @@
 import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
-import { strokeMediansCodec } from "#util/strokeMedians.ts";
+import type { StrokeMedianPoint } from "#util/strokeMedians.ts";
 import { buildSvgSegmentPaths } from "#util/strokeSegments.ts";
 import {
   existsSync,
@@ -184,6 +184,10 @@ function collectStrokeSpecTexts(
   return result;
 }
 
+function medianPointsToSvgPath(points: readonly StrokeMedianPoint[]): string {
+  return `M ` + points.map((point) => `${point[0]} ${point[1]}`).join(` L `);
+}
+
 for (const character of allCharacters) {
   // If we're only updating specific characters, skip the rest.
   if (argv.update != null && !argv.update.includes(character)) {
@@ -212,26 +216,16 @@ for (const character of allCharacters) {
   const nextMedians =
     graphicsRecord == null
       ? asStringArray(existingSvg[`medians`])
-      : strokeMediansCodec.encode(graphicsRecord.medians);
+      : graphicsRecord.medians.map((median) => medianPointsToSvgPath(median));
 
   const strokeSpecTexts = [
     ...collectStrokeSpecTexts(existingData[`decompositions`]),
     ...collectStrokeSpecTexts(asRecord(existingData[`mnemonic`])[`components`]),
   ];
-  const nextMediansPaths =
-    nextMedians == null
-      ? undefined
-      : strokeMediansCodec
-          .decode(nextMedians)
-          .map(
-            (medians) =>
-              `M ` +
-              medians.map((point) => `${point[0]} ${point[1]}`).join(` L `),
-          );
   const generatedSegments =
     nextStrokes == null || nextMedians == null
       ? undefined
-      : buildSvgSegmentPaths(nextStrokes, nextMediansPaths, strokeSpecTexts);
+      : buildSvgSegmentPaths(nextStrokes, nextMedians, strokeSpecTexts);
   const existingSegments = asStringMap(existingSvg[`segments`]);
   const nextSegments =
     generatedSegments == null

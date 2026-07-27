@@ -614,7 +614,7 @@ function ExperimentalContent(props: { hanzi: HanziText }) {
             to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
           "
         >
-          electricity
+          电 electricity
         </Text>
         {` `}
         shocks him back to one.{` `}

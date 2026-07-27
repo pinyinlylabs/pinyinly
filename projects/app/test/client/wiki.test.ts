@@ -23,7 +23,6 @@ import {
 import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
-import { strokeMedianCodec } from "#util/strokeMedians.ts";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -45,6 +44,7 @@ import {
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
 import path from "node:path";
+import SVGPathCommander from "svg-path-commander";
 import { describe, expect, test } from "vitest";
 
 describe(`speech files`, async () => {
@@ -262,14 +262,14 @@ describe(`character.json files`, async () => {
         )
         .toBe(characterData.svg.strokes.length);
 
-      for (const [i, encodedMedian] of characterData.svg.medians.entries()) {
-        const points = strokeMedianCodec.decode(encodedMedian);
+      for (const [i, medianPath] of characterData.svg.medians.entries()) {
+        const totalLength = SVGPathCommander.getTotalLength(medianPath);
         expect
           .soft(
-            points.length,
-            `${character} median ${i} should contain at least 2 points`,
+            Number.isFinite(totalLength) && totalLength > 0,
+            `${character} median ${i} should be a valid non-empty SVG path`,
           )
-          .toBeGreaterThanOrEqual(2);
+          .toBe(true);
       }
     }
   });
