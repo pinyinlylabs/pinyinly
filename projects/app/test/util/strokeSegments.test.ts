@@ -1,5 +1,6 @@
 import {
   buildClosedSvgSegmentPathFromStrokeSpec,
+  buildSvgSegmentPathFromLengths,
   buildSvgSegmentPaths,
   getSvgPathIntersections,
 } from "#util/strokeSegments.ts";
@@ -65,6 +66,18 @@ describe(`strokeSegments helper`, () => {
     expect(intersections).toHaveLength(2);
     expect(intersections[0]?.x).toBeCloseTo(3.5);
     expect(intersections[1]?.x).toBeCloseTo(6.5);
+  });
+
+  test(`buildSvgSegmentPathFromLengths preserves curve commands on curved paths`, () => {
+    const segment = buildSvgSegmentPathFromLengths(
+      `M 0 0 C 0 100 100 100 100 0`,
+      40,
+      160,
+    );
+
+    expect(segment).toContain(`M `);
+    expect(segment).toContain(` C `);
+    expect(segment).not.toContain(` NaN`);
   });
 
   test(`builds a closed cut from StrokeSpec with explicit target/cutter IDs`, () => {
