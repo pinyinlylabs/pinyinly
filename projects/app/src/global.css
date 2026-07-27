@@ -207,6 +207,11 @@
   }
 }
 
+@utility accent-* {
+  /* Workaround for icons until https://github.com/uni-stack/uniwind/pull/611 is released */
+  --pyly-accent-color: --value(--color-*);
+}
+
 @utility pyly-ref-xs {
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
