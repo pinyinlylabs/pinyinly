@@ -1,4 +1,4 @@
-import { buildMnemonicActorProfilePrompt } from "#util/prompts/buildMnemonicActorProfilePrompt.ts";
+import { buildMnemonicActorProfilePrompt } from "#util/prompts/mnemonicActorSpec.ts";
 import { describe, expect, test } from "vitest";
 
 describe(

@@ -22,8 +22,8 @@ true satisfies JwtSchemaOptions extends Partial<JWTHeaderParameters>
  * Zod schema for validating a JWT token, verifies and returns the payload of
  * the JWT.
  *
- * @usage jwtSchema().pipe(z.object({ xxx: z.string().min(1) }))
- * @usage jwtSchema({ alg: 'HS256' }).pipe(z.object({ xxx: z.string().min(1) }))
+ * @usage jwtSchema().pipe(z.object({ xxx: z.string() }))
+ * @usage jwtSchema({ alg: 'HS256' }).pipe(z.object({ xxx: z.string() }))
  *
  */
 export const jwtSchema = (config?: JwtSchemaOptions) => {

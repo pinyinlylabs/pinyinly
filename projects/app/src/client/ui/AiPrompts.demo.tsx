@@ -7,7 +7,7 @@ import {
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
 } from "@/util/prompts/meaningHint";
-import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import { buildMnemonicActorSpecPrompt } from "@/util/prompts/mnemonicActorSpec";
 import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
@@ -927,8 +927,8 @@ function buildCurrentPrompt(args: {
     return { result: null, errors };
   }
 
-  const result = buildMnemonicActorProfilePrompt({
-    identity: args.mnemonicActorInput.identity.trim(),
+  const result = buildMnemonicActorSpecPrompt({
+    actorName: args.mnemonicActorInput.identity.trim(),
   });
 
   return { result: result.messages, errors };

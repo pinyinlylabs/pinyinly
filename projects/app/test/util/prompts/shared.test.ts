@@ -5,7 +5,7 @@ import {
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
 } from "#util/prompts/meaningHint.ts";
-import { buildMnemonicActorProfilePrompt } from "#util/prompts/buildMnemonicActorProfilePrompt.ts";
+import { buildMnemonicActorProfilePrompt } from "#util/prompts/mnemonicActorSpec.ts";
 import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,

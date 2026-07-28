@@ -3,6 +3,7 @@ import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { trpc } from "@/client/trpc";
 import { RectButton } from "@/client/ui/RectButton";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
@@ -17,7 +18,7 @@ import {
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export default function ActorIdPage() {
   const { id: rawId } = useLocalSearchParams<`/actors/[id]`>();
@@ -41,6 +42,7 @@ export default function ActorIdPage() {
         : `Actor`;
 
   const [isNameEditingEnabled, setIsNameEditingEnabled] = useState(false);
+  const generateActorSpecMutation = trpc.ai.enqueueActorSpec.useMutation();
 
   const linkedSoundIds: PinyinSoundId[] = [];
   for (const [
@@ -106,15 +108,38 @@ export default function ActorIdPage() {
       </View>
 
       <WikiTitledBox
-        title="Mnemonic Identity"
+        title="Mnemonic Spec"
         className="rounded-lg border border-fg/10 bg-bg-high p-4"
       >
-        <InlineEditableSettingJson
-          setting={pinyinSoundActorMnemonicIdentitySetting}
-          settingKey={{ actorId }}
-          placeholder='{"traits": ["curious"]}'
-          autoResizeMinHeight={120}
-        />
+        <View className="gap-3">
+          <InlineEditableSettingJson
+            setting={pinyinSoundActorMnemonicIdentitySetting}
+            settingKey={{ actorId }}
+            placeholder='{"traits": ["curious"]}'
+            autoResizeMinHeight={120}
+          />
+
+          <Pressable
+            disabled={generateActorSpecMutation.isPending}
+            onPress={() => {
+              generateActorSpecMutation.mutate({
+                actorId,
+                actorName: title,
+              });
+            }}
+            className="
+              items-center rounded-xl border border-fg/10 bg-fg px-4 py-3
+
+              disabled:opacity-40
+            "
+          >
+            <Text className="pyly-body text-bg">
+              {generateActorSpecMutation.isPending
+                ? `Generating spec...`
+                : `Generate spec`}
+            </Text>
+          </Pressable>
+        </View>
       </WikiTitledBox>
 
       <WikiTitledBox

@@ -50,7 +50,7 @@ export const generateLocationSpec = inngest.createFunction(
     id: `location/generateLocationSpec`,
     triggers: invoke(
       z.object({
-        location: z.string().min(1),
+        location: z.string(),
         maxAttempts: z.number().int().min(1).optional(),
       }),
     ),

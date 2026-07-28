@@ -13,7 +13,7 @@ const projectDir = path.join(import.meta.dirname, `../`);
 
 // Move Zod schema definition to the top
 const packageJsonSchema = z.object({
-  license: z.string().min(1).optional(),
+  license: z.string().optional(),
 });
 
 // Construct the path to the atlas.jsonl file
@@ -49,7 +49,7 @@ try {
 // Update schema for package arrays to validate optional non-empty string 'package' field
 const packageSchema = z
   .object({
-    package: z.string().min(1).optional(),
+    package: z.string().optional(),
     // ...other fields are ignored
   })
   .loose();

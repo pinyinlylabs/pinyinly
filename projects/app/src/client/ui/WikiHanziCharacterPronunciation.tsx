@@ -381,8 +381,7 @@ export function WikiHanziCharacterPronunciationBox({
       {showAiModal && splitPinyin != null && initialPinyinSoundName != null ? (
         <AiPronunciationHintModal
           leadCharacter={{
-            name:
-              selectedInitialActor?.name ?? initialPinyinSoundName ?? undefined,
+            name: selectedInitialActor?.name ?? initialPinyinSoundName,
             bio: initialSoundDescription ?? undefined,
           }}
           location={{

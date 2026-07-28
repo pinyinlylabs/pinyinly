@@ -9,9 +9,9 @@ const fsDbCache = makeFsDbCache(import.meta.filename);
 export const ivankraHsk30Schema = z
   .object({
     id: z.string(),
-    simplified: z.string().min(1).pipe(hanziTextSchema),
-    traditional: z.string().min(1).pipe(hanziTextSchema),
-    pinyin: z.string().min(1).pipe(pinyinTextSchema),
+    simplified: z.string().pipe(hanziTextSchema),
+    traditional: z.string().pipe(hanziTextSchema),
+    pinyin: z.string().pipe(pinyinTextSchema),
     pos: z.string().transform((val) => val.split(`/`)),
     level: z.union([
       z.literal(`1`),

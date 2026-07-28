@@ -8,22 +8,22 @@ export type MnemonicActorSpecInputType = {
 
 export const mnemonicActorSpecSchema = z
   .object({
-    identity: z.string().min(1),
-    nickname: z.string().min(1),
-    summary: z.string().min(1),
-    identityAnchor: z.string().min(1),
-    coreTraits: z.array(z.string().min(1)),
-    obsession: z.string().min(1),
-    signatureAbility: z.string().min(1),
-    storyRole: z.string().min(1),
-    always: z.array(z.string().min(1)),
-    never: z.array(z.string().min(1)),
-    likes: z.array(z.string().min(1)),
-    dislikes: z.array(z.string().min(1)),
-    defaultMood: z.string().min(1),
-    bodyLanguage: z.string().min(1),
-    signatureExpression: z.string().min(1),
-    weakness: z.string().min(1),
+    identity: z.string(),
+    nickname: z.string(),
+    summary: z.string(),
+    identityAnchor: z.string(),
+    coreTraits: z.array(z.string()),
+    obsession: z.string(),
+    signatureAbility: z.string(),
+    storyRole: z.string(),
+    always: z.array(z.string()),
+    never: z.array(z.string()),
+    likes: z.array(z.string()),
+    dislikes: z.array(z.string()),
+    defaultMood: z.string(),
+    bodyLanguage: z.string(),
+    signatureExpression: z.string(),
+    weakness: z.string(),
   })
   .strict();
 

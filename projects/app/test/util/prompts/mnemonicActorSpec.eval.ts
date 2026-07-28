@@ -1,10 +1,10 @@
 import { createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
-import { buildMnemonicActorProfilePrompt } from "#util/prompts/buildMnemonicActorProfilePrompt.ts";
+import { buildMnemonicActorProfilePrompt } from "#util/prompts/mnemonicActorSpec.ts";
 import type {
   MnemonicActorPromptInputType,
   MnemonicActorProfileType,
-} from "#util/prompts/buildMnemonicActorProfilePrompt.ts";
+} from "#util/prompts/mnemonicActorSpec.ts";
 import { createResponsePromptHarness } from "./eval.ts";
 
 function normalized(value: string): string {

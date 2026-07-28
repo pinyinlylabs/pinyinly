@@ -2,6 +2,7 @@ import { eventType, Inngest } from "inngest";
 import pino from "pino";
 import pretty from "pino-pretty";
 import {
+  actorIdSchema,
   assetIdSchema,
   locationSetKeySchema,
   locationIdSchema,
@@ -119,6 +120,17 @@ export const locationPopulateLocationEvent = eventType(
     schema: z.object({
       userId: z.string(),
       locationId: locationIdSchema,
+    }),
+  },
+);
+
+export const actorPopulateActorSpecEvent = eventType(
+  `actor/populate-actor-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      actorId: actorIdSchema,
+      actorName: z.string(),
     }),
   },
 );

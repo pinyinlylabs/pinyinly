@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
-import type { MnemonicActorProfileType } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import { buildMnemonicActorSpecPrompt } from "@/util/prompts/mnemonicActorSpec";
+import type { MnemonicActorSpecType } from "@/util/prompts/mnemonicActorSpec";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
@@ -10,7 +10,7 @@ import { RectButton } from "./RectButton";
 
 export interface AiLeadCharacterDescriptionModalProps {
   identity: string;
-  onApplyActor: (actor: MnemonicActorProfileType) => void;
+  onApplyActor: (actor: MnemonicActorSpecType) => void;
   onDismiss: () => void;
 }
 
@@ -19,13 +19,13 @@ export function AiLeadCharacterDescriptionModal({
   onApplyActor,
   onDismiss,
 }: AiLeadCharacterDescriptionModalProps) {
-  const [actor, setActor] = useState<MnemonicActorProfileType | null>(null);
+  const [actor, setActor] = useState<MnemonicActorSpecType | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const generateMutation = trpc.ai.generateMnemonicActorIdentity.useMutation();
+  const generateMutation = trpc.ai.generateMnemonicActorSpec.useMutation();
 
-  const actorPrompt = buildMnemonicActorProfilePrompt({
-    identity,
+  const actorPrompt = buildMnemonicActorSpecPrompt({
+    actorName: identity,
   });
 
   const handleGenerate = async () => {
@@ -36,8 +36,8 @@ export function AiLeadCharacterDescriptionModal({
       });
       setActor(result);
     } catch (err) {
-      console.error(`AI mnemonic actor generation failed:`, err);
-      setError(`Unable to generate actor profile right now.`);
+      console.error(`AI mnemonic actor spec generation failed:`, err);
+      setError(`Unable to generate actor spec right now.`);
     }
   };
 
@@ -70,7 +70,7 @@ export function AiLeadCharacterDescriptionModal({
 
           <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
             <AiPromptPreview
-              description="Prompt text generated from the same builder used by AI actor identity generation."
+              description="Prompt text generated from the same builder used by AI actor spec generation."
               sections={[
                 {
                   messages: actorPrompt.messages,
@@ -85,15 +85,15 @@ export function AiLeadCharacterDescriptionModal({
             )}
 
             <View className="gap-2">
-              <Text className="pyly-body-subheading">Actor profile</Text>
+              <Text className="pyly-body-subheading">Actor spec</Text>
               {isGenerating ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
-                  Generating actor profile...
+                  Generating actor spec...
                 </Text>
               ) : null}
               {actor == null ? (
                 <Text className="font-sans text-[14px] text-fg-dim">
-                  Press Generate to create a mnemonic actor profile.
+                  Press Generate to create a mnemonic actor spec.
                 </Text>
               ) : (
                 <View className="gap-3 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">

@@ -1,4 +1,4 @@
-import { assetIdSchema, locationIdSchema } from "@/data/model";
+import { actorIdSchema, assetIdSchema, locationIdSchema } from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import {
   geminiImageAspectRatioSchema,
@@ -15,34 +15,37 @@ import {
   buildMeaningHintLogicalPrompt,
   buildMeaningHintPrompt,
 } from "@/util/prompts/meaningHint";
-import { buildMnemonicActorProfilePrompt } from "@/util/prompts/buildMnemonicActorProfilePrompt";
+import { buildMnemonicActorSpecPrompt } from "@/util/prompts/mnemonicActorSpec";
 import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
 } from "@/util/prompts/pronunciationHint";
-import { locationPopulateLocationEvent } from "@/server/lib/inngest/client";
+import {
+  actorPopulateActorSpecEvent,
+  locationPopulateLocationEvent,
+} from "@/server/lib/inngest/client";
 
 const pronunciationHintInputSchema = z
   .object({
     leadCharacter: z
       .object({
-        name: z.string().min(1),
+        name: z.string(),
         bio: z.string().optional(),
       })
       .strict(),
     location: z
       .object({
-        name: z.string().min(1),
+        name: z.string(),
         description: z.string().optional(),
       })
       .strict(),
     cue: z
       .object({
-        word: z.string().min(1),
+        word: z.string(),
         meaning: z.string().optional(),
       })
       .strict(),
-    count: z.number().int().min(1).max(6),
+    count: z.number().int().max(6),
   })
   .strict();
 
@@ -92,20 +95,20 @@ function containsPronunciationArtifacts(value: string): boolean {
 
 const meaningHintInputSchema = z
   .object({
-    hanzi: z.string().min(1).max(2),
+    hanzi: z.string().max(2),
     meaning: z
       .object({
-        hanziWord: z.string().min(1),
-        glosses: z.array(z.string().min(1)).min(1).max(12),
+        hanziWord: z.string(),
+        glosses: z.array(z.string()).min(1).max(12),
       })
       .strict(),
     components: z
       .array(
         z
           .object({
-            hanzi: z.string().min(1).max(2).optional(),
-            label: z.string().min(1).optional(),
-            meaning: z.string().min(1).optional(),
+            hanzi: z.string().max(2).optional(),
+            label: z.string().optional(),
+            meaning: z.string().optional(),
           })
           .strict(),
       )
@@ -133,17 +136,17 @@ const meaningHintOutputSchema = z
 
 const locationSetDescriptionInputSchema = z
   .object({
-    label: z.string().min(1),
-    location: z.string().min(1),
+    label: z.string(),
+    location: z.string(),
     locationNotes: z.string().optional(),
-    locationSet: z.string().min(1),
+    locationSet: z.string(),
     count: z.number().int().min(1).max(6),
   })
   .strict();
 
 const mnemonicActorIdentityInputSchema = z
   .object({
-    identity: z.string().min(1),
+    identity: z.string(),
   })
   .strict();
 
@@ -151,7 +154,7 @@ const imagePromptTextMessageSchema = z
   .object({
     role: z.literal(`user`),
     kind: z.literal(`text`),
-    content: z.string().min(1).max(4000),
+    content: z.string().max(4000),
   })
   .strict();
 
@@ -193,6 +196,19 @@ const enqueueLocationSetIdentityImagesOutputSchema = z
   })
   .strict();
 
+const enqueueActorSpecInputSchema = z
+  .object({
+    actorId: actorIdSchema,
+    actorName: z.string(),
+  })
+  .strict();
+
+const enqueueActorSpecOutputSchema = z
+  .object({
+    enqueued: z.literal(true),
+  })
+  .strict();
+
 export const aiRouter = router({
   enqueueLocationSetIdentityImages: authedProcedure
     .input(enqueueLocationSetIdentityImagesInputSchema)
@@ -202,6 +218,21 @@ export const aiRouter = router({
         locationPopulateLocationEvent.create({
           userId: ctx.session.userId,
           locationId: input.locationId,
+        }),
+      );
+
+      return { enqueued: true };
+    }),
+
+  enqueueActorSpec: authedProcedure
+    .input(enqueueActorSpecInputSchema)
+    .output(enqueueActorSpecOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      await inngest.send(
+        actorPopulateActorSpecEvent.create({
+          userId: ctx.session.userId,
+          actorId: input.actorId,
+          actorName: input.actorName,
         }),
       );
 
@@ -355,14 +386,14 @@ export const aiRouter = router({
       }
     }),
 
-  generateMnemonicActorIdentity: authedProcedure
+  generateMnemonicActorSpec: authedProcedure
     .input(mnemonicActorIdentityInputSchema)
-    .output(buildMnemonicActorProfilePrompt.schema)
+    .output(buildMnemonicActorSpecPrompt.schema)
     .mutation(async ({ input, signal }) => {
       const { identity } = input;
 
-      const prompt = buildMnemonicActorProfilePrompt({
-        identity,
+      const prompt = buildMnemonicActorSpecPrompt({
+        actorName: identity,
       });
 
       try {
@@ -371,10 +402,10 @@ export const aiRouter = router({
         });
         return data;
       } catch (error) {
-        console.error(`Failed to generate mnemonic actor identity:`, error);
+        console.error(`Failed to generate mnemonic actor spec:`, error);
         throw new TRPCError({
           code: `INTERNAL_SERVER_ERROR`,
-          message: `Unable to generate mnemonic actor identity`,
+          message: `Unable to generate mnemonic actor spec`,
         });
       }
     }),
