@@ -1,8 +1,14 @@
 import type { DictionarySearchEntry } from "@/client/query";
+import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
+import type {
+  AssetId,
+  HanziText,
+  PinyinSoundId,
+  PinyinUnit,
+} from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
 import {
   getFinalSoundLabel,
@@ -15,7 +21,6 @@ import {
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundDescriptionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
@@ -133,14 +138,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.toneSoundId },
         },
   );
-  const initialDescriptionSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundDescriptionSetting,
-          key: { soundId: splitPinyin.initialSoundId },
-        },
-  );
   const finalPlaceSelectionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -150,8 +147,20 @@ export function WikiHanziCharacterPronunciationBox({
         },
   );
   const placeDirectory = usePinyinSoundLocations();
+  const actorDirectory = usePinyinSoundActors();
   const initialPinyinSoundName = initialPinyinSound?.value?.text;
   const tonePinyinSoundName = tonePinyinSound?.value?.text;
+  const selectedInitialActorId =
+    splitPinyin == null
+      ? null
+      : (actorDirectory.soundActorIdBySoundId.get(splitPinyin.initialSoundId) ??
+        null);
+  const selectedInitialActor =
+    selectedInitialActorId == null
+      ? null
+      : (actorDirectory.actors.find(
+          (entry) => entry.actorId === selectedInitialActorId,
+        ) ?? null);
   const selectedFinalLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedFinalLocation =
@@ -161,8 +170,7 @@ export function WikiHanziCharacterPronunciationBox({
           (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
 
-  const initialSoundDescription =
-    initialDescriptionSetting?.value?.text ?? null;
+  const initialSoundDescription = selectedInitialActor?.description ?? null;
   const finalToneLocationDescription =
     selectedFinalLocation?.description ?? null;
 
@@ -223,7 +231,10 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.initialSoundId}
                   href={`/sounds/${splitPinyin.initialSoundId}`}
                   label={initialLabel}
-                  name={initialPinyinSoundName ?? null}
+                  name={
+                    initialPinyinSoundName ?? selectedInitialActor?.name ?? null
+                  }
+                  imageOverride={selectedInitialActor?.image ?? null}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
@@ -370,7 +381,8 @@ export function WikiHanziCharacterPronunciationBox({
       {showAiModal && splitPinyin != null && initialPinyinSoundName != null ? (
         <AiPronunciationHintModal
           leadCharacter={{
-            name: initialPinyinSoundName,
+            name:
+              selectedInitialActor?.name ?? initialPinyinSoundName ?? undefined,
             bio: initialSoundDescription ?? undefined,
           }}
           location={{
@@ -423,11 +435,18 @@ export function SoundLinkBlock({
   href,
   label,
   name,
+  imageOverride,
 }: {
   soundId: PinyinSoundId;
   href: Href;
   label: ReactNode;
   name: string | null;
+  imageOverride?: {
+    assetId: AssetId;
+    crop: ReturnType<typeof parseImageCrop>;
+    imageWidth: number | null;
+    imageHeight: number | null;
+  } | null;
 }) {
   const soundImageSetting = useUserSetting({
     setting: pinyinSoundImageSetting,
@@ -436,6 +455,16 @@ export function SoundLinkBlock({
   const isPointerHoverCapable = usePointerHoverCapability();
   const soundImage = soundImageSetting.value;
   const soundImageCrop = parseImageCrop(soundImage?.imageCrop);
+  const resolvedImage =
+    imageOverride ??
+    (soundImage?.imageId == null
+      ? null
+      : {
+          assetId: soundImage.imageId,
+          crop: soundImageCrop,
+          imageWidth: soundImage.imageWidth ?? null,
+          imageHeight: soundImage.imageHeight ?? null,
+        });
   const frameShape = isInitialSoundId(soundId) ? `circle` : `rect`;
 
   const nameLink = (
@@ -452,7 +481,7 @@ export function SoundLinkBlock({
       {name == null ? null : (
         <>
           <DownArrow />
-          {!isPointerHoverCapable || soundImage?.imageId == null ? (
+          {!isPointerHoverCapable || resolvedImage == null ? (
             nameLink
           ) : (
             <Tooltip placement="top" sideOffset={6}>
@@ -468,10 +497,10 @@ export function SoundLinkBlock({
                   `}
                 >
                   <FramedAssetImage
-                    assetId={soundImage.imageId}
-                    crop={soundImageCrop}
-                    imageWidth={soundImage.imageWidth}
-                    imageHeight={soundImage.imageHeight}
+                    assetId={resolvedImage.assetId}
+                    crop={resolvedImage.crop}
+                    imageWidth={resolvedImage.imageWidth}
+                    imageHeight={resolvedImage.imageHeight}
                     frameShape={frameShape}
                     className="size-full"
                   />

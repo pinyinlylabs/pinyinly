@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
+import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { useDb } from "@/client/ui/hooks/useDb";
 import {
   getPinyinSoundLocationDisplaySummary,
@@ -19,6 +20,7 @@ import {
 } from "@/data/pinyin";
 import {
   pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundActorSelectionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,
@@ -34,6 +36,7 @@ import { Text, View } from "react-native";
 export default function SoundsPage() {
   "use memo";
   const pinyinSoundGroupsQuery = usePinyinSoundGroups();
+  const actorDirectory = usePinyinSoundActors();
   const placeDirectory = usePinyinSoundLocations();
   const chart = loadPylyPinyinChart();
   const db = useDb();
@@ -57,9 +60,30 @@ export default function SoundsPage() {
         ),
     [chart.soundIds],
   );
+  const actorSelectionKeys = useMemo(
+    () =>
+      chart.soundIds
+        .filter((soundId) => isInitialSoundId(soundId))
+        .map((soundId) =>
+          pinyinSoundActorSelectionSetting.entity.marshalKey({
+            soundId,
+          }),
+        ),
+    [chart.soundIds],
+  );
   const relevantKeys = useMemo(
-    () => [...nameSettingKeys, ...imageSettingKeys, ...finalPlaceSelectionKeys],
-    [nameSettingKeys, imageSettingKeys, finalPlaceSelectionKeys],
+    () => [
+      ...nameSettingKeys,
+      ...imageSettingKeys,
+      ...actorSelectionKeys,
+      ...finalPlaceSelectionKeys,
+    ],
+    [
+      nameSettingKeys,
+      imageSettingKeys,
+      actorSelectionKeys,
+      finalPlaceSelectionKeys,
+    ],
   );
 
   const { data: settings } = useLiveQuery(
@@ -106,6 +130,26 @@ export default function SoundsPage() {
                 : placeDisplay.name,
             badge: chart.soundToCustomLabel[soundId] ?? soundId,
             image: placeDisplay?.identityImage ?? null,
+          },
+        ];
+      }
+
+      if (isInitialSoundId(soundId)) {
+        const selectedActorId =
+          actorDirectory.soundActorIdBySoundId.get(soundId) ?? null;
+        const selectedActor =
+          selectedActorId == null
+            ? null
+            : (actorDirectory.actors.find(
+                (entry) => entry.actorId === selectedActorId,
+              ) ?? null);
+
+        return [
+          soundId,
+          {
+            name: selectedActor?.name ?? null,
+            badge: chart.soundToCustomLabel[soundId] ?? soundId,
+            image: selectedActor?.image ?? null,
           },
         ];
       }

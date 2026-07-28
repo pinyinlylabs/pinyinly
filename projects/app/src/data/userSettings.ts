@@ -342,7 +342,7 @@ export const pinyinSoundActorModelSheetImageSetting = defineUserSetting({
 export const pinyinSoundActorSelectionSetting = defineUserSetting({
   entity: r.entity(`psas/[soundId]`, {
     soundId: rPinyinSoundId().alias(`i`),
-    actorIds: r.json().optional().alias(`a`),
+    actorId: rActorId().optional().alias(`a`),
   }),
 });
 

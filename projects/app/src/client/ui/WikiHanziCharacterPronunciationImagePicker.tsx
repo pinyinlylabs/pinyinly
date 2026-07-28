@@ -2,6 +2,7 @@ import {
   getPinyinSoundLocationDisplaySummary,
   usePinyinSoundLocations,
 } from "@/client/ui/hooks/usePinyinSoundLocations";
+import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import {
@@ -13,7 +14,7 @@ import {
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundImageSetting,
+  pinyinSoundActorImageSetting,
   pinyinSoundLocationIdentityImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
@@ -35,6 +36,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
   const placeDirectory = usePinyinSoundLocations();
+  const actorDirectory = usePinyinSoundActors();
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const imagePromptSetting = useUserSetting({
@@ -71,6 +73,17 @@ export function WikiHanziCharacterPronunciationImagePicker({
   const finalLabel = getFinalSoundLabel(pinyinUnit);
   const initialPinyinSoundName = initialPinyinSoundSetting?.value?.text;
   const finalDisplayName = finalPinyinSoundSetting?.value?.text ?? finalLabel;
+  const selectedInitialActorId =
+    splitPinyin == null
+      ? null
+      : (actorDirectory.soundActorIdBySoundId.get(splitPinyin.initialSoundId) ??
+        null);
+  const selectedInitialActor =
+    selectedInitialActorId == null
+      ? null
+      : (actorDirectory.actors.find(
+          (entry) => entry.actorId === selectedInitialActorId,
+        ) ?? null);
   const selectedFinalLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedFinalLocation =
@@ -93,15 +106,22 @@ export function WikiHanziCharacterPronunciationImagePicker({
     splitPinyin == null
       ? undefined
       : [
-          {
-            id: `actor-primary`,
-            kind: `actor`,
-            defaultVisibleInRow: true,
-            imageSetting: pinyinSoundImageSetting,
-            imageSettingKey: { soundId: splitPinyin.initialSoundId },
-            label: initialPinyinSoundName ?? initialLabel,
-            missingPromptPrefill: `Generate a clear close-up of ${initialPinyinSoundName ?? initialLabel} only, with no scene background.`,
-          },
+          ...(selectedInitialActor == null
+            ? []
+            : [
+                {
+                  id: `actor-primary`,
+                  kind: `actor` as const,
+                  defaultVisibleInRow: true,
+                  imageSetting: pinyinSoundActorImageSetting,
+                  imageSettingKey: { actorId: selectedInitialActor.actorId },
+                  label:
+                    selectedInitialActor.name ??
+                    initialPinyinSoundName ??
+                    initialLabel,
+                  missingPromptPrefill: `Generate a clear close-up of ${selectedInitialActor.name ?? initialPinyinSoundName ?? initialLabel} only, with no scene background.`,
+                },
+              ]),
           ...(selectedFinalLocation == null
             ? []
             : [

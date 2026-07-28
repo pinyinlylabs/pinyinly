@@ -43,8 +43,11 @@ export default function ActorIdPage() {
   const [isNameEditingEnabled, setIsNameEditingEnabled] = useState(false);
 
   const linkedSoundIds: PinyinSoundId[] = [];
-  for (const [soundId, actorIds] of actorDirectory.soundActorIdsBySoundId) {
-    if (actorIds.includes(actorId)) {
+  for (const [
+    soundId,
+    selectedActorId,
+  ] of actorDirectory.soundActorIdBySoundId) {
+    if (selectedActorId === actorId) {
       linkedSoundIds.push(soundId);
     }
   }
