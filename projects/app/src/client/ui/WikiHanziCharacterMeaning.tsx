@@ -249,7 +249,7 @@ function CoverImageSection({
             ? `Create an image for ${hanzi}`
             : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
         }
-        aspectRatio={`16:9`}
+        aspectRatio={`5:4`}
         onUploadError={handleUploadError}
         onSaveAiPrompt={(prompt) => {
           imagePromptSetting?.setValue({
