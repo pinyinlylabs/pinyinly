@@ -188,7 +188,7 @@ Generate a mnemonic actor for:
   return {
     messages,
     schema: buildMnemonicActorProfilePrompt.schema,
-    model: `gpt-5-mini`,
+    model: `gpt-5.5`,
     reasoningEffort: `medium`,
   };
 }
