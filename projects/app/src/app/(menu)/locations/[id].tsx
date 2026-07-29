@@ -2,6 +2,7 @@ import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { trpc } from "@/client/trpc";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
+import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import {
@@ -19,6 +20,7 @@ import {
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
+  pinyinSoundLocationThoughtChainsSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
@@ -151,6 +153,21 @@ export default function LocationIdPage() {
                 : `Generate set images`}
             </Text>
           </Pressable>
+        </View>
+      </WikiTitledBox>
+
+      <WikiTitledBox
+        title="Thought chains"
+        bottomCaption="Store candidates by final sound key, for example -ong. The highest score for the current sound is shown in sound location pickers."
+      >
+        <View className="p-4">
+          <InlineEditableSettingJson
+            setting={pinyinSoundLocationThoughtChainsSetting}
+            settingKey={{ locationId: locationId }}
+            placeholder='{"-ong":[{"path":[{"anchor":"-ong"},{"anchor":"Giant gong","reason":"-ong echoes gong"},{"anchor":"Jungle Temple","reason":"A giant gong fits a temple"}],"score":92,"strengths":["Simple visual route"],"weaknesses":["Approximate vowel"]}]}'
+            emptyStateText="No thought chains yet"
+            autoResizeMinHeight={180}
+          />
         </View>
       </WikiTitledBox>
     </View>

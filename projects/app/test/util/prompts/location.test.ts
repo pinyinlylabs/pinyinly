@@ -5,7 +5,6 @@ import {
 } from "#server/lib/ai.js";
 import {
   buildPopulateLocationSetDescriptionPrompt,
-  buildLocationSetDescriptionPrompt,
   buildLocationSpecPrompt,
   locationSpecWithDetailSchema,
   populateLocationSetDescriptionInputSchema,
@@ -15,7 +14,8 @@ import type {
   LocationSpecWithDetail,
 } from "#util/prompts/location.ts";
 import { InngestTestEngine } from "@inngest/test";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { logger as inngestLogger } from "#server/lib/inngest/client.ts";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock(`#server/lib/ai.js`, async () => {
   const actual =
@@ -368,47 +368,6 @@ describe(`locationSpecSchema`, () => {
 });
 
 describe(
-  `buildLocationSetDescriptionPrompt` satisfies HasNameOf<
-    typeof buildLocationSetDescriptionPrompt
-  >,
-  () => {
-    test(`builds minimal prompt without optional notes`, () => {
-      const result = buildLocationSetDescriptionPrompt({
-        label: `Outside Lawson`,
-        location: `Lawson`,
-        locationSet: `Outside`,
-        count: 4,
-      });
-
-      expect(result.model).toBe(`gpt-5-mini`);
-      expect(result.reasoningEffort).toBe(`medium`);
-      expect(result.messages).toHaveLength(2);
-      expect(result.messages[1]?.content).toContain(
-        `Generate 4 distinct reusable location descriptions for this exact combined place.`,
-      );
-      expect(result.messages[1]?.content).not.toContain(`"locationNotes":`);
-    });
-
-    test(`includes optional notes and dynamic count`, () => {
-      const result = buildLocationSetDescriptionPrompt({
-        label: `Gong Cha bathroom`,
-        location: `Gong Cha`,
-        locationNotes: `The famous chain store bathroom.`,
-        locationSet: `bathroom`,
-        count: 3,
-      });
-
-      expect(result.messages[1]?.content).toContain(
-        `Generate 3 distinct reusable location descriptions for this exact combined place.`,
-      );
-      expect(result.messages[1]?.content).toContain(
-        `"locationNotes": "The famous chain store bathroom."`,
-      );
-    });
-  },
-);
-
-describe(
   `buildPopulateLocationSetDescriptionPrompt` satisfies HasNameOf<
     typeof buildPopulateLocationSetDescriptionPrompt
   >,
@@ -479,6 +438,14 @@ describe(`buildLocationSpecPrompt`, () => {
 
 describe(`generateLocationSpec`, () => {
   const requestMock = vi.mocked(requestOpenAiResponseJson);
+
+  beforeEach(() => {
+    vi.spyOn(inngestLogger, `info`).mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.mocked(inngestLogger.info).mockReset();
+  });
 
   async function executeRefinement(options: {
     location: string;

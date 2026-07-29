@@ -1,6 +1,5 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
-import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type {
@@ -9,7 +8,6 @@ import type {
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
-import { PartOfSpeech } from "@/data/model";
 import {
   getFinalSoundLabel,
   getInitialSoundLabel,
@@ -31,7 +29,6 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "./InlineEditableSettingJson";
@@ -47,11 +44,7 @@ import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation
 import { useDb } from "./hooks/useDb";
 import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
-import {
-  composeHintText,
-  hintFirstLineLength,
-  parseHintText,
-} from "./hintText";
+import { hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 
 export function WikiHanziCharacterPronunciation({
@@ -93,16 +86,9 @@ export function WikiHanziCharacterPronunciation({
     return null;
   }
 
-  const cueMeaning = buildCueMeaningContext({
-    cueWord: gloss,
-    gloss: firstMeaning.gloss,
-    partOfSpeech: firstMeaning.pos,
-  });
-
   return (
     <WikiHanziCharacterPronunciationBox
       gloss={gloss}
-      cueMeaning={cueMeaning}
       hanzi={hanzi}
       pinyinUnit={pronunciation.pinyinUnit}
     />
@@ -113,10 +99,8 @@ export function WikiHanziCharacterPronunciationBox({
   hanzi,
   pinyinUnit,
   gloss,
-  cueMeaning,
 }: {
   gloss: DictionarySearchEntry[`gloss`][number];
-  cueMeaning?: string;
   hanzi: HanziText;
   pinyinUnit: PinyinUnit;
 }) {
@@ -170,20 +154,9 @@ export function WikiHanziCharacterPronunciationBox({
           (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
 
-  const initialSoundDescription = selectedInitialActor?.description ?? null;
-  const finalToneLocationDescription =
-    selectedFinalLocation?.description ?? null;
-
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
-  const finalToneLocationSetKey = toneToLocationSetKey(splitPinyin?.tone ?? 5);
-  const finalToneLocationSetName =
-    selectedFinalLocation?.sets[finalToneLocationSetKey].name ?? null;
-  const finalToneName =
-    finalToneLocationSetName == null ||
-    finalToneLocationSetName.trim().length === 0
-      ? `Unnamed set`
-      : finalToneLocationSetName;
+
   const finalLocationName = selectedFinalLocation?.name ?? null;
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
@@ -191,7 +164,6 @@ export function WikiHanziCharacterPronunciationBox({
     setting: hanziPronunciationHintImageSetting,
     key: hintSettingKey,
   });
-  const [showAiModal, setShowAiModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
   const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
@@ -314,25 +286,6 @@ export function WikiHanziCharacterPronunciationBox({
                   }
                 }}
               />
-
-              {isEditMode ? (
-                <View className="flex-row items-center justify-between">
-                  <Text className="font-sans text-[13px] text-fg-dim">
-                    Want help brainstorming a hint?
-                  </Text>
-                  <RectButton
-                    variant="bare"
-                    onPress={() => {
-                      setShowAiModal(true);
-                    }}
-                    disabled={
-                      splitPinyin == null || initialPinyinSoundName == null
-                    }
-                  >
-                    Use AI
-                  </RectButton>
-                </View>
-              ) : null}
             </View>
           ) : null}
 
@@ -376,32 +329,6 @@ export function WikiHanziCharacterPronunciationBox({
             emptyStateText="No mnemonic spec JSON"
           />
         </View>
-      ) : null}
-
-      {showAiModal && splitPinyin != null && initialPinyinSoundName != null ? (
-        <AiPronunciationHintModal
-          leadCharacter={{
-            name: selectedInitialActor?.name ?? initialPinyinSoundName,
-            bio: initialSoundDescription ?? undefined,
-          }}
-          location={{
-            name: finalToneName,
-            description:
-              finalToneLocationDescription == null ||
-              finalToneLocationDescription.length === 0
-                ? undefined
-                : finalToneLocationDescription,
-          }}
-          cue={{ word: gloss, meaning: cueMeaning }}
-          onApplyHint={({ text, explanation }) => {
-            const mergedHintText = composeHintText(text, explanation);
-            pronunciationHint.setText(mergedHintText);
-            setShowHintEditor((mergedHintText ?? ``).trim().length > 0);
-          }}
-          onDismiss={() => {
-            setShowAiModal(false);
-          }}
-        />
       ) : null}
     </WikiTitledBox>
   );
@@ -519,105 +446,6 @@ const soundNameClass = tv({
 
 function DownArrow() {
   return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
-}
-
-function toneToLocationSetKey(tone: number): LocationSetKey {
-  switch (tone) {
-    case 1: {
-      return `arrival`;
-    }
-    case 2: {
-      return `ascent`;
-    }
-    case 3: {
-      return `heart`;
-    }
-    case 4: {
-      return `below`;
-    }
-    default: {
-      return `summit`;
-    }
-  }
-}
-
-function buildCueMeaningContext({
-  cueWord,
-  gloss,
-  partOfSpeech,
-}: {
-  cueWord: string;
-  gloss: readonly string[];
-  partOfSpeech?: PartOfSpeech;
-}) {
-  const normalizedCueWord = cueWord.trim().toLowerCase();
-  const additionalGloss = gloss
-    .map((item) => item.trim())
-    .filter(
-      (item) => item.length > 0 && item.toLowerCase() !== normalizedCueWord,
-    )
-    .slice(0, 3);
-
-  const partOfSpeechText =
-    partOfSpeech == null ? null : formatPartOfSpeech(partOfSpeech);
-
-  const pieces = [
-    partOfSpeechText == null
-      ? null
-      : `intended sense part of speech: ${partOfSpeechText}`,
-    additionalGloss.length === 0
-      ? null
-      : `related glosses: ${additionalGloss.join(`; `)}`,
-  ].filter((x) => x != null);
-
-  return pieces.length === 0 ? undefined : pieces.join(`. `);
-}
-
-function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
-  switch (partOfSpeech) {
-    case PartOfSpeech.Noun: {
-      return `noun`;
-    }
-    case PartOfSpeech.Verb: {
-      return `verb`;
-    }
-    case PartOfSpeech.Adjective: {
-      return `adjective`;
-    }
-    case PartOfSpeech.Adverb: {
-      return `adverb`;
-    }
-    case PartOfSpeech.Pronoun: {
-      return `pronoun`;
-    }
-    case PartOfSpeech.Numeral: {
-      return `numeral`;
-    }
-    case PartOfSpeech.MeasureWordOrClassifier: {
-      return `measure word or classifier`;
-    }
-    case PartOfSpeech.Preposition: {
-      return `preposition`;
-    }
-    case PartOfSpeech.Conjunction: {
-      return `conjunction`;
-    }
-    case PartOfSpeech.AuxiliaryWordOrParticle: {
-      return `auxiliary word or particle`;
-    }
-    case PartOfSpeech.Interjection: {
-      return `interjection`;
-    }
-    case PartOfSpeech.Prefix: {
-      return `prefix`;
-    }
-    case PartOfSpeech.Suffix: {
-      return `suffix`;
-    }
-    case PartOfSpeech.Phonetic: {
-      return `phonetic`;
-    }
-  }
 }
 
 function ExperimentalContent(props: { hanzi: HanziText }) {

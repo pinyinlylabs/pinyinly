@@ -6,6 +6,8 @@ import {
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationNameSettingKey,
   pinyinSoundLocationSpecSetting,
+  pinyinSoundLocationThoughtChainsSetting,
+  pinyinSoundLocationThoughtChainsSettingKey,
   pinyinSoundLocationSetNameSetting,
   pinyinSoundLocationSetNameSettingKey,
 } from "@/data/userSettings";
@@ -18,9 +20,15 @@ import {
   buildRefineLocationSpecPrompt,
   hasMajorCriticisms,
 } from "@/util/prompts/location";
+import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
 import { locationSpecSchema } from "@/data/model";
-import type { LocationSpec } from "@/data/model";
+import type { LocationSpec, PinyinSoundId } from "@/data/model";
+import {
+  defaultPinyinSoundInstructions,
+  isFinalSoundId,
+  loadPylyPinyinChart,
+} from "@/data/pinyin";
 import { and, eq } from "drizzle-orm";
 import { invoke } from "inngest";
 import z from "zod";
@@ -30,6 +38,7 @@ import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
   locationPopulateLocationEvent,
+  locationPopulateLocationSoundThoughtChainEvent,
   locationPopulateLocationSetDescriptionEvent,
   locationPopulateLocationSetIdentityImageEvent,
   locationPopulateLocationSetNameEvent,
@@ -44,6 +53,11 @@ import { geminiRequestImageAsAsset } from "./gemini";
 import { invariant } from "@pinyinly/lib/invariant";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { buildLocationSetIdentityImagePrompt } from "@/util/prompts/locationSetIdentityImage";
+import {
+  locationSoundThoughtChainCandidateSchema,
+  locationSoundThoughtChainsBySoundIdSchema,
+} from "@/util/locationSoundThoughtChain";
+import type { LocationSoundThoughtChainsBySoundIdType } from "@/util/locationSoundThoughtChain";
 
 export const generateLocationSpec = inngest.createFunction(
   {
@@ -284,6 +298,225 @@ const populateLocation = inngest.createFunction(
         }),
       );
     }
+
+    const finalSoundIds = loadPylyPinyinChart().soundIds.filter((soundId) =>
+      isFinalSoundId(soundId),
+    );
+
+    const existingThoughtChainsBySoundId = await step.run(
+      `read location sound thought chains`,
+      async () =>
+        withDrizzle(
+          async (db): Promise<LocationSoundThoughtChainsBySoundIdType> => {
+            const setting = await db.query.userSetting.findFirst({
+              where: and(
+                eq(s.userSetting.userId, userId),
+                eq(
+                  s.userSetting.key,
+                  pinyinSoundLocationThoughtChainsSettingKey(locationId),
+                ),
+              ),
+            });
+
+            if (setting == null) {
+              return {};
+            }
+
+            const decoded = pinyinSoundLocationThoughtChainsSetting.decode(
+              { locationId },
+              setting.value,
+            );
+
+            const thoughtChainsBySoundId =
+              locationSoundThoughtChainsBySoundIdSchema.safeParse(
+                decoded?.thoughtChains,
+              );
+
+            return thoughtChainsBySoundId.success
+              ? thoughtChainsBySoundId.data
+              : {};
+          },
+        ),
+    );
+
+    const missingSoundIds: PinyinSoundId[] = [];
+
+    for (const finalSoundId of finalSoundIds) {
+      const existingCandidates = existingThoughtChainsBySoundId[finalSoundId];
+      const existingCandidatesResult = z
+        .array(locationSoundThoughtChainCandidateSchema)
+        .safeParse(existingCandidates);
+      const hasUsableExistingCandidates =
+        existingCandidatesResult.success &&
+        existingCandidatesResult.data.length > 0;
+
+      if (hasUsableExistingCandidates) {
+        continue;
+      }
+
+      missingSoundIds.push(finalSoundId);
+    }
+
+    for (const soundId of missingSoundIds) {
+      await step.sendEvent(
+        `emit location sound thought chain populate (${soundId})`,
+        locationPopulateLocationSoundThoughtChainEvent.create({
+          userId,
+          locationId,
+          soundId,
+        }),
+      );
+    }
+  },
+);
+
+const populateLocationSoundThoughtChain = inngest.createFunction(
+  {
+    id: `location/populateLocationSoundThoughtChain`,
+    singleton: {
+      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.soundId`,
+      mode: `skip`,
+    },
+    triggers: locationPopulateLocationSoundThoughtChainEvent,
+  },
+  async ({ event, step, logger }) => {
+    const { userId, locationId, soundId } = event.data;
+
+    if (!isFinalSoundId(soundId)) {
+      logger.error(
+        { soundId, locationId, userId },
+        `populateLocationSoundThoughtChain requires a final sound id`,
+      );
+      return;
+    }
+
+    const locationSpec = await step.run(
+      `load location specification`,
+      async () =>
+        withDrizzle(async (db) => {
+          return getLocationSpec(db, userId, locationId);
+        }),
+    );
+
+    if (locationSpec == null) {
+      logger.error(
+        { soundId, locationId, userId },
+        `Missing location specification for thought chain generation`,
+      );
+      return;
+    }
+
+    const existingThoughtChainsBySoundId = await step.run(
+      `read location sound thought chains (${soundId})`,
+      async () =>
+        withDrizzle(
+          async (db): Promise<LocationSoundThoughtChainsBySoundIdType> => {
+            const setting = await db.query.userSetting.findFirst({
+              where: and(
+                eq(s.userSetting.userId, userId),
+                eq(
+                  s.userSetting.key,
+                  pinyinSoundLocationThoughtChainsSettingKey(locationId),
+                ),
+              ),
+            });
+
+            if (setting == null) {
+              return {};
+            }
+
+            const decoded = pinyinSoundLocationThoughtChainsSetting.decode(
+              { locationId },
+              setting.value,
+            );
+
+            const thoughtChainsBySoundId =
+              locationSoundThoughtChainsBySoundIdSchema.safeParse(
+                decoded?.thoughtChains,
+              );
+
+            return thoughtChainsBySoundId.success
+              ? thoughtChainsBySoundId.data
+              : {};
+          },
+        ),
+    );
+
+    const existingCandidatesResult = z
+      .array(locationSoundThoughtChainCandidateSchema)
+      .safeParse(existingThoughtChainsBySoundId[soundId]);
+    const hasUsableExistingCandidates =
+      existingCandidatesResult.success &&
+      existingCandidatesResult.data.length > 0;
+
+    if (hasUsableExistingCandidates) {
+      return;
+    }
+
+    const response = await step.run(
+      `generate location sound thought chains (${soundId})`,
+      async () => {
+        return requestOpenAiResponseJson(
+          buildLocationSoundThoughtChain({
+            syllable: soundId,
+            pronunciationHint:
+              defaultPinyinSoundInstructions[soundId] ?? soundId,
+            location: locationSpec.location,
+          }),
+        );
+      },
+    );
+
+    await step.run(
+      `write location sound thought chains (${soundId})`,
+      async () =>
+        withDrizzle(async (db) => {
+          // Re-read inside the write step so concurrent per-sound workers merge
+          // against the latest stored map instead of a stale pre-generation
+          // snapshot. This prevents workers from clobbering each other's keys.
+          const latestSetting = await db.query.userSetting.findFirst({
+            where: and(
+              eq(s.userSetting.userId, userId),
+              eq(
+                s.userSetting.key,
+                pinyinSoundLocationThoughtChainsSettingKey(locationId),
+              ),
+            ),
+          });
+
+          const latestDecoded = pinyinSoundLocationThoughtChainsSetting.decode(
+            { locationId },
+            latestSetting?.value ?? null,
+          );
+
+          const latestThoughtChainsBySoundIdResult =
+            locationSoundThoughtChainsBySoundIdSchema.safeParse(
+              latestDecoded?.thoughtChains,
+            );
+
+          const latestThoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType =
+            latestThoughtChainsBySoundIdResult.success
+              ? latestThoughtChainsBySoundIdResult.data
+              : {};
+
+          const mergedThoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType =
+            {
+              ...latestThoughtChainsBySoundId,
+              [soundId]: response.data.candidates,
+            };
+
+          await setUserSetting(db, userId, {
+            key: pinyinSoundLocationThoughtChainsSettingKey(locationId),
+            value: pinyinSoundLocationThoughtChainsSetting.entity.marshalValue({
+              locationId,
+              thoughtChains: mergedThoughtChainsBySoundId,
+            }),
+            now: new Date(),
+            skipHistory: false,
+            historyId: nanoid(),
+          });
+        }),
+    );
   },
 );
 
@@ -615,6 +848,7 @@ const runLocationNameSuggestions = inngest.createFunction(
 export const functions = [
   generateLocationSpec,
   populateLocation,
+  populateLocationSoundThoughtChain,
   populateLocationSetDescription,
   populateLocationSetIdentityImage,
   populateLocationSetName,

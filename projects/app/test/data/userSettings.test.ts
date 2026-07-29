@@ -10,6 +10,7 @@ import {
   pinyinSoundActorImageSetting,
   pinyinSoundActorModelSheetImageSetting,
   pinyinSoundLocationIdentityImageSetting,
+  pinyinSoundLocationThoughtChainsSetting,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   pinyinSoundModelSheetImageSetting,
@@ -218,6 +219,47 @@ describe(
 
       expect(decoded).toEqual({ text: `Brad` });
     });
+
+    test(`decodes location thought chains setting with json payload`, () => {
+      const decoded = decodeUserSettingValue(
+        pinyinSoundLocationThoughtChainsSetting,
+        { locationId: testLocationId },
+        {
+          j: {
+            "-ong": [
+              {
+                path: [
+                  { anchor: `-ong` },
+                  { anchor: `gong`, reason: `close pronunciation` },
+                  { anchor: `Temple`, reason: `belongs in temple` },
+                ],
+                score: 90,
+                strengths: [],
+                weaknesses: [],
+              },
+            ],
+          },
+        },
+      );
+
+      expect(decoded).toEqual({
+        locationId: testLocationId,
+        thoughtChains: {
+          "-ong": [
+            {
+              path: [
+                { anchor: `-ong` },
+                { anchor: `gong`, reason: `close pronunciation` },
+                { anchor: `Temple`, reason: `belongs in temple` },
+              ],
+              score: 90,
+              strengths: [],
+              weaknesses: [],
+            },
+          ],
+        },
+      });
+    });
   },
 );
 
@@ -255,6 +297,47 @@ describe(
       const encoded = encodeUserSettingStoredValue(userNameSetting, {}, null);
 
       expect(encoded).toBeNull();
+    });
+
+    test(`stores only json payload for location thought chains setting`, () => {
+      const encoded = encodeUserSettingStoredValue(
+        pinyinSoundLocationThoughtChainsSetting,
+        { locationId: testLocationId },
+        {
+          locationId: testLocationId,
+          thoughtChains: {
+            "-ong": [
+              {
+                path: [
+                  { anchor: `-ong` },
+                  { anchor: `gong`, reason: `close pronunciation` },
+                  { anchor: `Temple`, reason: `belongs in temple` },
+                ],
+                score: 80,
+                strengths: [],
+                weaknesses: [],
+              },
+            ],
+          },
+        },
+      );
+
+      expect(encoded).toEqual({
+        j: {
+          "-ong": [
+            {
+              path: [
+                { anchor: `-ong` },
+                { anchor: `gong`, reason: `close pronunciation` },
+                { anchor: `Temple`, reason: `belongs in temple` },
+              ],
+              score: 80,
+              strengths: [],
+              weaknesses: [],
+            },
+          ],
+        },
+      });
     });
   },
 );

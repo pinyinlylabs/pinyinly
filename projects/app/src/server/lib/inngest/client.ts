@@ -6,6 +6,7 @@ import {
   assetIdSchema,
   locationSetKeySchema,
   locationIdSchema,
+  pinyinSoundIdSchema,
 } from "@/data/model";
 import { z } from "zod";
 
@@ -17,7 +18,7 @@ declare global {
 // cause a large memory leak if it's re-instantiated because it hooks into
 // process.on('exit') and never removes the listener. So we store it on
 // globalThis to avoid re-instantiating it.
-globalThis.__pylyPino ??= pino(
+export const logger = (globalThis.__pylyPino ??= pino(
   { name: `inngest` },
   process.env.NODE_ENV === `development`
     ? pretty({
@@ -27,12 +28,12 @@ globalThis.__pylyPino ??= pino(
         minimumLevel: `debug`,
       })
     : undefined,
-);
+));
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
   id: `my-app`,
-  logger: globalThis.__pylyPino,
+  logger,
   // middleware: [sentryMiddleware()],
   isDev: process.env.NODE_ENV === `development`,
   checkpointing: {
@@ -120,6 +121,17 @@ export const locationPopulateLocationEvent = eventType(
     schema: z.object({
       userId: z.string(),
       locationId: locationIdSchema,
+    }),
+  },
+);
+
+export const locationPopulateLocationSoundThoughtChainEvent = eventType(
+  `location/populate-location-sound-thought-chain`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      soundId: pinyinSoundIdSchema,
     }),
   },
 );

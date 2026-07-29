@@ -7,6 +7,7 @@ import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
+import type { PinyinSoundLocationThoughtChainType } from "@/client/ui/hooks/usePinyinSoundLocations";
 import {
   getPinyinSoundLocationDisplaySummary,
   usePinyinSoundLocations,
@@ -38,11 +39,37 @@ import {
   pinyinSoundGroupNameSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
-import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
+import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { intersperse } from "@/client/react";
+
+function getThoughtChainPreviewsForSound(
+  location: {
+    thoughtChainsBySoundId: Record<
+      string,
+      PinyinSoundLocationThoughtChainType[]
+    >;
+  },
+  soundId: PinyinSoundId,
+): { chain: string[]; score: number }[] {
+  if (!isFinalSoundId(soundId)) {
+    return [];
+  }
+
+  const thoughtChains = location.thoughtChainsBySoundId[soundId] ?? [];
+
+  return [...thoughtChains]
+    .sort((left, right) => right.score - left.score)
+    .map((thoughtChain) => {
+      return {
+        chain: thoughtChain.path.map((step) => step.anchor),
+        score: thoughtChain.score,
+      };
+    });
+}
 
 export default function SoundIdPage() {
   const { id: rawId } = useLocalSearchParams<`/sounds/[id]`>();
@@ -184,11 +211,29 @@ function MnemonicStoryRoleSection({
 }: {
   pinyinSoundId: PinyinSoundId;
 }) {
+  const db = useDb();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSelectActorOpen, setIsSelectActorOpen] = useState(false);
   const actorDirectory = usePinyinSoundActors();
   const placeDirectory = usePinyinSoundLocations();
   const isFinalSound = isFinalSoundId(pinyinSoundId);
+  const finalSoundIds = loadPylyPinyinChart().soundIds.filter((soundId) =>
+    isFinalSoundId(soundId),
+  );
+  const finalLocationSelectionKeysCsv = finalSoundIds
+    .map((soundId) =>
+      pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({ soundId }),
+    )
+    .join(`,`);
+  const { data: finalLocationSelectionSettings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: db.settingCollection })
+        .where(({ setting }) =>
+          inArray(setting.key, finalLocationSelectionKeysCsv.split(`,`)),
+        ),
+    [db.settingCollection, finalLocationSelectionKeysCsv],
+  );
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
@@ -217,6 +262,55 @@ function MnemonicStoryRoleSection({
     selectedLocation == null
       ? null
       : getPinyinSoundLocationDisplaySummary(selectedLocation);
+  const finalLocationSelectionByKey = new Map(
+    finalLocationSelectionSettings.map((setting) => [
+      setting.key,
+      setting.value,
+    ]),
+  );
+  const locationUsageByLocationId = new Map<string, PinyinSoundId[]>();
+
+  for (const soundId of finalSoundIds) {
+    const settingValue =
+      finalLocationSelectionByKey.get(
+        pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({ soundId }),
+      ) ?? null;
+    const decoded = pinyinFinalSoundLocationSelectionSetting.decode(
+      { soundId },
+      settingValue,
+    );
+    const locationId = decoded?.locationId;
+    if (locationId == null) {
+      continue;
+    }
+
+    const existing = locationUsageByLocationId.get(locationId) ?? [];
+    locationUsageByLocationId.set(locationId, [...existing, soundId]);
+  }
+
+  const availableLocations = placeDirectory.locations.filter((location) => {
+    if (selectedLocationId === location.locationId) {
+      return true;
+    }
+
+    const usedBy = locationUsageByLocationId.get(location.locationId) ?? [];
+    const usedByOtherSoundIds = usedBy.filter(
+      (soundId) => soundId !== pinyinSoundId,
+    );
+    return usedByOtherSoundIds.length === 0;
+  });
+
+  const unavailableLocations = placeDirectory.locations.filter((location) => {
+    if (selectedLocationId === location.locationId) {
+      return false;
+    }
+
+    const usedBy = locationUsageByLocationId.get(location.locationId) ?? [];
+    const usedByOtherSoundIds = usedBy.filter(
+      (soundId) => soundId !== pinyinSoundId,
+    );
+    return usedByOtherSoundIds.length > 0;
+  });
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
@@ -306,23 +400,124 @@ function MnemonicStoryRoleSection({
                     </Text>
                   ) : (
                     <View className="gap-2">
-                      {placeDirectory.locations.map((place) => (
-                        <RectButton
-                          key={place.locationId}
-                          variant="bareDim"
-                          onPress={() => {
-                            finalPlaceSelectionSetting?.setValue({
-                              soundId: pinyinSoundId,
-                              locationId: place.locationId,
-                            });
-                            setIsSelectActorOpen(false);
-                          }}
-                        >
-                          {place.name == null || place.name.trim().length === 0
-                            ? place.locationId
-                            : place.name}
-                        </RectButton>
-                      ))}
+                      {availableLocations.map((location) => {
+                        const locationName =
+                          location.name == null ||
+                          location.name.trim().length === 0
+                            ? location.locationId
+                            : location.name;
+                        const isActiveLocation =
+                          selectedLocationId === location.locationId;
+                        const thoughtChainPreviews =
+                          getThoughtChainPreviewsForSound(
+                            location,
+                            pinyinSoundId,
+                          );
+
+                        return (
+                          <Pressable
+                            key={location.locationId}
+                            onPress={() => {
+                              finalPlaceSelectionSetting?.setValue({
+                                soundId: pinyinSoundId,
+                                locationId: location.locationId,
+                              });
+                              setIsSelectActorOpen(false);
+                            }}
+                            className="
+                              rounded-lg border border-fg/10 bg-bg px-3 py-2
+
+                              active:opacity-80
+                            "
+                          >
+                            <View className="flex-row items-center justify-between gap-3">
+                              <Text className="pyly-body text-fg">
+                                {locationName}
+                              </Text>
+                              {isActiveLocation ? (
+                                <Text className="pyly-body-caption font-semibold text-fg/80">
+                                  ✓ Active
+                                </Text>
+                              ) : null}
+                            </View>
+                            {thoughtChainPreviews.length === 0 ? null : (
+                              <View className="mt-1 gap-1">
+                                {thoughtChainPreviews.map((preview, index) => {
+                                  return (
+                                    <Text
+                                      key={`${location.locationId}-${index}`}
+                                      className={`pyly-body-caption text-fg-dim`}
+                                    >
+                                      {intersperse(
+                                        preview.chain.map((step, i) => (
+                                          <Text
+                                            key={i}
+                                            className={[
+                                              i === 1 ? `` : ``,
+                                              i === 1 && index === 0
+                                                ? `text-fg/80 font-semibold`
+                                                : ``,
+                                            ].join(` `)}
+                                          >
+                                            {step}
+                                          </Text>
+                                        )),
+                                        <Text> → </Text>,
+                                      )}
+                                      {` `}
+                                      <Text className="text-fg-dim/50">
+                                        ({preview.score}%)
+                                      </Text>
+                                    </Text>
+                                  );
+                                })}
+                              </View>
+                            )}
+                          </Pressable>
+                        );
+                      })}
+
+                      {unavailableLocations.length === 0 ? null : (
+                        <View className="mt-3 gap-2 border-t border-fg/10 pt-3">
+                          <Text
+                            className="
+                              pyly-body-caption font-semibold tracking-wide text-fg-dim uppercase
+                            "
+                          >
+                            Unavailable
+                          </Text>
+                          {unavailableLocations.map((location) => {
+                            const locationName =
+                              location.name == null ||
+                              location.name.trim().length === 0
+                                ? location.locationId
+                                : location.name;
+                            const usedBy =
+                              locationUsageByLocationId.get(
+                                location.locationId,
+                              ) ?? [];
+                            const usedByOtherSoundIds = usedBy.filter(
+                              (soundId) => soundId !== pinyinSoundId,
+                            );
+
+                            return (
+                              <View
+                                key={`unavailable-${location.locationId}`}
+                                className="
+                                  rounded-lg border border-fg/10 bg-bg px-3 py-2 opacity-70
+                                "
+                              >
+                                <Text className="pyly-body text-fg">
+                                  {locationName}
+                                </Text>
+                                <Text className="pyly-body-caption text-fg-dim">
+                                  In use by: {usedByOtherSoundIds.join(`, `)}
+                                </Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
                     </View>
                   )
                 ) : null}

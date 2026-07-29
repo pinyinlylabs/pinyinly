@@ -1,7 +1,8 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { parseImageCrop } from "@/client/ui/imageCrop";
-import type { AssetId, LocationId } from "@/data/model";
+import type { AssetId, LocationId, PinyinSoundId } from "@/data/model";
+import { isFinalSoundId } from "@/data/pinyin";
 import {
   pinyinSoundLocationDescriptionSetting,
   pinyinSoundLocationDescriptionSettingKey,
@@ -15,9 +16,21 @@ import {
   pinyinSoundLocationSetIdentityImageSettingKey,
   pinyinSoundLocationSetNameSetting,
   pinyinSoundLocationSetNameSettingKey,
+  pinyinSoundLocationThoughtChainsSetting,
+  pinyinSoundLocationThoughtChainsSettingKey,
 } from "@/data/userSettings";
+import {
+  getHighestScoreLocationSoundThoughtChainCandidate,
+  locationSoundThoughtChainCandidateSchema,
+  locationSoundThoughtChainsBySoundIdSchema,
+} from "@/util/locationSoundThoughtChain";
+import type {
+  LocationSoundThoughtChainCandidateType,
+  LocationSoundThoughtChainsBySoundIdType,
+} from "@/util/locationSoundThoughtChain";
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
+import { z } from "zod";
 
 export const locationSetKeys = [
   `arrival`,
@@ -51,6 +64,7 @@ export interface PinyinSoundLocationSummary {
     imageWidth: number | null;
     imageHeight: number | null;
   } | null;
+  thoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType;
   sets: Record<LocationSetKey, PinyinSoundLocationSetSummary>;
 }
 
@@ -75,7 +89,35 @@ interface LocationAccumulator {
     imageWidth: number | null;
     imageHeight: number | null;
   } | null;
+  thoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType;
   sets: Record<LocationSetKey, PinyinSoundLocationSetSummary>;
+}
+
+export const pinyinSoundLocationThoughtChainSchema =
+  locationSoundThoughtChainCandidateSchema;
+export const pinyinSoundLocationThoughtChainsSchema = z.array(
+  locationSoundThoughtChainCandidateSchema,
+);
+
+export type PinyinSoundLocationThoughtChainType =
+  LocationSoundThoughtChainCandidateType;
+
+export function getHighestScoreLocationThoughtChain(
+  thoughtChains: PinyinSoundLocationThoughtChainType[],
+): PinyinSoundLocationThoughtChainType | null {
+  return getHighestScoreLocationSoundThoughtChainCandidate(thoughtChains);
+}
+
+export function getHighestScoreLocationThoughtChainForSound(
+  location: Pick<PinyinSoundLocationSummary, `thoughtChainsBySoundId`>,
+  soundId: PinyinSoundId,
+): PinyinSoundLocationThoughtChainType | null {
+  if (!isFinalSoundId(soundId)) {
+    return null;
+  }
+
+  const soundThoughtChains = location.thoughtChainsBySoundId[soundId] ?? [];
+  return getHighestScoreLocationThoughtChain(soundThoughtChains);
 }
 
 function createEmptySet(role: LocationSetKey): PinyinSoundLocationSetSummary {
@@ -95,6 +137,7 @@ function createLocationAccumulator(
     name: null,
     description: null,
     identityImage: null,
+    thoughtChainsBySoundId: {},
     sets: {
       arrival: createEmptySet(`arrival`),
       heart: createEmptySet(`heart`),
@@ -229,6 +272,29 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
       continue;
     }
 
+    if (setting.key.startsWith(`psptc/`)) {
+      const locationId = setting.key.slice(`psptc/`.length) as LocationId;
+      const value = pinyinSoundLocationThoughtChainsSetting.decode(
+        { locationId },
+        setting.value,
+      );
+      if (value == null) {
+        continue;
+      }
+
+      const thoughtChainsResult =
+        locationSoundThoughtChainsBySoundIdSchema.safeParse(
+          value.thoughtChains,
+        );
+      if (!thoughtChainsResult.success) {
+        continue;
+      }
+
+      const location = getOrCreateLocation(value.locationId);
+      location.thoughtChainsBySoundId = thoughtChainsResult.data;
+      continue;
+    }
+
     if (setting.key.startsWith(`pspln/`)) {
       const keyData = parseLocationAndSetKeyFromKey(setting.key, `pspln/`);
       if (keyData == null) {
@@ -355,6 +421,13 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
     });
     void r.mutate.setSetting({
       key: pinyinSoundLocationIdentityImageSettingKey(locationId),
+      value: null,
+      now: new Date(),
+      skipHistory: false,
+      historyId: nanoid(),
+    });
+    void r.mutate.setSetting({
+      key: pinyinSoundLocationThoughtChainsSettingKey(locationId),
       value: null,
       now: new Date(),
       skipHistory: false,

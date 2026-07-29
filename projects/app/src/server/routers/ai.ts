@@ -9,12 +9,7 @@ import { authedProcedure, router } from "@/server/lib/trpc";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { buildLocationSetDescriptionPrompt } from "@/util/prompts/location";
-import {
-  buildMeaningHintCausualBridgePrompt,
-  buildMeaningHintLogicalPrompt,
-  buildMeaningHintPrompt,
-} from "@/util/prompts/meaningHint";
+import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import { buildMnemonicActorSpecPrompt } from "@/util/prompts/mnemonicActorSpec";
 import {
   buildPronunciationHintFantasyPrompt,
@@ -24,6 +19,8 @@ import {
   actorPopulateActorSpecEvent,
   locationPopulateLocationEvent,
 } from "@/server/lib/inngest/client";
+import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
+import { buildMeaningHintLogicalPrompt } from "@/util/prompts/meaningHintLogical";
 
 const pronunciationHintInputSchema = z
   .object({
@@ -131,16 +128,6 @@ const meaningHintOutputSchema = z
           .strict(),
       )
       .min(1),
-  })
-  .strict();
-
-const locationSetDescriptionInputSchema = z
-  .object({
-    label: z.string(),
-    location: z.string(),
-    locationNotes: z.string().optional(),
-    locationSet: z.string(),
-    count: z.number().int().min(1).max(6),
   })
   .strict();
 
@@ -356,34 +343,6 @@ export const aiRouter = router({
       }
 
       return { suggestions };
-    }),
-
-  generateLocationSetDescriptions: authedProcedure
-    .input(locationSetDescriptionInputSchema)
-    .output(buildLocationSetDescriptionPrompt.schema)
-    .mutation(async ({ input, signal }) => {
-      const { label, location, locationNotes, locationSet, count } = input;
-
-      const prompt = buildLocationSetDescriptionPrompt({
-        label,
-        location,
-        locationNotes,
-        locationSet,
-        count,
-      });
-
-      try {
-        const { data } = await requestOpenAiResponseJson(prompt, {
-          signal,
-        });
-        return data;
-      } catch (error) {
-        console.error(`Failed to generate location set descriptions:`, error);
-        throw new TRPCError({
-          code: `INTERNAL_SERVER_ERROR`,
-          message: `Unable to generate descriptions`,
-        });
-      }
     }),
 
   generateMnemonicActorSpec: authedProcedure

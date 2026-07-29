@@ -23,79 +23,15 @@ export interface ChatPrompt<Schema extends z.ZodType> {
   timeout?: number;
 }
 
-const unsupportedOpenAiJsonSchemaKeywords = new Set([
-  `maxItems`,
-  `minItems`,
-  `prefixItems`,
-]);
-
-function formatJsonSchemaPath(path: readonly (number | string)[]): string {
-  let result = `$`;
-
-  for (const part of path) {
-    result +=
-      typeof part === `number`
-        ? `[${part}]`
-        : /^[a-zA-Z_][a-zA-Z0-9_]*$/u.test(part)
-          ? `.${part}`
-          : `[${JSON.stringify(part)}]`;
-  }
-
-  return result;
-}
-
-function assertOpenAiCompatibleJsonSchema(
-  value: unknown,
-  path: readonly (number | string)[] = [],
-): void {
-  if (value == null || typeof value !== `object`) {
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    for (const [index, item] of value.entries()) {
-      assertOpenAiCompatibleJsonSchema(item, [...path, index]);
-    }
-    return;
-  }
-
-  for (const [key, child] of Object.entries(value)) {
-    if (unsupportedOpenAiJsonSchemaKeywords.has(key)) {
-      throw new Error(
-        `OpenAI response format does not support JSON Schema keyword ${JSON.stringify(key)} at ${formatJsonSchemaPath([...path, key])}`,
-      );
-    }
-
-    assertOpenAiCompatibleJsonSchema(child, [...path, key]);
-  }
-
-  const isArraySchema =
-    `type` in value &&
-    (value.type === `array` ||
-      (Array.isArray(value.type) && value.type.includes(`array`)));
-
-  if (isArraySchema && !(`items` in value)) {
-    throw new Error(
-      `OpenAI response format requires JSON Schema arrays to define "items" at ${formatJsonSchemaPath(path)}`,
-    );
-  }
-}
-
-function zodToOpenAiJsonSchema<Schema extends z.ZodType>(
-  schema: Schema,
-): z.core.JSONSchema.BaseSchema {
-  const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
-  assertOpenAiCompatibleJsonSchema(jsonSchema);
-  return jsonSchema;
-}
-
 export function zodResponseFormatJson<Schema extends z.ZodType>(
   schema: Schema,
 ): OpenAI.Responses.ResponseFormatTextJSONSchemaConfig {
+  const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
+
   return {
     type: `json_schema`,
     name: `result_shape`,
-    schema: zodToOpenAiJsonSchema(schema),
+    schema: jsonSchema,
   };
 }
 

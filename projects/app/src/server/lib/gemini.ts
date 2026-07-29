@@ -63,25 +63,23 @@ export type GeminiImageAspectRatio = z.infer<
   typeof geminiImageAspectRatioSchema
 >;
 
+export const imagePromptMessageSchema = z.discriminatedUnion(`kind`, [
+  z.object({
+    kind: z.literal(`text`),
+    role: z.literal(`user`),
+    content: z.string(),
+  }),
+  z.object({
+    kind: z.literal(`asset`),
+    role: z.literal(`user`),
+    assetId: assetIdSchema,
+  }),
+]);
+
 export const imagePromptSchema = z.object({
   model: z.enum(geminiImageModels),
   systemInstruction: z.string().optional(),
-  messages: z
-    .array(
-      z.discriminatedUnion(`kind`, [
-        z.object({
-          kind: z.literal(`text`),
-          role: z.literal(`user`),
-          content: z.string(),
-        }),
-        z.object({
-          kind: z.literal(`asset`),
-          role: z.literal(`user`),
-          assetId: assetIdSchema,
-        }),
-      ]),
-    )
-    .min(1),
+  messages: z.array(imagePromptMessageSchema).min(1),
   aspectRatio: geminiImageAspectRatioSchema.optional(),
   resolution: z.enum(geminiImageResolutionPresets).optional(),
   thinkingLevel: z.enum(geminiImageThinkingLevels).optional(),

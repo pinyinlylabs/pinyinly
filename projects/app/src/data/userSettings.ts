@@ -384,6 +384,13 @@ export const pinyinSoundLocationSpecSetting = defineUserSetting({
   historyLimit: 20,
 });
 
+export const pinyinSoundLocationThoughtChainsSetting = defineUserSetting({
+  entity: r.entity(`psptc/[locationId]`, {
+    locationId: rLocationId().alias(`p`),
+    thoughtChains: r.json().optional().alias(`j`),
+  }),
+});
+
 export const pinyinSoundLocationSetNameSetting = defineUserSetting({
   entity: r.entity(`pspln/[locationId]/[setKey]`, {
     locationId: rLocationId().alias(`p`),
@@ -512,6 +519,14 @@ export function pinyinSoundLocationIdentityImageSettingKey(
   locationId: LocationId,
 ): string {
   return pinyinSoundLocationIdentityImageSetting.entity.marshalKey({
+    locationId,
+  });
+}
+
+export function pinyinSoundLocationThoughtChainsSettingKey(
+  locationId: LocationId,
+): string {
+  return pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
     locationId,
   });
 }
@@ -771,6 +786,7 @@ export const userSettingDefinitions = [
   pinyinSoundLocationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationSpecSetting,
+  pinyinSoundLocationThoughtChainsSetting,
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,

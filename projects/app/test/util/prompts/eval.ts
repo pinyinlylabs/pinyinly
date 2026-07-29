@@ -1,4 +1,3 @@
-// pyly-not-src-test
 import { createHarness, createJudgeHarness } from "vitest-evals";
 import type {
   HarnessMetadata,

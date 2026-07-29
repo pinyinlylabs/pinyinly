@@ -1,20 +1,22 @@
-import { buildMeaningHintPrompt } from "#util/prompts/meaningHint.ts";
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
+import { buildMeaningHintLogicalPrompt } from "#util/prompts/meaningHintLogical.js";
 
 describe(
-  `buildMeaningHintPrompt` satisfies HasNameOf<typeof buildMeaningHintPrompt>,
+  `buildMeaningHintLogicalPrompt` satisfies HasNameOf<
+    typeof buildMeaningHintLogicalPrompt
+  >,
   () => {
     test(`snapshot`, () => {
-      const prompt = buildMeaningHintPrompt({
+      const prompt = buildMeaningHintLogicalPrompt({
         hanzi: `好`,
         meaning: {
           hanziWord: `好`,
-          glosses: [`good`, `well`],
+          glosses: [`good`, `well`, `fine`],
         },
         components: [
           { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child`, meaning: `child` },
+          { hanzi: `子`, label: `child` },
         ],
         count: 4,
       });
@@ -25,18 +27,17 @@ describe(
         =====================
          SYSTEM MESSAGE
         ---------------------
-        You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
-        Your job is to help the learner remember what a Hanzi means using its visual components.
-        Use the provided component details as the core building blocks of each hint.
-        Write vivid, concrete, and memorable mini-scenes or mental images.
-        Focus on meaning recall, not pronunciation.
-        Avoid historical or etymological claims unless directly supported by the provided component context.
-        Keep each hint to 1-2 sentences.
-        Prefer unusual but clear imagery over generic definitions.
-        Each suggestion should help a learner recall the target meaning from the character's components.
-        Do not write a plain dictionary definition.
-        Do not introduce pronunciation guidance.
-        If component context is provided, ground the hint in those components explicitly.
+        You're a helpful assistant that generates memorable mnemonic phrases for Chinese characters. Your job is to help the learner remember what a Hanzi means using just its visual components.
+
+        Rules:
+        - Keep mnemonics realistic, intuitive, concrete and memorable.
+        - Keep mnemonics short, 1-2 sentences is optimal.
+        - Leverage the logical connection between the components to explain the target character.
+        - The disambiguation values are form/meaning guidance only, do not include them directly in the hint.
+        - Anchor on the exact gloss values, don't use them as a base stem for derivative words.
+        - Only focus on meaning recall, not pronunciation.
+        - Avoid introducing unnecessary elements that could distract from the core elements.
+        - Put the hanzi after each gloss in parenthesis: <gloss> (<hanzi>)
         =====================
 
 
@@ -44,26 +45,23 @@ describe(
         =====================
          USER MESSAGE
         ---------------------
-        Generate 4 distinct mnemonic hints.
+        Generate 4 distinct mnemonic hints:
+
         <data>
         {
-          "hanzi": "好",
-          "meaning": {
-            "hanziWord": "好",
-            "glosses": [
-              "good",
-              "well"
-            ]
+          "targetCharacter": {
+            "hanzi": "好",
+            "gloss": "good",
+            "disambiguation": "well; fine"
           },
           "components": [
             {
               "hanzi": "女",
-              "meaning": "woman"
+              "gloss": "woman"
             },
             {
               "hanzi": "子",
-              "label": "child",
-              "meaning": "child"
+              "gloss": "child"
             }
           ]
         }

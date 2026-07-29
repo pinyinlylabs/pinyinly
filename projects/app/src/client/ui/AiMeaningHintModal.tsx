@@ -1,15 +1,13 @@
 import { trpc } from "@/client/trpc";
-import {
-  buildMeaningHintCausualBridgePrompt,
-  buildMeaningHintLogicalPrompt,
-  buildMeaningHintPrompt,
-} from "@/util/prompts/meaningHint";
+import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
+import { buildMeaningHintLogicalPrompt } from "@/util/prompts/meaningHintLogical";
 
 export interface AiMeaningHintModalProps {
   hanzi: string;
