@@ -1,8 +1,4 @@
 import { trpc } from "@/client/trpc";
-import {
-  buildPronunciationHintFantasyPrompt,
-  buildPronunciationHintRealisticPrompt,
-} from "@/util/prompts/pronunciationHint";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
@@ -10,6 +6,8 @@ import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { memoize0 } from "@pinyinly/lib/collections";
+import { buildPronunciationHintFantasyPrompt } from "@/util/prompts/pronunciationHintFantasy";
+import { buildPronunciationHintRealisticPrompt } from "@/util/prompts/pronunciationHintRealistic";
 
 export interface AiPronunciationHintModalProps {
   leadCharacter: { name: string; bio?: string };

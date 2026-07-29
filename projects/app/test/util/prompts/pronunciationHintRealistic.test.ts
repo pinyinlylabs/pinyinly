@@ -1,31 +1,28 @@
-import {
-  buildPronunciationHintFantasyPrompt,
-  buildPronunciationHintRealisticPrompt,
-} from "#util/prompts/pronunciationHint.ts";
 import { describe, expect, test } from "vitest";
+import { buildPronunciationHintRealisticPrompt } from "#util/prompts/pronunciationHintRealistic.js";
 import { fmtChatPromptForSnapshot } from "./helpers";
 
 describe(
-  `buildPronunciationHintFantasyPrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintFantasyPrompt
+  `buildPronunciationHintRealisticPrompt` satisfies HasNameOf<
+    typeof buildPronunciationHintRealisticPrompt
   >,
   () => {
-    test(`builds a fantasy prompt with expected metadata`, () => {
-      const result = buildPronunciationHintFantasyPrompt({
+    test(`snapshot`, () => {
+      const prompt = buildPronunciationHintRealisticPrompt({
         leadCharacter: { name: `Ethan` },
         location: { name: `Gong Cha bathroom` },
         cue: { word: `use` },
         count: 3,
       });
 
-      expect(fmtChatPromptForSnapshot(result)).toMatchInlineSnapshot(`
+      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
          SYSTEM MESSAGE
         ---------------------
         You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
-        Invent vivid, memorable mini-scenes using a character, a location, and a keyword.
+        Invent clear, grounded mini-scenes using a character, a location, and a keyword.
         The UI shows a shared story setup separately (for example: "In [location], [character] is...").
         Return only ending-style continuations that naturally finish that setup.
         Do not repeat the setup phrase, and do not restate the character or location names in every ending unless essential for clarity.
@@ -40,14 +37,14 @@ describe(
         Use the keyword as light inspiration for the central action, object, or conflict, but do not turn the result into a definition.
         If cue meaning context is provided, follow that exact sense instead of other possible senses.
         If extra character or location details are provided, use them to make endings more specific.
-        Prefer visual, unusual, and memorable situations over generic ones.
-        Lean into imaginative, playful, and cinematic moments.
-        Surprising details are welcome when they remain easy to picture.
+        Keep scenes realistic and plausible in everyday life.
+        Avoid supernatural, magical, dreamlike, or impossible events.
+        Avoid bizarre shock-value imagery; prefer practical, familiar actions.
         Never include pinyin, Hanzi, IPA, tone marks, or pronunciation syllables in the ending text.
         Do not mention sound, pronunciation, phonetics, letters, initials, finals, tones, or transliteration.
         Only anchor the story on the lead character, the location, and the cue concept.
-        Good endings are concrete, replayable, and mentally vivid.
-        Bad endings are generic, flat, or mostly definitions.
+        Good endings are concrete, replayable, mentally vivid, and believable.
+        Bad endings are generic, flat, fantastical, or mostly definitions.
         When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
         =====================
 
@@ -118,49 +115,6 @@ describe(
           },
         }
       `);
-    });
-
-    test(`includes optional context when provided`, () => {
-      const result = buildPronunciationHintFantasyPrompt({
-        leadCharacter: { name: `Ethan`, bio: `Loud and chaotic` },
-        location: { name: `Gong Cha bathroom`, description: `Cramped room` },
-        cue: { word: `use`, meaning: `to employ` },
-        count: 4,
-      });
-
-      expect(result.messages[1]?.content).toContain(
-        `"bio": "Loud and chaotic"`,
-      );
-      expect(result.messages[1]?.content).toContain(
-        `"description": "Cramped room"`,
-      );
-      expect(result.messages[1]?.content).toContain(`"meaning": "to employ"`);
-    });
-  },
-);
-
-describe(
-  `buildPronunciationHintRealisticPrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintRealisticPrompt
-  >,
-  () => {
-    test(`builds a realistic prompt with style constraints`, () => {
-      const result = buildPronunciationHintRealisticPrompt({
-        leadCharacter: { name: `Ethan` },
-        location: { name: `Gong Cha bathroom` },
-        cue: { word: `use` },
-        count: 3,
-      });
-
-      expect(result.model).toBe(`gpt-5-mini`);
-      expect(result.reasoningEffort).toBe(`medium`);
-      expect(buildPronunciationHintRealisticPrompt.strategy).toBe(`realistic`);
-      expect(result.messages[0]?.content).toContain(
-        `Keep scenes realistic and plausible in everyday life.`,
-      );
-      expect(result.messages[1]?.content).toContain(
-        `Generate 3 distinct mnemonic story ideas.`,
-      );
     });
   },
 );

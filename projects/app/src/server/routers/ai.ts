@@ -15,15 +15,13 @@ import {
   mnemonicActorSpecSchema,
 } from "@/util/prompts/mnemonicActorSpec";
 import {
-  buildPronunciationHintFantasyPrompt,
-  buildPronunciationHintRealisticPrompt,
-} from "@/util/prompts/pronunciationHint";
-import {
   actorPopulateActorSpecEvent,
   locationPopulateLocationEvent,
 } from "@/server/lib/inngest/client";
 import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
 import { buildMeaningHintLogicalPrompt } from "@/util/prompts/meaningHintLogical";
+import { buildPronunciationHintFantasyPrompt } from "@/util/prompts/pronunciationHintFantasy";
+import { buildPronunciationHintRealisticPrompt } from "@/util/prompts/pronunciationHintRealistic";
 
 const pronunciationHintInputSchema = z
   .object({
