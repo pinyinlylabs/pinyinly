@@ -126,7 +126,7 @@ export function buildPronunciationHintRealisticPrompt({
   cue,
   count,
 }: PronunciationHintPromptInput): ChatPrompt<
-  typeof buildPronunciationHintRealisticPrompt.schema
+  typeof pronunciationHintOutputSchema
 > {
   const systemTemplate = `
 You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
@@ -183,10 +183,9 @@ Generate {{ count }} distinct mnemonic story ideas.
 
   return {
     messages,
-    schema: buildPronunciationHintRealisticPrompt.schema,
+    schema: pronunciationHintOutputSchema,
     model: `gpt-5-mini`,
     reasoningEffort: `medium`,
   };
 }
 buildPronunciationHintRealisticPrompt.strategy = `realistic`;
-buildPronunciationHintRealisticPrompt.schema = pronunciationHintOutputSchema;

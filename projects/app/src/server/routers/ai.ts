@@ -10,7 +10,10 @@ import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
-import { buildMnemonicActorSpecPrompt } from "@/util/prompts/mnemonicActorSpec";
+import {
+  buildMnemonicActorSpecPrompt,
+  mnemonicActorSpecSchema,
+} from "@/util/prompts/mnemonicActorSpec";
 import {
   buildPronunciationHintFantasyPrompt,
   buildPronunciationHintRealisticPrompt,
@@ -347,12 +350,12 @@ export const aiRouter = router({
 
   generateMnemonicActorSpec: authedProcedure
     .input(mnemonicActorIdentityInputSchema)
-    .output(buildMnemonicActorSpecPrompt.schema)
+    .output(mnemonicActorSpecSchema)
     .mutation(async ({ input, signal }) => {
       const { identity } = input;
 
       const prompt = buildMnemonicActorSpecPrompt({
-        actorName: identity,
+        identity: identity,
       });
 
       try {

@@ -3,7 +3,7 @@ import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 
 export type MnemonicActorSpecInputType = {
-  actorName: string;
+  identity: string;
 };
 
 export const mnemonicActorSpecSchema = z
@@ -30,10 +30,8 @@ export const mnemonicActorSpecSchema = z
 export type MnemonicActorSpecType = z.infer<typeof mnemonicActorSpecSchema>;
 
 export function buildMnemonicActorSpecPrompt({
-  actorName,
-}: MnemonicActorSpecInputType): ChatPrompt<
-  typeof buildMnemonicActorSpecPrompt.schema
-> {
+  identity,
+}: MnemonicActorSpecInputType): ChatPrompt<typeof mnemonicActorSpecSchema> {
   const systemTemplate = `
 You are designing a recurring mnemonic actor for a Chinese language learning system.
 
@@ -161,7 +159,7 @@ A successful actor should:
 `;
 
   const data = {
-    identity: actorName,
+    identity,
   };
 
   const userTemplate = `
@@ -185,25 +183,8 @@ Generate a mnemonic actor for:
 
   return {
     messages,
-    schema: buildMnemonicActorSpecPrompt.schema,
+    schema: mnemonicActorSpecSchema,
     model: `gpt-5.5`,
     reasoningEffort: `medium`,
   };
 }
-buildMnemonicActorSpecPrompt.schema = mnemonicActorSpecSchema;
-
-export type MnemonicActorPromptInputType = {
-  identity: string;
-};
-export const mnemonicActorProfileSchema = mnemonicActorSpecSchema;
-export type MnemonicActorProfileType = MnemonicActorSpecType;
-export const buildMnemonicActorProfilePrompt = Object.assign(
-  (input: MnemonicActorPromptInputType) => {
-    return buildMnemonicActorSpecPrompt({
-      actorName: input.identity,
-    });
-  },
-  {
-    schema: buildMnemonicActorSpecPrompt.schema,
-  },
-);

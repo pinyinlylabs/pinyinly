@@ -1,9 +1,9 @@
 import { createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
-import { buildMnemonicActorProfilePrompt } from "#util/prompts/mnemonicActorSpec.ts";
+import { buildMnemonicActorSpecPrompt } from "#util/prompts/mnemonicActorSpec.ts";
 import type {
-  MnemonicActorPromptInputType,
-  MnemonicActorProfileType,
+  MnemonicActorSpecInputType,
+  MnemonicActorSpecType,
 } from "#util/prompts/mnemonicActorSpec.ts";
 import { createResponsePromptHarness } from "./eval.ts";
 
@@ -11,7 +11,7 @@ function normalized(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function hasAllCoreFields(actor: MnemonicActorProfileType): boolean {
+function hasAllCoreFields(actor: MnemonicActorSpecType): boolean {
   return (
     actor.identity.trim().length > 0 &&
     actor.nickname.trim().length > 0 &&
@@ -37,7 +37,7 @@ const MnemonicActorJudge = createJudge(
   async ({
     input,
     output,
-  }: JudgeContext<MnemonicActorPromptInputType, MnemonicActorProfileType>) => {
+  }: JudgeContext<MnemonicActorSpecInputType, MnemonicActorSpecType>) => {
     const structureScore = hasAllCoreFields(output) ? 1 : 0;
     const identityScore =
       normalized(output.identity) === normalized(input.identity) ? 1 : 0;
@@ -54,16 +54,16 @@ const MnemonicActorJudge = createJudge(
   },
 );
 
-const promptCases: MnemonicActorPromptInputType[] = [
+const promptCases: MnemonicActorSpecInputType[] = [
   { identity: `Dracula` },
   { identity: `Bear` },
   { identity: `Julius Caesar` },
 ];
 
 describeEval(
-  `buildMnemonicActorProfilePrompt eval`,
+  `buildMnemonicActorSpecPrompt eval`,
   {
-    harness: createResponsePromptHarness(buildMnemonicActorProfilePrompt),
+    harness: createResponsePromptHarness(buildMnemonicActorSpecPrompt),
     judges: [MnemonicActorJudge],
   },
   (it) => {

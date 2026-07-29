@@ -12,14 +12,6 @@ import {
   pinyinSoundLocationSetNameSettingKey,
 } from "@/data/userSettings";
 import * as s from "@/server/pgSchema";
-import {
-  buildPopulateLocationSetDescriptionPrompt,
-  buildEvaluateLocationSpecPrompt,
-  buildLocationNameSuggestionsPrompt,
-  buildLocationSpecPrompt,
-  buildRefineLocationSpecPrompt,
-  hasMajorCriticisms,
-} from "@/util/prompts/location";
 import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
 import { locationSpecSchema } from "@/data/model";
@@ -58,6 +50,14 @@ import {
   locationSoundThoughtChainsBySoundIdSchema,
 } from "@/util/locationSoundThoughtChain";
 import type { LocationSoundThoughtChainsBySoundIdType } from "@/util/locationSoundThoughtChain";
+import { buildLocationNameSuggestionsPrompt } from "@/util/prompts/locationNameSuggestions";
+import { buildLocationRefineSpecPrompt } from "@/util/prompts/locationRefineSpec";
+import {
+  buildLocationEvaluateSpecPrompt,
+  hasMajorCriticisms,
+} from "@/util/prompts/locationEvaluateSpec";
+import { buildLocationPopulateSetDescriptionPrompt } from "@/util/prompts/locationPopulateSetDescription";
+import { buildLocationSpecPrompt } from "@/util/prompts/locationSpec";
 
 export const generateLocationSpec = inngest.createFunction(
   {
@@ -93,7 +93,7 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-evaluate-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildEvaluateLocationSpecPrompt({
+            buildLocationEvaluateSpecPrompt({
               location,
               locationSpec: locationSpecForEvaluation,
             }),
@@ -124,7 +124,7 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-refine-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildRefineLocationSpecPrompt({
+            buildLocationRefineSpecPrompt({
               location,
               locationSpec: locationSpecForRefine,
               criticisms: criticismsForRefine,
@@ -139,7 +139,7 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-evaluate-refinement-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildEvaluateLocationSpecPrompt({
+            buildLocationEvaluateSpecPrompt({
               location,
               locationSpec: refinedLocationSpec,
             }),
@@ -646,7 +646,7 @@ const populateLocationSetDescription = inngest.createFunction(
         }
 
         const response = await requestOpenAiResponseJson(
-          buildPopulateLocationSetDescriptionPrompt({
+          buildLocationPopulateSetDescriptionPrompt({
             locationSpec,
             setKey,
           }),

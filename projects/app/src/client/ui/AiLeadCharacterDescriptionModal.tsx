@@ -25,7 +25,7 @@ export function AiLeadCharacterDescriptionModal({
   const generateMutation = trpc.ai.generateMnemonicActorSpec.useMutation();
 
   const actorPrompt = buildMnemonicActorSpecPrompt({
-    actorName: identity,
+    identity: identity,
   });
 
   const handleGenerate = async () => {

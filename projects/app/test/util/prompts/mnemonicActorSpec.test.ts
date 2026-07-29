@@ -1,14 +1,14 @@
-import { buildMnemonicActorProfilePrompt } from "#util/prompts/mnemonicActorSpec.ts";
+import { buildMnemonicActorSpecPrompt } from "#util/prompts/mnemonicActorSpec.ts";
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 
 describe(
-  `buildMnemonicActorProfilePrompt` satisfies HasNameOf<
-    typeof buildMnemonicActorProfilePrompt
+  `buildMnemonicActorSpecPrompt` satisfies HasNameOf<
+    typeof buildMnemonicActorSpecPrompt
   >,
   () => {
     test(`uses mnemonic actor system prompt and input wrapper`, () => {
-      const prompt = buildMnemonicActorProfilePrompt({
+      const prompt = buildMnemonicActorSpecPrompt({
         identity: `Dracula`,
       });
 

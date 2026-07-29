@@ -67,7 +67,7 @@ export const populateActor: ReturnType<typeof inngest.createFunction> =
       }
 
       const prompt = buildMnemonicActorSpecPrompt({
-        actorName,
+        identity: actorName,
       });
 
       const result = await requestOpenAiResponseJson(prompt);
