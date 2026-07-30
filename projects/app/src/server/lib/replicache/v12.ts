@@ -20,7 +20,7 @@ import {
   pgXmin,
   withRepeatableReadTransaction,
 } from "@/server/lib/db";
-import { updateSkillState } from "@/server/lib/queries";
+import { updateSkillState } from "@/server/lib/query";
 import type { CvrEntities } from "@/server/pgSchema";
 import * as s from "@/server/pgSchema";
 import type {

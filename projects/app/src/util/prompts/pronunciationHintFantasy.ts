@@ -24,7 +24,8 @@ export const pronunciationHintOutputSchema = z
         .strict(),
     ),
   })
-  .strict();
+  .strict()
+  .meta({ title: `pronunciationHintOutputSchema` });
 
 function buildPronunciationHintPromptData({
   leadCharacter,

@@ -145,9 +145,8 @@ describe(
           "model": "gpt-5.5",
           "reasoningEffort": "medium",
           "schema": {
-            "name": "result_shape",
+            "name": "locationSoundThoughtChainPromptOutputSchema",
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "additionalProperties": false,
               "properties": {
                 "candidates": {
@@ -162,14 +161,8 @@ describe(
                               "type": "string",
                             },
                             "reason": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "type": "null",
-                                },
-                              ],
+                              "nullable": true,
+                              "type": "string",
                             },
                           },
                           "required": [
@@ -212,6 +205,7 @@ describe(
               "required": [
                 "candidates",
               ],
+              "title": "locationSoundThoughtChainPromptOutputSchema",
               "type": "object",
             },
             "type": "json_schema",

@@ -160,9 +160,8 @@ describe(
           "model": "gpt-5.5",
           "reasoningEffort": "medium",
           "schema": {
-            "name": "result_shape",
+            "name": "mnemonicActorSpecSchema",
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "additionalProperties": false,
               "properties": {
                 "always": {
@@ -247,6 +246,7 @@ describe(
                 "signatureExpression",
                 "weakness",
               ],
+              "title": "mnemonicActorSpecSchema",
               "type": "object",
             },
             "type": "json_schema",

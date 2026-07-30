@@ -123,9 +123,22 @@ export const locationSpecSchema = z
       })
       .strict(),
   })
-  .loose();
+  .loose()
+  .meta({ title: `locationSpecSchema` });
 
 export type LocationSpec = z.infer<typeof locationSpecSchema>;
+
+/**
+ * Persisted actor specification schema.
+ *
+ * Required fields are intentionally minimal to preserve backwards
+ * compatibility with older stored actor-spec versions.
+ */
+export const actorSpecSchema = z.object({
+  nickname: z.string(),
+});
+
+export type ActorSpec = z.infer<typeof actorSpecSchema>;
 
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;

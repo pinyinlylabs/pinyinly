@@ -71,9 +71,8 @@ describe(
           "model": "gpt-5.4",
           "reasoningEffort": "none",
           "schema": {
-            "name": "result_shape",
+            "name": "meaningHintOutputSchema",
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "additionalProperties": false,
               "properties": {
                 "suggestions": {
@@ -81,14 +80,8 @@ describe(
                     "additionalProperties": false,
                     "properties": {
                       "explanation": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "type": "null",
-                          },
-                        ],
+                        "nullable": true,
+                        "type": "string",
                       },
                       "hint": {
                         "type": "string",
@@ -106,6 +99,7 @@ describe(
               "required": [
                 "suggestions",
               ],
+              "title": "meaningHintOutputSchema",
               "type": "object",
             },
             "type": "json_schema",

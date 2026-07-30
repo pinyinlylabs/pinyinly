@@ -2,10 +2,10 @@ import { createHarness, createJudge, describeEval } from "vitest-evals";
 import type { JudgeContext } from "vitest-evals";
 import { generateLocationSpec } from "#server/lib/inngest/location.ts";
 import { InngestTestEngine } from "@inngest/test";
-import type { LocationSpecRefinementResultType } from "#util/prompts/locationEvaluateSpec.js";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
 import { buildLocationSpecPrompt } from "#util/prompts/locationSpec.js";
 import { createResponsePromptHarness } from "#test/util/prompts/eval.ts";
+import type { LocationSpecRefinementResultType } from "#util/prompts/locationSpecEvaluate.js";
 
 type LocationPromptInput = {
   location: string;

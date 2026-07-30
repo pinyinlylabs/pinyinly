@@ -1,6 +1,8 @@
+import type { LocationSpec } from "#data/model.js";
 import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
+import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
 import omit from "lodash/omit";
 import { expect } from "vitest";
 import type { z } from "zod";
@@ -19,8 +21,18 @@ function fmtChatPromptMessagesForSnapshot(
 export function fmtChatPromptForSnapshot<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
 ) {
+  // Make sure a title is defined.
+  const meta = prompt.schema.meta();
+  expect(
+    meta?.title,
+    `schema has a title defined (\`.meta({ title: "…" })\`)`,
+  ).toBeDefined();
+
   const responseFormat = zodResponseFormatJson(prompt.schema);
-  assertOpenAiCompatibleJsonSchema(responseFormat.schema);
+  expect(responseFormat.name).toMatch(/^[a-zA-Z0-9_-]{1,63}$/u);
+
+  const jsonSchema = responseFormat.schema;
+  assertOpenAiCompatibleJsonSchema(jsonSchema);
 
   return {
     ...omit(prompt, [`messages`, `schema`]),
@@ -83,6 +95,21 @@ export function assertOpenAiCompatibleJsonSchema(
     throw new Error(
       `OpenAI response format requires JSON Schema arrays to define "items" at ${formatJsonSchemaPath(path)}`,
     );
+  }
+
+  const isObjectSchema =
+    `type` in value &&
+    (value.type === `object` ||
+      (Array.isArray(value.type) && value.type.includes(`object`)));
+  if (
+    isObjectSchema &&
+    `additionalProperties` in value &&
+    typeof value.additionalProperties === `object`
+  ) {
+    expect(
+      (value.additionalProperties as Record<string, unknown>)[`type`],
+      `OpenAI response format requires "type" at ${formatJsonSchemaPath([...path, `additionalProperties`, `type`])}`,
+    ).toBeTypeOf(`string`);
   }
 
   assertNoMissingRequiredProperties(value);
@@ -183,4 +210,74 @@ function formatJsonSchemaPath(path: readonly (number | string)[]): string {
   }
 
   return result;
+}
+
+export function makeLocationSpec(location: string): LocationSpec {
+  return {
+    location,
+    sets: {
+      arrival: {
+        name: `dock`,
+      },
+      heart: {
+        name: `captain's cabin`,
+      },
+      below: {
+        name: `cargo hold`,
+      },
+      ascent: {
+        name: `stairs`,
+      },
+      summit: {
+        name: `crow's nest`,
+      },
+    },
+  };
+}
+
+export function makeLocationSpecWithDetail(
+  location: string,
+): LocationSpecWithDetail {
+  return {
+    location,
+    recognitionHooks: [`mast`, `bow`, `anchor`],
+    designRules: [`Keep the hull dominant in the composition.`],
+    sets: {
+      arrival: {
+        name: `dock`,
+        props: [],
+        designRules: [`Show the gangplank and mooring ropes.`],
+        canonicalFraming: `View from the dock looking toward the deck entrance.`,
+        avoidFraming: [`Do not frame it as a distant open-sea panorama.`],
+      },
+      heart: {
+        name: `captain's cabin`,
+        props: [`Desk with a map on it`],
+        designRules: [`Show the richest interior detail.`],
+        canonicalFraming: `View from the doorway looking toward the captain's chair and desk.`,
+        avoidFraming: [`Do not reduce it to a plain hallway.`],
+      },
+      below: {
+        name: `cargo hold`,
+        props: [`Barrels`],
+        designRules: [`Show stacked crates and a low ceiling.`],
+        canonicalFraming: `View from knee height looking into the lower hold.`,
+        avoidFraming: [`Do not frame it like the main deck.`],
+      },
+      ascent: {
+        name: `stairs`,
+        props: [`Handrail`],
+        designRules: [`Show the climb upward along the mast.`],
+        canonicalFraming: `View from below looking up the rigging and steps.`,
+        avoidFraming: [`Do not frame it as a flat side path.`],
+      },
+      summit: {
+        name: `crow's nest`,
+        props: [`Binoculars`],
+        designRules: [`Show the tiny lookout at the top of the mast.`],
+        canonicalFraming: `View from the deck looking up to the lookout platform.`,
+        avoidFraming: [`Do not frame it as the same as the cabin interior.`],
+      },
+    },
+  };
 }

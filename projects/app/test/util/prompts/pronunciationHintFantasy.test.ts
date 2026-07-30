@@ -73,9 +73,8 @@ describe(
           "model": "gpt-5-mini",
           "reasoningEffort": "medium",
           "schema": {
-            "name": "result_shape",
+            "name": "pronunciationHintOutputSchema",
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "additionalProperties": false,
               "properties": {
                 "suggestions": {
@@ -83,14 +82,8 @@ describe(
                     "additionalProperties": false,
                     "properties": {
                       "explanation": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "type": "null",
-                          },
-                        ],
+                        "nullable": true,
+                        "type": "string",
                       },
                       "hint": {
                         "description": "A short story ending that continues a shared setup shown separately in the UI. When the cue word appears, wrap it in ==word== (e.g. ==can==) so it renders highlighted.",
@@ -109,6 +102,7 @@ describe(
               "required": [
                 "suggestions",
               ],
+              "title": "pronunciationHintOutputSchema",
               "type": "object",
             },
             "type": "json_schema",

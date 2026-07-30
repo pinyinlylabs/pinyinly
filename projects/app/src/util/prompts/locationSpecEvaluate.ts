@@ -55,7 +55,8 @@ export const locationEvaluationSchema = z
     score: z.number().min(0).max(1),
     criticisms: z.array(locationCriticismSchema),
   })
-  .strict();
+  .strict()
+  .meta({ title: `locationEvaluationSchema` });
 
 export type LocationEvaluationType = z.infer<typeof locationEvaluationSchema>;
 
@@ -94,7 +95,7 @@ export type LocationSpecRefinementResultType = z.infer<
   typeof locationSpecRefinementResultSchema
 >;
 
-export const buildLocationEvaluateSpecPrompt = (entry: {
+export const buildLocationSpecEvaluatePrompt = (entry: {
   location: string;
   locationSpec: LocationSpec;
 }): ChatPrompt<typeof locationEvaluationSchema> => {

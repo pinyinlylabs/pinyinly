@@ -18,9 +18,8 @@ describe(
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "name": "result_shape",
+          "name": "anonymous_schema",
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
             "properties": {
               "hint": {
@@ -48,6 +47,25 @@ describe(
           "type": "json_schema",
         }
       `);
+    });
+
+    test(`uses the meta title for the name if present`, () => {
+      const schema = z
+        .object({
+          hint: z.string(),
+        })
+        .meta({ title: `custom_name` });
+
+      const result = zodResponseFormatJson(schema);
+
+      expect(result.name).toBe(`custom_name`);
+    });
+
+    test(`fixes "additionalProperties: {}" to "additionalProperties: true"`, () => {
+      const schema = z.object().loose();
+
+      const result = zodResponseFormatJson(schema);
+      expect(result.schema[`additionalProperties`]).toBe(true);
     });
   },
 );

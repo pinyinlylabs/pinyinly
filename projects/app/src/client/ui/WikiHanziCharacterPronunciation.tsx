@@ -454,50 +454,74 @@ function ExperimentalContent(props: { hanzi: HanziText }) {
   return props.hanzi === `电` ? (
     <View>
       <Text className="pyly-body leading-7">
-        <Text
-          className="
-            my-0 inline-block rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50
-            via-sky-500/50 to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
-          "
-        >
-          [di-] Count Drac
-        </Text>
+        <MnemonicComponentText>[di-] Count Drac</MnemonicComponentText>
         {` `}
         counts the underground water gauges until{` `}
-        <Text
-          className="
-            my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
-            to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
-          "
-        >
-          电 electricity
-        </Text>
+        <MnemonicGlossText>电 electricity</MnemonicGlossText>
         {` `}
         shocks him back to one.{` `}
         <Text className="text-fg-dim">
           In the{` `}
-          <Text
-            className="
-              my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
-              to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
-            "
-          >
-            [-an] pyramid’s
-          </Text>
+          <MnemonicComponentText>[-an] pyramid’s</MnemonicComponentText>
           {` `}
           damp{` `}
-          <Text
-            className="
-              my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
-              to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
-            "
-          >
+          <MnemonicComponentText>
             [4<sup>th</sup>] subterranean chamber
-          </Text>
+          </MnemonicComponentText>
           , Count Drac keeps trying to count the water-gauge pillars, but
           electricity jumps through the wet floor and shocks him back to one.
         </Text>
       </Text>
     </View>
+  ) : props.hanzi === `中` ? (
+    <View>
+      <Text className="pyly-body leading-7">
+        <MnemonicComponentText>[zh-] Jelly</MnemonicComponentText>
+        {` `}
+        keeps wobbling back onto the{` `}
+        <MnemonicGlossText>中 middle</MnemonicGlossText>
+        {` `}
+        line to the{` `}
+        <MnemonicComponentText>[-ong] jungle temple</MnemonicComponentText>
+        {` `}
+        <MnemonicComponentText>
+          [1<sup>st</sup>] staircase
+        </MnemonicComponentText>
+        .{` `}
+        <Text className="text-xs text-fg-dim">
+          Jelly floats out of the narrow jungle path into the clearing, aiming
+          himself perfectly at the staircase in the temple facade. A root or
+          fern bumps his gelatinous bell sideways. He nervously jiggles back
+          into alignment, only for another bit of foreground growth to shove him
+          off again.
+        </Text>
+      </Text>
+    </View>
   ) : null;
+}
+
+function MnemonicComponentText({ children }: { children: ReactNode }) {
+  return (
+    <Text
+      className="
+        my-0 inline-block rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50
+        via-sky-500/50 to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+      "
+    >
+      {children}
+    </Text>
+  );
+}
+
+function MnemonicGlossText({ children }: { children: ReactNode }) {
+  return (
+    <Text
+      className="
+        my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
+        to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
+      "
+    >
+      {children}
+    </Text>
+  );
 }

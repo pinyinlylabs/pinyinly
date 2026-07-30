@@ -26,7 +26,8 @@ export const locationSoundThoughtChainPromptOutputSchema = z
   .object({
     candidates: z.array(locationSoundThoughtChainCandidateSchema),
   })
-  .strict();
+  .strict()
+  .meta({ title: `locationSoundThoughtChainPromptOutputSchema` });
 
 export type LocationSoundThoughtChainPromptOutputType = z.infer<
   typeof locationSoundThoughtChainPromptOutputSchema

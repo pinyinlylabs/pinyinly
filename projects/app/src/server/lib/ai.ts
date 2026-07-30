@@ -3,6 +3,8 @@ import type { OpenAI } from "openai";
 import { z } from "zod";
 import makeDebug from "debug";
 import { invariant } from "@pinyinly/lib/invariant";
+import isEqual from "lodash/isEqual";
+import type { JSONSchemaGeneratorParams } from "zod/v4/core";
 
 const debug = makeDebug(`pyly:ai.ts`);
 
@@ -26,14 +28,40 @@ export interface ChatPrompt<Schema extends z.ZodType> {
 export function zodResponseFormatJson<Schema extends z.ZodType>(
   schema: Schema,
 ): OpenAI.Responses.ResponseFormatTextJSONSchemaConfig {
-  const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
+  const jsonSchema = z.toJSONSchema(schema, {
+    target: `openapi-3.0`,
+    unrepresentable: `throw`,
+    override: (ctx) => {
+      fixAdditionalPropertiesEmptyObject(ctx);
+    },
+  });
+
+  const title = schema.meta()?.title ?? `anonymous schema`;
+  const name = title.replaceAll(/[^a-zA-Z0-9_-]/gu, `_`);
 
   return {
     type: `json_schema`,
-    name: `result_shape`,
+    name: name,
     schema: jsonSchema,
   };
 }
+
+type JsonSchemaOverride = NonNullable<JSONSchemaGeneratorParams[`override`]>;
+
+/**
+ * Fixes the `additionalProperties: {}` from a z.object().loose() schema to be
+ * `additionalProperties: true` for OpenAI compatibility.
+ */
+const fixAdditionalPropertiesEmptyObject: JsonSchemaOverride = ({
+  jsonSchema,
+}) => {
+  if (
+    jsonSchema.type === `object` &&
+    isEqual(jsonSchema.additionalProperties, {})
+  ) {
+    jsonSchema.additionalProperties = true;
+  }
+};
 
 export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,

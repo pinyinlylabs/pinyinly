@@ -146,3 +146,16 @@ export const actorPopulateActorSpecEvent = eventType(
     }),
   },
 );
+
+export const pronunciationGenerateHintEvent = eventType(
+  `pronunciation/generate-hint`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      actorId: actorIdSchema,
+      setKey: locationSetKeySchema,
+      cue: z.string(),
+    }),
+  },
+);

@@ -2,9 +2,9 @@ import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import type { LocationSpec } from "@/data/model";
 import { locationSpecSchema } from "@/data/model";
 import { renderPromptTemplate } from "@/util/prompts/shared";
-import type { LocationCriticismType } from "./locationEvaluateSpec";
+import type { LocationCriticismType } from "./locationSpecEvaluate";
 
-export const buildLocationRefineSpecPrompt = (entry: {
+export const buildLocationSpecRefinePrompt = (entry: {
   location: string;
   locationSpec: LocationSpec;
   criticisms: LocationCriticismType[];

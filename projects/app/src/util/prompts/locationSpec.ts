@@ -59,8 +59,9 @@ const locationSpecWithDetailBaseSchema = z
   })
   .strict();
 
-export const locationSpecWithDetailSchema =
-  locationSpecWithDetailBaseSchema.superRefine(validateLocationSpecShape);
+export const locationSpecWithDetailSchema = locationSpecWithDetailBaseSchema
+  .superRefine(validateLocationSpecShape)
+  .meta({ title: `locationSpecWithDetailSchema` });
 
 export type LocationSpecWithDetailSchemaType = z.infer<
   typeof locationSpecWithDetailSchema

@@ -40,7 +40,7 @@ import {
   getLocationSpec,
   getLocationSetIdentityImage,
   setLocationSetIdentityImage,
-} from "@/server/lib/queries";
+} from "@/server/lib/query";
 import { geminiRequestImageAsAsset } from "./gemini";
 import { invariant } from "@pinyinly/lib/invariant";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
@@ -51,13 +51,13 @@ import {
 } from "@/util/locationSoundThoughtChain";
 import type { LocationSoundThoughtChainsBySoundIdType } from "@/util/locationSoundThoughtChain";
 import { buildLocationNameSuggestionsPrompt } from "@/util/prompts/locationNameSuggestions";
-import { buildLocationRefineSpecPrompt } from "@/util/prompts/locationRefineSpec";
-import {
-  buildLocationEvaluateSpecPrompt,
-  hasMajorCriticisms,
-} from "@/util/prompts/locationEvaluateSpec";
 import { buildLocationPopulateSetDescriptionPrompt } from "@/util/prompts/locationPopulateSetDescription";
 import { buildLocationSpecPrompt } from "@/util/prompts/locationSpec";
+import { buildLocationSpecRefinePrompt } from "@/util/prompts/locationSpecRefine";
+import {
+  buildLocationSpecEvaluatePrompt,
+  hasMajorCriticisms,
+} from "@/util/prompts/locationSpecEvaluate";
 
 export const generateLocationSpec = inngest.createFunction(
   {
@@ -93,7 +93,7 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-evaluate-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildLocationEvaluateSpecPrompt({
+            buildLocationSpecEvaluatePrompt({
               location,
               locationSpec: locationSpecForEvaluation,
             }),
@@ -124,7 +124,7 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-refine-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildLocationRefineSpecPrompt({
+            buildLocationSpecRefinePrompt({
               location,
               locationSpec: locationSpecForRefine,
               criticisms: criticismsForRefine,
@@ -139,7 +139,7 @@ export const generateLocationSpec = inngest.createFunction(
         `location-spec-evaluate-refinement-attempt-${attempt}`,
         async () => {
           const response = await requestOpenAiResponseJson(
-            buildLocationEvaluateSpecPrompt({
+            buildLocationSpecEvaluatePrompt({
               location,
               locationSpec: refinedLocationSpec,
             }),

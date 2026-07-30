@@ -37,15 +37,27 @@ describe(`assertOpenAiCompatibleJsonSchema`, () => {
   });
 
   test(`tuple schemas throw because OpenAI does not support prefixItems`, () => {
-    const schema = z.object({
-      experiences: z.tuple([
-        z.object({ role: z.literal(`arrival`) }),
-        z.object({ role: z.literal(`heart`) }),
-      ]),
-    });
+    const jsonSchema = {
+      $schema: `https://json-schema.org/draft/2020-12/schema`,
+      type: `array`,
+      prefixItems: [{ type: `string` }, { type: `integer` }],
+      unevaluatedItems: false,
+    };
 
     expect(() => {
-      assertSchema(schema);
+      assertOpenAiCompatibleJsonSchema(jsonSchema);
     }).toThrow(/"prefixItems"/u);
+  });
+
+  test(`empty object for additionalProperties throws error`, () => {
+    const jsonSchema = {
+      $schema: `https://json-schema.org/draft/2020-12/schema`,
+      additionalProperties: {},
+      type: `object`,
+    };
+
+    expect(() => {
+      assertOpenAiCompatibleJsonSchema(jsonSchema);
+    }).toThrow();
   });
 });

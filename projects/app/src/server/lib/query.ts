@@ -5,9 +5,13 @@ import type {
   LocationSpec,
   Skill,
   SrsStateType,
+  ActorSpec,
+  ActorId,
 } from "@/data/model";
-import { locationSpecSchema, SrsKind } from "@/data/model";
+import { locationSpecSchema, SrsKind, actorSpecSchema } from "@/data/model";
 import {
+  pinyinSoundActorMnemonicIdentitySetting,
+  pinyinSoundActorMnemonicIdentitySettingKey,
   pinyinSoundLocationSetIdentityImageSetting,
   pinyinSoundLocationSetIdentityImageSettingKey,
   pinyinSoundLocationSpecSetting,
@@ -157,6 +161,35 @@ export async function getLocationSpec(
   }
 
   return jsonCodec(locationSpecSchema).parse(decoded.text, {
+    reportInput: true,
+  });
+}
+
+export async function getActorSpec(
+  db: Drizzle,
+  userId: string,
+  actorId: ActorId,
+): Promise<ActorSpec | null> {
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(
+        schema.userSetting.key,
+        pinyinSoundActorMnemonicIdentitySettingKey(actorId),
+      ),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = pinyinSoundActorMnemonicIdentitySetting.decode(
+    { actorId },
+    setting.value,
+  );
+
+  return actorSpecSchema.parse(decoded?.mnemonicIdentity, {
     reportInput: true,
   });
 }

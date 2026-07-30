@@ -25,7 +25,8 @@ export const mnemonicActorSpecSchema = z
     signatureExpression: z.string(),
     weakness: z.string(),
   })
-  .strict();
+  .strict()
+  .meta({ title: `mnemonicActorSpecSchema` });
 
 export type MnemonicActorSpecType = z.infer<typeof mnemonicActorSpecSchema>;
 

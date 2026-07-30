@@ -33,7 +33,8 @@ export const meaningHintOutputSchema = z
         .strict(),
     ),
   })
-  .strict();
+  .strict()
+  .meta({ title: `meaningHintOutputSchema` });
 
 export const buildMeaningHintPrompt = ({
   hanzi,

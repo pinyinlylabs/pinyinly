@@ -4,7 +4,7 @@ import { InngestTestEngine } from "@inngest/test";
 import { logger as inngestLogger } from "#server/lib/inngest/client.ts";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
-import type { LocationEvaluationType } from "#util/prompts/locationEvaluateSpec.js";
+import type { LocationEvaluationType } from "#util/prompts/locationSpecEvaluate.js";
 
 vi.mock(`#server/lib/ai.js`, async () => {
   const actual =
