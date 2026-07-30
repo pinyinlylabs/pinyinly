@@ -1,15 +1,10 @@
 import {
   pinyinSoundLocationSetDescriptionSetting,
-  pinyinSoundLocationSetDescriptionSettingKey,
   locationIdentityImageSetting,
-  pinyinSoundLocationIdentityImageSettingKey,
   pinyinSoundLocationNameSetting,
-  pinyinSoundLocationNameSettingKey,
   pinyinSoundLocationSpecSetting,
   pinyinSoundLocationThoughtChainsSetting,
-  pinyinSoundLocationThoughtChainsSettingKey,
   pinyinSoundLocationSetNameSetting,
-  pinyinSoundLocationSetNameSettingKey,
 } from "@/data/userSettings";
 import * as s from "@/server/pgSchema";
 import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
@@ -250,7 +245,7 @@ const populateLocation = inngest.createFunction(
               eq(s.userSetting.userId, userId),
               eq(
                 s.userSetting.key,
-                pinyinSoundLocationIdentityImageSettingKey(locationId),
+                locationIdentityImageSetting.entity.marshalKey({ locationId }),
               ),
             ),
           });
@@ -284,7 +279,7 @@ const populateLocation = inngest.createFunction(
       await step.run(`write location identity image`, async () =>
         withDrizzle(async (db) => {
           await setUserSetting(db, userId, {
-            key: pinyinSoundLocationIdentityImageSettingKey(locationId),
+            key: locationIdentityImageSetting.entity.marshalKey({ locationId }),
             value: locationIdentityImageSetting.entity.marshalValue({
               locationId: locationId,
               imageId: generatedLocationImageAssetId,
@@ -311,7 +306,9 @@ const populateLocation = inngest.createFunction(
                 eq(s.userSetting.userId, userId),
                 eq(
                   s.userSetting.key,
-                  pinyinSoundLocationThoughtChainsSettingKey(locationId),
+                  pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+                    locationId,
+                  }),
                 ),
               ),
             });
@@ -414,7 +411,9 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
                 eq(s.userSetting.userId, userId),
                 eq(
                   s.userSetting.key,
-                  pinyinSoundLocationThoughtChainsSettingKey(locationId),
+                  pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+                    locationId,
+                  }),
                 ),
               ),
             });
@@ -477,7 +476,9 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
               eq(s.userSetting.userId, userId),
               eq(
                 s.userSetting.key,
-                pinyinSoundLocationThoughtChainsSettingKey(locationId),
+                pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+                  locationId,
+                }),
               ),
             ),
           });
@@ -504,7 +505,9 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
             };
 
           await setUserSetting(db, userId, {
-            key: pinyinSoundLocationThoughtChainsSettingKey(locationId),
+            key: pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+              locationId,
+            }),
             value: pinyinSoundLocationThoughtChainsSetting.entity.marshalValue({
               locationId,
               thoughtChains: mergedThoughtChainsBySoundId,
@@ -610,7 +613,10 @@ const populateLocationSetDescription = inngest.createFunction(
             eq(s.userSetting.userId, userId),
             eq(
               s.userSetting.key,
-              pinyinSoundLocationSetDescriptionSettingKey(locationId, setKey),
+              pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
+                locationId,
+                setKey,
+              }),
             ),
           ),
         });
@@ -651,7 +657,10 @@ const populateLocationSetDescription = inngest.createFunction(
         );
 
         await setUserSetting(db, userId, {
-          key: pinyinSoundLocationSetDescriptionSettingKey(locationId, setKey),
+          key: pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
+            locationId,
+            setKey,
+          }),
           value: pinyinSoundLocationSetDescriptionSetting.entity.marshalValue({
             locationId,
             setKey,
@@ -685,7 +694,10 @@ const populateLocationSetName = inngest.createFunction(
             eq(s.userSetting.userId, userId),
             eq(
               s.userSetting.key,
-              pinyinSoundLocationSetNameSettingKey(locationId, setKey),
+              pinyinSoundLocationSetNameSetting.entity.marshalKey({
+                locationId,
+                setKey,
+              }),
             ),
           ),
         });
@@ -716,7 +728,10 @@ const populateLocationSetName = inngest.createFunction(
         }
 
         await setUserSetting(db, userId, {
-          key: pinyinSoundLocationSetNameSettingKey(locationId, setKey),
+          key: pinyinSoundLocationSetNameSetting.entity.marshalKey({
+            locationId,
+            setKey,
+          }),
           value: pinyinSoundLocationSetNameSetting.entity.marshalValue({
             locationId,
             setKey,
@@ -760,7 +775,9 @@ const populateLocationSpec = inngest.createFunction(
               eq(s.userSetting.userId, userId),
               eq(
                 s.userSetting.key,
-                pinyinSoundLocationNameSettingKey(locationId),
+                pinyinSoundLocationNameSetting.entity.marshalKey({
+                  locationId,
+                }),
               ),
             ),
           });

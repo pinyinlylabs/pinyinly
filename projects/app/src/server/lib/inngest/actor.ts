@@ -1,8 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import {
   actorMnemonicIdentitySetting,
-  actorMnemonicIdentitySettingKey,
-  actorModelSheetImageSettingKey,
   actorModelSheetImageSetting,
 } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
@@ -36,7 +34,10 @@ export const populateActor = inngest.createFunction(
       const setting = await db.query.userSetting.findFirst({
         where: and(
           eq(s.userSetting.userId, userId),
-          eq(s.userSetting.key, actorMnemonicIdentitySettingKey(actorId)),
+          eq(
+            s.userSetting.key,
+            actorMnemonicIdentitySetting.entity.marshalKey({ actorId }),
+          ),
         ),
       });
 
@@ -121,7 +122,7 @@ export const populateActor = inngest.createFunction(
       await step.run(`write model sheet image`, async () =>
         withDrizzle(async (db) => {
           await setUserSetting(db, userId, {
-            key: actorModelSheetImageSettingKey(actorId),
+            key: actorModelSheetImageSetting.entity.marshalKey({ actorId }),
             value: actorModelSheetImageSetting.entity.marshalValue({
               actorId: actorId,
               imageId: generatedImageAssetId,

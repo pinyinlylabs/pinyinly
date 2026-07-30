@@ -24,9 +24,7 @@ import {
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,
-  pinyinSoundImageSettingKey,
   pinyinSoundNameSetting,
-  pinyinSoundNameSettingKey,
 } from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
@@ -42,11 +40,17 @@ export default function SoundsPage() {
   const db = useDb();
 
   const nameSettingKeys = useMemo(
-    () => chart.soundIds.map((soundId) => pinyinSoundNameSettingKey(soundId)),
+    () =>
+      chart.soundIds.map((soundId) =>
+        pinyinSoundNameSetting.entity.marshalKey({ soundId }),
+      ),
     [chart.soundIds],
   );
   const imageSettingKeys = useMemo(
-    () => chart.soundIds.map((soundId) => pinyinSoundImageSettingKey(soundId)),
+    () =>
+      chart.soundIds.map((soundId) =>
+        pinyinSoundImageSetting.entity.marshalKey({ soundId }),
+      ),
     [chart.soundIds],
   );
   const finalPlaceSelectionKeys = useMemo(
@@ -156,11 +160,15 @@ export default function SoundsPage() {
 
       const nameValueData = pinyinSoundNameSetting.decode(
         { soundId },
-        settingsByKey.get(pinyinSoundNameSettingKey(soundId)) ?? null,
+        settingsByKey.get(
+          pinyinSoundNameSetting.entity.marshalKey({ soundId }),
+        ) ?? null,
       );
       const imageValueData = pinyinSoundImageSetting.decode(
         { soundId },
-        settingsByKey.get(pinyinSoundImageSettingKey(soundId)) ?? null,
+        settingsByKey.get(
+          pinyinSoundImageSetting.entity.marshalKey({ soundId }),
+        ) ?? null,
       );
       const imageId = imageValueData?.imageId ?? null;
 

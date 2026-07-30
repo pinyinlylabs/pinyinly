@@ -1,6 +1,6 @@
 import type { PinyinSoundId } from "@/data/model";
 import {
-  pinyinSoundGroupThemeSettingKey,
+  pinyinSoundGroupThemeSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
@@ -127,8 +127,8 @@ function SoundNameEditModalContent({
                           onPress={() => {
                             if (pinyinSoundGroup?.id != null) {
                               void r.mutate.setSetting({
-                                key: pinyinSoundGroupThemeSettingKey(
-                                  pinyinSoundGroup.id,
+                                key: pinyinSoundGroupThemeSetting.entity.marshalKey(
+                                  { soundGroupId: pinyinSoundGroup.id },
                                 ),
                                 value: { t: theme },
                                 now: new Date(),

@@ -12,7 +12,6 @@ import {
 import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
 import type { LocationId } from "@/data/model";
 import {
-  getPinyinSoundLocationSetKeyParams,
   pinyinSoundLocationDescriptionSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
@@ -86,15 +85,11 @@ export default function LocationIdPage() {
 
       <View className="gap-20">
         {locationSetKeys.map((setKey) => {
-          const settingKey = getPinyinSoundLocationSetKeyParams(
-            locationId,
-            setKey,
-          );
           return (
             <WikiTitledBox key={setKey} title={locationSetTitles[setKey]}>
               <InlineEditableSettingImage
                 setting={locationSetIdentityImageSetting}
-                settingKey={settingKey}
+                settingKey={{ locationId, setKey }}
                 enableAiGeneration
                 frameShape="rect"
                 aspectRatio="5:4"
@@ -105,13 +100,13 @@ export default function LocationIdPage() {
               <View className="mx-4 my-2">
                 <InlineEditableSettingText
                   setting={pinyinSoundLocationSetNameSetting}
-                  settingKey={settingKey}
+                  settingKey={{ locationId, setKey }}
                   placeholder="Set name"
                   textClassName="pyly-body-heading"
                 />
                 <InlineEditableSettingText
                   setting={pinyinSoundLocationSetDescriptionSetting}
-                  settingKey={settingKey}
+                  settingKey={{ locationId, setKey }}
                   placeholder="Description"
                   textClassName="pyly-body text-fg/80"
                   multiline

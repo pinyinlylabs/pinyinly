@@ -5,19 +5,12 @@ import type { AssetId, LocationId, PinyinSoundId } from "@/data/model";
 import { isFinalSoundId } from "@/data/pinyin";
 import {
   pinyinSoundLocationDescriptionSetting,
-  pinyinSoundLocationDescriptionSettingKey,
   locationIdentityImageSetting,
-  pinyinSoundLocationIdentityImageSettingKey,
   pinyinSoundLocationNameSetting,
-  pinyinSoundLocationNameSettingKey,
   pinyinSoundLocationSetDescriptionSetting,
-  pinyinSoundLocationSetDescriptionSettingKey,
   locationSetIdentityImageSetting,
-  pinyinSoundLocationSetIdentityImageSettingKey,
   pinyinSoundLocationSetNameSetting,
-  pinyinSoundLocationSetNameSettingKey,
   pinyinSoundLocationThoughtChainsSetting,
-  pinyinSoundLocationThoughtChainsSettingKey,
 } from "@/data/userSettings";
 import {
   getHighestScoreLocationSoundThoughtChainCandidate,
@@ -378,7 +371,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
     const locationId = `place_${nanoid()}` as LocationId;
 
     void r.mutate.setSetting({
-      key: pinyinSoundLocationNameSettingKey(locationId),
+      key: pinyinSoundLocationNameSetting.entity.marshalKey({ locationId }),
       value: pinyinSoundLocationNameSetting.entity.marshalValue({
         locationId: locationId,
         text: name,
@@ -390,21 +383,30 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
 
     for (const role of locationSetKeys) {
       void r.mutate.setSetting({
-        key: pinyinSoundLocationSetNameSettingKey(locationId, role),
+        key: pinyinSoundLocationSetNameSetting.entity.marshalKey({
+          locationId,
+          setKey: role,
+        }),
         value: null,
         now: new Date(),
         skipHistory: false,
         historyId: nanoid(),
       });
       void r.mutate.setSetting({
-        key: pinyinSoundLocationSetDescriptionSettingKey(locationId, role),
+        key: pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
+          locationId,
+          setKey: role,
+        }),
         value: null,
         now: new Date(),
         skipHistory: false,
         historyId: nanoid(),
       });
       void r.mutate.setSetting({
-        key: pinyinSoundLocationSetIdentityImageSettingKey(locationId, role),
+        key: locationSetIdentityImageSetting.entity.marshalKey({
+          locationId,
+          setKey: role,
+        }),
         value: null,
         now: new Date(),
         skipHistory: false,
@@ -413,21 +415,25 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
     }
 
     void r.mutate.setSetting({
-      key: pinyinSoundLocationDescriptionSettingKey(locationId),
+      key: pinyinSoundLocationDescriptionSetting.entity.marshalKey({
+        locationId,
+      }),
       value: null,
       now: new Date(),
       skipHistory: false,
       historyId: nanoid(),
     });
     void r.mutate.setSetting({
-      key: pinyinSoundLocationIdentityImageSettingKey(locationId),
+      key: locationIdentityImageSetting.entity.marshalKey({ locationId }),
       value: null,
       now: new Date(),
       skipHistory: false,
       historyId: nanoid(),
     });
     void r.mutate.setSetting({
-      key: pinyinSoundLocationThoughtChainsSettingKey(locationId),
+      key: pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+        locationId,
+      }),
       value: null,
       now: new Date(),
       skipHistory: false,
