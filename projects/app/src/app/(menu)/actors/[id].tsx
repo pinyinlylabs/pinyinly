@@ -17,12 +17,11 @@ import {
   pinyinSoundActorNameSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
-import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 export default function ActorIdPage() {
   const { id: rawId } = useLocalSearchParams<`/actors/[id]`>();
-  const actorId = (Array.isArray(rawId) ? rawId[0] : rawId) as ActorId;
+  const actorId = rawId as ActorId;
   const actorDirectory = usePinyinSoundActors();
 
   const actorNameSetting = useUserSetting({
@@ -41,7 +40,6 @@ export default function ActorIdPage() {
         ? actor.name
         : `Actor`;
 
-  const [isNameEditingEnabled, setIsNameEditingEnabled] = useState(false);
   const generateActorSpecMutation = trpc.ai.enqueueActorSpec.useMutation();
 
   const linkedSoundIds: PinyinSoundId[] = [];
@@ -79,23 +77,11 @@ export default function ActorIdPage() {
 
       <View className="gap-3">
         <View className="flex-row items-center gap-2 self-start">
-          {isNameEditingEnabled ? (
-            <InlineEditableSettingText
-              textClassName="pyly-body-title"
-              setting={pinyinSoundActorNameSetting}
-              settingKey={{ actorId }}
-              placeholder="Actor name"
-            />
-          ) : (
-            <Text className="pyly-body-title">{title}</Text>
-          )}
-
-          <RectButton
-            onPress={() => {
-              setIsNameEditingEnabled((value) => !value);
-            }}
-            variant="bare"
-            iconStart="pencil"
+          <InlineEditableSettingText
+            textClassName="pyly-body-title"
+            setting={pinyinSoundActorNameSetting}
+            settingKey={{ actorId }}
+            placeholder="Actor name"
           />
         </View>
 
@@ -107,11 +93,8 @@ export default function ActorIdPage() {
         />
       </View>
 
-      <WikiTitledBox
-        title="Mnemonic Spec"
-        className="rounded-lg border border-fg/10 bg-bg-high p-4"
-      >
-        <View className="gap-3">
+      <WikiTitledBox title="Mnemonic Spec">
+        <View className="gap-3 p-4">
           <InlineEditableSettingJson
             setting={pinyinSoundActorMnemonicIdentitySetting}
             settingKey={{ actorId }}
@@ -142,37 +125,37 @@ export default function ActorIdPage() {
         </View>
       </WikiTitledBox>
 
-      <WikiTitledBox
-        title="Model sheet"
-        className="rounded-lg border border-fg/10 bg-bg-high p-4"
-      >
-        <InlineEditableSettingImage
-          setting={pinyinSoundActorModelSheetImageSetting}
-          settingKey={{ actorId }}
-          enableAiGeneration
-          frameShape="rect"
-          aspectRatio="16:9"
-          previewHeight={220}
-          tileSize={64}
-        />
+      <WikiTitledBox title="Model sheet">
+        <View className="p-4">
+          <InlineEditableSettingImage
+            setting={pinyinSoundActorModelSheetImageSetting}
+            settingKey={{ actorId }}
+            enableAiGeneration
+            frameShape="rect"
+            aspectRatio="16:9"
+            previewHeight={220}
+            tileSize={64}
+          />
+        </View>
       </WikiTitledBox>
 
-      <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
-        <Text className="pyly-body-caption text-fg-dim">Used by sounds</Text>
-        {linkedSoundIds.length === 0 ? (
-          <Text className="pyly-body-caption text-fg-dim">
-            Not currently selected by any sound.
-          </Text>
-        ) : (
-          <View className="flex-row flex-wrap gap-2">
-            {linkedSoundIds.map((soundId) => (
-              <Link key={soundId} href={`/sounds/${soundId}`} asChild>
-                <RectButton variant="option">{soundId}</RectButton>
-              </Link>
-            ))}
-          </View>
-        )}
-      </View>
+      <WikiTitledBox title="Used by sounds">
+        <View className="p-4">
+          {linkedSoundIds.length === 0 ? (
+            <Text className="pyly-body-caption text-fg-dim">
+              Not currently selected by any sound.
+            </Text>
+          ) : (
+            <View className="flex-row flex-wrap gap-2">
+              {linkedSoundIds.map((soundId) => (
+                <Link key={soundId} href={`/sounds/${soundId}`} asChild>
+                  <RectButton variant="option">{soundId}</RectButton>
+                </Link>
+              ))}
+            </View>
+          )}
+        </View>
+      </WikiTitledBox>
     </View>
   );
 }

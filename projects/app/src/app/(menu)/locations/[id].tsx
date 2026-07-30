@@ -122,11 +122,8 @@ export default function LocationIdPage() {
         })}
       </View>
 
-      <WikiTitledBox
-        title="Location specification JSON"
-        className="rounded-lg border border-fg/10 bg-bg-high p-4"
-      >
-        <View className="gap-3">
+      <WikiTitledBox title="Location specification JSON">
+        <View className="gap-3 p-4">
           <InlineEditableSettingText
             setting={pinyinSoundLocationSpecSetting}
             settingKey={{ locationId: locationId }}
