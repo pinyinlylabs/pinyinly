@@ -14,11 +14,11 @@ import type { LocationId } from "@/data/model";
 import {
   getPinyinSoundLocationSetKeyParams,
   pinyinSoundLocationDescriptionSetting,
-  pinyinSoundLocationIdentityImageSetting,
+  locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationSpecSetting,
   pinyinSoundLocationSetDescriptionSetting,
-  pinyinSoundLocationSetIdentityImageSetting,
+  locationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
   pinyinSoundLocationThoughtChainsSetting,
 } from "@/data/userSettings";
@@ -58,7 +58,7 @@ export default function LocationIdPage() {
       <View className="gap-1">
         <View className="w-[260px] overflow-hidden rounded-2xl">
           <InlineEditableSettingImage
-            setting={pinyinSoundLocationIdentityImageSetting}
+            setting={locationIdentityImageSetting}
             settingKey={{ locationId: locationId }}
             enableAiGeneration
             frameShape="rect"
@@ -93,7 +93,7 @@ export default function LocationIdPage() {
           return (
             <WikiTitledBox key={setKey} title={locationSetTitles[setKey]}>
               <InlineEditableSettingImage
-                setting={pinyinSoundLocationSetIdentityImageSetting}
+                setting={locationSetIdentityImageSetting}
                 settingKey={settingKey}
                 enableAiGeneration
                 frameShape="rect"

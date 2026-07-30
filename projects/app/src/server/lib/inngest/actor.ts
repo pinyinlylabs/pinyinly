@@ -1,10 +1,10 @@
 import { and, eq } from "drizzle-orm";
-import type { ActorId } from "@/data/model";
 import {
-  pinyinSoundActorMnemonicIdentitySetting,
-  pinyinSoundActorMnemonicIdentitySettingKey,
+  actorMnemonicIdentitySetting,
+  actorMnemonicIdentitySettingKey,
+  actorModelSheetImageSettingKey,
+  actorModelSheetImageSetting,
 } from "@/data/userSettings";
-import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { withDrizzle } from "@/server/lib/db";
 import * as s from "@/server/pgSchema";
 import { setUserSetting } from "@/server/lib/userSettings";
@@ -12,73 +12,64 @@ import {
   buildActorSpecPrompt,
   actorSpecSchema,
 } from "@/util/prompts/actorSpec";
-import type { ActorSpecType } from "@/util/prompts/actorSpec";
 import { nanoid } from "@/util/nanoid";
 import { actorPopulateActorSpecEvent, inngest } from "./client";
+import { step } from "inngest";
+import { requestOpenAiResponseJson } from "@/server/lib/ai";
+import { geminiRequestImageAsAsset } from "./gemini";
+import { buildActorModelSheetImagePrompt } from "@/util/prompts/actorModelSheetImage";
+import type { ActorSpec } from "@/data/model";
 
-type PopulateActorSpecEventData = {
-  userId: string;
-  actorId: ActorId;
-  actorName: string;
-};
-
-export const populateActor: ReturnType<typeof inngest.createFunction> =
-  inngest.createFunction(
-    {
-      id: `actor/populateActor`,
-      singleton: {
-        key: `event.data.userId + "-" + event.data.actorId`,
-        mode: `skip`,
-      },
-      triggers: actorPopulateActorSpecEvent,
+export const populateActor = inngest.createFunction(
+  {
+    id: `actor/populateActor`,
+    singleton: {
+      key: `event.data.userId + "-" + event.data.actorId`,
+      mode: `skip`,
     },
-    async ({
-      event,
-    }: {
-      event: { data: PopulateActorSpecEventData };
-    }): Promise<ActorSpecType> => {
-      const { userId, actorId, actorName } = event.data;
+    triggers: actorPopulateActorSpecEvent,
+  },
+  async ({ event }): Promise<ActorSpec> => {
+    const { userId, actorId, actorName } = event.data;
 
-      const existingActorSpec = await withDrizzle(async (db) => {
-        const setting = await db.query.userSetting.findFirst({
-          where: and(
-            eq(s.userSetting.userId, userId),
-            eq(
-              s.userSetting.key,
-              pinyinSoundActorMnemonicIdentitySettingKey(actorId),
-            ),
-          ),
-        });
-
-        if (setting == null) {
-          return null;
-        }
-
-        const decoded = pinyinSoundActorMnemonicIdentitySetting.decode(
-          { actorId },
-          setting.value,
-        );
-
-        return decoded?.mnemonicIdentity ?? null;
+    let actorSpec = await withDrizzle(async (db): Promise<ActorSpec | null> => {
+      const setting = await db.query.userSetting.findFirst({
+        where: and(
+          eq(s.userSetting.userId, userId),
+          eq(s.userSetting.key, actorMnemonicIdentitySettingKey(actorId)),
+        ),
       });
 
-      if (existingActorSpec != null) {
-        return actorSpecSchema.parse(existingActorSpec);
+      if (setting == null) {
+        return null;
       }
 
+      const decoded = actorMnemonicIdentitySetting.decode(
+        { actorId },
+        setting.value,
+      );
+
+      if (decoded == null) {
+        return null;
+      }
+
+      return actorSpecSchema.parse(decoded.mnemonicIdentity);
+    });
+
+    if (actorSpec == null) {
       const prompt = buildActorSpecPrompt({
         identity: actorName,
       });
 
       const result = await requestOpenAiResponseJson(prompt);
-      const actorSpec = actorSpecSchema.parse(result.data);
+      actorSpec = actorSpecSchema.parse(result.data);
 
       await withDrizzle(async (db) => {
         await setUserSetting(db, userId, {
-          key: pinyinSoundActorMnemonicIdentitySetting.entity.marshalKey({
+          key: actorMnemonicIdentitySetting.entity.marshalKey({
             actorId,
           }),
-          value: pinyinSoundActorMnemonicIdentitySetting.entity.marshalValue({
+          value: actorMnemonicIdentitySetting.entity.marshalValue({
             actorId,
             mnemonicIdentity: actorSpec,
           }),
@@ -87,9 +78,64 @@ export const populateActor: ReturnType<typeof inngest.createFunction> =
           historyId: nanoid(),
         });
       });
+    }
 
-      return actorSpec;
-    },
-  );
+    const currentModelSheetImage = await step.run(
+      `read current model sheet`,
+      async () =>
+        withDrizzle(async (db) => {
+          const setting = await db.query.userSetting.findFirst({
+            where: and(
+              eq(s.userSetting.userId, userId),
+              eq(
+                s.userSetting.key,
+                actorModelSheetImageSetting.entity.marshalKey({ actorId }),
+              ),
+            ),
+          });
+
+          if (setting == null) {
+            return null;
+          }
+
+          const decoded = actorModelSheetImageSetting.decode(
+            { actorId },
+            setting.value,
+          );
+
+          return decoded?.imageId ?? null;
+        }),
+    );
+
+    if (currentModelSheetImage == null) {
+      const generatedImageAssetId = await step.invoke(
+        `generate model sheet image`,
+        {
+          function: geminiRequestImageAsAsset,
+          data: {
+            prompt: buildActorModelSheetImagePrompt({ actorSpec }),
+          },
+        },
+      );
+
+      await step.run(`write model sheet image`, async () =>
+        withDrizzle(async (db) => {
+          await setUserSetting(db, userId, {
+            key: actorModelSheetImageSettingKey(actorId),
+            value: actorModelSheetImageSetting.entity.marshalValue({
+              actorId: actorId,
+              imageId: generatedImageAssetId,
+            }),
+            now: new Date(),
+            skipHistory: false,
+            historyId: nanoid(),
+          });
+        }),
+      );
+    }
+
+    return actorSpec;
+  },
+);
 
 export const functions: ReadonlyArray<typeof populateActor> = [populateActor];

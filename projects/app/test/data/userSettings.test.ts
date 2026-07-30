@@ -7,13 +7,12 @@ import {
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
   pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundActorImageSetting,
-  pinyinSoundActorModelSheetImageSetting,
-  pinyinSoundLocationIdentityImageSetting,
+  actorImageSetting,
+  actorModelSheetImageSetting,
+  locationIdentityImageSetting,
   pinyinSoundLocationThoughtChainsSetting,
-  pinyinSoundLocationSetIdentityImageSetting,
+  locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
-  pinyinSoundModelSheetImageSetting,
   userNameSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
@@ -38,15 +37,12 @@ function expectUniqueSettingKeyPaths(
 
 describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
   test(`contains all image setting entities`, () => {
-    expect(imageSettingDefs).toHaveLength(8);
-    expect(imageSettingDefs).toContain(pinyinSoundActorImageSetting);
-    expect(imageSettingDefs).toContain(pinyinSoundActorModelSheetImageSetting);
-    expect(imageSettingDefs).toContain(pinyinSoundLocationIdentityImageSetting);
-    expect(imageSettingDefs).toContain(
-      pinyinSoundLocationSetIdentityImageSetting,
-    );
+    expect(imageSettingDefs).toHaveLength(7);
+    expect(imageSettingDefs).toContain(actorImageSetting);
+    expect(imageSettingDefs).toContain(actorModelSheetImageSetting);
+    expect(imageSettingDefs).toContain(locationIdentityImageSetting);
+    expect(imageSettingDefs).toContain(locationSetIdentityImageSetting);
     expect(imageSettingDefs).toContain(pinyinSoundImageSetting);
-    expect(imageSettingDefs).toContain(pinyinSoundModelSheetImageSetting);
     expect(imageSettingDefs).toContain(hanziWordMeaningHintImageSetting);
     expect(imageSettingDefs).toContain(hanziPronunciationHintImageSetting);
   });
@@ -80,13 +76,12 @@ describe(
     test(`returns SQL LIKE patterns for all image settings`, () => {
       const patterns = getImageSettingKeyPatterns();
 
-      expect(patterns).toHaveLength(8);
+      expect(patterns).toHaveLength(7);
       expect(patterns).toContain(`psai/%`); // pinyinSoundActorImageSetting
       expect(patterns).toContain(`psams/%`); // pinyinSoundActorModelSheetImageSetting
       expect(patterns).toContain(`pspi/%`); // pinyinSoundLocationIdentityImageSetting
       expect(patterns).toContain(`pspli/%`); // pinyinSoundLocationSetIdentityImageSetting
       expect(patterns).toContain(`psi/%`); // pinyinSoundImageSetting
-      expect(patterns).toContain(`psms/%`); // pinyinSoundModelSheetImageSetting
       expect(patterns).toContain(`hwmhi/%`); // hanziWordMeaningHintImageSetting
       expect(patterns).toContain(`hphi/%`); // hanziPronunciationHintImageSetting
     });
@@ -94,34 +89,27 @@ describe(
     test(`patterns match the key path prefixes`, () => {
       const patterns = getImageSettingKeyPatterns();
 
-      expect(pinyinSoundActorImageSetting.entity._def.keyPath).toBe(
-        `psai/[actorId]`,
-      );
+      expect(actorImageSetting.entity._def.keyPath).toBe(`psai/[actorId]`);
       expect(patterns).toContain(`psai/%`);
 
-      expect(pinyinSoundActorModelSheetImageSetting.entity._def.keyPath).toBe(
+      expect(actorModelSheetImageSetting.entity._def.keyPath).toBe(
         `psams/[actorId]`,
       );
       expect(patterns).toContain(`psams/%`);
 
-      expect(pinyinSoundLocationIdentityImageSetting.entity._def.keyPath).toBe(
+      expect(locationIdentityImageSetting.entity._def.keyPath).toBe(
         `pspi/[locationId]`,
       );
       expect(patterns).toContain(`pspi/%`);
 
-      expect(
-        pinyinSoundLocationSetIdentityImageSetting.entity._def.keyPath,
-      ).toBe(`pspli/[locationId]/[setKey]`);
+      expect(locationSetIdentityImageSetting.entity._def.keyPath).toBe(
+        `pspli/[locationId]/[setKey]`,
+      );
       expect(patterns).toContain(`pspli/%`);
 
       // Verify each pattern corresponds to its setting's key path
       expect(pinyinSoundImageSetting.entity._def.keyPath).toBe(`psi/[soundId]`);
       expect(patterns).toContain(`psi/%`);
-
-      expect(pinyinSoundModelSheetImageSetting.entity._def.keyPath).toBe(
-        `psms/[soundId]`,
-      );
-      expect(patterns).toContain(`psms/%`);
 
       expect(hanziWordMeaningHintImageSetting.entity._def.keyPath).toBe(
         `hwmhi/[hanziWord]`,

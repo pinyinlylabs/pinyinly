@@ -302,7 +302,7 @@ export const pinyinSoundMnemonicIdentitySetting = defineUserSetting({
   }),
 });
 
-export const pinyinSoundActorNameSetting = defineUserSetting({
+export const actorNameSetting = defineUserSetting({
   entity: r.entity(`psan/[actorId]`, {
     actorId: rActorId().alias(`a`),
     text: r.string().alias(`t`),
@@ -310,7 +310,7 @@ export const pinyinSoundActorNameSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const pinyinSoundActorDescriptionSetting = defineUserSetting({
+export const actorDescriptionSetting = defineUserSetting({
   entity: r.entity(`psad/[actorId]`, {
     actorId: rActorId().alias(`a`),
     text: r.string().alias(`t`),
@@ -318,21 +318,21 @@ export const pinyinSoundActorDescriptionSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const pinyinSoundActorMnemonicIdentitySetting = defineUserSetting({
+export const actorMnemonicIdentitySetting = defineUserSetting({
   entity: r.entity(`psami/[actorId]`, {
     actorId: rActorId().alias(`a`),
     mnemonicIdentity: r.json().optional().alias(`j`),
   }),
 });
 
-export const pinyinSoundActorImageSetting = defineUserSetting({
+export const actorImageSetting = defineUserSetting({
   entity: r.entity(`psai/[actorId]`, {
     actorId: rActorId().alias(`a`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
 });
 
-export const pinyinSoundActorModelSheetImageSetting = defineUserSetting({
+export const actorModelSheetImageSetting = defineUserSetting({
   entity: r.entity(`psams/[actorId]`, {
     actorId: rActorId().alias(`a`),
     ...imageSettingFields,
@@ -369,7 +369,7 @@ export const pinyinSoundLocationDescriptionSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const pinyinSoundLocationIdentityImageSetting = defineUserSetting({
+export const locationIdentityImageSetting = defineUserSetting({
   entity: r.entity(`pspi/[locationId]`, {
     locationId: rLocationId().alias(`p`),
     ...imageSettingFields,
@@ -409,7 +409,7 @@ export const pinyinSoundLocationSetDescriptionSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const pinyinSoundLocationSetIdentityImageSetting = defineUserSetting({
+export const locationSetIdentityImageSetting = defineUserSetting({
   entity: r.entity(`pspli/[locationId]/[setKey]`, {
     locationId: rLocationId().alias(`p`),
     setKey: r.string().alias(`r`),
@@ -419,13 +419,6 @@ export const pinyinSoundLocationSetIdentityImageSetting = defineUserSetting({
 
 export const pinyinSoundImageSetting = defineUserSetting({
   entity: r.entity(`psi/[soundId]`, {
-    soundId: rPinyinSoundId().alias(`i`),
-    ...imageSettingFields,
-  }) satisfies UserSettingImageEntity,
-});
-
-export const pinyinSoundModelSheetImageSetting = defineUserSetting({
-  entity: r.entity(`psms/[soundId]`, {
     soundId: rPinyinSoundId().alias(`i`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
@@ -459,30 +452,24 @@ export function pinyinSoundMnemonicIdentitySettingKey(
   return pinyinSoundMnemonicIdentitySetting.entity.marshalKey({ soundId });
 }
 
-export function pinyinSoundActorNameSettingKey(actorId: ActorId): string {
-  return pinyinSoundActorNameSetting.entity.marshalKey({ actorId });
+export function actorNameSettingKey(actorId: ActorId): string {
+  return actorNameSetting.entity.marshalKey({ actorId });
 }
 
-export function pinyinSoundActorDescriptionSettingKey(
-  actorId: ActorId,
-): string {
-  return pinyinSoundActorDescriptionSetting.entity.marshalKey({ actorId });
+export function actorDescriptionSettingKey(actorId: ActorId): string {
+  return actorDescriptionSetting.entity.marshalKey({ actorId });
 }
 
-export function pinyinSoundActorMnemonicIdentitySettingKey(
-  actorId: ActorId,
-): string {
-  return pinyinSoundActorMnemonicIdentitySetting.entity.marshalKey({ actorId });
+export function actorMnemonicIdentitySettingKey(actorId: ActorId): string {
+  return actorMnemonicIdentitySetting.entity.marshalKey({ actorId });
 }
 
-export function pinyinSoundActorImageSettingKey(actorId: ActorId): string {
-  return pinyinSoundActorImageSetting.entity.marshalKey({ actorId });
+export function actorImageSettingKey(actorId: ActorId): string {
+  return actorImageSetting.entity.marshalKey({ actorId });
 }
 
-export function pinyinSoundActorModelSheetImageSettingKey(
-  actorId: ActorId,
-): string {
-  return pinyinSoundActorModelSheetImageSetting.entity.marshalKey({ actorId });
+export function actorModelSheetImageSettingKey(actorId: ActorId): string {
+  return actorModelSheetImageSetting.entity.marshalKey({ actorId });
 }
 
 export function pinyinSoundActorSelectionSettingKey(
@@ -518,7 +505,7 @@ export function pinyinSoundLocationDescriptionSettingKey(
 export function pinyinSoundLocationIdentityImageSettingKey(
   locationId: LocationId,
 ): string {
-  return pinyinSoundLocationIdentityImageSetting.entity.marshalKey({
+  return locationIdentityImageSetting.entity.marshalKey({
     locationId,
   });
 }
@@ -562,7 +549,7 @@ export function pinyinSoundLocationSetIdentityImageSettingKey(
   locationId: LocationId,
   setKey: string,
 ): string {
-  return pinyinSoundLocationSetIdentityImageSetting.entity.marshalKey({
+  return locationSetIdentityImageSetting.entity.marshalKey({
     locationId,
     setKey,
   });
@@ -570,12 +557,6 @@ export function pinyinSoundLocationSetIdentityImageSettingKey(
 
 export function pinyinSoundImageSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundImageSetting.entity.marshalKey({ soundId });
-}
-
-export function pinyinSoundModelSheetImageSettingKey(
-  soundId: PinyinSoundId,
-): string {
-  return pinyinSoundModelSheetImageSetting.entity.marshalKey({ soundId });
 }
 
 //
@@ -745,12 +726,11 @@ export function userHanziSettingLike(hanzi: HanziText): string {
  * Used for syncing assets between servers.
  */
 export const imageSettingDefs = [
-  pinyinSoundActorImageSetting,
-  pinyinSoundActorModelSheetImageSetting,
-  pinyinSoundLocationIdentityImageSetting,
-  pinyinSoundLocationSetIdentityImageSetting,
+  actorImageSetting,
+  actorModelSheetImageSetting,
+  locationIdentityImageSetting,
+  locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
-  pinyinSoundModelSheetImageSetting,
   hanziWordMeaningHintImageSetting,
   hanziPronunciationHintImageSetting,
 ] as const satisfies readonly UserSetting[];
@@ -776,14 +756,14 @@ export const userSettingDefinitions = [
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
   pinyinSoundDescriptionSetting,
-  pinyinSoundActorDescriptionSetting,
-  pinyinSoundActorImageSetting,
-  pinyinSoundActorMnemonicIdentitySetting,
-  pinyinSoundActorModelSheetImageSetting,
-  pinyinSoundActorNameSetting,
+  actorDescriptionSetting,
+  actorImageSetting,
+  actorMnemonicIdentitySetting,
+  actorModelSheetImageSetting,
+  actorNameSetting,
   pinyinSoundActorSelectionSetting,
   pinyinSoundLocationDescriptionSetting,
-  pinyinSoundLocationIdentityImageSetting,
+  locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationSpecSetting,
   pinyinSoundLocationThoughtChainsSetting,
@@ -792,9 +772,8 @@ export const userSettingDefinitions = [
   pinyinSoundGroupThemeSetting,
   pinyinSoundImageSetting,
   pinyinSoundMnemonicIdentitySetting,
-  pinyinSoundLocationSetIdentityImageSetting,
+  locationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
-  pinyinSoundModelSheetImageSetting,
   pinyinSoundNameSetting,
   prioritizedWordItemSetting,
   quickSearchPickSetting,

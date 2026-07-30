@@ -14,8 +14,8 @@ import {
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundActorImageSetting,
-  pinyinSoundLocationIdentityImageSetting,
+  actorImageSetting,
+  locationIdentityImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
 import { Text, View } from "react-native";
@@ -113,7 +113,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
                   id: `actor-primary`,
                   kind: `actor` as const,
                   defaultVisibleInRow: true,
-                  imageSetting: pinyinSoundActorImageSetting,
+                  imageSetting: actorImageSetting,
                   imageSettingKey: { actorId: selectedInitialActor.actorId },
                   label:
                     selectedInitialActor.name ??
@@ -129,7 +129,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
                   id: `location-primary`,
                   kind: `location` as const,
                   defaultVisibleInRow: true,
-                  imageSetting: pinyinSoundLocationIdentityImageSetting,
+                  imageSetting: locationIdentityImageSetting,
                   imageSettingKey: {
                     locationId: selectedFinalLocation.locationId,
                   },

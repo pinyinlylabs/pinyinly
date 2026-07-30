@@ -11,6 +11,7 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 
 export const geminiImageModels = [
   `gemini-2.5-flash-image`,
+  `gemini-3.1-flash-image`,
   `gemini-3.1-flash-lite-image`,
 ] as const;
 

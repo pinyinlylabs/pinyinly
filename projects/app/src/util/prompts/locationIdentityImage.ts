@@ -3,10 +3,8 @@ import { renderPromptTemplate } from "@/util/prompts/shared";
 import type { ImagePrompt } from "@/server/lib/gemini";
 import type { AssetId, LocationSpec } from "@/data/model";
 
-export function buildLocationIdentityImagePrompt(entry: {
-  input: {
-    locationSpec: LocationSpec;
-  };
+export function buildLocationIdentityImagePrompt(input: {
+  locationSpec: LocationSpec;
 }): ImagePrompt {
   const userTemplate = `
 You are given a complete mnemonic location specification.
@@ -75,8 +73,8 @@ The goal is to create the single image that people will forever associate with t
 `;
 
   const variables = {
-    locationName: entry.input.locationSpec.location,
-    input: JSON.stringify(entry.input, null, 2),
+    locationName: input.locationSpec.location,
+    input: JSON.stringify(input, null, 2),
   };
 
   const userPrompt = renderPromptTemplate(userTemplate, variables);

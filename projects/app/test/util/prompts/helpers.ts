@@ -1,4 +1,4 @@
-import type { LocationSpec } from "#data/model.js";
+import type { ActorSpec, LocationSpec } from "#data/model.js";
 import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
@@ -275,5 +275,11 @@ export function makeLocationSpecWithDetail(
         avoidFraming: [`Do not frame it as the same as the cabin interior.`],
       },
     },
+  };
+}
+
+export function makeActorSpec(actorName: string): ActorSpec {
+  return {
+    nickname: actorName,
   };
 }

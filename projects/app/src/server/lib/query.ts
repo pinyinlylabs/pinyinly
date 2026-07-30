@@ -10,9 +10,9 @@ import type {
 } from "@/data/model";
 import { locationSpecSchema, SrsKind, actorSpecSchema } from "@/data/model";
 import {
-  pinyinSoundActorMnemonicIdentitySetting,
-  pinyinSoundActorMnemonicIdentitySettingKey,
-  pinyinSoundLocationSetIdentityImageSetting,
+  actorMnemonicIdentitySetting,
+  actorMnemonicIdentitySettingKey,
+  locationSetIdentityImageSetting,
   pinyinSoundLocationSetIdentityImageSettingKey,
   pinyinSoundLocationSpecSetting,
   userNameSetting,
@@ -173,10 +173,7 @@ export async function getActorSpec(
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
-      eq(
-        schema.userSetting.key,
-        pinyinSoundActorMnemonicIdentitySettingKey(actorId),
-      ),
+      eq(schema.userSetting.key, actorMnemonicIdentitySettingKey(actorId)),
     ),
   });
 
@@ -184,7 +181,7 @@ export async function getActorSpec(
     return null;
   }
 
-  const decoded = pinyinSoundActorMnemonicIdentitySetting.decode(
+  const decoded = actorMnemonicIdentitySetting.decode(
     { actorId },
     setting.value,
   );
@@ -203,7 +200,7 @@ export async function setLocationSetIdentityImage(
 ): Promise<void> {
   await setUserSetting(db, userId, {
     key: pinyinSoundLocationSetIdentityImageSettingKey(locationId, setKey),
-    value: pinyinSoundLocationSetIdentityImageSetting.entity.marshalValue({
+    value: locationSetIdentityImageSetting.entity.marshalValue({
       locationId: locationId,
       setKey,
       imageId: imageId,
@@ -234,7 +231,7 @@ export async function getLocationSetIdentityImage(
     return null;
   }
 
-  const decoded = pinyinSoundLocationSetIdentityImageSetting.decode(
+  const decoded = locationSetIdentityImageSetting.decode(
     { locationId, setKey },
     setting.value,
   );

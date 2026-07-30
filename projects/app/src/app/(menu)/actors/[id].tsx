@@ -10,11 +10,11 @@ import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { ActorId, PinyinSoundId } from "@/data/model";
 import {
-  pinyinSoundActorDescriptionSetting,
-  pinyinSoundActorImageSetting,
-  pinyinSoundActorMnemonicIdentitySetting,
-  pinyinSoundActorModelSheetImageSetting,
-  pinyinSoundActorNameSetting,
+  actorDescriptionSetting,
+  actorImageSetting,
+  actorMnemonicIdentitySetting,
+  actorModelSheetImageSetting,
+  actorNameSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
@@ -24,11 +24,11 @@ export default function ActorIdPage() {
   const actorId = rawId as ActorId;
   const actorDirectory = usePinyinSoundActors();
 
-  const actorNameSetting = useUserSetting({
-    setting: pinyinSoundActorNameSetting,
+  const actorNameSettingResult = useUserSetting({
+    setting: actorNameSetting,
     key: { actorId },
   });
-  const actorName = actorNameSetting.value?.text;
+  const actorName = actorNameSettingResult.value?.text;
 
   const actor = actorDirectory.actors.find(
     (entry) => entry.actorId === actorId,
@@ -64,7 +64,7 @@ export default function ActorIdPage() {
 
       <View className="items-center">
         <InlineEditableSettingImage
-          setting={pinyinSoundActorImageSetting}
+          setting={actorImageSetting}
           settingKey={{ actorId }}
           enableAiGeneration
           frameShape="circle"
@@ -79,14 +79,14 @@ export default function ActorIdPage() {
         <View className="flex-row items-center gap-2 self-start">
           <InlineEditableSettingText
             textClassName="pyly-body-title"
-            setting={pinyinSoundActorNameSetting}
+            setting={actorNameSetting}
             settingKey={{ actorId }}
             placeholder="Actor name"
           />
         </View>
 
         <InlineEditableSettingText
-          setting={pinyinSoundActorDescriptionSetting}
+          setting={actorDescriptionSetting}
           settingKey={{ actorId }}
           placeholder="Actor description"
           multiline
@@ -96,7 +96,7 @@ export default function ActorIdPage() {
       <WikiTitledBox title="Mnemonic Spec">
         <View className="gap-3 p-4">
           <InlineEditableSettingJson
-            setting={pinyinSoundActorMnemonicIdentitySetting}
+            setting={actorMnemonicIdentitySetting}
             settingKey={{ actorId }}
             placeholder='{"traits": ["curious"]}'
             autoResizeMinHeight={120}
@@ -128,7 +128,7 @@ export default function ActorIdPage() {
       <WikiTitledBox title="Model sheet">
         <View className="p-4">
           <InlineEditableSettingImage
-            setting={pinyinSoundActorModelSheetImageSetting}
+            setting={actorModelSheetImageSetting}
             settingKey={{ actorId }}
             enableAiGeneration
             frameShape="rect"

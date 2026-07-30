@@ -6,13 +6,13 @@ import { isFinalSoundId } from "@/data/pinyin";
 import {
   pinyinSoundLocationDescriptionSetting,
   pinyinSoundLocationDescriptionSettingKey,
-  pinyinSoundLocationIdentityImageSetting,
+  locationIdentityImageSetting,
   pinyinSoundLocationIdentityImageSettingKey,
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationNameSettingKey,
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundLocationSetDescriptionSettingKey,
-  pinyinSoundLocationSetIdentityImageSetting,
+  locationSetIdentityImageSetting,
   pinyinSoundLocationSetIdentityImageSettingKey,
   pinyinSoundLocationSetNameSetting,
   pinyinSoundLocationSetNameSettingKey,
@@ -254,7 +254,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
 
     if (setting.key.startsWith(`pspi/`)) {
       const locationId = setting.key.slice(`pspi/`.length) as LocationId;
-      const value = pinyinSoundLocationIdentityImageSetting.decode(
+      const value = locationIdentityImageSetting.decode(
         { locationId },
         setting.value,
       );
@@ -348,7 +348,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
         continue;
       }
 
-      const value = pinyinSoundLocationSetIdentityImageSetting.decode(
+      const value = locationSetIdentityImageSetting.decode(
         {
           locationId: keyData.locationId,
           setKey: keyData.setKey,

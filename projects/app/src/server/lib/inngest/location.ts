@@ -1,7 +1,7 @@
 import {
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundLocationSetDescriptionSettingKey,
-  pinyinSoundLocationIdentityImageSetting,
+  locationIdentityImageSetting,
   pinyinSoundLocationIdentityImageSettingKey,
   pinyinSoundLocationNameSetting,
   pinyinSoundLocationNameSettingKey,
@@ -259,7 +259,7 @@ const populateLocation = inngest.createFunction(
             return null;
           }
 
-          const decoded = pinyinSoundLocationIdentityImageSetting.decode(
+          const decoded = locationIdentityImageSetting.decode(
             { locationId: locationId },
             setting.value,
           );
@@ -275,9 +275,7 @@ const populateLocation = inngest.createFunction(
           function: geminiRequestImageAsAsset,
           data: {
             prompt: buildLocationIdentityImagePrompt({
-              input: {
-                locationSpec,
-              },
+              locationSpec,
             }),
           },
         },
@@ -287,7 +285,7 @@ const populateLocation = inngest.createFunction(
         withDrizzle(async (db) => {
           await setUserSetting(db, userId, {
             key: pinyinSoundLocationIdentityImageSettingKey(locationId),
-            value: pinyinSoundLocationIdentityImageSetting.entity.marshalValue({
+            value: locationIdentityImageSetting.entity.marshalValue({
               locationId: locationId,
               imageId: generatedLocationImageAssetId,
             }),

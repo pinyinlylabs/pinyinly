@@ -1,86 +1,6 @@
-import type { LocationSpec } from "#data/model.js";
 import { buildLocationIdentityImagePrompt } from "#util/prompts/locationIdentityImage.ts";
 import { describe, expect, test } from "vitest";
-import { fmtImagePromptForSnapshot } from "./helpers";
-
-type LocationIdentityImagePromptInputType = {
-  input: {
-    locationSpec: LocationSpec;
-  };
-};
-
-const exampleInput: LocationIdentityImagePromptInputType = {
-  input: {
-    locationSpec: {
-      location: `Aircraft hangar`,
-      recognitionHooks: [
-        `giant hangar doors`,
-        `aircraft in open bay`,
-        `steel roof trusses`,
-        `vast concrete floor`,
-        `high open interior`,
-      ],
-      designRules: [
-        `The hangar reads as one huge clear-span interior rather than a maze of rooms.`,
-        `An aircraft sits directly in the open bay and clearly reads within the building volume.`,
-      ],
-      emblem: {
-        subject: `aircraft nose framed by hangar doors`,
-        rationale: `The aircraft identifies aviation, while the oversized doorway distinguishes a hangar from an airport or aircraft alone.`,
-      },
-      sets: {
-        arrival: {
-          name: `Hangar entrance`,
-          designRules: [
-            `The approach is from the apron toward a towering open doorway.`,
-          ],
-          canonicalFraming: `The viewer stands on the apron just outside the open hangar doors and looks inward.`,
-          avoidFraming: [
-            `Views so close that the doorway no longer reads as enormous`,
-          ],
-        },
-        heart: {
-          name: `Main bay`,
-          designRules: [
-            `The composition is dominated by the aircraft and the vast open volume around it.`,
-          ],
-          canonicalFraming: `The viewer stands on the hangar floor a short distance from the aircraft, slightly off center.`,
-          avoidFraming: [
-            `Wide empty interiors with the aircraft reduced to a tiny detail`,
-          ],
-        },
-        below: {
-          name: `Under the wing`,
-          designRules: [
-            `The viewer is positioned low beneath part of the aircraft while still on the hangar floor.`,
-          ],
-          canonicalFraming: `The viewer stands low on the hangar floor beneath the aircraft and looks outward past its underside.`,
-          avoidFraming: [
-            `Generic undercarriage close-ups with no sense of the hangar around them`,
-          ],
-        },
-        ascent: {
-          name: `Aircraft stairs`,
-          designRules: [
-            `The climb uses a mobile stair or service platform positioned directly against the aircraft inside the hangar.`,
-          ],
-          canonicalFraming: `The viewer stands partway up the aircraft stairs or service platform and looks upward along the climb.`,
-          avoidFraming: [`Views that crop out the sense of upward movement`],
-        },
-        summit: {
-          name: `Service platform at the aircraft`,
-          designRules: [
-            `The destination is an elevated platform beside the aircraft rather than a distant upper walkway.`,
-          ],
-          canonicalFraming: `The viewer stands on an elevated service platform beside the aircraft and looks out across the hangar interior.`,
-          avoidFraming: [
-            `Pure bird's-eye views that turn the hangar into a flat plan`,
-          ],
-        },
-      },
-    },
-  },
-};
+import { fmtImagePromptForSnapshot, makeLocationSpec } from "./helpers";
 
 describe(
   `buildLocationIdentityImagePrompt` satisfies HasNameOf<
@@ -88,7 +8,9 @@ describe(
   >,
   () => {
     test(`builds a square image prompt with trading-card location guidance`, () => {
-      const prompt = buildLocationIdentityImagePrompt(exampleInput);
+      const prompt = buildLocationIdentityImagePrompt({
+        locationSpec: makeLocationSpec(`Aircraft hangar`),
+      });
 
       expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
@@ -177,71 +99,21 @@ describe(
         {
           "locationSpec": {
             "location": "Aircraft hangar",
-            "recognitionHooks": [
-              "giant hangar doors",
-              "aircraft in open bay",
-              "steel roof trusses",
-              "vast concrete floor",
-              "high open interior"
-            ],
-            "designRules": [
-              "The hangar reads as one huge clear-span interior rather than a maze of rooms.",
-              "An aircraft sits directly in the open bay and clearly reads within the building volume."
-            ],
-            "emblem": {
-              "subject": "aircraft nose framed by hangar doors",
-              "rationale": "The aircraft identifies aviation, while the oversized doorway distinguishes a hangar from an airport or aircraft alone."
-            },
             "sets": {
               "arrival": {
-                "name": "Hangar entrance",
-                "designRules": [
-                  "The approach is from the apron toward a towering open doorway."
-                ],
-                "canonicalFraming": "The viewer stands on the apron just outside the open hangar doors and looks inward.",
-                "avoidFraming": [
-                  "Views so close that the doorway no longer reads as enormous"
-                ]
+                "name": "dock"
               },
               "heart": {
-                "name": "Main bay",
-                "designRules": [
-                  "The composition is dominated by the aircraft and the vast open volume around it."
-                ],
-                "canonicalFraming": "The viewer stands on the hangar floor a short distance from the aircraft, slightly off center.",
-                "avoidFraming": [
-                  "Wide empty interiors with the aircraft reduced to a tiny detail"
-                ]
+                "name": "captain's cabin"
               },
               "below": {
-                "name": "Under the wing",
-                "designRules": [
-                  "The viewer is positioned low beneath part of the aircraft while still on the hangar floor."
-                ],
-                "canonicalFraming": "The viewer stands low on the hangar floor beneath the aircraft and looks outward past its underside.",
-                "avoidFraming": [
-                  "Generic undercarriage close-ups with no sense of the hangar around them"
-                ]
+                "name": "cargo hold"
               },
               "ascent": {
-                "name": "Aircraft stairs",
-                "designRules": [
-                  "The climb uses a mobile stair or service platform positioned directly against the aircraft inside the hangar."
-                ],
-                "canonicalFraming": "The viewer stands partway up the aircraft stairs or service platform and looks upward along the climb.",
-                "avoidFraming": [
-                  "Views that crop out the sense of upward movement"
-                ]
+                "name": "stairs"
               },
               "summit": {
-                "name": "Service platform at the aircraft",
-                "designRules": [
-                  "The destination is an elevated platform beside the aircraft rather than a distant upper walkway."
-                ],
-                "canonicalFraming": "The viewer stands on an elevated service platform beside the aircraft and looks out across the hangar interior.",
-                "avoidFraming": [
-                  "Pure bird's-eye views that turn the hangar into a flat plan"
-                ]
+                "name": "crow's nest"
               }
             }
           }
