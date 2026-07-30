@@ -4,8 +4,8 @@ import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { ActorId, AssetId, PinyinSoundId } from "@/data/model";
 import {
   actorDescriptionSetting,
-  actorImageSetting,
-  actorMnemonicIdentitySetting,
+  actorIdentityImageSetting,
+  actorSpecSetting,
   actorModelSheetImageSetting,
   actorNameSetting,
   pinyinSoundActorSelectionSetting,
@@ -150,7 +150,10 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
       if (setting.key.startsWith(`psai/`)) {
         const actorId = setting.key.slice(`psai/`.length) as ActorId;
-        const value = actorImageSetting.decode({ actorId }, setting.value);
+        const value = actorIdentityImageSetting.decode(
+          { actorId },
+          setting.value,
+        );
         if (value == null) {
           continue;
         }
@@ -264,11 +267,11 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
 
     void r.mutate.setSetting({
-      key: actorMnemonicIdentitySetting.entity.marshalKey({ actorId }),
+      key: actorSpecSetting.entity.marshalKey({ actorId }),
       value:
         mnemonicIdentity == null
           ? null
-          : actorMnemonicIdentitySetting.entity.marshalValue({
+          : actorSpecSetting.entity.marshalValue({
               actorId,
               mnemonicIdentity,
             }),
@@ -278,11 +281,11 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
 
     void r.mutate.setSetting({
-      key: actorImageSetting.entity.marshalKey({ actorId }),
+      key: actorIdentityImageSetting.entity.marshalKey({ actorId }),
       value:
         image?.imageId == null
           ? null
-          : actorImageSetting.entity.marshalValue({
+          : actorIdentityImageSetting.entity.marshalValue({
               actorId,
               imageId: image.imageId,
               imageCrop: image.imageCrop ?? undefined,

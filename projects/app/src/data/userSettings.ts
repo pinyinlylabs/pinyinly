@@ -310,14 +310,14 @@ export const actorDescriptionSetting = defineUserSetting({
   historyLimit: 20,
 });
 
-export const actorMnemonicIdentitySetting = defineUserSetting({
+export const actorSpecSetting = defineUserSetting({
   entity: r.entity(`psami/[actorId]`, {
     actorId: rActorId().alias(`a`),
     mnemonicIdentity: r.json().optional().alias(`j`),
   }),
 });
 
-export const actorImageSetting = defineUserSetting({
+export const actorIdentityImageSetting = defineUserSetting({
   entity: r.entity(`psai/[actorId]`, {
     actorId: rActorId().alias(`a`),
     ...imageSettingFields,
@@ -583,7 +583,7 @@ export function userHanziSettingLike(hanzi: HanziText): string {
  * Used for syncing assets between servers.
  */
 export const imageSettingDefs = [
-  actorImageSetting,
+  actorIdentityImageSetting,
   actorModelSheetImageSetting,
   locationIdentityImageSetting,
   locationSetIdentityImageSetting,
@@ -614,8 +614,8 @@ export const userSettingDefinitions = [
   hanziWordMeaningHintTextSetting,
   pinyinSoundDescriptionSetting,
   actorDescriptionSetting,
-  actorImageSetting,
-  actorMnemonicIdentitySetting,
+  actorIdentityImageSetting,
+  actorSpecSetting,
   actorModelSheetImageSetting,
   actorNameSetting,
   pinyinSoundActorSelectionSetting,

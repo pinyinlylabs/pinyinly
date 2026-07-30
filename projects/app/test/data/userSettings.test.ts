@@ -7,7 +7,7 @@ import {
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
   pinyinFinalSoundLocationSelectionSetting,
-  actorImageSetting,
+  actorIdentityImageSetting,
   actorModelSheetImageSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationThoughtChainsSetting,
@@ -38,7 +38,7 @@ function expectUniqueSettingKeyPaths(
 describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
   test(`contains all image setting entities`, () => {
     expect(imageSettingDefs).toHaveLength(7);
-    expect(imageSettingDefs).toContain(actorImageSetting);
+    expect(imageSettingDefs).toContain(actorIdentityImageSetting);
     expect(imageSettingDefs).toContain(actorModelSheetImageSetting);
     expect(imageSettingDefs).toContain(locationIdentityImageSetting);
     expect(imageSettingDefs).toContain(locationSetIdentityImageSetting);
@@ -89,7 +89,9 @@ describe(
     test(`patterns match the key path prefixes`, () => {
       const patterns = getImageSettingKeyPatterns();
 
-      expect(actorImageSetting.entity._def.keyPath).toBe(`psai/[actorId]`);
+      expect(actorIdentityImageSetting.entity._def.keyPath).toBe(
+        `psai/[actorId]`,
+      );
       expect(patterns).toContain(`psai/%`);
 
       expect(actorModelSheetImageSetting.entity._def.keyPath).toBe(

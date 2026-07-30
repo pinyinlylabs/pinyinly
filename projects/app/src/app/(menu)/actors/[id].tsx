@@ -11,8 +11,8 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { ActorId, PinyinSoundId } from "@/data/model";
 import {
   actorDescriptionSetting,
-  actorImageSetting,
-  actorMnemonicIdentitySetting,
+  actorIdentityImageSetting,
+  actorSpecSetting,
   actorModelSheetImageSetting,
   actorNameSetting,
 } from "@/data/userSettings";
@@ -64,7 +64,7 @@ export default function ActorIdPage() {
 
       <View className="items-center">
         <InlineEditableSettingImage
-          setting={actorImageSetting}
+          setting={actorIdentityImageSetting}
           settingKey={{ actorId }}
           enableAiGeneration
           frameShape="circle"
@@ -96,7 +96,7 @@ export default function ActorIdPage() {
       <WikiTitledBox title="Mnemonic Spec">
         <View className="gap-3 p-4">
           <InlineEditableSettingJson
-            setting={actorMnemonicIdentitySetting}
+            setting={actorSpecSetting}
             settingKey={{ actorId }}
             placeholder='{"traits": ["curious"]}'
             autoResizeMinHeight={120}

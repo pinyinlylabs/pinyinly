@@ -10,7 +10,7 @@ import type {
 } from "@/data/model";
 import { locationSpecSchema, SrsKind, actorSpecSchema } from "@/data/model";
 import {
-  actorMnemonicIdentitySetting,
+  actorSpecSetting,
   locationSetIdentityImageSetting,
   pinyinSoundLocationSpecSetting,
   userNameSetting,
@@ -173,7 +173,7 @@ export async function getActorSpec(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        actorMnemonicIdentitySetting.entity.marshalKey({ actorId }),
+        actorSpecSetting.entity.marshalKey({ actorId }),
       ),
     ),
   });
@@ -182,10 +182,7 @@ export async function getActorSpec(
     return null;
   }
 
-  const decoded = actorMnemonicIdentitySetting.decode(
-    { actorId },
-    setting.value,
-  );
+  const decoded = actorSpecSetting.decode({ actorId }, setting.value);
 
   return actorSpecSchema.parse(decoded?.mnemonicIdentity, {
     reportInput: true,

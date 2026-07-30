@@ -14,7 +14,7 @@ import {
   hanziPronunciationHintImagePromptSetting,
   hanziPronunciationHintImageSetting,
   pinyinFinalSoundLocationSelectionSetting,
-  actorImageSetting,
+  actorIdentityImageSetting,
   locationIdentityImageSetting,
   pinyinSoundNameSetting,
 } from "@/data/userSettings";
@@ -113,7 +113,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
                   id: `actor-primary`,
                   kind: `actor` as const,
                   defaultVisibleInRow: true,
-                  imageSetting: actorImageSetting,
+                  imageSetting: actorIdentityImageSetting,
                   imageSettingKey: { actorId: selectedInitialActor.actorId },
                   label:
                     selectedInitialActor.name ??

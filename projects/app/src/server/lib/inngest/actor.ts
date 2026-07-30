@@ -1,7 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import {
-  actorMnemonicIdentitySetting,
+  actorSpecSetting,
   actorModelSheetImageSetting,
+  actorIdentityImageSetting,
 } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import * as s from "@/server/pgSchema";
@@ -17,6 +18,8 @@ import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { geminiRequestImageAsAsset } from "./gemini";
 import { buildActorModelSheetImagePrompt } from "@/util/prompts/actorModelSheetImage";
 import type { ActorSpec } from "@/data/model";
+import { nonNullable } from "@pinyinly/lib/invariant";
+import { buildActorIdentityImagePrompt } from "@/util/prompts/actorIdentityImage";
 
 export const populateActor = inngest.createFunction(
   {
@@ -36,7 +39,7 @@ export const populateActor = inngest.createFunction(
           eq(s.userSetting.userId, userId),
           eq(
             s.userSetting.key,
-            actorMnemonicIdentitySetting.entity.marshalKey({ actorId }),
+            actorSpecSetting.entity.marshalKey({ actorId }),
           ),
         ),
       });
@@ -45,10 +48,7 @@ export const populateActor = inngest.createFunction(
         return null;
       }
 
-      const decoded = actorMnemonicIdentitySetting.decode(
-        { actorId },
-        setting.value,
-      );
+      const decoded = actorSpecSetting.decode({ actorId }, setting.value);
 
       if (decoded == null) {
         return null;
@@ -67,10 +67,10 @@ export const populateActor = inngest.createFunction(
 
       await withDrizzle(async (db) => {
         await setUserSetting(db, userId, {
-          key: actorMnemonicIdentitySetting.entity.marshalKey({
+          key: actorSpecSetting.entity.marshalKey({
             actorId,
           }),
-          value: actorMnemonicIdentitySetting.entity.marshalValue({
+          value: actorSpecSetting.entity.marshalValue({
             actorId,
             mnemonicIdentity: actorSpec,
           }),
@@ -81,7 +81,7 @@ export const populateActor = inngest.createFunction(
       });
     }
 
-    const currentModelSheetImage = await step.run(
+    let modelSheetAssetId = await step.run(
       `read current model sheet`,
       async () =>
         withDrizzle(async (db) => {
@@ -108,16 +108,13 @@ export const populateActor = inngest.createFunction(
         }),
     );
 
-    if (currentModelSheetImage == null) {
-      const generatedImageAssetId = await step.invoke(
-        `generate model sheet image`,
-        {
-          function: geminiRequestImageAsAsset,
-          data: {
-            prompt: buildActorModelSheetImagePrompt({ actorSpec }),
-          },
+    if (modelSheetAssetId == null) {
+      modelSheetAssetId = await step.invoke(`generate model sheet image`, {
+        function: geminiRequestImageAsAsset,
+        data: {
+          prompt: buildActorModelSheetImagePrompt({ actorSpec }),
         },
-      );
+      });
 
       await step.run(`write model sheet image`, async () =>
         withDrizzle(async (db) => {
@@ -125,7 +122,60 @@ export const populateActor = inngest.createFunction(
             key: actorModelSheetImageSetting.entity.marshalKey({ actorId }),
             value: actorModelSheetImageSetting.entity.marshalValue({
               actorId: actorId,
-              imageId: generatedImageAssetId,
+              imageId: nonNullable(modelSheetAssetId),
+            }),
+            now: new Date(),
+            skipHistory: false,
+            historyId: nanoid(),
+          });
+        }),
+      );
+    }
+
+    let identityImageAssetId = await step.run(
+      `read current identity image`,
+      async () =>
+        withDrizzle(async (db) => {
+          const setting = await db.query.userSetting.findFirst({
+            where: and(
+              eq(s.userSetting.userId, userId),
+              eq(
+                s.userSetting.key,
+                actorIdentityImageSetting.entity.marshalKey({ actorId }),
+              ),
+            ),
+          });
+
+          if (setting == null) {
+            return null;
+          }
+
+          const decoded = actorIdentityImageSetting.decode(
+            { actorId },
+            setting.value,
+          );
+
+          return decoded?.imageId ?? null;
+        }),
+    );
+
+    if (identityImageAssetId == null) {
+      identityImageAssetId = await step.invoke(`generate identity image`, {
+        function: geminiRequestImageAsAsset,
+        data: {
+          prompt: buildActorIdentityImagePrompt({
+            modelSheet: modelSheetAssetId,
+          }),
+        },
+      });
+
+      await step.run(`write identity image`, async () =>
+        withDrizzle(async (db) => {
+          await setUserSetting(db, userId, {
+            key: actorIdentityImageSetting.entity.marshalKey({ actorId }),
+            value: actorIdentityImageSetting.entity.marshalValue({
+              actorId: actorId,
+              imageId: nonNullable(identityImageAssetId),
             }),
             now: new Date(),
             skipHistory: false,
