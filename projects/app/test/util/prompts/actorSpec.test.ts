@@ -1,14 +1,12 @@
-import { buildMnemonicActorSpecPrompt } from "#util/prompts/mnemonicActorSpec.ts";
+import { buildActorSpecPrompt } from "#util/prompts/actorSpec.ts";
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 
 describe(
-  `buildMnemonicActorSpecPrompt` satisfies HasNameOf<
-    typeof buildMnemonicActorSpecPrompt
-  >,
+  `buildActorSpecPrompt` satisfies HasNameOf<typeof buildActorSpecPrompt>,
   () => {
-    test(`uses mnemonic actor system prompt and input wrapper`, () => {
-      const prompt = buildMnemonicActorSpecPrompt({
+    test(`snapshot`, () => {
+      const prompt = buildActorSpecPrompt({
         identity: `Dracula`,
       });
 
@@ -160,7 +158,7 @@ describe(
           "model": "gpt-5.5",
           "reasoningEffort": "medium",
           "schema": {
-            "name": "mnemonicActorSpecSchema",
+            "name": "actorSpecSchema",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -246,7 +244,7 @@ describe(
                 "signatureExpression",
                 "weakness",
               ],
-              "title": "mnemonicActorSpecSchema",
+              "title": "actorSpecSchema",
               "type": "object",
             },
             "type": "json_schema",

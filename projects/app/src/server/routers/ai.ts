@@ -11,10 +11,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import {
-  buildMnemonicActorSpecPrompt,
-  mnemonicActorSpecSchema,
-} from "@/util/prompts/mnemonicActorSpec";
-import {
   actorPopulateActorSpecEvent,
   locationPopulateLocationEvent,
 } from "@/server/lib/inngest/client";
@@ -129,12 +125,6 @@ const meaningHintOutputSchema = z
           .strict(),
       )
       .min(1),
-  })
-  .strict();
-
-const mnemonicActorIdentityInputSchema = z
-  .object({
-    identity: z.string(),
   })
   .strict();
 
@@ -344,30 +334,6 @@ export const aiRouter = router({
       }
 
       return { suggestions };
-    }),
-
-  generateMnemonicActorSpec: authedProcedure
-    .input(mnemonicActorIdentityInputSchema)
-    .output(mnemonicActorSpecSchema)
-    .mutation(async ({ input, signal }) => {
-      const { identity } = input;
-
-      const prompt = buildMnemonicActorSpecPrompt({
-        identity: identity,
-      });
-
-      try {
-        const { data } = await requestOpenAiResponseJson(prompt, {
-          signal,
-        });
-        return data;
-      } catch (error) {
-        console.error(`Failed to generate mnemonic actor spec:`, error);
-        throw new TRPCError({
-          code: `INTERNAL_SERVER_ERROR`,
-          message: `Unable to generate mnemonic actor spec`,
-        });
-      }
     }),
 
   generateHintImage: authedProcedure

@@ -9,10 +9,10 @@ import { withDrizzle } from "@/server/lib/db";
 import * as s from "@/server/pgSchema";
 import { setUserSetting } from "@/server/lib/userSettings";
 import {
-  buildMnemonicActorSpecPrompt,
-  mnemonicActorSpecSchema,
-} from "@/util/prompts/mnemonicActorSpec";
-import type { MnemonicActorSpecType } from "@/util/prompts/mnemonicActorSpec";
+  buildActorSpecPrompt,
+  actorSpecSchema,
+} from "@/util/prompts/actorSpec";
+import type { ActorSpecType } from "@/util/prompts/actorSpec";
 import { nanoid } from "@/util/nanoid";
 import { actorPopulateActorSpecEvent, inngest } from "./client";
 
@@ -36,7 +36,7 @@ export const populateActor: ReturnType<typeof inngest.createFunction> =
       event,
     }: {
       event: { data: PopulateActorSpecEventData };
-    }): Promise<MnemonicActorSpecType> => {
+    }): Promise<ActorSpecType> => {
       const { userId, actorId, actorName } = event.data;
 
       const existingActorSpec = await withDrizzle(async (db) => {
@@ -63,15 +63,15 @@ export const populateActor: ReturnType<typeof inngest.createFunction> =
       });
 
       if (existingActorSpec != null) {
-        return mnemonicActorSpecSchema.parse(existingActorSpec);
+        return actorSpecSchema.parse(existingActorSpec);
       }
 
-      const prompt = buildMnemonicActorSpecPrompt({
+      const prompt = buildActorSpecPrompt({
         identity: actorName,
       });
 
       const result = await requestOpenAiResponseJson(prompt);
-      const actorSpec = mnemonicActorSpecSchema.parse(result.data);
+      const actorSpec = actorSpecSchema.parse(result.data);
 
       await withDrizzle(async (db) => {
         await setUserSetting(db, userId, {
