@@ -270,7 +270,7 @@ tasks:
     toolchain: "node"
 
   devInngest:
-    command: npx -y inngest-cli@1.38.1 dev
+    command: npx -y inngest-cli@1.39.0 dev
     preset: watcher
 
   devMinio:

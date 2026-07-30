@@ -101,15 +101,11 @@ export function assertOpenAiCompatibleJsonSchema(
     `type` in value &&
     (value.type === `object` ||
       (Array.isArray(value.type) && value.type.includes(`object`)));
-  if (
-    isObjectSchema &&
-    `additionalProperties` in value &&
-    typeof value.additionalProperties === `object`
-  ) {
+  if (isObjectSchema && `additionalProperties` in value) {
     expect(
-      (value.additionalProperties as Record<string, unknown>)[`type`],
-      `OpenAI response format requires "type" at ${formatJsonSchemaPath([...path, `additionalProperties`, `type`])}`,
-    ).toBeTypeOf(`string`);
+      value.additionalProperties,
+      `OpenAI response format requires "additionalProperties" to be supplied and to be false at ${formatJsonSchemaPath(path)}`,
+    ).toBe(false);
   }
 
   assertNoMissingRequiredProperties(value);

@@ -89,73 +89,210 @@ describe(`buildLocationSpecRefinePrompt`, () => {
         "model": "gpt-5.5",
         "reasoningEffort": "low",
         "schema": {
-          "name": "locationSpecSchema",
+          "name": "locationSpecWithDetailSchema",
           "schema": {
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
+              "designRules": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
               "location": {
                 "type": "string",
+              },
+              "recognitionHooks": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
               },
               "sets": {
                 "additionalProperties": false,
                 "properties": {
                   "arrival": {
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
+                      "avoidFraming": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "canonicalFraming": {
+                        "type": "string",
+                      },
+                      "designRules": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "name": {
                         "type": "string",
+                      },
+                      "props": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
                       },
                     },
                     "required": [
                       "name",
+                      "props",
+                      "designRules",
+                      "canonicalFraming",
+                      "avoidFraming",
                     ],
                     "type": "object",
                   },
                   "ascent": {
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
+                      "avoidFraming": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "canonicalFraming": {
+                        "type": "string",
+                      },
+                      "designRules": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "name": {
                         "type": "string",
+                      },
+                      "props": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
                       },
                     },
                     "required": [
                       "name",
+                      "props",
+                      "designRules",
+                      "canonicalFraming",
+                      "avoidFraming",
                     ],
                     "type": "object",
                   },
                   "below": {
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
+                      "avoidFraming": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "canonicalFraming": {
+                        "type": "string",
+                      },
+                      "designRules": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "name": {
                         "type": "string",
+                      },
+                      "props": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
                       },
                     },
                     "required": [
                       "name",
+                      "props",
+                      "designRules",
+                      "canonicalFraming",
+                      "avoidFraming",
                     ],
                     "type": "object",
                   },
                   "heart": {
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
+                      "avoidFraming": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "canonicalFraming": {
+                        "type": "string",
+                      },
+                      "designRules": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "name": {
                         "type": "string",
+                      },
+                      "props": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
                       },
                     },
                     "required": [
                       "name",
+                      "props",
+                      "designRules",
+                      "canonicalFraming",
+                      "avoidFraming",
                     ],
                     "type": "object",
                   },
                   "summit": {
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
+                      "avoidFraming": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "canonicalFraming": {
+                        "type": "string",
+                      },
+                      "designRules": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "name": {
                         "type": "string",
+                      },
+                      "props": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
                       },
                     },
                     "required": [
                       "name",
+                      "props",
+                      "designRules",
+                      "canonicalFraming",
+                      "avoidFraming",
                     ],
                     "type": "object",
                   },
@@ -172,9 +309,11 @@ describe(`buildLocationSpecRefinePrompt`, () => {
             },
             "required": [
               "location",
+              "recognitionHooks",
+              "designRules",
               "sets",
             ],
-            "title": "locationSpecSchema",
+            "title": "locationSpecWithDetailSchema",
             "type": "object",
           },
           "type": "json_schema",

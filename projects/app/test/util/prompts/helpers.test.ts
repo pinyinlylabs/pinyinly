@@ -38,7 +38,6 @@ describe(`assertOpenAiCompatibleJsonSchema`, () => {
 
   test(`tuple schemas throw because OpenAI does not support prefixItems`, () => {
     const jsonSchema = {
-      $schema: `https://json-schema.org/draft/2020-12/schema`,
       type: `array`,
       prefixItems: [{ type: `string` }, { type: `integer` }],
       unevaluatedItems: false,
@@ -51,13 +50,24 @@ describe(`assertOpenAiCompatibleJsonSchema`, () => {
 
   test(`empty object for additionalProperties throws error`, () => {
     const jsonSchema = {
-      $schema: `https://json-schema.org/draft/2020-12/schema`,
       additionalProperties: {},
       type: `object`,
     };
 
     expect(() => {
       assertOpenAiCompatibleJsonSchema(jsonSchema);
-    }).toThrow();
+    }).toThrow(/"additionalProperties"/u);
+  });
+
+  test(`additionalProperties: true throws errors`, () => {
+    // Error: 400 Invalid schema for response_format 'locationSpecSchema': In context=(), 'additionalProperties' is required to be supplied and to be false.
+    const jsonSchema = {
+      additionalProperties: true,
+      type: `object`,
+    };
+
+    expect(() => {
+      assertOpenAiCompatibleJsonSchema(jsonSchema);
+    }).toThrow(/"additionalProperties"/u);
   });
 });
