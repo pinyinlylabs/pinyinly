@@ -142,8 +142,8 @@ describe(
         </data>
         =====================
         ",
-          "model": "gpt-5.5",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4-mini",
+          "reasoningEffort": "low",
           "schema": {
             "name": "locationSoundThoughtChainPromptOutputSchema",
             "schema": {

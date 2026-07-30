@@ -154,7 +154,7 @@ Return up to 5 candidates ordered from strongest to weakest.
   return {
     messages,
     schema: locationSoundThoughtChainPromptOutputSchema,
-    model: `gpt-5.5`,
-    reasoningEffort: `medium`,
+    model: `gpt-5.4-mini`,
+    reasoningEffort: `low`,
   };
 }
