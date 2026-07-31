@@ -2,6 +2,7 @@ import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 import type { ActorSpec, LocationSetKey, LocationSpec } from "@/data/model";
+import pick from "lodash/pick";
 
 export type PronunciationHintRecurringPromptInput = {
   location: LocationSpec;
@@ -273,7 +274,12 @@ Avoid decorative details, explanations, artistic descriptions, colours, lighting
     {
       role: `system`,
       content: renderPromptTemplate(systemTemplate, {
-        input: JSON.stringify(input, null, 2),
+        input: JSON.stringify({
+          set: input.location.sets[input.set],
+          location: pick(input.location, [`name`, `recognitionHooks`]),
+          cue: input.cue,
+          actor: input.actor,
+        }),
       }),
     },
   ];
@@ -281,7 +287,7 @@ Avoid decorative details, explanations, artistic descriptions, colours, lighting
   return {
     messages,
     schema: pronunciationHintOutputSchema,
-    model: `gpt-5.5`,
-    reasoningEffort: `medium`,
+    model: `gpt-5.4`,
+    reasoningEffort: `low`,
   };
 }

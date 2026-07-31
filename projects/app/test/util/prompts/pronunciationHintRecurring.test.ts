@@ -262,38 +262,12 @@ describe(
         Avoid decorative details, explanations, artistic descriptions, colours, lighting, camera directions, or unnecessary worldbuilding.
 
         <input>
-        {
-          "location": {
-            "location": "Gong Cha bathroom",
-            "sets": {
-              "arrival": {
-                "name": "dock"
-              },
-              "heart": {
-                "name": "captain's cabin"
-              },
-              "below": {
-                "name": "cargo hold"
-              },
-              "ascent": {
-                "name": "stairs"
-              },
-              "summit": {
-                "name": "crow's nest"
-              }
-            }
-          },
-          "set": "arrival",
-          "actor": {
-            "nickname": "Ethan"
-          },
-          "cue": "cue word"
-        }
+        {"set":{"name":"dock"},"location":{},"cue":"cue word","actor":{"nickname":"Ethan"}}
         </input>
         =====================
         ",
-          "model": "gpt-5.5",
-          "reasoningEffort": "medium",
+          "model": "gpt-5.4",
+          "reasoningEffort": "low",
           "schema": {
             "name": "pronunciationHintOutputSchema",
             "schema": {
