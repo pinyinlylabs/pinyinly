@@ -75,6 +75,16 @@ export const assetIdSchema = z
 export type ActorId = string & z.$brand<`ActorId`>;
 export const actorIdSchema = z.custom<ActorId>(isString);
 
+export const openAiReasoningEffortSchema = z.enum([
+  `none`,
+  `minimal`,
+  `low`,
+  `medium`,
+  `high`,
+  `xhigh`,
+  `max`,
+]);
+
 /**
  * A reusable place record used by pinyin finals mnemonic locations.
  */
@@ -89,6 +99,17 @@ export const locationSetKeySchema = z.enum([
   `summit`,
 ]);
 export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
+
+export const locationSetKindSchema = z.enum([
+  `entrance`,
+  `inside`,
+  `basement`,
+  `bathroom`,
+  `backRoom`,
+  `hiddenCloset`,
+  `staircase`,
+]);
+export type LocationSetKind = z.infer<typeof locationSetKindSchema>;
 
 /**
  * Persisted location-set schema used for reading/writing user settings.

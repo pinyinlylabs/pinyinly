@@ -9,15 +9,20 @@ import {
 import * as s from "@/server/pgSchema";
 import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
-import { locationSpecSchema } from "@/data/model";
-import type { LocationSpec, PinyinSoundId } from "@/data/model";
+import {
+  locationIdSchema,
+  locationSetKindSchema,
+  locationSpecSchema,
+  openAiReasoningEffortSchema,
+} from "@/data/model";
+import type { PinyinSoundId, LocationSpec } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   isFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { and, eq } from "drizzle-orm";
-import { invoke } from "inngest";
+import { eventType, invoke } from "inngest";
 import z from "zod";
 import { nanoid } from "@/util/nanoid";
 import { setUserSetting } from "@/server/lib/userSettings";
@@ -53,16 +58,17 @@ import {
   buildLocationSpecEvaluatePrompt,
   hasMajorCriticisms,
 } from "@/util/prompts/locationSpecEvaluate";
+import { buildLocationSetSpecPrompt } from "@/util/prompts/locationSetSpec";
 
 export const generateLocationSpec = inngest.createFunction(
   {
     id: `location/generateLocationSpec`,
-    triggers: invoke(
-      z.object({
+    triggers: eventType(`location/generate-location-spec`, {
+      schema: z.object({
         location: z.string(),
         maxAttempts: z.number().int().min(1).optional(),
       }),
-    ),
+    }),
   },
   async ({ event, step, logger }): Promise<LocationSpec> => {
     const { location } = event.data;
@@ -860,8 +866,44 @@ const runLocationNameSuggestions = inngest.createFunction(
   },
 );
 
+export const generateLocationSetSpec = inngest.createFunction(
+  {
+    id: `location/generateLocationSetSpec`,
+    triggers: eventType(`location/generate-location-set-spec`, {
+      schema: z.object({
+        locationId: locationIdSchema,
+        userId: z.string(),
+        setKind: locationSetKindSchema,
+        reasoningEffort: openAiReasoningEffortSchema.optional(),
+      }),
+    }),
+  },
+  async ({ event }) => {
+    const { locationId, userId, setKind, reasoningEffort } = event.data;
+
+    const locationSpec = await withDrizzle(async (db) => {
+      return getLocationSpec(db, userId, locationId);
+    });
+
+    invariant(
+      locationSpec != null,
+      `Location spec not found for locationId: ${locationId}`,
+    );
+
+    const prompt = buildLocationSetSpecPrompt({ locationSpec, setKind });
+    if (reasoningEffort != null) {
+      prompt.reasoningEffort = reasoningEffort;
+    }
+
+    const response = await requestOpenAiResponseJson(prompt);
+
+    return response;
+  },
+);
+
 export const functions = [
   generateLocationSpec,
+  generateLocationSetSpec,
   populateLocation,
   populateLocationSoundThoughtChain,
   populateLocationSetDescription,
