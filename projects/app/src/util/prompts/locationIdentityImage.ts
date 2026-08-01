@@ -88,6 +88,7 @@ The goal is to create the single image that people will forever associate with t
     aspectRatio: `1:1`,
     resolution: `1K`,
     systemInstruction,
+    thinkingLevel: `high`,
     messages: [
       {
         role: `user`,

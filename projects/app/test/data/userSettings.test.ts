@@ -10,7 +10,7 @@ import {
   actorIdentityImageSetting,
   actorModelSheetImageSetting,
   locationIdentityImageSetting,
-  pinyinSoundLocationThoughtChainsSetting,
+  locationThoughtChainsJsonSetting,
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   userNameTextSetting,
@@ -176,7 +176,7 @@ describe(
 
     test(`decodes location thought chains setting with json payload`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinSoundLocationThoughtChainsSetting,
+        locationThoughtChainsJsonSetting,
         { locationId: testLocationId },
         {
           j: {
@@ -269,7 +269,7 @@ describe(
 
     test(`stores only json payload for location thought chains setting`, () => {
       const encoded = encodeUserSettingStoredValue(
-        pinyinSoundLocationThoughtChainsSetting,
+        locationThoughtChainsJsonSetting,
         { locationId: testLocationId },
         {
           locationId: testLocationId,

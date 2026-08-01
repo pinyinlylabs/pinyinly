@@ -5,7 +5,6 @@ import { InngestTestEngine } from "@inngest/test";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
 import { buildLocationSpecPrompt } from "#util/prompts/locationSpec.js";
 import { createResponsePromptHarness } from "#test/util/prompts/eval.ts";
-import type { LocationSpecRefinementResultType } from "#util/prompts/locationSpecEvaluate.js";
 
 type LocationPromptInput = {
   location: string;
@@ -36,21 +35,14 @@ const LocationSpecJudge = createJudge(
 
 const LocationPipelineJudge = createJudge(
   `LocationPipelineJudge`,
-  async ({
-    output,
-  }: JudgeContext<LocationPromptInput, LocationSpecRefinementResultType>) => {
-    const final = output.finalLocationSpec;
-    const budgetScore = output.attempts.length <= 3 ? 1 : 0;
-    const locationScore = normalized(final.location).length > 0 ? 1 : 0;
+  async ({ output }: JudgeContext<LocationPromptInput, any>) => {
+    const spec = output as LocationSpecWithDetail;
+    const locationScore = normalized(spec.location).length > 0 ? 1 : 0;
 
     return {
-      score: (budgetScore + locationScore) / 3,
+      score: locationScore,
       metadata: {
-        rationale: [
-          `attempts=${output.attempts.length}`,
-          `stopReason=${output.stopReason}`,
-          `finalScore=${output.finalEvaluation.score}`,
-        ].join(`\n`),
+        rationale: `Generated one-shot location specification.`,
       },
     };
   },
@@ -76,13 +68,10 @@ describeEval(
 );
 
 describeEval(
-  `runLocationSpecRefinementPipeline eval`,
+  `runLocationSpecGeneration eval`,
   {
-    harness: createHarness<
-      LocationPromptInput,
-      LocationSpecRefinementResultType
-    >({
-      name: `locationSpecRefinementPipelineHarness`,
+    harness: createHarness<LocationPromptInput, any>({
+      name: `locationSpecGenerationHarness`,
       run: async ({ input, signal }) => {
         const testEngine = new InngestTestEngine({
           function: generateLocationSpec,
@@ -94,7 +83,6 @@ describeEval(
               name: `inngest/function.invoked`,
               data: {
                 location: input.location,
-                maxAttempts: 3,
               },
             },
           ],
@@ -103,7 +91,7 @@ describeEval(
         signal?.throwIfAborted();
 
         return {
-          output: result as LocationSpecRefinementResultType,
+          output: result as LocationSpecWithDetail,
           messages: [],
         };
       },

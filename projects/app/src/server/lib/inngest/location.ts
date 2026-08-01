@@ -1,10 +1,10 @@
 import {
-  pinyinSoundLocationSetDescriptionSetting,
+  locationSetDescriptionTextSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
   locationSpecJsonSetting,
-  pinyinSoundLocationThoughtChainsSetting,
-  pinyinSoundLocationSetNameSetting,
+  locationThoughtChainsJsonSetting,
+  locationSetNameTextSetting,
 } from "@/data/userSettings";
 import * as s from "@/server/pgSchema";
 import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
@@ -12,6 +12,7 @@ import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentit
 import {
   locationIdSchema,
   locationSetKeySchema,
+  locationSetSpecSchema,
   locationSpecSchema,
   openAiReasoningEffortSchema,
 } from "@/data/model";
@@ -35,6 +36,7 @@ import {
   locationPopulateLocationSetIdentityImageEvent,
   locationPopulateLocationSetNameEvent,
   locationPopulateLocationSpecEvent,
+  locationPopulateLocationSetSpecEvent,
 } from "./client";
 import {
   getLocationSpec,
@@ -53,11 +55,6 @@ import type { LocationSoundThoughtChainsBySoundIdType } from "@/util/locationSou
 import { buildLocationNameSuggestionsPrompt } from "@/util/prompts/locationNameSuggestions";
 import { buildLocationPopulateSetDescriptionPrompt } from "@/util/prompts/locationPopulateSetDescription";
 import { buildLocationSpecPrompt } from "@/util/prompts/locationSpec";
-import { buildLocationSpecRefinePrompt } from "@/util/prompts/locationSpecRefine";
-import {
-  buildLocationSpecEvaluatePrompt,
-  hasMajorCriticisms,
-} from "@/util/prompts/locationSpecEvaluate";
 import { buildLocationSetSpecPrompt } from "@/util/prompts/locationSetSpec";
 
 export const generateLocationSpec = inngest.createFunction(
@@ -66,124 +63,17 @@ export const generateLocationSpec = inngest.createFunction(
     triggers: eventType(`location/generate-location-spec`, {
       schema: z.object({
         location: z.string(),
-        maxAttempts: z.number().int().min(1).optional(),
       }),
     }),
   },
-  async ({ event, step, logger }): Promise<LocationSpec> => {
+  async ({ event, step }): Promise<LocationSpec> => {
     const { location } = event.data;
-    const maxAttempts = event.data.maxAttempts ?? 3;
-
-    let bestLocationSpec: LocationSpec | null = null;
-    let bestScore = Number.NEGATIVE_INFINITY;
-
-    let currentLocationSpec: LocationSpec = await step.run(
-      `location-spec-initial-generate`,
-      async () => {
-        const response = await requestOpenAiResponseJson(
-          buildLocationSpecPrompt({ location }),
-        );
-        return response.data;
-      },
-    );
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      const locationSpecForEvaluation = currentLocationSpec;
-
-      const evaluation = await step.run(
-        `location-spec-evaluate-attempt-${attempt}`,
-        async () => {
-          const response = await requestOpenAiResponseJson(
-            buildLocationSpecEvaluatePrompt({
-              location,
-              locationSpec: locationSpecForEvaluation,
-            }),
-          );
-
-          return response.data;
-        },
+    return step.run(`location-spec-generate`, async () => {
+      const response = await requestOpenAiResponseJson(
+        buildLocationSpecPrompt({ location }),
       );
-
-      if (evaluation.score > bestScore) {
-        bestScore = evaluation.score;
-        bestLocationSpec = locationSpecForEvaluation;
-      }
-
-      logger.info(
-        { location, attempt, evaluation },
-        `Evaluated location spec attempt`,
-      );
-
-      if (!hasMajorCriticisms(evaluation)) {
-        break;
-      }
-
-      const locationSpecForRefine = currentLocationSpec;
-      const criticismsForRefine = evaluation.criticisms;
-
-      const refinedLocationSpec = await step.run(
-        `location-spec-refine-attempt-${attempt}`,
-        async () => {
-          const response = await requestOpenAiResponseJson(
-            buildLocationSpecRefinePrompt({
-              location,
-              locationSpec: locationSpecForRefine,
-              criticisms: criticismsForRefine,
-            }),
-          );
-
-          return response.data;
-        },
-      );
-
-      const refinedEvaluation = await step.run(
-        `location-spec-evaluate-refinement-attempt-${attempt}`,
-        async () => {
-          const response = await requestOpenAiResponseJson(
-            buildLocationSpecEvaluatePrompt({
-              location,
-              locationSpec: refinedLocationSpec,
-            }),
-          );
-
-          return response.data;
-        },
-      );
-
-      if (refinedEvaluation.score > bestScore) {
-        bestScore = refinedEvaluation.score;
-        bestLocationSpec = refinedLocationSpec;
-      }
-
-      if (refinedEvaluation.score > evaluation.score) {
-        currentLocationSpec = refinedLocationSpec;
-
-        logger.info(
-          {
-            location,
-            attempt,
-            previousScore: evaluation.score,
-            refinedScore: refinedEvaluation.score,
-            refinedLocationSpec,
-          },
-          `Accepted refined location spec attempt`,
-        );
-
-        continue;
-      }
-
-      logger.info(
-        {
-          location,
-          attempt,
-          previousScore: evaluation.score,
-          refinedScore: refinedEvaluation.score,
-        },
-        `Rejected refined location spec attempt`,
-      );
-    }
-
-    return bestLocationSpec ?? currentLocationSpec;
+      return response.data;
+    });
   },
 );
 
@@ -207,13 +97,23 @@ const populateLocation = inngest.createFunction(
       },
     });
 
-    for (const setKey of [
-      `arrival`,
-      `heart`,
-      `below`,
-      `ascent`,
-      `summit`,
-    ] as const) {
+    const deprecatedSetKeys = [`arrival`, `heart`, `below`, `ascent`, `summit`];
+
+    for (const setKey of locationSetKeySchema.options) {
+      if (deprecatedSetKeys.includes(setKey)) {
+        // Don't waste time generating deprecated sets
+        continue;
+      }
+
+      await step.invoke(`populate location set spec (${setKey})`, {
+        function: populateLocationSetSpec,
+        data: {
+          locationId,
+          userId,
+          setKey,
+        },
+      });
+
       await step.sendEvent(
         `emit image set populate description for ${setKey}`,
         locationPopulateLocationSetDescriptionEvent.create({
@@ -312,7 +212,7 @@ const populateLocation = inngest.createFunction(
                 eq(s.userSetting.userId, userId),
                 eq(
                   s.userSetting.key,
-                  pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+                  locationThoughtChainsJsonSetting.entity.marshalKey({
                     locationId,
                   }),
                 ),
@@ -323,7 +223,7 @@ const populateLocation = inngest.createFunction(
               return {};
             }
 
-            const decoded = pinyinSoundLocationThoughtChainsSetting.decode(
+            const decoded = locationThoughtChainsJsonSetting.decode(
               { locationId },
               setting.value,
             );
@@ -359,6 +259,11 @@ const populateLocation = inngest.createFunction(
     }
 
     for (const soundId of missingSoundIds) {
+      // skip generating thought chains for now because they're bad.
+      if (Math.random() > -1) {
+        continue;
+      }
+
       await step.sendEvent(
         `emit location sound thought chain populate (${soundId})`,
         locationPopulateLocationSoundThoughtChainEvent.create({
@@ -417,7 +322,7 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
                 eq(s.userSetting.userId, userId),
                 eq(
                   s.userSetting.key,
-                  pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+                  locationThoughtChainsJsonSetting.entity.marshalKey({
                     locationId,
                   }),
                 ),
@@ -428,7 +333,7 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
               return {};
             }
 
-            const decoded = pinyinSoundLocationThoughtChainsSetting.decode(
+            const decoded = locationThoughtChainsJsonSetting.decode(
               { locationId },
               setting.value,
             );
@@ -482,14 +387,14 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
               eq(s.userSetting.userId, userId),
               eq(
                 s.userSetting.key,
-                pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+                locationThoughtChainsJsonSetting.entity.marshalKey({
                   locationId,
                 }),
               ),
             ),
           });
 
-          const latestDecoded = pinyinSoundLocationThoughtChainsSetting.decode(
+          const latestDecoded = locationThoughtChainsJsonSetting.decode(
             { locationId },
             latestSetting?.value ?? null,
           );
@@ -511,10 +416,10 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
             };
 
           await setUserSetting(db, userId, {
-            key: pinyinSoundLocationThoughtChainsSetting.entity.marshalKey({
+            key: locationThoughtChainsJsonSetting.entity.marshalKey({
               locationId,
             }),
-            value: pinyinSoundLocationThoughtChainsSetting.entity.marshalValue({
+            value: locationThoughtChainsJsonSetting.entity.marshalValue({
               locationId,
               value: mergedThoughtChainsBySoundId,
             }),
@@ -614,12 +519,12 @@ const populateLocationSetDescription = inngest.createFunction(
 
     await step.run(`read set description (${setKey})`, async () =>
       withDrizzle(async (db) => {
-        const setting = await db.query.userSetting.findFirst({
+        const currentSetting = await db.query.userSetting.findFirst({
           where: and(
             eq(s.userSetting.userId, userId),
             eq(
               s.userSetting.key,
-              pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
+              locationSetDescriptionTextSetting.entity.marshalKey({
                 locationId,
                 setKey,
               }),
@@ -627,22 +532,20 @@ const populateLocationSetDescription = inngest.createFunction(
           ),
         });
 
-        if (setting == null) {
-          return null;
-        }
+        if (currentSetting != null) {
+          const decoded = locationSetDescriptionTextSetting.decode(
+            { locationId, setKey },
+            currentSetting.value,
+          );
 
-        const decoded = pinyinSoundLocationSetDescriptionSetting.decode(
-          { locationId, setKey },
-          setting.value,
-        );
+          const currentDescription = decoded?.text ?? null;
 
-        const currentDescription = decoded?.text ?? null;
-
-        if (
-          currentDescription != null &&
-          currentDescription.trim().length > 0
-        ) {
-          return;
+          if (
+            currentDescription != null &&
+            currentDescription.trim().length > 0
+          ) {
+            return;
+          }
         }
 
         const locationSpec = await getLocationSpec(db, userId, locationId);
@@ -663,11 +566,11 @@ const populateLocationSetDescription = inngest.createFunction(
         );
 
         await setUserSetting(db, userId, {
-          key: pinyinSoundLocationSetDescriptionSetting.entity.marshalKey({
+          key: locationSetDescriptionTextSetting.entity.marshalKey({
             locationId,
             setKey,
           }),
-          value: pinyinSoundLocationSetDescriptionSetting.entity.marshalValue({
+          value: locationSetDescriptionTextSetting.entity.marshalValue({
             locationId,
             setKey,
             text: response.data.description,
@@ -695,12 +598,12 @@ const populateLocationSetName = inngest.createFunction(
 
     await step.run(`read set name (${setKey})`, async () =>
       withDrizzle(async (db) => {
-        const setting = await db.query.userSetting.findFirst({
+        const currentSetting = await db.query.userSetting.findFirst({
           where: and(
             eq(s.userSetting.userId, userId),
             eq(
               s.userSetting.key,
-              pinyinSoundLocationSetNameSetting.entity.marshalKey({
+              locationSetNameTextSetting.entity.marshalKey({
                 locationId,
                 setKey,
               }),
@@ -708,19 +611,17 @@ const populateLocationSetName = inngest.createFunction(
           ),
         });
 
-        if (setting == null) {
-          return null;
-        }
+        if (currentSetting != null) {
+          const decoded = locationSetNameTextSetting.decode(
+            { locationId, setKey },
+            currentSetting.value,
+          );
 
-        const decoded = pinyinSoundLocationSetNameSetting.decode(
-          { locationId, setKey },
-          setting.value,
-        );
+          const currentName = decoded?.text ?? null;
 
-        const currentName = decoded?.text ?? null;
-
-        if (currentName != null && currentName.trim().length > 0) {
-          return;
+          if (currentName != null && currentName.trim().length > 0) {
+            return;
+          }
         }
 
         const locationSpec = await getLocationSpec(db, userId, locationId);
@@ -743,11 +644,11 @@ const populateLocationSetName = inngest.createFunction(
         }
 
         await setUserSetting(db, userId, {
-          key: pinyinSoundLocationSetNameSetting.entity.marshalKey({
+          key: locationSetNameTextSetting.entity.marshalKey({
             locationId,
             setKey,
           }),
-          value: pinyinSoundLocationSetNameSetting.entity.marshalValue({
+          value: locationSetNameTextSetting.entity.marshalValue({
             locationId,
             setKey,
             text: locationSetSpec.name,
@@ -820,7 +721,6 @@ const populateLocationSpec = inngest.createFunction(
         function: generateLocationSpec,
         data: {
           location: locationName,
-          maxAttempts: 3,
         },
       });
 
@@ -906,7 +806,92 @@ export const generateLocationSetSpec = inngest.createFunction(
 
     const response = await requestOpenAiResponseJson(prompt);
 
-    return response;
+    return response.data;
+  },
+);
+
+export const populateLocationSetSpec = inngest.createFunction(
+  {
+    id: `location/populateLocationSetSpec`,
+    singleton: {
+      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.setKey`,
+      mode: `skip`,
+    },
+    triggers: locationPopulateLocationSetSpecEvent,
+  },
+  async ({ event, step }): Promise<LocationSpec | undefined> => {
+    const { userId, locationId, setKey } = event.data;
+
+    let locationSpec = await step.run(`load location specification`, async () =>
+      withDrizzle(async (db) => {
+        return getLocationSpec(db, userId, locationId);
+      }),
+    );
+
+    invariant(locationSpec != null, `Missing location specification`);
+
+    if (locationSpec.sets?.[setKey] == null) {
+      const locationSetSpec = locationSetSpecSchema.parse({
+        ...(await step.invoke(
+          `generate location set specification (${setKey})`,
+          {
+            function: generateLocationSetSpec,
+            data: {
+              userId,
+              locationId,
+              setKey,
+            },
+          },
+        )),
+        set: setKey,
+      });
+
+      locationSpec = await step.run(
+        `write location set specification (${setKey})`,
+        async () =>
+          withDrizzle(async (db) => {
+            const latestLocationSpec = await getLocationSpec(
+              db,
+              userId,
+              locationId,
+            );
+
+            invariant(
+              latestLocationSpec != null,
+              `Missing location specification`,
+            );
+
+            if (latestLocationSpec.sets?.[setKey] != null) {
+              return latestLocationSpec;
+            }
+
+            const mergedLocationSpec = locationSpecSchema.parse({
+              ...latestLocationSpec,
+              sets: {
+                ...latestLocationSpec.sets,
+                [setKey]: locationSetSpec,
+              },
+            });
+
+            await setUserSetting(db, userId, {
+              key: locationSpecJsonSetting.entity.marshalKey({
+                locationId: locationId,
+              }),
+              value: locationSpecJsonSetting.entity.marshalValue({
+                locationId: locationId,
+                value: mergedLocationSpec,
+              }),
+              now: new Date(),
+              skipHistory: false,
+              historyId: nanoid(),
+            });
+
+            return mergedLocationSpec;
+          }),
+      );
+    }
+
+    return locationSpec;
   },
 );
 
@@ -918,6 +903,7 @@ export const functions = [
   populateLocationSetDescription,
   populateLocationSetIdentityImage,
   populateLocationSetName,
+  populateLocationSetSpec,
   populateLocationSpec,
   runLocationNameSuggestions,
 ];

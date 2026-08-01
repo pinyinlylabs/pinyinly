@@ -15,10 +15,10 @@ import {
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
   locationSpecJsonSetting,
-  pinyinSoundLocationSetDescriptionSetting,
+  locationSetDescriptionTextSetting,
   locationSetIdentityImageSetting,
-  pinyinSoundLocationSetNameSetting,
-  pinyinSoundLocationThoughtChainsSetting,
+  locationSetNameTextSetting,
+  locationThoughtChainsJsonSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
@@ -93,13 +93,13 @@ export default function LocationIdPage() {
 
               <View className="mx-4 my-2">
                 <InlineEditableSettingText
-                  setting={pinyinSoundLocationSetNameSetting}
+                  setting={locationSetNameTextSetting}
                   settingKey={{ locationId, setKey }}
                   placeholder="Set name"
                   textClassName="pyly-body-heading"
                 />
                 <InlineEditableSettingText
-                  setting={pinyinSoundLocationSetDescriptionSetting}
+                  setting={locationSetDescriptionTextSetting}
                   settingKey={{ locationId, setKey }}
                   placeholder="Description"
                   textClassName="pyly-body text-fg/80"
@@ -147,7 +147,7 @@ export default function LocationIdPage() {
       >
         <View className="p-4">
           <InlineEditableSettingJson
-            setting={pinyinSoundLocationThoughtChainsSetting}
+            setting={locationThoughtChainsJsonSetting}
             settingKey={{ locationId: locationId }}
             placeholder='{"-ong":[{"path":[{"anchor":"-ong"},{"anchor":"Giant gong","reason":"-ong echoes gong"},{"anchor":"Jungle Temple","reason":"A giant gong fits a temple"}],"score":92,"strengths":["Simple visual route"],"weaknesses":["Approximate vowel"]}]}'
             emptyStateText="No thought chains yet"

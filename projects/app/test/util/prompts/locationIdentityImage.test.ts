@@ -7,7 +7,7 @@ describe(
     typeof buildLocationIdentityImagePrompt
   >,
   () => {
-    test(`builds a square image prompt with trading-card location guidance`, () => {
+    test(`snapshot`, () => {
       const prompt = buildLocationIdentityImagePrompt({
         locationSpec: makeLocationSpec(`Aircraft hangar`),
       });
@@ -148,6 +148,7 @@ describe(
         - Generic stock-art compositions.
         - Tiny details that disappear at thumbnail size.
         - Wide panoramic views.",
+          "thinkingLevel": "high",
         }
       `);
     });

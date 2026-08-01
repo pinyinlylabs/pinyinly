@@ -119,6 +119,17 @@ export const locationPopulateLocationSpecEvent = eventType(
   },
 );
 
+export const locationPopulateLocationSetSpecEvent = eventType(
+  `location/populate-location-set-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+    }),
+  },
+);
+
 export const locationPopulateLocationEvent = eventType(
   `location/populate-location`,
   {

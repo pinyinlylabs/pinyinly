@@ -111,7 +111,14 @@ The framing should make the set immediately recognisable.
 
 Avoid viewpoints that make the set resemble another set within the same location.
 
-## Output
+## Set specification
+
+For the set:
+
+- use the simplest widely recognised name
+- write concise observable design rules
+- list 5-10 iconic props
+- define a canonical framing
 
 Before finalising, silently check:
 
