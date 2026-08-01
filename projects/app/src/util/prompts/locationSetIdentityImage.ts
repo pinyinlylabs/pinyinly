@@ -49,5 +49,6 @@ Instructions:
     resolution: `1K`,
     systemInstruction,
     messages: [{ role: `user`, kind: `text`, content: userPrompt }],
+    thinkingLevel: `high`,
   };
 }

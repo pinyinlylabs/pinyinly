@@ -252,6 +252,7 @@ describe(
         It should resemble an animator's exploratory location sketch from a sketchbook, not finished concept art.
 
         The viewer should recognize the place at a quick glance and be able to reconstruct it later from memory.",
+          "thinkingLevel": "high",
         }
       `);
     });
