@@ -1,6 +1,6 @@
 import { useAuth } from "@/client/auth";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import { userNameSetting } from "@/data/userSettings";
+import { userNameTextSetting } from "@/data/userSettings";
 import { useEffect } from "react";
 
 /**
@@ -16,7 +16,7 @@ import { useEffect } from "react";
  */
 export function DeviceStoreSync({ dbName }: { dbName: string }) {
   const userName =
-    useUserSetting({ setting: userNameSetting }).value?.text ?? null;
+    useUserSetting({ setting: userNameTextSetting }).value?.text ?? null;
   const { setDeviceSessionUserName } = useAuth();
 
   // Sync userName from setting to auth state (DeviceSession cache)

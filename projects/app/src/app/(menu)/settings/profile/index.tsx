@@ -3,7 +3,7 @@ import { useAuth } from "@/client/auth";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
-import { userNameSetting } from "@/data/userSettings";
+import { userNameTextSetting } from "@/data/userSettings";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 
@@ -59,7 +59,7 @@ export default function ProfileSettingsPage() {
         <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
           <Text className="font-sans text-sm text-fg-dim">Account Name</Text>
           <InlineEditableSettingText
-            setting={userNameSetting}
+            setting={userNameTextSetting}
             settingKey={{}}
             textClassName="pyly-body"
             placeholder="Enter account name"

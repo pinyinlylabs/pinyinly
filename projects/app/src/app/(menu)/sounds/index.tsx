@@ -21,10 +21,10 @@ import {
 import {
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundActorSelectionSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundGroupThemeSetting,
+  pinyinSoundGroupNameTextSetting,
+  pinyinSoundGroupThemeTextSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
+  pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
@@ -42,7 +42,7 @@ export default function SoundsPage() {
   const nameSettingKeys = useMemo(
     () =>
       chart.soundIds.map((soundId) =>
-        pinyinSoundNameSetting.entity.marshalKey({ soundId }),
+        pinyinSoundNameTextSetting.entity.marshalKey({ soundId }),
       ),
     [chart.soundIds],
   );
@@ -158,10 +158,10 @@ export default function SoundsPage() {
         ];
       }
 
-      const nameValueData = pinyinSoundNameSetting.decode(
+      const nameValueData = pinyinSoundNameTextSetting.decode(
         { soundId },
         settingsByKey.get(
-          pinyinSoundNameSetting.entity.marshalKey({ soundId }),
+          pinyinSoundNameTextSetting.entity.marshalKey({ soundId }),
         ) ?? null,
       );
       const imageValueData = pinyinSoundImageSetting.decode(
@@ -221,14 +221,14 @@ export default function SoundsPage() {
           <View key={id} className="gap-4">
             <View className="flex-row items-center gap-2">
               <InlineEditableSettingText
-                setting={pinyinSoundGroupNameSetting}
+                setting={pinyinSoundGroupNameTextSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Group name"
                 textClassName="font-sans text-lg font-bold"
               />
               <Text className="font-sans text-fg-dim">({sounds.length})</Text>
               <InlineEditableSettingText
-                setting={pinyinSoundGroupThemeSetting}
+                setting={pinyinSoundGroupThemeTextSetting}
                 settingKey={{ soundGroupId: id }}
                 placeholder="Theme"
                 textClassName="font-sans text-lg font-bold"

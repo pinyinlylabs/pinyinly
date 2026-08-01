@@ -13,7 +13,7 @@ import {
   pinyinSoundLocationThoughtChainsSetting,
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
-  userNameSetting,
+  userNameTextSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
@@ -119,7 +119,7 @@ describe(
     });
 
     test(`returns empty key metadata for keyless settings`, () => {
-      const keyInfo = getUserSettingKeyInfo(userNameSetting, {});
+      const keyInfo = getUserSettingKeyInfo(userNameTextSetting, {});
 
       expect(keyInfo.settingKey).toBe(`userName`);
       expect(keyInfo.keyParamAliases).toEqual([]);
@@ -166,7 +166,7 @@ describe(
 
     test(`decodes keyless setting values directly`, () => {
       const decoded = decodeUserSettingValue(
-        userNameSetting,
+        userNameTextSetting,
         {},
         { t: `Brad` },
       );
@@ -196,23 +196,33 @@ describe(
         },
       );
 
-      expect(decoded).toEqual({
-        locationId: testLocationId,
-        thoughtChains: {
-          "-ong": [
-            {
-              path: [
-                { anchor: `-ong` },
-                { anchor: `gong`, reason: `close pronunciation` },
-                { anchor: `Temple`, reason: `belongs in temple` },
-              ],
-              score: 90,
-              strengths: [],
-              weaknesses: [],
-            },
-          ],
-        },
-      });
+      expect(decoded).toMatchInlineSnapshot(`
+        {
+          "locationId": "place_123",
+          "value": {
+            "-ong": [
+              {
+                "path": [
+                  {
+                    "anchor": "-ong",
+                  },
+                  {
+                    "anchor": "gong",
+                    "reason": "close pronunciation",
+                  },
+                  {
+                    "anchor": "Temple",
+                    "reason": "belongs in temple",
+                  },
+                ],
+                "score": 90,
+                "strengths": [],
+                "weaknesses": [],
+              },
+            ],
+          },
+        }
+      `);
     });
   },
 );
@@ -237,7 +247,7 @@ describe(
 
     test(`keeps all marshaled fields for keyless settings`, () => {
       const encoded = encodeUserSettingStoredValue(
-        userNameSetting,
+        userNameTextSetting,
         {},
         {
           text: `Brad`,
@@ -248,7 +258,11 @@ describe(
     });
 
     test(`returns null when value is null`, () => {
-      const encoded = encodeUserSettingStoredValue(userNameSetting, {}, null);
+      const encoded = encodeUserSettingStoredValue(
+        userNameTextSetting,
+        {},
+        null,
+      );
 
       expect(encoded).toBeNull();
     });

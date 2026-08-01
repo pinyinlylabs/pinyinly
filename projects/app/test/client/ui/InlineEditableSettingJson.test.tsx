@@ -8,6 +8,7 @@ import type {
 } from "#client/ui/hooks/useUserSetting.ts";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import type { UserSettingJsonEntity } from "#data/userSettings.js";
 
 vi.mock(`#client/ui/hooks/useUserSetting.ts`, () => ({
   useUserSetting: vi.fn(),
@@ -20,12 +21,12 @@ const mockSettingEntity = {
       _def: {
         shape: {
           id: {},
-          mnemonicIdentity: {},
+          value: {},
         },
       },
     },
   },
-} as unknown as UserSettingEntity;
+} as unknown as UserSettingJsonEntity;
 
 const mockSetting = {
   kind: `userSetting` as const,
@@ -69,13 +70,13 @@ describe(`InlineEditableSettingJson`, () => {
 
     await waitFor(() => {
       expect(mockSetValue).toHaveBeenCalledWith({
-        mnemonicIdentity: { traits: [`curious`] },
+        value: { traits: [`curious`] },
       });
     });
   });
 
   test(`clears setting when draft is empty on blur`, async () => {
-    setupTest({ mnemonicIdentity: { traits: [`curious`] } });
+    setupTest({ value: { traits: [`curious`] } });
 
     render(
       <InlineEditableSettingJson<any>

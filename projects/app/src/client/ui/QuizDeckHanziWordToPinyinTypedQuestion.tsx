@@ -18,7 +18,7 @@ import {
   shouldAutoSubmitPinyinTypedAnswer,
 } from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordFromSkill } from "@/data/skills";
-import { autoCheckUserSetting } from "@/data/userSettings";
+import { autoCheckUserToggleSetting } from "@/data/userSettings";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
 import type { ReactNode, Ref } from "react";
@@ -53,7 +53,8 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   const { skill, flag, answers, bannedMeaningPinyinHint } = question;
 
   const autoCheck =
-    useUserSetting({ setting: autoCheckUserSetting }).value?.enabled ?? false;
+    useUserSetting({ setting: autoCheckUserToggleSetting }).value?.enabled ??
+    false;
 
   const userAnswerRef = useRef(``);
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);

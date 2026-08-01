@@ -15,7 +15,7 @@ import { usePointerHoverCapability } from "@/client/ui/hooks/usePointerHoverCapa
 import type { UserSettingKeyInput } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { AssetId } from "@/data/model";
-import { aiImagePlaygroundSetting } from "@/data/userSettings";
+import { aiImagePlaygroundTextSetting } from "@/data/userSettings";
 import { setAdd, setDelete, setToggle } from "@pinyinly/lib/collections";
 import type {
   UserSetting,
@@ -175,7 +175,7 @@ export function AiImageGenerationPanel({
 }: AiImageGenerationPanelProps) {
   const { aiImageStyle } = useAiImageStyleSetting();
   const playgroundSettingResult = useUserSetting({
-    setting: aiImagePlaygroundSetting,
+    setting: aiImagePlaygroundTextSetting,
     key: { settingKey: playgroundStorageKey },
   });
 

@@ -10,17 +10,16 @@ import type {
 } from "@/data/model";
 import { locationSpecSchema, SrsKind, actorSpecSchema } from "@/data/model";
 import {
-  actorSpecSetting,
+  actorSpecJsonSetting,
   locationSetIdentityImageSetting,
   locationSpecJsonSetting,
-  userNameSetting,
+  userNameTextSetting,
 } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
-import { jsonCodec } from "@pinyinly/lib/zod";
 import { setUserSetting } from "./userSettings";
 import { nanoid } from "@/util/nanoid";
 
@@ -87,7 +86,7 @@ export async function getUserName(
   db: Drizzle,
   userId: string,
 ): Promise<string | null> {
-  const settingKey = userNameSetting.entity.marshalKey({});
+  const settingKey = userNameTextSetting.entity.marshalKey({});
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
@@ -96,7 +95,7 @@ export async function getUserName(
   });
 
   if (setting?.value) {
-    const decoded = userNameSetting.decode({}, setting.value);
+    const decoded = userNameTextSetting.decode({}, setting.value);
     return decoded?.text ?? null;
   }
   return null;
@@ -111,8 +110,8 @@ export async function setUserName(
   userId: string,
   userName: string,
 ): Promise<void> {
-  const settingKey = userNameSetting.entity.marshalKey({});
-  const marshaledValue = userNameSetting.entity.marshalValue({
+  const settingKey = userNameTextSetting.entity.marshalKey({});
+  const marshaledValue = userNameTextSetting.entity.marshalValue({
     text: userName,
   });
   await db
@@ -158,7 +157,7 @@ export async function getLocationSpec(
     return null;
   }
 
-  return jsonCodec(locationSpecSchema).parse(decoded.text, {
+  return locationSpecSchema.parse(decoded.value, {
     reportInput: true,
   });
 }
@@ -173,7 +172,7 @@ export async function getActorSpec(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        actorSpecSetting.entity.marshalKey({ actorId }),
+        actorSpecJsonSetting.entity.marshalKey({ actorId }),
       ),
     ),
   });
@@ -182,9 +181,9 @@ export async function getActorSpec(
     return null;
   }
 
-  const decoded = actorSpecSetting.decode({ actorId }, setting.value);
+  const decoded = actorSpecJsonSetting.decode({ actorId }, setting.value);
 
-  return actorSpecSchema.parse(decoded?.mnemonicIdentity, {
+  return actorSpecSchema.parse(decoded?.value, {
     reportInput: true,
   });
 }

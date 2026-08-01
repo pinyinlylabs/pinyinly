@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import {
-  actorSpecSetting,
+  actorSpecJsonSetting,
   actorModelSheetImageSetting,
   actorIdentityImageSetting,
 } from "@/data/userSettings";
@@ -39,7 +39,7 @@ export const populateActor = inngest.createFunction(
           eq(s.userSetting.userId, userId),
           eq(
             s.userSetting.key,
-            actorSpecSetting.entity.marshalKey({ actorId }),
+            actorSpecJsonSetting.entity.marshalKey({ actorId }),
           ),
         ),
       });
@@ -48,13 +48,13 @@ export const populateActor = inngest.createFunction(
         return null;
       }
 
-      const decoded = actorSpecSetting.decode({ actorId }, setting.value);
+      const decoded = actorSpecJsonSetting.decode({ actorId }, setting.value);
 
       if (decoded == null) {
         return null;
       }
 
-      return actorSpecSchema.parse(decoded.mnemonicIdentity);
+      return actorSpecSchema.parse(decoded.value);
     });
 
     if (actorSpec == null) {
@@ -67,12 +67,12 @@ export const populateActor = inngest.createFunction(
 
       await withDrizzle(async (db) => {
         await setUserSetting(db, userId, {
-          key: actorSpecSetting.entity.marshalKey({
+          key: actorSpecJsonSetting.entity.marshalKey({
             actorId,
           }),
-          value: actorSpecSetting.entity.marshalValue({
+          value: actorSpecJsonSetting.entity.marshalValue({
             actorId,
-            mnemonicIdentity: actorSpec,
+            value: actorSpec,
           }),
           now: new Date(),
           skipHistory: false,

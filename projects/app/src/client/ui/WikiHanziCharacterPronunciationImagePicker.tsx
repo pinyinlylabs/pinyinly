@@ -16,7 +16,7 @@ import {
   pinyinFinalSoundLocationSelectionSetting,
   actorIdentityImageSetting,
   locationIdentityImageSetting,
-  pinyinSoundNameSetting,
+  pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
 import { Text, View } from "react-native";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
@@ -48,7 +48,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinSoundNameSetting,
+          setting: pinyinSoundNameTextSetting,
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
@@ -56,7 +56,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinSoundNameSetting,
+          setting: pinyinSoundNameTextSetting,
           key: { soundId: splitPinyin.finalSoundId },
         },
   );

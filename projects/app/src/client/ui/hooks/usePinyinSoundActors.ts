@@ -3,11 +3,11 @@ import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { ActorId, AssetId, PinyinSoundId } from "@/data/model";
 import {
-  actorDescriptionSetting,
+  actorDescriptionTextSetting,
   actorIdentityImageSetting,
-  actorSpecSetting,
+  actorSpecJsonSetting,
   actorModelSheetImageSetting,
-  actorNameSetting,
+  actorNameTextSetting,
   pinyinSoundActorSelectionSetting,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
@@ -123,7 +123,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     for (const setting of settings) {
       if (setting.key.startsWith(`psan/`)) {
         const actorId = setting.key.slice(`psan/`.length) as ActorId;
-        const value = actorNameSetting.decode({ actorId }, setting.value);
+        const value = actorNameTextSetting.decode({ actorId }, setting.value);
         if (value == null) {
           continue;
         }
@@ -135,7 +135,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
       if (setting.key.startsWith(`psad/`)) {
         const actorId = setting.key.slice(`psad/`.length) as ActorId;
-        const value = actorDescriptionSetting.decode(
+        const value = actorDescriptionTextSetting.decode(
           { actorId },
           setting.value,
         );
@@ -202,8 +202,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     const actorId = `actor_${nanoid()}` as ActorId;
 
     void r.mutate.setSetting({
-      key: actorNameSetting.entity.marshalKey({ actorId }),
-      value: actorNameSetting.entity.marshalValue({
+      key: actorNameTextSetting.entity.marshalKey({ actorId }),
+      value: actorNameTextSetting.entity.marshalValue({
         actorId,
         text: name,
       }),
@@ -241,8 +241,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
     if (target.kind === `existing`) {
       void r.mutate.setSetting({
-        key: actorNameSetting.entity.marshalKey({ actorId }),
-        value: actorNameSetting.entity.marshalValue({
+        key: actorNameTextSetting.entity.marshalKey({ actorId }),
+        value: actorNameTextSetting.entity.marshalValue({
           actorId,
           text: resolvedName,
         }),
@@ -253,11 +253,11 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     }
 
     void r.mutate.setSetting({
-      key: actorDescriptionSetting.entity.marshalKey({ actorId }),
+      key: actorDescriptionTextSetting.entity.marshalKey({ actorId }),
       value:
         resolvedDescription == null
           ? null
-          : actorDescriptionSetting.entity.marshalValue({
+          : actorDescriptionTextSetting.entity.marshalValue({
               actorId,
               text: resolvedDescription,
             }),
@@ -267,13 +267,13 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
 
     void r.mutate.setSetting({
-      key: actorSpecSetting.entity.marshalKey({ actorId }),
+      key: actorSpecJsonSetting.entity.marshalKey({ actorId }),
       value:
         mnemonicIdentity == null
           ? null
-          : actorSpecSetting.entity.marshalValue({
+          : actorSpecJsonSetting.entity.marshalValue({
               actorId,
-              mnemonicIdentity,
+              value: mnemonicIdentity,
             }),
       now: new Date(),
       skipHistory: false,

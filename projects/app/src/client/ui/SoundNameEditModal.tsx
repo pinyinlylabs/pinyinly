@@ -1,7 +1,7 @@
 import type { PinyinSoundId } from "@/data/model";
 import {
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundNameSetting,
+  pinyinSoundGroupThemeTextSetting,
+  pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { sortComparatorString } from "@pinyinly/lib/collections";
@@ -48,7 +48,7 @@ function SoundNameEditModalContent({
   const r = useRizzle();
   const pinyinSoundGroups = usePinyinSoundGroups();
   const { setValue: setSoundName, value: currentSoundName } = useUserSetting({
-    setting: pinyinSoundNameSetting,
+    setting: pinyinSoundNameTextSetting,
     key: { soundId },
   });
 
@@ -102,7 +102,7 @@ function SoundNameEditModalContent({
               Sound name
             </Text>
             <InlineEditableSettingText
-              setting={pinyinSoundNameSetting}
+              setting={pinyinSoundNameTextSetting}
               settingKey={{ soundId }}
               placeholder="Name this sound"
             />
@@ -127,7 +127,7 @@ function SoundNameEditModalContent({
                           onPress={() => {
                             if (pinyinSoundGroup?.id != null) {
                               void r.mutate.setSetting({
-                                key: pinyinSoundGroupThemeSetting.entity.marshalKey(
+                                key: pinyinSoundGroupThemeTextSetting.entity.marshalKey(
                                   { soundGroupId: pinyinSoundGroup.id },
                                 ),
                                 value: { t: theme },

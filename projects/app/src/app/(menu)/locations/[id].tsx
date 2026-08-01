@@ -119,11 +119,10 @@ export default function LocationIdPage() {
 
       <WikiTitledBox title="Location specification JSON">
         <View className="gap-3 p-4">
-          <InlineEditableSettingText
+          <InlineEditableSettingJson
             setting={locationSpecJsonSetting}
             settingKey={{ locationId: locationId }}
             placeholder='{"location": "Aircraft hangar"}'
-            multiline
           />
 
           <Pressable

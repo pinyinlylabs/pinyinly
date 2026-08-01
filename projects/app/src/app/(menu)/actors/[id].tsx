@@ -10,11 +10,11 @@ import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { ActorId, PinyinSoundId } from "@/data/model";
 import {
-  actorDescriptionSetting,
+  actorDescriptionTextSetting,
   actorIdentityImageSetting,
-  actorSpecSetting,
+  actorSpecJsonSetting,
   actorModelSheetImageSetting,
-  actorNameSetting,
+  actorNameTextSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
@@ -25,7 +25,7 @@ export default function ActorIdPage() {
   const actorDirectory = usePinyinSoundActors();
 
   const actorNameSettingResult = useUserSetting({
-    setting: actorNameSetting,
+    setting: actorNameTextSetting,
     key: { actorId },
   });
   const actorName = actorNameSettingResult.value?.text;
@@ -79,14 +79,14 @@ export default function ActorIdPage() {
         <View className="flex-row items-center gap-2 self-start">
           <InlineEditableSettingText
             textClassName="pyly-body-title"
-            setting={actorNameSetting}
+            setting={actorNameTextSetting}
             settingKey={{ actorId }}
             placeholder="Actor name"
           />
         </View>
 
         <InlineEditableSettingText
-          setting={actorDescriptionSetting}
+          setting={actorDescriptionTextSetting}
           settingKey={{ actorId }}
           placeholder="Actor description"
           multiline
@@ -96,7 +96,7 @@ export default function ActorIdPage() {
       <WikiTitledBox title="Mnemonic Spec">
         <View className="gap-3 p-4">
           <InlineEditableSettingJson
-            setting={actorSpecSetting}
+            setting={actorSpecJsonSetting}
             settingKey={{ actorId }}
             placeholder='{"traits": ["curious"]}'
             autoResizeMinHeight={120}

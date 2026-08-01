@@ -7,7 +7,7 @@ import { useUserSetting } from "#client/ui/hooks/useUserSetting.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import type { HanziWord } from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
-import { autoCheckUserSetting } from "#data/userSettings.ts";
+import { autoCheckUserToggleSetting } from "#data/userSettings.ts";
 import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import { r } from "#util/rizzle.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -81,7 +81,7 @@ testWithRizzle(`returns null when skipped`, ({ rizzle }) => {
 
 testWithRizzle(`loads and updates setting values`, async ({ rizzle }) => {
   const { result, unmount } = renderHook(
-    () => useUserSetting({ setting: autoCheckUserSetting }),
+    () => useUserSetting({ setting: autoCheckUserToggleSetting }),
     {
       wrapper: testContextProviders({ rizzle }),
     },

@@ -14,7 +14,7 @@ import type {
 } from "@/data/model";
 import {
   hanziWordMeaningHintCaptionSetting,
-  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintExplanationTextSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
@@ -310,7 +310,7 @@ function MeaningsSection({
     const key = { hanziWord: entry.hanziWord };
     return [
       hanziWordMeaningHintTextSetting.entity.marshalKey(key),
-      hanziWordMeaningHintExplanationSetting.entity.marshalKey(key),
+      hanziWordMeaningHintExplanationTextSetting.entity.marshalKey(key),
     ];
   });
 
@@ -343,7 +343,7 @@ function MeaningsSection({
       hanziWord: entry.hanziWord,
     });
     const explanationKey =
-      hanziWordMeaningHintExplanationSetting.entity.marshalKey({
+      hanziWordMeaningHintExplanationTextSetting.entity.marshalKey({
         hanziWord: entry.hanziWord,
       });
     return (

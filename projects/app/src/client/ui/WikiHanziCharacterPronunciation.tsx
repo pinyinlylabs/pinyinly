@@ -20,7 +20,7 @@ import {
   hanziPronunciationHintTextSetting,
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
+  pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -110,7 +110,7 @@ export function WikiHanziCharacterPronunciationBox({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinSoundNameSetting,
+          setting: pinyinSoundNameTextSetting,
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
@@ -118,7 +118,7 @@ export function WikiHanziCharacterPronunciationBox({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinSoundNameSetting,
+          setting: pinyinSoundNameTextSetting,
           key: { soundId: splitPinyin.toneSoundId },
         },
   );
@@ -497,6 +497,34 @@ function ExperimentalContent(props: { hanzi: HanziText }) {
         </Text>
       </Text>
     </View>
+  ) : props.hanzi === `表` ? (
+    <View>
+      <Text className="pyly-body leading-6">
+        Hidden in the{` `}
+        <MnemonicComponentText>[-ao] Barn’s</MnemonicComponentText>
+        {` `}
+        <MnemonicComponentText>
+          [3<sup>rd</sup>] main room
+        </MnemonicComponentText>
+        , <MnemonicComponentText>[bi-] Bigfoot</MnemonicComponentText> uses a
+        trumpet through the loft opening{` `}
+        <MnemonicGlossText>表 to express</MnemonicGlossText> himself without
+        showing himself.{` `}
+        <Text className="text-fg-dim">
+          <MnemonicComponentText>[bi-] Bigfoot</MnemonicComponentText>,
+          desperate to stay hidden yet still{` `}
+          <MnemonicGlossText>表 express</MnemonicGlossText> himself, repeatedly
+          burrows into the towering hay of the{` `}
+          <MnemonicComponentText>
+            [3<sup>rd</sup>] hayloft
+          </MnemonicComponentText>
+          {` `}
+          and uses the bright open loft door as the only safe outlet for a huge
+          speaking trumpet that pokes out from the straw while the whole
+          haystack obviously squirms around him.
+        </Text>
+      </Text>
+    </View>
   ) : null;
 }
 
@@ -504,8 +532,8 @@ function MnemonicComponentText({ children }: { children: ReactNode }) {
   return (
     <Text
       className="
-        my-0 inline-block rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50
-        via-sky-500/50 to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
+        my-0 inline-block rounded-sm bg-gradient-to-b from-sky-400/50 via-sky-500/50 to-sky-500/50
+        px-1 leading-5.5 font-medium text-white shadow-sm outline -outline-offset-1 outline-sky-400
       "
     >
       {children}
@@ -518,7 +546,7 @@ function MnemonicGlossText({ children }: { children: ReactNode }) {
     <Text
       className="
         my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
-        to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
+        to-rose-600/50 px-1 leading-5 font-medium text-white shadow-sm
       "
     >
       {children}

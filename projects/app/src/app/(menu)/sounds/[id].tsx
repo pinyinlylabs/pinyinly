@@ -36,8 +36,8 @@ import {
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
   pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundNameSetting,
+  pinyinSoundGroupNameTextSetting,
+  pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
 import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -141,7 +141,7 @@ export default function SoundIdPage() {
         </View>
         <InlineEditableSettingText
           textClassName="pyly-body-title"
-          setting={pinyinSoundNameSetting}
+          setting={pinyinSoundNameTextSetting}
           settingKey={{ soundId: id }}
           placeholder="Name this sound"
           readonly={isFinalSound}
@@ -680,7 +680,7 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
       {pinyinSoundGroupId == null ? null : (
         <Breadcrumbs.Item href="/sounds">
           <SettingText
-            setting={pinyinSoundGroupNameSetting}
+            setting={pinyinSoundGroupNameTextSetting}
             settingKey={{ soundGroupId: pinyinSoundGroupId }}
           />
         </Breadcrumbs.Item>

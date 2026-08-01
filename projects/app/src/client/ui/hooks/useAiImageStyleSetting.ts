@@ -1,6 +1,6 @@
 import type { AiImageStyleKind } from "@/client/aiImageStyle";
 import { normalizeAiImageStyleKind } from "@/client/aiImageStyle";
-import { aiImageStyleSetting } from "@/data/userSettings";
+import { aiImageStyleTextSetting } from "@/data/userSettings";
 import { useUserSetting } from "./useUserSetting";
 
 /**
@@ -20,7 +20,7 @@ export interface UseAiImageStyleResult {
  * Returns the normalized style ('comic' or 'realistic') plus loading state and setter.
  */
 export function useAiImageStyleSetting(): UseAiImageStyleResult {
-  const setting = useUserSetting({ setting: aiImageStyleSetting });
+  const setting = useUserSetting({ setting: aiImageStyleTextSetting });
   const aiImageStyle = normalizeAiImageStyleKind(setting.value?.text);
 
   const setAiImageStyle = (styleKind: AiImageStyleKind) => {

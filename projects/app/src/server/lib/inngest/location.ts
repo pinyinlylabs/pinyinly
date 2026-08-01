@@ -819,7 +819,7 @@ const populateLocationSpec = inngest.createFunction(
             }),
             value: locationSpecJsonSetting.entity.marshalValue({
               locationId: locationId,
-              text: JSON.stringify(locationSpec),
+              value: locationSpec,
             }),
             now: new Date(),
             skipHistory: false,
