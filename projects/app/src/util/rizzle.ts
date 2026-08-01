@@ -887,7 +887,7 @@ function boolean(alias?: string) {
 const _boolean = RizzleCustom.createSymmetric(z.boolean());
 
 /**
- * Stores an arbitrary JSON value.
+ * Stores an arbitrary JSON compatible object value.
  */
 function json(): typeof _json;
 function json<Alias extends string>(

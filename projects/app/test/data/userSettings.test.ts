@@ -37,23 +37,22 @@ function expectUniqueSettingKeyPaths(
 
 describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
   test(`contains all image setting entities`, () => {
-    expect(imageSettingDefs).toHaveLength(7);
-    expect(imageSettingDefs).toContain(actorIdentityImageSetting);
-    expect(imageSettingDefs).toContain(actorModelSheetImageSetting);
-    expect(imageSettingDefs).toContain(locationIdentityImageSetting);
-    expect(imageSettingDefs).toContain(locationSetIdentityImageSetting);
-    expect(imageSettingDefs).toContain(pinyinSoundImageSetting);
-    expect(imageSettingDefs).toContain(hanziWordMeaningHintImageSetting);
-    expect(imageSettingDefs).toContain(hanziPronunciationHintImageSetting);
+    expect(new Set(imageSettingDefs)).toEqual(
+      new Set([
+        actorIdentityImageSetting,
+        actorModelSheetImageSetting,
+        locationIdentityImageSetting,
+        locationSetIdentityImageSetting,
+        pinyinSoundImageSetting,
+        hanziWordMeaningHintImageSetting,
+        hanziPronunciationHintImageSetting,
+      ]),
+    );
   });
 
   test(`all settings have imageId field`, () => {
     for (const setting of imageSettingDefs) {
-      const valueShape = (
-        setting.entity._def.valueType as unknown as {
-          _def: { shape: Record<string, unknown> };
-        }
-      )._def.shape;
+      const valueShape = setting.entity._def.valueType._def.shape;
       expect(valueShape).toHaveProperty(`imageId`);
     }
   });
@@ -76,52 +75,17 @@ describe(
     test(`returns SQL LIKE patterns for all image settings`, () => {
       const patterns = getImageSettingKeyPatterns();
 
-      expect(patterns).toHaveLength(7);
-      expect(patterns).toContain(`psai/%`); // pinyinSoundActorImageSetting
-      expect(patterns).toContain(`psams/%`); // pinyinSoundActorModelSheetImageSetting
-      expect(patterns).toContain(`pspi/%`); // pinyinSoundLocationIdentityImageSetting
-      expect(patterns).toContain(`pspli/%`); // pinyinSoundLocationSetIdentityImageSetting
-      expect(patterns).toContain(`psi/%`); // pinyinSoundImageSetting
-      expect(patterns).toContain(`hwmhi/%`); // hanziWordMeaningHintImageSetting
-      expect(patterns).toContain(`hphi/%`); // hanziPronunciationHintImageSetting
-    });
-
-    test(`patterns match the key path prefixes`, () => {
-      const patterns = getImageSettingKeyPatterns();
-
-      expect(actorIdentityImageSetting.entity._def.keyPath).toBe(
-        `psai/[actorId]`,
-      );
-      expect(patterns).toContain(`psai/%`);
-
-      expect(actorModelSheetImageSetting.entity._def.keyPath).toBe(
-        `psams/[actorId]`,
-      );
-      expect(patterns).toContain(`psams/%`);
-
-      expect(locationIdentityImageSetting.entity._def.keyPath).toBe(
-        `pspi/[locationId]`,
-      );
-      expect(patterns).toContain(`pspi/%`);
-
-      expect(locationSetIdentityImageSetting.entity._def.keyPath).toBe(
-        `pspli/[locationId]/[setKey]`,
-      );
-      expect(patterns).toContain(`pspli/%`);
-
-      // Verify each pattern corresponds to its setting's key path
-      expect(pinyinSoundImageSetting.entity._def.keyPath).toBe(`psi/[soundId]`);
-      expect(patterns).toContain(`psi/%`);
-
-      expect(hanziWordMeaningHintImageSetting.entity._def.keyPath).toBe(
-        `hwmhi/[hanziWord]`,
-      );
-      expect(patterns).toContain(`hwmhi/%`);
-
-      expect(hanziPronunciationHintImageSetting.entity._def.keyPath).toBe(
-        `hphi/[hanzi]/[pinyin]`,
-      );
-      expect(patterns).toContain(`hphi/%`);
+      expect(patterns).toMatchInlineSnapshot(`
+        [
+          "psai/%",
+          "psams/%",
+          "pspi/%",
+          "pspli/%",
+          "psi/%",
+          "hwmhi/%",
+          "hphi/%",
+        ]
+      `);
     });
 
     test(`extracts prefix before first parameter`, () => {
@@ -295,7 +259,7 @@ describe(
         { locationId: testLocationId },
         {
           locationId: testLocationId,
-          thoughtChains: {
+          value: {
             "-ong": [
               {
                 path: [

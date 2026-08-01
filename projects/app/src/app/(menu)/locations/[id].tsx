@@ -15,7 +15,7 @@ import {
   pinyinSoundLocationDescriptionSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
-  pinyinSoundLocationSpecSetting,
+  locationSpecJsonSetting,
   pinyinSoundLocationSetDescriptionSetting,
   locationSetIdentityImageSetting,
   pinyinSoundLocationSetNameSetting,
@@ -120,7 +120,7 @@ export default function LocationIdPage() {
       <WikiTitledBox title="Location specification JSON">
         <View className="gap-3 p-4">
           <InlineEditableSettingText
-            setting={pinyinSoundLocationSpecSetting}
+            setting={locationSpecJsonSetting}
             settingKey={{ locationId: locationId }}
             placeholder='{"location": "Aircraft hangar"}'
             multiline

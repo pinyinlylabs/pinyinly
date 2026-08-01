@@ -1,6 +1,8 @@
 import type {
   AssetId,
   HanziWord,
+  LocationSetSpec,
+  LocationSpec,
   PinyinlyObjectId,
   PinyinSoundId,
   Skill,
@@ -13,6 +15,8 @@ import {
   hanziWordFromPinyinlyObjectId,
   hanziWordPinyinlyObjectId,
   hanziWordPinyinlyObjectIdKind,
+  locationSetSpecSchema,
+  locationSpecSchema,
   pinyinlyObjectIdKind,
   pinyinSoundIdPinyinlyObjectId,
   pinyinSoundIdPinyinlyObjectIdKind,
@@ -162,6 +166,45 @@ describe(
     });
   },
 );
+
+describe(`locationSpecSchema`, () => {
+  test(`it allows passthrough of extra fields`, () => {
+    const spec = {
+      location: `loc123`,
+      sets: {
+        arrival: {
+          name: `Arrival Set`,
+        },
+        ascent: {
+          name: `Ascent Set`,
+        },
+        below: {
+          name: `Below Set`,
+        },
+        heart: {
+          name: `Heart Set`,
+        },
+        summit: {
+          name: `Summit Set`,
+        },
+      },
+      extraField1: `value1`,
+    } satisfies LocationSpec;
+
+    expect(locationSpecSchema.parse(spec)).toHaveProperty(`extraField1`);
+  });
+});
+
+describe(`locationSetSpecSchema`, () => {
+  test(`it allows passthrough of extra fields`, () => {
+    const spec = {
+      name: `Arrival Set`,
+      extraField1: `value1`,
+    } satisfies LocationSetSpec;
+
+    expect(locationSetSpecSchema.parse(spec)).toHaveProperty(`extraField1`);
+  });
+});
 
 describe(
   `skillIdFromPinyinlyObjectId` satisfies HasNameOf<

@@ -2,7 +2,7 @@ import {
   pinyinSoundLocationSetDescriptionSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
-  pinyinSoundLocationSpecSetting,
+  locationSpecJsonSetting,
   pinyinSoundLocationThoughtChainsSetting,
   pinyinSoundLocationSetNameSetting,
 } from "@/data/userSettings";
@@ -324,7 +324,7 @@ const populateLocation = inngest.createFunction(
 
             const thoughtChainsBySoundId =
               locationSoundThoughtChainsBySoundIdSchema.safeParse(
-                decoded?.thoughtChains,
+                decoded?.value,
               );
 
             return thoughtChainsBySoundId.success
@@ -429,7 +429,7 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
 
             const thoughtChainsBySoundId =
               locationSoundThoughtChainsBySoundIdSchema.safeParse(
-                decoded?.thoughtChains,
+                decoded?.value,
               );
 
             return thoughtChainsBySoundId.success
@@ -490,7 +490,7 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
 
           const latestThoughtChainsBySoundIdResult =
             locationSoundThoughtChainsBySoundIdSchema.safeParse(
-              latestDecoded?.thoughtChains,
+              latestDecoded?.value,
             );
 
           const latestThoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType =
@@ -510,7 +510,7 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
             }),
             value: pinyinSoundLocationThoughtChainsSetting.entity.marshalValue({
               locationId,
-              thoughtChains: mergedThoughtChainsBySoundId,
+              value: mergedThoughtChainsBySoundId,
             }),
             now: new Date(),
             skipHistory: false,
@@ -814,10 +814,10 @@ const populateLocationSpec = inngest.createFunction(
       await step.run(`write location specification`, async () =>
         withDrizzle(async (db) => {
           await setUserSetting(db, userId, {
-            key: pinyinSoundLocationSpecSetting.entity.marshalKey({
+            key: locationSpecJsonSetting.entity.marshalKey({
               locationId: locationId,
             }),
-            value: pinyinSoundLocationSpecSetting.entity.marshalValue({
+            value: locationSpecJsonSetting.entity.marshalValue({
               locationId: locationId,
               text: JSON.stringify(locationSpec),
             }),

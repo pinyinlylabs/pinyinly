@@ -276,9 +276,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
       }
 
       const thoughtChainsResult =
-        locationSoundThoughtChainsBySoundIdSchema.safeParse(
-          value.thoughtChains,
-        );
+        locationSoundThoughtChainsBySoundIdSchema.safeParse(value.value);
       if (!thoughtChainsResult.success) {
         continue;
       }

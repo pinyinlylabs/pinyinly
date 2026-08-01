@@ -11,7 +11,8 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
     triggers: [pronunciationGenerateHintEvent],
   },
   async ({ event }) => {
-    const { userId, actorId, cue, locationId, setKey } = event.data;
+    const { userId, actorId, cue, locationId, setKey, associationStrategy } =
+      event.data;
 
     const actorSpec = await withDrizzle(async (db) => {
       return getActorSpec(db, userId, actorId);
@@ -35,12 +36,13 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
       actor: actorSpec,
       cue,
       location: locationSpec,
-      set: setKey,
+      setKey: setKey,
+      associationStrategy,
     });
 
     const response = await requestOpenAiResponseJson(prompt);
 
-    return response;
+    return { response, prompt };
   },
 );
 

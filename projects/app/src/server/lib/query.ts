@@ -12,7 +12,7 @@ import { locationSpecSchema, SrsKind, actorSpecSchema } from "@/data/model";
 import {
   actorSpecSetting,
   locationSetIdentityImageSetting,
-  pinyinSoundLocationSpecSetting,
+  locationSpecJsonSetting,
   userNameSetting,
 } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
@@ -138,7 +138,7 @@ export async function getLocationSpec(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        pinyinSoundLocationSpecSetting.entity.marshalKey({
+        locationSpecJsonSetting.entity.marshalKey({
           locationId: locationId,
         }),
       ),
@@ -149,7 +149,7 @@ export async function getLocationSpec(
     return null;
   }
 
-  const decoded = pinyinSoundLocationSpecSetting.decode(
+  const decoded = locationSpecJsonSetting.decode(
     { locationId: locationId },
     setting.value,
   );

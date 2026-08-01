@@ -1,7 +1,7 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { locationSetKeySchema } from "@/data/model";
-import type { LocationSet, LocationSpec } from "@/data/model";
+import type { LocationSetSpec, LocationSpec } from "@/data/model";
 import { z } from "zod";
 
 /**
@@ -12,7 +12,7 @@ import { z } from "zod";
  * architectural center.
  */
 
-export interface LocationSetWithDetail extends LocationSet {
+export interface LocationSetSpecWithDetail extends LocationSetSpec {
   props: string[];
   designRules: string[];
   canonicalFraming: string;
@@ -24,11 +24,11 @@ export interface LocationSpecWithDetail extends LocationSpec {
   recognitionHooks: string[];
   designRules: string[];
   sets: {
-    arrival: LocationSetWithDetail;
-    heart: LocationSetWithDetail;
-    below: LocationSetWithDetail;
-    ascent: LocationSetWithDetail;
-    summit: LocationSetWithDetail;
+    arrival: LocationSetSpecWithDetail;
+    heart: LocationSetSpecWithDetail;
+    below: LocationSetSpecWithDetail;
+    ascent: LocationSetSpecWithDetail;
+    summit: LocationSetSpecWithDetail;
   };
 }
 
@@ -289,7 +289,7 @@ Generate the canonical location specification for the following input.
 
   return {
     messages,
-    model: `gpt-5.5`,
+    model: `gpt-5.4`,
     reasoningEffort: `medium`,
     schema: locationSpecWithDetailSchema,
   };

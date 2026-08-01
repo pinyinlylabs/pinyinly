@@ -96,13 +96,13 @@ export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
  * Keep this permissive so older and newer saved payloads remain decodable while
  * prompt-generation schemas can evolve independently.
  */
-export const locationSetSchema = z
+export const locationSetSpecSchema = z
   .object({
     name: z.string(),
   })
   .loose();
 
-export type LocationSet = z.infer<typeof locationSetSchema>;
+export type LocationSetSpec = z.infer<typeof locationSetSpecSchema>;
 
 /**
  * Persisted location specification schema.
@@ -115,11 +115,11 @@ export const locationSpecSchema = z
     location: z.string(),
     sets: z
       .object({
-        arrival: locationSetSchema,
-        heart: locationSetSchema,
-        below: locationSetSchema,
-        ascent: locationSetSchema,
-        summit: locationSetSchema,
+        arrival: locationSetSpecSchema,
+        heart: locationSetSpecSchema,
+        below: locationSetSpecSchema,
+        ascent: locationSetSpecSchema,
+        summit: locationSetSpecSchema,
       })
       .strict(),
   })
@@ -134,9 +134,11 @@ export type LocationSpec = z.infer<typeof locationSpecSchema>;
  * Required fields are intentionally minimal to preserve backwards
  * compatibility with older stored actor-spec versions.
  */
-export const actorSpecSchema = z.object({
-  nickname: z.string(),
-});
+export const actorSpecSchema = z
+  .object({
+    nickname: z.string(),
+  })
+  .loose();
 
 export type ActorSpec = z.infer<typeof actorSpecSchema>;
 

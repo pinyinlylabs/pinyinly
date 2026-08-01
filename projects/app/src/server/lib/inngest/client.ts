@@ -9,6 +9,10 @@ import {
   pinyinSoundIdSchema,
 } from "@/data/model";
 import { z } from "zod";
+import {
+  pronunciationHintRecurringPromptAssociationStrategyKindSchema,
+  pronunciationHintRecurringPromptCueSchema,
+} from "@/util/prompts/pronunciationHintRecurring";
 
 declare global {
   var __pylyPino: pino.Logger | undefined;
@@ -155,7 +159,9 @@ export const pronunciationGenerateHintEvent = eventType(
       locationId: locationIdSchema,
       actorId: actorIdSchema,
       setKey: locationSetKeySchema,
-      cue: z.string(),
+      cue: pronunciationHintRecurringPromptCueSchema,
+      associationStrategy:
+        pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
     }),
   },
 );

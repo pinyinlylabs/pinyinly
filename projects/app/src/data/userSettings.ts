@@ -36,6 +36,17 @@ export type UserSettingTextEntity = RizzleEntity<
   }
 >;
 
+// A user setting entity that has a `json` field
+export type UserSettingJsonEntity = RizzleEntity<
+  string,
+  {
+    value: RizzleTypeAlias<
+      RizzleType<RizzleTypeDef, unknown, unknown, unknown>,
+      `j`
+    >;
+  }
+>;
+
 // A user setting entity that has an `imageId` field
 
 const imageSettingFields = {
@@ -368,7 +379,7 @@ export const locationIdentityImageSetting = defineUserSetting({
   }) satisfies UserSettingImageEntity,
 });
 
-export const pinyinSoundLocationSpecSetting = defineUserSetting({
+export const locationSpecJsonSetting = defineUserSetting({
   entity: r.entity(`psps/[locationId]`, {
     locationId: rLocationId().alias(`p`),
     text: r.string().alias(`t`),
@@ -379,8 +390,8 @@ export const pinyinSoundLocationSpecSetting = defineUserSetting({
 export const pinyinSoundLocationThoughtChainsSetting = defineUserSetting({
   entity: r.entity(`psptc/[locationId]`, {
     locationId: rLocationId().alias(`p`),
-    thoughtChains: r.json().optional().alias(`j`),
-  }),
+    value: r.json().optional().alias(`j`),
+  }) satisfies UserSettingJsonEntity,
 });
 
 export const pinyinSoundLocationSetNameSetting = defineUserSetting({
@@ -622,7 +633,7 @@ export const userSettingDefinitions = [
   pinyinSoundLocationDescriptionSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
-  pinyinSoundLocationSpecSetting,
+  locationSpecJsonSetting,
   pinyinSoundLocationThoughtChainsSetting,
   pinyinSoundLocationSetDescriptionSetting,
   pinyinSoundGroupNameSetting,
