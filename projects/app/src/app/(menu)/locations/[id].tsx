@@ -9,7 +9,6 @@ import {
   locationSetKeys,
   usePinyinSoundLocations,
 } from "@/client/ui/hooks/usePinyinSoundLocations";
-import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
 import type { LocationId } from "@/data/model";
 import {
   pinyinSoundLocationDescriptionSetting,
@@ -23,14 +22,6 @@ import {
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-
-const locationSetTitles: Record<LocationSetKey, string> = {
-  arrival: `Arrival`,
-  heart: `Heart`,
-  below: `Below`,
-  ascent: `Ascent`,
-  summit: `Summit`,
-};
 
 export default function LocationIdPage() {
   const { id: rawId } = useLocalSearchParams<`/locations/[id]`>();
@@ -86,7 +77,10 @@ export default function LocationIdPage() {
       <View className="gap-20">
         {locationSetKeys.map((setKey) => {
           return (
-            <WikiTitledBox key={setKey} title={locationSetTitles[setKey]}>
+            <WikiTitledBox
+              key={setKey}
+              title={setKey.replaceAll(/([A-Z])/gu, ` $1`)}
+            >
               <InlineEditableSettingImage
                 setting={locationSetIdentityImageSetting}
                 settingKey={{ locationId, setKey }}

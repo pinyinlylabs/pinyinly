@@ -175,7 +175,7 @@ Only mention the location or set if it genuinely helps distinguish this mnemonic
               input.associationStrategy ?? `identityBinding`
             ],
           input: JSON.stringify({
-            set: input.location.sets[input.setKey],
+            set: input.location.sets?.[input.setKey],
             location: pick(input.location, [`name`, `recognitionHooks`]),
             cue: input.cue,
             actor: omit(input.actor, [`summary`, `bodyLanguage`]),

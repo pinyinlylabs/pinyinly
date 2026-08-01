@@ -8,7 +8,6 @@ export const locationCriticismCodeSchema = z.enum([
   `NON_CANONICAL`,
   `INVENTED_LORE`,
   `AWKWARD_SET`,
-  `WEAK_HEART`,
   `WEAK_RECOGNITION_HOOK`,
   `REDUNDANT_RULE`,
   `UNOBSERVABLE_RULE`,
@@ -195,7 +194,7 @@ Evaluate the following location specification.
 
   return {
     messages,
-    model: `gpt-5.5`,
+    model: `gpt-5.4`,
     reasoningEffort: `medium`,
     schema: locationEvaluationSchema,
   };

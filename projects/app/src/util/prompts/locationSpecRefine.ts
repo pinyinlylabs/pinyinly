@@ -3,12 +3,20 @@ import type { LocationSpec } from "@/data/model";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import type { LocationCriticismType } from "./locationSpecEvaluate";
 import { locationSpecWithDetailSchema } from "./locationSpec";
+import { z } from "zod";
+
+const outputSchema = z
+  .object({
+    ...locationSpecWithDetailSchema.shape,
+    sets: z.object(),
+  })
+  .meta({ title: `locationSpecRefineOutputSchema hacked up temp schema` });
 
 export const buildLocationSpecRefinePrompt = (entry: {
   location: string;
   locationSpec: LocationSpec;
   criticisms: LocationCriticismType[];
-}): ChatPrompt<typeof locationSpecWithDetailSchema> => {
+}): ChatPrompt<typeof outputSchema> => {
   const systemTemplate = `
 You revise location specifications based on evaluator criticisms.
 
@@ -65,8 +73,8 @@ Revise the following location specification based on the criticisms.
 
   return {
     messages,
-    model: `gpt-5.5`,
+    model: `gpt-5.4`,
     reasoningEffort: `low`,
-    schema: locationSpecWithDetailSchema,
+    schema: outputSchema,
   };
 };

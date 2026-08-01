@@ -4,6 +4,7 @@ import {
   locationPopulateSetDescriptionInputSchema,
 } from "#util/prompts/locationPopulateSetDescription.js";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
+import { fmtChatPromptForSnapshot } from "./helpers";
 
 function makeLocationSpec(location: string): LocationSpecWithDetail {
   return {
@@ -56,31 +57,214 @@ describe(
   >,
   () => {
     test(`builds a single-description prompt from location spec and target set`, () => {
-      const result = buildLocationPopulateSetDescriptionPrompt({
+      const prompt = buildLocationPopulateSetDescriptionPrompt({
         locationSpec: makeLocationSpec(`Pirate ship`),
         setKey: `below`,
       });
 
-      expect(result.model).toBe(`gpt-5.5`);
-      expect(result.reasoningEffort).toBe(`low`);
-      expect(result.messages).toHaveLength(2);
+      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+        {
+          "messages": "
+        =====================
+         SYSTEM MESSAGE
+        ---------------------
+        You are an expert guidebook writer creating an illustrated guide to a collection of famous fictional locations.
 
-      const system = result.messages[0]?.content ?? ``;
-      const user = result.messages[1]?.content ?? ``;
+        Each location will become a familiar place that learners revisit many times while studying.
 
-      expect(system).toContain(
-        `You are an expert guidebook writer creating an illustrated guide to a collection of famous fictional locations.`,
-      );
-      expect(system).toContain(`Write 60–100 words.`);
-      expect(system).toContain(
-        `Do not invent lore, history, characters, stories, or new architectural features.`,
-      );
+        You are writing about one set within one location.
 
-      expect(user).toContain(`<input>`);
-      expect(user).toContain(`"location": "Pirate ship"`);
-      expect(user).toContain(`"set": "below"`);
-      expect(user).toContain(`"name": "cargo hold"`);
-      expect(user).not.toContain(`{{ input }}`);
+        The learner will read your text immediately before viewing an illustration.
+
+        Your job is to make them feel as though they have already visited the place.
+
+        The location specification is the canonical source of truth.
+
+        Do not invent lore, history, characters, stories, or new architectural features.
+
+        Instead, imagine you've brought a friend here for the first time.
+
+        You're smiling and saying:
+
+        "Here's this fascinating place. Let me show you around."
+
+        You wouldn't point out every interesting object.
+
+        You'd naturally mention the few things that define the place and explain why it's memorable.
+
+        That's exactly what you're writing.
+
+        ## Style
+
+        - Write 60–100 words.
+        - Write 3–4 natural paragraphs or sentences.
+        - Begin by clearly identifying the set and where it sits within the location.
+        - Use the set's name naturally in the opening sentence.
+        - Focus on the overall impression rather than an exhaustive description.
+        - Mention only a few of the most recognisable recurring features or props.
+        - Prefer vivid observations over lists of details.
+        - Let the atmosphere emerge naturally from the environment.
+        - Write warmly, conversationally, and naturally.
+        - The writing should be enjoyable to read without drawing attention to itself.
+
+        ## Purpose
+
+        When the learner finishes reading they should think:
+
+        "I feel like I've been there."
+
+        The introduction should naturally answer questions like:
+
+        - Where am I?
+        - What immediately catches my attention?
+        - What makes this place memorable?
+        - Why would I recognise it if I came back?
+
+        The goal is not to describe every feature.
+
+        The goal is to leave the learner with a clear and lasting mental picture.
+
+        ## Do
+
+        - Introduce the place before describing it.
+        - Read the specification, then imagine standing there.
+        - Describe the environment as a real place rather than structured data.
+        - Smoothly combine multiple details into natural prose.
+        - Make small, natural inferences from the environment when appropriate (for example, rough stone and dim light can make a place feel secluded).
+        - Prioritise readability over completeness.
+
+        ## Don't
+
+        - Invent lore, myths, history, characters, or events.
+        - Invent rooms, props, decorations, or architectural features.
+        - Mechanically convert the specification into prose.
+        - Mention every recurring feature.
+        - Compare this set with other sets.
+        - Describe the illustration or camera framing.
+        - Explain the mnemonic system.
+        - Address the learner directly using "you".
+        - Write like an architect, production designer, or technical document.
+        - Try to sound poetic or literary.
+
+        Imagine this paragraph appearing beneath a beautiful illustration in a high-quality illustrated guidebook.
+
+        The learner should finish reading feeling that they've just been shown around somewhere fascinating by a knowledgeable friend.
+
+        You will be given:
+
+        - the complete location specification
+        - the target set
+        =====================
+
+
+
+        =====================
+         USER MESSAGE
+        ---------------------
+        <input>
+        {
+          "locationSpec": {
+            "location": "Pirate ship",
+            "recognitionHooks": [
+              "mast",
+              "bow",
+              "anchor"
+            ],
+            "designRules": [
+              "Keep the hull dominant in the composition."
+            ],
+            "sets": {
+              "arrival": {
+                "name": "dock",
+                "props": [],
+                "designRules": [
+                  "Show the gangplank and mooring ropes."
+                ],
+                "canonicalFraming": "View from the dock looking toward the deck entrance.",
+                "avoidFraming": [
+                  "Do not frame it as a distant open-sea panorama."
+                ]
+              },
+              "heart": {
+                "name": "captain's cabin",
+                "props": [
+                  "Desk with a map on it"
+                ],
+                "designRules": [
+                  "Show the richest interior detail."
+                ],
+                "canonicalFraming": "View from the doorway looking toward the captain's chair and desk.",
+                "avoidFraming": [
+                  "Do not reduce it to a plain hallway."
+                ]
+              },
+              "below": {
+                "name": "cargo hold",
+                "props": [
+                  "Barrels"
+                ],
+                "designRules": [
+                  "Show stacked crates and a low ceiling."
+                ],
+                "canonicalFraming": "View from knee height looking into the lower hold.",
+                "avoidFraming": [
+                  "Do not frame it like the main deck."
+                ]
+              },
+              "ascent": {
+                "name": "stairs",
+                "props": [
+                  "Handrail"
+                ],
+                "designRules": [
+                  "Show the climb upward along the mast."
+                ],
+                "canonicalFraming": "View from below looking up the rigging and steps.",
+                "avoidFraming": [
+                  "Do not frame it as a flat side path."
+                ]
+              },
+              "summit": {
+                "name": "crow's nest",
+                "props": [
+                  "Binoculars"
+                ],
+                "designRules": [
+                  "Show the tiny lookout at the top of the mast."
+                ],
+                "canonicalFraming": "View from the deck looking up to the lookout platform.",
+                "avoidFraming": [
+                  "Do not frame it as the same as the cabin interior."
+                ]
+              }
+            }
+          },
+          "set": "below"
+        }
+        </input>
+        =====================
+        ",
+          "model": "gpt-5.4",
+          "reasoningEffort": "low",
+          "schema": {
+            "name": "locationPopulateSetDescriptionOutputSchema",
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "description": {
+                  "type": "string",
+                },
+              },
+              "required": [
+                "description",
+              ],
+              "title": "locationPopulateSetDescriptionOutputSchema",
+              "type": "object",
+            },
+            "type": "json_schema",
+          },
+        }
+      `);
     });
 
     test(`input schema rejects unexpected fields`, () => {

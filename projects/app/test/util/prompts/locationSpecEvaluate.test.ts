@@ -124,7 +124,7 @@ describe(`buildLocationSpecEvaluatePrompt`, () => {
       </data>
       =====================
       ",
-        "model": "gpt-5.5",
+        "model": "gpt-5.4",
         "reasoningEffort": "medium",
         "schema": {
           "name": "locationEvaluationSchema",
@@ -140,7 +140,6 @@ describe(`buildLocationSpecEvaluatePrompt`, () => {
                         "NON_CANONICAL",
                         "INVENTED_LORE",
                         "AWKWARD_SET",
-                        "WEAK_HEART",
                         "WEAK_RECOGNITION_HOOK",
                         "REDUNDANT_RULE",
                         "UNOBSERVABLE_RULE",

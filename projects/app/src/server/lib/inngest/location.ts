@@ -11,7 +11,7 @@ import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThou
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
 import {
   locationIdSchema,
-  locationSetKindSchema,
+  locationSetKeySchema,
   locationSpecSchema,
   openAiReasoningEffortSchema,
 } from "@/data/model";
@@ -733,6 +733,15 @@ const populateLocationSetName = inngest.createFunction(
           return;
         }
 
+        const locationSetSpec = locationSpec.sets?.[setKey];
+        if (locationSetSpec == null) {
+          logger.error(
+            { locationId, userId, setKey },
+            `Missing location set specification for set name generation`,
+          );
+          return;
+        }
+
         await setUserSetting(db, userId, {
           key: pinyinSoundLocationSetNameSetting.entity.marshalKey({
             locationId,
@@ -741,7 +750,7 @@ const populateLocationSetName = inngest.createFunction(
           value: pinyinSoundLocationSetNameSetting.entity.marshalValue({
             locationId,
             setKey,
-            text: locationSpec.sets[setKey].name,
+            text: locationSetSpec.name,
           }),
           now: new Date(),
           skipHistory: false,
@@ -873,13 +882,13 @@ export const generateLocationSetSpec = inngest.createFunction(
       schema: z.object({
         locationId: locationIdSchema,
         userId: z.string(),
-        setKind: locationSetKindSchema,
+        setKey: locationSetKeySchema,
         reasoningEffort: openAiReasoningEffortSchema.optional(),
       }),
     }),
   },
   async ({ event }) => {
-    const { locationId, userId, setKind, reasoningEffort } = event.data;
+    const { locationId, userId, setKey, reasoningEffort } = event.data;
 
     const locationSpec = await withDrizzle(async (db) => {
       return getLocationSpec(db, userId, locationId);
@@ -890,7 +899,7 @@ export const generateLocationSetSpec = inngest.createFunction(
       `Location spec not found for locationId: ${locationId}`,
     );
 
-    const prompt = buildLocationSetSpecPrompt({ locationSpec, setKind });
+    const prompt = buildLocationSetSpecPrompt({ locationSpec, setKey });
     if (reasoningEffort != null) {
       prompt.reasoningEffort = reasoningEffort;
     }

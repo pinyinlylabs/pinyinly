@@ -70,6 +70,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   data: z.infer<Schema>;
   usage?: OpenAI.Responses.ResponseUsage;
   model: string;
+  reasoning?: OpenAI.Reasoning | null;
 }> {
   const client = getOpenAIClient();
 
@@ -117,6 +118,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       data,
       usage: response.usage,
       model: response.model,
+      reasoning: response.reasoning,
     };
   }
 }

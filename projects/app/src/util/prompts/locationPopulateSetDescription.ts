@@ -18,7 +18,8 @@ const locationPopulateSetDescriptionOutputSchema = z
   .object({
     description: z.string(),
   })
-  .strict();
+  .strict()
+  .meta({ title: `locationPopulateSetDescriptionOutputSchema` });
 
 export function buildLocationPopulateSetDescriptionPrompt({
   locationSpec,
@@ -134,7 +135,7 @@ You will be given:
   return {
     messages,
     schema: locationPopulateSetDescriptionOutputSchema,
-    model: `gpt-5.5`,
+    model: `gpt-5.4`,
     reasoningEffort: `low`,
   };
 }

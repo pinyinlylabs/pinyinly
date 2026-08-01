@@ -92,15 +92,6 @@ export type LocationId = string & z.$brand<`LocationId`>;
 export const locationIdSchema = z.custom<LocationId>(isString);
 
 export const locationSetKeySchema = z.enum([
-  `arrival`,
-  `heart`,
-  `below`,
-  `ascent`,
-  `summit`,
-]);
-export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
-
-export const locationSetKindSchema = z.enum([
   `entrance`,
   `inside`,
   `basement`,
@@ -108,7 +99,17 @@ export const locationSetKindSchema = z.enum([
   `backRoom`,
   `hiddenCloset`,
   `staircase`,
+
+  `arrival`,
+  `heart`,
+  `below`,
+  `ascent`,
+  `summit`,
 ]);
+export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
+export const locationSetKeys = locationSetKeySchema.options;
+
+export const locationSetKindSchema = z.enum([]);
 export type LocationSetKind = z.infer<typeof locationSetKindSchema>;
 
 /**
@@ -119,6 +120,7 @@ export type LocationSetKind = z.infer<typeof locationSetKindSchema>;
  */
 export const locationSetSpecSchema = z
   .object({
+    set: locationSetKeySchema.optional(),
     name: z.string(),
   })
   .loose();
@@ -135,14 +137,8 @@ export const locationSpecSchema = z
   .object({
     location: z.string(),
     sets: z
-      .object({
-        arrival: locationSetSpecSchema,
-        heart: locationSetSpecSchema,
-        below: locationSetSpecSchema,
-        ascent: locationSetSpecSchema,
-        summit: locationSetSpecSchema,
-      })
-      .strict(),
+      .partialRecord(locationSetKeySchema, locationSetSpecSchema)
+      .optional(),
   })
   .loose()
   .meta({ title: `locationSpecSchema` });

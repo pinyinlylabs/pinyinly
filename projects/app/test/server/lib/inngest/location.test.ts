@@ -168,10 +168,6 @@ describe(`generateLocationSpec`, () => {
   test(`invokes the refiner when evaluation fails`, async () => {
     const generated = makeLocationSpec(`Pirate ship`);
     const refined = makeLocationSpec(`Pirate ship`);
-    refined.sets.heart = {
-      ...refined.sets.heart,
-      name: `treasure room`,
-    };
 
     let callCount = 0;
 
@@ -185,7 +181,7 @@ describe(`generateLocationSpec`, () => {
             return {
               data: makeEvaluation(false, 0.2, [
                 {
-                  code: `WEAK_HEART`,
+                  code: `NON_CANONICAL`,
                   scope: `heart`,
                   severity: `major`,
                   message: `The heart is too close to a routine interior.`,
@@ -271,15 +267,7 @@ describe(`generateLocationSpec`, () => {
   test(`returns the highest-scoring candidate when none pass`, async () => {
     const first = makeLocationSpec(`Pirate ship`);
     const second = makeLocationSpec(`Pirate ship`);
-    second.sets.heart = {
-      ...second.sets.heart,
-      name: `treasure room`,
-    };
     const third = makeLocationSpec(`Pirate ship`);
-    third.sets.heart = {
-      ...third.sets.heart,
-      name: `flag deck`,
-    };
 
     let callCount = 0;
 
@@ -293,7 +281,7 @@ describe(`generateLocationSpec`, () => {
             return {
               data: makeEvaluation(false, 0.2, [
                 {
-                  code: `WEAK_HEART`,
+                  code: `AWKWARD_SET`,
                   scope: `heart`,
                   severity: `major`,
                   message: `The heart is too ordinary.`,

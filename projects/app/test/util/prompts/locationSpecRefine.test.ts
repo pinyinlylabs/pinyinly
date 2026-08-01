@@ -86,10 +86,10 @@ describe(`buildLocationSpecRefinePrompt`, () => {
       </data>
       =====================
       ",
-        "model": "gpt-5.5",
+        "model": "gpt-5.4",
         "reasoningEffort": "low",
         "schema": {
-          "name": "locationSpecWithDetailSchema",
+          "name": "locationSpecRefineOutputSchema_hacked_up_temp_schema",
           "schema": {
             "additionalProperties": false,
             "properties": {
@@ -110,200 +110,7 @@ describe(`buildLocationSpecRefinePrompt`, () => {
               },
               "sets": {
                 "additionalProperties": false,
-                "properties": {
-                  "arrival": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "avoidFraming": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "canonicalFraming": {
-                        "type": "string",
-                      },
-                      "designRules": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "name": {
-                        "type": "string",
-                      },
-                      "props": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                    },
-                    "required": [
-                      "name",
-                      "props",
-                      "designRules",
-                      "canonicalFraming",
-                      "avoidFraming",
-                    ],
-                    "type": "object",
-                  },
-                  "ascent": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "avoidFraming": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "canonicalFraming": {
-                        "type": "string",
-                      },
-                      "designRules": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "name": {
-                        "type": "string",
-                      },
-                      "props": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                    },
-                    "required": [
-                      "name",
-                      "props",
-                      "designRules",
-                      "canonicalFraming",
-                      "avoidFraming",
-                    ],
-                    "type": "object",
-                  },
-                  "below": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "avoidFraming": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "canonicalFraming": {
-                        "type": "string",
-                      },
-                      "designRules": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "name": {
-                        "type": "string",
-                      },
-                      "props": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                    },
-                    "required": [
-                      "name",
-                      "props",
-                      "designRules",
-                      "canonicalFraming",
-                      "avoidFraming",
-                    ],
-                    "type": "object",
-                  },
-                  "heart": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "avoidFraming": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "canonicalFraming": {
-                        "type": "string",
-                      },
-                      "designRules": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "name": {
-                        "type": "string",
-                      },
-                      "props": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                    },
-                    "required": [
-                      "name",
-                      "props",
-                      "designRules",
-                      "canonicalFraming",
-                      "avoidFraming",
-                    ],
-                    "type": "object",
-                  },
-                  "summit": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "avoidFraming": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "canonicalFraming": {
-                        "type": "string",
-                      },
-                      "designRules": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                      "name": {
-                        "type": "string",
-                      },
-                      "props": {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
-                    },
-                    "required": [
-                      "name",
-                      "props",
-                      "designRules",
-                      "canonicalFraming",
-                      "avoidFraming",
-                    ],
-                    "type": "object",
-                  },
-                },
-                "required": [
-                  "arrival",
-                  "heart",
-                  "below",
-                  "ascent",
-                  "summit",
-                ],
+                "properties": {},
                 "type": "object",
               },
             },
@@ -313,7 +120,7 @@ describe(`buildLocationSpecRefinePrompt`, () => {
               "designRules",
               "sets",
             ],
-            "title": "locationSpecWithDetailSchema",
+            "title": "locationSpecRefineOutputSchema hacked up temp schema",
             "type": "object",
           },
           "type": "json_schema",

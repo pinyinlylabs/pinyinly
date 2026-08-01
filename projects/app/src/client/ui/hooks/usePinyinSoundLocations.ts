@@ -26,20 +26,32 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { z } from "zod";
 
 export const locationSetKeys = [
+  `entrance`,
+  `inside`,
+  `basement`,
+  `bathroom`,
+  `backRoom`,
+  `hiddenCloset`,
+  `staircase`,
+  /** @deprecated */
   `arrival`,
+  /** @deprecated */
   `heart`,
+  /** @deprecated */
   `below`,
+  /** @deprecated */
   `ascent`,
+  /** @deprecated */
   `summit`,
 ] as const;
 
 export type LocationSetKey = (typeof locationSetKeys)[number];
 
 export interface PinyinSoundLocationSetSummary {
-  role: LocationSetKey;
-  name: string | null;
-  description: string | null;
-  identityImage: {
+  key: LocationSetKey;
+  name?: string | null;
+  description?: string | null;
+  identityImage?: {
     assetId: AssetId;
     crop: ReturnType<typeof parseImageCrop>;
     imageWidth: number | null;
@@ -58,7 +70,7 @@ export interface PinyinSoundLocationSummary {
     imageHeight: number | null;
   } | null;
   thoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType;
-  sets: Record<LocationSetKey, PinyinSoundLocationSetSummary>;
+  sets: Partial<Record<LocationSetKey, PinyinSoundLocationSetSummary>>;
 }
 
 export interface UsePinyinSoundLocationsResult {
@@ -83,7 +95,7 @@ interface LocationAccumulator {
     imageHeight: number | null;
   } | null;
   thoughtChainsBySoundId: LocationSoundThoughtChainsBySoundIdType;
-  sets: Record<LocationSetKey, PinyinSoundLocationSetSummary>;
+  sets: Partial<Record<LocationSetKey, PinyinSoundLocationSetSummary>>;
 }
 
 export const pinyinSoundLocationThoughtChainSchema =
@@ -113,15 +125,6 @@ export function getHighestScoreLocationThoughtChainForSound(
   return getHighestScoreLocationThoughtChain(soundThoughtChains);
 }
 
-function createEmptySet(role: LocationSetKey): PinyinSoundLocationSetSummary {
-  return {
-    role,
-    name: null,
-    description: null,
-    identityImage: null,
-  };
-}
-
 function createLocationAccumulator(
   locationId: LocationId,
 ): LocationAccumulator {
@@ -131,13 +134,7 @@ function createLocationAccumulator(
     description: null,
     identityImage: null,
     thoughtChainsBySoundId: {},
-    sets: {
-      arrival: createEmptySet(`arrival`),
-      heart: createEmptySet(`heart`),
-      below: createEmptySet(`below`),
-      ascent: createEmptySet(`ascent`),
-      summit: createEmptySet(`summit`),
-    },
+    sets: {},
   };
 }
 
@@ -155,11 +152,11 @@ export function getPinyinSoundLocationDisplaySummary(
   }
 
   const fallbackName = locationSetKeys
-    .map((role) => location.sets[role].name?.trim() ?? ``)
+    .map((setKey) => location.sets[setKey]?.name?.trim() ?? ``)
     .find((value) => value.length > 0);
   const fallbackImage =
     locationSetKeys
-      .map((role) => location.sets[role].identityImage)
+      .map((setKey) => location.sets[setKey]?.identityImage)
       .find((value) => value != null) ?? null;
 
   return {
@@ -304,8 +301,9 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
       }
 
       const location = getOrCreateLocation(value.locationId);
-      const role = value.setKey as LocationSetKey;
-      location.sets[role].name =
+      const setKey = value.setKey as LocationSetKey;
+      location.sets[setKey] ??= { key: setKey };
+      location.sets[setKey].name =
         value.text.trim().length > 0 ? value.text : null;
       continue;
     }
@@ -329,6 +327,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
 
       const location = getOrCreateLocation(value.locationId);
       const setKey = value.setKey as LocationSetKey;
+      location.sets[setKey] ??= { key: setKey };
       location.sets[setKey].description = value.text;
       continue;
     }
@@ -352,6 +351,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
 
       const location = getOrCreateLocation(value.locationId);
       const setKey = value.setKey as LocationSetKey;
+      location.sets[setKey] ??= { key: setKey };
       location.sets[setKey].identityImage = {
         assetId: value.imageId,
         crop: parseImageCrop(value.imageCrop),
