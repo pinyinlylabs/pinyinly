@@ -9,8 +9,8 @@ describe(
   () => {
     test(`snapshot`, () => {
       const prompt = buildPronunciationHintRecurringPrompt({
-        location: makeLocationSpec(`Gong Cha bathroom`),
-        setKey: `arrival`,
+        location: makeLocationSpec(`Gong Cha`),
+        set: { name: `dock` },
         actor: {
           nickname: `Ethan`,
           recognitionHooks: [`being funny`],
@@ -28,10 +28,10 @@ describe(
         You are a helpful assistant that designs canonical visual mnemonics.
 
         You are given:
-        - 'cue'
-        - 'actor'
-        - 'location'
-        - 'set'
+        - cue
+        - actor
+        - location
+        - set
 
         # Universal objective
 
@@ -155,7 +155,7 @@ describe(
         # Input
 
         <input>
-        {"set":{"name":"dock"},"location":{},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
+        {"set":{"name":"dock"},"location":{"location":"Gong Cha"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
         </input>
         =====================
         ",

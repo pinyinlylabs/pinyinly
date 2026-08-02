@@ -1,7 +1,13 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { parseImageCrop } from "@/client/ui/imageCrop";
-import type { AssetId, LocationId, PinyinSoundId } from "@/data/model";
+import { locationSetKeys } from "@/data/model";
+import type {
+  AssetId,
+  LocationId,
+  PinyinSoundId,
+  LocationSetKey,
+} from "@/data/model";
 import { isFinalSoundId } from "@/data/pinyin";
 import {
   pinyinSoundLocationDescriptionSetting,
@@ -24,28 +30,6 @@ import type {
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
 import { z } from "zod";
-
-export const locationSetKeys = [
-  `entrance`,
-  `inside`,
-  `basement`,
-  `bathroom`,
-  `backRoom`,
-  `hiddenCloset`,
-  `staircase`,
-  /** @deprecated */
-  `arrival`,
-  /** @deprecated */
-  `heart`,
-  /** @deprecated */
-  `below`,
-  /** @deprecated */
-  `ascent`,
-  /** @deprecated */
-  `summit`,
-] as const;
-
-export type LocationSetKey = (typeof locationSetKeys)[number];
 
 export interface PinyinSoundLocationSetSummary {
   key: LocationSetKey;

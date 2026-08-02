@@ -5,10 +5,8 @@ import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingIma
 import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
-import {
-  locationSetKeys,
-  usePinyinSoundLocations,
-} from "@/client/ui/hooks/usePinyinSoundLocations";
+import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
+import { locationSetKeys } from "@/data/model";
 import type { LocationId } from "@/data/model";
 import {
   pinyinSoundLocationDescriptionSetting,

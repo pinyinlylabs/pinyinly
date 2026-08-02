@@ -99,11 +99,15 @@ export const locationSetKeySchema = z.enum([
   `backRoom`,
   `hiddenCloset`,
   `staircase`,
-
+  /** @deprecated */
   `arrival`,
+  /** @deprecated */
   `heart`,
+  /** @deprecated */
   `below`,
+  /** @deprecated */
   `ascent`,
+  /** @deprecated */
   `summit`,
 ]);
 export type LocationSetKey = z.infer<typeof locationSetKeySchema>;

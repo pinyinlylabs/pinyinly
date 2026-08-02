@@ -32,11 +32,14 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
       `Location spec not found for locationId: ${locationId}`,
     );
 
+    const locationSetSpec = locationSpec.sets?.[setKey];
+    invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
+
     const prompt = buildPronunciationHintRecurringPrompt({
       actor: actorSpec,
       cue,
       location: locationSpec,
-      setKey: setKey,
+      set: locationSetSpec,
       associationStrategy,
     });
 

@@ -3,10 +3,9 @@ import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 import {
   actorSpecSchema,
-  locationSetKeySchema,
+  locationSetSpecSchema,
   locationSpecSchema,
 } from "@/data/model";
-import pick from "lodash/pick";
 import omit from "lodash/omit";
 
 export const pronunciationHintRecurringPromptAssociationStrategyKindSchema =
@@ -23,8 +22,8 @@ export const pronunciationHintRecurringPromptCueSchema = z.object({
 });
 
 export const pronunciationHintRecurringPromptInputSchema = z.object({
-  location: locationSpecSchema,
-  setKey: locationSetKeySchema,
+  location: locationSpecSchema.omit(`sets`),
+  set: locationSetSpecSchema,
   cue: pronunciationHintRecurringPromptCueSchema,
   actor: actorSpecSchema,
   associationStrategy:
@@ -50,10 +49,10 @@ export function buildPronunciationHintRecurringPrompt(
 You are a helpful assistant that designs canonical visual mnemonics.
 
 You are given:
-- 'cue'
-- 'actor'
-- 'location'
-- 'set'
+- cue
+- actor
+- location
+- set
 
 # Universal objective
 
@@ -175,8 +174,8 @@ Only mention the location or set if it genuinely helps distinguish this mnemonic
               input.associationStrategy ?? `identityBinding`
             ],
           input: JSON.stringify({
-            set: input.location.sets?.[input.setKey],
-            location: pick(input.location, [`name`, `recognitionHooks`]),
+            set: input.set,
+            location: omit(input.location, [`sets`]),
             cue: input.cue,
             actor: omit(input.actor, [`summary`, `bodyLanguage`]),
           }),
