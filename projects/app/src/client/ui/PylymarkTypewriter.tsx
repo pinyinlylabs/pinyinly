@@ -116,6 +116,10 @@ export const PylymarkTypewriter = ({
         );
         break;
       }
+      case `token`: {
+        void typeChars(node.text, clock, fastForward, nodes);
+        break;
+      }
     }
   }
 

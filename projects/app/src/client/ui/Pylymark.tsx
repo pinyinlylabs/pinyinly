@@ -43,6 +43,9 @@ export const Pylymark = ({ source }: { source: string }) => {
                 </Text>
               );
             }
+            case `token`: {
+              return <Text key={index}>{node.text}</Text>;
+            }
           }
         })}
       </Text>
