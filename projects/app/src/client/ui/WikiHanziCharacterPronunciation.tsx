@@ -264,8 +264,6 @@ export function WikiHanziCharacterPronunciationBox({
         <View className="gap-4 bg-black/10 pt-4">
           {isHintSectionVisible ? (
             <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
-              <ExperimentalContent hanzi={hanzi} />
-
               <InlineEditableSettingText
                 readonly={!isEditMode}
                 setting={hanziPronunciationHintTextSetting}
@@ -276,7 +274,9 @@ export function WikiHanziCharacterPronunciationBox({
                 showCounterAtRatio={0.8}
                 counterLength={hintFirstLineLength}
                 overLimitMessage="Keep the first line under 80 characters. Add details after a blank line."
-                renderDisplay={(value) => <MergedHintDisplay value={value} />}
+                renderDisplay={(value) => (
+                  <MergedHintDisplay value={value} hanzi={hanzi} />
+                )}
                 onSaveValue={(nextHintText) => {
                   const nextHintTextLength = nextHintText?.length ?? 0;
                   if (nextHintTextLength === 0) {
@@ -334,7 +334,13 @@ export function WikiHanziCharacterPronunciationBox({
   );
 }
 
-function MergedHintDisplay({ value }: { value: string }) {
+function MergedHintDisplay({
+  value,
+  hanzi,
+}: {
+  value: string;
+  hanzi: HanziText;
+}) {
   const parsed = parseHintText(value);
 
   if (parsed.hint.length === 0 && parsed.description == null) {
@@ -342,17 +348,16 @@ function MergedHintDisplay({ value }: { value: string }) {
   }
 
   return (
-    <>
-      <Text className="font-sans font-semibold">
-        <Pylymark source={parsed.hint} />
+    <Text className="pyly-body my-2 leading-6">
+      <Text className="font-medium">
+        <Pylymark source={parsed.hint} highlightToken={hanzi} />
       </Text>
       {parsed.description == null ? null : (
-        <Text className="font-sans font-normal text-fg-dim">
-          {` `}
-          <Pylymark source={parsed.description} />
+        <Text className="mt-3 block text-sm text-fg-dim">
+          <Pylymark source={parsed.description} highlightToken={hanzi} />
         </Text>
       )}
-    </>
+    </Text>
   );
 }
 
@@ -446,84 +451,4 @@ const soundNameClass = tv({
 
 function DownArrow() {
   return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
-}
-
-function ExperimentalContent(props: { hanzi: HanziText }) {
-  void `leading-5 leading-6 leading-7 leading-8`;
-
-  return props.hanzi === `电` ? (
-    <View>
-      <Text className="pyly-body leading-7">
-        <MnemonicComponentText>[di-] Count Drac</MnemonicComponentText>
-        {` `}
-        counts the underground water gauges until{` `}
-        <MnemonicGlossText>电 electricity</MnemonicGlossText>
-        {` `}
-        shocks him back to one.{` `}
-        <Text className="text-fg-dim">
-          In the{` `}
-          <MnemonicComponentText>[-an] pyramid’s</MnemonicComponentText>
-          {` `}
-          damp{` `}
-          <MnemonicComponentText>
-            [4<sup>th</sup>] subterranean chamber
-          </MnemonicComponentText>
-          , Count Drac keeps trying to count the water-gauge pillars, but
-          electricity jumps through the wet floor and shocks him back to one.
-        </Text>
-      </Text>
-    </View>
-  ) : props.hanzi === `中` ? (
-    <View>
-      <Text className="pyly-body leading-7">
-        <MnemonicComponentText>[zh-] Jelly</MnemonicComponentText>
-        {` `}
-        keeps wobbling back onto the{` `}
-        <MnemonicGlossText>中 middle</MnemonicGlossText>
-        {` `}
-        line to the{` `}
-        <MnemonicComponentText>[-ong] jungle temple</MnemonicComponentText>
-        {` `}
-        <MnemonicComponentText>
-          [1<sup>st</sup>] staircase
-        </MnemonicComponentText>
-        .{` `}
-        <Text className="text-xs text-fg-dim">
-          Jelly floats out of the narrow jungle path into the clearing, aiming
-          himself perfectly at the staircase in the temple facade. A root or
-          fern bumps his gelatinous bell sideways. He nervously jiggles back
-          into alignment, only for another bit of foreground growth to shove him
-          off again.
-        </Text>
-      </Text>
-    </View>
-  ) : props.hanzi === `表` ? (
-    <View>
-      <Text className="pyly-body my-2 leading-6">
-        <Text className="font-medium">
-          <Pylymark
-            source="[bi- Bigfoot] hides in the [-ao barn] [3 basement] and uses a barrel-through-the-trapdoor megaphone [表 to express] himself."
-            highlightToken={props.hanzi}
-          />
-        </Text>
-        <Text className="mt-3 block text-sm text-fg-dim">
-          Shy, camera-dodging{` `}
-          Bigfoot stays crouched under the{` `}
-          barn cellar low beams and repeatedly uses a huge empty storage barrel
-          pointed at the open trapdoor like a booming megaphone, hiding his body
-          among the feed sacks while the cellar barrel lets him{` `}
-          express his thoughts and feelings up into the barn without ever
-          showing himself clearly.
-        </Text>
-      </Text>
-    </View>
-  ) : null;
-}
-
-function MnemonicComponentText({ children }: { children: ReactNode }) {
-  return <Text className="pyly-token">{children}</Text>;
-}
-
-function MnemonicGlossText({ children }: { children: ReactNode }) {
-  return <Text className="pyly-token pyly-token-highlighted">{children}</Text>;
 }
