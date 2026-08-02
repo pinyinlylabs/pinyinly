@@ -242,6 +242,10 @@
   text-underline-offset: 3px;
 }
 
+@utility pyly-token-highlighted {
+  @apply outline-rose-500 from-rose-500/50 via-rose-500/50 to-rose-600/50;
+}
+
 @utility pyly-button-outline {
   @apply font-sans text-base/snug font-bold uppercase text-fg;
 }
@@ -914,6 +918,10 @@
   }
   .pyly-mdx > ul > li > ul {
     @apply my-2;
+  }
+
+  .pyly-token {
+    @apply my-0 rounded-sm bg-gradient-to-b from-sky-400/50 via-sky-500/50 to-sky-500/50 px-1 leading-5.5 font-medium text-white shadow-sm outline -outline-offset-1 outline-sky-400;
   }
 }
 

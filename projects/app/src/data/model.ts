@@ -1,4 +1,5 @@
 import type { Rating } from "@/util/fsrs";
+import type { IsEqual } from "@pinyinly/lib/types";
 import type { Interval } from "date-fns";
 import { z } from "zod";
 
@@ -46,7 +47,11 @@ export type PinyinFinalAssociationSkill =
  * - Tones: Single digit between 1 and 5, inclusive.
  */
 export type PinyinSoundId = string & z.$brand<`PinyinSoundId`>;
-export const pinyinSoundIdSchema = z.custom<PinyinSoundId>(isString);
+export const pinyinSoundIdSchema = z
+  .string()
+  .regex(/^-.{1,5}|.{1,5}-|[1-5]$/gu)
+  .brand<`PinyinSoundId`, `inout`>();
+true satisfies IsEqual<PinyinSoundId, z.infer<typeof pinyinSoundIdSchema>>;
 
 /**
  * An ID for a group of pinyin sounds.

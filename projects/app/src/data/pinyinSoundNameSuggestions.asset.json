@@ -861,7 +861,7 @@
   }
 },
 "Archetypes":{
- "∅":{
+ "∅-":{
   "Actor":"Begins with a bare vowel /æ/ just like a syllable with no initial; the image of someone on stage is vivid and memorable.",
   "Artist":"Starts with the open vowel /ɑː/ and instantly conjures paint, canvas, and creativity.",
   "Astronaut":"Opens with the vowel /æ/ and evokes a striking picture of a space suit floating in orbit.",
@@ -1033,7 +1033,7 @@
   "Lute Player (Lutenist)":"The word “lute” is pronounced /luːt/; imagining a renaissance musician helps lock in the long \"loo\" start.",
   "Luthier":"Starts with the exact “loo” sound (LOO-thee-er); a recognizable craftsperson who builds guitars and violins."
 },
- "lü":{
+ "lü-":{
   "Lifeguard (pronounced ‘loo-guard’ in many accents)":"In several dialects, the first syllable of “lifeguard” is reduced to a front-rounded ‘li/lu’ vowel, making it close enough for mnemonic purposes, and the red-swimsuit-and-whistle image is clear.",
   "Lua Programmer":"‘Lua’ (the scripting-language name, pronounced ‘loo-ah’) opens with the desired ‘lu’ sound, and picturing a coder typing green text on a black screen is highly memorable.",
   "Luger":"An Olympic sled racer (“loo-ger”) begins with an unmistakable “lu” sound that echoes lü. The ice track and high-speed sled create a strong mental picture.",
@@ -1084,7 +1084,7 @@
   "Nurse":"The opening “nur-” begins with the same N and a very similar “oo” vowel; nurses are universally known and easy to picture.",
   "Nutritionist":"Begins with a clear “nu” and immediately evokes food advice and diet charts—memorable visual props."
 },
- "nü":{
+ "nü-":{
   "Newscaster":"The word opens with “new” (nyu), matching the glide in nü- and conjuring a vivid TV-studio image.",
   "Nuclear Scientist":"The first syllable “nu-” echoes nü- and the profession evokes memorable lab-and-reactor imagery.",
   "Numerologist":"Begins with a prominent “nu-” and is distinct from other initials’ professions.",
@@ -1248,7 +1248,7 @@
 }
 },
 "People":{
- "∅":{
+ "∅-":{
   "Yourself":"Yourself"
 },
  "y-":{

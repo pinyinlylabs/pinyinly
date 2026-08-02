@@ -8,250 +8,284 @@ describe(
   () => {
     test(`parses plain text correctly`, () => {
       const nodes = parsePylymark(`This is a plain text.`);
-      expect(nodes).toEqual([
-        {
-          text: `This is a plain text.`,
-          type: `text`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "This is a plain text.",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`parses HanziWord references correctly`, () => {
       const nodes = parsePylymark(`See also {好:good}.`);
-      expect(nodes).toEqual([
-        {
-          text: `See also `,
-          type: `text`,
-        },
-        {
-          hanziWord: `好:good`,
-          type: `hanziWord`,
-          showGloss: true,
-        },
-        {
-          text: `.`,
-          type: `text`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "See also ",
+            "type": "text",
+          },
+          {
+            "hanziWord": "好:good",
+            "showGloss": true,
+            "type": "hanziWord",
+          },
+          {
+            "text": ".",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`parses HanziWord references with omitted gloss`, () => {
       const nodes = parsePylymark(`See also {好:-good}.`);
-      expect(nodes).toEqual([
-        {
-          text: `See also `,
-          type: `text`,
-        },
-        {
-          hanziWord: `好:good`,
-          type: `hanziWord`,
-          showGloss: false,
-        },
-        {
-          text: `.`,
-          type: `text`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "See also ",
+            "type": "text",
+          },
+          {
+            "hanziWord": "好:good",
+            "showGloss": false,
+            "type": "hanziWord",
+          },
+          {
+            "text": ".",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`parses bold text correctly`, () => {
       const nodes = parsePylymark(`This is **bold** text.`);
-      expect(nodes).toEqual([
-        {
-          text: `This is `,
-          type: `text`,
-        },
-        {
-          text: `bold`,
-          type: `bold`,
-        },
-        {
-          text: ` text.`,
-          type: `text`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "This is ",
+            "type": "text",
+          },
+          {
+            "text": "bold",
+            "type": "bold",
+          },
+          {
+            "text": " text.",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`parses italic text correctly`, () => {
       const nodes = parsePylymark(`This is *italic* text.`);
-      expect(nodes).toEqual([
-        {
-          text: `This is `,
-          type: `text`,
-        },
-        {
-          text: `italic`,
-          type: `italic`,
-        },
-        {
-          text: ` text.`,
-          type: `text`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "This is ",
+            "type": "text",
+          },
+          {
+            "text": "italic",
+            "type": "italic",
+          },
+          {
+            "text": " text.",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`parses marked text correctly`, () => {
       const nodes = parsePylymark(`This is ==marked== text.`);
-      expect(nodes).toEqual([
-        {
-          text: `This is `,
-          type: `text`,
-        },
-        {
-          text: `marked`,
-          type: `mark`,
-        },
-        {
-          text: ` text.`,
-          type: `text`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "This is ",
+            "type": "text",
+          },
+          {
+            "text": "marked",
+            "type": "mark",
+          },
+          {
+            "text": " text.",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`parses basic token references correctly`, () => {
       const nodes = parsePylymark(
-        `[bi- Bigfoot] [-ao barn] [3 basement] [表 express himself]`,
+        `[bi- Bigfoot] [-ao barn] [-[e]n engine room] [3 basement] [表 express himself]`,
       );
-      expect(nodes).toEqual([
-        {
-          type: `token`,
-          ref: `bi-`,
-          text: `Bigfoot`,
-        },
-        {
-          type: `text`,
-          text: ` `,
-        },
-        {
-          type: `token`,
-          ref: `-ao`,
-          text: `barn`,
-        },
-        {
-          type: `text`,
-          text: ` `,
-        },
-        {
-          type: `token`,
-          ref: `3`,
-          text: `basement`,
-        },
-        {
-          type: `text`,
-          text: ` `,
-        },
-        {
-          type: `token`,
-          ref: `表`,
-          text: `express himself`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "ref": "bi-",
+            "text": "Bigfoot",
+            "type": "token",
+          },
+          {
+            "text": " ",
+            "type": "text",
+          },
+          {
+            "ref": "-ao",
+            "text": "barn",
+            "type": "token",
+          },
+          {
+            "text": " ",
+            "type": "text",
+          },
+          {
+            "ref": "-[e]n",
+            "text": "engine room",
+            "type": "token",
+          },
+          {
+            "text": " ",
+            "type": "text",
+          },
+          {
+            "ref": "3",
+            "text": "basement",
+            "type": "token",
+          },
+          {
+            "text": " ",
+            "type": "text",
+          },
+          {
+            "ref": "表",
+            "text": "express himself",
+            "type": "token",
+          },
+        ]
+      `);
     });
 
     test(`parses multiword token text correctly`, () => {
       const nodes = parsePylymark(`[表 express himself without speaking]`);
-      expect(nodes).toEqual([
-        {
-          type: `token`,
-          ref: `表`,
-          text: `express himself without speaking`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "ref": "表",
+            "text": "express himself without speaking",
+            "type": "token",
+          },
+        ]
+      `);
     });
 
     test(`parses mixed PylyMark with token references`, () => {
       const nodes = parsePylymark(
         `**Bigfoot** hides in the [-ao barn] and tries to [表 express himself].`,
       );
-      expect(nodes).toEqual([
-        {
-          type: `bold`,
-          text: `Bigfoot`,
-        },
-        {
-          type: `text`,
-          text: ` hides in the `,
-        },
-        {
-          type: `token`,
-          ref: `-ao`,
-          text: `barn`,
-        },
-        {
-          type: `text`,
-          text: ` and tries to `,
-        },
-        {
-          type: `token`,
-          ref: `表`,
-          text: `express himself`,
-        },
-        {
-          type: `text`,
-          text: `.`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "Bigfoot",
+            "type": "bold",
+          },
+          {
+            "text": " hides in the ",
+            "type": "text",
+          },
+          {
+            "ref": "-ao",
+            "text": "barn",
+            "type": "token",
+          },
+          {
+            "text": " and tries to ",
+            "type": "text",
+          },
+          {
+            "ref": "表",
+            "text": "express himself",
+            "type": "token",
+          },
+          {
+            "text": ".",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     test(`preserves existing syntax regressions`, () => {
       const nodes = parsePylymark(
         `{好:good}{好:-good}**bold***italic*==marked==`,
       );
-      expect(nodes).toEqual([
-        {
-          type: `hanziWord`,
-          hanziWord: `好:good`,
-          showGloss: true,
-        },
-        {
-          type: `hanziWord`,
-          hanziWord: `好:good`,
-          showGloss: false,
-        },
-        {
-          type: `bold`,
-          text: `bold`,
-        },
-        {
-          type: `italic`,
-          text: `italic`,
-        },
-        {
-          type: `mark`,
-          text: `marked`,
-        },
-      ]);
+      expect(nodes).toMatchInlineSnapshot(`
+        [
+          {
+            "hanziWord": "好:good",
+            "showGloss": true,
+            "type": "hanziWord",
+          },
+          {
+            "hanziWord": "好:good",
+            "showGloss": false,
+            "type": "hanziWord",
+          },
+          {
+            "text": "bold",
+            "type": "bold",
+          },
+          {
+            "text": "italic",
+            "type": "italic",
+          },
+          {
+            "text": "marked",
+            "type": "mark",
+          },
+        ]
+      `);
     });
 
     test(`keeps token adjacency and text-node merging behavior`, () => {
-      expect(parsePylymark(`Before [表 express] after.`)).toEqual([
-        {
-          type: `text`,
-          text: `Before `,
-        },
-        {
-          type: `token`,
-          ref: `表`,
-          text: `express`,
-        },
-        {
-          type: `text`,
-          text: ` after.`,
-        },
-      ]);
+      expect(parsePylymark(`Before [表 express] after.`))
+        .toMatchInlineSnapshot(`
+        [
+          {
+            "text": "Before ",
+            "type": "text",
+          },
+          {
+            "ref": "表",
+            "text": "express",
+            "type": "token",
+          },
+          {
+            "text": " after.",
+            "type": "text",
+          },
+        ]
+      `);
 
-      expect(parsePylymark(`[bi- Bigfoot][-ao barn]`)).toEqual([
-        {
-          type: `token`,
-          ref: `bi-`,
-          text: `Bigfoot`,
-        },
-        {
-          type: `token`,
-          ref: `-ao`,
-          text: `barn`,
-        },
-      ]);
+      expect(parsePylymark(`[bi- Bigfoot][-ao barn]`)).toMatchInlineSnapshot(`
+        [
+          {
+            "ref": "bi-",
+            "text": "Bigfoot",
+            "type": "token",
+          },
+          {
+            "ref": "-ao",
+            "text": "barn",
+            "type": "token",
+          },
+        ]
+      `);
     });
 
     test(`keeps malformed token references as plain text`, () => {

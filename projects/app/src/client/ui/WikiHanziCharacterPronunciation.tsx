@@ -499,29 +499,21 @@ function ExperimentalContent(props: { hanzi: HanziText }) {
     </View>
   ) : props.hanzi === `表` ? (
     <View>
-      <Text className="pyly-body leading-6">
-        Hidden in the{` `}
-        <MnemonicComponentText>[-ao] Barn’s</MnemonicComponentText>
-        {` `}
-        <MnemonicComponentText>
-          [3<sup>rd</sup>] main room
-        </MnemonicComponentText>
-        , <MnemonicComponentText>[bi-] Bigfoot</MnemonicComponentText> uses a
-        trumpet through the loft opening{` `}
-        <MnemonicGlossText>表 to express</MnemonicGlossText> himself without
-        showing himself.{` `}
-        <Text className="text-fg-dim">
-          <MnemonicComponentText>[bi-] Bigfoot</MnemonicComponentText>,
-          desperate to stay hidden yet still{` `}
-          <MnemonicGlossText>表 express</MnemonicGlossText> himself, repeatedly
-          burrows into the towering hay of the{` `}
-          <MnemonicComponentText>
-            [3<sup>rd</sup>] hayloft
-          </MnemonicComponentText>
-          {` `}
-          and uses the bright open loft door as the only safe outlet for a huge
-          speaking trumpet that pokes out from the straw while the whole
-          haystack obviously squirms around him.
+      <Text className="pyly-body my-2 leading-6">
+        <Text className="font-medium">
+          <Pylymark
+            source="[bi- Bigfoot] hides in the [-ao barn] [3 basement] and uses a barrel-through-the-trapdoor megaphone [表 to express] himself."
+            highlightToken={props.hanzi}
+          />
+        </Text>
+        <Text className="mt-3 block text-sm text-fg-dim">
+          Shy, camera-dodging{` `}
+          Bigfoot stays crouched under the{` `}
+          barn cellar low beams and repeatedly uses a huge empty storage barrel
+          pointed at the open trapdoor like a booming megaphone, hiding his body
+          among the feed sacks while the cellar barrel lets him{` `}
+          express his thoughts and feelings up into the barn without ever
+          showing himself clearly.
         </Text>
       </Text>
     </View>
@@ -529,27 +521,9 @@ function ExperimentalContent(props: { hanzi: HanziText }) {
 }
 
 function MnemonicComponentText({ children }: { children: ReactNode }) {
-  return (
-    <Text
-      className="
-        my-0 inline-block rounded-sm bg-gradient-to-b from-sky-400/50 via-sky-500/50 to-sky-500/50
-        px-1 leading-5.5 font-medium text-white shadow-sm outline -outline-offset-1 outline-sky-400
-      "
-    >
-      {children}
-    </Text>
-  );
+  return <Text className="pyly-token">{children}</Text>;
 }
 
 function MnemonicGlossText({ children }: { children: ReactNode }) {
-  return (
-    <Text
-      className="
-        my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
-        to-rose-600/50 px-1 leading-5 font-medium text-white shadow-sm
-      "
-    >
-      {children}
-    </Text>
-  );
+  return <Text className="pyly-token pyly-token-highlighted">{children}</Text>;
 }
