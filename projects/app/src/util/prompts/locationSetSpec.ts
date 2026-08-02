@@ -281,6 +281,19 @@ Avoid making it merely a smaller version of the main room.
 
 The back room should provide interesting props, equipment, or workspaces that create memorable scene opportunities while remaining recognisably part of the same location.
 `,
+  stairway: `
+## Goal
+
+Design the canonical stairway for the supplied location.
+
+The stairway is the primary upward route.
+
+It should clearly communicate vertical movement.
+
+Prefer recognisable stairs, ramps, catwalks, ladders, elevators, escalators...
+
+It should connect naturally toward the upper parts of the location without becoming the destination itself.
+`,
   staircase: `
 ## Goal
 

@@ -1,3 +1,4 @@
+import { actorSpecSchema } from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
@@ -6,10 +7,9 @@ export type ActorSpecInputType = {
   identity: string;
 };
 
-export const actorSpecSchema = z
-  .object({
+export const actorSpecWithDetailSchema = actorSpecSchema
+  .extend({
     identity: z.string(),
-    nickname: z.string(),
     summary: z.string(),
     identityAnchor: z.string(),
     coreTraits: z.array(z.string()),
@@ -28,11 +28,11 @@ export const actorSpecSchema = z
   .strict()
   .meta({ title: `actorSpecSchema` });
 
-export type ActorSpecType = z.infer<typeof actorSpecSchema>;
+export type ActorSpecWithDetailType = z.infer<typeof actorSpecWithDetailSchema>;
 
 export function buildActorSpecPrompt({
   identity,
-}: ActorSpecInputType): ChatPrompt<typeof actorSpecSchema> {
+}: ActorSpecInputType): ChatPrompt<typeof actorSpecWithDetailSchema> {
   const systemTemplate = `
 You are designing a recurring mnemonic actor for a Chinese language learning system.
 
@@ -184,7 +184,7 @@ Generate a mnemonic actor for:
 
   return {
     messages,
-    schema: actorSpecSchema,
+    schema: actorSpecWithDetailSchema,
     model: `gpt-5.4`,
     reasoningEffort: `medium`,
   };

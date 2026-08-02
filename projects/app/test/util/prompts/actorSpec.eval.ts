@@ -3,7 +3,7 @@ import type { JudgeContext } from "vitest-evals";
 import { buildActorSpecPrompt } from "#util/prompts/actorSpec.ts";
 import type {
   ActorSpecInputType,
-  ActorSpecType,
+  ActorSpecWithDetailType,
 } from "#util/prompts/actorSpec.ts";
 import { createResponsePromptHarness } from "./eval.ts";
 
@@ -11,7 +11,7 @@ function normalized(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function hasAllCoreFields(actor: ActorSpecType): boolean {
+function hasAllCoreFields(actor: ActorSpecWithDetailType): boolean {
   return (
     actor.identity.trim().length > 0 &&
     actor.nickname.trim().length > 0 &&
@@ -37,7 +37,7 @@ const ActorJudge = createJudge(
   async ({
     input,
     output,
-  }: JudgeContext<ActorSpecInputType, ActorSpecType>) => {
+  }: JudgeContext<ActorSpecInputType, ActorSpecWithDetailType>) => {
     const structureScore = hasAllCoreFields(output) ? 1 : 0;
     const identityScore =
       normalized(output.identity) === normalized(input.identity) ? 1 : 0;

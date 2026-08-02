@@ -37,6 +37,7 @@ The finished image should resemble an official animation studio character refere
     model: `gemini-3.1-flash-image`,
     aspectRatio: `1:1`,
     resolution: `1K`,
+    thinkingLevel: `high`,
     messages: [
       { role: `user`, kind: `text`, content: userPrompt },
       {
@@ -48,7 +49,7 @@ The finished image should resemble an official animation studio character refere
       {
         role: `user`,
         kind: `text`,
-        content: `Use this illustration style, keeping the background a solid color hue that suits the character, making outlines crisp and contiguous, using solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes. But DO NOT copy the content of the image, just the style. The content should be based on the input prompt.`,
+        content: `Use the previous image's illustration style, keeping the background a solid color hue that suits the character, making outlines crisp and contiguous, using solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes. But DO NOT copy the content of the image, only use the style. The content should be based on the input prompt.`,
       },
     ],
   };

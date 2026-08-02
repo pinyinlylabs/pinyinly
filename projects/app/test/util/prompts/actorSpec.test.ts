@@ -227,8 +227,8 @@ describe(
                 },
               },
               "required": [
-                "identity",
                 "nickname",
+                "identity",
                 "summary",
                 "identityAnchor",
                 "coreTraits",

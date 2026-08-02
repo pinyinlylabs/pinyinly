@@ -1,3 +1,4 @@
+import { locationSpecSchema } from "@/data/model";
 import type { LocationSpec } from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
@@ -8,11 +9,13 @@ import { z } from "zod";
  * fictional location.
  */
 
-const locationSpecWithDetailBaseSchema = z.object({
-  location: z.string(),
-  recognitionHooks: z.array(z.string()),
-  designRules: z.array(z.string()),
-});
+const locationSpecWithDetailBaseSchema = locationSpecSchema
+  .omit({ sets: true })
+  .strict()
+  .extend({
+    recognitionHooks: z.array(z.string()),
+    designRules: z.array(z.string()),
+  });
 
 export const locationSpecWithDetailSchema = locationSpecWithDetailBaseSchema
   .superRefine(validateLocationSpecShape)

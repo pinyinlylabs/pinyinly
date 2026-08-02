@@ -1,10 +1,12 @@
 import type { DictionarySearchEntry } from "@/client/query";
+import { trpc } from "@/client/trpc";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type {
   AssetId,
   HanziText,
+  LocationSetKey,
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
@@ -89,6 +91,7 @@ export function WikiHanziCharacterPronunciation({
   return (
     <WikiHanziCharacterPronunciationBox
       gloss={gloss}
+      glosses={firstMeaning.gloss}
       hanzi={hanzi}
       pinyinUnit={pronunciation.pinyinUnit}
     />
@@ -99,8 +102,10 @@ export function WikiHanziCharacterPronunciationBox({
   hanzi,
   pinyinUnit,
   gloss,
+  glosses,
 }: {
   gloss: DictionarySearchEntry[`gloss`][number];
+  glosses: DictionarySearchEntry[`gloss`];
   hanzi: HanziText;
   pinyinUnit: PinyinUnit;
 }) {
@@ -167,6 +172,11 @@ export function WikiHanziCharacterPronunciationBox({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
   const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
+  const [enqueueResultMessage, setEnqueueResultMessage] = useState<
+    string | null
+  >(null);
+  const enqueuePronunciationRecurringHintMutation =
+    trpc.ai.enqueuePronunciationRecurringHint.useMutation();
 
   const hintImage = hintImageSetting.value;
   const hasHintContent = pronunciationHint.hasText;
@@ -177,6 +187,40 @@ export function WikiHanziCharacterPronunciationBox({
   const isImageSectionVisible = isEditMode
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
+
+  const setKeyByTone: Record<1 | 2 | 3 | 4 | 5, LocationSetKey> = {
+    1: `entrance`,
+    2: `stairway`,
+    3: `basement`,
+    4: `bathroom`,
+    5: `hiddenCloset`,
+  };
+  const tone = splitPinyin?.tone;
+  const setKey =
+    tone == null || tone < 1 || tone > 5
+      ? null
+      : setKeyByTone[tone as 1 | 2 | 3 | 4 | 5];
+  const trimmedGlosses = glosses
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+  const cueLabel = gloss.trim();
+  const cueMeaning =
+    trimmedGlosses.length === 0 ? null : trimmedGlosses.join(`; `);
+  const canEnqueueRecurringHint =
+    selectedInitialActorId != null &&
+    selectedFinalLocationId != null &&
+    setKey != null &&
+    cueLabel.length > 0;
+  const enqueueBlockedReason =
+    selectedInitialActorId == null
+      ? `Select an initial actor first.`
+      : selectedFinalLocationId == null
+        ? `Select a final location first.`
+        : setKey == null
+          ? `Unable to map tone to set key.`
+          : cueLabel.length === 0
+            ? `Cue label is empty.`
+            : null;
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
@@ -328,6 +372,65 @@ export function WikiHanziCharacterPronunciationBox({
             placeholder='{"story": "A chef juggling cans"}'
             emptyStateText="No mnemonic spec JSON"
           />
+
+          {__DEV__ ? (
+            <View className="gap-2 border-t border-fg/10 pt-3">
+              <RectButton
+                variant="bare"
+                iconStart="wand-magic"
+                iconSize={20}
+                disabled={
+                  !canEnqueueRecurringHint ||
+                  enqueuePronunciationRecurringHintMutation.isPending
+                }
+                onPress={() => {
+                  if (!canEnqueueRecurringHint) {
+                    return;
+                  }
+
+                  setEnqueueResultMessage(null);
+                  enqueuePronunciationRecurringHintMutation
+                    .mutateAsync({
+                      actorId: selectedInitialActorId,
+                      locationId: selectedFinalLocationId,
+                      setKey,
+                      cue: {
+                        label: cueLabel,
+                        ...(cueMeaning == null ? {} : { meaning: cueMeaning }),
+                      },
+                    })
+                    .then(() => {
+                      setEnqueueResultMessage(
+                        `Enqueued. Check Inngest dev UI.`,
+                      );
+                    })
+                    .catch((error: unknown) => {
+                      console.error(
+                        `Failed to enqueue pronunciation recurring hint:`,
+                        error,
+                      );
+                      setEnqueueResultMessage(`Failed to enqueue.`);
+                    });
+                }}
+              >
+                {enqueuePronunciationRecurringHintMutation.isPending
+                  ? `Enqueueing generation...`
+                  : `Enqueue pronunciation generation`}
+              </RectButton>
+
+              {enqueueBlockedReason == null ? null : (
+                <Text className="pyly-body-caption text-fg-dim">
+                  {enqueueBlockedReason}
+                </Text>
+              )}
+
+              {enqueueResultMessage == null ? null : (
+                <Text className="pyly-body-caption text-fg-dim">
+                  {enqueueResultMessage}
+                </Text>
+              )}
+            </View>
+          ) : null}
         </View>
       ) : null}
     </WikiTitledBox>

@@ -132,7 +132,7 @@ export default function ActorIdPage() {
             settingKey={{ actorId }}
             enableAiGeneration
             frameShape="rect"
-            aspectRatio="16:9"
+            aspectRatio="1:1"
             previewHeight={220}
             tileSize={64}
           />

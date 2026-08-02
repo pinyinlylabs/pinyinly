@@ -1,4 +1,9 @@
-import { actorIdSchema, assetIdSchema, locationIdSchema } from "@/data/model";
+import {
+  actorIdSchema,
+  assetIdSchema,
+  locationIdSchema,
+  locationSetKeySchema,
+} from "@/data/model";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import {
   geminiImageAspectRatioSchema,
@@ -13,11 +18,13 @@ import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import {
   actorPopulateActorSpecEvent,
   locationPopulateLocationEvent,
+  pronunciationGenerateHintEvent,
 } from "@/server/lib/inngest/client";
 import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
 import { buildMeaningHintLogicalPrompt } from "@/util/prompts/meaningHintLogical";
 import { buildPronunciationHintFantasyPrompt } from "@/util/prompts/pronunciationHintFantasy";
 import { buildPronunciationHintRealisticPrompt } from "@/util/prompts/pronunciationHintRealistic";
+import { pronunciationHintRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationHintRecurring";
 
 const pronunciationHintInputSchema = z
   .object({
@@ -187,6 +194,28 @@ const enqueueActorSpecOutputSchema = z
   })
   .strict();
 
+const enqueuePronunciationRecurringHintInputSchema = z
+  .object({
+    actorId: actorIdSchema,
+    locationId: locationIdSchema,
+    setKey: locationSetKeySchema,
+    cue: z
+      .object({
+        label: z.string(),
+        meaning: z.string().optional(),
+      })
+      .strict(),
+    associationStrategy:
+      pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
+  })
+  .strict();
+
+const enqueuePronunciationRecurringHintOutputSchema = z
+  .object({
+    enqueued: z.literal(true),
+  })
+  .strict();
+
 export const aiRouter = router({
   enqueueLocationSetIdentityImages: authedProcedure
     .input(enqueueLocationSetIdentityImagesInputSchema)
@@ -211,6 +240,24 @@ export const aiRouter = router({
           userId: ctx.session.userId,
           actorId: input.actorId,
           actorName: input.actorName,
+        }),
+      );
+
+      return { enqueued: true };
+    }),
+
+  enqueuePronunciationRecurringHint: authedProcedure
+    .input(enqueuePronunciationRecurringHintInputSchema)
+    .output(enqueuePronunciationRecurringHintOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      await inngest.send(
+        pronunciationGenerateHintEvent.create({
+          userId: ctx.session.userId,
+          actorId: input.actorId,
+          locationId: input.locationId,
+          setKey: input.setKey,
+          cue: input.cue,
+          associationStrategy: input.associationStrategy,
         }),
       );
 

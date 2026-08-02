@@ -7,16 +7,14 @@ import {
 import { withDrizzle } from "@/server/lib/db";
 import * as s from "@/server/pgSchema";
 import { setUserSetting } from "@/server/lib/userSettings";
-import {
-  buildActorSpecPrompt,
-  actorSpecSchema,
-} from "@/util/prompts/actorSpec";
+import { buildActorSpecPrompt } from "@/util/prompts/actorSpec";
 import { nanoid } from "@/util/nanoid";
 import { actorPopulateActorSpecEvent, inngest } from "./client";
 import { step } from "inngest";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { geminiRequestImageAsAsset } from "./gemini";
 import { buildActorModelSheetImagePrompt } from "@/util/prompts/actorModelSheetImage";
+import { actorSpecSchema } from "@/data/model";
 import type { ActorSpec } from "@/data/model";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { buildActorIdentityImagePrompt } from "@/util/prompts/actorIdentityImage";

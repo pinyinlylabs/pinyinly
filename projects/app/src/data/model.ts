@@ -103,6 +103,8 @@ export const locationSetKeySchema = z.enum([
   `bathroom`,
   `backRoom`,
   `hiddenCloset`,
+  `stairway`,
+  /** @deprecated */
   `staircase`,
   /** @deprecated */
   `arrival`,
@@ -149,8 +151,7 @@ export const locationSpecSchema = z
       .partialRecord(locationSetKeySchema, locationSetSpecSchema)
       .optional(),
   })
-  .loose()
-  .meta({ title: `locationSpecSchema` });
+  .loose();
 
 export type LocationSpec = z.infer<typeof locationSpecSchema>;
 
