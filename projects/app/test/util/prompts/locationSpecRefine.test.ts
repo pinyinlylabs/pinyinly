@@ -59,30 +59,7 @@ describe(`buildLocationSpecRefinePrompt`, () => {
       Revise the following location specification based on the criticisms.
 
       <data>
-      {
-        "criticisms": [],
-        "location": "Pirate ship",
-        "locationSpec": {
-          "location": "Pirate ship",
-          "sets": {
-            "arrival": {
-              "name": "dock"
-            },
-            "heart": {
-              "name": "captain's cabin"
-            },
-            "below": {
-              "name": "cargo hold"
-            },
-            "ascent": {
-              "name": "stairs"
-            },
-            "summit": {
-              "name": "crow's nest"
-            }
-          }
-        }
-      }
+      {"criticisms":[],"location":"Pirate ship","locationSpec":{"location":"Pirate ship","sets":{"arrival":{"name":"dock"},"heart":{"name":"captain's cabin"},"below":{"name":"cargo hold"},"ascent":{"name":"stairs"},"summit":{"name":"crow's nest"}}}}
       </data>
       =====================
       ",

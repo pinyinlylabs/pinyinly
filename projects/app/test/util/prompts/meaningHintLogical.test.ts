@@ -48,23 +48,7 @@ describe(
         Generate 4 distinct mnemonic hints:
 
         <data>
-        {
-          "targetCharacter": {
-            "hanzi": "好",
-            "gloss": "good",
-            "disambiguation": "well; fine"
-          },
-          "components": [
-            {
-              "hanzi": "女",
-              "gloss": "woman"
-            },
-            {
-              "hanzi": "子",
-              "gloss": "child"
-            }
-          ]
-        }
+        {"targetCharacter":{"hanzi":"好","gloss":"good","disambiguation":"well; fine"},"components":[{"hanzi":"女","gloss":"woman"},{"hanzi":"子","gloss":"child"}]}
         </data>
         =====================
         ",

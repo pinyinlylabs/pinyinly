@@ -27,29 +27,6 @@ export const pronunciationHintOutputSchema = z
   .strict()
   .meta({ title: `pronunciationHintOutputSchema` });
 
-function buildPronunciationHintPromptData({
-  leadCharacter,
-  location,
-  cue,
-}: Omit<PronunciationHintPromptInput, `count`>) {
-  return {
-    leadCharacter: {
-      name: leadCharacter.name,
-      ...(leadCharacter.bio == null ? {} : { bio: leadCharacter.bio }),
-    },
-    location: {
-      name: location.name,
-      ...(location.description == null
-        ? {}
-        : { description: location.description }),
-    },
-    cue: {
-      word: cue.word,
-      ...(cue.meaning == null ? {} : { meaning: cue.meaning }),
-    },
-  };
-}
-
 export function buildPronunciationHintRealisticPrompt({
   leadCharacter,
   location,
@@ -86,18 +63,29 @@ Bad endings are generic, flat, fantastical, or mostly definitions.
 When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
 `;
 
-  const data = buildPronunciationHintPromptData({
-    leadCharacter,
-    location,
-    cue,
-  });
+  const input = {
+    leadCharacter: {
+      name: leadCharacter.name,
+      ...(leadCharacter.bio == null ? {} : { bio: leadCharacter.bio }),
+    },
+    location: {
+      name: location.name,
+      ...(location.description == null
+        ? {}
+        : { description: location.description }),
+    },
+    cue: {
+      word: cue.word,
+      ...(cue.meaning == null ? {} : { meaning: cue.meaning }),
+    },
+  };
 
   const userTemplate = `
 Generate {{ count }} distinct mnemonic story ideas.
 
-<data>
-{{ data }}
-</data>
+<input>
+{{ input }}
+</input>
 `;
 
   const messages: ChatPromptMessage[] = [
@@ -106,7 +94,7 @@ Generate {{ count }} distinct mnemonic story ideas.
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
         count: String(count),
-        data: JSON.stringify(data, null, 2),
+        input: JSON.stringify(input),
       }),
     },
   ];

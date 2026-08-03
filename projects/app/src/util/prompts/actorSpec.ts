@@ -177,7 +177,7 @@ Generate a mnemonic actor for:
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        input: JSON.stringify(data, null, 2),
+        input: JSON.stringify(data),
       }),
     },
   ];

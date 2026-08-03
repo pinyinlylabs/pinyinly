@@ -146,7 +146,7 @@ Return up to 5 candidates ordered from strongest to weakest.
     {
       role: `system`,
       content: renderPromptTemplate(systemTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];

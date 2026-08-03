@@ -56,7 +56,7 @@ Generate {{ count }} distinct mnemonic hints:
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
         count: String(count),
-        data: JSON.stringify(data, null, 2),
+        data: JSON.stringify(data),
       }),
     },
   ];

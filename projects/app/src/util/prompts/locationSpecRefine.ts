@@ -66,7 +66,7 @@ Revise the following location specification based on the criticisms.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];

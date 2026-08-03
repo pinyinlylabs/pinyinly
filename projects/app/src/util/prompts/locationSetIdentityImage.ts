@@ -34,7 +34,7 @@ Instructions:
 `;
 
   const variables = {
-    input: JSON.stringify(entry.input, null, 2),
+    input: JSON.stringify(entry.input),
   };
 
   const userPrompt = renderPromptTemplate(userTemplate, variables);

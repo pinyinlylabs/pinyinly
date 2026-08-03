@@ -134,11 +134,7 @@ describe(
         ## Input
 
         <data>
-        {
-          "syllable": "-ong",
-          "pronunciationHint": "oong (similar to the ending of 'book' + ng)",
-          "location": "Jungle Temple"
-        }
+        {"syllable":"-ong","pronunciationHint":"oong (similar to the ending of 'book' + ng)","location":"Jungle Temple"}
         </data>
         =====================
         ",

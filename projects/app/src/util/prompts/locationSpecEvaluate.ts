@@ -187,7 +187,7 @@ Evaluate the following location specification.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];

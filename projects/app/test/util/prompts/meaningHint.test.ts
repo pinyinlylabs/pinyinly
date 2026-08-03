@@ -46,27 +46,7 @@ describe(
         ---------------------
         Generate 4 distinct mnemonic hints.
         <data>
-        {
-          "hanzi": "好",
-          "meaning": {
-            "hanziWord": "好",
-            "glosses": [
-              "good",
-              "well"
-            ]
-          },
-          "components": [
-            {
-              "hanzi": "女",
-              "meaning": "woman"
-            },
-            {
-              "hanzi": "子",
-              "label": "child",
-              "meaning": "child"
-            }
-          ]
-        }
+        {"hanzi":"好","meaning":{"hanziWord":"好","glosses":["good","well"]},"components":[{"hanzi":"女","meaning":"woman"},{"hanzi":"子","label":"child","meaning":"child"}]}
         </data>
         =====================
         ",

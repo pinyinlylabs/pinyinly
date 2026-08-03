@@ -63,13 +63,7 @@ describe(
         Generate 3 mnemonic stories:
 
         <data>
-        {
-          "target": "good",
-          "cues": [
-            "woman",
-            "child"
-          ]
-        }
+        {"target":"good","cues":["woman","child"]}
         </data>
         =====================
         ",

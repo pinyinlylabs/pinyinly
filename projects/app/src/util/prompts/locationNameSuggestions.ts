@@ -279,7 +279,7 @@ Reserve the highest ratings for exceptional candidates.
     {
       role: `system`,
       content: renderPromptTemplate(systemTemplate, {
-        input: JSON.stringify(entry, null, 2),
+        input: JSON.stringify(entry),
       }),
     },
   ];

@@ -843,14 +843,10 @@ Generate a thought funnel for the following input:
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(
-          {
-            ...entry,
-            parsedConcepts,
-          },
-          null,
-          2,
-        ),
+        data: JSON.stringify({
+          ...entry,
+          parsedConcepts,
+        }),
       }),
     },
   ];
@@ -953,7 +949,7 @@ Convert the following mnemonic representation into a guided imagination.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        input: JSON.stringify(entry, null, 2),
+        input: JSON.stringify(entry),
       }),
     },
   ];
@@ -1079,7 +1075,7 @@ Evaluate the following guided imagination.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];
@@ -1673,14 +1669,10 @@ Evaluate the following thought funnel.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(
-          {
-            ...entry,
-            parsedConcepts,
-          },
-          null,
-          2,
-        ),
+        data: JSON.stringify({
+          ...entry,
+          parsedConcepts,
+        }),
       }),
     },
   ];
@@ -1946,14 +1938,10 @@ Revise the following thought funnel based on the criticisms.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(
-          {
-            ...entry,
-            parsedConcepts,
-          },
-          null,
-          2,
-        ),
+        data: JSON.stringify({
+          ...entry,
+          parsedConcepts,
+        }),
       }),
     },
   ];

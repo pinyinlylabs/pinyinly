@@ -138,7 +138,7 @@ Generate thought chain results for the following input:
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];
@@ -345,7 +345,7 @@ Evaluate the following thought chain.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];
@@ -399,7 +399,7 @@ Revise the following thought chain based on the criticisms.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];

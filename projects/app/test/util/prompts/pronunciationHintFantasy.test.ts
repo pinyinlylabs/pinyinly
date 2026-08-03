@@ -56,17 +56,7 @@ describe(
         Generate 3 distinct mnemonic story ideas.
 
         <data>
-        {
-          "leadCharacter": {
-            "name": "Ethan"
-          },
-          "location": {
-            "name": "Gong Cha bathroom"
-          },
-          "cue": {
-            "word": "use"
-          }
-        }
+        {"leadCharacter":{"name":"Ethan"},"location":{"name":"Gong Cha bathroom"},"cue":{"word":"use"}}
         </data>
         =====================
         ",

@@ -149,9 +149,7 @@ describe(
         Generate a mnemonic actor for:
 
         <input>
-        {
-          "identity": "Dracula"
-        }
+        {"identity":"Dracula"}
         </input>
         =====================
         ",

@@ -74,7 +74,7 @@ The goal is to create the single image that people will forever associate with t
 
   const variables = {
     locationName: input.locationSpec.location,
-    input: JSON.stringify(input, null, 2),
+    input: JSON.stringify(input),
   };
 
   const userPrompt = renderPromptTemplate(userTemplate, variables);
