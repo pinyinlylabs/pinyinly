@@ -1,4 +1,4 @@
-import { getUserSetting } from "#server/lib/userSettings.ts";
+import { getUserSetting } from "#server/lib/query.ts";
 import * as s from "#server/pgSchema.ts";
 import {
   aiImageStyleTextSetting,

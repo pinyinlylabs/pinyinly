@@ -173,8 +173,8 @@ export const actorPopulateActorSpecEvent = eventType(
   },
 );
 
-export const pronunciationGenerateMnemonicEvent = eventType(
-  `pronunciation/generate-mnemonic`,
+export const pronunciationGenerateRecurringMnemonicEvent = eventType(
+  `pronunciation/generate-recurring-mnemonic`,
   {
     schema: z.object({
       userId: z.string(),
@@ -219,6 +219,36 @@ export const pronunciationGenerateMnemonicStoryboardImageEvent = eventType(
 
 export const populatePronunciationMnemonicSpecEvent = eventType(
   `pronunciation/populate-mnemonic-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicSpecBeatsEvent = eventType(
+  `pronunciation/populate-mnemonic-spec-beats`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicImageEvent = eventType(
+  `pronunciation/populate-mnemonic-image`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicSpecHookAndPremiseEvent = eventType(
+  `pronunciation/populate-mnemonic-spec-hook-and-premise`,
   {
     schema: z.object({
       userId: z.string(),

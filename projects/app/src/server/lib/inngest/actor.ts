@@ -4,7 +4,6 @@ import {
   actorIdentityImageSetting,
 } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
-import { getUserSetting, setUserSetting } from "@/server/lib/userSettings";
 import { buildActorSpecPrompt } from "@/util/prompts/actorSpec";
 import { actorPopulateActorSpecEvent, inngest } from "./client";
 import { step } from "inngest";
@@ -15,7 +14,11 @@ import { actorSpecSchema } from "@/data/model";
 import type { ActorSpec } from "@/data/model";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { buildActorIdentityImagePrompt } from "@/util/prompts/actorIdentityImage";
-import { getActorModelSheetImage } from "@/server/lib/query";
+import {
+  getUserSetting,
+  setUserSetting,
+  getActorModelSheetImage,
+} from "@/server/lib/query";
 
 export const populateActor = inngest.createFunction(
   {

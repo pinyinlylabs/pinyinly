@@ -7,10 +7,13 @@ import {
 import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
+  populatePronunciationMnemonicImageEvent,
+  populatePronunciationMnemonicSpecBeatsEvent,
   populatePronunciationMnemonicSpecEvent,
+  populatePronunciationMnemonicSpecHookAndPremiseEvent,
   pronunciationGenerateMnemonicStoryboardImageEvent,
   pronunciationGenerateMnemonicStoryboardPanelsEvent,
-  pronunciationGenerateMnemonicEvent as pronunciationGenerateRecurringHintEvent,
+  pronunciationGenerateRecurringMnemonicEvent,
 } from "./client";
 import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
 import {
@@ -20,6 +23,8 @@ import {
   getLocationSpec,
   getMnemonicAssociationsForPinyin,
   getPronunciationMnemonicSpec,
+  getUserSetting,
+  setUserSetting,
 } from "@/server/lib/query";
 import { buildPronunciationMnemonicRecurringPrompt } from "@/util/prompts/pronunciationMnemonicRecurring";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -32,11 +37,9 @@ import { step } from "inngest";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
 import {
-  actorIdentityImageSetting,
   pronunciationMnemonicImageSetting,
   pronunciationMnemonicSpecSetting,
 } from "@/data/userSettings";
-import { getUserSetting, setUserSetting } from "@/server/lib/userSettings";
 
 function normalizeTerms(terms: readonly string[]): string[] {
   return [
@@ -46,10 +49,10 @@ function normalizeTerms(terms: readonly string[]): string[] {
   ];
 }
 
-export const generatePronunciationRecurringHint = inngest.createFunction(
+export const generatePronunciationRecurringMnemonic = inngest.createFunction(
   {
-    id: `pronunciation/generateRecurringHint`,
-    triggers: [pronunciationGenerateRecurringHintEvent],
+    id: `pronunciation/generateRecurringMnemonic`,
+    triggers: [pronunciationGenerateRecurringMnemonicEvent],
   },
   async ({ event }) => {
     const {
@@ -281,7 +284,7 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
 export const populatePronunciationMnemonicImage = inngest.createFunction(
   {
     id: `pronunciation/populateMnemonicImage`,
-    triggers: [populatePronunciationMnemonicSpecEvent],
+    triggers: [populatePronunciationMnemonicImageEvent],
   },
   async ({ event }) => {
     const { userId, hanziWord } = event.data;
@@ -345,12 +348,16 @@ export const populatePronunciationMnemonicImage = inngest.createFunction(
       },
     });
 
-    await step.run(`write identity image`, async () =>
+    await step.run(`write image`, async () =>
       withDrizzle(async (db) => {
         await setUserSetting(db, userId, {
-          key: actorIdentityImageSetting.entity.marshalKey({ actorId }),
-          value: actorIdentityImageSetting.entity.marshalValue({
-            actorId,
+          key: pronunciationMnemonicImageSetting.entity.marshalKey({
+            hanzi,
+            pinyin,
+          }),
+          value: pronunciationMnemonicImageSetting.entity.marshalValue({
+            hanzi,
+            pinyin,
             imageId: generateResult.response,
           }),
         });
@@ -363,7 +370,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
   inngest.createFunction(
     {
       id: `pronunciation/populateHintMnemonicSpecHookAndPremise`,
-      triggers: [populatePronunciationMnemonicSpecEvent],
+      triggers: [populatePronunciationMnemonicSpecHookAndPremiseEvent],
     },
     async ({ event }) => {
       const { userId, hanziWord } = event.data;
@@ -386,7 +393,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
       );
 
       const generateResult = await step.invoke(`generate hook and premise`, {
-        function: generatePronunciationRecurringHint,
+        function: generatePronunciationRecurringMnemonic,
         data: {
           actorId,
           hanziWord,
@@ -434,7 +441,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
 export const populatePronunciationMnemonicSpecBeats = inngest.createFunction(
   {
     id: `pronunciation/populateHintMnemonicSpecBeats`,
-    triggers: [populatePronunciationMnemonicSpecEvent],
+    triggers: [populatePronunciationMnemonicSpecBeatsEvent],
   },
   async ({ event }) => {
     const { userId, hanziWord } = event.data;
@@ -583,7 +590,7 @@ export const generatePronunciationMnemonicStoryboardImage =
   );
 
 export const functions = [
-  generatePronunciationRecurringHint,
+  generatePronunciationRecurringMnemonic,
   generatePronunciationMnemonicStoryboardPanels,
   generatePronunciationMnemonicStoryboardImage,
   populatePronunciationMnemonicSpec,

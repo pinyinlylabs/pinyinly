@@ -23,7 +23,6 @@ import {
 } from "@/data/pinyin";
 import { eventType, invoke } from "inngest";
 import z from "zod";
-import { getUserSetting, setUserSetting } from "@/server/lib/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
@@ -37,6 +36,8 @@ import {
   locationPopulateLocationSetSpecEvent,
 } from "./client";
 import {
+  getUserSetting,
+  setUserSetting,
   getLocationSpec,
   getLocationSetIdentityImage,
   setLocationSetIdentityImage,
