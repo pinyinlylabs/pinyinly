@@ -1,7 +1,9 @@
 import {
   decodeUserSettingValue,
   encodeUserSettingStoredValue,
+  getEffectiveToneSetKeyForSoundId,
   getUserSettingKeyInfo,
+  getToneSoundNameFromSetKey,
   getImageSettingKeyPatterns,
   pronunciationHintImageSetting,
   hanziWordMeaningHintImageSetting,
@@ -100,6 +102,68 @@ describe(
       for (const pattern of patterns) {
         expect(pattern).not.toContain(`[`);
       }
+    });
+  },
+);
+
+describe(
+  `getEffectiveToneSetKeyForSoundId` satisfies HasNameOf<
+    typeof getEffectiveToneSetKeyForSoundId
+  >,
+  () => {
+    test(`returns default set key for tone sound when setting is missing`, () => {
+      expect(getEffectiveToneSetKeyForSoundId(`1` as PinyinSoundId, null)).toBe(
+        `entrance`,
+      );
+    });
+
+    test(`returns configured set key when value is valid`, () => {
+      expect(
+        getEffectiveToneSetKeyForSoundId(`5` as PinyinSoundId, `backRoom`),
+      ).toBe(`backRoom`);
+    });
+
+    test(`falls back to default key when configured value is invalid`, () => {
+      expect(
+        getEffectiveToneSetKeyForSoundId(`4` as PinyinSoundId, `notASet`),
+      ).toBe(`bathroom`);
+    });
+
+    test(`returns null for non-tone sound IDs`, () => {
+      expect(
+        getEffectiveToneSetKeyForSoundId(`-ang` as PinyinSoundId, `entrance`),
+      ).toBeNull();
+    });
+  },
+);
+
+describe(
+  `getToneSoundNameFromSetKey` satisfies HasNameOf<
+    typeof getToneSoundNameFromSetKey
+  >,
+  () => {
+    test(`formats camelCase set keys into readable tone names`, () => {
+      expect(
+        getToneSoundNameFromSetKey(`5` as PinyinSoundId, `hiddenCloset`),
+      ).toBe(`Hidden Closet`);
+      expect(getToneSoundNameFromSetKey(`2` as PinyinSoundId, `backRoom`)).toBe(
+        `Back Room`,
+      );
+    });
+
+    test(`uses default set key name when stored key is missing or invalid`, () => {
+      expect(getToneSoundNameFromSetKey(`3` as PinyinSoundId, null)).toBe(
+        `Basement`,
+      );
+      expect(getToneSoundNameFromSetKey(`1` as PinyinSoundId, `badKey`)).toBe(
+        `Entrance`,
+      );
+    });
+
+    test(`returns null for non-tone sound IDs`, () => {
+      expect(
+        getToneSoundNameFromSetKey(`zh-` as PinyinSoundId, `entrance`),
+      ).toBeNull();
     });
   },
 );

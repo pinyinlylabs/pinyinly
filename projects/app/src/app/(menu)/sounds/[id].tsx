@@ -25,7 +25,7 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { LocationSetKey, PinyinSoundId } from "@/data/model";
-import { locationSetKeys, locationSetKeySchema } from "@/data/model";
+import { locationSetKeys } from "@/data/model";
 import {
   isToneSoundId,
   defaultPinyinSoundExamples,
@@ -37,7 +37,8 @@ import {
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
-  getDefaultLocationSetKeyForToneSoundId,
+  getEffectiveToneSetKeyForSoundId,
+  getToneSoundNameFromSetKey,
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundGroupNameTextSetting,
   pinyinSoundNameTextSetting,
@@ -90,13 +91,14 @@ export default function SoundIdPage() {
         }
       : null,
   );
-  const decodedToneSetKey = locationSetKeySchema.safeParse(
+  const selectedToneSetKey = getEffectiveToneSetKeyForSoundId(
+    id,
     toneSetKeySetting?.value?.setKey,
   );
-  const selectedToneSetKey =
-    decodedToneSetKey.success && isToneSound
-      ? decodedToneSetKey.data
-      : getDefaultLocationSetKeyForToneSoundId(id);
+  const toneSoundName = getToneSoundNameFromSetKey(
+    id,
+    toneSetKeySetting?.value?.setKey,
+  );
   const hasCustomToneSetKey = toneSetKeySetting?.value != null;
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
@@ -160,26 +162,32 @@ export default function SoundIdPage() {
             />
           )}
         </View>
-        <InlineEditableSettingText
-          textClassName="pyly-body-title"
-          setting={pinyinSoundNameTextSetting}
-          settingKey={{ soundId: id }}
-          placeholder="Name this sound"
-          readonly={isFinalSound}
-          renderDisplay={() => {
-            if (!isFinalSound) {
-              return null;
-            }
+        {isToneSound ? (
+          <Text className="pyly-ref pyly-body-subheading text-fg">
+            {toneSoundName ?? `Select a set key below`}
+          </Text>
+        ) : (
+          <InlineEditableSettingText
+            textClassName="pyly-body-title"
+            setting={pinyinSoundNameTextSetting}
+            settingKey={{ soundId: id }}
+            placeholder="Name this sound"
+            readonly={isFinalSound}
+            renderDisplay={() => {
+              if (!isFinalSound) {
+                return null;
+              }
 
-            return (
-              <Text className="pyly-ref pyly-body-subheading text-fg">
-                {finalDisplayName ?? `Select a location below`}
-              </Text>
-            );
-          }}
-        />
+              return (
+                <Text className="pyly-ref pyly-body-subheading text-fg">
+                  {finalDisplayName ?? `Select a location below`}
+                </Text>
+              );
+            }}
+          />
+        )}
 
-        {isFinalSound ? null : (
+        {isFinalSound || isToneSound ? null : (
           <RectButton
             onPress={() => {
               setIsEditSoundNameModalOpen(true);
@@ -231,7 +239,7 @@ export default function SoundIdPage() {
 
       <SoundUsageExamplesSection pinyinSoundId={id} />
 
-      {isFinalSound ? null : (
+      {isFinalSound || isToneSound ? null : (
         <SoundNameEditModal
           soundId={id}
           isOpen={isEditSoundNameModalOpen}

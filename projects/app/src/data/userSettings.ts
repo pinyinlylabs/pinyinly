@@ -5,6 +5,7 @@ import type {
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
+import { locationSetKeySchema } from "@/data/model";
 import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupThemes,
@@ -330,6 +331,44 @@ export function getDefaultLocationSetKeyForToneSoundId(
   return defaultLocationSetKeyByToneSoundId[
     soundId as keyof typeof defaultLocationSetKeyByToneSoundId
   ];
+}
+
+export function getEffectiveToneSetKeyForSoundId(
+  soundId: PinyinSoundId,
+  setKey: string | null | undefined,
+): LocationSetKey | null {
+  const defaultSetKey = getDefaultLocationSetKeyForToneSoundId(soundId);
+  if (defaultSetKey == null) {
+    return null;
+  }
+
+  const parsedSetKey = locationSetKeySchema.safeParse(setKey);
+  if (!parsedSetKey.success) {
+    return defaultSetKey;
+  }
+
+  return parsedSetKey.data;
+}
+
+export function getLocationSetKeyDisplayName(setKey: LocationSetKey): string {
+  return setKey
+    .replaceAll(/([A-Z])/gu, ` $1`)
+    .trim()
+    .split(/\s+/u)
+    .map((word) =>
+      word.length === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
+    )
+    .join(` `);
+}
+
+export function getToneSoundNameFromSetKey(
+  soundId: PinyinSoundId,
+  setKey: string | null | undefined,
+): string | null {
+  const resolvedSetKey = getEffectiveToneSetKeyForSoundId(soundId, setKey);
+  return resolvedSetKey == null
+    ? null
+    : getLocationSetKeyDisplayName(resolvedSetKey);
 }
 
 export const pinyinToneSetKeySetting = defineUserSetting({

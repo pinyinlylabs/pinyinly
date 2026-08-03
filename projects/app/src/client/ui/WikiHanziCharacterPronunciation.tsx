@@ -10,7 +10,6 @@ import type {
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
-import { locationSetKeySchema } from "@/data/model";
 import {
   getFinalSoundLabel,
   getInitialSoundLabel,
@@ -18,7 +17,8 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  getDefaultLocationSetKeyForToneSoundId,
+  getEffectiveToneSetKeyForSoundId,
+  getToneSoundNameFromSetKey,
   pronunciationHintMnemonicSpecSetting,
   pronunciationHintImageSetting,
   pronunciationHintTextSetting,
@@ -121,14 +121,6 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
-  const tonePinyinSound = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameTextSetting,
-          key: { soundId: splitPinyin.toneSoundId },
-        },
-  );
   const finalPlaceSelectionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -148,7 +140,13 @@ export function WikiHanziCharacterPronunciationBox({
   const placeDirectory = usePinyinSoundLocations();
   const actorDirectory = usePinyinSoundActors();
   const initialPinyinSoundName = initialPinyinSound?.value?.text;
-  const tonePinyinSoundName = tonePinyinSound?.value?.text;
+  const tonePinyinSoundName =
+    splitPinyin == null
+      ? null
+      : getToneSoundNameFromSetKey(
+          splitPinyin.toneSoundId,
+          toneSetKeySetting?.value?.setKey,
+        );
   const selectedInitialActorId =
     splitPinyin == null
       ? null
@@ -195,15 +193,13 @@ export function WikiHanziCharacterPronunciationBox({
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
 
-  const parsedToneSetKey = locationSetKeySchema.safeParse(
-    toneSetKeySetting?.value?.setKey,
-  );
   const setKey =
     splitPinyin == null
       ? null
-      : parsedToneSetKey.success
-        ? parsedToneSetKey.data
-        : getDefaultLocationSetKeyForToneSoundId(splitPinyin.toneSoundId);
+      : getEffectiveToneSetKeyForSoundId(
+          splitPinyin.toneSoundId,
+          toneSetKeySetting?.value?.setKey,
+        );
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);

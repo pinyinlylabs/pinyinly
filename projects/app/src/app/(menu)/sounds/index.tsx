@@ -16,15 +16,18 @@ import { ToneSoundTile } from "@/client/ui/ToneSoundTile";
 import {
   isFinalSoundId,
   isInitialSoundId,
+  isToneSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import {
+  getToneSoundNameFromSetKey,
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundActorSelectionSetting,
   pinyinSoundGroupNameTextSetting,
   pinyinSoundGroupThemeTextSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameTextSetting,
+  pinyinToneSetKeySetting,
 } from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
@@ -41,9 +44,20 @@ export default function SoundsPage() {
 
   const nameSettingKeys = useMemo(
     () =>
-      chart.soundIds.map((soundId) =>
-        pinyinSoundNameTextSetting.entity.marshalKey({ soundId }),
-      ),
+      chart.soundIds
+        .filter((soundId) => !isToneSoundId(soundId))
+        .map((soundId) =>
+          pinyinSoundNameTextSetting.entity.marshalKey({ soundId }),
+        ),
+    [chart.soundIds],
+  );
+  const toneSetKeySettingKeys = useMemo(
+    () =>
+      chart.soundIds
+        .filter((soundId) => isToneSoundId(soundId))
+        .map((soundId) =>
+          pinyinToneSetKeySetting.entity.marshalKey({ soundId }),
+        ),
     [chart.soundIds],
   );
   const imageSettingKeys = useMemo(
@@ -78,12 +92,14 @@ export default function SoundsPage() {
   const relevantKeys = useMemo(
     () => [
       ...nameSettingKeys,
+      ...toneSetKeySettingKeys,
       ...imageSettingKeys,
       ...actorSelectionKeys,
       ...finalPlaceSelectionKeys,
     ],
     [
       nameSettingKeys,
+      toneSetKeySettingKeys,
       imageSettingKeys,
       actorSelectionKeys,
       finalPlaceSelectionKeys,
@@ -154,6 +170,39 @@ export default function SoundsPage() {
             name: selectedActor?.name ?? null,
             badge: chart.soundToCustomLabel[soundId] ?? soundId,
             image: selectedActor?.image ?? null,
+          },
+        ];
+      }
+
+      if (isToneSoundId(soundId)) {
+        const toneSetKeyValue = pinyinToneSetKeySetting.decode(
+          { soundId },
+          settingsByKey.get(
+            pinyinToneSetKeySetting.entity.marshalKey({ soundId }),
+          ) ?? null,
+        );
+        const imageValueData = pinyinSoundImageSetting.decode(
+          { soundId },
+          settingsByKey.get(
+            pinyinSoundImageSetting.entity.marshalKey({ soundId }),
+          ) ?? null,
+        );
+        const imageId = imageValueData?.imageId ?? null;
+
+        return [
+          soundId,
+          {
+            name: getToneSoundNameFromSetKey(soundId, toneSetKeyValue?.setKey),
+            badge: chart.soundToCustomLabel[soundId] ?? soundId,
+            image:
+              imageId == null
+                ? null
+                : {
+                    assetId: imageId,
+                    crop: parseImageCrop(imageValueData?.imageCrop),
+                    imageWidth: imageValueData?.imageWidth ?? null,
+                    imageHeight: imageValueData?.imageHeight ?? null,
+                  },
           },
         ];
       }

@@ -1,33 +1,32 @@
 import type {
-  ActorId,
-  ActorSpec,
-  AssetId,
-  HanziText,
-  LocationId,
-  LocationSetKey,
-  PinyinSoundId,
-  LocationSpec,
-  PinyinText,
-  PronunciationHintMnemonicSpec,
-  Skill,
-  SrsStateType,
+    ActorId,
+    ActorSpec,
+    AssetId,
+    HanziText,
+    LocationId,
+    LocationSetKey,
+    PinyinSoundId,
+    LocationSpec,
+    PinyinText,
+    PronunciationHintMnemonicSpec,
+    Skill,
+    SrsStateType,
 } from "@/data/model";
 import {
-  actorSpecSchema,
-  locationSetKeySchema,
-  locationSpecSchema,
-  pronunciationHintMnemonicSpecSchema,
-  SrsKind,
+    actorSpecSchema,
+    locationSpecSchema,
+    pronunciationHintMnemonicSpecSchema,
+    SrsKind,
 } from "@/data/model";
 import {
-  actorModelSheetImageSetting,
-  actorSpecJsonSetting,
-  getDefaultLocationSetKeyForToneSoundId,
-  locationSetIdentityImageSetting,
-  locationSpecJsonSetting,
-  pinyinToneSetKeySetting,
-  pronunciationHintMnemonicSpecSetting,
-  userNameTextSetting,
+    actorModelSheetImageSetting,
+    actorSpecJsonSetting,
+    getEffectiveToneSetKeyForSoundId,
+    locationSetIdentityImageSetting,
+    locationSpecJsonSetting,
+    pinyinToneSetKeySetting,
+    pronunciationHintMnemonicSpecSetting,
+    userNameTextSetting,
 } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
 import type { FsrsState } from "@/util/fsrs";
@@ -251,16 +250,5 @@ export async function getToneLocationSetKey(
     soundId,
   });
 
-  const defaultSetKey = getDefaultLocationSetKeyForToneSoundId(soundId);
-  const setKey = decoded?.setKey;
-  if (setKey == null) {
-    return defaultSetKey;
-  }
-
-  const parsedSetKey = locationSetKeySchema.safeParse(setKey);
-  if (!parsedSetKey.success) {
-    return defaultSetKey;
-  }
-
-  return parsedSetKey.data;
+  return getEffectiveToneSetKeyForSoundId(soundId, decoded?.setKey);
 }
