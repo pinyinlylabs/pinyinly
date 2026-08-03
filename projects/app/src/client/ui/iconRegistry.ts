@@ -1,8 +1,9 @@
 // prettier-ignore
 // oxlint-disable eslint-plugin-import/no-commonjs
-export const iconRegistry: Record<string, RnRequireSource> = {
+export const iconRegistry = {
   // <pyly-glob-template glob="../../assets/icons/*.svg" template="  [`${filenameWithoutExt}`]: require(`${path}`),">
   [`add-circled-filled`]: require(`../../assets/icons/add-circled-filled.svg`),
+  [`ai`]: require(`../../assets/icons/ai.svg`),
   [`alarm-filled`]: require(`../../assets/icons/alarm-filled.svg`),
   [`alarm`]: require(`../../assets/icons/alarm.svg`),
   [`arrow-down`]: require(`../../assets/icons/arrow-down.svg`),
@@ -88,7 +89,7 @@ export const iconRegistry: Record<string, RnRequireSource> = {
   [`voice-square`]: require(`../../assets/icons/voice-square.svg`),
   [`zap-filled`]: require(`../../assets/icons/zap-filled.svg`),
 // </pyly-glob-template>
-} as const;
+} as const satisfies Record<string, RnRequireSource>;
 
 export type IconRegistry = typeof iconRegistry;
 export type IconName = keyof IconRegistry;

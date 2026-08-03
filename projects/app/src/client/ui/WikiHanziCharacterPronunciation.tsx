@@ -172,9 +172,6 @@ export function WikiHanziCharacterPronunciationBox({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
   const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
-  const [enqueueResultMessage, setEnqueueResultMessage] = useState<
-    string | null
-  >(null);
   const enqueuePronunciationRecurringHintMutation =
     trpc.ai.enqueuePronunciationRecurringHint.useMutation();
 
@@ -200,18 +197,6 @@ export function WikiHanziCharacterPronunciationBox({
     tone == null || tone < 1 || tone > 5
       ? null
       : setKeyByTone[tone as 1 | 2 | 3 | 4 | 5];
-  const canEnqueueRecurringHint =
-    selectedInitialActorId != null &&
-    selectedFinalLocationId != null &&
-    setKey != null;
-  const enqueueBlockedReason =
-    selectedInitialActorId == null
-      ? `Select an initial actor first.`
-      : selectedFinalLocationId == null
-        ? `Select a final location first.`
-        : setKey == null
-          ? `Unable to map tone to set key.`
-          : null;
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
@@ -264,7 +249,7 @@ export function WikiHanziCharacterPronunciationBox({
           </View>
         </View>
       )}
-      {isEditMode && (!isHintSectionVisible || !isImageSectionVisible) ? (
+      {isEditMode ? (
         <View className="flex-row items-start gap-4 p-4">
           {isHintSectionVisible ? null : (
             <RectButton
@@ -292,6 +277,30 @@ export function WikiHanziCharacterPronunciationBox({
               Add image
             </RectButton>
           )}
+          {__DEV__ ? (
+            <RectButton
+              variant="bare"
+              iconStart="ai"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                if (
+                  selectedInitialActorId != null &&
+                  selectedFinalLocationId != null &&
+                  setKey != null
+                ) {
+                  enqueuePronunciationRecurringHintMutation.mutate({
+                    actorId: selectedInitialActorId,
+                    locationId: selectedFinalLocationId,
+                    setKey,
+                    hanziWord,
+                  });
+                }
+              }}
+            >
+              Use AI
+            </RectButton>
+          ) : null}
         </View>
       ) : null}
 
@@ -363,62 +372,6 @@ export function WikiHanziCharacterPronunciationBox({
             placeholder='{"story": "A chef juggling cans"}'
             emptyStateText="No mnemonic spec JSON"
           />
-
-          {__DEV__ ? (
-            <View className="gap-2 border-t border-fg/10 pt-3">
-              <RectButton
-                variant="bare"
-                iconStart="wand-magic"
-                iconSize={20}
-                disabled={
-                  !canEnqueueRecurringHint ||
-                  enqueuePronunciationRecurringHintMutation.isPending
-                }
-                onPress={() => {
-                  if (!canEnqueueRecurringHint) {
-                    return;
-                  }
-
-                  setEnqueueResultMessage(null);
-                  enqueuePronunciationRecurringHintMutation
-                    .mutateAsync({
-                      actorId: selectedInitialActorId,
-                      locationId: selectedFinalLocationId,
-                      setKey,
-                      hanziWord,
-                    })
-                    .then(() => {
-                      setEnqueueResultMessage(
-                        `Enqueued. Check Inngest dev UI.`,
-                      );
-                    })
-                    .catch((error: unknown) => {
-                      console.error(
-                        `Failed to enqueue pronunciation recurring hint:`,
-                        error,
-                      );
-                      setEnqueueResultMessage(`Failed to enqueue.`);
-                    });
-                }}
-              >
-                {enqueuePronunciationRecurringHintMutation.isPending
-                  ? `Enqueueing generation...`
-                  : `Enqueue pronunciation generation`}
-              </RectButton>
-
-              {enqueueBlockedReason == null ? null : (
-                <Text className="pyly-body-caption text-fg-dim">
-                  {enqueueBlockedReason}
-                </Text>
-              )}
-
-              {enqueueResultMessage == null ? null : (
-                <Text className="pyly-body-caption text-fg-dim">
-                  {enqueueResultMessage}
-                </Text>
-              )}
-            </View>
-          ) : null}
         </View>
       ) : null}
     </WikiTitledBox>
