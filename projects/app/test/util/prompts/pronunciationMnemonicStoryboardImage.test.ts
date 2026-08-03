@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildPronunciationHintStoryboardImagePrompt } from "#util/prompts/pronunciationHintStoryboardImage.js";
+import { buildPronunciationMnemonicStoryboardImagePrompt } from "#util/prompts/pronunciationMnemonicStoryboardImage.js";
 import {
   makeActorSpec,
   fmtImagePromptForSnapshot,
@@ -9,12 +9,12 @@ import {
 import type { AssetId } from "#data/model.js";
 
 describe(
-  `buildPronunciationHintStoryboardImagePrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintStoryboardImagePrompt
+  `buildPronunciationMnemonicStoryboardImagePrompt` satisfies HasNameOf<
+    typeof buildPronunciationMnemonicStoryboardImagePrompt
   >,
   () => {
     test(`snapshot`, () => {
-      const prompt = buildPronunciationHintStoryboardImagePrompt({
+      const prompt = buildPronunciationMnemonicStoryboardImagePrompt({
         location: makeLocationSpec(`location`),
         locationSet: makeLocationSetSpec(`arrival`),
         actorModelSheet: `sha256/xxx` as AssetId,

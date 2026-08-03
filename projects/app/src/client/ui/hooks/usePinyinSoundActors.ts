@@ -8,7 +8,7 @@ import {
   actorSpecJsonSetting,
   actorModelSheetImageSetting,
   actorNameTextSetting,
-  pinyinSoundActorSelectionSetting,
+  pinyinSoundActorSetting,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -182,10 +182,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
       }
 
       const soundId = setting.key.slice(`psas/`.length) as PinyinSoundId;
-      const value = pinyinSoundActorSelectionSetting.decode(
-        { soundId },
-        setting.value,
-      );
+      const value = pinyinSoundActorSetting.decode({ soundId }, setting.value);
       if (value == null) {
         continue;
       }
@@ -320,7 +317,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
   const setSoundActorId = (soundId: PinyinSoundId, actorId: ActorId | null) => {
     if (actorId == null) {
       void r.mutate.setSetting({
-        key: pinyinSoundActorSelectionSetting.entity.marshalKey({ soundId }),
+        key: pinyinSoundActorSetting.entity.marshalKey({ soundId }),
         value: null,
         now: new Date(),
         skipHistory: false,
@@ -330,8 +327,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     }
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorSelectionSetting.entity.marshalKey({ soundId }),
-      value: pinyinSoundActorSelectionSetting.entity.marshalValue({
+      key: pinyinSoundActorSetting.entity.marshalKey({ soundId }),
+      value: pinyinSoundActorSetting.entity.marshalValue({
         soundId,
         actorId,
       }),

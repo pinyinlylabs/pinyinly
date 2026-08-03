@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildPronunciationHintStoryboardPanelsPrompt } from "#util/prompts/pronunciationHintStoryboardPanels.js";
+import { buildPronunciationMnemonicStoryboardPanelsPrompt } from "#util/prompts/pronunciationMnemonicStoryboardPanels.js";
 import {
   fmtChatPromptForSnapshot,
   makeActorSpec,
@@ -7,12 +7,12 @@ import {
 } from "./helpers";
 
 describe(
-  `buildPronunciationHintStoryboardPanelsPrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintStoryboardPanelsPrompt
+  `buildPronunciationMnemonicStoryboardPanelsPrompt` satisfies HasNameOf<
+    typeof buildPronunciationMnemonicStoryboardPanelsPrompt
   >,
   () => {
     test(`snapshot`, () => {
-      const prompt = buildPronunciationHintStoryboardPanelsPrompt({
+      const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
         // TODO: maybe include location here?
         locationSet: makeLocationSetSpec(`arrival`),
         actor: makeActorSpec(`Ethan`),
@@ -95,7 +95,7 @@ describe(
           "model": "gpt-5.4",
           "reasoningEffort": "low",
           "schema": {
-            "name": "pronunciationHintStoryboardPanelsPromptOutputSchema",
+            "name": "pronunciationMnemonicStoryboardPanelsPromptOutputSchema",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -109,7 +109,7 @@ describe(
               "required": [
                 "panels",
               ],
-              "title": "pronunciationHintStoryboardPanelsPromptOutputSchema",
+              "title": "pronunciationMnemonicStoryboardPanelsPromptOutputSchema",
               "type": "object",
             },
             "type": "json_schema",

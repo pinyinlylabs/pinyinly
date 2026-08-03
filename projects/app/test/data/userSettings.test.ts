@@ -5,10 +5,10 @@ import {
   getUserSettingKeyInfo,
   getToneSoundNameFromSetKey,
   getImageSettingKeyPatterns,
-  pronunciationHintImageSetting,
+  pronunciationMnemonicImageSetting,
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
-  pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundLocationSetting,
   actorIdentityImageSetting,
   actorModelSheetImageSetting,
   locationIdentityImageSetting,
@@ -47,7 +47,7 @@ describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
         locationSetIdentityImageSetting,
         pinyinSoundImageSetting,
         hanziWordMeaningHintImageSetting,
-        pronunciationHintImageSetting,
+        pronunciationMnemonicImageSetting,
       ]),
     );
   });
@@ -172,10 +172,9 @@ describe(
   `getUserSettingKeyInfo` satisfies HasNameOf<typeof getUserSettingKeyInfo>,
   () => {
     test(`returns marshaled key metadata for keyed settings`, () => {
-      const keyInfo = getUserSettingKeyInfo(
-        pinyinFinalSoundLocationSelectionSetting,
-        { soundId: testSoundId },
-      );
+      const keyInfo = getUserSettingKeyInfo(pinyinSoundLocationSetting, {
+        soundId: testSoundId,
+      });
 
       expect(keyInfo.settingKey).toBe(`pfsps/-a`);
       expect(keyInfo.keyParamAliases).toEqual([`s`]);
@@ -197,7 +196,7 @@ describe(
   () => {
     test(`decodes keyed setting when stored value omits key fields`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinFinalSoundLocationSelectionSetting,
+        pinyinSoundLocationSetting,
         { soundId: testSoundId },
         { p: testLocationId },
       );
@@ -210,7 +209,7 @@ describe(
 
     test(`returns null when stored value is null`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinFinalSoundLocationSelectionSetting,
+        pinyinSoundLocationSetting,
         { soundId: testSoundId },
         null,
       );
@@ -220,7 +219,7 @@ describe(
 
     test(`returns null when stored object cannot be decoded`, () => {
       const decoded = decodeUserSettingValue(
-        pinyinFinalSoundLocationSelectionSetting,
+        pinyinSoundLocationSetting,
         { soundId: testSoundId },
         { notPlace: `x` },
       );
@@ -298,7 +297,7 @@ describe(
   () => {
     test(`strips key-path fields from keyed setting stored values`, () => {
       const encoded = encodeUserSettingStoredValue(
-        pinyinFinalSoundLocationSelectionSetting,
+        pinyinSoundLocationSetting,
         { soundId: testSoundId },
         {
           soundId: testSoundId,

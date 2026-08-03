@@ -6,7 +6,6 @@ import {
   locationThoughtChainsJsonSetting,
   locationSetNameTextSetting,
 } from "@/data/userSettings";
-import * as s from "@/server/pgSchema";
 import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
 import {
@@ -22,10 +21,9 @@ import {
   isFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import { and, eq } from "drizzle-orm";
 import { eventType, invoke } from "inngest";
 import z from "zod";
-import { setUserSetting } from "@/server/lib/userSettings";
+import { getUserSetting, setUserSetting } from "@/server/lib/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
@@ -125,25 +123,12 @@ const populateLocation = inngest.createFunction(
       `read location identity image`,
       async () =>
         withDrizzle(async (db) => {
-          const setting = await db.query.userSetting.findFirst({
-            where: and(
-              eq(s.userSetting.userId, userId),
-              eq(
-                s.userSetting.key,
-                locationIdentityImageSetting.entity.marshalKey({ locationId }),
-              ),
-            ),
-          });
-
-          if (setting == null) {
-            return null;
-          }
-
-          const decoded = locationIdentityImageSetting.decode(
-            { locationId: locationId },
-            setting.value,
+          const decoded = await getUserSetting(
+            db,
+            userId,
+            locationIdentityImageSetting,
+            { locationId },
           );
-
           return decoded?.imageId ?? null;
         }),
     );
@@ -183,25 +168,11 @@ const populateLocation = inngest.createFunction(
       async () =>
         withDrizzle(
           async (db): Promise<LocationSoundThoughtChainsBySoundIdType> => {
-            const setting = await db.query.userSetting.findFirst({
-              where: and(
-                eq(s.userSetting.userId, userId),
-                eq(
-                  s.userSetting.key,
-                  locationThoughtChainsJsonSetting.entity.marshalKey({
-                    locationId,
-                  }),
-                ),
-              ),
-            });
-
-            if (setting == null) {
-              return {};
-            }
-
-            const decoded = locationThoughtChainsJsonSetting.decode(
+            const decoded = await getUserSetting(
+              db,
+              userId,
+              locationThoughtChainsJsonSetting,
               { locationId },
-              setting.value,
             );
 
             const thoughtChainsBySoundId =
@@ -334,25 +305,11 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
       async () =>
         withDrizzle(
           async (db): Promise<LocationSoundThoughtChainsBySoundIdType> => {
-            const setting = await db.query.userSetting.findFirst({
-              where: and(
-                eq(s.userSetting.userId, userId),
-                eq(
-                  s.userSetting.key,
-                  locationThoughtChainsJsonSetting.entity.marshalKey({
-                    locationId,
-                  }),
-                ),
-              ),
-            });
-
-            if (setting == null) {
-              return {};
-            }
-
-            const decoded = locationThoughtChainsJsonSetting.decode(
+            const decoded = await getUserSetting(
+              db,
+              userId,
+              locationThoughtChainsJsonSetting,
               { locationId },
-              setting.value,
             );
 
             const thoughtChainsBySoundId =
@@ -399,21 +356,11 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
           // Re-read inside the write step so concurrent per-sound workers merge
           // against the latest stored map instead of a stale pre-generation
           // snapshot. This prevents workers from clobbering each other's keys.
-          const latestSetting = await db.query.userSetting.findFirst({
-            where: and(
-              eq(s.userSetting.userId, userId),
-              eq(
-                s.userSetting.key,
-                locationThoughtChainsJsonSetting.entity.marshalKey({
-                  locationId,
-                }),
-              ),
-            ),
-          });
-
-          const latestDecoded = locationThoughtChainsJsonSetting.decode(
+          const latestDecoded = await getUserSetting(
+            db,
+            userId,
+            locationThoughtChainsJsonSetting,
             { locationId },
-            latestSetting?.value ?? null,
           );
 
           const latestThoughtChainsBySoundIdResult =
@@ -533,33 +480,20 @@ const populateLocationSetDescription = inngest.createFunction(
 
     await step.run(`read set description (${setKey})`, async () =>
       withDrizzle(async (db) => {
-        const currentSetting = await db.query.userSetting.findFirst({
-          where: and(
-            eq(s.userSetting.userId, userId),
-            eq(
-              s.userSetting.key,
-              locationSetDescriptionTextSetting.entity.marshalKey({
-                locationId,
-                setKey,
-              }),
-            ),
-          ),
-        });
+        const decoded = await getUserSetting(
+          db,
+          userId,
+          locationSetDescriptionTextSetting,
+          { locationId, setKey },
+        );
 
-        if (currentSetting != null) {
-          const decoded = locationSetDescriptionTextSetting.decode(
-            { locationId, setKey },
-            currentSetting.value,
-          );
+        const currentDescription = decoded?.text ?? null;
 
-          const currentDescription = decoded?.text ?? null;
-
-          if (
-            currentDescription != null &&
-            currentDescription.trim().length > 0
-          ) {
-            return;
-          }
+        if (
+          currentDescription != null &&
+          currentDescription.trim().length > 0
+        ) {
+          return;
         }
 
         const locationSpec = await getLocationSpec(db, userId, locationId);
@@ -609,30 +543,17 @@ const populateLocationSetName = inngest.createFunction(
 
     await step.run(`read set name (${setKey})`, async () =>
       withDrizzle(async (db) => {
-        const currentSetting = await db.query.userSetting.findFirst({
-          where: and(
-            eq(s.userSetting.userId, userId),
-            eq(
-              s.userSetting.key,
-              locationSetNameTextSetting.entity.marshalKey({
-                locationId,
-                setKey,
-              }),
-            ),
-          ),
-        });
+        const decoded = await getUserSetting(
+          db,
+          userId,
+          locationSetNameTextSetting,
+          { locationId, setKey },
+        );
 
-        if (currentSetting != null) {
-          const decoded = locationSetNameTextSetting.decode(
-            { locationId, setKey },
-            currentSetting.value,
-          );
+        const currentName = decoded?.text ?? null;
 
-          const currentName = decoded?.text ?? null;
-
-          if (currentName != null && currentName.trim().length > 0) {
-            return;
-          }
+        if (currentName != null && currentName.trim().length > 0) {
+          return;
         }
 
         const locationSpec = await getLocationSpec(db, userId, locationId);
@@ -694,25 +615,11 @@ const populateLocationSpec = inngest.createFunction(
     if (locationSpec == null) {
       const locationName = await step.run(`read location name`, async () =>
         withDrizzle(async (db) => {
-          const setting = await db.query.userSetting.findFirst({
-            where: and(
-              eq(s.userSetting.userId, userId),
-              eq(
-                s.userSetting.key,
-                pinyinSoundLocationNameSetting.entity.marshalKey({
-                  locationId,
-                }),
-              ),
-            ),
-          });
-
-          if (setting == null) {
-            return null;
-          }
-
-          const decoded = pinyinSoundLocationNameSetting.decode(
-            { locationId: locationId },
-            setting.value,
+          const decoded = await getUserSetting(
+            db,
+            userId,
+            pinyinSoundLocationNameSetting,
+            { locationId },
           );
 
           const text = decoded?.text.trim();

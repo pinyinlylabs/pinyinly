@@ -1,32 +1,38 @@
 import type {
-    ActorId,
-    ActorSpec,
-    AssetId,
-    HanziText,
-    LocationId,
-    LocationSetKey,
-    PinyinSoundId,
-    LocationSpec,
-    PinyinText,
-    PronunciationHintMnemonicSpec,
-    Skill,
-    SrsStateType,
+  ActorId,
+  ActorSpec,
+  AssetId,
+  HanziText,
+  LocationId,
+  LocationSetKey,
+  PinyinSoundId,
+  LocationSpec,
+  PinyinText,
+  PronunciationMnemonicSpec,
+  Skill,
+  SrsStateType,
+  PinyinUnit,
 } from "@/data/model";
 import {
-    actorSpecSchema,
-    locationSpecSchema,
-    pronunciationHintMnemonicSpecSchema,
-    SrsKind,
+  actorIdSchema,
+  actorSpecSchema,
+  locationIdSchema,
+  locationSetKeySchema,
+  locationSpecSchema,
+  pronunciationMnemonicSpecSchema,
+  SrsKind,
 } from "@/data/model";
 import {
-    actorModelSheetImageSetting,
-    actorSpecJsonSetting,
-    getEffectiveToneSetKeyForSoundId,
-    locationSetIdentityImageSetting,
-    locationSpecJsonSetting,
-    pinyinToneSetKeySetting,
-    pronunciationHintMnemonicSpecSetting,
-    userNameTextSetting,
+  actorModelSheetImageSetting,
+  actorSpecJsonSetting,
+  getEffectiveToneSetKeyForSoundId,
+  locationSetIdentityImageSetting,
+  locationSpecJsonSetting,
+  pinyinSoundActorSetting,
+  pinyinSoundLocationSetKeySetting,
+  pinyinSoundLocationSetting,
+  pronunciationMnemonicSpecSetting,
+  userNameTextSetting,
 } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
 import type { FsrsState } from "@/util/fsrs";
@@ -34,6 +40,10 @@ import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
 import { getUserSetting, setUserSetting } from "./userSettings";
+import {
+  normalizePinyinUnitForHintKey,
+  splitPinyinUnitOrThrow,
+} from "@/data/pinyin";
 
 export async function updateSkillState(
   tx: Drizzle,
@@ -136,16 +146,16 @@ export async function setUserName(
     });
 }
 
-export async function getPronunciationHintMnemonicSpec(
+export async function getPronunciationMnemonicSpec(
   db: Drizzle,
   userId: string,
   hanzi: HanziText,
   pinyin: PinyinText,
-): Promise<PronunciationHintMnemonicSpec | null> {
+): Promise<PronunciationMnemonicSpec | null> {
   const decoded = await getUserSetting(
     db,
     userId,
-    pronunciationHintMnemonicSpecSetting,
+    pronunciationMnemonicSpecSetting,
     { hanzi, pinyin },
   );
 
@@ -153,7 +163,7 @@ export async function getPronunciationHintMnemonicSpec(
     return null;
   }
 
-  return pronunciationHintMnemonicSpecSchema.parse(decoded.value, {
+  return pronunciationMnemonicSpecSchema.parse(decoded.value, {
     reportInput: true,
   });
 }
@@ -241,14 +251,75 @@ export async function getLocationSetIdentityImage(
   return decoded?.imageId ?? null;
 }
 
+export async function getMnemonicAssociationsForPinyin(
+  db: Drizzle,
+  userId: string,
+  pinyin: PinyinUnit,
+): Promise<{
+  actorId: ActorId;
+  locationId: LocationId;
+  locationSetKey: LocationSetKey;
+}> {
+  const splitPinyin = splitPinyinUnitOrThrow(pinyin);
+
+  const actorResult = await getUserSetting(
+    db,
+    userId,
+    pinyinSoundActorSetting,
+    { soundId: splitPinyin.initialSoundId },
+  );
+
+  const locationResult = await getUserSetting(
+    db,
+    userId,
+    pinyinSoundLocationSetting,
+    { soundId: splitPinyin.finalSoundId },
+  );
+
+  const setKeyResult = await getUserSetting(
+    db,
+    userId,
+    pinyinSoundLocationSetKeySetting,
+    { soundId: splitPinyin.toneSoundId },
+  );
+
+  const actorId = actorIdSchema.parse(actorResult?.actorId, {
+    reportInput: true,
+  });
+  const locationId = locationIdSchema.parse(locationResult?.locationId, {
+    reportInput: true,
+  });
+  const locationSetKey = locationSetKeySchema.parse(setKeyResult?.setKey, {
+    reportInput: true,
+  });
+
+  return { actorId, locationId, locationSetKey };
+}
+
+export async function getPinyinToneLocationSetKey(
+  db: Drizzle,
+  userId: string,
+  pinyin: PinyinUnit,
+): Promise<LocationSetKey | null> {
+  const pinyinUnit = normalizePinyinUnitForHintKey(pinyin);
+  const splitPinyin = splitPinyinUnitOrThrow(pinyinUnit);
+
+  return getToneLocationSetKey(db, userId, splitPinyin.toneSoundId);
+}
+
 export async function getToneLocationSetKey(
   db: Drizzle,
   userId: string,
   soundId: PinyinSoundId,
 ): Promise<LocationSetKey | null> {
-  const decoded = await getUserSetting(db, userId, pinyinToneSetKeySetting, {
-    soundId,
-  });
+  const decoded = await getUserSetting(
+    db,
+    userId,
+    pinyinSoundLocationSetKeySetting,
+    {
+      soundId,
+    },
+  );
 
   return getEffectiveToneSetKeyForSoundId(soundId, decoded?.setKey);
 }

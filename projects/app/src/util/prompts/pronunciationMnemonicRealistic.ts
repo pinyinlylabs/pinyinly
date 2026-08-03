@@ -2,14 +2,14 @@ import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 
-export type PronunciationHintPromptInput = {
+export type PronunciationMnemonicPromptInput = {
   leadCharacter: { name: string; bio?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   count: number;
 };
 
-export const pronunciationHintOutputSchema = z
+export const pronunciationMnemonicOutputSchema = z
   .object({
     suggestions: z.array(
       z
@@ -25,15 +25,15 @@ export const pronunciationHintOutputSchema = z
     ),
   })
   .strict()
-  .meta({ title: `pronunciationHintOutputSchema` });
+  .meta({ title: `pronunciationMnemonicOutputSchema` });
 
-export function buildPronunciationHintRealisticPrompt({
+export function buildPronunciationMnemonicRealisticPrompt({
   leadCharacter,
   location,
   cue,
   count,
-}: PronunciationHintPromptInput): ChatPrompt<
-  typeof pronunciationHintOutputSchema
+}: PronunciationMnemonicPromptInput): ChatPrompt<
+  typeof pronunciationMnemonicOutputSchema
 > {
   const systemTemplate = `
 You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
@@ -101,9 +101,9 @@ Generate {{ count }} distinct mnemonic story ideas.
 
   return {
     messages,
-    schema: pronunciationHintOutputSchema,
+    schema: pronunciationMnemonicOutputSchema,
     model: `gpt-5-mini`,
     reasoningEffort: `medium`,
   };
 }
-buildPronunciationHintRealisticPrompt.strategy = `realistic`;
+buildPronunciationMnemonicRealisticPrompt.strategy = `realistic`;

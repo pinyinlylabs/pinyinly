@@ -39,10 +39,10 @@ import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
   getEffectiveToneSetKeyForSoundId,
   getToneSoundNameFromSetKey,
-  pinyinFinalSoundLocationSelectionSetting,
+  pinyinSoundLocationSetting,
   pinyinSoundGroupNameTextSetting,
   pinyinSoundNameTextSetting,
-  pinyinToneSetKeySetting,
+  pinyinSoundLocationSetKeySetting,
 } from "@/data/userSettings";
 import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -86,7 +86,7 @@ export default function SoundIdPage() {
   const toneSetKeySetting = useUserSetting(
     isToneSound
       ? {
-          setting: pinyinToneSetKeySetting,
+          setting: pinyinSoundLocationSetKeySetting,
           key: { soundId: id },
         }
       : null,
@@ -103,7 +103,7 @@ export default function SoundIdPage() {
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: id },
         }
       : null,
@@ -267,9 +267,7 @@ function MnemonicStoryRoleSection({
     isFinalSoundId(soundId),
   );
   const finalLocationSelectionKeysCsv = finalSoundIds
-    .map((soundId) =>
-      pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({ soundId }),
-    )
+    .map((soundId) => pinyinSoundLocationSetting.entity.marshalKey({ soundId }))
     .join(`,`);
   const { data: finalLocationSelectionSettings } = useLiveQuery(
     (q) =>
@@ -283,7 +281,7 @@ function MnemonicStoryRoleSection({
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: pinyinSoundId },
         }
       : null,
@@ -319,9 +317,9 @@ function MnemonicStoryRoleSection({
   for (const soundId of finalSoundIds) {
     const settingValue =
       finalLocationSelectionByKey.get(
-        pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({ soundId }),
+        pinyinSoundLocationSetting.entity.marshalKey({ soundId }),
       ) ?? null;
-    const decoded = pinyinFinalSoundLocationSelectionSetting.decode(
+    const decoded = pinyinSoundLocationSetting.decode(
       { soundId },
       settingValue,
     );

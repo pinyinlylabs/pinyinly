@@ -6,8 +6,8 @@ import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { buildPronunciationHintFantasyPrompt } from "@/util/prompts/pronunciationHintFantasy";
-import { buildPronunciationHintRealisticPrompt } from "@/util/prompts/pronunciationHintRealistic";
+import { buildPronunciationMnemonicFantasyPrompt } from "@/util/prompts/pronunciationMnemonicFantasy";
+import { buildPronunciationMnemonicRealisticPrompt } from "@/util/prompts/pronunciationMnemonicRealistic";
 
 export interface AiPronunciationHintModalProps {
   leadCharacter: { name: string; bio?: string };
@@ -137,7 +137,7 @@ export function AiPronunciationHintModal({
     number | null
   >(null);
 
-  const generateMutation = trpc.ai.generatePronunciationHints.useMutation();
+  const generateMutation = trpc.ai.generatePronunciationMnemonics.useMutation();
 
   const requestInput = {
     leadCharacter: {
@@ -157,8 +157,9 @@ export function AiPronunciationHintModal({
     count: 4,
   };
 
-  const fantasyPrompt = buildPronunciationHintFantasyPrompt(requestInput);
-  const realisticPrompt = buildPronunciationHintRealisticPrompt(requestInput);
+  const fantasyPrompt = buildPronunciationMnemonicFantasyPrompt(requestInput);
+  const realisticPrompt =
+    buildPronunciationMnemonicRealisticPrompt(requestInput);
   const storyPreamble = buildPronunciationStoryPreamble({
     leadCharacter,
     location,

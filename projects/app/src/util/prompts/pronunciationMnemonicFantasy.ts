@@ -2,14 +2,14 @@ import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
 import { z } from "zod";
 
-export type PronunciationHintPromptInput = {
+export type PronunciationMnemonicPromptInput = {
   leadCharacter: { name: string; bio?: string };
   location: { name: string; description?: string };
   cue: { word: string; meaning?: string };
   count: number;
 };
 
-export const pronunciationHintOutputSchema = z
+export const pronunciationMnemonicOutputSchema = z
   .object({
     suggestions: z.array(
       z
@@ -25,13 +25,13 @@ export const pronunciationHintOutputSchema = z
     ),
   })
   .strict()
-  .meta({ title: `pronunciationHintOutputSchema` });
+  .meta({ title: `pronunciationMnemonicOutputSchema` });
 
-function buildPronunciationHintPromptData({
+function buildPronunciationMnemonicPromptData({
   leadCharacter,
   location,
   cue,
-}: Omit<PronunciationHintPromptInput, `count`>) {
+}: Omit<PronunciationMnemonicPromptInput, `count`>) {
   return {
     leadCharacter: {
       name: leadCharacter.name,
@@ -50,13 +50,13 @@ function buildPronunciationHintPromptData({
   };
 }
 
-export function buildPronunciationHintFantasyPrompt({
+export function buildPronunciationMnemonicFantasyPrompt({
   leadCharacter,
   location,
   cue,
   count,
-}: PronunciationHintPromptInput): ChatPrompt<
-  typeof pronunciationHintOutputSchema
+}: PronunciationMnemonicPromptInput): ChatPrompt<
+  typeof pronunciationMnemonicOutputSchema
 > {
   const systemTemplate = `
 You're a helpful assistant that creates short pronunciation mnemonic story ideas for Mandarin learners.
@@ -86,7 +86,7 @@ Bad endings are generic, flat, or mostly definitions.
 When the cue word (or a close form of it) appears in the ending text, wrap it in ==word== markup (e.g. ==can== or ==canning==).
 `;
 
-  const data = buildPronunciationHintPromptData({
+  const data = buildPronunciationMnemonicPromptData({
     leadCharacter,
     location,
     cue,
@@ -113,9 +113,9 @@ Generate {{ count }} distinct mnemonic story ideas.
 
   return {
     messages,
-    schema: pronunciationHintOutputSchema,
+    schema: pronunciationMnemonicOutputSchema,
     model: `gpt-5-mini`,
     reasoningEffort: `medium`,
   };
 }
-buildPronunciationHintFantasyPrompt.strategy = `fantasy`;
+buildPronunciationMnemonicFantasyPrompt.strategy = `fantasy`;

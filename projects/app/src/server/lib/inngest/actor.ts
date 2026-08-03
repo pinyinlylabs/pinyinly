@@ -1,12 +1,10 @@
-import { and, eq } from "drizzle-orm";
 import {
   actorSpecJsonSetting,
   actorModelSheetImageSetting,
   actorIdentityImageSetting,
 } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
-import * as s from "@/server/pgSchema";
-import { setUserSetting } from "@/server/lib/userSettings";
+import { getUserSetting, setUserSetting } from "@/server/lib/userSettings";
 import { buildActorSpecPrompt } from "@/util/prompts/actorSpec";
 import { actorPopulateActorSpecEvent, inngest } from "./client";
 import { step } from "inngest";
@@ -32,21 +30,9 @@ export const populateActor = inngest.createFunction(
     const { userId, actorId, actorName } = event.data;
 
     let actorSpec = await withDrizzle(async (db): Promise<ActorSpec | null> => {
-      const setting = await db.query.userSetting.findFirst({
-        where: and(
-          eq(s.userSetting.userId, userId),
-          eq(
-            s.userSetting.key,
-            actorSpecJsonSetting.entity.marshalKey({ actorId }),
-          ),
-        ),
+      const decoded = await getUserSetting(db, userId, actorSpecJsonSetting, {
+        actorId,
       });
-
-      if (setting == null) {
-        return null;
-      }
-
-      const decoded = actorSpecJsonSetting.decode({ actorId }, setting.value);
 
       if (decoded == null) {
         return null;
@@ -109,25 +95,12 @@ export const populateActor = inngest.createFunction(
       `read current identity image`,
       async () =>
         withDrizzle(async (db) => {
-          const setting = await db.query.userSetting.findFirst({
-            where: and(
-              eq(s.userSetting.userId, userId),
-              eq(
-                s.userSetting.key,
-                actorIdentityImageSetting.entity.marshalKey({ actorId }),
-              ),
-            ),
-          });
-
-          if (setting == null) {
-            return null;
-          }
-
-          const decoded = actorIdentityImageSetting.decode(
+          const decoded = await getUserSetting(
+            db,
+            userId,
+            actorIdentityImageSetting,
             { actorId },
-            setting.value,
           );
-
           return decoded?.imageId ?? null;
         }),
     );

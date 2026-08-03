@@ -11,9 +11,9 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  pronunciationHintImagePromptSetting,
-  pronunciationHintImageSetting,
-  pinyinFinalSoundLocationSelectionSetting,
+  pronunciationMnemonicImagePromptSetting,
+  pronunciationMnemonicImageSetting,
+  pinyinSoundLocationSetting,
   actorIdentityImageSetting,
   locationIdentityImageSetting,
   pinyinSoundNameTextSetting,
@@ -21,7 +21,7 @@ import {
 import { Text, View } from "react-native";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
-import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
+import { useHanziPronunciationMnemonic } from "./hooks/useHanziPronunciationMnemonic";
 
 export function WikiHanziCharacterPronunciationImagePicker({
   gloss,
@@ -37,10 +37,13 @@ export function WikiHanziCharacterPronunciationImagePicker({
   const splitPinyin = splitPinyinUnit(pinyinUnit);
   const placeDirectory = usePinyinSoundLocations();
   const actorDirectory = usePinyinSoundActors();
-  const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
-  const hintSettingKey = pronunciationHint.settingKey;
+  const pronunciationMnemonic = useHanziPronunciationMnemonic(
+    hanzi,
+    pinyinUnit,
+  );
+  const hintSettingKey = pronunciationMnemonic.settingKey;
   const imagePromptSetting = useUserSetting({
-    setting: pronunciationHintImagePromptSetting,
+    setting: pronunciationMnemonicImagePromptSetting,
     key: hintSettingKey,
   });
 
@@ -64,7 +67,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
@@ -149,7 +152,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
       </View>
 
       <InlineEditableSettingImage
-        setting={pronunciationHintImageSetting}
+        setting={pronunciationMnemonicImageSetting}
         settingKey={hintSettingKey}
         previewHeight={200}
         tileSize={64}
@@ -157,7 +160,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
         aiReferenceImages={aiReferenceImages}
         initialAiPrompt={
           imagePromptSetting.value?.text ??
-          pronunciationHint.text ??
+          pronunciationMnemonic.text ??
           `Create an image for ${hanzi} (${pinyinUnit}) - ${gloss}`
         }
         aspectRatio="16:9"

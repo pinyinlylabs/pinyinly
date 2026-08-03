@@ -8,7 +8,7 @@ import {
 } from "@/data/model";
 import omit from "lodash/omit";
 
-export const pronunciationHintRecurringPromptAssociationStrategyKindSchema =
+export const pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema =
   z.enum([
     `identityBinding`,
     `environmentRule`,
@@ -16,35 +16,35 @@ export const pronunciationHintRecurringPromptAssociationStrategyKindSchema =
     `behaviourConsequence`,
   ]);
 
-export const pronunciationHintRecurringPromptCueSchema = z.object({
+export const pronunciationMnemonicRecurringPromptCueSchema = z.object({
   label: z.string(),
   meaning: z.string().optional(),
 });
 
-export const pronunciationHintRecurringPromptInputSchema = z.object({
+export const pronunciationMnemonicRecurringPromptInputSchema = z.object({
   location: locationSpecSchema.omit(`sets`),
   set: locationSetSpecSchema,
-  cue: pronunciationHintRecurringPromptCueSchema,
+  cue: pronunciationMnemonicRecurringPromptCueSchema,
   actor: actorSpecSchema,
   associationStrategy:
-    pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
+    pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
 });
 
-export type PronunciationHintRecurringPromptInput = z.infer<
-  typeof pronunciationHintRecurringPromptInputSchema
+export type PronunciationMnemonicRecurringPromptInput = z.infer<
+  typeof pronunciationMnemonicRecurringPromptInputSchema
 >;
 
-export const pronunciationHintRecurringPromptOutputSchema = z
+export const pronunciationMnemonicRecurringPromptOutputSchema = z
   .object({
     premise: z.string(),
     hook: z.string(),
   })
   .strict()
-  .meta({ title: `pronunciationHintRecurringPromptOutputSchema` });
+  .meta({ title: `pronunciationMnemonicRecurringPromptOutputSchema` });
 
-export function buildPronunciationHintRecurringPrompt(
-  input: PronunciationHintRecurringPromptInput,
-): ChatPrompt<typeof pronunciationHintRecurringPromptOutputSchema> {
+export function buildPronunciationMnemonicRecurringPrompt(
+  input: PronunciationMnemonicRecurringPromptInput,
+): ChatPrompt<typeof pronunciationMnemonicRecurringPromptOutputSchema> {
   const systemTemplate = `
 You are a helpful assistant that designs canonical visual mnemonics.
 
@@ -162,7 +162,7 @@ Only mention the location or set if it genuinely helps distinguish this mnemonic
 `;
 
   return {
-    schema: pronunciationHintRecurringPromptOutputSchema,
+    schema: pronunciationMnemonicRecurringPromptOutputSchema,
     model: `gpt-5.4`,
     reasoningEffort: `low`,
     messages: [

@@ -2,7 +2,7 @@ import { getUserSetting } from "#server/lib/userSettings.ts";
 import * as s from "#server/pgSchema.ts";
 import {
   aiImageStyleTextSetting,
-  pinyinToneSetKeySetting,
+  pinyinSoundLocationSetKeySetting,
   userNameTextSetting,
 } from "#data/userSettings.ts";
 import type { PinyinSoundId } from "#data/model.ts";
@@ -45,9 +45,14 @@ describe(`getUserSetting`, () => {
     const userId = `user-3`;
     await db.insert(s.user).values({ id: userId });
 
-    const result = await getUserSetting(db, userId, pinyinToneSetKeySetting, {
-      soundId: `nonTone` as PinyinSoundId,
-    });
+    const result = await getUserSetting(
+      db,
+      userId,
+      pinyinSoundLocationSetKeySetting,
+      {
+        soundId: `nonTone` as PinyinSoundId,
+      },
+    );
 
     expect(result).toBeNull();
   });

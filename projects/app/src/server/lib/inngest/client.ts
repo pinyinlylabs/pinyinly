@@ -9,10 +9,10 @@ import {
   locationIdSchema,
   pinyinSoundIdSchema,
   hanziTextSchema,
-  pinyinTextSchema,
+  pinyinUnitSchema,
 } from "@/data/model";
 import { z } from "zod";
-import { pronunciationHintRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationHintRecurring";
+import { pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationMnemonicRecurring";
 
 declare global {
   var __pylyPino: pino.Logger | undefined;
@@ -173,23 +173,23 @@ export const actorPopulateActorSpecEvent = eventType(
   },
 );
 
-export const pronunciationGenerateHintEvent = eventType(
-  `pronunciation/generate-hint`,
+export const pronunciationGenerateMnemonicEvent = eventType(
+  `pronunciation/generate-mnemonic`,
   {
     schema: z.object({
       userId: z.string(),
       locationId: locationIdSchema,
+      locationSetKey: locationSetKeySchema,
       actorId: actorIdSchema,
-      setKey: locationSetKeySchema,
       hanziWord: hanziWordSchema,
       associationStrategy:
-        pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
+        pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
     }),
   },
 );
 
-export const pronunciationGenerateHintStoryboardPanelsEvent = eventType(
-  `pronunciation/generate-hint-storyboard-panels`,
+export const pronunciationGenerateMnemonicStoryboardPanelsEvent = eventType(
+  `pronunciation/generate-mnemonic-storyboard-panels`,
   {
     schema: z.object({
       actorId: actorIdSchema,
@@ -197,13 +197,13 @@ export const pronunciationGenerateHintStoryboardPanelsEvent = eventType(
       locationId: locationIdSchema,
       setKey: locationSetKeySchema,
       hanzi: hanziTextSchema,
-      pinyin: pinyinTextSchema,
+      pinyin: pinyinUnitSchema,
     }),
   },
 );
 
-export const pronunciationGenerateHintStoryboardImageEvent = eventType(
-  `pronunciation/generate-hint-storyboard-image`,
+export const pronunciationGenerateMnemonicStoryboardImageEvent = eventType(
+  `pronunciation/generate-mnemonic-storyboard-image`,
   {
     schema: z.object({
       userId: z.string(),
@@ -213,6 +213,16 @@ export const pronunciationGenerateHintStoryboardImageEvent = eventType(
       hook: z.string(),
       premise: z.string(),
       beats: z.array(z.string()),
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicSpecEvent = eventType(
+  `pronunciation/populate-mnemonic-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
     }),
   },
 );

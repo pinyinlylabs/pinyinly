@@ -17,15 +17,14 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  getEffectiveToneSetKeyForSoundId,
   getToneSoundNameFromSetKey,
-  pronunciationHintMnemonicSpecSetting,
-  pronunciationHintImageSetting,
-  pronunciationHintTextSetting,
-  pinyinFinalSoundLocationSelectionSetting,
+  pronunciationMnemonicSpecSetting,
+  pronunciationMnemonicImageSetting,
+  pronunciationMnemonicTextSetting,
+  pinyinSoundLocationSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameTextSetting,
-  pinyinToneSetKeySetting,
+  pinyinSoundLocationSetKeySetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -47,7 +46,7 @@ import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacter
 import { WikiTitledBox } from "./WikiTitledBox";
 import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation.utils";
 import { useDb } from "./hooks/useDb";
-import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
+import { useHanziPronunciationMnemonic } from "./hooks/useHanziPronunciationMnemonic";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
@@ -125,7 +124,7 @@ export function WikiHanziCharacterPronunciationBox({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
@@ -133,7 +132,7 @@ export function WikiHanziCharacterPronunciationBox({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinToneSetKeySetting,
+          setting: pinyinSoundLocationSetKeySetting,
           key: { soundId: splitPinyin.toneSoundId },
         },
   );
@@ -171,35 +170,32 @@ export function WikiHanziCharacterPronunciationBox({
   const finalLabel = getFinalSoundLabel(pinyinUnit);
 
   const finalLocationName = selectedFinalLocation?.name ?? null;
-  const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
-  const hintSettingKey = pronunciationHint.settingKey;
-  const hintImageSetting = useUserSetting({
-    setting: pronunciationHintImageSetting,
-    key: hintSettingKey,
+  const pronunciationMnemonic = useHanziPronunciationMnemonic(
+    hanzi,
+    pinyinUnit,
+  );
+  const mnemonicSettingKey = pronunciationMnemonic.settingKey;
+  const mnemonicImageSetting = useUserSetting({
+    setting: pronunciationMnemonicImageSetting,
+    key: mnemonicSettingKey,
   });
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
+  const [showMnemonicEditor, setShowMnemonicEditor] = useState<boolean | null>(
+    null,
+  );
   const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
   const enqueuePronunciationRecurringHintMutation =
     trpc.ai.enqueuePronunciationRecurringHint.useMutation();
 
-  const hintImage = hintImageSetting.value;
-  const hasHintContent = pronunciationHint.hasText;
-  const hasImageContent = hintImage?.imageId != null;
+  const mnemonicImage = mnemonicImageSetting.value;
+  const hasMnemonicContent = pronunciationMnemonic.hasText;
+  const hasImageContent = mnemonicImage?.imageId != null;
   const isHintSectionVisible = isEditMode
-    ? (showHintEditor ?? hasHintContent)
-    : hasHintContent;
+    ? (showMnemonicEditor ?? hasMnemonicContent)
+    : hasMnemonicContent;
   const isImageSectionVisible = isEditMode
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
-
-  const setKey =
-    splitPinyin == null
-      ? null
-      : getEffectiveToneSetKeyForSoundId(
-          splitPinyin.toneSoundId,
-          toneSetKeySetting?.value?.setKey,
-        );
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
@@ -261,7 +257,7 @@ export function WikiHanziCharacterPronunciationBox({
               iconSize={20}
               className="opacity-80"
               onPress={() => {
-                setShowHintEditor(true);
+                setShowMnemonicEditor(true);
               }}
             >
               Add hint
@@ -289,13 +285,9 @@ export function WikiHanziCharacterPronunciationBox({
               onPress={() => {
                 if (
                   selectedInitialActorId != null &&
-                  selectedFinalLocationId != null &&
-                  setKey != null
+                  selectedFinalLocationId != null
                 ) {
                   enqueuePronunciationRecurringHintMutation.mutate({
-                    actorId: selectedInitialActorId,
-                    locationId: selectedFinalLocationId,
-                    setKey,
                     hanziWord,
                   });
                 }
@@ -313,8 +305,8 @@ export function WikiHanziCharacterPronunciationBox({
             <View className={`px-7 py-4`}>
               <InlineEditableSettingText
                 readonly={!isEditMode}
-                setting={pronunciationHintTextSetting}
-                settingKey={hintSettingKey}
+                setting={pronunciationMnemonicTextSetting}
+                settingKey={mnemonicSettingKey}
                 placeholder="Add a hint on the first line. Add details after a blank line."
                 multiline
                 maxLength={80}
@@ -327,9 +319,9 @@ export function WikiHanziCharacterPronunciationBox({
                 onSaveValue={(nextHintText) => {
                   const nextHintTextLength = nextHintText?.length ?? 0;
                   if (nextHintTextLength === 0) {
-                    setShowHintEditor(false);
+                    setShowMnemonicEditor(false);
                   } else {
-                    setShowHintEditor(true);
+                    setShowMnemonicEditor(true);
                   }
                 }}
               />
@@ -350,11 +342,11 @@ export function WikiHanziCharacterPronunciationBox({
                   }
                 }}
               />
-            ) : hintImage?.imageId == null ? null : (
+            ) : mnemonicImage?.imageId == null ? null : (
               <InlineEditableSettingImage
                 readonly
-                setting={pronunciationHintImageSetting}
-                settingKey={hintSettingKey}
+                setting={pronunciationMnemonicImageSetting}
+                settingKey={mnemonicSettingKey}
                 previewHeight={200}
                 aspectRatio={`5:4`}
               />
@@ -369,8 +361,8 @@ export function WikiHanziCharacterPronunciationBox({
             Mnemonic spec
           </Text>
           <InlineEditableSettingJson
-            setting={pronunciationHintMnemonicSpecSetting}
-            settingKey={hintSettingKey}
+            setting={pronunciationMnemonicSpecSetting}
+            settingKey={mnemonicSettingKey}
             readonly={!isEditMode}
             placeholder='{"story": "A chef juggling cans"}'
             emptyStateText="No mnemonic spec JSON"

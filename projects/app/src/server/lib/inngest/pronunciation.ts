@@ -7,28 +7,36 @@ import {
 import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
-  pronunciationGenerateHintStoryboardImageEvent,
-  pronunciationGenerateHintStoryboardPanelsEvent,
-  pronunciationGenerateHintEvent as pronunciationGenerateRecurringHintEvent,
+  populatePronunciationMnemonicSpecEvent,
+  pronunciationGenerateMnemonicStoryboardImageEvent,
+  pronunciationGenerateMnemonicStoryboardPanelsEvent,
+  pronunciationGenerateMnemonicEvent as pronunciationGenerateRecurringHintEvent,
 } from "./client";
-import { splitPinyinUnitOrThrow } from "@/data/pinyin";
+import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
 import {
   getActorModelSheetImage,
   getActorSpec,
   getLocationSetIdentityImage,
   getLocationSpec,
-  getPronunciationHintMnemonicSpec,
-  getToneLocationSetKey,
+  getMnemonicAssociationsForPinyin,
+  getPronunciationMnemonicSpec,
 } from "@/server/lib/query";
-import { buildPronunciationHintRecurringPrompt } from "@/util/prompts/pronunciationHintRecurring";
+import { buildPronunciationMnemonicRecurringPrompt } from "@/util/prompts/pronunciationMnemonicRecurring";
 import { invariant } from "@pinyinly/lib/invariant";
-import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { buildPylymarkTokenizePrompt } from "@/util/prompts/pylymarkTokenize";
-import { buildPronunciationHintStoryboardPanelsPrompt } from "@/util/prompts/pronunciationHintStoryboardPanels";
+import { buildPronunciationMnemonicStoryboardPanelsPrompt } from "@/util/prompts/pronunciationMnemonicStoryboardPanels";
 import { parsePylymark, stripTokens, stringifyPylymark } from "@/data/pylymark";
-import { buildPronunciationHintStoryboardImagePrompt } from "@/util/prompts/pronunciationHintStoryboardImage";
+import { buildPronunciationMnemonicStoryboardImagePrompt } from "@/util/prompts/pronunciationMnemonicStoryboardImage";
 import { geminiRequestImageAsAsset } from "./gemini";
 import { step } from "inngest";
+import { requestOpenAiResponseJson } from "@/server/lib/ai";
+import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
+import {
+  actorIdentityImageSetting,
+  pronunciationMnemonicImageSetting,
+  pronunciationMnemonicSpecSetting,
+} from "@/data/userSettings";
+import { getUserSetting, setUserSetting } from "@/server/lib/userSettings";
 
 function normalizeTerms(terms: readonly string[]): string[] {
   return [
@@ -49,7 +57,7 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
       actorId,
       hanziWord,
       locationId,
-      setKey,
+      locationSetKey,
       associationStrategy,
     } = event.data;
 
@@ -67,19 +75,6 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
     );
 
     const splitPinyin = splitPinyinUnitOrThrow(pinyinUnit);
-    const configuredSetKey = await withDrizzle(async (db) => {
-      return getToneLocationSetKey(db, userId, splitPinyin.toneSoundId);
-    });
-
-    invariant(
-      configuredSetKey != null,
-      `No configured set key found for tone ${splitPinyin.toneSoundId}`,
-    );
-
-    invariant(
-      setKey === configuredSetKey,
-      `Set key ${setKey} does not match configured tone set key ${configuredSetKey} for tone ${splitPinyin.toneSoundId} (${hanziWord})`,
-    );
 
     const cueTerms = normalizeTerms(meaning.gloss);
     const cue = {
@@ -105,10 +100,13 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
       `Location spec not found for locationId: ${locationId}`,
     );
 
-    const locationSetSpec = locationSpec.sets?.[setKey];
-    invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
+    const locationSetSpec = locationSpec.sets?.[locationSetKey];
+    invariant(
+      locationSetSpec != null,
+      `Set not found for setKey: ${locationSetKey}`,
+    );
 
-    const prompt = buildPronunciationHintRecurringPrompt({
+    const prompt = buildPronunciationMnemonicRecurringPrompt({
       actor: actorSpec,
       cue,
       location: locationSpec,
@@ -163,160 +161,433 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
   },
 );
 
-export const generatePronunciationHintStoryboardPanels = inngest.createFunction(
-  {
-    id: `pronunciation/generateHintStoryboardPanels`,
-    triggers: [pronunciationGenerateHintStoryboardPanelsEvent],
-  },
-  async ({ event }) => {
-    const { actorId, locationId, userId, setKey, hanzi, pinyin } = event.data;
+export const generatePronunciationMnemonicStoryboardPanels =
+  inngest.createFunction(
+    {
+      id: `pronunciation/generateMnemonicStoryboardPanels`,
+      triggers: [pronunciationGenerateMnemonicStoryboardPanelsEvent],
+    },
+    async ({ event }) => {
+      const { actorId, locationId, userId, setKey, hanzi, pinyin } = event.data;
 
-    const actorSpec = await withDrizzle(async (db) => {
-      return getActorSpec(db, userId, actorId);
-    });
+      const actorSpec = await withDrizzle(async (db) => {
+        return getActorSpec(db, userId, actorId);
+      });
 
-    invariant(
-      actorSpec != null,
-      `Actor spec not found for actorId: ${actorId}`,
-    );
+      invariant(
+        actorSpec != null,
+        `Actor spec not found for actorId: ${actorId}`,
+      );
 
-    const locationSpec = await withDrizzle(async (db) => {
-      return getLocationSpec(db, userId, locationId);
-    });
+      const locationSpec = await withDrizzle(async (db) => {
+        return getLocationSpec(db, userId, locationId);
+      });
 
-    invariant(
-      locationSpec != null,
-      `Location spec not found for locationId: ${locationId}`,
-    );
+      invariant(
+        locationSpec != null,
+        `Location spec not found for locationId: ${locationId}`,
+      );
 
-    const locationSetSpec = locationSpec.sets?.[setKey];
-    invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
+      const locationSetSpec = locationSpec.sets?.[setKey];
+      invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
 
-    const pronunciationMnemonicSpec = await withDrizzle(async (db) => {
-      return getPronunciationHintMnemonicSpec(db, userId, hanzi, pinyin);
-    });
+      const pronunciationMnemonicSpec = await withDrizzle(async (db) => {
+        return getPronunciationMnemonicSpec(db, userId, hanzi, pinyin);
+      });
 
-    invariant(
-      pronunciationMnemonicSpec != null,
-      `Pronunciation hint mnemonic spec not found for hanzi: ${hanzi}, pinyin: ${pinyin}`,
-    );
+      invariant(
+        pronunciationMnemonicSpec != null,
+        `Pronunciation hint mnemonic spec not found for hanzi: ${hanzi}, pinyin: ${pinyin}`,
+      );
 
-    const { hook, premise } = pronunciationMnemonicSpec;
-    invariant(
-      hook != null,
-      `Hook not found in pronunciation hint mnemonic spec`,
-    );
+      const { hook, premise } = pronunciationMnemonicSpec;
+      invariant(
+        hook != null,
+        `Hook not found in pronunciation hint mnemonic spec`,
+      );
 
-    invariant(
-      premise != null,
-      `Premise not found in pronunciation hint mnemonic spec`,
-    );
+      invariant(
+        premise != null,
+        `Premise not found in pronunciation hint mnemonic spec`,
+      );
 
-    // Remove [-ong foo] style tokens from the hook and premise for the
-    // storyboard prompt as these might confuse the storyboard prompt.
-    const hookPlaintext = stringifyPylymark(stripTokens(parsePylymark(hook)));
-    const premisePlaintext = stringifyPylymark(
-      stripTokens(parsePylymark(premise)),
-    );
+      // Remove [-ong foo] style tokens from the hook and premise for the
+      // storyboard prompt as these might confuse the storyboard prompt.
+      const hookPlaintext = stringifyPylymark(stripTokens(parsePylymark(hook)));
+      const premisePlaintext = stringifyPylymark(
+        stripTokens(parsePylymark(premise)),
+      );
 
-    const prompt = buildPronunciationHintStoryboardPanelsPrompt({
-      locationSet: locationSetSpec,
-      actor: actorSpec,
-      hook: hookPlaintext,
-      premise: premisePlaintext,
-    });
-
-    const response = await requestOpenAiResponseJson(prompt);
-
-    return {
-      response,
-      prompt,
-    };
-  },
-);
-
-export const generatePronunciationHintStoryboardImage = inngest.createFunction(
-  {
-    id: `pronunciation/generateHintStoryboardImage`,
-    triggers: [pronunciationGenerateHintStoryboardImageEvent],
-  },
-  async ({ event }) => {
-    const { actorId, locationId, userId, setKey, hook, beats, premise } =
-      event.data;
-
-    const actorSpec = await withDrizzle(async (db) => {
-      return getActorSpec(db, userId, actorId);
-    });
-
-    invariant(
-      actorSpec != null,
-      `Actor spec not found for actorId: ${actorId}`,
-    );
-
-    const locationSpec = await withDrizzle(async (db) => {
-      return getLocationSpec(db, userId, locationId);
-    });
-
-    invariant(
-      locationSpec != null,
-      `Location spec not found for locationId: ${locationId}`,
-    );
-
-    const locationSetSpec = locationSpec.sets?.[setKey];
-    invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
-
-    // Remove [-ong foo] style tokens from the hook and premise for the
-    // storyboard prompt as these might confuse the storyboard prompt.
-    const hookPlaintext = stringifyPylymark(stripTokens(parsePylymark(hook)));
-    const premisePlaintext = stringifyPylymark(
-      stripTokens(parsePylymark(premise)),
-    );
-
-    const actorModelSheetAssetId = await withDrizzle(async (db) => {
-      return getActorModelSheetImage(db, userId, actorId);
-    });
-
-    invariant(
-      actorModelSheetAssetId != null,
-      `Actor model sheet not found for actorId: ${actorId}`,
-    );
-
-    const locationSetImageAssetId = await withDrizzle(async (db) => {
-      return getLocationSetIdentityImage(db, userId, locationId, setKey);
-    });
-
-    invariant(
-      locationSetImageAssetId != null,
-      `Location set identity image not found for locationId: ${locationId}, setKey: ${setKey}`,
-    );
-
-    const prompt = buildPronunciationHintStoryboardImagePrompt({
-      actor: actorSpec,
-      location: locationSpec,
-      locationSet: locationSetSpec,
-      mnemonicSpec: {
+      const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
+        locationSet: locationSetSpec,
+        actor: actorSpec,
         hook: hookPlaintext,
         premise: premisePlaintext,
-        beats,
-      },
-      actorModelSheet: actorModelSheetAssetId,
-      locationSetImage: locationSetImageAssetId,
+      });
+
+      const response = await requestOpenAiResponseJson(prompt);
+
+      return {
+        response,
+        prompt,
+      };
+    },
+  );
+
+async function getHanziAndPinyinForHanziWord(
+  hanziWord: HanziWord,
+): Promise<{ hanzi: HanziText; pinyin: PinyinUnit }> {
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(hanziWord);
+  invariant(
+    meaning != null,
+    `Dictionary meaning not found for hanziWord: ${hanziWord}`,
+  );
+  const hanzi = hanziFromHanziWord(hanziWord);
+  const pinyin = meaning.pinyin?.[0];
+  invariant(pinyin != null, `Pinyin not found for hanziWord: ${hanziWord}`);
+
+  return {
+    hanzi,
+    pinyin: normalizePinyinUnit(pinyin),
+  };
+}
+
+export const populatePronunciationMnemonicSpec = inngest.createFunction(
+  {
+    id: `pronunciation/populateHintMnemonicSpec`,
+    triggers: [populatePronunciationMnemonicSpecEvent],
+  },
+  async ({ event }) => {
+    const { userId, hanziWord } = event.data;
+
+    await step.invoke(`populate hook and premise`, {
+      function: populatePronunciationMnemonicSpecHookAndPremise,
+      data: { userId, hanziWord },
     });
 
-    const response = await step.invoke(`generate image`, {
-      function: geminiRequestImageAsAsset,
-      data: { prompt },
+    await step.invoke(`populate beats`, {
+      function: populatePronunciationMnemonicSpecBeats,
+      data: { userId, hanziWord },
     });
 
-    return {
-      response,
-      prompt,
-    };
+    await step.invoke(`populate image`, {
+      function: populatePronunciationMnemonicImage,
+      data: { userId, hanziWord },
+    });
   },
 );
+
+export const populatePronunciationMnemonicImage = inngest.createFunction(
+  {
+    id: `pronunciation/populateMnemonicImage`,
+    triggers: [populatePronunciationMnemonicSpecEvent],
+  },
+  async ({ event }) => {
+    const { userId, hanziWord } = event.data;
+    const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
+
+    const isAlreadySet = await step.run(`read current image`, async () =>
+      withDrizzle(async (db) => {
+        const decoded = await getUserSetting(
+          db,
+          userId,
+          pronunciationMnemonicImageSetting,
+          { hanzi, pinyin },
+        );
+        return decoded?.imageId != null;
+      }),
+    );
+
+    if (isAlreadySet) {
+      return;
+    }
+
+    const { actorId, locationId, locationSetKey, hook, premise, beats } =
+      await withDrizzle(async (db) => {
+        const { actorId, locationId, locationSetKey } =
+          await getMnemonicAssociationsForPinyin(db, userId, pinyin);
+        const specResult = await getPronunciationMnemonicSpec(
+          db,
+          userId,
+          hanzi,
+          pinyin,
+        );
+
+        invariant(
+          specResult?.hook != null,
+          `Expected hook to be populated for hanzi: ${hanzi}, pinyin: ${pinyin}`,
+        );
+        invariant(
+          specResult.premise != null,
+          `Expected premise to be populated for hanzi: ${hanzi}, pinyin: ${pinyin}`,
+        );
+        invariant(
+          specResult.beats != null,
+          `Expected beats to be populated for hanzi: ${hanzi}, pinyin: ${pinyin}`,
+        );
+
+        const { hook, premise, beats } = specResult;
+
+        return { actorId, locationId, locationSetKey, hook, premise, beats };
+      });
+
+    const generateResult = await step.invoke(`generate identity image`, {
+      function: generatePronunciationMnemonicStoryboardImage,
+      data: {
+        actorId,
+        beats,
+        hook,
+        locationId,
+        premise,
+        setKey: locationSetKey,
+        userId,
+      },
+    });
+
+    await step.run(`write identity image`, async () =>
+      withDrizzle(async (db) => {
+        await setUserSetting(db, userId, {
+          key: actorIdentityImageSetting.entity.marshalKey({ actorId }),
+          value: actorIdentityImageSetting.entity.marshalValue({
+            actorId,
+            imageId: generateResult.response,
+          }),
+        });
+      }),
+    );
+  },
+);
+
+export const populatePronunciationMnemonicSpecHookAndPremise =
+  inngest.createFunction(
+    {
+      id: `pronunciation/populateHintMnemonicSpecHookAndPremise`,
+      triggers: [populatePronunciationMnemonicSpecEvent],
+    },
+    async ({ event }) => {
+      const { userId, hanziWord } = event.data;
+
+      const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
+      {
+        const existingSpec = await withDrizzle(async (db) => {
+          return getPronunciationMnemonicSpec(db, userId, hanzi, pinyin);
+        });
+
+        if (existingSpec?.hook != null && existingSpec.premise != null) {
+          return;
+        }
+      }
+
+      const { actorId, locationId, locationSetKey } = await withDrizzle(
+        async (db) => {
+          return getMnemonicAssociationsForPinyin(db, userId, pinyin);
+        },
+      );
+
+      const generateResult = await step.invoke(`generate hook and premise`, {
+        function: generatePronunciationRecurringHint,
+        data: {
+          actorId,
+          hanziWord,
+          locationId,
+          locationSetKey,
+          associationStrategy: `identityBinding`,
+          userId,
+        },
+      });
+
+      {
+        await withDrizzle(async (db) => {
+          const existingSpec = await getPronunciationMnemonicSpec(
+            db,
+            userId,
+            hanzi,
+            pinyin,
+          );
+          if (existingSpec?.hook != null && existingSpec.premise != null) {
+            return;
+          }
+
+          const updatedSpec = {
+            ...existingSpec,
+            hook: generateResult.tokenizedResponse.hook,
+            premise: generateResult.tokenizedResponse.premise,
+          };
+
+          await setUserSetting(db, userId, {
+            key: pronunciationMnemonicSpecSetting.entity.marshalKey({
+              hanzi,
+              pinyin,
+            }),
+            value: pronunciationMnemonicSpecSetting.entity.marshalValue({
+              hanzi,
+              pinyin,
+              value: updatedSpec,
+            }),
+          });
+        });
+      }
+    },
+  );
+
+export const populatePronunciationMnemonicSpecBeats = inngest.createFunction(
+  {
+    id: `pronunciation/populateHintMnemonicSpecBeats`,
+    triggers: [populatePronunciationMnemonicSpecEvent],
+  },
+  async ({ event }) => {
+    const { userId, hanziWord } = event.data;
+
+    const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
+    {
+      const existingSpec = await withDrizzle(async (db) => {
+        return getPronunciationMnemonicSpec(db, userId, hanzi, pinyin);
+      });
+
+      if (existingSpec?.beats != null) {
+        return;
+      }
+    }
+
+    const { actorId, locationId, locationSetKey } = await withDrizzle(
+      async (db) => {
+        return getMnemonicAssociationsForPinyin(db, userId, pinyin);
+      },
+    );
+
+    const generateResult = await step.invoke(`generate beats`, {
+      function: generatePronunciationMnemonicStoryboardPanels,
+      data: {
+        userId,
+        actorId,
+        locationId,
+        setKey: locationSetKey,
+        hanzi,
+        pinyin,
+      },
+    });
+
+    {
+      await withDrizzle(async (db) => {
+        const existingSpec = await getPronunciationMnemonicSpec(
+          db,
+          userId,
+          hanzi,
+          pinyin,
+        );
+        if (existingSpec?.beats != null) {
+          return;
+        }
+
+        const updatedSpec = {
+          ...existingSpec,
+          beats: generateResult.response.data.panels,
+        };
+
+        await setUserSetting(db, userId, {
+          key: pronunciationMnemonicSpecSetting.entity.marshalKey({
+            hanzi,
+            pinyin,
+          }),
+          value: pronunciationMnemonicSpecSetting.entity.marshalValue({
+            hanzi,
+            pinyin,
+            value: updatedSpec,
+          }),
+        });
+      });
+    }
+  },
+);
+
+export const generatePronunciationMnemonicStoryboardImage =
+  inngest.createFunction(
+    {
+      id: `pronunciation/generateMnemonicStoryboardImage`,
+      triggers: [pronunciationGenerateMnemonicStoryboardImageEvent],
+    },
+    async ({ event }) => {
+      const { actorId, locationId, userId, setKey, hook, beats, premise } =
+        event.data;
+
+      const actorSpec = await withDrizzle(async (db) => {
+        return getActorSpec(db, userId, actorId);
+      });
+
+      invariant(
+        actorSpec != null,
+        `Actor spec not found for actorId: ${actorId}`,
+      );
+
+      const locationSpec = await withDrizzle(async (db) => {
+        return getLocationSpec(db, userId, locationId);
+      });
+
+      invariant(
+        locationSpec != null,
+        `Location spec not found for locationId: ${locationId}`,
+      );
+
+      const locationSetSpec = locationSpec.sets?.[setKey];
+      invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
+
+      // Remove [-ong foo] style tokens from the hook and premise for the
+      // storyboard prompt as these might confuse the storyboard prompt.
+      const hookPlaintext = stringifyPylymark(stripTokens(parsePylymark(hook)));
+      const premisePlaintext = stringifyPylymark(
+        stripTokens(parsePylymark(premise)),
+      );
+
+      const actorModelSheetAssetId = await withDrizzle(async (db) => {
+        return getActorModelSheetImage(db, userId, actorId);
+      });
+
+      invariant(
+        actorModelSheetAssetId != null,
+        `Actor model sheet not found for actorId: ${actorId}`,
+      );
+
+      const locationSetImageAssetId = await withDrizzle(async (db) => {
+        return getLocationSetIdentityImage(db, userId, locationId, setKey);
+      });
+
+      invariant(
+        locationSetImageAssetId != null,
+        `Location set identity image not found for locationId: ${locationId}, setKey: ${setKey}`,
+      );
+
+      const prompt = buildPronunciationMnemonicStoryboardImagePrompt({
+        actor: actorSpec,
+        location: locationSpec,
+        locationSet: locationSetSpec,
+        mnemonicSpec: {
+          hook: hookPlaintext,
+          premise: premisePlaintext,
+          beats,
+        },
+        actorModelSheet: actorModelSheetAssetId,
+        locationSetImage: locationSetImageAssetId,
+      });
+
+      const response = await step.invoke(`generate image`, {
+        function: geminiRequestImageAsAsset,
+        data: { prompt },
+      });
+
+      return {
+        response,
+        prompt,
+      };
+    },
+  );
 
 export const functions = [
   generatePronunciationRecurringHint,
-  generatePronunciationHintStoryboardPanels,
-  generatePronunciationHintStoryboardImage,
+  generatePronunciationMnemonicStoryboardPanels,
+  generatePronunciationMnemonicStoryboardImage,
+  populatePronunciationMnemonicSpec,
+  populatePronunciationMnemonicImage,
+  populatePronunciationMnemonicSpecHookAndPremise,
+  populatePronunciationMnemonicSpecBeats,
 ] as const;

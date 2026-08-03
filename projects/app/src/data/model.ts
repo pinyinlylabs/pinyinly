@@ -155,7 +155,7 @@ export const locationSpecSchema = z
 
 export type LocationSpec = z.infer<typeof locationSpecSchema>;
 
-export const pronunciationHintMnemonicSpecSchema = z
+export const pronunciationMnemonicSpecSchema = z
   .object({
     hook: z.string().optional(),
     premise: z.string().optional(),
@@ -163,8 +163,8 @@ export const pronunciationHintMnemonicSpecSchema = z
   })
   .loose();
 
-export type PronunciationHintMnemonicSpec = z.infer<
-  typeof pronunciationHintMnemonicSpecSchema
+export type PronunciationMnemonicSpec = z.infer<
+  typeof pronunciationMnemonicSpecSchema
 >;
 
 /**

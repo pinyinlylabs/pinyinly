@@ -3,26 +3,26 @@ import { actorSpecSchema, locationSetSpecSchema } from "@/data/model";
 import { z } from "zod";
 import type { ChatPrompt } from "@/server/lib/ai";
 
-export const pronunciationHintStoryboardPanelsPromptInputSchema = z.object({
+export const pronunciationMnemonicStoryboardPanelsPromptInputSchema = z.object({
   hook: z.string(),
   premise: z.string(),
   actor: actorSpecSchema,
   locationSet: locationSetSpecSchema,
 });
 
-export type PronunciationHintStoryboardPanelsPromptInputSchema = z.infer<
-  typeof pronunciationHintStoryboardPanelsPromptInputSchema
+export type PronunciationMnemonicStoryboardPanelsPromptInputSchema = z.infer<
+  typeof pronunciationMnemonicStoryboardPanelsPromptInputSchema
 >;
 
-export const pronunciationHintStoryboardPanelsPromptOutputSchema = z
+export const pronunciationMnemonicStoryboardPanelsPromptOutputSchema = z
   .object({
     panels: z.array(z.string()),
   })
-  .meta({ title: `pronunciationHintStoryboardPanelsPromptOutputSchema` });
+  .meta({ title: `pronunciationMnemonicStoryboardPanelsPromptOutputSchema` });
 
-export function buildPronunciationHintStoryboardPanelsPrompt(
-  input: PronunciationHintStoryboardPanelsPromptInputSchema,
-): ChatPrompt<typeof pronunciationHintStoryboardPanelsPromptOutputSchema> {
+export function buildPronunciationMnemonicStoryboardPanelsPrompt(
+  input: PronunciationMnemonicStoryboardPanelsPromptInputSchema,
+): ChatPrompt<typeof pronunciationMnemonicStoryboardPanelsPromptOutputSchema> {
   const userTemplate = `
 You are a helpful assistant that converts visual mnemonic premises into storyboard panels.
 
@@ -91,7 +91,7 @@ Return a JSON array of 2–4 short strings.
 `;
 
   return {
-    schema: pronunciationHintStoryboardPanelsPromptOutputSchema,
+    schema: pronunciationMnemonicStoryboardPanelsPromptOutputSchema,
     model: `gpt-5.4`,
     reasoningEffort: `low`,
     messages: [

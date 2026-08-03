@@ -21,13 +21,13 @@ import {
 } from "@/data/pinyin";
 import {
   getToneSoundNameFromSetKey,
-  pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundActorSelectionSetting,
+  pinyinSoundLocationSetting,
+  pinyinSoundActorSetting,
   pinyinSoundGroupNameTextSetting,
   pinyinSoundGroupThemeTextSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameTextSetting,
-  pinyinToneSetKeySetting,
+  pinyinSoundLocationSetKeySetting,
 } from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
@@ -56,7 +56,7 @@ export default function SoundsPage() {
       chart.soundIds
         .filter((soundId) => isToneSoundId(soundId))
         .map((soundId) =>
-          pinyinToneSetKeySetting.entity.marshalKey({ soundId }),
+          pinyinSoundLocationSetKeySetting.entity.marshalKey({ soundId }),
         ),
     [chart.soundIds],
   );
@@ -72,7 +72,7 @@ export default function SoundsPage() {
       chart.soundIds
         .filter((soundId) => isFinalSoundId(soundId))
         .map((soundId) =>
-          pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({
+          pinyinSoundLocationSetting.entity.marshalKey({
             soundId,
           }),
         ),
@@ -83,7 +83,7 @@ export default function SoundsPage() {
       chart.soundIds
         .filter((soundId) => isInitialSoundId(soundId))
         .map((soundId) =>
-          pinyinSoundActorSelectionSetting.entity.marshalKey({
+          pinyinSoundActorSetting.entity.marshalKey({
             soundId,
           }),
         ),
@@ -121,15 +121,14 @@ export default function SoundsPage() {
   const pinyinSounds = new Map(
     chart.soundIds.map((soundId) => {
       if (isFinalSoundId(soundId)) {
-        const placeSelectionValue =
-          pinyinFinalSoundLocationSelectionSetting.decode(
-            { soundId },
-            settingsByKey.get(
-              pinyinFinalSoundLocationSelectionSetting.entity.marshalKey({
-                soundId,
-              }),
-            ) ?? null,
-          );
+        const placeSelectionValue = pinyinSoundLocationSetting.decode(
+          { soundId },
+          settingsByKey.get(
+            pinyinSoundLocationSetting.entity.marshalKey({
+              soundId,
+            }),
+          ) ?? null,
+        );
         const selectedLocationId = placeSelectionValue?.locationId ?? null;
         const place =
           selectedLocationId == null
@@ -175,10 +174,10 @@ export default function SoundsPage() {
       }
 
       if (isToneSoundId(soundId)) {
-        const toneSetKeyValue = pinyinToneSetKeySetting.decode(
+        const toneSetKeyValue = pinyinSoundLocationSetKeySetting.decode(
           { soundId },
           settingsByKey.get(
-            pinyinToneSetKeySetting.entity.marshalKey({ soundId }),
+            pinyinSoundLocationSetKeySetting.entity.marshalKey({ soundId }),
           ) ?? null,
         );
         const imageValueData = pinyinSoundImageSetting.decode(

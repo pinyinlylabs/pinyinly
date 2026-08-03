@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
-import { buildPronunciationHintRecurringPrompt } from "#util/prompts/pronunciationHintRecurring.js";
+import { buildPronunciationMnemonicRecurringPrompt } from "#util/prompts/pronunciationMnemonicRecurring.js";
 import { fmtChatPromptForSnapshot, makeLocationSpec } from "./helpers";
 
 describe(
-  `buildPronunciationHintRecurringPrompt` satisfies HasNameOf<
-    typeof buildPronunciationHintRecurringPrompt
+  `buildPronunciationMnemonicRecurringPrompt` satisfies HasNameOf<
+    typeof buildPronunciationMnemonicRecurringPrompt
   >,
   () => {
     test(`snapshot`, () => {
-      const prompt = buildPronunciationHintRecurringPrompt({
+      const prompt = buildPronunciationMnemonicRecurringPrompt({
         location: makeLocationSpec(`Gong Cha`),
         set: { name: `dock` },
         actor: {
@@ -162,7 +162,7 @@ describe(
           "model": "gpt-5.4",
           "reasoningEffort": "low",
           "schema": {
-            "name": "pronunciationHintRecurringPromptOutputSchema",
+            "name": "pronunciationMnemonicRecurringPromptOutputSchema",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -177,7 +177,7 @@ describe(
                 "premise",
                 "hook",
               ],
-              "title": "pronunciationHintRecurringPromptOutputSchema",
+              "title": "pronunciationMnemonicRecurringPromptOutputSchema",
               "type": "object",
             },
             "type": "json_schema",

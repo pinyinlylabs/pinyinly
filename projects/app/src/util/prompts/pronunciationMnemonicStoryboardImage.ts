@@ -6,16 +6,16 @@ import type {
   AssetId,
   LocationSetSpec,
   LocationSpec,
-  PronunciationHintMnemonicSpec,
+  PronunciationMnemonicSpec,
 } from "@/data/model";
 
-export function buildPronunciationHintStoryboardImagePrompt(input: {
+export function buildPronunciationMnemonicStoryboardImagePrompt(input: {
   actor: ActorSpec;
   actorModelSheet: AssetId;
   location: LocationSpec;
   locationSet: LocationSetSpec;
   locationSetImage: AssetId;
-  mnemonicSpec: Required<PronunciationHintMnemonicSpec>;
+  mnemonicSpec: Required<PronunciationMnemonicSpec>;
 }): ImagePrompt {
   const userTemplate = `
 You are an animation storyboard artist creating a mnemonic scene.

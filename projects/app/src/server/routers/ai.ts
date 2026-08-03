@@ -20,15 +20,14 @@ import {
   actorPopulateActorSpecEvent,
   locationPopulateLocationEvent,
   locationPopulateLocationSetEvent,
-  pronunciationGenerateHintEvent,
+  populatePronunciationMnemonicSpecEvent,
 } from "@/server/lib/inngest/client";
 import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
 import { buildMeaningHintLogicalPrompt } from "@/util/prompts/meaningHintLogical";
-import { buildPronunciationHintFantasyPrompt } from "@/util/prompts/pronunciationHintFantasy";
-import { buildPronunciationHintRealisticPrompt } from "@/util/prompts/pronunciationHintRealistic";
-import { pronunciationHintRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationHintRecurring";
+import { buildPronunciationMnemonicFantasyPrompt } from "@/util/prompts/pronunciationMnemonicFantasy";
+import { buildPronunciationMnemonicRealisticPrompt } from "@/util/prompts/pronunciationMnemonicRealistic";
 
-const pronunciationHintInputSchema = z
+const pronunciationMnemonicInputSchema = z
   .object({
     leadCharacter: z
       .object({
@@ -52,7 +51,7 @@ const pronunciationHintInputSchema = z
   })
   .strict();
 
-const pronunciationHintOutputSchema = z
+const pronunciationMnemonicOutputSchema = z
   .object({
     suggestions: z
       .array(
@@ -211,12 +210,7 @@ const enqueueActorSpecOutputSchema = z
 
 const enqueuePronunciationRecurringHintInputSchema = z
   .object({
-    actorId: actorIdSchema,
-    locationId: locationIdSchema,
-    setKey: locationSetKeySchema,
     hanziWord: hanziWordSchema,
-    associationStrategy:
-      pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
   })
   .strict();
 
@@ -276,28 +270,24 @@ export const aiRouter = router({
     .output(enqueuePronunciationRecurringHintOutputSchema)
     .mutation(async ({ ctx, input }) => {
       await inngest.send(
-        pronunciationGenerateHintEvent.create({
+        populatePronunciationMnemonicSpecEvent.create({
           userId: ctx.session.userId,
-          actorId: input.actorId,
-          locationId: input.locationId,
-          setKey: input.setKey,
           hanziWord: input.hanziWord,
-          associationStrategy: input.associationStrategy,
         }),
       );
 
       return { enqueued: true };
     }),
 
-  generatePronunciationHints: authedProcedure
-    .input(pronunciationHintInputSchema)
-    .output(pronunciationHintOutputSchema)
+  generatePronunciationMnemonics: authedProcedure
+    .input(pronunciationMnemonicInputSchema)
+    .output(pronunciationMnemonicOutputSchema)
     .mutation(async ({ input, signal }) => {
       const { leadCharacter, location, cue, count } = input;
 
       const strategyPlans = [
-        buildPronunciationHintFantasyPrompt,
-        buildPronunciationHintRealisticPrompt,
+        buildPronunciationMnemonicFantasyPrompt,
+        buildPronunciationMnemonicRealisticPrompt,
       ];
 
       const baseCount = Math.floor(count / strategyPlans.length);
