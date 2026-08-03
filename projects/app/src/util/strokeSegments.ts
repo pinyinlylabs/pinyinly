@@ -1,6 +1,7 @@
 import SVGPathCommander from "svg-path-commander";
 import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
 import { invariant } from "@pinyinly/lib/invariant";
+import { z } from "zod";
 
 export interface SvgPathIntersection {
   x: number;
@@ -49,6 +50,9 @@ interface CubicCurveSegment {
   control2: PathPoint;
   end: PathPoint;
 }
+
+const pointSchema = z.tuple([z.number(), z.number()]).readonly();
+export type StrokeMedianPoint = z.infer<typeof pointSchema>;
 
 function distanceSquared(
   x1: number,

@@ -1,7 +1,7 @@
 import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
-import type { StrokeMedianPoint } from "#util/strokeMedians.ts";
+import type { StrokeMedianPoint } from "#util/strokeSegments.ts";
 import { buildSvgSegmentPaths } from "#util/strokeSegments.ts";
 import {
   existsSync,
