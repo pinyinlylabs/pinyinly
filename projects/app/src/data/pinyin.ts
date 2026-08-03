@@ -334,6 +334,13 @@ export function isFinalSoundId(soundId: PinyinSoundId): boolean {
   return soundId.startsWith(`-`);
 }
 
+export const toneSoundIds = [`1`, `2`, `3`, `4`, `5`] as const;
+export type ToneSoundId = (typeof toneSoundIds)[number] & PinyinSoundId;
+
+export function isToneSoundId(soundId: PinyinSoundId): soundId is ToneSoundId {
+  return toneSoundIds.includes(soundId as (typeof toneSoundIds)[number]);
+}
+
 export function isInitialOrFinalSoundId(soundId: PinyinSoundId): boolean {
   return isInitialSoundId(soundId) || isFinalSoundId(soundId);
 }

@@ -7,10 +7,10 @@ import type {
   AssetId,
   HanziText,
   HanziWord,
-  LocationSetKey,
   PinyinSoundId,
   PinyinUnit,
 } from "@/data/model";
+import { locationSetKeySchema } from "@/data/model";
 import {
   getFinalSoundLabel,
   getInitialSoundLabel,
@@ -18,12 +18,14 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
+  getDefaultLocationSetKeyForToneSoundId,
   pronunciationHintMnemonicSpecSetting,
   pronunciationHintImageSetting,
   pronunciationHintTextSetting,
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameTextSetting,
+  pinyinToneSetKeySetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -135,6 +137,14 @@ export function WikiHanziCharacterPronunciationBox({
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
+  const toneSetKeySetting = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinToneSetKeySetting,
+          key: { soundId: splitPinyin.toneSoundId },
+        },
+  );
   const placeDirectory = usePinyinSoundLocations();
   const actorDirectory = usePinyinSoundActors();
   const initialPinyinSoundName = initialPinyinSound?.value?.text;
@@ -185,18 +195,15 @@ export function WikiHanziCharacterPronunciationBox({
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
 
-  const setKeyByTone: Record<1 | 2 | 3 | 4 | 5, LocationSetKey> = {
-    1: `entrance`,
-    2: `stairway`,
-    3: `basement`,
-    4: `bathroom`,
-    5: `hiddenCloset`,
-  };
-  const tone = splitPinyin?.tone;
+  const parsedToneSetKey = locationSetKeySchema.safeParse(
+    toneSetKeySetting?.value?.setKey,
+  );
   const setKey =
-    tone == null || tone < 1 || tone > 5
+    splitPinyin == null
       ? null
-      : setKeyByTone[tone as 1 | 2 | 3 | 4 | 5];
+      : parsedToneSetKey.success
+        ? parsedToneSetKey.data
+        : getDefaultLocationSetKeyForToneSoundId(splitPinyin.toneSoundId);
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);

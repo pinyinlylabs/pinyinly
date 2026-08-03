@@ -1,11 +1,56 @@
-import { getUserSettingHistoryLimitFromKey } from "@/data/userSettings";
+import {
+  getUserSettingDefaultValue,
+  getUserSettingHistoryLimitFromKey,
+} from "@/data/userSettings";
+import type { UserSetting, UserSettingKeyInput } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
+import type { Drizzle } from "./db";
 import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { and, eq, inArray } from "drizzle-orm";
-import type { Drizzle } from "./db";
 import { nanoid } from "@/util/nanoid";
+import type {
+  RizzleAnyEntity,
+  RizzleEntityInput,
+  RizzleEntityOutput,
+} from "@/util/rizzle";
 
 type UserSettingValue = (typeof schema.userSetting.$inferInsert)[`value`];
+
+type UserSettingReadDb = Pick<Drizzle, `query`>;
+
+export async function getUserSetting<T extends RizzleAnyEntity>(
+  db: UserSettingReadDb,
+  userId: string,
+  userSetting: UserSetting<T>,
+  keyParams: UserSettingKeyInput<T>,
+): Promise<RizzleEntityOutput<T> | null> {
+  const settingKey = userSetting.entity.marshalKey(keyParams);
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(schema.userSetting.key, settingKey),
+    ),
+  });
+
+  const storedValue =
+    setting?.value ?? getUserSettingDefaultValue(userSetting, keyParams);
+
+  if (storedValue == null) {
+    return null;
+  }
+
+  if (setting == null) {
+    return userSetting.decode(
+      keyParams,
+      userSetting.entity.marshalValue({
+        ...(keyParams as Record<string, unknown>),
+        ...storedValue,
+      } as RizzleEntityInput<T>),
+    );
+  }
+
+  return userSetting.decode(keyParams, storedValue);
+}
 
 export async function setUserSetting(
   db: Drizzle,
@@ -67,9 +112,9 @@ export async function setUserSetting(
   });
 
   const staleEntryIds = entries
-    .sort(sortComparatorDate((entry) => entry.createdAt))
+    .sort(sortComparatorDate((entry: { createdAt: Date }) => entry.createdAt))
     .slice(0, Math.max(0, entries.length - historyLimit))
-    .map((entry) => entry.id);
+    .map((entry: { id: string }) => entry.id);
 
   if (staleEntryIds.length > 0) {
     await db

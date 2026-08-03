@@ -5,6 +5,7 @@ import type {
   HanziText,
   LocationId,
   LocationSetKey,
+  PinyinSoundId,
   LocationSpec,
   PinyinText,
   PronunciationHintMnemonicSpec,
@@ -13,6 +14,7 @@ import type {
 } from "@/data/model";
 import {
   actorSpecSchema,
+  locationSetKeySchema,
   locationSpecSchema,
   pronunciationHintMnemonicSpecSchema,
   SrsKind,
@@ -20,8 +22,10 @@ import {
 import {
   actorModelSheetImageSetting,
   actorSpecJsonSetting,
+  getDefaultLocationSetKeyForToneSoundId,
   locationSetIdentityImageSetting,
   locationSpecJsonSetting,
+  pinyinToneSetKeySetting,
   pronunciationHintMnemonicSpecSetting,
   userNameTextSetting,
 } from "@/data/userSettings";
@@ -30,7 +34,7 @@ import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
-import { setUserSetting } from "./userSettings";
+import { getUserSetting, setUserSetting } from "./userSettings";
 
 export async function updateSkillState(
   tx: Drizzle,
@@ -95,19 +99,8 @@ export async function getUserName(
   db: Drizzle,
   userId: string,
 ): Promise<string | null> {
-  const key = {};
-  const setting = await db.query.userSetting.findFirst({
-    where: and(
-      eq(schema.userSetting.userId, userId),
-      eq(schema.userSetting.key, userNameTextSetting.entity.marshalKey(key)),
-    ),
-  });
-
-  if (setting?.value) {
-    const decoded = userNameTextSetting.decode(key, setting.value);
-    return decoded?.text ?? null;
-  }
-  return null;
+  const decoded = await getUserSetting(db, userId, userNameTextSetting, {});
+  return decoded?.text ?? null;
 }
 
 /**
@@ -150,25 +143,11 @@ export async function getPronunciationHintMnemonicSpec(
   hanzi: HanziText,
   pinyin: PinyinText,
 ): Promise<PronunciationHintMnemonicSpec | null> {
-  const key = { hanzi, pinyin };
-
-  const setting = await db.query.userSetting.findFirst({
-    where: and(
-      eq(schema.userSetting.userId, userId),
-      eq(
-        schema.userSetting.key,
-        pronunciationHintMnemonicSpecSetting.entity.marshalKey(key),
-      ),
-    ),
-  });
-
-  if (setting == null) {
-    return null;
-  }
-
-  const decoded = pronunciationHintMnemonicSpecSetting.decode(
-    key,
-    setting.value,
+  const decoded = await getUserSetting(
+    db,
+    userId,
+    pronunciationHintMnemonicSpecSetting,
+    { hanzi, pinyin },
   );
 
   if (decoded == null) {
@@ -185,24 +164,9 @@ export async function getLocationSpec(
   userId: string,
   locationId: LocationId,
 ): Promise<LocationSpec | null> {
-  const key = {
+  const decoded = await getUserSetting(db, userId, locationSpecJsonSetting, {
     locationId: locationId,
-  };
-  const setting = await db.query.userSetting.findFirst({
-    where: and(
-      eq(schema.userSetting.userId, userId),
-      eq(
-        schema.userSetting.key,
-        locationSpecJsonSetting.entity.marshalKey(key),
-      ),
-    ),
   });
-
-  if (setting == null) {
-    return null;
-  }
-
-  const decoded = locationSpecJsonSetting.decode(key, setting.value);
 
   if (decoded == null) {
     return null;
@@ -218,19 +182,9 @@ export async function getActorSpec(
   userId: string,
   actorId: ActorId,
 ): Promise<ActorSpec | null> {
-  const key = { actorId };
-  const setting = await db.query.userSetting.findFirst({
-    where: and(
-      eq(schema.userSetting.userId, userId),
-      eq(schema.userSetting.key, actorSpecJsonSetting.entity.marshalKey(key)),
-    ),
+  const decoded = await getUserSetting(db, userId, actorSpecJsonSetting, {
+    actorId,
   });
-
-  if (setting == null) {
-    return null;
-  }
-
-  const decoded = actorSpecJsonSetting.decode(key, setting.value);
 
   return actorSpecSchema.parse(decoded?.value, {
     reportInput: true,
@@ -242,23 +196,12 @@ export async function getActorModelSheetImage(
   userId: string,
   actorId: ActorId,
 ): Promise<AssetId | null> {
-  const key = { actorId };
-
-  const setting = await db.query.userSetting.findFirst({
-    where: and(
-      eq(schema.userSetting.userId, userId),
-      eq(
-        schema.userSetting.key,
-        actorModelSheetImageSetting.entity.marshalKey(key),
-      ),
-    ),
-  });
-
-  if (setting == null) {
-    return null;
-  }
-
-  const decoded = actorModelSheetImageSetting.decode(key, setting.value);
+  const decoded = await getUserSetting(
+    db,
+    userId,
+    actorModelSheetImageSetting,
+    { actorId },
+  );
 
   return decoded?.imageId ?? null;
 }
@@ -289,25 +232,35 @@ export async function getLocationSetIdentityImage(
   locationId: LocationId,
   setKey: LocationSetKey,
 ): Promise<AssetId | null> {
-  const key = {
-    locationId,
-    setKey,
-  };
-  const setting = await db.query.userSetting.findFirst({
-    where: and(
-      eq(schema.userSetting.userId, userId),
-      eq(
-        schema.userSetting.key,
-        locationSetIdentityImageSetting.entity.marshalKey(key),
-      ),
-    ),
-  });
-
-  if (setting == null) {
-    return null;
-  }
-
-  const decoded = locationSetIdentityImageSetting.decode(key, setting.value);
+  const decoded = await getUserSetting(
+    db,
+    userId,
+    locationSetIdentityImageSetting,
+    { locationId, setKey },
+  );
 
   return decoded?.imageId ?? null;
+}
+
+export async function getToneLocationSetKey(
+  db: Drizzle,
+  userId: string,
+  soundId: PinyinSoundId,
+): Promise<LocationSetKey | null> {
+  const decoded = await getUserSetting(db, userId, pinyinToneSetKeySetting, {
+    soundId,
+  });
+
+  const defaultSetKey = getDefaultLocationSetKeyForToneSoundId(soundId);
+  const setKey = decoded?.setKey;
+  if (setKey == null) {
+    return defaultSetKey;
+  }
+
+  const parsedSetKey = locationSetKeySchema.safeParse(setKey);
+  if (!parsedSetKey.success) {
+    return defaultSetKey;
+  }
+
+  return parsedSetKey.data;
 }

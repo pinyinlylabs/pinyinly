@@ -1,7 +1,14 @@
-import type { AssetId, HanziText, PinyinUnit } from "@/data/model";
+import type {
+  AssetId,
+  HanziText,
+  LocationSetKey,
+  PinyinSoundId,
+  PinyinUnit,
+} from "@/data/model";
 import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupThemes,
+  isToneSoundId,
   normalizePinyinUnitForHintKey,
 } from "@/data/pinyin";
 import {
@@ -303,6 +310,41 @@ export const pinyinSoundMnemonicIdentityJsonSetting = defineUserSetting({
     soundId: rPinyinSoundId().alias(`i`),
     value: r.json().optional().alias(`j`),
   }) satisfies UserSettingJsonEntity,
+});
+
+export const defaultLocationSetKeyByToneSoundId = {
+  "1": `entrance`,
+  "2": `stairway`,
+  "3": `basement`,
+  "4": `bathroom`,
+  "5": `hiddenCloset`,
+} as const satisfies Record<`1` | `2` | `3` | `4` | `5`, LocationSetKey>;
+
+export function getDefaultLocationSetKeyForToneSoundId(
+  soundId: PinyinSoundId,
+): LocationSetKey | null {
+  if (!isToneSoundId(soundId)) {
+    return null;
+  }
+
+  return defaultLocationSetKeyByToneSoundId[
+    soundId as keyof typeof defaultLocationSetKeyByToneSoundId
+  ];
+}
+
+export const pinyinToneSetKeySetting = defineUserSetting({
+  entity: r.entity(`pstsk/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    setKey: r.string().alias(`k`),
+  }),
+  defaultValue: ({ soundId }) => {
+    const defaultSetKey = getDefaultLocationSetKeyForToneSoundId(soundId);
+    if (defaultSetKey == null) {
+      return null;
+    }
+
+    return { setKey: defaultSetKey };
+  },
 });
 
 export const actorNameTextSetting = defineUserSetting({
@@ -640,6 +682,7 @@ export const userSettingDefinitions = [
   pinyinSoundGroupThemeTextSetting,
   pinyinSoundImageSetting,
   pinyinSoundMnemonicIdentityJsonSetting,
+  pinyinToneSetKeySetting,
   locationSetIdentityImageSetting,
   locationSetNameTextSetting,
   pinyinSoundNameTextSetting,

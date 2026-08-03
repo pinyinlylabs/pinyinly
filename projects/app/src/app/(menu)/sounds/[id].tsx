@@ -24,8 +24,10 @@ import { useDb } from "@/client/ui/hooks/useDb";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
-import type { PinyinSoundId } from "@/data/model";
+import type { LocationSetKey, PinyinSoundId } from "@/data/model";
+import { locationSetKeys, locationSetKeySchema } from "@/data/model";
 import {
+  isToneSoundId,
   defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
@@ -35,9 +37,11 @@ import {
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
+  getDefaultLocationSetKeyForToneSoundId,
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundGroupNameTextSetting,
   pinyinSoundNameTextSetting,
+  pinyinToneSetKeySetting,
 } from "@/data/userSettings";
 import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -75,8 +79,25 @@ export default function SoundIdPage() {
   const { id: rawId } = useLocalSearchParams<`/sounds/[id]`>();
   const id = rawId as PinyinSoundId;
   const chart = loadPylyPinyinChart();
+  const isToneSound = isToneSoundId(id);
   const isFinalSound = isFinalSoundId(id);
   const placeDirectory = usePinyinSoundLocations();
+  const toneSetKeySetting = useUserSetting(
+    isToneSound
+      ? {
+          setting: pinyinToneSetKeySetting,
+          key: { soundId: id },
+        }
+      : null,
+  );
+  const decodedToneSetKey = locationSetKeySchema.safeParse(
+    toneSetKeySetting?.value?.setKey,
+  );
+  const selectedToneSetKey =
+    decodedToneSetKey.success && isToneSound
+      ? decodedToneSetKey.data
+      : getDefaultLocationSetKeyForToneSoundId(id);
+  const hasCustomToneSetKey = toneSetKeySetting?.value != null;
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
@@ -187,6 +208,23 @@ export default function SoundIdPage() {
         </WikiTitledBox>
 
         <MnemonicStoryRoleSection pinyinSoundId={id} />
+
+        {isToneSound && selectedToneSetKey != null ? (
+          <ToneSetKeySection
+            soundId={id}
+            selectedSetKey={selectedToneSetKey}
+            hasCustomValue={hasCustomToneSetKey}
+            onSelectSetKey={(setKey) => {
+              toneSetKeySetting?.setValue({
+                soundId: id,
+                setKey,
+              });
+            }}
+            onReset={() => {
+              toneSetKeySetting?.setValue(null);
+            }}
+          />
+        ) : null}
 
         {isFinalSound && <PinyinFinalToneEditor finalSoundId={id} />}
       </View>
@@ -730,6 +768,60 @@ function SiblingSoundMenu({
         </DropdownMenu.Item>
       ))}
     </DropdownMenu.Content>
+  );
+}
+
+function ToneSetKeySection({
+  soundId,
+  selectedSetKey,
+  hasCustomValue,
+  onSelectSetKey,
+  onReset,
+}: {
+  soundId: PinyinSoundId;
+  selectedSetKey: LocationSetKey;
+  hasCustomValue: boolean;
+  onSelectSetKey: (setKey: LocationSetKey) => void;
+  onReset: () => void;
+}) {
+  return (
+    <WikiTitledBox title="Tone location set key">
+      <View className="gap-3 p-4">
+        <Text className="pyly-body text-fg-dim">
+          Tone {soundId} uses the{` `}
+          <Text className="pyly-bold">{selectedSetKey}</Text>
+          {` `}
+          set for pronunciation mnemonics.
+        </Text>
+
+        <View className="flex-row flex-wrap gap-2">
+          {locationSetKeys.map((setKey) => {
+            const isActive = setKey === selectedSetKey;
+            return (
+              <RectButton
+                key={setKey}
+                variant={isActive ? `filled` : `option`}
+                onPress={() => {
+                  onSelectSetKey(setKey);
+                }}
+              >
+                {setKey}
+              </RectButton>
+            );
+          })}
+        </View>
+
+        {hasCustomValue ? (
+          <RectButton variant="bareDim" onPress={onReset}>
+            Reset to default
+          </RectButton>
+        ) : (
+          <Text className="pyly-body-caption text-fg-dim">
+            Using default mapping.
+          </Text>
+        )}
+      </View>
+    </WikiTitledBox>
   );
 }
 

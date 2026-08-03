@@ -11,7 +11,6 @@ import {
   pronunciationGenerateHintStoryboardPanelsEvent,
   pronunciationGenerateHintEvent as pronunciationGenerateRecurringHintEvent,
 } from "./client";
-import type { PinyinSoundId } from "@/data/model";
 import { splitPinyinUnitOrThrow } from "@/data/pinyin";
 import {
   getActorModelSheetImage,
@@ -19,6 +18,7 @@ import {
   getLocationSetIdentityImage,
   getLocationSpec,
   getPronunciationHintMnemonicSpec,
+  getToneLocationSetKey,
 } from "@/server/lib/query";
 import { buildPronunciationHintRecurringPrompt } from "@/util/prompts/pronunciationHintRecurring";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -67,9 +67,18 @@ export const generatePronunciationRecurringHint = inngest.createFunction(
     );
 
     const splitPinyin = splitPinyinUnitOrThrow(pinyinUnit);
+    const configuredSetKey = await withDrizzle(async (db) => {
+      return getToneLocationSetKey(db, userId, splitPinyin.toneSoundId);
+    });
+
     invariant(
-      splitPinyin.toneSoundId === (setKeyToToneSoundId[setKey] ?? null),
-      `Set key ${setKey} does not match tone ${splitPinyin.toneSoundId} for ${hanziWord}`,
+      configuredSetKey != null,
+      `No configured set key found for tone ${splitPinyin.toneSoundId}`,
+    );
+
+    invariant(
+      setKey === configuredSetKey,
+      `Set key ${setKey} does not match configured tone set key ${configuredSetKey} for tone ${splitPinyin.toneSoundId} (${hanziWord})`,
     );
 
     const cueTerms = normalizeTerms(meaning.gloss);
@@ -311,11 +320,3 @@ export const functions = [
   generatePronunciationHintStoryboardPanels,
   generatePronunciationHintStoryboardImage,
 ] as const;
-
-const setKeyToToneSoundId: Record<string, PinyinSoundId> = {
-  entrance: `1` as PinyinSoundId,
-  stairway: `2` as PinyinSoundId,
-  basement: `3` as PinyinSoundId,
-  bathroom: `4` as PinyinSoundId,
-  hiddenCloset: `5` as PinyinSoundId,
-};
