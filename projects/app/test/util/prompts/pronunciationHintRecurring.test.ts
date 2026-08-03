@@ -136,9 +136,9 @@ describe(
 
         A good premise should be simple enough that someone immediately understands the gag.
 
-        Everything else in the output should merely illustrate this interation.
+        Everything else in the output should merely illustrate this interaction.
 
-        Mention the cue at least once, wrapped in '==...=='.
+        Mention the cue at least once.
 
         ---
 
@@ -148,7 +148,7 @@ describe(
 
         Compress the premise into a single memorable sentence.
 
-        Mention the cue at least once, wrapped in '==...=='.
+        Mention the cue at least once.
 
         Only mention the location or set if it genuinely helps distinguish this mnemonic from another one.
 

@@ -6,6 +6,7 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type {
   AssetId,
   HanziText,
+  HanziWord,
   LocationSetKey,
   PinyinSoundId,
   PinyinUnit,
@@ -48,6 +49,7 @@ import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
+import { hanziFromHanziWord } from "@/dictionary";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -91,24 +93,22 @@ export function WikiHanziCharacterPronunciation({
   return (
     <WikiHanziCharacterPronunciationBox
       gloss={gloss}
-      glosses={firstMeaning.gloss}
-      hanzi={hanzi}
+      hanziWord={firstMeaning.hanziWord}
       pinyinUnit={pronunciation.pinyinUnit}
     />
   );
 }
 
 export function WikiHanziCharacterPronunciationBox({
-  hanzi,
+  hanziWord,
   pinyinUnit,
   gloss,
-  glosses,
 }: {
   gloss: DictionarySearchEntry[`gloss`][number];
-  glosses: DictionarySearchEntry[`gloss`];
-  hanzi: HanziText;
+  hanziWord: HanziWord;
   pinyinUnit: PinyinUnit;
 }) {
+  const hanzi = hanziFromHanziWord(hanziWord);
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
   const initialPinyinSound = useUserSetting(
@@ -200,17 +200,10 @@ export function WikiHanziCharacterPronunciationBox({
     tone == null || tone < 1 || tone > 5
       ? null
       : setKeyByTone[tone as 1 | 2 | 3 | 4 | 5];
-  const trimmedGlosses = glosses
-    .map((entry) => entry.trim())
-    .filter((entry) => entry.length > 0);
-  const cueLabel = gloss.trim();
-  const cueMeaning =
-    trimmedGlosses.length === 0 ? null : trimmedGlosses.join(`; `);
   const canEnqueueRecurringHint =
     selectedInitialActorId != null &&
     selectedFinalLocationId != null &&
-    setKey != null &&
-    cueLabel.length > 0;
+    setKey != null;
   const enqueueBlockedReason =
     selectedInitialActorId == null
       ? `Select an initial actor first.`
@@ -218,9 +211,7 @@ export function WikiHanziCharacterPronunciationBox({
         ? `Select a final location first.`
         : setKey == null
           ? `Unable to map tone to set key.`
-          : cueLabel.length === 0
-            ? `Cue label is empty.`
-            : null;
+          : null;
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
@@ -394,10 +385,7 @@ export function WikiHanziCharacterPronunciationBox({
                       actorId: selectedInitialActorId,
                       locationId: selectedFinalLocationId,
                       setKey,
-                      cue: {
-                        label: cueLabel,
-                        ...(cueMeaning == null ? {} : { meaning: cueMeaning }),
-                      },
+                      hanziWord,
                     })
                     .then(() => {
                       setEnqueueResultMessage(

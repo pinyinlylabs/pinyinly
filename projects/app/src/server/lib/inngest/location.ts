@@ -31,6 +31,7 @@ import { withDrizzle } from "@/server/lib/db";
 import {
   inngest,
   locationPopulateLocationEvent,
+  locationPopulateLocationSetEvent,
   locationPopulateLocationSoundThoughtChainEvent,
   locationPopulateLocationSetDescriptionEvent,
   locationPopulateLocationSetIdentityImageEvent,
@@ -99,46 +100,25 @@ const populateLocation = inngest.createFunction(
 
     const deprecatedSetKeys = [`arrival`, `heart`, `below`, `ascent`, `summit`];
 
-    for (const setKey of locationSetKeySchema.options) {
+    for (const setKey of locationSetKeySchema.options.filter(
+      (key) => !deprecatedSetKeys.includes(key),
+    )) {
       if (deprecatedSetKeys.includes(setKey)) {
         // Don't waste time generating deprecated sets
         continue;
       }
 
-      await step.invoke(`populate location set spec (${setKey})`, {
-        function: populateLocationSetSpec,
-        data: {
-          locationId,
-          userId,
-          setKey,
-        },
-      });
-
       await step.sendEvent(
-        `emit image set populate description for ${setKey}`,
-        locationPopulateLocationSetDescriptionEvent.create({
-          locationId,
-          userId,
-          setKey,
-        }),
-      );
-
-      await step.sendEvent(
-        `emit image set populate name for ${setKey}`,
-        locationPopulateLocationSetNameEvent.create({
-          locationId,
-          userId,
-          setKey,
-        }),
-      );
-
-      await step.sendEvent(
-        `emit image set populate identity image for ${setKey}`,
-        locationPopulateLocationSetIdentityImageEvent.create({
-          locationId,
-          userId,
-          setKey,
-        }),
+        `emit population-location-set events`,
+        locationSetKeySchema.options
+          .filter((key) => !deprecatedSetKeys.includes(key))
+          .map((setKey) =>
+            locationPopulateLocationSetEvent.create({
+              locationId,
+              setKey,
+              userId,
+            }),
+          ),
       );
     }
 
@@ -273,6 +253,47 @@ const populateLocation = inngest.createFunction(
         }),
       );
     }
+  },
+);
+
+const populateLocationSet = inngest.createFunction(
+  {
+    id: `location/populateLocationSet`,
+    singleton: {
+      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.setKey`,
+      mode: `skip`,
+    },
+    triggers: locationPopulateLocationSetEvent,
+  },
+  async ({ event, step }): Promise<void> => {
+    const { userId, locationId, setKey } = event.data;
+
+    await step.invoke(`populate location set spec`, {
+      function: populateLocationSetSpec,
+      data: {
+        locationId,
+        userId,
+        setKey,
+      },
+    });
+
+    await step.sendEvent(`emit events to populate other fields`, [
+      locationPopulateLocationSetDescriptionEvent.create({
+        locationId,
+        userId,
+        setKey,
+      }),
+      locationPopulateLocationSetNameEvent.create({
+        locationId,
+        userId,
+        setKey,
+      }),
+      locationPopulateLocationSetIdentityImageEvent.create({
+        locationId,
+        userId,
+        setKey,
+      }),
+    ]);
   },
 );
 
@@ -899,6 +920,7 @@ export const functions = [
   generateLocationSpec,
   generateLocationSetSpec,
   populateLocation,
+  populateLocationSet,
   populateLocationSoundThoughtChain,
   populateLocationSetDescription,
   populateLocationSetIdentityImage,

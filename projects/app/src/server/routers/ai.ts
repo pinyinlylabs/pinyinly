@@ -1,6 +1,7 @@
 import {
   actorIdSchema,
   assetIdSchema,
+  hanziWordSchema,
   locationIdSchema,
   locationSetKeySchema,
 } from "@/data/model";
@@ -18,6 +19,7 @@ import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import {
   actorPopulateActorSpecEvent,
   locationPopulateLocationEvent,
+  locationPopulateLocationSetEvent,
   pronunciationGenerateHintEvent,
 } from "@/server/lib/inngest/client";
 import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
@@ -181,6 +183,19 @@ const enqueueLocationSetIdentityImagesOutputSchema = z
   })
   .strict();
 
+const enqueueLocationSetInputSchema = z
+  .object({
+    locationId: locationIdSchema,
+    setKey: locationSetKeySchema,
+  })
+  .strict();
+
+const enqueueLocationSetOutputSchema = z
+  .object({
+    enqueued: z.literal(true),
+  })
+  .strict();
+
 const enqueueActorSpecInputSchema = z
   .object({
     actorId: actorIdSchema,
@@ -199,12 +214,7 @@ const enqueuePronunciationRecurringHintInputSchema = z
     actorId: actorIdSchema,
     locationId: locationIdSchema,
     setKey: locationSetKeySchema,
-    cue: z
-      .object({
-        label: z.string(),
-        meaning: z.string().optional(),
-      })
-      .strict(),
+    hanziWord: hanziWordSchema,
     associationStrategy:
       pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
   })
@@ -217,6 +227,21 @@ const enqueuePronunciationRecurringHintOutputSchema = z
   .strict();
 
 export const aiRouter = router({
+  enqueueLocationSet: authedProcedure
+    .input(enqueueLocationSetInputSchema)
+    .output(enqueueLocationSetOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      await inngest.send(
+        locationPopulateLocationSetEvent.create({
+          userId: ctx.session.userId,
+          locationId: input.locationId,
+          setKey: input.setKey,
+        }),
+      );
+
+      return { enqueued: true };
+    }),
+
   enqueueLocationSetIdentityImages: authedProcedure
     .input(enqueueLocationSetIdentityImagesInputSchema)
     .output(enqueueLocationSetIdentityImagesOutputSchema)
@@ -256,7 +281,7 @@ export const aiRouter = router({
           actorId: input.actorId,
           locationId: input.locationId,
           setKey: input.setKey,
-          cue: input.cue,
+          hanziWord: input.hanziWord,
           associationStrategy: input.associationStrategy,
         }),
       );

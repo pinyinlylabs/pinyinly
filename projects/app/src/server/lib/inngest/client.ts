@@ -4,15 +4,13 @@ import pretty from "pino-pretty";
 import {
   actorIdSchema,
   assetIdSchema,
+  hanziWordSchema,
   locationSetKeySchema,
   locationIdSchema,
   pinyinSoundIdSchema,
 } from "@/data/model";
 import { z } from "zod";
-import {
-  pronunciationHintRecurringPromptAssociationStrategyKindSchema,
-  pronunciationHintRecurringPromptCueSchema,
-} from "@/util/prompts/pronunciationHintRecurring";
+import { pronunciationHintRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationHintRecurring";
 
 declare global {
   var __pylyPino: pino.Logger | undefined;
@@ -130,6 +128,17 @@ export const locationPopulateLocationSetSpecEvent = eventType(
   },
 );
 
+export const locationPopulateLocationSetEvent = eventType(
+  `location/populate-location-set`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+    }),
+  },
+);
+
 export const locationPopulateLocationEvent = eventType(
   `location/populate-location`,
   {
@@ -170,7 +179,7 @@ export const pronunciationGenerateHintEvent = eventType(
       locationId: locationIdSchema,
       actorId: actorIdSchema,
       setKey: locationSetKeySchema,
-      cue: pronunciationHintRecurringPromptCueSchema,
+      hanziWord: hanziWordSchema,
       associationStrategy:
         pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
     }),

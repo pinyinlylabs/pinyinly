@@ -19,12 +19,19 @@ import {
   locationThoughtChainsJsonSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 export default function LocationIdPage() {
   const { id: rawId } = useLocalSearchParams<`/locations/[id]`>();
   const locationId = (Array.isArray(rawId) ? rawId[0] : rawId) as LocationId;
+  const [pendingSetKey, setPendingSetKey] = useState<string | null>(null);
   const placeDirectory = usePinyinSoundLocations();
+  const enqueueLocationSetMutation = trpc.ai.enqueueLocationSet.useMutation({
+    onSettled: () => {
+      setPendingSetKey(null);
+    },
+  });
   const generateLocationSetIdentityImagesMutation =
     trpc.ai.enqueueLocationSetIdentityImages.useMutation();
 
@@ -103,6 +110,31 @@ export default function LocationIdPage() {
                   textClassName="pyly-body text-fg/80"
                   multiline
                 />
+
+                <View className="mt-3">
+                  <Pressable
+                    disabled={enqueueLocationSetMutation.isPending}
+                    onPress={() => {
+                      setPendingSetKey(setKey);
+                      enqueueLocationSetMutation.mutate({
+                        locationId,
+                        setKey,
+                      });
+                    }}
+                    className="
+                      items-center self-start rounded-xl border border-fg/10 bg-fg px-4 py-3
+
+                      disabled:opacity-40
+                    "
+                  >
+                    <Text className="pyly-body text-bg">
+                      {enqueueLocationSetMutation.isPending &&
+                      pendingSetKey === setKey
+                        ? `Generating set...`
+                        : `Generate set`}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             </WikiTitledBox>
           );
@@ -132,8 +164,8 @@ export default function LocationIdPage() {
           >
             <Text className="pyly-body text-bg">
               {generateLocationSetIdentityImagesMutation.isPending
-                ? `Generating set images...`
-                : `Generate set images`}
+                ? `Generating all sets...`
+                : `Generate all sets`}
             </Text>
           </Pressable>
         </View>
