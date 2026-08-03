@@ -1,19 +1,25 @@
 import type { HskLevel } from "@/data/model";
 import { Lozenge } from "./Lozenge";
 import type { LozengeColor } from "./Lozenge";
+import { Text } from "react-native";
 
 export function HskLozenge({
   hskLevel,
   size = `md`,
+  color,
 }: {
   hskLevel: HskLevel;
   size?: `sm` | `md`;
+  color?: LozengeColor;
 }) {
+  color ??= hskLevelToColor[hskLevel];
+
   return (
-    <Lozenge
-      color={hskLevelToColor[hskLevel]}
-      size={size}
-    >{`HSK${hskLevel}`}</Lozenge>
+    <Lozenge color={color} size={size}>
+      <Text className={size == `sm` ? `opacity-80` : undefined}>HSK</Text>
+      {` `}
+      {hskLevel}
+    </Lozenge>
   );
 }
 
