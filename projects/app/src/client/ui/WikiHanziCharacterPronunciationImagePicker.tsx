@@ -18,7 +18,7 @@ import {
   locationIdentityImageSetting,
   pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { useHanziPronunciationMnemonic } from "./hooks/useHanziPronunciationMnemonic";
@@ -144,13 +144,6 @@ export function WikiHanziCharacterPronunciationImagePicker({
 
   return (
     <View className="gap-2 pt-2">
-      <View className="gap-1">
-        <Text className="pyly-body-subheading">Choose an image</Text>
-        <Text className="font-sans text-[14px] text-fg-dim">
-          Pick the image that should appear on the wiki page
-        </Text>
-      </View>
-
       <InlineEditableSettingImage
         setting={pronunciationMnemonicImageSetting}
         settingKey={hintSettingKey}
