@@ -8,7 +8,6 @@ import { withDrizzle } from "@/server/lib/db";
 import * as s from "@/server/pgSchema";
 import { setUserSetting } from "@/server/lib/userSettings";
 import { buildActorSpecPrompt } from "@/util/prompts/actorSpec";
-import { nanoid } from "@/util/nanoid";
 import { actorPopulateActorSpecEvent, inngest } from "./client";
 import { step } from "inngest";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
@@ -18,6 +17,7 @@ import { actorSpecSchema } from "@/data/model";
 import type { ActorSpec } from "@/data/model";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { buildActorIdentityImagePrompt } from "@/util/prompts/actorIdentityImage";
+import { getActorModelSheetImage } from "@/server/lib/query";
 
 export const populateActor = inngest.createFunction(
   {
@@ -72,9 +72,6 @@ export const populateActor = inngest.createFunction(
             actorId,
             value: actorSpec,
           }),
-          now: new Date(),
-          skipHistory: false,
-          historyId: nanoid(),
         });
       });
     }
@@ -83,26 +80,7 @@ export const populateActor = inngest.createFunction(
       `read current model sheet`,
       async () =>
         withDrizzle(async (db) => {
-          const setting = await db.query.userSetting.findFirst({
-            where: and(
-              eq(s.userSetting.userId, userId),
-              eq(
-                s.userSetting.key,
-                actorModelSheetImageSetting.entity.marshalKey({ actorId }),
-              ),
-            ),
-          });
-
-          if (setting == null) {
-            return null;
-          }
-
-          const decoded = actorModelSheetImageSetting.decode(
-            { actorId },
-            setting.value,
-          );
-
-          return decoded?.imageId ?? null;
+          return getActorModelSheetImage(db, userId, actorId);
         }),
     );
 
@@ -122,9 +100,6 @@ export const populateActor = inngest.createFunction(
               actorId: actorId,
               imageId: nonNullable(modelSheetAssetId),
             }),
-            now: new Date(),
-            skipHistory: false,
-            historyId: nanoid(),
           });
         }),
       );
@@ -175,9 +150,6 @@ export const populateActor = inngest.createFunction(
               actorId: actorId,
               imageId: nonNullable(identityImageAssetId),
             }),
-            now: new Date(),
-            skipHistory: false,
-            historyId: nanoid(),
           });
         }),
       );

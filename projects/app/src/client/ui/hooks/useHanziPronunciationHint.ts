@@ -2,8 +2,8 @@ import { composeHintText, parseHintText } from "@/client/ui/hintText";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import {
   getHanziPronunciationHintKeyParams,
-  hanziPronunciationHintExplanationSetting,
-  hanziPronunciationHintTextSetting,
+  pronunciationHintExplanationSetting,
+  pronunciationHintTextSetting,
 } from "@/data/userSettings";
 import { useEffect } from "react";
 import { useUserSetting } from "./useUserSetting";
@@ -37,11 +37,11 @@ export function useHanziPronunciationHint(
 ): HanziPronunciationHintState {
   const settingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
   const hintSetting = useUserSetting({
-    setting: hanziPronunciationHintTextSetting,
+    setting: pronunciationHintTextSetting,
     key: settingKey,
   });
   const explanationSetting = useUserSetting({
-    setting: hanziPronunciationHintExplanationSetting,
+    setting: pronunciationHintExplanationSetting,
     key: settingKey,
   });
 

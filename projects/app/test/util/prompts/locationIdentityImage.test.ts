@@ -96,7 +96,7 @@ describe(
         The goal is to create the single image that people will forever associate with this location.
 
         <input>
-        {"locationSpec":{"location":"Aircraft hangar","sets":{"arrival":{"name":"dock"},"heart":{"name":"captain's cabin"},"below":{"name":"cargo hold"},"ascent":{"name":"stairs"},"summit":{"name":"crow's nest"}}}}
+        {"locationSpec":{"location":"Aircraft hangar"}}
         </input>
         =====================
         ",

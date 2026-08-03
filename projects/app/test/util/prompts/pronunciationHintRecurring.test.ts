@@ -3,7 +3,7 @@ import { buildPronunciationHintRecurringPrompt } from "#util/prompts/pronunciati
 import { fmtChatPromptForSnapshot, makeLocationSpec } from "./helpers";
 
 describe(
-  `buildPronunciationHintRealisticPrompt` satisfies HasNameOf<
+  `buildPronunciationHintRecurringPrompt` satisfies HasNameOf<
     typeof buildPronunciationHintRecurringPrompt
   >,
   () => {

@@ -11,8 +11,8 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  hanziPronunciationHintImagePromptSetting,
-  hanziPronunciationHintImageSetting,
+  pronunciationHintImagePromptSetting,
+  pronunciationHintImageSetting,
   pinyinFinalSoundLocationSelectionSetting,
   actorIdentityImageSetting,
   locationIdentityImageSetting,
@@ -40,7 +40,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const imagePromptSetting = useUserSetting({
-    setting: hanziPronunciationHintImagePromptSetting,
+    setting: pronunciationHintImagePromptSetting,
     key: hintSettingKey,
   });
 
@@ -149,7 +149,7 @@ export function WikiHanziCharacterPronunciationImagePicker({
       </View>
 
       <InlineEditableSettingImage
-        setting={hanziPronunciationHintImageSetting}
+        setting={pronunciationHintImageSetting}
         settingKey={hintSettingKey}
         previewHeight={200}
         tileSize={64}

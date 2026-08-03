@@ -3,7 +3,7 @@ import {
   encodeUserSettingStoredValue,
   getUserSettingKeyInfo,
   getImageSettingKeyPatterns,
-  hanziPronunciationHintImageSetting,
+  pronunciationHintImageSetting,
   hanziWordMeaningHintImageSetting,
   imageSettingDefs,
   pinyinFinalSoundLocationSelectionSetting,
@@ -45,7 +45,7 @@ describe(`imageSettings` satisfies HasNameOf<typeof imageSettingDefs>, () => {
         locationSetIdentityImageSetting,
         pinyinSoundImageSetting,
         hanziWordMeaningHintImageSetting,
-        hanziPronunciationHintImageSetting,
+        pronunciationHintImageSetting,
       ]),
     );
   });

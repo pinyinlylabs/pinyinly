@@ -478,7 +478,7 @@ export function getUserWikiCharacterDecompositionKeyParams(hanzi: HanziText) {
   return { hanzi };
 }
 
-export const hanziPronunciationHintTextSetting = defineUserSetting({
+export const pronunciationHintTextSetting = defineUserSetting({
   entity: r.entity(`hpht/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -486,7 +486,7 @@ export const hanziPronunciationHintTextSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
-export const hanziPronunciationHintExplanationSetting = defineUserSetting({
+export const pronunciationHintExplanationSetting = defineUserSetting({
   entity: r.entity(`hphe/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -494,7 +494,7 @@ export const hanziPronunciationHintExplanationSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
-export const hanziPronunciationHintImageSetting = defineUserSetting({
+export const pronunciationHintImageSetting = defineUserSetting({
   entity: r.entity(`hphi/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -502,7 +502,7 @@ export const hanziPronunciationHintImageSetting = defineUserSetting({
   }) satisfies UserSettingImageEntity,
 });
 
-export const hanziPronunciationHintImagePromptSetting = defineUserSetting({
+export const pronunciationHintImagePromptSetting = defineUserSetting({
   entity: r.entity(`hphip/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -510,7 +510,7 @@ export const hanziPronunciationHintImagePromptSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
-export const hanziPronunciationHintMnemonicSpecSetting = defineUserSetting({
+export const pronunciationHintMnemonicSpecSetting = defineUserSetting({
   entity: r.entity(`hphms/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -600,7 +600,7 @@ export const imageSettingDefs = [
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   hanziWordMeaningHintImageSetting,
-  hanziPronunciationHintImageSetting,
+  pronunciationHintImageSetting,
 ] as const satisfies readonly UserSetting[];
 
 export const userHanziMeaningDefs = [
@@ -614,10 +614,10 @@ export const userSettingDefinitions = [
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
   pinyinFinalSoundLocationSelectionSetting,
-  hanziPronunciationHintExplanationSetting,
-  hanziPronunciationHintImagePromptSetting,
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
+  pronunciationHintExplanationSetting,
+  pronunciationHintImagePromptSetting,
+  pronunciationHintImageSetting,
+  pronunciationHintTextSetting,
   hanziWordMeaningHintCaptionSetting,
   hanziWordMeaningHintExplanationTextSetting,
   hanziWordMeaningHintImagePromptSetting,

@@ -38,7 +38,7 @@ export const replicachePush = inngest.createFunction(
     singleton: { mode: `skip` },
     triggers: [
       // Sync every 5 minutes
-      { cron: `* * * * *` },
+      { cron: `*/5 * * * *` },
       invoke(z.object({})),
     ],
   },

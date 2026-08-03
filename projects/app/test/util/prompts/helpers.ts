@@ -1,4 +1,9 @@
-import type { ActorSpec, LocationSpec } from "#data/model.js";
+import type {
+  ActorSpec,
+  LocationSetKey,
+  LocationSetSpec,
+  LocationSpec,
+} from "#data/model.js";
 import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
@@ -211,23 +216,6 @@ function formatJsonSchemaPath(path: readonly (number | string)[]): string {
 export function makeLocationSpec(location: string): LocationSpec {
   return {
     location,
-    sets: {
-      arrival: {
-        name: `dock`,
-      },
-      heart: {
-        name: `captain's cabin`,
-      },
-      below: {
-        name: `cargo hold`,
-      },
-      ascent: {
-        name: `stairs`,
-      },
-      summit: {
-        name: `crow's nest`,
-      },
-    },
   };
 }
 
@@ -239,37 +227,22 @@ export function makeLocationSpecWithDetail(
     recognitionHooks: [`mast`, `bow`, `anchor`],
     designRules: [`Keep the hull dominant in the composition.`],
     sets: {
-      arrival: {
-        name: `dock`,
-        props: [],
-        designRules: [`Show the gangplank and mooring ropes.`],
-        canonicalFraming: `View from the dock looking toward the deck entrance.`,
-      },
-      heart: {
-        name: `captain's cabin`,
-        props: [`Desk with a map on it`],
-        designRules: [`Show the richest interior detail.`],
-        canonicalFraming: `View from the doorway looking toward the captain's chair and desk.`,
-      },
-      below: {
-        name: `cargo hold`,
-        props: [`Barrels`],
-        designRules: [`Show stacked crates and a low ceiling.`],
-        canonicalFraming: `View from knee height looking into the lower hold.`,
-      },
-      ascent: {
-        name: `stairs`,
-        props: [`Handrail`],
-        designRules: [`Show the climb upward along the mast.`],
-        canonicalFraming: `View from below looking up the rigging and steps.`,
-      },
-      summit: {
-        name: `crow's nest`,
-        props: [`Binoculars`],
-        designRules: [`Show the tiny lookout at the top of the mast.`],
-        canonicalFraming: `View from the deck looking up to the lookout platform.`,
-      },
+      arrival: makeLocationSetSpec(`arrival`),
+      heart: makeLocationSetSpec(`heart`),
+      below: makeLocationSetSpec(`below`),
+      ascent: makeLocationSetSpec(`ascent`),
+      summit: makeLocationSetSpec(`summit`),
     },
+  };
+}
+
+export function makeLocationSetSpec(set: LocationSetKey): LocationSetSpec {
+  return {
+    set,
+    name: `${set} name`,
+    props: [`${set} prop`],
+    designRules: [`${set} design rule`],
+    canonicalFraming: `${set} canonical framing`,
   };
 }
 

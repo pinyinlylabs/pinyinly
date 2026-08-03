@@ -98,7 +98,7 @@ describe(`buildLocationSpecEvaluatePrompt`, () => {
       Evaluate the following location specification.
 
       <data>
-      {"location":"Pirate ship","locationSpec":{"location":"Pirate ship","sets":{"arrival":{"name":"dock"},"heart":{"name":"captain's cabin"},"below":{"name":"cargo hold"},"ascent":{"name":"stairs"},"summit":{"name":"crow's nest"}}}}
+      {"location":"Pirate ship","locationSpec":{"location":"Pirate ship"}}
       </data>
       =====================
       ",

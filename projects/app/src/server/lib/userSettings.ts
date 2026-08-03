@@ -3,6 +3,7 @@ import * as schema from "@/server/pgSchema";
 import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { and, eq, inArray } from "drizzle-orm";
 import type { Drizzle } from "./db";
+import { nanoid } from "@/util/nanoid";
 
 type UserSettingValue = (typeof schema.userSetting.$inferInsert)[`value`];
 
@@ -18,11 +19,13 @@ export async function setUserSetting(
   }: {
     key: string;
     value: UserSettingValue;
-    now: Date;
+    now?: Date;
     skipHistory?: boolean;
     historyId?: string;
   },
 ): Promise<void> {
+  now ??= new Date();
+
   const updatedAt = now;
   const createdAt = now;
 
@@ -34,9 +37,11 @@ export async function setUserSetting(
       set: { value, updatedAt },
     });
 
-  if (skipHistory === true || historyId == null) {
+  if (skipHistory === true) {
     return;
   }
+
+  historyId ??= nanoid();
 
   await db.insert(schema.userSettingHistory).values([
     {

@@ -155,6 +155,18 @@ export const locationSpecSchema = z
 
 export type LocationSpec = z.infer<typeof locationSpecSchema>;
 
+export const pronunciationHintMnemonicSpecSchema = z
+  .object({
+    hook: z.string().optional(),
+    premise: z.string().optional(),
+    beats: z.array(z.string()).optional(),
+  })
+  .loose();
+
+export type PronunciationHintMnemonicSpec = z.infer<
+  typeof pronunciationHintMnemonicSpecSchema
+>;
+
 /**
  * Persisted actor specification schema.
  *

@@ -18,9 +18,9 @@ import {
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  hanziPronunciationHintMnemonicSpecSetting,
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
+  pronunciationHintMnemonicSpecSetting,
+  pronunciationHintImageSetting,
+  pronunciationHintTextSetting,
   pinyinFinalSoundLocationSelectionSetting,
   pinyinSoundImageSetting,
   pinyinSoundNameTextSetting,
@@ -166,7 +166,7 @@ export function WikiHanziCharacterPronunciationBox({
   const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
   const hintSettingKey = pronunciationHint.settingKey;
   const hintImageSetting = useUserSetting({
-    setting: hanziPronunciationHintImageSetting,
+    setting: pronunciationHintImageSetting,
     key: hintSettingKey,
   });
   const [isEditMode, setIsEditMode] = useState(false);
@@ -296,12 +296,12 @@ export function WikiHanziCharacterPronunciationBox({
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
-        <View className="gap-4 bg-black/10 pt-4">
+        <View className="bg-black/10">
           {isHintSectionVisible ? (
-            <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
+            <View className={`px-7 py-4`}>
               <InlineEditableSettingText
                 readonly={!isEditMode}
-                setting={hanziPronunciationHintTextSetting}
+                setting={pronunciationHintTextSetting}
                 settingKey={hintSettingKey}
                 placeholder="Add a hint on the first line. Add details after a blank line."
                 multiline
@@ -341,7 +341,7 @@ export function WikiHanziCharacterPronunciationBox({
             ) : hintImage?.imageId == null ? null : (
               <InlineEditableSettingImage
                 readonly
-                setting={hanziPronunciationHintImageSetting}
+                setting={pronunciationHintImageSetting}
                 settingKey={hintSettingKey}
                 previewHeight={200}
                 aspectRatio={`5:4`}
@@ -357,7 +357,7 @@ export function WikiHanziCharacterPronunciationBox({
             Mnemonic spec
           </Text>
           <InlineEditableSettingJson
-            setting={hanziPronunciationHintMnemonicSpecSetting}
+            setting={pronunciationHintMnemonicSpecSetting}
             settingKey={hintSettingKey}
             readonly={!isEditMode}
             placeholder='{"story": "A chef juggling cans"}'

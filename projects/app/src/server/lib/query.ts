@@ -1,18 +1,28 @@
 import type {
+  ActorId,
+  ActorSpec,
   AssetId,
-  LocationSetKey,
+  HanziText,
   LocationId,
+  LocationSetKey,
   LocationSpec,
+  PinyinText,
+  PronunciationHintMnemonicSpec,
   Skill,
   SrsStateType,
-  ActorSpec,
-  ActorId,
 } from "@/data/model";
-import { locationSpecSchema, SrsKind, actorSpecSchema } from "@/data/model";
 import {
+  actorSpecSchema,
+  locationSpecSchema,
+  pronunciationHintMnemonicSpecSchema,
+  SrsKind,
+} from "@/data/model";
+import {
+  actorModelSheetImageSetting,
   actorSpecJsonSetting,
   locationSetIdentityImageSetting,
   locationSpecJsonSetting,
+  pronunciationHintMnemonicSpecSetting,
   userNameTextSetting,
 } from "@/data/userSettings";
 import * as schema from "@/server/pgSchema";
@@ -21,7 +31,6 @@ import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Drizzle } from "./db";
 import { setUserSetting } from "./userSettings";
-import { nanoid } from "@/util/nanoid";
 
 export async function updateSkillState(
   tx: Drizzle,
@@ -86,16 +95,16 @@ export async function getUserName(
   db: Drizzle,
   userId: string,
 ): Promise<string | null> {
-  const settingKey = userNameTextSetting.entity.marshalKey({});
+  const key = {};
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
-      eq(schema.userSetting.key, settingKey),
+      eq(schema.userSetting.key, userNameTextSetting.entity.marshalKey(key)),
     ),
   });
 
   if (setting?.value) {
-    const decoded = userNameTextSetting.decode({}, setting.value);
+    const decoded = userNameTextSetting.decode(key, setting.value);
     return decoded?.text ?? null;
   }
   return null;
@@ -110,7 +119,15 @@ export async function setUserName(
   userId: string,
   userName: string,
 ): Promise<void> {
-  const settingKey = userNameTextSetting.entity.marshalKey({});
+  await setUserSetting(db, userId, {
+    key: userNameTextSetting.entity.marshalKey({}),
+    value: userNameTextSetting.entity.marshalValue({
+      text: userName,
+    }),
+    now: new Date(),
+    skipHistory: false,
+  });
+
   const marshaledValue = userNameTextSetting.entity.marshalValue({
     text: userName,
   });
@@ -118,7 +135,7 @@ export async function setUserName(
     .insert(schema.userSetting)
     .values({
       userId,
-      key: settingKey,
+      key: userNameTextSetting.entity.marshalKey({}),
       value: marshaledValue,
     })
     .onConflictDoUpdate({
@@ -127,19 +144,20 @@ export async function setUserName(
     });
 }
 
-export async function getLocationSpec(
+export async function getPronunciationHintMnemonicSpec(
   db: Drizzle,
   userId: string,
-  locationId: LocationId,
-): Promise<LocationSpec | null> {
+  hanzi: HanziText,
+  pinyin: PinyinText,
+): Promise<PronunciationHintMnemonicSpec | null> {
+  const key = { hanzi, pinyin };
+
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        locationSpecJsonSetting.entity.marshalKey({
-          locationId: locationId,
-        }),
+        pronunciationHintMnemonicSpecSetting.entity.marshalKey(key),
       ),
     ),
   });
@@ -148,10 +166,43 @@ export async function getLocationSpec(
     return null;
   }
 
-  const decoded = locationSpecJsonSetting.decode(
-    { locationId: locationId },
+  const decoded = pronunciationHintMnemonicSpecSetting.decode(
+    key,
     setting.value,
   );
+
+  if (decoded == null) {
+    return null;
+  }
+
+  return pronunciationHintMnemonicSpecSchema.parse(decoded.value, {
+    reportInput: true,
+  });
+}
+
+export async function getLocationSpec(
+  db: Drizzle,
+  userId: string,
+  locationId: LocationId,
+): Promise<LocationSpec | null> {
+  const key = {
+    locationId: locationId,
+  };
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(
+        schema.userSetting.key,
+        locationSpecJsonSetting.entity.marshalKey(key),
+      ),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = locationSpecJsonSetting.decode(key, setting.value);
 
   if (decoded == null) {
     return null;
@@ -167,12 +218,38 @@ export async function getActorSpec(
   userId: string,
   actorId: ActorId,
 ): Promise<ActorSpec | null> {
+  const key = { actorId };
+  const setting = await db.query.userSetting.findFirst({
+    where: and(
+      eq(schema.userSetting.userId, userId),
+      eq(schema.userSetting.key, actorSpecJsonSetting.entity.marshalKey(key)),
+    ),
+  });
+
+  if (setting == null) {
+    return null;
+  }
+
+  const decoded = actorSpecJsonSetting.decode(key, setting.value);
+
+  return actorSpecSchema.parse(decoded?.value, {
+    reportInput: true,
+  });
+}
+
+export async function getActorModelSheetImage(
+  db: Drizzle,
+  userId: string,
+  actorId: ActorId,
+): Promise<AssetId | null> {
+  const key = { actorId };
+
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        actorSpecJsonSetting.entity.marshalKey({ actorId }),
+        actorModelSheetImageSetting.entity.marshalKey(key),
       ),
     ),
   });
@@ -181,11 +258,9 @@ export async function getActorSpec(
     return null;
   }
 
-  const decoded = actorSpecJsonSetting.decode({ actorId }, setting.value);
+  const decoded = actorModelSheetImageSetting.decode(key, setting.value);
 
-  return actorSpecSchema.parse(decoded?.value, {
-    reportInput: true,
-  });
+  return decoded?.imageId ?? null;
 }
 
 export async function setLocationSetIdentityImage(
@@ -205,9 +280,6 @@ export async function setLocationSetIdentityImage(
       setKey,
       imageId: imageId,
     }),
-    now: new Date(),
-    skipHistory: false,
-    historyId: nanoid(),
   });
 }
 
@@ -217,15 +289,16 @@ export async function getLocationSetIdentityImage(
   locationId: LocationId,
   setKey: LocationSetKey,
 ): Promise<AssetId | null> {
+  const key = {
+    locationId,
+    setKey,
+  };
   const setting = await db.query.userSetting.findFirst({
     where: and(
       eq(schema.userSetting.userId, userId),
       eq(
         schema.userSetting.key,
-        locationSetIdentityImageSetting.entity.marshalKey({
-          locationId,
-          setKey,
-        }),
+        locationSetIdentityImageSetting.entity.marshalKey(key),
       ),
     ),
   });
@@ -234,10 +307,7 @@ export async function getLocationSetIdentityImage(
     return null;
   }
 
-  const decoded = locationSetIdentityImageSetting.decode(
-    { locationId, setKey },
-    setting.value,
-  );
+  const decoded = locationSetIdentityImageSetting.decode(key, setting.value);
 
   return decoded?.imageId ?? null;
 }

@@ -174,3 +174,12 @@ export function stringifyPylymark(nodes: PylymarkNode[]): string {
     })
     .join(``);
 }
+
+/**
+ * Convert token nodes to text nodes, preserving the text content.
+ */
+export function stripTokens(nodes: PylymarkNode[]): PylymarkNode[] {
+  return nodes.map((node) =>
+    node.type === `token` ? { type: `text`, text: node.text } : node,
+  );
+}

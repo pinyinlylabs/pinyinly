@@ -1,4 +1,8 @@
-import { parsePylymark, stringifyPylymark } from "#data/pylymark.ts";
+import {
+  parsePylymark,
+  stringifyPylymark,
+  stripTokens,
+} from "#data/pylymark.ts";
 import type { PylymarkNode } from "#data/pylymark.ts";
 
 import { describe, expect, test } from "vitest";
@@ -402,3 +406,11 @@ describe(
     });
   },
 );
+
+describe(`stripTokens suite`, () => {
+  test(`strips token nodes and converts them to text nodes`, () => {
+    const str = `Try [表 express himself] in the [-ao barn].`;
+    const stripped = stringifyPylymark(stripTokens(parsePylymark(str)));
+    expect(stripped).toBe(`Try express himself in the barn.`);
+  });
+});

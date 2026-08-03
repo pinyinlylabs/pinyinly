@@ -25,7 +25,6 @@ import {
 import { and, eq } from "drizzle-orm";
 import { eventType, invoke } from "inngest";
 import z from "zod";
-import { nanoid } from "@/util/nanoid";
 import { setUserSetting } from "@/server/lib/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import {
@@ -170,9 +169,6 @@ const populateLocation = inngest.createFunction(
               locationId: locationId,
               imageId: generatedLocationImageAssetId,
             }),
-            now: new Date(),
-            skipHistory: false,
-            historyId: nanoid(),
           });
         }),
       );
@@ -444,9 +440,6 @@ const populateLocationSoundThoughtChain = inngest.createFunction(
               locationId,
               value: mergedThoughtChainsBySoundId,
             }),
-            now: new Date(),
-            skipHistory: false,
-            historyId: nanoid(),
           });
         }),
     );
@@ -596,9 +589,6 @@ const populateLocationSetDescription = inngest.createFunction(
             setKey,
             text: response.data.description,
           }),
-          now: new Date(),
-          skipHistory: false,
-          historyId: nanoid(),
         });
       }),
     );
@@ -674,9 +664,6 @@ const populateLocationSetName = inngest.createFunction(
             setKey,
             text: locationSetSpec.name,
           }),
-          now: new Date(),
-          skipHistory: false,
-          historyId: nanoid(),
         });
       }),
     );
@@ -757,9 +744,6 @@ const populateLocationSpec = inngest.createFunction(
               locationId: locationId,
               value: locationSpec,
             }),
-            now: new Date(),
-            skipHistory: false,
-            historyId: nanoid(),
           });
         }),
       );
@@ -902,9 +886,6 @@ export const populateLocationSetSpec = inngest.createFunction(
                 locationId: locationId,
                 value: mergedLocationSpec,
               }),
-              now: new Date(),
-              skipHistory: false,
-              historyId: nanoid(),
             });
 
             return mergedLocationSpec;

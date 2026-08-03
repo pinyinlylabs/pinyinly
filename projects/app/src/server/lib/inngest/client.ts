@@ -8,6 +8,8 @@ import {
   locationSetKeySchema,
   locationIdSchema,
   pinyinSoundIdSchema,
+  hanziTextSchema,
+  pinyinTextSchema,
 } from "@/data/model";
 import { z } from "zod";
 import { pronunciationHintRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationHintRecurring";
@@ -182,6 +184,35 @@ export const pronunciationGenerateHintEvent = eventType(
       hanziWord: hanziWordSchema,
       associationStrategy:
         pronunciationHintRecurringPromptAssociationStrategyKindSchema.optional(),
+    }),
+  },
+);
+
+export const pronunciationGenerateHintStoryboardPanelsEvent = eventType(
+  `pronunciation/generate-hint-storyboard-panels`,
+  {
+    schema: z.object({
+      actorId: actorIdSchema,
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+      hanzi: hanziTextSchema,
+      pinyin: pinyinTextSchema,
+    }),
+  },
+);
+
+export const pronunciationGenerateHintStoryboardImageEvent = eventType(
+  `pronunciation/generate-hint-storyboard-image`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      actorId: actorIdSchema,
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+      hook: z.string(),
+      premise: z.string(),
+      beats: z.array(z.string()),
     }),
   },
 );
