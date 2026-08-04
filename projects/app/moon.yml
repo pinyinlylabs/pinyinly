@@ -374,6 +374,13 @@ tasks:
       envFile:
         - .env.test.local
 
+  browser:
+    deps:
+      - ~:codegen
+    options:
+      envFile:
+        - .env.test.local
+
   evals:
     deps:
       - ~:codegen
@@ -412,6 +419,7 @@ tags:
   - vercel
   - vitest
   - vitest-bench
+  - vitest-browser
   - vitest-evals
 
 dependsOn:

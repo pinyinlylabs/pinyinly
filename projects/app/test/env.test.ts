@@ -33,11 +33,13 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   const testRoot = `${projectRoot}/test`;
   const srcRoot = `${projectRoot}/src`;
 
-  const srcRelPaths = await getTreePaths(srcRoot, `**/*`);
+  const srcRelPaths = Array.from(await fs.glob(`**/*`, { cwd: srcRoot }));
   const srcRelPathsSet = new Set(srcRelPaths);
-  const testRelPaths = await getTreePaths(
-    testRoot,
-    `**/*.{eval,test,test-d}.ts{,x}`,
+  const testRelPaths = Array.from(
+    await fs.glob(`**/*.{eval,test,test-d}.ts{,x}`, {
+      cwd: testRoot,
+      ignore: [`**/__*__/**`],
+    }),
   );
 
   expect(srcRelPaths.length).toBeGreaterThan(20);
@@ -46,7 +48,7 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   for (const testRelPath of testRelPaths) {
     // e.g. foo.test-d.tsx -> foo
     const testRelPathNoExt = testRelPath.replace(
-      /\.(test(-d)?|eval)\.tsx?$/u,
+      /\.(browser\.test|test(-d)?|eval)\.tsx?$/u,
       ``,
     );
     const srcRelPath = [
@@ -76,22 +78,16 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   }
 });
 
-async function getTreePaths(
-  root: string,
-  globPattern: string,
-): Promise<string[]> {
-  const paths: string[] = [];
-  for (const p of await fs.glob(`${root}/${globPattern}`)) {
-    paths.push(path.relative(root, p));
-  }
-  return paths;
-}
-
 /**
  * Check if a test file is a standalone test file, which is defined as a
  * file that contains the comment `// pyly-not-src-test` somewhere in it.
  */
 async function isStandaloneTestFile(testPath: string): Promise<boolean> {
+  const stat = await fs.stat(testPath);
+  if (!stat.isFile()) {
+    return false;
+  }
+
   const contents = await fs.readFile(testPath, `utf8`);
   return /\/\/\s+pyly-not-src-test/mu.test(contents);
 }

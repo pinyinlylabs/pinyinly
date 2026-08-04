@@ -22,3 +22,6 @@ node_modules
 
 # eslint
 .eslintcache
+
+# vitest
+.vitest-attachments

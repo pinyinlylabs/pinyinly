@@ -1,5 +1,4 @@
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -13,6 +12,7 @@ export default defineConfig({
     globals: true,
     watch: false,
     environment: `node`,
+    include: [`!test/**/*.browser.test.*`, `test/**/*.test.ts`],
     server: {
       deps: {
         // Match the SSR rule above for Vitest's dependency server so imports
@@ -42,8 +42,9 @@ export default defineConfig({
     alias: {
       "react-native": `react-native-web`,
     },
+    tsconfigPaths: true,
   },
-  plugins: [tsconfigPaths(), react()],
+  plugins: [react()],
   define: {
     __DEV__: `true`,
     "process.env.EXPO_OS": JSON.stringify(`web`),
