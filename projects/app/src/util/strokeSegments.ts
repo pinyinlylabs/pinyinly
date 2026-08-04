@@ -1090,7 +1090,7 @@ export function buildSvgSegmentPaths(
   strokePaths: readonly string[],
   medianPaths: readonly string[] | undefined,
   strokeSpecTexts: readonly string[],
-): Record<string, string> | undefined {
+): Record<string, string> {
   const segments: Record<string, string> = {};
 
   for (const strokeSpecText of strokeSpecTexts) {
@@ -1121,5 +1121,5 @@ export function buildSvgSegmentPaths(
     }
   }
 
-  return Object.keys(segments).length > 0 ? segments : undefined;
+  return segments;
 }

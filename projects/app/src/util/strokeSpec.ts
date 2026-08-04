@@ -1,3 +1,5 @@
+import { invariant } from "@pinyinly/lib/invariant";
+
 export interface StrokeSpecBound {
   stroke: number;
   occurrence: number;
@@ -379,4 +381,34 @@ export function projectStrokeSpecThroughBindings({
   }
 
   return projected;
+}
+
+export function strokeSpecFilter(
+  pathsByIndex: string[],
+  pathsByAtom: Record<string, string>,
+  strokeSpec: string,
+): string[] {
+  const result: string[] = [];
+
+  const parsed = parseStrokeSpec(strokeSpec);
+
+  for (const item of parsed.items) {
+    for (const atom of item.atoms) {
+      if (atom.kind === `range`) {
+        for (let i = atom.start; i <= atom.end; i += 1) {
+          const path = pathsByIndex[i];
+          invariant(path != null, `Missing stoke path for index ${i}`);
+          result.push(path);
+        }
+      } else {
+        const atomKey = formatAtom(atom);
+        const path = pathsByAtom[atomKey];
+        invariant(path != null, `Missing segment path for atom ${atomKey}`);
+
+        result.push(path);
+      }
+    }
+  }
+
+  return result;
 }

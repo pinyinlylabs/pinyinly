@@ -9,6 +9,7 @@
   "imports": {
     "#bin/*": "./bin/*",
     "#test/*": "./test/*",
+    "#*.css": "./src/*.css",
     "#*.js": "./src/*.js",
     "#*.json": "./src/*.json",
     "#*.ts": "./src/*.ts",
@@ -137,6 +138,7 @@
     "@inngest/test": "^1.0.0",
     "@react-native/metro-config": "0.86.0",
     "@tailwindcss/postcss": "^4.1.12",
+    "@tailwindcss/vite": "^4.3.3",
     "@tanstack/eslint-plugin-query": "^5.100.9",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.9.1",
