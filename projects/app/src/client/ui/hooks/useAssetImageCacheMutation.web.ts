@@ -96,7 +96,7 @@ async function withStore<T>(
     };
 
     request.onsuccess = () => {
-      result = (request.result as T | undefined) ?? null;
+      result = request.result ?? null;
     };
 
     request.onerror = () => {

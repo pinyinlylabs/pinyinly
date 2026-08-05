@@ -58,7 +58,7 @@ async function buildFinalToneFrequencies(): Promise<FinalToneCount[]> {
     ) {
       continue;
     }
-    const tone = Number.parseInt(toneStr, 10);
+    const tone = Math.trunc(Number(toneStr));
     if (Number.isNaN(tone)) {
       continue;
     }

@@ -23,8 +23,6 @@ export function usePinyinSoundGroups() {
     for (const { id } of chart.soundGroups) {
       keys.push(
         pinyinSoundGroupNameTextSetting.entity.marshalKey({ soundGroupId: id }),
-      );
-      keys.push(
         pinyinSoundGroupThemeTextSetting.entity.marshalKey({
           soundGroupId: id,
         }),

@@ -306,9 +306,7 @@ export const loadCharacterComponentUsageEntries = memoize0(
   async function loadCharacterComponentUsageEntries() {
     const decompositionData = await loadBuiltinCharacterDecompositionEntries();
     // Avoid TS2589 from deeply expanding recursive IDS node types at this boundary.
-    return buildCharacterComponentUsageEntries(
-      decompositionData as CharacterDecompositionEntry[],
-    );
+    return buildCharacterComponentUsageEntries(decompositionData);
   },
 );
 
@@ -633,12 +631,6 @@ export const allHanziCharacters = memoize0(async function allHanziCharacters() {
 
   return new Set([...charactersJson].map(([char]) => char));
 });
-
-export function hanziTextFromHanziCharacter(
-  character: HanziCharacter,
-): HanziText {
-  return character as unknown as HanziText;
-}
 
 export const isHanziWord = memoize1(function isHanziWord(
   hanziOrHanziWord: HanziText | HanziWord,

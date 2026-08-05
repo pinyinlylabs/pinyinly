@@ -13,6 +13,7 @@ import path from "node:path";
 
 const projectRoot = path.join(import.meta.dirname, `..`);
 
+// oxlint-disable-next-line import/namespace
 const notoSansSc = await fontkit.open(
   path.join(projectRoot, `src/assets/fonts/NotoSansSC-VariableFont_wght.ttf`),
 );
@@ -28,6 +29,7 @@ for (const p of await glob(
 }
 invariant(pingFangPath != null, `expected to find PingFang font`);
 
+// oxlint-disable-next-line import/namespace
 const pingFangCollection = await fontkit.open(pingFangPath);
 invariant(pingFangCollection.type === `TTC`, `expected a TTC font`);
 const pingFang = pingFangCollection.fonts[0];

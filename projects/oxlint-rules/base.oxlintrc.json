@@ -271,6 +271,7 @@
     "typescript/no-useless-default-assignment": "off",
     "react/no-react-children": "off",
     "react/no-clone-element": "off",
+    "react/jsx-no-literals": "off",
 
     "react/exhaustive-deps": "off",
     "react/forbid-component-props": "off",

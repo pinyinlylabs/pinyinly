@@ -202,10 +202,10 @@ export function encodeUserSettingStoredValue<T extends RizzleAnyEntity>(
   const marshaledValue = userSetting.entity.marshalValue({
     ...(keyParams as Record<string, unknown>),
     ...(value as Record<string, unknown>),
-  } as RizzleEntityInput<T>);
+  });
 
   if (keyParamAliases.length === 0) {
-    return marshaledValue as Record<string, unknown>;
+    return marshaledValue;
   }
 
   // Persist only non-key fields; key fields are encoded in `setting.key`.

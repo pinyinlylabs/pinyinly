@@ -241,7 +241,7 @@ function firstValidationError(node: WikiCharacterDecomposition): string | null {
   }
 
   for (const child of children) {
-    const error = firstValidationError(child as WikiCharacterDecomposition);
+    const error = firstValidationError(child);
     if (error != null) {
       return error;
     }
@@ -867,7 +867,7 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
 
                 ${leafCellClassName}
               `}
-              {...(webDropTargetProps as object)}
+              {...webDropTargetProps}
             >
               {leaf.hanzi == null ? null : (
                 <Text
@@ -1119,9 +1119,7 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
     const childElements: ReactNode[] = [];
     for (const [index, child] of children.entries()) {
       const childIndex = index + 1;
-      childElements.push(
-        renderNode(child as WikiCharacterDecomposition, [...path, childIndex]),
-      );
+      childElements.push(renderNode(child, [...path, childIndex]));
     }
 
     const renderParentLayoutToolbar = () => (
@@ -1410,7 +1408,7 @@ export function HanziDecompositionEditor({ hanzi }: { hanzi: HanziText }) {
                   className={`
                     min-w-12 items-center rounded-md border border-fg/20 bg-bg-high px-2 py-1
                   `}
-                  {...(webDragProps as object)}
+                  {...webDragProps}
                 >
                   <Text
                     className={`

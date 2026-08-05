@@ -48,11 +48,7 @@ import {
 import type { UserSetting, UserSettingKeyInput } from "@/data/userSettings";
 import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { nanoid } from "@/util/nanoid";
-import type {
-  RizzleAnyEntity,
-  RizzleEntityInput,
-  RizzleEntityOutput,
-} from "@/util/rizzle";
+import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
 
 type UserSettingValue = (typeof schema.userSetting.$inferInsert)[`value`];
 
@@ -85,7 +81,7 @@ export async function getUserSetting<T extends RizzleAnyEntity>(
       userSetting.entity.marshalValue({
         ...(keyParams as Record<string, unknown>),
         ...storedValue,
-      } as RizzleEntityInput<T>),
+      }),
     );
   }
 

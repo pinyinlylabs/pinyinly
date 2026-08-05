@@ -327,7 +327,7 @@ describe(
     });
 
     test(`produces object ID with correct prefix`, () => {
-      const objectId = hanziWordPinyinlyObjectId(`多:many` as HanziWord);
+      const objectId = hanziWordPinyinlyObjectId(`多:many`);
       expect(objectId).toMatch(/^hw\//u);
     });
 
@@ -349,7 +349,7 @@ describe(
     });
 
     test(`produces object ID with correct prefix`, () => {
-      const objectId = skillPinyinlyObjectId(`het:多:many` as Skill);
+      const objectId = skillPinyinlyObjectId(`het:多:many`);
       expect(objectId).toMatch(/^sk\//u);
     });
 
@@ -467,11 +467,11 @@ describe(`PinyinlyObjectId round-trip conversions`, () => {
   test(`kind detection after formatting`, () => {
     const testCases = [
       {
-        objectId: hanziWordPinyinlyObjectId(`好:positive` as HanziWord),
+        objectId: hanziWordPinyinlyObjectId(`好:positive`),
         expectedKind: hanziWordPinyinlyObjectIdKind,
       },
       {
-        objectId: skillPinyinlyObjectId(`he:好:positive` as Skill),
+        objectId: skillPinyinlyObjectId(`he:好:positive`),
         expectedKind: skillPinyinlyObjectIdKind,
       },
       {

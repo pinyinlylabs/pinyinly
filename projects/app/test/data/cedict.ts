@@ -3887,7 +3887,7 @@ function extractDictionaryPinyinFromResolvedCedictSense(
         continue;
       }
 
-      pinyins.push(normalizePinyinText(token.value as PinyinNumericText));
+      pinyins.push(normalizePinyinText(token.value));
     }
   }
 

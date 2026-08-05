@@ -2,7 +2,7 @@
 import { projectRoot } from "#bin/util/paths.ts";
 import * as hanziVisualSearch from "#client/ui/hanziVisualSearch.ts";
 import { readFileSync } from "@pinyinly/lib/fs";
-import { resolve } from "node:path";
+import path from "node:path";
 import { describe, expect, test } from "vitest";
 
 const searchNearestByDotProduct = hanziVisualSearch.searchNearestByDotProduct;
@@ -21,16 +21,16 @@ const parseFlatIndex = (
   }
 ).parseFlatIndex;
 
-const ocrDir = resolve(projectRoot, `src/ocr`);
+const ocrDir = path.resolve(projectRoot, `src/ocr`);
 
 function loadIndex() {
-  const binBytes = readFileSync(resolve(ocrDir, `vectors.bin`));
+  const binBytes = readFileSync(path.resolve(ocrDir, `vectors.bin`));
   const binBuffer = binBytes.buffer.slice(
     binBytes.byteOffset,
     binBytes.byteOffset + binBytes.byteLength,
   );
   const meta = JSON.parse(
-    readFileSync(resolve(ocrDir, `vectorsMeta.json.bin`), `utf-8`),
+    readFileSync(path.resolve(ocrDir, `vectorsMeta.json.bin`), `utf-8`),
   ) as { codepoints: string[] };
 
   return parseFlatIndex(binBuffer, meta.codepoints);
@@ -39,7 +39,7 @@ function loadIndex() {
 describe(`parseFlatIndex + searchNearestByDotProduct`, () => {
   test(`normalizes U+2F26 (⼦) into 子 for dictionary matching`, () => {
     const meta = JSON.parse(
-      readFileSync(resolve(ocrDir, `vectorsMeta.json.bin`), `utf-8`),
+      readFileSync(path.resolve(ocrDir, `vectorsMeta.json.bin`), `utf-8`),
     ) as { codepoints: string[] };
     expect(meta.codepoints).toContain(`U+2F26`);
 
@@ -49,13 +49,13 @@ describe(`parseFlatIndex + searchNearestByDotProduct`, () => {
 
   test(`allowed set containing 子 keeps 子 embeddings and self-query ranks 子 first`, () => {
     const index = (() => {
-      const binBytes = readFileSync(resolve(ocrDir, `vectors.bin`));
+      const binBytes = readFileSync(path.resolve(ocrDir, `vectors.bin`));
       const binBuffer = binBytes.buffer.slice(
         binBytes.byteOffset,
         binBytes.byteOffset + binBytes.byteLength,
       );
       const meta = JSON.parse(
-        readFileSync(resolve(ocrDir, `vectorsMeta.json.bin`), `utf-8`),
+        readFileSync(path.resolve(ocrDir, `vectorsMeta.json.bin`), `utf-8`),
       ) as { codepoints: string[] };
       return parseFlatIndex(binBuffer, meta.codepoints, new Set([`子`]));
     })();

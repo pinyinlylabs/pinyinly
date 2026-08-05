@@ -25,7 +25,7 @@ export async function runChatResponseJudge<Schema extends z.ZodType>(
   const resultText = await runJudge(chatPromptToJudgeHarnessInput(prompt));
   return jsonCodec(prompt.schema).parse(resultText, {
     reportInput: true,
-  }) as z.infer<Schema>;
+  });
 }
 
 export function chatPromptToJudgeHarnessInput(

@@ -22,7 +22,8 @@ import {
 } from "#dictionary.js";
 import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
-import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
+import { parseIndexRanges } from "#util/indexRanges.js";
+import { normalizeStrokeSpec } from "#util/strokeSpec.js";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -280,7 +281,7 @@ describe(`character.json files`, async () => {
         for (const [i, component] of [
           ...walkIdsNodeLeafs(characterData.mnemonic.components),
         ].entries()) {
-          const normalized = normalizeIndexRanges(component.strokes);
+          const normalized = normalizeStrokeSpec(component.strokes);
           expect
             .soft(
               component.strokes,

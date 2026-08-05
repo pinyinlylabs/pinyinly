@@ -54,7 +54,7 @@ describe(`strokeSegments helper`, () => {
       [`0[1:2]`],
     );
 
-    expect(segments).toMatchInlineSnapshot(`undefined`);
+    expect(segments).toMatchInlineSnapshot(`{}`);
   });
 
   test(`lists intersections for a target and cutter path`, () => {

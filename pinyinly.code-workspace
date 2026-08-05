@@ -56,6 +56,14 @@
     "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace, 'Pinyinly Components'",
     "oxc.typeAware": true,
     "oxc.enable": true,
+    "oxc.lint.customization": {
+      "no-console": {
+        "autofix": false,
+      },
+      "no-debugger": {
+        "autofix": false,
+      },
+    },
     "tailwindCSS.classAttributes": [
       "class",
       "className",
@@ -63,6 +71,5 @@
       "class:list",
       ".*ClassName",
     ],
-    "typescript.native-preview.tsdk": "./node_modules/@typescript/native-preview",
   },
 }

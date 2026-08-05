@@ -345,7 +345,7 @@ describe.skipIf(env.geminiImageApiKey == null || true)(
   () => {
     test(
       `returns image data from the Gemini API`,
-      { timeout: 30000 },
+      { timeout: 30_000 },
       async () => {
         vi.doUnmock(`@google/genai`);
         vi.doUnmock(`#util/env.ts`);

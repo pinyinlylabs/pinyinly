@@ -20,26 +20,32 @@ export async function generateQuestionForSkillOrThrow(
 ): Promise<Question> {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziWordToGloss: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return hanziWordToGlossQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToGlossTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordToGlossTypedSkill;
       return hanziWordToGlossTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return hanziWordToPinyinTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinInitial: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return hanziWordToPinyinInitialQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinFinal: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return hanziWordToPinyinFinalQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTone: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return hanziWordToPinyinToneQuestionOrThrow(skill, flag);
     }

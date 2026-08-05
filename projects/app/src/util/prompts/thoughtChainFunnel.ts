@@ -232,8 +232,7 @@ export function renderThoughtChainFunnelAscii(
   }
 
   if (invalidJoinCues.length > 0) {
-    lines.push(`|`);
-    lines.push(`* INVALID JOIN CUES`);
+    lines.push(`|`, `* INVALID JOIN CUES`);
     for (const cue of invalidJoinCues) {
       for (const cueStep of cue.cueThoughtChain) {
         lines.push(

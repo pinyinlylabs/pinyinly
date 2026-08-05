@@ -12,11 +12,7 @@ import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
 import { getGeminiImageAspectRatioValue } from "@/util/geminiImageAspectRatio";
 import { useEffect, useId, useRef, useState } from "react";
-import type {
-  LayoutChangeEvent,
-  PanResponderInstance,
-  ViewStyle,
-} from "react-native";
+import type { LayoutChangeEvent, PanResponderInstance } from "react-native";
 import {
   ActivityIndicator,
   PanResponder,
@@ -823,11 +819,7 @@ function InlineImageRepositionFrame({
       )}
       <View
         className="absolute inset-0"
-        style={
-          Platform.OS === `web`
-            ? ({ touchAction: `none` } as ViewStyle)
-            : undefined
-        }
+        style={Platform.OS === `web` ? { touchAction: `none` } : undefined}
         {...(moveResponder?.panHandlers ?? {})}
       />
       <View className="pointer-events-none absolute inset-0 items-center justify-center">

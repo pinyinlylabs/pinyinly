@@ -199,6 +199,7 @@ export async function skillDependencies(
 
   switch (skillKind) {
     case SkillKind.GlossToHanziWord: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       // Learn the Hanzi -> Gloss first. It's easier to read than write (for chinese characters).
       deps.push(hanziWordToGloss(hanziWordFromSkill(skill)));
@@ -206,6 +207,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToGloss: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -252,6 +254,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToGlossTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       deps.push(hanziWordToGloss(hanziWord));
@@ -259,6 +262,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -301,6 +305,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinTone: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -315,6 +320,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinFinal: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -329,6 +335,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinInitial: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -345,6 +352,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.PinyinToHanziWord: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       // Learn going from Hanzi -> Pinyin first.

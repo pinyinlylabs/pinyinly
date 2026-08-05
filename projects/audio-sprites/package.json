@@ -35,10 +35,10 @@
     "eslint-plugin-import": "^2.31.0",
     "memfs": "^4.57.2",
     "oxfmt": "^0.48.0",
-    "oxlint": "^1.63.0",
-    "oxlint-tsgolint": "^0.22.1",
+    "oxlint": "^1.77.0",
+    "oxlint-tsgolint": "^7.0.2001",
     "ts-essentials": "^10.2.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.10"
   }
 }

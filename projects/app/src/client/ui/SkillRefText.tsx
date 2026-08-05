@@ -19,10 +19,12 @@ import { HanziWordRefText } from "./HanziWordRefText";
 export const SkillRefText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.PinyinFinalAssociation: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as PinyinFinalAssociationSkill;
       return <Text>-{finalFromPinyinFinalAssociationSkill(skill)}</Text>;
     }
     case SkillKind.PinyinInitialAssociation: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as PinyinInitialAssociationSkill;
       return <Text>{initialFromPinyinInitialAssociationSkill(skill)}-</Text>;
     }
@@ -31,10 +33,12 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
     case SkillKind.Deprecated_RadicalToPinyin:
     case SkillKind.Deprecated_PinyinToRadical:
     case SkillKind.Deprecated: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as DeprecatedSkill;
       return <Text>{skillKindToShorthand(skillKindFromSkill(skill))}</Text>;
     }
     case SkillKind.HanziWordToPinyinTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -42,6 +46,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       );
     }
     case SkillKind.HanziWordToPinyinInitial: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -52,6 +57,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       );
     }
     case SkillKind.HanziWordToPinyinFinal: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -62,6 +68,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       );
     }
     case SkillKind.HanziWordToPinyinTone: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -76,6 +83,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
     case SkillKind.ImageToHanziWord:
     case SkillKind.HanziWordToGloss:
     case SkillKind.HanziWordToGlossTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return <HanziWordRefText hanziWord={hanziWord} />;

@@ -19,10 +19,9 @@ Sentry.init({
     // nodeProfilingIntegration(),
   ],
   environment: process.env.PYLY_SENTRY_ENVIRONMENT,
-  tracesSampleRate: Number.parseFloat(
-    process.env.PYLY_SENTRY_TRACES_SAMPLE_RATE ?? `1`,
-  ), // Keep in sync with the other Sentry.init()
-  profilesSampleRate: Number.parseFloat(
+  tracesSampleRate: Number(process.env.PYLY_SENTRY_TRACES_SAMPLE_RATE ?? `1`), // Keep in sync with the other Sentry.init()
+  // oxlint-disable-next-line typescript/no-deprecated
+  profilesSampleRate: Number(
     process.env.PYLY_SENTRY_PROFILES_SAMPLE_RATE ?? `1`,
   ),
 });
@@ -46,6 +45,7 @@ const vercelEntrypoint = async (req, res) => {
 
 /**
  * @param {number} ms
+ * @returns {Promise<void>}
  */
 async function sleep(ms) {
   return new Promise((resolve) => {

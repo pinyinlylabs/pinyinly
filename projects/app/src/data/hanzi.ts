@@ -661,6 +661,7 @@ export function matchAllHanziCharactersWithIndexes(
 
   for (const segment of splitCharacters(input)) {
     if (isHanziIdeograph(segment)) {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       tokens.push(index, segment as HanziCharacter);
     }
 

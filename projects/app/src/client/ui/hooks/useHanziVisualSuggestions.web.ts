@@ -273,7 +273,7 @@ export function useHanziVisualSuggestions({
             queryImageSize,
             queryImageSize,
           ]),
-        } as Record<string, Tensor>);
+        });
 
         const embeddingOutput = output[`embedding`];
         if (

@@ -5,7 +5,6 @@ import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import type { UseUserSettingResult } from "#client/ui/hooks/useUserSetting.ts";
 import { useUserSetting } from "#client/ui/hooks/useUserSetting.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
-import type { HanziWord } from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { autoCheckUserToggleSetting } from "#data/userSettings.ts";
 import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
@@ -49,11 +48,11 @@ baseTest(`useUserSetting setValue types`, () => {
 
   typeChecks(() => {
     const setValue = null as unknown as HintSetValue;
-    setValue({ hanziWord: `` as HanziWord, text: `hint` });
+    setValue({ hanziWord: ``, text: `hint` });
     // @ts-expect-error missing key field
     setValue({ text: `hint` });
     // @ts-expect-error wrong field for entity shape
-    setValue({ hanziWord: `` as HanziWord, imageId: `x` });
+    setValue({ hanziWord: ``, imageId: `x` });
   });
 });
 

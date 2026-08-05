@@ -307,6 +307,7 @@ export function parseHistoryCommand(
         switch (skillKind) {
           case SkillKind.HanziWordToGloss:
           case SkillKind.HanziWordToGlossTyped: {
+            // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
             skill = skill as HanziWordSkill;
             // `❌ he:刀:knife (刀→legs)`,
             const match = /^\((?:(.+)→)?(.+)\)$/u.exec(skillArgs);
@@ -331,6 +332,7 @@ export function parseHistoryCommand(
           case SkillKind.HanziWordToPinyinFinal:
           case SkillKind.HanziWordToPinyinInitial:
           case SkillKind.HanziWordToPinyinTone: {
+            // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
             skill = skill as HanziWordSkill;
             // `❌ he:刀:knife (刀→legs)`,
             const match = /^\((?:(.+)→)?(.+?)\)$/u.exec(skillArgs);
@@ -585,9 +587,7 @@ const getHanziJsPinyinUsageCounts = memoize0(() => {
         continue;
       }
 
-      const hanziCharacters = matchAllHanziCharacters(
-        entry.simplified as HanziText,
-      );
+      const hanziCharacters = matchAllHanziCharacters(entry.simplified);
       const pinyinUnits = matchAllPinyinUnits(entry.pinyin).map((p) =>
         normalizePinyinUnit(p),
       );

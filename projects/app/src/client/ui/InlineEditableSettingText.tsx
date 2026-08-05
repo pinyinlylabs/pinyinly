@@ -122,7 +122,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         // Also check for React Native Web's modal container
         // which typically has very high z-index (9999+)
         const zIndex = window.getComputedStyle(current).zIndex;
-        if (zIndex && Number.parseInt(zIndex, 10) >= 9999) {
+        if (zIndex && Math.trunc(Number(zIndex)) >= 9999) {
           return true;
         }
         current = current.parentElement;

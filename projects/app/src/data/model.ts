@@ -264,21 +264,21 @@ export function assetIdFromPinyinlyObjectId(
 export function hanziWordPinyinlyObjectId(
   hanziWord: HanziWord,
 ): PinyinlyObjectId {
-  return `${hanziWordPinyinlyObjectIdKind}/${hanziWord}` as PinyinlyObjectId;
+  return `${hanziWordPinyinlyObjectIdKind}/${hanziWord}`;
 }
 
 export function skillPinyinlyObjectId(skill: Skill): PinyinlyObjectId {
-  return `${skillPinyinlyObjectIdKind}/${skill}` as PinyinlyObjectId;
+  return `${skillPinyinlyObjectIdKind}/${skill}`;
 }
 
 export function pinyinSoundIdPinyinlyObjectId(
   soundId: PinyinSoundId,
 ): PinyinlyObjectId {
-  return `${pinyinSoundIdPinyinlyObjectIdKind}/${soundId}` as PinyinlyObjectId;
+  return `${pinyinSoundIdPinyinlyObjectIdKind}/${soundId}`;
 }
 
 export function assetIdPinyinlyObjectId(assetId: AssetId): PinyinlyObjectId {
-  return `${assetIdPinyinlyObjectIdKind}/${assetId}` as PinyinlyObjectId;
+  return `${assetIdPinyinlyObjectIdKind}/${assetId}`;
 }
 
 export interface BaseSrsState {

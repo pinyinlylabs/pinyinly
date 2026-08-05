@@ -13,7 +13,6 @@ import memoize from "lodash/memoize";
 import type {
   IndexDefinition,
   MutatorDefs,
-  ReadonlyJSONValue,
   ReadTransaction,
   ReplicacheOptions,
   WriteTransaction,
@@ -540,10 +539,7 @@ export class RizzleEntity<
     key: EntityKeyType<S, KeyPath>[`_input`],
     value: EntityValueType<S>[`_input`],
   ) {
-    await tx.set(
-      this.marshalKey(key),
-      this.marshalValue(value) as ReadonlyJSONValue,
-    );
+    await tx.set(this.marshalKey(key), this.marshalValue(value));
   }
 
   getIndexes() {

@@ -121,7 +121,7 @@ function assertNoMissingRequiredProperties(schema: unknown, path = `$`): void {
 
   const properties = node[`properties`];
   if (properties != null && typeof properties === `object`) {
-    const propertyKeys = Object.keys(properties as Record<string, unknown>);
+    const propertyKeys = Object.keys(properties);
     if (propertyKeys.length > 0) {
       const required = node[`required`];
       expect

@@ -21,8 +21,12 @@ export const locationSpecWithDetailSchema = locationSpecWithDetailBaseSchema
   .superRefine(validateLocationSpecShape)
   .meta({ title: `locationSpecWithDetailSchema` });
 
+export type LocationSpecWithDetailSchemaType = z.infer<
+  typeof locationSpecWithDetailSchema
+>;
+
 export interface LocationSpecWithDetail
-  extends z.infer<typeof locationSpecWithDetailSchema>, LocationSpec {}
+  extends LocationSpecWithDetailSchemaType, LocationSpec {}
 
 function validateLocationSpecShape(
   value: z.infer<typeof locationSpecWithDetailBaseSchema>,

@@ -631,7 +631,7 @@ function settingRow({
   key: string;
   value: Record<string, unknown> | null;
 }): CollectionOutput<SettingCollection> {
-  return { key, value } as CollectionOutput<SettingCollection>;
+  return { key, value };
 }
 
 describe(`characterDecomposition overrides`, () => {

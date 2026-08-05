@@ -138,7 +138,7 @@ export async function tryHanziDistractor(
   }
 
   // No conflicts, add it.
-  ctx.hanziDistractors.push(hanzi as HanziText);
+  ctx.hanziDistractors.push(hanzi);
 
   return true;
 }

@@ -904,9 +904,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
         const hanziChars = matchAllHanziCharacters(hanzi);
         const hanziCharacterCount = hanziChars.length;
         const hskFirstAppearance =
-          hanziCharacterCount === 1
-            ? charMinHskMap.get(hanzi as string)
-            : meaning.hsk;
+          hanziCharacterCount === 1 ? charMinHskMap.get(hanzi) : meaning.hsk;
 
         entries.push({
           id: `builtIn:${hanziWord}`,
