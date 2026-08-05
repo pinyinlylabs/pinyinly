@@ -21,7 +21,7 @@ export interface ParsedSvgPaths extends Array<PathAttrs> {
 }
 
 const svgSize = 1024;
-const medianBoundaryTolerance = 8;
+const medianBoundaryTolerance = 50;
 
 /**
  * Parses an SVG string and extracts the path attributes from all `<path>`

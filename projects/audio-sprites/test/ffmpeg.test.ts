@@ -618,7 +618,7 @@ describe(`Integration tests with real ffmpeg`, () => {
       outputPath,
     ]);
 
-    const duration = Number.parseFloat(stdout.trim());
+    const duration = Number(stdout.trim());
     expect(duration).toBeCloseTo(3.064, 2);
 
     // Clean up
@@ -672,7 +672,7 @@ describe(`Integration tests with real ffmpeg`, () => {
       outputPath,
     ]);
 
-    const duration = Number.parseFloat(stdout.trim());
+    const duration = Number(stdout.trim());
     expect(duration).toBeCloseTo(5.48, 2);
 
     // Clean up
@@ -875,7 +875,7 @@ describe(`Integration tests with real ffmpeg`, () => {
       spriteOutputPath,
     ]);
 
-    const spriteDuration = Number.parseFloat(stdout.trim());
+    const spriteDuration = Number(stdout.trim());
     // Expected: last start time (4) + last file duration (~1.416) = ~5.416
     expect(spriteDuration).toBeCloseTo(5.416, 1);
 

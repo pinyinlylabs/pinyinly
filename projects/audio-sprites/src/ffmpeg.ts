@@ -152,8 +152,7 @@ function extractDuration(output: string) {
 
   return {
     fromStream:
-      astats[`Number of samples`] /
-      Number.parseInt(inputStreamSampleRateHz, 10),
+      astats[`Number of samples`] / Math.trunc(Number(inputStreamSampleRateHz)),
     fromContainer: parseTimestampToSeconds(container.duration),
   };
 }
@@ -173,9 +172,7 @@ function extractSilenceDetection(output: string) {
   // metadata-aware playback tools (e.g. macOS Quick Look).
   const containerStartMatch =
     /Duration: .+?, start: (?<start>.+?), bitrate: .+?$/gmsu.exec(output);
-  const parsedStart = Number.parseFloat(
-    containerStartMatch?.groups?.[`start`] ?? `0`,
-  );
+  const parsedStart = Number(containerStartMatch?.groups?.[`start`] ?? `0`);
   const timeOffset = Number.isFinite(parsedStart) ? parsedStart : 0;
 
   const matches = output.matchAll(/^\[silencedetect @ .+?\] (.+?)$/gmu);
@@ -186,7 +183,7 @@ function extractSilenceDetection(output: string) {
       const silenceStart = silenceStartMatch[1];
       invariant(silenceStart != null);
       invariant(start == null);
-      start = Number.parseFloat(silenceStart);
+      start = Number(silenceStart);
       continue;
     }
 
@@ -202,8 +199,8 @@ function extractSilenceDetection(output: string) {
 
       rawSilences.push({
         start,
-        end: Number.parseFloat(silenceEnd),
-        duration: Number.parseFloat(silenceDuration),
+        end: Number(silenceEnd),
+        duration: Number(silenceDuration),
       });
       start = null;
       continue;
@@ -264,9 +261,7 @@ export function parseTimestampToSeconds(timeStr: string): number {
     `Invalid time format: ${timeStr}`,
   );
   return (
-    Number.parseInt(hh, 10) * 3600 +
-    Number.parseInt(mm, 10) * 60 +
-    Number.parseFloat(ss)
+    Math.trunc(Number(hh)) * 3600 + Math.trunc(Number(mm)) * 60 + Number(ss)
   );
 }
 
