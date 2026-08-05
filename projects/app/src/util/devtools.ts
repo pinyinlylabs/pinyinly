@@ -1,12 +1,7 @@
 import type { DeviceStoreToggleableEntity } from "@/client/deviceStore";
 import { deviceStoreGet } from "@/client/deviceStore";
 import { r } from "./rizzle";
-
-export async function sleep(ms: number): Promise<void> {
-  await new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
+import { sleep } from "@pinyinly/lib/sleep";
 
 export async function devToolsSlowQuerySleepIfEnabled(): Promise<void> {
   const setting = await deviceStoreGet(slowQueriesSetting);

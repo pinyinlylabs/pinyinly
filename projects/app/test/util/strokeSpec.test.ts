@@ -32,6 +32,19 @@ describe(
       expect(normalizeStrokeSpec(`1[0#0:3#0]`)).toBe(`1[0:3]`);
     });
 
+    test(`parses percent selectors`, () => {
+      expect(normalizeStrokeSpec(`1[5%:]`)).toBe(`1[5%:]`);
+      expect(normalizeStrokeSpec(`1[:5%]`)).toBe(`1[:5%]`);
+      expect(normalizeStrokeSpec(`1[5%:95%]`)).toBe(`1[5%:95%]`);
+      expect(normalizeStrokeSpec(`1[05.500%:95.000%]`)).toBe(`1[5.5%:95%]`);
+    });
+
+    test(`parses mixed percent and stroke selectors`, () => {
+      expect(normalizeStrokeSpec(`1[5%:2]`)).toBe(`1[5%:2]`);
+      expect(normalizeStrokeSpec(`1[2:95%]`)).toBe(`1[2:95%]`);
+      expect(normalizeStrokeSpec(`1[2#3:95%]`)).toBe(`1[2#3:95%]`);
+    });
+
     test(`parses grouped unions`, () => {
       const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
 
@@ -46,12 +59,19 @@ describe(
       expect(normalizeStrokeSpec(` 1[ 0 : 3 ] + 2[ :4 ] `)).toBe(
         `1[0:3]+2[:4]`,
       );
+      expect(normalizeStrokeSpec(` 1[ 5% : 95% ] + 2[ 2 : 75% ] `)).toBe(
+        `1[5%:95%]+2[2:75%]`,
+      );
     });
 
     test(`rejects malformed input`, () => {
       expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
       expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
       expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[foo%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[-1%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[101%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[%:3]`)).toThrow();
       expect(() => parseStrokeSpec(`3-1`)).toThrow();
       expect(() => parseStrokeSpec(`1++2`)).toThrow();
     });

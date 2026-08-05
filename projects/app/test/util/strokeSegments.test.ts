@@ -6,46 +6,6 @@ import {
 } from "#util/strokeSegments.ts";
 import { describe, expect, test } from "vitest";
 
-function extractPathPoints(path: string): Array<{ x: number; y: number }> {
-  const numbers = path
-    .replaceAll(/[A-Za-z]/gu, ` `)
-    .trim()
-    .split(/\s+/u)
-    .map(Number);
-
-  const points: Array<{ x: number; y: number }> = [];
-  for (let index = 0; index + 1 < numbers.length; index += 2) {
-    const x = numbers[index];
-    const y = numbers[index + 1];
-    if (x == null || y == null || Number.isNaN(x) || Number.isNaN(y)) {
-      continue;
-    }
-    points.push({ x, y });
-  }
-
-  return points;
-}
-
-function polygonAreaFromPath(path: string): number {
-  const points = extractPathPoints(path);
-  if (points.length < 3) {
-    return 0;
-  }
-
-  let area = 0;
-  for (let index = 0; index < points.length; index += 1) {
-    const point = points[index];
-    const nextPoint = points[(index + 1) % points.length];
-    if (point == null || nextPoint == null) {
-      continue;
-    }
-
-    area += point.x * nextPoint.y - nextPoint.x * point.y;
-  }
-
-  return Math.abs(area / 2);
-}
-
 describe(`strokeSegments helper`, () => {
   test(`builds segment maps from stroke spec text`, () => {
     const segments = buildSvgSegmentPaths(
@@ -63,9 +23,26 @@ describe(`strokeSegments helper`, () => {
       `M 2 -5 L 5 5 L 8 -5`,
     );
 
-    expect(intersections).toHaveLength(2);
-    expect(intersections[0]?.x).toBeCloseTo(3.5);
-    expect(intersections[1]?.x).toBeCloseTo(6.5);
+    expect(intersections).toMatchInlineSnapshot(`
+      [
+        {
+          "boundaryLength": 5.22021484375,
+          "length": 3.5,
+          "t1": 0.35000001043081325,
+          "t2": 0.5000000149011611,
+          "x": 3.500000000000001,
+          "y": -0,
+        },
+        {
+          "boundaryLength": 15.66064453125,
+          "length": 6.5,
+          "t1": 0.6500000104308129,
+          "t2": 0.5000000149011616,
+          "x": 6.5000000000000036,
+          "y": -0,
+        },
+      ]
+    `);
   });
 
   test(`buildSvgSegmentPathFromLengths preserves curve commands on curved paths`, () => {
@@ -75,9 +52,9 @@ describe(`strokeSegments helper`, () => {
       160,
     );
 
-    expect(segment).toContain(`M `);
-    expect(segment).toContain(` C `);
-    expect(segment).not.toContain(` NaN`);
+    expect(segment).toMatchInlineSnapshot(
+      `"M 6.45 39.26 C 24.53 86.95 75.57 86.91 93.59 39.14"`,
+    );
   });
 
   test(`builds a closed cut from StrokeSpec with explicit target/cutter IDs`, () => {
@@ -92,8 +69,9 @@ describe(`strokeSegments helper`, () => {
       strokeSpecText: `0[1#0:1#1]`,
     });
 
-    expect(segment).not.toBeNull();
-    expect(segment).toContain(` Z`);
+    expect(segment).toMatchInlineSnapshot(
+      `"M 0 3 C 0 5.33 0 7.67 0 10 C 1.33 10 2.67 10 4 10 C 4 9 4 8 4 7 C 2.67 7 1.33 7 0 7 C 0 8 0 9 0 10 C 1.33 10 2.67 10 4 10 C 4 7.67 4 5.33 4 3 C 2.67 3 1.33 3 0 3 Z"`,
+    );
   });
 
   test(`supports open StrokeSpec bounds for median occurrences`, () => {
@@ -135,6 +113,11 @@ describe(`strokeSegments helper`, () => {
       },
       strokeSpecText: `0[:1]`,
     });
+
+    expect(fromStart).toMatchInlineSnapshot(
+      `"M 4 3 C 4 2 4 1 4 0 C 2.67 0 1.33 0 0 0 C 0 0 0 3 0 3 C 1.33 3 2.67 3 4 3 Z"`,
+    );
+
     const toEnd = buildClosedSvgSegmentPathFromStrokeSpec({
       strokePathsById: {
         0: `M 0 0 L 0 10 L 4 10 L 4 0 Z`,
@@ -146,16 +129,81 @@ describe(`strokeSegments helper`, () => {
       strokeSpecText: `0[1:]`,
     });
 
-    expect(fromStart).not.toBeNull();
-    expect(toEnd).not.toBeNull();
-    if (fromStart == null || toEnd == null) {
-      return;
-    }
+    expect(toEnd).toMatchInlineSnapshot(
+      `"M 0 3 C 0 5.33 0 7.67 0 10 C 1.33 10 2.67 10 4 10 C 4 7.67 4 5.33 4 3 C 2.67 3 1.33 3 0 3 Z"`,
+    );
+  });
 
-    expect(fromStart).toContain(` Z`);
-    expect(toEnd).toContain(` Z`);
-    expect(fromStart).not.toContain(`NaN`);
-    expect(toEnd).not.toContain(`NaN`);
+  test(`supports percent open bounds on median path`, () => {
+    const fromStart = buildClosedSvgSegmentPathFromStrokeSpec({
+      strokePathsById: {
+        0: `M 0 0 L 0 10 L 4 10 L 4 0 Z`,
+      },
+      medianPathsById: {
+        0: `M 2 0 L 2 10`,
+      },
+      strokeSpecText: `0[:5%]`,
+    });
+    expect(fromStart).toMatchInlineSnapshot(
+      `"M 4 0.5 C 4 0.33 4 0.17 4 0 C 2.67 0 1.33 0 0 0 C 0 0 0 0.5 0 0.5 C 1.33 0.5 2.67 0.5 4 0.5 Z"`,
+    );
+
+    const toEnd = buildClosedSvgSegmentPathFromStrokeSpec({
+      strokePathsById: {
+        0: `M 0 0 L 0 10 L 4 10 L 4 0 Z`,
+      },
+      medianPathsById: {
+        0: `M 2 0 L 2 10`,
+      },
+      strokeSpecText: `0[5%:]`,
+    });
+
+    expect(toEnd).toMatchInlineSnapshot(
+      `"M 0 0.5 C 0 3.67 0 6.83 0 10 C 1.33 10 2.67 10 4 10 C 4 6.83 4 3.67 4 0.5 C 2.67 0.5 1.33 0.5 0 0.5 Z"`,
+    );
+  });
+
+  test(`supports percent-to-percent and mixed stroke/percent bounds`, () => {
+    const percentSegment = buildClosedSvgSegmentPathFromStrokeSpec({
+      strokePathsById: {
+        0: `M 0 0 L 0 10 L 4 10 L 4 0 Z`,
+      },
+      medianPathsById: {
+        0: `M 2 0 L 2 10`,
+      },
+      strokeSpecText: `0[5%:95%]`,
+    });
+    expect(percentSegment).toMatchInlineSnapshot(
+      `"M 4 9.5 C 4 6.5 4 3.5 4 0.5 C 4 0.5 4 9.5 4 9.5 C 2.67 9.5 1.33 9.5 0 9.5 C 0 9.5 0 0.5 0 0.5 C 0 3.5 0 6.5 0 9.5 C 0 9.5 0 0.5 0 0.5 C 1.33 0.5 2.67 0.5 4 0.5 Z"`,
+    );
+
+    const mixedSegmentA = buildClosedSvgSegmentPathFromStrokeSpec({
+      strokePathsById: {
+        0: `M 0 0 L 0 10 L 4 10 L 4 0 Z`,
+        1: `M -2 3 L 6 3`,
+      },
+      medianPathsById: {
+        0: `M 2 0 L 2 10`,
+      },
+      strokeSpecText: `0[5%:1]`,
+    });
+    expect(mixedSegmentA).toMatchInlineSnapshot(
+      `"M 0 3 C 0 5.33 0 7.67 0 10 C 1.33 10 2.67 10 4 10 C 4 6.83 4 3.67 4 0.5 C 4 0.5 0 3 0 3 C 1.33 3 2.67 3 4 3 C 4 3 0 0.5 0 0.5 C 0 3.67 0 6.83 0 10 C 1.33 10 2.67 10 4 10 C 4 7.67 4 5.33 4 3 C 4 3 0 0.5 0 0.5 C 1.33 0.5 2.67 0.5 4 0.5 Z"`,
+    );
+
+    const mixedSegmentB = buildClosedSvgSegmentPathFromStrokeSpec({
+      strokePathsById: {
+        0: `M 0 0 L 0 10 L 4 10 L 4 0 Z`,
+        1: `M -2 3 L 6 3`,
+      },
+      medianPathsById: {
+        0: `M 2 0 L 2 10`,
+      },
+      strokeSpecText: `0[1:95%]`,
+    });
+    expect(mixedSegmentB).toMatchInlineSnapshot(
+      `"M 0 3 C 0 5.33 0 7.67 0 10 C 1.33 10 2.67 10 4 10 C 4 9.83 4 9.67 4 9.5 C 2.67 9.5 1.33 9.5 0 9.5 C 0 9.67 0 9.83 0 10 C 1.33 10 2.67 10 4 10 C 4 7.67 4 5.33 4 3 C 2.67 3 1.33 3 0 3 Z"`,
+    );
   });
 
   test(`supports two-cutter slice as fill between cut line 1 and cut line 2`, () => {
@@ -170,18 +218,9 @@ describe(`strokeSegments helper`, () => {
       },
       strokeSpecText: `0[1:2]`,
     });
-
-    expect(segment).not.toBeNull();
-    if (segment == null) {
-      return;
-    }
-
-    expect(segment).toContain(` Z`);
-    expect(segment).not.toContain(`NaN`);
-
-    const middleArea = polygonAreaFromPath(segment);
-    expect(middleArea).toBeGreaterThan(30);
-    expect(middleArea).toBeLessThan(40);
+    expect(segment).toMatchInlineSnapshot(
+      `"M 0 3 C 0 5 0 7 0 9 C 2 9 4 9 6 9 C 6 7 6 5 6 3 C 4 3 2 3 0 3 Z"`,
+    );
   });
 
   test(`uses referenced stroke medians (not outlines) for 0[1:2] cutter seams`, () => {
@@ -201,12 +240,8 @@ describe(`strokeSegments helper`, () => {
       strokeSpecText: `0[1:2]`,
     });
 
-    expect(segment).not.toBeNull();
-    if (segment == null) {
-      return;
-    }
-
-    expect(segment).toContain(` Z`);
-    expect(segment).not.toContain(`NaN`);
+    expect(segment).toMatchInlineSnapshot(
+      `"M 0 3 C 0 5 0 7 0 9 C 2 9 4 9 6 9 C 6 7 6 5 6 3 C 4 3 2 3 0 3 Z"`,
+    );
   });
 });

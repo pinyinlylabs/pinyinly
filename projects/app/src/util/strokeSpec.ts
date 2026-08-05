@@ -1,9 +1,17 @@
 import { invariant } from "@pinyinly/lib/invariant";
 
-export interface StrokeSpecBound {
+export interface StrokeSpecStrokeBound {
+  kind: `stroke`;
   stroke: number;
   occurrence: number;
 }
+
+export interface StrokeSpecPercentBound {
+  kind: `percent`;
+  percent: number;
+}
+
+export type StrokeSpecBound = StrokeSpecStrokeBound | StrokeSpecPercentBound;
 
 export interface StrokeSpecRange {
   kind: `range`;
@@ -69,17 +77,37 @@ function splitTopLevel(input: string, separator: string): string[] {
 }
 
 function parseBound(text: string): StrokeSpecBound {
-  const boundMatch = /^(\d+)(?:#(\d+))?$/u.exec(text.trim());
+  const trimmed = text.trim();
+  const percentMatch = /^(\d+(?:\.\d+)?)%$/u.exec(trimmed);
+  if (percentMatch != null) {
+    const percent = Number(percentMatch[1]);
+    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+      throw new Error(
+        `Invalid slice boundary ${JSON.stringify(text)}. Percent must be between 0% and 100%.`,
+      );
+    }
+
+    return {
+      kind: `percent`,
+      percent,
+    };
+  }
+
+  const boundMatch = /^(\d+)(?:#(\d+))?$/u.exec(trimmed);
   if (boundMatch == null) {
     throw new Error(
-      `Invalid slice boundary ${JSON.stringify(text)}. Use N or N#occurrence.`,
+      `Invalid slice boundary ${JSON.stringify(text)}. Use N, N#occurrence, or P%.`,
     );
   }
 
   const stroke = Number(boundMatch[1]);
   const occurrence = Number(boundMatch[2] ?? `0`);
 
-  return { stroke, occurrence };
+  return {
+    kind: `stroke`,
+    stroke,
+    occurrence,
+  };
 }
 
 function parseAtom(text: string): StrokeSpecAtom {
@@ -154,6 +182,10 @@ function parseAtom(text: string): StrokeSpecAtom {
 }
 
 function formatBound(bound: StrokeSpecBound): string {
+  if (bound.kind === `percent`) {
+    return `${bound.percent}%`;
+  }
+
   return bound.occurrence === 0
     ? `${bound.stroke}`
     : `${bound.stroke}#${bound.occurrence}`;

@@ -2,6 +2,7 @@ import SVGPathCommander from "svg-path-commander";
 import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
 import { invariant } from "@pinyinly/lib/invariant";
 import { z } from "zod";
+import type { StrokeSpecBound } from "@/util/strokeSpec";
 
 export interface SvgPathIntersection {
   x: number;
@@ -696,6 +697,198 @@ function getMedianSeamOccurrences(
   return seams;
 }
 
+interface MedianSeamPair {
+  edgeBefore: SvgPathIntersection;
+  edgeAfter: SvgPathIntersection;
+}
+
+interface ResolvedSliceBoundSeam {
+  cutterPath: string;
+  seam: MedianSeamPair;
+}
+
+function estimatePathTangentAtLength(
+  path: string,
+  length: number,
+): PathPoint | null {
+  const totalLength = SVGPathCommander.getTotalLength(path);
+  if (totalLength <= 0) {
+    return null;
+  }
+
+  const baseDelta = Math.max(sampleStep, totalLength / 200);
+  for (const scale of [1, 2, 4, 8] as const) {
+    const delta = baseDelta * scale;
+    const start = Math.max(0, length - delta);
+    const end = Math.min(totalLength, length + delta);
+
+    if (end - start <= Number.EPSILON) {
+      continue;
+    }
+
+    const startPoint = SVGPathCommander.getPointAtLength(path, start);
+    const endPoint = SVGPathCommander.getPointAtLength(path, end);
+    const dx = endPoint.x - startPoint.x;
+    const dy = endPoint.y - startPoint.y;
+    const magnitude = Math.hypot(dx, dy);
+
+    if (magnitude > Number.EPSILON) {
+      return {
+        x: dx / magnitude,
+        y: dy / magnitude,
+      };
+    }
+  }
+
+  return null;
+}
+
+function buildNormalCutterPathAtMedianPercent({
+  targetPath,
+  targetMedianPath,
+  percent,
+}: {
+  targetPath: string;
+  targetMedianPath: string;
+  percent: number;
+}): { cutterPath: string; anchorPoint: PathPoint } | null {
+  const targetMedianLength = SVGPathCommander.getTotalLength(targetMedianPath);
+  if (targetMedianLength <= 0) {
+    return null;
+  }
+
+  const clampedPercent = Math.max(0, Math.min(100, percent));
+  const medianLength = (targetMedianLength * clampedPercent) / 100;
+  const anchor = SVGPathCommander.getPointAtLength(
+    targetMedianPath,
+    medianLength,
+  );
+  const tangent = estimatePathTangentAtLength(targetMedianPath, medianLength);
+  if (tangent == null) {
+    return null;
+  }
+
+  const normal = {
+    x: -tangent.y,
+    y: tangent.x,
+  };
+
+  const bbox = SVGPathCommander.getPathBBox(targetPath);
+  const width = Math.max(0, bbox.x2 - bbox.x);
+  const height = Math.max(0, bbox.y2 - bbox.y);
+  const halfLength = Math.max(Math.hypot(width, height) * 2, 200);
+
+  const start = {
+    x: anchor.x - normal.x * halfLength,
+    y: anchor.y - normal.y * halfLength,
+  };
+  const end = {
+    x: anchor.x + normal.x * halfLength,
+    y: anchor.y + normal.y * halfLength,
+  };
+
+  const cutterPath =
+    `M ${formatNumber(start.x)} ${formatNumber(start.y)} ` +
+    `L ${formatNumber(end.x)} ${formatNumber(end.y)}`;
+
+  return {
+    cutterPath,
+    anchorPoint: {
+      x: anchor.x,
+      y: anchor.y,
+    },
+  };
+}
+
+function pickSeamPairAroundAnchorOnCutter({
+  intersections,
+  anchorBoundaryLength,
+}: {
+  intersections: readonly SvgPathIntersection[];
+  anchorBoundaryLength: number;
+}): MedianSeamPair | null {
+  if (intersections.length < 2) {
+    return null;
+  }
+
+  let afterIndex = intersections.findIndex(
+    (intersection) => intersection.boundaryLength > anchorBoundaryLength,
+  );
+  if (afterIndex < 0) {
+    afterIndex = intersections.length;
+  }
+
+  const edgeBefore = intersections[afterIndex - 1];
+  const edgeAfter = intersections[afterIndex];
+  if (edgeBefore != null && edgeAfter != null) {
+    return {
+      edgeBefore,
+      edgeAfter,
+    };
+  }
+
+  const closestTwo = [...intersections]
+    .sort(
+      (left, right) =>
+        Math.abs(left.boundaryLength - anchorBoundaryLength) -
+        Math.abs(right.boundaryLength - anchorBoundaryLength),
+    )
+    .slice(0, 2)
+    .sort((left, right) => left.boundaryLength - right.boundaryLength);
+
+  const fallbackBefore = closestTwo[0];
+  const fallbackAfter = closestTwo[1];
+  if (fallbackBefore == null || fallbackAfter == null) {
+    return null;
+  }
+
+  return {
+    edgeBefore: fallbackBefore,
+    edgeAfter: fallbackAfter,
+  };
+}
+
+function resolvePercentBoundSeam({
+  targetPath,
+  targetMedianPath,
+  percent,
+}: {
+  targetPath: string;
+  targetMedianPath: string;
+  percent: number;
+}): ResolvedSliceBoundSeam | null {
+  const normalCut = buildNormalCutterPathAtMedianPercent({
+    targetPath,
+    targetMedianPath,
+    percent,
+  });
+  if (normalCut == null) {
+    return null;
+  }
+
+  const intersections = sortByBoundaryLength(
+    getIntersectionPoints(targetPath, normalCut.cutterPath),
+  );
+  const anchorBoundaryLength = projectPointToPathLength(
+    normalCut.cutterPath,
+    normalCut.anchorPoint.x,
+    normalCut.anchorPoint.y,
+  );
+  const seam = pickSeamPairAroundAnchorOnCutter({
+    intersections,
+    anchorBoundaryLength,
+  });
+
+  if (seam == null) {
+    return null;
+  }
+
+  return {
+    cutterPath: normalCut.cutterPath,
+    seam,
+  };
+}
+
 function sampleClosedPathSegmentsForward(
   targetPath: string,
   startLength: number,
@@ -945,6 +1138,43 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
     return medianPathsById?.[strokeId] ?? strokePathsById[strokeId] ?? null;
   }
 
+  function resolveBoundSeam(args: {
+    targetPath: string;
+    targetMedianPath: string;
+    bound: StrokeSpecBound;
+  }): ResolvedSliceBoundSeam | null {
+    if (args.bound.kind === `percent`) {
+      return resolvePercentBoundSeam({
+        targetPath: args.targetPath,
+        targetMedianPath: args.targetMedianPath,
+        percent: args.bound.percent,
+      });
+    }
+
+    const cutterPath = resolveCutterPath(args.bound.stroke);
+    if (cutterPath == null) {
+      return null;
+    }
+
+    const occurrences = getMedianSeamOccurrences(
+      args.targetPath,
+      args.targetMedianPath,
+      cutterPath,
+    );
+    const seam = occurrences[args.bound.occurrence];
+    if (seam == null) {
+      return null;
+    }
+
+    return {
+      cutterPath,
+      seam: {
+        edgeBefore: seam.edgeBefore,
+        edgeAfter: seam.edgeAfter,
+      },
+    };
+  }
+
   for (const item of spec.items) {
     for (const atom of item.atoms) {
       if (atom.kind === `range`) {
@@ -965,35 +1195,23 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
         continue;
       }
 
-      const cutterStrokeId = atom.from?.stroke ?? atom.to?.stroke;
-      if (cutterStrokeId == null) {
-        continue;
-      }
-
-      const singleCutterPath = resolveCutterPath(cutterStrokeId);
-      if (singleCutterPath == null) {
-        continue;
-      }
-
       const targetMedianPath = medianPathsById?.[atom.stroke] ?? targetPath;
 
       const hasSingleBound =
         (atom.from == null && atom.to != null) ||
         (atom.from != null && atom.to == null);
       if (hasSingleBound) {
-        const occurrences = getMedianSeamOccurrences(
-          targetPath,
-          targetMedianPath,
-          singleCutterPath,
-        );
-        if (occurrences.length === 0) {
+        const bound = atom.from ?? atom.to;
+        if (bound == null) {
           continue;
         }
 
-        const seamOccurrence =
-          atom.from?.occurrence ?? atom.to?.occurrence ?? 0;
-        const seam = occurrences[seamOccurrence];
-        if (seam == null) {
+        const resolved = resolveBoundSeam({
+          targetPath,
+          targetMedianPath,
+          bound,
+        });
+        if (resolved == null) {
           continue;
         }
 
@@ -1001,8 +1219,8 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
         const path = buildClosedPathFromSingleMedianSeam({
           targetPath,
           targetMedianPath,
-          cutterPath: singleCutterPath,
-          seam,
+          cutterPath: resolved.cutterPath,
+          seam: resolved.seam,
           keep,
         });
 
@@ -1013,58 +1231,40 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
         continue;
       }
 
-      const fromOccurrence = atom.from?.occurrence ?? 0;
-      const toOccurrence = atom.to?.occurrence ?? 0;
-
-      const fromCutterStrokeId = atom.from?.stroke ?? cutterStrokeId;
-      const toCutterStrokeId = atom.to?.stroke ?? cutterStrokeId;
-
-      const fromCutterPath = resolveCutterPath(fromCutterStrokeId);
-      const toCutterPath = resolveCutterPath(toCutterStrokeId);
-      if (fromCutterPath == null || toCutterPath == null) {
+      const fromBound = atom.from;
+      const toBound = atom.to;
+      if (fromBound == null || toBound == null) {
         continue;
       }
 
-      const fromOccurrences = getMedianSeamOccurrences(
+      const fromResolved = resolveBoundSeam({
         targetPath,
         targetMedianPath,
-        fromCutterPath,
-      );
-      const toOccurrences = getMedianSeamOccurrences(
+        bound: fromBound,
+      });
+      const toResolved = resolveBoundSeam({
         targetPath,
         targetMedianPath,
-        toCutterPath,
-      );
-
-      if (
-        fromOccurrence < 0 ||
-        toOccurrence < 0 ||
-        fromOccurrence >= fromOccurrences.length ||
-        toOccurrence >= toOccurrences.length
-      ) {
-        continue;
-      }
-
-      const fromSeam = fromOccurrences[fromOccurrence];
-      const toSeam = toOccurrences[toOccurrence];
-      if (fromSeam == null || toSeam == null) {
+        bound: toBound,
+      });
+      if (fromResolved == null || toResolved == null) {
         continue;
       }
 
       const beforeCandidate = buildClosedPathFromMedianSeams(
         targetPath,
-        fromCutterPath,
-        toCutterPath,
-        fromSeam,
-        toSeam,
+        fromResolved.cutterPath,
+        toResolved.cutterPath,
+        fromResolved.seam,
+        toResolved.seam,
         `before`,
       );
       const afterCandidate = buildClosedPathFromMedianSeams(
         targetPath,
-        fromCutterPath,
-        toCutterPath,
-        fromSeam,
-        toSeam,
+        fromResolved.cutterPath,
+        toResolved.cutterPath,
+        fromResolved.seam,
+        toResolved.seam,
         `after`,
       );
 

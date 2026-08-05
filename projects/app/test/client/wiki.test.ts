@@ -23,7 +23,7 @@ import {
 import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { parseIndexRanges } from "#util/indexRanges.js";
-import { normalizeStrokeSpec } from "#util/strokeSpec.js";
+import { normalizeStrokeSpec, parseStrokeSpec } from "#util/strokeSpec.js";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -39,11 +39,7 @@ import {
   readFileSync,
   rm,
 } from "@pinyinly/lib/fs";
-import {
-  invariant,
-  nonNullable,
-  uniqueInvariant,
-} from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import SVGPathCommander from "svg-path-commander";
 import { describe, expect, test } from "vitest";
@@ -219,21 +215,17 @@ describe(`character.json files`, async () => {
 
   test(`component strokes conformance`, async () => {
     for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.components) {
-        for (const component of walkIdsNodeLeafs(
-          characterData.mnemonic.components,
-        )) {
-          const strokeIndices = parseIndexRanges(component.strokes);
-          // no duplicate stroke indicies in components (e.g. ❌ 0-3,2)
-          expect
-            .soft(() => {
-              uniqueInvariant(strokeIndices);
-            }, character)
-            .not.toThrow();
+      const decomps =
+        characterData.mnemonic?.components == null
+          ? []
+          : [characterData.mnemonic.components];
 
+      for (const decomp of decomps) {
+        for (const component of walkIdsNodeLeafs(decomp)) {
+          const strokeSpec = parseStrokeSpec(component.strokes);
           if (Array.isArray(characterData.svg.strokes)) {
             // at least one stroke if there's SVG stroke data
-            expect.soft(strokeIndices.length, character).toBeGreaterThan(0);
+            expect.soft(strokeSpec.items.length, character).toBeGreaterThan(0);
           }
         }
       }
@@ -373,12 +365,34 @@ describe(`character.json files`, async () => {
 
       if (characterData.mnemonic?.components) {
         const allComponentStrokes = new Set<number>();
+        function processStrokeSpecAtom(
+          atom: ReturnType<
+            typeof parseStrokeSpec
+          >["items"][number]["atoms"][number],
+        ) {
+          switch (atom.kind) {
+            case "range": {
+              for (let i = atom.start; i <= atom.end; i++) {
+                allComponentStrokes.add(i);
+              }
+              break;
+            }
+            case "slice": {
+              allComponentStrokes.add(atom.stroke);
+              break;
+            }
+          }
+        }
+
         for (const component of walkIdsNodeLeafs(
           characterData.mnemonic.components,
         )) {
-          const strokeIndices = parseIndexRanges(component.strokes);
-          for (const index of strokeIndices) {
-            allComponentStrokes.add(index);
+          const strokeSpec = parseStrokeSpec(component.strokes);
+
+          for (const item of strokeSpec.items) {
+            for (const atom of item.atoms) {
+              processStrokeSpecAtom(atom);
+            }
           }
         }
 

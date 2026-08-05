@@ -155,20 +155,37 @@ describe(`transformFigmaSvgPathsToArphicTtfSpace`, () => {
     );
   });
 
-  test(`should reject medians that are too far from the stroke boundary`, () => {
+  test(`should reject medians that start too far from the stroke boundary`, () => {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
         <g>
-          <path d="M120 120 L 180 180" stroke-dasharray="4 2" />
+          <path d="M145 145 L 190 190" stroke-dasharray="4 2" />
           <path d="M100 100 H 200 V 200 H 100 Z" />
         </g>
       </svg>
     `;
 
-    expect(() =>
-      transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg)),
-    ).toThrow(
-      /Expected median path 1 \(1-indexed, d=M120 120 L 180 180\) start point to be within 8 units of the stroke boundary/u,
+    expect(() => {
+      transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg));
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[InvariantException: Expected median path 1 (1-indexed, d=M145 145 L 190 190) start point to be within 40 units of the stroke boundary, but found 45.00]`,
+    );
+  });
+
+  test(`should reject medians that end too far from the stroke boundary`, () => {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+        <g>
+          <path d="M120 120 L 155 155" stroke-dasharray="4 2" />
+          <path d="M100 100 H 200 V 200 H 100 Z" />
+        </g>
+      </svg>
+    `;
+
+    expect(() => {
+      transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg));
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[InvariantException: Expected median path 1 (1-indexed, d=M120 120 L 155 155) end point to be within 40 units of the stroke boundary, but found 45.00]`,
     );
   });
 

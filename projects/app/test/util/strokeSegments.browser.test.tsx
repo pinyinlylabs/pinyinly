@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { page } from "vitest/browser";
+import type { Locator } from "vitest/browser";
+import { page, locators } from "vitest/browser";
 import { View } from "react-native";
 import { HanziGraphic } from "#client/ui/HanziGraphic.tsx";
 import "#global.css";
@@ -10,6 +11,20 @@ import {
   parseSvgPaths,
   transformFigmaSvgPathsToArphicTtfSpace,
 } from "#util/svgFont.js";
+
+locators.extend({
+  getByTagName(tagName: string) {
+    return tagName;
+  },
+});
+
+// if you are using typescript, you can extend LocatorSelectors interface
+// to have the autocompletion in locators.extend, page.* and locator.* methods
+declare module "vitest/browser" {
+  interface LocatorSelectors {
+    getByTagName(tagName: string): Locator;
+  }
+}
 
 // 电 diàn
 const dian4Svg = {
@@ -63,6 +78,11 @@ const hui2Svg = {
 };
 
 test.for([
+  {
+    name: `hui2Svg (1)`,
+    svg: hui2Svg,
+    strokeSpec: `2,1[13%:34.6%],3,4,5+6[27%:73%]`,
+  },
   { name: `dian4 (1)`, svg: dian4Svg, strokeSpec: `0-1,3` },
   { name: `dian4 (2)`, svg: dian4Svg, strokeSpec: `4[1:3]` },
   { name: `dian4 (3)`, svg: dian4Svg, strokeSpec: `4[1:2]` },
@@ -89,6 +109,8 @@ test.for([
       />
     </View>,
   );
+
+  await expect.element(page.getByTagName(`path`).first()).toBeInTheDocument();
 
   await expect(page.getByTestId(`pyly-snapshot`)).toMatchScreenshot(name);
 });
