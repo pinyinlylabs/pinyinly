@@ -41,6 +41,8 @@ export function invariant(
       message += ` (args: ${JSON.stringify(unusedArgs)})`;
     }
 
+    // oxlint-disable-next-line no-debugger
+    debugger;
     throw new Invariant(message);
   }
 }
