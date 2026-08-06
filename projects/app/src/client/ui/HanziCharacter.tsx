@@ -1,12 +1,12 @@
 import { G, Svg } from "react-native-svg";
-import type { HanziCharacterColor } from "./HanziCharacter.utils";
 import { SvgPath } from "./SvgPath";
+import type { HanziStrokeColor } from "@/data/model";
 
 export function HanziCharacter(props: {
   strokesData: string[];
   highlightStrokes: number[];
   highlightPaths?: readonly string[];
-  highlightColor?: HanziCharacterColor;
+  highlightColor?: HanziStrokeColor | null;
   className?: string;
 }) {
   const highlightedStrokes = new Set(props.highlightStrokes);

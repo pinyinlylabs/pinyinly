@@ -3,9 +3,13 @@
     {
       "files": [
         "projects/app/test/data/**/*.json",
-        "projects/app/src/data/dictionary.asset.json"
+        "projects/app/src/data/**/*.asset.json"
       ],
-      "indent": 1
+      "indentLevels": 1
+    },
+    {
+      "files": ["projects/app/public/raw/mdx/*.json"],
+      "indentLevels": 2
     }
   ]
 }

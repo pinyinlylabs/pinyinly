@@ -7,12 +7,8 @@ import type {
   PinyinText,
   Skill,
   SrsStateType,
-  WikiCharacterDecomposition,
 } from "@/data/model";
-import {
-  wikiCharacterDataSchema,
-  wikiCharacterDecompositionSchema,
-} from "@/data/model";
+import { wikiCharacterDataSchema } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
@@ -23,10 +19,7 @@ import {
   hanziWordToPinyinTyped,
   rankRules,
 } from "@/data/skills";
-import {
-  userWikiCharacterDecompositionSetting,
-  userHanziMeaningDefs,
-} from "@/data/userSettings";
+import { userHanziMeaningDefs } from "@/data/userSettings";
 import type {
   CharacterComponentUsageEntry,
   CharacterDecompositionEntry,
@@ -437,54 +430,13 @@ export const wikiMdxQuery = Platform.select({
 });
 
 const characterDecompositionDataSchema = wikiCharacterDataSchema.pick({
-  decompositions: true,
+  decompositions2: true,
   mnemonic: true,
 });
 
 export type CharacterDecompositionData = z.infer<
   typeof characterDecompositionDataSchema
 >;
-
-export const characterDecompositionQueryWeb = (hanzi: HanziCharacter | null) =>
-  queryOptions({
-    queryKey: [`characterDecomposition`, hanzi] as const,
-    queryFn:
-      hanzi == null
-        ? skipToken
-        : async ({ signal }): Promise<CharacterDecompositionData | null> => {
-            const response = await fetch(
-              `/raw/decompositions/${encodeURIComponent(hanzi)}.json`,
-              { signal },
-            );
-            if (!response.ok) {
-              return null;
-            }
-
-            const json = (await response.json()) as unknown;
-            const result = characterDecompositionDataSchema.safeParse(json);
-            return result.success ? result.data : null;
-          },
-    staleTime: Infinity,
-  });
-
-export const characterDecompositionQueryNative = (
-  hanzi: HanziCharacter | null,
-) =>
-  queryOptions({
-    queryKey: [`characterDecomposition`, hanzi] as const,
-    queryFn:
-      hanzi == null
-        ? skipToken
-        : async (): Promise<CharacterDecompositionData | null> => {
-            return null;
-          },
-    staleTime: Infinity,
-  });
-
-export const characterDecompositionQuery = Platform.select({
-  web: characterDecompositionQueryWeb,
-  default: characterDecompositionQueryNative,
-});
 
 export const fetchAudioBufferQuery = (
   uri: string | null,
@@ -931,204 +883,12 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
   });
 }
 
-function parseUserWikiCharacterDecompositionKey(
-  key: string,
-): HanziText | undefined {
-  const keyPrefix = userWikiCharacterDecompositionSetting.entity.keyPrefix;
-  if (!key.startsWith(keyPrefix)) {
-    return undefined;
-  }
-
-  const marshaledHanzi = key.slice(keyPrefix.length);
-  if (marshaledHanzi.length === 0) {
-    return undefined;
-  }
-
-  try {
-    return decodeURIComponent(marshaledHanzi) as HanziText;
-  } catch {
-    return undefined;
-  }
-}
-
-function parseUserWikiCharacterDecompositionValue(
-  hanzi: HanziText,
-  value: unknown,
-): WikiCharacterDecomposition | null {
-  const hanziAlias =
-    userWikiCharacterDecompositionSetting.entity._def.valueType._def.shape.hanzi
-      ._def.alias;
-
-  const hydratedValue =
-    typeof value === `object` && value != null
-      ? {
-          [hanziAlias]: encodeURIComponent(hanzi),
-          ...(value as Record<string, unknown>),
-        }
-      : value;
-
-  let decodedValue: ReturnType<
-    typeof userWikiCharacterDecompositionSetting.entity.unmarshalValue
-  >;
-  try {
-    decodedValue = userWikiCharacterDecompositionSetting.entity.unmarshalValue(
-      hydratedValue as RizzleEntityMarshaled<
-        typeof userWikiCharacterDecompositionSetting.entity
-      >,
-    );
-  } catch {
-    return null;
-  }
-
-  const parsed = wikiCharacterDecompositionSchema.safeParse(
-    decodedValue.components,
-  );
-  if (parsed.success) {
-    return parsed.data;
-  }
-
-  return null;
-}
-
-function userCharacterDecompositionCollectionOptions({
-  settingCollection,
-}: {
-  settingCollection: SettingCollection;
-}): CollectionConfig<CharacterDecompositionEntry, HanziText> {
-  const overrideSettings = createLiveQueryCollection((q) =>
-    q
-      .from({ setting: settingCollection })
-      .where(({ setting }) =>
-        like(
-          setting.key,
-          `${userWikiCharacterDecompositionSetting.entity.keyPrefix}%`,
-        ),
-      ),
-  );
-
-  return {
-    autoIndex: `eager`,
-    defaultIndexType: BTreeIndex,
-    id: `userCharacterDecomposition`,
-    sync: {
-      rowUpdateMode: `full`,
-      sync: (params) => {
-        const { begin, write, commit, collection } = params;
-
-        const markReadyOnce = memoize0(() => {
-          params.markReady();
-        });
-        const markReadyTimeout = setTimeout(() => {
-          markReadyOnce();
-        }, 5000);
-
-        type OverrideSettingChanges = CollectionChanges<
-          typeof overrideSettings
-        >;
-
-        const onChanges = (changes: OverrideSettingChanges) => {
-          try {
-            begin();
-
-            for (const change of changes) {
-              const setting =
-                change.type === `delete`
-                  ? (change.previousValue ?? change.value)
-                  : change.value;
-              const hanzi = parseUserWikiCharacterDecompositionKey(setting.key);
-              if (hanzi == null) {
-                continue;
-              }
-
-              if (change.type === `delete`) {
-                const existing = collection.get(hanzi);
-                if (existing != null) {
-                  write({ type: `delete`, value: existing });
-                }
-                continue;
-              }
-
-              const decompositionComponents =
-                parseUserWikiCharacterDecompositionValue(
-                  hanzi,
-                  change.value.value,
-                );
-              const existing = collection.get(hanzi);
-
-              if (decompositionComponents == null) {
-                if (existing != null) {
-                  write({ type: `delete`, value: existing });
-                }
-                continue;
-              }
-
-              const next: CharacterDecompositionEntry = {
-                hanzi,
-                decompositionComponents,
-              };
-
-              if (existing == null) {
-                write({ type: `insert`, value: next });
-                continue;
-              }
-
-              if (
-                !isEqual(
-                  existing.decompositionComponents,
-                  next.decompositionComponents,
-                )
-              ) {
-                write({ type: `update`, value: next });
-              }
-            }
-
-            commit();
-          } finally {
-            markReadyOnce();
-          }
-        };
-
-        let subscription:
-          | ReturnType<typeof overrideSettings.subscribeChanges>
-          | undefined;
-        let isDisposed = false;
-
-        void overrideSettings
-          .preload()
-          .then(() => {
-            if (isDisposed) {
-              return;
-            }
-
-            subscription = overrideSettings.subscribeChanges(onChanges, {
-              includeInitialState: true,
-            });
-          })
-          .catch((error: unknown) => {
-            console.error(`userCharacterDecomposition preload failed`, error);
-            markReadyOnce();
-          });
-
-        return () => {
-          isDisposed = true;
-          clearTimeout(markReadyTimeout);
-          subscription?.unsubscribe();
-        };
-      },
-    },
-    getKey: (item) => item.hanzi,
-  };
-}
-
 function characterDecompositionCollectionOptions({
   builtinCharacterDecomposition,
-  userCharacterDecomposition,
 }: {
   builtinCharacterDecomposition: CharacterDecompositionCollection;
-  userCharacterDecomposition: CharacterDecompositionCollection;
 }): CollectionConfig<CharacterDecompositionEntry, HanziText> {
   const builtInByHanzi = new Map<HanziText, CharacterDecompositionEntry>();
-  const userByHanzi = new Map<HanziText, CharacterDecompositionEntry>();
 
   return {
     autoIndex: `eager`,
@@ -1147,40 +907,19 @@ function characterDecompositionCollectionOptions({
         }, 5000);
 
         const applyRow = (hanzi: HanziText) => {
-          const user = userByHanzi.get(hanzi);
           const builtIn = builtInByHanzi.get(hanzi);
-          const nextComponents =
-            user?.decompositionComponents ?? builtIn?.decompositionComponents;
           const existing = collection.get(hanzi);
 
-          if (nextComponents == null) {
+          if (builtIn == null) {
             if (existing != null) {
               write({ type: `delete`, value: existing });
             }
-            return;
-          }
-
-          const next: CharacterDecompositionEntry = {
-            hanzi,
-            decompositionComponents: nextComponents,
-          };
-
-          if (existing == null) {
-            write({ type: `insert`, value: next });
-            return;
-          }
-
-          if (
-            !isEqual(
-              existing.decompositionComponents,
-              next.decompositionComponents,
-            )
-          ) {
-            write({ type: `update`, value: next });
+          } else if (existing == null) {
+            write({ type: `insert`, value: builtIn });
+          } else if (!isEqual(existing, builtIn)) {
+            write({ type: `update`, value: builtIn });
           }
         };
-
-        type UserChanges = CollectionChanges<typeof userCharacterDecomposition>;
 
         type BuiltInChanges = CollectionChanges<
           typeof builtinCharacterDecomposition
@@ -1200,41 +939,7 @@ function characterDecompositionCollectionOptions({
                 continue;
               }
 
-              builtInByHanzi.set(change.value.hanzi, {
-                hanzi: change.value.hanzi,
-                decompositionComponents: change.value.decompositionComponents,
-              });
-              changedHanzi.add(change.value.hanzi);
-            }
-
-            for (const hanzi of changedHanzi) {
-              applyRow(hanzi);
-            }
-
-            commit();
-          } finally {
-            markReadyOnce();
-          }
-        };
-
-        const onOverrideChanges = (changes: UserChanges) => {
-          try {
-            begin();
-
-            const changedHanzi = new Set<HanziText>();
-
-            for (const change of changes) {
-              if (change.type === `delete`) {
-                const previous = change.previousValue ?? change.value;
-                userByHanzi.delete(previous.hanzi);
-                changedHanzi.add(previous.hanzi);
-                continue;
-              }
-
-              userByHanzi.set(change.value.hanzi, {
-                hanzi: change.value.hanzi,
-                decompositionComponents: change.value.decompositionComponents,
-              });
+              builtInByHanzi.set(change.value.hanzi, change.value);
               changedHanzi.add(change.value.hanzi);
             }
 
@@ -1255,10 +960,8 @@ function characterDecompositionCollectionOptions({
           | undefined;
         let isDisposed = false;
 
-        void Promise.all([
-          builtinCharacterDecomposition.preload(),
-          userCharacterDecomposition.preload(),
-        ])
+        void builtinCharacterDecomposition
+          .preload()
           .then(() => {
             if (isDisposed) {
               return;
@@ -1269,15 +972,9 @@ function characterDecompositionCollectionOptions({
                 includeInitialState: true,
               });
 
-            const userSubscription =
-              userCharacterDecomposition.subscribeChanges(onOverrideChanges, {
-                includeInitialState: true,
-              });
-
             subscription = {
               unsubscribe: () => {
                 builtInSubscription.unsubscribe();
-                userSubscription.unsubscribe();
               },
             };
           })
@@ -1705,7 +1402,6 @@ export interface Db {
   skillRatingCollection: SkillRatingCollection;
   skillStateCollection: SkillStateCollection;
   targetSkillsCollection: TargetSkillsCollection;
-  userCharacterDecomposition: CharacterDecompositionCollection;
   userDictionary: UserDictionaryCollection;
 }
 
@@ -1780,13 +1476,6 @@ export function makeDb(rizzle: Rizzle): Db {
     }),
   );
 
-  const userCharacterDecomposition: CharacterDecompositionCollection =
-    createCollection(
-      userCharacterDecompositionCollectionOptions({
-        settingCollection,
-      }),
-    );
-
   const userDictionary: UserDictionaryCollection = createCollection(
     userDictionaryCollectionOptions({ settingCollection }),
   );
@@ -1809,7 +1498,6 @@ export function makeDb(rizzle: Rizzle): Db {
     createCollection(
       characterDecompositionCollectionOptions({
         builtinCharacterDecomposition,
-        userCharacterDecomposition,
       }),
     );
 
@@ -1832,10 +1520,7 @@ export function makeDb(rizzle: Rizzle): Db {
 
           const applyRows = async () => {
             const nextRows = await buildCharacterComponentUsageEntries(
-              characterDecompositionCollection.toArray.map((entry) => ({
-                hanzi: entry.hanzi,
-                decompositionComponents: entry.decompositionComponents,
-              })),
+              characterDecompositionCollection.toArray,
             );
 
             const nextByKey = new Map(
@@ -1914,7 +1599,6 @@ export function makeDb(rizzle: Rizzle): Db {
     builtInDictionarySearch,
     characterComponentUsage,
     characterDecompositionCollection,
-    userCharacterDecomposition,
     dictionarySearch,
     settingCollection,
     settingHistoryCollection,

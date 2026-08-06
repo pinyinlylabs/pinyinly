@@ -101,12 +101,14 @@ function decomp(char: HanziCharacter) {
   }
 
   allWords.add(char);
-  const ids = charactersJson.get(char)?.decomposition;
-  if (ids != null) {
-    const idsNode = parseIds(ids) as IdsNode<HanziCharacter>;
-    for (const leaf of walkIdsNodeLeafs(idsNode)) {
-      if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
-        decomp(leaf);
+  const decompositions = charactersJson.get(char)?.decompositions;
+  if (decompositions != null) {
+    for (const ids of Object.keys(decompositions)) {
+      const idsNode = parseIds(ids) as IdsNode<HanziCharacter>;
+      for (const leaf of walkIdsNodeLeafs(idsNode)) {
+        if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
+          decomp(leaf);
+        }
       }
     }
   }

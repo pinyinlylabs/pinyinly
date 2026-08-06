@@ -1,7 +1,6 @@
 {
-  "componentFormOf": "竹",
   "hanzi": "𥫗",
-  "svg": {
-    "strokes": 6
-  }
+  "svg": { "strokes": 6 },
+  "componentFormOf": "竹",
+  "decompositions": {}
 }

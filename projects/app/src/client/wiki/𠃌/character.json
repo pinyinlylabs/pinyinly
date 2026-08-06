@@ -1,7 +1,6 @@
 {
   "hanzi": "𠃌",
+  "svg": { "strokes": 1 },
   "isStructural": true,
-  "svg": {
-    "strokes": 1
-  }
+  "decompositions": {}
 }

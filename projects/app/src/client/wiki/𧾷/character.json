@@ -1,10 +1,9 @@
 {
-  "componentFormOf": "足",
   "hanzi": "𧾷",
+  "svg": { "strokes": 7 },
+  "componentFormOf": "足",
   "mnemonic": {
-    "components": ["⿱", { "hanzi": "口" }, { "hanzi": "止" }]
+    "decomposition": "⿱口止"
   },
-  "svg": {
-    "strokes": 7
-  }
+  "decompositions": { "⿱口止": ["", ""] }
 }

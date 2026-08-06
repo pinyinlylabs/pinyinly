@@ -1,14 +1,6 @@
-import {
-  isHanziCharacter,
-  mapIdsNodeLeafs,
-  parseIds,
-  walkIdsNodeLeafs,
-} from "#data/hanzi.js";
+import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import { wikiCharacterDataSchema } from "#data/model.js";
-import type {
-  HanziText,
-  wikiCharacterDecompositionSchema,
-} from "#data/model.js";
+import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   parseSvgPaths,
@@ -136,15 +128,6 @@ const allCharacters = await glob(`${wikiDir}/*`).then((ps) =>
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
-function collectStrokeSpecTexts(
-  values: z.infer<typeof wikiCharacterDecompositionSchema>[],
-): string[] {
-  const allStrokes = values
-    .flatMap((value) => [...walkIdsNodeLeafs(value)])
-    .map((c) => c.strokes);
-  return Array.from(new Set(allStrokes));
-}
-
 function medianPointsToSvgPath(points: readonly StrokeMedianPoint[]): string {
   return `M ` + points.map((point) => `${point[0]} ${point[1]}`).join(` L `);
 }
@@ -249,12 +232,9 @@ for (const character of allCharacters) {
     );
   }
 
-  const strokeSpecTexts = collectStrokeSpecTexts([
-    ...(existingData.mnemonic == null
-      ? []
-      : [existingData.mnemonic.components]),
-    ...(existingData.decompositions ?? []),
-  ]);
+  const strokeSpecTexts = Object.values(
+    existingData.decompositions ?? {},
+  ).flat();
 
   const generatedSegments =
     nextMedians == null

@@ -4,7 +4,7 @@ import {
   buildClosedSvgSegmentPathFromStrokeSpec,
   getSvgPathIntersections,
 } from "@/util/strokeSegments";
-import { parseStrokeSpec2 } from "@/util/strokeSpec";
+import { parseStrokeSpec } from "@/util/strokeSpec";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Switch, Text, TextInput, View } from "react-native";
 
@@ -164,7 +164,7 @@ function parseSvgFieldData(svgFieldText: string): ParsedSvgFieldData {
 }
 
 function inferPrimaryTargetStrokeId(strokeSpecText: string): number | null {
-  const spec = parseStrokeSpec2(strokeSpecText);
+  const spec = parseStrokeSpec(strokeSpecText);
 
   for (const item of spec) {
     for (const atom of item) {

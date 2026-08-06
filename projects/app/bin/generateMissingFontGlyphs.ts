@@ -40,15 +40,15 @@ const charactersJson = await loadCharactersJson();
 
 for (const [character, characterData] of charactersJson) {
   allComponents.add(character);
-  const ids = characterData.decomposition;
   invariant(
-    ids != null,
+    characterData.decompositions != null,
     `character "${character}" (${unicodeShortIdentifier(character)}) has no decomposition`,
   );
-  const idsNode = parseIds(ids);
-  for (const leaf of walkIdsNodeLeafs(idsNode)) {
-    if (strokeCountPlaceholderOrNull(leaf) == null) {
-      allComponents.add(leaf);
+  for (const ids of Object.keys(characterData.decompositions)) {
+    for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
+      if (strokeCountPlaceholderOrNull(leaf) == null) {
+        allComponents.add(leaf);
+      }
     }
   }
 }

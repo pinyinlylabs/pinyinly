@@ -1,7 +1,6 @@
 {
   "hanzi": "㐅",
+  "svg": { "strokes": 2 },
   "simplifiedForm": "五",
-  "svg": {
-    "strokes": 2
-  }
+  "decompositions": {}
 }

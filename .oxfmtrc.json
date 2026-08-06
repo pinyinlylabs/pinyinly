@@ -20,9 +20,9 @@
   ],
   "overrides": [
     {
-      "files": ["/projects/app/src/client/wiki/**/*.json"],
+      "files": ["projects/app/src/client/wiki/**/*.json"],
       "options": {
-        "printWidth": 320
+        "printWidth": 80
       }
     },
     {

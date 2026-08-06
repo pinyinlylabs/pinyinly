@@ -1,16 +1,13 @@
 import type { DictionarySearchEntry } from "@/client/query";
-import {
-  characterDecompositionQuery,
-  hanziSvgPathsQuery,
-} from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
-import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
+import { isHanziCharacter, parseIds, walkIdsNodeLeafs } from "@/data/hanzi";
 import type {
   HanziCharacter as HanziCharacterType,
   HanziText,
   HanziWord,
-  WikiCharacterComponent,
+  IdsNode,
+  MnemonicHanziComponent,
 } from "@/data/model";
 import {
   hanziWordMeaningHintCaptionSetting,
@@ -21,7 +18,6 @@ import {
 } from "@/data/userSettings";
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -40,6 +36,7 @@ import {
   hintFirstLineLength,
   parseHintText,
 } from "./hintText";
+import zip from "lodash/zip";
 
 export function WikiHanziCharacterMeaning({ hanzi }: { hanzi: HanziText }) {
   if (!isHanziCharacter(hanzi)) {
@@ -58,31 +55,46 @@ export function WikiHanziCharacterMeaningBox({
   const [isEditMode, setIsEditMode] = useState(false);
   const db = useDb();
 
-  const { data: selectedDecomposition } = useLiveQuery(
+  const { data: mnemonicDecomposition } = useLiveQuery(
     (q) =>
       q
         .from({ entry: db.characterDecompositionCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .select(({ entry }) => ({
-          decompositionComponents: entry.decompositionComponents,
+          ids: entry.ids,
+          strokeSpecs: entry.strokeSpecs,
         }))
         .findOne(),
     [db.characterDecompositionCollection, hanzi],
   );
 
-  const selectedComponents =
-    selectedDecomposition?.decompositionComponents == null
+  // const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
+
+  const mnemonicDecompositionComponents =
+    mnemonicDecomposition?.ids == null
       ? undefined
-      : [...walkIdsNodeLeafs(selectedDecomposition.decompositionComponents)];
+      : zip(
+          [
+            ...walkIdsNodeLeafs(
+              parseIds(
+                mnemonicDecomposition.ids,
+              ) as IdsNode<HanziCharacterType>,
+            ),
+          ],
+          mnemonicDecomposition.strokeSpecs,
+        ).map(
+          ([componentHanzi, componentStrokeSpec]): MnemonicHanziComponent => {
+            return {
+              hanzi: componentHanzi ?? null,
+              strokeSpec: componentStrokeSpec,
+            };
+          },
+        );
 
-  const { data: hanziSvgPathsData } = useQuery(hanziSvgPathsQuery(hanzi));
-
-  const { data: mnemonicData } = useQuery(characterDecompositionQuery(hanzi));
-
-  const hanziList: HanziText[] = [];
-  if (selectedComponents != null) {
-    for (const component of selectedComponents) {
-      if (component.hanzi != null) {
+  const hanziList: HanziCharacterType[] = [];
+  if (mnemonicDecompositionComponents != null) {
+    for (const component of mnemonicDecompositionComponents) {
+      if (component.hanzi !== null) {
         hanziList.push(component.hanzi);
       }
     }
@@ -135,22 +147,13 @@ export function WikiHanziCharacterMeaningBox({
     ]),
   );
 
-  const defaultMnemonicComponents =
-    mnemonicData?.mnemonic?.components == null
-      ? undefined
-      : [...walkIdsNodeLeafs(mnemonicData.mnemonic.components)];
-  const componentsForAi = selectedComponents ?? defaultMnemonicComponents;
-  const meaningAiComponents = aiMeaningComponents(
-    componentsForAi,
-    glossByHanzi,
-  );
-
   return (
     <WikiTitledBox
       title="Recognize the meaning"
       onEditingChange={setIsEditMode}
       bottomCaption={
-        selectedComponents != null && selectedComponents.length > 0
+        mnemonicDecompositionComponents != null &&
+        mnemonicDecompositionComponents.length > 0
           ? `Using the components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
           : undefined
       }
@@ -162,8 +165,7 @@ export function WikiHanziCharacterMeaningBox({
           glossByHanzi={glossByHanzi}
           hanzi={hanzi}
           primaryMeaningGloss={primaryMeaningGloss}
-          selectedComponents={selectedComponents}
-          strokeSvgs={hanziSvgPathsData?.strokes}
+          hanziComponents={mnemonicDecompositionComponents}
         />
       </View>
 
@@ -173,8 +175,8 @@ export function WikiHanziCharacterMeaningBox({
 
       <MeaningsSection
         hanzi={hanzi}
-        mnemonicHints={mnemonicData?.mnemonic?.hints}
-        aiComponents={meaningAiComponents}
+        mnemonicHints={[]}
+        aiComponents={[]}
         isEditMode={isEditMode}
       />
     </WikiTitledBox>
@@ -620,36 +622,6 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
 
 function renderMentalPathThought(thought: string): ReactNode {
   return thought;
-}
-
-function aiMeaningComponents(
-  components: readonly WikiCharacterComponent[] | undefined,
-  glossByHanzi: ReadonlyMap<string, string>,
-): readonly MeaningHintComponent[] {
-  if (components == null) {
-    return [];
-  }
-
-  return components
-    .map((component) => {
-      const meaning =
-        component.hanzi == null ? undefined : glossByHanzi.get(component.hanzi);
-      const cleanedMeaning =
-        meaning == null || meaning.trim().length === 0 ? undefined : meaning;
-
-      return {
-        hanzi: component.hanzi,
-        label: component.label,
-        meaning: cleanedMeaning,
-      };
-    })
-    .filter((component) => {
-      return (
-        component.hanzi != null ||
-        component.label != null ||
-        component.meaning != null
-      );
-    });
 }
 
 function hasSettingText(value: unknown): boolean {

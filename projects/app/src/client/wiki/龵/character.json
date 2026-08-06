@@ -1,7 +1,6 @@
 {
-  "componentFormOf": "手",
   "hanzi": "龵",
-  "svg": {
-    "strokes": 4
-  }
+  "svg": { "strokes": 4 },
+  "componentFormOf": "手",
+  "decompositions": {}
 }
