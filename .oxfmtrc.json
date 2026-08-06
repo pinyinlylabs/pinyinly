@@ -20,6 +20,12 @@
   ],
   "overrides": [
     {
+      "files": ["/projects/app/src/client/wiki/**/*.json"],
+      "options": {
+        "printWidth": 320
+      }
+    },
+    {
       "files": ["*.md", "*.mdx"],
       "options": {
         "printWidth": 100,

@@ -1,3 +1,4 @@
+import * as oxfmt from "oxfmt";
 import { sortComparatorString } from "#collections.ts";
 import { readFile, writeUtf8FileIfChanged } from "#fs.ts";
 import isEqual from "lodash/isEqual.js";
@@ -18,7 +19,6 @@ type JsonFmtConfigLoadResultType = {
 };
 
 const jsonFmtConfigFilename = `.jsonfmtrc.json`;
-const defaultJsonIndent = 2;
 
 function parseJsonFmtConfig(content: unknown): JsonFmtConfigType {
   if (
@@ -82,7 +82,7 @@ function parseJsonFmtConfig(content: unknown): JsonFmtConfigType {
 
 async function loadJsonFmtConfig(
   filePath: string,
-): Promise<JsonFmtConfigLoadResultType> {
+): Promise<JsonFmtConfigLoadResultType | null> {
   const absoluteFilePath = path.resolve(filePath);
   let currentDir = path.dirname(absoluteFilePath);
   const encoding = `utf8`;
@@ -109,12 +109,7 @@ async function loadJsonFmtConfig(
     currentDir = parentDir;
   }
 
-  return {
-    config: {
-      rules: [{ files: [`**/*.json`], indent: defaultJsonIndent }],
-    },
-    configDir: path.dirname(absoluteFilePath),
-  };
+  return null;
 }
 
 function toRelativePosixPath(baseDir: string, filePath: string): string {
@@ -125,8 +120,13 @@ function toRelativePosixPath(baseDir: string, filePath: string): string {
 
 export async function getJsonIndentForFilePath(
   filePath: string,
-): Promise<number> {
-  const { config, configDir } = await loadJsonFmtConfig(filePath);
+): Promise<number | null> {
+  const jsonFmtConfig = await loadJsonFmtConfig(filePath);
+  if (jsonFmtConfig == null) {
+    return null;
+  }
+
+  const { config, configDir } = jsonFmtConfig;
   const relativePosixPath = toRelativePosixPath(configDir, filePath);
 
   for (const rule of config.rules) {
@@ -138,7 +138,7 @@ export async function getJsonIndentForFilePath(
     }
   }
 
-  return defaultJsonIndent;
+  return null;
 }
 
 /**
@@ -182,14 +182,25 @@ function stableObjectKeyOrder<T>(_key: string, value: T): T {
   return value;
 }
 
+export async function format(path: string, content: string): Promise<string> {
+  const indentLevels = await getJsonIndentForFilePath(path);
+  if (indentLevels != null) {
+    const parsed = JSON.parse(content) as unknown;
+    return jsonStringifyShallowIndent(parsed, indentLevels);
+  }
+
+  // Fallback to oxfmt
+  const result = await oxfmt.format(path, content);
+  return result.code;
+}
+
 export async function writeJsonFileIfChanged(
   path: string,
   content: object,
 ): Promise<boolean> {
-  const indentLevels = await getJsonIndentForFilePath(path);
   return writeUtf8FileIfChanged(
     path,
-    jsonStringifyShallowIndent(content, indentLevels),
+    await format(path, JSON.stringify(content)),
     (a, b) => isEqual(JSON.parse(a), JSON.parse(b)),
   );
 }

@@ -1,9 +1,6 @@
 // pyly-not-src-test
 
-import {
-  getJsonIndentForFilePath,
-  jsonStringifyShallowIndent,
-} from "@pinyinly/lib/jsonfmt";
+import { format } from "@pinyinly/lib/jsonfmt";
 import { workspaceRoot } from "#bin/util/paths.ts";
 import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
@@ -35,12 +32,11 @@ test(`app json formatter rules are respected by formatted files`, async () => {
 
   for (const filePath of matchedFilePaths) {
     const actualContent = await fs.readFile(filePath, `utf8`);
-    const formattedContent = jsonStringifyShallowIndent(
-      JSON.parse(actualContent) as object,
-      await getJsonIndentForFilePath(filePath),
-    );
+    const formattedContent = await format(filePath, actualContent);
 
-    await expect(formattedContent).toMatchFileSnapshot(filePath);
+    await expect(formattedContent, `File: ${filePath}`).toMatchFileSnapshot(
+      filePath,
+    );
   }
 });
 

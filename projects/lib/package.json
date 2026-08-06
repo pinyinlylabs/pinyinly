@@ -21,7 +21,7 @@
     "@pinyinly/eslint-rules": "workspace:*",
     "@types/lodash": "^4 <=4.18.x",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
-    "oxfmt": "^0.48.0",
+    "oxfmt": "^0.62.0",
     "oxlint": "^1.77.0",
     "oxlint-tsgolint": "^7.0.2001",
     "typescript": "^6.0.3",

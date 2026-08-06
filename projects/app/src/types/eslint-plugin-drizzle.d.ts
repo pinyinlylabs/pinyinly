@@ -2,7 +2,7 @@
 declare module "eslint-plugin-drizzle" {
   import type { ESLint, Linter } from "eslint";
 
-  declare const exprt: ESLint.Plugin & {
+  const exprt: ESLint.Plugin & {
     configs: {
       recommended: Linter.LegacyConfig;
       all: Linter.LegacyConfig;
