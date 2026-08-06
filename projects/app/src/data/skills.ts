@@ -4,7 +4,7 @@ import type {
   HanziWordWithMeaning,
 } from "@/dictionary";
 import {
-  decomposeHanzi,
+  hanziComponentsToLearn,
   hanziFromHanziWord,
   loadCharactersJson,
   loadDictionary,
@@ -213,7 +213,7 @@ export async function skillDependencies(
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Learn the components of a hanzi word first.
-      for (let hanziCharacter of await decomposeHanzi(
+      for (let hanziCharacter of await hanziComponentsToLearn(
         hanzi,
         decompositionData,
       )) {

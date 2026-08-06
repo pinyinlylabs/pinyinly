@@ -708,36 +708,22 @@ export interface PinyinFinalAssociation {
   name: string;
 }
 
-const wikiCharacterComponentSchema = z.strictObject({
-  /**
-   * The hanzi character (if any) formed by the strokes. Usually this can
-   * be populated, but in some cases the strokes don't form a valid
-   * character and instead are combined for more creative visual reasons.
-   */
-  hanzi: hanziCharacterSchema.optional(),
-  label: z.string().optional(),
-  /**
-   * Comma-separated list of stroke indices (0-based) for strokes that are
-   * part of this character. Allows shorthand ranges (e.g. 0-2,5 is the same as
-   * 0,1,2,5).
-   */
-  strokes: z.string().default(``),
-  /**
-   * When the component uses a different number of strokes than `hanzi` it's
-   * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
-   * this field can be used to specify the different in stroke count.
-   */
-  strokeDiff: z.number().optional(),
-  /**
-   * What color to render this component in the decomposition illustration. This
-   * allows highlighting different components in different colors for clarity.
-   */
-  color: z.string().optional(),
-});
-
-export type WikiCharacterComponent = z.infer<
-  typeof wikiCharacterComponentSchema
+export type StrokeSpecString = string & z.$brand<`StrokeSpecString`>;
+export const strokeSpecStringSchema = z
+  .string()
+  // .regex(/^…$/gu) // TODO
+  .brand<`StrokeSpecString`, `inout`>();
+true satisfies IsEqual<
+  StrokeSpecString,
+  z.infer<typeof strokeSpecStringSchema>
 >;
+
+export type IdsString = string & z.$brand<`IdsString`>;
+export const idsStringSchema = z
+  .string()
+  // .regex(/^…$/gu) // TODO
+  .brand<`IdsString`, `inout`>();
+true satisfies IsEqual<IdsString, z.infer<typeof idsStringSchema>>;
 
 export const idsOperatorSchema = z.enum({
   LeftToRight: `⿰`,
@@ -859,12 +845,27 @@ export function buildIdsNodeSchema<T extends z.ZodType>(
   return depth5Schema as z.ZodType<IdsNode<z.infer<T>>>;
 }
 
-// TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-export const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
-  wikiCharacterComponentSchema,
-);
+export const hanziStrokeColorSchema = z.enum([
+  `blue`,
+  `yellow`,
+  `amber`,
+  `cyanold`,
+  `fg`,
+]);
 
-export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
+export type HanziStrokeColor = z.infer<typeof hanziStrokeColorSchema>;
+
+export interface MnemonicHanziComponent {
+  /**
+   * Could be `null` if there's no unicode character to represent this component
+   * (might be a radical or other component that doesn't have a single
+   * character).
+   */
+  hanzi: HanziCharacter | null;
+  strokeSpec?: StrokeSpecString | null;
+  label?: string | null;
+  color?: HanziStrokeColor | null;
+}
 
 export const wikiCharacterSvgSchema = z.strictObject({
   /**
@@ -939,8 +940,17 @@ export const wikiCharacterDataSchema = z.strictObject({
     ),
   /**
    * Alternative IDS decompositions
+   *
+   * TODO: rename to `decompositions` grep the code base for other instances too
    */
-  decompositions: z.array(wikiCharacterDecompositionSchema).optional(),
+  decompositions: z
+    .record(
+      idsStringSchema.describe(`partial or full IDS decomposition`),
+      z
+        .array(strokeSpecStringSchema)
+        .describe(`strokeSpec for each leaf hanzi, in DFS order`),
+    )
+    .optional(),
   /**
    * The meaning mnemonic for the character. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
@@ -948,11 +958,30 @@ export const wikiCharacterDataSchema = z.strictObject({
    */
   mnemonic: z
     .strictObject({
+      decomposition: idsStringSchema
+        .describe(`reference an IDS key in decompositions`)
+        .optional(),
       /**
-       * The layout of the components. The first element is the combining
-       * operator, and the remaining are the components for each slot.
+       * Override annotations for the components. Keys are component hanzi, values are the modifiers.
        */
-      components: wikiCharacterDecompositionSchema,
+      components: z
+        .record(
+          hanziCharacterSchema,
+          z
+            .object({
+              /**
+               * Override the normal gloss for the component.
+               */
+              label: z.string().optional(),
+              /**
+               * What color to render this component in the decomposition illustration. This
+               * allows highlighting different components in different colors for clarity.
+               */
+              color: z.string().optional(),
+            })
+            .strict(),
+        )
+        .optional(),
       hints: z
         .array(
           z.strictObject({
@@ -968,6 +997,40 @@ export const wikiCharacterDataSchema = z.strictObject({
 });
 
 export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
+
+export const charactersSchema = z.array(
+  z.tuple([
+    hanziCharacterSchema,
+    z.object({
+      mnemonic: z
+        .string()
+        .describe(`IDS used by the mnemonic, affects learning order`)
+        .optional(),
+      decompositions: z
+        .record(
+          idsStringSchema.describe(`IDS (can be partial)`),
+          z.array(strokeSpecStringSchema),
+        )
+        .describe(`all IDS decompositions`)
+        .optional(),
+      componentFormOf: hanziCharacterSchema
+        .describe(
+          `the primary form of this hanzi (only relevant for component-form hanzi)`,
+        )
+        .optional(),
+      isStructural: z
+        .literal(true)
+        .optional()
+        .describe(
+          `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
+        ),
+      canonicalForm: hanziCharacterSchema.optional(),
+    }),
+  ]),
+);
+
+export type CharactersKey = z.infer<typeof charactersSchema.element>[0];
+export type CharactersValue = z.infer<typeof charactersSchema.element>[1];
 
 /**
  * Allowed image MIME types for uploads and AI generation.

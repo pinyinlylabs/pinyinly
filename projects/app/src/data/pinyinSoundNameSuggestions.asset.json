@@ -1,1393 +1,165 @@
 {
-"Animals":{
- "b-":{
-  "Bat":"Well-known mammal, short name, the initial /b/ aligns perfectly with the pinyin sound.",
-  "Bear":"Iconic, instantly visual, begins with a clear /b/ sound that matches the pinyin initial exactly.",
-  "Bee":"Very common insect, easy to picture, single syllable starting with the exact /b/ sound.",
-  "Bison":"Large, memorable animal of North America; the /b/ onset mirrors the pinyin initial clearly.",
-  "Boar":"Distinct animal, vivid mental image (wild pig with tusks), starts with the needed /b/ sound."
-},
- "c-":{
-  "Cicada":"Starts with a soft, sizzling ‘c’ that helps remind learners of the affricate nature of c-, and the loud summer insect is easy to picture.",
-  "Civet":"Although spelled with a ‘c’, it is pronounced with a hissing fronted sound, echoing the sibilant quality of \"c-\" while remaining distinct from plain “s-.”",
-  "Coati":"The initial ‘co’ is sharp and airy enough to approximate the burst in c-, and the ring-tailed raccoon-relative is well-known and visually striking.",
-  "Tsessebe":"Another common English animal name that starts with /ts/; the antelope’s dramatic horns provide a memorable visual.",
-  "Tsetse":"The name begins with exactly the /ts/ cluster, making the match to the pinyin sound almost perfect while conjuring the vivid image of the biting fly."
-},
- "ch-":{
-  "Cheetah":"Begins with a clear “chee-” sound that closely mirrors the Mandarin ch-, and the sleek, spotted big cat is easy to picture.",
-  "Chicken":"Starts with the exact “chi-” onset; chickens are universally recognizable and appear in countless everyday contexts.",
-  "Chimp":"Short for chimpanzee; the initial “chimp-” matches ch-, and chimps’ playful behavior makes for vivid mnemonic stories.",
-  "Chinchilla":"Begins with “chin-,” matching the ch- sound; its soft, fluffy fur provides a distinctive mental picture.",
-  "Chipmunk":"The opening “chip-” aligns with ch-; the animal’s cheek-stuffing habit offers memorable imagery."
-},
- "d-":{
-  "Deer":"Familiar forest animal; its single syllable starts with the precise unaspirated \"d\" sound.",
-  "Dingo":"Distinctive Australian wild dog; memorable and begins with the required \"d\" pronunciation.",
-  "Dog":"Extremely common animal whose single-syllable name begins with the exact same crisp \"d\" sound.",
-  "Dolphin":"Well-known marine mammal; starts with a clear \"d\" and evokes a strong, friendly image.",
-  "Duck":"Simple, vivid farm bird; the initial \"d\" matches the pinyin sound and the word is easy to picture."
-},
- "f-":{
-  "Falcon":"Distinct bird of prey; clear initial “f” and evocative imagery of flight.",
-  "Ferret":"Recognizable mammal; shares precise “f” onset and fits one-word rule.",
-  "Flamingo":"Iconic pink bird; strong mental image, unmistakable “f” beginning.",
-  "Fox":"Very common animal; starts with the exact “f” sound and is easy to picture.",
-  "Frog":"Short, vivid word with initial “f” sound; readily forms imaginative scenes."
-},
- "g-":{
-  "Gazelle":"Starts with a crisp “gah-” sound aligning with g-; graceful antelope that stands out visually.",
-  "Gecko":"Initial “ge-” uses the hard g- sound; small, distinctive lizard that’s easy to imagine climbing walls.",
-  "Goat":"Starts with a hard “go-” sound that matches the un-aspirated g-; well-known farm animal easy to picture.",
-  "Goose":"Begins with the same hard “goo-” sound; common bird that evokes a clear mental image.",
-  "Gorilla":"The opening “guh-” matches g- tightly; iconic, powerful primate makes vivid mnemonic scenes."
-},
- "h-":{
-  "Hare":"Single-syllable, unmistakable ‘h’ onset, and visually distinct (long-eared rabbit).",
-  "Hawk":"Short, vivid word with the exact same initial breathy ‘h’; conjures a striking mental image.",
-  "Hippo":"Very common zoo animal; the opening “hi-” carries the same airy ‘h’ release.",
-  "Horse":"Starts with a clear, strong “h” sound; universally known and easy to picture.",
-  "Hyena":"Famous safari animal; initial ‘hy-’ gives the same aspirated ‘h’ while being memorable and distinct from other choices."
-},
- "k-":{
-  "Kangaroo":"Iconic hopper with a pouch; energetic action scenes (jumping, boxing) make memorable mnemonics, and the name is a crisp /k/.",
-  "Kingfisher":"Brightly colored, fish-diving bird; the single-word name begins with a strong /k/ and its vivid hunting imagery aids recall.",
-  "Kiwi":"Both a quirky, flightless bird and a fruit—lots of visual hooks—and the word is a short, sharp /k/ sound.",
-  "Koala":"Globally famous Australian tree-hugger; its soft, sleepy image is easy to picture and firmly starts with a clear /k/ sound.",
-  "Kudu":"Distinct spiral-horned antelope; less common than kangaroo but still seen in nature shows and zoos, giving variety while keeping the /k/ onset."
-},
- "l-":{
-  "Lemur":"Distinctive wide-eyed primate; quirky image sticks well and the initial /l/ is crystal clear.",
-  "Leopard":"Striking spotted big cat; common in pop culture and begins with the desired /l/.",
-  "Lion":"Iconic, instantly recognisable, one-syllable name that starts with a strong /l/ sound.",
-  "Llama":"Unusual, memorable South-American camelid; the repeated ‘l’ reinforces the sound association.",
-  "Lynx":"Short, sharp, and unique wild cat with tufted ears; single syllable starting with /l/ for easy recall."
-},
- "m-":{
-  "Meerkat":"Popularized by documentaries; begins with /m/ and its upright posture creates a striking mental image.",
-  "Mole":"Short, one-syllable word beginning with /m/ and easy to picture burrowing underground.",
-  "Monkey":"Globally recognizable; the first sound /m/ matches the pinyin exactly and the playful image is vivid.",
-  "Moose":"Distinct, memorable large animal; the name’s single syllable opens with the target /m/.",
-  "Mouse":"Starts with a clear /m/ and evokes strong, familiar imagery from cartoons and stories."
-},
- "n-":{
-  "Narwhal":"The ‘nar-’ opening keeps the strong \"n\" sound and its iconic spiraled tusk makes it memorable.",
-  "Newt":"Short, common amphibian whose name matches the exact \"n\" onset and evokes a clear image.",
-  "Nightingale":"Famous songbird beginning with “ni-,” reinforcing the nasal initial while providing vivid imagery of melodious calls.",
-  "Numbat":"Australian marsupial whose short, punchy name begins with the target sound and conjures a quirky, memorable picture.",
-  "Nyala":"Distinctive African antelope; the uncommon yet simple name starts with a pure “n” and stands apart from other initials."
-},
- "p-":{
-  "Panda":"Iconic Chinese animal, instantly visual, starts with the exact aspirated “p” sound.",
-  "Panther":"Evokes a sleek, powerful big cat; simple single-word name beginning with “p.”",
-  "Penguin":"Globally recognizable bird with a clear initial “p” and vivid imagery of waddling in ice.",
-  "Pig":"Very common farm animal, easy to picture and pronounce with a strong aspirated “p.”",
-  "Puma":"Well-known large cat of the Americas; short, punchy word that begins with the target sound."
-},
- "r-":{
-  "Rabbit":"Very common, cute, and instantly visual; the initial “ra-” matches the Mandarin r- sound closely.",
-  "Raccoon":"Distinctive masked face creates a memorable image, and the initial ‘ra-’ aligns well with the r- sound.",
-  "Raven":"Dark, intelligent bird featured in myths; simple one-word name beginning with the exact r- pronunciation.",
-  "Rhino":"Short for “rhinoceros,” but the single word “Rhino” is universally known and starts with the same retroflex-flavored “r” feel.",
-  "Rooster":"Iconic farm animal with loud crowing—easy to picture and starts with the correct initial."
-},
- "s-":{
-  "Seal":"The short, sharp opening consonant in “seal” is a clean English /s/, matching the pinyin initial precisely.",
-  "Snake":"The long, continuous hiss a snake makes mirrors the pure /s/ sound, making the link memorable.",
-  "Sparrow":"A common bird whose name begins with a bright /s/, easy to visualize flitting about.",
-  "Spider":"Widely recognized creature; the first sound is a crisp /s/, and the many-legged image sticks in memory.",
-  "Swan":"Starts with a clear /s/ and its elegant image can be vivid in a mnemonic story."
-},
- "sh-":{
-  "Shark":"Extremely well-known, starts with a crisp “sh” sound identical to the pinyin.",
-  "Sheep":"Simple farm animal, global familiarity, opens with clear “sh” sound.",
-  "Shrew":"Small mammal, short word beginning with pure “sh” for easy auditory link.",
-  "Shrike":"Striking predatory songbird; the initial “sh” (before the r-blend) matches the target sound while remaining a unique, memorable species.",
-  "Shrimp":"Distinct sea creature, single syllable starting with “shr-” that still delivers the core “sh” onset."
-},
- "t-":{
-  "Tarantula":"Memorable large spider; the first syllable “ta-” supplies a strong, breathy “t” to anchor the mnemonic.",
-  "Tiger":"Iconic, vivid predator whose name begins with a forceful, aspirated “t” sound that perfectly matches the Pinyin t-.",
-  "Toucan":"Brightly colored tropical bird; its name starts with a crisp “too-” that mirrors the Pinyin t-.",
-  "Turkey":"Familiar farm/holiday bird; “tur-” starts with the exact aspirated “t” sound learners need to recall.",
-  "Turtle":"Common, easily visualized reptile; the initial “tur-” carries the same clear aspirated “t” sound."
-},
- "z-":{
-  "Tsetse":"Begins with the exact “ts” consonant, perfectly mirroring the pinyin sound while still being a memorable African fly.",
-  "Zebra":"Iconic, high-contrast stripes and a very familiar animal; the English ‘z’ reminds learners of the initial even if they haven’t mastered the “ts” pronunciation yet.",
-  "Zebu":"Distinctive humped cattle; short two-syllable name beginning with the mnemonic letter ‘z’ that learners readily picture.",
-  "Zokor":"Mole-like rodent from Asia; quirky and uncommon enough to be memorable while still keeping the single-word, ‘z’-initial pattern.",
-  "Zorilla":"Also called the striped polecat, it looks like a skunk; unusual yet vivid, reinforcing the ‘z’ cue."
-},
- "zh-":{
-  "Jackal":"Short, one-syllable name starting with the same \"ja\" sound; distinct and easy to weave into mnemonic stories.",
-  "Jaguar":"Begins with the English “ja-” sound that closely mirrors the zh- initial; large, visually striking animal that’s easy to picture.",
-  "Jay":"Simple bird name pronounced exactly like the English letter \"J,\" a near-match to zh-; vivid blue coloration helps imagery.",
-  "Jellyfish":"Starts with the soft \"je-\" sound akin to zh-; its translucent, tentacled look gives memorable visual hooks.",
-  "Jerboa":"Opens with a clear \"jer-\" sound comparable to zh-; its comical long legs and hopping motion create a standout mental image."
-}
-},
-"GreekMythologyCharacter":{
- "b-":{
-
-},
- "bu-":{
-
-},
- "c-":{
-  "Calliope":"Muse of epic poetry, motherly and shrewd spirit.",
-  "Carme":"Cretan spirit-designed goddess associated with sea.",
-  "Cassandra":"Trojan priestess cursed to tell true prophecies no one believed.",
-  "Castor":"One of the Dioscuri, noted for stories of camaraderie.",
-  "Cephalus":"Hunter and Athenian lover of Dawn, mythological allusions.",
-  "Cerberus":"Three-headed dog guarding the entrance to the Underworld.",
-  "Ceres":"Roman goddess of agriculture, analogous to the Greek Demeter.",
-  "Ceto":"Goddess of the dangers of the deep sea.",
-  "Charybdis":"Sea monster whom Odysseus confronted.",
-  "Chiron":"A centaur who was a wisest creature known for healing and teaching.",
-  "Circe":"Enchantress who transformed Odysseus's men into pigs.",
-  "Clio":"Muse of history and lyric poetry.",
-  "Clytemnestra":"Wife of Agamemnon, known for murder and conspiracy.",
-  "Coeus":"Titan of intelligence and thoughtful inquiry.",
-  "Cratos":"Personification of strength and power, serving Zeus.",
-  
-  "Cybele":"Earth-mother figure of Anatolian myths, mythology rooted.",
-  "Cychreus":"Said to be the savage son of Poseidon, known in myths.",
-  "Cyclops":"One-eyed giants, prominent in Odysseus's tales.",
-  "Cyrene":"Huntress daughter romanticized by Apollo; North African queen."
-},
- "ch-":{
-  "Calypso":"Nymph who held Odysseus captive for years.",
-  "Cassandra":"Trojan priestess cursed to utter true prophecies no one believed.",
-  "Castalia":"Nymph associated with the Oracle of Delphi.",
-  "Cephalus":"Husband of Procris, known for his tragic tale.",
-  "Cerberus":"Three-headed dog guarding the entrance to Hades.",
-  "Cercyon":"King associated with the struggle against Theseus.",
-  "Ceto":"Goddess of the dangers of the ocean.",
-  "Chaos":"Primordial void state before creation.",
-  "Charon":"Ferryman of the dead to the underworld.",
-  "Charybdis":"Sea monster creating deadly whirlpools.",
-  "Chione":"Goddess of snow and daughter of Boreas.",
-  "Chiron":"Wisest of Centaurs, tutor to many heroes.",
-  "Chloe":"Fertility goddess generally associated with Demeter.",
-  "Circe":"Enchantress who transformed Odysseus's men into swine.",
-  "Clio":"Muse of history.",
-  "Clytemnestra":"Wife of Agamemnon, known for her intriguing narrative.",
-  "Coeus":"Titan of inquisitive mind and intellect.",
-  "Coroebus":"Hero linked with the Calydonian Boar hunt.",
-  "Cratos":"Personification of strength and power.",
-  "Cronus":"Leader of the Titans, father of Zeus."
-},
- "chu-":{
-  "Calypso":"Nymph who detained Odysseus on her island.",
-  "Cassandra":"Trojan princess and prophetess.",
-  "Chiron":"Wise centaur who tutored many heroes.",
-  "Cronus":"Leader of the Titans, father of Zeus."
-},
- "d-":{
-  "Dactyls":"Mythical beings associated with metalwork.",
-  "Daedalus":"Skilled craftsman and artist, father of Icarus.",
-  "Damon":"Pythias's loyal friend, swapped places for execution.",
-  "Danae":"Mother of Perseus by Zeus.",
-  "Daphne":"Nymph pursued by Apollo, turned into a laurel tree.",
-  "Deianeira":"Wife of Hercules, causes his death inadvertently.",
-  "Deimos":"Personification of terror, son of Ares.",
-  "Delphi":"Oracle famous for prophecies.",
-  "Demeter":"Goddess of agriculture and the harvest.",
-  "Deucalion":"Equivalent of Noah in Greek mythology.",
-  "Dictys":"Fisherman who rescues Danae and Perseus.",
-  "Diomedes":"Hero of the Trojan War.",
-  "Dione":"Titaness, possibly mother of Aphrodite.",
-  "Dionysus":"God of wine and festivity.",
-  "Dioscuri":"Twin brothers Castor and Pollux.",
-  "Dirce":"Tied to a bull by sons of Antiope.",
-  "Doris":"Sea nymph, mother of the Nereids.",
-  "Dryads":"Tree nymphs."
-},
- "du-":{
-  "Danae":"Mother of Perseus, visited by Zeus in the form of a golden shower.",
-  "Demeter":"Goddess of the harvest and agriculture.",
-  "Diomedes":"Hero who fought in the Trojan War.",
-  "Dionysus":"God of wine, pleasure, and festivity."
-},
- "f-":{
-  "Fadrus":"Made up as addition, could relate to many minor figures.",
-  "Fama":"Goddess of fame and rumor.",
-  "Fates":"Three goddesses who controlled it; Clotho, Lachesis, Atropos.",
-  "Faunus":"Roman nature god, equivalent of Greek Pan.",
-  "Fausta":"Minor female figure in some stories.",
-  "Faustulus":"Caretaker of Romulus and Remus.",
-  "Favonius":"Roman equivalent of Zephyrus, god of the west wind.",
-  "Fawns":"Represented as woodland deities.",
-  "Fear":"Personified in many minor figures or gods.",
-  "Fenix":"Alternative spelling for Phoenix, famed bird.",
-  "Fenrir":"Monstrous wolf in Norse mythology.",
-  "Flora":"Roman goddess of flowers and spring.",
-  "Foloi":"Region home to centaurs.",
-  "Fomorians":"Mythical race of supernatural beings.",
-  "Fortuna":"Goddess of fortune and luck.",
-  "Frescati":"Region referenced, not a personification.",
-  "Freyr":"God of prosperity and fertility (Norse origin often included in Greco studies).",
-  "Frigg":"Norse goddess often referenced in comparative mythology.",
-  "Furies":"Deities of vengeance, also known as Erinyes.",
-  "Furina":"Roman goddess of thieves."
-},
- "fu-":{
-  "Fates":"Three sisters who determined the destinies of humans.",
-  "Faunus":"Roman counterpart of Greek Pan, god of the forest and fields.",
-  "Flora":"Goddess of flowers and spring.",
-  "Furies":"Deities of vengeance and retribution."
-},
- "g-":{
-  "Gaea":"Alternative spelling for Gaia, earth mother.",
-  "Gaia":"Primordial Earth goddess.",
-  "Gala":"Alternative name for Gaia, Earth goddess.",
-  "Galatea":"Loved by Polyphemus, sculpted by Pygmalion.",
-  "Gallus":"Priest of Cybele, noted by various authors.",
-  "Ganymede":"Cupbearer to the gods, abducted by Zeus.",
-  "Geras":"Personification of old age.",
-  "Geryon":"Owner of herd stolen by Hercules.",
-  "Gigantes":"Race of giants who fought the gods.",
-  "Gilgamesh":"Epic hero sometimes referenced in comparative studies.",
-  "Glanis":"Associated water deity, often obscure.",
-  "Glaucus":"Prophet, turned immortal sea deity.",
-  "Gorgon":"Term for the trio of Medusa, Stheno, and Euryale.",
-  "Gorgons":"Three sisters with snakes for hair, including Medusa.",
-  "Graces":"Three goddesses of charm, beauty, and creativity.",
-  "Graeae":"Three sisters sharing one eye and tooth.",
-  "Griffin":"Creature with the body of a lion and the head of an eagle.",
-  "Gyges":"One of the Hecatoncheires, fell in battle fighting Typhon."
-},
- "gu-":{
-  "Gaia":"Primordial goddess of the Earth.",
-  "Ganymede":"Beautiful youth taken by Zeus to be the cupbearer of the gods.",
-  "Glaucus":"Sea god and a fisherman turned into a god.",
-  "Gorgons":"Three monstrous sisters; Medusa being the most famous."
-},
- "h-":{
-  "Hades":"God of the underworld and the dead.",
-  "Harmonia":"Goddess of harmony and concord.",
-  "Hebe":"Goddess of youth.",
-  "Hecate":"Goddess of magic and witchcraft.",
-  "Hecatoncheires":"The collective name for the Hundred-Handers.",
-  "Helios":"God of the sun.",
-  "Hephaestus":"God of fire and craftsmanship.",
-  "Hera":"Queen of the Gods, wife of Zeus.",
-  "Heracles":"Hero known for his strength and the Twelve Labors.",
-  "Hermes":"Messenger of the gods, god of trade.",
-  "Hesperides":"Guardians of the golden apples.",
-  "Hestia":"Goddess of hearth and home.",
-  "Hippocampus":"Sea creature with the fore-quarters of a horse and the tail of a fish.",
-  "Hippocrates":"Physician often associated with the art of healing.",
-  "Hippolyta":"Amazonian queen, owned a magical girdle.",
-  "Hundred-Handers":"Giant creatures with fifty heads and one hundred arms.",
-  "Hyacinthus":"Beautiful youth loved by Apollo.",
-  "Hygieia":"Goddess of good health.",
-  "Hylas":"Companion of Heracles, abducted by water nymphs.",
-  "Hypnos":"God of sleep."
-},
- "hu-":{
-  "Hades":"God of the Underworld.",
-  "Hera":"Queen of the gods and goddess of marriage and family.",
-  "Hercules":"Hero known for his strength and completion of the twelve labors.",
-  "Hermes":"God of travel, trade, and communication."
-},
- "k-":{
-  "Kadmos":"Founder of Thebes, brother of Europa.",
-  "Kairatos":"Minor location spirit or name, not heavily featured.",
-  "Kalliope":"Muse of epic poetry.",
-  "Kassiopeia":"Boasted about her daughter's beauty.",
-  "Kastor":"One of the Dioscuri twins.",
-  "Kelaino":"One of the Harpies, daughter of Thaumas and Electra.",
-  "Kerkopes":"Two mischievous dwarfs caught by Hercules.",
-  "Khione":"Goddess of snow.",
-  "Kleio":"Muse of history.",
-  "Kleobis":"Paired with Biton in a story of familial devotion.",
-  "Klytemnestra":"Wife of Agamemnon, involved in his murder.",
-  "Klytia":"Nymph, pined for Helios and turned into a sunflower.",
-  "Korybantes":"Dancers associated with Cybele.",
-  "Kraken":"Mythical sea monster sometimes referenced in latter myth adaptations.",
-  "Kreon":"King of Thebes, plays role in Oedipus story.",
-  "Kreusa":"Daughter of Priam, wife of Aeneas in some tales.",
-  "Kronion":"Another name for Zeus, acknowledging his father Kronos.",
-  "Kronos":"Leader of the first generation of Titans."
-},
- "ku-":{
-  "Calliope":"Muse of epic poetry.",
-  "Cerberus":"Multi-headed dog that guarded the gates of the Underworld.",
-  "Chimera":"Monstrous fire-breathing creature with a lion's head, goat's body, and serpent's tail.",
-  "Cronus":"Leader of the Titans and father of Zeus."
-},
- "l-":{
-  "Lachesis":"One of the three Fates, measures the thread of life.",
-  "Ladon":"Serpent-like dragon in the Garden of the Hesperides.",
-  "Laertes":"Father of Odysseus.",
-  "Laius":"Oedipus's father.",
-  "Lamia":"Vampiric demoness in Greek myth.",
-  "Laocoön":"Priest warned Trojans against Greek gift; killed by snakes.",
-  "Leander":"Swam Hellespont nightly to see beloved Hero.",
-  "Leda":"Queen who mothered Helen of Troy with Zeus.",
-  "Leto":"Mother of Apollo and Artemis with Zeus.",
-  "Leucothea":"Sea goddess who aided Odysseus.",
-  "Linus":"Famed musician and teacher.",
-  "Lotus-eaters":"Mythical people Odysseus encountered.",
-  "Lucina":"Roman goddess of childbirth, linked to Eileithyia.",
-  "Lycaon":"King transformed into a wolf by Zeus.",
-  "Lycurgus":"King opposed Dionysus.",
-  "Lydian":"Cultural or myth reference, pertaining to location."
-},
- "lu-":{
-  "Laertes":"Father of Odysseus.",
-  "Leda":"Mother of Helen of Troy, seduced by Zeus in the form of a swan.",
-  "Leto":"Mother of Apollo and Artemis.",
-  "Linus":"Son of Apollo and a hero."
-},
- "m-":{
-  "Maia":"One of the Pleiades and mother of Hermes.",
-  "Marsyas":"Satyr famed for his music.",
-  "Medea":"Sorceress and wife of Jason.",
-  "Medusa":"Gorgon, monster with snakes for hair.",
-  "Megara":"Wife of Hercules, killed by him in a fit of madness.",
-  "Melanion":"Husband of Atalanta.",
-  "Meleager":"Hero of the Calydonian Boar hunt.",
-  "Melpomene":"Muse of tragedy.",
-  "Memnon":"Ethiopian king and hero in the Trojan War.",
-  "Menelaus":"King of Sparta, husband of Helen.",
-  "Merope":"One of the Pleiades.",
-  "Midas":"King who could turn everything he touched into gold.",
-  "Minotaur":"Creature with the body of a man and the head of a bull.",
-  "Mithras":"God of the Mithraic mysteries.",
-  "Mnemosyne":"Titaness of memory.",
-  "Molpadia":"Amazon warrior.",
-  "Moros":"Personification of doom.",
-  "Morpheus":"God of dreams.",
-  "Muses":"Goddesses of the inspiration for literature and the arts."
-},
- "mu-":{
-  "Medusa":"Gorgon with snakes for hair who turned people to stone.",
-  "Midas":"King known for his ability to turn everything he touched into gold.",
-  "Minotaur":"Monster with the head of a bull and the body of a man.",
-  "Morpheus":"God of dreams."
-},
- "n-":{
-  "Naiads":"Freshwater nymphs.",
-  "Narcissus":"Young man who becomes a flower.",
-  "Nausicaa":"Phaeacian princess who helped Odysseus.",
-  "Nekyia":"Odysseus's journey to the Underworld, a narrative element.",
-  "Nemean Lion":"Slain by Hercules as one of the Twelve Labors.",
-  "Nemesis":"Goddess of retribution and revenge.",
-  "Neoptolemus":"Son of Achilles, also called Pyrrhus.",
-  "Nereids":"Sea nymphs, daughters of Nereus.",
-  "Nereus":"Old man of the sea, shapeshifter.",
-  "Nerites":"Sea deity associated with handsome beauty.",
-  "Nestor":"Wise King of Pylos, advisor in the Trojan War.",
-  "Nike":"Goddess of victory.",
-  "Nina":"Often used in adaptation or plays.",
-  "Niobe":"Punished for boasting about her children.",
-  "Nisus":"King of Megara, known for his purple hair.",
-  "Nonnus":"Late Greek epic poet.",
-  "Notus":"God of the south wind.",
-  "Nysa":"Mythical place related to Dionysus's upbringing.",
-  "Nyx":"Primordial goddess of the night."
-},
- "nu-":{
-  "Narcissus":"Hunter who fell in love with his own reflection.",
-  "Nemesis":"Goddess of retribution and vengeance.",
-  "Nereus":"Old man of the sea and a god of the sea's rich bounty.",
-  "Nike":"Goddess of victory."
-},
- "p-":{
-  "Pallas":"Son of Evander, killed by Turnus.",
-  "Pan":"God of the wild, shepherds, and flocks.",
-  "Pandora":"The first woman, opened the box releasing all evils.",
-  "Paris":"Prince of Troy, caused the Trojan War.",
-  "Patroclus":"Close companion of Achilles.",
-  "Pegasus":"Winged horse, born from Medusa's blood.",
-  "Penthesilea":"Queen of the Amazons.",
-  "Persephone":"Queen of the Underworld, goddess of spring growth.",
-  "Perseus":"Hero, slayer of Medusa.",
-  "Phaethon":"Son of Helios, lost control of the sun chariot.",
-  "Phobos":"Personification of fear, son of Ares.",
-  "Phoebe":"Titaness associated with the moon.",
-  "Pollux":"One of the Dioscuri twins.",
-  "Polyhymnia":"Muse of sacred poetry and hymns.",
-  "Pomona":"Goddess of fruit trees.",
-  "Priam":"King of Troy during the Trojan War.",
-  "Prometheus":"Titan who stole fire for humanity.",
-  "Proteus":"Shape-changing sea god.",
-  "Psyche":"Mortal woman who became the goddess of the soul.",
-  "Pygmalion":"Sculptor who fell in love with his statue."
-},
- "pu-":{
-  "Pandora":"First woman who opened a forbidden box, releasing evils into the world.",
-  "Perseus":"Hero known for slaying Medusa.",
-  "Poseidon":"God of the sea, earthquakes, and horses.",
-  "Prometheus":"Titan who gave fire to humanity."
-},
- "r-":{
-  "Raids":"Common in stories involving divine intervention or influence.",
-  "Rampi":"Derivative name used in adaptations or less known tales.",
-  "Realm":"Besides using as territory, signifies god dominions like Hades.",
-  "Rex":"King, in various forms of myth and legend.",
-  "Rhadamanthus":"Judge of the dead, king of Crete.",
-  "Rhea":"Titaness, mother of major Olympian gods.",
-  "Rhea Silvia":"Mother of Romulus and Remus.",
-  "Rhesus":"King of Thrace, appeared in Trojan War tales.",
-  "Rhoc":"Alternative names or lesser traits in mythogenic stories.",
-  "Rhode":"Marine goddess, associated with the island of Rhodes.",
-  "Riches":"Embodied by goddesses like Plutus in myth.",
-  "Ripples":"Usually metaphorical in mythological water stories.",
-  "Rivers":"Often personified, as in Alpheus or Peneus.",
-  "Rogue":"Adventurous or tricksters are common, i.e., Hermes traits.",
-  "Romans":"While not a character, Rome's mythology derives much symbolism.",
-  "Rome":"While personified in mythology, more of a symbolic entity.",
-  "Roofs":"Symbolic representation in deities like Vesta, not character-specific.",
-  "Ruffled":"Term might apply to deities like Phobos in symbolic interps.",
-  "Ruins":"Often used to symbolize or describe aftermath in myth.",
-  "Rumor":"Personified as a spreader of news and gossip."
-},
- "ru-":{
-  "Rhadamanthus":"Wise king and judge of the dead in the underworld.",
-  "Rhea":"Mother of the Olympian gods and wife of Cronus.",
-  "Romulus":"Founder of Rome and brother of Remus.",
-  "Rumina":"Roman goddess who protected nursing infants."
-},
- "s-":{
-  "Salmoneus":"Pretender to deity retribution by Zeus, thunderbolt myth.",
-  "Sarpedon":"Heroic figure noted in Trojan narratives, a son of Zeus.",
-  "Satyr":"Woodland spirits, often companions to Dionysus.",
-  "Scylla":"Monster living on one side of a narrow channel of water.",
-  "Selena":"Variation or adaptation of myths involving Selene.",
-  "Selene":"Goddess of the moon, daughter of the Titans Hyperion and Theia.",
-  "Semele":"Mother of Dionysus, known for her mortal visual demise.",
-  "Sibyl":"Known prophetesses, linked with oracles.",
-  "Silenus":"Drunken old creature, associated with Dionysian imagery.",
-  "Sirens":"Enchanting singers with deadly intentions for sailors.",
-  "Sisyphus":"King famous for his eternal punishment in Hades.",
-  "Sleep":"Personified by Hypnos in Greek culture.",
-  "Sol":"Roman god analogous to Helios in Greek mythology.",
-  "Sophrosyne":"Conceptual spirit representing moderation, self-control.",
-  "Soteria":"Deified spirit of safety and deliverance from harm.",
-  "Sphinx":"Mythical creature known for riddles, faced by Oedipus.",
-  "Sterope":"One of the Pleiades, sometimes featured in myth.",
-  "Styga":"Alternate names involved with stories of the Styx.",
-  "Styx":"River and goddess associated with oaths.",
-  "Symphonia":"Personified concept linked to harmony or music."
-},
- "sh-":{
-  "Salmoneus":"King struck down by Zeus for imitating thunder.",
-  "Sarpedon":"Son of Zeus, hero who fought in the Trojan War.",
-  "Satyr":"Mythical creatures associated with Dionysus, part goat, part man.",
-  "Scylla":"Sea monster who devoured sailors.",
-  "Selene":"Moon goddess, sister to Helios.",
-  "Semele":"Mother of Dionysus by Zeus, died from seeing Zeus's true form.",
-  "Sibyl":"Priestess and prophetess associated with Delphi.",
-  "Silenus":"Companion and tutor to Dionysus.",
-  "Silvanus":"Roman god of woods and fields.",
-  "Sirens":"Creatures whose songs lured sailors to their doom.",
-  "Sisyphus":"King condemned to roll a boulder uphill for eternity.",
-  "Sophrosyne":"Spirit of moderation and self-control.",
-  "Soteria":"Personification of safety and salvation.",
-  "Sparta":"Epithet or locality name, not a divine figure.",
-  "Sphinx":"Creature with the body of a lion, face of a woman, known for riddles.",
-  "Sterope":"One of the Pleiades.",
-  "Stheno":"Eldest of the Gorgons.",
-  "Styx":"River forming boundary between Earth and the Underworld.",
-  "Sybil":"Alternate spelling for Sibyl, prophetess."
-},
- "shu-":{
-  "Scylla":"Sea monster who lived opposite Charybdis.",
-  "Selene":"Goddess of the moon.",
-  "Sisyphus":"King punished to eternally roll a boulder uphill.",
-  "Sphinx":"Creature with the head of a human and body of a lion."
-},
- "su-":{
-  "Selene":"Goddess of the moon.",
-  "Silvanus":"Roman god of the countryside and forests.",
-  "Stheno":"One of the Gorgons, immortal sister of Medusa.",
-  "Syrinx":"Nymph who escaped pursuit by being turned into reeds."
-},
- "t-":{
-  "Tantalus":"Eternal punishment in Tartarus for dining crimes.",
-  "Teiresias":"Renowned prophet of Apollo, transformed into a woman.",
-  "Telamon":"Father of Ajax.",
-  "Telemachus":"Son of Odysseus.",
-  "Tethys":"Titaness of the sea.",
-  "Teucer":"Famous archer, brother of Ajax.",
-  "Thalassa":"Primordial spirit of the sea.",
-  "Thalia":"Muse of comedy and idyllic poetry.",
-  "Thersites":"Ugly and scurrilous critic of Greek leaders.",
-  "Theseus":"Hero, slayer of the Minotaur.",
-  "Thetis":"Sea nymph, mother of Achilles.",
-  "Tiresias":"Blind prophet of Thebes.",
-  "Titan":"Primordial deities preceding the Olympians.",
-  "Tithonus":"Granted eternal life but not eternal youth.",
-  "Tityos":"Giant punished in Hades.",
-  "Torchbearers":"Reference to minor figures or roles.",
-  "Triptolemus":"Demeter's protégé and spreader of agriculture.",
-  "Triton":"Messenger of the sea, son of Poseidon.",
-  "Troilus":"Young Trojan prince and tragic hero.",
-  "Typhon":"Father of all monsters."
-},
- "tu-":{
-  "Tantalus":"King punished in the afterlife with eternal hunger and thirst.",
-  "Themis":"Titaness of divine law and order.",
-  "Theseus":"Hero and king of Athens, known for slaying the Minotaur.",
-  "Typhon":"Gigantic monster with a hundred dragon heads."
-},
- "w-":{
-  "Apollo":"God of the sun, music, and prophecy.",
-  "Dionysus":"God of wine, pleasure, and festivity.",
-  "Hermes":"Messenger of the gods, known for his winged sandals.",
-  "Zeus":"King of the Gods in Mount Olympus."
-},
- "z-":{
-  "Zacynthos":"Mythical founder linked to the island of Zakynthos.",
-  "Zaes":"Mythological reference derivative of Zeus.",
-  "Zagreus":"Said to be the son of Zeus and Persephone.",
-  "Zelea":"Town mentioned in the Iliad, indirectly anthropomorphized.",
-  "Zelos":"Personified spirit of emulation, rival to others.",
-  "Zeme":"Terrestrial entities or beings familiar in myth.",
-  "Zenith":"Linked to divine knowledge in minor tales.",
-  "Zenius":"A figure of wisdom and character, possibly adapted form.",
-  "Zenophanes":"A philosopher engaging in mythological discourse.",
-  "Zephyrus":"God of the west wind, known for gentle demeanor.",
-  "Zerynthia":"Tales or territories often enriched with divine story.",
-  "Zetes":"Winged sons of Boreas and Orithyia, joined the Argonauts.",
-  "Zethus":"Twin brother of Amphion, part of Theban myths.",
-  "Zeus":"King of the Gods, ruler of Mount Olympus.",
-  "Zeuxo":"One of the Oceanids, daughters of Oceanus and Tethys.",
-  "Ziklus":"Distant echoes of narratives involving protection.",
-  "Zimri":"Adaptor's choices to replicate heroic tales in myth.",
-  "Zion":"Sometimes involved in adaptation or allegories in myth.",
-  "Zionia":"Name occurred in ancient adaptations or storytelling."
-},
- "zh-":{
-  "Zaes":"Version or stylization based on Zeus in some narratives.",
-  "Zagreus":"In some legends, son of Zeus and Persephone.",
-  "Zan":"Abbreviated or adapted names in some translations.",
-  "Zarex":"Minor figure, occasionally in heroic tales.",
-  "Zela":"Refers to various figures across mythological canons.",
-  "Zeleia":"Trojan city mentioned in the Iliad.",
-  "Zelos":"Often parallels with Zelus, emphasizing spirit of rivalry.",
-  "Zelus":"Personification of rivalry and emulation.",
-  "Zena":"Adapted name in mythological tales.",
-  "Zephyrus":"God of the west wind.",
-  "Zerynthia":"Name associated with a locale or mythology tale.",
-  "Zetes":"Winged sons of Boreas, took part in the Argonauts.",
-  "Zethus":"Brother of Amphion, co-founder of Thebes.",
-  "Zeugma":"A hero, generally associated with military tales.",
-  "Zeus":"King of the Gods, ruler of Mount Olympus.",
-  "Zeuxo":"One of the Oceanids, daughters of Oceanus and Tethys.",
-  "Zigura":"Rare, linked to adaptations or geographic names.",
-  "Zikum":"Name found in cross-cultural myth discussions.",
-  "Zion":"Mythologized concept, not directly Greco-Roman."
-},
- "zhu-":{
-  "Zagreus":"An underworld god who later merged with the myth of Dionysus.",
-  "Zelus":"Spirit of eager rivalry, emulation, envy, jealousy, and zeal.",
-  "Zephyrus":"God of the west wind.",
-  "Zeus":"King of the gods and ruler of Mount Olympus."
-},
- "zu-":{
-  "Zagreus":"Mythical counterpart of Dionysus in his underworld aspect.",
-  "Zelus":"Spirited representation of envy, zeal, and rivalry.",
-  "Zephyrus":"God of the west wind.",
-  "Zeus":"King of the gods, ruler of Mount Olympus."
-}
-},
-"Fiction":{
- "ju-":{
-  "Jade Emperor (Yù Huáng)":"A supreme deity in Taoism, comparable to Zeus in Greek mythology.",
-  "Jade Lady":"A being of grace and beauty in various Eastern mythologies.",
-  "Janus":"The Roman god of beginnings, gates, transitions, and time.",
-  "Jebusite":"A group or figure mentioned in Biblical texts, associated with ancient Jerusalem.",
-  "Jiang Ziya":"A legendary figure and advisor in Chinese folklore.",
-  "Jiangshi":"A reanimated corpse in Chinese folklore, known as a 'hopping vampire'.",
-  "Jormungandr":"The World Serpent in Norse mythology.",
-  "Jotun":"A race of giants in Norse mythology.",
-  "Juggernaut (Jagannath)":"A Hindu deity and a significant form of Vishnu or Krishna.",
-  "Juno":"The Roman goddess of marriage and queen of the gods.",
-  "Juno Moneta":"An aspect of the Roman goddess Juno, associated with the minting of money.",
-  "Jupiter":"The king of the Roman gods, associated with thunder."
-},
- "ku-":{
-  "Kaa":"Python from 'The Jungle Book', often associated with mythical serpent essence.",
-  "Kali":"Hindu goddess associated with time, change, and destruction.",
-  "Kamadeva":"Hindu god of love also known as Cupid.",
-  "Kappa":"Mythical water creature from Japanese folklore.",
-  "Khonsu":"Egyptian god of the moon and time.",
-  "Kitsune":"Fox spirits prominent in Japanese folklore.",
-  "Koyolxauhqui":"Aztec goddess, often shown partially complete with vivid mythos.",
-  "Kraken":"Legendary sea monster said to dwell off the coast of Norway and Greenland.",
-  "Krishna":"Major Hindu god celebrated in the Bhagavad Gita.",
-  "Kronos":"Titan and father of Zeus in Greek mythology.",
-  "Kua Fu (夸父)":"A giant who chased the sun in one of the most popular Chinese myths.",
-  "Kuafu (夸父)":"Alternative name and depiction of the sun-chasing giant.",
-  "Kui (夔)":"A dragon-like creature emblematic of powerful music in Chinese legend.",
-  "Kuixing (魁星)":"A deity associated with examinations and scholars, depicted as stepping on an ao (a mythical turtle) and pointing at the dipper stars.",
-  "Kukulkan":"Feathered serpent deity in Mesoamerican culture.",
-  "Kumbhakarna":"Giant character in Hindu epic discussed predominantly in Ramayana."
-},
- "li-":{
-  "Lamassu":"A protective deity in ancient Mesopotamian mythology, often depicted as a hybrid of a human, bird, and bull.",
-  "Lancelot":"One of the Knights of the Round Table in Arthurian legend.",
-  "Leda":"A figure from Greek mythology who was seduced by Zeus in the form of a swan.",
-  "Leshy":"A male woodland spirit in Slavic mythology.",
-  "Leviathan":"A sea monster in Jewish mythology.",
-  "Lilith":"A figure in Jewish mythology often characterized as a dangerous demon of the night.",
-  "Lir":"An Irish sea god.",
-  "Loki":"The cunning trickster god from Norse mythology.",
-  "Lorelei":"A siren-like figure from German folklore.",
-  "Lotus Lantern (莲花灯)":"An important motif in Chinese folklore, often featured as a mythological symbol.",
-  "Lu Dongbin (吕洞宾)":"One of the Eight Immortals in Chinese mythology, known for his swordsmanship.",
-  "Lugh":"A hero and High King of the ancient Celts."
-},
- "lü-":{
-  "Lakshmi":"Hindu goddess of wealth and purity.",
-  "Lancelot":"Knight of the Round Table in Arthurian legend.",
-  "Lares":"Household deities in Roman mythology, guardians of the home.",
-  "Leto":"Mother to Apollo and Artemis in Greek mythology.",
-  "Leviathan":"Sea monster referenced in biblical texts.",
-  "Lu Wu (禄武)":"A guardian figure in Taoist mythology.",
-  "Luban (鲁班)":"Though historical, regarded mythologically for his inventions and craftsmanship.",
-  "Lubu (吕布)":"A historical warrior often romanticized into a god-like figure in folk tales.",
-  "Lucifer":"Figure often depicted as a fallen angel.",
-  "Luguan (禄馆)":"Mythically considered a guide for spirits to the underworld.",
-  "Luna":"Roman goddess of the moon.",
-  "Lycaon":"King in Greek mythology transformed into a wolf.",
-  "Lachesis":"One of the Fates in Greek mythology, responsible for measuring the thread of life.",
-  "Lady White Snake":"A legend in Chinese folklore about a snake spirit that transforms into a woman.",
-  "Lamia":"A child-devouring monster in Greek mythology.",
-  "Lernaean Hydra":"A serpentine water monster in Greek mythology.",
-  "Lilith":"A figure in Jewish mythology, sometimes envisioned as a demon.",
-  "Loki":"A trickster god in Norse mythology, associated with mischief.",
-  "Lorelei":"A siren-like figure from German folklore.",
-  "Louhi":"A powerful witch-queen in Finnish mythology.",
-  "Lú Dongbin":"One of the Eight Immortals in Chinese mythology, known for his magic sword.",
-  "Lugh":"A prominent god in Irish mythology associated with skill and mastery in multiple disciplines.",
-  "Lugh of the Long Arm":"Another reference to the skilled god Lugh in Irish myth.",
-  "Lysistrata":"While not a mythological figure, Lysistrata is a character from Greek comedy with cultural significance."
-},
- "nü-":{
-  "Nakula":"One of the Pandavas in the Indian epic Mahabharata.",
-  "Nanna":"Norse god associated with the moon.",
-  "Nephthys":"Egyptian goddess of mourning, night, and service.",
-  "Neptune":"Roman god of the sea, similar to the Greek Poseidon.",
-  "Nereus":"'Old Man of the Sea' in Greek mythology, known for his truthfulness and virtue.",
-  "Nike":"Greek goddess of victory in battle and competition.",
-  "Ninurta":"Mesopotamian god of war and agriculture.",
-  "Nügu (女姑)":"A mystical woman often featured in regional tales for her prophecy skills.",
-  "Nüshen (女神)":"Generic term for goddess, often referencing many female deities in folklore.",
-  "Nuwa":"Chinese goddess who molded humanity from clay.",
-  "Nuwa (女娲)":"The goddess who created mankind and mended the heavens. A significant figure in mythology.",
-  "Nüwa Wuhua (女娲无华)":"A slight variation of Nuwa's myth, reflecting her multifaceted nature.",
-  "Naga":"Serpent deities in Hindu and Buddhist mythology.",
-  "Narcissus":"A hunter in Greek mythology who fell in love with his own reflection.",
-  "Nemean Lion":"A lion of Greek mythology that was impervious to weapons.",
-  "Nemesis":"The Greek goddess of retribution, enacting punishment against hubris.",
-  "Nereids":"Sea nymphs in Greek mythology and daughters of the sea god Nereus.",
-  "Ninki Nanka":"A dragon-like creature in West African mythology.",
-  "Njord":"A god of the sea, associated with wealth and fertility in Norse mythology.",
-  "Norns":"The Fates in Norse mythology who control fate and destiny.",
-  "Nü Gui":"A ghostly figure of a woman in Chinese folklore seeking vengeance.",
-  "Nüwa":"A Chinese goddess known for creating humans and repairing the heavens.",
-  "Nymphs":"Female spirits of nature in Greek mythology, often associated with a particular place.",
-  "Nyx":"The primordial goddess of the night in Greek mythology."
-},
- "qu-":{
-  "Qetza":"A mythical bird of wonder in allegoric Aztec narratives.",
-  "Qilin":"A Chinese mythical hooved chimerical creature known for good omens.",
-  "Qoppa":"A legendary symbol or character in ancient Greek traditions.",
-  "Queen Mab":"A fairy referred to in Shakespeare's works, symbolizing dreams and illusions.",
-  "Quesare":"A rarely mentioned entity in obscure Greek tales.",
-  "Quetzalcoatl":"A Mesoamerican feathered serpent deity associated with wind and learning.",
-  "Quetzalli":"A divine figure associated with beauty and grace in Aztec culture.",
-  "Quicksilver (Mercury)":"Roman deity associated with commerce, communication, and travel.",
-  "Quinga":"A protector deity in some indigenous South American mythologies.",
-  "Quinotaur":"A God or creature from Frankish mythology involving seafaring and interspecies ancestry.",
-  "Quirinus":"An ancient Roman god of war, later associated with the legendary Romulus.",
-  "Quraish":"An Arabian tribal deity-like figure, mentioned in historical texts.",
-  "Cupid":"Roman god of love, akin to Greek Eros.",
-  "Choo Choo":"The sound a steam train makes."
-},
- "xu-":{
-  "Joshua": "",
-  "Xena": "",
-  "Professor X": "",
-  "Xavier": "",
-  "Shuri": "",
-  "Xenos":"A mysterious Greek god representing the unknown and foreign.",
-  "Xu Fang":"Mythic philosopher devoted to uncovering secrets of immortality.",
-  "Xu Fu":"A court sorcerer for Emperor Qin Shi Huang, rumored to have sought the elixir of life.",
-  "Xu Zhenjun":"A Taoist immortal in Chinese legend, revered for his wisdom.",
-  "Xuan":"A mythical title often given to divine emperors or celestial beings.",
-  "Xuan Lu":"A mythical character oftentimes associated with rebirth and renewal.",
-  "Xuan Nü":"A hermit goddess known for her knowledge of battle in Chinese mythology.",
-  "Xuan Zhao":"A figure in Eastern mythologies often linked to celestial guidance.",
-  "Xuanwu":"A dark warrior and protector deity in Chinese mythology, associated with the north.",
-  "Xuanzang":"A monk who became a legendary figure in Chinese mythology for his journey to India.",
-  "Xuchi":"A dragon or serpent in South American folklore.",
-  "Xuthos":"A figure in Greek mythology regarded as an ancestor of the Greek tribes."
-},
- "yu-":{
-  "Yoda": "",
-  "Yeti": "",
-  "Yowie": "",
-  "Yama":"The Hindu god of death, also recognized in various East Asian mythologies.",
-  "Ymir":"A primordial giant in Norse mythology, ancestor of all jötnar.",
-  "Ymir's Blood (from Ymir's sacrificial myth)":"Norse creation myth where the world was created from Ymir's body.",
-  "Yochlol":"Demonic creatures in Dungeons & Dragons mythology, resembling chaotic elements.",
-  "Yù Dì (玉帝)":"The Jade Emperor, the most powerful god in the Chinese Pantheon, ruler of Heaven.",
-  "Yu Huang":"Another title for the Jade Emperor in Taoist mythology.",
-  "Yu the Great (大禹)":"A legendary ruler famous for his flood control efforts and founder of the Xia dynasty.",
-  "Yue Lao":"A matchmaker deity who binds lovers together in Chinese mythology.",
-  "Yuki-onna":"A spirit or yōkai in Japanese folklore often translated as \"Snow Woman\".",
-  "Yurei":"Ghostly spirits in Japanese folklore, similar to Western ghosts.",
-  "Yurei no Tsubasa":"A mythical Japanese spirit known for wings of phantom imagery.",
-  "Yutu (Jade Rabbit)":"A companion of the moon goddess Chang'e in Chinese folklore."
-}
-},
-"Places":{
-  "-∅": {
-    "Home": "Your home"
+  "Animals":{
+    "b-":{"Bat":"Well-known mammal, short name, the initial /b/ aligns perfectly with the pinyin sound.","Bear":"Iconic, instantly visual, begins with a clear /b/ sound that matches the pinyin initial exactly.","Bee":"Very common insect, easy to picture, single syllable starting with the exact /b/ sound.","Bison":"Large, memorable animal of North America; the /b/ onset mirrors the pinyin initial clearly.","Boar":"Distinct animal, vivid mental image (wild pig with tusks), starts with the needed /b/ sound."},
+    "c-":{"Cicada":"Starts with a soft, sizzling ‘c’ that helps remind learners of the affricate nature of c-, and the loud summer insect is easy to picture.","Civet":"Although spelled with a ‘c’, it is pronounced with a hissing fronted sound, echoing the sibilant quality of \"c-\" while remaining distinct from plain “s-.”","Coati":"The initial ‘co’ is sharp and airy enough to approximate the burst in c-, and the ring-tailed raccoon-relative is well-known and visually striking.","Tsessebe":"Another common English animal name that starts with /ts/; the antelope’s dramatic horns provide a memorable visual.","Tsetse":"The name begins with exactly the /ts/ cluster, making the match to the pinyin sound almost perfect while conjuring the vivid image of the biting fly."},
+    "ch-":{"Cheetah":"Begins with a clear “chee-” sound that closely mirrors the Mandarin ch-, and the sleek, spotted big cat is easy to picture.","Chicken":"Starts with the exact “chi-” onset; chickens are universally recognizable and appear in countless everyday contexts.","Chimp":"Short for chimpanzee; the initial “chimp-” matches ch-, and chimps’ playful behavior makes for vivid mnemonic stories.","Chinchilla":"Begins with “chin-,” matching the ch- sound; its soft, fluffy fur provides a distinctive mental picture.","Chipmunk":"The opening “chip-” aligns with ch-; the animal’s cheek-stuffing habit offers memorable imagery."},
+    "d-":{"Deer":"Familiar forest animal; its single syllable starts with the precise unaspirated \"d\" sound.","Dingo":"Distinctive Australian wild dog; memorable and begins with the required \"d\" pronunciation.","Dog":"Extremely common animal whose single-syllable name begins with the exact same crisp \"d\" sound.","Dolphin":"Well-known marine mammal; starts with a clear \"d\" and evokes a strong, friendly image.","Duck":"Simple, vivid farm bird; the initial \"d\" matches the pinyin sound and the word is easy to picture."},
+    "f-":{"Falcon":"Distinct bird of prey; clear initial “f” and evocative imagery of flight.","Ferret":"Recognizable mammal; shares precise “f” onset and fits one-word rule.","Flamingo":"Iconic pink bird; strong mental image, unmistakable “f” beginning.","Fox":"Very common animal; starts with the exact “f” sound and is easy to picture.","Frog":"Short, vivid word with initial “f” sound; readily forms imaginative scenes."},
+    "g-":{"Gazelle":"Starts with a crisp “gah-” sound aligning with g-; graceful antelope that stands out visually.","Gecko":"Initial “ge-” uses the hard g- sound; small, distinctive lizard that’s easy to imagine climbing walls.","Goat":"Starts with a hard “go-” sound that matches the un-aspirated g-; well-known farm animal easy to picture.","Goose":"Begins with the same hard “goo-” sound; common bird that evokes a clear mental image.","Gorilla":"The opening “guh-” matches g- tightly; iconic, powerful primate makes vivid mnemonic scenes."},
+    "h-":{"Hare":"Single-syllable, unmistakable ‘h’ onset, and visually distinct (long-eared rabbit).","Hawk":"Short, vivid word with the exact same initial breathy ‘h’; conjures a striking mental image.","Hippo":"Very common zoo animal; the opening “hi-” carries the same airy ‘h’ release.","Horse":"Starts with a clear, strong “h” sound; universally known and easy to picture.","Hyena":"Famous safari animal; initial ‘hy-’ gives the same aspirated ‘h’ while being memorable and distinct from other choices."},
+    "k-":{"Kangaroo":"Iconic hopper with a pouch; energetic action scenes (jumping, boxing) make memorable mnemonics, and the name is a crisp /k/.","Kingfisher":"Brightly colored, fish-diving bird; the single-word name begins with a strong /k/ and its vivid hunting imagery aids recall.","Kiwi":"Both a quirky, flightless bird and a fruit—lots of visual hooks—and the word is a short, sharp /k/ sound.","Koala":"Globally famous Australian tree-hugger; its soft, sleepy image is easy to picture and firmly starts with a clear /k/ sound.","Kudu":"Distinct spiral-horned antelope; less common than kangaroo but still seen in nature shows and zoos, giving variety while keeping the /k/ onset."},
+    "l-":{"Lemur":"Distinctive wide-eyed primate; quirky image sticks well and the initial /l/ is crystal clear.","Leopard":"Striking spotted big cat; common in pop culture and begins with the desired /l/.","Lion":"Iconic, instantly recognisable, one-syllable name that starts with a strong /l/ sound.","Llama":"Unusual, memorable South-American camelid; the repeated ‘l’ reinforces the sound association.","Lynx":"Short, sharp, and unique wild cat with tufted ears; single syllable starting with /l/ for easy recall."},
+    "m-":{"Meerkat":"Popularized by documentaries; begins with /m/ and its upright posture creates a striking mental image.","Mole":"Short, one-syllable word beginning with /m/ and easy to picture burrowing underground.","Monkey":"Globally recognizable; the first sound /m/ matches the pinyin exactly and the playful image is vivid.","Moose":"Distinct, memorable large animal; the name’s single syllable opens with the target /m/.","Mouse":"Starts with a clear /m/ and evokes strong, familiar imagery from cartoons and stories."},
+    "n-":{"Narwhal":"The ‘nar-’ opening keeps the strong \"n\" sound and its iconic spiraled tusk makes it memorable.","Newt":"Short, common amphibian whose name matches the exact \"n\" onset and evokes a clear image.","Nightingale":"Famous songbird beginning with “ni-,” reinforcing the nasal initial while providing vivid imagery of melodious calls.","Numbat":"Australian marsupial whose short, punchy name begins with the target sound and conjures a quirky, memorable picture.","Nyala":"Distinctive African antelope; the uncommon yet simple name starts with a pure “n” and stands apart from other initials."},
+    "p-":{"Panda":"Iconic Chinese animal, instantly visual, starts with the exact aspirated “p” sound.","Panther":"Evokes a sleek, powerful big cat; simple single-word name beginning with “p.”","Penguin":"Globally recognizable bird with a clear initial “p” and vivid imagery of waddling in ice.","Pig":"Very common farm animal, easy to picture and pronounce with a strong aspirated “p.”","Puma":"Well-known large cat of the Americas; short, punchy word that begins with the target sound."},
+    "r-":{"Rabbit":"Very common, cute, and instantly visual; the initial “ra-” matches the Mandarin r- sound closely.","Raccoon":"Distinctive masked face creates a memorable image, and the initial ‘ra-’ aligns well with the r- sound.","Raven":"Dark, intelligent bird featured in myths; simple one-word name beginning with the exact r- pronunciation.","Rhino":"Short for “rhinoceros,” but the single word “Rhino” is universally known and starts with the same retroflex-flavored “r” feel.","Rooster":"Iconic farm animal with loud crowing—easy to picture and starts with the correct initial."},
+    "s-":{"Seal":"The short, sharp opening consonant in “seal” is a clean English /s/, matching the pinyin initial precisely.","Snake":"The long, continuous hiss a snake makes mirrors the pure /s/ sound, making the link memorable.","Sparrow":"A common bird whose name begins with a bright /s/, easy to visualize flitting about.","Spider":"Widely recognized creature; the first sound is a crisp /s/, and the many-legged image sticks in memory.","Swan":"Starts with a clear /s/ and its elegant image can be vivid in a mnemonic story."},
+    "sh-":{"Shark":"Extremely well-known, starts with a crisp “sh” sound identical to the pinyin.","Sheep":"Simple farm animal, global familiarity, opens with clear “sh” sound.","Shrew":"Small mammal, short word beginning with pure “sh” for easy auditory link.","Shrike":"Striking predatory songbird; the initial “sh” (before the r-blend) matches the target sound while remaining a unique, memorable species.","Shrimp":"Distinct sea creature, single syllable starting with “shr-” that still delivers the core “sh” onset."},
+    "t-":{"Tarantula":"Memorable large spider; the first syllable “ta-” supplies a strong, breathy “t” to anchor the mnemonic.","Tiger":"Iconic, vivid predator whose name begins with a forceful, aspirated “t” sound that perfectly matches the Pinyin t-.","Toucan":"Brightly colored tropical bird; its name starts with a crisp “too-” that mirrors the Pinyin t-.","Turkey":"Familiar farm/holiday bird; “tur-” starts with the exact aspirated “t” sound learners need to recall.","Turtle":"Common, easily visualized reptile; the initial “tur-” carries the same clear aspirated “t” sound."},
+    "z-":{"Tsetse":"Begins with the exact “ts” consonant, perfectly mirroring the pinyin sound while still being a memorable African fly.","Zebra":"Iconic, high-contrast stripes and a very familiar animal; the English ‘z’ reminds learners of the initial even if they haven’t mastered the “ts” pronunciation yet.","Zebu":"Distinctive humped cattle; short two-syllable name beginning with the mnemonic letter ‘z’ that learners readily picture.","Zokor":"Mole-like rodent from Asia; quirky and uncommon enough to be memorable while still keeping the single-word, ‘z’-initial pattern.","Zorilla":"Also called the striped polecat, it looks like a skunk; unusual yet vivid, reinforcing the ‘z’ cue."},
+    "zh-":{"Jackal":"Short, one-syllable name starting with the same \"ja\" sound; distinct and easy to weave into mnemonic stories.","Jaguar":"Begins with the English “ja-” sound that closely mirrors the zh- initial; large, visually striking animal that’s easy to picture.","Jay":"Simple bird name pronounced exactly like the English letter \"J,\" a near-match to zh-; vivid blue coloration helps imagery.","Jellyfish":"Starts with the soft \"je-\" sound akin to zh-; its translucent, tentacled look gives memorable visual hooks.","Jerboa":"Opens with a clear \"jer-\" sound comparable to zh-; its comical long legs and hopping motion create a standout mental image."}
   },
-  "-a": {
-    "Airport": "",
-    "Art Gallery": "",
-    "Aquarium": "",
-    "Auditorium": ""
+  "Archetypes":{
+    "∅-":{"Actor":"Begins with a bare vowel /æ/ just like a syllable with no initial; the image of someone on stage is vivid and memorable.","Artist":"Starts with the open vowel /ɑː/ and instantly conjures paint, canvas, and creativity.","Astronaut":"Opens with the vowel /æ/ and evokes a striking picture of a space suit floating in orbit.","Author":"Begins with the vowel /ɔː/ and calls up the scene of someone writing a book, a strong and distinct profession image.","Engineer":"Starts with the vowel /ɛ/ and ties to clear imagery of hard hats, blueprints, and machinery."},
+    "b-":{"Baker":"Starts with a clear “b” sound, extremely common profession, easy to picture kneading dough and bread.","Banker":"Widely recognized job; evokes money, suits, and a vault—memorable visuals with “b” onset.","Barber":"Iconic pole and scissors imagery; concise word with a strong initial “b”.","Bouncer":"Distinct occupation at clubs; the single syllable “bounce-r” keeps the bold “b” start and is not easily confused with other initials.","Builder":"Simple term for construction worker; hard-hat and tools give vivid imagery, starts with pure “b”."},
+    "bi-":{"Beach Lifeguard":"The word “beach” begins with “beech,” very close to the bi- sound, and the image of a lifeguard is visually rich.","Bean-Counter (Accountant)":"Colloquial job title starting with “bean/been,” which is near-homophonous with bi- and creates a playful, memorable link.","Beatboxer":"The first syllable “beat” is pronounced “beet,” mirroring the bi- sound while giving a vivid, modern profession.","Bee Farmer":"Another clear “bee” starter that is distinct from Beekeeper yet equally memorable.","Beekeeper":"Opens with the exact “bee” sound, instantly evoking the pronunciation of bi-."},
+    "bu-":{"Builder":"Common, easy to picture (hardhat, bricks, crane) and its first syllable is often pronounced “bil/boo-” depending on accent, close enough for a mnemonic while still distinct from other initials.","Bureaucrat":"Opens with a ‘byu/boo’ sound. Paperwork piles, stamps, and grey office walls give a unique, unmistakable picture for the initial.","Busker":"Street musician ‘BUS-ker’ begins with a strong ‘bus/buhs’ sound matching bu-. Colourful imagery of guitar cases and city corners makes it stick.","Butcher":"The word begins with the exact “boo” sound, is short, vivid, and the image of a cleaver-wielding butcher is very memorable.","Butler":"Starts with the same “buh/boo” onset; the tuxedo-clad, tray-carrying servant creates a clear, elegant mental snapshot."},
+    "c-":{"TSA Agent":"The acronym “TSA” is commonly said as /ˈtsiːˈesˈeɪ/; rushing the letters together gives a clear aspirated “ts” onset, matching the pinyin c- sound.","Tsar":"Although a regal title, it functions as an occupation and starts with the classic /ts/ onset, giving a short, vivid hook for the c- initial.","Tsetse-Fly Researcher":"“Tsetse” (as in the tsetse fly) starts with /ˈtsɛt-/ — a crisp aspirated “ts” that is nearly identical to c-.","Tsunami Responder":"Disaster-response teams that specialise in tsunami relief are well known; the word “tsunami” again provides the perfect /tsʰ/ opening for the mnemonic.","Tsunami Scientist":"“Tsunami” begins with exactly the English cluster /ts/ followed by the vowel u, mirroring the aspirated ‘ts’ quality of c-."},
+    "ch-":{"Chancellor":"Starts with a crisp “ch-” identical to the Pinyin sound and evokes a clear image of a high-ranking official in government or academia.","Chandler":"A traditional candle-maker; the occupational title starts with the exact “ch-” sound and paints a picture of melted wax and rows of candles.","Childcare Worker":"Begins with the same “ch-” and instantly brings to mind toys, toddlers, and a busy daycare setting.","Chimney Sweep":"The classic soot-covered sweep with brush and ladder is memorable, and the word “chimney” starts with a perfect “ch-.”","Chocolatier":"The word “chocolate” anchors the “ch-” sound; a chocolatier conjures vivid visuals of glossy sweets and a workshop full of cocoa."},
+    "chu-":{"Butter Churner":"\"Churn-\" gives the same \"chur\" pronunciation; imagining someone vigorously churning butter is memorable.","Chancellor":"Starts with a clear \"chan-\" /tʃæn/ that lets you picture the big \"ch\" sound right away.","Chaplain":"Opens with the identical “chap-” /tʃæp/ affricate, and the uniform-wearing clergy image is distinctive.","Chewing-gum taster":"Sits on an R&D sensory panel, spends the day chewing test batches, rating flavour release & texture, and giving feedback to food scientists.","Childminder":"Begins with “chi-” /tʃaɪ/—clear match to the target consonant—and instantly evokes caring for children.","Chocolatier":"Starts with a strong “choc-” /tʃɒk/; easy to picture someone crafting gourmet chocolate, rich and memorable.","Choo Choo":"The sound a steam train makes.","Choral Conductor":"\"Cho-\" /tʃoʊ/ is very close to \"choo\"; a conductor’s sweeping arm movements create a strong mental picture.","Church Pastor":"The word \"church\" begins with the exact \"chur-\" /tʃɜːr/ sound, easy to link with chu-.","Churro Chef":"\"Chur-\" mirrors the \"chu\" sound, and a street-cart chef makes a vivid, tasty image.","Train Conductor":"The phrase “choo-choo” that we instinctively link to steam trains mirrors the exact sound of ‘chu-’, making the profession an instant mnemonic even though the word itself doesn’t start with ‘ch’."},
+    "cu-":{"Suit Tailor":"The word ‘suit’ opens with that ‘su/tsu’ onset; a tailor measuring fabric makes a concrete, visual profession cue.","Sumo Wrestler":"‘Sumo’ begins with the same ‘su/tsu’ sound and the image of an enormous wrestler in a ring is unforgettable.","Supermodel":"‘Super’ starts with a strong ‘su’ sound; flashing cameras and catwalks create a lively scene.","Supervisor":"The first syllable ‘su-’ matches the cu- sound well, and a supervisor’s clipboard or headset is easy to picture.","Sushi Chef":"‘Sushi’ starts with a clear “su/tsu” sound that closely mirrors cu-. A sushi bar’s knives, fish and rice give vivid imagery."},
+    "d-":{"Dentist":"Begins with the same “d” sound and is an easily visualized profession (dental chair, drill, bright light).","Designer":"Opens with the ‘d’ sound and sparks visual scenes of sketches, fabrics, or digital layouts.","Detective":"Shares the same first sound and conjures a distinctive look (magnifying glass, trench coat).","Doctor":"Starts with the exact same un-aspirated “d” sound; universally known and evokes a clear image (white coat, stethoscope).","Driver":"The initial ‘d’ matches perfectly; imagery of someone behind the wheel is straightforward and vivid."},
+    "di-":{"Dealer (Casino Dealer)":"The first syllable “DEE-” in “dealer” mirrors “di-”; the card-shuffling table scene is easy to picture.","Dean":"University dean is said “DEEN”, a very clean, one-syllable match to “di” and conjures the image of an academic in a gown.","Designer":"Begins with the stressed “DEE-” sound (“DEE-ziner”) and summons vivid visuals of sketches, fashion shows, or CAD screens.","Detective":"Starts with “DEE-” (“DEE-tect-iv”) and instantly suggests a trench-coated sleuth with a magnifying glass.","DJ (Disc Jockey)":"The job title is literally pronounced “DEE-jay”, matching the pinyin sound perfectly and evokes a clear image of someone spinning records."},
+    "du-":{"Doula":"Starts with the exact “doo” sound, is a distinct and increasingly well-known birth-support profession.","Duelist":"Classic sword-fighter image; first syllable “doo” matches the initial while remaining unique among the other initials.","Duke":"Short, iconic title pronounced “dook,” giving a crisp “doo” start that is easy to picture (robes, castle, etc.).","Durian Vendor":"Push-cart piled with fruit, cleaver ready"},
+    "f-":{"Farmer":"Starts with the /f/ sound, universally known, and immediately evokes clear imagery (fields, animals, tractor).","Firefighter":"Strong /f/ onset, dramatic visual of flames and rescue gear helps memory retention.","Fisherman":"Distinct /f/ sound, conjures vivid scenes of boats, nets and water—easy to visualize.","Florist":"Clear /f/ beginning and colorful mental pictures of bouquets and flower shops.","Pharmacist":"Although spelled with “ph,” it is pronounced /f/; white coat and pill bottles create a readily recognizable image."},
+    "fu-":{"Food Critic":"Starts with “food” (same “foo” opening); easy to picture someone tasting dishes and jotting notes.","Foodie":"Starts with “food” (same “foo” opening); easy to picture someone tasting dishes and jotting notes.","Fugu Chef":"Begins with the exact “foo” sound; memorable because of the exotic, risky nature of preparing puffer-fish.","Furrier":"Traditional profession that starts with a clear “fur/foor” sound; the image of sewing luxurious furs is vivid."},
+    "g-":{"Gardener":"Begins with a clear hard “g” and evokes vivid imagery of plants, tools, and soil.","Geologist":"First syllable “gee-” uses the same consonant; rock hammers and fossils create rich mnemonic images.","Golfer":"The opening hard “g” matches perfectly, and golf provides distinctive visual props (clubs, greens).","Guard":"Starts with the exact same hard “g” sound; easy to picture a uniformed security guard.","Guide":"Short, standalone word with the target sound; a tour guide conjures strong, memorable scenes."},
+    "gu-":{"Goon":"A hired thug.","Goose Farmer":"“Goose” opens with “goo-”; imagining someone herding honking geese is memorable and visually distinctive.","Guru":"The word “guru” begins with exactly the “goo-” sound, making it an effortless acoustic match."},
+    "h-":{"Hacker":"Opens with a strong “hack-” h- sound; the idea of someone furiously typing code is memorable and current.","Hairstylist":"Starts with a clear “hai-” sound that matches the Mandarin h-, and the image of cutting and styling hair is vivid and modern.","Historian":"Begins with “his-,” a straightforward h- onset, and you can picture dusty archives and ancient scrolls.","Host":"As in TV or event host; the short word starts squarely with h-, and you can imagine someone on stage holding a microphone.","Hunter":"The sharp initial “hun-” echoes the Mandarin h-, and the mental image of tracking game in the forest is striking."},
+    "hu-":{"Hula Dancer":"“Hula” begins with the exact same “hoo” sound, and the grass-skirt dancer creates a colourful, memorable image.","Hula Hooper":"Both “hula” and “hoop” reinforce the ‘hoo’ pronunciation; the spinning hoop is an easy visual anchor.","Humorist":"Begins with ‘hu-’ and evokes a stand-up comic delivering jokes under a spotlight – a scene full of emotion and motion.","Hunter":"Opens with the ‘hu-’ sound and instantly brings to mind someone in camouflage stalking game – a clear, vivid scene.","Hurdler":"Starts with the same initial; picturing an athlete frozen mid-jump over a hurdle is dynamic and memorable."},
+    "ji-":{"Geneticist":"Opens with the same unaspirated “gee/jih” sound and is distinct from other initials.","Geologist":"Begins with the “gee” sound and is a well-known, image-rich science profession.","Gymnast":"Although athletic, it functions as a profession in modern media; the first syllable “gym-/jim-” matches ji-.","Jeep Driver":"“Jeep” starts with the exact “jee” sound; safari or tour Jeep drivers evoke a clear picture.","Jingle Writer":"“Jin-” in “jingle” echoes the ji- sound, and the job is easy to visualize thanks to commercials and ads."},
+    "ju-":{"Jeweler":"The opening “jew-” matches the syllable closely and the idea of gems and a workbench makes for vivid imagery.","Journalist":"Begins with the exact “jour-” sound and conjures strong images of notebooks, cameras, and breaking news.","Judge":"Starts with the same crisp \"ju\" sound and is a very familiar profession that evokes a clear robe-and-gavel image.","Judo Instructor":"The word opens with “ju-”, and the martial-arts uniform and dojo setting provide a rich, distinct scene.","Juggler":"“Jug-” echoes the initial well and the visual of colorful balls in motion is memorable."},
+    "k-":{"Captain":"Universal, easily visualised figure—sea or air captain—whose name begins with the target consonant.","Coach":"Very common word, starts with a clear /k/ sound, easy to picture a whistle-wearing sports coach.","Coder":"Modern, familiar tech profession; the initial consonant is the exact /k/ sound.","Cook":"Kitchen imagery is vivid and memorable; the word opens with the aspirated /k/ sound.","Courier":"Simple, everyday job; the opening consonant matches the aspirated Mandarin k-, and you can imagine a package-carrying courier."},
+    "ku-":{"Cooper":"Traditional barrel maker; its first syllable is exactly “koo”. Short, single word, and visually distinctive (wooden barrels, tools).","Courier":"The word starts with the pure “koo” sound (KOO-ree-er) and is a common, easily pictured job—someone dashing around with packages.","Croupier":"Casino card-table dealer. Begins with “kroo”, very close to “koo”, and evokes vivid imagery of casino chips and roulette wheels.","Koala Keeper":"Zoo worker who cares for koalas. The phrase starts with the ‘koo’ sound (“ko-a-la” /ˈkoʊ.ə.lə/ keeper), and the cute animal imagery makes it stick in memory.","Kook":"A person who is odd, crazy, or incompetent. Can be mildly negative or playful depending on context.","Kung-fu Instructor":"Widely recognised modern profession; “Kung” opens with a clear “kung/kooŋ” sound, reinforcing the ‘ku’ pronunciation while adding a memorable martial-arts image."},
+    "l-":{"Lawyer":"Instantly recognisable profession whose name begins with a crisp L sound identical to the pinyin initial.","Lecturer":"Starts with “le-,” ties to academia, and the single word stands alone without overlapping other initials.","Librarian":"Starts with “li-,” matching many common Mandarin syllables, and conjures a clear image of books and shelves.","Lifeguard":"Begins with “li-” and evokes a vivid beach scene, making it easy to remember while staying distinct from other initials.","Lumberjack":"Opens with “lu-,” mirrors common Mandarin syllables, and offers a strong visual of chopping wood."},
+    "li-":{"Librarian":"Starts with the clear “lee” sound and instantly evokes the image of books, shelves, and a quiet library.","Lifeguard":"First syllable is “life” (pronounced /laɪf/), but many learners shorten it to “lee” in fast speech; bright red swimsuits and a rescue whistle make a vivid image.","Linguist":"Begins with the same “lee” sound and conjures a scholar studying languages—fitting for a pronunciation mnemonic.","Lion Tamer":"Although two words, the memorable circus act and roaring lions create a strong mental picture; “Lion” begins with the desired “lee”‐like start.","Litigator":"Legal professional whose title opens with the “lee” sound and suggests dramatic courtroom scenes."},
+    "lu-":{"Loo Attendant":"Literally begins with the word “loo,” making the sound–image link unmistakable and humorous.","Looter":"A sneaky thief who steals from others, the word “looter” begins with the exact “loo” sound, making it a perfect match for the pinyin lu-.","Luge Racer":"“Luge” begins /luːʒ/; picturing a winter-sport athlete rocketing down an ice track reinforces the ‘lu-’ sound.","Lunar Scientist":"“Lunar” starts /ˈluːnər/; a moon researcher is vivid and keeps the leading “loo” pronunciation.","Lute Player (Lutenist)":"The word “lute” is pronounced /luːt/; imagining a renaissance musician helps lock in the long \"loo\" start.","Luthier":"Starts with the exact “loo” sound (LOO-thee-er); a recognizable craftsperson who builds guitars and violins."},
+    "lü-":{"Lifeguard (pronounced ‘loo-guard’ in many accents)":"In several dialects, the first syllable of “lifeguard” is reduced to a front-rounded ‘li/lu’ vowel, making it close enough for mnemonic purposes, and the red-swimsuit-and-whistle image is clear.","Lua Programmer":"‘Lua’ (the scripting-language name, pronounced ‘loo-ah’) opens with the desired ‘lu’ sound, and picturing a coder typing green text on a black screen is highly memorable.","Luger":"An Olympic sled racer (“loo-ger”) begins with an unmistakable “lu” sound that echoes lü. The ice track and high-speed sled create a strong mental picture.","Lute Player":"A medieval musician strumming a lute (“loo-t”) starts with the same mouth shape as lü, and the historical costume provides memorable imagery.","Luthier":"The opening “Lu-” in “luthier” (a maker of stringed instruments) is very close to the lü [lyü] sound, and the image of a craftsperson carving violins is vivid and distinctive."},
+    "m-":{"Magician":"Starts with a crisp “m” sound, conjures vivid imagery of capes, rabbits, and cards, and is unlikely to clash with other initials.","Maid":"Short, common occupation, evokes an immediate picture (uniform, cleaning tools), and the initial sound is an unmistakable “m.”","Mayor":"Simple political role, strong visual of a suited official with a sash; the word kicks off with the pure “m” needed.","Mechanic":"Everyday, easily pictured (grease, wrench, overalls), begins with a clear “m” and is unique among the list.","Miner":"Strong mental image of a hard-hat, pickaxe, and underground tunnels; opening consonant matches the “m-” initial cleanly."},
+    "mi-":{"Meatpacker":"Starts with the “meet” sound that matches “mi-”. You can visualize conveyor belts and hanging sides of beef, giving strong imagery.","Mediator":"Begins with the clear “mee” sound and is a well-known, single-word profession involving conflict resolution—easy to picture two parties with the Mediator between them.","Medium":"A psychic or spiritual Medium—short, stand-alone word that starts with “mee”, and the séance scene is memorable.","Meteorologist":"The weather expert whose title opens with “mee”. Forecast maps, clouds and radar images create vivid story material.","Midwife":"Common, historic profession; while the vowel is a touch shorter, many speakers still start it with a clear “mih/mee” sound. Birth scenes make for powerful mnemonic images."},
+    "mu-":{"Mover":"The word starts with the same “moo” and paints a clear picture of someone hefting boxes and furniture.","Mullah":"Religious leader in many Islamic communities; starts with the required “mu” sound and is distinct from other initials.","Muralist":"An artist who paints large murals; opens with “mu-,” is a recognizable creative profession, and prompts colorful mental scenes.","Musher":"Dog-sled driver whose title opens with “mush-,” phonetically close to “mu,” and evokes vivid snow-trail imagery.","Musician":"Begins with the exact “moo” sound, is globally familiar, and instantly conjures images of instruments and performances."},
+    "n-":{"Newscaster":"Familiar figure behind a news desk reading the evening news, giving a vivid scene.","Notary":"Easily pictured stamping documents and verifying signatures; simple one-word title.","Novelist":"Clear mental image of someone typing manuscripts or signing books; creative profession that stands alone.","Nurse":"Extremely common, instantly visual: scrubs, stethoscope, hospital setting.","Nutritionist":"Distinct health-related role, often shown advising on food or diet charts."},
+    "ni-":{"Knee Surgeon":"It begins with the homophone “knee,” matching the pronunciation perfectly, and the idea of operating on a leg is memorable.","Nanny":"Although it adds a second syllable, it still opens with a clear “ni” sound and conjures an easily imagined caretaker figure.","Needleworker":"Whether you picture a tailor or embroidery specialist, the word “needle” gives an unmistakable “nee” onset.","Neon Artist":"“Neon” starts with “nee.” Bright glowing signs create a strong, colorful mental picture.","Ninja":"The very first sound in “ninja” is the pure “ni-” you need, and the black-clad stealth-warrior image is instantly vivid."},
+    "nu-":{"Newbie":"Someone with a big “NEWBIE” badge, sticky note, or on-screen label makes the character instantly recognisable.","Newscaster":"Starts with the exact “new”/“nu” sound; the image of someone reading the news on TV is vivid and modern.","Noobie":"Someone with a big “NEWBIE” badge, sticky note, or on-screen label makes the character instantly recognisable.","NuclearEngineer":"Although two concepts, it is often spoken as a tight unit; the first syllable “nu” matches perfectly and conjures up lab coats and reactors.","Numerologist":"Kicks off with a strong “nu” sound and brings to mind someone surrounded by mystical numbers—an unusual but striking profession.","Nurse":"The opening “nur-” begins with the same N and a very similar “oo” vowel; nurses are universally known and easy to picture.","Nutritionist":"Begins with a clear “nu” and immediately evokes food advice and diet charts—memorable visual props."},
+    "nü-":{"Newscaster":"The word opens with “new” (nyu), matching the glide in nü- and conjuring a vivid TV-studio image.","Nuclear Scientist":"The first syllable “nu-” echoes nü- and the profession evokes memorable lab-and-reactor imagery.","Numerologist":"Begins with a prominent “nu-” and is distinct from other initials’ professions.","Nurse":"Extremely common, easy to picture, and the opening “nur-” is close to the nü sound.","Nutritionist":"Starts with the clear “nu-/nyu-” sound and is a well-known modern health profession."},
+    "p-":{"Painter":"The opening /p/ is identical to the pinyin sound, and the profession easily conjures up bright colors and canvases.","Pilot":"Starts with a strong, clearly aspirated /p/ just like the pinyin initial, and it instantly evokes vivid imagery of cockpits and airplanes.","Plumber":"Begins with a crisp /p/ burst; the image of pipes, wrenches, and water leaks is memorable.","Professor":"Kicks off with the same aspirated /p/ and evokes an instantly recognizable classroom setting and a scholarly figure.","Programmer":"Starts with a clear /p/ and brings to mind code, computers, and screens—modern and easy to visualize."},
+    "pi-":{"Pediatrician":"The opening “pee-” matches pi-; the white-coat doctor for kids is well-known and memorable.","Pianist":"Starts with “pee-” exactly like pi-, and instantly evokes a vivid scene of someone at a grand piano.","Pilot":"Begins with the same crisp “pi” sound and is a very familiar, image-rich profession (uniform, cockpit, headset).","Pizza Chef":"“Pi-” in “pizza” is pronounced ‘pee,’ and a chef tossing dough makes a clear, lively image.","Private Investigator":"Often shortened to the letters “P.I.” themselves, giving a perfect one-to-one sound link with pi- and conjuring trench-coat detectives."},
+    "pu-":{"Poodle Groomer":"“Poo-” in “poodle” mirrors the pinyin; easy to picture a groomer trimming a fluffy dog.","Pool Cleaner":"The first syllable “pool” is pronounced “poo-l”; the job’s visual (nets, chlorine, blue water) is memorable.","Pooper-Scooper":"Starts with the exact “poo” sound; the mental image of someone cleaning up pet waste is vivid and unique.","Pugilist":"Traditional term for a professional boxer; begins with a clear aspirated “pu-” and conjures a strong boxing scene.","Puppeteer":"Although the second syllable changes, the opening “pu-” matches the target sound and evokes lively puppet imagery."},
+    "qi-":{"Cheerleader":"Instantly visual profession that starts with a bright “chee-” sound, matching q-.","Chef":"Well-known, single-syllable job beginning with the same “che-” sound students produce for q-.","Childminder":"Everyday occupation; initial “chi-” gives a clear phonetic link to q-.","Chiropractor":"Health-care profession beginning with “chi-,” closely mirroring the pinyin pronunciation.","Choreographer":"Distinct artistic role; opening “cho/chor” keeps the same unvoiced, aspirated ‘ch’ quality as q-."},
+    "qu-":{"QA Engineer":"Begins with the letter Q, instantly reminding you of the ‘qu-’ spelling, and the short, punchy job title matches the brisk “chyü” sound.","Quantum Physicist":"The first syllable “Quan-” starts with the same Q initial; the cutting-edge, high-tech image can make a vivid mnemonic scene.","Quartermaster":"A historic naval-supply officer; the strong ‘kwor-’ at the start keeps the letter Q prominent while being a well-known profession.","Quilter":"A craft professional who sews quilts; the single-word title is short, concrete, and keeps the Q association front-and-center.","Quizmaster":"Runs pub quizzes and TV game shows. The playful image of asking questions links neatly to the distinctive Q sound."},
+    "r-":{"Racer":"Short, energetic word; evokes roaring engines and checkered flags, reinforcing the sharp initial R.","Ranger":"Strong initial R; conjures an outdoors uniform, badge, and wide-brim hat—rich visual potential.","Rapper":"Begins with a clear, punchy R-sound; modern, vivid, and easy to picture on a stage with a microphone.","Realtor":"Common profession in daily life; office tours, house keys, and “For Sale” signs make memorable imagery.","Referee":"Starts with R and carries rhythmic repetition; whistles, striped shirt, and hand signals form a clear mental scene."},
+    "ru-":{"Roofer":"Begins with the exact “roo” sound, is a common trade, and conjures a clear image of someone working on a roof.","Rugmaker":"Starts with “rug-,” pronounced “ru-,” and brings to mind colorful looms and patterned carpets—rich visual material.","Ruler (Monarch)":"The title “Ruler” is short, well-known, starts with the identical “roo” sound, and evokes vivid imagery of crowns and thrones.","Rum Distiller":"The word “Rum” starts with the desired ‘ru’ sound; a distiller surrounded by barrels of spirits is a memorable scene.","Runner (Pro Athlete)":"Although a sports profession, ‘Runner’ is widely recognized, easy to picture, and the opening syllable matches “ru.”"},
+    "s-":{"Sailor":"Opens with a clear \"s\" hiss and conjures a strong visual of someone at sea, useful for story-building.","Scientist":"Kicks off with the same sharp \"s\" and brings to mind lab coats and experiments, rich mnemonic material.","Singer":"Begins with the pure \"s\" sound and immediately suggests microphones and music, easy to picture.","Soldier":"Starts with the exact \"s\" consonant and calls up striking scenes of uniforms and marches.","Surgeon":"Starts with a crisp, standalone \"s\" sound identical to the pinyin initial and evokes vivid imagery of scrubs and scalpels."},
+    "sh-":{"Chef":"Though spelled with ‘ch’, it is pronounced “shef,” giving the exact ‘sh’ onset, and it’s a very familiar modern job.","Shepherd":"Opens with “shep-,” matching the target sound; picturing someone herding sheep makes a vivid scene.","Sheriff":"Starts with a strong “sh” sound and instantly calls up the image of a badge-wearing law-enforcer.","Ship Captain":"The word starts with “ship” (sh-); imagining a uniformed captain at the helm of a vessel is easy and distinctive.","Shoemaker":"Begins with “shoe-,” an unmistakable ‘sh’ sound; the craft tools and shoes provide rich visual detail."},
+    "shu-":{"Shoemaker":"Classic craft that literally contains the sound “shoe.”","Shoeshiner":"Another well-known occupation centered on “shoes,” matching the exact “shoo” sound.","Shrimper":"Commercial shrimp fisher; begins with “shr-,” an English cluster whose first part is the same “sh” retroflex consonant.","Shuriken Instructor":"Martial-arts teacher specializing in throwing stars; the word “shuriken” begins with perfect “shu-,” and the image is vivid and memorable.","Shuttle Driver":"Starts with “shut-” /ʃʌt/; students still hear the strong “sh-” onset and can shorten it mentally to “shoo.”"},
+    "su-":{"Sous-chef":"Begins with the exact “soo” sound and instantly evokes a clear kitchen image.","Sumo wrestler":"First syllable is pronounced “soo,” and the image of a wrestler in a mawashi is memorable.","Superintendent":"Well-known leadership role that also kicks off with “soo.”","Supermodel":"Starts with “soo-” and is a vivid, widely-known profession.","Supervisor":"Common job title that opens with the same “soo” sound."},
+    "t-":{"Tailor":"The crisp initial \"T\" in Tailor matches t-. Visualizing someone measuring fabric with scissors in hand creates a memorable scene.","Teacher":"Starts with a clear, aspirated \"T\" sound that mirrors the pinyin t-. Nearly everyone can picture a Teacher in a classroom, making the image vivid.","Technician":"Starts with the target sound and conjures an image of someone repairing electronics or machinery, giving rich detail for storytelling.","Trainer":"Features an obvious \"T\" onset; a personal Trainer counting reps or blowing a whistle provides a dynamic visual cue.","Tutor":"Begins with the same aspirated \"t-\" and evokes the simple image of one-on-one instruction, distinct from Teacher but still easily imagined."},
+    "ti-":{"Tea Taster":"Starts with the word “tea” (pronounced “tee”); clear imagery of someone evaluating teas.","Teacher":"Begins with the exact “tee” sound of ti-; universally known profession.","Teamster":"First syllable “team-” is pronounced “teem,” matching the ti- sound; distinct blue-collar job transporting goods.","Teen Counselor":"“Teen” begins with the same “tee” sound; evokes a specific role working with adolescents.","TV Host":"The abbreviation “TV” is read aloud as “tee-vee”; a recognizable media profession."},
+    "tu-":{"Toolmaker":"“Tool” shares the identical “too-” opening, and the image of someone crafting hammers and wrenches is concrete and memorable.","Tour Guide":"“Tour” is pronounced “too-er” in many accents, matching the target sound and conjuring up a clear picture of someone leading sightseers.","Tourist":"“Tour” is pronounced “too-er” in many accents, matching the target sound and conjuring of a sightseer.","Tuba Player":"The musical profession starts with the “too-” of “tuba,” creating a strong auditory link while evoking the vivid image of a large brass instrument.","Tuna Fisher":"The first syllable of “tuna” is “too-,” and picturing a professional fisher hauling in giant tuna provides a vivid scene.","Tutor":"Begins with the clear “too-” sound and is a well-known, easily pictured profession (someone teaching a student one-on-one)."},
+    "w-":{"Waiter":"Starts with a clear /w/ sound and is a very familiar, easy-to-picture job.","Weatherman":"Begins with /w/ and instantly suggests green-screen forecasts, maps, and storms.","Weaver":"Distinct /w/ opening and conjures up the visual of a loom and colorful threads.","Welder":"Strong, unmistakable /w/ onset and evokes vivid imagery of sparks and protective gear.","Woodworker":"Prominent /w/ sound and provides a concrete mental scene of sawdust and carpentry tools."},
+    "xi-":{"Sheep Shearer":"Opening “shee-” is spot-on; the act of clipping wool creates a memorable visual of flying fleece.","Sheet-Metal Worker":"Starts with “sheet-,” again the “shee” sound; sparks images of sparks, welding masks, and folded metal panels.","Shepherd":"Starts with the clear “she-” sound that matches /ɕi/. A familiar, image-rich profession (staff, sheep, hills).","Sherpa":"First syllable “sher-” uses the same soft fricative and quickly evokes mountains, ropes, and guiding climbers—very vivid.","Shiatsu Therapist":"Begins with “shi-,” almost a perfect phonetic match. Easy to picture someone giving a massage on a floor mat."},
+    "y-":{"Yachtsman":"Conjures a sailor at the helm of a sleek yacht; starts with a strong “ya-” sound parallel to y-.","Yardkeeper":"Easily pictured tending lawns and gardens; first syllable “yard” provides the same initial /y/ glide.","Yodeler":"Distinct mental picture of someone singing alpine yodels; the opening “yo-” matches y- exactly.","Yogi":"Short, instantly evokes a person bending into yoga poses; the initial sound /y/ is identical to the pinyin y-.","YouTuber":"Modern, vivid image of someone filming themselves; begins with the clear English /y/ glide."},
+    "yu-":{"University Professor":"Common occupation starting with “yoo-ni-”; think of a lecturer at a podium with a stack of books.","Urologist":"Medical specialty that starts with the clear “yoo” sound; white coat and stethoscope create a vivid image.","Youth Pastor":"Another well-known role beginning with “yoo-th”; easy to imagine in a chapel with teens.","Youth Worker":"Profession focused on helping young people; starts with “yoo-th,” matching the target sound and picturable as someone running a youth center.","YouTuber":"Begins with the exact “yoo” sound; modern and instantly visual (camera, ring-light, subscriber button)."},
+    "z-":{"Zen Teacher":"The calm mediator of meditation sessions uses the /z/ onset and is distinct from other initials.","Zipper Designer":"A quirky but understandable occupation whose name opens with a crisp /z/ and creates a memorable image of crafting fasteners.","Zookeeper":"Begins with a clear /z/ sound; a vivid, easily pictured job tending animals.","Zoologist":"Starts with the same /z/ and evokes lab coats, research, and exotic creatures.","Zumba Instructor":"The energetic dance-fitness teacher starts with a punchy /z/ that matches the initial."},
+    "zh-":{"Janitor":"Initial soft “j” matches zh-; the mop, bucket and keys supply a concrete picture.","Jeweler":"Opens with the soft “j” sound and evokes sparkling gems, giving plenty of visual hooks.","Jockey":"Starts with the soft “j” sound; the racing silks, helmet and horse form a distinctive, action-packed scene.","Journalist":"Begins with the same soft “j” sound; the image of someone holding a microphone or notepad is clear and modern.","Judge":"Starts with exactly the same English sound /dʒ/ that most learners use to approximate zh-; short, instantly recognisable, vivid robes and gavel create a strong mental image."},
+    "zhu-":{"Jeweler":"Begins with exactly the same “joo” sound as zhu-, making the link immediate and unambiguous.","Judge":"Starts with the same un-aspirated retroflex ‘j’ sound; short, familiar, and visually distinctive (gavel, robe).","Judo Coach":"The first syllable “Ju-” is pronounced /dʒuː/, matching the zhu- sound while still naming a clear, modern profession.","Juggler":"Although the vowel shortens slightly, the initial ‘j’ sound is close enough to trigger the zhu- memory, and the circus imagery is strong.","Jukebox DJ":"The opening “Ju-” mirrors zhu- and the image of a DJ at a jukebox is vivid and memorable."},
+    "zu-":{"Zoo Photographer":"Pairs the clear “zoo/zu” beginning with a vivid picture of someone snapping photos of wildlife in enclosures.","Zookeeper":"Begins with the exact “zoo/zu” sound and instantly evokes cages, animals, and safari hats.","Zoologist":"Another common ‘zoo-’ profession that shares the identical opening sound and summons images of a scientist studying animals.","Zoom Producer":"‘Zoom’ opens with the desired sound and this modern tech-facilitation job is widely recognised after 2020.","Zumba Instructor":"‘Zumba’ starts with the same “zu” pronunciation; the energetic dance teacher is easy to visualize."}
   },
-  "-ai": {
-    "Tai Chi Studio": "",
-    "High School": "",
-    "Thai Resturant": "Thai ends with the -ai sound.",
-    "Myer": "M-ai-er, is there a specific store you can think of?"
+  "Areas":{
+    "1":{"Car Park":"Where you park your e.g. parking lot or your garage","Garden":"Outside with the plants","Outside":"Outside somewhere"},
+    "2":{"Entry":"Front door, entry-way, or foyer","Front Door":"Just outside the entrance"},
+    "3":{"Inside":"Inside the main area"},
+    "4":{"Bathroom":"The bathroom with a shower, sink, and toilet.","Toilet":"The toilet room."},
+    "5":{"Rooftop":"On the roof of the building"}
   },
-  "-an": {
-    "The Vatican": "Vatican ends with 'ahn' sound."
-    },
-  "-ang": {
-    "Kahn Academy": "“Karn” → “karng” → “arng”. Imagine a real world version of the online learning platform.",
-    "Carnegie": "“Carn” → “carng” → “arng”"
+  "Fiction":{
+    "ju-":{"Jade Emperor (Yù Huáng)":"A supreme deity in Taoism, comparable to Zeus in Greek mythology.","Jade Lady":"A being of grace and beauty in various Eastern mythologies.","Janus":"The Roman god of beginnings, gates, transitions, and time.","Jebusite":"A group or figure mentioned in Biblical texts, associated with ancient Jerusalem.","Jiang Ziya":"A legendary figure and advisor in Chinese folklore.","Jiangshi":"A reanimated corpse in Chinese folklore, known as a 'hopping vampire'.","Jormungandr":"The World Serpent in Norse mythology.","Jotun":"A race of giants in Norse mythology.","Juggernaut (Jagannath)":"A Hindu deity and a significant form of Vishnu or Krishna.","Juno":"The Roman goddess of marriage and queen of the gods.","Juno Moneta":"An aspect of the Roman goddess Juno, associated with the minting of money.","Jupiter":"The king of the Roman gods, associated with thunder."},
+    "ku-":{"Kaa":"Python from 'The Jungle Book', often associated with mythical serpent essence.","Kali":"Hindu goddess associated with time, change, and destruction.","Kamadeva":"Hindu god of love also known as Cupid.","Kappa":"Mythical water creature from Japanese folklore.","Khonsu":"Egyptian god of the moon and time.","Kitsune":"Fox spirits prominent in Japanese folklore.","Koyolxauhqui":"Aztec goddess, often shown partially complete with vivid mythos.","Kraken":"Legendary sea monster said to dwell off the coast of Norway and Greenland.","Krishna":"Major Hindu god celebrated in the Bhagavad Gita.","Kronos":"Titan and father of Zeus in Greek mythology.","Kua Fu (夸父)":"A giant who chased the sun in one of the most popular Chinese myths.","Kuafu (夸父)":"Alternative name and depiction of the sun-chasing giant.","Kui (夔)":"A dragon-like creature emblematic of powerful music in Chinese legend.","Kuixing (魁星)":"A deity associated with examinations and scholars, depicted as stepping on an ao (a mythical turtle) and pointing at the dipper stars.","Kukulkan":"Feathered serpent deity in Mesoamerican culture.","Kumbhakarna":"Giant character in Hindu epic discussed predominantly in Ramayana."},
+    "li-":{"Lamassu":"A protective deity in ancient Mesopotamian mythology, often depicted as a hybrid of a human, bird, and bull.","Lancelot":"One of the Knights of the Round Table in Arthurian legend.","Leda":"A figure from Greek mythology who was seduced by Zeus in the form of a swan.","Leshy":"A male woodland spirit in Slavic mythology.","Leviathan":"A sea monster in Jewish mythology.","Lilith":"A figure in Jewish mythology often characterized as a dangerous demon of the night.","Lir":"An Irish sea god.","Loki":"The cunning trickster god from Norse mythology.","Lorelei":"A siren-like figure from German folklore.","Lotus Lantern (莲花灯)":"An important motif in Chinese folklore, often featured as a mythological symbol.","Lu Dongbin (吕洞宾)":"One of the Eight Immortals in Chinese mythology, known for his swordsmanship.","Lugh":"A hero and High King of the ancient Celts."},
+    "lü-":{"Lachesis":"One of the Fates in Greek mythology, responsible for measuring the thread of life.","Lady White Snake":"A legend in Chinese folklore about a snake spirit that transforms into a woman.","Lakshmi":"Hindu goddess of wealth and purity.","Lamia":"A child-devouring monster in Greek mythology.","Lancelot":"Knight of the Round Table in Arthurian legend.","Lares":"Household deities in Roman mythology, guardians of the home.","Lernaean Hydra":"A serpentine water monster in Greek mythology.","Leto":"Mother to Apollo and Artemis in Greek mythology.","Leviathan":"Sea monster referenced in biblical texts.","Lilith":"A figure in Jewish mythology, sometimes envisioned as a demon.","Loki":"A trickster god in Norse mythology, associated with mischief.","Lorelei":"A siren-like figure from German folklore.","Louhi":"A powerful witch-queen in Finnish mythology.","Lú Dongbin":"One of the Eight Immortals in Chinese mythology, known for his magic sword.","Lu Wu (禄武)":"A guardian figure in Taoist mythology.","Luban (鲁班)":"Though historical, regarded mythologically for his inventions and craftsmanship.","Lubu (吕布)":"A historical warrior often romanticized into a god-like figure in folk tales.","Lucifer":"Figure often depicted as a fallen angel.","Lugh":"A prominent god in Irish mythology associated with skill and mastery in multiple disciplines.","Lugh of the Long Arm":"Another reference to the skilled god Lugh in Irish myth.","Luguan (禄馆)":"Mythically considered a guide for spirits to the underworld.","Luna":"Roman goddess of the moon.","Lycaon":"King in Greek mythology transformed into a wolf.","Lysistrata":"While not a mythological figure, Lysistrata is a character from Greek comedy with cultural significance."},
+    "nü-":{"Naga":"Serpent deities in Hindu and Buddhist mythology.","Nakula":"One of the Pandavas in the Indian epic Mahabharata.","Nanna":"Norse god associated with the moon.","Narcissus":"A hunter in Greek mythology who fell in love with his own reflection.","Nemean Lion":"A lion of Greek mythology that was impervious to weapons.","Nemesis":"The Greek goddess of retribution, enacting punishment against hubris.","Nephthys":"Egyptian goddess of mourning, night, and service.","Neptune":"Roman god of the sea, similar to the Greek Poseidon.","Nereids":"Sea nymphs in Greek mythology and daughters of the sea god Nereus.","Nereus":"'Old Man of the Sea' in Greek mythology, known for his truthfulness and virtue.","Nike":"Greek goddess of victory in battle and competition.","Ninki Nanka":"A dragon-like creature in West African mythology.","Ninurta":"Mesopotamian god of war and agriculture.","Njord":"A god of the sea, associated with wealth and fertility in Norse mythology.","Norns":"The Fates in Norse mythology who control fate and destiny.","Nü Gui":"A ghostly figure of a woman in Chinese folklore seeking vengeance.","Nügu (女姑)":"A mystical woman often featured in regional tales for her prophecy skills.","Nüshen (女神)":"Generic term for goddess, often referencing many female deities in folklore.","Nuwa":"Chinese goddess who molded humanity from clay.","Nüwa":"A Chinese goddess known for creating humans and repairing the heavens.","Nuwa (女娲)":"The goddess who created mankind and mended the heavens. A significant figure in mythology.","Nüwa Wuhua (女娲无华)":"A slight variation of Nuwa's myth, reflecting her multifaceted nature.","Nymphs":"Female spirits of nature in Greek mythology, often associated with a particular place.","Nyx":"The primordial goddess of the night in Greek mythology."},
+    "qu-":{"Choo Choo":"The sound a steam train makes.","Cupid":"Roman god of love, akin to Greek Eros.","Qetza":"A mythical bird of wonder in allegoric Aztec narratives.","Qilin":"A Chinese mythical hooved chimerical creature known for good omens.","Qoppa":"A legendary symbol or character in ancient Greek traditions.","Queen Mab":"A fairy referred to in Shakespeare's works, symbolizing dreams and illusions.","Quesare":"A rarely mentioned entity in obscure Greek tales.","Quetzalcoatl":"A Mesoamerican feathered serpent deity associated with wind and learning.","Quetzalli":"A divine figure associated with beauty and grace in Aztec culture.","Quicksilver (Mercury)":"Roman deity associated with commerce, communication, and travel.","Quinga":"A protector deity in some indigenous South American mythologies.","Quinotaur":"A God or creature from Frankish mythology involving seafaring and interspecies ancestry.","Quirinus":"An ancient Roman god of war, later associated with the legendary Romulus.","Quraish":"An Arabian tribal deity-like figure, mentioned in historical texts."},
+    "xu-":{"Joshua":"","Professor X":"","Shuri":"","Xavier":"","Xena":"","Xenos":"A mysterious Greek god representing the unknown and foreign.","Xu Fang":"Mythic philosopher devoted to uncovering secrets of immortality.","Xu Fu":"A court sorcerer for Emperor Qin Shi Huang, rumored to have sought the elixir of life.","Xu Zhenjun":"A Taoist immortal in Chinese legend, revered for his wisdom.","Xuan":"A mythical title often given to divine emperors or celestial beings.","Xuan Lu":"A mythical character oftentimes associated with rebirth and renewal.","Xuan Nü":"A hermit goddess known for her knowledge of battle in Chinese mythology.","Xuan Zhao":"A figure in Eastern mythologies often linked to celestial guidance.","Xuanwu":"A dark warrior and protector deity in Chinese mythology, associated with the north.","Xuanzang":"A monk who became a legendary figure in Chinese mythology for his journey to India.","Xuchi":"A dragon or serpent in South American folklore.","Xuthos":"A figure in Greek mythology regarded as an ancestor of the Greek tribes."},
+    "yu-":{"Yama":"The Hindu god of death, also recognized in various East Asian mythologies.","Yeti":"","Ymir":"A primordial giant in Norse mythology, ancestor of all jötnar.","Ymir's Blood (from Ymir's sacrificial myth)":"Norse creation myth where the world was created from Ymir's body.","Yochlol":"Demonic creatures in Dungeons & Dragons mythology, resembling chaotic elements.","Yoda":"","Yowie":"","Yù Dì (玉帝)":"The Jade Emperor, the most powerful god in the Chinese Pantheon, ruler of Heaven.","Yu Huang":"Another title for the Jade Emperor in Taoist mythology.","Yu the Great (大禹)":"A legendary ruler famous for his flood control efforts and founder of the Xia dynasty.","Yue Lao":"A matchmaker deity who binds lovers together in Chinese mythology.","Yuki-onna":"A spirit or yōkai in Japanese folklore often translated as \"Snow Woman\".","Yurei":"Ghostly spirits in Japanese folklore, similar to Western ghosts.","Yurei no Tsubasa":"A mythical Japanese spirit known for wings of phantom imagery.","Yutu (Jade Rabbit)":"A companion of the moon goddess Chang'e in Chinese folklore."}
   },
-  "-ao": {
-    "Powerhouse Museum": "Museum in Sydney",
-    "Powerstation": "",
-    "Flower Market": ""
+  "GreekMythologyCharacter":{
+    "b-":{},
+    "bu-":{},
+    "c-":{"Calliope":"Muse of epic poetry, motherly and shrewd spirit.","Carme":"Cretan spirit-designed goddess associated with sea.","Cassandra":"Trojan priestess cursed to tell true prophecies no one believed.","Castor":"One of the Dioscuri, noted for stories of camaraderie.","Cephalus":"Hunter and Athenian lover of Dawn, mythological allusions.","Cerberus":"Three-headed dog guarding the entrance to the Underworld.","Ceres":"Roman goddess of agriculture, analogous to the Greek Demeter.","Ceto":"Goddess of the dangers of the deep sea.","Charybdis":"Sea monster whom Odysseus confronted.","Chiron":"A centaur who was a wisest creature known for healing and teaching.","Circe":"Enchantress who transformed Odysseus's men into pigs.","Clio":"Muse of history and lyric poetry.","Clytemnestra":"Wife of Agamemnon, known for murder and conspiracy.","Coeus":"Titan of intelligence and thoughtful inquiry.","Cratos":"Personification of strength and power, serving Zeus.","Cybele":"Earth-mother figure of Anatolian myths, mythology rooted.","Cychreus":"Said to be the savage son of Poseidon, known in myths.","Cyclops":"One-eyed giants, prominent in Odysseus's tales.","Cyrene":"Huntress daughter romanticized by Apollo; North African queen."},
+    "ch-":{"Calypso":"Nymph who held Odysseus captive for years.","Cassandra":"Trojan priestess cursed to utter true prophecies no one believed.","Castalia":"Nymph associated with the Oracle of Delphi.","Cephalus":"Husband of Procris, known for his tragic tale.","Cerberus":"Three-headed dog guarding the entrance to Hades.","Cercyon":"King associated with the struggle against Theseus.","Ceto":"Goddess of the dangers of the ocean.","Chaos":"Primordial void state before creation.","Charon":"Ferryman of the dead to the underworld.","Charybdis":"Sea monster creating deadly whirlpools.","Chione":"Goddess of snow and daughter of Boreas.","Chiron":"Wisest of Centaurs, tutor to many heroes.","Chloe":"Fertility goddess generally associated with Demeter.","Circe":"Enchantress who transformed Odysseus's men into swine.","Clio":"Muse of history.","Clytemnestra":"Wife of Agamemnon, known for her intriguing narrative.","Coeus":"Titan of inquisitive mind and intellect.","Coroebus":"Hero linked with the Calydonian Boar hunt.","Cratos":"Personification of strength and power.","Cronus":"Leader of the Titans, father of Zeus."},
+    "chu-":{"Calypso":"Nymph who detained Odysseus on her island.","Cassandra":"Trojan princess and prophetess.","Chiron":"Wise centaur who tutored many heroes.","Cronus":"Leader of the Titans, father of Zeus."},
+    "d-":{"Dactyls":"Mythical beings associated with metalwork.","Daedalus":"Skilled craftsman and artist, father of Icarus.","Damon":"Pythias's loyal friend, swapped places for execution.","Danae":"Mother of Perseus by Zeus.","Daphne":"Nymph pursued by Apollo, turned into a laurel tree.","Deianeira":"Wife of Hercules, causes his death inadvertently.","Deimos":"Personification of terror, son of Ares.","Delphi":"Oracle famous for prophecies.","Demeter":"Goddess of agriculture and the harvest.","Deucalion":"Equivalent of Noah in Greek mythology.","Dictys":"Fisherman who rescues Danae and Perseus.","Diomedes":"Hero of the Trojan War.","Dione":"Titaness, possibly mother of Aphrodite.","Dionysus":"God of wine and festivity.","Dioscuri":"Twin brothers Castor and Pollux.","Dirce":"Tied to a bull by sons of Antiope.","Doris":"Sea nymph, mother of the Nereids.","Dryads":"Tree nymphs."},
+    "du-":{"Danae":"Mother of Perseus, visited by Zeus in the form of a golden shower.","Demeter":"Goddess of the harvest and agriculture.","Diomedes":"Hero who fought in the Trojan War.","Dionysus":"God of wine, pleasure, and festivity."},
+    "f-":{"Fadrus":"Made up as addition, could relate to many minor figures.","Fama":"Goddess of fame and rumor.","Fates":"Three goddesses who controlled it; Clotho, Lachesis, Atropos.","Faunus":"Roman nature god, equivalent of Greek Pan.","Fausta":"Minor female figure in some stories.","Faustulus":"Caretaker of Romulus and Remus.","Favonius":"Roman equivalent of Zephyrus, god of the west wind.","Fawns":"Represented as woodland deities.","Fear":"Personified in many minor figures or gods.","Fenix":"Alternative spelling for Phoenix, famed bird.","Fenrir":"Monstrous wolf in Norse mythology.","Flora":"Roman goddess of flowers and spring.","Foloi":"Region home to centaurs.","Fomorians":"Mythical race of supernatural beings.","Fortuna":"Goddess of fortune and luck.","Frescati":"Region referenced, not a personification.","Freyr":"God of prosperity and fertility (Norse origin often included in Greco studies).","Frigg":"Norse goddess often referenced in comparative mythology.","Furies":"Deities of vengeance, also known as Erinyes.","Furina":"Roman goddess of thieves."},
+    "fu-":{"Fates":"Three sisters who determined the destinies of humans.","Faunus":"Roman counterpart of Greek Pan, god of the forest and fields.","Flora":"Goddess of flowers and spring.","Furies":"Deities of vengeance and retribution."},
+    "g-":{"Gaea":"Alternative spelling for Gaia, earth mother.","Gaia":"Primordial Earth goddess.","Gala":"Alternative name for Gaia, Earth goddess.","Galatea":"Loved by Polyphemus, sculpted by Pygmalion.","Gallus":"Priest of Cybele, noted by various authors.","Ganymede":"Cupbearer to the gods, abducted by Zeus.","Geras":"Personification of old age.","Geryon":"Owner of herd stolen by Hercules.","Gigantes":"Race of giants who fought the gods.","Gilgamesh":"Epic hero sometimes referenced in comparative studies.","Glanis":"Associated water deity, often obscure.","Glaucus":"Prophet, turned immortal sea deity.","Gorgon":"Term for the trio of Medusa, Stheno, and Euryale.","Gorgons":"Three sisters with snakes for hair, including Medusa.","Graces":"Three goddesses of charm, beauty, and creativity.","Graeae":"Three sisters sharing one eye and tooth.","Griffin":"Creature with the body of a lion and the head of an eagle.","Gyges":"One of the Hecatoncheires, fell in battle fighting Typhon."},
+    "gu-":{"Gaia":"Primordial goddess of the Earth.","Ganymede":"Beautiful youth taken by Zeus to be the cupbearer of the gods.","Glaucus":"Sea god and a fisherman turned into a god.","Gorgons":"Three monstrous sisters; Medusa being the most famous."},
+    "h-":{"Hades":"God of the underworld and the dead.","Harmonia":"Goddess of harmony and concord.","Hebe":"Goddess of youth.","Hecate":"Goddess of magic and witchcraft.","Hecatoncheires":"The collective name for the Hundred-Handers.","Helios":"God of the sun.","Hephaestus":"God of fire and craftsmanship.","Hera":"Queen of the Gods, wife of Zeus.","Heracles":"Hero known for his strength and the Twelve Labors.","Hermes":"Messenger of the gods, god of trade.","Hesperides":"Guardians of the golden apples.","Hestia":"Goddess of hearth and home.","Hippocampus":"Sea creature with the fore-quarters of a horse and the tail of a fish.","Hippocrates":"Physician often associated with the art of healing.","Hippolyta":"Amazonian queen, owned a magical girdle.","Hundred-Handers":"Giant creatures with fifty heads and one hundred arms.","Hyacinthus":"Beautiful youth loved by Apollo.","Hygieia":"Goddess of good health.","Hylas":"Companion of Heracles, abducted by water nymphs.","Hypnos":"God of sleep."},
+    "hu-":{"Hades":"God of the Underworld.","Hera":"Queen of the gods and goddess of marriage and family.","Hercules":"Hero known for his strength and completion of the twelve labors.","Hermes":"God of travel, trade, and communication."},
+    "k-":{"Kadmos":"Founder of Thebes, brother of Europa.","Kairatos":"Minor location spirit or name, not heavily featured.","Kalliope":"Muse of epic poetry.","Kassiopeia":"Boasted about her daughter's beauty.","Kastor":"One of the Dioscuri twins.","Kelaino":"One of the Harpies, daughter of Thaumas and Electra.","Kerkopes":"Two mischievous dwarfs caught by Hercules.","Khione":"Goddess of snow.","Kleio":"Muse of history.","Kleobis":"Paired with Biton in a story of familial devotion.","Klytemnestra":"Wife of Agamemnon, involved in his murder.","Klytia":"Nymph, pined for Helios and turned into a sunflower.","Korybantes":"Dancers associated with Cybele.","Kraken":"Mythical sea monster sometimes referenced in latter myth adaptations.","Kreon":"King of Thebes, plays role in Oedipus story.","Kreusa":"Daughter of Priam, wife of Aeneas in some tales.","Kronion":"Another name for Zeus, acknowledging his father Kronos.","Kronos":"Leader of the first generation of Titans."},
+    "ku-":{"Calliope":"Muse of epic poetry.","Cerberus":"Multi-headed dog that guarded the gates of the Underworld.","Chimera":"Monstrous fire-breathing creature with a lion's head, goat's body, and serpent's tail.","Cronus":"Leader of the Titans and father of Zeus."},
+    "l-":{"Lachesis":"One of the three Fates, measures the thread of life.","Ladon":"Serpent-like dragon in the Garden of the Hesperides.","Laertes":"Father of Odysseus.","Laius":"Oedipus's father.","Lamia":"Vampiric demoness in Greek myth.","Laocoön":"Priest warned Trojans against Greek gift; killed by snakes.","Leander":"Swam Hellespont nightly to see beloved Hero.","Leda":"Queen who mothered Helen of Troy with Zeus.","Leto":"Mother of Apollo and Artemis with Zeus.","Leucothea":"Sea goddess who aided Odysseus.","Linus":"Famed musician and teacher.","Lotus-eaters":"Mythical people Odysseus encountered.","Lucina":"Roman goddess of childbirth, linked to Eileithyia.","Lycaon":"King transformed into a wolf by Zeus.","Lycurgus":"King opposed Dionysus.","Lydian":"Cultural or myth reference, pertaining to location."},
+    "lu-":{"Laertes":"Father of Odysseus.","Leda":"Mother of Helen of Troy, seduced by Zeus in the form of a swan.","Leto":"Mother of Apollo and Artemis.","Linus":"Son of Apollo and a hero."},
+    "m-":{"Maia":"One of the Pleiades and mother of Hermes.","Marsyas":"Satyr famed for his music.","Medea":"Sorceress and wife of Jason.","Medusa":"Gorgon, monster with snakes for hair.","Megara":"Wife of Hercules, killed by him in a fit of madness.","Melanion":"Husband of Atalanta.","Meleager":"Hero of the Calydonian Boar hunt.","Melpomene":"Muse of tragedy.","Memnon":"Ethiopian king and hero in the Trojan War.","Menelaus":"King of Sparta, husband of Helen.","Merope":"One of the Pleiades.","Midas":"King who could turn everything he touched into gold.","Minotaur":"Creature with the body of a man and the head of a bull.","Mithras":"God of the Mithraic mysteries.","Mnemosyne":"Titaness of memory.","Molpadia":"Amazon warrior.","Moros":"Personification of doom.","Morpheus":"God of dreams.","Muses":"Goddesses of the inspiration for literature and the arts."},
+    "mu-":{"Medusa":"Gorgon with snakes for hair who turned people to stone.","Midas":"King known for his ability to turn everything he touched into gold.","Minotaur":"Monster with the head of a bull and the body of a man.","Morpheus":"God of dreams."},
+    "n-":{"Naiads":"Freshwater nymphs.","Narcissus":"Young man who becomes a flower.","Nausicaa":"Phaeacian princess who helped Odysseus.","Nekyia":"Odysseus's journey to the Underworld, a narrative element.","Nemean Lion":"Slain by Hercules as one of the Twelve Labors.","Nemesis":"Goddess of retribution and revenge.","Neoptolemus":"Son of Achilles, also called Pyrrhus.","Nereids":"Sea nymphs, daughters of Nereus.","Nereus":"Old man of the sea, shapeshifter.","Nerites":"Sea deity associated with handsome beauty.","Nestor":"Wise King of Pylos, advisor in the Trojan War.","Nike":"Goddess of victory.","Nina":"Often used in adaptation or plays.","Niobe":"Punished for boasting about her children.","Nisus":"King of Megara, known for his purple hair.","Nonnus":"Late Greek epic poet.","Notus":"God of the south wind.","Nysa":"Mythical place related to Dionysus's upbringing.","Nyx":"Primordial goddess of the night."},
+    "nu-":{"Narcissus":"Hunter who fell in love with his own reflection.","Nemesis":"Goddess of retribution and vengeance.","Nereus":"Old man of the sea and a god of the sea's rich bounty.","Nike":"Goddess of victory."},
+    "p-":{"Pallas":"Son of Evander, killed by Turnus.","Pan":"God of the wild, shepherds, and flocks.","Pandora":"The first woman, opened the box releasing all evils.","Paris":"Prince of Troy, caused the Trojan War.","Patroclus":"Close companion of Achilles.","Pegasus":"Winged horse, born from Medusa's blood.","Penthesilea":"Queen of the Amazons.","Persephone":"Queen of the Underworld, goddess of spring growth.","Perseus":"Hero, slayer of Medusa.","Phaethon":"Son of Helios, lost control of the sun chariot.","Phobos":"Personification of fear, son of Ares.","Phoebe":"Titaness associated with the moon.","Pollux":"One of the Dioscuri twins.","Polyhymnia":"Muse of sacred poetry and hymns.","Pomona":"Goddess of fruit trees.","Priam":"King of Troy during the Trojan War.","Prometheus":"Titan who stole fire for humanity.","Proteus":"Shape-changing sea god.","Psyche":"Mortal woman who became the goddess of the soul.","Pygmalion":"Sculptor who fell in love with his statue."},
+    "pu-":{"Pandora":"First woman who opened a forbidden box, releasing evils into the world.","Perseus":"Hero known for slaying Medusa.","Poseidon":"God of the sea, earthquakes, and horses.","Prometheus":"Titan who gave fire to humanity."},
+    "r-":{"Raids":"Common in stories involving divine intervention or influence.","Rampi":"Derivative name used in adaptations or less known tales.","Realm":"Besides using as territory, signifies god dominions like Hades.","Rex":"King, in various forms of myth and legend.","Rhadamanthus":"Judge of the dead, king of Crete.","Rhea":"Titaness, mother of major Olympian gods.","Rhea Silvia":"Mother of Romulus and Remus.","Rhesus":"King of Thrace, appeared in Trojan War tales.","Rhoc":"Alternative names or lesser traits in mythogenic stories.","Rhode":"Marine goddess, associated with the island of Rhodes.","Riches":"Embodied by goddesses like Plutus in myth.","Ripples":"Usually metaphorical in mythological water stories.","Rivers":"Often personified, as in Alpheus or Peneus.","Rogue":"Adventurous or tricksters are common, i.e., Hermes traits.","Romans":"While not a character, Rome's mythology derives much symbolism.","Rome":"While personified in mythology, more of a symbolic entity.","Roofs":"Symbolic representation in deities like Vesta, not character-specific.","Ruffled":"Term might apply to deities like Phobos in symbolic interps.","Ruins":"Often used to symbolize or describe aftermath in myth.","Rumor":"Personified as a spreader of news and gossip."},
+    "ru-":{"Rhadamanthus":"Wise king and judge of the dead in the underworld.","Rhea":"Mother of the Olympian gods and wife of Cronus.","Romulus":"Founder of Rome and brother of Remus.","Rumina":"Roman goddess who protected nursing infants."},
+    "s-":{"Salmoneus":"Pretender to deity retribution by Zeus, thunderbolt myth.","Sarpedon":"Heroic figure noted in Trojan narratives, a son of Zeus.","Satyr":"Woodland spirits, often companions to Dionysus.","Scylla":"Monster living on one side of a narrow channel of water.","Selena":"Variation or adaptation of myths involving Selene.","Selene":"Goddess of the moon, daughter of the Titans Hyperion and Theia.","Semele":"Mother of Dionysus, known for her mortal visual demise.","Sibyl":"Known prophetesses, linked with oracles.","Silenus":"Drunken old creature, associated with Dionysian imagery.","Sirens":"Enchanting singers with deadly intentions for sailors.","Sisyphus":"King famous for his eternal punishment in Hades.","Sleep":"Personified by Hypnos in Greek culture.","Sol":"Roman god analogous to Helios in Greek mythology.","Sophrosyne":"Conceptual spirit representing moderation, self-control.","Soteria":"Deified spirit of safety and deliverance from harm.","Sphinx":"Mythical creature known for riddles, faced by Oedipus.","Sterope":"One of the Pleiades, sometimes featured in myth.","Styga":"Alternate names involved with stories of the Styx.","Styx":"River and goddess associated with oaths.","Symphonia":"Personified concept linked to harmony or music."},
+    "sh-":{"Salmoneus":"King struck down by Zeus for imitating thunder.","Sarpedon":"Son of Zeus, hero who fought in the Trojan War.","Satyr":"Mythical creatures associated with Dionysus, part goat, part man.","Scylla":"Sea monster who devoured sailors.","Selene":"Moon goddess, sister to Helios.","Semele":"Mother of Dionysus by Zeus, died from seeing Zeus's true form.","Sibyl":"Priestess and prophetess associated with Delphi.","Silenus":"Companion and tutor to Dionysus.","Silvanus":"Roman god of woods and fields.","Sirens":"Creatures whose songs lured sailors to their doom.","Sisyphus":"King condemned to roll a boulder uphill for eternity.","Sophrosyne":"Spirit of moderation and self-control.","Soteria":"Personification of safety and salvation.","Sparta":"Epithet or locality name, not a divine figure.","Sphinx":"Creature with the body of a lion, face of a woman, known for riddles.","Sterope":"One of the Pleiades.","Stheno":"Eldest of the Gorgons.","Styx":"River forming boundary between Earth and the Underworld.","Sybil":"Alternate spelling for Sibyl, prophetess."},
+    "shu-":{"Scylla":"Sea monster who lived opposite Charybdis.","Selene":"Goddess of the moon.","Sisyphus":"King punished to eternally roll a boulder uphill.","Sphinx":"Creature with the head of a human and body of a lion."},
+    "su-":{"Selene":"Goddess of the moon.","Silvanus":"Roman god of the countryside and forests.","Stheno":"One of the Gorgons, immortal sister of Medusa.","Syrinx":"Nymph who escaped pursuit by being turned into reeds."},
+    "t-":{"Tantalus":"Eternal punishment in Tartarus for dining crimes.","Teiresias":"Renowned prophet of Apollo, transformed into a woman.","Telamon":"Father of Ajax.","Telemachus":"Son of Odysseus.","Tethys":"Titaness of the sea.","Teucer":"Famous archer, brother of Ajax.","Thalassa":"Primordial spirit of the sea.","Thalia":"Muse of comedy and idyllic poetry.","Thersites":"Ugly and scurrilous critic of Greek leaders.","Theseus":"Hero, slayer of the Minotaur.","Thetis":"Sea nymph, mother of Achilles.","Tiresias":"Blind prophet of Thebes.","Titan":"Primordial deities preceding the Olympians.","Tithonus":"Granted eternal life but not eternal youth.","Tityos":"Giant punished in Hades.","Torchbearers":"Reference to minor figures or roles.","Triptolemus":"Demeter's protégé and spreader of agriculture.","Triton":"Messenger of the sea, son of Poseidon.","Troilus":"Young Trojan prince and tragic hero.","Typhon":"Father of all monsters."},
+    "tu-":{"Tantalus":"King punished in the afterlife with eternal hunger and thirst.","Themis":"Titaness of divine law and order.","Theseus":"Hero and king of Athens, known for slaying the Minotaur.","Typhon":"Gigantic monster with a hundred dragon heads."},
+    "w-":{"Apollo":"God of the sun, music, and prophecy.","Dionysus":"God of wine, pleasure, and festivity.","Hermes":"Messenger of the gods, known for his winged sandals.","Zeus":"King of the Gods in Mount Olympus."},
+    "z-":{"Zacynthos":"Mythical founder linked to the island of Zakynthos.","Zaes":"Mythological reference derivative of Zeus.","Zagreus":"Said to be the son of Zeus and Persephone.","Zelea":"Town mentioned in the Iliad, indirectly anthropomorphized.","Zelos":"Personified spirit of emulation, rival to others.","Zeme":"Terrestrial entities or beings familiar in myth.","Zenith":"Linked to divine knowledge in minor tales.","Zenius":"A figure of wisdom and character, possibly adapted form.","Zenophanes":"A philosopher engaging in mythological discourse.","Zephyrus":"God of the west wind, known for gentle demeanor.","Zerynthia":"Tales or territories often enriched with divine story.","Zetes":"Winged sons of Boreas and Orithyia, joined the Argonauts.","Zethus":"Twin brother of Amphion, part of Theban myths.","Zeus":"King of the Gods, ruler of Mount Olympus.","Zeuxo":"One of the Oceanids, daughters of Oceanus and Tethys.","Ziklus":"Distant echoes of narratives involving protection.","Zimri":"Adaptor's choices to replicate heroic tales in myth.","Zion":"Sometimes involved in adaptation or allegories in myth.","Zionia":"Name occurred in ancient adaptations or storytelling."},
+    "zh-":{"Zaes":"Version or stylization based on Zeus in some narratives.","Zagreus":"In some legends, son of Zeus and Persephone.","Zan":"Abbreviated or adapted names in some translations.","Zarex":"Minor figure, occasionally in heroic tales.","Zela":"Refers to various figures across mythological canons.","Zeleia":"Trojan city mentioned in the Iliad.","Zelos":"Often parallels with Zelus, emphasizing spirit of rivalry.","Zelus":"Personification of rivalry and emulation.","Zena":"Adapted name in mythological tales.","Zephyrus":"God of the west wind.","Zerynthia":"Name associated with a locale or mythology tale.","Zetes":"Winged sons of Boreas, took part in the Argonauts.","Zethus":"Brother of Amphion, co-founder of Thebes.","Zeugma":"A hero, generally associated with military tales.","Zeus":"King of the Gods, ruler of Mount Olympus.","Zeuxo":"One of the Oceanids, daughters of Oceanus and Tethys.","Zigura":"Rare, linked to adaptations or geographic names.","Zikum":"Name found in cross-cultural myth discussions.","Zion":"Mythologized concept, not directly Greco-Roman."},
+    "zhu-":{"Zagreus":"An underworld god who later merged with the myth of Dionysus.","Zelus":"Spirit of eager rivalry, emulation, envy, jealousy, and zeal.","Zephyrus":"God of the west wind.","Zeus":"King of the gods and ruler of Mount Olympus."},
+    "zu-":{"Zagreus":"Mythical counterpart of Dionysus in his underworld aspect.","Zelus":"Spirited representation of envy, zeal, and rivalry.","Zephyrus":"God of the west wind.","Zeus":"King of the gods, ruler of Mount Olympus."}
   },
-  "-e": {
-    "Pho Restuarant": "Pho ends with the -e 'uh' sound.",
-    "River Stage": ""
+  "People":{
+    "∅-":{"Yourself":"Yourself"},
+    "bi-":{"Bea":"","Bee":"","Benjamin":"\"Behn-GEE-man\" matches the sound.","Bianca":"","Bibi":"","Bilbo":"","Bill":"","Bindi":""},
+    "di-":{"Dakota":"","David":"","Davina":"","Dee":"","Dia":"","Diddy":"","Dido":"","Diego":"","Diesel":"","Dimitri":"","Dina":"","Dion":"","Dior":"","Divine":"","Dylan":""},
+    "ji-":{"Geo":"","Gia":"","Gina":"","Gio":"","Jeanne":"","Jeeves":"","Jia":"","Jiao":"","Jill":"","Jim":"","Jimi":"","Jimmy":"","Jiovani":"","Jiro":""},
+    "li-":{"Leah":"","Lee":"","Li":"","Liam":"","Lila":"","Lina":"","Lisa":"","Lito":"","Lucy":"\"Loo-sea\" still ends with an \"ee\" sound."},
+    "mi-":{"Meena":"","Megan":"","Mia":"","Michelle":"","Mikayla":"","Milan":"","Millie":"","Mimi":"","Mira":"","Miro":"","Mitch":""},
+    "ni-":{"Neil":"","Nia":"","Nicholas":"","Nick":"","Nicky":"","Nico":"","Nicole":"","Nidhi":"","Nikola":"","Nina":"","Nixon":""},
+    "pi-":{"Pei":"","Pete":"","Pia":"","Pierce":"","Piet":"","Pio":"","Piro":""},
+    "qi-":{"Chee":"","Chi":"","Chia":"","Chico":"","Chie":"","Chiku":"","Chip":"","Qian":"","Qiǎo":""},
+    "ti-":{"Tee":"","Tegan":"","Tia":"","Tian":"","Tiara":"","Tiger":"","Tila":"","Tim":"","Tina":"","Tito":"","TJ":""},
+    "xi-":{"Sean":"","Sheena":"","Sheila":"","Shindler":"","Shiv":"","Shiva":"","Xia":"","Xing":""},
+    "y-":{"Easton":"","Eden":"","Edith":"","Eli":"","Ethan":"","Eva":"","Eve":"","Ian":"","Igor":"","Isis":"","Ivy":"","Yee":"","Yves":""}
   },
-  "-ei": {
-    "Cafe": "Café ends with the -ei sound.",
-    "Playground": "Play ends with the -ei sound.",
-    "Broadway": "Broadway ends with the -ei sound.",
-    "Bay Bridge": "Bay ends with the -ei sound."
+  "Places":{
+    "-∅":{"Home":"Your home"},
+    "-a":{"Airport":"","Aquarium":"","Art Gallery":"","Auditorium":""},
+    "-ai":{"High School":"","Myer":"M-ai-er, is there a specific store you can think of?","Tai Chi Studio":"","Thai Resturant":"Thai ends with the -ai sound."},
+    "-an":{"The Vatican":"Vatican ends with 'ahn' sound."},
+    "-ang":{"Carnegie":"“Carn” → “carng” → “arng”","Kahn Academy":"“Karn” → “karng” → “arng”. Imagine a real world version of the online learning platform."},
+    "-ao":{"Flower Market":"","Powerhouse Museum":"Museum in Sydney","Powerstation":""},
+    "-e":{"Pho Restuarant":"Pho ends with the -e 'uh' sound.","River Stage":""},
+    "-ei":{"Bay Bridge":"Bay ends with the -ei sound.","Broadway":"Broadway ends with the -ei sound.","Cafe":"Café ends with the -ei sound.","Playground":"Play ends with the -ei sound."},
+    "-en":{"7-Eleven":"Seven ends with the -en sound.","Ben & Jerry’s":"","Cabin":"","Dungeon":"","Heaven":"","Prison":""},
+    "-eng":{"Bunker":"The “unk” without the “k” sounds like “-eng”.","Jungle Gym":"","Jungle Temple":"","Tongue Hotel":""},
+    "-o":{"Dawes Point":"","Law Society":"","Lawson":"Japanese convenience store chain, pronounced as 'lo-son'.","Moore Park":"","Straw House":"throwback to fairy tale style (Three Little Pigs)","Strawberry Hills":""},
+    "-ong":{"Gong Cha":"Get some bubble tea.","Gong Temple":"","Long Beach":"","Long Island Diner":"","Longcon Convention":"","Longshore":"","Mong Kok Mall":"","Song Hotel":"","Stronghold":""},
+    "-ou":{"Apollo Rocket":"","Bungalow":"","Casino":"","Chateau":"","Condo":"","Dojo":"","Moma":"“mo-” = “oh” sound","Rodeo":"","Show Dome":"","Silo":"“mo-” = “oh” sound. A grain or sugar silo perhaps.","Soho House":"","Studio":""}
   },
-  "-en": {
-    "7-Eleven": "Seven ends with the -en sound.",
-    "Ben & Jerry’s": "",
-    "Heaven": "",
-    "Cabin": "",
-    "Prison": "",
-    "Dungeon": ""
-  },
-  "-eng": {
-    "Tongue Hotel": "",
-    "Bunker": "The “unk” without the “k” sounds like “-eng”.",
-    "Jungle Temple": "",
-    "Jungle Gym": ""
-  },
-  "-o": {
-    "Lawson": "Japanese convenience store chain, pronounced as 'lo-son'.",
-    "Dawes Point": "",
-    "Moore Park": "",
-    "Strawberry Hills": "",
-    "Law Society": "",
-    "Straw House": "throwback to fairy tale style (Three Little Pigs)"
-  },
-  "-ou": {
-    "Silo": "“mo-” = “oh” sound. A grain or sugar silo perhaps.",
-    "Apollo Rocket": "",
-    "Show Dome": "",
-    "Soho House": "",
-    "Moma": "“mo-” = “oh” sound",
-    "Studio": "",
-    "Casino": "",
-    "Dojo": "",
-    "Condo": "",
-    "Bungalow": "",
-    "Chateau": "",
-    "Rodeo": ""
-  },
-  "-ong": {
-    "Song Hotel": "",
-    "Long Island Diner": "",
-    "Mong Kok Mall": "",
-    "Long Beach": "",
-    "Longcon Convention": "",
-    "Gong Temple": "",
-    "Gong Cha": "Get some bubble tea.",
-    "Stronghold": "",
-    "Longshore": ""
+  "Unique":{
+    "∅-":{"Yourself":""}
   }
-},
-"Areas":{
-  "1": {
-    "Car Park": "Where you park your e.g. parking lot or your garage",
-    "Garden": "Outside with the plants",
-    "Outside": "Outside somewhere"
-  },
-  "2": {
-    "Front Door": "Just outside the entrance",
-    "Entry": "Front door, entry-way, or foyer"
-  },
-  "3": {
-    "Inside": "Inside the main area"
-  },
-  "4": {
-    "Bathroom": "The bathroom with a shower, sink, and toilet.",
-    "Toilet": "The toilet room."
-  },
-  "5": {
-    "Rooftop": "On the roof of the building"
-  }
-},
-"Unique":{
-  "∅-": {
-    "Yourself": ""
-  }
-},
-"Archetypes":{
- "∅-":{
-  "Actor":"Begins with a bare vowel /æ/ just like a syllable with no initial; the image of someone on stage is vivid and memorable.",
-  "Artist":"Starts with the open vowel /ɑː/ and instantly conjures paint, canvas, and creativity.",
-  "Astronaut":"Opens with the vowel /æ/ and evokes a striking picture of a space suit floating in orbit.",
-  "Author":"Begins with the vowel /ɔː/ and calls up the scene of someone writing a book, a strong and distinct profession image.",
-  "Engineer":"Starts with the vowel /ɛ/ and ties to clear imagery of hard hats, blueprints, and machinery."
-},
- "b-":{
-  "Baker":"Starts with a clear “b” sound, extremely common profession, easy to picture kneading dough and bread.",
-  "Banker":"Widely recognized job; evokes money, suits, and a vault—memorable visuals with “b” onset.",
-  "Barber":"Iconic pole and scissors imagery; concise word with a strong initial “b”.",
-  "Bouncer":"Distinct occupation at clubs; the single syllable “bounce-r” keeps the bold “b” start and is not easily confused with other initials.",
-  "Builder":"Simple term for construction worker; hard-hat and tools give vivid imagery, starts with pure “b”."
-},
- "bi-":{
-  "Beach Lifeguard":"The word “beach” begins with “beech,” very close to the bi- sound, and the image of a lifeguard is visually rich.",
-  "Bean-Counter (Accountant)":"Colloquial job title starting with “bean/been,” which is near-homophonous with bi- and creates a playful, memorable link.",
-  "Beatboxer":"The first syllable “beat” is pronounced “beet,” mirroring the bi- sound while giving a vivid, modern profession.",
-  "Bee Farmer":"Another clear “bee” starter that is distinct from Beekeeper yet equally memorable.",
-  "Beekeeper":"Opens with the exact “bee” sound, instantly evoking the pronunciation of bi-."
-},
- "bu-":{
-  "Builder":"Common, easy to picture (hardhat, bricks, crane) and its first syllable is often pronounced “bil/boo-” depending on accent, close enough for a mnemonic while still distinct from other initials.",
-  "Bureaucrat":"Opens with a ‘byu/boo’ sound. Paperwork piles, stamps, and grey office walls give a unique, unmistakable picture for the initial.",
-  "Busker":"Street musician ‘BUS-ker’ begins with a strong ‘bus/buhs’ sound matching bu-. Colourful imagery of guitar cases and city corners makes it stick.",
-  "Butcher":"The word begins with the exact “boo” sound, is short, vivid, and the image of a cleaver-wielding butcher is very memorable.",
-  "Butler":"Starts with the same “buh/boo” onset; the tuxedo-clad, tray-carrying servant creates a clear, elegant mental snapshot."
-},
- "c-":{
-  "TSA Agent":"The acronym “TSA” is commonly said as /ˈtsiːˈesˈeɪ/; rushing the letters together gives a clear aspirated “ts” onset, matching the pinyin c- sound.",
-  "Tsar":"Although a regal title, it functions as an occupation and starts with the classic /ts/ onset, giving a short, vivid hook for the c- initial.",
-  "Tsetse-Fly Researcher":"“Tsetse” (as in the tsetse fly) starts with /ˈtsɛt-/ — a crisp aspirated “ts” that is nearly identical to c-.",
-  "Tsunami Responder":"Disaster-response teams that specialise in tsunami relief are well known; the word “tsunami” again provides the perfect /tsʰ/ opening for the mnemonic.",
-  "Tsunami Scientist":"“Tsunami” begins with exactly the English cluster /ts/ followed by the vowel u, mirroring the aspirated ‘ts’ quality of c-."
-},
- "ch-":{
-  "Chancellor":"Starts with a crisp “ch-” identical to the Pinyin sound and evokes a clear image of a high-ranking official in government or academia.",
-  "Chandler":"A traditional candle-maker; the occupational title starts with the exact “ch-” sound and paints a picture of melted wax and rows of candles.",
-  "Childcare Worker":"Begins with the same “ch-” and instantly brings to mind toys, toddlers, and a busy daycare setting.",
-  "Chimney Sweep":"The classic soot-covered sweep with brush and ladder is memorable, and the word “chimney” starts with a perfect “ch-.”",
-  "Chocolatier":"The word “chocolate” anchors the “ch-” sound; a chocolatier conjures vivid visuals of glossy sweets and a workshop full of cocoa."
-},
- "chu-":{
-  "Butter Churner":"\"Churn-\" gives the same \"chur\" pronunciation; imagining someone vigorously churning butter is memorable.",
-  "Chancellor":"Starts with a clear \"chan-\" /tʃæn/ that lets you picture the big \"ch\" sound right away.",
-  "Chaplain":"Opens with the identical “chap-” /tʃæp/ affricate, and the uniform-wearing clergy image is distinctive.",
-  "Chewing-gum taster":"Sits on an R&D sensory panel, spends the day chewing test batches, rating flavour release & texture, and giving feedback to food scientists.",
-  "Childminder":"Begins with “chi-” /tʃaɪ/—clear match to the target consonant—and instantly evokes caring for children.",
-  "Chocolatier":"Starts with a strong “choc-” /tʃɒk/; easy to picture someone crafting gourmet chocolate, rich and memorable.",
-  "Choo Choo":"The sound a steam train makes.",
-  "Choral Conductor":"\"Cho-\" /tʃoʊ/ is very close to \"choo\"; a conductor’s sweeping arm movements create a strong mental picture.",
-  "Church Pastor":"The word \"church\" begins with the exact \"chur-\" /tʃɜːr/ sound, easy to link with chu-.",
-  "Churro Chef":"\"Chur-\" mirrors the \"chu\" sound, and a street-cart chef makes a vivid, tasty image.",
-  "Train Conductor":"The phrase “choo-choo” that we instinctively link to steam trains mirrors the exact sound of ‘chu-’, making the profession an instant mnemonic even though the word itself doesn’t start with ‘ch’."
-},
- "cu-":{
-  "Suit Tailor":"The word ‘suit’ opens with that ‘su/tsu’ onset; a tailor measuring fabric makes a concrete, visual profession cue.",
-  "Sumo Wrestler":"‘Sumo’ begins with the same ‘su/tsu’ sound and the image of an enormous wrestler in a ring is unforgettable.",
-  "Supermodel":"‘Super’ starts with a strong ‘su’ sound; flashing cameras and catwalks create a lively scene.",
-  "Supervisor":"The first syllable ‘su-’ matches the cu- sound well, and a supervisor’s clipboard or headset is easy to picture.",
-  "Sushi Chef":"‘Sushi’ starts with a clear “su/tsu” sound that closely mirrors cu-. A sushi bar’s knives, fish and rice give vivid imagery."
-},
- "d-":{
-  "Dentist":"Begins with the same “d” sound and is an easily visualized profession (dental chair, drill, bright light).",
-  "Designer":"Opens with the ‘d’ sound and sparks visual scenes of sketches, fabrics, or digital layouts.",
-  "Detective":"Shares the same first sound and conjures a distinctive look (magnifying glass, trench coat).",
-  "Doctor":"Starts with the exact same un-aspirated “d” sound; universally known and evokes a clear image (white coat, stethoscope).",
-  "Driver":"The initial ‘d’ matches perfectly; imagery of someone behind the wheel is straightforward and vivid."
-},
- "di-":{
-  "Dealer (Casino Dealer)":"The first syllable “DEE-” in “dealer” mirrors “di-”; the card-shuffling table scene is easy to picture.",
-  "Dean":"University dean is said “DEEN”, a very clean, one-syllable match to “di” and conjures the image of an academic in a gown.",
-  "Designer":"Begins with the stressed “DEE-” sound (“DEE-ziner”) and summons vivid visuals of sketches, fashion shows, or CAD screens.",
-  "Detective":"Starts with “DEE-” (“DEE-tect-iv”) and instantly suggests a trench-coated sleuth with a magnifying glass.",
-  "DJ (Disc Jockey)":"The job title is literally pronounced “DEE-jay”, matching the pinyin sound perfectly and evokes a clear image of someone spinning records."
-},
- "du-":{
-  "Doula":"Starts with the exact “doo” sound, is a distinct and increasingly well-known birth-support profession.",
-  "Duelist":"Classic sword-fighter image; first syllable “doo” matches the initial while remaining unique among the other initials.",
-  "Duke":"Short, iconic title pronounced “dook,” giving a crisp “doo” start that is easy to picture (robes, castle, etc.).",
-  "Durian Vendor":"Push-cart piled with fruit, cleaver ready"
-},
- "f-":{
-  "Farmer":"Starts with the /f/ sound, universally known, and immediately evokes clear imagery (fields, animals, tractor).",
-  "Firefighter":"Strong /f/ onset, dramatic visual of flames and rescue gear helps memory retention.",
-  "Fisherman":"Distinct /f/ sound, conjures vivid scenes of boats, nets and water—easy to visualize.",
-  "Florist":"Clear /f/ beginning and colorful mental pictures of bouquets and flower shops.",
-  "Pharmacist":"Although spelled with “ph,” it is pronounced /f/; white coat and pill bottles create a readily recognizable image."
-},
- "fu-":{
-  "Foodie":"Starts with “food” (same “foo” opening); easy to picture someone tasting dishes and jotting notes.",
-  "Food Critic":"Starts with “food” (same “foo” opening); easy to picture someone tasting dishes and jotting notes.",
-  "Fugu Chef":"Begins with the exact “foo” sound; memorable because of the exotic, risky nature of preparing puffer-fish.",
-  "Furrier":"Traditional profession that starts with a clear “fur/foor” sound; the image of sewing luxurious furs is vivid."
-},
- "g-":{
-  "Gardener":"Begins with a clear hard “g” and evokes vivid imagery of plants, tools, and soil.",
-  "Geologist":"First syllable “gee-” uses the same consonant; rock hammers and fossils create rich mnemonic images.",
-  "Golfer":"The opening hard “g” matches perfectly, and golf provides distinctive visual props (clubs, greens).",
-  "Guard":"Starts with the exact same hard “g” sound; easy to picture a uniformed security guard.",
-  "Guide":"Short, standalone word with the target sound; a tour guide conjures strong, memorable scenes."
-},
- "gu-":{
-  "Goose Farmer":"“Goose” opens with “goo-”; imagining someone herding honking geese is memorable and visually distinctive.",
-  "Goon":"A hired thug.",
-  "Guru":"The word “guru” begins with exactly the “goo-” sound, making it an effortless acoustic match."
-},
- "h-":{
-  "Hacker":"Opens with a strong “hack-” h- sound; the idea of someone furiously typing code is memorable and current.",
-  "Hairstylist":"Starts with a clear “hai-” sound that matches the Mandarin h-, and the image of cutting and styling hair is vivid and modern.",
-  "Historian":"Begins with “his-,” a straightforward h- onset, and you can picture dusty archives and ancient scrolls.",
-  "Host":"As in TV or event host; the short word starts squarely with h-, and you can imagine someone on stage holding a microphone.",
-  "Hunter":"The sharp initial “hun-” echoes the Mandarin h-, and the mental image of tracking game in the forest is striking."
-},
- "hu-":{
-  "Hula Dancer":"“Hula” begins with the exact same “hoo” sound, and the grass-skirt dancer creates a colourful, memorable image.",
-  "Hula Hooper":"Both “hula” and “hoop” reinforce the ‘hoo’ pronunciation; the spinning hoop is an easy visual anchor.",
-  "Humorist":"Begins with ‘hu-’ and evokes a stand-up comic delivering jokes under a spotlight – a scene full of emotion and motion.",
-  "Hunter":"Opens with the ‘hu-’ sound and instantly brings to mind someone in camouflage stalking game – a clear, vivid scene.",
-  "Hurdler":"Starts with the same initial; picturing an athlete frozen mid-jump over a hurdle is dynamic and memorable."
-},
- "ji-":{
-  "Geneticist":"Opens with the same unaspirated “gee/jih” sound and is distinct from other initials.",
-  "Geologist":"Begins with the “gee” sound and is a well-known, image-rich science profession.",
-  "Gymnast":"Although athletic, it functions as a profession in modern media; the first syllable “gym-/jim-” matches ji-.",
-  "Jeep Driver":"“Jeep” starts with the exact “jee” sound; safari or tour Jeep drivers evoke a clear picture.",
-  "Jingle Writer":"“Jin-” in “jingle” echoes the ji- sound, and the job is easy to visualize thanks to commercials and ads."
-},
- "ju-":{
-  "Jeweler":"The opening “jew-” matches the syllable closely and the idea of gems and a workbench makes for vivid imagery.",
-  "Journalist":"Begins with the exact “jour-” sound and conjures strong images of notebooks, cameras, and breaking news.",
-  "Judge":"Starts with the same crisp \"ju\" sound and is a very familiar profession that evokes a clear robe-and-gavel image.",
-  "Judo Instructor":"The word opens with “ju-”, and the martial-arts uniform and dojo setting provide a rich, distinct scene.",
-  "Juggler":"“Jug-” echoes the initial well and the visual of colorful balls in motion is memorable."
-},
- "k-":{
-  "Captain":"Universal, easily visualised figure—sea or air captain—whose name begins with the target consonant.",
-  "Coach":"Very common word, starts with a clear /k/ sound, easy to picture a whistle-wearing sports coach.",
-  "Coder":"Modern, familiar tech profession; the initial consonant is the exact /k/ sound.",
-  "Cook":"Kitchen imagery is vivid and memorable; the word opens with the aspirated /k/ sound.",
-  "Courier":"Simple, everyday job; the opening consonant matches the aspirated Mandarin k-, and you can imagine a package-carrying courier."
-},
- "ku-":{
-  "Kook":"A person who is odd, crazy, or incompetent. Can be mildly negative or playful depending on context.",
-  "Cooper":"Traditional barrel maker; its first syllable is exactly “koo”. Short, single word, and visually distinctive (wooden barrels, tools).",
-  "Courier":"The word starts with the pure “koo” sound (KOO-ree-er) and is a common, easily pictured job—someone dashing around with packages.",
-  "Croupier":"Casino card-table dealer. Begins with “kroo”, very close to “koo”, and evokes vivid imagery of casino chips and roulette wheels.",
-  "Koala Keeper":"Zoo worker who cares for koalas. The phrase starts with the ‘koo’ sound (“ko-a-la” /ˈkoʊ.ə.lə/ keeper), and the cute animal imagery makes it stick in memory.",
-  "Kung-fu Instructor":"Widely recognised modern profession; “Kung” opens with a clear “kung/kooŋ” sound, reinforcing the ‘ku’ pronunciation while adding a memorable martial-arts image."
-},
- "l-":{
-  "Lawyer":"Instantly recognisable profession whose name begins with a crisp L sound identical to the pinyin initial.",
-  "Lecturer":"Starts with “le-,” ties to academia, and the single word stands alone without overlapping other initials.",
-  "Librarian":"Starts with “li-,” matching many common Mandarin syllables, and conjures a clear image of books and shelves.",
-  "Lifeguard":"Begins with “li-” and evokes a vivid beach scene, making it easy to remember while staying distinct from other initials.",
-  "Lumberjack":"Opens with “lu-,” mirrors common Mandarin syllables, and offers a strong visual of chopping wood."
-},
- "li-":{
-  "Librarian":"Starts with the clear “lee” sound and instantly evokes the image of books, shelves, and a quiet library.",
-  "Lifeguard":"First syllable is “life” (pronounced /laɪf/), but many learners shorten it to “lee” in fast speech; bright red swimsuits and a rescue whistle make a vivid image.",
-  "Linguist":"Begins with the same “lee” sound and conjures a scholar studying languages—fitting for a pronunciation mnemonic.",
-  "Lion Tamer":"Although two words, the memorable circus act and roaring lions create a strong mental picture; “Lion” begins with the desired “lee”‐like start.",
-  "Litigator":"Legal professional whose title opens with the “lee” sound and suggests dramatic courtroom scenes."
-},
- "lu-":{
-  "Looter":"A sneaky thief who steals from others, the word “looter” begins with the exact “loo” sound, making it a perfect match for the pinyin lu-.",
-  "Loo Attendant":"Literally begins with the word “loo,” making the sound–image link unmistakable and humorous.",
-  "Luge Racer":"“Luge” begins /luːʒ/; picturing a winter-sport athlete rocketing down an ice track reinforces the ‘lu-’ sound.",
-  "Lunar Scientist":"“Lunar” starts /ˈluːnər/; a moon researcher is vivid and keeps the leading “loo” pronunciation.",
-  "Lute Player (Lutenist)":"The word “lute” is pronounced /luːt/; imagining a renaissance musician helps lock in the long \"loo\" start.",
-  "Luthier":"Starts with the exact “loo” sound (LOO-thee-er); a recognizable craftsperson who builds guitars and violins."
-},
- "lü-":{
-  "Lifeguard (pronounced ‘loo-guard’ in many accents)":"In several dialects, the first syllable of “lifeguard” is reduced to a front-rounded ‘li/lu’ vowel, making it close enough for mnemonic purposes, and the red-swimsuit-and-whistle image is clear.",
-  "Lua Programmer":"‘Lua’ (the scripting-language name, pronounced ‘loo-ah’) opens with the desired ‘lu’ sound, and picturing a coder typing green text on a black screen is highly memorable.",
-  "Luger":"An Olympic sled racer (“loo-ger”) begins with an unmistakable “lu” sound that echoes lü. The ice track and high-speed sled create a strong mental picture.",
-  "Lute Player":"A medieval musician strumming a lute (“loo-t”) starts with the same mouth shape as lü, and the historical costume provides memorable imagery.",
-  "Luthier":"The opening “Lu-” in “luthier” (a maker of stringed instruments) is very close to the lü [lyü] sound, and the image of a craftsperson carving violins is vivid and distinctive."
-},
- "m-":{
-  "Magician":"Starts with a crisp “m” sound, conjures vivid imagery of capes, rabbits, and cards, and is unlikely to clash with other initials.",
-  "Maid":"Short, common occupation, evokes an immediate picture (uniform, cleaning tools), and the initial sound is an unmistakable “m.”",
-  "Mayor":"Simple political role, strong visual of a suited official with a sash; the word kicks off with the pure “m” needed.",
-  "Mechanic":"Everyday, easily pictured (grease, wrench, overalls), begins with a clear “m” and is unique among the list.",
-  "Miner":"Strong mental image of a hard-hat, pickaxe, and underground tunnels; opening consonant matches the “m-” initial cleanly."
-},
- "mi-":{
-  "Meatpacker":"Starts with the “meet” sound that matches “mi-”. You can visualize conveyor belts and hanging sides of beef, giving strong imagery.",
-  "Mediator":"Begins with the clear “mee” sound and is a well-known, single-word profession involving conflict resolution—easy to picture two parties with the Mediator between them.",
-  "Medium":"A psychic or spiritual Medium—short, stand-alone word that starts with “mee”, and the séance scene is memorable.",
-  "Meteorologist":"The weather expert whose title opens with “mee”. Forecast maps, clouds and radar images create vivid story material.",
-  "Midwife":"Common, historic profession; while the vowel is a touch shorter, many speakers still start it with a clear “mih/mee” sound. Birth scenes make for powerful mnemonic images."
-},
- "mu-":{
-  "Mover":"The word starts with the same “moo” and paints a clear picture of someone hefting boxes and furniture.",
-  "Mullah":"Religious leader in many Islamic communities; starts with the required “mu” sound and is distinct from other initials.",
-  "Muralist":"An artist who paints large murals; opens with “mu-,” is a recognizable creative profession, and prompts colorful mental scenes.",
-  "Musher":"Dog-sled driver whose title opens with “mush-,” phonetically close to “mu,” and evokes vivid snow-trail imagery.",
-  "Musician":"Begins with the exact “moo” sound, is globally familiar, and instantly conjures images of instruments and performances."
-},
- "n-":{
-  "Newscaster":"Familiar figure behind a news desk reading the evening news, giving a vivid scene.",
-  "Notary":"Easily pictured stamping documents and verifying signatures; simple one-word title.",
-  "Novelist":"Clear mental image of someone typing manuscripts or signing books; creative profession that stands alone.",
-  "Nurse":"Extremely common, instantly visual: scrubs, stethoscope, hospital setting.",
-  "Nutritionist":"Distinct health-related role, often shown advising on food or diet charts."
-},
- "ni-":{
-  "Knee Surgeon":"It begins with the homophone “knee,” matching the pronunciation perfectly, and the idea of operating on a leg is memorable.",
-  "Nanny":"Although it adds a second syllable, it still opens with a clear “ni” sound and conjures an easily imagined caretaker figure.",
-  "Needleworker":"Whether you picture a tailor or embroidery specialist, the word “needle” gives an unmistakable “nee” onset.",
-  "Neon Artist":"“Neon” starts with “nee.” Bright glowing signs create a strong, colorful mental picture.",
-  "Ninja":"The very first sound in “ninja” is the pure “ni-” you need, and the black-clad stealth-warrior image is instantly vivid."
-},
- "nu-":{
-  "Newbie":"Someone with a big “NEWBIE” badge, sticky note, or on-screen label makes the character instantly recognisable.",
-  "Noobie":"Someone with a big “NEWBIE” badge, sticky note, or on-screen label makes the character instantly recognisable.",
-  "Newscaster":"Starts with the exact “new”/“nu” sound; the image of someone reading the news on TV is vivid and modern.",
-  "NuclearEngineer":"Although two concepts, it is often spoken as a tight unit; the first syllable “nu” matches perfectly and conjures up lab coats and reactors.",
-  "Numerologist":"Kicks off with a strong “nu” sound and brings to mind someone surrounded by mystical numbers—an unusual but striking profession.",
-  "Nurse":"The opening “nur-” begins with the same N and a very similar “oo” vowel; nurses are universally known and easy to picture.",
-  "Nutritionist":"Begins with a clear “nu” and immediately evokes food advice and diet charts—memorable visual props."
-},
- "nü-":{
-  "Newscaster":"The word opens with “new” (nyu), matching the glide in nü- and conjuring a vivid TV-studio image.",
-  "Nuclear Scientist":"The first syllable “nu-” echoes nü- and the profession evokes memorable lab-and-reactor imagery.",
-  "Numerologist":"Begins with a prominent “nu-” and is distinct from other initials’ professions.",
-  "Nurse":"Extremely common, easy to picture, and the opening “nur-” is close to the nü sound.",
-  "Nutritionist":"Starts with the clear “nu-/nyu-” sound and is a well-known modern health profession."
-},
- "p-":{
-  "Painter":"The opening /p/ is identical to the pinyin sound, and the profession easily conjures up bright colors and canvases.",
-  "Pilot":"Starts with a strong, clearly aspirated /p/ just like the pinyin initial, and it instantly evokes vivid imagery of cockpits and airplanes.",
-  "Plumber":"Begins with a crisp /p/ burst; the image of pipes, wrenches, and water leaks is memorable.",
-  "Professor":"Kicks off with the same aspirated /p/ and evokes an instantly recognizable classroom setting and a scholarly figure.",
-  "Programmer":"Starts with a clear /p/ and brings to mind code, computers, and screens—modern and easy to visualize."
-},
- "pi-":{
-  "Pediatrician":"The opening “pee-” matches pi-; the white-coat doctor for kids is well-known and memorable.",
-  "Pianist":"Starts with “pee-” exactly like pi-, and instantly evokes a vivid scene of someone at a grand piano.",
-  "Pilot":"Begins with the same crisp “pi” sound and is a very familiar, image-rich profession (uniform, cockpit, headset).",
-  "Pizza Chef":"“Pi-” in “pizza” is pronounced ‘pee,’ and a chef tossing dough makes a clear, lively image.",
-  "Private Investigator":"Often shortened to the letters “P.I.” themselves, giving a perfect one-to-one sound link with pi- and conjuring trench-coat detectives."
-},
- "pu-":{
-  "Poodle Groomer":"“Poo-” in “poodle” mirrors the pinyin; easy to picture a groomer trimming a fluffy dog.",
-  "Pool Cleaner":"The first syllable “pool” is pronounced “poo-l”; the job’s visual (nets, chlorine, blue water) is memorable.",
-  "Pooper-Scooper":"Starts with the exact “poo” sound; the mental image of someone cleaning up pet waste is vivid and unique.",
-  "Pugilist":"Traditional term for a professional boxer; begins with a clear aspirated “pu-” and conjures a strong boxing scene.",
-  "Puppeteer":"Although the second syllable changes, the opening “pu-” matches the target sound and evokes lively puppet imagery."
-},
- "qi-":{
-  "Cheerleader":"Instantly visual profession that starts with a bright “chee-” sound, matching q-.",
-  "Chef":"Well-known, single-syllable job beginning with the same “che-” sound students produce for q-.",
-  "Childminder":"Everyday occupation; initial “chi-” gives a clear phonetic link to q-.",
-  "Chiropractor":"Health-care profession beginning with “chi-,” closely mirroring the pinyin pronunciation.",
-  "Choreographer":"Distinct artistic role; opening “cho/chor” keeps the same unvoiced, aspirated ‘ch’ quality as q-."
-},
- "qu-":{
-  "QA Engineer":"Begins with the letter Q, instantly reminding you of the ‘qu-’ spelling, and the short, punchy job title matches the brisk “chyü” sound.",
-  "Quantum Physicist":"The first syllable “Quan-” starts with the same Q initial; the cutting-edge, high-tech image can make a vivid mnemonic scene.",
-  "Quartermaster":"A historic naval-supply officer; the strong ‘kwor-’ at the start keeps the letter Q prominent while being a well-known profession.",
-  "Quilter":"A craft professional who sews quilts; the single-word title is short, concrete, and keeps the Q association front-and-center.",
-  "Quizmaster":"Runs pub quizzes and TV game shows. The playful image of asking questions links neatly to the distinctive Q sound."
-},
- "r-":{
-  "Racer":"Short, energetic word; evokes roaring engines and checkered flags, reinforcing the sharp initial R.",
-  "Ranger":"Strong initial R; conjures an outdoors uniform, badge, and wide-brim hat—rich visual potential.",
-  "Rapper":"Begins with a clear, punchy R-sound; modern, vivid, and easy to picture on a stage with a microphone.",
-  "Realtor":"Common profession in daily life; office tours, house keys, and “For Sale” signs make memorable imagery.",
-  "Referee":"Starts with R and carries rhythmic repetition; whistles, striped shirt, and hand signals form a clear mental scene."
-},
- "ru-":{
-  "Roofer":"Begins with the exact “roo” sound, is a common trade, and conjures a clear image of someone working on a roof.",
-  "Rugmaker":"Starts with “rug-,” pronounced “ru-,” and brings to mind colorful looms and patterned carpets—rich visual material.",
-  "Ruler (Monarch)":"The title “Ruler” is short, well-known, starts with the identical “roo” sound, and evokes vivid imagery of crowns and thrones.",
-  "Rum Distiller":"The word “Rum” starts with the desired ‘ru’ sound; a distiller surrounded by barrels of spirits is a memorable scene.",
-  "Runner (Pro Athlete)":"Although a sports profession, ‘Runner’ is widely recognized, easy to picture, and the opening syllable matches “ru.”"
-},
- "s-":{
-  "Sailor":"Opens with a clear \"s\" hiss and conjures a strong visual of someone at sea, useful for story-building.",
-  "Scientist":"Kicks off with the same sharp \"s\" and brings to mind lab coats and experiments, rich mnemonic material.",
-  "Singer":"Begins with the pure \"s\" sound and immediately suggests microphones and music, easy to picture.",
-  "Soldier":"Starts with the exact \"s\" consonant and calls up striking scenes of uniforms and marches.",
-  "Surgeon":"Starts with a crisp, standalone \"s\" sound identical to the pinyin initial and evokes vivid imagery of scrubs and scalpels."
-},
- "sh-":{
-  "Chef":"Though spelled with ‘ch’, it is pronounced “shef,” giving the exact ‘sh’ onset, and it’s a very familiar modern job.",
-  "Shepherd":"Opens with “shep-,” matching the target sound; picturing someone herding sheep makes a vivid scene.",
-  "Sheriff":"Starts with a strong “sh” sound and instantly calls up the image of a badge-wearing law-enforcer.",
-  "Ship Captain":"The word starts with “ship” (sh-); imagining a uniformed captain at the helm of a vessel is easy and distinctive.",
-  "Shoemaker":"Begins with “shoe-,” an unmistakable ‘sh’ sound; the craft tools and shoes provide rich visual detail."
-},
- "shu-":{
-  "Shoemaker":"Classic craft that literally contains the sound “shoe.”",
-  "Shoeshiner":"Another well-known occupation centered on “shoes,” matching the exact “shoo” sound.",
-  "Shrimper":"Commercial shrimp fisher; begins with “shr-,” an English cluster whose first part is the same “sh” retroflex consonant.",
-  "Shuriken Instructor":"Martial-arts teacher specializing in throwing stars; the word “shuriken” begins with perfect “shu-,” and the image is vivid and memorable.",
-  "Shuttle Driver":"Starts with “shut-” /ʃʌt/; students still hear the strong “sh-” onset and can shorten it mentally to “shoo.”"
-},
- "su-":{
-  "Sous-chef":"Begins with the exact “soo” sound and instantly evokes a clear kitchen image.",
-  "Sumo wrestler":"First syllable is pronounced “soo,” and the image of a wrestler in a mawashi is memorable.",
-  "Superintendent":"Well-known leadership role that also kicks off with “soo.”",
-  "Supermodel":"Starts with “soo-” and is a vivid, widely-known profession.",
-  "Supervisor":"Common job title that opens with the same “soo” sound."
-},
- "t-":{
-  "Tailor":"The crisp initial \"T\" in Tailor matches t-. Visualizing someone measuring fabric with scissors in hand creates a memorable scene.",
-  "Teacher":"Starts with a clear, aspirated \"T\" sound that mirrors the pinyin t-. Nearly everyone can picture a Teacher in a classroom, making the image vivid.",
-  "Technician":"Starts with the target sound and conjures an image of someone repairing electronics or machinery, giving rich detail for storytelling.",
-  "Trainer":"Features an obvious \"T\" onset; a personal Trainer counting reps or blowing a whistle provides a dynamic visual cue.",
-  "Tutor":"Begins with the same aspirated \"t-\" and evokes the simple image of one-on-one instruction, distinct from Teacher but still easily imagined."
-},
- "ti-":{
-  "Tea Taster":"Starts with the word “tea” (pronounced “tee”); clear imagery of someone evaluating teas.",
-  "Teacher":"Begins with the exact “tee” sound of ti-; universally known profession.",
-  "Teamster":"First syllable “team-” is pronounced “teem,” matching the ti- sound; distinct blue-collar job transporting goods.",
-  "Teen Counselor":"“Teen” begins with the same “tee” sound; evokes a specific role working with adolescents.",
-  "TV Host":"The abbreviation “TV” is read aloud as “tee-vee”; a recognizable media profession."
-},
- "tu-":{
-  "Toolmaker":"“Tool” shares the identical “too-” opening, and the image of someone crafting hammers and wrenches is concrete and memorable.",
-  "Tourist":"“Tour” is pronounced “too-er” in many accents, matching the target sound and conjuring of a sightseer.",
-  "Tour Guide":"“Tour” is pronounced “too-er” in many accents, matching the target sound and conjuring up a clear picture of someone leading sightseers.",
-  "Tuba Player":"The musical profession starts with the “too-” of “tuba,” creating a strong auditory link while evoking the vivid image of a large brass instrument.",
-  "Tuna Fisher":"The first syllable of “tuna” is “too-,” and picturing a professional fisher hauling in giant tuna provides a vivid scene.",
-  "Tutor":"Begins with the clear “too-” sound and is a well-known, easily pictured profession (someone teaching a student one-on-one)."
-},
- "w-":{
-  "Waiter":"Starts with a clear /w/ sound and is a very familiar, easy-to-picture job.",
-  "Weatherman":"Begins with /w/ and instantly suggests green-screen forecasts, maps, and storms.",
-  "Weaver":"Distinct /w/ opening and conjures up the visual of a loom and colorful threads.",
-  "Welder":"Strong, unmistakable /w/ onset and evokes vivid imagery of sparks and protective gear.",
-  "Woodworker":"Prominent /w/ sound and provides a concrete mental scene of sawdust and carpentry tools."
-},
- "xi-":{
-  "Sheep Shearer":"Opening “shee-” is spot-on; the act of clipping wool creates a memorable visual of flying fleece.",
-  "Sheet-Metal Worker":"Starts with “sheet-,” again the “shee” sound; sparks images of sparks, welding masks, and folded metal panels.",
-  "Shepherd":"Starts with the clear “she-” sound that matches /ɕi/. A familiar, image-rich profession (staff, sheep, hills).",
-  "Sherpa":"First syllable “sher-” uses the same soft fricative and quickly evokes mountains, ropes, and guiding climbers—very vivid.",
-  "Shiatsu Therapist":"Begins with “shi-,” almost a perfect phonetic match. Easy to picture someone giving a massage on a floor mat."
-},
- "y-":{
-  "Yachtsman":"Conjures a sailor at the helm of a sleek yacht; starts with a strong “ya-” sound parallel to y-.",
-  "Yardkeeper":"Easily pictured tending lawns and gardens; first syllable “yard” provides the same initial /y/ glide.",
-  "Yodeler":"Distinct mental picture of someone singing alpine yodels; the opening “yo-” matches y- exactly.",
-  "Yogi":"Short, instantly evokes a person bending into yoga poses; the initial sound /y/ is identical to the pinyin y-.",
-  "YouTuber":"Modern, vivid image of someone filming themselves; begins with the clear English /y/ glide."
-},
- "yu-":{
-  "University Professor":"Common occupation starting with “yoo-ni-”; think of a lecturer at a podium with a stack of books.",
-  "Urologist":"Medical specialty that starts with the clear “yoo” sound; white coat and stethoscope create a vivid image.",
-  "Youth Pastor":"Another well-known role beginning with “yoo-th”; easy to imagine in a chapel with teens.",
-  "Youth Worker":"Profession focused on helping young people; starts with “yoo-th,” matching the target sound and picturable as someone running a youth center.",
-  "YouTuber":"Begins with the exact “yoo” sound; modern and instantly visual (camera, ring-light, subscriber button)."
-},
- "z-":{
-  "Zen Teacher":"The calm mediator of meditation sessions uses the /z/ onset and is distinct from other initials.",
-  "Zipper Designer":"A quirky but understandable occupation whose name opens with a crisp /z/ and creates a memorable image of crafting fasteners.",
-  "Zookeeper":"Begins with a clear /z/ sound; a vivid, easily pictured job tending animals.",
-  "Zoologist":"Starts with the same /z/ and evokes lab coats, research, and exotic creatures.",
-  "Zumba Instructor":"The energetic dance-fitness teacher starts with a punchy /z/ that matches the initial."
-},
- "zh-":{
-  "Janitor":"Initial soft “j” matches zh-; the mop, bucket and keys supply a concrete picture.",
-  "Jeweler":"Opens with the soft “j” sound and evokes sparkling gems, giving plenty of visual hooks.",
-  "Jockey":"Starts with the soft “j” sound; the racing silks, helmet and horse form a distinctive, action-packed scene.",
-  "Journalist":"Begins with the same soft “j” sound; the image of someone holding a microphone or notepad is clear and modern.",
-  "Judge":"Starts with exactly the same English sound /dʒ/ that most learners use to approximate zh-; short, instantly recognisable, vivid robes and gavel create a strong mental image."
-},
- "zhu-":{
-  "Jeweler":"Begins with exactly the same “joo” sound as zhu-, making the link immediate and unambiguous.",
-  "Judge":"Starts with the same un-aspirated retroflex ‘j’ sound; short, familiar, and visually distinctive (gavel, robe).",
-  "Judo Coach":"The first syllable “Ju-” is pronounced /dʒuː/, matching the zhu- sound while still naming a clear, modern profession.",
-  "Juggler":"Although the vowel shortens slightly, the initial ‘j’ sound is close enough to trigger the zhu- memory, and the circus imagery is strong.",
-  "Jukebox DJ":"The opening “Ju-” mirrors zhu- and the image of a DJ at a jukebox is vivid and memorable."
-},
- "zu-":{
-  "Zoo Photographer":"Pairs the clear “zoo/zu” beginning with a vivid picture of someone snapping photos of wildlife in enclosures.",
-  "Zookeeper":"Begins with the exact “zoo/zu” sound and instantly evokes cages, animals, and safari hats.",
-  "Zoologist":"Another common ‘zoo-’ profession that shares the identical opening sound and summons images of a scientist studying animals.",
-  "Zoom Producer":"‘Zoom’ opens with the desired sound and this modern tech-facilitation job is widely recognised after 2020.",
-  "Zumba Instructor":"‘Zumba’ starts with the same “zu” pronunciation; the energetic dance teacher is easy to visualize."
-}
-},
-"People":{
- "∅-":{
-  "Yourself":"Yourself"
-},
- "y-":{
-  "Ian":"",
-  "Eve":"",
-  "Eva":"",
-  "Easton":"",
-  "Eden":"",
-  "Eli":"",
-  "Isis":"",
-  "Igor":"",
-  "Edith":"",
-  "Ethan":"",
-  "Yves":"",
-  "Yee":"",
-  "Ivy":""
-},
- "bi-":{
-  "Benjamin":"\"Behn-GEE-man\" matches the sound.",
-  "Bea":"",
-  "Bee":"",
-  "Bibi":"",
-  "Bilbo":"",
-  "Bianca":"",
-  "Bill":"",
-  "Bindi":""
-},
- "pi-":{
-  "Pia":"",
-  "Pete":"",
-  "Pio":"",
-  "Pei":"",
-  "Piro":"",
-  "Piet":"",
-  "Pierce":""
-},
- "mi-":{
-  "Mia":"",
-  "Mimi":"",
-  "Milan":"",
-  "Millie":"",
-  "Michelle":"",
-  "Meena":"",
-  "Miro":"",
-  "Mira":"",
-  "Mikayla":"",
-  "Megan": "",
-  "Mitch": ""
-},
- "di-":{
-  "Dee":"",
-  "Dina":"",
-  "Dion":"",
-  "Dior":"",
-  "Diego":"",
-  "Dimitri":"",
-  "Davina":"",
-  "Divine":"",
-  "Diesel":"",
-  "Dido":"",
-  "Dia":"",
-  "Diddy":"",
-  "David":"",
-  "Dylan":"",
-  "Dakota":""
-},
- "ti-":{
-  "Tia":"",
-  "Tina":"",
-  "Tito":"",
-  "Tian":"",
-  "Tila":"",
-  "Tiger":"",
-  "Tiara":"",
-  "Tim":"",
-  "TJ":"",
-  "Tee":"",
-  "Tegan":""
-},
- "ni-":{
-  "Nia":"",
-  "Nina":"",
-  "Nick":"",
-  "Nicholas":"",
-  "Nixon":"",
-  "Nikola":"",
-  "Nicole":"",
-  "Nicky":"",
-  "Neil":"",
-  "Nico":"",
-  "Nidhi":""
-},
- "li-":{
-  "Lee":"",
-  "Li":"",
-  "Leah":"",
-  "Liam":"",
-  "Lila":"",
-  "Lisa":"",
-  "Lina":"",
-  "Lito":"",
-  "Lucy":"\"Loo-sea\" still ends with an \"ee\" sound."
-},
- "ji-":{
-  "Gina":"",
-  "Jim":"",
-  "Jimi":"",
-  "Gia":"",
-  "Jiao":"",
-  "Jeanne":"",
-  "Jiro":"",
-  "Jia":"",
-  "Jill":"",
-  "Jimmy":"",
-  "Geo":"",
-  "Gio":"",
-  "Jiovani":"",
-  "Jeeves":""
-},
- "qi-":{
-  "Chi":"",
-  "Chie":"",
-  "Chee":"",
-  "Qian":"",
-  "Chiku":"",
-  "Chip":"",
-  "Chia":"",
-  "Chico":"",
-  "Qiǎo":""
-},
- "xi-":{
-  "Sean":"",
-  "Sheila":"",
-  "Sheena":"",
-  "Shiva":"",
-  "Xia":"",
-  "Xing":"",
-  "Shiv":"",
-  "Shindler":""
-}
-}
 }

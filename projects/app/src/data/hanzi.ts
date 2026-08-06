@@ -2,11 +2,10 @@ import type {
   HanziCharacter,
   HanziText,
   IdsNode,
-  WikiCharacterComponent,
+  IdsString,
   WikiCharacterData,
 } from "@/data/model";
 import { IdsOperator, idsOperatorSchema } from "@/data/model";
-import { parseIndexRanges } from "@/util/indexRanges";
 import {
   characterCount,
   isHanziIdeograph,
@@ -1002,15 +1001,15 @@ export function makeHorizontalMergeCharacterIdsTransform<T>(
 export function idsNodeToString<T>(
   ids: IdsNode<T>,
   leafToString: (leaf: T) => string,
-): string {
+): IdsString {
   if (!Array.isArray(ids)) {
-    return leafToString(ids);
+    return leafToString(ids) as IdsString;
   }
 
   switch (ids[0]) {
     case IdsOperator.HorizontalReflection:
     case IdsOperator.Rotation: {
-      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}`;
+      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}` as IdsString;
     }
     case IdsOperator.LeftToRight:
     case IdsOperator.AboveToBelow:
@@ -1024,25 +1023,16 @@ export function idsNodeToString<T>(
     case IdsOperator.SurroundFromLowerLeft:
     case IdsOperator.SurroundFromLowerRight:
     case IdsOperator.Overlaid: {
-      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}`;
+      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}` as IdsString;
     }
     case IdsOperator.LeftToMiddleToRight:
     case IdsOperator.AboveToMiddleAndBelow: {
-      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}${idsNodeToString(ids[3], leafToString)}`;
+      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}${idsNodeToString(ids[3], leafToString)}` as IdsString;
     }
     default: {
       throw new UnexpectedValueError(ids);
     }
   }
-}
-
-export function componentToString(component: WikiCharacterComponent): string {
-  if (`hanzi` in component && component.hanzi != null) {
-    return component.hanzi;
-  } else if (`strokes` in component) {
-    return strokeCountToCharacter(parseIndexRanges(component.strokes).length);
-  }
-  throw new Error(`Invalid component format`);
 }
 
 export function characterStrokeCount(characterData: WikiCharacterData): number {

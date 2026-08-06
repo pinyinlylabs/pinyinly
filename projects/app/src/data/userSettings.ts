@@ -547,14 +547,6 @@ export const hanziWordMeaningHintCaptionSetting = defineUserSetting({
   }) satisfies UserSettingTextEntity,
 });
 
-export const userWikiCharacterDecompositionSetting = defineUserSetting({
-  entity: r.entity(`cdo/[hanzi]`, {
-    hanzi: r.string().alias(`h`),
-    components: r.json().optional().alias(`c`),
-  }),
-  historyLimit: 20,
-});
-
 export function getUserWikiCharacterDecompositionKeyParams(hanzi: HanziText) {
   return { hanzi };
 }
@@ -722,7 +714,6 @@ export const userSettingDefinitions = [
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
   userNameTextSetting,
-  userWikiCharacterDecompositionSetting,
 ] as const satisfies readonly UserSetting[];
 
 function userSettingPrefixFromKey(settingKey: string): string {

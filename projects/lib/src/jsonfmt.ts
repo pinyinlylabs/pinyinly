@@ -6,7 +6,7 @@ import path from "node:path";
 
 type JsonFmtRuleType = {
   files: string[];
-  indent: number;
+  indentLevels: number;
 };
 
 type JsonFmtConfigType = {
@@ -43,7 +43,7 @@ function parseJsonFmtConfig(content: unknown): JsonFmtConfigType {
       }
 
       const files = (rule as { files?: unknown }).files;
-      const indent = (rule as { indent?: unknown }).indent;
+      const indentLevels = (rule as { indentLevels?: unknown }).indentLevels;
 
       if (!Array.isArray(files) || files.length === 0) {
         throw new Error(
@@ -63,18 +63,18 @@ function parseJsonFmtConfig(content: unknown): JsonFmtConfigType {
       }
 
       if (
-        typeof indent !== `number` ||
-        !Number.isInteger(indent) ||
-        indent < 0
+        typeof indentLevels !== `number` ||
+        !Number.isInteger(indentLevels) ||
+        indentLevels < 0
       ) {
         throw new Error(
-          `${jsonFmtConfigFilename} rule at index ${index} must contain a non-negative integer "indent"`,
+          `${jsonFmtConfigFilename} rule at index ${index} must contain a non-negative integer "indentLevels"`,
         );
       }
 
       return {
         files,
-        indent,
+        indentLevels,
       };
     }),
   };
@@ -118,7 +118,7 @@ function toRelativePosixPath(baseDir: string, filePath: string): string {
   return relativePath.split(path.sep).join(path.posix.sep).normalize(`NFC`);
 }
 
-export async function getJsonIndentForFilePath(
+export async function getJsonIndentLevelsForFilePath(
   filePath: string,
 ): Promise<number | null> {
   const jsonFmtConfig = await loadJsonFmtConfig(filePath);
@@ -134,7 +134,7 @@ export async function getJsonIndentForFilePath(
       path.posix.matchesGlob(relativePosixPath, pattern),
     );
     if (hasMatchingPattern) {
-      return rule.indent;
+      return rule.indentLevels;
     }
   }
 
@@ -183,7 +183,7 @@ function stableObjectKeyOrder<T>(_key: string, value: T): T {
 }
 
 export async function format(path: string, content: string): Promise<string> {
-  const indentLevels = await getJsonIndentForFilePath(path);
+  const indentLevels = await getJsonIndentLevelsForFilePath(path);
   if (indentLevels != null) {
     const parsed = JSON.parse(content) as unknown;
     return jsonStringifyShallowIndent(parsed, indentLevels);

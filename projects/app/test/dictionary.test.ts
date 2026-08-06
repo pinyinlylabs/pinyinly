@@ -9,6 +9,7 @@ import type {
   HanziCharacter,
   HanziText,
   HanziWord,
+  IdsString,
   PinyinText,
   PinyinUnit,
 } from "#data/model.ts";
@@ -18,8 +19,7 @@ import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
-  decompositionComponentsToIds,
-  decomposeHanzi,
+  hanziComponentsToLearn,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
   hanziFromHanziOrHanziWord,
@@ -38,7 +38,6 @@ import {
   oneUnitPinyinListOrNull,
   oneUnitPinyinOrNull,
   parsePartOfSpeech,
-  parseIdsToDecompositionComponents,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -640,7 +639,7 @@ test(`dictionary contains entries for decomposition`, async () => {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
-      for (const component of await decomposeHanzi(
+      for (const component of await hanziComponentsToLearn(
         character,
         decompositionData,
       )) {
@@ -738,11 +737,10 @@ test(`dictionary contains entries for decomposition`, async () => {
       "⺆ via 周[HSK2]",
       "⺈ via 争[HSK3], 免, 欠, 色[HSK4], 角[HSK2], 象, 负, 饣, 鱼[HSK2]",
       "⺧ via 先[HSK1], 告",
-      "⺶ via 养[HSK2]",
       "⺺ via 隶",
       "〢 via 坚, 紧[HSK3]",
       "コ via 彐",
-      "ュ via 候, 敢[HSK3]",
+      "ュ via 候",
       "㇀ via 七[HSK1]",
       "㇂ via 民",
       "㇇ via 今, 水[HSK1]",
@@ -757,6 +755,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "㠯 via 官[HSK4]",
       "㡀 via 黹",
       "䏍 via 能[HSK1]",
+      "丄 via 工",
       "丅 via 斤[HSK2], 鬲",
       "丆 via 才[HSK2], 石, 面[HSK2], 页[HSK1]",
       "丈 via 丈夫[HSK4]",
@@ -773,7 +772,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "之 via 之一[HSK4], 之前[HSK4], 之后[HSK4], 之间[HSK4], 分之[HSK4], 总之[HSK4]",
       "乎 via 不在乎[HSK4], 似乎[HSK4], 几乎[HSK4], 在乎[HSK4]",
       "乔 via 桥[HSK3]",
-      "乛 via 买[HSK1], 了[HSK1]",
+      "乛 via 买[HSK1], 了[HSK1], 敢[HSK3]",
       "乞 via 吃[HSK1]",
       "亇 via 竹",
       "予 via 舒, 预",
@@ -966,7 +965,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "毕 via 毕业[HSK4], 毕业生[HSK4], 毕竟",
       "毫 via 毫升[HSK4], 毫米[HSK4]",
       "氾 via 范",
-      "泉 via 原, 矿泉水[HSK4]",
+      "泉 via 矿泉水[HSK4]",
       "洛 via 落[HSK4]",
       "渐 via 渐渐[HSK4], 逐渐[HSK4]",
       "源 via 来源[HSK4], 电源[HSK4], 资源[HSK4]",
@@ -1078,7 +1077,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "限 via 无限[HSK4], 有限[HSK4], 期限[HSK4], 限制[HSK4]",
       "雷 via 打雷[HSK4]",
       "默 via 沉默[HSK4], 默默[HSK4]",
-      "龰 via 疋, 走[HSK1], 足",
+      "龰 via 是[HSK1], 疋, 走[HSK1], 足",
       "龱 via 卤",
       "龴 via 令, 矛",
       "龵 via 看[HSK1]",
@@ -1112,8 +1111,8 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𢎨 via 弟[HSK1], 第[HSK1]",
       "𣥂 via 步[HSK3]",
       "𣦼 via 餐",
-      "𤴓 via 定[HSK4], 是[HSK1]",
-      "𦍌 via 美[HSK3]",
+      "𤴓 via 定[HSK4]",
+      "𦍌 via 养[HSK2], 美[HSK3]",
       "𦓐 via 而[HSK4]",
       "𦣻 via 夏",
       "𧰨 via 豕",
@@ -1441,29 +1440,12 @@ describe(
 );
 
 describe(`character decomposition loaders`, () => {
-  test(`includes decomposition rows from characters data`, async () => {
-    const entries = await loadBuiltinCharacterDecompositionEntries();
-    const shuo = entries.find((entry) => entry.hanzi === 汉`说`);
-
-    expect(shuo).toBeDefined();
-    expect(
-      shuo == null
-        ? null
-        : decompositionComponentsToIds(shuo.decompositionComponents),
-    ).toBe(`⿰讠兑`);
-  });
-
   test(`decomposeHanzi supports decomposition overrides`, async () => {
-    const overrideComponents = parseIdsToDecompositionComponents(`⿰言兑`);
-    expect(overrideComponents).not.toBeNull();
-    if (overrideComponents == null) {
-      throw new Error(`Expected valid decomposition components`);
-    }
-
-    const components = await decomposeHanzi(汉`说`, [
+    const components = await hanziComponentsToLearn(汉`说`, [
       {
         hanzi: 汉`说`,
-        decompositionComponents: overrideComponents,
+        ids: `⿰言兑` as IdsString,
+        strokeSpecs: [],
       },
     ]);
 

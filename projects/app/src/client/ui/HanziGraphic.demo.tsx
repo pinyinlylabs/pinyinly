@@ -1,7 +1,7 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import { Text, View } from "react-native";
-import { HanziCharacter } from "./HanziCharacter";
 import { HanziWordRefText } from "./HanziWordRefText";
+import { HanziGraphic } from "./HanziGraphic";
 
 const xueStrokes = [
   `M 311 681 Q 332 656 354 626 Q 364 611 380 610 Q 390 609 397 621 Q 404 634 399 664 Q 395 694 313 727 Q 298 733 292 731 Q 288 728 287 715 Q 288 705 311 681 Z`,
@@ -19,26 +19,29 @@ export default () => {
     <>
       <View className="w-full flex-row gap-2">
         <ExampleStack title="Fingers">
-          <HanziCharacter
-            strokesData={xueStrokes}
-            highlightStrokes={[0, 1, 2]}
+          <HanziGraphic
+            bgSvgPaths={xueStrokes}
+            fgSvgPaths={xueStrokes.slice(0, 3)}
           />
         </ExampleStack>
         <ExampleStack title="Roof">
-          <HanziCharacter strokesData={xueStrokes} highlightStrokes={[3, 4]} />
+          <HanziGraphic
+            bgSvgPaths={xueStrokes}
+            fgSvgPaths={xueStrokes.slice(3, 5)}
+          />
         </ExampleStack>
         <ExampleStack title="Child">
-          <HanziCharacter
-            strokesData={xueStrokes}
-            highlightStrokes={[5, 6, 7, 8]}
+          <HanziGraphic
+            bgSvgPaths={xueStrokes}
+            fgSvgPaths={xueStrokes.slice(5, 9)}
           />
         </ExampleStack>
       </View>
       <View className="w-full gap-2">
         <View className="flex-row gap-2">
-          <HanziCharacter
-            strokesData={xueStrokes}
-            highlightStrokes={[0, 1, 2]}
+          <HanziGraphic
+            bgSvgPaths={xueStrokes}
+            fgSvgPaths={xueStrokes.slice(0, 3)}
           />
           <View>
             <Text className="pyly-body">
@@ -49,7 +52,10 @@ export default () => {
           </View>
         </View>
         <View className="flex-row gap-2">
-          <HanziCharacter strokesData={xueStrokes} highlightStrokes={[3, 4]} />
+          <HanziGraphic
+            bgSvgPaths={xueStrokes}
+            fgSvgPaths={xueStrokes.slice(3, 5)}
+          />
           <View>
             <Text className="pyly-body">
               a <HanziWordRefText hanziWord="冖:cover" gloss /> depicting a
@@ -58,9 +64,9 @@ export default () => {
           </View>
         </View>
         <View className="flex-row gap-2">
-          <HanziCharacter
-            strokesData={xueStrokes}
-            highlightStrokes={[5, 6, 7, 8]}
+          <HanziGraphic
+            bgSvgPaths={xueStrokes}
+            fgSvgPaths={xueStrokes.slice(5, 9)}
           />
           <View>
             <Text className="pyly-body">

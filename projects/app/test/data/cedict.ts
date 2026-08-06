@@ -2320,12 +2320,10 @@ function inlineClassifierParserStep(value: string): GlossParseStepType | null {
   }
 
   startTokens.push(
-    ...parsedRefs.refs.map(
-      (v): GlossTokenUsesClassifierType => ({
-        kind: `usesClassifier`,
-        value: v,
-      }),
-    ),
+    ...parsedRefs.refs.map((v): GlossTokenUsesClassifierType => ({
+      kind: `usesClassifier`,
+      value: v,
+    })),
   );
 
   return {
@@ -2361,11 +2359,10 @@ function inlinePronunciationParserStep(
   }
 
   startTokens.push(
-    ...inlinePronunciation.pinyin.map(
-      (v): GlossTokenAlsoPrType =>
-        inlinePronunciation.marker === `also`
-          ? { kind: `alsoPr`, value: v }
-          : { kind: `alsoPr`, value: v, marker: inlinePronunciation.marker },
+    ...inlinePronunciation.pinyin.map((v): GlossTokenAlsoPrType =>
+      inlinePronunciation.marker === `also`
+        ? { kind: `alsoPr`, value: v }
+        : { kind: `alsoPr`, value: v, marker: inlinePronunciation.marker },
     ),
   );
 
@@ -2445,12 +2442,10 @@ function inlineAlsoWrittenParserStep(value: string): GlossParseStepType | null {
   }
 
   startTokens.push(
-    ...refs.map(
-      (v): GlossTokenAlsoWrittenType => ({
-        kind: `alsoWritten`,
-        value: v,
-      }),
-    ),
+    ...refs.map((v): GlossTokenAlsoWrittenType => ({
+      kind: `alsoWritten`,
+      value: v,
+    })),
   );
 
   return {
@@ -2484,9 +2479,10 @@ function inlineSeeParserStep(value: string): GlossParseStepType | null {
   }
 
   startTokens.push(
-    ...parsedRefs.refs.map(
-      (v): GlossTokenSeeType => ({ kind: `see`, value: v }),
-    ),
+    ...parsedRefs.refs.map((v): GlossTokenSeeType => ({
+      kind: `see`,
+      value: v,
+    })),
   );
 
   return {
@@ -2518,9 +2514,10 @@ function inlineSeeAlsoParserStep(value: string): GlossParseStepType | null {
   }
 
   startTokens.push(
-    ...parsedRefs.refs.map(
-      (v): GlossTokenSeeAlsoType => ({ kind: `seeAlso`, value: v }),
-    ),
+    ...parsedRefs.refs.map((v): GlossTokenSeeAlsoType => ({
+      kind: `seeAlso`,
+      value: v,
+    })),
   );
 
   return {
@@ -2552,9 +2549,10 @@ function inlineUsedInParserStep(value: string): GlossParseStepType | null {
   }
 
   startTokens.push(
-    ...parsedRefs.refs.map(
-      (v): GlossTokenUsedInType => ({ kind: `usedIn`, value: v }),
-    ),
+    ...parsedRefs.refs.map((v): GlossTokenUsedInType => ({
+      kind: `usedIn`,
+      value: v,
+    })),
   );
 
   return {
@@ -2715,9 +2713,10 @@ function leadingParenthesizedUsedInParserStep(
   }
 
   return {
-    startTokens: parsedRefs.refs.map(
-      (v): GlossTokenUsedInType => ({ kind: `usedIn`, value: v }),
-    ),
+    startTokens: parsedRefs.refs.map((v): GlossTokenUsedInType => ({
+      kind: `usedIn`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: trimmed.slice(leadingParenthesizedUsedInMatch[0].length),
   };
@@ -2738,9 +2737,10 @@ function leadingUsedInParserStep(value: string): GlossParseStepType | null {
   }
 
   return {
-    startTokens: parsedRefs.refs.map(
-      (v): GlossTokenUsedInType => ({ kind: `usedIn`, value: v }),
-    ),
+    startTokens: parsedRefs.refs.map((v): GlossTokenUsedInType => ({
+      kind: `usedIn`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: parsedRefs.tail,
   };
@@ -2765,11 +2765,10 @@ function leadingParenthesizedPronunciationParserStep(
   }
 
   return {
-    startTokens: inlinePronunciation.pinyin.map(
-      (v): GlossTokenAlsoPrType =>
-        inlinePronunciation.marker === `also`
-          ? { kind: `alsoPr`, value: v }
-          : { kind: `alsoPr`, value: v, marker: inlinePronunciation.marker },
+    startTokens: inlinePronunciation.pinyin.map((v): GlossTokenAlsoPrType =>
+      inlinePronunciation.marker === `also`
+        ? { kind: `alsoPr`, value: v }
+        : { kind: `alsoPr`, value: v, marker: inlinePronunciation.marker },
     ),
     endTokens: [],
     unparsed: trimmed.slice(leadingParenthesizedPronunciationMatch[0].length),
@@ -2993,9 +2992,10 @@ function variantOfSenseRefsParserStep(
   }
 
   return {
-    startTokens: standaloneVariantOf.map(
-      (v): GlossTokenVariantOfType => ({ kind: `variantOf`, value: v }),
-    ),
+    startTokens: standaloneVariantOf.map((v): GlossTokenVariantOfType => ({
+      kind: `variantOf`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: ``,
   };
@@ -3030,9 +3030,10 @@ function alsoWrittenSenseRefsParserStep(
   }
 
   return {
-    startTokens: standaloneAlsoWritten.map(
-      (v): GlossTokenAlsoWrittenType => ({ kind: `alsoWritten`, value: v }),
-    ),
+    startTokens: standaloneAlsoWritten.map((v): GlossTokenAlsoWrittenType => ({
+      kind: `alsoWritten`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: ``,
   };
@@ -3045,9 +3046,10 @@ function seeSenseRefsParserStep(value: string): GlossParseStepType | null {
   }
 
   return {
-    startTokens: standaloneSee.map(
-      (v): GlossTokenSeeType => ({ kind: `see`, value: v }),
-    ),
+    startTokens: standaloneSee.map((v): GlossTokenSeeType => ({
+      kind: `see`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: ``,
   };
@@ -3060,9 +3062,10 @@ function seeAlsoSenseRefsParserStep(value: string): GlossParseStepType | null {
   }
 
   return {
-    startTokens: standaloneSeeAlso.map(
-      (v): GlossTokenSeeAlsoType => ({ kind: `seeAlso`, value: v }),
-    ),
+    startTokens: standaloneSeeAlso.map((v): GlossTokenSeeAlsoType => ({
+      kind: `seeAlso`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: ``,
   };
@@ -3075,9 +3078,10 @@ function usedInSenseRefsParserStep(value: string): GlossParseStepType | null {
   }
 
   return {
-    startTokens: standaloneUsedIn.map(
-      (v): GlossTokenUsedInType => ({ kind: `usedIn`, value: v }),
-    ),
+    startTokens: standaloneUsedIn.map((v): GlossTokenUsedInType => ({
+      kind: `usedIn`,
+      value: v,
+    })),
     endTokens: [],
     unparsed: ``,
   };

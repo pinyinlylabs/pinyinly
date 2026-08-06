@@ -1,110 +1,103 @@
+import type { StrokeSpecString } from "#data/model.js";
 import type { StrokeSpecAtom } from "#util/strokeSpec.ts";
 import {
   normalizeStrokeSpec,
-  parseIndexRangesFromStrokeSpec,
   mapStrokeSpec,
-  projectStrokeSpecThroughBindings,
-  strokeSpecToSlotBindings,
-  formatStrokeSpec2,
-  parseStrokeSpec2,
-  flattenStrokeSpec2,
+  formatStrokeSpec,
+  parseStrokeSpec,
+  flattenStrokeSpecRanges,
   formatAtom,
 } from "#util/strokeSpec.ts";
 import { describe, expect, test } from "vitest";
 
 describe(
-  `parseStrokeSpec2 suite` satisfies HasNameOf<typeof parseStrokeSpec2>,
+  `parseStrokeSpec suite` satisfies HasNameOf<typeof parseStrokeSpec>,
   () => {
-    test(`parses legacy ranges`, () => {
-      const spec = parseStrokeSpec2(`0-2,5`);
-
+    test(`parses ranges`, () => {
+      const spec = parseStrokeSpec(`0-2,5`);
       expect(spec).toHaveLength(2);
-      expect(formatStrokeSpec2(spec)).toBe(`0-2,5`);
-      expect(parseIndexRangesFromStrokeSpec(`0-2,5`)).toEqual([0, 1, 2, 5]);
-    });
-
-    test(`parses slice tokens`, () => {
-      expect(normalizeStrokeSpec(`1[0:3]`)).toBe(`1[0:3]`);
-      expect(normalizeStrokeSpec(`1[:3]`)).toBe(`1[:3]`);
-      expect(normalizeStrokeSpec(`1[0:]`)).toBe(`1[0:]`);
-      expect(normalizeStrokeSpec(`1[:]`)).toBe(`1`);
-    });
-
-    test(`parses occurrence selectors`, () => {
-      expect(normalizeStrokeSpec(`1[0#1:3#2]`)).toBe(`1[0#1:3#2]`);
-      expect(normalizeStrokeSpec(`1[0#0:3#0]`)).toBe(`1[0:3]`);
-    });
-
-    test(`parses percent selectors`, () => {
-      expect(normalizeStrokeSpec(`1[5%:]`)).toBe(`1[5%:]`);
-      expect(normalizeStrokeSpec(`1[:5%]`)).toBe(`1[:5%]`);
-      expect(normalizeStrokeSpec(`1[5%:95%]`)).toBe(`1[5%:95%]`);
-      expect(normalizeStrokeSpec(`1[05.500%:95.000%]`)).toBe(`1[5.5%:95%]`);
-    });
-
-    test(`parses mixed percent and stroke selectors`, () => {
-      expect(normalizeStrokeSpec(`1[5%:2]`)).toBe(`1[5%:2]`);
-      expect(normalizeStrokeSpec(`1[2:95%]`)).toBe(`1[2:95%]`);
-      expect(normalizeStrokeSpec(`1[2#3:95%]`)).toBe(`1[2#3:95%]`);
+      expect(formatStrokeSpec(spec)).toBe(`0-2,5`);
     });
 
     test(`parses grouped unions`, () => {
-      const spec = parseStrokeSpec2(`1[0:2]+7[:4],9`);
+      const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
 
       expect(spec).toHaveLength(2);
       expect(spec[0]).toHaveLength(2);
       expect(spec[1]).toHaveLength(1);
     });
 
-    test(`normalizes whitespace`, () => {
-      expect(normalizeStrokeSpec(`  0 - 2 , 5 `)).toBe(`0-2,5`);
-      expect(normalizeStrokeSpec(` 1[ 0 : 3 ] + 2[ :4 ] `)).toBe(
-        `1[0:3]+2[:4]`,
-      );
-      expect(normalizeStrokeSpec(` 1[ 5% : 95% ] + 2[ 2 : 75% ] `)).toBe(
-        `1[5%:95%]+2[2:75%]`,
-      );
-    });
-
     test(`rejects malformed input`, () => {
-      expect(() => parseStrokeSpec2(`1[0:3`)).toThrow();
-      expect(() => parseStrokeSpec2(`1[0:3:4]`)).toThrow();
-      expect(() => parseStrokeSpec2(`1[foo:3]`)).toThrow();
-      expect(() => parseStrokeSpec2(`1[foo%:3]`)).toThrow();
-      expect(() => parseStrokeSpec2(`1[-1%:3]`)).toThrow();
-      expect(() => parseStrokeSpec2(`1[101%:3]`)).toThrow();
-      expect(() => parseStrokeSpec2(`1[%:3]`)).toThrow();
-      expect(() => parseStrokeSpec2(`3-1`)).toThrow();
-      expect(() => parseStrokeSpec2(`1++2`)).toThrow();
-    });
-
-    test(`legacy numeric extraction rejects slices`, () => {
-      expect(() => parseIndexRangesFromStrokeSpec(`1[0:3]`)).toThrow();
-    });
-
-    test(`projects local ranges through parent slot bindings`, () => {
-      const parentBindings = strokeSpecToSlotBindings(`1[0:2]+7[:4],9,11`);
-
-      expect(
-        projectStrokeSpecThroughBindings({
-          localStrokeSpec: `0-1`,
-          sourceSlotBindingsInOriginal: parentBindings,
-        }),
-      ).toEqual([`1[0:2]+7[:4]`, `9`]);
-    });
-
-    test(`projects grouped local unions to grouped original unions`, () => {
-      const parentBindings = strokeSpecToSlotBindings(`2,4,6`);
-
-      expect(
-        projectStrokeSpecThroughBindings({
-          localStrokeSpec: `0-1+2`,
-          sourceSlotBindingsInOriginal: parentBindings,
-        }),
-      ).toEqual([`2+4+6`]);
+      expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
+      expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[foo%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[-1%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[101%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`1[%:3]`)).toThrow();
+      expect(() => parseStrokeSpec(`3-1`)).toThrow();
+      expect(() => parseStrokeSpec(`1++2`)).toThrow();
     });
   },
 );
+
+describe(`normalizeStrokeSpec`, () => {
+  test.for([
+    [`1[0:3]`, `1[0:3]`],
+    [`1[:3]`, `1[:3]`],
+    [`1[0:]`, `1[0:]`],
+    [`1[:]`, `1`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses slice tokens`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
+
+  test.for([
+    [`1[0#1:3#2]`, `1[0#1:3#2]`],
+    [`1[0#0:3#0]`, `1[0:3]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses occurrence selectors`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
+
+  test.for([
+    [`1[5%:]`, `1[5%:]`],
+    [`1[:5%]`, `1[:5%]`],
+    [`1[5%:95%]`, `1[5%:95%]`],
+    [`1[05.500%:95.000%]`, `1[5.5%:95%]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses percent selectors`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
+
+  test.for([
+    [`1[5%:2]`, `1[5%:2]`],
+    [`1[2:95%]`, `1[2:95%]`],
+    [`1[2#3:95%]`, `1[2#3:95%]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses mixed percent and stroke selectors`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
+
+  test.for([
+    [`  0 - 2 , 5 `, `0-2,5`],
+    [` 1[ 0 : 3 ] + 2[ :4 ] `, `1[0:3]+2[:4]`],
+    [` 1[ 5% : 95% ] + 2[ 2 : 75% ] `, `1[5%:95%]+2[2:75%]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `normalizes whitespace`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
+});
 
 describe(`mapStrokeSpec`, () => {
   test.for([
@@ -114,7 +107,8 @@ describe(`mapStrokeSpec`, () => {
     [`1+2,3`, `1,0`, `3,1+2`],
     [`0-1+2,3`, `1,0`, `3,0-1+2`],
     [`0`, `0,1`, null],
-  ] as [string, string, string | null][])(
+    // [`2-8`, `2,1[13%:34.6%],3,4,5+6[27%:73%]`, ``],
+  ] as [StrokeSpecString, StrokeSpecString, StrokeSpecString | null][])(
     `projects $0 through $1 to $2`,
     ([src, dest, expected]) => {
       expect(mapStrokeSpec(src, dest)).toBe(expected);
@@ -131,9 +125,9 @@ describe(`flattenStrokeSpec2`, () => {
     [`1+2,3`, `1+2,3`],
     [`0[1:],2`, `0[1:],2`],
   ] as const)(`flattens $0 to $1`, ([src, expected]) => {
-    expect(formatStrokeSpec2(flattenStrokeSpec2(parseStrokeSpec2(src)))).toBe(
-      expected,
-    );
+    expect(
+      formatStrokeSpec(flattenStrokeSpecRanges(parseStrokeSpec(src))),
+    ).toBe(expected);
   });
 });
 
@@ -143,7 +137,7 @@ describe(`formatAtom`, () => {
       {
         kind: `slice`,
         stroke: 0,
-        from: { kind: "stroke", stroke: 1, occurrence: 0 },
+        from: { kind: `stroke`, stroke: 1, occurrence: 0 },
         to: null,
       },
       `0[1:]`,
@@ -153,7 +147,7 @@ describe(`formatAtom`, () => {
         kind: `slice`,
         stroke: 0,
         from: null,
-        to: { kind: "stroke", stroke: 1, occurrence: 0 },
+        to: { kind: `stroke`, stroke: 1, occurrence: 0 },
       },
       `0[:1]`,
     ],
@@ -161,8 +155,8 @@ describe(`formatAtom`, () => {
       {
         kind: `slice`,
         stroke: 0,
-        from: { kind: "stroke", stroke: 1, occurrence: 0 },
-        to: { kind: "stroke", stroke: 2, occurrence: 0 },
+        from: { kind: `stroke`, stroke: 1, occurrence: 0 },
+        to: { kind: `stroke`, stroke: 2, occurrence: 0 },
       },
       `0[1:2]`,
     ],
@@ -170,8 +164,8 @@ describe(`formatAtom`, () => {
       {
         kind: `slice`,
         stroke: 0,
-        from: { kind: "stroke", stroke: 1, occurrence: 3 },
-        to: { kind: "stroke", stroke: 2, occurrence: 4 },
+        from: { kind: `stroke`, stroke: 1, occurrence: 3 },
+        to: { kind: `stroke`, stroke: 2, occurrence: 4 },
       },
       `0[1#3:2#4]`,
     ],

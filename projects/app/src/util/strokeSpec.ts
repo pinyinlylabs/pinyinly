@@ -1,3 +1,4 @@
+import type { StrokeSpecString } from "@/data/model";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 
 export interface StrokeSpecStrokeBound {
@@ -30,17 +31,7 @@ export interface StrokeSpecSliceAtom {
 
 export type StrokeSpecAtom = StrokeSpecRangeAtom | StrokeSpecSliceAtom;
 
-export interface StrokeSpecItem {
-  kind: `item`;
-  atoms: readonly StrokeSpecAtom[];
-}
-
-export interface StrokeSpec {
-  kind: `list`;
-  items: readonly StrokeSpecItem[];
-}
-
-export type StrokeSpec2 = StrokeSpecAtom[][];
+export type StrokeSpec = StrokeSpecAtom[][];
 
 function splitTopLevel(input: string, separator: string): string[] {
   const result: string[] = [];
@@ -214,42 +205,6 @@ export function formatAtom(atom: StrokeSpecAtom): string {
 export function parseStrokeSpec(specText: string): StrokeSpec {
   const trimmed = specText.trim();
   if (trimmed.length === 0) {
-    return {
-      kind: `list`,
-      items: [],
-    };
-  }
-
-  const itemTexts = splitTopLevel(trimmed, `,`);
-  const items: StrokeSpecItem[] = [];
-
-  for (const itemText of itemTexts) {
-    if (itemText.length === 0) {
-      throw new Error(`Stroke spec items cannot be empty.`);
-    }
-
-    const atomTexts = splitTopLevel(itemText, `+`);
-
-    if (atomTexts.length === 0 || atomTexts.some((text) => text.length === 0)) {
-      throw new Error(`Stroke spec items cannot be empty.`);
-    }
-
-    const atoms = atomTexts.map(parseAtom);
-    items.push({
-      kind: `item`,
-      atoms,
-    });
-  }
-
-  return {
-    kind: `list`,
-    items,
-  };
-}
-
-export function parseStrokeSpec2(specText: string): StrokeSpec2 {
-  const trimmed = specText.trim();
-  if (trimmed.length === 0) {
     return [];
   }
 
@@ -273,24 +228,22 @@ export function parseStrokeSpec2(specText: string): StrokeSpec2 {
   return items;
 }
 
-export function formatStrokeSpec(spec: StrokeSpec): string {
-  return spec.items
-    .map((item) => item.atoms.map((atom) => formatAtom(atom)).join(`+`))
-    .join(`,`);
-}
-
-export function formatStrokeSpec2(spec: StrokeSpec2): string {
+export function formatStrokeSpec(spec: StrokeSpec): StrokeSpecString {
   return spec
     .map((item) => item.map((atom) => formatAtom(atom)).join(`+`))
-    .join(`,`);
+    .join(`,`) as StrokeSpecString;
 }
 
-export function normalizeStrokeSpec(specText: string): string {
-  return formatStrokeSpec2(parseStrokeSpec2(specText));
+export function normalizeStrokeSpec(
+  specText: StrokeSpecString,
+): StrokeSpecString {
+  return formatStrokeSpec(parseStrokeSpec(specText));
 }
 
-export function parseIndexRangesFromStrokeSpec(specText: string): number[] {
-  const spec = parseStrokeSpec2(specText);
+export function parseIndexRangesFromStrokeSpec(
+  specText: StrokeSpecString,
+): number[] {
+  const spec = parseStrokeSpec(specText);
   const result: number[] = [];
 
   for (const item of spec) {
@@ -310,115 +263,24 @@ export function parseIndexRangesFromStrokeSpec(specText: string): number[] {
   return result;
 }
 
-function cloneAtom(atom: StrokeSpecAtom): StrokeSpecAtom {
-  if (atom.kind === `range`) {
-    return {
-      kind: `range`,
-      start: atom.start,
-      end: atom.end,
-    };
-  }
-
-  return {
-    kind: `slice`,
-    stroke: atom.stroke,
-    from: atom.from == null ? null : { ...atom.from },
-    to: atom.to == null ? null : { ...atom.to },
-  };
-}
-
-function cloneItem(item: StrokeSpecItem): StrokeSpecItem {
-  return {
-    kind: `item`,
-    atoms: item.atoms.map(cloneAtom),
-  };
-}
-
-function singletonRangeItem(index: number): StrokeSpecItem {
-  return {
-    kind: `item`,
-    atoms: [{ kind: `range`, start: index, end: index }],
-  };
-}
-
-function isSingleRangeAtom(item: StrokeSpecItem): item is {
-  kind: `item`;
-  atoms: readonly [StrokeSpecRangeAtom];
-} {
-  return item.atoms.length === 1 && item.atoms[0]?.kind === `range`;
-}
-
-function expandItemsToSlotBindings(spec: StrokeSpec): StrokeSpecItem[] {
-  const result: StrokeSpecItem[] = [];
-
-  for (const item of spec.items) {
-    if (isSingleRangeAtom(item)) {
-      const atom = item.atoms[0];
-      for (let i = atom.start; i <= atom.end; i += 1) {
-        result.push(singletonRangeItem(i));
-      }
-      continue;
-    }
-
-    result.push(cloneItem(item));
-  }
-
-  return result;
-}
-
-function itemReferencedSlotIndexes(item: StrokeSpecItem): number[] {
-  const result: number[] = [];
-
-  for (const atom of item.atoms) {
-    if (atom.kind === `range`) {
-      for (let i = atom.start; i <= atom.end; i += 1) {
-        result.push(i);
-      }
-      continue;
-    }
-
-    result.push(atom.stroke);
-  }
-
-  return result;
-}
-
-function itemToText(item: StrokeSpecItem): string {
-  return formatStrokeSpec({
-    kind: `list`,
-    items: [item],
-  });
-}
-
-function parseItemText(itemText: string): StrokeSpecItem {
-  const parsed = parseStrokeSpec(itemText);
-  const item = parsed.items[0];
-  if (parsed.items.length !== 1 || item == null) {
-    throw new Error(`Expected a single StrokeSpec item.`);
-  }
-  return cloneItem(item);
-}
-
-export function strokeSpecToSlotBindings(specText: string): string[] {
-  const spec = parseStrokeSpec(specText);
-  return expandItemsToSlotBindings(spec).map(itemToText);
-}
-
 /**
  * Maps a stroke spec from a source context to a destination context, based on
  * the provided source and destination stroke specs.
  *
  * e.g. `mapStrokeSpec("0,3", "1,0")` returns `"3,0"`.
  */
-export function mapStrokeSpec(src: string, dest: string): string | null {
-  const srcSpec = flattenStrokeSpec2(parseStrokeSpec2(src));
-  const destSpec = flattenStrokeSpec2(parseStrokeSpec2(dest));
+export function mapStrokeSpec(
+  src: StrokeSpecString,
+  dest: StrokeSpecString,
+): StrokeSpecString | null {
+  const srcSpec = flattenStrokeSpecRanges(parseStrokeSpec(src));
+  const destSpec = flattenStrokeSpecRanges(parseStrokeSpec(dest));
 
   if (srcSpec.length !== destSpec.length) {
     return null;
   }
 
-  const result: StrokeSpec2 = [];
+  const result: StrokeSpec = [];
 
   for (const item of destSpec) {
     const newItem: StrokeSpecAtom[] = [];
@@ -442,10 +304,10 @@ export function mapStrokeSpec(src: string, dest: string): string | null {
     result.push(newItem);
   }
 
-  return formatStrokeSpec2(result);
+  return formatStrokeSpec(result);
 }
 
-export function flattenStrokeSpec2(spec: StrokeSpec2): StrokeSpec2 {
+export function flattenStrokeSpecRanges(spec: StrokeSpec): StrokeSpec {
   const result = [];
 
   for (const item of spec) {
@@ -468,53 +330,6 @@ export function flattenStrokeSpec2(spec: StrokeSpec2): StrokeSpec2 {
   return result;
 }
 
-export function projectStrokeSpecThroughBindings({
-  localStrokeSpec,
-  sourceSlotBindingsInOriginal,
-}: {
-  localStrokeSpec: string;
-  sourceSlotBindingsInOriginal: readonly string[] | null;
-}): string[] {
-  const localSpec = parseStrokeSpec(localStrokeSpec);
-  const localItems = expandItemsToSlotBindings(localSpec);
-
-  if (sourceSlotBindingsInOriginal == null) {
-    return localItems.map(itemToText);
-  }
-
-  const projected: string[] = [];
-  for (const localItem of localItems) {
-    const referencedIndexes = itemReferencedSlotIndexes(localItem);
-    const mappedItems = referencedIndexes
-      .map((index) => sourceSlotBindingsInOriginal[index])
-      .filter((item): item is string => item != null);
-
-    if (mappedItems.length === 0) {
-      continue;
-    }
-
-    if (mappedItems.length === 1) {
-      const mappedItem = mappedItems[0];
-      if (mappedItem != null) {
-        projected.push(mappedItem);
-      }
-      continue;
-    }
-
-    const unionAtoms = mappedItems
-      .flatMap((mappedItemText) => parseItemText(mappedItemText).atoms)
-      .map(cloneAtom);
-    projected.push(
-      itemToText({
-        kind: `item`,
-        atoms: unionAtoms,
-      }),
-    );
-  }
-
-  return projected;
-}
-
 export function strokeSpecFilter(
   pathsByIndex: string[],
   pathsByAtom: Record<string, string>,
@@ -522,7 +337,7 @@ export function strokeSpecFilter(
 ): string[] {
   const result: string[] = [];
 
-  const parsed = parseStrokeSpec2(strokeSpec);
+  const parsed = parseStrokeSpec(strokeSpec);
 
   for (const item of parsed) {
     for (const atom of item) {

@@ -1,5 +1,5 @@
 import {
-  getJsonIndentForFilePath,
+  getJsonIndentLevelsForFilePath,
   jsonStringifyShallowIndent,
 } from "#jsonfmt.ts";
 import path from "node:path";
@@ -82,13 +82,13 @@ describe(
 
 describe(
   `getJsonIndentForFilePath` satisfies HasNameOf<
-    typeof getJsonIndentForFilePath
+    typeof getJsonIndentLevelsForFilePath
   >,
   () => {
     test(`falls back to 2 when config file is missing`, async () => {
       await using resource = await fs.tempDir();
       const filePath = path.join(resource.tempDir, `foo.json`);
-      const indent = await getJsonIndentForFilePath(filePath);
+      const indent = await getJsonIndentLevelsForFilePath(filePath);
       expect(indent).toBe(2);
     });
 
@@ -113,7 +113,7 @@ describe(
         resource.tempDir,
         `projects/app/test/data/example.json`,
       );
-      const indent = await getJsonIndentForFilePath(filePath);
+      const indent = await getJsonIndentLevelsForFilePath(filePath);
       expect(indent).toBe(1);
     });
 
@@ -132,7 +132,7 @@ describe(
       );
 
       const filePath = path.join(resource.tempDir, `projects/lib/package.json`);
-      const indent = await getJsonIndentForFilePath(filePath);
+      const indent = await getJsonIndentLevelsForFilePath(filePath);
       expect(indent).toBe(2);
     });
   },

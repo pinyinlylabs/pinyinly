@@ -1,5 +1,5 @@
 import SVGPathCommander from "svg-path-commander";
-import { formatAtom, parseStrokeSpec2 } from "@/util/strokeSpec";
+import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
 import { invariant } from "@pinyinly/lib/invariant";
 import { z } from "zod";
 import type { StrokeSpecSliceBound } from "@/util/strokeSpec";
@@ -1132,7 +1132,7 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
   medianPathsById,
   strokeSpecText,
 }: BuildClosedSvgSegmentPathFromStrokeSpecArgs): string | null {
-  const spec = parseStrokeSpec2(strokeSpecText);
+  const spec = parseStrokeSpec(strokeSpecText);
 
   function resolveCutterPath(strokeId: number): string | null {
     return medianPathsById?.[strokeId] ?? strokePathsById[strokeId] ?? null;
@@ -1298,7 +1298,7 @@ export function buildSvgSegmentPaths(
       continue;
     }
 
-    const spec = parseStrokeSpec2(strokeSpecText);
+    const spec = parseStrokeSpec(strokeSpecText);
     for (const item of spec) {
       for (const atom of item) {
         if (atom.kind !== `slice`) {

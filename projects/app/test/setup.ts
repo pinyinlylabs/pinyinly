@@ -1,13 +1,12 @@
 import type { IconRegistry } from "#client/ui/iconRegistry.js";
-import {
-  getJsonIndentForFilePath,
-  jsonStringifyShallowIndent,
-} from "@pinyinly/lib/jsonfmt";
+import { format } from "@pinyinly/lib/jsonfmt";
 import * as matchers from "@testing-library/jest-dom/matchers";
+import * as fs from "@pinyinly/lib/fs";
 import type { Component } from "react";
 import { createElement, Fragment } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
+import isEqual from "lodash/isEqual";
 
 expect.extend(matchers);
 
@@ -21,15 +20,21 @@ expect.extend({
       };
     }
 
-    const indent = await getJsonIndentForFilePath(filePath);
-    const formatted = jsonStringifyShallowIndent(received, indent);
+    const expected = await format(filePath, JSON.stringify(received));
 
-    await expect(formatted).toMatchFileSnapshot(filePath);
+    const current = (await fs.stat(filePath)).isFile()
+      ? (JSON.parse(
+          await fs.readFile(filePath, { encoding: `utf-8` }),
+        ) as unknown)
+      : null;
+
+    if (!isEqual(received, current)) {
+      await expect(expected, `File: ${filePath}`).toMatchFileSnapshot(filePath);
+    }
 
     return {
       pass: true,
-      message: () =>
-        `expected JSON not to match file snapshot at "${filePath}"`,
+      message: () => `expected JSON to match file snapshot at "${filePath}"`,
     };
   },
 });

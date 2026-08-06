@@ -430,7 +430,7 @@ export const wikiMdxQuery = Platform.select({
 });
 
 const characterDecompositionDataSchema = wikiCharacterDataSchema.pick({
-  decompositions2: true,
+  decompositions: true,
   mnemonic: true,
 });
 

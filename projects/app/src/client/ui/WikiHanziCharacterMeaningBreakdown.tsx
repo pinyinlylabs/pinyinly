@@ -1,13 +1,12 @@
-import { parseIndexRanges } from "@/util/indexRanges";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import type { HanziCharacter, MnemonicHanziComponent } from "@/data/model";
-import { HanziCharacter as HanziCharacterSvg } from "./HanziCharacter";
 import { HanziStrokesTile } from "./HanziStrokesTile";
 import { hanziSvgPathsQuery } from "@/client/query";
 import { useQuery } from "@tanstack/react-query";
 import { parseStrokeSpec } from "@/util/strokeSpec";
+import { HanziGraphic } from "./HanziGraphic";
 
 interface WikiHanziCharacterMeaningBreakdownProps {
   hanzi: HanziCharacter;
@@ -126,11 +125,7 @@ export function WikiHanziCharacterMeaningBreakdown({
         </Text>
 
         <View className="flex-1 items-center">
-          <HanziCharacterSvg
-            className="size-12"
-            strokesData={[...strokeSvgs]}
-            highlightStrokes={parseIndexRanges(`0-${strokeSvgs.length - 1}`)}
-          />
+          <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
         </View>
       </>
     );
@@ -174,13 +169,7 @@ export function WikiHanziCharacterMeaningBreakdown({
             </View>
           ) : (
             <View className="w-12">
-              <HanziCharacterSvg
-                className="size-12"
-                strokesData={[...strokeSvgs]}
-                highlightStrokes={parseIndexRanges(
-                  `0-${strokeSvgs.length - 1}`,
-                )}
-              />
+              <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
             </View>
           )}
 

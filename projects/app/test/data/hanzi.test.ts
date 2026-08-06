@@ -1,5 +1,4 @@
 import {
-  componentToString,
   flattenIds,
   hanziCharacterCount,
   horizontalPairToTripleMergeIdsTransform,
@@ -20,7 +19,7 @@ import {
 import type { HanziCharacter } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
-import { 汉, 汉字 } from "./helpers.ts";
+import { 汉 } from "./helpers.ts";
 
 test.for([
   [`⿱⿱abc`, `⿳abc`],
@@ -504,16 +503,6 @@ test.for([
     );
 
     expect(result).toEqual(expected);
-  },
-);
-
-test.for([
-  [{ hanzi: 汉字`A`, strokes: `` }, `A`],
-  [{ strokes: `0-4` }, `⑤`],
-] as const)(
-  `idsNodeToString %s -> %s` satisfies HasNameOf<typeof idsNodeToString>,
-  ([component, expected]) => {
-    expect(componentToString(component)).toBe(expected);
   },
 );
 

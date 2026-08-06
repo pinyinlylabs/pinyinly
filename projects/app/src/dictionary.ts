@@ -129,7 +129,11 @@ export const loadCharactersJson = memoize0(async function loadCharactersJson() {
   return charactersSchema
     .transform((x) => new Map(x))
     .transform(deepReadonly)
-    .parse(await import(`./data/characters.asset.json`).then((x) => x.default));
+    .parse(
+      await import(`./data/characters.asset.json`).then(
+        (x) => x.default as unknown[],
+      ),
+    );
 });
 
 export interface CharacterDecompositionEntry {
