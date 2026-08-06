@@ -20,7 +20,7 @@ import { IdsOperator, wikiCharacterDecompositionSchema } from "@/data/model";
 import { userWikiCharacterDecompositionSetting } from "@/data/userSettings";
 import { decompositionComponentsToIds } from "@/dictionary";
 import { parseIndexRanges, normalizeIndexRanges } from "@/util/indexRanges";
-import { parseStrokeSpec } from "@/util/strokeSpec";
+import { parseStrokeSpec2 } from "@/util/strokeSpec";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, Suspense } from "react";
@@ -215,7 +215,7 @@ function validateStrokeRanges(ranges: string): string | null {
   }
 
   try {
-    parseStrokeSpec(ranges);
+    parseStrokeSpec2(ranges);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : `Invalid stroke specification.`;

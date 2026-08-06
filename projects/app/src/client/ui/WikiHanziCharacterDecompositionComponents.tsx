@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   normalizeStrokeSpec,
   projectStrokeSpecThroughBindings,
-  strokeSpecItemCount,
 } from "@/util/strokeSpec";
 import { useState } from "react";
 import { View } from "react-native";
@@ -166,11 +165,11 @@ function WikiHanziCharacterDecompositionComponentsBox({
 
   const sortedTreeItems = [...decompositionTreeItems].sort((a, b) => {
     const aStrokeCount = [...walkIdsNodeLeafs(a.node)].reduce(
-      (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
+      (sum, leaf) => sum + leaf.strokes.length,
       0,
     );
     const bStrokeCount = [...walkIdsNodeLeafs(b.node)].reduce(
-      (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
+      (sum, leaf) => sum + leaf.strokes.length,
       0,
     );
 
@@ -267,15 +266,15 @@ function DecompositionTileNode({
   const [, ...children] = node;
   const sortedChildren = [...children].sort((a, b) => {
     const aStrokeCount = isLeafNode(a)
-      ? strokeSpecItemCount(a.strokes)
+      ? a.strokes.length
       : [...walkIdsNodeLeafs(a)].reduce(
-          (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
+          (sum, leaf) => sum + leaf.strokes.length,
           0,
         );
     const bStrokeCount = isLeafNode(b)
-      ? strokeSpecItemCount(b.strokes)
+      ? b.strokes.length
       : [...walkIdsNodeLeafs(b)].reduce(
-          (sum, leaf) => sum + strokeSpecItemCount(leaf.strokes),
+          (sum, leaf) => sum + leaf.strokes.length,
           0,
         );
 

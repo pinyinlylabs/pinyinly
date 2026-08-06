@@ -1,4 +1,4 @@
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 
 export interface StrokeSpecStrokeBound {
   kind: `stroke`;
@@ -11,22 +11,24 @@ export interface StrokeSpecPercentBound {
   percent: number;
 }
 
-export type StrokeSpecBound = StrokeSpecStrokeBound | StrokeSpecPercentBound;
+export type StrokeSpecSliceBound =
+  | StrokeSpecStrokeBound
+  | StrokeSpecPercentBound;
 
-export interface StrokeSpecRange {
+export interface StrokeSpecRangeAtom {
   kind: `range`;
   start: number;
   end: number;
 }
 
-export interface StrokeSpecSlice {
+export interface StrokeSpecSliceAtom {
   kind: `slice`;
   stroke: number;
-  from: StrokeSpecBound | null;
-  to: StrokeSpecBound | null;
+  from: StrokeSpecSliceBound | null;
+  to: StrokeSpecSliceBound | null;
 }
 
-export type StrokeSpecAtom = StrokeSpecRange | StrokeSpecSlice;
+export type StrokeSpecAtom = StrokeSpecRangeAtom | StrokeSpecSliceAtom;
 
 export interface StrokeSpecItem {
   kind: `item`;
@@ -37,6 +39,8 @@ export interface StrokeSpec {
   kind: `list`;
   items: readonly StrokeSpecItem[];
 }
+
+export type StrokeSpec2 = StrokeSpecAtom[][];
 
 function splitTopLevel(input: string, separator: string): string[] {
   const result: string[] = [];
@@ -76,7 +80,7 @@ function splitTopLevel(input: string, separator: string): string[] {
   return result;
 }
 
-function parseBound(text: string): StrokeSpecBound {
+function parseBound(text: string): StrokeSpecSliceBound {
   const trimmed = text.trim();
   const percentMatch = /^(\d+(?:\.\d+)?)%$/u.exec(trimmed);
   if (percentMatch != null) {
@@ -181,7 +185,7 @@ function parseAtom(text: string): StrokeSpecAtom {
   };
 }
 
-function formatBound(bound: StrokeSpecBound): string {
+function formatSliceBound(bound: StrokeSpecSliceBound): string {
   if (bound.kind === `percent`) {
     return `${bound.percent}%`;
   }
@@ -198,8 +202,12 @@ export function formatAtom(atom: StrokeSpecAtom): string {
       : `${atom.start}-${atom.end}`;
   }
 
-  const from = atom.from == null ? `` : formatBound(atom.from);
-  const to = atom.to == null ? `` : formatBound(atom.to);
+  if (atom.from == null && atom.to == null) {
+    return `${atom.stroke}`;
+  }
+
+  const from = atom.from == null ? `` : formatSliceBound(atom.from);
+  const to = atom.to == null ? `` : formatSliceBound(atom.to);
   return `${atom.stroke}[${from}:${to}]`;
 }
 
@@ -239,26 +247,54 @@ export function parseStrokeSpec(specText: string): StrokeSpec {
   };
 }
 
+export function parseStrokeSpec2(specText: string): StrokeSpec2 {
+  const trimmed = specText.trim();
+  if (trimmed.length === 0) {
+    return [];
+  }
+
+  const itemTexts = splitTopLevel(trimmed, `,`);
+  const items: StrokeSpecAtom[][] = [];
+
+  for (const itemText of itemTexts) {
+    if (itemText.length === 0) {
+      throw new Error(`Stroke spec items cannot be empty.`);
+    }
+
+    const atomTexts = splitTopLevel(itemText, `+`);
+
+    if (atomTexts.length === 0 || atomTexts.some((text) => text.length === 0)) {
+      throw new Error(`Stroke spec items cannot be empty.`);
+    }
+
+    items.push(atomTexts.map(parseAtom));
+  }
+
+  return items;
+}
+
 export function formatStrokeSpec(spec: StrokeSpec): string {
   return spec.items
     .map((item) => item.atoms.map((atom) => formatAtom(atom)).join(`+`))
     .join(`,`);
 }
 
-export function normalizeStrokeSpec(specText: string): string {
-  return formatStrokeSpec(parseStrokeSpec(specText));
+export function formatStrokeSpec2(spec: StrokeSpec2): string {
+  return spec
+    .map((item) => item.map((atom) => formatAtom(atom)).join(`+`))
+    .join(`,`);
 }
 
-export function strokeSpecItemCount(specText: string): number {
-  return parseStrokeSpec(specText).items.length;
+export function normalizeStrokeSpec(specText: string): string {
+  return formatStrokeSpec2(parseStrokeSpec2(specText));
 }
 
 export function parseIndexRangesFromStrokeSpec(specText: string): number[] {
-  const spec = parseStrokeSpec(specText);
+  const spec = parseStrokeSpec2(specText);
   const result: number[] = [];
 
-  for (const item of spec.items) {
-    for (const atom of item.atoms) {
+  for (const item of spec) {
+    for (const atom of item) {
       if (atom.kind === `slice`) {
         throw new Error(
           `Cannot convert slice ${JSON.stringify(formatAtom(atom))} to numeric index ranges.`,
@@ -307,7 +343,7 @@ function singletonRangeItem(index: number): StrokeSpecItem {
 
 function isSingleRangeAtom(item: StrokeSpecItem): item is {
   kind: `item`;
-  atoms: readonly [StrokeSpecRange];
+  atoms: readonly [StrokeSpecRangeAtom];
 } {
   return item.atoms.length === 1 && item.atoms[0]?.kind === `range`;
 }
@@ -368,6 +404,70 @@ export function strokeSpecToSlotBindings(specText: string): string[] {
   return expandItemsToSlotBindings(spec).map(itemToText);
 }
 
+/**
+ * Maps a stroke spec from a source context to a destination context, based on
+ * the provided source and destination stroke specs.
+ *
+ * e.g. `mapStrokeSpec("0,3", "1,0")` returns `"3,0"`.
+ */
+export function mapStrokeSpec(src: string, dest: string): string | null {
+  const srcSpec = flattenStrokeSpec2(parseStrokeSpec2(src));
+  const destSpec = flattenStrokeSpec2(parseStrokeSpec2(dest));
+
+  if (srcSpec.length !== destSpec.length) {
+    return null;
+  }
+
+  const result: StrokeSpec2 = [];
+
+  for (const item of destSpec) {
+    const newItem: StrokeSpecAtom[] = [];
+    for (const atom of item) {
+      invariant(
+        atom.kind !== `range`,
+        `ranges should have been flattened away`,
+      );
+      const slice = atom;
+
+      const x = nonNullable(srcSpec.at(slice.stroke));
+
+      if (slice.from != null || slice.to != null) {
+        // Sliced atoms cannot be mapped because they depend on the source
+        // context.
+        return null;
+      }
+
+      newItem.push(...x);
+    }
+    result.push(newItem);
+  }
+
+  return formatStrokeSpec2(result);
+}
+
+export function flattenStrokeSpec2(spec: StrokeSpec2): StrokeSpec2 {
+  const result = [];
+
+  for (const item of spec) {
+    if (item.length === 1 && item[0]?.kind === `range`) {
+      for (let i = item[0].start; i <= item[0].end; i++) {
+        result.push([
+          {
+            kind: `slice`,
+            stroke: i,
+            from: null,
+            to: null,
+          } satisfies StrokeSpecSliceAtom,
+        ]);
+      }
+    } else {
+      result.push(item);
+    }
+  }
+
+  return result;
+}
+
 export function projectStrokeSpecThroughBindings({
   localStrokeSpec,
   sourceSlotBindingsInOriginal,
@@ -422,10 +522,10 @@ export function strokeSpecFilter(
 ): string[] {
   const result: string[] = [];
 
-  const parsed = parseStrokeSpec(strokeSpec);
+  const parsed = parseStrokeSpec2(strokeSpec);
 
-  for (const item of parsed.items) {
-    for (const atom of item.atoms) {
+  for (const item of parsed) {
+    for (const atom of item) {
       if (atom.kind === `range`) {
         for (let i = atom.start; i <= atom.end; i += 1) {
           const path = pathsByIndex[i];

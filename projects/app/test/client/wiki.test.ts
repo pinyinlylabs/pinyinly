@@ -23,7 +23,8 @@ import {
 import { getFonts } from "#test/helpers.ts";
 import { isCi } from "#util/env.js";
 import { parseIndexRanges } from "#util/indexRanges.js";
-import { normalizeStrokeSpec, parseStrokeSpec } from "#util/strokeSpec.js";
+import type { StrokeSpecAtom } from "#util/strokeSpec.js";
+import { normalizeStrokeSpec, parseStrokeSpec2 } from "#util/strokeSpec.js";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -222,10 +223,10 @@ describe(`character.json files`, async () => {
 
       for (const decomp of decomps) {
         for (const component of walkIdsNodeLeafs(decomp)) {
-          const strokeSpec = parseStrokeSpec(component.strokes);
+          const strokeSpec = parseStrokeSpec2(component.strokes);
           if (Array.isArray(characterData.svg.strokes)) {
             // at least one stroke if there's SVG stroke data
-            expect.soft(strokeSpec.items.length, character).toBeGreaterThan(0);
+            expect.soft(strokeSpec.length, character).toBeGreaterThan(0);
           }
         }
       }
@@ -365,11 +366,7 @@ describe(`character.json files`, async () => {
 
       if (characterData.mnemonic?.components) {
         const allComponentStrokes = new Set<number>();
-        function processStrokeSpecAtom(
-          atom: ReturnType<
-            typeof parseStrokeSpec
-          >["items"][number]["atoms"][number],
-        ) {
+        function processStrokeSpecAtom(atom: StrokeSpecAtom) {
           switch (atom.kind) {
             case "range": {
               for (let i = atom.start; i <= atom.end; i++) {
@@ -387,10 +384,10 @@ describe(`character.json files`, async () => {
         for (const component of walkIdsNodeLeafs(
           characterData.mnemonic.components,
         )) {
-          const strokeSpec = parseStrokeSpec(component.strokes);
+          const strokeSpec = parseStrokeSpec2(component.strokes);
 
-          for (const item of strokeSpec.items) {
-            for (const atom of item.atoms) {
+          for (const item of strokeSpec) {
+            for (const atom of item) {
               processStrokeSpecAtom(atom);
             }
           }

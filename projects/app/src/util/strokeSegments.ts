@@ -1,8 +1,8 @@
 import SVGPathCommander from "svg-path-commander";
-import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
+import { formatAtom, parseStrokeSpec2 } from "@/util/strokeSpec";
 import { invariant } from "@pinyinly/lib/invariant";
 import { z } from "zod";
-import type { StrokeSpecBound } from "@/util/strokeSpec";
+import type { StrokeSpecSliceBound } from "@/util/strokeSpec";
 
 export interface SvgPathIntersection {
   x: number;
@@ -1132,7 +1132,7 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
   medianPathsById,
   strokeSpecText,
 }: BuildClosedSvgSegmentPathFromStrokeSpecArgs): string | null {
-  const spec = parseStrokeSpec(strokeSpecText);
+  const spec = parseStrokeSpec2(strokeSpecText);
 
   function resolveCutterPath(strokeId: number): string | null {
     return medianPathsById?.[strokeId] ?? strokePathsById[strokeId] ?? null;
@@ -1141,7 +1141,7 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
   function resolveBoundSeam(args: {
     targetPath: string;
     targetMedianPath: string;
-    bound: StrokeSpecBound;
+    bound: StrokeSpecSliceBound;
   }): ResolvedSliceBoundSeam | null {
     if (args.bound.kind === `percent`) {
       return resolvePercentBoundSeam({
@@ -1175,8 +1175,8 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
     };
   }
 
-  for (const item of spec.items) {
-    for (const atom of item.atoms) {
+  for (const item of spec) {
+    for (const atom of item) {
       if (atom.kind === `range`) {
         if (atom.start !== atom.end) {
           continue;
@@ -1298,9 +1298,9 @@ export function buildSvgSegmentPaths(
       continue;
     }
 
-    const spec = parseStrokeSpec(strokeSpecText);
-    for (const item of spec.items) {
-      for (const atom of item.atoms) {
+    const spec = parseStrokeSpec2(strokeSpecText);
+    for (const item of spec) {
+      for (const atom of item) {
         if (atom.kind !== `slice`) {
           continue;
         }

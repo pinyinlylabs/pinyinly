@@ -1,7 +1,7 @@
 import { hanziSvgPathsQuery } from "@/client/query";
 import type { HanziCharacter as HanziCharacterType } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
-import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
+import { formatAtom, parseStrokeSpec2 } from "@/util/strokeSpec";
 import type { LayoutChangeEvent } from "react-native";
 import { Text, View } from "react-native";
 import { HanziCharacter } from "./HanziCharacter";
@@ -23,10 +23,10 @@ function buildHighlightStrokeData(
   const segmentPaths: string[] = [];
 
   try {
-    const parsed = parseStrokeSpec(highlightStrokeRanges);
+    const parsed = parseStrokeSpec2(highlightStrokeRanges);
 
-    for (const item of parsed.items) {
-      for (const atom of item.atoms) {
+    for (const item of parsed) {
+      for (const atom of item) {
         if (atom.kind === `range`) {
           for (let i = atom.start; i <= atom.end; i += 1) {
             strokeIndexes.add(i);
