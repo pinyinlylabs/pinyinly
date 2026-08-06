@@ -11,25 +11,28 @@ import isEqual from "lodash/isEqual";
 expect.extend(matchers);
 
 expect.extend({
-  async toMatchJsonFileSnapshot(received: unknown, filePath: string) {
-    if (typeof received !== `object` || received == null) {
+  async toMatchJsonFileSnapshot(receivedObj: unknown, filePath: string) {
+    if (typeof receivedObj !== `object` || receivedObj == null) {
       return {
         pass: false,
         message: () =>
-          `toMatchJsonFileSnapshot expected an object or array, but received ${typeof received}`,
+          `toMatchJsonFileSnapshot expected an object or array, but received ${typeof receivedObj}`,
       };
     }
 
-    const expected = await format(filePath, JSON.stringify(received));
+    // Deep clone to remove any non-serializable properties. (e.g. `{ "foo":
+    // undefined }` -> `{}`)
+    receivedObj = JSON.parse(JSON.stringify(receivedObj));
 
-    const current = (await fs.stat(filePath)).isFile()
+    const expectedObj = (await fs.stat(filePath)).isFile()
       ? (JSON.parse(
           await fs.readFile(filePath, { encoding: `utf-8` }),
         ) as unknown)
       : null;
 
-    if (!isEqual(received, current)) {
-      await expect(expected, `File: ${filePath}`).toMatchFileSnapshot(filePath);
+    if (!isEqual(receivedObj, expectedObj)) {
+      const received = await format(filePath, JSON.stringify(receivedObj));
+      await expect(received, `File: ${filePath}`).toMatchFileSnapshot(filePath);
     }
 
     return {
