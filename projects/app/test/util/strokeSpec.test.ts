@@ -7,6 +7,7 @@ import {
   parseStrokeSpec,
   flattenStrokeSpecRanges,
   formatAtom,
+  strokeSpecFilter,
 } from "#util/strokeSpec.ts";
 import { describe, expect, test } from "vitest";
 
@@ -116,7 +117,7 @@ describe(`mapStrokeSpec`, () => {
   );
 });
 
-describe(`flattenStrokeSpec2`, () => {
+describe(`flattenStrokeSpec`, () => {
   test.for([
     [`0`, `0`],
     [`0-1`, `0,1`],
@@ -173,4 +174,76 @@ describe(`formatAtom`, () => {
   ] as [StrokeSpecAtom, string][])(`formats $0 to $1`, ([atom, expected]) => {
     expect(formatAtom(atom)).toBe(expected);
   });
+});
+
+describe(`strokeSpecFilter`, () => {
+  const toThrow = Symbol("<throws>");
+  interface TestCase {
+    strokeSpec: string;
+    pathsByAtom: Record<string, string>;
+    pathsByIndex: string[];
+    expected: string[] | typeof toThrow;
+  }
+
+  test.for([
+    {
+      pathsByAtom: null,
+      pathsByIndex: ["path0", "path1"],
+      strokeSpec: "0",
+      expected: ["path0"],
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: ["path0", "path1"],
+      strokeSpec: "0,1",
+      expected: ["path0", "path1"],
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: ["path0", "path1"],
+      strokeSpec: "0-1",
+      expected: ["path0", "path1"],
+    },
+    {
+      pathsByAtom: {
+        "0[:1]": "path0[:1]",
+      },
+      pathsByIndex: ["path0", "path1"],
+      strokeSpec: "0[:1]",
+      expected: ["path0[:1]"],
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: [],
+      strokeSpec: "0-2",
+      expected: toThrow,
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: ["path0"],
+      strokeSpec: "0[:1]",
+      expected: toThrow,
+    },
+    {
+      pathsByAtom: {},
+      pathsByIndex: ["path0"],
+      strokeSpec: "0[:1]",
+      expected: toThrow,
+    },
+  ] as TestCase[])(
+    `strokeSpecFilter($strokeSpec, $pathsByAtom, $pathsByIndex) -> $expected`,
+    ({ strokeSpec, pathsByAtom, pathsByIndex, expected }) => {
+      const getResult = () =>
+        strokeSpecFilter(
+          pathsByIndex,
+          pathsByAtom,
+          strokeSpec as StrokeSpecString,
+        );
+      if (expected === toThrow) {
+        expect(getResult).toThrow();
+      } else {
+        expect(getResult()).toEqual(expected);
+      }
+    },
+  );
 });

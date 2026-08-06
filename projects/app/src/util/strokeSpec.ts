@@ -332,8 +332,8 @@ export function flattenStrokeSpecRanges(spec: StrokeSpec): StrokeSpec {
 
 export function strokeSpecFilter(
   pathsByIndex: string[],
-  pathsByAtom: Record<string, string>,
-  strokeSpec: string,
+  pathsByAtom: Record<string, string> | null,
+  strokeSpec: StrokeSpecString,
 ): string[] {
   const result: string[] = [];
 
@@ -349,8 +349,13 @@ export function strokeSpecFilter(
         }
       } else {
         const atomKey = formatAtom(atom);
-        const path = pathsByAtom[atomKey];
-        invariant(path != null, `Missing segment path for atom ${atomKey}`);
+        const path = pathsByAtom?.[atomKey];
+        invariant(
+          path != null,
+          `Missing path for atom ${atomKey}, pathsByIndex=%s pathsByAtom=%s`,
+          pathsByIndex,
+          pathsByAtom,
+        );
 
         result.push(path);
       }
