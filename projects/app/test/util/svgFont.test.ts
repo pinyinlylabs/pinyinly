@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  pointInSvgPath,
   parseSvgPaths,
   transformArphicSpaceSvgPath,
   transformFigmaSvgPathsToArphicTtfSpace,
@@ -228,5 +229,25 @@ describe(`transformArphicSpaceSvgPath`, () => {
 
     const transformedPath = transformArphicSpaceSvgPath(ttfPath);
     expect(transformedPath).toMatchInlineSnapshot(`"M0 900H100V800H0Z"`);
+  });
+});
+
+describe(`pointInSvgPath tests`, () => {
+  test.for([
+    [`M80 80A 45 45, 0, 0, 0, 125 125L 125 80 Z`, 100, 100],
+    [`M230 80A 45 45, 0, 1, 0, 275 125L 275 80 Z`, 220, 100],
+    [`M80 230A 45 45, 0, 0, 1, 125 275L 125 230 Z`, 115, 235],
+    [`M230 230A 45 45, 0, 1, 1, 275 275L 275 230 Z`, 300, 235],
+  ] as const)(`($1,$2) is inside $0`, ([path, x, y]) => {
+    expect(pointInSvgPath(path, x, y)).toBe(true);
+  });
+
+  test.for([
+    [`M80 80A 45 45, 0, 0, 0, 125 125L 125 80 Z`, 200, 100],
+    [`M230 80A 45 45, 0, 1, 0, 275 125L 275 80 Z`, 220, 50],
+    [`M80 230A 45 45, 0, 0, 1, 125 275L 125 230 Z`, 115, 200],
+    [`M230 230A 45 45, 0, 1, 1, 275 275L 275 230 Z`, 250, 235],
+  ] as const)(`($1,$2) is output $0`, ([path, x, y]) => {
+    expect(pointInSvgPath(path, x, y)).toBe(false);
   });
 });

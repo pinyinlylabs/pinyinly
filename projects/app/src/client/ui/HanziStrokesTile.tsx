@@ -31,15 +31,19 @@ export function HanziStrokesTile({
   onVisualLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const { data: strokesData } = useQuery(hanziSvgPathsQuery(hanzi));
-  const segmentPathsByAtom = strokesData?.segments ?? null;
-  const strokePaths = strokesData?.strokes ?? null;
+
+  if (strokesData == null) {
+    return null;
+  }
+  const segmentPathsByAtom = strokesData.segments ?? null;
+  const strokePaths = strokesData.strokes;
 
   const fgSvgPaths =
     componentStrokeSpec == null
       ? []
       : strokeSpecFilter(
-          strokePaths ?? [],
-          segmentPathsByAtom ?? {},
+          strokePaths,
+          segmentPathsByAtom ?? null,
           componentStrokeSpec,
         );
 

@@ -3,6 +3,7 @@ import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
 import { invariant } from "@pinyinly/lib/invariant";
 import { z } from "zod";
 import type { StrokeSpecSliceBound } from "@/util/strokeSpec";
+import type { StrokeSpecString } from "#data/model.js";
 
 export interface SvgPathIntersection {
   x: number;
@@ -1286,10 +1287,10 @@ export function buildClosedSvgSegmentPathFromStrokeSpec({
   return null;
 }
 
-export function buildSvgSegmentPaths(
+export function buildStrokeSpecSegmentPaths(
   strokePaths: readonly string[],
   medianPaths: readonly string[] | undefined,
-  strokeSpecTexts: readonly string[],
+  strokeSpecTexts: readonly StrokeSpecString[],
 ): Record<string, string> {
   const segments: Record<string, string> = {};
 

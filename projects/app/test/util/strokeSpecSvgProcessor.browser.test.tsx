@@ -5,12 +5,13 @@ import { page, locators } from "vitest/browser";
 import { View } from "react-native";
 import { HanziGraphic } from "#client/ui/HanziGraphic.tsx";
 import "#global.css";
-import { buildSvgSegmentPaths } from "#util/strokeSegments.js";
+import { buildStrokeSpecSegmentPaths } from "#util/strokeSpecSvgProcessor.js";
 import { strokeSpecFilter } from "#util/strokeSpec.js";
 import {
   parseSvgPaths,
   transformFigmaSvgPathsToArphicTtfSpace,
 } from "#util/svgFont.js";
+import type { StrokeSpecString } from "#data/model.js";
 
 locators.extend({
   getByTagName(tagName: string) {
@@ -93,27 +94,32 @@ test.for([
   { name: `swirlSvg (2)`, svg: swirlSvg, strokeSpec: `0[:1]` },
   { name: `swirlSvg (3)`, svg: swirlSvg, strokeSpec: `0[:1#1]` },
   // { name: `hui2`, svg: hui2Svg, strokeSpec: `2,1[2:3],3,4-5` },
-] as const)(`render $name $strokeSpec`, async ({ name, svg, strokeSpec }) => {
-  const segmentPaths = buildSvgSegmentPaths(svg.strokes, svg.medians, [
-    strokeSpec,
-  ]);
+] as const)(
+  `render $name $strokeSpec`,
+  async ({ name, svg, strokeSpec: strokeSpecStr }) => {
+    const strokeSpec = strokeSpecStr as StrokeSpecString;
 
-  const fgSvgPaths = strokeSpecFilter(svg.strokes, segmentPaths, strokeSpec);
+    const segmentPaths = buildStrokeSpecSegmentPaths(svg.strokes, svg.medians, [
+      strokeSpec,
+    ]);
 
-  await render(
-    <View testID="pyly-snapshot" className="size-100">
-      <HanziGraphic
-        className="size-100"
-        bgSvgPaths={svg.strokes}
-        fgSvgPaths={fgSvgPaths}
-      />
-    </View>,
-  );
+    const fgSvgPaths = strokeSpecFilter(svg.strokes, segmentPaths, strokeSpec);
 
-  await expect.element(page.getByTagName(`path`).first()).toBeInTheDocument();
+    await render(
+      <View testID="pyly-snapshot" className="size-100">
+        <HanziGraphic
+          className="size-100"
+          bgSvgPaths={svg.strokes}
+          fgSvgPaths={fgSvgPaths}
+        />
+      </View>,
+    );
 
-  await expect(page.getByTestId(`pyly-snapshot`)).toMatchScreenshot(name);
-});
+    await expect.element(page.getByTagName(`path`).first()).toBeInTheDocument();
+
+    await expect(page.getByTestId(`pyly-snapshot`)).toMatchScreenshot(name);
+  },
+);
 
 test(`svg export`, async () => {
   const path = `M843 79L843 7L144 7L144 79ZM884 795L884 -59L808 -59L808 721L183 721L183 -59L107 -59L107 795ZM630 554L630 482L362 482L362 554ZM630 317L630 245L362 245L362 317ZM399 758L399 42L326 42L326 758ZM669 758L669 42L597 42L597 758Z`;

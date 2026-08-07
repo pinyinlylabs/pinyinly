@@ -1,17 +1,18 @@
+import type { StrokeSpecString } from "#data/model.js";
 import {
   buildClosedSvgSegmentPathFromStrokeSpec,
   buildSvgSegmentPathFromLengths,
-  buildSvgSegmentPaths,
+  buildStrokeSpecSegmentPaths,
   getSvgPathIntersections,
-} from "#util/strokeSegments.ts";
+} from "#util/strokeSpecSvgProcessor.js";
 import { describe, expect, test } from "vitest";
 
-describe(`strokeSegments helper`, () => {
+describe(`buildStrokeSpecSegmentPaths`, () => {
   test(`builds segment maps from stroke spec text`, () => {
-    const segments = buildSvgSegmentPaths(
+    const segments = buildStrokeSpecSegmentPaths(
       [`M 0 0 L 10 0`, `M 2 -5 L 2 5`, `M 8 -5 L 8 5`],
       undefined,
-      [`0[1:2]`],
+      [`0[1:2]` as StrokeSpecString],
     );
 
     expect(segments).toMatchInlineSnapshot(`{}`);

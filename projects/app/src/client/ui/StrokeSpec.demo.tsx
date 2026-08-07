@@ -3,7 +3,7 @@ import { RectButton } from "@/client/ui/RectButton";
 import {
   buildClosedSvgSegmentPathFromStrokeSpec,
   getSvgPathIntersections,
-} from "@/util/strokeSegments";
+} from "@/util/strokeSpecSvgProcessor";
 import { parseStrokeSpec } from "@/util/strokeSpec";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Switch, Text, TextInput, View } from "react-native";
