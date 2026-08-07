@@ -286,7 +286,7 @@
   ["匕",{"decompositions":{"⿺乚丿":["0","1"]},"mnemonic":"⿺乚丿"}],
   ["𠤎",{"decompositions":{"⿻乚丿":["",""]},"mnemonic":"⿻乚丿"}],
   ["化",{"decompositions":{"⿰亻𠤎":["0-1","2-3"]},"mnemonic":"⿰亻𠤎"}],
-  ["𫧇",{"decompositions":{"⿱匕匕":["",""]},"mnemonic":"⿱匕匕"}],
+  ["𫧇",{"decompositions":{"⿱匕匕":["0-1","2-3"]},"mnemonic":"⿱匕匕"}],
   ["北",{"decompositions":{"⿰③匕":["0-2","3-4"]},"mnemonic":"⿰③匕"}],
   ["匚",{"decompositions":{"⿱一①":["0","1"]},"mnemonic":"⿱一①"}],
   ["匸",{"decompositions":{}}],

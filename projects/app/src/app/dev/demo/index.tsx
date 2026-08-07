@@ -33,6 +33,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`CloseButton`]: lazyDemo(() => import(`../../../client/ui/CloseButton.demo`)),
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
   [`FloatingMenuModal`]: lazyDemo(() => import(`../../../client/ui/FloatingMenuModal.demo`)),
+  [`GlyphBuilder`]: lazyDemo(() => import(`../../../client/ui/GlyphBuilder.demo`)),
   [`HanziDecompositionEditor`]: lazyDemo(() => import(`../../../client/ui/HanziDecompositionEditor.demo`)),
   [`HanziGraphic`]: lazyDemo(() => import(`../../../client/ui/HanziGraphic.demo`)),
   [`HanziHintOption`]: lazyDemo(() => import(`../../../client/ui/HanziHintOption.demo`)),

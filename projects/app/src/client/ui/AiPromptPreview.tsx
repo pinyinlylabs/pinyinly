@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { RectButton } from "./RectButton";
+import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import type { ChatPromptMessage } from "@/server/lib/ai";
 
 export type AiPromptPreviewSectionType = {
@@ -53,21 +53,11 @@ export function AiPromptPreview({
 }
 
 function PromptTextBlock({ label, text }: { label: string; text: string }) {
-  const handleCopy = () => {
-    void copyToClipboard(text);
-  };
-
   return (
     <View className="gap-1">
       <View className="flex-row items-center justify-between gap-2">
         <Text className="pyly-body-caption text-fg-dim">{label}</Text>
-        <RectButton
-          variant="bareDim"
-          iconStart="copy"
-          iconSize={12}
-          onPress={handleCopy}
-          className="size-6 rounded p-0 text-fg-dim"
-        />
+        <CopyToClipboardButton text={text} />
       </View>
       <Text
         selectable
@@ -77,26 +67,4 @@ function PromptTextBlock({ label, text }: { label: string; text: string }) {
       </Text>
     </View>
   );
-}
-
-async function copyToClipboard(text: string): Promise<boolean> {
-  if (text.length === 0) {
-    return false;
-  }
-
-  if (!(`navigator` in globalThis)) {
-    return false;
-  }
-
-  const globalNavigator = globalThis.navigator;
-  if (typeof globalNavigator.clipboard.writeText !== `function`) {
-    return false;
-  }
-
-  try {
-    await globalNavigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
 }

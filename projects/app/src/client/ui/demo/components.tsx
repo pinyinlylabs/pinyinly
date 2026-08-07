@@ -4,15 +4,11 @@ import { ToggleButton } from "@/client/ui/ToggleButton";
 import type { HanziText, HanziWord } from "@/data/model";
 import { Link } from "expo-router";
 import type { Href } from "expo-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import {
-  examplesStackClassName,
-  useDemoHanziKnob,
-  useDemoHanziWordKnob,
-} from "./utils";
+import { useDemoHanziKnob, useDemoHanziWordKnob } from "./utils";
 
 export const ExampleStack = ({
   children,
@@ -57,6 +53,9 @@ export const Section = ({
   href: Href;
 }) => {
   const ref = useRef<View>(null);
+  const [isLightCollapsed, setIsLightCollapsed] = useState(false);
+  const [isDarkCollapsed, setIsDarkCollapsed] = useState(false);
+
   return (
     <>
       <View className="flex-row" ref={ref}>
@@ -67,41 +66,79 @@ export const Section = ({
             hover:bg-bg
           `}
         >
-          <Link href={href} asChild>
-            <Text className="font-mono text-2xl text-fg">{title}</Text>
-          </Link>
+          <View className="flex-row items-center justify-between gap-2">
+            <Link href={href} asChild>
+              <Text className="font-mono text-2xl text-fg">{title}</Text>
+            </Link>
+            <RectButton
+              className="hidden lg:flex"
+              variant="bare"
+              onPress={() => {
+                setIsLightCollapsed((current) => !current);
+              }}
+            >
+              {isLightCollapsed ? `Show` : `Hide`}
+            </RectButton>
+          </View>
         </View>
         <View
           className={`
-            pyly-color-scheme-dark hidden flex-1 bg-bg-high p-2
+              pyly-color-scheme-dark flex-1 hidden bg-bg-high p-2
 
-            lg:flex
-          `}
-        />
+              lg:flex
+            `}
+        >
+          <RectButton
+            className="hidden lg:flex self-end"
+            variant="bare"
+            onPress={() => {
+              setIsDarkCollapsed((current) => !current);
+            }}
+          >
+            {isDarkCollapsed ? `Show` : `Hide`}
+          </RectButton>
+        </View>
       </View>
       <View className="lg:flex-row">
         <View
           className={`
             pyly-color-scheme-light theme-default
 
-            ${examplesStackClassName}
+
+            ${stackContentClass({ collapsed: isLightCollapsed })}
           `}
         >
-          {children}
+          {isLightCollapsed ? null : children}
         </View>
         <View
           className={`
-            pyly-color-scheme-dark theme-default
+              pyly-color-scheme-dark theme-default
 
-            ${examplesStackClassName}
-          `}
+              ${stackContentClass({ collapsed: isDarkCollapsed })}
+            `}
         >
-          {children}
+          {isDarkCollapsed ? null : children}
         </View>
       </View>
     </>
   );
 };
+
+const stackContentClass = tv({
+  base: `
+    bg-bg flex-row flex-wrap justify-center gap-2 p-2
+  
+    sm:justify-start
+
+    lg:flex-1 lg:shrink lg:basis-1
+  `,
+  variants: {
+    collapsed: {
+      true: `hidden`,
+      false: ``,
+    },
+  },
+});
 
 export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (

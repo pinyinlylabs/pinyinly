@@ -24,11 +24,24 @@ expect.extend({
     // undefined }` -> `{}`)
     receivedObj = JSON.parse(JSON.stringify(receivedObj));
 
-    const expectedObj = (await fs.stat(filePath)).isFile()
-      ? (JSON.parse(
-          await fs.readFile(filePath, { encoding: `utf-8` }),
-        ) as unknown)
-      : null;
+    let expectedObj: symbol | unknown = Symbol();
+
+    try {
+      expectedObj = JSON.parse(
+        await fs.readFile(filePath, { encoding: `utf-8` }),
+      ) as unknown;
+    } catch (err: unknown) {
+      if (
+        !(
+          typeof err === "object" &&
+          err !== null &&
+          (err as { code?: string }).code === "ENOENT"
+        ) &&
+        !(err instanceof SyntaxError)
+      ) {
+        throw err;
+      }
+    }
 
     if (!isEqual(receivedObj, expectedObj)) {
       const received = await format(filePath, JSON.stringify(receivedObj));
