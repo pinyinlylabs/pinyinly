@@ -104,7 +104,17 @@ export const PylymarkTokenText = ({
           ${isHighlighted ? `pyly-token-highlighted` : ``}
         `}
       >
-        [{label}] {token.text}
+        <Text
+          // Don't let the label split across multiple lines, e.g.
+          //
+          //  …getting fussed over at the [-
+          //  an] pyramid purification…
+          //
+          className="text-nowrap"
+        >
+          [{label}]
+        </Text>{" "}
+        {token.text}
       </Link>
     );
   }
