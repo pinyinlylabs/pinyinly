@@ -7,8 +7,7 @@ import {
   transformArphicSpaceSvgPath,
   transformFigmaSvgPathsToArphicTtfSpace,
 } from "#util/svgFont.ts";
-import type { StrokeMedianPoint } from "#util/strokeSegments.ts";
-import { buildSvgSegmentPaths } from "#util/strokeSegments.ts";
+import type { StrokeMedianPoint } from "#util/strokeSpecSvgProcessor.js";
 import {
   existsSync,
   fetchWithFsDbCache,
@@ -232,36 +231,14 @@ for (const character of allCharacters) {
     );
   }
 
-  const strokeSpecTexts = Object.values(
-    existingData.decompositions ?? {},
-  ).flat();
-
-  const generatedSegments =
-    nextMedians == null
-      ? undefined
-      : buildSvgSegmentPaths(nextStrokes, nextMedians, strokeSpecTexts);
-  debug(`generatedSegments for %O: %O`, character, generatedSegments);
-  debug(`strokeSpecTexts for %O: %O`, character, strokeSpecTexts);
-  debug(`existingData for %O: %O`, character, existingData.mnemonic);
-  const existingSegments = existingSvg.segments;
-  const nextSegments =
-    generatedSegments == null
-      ? existingSegments
-      : existingSegments == null
-        ? generatedSegments
-        : {
-            ...existingSegments,
-            ...generatedSegments,
-          };
-
   const nextData: Record<string, unknown> = {
     ...existingData,
     hanzi: character,
   };
 
   nextData[`svg`] = {
+    ...existingSvg,
     ...(nextMedians == null ? {} : { medians: nextMedians }),
-    ...(nextSegments == null ? {} : { segments: nextSegments }),
     strokes: nextStrokes,
   };
 

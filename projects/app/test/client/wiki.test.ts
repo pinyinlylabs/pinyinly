@@ -18,11 +18,14 @@ import type {
   IdsNode,
   WikiCharacterData,
 } from "#data/model.js";
-import { HskLevel, wikiCharacterDataSchema } from "#data/model.js";
+import { wikiCharacterDataSchema } from "#data/model.js";
 import {
   buildHanziWord,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
+  hanziComponentsToLearn,
+  hanziFromHanziWord,
+  loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
 } from "#dictionary.js";
 import { getFonts } from "#test/helpers.ts";
@@ -32,6 +35,7 @@ import {
   normalizeStrokeSpec,
   parseStrokeSpec,
 } from "#util/strokeSpec.js";
+import { buildStrokeSpecSegmentPaths } from "#util/strokeSpecSvgProcessor.js";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -295,8 +299,7 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`HSK1 mnemonic decomposition does not use invalid "hanzi" strings`, async () => {
-    const dictionary = await loadDictionary();
+  test(`mnemonic decomposition IDS does not use invalid "hanzi" strings`, async () => {
     const bannedCharacters = new Set();
 
     // Don't allow IDS combining characters or circled numbers (meaning "unknown N stroke character").
@@ -315,12 +318,9 @@ describe(`character.json files`, async () => {
       bannedCharacters.add(char);
     }
 
+    const charactersToCheck = await buildCharactersToCheck();
     for (const { character, characterData, filePath } of characterFiles) {
-      const isHsk1Character = dictionary
-        .lookupHanzi(character)
-        .some(([, meaning]) => meaning.hsk === HskLevel[1]);
-
-      if (isHsk1Character) {
+      if (charactersToCheck.has(character)) {
         const ids = characterData.mnemonic?.decomposition;
         if (ids) {
           for (const leaf of walkIdsNodeLeafs(
@@ -437,14 +437,10 @@ describe(`character.json files`, async () => {
   });
 
   test(`decomposition strokes match the hanzi stroke count`, async () => {
-    const dictionary = await loadDictionary();
+    const charactersToCheck = await buildCharactersToCheck();
 
     for (const { character, characterData, filePath } of characterFiles) {
-      const isHsk1Character = dictionary
-        .lookupHanzi(character)
-        .some(([, meaning]) => meaning.hsk === HskLevel[1]);
-
-      if (isHsk1Character && characterData.decompositions) {
+      if (charactersToCheck.has(character) && characterData.decompositions) {
         for (const [ids, strokeSpecs] of Object.entries(
           characterData.decompositions,
         )) {
@@ -466,6 +462,54 @@ describe(`character.json files`, async () => {
             i++;
           }
         }
+      }
+    }
+  });
+
+  test(`svg.segments is populated from decompositions`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
+
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (charactersToCheck.has(character)) {
+        let segments: Record<string, string> | undefined = undefined;
+
+        const strokeSpecTexts = Object.values(
+          characterData.decompositions ?? {},
+        ).flat();
+
+        if (strokeSpecTexts.length > 0) {
+          if (!Array.isArray(characterData.svg.strokes)) {
+            continue;
+          }
+          expect
+            .soft(
+              characterData.svg.strokes,
+              `${filePath} svg.strokes should not be a number`,
+            )
+            .not.toBeTypeOf("number");
+          if (!Array.isArray(characterData.svg.strokes)) {
+            continue;
+          }
+
+          const result = buildStrokeSpecSegmentPaths(
+            characterData.svg.strokes,
+            characterData.svg.medians,
+            strokeSpecTexts,
+          );
+          if (Object.keys(result).length > 0) {
+            segments = result;
+          }
+        }
+
+        const expected = {
+          ...characterData,
+          svg: {
+            ...characterData.svg,
+            segments,
+          },
+        };
+
+        await expect.soft(expected).toMatchJsonFileSnapshot(filePath);
       }
     }
   });
@@ -603,4 +647,43 @@ describe(`character.json files`, async () => {
         );
     }
   });
+});
+
+/**
+ * Computes the set of all the characters (and their dependencies) to run tests
+ * on, based on the number of HSK levels we want to include in the test
+ * coverage.
+ *
+ * This started with just HSK1, but should be expanded to include more levels in
+ * the future. The goal is to ensure that all characters in the dictionary have
+ * valid decomposition data, stroke data, and mnemonic data, and that they are
+ * consistent with the rest of the data in the project.
+ */
+const buildCharactersToCheck = memoize0(async function (): Promise<
+  ReadonlySet<HanziCharacter>
+> {
+  const dictionary = await loadDictionary();
+  const decompositionData = await loadBuiltinCharacterDecompositionEntries();
+
+  const seeds = [
+    ...dictionary.hsk1HanziWords,
+    // Uncomment these lines incrementally in the future to increase validation coverage.
+    // ...dictionary.hsk2HanziWords,
+    // ...dictionary.hsk3HanziWords,
+    // ...dictionary.hsk4HanziWords,
+    // ...dictionary.hsk5HanziWords,
+    // ...dictionary.hsk6HanziWords,
+    // ...dictionary.hsk7To9HanziWords,
+  ];
+  const result = new Set<HanziCharacter>();
+  for (const seed of seeds) {
+    const hanzi = hanziFromHanziWord(seed);
+    for (const component of await hanziComponentsToLearn(
+      hanzi,
+      decompositionData,
+    )) {
+      result.add(component);
+    }
+  }
+  return result;
 });
