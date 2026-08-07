@@ -24,18 +24,18 @@ expect.extend({
     // undefined }` -> `{}`)
     receivedObj = JSON.parse(JSON.stringify(receivedObj));
 
-    let expectedObj: symbol | unknown = Symbol();
+    let expectedObj: symbol | object = Symbol(`no existing snapshot`);
 
     try {
       expectedObj = JSON.parse(
         await fs.readFile(filePath, { encoding: `utf-8` }),
-      ) as unknown;
+      ) as object;
     } catch (err: unknown) {
       if (
         !(
-          typeof err === "object" &&
+          typeof err === `object` &&
           err !== null &&
-          (err as { code?: string }).code === "ENOENT"
+          (err as { code?: string }).code === `ENOENT`
         ) &&
         !(err instanceof SyntaxError)
       ) {

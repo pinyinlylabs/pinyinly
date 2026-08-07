@@ -25,7 +25,10 @@
     ]
   },
   "mnemonic": {
-    "decomposition": "⿳𭕄冖见"
+    "decomposition": "⿱龸见"
   },
-  "decompositions": { "⿳𭕄冖见": ["0-2", "3-4", "5-8"] }
+  "decompositions": {
+    "⿳𭕄冖见": ["0-2", "3-4", "5-8"],
+    "⿱龸见": ["0-4", "5-8"]
+  }
 }

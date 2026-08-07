@@ -740,7 +740,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "⺺ via 隶",
       "〢 via 坚, 紧[HSK3]",
       "コ via 彐",
-      "ュ via 候",
+      "ュ via 候, 夬",
       "㇀ via 七[HSK1]",
       "㇂ via 民",
       "㇇ via 今, 水[HSK1]",

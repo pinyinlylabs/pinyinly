@@ -89,12 +89,8 @@ const inputClass = tv({
       right: `text-right`,
     },
     variant: {
-      bare: `
-        font-sans text-fg outline-none
-      `,
-      flat: `
-        rounded-xl bg-bg-high px-4 py-3 pyly-body-input outline-none
-      `,
+      bare: `font-sans text-fg outline-none`,
+      flat: `rounded-xl bg-bg-high px-4 py-3 pyly-body-input outline-none`,
     },
   },
 });

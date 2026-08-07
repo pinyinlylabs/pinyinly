@@ -56,7 +56,7 @@ export function HanziStrokesTile({
       className={fillWidth ? `w-full items-center gap-2` : `items-start gap-2`}
     >
       <View className="min-w-12 items-center" onLayout={onVisualLayout}>
-        {strokePaths != null && fgSvgPaths.length > 0 ? (
+        {fgSvgPaths.length > 0 ? (
           <HanziGraphic
             className={`
               size-12

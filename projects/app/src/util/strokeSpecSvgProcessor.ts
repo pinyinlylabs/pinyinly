@@ -3,7 +3,7 @@ import { formatAtom, parseStrokeSpec } from "@/util/strokeSpec";
 import { invariant } from "@pinyinly/lib/invariant";
 import { z } from "zod";
 import type { StrokeSpecSliceBound } from "@/util/strokeSpec";
-import type { StrokeSpecString } from "#data/model.js";
+import type { StrokeSpecString } from "@/data/model";
 
 export interface SvgPathIntersection {
   x: number;

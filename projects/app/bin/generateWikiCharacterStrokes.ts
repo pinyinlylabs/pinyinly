@@ -114,8 +114,8 @@ const dictionaryDataByCharacter = await (async () => {
 })();
 
 const wikiDir = new URL(`../src/client/wiki/`, import.meta.url).pathname;
-const miSansGlyphsDir = new URL(
-  `../src/assets/fonts/MiSans/glyphs/`,
+const arphicUkaiGlyphsDir = new URL(
+  `../src/assets/fonts/ArphicUkai/glyphs/`,
   import.meta.url,
 ).pathname;
 
@@ -137,7 +137,7 @@ function getLocalGlyphSvgData(character: HanziText):
       medians?: string[];
     }
   | undefined {
-  const glyphFile = path.join(miSansGlyphsDir, `${character}.svg`);
+  const glyphFile = path.join(arphicUkaiGlyphsDir, `${character}.svg`);
   if (!existsSync(glyphFile)) {
     return undefined;
   }

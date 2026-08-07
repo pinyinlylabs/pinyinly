@@ -177,7 +177,7 @@ describe(`formatAtom`, () => {
 });
 
 describe(`strokeSpecFilter`, () => {
-  const toThrow = Symbol("<throws>");
+  const toThrow = Symbol(`<throws>`);
   interface TestCase {
     strokeSpec: string;
     pathsByAtom: Record<string, string>;
@@ -188,46 +188,46 @@ describe(`strokeSpecFilter`, () => {
   test.for([
     {
       pathsByAtom: null,
-      pathsByIndex: ["path0", "path1"],
-      strokeSpec: "0",
-      expected: ["path0"],
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0`,
+      expected: [`path0`],
     },
     {
       pathsByAtom: null,
-      pathsByIndex: ["path0", "path1"],
-      strokeSpec: "0,1",
-      expected: ["path0", "path1"],
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0,1`,
+      expected: [`path0`, `path1`],
     },
     {
       pathsByAtom: null,
-      pathsByIndex: ["path0", "path1"],
-      strokeSpec: "0-1",
-      expected: ["path0", "path1"],
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0-1`,
+      expected: [`path0`, `path1`],
     },
     {
       pathsByAtom: {
-        "0[:1]": "path0[:1]",
+        "0[:1]": `path0[:1]`,
       },
-      pathsByIndex: ["path0", "path1"],
-      strokeSpec: "0[:1]",
-      expected: ["path0[:1]"],
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0[:1]`,
+      expected: [`path0[:1]`],
     },
     {
       pathsByAtom: null,
       pathsByIndex: [],
-      strokeSpec: "0-2",
+      strokeSpec: `0-2`,
       expected: toThrow,
     },
     {
       pathsByAtom: null,
-      pathsByIndex: ["path0"],
-      strokeSpec: "0[:1]",
+      pathsByIndex: [`path0`],
+      strokeSpec: `0[:1]`,
       expected: toThrow,
     },
     {
       pathsByAtom: {},
-      pathsByIndex: ["path0"],
-      strokeSpec: "0[:1]",
+      pathsByIndex: [`path0`],
+      strokeSpec: `0[:1]`,
       expected: toThrow,
     },
   ] as TestCase[])(

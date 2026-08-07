@@ -71,7 +71,11 @@ export const Section = ({
               <Text className="font-mono text-2xl text-fg">{title}</Text>
             </Link>
             <RectButton
-              className="hidden lg:flex"
+              className="
+                hidden
+
+                lg:flex
+              "
               variant="bare"
               onPress={() => {
                 setIsLightCollapsed((current) => !current);
@@ -83,13 +87,17 @@ export const Section = ({
         </View>
         <View
           className={`
-              pyly-color-scheme-dark flex-1 hidden bg-bg-high p-2
+            pyly-color-scheme-dark hidden flex-1 bg-bg-high p-2
 
-              lg:flex
-            `}
+            lg:flex
+          `}
         >
           <RectButton
-            className="hidden lg:flex self-end"
+            className="
+              hidden self-end
+
+              lg:flex
+            "
             variant="bare"
             onPress={() => {
               setIsDarkCollapsed((current) => !current);
@@ -104,7 +112,6 @@ export const Section = ({
           className={`
             pyly-color-scheme-light theme-default
 
-
             ${stackContentClass({ collapsed: isLightCollapsed })}
           `}
         >
@@ -112,10 +119,10 @@ export const Section = ({
         </View>
         <View
           className={`
-              pyly-color-scheme-dark theme-default
+            pyly-color-scheme-dark theme-default
 
-              ${stackContentClass({ collapsed: isDarkCollapsed })}
-            `}
+            ${stackContentClass({ collapsed: isDarkCollapsed })}
+          `}
         >
           {isDarkCollapsed ? null : children}
         </View>
@@ -126,8 +133,8 @@ export const Section = ({
 
 const stackContentClass = tv({
   base: `
-    bg-bg flex-row flex-wrap justify-center gap-2 p-2
-  
+    flex-row flex-wrap justify-center gap-2 bg-bg p-2
+
     sm:justify-start
 
     lg:flex-1 lg:shrink lg:basis-1

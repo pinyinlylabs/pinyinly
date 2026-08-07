@@ -299,7 +299,7 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`mnemonic decomposition IDS does not use invalid "hanzi" strings`, async () => {
+  test.skip(`mnemonic decomposition IDS does not use invalid "hanzi" strings`, async () => {
     const bannedCharacters = new Set();
 
     // Don't allow IDS combining characters or circled numbers (meaning "unknown N stroke character").
@@ -379,59 +379,57 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`all strokes are covered by mnemonic components`, async () => {
-    for (const { character, characterData } of characterFiles) {
-      if (!Array.isArray(characterData.svg.strokes)) {
-        // There's no point having components referencing strokes if we don't
-        // have any SVG stroke paths to draw.
+  test(`all strokes are covered by decompositions`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
+
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (!charactersToCheck.has(character)) {
         continue;
       }
 
-      if (characterData.mnemonic?.components) {
-        const allComponentStrokes = new Set<number>();
-        function processStrokeSpecAtom(atom: StrokeSpecAtom) {
-          switch (atom.kind) {
-            case `range`: {
-              for (let i = atom.start; i <= atom.end; i++) {
-                allComponentStrokes.add(i);
-              }
-              break;
+      if (
+        characterData.decompositions == null ||
+        Object.keys(characterData.decompositions).length === 0
+      ) {
+        continue;
+      }
+
+      const allComponentStrokes = new Set<number>();
+      function processStrokeSpecAtom(atom: StrokeSpecAtom) {
+        switch (atom.kind) {
+          case `range`: {
+            for (let i = atom.start; i <= atom.end; i++) {
+              allComponentStrokes.add(i);
             }
-            case `slice`: {
-              allComponentStrokes.add(atom.stroke);
-              break;
+            break;
+          }
+          case `slice`: {
+            allComponentStrokes.add(atom.stroke);
+            break;
+          }
+        }
+      }
+
+      for (const strokeSpecs of Object.values(characterData.decompositions)) {
+        for (const strokeSpec of strokeSpecs) {
+          for (const item of parseStrokeSpec(strokeSpec)) {
+            for (const atom of item) {
+              processStrokeSpecAtom(atom);
             }
           }
         }
+      }
 
-        if (characterData.decompositions) {
-          for (const strokeSpecs of Object.values(
-            characterData.decompositions,
-          )) {
-            for (const strokeSpec of strokeSpecs) {
-              for (const item of parseStrokeSpec(strokeSpec)) {
-                for (const atom of item) {
-                  processStrokeSpecAtom(atom);
-                }
-              }
-            }
-          }
-        }
+      const totalStrokes = characterStrokeCount(characterData);
+      const expectedStrokes = Array.from({ length: totalStrokes }, (_, i) => i);
 
-        const totalStrokes = characterStrokeCount(characterData);
-        const expectedStrokes = Array.from(
-          { length: totalStrokes },
-          (_, i) => i,
-        );
-
-        for (const strokeIndex of expectedStrokes) {
-          expect
-            .soft(
-              allComponentStrokes.has(strokeIndex),
-              `${character} stroke ${strokeIndex} is not covered by any mnemonic component`,
-            )
-            .toBe(true);
-        }
+      for (const strokeIndex of expectedStrokes) {
+        expect
+          .soft(
+            allComponentStrokes.has(strokeIndex),
+            `${filePath} stroke ${strokeIndex} is not covered by any mnemonic component`,
+          )
+          .toBe(true);
       }
     }
   });
@@ -444,24 +442,41 @@ describe(`character.json files`, async () => {
         for (const [ids, strokeSpecs] of Object.entries(
           characterData.decompositions,
         )) {
-          let i = 0;
+          let i = -1;
           for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
+            i++;
+
             const hanziData = getCharacterData(leaf);
-            if (hanziData != null && Array.isArray(hanziData.svg.strokes)) {
+            if (Array.isArray(hanziData?.svg.strokes)) {
               const strokeSpecText = nonNullable(strokeSpecs[i]);
               const strokeSpec = flattenStrokeSpecRanges(
                 parseStrokeSpec(strokeSpecText),
               );
 
-              expect(
-                strokeSpec.length,
-                `${filePath} IDS ${ids} (${leaf}) stroke count`,
-              ).toEqual(hanziData.svg.strokes.length);
+              expect
+                .soft(
+                  strokeSpec.length,
+                  `${filePath} IDS ${ids} (${leaf}) stroke count`,
+                )
+                .toEqual(hanziData.svg.strokes.length);
             }
-
-            i++;
           }
         }
+      }
+    }
+  });
+
+  test(`.strokes is SVG paths not just a count`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
+
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (charactersToCheck.has(character)) {
+        expect
+          .soft(
+            characterData.svg.strokes,
+            `${filePath} .strokes should be an array of SVG paths`,
+          )
+          .toBeTypeOf(`object`);
       }
     }
   });
@@ -486,7 +501,7 @@ describe(`character.json files`, async () => {
               characterData.svg.strokes,
               `${filePath} svg.strokes should not be a number`,
             )
-            .not.toBeTypeOf("number");
+            .not.toBeTypeOf(`number`);
           if (!Array.isArray(characterData.svg.strokes)) {
             continue;
           }

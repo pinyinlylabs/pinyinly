@@ -13,11 +13,12 @@ import { loadBuiltinCharacterDecompositionEntries } from "@/dictionary";
 import { nanoid } from "@/util/nanoid";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { parseStrokeSpec, strokeSpecFilter } from "@/util/strokeSpec";
+import { transformArphicSpaceSvgPath } from "@/util/svgFont";
 import SVGPathCommander from "svg-path-commander";
 import { useEffect, useRef, useState } from "react";
 import type { GestureResponderEvent, LayoutChangeEvent } from "react-native";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
-import { G, Svg } from "react-native-svg";
+import { G, Rect, Svg } from "react-native-svg";
 import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import { RectButton } from "./RectButton";
 import { SvgPath } from "./SvgPath";
@@ -35,6 +36,7 @@ interface GlyphLayer {
   ty: number;
   sx: number;
   sy: number;
+  r: number;
   isVisible: boolean;
   sourceOverride?: LayerSourceData;
 }
@@ -43,6 +45,7 @@ interface RenderedLayer {
   id: string;
   strokes: string[];
   medians: string[];
+  medianStarts: Array<{ x: number; y: number } | null>;
 }
 
 interface PathBBox {
@@ -53,7 +56,7 @@ interface PathBBox {
 }
 
 const previewSizePx = 520;
-const glyphBuilderStorageKey = "glyphBuilder.demo.v1";
+const glyphBuilderStorageKey = `glyphBuilder.demo.v1`;
 const glyphBuilderHistoryLimit = 40;
 const glyphBuilderSaveDebounceMs = 2000;
 const squareHanziInputSize = 44;
@@ -77,8 +80,8 @@ function createDefaultLayers(): GlyphLayer[] {
   return [
     {
       ...layerWithDefaults(),
-      hanziInput: "好",
-      hanzi: "好" as HanziCharacter,
+      hanziInput: `好`,
+      hanzi: `好` as HanziCharacter,
     },
   ];
 }
@@ -91,27 +94,27 @@ function snapshotEquals(
 }
 
 function sanitizeLayer(layer: unknown): GlyphLayer | null {
-  if (typeof layer !== "object" || layer == null) {
+  if (typeof layer !== `object` || layer == null) {
     return null;
   }
 
   const value = layer as Record<string, unknown>;
 
-  const sourceOverrideRaw = value["sourceOverride"];
+  const sourceOverrideRaw = value[`sourceOverride`];
   let sourceOverride: LayerSourceData | undefined;
   if (sourceOverrideRaw != null) {
-    if (typeof sourceOverrideRaw !== "object") {
+    if (typeof sourceOverrideRaw !== `object`) {
       return null;
     }
 
     const sourceOverrideValue = sourceOverrideRaw as Record<string, unknown>;
-    const sourceOverrideStrokes = sourceOverrideValue["strokes"];
-    const sourceOverrideMedians = sourceOverrideValue["medians"];
+    const sourceOverrideStrokes = sourceOverrideValue[`strokes`];
+    const sourceOverrideMedians = sourceOverrideValue[`medians`];
     if (
       !Array.isArray(sourceOverrideStrokes) ||
       !Array.isArray(sourceOverrideMedians) ||
-      sourceOverrideStrokes.some((x) => typeof x !== "string") ||
-      sourceOverrideMedians.some((x) => typeof x !== "string")
+      sourceOverrideStrokes.some((x) => typeof x !== `string`) ||
+      sourceOverrideMedians.some((x) => typeof x !== `string`)
     ) {
       return null;
     }
@@ -124,24 +127,26 @@ function sanitizeLayer(layer: unknown): GlyphLayer | null {
     };
   }
 
-  const layerId = value["id"];
-  const hanziInput = value["hanziInput"];
-  const layerHanzi = value["hanzi"];
-  const tx = value["tx"];
-  const ty = value["ty"];
-  const sx = value["sx"];
-  const sy = value["sy"];
-  const isVisible = value["isVisible"];
+  const layerId = value[`id`];
+  const hanziInput = value[`hanziInput`];
+  const layerHanzi = value[`hanzi`];
+  const tx = value[`tx`];
+  const ty = value[`ty`];
+  const sx = value[`sx`];
+  const sy = value[`sy`];
+  const rotation = value[`r`];
+  const isVisible = value[`isVisible`];
 
   if (
-    typeof layerId !== "string" ||
-    typeof hanziInput !== "string" ||
-    (layerHanzi != null && typeof layerHanzi !== "string") ||
-    typeof tx !== "number" ||
-    typeof ty !== "number" ||
-    typeof sx !== "number" ||
-    typeof sy !== "number" ||
-    typeof isVisible !== "boolean"
+    typeof layerId !== `string` ||
+    typeof hanziInput !== `string` ||
+    (layerHanzi != null && typeof layerHanzi !== `string`) ||
+    typeof tx !== `number` ||
+    typeof ty !== `number` ||
+    typeof sx !== `number` ||
+    typeof sy !== `number` ||
+    (rotation != null && typeof rotation !== `number`) ||
+    typeof isVisible !== `boolean`
   ) {
     return null;
   }
@@ -154,23 +159,24 @@ function sanitizeLayer(layer: unknown): GlyphLayer | null {
     ty,
     sx,
     sy,
+    r: rotation ?? 0,
     isVisible,
     sourceOverride,
   };
 }
 
 function sanitizeSnapshot(snapshot: unknown): GlyphBuilderSnapshot | null {
-  if (typeof snapshot !== "object" || snapshot == null) {
+  if (typeof snapshot !== `object` || snapshot == null) {
     return null;
   }
 
   const value = snapshot as Record<string, unknown>;
-  const layersRaw = value["layers"];
-  const selectedLayerIdsRaw = value["selectedLayerIds"];
+  const layersRaw = value[`layers`];
+  const selectedLayerIdsRaw = value[`selectedLayerIds`];
   if (
     !Array.isArray(layersRaw) ||
     !Array.isArray(selectedLayerIdsRaw) ||
-    selectedLayerIdsRaw.some((id) => typeof id !== "string")
+    selectedLayerIdsRaw.some((id) => typeof id !== `string`)
   ) {
     return null;
   }
@@ -181,24 +187,24 @@ function sanitizeSnapshot(snapshot: unknown): GlyphBuilderSnapshot | null {
 
   const layerIdSet = new Set(layers.map((layer) => layer.id));
   const selectedLayerIds = selectedLayerIdsRaw
-    .filter((id): id is string => typeof id === "string")
+    .filter((id): id is string => typeof id === `string`)
     .filter((id) => layerIdSet.has(id));
 
-  const referenceHanziInputRaw = value["referenceHanziInput"];
-  const referenceHanziRaw = value["referenceHanzi"];
-  const isReferenceVisibleRaw = value["isReferenceVisible"];
+  const referenceHanziInputRaw = value[`referenceHanziInput`];
+  const referenceHanziRaw = value[`referenceHanzi`];
+  const isReferenceVisibleRaw = value[`isReferenceVisible`];
 
   return {
     layers,
     selectedLayerIds,
     referenceHanziInput:
-      typeof referenceHanziInputRaw === "string" ? referenceHanziInputRaw : "",
+      typeof referenceHanziInputRaw === `string` ? referenceHanziInputRaw : ``,
     referenceHanzi:
-      typeof referenceHanziRaw === "string"
+      typeof referenceHanziRaw === `string`
         ? (referenceHanziRaw as HanziCharacter)
         : null,
     isReferenceVisible:
-      typeof isReferenceVisibleRaw === "boolean"
+      typeof isReferenceVisibleRaw === `boolean`
         ? isReferenceVisibleRaw
         : false,
   };
@@ -207,23 +213,23 @@ function sanitizeSnapshot(snapshot: unknown): GlyphBuilderSnapshot | null {
 function sanitizePersistedState(
   value: unknown,
 ): GlyphBuilderPersistedState | null {
-  if (typeof value !== "object" || value == null) {
+  if (typeof value !== `object` || value == null) {
     return null;
   }
 
   const record = value as Record<string, unknown>;
-  const version = record["version"];
+  const version = record[`version`];
   if (version !== 1 && version !== 2) {
     return null;
   }
 
-  const current = sanitizeSnapshot(record["current"]);
+  const current = sanitizeSnapshot(record[`current`]);
   if (current == null) {
     return null;
   }
 
-  const pastRaw = version === 1 ? record["history"] : record["past"];
-  const futureRaw = version === 1 ? [] : record["future"];
+  const pastRaw = version === 1 ? record[`history`] : record[`past`];
+  const futureRaw = version === 1 ? [] : record[`future`];
 
   const past = Array.isArray(pastRaw)
     ? pastRaw
@@ -271,16 +277,16 @@ function medianToSvgPath(median: string): string | null {
     return null;
   }
 
-  if (/^[Mm]\s/u.test(trimmed)) {
+  if (/^[Mm]/u.test(trimmed)) {
     return trimmed;
   }
 
   const points = trimmed
-    .split(";")
+    .split(`;`)
     .map((pointText) => pointText.trim())
     .filter((pointText) => pointText.length > 0)
     .map((pointText) => {
-      const [xText, yText] = pointText.split(",");
+      const [xText, yText] = pointText.split(`,`);
       const x = Number(xText);
       const y = Number(yText);
       if (Number.isNaN(x) || Number.isNaN(y)) {
@@ -298,12 +304,12 @@ function medianToSvgPath(median: string): string | null {
     .map((point, index) =>
       index === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`,
     )
-    .join(" ");
+    .join(` `);
 }
 
 function transformPath(
   path: string,
-  layer: Pick<GlyphLayer, "tx" | "ty" | "sx" | "sy">,
+  layer: Pick<GlyphLayer, `tx` | `ty` | `sx` | `sy`>,
 ): string {
   return new SVGPathCommander(path)
     .transform({
@@ -314,15 +320,47 @@ function transformPath(
     .toString();
 }
 
+function rotatePath(
+  path: string,
+  degrees: number,
+  rotationOrigin: { x: number; y: number },
+): string {
+  return new SVGPathCommander(path)
+    .transform({
+      origin: [rotationOrigin.x, rotationOrigin.y],
+      rotate: degrees,
+    })
+    .toString();
+}
+
+function getPathStartPoint(path: string): { x: number; y: number } | null {
+  const match = path.match(
+    /^[Mm]\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*[, ]\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/u,
+  );
+  if (match == null) {
+    return null;
+  }
+
+  const x = Number(match[1]);
+  const y = Number(match[2]);
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    return null;
+  }
+
+  return { x, y };
+}
+
 function layerWithDefaults(): GlyphLayer {
   return {
     id: nanoid(),
-    hanziInput: "",
+    hanziInput: ``,
     hanzi: null,
     tx: 0,
     ty: 0,
     sx: 1,
     sy: 1,
+    r: 0,
     isVisible: true,
   };
 }
@@ -336,10 +374,13 @@ function getSourceDataFromRaw(
 
   const medians = (raw.medians ?? [])
     .map((median) => medianToSvgPath(median))
+    .map((median) =>
+      median == null ? null : transformArphicSpaceSvgPath(median),
+    )
     .filter((median): median is string => median != null);
 
   return {
-    strokes: [...raw.strokes],
+    strokes: raw.strokes.map((stroke) => transformArphicSpaceSvgPath(stroke)),
     medians,
   };
 }
@@ -364,6 +405,71 @@ function getPathsBBox(paths: readonly string[]): PathBBox | null {
   return bbox;
 }
 
+function transformLayerPaths(
+  paths: readonly string[],
+  layer: Pick<GlyphLayer, `tx` | `ty` | `sx` | `sy` | `r`>,
+): string[] {
+  const translatedScaledPaths = paths.map((path) => transformPath(path, layer));
+  if (layer.r === 0) {
+    return translatedScaledPaths;
+  }
+
+  const rotationOrigin = getLayerRotationOrigin(paths, layer);
+  if (rotationOrigin == null) {
+    return translatedScaledPaths;
+  }
+
+  return translatedScaledPaths.map((path) =>
+    rotatePath(path, layer.r, rotationOrigin),
+  );
+}
+
+function getLayerRotationOrigin(
+  paths: readonly string[],
+  layer: Pick<GlyphLayer, `tx` | `ty` | `sx` | `sy` | `r`>,
+): { x: number; y: number } | null {
+  if (layer.r === 0) {
+    return null;
+  }
+
+  const translatedScaledPaths = paths.map((path) => transformPath(path, layer));
+  const bbox = getPathsBBox(translatedScaledPaths);
+  if (bbox == null) {
+    return null;
+  }
+
+  return {
+    x: (bbox.x + bbox.x2) / 2,
+    y: (bbox.y + bbox.y2) / 2,
+  };
+}
+
+function transformLayerPathsWithRotationOrigin(
+  paths: readonly string[],
+  layer: Pick<GlyphLayer, `tx` | `ty` | `sx` | `sy` | `r`>,
+  rotationOrigin: { x: number; y: number } | null,
+): string[] {
+  const translatedScaledPaths = paths.map((path) => transformPath(path, layer));
+  if (layer.r === 0 || rotationOrigin == null) {
+    return translatedScaledPaths;
+  }
+
+  return translatedScaledPaths.map((path) =>
+    rotatePath(path, layer.r, rotationOrigin),
+  );
+}
+
+function roundSvgPathToIntegers(path: string): string {
+  return path.replaceAll(/[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/gu, (valueText) => {
+    const value = Number(valueText);
+    if (!Number.isFinite(value)) {
+      return valueText;
+    }
+
+    return String(Math.round(value));
+  });
+}
+
 function SquareHanziInput({
   value,
   onChangeText,
@@ -381,7 +487,7 @@ function SquareHanziInput({
       variant="flat"
       autoCorrect={false}
       autoCapitalize="none"
-      className="rounded-md px-0 py-0 text-center text-lg"
+      className="rounded-md p-0 text-center text-lg"
       style={{
         width: squareHanziInputSize,
         height: squareHanziInputSize,
@@ -437,7 +543,11 @@ function PositionNumberInput({
         keyboardType="decimal-pad"
         autoCorrect={false}
         autoCapitalize="none"
-        className={`${widthClassName} rounded-md px-2 py-2 text-center text-sm`}
+        className={`
+          ${widthClassName}
+
+          rounded-md p-2 text-center text-sm
+        `}
       />
       {suffix == null ? null : (
         <Text className="pyly-body-caption text-fg-dim">{suffix}</Text>
@@ -482,7 +592,7 @@ export default function GlyphBuilderDemo() {
     createDefaultLayers(),
   );
   const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>([]);
-  const [referenceHanziInput, setReferenceHanziInput] = useState("");
+  const [referenceHanziInput, setReferenceHanziInput] = useState(``);
   const [referenceHanzi, setReferenceHanzi] = useState<HanziCharacter | null>(
     null,
   );
@@ -500,6 +610,7 @@ export default function GlyphBuilderDemo() {
     ty: `0`,
     sx: `100`,
     sy: `100`,
+    r: `0`,
   });
   const [isPositionAspectRatioLocked, setIsPositionAspectRatioLocked] =
     useState(false);
@@ -530,7 +641,7 @@ export default function GlyphBuilderDemo() {
         }
       })
       .catch((error: unknown) => {
-        console.error("Failed to load decomposition entries", error);
+        console.error(`Failed to load decomposition entries`, error);
       });
 
     return () => {
@@ -539,7 +650,7 @@ export default function GlyphBuilderDemo() {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS !== "web") {
+    if (Platform.OS !== `web`) {
       hasHydratedPersistedStateRef.current = true;
       return;
     }
@@ -570,14 +681,14 @@ export default function GlyphBuilderDemo() {
       setReferenceHanzi(sanitized.current.referenceHanzi);
       setIsReferenceVisible(sanitized.current.isReferenceVisible);
     } catch (error: unknown) {
-      console.error("Failed to load GlyphBuilder persisted state", error);
+      console.error(`Failed to load GlyphBuilder persisted state`, error);
     } finally {
       hasHydratedPersistedStateRef.current = true;
     }
   }, []);
 
   useEffect(() => {
-    if (!hasHydratedPersistedStateRef.current || Platform.OS !== "web") {
+    if (!hasHydratedPersistedStateRef.current || Platform.OS !== `web`) {
       return;
     }
 
@@ -636,7 +747,7 @@ export default function GlyphBuilderDemo() {
         persistedStateRef.current = nextPersisted;
         setHistoryState(nextPersisted);
       } catch (error: unknown) {
-        console.error("Failed to persist GlyphBuilder state", error);
+        console.error(`Failed to persist GlyphBuilder state`, error);
       }
     }, glyphBuilderSaveDebounceMs);
 
@@ -690,10 +801,16 @@ export default function GlyphBuilderDemo() {
       continue;
     }
 
+    const transformedStrokes = transformLayerPaths(sourceData.strokes, layer);
+    const transformedMedians = transformLayerPaths(sourceData.medians, layer);
+
     renderedLayers.push({
       id: layer.id,
-      strokes: sourceData.strokes.map((stroke) => transformPath(stroke, layer)),
-      medians: sourceData.medians.map((median) => transformPath(median, layer)),
+      strokes: transformedStrokes,
+      medians: transformedMedians,
+      medianStarts: transformedMedians.map((median) =>
+        getPathStartPoint(median),
+      ),
     });
   }
 
@@ -709,8 +826,14 @@ export default function GlyphBuilderDemo() {
         };
 
   const mergedOutput = {
-    strokes: previewLayers.flatMap((layer) => layer.strokes),
-    medians: previewLayers.flatMap((layer) => layer.medians),
+    strokes: previewLayers
+      .flatMap((layer) => layer.strokes)
+      .map((stroke) => transformArphicSpaceSvgPath(stroke))
+      .map((stroke) => roundSvgPathToIntegers(stroke)),
+    medians: previewLayers
+      .flatMap((layer) => layer.medians)
+      .map((median) => transformArphicSpaceSvgPath(median))
+      .map((median) => roundSvgPathToIntegers(median)),
   };
   const mergedOutputText = JSON.stringify(mergedOutput, null, 2);
 
@@ -743,6 +866,11 @@ export default function GlyphBuilderDemo() {
           (sum, layer) => sum + Math.abs(layer.sy) * 100,
           0,
         ) / selectedLayers.length;
+  const selectedRotationDeg =
+    selectedLayers.length === 0
+      ? 0
+      : selectedLayers.reduce((sum, layer) => sum + layer.r, 0) /
+        selectedLayers.length;
 
   useEffect(() => {
     if (selectedLayers.length === 0) {
@@ -751,6 +879,7 @@ export default function GlyphBuilderDemo() {
         ty: `0`,
         sx: `100`,
         sy: `100`,
+        r: `0`,
       });
       return;
     }
@@ -760,9 +889,11 @@ export default function GlyphBuilderDemo() {
       ty: formatLayerNumber(selectedPositionTy),
       sx: formatLayerPercent(selectedPositionSx),
       sy: formatLayerPercent(selectedPositionSy),
+      r: formatLayerNumber(selectedRotationDeg),
     });
   }, [
     selectedLayers.length,
+    selectedRotationDeg,
     selectedPositionSx,
     selectedPositionSy,
     selectedPositionTx,
@@ -770,7 +901,7 @@ export default function GlyphBuilderDemo() {
   ]);
 
   useEffect(() => {
-    if (Platform.OS !== "web" || selectedLayerIds.length === 0) {
+    if (Platform.OS !== `web` || selectedLayerIds.length === 0) {
       return;
     }
 
@@ -884,7 +1015,7 @@ export default function GlyphBuilderDemo() {
           return [];
         }
 
-        return sourceData.strokes.map((stroke) => transformPath(stroke, layer));
+        return transformLayerPaths(sourceData.strokes, layer);
       }),
     );
     const anchorX =
@@ -897,16 +1028,36 @@ export default function GlyphBuilderDemo() {
         : (selectedPathsBBox.y + selectedPathsBBox.y2) / 2;
 
     updateSelectedLayers((layer) => {
-      const nextScaleX =
-        (layer.sx < 0 ? -1 : 1) *
-        (isPositionAspectRatioLocked || field === `sx`
-          ? scaleValue
-          : Math.abs(layer.sx));
-      const nextScaleY =
-        (layer.sy < 0 ? -1 : 1) *
-        (isPositionAspectRatioLocked || field === `sy`
-          ? scaleValue
-          : Math.abs(layer.sy));
+      const currentAbsSx = Math.abs(layer.sx);
+      const currentAbsSy = Math.abs(layer.sy);
+
+      let nextAbsSx = currentAbsSx;
+      let nextAbsSy = currentAbsSy;
+
+      if (isPositionAspectRatioLocked) {
+        if (field === `sx`) {
+          const ratio =
+            currentAbsSx === 0
+              ? null
+              : scaleValue / Math.max(currentAbsSx, 1e-9);
+          nextAbsSx = scaleValue;
+          nextAbsSy = ratio == null ? currentAbsSy : currentAbsSy * ratio;
+        } else {
+          const ratio =
+            currentAbsSy === 0
+              ? null
+              : scaleValue / Math.max(currentAbsSy, 1e-9);
+          nextAbsSy = scaleValue;
+          nextAbsSx = ratio == null ? currentAbsSx : currentAbsSx * ratio;
+        }
+      } else if (field === `sx`) {
+        nextAbsSx = scaleValue;
+      } else {
+        nextAbsSy = scaleValue;
+      }
+
+      const nextScaleX = (layer.sx < 0 ? -1 : 1) * nextAbsSx;
+      const nextScaleY = (layer.sy < 0 ? -1 : 1) * nextAbsSy;
 
       const scaleRatioX = layer.sx === 0 ? null : nextScaleX / layer.sx;
       const scaleRatioY = layer.sy === 0 ? null : nextScaleY / layer.sy;
@@ -931,7 +1082,7 @@ export default function GlyphBuilderDemo() {
   };
 
   const stepPositionField = (
-    field: `tx` | `ty` | `sx` | `sy`,
+    field: `tx` | `ty` | `sx` | `sy` | `r`,
     direction: 1 | -1,
   ) => {
     if (field === `tx`) {
@@ -944,23 +1095,66 @@ export default function GlyphBuilderDemo() {
       return;
     }
 
+    if (field === `r`) {
+      stepRotationField(direction);
+      return;
+    }
+
     const currentPercent =
       field === `sx` ? selectedPositionSx : selectedPositionSy;
     setSelectedLayerScalePercent(field, currentPercent + direction);
   };
 
+  const setSelectedLayerRotation = (value: number) => {
+    updateSelectedLayers((layer) => ({
+      ...layer,
+      r: value,
+    }));
+  };
+
+  const stepRotationField = (direction: 1 | -1) => {
+    setSelectedLayerRotation(selectedRotationDeg + direction);
+  };
+
   const flipSelectedLayerAxis = (field: `sx` | `sy`) => {
+    const selectedPathsBBox = getPathsBBox(
+      selectedLayers.flatMap((layer) => {
+        const sourceData = layerSourceDataById.get(layer.id);
+        if (sourceData == null) {
+          return [];
+        }
+
+        return transformLayerPaths(sourceData.strokes, layer);
+      }),
+    );
+    const anchorX =
+      selectedPathsBBox == null
+        ? null
+        : (selectedPathsBBox.x + selectedPathsBBox.x2) / 2;
+    const anchorY =
+      selectedPathsBBox == null
+        ? null
+        : (selectedPathsBBox.y + selectedPathsBBox.y2) / 2;
+
     updateSelectedLayers((layer) => {
       if (field === `sx`) {
-        return { ...layer, sx: -layer.sx };
+        return {
+          ...layer,
+          sx: -layer.sx,
+          tx: anchorX == null ? layer.tx : 2 * anchorX - layer.tx,
+        };
       }
 
-      return { ...layer, sy: -layer.sy };
+      return {
+        ...layer,
+        sy: -layer.sy,
+        ty: anchorY == null ? layer.ty : 2 * anchorY - layer.ty,
+      };
     });
   };
 
   const commitPositionDraft = (
-    field: `tx` | `ty` | `sx` | `sy`,
+    field: `tx` | `ty` | `sx` | `sy` | `r`,
     valueText: string,
   ) => {
     const parsed = Number(valueText);
@@ -968,7 +1162,9 @@ export default function GlyphBuilderDemo() {
       return;
     }
 
-    if (field === `sx` || field === `sy`) {
+    if (field === `r`) {
+      setSelectedLayerRotation(parsed);
+    } else if (field === `sx` || field === `sy`) {
       setSelectedLayerScalePercent(field, parsed);
     } else {
       setSelectedLayerNumericField(field, parsed);
@@ -1045,12 +1241,21 @@ export default function GlyphBuilderDemo() {
   };
 
   const setLayerHanziInput = (layerId: string, text: string) => {
-    updateLayer(layerId, (layer) => ({
-      ...layer,
-      hanziInput: text,
-      hanzi: parseSingleHanzi(text),
-      sourceOverride: undefined,
-    }));
+    updateLayer(layerId, (layer) => {
+      const resetLayer = layerWithDefaults();
+
+      return {
+        ...layer,
+        tx: resetLayer.tx,
+        ty: resetLayer.ty,
+        sx: resetLayer.sx,
+        sy: resetLayer.sy,
+        r: resetLayer.r,
+        hanziInput: text,
+        hanzi: parseSingleHanzi(text),
+        sourceOverride: undefined,
+      };
+    });
   };
 
   const addLayer = () => {
@@ -1059,14 +1264,14 @@ export default function GlyphBuilderDemo() {
     setSelectedLayerIds([next.id]);
   };
 
-  const moveLayer = (layerId: string, direction: "up" | "down") => {
+  const moveLayer = (layerId: string, direction: `up` | `down`) => {
     setLayers((current) => {
       const index = current.findIndex((layer) => layer.id === layerId);
       if (index < 0) {
         return current;
       }
 
-      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      const targetIndex = direction === `up` ? index - 1 : index + 1;
       if (targetIndex < 0 || targetIndex >= current.length) {
         return current;
       }
@@ -1101,7 +1306,7 @@ export default function GlyphBuilderDemo() {
 
   const handleSelectLayer = (layerId: string, event: GestureResponderEvent) => {
     const nativeEvent =
-      event.nativeEvent as GestureResponderEvent["nativeEvent"] & {
+      event.nativeEvent as GestureResponderEvent[`nativeEvent`] & {
         shiftKey?: boolean;
         ctrlKey?: boolean;
         metaKey?: boolean;
@@ -1133,12 +1338,16 @@ export default function GlyphBuilderDemo() {
     const selectedLayerSnapshot = selectedLayer;
     const parentSourceData = layerSourceDataById.get(selectedLayerSnapshot.id);
     if (parentSourceData == null) {
-      setNotice("Load the selected layer glyph data first before decomposing.");
+      setNotice(`Load the selected layer glyph data first before decomposing.`);
       return;
     }
 
     const parentRawSvgData = layerRawSvgDataById.get(selectedLayerSnapshot.id);
     const parentSegmentPathsByAtom = parentRawSvgData?.segments ?? null;
+    const parentRotationOrigin = getLayerRotationOrigin(
+      parentSourceData.strokes,
+      selectedLayerSnapshot,
+    );
 
     const leafCharacters = [...walkIdsNodeLeafs(parseIds(entry.ids))]
       .filter((leaf) => isHanziCharacter(leaf as HanziText))
@@ -1198,26 +1407,38 @@ export default function GlyphBuilderDemo() {
         continue;
       }
 
+      const transformedComponentStrokes = transformLayerPathsWithRotationOrigin(
+        componentStrokes,
+        selectedLayerSnapshot,
+        parentRotationOrigin,
+      );
+      const transformedComponentMedians = transformLayerPathsWithRotationOrigin(
+        componentMedians,
+        selectedLayerSnapshot,
+        parentRotationOrigin,
+      );
+
       nextLayers.push({
         ...layerWithDefaults(),
         hanziInput: leaf,
         hanzi: leaf,
         isVisible: selectedLayerSnapshot.isVisible,
-        // Component data is sliced from the selected parent's own paths.
+        // Bake parent transform into child component paths to preserve placement.
         sourceOverride: {
-          strokes: componentStrokes,
-          medians: componentMedians,
+          strokes: transformedComponentStrokes,
+          medians: transformedComponentMedians,
         },
         tx: 0,
         ty: 0,
         sx: 1,
         sy: 1,
+        r: 0,
       });
     }
 
     if (nextLayers.length === 0) {
       setNotice(
-        "Could not derive component paths from the selected layer stroke specs.",
+        `Could not derive component paths from the selected layer stroke specs.`,
       );
       return;
     }
@@ -1244,8 +1465,72 @@ export default function GlyphBuilderDemo() {
         `Decomposed layer, but ${missingCount} child layer(s) could not be derived from stroke specs.`,
       );
     } else {
-      setNotice("Layer decomposed into child layers.");
+      setNotice(`Layer decomposed into child layers.`);
     }
+  };
+
+  const splitSelectedLayerIntoStrokes = () => {
+    if (selectedLayer == null) {
+      return;
+    }
+
+    const selectedLayerSnapshot = selectedLayer;
+    const sourceData = layerSourceDataById.get(selectedLayerSnapshot.id);
+    if (sourceData == null) {
+      setNotice(`Load the selected layer glyph data first before splitting.`);
+      return;
+    }
+
+    if (sourceData.strokes.length === 0) {
+      setNotice(`Selected layer has no strokes to split.`);
+      return;
+    }
+
+    const transformedStrokes = transformLayerPaths(
+      sourceData.strokes,
+      selectedLayerSnapshot,
+    );
+    const transformedMedians = transformLayerPaths(
+      sourceData.medians,
+      selectedLayerSnapshot,
+    );
+
+    const nextLayers = transformedStrokes.map((stroke, index) => {
+      const median = transformedMedians[index];
+      return {
+        ...layerWithDefaults(),
+        hanziInput: ``,
+        hanzi: null,
+        isVisible: selectedLayerSnapshot.isVisible,
+        sourceOverride: {
+          strokes: [stroke],
+          medians: median == null ? [] : [median],
+        },
+        tx: 0,
+        ty: 0,
+        sx: 1,
+        sy: 1,
+        r: 0,
+      };
+    });
+
+    setLayers((current) => {
+      const selectedIndex = current.findIndex(
+        (layer) => layer.id === selectedLayerSnapshot.id,
+      );
+      if (selectedIndex === -1) {
+        return current;
+      }
+
+      return [
+        ...current.slice(0, selectedIndex),
+        ...nextLayers,
+        ...current.slice(selectedIndex + 1),
+      ];
+    });
+
+    setSelectedLayerIds(nextLayers.map((layer) => layer.id));
+    setNotice(`Split layer into ${nextLayers.length} stroke layer(s).`);
   };
 
   const onPreviewLayout = (event: LayoutChangeEvent) => {
@@ -1285,19 +1570,19 @@ export default function GlyphBuilderDemo() {
     }
 
     const nativeEvent =
-      event.nativeEvent as GestureResponderEvent["nativeEvent"] & {
+      event.nativeEvent as GestureResponderEvent[`nativeEvent`] & {
         shiftKey?: boolean;
       };
     const rawDx = (event.nativeEvent.pageX - dragState.startX) * previewScale;
-    const rawDy = -(event.nativeEvent.pageY - dragState.startY) * previewScale;
+    const rawDy = (event.nativeEvent.pageY - dragState.startY) * previewScale;
 
     let dx = rawDx;
     let dy = rawDy;
 
     if (nativeEvent.shiftKey === true) {
-      const lockedAxis = Math.abs(rawDx) > Math.abs(rawDy) ? "x" : "y";
+      const lockedAxis = Math.abs(rawDx) > Math.abs(rawDy) ? `x` : `y`;
 
-      if (lockedAxis === "x") {
+      if (lockedAxis === `x`) {
         dy = 0;
       } else {
         dx = 0;
@@ -1324,7 +1609,7 @@ export default function GlyphBuilderDemo() {
     dragStateRef.current = null;
   };
 
-  if (Platform.OS !== "web") {
+  if (Platform.OS !== `web`) {
     return (
       <View className="gap-2">
         <Text className="pyly-body">
@@ -1340,7 +1625,7 @@ export default function GlyphBuilderDemo() {
         <Text className="pyly-body-caption text-amber">{notice}</Text>
       )}
 
-      <View className="min-h-[680px] flex-row gap-4 h-[680px]">
+      <View className="h-[680px] min-h-[680px] flex-row gap-4">
         <View className="w-[320px] gap-3 rounded-xl border border-fg/15 bg-bg-high p-3">
           <View className="flex-row items-center justify-between">
             <Text className="font-sans text-base font-semibold text-fg">
@@ -1363,8 +1648,9 @@ export default function GlyphBuilderDemo() {
                   <Pressable
                     key={layer.id}
                     className={`
-                      gap-2 rounded-lg border px-2 py-2
-                      ${isSelected ? "border-blue bg-blue/10" : "border-fg/15 bg-bg"}
+                      gap-2 rounded-lg border p-2
+
+                      ${isSelected ? `border-blue bg-blue/10` : `border-fg/15 bg-bg`}
                     `}
                     onPress={(event) => {
                       handleSelectLayer(layer.id, event);
@@ -1403,7 +1689,7 @@ export default function GlyphBuilderDemo() {
                         <RectButton
                           variant="bareDim"
                           onPress={() => {
-                            moveLayer(layer.id, "up");
+                            moveLayer(layer.id, `up`);
                           }}
                         >
                           ↑
@@ -1411,7 +1697,7 @@ export default function GlyphBuilderDemo() {
                         <RectButton
                           variant="bareDim"
                           onPress={() => {
-                            moveLayer(layer.id, "down");
+                            moveLayer(layer.id, `down`);
                           }}
                         >
                           ↓
@@ -1511,67 +1797,85 @@ export default function GlyphBuilderDemo() {
                   strokeDasharray="18 14"
                   strokeLinecap="round"
                 />
-                <G transform="scale(1, -1) translate(0, -900)">
-                  {referencePreview == null ? null : (
-                    <G>
-                      {referencePreview.strokes.map((stroke, index) => (
+                {referencePreview == null ? null : (
+                  <G>
+                    {referencePreview.strokes.map((stroke, index) => (
+                      <SvgPath
+                        key={`reference:stroke:${index}`}
+                        d={stroke}
+                        fillClassName="accent-fg/25"
+                        strokeClassName="accent-fg/25"
+                        strokeWidth={8}
+                      />
+                    ))}
+                    {referencePreview.medians.map((median, index) => (
+                      <SvgPath
+                        key={`reference:median:${index}`}
+                        d={median}
+                        fill="none"
+                        strokeClassName="accent-fg-loud/35"
+                        strokeWidth={8}
+                        strokeDasharray="14 10"
+                        strokeLinecap="round"
+                      />
+                    ))}
+                  </G>
+                )}
+                {previewLayers.map((layer) => {
+                  const isSelected = selectedLayerIds.includes(layer.id);
+                  const isHovered = hoveredLayerId === layer.id;
+                  const layerToneClassName = isHovered
+                    ? `accent-yellow`
+                    : isSelected
+                      ? `accent-blue`
+                      : `accent-zinc-800`;
+
+                  return (
+                    <G key={layer.id}>
+                      {layer.strokes.map((stroke, index) => (
                         <SvgPath
-                          key={`reference:stroke:${index}`}
+                          key={`${layer.id}:stroke:${index}`}
                           d={stroke}
-                          fillClassName="accent-fg/25"
-                          strokeClassName="accent-fg/25"
+                          fillClassName={layerToneClassName}
+                          strokeClassName={layerToneClassName}
                           strokeWidth={8}
                         />
                       ))}
-                      {referencePreview.medians.map((median, index) => (
+
+                      {layer.medians.map((median, index) => (
                         <SvgPath
-                          key={`reference:median:${index}`}
+                          key={`${layer.id}:median:${index}`}
                           d={median}
                           fill="none"
-                          strokeClassName="accent-fg-loud/35"
+                          strokeClassName="accent-zinc-200"
                           strokeWidth={8}
                           strokeDasharray="14 10"
                           strokeLinecap="round"
                         />
                       ))}
+
+                      {layer.medianStarts.map((startPoint, index) => {
+                        if (startPoint == null) {
+                          return null;
+                        }
+
+                        const markerSize = 24;
+                        const halfMarker = markerSize / 2;
+
+                        return (
+                          <Rect
+                            key={`${layer.id}:median-start:${index}`}
+                            x={startPoint.x - halfMarker}
+                            y={startPoint.y - halfMarker}
+                            width={markerSize}
+                            height={markerSize}
+                            fill="#d4d4d8"
+                          />
+                        );
+                      })}
                     </G>
-                  )}
-                  {previewLayers.map((layer) => {
-                    const isSelected = selectedLayerIds.includes(layer.id);
-                    const isHovered = hoveredLayerId === layer.id;
-                    const layerToneClassName = isHovered
-                      ? `accent-yellow`
-                      : isSelected
-                        ? `accent-blue`
-                        : `accent-zinc-800`;
-
-                    return (
-                      <G key={layer.id}>
-                        {layer.strokes.map((stroke, index) => (
-                          <SvgPath
-                            key={`${layer.id}:stroke:${index}`}
-                            d={stroke}
-                            fillClassName={layerToneClassName}
-                            strokeClassName={layerToneClassName}
-                            strokeWidth={8}
-                          />
-                        ))}
-
-                        {layer.medians.map((median, index) => (
-                          <SvgPath
-                            key={`${layer.id}:median:${index}`}
-                            d={median}
-                            fill="none"
-                            strokeClassName="accent-zinc-200"
-                            strokeWidth={8}
-                            strokeDasharray="14 10"
-                            strokeLinecap="round"
-                          />
-                        ))}
-                      </G>
-                    );
-                  })}
-                </G>
+                  );
+                })}
               </Svg>
             </View>
           </View>
@@ -1704,7 +2008,7 @@ export default function GlyphBuilderDemo() {
                     </View>
                   </View>
 
-                  <View className="gap-1 items-center">
+                  <View className="items-center gap-1">
                     <Text className="pyly-body-caption text-fg-dim">Lock</Text>
                     <ToggleButton
                       isActive={isPositionAspectRatioLocked}
@@ -1716,32 +2020,70 @@ export default function GlyphBuilderDemo() {
                 </View>
               </View>
 
-              <View className="flex-row flex-wrap gap-2">
-                <RectButton
-                  variant="bareDim"
-                  onPress={() => {
-                    flipSelectedLayerAxis(`sx`);
-                  }}
-                >
-                  Flip X
-                </RectButton>
-                <RectButton
-                  variant="bareDim"
-                  onPress={() => {
-                    flipSelectedLayerAxis(`sy`);
-                  }}
-                >
-                  Flip Y
-                </RectButton>
+              <View className="gap-2 rounded-lg border border-fg/15 bg-bg p-2">
+                <Text className="pyly-body-caption text-fg-dim">
+                  Rotate / Mirror
+                </Text>
+                <View className="flex-row flex-wrap items-end gap-2">
+                  <View className="gap-1">
+                    <Text className="pyly-body-caption text-fg-dim">
+                      Rotate
+                    </Text>
+                    <PositionNumberInput
+                      value={positionDrafts.r}
+                      onChangeText={(text) => {
+                        setPositionDrafts((current) => ({
+                          ...current,
+                          r: text,
+                        }));
+                      }}
+                      onCommitText={(text) => {
+                        commitPositionDraft(`r`, text);
+                      }}
+                      onStep={(direction) => {
+                        stepPositionField(`r`, direction);
+                      }}
+                      placeholder="0"
+                      suffix="°"
+                      widthClassName="w-24"
+                    />
+                  </View>
+
+                  <RectButton
+                    variant="bareDim"
+                    onPress={() => {
+                      flipSelectedLayerAxis(`sx`);
+                    }}
+                  >
+                    Flip X
+                  </RectButton>
+                  <RectButton
+                    variant="bareDim"
+                    onPress={() => {
+                      flipSelectedLayerAxis(`sy`);
+                    }}
+                  >
+                    Flip Y
+                  </RectButton>
+                </View>
               </View>
 
-              {selectedLayers.length === 1 &&
-              decompositionOptions.length > 0 ? (
+              {selectedLayers.length === 1 ? (
                 <View className="gap-2 rounded-lg border border-fg/15 bg-bg p-2">
-                  <Text className="pyly-body-caption text-fg-dim">
-                    Decompose into:
-                  </Text>
-                  <View className="gap-1 items-start">
+                  {decompositionOptions.length > 0 ? (
+                    <Text className="pyly-body-caption text-fg-dim">
+                      Decompose into:
+                    </Text>
+                  ) : null}
+                  <View className="flex-row flex-wrap items-start gap-1">
+                    <RectButton
+                      variant="bareDim"
+                      onPress={() => {
+                        splitSelectedLayerIntoStrokes();
+                      }}
+                    >
+                      split all
+                    </RectButton>
                     {decompositionOptions.map((entry, index) => (
                       <RectButton
                         key={`${entry.hanzi}:${index}`}

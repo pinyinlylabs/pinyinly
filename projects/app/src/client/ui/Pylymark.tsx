@@ -113,7 +113,8 @@ export const PylymarkTokenText = ({
           className="text-nowrap"
         >
           [{label}]
-        </Text>{" "}
+        </Text>
+        {` `}
         {token.text}
       </Link>
     );
