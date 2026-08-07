@@ -339,9 +339,12 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
 const hanziSvgDataSchema = z
   .strictObject({
     strokes: z.array(z.string()),
+    medians: z.array(z.string()).optional(),
     segments: z.record(z.string(), z.string()).optional(),
   })
-  .describe(`SVG stroke data with optional precomputed segment paths.`);
+  .describe(
+    `SVG stroke and median data with optional precomputed segment paths.`,
+  );
 
 const wikiMdastRootSchema = z.looseObject({
   type: z.literal(`root`),

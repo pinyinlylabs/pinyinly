@@ -609,17 +609,22 @@ describe(`character.json files`, async () => {
       HanziText,
       {
         strokes: string[];
+        medians?: string[];
         segments?: Record<string, string>;
       }
     >();
 
     for (const { character, characterData } of characterFiles) {
       if (Array.isArray(characterData.svg.strokes)) {
+        const hasMedians =
+          Array.isArray(characterData.svg.medians) &&
+          characterData.svg.medians.length > 0;
         const hasSegments =
           characterData.svg.segments != null &&
           Object.keys(characterData.svg.segments).length > 0;
         expected.set(character, {
           strokes: characterData.svg.strokes,
+          ...(hasMedians ? { medians: characterData.svg.medians } : {}),
           ...(hasSegments ? { segments: characterData.svg.segments } : {}),
         });
       }
