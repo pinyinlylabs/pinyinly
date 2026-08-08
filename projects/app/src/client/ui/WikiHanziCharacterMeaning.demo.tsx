@@ -1,6 +1,6 @@
 import type {
   HanziCharacter,
-  IdsString,
+  HanziIds,
   StrokeSpecString,
   WikiCharacterData,
 } from "@/data/model";
@@ -36,7 +36,7 @@ export const characterData = {
     ],
   },
   decompositions: {
-    [`⿱手目` as IdsString]: [
+    [`⿱手目` as HanziIds]: [
       `0,1,2,3` as StrokeSpecString,
       `4,5,6,7,8` as StrokeSpecString,
     ],

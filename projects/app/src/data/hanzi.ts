@@ -2,10 +2,15 @@ import type {
   HanziCharacter,
   HanziText,
   IdsNode,
-  IdsString,
+  HanziIds,
   WikiCharacterData,
+  HanziIdsLeaf,
 } from "@/data/model";
-import { IdsOperator, idsOperatorSchema } from "@/data/model";
+import {
+  IdsOperator,
+  idsOperatorSchema,
+  isHanziStrokeCountChar,
+} from "@/data/model";
 import {
   characterCount,
   isHanziIdeograph,
@@ -286,140 +291,111 @@ export function parseIds(
   ids: string,
   cursor?: { index: number },
 ): IdsNode<string> {
+  const isRoot = cursor == null;
   cursor ??= { index: 0 };
   const charCodePoint = ids.codePointAt(cursor.index);
   invariant(charCodePoint != null);
   const char = String.fromCodePoint(charCodePoint);
   cursor.index += char.length;
 
-  if (charCodePoint >= /* ⿰ */ 12_272 && charCodePoint <= /* ⿿ */ 12_287) {
-    const operator = idsOperatorSchema.parse(char);
-    switch (operator) {
-      case IdsOperator.LeftToRight: {
-        const left = parseIds(ids, cursor);
-        const right = parseIds(ids, cursor);
-        return [IdsOperator.LeftToRight, left, right];
-      }
-      case IdsOperator.AboveToBelow: {
-        const above = parseIds(ids, cursor);
-        const below = parseIds(ids, cursor);
-        return [IdsOperator.AboveToBelow, above, below];
-      }
-      case IdsOperator.LeftToMiddleToRight: {
-        const left = parseIds(ids, cursor);
-        const middle = parseIds(ids, cursor);
-        const right = parseIds(ids, cursor);
-        return [IdsOperator.LeftToMiddleToRight, left, middle, right];
-      }
-      case IdsOperator.AboveToMiddleAndBelow: {
-        const above = parseIds(ids, cursor);
-        const middle = parseIds(ids, cursor);
-        const below = parseIds(ids, cursor);
-        return [IdsOperator.AboveToMiddleAndBelow, above, middle, below];
-      }
-      case IdsOperator.FullSurround: {
-        const surrounding = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.FullSurround, surrounding, surrounded];
-      }
-      case IdsOperator.SurroundFromAbove: {
-        const above = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromAbove, above, surrounded];
-      }
-      case IdsOperator.SurroundFromBelow: {
-        const below = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromBelow, below, surrounded];
-      }
-      case IdsOperator.SurroundFromLeft: {
-        const left = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromLeft, left, surrounded];
-      }
-      case IdsOperator.SurroundFromRight: {
-        const right = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromRight, right, surrounded];
-      }
-      case IdsOperator.SurroundFromUpperLeft: {
-        const upperLeft = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromUpperLeft, upperLeft, surrounded];
-      }
-      case IdsOperator.SurroundFromUpperRight: {
-        const upperRight = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromUpperRight, upperRight, surrounded];
-      }
-      case IdsOperator.SurroundFromLowerLeft: {
-        const lowerLeft = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromLowerLeft, lowerLeft, surrounded];
-      }
-      case IdsOperator.SurroundFromLowerRight: {
-        const lowerRight = parseIds(ids, cursor);
-        const surrounded = parseIds(ids, cursor);
-        return [IdsOperator.SurroundFromLowerRight, lowerRight, surrounded];
-      }
-      case IdsOperator.Overlaid: {
-        const overlay = parseIds(ids, cursor);
-        const underlay = parseIds(ids, cursor);
-        return [IdsOperator.Overlaid, overlay, underlay];
-      }
-      case IdsOperator.HorizontalReflection: {
-        const reflected = parseIds(ids, cursor);
-        return [IdsOperator.HorizontalReflection, reflected];
-      }
-      case IdsOperator.Rotation: {
-        const rotated = parseIds(ids, cursor);
-        return [IdsOperator.Rotation, rotated];
-      }
-      default: {
-        throw new Error(`unexpected combining character ${char}`);
+  try {
+    if (charCodePoint >= /* ⿰ */ 12_272 && charCodePoint <= /* ⿿ */ 12_287) {
+      const operator = idsOperatorSchema.parse(char);
+      switch (operator) {
+        case IdsOperator.LeftToRight: {
+          const left = parseIds(ids, cursor);
+          const right = parseIds(ids, cursor);
+          return [IdsOperator.LeftToRight, left, right];
+        }
+        case IdsOperator.AboveToBelow: {
+          const above = parseIds(ids, cursor);
+          const below = parseIds(ids, cursor);
+          return [IdsOperator.AboveToBelow, above, below];
+        }
+        case IdsOperator.LeftToMiddleToRight: {
+          const left = parseIds(ids, cursor);
+          const middle = parseIds(ids, cursor);
+          const right = parseIds(ids, cursor);
+          return [IdsOperator.LeftToMiddleToRight, left, middle, right];
+        }
+        case IdsOperator.AboveToMiddleAndBelow: {
+          const above = parseIds(ids, cursor);
+          const middle = parseIds(ids, cursor);
+          const below = parseIds(ids, cursor);
+          return [IdsOperator.AboveToMiddleAndBelow, above, middle, below];
+        }
+        case IdsOperator.FullSurround: {
+          const surrounding = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.FullSurround, surrounding, surrounded];
+        }
+        case IdsOperator.SurroundFromAbove: {
+          const above = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromAbove, above, surrounded];
+        }
+        case IdsOperator.SurroundFromBelow: {
+          const below = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromBelow, below, surrounded];
+        }
+        case IdsOperator.SurroundFromLeft: {
+          const left = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromLeft, left, surrounded];
+        }
+        case IdsOperator.SurroundFromRight: {
+          const right = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromRight, right, surrounded];
+        }
+        case IdsOperator.SurroundFromUpperLeft: {
+          const upperLeft = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromUpperLeft, upperLeft, surrounded];
+        }
+        case IdsOperator.SurroundFromUpperRight: {
+          const upperRight = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromUpperRight, upperRight, surrounded];
+        }
+        case IdsOperator.SurroundFromLowerLeft: {
+          const lowerLeft = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromLowerLeft, lowerLeft, surrounded];
+        }
+        case IdsOperator.SurroundFromLowerRight: {
+          const lowerRight = parseIds(ids, cursor);
+          const surrounded = parseIds(ids, cursor);
+          return [IdsOperator.SurroundFromLowerRight, lowerRight, surrounded];
+        }
+        case IdsOperator.Overlaid: {
+          const overlay = parseIds(ids, cursor);
+          const underlay = parseIds(ids, cursor);
+          return [IdsOperator.Overlaid, overlay, underlay];
+        }
+        case IdsOperator.HorizontalReflection: {
+          const reflected = parseIds(ids, cursor);
+          return [IdsOperator.HorizontalReflection, reflected];
+        }
+        case IdsOperator.Rotation: {
+          const rotated = parseIds(ids, cursor);
+          return [IdsOperator.Rotation, rotated];
+        }
+        default: {
+          throw new Error(`unexpected combining character ${char}`);
+        }
       }
     }
-  }
 
-  return char;
-}
-
-export function parseIdsStrict(idsRaw: string): IdsNode<string> {
-  const ids = idsRaw.trim();
-  if (ids.length === 0) {
-    throw new Error(`IDS decomposition is empty`);
-  }
-
-  const cursor = { index: 0 };
-  const parsed = parseIds(ids, cursor);
-
-  if (cursor.index !== ids.length) {
-    throw new Error(
-      `IDS decomposition has trailing content at character index ${cursor.index}`,
-    );
-  }
-
-  return parsed;
-}
-
-export function parseIdsStrictOrNull(idsRaw: string): IdsNode<string> | null {
-  try {
-    return parseIdsStrict(idsRaw);
-  } catch {
-    return null;
-  }
-}
-
-export function strokeCountPlaceholderOrNull(
-  charOrCharPoint: string | number,
-): number | undefined {
-  const charCodePoint =
-    typeof charOrCharPoint === `string`
-      ? charOrCharPoint.codePointAt(0)
-      : charOrCharPoint;
-  invariant(charCodePoint != null);
-  if (charCodePoint >= /* ① */ 9312 && charCodePoint <= /* ⑳ */ 9331) {
-    return charCodePoint - 9311;
+    return char;
+  } finally {
+    if (isRoot && cursor.index !== ids.length) {
+      // oxlint-disable-next-line no-unsafe-finally
+      throw new Error(
+        `IDS decomposition has trailing content at character index ${cursor.index}`,
+      );
+    }
   }
 }
 
@@ -678,8 +654,10 @@ export const radicalStrokes = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ];
 
-export function isHanziCharacter(hanzi: HanziText): hanzi is HanziCharacter {
-  return hanziCharacterCount(hanzi) === 1;
+export function isHanziCharacter(
+  hanzi: HanziText | HanziIdsLeaf,
+): hanzi is HanziCharacter {
+  return !isHanziStrokeCountChar(hanzi) && hanziCharacterCount(hanzi) === 1;
 }
 
 export function hanziCharacterCount(hanziText: HanziText): number {
@@ -1001,15 +979,15 @@ export function makeHorizontalMergeCharacterIdsTransform<T>(
 export function idsNodeToString<T>(
   ids: IdsNode<T>,
   leafToString: (leaf: T) => string,
-): IdsString {
+): HanziIds {
   if (!Array.isArray(ids)) {
-    return leafToString(ids) as IdsString;
+    return leafToString(ids) as HanziIds;
   }
 
   switch (ids[0]) {
     case IdsOperator.HorizontalReflection:
     case IdsOperator.Rotation: {
-      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}` as IdsString;
+      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}` as HanziIds;
     }
     case IdsOperator.LeftToRight:
     case IdsOperator.AboveToBelow:
@@ -1023,11 +1001,11 @@ export function idsNodeToString<T>(
     case IdsOperator.SurroundFromLowerLeft:
     case IdsOperator.SurroundFromLowerRight:
     case IdsOperator.Overlaid: {
-      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}` as IdsString;
+      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}` as HanziIds;
     }
     case IdsOperator.LeftToMiddleToRight:
     case IdsOperator.AboveToMiddleAndBelow: {
-      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}${idsNodeToString(ids[3], leafToString)}` as IdsString;
+      return `${ids[0]}${idsNodeToString(ids[1], leafToString)}${idsNodeToString(ids[2], leafToString)}${idsNodeToString(ids[3], leafToString)}` as HanziIds;
     }
     default: {
       throw new UnexpectedValueError(ids);

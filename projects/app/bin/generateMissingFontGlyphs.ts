@@ -1,8 +1,5 @@
-import {
-  parseIds,
-  strokeCountPlaceholderOrNull,
-  walkIdsNodeLeafs,
-} from "#data/hanzi.ts";
+import { parseIds, walkIdsNodeLeafs } from "#data/hanzi.ts";
+import { hanziStrokeCountAsNumber } from "#data/model.js";
 import { loadCharactersJson } from "#dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { glob, writeFile } from "@pinyinly/lib/fs";
@@ -46,7 +43,7 @@ for (const [character, characterData] of charactersJson) {
   );
   for (const ids of Object.keys(characterData.decompositions)) {
     for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
-      if (strokeCountPlaceholderOrNull(leaf) == null) {
+      if (hanziStrokeCountAsNumber(leaf) == null) {
         allComponents.add(leaf);
       }
     }

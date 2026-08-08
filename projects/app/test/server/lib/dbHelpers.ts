@@ -49,7 +49,6 @@ async function createTestDb(annotate?: TestContext[`annotate`]) {
 export type TestDb = Awaited<ReturnType<typeof createTestDb>>;
 
 export const txTest = test
-  // TODO. can i flatten this?
   .extend<{ db: TestDb }>({
     db: [
       async ({ annotate }, use) => {

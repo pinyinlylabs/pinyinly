@@ -12,6 +12,7 @@ import {
   assetIdPinyinlyObjectId,
   assetIdPinyinlyObjectIdKind,
   assetIdSchema,
+  hanziIdsSchema,
   hanziWordFromPinyinlyObjectId,
   hanziWordPinyinlyObjectId,
   hanziWordPinyinlyObjectIdKind,
@@ -489,5 +490,22 @@ describe(`PinyinlyObjectId round-trip conversions`, () => {
     for (const { objectId, expectedKind } of testCases) {
       expect(pinyinlyObjectIdKind(objectId)).toBe(expectedKind);
     }
+  });
+});
+
+describe(`hanziIdsSchema`, () => {
+  test.for([`一`, `⿱一𠃌`, `⿱一⿰丿𠃌`, `①`, `⿱㇖龰`, `コュス`])(
+    `$1 is valid`,
+    (hanziIds) => {
+      expect(() =>
+        hanziIdsSchema.parse(hanziIds, { reportInput: true }),
+      ).not.toThrow();
+    },
+  );
+
+  test.for([`⿱ab`])(`$1 is invalid`, (hanziIds) => {
+    expect(() =>
+      hanziIdsSchema.parse(hanziIds, { reportInput: true }),
+    ).toThrow();
   });
 });

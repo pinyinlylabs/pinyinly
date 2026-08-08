@@ -11,8 +11,6 @@ import {
   matchAllHanziCharacters,
   matchAllHanziCharactersWithIndexes,
   parseIds,
-  parseIdsStrict,
-  parseIdsStrictOrNull,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
@@ -65,11 +63,12 @@ test.for([
   },
 );
 
-test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
-  expect.soft(parseIds(`木`)).toMatchInlineSnapshot(`"木"`);
+describe(`parseIds() suite`, () => {
+  test(`handles 1 depth`, () => {
+    expect.soft(parseIds(`木`)).toMatchInlineSnapshot(`"木"`);
 
-  // 相
-  expect.soft(parseIds(`⿰木目`)).toMatchInlineSnapshot(`
+    // 相
+    expect.soft(parseIds(`⿰木目`)).toMatchInlineSnapshot(`
     [
       "⿰",
       "木",
@@ -77,8 +76,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 杏
-  expect.soft(parseIds(`⿱木口`)).toMatchInlineSnapshot(`
+    // 杏
+    expect.soft(parseIds(`⿱木口`)).toMatchInlineSnapshot(`
     [
       "⿱",
       "木",
@@ -86,8 +85,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 衍
-  expect.soft(parseIds(`⿲彳氵亍`)).toMatchInlineSnapshot(`
+    // 衍
+    expect.soft(parseIds(`⿲彳氵亍`)).toMatchInlineSnapshot(`
     [
       "⿲",
       "彳",
@@ -96,8 +95,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 京
-  expect.soft(parseIds(`⿳亠口小`)).toMatchInlineSnapshot(`
+    // 京
+    expect.soft(parseIds(`⿳亠口小`)).toMatchInlineSnapshot(`
     [
       "⿳",
       "亠",
@@ -106,8 +105,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 回
-  expect.soft(parseIds(`⿴囗口`)).toMatchInlineSnapshot(`
+    // 回
+    expect.soft(parseIds(`⿴囗口`)).toMatchInlineSnapshot(`
     [
       "⿴",
       "囗",
@@ -115,8 +114,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 凰
-  expect.soft(parseIds(`⿵几皇`)).toMatchInlineSnapshot(`
+    // 凰
+    expect.soft(parseIds(`⿵几皇`)).toMatchInlineSnapshot(`
     [
       "⿵",
       "几",
@@ -124,8 +123,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 凶
-  expect.soft(parseIds(`⿶凵㐅`)).toMatchInlineSnapshot(`
+    // 凶
+    expect.soft(parseIds(`⿶凵㐅`)).toMatchInlineSnapshot(`
     [
       "⿶",
       "凵",
@@ -133,8 +132,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 匠
-  expect.soft(parseIds(`⿷匚斤`)).toMatchInlineSnapshot(`
+    // 匠
+    expect.soft(parseIds(`⿷匚斤`)).toMatchInlineSnapshot(`
     [
       "⿷",
       "匚",
@@ -142,8 +141,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 㕚
-  expect.soft(parseIds(`⿼叉丶`)).toMatchInlineSnapshot(`
+    // 㕚
+    expect.soft(parseIds(`⿼叉丶`)).toMatchInlineSnapshot(`
     [
       "⿼",
       "叉",
@@ -151,8 +150,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 病
-  expect.soft(parseIds(`⿸疒丙`)).toMatchInlineSnapshot(`
+    // 病
+    expect.soft(parseIds(`⿸疒丙`)).toMatchInlineSnapshot(`
     [
       "⿸",
       "疒",
@@ -160,8 +159,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 戒
-  expect.soft(parseIds(`⿹戈廾`)).toMatchInlineSnapshot(`
+    // 戒
+    expect.soft(parseIds(`⿹戈廾`)).toMatchInlineSnapshot(`
     [
       "⿹",
       "戈",
@@ -169,8 +168,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 超
-  expect.soft(parseIds(`⿺走召`)).toMatchInlineSnapshot(`
+    // 超
+    expect.soft(parseIds(`⿺走召`)).toMatchInlineSnapshot(`
     [
       "⿺",
       "走",
@@ -178,8 +177,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 氷
-  expect.soft(parseIds(`⿽水丶`)).toMatchInlineSnapshot(`
+    // 氷
+    expect.soft(parseIds(`⿽水丶`)).toMatchInlineSnapshot(`
     [
       "⿽",
       "水",
@@ -187,8 +186,8 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 巫
-  expect.soft(parseIds(`⿻工从`)).toMatchInlineSnapshot(`
+    // 巫
+    expect.soft(parseIds(`⿻工从`)).toMatchInlineSnapshot(`
     [
       "⿻",
       "工",
@@ -196,48 +195,48 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     ]
   `);
 
-  // 卐
-  expect.soft(parseIds(`⿾卍`)).toMatchInlineSnapshot(`
+    // 卐
+    expect.soft(parseIds(`⿾卍`)).toMatchInlineSnapshot(`
     [
       "⿾",
       "卍",
     ]
   `);
 
-  // 𠕄
-  expect.soft(parseIds(`⿿凹`)).toMatchInlineSnapshot(`
+    // 𠕄
+    expect.soft(parseIds(`⿿凹`)).toMatchInlineSnapshot(`
     [
       "⿿",
       "凹",
     ]
   `);
 
-  expect.soft(parseIds(`①`)).toMatchInlineSnapshot(`"①"`);
-  expect.soft(parseIds(`②`)).toMatchInlineSnapshot(`"②"`);
-  expect.soft(parseIds(`③`)).toMatchInlineSnapshot(`"③"`);
-  expect.soft(parseIds(`④`)).toMatchInlineSnapshot(`"④"`);
-  expect.soft(parseIds(`⑤`)).toMatchInlineSnapshot(`"⑤"`);
-  expect.soft(parseIds(`⑥`)).toMatchInlineSnapshot(`"⑥"`);
-  expect.soft(parseIds(`⑦`)).toMatchInlineSnapshot(`"⑦"`);
-  expect.soft(parseIds(`⑧`)).toMatchInlineSnapshot(`"⑧"`);
-  expect.soft(parseIds(`⑨`)).toMatchInlineSnapshot(`"⑨"`);
-  expect.soft(parseIds(`⑩`)).toMatchInlineSnapshot(`"⑩"`);
-  expect.soft(parseIds(`⑪`)).toMatchInlineSnapshot(`"⑪"`);
-  expect.soft(parseIds(`⑫`)).toMatchInlineSnapshot(`"⑫"`);
-  expect.soft(parseIds(`⑬`)).toMatchInlineSnapshot(`"⑬"`);
-  expect.soft(parseIds(`⑭`)).toMatchInlineSnapshot(`"⑭"`);
-  expect.soft(parseIds(`⑮`)).toMatchInlineSnapshot(`"⑮"`);
-  expect.soft(parseIds(`⑯`)).toMatchInlineSnapshot(`"⑯"`);
-  expect.soft(parseIds(`⑰`)).toMatchInlineSnapshot(`"⑰"`);
-  expect.soft(parseIds(`⑱`)).toMatchInlineSnapshot(`"⑱"`);
-  expect.soft(parseIds(`⑲`)).toMatchInlineSnapshot(`"⑲"`);
-  expect.soft(parseIds(`⑳`)).toMatchInlineSnapshot(`"⑳"`);
-});
+    expect.soft(parseIds(`①`)).toMatchInlineSnapshot(`"①"`);
+    expect.soft(parseIds(`②`)).toMatchInlineSnapshot(`"②"`);
+    expect.soft(parseIds(`③`)).toMatchInlineSnapshot(`"③"`);
+    expect.soft(parseIds(`④`)).toMatchInlineSnapshot(`"④"`);
+    expect.soft(parseIds(`⑤`)).toMatchInlineSnapshot(`"⑤"`);
+    expect.soft(parseIds(`⑥`)).toMatchInlineSnapshot(`"⑥"`);
+    expect.soft(parseIds(`⑦`)).toMatchInlineSnapshot(`"⑦"`);
+    expect.soft(parseIds(`⑧`)).toMatchInlineSnapshot(`"⑧"`);
+    expect.soft(parseIds(`⑨`)).toMatchInlineSnapshot(`"⑨"`);
+    expect.soft(parseIds(`⑩`)).toMatchInlineSnapshot(`"⑩"`);
+    expect.soft(parseIds(`⑪`)).toMatchInlineSnapshot(`"⑪"`);
+    expect.soft(parseIds(`⑫`)).toMatchInlineSnapshot(`"⑫"`);
+    expect.soft(parseIds(`⑬`)).toMatchInlineSnapshot(`"⑬"`);
+    expect.soft(parseIds(`⑭`)).toMatchInlineSnapshot(`"⑭"`);
+    expect.soft(parseIds(`⑮`)).toMatchInlineSnapshot(`"⑮"`);
+    expect.soft(parseIds(`⑯`)).toMatchInlineSnapshot(`"⑯"`);
+    expect.soft(parseIds(`⑰`)).toMatchInlineSnapshot(`"⑰"`);
+    expect.soft(parseIds(`⑱`)).toMatchInlineSnapshot(`"⑱"`);
+    expect.soft(parseIds(`⑲`)).toMatchInlineSnapshot(`"⑲"`);
+    expect.soft(parseIds(`⑳`)).toMatchInlineSnapshot(`"⑳"`);
+  });
 
-test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
-  {
-    const cursor = { index: 0 };
-    expect(parseIds(`⿰a⿱bc`, cursor)).toMatchInlineSnapshot(`
+  test(`handles 2 depth`, () => {
+    {
+      const cursor = { index: 0 };
+      expect(parseIds(`⿰a⿱bc`, cursor)).toMatchInlineSnapshot(`
       [
         "⿰",
         "a",
@@ -248,12 +247,12 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
         ],
       ]
     `);
-    expect(cursor).toEqual({ index: 5 });
-  }
+      expect(cursor).toEqual({ index: 5 });
+    }
 
-  {
-    const cursor = { index: 0 };
-    expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toMatchInlineSnapshot(`
+    {
+      const cursor = { index: 0 };
+      expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toMatchInlineSnapshot(`
       [
         "⿱",
         "a",
@@ -269,65 +268,38 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
         ],
       ]
     `);
-    expect(cursor).toEqual({ index: 8 });
-  }
-});
+      expect(cursor).toEqual({ index: 8 });
+    }
+  });
 
-test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
-  expect(parseIds(`⿱丿𭕄`)).toMatchInlineSnapshot(`
+  test(`regression tests`, () => {
+    expect(parseIds(`⿱丿𭕄`)).toMatchInlineSnapshot(`
     [
       "⿱",
       "丿",
       "𭕄",
     ]
   `);
-});
+  });
 
-test(
-  `parseIdsStrict parses valid IDS and trims whitespace` satisfies HasNameOf<
-    typeof parseIdsStrict
-  >,
-  () => {
-    expect(parseIdsStrict(`  ⿰讠兑  `)).toMatchInlineSnapshot(`
-      [
-        "⿰",
-        "讠",
-        "兑",
-      ]
-    `);
-  },
-);
+  test(`throws for IDS with trailing whitespace`, () => {
+    expect(() => parseIds(`  ⿰讠兑  `)).toThrowErrorMatchingInlineSnapshot(
+      `[Error: IDS decomposition has trailing content at character index 1]`,
+    );
+  });
 
-test(
-  `parseIdsStrict throws for empty input` satisfies HasNameOf<
-    typeof parseIdsStrict
-  >,
-  () => {
-    expect(() => parseIdsStrict(`   `)).toThrow(`IDS decomposition is empty`);
-  },
-);
+  test(`parseIds throws for empty input`, () => {
+    expect(() => parseIds(`   `)).toThrowErrorMatchingInlineSnapshot(
+      `[Error: IDS decomposition has trailing content at character index 1]`,
+    );
+  });
 
-test(
-  `parseIdsStrict throws when IDS has trailing content` satisfies HasNameOf<
-    typeof parseIdsStrict
-  >,
-  () => {
-    expect(() => parseIdsStrict(`⿰讠兑X`)).toThrow(
+  test(`throws when IDS has trailing content`, () => {
+    expect(() => parseIds(`⿰讠兑X`)).toThrow(
       `IDS decomposition has trailing content at character index 3`,
     );
-  },
-);
-
-test(
-  `parseIdsStrictOrNull returns null for invalid IDS` satisfies HasNameOf<
-    typeof parseIdsStrictOrNull
-  >,
-  () => {
-    expect(parseIdsStrictOrNull(``)).toBeNull();
-    expect(parseIdsStrictOrNull(`⿰讠兑X`)).toBeNull();
-    expect(parseIdsStrictOrNull(`⿰讠兑`)).not.toBeNull();
-  },
-);
+  });
+});
 
 test(
   `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,

@@ -686,18 +686,8 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
 
     // Should be formatted with 2-space indentation
     expect(savedContent).toMatchInlineSnapshot(`
-      "{
-        "outDir":"sprites",
-        "rules":[
-
-        ],
-        "segments":{
-
-        },
-        "spriteFiles":[
-
-        ]
-      }"
+      "{ "spriteFiles": [], "rules": [], "segments": {}, "outDir": "sprites" }
+      "
     `);
   });
 });

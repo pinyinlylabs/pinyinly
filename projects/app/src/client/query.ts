@@ -1031,7 +1031,7 @@ function builtInCharacterDecompositionCollectionOptions(): CollectionConfig<
     id: `builtInCharacterDecomposition`,
     queryFn: async () => {
       const entries = await loadBuiltinCharacterDecompositionEntries();
-      return entries as CharacterDecompositionEntry[];
+      return [...entries];
     },
     getKey: (item) => item.hanzi,
   });

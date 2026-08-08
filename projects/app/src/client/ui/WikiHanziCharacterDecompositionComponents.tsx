@@ -58,8 +58,10 @@ function WikiHanziCharacterDecompositionComponentsBox({
       continue;
     }
 
-    let i = 0;
+    let i = -1;
     for (const leaf of walkIdsNodeLeafs(parseIds(entry.ids))) {
+      i++;
+
       const strokeSpec = nonNullable(entry.strokeSpecs[i]);
       const mappedStrokeSpec =
         currentItem.contextStrokeSpec == null
@@ -71,8 +73,6 @@ function WikiHanziCharacterDecompositionComponentsBox({
           strokeSpec: mappedStrokeSpec,
         });
       }
-
-      i++;
     }
   }
 
@@ -172,7 +172,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
     primaryGlossByHanzi.set(entry.hanzi, primaryGloss);
   }
 
-  const sortedTreeItems = [...decompositionItems].sort((a, b) => {
+  const sortedDecompositionComponents = [...decompositionItems].sort((a, b) => {
     const aStrokeCount = parseStrokeSpec(a.strokeSpec).length;
     const bStrokeCount = parseStrokeSpec(b.strokeSpec).length;
 
@@ -207,7 +207,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
             rowGap: decompositionGridRowGap,
           }}
         >
-          {sortedTreeItems.map((treeItem, index) => (
+          {sortedDecompositionComponents.map((treeItem, index) => (
             <View
               key={index}
               className="items-center justify-center"
@@ -221,7 +221,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
                 fillWidth
                 hanzi={hanzi}
                 componentStrokeSpec={treeItem.strokeSpec}
-                label={`TODO label`}
+                label={primaryGlossByHanzi.get(treeItem.hanzi) ?? null}
                 labelNumberOfLines={1}
               />
             </View>

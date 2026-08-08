@@ -711,19 +711,28 @@ export interface PinyinFinalAssociation {
 export type StrokeSpecString = string & z.$brand<`StrokeSpecString`>;
 export const strokeSpecStringSchema = z
   .string()
-  // .regex(/^…$/gu) // TODO
+  .regex(/^[\d#[\]:+,%.-]*$/gu)
   .brand<`StrokeSpecString`, `inout`>();
 true satisfies IsEqual<
   StrokeSpecString,
   z.infer<typeof strokeSpecStringSchema>
 >;
 
-export type IdsString = string & z.$brand<`IdsString`>;
-export const idsStringSchema = z
+/**
+ * A Hanzi IDS string.
+ */
+export type HanziIds = string & z.$brand<`HanziIds`>;
+export const hanziIdsSchema = z
   .string()
-  // .regex(/^…$/gu) // TODO
-  .brand<`IdsString`, `inout`>();
-true satisfies IsEqual<IdsString, z.infer<typeof idsStringSchema>>;
+  .regex(
+    // 1. combining characters
+    // 2. enclosed alphanumerics
+    // 3. Han script
+    // 4. CJK strokes
+    /^(?:[⿰⿱⿲⿳⿴⿵⿶⿷⿼⿸⿹⿺⿽⿻⿾⿿]|[\u2460-\u2473]|\p{Script=Han}|[\u31C0-\u31EFコュス])+$/gu,
+  )
+  .brand<`HanziIds`, `inout`>();
+true satisfies IsEqual<HanziIds, z.infer<typeof hanziIdsSchema>>;
 
 export const idsOperatorSchema = z.enum({
   LeftToRight: `⿰`,
@@ -855,6 +864,41 @@ export const hanziStrokeColorSchema = z.enum([
 
 export type HanziStrokeColor = z.infer<typeof hanziStrokeColorSchema>;
 
+export function hanziStrokeCountAsNumber(str: string): number | undefined {
+  if (str.length === 1) {
+    const codePoint = str.codePointAt(0);
+    if (
+      codePoint != null &&
+      codePoint >= /* ① */ 9312 &&
+      codePoint <= /* ⑳ */ 9331
+    ) {
+      return codePoint - 9311;
+    }
+  }
+  return undefined;
+}
+
+export function isHanziStrokeCountChar(
+  str: string,
+): str is HanziStrokeCountChar {
+  return hanziStrokeCountAsNumber(str) != null;
+}
+
+/**
+ * A single hanzi character that represents a stroke count (①, ②, ③, …, ⑳).
+ *
+ * This is used in IDS strings to represent the number of strokes in a component
+ * when the component itself does not have a single-character representation.
+ */
+export const hanziStrokeCountCharSchema = z
+  .string()
+  .refine((str) => hanziStrokeCountAsNumber(str) != null)
+  .brand<`HanziStrokeCountChar`, `inout`>();
+
+export type HanziStrokeCountChar = z.infer<typeof hanziStrokeCountCharSchema>;
+
+export type HanziIdsLeaf = HanziCharacter | HanziStrokeCountChar;
+
 export interface MnemonicHanziComponent {
   /**
    * Could be `null` if there's no unicode character to represent this component
@@ -945,7 +989,7 @@ export const wikiCharacterDataSchema = z.strictObject({
    */
   decompositions: z
     .record(
-      idsStringSchema.describe(`partial or full IDS decomposition`),
+      hanziIdsSchema.describe(`partial or full IDS decomposition`),
       z
         .array(strokeSpecStringSchema)
         .describe(`strokeSpec for each leaf hanzi, in DFS order`),
@@ -958,8 +1002,14 @@ export const wikiCharacterDataSchema = z.strictObject({
    */
   mnemonic: z
     .strictObject({
-      decomposition: idsStringSchema
+      /**
+       * Can be `null` if none of the decompositions should be used for the
+       * mnemonic (to avoid unnecessarily learning a component that is not
+       * relevant to the mnemonic).
+       */
+      decomposition: hanziIdsSchema
         .describe(`reference an IDS key in decompositions`)
+        .nullable()
         .optional(),
       /**
        * Override annotations for the components. Keys are component hanzi, values are the modifiers.
@@ -1002,13 +1052,13 @@ export const charactersSchema = z.array(
   z.tuple([
     hanziCharacterSchema,
     z.object({
-      mnemonic: z
-        .string()
+      mnemonic: hanziIdsSchema
         .describe(`IDS used by the mnemonic, affects learning order`)
+        .nullable()
         .optional(),
       decompositions: z
         .record(
-          idsStringSchema.describe(`IDS (can be partial)`),
+          hanziIdsSchema.describe(`IDS (can include stroke count characters)`),
           z.array(strokeSpecStringSchema),
         )
         .describe(`all IDS decompositions`)

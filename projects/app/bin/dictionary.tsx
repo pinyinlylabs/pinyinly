@@ -1,9 +1,5 @@
 import { intersperse } from "#client/react.ts";
-import {
-  parseIds,
-  strokeCountPlaceholderOrNull,
-  walkIdsNodeLeafs,
-} from "#data/hanzi.ts";
+import { parseIds, walkIdsNodeLeafs } from "#data/hanzi.ts";
 import type {
   HanziCharacter,
   HanziText,
@@ -11,7 +7,7 @@ import type {
   IdsNode,
   PinyinText,
 } from "#data/model.ts";
-import { partOfSpeechSchema } from "#data/model.ts";
+import { hanziStrokeCountAsNumber, partOfSpeechSchema } from "#data/model.ts";
 import type {
   DictionaryJson,
   HanziWordMeaning,
@@ -93,6 +89,7 @@ const requestOpenAiResponseJsonCached =
 // All root words as well as all the components of each word.
 const allWords = new Set<string>();
 
+// TODO REPLACE
 // Recursively decompose each hanzi and gather together all the components that
 // aren't already in the list.
 function decomp(char: HanziCharacter) {
@@ -106,7 +103,7 @@ function decomp(char: HanziCharacter) {
     for (const ids of Object.keys(decompositions)) {
       const idsNode = parseIds(ids) as IdsNode<HanziCharacter>;
       for (const leaf of walkIdsNodeLeafs(idsNode)) {
-        if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
+        if (hanziStrokeCountAsNumber(leaf) == null && leaf !== char) {
           decomp(leaf);
         }
       }

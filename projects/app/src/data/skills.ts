@@ -4,7 +4,7 @@ import type {
   HanziWordWithMeaning,
 } from "@/dictionary";
 import {
-  hanziComponentsToLearn,
+  decomposeHanziToIdsLeafs,
   hanziFromHanziWord,
   loadCharactersJson,
   loadDictionary,
@@ -213,16 +213,21 @@ export async function skillDependencies(
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Learn the components of a hanzi word first.
-      for (let hanziCharacter of await hanziComponentsToLearn(
+      for (let hanziComponent of decomposeHanziToIdsLeafs(
         hanzi,
         decompositionData,
+        isHanziCharacter,
       )) {
+        if (hanziComponent === hanzi) {
+          continue;
+        }
+
         // Use the canonical form of the character.
         {
-          let hanziCharacterData = charactersJson.get(hanziCharacter);
-          while (hanziCharacterData?.canonicalForm != null) {
-            hanziCharacter = hanziCharacterData.canonicalForm;
-            hanziCharacterData = charactersJson.get(hanziCharacter);
+          let hanziComponentData = charactersJson.get(hanziComponent);
+          while (hanziComponentData?.canonicalForm != null) {
+            hanziComponent = hanziComponentData.canonicalForm;
+            hanziComponentData = charactersJson.get(hanziComponent);
           }
         }
 
@@ -233,7 +238,7 @@ export async function skillDependencies(
             return (
               hanziFromHanziWord(
                 hanziWordFromSkill(skill as HanziWordSkill),
-              ) === hanziCharacter
+              ) === hanziComponent
             );
           }
           return false;
@@ -243,7 +248,7 @@ export async function skillDependencies(
         // guessing what disambugation to use for the hanzi.
         if (!depAlreadyAdded) {
           const hanziWordWithMeaning =
-            await hackyGuessHanziWordToLearn(hanziCharacter);
+            await hackyGuessHanziWordToLearn(hanziComponent);
           if (hanziWordWithMeaning != null) {
             const [hanziWord] = hanziWordWithMeaning;
             deps.push(hanziWordToGloss(hanziWord));
@@ -1063,11 +1068,14 @@ export function skillReviewQueue({
   const learningOrderNewWordCandidates: Skill[] = [];
   const learningOrderNewComponentCandidates: Skill[] = [];
   for (const skill of learningOrderNewCandidates) {
+    const hanzi = isHanziWordSkill(skill)
+      ? hanziFromHanziWord(hanziWordFromSkill(skill))
+      : null;
+
     if (
-      isHanziWordSkill(skill) &&
-      dictionary.isStructuralHanzi(
-        hanziFromHanziWord(hanziWordFromSkill(skill)),
-      )
+      hanzi != null &&
+      isHanziCharacter(hanzi) &&
+      dictionary.isStructuralHanzi(hanzi)
     ) {
       learningOrderNewComponentCandidates.push(skill);
     } else {

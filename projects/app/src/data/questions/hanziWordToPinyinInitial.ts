@@ -31,6 +31,7 @@ import {
   hanziOrPinyinUnitCount,
   oneCorrectPairQuestionInvariant,
 } from "./oneCorrectPair";
+import { isHanziCharacter } from "@/data/hanzi";
 
 export async function hanziWordToPinyinInitialQuestionOrThrow(
   skill: HanziWordSkill,
@@ -95,8 +96,13 @@ interface QuestionContext {
 export async function makeQuestionContext(
   correctAnswer: HanziWord,
 ): Promise<QuestionContext> {
-  const hanzi = hanziFromHanziWord(correctAnswer);
   const dictionary = await loadDictionary();
+  const hanzi = hanziFromHanziWord(correctAnswer);
+  invariant(
+    isHanziCharacter(hanzi),
+    `expected a single character for %s`,
+    correctAnswer,
+  );
   const meaning = nonNullable(
     dictionary.lookupHanziWord(correctAnswer),
     `expected meaning in the dictionary for %s`,

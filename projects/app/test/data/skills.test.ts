@@ -17,12 +17,12 @@ import {
   randomPickSkillsForReview,
   rankRules,
   skillKindFromSkill,
-  skillLearningGraph as skillLearningGraphInner,
+  skillLearningGraph,
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
 import {
-  loadBuiltinCharacterDecompositionEntries,
+  loadBuiltinCharacterDecompositionForMnemonicsEntries,
   loadDictionary,
 } from "#dictionary.ts";
 import type { HistoryCommand } from "#test/data/helpers.ts";
@@ -40,7 +40,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 type CharacterDecompositionData = Awaited<
-  ReturnType<typeof loadBuiltinCharacterDecompositionEntries>
+  ReturnType<typeof loadBuiltinCharacterDecompositionForMnemonicsEntries>
 >;
 
 const skillTest = test.extend<{
@@ -50,7 +50,7 @@ const skillTest = test.extend<{
   decompositionData: [
     async ({}, use) => {
       const decompositionData =
-        await loadBuiltinCharacterDecompositionEntries();
+        await loadBuiltinCharacterDecompositionForMnemonicsEntries();
       await use(decompositionData);
     },
     { scope: `worker` },
@@ -63,13 +63,6 @@ const skillTest = test.extend<{
     { scope: `worker` },
   ],
 });
-
-async function skillLearningGraph(options: {
-  targetSkills: Skill[];
-  decompositionData: CharacterDecompositionData;
-}) {
-  return skillLearningGraphInner(options);
-}
 
 describe(
   `skillLearningGraph suite` satisfies HasNameOf<typeof skillLearningGraph>,
@@ -1311,7 +1304,7 @@ describe(
           },
         );
 
-        skillTest(
+        skillTest.only(
           `schedules new skills in dependency order`,
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({

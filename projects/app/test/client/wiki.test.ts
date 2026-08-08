@@ -21,9 +21,9 @@ import type {
 import { wikiCharacterDataSchema } from "#data/model.js";
 import {
   buildHanziWord,
+  decomposeHanziToIdsLeafs,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
-  hanziComponentsToLearn,
   hanziFromHanziWord,
   loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
@@ -75,8 +75,8 @@ describe(`/meaning.mdx files`, async () => {
   const dictionary = await loadDictionary();
 
   const data = meaningFilePaths.map((filePath) => {
-    const hanzi = path.basename(path.dirname(filePath)) as HanziText;
-    const isStructural = isStructuralHanzi(hanzi);
+    const hanzi = path.basename(path.dirname(filePath)) as HanziCharacter;
+    const isStructural = isHanziCharacter(hanzi) && isStructuralHanzi(hanzi);
     const isInDictionary = dictionary.lookupHanzi(hanzi).length > 0;
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
@@ -187,7 +187,7 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`characters in the dictionary with 5+ strokes have mnemonic components`, async () => {
+  test(`characters in the dictionary with 5+ strokes have decompositions`, async () => {
     const atomicCharacters = new Set([
       `非`,
       `臣`,
@@ -197,6 +197,7 @@ describe(`character.json files`, async () => {
       `𩰋`,
       `𡗗`,
       `年`,
+      `耳`,
     ]);
     const dictionary = await loadDictionary();
 
@@ -214,19 +215,16 @@ describe(`character.json files`, async () => {
       }
 
       expect
+        .soft(characterData, `${filePath} to have mnemonic`)
+        .toHaveProperty(`mnemonic`);
+      expect
         .soft(characterData.mnemonic, `${filePath} to have mnemonic`)
         .toBeDefined();
-      if (characterData.mnemonic?.decomposition != null) {
-        const mnemonicComponentCount = [
-          ...walkIdsNodeLeafs(parseIds(characterData.mnemonic.decomposition)),
-        ].length;
-        expect
-          .soft(
-            mnemonicComponentCount,
-            `${filePath} has ${svgStrokeCount} but only ${mnemonicComponentCount} mnemonic components`,
-          )
-          .toBeGreaterThanOrEqual(2);
-      }
+
+      expect(
+        Object.keys(characterData.decompositions ?? {}).length,
+        `${filePath} has at least one decomposition`,
+      ).toBeGreaterThan(0);
     }
   });
 
@@ -594,9 +592,7 @@ describe(`character.json files`, async () => {
 
     for (const { character, characterData } of characterFiles) {
       expected.set(character, {
-        ...(characterData.mnemonic?.decomposition == null
-          ? {}
-          : { mnemonic: characterData.mnemonic.decomposition }),
+        mnemonic: characterData.mnemonic?.decomposition,
         ...(characterData.decompositions == null
           ? {}
           : { decompositions: characterData.decompositions }),
@@ -698,9 +694,10 @@ const buildCharactersToCheck = memoize0(async function (): Promise<
   const result = new Set<HanziCharacter>();
   for (const seed of seeds) {
     const hanzi = hanziFromHanziWord(seed);
-    for (const component of await hanziComponentsToLearn(
+    for (const component of decomposeHanziToIdsLeafs(
       hanzi,
       decompositionData,
+      isHanziCharacter,
     )) {
       result.add(component);
     }

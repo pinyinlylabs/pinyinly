@@ -85,13 +85,6 @@ describe(
     typeof getJsonIndentLevelsForFilePath
   >,
   () => {
-    test(`falls back to 2 when config file is missing`, async () => {
-      await using resource = await fs.tempDir();
-      const filePath = path.join(resource.tempDir, `foo.json`);
-      const indent = await getJsonIndentLevelsForFilePath(filePath);
-      expect(indent).toBe(2);
-    });
-
     test(`uses first matching rule`, async () => {
       await using resource = await fs.tempDir();
       await fs.writeFile(
@@ -99,8 +92,8 @@ describe(
         JSON.stringify(
           {
             rules: [
-              { files: [`**/*.json`], indent: 1 },
-              { files: [`projects/app/test/data/**/*.json`], indent: 3 },
+              { files: [`**/*.json`], indentLevels: 1 },
+              { files: [`projects/app/test/data/**/*.json`], indentLevels: 3 },
             ],
           },
           null,
@@ -117,13 +110,15 @@ describe(
       expect(indent).toBe(1);
     });
 
-    test(`uses fallback when no rules match`, async () => {
+    test(`returns null when no rules match`, async () => {
       await using resource = await fs.tempDir();
       await fs.writeFile(
         path.join(resource.tempDir, `.jsonfmtrc.json`),
         JSON.stringify(
           {
-            rules: [{ files: [`projects/app/test/data/**/*.json`], indent: 1 }],
+            rules: [
+              { files: [`projects/app/test/data/**/*.json`], indentLevels: 1 },
+            ],
           },
           null,
           2,
@@ -133,7 +128,7 @@ describe(
 
       const filePath = path.join(resource.tempDir, `projects/lib/package.json`);
       const indent = await getJsonIndentLevelsForFilePath(filePath);
-      expect(indent).toBe(2);
+      expect(indent).toBe(null);
     });
   },
 );

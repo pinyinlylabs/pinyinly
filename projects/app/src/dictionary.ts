@@ -2,23 +2,25 @@ import {
   isHanziCharacter,
   parseIds,
   splitHanziText,
-  strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
 } from "@/data/hanzi";
 import type {
   HanziCharacter,
-  HanziText,
+  HanziIdsLeaf,
   HanziWord,
-  IdsString,
+  IdsNode,
+  HanziIds,
   PinyinText,
   PinyinUnit,
   StrokeSpecString,
+  HanziText,
 } from "@/data/model";
 import {
   charactersSchema,
   hanziWordSchema,
   HskLevel,
   hskLevelSchema,
+  isHanziStrokeCountChar,
   PartOfSpeech,
   pinyinSoundIdSchema,
   pinyinTextSchema,
@@ -137,8 +139,8 @@ export const loadCharactersJson = memoize0(async function loadCharactersJson() {
 });
 
 export interface CharacterDecompositionEntry {
-  hanzi: HanziText;
-  ids: IdsString;
+  hanzi: HanziCharacter;
+  ids: HanziIds;
   strokeSpecs: readonly StrokeSpecString[];
 }
 
@@ -155,7 +157,7 @@ export const loadBuiltinCharacterDecompositionEntries = memoize0(
       for (const [ids, strokeSpecs] of Object.entries(data.decompositions)) {
         entries.push({
           hanzi: hanzi,
-          ids: ids as IdsString,
+          ids: ids as HanziIds,
           strokeSpecs,
         });
       }
@@ -169,14 +171,69 @@ export const loadBuiltinCharacterDecompositionEntries = memoize0(
   },
 );
 
-const decompositionByHanziMapMemo = weakMemoize1(
-  (decompositionData: readonly CharacterDecompositionEntry[]) =>
-    new Map(decompositionData.map((entry) => [entry.hanzi, entry])),
+/**
+ * Same as @see loadBuiltinCharacterDecompositionEntries but only includes
+ * decompositions used by mnemonics.
+ */
+export const loadBuiltinCharacterDecompositionForMnemonicsEntries = memoize0(
+  async function loadBuiltinCharacterDecompositionForMnemonicsEntries() {
+    const charactersJson = await loadCharactersJson();
+    const entries: CharacterDecompositionEntry[] = [];
+
+    for (const [hanzi, data] of charactersJson.entries()) {
+      if (data.decompositions == null) {
+        continue;
+      }
+
+      const decompositionEntries = Object.entries(data.decompositions);
+
+      if (data.mnemonic === null) {
+        continue;
+      } else if (data.mnemonic === undefined) {
+        invariant(
+          !(decompositionEntries.length > 1),
+          `%s has more than one decomposition causing ambiguous learning dependencies`,
+          hanzi,
+        );
+      }
+
+      for (const [ids, strokeSpecs] of Object.entries(data.decompositions)) {
+        if (data.mnemonic != null && ids !== data.mnemonic) {
+          continue;
+        }
+
+        entries.push({
+          hanzi,
+          ids: ids as HanziIds,
+          strokeSpecs,
+        });
+        break; // only include the first decomposition to avoid duplicates
+      }
+    }
+
+    entries.sort((a, b) => a.hanzi.localeCompare(b.hanzi));
+
+    return deepReadonly(
+      entries as unknown[],
+    ) as readonly CharacterDecompositionEntry[];
+  },
+);
+
+const groupByHanzi = weakMemoize1(
+  <H extends HanziCharacter, T extends Readonly<{ hanzi: H }>>(
+    decompositionData: readonly T[],
+  ): ReadonlyMap<H, readonly T[]> => {
+    const result = new Map<H, T[]>();
+    for (const entry of decompositionData) {
+      mapArrayAdd(result, entry.hanzi, entry);
+    }
+    return result;
+  },
 );
 
 export interface CharacterComponentUsageEntry {
-  component: HanziText;
-  usedInHanzi: readonly HanziText[];
+  component: HanziCharacter;
+  usedInHanzi: readonly HanziCharacter[];
 }
 
 export async function buildCharacterComponentUsageEntries(
@@ -196,7 +253,7 @@ export async function buildCharacterComponentUsageEntries(
     return canonical;
   };
 
-  const componentUsage = new Map<HanziText, Set<HanziText>>();
+  const componentUsage = new Map<HanziCharacter, Set<HanziCharacter>>();
 
   for (const { hanzi, ids } of decompositionData) {
     for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
@@ -390,7 +447,7 @@ export interface Dictionary {
   lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
   lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
   lookupPinyinUnit(pinyinUnit: PinyinUnit): readonly HanziCharacter[];
-  isStructuralHanzi(hanzi: HanziText): boolean;
+  isStructuralHanzi(hanzi: HanziCharacter): boolean;
   allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
   allHanziWords: readonly HanziWord[];
   hsk1HanziWords: readonly HanziWord[];
@@ -421,7 +478,7 @@ export const loadDictionary = memoize0(
     const hsk5HanziWords: HanziWord[] = [];
     const hsk6HanziWords: HanziWord[] = [];
     const hsk7To9HanziWords: HanziWord[] = [];
-    const structuralHanzi = new Set<HanziText>();
+    const structuralHanzi = new Set<HanziCharacter>();
 
     for (const [character, data] of charactersJson.entries()) {
       if (data.isStructural != null) {
@@ -512,7 +569,7 @@ export const loadDictionary = memoize0(
     });
 
     return {
-      lookupHanzi(hanzi: HanziText) {
+      lookupHanzi(hanzi: HanziCharacter) {
         return hanziMap.get(hanzi) ?? emptyArray;
       },
       lookupHanziWord(hanziWord: HanziWord) {
@@ -526,7 +583,7 @@ export const loadDictionary = memoize0(
 
         return pinyinUnitToHanziMap.get(pinyinUnit) ?? emptyArray;
       },
-      isStructuralHanzi(hanzi: HanziText) {
+      isStructuralHanzi(hanzi: HanziCharacter) {
         return structuralHanzi.has(hanzi);
       },
       allEntries: [...dictionaryJson.entries()],
@@ -589,47 +646,65 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
 }
 
-/**
- * Break apart a hanzi text into its constituent characters that should be
- * learned in a "bottom up" learning strategy.
- *
- * This first splits up into each characters, and then splits each characters down
- * further into its constituent parts (radicals).
- */
-export async function hanziComponentsToLearn(
+export function decomposeHanziToIdsLeafs<S extends HanziIdsLeaf>(
   hanzi: HanziText,
-  decompositionData: readonly CharacterDecompositionEntry[],
-): Promise<HanziCharacter[]> {
-  const decompositionByHanzi = decompositionByHanziMapMemo(decompositionData);
-  const hanziCharacters = splitHanziText(hanzi);
+  decompositionData: readonly Readonly<
+    Pick<CharacterDecompositionEntry, `hanzi` | `ids`>
+  >[],
+  /**
+   * Optional predicate to filter out branches of the decomposition. If the
+   * predicate returns false for a given leaf, that leaf will not be added to
+   * the result, and its children will not be descended into.
+   */
+  predicate: (value: HanziIdsLeaf) => value is S = (_x): _x is S => true,
+): S[] {
+  const decompositionsByHanzi = groupByHanzi(decompositionData);
+  const hanziCharacters = splitHanziText(hanzi) as HanziIdsLeaf[];
 
   // For multi-character hanzi, learn each character, but for for
   // single-character hanzi, decompose it into radicals and learn those.
-  const result: HanziCharacter[] = [];
-  if (hanziCharacters.length > 1) {
-    for (const char of hanziCharacters) {
-      result.push(char);
-    }
-  } else {
-    for (const character of hanziCharacters) {
-      const decomposition = decompositionByHanzi.get(character);
-      if (decomposition == null) {
-        continue;
-      }
+  const result: Set<S> = new Set();
 
-      for (const leaf of walkIdsNodeLeafs(parseIds(decomposition.ids))) {
-        if (
-          leaf !== character && // todo turn into invariant?
-          strokeCountPlaceholderOrNull(leaf) == null &&
-          isHanziCharacter(leaf as HanziText)
-        ) {
-          result.push(leaf as HanziCharacter);
+  const queue = [...hanziCharacters];
+
+  while (queue.length > 0) {
+    const character = queue.shift();
+    if (character == null || !predicate(character)) {
+      continue;
+    }
+
+    result.add(character);
+
+    if (isHanziStrokeCountChar(character)) {
+      // Can't decompose a stroke count character, so skip it.
+      continue;
+    }
+
+    const decompositions = decompositionsByHanzi.get(
+      character as HanziCharacter,
+    );
+    if (decompositions == null) {
+      continue;
+    }
+
+    for (const decomposition of decompositions) {
+      const idsNode = parseIds(decomposition.ids) as IdsNode<HanziIdsLeaf>;
+      for (const idsLeaf of walkIdsNodeLeafs(idsNode)) {
+        if (!predicate(idsLeaf)) {
+          // If it fails the predicate, don't add it nor descend into it.
+          continue;
         }
+
+        if (result.has(idsLeaf)) {
+          continue;
+        }
+
+        queue.push(idsLeaf);
       }
     }
   }
 
-  return result;
+  return [...result];
 }
 
 export function pinyinOrThrow(
@@ -684,7 +759,7 @@ export function oneUnitPinyinListOrNull(
 
 export const allHanziCharacterPronunciationsForHanzi = memoize1(
   async function allHanziCharacterPronunciationsForHanzi(
-    hanzi: HanziText,
+    hanzi: HanziCharacter,
   ): Promise<Set<PinyinUnit>> {
     const dictionary = await loadDictionary();
     const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
@@ -709,7 +784,7 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
 export const getIsStructuralHanzi = memoize0(async () => {
   const charactersJson = await loadCharactersJson();
 
-  const structuralHanzi = new Set<HanziText>();
+  const structuralHanzi = new Set<HanziCharacter>();
 
   for (const [character, data] of charactersJson.entries()) {
     if (data.isStructural != null) {
@@ -717,14 +792,15 @@ export const getIsStructuralHanzi = memoize0(async () => {
     }
   }
 
-  const isStructuralHanzi = (hanzi: HanziText) => structuralHanzi.has(hanzi);
+  const isStructuralHanzi = (hanzi: HanziCharacter) =>
+    structuralHanzi.has(hanzi);
 
   return isStructuralHanzi;
 });
 
 export const getIsComponentFormHanzi = memoize0(async () => {
   const charactersJson = await loadCharactersJson();
-  const componentFormHanzi = new Set<HanziText>();
+  const componentFormHanzi = new Set<HanziCharacter>();
 
   for (const [character, data] of charactersJson.entries()) {
     if (data.componentFormOf != null) {
@@ -732,8 +808,18 @@ export const getIsComponentFormHanzi = memoize0(async () => {
     }
   }
 
-  const isComponentFormHanzi = (hanzi: HanziText) =>
+  const isComponentFormHanzi = (hanzi: HanziCharacter) =>
     componentFormHanzi.has(hanzi);
 
   return isComponentFormHanzi;
 });
+
+// export function decomposeHanziWithStrokeSpec(
+//   hanzi: HanziCharacter,
+//   strokeSpec: StrokeSpecString,
+// ): { hanzi: HanziCharacter; strokeSpec: StrokeSpecString }[] {
+//   return parseIndexRangesFromStrokeSpec(strokeSpec).map((index) => ({
+//     hanzi,
+//     strokeSpec: `${index}`,
+//   }));
+// }
