@@ -17,7 +17,8 @@ import {
   actorNameTextSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { useState } from "react";
 
 export default function ActorIdPage() {
   const { id: rawId } = useLocalSearchParams<`/actors/[id]`>();
@@ -33,14 +34,14 @@ export default function ActorIdPage() {
   const actor = actorDirectory.actors.find(
     (entry) => entry.actorId === actorId,
   );
-  const title =
+  const name =
     actorName != null && actorName.trim().length > 0
       ? actorName
       : actor?.name != null && actor.name.trim().length > 0
         ? actor.name
-        : `Actor`;
+        : null;
 
-  const generateActorSpecMutation = trpc.ai.enqueueActorSpec.useMutation();
+  const title = name ?? `Actor`;
 
   const linkedSoundIds: PinyinSoundId[] = [];
   for (const [
@@ -93,37 +94,7 @@ export default function ActorIdPage() {
         />
       </View>
 
-      <WikiTitledBox title="Mnemonic Spec">
-        <View className="gap-3 p-4">
-          <InlineEditableSettingJson
-            setting={actorSpecJsonSetting}
-            settingKey={{ actorId }}
-            placeholder='{"traits": ["curious"]}'
-            autoResizeMinHeight={120}
-          />
-
-          <Pressable
-            disabled={generateActorSpecMutation.isPending}
-            onPress={() => {
-              generateActorSpecMutation.mutate({
-                actorId,
-                actorName: title,
-              });
-            }}
-            className="
-              items-center rounded-xl border border-fg/10 bg-fg px-4 py-3
-
-              disabled:opacity-40
-            "
-          >
-            <Text className="pyly-body text-bg">
-              {generateActorSpecMutation.isPending
-                ? `Generating spec...`
-                : `Generate spec`}
-            </Text>
-          </Pressable>
-        </View>
-      </WikiTitledBox>
+      <MnemonicSpecBox actorId={actorId} name={name} />
 
       <WikiTitledBox title="Model sheet">
         <View className="p-4">
@@ -157,5 +128,50 @@ export default function ActorIdPage() {
         </View>
       </WikiTitledBox>
     </View>
+  );
+}
+
+function MnemonicSpecBox({
+  actorId,
+  name,
+}: {
+  actorId: ActorId;
+  name: string | null;
+}) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const generateActorSpecMutation = trpc.ai.enqueueActorSpec.useMutation();
+
+  return (
+    <WikiTitledBox title="Mnemonic Spec" onEditingChange={setIsEditMode}>
+      <View className="gap-3 p-4">
+        <InlineEditableSettingJson
+          setting={actorSpecJsonSetting}
+          settingKey={{ actorId }}
+          placeholder='{"traits": ["curious"]}'
+          autoResizeMinHeight={120}
+        />
+
+        {isEditMode ? (
+          <View className="flex-row items-start gap-4 p-4">
+            <RectButton
+              variant="bare"
+              iconStart="ai"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                if (name != null) {
+                  generateActorSpecMutation.mutate({
+                    actorId,
+                    actorName: name,
+                  });
+                }
+              }}
+            >
+              Use AI
+            </RectButton>
+          </View>
+        ) : null}
+      </View>
+    </WikiTitledBox>
   );
 }
