@@ -68,7 +68,7 @@ import { Platform } from "react-native";
 import { z } from "zod";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
-import { BTreeIndex } from "@tanstack/db";
+import { BTreeIndex, concat } from "@tanstack/db";
 
 type ExpressionLike = Parameters<typeof isUndefined>[0];
 const isNullish = (value: ExpressionLike) =>
@@ -891,32 +891,6 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
   });
 }
 
-function mapUserMeaningToDictionarySearchEntry(
-  userEntry: UserDictionaryEntry,
-): DictionarySearchEntry {
-  const hanziWord = buildHanziWord(userEntry.hanzi, userEntry.meaningKey);
-  const pinyin =
-    userEntry.pinyin == null || userEntry.pinyin.length === 0
-      ? undefined
-      : [userEntry.pinyin];
-
-  return {
-    id: `user:${hanziWord}`,
-    sourceKind: `user`,
-    hanzi: userEntry.hanzi,
-    meaningKey: userEntry.meaningKey,
-    hanziWord,
-    gloss: [userEntry.gloss],
-    glossCount: 1,
-    pos: undefined,
-    pinyin,
-    hsk: undefined,
-    hskSortKey: dictionarySearchHskSortKey(),
-    note: userEntry.note,
-    hanziCharacterCount: matchAllHanziCharacters(userEntry.hanzi).length,
-  };
-}
-
 function builtInCharacterDecompositionCollectionOptions(): CollectionConfig<
   CharacterDecompositionRow,
   string
@@ -968,145 +942,6 @@ function characterMnemonicIdsCollectionOptions(): CollectionConfig<
 
 function dictionarySearchHskSortKey(hsk?: HskLevel): number {
   return hsk == null ? 9999 : hskLevelToNumber(hsk);
-}
-
-function dictionarySearchCollectionOptions({
-  builtInDictionarySearch,
-  userDictionary,
-}: {
-  builtInDictionarySearch: BuiltInDictionarySearchCollection;
-  userDictionary: UserDictionaryCollection;
-}): CollectionConfig<DictionarySearchEntry, string> {
-  const builtInRows = createLiveQueryCollection((q) =>
-    q.from({ entry: builtInDictionarySearch }),
-  );
-
-  const userRows = createLiveQueryCollection((q) =>
-    q.from({ entry: userDictionary }),
-  );
-
-  return {
-    autoIndex: `eager`,
-    defaultIndexType: BTreeIndex,
-    id: `dictionarySearch`,
-    sync: {
-      rowUpdateMode: `full`,
-      sync: (params) => {
-        const { begin, write, commit, collection } = params;
-
-        const markReadyOnce = memoize0(() => {
-          params.markReady();
-        });
-        const markReadyTimeout = setTimeout(() => {
-          markReadyOnce();
-        }, 5000);
-
-        const applyRow = (next: DictionarySearchEntry | undefined) => {
-          if (next == null) {
-            return;
-          }
-
-          const existing = collection.get(next.id);
-
-          if (existing == null) {
-            write({ type: `insert`, value: next });
-            return;
-          }
-
-          if (!isEqual(existing, next)) {
-            write({ type: `update`, value: next });
-          }
-        };
-
-        const deleteRow = (id: string) => {
-          const existing = collection.get(id);
-          if (existing != null) {
-            write({ type: `delete`, value: existing });
-          }
-        };
-
-        type BuiltInChanges = CollectionChanges<typeof builtInRows>;
-
-        type UserChanges = CollectionChanges<typeof userRows>;
-
-        const onBuiltInChanges = (changes: BuiltInChanges) => {
-          try {
-            begin();
-
-            for (const change of changes) {
-              if (change.type === `delete`) {
-                const id = change.previousValue?.id ?? change.value.id;
-                deleteRow(id);
-                continue;
-              }
-
-              applyRow(change.value);
-            }
-
-            commit();
-          } finally {
-            markReadyOnce();
-          }
-        };
-
-        const onUserChanges = (changes: UserChanges) => {
-          try {
-            begin();
-
-            for (const change of changes) {
-              if (change.type === `delete`) {
-                const previous = change.previousValue ?? change.value;
-                const id = `user:${buildHanziWord(previous.hanzi, previous.meaningKey)}`;
-                deleteRow(id);
-                continue;
-              }
-
-              applyRow(mapUserMeaningToDictionarySearchEntry(change.value));
-            }
-
-            commit();
-          } finally {
-            markReadyOnce();
-          }
-        };
-
-        let builtInSubscription:
-          | ReturnType<typeof builtInRows.subscribeChanges>
-          | undefined;
-        let userSubscription:
-          | ReturnType<typeof userRows.subscribeChanges>
-          | undefined;
-        let isDisposed = false;
-
-        void Promise.all([builtInRows.preload(), userRows.preload()])
-          .then(() => {
-            if (isDisposed) {
-              return;
-            }
-
-            builtInSubscription = builtInRows.subscribeChanges(
-              onBuiltInChanges,
-              { includeInitialState: true },
-            );
-
-            userSubscription = userRows.subscribeChanges(onUserChanges, {
-              includeInitialState: true,
-            });
-          })
-          .catch((error: unknown) => {
-            console.error(`dictionarySearch preload failed`, error);
-          });
-
-        return () => {
-          isDisposed = true;
-          clearTimeout(markReadyTimeout);
-          builtInSubscription?.unsubscribe();
-          userSubscription?.unsubscribe();
-        };
-      },
-    },
-    getKey: (item) => item.id,
-  };
 }
 
 export const rizzleCollectionOptions = <
@@ -1430,13 +1265,66 @@ export function makeDb(rizzle: Rizzle) {
     createCollection(builtInDictionarySearchCollectionOptions());
 
   // TODO: use q.unionAll()
-  const dictionarySearch: DictionarySearchCollection = createCollection(
-    dictionarySearchCollectionOptions({
-      builtInDictionarySearch,
-      userDictionary,
-    }),
-  );
-  dictionarySearch.createIndex((row) => row.hanzi);
+  // const dictionarySearch: DictionarySearchCollection = createCollection(
+  //   dictionarySearchCollectionOptions({
+  //     builtInDictionarySearch,
+  //     userDictionary,
+  //   }),
+  // );
+  const dictionarySearch = createLiveQueryCollection((q) => {
+    const builtinRows = q
+      .from({ builtin: builtInDictionarySearch })
+      .select(({ builtin: row }) => ({
+        id: concat(`builtin:`, row.hanziWord),
+        sourceKind: `builtIn` as const,
+        hanzi: row.hanzi,
+        meaningKey: row.meaningKey,
+        hanziWord: row.hanziWord,
+        freq: row.freq,
+        gloss: row.gloss,
+        glossCount: row.glossCount,
+        pos: row.pos,
+        pinyin: row.pinyin,
+        hsk: row.hsk,
+        hskSortKey: row.hskSortKey,
+        hskFirstAppearance: row.hskFirstAppearance,
+        hanziCharacterCount: row.hanziCharacterCount,
+        note: undefined as string | undefined,
+        isStructural: row.isStructural,
+      }));
+
+    const userRows = q
+      .from({ user: userDictionary })
+      .fn.select(({ user: row }) => {
+        const hanziWord = buildHanziWord(row.hanzi, row.meaningKey);
+        const pinyin =
+          row.pinyin == null || row.pinyin.length === 0
+            ? undefined
+            : [row.pinyin];
+        return {
+          id: `user:${hanziWord}`,
+          sourceKind: `user` as const,
+          hanzi: row.hanzi,
+          meaningKey: row.meaningKey,
+          hanziWord,
+          freq: undefined,
+          gloss: [row.gloss],
+          glossCount: 1,
+          pos: undefined,
+          pinyin,
+          hsk: undefined,
+          hskSortKey: dictionarySearchHskSortKey(),
+          hskFirstAppearance: undefined,
+          note: row.note,
+          hanziCharacterCount: matchAllHanziCharacters(row.hanzi).length,
+          isStructural: undefined,
+        };
+      });
+    return q.unionAll(builtinRows, userRows);
+  });
+
+  // dictionarySearch.createIndex((row) => row.hanzi);
+  // dictionarySearch.createIndex((row) => row.hskSortKey);
 
   const characterComponentUsage: CharacterComponentUsageCollection =
     createCollection({
