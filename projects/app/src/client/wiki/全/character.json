@@ -18,8 +18,6 @@
       "M 187 26 L 241 15 L 418 40 L 734 67 L 821 43"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱人王"
-  },
-  "decompositions": { "⿱人王": ["0-1", "2-5"] }
+  "decompositions": { "⿱人王": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿱人王" }
 }

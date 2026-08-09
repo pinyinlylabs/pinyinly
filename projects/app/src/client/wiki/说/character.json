@@ -24,8 +24,6 @@
       "M 618 383 L 645 365 L 652 352 L 641 187 L 649 117 L 667 86 L 693 67 L 738 53 L 782 49 L 866 59 L 907 79 L 925 98 L 932 239"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠兑"
-  },
-  "decompositions": { "⿰讠兑": ["0-1", "2-8"] }
+  "decompositions": { "⿰讠兑": ["0,1", "2-8"] },
+  "mnemonic": { "decomposition": "⿰讠兑" }
 }

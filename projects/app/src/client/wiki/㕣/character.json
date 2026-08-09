@@ -16,8 +16,6 @@
       "M393 66L408 86L568 119L621 120L658 110"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱八口"
-  },
-  "decompositions": { "⿱八口": ["0-1", "2-4"] }
+  "decompositions": { "⿱八口": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿱八口" }
 }

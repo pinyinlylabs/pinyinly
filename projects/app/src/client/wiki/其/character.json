@@ -22,8 +22,6 @@
       "M 581 187 L 669 119 L 717 73 L 742 35 L 753 -3"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳甘一八"
-  },
-  "decompositions": { "⿳甘一八": ["0-4", "5", "6-7"] }
+  "decompositions": { "⿳甘一八": ["0-4", "5", "6,7"] },
+  "mnemonic": { "decomposition": "⿳甘一八" }
 }

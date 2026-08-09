@@ -16,8 +16,6 @@
       "M 409 495 L 430 492 L 456 475 L 646 232 L 719 154 L 772 109 L 853 84 L 982 67"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰口又"
-  },
-  "decompositions": { "⿰口又": ["0-2", "3-4"] }
+  "decompositions": { "⿰口又": ["0-2", "3,4"] },
+  "mnemonic": { "decomposition": "⿰口又" }
 }

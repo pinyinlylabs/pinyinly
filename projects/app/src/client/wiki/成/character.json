@@ -18,8 +18,6 @@
       "M 653 777 L 727 741 L 763 708"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿵戊𠃌"
-  },
-  "decompositions": { "⿵戊𠃌": ["0-1,3-5", "2"] }
+  "decompositions": { "⿵戊𠃌": ["0,1,3-5", "2"] },
+  "mnemonic": { "decomposition": "⿵戊𠃌" }
 }

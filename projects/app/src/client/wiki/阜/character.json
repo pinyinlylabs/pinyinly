@@ -23,8 +23,6 @@
     ]
   },
   "simplifiedForm": "阝",
-  "mnemonic": {
-    "decomposition": "⿱𠂤十"
-  },
-  "decompositions": { "⿱𠂤十": ["0-5", "6-7"] }
+  "decompositions": { "⿱𠂤十": ["0-5", "6,7"] },
+  "mnemonic": { "decomposition": "⿱𠂤十" }
 }

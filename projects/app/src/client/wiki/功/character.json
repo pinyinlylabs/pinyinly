@@ -16,8 +16,6 @@
       "M 602 804 L 623 794 L 653 762 L 626 492 L 588 362 L 528 238 L 464 156 L 402 94 L 314 30 L 274 9"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰工力"
-  },
-  "decompositions": { "⿰工力": ["0-2", "3-4"] }
+  "decompositions": { "⿰工力": ["0-2", "3,4"] },
+  "mnemonic": { "decomposition": "⿰工力" }
 }

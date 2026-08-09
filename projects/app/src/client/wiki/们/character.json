@@ -16,8 +16,6 @@
       "M 589 664 L 644 658 L 746 682 L 787 674 L 816 645 L 812 594 L 821 127 L 815 75 L 801 43 L 752 51 L 662 83"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻门"
-  },
-  "decompositions": { "⿰亻门": ["0-1", "2-4"] }
+  "decompositions": { "⿰亻门": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿰亻门" }
 }

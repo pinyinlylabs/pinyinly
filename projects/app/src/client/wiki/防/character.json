@@ -18,8 +18,6 @@
       "M 581 505 L 611 479 L 609 469 L 571 366 L 530 293 L 494 244 L 438 185 L 358 122 L 288 82"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰阝方"
-  },
-  "decompositions": { "⿰阝方": ["0-1", "2-5"] }
+  "decompositions": { "⿰阝方": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰阝方" }
 }

@@ -15,8 +15,6 @@
     ]
   },
   "componentFormOf": "示",
-  "mnemonic": {
-    "decomposition": "⿱②卜"
-  },
-  "decompositions": { "⿱②卜": ["0-1", "2-3"] }
+  "decompositions": { "⿱②卜": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿱②卜" }
 }

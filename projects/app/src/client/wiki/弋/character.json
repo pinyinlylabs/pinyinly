@@ -12,12 +12,12 @@
       "M 622 787 L 716 732 L 745 693"
     ]
   },
+  "decompositions": { "⿺𫠠丶": ["0,1", "2"] },
   "mnemonic": {
+    "decomposition": "⿺𫠠丶",
     "components": {
       "𫠠": { "label": "a man falling backwards" },
       "丶": { "label": "a bullet" }
-    },
-    "decomposition": "⿺𫠠丶"
-  },
-  "decompositions": { "⿺𫠠丶": ["0-1", "2"] }
+    }
+  }
 }

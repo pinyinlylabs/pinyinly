@@ -16,8 +16,6 @@
       "M284 120L297 136L371 146L620 170L692 161"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿻儿口"
-  },
-  "decompositions": { "⿻儿口": ["0-1", "2-4"] }
+  "decompositions": { "⿻儿口": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿻儿口" }
 }

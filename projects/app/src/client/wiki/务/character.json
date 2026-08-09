@@ -16,8 +16,6 @@
       "M 482 398 L 509 361 L 483 267 L 447 185 L 405 117 L 349 52 L 277 -9 L 231 -39"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱夂力"
-  },
-  "decompositions": { "⿱夂力": ["0-2", "3-4"] }
+  "decompositions": { "⿱夂力": ["0-2", "3,4"] },
+  "mnemonic": { "decomposition": "⿱夂力" }
 }

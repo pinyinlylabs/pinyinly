@@ -18,8 +18,6 @@
       "M 708 808 L 743 785 L 767 757 L 762 439 L 772 131 L 767 102 L 750 68 L 716 80 L 637 135"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰月刂"
-  },
-  "decompositions": { "⿰月刂": ["0-3", "4-5"] }
+  "decompositions": { "⿰月刂": ["0-3", "4,5"] },
+  "mnemonic": { "decomposition": "⿰月刂" }
 }

@@ -26,7 +26,9 @@
       "M 702 249 L 764 211 L 817 169 L 837 143 L 849 110"
     ]
   },
+  "decompositions": { "⿰厂泉": ["0,1", "1-9"], "⿸厂⿱白小": ["", "", ""] },
   "mnemonic": {
+    "decomposition": "⿰厂泉",
     "components": {
       "厂": { "label": "cliff", "color": "yellow" },
       "泉": { "label": "waterfall", "color": "cyanold" }
@@ -38,8 +40,6 @@
         "explanation": "Picture a cliff (厂) with a waterfall (泉) cascading down from the top. Where does the water come from? This is the original source.",
         "imageAssetIds": ["sha256/tf64raCNkXcor6F8YHuf4xh6yOiCAiFMR3VrhiJwCug"]
       }
-    ],
-    "decomposition": "⿰厂泉"
-  },
-  "decompositions": { "⿰厂泉": ["0-1", "1-9"], "⿸厂⿱白小": ["", "", ""] }
+    ]
+  }
 }

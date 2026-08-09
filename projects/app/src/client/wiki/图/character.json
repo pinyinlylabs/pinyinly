@@ -22,8 +22,6 @@
       "M 253 58 L 268 73 L 676 99 L 739 85"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿴囗冬"
-  },
-  "decompositions": { "⿴囗冬": ["0-1,7", "2-6"] }
+  "decompositions": { "⿴囗冬": ["0,1,7", "2-6"] },
+  "mnemonic": { "decomposition": "⿴囗冬" }
 }

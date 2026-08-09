@@ -18,8 +18,6 @@
       "M 430 204 L 442 213 L 482 223 L 552 233 L 598 226"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿸𠂇月"
-  },
-  "decompositions": { "⿸𠂇月": ["0-1", "2-5"] }
+  "decompositions": { "⿸𠂇月": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿸𠂇月" }
 }

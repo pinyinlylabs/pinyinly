@@ -14,8 +14,6 @@
       "M 811 542 L 829 530 L 858 489 L 825 59"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿶凵㐅"
-  },
-  "decompositions": { "⿶凵㐅": ["2-3", "0-1"] }
+  "decompositions": { "⿶凵㐅": ["2,3", "0,1"] },
+  "mnemonic": { "decomposition": "⿶凵㐅" }
 }

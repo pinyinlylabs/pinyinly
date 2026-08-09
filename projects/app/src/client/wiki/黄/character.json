@@ -28,8 +28,6 @@
       "M 598 101 L 715 26 L 747 -10 L 761 -42"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳龷由八"
-  },
-  "decompositions": { "⿳龷由八": ["0-3", "4-8", "9-10"] }
+  "decompositions": { "⿳龷由八": ["0-3", "4-8", "9,10"] },
+  "mnemonic": { "decomposition": "⿳龷由八" }
 }

@@ -22,8 +22,6 @@
       "M 478 363 L 522 326 L 519 -65"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⺊早"
-  },
-  "decompositions": { "⿱⺊早": ["0-1", "2-7"] }
+  "decompositions": { "⿱⺊早": ["0,1", "2-7"] },
+  "mnemonic": { "decomposition": "⿱⺊早" }
 }

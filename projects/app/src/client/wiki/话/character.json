@@ -22,8 +22,6 @@
       "M 555 74 L 568 89 L 732 111 L 789 111 L 814 101"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠舌"
-  },
-  "decompositions": { "⿰讠舌": ["0-1", "2-7"] }
+  "decompositions": { "⿰讠舌": ["0,1", "2-7"] },
+  "mnemonic": { "decomposition": "⿰讠舌" }
 }

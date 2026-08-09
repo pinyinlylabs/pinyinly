@@ -20,8 +20,6 @@
       "M 453 303 L 495 258 L 508 234"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱𠂉母"
-  },
-  "decompositions": { "⿱𠂉母": ["0-1", "2-6"] }
+  "decompositions": { "⿱𠂉母": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿱𠂉母" }
 }

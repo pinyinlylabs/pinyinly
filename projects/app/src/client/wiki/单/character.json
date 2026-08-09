@@ -22,8 +22,6 @@
       "M 459 584 L 505 558 L 503 -61"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱丷⿻甲一"
-  },
-  "decompositions": { "⿱丷⿻甲一": ["0-1", "2-5,7", "6"] }
+  "decompositions": { "⿱丷⿻甲一": ["0,1", "2-5,7", "6"] },
+  "mnemonic": { "decomposition": "⿱丷⿻甲一" }
 }

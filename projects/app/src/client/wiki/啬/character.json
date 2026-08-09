@@ -28,8 +28,6 @@
       "M 348 14 L 365 28 L 651 64"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⿻土丷回"
-  },
-  "decompositions": { "⿱⿻土丷回": ["0-1,4", "2-3", "5-10"] }
+  "decompositions": { "⿱⿻土丷回": ["0,1,4", "2,3", "5-10"] },
+  "mnemonic": { "decomposition": "⿱⿻土丷回" }
 }

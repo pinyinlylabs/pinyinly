@@ -2,17 +2,15 @@
   "hanzi": "𡗗",
   "svg": { "strokes": 5 },
   "isStructural": true,
+  "decompositions": { "⿻𠂇③": ["0,1", "2-4"] },
   "mnemonic": {
-    "components": {
-      "③": { "label": "more hand parts" }
-    },
+    "decomposition": "⿻𠂇③",
+    "components": { "③": { "label": "more hand parts" } },
     "hints": [
       {
         "meaningKey": "openHands",
         "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out."
       }
-    ],
-    "decomposition": "⿻𠂇③"
-  },
-  "decompositions": { "⿻𠂇③": ["0-1", "2-4"] }
+    ]
+  }
 }

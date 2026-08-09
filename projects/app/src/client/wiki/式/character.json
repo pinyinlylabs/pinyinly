@@ -18,8 +18,6 @@
       "M 648 754 L 752 715 L 785 680"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿹弋工"
-  },
-  "decompositions": { "⿹弋工": ["0,4-5", "1-3"] }
+  "decompositions": { "⿹弋工": ["0,4,5", "1-3"] },
+  "mnemonic": { "decomposition": "⿹弋工" }
 }

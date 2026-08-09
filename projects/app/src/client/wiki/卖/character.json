@@ -22,8 +22,6 @@
       "M 539 226 L 539 213 L 624 148 L 723 57 L 752 17 L 763 -15"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱十买"
-  },
-  "decompositions": { "⿱十买": ["0-1", "2-7"] }
+  "decompositions": { "⿱十买": ["0,1", "2-7"] },
+  "mnemonic": { "decomposition": "⿱十买" }
 }

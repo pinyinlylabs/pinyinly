@@ -20,8 +20,6 @@
       "M 411 18 L 424 31 L 442 35 L 629 57 L 677 55 L 700 45"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱亠⿱二口"
-  },
-  "decompositions": { "⿱亠⿱二口": ["0-1", "2-3", "4-6"] }
+  "decompositions": { "⿱亠⿱二口": ["0,1", "2,3", "4-6"] },
+  "mnemonic": { "decomposition": "⿱亠⿱二口" }
 }

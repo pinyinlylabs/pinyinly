@@ -26,8 +26,6 @@
       "M 607 135 L 722 46 L 741 23 L 760 -29"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱十具"
-  },
-  "decompositions": { "⿱十具": ["0-1", "2-9"] }
+  "decompositions": { "⿱十具": ["0,1", "2-9"] },
+  "mnemonic": { "decomposition": "⿱十具" }
 }

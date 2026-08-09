@@ -29,8 +29,6 @@
     ]
   },
   "simplifiedForm": "卤",
-  "mnemonic": {
-    "decomposition": "⿱⺊⿴囗𠂭"
-  },
-  "decompositions": { "⿱⺊⿴囗𠂭": ["0-1", "2-3,10", "4-9"] }
+  "decompositions": { "⿱⺊⿴囗𠂭": ["0,1", "2,3,10", "4-9"] },
+  "mnemonic": { "decomposition": "⿱⺊⿴囗𠂭" }
 }

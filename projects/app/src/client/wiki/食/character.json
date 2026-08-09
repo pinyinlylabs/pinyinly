@@ -24,8 +24,6 @@
       "M 459 194 L 591 136 L 701 77 L 751 40 L 774 0"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱人良"
-  },
-  "decompositions": { "⿱人良": ["0-1", "2-8"] }
+  "decompositions": { "⿱人良": ["0,1", "2-8"] },
+  "mnemonic": { "decomposition": "⿱人良" }
 }

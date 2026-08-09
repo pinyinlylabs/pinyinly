@@ -12,8 +12,6 @@
       "M623 345L755 232L779 190L792 139"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱一厶"
-  },
-  "decompositions": { "⿱一厶": ["0", "1-2"] }
+  "decompositions": { "⿱一厶": ["0", "1,2"] },
+  "mnemonic": { "decomposition": "⿱一厶" }
 }

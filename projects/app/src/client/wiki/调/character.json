@@ -26,8 +26,6 @@
       "M 600 208 L 610 218 L 694 234 L 725 236 L 751 228"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠周"
-  },
-  "decompositions": { "⿰讠周": ["0-1", "2-9"] }
+  "decompositions": { "⿰讠周": ["0,1", "2-9"] },
+  "mnemonic": { "decomposition": "⿰讠周" }
 }

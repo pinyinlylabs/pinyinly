@@ -16,8 +16,6 @@
       "M 399 41 L 412 56 L 633 82 L 694 85 L 737 71"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱刀口"
-  },
-  "decompositions": { "⿱刀口": ["0-1", "2-4"] }
+  "decompositions": { "⿱刀口": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿱刀口" }
 }

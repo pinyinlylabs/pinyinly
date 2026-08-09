@@ -26,8 +26,6 @@
       "M 352 73 L 362 63 L 594 90 L 634 92 L 657 86"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⿰③刀田"
-  },
-  "decompositions": { "⿱⿰③刀田": ["0-2", "3-4", "5-9"] }
+  "decompositions": { "⿱⿰③刀田": ["0-2", "3,4", "5-9"] },
+  "mnemonic": { "decomposition": "⿱⿰③刀田" }
 }

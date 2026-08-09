@@ -20,8 +20,6 @@
       "M 487 472 L 512 456 L 529 435 L 530 424 L 519 -73"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱㐅布"
-  },
-  "decompositions": { "⿱㐅布": ["0-1", "2-6"] }
+  "decompositions": { "⿱㐅布": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿱㐅布" }
 }

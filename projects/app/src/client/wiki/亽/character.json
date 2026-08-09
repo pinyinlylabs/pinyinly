@@ -12,8 +12,6 @@
       "M439 369L553 238L593 207"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱人丶"
-  },
-  "decompositions": { "⿱人丶": ["0-1", "2"] }
+  "decompositions": { "⿱人丶": ["0,1", "2"] },
+  "mnemonic": { "decomposition": "⿱人丶" }
 }

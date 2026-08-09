@@ -20,8 +20,6 @@
       "M 583 364 L 584 353 L 672 285 L 688 263 L 699 232"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱一⿻从冂"
-  },
-  "decompositions": { "⿱一⿻从冂": ["0", "3-6", "1-2"] }
+  "decompositions": { "⿱一⿻从冂": ["0", "3-6", "1,2"] },
+  "mnemonic": { "decomposition": "⿱一⿻从冂" }
 }

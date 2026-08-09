@@ -28,8 +28,6 @@
       "M 386 44 L 405 30 L 625 54 L 677 51 L 704 41"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳艹冖吕"
-  },
-  "decompositions": { "⿳艹冖吕": ["0-2", "3-4", "5-10"] }
+  "decompositions": { "⿳艹冖吕": ["0-2", "3,4", "5-10"] },
+  "mnemonic": { "decomposition": "⿳艹冖吕" }
 }

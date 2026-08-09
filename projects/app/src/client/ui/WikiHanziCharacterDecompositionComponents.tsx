@@ -1,17 +1,19 @@
-import { isHanziCharacter, parseIds, walkIdsNodeLeafs } from "@/data/hanzi";
-import type { HanziCharacter, HanziText, StrokeSpecString } from "@/data/model";
+import { isHanziCharacter } from "@/data/hanzi";
+import type { HanziCharacter, HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { use, useState } from "react";
 import { View } from "react-native";
 import { HanziStrokesTile } from "./HanziStrokesTile";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
-import { loadBuiltinCharacterDecompositionEntries } from "@/dictionary";
-import { mapStrokeSpec, parseStrokeSpec } from "@/util/strokeSpec";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import {
+  decomposeHanziToIdsLeafsWithStrokeSpecs,
+  loadBuiltinCharacterDecompositionEntries,
+} from "@/dictionary";
+import { parseStrokeSpec } from "@/util/strokeSpec";
 
-const decompositionGridMinColumnWidth = 148;
-const decompositionGridColumnGap = 12;
+const decompositionGridMinColumnWidth = 130;
+const decompositionGridColumnGap = 4;
 const decompositionGridRowGap = 16;
 const decompositionGridCellMinHeight = 124;
 
@@ -40,96 +42,10 @@ function WikiHanziCharacterDecompositionComponentsBox({
     loadBuiltinCharacterDecompositionEntries(),
   );
 
-  const decompositionItems: {
-    hanzi: HanziCharacter;
-    strokeSpec: StrokeSpecString;
-  }[] = [];
-  const decompositionQueue: {
-    contextStrokeSpec: StrokeSpecString | null;
-    hanzi: HanziCharacter;
-  }[] = [{ contextStrokeSpec: null, hanzi }];
-  while (decompositionQueue.length > 0) {
-    const currentItem = nonNullable(decompositionQueue.shift());
-    const entry = characterDecompositionEntries.find(
-      (entry) => entry.hanzi === currentItem.hanzi,
-    );
-
-    if (!entry) {
-      continue;
-    }
-
-    let i = -1;
-    for (const leaf of walkIdsNodeLeafs(parseIds(entry.ids))) {
-      i++;
-
-      const strokeSpec = nonNullable(entry.strokeSpecs[i]);
-      const mappedStrokeSpec =
-        currentItem.contextStrokeSpec == null
-          ? strokeSpec
-          : mapStrokeSpec(currentItem.contextStrokeSpec, strokeSpec);
-      if (mappedStrokeSpec != null) {
-        decompositionItems.push({
-          hanzi: leaf as HanziCharacter,
-          strokeSpec: mappedStrokeSpec,
-        });
-      }
-    }
-  }
-
-  // const decompositionItems: {
-  //   hanzi: HanziCharacter;
-  //   strokes: StrokeSpecString;
-  // }[] = characterDecompositionEntries
-  //   .filter((entry) => entry.hanzi === hanzi)
-  //   .flatMap((entry) => {
-  //     const result = [];
-
-  //     return Object.values(entry.decompositions2).flatMap(([ids, strokeSpecs]) => {
-  //           invariant(ids != null, `ids must not be null`);
-  //           invariant(strokeSpecs != null, `strokeSpecs must not be null`);
-
-  //           const result = [];
-
-  //           let i = 0;
-  //           for (const x of walkIdsNodeLeafs(parseIds(ids))) {
-  //             if (!isHanziCharacter(x as HanziText)) {
-  //               continue;
-  //             }
-
-  //             result.push({
-  //               hanzi: x as HanziCharacter,
-  //               strokes: nonNullable(strokeSpecs[i]) as StrokeSpecString,
-  //             });
-  //             i++;
-  //           }
-  //           return result;
-  //         });
-  //   });
-
-  // decompositionData?.decompositions2 == null
-  //   ? []
-  //   : Object.values(decompositionData.decompositions2).flatMap(
-  //       ([ids, strokeSpecs]) => {
-  //         invariant(ids != null, `ids must not be null`);
-  //         invariant(strokeSpecs != null, `strokeSpecs must not be null`);
-
-  //         const result = [];
-
-  //         let i = 0;
-  //         for (const x of walkIdsNodeLeafs(parseIds(ids))) {
-  //           if (!isHanziCharacter(x as HanziText)) {
-  //             continue;
-  //           }
-
-  //           result.push({
-  //             hanzi: x as HanziCharacter,
-  //             strokes: nonNullable(strokeSpecs[i]) as StrokeSpecString,
-  //           });
-  //           i++;
-  //         }
-  //         return result;
-  //       },
-  //     );
+  const decompositionItems = decomposeHanziToIdsLeafsWithStrokeSpecs(
+    hanzi,
+    characterDecompositionEntries,
+  );
 
   const dedupedHanziListKey = [
     ...new Set(decompositionItems.map((x) => x.hanzi)),

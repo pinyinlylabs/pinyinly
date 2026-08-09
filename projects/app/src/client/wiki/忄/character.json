@@ -14,8 +14,6 @@
   },
   "componentFormOf": "心",
   "isStructural": true,
-  "mnemonic": {
-    "decomposition": "⿻八丨"
-  },
-  "decompositions": { "⿻八丨": ["0-1", "2"] }
+  "decompositions": { "⿻八丨": ["0,1", "2"] },
+  "mnemonic": { "decomposition": "⿻八丨" }
 }

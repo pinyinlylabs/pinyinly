@@ -18,8 +18,6 @@
       "M 631 454 L 642 448 L 663 416 L 661 103 L 674 -13"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻介"
-  },
-  "decompositions": { "⿰亻介": ["0-1", "2-5"] }
+  "decompositions": { "⿰亻介": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰亻介" }
 }

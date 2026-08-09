@@ -14,8 +14,6 @@
       "M 429 311 L 464 285 L 444 211 L 417 153 L 396 117 L 346 55 L 302 15 L 262 -10"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿹丩厂"
-  },
-  "decompositions": { "⿹丩厂": ["0-1", "2-3"] }
+  "decompositions": { "⿹丩厂": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿹丩厂" }
 }

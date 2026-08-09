@@ -13,8 +13,6 @@
     ]
   },
   "componentFormOf": "糸",
-  "mnemonic": {
-    "decomposition": "⿱②一"
-  },
-  "decompositions": { "⿱②一": ["0-1", "2"] }
+  "decompositions": { "⿱②一": ["0,1", "2"] },
+  "mnemonic": { "decomposition": "⿱②一" }
 }

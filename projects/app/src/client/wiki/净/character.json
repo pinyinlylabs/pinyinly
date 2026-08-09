@@ -22,8 +22,6 @@
       "M 526 487 L 557 468 L 570 389 L 582 182 L 574 89 L 560 49 L 534 19 L 413 73"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰冫争"
-  },
-  "decompositions": { "⿰冫争": ["0-1", "2-7"] }
+  "decompositions": { "⿰冫争": ["0,1", "2-7"] },
+  "mnemonic": { "decomposition": "⿰冫争" }
 }

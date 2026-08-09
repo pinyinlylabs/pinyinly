@@ -20,8 +20,6 @@
       "M 310 61 L 324 73 L 612 94 L 689 93"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⺊龱"
-  },
-  "decompositions": { "⿱⺊龱": ["0-1", "2-6"] }
+  "decompositions": { "⿱⺊龱": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿱⺊龱" }
 }

@@ -29,8 +29,6 @@
     ]
   },
   "simplifiedForm": "鱼",
-  "mnemonic": {
-    "decomposition": "⿳⺈田灬"
-  },
-  "decompositions": { "⿳⺈田灬": ["0-1", "2-6", "7-10"] }
+  "decompositions": { "⿳⺈田灬": ["0,1", "2-6", "7-10"] },
+  "mnemonic": { "decomposition": "⿳⺈田灬" }
 }

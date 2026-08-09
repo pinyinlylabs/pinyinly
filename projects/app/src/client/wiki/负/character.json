@@ -18,8 +18,6 @@
       "M 575 155 L 669 87 L 717 43 L 736 15 L 749 -23"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⺈贝"
-  },
-  "decompositions": { "⿱⺈贝": ["0-1", "2-5"] }
+  "decompositions": { "⿱⺈贝": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿱⺈贝" }
 }

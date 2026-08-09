@@ -12,8 +12,6 @@
       "M97 424L154 413L437 452L828 487L860 485L931 462"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱丷一"
-  },
-  "decompositions": { "⿱丷一": ["0-1", "2"] }
+  "decompositions": { "⿱丷一": ["0,1", "2"] },
+  "mnemonic": { "decomposition": "⿱丷一" }
 }

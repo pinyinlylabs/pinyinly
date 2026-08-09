@@ -18,8 +18,6 @@
       "M 721 761 L 806 715 L 836 679"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰又戈"
-  },
-  "decompositions": { "⿰又戈": ["0-1", "2-5"] }
+  "decompositions": { "⿰又戈": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰又戈" }
 }

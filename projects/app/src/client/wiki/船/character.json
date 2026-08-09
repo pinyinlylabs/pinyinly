@@ -28,8 +28,6 @@
       "M 617 47 L 628 59 L 774 77 L 820 77 L 843 68"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰舟⿱几口"
-  },
-  "decompositions": { "⿰舟⿱几口": ["0-5", "6-7", "8-10"] }
+  "decompositions": { "⿰舟⿱几口": ["0-5", "6,7", "8-10"] },
+  "mnemonic": { "decomposition": "⿰舟⿱几口" }
 }

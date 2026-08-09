@@ -22,8 +22,6 @@
       "M 99 75 L 168 54 L 457 89 L 803 112 L 853 104 L 909 81"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳⺈田一"
-  },
-  "decompositions": { "⿳⺈田一": ["0-1", "2-6", "7"] }
+  "decompositions": { "⿳⺈田一": ["0,1", "2-6", "7"] },
+  "mnemonic": { "decomposition": "⿳⺈田一" }
 }

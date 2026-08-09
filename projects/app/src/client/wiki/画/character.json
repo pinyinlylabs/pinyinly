@@ -22,8 +22,6 @@
       "M 792 408 L 809 396 L 835 356 L 794 30"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱一⿶凵田"
-  },
-  "decompositions": { "⿱一⿶凵田": ["0", "6-7", "1-5"] }
+  "decompositions": { "⿱一⿶凵田": ["0", "6,7", "1-5"] },
+  "mnemonic": { "decomposition": "⿱一⿶凵田" }
 }

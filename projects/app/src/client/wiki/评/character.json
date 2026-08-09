@@ -20,8 +20,6 @@
       "M 599 675 L 633 657 L 645 647 L 646 638 L 639 -29"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠平"
-  },
-  "decompositions": { "⿰讠平": ["0-1", "2-6"] }
+  "decompositions": { "⿰讠平": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿰讠平" }
 }

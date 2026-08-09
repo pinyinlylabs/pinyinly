@@ -34,8 +34,6 @@
       "M 632 422 L 648 414 L 670 388 L 659 -59"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⿳𠂉卌一舛"
-  },
-  "decompositions": { "⿱⿳𠂉卌一舛": ["0-1", "2-6", "7", "8-13"] }
+  "decompositions": { "⿱⿳𠂉卌一舛": ["0,1", "2-6", "7", "8-13"] },
+  "mnemonic": { "decomposition": "⿱⿳𠂉卌一舛" }
 }

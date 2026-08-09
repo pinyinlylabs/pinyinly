@@ -24,8 +24,6 @@
       "M 628 300 L 634 281 L 698 197 L 796 90 L 825 76 L 949 45"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠吴"
-  },
-  "decompositions": { "⿰讠吴": ["0-1", "2-8"] }
+  "decompositions": { "⿰讠吴": ["0,1", "2-8"] },
+  "mnemonic": { "decomposition": "⿰讠吴" }
 }

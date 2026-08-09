@@ -16,11 +16,9 @@
       "M 534 781 L 573 755 L 590 727 L 574 562 L 569 334 L 579 183 L 599 134 L 640 97 L 709 78 L 793 76 L 844 83 L 873 95 L 893 111 L 895 126 L 896 291"
     ]
   },
+  "decompositions": { "⿰③匕": ["0-2", "3,4"] },
   "mnemonic": {
     "decomposition": "⿰③匕",
-    "components": {
-      "③": { "label": "don't know" }
-    }
-  },
-  "decompositions": { "⿰③匕": ["0-2", "3-4"] }
+    "components": { "③": { "label": "don't know" } }
+  }
 }

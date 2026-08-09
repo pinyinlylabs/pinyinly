@@ -18,8 +18,6 @@
       "M 519 322 L 631 180 L 723 88 L 753 74 L 897 41"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱丷天"
-  },
-  "decompositions": { "⿱丷天": ["0-1", "2-5"] }
+  "decompositions": { "⿱丷天": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿱丷天" }
 }

@@ -1,3 +1,4 @@
+import { mapStrokeSpec } from "@/util/strokeSpec";
 import {
   isHanziCharacter,
   parseIds,
@@ -6,7 +7,6 @@ import {
 } from "@/data/hanzi";
 import type {
   HanziCharacter,
-  HanziIdsLeaf,
   HanziWord,
   IdsNode,
   HanziIds,
@@ -14,6 +14,7 @@ import type {
   PinyinUnit,
   StrokeSpecString,
   HanziText,
+  HanziIdsLeaf,
 } from "@/data/model";
 import {
   charactersSchema,
@@ -34,6 +35,7 @@ import {
   memoize0,
   memoize1,
   weakMemoize1,
+  zip,
 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
@@ -646,7 +648,7 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
 }
 
-export function decomposeHanziToIdsLeafs<S extends HanziIdsLeaf>(
+export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
   hanzi: HanziText,
   decompositionData: readonly Readonly<
     Pick<CharacterDecompositionEntry, `hanzi` | `ids`>
@@ -656,17 +658,14 @@ export function decomposeHanziToIdsLeafs<S extends HanziIdsLeaf>(
    * predicate returns false for a given leaf, that leaf will not be added to
    * the result, and its children will not be descended into.
    */
-  predicate: (value: HanziIdsLeaf) => value is S = (_x): _x is S => true,
+  predicate: (value: HanziCharacter) => value is S = (_x): _x is S => true,
 ): S[] {
   const decompositionsByHanzi = groupByHanzi(decompositionData);
-  const hanziCharacters = splitHanziText(hanzi) as HanziIdsLeaf[];
+  const hanziCharacters = splitHanziText(hanzi);
 
-  // For multi-character hanzi, learn each character, but for for
-  // single-character hanzi, decompose it into radicals and learn those.
   const result: Set<S> = new Set();
 
   const queue = [...hanziCharacters];
-
   while (queue.length > 0) {
     const character = queue.shift();
     if (character == null || !predicate(character)) {
@@ -680,15 +679,13 @@ export function decomposeHanziToIdsLeafs<S extends HanziIdsLeaf>(
       continue;
     }
 
-    const decompositions = decompositionsByHanzi.get(
-      character as HanziCharacter,
-    );
+    const decompositions = decompositionsByHanzi.get(character);
     if (decompositions == null) {
       continue;
     }
 
     for (const decomposition of decompositions) {
-      const idsNode = parseIds(decomposition.ids) as IdsNode<HanziIdsLeaf>;
+      const idsNode = parseIds(decomposition.ids) as IdsNode<HanziCharacter>;
       for (const idsLeaf of walkIdsNodeLeafs(idsNode)) {
         if (!predicate(idsLeaf)) {
           // If it fails the predicate, don't add it nor descend into it.
@@ -705,6 +702,74 @@ export function decomposeHanziToIdsLeafs<S extends HanziIdsLeaf>(
   }
 
   return [...result];
+}
+
+export function decomposeHanziToIdsLeafsWithStrokeSpecs(
+  hanziCharacter: HanziCharacter,
+  decompositionData: readonly Readonly<CharacterDecompositionEntry>[],
+): { hanzi: HanziCharacter; strokeSpec: StrokeSpecString }[] {
+  const decompositionsByHanzi = groupByHanzi(decompositionData);
+
+  // Use a set to avoid duplicates, since the same leaf can be reached via
+  // multiple paths in the decomposition tree.
+  const result: Set<string> = new Set();
+
+  const queue: {
+    baseStrokeSpec: StrokeSpecString;
+    character: HanziCharacter;
+  }[] = [
+    {
+      baseStrokeSpec:
+        `0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20` as StrokeSpecString,
+      character: hanziCharacter,
+    },
+  ];
+
+  let item;
+  while ((item = queue.shift())) {
+    const { character, baseStrokeSpec } = item;
+
+    const decompositions = decompositionsByHanzi.get(character);
+    if (decompositions == null) {
+      continue;
+    }
+
+    for (const decomposition of decompositions) {
+      for (const [leafIds, leafStrokeSpec] of zip(
+        walkIdsNodeLeafs(parseIds(decomposition.ids) as IdsNode<HanziIdsLeaf>),
+        decomposition.strokeSpecs,
+      )) {
+        if (isHanziStrokeCountChar(character) || !isHanziCharacter(leafIds)) {
+          continue;
+        }
+
+        const strokeSpec = mapStrokeSpec(baseStrokeSpec, leafStrokeSpec);
+        if (strokeSpec == null) {
+          continue;
+        }
+
+        result.add(`${leafIds}\0${strokeSpec}`);
+
+        queue.push({
+          character: leafIds,
+          baseStrokeSpec: strokeSpec,
+        });
+      }
+    }
+  }
+
+  return [...result].map((x) => {
+    const [hanzi, strokeSpec] = x.split(`\0`);
+    invariant(
+      hanzi != null && strokeSpec != null,
+      `expected to split %o into hanzi and strokeSpec`,
+      x,
+    );
+    return {
+      hanzi: hanzi as HanziCharacter,
+      strokeSpec: strokeSpec as StrokeSpecString,
+    };
+  });
 }
 
 export function pinyinOrThrow(
@@ -813,13 +878,3 @@ export const getIsComponentFormHanzi = memoize0(async () => {
 
   return isComponentFormHanzi;
 });
-
-// export function decomposeHanziWithStrokeSpec(
-//   hanzi: HanziCharacter,
-//   strokeSpec: StrokeSpecString,
-// ): { hanzi: HanziCharacter; strokeSpec: StrokeSpecString }[] {
-//   return parseIndexRangesFromStrokeSpec(strokeSpec).map((index) => ({
-//     hanzi,
-//     strokeSpec: `${index}`,
-//   }));
-// }

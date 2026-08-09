@@ -22,8 +22,6 @@
       "M 648 266 L 783 170 L 812 122 L 822 89"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳亠口小"
-  },
-  "decompositions": { "⿳亠口小": ["0-1", "2-4", "5-7"] }
+  "decompositions": { "⿳亠口小": ["0,1", "2-4", "5-7"] },
+  "mnemonic": { "decomposition": "⿳亠口小" }
 }

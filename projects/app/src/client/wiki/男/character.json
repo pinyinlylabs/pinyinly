@@ -20,8 +20,6 @@
       "M 466 463 L 482 448 L 498 417 L 452 282 L 393 175 L 332 108 L 293 78 L 232 46 L 157 21"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱田力"
-  },
-  "decompositions": { "⿱田力": ["0-4", "5-6"] }
+  "decompositions": { "⿱田力": ["0-4", "5,6"] },
+  "mnemonic": { "decomposition": "⿱田力" }
 }

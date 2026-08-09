@@ -18,8 +18,6 @@
       "M 616 335 L 625 308 L 678 231 L 747 145 L 815 77 L 837 66 L 946 40"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰又欠"
-  },
-  "decompositions": { "⿰又欠": ["0-1", "2-5"] }
+  "decompositions": { "⿰又欠": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰又欠" }
 }

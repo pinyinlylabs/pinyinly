@@ -22,8 +22,6 @@
       "M 114 51 L 136 43 L 185 39 L 367 60 L 836 90 L 876 82 L 935 59"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱丷亚"
-  },
-  "decompositions": { "⿱丷亚": ["0-1", "2-7"], "⿱䒑业": ["", ""] }
+  "decompositions": { "⿱丷亚": ["0,1", "2-7"], "⿱䒑业": ["", ""] },
+  "mnemonic": { "decomposition": "⿱丷亚" }
 }

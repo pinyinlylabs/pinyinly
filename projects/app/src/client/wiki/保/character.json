@@ -24,8 +24,6 @@
       "M 641 398 L 653 370 L 715 297 L 823 191 L 977 156"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻呆"
-  },
-  "decompositions": { "⿰亻呆": ["0-1", "2-8"] }
+  "decompositions": { "⿰亻呆": ["0,1", "2-8"] },
+  "mnemonic": { "decomposition": "⿰亻呆" }
 }

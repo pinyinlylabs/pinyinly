@@ -16,8 +16,6 @@
       "M 677 159 L 694 175 L 801 190 L 854 190 L 883 181"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰力口"
-  },
-  "decompositions": { "⿰力口": ["0-1", "2-4"] }
+  "decompositions": { "⿰力口": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿰力口" }
 }

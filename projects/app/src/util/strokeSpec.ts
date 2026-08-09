@@ -234,10 +234,54 @@ export function formatStrokeSpec(spec: StrokeSpec): StrokeSpecString {
     .join(`,`) as StrokeSpecString;
 }
 
+function isSingleIndexAtom(
+  item: StrokeSpecAtom[],
+): item is [StrokeSpecSliceAtom] {
+  return (
+    item.length === 1 &&
+    item[0]?.kind === `slice` &&
+    item[0].from == null &&
+    item[0].to == null
+  );
+}
+
 export function normalizeStrokeSpec(
-  specText: StrokeSpecString,
+  spec: StrokeSpecString | StrokeSpec,
 ): StrokeSpecString {
-  return formatStrokeSpec(parseStrokeSpec(specText));
+  if (typeof spec === `string`) {
+    spec = parseStrokeSpec(spec);
+  }
+
+  spec = flattenStrokeSpecRanges(spec);
+
+  for (let i = 0; i < spec.length;) {
+    const thisItem = nonNullable(spec[i]);
+    if (isSingleIndexAtom(thisItem)) {
+      let runLength = 1;
+      for (let j = i + 1; j < spec.length; j++) {
+        const nextItem = nonNullable(spec[j]);
+        if (
+          isSingleIndexAtom(nextItem) &&
+          nextItem[0].stroke === thisItem[0].stroke + runLength
+        ) {
+          runLength++;
+        } else {
+          break;
+        }
+      }
+      if (runLength > 2) {
+        spec.splice(i, runLength, [
+          {
+            kind: `range`,
+            start: thisItem[0].stroke,
+            end: thisItem[0].stroke + runLength - 1,
+          } satisfies StrokeSpecRangeAtom,
+        ]);
+      }
+    }
+    i++;
+  }
+  return formatStrokeSpec(spec);
 }
 
 export function parseIndexRangesFromStrokeSpec(
@@ -264,25 +308,32 @@ export function parseIndexRangesFromStrokeSpec(
 }
 
 /**
- * Maps a stroke spec from a source context to a destination context, based on
- * the provided source and destination stroke specs.
+ * Maps a stroke spec from one "index space" to another. This facilitates
+ * showing the component strokes of a character using the component's stroke
+ * spec "projected" onto the parent's strokes. This can be done recursively to
+ * show all the components of a character going down multiple levels of
+ * decomposition.
+ *
+ * For normal stroke specs, they're assuming a default "index space" that's
+ * simply "0,1,2…<N-1>" for an N-stroke character. These correspond to the SVG
+ * paths in character.json `svg.strokes`. However for a component of a
+ * component, the stroke spec is relative to the component's strokes, not the
+ * parent's strokes. So we need to map the component's stroke spec to the
+ * parent's stroke spec so that we can show the component's strokes in the
+ * context of the parent character.
  *
  * e.g. `mapStrokeSpec("0,3", "1,0")` returns `"3,0"`.
  */
 export function mapStrokeSpec(
-  src: StrokeSpecString,
-  dest: StrokeSpecString,
+  base: StrokeSpecString,
+  spec: StrokeSpecString,
 ): StrokeSpecString | null {
-  const srcSpec = flattenStrokeSpecRanges(parseStrokeSpec(src));
-  const destSpec = flattenStrokeSpecRanges(parseStrokeSpec(dest));
-
-  if (srcSpec.length !== destSpec.length) {
-    return null;
-  }
+  const baseSpec = flattenStrokeSpecRanges(parseStrokeSpec(base));
+  const specSpec = flattenStrokeSpecRanges(parseStrokeSpec(spec));
 
   const result: StrokeSpec = [];
 
-  for (const item of destSpec) {
+  for (const item of specSpec) {
     const newItem: StrokeSpecAtom[] = [];
     for (const atom of item) {
       invariant(
@@ -291,7 +342,13 @@ export function mapStrokeSpec(
       );
       const slice = atom;
 
-      const x = nonNullable(srcSpec.at(slice.stroke));
+      const x = baseSpec.at(slice.stroke);
+      if (x == null) {
+        // The base stroke spec doesn't have a stroke at this index, so we can't
+        // map the slice to anything. This can happen if the base stroke spec is
+        // shorter than the spec we're trying to map.
+        return null;
+      }
 
       if (slice.from != null || slice.to != null) {
         // Sliced atoms cannot be mapped because they depend on the source
@@ -304,7 +361,7 @@ export function mapStrokeSpec(
     result.push(newItem);
   }
 
-  return formatStrokeSpec(result);
+  return normalizeStrokeSpec(result);
 }
 
 export function flattenStrokeSpecRanges(spec: StrokeSpec): StrokeSpec {

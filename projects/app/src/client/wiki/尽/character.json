@@ -18,8 +18,6 @@
       "M 389 177 L 507 96 L 539 63 L 561 14"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱尺⺀"
-  },
-  "decompositions": { "⿱尺⺀": ["0-3", "4-5"] }
+  "decompositions": { "⿱尺⺀": ["0-3", "4,5"] },
+  "mnemonic": { "decomposition": "⿱尺⺀" }
 }

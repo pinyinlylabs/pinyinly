@@ -26,8 +26,6 @@
       "M 721 259 L 787 210 L 839 162 L 859 132 L 869 93"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰冫京"
-  },
-  "decompositions": { "⿰冫京": ["0-1", "2-9"] }
+  "decompositions": { "⿰冫京": ["0,1", "2-9"] },
+  "mnemonic": { "decomposition": "⿰冫京" }
 }

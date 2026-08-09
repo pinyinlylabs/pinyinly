@@ -18,8 +18,6 @@
       "M354 436L562 275L623 216L647 173"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱亠凶"
-  },
-  "decompositions": { "⿱亠凶": ["0-1", "2-5"] }
+  "decompositions": { "⿱亠凶": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿱亠凶" }
 }

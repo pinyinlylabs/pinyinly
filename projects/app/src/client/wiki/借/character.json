@@ -26,8 +26,6 @@
       "M 502 46 L 526 61 L 647 76 L 701 70"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻昔"
-  },
-  "decompositions": { "⿰亻昔": ["0-1", "2-9"] }
+  "decompositions": { "⿰亻昔": ["0,1", "2-9"] },
+  "mnemonic": { "decomposition": "⿰亻昔" }
 }

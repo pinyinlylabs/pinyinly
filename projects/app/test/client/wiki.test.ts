@@ -245,6 +245,31 @@ describe(`character.json files`, async () => {
     }
   });
 
+  test(`.mnemonic.decomposition reference exists in .decompositions`, async () => {
+    for (const { characterData, filePath } of characterFiles) {
+      if (characterData.mnemonic?.decomposition == null) {
+        continue;
+      }
+
+      expect
+        .soft(Object.keys(characterData.decompositions ?? {}), `${filePath}`)
+        .toContain(characterData.mnemonic.decomposition);
+    }
+  });
+
+  test(`decompositions don't reference the current character causing infinite loops`, async () => {
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (characterData.decompositions != null) {
+        for (const ids of Object.keys(characterData.decompositions)) {
+          const leafs = [...walkIdsNodeLeafs(parseIds(ids))];
+          expect
+            .soft(leafs, `${filePath} IDS: ${ids}`)
+            .not.toContain(character);
+        }
+      }
+    }
+  });
+
   test(`stroke medians conformance`, async () => {
     for (const { character, characterData } of characterFiles) {
       if (characterData.svg.medians == null) {
@@ -280,19 +305,22 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`decomposition stroke specs are normalized`, () => {
-    for (const { character, characterData } of characterFiles) {
+  test(`decomposition stroke specs are normalized`, async () => {
+    for (const { characterData, filePath } of characterFiles) {
       if (characterData.decompositions) {
-        for (const [ids, strokeSpecs] of Object.entries(
-          characterData.decompositions,
-        )) {
-          for (const [i, strokeSpec] of strokeSpecs.entries()) {
-            const normalized = normalizeStrokeSpec(strokeSpec);
-            expect
-              .soft(strokeSpec, `${character} IDS: ${ids} stroke spec ${i}`)
-              .toEqual(normalized);
-          }
-        }
+        const expected = {
+          ...characterData,
+          decompositions: Object.fromEntries(
+            Object.entries(characterData.decompositions).map(
+              ([ids, strokeSpecs]) => [
+                ids,
+                strokeSpecs.map(normalizeStrokeSpec),
+              ],
+            ),
+          ),
+        };
+
+        await expect.soft(expected).toMatchJsonFileSnapshot(filePath);
       }
     }
   });

@@ -14,8 +14,6 @@
       "M 513 375 L 521 341 L 606 223 L 689 127 L 745 76 L 768 60 L 934 25"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱八人"
-  },
-  "decompositions": { "⿱八人": ["0-1", "2-3"] }
+  "decompositions": { "⿱八人": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿱八人" }
 }

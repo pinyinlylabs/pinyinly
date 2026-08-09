@@ -16,8 +16,6 @@
       "M 496 410 L 532 396 L 675 192 L 773 80 L 932 38"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱宀八"
-  },
-  "decompositions": { "⿱宀八": ["0-2", "3-4"] }
+  "decompositions": { "⿱宀八": ["0-2", "3,4"] },
+  "mnemonic": { "decomposition": "⿱宀八" }
 }

@@ -31,8 +31,6 @@
     ]
   },
   "simplifiedForm": "黄",
-  "mnemonic": {
-    "decomposition": "⿱廿⿳一由八"
-  },
-  "decompositions": { "⿱廿⿳一由八": ["0-3", "4", "5-9", "10-11"] }
+  "decompositions": { "⿱廿⿳一由八": ["0-3", "4", "5-9", "10,11"] },
+  "mnemonic": { "decomposition": "⿱廿⿳一由八" }
 }

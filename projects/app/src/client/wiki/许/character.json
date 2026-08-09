@@ -18,8 +18,6 @@
       "M 632 561 L 676 535 L 671 -52"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠午"
-  },
-  "decompositions": { "⿰讠午": ["0-1", "2-5"] }
+  "decompositions": { "⿰讠午": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰讠午" }
 }

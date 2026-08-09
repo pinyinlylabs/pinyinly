@@ -20,8 +20,6 @@
       "M 623 366 L 817 301 L 854 278 L 878 243"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠斥"
-  },
-  "decompositions": { "⿰讠斥": ["0-1", "2-6"] }
+  "decompositions": { "⿰讠斥": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿰讠斥" }
 }

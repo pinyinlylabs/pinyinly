@@ -20,8 +20,6 @@
       "M 613 513 L 647 490 L 629 398 L 601 318 L 574 265 L 512 179 L 470 135 L 406 85"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰衤刀"
-  },
-  "decompositions": { "⿰衤刀": ["0-4", "5-6"] }
+  "decompositions": { "⿰衤刀": ["0-4", "5,6"] },
+  "mnemonic": { "decomposition": "⿰衤刀" }
 }

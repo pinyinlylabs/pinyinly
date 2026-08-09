@@ -89,6 +89,8 @@ describe(`normalizeStrokeSpec`, () => {
   );
 
   test.for([
+    [`0,1,2,5`, `0-2,5`],
+    [`0,1,4,2-5`, `0,1,4,2-5`],
     [`  0 - 2 , 5 `, `0-2,5`],
     [` 1[ 0 : 3 ] + 2[ :4 ] `, `1[0:3]+2[:4]`],
     [` 1[ 5% : 95% ] + 2[ 2 : 75% ] `, `1[5%:95%]+2[2:75%]`],
@@ -105,14 +107,17 @@ describe(`mapStrokeSpec`, () => {
     [`0-1`, `0-1`, `0,1`],
     [`0,1`, `0[1:]`, null],
     [`1,3`, `1,0`, `3,1`],
+    [`1,3,4`, `1,0`, `3,1`], // Should allow the base spec to be longer than the spec to map, and just ignore the extra atoms.
     [`1+2,3`, `1,0`, `3,1+2`],
     [`0-1+2,3`, `1,0`, `3,0-1+2`],
     [`0`, `0,1`, null],
+    [`0`, `1`, null],
+    [`0-10`, `3-7`, `3-7`],
     // [`2-8`, `2,1[13%:34.6%],3,4,5+6[27%:73%]`, ``],
   ] as [StrokeSpecString, StrokeSpecString, StrokeSpecString | null][])(
     `projects $0 through $1 to $2`,
-    ([src, dest, expected]) => {
-      expect(mapStrokeSpec(src, dest)).toBe(expected);
+    ([base, spec, expected]) => {
+      expect(mapStrokeSpec(base, spec)).toBe(expected);
     },
   );
 });

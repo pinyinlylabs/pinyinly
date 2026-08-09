@@ -18,8 +18,6 @@
       "M 764 317 L 845 257 L 870 214"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿸厂圡"
-  },
-  "decompositions": { "⿸厂圡": ["0-1", "2-5"] }
+  "decompositions": { "⿸厂圡": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿸厂圡" }
 }

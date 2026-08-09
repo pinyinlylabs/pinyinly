@@ -22,7 +22,12 @@
       "M 168 251 L 231 233 L 449 265 L 815 296 L 896 268"
     ]
   },
+  "decompositions": {
+    "⿳𭕄冖子": ["0-2", "3,4", "5-7"],
+    "⿱龸子": ["0-4", "5-7"]
+  },
   "mnemonic": {
+    "decomposition": "⿳𭕄冖子",
     "components": {
       "𭕄": { "label": "raised fingers" },
       "冖": { "label": "a blanket", "color": "yellow" },
@@ -34,11 +39,6 @@
         "hint": "A child using their hand to **learn** about the world.",
         "imageAssetIds": ["sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw"]
       }
-    ],
-    "decomposition": "⿳𭕄冖子"
-  },
-  "decompositions": {
-    "⿳𭕄冖子": ["0-2", "3-4", "5-7"],
-    "⿱龸子": ["0-4", "5-7"]
+    ]
   }
 }

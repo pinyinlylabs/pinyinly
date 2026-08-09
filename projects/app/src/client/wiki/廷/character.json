@@ -18,8 +18,6 @@
       "M 101 291 L 167 288 L 208 275 L 488 119 L 586 75 L 700 37 L 788 37 L 956 60"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿺廴壬"
-  },
-  "decompositions": { "⿺廴壬": ["4-5", "0-3"] }
+  "decompositions": { "⿺廴壬": ["4,5", "0-3"] },
+  "mnemonic": { "decomposition": "⿺廴壬" }
 }

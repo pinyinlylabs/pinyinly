@@ -22,8 +22,6 @@
       "M 151 201 L 203 190 L 408 218 L 809 251 L 858 242 L 894 228"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳亠口子"
-  },
-  "decompositions": { "⿳亠口子": ["0-1", "2-4", "5-7"] }
+  "decompositions": { "⿳亠口子": ["0,1", "2-4", "5-7"] },
+  "mnemonic": { "decomposition": "⿳亠口子" }
 }

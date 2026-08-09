@@ -20,8 +20,6 @@
       "M 509 265 L 542 238 L 627 140 L 726 48 L 807 20 L 922 -5"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⺈央"
-  },
-  "decompositions": { "⿱⺈央": ["0-1", "2-6"], "⿳𠂊冂大": ["", "", ""] }
+  "decompositions": { "⿱⺈央": ["0,1", "2-6"], "⿳𠂊冂大": ["", "", ""] },
+  "mnemonic": { "decomposition": "⿱⺈央" }
 }

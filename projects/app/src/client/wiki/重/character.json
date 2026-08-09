@@ -24,8 +24,6 @@
       "M 202 3 L 256 -7 L 563 23 L 764 33 L 800 30 L 850 12"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱千里"
-  },
-  "decompositions": { "⿱千里": ["0-1,6", "2-8"] }
+  "decompositions": { "⿱千里": ["0,1,6", "2-8"] },
+  "mnemonic": { "decomposition": "⿱千里" }
 }

@@ -20,8 +20,6 @@
       "M 490 313 L 527 285 L 535 269 L 524 157 L 531 65 L 555 28 L 602 6 L 656 -3 L 766 -5 L 843 6 L 898 29 L 903 81 L 900 194"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱十兄"
-  },
-  "decompositions": { "⿱十兄": ["0-1", "2-6"] }
+  "decompositions": { "⿱十兄": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿱十兄" }
 }

@@ -1,6 +1,7 @@
 import { LRUCache } from "lru-cache";
 import type { DeepReadonly } from "ts-essentials";
 import { invariant } from "./invariant.ts";
+import lodashZip from "lodash/zip.js";
 
 export const deepReadonly = <T>(value: T) => value as DeepReadonly<T>;
 
@@ -550,4 +551,23 @@ export function maxK<T>(
     capacity,
     inverseSortComparator(sortComparatorNumber(getCompareValue)),
   );
+}
+
+/**
+ * Strict version of lodash/zip that throws if the arrays are not the same length.
+ */
+export function zip<T1, T2>(
+  a: readonly T1[] | Generator<T1>,
+  b: readonly T2[] | Generator<T2>,
+): [T1, T2][] {
+  a = Array.isArray(a) ? a : Array.from(a);
+  b = Array.isArray(b) ? b : Array.from(b);
+
+  invariant(
+    a.length === b.length,
+    `arrays must be the same length, %s != %s`,
+    a.length,
+    b.length,
+  );
+  return lodashZip(a, b) as [T1, T2][];
 }

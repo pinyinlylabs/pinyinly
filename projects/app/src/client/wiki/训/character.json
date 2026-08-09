@@ -16,8 +16,6 @@
       "M 805 802 L 859 750 L 861 724 L 859 587 L 867 376 L 858 63 L 863 -25"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠川"
-  },
-  "decompositions": { "⿰讠川": ["0-1", "2-4"] }
+  "decompositions": { "⿰讠川": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿰讠川" }
 }

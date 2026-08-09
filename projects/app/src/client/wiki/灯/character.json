@@ -18,8 +18,6 @@
       "M 676 561 L 707 542 L 722 514 L 729 139 L 722 95 L 703 62 L 655 74 L 572 114"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰火丁"
-  },
-  "decompositions": { "⿰火丁": ["0-3", "4-5"] }
+  "decompositions": { "⿰火丁": ["0-3", "4,5"] },
+  "mnemonic": { "decomposition": "⿰火丁" }
 }

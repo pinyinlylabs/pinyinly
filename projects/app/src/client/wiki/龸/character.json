@@ -16,8 +16,6 @@
       "M240 517L255 530L419 559L726 601L782 600L818 580L829 560L767 481L756 477"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⺌冖"
-  },
-  "decompositions": { "⿱⺌冖": ["0-2", "3-4"] }
+  "decompositions": { "⿱⺌冖": ["0-2", "3,4"] },
+  "mnemonic": { "decomposition": "⿱⺌冖" }
 }

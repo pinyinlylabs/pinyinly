@@ -15,8 +15,6 @@
     ]
   },
   "componentFormOf": "攴",
-  "mnemonic": {
-    "decomposition": "⿱②乂"
-  },
-  "decompositions": { "⿱②乂": ["0-1", "2-3"] }
+  "decompositions": { "⿱②乂": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿱②乂" }
 }

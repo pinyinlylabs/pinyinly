@@ -22,8 +22,6 @@
       "M 670 709 L 768 668 L 803 633"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿹⿶弋一止"
-  },
-  "decompositions": { "⿹⿶弋一止": ["1,6-7", "0", "2-5"] }
+  "decompositions": { "⿹⿶弋一止": ["1,6,7", "0", "2-5"] },
+  "mnemonic": { "decomposition": "⿹⿶弋一止" }
 }

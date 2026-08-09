@@ -24,8 +24,6 @@
       "M 650 761 L 753 715 L 772 695"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿵戊𠮛"
-  },
-  "decompositions": { "⿵戊𠮛": ["0-1,6-8", "2-5"] }
+  "decompositions": { "⿵戊𠮛": ["0,1,6-8", "2-5"] },
+  "mnemonic": { "decomposition": "⿵戊𠮛" }
 }

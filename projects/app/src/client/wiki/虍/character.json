@@ -19,8 +19,6 @@
     ]
   },
   "componentFormOf": "虎",
-  "mnemonic": {
-    "decomposition": "⿱⺊⿸厂七"
-  },
-  "decompositions": { "⿱⺊⿸厂七": ["0-1", "2-3", "4-5"] }
+  "decompositions": { "⿱⺊⿸厂七": ["0,1", "2,3", "4,5"] },
+  "mnemonic": { "decomposition": "⿱⺊⿸厂七" }
 }

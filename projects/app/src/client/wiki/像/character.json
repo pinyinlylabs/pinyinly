@@ -32,8 +32,6 @@
       "M 659 288 L 709 239 L 815 167 L 889 156 L 973 155"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻象"
-  },
-  "decompositions": { "⿰亻象": ["0-1", "2-12"] }
+  "decompositions": { "⿰亻象": ["0,1", "2-12"] },
+  "mnemonic": { "decomposition": "⿰亻象" }
 }

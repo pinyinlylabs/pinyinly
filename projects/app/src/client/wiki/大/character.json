@@ -12,8 +12,6 @@
       "M 486 430 L 500 393 L 576 284 L 660 182 L 722 118 L 774 77 L 953 42"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿻一人"
-  },
-  "decompositions": { "⿻一人": ["0", "1-2"] }
+  "decompositions": { "⿻一人": ["0", "1,2"] },
+  "mnemonic": { "decomposition": "⿻一人" }
 }

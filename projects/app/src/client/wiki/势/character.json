@@ -22,8 +22,6 @@
       "M 456 373 L 475 355 L 488 330 L 451 209 L 408 128 L 354 66 L 301 26 L 239 -5 L 205 -15"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱执力"
-  },
-  "decompositions": { "⿱执力": ["0-5", "6-7"] }
+  "decompositions": { "⿱执力": ["0-5", "6,7"] },
+  "mnemonic": { "decomposition": "⿱执力" }
 }

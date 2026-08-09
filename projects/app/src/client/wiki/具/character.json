@@ -22,10 +22,6 @@
       "M 600 176 L 749 70 L 772 37 L 788 -1"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳目一八"
-  },
-  "decompositions": {
-    "⿳目一八": ["0-4", "5", "6-7"]
-  }
+  "decompositions": { "⿳目一八": ["0-4", "5", "6,7"] },
+  "mnemonic": { "decomposition": "⿳目一八" }
 }

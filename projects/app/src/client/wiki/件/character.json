@@ -18,8 +18,6 @@
       "M 589 815 L 617 808 L 653 773 L 644 517 L 643 -42"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻牛"
-  },
-  "decompositions": { "⿰亻牛": ["0-1", "2-5"] }
+  "decompositions": { "⿰亻牛": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰亻牛" }
 }

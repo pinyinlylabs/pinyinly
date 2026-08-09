@@ -28,8 +28,6 @@
       "M 601 296 L 626 275 L 629 260 L 629 89 L 621 37 L 605 11 L 560 26 L 495 59"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻亭"
-  },
-  "decompositions": { "⿰亻亭": ["0-1", "2-10"] }
+  "decompositions": { "⿰亻亭": ["0,1", "2-10"] },
+  "mnemonic": { "decomposition": "⿰亻亭" }
 }

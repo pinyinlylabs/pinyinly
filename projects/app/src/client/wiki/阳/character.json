@@ -18,8 +18,6 @@
       "M 546 195 L 570 210 L 751 233"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰阝日"
-  },
-  "decompositions": { "⿰阝日": ["0-1", "2-5"] }
+  "decompositions": { "⿰阝日": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰阝日" }
 }

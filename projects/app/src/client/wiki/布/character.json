@@ -16,8 +16,6 @@
       "M 511 572 L 529 561 L 554 528 L 547 -64"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿸𠂇巾"
-  },
-  "decompositions": { "⿸𠂇巾": ["0-1", "2-4"] }
+  "decompositions": { "⿸𠂇巾": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿸𠂇巾" }
 }

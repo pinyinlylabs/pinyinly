@@ -26,8 +26,6 @@
       "M 649 180 L 749 98 L 777 60 L 786 26"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱⿰〢又糸"
-  },
-  "decompositions": { "⿱⿰〢又糸": ["0-1", "2-3", "4-9"] }
+  "decompositions": { "⿱⿰〢又糸": ["0,1", "2,3", "4-9"] },
+  "mnemonic": { "decomposition": "⿱⿰〢又糸" }
 }

@@ -28,8 +28,6 @@
       "M 573 365 L 592 361 L 618 339 L 726 187 L 831 78 L 926 52 L 973 46"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻故"
-  },
-  "decompositions": { "⿰亻故": ["0-1", "2-10"] }
+  "decompositions": { "⿰亻故": ["0,1", "2-10"] },
+  "mnemonic": { "decomposition": "⿰亻故" }
 }

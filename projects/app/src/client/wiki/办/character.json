@@ -14,8 +14,6 @@
       "M 777 404 L 875 322 L 892 294 L 902 259"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿻力八"
-  },
-  "decompositions": { "⿻力八": ["0-1", "2-3"] }
+  "decompositions": { "⿻力八": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿻力八" }
 }

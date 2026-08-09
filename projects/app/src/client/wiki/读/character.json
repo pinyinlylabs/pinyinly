@@ -26,8 +26,6 @@
       "M 693 161 L 802 85 L 829 51 L 842 19"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠卖"
-  },
-  "decompositions": { "⿰讠卖": ["0-1", "2-9"] }
+  "decompositions": { "⿰讠卖": ["0,1", "2-9"] },
+  "mnemonic": { "decomposition": "⿰讠卖" }
 }

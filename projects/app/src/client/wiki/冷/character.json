@@ -20,8 +20,6 @@
       "M 473 143 L 542 90 L 609 28 L 626 -1 L 637 -39"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰冫令"
-  },
-  "decompositions": { "⿰冫令": ["0-1", "2-6"] }
+  "decompositions": { "⿰冫令": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿰冫令" }
 }

@@ -26,8 +26,6 @@
       "M 619 672 L 659 637 L 665 594 L 659 -69"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰者阝"
-  },
-  "decompositions": { "⿰者阝": ["0-7", "8-9"] }
+  "decompositions": { "⿰者阝": ["0-7", "8,9"] },
+  "mnemonic": { "decomposition": "⿰者阝" }
 }

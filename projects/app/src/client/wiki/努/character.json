@@ -20,8 +20,6 @@
       "M 488 410 L 510 382 L 512 369 L 481 262 L 436 172 L 376 92 L 328 43 L 230 -28"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱奴力"
-  },
-  "decompositions": { "⿱奴力": ["0-4", "5-6"] }
+  "decompositions": { "⿱奴力": ["0-4", "5,6"] },
+  "mnemonic": { "decomposition": "⿱奴力" }
 }

@@ -26,8 +26,6 @@
       "M 284 210 L 328 208 L 384 188 L 591 73 L 728 18 L 803 14 L 961 37"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻建"
-  },
-  "decompositions": { "⿰亻建": ["0-1", "2-9"] }
+  "decompositions": { "⿰亻建": ["0,1", "2-9"] },
+  "mnemonic": { "decomposition": "⿰亻建" }
 }

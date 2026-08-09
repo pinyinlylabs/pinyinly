@@ -30,8 +30,6 @@
       "M 671 386 L 728 338 L 747 298"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰讠射"
-  },
-  "decompositions": { "⿰讠射": ["0-1", "2-11"] }
+  "decompositions": { "⿰讠射": ["0,1", "2-11"] },
+  "mnemonic": { "decomposition": "⿰讠射" }
 }

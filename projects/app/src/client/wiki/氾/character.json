@@ -16,8 +16,6 @@
       "M 419 637 L 448 605 L 455 582 L 446 348 L 458 219 L 479 159 L 517 120 L 581 91 L 668 77 L 759 83 L 833 107 L 862 126 L 883 151 L 888 311"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰氵㔾"
-  },
-  "decompositions": { "⿰氵㔾": ["0-2", "3-4"] }
+  "decompositions": { "⿰氵㔾": ["0-2", "3,4"] },
+  "mnemonic": { "decomposition": "⿰氵㔾" }
 }

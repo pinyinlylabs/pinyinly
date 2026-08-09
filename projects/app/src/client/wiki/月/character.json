@@ -15,8 +15,6 @@
     ]
   },
   "componentFormOf": "肉",
-  "mnemonic": {
-    "decomposition": "⿵冂二"
-  },
-  "decompositions": { "⿵冂二": ["0-1", "2-3"] }
+  "decompositions": { "⿵冂二": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿵冂二" }
 }

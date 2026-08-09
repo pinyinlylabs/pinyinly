@@ -22,8 +22,6 @@
       "M 402 291 L 445 290 L 494 264 L 706 73 L 788 17 L 956 1"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻吏"
-  },
-  "decompositions": { "⿰亻吏": ["0-1", "2-7"] }
+  "decompositions": { "⿰亻吏": ["0,1", "2-7"] },
+  "mnemonic": { "decomposition": "⿰亻吏" }
 }

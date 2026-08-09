@@ -18,8 +18,6 @@
       "M 559 819 L 604 781 L 608 744 L 603 -28"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻韦"
-  },
-  "decompositions": { "⿰亻韦": ["0-1", "2-5"] }
+  "decompositions": { "⿰亻韦": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰亻韦" }
 }

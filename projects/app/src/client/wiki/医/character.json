@@ -20,8 +20,6 @@
       "M 211 740 L 249 709 L 255 687 L 247 322 L 227 55 L 280 50 L 443 72 L 738 90 L 778 89 L 849 68"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿷匚矢"
-  },
-  "decompositions": { "⿷匚矢": ["0-1", "2-6"] }
+  "decompositions": { "⿷匚矢": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿷匚矢" }
 }

@@ -16,8 +16,6 @@
       "M 467 378 L 528 312 L 546 274"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻寸"
-  },
-  "decompositions": { "⿰亻寸": ["0-1", "2-4"] }
+  "decompositions": { "⿰亻寸": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿰亻寸" }
 }

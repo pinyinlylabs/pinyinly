@@ -16,8 +16,6 @@
       "M201 415L248 372L242 163L295 165L414 191L570 201L605 197L644 179"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿹勹亾"
-  },
-  "decompositions": { "⿹勹亾": ["0-1", "2-4"] }
+  "decompositions": { "⿹勹亾": ["0,1", "2-4"] },
+  "mnemonic": { "decomposition": "⿹勹亾" }
 }

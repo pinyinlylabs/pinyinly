@@ -18,8 +18,6 @@
       "M 542 796 L 572 779 L 599 746 L 584 557 L 582 318 L 592 201 L 602 165 L 619 137 L 665 106 L 711 94 L 801 91 L 893 110 L 921 131 L 928 279"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰止匕"
-  },
-  "decompositions": { "⿰止匕": ["0-3", "4-5"] }
+  "decompositions": { "⿰止匕": ["0-3", "4,5"] },
+  "mnemonic": { "decomposition": "⿰止匕" }
 }

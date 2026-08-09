@@ -25,8 +25,6 @@
     ]
   },
   "simplifiedForm": "风",
-  "mnemonic": {
-    "decomposition": "⿵几䖝"
-  },
-  "decompositions": { "⿵几䖝": ["0-1", "2-8"] }
+  "decompositions": { "⿵几䖝": ["0,1", "2-8"] },
+  "mnemonic": { "decomposition": "⿵几䖝" }
 }

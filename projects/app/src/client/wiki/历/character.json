@@ -14,8 +14,6 @@
       "M 540 604 L 566 579 L 573 564 L 549 413 L 512 304 L 471 226 L 416 147 L 347 69 L 286 14"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿸厂力"
-  },
-  "decompositions": { "⿸厂力": ["0-1", "2-3"] }
+  "decompositions": { "⿸厂力": ["0,1", "2,3"] },
+  "mnemonic": { "decomposition": "⿸厂力" }
 }

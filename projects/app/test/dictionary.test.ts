@@ -12,6 +12,7 @@ import type {
   HanziIds,
   PinyinText,
   PinyinUnit,
+  StrokeSpecString,
 } from "#data/model.ts";
 import { isCi } from "#util/env.js";
 import { PartOfSpeech } from "#data/model.ts";
@@ -37,6 +38,7 @@ import {
   oneUnitPinyinOrNull,
   parsePartOfSpeech,
   decomposeHanziToIdsLeafs,
+  decomposeHanziToIdsLeafsWithStrokeSpecs,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -1468,10 +1470,16 @@ describe(
 );
 
 describe(`decomposeHanziToIdsLeafs() suite`, () => {
-  test(`includes each starting character`, async () => {
+  test(`includes each starting character for multi-character input`, async () => {
     const result = decomposeHanziToIdsLeafs(汉`说讠`, []);
 
     expect(result).toEqual([`说`, `讠`]);
+  });
+
+  test(`includes the starting character for single-character input`, async () => {
+    const result = decomposeHanziToIdsLeafs(汉`说`, []);
+
+    expect(result).toEqual([`说`]);
   });
 
   test(`predicate applies to each starting character`, async () => {
@@ -1491,4 +1499,179 @@ describe(`decomposeHanziToIdsLeafs() suite`, () => {
 
     expect(result).toEqual([`说`, `讠`, `言`, `兑`]);
   });
+
+  test(`deduplicates leafs`, async () => {
+    const result = decomposeHanziToIdsLeafs(汉`说讠`, [
+      { hanzi: 汉字`说`, ids: `⿰言讠` as HanziIds },
+    ]);
+
+    expect(result).toEqual([`说`, `讠`, `言`]);
+  });
+
+  test(`supports mapping results`, async () => {
+    const result = decomposeHanziToIdsLeafs(汉`说讠`, [
+      { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
+    ]);
+
+    expect(result).toEqual([`说`, `讠`, `言`, `兑`]);
+  });
+});
+
+describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
+  test(`does not include the starting character`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, []);
+
+    expect(result).toEqual([]);
+  });
+
+  test(`decomposes one level with two children`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+      {
+        hanzi: 汉字`说`,
+        ids: `⿰言兑` as HanziIds,
+        strokeSpecs: [`0-1`, `2-3`] as StrokeSpecString[],
+      },
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "hanzi": "言",
+          "strokeSpec": "0,1",
+        },
+        {
+          "hanzi": "兑",
+          "strokeSpec": "2,3",
+        },
+      ]
+    `);
+  });
+
+  test(`decomposes two levels`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+      {
+        hanzi: 汉字`说`,
+        ids: `兑` as HanziIds,
+        strokeSpecs: [`2-8`] as StrokeSpecString[],
+      },
+      {
+        hanzi: 汉字`兑`,
+        ids: `丷` as HanziIds,
+        strokeSpecs: [`0-1`] as StrokeSpecString[],
+      },
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "hanzi": "兑",
+          "strokeSpec": "2-8",
+        },
+        {
+          "hanzi": "丷",
+          "strokeSpec": "2,3",
+        },
+      ]
+    `);
+  });
+
+  test(`skips stroke count placeholder characters at first level`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+      {
+        hanzi: 汉字`说`,
+        ids: `①` as HanziIds,
+        strokeSpecs: [`0`] as StrokeSpecString[],
+      },
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`[]`);
+  });
+
+  test(`skips stroke count placeholder characters at second level`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+      {
+        hanzi: 汉字`说`,
+        ids: `兑` as HanziIds,
+        strokeSpecs: [`2-8`] as StrokeSpecString[],
+      },
+      {
+        hanzi: 汉字`兑`,
+        ids: `①` as HanziIds,
+        strokeSpecs: [`0`] as StrokeSpecString[],
+      },
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "hanzi": "兑",
+          "strokeSpec": "2-8",
+        },
+      ]
+    `);
+  });
+
+  test(`includes multiple instances of the same component with differing strokeSpec`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+      {
+        hanzi: 汉字`说`,
+        ids: `⿰㇀㇀` as HanziIds,
+        strokeSpecs: [`0`, `1`] as StrokeSpecString[],
+      },
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "hanzi": "㇀",
+          "strokeSpec": "0",
+        },
+        {
+          "hanzi": "㇀",
+          "strokeSpec": "1",
+        },
+      ]
+    `);
+  });
+
+  test(`deduplicates multiple instances of the same component with the same strokeSpec`, async () => {
+    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+      {
+        hanzi: 汉字`说`,
+        ids: `㇀` as HanziIds,
+        strokeSpecs: [`0`] as StrokeSpecString[],
+      },
+      {
+        hanzi: 汉字`说`,
+        ids: `㇀` as HanziIds,
+        strokeSpecs: [`0`] as StrokeSpecString[],
+      },
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "hanzi": "㇀",
+          "strokeSpec": "0",
+        },
+      ]
+    `);
+  });
+
+  test.for([
+    `0[1:]`,
+    `0[:1]`,
+    `0[0:1]`,
+    `0[10%:]`,
+    `0[:10%]`,
+  ] as StrokeSpecString[])(
+    `skips when strokeSpec are too complex (%s)`,
+    async (strokeSpec) => {
+      const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`兑`, [
+        { hanzi: 汉字`兑`, ids: `㇀` as HanziIds, strokeSpecs: [strokeSpec] },
+      ]);
+
+      expect(result).toEqual([]);
+    },
+  );
 });

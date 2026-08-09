@@ -22,8 +22,6 @@
       "M 774 793 L 796 780 L 829 745 L 819 493 L 822 97 L 801 47 L 692 99"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻列"
-  },
-  "decompositions": { "⿰亻列": ["0-1", "2-7"] }
+  "decompositions": { "⿰亻列": ["0,1", "2-7"] },
+  "mnemonic": { "decomposition": "⿰亻列" }
 }

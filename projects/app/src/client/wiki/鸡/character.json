@@ -20,8 +20,6 @@
       "M 320 170 L 375 160 L 528 190 L 690 211 L 761 193"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰又鸟"
-  },
-  "decompositions": { "⿰又鸟": ["0-1", "2-6"] }
+  "decompositions": { "⿰又鸟": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿰又鸟" }
 }

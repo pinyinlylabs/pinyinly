@@ -22,8 +22,6 @@
       "M 746 780 L 768 768 L 802 735 L 796 400 L 805 108 L 784 56 L 741 72 L 654 120"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰至刂"
-  },
-  "decompositions": { "⿰至刂": ["0-5", "6-7"] }
+  "decompositions": { "⿰至刂": ["0-5", "6,7"] },
+  "mnemonic": { "decomposition": "⿰至刂" }
 }

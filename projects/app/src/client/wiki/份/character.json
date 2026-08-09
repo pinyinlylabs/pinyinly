@@ -18,8 +18,6 @@
       "M 490 318 L 513 302 L 519 281 L 486 204 L 408 85 L 363 34 L 327 6"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻分"
-  },
-  "decompositions": { "⿰亻分": ["0-1", "2-5"] }
+  "decompositions": { "⿰亻分": ["0,1", "2-5"] },
+  "mnemonic": { "decomposition": "⿰亻分" }
 }

@@ -20,8 +20,6 @@
       "M 510 377 L 536 359 L 543 346 L 528 162 L 536 99 L 554 69 L 598 42 L 646 29 L 710 25 L 813 37 L 860 55 L 893 83 L 904 227"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿱丷兄"
-  },
-  "decompositions": { "⿱丷兄": ["0-1", "2-6"] }
+  "decompositions": { "⿱丷兄": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿱丷兄" }
 }

@@ -24,8 +24,6 @@
       "M 623 195 L 737 105 L 758 75 L 769 39"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿳艹人朩"
-  },
-  "decompositions": { "⿳艹人朩": ["0-2", "3-4", "5-8"] }
+  "decompositions": { "⿳艹人朩": ["0-2", "3,4", "5-8"] },
+  "mnemonic": { "decomposition": "⿳艹人朩" }
 }

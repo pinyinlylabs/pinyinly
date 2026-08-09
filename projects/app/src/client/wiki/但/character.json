@@ -20,8 +20,6 @@
       "M 356 170 L 410 159 L 609 186 L 851 206 L 884 204 L 950 181"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰亻旦"
-  },
-  "decompositions": { "⿰亻旦": ["0-1", "2-6"] }
+  "decompositions": { "⿰亻旦": ["0,1", "2-6"] },
+  "mnemonic": { "decomposition": "⿰亻旦" }
 }

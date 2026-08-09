@@ -20,8 +20,6 @@
       "M 449 422 L 484 405 L 635 220 L 743 125 L 768 110 L 809 100 L 945 82"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿸厂⿱一④"
-  },
-  "decompositions": { "⿸厂⿱一④": ["0-1", "2", "3-6"] }
+  "decompositions": { "⿸厂⿱一④": ["0,1", "2", "3-6"] },
+  "mnemonic": { "decomposition": "⿸厂⿱一④" }
 }
