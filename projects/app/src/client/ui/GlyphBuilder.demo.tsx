@@ -7,8 +7,11 @@ import {
   splitHanziText,
   walkIdsNodeLeafs,
 } from "@/data/hanzi";
-import type { HanziCharacter, HanziText } from "@/data/model";
-import type { CharacterDecompositionEntry } from "@/dictionary";
+import type {
+  CharacterDecompositionRow,
+  HanziCharacter,
+  HanziText,
+} from "@/data/model";
 import { loadBuiltinCharacterDecompositionEntries } from "@/dictionary";
 import { nanoid } from "@/util/nanoid";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -599,7 +602,7 @@ export default function GlyphBuilderDemo() {
   const [isReferenceVisible, setIsReferenceVisible] = useState(false);
   const [hoveredLayerId, setHoveredLayerId] = useState<string | null>(null);
   const [decompositionEntries, setDecompositionEntries] = useState<
-    readonly CharacterDecompositionEntry[]
+    readonly CharacterDecompositionRow[]
   >([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [previewWidthPx, setPreviewWidthPx] = useState(previewSizePx);
@@ -1330,7 +1333,7 @@ export default function GlyphBuilderDemo() {
     });
   };
 
-  const decomposeSelectedLayer = async (entry: CharacterDecompositionEntry) => {
+  const decomposeSelectedLayer = async (entry: CharacterDecompositionRow) => {
     if (selectedLayer == null || selectedLayer.hanzi == null) {
       return;
     }

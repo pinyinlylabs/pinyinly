@@ -36,7 +36,7 @@ import {
   hintFirstLineLength,
   parseHintText,
 } from "./hintText";
-import zip from "lodash/zip";
+import { zip } from "@pinyinly/lib/collections";
 
 export function WikiHanziCharacterMeaning({ hanzi }: { hanzi: HanziText }) {
   if (!isHanziCharacter(hanzi)) {
@@ -56,16 +56,26 @@ export function WikiHanziCharacterMeaningBox({
   const db = useDb();
 
   const { data: mnemonicDecomposition } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.characterDecompositionCollection })
-        .where(({ entry }) => eq(entry.hanzi, hanzi))
-        .select(({ entry }) => ({
-          ids: entry.ids,
-          strokeSpecs: entry.strokeSpecs,
-        }))
-        .findOne(),
-    [db.characterDecompositionCollection, hanzi],
+    (q) => {
+      const mnemonicQuery = q
+        .from({ mnemonic: db.characterMnemonicIdsCollection })
+        .where(({ mnemonic }) => eq(mnemonic.hanzi, hanzi))
+        .findOne();
+
+      return q
+        .from({ decomposition: db.characterDecompositionsCollection })
+        .where(({ decomposition }) => eq(decomposition.hanzi, hanzi))
+        .join({ mnemonic: mnemonicQuery }, ({ decomposition, mnemonic }) =>
+          eq(decomposition.ids, mnemonic.ids),
+        )
+        .select(({ decomposition }) => decomposition)
+        .findOne();
+    },
+    [
+      db.characterDecompositionsCollection,
+      db.characterMnemonicIdsCollection,
+      hanzi,
+    ],
   );
 
   // const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
@@ -74,22 +84,14 @@ export function WikiHanziCharacterMeaningBox({
     mnemonicDecomposition?.ids == null
       ? undefined
       : zip(
-          [
-            ...walkIdsNodeLeafs(
-              parseIds(
-                mnemonicDecomposition.ids,
-              ) as IdsNode<HanziCharacterType>,
-            ),
-          ],
+          walkIdsNodeLeafs(
+            parseIds(mnemonicDecomposition.ids) as IdsNode<HanziCharacterType>,
+          ),
           mnemonicDecomposition.strokeSpecs,
-        ).map(
-          ([componentHanzi, componentStrokeSpec]): MnemonicHanziComponent => {
-            return {
-              hanzi: componentHanzi ?? null,
-              strokeSpec: componentStrokeSpec,
-            };
-          },
-        );
+        ).map(([hanzi, strokeSpec]): MnemonicHanziComponent => ({
+          hanzi,
+          strokeSpec,
+        }));
 
   const hanziList: HanziCharacterType[] = [];
   if (mnemonicDecompositionComponents != null) {

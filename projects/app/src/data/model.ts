@@ -899,6 +899,22 @@ export type HanziStrokeCountChar = z.infer<typeof hanziStrokeCountCharSchema>;
 
 export type HanziIdsLeaf = HanziCharacter | HanziStrokeCountChar;
 
+export interface CharacterDecompositionRow {
+  hanzi: HanziCharacter;
+  ids: HanziIds;
+  strokeSpecs: readonly StrokeSpecString[];
+}
+
+export interface CharacterComponentUsageRow {
+  component: HanziCharacter;
+  usedInHanzi: readonly HanziCharacter[];
+}
+
+export interface CharacterMnemonicIdsRow {
+  hanzi: HanziCharacter;
+  ids: HanziIds;
+}
+
 export interface MnemonicHanziComponent {
   /**
    * Could be `null` if there's no unicode character to represent this component

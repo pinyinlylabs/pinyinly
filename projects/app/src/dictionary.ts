@@ -15,6 +15,8 @@ import type {
   StrokeSpecString,
   HanziText,
   HanziIdsLeaf,
+  CharacterDecompositionRow,
+  CharacterComponentUsageRow,
 } from "@/data/model";
 import {
   charactersSchema,
@@ -140,16 +142,10 @@ export const loadCharactersJson = memoize0(async function loadCharactersJson() {
     );
 });
 
-export interface CharacterDecompositionEntry {
-  hanzi: HanziCharacter;
-  ids: HanziIds;
-  strokeSpecs: readonly StrokeSpecString[];
-}
-
 export const loadBuiltinCharacterDecompositionEntries = memoize0(
   async function loadBuiltinCharacterDecompositionEntries() {
     const charactersJson = await loadCharactersJson();
-    const entries: CharacterDecompositionEntry[] = [];
+    const entries: CharacterDecompositionRow[] = [];
 
     for (const [hanzi, data] of charactersJson.entries()) {
       if (data.decompositions == null) {
@@ -169,7 +165,7 @@ export const loadBuiltinCharacterDecompositionEntries = memoize0(
 
     return deepReadonly(
       entries as unknown[],
-    ) as readonly CharacterDecompositionEntry[];
+    ) as readonly CharacterDecompositionRow[];
   },
 );
 
@@ -180,7 +176,7 @@ export const loadBuiltinCharacterDecompositionEntries = memoize0(
 export const loadBuiltinCharacterDecompositionForMnemonicsEntries = memoize0(
   async function loadBuiltinCharacterDecompositionForMnemonicsEntries() {
     const charactersJson = await loadCharactersJson();
-    const entries: CharacterDecompositionEntry[] = [];
+    const entries: CharacterDecompositionRow[] = [];
 
     for (const [hanzi, data] of charactersJson.entries()) {
       if (data.decompositions == null) {
@@ -217,7 +213,7 @@ export const loadBuiltinCharacterDecompositionForMnemonicsEntries = memoize0(
 
     return deepReadonly(
       entries as unknown[],
-    ) as readonly CharacterDecompositionEntry[];
+    ) as readonly CharacterDecompositionRow[];
   },
 );
 
@@ -233,14 +229,9 @@ const groupByHanzi = weakMemoize1(
   },
 );
 
-export interface CharacterComponentUsageEntry {
-  component: HanziCharacter;
-  usedInHanzi: readonly HanziCharacter[];
-}
-
 export async function buildCharacterComponentUsageEntries(
-  decompositionData: readonly CharacterDecompositionEntry[],
-): Promise<readonly CharacterComponentUsageEntry[]> {
+  decompositionData: readonly CharacterDecompositionRow[],
+): Promise<readonly CharacterComponentUsageRow[]> {
   const charactersJson = await loadCharactersJson();
 
   const canonicalizeCharacter = (character: HanziCharacter) => {
@@ -651,7 +642,7 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
 export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
   hanzi: HanziText,
   decompositionData: readonly Readonly<
-    Pick<CharacterDecompositionEntry, `hanzi` | `ids`>
+    Pick<CharacterDecompositionRow, `hanzi` | `ids`>
   >[],
   /**
    * Optional predicate to filter out branches of the decomposition. If the
@@ -706,7 +697,7 @@ export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
 
 export function decomposeHanziToIdsLeafsWithStrokeSpecs(
   hanziCharacter: HanziCharacter,
-  decompositionData: readonly Readonly<CharacterDecompositionEntry>[],
+  decompositionData: readonly Readonly<CharacterDecompositionRow>[],
 ): { hanzi: HanziCharacter; strokeSpec: StrokeSpecString }[] {
   const decompositionsByHanzi = groupByHanzi(decompositionData);
 

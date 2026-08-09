@@ -63,8 +63,8 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     data: characterDecompositionData,
     isLoading: isCharacterDecompositionLoading,
   } = useLiveQuery(
-    (q) => q.from({ decomposition: db.characterDecompositionCollection }),
-    [db.characterDecompositionCollection],
+    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
+    [db.characterDecompositionsCollection],
   );
 
   const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({

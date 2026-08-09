@@ -1,8 +1,4 @@
-import type {
-  CharacterDecompositionEntry,
-  Dictionary,
-  HanziWordWithMeaning,
-} from "@/dictionary";
+import type { Dictionary, HanziWordWithMeaning } from "@/dictionary";
 import {
   decomposeHanziToIdsLeafs,
   hanziFromHanziWord,
@@ -40,6 +36,7 @@ import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
 import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
+  CharacterDecompositionRow,
   HanziText,
   HanziWord,
   HanziWordSkill,
@@ -71,7 +68,7 @@ export type SkillLearningGraph = Map<Skill, Node>;
 
 export async function skillLearningGraph(options: {
   targetSkills: Skill[];
-  decompositionData: readonly CharacterDecompositionEntry[];
+  decompositionData: readonly CharacterDecompositionRow[];
 }): Promise<SkillLearningGraph> {
   const graph: SkillLearningGraph = new Map();
 
@@ -190,7 +187,7 @@ export const finalFromPinyinFinalAssociationSkill = (
 
 export async function skillDependencies(
   skill: Skill,
-  decompositionData: readonly CharacterDecompositionEntry[],
+  decompositionData: readonly CharacterDecompositionRow[],
 ): Promise<Skill[]> {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
