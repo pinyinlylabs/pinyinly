@@ -39,6 +39,7 @@ import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
 import {
   pronunciationMnemonicImageSetting,
   pronunciationMnemonicSpecSetting,
+  pronunciationMnemonicTextSetting,
 } from "@/data/userSettings";
 
 function normalizeTerms(terms: readonly string[]): string[] {
@@ -268,6 +269,50 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
       function: populatePronunciationMnemonicSpecHookAndPremise,
       data: { userId, hanziWord },
     });
+
+    // save the hook+premise to the hint field.
+    await step.run(`save hook and premise to hint`, async () =>
+      withDrizzle(async (db) => {
+        const { hanzi, pinyin } =
+          await getHanziAndPinyinForHanziWord(hanziWord);
+
+        const current = await getUserSetting(
+          db,
+          userId,
+          pronunciationMnemonicTextSetting,
+          { hanzi, pinyin },
+        );
+        if (current && current.text.trim().length > 0) {
+          // Don't overwrite existing text if it's already set.
+          return;
+        }
+
+        const spec = await getPronunciationMnemonicSpec(
+          db,
+          userId,
+          hanzi,
+          pinyin,
+        );
+        invariant(
+          spec?.hook != null && spec.premise != null,
+          `Expected hook and premise to be populated for hanzi: %s, pinyin: %s`,
+          hanzi,
+          pinyin,
+        );
+
+        await setUserSetting(db, userId, {
+          key: pronunciationMnemonicTextSetting.entity.marshalKey({
+            hanzi,
+            pinyin,
+          }),
+          value: pronunciationMnemonicTextSetting.entity.marshalValue({
+            hanzi,
+            pinyin,
+            text: `${spec.hook}\n\n${spec.premise}`,
+          }),
+        });
+      }),
+    );
 
     await step.invoke(`populate beats`, {
       function: populatePronunciationMnemonicSpecBeats,
