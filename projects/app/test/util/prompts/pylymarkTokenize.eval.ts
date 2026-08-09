@@ -3,7 +3,7 @@ import type { HarnessMetadata, JudgeContext } from "vitest-evals";
 import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod";
 import { buildPylymarkTokenizePrompt } from "#util/prompts/pylymarkTokenize.ts";
-import type { pylymarkTokenizeInput } from "#util/prompts/pylymarkTokenize.ts";
+import type { PylymarkTokenizeInput } from "#util/prompts/pylymarkTokenize.ts";
 import { createResponsePromptHarness } from "./eval.ts";
 
 interface PylymarkTokenizeHarnessMetadata extends HarnessMetadata {
@@ -12,7 +12,7 @@ interface PylymarkTokenizeHarnessMetadata extends HarnessMetadata {
 
 interface PylymarkTokenizeEvalCase {
   name: string;
-  input: pylymarkTokenizeInput;
+  input: PylymarkTokenizeInput;
   expectedText: string;
 }
 
@@ -22,7 +22,7 @@ const ExpectedTextJudge = createJudge(
     output,
     metadata,
   }: JudgeContext<
-    pylymarkTokenizeInput,
+    PylymarkTokenizeInput,
     { text: string },
     PylymarkTokenizeHarnessMetadata
   >) => {
@@ -126,6 +126,19 @@ const pylymarkTokenizeCases: PylymarkTokenizeEvalCase[] = [
       ],
     },
     expectedText: `**[bi- Bigfoot]** waits in the [-ao barn].`,
+  },
+  {
+    name: `doesn't combine location and set into a single token, even when `,
+    input: {
+      text: `Difficult = Tuskie finding the ancient pyramid stairway hilariously hard to climb because his tusk keeps making the cramped ascent a bad fit.`,
+      references: [
+        { reference: `n-`, terms: [`Tuskie the Narwhal`] },
+        { reference: `-an`, terms: [`Ancient pyramid`] },
+        // { reference: "2", terms: ["Ascending passage"] },
+        { reference: `难`, terms: [`difficult`] },
+      ],
+    },
+    expectedText: `[难 Difficult] = Tuskie finding the [-an ancient pyramid] stairway hilariously hard to climb because his tusk keeps making the cramped ascent a bad fit.`,
   },
 ];
 

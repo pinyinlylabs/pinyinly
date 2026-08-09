@@ -44,20 +44,18 @@ describe(
         {
           "text": "Bigfoot hides in the barn basement and expresses himself.",
           "references": [
-            { "reference": "bi-", "terms": ["Bigfoot"] },
-            { "reference": "-ao", "terms": ["barn"] },
-            { "reference": "3", "terms": ["basement"] },
-            { "reference": "表", "terms": ["to express"] }
+            { "id": "0", "terms": ["Bigfoot"] },
+            { "id": "1", "terms": ["barn"] },
+            { "id": "2", "terms": ["basement"] },
+            { "id": "3", "terms": ["to express"] }
           ]
         }
 
         Output:
 
         {
-          "text": "[bi- Bigfoot] hides in the [-ao barn] [3 basement] and [表 expresses] himself."
+          "text": "[0 Bigfoot] hides in the [1 barn] [2 basement] and [3 expresses] himself."
         }
-
-
 
         Rules:
 
@@ -70,11 +68,12 @@ describe(
         - Return only the annotated text.
 
         <input>
-        {"text":"Bigfoot hides in the barn basement and expresses himself.","references":[{"reference":"bi-","terms":["Bigfoot"]},{"reference":"-ao","terms":["barn"]},{"reference":"3","terms":["basement"]},{"reference":"表","terms":["to express"]}]}
+        {"text":"Bigfoot hides in the barn basement and expresses himself.","references":[{"id":"0","terms":["Bigfoot"]},{"id":"1","terms":["barn"]},{"id":"2","terms":["basement"]},{"id":"3","terms":["to express"]}]}
         </input>
         =====================
         ",
           "model": "gpt-5.4",
+          "postprocess": [Function],
           "reasoningEffort": "none",
           "schema": {
             "name": "pylymarkTokenizeOutputSchema",

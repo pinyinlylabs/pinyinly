@@ -98,7 +98,11 @@ describe(`generateLocationSpec`, () => {
 
   test(`generates and returns one location spec in a single model call`, async () => {
     const generated = makeLocationSpec(`Pirate ship`);
-    requestMock.mockResolvedValue({ data: generated, model: `gpt-5.4` });
+    requestMock.mockResolvedValue({
+      data: generated,
+      model: `gpt-5.4`,
+      output: [],
+    });
 
     const result = await executeGeneration(`Pirate ship`);
 
@@ -108,7 +112,11 @@ describe(`generateLocationSpec`, () => {
 
   test(`uses the generation prompt without evaluation or refine prompts`, async () => {
     const generated = makeLocationSpec(`Pirate ship`);
-    requestMock.mockResolvedValue({ data: generated, model: `gpt-5.4` });
+    requestMock.mockResolvedValue({
+      data: generated,
+      model: `gpt-5.4`,
+      output: [],
+    });
 
     await executeGeneration(`Pirate ship`);
 

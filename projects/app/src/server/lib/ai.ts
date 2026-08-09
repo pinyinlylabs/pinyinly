@@ -23,6 +23,11 @@ export interface ChatPrompt<Schema extends z.ZodType> {
    */
   schema: Schema;
   timeout?: number;
+  /**
+   * Optional postprocessing function to transform the raw response data into
+   * the desired format.
+   */
+  postprocess?: (data: z.infer<Schema>) => z.infer<Schema>;
 }
 
 export function zodResponseFormatJson<Schema extends z.ZodType>(
@@ -67,7 +72,16 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
   options?: { signal?: AbortSignal; retries?: number; store?: boolean },
 ): Promise<{
+  /**
+   * Final data including any postprocessing applied. This is the data that
+   * should be used by the caller.
+   */
   data: z.infer<Schema>;
+  /**
+   * The raw output from the OpenAI response, which may include additional
+   * metadata and information about the response.
+   */
+  output: OpenAI.Responses.Response[`output`];
   usage?: OpenAI.Responses.ResponseUsage;
   model: string;
   reasoning?: OpenAI.Reasoning | null;
@@ -114,8 +128,13 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       throw e;
     }
 
+    if (prompt.postprocess != null) {
+      data = prompt.postprocess(data);
+    }
+
     return {
       data,
+      output: response.output,
       usage: response.usage,
       model: response.model,
       reasoning: response.reasoning,

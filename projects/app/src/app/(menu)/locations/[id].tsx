@@ -21,7 +21,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { RectButton } from "#client/ui/RectButton.tsx";
+import { RectButton } from "@/client/ui/RectButton";
 
 export default function LocationIdPage() {
   const { id: rawId } = useLocalSearchParams<`/locations/[id]`>();

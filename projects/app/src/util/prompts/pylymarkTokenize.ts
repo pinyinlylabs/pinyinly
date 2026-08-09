@@ -9,7 +9,7 @@ export const pylymarkTokenizeInputSchema = z.object({
   ),
 });
 
-export type pylymarkTokenizeInput = z.infer<typeof pylymarkTokenizeInputSchema>;
+export type PylymarkTokenizeInput = z.infer<typeof pylymarkTokenizeInputSchema>;
 
 export const pylymarkTokenizeOutputSchema = z
   .object({
@@ -18,7 +18,7 @@ export const pylymarkTokenizeOutputSchema = z
   .meta({ title: `pylymarkTokenizeOutputSchema` });
 
 export function buildPylymarkTokenizePrompt(
-  input: pylymarkTokenizeInput,
+  input: PylymarkTokenizeInput,
 ): ChatPrompt<typeof pylymarkTokenizeOutputSchema> {
   const systemTemplate = `
 You are annotating text by inserting inline reference markers.
@@ -41,20 +41,18 @@ Input:
 {
   "text": "Bigfoot hides in the barn basement and expresses himself.",
   "references": [
-    { "reference": "bi-", "terms": ["Bigfoot"] },
-    { "reference": "-ao", "terms": ["barn"] },
-    { "reference": "3", "terms": ["basement"] },
-    { "reference": "表", "terms": ["to express"] }
+    { "id": "0", "terms": ["Bigfoot"] },
+    { "id": "1", "terms": ["barn"] },
+    { "id": "2", "terms": ["basement"] },
+    { "id": "3", "terms": ["to express"] }
   ]
 }
 
 Output:
 
 {
-  "text": "[bi- Bigfoot] hides in the [-ao barn] [3 basement] and [表 expresses] himself."
+  "text": "[0 Bigfoot] hides in the [1 barn] [2 basement] and [3 expresses] himself."
 }
-
-
 
 Rules:
 
@@ -71,15 +69,36 @@ Rules:
 </input>
 `;
 
+  const referencesWithIds = input.references.map((ref, index) => ({
+    ...ref,
+    id: index.toString(),
+  }));
+
   return {
     schema: pylymarkTokenizeOutputSchema,
     model: `gpt-5.4`,
     reasoningEffort: `none`,
+    postprocess: (data) => {
+      let text = data.text;
+      for (const { id, reference } of referencesWithIds) {
+        text = text.replaceAll(`[${id} `, `[${reference} `);
+      }
+      return { text };
+    },
     messages: [
       {
         role: `system`,
         content: renderPromptTemplate(systemTemplate, {
-          input: JSON.stringify(input),
+          input: JSON.stringify({
+            text: input.text,
+            // Using numerical IDs for the references instead of arbitrary
+            // strings like "-an" or "表" gets more consistent results from the
+            // LLM.
+            references: referencesWithIds.map(({ id, terms }) => ({
+              id,
+              terms,
+            })),
+          }),
         }),
       },
     ],
