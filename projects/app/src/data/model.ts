@@ -176,6 +176,7 @@ export type PronunciationMnemonicSpec = z.infer<
 export const actorSpecSchema = z
   .object({
     nickname: z.string(),
+    pronouns: z.string().optional(),
   })
   .loose();
 

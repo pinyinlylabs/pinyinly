@@ -208,6 +208,9 @@ describe(
                 "obsession": {
                   "type": "string",
                 },
+                "pronouns": {
+                  "type": "string",
+                },
                 "signatureAbility": {
                   "type": "string",
                 },
@@ -226,6 +229,7 @@ describe(
               },
               "required": [
                 "nickname",
+                "pronouns",
                 "identity",
                 "summary",
                 "identityAnchor",
