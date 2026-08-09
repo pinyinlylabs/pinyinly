@@ -114,7 +114,7 @@ export const PylymarkTokenText = ({
         >
           [{label}]
         </Text>
-        {` `}
+        &nbsp;
         {token.text}
       </Link>
     );
@@ -129,7 +129,7 @@ export const PylymarkTokenText = ({
         ${isHighlighted ? `pyly-token-highlighted` : ``}
       `}
     >
-      {token.ref} {token.text}
+      {token.ref}&nbsp;{token.text}
     </Link>
   );
 };
