@@ -7,7 +7,7 @@ import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { locationSetKeys } from "@/data/model";
-import type { LocationId } from "@/data/model";
+import type { LocationId, LocationSetKey } from "@/data/model";
 import {
   pinyinSoundLocationDescriptionSetting,
   locationIdentityImageSetting,
@@ -21,17 +21,12 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { RectButton } from "#client/ui/RectButton.tsx";
 
 export default function LocationIdPage() {
   const { id: rawId } = useLocalSearchParams<`/locations/[id]`>();
   const locationId = (Array.isArray(rawId) ? rawId[0] : rawId) as LocationId;
-  const [pendingSetKey, setPendingSetKey] = useState<string | null>(null);
   const placeDirectory = usePinyinSoundLocations();
-  const enqueueLocationSetMutation = trpc.ai.enqueueLocationSet.useMutation({
-    onSettled: () => {
-      setPendingSetKey(null);
-    },
-  });
   const generateLocationSetIdentityImagesMutation =
     trpc.ai.enqueueLocationSetIdentityImages.useMutation();
 
@@ -82,61 +77,11 @@ export default function LocationIdPage() {
       <View className="gap-20">
         {locationSetKeys.map((setKey) => {
           return (
-            <WikiTitledBox
+            <LocationSetBox
               key={setKey}
-              title={setKey.replaceAll(/([A-Z])/gu, ` $1`)}
-            >
-              <InlineEditableSettingImage
-                setting={locationSetIdentityImageSetting}
-                settingKey={{ locationId, setKey }}
-                enableAiGeneration
-                frameShape="rect"
-                aspectRatio="5:4"
-                previewHeight={200}
-                tileSize={56}
-              />
-
-              <View className="mx-4 my-2">
-                <InlineEditableSettingText
-                  setting={locationSetNameTextSetting}
-                  settingKey={{ locationId, setKey }}
-                  placeholder="Set name"
-                  textClassName="pyly-body-heading"
-                />
-                <InlineEditableSettingText
-                  setting={locationSetDescriptionTextSetting}
-                  settingKey={{ locationId, setKey }}
-                  placeholder="Description"
-                  textClassName="pyly-body text-fg/80"
-                  multiline
-                />
-
-                <View className="mt-3">
-                  <Pressable
-                    disabled={enqueueLocationSetMutation.isPending}
-                    onPress={() => {
-                      setPendingSetKey(setKey);
-                      enqueueLocationSetMutation.mutate({
-                        locationId,
-                        setKey,
-                      });
-                    }}
-                    className="
-                      items-center self-start rounded-xl border border-fg/10 bg-fg px-4 py-3
-
-                      disabled:opacity-40
-                    "
-                  >
-                    <Text className="pyly-body text-bg">
-                      {enqueueLocationSetMutation.isPending &&
-                      pendingSetKey === setKey
-                        ? `Generating set...`
-                        : `Generate set`}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            </WikiTitledBox>
+              locationId={locationId}
+              setKey={setKey}
+            />
           );
         })}
       </View>
@@ -186,5 +131,70 @@ export default function LocationIdPage() {
         </View>
       </WikiTitledBox>
     </View>
+  );
+}
+
+export function LocationSetBox({
+  locationId,
+  setKey,
+}: {
+  locationId: LocationId;
+  setKey: LocationSetKey;
+}) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const enqueueLocationSetMutation = trpc.ai.enqueueLocationSet.useMutation();
+
+  return (
+    <WikiTitledBox
+      title={setKey.replaceAll(/([A-Z])/gu, ` $1`)}
+      onEditingChange={setIsEditMode}
+    >
+      <InlineEditableSettingImage
+        readonly={!isEditMode}
+        setting={locationSetIdentityImageSetting}
+        settingKey={{ locationId, setKey }}
+        enableAiGeneration
+        frameShape="rect"
+        aspectRatio="5:4"
+        previewHeight={200}
+        tileSize={56}
+      />
+
+      <View className="mx-4 my-2">
+        <InlineEditableSettingText
+          readonly={!isEditMode}
+          setting={locationSetNameTextSetting}
+          settingKey={{ locationId, setKey }}
+          placeholder="Set name"
+          textClassName="pyly-body-heading"
+        />
+        <InlineEditableSettingText
+          readonly={!isEditMode}
+          setting={locationSetDescriptionTextSetting}
+          settingKey={{ locationId, setKey }}
+          placeholder="Description"
+          textClassName="text-sm text-fg-dim"
+          multiline
+        />
+      </View>
+      {isEditMode ? (
+        <View className="flex-row items-start gap-4 p-4">
+          <RectButton
+            variant="bare"
+            iconStart="ai"
+            iconSize={20}
+            className="opacity-80"
+            onPress={() => {
+              enqueueLocationSetMutation.mutate({
+                locationId,
+                setKey,
+              });
+            }}
+          >
+            Use AI
+          </RectButton>
+        </View>
+      ) : null}
+    </WikiTitledBox>
   );
 }
