@@ -2,23 +2,19 @@ import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 import { buildPylymarkTokenizePrompt } from "#util/prompts/pylymarkTokenize.ts";
 
-describe(
-  `buildPylymarkTokenizePrompt` satisfies HasNameOf<
-    typeof buildPylymarkTokenizePrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildPylymarkTokenizePrompt({
-        text: `Bigfoot hides in the barn basement and expresses himself.`,
-        references: [
-          { reference: `bi-`, terms: [`Bigfoot`] },
-          { reference: `-ao`, terms: [`barn`] },
-          { reference: `3`, terms: [`basement`] },
-          { reference: `表`, terms: [`to express`] },
-        ],
-      });
+describe(`buildPylymarkTokenizePrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildPylymarkTokenizePrompt({
+      text: `Bigfoot hides in the barn basement and expresses himself.`,
+      references: [
+        { reference: `bi-`, terms: [`Bigfoot`] },
+        { reference: `-ao`, terms: [`barn`] },
+        { reference: `3`, terms: [`basement`] },
+        { reference: `表`, terms: [`to express`] },
+      ],
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -94,6 +90,30 @@ describe(
           },
         }
       `);
+  });
+
+  test(`postprocess doesn't clobber tone numbers`, () => {
+    const prompt = buildPylymarkTokenizePrompt({
+      text: `Bigfoot hides in the barn basement and expresses himself.`,
+      references: [
+        // This is the key part of the test, when the reference is a substring
+        // of another reference, we want to make sure the postprocess doesn't
+        // clobber the other reference.
+        { reference: `1`, terms: [`basement`] },
+        { reference: `bi-`, terms: [`Bigfoot`] },
+        { reference: `-ao`, terms: [`barn`] },
+        { reference: `表`, terms: [`to express`] },
+      ],
     });
-  },
-);
+
+    expect(
+      prompt.postprocess?.({
+        text: `[1 Bigfoot] hides in the [2 barn] [0 basement] and [3 expresses] himself.`,
+      }),
+    ).toMatchInlineSnapshot(`
+      {
+        "text": "[bi- Bigfoot] hides in the [-ao barn] [1 basement] and [表 expresses] himself.",
+      }
+    `);
+  });
+});

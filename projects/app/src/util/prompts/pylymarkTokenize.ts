@@ -1,5 +1,6 @@
 import type { ChatPrompt } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
+import { invariant } from "@pinyinly/lib/invariant";
 import { z } from "zod";
 
 export const pylymarkTokenizeInputSchema = z.object({
@@ -79,11 +80,15 @@ Rules:
     model: `gpt-5.4`,
     reasoningEffort: `none`,
     postprocess: (data) => {
-      let text = data.text;
-      for (const { id, reference } of referencesWithIds) {
-        text = text.replaceAll(`[${id} `, `[${reference} `);
-      }
-      return { text };
+      return {
+        text: data.text.replaceAll(/\[(\d+) /g, (_, id) => {
+          const reference = referencesWithIds.find(
+            (ref) => ref.id === id,
+          )?.reference;
+          invariant(reference, `Reference with id %s not found`, id);
+          return `[${reference} `;
+        }),
+      };
     },
     messages: [
       {
