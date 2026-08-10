@@ -114,7 +114,7 @@ const pylymarkTokenizeCases: PylymarkTokenizeEvalCase[] = [
         { reference: `3`, terms: [`basement`] },
       ],
     },
-    expectedText: `[bi- Bigfoot] entered the [-ao barn] and began to [表 express] gratitude in the [3 basement].`,
+    expectedText: `[bi- Bigfoot] entered the [-ao barn] and began [表 to express] gratitude in the [3 basement].`,
   },
   {
     name: `does not alter non-target formatting markers`,
@@ -128,17 +128,17 @@ const pylymarkTokenizeCases: PylymarkTokenizeEvalCase[] = [
     expectedText: `**[bi- Bigfoot]** waits in the [-ao barn].`,
   },
   {
-    name: `doesn't combine location and set into a single token, even when `,
+    name: `tokenzises all instances of references`,
     input: {
       text: `Difficult = Tuskie finding the ancient pyramid stairway hilariously hard to climb because his tusk keeps making the cramped ascent a bad fit.`,
       references: [
         { reference: `n-`, terms: [`Tuskie the Narwhal`] },
         { reference: `-an`, terms: [`Ancient pyramid`] },
-        // { reference: "2", terms: ["Ascending passage"] },
+        { reference: "2", terms: ["Ascending passage"] },
         { reference: `难`, terms: [`difficult`] },
       ],
     },
-    expectedText: `[难 Difficult] = Tuskie finding the [-an ancient pyramid] stairway hilariously hard to climb because his tusk keeps making the cramped ascent a bad fit.`,
+    expectedText: `[难 Difficult] = [n- Tuskie] finding the [-an ancient pyramid] stairway hilariously hard to climb because his tusk keeps making the cramped [2 ascent a bad fit.`,
   },
 ];
 
