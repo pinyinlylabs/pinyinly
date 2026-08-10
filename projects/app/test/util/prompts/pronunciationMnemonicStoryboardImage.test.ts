@@ -3,19 +3,18 @@ import { buildPronunciationMnemonicStoryboardImagePrompt } from "#util/prompts/p
 import {
   makeActorSpec,
   fmtImagePromptForSnapshot,
-  makeLocationSetSpec,
-  makeLocationSpec,
+  makeLocationSpecWithDetail,
 } from "./helpers";
 import type { AssetId } from "#data/model.js";
 
 describe(`buildPronunciationMnemonicStoryboardImagePrompt`, () => {
   test(`snapshot`, () => {
     const prompt = buildPronunciationMnemonicStoryboardImagePrompt({
-      location: makeLocationSpec(`location`),
-      locationSet: makeLocationSetSpec(`entrance`),
+      locationSpec: makeLocationSpecWithDetail(`location`),
+      locationSetKey: `arrival`,
       actorModelSheet: `sha256/xxx` as AssetId,
       locationSetImage: `sha256/yyy` as AssetId,
-      actor: makeActorSpec(`Ethan`),
+      actorSpec: makeActorSpec(`Ethan`),
       mnemonicSpec: {
         hook: `hook`,
         premise: `premise`,
@@ -118,7 +117,7 @@ describe(`buildPronunciationMnemonicStoryboardImagePrompt`, () => {
       The canvas should contain only edge-to-edge artwork and, where needed, thin black separators.
 
       <input>
-      {"actor":{"nickname":"Ethan"},"location":{"location":"location","set":{"name":"Entrance","purpose":"entrance purpose","props":["entrance prop"],"designRules":["entrance design rule"],"canonicalFraming":"entrance canonical framing"}},"scene":{"hook":"hook","premise":"premise","beats":["beat1","beat2"]}}
+      {"location":{"name":"location","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"actor":{"nickname":"Ethan"},"scene":{"hook":"hook","premise":"premise","beats":["beat1","beat2"]}}
       </input>
       =====================
 

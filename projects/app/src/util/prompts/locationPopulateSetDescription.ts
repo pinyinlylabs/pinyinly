@@ -1,15 +1,15 @@
-import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 import { locationSetKeySchema, locationSpecSchema } from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
-import { renderPromptTemplate } from "@/util/prompts/shared";
-import { invariant } from "@pinyinly/lib/invariant";
-import omit from "lodash/omit";
+import {
+  locationAndLocationSetFromInput,
+  renderPromptTemplate,
+} from "@/util/prompts/shared";
 import { z } from "zod";
 
 export const locationPopulateSetDescriptionInputSchema = z
   .object({
     locationSpec: locationSpecSchema,
-    setKey: locationSetKeySchema,
+    locationSetKey: locationSetKeySchema,
   })
   .strict();
 
@@ -24,12 +24,9 @@ const locationPopulateSetDescriptionOutputSchema = z
   .strict()
   .meta({ title: `locationPopulateSetDescriptionOutputSchema` });
 
-export function buildLocationPopulateSetDescriptionPrompt({
-  locationSpec,
-  setKey,
-}: LocationPopulateSetDescriptionInputType): ChatPrompt<
-  typeof locationPopulateSetDescriptionOutputSchema
-> {
+export function buildLocationPopulateSetDescriptionPrompt(
+  input: LocationPopulateSetDescriptionInputType,
+): ChatPrompt<typeof locationPopulateSetDescriptionOutputSchema> {
   const systemTemplate = `
 You are an expert guidebook writer creating an illustrated guide to a collection of famous fictional locations.
 
@@ -125,24 +122,13 @@ You will be given:
 </input>
 `.trim();
 
-  const locationSetSpec = locationSpec.sets?.[setKey];
-  invariant(
-    locationSetSpec != null,
-    `Location set "%s" not found in location spec.`,
-    setKey,
-  );
-
   const messages: ChatPromptMessage[] = [
     { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
         input: JSON.stringify({
-          location: omit(locationSpec, [`sets`]),
-          locationSet: {
-            name: getLocationSetKeyDisplayName(setKey),
-            ...omit(locationSetSpec, [`set`]),
-          },
+          ...locationAndLocationSetFromInput(input),
         }),
       }),
     },

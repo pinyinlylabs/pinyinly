@@ -6,9 +6,6 @@ import { z } from "zod";
 import omit from "lodash/omit";
 
 const locationSetSpecDetailSchema = locationSetSpecSchema
-  .omit({
-    set: true,
-  })
   .required({
     purpose: true,
   })

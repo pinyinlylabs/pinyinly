@@ -1,3 +1,8 @@
+import type { LocationSetKey, LocationSpec } from "@/data/model";
+import { getLocationSetKeyDisplayName } from "@/data/userSettings";
+import { invariant } from "@pinyinly/lib/invariant";
+import omit from "lodash/omit";
+
 export function renderPromptTemplate(
   template: string,
   variables: Record<string, string>,
@@ -20,4 +25,31 @@ export function renderPromptTemplate(
   }
 
   return rendered;
+}
+
+/**
+ * Create standardised `location` and `locationSet` objects suitable for
+ * injecting into prompts that need context on a single location set.
+ */
+export function locationAndLocationSetFromInput(input: {
+  locationSpec: LocationSpec;
+  locationSetKey: LocationSetKey;
+}): { location: object; locationSet: object } {
+  const locationSetSpec = input.locationSpec.sets?.[input.locationSetKey];
+  invariant(
+    locationSetSpec != null,
+    `Location set "%s" not found in location spec.`,
+    input.locationSetKey,
+  );
+
+  return {
+    location: {
+      name: input.locationSpec.location,
+      ...omit(input.locationSpec, [`sets`, `location`]),
+    },
+    locationSet: {
+      name: getLocationSetKeyDisplayName(input.locationSetKey),
+      ...locationSetSpec,
+    },
+  };
 }

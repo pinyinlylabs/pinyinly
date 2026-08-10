@@ -15,5 +15,6 @@
     ]
   },
   "componentFormOf": "止",
-  "decompositions": {}
+  "mnemonic": { "decomposition": null },
+  "decompositions": { "⿻⺊②": ["0,1", "2,3"] }
 }

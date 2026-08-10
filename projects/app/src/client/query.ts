@@ -1155,24 +1155,6 @@ export const latestSkillRatingCollectionOptions = ({
   getKey: (item) => item.skill,
 });
 
-// export interface Db {
-//   builtinCharacterDecompositions: CharacterDecompositionsCollection;
-//   builtInDictionarySearch: BuiltInDictionarySearchCollection;
-//   characterComponentUsage: CharacterComponentUsageCollection;
-//   characterDecompositionsCollection: CharacterDecompositionsCollection;
-//   characterMnemonicDecompositionCollection: CharacterDecompositionsCollection;
-//   dictionarySearch: DictionarySearchCollection;
-//   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
-//   hanziPinyinMistakeCollection: HanziPinyinMistakeCollection;
-//   latestSkillRatingsCollection: LatestSkillRatingsCollection;
-//   settingCollection: SettingCollection;
-//   settingHistoryCollection: SettingHistoryCollection;
-//   skillRatingCollection: SkillRatingCollection;
-//   skillStateCollection: SkillStateCollection;
-//   targetSkillsCollection: TargetSkillsCollection;
-//   userDictionary: UserDictionaryCollection;
-// }
-
 export function makeDb(rizzle: Rizzle) {
   const skillStateCollection: SkillStateCollection = createCollection(
     rizzleCollectionOptions({
@@ -1264,13 +1246,6 @@ export function makeDb(rizzle: Rizzle) {
   const builtInDictionarySearch: BuiltInDictionarySearchCollection =
     createCollection(builtInDictionarySearchCollectionOptions());
 
-  // TODO: use q.unionAll()
-  // const dictionarySearch: DictionarySearchCollection = createCollection(
-  //   dictionarySearchCollectionOptions({
-  //     builtInDictionarySearch,
-  //     userDictionary,
-  //   }),
-  // );
   const dictionarySearch = createLiveQueryCollection((q) => {
     const builtinRows = q
       .from({ builtin: builtInDictionarySearch })
@@ -1322,9 +1297,6 @@ export function makeDb(rizzle: Rizzle) {
       });
     return q.unionAll(builtinRows, userRows);
   });
-
-  // dictionarySearch.createIndex((row) => row.hanzi);
-  // dictionarySearch.createIndex((row) => row.hskSortKey);
 
   const characterComponentUsage: CharacterComponentUsageCollection =
     createCollection({

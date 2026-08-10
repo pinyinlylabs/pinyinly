@@ -204,7 +204,6 @@ describe(`locationSpecSchema`, () => {
 describe(`locationSetSpecSchema`, () => {
   test(`it allows passthrough of extra fields`, () => {
     const spec = {
-      set: `arrival`,
       name: `Arrival Set`,
       extraField1: `value1`,
     } satisfies LocationSetSpec;

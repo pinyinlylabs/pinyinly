@@ -1,21 +1,22 @@
-import { renderPromptTemplate } from "@/util/prompts/shared";
+import {
+  locationAndLocationSetFromInput,
+  renderPromptTemplate,
+} from "@/util/prompts/shared";
 import { tradingCardSystemTemplate } from "@/util/prompts/imageStyles";
 import type { ImagePrompt } from "@/server/lib/gemini";
 import type {
   ActorSpec,
   AssetId,
-  LocationSetSpec,
+  LocationSetKey,
   LocationSpec,
   PronunciationMnemonicSpec,
 } from "@/data/model";
-import omit from "lodash/omit";
-import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 
 export function buildPronunciationMnemonicStoryboardImagePrompt(input: {
-  actor: ActorSpec;
+  actorSpec: ActorSpec;
   actorModelSheet: AssetId;
-  location: LocationSpec;
-  locationSet: LocationSetSpec;
+  locationSpec: LocationSpec;
+  locationSetKey: LocationSetKey;
   locationSetImage: AssetId;
   mnemonicSpec: Required<PronunciationMnemonicSpec>;
 }): ImagePrompt {
@@ -125,14 +126,8 @@ The canvas should contain only edge-to-edge artwork and, where needed, thin blac
         kind: `text`,
         content: renderPromptTemplate(userTemplate, {
           input: JSON.stringify({
-            actor: input.actor,
-            location: {
-              location: input.location.location,
-              set: {
-                name: getLocationSetKeyDisplayName(input.locationSet.set),
-                ...omit(input.locationSet, [`set`]),
-              },
-            },
+            ...locationAndLocationSetFromInput(input),
+            actor: input.actorSpec,
             scene: input.mnemonicSpec,
           }),
         }),

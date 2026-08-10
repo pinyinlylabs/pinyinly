@@ -3,7 +3,7 @@ import { buildPronunciationMnemonicStoryboardPanelsPrompt } from "#util/prompts/
 import {
   fmtChatPromptForSnapshot,
   makeActorSpec,
-  makeLocationSetSpec,
+  makeLocationSpecWithDetail,
 } from "./helpers";
 
 describe(
@@ -13,8 +13,8 @@ describe(
   () => {
     test(`snapshot`, () => {
       const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
-        // TODO: maybe include location here?
-        locationSet: makeLocationSetSpec(`entrance`),
+        locationSpec: makeLocationSpecWithDetail(`Ship`),
+        locationSetKey: `arrival`,
         actor: makeActorSpec(`Ethan`),
         hook: `hook`,
         premise: `premise`,
@@ -88,7 +88,7 @@ describe(
         # Input
 
         <input>
-        {"actor":{"nickname":"Ethan"},"set":{"name":"Entrance","purpose":"entrance purpose","props":["entrance prop"],"designRules":["entrance design rule"],"canonicalFraming":"entrance canonical framing"},"hook":"hook","premise":"premise"}
+        {"actor":{"nickname":"Ethan"},"location":{"name":"Ship","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"hook":"hook","premise":"premise"}
         </input>
         =====================
         ",

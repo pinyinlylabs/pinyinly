@@ -438,7 +438,7 @@ const populateLocationSetIdentityImage = inngest.createFunction(
         data: {
           prompt: buildLocationSetIdentityImagePrompt({
             locationSpec,
-            targetSet: setKey,
+            locationSetKey: setKey,
           }),
         },
       },
@@ -501,7 +501,7 @@ const populateLocationSetDescription = inngest.createFunction(
         const response = await requestOpenAiResponseJson(
           buildLocationPopulateSetDescriptionPrompt({
             locationSpec,
-            setKey,
+            locationSetKey: setKey,
           }),
         );
 

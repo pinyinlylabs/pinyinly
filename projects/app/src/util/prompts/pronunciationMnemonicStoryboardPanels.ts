@@ -1,15 +1,21 @@
-import { renderPromptTemplate } from "@/util/prompts/shared";
-import { actorSpecSchema, locationSetSpecSchema } from "@/data/model";
+import {
+  locationAndLocationSetFromInput,
+  renderPromptTemplate,
+} from "@/util/prompts/shared";
+import {
+  actorSpecSchema,
+  locationSetKeySchema,
+  locationSpecSchema,
+} from "@/data/model";
 import { z } from "zod";
 import type { ChatPrompt } from "@/server/lib/ai";
-import omit from "lodash/omit";
-import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 
 export const pronunciationMnemonicStoryboardPanelsPromptInputSchema = z.object({
   hook: z.string(),
   premise: z.string(),
   actor: actorSpecSchema,
-  locationSet: locationSetSpecSchema,
+  locationSpec: locationSpecSchema,
+  locationSetKey: locationSetKeySchema,
 });
 
 export type PronunciationMnemonicStoryboardPanelsPromptInputSchema = z.infer<
@@ -102,10 +108,7 @@ Return a JSON array of 2–4 short strings.
         content: renderPromptTemplate(userTemplate, {
           input: JSON.stringify({
             actor: input.actor,
-            set: {
-              name: getLocationSetKeyDisplayName(input.locationSet.set),
-              ...omit(input.locationSet, [`set`]),
-            },
+            ...locationAndLocationSetFromInput(input),
             hook: input.hook,
             premise: input.premise,
           }),

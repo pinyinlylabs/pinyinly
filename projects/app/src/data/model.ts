@@ -131,7 +131,6 @@ export type LocationSetKind = z.infer<typeof locationSetKindSchema>;
  */
 export const locationSetSpecSchema = z
   .object({
-    set: locationSetKeySchema,
     purpose: z.string().optional(),
   })
   .loose();
@@ -187,7 +186,7 @@ export const actorSpecSchema = z
      * Specifying the gender helps image model create the correct gender, and
      * the text models to generate the correct pronouns and gendered language.
      */
-    gender: z.string().optional(),
+    gender: z.enum([`male`, `female`]).optional(),
   })
   .loose();
 

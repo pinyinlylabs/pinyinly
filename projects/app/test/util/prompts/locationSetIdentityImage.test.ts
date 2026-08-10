@@ -76,7 +76,7 @@ describe(`buildLocationSetIdentityImagePrompt`, () => {
           },
         },
       },
-      targetSet: `below`,
+      locationSetKey: `below`,
     });
 
     expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
@@ -90,7 +90,7 @@ describe(`buildLocationSetIdentityImagePrompt`, () => {
 
       Use the full location specification for global visual consistency.
 
-      Use only the selected targetSet for the scene content and canonical framing.
+      Use only the selected set for the scene content and canonical framing.
 
       Do not blend in the framing, viewpoint, or defining setup of any other set.
 
@@ -105,7 +105,7 @@ describe(`buildLocationSetIdentityImagePrompt`, () => {
       - Let the system-level image style instructions control the rendering style.
 
       <input>
-      {"location":{"location":"Haunted castle","recognitionHooks":["spiked towers and turrets","pointed arched windows","full moon silhouette","wrought-iron gate","crooked stone staircase"],"designRules":["Use a massive dark stone castle silhouette with steep roofs, jagged battlements, and uneven towers."]},"locationSet":{"name":"Below","purpose":"functions as a prison-like dungeon below the castle","props":["Iron bars","Chains","Stone walls"],"designRules":["Low stone chambers and narrow corridors sit beneath heavy arches or vaulted ceilings."],"canonicalFraming":"The viewer stands in a low stone corridor or cell entrance, looking toward iron bars or a heavy barred door under a rough arch.","avoidFraming":["Bright cellar storage room without bars or restraints"]}}
+      {"location":{"name":"Haunted castle","recognitionHooks":["spiked towers and turrets","pointed arched windows","full moon silhouette","wrought-iron gate","crooked stone staircase"],"designRules":["Use a massive dark stone castle silhouette with steep roofs, jagged battlements, and uneven towers."]},"locationSet":{"name":"Below","set":"below","purpose":"functions as a prison-like dungeon below the castle","props":["Iron bars","Chains","Stone walls"],"designRules":["Low stone chambers and narrow corridors sit beneath heavy arches or vaulted ceilings."],"canonicalFraming":"The viewer stands in a low stone corridor or cell entrance, looking toward iron bars or a heavy barred door under a rough arch.","avoidFraming":["Bright cellar storage room without bars or restraints"]}}
       </input>
       =====================
       ",

@@ -238,7 +238,6 @@ export function makeLocationSpecWithDetail(
 
 export function makeLocationSetSpec(set: LocationSetKey): LocationSetSpec {
   return {
-    set,
     purpose: `${set} purpose`,
     props: [`${set} prop`],
     designRules: [`${set} design rule`],

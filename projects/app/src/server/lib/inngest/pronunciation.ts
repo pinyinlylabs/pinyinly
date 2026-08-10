@@ -105,17 +105,11 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       `Location spec not found for locationId: ${locationId}`,
     );
 
-    const locationSetSpec = locationSpec.sets?.[locationSetKey];
-    invariant(
-      locationSetSpec != null,
-      `Set not found for setKey: ${locationSetKey}`,
-    );
-
     const prompt = buildPronunciationMnemonicRecurringPrompt({
-      actor: actorSpec,
+      actorSpec,
       cue,
-      location: locationSpec,
-      set: locationSetSpec,
+      locationSpec,
+      locationSetKey,
       associationStrategy,
     });
 
@@ -224,7 +218,8 @@ export const generatePronunciationMnemonicStoryboardPanels =
       );
 
       const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
-        locationSet: locationSetSpec,
+        locationSpec: locationSpec,
+        locationSetKey: setKey,
         actor: actorSpec,
         hook: hookPlaintext,
         premise: premisePlaintext,
@@ -611,9 +606,9 @@ export const generatePronunciationMnemonicStoryboardImage =
       );
 
       const prompt = buildPronunciationMnemonicStoryboardImagePrompt({
-        actor: actorSpec,
-        location: locationSpec,
-        locationSet: locationSetSpec,
+        actorSpec: actorSpec,
+        locationSpec: locationSpec,
+        locationSetKey: setKey,
         mnemonicSpec: {
           hook: hookPlaintext,
           premise: premisePlaintext,

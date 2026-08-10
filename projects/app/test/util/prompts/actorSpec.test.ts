@@ -185,6 +185,10 @@ describe(
                   "type": "array",
                 },
                 "gender": {
+                  "enum": [
+                    "male",
+                    "female",
+                  ],
                   "type": "string",
                 },
                 "identity": {

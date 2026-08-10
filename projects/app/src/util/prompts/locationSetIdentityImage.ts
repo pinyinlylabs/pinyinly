@@ -1,21 +1,21 @@
-import { renderPromptTemplate } from "@/util/prompts/shared";
+import {
+  locationAndLocationSetFromInput,
+  renderPromptTemplate,
+} from "@/util/prompts/shared";
 import { animatorMemorySketchSystemTemplate } from "@/util/prompts/imageStyles";
 import type { ImagePrompt } from "@/server/lib/gemini";
 import type { LocationSetKey, LocationSpec } from "@/data/model";
-import { invariant } from "@pinyinly/lib/invariant";
-import omit from "lodash/omit";
-import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 
 export function buildLocationSetIdentityImagePrompt(input: {
   locationSpec: LocationSpec;
-  targetSet: LocationSetKey;
+  locationSetKey: LocationSetKey;
 }): ImagePrompt {
   const userTemplate = `
 Create an image for one set from the supplied location specification.
 
 Use the full location specification for global visual consistency.
 
-Use only the selected targetSet for the scene content and canonical framing.
+Use only the selected set for the scene content and canonical framing.
 
 Do not blend in the framing, viewpoint, or defining setup of any other set.
 
@@ -34,25 +34,12 @@ Instructions:
 </input>
 `;
 
-  const location = omit(input.locationSpec, [`sets`]);
-  const locationSetSpec = input.locationSpec.sets?.[input.targetSet];
-  invariant(
-    locationSetSpec,
-    `Location set "%s" not found in location spec.`,
-    input.targetSet,
-  );
-
-  const variables = {
+  const userPrompt = renderPromptTemplate(userTemplate, {
     input: JSON.stringify({
-      location,
-      locationSet: {
-        name: getLocationSetKeyDisplayName(input.targetSet),
-        ...omit(locationSetSpec, [`set`]),
-      },
+      ...locationAndLocationSetFromInput(input),
     }),
-  };
+  });
 
-  const userPrompt = renderPromptTemplate(userTemplate, variables);
   const systemInstruction = renderPromptTemplate(
     animatorMemorySketchSystemTemplate,
     {},

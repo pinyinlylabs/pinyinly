@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { buildPronunciationMnemonicRecurringPrompt } from "#util/prompts/pronunciationMnemonicRecurring.js";
-import { fmtChatPromptForSnapshot, makeLocationSpec } from "./helpers";
+import {
+  fmtChatPromptForSnapshot,
+  makeLocationSpecWithDetail,
+} from "./helpers";
 
 describe(
   `buildPronunciationMnemonicRecurringPrompt` satisfies HasNameOf<
@@ -9,9 +12,9 @@ describe(
   () => {
     test(`snapshot`, () => {
       const prompt = buildPronunciationMnemonicRecurringPrompt({
-        location: makeLocationSpec(`Gong Cha`),
-        set: { set: `entrance`, purpose: `used as a dock for arrivals` },
-        actor: {
+        locationSpec: makeLocationSpecWithDetail(`Gong Cha`),
+        locationSetKey: `arrival`,
+        actorSpec: {
           nickname: `Ethan`,
           recognitionHooks: [`being funny`],
           summary: `should be omitted`,
@@ -155,7 +158,7 @@ describe(
         # Input
 
         <input>
-        {"set":{"name":"Entrance","purpose":"used as a dock for arrivals"},"location":{"location":"Gong Cha"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
+        {"location":{"name":"Gong Cha","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
         </input>
         =====================
         ",
