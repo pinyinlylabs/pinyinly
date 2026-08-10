@@ -8,6 +8,8 @@ import type {
   LocationSpec,
   PronunciationMnemonicSpec,
 } from "@/data/model";
+import omit from "lodash/omit";
+import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 
 export function buildPronunciationMnemonicStoryboardImagePrompt(input: {
   actor: ActorSpec;
@@ -126,7 +128,10 @@ The canvas should contain only edge-to-edge artwork and, where needed, thin blac
             actor: input.actor,
             location: {
               location: input.location.location,
-              set: input.locationSet,
+              set: {
+                name: getLocationSetKeyDisplayName(input.locationSet.set),
+                ...omit(input.locationSet, [`set`]),
+              },
             },
             scene: input.mnemonicSpec,
           }),

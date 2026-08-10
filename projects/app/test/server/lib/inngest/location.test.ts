@@ -23,31 +23,31 @@ function makeLocationSpec(location: string): LocationSpecWithDetail {
     designRules: [`Keep the hull dominant in the composition.`],
     sets: {
       arrival: {
-        name: `dock`,
+        set: `arrival`,
         props: [],
         designRules: [`Show the gangplank and mooring ropes.`],
         canonicalFraming: `View from the dock looking toward the deck entrance.`,
       },
       heart: {
-        name: `captain's cabin`,
+        set: `heart`,
         props: [`Desk with a map on it`],
         designRules: [`Show the richest interior detail.`],
         canonicalFraming: `View from the doorway looking toward the captain's chair and desk.`,
       },
       below: {
-        name: `cargo hold`,
+        set: `below`,
         props: [`Barrels`],
         designRules: [`Show stacked crates and a low ceiling.`],
         canonicalFraming: `View from knee height looking into the lower hold.`,
       },
       ascent: {
-        name: `stairs`,
+        set: `ascent`,
         props: [`Handrail`],
         designRules: [`Show the climb upward along the mast.`],
         canonicalFraming: `View from below looking up the rigging and steps.`,
       },
       summit: {
-        name: `crow's nest`,
+        set: `summit`,
         props: [`Binoculars`],
         designRules: [`Show the tiny lookout at the top of the mast.`],
         canonicalFraming: `View from the deck looking up to the lookout platform.`,

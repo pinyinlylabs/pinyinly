@@ -1,6 +1,9 @@
+import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 import { locationSetKeySchema, locationSpecSchema } from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
+import { invariant } from "@pinyinly/lib/invariant";
+import omit from "lodash/omit";
 import { z } from "zod";
 
 export const locationPopulateSetDescriptionInputSchema = z
@@ -122,12 +125,25 @@ You will be given:
 </input>
 `.trim();
 
+  const locationSetSpec = locationSpec.sets?.[setKey];
+  invariant(
+    locationSetSpec != null,
+    `Location set "%s" not found in location spec.`,
+    setKey,
+  );
+
   const messages: ChatPromptMessage[] = [
     { role: `system`, content: renderPromptTemplate(systemTemplate, {}) },
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        input: JSON.stringify({ locationSpec, set: setKey }, null, 2),
+        input: JSON.stringify({
+          location: omit(locationSpec, [`sets`]),
+          locationSet: {
+            name: getLocationSetKeyDisplayName(setKey),
+            ...omit(locationSetSpec, [`set`]),
+          },
+        }),
       }),
     },
   ];

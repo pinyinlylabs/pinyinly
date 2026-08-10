@@ -1,16 +1,16 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
-import {
-  locationSetSpecSchema,
-  type LocationSetKey,
-  type LocationSpec,
-} from "@/data/model";
+import { locationSetSpecSchema } from "@/data/model";
+import type { LocationSetKey, LocationSpec } from "@/data/model";
 import { z } from "zod";
 import omit from "lodash/omit";
 
 const locationSetSpecDetailSchema = locationSetSpecSchema
   .omit({
     set: true,
+  })
+  .required({
+    purpose: true,
   })
   .extend({
     props: z.array(z.string()),
@@ -121,7 +121,7 @@ Avoid viewpoints that make the set resemble another set within the same location
 
 For the set:
 
-- use the simplest widely recognised name
+- write a short purpose phrase that explains how this set is used in this location
 - write concise observable design rules
 - list 5-10 iconic props
 - define a canonical framing

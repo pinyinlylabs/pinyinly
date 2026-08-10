@@ -14,7 +14,7 @@ describe(
     test(`snapshot`, () => {
       const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
         // TODO: maybe include location here?
-        locationSet: makeLocationSetSpec(`arrival`),
+        locationSet: makeLocationSetSpec(`entrance`),
         actor: makeActorSpec(`Ethan`),
         hook: `hook`,
         premise: `premise`,
@@ -88,7 +88,7 @@ describe(
         # Input
 
         <input>
-        {"actor":{"nickname":"Ethan"},"set":{"set":"arrival","name":"arrival name","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"hook":"hook","premise":"premise"}
+        {"actor":{"nickname":"Ethan"},"set":{"name":"Entrance","purpose":"entrance purpose","props":["entrance prop"],"designRules":["entrance design rule"],"canonicalFraming":"entrance canonical framing"},"hook":"hook","premise":"premise"}
         </input>
         =====================
         ",

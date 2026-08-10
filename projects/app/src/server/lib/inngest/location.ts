@@ -4,7 +4,6 @@ import {
   pinyinSoundLocationNameSetting,
   locationSpecJsonSetting,
   locationThoughtChainsJsonSetting,
-  locationSetNameTextSetting,
 } from "@/data/userSettings";
 import { buildLocationSoundThoughtChain } from "@/util/prompts/locationSoundThoughtChain";
 import { buildLocationIdentityImagePrompt } from "@/util/prompts/locationIdentityImage";
@@ -31,7 +30,6 @@ import {
   locationPopulateLocationSoundThoughtChainEvent,
   locationPopulateLocationSetDescriptionEvent,
   locationPopulateLocationSetIdentityImageEvent,
-  locationPopulateLocationSetNameEvent,
   locationPopulateLocationSpecEvent,
   locationPopulateLocationSetSpecEvent,
 } from "./client";
@@ -251,11 +249,6 @@ const populateLocationSet = inngest.createFunction(
         userId,
         setKey,
       }),
-      locationPopulateLocationSetNameEvent.create({
-        locationId,
-        userId,
-        setKey,
-      }),
       locationPopulateLocationSetIdentityImageEvent.create({
         locationId,
         userId,
@@ -444,10 +437,8 @@ const populateLocationSetIdentityImage = inngest.createFunction(
         function: geminiRequestImageAsAsset,
         data: {
           prompt: buildLocationSetIdentityImagePrompt({
-            input: {
-              locationSpec,
-              targetSet: setKey,
-            },
+            locationSpec,
+            targetSet: setKey,
           }),
         },
       },
@@ -523,68 +514,6 @@ const populateLocationSetDescription = inngest.createFunction(
             locationId,
             setKey,
             text: response.data.description,
-          }),
-        });
-      }),
-    );
-  },
-);
-
-const populateLocationSetName = inngest.createFunction(
-  {
-    id: `location/populateLocationSetName`,
-    singleton: {
-      key: `event.data.userId + "-" + event.data.locationId + "-" + event.data.setKey`,
-      mode: `skip`,
-    },
-    triggers: locationPopulateLocationSetNameEvent,
-  },
-  async ({ event, step, logger }) => {
-    const { userId, locationId, setKey } = event.data;
-
-    await step.run(`read set name (${setKey})`, async () =>
-      withDrizzle(async (db) => {
-        const decoded = await getUserSetting(
-          db,
-          userId,
-          locationSetNameTextSetting,
-          { locationId, setKey },
-        );
-
-        const currentName = decoded?.text ?? null;
-
-        if (currentName != null && currentName.trim().length > 0) {
-          return;
-        }
-
-        const locationSpec = await getLocationSpec(db, userId, locationId);
-
-        if (locationSpec == null) {
-          logger.error(
-            { locationId, userId, setKey },
-            `Missing location specification for set name generation`,
-          );
-          return;
-        }
-
-        const locationSetSpec = locationSpec.sets?.[setKey];
-        if (locationSetSpec == null) {
-          logger.error(
-            { locationId, userId, setKey },
-            `Missing location set specification for set name generation`,
-          );
-          return;
-        }
-
-        await setUserSetting(db, userId, {
-          key: locationSetNameTextSetting.entity.marshalKey({
-            locationId,
-            setKey,
-          }),
-          value: locationSetNameTextSetting.entity.marshalValue({
-            locationId,
-            setKey,
-            text: locationSetSpec.name,
           }),
         });
       }),
@@ -813,7 +742,6 @@ export const functions = [
   populateLocationSoundThoughtChain,
   populateLocationSetDescription,
   populateLocationSetIdentityImage,
-  populateLocationSetName,
   populateLocationSetSpec,
   populateLocationSpec,
   runLocationNameSuggestions,

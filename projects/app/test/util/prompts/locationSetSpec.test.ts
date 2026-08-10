@@ -145,7 +145,7 @@ describe(`buildLocationSetSpecPrompt`, () => {
 
       For the set:
 
-      - use the simplest widely recognised name
+      - write a short purpose phrase that explains how this set is used in this location
       - write concise observable design rules
       - list 5-10 iconic props
       - define a canonical framing
@@ -185,18 +185,18 @@ describe(`buildLocationSetSpecPrompt`, () => {
                 },
                 "type": "array",
               },
-              "name": {
-                "type": "string",
-              },
               "props": {
                 "items": {
                   "type": "string",
                 },
                 "type": "array",
               },
+              "purpose": {
+                "type": "string",
+              },
             },
             "required": [
-              "name",
+              "purpose",
               "props",
               "designRules",
               "canonicalFraming",

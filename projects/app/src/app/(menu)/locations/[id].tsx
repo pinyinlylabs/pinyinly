@@ -9,13 +9,13 @@ import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocatio
 import { locationSetKeys } from "@/data/model";
 import type { LocationId, LocationSetKey } from "@/data/model";
 import {
+  getLocationSetKeyDisplayName,
   pinyinSoundLocationDescriptionSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
   locationSpecJsonSetting,
   locationSetDescriptionTextSetting,
   locationSetIdentityImageSetting,
-  locationSetNameTextSetting,
   locationThoughtChainsJsonSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
@@ -146,7 +146,7 @@ export function LocationSetBox({
 
   return (
     <WikiTitledBox
-      title={setKey.replaceAll(/([A-Z])/gu, ` $1`)}
+      title={getLocationSetKeyDisplayName(setKey)}
       onEditingChange={setIsEditMode}
     >
       <InlineEditableSettingImage
@@ -161,13 +161,6 @@ export function LocationSetBox({
       />
 
       <View className="mx-4 my-2">
-        <InlineEditableSettingText
-          readonly={!isEditMode}
-          setting={locationSetNameTextSetting}
-          settingKey={{ locationId, setKey }}
-          placeholder="Set name"
-          textClassName="pyly-body-heading"
-        />
         <InlineEditableSettingText
           readonly={!isEditMode}
           setting={locationSetDescriptionTextSetting}

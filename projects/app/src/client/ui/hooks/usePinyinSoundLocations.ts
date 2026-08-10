@@ -15,7 +15,6 @@ import {
   pinyinSoundLocationNameSetting,
   locationSetDescriptionTextSetting,
   locationSetIdentityImageSetting,
-  locationSetNameTextSetting,
   locationThoughtChainsJsonSetting,
 } from "@/data/userSettings";
 import {
@@ -33,7 +32,6 @@ import { z } from "zod";
 
 export interface PinyinSoundLocationSetSummary {
   key: LocationSetKey;
-  name?: string | null;
   description?: string | null;
   identityImage?: {
     assetId: AssetId;
@@ -135,17 +133,13 @@ export function getPinyinSoundLocationDisplaySummary(
     };
   }
 
-  const fallbackName = locationSetKeys
-    .map((setKey) => location.sets[setKey]?.name?.trim() ?? ``)
-    .find((value) => value.length > 0);
   const fallbackImage =
     locationSetKeys
       .map((setKey) => location.sets[setKey]?.identityImage)
       .find((value) => value != null) ?? null;
 
   return {
-    name:
-      fallbackName == null || fallbackName.length === 0 ? null : fallbackName,
+    name: null,
     identityImage: fallbackImage,
   };
 }
@@ -267,31 +261,6 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
       continue;
     }
 
-    if (setting.key.startsWith(`pspln/`)) {
-      const keyData = parseLocationAndSetKeyFromKey(setting.key, `pspln/`);
-      if (keyData == null) {
-        continue;
-      }
-
-      const value = locationSetNameTextSetting.decode(
-        {
-          locationId: keyData.locationId,
-          setKey: keyData.setKey,
-        },
-        setting.value,
-      );
-      if (value == null) {
-        continue;
-      }
-
-      const location = getOrCreateLocation(value.locationId);
-      const setKey = value.setKey as LocationSetKey;
-      location.sets[setKey] ??= { key: setKey };
-      location.sets[setKey].name =
-        value.text.trim().length > 0 ? value.text : null;
-      continue;
-    }
-
     if (setting.key.startsWith(`pspld/`)) {
       const keyData = parseLocationAndSetKeyFromKey(setting.key, `pspld/`);
       if (keyData == null) {
@@ -363,21 +332,11 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
       historyId: nanoid(),
     });
 
-    for (const role of locationSetKeys) {
-      void r.mutate.setSetting({
-        key: locationSetNameTextSetting.entity.marshalKey({
-          locationId,
-          setKey: role,
-        }),
-        value: null,
-        now: new Date(),
-        skipHistory: false,
-        historyId: nanoid(),
-      });
+    for (const setKey of locationSetKeys) {
       void r.mutate.setSetting({
         key: locationSetDescriptionTextSetting.entity.marshalKey({
           locationId,
-          setKey: role,
+          setKey: setKey,
         }),
         value: null,
         now: new Date(),
@@ -387,7 +346,7 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
       void r.mutate.setSetting({
         key: locationSetIdentityImageSetting.entity.marshalKey({
           locationId,
-          setKey: role,
+          setKey: setKey,
         }),
         value: null,
         now: new Date(),

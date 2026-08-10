@@ -81,11 +81,11 @@ Rules:
     reasoningEffort: `none`,
     postprocess: (data) => {
       return {
-        text: data.text.replaceAll(/\[(\d+) /g, (_, id) => {
+        text: data.text.replaceAll(/\[(\d+) /gu, (_, id) => {
           const reference = referencesWithIds.find(
             (ref) => ref.id === id,
           )?.reference;
-          invariant(reference, `Reference with id %s not found`, id);
+          invariant(reference != null, `Reference with id %s not found`, id);
           return `[${reference} `;
         }),
       };

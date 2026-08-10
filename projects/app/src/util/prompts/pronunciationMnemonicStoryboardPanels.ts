@@ -2,6 +2,8 @@ import { renderPromptTemplate } from "@/util/prompts/shared";
 import { actorSpecSchema, locationSetSpecSchema } from "@/data/model";
 import { z } from "zod";
 import type { ChatPrompt } from "@/server/lib/ai";
+import omit from "lodash/omit";
+import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 
 export const pronunciationMnemonicStoryboardPanelsPromptInputSchema = z.object({
   hook: z.string(),
@@ -100,7 +102,10 @@ Return a JSON array of 2–4 short strings.
         content: renderPromptTemplate(userTemplate, {
           input: JSON.stringify({
             actor: input.actor,
-            set: input.locationSet,
+            set: {
+              name: getLocationSetKeyDisplayName(input.locationSet.set),
+              ...omit(input.locationSet, [`set`]),
+            },
             hook: input.hook,
             premise: input.premise,
           }),

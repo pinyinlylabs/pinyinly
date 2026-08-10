@@ -174,18 +174,23 @@ describe(`locationSpecSchema`, () => {
       location: `loc123`,
       sets: {
         arrival: {
+          set: `arrival`,
           name: `Arrival Set`,
         },
         ascent: {
+          set: `ascent`,
           name: `Ascent Set`,
         },
         below: {
+          set: `below`,
           name: `Below Set`,
         },
         heart: {
+          set: `heart`,
           name: `Heart Set`,
         },
         summit: {
+          set: `summit`,
           name: `Summit Set`,
         },
       },
@@ -199,6 +204,7 @@ describe(`locationSpecSchema`, () => {
 describe(`locationSetSpecSchema`, () => {
   test(`it allows passthrough of extra fields`, () => {
     const spec = {
+      set: `arrival`,
       name: `Arrival Set`,
       extraField1: `value1`,
     } satisfies LocationSetSpec;
@@ -207,114 +213,99 @@ describe(`locationSetSpecSchema`, () => {
   });
 });
 
-describe(
-  `skillIdFromPinyinlyObjectId` satisfies HasNameOf<
-    typeof skillIdFromPinyinlyObjectId
-  >,
-  () => {
-    test(`extracts skill ID from valid skill object ID`, () => {
-      const skill = `he:好:positive` as Skill;
+describe(`skillIdFromPinyinlyObjectId`, () => {
+  test(`extracts skill ID from valid skill object ID`, () => {
+    const skill = `he:好:positive` as Skill;
+    const objectId = skillPinyinlyObjectId(skill);
+    const result = skillIdFromPinyinlyObjectId(objectId);
+    expect(result).toBe(skill);
+  });
+
+  test(`returns null for non-skill IDs`, () => {
+    const hanziWordObjectId: PinyinlyObjectId = `hw/好:positive`;
+    expect(skillIdFromPinyinlyObjectId(hanziWordObjectId)).toBeNull();
+  });
+
+  test(`handles various skill types`, () => {
+    const skills: readonly Skill[] = [
+      `he:好:positive`,
+      `het:好:positive`,
+      `eh:好:positive`,
+      `hpi:好:positive`,
+      `hpf:好:positive`,
+      `hpt:好:positive`,
+    ];
+
+    for (const skill of skills) {
       const objectId = skillPinyinlyObjectId(skill);
       const result = skillIdFromPinyinlyObjectId(objectId);
       expect(result).toBe(skill);
-    });
+    }
+  });
+});
 
-    test(`returns null for non-skill IDs`, () => {
-      const hanziWordObjectId: PinyinlyObjectId = `hw/好:positive`;
-      expect(skillIdFromPinyinlyObjectId(hanziWordObjectId)).toBeNull();
-    });
+describe(`soundIdFromPinyinlyObjectId`, () => {
+  test(`extracts sound ID from valid sound object ID`, () => {
+    const soundId = `n-` as PinyinSoundId;
+    const objectId = pinyinSoundIdPinyinlyObjectId(soundId);
+    const result = soundIdFromPinyinlyObjectId(objectId);
+    expect(result).toBe(soundId);
+  });
 
-    test(`handles various skill types`, () => {
-      const skills: readonly Skill[] = [
-        `he:好:positive`,
-        `het:好:positive`,
-        `eh:好:positive`,
-        `hpi:好:positive`,
-        `hpf:好:positive`,
-        `hpt:好:positive`,
-      ];
+  test(`returns null for non-sound IDs`, () => {
+    const skillObjectId: PinyinlyObjectId = `sk/he:好:positive`;
+    expect(soundIdFromPinyinlyObjectId(skillObjectId)).toBeNull();
+  });
 
-      for (const skill of skills) {
-        const objectId = skillPinyinlyObjectId(skill);
-        const result = skillIdFromPinyinlyObjectId(objectId);
-        expect(result).toBe(skill);
-      }
-    });
-  },
-);
+  test(`handles various sound ID formats`, () => {
+    const soundIds: readonly PinyinSoundId[] = [
+      `p-` as PinyinSoundId,
+      `b-` as PinyinSoundId,
+      `-an` as PinyinSoundId,
+      `-ang` as PinyinSoundId,
+      `3` as PinyinSoundId,
+      `4` as PinyinSoundId,
+      `sh-` as PinyinSoundId,
+      `-ong` as PinyinSoundId,
+    ];
 
-describe(
-  `soundIdFromPinyinlyObjectId` satisfies HasNameOf<
-    typeof soundIdFromPinyinlyObjectId
-  >,
-  () => {
-    test(`extracts sound ID from valid sound object ID`, () => {
-      const soundId = `n-` as PinyinSoundId;
+    for (const soundId of soundIds) {
       const objectId = pinyinSoundIdPinyinlyObjectId(soundId);
       const result = soundIdFromPinyinlyObjectId(objectId);
       expect(result).toBe(soundId);
-    });
+    }
+  });
+});
 
-    test(`returns null for non-sound IDs`, () => {
-      const skillObjectId: PinyinlyObjectId = `sk/he:好:positive`;
-      expect(soundIdFromPinyinlyObjectId(skillObjectId)).toBeNull();
-    });
+describe(`assetIdFromPinyinlyObjectId`, () => {
+  test(`extracts asset ID from valid asset object ID`, () => {
+    const assetId = `sha256/${`a`.repeat(43)}` as AssetId;
+    const objectId = assetIdPinyinlyObjectId(assetId);
+    const result = assetIdFromPinyinlyObjectId(objectId);
+    expect(result).toBe(assetId);
+  });
 
-    test(`handles various sound ID formats`, () => {
-      const soundIds: readonly PinyinSoundId[] = [
-        `p-` as PinyinSoundId,
-        `b-` as PinyinSoundId,
-        `-an` as PinyinSoundId,
-        `-ang` as PinyinSoundId,
-        `3` as PinyinSoundId,
-        `4` as PinyinSoundId,
-        `sh-` as PinyinSoundId,
-        `-ong` as PinyinSoundId,
-      ];
+  test(`returns null for non-asset IDs`, () => {
+    const hanziWordObjectId: PinyinlyObjectId = `hw/好:positive`;
+    expect(assetIdFromPinyinlyObjectId(hanziWordObjectId)).toBeNull();
+  });
 
-      for (const soundId of soundIds) {
-        const objectId = pinyinSoundIdPinyinlyObjectId(soundId);
-        const result = soundIdFromPinyinlyObjectId(objectId);
-        expect(result).toBe(soundId);
-      }
-    });
-  },
-);
+  test(`handles different valid asset ID formats`, () => {
+    const assetIds: readonly AssetId[] = [
+      `sha256/${`0`.repeat(43)}` as AssetId,
+      `sha256/${`a`.repeat(43)}` as AssetId,
+      `sha256/${`z`.repeat(43)}` as AssetId,
+      `sha256/${`_`.repeat(43)}` as AssetId,
+      `sha256/${`-`.repeat(43)}` as AssetId,
+    ];
 
-describe(
-  `assetIdFromPinyinlyObjectId` satisfies HasNameOf<
-    typeof assetIdFromPinyinlyObjectId
-  >,
-  () => {
-    test(`extracts asset ID from valid asset object ID`, () => {
-      const assetId = `sha256/${`a`.repeat(43)}` as AssetId;
+    for (const assetId of assetIds) {
       const objectId = assetIdPinyinlyObjectId(assetId);
       const result = assetIdFromPinyinlyObjectId(objectId);
       expect(result).toBe(assetId);
-    });
-
-    test(`returns null for non-asset IDs`, () => {
-      const hanziWordObjectId: PinyinlyObjectId = `hw/好:positive`;
-      expect(assetIdFromPinyinlyObjectId(hanziWordObjectId)).toBeNull();
-    });
-
-    test(`handles different valid asset ID formats`, () => {
-      const assetIds: readonly AssetId[] = [
-        `sha256/${`0`.repeat(43)}` as AssetId,
-        `sha256/${`a`.repeat(43)}` as AssetId,
-        `sha256/${`z`.repeat(43)}` as AssetId,
-        `sha256/${`_`.repeat(43)}` as AssetId,
-        `sha256/${`-`.repeat(43)}` as AssetId,
-      ];
-
-      for (const assetId of assetIds) {
-        const objectId = assetIdPinyinlyObjectId(assetId);
-        const result = assetIdFromPinyinlyObjectId(objectId);
-        expect(result).toBe(assetId);
-      }
-    });
-  },
-);
+    }
+  });
+});
 
 describe(
   `hanziWordPinyinlyObjectId` satisfies HasNameOf<
@@ -340,40 +331,28 @@ describe(
   },
 );
 
-describe(
-  `skillPinyinlyObjectId` satisfies HasNameOf<typeof skillPinyinlyObjectId>,
-  () => {
-    test(`formats skill ID into valid object ID`, () => {
-      const skill = `he:好:positive` as Skill;
+describe(`skillPinyinlyObjectId`, () => {
+  test(`formats skill ID into valid object ID`, () => {
+    const skill = `he:好:positive` as Skill;
+    const objectId = skillPinyinlyObjectId(skill);
+    expect(objectId).toBe(`sk/he:好:positive`);
+  });
+
+  test(`produces object ID with correct prefix`, () => {
+    const objectId = skillPinyinlyObjectId(`het:多:many`);
+    expect(objectId).toMatch(/^sk\//u);
+  });
+
+  test(`handles all skill type prefixes`, () => {
+    const skillPrefixes = [`he`, `het`, `eh`, `ph`, `hpi`, `hpf`, `hpt`, `ih`];
+
+    for (const prefix of skillPrefixes) {
+      const skill = `${prefix}:好:positive` as Skill;
       const objectId = skillPinyinlyObjectId(skill);
-      expect(objectId).toBe(`sk/he:好:positive`);
-    });
-
-    test(`produces object ID with correct prefix`, () => {
-      const objectId = skillPinyinlyObjectId(`het:多:many`);
-      expect(objectId).toMatch(/^sk\//u);
-    });
-
-    test(`handles all skill type prefixes`, () => {
-      const skillPrefixes = [
-        `he`,
-        `het`,
-        `eh`,
-        `ph`,
-        `hpi`,
-        `hpf`,
-        `hpt`,
-        `ih`,
-      ];
-
-      for (const prefix of skillPrefixes) {
-        const skill = `${prefix}:好:positive` as Skill;
-        const objectId = skillPinyinlyObjectId(skill);
-        expect(objectId).toBe(`sk/${skill}`);
-      }
-    });
-  },
-);
+      expect(objectId).toBe(`sk/${skill}`);
+    }
+  });
+});
 
 describe(
   `pinyinSoundIdPinyinlyObjectId` satisfies HasNameOf<

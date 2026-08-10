@@ -142,7 +142,7 @@ describe(
     typeof getToneSoundNameFromSetKey
   >,
   () => {
-    test(`formats camelCase set keys into readable tone names`, () => {
+    test(`returns canonical display names for configured set keys`, () => {
       expect(
         getToneSoundNameFromSetKey(`5` as PinyinSoundId, `hiddenCloset`),
       ).toBe(`Hidden Closet`);

@@ -7,6 +7,7 @@ import {
   locationSpecSchema,
 } from "@/data/model";
 import omit from "lodash/omit";
+import { getLocationSetKeyDisplayName } from "@/data/userSettings";
 
 export const pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema =
   z.enum([
@@ -174,7 +175,10 @@ Only mention the location or set if it genuinely helps distinguish this mnemonic
               input.associationStrategy ?? `identityBinding`
             ],
           input: JSON.stringify({
-            set: input.set,
+            set: {
+              name: getLocationSetKeyDisplayName(input.set.set),
+              ...omit(input.set, [`set`]),
+            },
             location: omit(input.location, [`sets`]),
             cue: input.cue,
             actor: omit(input.actor, [`summary`, `bodyLanguage`]),

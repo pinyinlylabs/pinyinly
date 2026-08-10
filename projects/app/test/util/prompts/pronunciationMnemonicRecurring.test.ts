@@ -10,7 +10,7 @@ describe(
     test(`snapshot`, () => {
       const prompt = buildPronunciationMnemonicRecurringPrompt({
         location: makeLocationSpec(`Gong Cha`),
-        set: { name: `dock` },
+        set: { set: `entrance`, purpose: `used as a dock for arrivals` },
         actor: {
           nickname: `Ethan`,
           recognitionHooks: [`being funny`],
@@ -155,7 +155,7 @@ describe(
         # Input
 
         <input>
-        {"set":{"name":"dock"},"location":{"location":"Gong Cha"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
+        {"set":{"name":"Entrance","purpose":"used as a dock for arrivals"},"location":{"location":"Gong Cha"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
         </input>
         =====================
         ",

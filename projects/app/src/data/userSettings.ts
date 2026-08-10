@@ -351,15 +351,24 @@ export function getEffectiveToneSetKeyForSoundId(
 }
 
 export function getLocationSetKeyDisplayName(setKey: LocationSetKey): string {
-  return setKey
-    .replaceAll(/([A-Z])/gu, ` $1`)
-    .trim()
-    .split(/\s+/u)
-    .map((word) =>
-      word.length === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
-    )
-    .join(` `);
+  return locationSetDisplayNameByKey[setKey];
 }
+
+const locationSetDisplayNameByKey = {
+  entrance: `Entrance`,
+  inside: `Inside`,
+  basement: `Basement`,
+  bathroom: `Bathroom`,
+  backRoom: `Back Room`,
+  hiddenCloset: `Hidden Closet`,
+  stairway: `Stairway`,
+  staircase: `Staircase`,
+  arrival: `Arrival`,
+  heart: `Heart`,
+  below: `Below`,
+  ascent: `Ascent`,
+  summit: `Summit`,
+} as const satisfies Record<LocationSetKey, string>;
 
 export function getToneSoundNameFromSetKey(
   soundId: PinyinSoundId,
@@ -473,15 +482,6 @@ export const locationThoughtChainsJsonSetting = defineUserSetting({
     locationId: rLocationId().alias(`p`),
     value: r.json().optional().alias(`j`),
   }) satisfies UserSettingJsonEntity,
-});
-
-export const locationSetNameTextSetting = defineUserSetting({
-  entity: r.entity(`pspln/[locationId]/[setKey]`, {
-    locationId: rLocationId().alias(`p`),
-    setKey: r.string().alias(`r`),
-    text: r.string().alias(`t`),
-  }) satisfies UserSettingTextEntity,
-  historyLimit: 20,
 });
 
 export const locationSetDescriptionTextSetting = defineUserSetting({
@@ -706,7 +706,6 @@ export const userSettingDefinitions = [
   pinyinSoundMnemonicIdentityJsonSetting,
   pinyinSoundLocationSetKeySetting,
   locationSetIdentityImageSetting,
-  locationSetNameTextSetting,
   pinyinSoundNameTextSetting,
   prioritizedWordItemSetting,
   quickSearchPickSetting,

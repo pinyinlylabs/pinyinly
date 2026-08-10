@@ -135,7 +135,7 @@ function ModelSheetBox({ actorId }: { actorId: ActorId }) {
             frameShape="rect"
             aspectRatio="1:1"
             previewHeight={220}
-            className="rounded-sm overflow-hidden"
+            className="overflow-hidden rounded-sm"
             tileSize={64}
           />
         </View>

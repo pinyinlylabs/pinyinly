@@ -134,6 +134,7 @@ export const populateActorModelSheetImage = inngest.createFunction(
   async ({ event, step }) => {
     const { userId, actorId } = event.data;
 
+    // oxlint-disable-next-line eslint/prefer-const
     let [actorSpec, modelSheetAssetId] = await step.run(
       `read current model sheet`,
       async () =>

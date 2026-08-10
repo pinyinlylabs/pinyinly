@@ -131,8 +131,8 @@ export type LocationSetKind = z.infer<typeof locationSetKindSchema>;
  */
 export const locationSetSpecSchema = z
   .object({
-    set: locationSetKeySchema.optional(),
-    name: z.string(),
+    set: locationSetKeySchema,
+    purpose: z.string().optional(),
   })
   .loose();
 

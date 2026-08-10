@@ -37,6 +37,7 @@ import { step } from "inngest";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
 import {
+  getLocationSetKeyDisplayName,
   pronunciationMnemonicImageSetting,
   pronunciationMnemonicSpecSetting,
   pronunciationMnemonicTextSetting,
@@ -131,7 +132,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       },
       {
         reference: splitPinyin.toneSoundId,
-        terms: [locationSetSpec.name],
+        terms: [getLocationSetKeyDisplayName(locationSetKey)],
       },
       {
         reference: hanziFromHanziWord(hanziWord),
