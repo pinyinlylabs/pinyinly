@@ -94,9 +94,9 @@ export default function ActorIdPage() {
         />
       </View>
 
-      <MnemonicSpecBox actorId={actorId} name={name} />
-
       <ModelSheetBox actorId={actorId} />
+
+      <MnemonicSpecBox actorId={actorId} name={name} />
 
       <WikiTitledBox title="Used by sounds">
         <View className="p-4">
@@ -135,6 +135,7 @@ function ModelSheetBox({ actorId }: { actorId: ActorId }) {
             frameShape="rect"
             aspectRatio="1:1"
             previewHeight={220}
+            className="rounded-sm overflow-hidden"
             tileSize={64}
           />
         </View>

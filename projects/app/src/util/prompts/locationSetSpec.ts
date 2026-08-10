@@ -1,12 +1,18 @@
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
-import type { LocationSetKey, LocationSpec } from "@/data/model";
+import {
+  locationSetSpecSchema,
+  type LocationSetKey,
+  type LocationSpec,
+} from "@/data/model";
 import { z } from "zod";
 import omit from "lodash/omit";
 
-const locationSetSpecDetailSchema = z
-  .object({
-    name: z.string(),
+const locationSetSpecDetailSchema = locationSetSpecSchema
+  .omit({
+    set: true,
+  })
+  .extend({
     props: z.array(z.string()),
     designRules: z.array(z.string()),
     canonicalFraming: z.string(),
