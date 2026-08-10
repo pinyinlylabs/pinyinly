@@ -5,8 +5,12 @@ import {
 } from "@/data/userSettings";
 import { withDrizzle } from "@/server/lib/db";
 import { buildActorSpecPrompt } from "@/util/prompts/actorSpec";
-import { actorPopulateActorSpecEvent, inngest } from "./client";
-import { step } from "inngest";
+import {
+  actorPopulateActorSpecEvent,
+  actorPopulateModelSheetImageEvent,
+  inngest,
+} from "./client";
+import { NonRetriableError, step } from "inngest";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import { geminiRequestImageAsAsset } from "./gemini";
 import { buildActorModelSheetImagePrompt } from "@/util/prompts/actorModelSheetImage";
@@ -18,6 +22,7 @@ import {
   getUserSetting,
   setUserSetting,
   getActorModelSheetImage,
+  getActorSpec,
 } from "@/server/lib/query";
 
 export const populateActor = inngest.createFunction(
@@ -65,34 +70,16 @@ export const populateActor = inngest.createFunction(
       });
     }
 
-    let modelSheetAssetId = await step.run(
-      `read current model sheet`,
-      async () =>
-        withDrizzle(async (db) => {
-          return getActorModelSheetImage(db, userId, actorId);
-        }),
-    );
-
-    if (modelSheetAssetId == null) {
-      modelSheetAssetId = await step.invoke(`generate model sheet image`, {
-        function: geminiRequestImageAsAsset,
+    const { modelSheetAssetId } = await step.invoke(
+      `populate location set spec`,
+      {
+        function: populateActorModelSheetImage,
         data: {
-          prompt: buildActorModelSheetImagePrompt({ actorSpec }),
+          userId,
+          actorId,
         },
-      });
-
-      await step.run(`write model sheet image`, async () =>
-        withDrizzle(async (db) => {
-          await setUserSetting(db, userId, {
-            key: actorModelSheetImageSetting.entity.marshalKey({ actorId }),
-            value: actorModelSheetImageSetting.entity.marshalValue({
-              actorId: actorId,
-              imageId: nonNullable(modelSheetAssetId),
-            }),
-          });
-        }),
-      );
-    }
+      },
+    );
 
     let identityImageAssetId = await step.run(
       `read current identity image`,
@@ -135,4 +122,60 @@ export const populateActor = inngest.createFunction(
   },
 );
 
-export const functions: ReadonlyArray<typeof populateActor> = [populateActor];
+export const populateActorModelSheetImage = inngest.createFunction(
+  {
+    id: `actor/populate-model-sheet-image`,
+    singleton: {
+      key: `event.data.userId + "-" + event.data.actorId`,
+      mode: `skip`,
+    },
+    triggers: actorPopulateModelSheetImageEvent,
+  },
+  async ({ event, step }) => {
+    const { userId, actorId } = event.data;
+
+    let [actorSpec, modelSheetAssetId] = await step.run(
+      `read current model sheet`,
+      async () =>
+        withDrizzle(async (db) => {
+          return Promise.all([
+            getActorSpec(db, userId, actorId),
+            getActorModelSheetImage(db, userId, actorId),
+          ]);
+        }),
+    );
+
+    if (actorSpec == null) {
+      throw new NonRetriableError(
+        `Missing actor spec for model sheet image generation`,
+      );
+    }
+
+    if (modelSheetAssetId == null) {
+      modelSheetAssetId = await step.invoke(`generate model sheet image`, {
+        function: geminiRequestImageAsAsset,
+        data: {
+          prompt: buildActorModelSheetImagePrompt({ actorSpec }),
+        },
+      });
+
+      await step.run(`write model sheet image`, async () =>
+        withDrizzle(async (db) => {
+          await setUserSetting(db, userId, {
+            key: actorModelSheetImageSetting.entity.marshalKey({ actorId }),
+            value: actorModelSheetImageSetting.entity.marshalValue({
+              actorId: actorId,
+              imageId: nonNullable(modelSheetAssetId),
+            }),
+          });
+        }),
+      );
+    }
+
+    return {
+      modelSheetAssetId: modelSheetAssetId,
+    };
+  },
+);
+
+export const functions = [populateActor, populateActorModelSheetImage];

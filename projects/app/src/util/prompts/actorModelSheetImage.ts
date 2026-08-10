@@ -18,9 +18,9 @@ Maintain identical proportions, silhouette, colours, markings, anatomy, clothing
 
 Present everything on a solid background with no scenery, props, captions, labels, titles, measurements, arrows, logos, signatures, speech bubbles, symbols, watermarks, borders, or graphic design elements. Do not include any text whatsoever.
 
-Arrange the drawings efficiently so each one is as large and readable as possible while remaining easy to compare between views. Fill the canvas efficiently and avoid unnecessary empty space.
+Arrange the drawings efficiently so each one is as large and interpretable as possible while remaining easy to compare between views. Fill the canvas efficiently and avoid unnecessary empty space.
 
-The finished image should resemble an official animation studio character reference sheet whose purpose is to establish the character's canonical design for all future artwork.
+The finished image should resemble a professional animator's imaginary character reference sheet whose purpose is to establish the character's canonical design for all future artwork.
 
 <input>
 {{ input }}
@@ -34,6 +34,11 @@ The finished image should resemble an official animation studio character refere
   const userPrompt = renderPromptTemplate(userTemplate, variables);
 
   return {
+    // Using flash-image instead of flash-lite-image seems to produce more
+    // character expression/detail/realism, and since this is the model sheet
+    // that will guide all future artwork, we want it to be as high quality as
+    // possible. flash-image also does a better job at not putting text labels
+    // into the image.
     model: `gemini-3.1-flash-image`,
     aspectRatio: `1:1`,
     resolution: `1K`,
@@ -43,13 +48,15 @@ The finished image should resemble an official animation studio character refere
       {
         role: `user`,
         kind: `asset`,
+        // Make sure this is a grayscale image, so that the model doesn't bias
+        // the color palette of the final image based on the reference image.
         assetId:
-          `sha256/shhOLLMuKbDljkWQCOFet1D1ty6Da5nHGHEZa8ZQ_ks` as AssetId,
+          `sha256/03aBqVrMUSM-ncBXkT-BY5yLrMqBT-OHqjRB8rG9Eno` as AssetId,
       },
       {
         role: `user`,
         kind: `text`,
-        content: `Use the previous image's illustration style, keeping the background a solid color hue that suits the character, making outlines crisp and contiguous, using solid fill highlighter shading, studio ghibli concept simplicity, and ultra clean crisp vector shapes. But DO NOT copy the content of the image, only use the style. The content should be based on the input prompt.`,
+        content: `This is image is another character/scene from the animation, so match the artistic style of this. Use the style from this image, but base the content from the spec provided at the start. Colorize the final image.`,
       },
     ],
   };

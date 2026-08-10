@@ -176,7 +176,18 @@ export type PronunciationMnemonicSpec = z.infer<
 export const actorSpecSchema = z
   .object({
     nickname: z.string(),
-    pronouns: z.string().optional(),
+    /**
+     * Specifying the species helps avoid the image models from generating a
+     * non-human character when the actor is intended to be a human. Human race
+     * can be included like `Human (Asian)` or `Human (Black)` if desired, but
+     * is not required.
+     */
+    species: z.string().optional(),
+    /**
+     * Specifying the gender helps image model create the correct gender, and
+     * the text models to generate the correct pronouns and gendered language.
+     */
+    gender: z.string().optional(),
   })
   .loose();
 

@@ -18,6 +18,7 @@ import { z } from "zod";
 import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import {
   actorPopulateActorSpecEvent,
+  actorPopulateModelSheetImageEvent,
   locationPopulateLocationEvent,
   locationPopulateLocationSetEvent,
   populatePronunciationMnemonicSpecEvent,
@@ -195,19 +196,6 @@ const enqueueLocationSetOutputSchema = z
   })
   .strict();
 
-const enqueueActorSpecInputSchema = z
-  .object({
-    actorId: actorIdSchema,
-    actorName: z.string(),
-  })
-  .strict();
-
-const enqueueActorSpecOutputSchema = z
-  .object({
-    enqueued: z.literal(true),
-  })
-  .strict();
-
 const enqueuePronunciationRecurringHintInputSchema = z
   .object({
     hanziWord: hanziWordSchema,
@@ -251,14 +239,28 @@ export const aiRouter = router({
     }),
 
   enqueueActorSpec: authedProcedure
-    .input(enqueueActorSpecInputSchema)
-    .output(enqueueActorSpecOutputSchema)
+    .input(z.object({ actorId: actorIdSchema, actorName: z.string() }).strict())
+    .output(z.object({ enqueued: z.literal(true) }).strict())
     .mutation(async ({ ctx, input }) => {
       await inngest.send(
         actorPopulateActorSpecEvent.create({
           userId: ctx.session.userId,
           actorId: input.actorId,
           actorName: input.actorName,
+        }),
+      );
+
+      return { enqueued: true };
+    }),
+
+  enqueueActorModelSheet: authedProcedure
+    .input(z.object({ actorId: actorIdSchema }).strict())
+    .output(z.object({ enqueued: z.boolean() }).strict())
+    .mutation(async ({ ctx, input }) => {
+      await inngest.send(
+        actorPopulateModelSheetImageEvent.create({
+          userId: ctx.session.userId,
+          actorId: input.actorId,
         }),
       );
 

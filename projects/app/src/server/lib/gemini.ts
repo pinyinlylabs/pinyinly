@@ -147,6 +147,7 @@ export async function requestGeminiImage(prompt: ImagePrompt): Promise<{
 
   const response = await client.models.generateContentStream({
     model: prompt.model,
+
     config: {
       responseModalities: [`IMAGE`],
       imageConfig: {

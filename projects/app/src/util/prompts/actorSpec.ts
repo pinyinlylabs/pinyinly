@@ -8,9 +8,12 @@ export type ActorSpecInputType = {
 };
 
 export const actorSpecWithDetailSchema = actorSpecSchema
+  .required({
+    gender: true,
+    species: true,
+  })
   .extend({
     identity: z.string(),
-    pronouns: z.string(),
     summary: z.string(),
     identityAnchor: z.string(),
     coreTraits: z.array(z.string()),

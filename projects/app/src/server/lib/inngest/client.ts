@@ -173,6 +173,16 @@ export const actorPopulateActorSpecEvent = eventType(
   },
 );
 
+export const actorPopulateModelSheetImageEvent = eventType(
+  `actor/populate-model-sheet-image`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      actorId: actorIdSchema,
+    }),
+  },
+);
+
 export const pronunciationGenerateRecurringMnemonicEvent = eventType(
   `pronunciation/generate-recurring-mnemonic`,
   {

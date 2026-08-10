@@ -184,6 +184,9 @@ describe(
                   },
                   "type": "array",
                 },
+                "gender": {
+                  "type": "string",
+                },
                 "identity": {
                   "type": "string",
                 },
@@ -208,13 +211,13 @@ describe(
                 "obsession": {
                   "type": "string",
                 },
-                "pronouns": {
-                  "type": "string",
-                },
                 "signatureAbility": {
                   "type": "string",
                 },
                 "signatureExpression": {
+                  "type": "string",
+                },
+                "species": {
                   "type": "string",
                 },
                 "storyRole": {
@@ -229,7 +232,8 @@ describe(
               },
               "required": [
                 "nickname",
-                "pronouns",
+                "species",
+                "gender",
                 "identity",
                 "summary",
                 "identityAnchor",

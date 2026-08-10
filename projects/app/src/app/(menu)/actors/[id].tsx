@@ -96,19 +96,7 @@ export default function ActorIdPage() {
 
       <MnemonicSpecBox actorId={actorId} name={name} />
 
-      <WikiTitledBox title="Model sheet">
-        <View className="p-4">
-          <InlineEditableSettingImage
-            setting={actorModelSheetImageSetting}
-            settingKey={{ actorId }}
-            enableAiGeneration
-            frameShape="rect"
-            aspectRatio="1:1"
-            previewHeight={220}
-            tileSize={64}
-          />
-        </View>
-      </WikiTitledBox>
+      <ModelSheetBox actorId={actorId} />
 
       <WikiTitledBox title="Used by sounds">
         <View className="p-4">
@@ -131,6 +119,47 @@ export default function ActorIdPage() {
   );
 }
 
+function ModelSheetBox({ actorId }: { actorId: ActorId }) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const useAiMutation = trpc.ai.enqueueActorModelSheet.useMutation();
+
+  return (
+    <WikiTitledBox title="Model sheet" onEditingChange={setIsEditMode}>
+      <View className="gap-3 py-4">
+        <View className="px-4">
+          <InlineEditableSettingImage
+            readonly={!isEditMode}
+            setting={actorModelSheetImageSetting}
+            settingKey={{ actorId }}
+            enableAiGeneration
+            frameShape="rect"
+            aspectRatio="1:1"
+            previewHeight={220}
+            tileSize={64}
+          />
+        </View>
+        {isEditMode ? (
+          <View className="flex-row items-start gap-4 px-4">
+            <RectButton
+              variant="bare"
+              iconStart="ai"
+              iconSize={20}
+              className="opacity-80"
+              onPress={() => {
+                useAiMutation.mutate({
+                  actorId,
+                });
+              }}
+            >
+              Use AI
+            </RectButton>
+          </View>
+        ) : null}
+      </View>
+    </WikiTitledBox>
+  );
+}
+
 function MnemonicSpecBox({
   actorId,
   name,
@@ -143,16 +172,18 @@ function MnemonicSpecBox({
 
   return (
     <WikiTitledBox title="Mnemonic Spec" onEditingChange={setIsEditMode}>
-      <View className="gap-3 p-4">
-        <InlineEditableSettingJson
-          setting={actorSpecJsonSetting}
-          settingKey={{ actorId }}
-          placeholder='{"traits": ["curious"]}'
-          autoResizeMinHeight={120}
-        />
-
+      <View className="gap-3 py-4">
+        <View className="px-4">
+          <InlineEditableSettingJson
+            readonly={!isEditMode}
+            setting={actorSpecJsonSetting}
+            settingKey={{ actorId }}
+            placeholder='{"traits": ["curious"]}'
+            autoResizeMinHeight={120}
+          />
+        </View>
         {isEditMode ? (
-          <View className="flex-row items-start gap-4 p-4">
+          <View className="flex-row items-start gap-4 px-4">
             <RectButton
               variant="bare"
               iconStart="ai"
