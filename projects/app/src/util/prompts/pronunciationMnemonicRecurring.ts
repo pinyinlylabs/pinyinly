@@ -55,14 +55,14 @@ You are given:
 - cue
 - actor
 - location
-- set
+- location set
 
 # Universal objective
 
 Create one canonical recurring cartoon interaction that tightly binds:
 - the actor
 - the cue
-- the selected set
+- the location set
 
 All three must materially determine the mnemonic. Replacing any one of them
 should break or substantially change the interaction.
@@ -153,9 +153,15 @@ Write a concise retrieval cue.
 
 Compress the premise into a single memorable sentence.
 
-Mention the cue at least once.
+Mention the cue, location name, set name, and actor, at least once.
 
-Only mention the location or set if it genuinely helps distinguish this mnemonic from another one.
+---
+
+## Terminology
+
+When referencing the location and set, use the exact names provided in the 
+input. Do not invent new names. For example location set name is "basement",
+refer to it as "basement" rather than "cellar" or "dungeon".
 
 # Input
 

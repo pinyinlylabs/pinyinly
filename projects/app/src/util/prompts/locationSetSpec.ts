@@ -23,7 +23,7 @@ export type LocationSetSpecDetailSchemaType = z.infer<
 
 export const buildLocationSetSpecPrompt = (input: {
   locationSpec: LocationSpec;
-  setKey: LocationSetKey;
+  locationSetKey: LocationSetKey;
 }): ChatPrompt<typeof locationSetSpecDetailSchema> => {
   const systemTemplate = `
 You are an expert production designer creating the canonical specification for a recurring set within a fictional location.
@@ -149,7 +149,7 @@ Generate the canonical set specification for the supplied location.
         input: JSON.stringify({
           locationSpec: omit(input.locationSpec, [`sets`]),
         }),
-        goalSection: goalSectionByKey[input.setKey],
+        goalSection: goalSectionByKey[input.locationSetKey],
       }),
     },
   ];

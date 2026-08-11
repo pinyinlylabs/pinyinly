@@ -6,7 +6,7 @@ describe(`buildLocationSetSpecPrompt`, () => {
   test(`snapshot`, () => {
     const prompt = buildLocationSetSpecPrompt({
       locationSpec: makeLocationSpec(`Pirate ship`),
-      setKey: `bathroom`,
+      locationSetKey: `bathroom`,
     });
 
     expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`

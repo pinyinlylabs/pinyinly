@@ -8,6 +8,7 @@ import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
+import { regExpEscape } from "#util/regExp.js";
 import omit from "lodash/omit";
 import { expect } from "vitest";
 import type { z } from "zod";
@@ -217,6 +218,10 @@ export function makeLocationSpec(location: string): LocationSpec {
   return {
     location,
   };
+}
+
+export function regexpForMention(term: string): RegExp {
+  return new RegExp(`\\b${regExpEscape(term)}\\b`, `iu`);
 }
 
 export function makeLocationSpecWithDetail(

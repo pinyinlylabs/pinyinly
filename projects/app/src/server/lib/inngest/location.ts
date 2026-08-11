@@ -641,7 +641,10 @@ export const generateLocationSetSpec = inngest.createFunction(
       `Location spec not found for locationId: ${locationId}`,
     );
 
-    const prompt = buildLocationSetSpecPrompt({ locationSpec, setKey });
+    const prompt = buildLocationSetSpecPrompt({
+      locationSpec,
+      locationSetKey: setKey,
+    });
     if (reasoningEffort != null) {
       prompt.reasoningEffort = reasoningEffort;
     }

@@ -115,23 +115,28 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
 
     const { data: response } = await requestOpenAiResponseJson(prompt);
 
+    const actorReference = {
+      reference: splitPinyin.initialSoundId,
+      terms: [actorSpec.nickname],
+    };
+    const locationReference = {
+      reference: splitPinyin.finalSoundId,
+      terms: [locationSpec.location],
+    };
+    const locationSetReference = {
+      reference: splitPinyin.toneSoundId,
+      terms: [getLocationSetKeyDisplayName(locationSetKey)],
+    };
+    const cueReference = {
+      reference: hanziFromHanziWord(hanziWord),
+      terms: [cue.label],
+    };
+
     const references = [
-      {
-        reference: splitPinyin.initialSoundId,
-        terms: [actorSpec.nickname],
-      },
-      {
-        reference: splitPinyin.finalSoundId,
-        terms: [locationSpec.location],
-      },
-      {
-        reference: splitPinyin.toneSoundId,
-        terms: [getLocationSetKeyDisplayName(locationSetKey)],
-      },
-      {
-        reference: hanziFromHanziWord(hanziWord),
-        terms: [cue.label],
-      },
+      actorReference,
+      locationReference,
+      locationSetReference,
+      cueReference,
     ].filter((reference) => reference.terms.length > 0);
 
     const premiseTokenizePrompt = buildPylymarkTokenizePrompt({

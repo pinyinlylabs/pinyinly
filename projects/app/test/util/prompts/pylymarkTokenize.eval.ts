@@ -134,7 +134,7 @@ const pylymarkTokenizeCases: PylymarkTokenizeEvalCase[] = [
       references: [
         { reference: `n-`, terms: [`Tuskie the Narwhal`] },
         { reference: `-an`, terms: [`Ancient pyramid`] },
-        { reference: "2", terms: ["Ascending passage"] },
+        { reference: `2`, terms: [`Ascending passage`] },
         { reference: `难`, terms: [`difficult`] },
       ],
     },
