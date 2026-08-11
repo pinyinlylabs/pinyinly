@@ -8,6 +8,7 @@ import {
   actorSpecSchema,
   locationSetKeySchema,
   locationSpecSchema,
+  pronunciationMnemonicSpecSchema,
 } from "@/data/model";
 import omit from "lodash/omit";
 
@@ -30,20 +31,19 @@ export const pronunciationMnemonicRecurringPromptInputSchema = z.object({
   cue: pronunciationMnemonicRecurringPromptCueSchema,
   actorSpec: actorSpecSchema,
   associationStrategy:
-    pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
+    pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema,
 });
 
 export type PronunciationMnemonicRecurringPromptInput = z.infer<
   typeof pronunciationMnemonicRecurringPromptInputSchema
 >;
 
-export const pronunciationMnemonicRecurringPromptOutputSchema = z
-  .object({
-    premise: z.string(),
-    hook: z.string(),
-  })
-  .strict()
-  .meta({ title: `pronunciationMnemonicRecurringPromptOutputSchema` });
+export const pronunciationMnemonicRecurringPromptOutputSchema =
+  pronunciationMnemonicSpecSchema
+    .pick({ premise: true, hook: true })
+    .required()
+    .strict()
+    .meta({ title: `pronunciationMnemonicRecurringPromptOutputSchema` });
 
 export function buildPronunciationMnemonicRecurringPrompt(
   input: PronunciationMnemonicRecurringPromptInput,
@@ -107,7 +107,7 @@ Replacing the set with a generic room should weaken or break the mnemonic.
 
 # Association strategy
 
-{{ associationStrategy }}
+{{ associationStrategyPrompt }}
 
 # Final quality check
 
@@ -183,10 +183,8 @@ refer to it as "basement" rather than "cellar" or "dungeon".
       {
         role: `system`,
         content: renderPromptTemplate(systemTemplate, {
-          associationStrategy:
-            associationStrategies[
-              input.associationStrategy ?? `identityBinding`
-            ],
+          associationStrategyPrompt:
+            associationStrategyPrompts[input.associationStrategy],
           input: JSON.stringify({
             ...locationAndLocationSetFromInput(input),
             cue: input.cue,
@@ -198,7 +196,7 @@ refer to it as "basement" rather than "cellar" or "dungeon".
   };
 }
 
-const associationStrategies = {
+const associationStrategyPrompts = {
   identityBinding: `
 ## Association strategy: Identity Binding
 

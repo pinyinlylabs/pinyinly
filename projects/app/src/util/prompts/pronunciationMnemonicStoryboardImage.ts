@@ -11,6 +11,7 @@ import type {
   LocationSpec,
   PronunciationMnemonicSpec,
 } from "@/data/model";
+import pick from "lodash/pick";
 
 export function buildPronunciationMnemonicStoryboardImagePrompt(input: {
   actorSpec: ActorSpec;
@@ -18,7 +19,9 @@ export function buildPronunciationMnemonicStoryboardImagePrompt(input: {
   locationSpec: LocationSpec;
   locationSetKey: LocationSetKey;
   locationSetImage: AssetId;
-  mnemonicSpec: Required<PronunciationMnemonicSpec>;
+  mnemonicSpec: Required<
+    Pick<PronunciationMnemonicSpec, `hook` | `premise` | `beats`>
+  >;
 }): ImagePrompt {
   const userTemplate = `
 You are an animation storyboard artist creating a mnemonic scene.
@@ -128,7 +131,7 @@ The canvas should contain only edge-to-edge artwork and, where needed, thin blac
           input: JSON.stringify({
             ...locationAndLocationSetFromInput(input),
             actor: input.actorSpec,
-            scene: input.mnemonicSpec,
+            scene: pick(input.mnemonicSpec, [`hook`, `premise`, `beats`]),
           }),
         }),
       },

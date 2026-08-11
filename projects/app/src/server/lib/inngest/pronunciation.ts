@@ -63,7 +63,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       hanziWord,
       locationId,
       locationSetKey,
-      associationStrategy,
+      associationStrategy = `identityBinding`,
     } = event.data;
 
     const dictionary = await loadDictionary();
@@ -156,6 +156,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
     return {
       prompt,
       rawResponse: response,
+      associationStrategy,
       tokenizedResponse: {
         premise: premiseTokenized.data.text,
         hook: hookTokenized.data.text,
@@ -466,6 +467,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
             ...existingSpec,
             hook: generateResult.tokenizedResponse.hook,
             premise: generateResult.tokenizedResponse.premise,
+            associationStrategy: generateResult.associationStrategy,
           };
 
           await setUserSetting(db, userId, {

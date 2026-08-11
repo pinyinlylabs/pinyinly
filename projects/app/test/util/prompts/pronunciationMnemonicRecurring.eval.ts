@@ -100,6 +100,7 @@ const promptCases: Parameters<
     locationSetKey: `bathroom`,
     actorSpec: foxActorSpec,
     cue: { label: `portion` },
+    associationStrategy: `identityBinding`,
   },
 ];
 

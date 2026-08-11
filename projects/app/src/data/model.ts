@@ -163,6 +163,7 @@ export const pronunciationMnemonicSpecSchema = z
     hook: z.string().optional(),
     premise: z.string().optional(),
     beats: z.array(z.string()).optional(),
+    associationStrategy: z.string().optional(),
   })
   .loose();
 

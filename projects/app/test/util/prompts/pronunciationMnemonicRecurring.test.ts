@@ -20,6 +20,7 @@ describe(
           summary: `should be omitted`,
         },
         cue: { label: `cue word`, meaning: `cue meaning` },
+        associationStrategy: `identityBinding`,
       });
 
       expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
