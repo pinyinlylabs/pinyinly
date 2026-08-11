@@ -350,24 +350,31 @@ export function getEffectiveToneSetKeyForSoundId(
   return parsedSetKey.data;
 }
 
-export function getLocationSetKeyDisplayName(setKey: LocationSetKey): string {
-  return locationSetDisplayNameByKey[setKey];
+/**
+ * Get the name of location set.
+ *
+ * Names use normal English capitalization as it would appear inside a sentence,
+ * not title capitalization. Proper nouns retain their normal capitalization;
+ * common nouns are lowercase.
+ */
+export function getLocationSetName(setKey: LocationSetKey): string {
+  return locationSetNameByKey[setKey];
 }
 
-const locationSetDisplayNameByKey = {
-  entrance: `Entrance`,
-  inside: `Inside`,
-  basement: `Basement`,
-  bathroom: `Bathroom`,
-  backRoom: `Back Room`,
-  hiddenCloset: `Hidden Closet`,
-  stairway: `Stairway`,
-  staircase: `Staircase`,
-  arrival: `Arrival`,
-  heart: `Heart`,
-  below: `Below`,
-  ascent: `Ascent`,
-  summit: `Summit`,
+const locationSetNameByKey = {
+  entrance: `entrance`,
+  inside: `inside`,
+  basement: `basement`,
+  bathroom: `bathroom`,
+  backRoom: `back room`,
+  hiddenCloset: `hidden closet`,
+  stairway: `stairway`,
+  staircase: `staircase`,
+  arrival: `arrival`,
+  heart: `heart`,
+  below: `below`,
+  ascent: `ascent`,
+  summit: `summit`,
 } as const satisfies Record<LocationSetKey, string>;
 
 export function getToneSoundNameFromSetKey(
@@ -375,9 +382,7 @@ export function getToneSoundNameFromSetKey(
   setKey: string | null | undefined,
 ): string | null {
   const resolvedSetKey = getEffectiveToneSetKeyForSoundId(soundId, setKey);
-  return resolvedSetKey == null
-    ? null
-    : getLocationSetKeyDisplayName(resolvedSetKey);
+  return resolvedSetKey == null ? null : getLocationSetName(resolvedSetKey);
 }
 
 export const actorNameTextSetting = defineUserSetting({

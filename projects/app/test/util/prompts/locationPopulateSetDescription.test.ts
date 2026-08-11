@@ -116,7 +116,7 @@ describe(`buildLocationPopulateSetDescriptionPrompt`, () => {
        USER MESSAGE
       ---------------------
       <input>
-      {"location":{"name":"Pirate ship","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Below","purpose":"below purpose","props":["below prop"],"designRules":["below design rule"],"canonicalFraming":"below canonical framing"}}
+      {"location":{"name":"Pirate ship","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"below","purpose":"below purpose","props":["below prop"],"designRules":["below design rule"],"canonicalFraming":"below canonical framing"}}
       </input>
       =====================
       ",

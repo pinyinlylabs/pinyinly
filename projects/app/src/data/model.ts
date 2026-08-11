@@ -145,7 +145,11 @@ export type LocationSetSpec = z.infer<typeof locationSetSpecSchema>;
  */
 export const locationSpecSchema = z
   .object({
-    location: z.string(),
+    location: z
+      .string()
+      .describe(
+        `The name of the location using normal English capitalization as it would appear inside a sentence, not title capitalization. Proper nouns retain their normal capitalization; common nouns are lowercase.`,
+      ),
     sets: z
       .partialRecord(locationSetKeySchema, locationSetSpecSchema)
       .optional(),

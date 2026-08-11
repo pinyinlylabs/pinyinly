@@ -9,7 +9,7 @@ import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocatio
 import { locationSetKeys } from "@/data/model";
 import type { LocationId, LocationSetKey } from "@/data/model";
 import {
-  getLocationSetKeyDisplayName,
+  getLocationSetName,
   pinyinSoundLocationDescriptionSetting,
   locationIdentityImageSetting,
   pinyinSoundLocationNameSetting,
@@ -146,7 +146,7 @@ export function LocationSetBox({
 
   return (
     <WikiTitledBox
-      title={getLocationSetKeyDisplayName(setKey)}
+      title={getLocationSetName(setKey)}
       onEditingChange={setIsEditMode}
     >
       <InlineEditableSettingImage

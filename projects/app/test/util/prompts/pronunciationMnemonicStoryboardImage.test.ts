@@ -117,7 +117,7 @@ describe(`buildPronunciationMnemonicStoryboardImagePrompt`, () => {
       The canvas should contain only edge-to-edge artwork and, where needed, thin black separators.
 
       <input>
-      {"location":{"name":"location","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"actor":{"nickname":"Ethan"},"scene":{"hook":"hook","premise":"premise","beats":["beat1","beat2"]}}
+      {"location":{"name":"location","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"actor":{"nickname":"Ethan"},"scene":{"hook":"hook","premise":"premise","beats":["beat1","beat2"]}}
       </input>
       =====================
 

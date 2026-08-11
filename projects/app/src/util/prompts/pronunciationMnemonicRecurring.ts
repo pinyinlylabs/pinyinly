@@ -155,6 +155,11 @@ Compress the premise into a single memorable sentence.
 
 Mention the cue, location name, set name, and actor, at least once.
 
+A natural way to tie these together is to start the sentence with 
+"<actor> is in the <set name> of the <location name>, …" (or "<actor> is in 
+the <location name>'s <set name>, …" whichever is more natural) and then finish
+with incorporating the cue.
+
 ---
 
 ## Terminology

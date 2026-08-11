@@ -88,7 +88,7 @@ describe(
         # Input
 
         <input>
-        {"actor":{"nickname":"Ethan"},"location":{"name":"Ship","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"hook":"hook","premise":"premise"}
+        {"actor":{"nickname":"Ethan"},"location":{"name":"Ship","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"hook":"hook","premise":"premise"}
         </input>
         =====================
         ",

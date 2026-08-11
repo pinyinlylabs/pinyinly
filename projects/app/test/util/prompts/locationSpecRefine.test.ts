@@ -77,6 +77,7 @@ describe(`buildLocationSpecRefinePrompt`, () => {
                 "type": "array",
               },
               "location": {
+                "description": "The name of the location using normal English capitalization as it would appear inside a sentence, not title capitalization. Proper nouns retain their normal capitalization; common nouns are lowercase.",
                 "type": "string",
               },
               "recognitionHooks": {

@@ -145,19 +145,19 @@ describe(
     test(`returns canonical display names for configured set keys`, () => {
       expect(
         getToneSoundNameFromSetKey(`5` as PinyinSoundId, `hiddenCloset`),
-      ).toBe(`Hidden Closet`);
-      expect(getToneSoundNameFromSetKey(`2` as PinyinSoundId, `backRoom`)).toBe(
-        `Back Room`,
-      );
+      ).toMatchInlineSnapshot(`"hidden closet"`);
+      expect(
+        getToneSoundNameFromSetKey(`2` as PinyinSoundId, `backRoom`),
+      ).toMatchInlineSnapshot(`"back room"`);
     });
 
     test(`uses default set key name when stored key is missing or invalid`, () => {
-      expect(getToneSoundNameFromSetKey(`3` as PinyinSoundId, null)).toBe(
-        `Basement`,
-      );
-      expect(getToneSoundNameFromSetKey(`1` as PinyinSoundId, `badKey`)).toBe(
-        `Entrance`,
-      );
+      expect(
+        getToneSoundNameFromSetKey(`3` as PinyinSoundId, null),
+      ).toMatchInlineSnapshot(`"basement"`);
+      expect(
+        getToneSoundNameFromSetKey(`1` as PinyinSoundId, `badKey`),
+      ).toMatchInlineSnapshot(`"entrance"`);
     });
 
     test(`returns null for non-tone sound IDs`, () => {

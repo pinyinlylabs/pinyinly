@@ -2,7 +2,7 @@ import { describeEval } from "vitest-evals";
 import { buildPronunciationMnemonicRecurringPrompt } from "#util/prompts/pronunciationMnemonicRecurring.js";
 import { createResponsePromptHarness } from "./eval";
 import type { ActorSpec, LocationSpec } from "#data/model.js";
-import { getLocationSetKeyDisplayName } from "#data/userSettings.js";
+import { getLocationSetName } from "#data/userSettings.js";
 import { regexpForMention } from "./helpers.ts";
 import { expect } from "vitest";
 
@@ -14,10 +14,8 @@ const foxActorSpec: ActorSpec = {
   identityAnchor: `Sly trickster fox.`,
   coreTraits: [`clever`, `sneaky`, `playful`, `opportunistic`, `smug`],
   obsession: `Proving that they are the cleverest creature around.`,
-  signatureAbility:
-    `Outsmarting others with sneaky tricks, fast thinking, and clever shortcuts.`,
-  storyRole:
-    `Creates mischief and moves the story forward by tricking, sneaking, or cleverly escaping.`,
+  signatureAbility: `Outsmarting others with sneaky tricks, fast thinking, and clever shortcuts.`,
+  storyRole: `Creates mischief and moves the story forward by tricking, sneaking, or cleverly escaping.`,
   always: [
     `looks for the easiest, smartest way to get what they want`,
     `sneaks instead of charging straight in`,
@@ -45,8 +43,7 @@ const foxActorSpec: ActorSpec = {
   ],
   defaultMood: `alert and smug`,
   signatureExpression: `A sly sideways grin with narrowed eyes.`,
-  weakness:
-    `Overconfidence—they love clever tricks so much that they often underestimate simple problems or fall into their own schemes.`,
+  weakness: `Overconfidence—they love clever tricks so much that they often underestimate simple problems or fall into their own schemes.`,
 };
 const engineRoomLocationSpec: LocationSpec = {
   location: `Engine room`,
@@ -69,10 +66,8 @@ const engineRoomLocationSpec: LocationSpec = {
   ],
   sets: {
     bathroom: {
-      purpose:
-        `A hard-used engine-room washroom where crew scrub off oil, soot, and heat before returning to the catwalks.`,
-      canonicalFraming:
-        `View from the washroom entrance or from one end of the room, looking diagonally across the long wash trough toward the shower manifold wall. The communal pipe-fed fixtures should dominate the composition, with the trench drain and grated floor leading the eye through the space. When naturally possible, keep a glimpse of the engine room connection visible through an open hatch, window, or railing beyond, so pipes, warning lights, steam, or a hint of catwalk depth confirm the location. Include the gauges, valves, lockers, and bolted bench when they strengthen recognition.`,
+      purpose: `A hard-used engine-room washroom where crew scrub off oil, soot, and heat before returning to the catwalks.`,
+      canonicalFraming: `View from the washroom entrance or from one end of the room, looking diagonally across the long wash trough toward the shower manifold wall. The communal pipe-fed fixtures should dominate the composition, with the trench drain and grated floor leading the eye through the space. When naturally possible, keep a glimpse of the engine room connection visible through an open hatch, window, or railing beyond, so pipes, warning lights, steam, or a hint of catwalk depth confirm the location. Include the gauges, valves, lockers, and bolted bench when they strengthen recognition.`,
       designRules: [
         `The bathroom is an industrial washroom directly attached to the engine room, with exposed pipes, steel walls, and grated flooring instead of domestic finishes.`,
         `Its defining feature is a long communal wash trough and shower line built from engine-room pipework, making hygiene fixtures look like a repurposed part of the machinery.`,
@@ -129,9 +124,7 @@ describeEval(
           )
           .toMatch(regexpForMention(locationName));
 
-        const locationSetName = getLocationSetKeyDisplayName(
-          spec.locationSetKey,
-        );
+        const locationSetName = getLocationSetName(spec.locationSetKey);
         expect
           .soft(
             result.output.hook,

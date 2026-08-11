@@ -1,5 +1,5 @@
 import type { LocationSetKey, LocationSpec } from "@/data/model";
-import { getLocationSetKeyDisplayName } from "@/data/userSettings";
+import { getLocationSetName } from "@/data/userSettings";
 import { invariant } from "@pinyinly/lib/invariant";
 import omit from "lodash/omit";
 
@@ -48,7 +48,7 @@ export function locationAndLocationSetFromInput(input: {
       ...omit(input.locationSpec, [`sets`, `location`]),
     },
     locationSet: {
-      name: getLocationSetKeyDisplayName(input.locationSetKey),
+      name: getLocationSetName(input.locationSetKey),
       ...locationSetSpec,
     },
   };

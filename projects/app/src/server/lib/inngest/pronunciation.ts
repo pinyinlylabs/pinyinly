@@ -37,7 +37,7 @@ import { step } from "inngest";
 import { requestOpenAiResponseJson } from "@/server/lib/ai";
 import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
 import {
-  getLocationSetKeyDisplayName,
+  getLocationSetName,
   pronunciationMnemonicImageSetting,
   pronunciationMnemonicSpecSetting,
   pronunciationMnemonicTextSetting,
@@ -113,7 +113,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       associationStrategy,
     });
 
-    const { data: response } = await requestOpenAiResponseJson(prompt);
+    const response = await requestOpenAiResponseJson(prompt);
 
     const actorReference = {
       reference: splitPinyin.initialSoundId,
@@ -125,7 +125,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
     };
     const locationSetReference = {
       reference: splitPinyin.toneSoundId,
-      terms: [getLocationSetKeyDisplayName(locationSetKey)],
+      terms: [getLocationSetName(locationSetKey)],
     };
     const cueReference = {
       reference: hanziFromHanziWord(hanziWord),
@@ -140,11 +140,11 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
     ].filter((reference) => reference.terms.length > 0);
 
     const premiseTokenizePrompt = buildPylymarkTokenizePrompt({
-      text: response.premise,
+      text: response.data.premise,
       references,
     });
     const hookTokenizePrompt = buildPylymarkTokenizePrompt({
-      text: response.hook,
+      text: response.data.hook,
       references,
     });
 

@@ -153,6 +153,11 @@ describe(
 
         Mention the cue, location name, set name, and actor, at least once.
 
+        A natural way to tie these together is to start the sentence with 
+        "<actor> is in the <set name> of the <location name>, …" (or "<actor> is in 
+        the <location name>'s <set name>, …" whichever is more natural) and then finish
+        with incorporating the cue.
+
         ---
 
         ## Terminology
@@ -164,7 +169,7 @@ describe(
         # Input
 
         <input>
-        {"location":{"name":"Gong Cha","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"Arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
+        {"location":{"name":"Gong Cha","recognitionHooks":["mast","bow","anchor"],"designRules":["Keep the hull dominant in the composition."]},"locationSet":{"name":"arrival","purpose":"arrival purpose","props":["arrival prop"],"designRules":["arrival design rule"],"canonicalFraming":"arrival canonical framing"},"cue":{"label":"cue word","meaning":"cue meaning"},"actor":{"nickname":"Ethan","recognitionHooks":["being funny"]}}
         </input>
         =====================
         ",

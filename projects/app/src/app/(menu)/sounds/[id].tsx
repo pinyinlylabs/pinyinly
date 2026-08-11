@@ -38,7 +38,7 @@ import {
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
   getEffectiveToneSetKeyForSoundId,
-  getLocationSetKeyDisplayName,
+  getLocationSetName,
   getToneSoundNameFromSetKey,
   pinyinSoundLocationSetting,
   pinyinSoundGroupNameTextSetting,
@@ -797,7 +797,7 @@ function ToneSetKeySection({
         <Text className="pyly-body text-fg-dim">
           Tone {soundId} uses the{` `}
           <Text className="pyly-bold">
-            {getLocationSetKeyDisplayName(selectedSetKey)}
+            {getLocationSetName(selectedSetKey)}
           </Text>
           {` `}
           set for pronunciation mnemonics.
@@ -814,7 +814,7 @@ function ToneSetKeySection({
                   onSelectSetKey(setKey);
                 }}
               >
-                {getLocationSetKeyDisplayName(setKey)}
+                {getLocationSetName(setKey)}
               </RectButton>
             );
           })}

@@ -51,7 +51,7 @@ The finished image should resemble a professional animator's imaginary character
         // Make sure this is a grayscale image, so that the model doesn't bias
         // the color palette of the final image based on the reference image.
         assetId:
-          `sha256/03aBqVrMUSM-ncBXkT-BY5yLrMqBT-OHqjRB8rG9Eno` as AssetId,
+          `sha256/Fr2exBNTnPkWM0MUdTZ-4cJhTvjFrSuwEOVaxMf_wAU` as AssetId,
       },
       {
         role: `user`,
