@@ -49,7 +49,7 @@ describe(
         =====================
          USER MESSAGE
         ---------------------
-        [ASSET: sha256/Fr2exBNTnPkWM0MUdTZ-4cJhTvjFrSuwEOVaxMf_wAU]
+        [ASSET: sha256/xPxit0gONs2W-yd-I82cUfQy1mZ1IyVxFUksrPZvTSY]
         =====================
 
 
