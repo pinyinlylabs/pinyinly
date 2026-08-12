@@ -199,6 +199,7 @@ const enqueueLocationSetOutputSchema = z
 const enqueuePronunciationRecurringHintInputSchema = z
   .object({
     hanziWord: hanziWordSchema,
+    mnemonicId: z.string(),
   })
   .strict();
 
@@ -275,6 +276,7 @@ export const aiRouter = router({
         populatePronunciationMnemonicSpecEvent.create({
           userId: ctx.session.userId,
           hanziWord: input.hanziWord,
+          mnemonicId: input.mnemonicId,
         }),
       );
 

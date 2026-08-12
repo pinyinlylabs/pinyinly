@@ -5,9 +5,7 @@ import type {
   HanziText,
   LocationId,
   LocationSetKey,
-  PinyinSoundId,
   LocationSpec,
-  PinyinText,
   PronunciationMnemonicSpec,
   Skill,
   SrsStateType,
@@ -25,7 +23,6 @@ import {
 import {
   actorModelSheetImageSetting,
   actorSpecJsonSetting,
-  getEffectiveToneSetKeyForSoundId,
   locationSetIdentityImageSetting,
   locationSpecJsonSetting,
   pinyinSoundActorSetting,
@@ -41,10 +38,7 @@ import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull, inArray } from "drizzle-orm";
 import type { Drizzle } from "./db";
-import {
-  normalizePinyinUnitForHintKey,
-  splitPinyinUnitOrThrow,
-} from "@/data/pinyin";
+import { pinyinUnitId, splitPinyinUnitOrThrow } from "@/data/pinyin";
 import type { UserSetting, UserSettingKeyInput } from "@/data/userSettings";
 import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { nanoid } from "@/util/nanoid";
@@ -269,13 +263,14 @@ export async function getPronunciationMnemonicSpec(
   db: Drizzle,
   userId: string,
   hanzi: HanziText,
-  pinyin: PinyinText,
+  pinyin: PinyinUnit,
+  mnemonicId: string,
 ): Promise<PronunciationMnemonicSpec | null> {
   const decoded = await getUserSetting(
     db,
     userId,
     pronunciationMnemonicSpecSetting,
-    { hanzi, pinyin },
+    { hanzi, pinyin: pinyinUnitId(pinyin), mnemonicId },
   );
 
   if (decoded == null) {
@@ -413,32 +408,4 @@ export async function getMnemonicAssociationsForPinyin(
   });
 
   return { actorId, locationId, locationSetKey };
-}
-
-export async function getPinyinToneLocationSetKey(
-  db: Drizzle,
-  userId: string,
-  pinyin: PinyinUnit,
-): Promise<LocationSetKey | null> {
-  const pinyinUnit = normalizePinyinUnitForHintKey(pinyin);
-  const splitPinyin = splitPinyinUnitOrThrow(pinyinUnit);
-
-  return getToneLocationSetKey(db, userId, splitPinyin.toneSoundId);
-}
-
-export async function getToneLocationSetKey(
-  db: Drizzle,
-  userId: string,
-  soundId: PinyinSoundId,
-): Promise<LocationSetKey | null> {
-  const decoded = await getUserSetting(
-    db,
-    userId,
-    pinyinSoundLocationSetKeySetting,
-    {
-      soundId,
-    },
-  );
-
-  return getEffectiveToneSetKeyForSoundId(soundId, decoded?.setKey);
 }

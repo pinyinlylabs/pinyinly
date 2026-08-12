@@ -431,14 +431,32 @@ export type HanziWord =
   | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
+ * A branded type to represent a pinyin unit that's safe for use as an ID
+ * because it's been normalized to a canonical form. This is used for keys in
+ * the database and other places where a consistent representation of pinyin is
+ * needed.
+ *
+ * The normalization is converting erhua to the canonical form, and converting
+ * numeric tone notation to diacritic tone notation. For example, `hao3` would
+ * be normalized to `hǎo`, and `er5` would be normalized to `ér`.
+ *
+ * This is only supported for PinyinUnit and not PinyinText, because PinyinText
+ * can contain multiple units, spaces, punctuation, and anything else that could
+ * be in a piece of text and it's not clear how to safely normalize that.
+ */
+export type PinyinUnitId = string & z.$brand<`PinyinUnitId`>;
+export const pinyinUnitIdSchema = z.custom<PinyinUnitId>(isString);
+
+/**
  * A single pinyin diacritic unit (e.g. `hǎo`). This should not include numeric
  * notation, use `normalizePinyin__` functions to convert numeric to diacritic
  * forms.
  *
  * A unit is a single sound or component (e.g. nǐ, or 儿 in 一点儿), so `nǐ hǎo`
- * would be two units: `nǐ` and `hǎo`.
+ * would be two units: `nǐ` and `hǎo`. Erhua is considered two Pinyin units, so
+ * `yìdiǎnr` would be three units: `yì`, `diǎn`, and `r`.
  */
-export type PinyinUnit = string & z.$brand<`PinyinUnit`>;
+export type PinyinUnit = PinyinUnitId | (string & z.$brand<`PinyinUnit`>);
 
 export type PinyinText = PinyinUnit | (string & z.$brand<`PinyinText`>);
 

@@ -3,14 +3,12 @@ import type {
   HanziText,
   LocationSetKey,
   PinyinSoundId,
-  PinyinUnit,
 } from "@/data/model";
 import { locationSetKeySchema } from "@/data/model";
 import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupThemes,
   isToneSoundId,
-  normalizePinyinUnitForHintKey,
 } from "@/data/pinyin";
 import {
   rAssetId,
@@ -20,6 +18,7 @@ import {
   rPinyinlyObjectId,
   rPinyinSoundGroupId,
   rPinyinSoundId,
+  rPinyinUnitId,
 } from "@/data/rizzleSchema";
 import type {
   RizzleAnyEntity,
@@ -556,47 +555,49 @@ export function getUserWikiCharacterDecompositionKeyParams(hanzi: HanziText) {
   return { hanzi };
 }
 
-export const pronunciationMnemonicTextSetting = defineUserSetting({
-  entity: r.entity(`hpht/[hanzi]/[pinyin]`, {
+export const pronunciationMnemonicSelectedSetting = defineUserSetting({
+  entity: r.entity(`hphs/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
+    pinyin: rPinyinUnitId().alias(`p`),
+    mnemonicId: r.string().alias(`m`),
+  }),
+});
+
+export const pronunciationMnemonicTextSetting = defineUserSetting({
+  entity: r.entity(`hpht/[hanzi]/[pinyin]/[mnemonicId]`, {
+    hanzi: r.string().alias(`h`),
+    pinyin: rPinyinUnitId().alias(`p`),
+    mnemonicId: r.string().alias(`m`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
 });
 
 export const pronunciationMnemonicImageSetting = defineUserSetting({
-  entity: r.entity(`hphi/[hanzi]/[pinyin]`, {
+  entity: r.entity(`hphi/[hanzi]/[pinyin]/[mnemonicId]`, {
     hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
+    pinyin: rPinyinUnitId().alias(`p`),
+    mnemonicId: r.string().alias(`m`),
     ...imageSettingFields,
   }) satisfies UserSettingImageEntity,
 });
 
 export const pronunciationMnemonicImagePromptSetting = defineUserSetting({
-  entity: r.entity(`hphip/[hanzi]/[pinyin]`, {
+  entity: r.entity(`hphip/[hanzi]/[pinyin]/[mnemonicId]`, {
     hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
+    pinyin: rPinyinUnitId().alias(`p`),
+    mnemonicId: r.string().alias(`m`),
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
 });
 
 export const pronunciationMnemonicSpecSetting = defineUserSetting({
-  entity: r.entity(`hphms/[hanzi]/[pinyin]`, {
+  entity: r.entity(`hphms/[hanzi]/[pinyin]/[mnemonicId]`, {
     hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
+    pinyin: rPinyinUnitId().alias(`p`),
+    mnemonicId: r.string().alias(`m`),
     value: r.json().optional().alias(`j`),
   }) satisfies UserSettingJsonEntity,
 });
-
-export function getHanziPronunciationMnemonicKeyParams(
-  hanzi: HanziText,
-  pinyinUnit: PinyinUnit,
-) {
-  return {
-    hanzi,
-    pinyin: normalizePinyinUnitForHintKey(pinyinUnit),
-  };
-}
 
 //
 // Priority words list (bookmarking)
@@ -684,6 +685,7 @@ export const userSettingDefinitions = [
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
   pinyinSoundLocationSetting,
+  pronunciationMnemonicSelectedSetting,
   pronunciationMnemonicImagePromptSetting,
   pronunciationMnemonicImageSetting,
   pronunciationMnemonicTextSetting,

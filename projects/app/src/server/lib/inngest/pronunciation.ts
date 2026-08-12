@@ -15,7 +15,11 @@ import {
   pronunciationGenerateMnemonicStoryboardPanelsEvent,
   pronunciationGenerateRecurringMnemonicEvent,
 } from "./client";
-import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
+import {
+  normalizePinyinUnit,
+  pinyinUnitId,
+  splitPinyinUnitOrThrow,
+} from "@/data/pinyin";
 import {
   getActorModelSheetImage,
   getActorSpec,
@@ -173,7 +177,8 @@ export const generatePronunciationMnemonicStoryboardPanels =
       triggers: [pronunciationGenerateMnemonicStoryboardPanelsEvent],
     },
     async ({ event }) => {
-      const { actorId, locationId, userId, setKey, hanzi, pinyin } = event.data;
+      const { actorId, locationId, userId, setKey, hanzi, pinyin, mnemonicId } =
+        event.data;
 
       const actorSpec = await withDrizzle(async (db) => {
         return getActorSpec(db, userId, actorId);
@@ -197,7 +202,13 @@ export const generatePronunciationMnemonicStoryboardPanels =
       invariant(locationSetSpec != null, `Set not found for setKey: ${setKey}`);
 
       const pronunciationMnemonicSpec = await withDrizzle(async (db) => {
-        return getPronunciationMnemonicSpec(db, userId, hanzi, pinyin);
+        return getPronunciationMnemonicSpec(
+          db,
+          userId,
+          hanzi,
+          pinyin,
+          mnemonicId,
+        );
       });
 
       invariant(
@@ -265,11 +276,11 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
     triggers: [populatePronunciationMnemonicSpecEvent],
   },
   async ({ event }) => {
-    const { userId, hanziWord } = event.data;
+    const { userId, hanziWord, mnemonicId } = event.data;
 
     await step.invoke(`populate hook and premise`, {
       function: populatePronunciationMnemonicSpecHookAndPremise,
-      data: { userId, hanziWord },
+      data: { userId, hanziWord, mnemonicId },
     });
 
     // save the hook+premise to the hint field.
@@ -282,7 +293,7 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
           db,
           userId,
           pronunciationMnemonicTextSetting,
-          { hanzi, pinyin },
+          { hanzi, pinyin: pinyinUnitId(pinyin), mnemonicId },
         );
         if (current && current.text.trim().length > 0) {
           // Don't overwrite existing text if it's already set.
@@ -294,6 +305,7 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
           userId,
           hanzi,
           pinyin,
+          mnemonicId,
         );
         invariant(
           spec?.hook != null && spec.premise != null,
@@ -305,11 +317,13 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
         await setUserSetting(db, userId, {
           key: pronunciationMnemonicTextSetting.entity.marshalKey({
             hanzi,
-            pinyin,
+            pinyin: pinyinUnitId(pinyin),
+            mnemonicId,
           }),
           value: pronunciationMnemonicTextSetting.entity.marshalValue({
             hanzi,
-            pinyin,
+            pinyin: pinyinUnitId(pinyin),
+            mnemonicId,
             text: `${spec.hook}\n\n${spec.premise}`,
           }),
         });
@@ -318,12 +332,12 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
 
     await step.invoke(`populate beats`, {
       function: populatePronunciationMnemonicSpecBeats,
-      data: { userId, hanziWord },
+      data: { userId, hanziWord, mnemonicId },
     });
 
     await step.invoke(`populate image`, {
       function: populatePronunciationMnemonicImage,
-      data: { userId, hanziWord },
+      data: { userId, hanziWord, mnemonicId },
     });
   },
 );
@@ -334,7 +348,7 @@ export const populatePronunciationMnemonicImage = inngest.createFunction(
     triggers: [populatePronunciationMnemonicImageEvent],
   },
   async ({ event }) => {
-    const { userId, hanziWord } = event.data;
+    const { userId, hanziWord, mnemonicId } = event.data;
     const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
 
     const isAlreadySet = await step.run(`read current image`, async () =>
@@ -343,7 +357,7 @@ export const populatePronunciationMnemonicImage = inngest.createFunction(
           db,
           userId,
           pronunciationMnemonicImageSetting,
-          { hanzi, pinyin },
+          { hanzi, pinyin: pinyinUnitId(pinyin), mnemonicId },
         );
         return decoded?.imageId != null;
       }),
@@ -362,6 +376,7 @@ export const populatePronunciationMnemonicImage = inngest.createFunction(
           userId,
           hanzi,
           pinyin,
+          mnemonicId,
         );
 
         invariant(
@@ -400,11 +415,13 @@ export const populatePronunciationMnemonicImage = inngest.createFunction(
         await setUserSetting(db, userId, {
           key: pronunciationMnemonicImageSetting.entity.marshalKey({
             hanzi,
-            pinyin,
+            pinyin: pinyinUnitId(pinyin),
+            mnemonicId,
           }),
           value: pronunciationMnemonicImageSetting.entity.marshalValue({
             hanzi,
-            pinyin,
+            pinyin: pinyinUnitId(pinyin),
+            mnemonicId,
             imageId: generateResult.response,
           }),
         });
@@ -420,12 +437,18 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
       triggers: [populatePronunciationMnemonicSpecHookAndPremiseEvent],
     },
     async ({ event }) => {
-      const { userId, hanziWord } = event.data;
+      const { userId, hanziWord, mnemonicId } = event.data;
 
       const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
       {
         const existingSpec = await withDrizzle(async (db) => {
-          return getPronunciationMnemonicSpec(db, userId, hanzi, pinyin);
+          return getPronunciationMnemonicSpec(
+            db,
+            userId,
+            hanzi,
+            pinyin,
+            mnemonicId,
+          );
         });
 
         if (existingSpec?.hook != null && existingSpec.premise != null) {
@@ -458,6 +481,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
             userId,
             hanzi,
             pinyin,
+            mnemonicId,
           );
           if (existingSpec?.hook != null && existingSpec.premise != null) {
             return;
@@ -473,11 +497,13 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
           await setUserSetting(db, userId, {
             key: pronunciationMnemonicSpecSetting.entity.marshalKey({
               hanzi,
-              pinyin,
+              pinyin: pinyinUnitId(pinyin),
+              mnemonicId,
             }),
             value: pronunciationMnemonicSpecSetting.entity.marshalValue({
               hanzi,
-              pinyin,
+              pinyin: pinyinUnitId(pinyin),
+              mnemonicId,
               value: updatedSpec,
             }),
           });
@@ -492,12 +518,18 @@ export const populatePronunciationMnemonicSpecBeats = inngest.createFunction(
     triggers: [populatePronunciationMnemonicSpecBeatsEvent],
   },
   async ({ event }) => {
-    const { userId, hanziWord } = event.data;
+    const { userId, hanziWord, mnemonicId } = event.data;
 
     const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
     {
       const existingSpec = await withDrizzle(async (db) => {
-        return getPronunciationMnemonicSpec(db, userId, hanzi, pinyin);
+        return getPronunciationMnemonicSpec(
+          db,
+          userId,
+          hanzi,
+          pinyin,
+          mnemonicId,
+        );
       });
 
       if (existingSpec?.beats != null) {
@@ -520,6 +552,7 @@ export const populatePronunciationMnemonicSpecBeats = inngest.createFunction(
         setKey: locationSetKey,
         hanzi,
         pinyin,
+        mnemonicId,
       },
     });
 
@@ -530,6 +563,7 @@ export const populatePronunciationMnemonicSpecBeats = inngest.createFunction(
           userId,
           hanzi,
           pinyin,
+          mnemonicId,
         );
         if (existingSpec?.beats != null) {
           return;
@@ -543,11 +577,13 @@ export const populatePronunciationMnemonicSpecBeats = inngest.createFunction(
         await setUserSetting(db, userId, {
           key: pronunciationMnemonicSpecSetting.entity.marshalKey({
             hanzi,
-            pinyin,
+            pinyin: pinyinUnitId(pinyin),
+            mnemonicId,
           }),
           value: pronunciationMnemonicSpecSetting.entity.marshalValue({
             hanzi,
-            pinyin,
+            pinyin: pinyinUnitId(pinyin),
+            mnemonicId,
             value: updatedSpec,
           }),
         });

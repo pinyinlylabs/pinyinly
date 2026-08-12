@@ -197,6 +197,7 @@ export const pronunciationGenerateMnemonicStoryboardPanelsEvent = eventType(
       setKey: locationSetKeySchema,
       hanzi: hanziTextSchema,
       pinyin: pinyinUnitSchema,
+      mnemonicId: z.string(),
     }),
   },
 );
@@ -222,6 +223,7 @@ export const populatePronunciationMnemonicSpecEvent = eventType(
     schema: z.object({
       userId: z.string(),
       hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
     }),
   },
 );
@@ -232,6 +234,7 @@ export const populatePronunciationMnemonicSpecBeatsEvent = eventType(
     schema: z.object({
       userId: z.string(),
       hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
     }),
   },
 );
@@ -242,6 +245,7 @@ export const populatePronunciationMnemonicImageEvent = eventType(
     schema: z.object({
       userId: z.string(),
       hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
     }),
   },
 );
@@ -252,6 +256,7 @@ export const populatePronunciationMnemonicSpecHookAndPremiseEvent = eventType(
     schema: z.object({
       userId: z.string(),
       hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
     }),
   },
 );

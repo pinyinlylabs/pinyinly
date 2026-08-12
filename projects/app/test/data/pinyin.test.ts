@@ -17,8 +17,8 @@ import {
   matchAllPinyinUnitsWithIndexes,
   normalizePinyinText,
   normalizePinyinUnit,
-  normalizePinyinUnitForHintKey,
   pinyinUnitCount,
+  pinyinUnitId,
   pinyinUnitPattern,
   pinyinUnitSuggestions,
   splitPinyinUnit,
@@ -146,29 +146,31 @@ describe(
       // Handles capital letters
       [`Hao3`, `Hǎo`],
       [`Ma1`, `Mā`],
+
+      // er
+      [`er2`, `ér`],
+      [`er5`, `er`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
     });
   },
 );
 
-describe(
-  `normalizePinyinUnitForHintKey fixtures` satisfies HasNameOf<
-    typeof normalizePinyinUnitForHintKey
-  >,
-  () => {
-    test.for([
-      [`huar2`, `huá`],
-      [`huār`, `huā`],
-      [`chuanr4`, `chuàn`],
-      [`r`, `r`],
-      [`er2`, `ér`],
-      [`er5`, `er`],
-    ] as const)(`%s → %s`, ([input, expected]) => {
-      expect(normalizePinyinUnitForHintKey(input)).toEqual(expected);
-    });
-  },
-);
+describe(`pinyinUnitId()`, () => {
+  test.for([
+    [`a`, `a`],
+    [`ā`, `ā`],
+    [`huá`, `huá`],
+    [`huár`, `huá`],
+    [`huār`, `huā`],
+    [`chuànr`, `chuàn`],
+    [`ér`, `ér`],
+    // `r` is not valid on its own, so it should be normalized to an empty string.
+    [`r`, ``],
+  ] as const)(`%s → %s`, ([input, expected]) => {
+    expect(pinyinUnitId(input as PinyinUnit)).toEqual(expected);
+  });
+});
 
 describe(
   `normalizePinyinText fixtures` satisfies HasNameOf<
@@ -185,6 +187,8 @@ describe(
       [`hǎo hao3 nü nv nu: nǖ nv1 nu:1`, `hǎo hǎo nü nü nü nǖ nǖ nǖ`],
       // Multiple multi-unit words
       [`hǎohao3 nü nvnu: nǖ nv1nu:1hao3`, `hǎohǎo nü nünü nǖ nǖnǖhǎo`],
+      // Handles erhua
+      [`hua2r hua1r chuan4r er2`, `huár huār chuànr ér`],
       // Leaves punctuation alone
       [
         `hǎohao3. nü nvnu: nǖ 【nv1nu:1hao3】`,

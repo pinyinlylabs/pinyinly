@@ -1,4 +1,3 @@
-import type { DictionarySearchEntry } from "@/client/query";
 import { trpc } from "@/client/trpc";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
@@ -14,6 +13,7 @@ import {
   getFinalSoundLabel,
   getInitialSoundLabel,
   isInitialSoundId,
+  pinyinUnitId,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
@@ -25,6 +25,7 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundNameTextSetting,
   pinyinSoundLocationSetKeySetting,
+  pronunciationMnemonicSelectedSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -42,15 +43,15 @@ import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { ToneLabelText } from "./ToneLabelText";
 import { Tooltip } from "./Tooltip";
-import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacterPronunciationImagePicker";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation.utils";
 import { useDb } from "./hooks/useDb";
-import { useHanziPronunciationMnemonic } from "./hooks/useHanziPronunciationMnemonic";
+import { useHanziPronunciationMnemonicId as useHanziPronunciationMnemonicIds } from "./hooks/useHanziPronunciationMnemonicIds";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 import { hanziFromHanziWord } from "@/dictionary";
+import { nanoid } from "@/util/nanoid";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -93,7 +94,6 @@ export function WikiHanziCharacterPronunciation({
 
   return (
     <WikiHanziCharacterPronunciationBox
-      gloss={gloss}
       hanziWord={firstMeaning.hanziWord}
       pinyinUnit={pronunciation.pinyinUnit}
     />
@@ -103,9 +103,7 @@ export function WikiHanziCharacterPronunciation({
 export function WikiHanziCharacterPronunciationBox({
   hanziWord,
   pinyinUnit,
-  gloss,
 }: {
-  gloss: DictionarySearchEntry[`gloss`][number];
   hanziWord: HanziWord;
   pinyinUnit: PinyinUnit;
 }) {
@@ -170,15 +168,38 @@ export function WikiHanziCharacterPronunciationBox({
   const finalLabel = getFinalSoundLabel(pinyinUnit);
 
   const finalLocationName = selectedFinalLocation?.name ?? null;
-  const pronunciationMnemonic = useHanziPronunciationMnemonic(
+  const pronunciationMnemonicIds = useHanziPronunciationMnemonicIds(
     hanzi,
     pinyinUnit,
   );
-  const mnemonicSettingKey = pronunciationMnemonic.settingKey;
-  const mnemonicImageSetting = useUserSetting({
-    setting: pronunciationMnemonicImageSetting,
-    key: mnemonicSettingKey,
-  });
+  const mnemonicSettingKey =
+    pronunciationMnemonicIds.selectedId == null
+      ? null
+      : {
+          hanzi,
+          pinyin: pinyinUnitId(pinyinUnit),
+          mnemonicId: pronunciationMnemonicIds.selectedId,
+        };
+  const mnemonicImageSetting = useUserSetting(
+    mnemonicSettingKey == null
+      ? null
+      : {
+          setting: pronunciationMnemonicImageSetting,
+          key: mnemonicSettingKey,
+        },
+  );
+  const mnemonicTextSetting = useUserSetting(
+    mnemonicSettingKey == null
+      ? null
+      : {
+          setting: pronunciationMnemonicTextSetting,
+          key: mnemonicSettingKey,
+        },
+  );
+
+  const hasMnemonicContent =
+    (mnemonicTextSetting?.value?.text ?? ``).trim().length > 0;
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [showMnemonicEditor, setShowMnemonicEditor] = useState<boolean | null>(
     null,
@@ -187,8 +208,7 @@ export function WikiHanziCharacterPronunciationBox({
   const enqueuePronunciationRecurringHintMutation =
     trpc.ai.enqueuePronunciationRecurringHint.useMutation();
 
-  const mnemonicImage = mnemonicImageSetting.value;
-  const hasMnemonicContent = pronunciationMnemonic.hasText;
+  const mnemonicImage = mnemonicImageSetting?.value;
   const hasImageContent = mnemonicImage?.imageId != null;
   const isHintSectionVisible = isEditMode
     ? (showMnemonicEditor ?? hasMnemonicContent)
@@ -200,6 +220,13 @@ export function WikiHanziCharacterPronunciationBox({
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
   };
+  const selectedMnemonicSetting = useUserSetting({
+    setting: pronunciationMnemonicSelectedSetting,
+    key: {
+      hanzi,
+      pinyin: pinyinUnitId(pinyinUnit),
+    },
+  });
 
   return (
     <WikiTitledBox
@@ -287,8 +314,15 @@ export function WikiHanziCharacterPronunciationBox({
                   selectedInitialActorId != null &&
                   selectedFinalLocationId != null
                 ) {
+                  const mnemonicId = nanoid();
+                  selectedMnemonicSetting.setValue({
+                    hanzi,
+                    pinyin: pinyinUnitId(pinyinUnit),
+                    mnemonicId: mnemonicId,
+                  });
                   enqueuePronunciationRecurringHintMutation.mutate({
                     hanziWord,
+                    mnemonicId,
                   });
                 }
               }}
@@ -296,12 +330,44 @@ export function WikiHanziCharacterPronunciationBox({
               Use AI
             </RectButton>
           ) : null}
+          {pronunciationMnemonicIds.allIds.length < 2 ? null : (
+            <RectButton
+              variant="bare"
+              className="opacity-80"
+              onPress={() => {
+                const { allIds: mnemonicIds, selectedId: mnemonicId } =
+                  pronunciationMnemonicIds;
+                if (mnemonicIds.length < 2) {
+                  return;
+                }
+
+                const currentIndex =
+                  mnemonicId == null ? null : mnemonicIds.indexOf(mnemonicId);
+                const nextIndex =
+                  currentIndex == null || currentIndex < 0
+                    ? 0
+                    : (currentIndex + 1) % mnemonicIds.length;
+                const nextMnemonicId = mnemonicIds[nextIndex];
+                if (nextMnemonicId == null) {
+                  return;
+                }
+
+                selectedMnemonicSetting.setValue({
+                  hanzi,
+                  pinyin: pinyinUnitId(pinyinUnit),
+                  mnemonicId: nextMnemonicId,
+                });
+              }}
+            >
+              Shuffle
+            </RectButton>
+          )}
         </View>
       ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
         <View className="bg-black/10">
-          {isHintSectionVisible ? (
+          {isHintSectionVisible && mnemonicSettingKey != null ? (
             <View className={`px-7 py-4`}>
               <InlineEditableSettingText
                 readonly={!isEditMode}
@@ -328,20 +394,28 @@ export function WikiHanziCharacterPronunciationBox({
             </View>
           ) : null}
 
-          {isImageSectionVisible ? (
+          {isImageSectionVisible && mnemonicSettingKey != null ? (
             isEditMode ? (
-              <WikiHanziCharacterPronunciationImagePicker
-                gloss={gloss}
-                hanzi={hanzi}
-                pinyinUnit={pinyinUnit}
-                onChangeImageId={(nextImageId) => {
-                  if (nextImageId == null) {
-                    setShowImageEditor(false);
-                  } else {
-                    setShowImageEditor(true);
-                  }
-                }}
-              />
+              <View className="gap-2 pt-2">
+                <InlineEditableSettingImage
+                  setting={pronunciationMnemonicImageSetting}
+                  settingKey={mnemonicSettingKey}
+                  previewHeight={200}
+                  tileSize={64}
+                  enableAiGeneration
+                  aspectRatio="16:9"
+                  onUploadError={(error) => {
+                    console.error(`Upload error:`, error);
+                  }}
+                  onChangeImageId={(nextImageId) => {
+                    if (nextImageId == null) {
+                      setShowImageEditor(false);
+                    } else {
+                      setShowImageEditor(true);
+                    }
+                  }}
+                />
+              </View>
             ) : mnemonicImage?.imageId == null ? null : (
               <InlineEditableSettingImage
                 readonly
@@ -355,7 +429,7 @@ export function WikiHanziCharacterPronunciationBox({
         </View>
       ) : null}
 
-      {isEditMode ? (
+      {isEditMode && mnemonicSettingKey != null ? (
         <View className="gap-2 p-4">
           <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
             Mnemonic spec

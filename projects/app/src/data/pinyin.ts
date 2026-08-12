@@ -3,6 +3,7 @@ import type {
   PinyinSoundId,
   PinyinText,
   PinyinUnit,
+  PinyinUnitId,
 } from "@/data/model";
 import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
@@ -14,10 +15,13 @@ import z from "zod";
  * numeric form.
  * @param pinyin
  */
-export const normalizePinyinText = (pinyin: string): PinyinText => {
+export const mapPinyinTextUnits = (
+  pinyin: PinyinText,
+  mapper: (unit: PinyinUnit) => PinyinUnit,
+): PinyinText => {
   const units = matchAllPinyinUnitsWithIndexes(pinyin);
   if (units.length === 0) {
-    return pinyin as PinyinText;
+    return pinyin;
   }
 
   let result = ``;
@@ -26,11 +30,20 @@ export const normalizePinyinText = (pinyin: string): PinyinText => {
     const [index, unit] = [units[i], units[i + 1]] as [number, string];
 
     result += pinyin.slice(lastIndex, index);
-    result += normalizePinyinUnit(unit);
+    result += mapper(unit as PinyinUnit);
     lastIndex = index + unit.length;
   }
   result += pinyin.slice(lastIndex);
   return result as PinyinText;
+};
+
+/**
+ * Converts a pinyin string to use the standard diacritic tone marks instead of
+ * numeric form.
+ * @param pinyin
+ */
+export const normalizePinyinText = (pinyin: string): PinyinText => {
+  return mapPinyinTextUnits(pinyin as PinyinText, normalizePinyinUnit);
 };
 
 /**
@@ -97,23 +110,13 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
   return result as PinyinUnit;
 });
 
-/**
- * Normalize a pinyin unit for pronunciation hint keying.
- *
- * This preserves tone marks and collapses erhua suffixes so r-variants share
- * the same hint key.
- */
-export const normalizePinyinUnitForHintKey = memoize1(
-  function normalizePinyinUnitForHintKey(pinyinOrNumeric: string): PinyinUnit {
-    const normalized = normalizePinyinUnit(pinyinOrNumeric);
-
-    if (normalized.length > 2 && normalized.endsWith(`r`)) {
-      return normalized.slice(0, -1) as PinyinUnit;
-    }
-
-    return normalized;
-  },
-);
+export const pinyinUnitId = memoize1(function pinyinUnitId(
+  pinyin: PinyinUnit,
+): PinyinUnitId {
+  return mapPinyinTextUnits(pinyin, (unit) =>
+    unit === `r` ? (`` as PinyinUnit) : unit,
+  ) as PinyinUnitId;
+});
 
 const toneMap = {
   a: [`_`, `ā`, `á`, `ǎ`, `à`, `a`],
