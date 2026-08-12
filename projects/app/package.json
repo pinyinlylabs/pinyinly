@@ -119,7 +119,7 @@
     "svg-path-commander": "^2.3.0",
     "tailwind-variants": "^1.0.0",
     "tailwindcss": "^4.1.12",
-    "uniwind": "patch:uniwind@npm%3A1.10.0#~/.yarn/patches/uniwind-npm-1.10.0-15f2f30a35.patch",
+    "uniwind": "patch:uniwind@npm%3A1.10.1#~/.yarn/patches/uniwind-npm-1.10.1-fc1503837c.patch",
     "ws": "^8.17.1",
     "zod": "^4.4.3",
     "zustand": "^5.0.3"

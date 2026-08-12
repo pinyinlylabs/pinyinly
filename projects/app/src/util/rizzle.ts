@@ -671,9 +671,7 @@ export class RizzleEntity<
           cursor = nextFillerIndex + nextFiller.length;
         }
 
-        resultRecord[varName] = shape[varName].unmarshal(
-          marshaledValue as (typeof shape)[typeof varName][`_marshaled`],
-        );
+        resultRecord[varName] = shape[varName].unmarshal(marshaledValue);
       }
 
       invariant(cursor === key.length, `key has unexpected trailing data`);
