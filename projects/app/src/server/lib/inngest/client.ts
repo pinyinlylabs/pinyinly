@@ -224,6 +224,8 @@ export const populatePronunciationMnemonicSpecEvent = eventType(
       userId: z.string(),
       hanziWord: hanziWordSchema,
       mnemonicId: z.string(),
+      associationStrategy:
+        pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
     }),
   },
 );
@@ -257,6 +259,8 @@ export const populatePronunciationMnemonicSpecHookAndPremiseEvent = eventType(
       userId: z.string(),
       hanziWord: hanziWordSchema,
       mnemonicId: z.string(),
+      associationStrategy:
+        pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
     }),
   },
 );

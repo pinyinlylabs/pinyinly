@@ -20,6 +20,11 @@ export const pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema =
     `behaviourConsequence`,
   ]);
 
+export type PronunciationMnemonicRecurringPromptAssociationStrategyKind =
+  z.infer<
+    typeof pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema
+  >;
+
 export const pronunciationMnemonicRecurringPromptCueSchema = z.object({
   label: z.string(),
   meaning: z.string().optional(),
@@ -167,6 +172,11 @@ with incorporating the cue.
 When referencing the location and set, use the exact names provided in the 
 input. Do not invent new names. For example location set name is "basement",
 refer to it as "basement" rather than "cellar" or "dungeon".
+
+
+## Formatting
+
+Don't use any markdown formatting (e.g. **…** or _…_) in the output, just use plaintext English.
 
 # Input
 

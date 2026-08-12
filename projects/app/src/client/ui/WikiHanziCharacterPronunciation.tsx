@@ -52,6 +52,8 @@ import { hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
 import { hanziFromHanziWord } from "@/dictionary";
 import { nanoid } from "@/util/nanoid";
+import { DropdownMenu2 } from "./DropdownMenu2";
+import { PronunciationMnemonicRecurringPromptAssociationStrategyKind } from "@/util/prompts/pronunciationMnemonicRecurring";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -228,6 +230,24 @@ export function WikiHanziCharacterPronunciationBox({
     },
   });
 
+  const handleUseAi = (
+    associationStrategy: PronunciationMnemonicRecurringPromptAssociationStrategyKind,
+  ) => {
+    if (selectedInitialActorId != null && selectedFinalLocationId != null) {
+      const mnemonicId = nanoid();
+      selectedMnemonicSetting.setValue({
+        hanzi,
+        pinyin: pinyinUnitId(pinyinUnit),
+        mnemonicId: mnemonicId,
+      });
+      enqueuePronunciationRecurringHintMutation.mutate({
+        hanziWord,
+        mnemonicId,
+        associationStrategy,
+      });
+    }
+  };
+
   return (
     <WikiTitledBox
       title="Remember the pronunciation"
@@ -367,31 +387,69 @@ export function WikiHanziCharacterPronunciationBox({
                 </RectButton>
               )}
               {__DEV__ ? (
-                <RectButton
-                  variant="bare"
-                  iconStart="ai"
-                  iconSize={20}
-                  className="opacity-80"
-                  onPress={() => {
-                    if (
-                      selectedInitialActorId != null &&
-                      selectedFinalLocationId != null
-                    ) {
-                      const mnemonicId = nanoid();
-                      selectedMnemonicSetting.setValue({
-                        hanzi,
-                        pinyin: pinyinUnitId(pinyinUnit),
-                        mnemonicId: mnemonicId,
-                      });
-                      enqueuePronunciationRecurringHintMutation.mutate({
-                        hanziWord,
-                        mnemonicId,
-                      });
-                    }
-                  }}
-                >
-                  Use AI
-                </RectButton>
+                <DropdownMenu2>
+                  <DropdownMenu2.Trigger asChild>
+                    <RectButton
+                      variant="bare"
+                      iconStart="ai"
+                      iconSize={20}
+                      className="opacity-80"
+                      onPress={() => {
+                        if (
+                          selectedInitialActorId != null &&
+                          selectedFinalLocationId != null
+                        ) {
+                          const mnemonicId = nanoid();
+                          selectedMnemonicSetting.setValue({
+                            hanzi,
+                            pinyin: pinyinUnitId(pinyinUnit),
+                            mnemonicId: mnemonicId,
+                          });
+                          enqueuePronunciationRecurringHintMutation.mutate({
+                            hanziWord,
+                            mnemonicId,
+                          });
+                        }
+                      }}
+                    >
+                      Use AI
+                    </RectButton>
+                  </DropdownMenu2.Trigger>
+                  <DropdownMenu2.Content
+                    sideOffset={2}
+                    className="w-56"
+                    align="start"
+                  >
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`identityBinding`);
+                      }}
+                    >
+                      <Text>Identity binding</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`environmentRule`);
+                      }}
+                    >
+                      <Text>Environment rule</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`objectBinding`);
+                      }}
+                    >
+                      <Text>Object binding</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`behaviourConsequence`);
+                      }}
+                    >
+                      <Text>Behaviour consequence</Text>
+                    </DropdownMenu2.Item>
+                  </DropdownMenu2.Content>
+                </DropdownMenu2>
               ) : null}
               {pronunciationMnemonicIds.allIds.length < 2 ? null : (
                 <RectButton

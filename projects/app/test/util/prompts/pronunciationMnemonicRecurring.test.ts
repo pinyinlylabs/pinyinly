@@ -167,6 +167,11 @@ describe(
         input. Do not invent new names. For example location set name is "basement",
         refer to it as "basement" rather than "cellar" or "dungeon".
 
+
+        ## Formatting
+
+        Don't use any markdown formatting (e.g. **…** or _…_) in the output.
+
         # Input
 
         <input>

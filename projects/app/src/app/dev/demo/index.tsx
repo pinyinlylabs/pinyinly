@@ -27,12 +27,12 @@ const lazyDemo = <Demo extends FunctionComponent>(
 export const demos: Record<string, FunctionComponent> = {
   // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
   [`AiMeaningHintModal`]: lazyDemo(() => import(`../../../client/ui/AiMeaningHintModal.demo`)),
-  [`AiPronunciationHintModal`]: lazyDemo(() => import(`../../../client/ui/AiPronunciationHintModal.demo`)),
   [`AssetImage`]: lazyDemo(() => import(`../../../client/ui/AssetImage.demo`)),
   [`Breadcrumbs`]: lazyDemo(() => import(`../../../client/ui/Breadcrumbs.demo`)),
   [`ButtonGroup`]: lazyDemo(() => import(`../../../client/ui/ButtonGroup.demo`)),
   [`CloseButton`]: lazyDemo(() => import(`../../../client/ui/CloseButton.demo`)),
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
+  [`DropdownMenu2`]: lazyDemo(() => import(`../../../client/ui/DropdownMenu2.demo`)),
   [`FloatingMenuModal`]: lazyDemo(() => import(`../../../client/ui/FloatingMenuModal.demo`)),
   [`GlyphBuilder`]: lazyDemo(() => import(`../../../client/ui/GlyphBuilder.demo`)),
   [`HanziDecompositionEditor`]: lazyDemo(() => import(`../../../client/ui/HanziDecompositionEditor.demo`)),

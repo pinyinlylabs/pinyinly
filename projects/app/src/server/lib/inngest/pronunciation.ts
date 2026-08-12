@@ -276,11 +276,11 @@ export const populatePronunciationMnemonicSpec = inngest.createFunction(
     triggers: [populatePronunciationMnemonicSpecEvent],
   },
   async ({ event }) => {
-    const { userId, hanziWord, mnemonicId } = event.data;
+    const { userId, hanziWord, mnemonicId, associationStrategy } = event.data;
 
     await step.invoke(`populate hook and premise`, {
       function: populatePronunciationMnemonicSpecHookAndPremise,
-      data: { userId, hanziWord, mnemonicId },
+      data: { userId, hanziWord, mnemonicId, associationStrategy },
     });
 
     // save the hook+premise to the hint field.
@@ -437,7 +437,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
       triggers: [populatePronunciationMnemonicSpecHookAndPremiseEvent],
     },
     async ({ event }) => {
-      const { userId, hanziWord, mnemonicId } = event.data;
+      const { userId, hanziWord, mnemonicId, associationStrategy } = event.data;
 
       const { hanzi, pinyin } = await getHanziAndPinyinForHanziWord(hanziWord);
       {
@@ -469,7 +469,7 @@ export const populatePronunciationMnemonicSpecHookAndPremise =
           hanziWord,
           locationId,
           locationSetKey,
-          associationStrategy: `identityBinding`,
+          associationStrategy,
           userId,
         },
       });
