@@ -275,95 +275,6 @@ export function WikiHanziCharacterPronunciationBox({
           </View>
         </View>
       )}
-      {isEditMode ? (
-        <View className="flex-row items-start gap-4 p-4">
-          {isHintSectionVisible ? null : (
-            <RectButton
-              variant="bare"
-              iconStart="keyboard"
-              iconSize={20}
-              className="opacity-80"
-              onPress={() => {
-                setShowMnemonicEditor(true);
-              }}
-            >
-              Add hint
-            </RectButton>
-          )}
-          {isImageSectionVisible ? null : (
-            <RectButton
-              variant="bare"
-              iconStart="photos-filled"
-              iconSize={20}
-              className="opacity-80"
-              onPress={() => {
-                setShowImageEditor(true);
-              }}
-            >
-              Add image
-            </RectButton>
-          )}
-          {__DEV__ ? (
-            <RectButton
-              variant="bare"
-              iconStart="ai"
-              iconSize={20}
-              className="opacity-80"
-              onPress={() => {
-                if (
-                  selectedInitialActorId != null &&
-                  selectedFinalLocationId != null
-                ) {
-                  const mnemonicId = nanoid();
-                  selectedMnemonicSetting.setValue({
-                    hanzi,
-                    pinyin: pinyinUnitId(pinyinUnit),
-                    mnemonicId: mnemonicId,
-                  });
-                  enqueuePronunciationRecurringHintMutation.mutate({
-                    hanziWord,
-                    mnemonicId,
-                  });
-                }
-              }}
-            >
-              Use AI
-            </RectButton>
-          ) : null}
-          {pronunciationMnemonicIds.allIds.length < 2 ? null : (
-            <RectButton
-              variant="bare"
-              className="opacity-80"
-              onPress={() => {
-                const { allIds: mnemonicIds, selectedId: mnemonicId } =
-                  pronunciationMnemonicIds;
-                if (mnemonicIds.length < 2) {
-                  return;
-                }
-
-                const currentIndex =
-                  mnemonicId == null ? null : mnemonicIds.indexOf(mnemonicId);
-                const nextIndex =
-                  currentIndex == null || currentIndex < 0
-                    ? 0
-                    : (currentIndex + 1) % mnemonicIds.length;
-                const nextMnemonicId = mnemonicIds[nextIndex];
-                if (nextMnemonicId == null) {
-                  return;
-                }
-
-                selectedMnemonicSetting.setValue({
-                  hanzi,
-                  pinyin: pinyinUnitId(pinyinUnit),
-                  mnemonicId: nextMnemonicId,
-                });
-              }}
-            >
-              Shuffle
-            </RectButton>
-          )}
-        </View>
-      ) : null}
 
       {isHintSectionVisible || isImageSectionVisible ? (
         <View className="bg-black/10">
@@ -425,6 +336,98 @@ export function WikiHanziCharacterPronunciationBox({
                 aspectRatio={`5:4`}
               />
             )
+          ) : null}
+
+          {isEditMode ? (
+            <View className="flex-row items-start gap-4 p-4">
+              {isHintSectionVisible ? null : (
+                <RectButton
+                  variant="bare"
+                  iconStart="keyboard"
+                  iconSize={20}
+                  className="opacity-80"
+                  onPress={() => {
+                    setShowMnemonicEditor(true);
+                  }}
+                >
+                  Add hint
+                </RectButton>
+              )}
+              {isImageSectionVisible ? null : (
+                <RectButton
+                  variant="bare"
+                  iconStart="photos-filled"
+                  iconSize={20}
+                  className="opacity-80"
+                  onPress={() => {
+                    setShowImageEditor(true);
+                  }}
+                >
+                  Add image
+                </RectButton>
+              )}
+              {__DEV__ ? (
+                <RectButton
+                  variant="bare"
+                  iconStart="ai"
+                  iconSize={20}
+                  className="opacity-80"
+                  onPress={() => {
+                    if (
+                      selectedInitialActorId != null &&
+                      selectedFinalLocationId != null
+                    ) {
+                      const mnemonicId = nanoid();
+                      selectedMnemonicSetting.setValue({
+                        hanzi,
+                        pinyin: pinyinUnitId(pinyinUnit),
+                        mnemonicId: mnemonicId,
+                      });
+                      enqueuePronunciationRecurringHintMutation.mutate({
+                        hanziWord,
+                        mnemonicId,
+                      });
+                    }
+                  }}
+                >
+                  Use AI
+                </RectButton>
+              ) : null}
+              {pronunciationMnemonicIds.allIds.length < 2 ? null : (
+                <RectButton
+                  variant="bare"
+                  iconStart="shuffle"
+                  onPress={() => {
+                    const { allIds: mnemonicIds, selectedId: mnemonicId } =
+                      pronunciationMnemonicIds;
+                    if (mnemonicIds.length < 2) {
+                      return;
+                    }
+
+                    const currentIndex =
+                      mnemonicId == null
+                        ? null
+                        : mnemonicIds.indexOf(mnemonicId);
+                    const nextIndex =
+                      currentIndex == null || currentIndex < 0
+                        ? 0
+                        : (currentIndex + 1) % mnemonicIds.length;
+                    const nextMnemonicId = mnemonicIds[nextIndex];
+                    if (nextMnemonicId == null) {
+                      return;
+                    }
+
+                    selectedMnemonicSetting.setValue({
+                      hanzi,
+                      pinyin: pinyinUnitId(pinyinUnit),
+                      mnemonicId: nextMnemonicId,
+                    });
+                  }}
+                >
+                  Shuffle
+                </RectButton>
+              )}
+            </View>
           ) : null}
         </View>
       ) : null}

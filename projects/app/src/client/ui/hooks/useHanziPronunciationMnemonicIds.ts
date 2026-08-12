@@ -35,12 +35,11 @@ export function useHanziPronunciationMnemonicId(
   const allIds = [
     ...new Set(
       mnemonicTextSettings
-        .map(
-          (setting) =>
-            pronunciationMnemonicTextSetting.entity.unmarshalValueSafe(
-              setting.value,
-            )?.mnemonicId,
-        )
+        .map((setting) => {
+          return pronunciationMnemonicTextSetting.entity.unmarshalKey(
+            setting.key,
+          ).mnemonicId;
+        })
         .filter((x) => x != null),
     ),
   ];
