@@ -6311,7 +6311,6 @@ __metadata:
     lucia: "npm:^3.2.2"
     moti: "npm:^0.30.0"
     nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
-    nativewind: "npm:5.0.0-preview.4"
     onnxruntime-web: "npm:^1.25.1"
     openai: "npm:^6.45.0"
     oslo: "npm:^1.2.1"
@@ -18546,18 +18545,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nativewind@npm:5.0.0-preview.4":
-  version: 5.0.0-preview.4
-  resolution: "nativewind@npm:5.0.0-preview.4"
-  dependencies:
-    tailwindcss-safe-area: "npm:^1.1.0"
-  peerDependencies:
-    react-native-css: ^3.0.1
-    tailwindcss: ">4.1.11"
-  checksum: 10c0/56f82fdaad35583ebf08d9df96e80a0e2b236c5fa60ade124a8de767bed4345b306e1ee3bcb9d056a8c6a89267cb8a2f226ae4c3b4308a2a02a630cc779fa58f
-  languageName: node
-  linkType: hard
-
 "natural-compare@npm:^1.4.0":
   version: 1.4.0
   resolution: "natural-compare@npm:1.4.0"
@@ -22096,15 +22083,6 @@ __metadata:
   peerDependencies:
     tailwindcss: "*"
   checksum: 10c0/404b88293067009c72b5c22e662ad6994438278b7ebcf4dedf9782832d98206f56f2918e39e202c590e7bb4a99b6272e3482fae3058fcd1cb7cc6e1c9ccf2435
-  languageName: node
-  linkType: hard
-
-"tailwindcss-safe-area@npm:^1.1.0":
-  version: 1.3.0
-  resolution: "tailwindcss-safe-area@npm:1.3.0"
-  peerDependencies:
-    tailwindcss: ^4.0.0
-  checksum: 10c0/4559bde30426323da2d1d345c55850f08375d77ac92b2e786f60056b3f92833f1b37e4be52a9faf64338c1be62cfbf65381e254bf547fe78b9d99b6ce585cb69
   languageName: node
   linkType: hard
 

@@ -90,7 +90,6 @@
     "lucia": "^3.2.2",
     "moti": "^0.30.0",
     "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
-    "nativewind": "5.0.0-preview.4",
     "onnxruntime-web": "^1.25.1",
     "oslo": "^1.2.1",
     "pg": "^8.20.0",

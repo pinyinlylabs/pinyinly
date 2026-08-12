@@ -740,7 +740,7 @@ import type { HanziText } from "@/data/model";
 //           : layoutTargetNode[0];
 
 //       const getLeafHanziSizeClass = (): string => {
-//         // Keep all possible classes as literals so NativeWind can include them.
+//         // Keep all possible classes as literals so Uniwind can include them.
 //         const sizeTiers = [
 //           `text-6xl`,
 //           `text-5xl`,
