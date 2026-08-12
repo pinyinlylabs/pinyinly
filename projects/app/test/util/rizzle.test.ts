@@ -1942,6 +1942,90 @@ test(
   },
 );
 
+describe(`unmarshalKey()`, () => {
+  test(`round trips with key encoding`, () => {
+    const SkillLevel = {
+      Beginner: `beginner`,
+      Advanced: `advanced`,
+    } as const;
+
+    const entity = r.entity(`skill/[level]/entry/[id]`, {
+      level: r.enum(SkillLevel, {
+        [SkillLevel.Beginner]: `b`,
+        [SkillLevel.Advanced]: `a`,
+      }),
+      id: r.string(),
+      value: r.string(),
+    });
+
+    const key = entity.marshalKey({
+      level: SkillLevel.Beginner,
+      id: `x-1`,
+    });
+
+    expect(key).toBe(`skill/b/entry/x-1`);
+    expect(entity.unmarshalKey(key)).toEqual({
+      level: SkillLevel.Beginner,
+      id: `x-1`,
+    });
+  });
+
+  test(`supports partial decoding`, () => {
+    const entity = r.entity(`foo/[id]/bar/[kind]`, {
+      id: r.string(),
+      kind: r.string(),
+      value: r.string(),
+    });
+
+    expect(entity.unmarshalKey(`foo/abc/bar/`, true)).toEqual({ id: `abc` });
+  });
+
+  test(`throws for invalid key prefix`, () => {
+    const entity = r.entity(`foo/[id]`, {
+      id: r.string(),
+      value: r.string(),
+    });
+
+    expect(() => entity.unmarshalKey(`bar/1`)).toThrow();
+  });
+
+  test(`throws when strict mode is missing key variables`, () => {
+    const entity = r.entity(`foo/[id]/bar/[kind]`, {
+      id: r.string(),
+      kind: r.string(),
+      value: r.string(),
+    });
+
+    expect(() => entity.unmarshalKey(`foo/abc/bar/`)).toThrow();
+  });
+
+  test(`throws for unexpected trailing data`, () => {
+    const entity = r.entity(`foo/[id]/bar`, {
+      id: r.string(),
+      value: r.string(),
+    });
+
+    expect(() => entity.unmarshalKey(`foo/abc/bar/extra`)).toThrow();
+  });
+});
+
+typeChecks(`unmarshalKey() type overloads`, () => {
+  const entity = r.entity(`foo/[id]/bar/[kind]`, {
+    id: r.string(),
+    kind: r.string(),
+    value: r.string(),
+  });
+
+  const fullKey = entity.unmarshalKey(`foo/abc/bar/kind-a`);
+  true satisfies IsEqual<typeof fullKey, { id: string; kind: string }>;
+
+  const partialKey = entity.unmarshalKey(`foo/abc/bar/`, true);
+  true satisfies IsEqual<
+    typeof partialKey,
+    Partial<{ id: string; kind: string }>
+  >;
+});
+
 typeChecks<ExtractVariableNames<never>>(() => {
   true satisfies IsEqual<ExtractVariableNames<`a[b]`>, `b`>;
   true satisfies IsEqual<ExtractVariableNames<`a[b][c]`>, `b` | `c`>;

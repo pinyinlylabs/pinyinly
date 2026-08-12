@@ -485,6 +485,10 @@ interface RizzleEntityDef<
     key: Partial<EntityKeyType<S, KeyPath>[`_input`]>,
     allowPartial?: boolean,
   ) => string;
+  unmarshalKey: (
+    key: string,
+    allowPartial?: boolean,
+  ) => Partial<EntityKeyType<S, KeyPath>[`_output`]>;
   typeName: `entity`;
 }
 
@@ -561,6 +565,22 @@ export class RizzleEntity<
     return this._def.interpolateKey(input);
   }
 
+  unmarshalKey(key: string): EntityKeyType<S, KeyPath>[`_output`];
+  unmarshalKey(
+    key: string,
+    allowPartial: false,
+  ): EntityKeyType<S, KeyPath>[`_output`];
+  unmarshalKey(
+    key: string,
+    allowPartial: true,
+  ): Partial<EntityKeyType<S, KeyPath>[`_output`]>;
+  unmarshalKey(
+    key: string,
+    allowPartial = false,
+  ): Partial<EntityKeyType<S, KeyPath>[`_output`]> {
+    return this._def.unmarshalKey(key, allowPartial);
+  }
+
   marshalValue(
     input: EntityValueType<S>[`_input`],
   ): EntityValueType<S>[`_marshaled`] {
@@ -618,10 +638,53 @@ export class RizzleEntity<
       return result;
     };
 
+    const unmarshalKey = (
+      key: string,
+      allowPartial = false,
+    ): Partial<EntityKeyType<S, KeyPath>[`_output`]> => {
+      const prefix = filler[0];
+      invariant(prefix != null);
+      invariant(key.startsWith(prefix), `invalid key prefix`);
+
+      const result: Partial<EntityKeyType<S, KeyPath>[`_output`]> = {};
+      const resultRecord = result as Record<string, unknown>;
+      let cursor = prefix.length;
+
+      for (const [i, varName] of keyPathVars.entries()) {
+        if (cursor === key.length) {
+          invariant(allowPartial, `missing key variable`);
+          break;
+        }
+
+        const nextFiller = filler[i + 1];
+        invariant(nextFiller != null);
+
+        let marshaledValue: string;
+
+        if (nextFiller.length === 0) {
+          marshaledValue = key.slice(cursor);
+          cursor = key.length;
+        } else {
+          const nextFillerIndex = key.indexOf(nextFiller, cursor);
+          invariant(nextFillerIndex !== -1, `invalid key layout`);
+          marshaledValue = key.slice(cursor, nextFillerIndex);
+          cursor = nextFillerIndex + nextFiller.length;
+        }
+
+        resultRecord[varName] = shape[varName].unmarshal(
+          marshaledValue as (typeof shape)[typeof varName][`_marshaled`],
+        );
+      }
+
+      invariant(cursor === key.length, `key has unexpected trailing data`);
+      return result;
+    };
+
     return new RizzleEntity({
       keyPath,
       valueType,
       interpolateKey,
+      unmarshalKey,
       typeName: `entity`,
     });
   };
