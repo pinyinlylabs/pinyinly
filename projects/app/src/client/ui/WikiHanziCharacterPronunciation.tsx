@@ -276,7 +276,7 @@ export function WikiHanziCharacterPronunciationBox({
         </View>
       )}
 
-      {isHintSectionVisible || isImageSectionVisible ? (
+      {isHintSectionVisible || isImageSectionVisible || isEditMode ? (
         <View className="bg-black/10">
           {isHintSectionVisible && mnemonicSettingKey != null ? (
             <View className={`px-7 py-4`}>
@@ -429,21 +429,20 @@ export function WikiHanziCharacterPronunciationBox({
               )}
             </View>
           ) : null}
-        </View>
-      ) : null}
-
-      {isEditMode && mnemonicSettingKey != null ? (
-        <View className="gap-2 p-4">
-          <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
-            Mnemonic spec
-          </Text>
-          <InlineEditableSettingJson
-            setting={pronunciationMnemonicSpecSetting}
-            settingKey={mnemonicSettingKey}
-            readonly={!isEditMode}
-            placeholder='{"story": "A chef juggling cans"}'
-            emptyStateText="No mnemonic spec JSON"
-          />
+          {isEditMode && mnemonicSettingKey != null ? (
+            <View className="gap-2 p-4">
+              <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
+                Mnemonic spec
+              </Text>
+              <InlineEditableSettingJson
+                setting={pronunciationMnemonicSpecSetting}
+                settingKey={mnemonicSettingKey}
+                readonly={!isEditMode}
+                placeholder='{"story": "A chef juggling cans"}'
+                emptyStateText="No mnemonic spec JSON"
+              />
+            </View>
+          ) : null}
         </View>
       ) : null}
     </WikiTitledBox>
