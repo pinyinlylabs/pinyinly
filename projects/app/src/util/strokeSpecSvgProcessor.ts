@@ -1294,6 +1294,13 @@ export function buildStrokeSpecSegmentPaths(
 ): Record<string, string> {
   const segments: Record<string, string> = {};
 
+  const strokePathsById = Object.fromEntries(
+    strokePaths.map((path, index) => [index, path]),
+  );
+  const medianPathsById = Object.fromEntries(
+    (medianPaths ?? []).map((path, index) => [index, path]),
+  );
+
   for (const strokeSpecText of strokeSpecTexts) {
     if (strokeSpecText.trim().length === 0) {
       continue;
@@ -1307,17 +1314,12 @@ export function buildStrokeSpecSegmentPaths(
         }
         const atomText = formatAtom(atom);
         const path = buildClosedSvgSegmentPathFromStrokeSpec({
-          strokePathsById: Object.fromEntries(
-            strokePaths.map((path, index) => [index, path]),
-          ),
-          medianPathsById: Object.fromEntries(
-            (medianPaths ?? []).map((path, index) => [index, path]),
-          ),
+          strokePathsById,
+          medianPathsById,
           strokeSpecText: atomText,
         });
-        if (path != null) {
-          segments[atomText] = path;
-        }
+        invariant(path != null, `Failed to build path for atom: ${atomText}`);
+        segments[atomText] = path;
       }
     }
   }

@@ -1275,7 +1275,7 @@
   ["釆",{"decompositions":{"⿱丿米":["0","1-6"]},"mnemonic":"⿱丿米"}],
   ["采",{"decompositions":{"⿱爫木":["0-3","4-7"]},"mnemonic":"⿱爫木"}],
   ["里",{"decompositions":{"⿻甲二":["0-4","5,6"]},"mnemonic":"⿻甲二"}],
-  ["重",{"decompositions":{"⿱千里":["0,1,6","2-8"]},"mnemonic":"⿱千里"}],
+  ["重",{"decompositions":{"⿱千里":["0,1,6[:5]","2-5,6[3:],7,8"]},"mnemonic":"⿱千里"}],
   ["量",{"decompositions":{"⿱旦里":["0-4","5-11"]},"mnemonic":"⿱旦里"}],
   ["金",{"decompositions":{"⿱人⿻王丷":["0,1","2-4,7","5,6"]},"mnemonic":"⿱人⿻王丷"}],
   ["釒",{"componentFormOf":"金","decompositions":{}}],
