@@ -128,6 +128,7 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     void (async () => {
       const graph = await skillLearningGraph({
         targetSkills: allTargetSkills,
+        dictionary,
         decompositionData: characterDecompositionData,
       });
 

@@ -78,6 +78,7 @@ describe(`skillLearningGraph`, async () => {
   bench(`no target skills`, async () => {
     await skillLearningGraph({
       targetSkills: [],
+      dictionary,
       decompositionData,
     });
   });
@@ -88,6 +89,7 @@ describe(`skillLearningGraph`, async () => {
   bench(`HSK1 target skills`, async () => {
     await skillLearningGraph({
       targetSkills: hsk1TargetSkills,
+      dictionary,
       decompositionData,
     });
   });
@@ -101,6 +103,7 @@ describe(`skillLearningGraph`, async () => {
   bench(`HSK1-3 target skills`, async () => {
     await skillLearningGraph({
       targetSkills: hsk1to3TargetSkills,
+      dictionary,
       decompositionData,
     });
   });

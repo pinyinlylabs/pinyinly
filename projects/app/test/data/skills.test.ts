@@ -22,6 +22,7 @@ import {
   walkSkillAndDependencies,
 } from "#data/skills.ts";
 import {
+  Dictionary,
   loadBuiltinCharacterDecompositionForMnemonicsEntries,
   loadDictionary,
 } from "#dictionary.ts";
@@ -69,10 +70,11 @@ describe(
   () => {
     skillTest(
       `no targets gives an empty graph`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         await expect(
           skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [],
           }),
         ).resolves.toEqual(new Map());
@@ -81,11 +83,12 @@ describe(
 
     skillTest(
       `includes the target skill in the graph`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         const skill = `he:我:i`;
 
         const graph = await skillLearningGraph({
           decompositionData,
+          dictionary,
           targetSkills: [skill],
         });
 
@@ -95,10 +98,11 @@ describe(
 
     skillTest(
       `includes decomposition dependencies when learning 好`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         await expect(
           skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [`he:好:good`],
           }),
         ).resolves.toMatchInlineSnapshot(`
@@ -142,10 +146,11 @@ describe(
 
     skillTest(
       `includes multiple levels of decomposition for a character`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         await expect(
           skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [`he:外:outside`],
           }),
         ).resolves.toEqual(
@@ -326,10 +331,11 @@ describe(
 
     skillTest(
       `supports multi-character words`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         assertLearningGraphEqual(
           await skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [`he:一下儿:aBit`],
           }),
           `
@@ -351,10 +357,11 @@ describe(
 
     skillTest(
       `supports HanziWordToPinyin dependency chain`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         assertLearningGraphEqual(
           await skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [`hp:儿:son`],
           }),
           `
@@ -375,6 +382,7 @@ describe(
       async ({ decompositionData, dictionary }) => {
         await skillLearningGraph({
           decompositionData,
+          dictionary,
           targetSkills: [
             ...dictionary.hsk1HanziWords,
             ...dictionary.hsk2HanziWords,
@@ -386,10 +394,11 @@ describe(
 
     skillTest(
       `learns the word form of component-form first`,
-      async ({ decompositionData }) => {
+      async ({ decompositionData, dictionary }) => {
         assertLearningGraphEqual(
           await skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [`he:汉:chinese`],
           }),
           `
@@ -413,6 +422,7 @@ describe(
       async ({ decompositionData, dictionary }) => {
         const graph = await skillLearningGraph({
           decompositionData,
+          dictionary,
           targetSkills: [],
         });
         expect(
@@ -440,6 +450,7 @@ describe(
       async ({ decompositionData, dictionary }) => {
         const graph = await skillLearningGraph({
           decompositionData,
+          dictionary,
           targetSkills: [],
         });
         const queue = skillReviewQueue({
@@ -471,6 +482,7 @@ describe(
       async ({ decompositionData, dictionary }) => {
         const graph = await skillLearningGraph({
           decompositionData,
+          dictionary,
           targetSkills: [`he:刀:knife`],
         });
 
@@ -510,6 +522,7 @@ describe(
       async ({ decompositionData, dictionary }) => {
         const graph = await skillLearningGraph({
           decompositionData,
+          dictionary,
           targetSkills: [`he:丿:slash`, `he:人:person`, `he:𠃌:radical`],
         });
 
@@ -608,6 +621,7 @@ describe(
         skillTest(`works for 好`, async ({ decompositionData, dictionary }) => {
           const graph = await skillLearningGraph({
             decompositionData,
+            dictionary,
             targetSkills: [`he:好:good`],
           });
           const queue = skillReviewQueue({
@@ -634,6 +648,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`he:汉:chinese`],
             });
 
@@ -657,7 +672,7 @@ describe(
 
         skillTest(
           `incorrect answers in a quiz don't get scheduled prematurely`,
-          async ({ decompositionData }) => {
+          async ({ decompositionData, dictionary }) => {
             vi.useFakeTimers({ toFake: [`Date`] });
 
             // There was a bug where "wrong answers" were being scheduled for review
@@ -666,6 +681,7 @@ describe(
 
             const queue = await simulateSkillReviews({
               decompositionData,
+              dictionary,
               targetSkills: [`he:分:divide`],
               history: [
                 // first question is he:八:eight but they get it wrong. 𠃌 is one of the
@@ -701,9 +717,10 @@ describe(
 
         skillTest(
           `learns new skills before not-due skills (stable sorted to maintain graph order)`,
-          async ({ decompositionData }) => {
+          async ({ decompositionData, dictionary }) => {
             const queue = await simulateSkillReviews({
               decompositionData,
+              dictionary,
               targetSkills: [`he:分:divide`],
               history: [`🟡 he:丿:slash`, `💤 1m`],
             });
@@ -722,7 +739,7 @@ describe(
 
         skillTest(
           `skills unblock dependant skills when they become stable enough`,
-          async ({ decompositionData }) => {
+          async ({ decompositionData, dictionary }) => {
             vi.useFakeTimers({ toFake: [`Date`] });
 
             const targetSkills: Skill[] = [`he:刀:knife`];
@@ -731,6 +748,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -749,6 +767,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -767,6 +786,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -785,6 +805,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -808,6 +829,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -821,7 +843,7 @@ describe(
 
         skillTest(
           `doesn't get stuck reviewing the same skill after all due skills are done`,
-          async ({ decompositionData }) => {
+          async ({ decompositionData, dictionary }) => {
             vi.useFakeTimers({ toFake: [`Date`] });
 
             const targetSkills: Skill[] = [`he:分:divide`];
@@ -841,6 +863,7 @@ describe(
 
             let queue = await simulateSkillReviews({
               decompositionData,
+              dictionary,
               targetSkills,
               history,
             });
@@ -852,6 +875,7 @@ describe(
               history.push(`💤 5s`, `🟡 he:𠃌:radical`);
               queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -868,7 +892,7 @@ describe(
 
         skillTest(
           `skills that are stale (heavily over-due and not stable) are treated as new skills`,
-          async ({ decompositionData }) => {
+          async ({ decompositionData, dictionary }) => {
             vi.useFakeTimers({ toFake: [`Date`] });
 
             const targetSkills: Skill[] = [`he:刀:knife`];
@@ -880,6 +904,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -906,6 +931,7 @@ describe(
             {
               const queue = await simulateSkillReviews({
                 decompositionData,
+                dictionary,
                 targetSkills,
                 history,
               });
@@ -937,6 +963,7 @@ describe(
 
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
@@ -978,6 +1005,7 @@ describe(
 
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
@@ -1016,6 +1044,7 @@ describe(
 
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
@@ -1089,6 +1118,7 @@ describe(
 
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [
                   `he:好:good`,
                   `hp:好:good`,
@@ -1144,6 +1174,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [
                   `he:好:good`,
                   `hp:好:good`,
@@ -1181,6 +1212,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [
                   `he:好:good`,
                   `hp:好:good`,
@@ -1227,6 +1259,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`he:好:good`, `hp:好:good`, `he:人:person`],
               });
 
@@ -1272,6 +1305,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`he:分:divide`],
             });
 
@@ -1309,6 +1343,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`he:分:divide`],
             });
 
@@ -1335,6 +1370,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`he:分:divide`, `he:一:one`],
             });
 
@@ -1375,6 +1411,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [
                 `he:分:divide`,
                 `he:一:one`,
@@ -1458,6 +1495,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`het:好:good`, `het:好:like`],
               });
               const queue = skillReviewQueue({
@@ -1496,6 +1534,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`het:任:any`, `het:任:appoint`, `het:任:duty`],
               });
               const queue = skillReviewQueue({
@@ -1536,6 +1575,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`het:任:any`, `het:任:appoint`],
               });
               const queue = skillReviewQueue({
@@ -1573,6 +1613,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`hp:几:howMany`, `hp:几:table`],
               });
               const queue = skillReviewQueue({
@@ -1610,6 +1651,7 @@ describe(
             async ({ decompositionData, dictionary }) => {
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`hp:几:howMany`, `hp:几:table`],
               });
               const queue = skillReviewQueue({
@@ -1647,6 +1689,7 @@ describe(
               // so answering one should NOT trigger an OtherAnswer reactive question
               const graph = await skillLearningGraph({
                 decompositionData,
+                dictionary,
                 targetSkills: [`hp:点:oClock`, `hp:点:point`],
               });
               const queue = skillReviewQueue({
@@ -1688,6 +1731,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`hp:好:good`],
             });
             const queue = skillReviewQueue({
@@ -1708,6 +1752,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`hp:一样:same`],
             });
 
@@ -1740,6 +1785,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`hp:一点儿:aLittle`],
             });
 
@@ -1783,6 +1829,7 @@ describe(
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
               decompositionData,
+              dictionary,
               targetSkills: [`hp:一:one`],
             });
 
@@ -2822,10 +2869,12 @@ function latestSkillRatings(
  */
 async function simulateSkillReviews({
   decompositionData,
+  dictionary,
   targetSkills,
   history,
 }: {
   decompositionData: CharacterDecompositionData;
+  dictionary: Dictionary;
   targetSkills: Skill[];
   history: HistoryCommand[];
 }): Promise<SkillReviewQueue> {
@@ -2840,6 +2889,7 @@ async function simulateSkillReviews({
   // Now compute the skill review queue using data from replicache.
   const graph = await skillLearningGraph({
     decompositionData,
+    dictionary,
     targetSkills,
   });
 
@@ -2852,7 +2902,6 @@ async function simulateSkillReviews({
   for await (const [, v] of rizzle.queryPaged.skillRating.byCreatedAt()) {
     latestSkillRatings.set(v.skill, v);
   }
-  const dictionary = await loadDictionary();
 
   // Compute the review queue.
   return skillReviewQueue({
