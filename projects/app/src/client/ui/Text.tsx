@@ -1,7 +1,9 @@
 import { Slot } from "@rn-primitives/slot";
-import * as React from "react";
-import { Platform, Text as RNText, type Role } from "react-native";
-import { cn, tv, VariantProps } from "tailwind-variants";
+import React from "react";
+import { Platform, Text as RNText } from "react-native";
+import type { Role } from "react-native";
+import type { VariantProps } from "tailwind-variants";
+import { cn, tv } from "tailwind-variants";
 
 const textVariants = tv({
   base: cn(

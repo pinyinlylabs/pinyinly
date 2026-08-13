@@ -53,7 +53,7 @@ import { parseImageCrop } from "./imageCrop";
 import { hanziFromHanziWord } from "@/dictionary";
 import { nanoid } from "@/util/nanoid";
 import { DropdownMenu2 } from "./DropdownMenu2";
-import { PronunciationMnemonicRecurringPromptAssociationStrategyKind } from "@/util/prompts/pronunciationMnemonicRecurring";
+import type { PronunciationMnemonicRecurringPromptAssociationStrategyKind } from "@/util/prompts/pronunciationMnemonicRecurring";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,

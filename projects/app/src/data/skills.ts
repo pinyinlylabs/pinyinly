@@ -3,11 +3,7 @@ import type {
   Dictionary,
   HanziWordWithMeaning,
 } from "@/dictionary";
-import {
-  hanziFromHanziWord,
-  loadCharactersJson,
-  shallowDecomposeHanzi,
-} from "@/dictionary";
+import { hanziFromHanziWord, shallowDecomposeHanzi } from "@/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
 import {
   fsrsIsForgotten,
@@ -70,12 +66,12 @@ export interface Node {
 
 export type SkillLearningGraph = Map<Skill, Node>;
 
-export async function skillLearningGraph(options: {
+export function skillLearningGraph(options: {
   targetSkills: Skill[];
   decompositionData: readonly CharacterDecompositionRow[];
   dictionary: Dictionary;
-}): Promise<SkillLearningGraph> {
-  const charactersJson = await loadCharactersJson();
+  charactersJson: CharactersJson;
+}): SkillLearningGraph {
   const graph: SkillLearningGraph = new Map();
 
   const decomposeHanzi = memoize1((hanzi: HanziText) =>
@@ -92,7 +88,7 @@ export async function skillLearningGraph(options: {
       skill,
       decomposeHanzi,
       options.dictionary,
-      charactersJson,
+      options.charactersJson,
     );
 
     const node: Node = { skill, dependencies: new Set(dependencies) };

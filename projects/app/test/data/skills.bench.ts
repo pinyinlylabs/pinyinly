@@ -5,6 +5,7 @@ import {
 } from "#data/skills.ts";
 import {
   loadBuiltinCharacterDecompositionForMnemonicsEntries,
+  loadCharactersJson,
   loadDictionary,
 } from "#dictionary.ts";
 import { bench, describe, expect } from "vitest";
@@ -17,6 +18,7 @@ expect(process.env[`MODE`]).toBe(`benchmark`);
 
 // Load dictionary once at module level for benchmarks
 const dictionary = await loadDictionary();
+const charactersJson = await loadCharactersJson();
 
 describe(`skillReviewQueue`, () => {
   const { graph, skillSrsStates, latestSkillRatings, now } =
@@ -80,6 +82,7 @@ describe(`skillLearningGraph`, async () => {
       targetSkills: [],
       dictionary,
       decompositionData,
+      charactersJson,
     });
   });
 
@@ -91,6 +94,7 @@ describe(`skillLearningGraph`, async () => {
       targetSkills: hsk1TargetSkills,
       dictionary,
       decompositionData,
+      charactersJson,
     });
   });
 
@@ -105,6 +109,7 @@ describe(`skillLearningGraph`, async () => {
       targetSkills: hsk1to3TargetSkills,
       dictionary,
       decompositionData,
+      charactersJson,
     });
   });
 });

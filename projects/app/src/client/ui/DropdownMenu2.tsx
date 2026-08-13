@@ -1,20 +1,16 @@
 import * as DropdownMenuPrimitive from "@rn-primitives/dropdown-menu";
-import * as React from "react";
 import { Text } from "./Text";
-import {
-  Platform,
-  type StyleProp,
-  StyleSheet,
-  View,
-  type ViewStyle,
-} from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import { FadeIn, ReduceMotion } from "react-native-reanimated";
 import { FullWindowOverlay as RNFullWindowOverlay } from "react-native-screens";
 import { cn } from "tailwind-variants";
 import { Icon } from "./Icon";
-import { IconName } from "./iconRegistry";
+import type { IconName } from "./iconRegistry";
 import { NativeOnlyAnimatedView } from "./NativeOnlyAnimatedView";
-import { PropsOf } from "@pinyinly/lib/types";
+import type { PropsOf } from "@pinyinly/lib/types";
+import type { ComponentProps, ReactNode } from "react";
+import React from "react";
 
 function DropdownMenuSubTrigger({
   className,
@@ -22,8 +18,8 @@ function DropdownMenuSubTrigger({
   children,
   iconClassName,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & {
-  children?: React.ReactNode;
+}: ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & {
+  children?: ReactNode;
   iconClassName?: string;
   inset?: boolean;
 }) {

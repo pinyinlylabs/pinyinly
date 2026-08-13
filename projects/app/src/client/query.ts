@@ -219,6 +219,18 @@ export const dictionaryQuery = queryOptions({
   structuralSharing: false,
 });
 
+export const charactersJsonQuery = queryOptions({
+  queryKey: [`charactersJson`],
+  queryFn: async () => {
+    await devToolsSlowQuerySleepIfEnabled();
+
+    return loadCharactersJson();
+  },
+  networkMode: `offlineFirst`,
+  retry: false,
+  structuralSharing: false,
+});
+
 export function getTargetHanziWordsFromDictionary(
   dictionary: Dictionary,
 ): HanziWord[] {

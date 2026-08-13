@@ -1,4 +1,5 @@
 import {
+  charactersJsonQuery,
   dictionaryQuery,
   getPrioritizedHanziWords,
   targetSkillsQuery,
@@ -16,9 +17,8 @@ import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
-import { useEffect, useMemo, useState } from "react";
-import type { SkillQueueContextValue } from "./contexts";
-import { SkillQueueContext } from "./contexts";
+import { useMemo } from "react";
+import { SkillQueueContext, SkillQueueContextValue } from "./contexts";
 
 const mockable = {
   getMaxQueueItems: () => 1,
@@ -42,6 +42,8 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     useQuery(targetSkillsQuery());
   const { data: dictionary, isLoading: isDictionaryLoading } =
     useQuery(dictionaryQuery);
+  const { data: charactersJson, isLoading: isCharactersJsonLoading } =
+    useQuery(charactersJsonQuery);
   const {
     data: latestSkillRatingsData,
     isLoading: isLatestSkillRatingsLoading,
@@ -67,28 +69,30 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     [db.characterDecompositionsCollection],
   );
 
-  const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
-    loading: true,
-  });
-
   const skillSrsStates = useMemo(
     () =>
-      new Map<Skill, SrsStateType>(skillStateData.map((x) => [x.skill, x.srs])),
-    [skillStateData],
+      isSkillStatesLoading
+        ? null
+        : new Map<Skill, SrsStateType>(
+            skillStateData.map((x) => [x.skill, x.srs]),
+          ),
+    [skillStateData, isSkillStatesLoading],
   );
 
   const latestSkillRatings = useMemo(
     () =>
-      new Map<Skill, LatestSkillRating>(
-        latestSkillRatingsData.map((x) => [x.skill, x]),
-      ),
-    [latestSkillRatingsData],
+      isLatestSkillRatingsLoading
+        ? null
+        : new Map<Skill, LatestSkillRating>(
+            latestSkillRatingsData.map((x) => [x.skill, x]),
+          ),
+    [latestSkillRatingsData, isLatestSkillRatingsLoading],
   );
 
   // Compute priority skills from settings
   const prioritySkills = useMemo(() => {
-    if (dictionary == null) {
-      return [];
+    if (dictionary == null || isPrioritySettingsLoading) {
+      return null;
     }
     const prioritizedWords = getPrioritizedHanziWords(
       prioritySettingsData,
@@ -102,66 +106,70 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
 
   // Combine base target skills with priority skills
   const allTargetSkills = useMemo(() => {
+    if (prioritySkills == null) {
+      return null;
+    }
+
     if (baseTargetSkills == null) {
       return [];
     }
     return [...baseTargetSkills, ...prioritySkills].filter(arrayFilterUnique());
   }, [baseTargetSkills, prioritySkills]);
 
-  useEffect(() => {
-    if (
-      isLatestSkillRatingsLoading ||
-      isSkillStatesLoading ||
+  const graph = useMemo(
+    () =>
+      dictionary == null ||
+      charactersJson == null ||
+      allTargetSkills == null ||
+      allTargetSkills.length === 0 ||
+      isCharactersJsonLoading ||
+      isCharacterDecompositionLoading ||
       isTargetSkillsLoading ||
-      isPrioritySettingsLoading ||
-      isDictionaryLoading ||
-      isCharacterDecompositionLoading
-    ) {
-      return;
-    }
+      isDictionaryLoading
+        ? null
+        : skillLearningGraph({
+            targetSkills: allTargetSkills,
+            decompositionData: characterDecompositionData,
+            dictionary,
+            charactersJson,
+          }),
+    [
+      dictionary,
+      charactersJson,
+      allTargetSkills,
+      isCharactersJsonLoading,
+      isCharacterDecompositionLoading,
+      isTargetSkillsLoading,
+      isDictionaryLoading,
+    ],
+  );
 
-    if (allTargetSkills.length === 0 || dictionary == null) {
-      return;
-    }
+  // Recompute the review queue when inputs are ready
+  const reviewQueue = useMemo(
+    () =>
+      graph == null ||
+      dictionary == null ||
+      skillSrsStates == null ||
+      latestSkillRatings == null
+        ? null
+        : skillReviewQueue({
+            graph,
+            skillSrsStates,
+            latestSkillRatings,
+            now: new Date(),
+            dictionary,
+            maxQueueItems: mockable.getMaxQueueItems(),
+          }),
+    [graph, dictionary, skillSrsStates, latestSkillRatings],
+  );
 
-    // Build graph with combined target skills and priority words
-    void (async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: allTargetSkills,
-        dictionary,
-        decompositionData: characterDecompositionData,
-      });
-
-      // Recompute the review queue when inputs are ready
-      const reviewQueue = skillReviewQueue({
-        graph,
-        skillSrsStates,
-        latestSkillRatings,
-        now: new Date(),
-        dictionary,
-        maxQueueItems: mockable.getMaxQueueItems(),
-      });
-
-      setSkillQueue((prev) => ({
-        loading: false,
-        reviewQueue,
-        version: prev.loading ? 0 : prev.version + 1,
-      }));
-    })();
-  }, [
-    isLatestSkillRatingsLoading,
-    isSkillStatesLoading,
-    isTargetSkillsLoading,
-    isPrioritySettingsLoading,
-    isDictionaryLoading,
-    isCharacterDecompositionLoading,
-    allTargetSkills,
-    dictionary,
-    skillSrsStates,
-    latestSkillRatings,
-    latestSkillRatingsData,
-    characterDecompositionData,
-  ]);
+  const skillQueue: SkillQueueContextValue = useMemo(
+    () =>
+      reviewQueue == null
+        ? { loading: true }
+        : { loading: false, reviewQueue, version: Date.now() },
+    [reviewQueue],
+  );
 
   return (
     <SkillQueueContext.Provider value={skillQueue}>
