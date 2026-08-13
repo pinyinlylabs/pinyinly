@@ -1304,7 +1304,7 @@ describe(
           },
         );
 
-        skillTest.only(
+        skillTest(
           `schedules new skills in dependency order`,
           async ({ decompositionData, dictionary }) => {
             const graph = await skillLearningGraph({
@@ -2772,6 +2772,33 @@ describe(
   },
 );
 
+describe(`makeLargeSkillReviewFixture suite`, () => {
+  test(`it works with skillReviewQueue`, async () => {
+    const dictionary = await loadDictionary();
+
+    const { graph, skillSrsStates, latestSkillRatings, now } =
+      makeLargeSkillReviewFixture({
+        skillCount: 1000,
+        introducedCount: 800,
+        ratingCount: 600,
+      });
+
+    expect(graph.size).toBe(1000);
+    expect(skillSrsStates.size).toBe(800);
+    expect(latestSkillRatings.size).toBe(600);
+    expect(now).toEqual(new Date(`2025-01-01T00:00:00.000Z`));
+
+    skillReviewQueue({
+      graph,
+      skillSrsStates,
+      latestSkillRatings,
+      dictionary,
+      now,
+      maxQueueItems: graph.size,
+    });
+  });
+});
+
 type LatestSkillRatingSpec = [rating: Rating, createdAt: Date];
 
 function latestSkillRatings(
@@ -2834,4 +2861,78 @@ async function simulateSkillReviews({
     latestSkillRatings,
     dictionary,
   });
+}
+
+export function makeLargeSkillReviewFixture({
+  skillCount,
+  introducedCount,
+  ratingCount,
+  branchingFactor = 8,
+  now = new Date(`2025-01-01T00:00:00.000Z`),
+}: {
+  skillCount: number;
+  introducedCount: number;
+  ratingCount: number;
+  branchingFactor?: number;
+  now?: Date;
+}): {
+  graph: SkillLearningGraph;
+  skillSrsStates: Map<Skill, SrsStateType>;
+  latestSkillRatings: Map<Skill, LatestSkillRating>;
+  skills: readonly Skill[];
+  now: Date;
+} {
+  invariant(introducedCount <= skillCount);
+
+  const secondaryFactor = branchingFactor * branchingFactor;
+  const skillPrefix = rSkillKind().marshal(SkillKind.HanziWordToGloss);
+  const skills: Skill[] = Array.from(
+    { length: skillCount },
+    (_, index) => `${skillPrefix}:好:${index}` as Skill,
+  );
+
+  const graph: SkillLearningGraph = new Map();
+  for (let index = 0; index < skillCount; index++) {
+    const skill = skills[index]!;
+    const dependencies = new Set<Skill>();
+
+    if (index > 0) {
+      const primaryParent = skills[Math.floor((index - 1) / branchingFactor)]!;
+      if (primaryParent !== skill) {
+        dependencies.add(primaryParent);
+      }
+
+      const secondaryIndex = Math.floor((index - 1) / secondaryFactor);
+      if (secondaryIndex > 0) {
+        dependencies.add(skills[secondaryIndex]!);
+      }
+    }
+
+    graph.set(skill, { skill, dependencies });
+  }
+
+  const dayMs = 24 * 60 * 60 * 1000;
+  const hourMs = 60 * 60 * 1000;
+  const skillSrsStates = new Map<Skill, SrsStateType>();
+  for (let index = 0; index < introducedCount; index++) {
+    const skill = skills[index]!;
+    const prevReviewAt = new Date(now.getTime() - (40 + (index % 10)) * dayMs);
+    const nextReviewAt =
+      index % 5 === 0
+        ? new Date(now.getTime() - ((index % 6) + 1) * hourMs)
+        : new Date(now.getTime() + ((index % 6) + 1) * hourMs);
+    skillSrsStates.set(skill, mockSrsState(prevReviewAt, nextReviewAt));
+  }
+
+  const latestSkillRatings = new Map<Skill, LatestSkillRating>();
+  for (let index = 0; index < ratingCount; index++) {
+    const skill = skills[index % skills.length]!;
+    latestSkillRatings.set(skill, {
+      skill,
+      rating: index % 4 === 0 ? Rating.Again : Rating.Good,
+      createdAt: new Date(now.getTime() - index * 90 * 1000),
+    });
+  }
+
+  return { graph, skillSrsStates, latestSkillRatings, skills, now };
 }

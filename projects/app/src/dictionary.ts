@@ -2,13 +2,13 @@ import { mapStrokeSpec } from "@/util/strokeSpec";
 import {
   isHanziCharacter,
   parseIds,
+  parseIdsLeafs,
   splitHanziText,
   walkIdsNodeLeafs,
 } from "@/data/hanzi";
 import type {
   HanziCharacter,
   HanziWord,
-  IdsNode,
   HanziIds,
   PinyinText,
   PinyinUnit,
@@ -141,6 +141,8 @@ export const loadCharactersJson = memoize0(async function loadCharactersJson() {
       ),
     );
 });
+
+export type CharactersJson = Awaited<ReturnType<typeof loadCharactersJson>>;
 
 export const loadBuiltinCharacterDecompositionEntries = memoize0(
   async function loadBuiltinCharacterDecompositionEntries() {
@@ -619,15 +621,6 @@ export const hanziFromHanziWord = memoize1(function hanziFromHanziWord(
   return hanzi as HanziText;
 });
 
-export const hanziCharactersFromHanziWord = memoize1(
-  function hanziCharactersFromHanziWord(
-    hanziWord: HanziWord,
-  ): HanziCharacter[] {
-    const hanzi = hanziFromHanziWord(hanziWord);
-    return splitHanziText(hanzi);
-  },
-);
-
 export const meaningKeyFromHanziWord = memoize1(
   function meaningKeyFromHanziWord(hanziWord: HanziWord): string {
     const hanzi = hanziFromHanziWord(hanziWord);
@@ -639,7 +632,7 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
 }
 
-export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
+export function shallowDecomposeHanzi<S extends HanziCharacter>(
   hanzi: HanziText,
   decompositionData: readonly Readonly<
     Pick<CharacterDecompositionRow, `hanzi` | `ids`>
@@ -650,7 +643,73 @@ export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
    * the result, and its children will not be descended into.
    */
   predicate: (value: HanziCharacter) => value is S = (_x): _x is S => true,
-): S[] {
+): readonly S[] {
+  const decompositionsByHanzi = groupByHanzi(decompositionData);
+  const hanziCharacters = splitHanziText(hanzi);
+
+  const result: Set<S> = new Set();
+
+  if (hanziCharacters.length > 1) {
+    for (const character of hanziCharacters) {
+      if (predicate(character)) {
+        result.add(character);
+      }
+    }
+    return [...result];
+  }
+
+  const queue = [...hanziCharacters];
+  while (queue.length > 0) {
+    const character = queue.shift();
+    if (character == null || !predicate(character)) {
+      continue;
+    }
+
+    if (isHanziStrokeCountChar(character)) {
+      // Can't decompose a stroke count character, so skip it.
+      continue;
+    }
+
+    const decompositions = decompositionsByHanzi.get(character);
+    if (decompositions == null) {
+      continue;
+    }
+
+    for (const decomposition of decompositions) {
+      for (const idsLeaf of parseIdsLeafs(
+        decomposition.ids,
+      ) as HanziCharacter[]) {
+        if (!predicate(idsLeaf)) {
+          // If it fails the predicate, don't add it nor descend into it.
+          continue;
+        }
+
+        result.add(idsLeaf);
+      }
+    }
+  }
+
+  return [...result];
+}
+
+/**
+ * Recursively decomposes a hanzi character into its IDS leaf components,
+ * filtering by the given predicate, and then continues decomposing the leafs
+ * recursively. Use @see shallowDecomposeHanziToIdsLeafs if you only want the
+ * immediate level of decomposition.
+ */
+export function deepDecomposeHanzi<S extends HanziCharacter>(
+  hanzi: HanziText,
+  decompositionData: readonly Readonly<
+    Pick<CharacterDecompositionRow, `hanzi` | `ids`>
+  >[],
+  /**
+   * Optional predicate to filter out branches of the decomposition. If the
+   * predicate returns false for a given leaf, that leaf will not be added to
+   * the result, and its children will not be descended into.
+   */
+  predicate: (value: HanziCharacter) => value is S = (_x): _x is S => true,
+): readonly S[] {
   const decompositionsByHanzi = groupByHanzi(decompositionData);
   const hanziCharacters = splitHanziText(hanzi);
 
@@ -676,8 +735,9 @@ export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
     }
 
     for (const decomposition of decompositions) {
-      const idsNode = parseIds(decomposition.ids) as IdsNode<HanziCharacter>;
-      for (const idsLeaf of walkIdsNodeLeafs(idsNode)) {
+      for (const idsLeaf of parseIdsLeafs(
+        decomposition.ids,
+      ) as HanziCharacter[]) {
         if (!predicate(idsLeaf)) {
           // If it fails the predicate, don't add it nor descend into it.
           continue;
@@ -695,7 +755,7 @@ export function decomposeHanziToIdsLeafs<S extends HanziCharacter>(
   return [...result];
 }
 
-export function decomposeHanziToIdsLeafsWithStrokeSpecs(
+export function deepDecomposeHanziWithStrokeSpecs(
   hanziCharacter: HanziCharacter,
   decompositionData: readonly Readonly<CharacterDecompositionRow>[],
 ): { hanzi: HanziCharacter; strokeSpec: StrokeSpecString }[] {
@@ -727,7 +787,7 @@ export function decomposeHanziToIdsLeafsWithStrokeSpecs(
 
     for (const decomposition of decompositions) {
       for (const [leafIds, leafStrokeSpec] of zip(
-        walkIdsNodeLeafs(parseIds(decomposition.ids) as IdsNode<HanziIdsLeaf>),
+        parseIdsLeafs(decomposition.ids) as HanziIdsLeaf[],
         decomposition.strokeSpecs,
       )) {
         if (isHanziStrokeCountChar(character) || !isHanziCharacter(leafIds)) {

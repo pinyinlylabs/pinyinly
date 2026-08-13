@@ -11,6 +11,7 @@ import {
   matchAllHanziCharacters,
   matchAllHanziCharactersWithIndexes,
   parseIds,
+  parseIdsLeafs,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
@@ -18,6 +19,7 @@ import type { HanziCharacter } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers.ts";
+import { loadCharactersJson } from "#dictionary.js";
 
 test.for([
   [`⿱⿱abc`, `⿳abc`],
@@ -298,6 +300,30 @@ describe(`parseIds() suite`, () => {
     expect(() => parseIds(`⿰讠兑X`)).toThrow(
       `IDS decomposition has trailing content at character index 3`,
     );
+  });
+});
+
+describe(`parseIdsLeafs() suite`, () => {
+  test.for([
+    [`⿰a⿱bc`, [`a`, `b`, `c`]],
+    [`⿱a⿳bc⿴de`, [`a`, `b`, `c`, `d`, `e`]],
+    [`⿱a⿳bc⿴d①`, [`a`, `b`, `c`, `d`, `①`]],
+  ] as [string, string[]][])(`parses $1`, ([input, expected]) => {
+    expect(parseIdsLeafs(input)).toEqual(expected);
+  });
+
+  test(`same results as parseIds()`, async () => {
+    const charactersJson = await loadCharactersJson();
+    const allIds = charactersJson
+      .values()
+      .flatMap((c) => Object.keys(c.decompositions ?? {}));
+
+    for (const ids of allIds) {
+      const leafs = parseIdsLeafs(ids);
+      const node = parseIds(ids);
+
+      expect.soft([...walkIdsNodeLeafs(node)], ids).toEqual(leafs);
+    }
   });
 });
 

@@ -7,7 +7,7 @@ import { HanziStrokesTile } from "./HanziStrokesTile";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
 import {
-  decomposeHanziToIdsLeafsWithStrokeSpecs,
+  deepDecomposeHanziWithStrokeSpecs,
   loadBuiltinCharacterDecompositionEntries,
 } from "@/dictionary";
 import { parseStrokeSpec } from "@/util/strokeSpec";
@@ -42,7 +42,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
     loadBuiltinCharacterDecompositionEntries(),
   );
 
-  const decompositionItems = decomposeHanziToIdsLeafsWithStrokeSpecs(
+  const decompositionItems = deepDecomposeHanziWithStrokeSpecs(
     hanzi,
     characterDecompositionEntries,
   );

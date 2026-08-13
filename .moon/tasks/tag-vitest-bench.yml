@@ -6,4 +6,6 @@ tasks:
       - "/yarn.lock" # Dependencies can change behaviour
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+    options:
+      cache: false
     toolchain: "node"

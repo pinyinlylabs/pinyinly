@@ -21,7 +21,7 @@ import type {
 import { wikiCharacterDataSchema } from "#data/model.js";
 import {
   buildHanziWord,
-  decomposeHanziToIdsLeafs,
+  deepDecomposeHanzi,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
   hanziFromHanziWord,
@@ -722,7 +722,7 @@ const buildCharactersToCheck = memoize0(async function (): Promise<
   const result = new Set<HanziCharacter>();
   for (const seed of seeds) {
     const hanzi = hanziFromHanziWord(seed);
-    for (const component of decomposeHanziToIdsLeafs(
+    for (const component of deepDecomposeHanzi(
       hanzi,
       decompositionData,
       isHanziCharacter,

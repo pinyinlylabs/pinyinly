@@ -1,9 +1,13 @@
-import type { Dictionary, HanziWordWithMeaning } from "@/dictionary";
+import type {
+  CharactersJson,
+  Dictionary,
+  HanziWordWithMeaning,
+} from "@/dictionary";
 import {
-  decomposeHanziToIdsLeafs,
   hanziFromHanziWord,
   loadCharactersJson,
   loadDictionary,
+  shallowDecomposeHanzi,
 } from "@/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
 import {
@@ -37,6 +41,7 @@ import type { DeepReadonly } from "ts-essentials";
 import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
   CharacterDecompositionRow,
+  HanziCharacter,
   HanziText,
   HanziWord,
   HanziWordSkill,
@@ -70,29 +75,37 @@ export async function skillLearningGraph(options: {
   targetSkills: Skill[];
   decompositionData: readonly CharacterDecompositionRow[];
 }): Promise<SkillLearningGraph> {
+  const charactersJson = await loadCharactersJson();
+  const dictionary = await loadDictionary();
   const graph: SkillLearningGraph = new Map();
 
-  async function addSkill(skill: Skill): Promise<void> {
+  const decomposeHanzi = memoize1((hanzi: HanziText) =>
+    shallowDecomposeHanzi(hanzi, options.decompositionData, isHanziCharacter),
+  );
+
+  function addSkill(skill: Skill): void {
     // Skip doing any work if the skill is already in the graph.
     if (graph.has(skill)) {
       return;
     }
 
-    const dependencies = await skillDependencies(
+    const dependencies = skillDependencies(
       skill,
-      options.decompositionData,
+      decomposeHanzi,
+      dictionary,
+      charactersJson,
     );
 
     const node: Node = { skill, dependencies: new Set(dependencies) };
     graph.set(skill, node);
 
     for (const dependency of dependencies) {
-      await addSkill(dependency);
+      addSkill(dependency);
     }
   }
 
   for (const skill of options.targetSkills) {
-    await addSkill(skill);
+    addSkill(skill);
   }
 
   return graph;
@@ -185,14 +198,15 @@ export const finalFromPinyinFinalAssociationSkill = (
   return final;
 };
 
-export async function skillDependencies(
+export function skillDependencies(
   skill: Skill,
-  decompositionData: readonly CharacterDecompositionRow[],
-): Promise<Skill[]> {
+  decompose: (hanzi: HanziText) => readonly HanziCharacter[],
+  dictionary: Dictionary,
+  charactersJson: CharactersJson,
+): Skill[] {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
-  const charactersJson = await loadCharactersJson();
-  const dictionary = await loadDictionary();
+  const hanziWordToGlossDepsHanzi = new Set<HanziText>(); // fast lookup
 
   switch (skillKind) {
     case SkillKind.GlossToHanziWord: {
@@ -210,11 +224,7 @@ export async function skillDependencies(
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Learn the components of a hanzi word first.
-      for (let hanziComponent of decomposeHanziToIdsLeafs(
-        hanzi,
-        decompositionData,
-        isHanziCharacter,
-      )) {
+      for (let hanziComponent of decompose(hanzi)) {
         if (hanziComponent === hanzi) {
           continue;
         }
@@ -230,26 +240,21 @@ export async function skillDependencies(
 
         // Check if the character was already added as a dependency by being
         // referenced in the gloss hint.
-        const depAlreadyAdded = deps.some((x) => {
-          if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
-            return (
-              hanziFromHanziWord(
-                hanziWordFromSkill(skill as HanziWordSkill),
-              ) === hanziComponent
-            );
-          }
-          return false;
-        });
+        if (hanziWordToGlossDepsHanzi.has(hanziComponent)) {
+          continue;
+        }
 
-        // If the character wasn't already added, add it as a dependency by
-        // guessing what disambugation to use for the hanzi.
-        if (!depAlreadyAdded) {
-          const hanziWordWithMeaning =
-            await hackyGuessHanziWordToLearn(hanziComponent);
-          if (hanziWordWithMeaning != null) {
-            const [hanziWord] = hanziWordWithMeaning;
-            deps.push(hanziWordToGloss(hanziWord));
-          }
+        // If the character wasn't already added, we need to figure out which
+        // HanziWord to learn for it. Since there's no definite answer, we have
+        // to guess.
+        const hanziWordWithMeaning = hackyGuessHanziWordToLearn(
+          hanziComponent,
+          dictionary,
+        );
+        if (hanziWordWithMeaning != null) {
+          const [hanziWord] = hanziWordWithMeaning;
+          deps.push(hanziWordToGloss(hanziWord));
+          hanziWordToGlossDepsHanzi.add(hanziComponent);
         }
       }
       break;
@@ -382,15 +387,16 @@ export async function skillDependencies(
   return deps;
 }
 
-async function hackyGuessHanziWordToLearn(
+function hackyGuessHanziWordToLearn(
   hanzi: HanziText,
-): Promise<DeepReadonly<HanziWordWithMeaning> | undefined> {
-  const dictionary = await loadDictionary();
+  dictionary: Dictionary,
+): DeepReadonly<HanziWordWithMeaning> | undefined {
   const hanziWords = dictionary.lookupHanzi(hanzi);
   for (const item of hanziWords) {
     return item;
   }
 }
+
 export function hanziWordSkill(
   type: typeof SkillKind.HanziWordToGlossTyped,
   hanziWord: HanziWord,

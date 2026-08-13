@@ -400,6 +400,32 @@ export function parseIds(
 }
 
 /**
+ * More efficient alternative to @see parseIds if all you need is leaf
+ * characters, it avoids building the full tree structure and just returns the
+ * leaf characters in order. This reduces memory pressure. In raw CPU speed it's
+ * not much faster (1-2x) but it does surely reduce memory usage.
+ *
+ * This is useful for quickly extracting the leaf characters from an IDS string.
+ */
+export function parseIdsLeafs(ids: string): string[] {
+  const result = [];
+
+  for (let index = 0; index < ids.length;) {
+    const charCodePoint = ids.codePointAt(index);
+    invariant(charCodePoint != null);
+    const char = String.fromCodePoint(charCodePoint);
+    index += char.length;
+    if (charCodePoint >= /* ⿰ */ 12_272 && charCodePoint <= /* ⿿ */ 12_287) {
+      continue;
+    } else {
+      result.push(char);
+    }
+  }
+
+  return result;
+}
+
+/**
  * Index path to an IDS node, represented as an array of child indices.
  */
 export type IdsNodePath = number[];
@@ -606,7 +632,9 @@ export function* walkIdsNodeLeafs<T>(ids: IdsNode<T>): Generator<T> {
   }
 }
 
-export function splitHanziText(hanziText: HanziText): HanziCharacter[] {
+export function splitHanziText(
+  hanziText: HanziText,
+): readonly HanziCharacter[] {
   return splitCharacters(hanziText) as HanziCharacter[];
 }
 

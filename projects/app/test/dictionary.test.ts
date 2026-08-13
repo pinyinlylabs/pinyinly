@@ -37,8 +37,9 @@ import {
   oneUnitPinyinListOrNull,
   oneUnitPinyinOrNull,
   parsePartOfSpeech,
-  decomposeHanziToIdsLeafs,
-  decomposeHanziToIdsLeafsWithStrokeSpecs,
+  deepDecomposeHanzi,
+  deepDecomposeHanziWithStrokeSpecs,
+  shallowDecomposeHanzi,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -641,7 +642,7 @@ test(`dictionary contains entries for decomposition`, async () => {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
-      for (const component of decomposeHanziToIdsLeafs(
+      for (const component of deepDecomposeHanzi(
         character,
         decompositionData,
         isHanziCharacter,
@@ -1468,21 +1469,41 @@ describe(
   },
 );
 
-describe(`decomposeHanziToIdsLeafs() suite`, () => {
+describe(`shallowDecomposeHanzi()`, () => {
+  test(`for multi-character hanzi, only returns each character`, async () => {
+    const result = shallowDecomposeHanzi(汉`说讠`, [
+      { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
+      { hanzi: 汉字`兑`, ids: `丷` as HanziIds },
+    ]);
+
+    expect(result).toEqual([`说`, `讠`]);
+  });
+
+  test(`for single-character hanzi, returns the immediate decomposition`, async () => {
+    const result = shallowDecomposeHanzi(汉`说`, [
+      { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
+      { hanzi: 汉字`兑`, ids: `丷` as HanziIds },
+    ]);
+
+    expect(result).toEqual([`言`, `兑`]);
+  });
+});
+
+describe(`deepDecomposeHanzi() suite`, () => {
   test(`includes each starting character for multi-character input`, async () => {
-    const result = decomposeHanziToIdsLeafs(汉`说讠`, []);
+    const result = deepDecomposeHanzi(汉`说讠`, []);
 
     expect(result).toEqual([`说`, `讠`]);
   });
 
   test(`includes the starting character for single-character input`, async () => {
-    const result = decomposeHanziToIdsLeafs(汉`说`, []);
+    const result = deepDecomposeHanzi(汉`说`, []);
 
     expect(result).toEqual([`说`]);
   });
 
   test(`predicate applies to each starting character`, async () => {
-    const result = decomposeHanziToIdsLeafs(
+    const result = deepDecomposeHanzi(
       汉`说讠`,
       [],
       (x): x is HanziCharacter => x === 汉`讠`,
@@ -1492,7 +1513,7 @@ describe(`decomposeHanziToIdsLeafs() suite`, () => {
   });
 
   test(`supports multiple decompositions for a single hanzi`, async () => {
-    const result = decomposeHanziToIdsLeafs(汉`说讠`, [
+    const result = deepDecomposeHanzi(汉`说讠`, [
       { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
     ]);
 
@@ -1500,7 +1521,7 @@ describe(`decomposeHanziToIdsLeafs() suite`, () => {
   });
 
   test(`deduplicates leafs`, async () => {
-    const result = decomposeHanziToIdsLeafs(汉`说讠`, [
+    const result = deepDecomposeHanzi(汉`说讠`, [
       { hanzi: 汉字`说`, ids: `⿰言讠` as HanziIds },
     ]);
 
@@ -1508,7 +1529,7 @@ describe(`decomposeHanziToIdsLeafs() suite`, () => {
   });
 
   test(`supports mapping results`, async () => {
-    const result = decomposeHanziToIdsLeafs(汉`说讠`, [
+    const result = deepDecomposeHanzi(汉`说讠`, [
       { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
     ]);
 
@@ -1516,15 +1537,15 @@ describe(`decomposeHanziToIdsLeafs() suite`, () => {
   });
 });
 
-describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
+describe(`deepDecomposeHanziWithStrokeSpecs() suite`, () => {
   test(`does not include the starting character`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, []);
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, []);
 
     expect(result).toEqual([]);
   });
 
   test(`decomposes one level with two children`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, [
       {
         hanzi: 汉字`说`,
         ids: `⿰言兑` as HanziIds,
@@ -1547,7 +1568,7 @@ describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
   });
 
   test(`decomposes two levels`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, [
       {
         hanzi: 汉字`说`,
         ids: `兑` as HanziIds,
@@ -1575,7 +1596,7 @@ describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
   });
 
   test(`skips stroke count placeholder characters at first level`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, [
       {
         hanzi: 汉字`说`,
         ids: `①` as HanziIds,
@@ -1587,7 +1608,7 @@ describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
   });
 
   test(`skips stroke count placeholder characters at second level`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, [
       {
         hanzi: 汉字`说`,
         ids: `兑` as HanziIds,
@@ -1611,7 +1632,7 @@ describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
   });
 
   test(`includes multiple instances of the same component with differing strokeSpec`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, [
       {
         hanzi: 汉字`说`,
         ids: `⿰㇀㇀` as HanziIds,
@@ -1634,7 +1655,7 @@ describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
   });
 
   test(`deduplicates multiple instances of the same component with the same strokeSpec`, async () => {
-    const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`说`, [
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`说`, [
       {
         hanzi: 汉字`说`,
         ids: `㇀` as HanziIds,
@@ -1666,7 +1687,7 @@ describe(`decomposeHanziToIdsLeafsWithStrokeSpecs() suite`, () => {
   ] as StrokeSpecString[])(
     `skips when strokeSpec are too complex (%s)`,
     async (strokeSpec) => {
-      const result = decomposeHanziToIdsLeafsWithStrokeSpecs(汉字`兑`, [
+      const result = deepDecomposeHanziWithStrokeSpecs(汉字`兑`, [
         { hanzi: 汉字`兑`, ids: `㇀` as HanziIds, strokeSpecs: [strokeSpec] },
       ]);
 

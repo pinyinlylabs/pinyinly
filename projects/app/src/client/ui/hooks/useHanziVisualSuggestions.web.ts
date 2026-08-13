@@ -3,7 +3,7 @@ import {
   parseFlatIndex,
 } from "@/client/ui/hanziVisualSearch";
 import type { FlatHanziVisualIndex } from "@/client/ui/hanziVisualSearch";
-import { hanziCharactersFromHanziWord, loadDictionary } from "@/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useEffect, useState } from "react";
 import type { InferenceSession, Tensor } from "onnxruntime-web";
@@ -12,6 +12,7 @@ import type {
   UseHanziVisualSuggestionsParams,
 } from "./useHanziVisualSuggestions";
 import { Asset } from "expo-asset";
+import { splitHanziText } from "@/data/hanzi";
 
 const queryImageSize = 32;
 
@@ -62,7 +63,7 @@ async function loadDictionaryCharacterSet(): Promise<Set<string>> {
   const characters = new Set<string>();
 
   for (const hanziWord of dictionary.allHanziWords) {
-    for (const character of hanziCharactersFromHanziWord(hanziWord)) {
+    for (const character of splitHanziText(hanziFromHanziWord(hanziWord))) {
       characters.add(character);
     }
   }
