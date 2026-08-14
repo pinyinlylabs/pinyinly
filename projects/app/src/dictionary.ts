@@ -30,6 +30,7 @@ import {
 } from "@/data/model";
 import { matchAllPinyinUnits, normalizePinyinUnit } from "@/data/pinyin";
 import {
+  arrayFilterUnique,
   deepReadonly,
   emptyArray,
   mapArrayAdd,
@@ -761,66 +762,56 @@ export function deepDecomposeHanziWithStrokeSpecs(
 ): { hanzi: HanziCharacter; strokeSpec: StrokeSpecString }[] {
   const decompositionsByHanzi = groupByHanzi(decompositionData);
 
-  // Use a set to avoid duplicates, since the same leaf can be reached via
-  // multiple paths in the decomposition tree.
-  const result: Set<string> = new Set();
+  const items: {
+    strokeSpec: StrokeSpecString;
+    hanzi: HanziCharacter;
+  }[] =
+    decompositionsByHanzi
+      .get(hanziCharacter)
+      ?.flatMap((d) =>
+        zip(parseIdsLeafs(d.ids) as HanziIdsLeaf[], d.strokeSpecs),
+      )
+      .map(([hanzi, strokeSpec]) =>
+        isHanziStrokeCountChar(hanzi) ? null : { strokeSpec, hanzi },
+      )
+      .filter((x) => x != null) ?? [];
 
-  const queue: {
-    baseStrokeSpec: StrokeSpecString;
-    character: HanziCharacter;
-  }[] = [
-    {
-      baseStrokeSpec:
-        `0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20` as StrokeSpecString,
-      character: hanziCharacter,
-    },
-  ];
+  for (const item of items) {
+    const { hanzi, strokeSpec } = item;
 
-  let item;
-  while ((item = queue.shift())) {
-    const { character, baseStrokeSpec } = item;
-
-    const decompositions = decompositionsByHanzi.get(character);
+    const decompositions = decompositionsByHanzi.get(hanzi);
     if (decompositions == null) {
       continue;
     }
 
     for (const decomposition of decompositions) {
-      for (const [leafIds, leafStrokeSpec] of zip(
+      for (const [idsLeaf, leafStrokeSpec] of zip(
         parseIdsLeafs(decomposition.ids) as HanziIdsLeaf[],
         decomposition.strokeSpecs,
       )) {
-        if (isHanziStrokeCountChar(character) || !isHanziCharacter(leafIds)) {
+        if (isHanziStrokeCountChar(hanzi) || !isHanziCharacter(idsLeaf)) {
           continue;
         }
 
-        const strokeSpec = mapStrokeSpec(baseStrokeSpec, leafStrokeSpec);
-        if (strokeSpec == null) {
+        const mappedStrokeSpec = mapStrokeSpec(strokeSpec, leafStrokeSpec);
+        if (mappedStrokeSpec == null) {
           continue;
         }
 
-        result.add(`${leafIds}\0${strokeSpec}`);
-
-        queue.push({
-          character: leafIds,
-          baseStrokeSpec: strokeSpec,
+        items.push({
+          hanzi: idsLeaf,
+          strokeSpec: mappedStrokeSpec,
         });
       }
     }
   }
 
-  return [...result].map((x) => {
-    const [hanzi, strokeSpec] = x.split(`\0`);
-    invariant(
-      hanzi != null && strokeSpec != null,
-      `expected to split %o into hanzi and strokeSpec`,
-      x,
-    );
-    return {
-      hanzi: hanzi as HanziCharacter,
-      strokeSpec: strokeSpec as StrokeSpecString,
-    };
-  });
+  return (
+    items
+      // Deduplicate because there could be identical items derived from
+      // multiple different decomposition paths.
+      .filter(arrayFilterUnique((x) => `${x.hanzi}\0${x.strokeSpec}`))
+  );
 }
 
 export function pinyinOrThrow(

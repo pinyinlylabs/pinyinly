@@ -1510,7 +1510,7 @@ describe(`deepDecomposeHanziWithStrokeSpecs() suite`, () => {
       {
         hanzi: 汉字`说`,
         ids: `⿰言兑` as HanziIds,
-        strokeSpecs: [`0-1`, `2-3`] as StrokeSpecString[],
+        strokeSpecs: [`0,1`, `2,3`] as StrokeSpecString[],
       },
     ]);
 
@@ -1639,20 +1639,43 @@ describe(`deepDecomposeHanziWithStrokeSpecs() suite`, () => {
     `);
   });
 
-  test.for([
-    `0[1:]`,
-    `0[:1]`,
-    `0[0:1]`,
-    `0[10%:]`,
-    `0[:10%]`,
-  ] as StrokeSpecString[])(
-    `skips when strokeSpec are too complex (%s)`,
-    async (strokeSpec) => {
-      const result = deepDecomposeHanziWithStrokeSpecs(汉字`兑`, [
-        { hanzi: 汉字`兑`, ids: `㇀` as HanziIds, strokeSpecs: [strokeSpec] },
-      ]);
+  test(`supports complex slices only for shallow decomposition`, () => {
+    const result = deepDecomposeHanziWithStrokeSpecs(汉字`兑`, [
+      {
+        hanzi: 汉字`兑`,
+        ids: `⿱丷兄` as HanziIds,
+        strokeSpecs: [
+          `0[:10%],1` as StrokeSpecString,
+          "2-6" as StrokeSpecString,
+        ],
+      },
+      {
+        hanzi: 汉字`兄`,
+        ids: `儿` as HanziIds,
+        strokeSpecs: [`0[:20%],1` as StrokeSpecString],
+      },
+      {
+        hanzi: 汉字`丷`,
+        ids: `㇀` as HanziIds,
+        strokeSpecs: [`0` as StrokeSpecString],
+      },
+    ]);
 
-      expect(result).toEqual([]);
-    },
-  );
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "hanzi": "丷",
+          "strokeSpec": "0[:10%],1",
+        },
+        {
+          "hanzi": "兄",
+          "strokeSpec": "2-6",
+        },
+        {
+          "hanzi": "㇀",
+          "strokeSpec": "0[:10%]",
+        },
+      ]
+    `);
+  });
 });
