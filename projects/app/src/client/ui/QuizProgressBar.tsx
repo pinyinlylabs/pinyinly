@@ -92,7 +92,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
         Math.trunc((progress - 1) / milestoneInterval) * milestoneInterval,
         0,
       );
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setNStart(newNStart);
     }
   }, [metrics, progress, nStart]);

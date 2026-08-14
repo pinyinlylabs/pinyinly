@@ -69,9 +69,7 @@ function DemoQuizQueueLozenge({
   className?: string;
 }) {
   return (
-    <SkillQueueContext.Provider
-      value={{ loading: false, reviewQueue, version: 0 }}
-    >
+    <SkillQueueContext.Provider value={{ loading: false, reviewQueue }}>
       <QuizQueueLozenge className={className} />
     </SkillQueueContext.Provider>
   );

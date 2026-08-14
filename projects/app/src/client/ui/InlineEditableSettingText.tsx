@@ -87,12 +87,10 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const containerRef = useRef<View>(null);
   const inputRef = useRef<TextInput>(null);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setDraft(displayValue);
-      setIsInputFocused(false);
-    }
-  }, [displayValue, isEditing]);
+  if (!isEditing && draft !== displayValue) {
+    setDraft(displayValue);
+    setIsInputFocused(false);
+  }
 
   useEffect(() => {
     if (!isEditing) {

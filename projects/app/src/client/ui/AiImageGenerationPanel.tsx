@@ -200,6 +200,7 @@ export function AiImageGenerationPanel({
       playgroundSettingText,
       initialPrompt,
     );
+    // oxlint-disable-next-line react/react-compiler
     setPlaygroundState(parsed);
     setIsLoadedFromSetting(true);
   }, [initialPrompt, playgroundSettingLoading, playgroundSettingText]);
@@ -502,10 +503,12 @@ export function AiImageGenerationPanel({
   };
 
   useEffect(() => {
+    // oxlint-disable-next-line react/react-compiler
     resetReferenceSelection();
   }, [activeThreadId]);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/react-compiler
     resetOneTimeTimelineContextSelection();
   }, [activeThreadId]);
 

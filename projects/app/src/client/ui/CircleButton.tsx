@@ -20,7 +20,7 @@ export function CircleButton({
   color = `#1CB0F5`,
   ...pressableProps
 }: CircleButtonProps) {
-  const baseColor = useMemo(() => Color(color).darken(0.2).hex(), [color]);
+  const baseColor = useMemo(() => new Color(color).darken(0.2).hex(), [color]);
 
   return (
     <Pressable

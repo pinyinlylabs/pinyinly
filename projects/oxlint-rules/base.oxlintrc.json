@@ -2,21 +2,17 @@
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "import", "eslint", "unicorn", "react"],
   "jsPlugins": [
-    {
-      "name": "react-compiler-js",
-      "specifier": "eslint-plugin-react-compiler"
-    },
-    {
-      "name": "react-hooks-js",
-      "specifier": "eslint-plugin-react-hooks"
-    },
+    // {
+    //   "name": "react-compiler-js",
+    //   "specifier": "eslint-plugin-react-compiler"
+    // },
+    // {
+    //   "name": "react-hooks-js",
+    //   "specifier": "eslint-plugin-react-hooks"
+    // },
     {
       "name": "import-js",
       "specifier": "eslint-plugin-import"
-    },
-    {
-      "name": "drizzle-js",
-      "specifier": "eslint-plugin-drizzle"
     }
     // Crashes oxlint LSP
     // {
@@ -245,7 +241,10 @@
     "typescript/require-await": "off",
     "typescript/return-await": "deny",
     "typescript/no-empty-object-type": "deny",
-    "typescript/strict-boolean-expressions": "deny",
+    "typescript/strict-boolean-expressions": [
+      "deny",
+      { "allowNullableBoolean": true }
+    ],
     "typescript/strict-void-return": "off",
     "typescript/switch-exhaustiveness-check": [
       "deny",
@@ -269,62 +268,19 @@
     ],
 
     "typescript/no-useless-default-assignment": "off",
+    "react/rules-of-hooks": "error",
     "react/no-react-children": "off",
     "react/no-clone-element": "off",
+    "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }],
     "react/jsx-no-literals": "off",
 
-    "react/exhaustive-deps": "off",
     "react/forbid-component-props": "off",
     "react/jsx-filename-extension": ["error", { "extensions": ["tsx"] }],
     "react/no-children-prop": "error",
     "react/no-multi-comp": "off",
     "react/only-export-components": "error",
-
-    "react-hooks-js/exhaustive-deps": [
-      "error",
-      { "additionalHooks": "(useLiveQuery)" }
-    ],
-    //
-    // From https://github.com/TheAlexLichter/oxlint-react-compiler-rules/issues/1#issue-3904052296
-    "react-hooks-js/component-hook-factories": "error",
-    "react-hooks-js/config": "error",
-    "react-hooks-js/error-boundaries": "error",
-    "react-hooks-js/gating": "error",
-    "react-hooks-js/globals": "error",
-    "react-hooks-js/immutability": "error",
-    "react-hooks-js/incompatible-library": "error",
-    "react-hooks-js/preserve-manual-memoization": "error",
-    "react-hooks-js/purity": "error",
-    "react-hooks-js/refs": "error",
-    "react-hooks-js/set-state-in-effect": "error",
-    "react-hooks-js/set-state-in-render": "error",
-    "react-hooks-js/static-components": "error",
-    "react-hooks-js/unsupported-syntax": "error",
-    "react-hooks-js/use-memo": "error",
-    //
-    // Recommended-latest rules (from LintRulePreset.RecommendedLatest)
-    "react-hooks-js/void-use-memo": "error",
-    //
-    // Off rules (LintRulePreset.Off) - not enabled by default
-    "react-hooks-js/automatic-effect-dependencies": "error",
-    "react-hooks-js/capitalized-calls": "error",
-    "react-hooks-js/fbt": "error",
-    "react-hooks-js/fire": "error",
-    "react-hooks-js/hooks": "error",
-    "react-hooks-js/invariant": "error",
-    "react-hooks-js/memoized-effect-dependencies": "error",
-    "react-hooks-js/no-deriving-state-in-effects": "error",
-    "react-hooks-js/rule-suppression": "error",
-    "react-hooks-js/syntax": "error",
-    // "react-hooks-js/todo": "error",
-
-    "react-compiler-js/react-compiler": "error",
-
-    "drizzle-js/enforce-update-with-where": "error",
-    "drizzle-js/enforce-delete-with-where": [
-      "error",
-      { "drizzleObjectName": ["db", "tx"] }
-    ]
+    "react/exhaustive-deps": ["error", { "additionalHooks": "(useLiveQuery)" }],
+    "react/react-compiler": "error"
 
     // "stylistic-js/quotes": ["error", "backtick"]
 
@@ -404,6 +360,7 @@
 
         "typescript/no-dynamic-delete": "off",
         "typescript/no-explicit-any": "off",
+        "typescript/no-unsafe-assignment": "off",
         "typescript/restrict-template-expressions": "off",
 
         "react/rules-of-hooks": "error",

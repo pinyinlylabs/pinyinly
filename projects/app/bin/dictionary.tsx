@@ -329,7 +329,7 @@ const Select2 = <T,>({
 
   useEffect(() => {
     if (selectedIndex < scrollIndexStart) {
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setScrollIndexStart(selectedIndex);
     } else if (selectedIndex >= scrollIndexStart + visibleOptionCount) {
       setScrollIndexStart(selectedIndex - visibleOptionCount + 1);

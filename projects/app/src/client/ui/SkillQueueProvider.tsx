@@ -41,10 +41,8 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
 
   const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
     useQuery(targetSkillsQuery());
-  const { data: dictionary, isLoading: isDictionaryLoading } =
-    useQuery(dictionaryQuery);
-  const { data: charactersJson, isLoading: isCharactersJsonLoading } =
-    useQuery(charactersJsonQuery);
+  const { data: dictionary } = useQuery(dictionaryQuery);
+  const { data: charactersJson } = useQuery(charactersJsonQuery);
   const {
     data: latestSkillRatingsData,
     isLoading: isLatestSkillRatingsLoading,
@@ -103,7 +101,7 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       hanziWordToGlossTyped(w),
       hanziWordToPinyinTyped(w),
     ]);
-  }, [prioritySettingsData, dictionary]);
+  }, [prioritySettingsData, dictionary, isPrioritySettingsLoading]);
 
   // Combine base target skills with priority skills
   const allTargetSkills = useMemo(() => {
@@ -123,10 +121,8 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       charactersJson == null ||
       allTargetSkills == null ||
       allTargetSkills.length === 0 ||
-      isCharactersJsonLoading ||
       isCharacterDecompositionLoading ||
-      isTargetSkillsLoading ||
-      isDictionaryLoading
+      isTargetSkillsLoading
         ? null
         : skillLearningGraph({
             targetSkills: allTargetSkills,
@@ -137,11 +133,10 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     [
       dictionary,
       charactersJson,
+      characterDecompositionData,
       allTargetSkills,
-      isCharactersJsonLoading,
       isCharacterDecompositionLoading,
       isTargetSkillsLoading,
-      isDictionaryLoading,
     ],
   );
 
@@ -166,9 +161,7 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
 
   const skillQueue: SkillQueueContextValue = useMemo(
     () =>
-      reviewQueue == null
-        ? { loading: true }
-        : { loading: false, reviewQueue, version: Date.now() },
+      reviewQueue == null ? { loading: true } : { loading: false, reviewQueue },
     [reviewQueue],
   );
 

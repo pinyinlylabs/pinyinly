@@ -106,7 +106,6 @@ const rule: Rule.RuleModule = {
           let closeIndex = index + 1;
           let closeComment = null;
           while (closeIndex < comments.length) {
-            // oxlint-disable-next-line typescript/strict-boolean-expressions
             if (comments[closeIndex]?.value.includes(`</pyly-glob-template>`)) {
               closeComment = comments[closeIndex];
               break;

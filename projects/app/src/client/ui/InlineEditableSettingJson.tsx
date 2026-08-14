@@ -4,7 +4,7 @@ import type {
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { UserSettingJsonEntity } from "@/data/userSettings";
 import { TextInputMulti } from "./TextInputMulti";
@@ -47,14 +47,10 @@ export function InlineEditableSettingJson<T extends UserSettingJsonEntity>({
   const [isDirty, setIsDirty] = useState(false);
   const skipNextBlurSaveRef = useRef(false);
 
-  useEffect(() => {
-    if (isDirty) {
-      return;
-    }
-
+  if (!isDirty && draft !== currentJsonText) {
     setDraft(currentJsonText);
     setError(null);
-  }, [currentJsonText, isDirty]);
+  }
 
   const handleSaveDraft = () => {
     const trimmed = draft.trim();

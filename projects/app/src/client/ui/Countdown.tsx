@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Text } from "react-native";
 
 function diffValue(date: Date): string {
@@ -24,23 +24,19 @@ function countdownUpdatePeriod(date: Date): number {
 }
 
 export const Countdown = ({ date }: { date: Date }) => {
-  const [value, setValue] = useState(() => diffValue(date));
+  const [, setTick] = useState(0);
 
-  const updateValue = useCallback(() => {
-    setValue(diffValue(date));
-  }, [date]);
+  const value = diffValue(date);
 
   useEffect(() => {
-    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-    updateValue();
     const timer = setTimeout(() => {
-      updateValue();
+      setTick((tick) => tick + 1);
     }, countdownUpdatePeriod(date));
 
     return () => {
       clearTimeout(timer);
     };
-  }, [date, updateValue]);
+  }, [date]);
 
   return <Text className={`font-sans font-bold text-fg`}>⏱️ {value}</Text>;
 };

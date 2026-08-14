@@ -1,5 +1,3 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import inngestPlugin from "@inngest/eslint-plugin";
 import {
   configs,
   defineConfig,
@@ -10,8 +8,6 @@ import queryPlugin from "@tanstack/eslint-plugin-query";
 import { builtinModules } from "node:module";
 import { fileURLToPath } from "node:url";
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
-
 const gitignorePath = fileURLToPath(new URL(`.gitignore`, import.meta.url));
 export const gitignoreConfig = includeIgnoreFile(gitignorePath);
 
@@ -20,7 +16,6 @@ export const pluginsConfig = {
   plugins: {
     ...plugins,
     [`@expoCodeImports`]: plugins[`@typescript-eslint`], // an extra scope for no-restricted-imports so they don't clobber other configs
-    [`@inngest`]: inngestPlugin,
   },
 };
 
@@ -35,7 +30,6 @@ export default defineConfig(
   configs.tailwind,
 
   queryPlugin.configs[`flat/recommended`],
-  compat.config(inngestPlugin.configs.recommended),
 
   // Metro bundled files
   {

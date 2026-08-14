@@ -1,3 +1,4 @@
+// oxlint-disable import/namespace -- See https://github.com/oxc-project/oxc/issues/13258#issuecomment-4582968867
 import * as DropdownMenuPrimitive from "@rn-primitives/dropdown-menu";
 import { Text } from "./Text";
 import { Platform, StyleSheet, View } from "react-native";
@@ -59,7 +60,7 @@ function DropdownMenuSubTrigger({
         )}
         {...props}
       >
-        <>{children}</>
+        {children}
         <Icon
           icon={icon}
           tintColorClassName="accent-fg"
@@ -111,12 +112,13 @@ function DropdownMenuContent({
         <DropdownMenuPrimitive.Overlay
           style={Platform.select<StyleProp<ViewStyle>>({
             web: overlayStyle ?? undefined,
-            native: overlayStyle
-              ? StyleSheet.flatten([
-                  StyleSheet.absoluteFill as ViewStyle,
-                  overlayStyle as ViewStyle,
-                ])
-              : (StyleSheet.absoluteFill as ViewStyle),
+            native:
+              overlayStyle == null
+                ? (StyleSheet.absoluteFill as ViewStyle)
+                : StyleSheet.flatten([
+                    StyleSheet.absoluteFill as ViewStyle,
+                    overlayStyle as ViewStyle,
+                  ]),
           })}
           className={overlayClassName}
           asChild={Platform.OS !== `web`}
@@ -261,7 +263,7 @@ function DropdownMenuCheckboxItem({
             />
           </DropdownMenuPrimitive.ItemIndicator>
         </View>
-        <>{children}</>
+        {children}
       </DropdownMenuPrimitive.CheckboxItem>
     </Text.ClassContext.Provider>
   );
@@ -298,7 +300,7 @@ function DropdownMenuRadioItem({
             <View className="bg-foreground size-2 rounded-full" />
           </DropdownMenuPrimitive.ItemIndicator>
         </View>
-        <>{children}</>
+        {children}
       </DropdownMenuPrimitive.RadioItem>
     </Text.ClassContext.Provider>
   );
@@ -306,7 +308,7 @@ function DropdownMenuRadioItem({
 
 function DropdownMenuLabel({
   className,
-  inset,
+  inset = false,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
   className?: string;
@@ -320,7 +322,7 @@ function DropdownMenuLabel({
 
           sm:py-1.5
         `,
-        inset && `pl-8`,
+        inset ? `pl-8` : null,
         className,
       )}
       {...props}

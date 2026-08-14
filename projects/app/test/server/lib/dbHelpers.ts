@@ -1,3 +1,4 @@
+// oxlint-disable react-hooks/rules-of-hooks
 import type { Drizzle, Transaction } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
 import { isTiming } from "#util/env.js";

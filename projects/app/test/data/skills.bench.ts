@@ -77,8 +77,8 @@ describe(`skillLearningGraph`, async () => {
   const decompositionData =
     await loadBuiltinCharacterDecompositionForMnemonicsEntries();
 
-  bench(`no target skills`, async () => {
-    await skillLearningGraph({
+  bench(`no target skills`, () => {
+    skillLearningGraph({
       targetSkills: [],
       dictionary,
       decompositionData,
@@ -89,8 +89,8 @@ describe(`skillLearningGraph`, async () => {
   const hsk1TargetSkills = [...dictionary.hsk1HanziWords].map((w) =>
     hanziWordToGloss(w),
   );
-  bench(`HSK1 target skills`, async () => {
-    await skillLearningGraph({
+  bench(`HSK1 target skills`, () => {
+    skillLearningGraph({
       targetSkills: hsk1TargetSkills,
       dictionary,
       decompositionData,
@@ -104,8 +104,8 @@ describe(`skillLearningGraph`, async () => {
     ...dictionary.hsk3HanziWords,
   ].map((w) => hanziWordToGloss(w));
 
-  bench(`HSK1-3 target skills`, async () => {
-    await skillLearningGraph({
+  bench(`HSK1-3 target skills`, () => {
+    skillLearningGraph({
       targetSkills: hsk1to3TargetSkills,
       dictionary,
       decompositionData,

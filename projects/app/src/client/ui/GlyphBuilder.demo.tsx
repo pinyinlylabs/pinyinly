@@ -673,6 +673,7 @@ export default function GlyphBuilderDemo() {
       }
 
       persistedStateRef.current = sanitized;
+      // oxlint-disable-next-line react/react-compiler
       setHistoryState(sanitized);
       setLayers(
         sanitized.current.layers.length > 0
@@ -877,6 +878,7 @@ export default function GlyphBuilderDemo() {
 
   useEffect(() => {
     if (selectedLayers.length === 0) {
+      // oxlint-disable-next-line react/react-compiler
       setPositionDrafts({
         tx: `0`,
         ty: `0`,

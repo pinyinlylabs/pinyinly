@@ -92,8 +92,8 @@ function Text({
   return (
     <Component
       className={cn(textVariants({ variant }), textClass, className)}
-      role={variant ? ROLE[variant] : undefined}
-      aria-level={variant ? ARIA_LEVEL[variant] : undefined}
+      role={ROLE[variant]}
+      aria-level={ARIA_LEVEL[variant]}
       {...props}
     />
   );

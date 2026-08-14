@@ -235,6 +235,7 @@ export function useHanziVisualSuggestions({
 
   useEffect(() => {
     if (typeof document === `undefined`) {
+      // oxlint-disable-next-line react/react-compiler
       setState({
         kind: `unsupported`,
         message: `Visual ONNX suggestions require a browser environment.`,

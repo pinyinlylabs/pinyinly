@@ -623,13 +623,13 @@ function InlineImageRepositionEditor({
 
     if (initialAssetIdRef.current !== assetId) {
       initialAssetIdRef.current = assetId;
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setCropRect(null);
       setInitialRect(defaultCropRect);
       return;
     }
 
     if (initialRect == null) {
+      // oxlint-disable-next-line react/react-compiler
       setInitialRect(defaultCropRect);
     }
   }, [assetId, defaultCropRect, initialRect]);
