@@ -12,7 +12,7 @@
     },
     "resolveJsonModule": true,
     "target": "ESNext",
-    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
+    "types": []
   },
   "include": ["../.expo/types/**/*.ts", "../*.d.ts", "*", "**/*", "**/*.json"],
   "references": [

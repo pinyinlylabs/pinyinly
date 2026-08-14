@@ -8,7 +8,7 @@
     "outDir": "../../../.moon/cache/types/projects/audio-sprites-src",
     "resolveJsonModule": true,
     "target": "ESNext",
-    "types": ["node", "@pinyinly/eslint-rules/nameof.d.ts"]
+    "types": ["node"]
   },
   "include": ["**/*"],
   "references": [

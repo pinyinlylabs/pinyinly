@@ -3,17 +3,13 @@ import { describe, expect, test } from "vitest";
 import { fmtImagePromptForSnapshot } from "./helpers";
 import type { AssetId } from "#data/model.js";
 
-describe(
-  `buildActorIdentityImagePrompt` satisfies HasNameOf<
-    typeof buildActorIdentityImagePrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildActorIdentityImagePrompt({
-        modelSheet: `xxx` as AssetId,
-      });
+describe(`buildActorIdentityImagePrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildActorIdentityImagePrompt({
+      modelSheet: `xxx` as AssetId,
+    });
 
-      expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "aspectRatio": "1:1",
           "messages": "
@@ -74,6 +70,5 @@ describe(
           "thinkingLevel": "minimal",
         }
       `);
-    });
-  },
-);
+  });
+});

@@ -12,60 +12,52 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 let TEST_OUTPUT_DIR: string;
 
-describe(`generateSpeech` satisfies HasNameOf<typeof generateSpeech>, () => {
-  describe(
-    `renderFileNameParts` satisfies HasNameOf<typeof renderFileNameParts>,
-    () => {
-      test(`renders dynamic tokens`, () => {
-        const fileName = renderFileNameParts(
-          [`ni3 hao3`, `你好`, `:voice:`, `:id:`],
-          {
-            voice: `nova`,
-            id: `abc123`,
-          },
-        );
+describe(`generateSpeech`, () => {
+  describe(`renderFileNameParts`, () => {
+    test(`renders dynamic tokens`, () => {
+      const fileName = renderFileNameParts(
+        [`ni3 hao3`, `你好`, `:voice:`, `:id:`],
+        {
+          voice: `nova`,
+          id: `abc123`,
+        },
+      );
 
-        expect(fileName).toBe(`ni3 hao3-你好-nova-abc123`);
-      });
-    },
-  );
+      expect(fileName).toBe(`ni3 hao3-你好-nova-abc123`);
+    });
+  });
 
-  describe(
-    `buildFileNameCheckRegExp` satisfies HasNameOf<
-      typeof buildFileNameCheckRegExp
-    >,
-    () => {
-      test(`uses wildcard matching for non-key parts`, () => {
-        const pattern = buildFileNameCheckRegExp(
+  describe(`buildFileNameCheckRegExp`, () => {
+    test(`uses wildcard matching for non-key parts`, () => {
+      const pattern = buildFileNameCheckRegExp(
+        [
+          { text: `ni3 hao3`, key: true },
+          { text: `你好`, key: false },
+          { text: `:voice:`, key: true },
+          { text: `:id:`, key: false },
+        ],
+        `nova`,
+        `m4a`,
+      );
+
+      expect(pattern.test(`ni3 hao3-你好-nova-abc123.m4a`)).toBe(true);
+      expect(pattern.test(`ni3 hao3-您好-nova-z9.m4a`)).toBe(true);
+      expect(pattern.test(`ni3 hao3-你好-alloy-abc123.m4a`)).toBe(false);
+    });
+
+    test(`throws when :id: is key=true`, () => {
+      expect(() =>
+        buildFileNameCheckRegExp(
           [
-            { text: `ni3 hao3`, key: true },
-            { text: `你好`, key: false },
+            { text: `:id:`, key: true },
             { text: `:voice:`, key: true },
-            { text: `:id:`, key: false },
           ],
           `nova`,
           `m4a`,
-        );
-
-        expect(pattern.test(`ni3 hao3-你好-nova-abc123.m4a`)).toBe(true);
-        expect(pattern.test(`ni3 hao3-您好-nova-z9.m4a`)).toBe(true);
-        expect(pattern.test(`ni3 hao3-你好-alloy-abc123.m4a`)).toBe(false);
-      });
-
-      test(`throws when :id: is key=true`, () => {
-        expect(() =>
-          buildFileNameCheckRegExp(
-            [
-              { text: `:id:`, key: true },
-              { text: `:voice:`, key: true },
-            ],
-            `nova`,
-            `m4a`,
-          ),
-        ).toThrow(`:id:`);
-      });
-    },
-  );
+        ),
+      ).toThrow(`:id:`);
+    });
+  });
 
   beforeEach(async () => {
     TEST_OUTPUT_DIR = `./test-output/speech-${nanoid()}`;

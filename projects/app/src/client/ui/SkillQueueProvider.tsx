@@ -18,7 +18,8 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useMemo } from "react";
-import { SkillQueueContext, SkillQueueContextValue } from "./contexts";
+import type { SkillQueueContextValue } from "./contexts";
+import { SkillQueueContext } from "./contexts";
 
 const mockable = {
   getMaxQueueItems: () => 1,

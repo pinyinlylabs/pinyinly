@@ -2,15 +2,13 @@ import { buildActorSpecPrompt } from "#util/prompts/actorSpec.ts";
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 
-describe(
-  `buildActorSpecPrompt` satisfies HasNameOf<typeof buildActorSpecPrompt>,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildActorSpecPrompt({
-        identity: `Dracula`,
-      });
+describe(`buildActorSpecPrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildActorSpecPrompt({
+      identity: `Dracula`,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -261,6 +259,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

@@ -2,19 +2,15 @@ import { buildLocationSoundThoughtChain } from "#util/prompts/locationSoundThoug
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 
-describe(
-  `buildLocationSoundThoughtChain` satisfies HasNameOf<
-    typeof buildLocationSoundThoughtChain
-  >,
-  () => {
-    test(`builds prompt with syllable, pronunciation hint, and location`, () => {
-      const prompt = buildLocationSoundThoughtChain({
-        syllable: `-ong`,
-        pronunciationHint: `oong (similar to the ending of 'book' + ng)`,
-        location: `Jungle Temple`,
-      });
+describe(`buildLocationSoundThoughtChain`, () => {
+  test(`builds prompt with syllable, pronunciation hint, and location`, () => {
+    const prompt = buildLocationSoundThoughtChain({
+      syllable: `-ong`,
+      pronunciationHint: `oong (similar to the ending of 'book' + ng)`,
+      location: `Jungle Temple`,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -208,6 +204,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

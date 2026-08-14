@@ -28,7 +28,7 @@ import {
 } from "#data/model.ts";
 import { describe, expect, test } from "vitest";
 
-describe(`assetIdSchema` satisfies HasNameOf<typeof assetIdSchema>, () => {
+describe(`assetIdSchema`, () => {
   test(`accepts valid sha256 base64url asset IDs`, () => {
     // Each hash must be exactly 43 characters
     const validIds = [
@@ -101,72 +101,62 @@ describe(`assetIdSchema` satisfies HasNameOf<typeof assetIdSchema>, () => {
   });
 });
 
-describe(
-  `pinyinlyObjectIdKind` satisfies HasNameOf<typeof pinyinlyObjectIdKind>,
-  () => {
-    test(`returns hanziWordPinyinlyObjectIdKind for hanzi word IDs`, () => {
-      const objectId: PinyinlyObjectId = `hw/好:positive`;
-      expect(pinyinlyObjectIdKind(objectId)).toBe(
-        hanziWordPinyinlyObjectIdKind,
-      );
-    });
+describe(`pinyinlyObjectIdKind`, () => {
+  test(`returns hanziWordPinyinlyObjectIdKind for hanzi word IDs`, () => {
+    const objectId: PinyinlyObjectId = `hw/好:positive`;
+    expect(pinyinlyObjectIdKind(objectId)).toBe(hanziWordPinyinlyObjectIdKind);
+  });
 
-    test(`returns skillPinyinlyObjectIdKind for skill IDs`, () => {
-      const objectId: PinyinlyObjectId = `sk/he:好:positive`;
-      expect(pinyinlyObjectIdKind(objectId)).toBe(skillPinyinlyObjectIdKind);
-    });
+  test(`returns skillPinyinlyObjectIdKind for skill IDs`, () => {
+    const objectId: PinyinlyObjectId = `sk/he:好:positive`;
+    expect(pinyinlyObjectIdKind(objectId)).toBe(skillPinyinlyObjectIdKind);
+  });
 
-    test(`returns pinyinSoundIdPinyinlyObjectIdKind for pinyin sound IDs`, () => {
-      const objectId: PinyinlyObjectId = `ps/n-`;
-      expect(pinyinlyObjectIdKind(objectId)).toBe(
-        pinyinSoundIdPinyinlyObjectIdKind,
-      );
-    });
+  test(`returns pinyinSoundIdPinyinlyObjectIdKind for pinyin sound IDs`, () => {
+    const objectId: PinyinlyObjectId = `ps/n-`;
+    expect(pinyinlyObjectIdKind(objectId)).toBe(
+      pinyinSoundIdPinyinlyObjectIdKind,
+    );
+  });
 
-    test(`returns assetIdPinyinlyObjectIdKind for asset IDs`, () => {
-      const objectId: PinyinlyObjectId = `a/sha256/${`a`.repeat(43)}`;
-      expect(pinyinlyObjectIdKind(objectId)).toBe(assetIdPinyinlyObjectIdKind);
-    });
+  test(`returns assetIdPinyinlyObjectIdKind for asset IDs`, () => {
+    const objectId: PinyinlyObjectId = `a/sha256/${`a`.repeat(43)}`;
+    expect(pinyinlyObjectIdKind(objectId)).toBe(assetIdPinyinlyObjectIdKind);
+  });
 
-    test(`returns null for unknown kind`, () => {
-      // @ts-expect-error: Intentionally testing invalid format
-      const objectId: PinyinlyObjectId = `unknown/something`;
-      expect(pinyinlyObjectIdKind(objectId)).toBeNull();
-    });
+  test(`returns null for unknown kind`, () => {
+    // @ts-expect-error: Intentionally testing invalid format
+    const objectId: PinyinlyObjectId = `unknown/something`;
+    expect(pinyinlyObjectIdKind(objectId)).toBeNull();
+  });
 
-    test(`returns null for malformed ID`, () => {
-      // @ts-expect-error: Intentionally testing invalid format
-      const objectId: PinyinlyObjectId = `no-slash`;
-      expect(pinyinlyObjectIdKind(objectId)).toBeNull();
-    });
-  },
-);
+  test(`returns null for malformed ID`, () => {
+    // @ts-expect-error: Intentionally testing invalid format
+    const objectId: PinyinlyObjectId = `no-slash`;
+    expect(pinyinlyObjectIdKind(objectId)).toBeNull();
+  });
+});
 
-describe(
-  `hanziWordFromPinyinlyObjectId` satisfies HasNameOf<
-    typeof hanziWordFromPinyinlyObjectId
-  >,
-  () => {
-    test(`extracts hanzi word from valid ID`, () => {
-      const hanziWord = `好:positive` as HanziWord;
-      const objectId = hanziWordPinyinlyObjectId(hanziWord);
-      const result = hanziWordFromPinyinlyObjectId(objectId);
-      expect(result).toBe(hanziWord);
-    });
+describe(`hanziWordFromPinyinlyObjectId`, () => {
+  test(`extracts hanzi word from valid ID`, () => {
+    const hanziWord = `好:positive` as HanziWord;
+    const objectId = hanziWordPinyinlyObjectId(hanziWord);
+    const result = hanziWordFromPinyinlyObjectId(objectId);
+    expect(result).toBe(hanziWord);
+  });
 
-    test(`returns null for non-hanzi-word IDs`, () => {
-      const skillObjectId: PinyinlyObjectId = `sk/he:好:positive`;
-      expect(hanziWordFromPinyinlyObjectId(skillObjectId)).toBeNull();
-    });
+  test(`returns null for non-hanzi-word IDs`, () => {
+    const skillObjectId: PinyinlyObjectId = `sk/he:好:positive`;
+    expect(hanziWordFromPinyinlyObjectId(skillObjectId)).toBeNull();
+  });
 
-    test(`handles hanzi words with colons in the word part`, () => {
-      const hanziWord = `多:many` as HanziWord;
-      const objectId = hanziWordPinyinlyObjectId(hanziWord);
-      const result = hanziWordFromPinyinlyObjectId(objectId);
-      expect(result).toBe(hanziWord);
-    });
-  },
-);
+  test(`handles hanzi words with colons in the word part`, () => {
+    const hanziWord = `多:many` as HanziWord;
+    const objectId = hanziWordPinyinlyObjectId(hanziWord);
+    const result = hanziWordFromPinyinlyObjectId(objectId);
+    expect(result).toBe(hanziWord);
+  });
+});
 
 describe(`locationSpecSchema`, () => {
   test(`it allows passthrough of extra fields`, () => {
@@ -306,29 +296,24 @@ describe(`assetIdFromPinyinlyObjectId`, () => {
   });
 });
 
-describe(
-  `hanziWordPinyinlyObjectId` satisfies HasNameOf<
-    typeof hanziWordPinyinlyObjectId
-  >,
-  () => {
-    test(`formats hanzi word into valid object ID`, () => {
-      const hanziWord = `好:positive` as HanziWord;
-      const objectId = hanziWordPinyinlyObjectId(hanziWord);
-      expect(objectId).toBe(`hw/好:positive`);
-    });
+describe(`hanziWordPinyinlyObjectId`, () => {
+  test(`formats hanzi word into valid object ID`, () => {
+    const hanziWord = `好:positive` as HanziWord;
+    const objectId = hanziWordPinyinlyObjectId(hanziWord);
+    expect(objectId).toBe(`hw/好:positive`);
+  });
 
-    test(`produces object ID with correct prefix`, () => {
-      const objectId = hanziWordPinyinlyObjectId(`多:many`);
-      expect(objectId).toMatch(/^hw\//u);
-    });
+  test(`produces object ID with correct prefix`, () => {
+    const objectId = hanziWordPinyinlyObjectId(`多:many`);
+    expect(objectId).toMatch(/^hw\//u);
+  });
 
-    test(`preserves hanzi word with colons`, () => {
-      const hanziWord = `好:like` as HanziWord;
-      const objectId = hanziWordPinyinlyObjectId(hanziWord);
-      expect(objectId).toBe(`hw/好:like`);
-    });
-  },
-);
+  test(`preserves hanzi word with colons`, () => {
+    const hanziWord = `好:like` as HanziWord;
+    const objectId = hanziWordPinyinlyObjectId(hanziWord);
+    expect(objectId).toBe(`hw/好:like`);
+  });
+});
 
 describe(`skillPinyinlyObjectId`, () => {
   test(`formats skill ID into valid object ID`, () => {
@@ -353,66 +338,58 @@ describe(`skillPinyinlyObjectId`, () => {
   });
 });
 
-describe(
-  `pinyinSoundIdPinyinlyObjectId` satisfies HasNameOf<
-    typeof pinyinSoundIdPinyinlyObjectId
-  >,
-  () => {
-    test(`formats sound ID into valid object ID`, () => {
-      const soundId = `n-` as PinyinSoundId;
+describe(`pinyinSoundIdPinyinlyObjectId`, () => {
+  test(`formats sound ID into valid object ID`, () => {
+    const soundId = `n-` as PinyinSoundId;
+    const objectId = pinyinSoundIdPinyinlyObjectId(soundId);
+    expect(objectId).toBe(`ps/n-`);
+  });
+
+  test(`produces object ID with correct prefix`, () => {
+    const objectId = pinyinSoundIdPinyinlyObjectId(`-ang` as PinyinSoundId);
+    expect(objectId).toMatch(/^ps\//u);
+  });
+
+  test(`handles various sound ID formats`, () => {
+    const soundIds: readonly PinyinSoundId[] = [
+      `p-` as PinyinSoundId,
+      `b-` as PinyinSoundId,
+      `-an` as PinyinSoundId,
+      `-ang` as PinyinSoundId,
+      `1` as PinyinSoundId,
+      `4` as PinyinSoundId,
+      `sh-` as PinyinSoundId,
+      `-ong` as PinyinSoundId,
+    ];
+
+    for (const soundId of soundIds) {
       const objectId = pinyinSoundIdPinyinlyObjectId(soundId);
-      expect(objectId).toBe(`ps/n-`);
-    });
+      expect(objectId).toBe(`ps/${soundId}`);
+    }
+  });
+});
 
-    test(`produces object ID with correct prefix`, () => {
-      const objectId = pinyinSoundIdPinyinlyObjectId(`-ang` as PinyinSoundId);
-      expect(objectId).toMatch(/^ps\//u);
-    });
+describe(`assetIdPinyinlyObjectId`, () => {
+  test(`formats asset ID into valid object ID`, () => {
+    const assetId = `sha256/${`a`.repeat(43)}` as AssetId;
+    const objectId = assetIdPinyinlyObjectId(assetId);
+    expect(objectId).toBe(`a/${assetId}`);
+  });
 
-    test(`handles various sound ID formats`, () => {
-      const soundIds: readonly PinyinSoundId[] = [
-        `p-` as PinyinSoundId,
-        `b-` as PinyinSoundId,
-        `-an` as PinyinSoundId,
-        `-ang` as PinyinSoundId,
-        `1` as PinyinSoundId,
-        `4` as PinyinSoundId,
-        `sh-` as PinyinSoundId,
-        `-ong` as PinyinSoundId,
-      ];
+  test(`produces object ID with correct prefix`, () => {
+    const objectId = assetIdPinyinlyObjectId(
+      `sha256/${`0`.repeat(43)}` as AssetId,
+    );
+    expect(objectId).toMatch(/^a\//u);
+  });
 
-      for (const soundId of soundIds) {
-        const objectId = pinyinSoundIdPinyinlyObjectId(soundId);
-        expect(objectId).toBe(`ps/${soundId}`);
-      }
-    });
-  },
-);
-
-describe(
-  `assetIdPinyinlyObjectId` satisfies HasNameOf<typeof assetIdPinyinlyObjectId>,
-  () => {
-    test(`formats asset ID into valid object ID`, () => {
-      const assetId = `sha256/${`a`.repeat(43)}` as AssetId;
-      const objectId = assetIdPinyinlyObjectId(assetId);
-      expect(objectId).toBe(`a/${assetId}`);
-    });
-
-    test(`produces object ID with correct prefix`, () => {
-      const objectId = assetIdPinyinlyObjectId(
-        `sha256/${`0`.repeat(43)}` as AssetId,
-      );
-      expect(objectId).toMatch(/^a\//u);
-    });
-
-    test(`produces correct ID length`, () => {
-      const assetId = `sha256/${`a`.repeat(43)}` as AssetId;
-      const objectId = assetIdPinyinlyObjectId(assetId);
-      // "a/" (2) + "sha256/" (7) + 43 = 52
-      expect(objectId.length).toBe(52);
-    });
-  },
-);
+  test(`produces correct ID length`, () => {
+    const assetId = `sha256/${`a`.repeat(43)}` as AssetId;
+    const objectId = assetIdPinyinlyObjectId(assetId);
+    // "a/" (2) + "sha256/" (7) + 43 = 52
+    expect(objectId.length).toBe(52);
+  });
+});
 
 describe(`PinyinlyObjectId round-trip conversions`, () => {
   test(`hanzi word round-trip`, () => {

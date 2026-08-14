@@ -11,36 +11,33 @@ import {
 } from "#util/strokeSpec.ts";
 import { describe, expect, test } from "vitest";
 
-describe(
-  `parseStrokeSpec suite` satisfies HasNameOf<typeof parseStrokeSpec>,
-  () => {
-    test(`parses ranges`, () => {
-      const spec = parseStrokeSpec(`0-2,5`);
-      expect(spec).toHaveLength(2);
-      expect(formatStrokeSpec(spec)).toBe(`0-2,5`);
-    });
+describe(`parseStrokeSpec suite`, () => {
+  test(`parses ranges`, () => {
+    const spec = parseStrokeSpec(`0-2,5`);
+    expect(spec).toHaveLength(2);
+    expect(formatStrokeSpec(spec)).toBe(`0-2,5`);
+  });
 
-    test(`parses grouped unions`, () => {
-      const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
+  test(`parses grouped unions`, () => {
+    const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
 
-      expect(spec).toHaveLength(2);
-      expect(spec[0]).toHaveLength(2);
-      expect(spec[1]).toHaveLength(1);
-    });
+    expect(spec).toHaveLength(2);
+    expect(spec[0]).toHaveLength(2);
+    expect(spec[1]).toHaveLength(1);
+  });
 
-    test(`rejects malformed input`, () => {
-      expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
-      expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
-      expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
-      expect(() => parseStrokeSpec(`1[foo%:3]`)).toThrow();
-      expect(() => parseStrokeSpec(`1[-1%:3]`)).toThrow();
-      expect(() => parseStrokeSpec(`1[101%:3]`)).toThrow();
-      expect(() => parseStrokeSpec(`1[%:3]`)).toThrow();
-      expect(() => parseStrokeSpec(`3-1`)).toThrow();
-      expect(() => parseStrokeSpec(`1++2`)).toThrow();
-    });
-  },
-);
+  test(`rejects malformed input`, () => {
+    expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
+    expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[foo%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[-1%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[101%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`3-1`)).toThrow();
+    expect(() => parseStrokeSpec(`1++2`)).toThrow();
+  });
+});
 
 describe(`normalizeStrokeSpec`, () => {
   test.for([

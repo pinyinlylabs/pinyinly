@@ -16,7 +16,7 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 
-describe(`push suite` satisfies HasNameOf<typeof push>, () => {
+describe(`push suite`, () => {
   txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   describe(`database transaction isolation level`, () => {
@@ -275,7 +275,7 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
   });
 });
 
-describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
+describe(`pull suite`, () => {
   txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   describe(`database transaction isolation level`, () => {
@@ -808,105 +808,102 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
   });
 });
 
-describe(
-  `computeEntitiesState suite` satisfies HasNameOf<typeof computeEntitiesState>,
-  () => {
-    describe(`schema ${schema.version}`, () => {
-      txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
+describe(`computeEntitiesState suite`, () => {
+  describe(`schema ${schema.version}`, () => {
+    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
-      txTest(`works for non-existant user and client group`, async ({ tx }) => {
-        await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillState: [],
-          skillRating: [],
-          setting: [],
-        });
-      });
-
-      txTest(`works for user`, async ({ tx }) => {
-        const user = await createUser(tx);
-
-        await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillState: [],
-          skillRating: [],
-          setting: [],
-        });
-      });
-
-      txTest(`only includes skillState for the user`, async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1SkillState] = await tx
-          .insert(s.skillState)
-          .values([
-            {
-              userId: user1.id,
-              skill: glossToHanziWord(`我:i`),
-              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-            },
-            {
-              userId: user2.id,
-              skill: glossToHanziWord(`我:i`),
-              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-            },
-          ])
-          .returning({
-            id: s.skillState.id,
-            key: s.skillState.skill,
-            xmin: pgXmin(s.skillState),
-          });
-        invariant(user1SkillState != null);
-
-        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillRating: [],
-          skillState: [user1SkillState],
-          setting: [],
-        });
-      });
-
-      txTest(`only includes skillRating for the user`, async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1SkillRating] = await tx
-          .insert(s.skillRating)
-          .values([
-            {
-              userId: user1.id,
-              skill: glossToHanziWord(`我:i`),
-              rating: Rating.Again,
-            },
-            {
-              userId: user2.id,
-              skill: glossToHanziWord(`我:i`),
-              rating: Rating.Good,
-            },
-          ])
-          .returning({
-            id: s.skillRating.id,
-            xmin: pgXmin(s.skillRating),
-          });
-        invariant(user1SkillRating != null);
-
-        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillRating: [user1SkillRating],
-          skillState: [],
-          setting: [],
-        });
+    txTest(`works for non-existant user and client group`, async ({ tx }) => {
+      await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillState: [],
+        skillRating: [],
+        setting: [],
       });
     });
-  },
-);
 
-describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
+    txTest(`works for user`, async ({ tx }) => {
+      const user = await createUser(tx);
+
+      await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillState: [],
+        skillRating: [],
+        setting: [],
+      });
+    });
+
+    txTest(`only includes skillState for the user`, async ({ tx }) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1SkillState] = await tx
+        .insert(s.skillState)
+        .values([
+          {
+            userId: user1.id,
+            skill: glossToHanziWord(`我:i`),
+            srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          },
+          {
+            userId: user2.id,
+            skill: glossToHanziWord(`我:i`),
+            srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          },
+        ])
+        .returning({
+          id: s.skillState.id,
+          key: s.skillState.skill,
+          xmin: pgXmin(s.skillState),
+        });
+      invariant(user1SkillState != null);
+
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillRating: [],
+        skillState: [user1SkillState],
+        setting: [],
+      });
+    });
+
+    txTest(`only includes skillRating for the user`, async ({ tx }) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1SkillRating] = await tx
+        .insert(s.skillRating)
+        .values([
+          {
+            userId: user1.id,
+            skill: glossToHanziWord(`我:i`),
+            rating: Rating.Again,
+          },
+          {
+            userId: user2.id,
+            skill: glossToHanziWord(`我:i`),
+            rating: Rating.Good,
+          },
+        ])
+        .returning({
+          id: s.skillRating.id,
+          xmin: pgXmin(s.skillRating),
+        });
+      invariant(user1SkillRating != null);
+
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillRating: [user1SkillRating],
+        skillState: [],
+        setting: [],
+      });
+    });
+  });
+});
+
+describe(`computePatch suite`, () => {
   type EntitiesState = Parameters<typeof computePatch>[1];
 
   test(`unchanged entities are preserved`, async () => {

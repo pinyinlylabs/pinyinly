@@ -27,9 +27,7 @@ test.for([
   [`⿰⿰abc`, `⿲abc`],
   [`⿰a⿰bc`, `⿲abc`],
 ] as const)(
-  `flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲` satisfies HasNameOf<
-    typeof flattenIds
-  >,
+  `flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`,
   ([input, expected]) => {
     expect(idsNodeToString(flattenIds(parseIds(input)), (x) => x)).toBe(
       expected,
@@ -41,9 +39,7 @@ test.for([
   [`⿰⿰abc`, `⿲abc`],
   [`⿰a⿰bc`, `⿲abc`],
 ] as const)(
-  `horizontalPairToTripleMergeIdsTransform %s -> %s` satisfies HasNameOf<
-    typeof horizontalPairToTripleMergeIdsTransform
-  >,
+  `horizontalPairToTripleMergeIdsTransform %s -> %s`,
   ([input, expected]) => {
     const result = horizontalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
@@ -54,16 +50,11 @@ test.for([
 test.for([
   [`⿱⿱abc`, `⿳abc`],
   [`⿱a⿱bc`, `⿳abc`],
-] as const)(
-  `verticalPairToTripleMergeIdsTransform` satisfies HasNameOf<
-    typeof verticalPairToTripleMergeIdsTransform
-  >,
-  ([input, expected]) => {
-    const result = verticalPairToTripleMergeIdsTransform(parseIds(input));
-    invariant(result != null);
-    expect(idsNodeToString(result, (x) => x)).toBe(expected);
-  },
-);
+] as const)(`verticalPairToTripleMergeIdsTransform`, ([input, expected]) => {
+  const result = verticalPairToTripleMergeIdsTransform(parseIds(input));
+  invariant(result != null);
+  expect(idsNodeToString(result, (x) => x)).toBe(expected);
+});
 
 describe(`parseIds() suite`, () => {
   test(`handles 1 depth`, () => {
@@ -327,71 +318,55 @@ describe(`parseIdsLeafs() suite`, () => {
   });
 });
 
-test(
-  `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
-  () => {
-    const ids = parseIds(`⿰a⿱bc`);
-    const leafs = [...walkIdsNodeLeafs(ids)];
+test(`walkIdsNodeLeafs fixture`, () => {
+  const ids = parseIds(`⿰a⿱bc`);
+  const leafs = [...walkIdsNodeLeafs(ids)];
 
-    expect(leafs).toEqual([`a`, `b`, `c`]);
-  },
-);
+  expect(leafs).toEqual([`a`, `b`, `c`]);
+});
 
-test(
-  `idsNodeToStringCustom roundtrips` satisfies HasNameOf<
-    typeof idsNodeToString
-  >,
-  () => {
-    for (const input of [
-      [`木`],
-      [`⿰木目`, `⿱木口`, `⿲彳氵亍`, `⿳亠口小`],
-      [`⿴囗口`, `⿵几皇`, `⿶凵㐅`, `⿷匚斤`, `⿸疒丙`, `⿹戈廾`],
-      [`⿺走召`],
-      [`⿻工从`],
-      [`⿼叉丶`],
-      [`⿽水丶`],
-      [`⿾卍`],
-      [`⿿凹`],
-      [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
-      [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
-    ].flat()) {
-      expect(idsNodeToString(parseIds(input), (x) => x)).toEqual(input);
+test(`idsNodeToStringCustom roundtrips`, () => {
+  for (const input of [
+    [`木`],
+    [`⿰木目`, `⿱木口`, `⿲彳氵亍`, `⿳亠口小`],
+    [`⿴囗口`, `⿵几皇`, `⿶凵㐅`, `⿷匚斤`, `⿸疒丙`, `⿹戈廾`],
+    [`⿺走召`],
+    [`⿻工从`],
+    [`⿼叉丶`],
+    [`⿽水丶`],
+    [`⿾卍`],
+    [`⿿凹`],
+    [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
+    [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
+  ].flat()) {
+    expect(idsNodeToString(parseIds(input), (x) => x)).toEqual(input);
+  }
+});
+
+describe(`hanziCharacterCount fixtures`, () => {
+  test.for([
+    [汉`木`, 1],
+    [汉`你`, 1],
+    [汉`你好`, 2],
+    [汉`再见`, 2],
+  ] as const)(`%s -> %s`, ([value, count]) => {
+    expect(hanziCharacterCount(value)).toBe(count);
+  });
+});
+
+describe(`isHanziCharacter suite`, () => {
+  test(`fixtures`, () => {
+    const valid = [汉`应`, 汉`兄`, 汉`同`];
+    for (const x of valid) {
+      expect(isHanziCharacter(x)).toBe(true);
     }
-  },
-);
 
-describe(
-  `hanziCharacterCount fixtures` satisfies HasNameOf<
-    typeof hanziCharacterCount
-  >,
-  () => {
-    test.for([
-      [汉`木`, 1],
-      [汉`你`, 1],
-      [汉`你好`, 2],
-      [汉`再见`, 2],
-    ] as const)(`%s -> %s`, ([value, count]) => {
-      expect(hanziCharacterCount(value)).toBe(count);
-    });
-  },
-);
-
-describe(
-  `isHanziCharacter suite` satisfies HasNameOf<typeof isHanziCharacter>,
-  () => {
-    test(`fixtures`, () => {
-      const valid = [汉`应`, 汉`兄`, 汉`同`];
-      for (const x of valid) {
-        expect(isHanziCharacter(x)).toBe(true);
-      }
-
-      const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
-      for (const x of invalid) {
-        expect(isHanziCharacter(x)).toBe(false);
-      }
-    });
-  },
-);
+    const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
+    for (const x of invalid) {
+      expect(isHanziCharacter(x)).toBe(false);
+    }
+  });
+});
 
 const hanziWithIndexesFixtures = [
   [``, []],
@@ -415,34 +390,24 @@ const hanziWithIndexesFixtures = [
   [`abc⿔！`, [3, `⿔`]],
   [`𠮷野家`, [0, `𠮷`, 2, `野`, 3, `家`]],
 ] as [string, (number | HanziCharacter)[]][];
-describe(
-  `matchAllHanziCharacters suite` satisfies HasNameOf<
-    typeof matchAllHanziCharacters
-  >,
-  () => {
-    test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
-      const actual = matchAllHanziCharacters(input);
-      expect([input, actual]).toEqual([
-        input,
-        expected
-          // strip out the indexes to re-use the same fixture data
-          .filter((_, i) => i % 2 === 1),
-      ]);
-    });
-  },
-);
+describe(`matchAllHanziCharacters suite`, () => {
+  test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
+    const actual = matchAllHanziCharacters(input);
+    expect([input, actual]).toEqual([
+      input,
+      expected
+        // strip out the indexes to re-use the same fixture data
+        .filter((_, i) => i % 2 === 1),
+    ]);
+  });
+});
 
-describe(
-  `matchAllHanziCharactersWithIndexes suite` satisfies HasNameOf<
-    typeof matchAllHanziCharactersWithIndexes
-  >,
-  () => {
-    test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
-      const actual = matchAllHanziCharactersWithIndexes(input);
-      expect([input, actual]).toEqual([input, expected]);
-    });
-  },
-);
+describe(`matchAllHanziCharactersWithIndexes suite`, () => {
+  test.for(hanziWithIndexesFixtures)(`%s`, ([input, expected]) => {
+    const actual = matchAllHanziCharactersWithIndexes(input);
+    expect([input, actual]).toEqual([input, expected]);
+  });
+});
 
 test.for([
   [`1→2→⑫`, `⿱12`, `⑫`],
@@ -454,9 +419,7 @@ test.for([
   [`1→2→⑫`, `⿳1⿱234`, `⿳⑫34`],
   [`1→2→⑫`, `⿳01⿱23`, `⿳0⑫3`],
 ] as const)(
-  `makeVerticalMergeCharacterIdsTransform %s (%s)` satisfies HasNameOf<
-    typeof makeVerticalMergeCharacterIdsTransform
-  >,
+  `makeVerticalMergeCharacterIdsTransform %s (%s)`,
   ([spec, input, expected]) => {
     const [top, bottom, merged] = spec.split(`→`);
 
@@ -484,9 +447,7 @@ test.for([
   [`1→2→⑫`, `⿲1⿰234`, `⿲⑫34`],
   [`1→2→⑫`, `⿲01⿰23`, `⿲0⑫3`],
 ] as const)(
-  `makeHorizontalMergeCharacterIdsTransform %s (%s)` satisfies HasNameOf<
-    typeof makeHorizontalMergeCharacterIdsTransform
-  >,
+  `makeHorizontalMergeCharacterIdsTransform %s (%s)`,
   ([spec, input, expected]) => {
     const [left, right, merged] = spec.split(`→`);
 
@@ -504,16 +465,14 @@ test.for([
   },
 );
 
-test(
-  `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
-  () => {
-    const ids = parseIds(`⿰a⿱bc`);
-    const mapped = mapIdsNodeLeafs(
-      ids,
-      (leaf, path) => `${leaf.toUpperCase()}(${path.join(`,`)})`,
-    );
+test(`walkIdsNodeLeafs fixture`, () => {
+  const ids = parseIds(`⿰a⿱bc`);
+  const mapped = mapIdsNodeLeafs(
+    ids,
+    (leaf, path) => `${leaf.toUpperCase()}(${path.join(`,`)})`,
+  );
 
-    expect(mapped).toMatchInlineSnapshot(`
+  expect(mapped).toMatchInlineSnapshot(`
       [
         "⿰",
         "A(0)",
@@ -524,5 +483,4 @@ test(
         ],
       ]
     `);
-  },
-);
+});

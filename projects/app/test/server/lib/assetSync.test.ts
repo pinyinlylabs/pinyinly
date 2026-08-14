@@ -57,64 +57,59 @@ function mockReferencedAssets(
   );
 }
 
-describe(
-  `listReferencedAssetIdsForUser integration` satisfies HasNameOf<
-    typeof listReferencedAssetIdsForUser
-  >,
-  () => {
-    beforeEach(() => {
-      mockWithDrizzle.mockReset();
-      mockGetImageSettingKeyPatterns.mockReset();
+describe(`listReferencedAssetIdsForUser integration`, () => {
+  beforeEach(() => {
+    mockWithDrizzle.mockReset();
+    mockGetImageSettingKeyPatterns.mockReset();
 
-      mockGetImageSettingKeyPatterns.mockReturnValue([
-        `psi/%`,
-        `psms/%`,
-        `hwmhi/%`,
-        `hphi/%`,
-      ]);
-    });
+    mockGetImageSettingKeyPatterns.mockReturnValue([
+      `psi/%`,
+      `psms/%`,
+      `hwmhi/%`,
+      `hphi/%`,
+    ]);
+  });
 
-    test(`returns referenced assets from current and historical settings`, async () => {
-      const currentAssetId = `sha256/${`a`.repeat(43)}`;
-      const historicalAssetId = `sha256/${`b`.repeat(43)}`;
+  test(`returns referenced assets from current and historical settings`, async () => {
+    const currentAssetId = `sha256/${`a`.repeat(43)}`;
+    const historicalAssetId = `sha256/${`b`.repeat(43)}`;
 
-      mockReferencedAssets(
-        [{ assetId: currentAssetId }],
-        [{ assetId: historicalAssetId }],
-      );
+    mockReferencedAssets(
+      [{ assetId: currentAssetId }],
+      [{ assetId: historicalAssetId }],
+    );
 
-      const result = await listReferencedAssetIdsForUser(`user-1`);
+    const result = await listReferencedAssetIdsForUser(`user-1`);
 
-      expect(result).toContain(currentAssetId);
-      expect(result).toContain(historicalAssetId);
-      expect(result).toHaveLength(2);
-    });
+    expect(result).toContain(currentAssetId);
+    expect(result).toContain(historicalAssetId);
+    expect(result).toHaveLength(2);
+  });
 
-    test(`deduplicates IDs and filters invalid asset IDs`, async () => {
-      const validAssetId = `sha256/${`c`.repeat(43)}`;
+  test(`deduplicates IDs and filters invalid asset IDs`, async () => {
+    const validAssetId = `sha256/${`c`.repeat(43)}`;
 
-      mockReferencedAssets(
-        [
-          { assetId: validAssetId },
-          { assetId: validAssetId },
-          { assetId: `not-an-asset-id` },
-          { assetId: `` },
-          { assetId: null },
-        ],
-        [{ assetId: validAssetId }],
-      );
+    mockReferencedAssets(
+      [
+        { assetId: validAssetId },
+        { assetId: validAssetId },
+        { assetId: `not-an-asset-id` },
+        { assetId: `` },
+        { assetId: null },
+      ],
+      [{ assetId: validAssetId }],
+    );
 
-      const result = await listReferencedAssetIdsForUser(`user-2`);
+    const result = await listReferencedAssetIdsForUser(`user-2`);
 
-      expect(result).toEqual([validAssetId]);
-    });
+    expect(result).toEqual([validAssetId]);
+  });
 
-    test(`returns empty array when no referenced assets are found`, async () => {
-      mockReferencedAssets([], [{ assetId: null }, { assetId: `` }]);
+  test(`returns empty array when no referenced assets are found`, async () => {
+    mockReferencedAssets([], [{ assetId: null }, { assetId: `` }]);
 
-      const result = await listReferencedAssetIdsForUser(`user-3`);
+    const result = await listReferencedAssetIdsForUser(`user-3`);
 
-      expect(result).toEqual([]);
-    });
-  },
-);
+    expect(result).toEqual([]);
+  });
+});

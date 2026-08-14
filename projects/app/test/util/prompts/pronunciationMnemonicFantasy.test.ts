@@ -2,20 +2,16 @@ import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 import { buildPronunciationMnemonicFantasyPrompt } from "#util/prompts/pronunciationMnemonicFantasy.js";
 
-describe(
-  `buildPronunciationMnemonicFantasyPrompt` satisfies HasNameOf<
-    typeof buildPronunciationMnemonicFantasyPrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildPronunciationMnemonicFantasyPrompt({
-        leadCharacter: { name: `Ethan` },
-        location: { name: `Gong Cha bathroom` },
-        cue: { word: `use` },
-        count: 3,
-      });
+describe(`buildPronunciationMnemonicFantasyPrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildPronunciationMnemonicFantasyPrompt({
+      leadCharacter: { name: `Ethan` },
+      location: { name: `Gong Cha bathroom` },
+      cue: { word: `use` },
+      count: 3,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -99,6 +95,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

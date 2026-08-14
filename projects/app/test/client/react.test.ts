@@ -2,7 +2,7 @@ import { mergeProps } from "#client/react.js";
 import type { Ref } from "react";
 import { describe, expect, test, vi } from "vitest";
 
-describe(`mergeProps suite` satisfies HasNameOf<typeof mergeProps>, () => {
+describe(`mergeProps suite`, () => {
   test(`should merge two basic props`, () => {
     expect(mergeProps({ a: 1, b: 2 }, { c: 3 })).toStrictEqual({
       a: 1,

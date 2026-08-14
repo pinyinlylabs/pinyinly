@@ -6,21 +6,17 @@ import {
   makeLocationSpecWithDetail,
 } from "./helpers";
 
-describe(
-  `buildPronunciationMnemonicStoryboardPanelsPrompt` satisfies HasNameOf<
-    typeof buildPronunciationMnemonicStoryboardPanelsPrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
-        locationSpec: makeLocationSpecWithDetail(`Ship`),
-        locationSetKey: `arrival`,
-        actor: makeActorSpec(`Ethan`),
-        hook: `hook`,
-        premise: `premise`,
-      });
+describe(`buildPronunciationMnemonicStoryboardPanelsPrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildPronunciationMnemonicStoryboardPanelsPrompt({
+      locationSpec: makeLocationSpecWithDetail(`Ship`),
+      locationSetKey: `arrival`,
+      actor: makeActorSpec(`Ethan`),
+      hook: `hook`,
+      premise: `premise`,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -116,6 +112,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

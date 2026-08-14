@@ -3,15 +3,10 @@ import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import { expect, test } from "vitest";
 
-test(
-  `projectRoot is correct` satisfies HasNameOf<typeof projectRoot>,
-  async () => {
-    // Check that `projectRoot` is pointing to the correct directory.
-    await expect(
-      fs.access(projectRoot + `/package.json`),
-    ).resolves.not.toThrow();
-  },
-);
+test(`projectRoot is correct`, async () => {
+  // Check that `projectRoot` is pointing to the correct directory.
+  await expect(fs.access(projectRoot + `/package.json`)).resolves.not.toThrow();
+});
 
 test(`.env file does not exist in projects/app`, async () => {
   // Check that `projectRoot` is pointing to the correct directory.

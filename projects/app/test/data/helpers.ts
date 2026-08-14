@@ -405,12 +405,7 @@ export async function seedSkillReviews(
    */
   history: HistoryCommand[],
 ) {
-  invariant(
-    vi.isFakeTimers(),
-    `seedSkillReviews requires fake timers` satisfies HasNameOf<
-      typeof seedSkillReviews
-    >,
-  );
+  invariant(vi.isFakeTimers(), `seedSkillReviews requires fake timers`);
 
   const historyEvents = history.flatMap((command) =>
     parseHistoryCommand(command),

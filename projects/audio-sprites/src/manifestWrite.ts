@@ -84,9 +84,7 @@ const createSpriteFromFiles = (
   fileHashMap: Map<string, string>,
   bitrate = `128k`,
 ): string => {
-  const fnDebug = debug.extend(
-    `createSpriteFromFiles()` satisfies HasNameOf<typeof createSpriteFromFiles>,
-  );
+  const fnDebug = debug.extend(`createSpriteFromFiles()`);
 
   const hash = crypto.createHash(`sha256`);
 
@@ -134,9 +132,7 @@ export const recomputeManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<SpriteManifest> => {
-  const fnDebug = debug.extend(
-    `recomputeManifest()` satisfies HasNameOf<typeof recomputeManifest>,
-  );
+  const fnDebug = debug.extend(`recomputeManifest()`);
 
   const manifestDir = path.dirname(manifestPath);
   const inputFiles = await getInputFiles(manifest, manifestPath);

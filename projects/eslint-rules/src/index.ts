@@ -8,7 +8,6 @@ import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.ts";
 import { importNames as importNamesRule } from "./import-names.ts";
 import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.ts";
-import { nameof as nameofRule } from "./nameof.ts";
 import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.ts";
 
 export { includeIgnoreFile } from "@eslint/compat";
@@ -17,7 +16,6 @@ export const plugin: ESLint.Plugin = {
   rules: {
     [`import-names`]: importNamesRule,
     [`import-path-rewrite`]: importPathRewriteRule,
-    [`nameof`]: nameofRule,
     [`no-restricted-css-classes`]: noRestrictedCssClassesRule,
     [`glob-template`]: globTemplateRule,
   },

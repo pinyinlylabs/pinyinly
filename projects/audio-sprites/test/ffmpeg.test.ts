@@ -20,57 +20,50 @@ const execFileAsync = promisify(execFile);
 const fixturesDir = path.join(import.meta.dirname, `fixtures`);
 const outputsDir = path.join(fixturesDir, `outputs`);
 
-describe(
-  `stringifiedNumberSchema suite` satisfies HasNameOf<
-    typeof stringifiedNumberSchema
-  >,
-  () => {
-    test(`parses regular numeric strings`, () => {
-      expect(stringifiedNumberSchema.parse(`123`)).toBe(123);
-      expect(stringifiedNumberSchema.parse(`-17.33`)).toBe(-17.33);
-      expect(stringifiedNumberSchema.parse(`0.00`)).toBe(0);
-      expect(stringifiedNumberSchema.parse(`-3.49`)).toBe(-3.49);
-    });
+describe(`stringifiedNumberSchema suite`, () => {
+  test(`parses regular numeric strings`, () => {
+    expect(stringifiedNumberSchema.parse(`123`)).toBe(123);
+    expect(stringifiedNumberSchema.parse(`-17.33`)).toBe(-17.33);
+    expect(stringifiedNumberSchema.parse(`0.00`)).toBe(0);
+    expect(stringifiedNumberSchema.parse(`-3.49`)).toBe(-3.49);
+  });
 
-    test(`handles -inf and -Infinity strings`, () => {
-      expect(stringifiedNumberSchema.parse(`-inf`)).toBe(-Infinity);
-      expect(stringifiedNumberSchema.parse(`-Infinity`)).toBe(-Infinity);
-    });
+  test(`handles -inf and -Infinity strings`, () => {
+    expect(stringifiedNumberSchema.parse(`-inf`)).toBe(-Infinity);
+    expect(stringifiedNumberSchema.parse(`-Infinity`)).toBe(-Infinity);
+  });
 
-    test(`handles inf and Infinity strings`, () => {
-      expect(stringifiedNumberSchema.parse(`inf`)).toBe(Infinity);
-      expect(stringifiedNumberSchema.parse(`Infinity`)).toBe(Infinity);
-    });
+  test(`handles inf and Infinity strings`, () => {
+    expect(stringifiedNumberSchema.parse(`inf`)).toBe(Infinity);
+    expect(stringifiedNumberSchema.parse(`Infinity`)).toBe(Infinity);
+  });
 
-    test(`trims whitespace before parsing`, () => {
-      expect(stringifiedNumberSchema.parse(`  -inf  `)).toBe(-Infinity);
-      expect(stringifiedNumberSchema.parse(`  123  `)).toBe(123);
-      expect(stringifiedNumberSchema.parse(`\t-17.33\n`)).toBe(-17.33);
-    });
+  test(`trims whitespace before parsing`, () => {
+    expect(stringifiedNumberSchema.parse(`  -inf  `)).toBe(-Infinity);
+    expect(stringifiedNumberSchema.parse(`  123  `)).toBe(123);
+    expect(stringifiedNumberSchema.parse(`\t-17.33\n`)).toBe(-17.33);
+  });
 
-    test(`rejects NaN strings`, () => {
-      expect(() => stringifiedNumberSchema.parse(`NaN`)).toThrow();
-    });
+  test(`rejects NaN strings`, () => {
+    expect(() => stringifiedNumberSchema.parse(`NaN`)).toThrow();
+  });
 
-    test(`parses empty strings as zero`, () => {
-      // Empty strings coerce to 0, which is a valid finite number
-      expect(stringifiedNumberSchema.parse(``)).toBe(0);
-      expect(stringifiedNumberSchema.parse(`   `)).toBe(0);
-    });
+  test(`parses empty strings as zero`, () => {
+    // Empty strings coerce to 0, which is a valid finite number
+    expect(stringifiedNumberSchema.parse(``)).toBe(0);
+    expect(stringifiedNumberSchema.parse(`   `)).toBe(0);
+  });
 
-    test(`rejects non-numeric strings`, () => {
-      expect(() => stringifiedNumberSchema.parse(`abc`)).toThrow(
-        /could not be parsed as a finite number/u,
-      );
-      expect(() => stringifiedNumberSchema.parse(`1.2.3`)).toThrow();
-    });
-  },
-);
+  test(`rejects non-numeric strings`, () => {
+    expect(() => stringifiedNumberSchema.parse(`abc`)).toThrow(
+      /could not be parsed as a finite number/u,
+    );
+    expect(() => stringifiedNumberSchema.parse(`1.2.3`)).toThrow();
+  });
+});
 
-test(
-  `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,
-  () => {
-    expect(parseFfmpegOutput(outputExample1)).toMatchInlineSnapshot(`
+test(`parseFfmpegOutput suite`, () => {
+  expect(parseFfmpegOutput(outputExample1)).toMatchInlineSnapshot(`
       {
         "astats": {
           "Abs Peak count": "1.000000",
@@ -126,50 +119,39 @@ test(
         ],
       }
     `);
-  },
-);
+});
 
-describe(
-  `parseTimestampToSeconds suite` satisfies HasNameOf<
-    typeof parseTimestampToSeconds
-  >,
-  () => {
-    test(`parses HH:MM:SS.SS format`, () => {
-      expect(parseTimestampToSeconds(`00:00:00.7`)).toEqual(0.7);
-      expect(parseTimestampToSeconds(`00:00:00.69`)).toEqual(0.69);
-      expect(parseTimestampToSeconds(`00:00:01`)).toEqual(1);
-      expect(parseTimestampToSeconds(`00:00:00.01`)).toEqual(0.01);
-      expect(parseTimestampToSeconds(`00:01:23.45`)).toEqual(83.45);
-      expect(parseTimestampToSeconds(`01:02:03.04`)).toEqual(3723.04);
-    });
+describe(`parseTimestampToSeconds suite`, () => {
+  test(`parses HH:MM:SS.SS format`, () => {
+    expect(parseTimestampToSeconds(`00:00:00.7`)).toEqual(0.7);
+    expect(parseTimestampToSeconds(`00:00:00.69`)).toEqual(0.69);
+    expect(parseTimestampToSeconds(`00:00:01`)).toEqual(1);
+    expect(parseTimestampToSeconds(`00:00:00.01`)).toEqual(0.01);
+    expect(parseTimestampToSeconds(`00:01:23.45`)).toEqual(83.45);
+    expect(parseTimestampToSeconds(`01:02:03.04`)).toEqual(3723.04);
+  });
 
-    test(`throws on invalid format`, () => {
-      expect(() => parseTimestampToSeconds(`invalid`)).toThrow(
-        `Invalid time format: invalid`,
-      );
-    });
-  },
-);
+  test(`throws on invalid format`, () => {
+    expect(() => parseTimestampToSeconds(`invalid`)).toThrow(
+      `Invalid time format: invalid`,
+    );
+  });
+});
 
-test(
-  `parseFfmpegOutput handles infinity values from quiet audio` satisfies HasNameOf<
-    typeof parseFfmpegOutput
-  >,
-  () => {
-    // Regression test for sporadic NaN errors when ffmpeg outputs "-inf" or "inf"
-    // for extremely quiet/silent audio files
-    const result = parseFfmpegOutput(outputExampleWithInfinity);
+test(`parseFfmpegOutput handles infinity values from quiet audio`, () => {
+  // Regression test for sporadic NaN errors when ffmpeg outputs "-inf" or "inf"
+  // for extremely quiet/silent audio files
+  const result = parseFfmpegOutput(outputExampleWithInfinity);
 
-    // Infinity values should be parsed as JavaScript Infinity/-Infinity
-    expect(result.loudnorm.input_i).toBe(-Infinity);
-    expect(result.loudnorm.output_i).toBe(-Infinity);
-    expect(result.loudnorm.target_offset).toBe(Infinity);
+  // Infinity values should be parsed as JavaScript Infinity/-Infinity
+  expect(result.loudnorm.input_i).toBe(-Infinity);
+  expect(result.loudnorm.output_i).toBe(-Infinity);
+  expect(result.loudnorm.target_offset).toBe(Infinity);
 
-    // Other fields should parse normally
-    expect(result.loudnorm.input_tp).toBe(-53.95);
-    expect(result.loudnorm.input_lra).toBe(0);
-  },
-);
+  // Other fields should parse normally
+  expect(result.loudnorm.input_tp).toBe(-53.95);
+  expect(result.loudnorm.input_lra).toBe(0);
+});
 
 const outputExample1 = `ffmpeg version 7.1.1 Copyright (c) 2000-2025 the FFmpeg developers
   built with Apple clang version 17.0.0 (clang-1700.0.13.3)
@@ -297,23 +279,19 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'pinyin/zhen1-nova.m4a':
 size=N/A time=00:00:00.70 bitrate=N/A speed=45.9x
 `;
 
-describe(
-  `generateSpriteCommand suite` satisfies HasNameOf<
-    typeof generateSpriteCommand
-  >,
-  () => {
-    test(`generates correct command for single file`, () => {
-      const audioFiles = [
-        {
-          relFilePath: `../path/to/audio1.m4a`,
-          startTime: 0,
-          duration: 1.5,
-        },
-      ];
+describe(`generateSpriteCommand suite`, () => {
+  test(`generates correct command for single file`, () => {
+    const audioFiles = [
+      {
+        relFilePath: `../path/to/audio1.m4a`,
+        startTime: 0,
+        duration: 1.5,
+      },
+    ];
 
-      const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
+    const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
-      expect(command).toMatchInlineSnapshot(`
+    expect(command).toMatchInlineSnapshot(`
         [
           "ffmpeg",
           "-i",
@@ -342,25 +320,25 @@ describe(
           "/output/sprite.m4a",
         ]
       `);
-    });
+  });
 
-    test(`generates correct command for multiple files with delays`, () => {
-      const audioFiles = [
-        {
-          relFilePath: `../path/to/audio1.m4a`,
-          startTime: 0,
-          duration: 1.5,
-        },
-        {
-          relFilePath: `../path/to/audio2.m4a`,
-          startTime: 2.5, // 1 second buffer after first file
-          duration: 2,
-        },
-      ];
+  test(`generates correct command for multiple files with delays`, () => {
+    const audioFiles = [
+      {
+        relFilePath: `../path/to/audio1.m4a`,
+        startTime: 0,
+        duration: 1.5,
+      },
+      {
+        relFilePath: `../path/to/audio2.m4a`,
+        startTime: 2.5, // 1 second buffer after first file
+        duration: 2,
+      },
+    ];
 
-      const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
+    const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
-      expect(command).toMatchInlineSnapshot(`
+    expect(command).toMatchInlineSnapshot(`
         [
           "ffmpeg",
           "-i",
@@ -391,26 +369,26 @@ describe(
           "/output/sprite.m4a",
         ]
       `);
-    });
+  });
 
-    test(`sorts files by start time`, () => {
-      const audioFiles = [
-        {
-          relFilePath: `../path/to/audio2.m4a`,
-          startTime: 2,
-          duration: 1,
-        },
-        {
-          relFilePath: `../path/to/audio1.m4a`,
-          startTime: 0,
-          duration: 1.5,
-        },
-      ];
+  test(`sorts files by start time`, () => {
+    const audioFiles = [
+      {
+        relFilePath: `../path/to/audio2.m4a`,
+        startTime: 2,
+        duration: 1,
+      },
+      {
+        relFilePath: `../path/to/audio1.m4a`,
+        startTime: 0,
+        duration: 1.5,
+      },
+    ];
 
-      const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
+    const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
-      // Should process audio1 first (startTime 0), then audio2 (startTime 2.0)
-      expect(command).toMatchInlineSnapshot(`
+    // Should process audio1 first (startTime 0), then audio2 (startTime 2.0)
+    expect(command).toMatchInlineSnapshot(`
         [
           "ffmpeg",
           "-i",
@@ -441,140 +419,136 @@ describe(
           "/output/sprite.m4a",
         ]
       `);
-    });
+  });
 
-    test(`allows custom sample rate`, () => {
-      const audioFiles = [
-        {
-          relFilePath: `audio1.m4a`,
-          startTime: 0,
-          duration: 1,
-        },
-      ];
+  test(`allows custom sample rate`, () => {
+    const audioFiles = [
+      {
+        relFilePath: `audio1.m4a`,
+        startTime: 0,
+        duration: 1,
+      },
+    ];
 
-      const command = generateSpriteCommand(
-        audioFiles,
-        `/output/sprite.m4a`,
-        48_000,
-      );
+    const command = generateSpriteCommand(
+      audioFiles,
+      `/output/sprite.m4a`,
+      48_000,
+    );
 
-      expect(command).toContain(`-ar`);
-      expect(command).toContain(`48000`);
-    });
+    expect(command).toContain(`-ar`);
+    expect(command).toContain(`48000`);
+  });
 
-    test(`throws error for empty files array`, () => {
-      expect(() => generateSpriteCommand([], `/output/sprite.m4a`)).toThrow(
-        `Cannot create sprite from empty audio files array`,
-      );
-    });
+  test(`throws error for empty files array`, () => {
+    expect(() => generateSpriteCommand([], `/output/sprite.m4a`)).toThrow(
+      `Cannot create sprite from empty audio files array`,
+    );
+  });
 
-    test(`uses custom bitrate when specified`, () => {
-      const audioFiles = [
-        {
-          relFilePath: `../path/to/audio1.m4a`,
-          startTime: 0,
-          duration: 1.5,
-        },
-      ];
+  test(`uses custom bitrate when specified`, () => {
+    const audioFiles = [
+      {
+        relFilePath: `../path/to/audio1.m4a`,
+        startTime: 0,
+        duration: 1.5,
+      },
+    ];
 
-      const command = generateSpriteCommand(
-        audioFiles,
-        `/output/sprite.m4a`,
-        44_100,
-        `256k`,
-      );
+    const command = generateSpriteCommand(
+      audioFiles,
+      `/output/sprite.m4a`,
+      44_100,
+      `256k`,
+    );
 
-      expect(command).toContain(`-b:a`);
-      const bitrateIndex = command.indexOf(`-b:a`);
-      expect(command[bitrateIndex + 1]).toBe(`256k`);
-    });
+    expect(command).toContain(`-b:a`);
+    const bitrateIndex = command.indexOf(`-b:a`);
+    expect(command[bitrateIndex + 1]).toBe(`256k`);
+  });
 
-    test(`uses default bitrate when not specified`, () => {
-      const audioFiles = [
-        {
-          relFilePath: `../path/to/audio1.m4a`,
-          startTime: 0,
-          duration: 1.5,
-        },
-      ];
+  test(`uses default bitrate when not specified`, () => {
+    const audioFiles = [
+      {
+        relFilePath: `../path/to/audio1.m4a`,
+        startTime: 0,
+        duration: 1.5,
+      },
+    ];
 
-      const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
+    const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
-      expect(command).toContain(`-b:a`);
-      const bitrateIndex = command.indexOf(`-b:a`);
-      expect(command[bitrateIndex + 1]).toBe(`128k`);
-    });
-  },
-);
+    expect(command).toContain(`-b:a`);
+    const bitrateIndex = command.indexOf(`-b:a`);
+    expect(command[bitrateIndex + 1]).toBe(`128k`);
+  });
+});
 
 describe(`Integration tests with real ffmpeg`, () => {
-  describe(
-    `analyzeAudioFile` satisfies HasNameOf<typeof analyzeAudioFile>,
-    () => {
-      test(`works with real audio files`, async () => {
-        const audioPath = path.join(import.meta.dirname, `fixtures/audio1.mp3`);
+  describe(`analyzeAudioFile`, () => {
+    test(`works with real audio files`, async () => {
+      const audioPath = path.join(import.meta.dirname, `fixtures/audio1.mp3`);
 
-        const result = await analyzeAudioFile(audioPath);
+      const result = await analyzeAudioFile(audioPath);
 
-        expect(result).toMatchObject({
-          duration: {
-            fromStream: expect.any(Number) as number,
-            fromContainer: expect.any(Number) as number,
-          },
-          astats: expect.any(Object) as object,
-          loudnorm: expect.any(Object) as object,
-        });
-
-        // Check that the duration is close to the expected 1.2 seconds
-        expect(result.duration.fromStream).toBeCloseTo(1.2, 1);
+      expect(result).toMatchObject({
+        duration: {
+          fromStream: expect.any(Number) as number,
+          fromContainer: expect.any(Number) as number,
+        },
+        astats: expect.any(Object) as object,
+        loudnorm: expect.any(Object) as object,
       });
 
-      test(`regression test, reports leading silence from t=0 on metadata-aware timeline for non-zero-start-metadata.m4a`, async () => {
-        // This fixture has non-zero stream start metadata. Leading silence
-        // should include that offset and therefore start at t=0.
-        const filePath = path.join(fixturesDir, `non-zero-start-metadata.m4a`);
+      // Check that the duration is close to the expected 1.2 seconds
+      expect(result.duration.fromStream).toBeCloseTo(1.2, 1);
+    });
 
-        const result = await analyzeAudioFile(filePath);
+    test(`regression test, reports leading silence from t=0 on metadata-aware timeline for non-zero-start-metadata.m4a`, async () => {
+      // This fixture has non-zero stream start metadata. Leading silence
+      // should include that offset and therefore start at t=0.
+      const filePath = path.join(fixturesDir, `non-zero-start-metadata.m4a`);
 
-        // Verify we detected silence
-        expect(result.silences.length).toBeGreaterThan(0);
+      const result = await analyzeAudioFile(filePath);
 
-        // Find the first silence segment.
-        const leadingSilence = result.silences[0];
+      // Verify we detected silence
+      expect(result.silences.length).toBeGreaterThan(0);
 
+      // Find the first silence segment.
+      const leadingSilence = result.silences[0];
+
+      expect(
+        leadingSilence,
+        `Expected to detect silence at the beginning of the file`,
+      ).toBeDefined();
+
+      // For this fixture, ffprobe reports ~0.744s start_time. The leading
+      // silence should start at 0 and include that offset.
+      expect(leadingSilence?.start).toBe(0);
+      expect(leadingSilence?.end).toBeGreaterThan(0.74);
+      expect(leadingSilence?.end).toBeLessThan(0.85);
+      expect(leadingSilence?.duration).toBeGreaterThan(0.74);
+      expect(leadingSilence?.duration).toBeLessThan(0.85);
+
+      // Log results for debugging if needed
+      // console.log('Detected silences:', result.silences);
+    });
+
+    test(`silence detection parameters are correctly applied`, async () => {
+      // Test that the configured minimum duration threshold (0.01s) is respected.
+      const filePath = path.join(fixturesDir, `non-zero-start-metadata.m4a`);
+
+      const result = await analyzeAudioFile(filePath);
+
+      // All detected silences should meet minimum duration of 0.01s
+      for (const silence of result.silences) {
         expect(
-          leadingSilence,
-          `Expected to detect silence at the beginning of the file`,
-        ).toBeDefined();
-
-        // For this fixture, ffprobe reports ~0.744s start_time. The leading
-        // silence should start at 0 and include that offset.
-        expect(leadingSilence?.start).toBe(0);
-        expect(leadingSilence?.end).toBeGreaterThan(0.74);
-        expect(leadingSilence?.end).toBeLessThan(0.85);
-        expect(leadingSilence?.duration).toBeGreaterThan(0.74);
-        expect(leadingSilence?.duration).toBeLessThan(0.85);
-
-        // Log results for debugging if needed
-        // console.log('Detected silences:', result.silences);
-      });
-
-      test(`silence detection parameters are correctly applied`, async () => {
-        // Test that the configured minimum duration threshold (0.01s) is respected.
-        const filePath = path.join(fixturesDir, `non-zero-start-metadata.m4a`);
-
-        const result = await analyzeAudioFile(filePath);
-
-        // All detected silences should meet minimum duration of 0.01s
-        for (const silence of result.silences) {
-          expect(
-            silence.duration,
-            `Silence duration ${silence.duration}s at ${silence.start}s should be >= 0.01s`,
-          ).toBeGreaterThanOrEqual(0.01);
-        }
-      });
-    },
-  );
+          silence.duration,
+          `Silence duration ${silence.duration}s at ${silence.start}s should be >= 0.01s`,
+        ).toBeGreaterThanOrEqual(0.01);
+      }
+    });
+  });
 
   test(`generateSpriteCommand produces working ffmpeg command`, async () => {
     const outputPath = path.join(fixturesDir, `test-sprite.m4a`);

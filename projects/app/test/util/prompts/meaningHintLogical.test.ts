@@ -2,26 +2,22 @@ import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 import { buildMeaningHintLogicalPrompt } from "#util/prompts/meaningHintLogical.js";
 
-describe(
-  `buildMeaningHintLogicalPrompt` satisfies HasNameOf<
-    typeof buildMeaningHintLogicalPrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildMeaningHintLogicalPrompt({
-        hanzi: `好`,
-        meaning: {
-          hanziWord: `好`,
-          glosses: [`good`, `well`, `fine`],
-        },
-        components: [
-          { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child` },
-        ],
-        count: 4,
-      });
+describe(`buildMeaningHintLogicalPrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildMeaningHintLogicalPrompt({
+      hanzi: `好`,
+      meaning: {
+        hanziWord: `好`,
+        glosses: [`good`, `well`, `fine`],
+      },
+      components: [
+        { hanzi: `女`, meaning: `woman` },
+        { hanzi: `子`, label: `child` },
+      ],
+      count: 4,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -90,6 +86,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

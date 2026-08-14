@@ -30,70 +30,67 @@ const expectedReviewSchema = z.object({
 
 const ratingSchema = z.enum(Rating);
 
-describe(
-  `nextReview suite` satisfies HasNameOf<typeof nextReview>,
-  async () => {
-    test(`stability increases after time elapsed with correct rating`, () => {
-      const before = nextReview(null, Rating.Again);
-      const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
-      const afterGood = nextReview(before, Rating.Good, 时`+1s`);
-      const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
+describe(`nextReview suite`, async () => {
+  test(`stability increases after time elapsed with correct rating`, () => {
+    const before = nextReview(null, Rating.Again);
+    const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
+    const afterGood = nextReview(before, Rating.Good, 时`+1s`);
+    const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
 
-      // .Easy should increase stability
-      expect(before.stability).toBeLessThan(afterEasy.stability);
+    // .Easy should increase stability
+    expect(before.stability).toBeLessThan(afterEasy.stability);
 
-      // .Good should increase stability
-      expect(before.stability).toBeLessThan(afterGood.stability);
+    // .Good should increase stability
+    expect(before.stability).toBeLessThan(afterGood.stability);
 
-      // .Hard should increase stability
-      expect(before.stability).toBeLessThan(afterHard.stability);
-    });
+    // .Hard should increase stability
+    expect(before.stability).toBeLessThan(afterHard.stability);
+  });
 
-    test(`stability decreases from .Again`, () => {
-      const before = nextReview(null, Rating.Good);
-      const after = nextReview(
-        before,
-        Rating.Again,
-        parseRelativeTimeShorthand(`+10m`),
-      );
+  test(`stability decreases from .Again`, () => {
+    const before = nextReview(null, Rating.Good);
+    const after = nextReview(
+      before,
+      Rating.Again,
+      parseRelativeTimeShorthand(`+10m`),
+    );
 
-      expect(after.stability).toBeLessThan(before.stability);
-    });
+    expect(after.stability).toBeLessThan(before.stability);
+  });
 
-    test(`difficulty lowers with Easy and increases with Hard`, () => {
-      const before = nextReview(null, Rating.Good);
-      const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
-      const afterGood = nextReview(before, Rating.Good, 时`+1s`);
-      const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
+  test(`difficulty lowers with Easy and increases with Hard`, () => {
+    const before = nextReview(null, Rating.Good);
+    const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
+    const afterGood = nextReview(before, Rating.Good, 时`+1s`);
+    const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
 
-      // .Easy should decrease difficulty
-      expect(before.difficulty).toBeGreaterThan(afterEasy.difficulty);
-      // .Good should keep the same difficulty
-      expect(before.difficulty).toBe(afterGood.difficulty);
-      // .Hard should increase difficulty
-      expect(before.difficulty).toBeLessThan(afterHard.difficulty);
-    });
+    // .Easy should decrease difficulty
+    expect(before.difficulty).toBeGreaterThan(afterEasy.difficulty);
+    // .Good should keep the same difficulty
+    expect(before.difficulty).toBe(afterGood.difficulty);
+    // .Hard should increase difficulty
+    expect(before.difficulty).toBeLessThan(afterHard.difficulty);
+  });
 
-    test(`regression test: InvariantException: neither stability nor difficulty changed after review`, () => {
-      // Presumably some floating point precision issue with these specific numbers,
-      // even though the review happened 4 seconds after the previous review.
-      const fixture = {
-        currentState: {
-          prevReviewAt: new Date(`2025-11-15T09:05:49.194Z`),
-          difficulty: 1,
-          stability: 1368.48336329,
-          nextReviewAt: new Date(`2029-08-14T20:41:49.194Z`),
-        },
-        rating: Rating.Easy,
-        now: new Date(`2025-11-15T09:05:53.351Z`),
-      };
+  test(`regression test: InvariantException: neither stability nor difficulty changed after review`, () => {
+    // Presumably some floating point precision issue with these specific numbers,
+    // even though the review happened 4 seconds after the previous review.
+    const fixture = {
+      currentState: {
+        prevReviewAt: new Date(`2025-11-15T09:05:49.194Z`),
+        difficulty: 1,
+        stability: 1368.48336329,
+        nextReviewAt: new Date(`2029-08-14T20:41:49.194Z`),
+      },
+      rating: Rating.Easy,
+      now: new Date(`2025-11-15T09:05:53.351Z`),
+    };
 
-      expect(() =>
-        nextReview(fixture.currentState, fixture.rating, fixture.now),
-      ).not.toThrow();
-    });
-  },
-);
+    expect(() =>
+      nextReview(fixture.currentState, fixture.rating, fixture.now),
+    ).not.toThrow();
+  });
+});
 
 test(`Again → Again → Again`, () => {
   assertFsrsSequence([
@@ -448,64 +445,56 @@ describe(`reviewing before due`, async () => {
   });
 });
 
-describe(
-  `fsrsPredictedRecallProbability suite` satisfies HasNameOf<
-    typeof fsrsPredictedRecallProbability
-  >,
-  async () => {
-    test(`decreases as days elapsed increases (memories fade with time)`, () => {
-      const srsState = nextReview(null, Rating.Good);
+describe(`fsrsPredictedRecallProbability suite`, async () => {
+  test(`decreases as days elapsed increases (memories fade with time)`, () => {
+    const srsState = nextReview(null, Rating.Good);
 
-      for (let i = 1; i < 100; i++) {
-        expect(
-          fsrsPredictedRecallProbability(
-            srsState,
-            parseRelativeTimeShorthand(`+${i}d`),
-          ),
-        ).toBeLessThan(
-          fsrsPredictedRecallProbability(
-            srsState,
-            parseRelativeTimeShorthand(`+${i - 1}d`),
-          ),
-        );
-      }
-    });
-  },
-);
+    for (let i = 1; i < 100; i++) {
+      expect(
+        fsrsPredictedRecallProbability(
+          srsState,
+          parseRelativeTimeShorthand(`+${i}d`),
+        ),
+      ).toBeLessThan(
+        fsrsPredictedRecallProbability(
+          srsState,
+          parseRelativeTimeShorthand(`+${i - 1}d`),
+        ),
+      );
+    }
+  });
+});
 
-describe(
-  `fsrsIsForgotten suite` satisfies HasNameOf<typeof fsrsIsForgotten>,
-  async () => {
-    test(`is "forgotten" if waited more than ~3 weeks after a single "good" review`, () => {
-      vi.useFakeTimers({ toFake: [`Date`] });
+describe(`fsrsIsForgotten suite`, async () => {
+  test(`is "forgotten" if waited more than ~3 weeks after a single "good" review`, () => {
+    vi.useFakeTimers({ toFake: [`Date`] });
 
-      const srsState = nextReview(null, Rating.Good);
+    const srsState = nextReview(null, Rating.Good);
 
-      expect(fsrsIsForgotten(srsState)).toBe(false);
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // after 1 day
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 18);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // after 19 days
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(true); // after 20 days
-    });
+    expect(fsrsIsForgotten(srsState)).toBe(false);
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // after 1 day
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 18);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // after 19 days
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(true); // after 20 days
+  });
 
-    test(`not "forgotten" within a few days of being introduced, regardless of probability`, () => {
-      vi.useFakeTimers({ toFake: [`Date`] });
+  test(`not "forgotten" within a few days of being introduced, regardless of probability`, () => {
+    vi.useFakeTimers({ toFake: [`Date`] });
 
-      let srsState = nextReview(null, Rating.Hard);
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1); // after 1 days
-      srsState = nextReview(srsState, Rating.Again);
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 4); // after 5 days
+    let srsState = nextReview(null, Rating.Hard);
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1); // after 1 days
+    srsState = nextReview(srsState, Rating.Again);
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 4); // after 5 days
 
-      // The probability of recall should be very low.
-      expect(fsrsPredictedRecallProbability(srsState)).toBeLessThan(0.01);
+    // The probability of recall should be very low.
+    expect(fsrsPredictedRecallProbability(srsState)).toBeLessThan(0.01);
 
-      // But it shouldn't be considered "forgotten" yet.
-      expect(fsrsIsForgotten(srsState)).toBe(false);
-    });
-  },
-);
+    // But it shouldn't be considered "forgotten" yet.
+    expect(fsrsIsForgotten(srsState)).toBe(false);
+  });
+});
 
 type ExpectedReview = z.output<typeof expectedReviewSchema>;
 

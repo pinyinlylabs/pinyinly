@@ -53,169 +53,162 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe(
-  `generateSpriteAssignments suite` satisfies HasNameOf<
-    typeof generateSpriteAssignments
-  >,
-  () => {
-    test(`should group files by sprite name based on rules`, () => {
-      const files = [
-        `audio/wiki/hello/greeting.m4a`,
-        `audio/wiki/hello/goodbye.m4a`,
-        `audio/wiki/world/intro.m4a`,
-        `audio/sounds/beep.m4a`,
-        `other/file.m4a`,
-      ];
+describe(`generateSpriteAssignments suite`, () => {
+  test(`should group files by sprite name based on rules`, () => {
+    const files = [
+      `audio/wiki/hello/greeting.m4a`,
+      `audio/wiki/hello/goodbye.m4a`,
+      `audio/wiki/world/intro.m4a`,
+      `audio/sounds/beep.m4a`,
+      `other/file.m4a`,
+    ];
 
-      const rules = [
-        {
-          include: [`audio/wiki/**/*.m4a`],
-          match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
-          sprite: `wiki-\${page}`,
-        },
-        {
-          include: [`audio/sounds/*.m4a`],
-          match: `audio/sounds/(?<file>[^/]+)\\.m4a`,
-          sprite: `sounds`,
-        },
-      ];
+    const rules = [
+      {
+        include: [`audio/wiki/**/*.m4a`],
+        match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
+        sprite: `wiki-\${page}`,
+      },
+      {
+        include: [`audio/sounds/*.m4a`],
+        match: `audio/sounds/(?<file>[^/]+)\\.m4a`,
+        sprite: `sounds`,
+      },
+    ];
 
-      const result = generateSpriteAssignments(files, rules);
+    const result = generateSpriteAssignments(files, rules);
 
-      expect(result.get(`wiki-hello`)).toEqual([
-        `audio/wiki/hello/greeting.m4a`,
-        `audio/wiki/hello/goodbye.m4a`,
-      ]);
-      expect(result.get(`wiki-world`)).toEqual([`audio/wiki/world/intro.m4a`]);
-      expect(result.get(`sounds`)).toEqual([`audio/sounds/beep.m4a`]);
-      expect(result.get(`other`)).toBeUndefined(); // No matching rule
+    expect(result.get(`wiki-hello`)).toEqual([
+      `audio/wiki/hello/greeting.m4a`,
+      `audio/wiki/hello/goodbye.m4a`,
+    ]);
+    expect(result.get(`wiki-world`)).toEqual([`audio/wiki/world/intro.m4a`]);
+    expect(result.get(`sounds`)).toEqual([`audio/sounds/beep.m4a`]);
+    expect(result.get(`other`)).toBeUndefined(); // No matching rule
+  });
+
+  test(`should handle empty files array`, () => {
+    const files: string[] = [];
+    const rules = [
+      {
+        include: [`audio/**/*.m4a`],
+        match: `audio/(?<category>[^/]+)/.*\\.m4a`,
+        sprite: `\${category}`,
+      },
+    ];
+
+    const result = generateSpriteAssignments(files, rules);
+
+    expect(result.size).toBe(0);
+  });
+
+  test(`should handle empty rules array`, () => {
+    const files = [`audio/wiki/hello.m4a`, `audio/sounds/beep.m4a`];
+    const rules: { include: string[]; match: string; sprite: string }[] = [];
+
+    const result = generateSpriteAssignments(files, rules);
+
+    expect(result.size).toBe(0);
+  });
+
+  test(`should handle files that don't match any rules`, () => {
+    const files = [`video/clip.mp4`, `image/photo.jpg`];
+    const rules = [
+      {
+        include: [`audio/**/*.m4a`],
+        match: `audio/.*\\.m4a`,
+        sprite: `audio-files`,
+      },
+    ];
+
+    const result = generateSpriteAssignments(files, rules);
+
+    expect(result.size).toBe(0);
+  });
+});
+
+describe(`recomputeManifest suite`, () => {
+  test(`should add file hashes to segments based on include patterns`, async () => {
+    vol.fromJSON({
+      "/project/audio/wiki/hello.m4a": `content1`,
+      "/project/audio/sounds/beep.m4a": `content2`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.*`,
+            sprite: `default`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
 
-    test(`should handle empty files array`, () => {
-      const files: string[] = [];
-      const rules = [
-        {
-          include: [`audio/**/*.m4a`],
-          match: `audio/(?<category>[^/]+)/.*\\.m4a`,
-          sprite: `\${category}`,
-        },
-      ];
+    const originalManifest = loadManifest(`/project/manifest.json`);
+    const updatedManifest = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      const result = generateSpriteAssignments(files, rules);
+    // Should have two segments with duration values from mock
+    expect(Object.keys(updatedManifest.segments)).toHaveLength(2);
 
-      expect(result.size).toBe(0);
+    // All segments should have object structure with mocked duration of 1.5
+    // Start times should be calculated with 1 second buffer between segments
+    for (const [filePath, segmentData] of Object.entries(
+      updatedManifest.segments,
+    )) {
+      expect(filePath).toMatch(/\.m4a$/u); // Should be file path, not hash
+      expect(segmentData.sprite).toBe(0);
+      expect(segmentData.duration).toBe(1.5);
+      expect(segmentData.hash).toHaveLength(64); // SHA-256 hash length
+
+      // Start times will vary based on file order, but should be frame-aligned
+      expect(segmentData.start).toBeGreaterThanOrEqual(0);
+      // Check that the start time is reasonably frame-aligned (within 1ms tolerance)
+      const sampleDuration = 1 / 44_100;
+      const remainder = segmentData.start % sampleDuration;
+      expect(remainder).toBeLessThan(0.001); // 1ms tolerance for floating point precision
+    }
+  });
+
+  test(`should preserve existing segments`, async () => {
+    vol.fromJSON({
+      "/project/audio/existing-file.m4a": `existing content`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.*\\.m4a`,
+            sprite: `default`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
 
-    test(`should handle empty rules array`, () => {
-      const files = [`audio/wiki/hello.m4a`, `audio/sounds/beep.m4a`];
-      const rules: { include: string[]; match: string; sprite: string }[] = [];
+    const originalManifest = await recomputeManifest(
+      loadManifest(`/project/manifest.json`)!,
+      `/project/manifest.json`,
+    );
 
-      const result = generateSpriteAssignments(files, rules);
+    // Now add a new file
 
-      expect(result.size).toBe(0);
+    vol.fromJSON({
+      "/project/audio/new-file.m4a": `new content`,
     });
+    const updatedManifest = await recomputeManifest(
+      loadManifest(`/project/manifest.json`)!,
+      `/project/manifest.json`,
+    );
 
-    test(`should handle files that don't match any rules`, () => {
-      const files = [`video/clip.mp4`, `image/photo.jpg`];
-      const rules = [
-        {
-          include: [`audio/**/*.m4a`],
-          match: `audio/.*\\.m4a`,
-          sprite: `audio-files`,
-        },
-      ];
-
-      const result = generateSpriteAssignments(files, rules);
-
-      expect(result.size).toBe(0);
-    });
-  },
-);
-
-describe(
-  `recomputeManifest suite` satisfies HasNameOf<typeof recomputeManifest>,
-  () => {
-    test(`should add file hashes to segments based on include patterns`, async () => {
-      vol.fromJSON({
-        "/project/audio/wiki/hello.m4a": `content1`,
-        "/project/audio/sounds/beep.m4a": `content2`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.*`,
-              sprite: `default`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
-
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await recomputeManifest(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
-
-      // Should have two segments with duration values from mock
-      expect(Object.keys(updatedManifest.segments)).toHaveLength(2);
-
-      // All segments should have object structure with mocked duration of 1.5
-      // Start times should be calculated with 1 second buffer between segments
-      for (const [filePath, segmentData] of Object.entries(
-        updatedManifest.segments,
-      )) {
-        expect(filePath).toMatch(/\.m4a$/u); // Should be file path, not hash
-        expect(segmentData.sprite).toBe(0);
-        expect(segmentData.duration).toBe(1.5);
-        expect(segmentData.hash).toHaveLength(64); // SHA-256 hash length
-
-        // Start times will vary based on file order, but should be frame-aligned
-        expect(segmentData.start).toBeGreaterThanOrEqual(0);
-        // Check that the start time is reasonably frame-aligned (within 1ms tolerance)
-        const sampleDuration = 1 / 44_100;
-        const remainder = segmentData.start % sampleDuration;
-        expect(remainder).toBeLessThan(0.001); // 1ms tolerance for floating point precision
-      }
-    });
-
-    test(`should preserve existing segments`, async () => {
-      vol.fromJSON({
-        "/project/audio/existing-file.m4a": `existing content`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.*\\.m4a`,
-              sprite: `default`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
-
-      const originalManifest = await recomputeManifest(
-        loadManifest(`/project/manifest.json`)!,
-        `/project/manifest.json`,
-      );
-
-      // Now add a new file
-
-      vol.fromJSON({
-        "/project/audio/new-file.m4a": `new content`,
-      });
-      const updatedManifest = await recomputeManifest(
-        loadManifest(`/project/manifest.json`)!,
-        `/project/manifest.json`,
-      );
-
-      // Check the previous segment is preserved.
-      expect(updatedManifest.segments).toMatchObject(originalManifest.segments);
-      expect(originalManifest.segments).toMatchInlineSnapshot(`
+    // Check the previous segment is preserved.
+    expect(updatedManifest.segments).toMatchObject(originalManifest.segments);
+    expect(originalManifest.segments).toMatchInlineSnapshot(`
         {
           "audio/existing-file.m4a": {
             "duration": 1.5,
@@ -225,7 +218,7 @@ describe(
           },
         }
       `);
-      expect(updatedManifest.segments).toMatchInlineSnapshot(`
+    expect(updatedManifest.segments).toMatchInlineSnapshot(`
         {
           "audio/existing-file.m4a": {
             "duration": 1.5,
@@ -241,246 +234,239 @@ describe(
           },
         }
       `);
+  });
+
+  test(`should handle empty include patterns`, async () => {
+    vol.fromJSON({
+      "/project/audio/file.m4a": `content`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
 
-    test(`should handle empty include patterns`, async () => {
-      vol.fromJSON({
-        "/project/audio/file.m4a": `content`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+    const originalManifest = loadManifest(`/project/manifest.json`);
+    const updatedManifest = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await recomputeManifest(
-        originalManifest!,
+    expect(updatedManifest.segments).toEqual({});
+  });
+
+  test(`should throw when an included file does not match any sprite rule`, async () => {
+    vol.fromJSON({
+      "/project/audio/wiki/hello.m4a": `content1`,
+      "/project/audio/other/unmatched.m4a": `content2`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `audio/wiki/.*\\.m4a`,
+            sprite: `wiki`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+    });
+
+    await expect(
+      recomputeManifest(
+        loadManifest(`/project/manifest.json`)!,
         `/project/manifest.json`,
-      );
+      ),
+    ).rejects.toThrow(
+      `Found audio files that do not match any sprite rule:\n- audio/other/unmatched.m4a\nAdd or update a manifest rule so every included file matches a sprite.`,
+    );
+  });
 
-      expect(updatedManifest.segments).toEqual({});
+  test(`should generate sprite file hash from multiple input files in same sprite`, async () => {
+    vol.fromJSON({
+      "/project/audio/wiki/hello/greeting.m4a": `hello greeting content`,
+      "/project/audio/wiki/hello/goodbye.m4a": `hello goodbye content`,
+      "/project/audio/wiki/world/intro.m4a": `world intro content`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `audio/wiki/(?<page>[^/]+)/.*\\.m4a`,
+            sprite: `wiki-\${page}`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
 
-    test(`should throw when an included file does not match any sprite rule`, async () => {
-      vol.fromJSON({
-        "/project/audio/wiki/hello.m4a": `content1`,
-        "/project/audio/other/unmatched.m4a": `content2`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `audio/wiki/.*\\.m4a`,
-              sprite: `wiki`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+    const originalManifest = loadManifest(`/project/manifest.json`);
+    const updatedManifest = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      await expect(
-        recomputeManifest(
-          loadManifest(`/project/manifest.json`)!,
-          `/project/manifest.json`,
-        ),
-      ).rejects.toThrow(
-        `Found audio files that do not match any sprite rule:\n- audio/other/unmatched.m4a\nAdd or update a manifest rule so every included file matches a sprite.`,
-      );
+    // Should have 2 sprite files: wiki-hello and wiki-world
+    expect(updatedManifest.spriteFiles).toHaveLength(2);
+
+    const wikiHelloSprite = updatedManifest.spriteFiles.find((file: string) =>
+      file.startsWith(`wiki-hello-`),
+    );
+    const wikiWorldSprite = updatedManifest.spriteFiles.find((file: string) =>
+      file.startsWith(`wiki-world-`),
+    );
+
+    expect(wikiHelloSprite).toBeDefined();
+    expect(wikiWorldSprite).toBeDefined();
+
+    // The wiki-hello sprite should be generated from combining hashes of both hello files
+    // The hash should be deterministic based on the content of both files
+    expect(wikiHelloSprite).toMatch(/^wiki-hello-[a-f0-9]{12}\.m4a$/u);
+    expect(wikiWorldSprite).toMatch(/^wiki-world-[a-f0-9]{12}\.m4a$/u);
+
+    // Verify segments are assigned to correct sprites
+    const segments = Object.values(updatedManifest.segments);
+    const sprite0Segments = segments.filter((segment) => segment.sprite === 0);
+    const sprite1Segments = segments.filter((segment) => segment.sprite === 1);
+
+    // One sprite should have 2 files (wiki-hello), the other should have 1 (wiki-world)
+    const segmentCounts = [sprite0Segments.length, sprite1Segments.length].sort(
+      sortComparatorNumber(),
+    );
+    expect(segmentCounts).toEqual([1, 2]);
+  });
+
+  test(`should generate deterministic sprite hash from sorted file hashes`, async () => {
+    // Use specific content that will generate predictable hashes
+    vol.fromJSON({
+      "/project/audio/test/file1.m4a": `content1`,
+      "/project/audio/test/file2.m4a": `content2`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `audio/test/.*\\.m4a`,
+            sprite: `test-sprite`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
 
-    test(`should generate sprite file hash from multiple input files in same sprite`, async () => {
-      vol.fromJSON({
-        "/project/audio/wiki/hello/greeting.m4a": `hello greeting content`,
-        "/project/audio/wiki/hello/goodbye.m4a": `hello goodbye content`,
-        "/project/audio/wiki/world/intro.m4a": `world intro content`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `audio/wiki/(?<page>[^/]+)/.*\\.m4a`,
-              sprite: `wiki-\${page}`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+    const originalManifest = loadManifest(`/project/manifest.json`);
+    const updatedManifest1 = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await recomputeManifest(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
+    // Run it again with same files - should produce same hash
+    const updatedManifest2 = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      // Should have 2 sprite files: wiki-hello and wiki-world
-      expect(updatedManifest.spriteFiles).toHaveLength(2);
+    expect(updatedManifest1.spriteFiles).toEqual(updatedManifest2.spriteFiles);
+    expect(updatedManifest1.spriteFiles).toHaveLength(1);
 
-      const wikiHelloSprite = updatedManifest.spriteFiles.find((file: string) =>
-        file.startsWith(`wiki-hello-`),
-      );
-      const wikiWorldSprite = updatedManifest.spriteFiles.find((file: string) =>
-        file.startsWith(`wiki-world-`),
-      );
+    const spriteFile = updatedManifest1.spriteFiles[0];
+    expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
+    // The sprite should contain both files
+    const segments = Object.values(updatedManifest1.segments);
+    expect(segments).toHaveLength(2);
+    expect(segments.every((segment) => segment.sprite === 0)).toBe(true);
+  });
 
-      expect(wikiHelloSprite).toBeDefined();
-      expect(wikiWorldSprite).toBeDefined();
-
-      // The wiki-hello sprite should be generated from combining hashes of both hello files
-      // The hash should be deterministic based on the content of both files
-      expect(wikiHelloSprite).toMatch(/^wiki-hello-[a-f0-9]{12}\.m4a$/u);
-      expect(wikiWorldSprite).toMatch(/^wiki-world-[a-f0-9]{12}\.m4a$/u);
-
-      // Verify segments are assigned to correct sprites
-      const segments = Object.values(updatedManifest.segments);
-      const sprite0Segments = segments.filter(
-        (segment) => segment.sprite === 0,
-      );
-      const sprite1Segments = segments.filter(
-        (segment) => segment.sprite === 1,
-      );
-
-      // One sprite should have 2 files (wiki-hello), the other should have 1 (wiki-world)
-      const segmentCounts = [
-        sprite0Segments.length,
-        sprite1Segments.length,
-      ].sort(sortComparatorNumber());
-      expect(segmentCounts).toEqual([1, 2]);
+  test(`should generate sprite hash based on file order, not hash order`, async () => {
+    // Create files where sorting by filename gives different order than sorting by hash
+    vol.fromJSON({
+      "/project/audio/test/a.m4a": `zzz`, // filename first, but hash will be large
+      "/project/audio/test/z.m4a": `aaa`, // filename last, but hash will be small
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.*audio/test/.*\\.m4a`,
+            sprite: `test-sprite`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
 
-    test(`should generate deterministic sprite hash from sorted file hashes`, async () => {
-      // Use specific content that will generate predictable hashes
-      vol.fromJSON({
-        "/project/audio/test/file1.m4a": `content1`,
-        "/project/audio/test/file2.m4a": `content2`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `audio/test/.*\\.m4a`,
-              sprite: `test-sprite`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+    const originalManifest = loadManifest(`/project/manifest.json`);
+    const updatedManifest = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest1 = await recomputeManifest(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
+    expect(updatedManifest.spriteFiles).toHaveLength(1);
+    const spriteFile = updatedManifest.spriteFiles[0];
 
-      // Run it again with same files - should produce same hash
-      const updatedManifest2 = await recomputeManifest(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
+    // The sprite filename should be deterministic and based on file order (a.m4a then z.m4a)
+    // This should be consistent regardless of the content hash values
+    expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
+    // Verify files are in correct order in segments
+    const segments = Object.entries(updatedManifest.segments).sort(
+      sortComparatorString(([x]) => x),
+    );
+    expect(segments).toHaveLength(2);
+    expect(segments[0]?.[0]).toBe(`audio/test/a.m4a`); // a.m4a should be first
+    expect(segments[1]?.[0]).toBe(`audio/test/z.m4a`); // z.m4a should be second
+    expect(segments[0]?.[1]?.start).toBe(0); // first file starts at 0
+    expect(segments[1]?.[1]?.start).toBeGreaterThan(0); // second file starts later
+  });
 
-      expect(updatedManifest1.spriteFiles).toEqual(
-        updatedManifest2.spriteFiles,
-      );
-      expect(updatedManifest1.spriteFiles).toHaveLength(1);
+  test(`should reuse duration from existing segments when files are moved`, async () => {
+    const manifestPath = `/project/manifest.json`;
 
-      const spriteFile = updatedManifest1.spriteFiles[0];
-      expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
-      // The sprite should contain both files
-      const segments = Object.values(updatedManifest1.segments);
-      expect(segments).toHaveLength(2);
-      expect(segments.every((segment) => segment.sprite === 0)).toBe(true);
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `audio/.*\\.m4a`,
+            sprite: `test-sprite`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+      "/project/audio/test1.m4a": `different content for file 1`,
+      "/project/audio/test2.m4a": `different content for file 2`,
     });
 
-    test(`should generate sprite hash based on file order, not hash order`, async () => {
-      // Create files where sorting by filename gives different order than sorting by hash
-      vol.fromJSON({
-        "/project/audio/test/a.m4a": `zzz`, // filename first, but hash will be large
-        "/project/audio/test/z.m4a": `aaa`, // filename last, but hash will be small
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.*audio/test/.*\\.m4a`,
-              sprite: `test-sprite`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+    // Update the manifest with the initial values.
+    await syncManifestWithFilesystem(manifestPath);
 
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await recomputeManifest(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
-
-      expect(updatedManifest.spriteFiles).toHaveLength(1);
-      const spriteFile = updatedManifest.spriteFiles[0];
-
-      // The sprite filename should be deterministic and based on file order (a.m4a then z.m4a)
-      // This should be consistent regardless of the content hash values
-      expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
-      // Verify files are in correct order in segments
-      const segments = Object.entries(updatedManifest.segments).sort(
-        sortComparatorString(([x]) => x),
-      );
-      expect(segments).toHaveLength(2);
-      expect(segments[0]?.[0]).toBe(`audio/test/a.m4a`); // a.m4a should be first
-      expect(segments[1]?.[0]).toBe(`audio/test/z.m4a`); // z.m4a should be second
-      expect(segments[0]?.[1]?.start).toBe(0); // first file starts at 0
-      expect(segments[1]?.[1]?.start).toBeGreaterThan(0); // second file starts later
+    // Now create a new file with the same content as another, in this case it
+    // shouldn't need to be analyzed again.
+    vol.fromJSON({
+      "/project/audio/test3.m4a": `different content for file 2`,
     });
 
-    test(`should reuse duration from existing segments when files are moved`, async () => {
-      const manifestPath = `/project/manifest.json`;
+    // Spy analyzeAudioFile to track calls
+    const analyzeAudioFileSpy = vi.spyOn(
+      await import(`#ffmpeg.ts`),
+      `analyzeAudioFile`,
+    );
 
-      vol.fromJSON({
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `audio/.*\\.m4a`,
-              sprite: `test-sprite`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-        "/project/audio/test1.m4a": `different content for file 1`,
-        "/project/audio/test2.m4a": `different content for file 2`,
-      });
+    const originalManifest = loadManifest(manifestPath);
+    const updatedManifest = await recomputeManifest(
+      originalManifest!,
+      manifestPath,
+    );
 
-      // Update the manifest with the initial values.
-      await syncManifestWithFilesystem(manifestPath);
+    expect(analyzeAudioFileSpy).toHaveBeenCalledTimes(0);
 
-      // Now create a new file with the same content as another, in this case it
-      // shouldn't need to be analyzed again.
-      vol.fromJSON({
-        "/project/audio/test3.m4a": `different content for file 2`,
-      });
-
-      // Spy analyzeAudioFile to track calls
-      const analyzeAudioFileSpy = vi.spyOn(
-        await import(`#ffmpeg.ts`),
-        `analyzeAudioFile`,
-      );
-
-      const originalManifest = loadManifest(manifestPath);
-      const updatedManifest = await recomputeManifest(
-        originalManifest!,
-        manifestPath,
-      );
-
-      expect(analyzeAudioFileSpy).toHaveBeenCalledTimes(0);
-
-      expect(updatedManifest.segments).toMatchInlineSnapshot(`
+    expect(updatedManifest.segments).toMatchInlineSnapshot(`
         {
           "audio/test1.m4a": {
             "duration": 1.5,
@@ -502,42 +488,42 @@ describe(
           },
         }
       `);
+  });
+
+  test(`should reuse duration from existing segments when files are moved`, async () => {
+    vol.fromJSON({
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `audio/.*\\.m4a`,
+            sprite: `test-sprite`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+      "/project/audio/test1.m4a": `different content for file 1`,
+      "/project/audio/test2.m4a": `different content for file 2`,
     });
 
-    test(`should reuse duration from existing segments when files are moved`, async () => {
-      vol.fromJSON({
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `audio/.*\\.m4a`,
-              sprite: `test-sprite`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-        "/project/audio/test1.m4a": `different content for file 1`,
-        "/project/audio/test2.m4a": `different content for file 2`,
-      });
+    // Mock analyzeAudioFile to track calls
+    const analyzeAudioFileDurationSpy = vi.spyOn(
+      await import(`#ffmpeg.ts`),
+      `analyzeAudioFileDuration`,
+    );
+    analyzeAudioFileDurationSpy.mockResolvedValue(3);
 
-      // Mock analyzeAudioFile to track calls
-      const analyzeAudioFileDurationSpy = vi.spyOn(
-        await import(`#ffmpeg.ts`),
-        `analyzeAudioFileDuration`,
-      );
-      analyzeAudioFileDurationSpy.mockResolvedValue(3);
+    const originalManifest = loadManifest(`/project/manifest.json`);
+    const updatedManifest = await recomputeManifest(
+      originalManifest!,
+      `/project/manifest.json`,
+    );
 
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await recomputeManifest(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
-
-      // Since file content changed, ffmpeg should be called for both files
-      expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
-      expect(analyzeAudioFileDurationSpy.mock.calls).toMatchInlineSnapshot(`
+    // Since file content changed, ffmpeg should be called for both files
+    expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
+    expect(analyzeAudioFileDurationSpy.mock.calls).toMatchInlineSnapshot(`
         [
           [
             "/project/audio/test1.m4a",
@@ -548,88 +534,87 @@ describe(
         ]
       `);
 
-      // Both files should get new durations (3 seconds) since content changed
-      expect(updatedManifest.segments[`audio/test1.m4a`]?.duration).toBe(3);
-      expect(updatedManifest.segments[`audio/test2.m4a`]?.duration).toBe(3);
+    // Both files should get new durations (3 seconds) since content changed
+    expect(updatedManifest.segments[`audio/test1.m4a`]?.duration).toBe(3);
+    expect(updatedManifest.segments[`audio/test2.m4a`]?.duration).toBe(3);
 
-      // Rename test2.m4a to test3.m4a with same content
-      vol.fromJSON({
-        "/project/audio/test2.m4a": null,
-        "/project/audio/test3.m4a": `different content for file 2`,
-      });
-
-      {
-        await recomputeManifest(updatedManifest, `/project/manifest.json`);
-        expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
-      }
+    // Rename test2.m4a to test3.m4a with same content
+    vol.fromJSON({
+      "/project/audio/test2.m4a": null,
+      "/project/audio/test3.m4a": `different content for file 2`,
     });
 
-    test(`should generate different sprite filenames for different bitrates`, async () => {
-      // Create identical audio files for both tests
-      const audioContent = `same audio content for both tests`;
+    {
+      await recomputeManifest(updatedManifest, `/project/manifest.json`);
+      expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
+    }
+  });
 
-      // First test with 128k bitrate
-      vol.fromJSON({
-        "/project/audio/test.m4a": audioContent,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.*`,
-              sprite: `test-sprite`,
-              bitrate: `128k`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+  test(`should generate different sprite filenames for different bitrates`, async () => {
+    // Create identical audio files for both tests
+    const audioContent = `same audio content for both tests`;
 
-      const manifest128k = loadManifest(`/project/manifest.json`);
-      const updated128k = await recomputeManifest(
-        manifest128k!,
-        `/project/manifest.json`,
-      );
-      const spriteFile128k = updated128k.spriteFiles[0];
-
-      // Reset and test with 256k bitrate
-      vol.reset();
-      vol.fromJSON({
-        "/project/audio/test.m4a": audioContent, // Same content
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.*`,
-              sprite: `test-sprite`,
-              bitrate: `256k`, // Different bitrate
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
-
-      const manifest256k = loadManifest(`/project/manifest.json`);
-      const updated256k = await recomputeManifest(
-        manifest256k!,
-        `/project/manifest.json`,
-      );
-      const spriteFile256k = updated256k.spriteFiles[0];
-
-      // Sprite filenames should be different due to different bitrates affecting the hash
-      expect(spriteFile128k).toBeDefined();
-      expect(spriteFile256k).toBeDefined();
-      expect(spriteFile128k).not.toBe(spriteFile256k);
-      expect(spriteFile128k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
-      expect(spriteFile256k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
+    // First test with 128k bitrate
+    vol.fromJSON({
+      "/project/audio/test.m4a": audioContent,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.*`,
+            sprite: `test-sprite`,
+            bitrate: `128k`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
-  },
-);
 
-describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
+    const manifest128k = loadManifest(`/project/manifest.json`);
+    const updated128k = await recomputeManifest(
+      manifest128k!,
+      `/project/manifest.json`,
+    );
+    const spriteFile128k = updated128k.spriteFiles[0];
+
+    // Reset and test with 256k bitrate
+    vol.reset();
+    vol.fromJSON({
+      "/project/audio/test.m4a": audioContent, // Same content
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.*`,
+            sprite: `test-sprite`,
+            bitrate: `256k`, // Different bitrate
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+    });
+
+    const manifest256k = loadManifest(`/project/manifest.json`);
+    const updated256k = await recomputeManifest(
+      manifest256k!,
+      `/project/manifest.json`,
+    );
+    const spriteFile256k = updated256k.spriteFiles[0];
+
+    // Sprite filenames should be different due to different bitrates affecting the hash
+    expect(spriteFile128k).toBeDefined();
+    expect(spriteFile256k).toBeDefined();
+    expect(spriteFile128k).not.toBe(spriteFile256k);
+    expect(spriteFile128k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
+    expect(spriteFile256k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/u);
+  });
+});
+
+describe(`saveManifest suite`, () => {
   test(`should save manifest to filesystem`, async () => {
     // Create the directory structure
     vol.fromJSON({
@@ -692,34 +677,30 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
   });
 });
 
-describe(
-  `syncManifestWithFilesystem suite` satisfies HasNameOf<
-    typeof syncManifestWithFilesystem
-  >,
-  () => {
-    test(`should load, update, and save manifest`, async () => {
-      vol.fromJSON({
-        "/project/audio/wiki/hello.m4a": `content1`,
-        "/project/audio/sounds/beep.m4a": `content2`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.+/(?<basename>[^/]+)\\.m4a$`,
-              sprite: `\${basename}`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+describe(`syncManifestWithFilesystem suite`, () => {
+  test(`should load, update, and save manifest`, async () => {
+    vol.fromJSON({
+      "/project/audio/wiki/hello.m4a": `content1`,
+      "/project/audio/sounds/beep.m4a": `content2`,
+      "/project/manifest.json": JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.+/(?<basename>[^/]+)\\.m4a$`,
+            sprite: `\${basename}`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+    });
 
-      const updatedManifest = await syncManifestWithFilesystem(
-        `/project/manifest.json`,
-      );
+    const updatedManifest = await syncManifestWithFilesystem(
+      `/project/manifest.json`,
+    );
 
-      expect(updatedManifest).toMatchInlineSnapshot(`
+    expect(updatedManifest).toMatchInlineSnapshot(`
         {
           "outDir": "sprites",
           "rules": [
@@ -752,25 +733,24 @@ describe(
         }
       `);
 
-      expect(updatedManifest.spriteFiles).toHaveLength(2);
+    expect(updatedManifest.spriteFiles).toHaveLength(2);
 
-      // Should have populated segments
-      expect(Object.keys(updatedManifest.segments)).toHaveLength(2);
+    // Should have populated segments
+    expect(Object.keys(updatedManifest.segments)).toHaveLength(2);
+  });
+
+  test(`should throw error if manifest cannot be loaded`, async () => {
+    vi.spyOn(console, `error`).mockImplementation(() => {
+      // Mock to prevent console output during tests
     });
 
-    test(`should throw error if manifest cannot be loaded`, async () => {
-      vi.spyOn(console, `error`).mockImplementation(() => {
-        // Mock to prevent console output during tests
-      });
+    await expect(async () =>
+      syncManifestWithFilesystem(`/nonexistent/manifest.json`),
+    ).rejects.toThrow(); // Just check that it throws, the specific error can vary
+  });
+});
 
-      await expect(async () =>
-        syncManifestWithFilesystem(`/nonexistent/manifest.json`),
-      ).rejects.toThrow(); // Just check that it throws, the specific error can vary
-    });
-  },
-);
-
-describe(`hashFile suite` satisfies HasNameOf<typeof hashFile>, () => {
+describe(`hashFile suite`, () => {
   test(`should produce different hashes for different file contents`, () => {
     const file1Path = `/test/file1.m4a`;
     const file2Path = `/test/file2.m4a`;
@@ -808,7 +788,7 @@ describe(`hashFile suite` satisfies HasNameOf<typeof hashFile>, () => {
   });
 });
 
-describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
+describe(`applyRules suite`, () => {
   test(`should apply named capture groups correctly`, () => {
     const rules = [
       {
@@ -908,137 +888,129 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   });
 });
 
-describe(
-  `resolveIncludePatterns suite` satisfies HasNameOf<
-    typeof resolveIncludePatterns
-  >,
-  () => {
-    test(`should resolve glob patterns to matching files`, async () => {
-      vol.fromJSON({
-        "/project/audio/wiki/hello/greeting.m4a": `content1`,
-        "/project/audio/wiki/world/intro.m4a": `content2`,
-        "/project/audio/sounds/beep.m4a": `content3`,
-        "/project/other/file.txt": `not audio`,
-        "/project/audio/subdir/": null, // Directory
-      });
-
-      const patterns = [`audio/**/hello/*.m4a`, `audio/sounds/*.m4a`];
-      const result = await resolveIncludePatterns(patterns, `/project`);
-
-      expect(result).toEqual([
-        `audio/sounds/beep.m4a`,
-        `audio/wiki/hello/greeting.m4a`,
-      ]);
+describe(`resolveIncludePatterns suite`, () => {
+  test(`should resolve glob patterns to matching files`, async () => {
+    vol.fromJSON({
+      "/project/audio/wiki/hello/greeting.m4a": `content1`,
+      "/project/audio/wiki/world/intro.m4a": `content2`,
+      "/project/audio/sounds/beep.m4a": `content3`,
+      "/project/other/file.txt": `not audio`,
+      "/project/audio/subdir/": null, // Directory
     });
 
-    test(`should handle patterns that match no files`, async () => {
-      vol.fromJSON({
-        "/project/video/clip.mp4": `content`,
-      });
+    const patterns = [`audio/**/hello/*.m4a`, `audio/sounds/*.m4a`];
+    const result = await resolveIncludePatterns(patterns, `/project`);
 
-      const patterns = [`audio/**/*.m4a`];
-      const result = await resolveIncludePatterns(patterns, `/project`);
+    expect(result).toEqual([
+      `audio/sounds/beep.m4a`,
+      `audio/wiki/hello/greeting.m4a`,
+    ]);
+  });
 
-      expect(result).toEqual([]);
+  test(`should handle patterns that match no files`, async () => {
+    vol.fromJSON({
+      "/project/video/clip.mp4": `content`,
     });
 
-    test(`should remove duplicates when patterns overlap`, async () => {
-      vol.fromJSON({
-        "/project/audio/file.m4a": `content`,
-      });
+    const patterns = [`audio/**/*.m4a`];
+    const result = await resolveIncludePatterns(patterns, `/project`);
 
-      const patterns = [`audio/*.m4a`, `audio/file.m4a`];
-      const result = await resolveIncludePatterns(patterns, `/project`);
+    expect(result).toEqual([]);
+  });
 
-      expect(result).toEqual([`audio/file.m4a`]);
+  test(`should remove duplicates when patterns overlap`, async () => {
+    vol.fromJSON({
+      "/project/audio/file.m4a": `content`,
     });
 
-    test(`should handle invalid patterns gracefully`, async () => {
-      const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
-        // Mock to prevent console output during tests
-      });
+    const patterns = [`audio/*.m4a`, `audio/file.m4a`];
+    const result = await resolveIncludePatterns(patterns, `/project`);
 
-      vol.fromJSON({
-        "/project/audio/file.m4a": `content`,
-      });
+    expect(result).toEqual([`audio/file.m4a`]);
+  });
 
-      // Test with a pattern that causes glob to throw
-      const patterns = [`**/**/[**`]; // Very invalid glob pattern
-      const result = await resolveIncludePatterns(patterns, `/project`);
-
-      expect(result).toEqual([]);
-      // Note: glob library might not throw for all invalid patterns,
-      // so we'll just ensure the function handles errors gracefully
-      consoleSpy.mockRestore();
-    });
-  },
-);
-
-describe(
-  `getInputFiles suite` satisfies HasNameOf<typeof getInputFiles>,
-  () => {
-    test(`should return files based on manifest include patterns`, async () => {
-      const manifestPath = `/project/manifest.json`;
-
-      vol.fromJSON({
-        "/project/audio/wiki/hello.m4a": `content1`,
-        "/project/audio/sounds/beep.m4a": `content2`,
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [
-            {
-              include: [`audio/**/*.m4a`],
-              match: `.*\\.m4a`,
-              sprite: `default`,
-            },
-          ],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
-
-      const manifest = loadManifest(manifestPath);
-      const result = await getInputFiles(manifest!, manifestPath);
-
-      expect(result).toEqual([`audio/sounds/beep.m4a`, `audio/wiki/hello.m4a`]);
+  test(`should handle invalid patterns gracefully`, async () => {
+    const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
+      // Mock to prevent console output during tests
     });
 
-    test(`should return empty array when no include patterns specified`, async () => {
-      const manifestPath = `/project/manifest.json`;
-
-      vol.fromJSON({
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
-
-      const manifest = loadManifest(manifestPath);
-      invariant(manifest != null);
-      const result = await getInputFiles(manifest, manifestPath);
-
-      expect(result).toEqual([]);
+    vol.fromJSON({
+      "/project/audio/file.m4a": `content`,
     });
 
-    test(`should return empty array when include is empty array`, async () => {
-      const manifestPath = `/project/manifest.json`;
+    // Test with a pattern that causes glob to throw
+    const patterns = [`**/**/[**`]; // Very invalid glob pattern
+    const result = await resolveIncludePatterns(patterns, `/project`);
 
-      vol.fromJSON({
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [],
-          outDir: `sprites`,
-        } satisfies SpriteManifest),
-      });
+    expect(result).toEqual([]);
+    // Note: glob library might not throw for all invalid patterns,
+    // so we'll just ensure the function handles errors gracefully
+    consoleSpy.mockRestore();
+  });
+});
 
-      const manifest = loadManifest(manifestPath);
-      invariant(manifest != null);
-      const result = await getInputFiles(manifest, manifestPath);
+describe(`getInputFiles suite`, () => {
+  test(`should return files based on manifest include patterns`, async () => {
+    const manifestPath = `/project/manifest.json`;
 
-      expect(result).toEqual([]);
+    vol.fromJSON({
+      "/project/audio/wiki/hello.m4a": `content1`,
+      "/project/audio/sounds/beep.m4a": `content2`,
+      [manifestPath]: JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            include: [`audio/**/*.m4a`],
+            match: `.*\\.m4a`,
+            sprite: `default`,
+          },
+        ],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
     });
-  },
-);
+
+    const manifest = loadManifest(manifestPath);
+    const result = await getInputFiles(manifest!, manifestPath);
+
+    expect(result).toEqual([`audio/sounds/beep.m4a`, `audio/wiki/hello.m4a`]);
+  });
+
+  test(`should return empty array when no include patterns specified`, async () => {
+    const manifestPath = `/project/manifest.json`;
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+    });
+
+    const manifest = loadManifest(manifestPath);
+    invariant(manifest != null);
+    const result = await getInputFiles(manifest, manifestPath);
+
+    expect(result).toEqual([]);
+  });
+
+  test(`should return empty array when include is empty array`, async () => {
+    const manifestPath = `/project/manifest.json`;
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [],
+        outDir: `sprites`,
+      } satisfies SpriteManifest),
+    });
+
+    const manifest = loadManifest(manifestPath);
+    invariant(manifest != null);
+    const result = await getInputFiles(manifest, manifestPath);
+
+    expect(result).toEqual([]);
+  });
+});

@@ -2,17 +2,13 @@ import { buildLocationIdentityImagePrompt } from "#util/prompts/locationIdentity
 import { describe, expect, test } from "vitest";
 import { fmtImagePromptForSnapshot, makeLocationSpec } from "./helpers";
 
-describe(
-  `buildLocationIdentityImagePrompt` satisfies HasNameOf<
-    typeof buildLocationIdentityImagePrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildLocationIdentityImagePrompt({
-        locationSpec: makeLocationSpec(`Aircraft hangar`),
-      });
+describe(`buildLocationIdentityImagePrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildLocationIdentityImagePrompt({
+      locationSpec: makeLocationSpec(`Aircraft hangar`),
+    });
 
-      expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "aspectRatio": "1:1",
           "messages": "
@@ -130,6 +126,5 @@ describe(
           "thinkingLevel": "high",
         }
       `);
-    });
-  },
-);
+  });
+});

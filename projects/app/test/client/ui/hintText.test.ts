@@ -1,7 +1,7 @@
 import { parseHintText } from "#client/ui/hintText.ts";
 import { describe, expect, test } from "vitest";
 
-describe(`parseHintText` satisfies HasNameOf<typeof parseHintText>, () => {
+describe(`parseHintText`, () => {
   test(`returns empty hint and null description for null input`, () => {
     expect(parseHintText(null)).toEqual({ hint: ``, description: null });
   });

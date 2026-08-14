@@ -10,7 +10,7 @@
       "@/*": ["./src/*"]
     },
     "target": "ESNext",
-    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
+    "types": []
   },
   "include": [
     "*",

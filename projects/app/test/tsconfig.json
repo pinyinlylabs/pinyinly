@@ -13,7 +13,6 @@
       "node",
       // Enable expect().toHaveTextContent() and similar matchers.
       "@testing-library/jest-dom",
-      "@pinyinly/eslint-rules/nameof.d.ts",
       "../expo-env.d.ts",
       "../uniwind-env.d.ts"
     ]

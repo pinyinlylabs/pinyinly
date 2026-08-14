@@ -2,24 +2,22 @@ import { buildMeaningHintPrompt } from "#util/prompts/meaningHint.ts";
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 
-describe(
-  `buildMeaningHintPrompt` satisfies HasNameOf<typeof buildMeaningHintPrompt>,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildMeaningHintPrompt({
-        hanzi: `好`,
-        meaning: {
-          hanziWord: `好`,
-          glosses: [`good`, `well`],
-        },
-        components: [
-          { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child`, meaning: `child` },
-        ],
-        count: 4,
-      });
+describe(`buildMeaningHintPrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildMeaningHintPrompt({
+      hanzi: `好`,
+      meaning: {
+        hanziWord: `好`,
+        glosses: [`good`, `well`],
+      },
+      components: [
+        { hanzi: `女`, meaning: `woman` },
+        { hanzi: `子`, label: `child`, meaning: `child` },
+      ],
+      count: 4,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -88,6 +86,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

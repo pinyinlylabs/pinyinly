@@ -24,7 +24,7 @@ vi.mock(`@floating-ui/react-native`, () => ({
   offset: vi.fn(() => ({})),
 }));
 
-describe(`Tooltip suite` satisfies HasNameOf<typeof Tooltip>, () => {
+describe(`Tooltip suite`, () => {
   test(`renders trigger element`, () => {
     render(
       <Tooltip>

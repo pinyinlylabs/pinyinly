@@ -360,7 +360,6 @@
     //     }
     //   }
     // ],
-    // "pinyinly/nameof": "error",
     // "pinyinly/glob-template": "error"
   },
   "overrides": [
@@ -407,7 +406,7 @@
         "typescript/no-explicit-any": "off",
         "typescript/restrict-template-expressions": "off",
 
-        "react/rules-of-hooks": "off",
+        "react/rules-of-hooks": "error",
         // Backup from eslint config:
         //
         // "typescript/no-non-null-assertion": "off",

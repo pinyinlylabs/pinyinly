@@ -10,13 +10,16 @@ const resolverOverrides = {
   [`lru-cache`]: { platform: `web` },
 };
 
+/** @type {import('metro-config').MetroConfig} */
 let config =
   // In development Sentry causes a memory leak that eventually crashes expo.
   process.env.NODE_ENV === `development`
     ? /** @type {import('metro-config').MetroConfig} */ (
         /** @type {unknown} */ (getDefaultConfig(__dirname))
       )
-    : getSentryExpoConfig(__dirname);
+    : /** @type {import('metro-config').MetroConfig} */ (
+        /** @type {unknown} */ getSentryExpoConfig(__dirname)
+      );
 
 config = {
   ...config,

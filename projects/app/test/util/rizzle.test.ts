@@ -1934,13 +1934,10 @@ typeChecks<RizzleAliasedKey<never, never>>(() => {
   >;
 });
 
-test(
-  `keyPathVariableNames()` satisfies HasNameOf<typeof keyPathVariableNames>,
-  () => {
-    expect(keyPathVariableNames(`foo/[id]`)).toEqual([`id`]);
-    expect(keyPathVariableNames(`foo/[id]/[bar]`)).toEqual([`id`, `bar`]);
-  },
-);
+test(`keyPathVariableNames()`, () => {
+  expect(keyPathVariableNames(`foo/[id]`)).toEqual([`id`]);
+  expect(keyPathVariableNames(`foo/[id]/[bar]`)).toEqual([`id`, `bar`]);
+});
 
 describe(`unmarshalKey()`, () => {
   test(`round trips with key encoding`, () => {

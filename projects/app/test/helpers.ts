@@ -92,12 +92,7 @@ export function emojiToRating(emoji: string): Rating {
 }
 
 export function formatTimeOffset(timestamp: Date): string {
-  invariant(
-    vi.isFakeTimers(),
-    `formatTimeOffset requires fake timers` satisfies HasNameOf<
-      typeof formatTimeOffset
-    >,
-  );
+  invariant(vi.isFakeTimers(), `formatTimeOffset requires fake timers`);
 
   const earliestTime = new Date(0);
 

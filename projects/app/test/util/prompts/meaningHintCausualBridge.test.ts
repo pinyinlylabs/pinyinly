@@ -2,26 +2,22 @@ import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 import { buildMeaningHintCausualBridgePrompt } from "#util/prompts/meaningHintCausualBridge.js";
 
-describe(
-  `buildMeaningHintCausualBridgePrompt` satisfies HasNameOf<
-    typeof buildMeaningHintCausualBridgePrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildMeaningHintCausualBridgePrompt({
-        hanzi: `好`,
-        meaning: {
-          hanziWord: `好`,
-          glosses: [`good`],
-        },
-        components: [
-          { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child` },
-        ],
-        count: 3,
-      });
+describe(`buildMeaningHintCausualBridgePrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildMeaningHintCausualBridgePrompt({
+      hanzi: `好`,
+      meaning: {
+        hanziWord: `好`,
+        glosses: [`good`],
+      },
+      components: [
+        { hanzi: `女`, meaning: `woman` },
+        { hanzi: `子`, label: `child` },
+      ],
+      count: 3,
+    });
 
-      expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "messages": "
         =====================
@@ -105,6 +101,5 @@ describe(
           },
         }
       `);
-    });
-  },
-);
+  });
+});

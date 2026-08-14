@@ -2,17 +2,13 @@ import { buildActorModelSheetImagePrompt } from "#util/prompts/actorModelSheetIm
 import { describe, expect, test } from "vitest";
 import { fmtImagePromptForSnapshot, makeActorSpec } from "./helpers";
 
-describe(
-  `buildActorModelSheetImagePrompt` satisfies HasNameOf<
-    typeof buildActorModelSheetImagePrompt
-  >,
-  () => {
-    test(`snapshot`, () => {
-      const prompt = buildActorModelSheetImagePrompt({
-        actorSpec: makeActorSpec(`Yeti`),
-      });
+describe(`buildActorModelSheetImagePrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildActorModelSheetImagePrompt({
+      actorSpec: makeActorSpec(`Yeti`),
+    });
 
-      expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+    expect(fmtImagePromptForSnapshot(prompt)).toMatchInlineSnapshot(`
         {
           "aspectRatio": "1:1",
           "messages": "
@@ -65,6 +61,5 @@ describe(
           "thinkingLevel": "high",
         }
       `);
-    });
-  },
-);
+  });
+});

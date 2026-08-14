@@ -273,9 +273,7 @@ export function skillDependencies(
       const meaning = dictionary.lookupHanziWord(hanziWord);
       invariant(
         meaning?.pinyin != null,
-        `SkillKind.HanziWordToPinyinTyped skill requires a hanzi word with pinyin.` satisfies HasNameOf<
-          typeof SkillKind.HanziWordToPinyinTyped
-        >,
+        `SkillKind.HanziWordToPinyinTyped skill requires a hanzi word with pinyin.`,
       );
 
       // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
@@ -925,9 +923,7 @@ export function skillReviewQueue({
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
 
-  const perfMilestone = startPerformanceMilestones(
-    `skillReviewQueue` satisfies NameOf<typeof skillReviewQueue>,
-  );
+  const perfMilestone = startPerformanceMilestones(`skillReviewQueue`);
 
   function enqueueReviewOnce(
     skill: Skill,

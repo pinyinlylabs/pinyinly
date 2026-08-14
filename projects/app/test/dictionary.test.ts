@@ -571,52 +571,47 @@ test(`hanzi uses consistent unicode characters`, async () => {
   );
 });
 
-describe(
-  `loadHanziWordMigrations suite` satisfies HasNameOf<
-    typeof loadHanziWordMigrations
-  >,
-  async () => {
-    test(`no "from" keys are in the dictionary`, async () => {
-      const hanziWordRenames = await loadHanziWordMigrations();
-      const dictionary = await loadDictionary();
-      for (const [oldHanziWord] of hanziWordRenames) {
-        expect
-          .soft(
-            dictionary.lookupHanziWord(oldHanziWord),
-            `${oldHanziWord} should not be in the dictionary`,
-          )
-          .toBeNull();
-      }
-    });
-
-    test(`all "to" keys are in the dictionary`, async () => {
-      const hanziWordRenames = await loadHanziWordMigrations();
-      const dictionary = await loadDictionary();
-      for (const [, newHanziWord] of hanziWordRenames) {
-        if (newHanziWord != null) {
-          expect
-            .soft(
-              dictionary.lookupHanziWord(newHanziWord),
-              `${newHanziWord} should be in the dictionary`,
-            )
-            .not.toBeNull();
-        }
-      }
-    });
-
-    test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
-      const hanziWordRenames = await loadHanziWordMigrations();
+describe(`loadHanziWordMigrations suite`, async () => {
+  test(`no "from" keys are in the dictionary`, async () => {
+    const hanziWordRenames = await loadHanziWordMigrations();
+    const dictionary = await loadDictionary();
+    for (const [oldHanziWord] of hanziWordRenames) {
       expect
         .soft(
-          [...hanziWordRenames].filter(
-            ([, newHanziWord]) =>
-              newHanziWord != null && hanziWordRenames.has(newHanziWord),
-          ),
+          dictionary.lookupHanziWord(oldHanziWord),
+          `${oldHanziWord} should not be in the dictionary`,
         )
-        .toEqual([]);
-    });
-  },
-);
+        .toBeNull();
+    }
+  });
+
+  test(`all "to" keys are in the dictionary`, async () => {
+    const hanziWordRenames = await loadHanziWordMigrations();
+    const dictionary = await loadDictionary();
+    for (const [, newHanziWord] of hanziWordRenames) {
+      if (newHanziWord != null) {
+        expect
+          .soft(
+            dictionary.lookupHanziWord(newHanziWord),
+            `${newHanziWord} should be in the dictionary`,
+          )
+          .not.toBeNull();
+      }
+    }
+  });
+
+  test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
+    const hanziWordRenames = await loadHanziWordMigrations();
+    expect
+      .soft(
+        [...hanziWordRenames].filter(
+          ([, newHanziWord]) =>
+            newHanziWord != null && hanziWordRenames.has(newHanziWord),
+        ),
+      )
+      .toEqual([]);
+  });
+});
 
 test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<
@@ -1246,113 +1241,89 @@ async function loadKangxiRadicalToCjkRadical(): Promise<
   };
 }
 
-describe(
-  `hanziFromHanziOrHanziWord suite` satisfies HasNameOf<
-    typeof hanziFromHanziOrHanziWord
-  >,
-  async () => {
-    test(`supports hanzi word`, () => {
-      expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
+describe(`hanziFromHanziOrHanziWord suite`, async () => {
+  test(`supports hanzi word`, () => {
+    expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
+  });
+
+  test(`supports hanzi`, () => {
+    expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
+  });
+});
+
+describe(`upsertHanziWordMeaning suite`, async () => {
+  function helloDict(): DictionaryJson {
+    const dict: DictionaryJson = new Map([
+      [
+        `你好:hello`,
+        {
+          gloss: [`hello`],
+          pinyin: [拼音`ni hao`],
+          pos: PartOfSpeech.Interjection,
+        },
+      ],
+    ]);
+    return dict;
+  }
+
+  test(`can update pinyin`, async () => {
+    const dict = helloDict();
+
+    upsertHanziWordMeaning(dict, `你好:hello`, {
+      pinyin: [拼音`nǐ hǎo`],
     });
 
-    test(`supports hanzi`, () => {
-      expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
+    expect(dict.get(`你好:hello`)).toEqual({
+      gloss: [`hello`],
+      pinyin: [拼音`nǐ hǎo`],
+      pos: PartOfSpeech.Interjection,
     });
-  },
-);
+  });
+});
 
-describe(
-  `upsertHanziWordMeaning suite` satisfies HasNameOf<
-    typeof upsertHanziWordMeaning
-  >,
-  async () => {
-    function helloDict(): DictionaryJson {
-      const dict: DictionaryJson = new Map([
-        [
-          `你好:hello`,
-          {
-            gloss: [`hello`],
-            pinyin: [拼音`ni hao`],
-            pos: PartOfSpeech.Interjection,
-          },
-        ],
-      ]);
-      return dict;
-    }
+describe(`getIsStructuralHanzi suite`, () => {
+  test(`fixtures`, async () => {
+    const isStructuralHanzi = await getIsStructuralHanzi();
 
-    test(`can update pinyin`, async () => {
-      const dict = helloDict();
+    expect(isStructuralHanzi(汉字`丿`)).toBe(true);
+    expect(isStructuralHanzi(汉字`八`)).toBe(false);
+  });
+});
 
-      upsertHanziWordMeaning(dict, `你好:hello`, {
-        pinyin: [拼音`nǐ hǎo`],
-      });
+describe(`oneUnitPinyinListOrNull suite`, () => {
+  test.for([
+    [undefined, null],
+    [null, null],
+    [[], null],
+    [[`nīhǎo`], null],
+    [[拼音`nī hǎo`], null],
+    [[拼音`nī`], `nī`],
+    [[拼音`hǎo`], `hǎo`],
+  ] as [readonly PinyinText[] | null | undefined, string | null][])(
+    `%s → %s`,
+    ([input, expected]) => {
+      expect(oneUnitPinyinListOrNull(input)).toBe(expected);
+    },
+  );
+});
 
-      expect(dict.get(`你好:hello`)).toEqual({
-        gloss: [`hello`],
-        pinyin: [拼音`nǐ hǎo`],
-        pos: PartOfSpeech.Interjection,
-      });
-    });
-  },
-);
+describe(`oneUnitPinyinOrNull suite`, () => {
+  const meaning: HanziWordMeaning = {
+    gloss: [`test`],
+  };
 
-describe(
-  `getIsStructuralHanzi suite` satisfies HasNameOf<typeof getIsStructuralHanzi>,
-  () => {
-    test(`fixtures`, async () => {
-      const isStructuralHanzi = await getIsStructuralHanzi();
-
-      expect(isStructuralHanzi(汉字`丿`)).toBe(true);
-      expect(isStructuralHanzi(汉字`八`)).toBe(false);
-    });
-  },
-);
-
-describe(
-  `oneUnitPinyinListOrNull suite` satisfies HasNameOf<
-    typeof oneUnitPinyinListOrNull
-  >,
-  () => {
-    test.for([
-      [undefined, null],
-      [null, null],
-      [[], null],
-      [[`nīhǎo`], null],
-      [[拼音`nī hǎo`], null],
-      [[拼音`nī`], `nī`],
-      [[拼音`hǎo`], `hǎo`],
-    ] as [readonly PinyinText[] | null | undefined, string | null][])(
-      `%s → %s`,
-      ([input, expected]) => {
-        expect(oneUnitPinyinListOrNull(input)).toBe(expected);
-      },
-    );
-  },
-);
-
-describe(
-  `oneUnitPinyinOrNull suite` satisfies HasNameOf<typeof oneUnitPinyinOrNull>,
-  () => {
-    const meaning: HanziWordMeaning = {
-      gloss: [`test`],
-    };
-
-    test.for([
-      [meaning, null],
-      [{ ...meaning, pinyin: [] }, null],
-      [{ ...meaning, pinyin: [`nīhǎo`] }, null],
-      [{ ...meaning, pinyin: [`nī hǎo`] }, null],
-      [{ ...meaning, pinyin: [`nī hǎo`] }, null],
-      [{ ...meaning, pinyin: [`nī`] }, `nī`],
-      [{ ...meaning, pinyin: [`hǎo`] }, `hǎo`],
-    ] as [HanziWordMeaning, string | null][])(
-      `%s → %s`,
-      ([input, expected]) => {
-        expect(oneUnitPinyinOrNull(input)).toBe(expected);
-      },
-    );
-  },
-);
+  test.for([
+    [meaning, null],
+    [{ ...meaning, pinyin: [] }, null],
+    [{ ...meaning, pinyin: [`nīhǎo`] }, null],
+    [{ ...meaning, pinyin: [`nī hǎo`] }, null],
+    [{ ...meaning, pinyin: [`nī hǎo`] }, null],
+    [{ ...meaning, pinyin: [`nī`] }, `nī`],
+    [{ ...meaning, pinyin: [`hǎo`] }, `hǎo`],
+  ] as [HanziWordMeaning, string | null][])(`%s → %s`, ([input, expected]) => {
+    expect(oneUnitPinyinOrNull(input)).toBe(expected);
+  });
+});
 
 describe(`lookupPinyinUnit suite`, async () => {
   test(`returns array of HanziCharacters for a given PinyinUnit`, async () => {
@@ -1428,46 +1399,36 @@ describe(`lookupPinyinUnit suite`, async () => {
   });
 });
 
-describe(
-  `parsePartOfSpeech suite` satisfies HasNameOf<typeof parsePartOfSpeech>,
-  () => {
-    test.for([
-      [`noun,名,N`, PartOfSpeech.Noun],
-      [`verb,动,V`, PartOfSpeech.Verb],
-      [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
-      [`adverb,副,Adv`, PartOfSpeech.Adverb],
-      [`pronoun,代,Pron,Det`, PartOfSpeech.Pronoun],
-      [`numeral,数,Num`, PartOfSpeech.Numeral],
-      [`measureWord,量,M`, PartOfSpeech.MeasureWordOrClassifier],
-      [`preposition,介,Prep`, PartOfSpeech.Preposition],
-      [`conjunction,连,Conj`, PartOfSpeech.Conjunction],
-      [`particle,助,Aux,Ptc`, PartOfSpeech.AuxiliaryWordOrParticle],
-      [`interjection,叹,Int`, PartOfSpeech.Interjection],
-      [`prefix,前缀,Prefix`, PartOfSpeech.Prefix],
-      [`suffix,后缀,Suffix`, PartOfSpeech.Suffix],
-      [`phonetic,拟声,Phonetic`, PartOfSpeech.Phonetic],
-      [`radical`, undefined],
-    ] as const)(`fixture: %s → %s`, ([input, expected]) => {
-      for (const text of input.split(`,`)) {
-        expect.soft(parsePartOfSpeech(text), `parsing ${text}`).toBe(expected);
-      }
-    });
+describe(`parsePartOfSpeech suite`, () => {
+  test.for([
+    [`noun,名,N`, PartOfSpeech.Noun],
+    [`verb,动,V`, PartOfSpeech.Verb],
+    [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
+    [`adverb,副,Adv`, PartOfSpeech.Adverb],
+    [`pronoun,代,Pron,Det`, PartOfSpeech.Pronoun],
+    [`numeral,数,Num`, PartOfSpeech.Numeral],
+    [`measureWord,量,M`, PartOfSpeech.MeasureWordOrClassifier],
+    [`preposition,介,Prep`, PartOfSpeech.Preposition],
+    [`conjunction,连,Conj`, PartOfSpeech.Conjunction],
+    [`particle,助,Aux,Ptc`, PartOfSpeech.AuxiliaryWordOrParticle],
+    [`interjection,叹,Int`, PartOfSpeech.Interjection],
+    [`prefix,前缀,Prefix`, PartOfSpeech.Prefix],
+    [`suffix,后缀,Suffix`, PartOfSpeech.Suffix],
+    [`phonetic,拟声,Phonetic`, PartOfSpeech.Phonetic],
+    [`radical`, undefined],
+  ] as const)(`fixture: %s → %s`, ([input, expected]) => {
+    for (const text of input.split(`,`)) {
+      expect.soft(parsePartOfSpeech(text), `parsing ${text}`).toBe(expected);
+    }
+  });
 
-    test(
-      `rPartOfSpeech marshaled values` satisfies HasNameOf<
-        typeof rPartOfSpeech
-      >,
-      () => {
-        for (const pos of Object.values(PartOfSpeech)) {
-          const marshaled = rPartOfSpeech().marshal(pos);
-          expect(parsePartOfSpeech(marshaled), `parsing ${marshaled}`).toBe(
-            pos,
-          );
-        }
-      },
-    );
-  },
-);
+  test(`rPartOfSpeech marshaled values`, () => {
+    for (const pos of Object.values(PartOfSpeech)) {
+      const marshaled = rPartOfSpeech().marshal(pos);
+      expect(parsePartOfSpeech(marshaled), `parsing ${marshaled}`).toBe(pos);
+    }
+  });
+});
 
 describe(`shallowDecomposeHanzi()`, () => {
   test(`for multi-character hanzi, only returns each character`, async () => {
