@@ -1,4 +1,9 @@
-import { splitN, toCamelCase, unicodeShortIdentifier } from "#util/unicode.ts";
+import {
+  splitN,
+  toCamelCase,
+  toTitle,
+  unicodeShortIdentifier,
+} from "#util/unicode.ts";
 import { describe, expect, test } from "vitest";
 
 describe(`unicodeShortIdentifier suite`, () => {
@@ -35,7 +40,7 @@ describe(`splitN suite`, () => {
   });
 });
 
-describe(`toCamelCase suite`, () => {
+describe(`toCamelCase() suite`, () => {
   test.for([
     [`hello world`, `helloWorld`],
     [`Hello World`, `helloWorld`],
@@ -45,5 +50,19 @@ describe(`toCamelCase suite`, () => {
     [`mixed CASE Example`, `mixedCaseExample`],
   ] as const)(`converts "%s" to camelCase "%s"`, ([input, expected]) => {
     expect(toCamelCase(input)).toEqual(expected);
+  });
+});
+
+describe(`toTitle()`, () => {
+  test.for([
+    [`hello`, `Hello`],
+    [` hello  `, ` Hello  `],
+    [`hello world`, `Hello World`],
+    [`Hello World`, `Hello World`],
+    [`UPPER CASE`, `UPPER CASE`],
+    [`UppER CAsE`, `UppER CAsE`],
+    [`mixed CASE Example`, `Mixed CASE Example`],
+  ] as const)(`converts "%s" to camelCase "%s"`, ([input, expected]) => {
+    expect(toTitle(input)).toEqual(expected);
   });
 });

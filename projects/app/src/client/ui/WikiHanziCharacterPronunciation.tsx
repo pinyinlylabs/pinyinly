@@ -54,6 +54,7 @@ import { hanziFromHanziWord } from "@/dictionary";
 import { nanoid } from "@/util/nanoid";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import type { PronunciationMnemonicRecurringPromptAssociationStrategyKind } from "@/util/prompts/pronunciationMnemonicRecurring";
+import { toTitle } from "@/util/unicode";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -268,8 +269,8 @@ export function WikiHanziCharacterPronunciationBox({
                 <SoundLinkBlock
                   soundId={splitPinyin.initialSoundId}
                   href={`/sounds/${splitPinyin.initialSoundId}`}
-                  label={initialLabel}
-                  name={
+                  soundName={initialLabel}
+                  mnemonicName={
                     initialPinyinSoundName ?? selectedInitialActor?.name ?? null
                   }
                   imageOverride={selectedInitialActor?.image ?? null}
@@ -279,16 +280,16 @@ export function WikiHanziCharacterPronunciationBox({
                 <SoundLinkBlock
                   soundId={splitPinyin.finalSoundId}
                   href={`/sounds/${splitPinyin.finalSoundId}`}
-                  label={finalLabel}
-                  name={finalLocationName}
+                  soundName={finalLabel}
+                  mnemonicName={finalLocationName}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
                   soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
-                  label={<ToneLabelText tone={splitPinyin.tone} />}
-                  name={tonePinyinSoundName ?? null}
+                  soundName={<ToneLabelText tone={splitPinyin.tone} />}
+                  mnemonicName={tonePinyinSoundName ?? null}
                 />
               </View>
             </View>
@@ -537,14 +538,14 @@ function MergedHintDisplay({
 export function SoundLinkBlock({
   soundId,
   href,
-  label,
-  name,
+  soundName,
+  mnemonicName,
   imageOverride,
 }: {
   soundId: PinyinSoundId;
   href: Href;
-  label: ReactNode;
-  name: string | null;
+  soundName: ReactNode;
+  mnemonicName: string | null;
   imageOverride?: {
     assetId: AssetId;
     crop: ReturnType<typeof parseImageCrop>;
@@ -573,16 +574,16 @@ export function SoundLinkBlock({
 
   const nameLink = (
     <Link href={href} className={soundNameClass()}>
-      {name}
+      {mnemonicName == null ? null : toTitle(mnemonicName)}
     </Link>
   );
 
   return (
     <View className="w-full items-center gap-1">
       <Link href={href} className={soundNameClass({ className: `text-fg/50` })}>
-        {label}
+        {soundName}
       </Link>
-      {name == null ? null : (
+      {mnemonicName == null ? null : (
         <>
           <DownArrow />
           {!isPointerHoverCapable || resolvedImage == null ? (

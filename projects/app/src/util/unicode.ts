@@ -161,3 +161,7 @@ export function toCamelCase(text: string) {
     )
     .join(``);
 }
+
+export function toTitle(text: string) {
+  return text.replaceAll(/(?:^| )\p{L}/gu, (match) => match.toUpperCase());
+}
