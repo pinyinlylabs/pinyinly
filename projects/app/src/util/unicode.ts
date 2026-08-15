@@ -60,10 +60,6 @@ export function isHanziIdeograph(char: string): boolean {
   );
 }
 
-export function isNotCjkUnifiedIdeograph(char: string): boolean {
-  return !isCjkUnifiedIdeograph(char);
-}
-
 const segmenter = new Intl.Segmenter(`en`, { granularity: `grapheme` });
 
 /**
