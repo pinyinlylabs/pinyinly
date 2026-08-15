@@ -2,14 +2,6 @@
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "import", "eslint", "unicorn", "react"],
   "jsPlugins": [
-    // {
-    //   "name": "react-compiler-js",
-    //   "specifier": "eslint-plugin-react-compiler"
-    // },
-    // {
-    //   "name": "react-hooks-js",
-    //   "specifier": "eslint-plugin-react-hooks"
-    // },
     {
       "name": "import-js",
       "specifier": "eslint-plugin-import"

@@ -65,7 +65,7 @@ export function WikiHanziCharacterMeaningBox({
       return q
         .from({ decomposition: db.characterDecompositionsCollection })
         .where(({ decomposition }) => eq(decomposition.hanzi, hanzi))
-        .join({ mnemonic: mnemonicQuery }, ({ decomposition, mnemonic }) =>
+        .innerJoin({ mnemonic: mnemonicQuery }, ({ decomposition, mnemonic }) =>
           eq(decomposition.ids, mnemonic.ids),
         )
         .select(({ decomposition }) => decomposition)
