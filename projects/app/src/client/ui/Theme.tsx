@@ -7,7 +7,7 @@ type LightModeStripped<T> = T extends `light-${infer U}`
   ? U
   : T extends `dark-${infer U}`
     ? U
-    : T;
+    : never;
 
 export type PylyThemeName = ThemeName | LightModeStripped<ThemeName>;
 
