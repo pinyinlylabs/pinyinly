@@ -43,7 +43,7 @@ function Breadcrumbs({ children }: BreadcrumbsProps) {
         index === 0
           ? [item]
           : [
-              <Text key={`sep-${index}`} className="text-fg-dim">
+              <Text key={`sep-${index}`} className="text-muted-fg">
                 /
               </Text>,
               item,

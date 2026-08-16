@@ -18,7 +18,7 @@ export default () => {
     <View className="gap-6">
       <View className="max-w-screen-sm gap-2">
         <Text className="pyly-body-subheading">AssetImage</Text>
-        <Text className="pyly-body text-fg-dim">
+        <Text className="pyly-body text-muted-fg">
           Loading examples below intentionally use an unresolved asset ID so the
           shimmer remains visible. This makes it easier to compare the
           placeholder against the loaded image in the same layout.
@@ -156,7 +156,7 @@ export default () => {
 
       <View className="max-w-180 gap-2 rounded-lg border border-fg/10 bg-fg-bg5 p-3">
         <Text className="pyly-body-subheading">What this demo is testing</Text>
-        <Text className="pyly-body text-fg-dim">
+        <Text className="pyly-body text-muted-fg">
           AssetImage now forwards its sizing props to the loading placeholder,
           so the shimmer respects the same className-based dimensions as the
           final image. This fixes the old collapse behavior for explicitly sized

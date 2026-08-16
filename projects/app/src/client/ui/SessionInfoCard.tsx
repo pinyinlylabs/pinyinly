@@ -75,7 +75,7 @@ function SessionInfoCardInner({
           <Text className="font-sans text-base font-semibold text-fg">
             {displayName}
           </Text>
-          <Text className="font-sans text-sm text-fg-dim">
+          <Text className="font-sans text-sm text-muted-fg">
             {authMethodBadge}
           </Text>
         </View>
@@ -91,7 +91,7 @@ function SessionInfoCardInner({
       {/* Details */}
       {showDetails === true && (
         <View className="gap-1">
-          <Text className="font-sans text-sm text-fg-dim">
+          <Text className="font-sans text-sm text-muted-fg">
             {skillCount}
             {` `}
             {typeof skillCount === `number` && skillCount === 1
@@ -99,7 +99,7 @@ function SessionInfoCardInner({
               : `skills`}
           </Text>
           {session.lastActive && (
-            <Text className="font-sans text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-muted-fg">
               Last active: {new Date(session.lastActive).toLocaleDateString()}
             </Text>
           )}

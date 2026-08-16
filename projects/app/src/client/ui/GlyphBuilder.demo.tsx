@@ -553,7 +553,7 @@ function PositionNumberInput({
         `}
       />
       {suffix == null ? null : (
-        <Text className="pyly-body-caption text-fg-dim">{suffix}</Text>
+        <Text className="pyly-body-caption text-muted-fg">{suffix}</Text>
       )}
     </View>
   );
@@ -1908,23 +1908,25 @@ export default function GlyphBuilderDemo() {
             Inspector
           </Text>
           {selectedLayers.length === 0 ? (
-            <Text className="pyly-body-caption text-fg-dim">
+            <Text className="pyly-body-caption text-muted-fg">
               Select one or more layers to edit them.
             </Text>
           ) : (
             <View className="gap-3">
-              <Text className="pyly-body-caption text-fg-dim">
+              <Text className="pyly-body-caption text-muted-fg">
                 Selected: {selectedLayers.length} layer(s)
               </Text>
-              <Text className="pyly-body-caption text-fg-dim">
+              <Text className="pyly-body-caption text-muted-fg">
                 Drag on preview to move selected layers.
               </Text>
 
               <View className="gap-2 rounded-lg border border-fg/15 bg-bg p-2">
-                <Text className="pyly-body-caption text-fg-dim">Position</Text>
+                <Text className="pyly-body-caption text-muted-fg">
+                  Position
+                </Text>
                 <View className="flex-row gap-2">
                   <View className="gap-1">
-                    <Text className="pyly-body-caption text-fg-dim">x</Text>
+                    <Text className="pyly-body-caption text-muted-fg">x</Text>
                     <PositionNumberInput
                       value={positionDrafts.tx}
                       onChangeText={(text) => {
@@ -1944,7 +1946,7 @@ export default function GlyphBuilderDemo() {
                   </View>
 
                   <View className="gap-1">
-                    <Text className="pyly-body-caption text-fg-dim">y</Text>
+                    <Text className="pyly-body-caption text-muted-fg">y</Text>
                     <PositionNumberInput
                       value={positionDrafts.ty}
                       onChangeText={(text) => {
@@ -1967,7 +1969,7 @@ export default function GlyphBuilderDemo() {
                 <View className="flex-row items-end justify-between gap-2">
                   <View className="flex-row gap-2">
                     <View className="gap-1">
-                      <Text className="pyly-body-caption text-fg-dim">
+                      <Text className="pyly-body-caption text-muted-fg">
                         hScale
                       </Text>
                       <PositionNumberInput
@@ -1990,7 +1992,7 @@ export default function GlyphBuilderDemo() {
                     </View>
 
                     <View className="gap-1">
-                      <Text className="pyly-body-caption text-fg-dim">
+                      <Text className="pyly-body-caption text-muted-fg">
                         vScale
                       </Text>
                       <PositionNumberInput
@@ -2014,7 +2016,9 @@ export default function GlyphBuilderDemo() {
                   </View>
 
                   <View className="items-center gap-1">
-                    <Text className="pyly-body-caption text-fg-dim">Lock</Text>
+                    <Text className="pyly-body-caption text-muted-fg">
+                      Lock
+                    </Text>
                     <ToggleButton
                       isActive={isPositionAspectRatioLocked}
                       onPress={() => {
@@ -2026,12 +2030,12 @@ export default function GlyphBuilderDemo() {
               </View>
 
               <View className="gap-2 rounded-lg border border-fg/15 bg-bg p-2">
-                <Text className="pyly-body-caption text-fg-dim">
+                <Text className="pyly-body-caption text-muted-fg">
                   Rotate / Mirror
                 </Text>
                 <View className="flex-row flex-wrap items-end gap-2">
                   <View className="gap-1">
-                    <Text className="pyly-body-caption text-fg-dim">
+                    <Text className="pyly-body-caption text-muted-fg">
                       Rotate
                     </Text>
                     <PositionNumberInput
@@ -2076,7 +2080,7 @@ export default function GlyphBuilderDemo() {
               {selectedLayers.length === 1 ? (
                 <View className="gap-2 rounded-lg border border-fg/15 bg-bg p-2">
                   {decompositionOptions.length > 0 ? (
-                    <Text className="pyly-body-caption text-fg-dim">
+                    <Text className="pyly-body-caption text-muted-fg">
                       Decompose into:
                     </Text>
                   ) : null}

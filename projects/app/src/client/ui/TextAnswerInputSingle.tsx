@@ -6,10 +6,11 @@ import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { tv } from "tailwind-variants";
 import { withIncorrectWobbleAnimation } from "./animations";
 import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
 import { TextInputSingle } from "./TextInputSingle";
+import { Theme } from "./Theme";
+import { tv } from "tailwind-variants";
 
 export type TextAnswerInputSingleProps = {
   autoFocus?: boolean;
@@ -84,32 +85,34 @@ export const TextAnswerInputSingle = ({
   };
 
   return (
-    <Reanimated.View style={animatedStyle} className={wrapperClass({ state })}>
-      <View className="items-center gap-2">
-        <TextInputSingle
-          autoFocus={autoFocus}
-          autoCapitalize="none"
-          autoCorrect={autoCorrect}
-          className={inputClass({ styled: state !== `default` })}
-          disabled={disabled}
-          editable={editable}
-          onChangeText={handleChangeText}
-          onKeyPress={(e) => {
-            if (e.nativeEvent.key === `Enter`) {
-              e.preventDefault();
-              onSubmit();
-            }
-          }}
-          placeholder={state === `default` ? placeholder : undefined}
-          textAlign="center"
-          ref={inputRef}
-          value={text}
-        />
-        {hintText == null ? null : (
-          <Text className="pyly-body-caption">{hintText}</Text>
-        )}
-      </View>
-    </Reanimated.View>
+    <Theme theme={themeForState[state]}>
+      <Reanimated.View style={animatedStyle}>
+        <View className="items-center gap-2">
+          <TextInputSingle
+            autoFocus={autoFocus}
+            autoCapitalize="none"
+            autoCorrect={autoCorrect}
+            className={inputClass({ styled: state !== `default` })}
+            disabled={disabled}
+            editable={editable}
+            onChangeText={handleChangeText}
+            onKeyPress={(e) => {
+              if (e.nativeEvent.key === `Enter`) {
+                e.preventDefault();
+                onSubmit();
+              }
+            }}
+            placeholder={state === `default` ? placeholder : undefined}
+            textAlign="center"
+            ref={inputRef}
+            value={text}
+          />
+          {hintText == null ? null : (
+            <Text className="pyly-body-caption">{hintText}</Text>
+          )}
+        </View>
+      </Reanimated.View>
+    </Theme>
   );
 };
 
@@ -122,14 +125,9 @@ const inputClass = tv({
   },
 });
 
-const wrapperClass = tv({
-  base: ``,
-  variants: {
-    state: {
-      default: ``,
-      success: `theme-success-panel`,
-      error: `theme-danger-panel`,
-      warning: `theme-warning-panel`,
-    },
-  },
-});
+const themeForState = {
+  default: undefined,
+  success: `success-panel`,
+  error: `danger-panel`,
+  warning: `warning-panel`,
+} as const;

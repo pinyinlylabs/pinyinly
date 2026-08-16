@@ -183,7 +183,7 @@ const footerLinkTitle = tv({
 
 const footerLinkClass = tv({
   base: `
-    www-text-footer-link my-0.5 inline-block py-0.5 text-fg-dim no-underline
+    www-text-footer-link my-0.5 inline-block py-0.5 text-muted-fg no-underline
 
     hover:text-cyanold
 

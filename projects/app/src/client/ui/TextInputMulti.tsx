@@ -92,10 +92,10 @@ export function TextInputMulti({
 }
 
 const inputPlaceholderTextColorClass = tv({
-  base: `accent-fg-dim`,
+  base: `accent-muted-fg`,
   variants: {
     variant: {
-      bare: `accent-fg-dim`,
+      bare: `accent-muted-fg`,
       flat: `accent-fg-bg30`,
     },
   },

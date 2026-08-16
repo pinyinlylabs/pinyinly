@@ -81,7 +81,7 @@ export function ToneSoundTile({
         </Text>
       ) : (
         <Text
-          className="overflow-visible leading-none text-fg-dim"
+          className="overflow-visible leading-none text-muted-fg"
           numberOfLines={1}
         >
           {name}

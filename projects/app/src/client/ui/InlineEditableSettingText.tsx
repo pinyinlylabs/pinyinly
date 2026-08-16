@@ -295,7 +295,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   className={
                     isTooLong
                       ? `font-sans text-[12px] text-fg`
-                      : `font-sans text-[12px] text-fg-dim`
+                      : `font-sans text-[12px] text-muted-fg`
                   }
                   style={
                     isTooLong ? { color: `var(--color-warning)` } : undefined
@@ -309,7 +309,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   className={
                     isAtLimit
                       ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
-                      : `text-right text-[11px] text-fg-dim`
+                      : `text-right text-[11px] text-muted-fg`
                   }
                 >
                   {currentLength}/{maxLength}
@@ -339,7 +339,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   variant="bare"
                   iconStart="time-circled"
                   iconSize={16}
-                  className={`text-fg-dim`}
+                  className={`text-muted-fg`}
                 />
               </FloatingMenuModal>
             </View>
@@ -491,7 +491,7 @@ function InlineEditableSettingHistoryMenu({
             `}
           >
             <Text className="font-sans text-[14px] text-fg">{entry.value}</Text>
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               {formatRelativeTime(entry.createdAt)}
             </Text>
           </View>

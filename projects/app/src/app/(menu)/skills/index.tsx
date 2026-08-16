@@ -16,7 +16,7 @@ export default function SkillsPage() {
       </View>
 
       <View className="gap-2">
-        <Text className="pyly-body-caption text-fg-dim">HSK</Text>
+        <Text className="pyly-body-caption text-muted-fg">HSK</Text>
         {([1, 2, 3, 4] as const).map((level) => (
           <Link href={`/skills/hsk/${level}`} asChild key={level}>
             <Pressable
@@ -30,7 +30,7 @@ export default function SkillsPage() {
               <View className="flex-row items-center gap-3">
                 <Text className="pyly-body-title text-fg-loud">{`HSK ${level}`}</Text>
               </View>
-              <Text className="pyly-body-caption text-fg-dim">Open</Text>
+              <Text className="pyly-body-caption text-muted-fg">Open</Text>
             </Pressable>
           </Link>
         ))}

@@ -274,7 +274,7 @@ export default function SoundsPage() {
                 placeholder="Group name"
                 textClassName="font-sans text-lg font-bold"
               />
-              <Text className="font-sans text-fg-dim">({sounds.length})</Text>
+              <Text className="font-sans text-muted-fg">({sounds.length})</Text>
               <InlineEditableSettingText
                 setting={pinyinSoundGroupThemeTextSetting}
                 settingKey={{ soundGroupId: id }}

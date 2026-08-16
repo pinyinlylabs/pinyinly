@@ -272,7 +272,7 @@ function CoverImageSection({
           maxLength={120}
         />
       ) : hasCaption ? (
-        <Text className="px-10 text-left pyly-body-caption text-fg-dim">
+        <Text className="px-10 text-left pyly-body-caption text-muted-fg">
           {captionText}
         </Text>
       ) : null}
@@ -415,14 +415,14 @@ function MeaningItem({
       <View className="flex-row items-center gap-2">
         <Text className="font-sans text-xl/normal font-medium text-fg-loud">
           <Text className="pyly-bold">{primaryGloss}</Text>
-            <Text className="text-fg-dim">⤵</Text>
+            <Text className="text-muted-fg">⤵</Text>
         </Text>
       </View>
       {isEditMode || hasHint ? (
         <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
           {isEditMode ? (
             <View className="flex-row items-center justify-between">
-              <Text className="font-sans text-[13px] text-fg-dim">
+              <Text className="font-sans text-[13px] text-muted-fg">
                 Want help brainstorming a hint?
               </Text>
               <RectButton
@@ -478,7 +478,7 @@ function MeaningItem({
         </View>
       ) : null}
       {hasHint ? null : (
-        <Text className="pl-7 pyly-body-caption text-fg-dim">
+        <Text className="pl-7 pyly-body-caption text-muted-fg">
           Add a hint to make this meaning easier to recognize.
         </Text>
       )}
@@ -512,7 +512,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
         <View className="gap-0 pt-4">
           <View className="min-w-0 flex-row gap-3">
             <View className="w-3 items-center pt-2">
-              <View className="size-1.5 rounded-full bg-fg-dim" />
+              <View className="size-1.5 rounded-full bg-muted-fg" />
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-1">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
@@ -530,13 +530,13 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
             }}
           >
             <View className="w-3 items-center">
-              <View className="h-5 w-px bg-fg-dim/35" />
-              <Text className="-mt-0.5 pyly-body-caption text-fg-dim/70">
+              <View className="h-5 w-px bg-muted-fg/35" />
+              <Text className="-mt-0.5 pyly-body-caption text-muted-fg/70">
                 {`↓`}
               </Text>
             </View>
             <View className="min-w-0 flex-1 justify-center">
-              <Text className="text-left pyly-body-caption text-fg-dim/70">
+              <Text className="text-left pyly-body-caption text-muted-fg/70">
                 {`Show ${hiddenStepCount} hidden steps`}
               </Text>
             </View>
@@ -544,7 +544,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
 
           <View className="min-w-0 flex-row gap-3">
             <View className="w-3 items-center pt-2">
-              <View className="size-1.5 rounded-full bg-fg-dim" />
+              <View className="size-1.5 rounded-full bg-muted-fg" />
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-2">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
@@ -581,14 +581,14 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                   <View
                     className={
                       isIntermediateStep
-                        ? `size-1.5 rounded-full bg-fg-dim/70`
-                        : `size-1.5 rounded-full bg-fg-dim`
+                        ? `size-1.5 rounded-full bg-muted-fg/70`
+                        : `size-1.5 rounded-full bg-muted-fg`
                     }
                   />
                   {isLastStep ? null : (
                     <>
-                      <View className="mt-1 w-px flex-1 bg-fg-dim/35" />
-                      <Text className="-mt-1 pyly-body-caption text-fg-dim/70">
+                      <View className="mt-1 w-px flex-1 bg-muted-fg/35" />
+                      <Text className="-mt-1 pyly-body-caption text-muted-fg/70">
                         {`↓`}
                       </Text>
                     </>
@@ -600,7 +600,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                     <Text
                       className={
                         isIntermediateStep
-                          ? `pyly-body text-left text-fg-dim`
+                          ? `pyly-body text-left text-muted-fg`
                           : `pyly-body text-left`
                       }
                     >
@@ -608,7 +608,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                     </Text>
                   </View>
                   {linkReason == null || !isPathExpanded ? null : (
-                    <Text className="text-left pyly-body-caption text-fg-dim">
+                    <Text className="text-left pyly-body-caption text-muted-fg">
                       {linkReason}
                     </Text>
                   )}
@@ -653,7 +653,7 @@ function MergedHintDisplay({ value }: { value: string }) {
         <Pylymark source={parsed.hint} />
       </Text>
       {parsed.description == null ? null : (
-        <Text className="font-normal text-fg-dim">
+        <Text className="font-normal text-muted-fg">
           {` `}
           <Pylymark source={parsed.description} />
         </Text>

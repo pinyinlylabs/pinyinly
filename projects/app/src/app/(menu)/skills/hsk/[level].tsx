@@ -218,7 +218,7 @@ function HskSkillWordRows({
               icon="chevron-right"
               size={12}
               className="ml-2"
-              tintColorClassName="accent-fg-dim"
+              tintColorClassName="accent-muted-fg"
             />
           </Pressable>
         </Link>

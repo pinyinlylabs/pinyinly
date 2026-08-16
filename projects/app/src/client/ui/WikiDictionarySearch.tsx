@@ -36,7 +36,7 @@ export function WikiDictionarySearch() {
           icon="search"
           size={16}
           className="absolute top-1/2 left-4 -translate-y-1/2"
-          tintColorClassName="accent-fg-dim"
+          tintColorClassName="accent-muted-fg"
         />
         <TextInputSingle
           placeholder="Search by hanzi, pinyin, or English"
@@ -49,7 +49,9 @@ export function WikiDictionarySearch() {
 
       {hasQuery ? (
         displayResults.length === 0 ? (
-          <Text className="pyly-body-caption text-fg-dim">No matches yet.</Text>
+          <Text className="pyly-body-caption text-muted-fg">
+            No matches yet.
+          </Text>
         ) : (
           <View className="gap-2">
             {displayResults.map((result) => (
@@ -66,7 +68,7 @@ export function WikiDictionarySearch() {
           </View>
         )
       ) : (
-        <Text className="pyly-body-caption text-fg-dim">
+        <Text className="pyly-body-caption text-muted-fg">
           Try a character, word, or meaning to jump into the wiki.
         </Text>
       )}
@@ -111,7 +113,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
               variant="bare"
               iconStart={isPriority ? `bookmark-filled` : `bookmark`}
               iconSize={20}
-              className="text-fg-dim"
+              className="text-muted-fg"
               onPress={(event) => {
                 event.stopPropagation();
                 event.preventDefault();
@@ -148,7 +150,7 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
         </Text>
       )}
       {dictionaryEntry?.pinyin?.[0] == null ? null : (
-        <Text className="font-sans text-xs text-fg-dim">
+        <Text className="font-sans text-xs text-muted-fg">
           {dictionaryEntry.pinyin[0]}
         </Text>
       )}

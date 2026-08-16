@@ -96,7 +96,7 @@ export function InlineEditableSettingJson<T extends UserSettingJsonEntity>({
 
       return (
         <View className={className}>
-          <Text className="pyly-body-caption text-fg-dim">
+          <Text className="pyly-body-caption text-muted-fg">
             {emptyStateText}
           </Text>
         </View>

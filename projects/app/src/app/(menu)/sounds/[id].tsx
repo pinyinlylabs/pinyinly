@@ -201,7 +201,7 @@ export default function SoundIdPage() {
 
       {examplePinyins.length === 0 ? null : (
         <View className="my-5 flex-row items-center gap-4">
-          <Text className="pyly-body text-fg-dim">
+          <Text className="pyly-body text-muted-fg">
             Example pinyin: {examplePinyins.join(`, `)}
           </Text>
         </View>
@@ -372,7 +372,7 @@ function MnemonicStoryRoleSection({
     >
       <View className="gap-4 p-4">
         {!isEditMode && !hasMnemonicContent ? (
-          <Text className="pyly-body text-fg-dim">
+          <Text className="pyly-body text-muted-fg">
             {isFinalSound
               ? `No location selected yet.`
               : `No actor selected yet.`}
@@ -380,14 +380,14 @@ function MnemonicStoryRoleSection({
         ) : isFinalSound ? (
           <>
             {selectedLocation == null ? (
-              <Text className="pyly-body text-fg-dim">
+              <Text className="pyly-body text-muted-fg">
                 No location selected yet.
               </Text>
             ) : (
               <>
                 {selectedLocation.description == null ||
                 selectedLocation.description.trim().length === 0 ? null : (
-                  <Text className="pyly-body text-fg-dim">
+                  <Text className="pyly-body text-muted-fg">
                     {selectedLocation.description}
                   </Text>
                 )}
@@ -439,7 +439,7 @@ function MnemonicStoryRoleSection({
 
                 {isSelectActorOpen ? (
                   placeDirectory.locations.length === 0 ? (
-                    <Text className="pyly-body-caption text-fg-dim">
+                    <Text className="pyly-body-caption text-muted-fg">
                       No places in your directory yet. Create one in Places
                       first.
                     </Text>
@@ -491,7 +491,7 @@ function MnemonicStoryRoleSection({
                                   return (
                                     <Text
                                       key={`${location.locationId}-${index}`}
-                                      className={`pyly-body-caption text-fg-dim`}
+                                      className={`pyly-body-caption text-muted-fg`}
                                     >
                                       {intersperse(
                                         preview.chain.map((step, i) => (
@@ -510,7 +510,7 @@ function MnemonicStoryRoleSection({
                                         <Text> → </Text>,
                                       )}
                                       {` `}
-                                      <Text className="text-fg-dim/50">
+                                      <Text className="text-muted-fg/50">
                                         ({preview.score}%)
                                       </Text>
                                     </Text>
@@ -526,7 +526,7 @@ function MnemonicStoryRoleSection({
                         <View className="mt-3 gap-2 border-t border-fg/10 pt-3">
                           <Text
                             className="
-                              pyly-body-caption font-semibold tracking-wide text-fg-dim uppercase
+                              pyly-body-caption font-semibold tracking-wide text-muted-fg uppercase
                             "
                           >
                             Unavailable
@@ -555,7 +555,7 @@ function MnemonicStoryRoleSection({
                                 <Text className="pyly-body text-fg">
                                   {locationName}
                                 </Text>
-                                <Text className="pyly-body-caption text-fg-dim">
+                                <Text className="pyly-body-caption text-muted-fg">
                                   In use by: {usedByOtherSoundIds.join(`, `)}
                                 </Text>
                               </View>
@@ -572,7 +572,7 @@ function MnemonicStoryRoleSection({
         ) : (
           <>
             {selectedActor == null ? (
-              <Text className="pyly-body text-fg-dim">
+              <Text className="pyly-body text-muted-fg">
                 No actor selected yet.
               </Text>
             ) : (
@@ -599,7 +599,7 @@ function MnemonicStoryRoleSection({
 
                 {selectedActor.description == null ||
                 selectedActor.description.trim().length === 0 ? null : (
-                  <Text className="pyly-body text-fg-dim">
+                  <Text className="pyly-body text-muted-fg">
                     {selectedActor.description}
                   </Text>
                 )}
@@ -623,7 +623,7 @@ function MnemonicStoryRoleSection({
 
                 {isSelectActorOpen ? (
                   actorDirectory.actors.length === 0 ? (
-                    <Text className="pyly-body-caption text-fg-dim">
+                    <Text className="pyly-body-caption text-muted-fg">
                       No actors in your directory yet. Create one in Actors
                       first.
                     </Text>
@@ -794,7 +794,7 @@ function ToneSetKeySection({
   return (
     <WikiTitledBox title="Tone location set key">
       <View className="gap-3 p-4">
-        <Text className="pyly-body text-fg-dim">
+        <Text className="pyly-body text-muted-fg">
           Tone {soundId} uses the{` `}
           <Text className="pyly-bold">
             {getLocationSetName(selectedSetKey)}
@@ -825,7 +825,7 @@ function ToneSetKeySection({
             Reset to default
           </RectButton>
         ) : (
-          <Text className="pyly-body-caption text-fg-dim">
+          <Text className="pyly-body-caption text-muted-fg">
             Using default mapping.
           </Text>
         )}

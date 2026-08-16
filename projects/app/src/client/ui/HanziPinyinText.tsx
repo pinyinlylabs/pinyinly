@@ -70,7 +70,7 @@ const hanziTextClass = tv({
 });
 
 const pinyinTextClass = tv({
-  base: `font-sans text-fg-dim`,
+  base: `font-sans text-muted-fg`,
   variants: {
     isSingleCharacter: {
       false: `text-sm`,

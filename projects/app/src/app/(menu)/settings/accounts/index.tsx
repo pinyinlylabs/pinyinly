@@ -35,7 +35,7 @@ export default function AccountsSettingsPage() {
       <View>
         <Text className="pyly-body-title">Accounts</Text>
         <HeaderTitleProvider.ScrollTrigger title="Accounts" />
-        <Text className="font-sans text-sm text-fg-dim">
+        <Text className="font-sans text-sm text-muted-fg">
           Switch between accounts or add a new one
         </Text>
       </View>

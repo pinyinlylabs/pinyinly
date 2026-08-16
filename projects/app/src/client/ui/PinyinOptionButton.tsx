@@ -49,7 +49,9 @@ export function PinyinOptionButton({
         {pinyin}
       </Text>
       {` `}
-      <Text className="font-sans text-sm/snug text-fg-dim">{shortcutKey}</Text>
+      <Text className="font-sans text-sm/snug text-muted-fg">
+        {shortcutKey}
+      </Text>
     </RectButton>
   );
 }

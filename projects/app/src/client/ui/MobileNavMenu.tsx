@@ -83,7 +83,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
       </View>
       <View className="px-4 py-2">
         <View className="flex-row items-center gap-2 rounded-xl bg-bg-high px-3 py-2">
-          <Icon icon="search" size={16} tintColorClassName="accent-fg-dim" />
+          <Icon icon="search" size={16} tintColorClassName="accent-muted-fg" />
           <TextInputSingle
             placeholder="Search…"
             value={query}
@@ -216,7 +216,7 @@ function MobileNavSubtleItem({
       <Pressable onPress={onNavigate}>
         <Text
           className={`
-            font-sans text-sm/[32px] font-bold text-fg-dim uppercase
+            font-sans text-sm/[32px] font-bold text-muted-fg uppercase
 
             hover:text-fg
           `}

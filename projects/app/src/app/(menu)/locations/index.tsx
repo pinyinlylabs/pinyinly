@@ -22,7 +22,7 @@ export default function LocationsPage() {
       <View className="gap-2">
         <Text className="pyly-body-title">Locations</Text>
         <HeaderTitleProvider.ScrollTrigger title="Locations" />
-        <Text className="font-sans text-sm text-fg-dim">
+        <Text className="font-sans text-sm text-muted-fg">
           Reusable location records for pinyin final tone scenes.
         </Text>
       </View>
@@ -38,14 +38,14 @@ export default function LocationsPage() {
           New location
         </RectButton>
         {isLoading ? (
-          <Text className="self-center font-sans text-sm text-fg-dim">
+          <Text className="self-center font-sans text-sm text-muted-fg">
             Loading...
           </Text>
         ) : null}
       </View>
 
       {lastCreatedLocationId == null ? null : (
-        <Text className="font-sans text-xs text-fg-dim/70">
+        <Text className="font-sans text-xs text-muted-fg/70">
           Created location {lastCreatedLocationId}
         </Text>
       )}
@@ -53,7 +53,7 @@ export default function LocationsPage() {
       <View className="gap-3">
         {locations.length === 0 ? (
           <View className="rounded-lg border border-fg/10 bg-bg-high p-4">
-            <Text className="font-sans text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-muted-fg">
               No locations yet. Create one to start building the directory.
             </Text>
           </View>

@@ -66,7 +66,7 @@ export function MenuDictionarySearch() {
         <Icon
           icon="search"
           size={16}
-          tintColorClassName="accent-fg-dim"
+          tintColorClassName="accent-muted-fg"
           className="absolute top-1/2 left-3 -translate-y-1/2"
         />
         <TextInputSingle
@@ -89,7 +89,7 @@ export function MenuDictionarySearch() {
           >
             {displayResults.length === 0 ? (
               <View className="px-3 py-2">
-                <Text className="font-sans text-sm text-fg-dim">
+                <Text className="font-sans text-sm text-muted-fg">
                   No matches
                 </Text>
               </View>
@@ -155,7 +155,7 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
         </Text>
       )}
       {dictionaryEntry?.pinyin?.[0] == null ? null : (
-        <Text className="font-sans text-xs text-fg-dim">
+        <Text className="font-sans text-xs text-muted-fg">
           {dictionaryEntry.pinyin[0]}
         </Text>
       )}

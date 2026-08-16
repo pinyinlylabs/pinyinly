@@ -42,12 +42,12 @@ const textVariants = tv({
         sm:mt-6 sm:pl-6
       `,
       code: cn(
-        `bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold`,
+        `relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold`,
       ),
-      lead: `text-muted-foreground text-xl`,
+      lead: `text-xl text-muted-fg`,
       large: `text-lg font-semibold`,
       small: `text-sm leading-none font-medium`,
-      muted: `text-muted-foreground text-sm`,
+      muted: `text-sm text-muted-fg`,
     },
   },
   defaultVariants: {

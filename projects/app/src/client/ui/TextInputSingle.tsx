@@ -70,7 +70,7 @@ export function TextInputSingle({
 const inputPlaceholderTextColorClass = tv({
   variants: {
     variant: {
-      bare: `accent-fg-dim`,
+      bare: `accent-muted-fg`,
       flat: `accent-fg-bg30`,
     },
   },

@@ -22,13 +22,15 @@ export function QuickSearchButton({
         className={pressableClass({ className })}
       >
         <View className="flex-row items-center gap-2">
-          <Icon icon="search" size={16} tintColorClassName="accent-fg-dim" />
-          <Text className="font-sans text-base font-medium text-fg-dim">
+          <Icon icon="search" size={16} tintColorClassName="accent-muted-fg" />
+          <Text className="font-sans text-base font-medium text-muted-fg">
             Search…
           </Text>
         </View>
 
-        <Text className="font-sans text-sm font-semibold text-fg-dim">⌘ K</Text>
+        <Text className="font-sans text-sm font-semibold text-muted-fg">
+          ⌘ K
+        </Text>
       </Pressable>
       {isModalOpen ? (
         <QuickSearchModal

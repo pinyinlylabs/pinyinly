@@ -192,7 +192,7 @@ function HanziWordResultContent({ hanziWord }: { hanziWord: HanziWord }) {
         )}
       </View>
       {pinyin == null ? null : (
-        <Text className="font-sans text-xs text-fg-dim">{pinyin}</Text>
+        <Text className="font-sans text-xs text-muted-fg">{pinyin}</Text>
       )}
     </View>
   );
@@ -211,7 +211,7 @@ function RecentQueries({
   if (items.length === 0) {
     return (
       <View className="items-center px-4 py-16">
-        <Text className="font-sans text-lg text-fg-dim">
+        <Text className="font-sans text-lg text-muted-fg">
           No recent searches
         </Text>
       </View>
@@ -373,7 +373,7 @@ function ResultItem<T>({
           variant="bare"
           iconStart="close"
           iconSize={24}
-          className="text-fg-dim"
+          className="text-muted-fg"
           onPress={(event) => {
             event.stopPropagation();
             event.preventDefault();
@@ -394,7 +394,7 @@ function NoResults({
 }) {
   return (
     <View className="items-center px-4 pt-10 pb-8">
-      <Text className="mb-10 font-sans text-lg font-medium text-fg-dim">
+      <Text className="mb-10 font-sans text-lg font-medium text-muted-fg">
         No results for &quot;<Text className={`text-fg`}>{query}</Text>&quot;
       </Text>
 

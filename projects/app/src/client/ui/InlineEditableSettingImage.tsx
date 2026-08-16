@@ -443,7 +443,7 @@ function InlineEditableSettingImageHistoryMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <View className="max-w-105 gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] text-fg-dim uppercase">
+      <Text className="font-sans text-[11px] text-muted-fg uppercase">
         History
       </Text>
       <InlineEditableSettingImageHistoryGrid
@@ -546,7 +546,9 @@ function HintImagePreview({
         `}
         style={aspectRatio == null ? { height } : { aspectRatio }}
       >
-        <Text className="font-sans text-xs text-fg-dim">No image selected</Text>
+        <Text className="font-sans text-xs text-muted-fg">
+          No image selected
+        </Text>
       </View>
     );
   }
@@ -650,7 +652,7 @@ function InlineImageRepositionEditor({
         style={containerStyle}
       >
         <ActivityIndicator size="small" className="text-fg" />
-        <Text className="mt-2 font-sans text-[12px] text-fg-dim">
+        <Text className="mt-2 font-sans text-[12px] text-muted-fg">
           {imageMeta.status === `error`
             ? `Failed to load image`
             : `Loading image`}

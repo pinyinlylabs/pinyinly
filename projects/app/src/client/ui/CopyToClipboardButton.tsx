@@ -8,7 +8,7 @@ const gap = 8;
 
 export function CopyToClipboardButton({
   text,
-  className = `size-6 rounded p-0 text-fg-dim`,
+  className = `size-6 rounded p-0 text-fg-muted`,
 }: {
   text: string;
   className?: string;

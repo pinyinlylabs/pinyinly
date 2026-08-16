@@ -380,13 +380,13 @@ import type { HanziText } from "@/data/model";
 //   return (
 //     <View className="gap-2">
 //       {suggestionsState.kind === `loading` ? (
-//         <Text className="pyly-body-caption text-fg-dim">
+//         <Text className="pyly-body-caption text-muted-fg">
 //           Finding matches...
 //         </Text>
 //       ) : null}
 
 //       {suggestionsState.kind === `unsupported` ? (
-//         <Text className="pyly-body-caption text-fg-dim">
+//         <Text className="pyly-body-caption text-muted-fg">
 //           {suggestionsState.message}
 //         </Text>
 //       ) : null}
@@ -419,7 +419,7 @@ import type { HanziText } from "@/data/model";
 //             </Pressable>
 //           </View>
 //           {suggestionsState.suggestions.length === 0 ? (
-//             <Text className="pyly-body-caption text-fg-dim">
+//             <Text className="pyly-body-caption text-muted-fg">
 //               No close matches yet.
 //             </Text>
 //           ) : (
@@ -440,7 +440,7 @@ import type { HanziText } from "@/data/model";
 //                   <Text className="font-sans text-xs text-fg">
 //                     {suggestion.hanzi}
 //                     {` `}
-//                     <Text className="text-fg-dim">
+//                     <Text className="text-muted-fg">
 //                       {Math.round(suggestion.score * 100)}%
 //                     </Text>
 //                   </Text>
@@ -1102,7 +1102,7 @@ import type { HanziText } from "@/data/model";
 //           <Text className="pyly-body-caption text-danger">
 //             Operator {operator} is not supported in the visual editor yet.
 //           </Text>
-//           <Text className="pyly-body-caption text-fg-dim">
+//           <Text className="pyly-body-caption text-muted-fg">
 //             Reset to default or choose another built-in decomposition.
 //           </Text>
 //         </View>
@@ -1355,7 +1355,7 @@ import type { HanziText } from "@/data/model";
 //       </View>
 
 //       {draftComponents == null ? (
-//         <Text className="pyly-body-caption text-fg-dim">
+//         <Text className="pyly-body-caption text-muted-fg">
 //           No decomposition available for this character.
 //         </Text>
 //       ) : (

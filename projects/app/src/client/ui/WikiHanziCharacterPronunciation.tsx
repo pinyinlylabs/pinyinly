@@ -490,7 +490,7 @@ export function WikiHanziCharacterPronunciationBox({
           ) : null}
           {isEditMode && mnemonicSettingKey != null ? (
             <View className="gap-2 p-4">
-              <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
+              <Text className="pyly-body-caption text-xs font-semibold text-muted-fg uppercase">
                 Mnemonic spec
               </Text>
               <InlineEditableSettingJson
@@ -527,7 +527,7 @@ function MergedHintDisplay({
         <Pylymark source={parsed.hint} highlightToken={hanzi} />
       </Text>
       {parsed.description == null ? null : (
-        <Text className="mt-3 block text-sm text-fg-dim">
+        <Text className="mt-3 block text-sm text-muted-fg">
           <Pylymark source={parsed.description} highlightToken={hanzi} />
         </Text>
       )}

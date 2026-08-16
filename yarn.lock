@@ -6327,9 +6327,9 @@ __metadata:
     resolve-package-path: "npm:^4.0.3"
     rive-react-native: "npm:^9.3.4"
     svg-path-commander: "npm:^2.3.0"
-    tailwind-animations: "npm:^1.0.2"
     tailwind-variants: "npm:^3.3.1"
     tailwindcss: "npm:^4.1.12"
+    tailwindcss-animate: "npm:^1.0.7"
     tinyrainbow: "npm:*"
     ts-essentials: "npm:^10.2.0"
     tsx: "npm:^4.21.0"
@@ -22498,15 +22498,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-animations@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "tailwind-animations@npm:1.0.2"
-  peerDependencies:
-    tailwindcss: 4
-  checksum: 10c0/682f307f0f99ab73125a8c4b1fa9196bc79602eaf2848dc17b39b8184c86676ac9fb89ce91f6f2a63a0055a49164deadf2c0b97c7571391d08f06671738a7b29
-  languageName: node
-  linkType: hard
-
 "tailwind-csstree@npm:^0.3.3":
   version: 0.3.3
   resolution: "tailwind-csstree@npm:0.3.3"
@@ -22531,6 +22522,15 @@ __metadata:
     tailwindcss:
       optional: true
   checksum: 10c0/dd0255f545b1f395540ec694de27df4c195bd06a2d38616a27d6fbe10273fa7f1f59a50bd3276b10db7275d18fcf386975d31e16046e1aa831223cbd361aa1b2
+  languageName: node
+  linkType: hard
+
+"tailwindcss-animate@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "tailwindcss-animate@npm:1.0.7"
+  peerDependencies:
+    tailwindcss: "*"
+  checksum: 10c0/ec7dbd1631076b97d66a1fbaaa06e0725fccfa63119221e8d87a997b02dcede98ad88bb1ef6665b968f5d260fcefb10592e0299ca70208d365b37761edf5e19a
   languageName: node
   linkType: hard
 

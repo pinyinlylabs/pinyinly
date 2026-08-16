@@ -88,7 +88,7 @@ export default () => {
             </RectButton>
             {lastHint == null ? null : (
               <View className="gap-1">
-                <Text className="font-sans text-[13px] text-fg-dim">
+                <Text className="font-sans text-[13px] text-muted-fg">
                   Last hint
                 </Text>
                 <Text className="font-sans text-[13px] text-fg">
@@ -99,7 +99,7 @@ export default () => {
           </View>
 
           {lastExplanation == null ? null : (
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Explanation: {lastExplanation}
             </Text>
           )}

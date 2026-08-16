@@ -166,7 +166,7 @@ export function LocationSetBox({
           setting={locationSetDescriptionTextSetting}
           settingKey={{ locationId, setKey }}
           placeholder="Description"
-          textClassName="text-sm text-fg-dim"
+          textClassName="text-sm text-muted-fg"
           multiline
         />
       </View>

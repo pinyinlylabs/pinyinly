@@ -150,7 +150,7 @@ export function ImagePasteDropZone({
               resizeMode="cover"
             />
           </View>
-          <Text className="font-sans text-[12px] text-fg-dim">
+          <Text className="font-sans text-[12px] text-muted-fg">
             {uploading ? `Uploading...` : `Pasted preview`}
           </Text>
         </View>
@@ -166,7 +166,7 @@ export function ImagePasteDropZone({
           <Text className="font-sans text-[13px] text-fg">
             Click to upload or paste an image anytime
           </Text>
-          <Text className="font-sans text-[12px] text-fg-dim">Web only</Text>
+          <Text className="font-sans text-[12px] text-muted-fg">Web only</Text>
         </View>
       )}
     </Pressable>

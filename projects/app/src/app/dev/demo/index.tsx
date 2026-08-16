@@ -4,7 +4,7 @@ import { lazy } from "react";
 import { Text } from "@/client/ui/Text";
 
 export default function UiDemoIndexPage() {
-  return <Text className="text-fg-dim">Choose a demo from the list</Text>;
+  return <Text className="text-muted-fg">Choose a demo from the list</Text>;
 }
 
 const lazyDemo = <Demo extends FunctionComponent>(
@@ -31,7 +31,6 @@ export const demos: Record<string, FunctionComponent> = {
   [`HanziGraphic`]: lazyDemo(() => import(`../../../client/ui/HanziGraphic.demo`)),
   [`HanziHintOption`]: lazyDemo(() => import(`../../../client/ui/HanziHintOption.demo`)),
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
-  [`HanziTile`]: lazyDemo(() => import(`../../../client/ui/HanziTile.demo`)),
   [`HeaderTitleProvider`]: lazyDemo(() => import(`../../../client/ui/HeaderTitleProvider.demo`)),
   [`HskLozenge`]: lazyDemo(() => import(`../../../client/ui/HskLozenge.demo`)),
   [`Icon`]: lazyDemo(() => import(`../../../client/ui/Icon.demo`)),

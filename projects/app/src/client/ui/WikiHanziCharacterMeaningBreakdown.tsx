@@ -174,7 +174,7 @@ export function WikiHanziCharacterMeaningBreakdown({
           )}
 
           {primaryMeaningGloss == null ? null : (
-            <Text className="text-left pyly-body-caption text-fg-dim">
+            <Text className="text-left pyly-body-caption text-muted-fg">
               {primaryMeaningGloss}
             </Text>
           )}
@@ -185,11 +185,11 @@ export function WikiHanziCharacterMeaningBreakdown({
         <View className="px-6">
           <View className="relative h-6">
             <View
-              className="absolute w-px bg-fg-dim/35"
+              className="absolute w-px bg-muted-fg/35"
               style={{ left: sourceConnectorX, top: 0, height: 10 }}
             />
             <View
-              className="absolute h-px bg-fg-dim/35"
+              className="absolute h-px bg-muted-fg/35"
               style={{
                 left: connectorMinX,
                 top: 10,
@@ -199,7 +199,7 @@ export function WikiHanziCharacterMeaningBreakdown({
             {validComponentCenters.map((centerX, index) => {
               return (
                 <View
-                  className="absolute w-px bg-fg-dim/35"
+                  className="absolute w-px bg-muted-fg/35"
                   key={`decomp-line:${index}`}
                   style={{ left: centerX, top: 10, height: 14 }}
                 />

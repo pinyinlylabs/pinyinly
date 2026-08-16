@@ -14,8 +14,12 @@ export type PylyThemeName = ThemeName | LightModeStripped<ThemeName>;
 export function Theme({
   children,
   theme,
-}: PropsWithChildren<{ theme: PylyThemeName }>) {
+}: PropsWithChildren<{ theme?: PylyThemeName }>) {
   const { theme: parentTheme } = useUniwind();
+
+  if (theme == null) {
+    return <>{children}</>;
+  }
 
   // Turn a theme like "danger-panel" into "light-danger-panel" or
   // "dark-danger-panel" depending on the parent theme.

@@ -98,7 +98,7 @@ function SoundNameEditModalContent({
         <View className="gap-4">
           {/* Text input */}
           <View className="gap-2">
-            <Text className="font-sans text-sm font-semibold text-fg-dim">
+            <Text className="font-sans text-sm font-semibold text-muted-fg">
               Sound name
             </Text>
             <InlineEditableSettingText
@@ -111,7 +111,7 @@ function SoundNameEditModalContent({
           {/* Suggestions */}
           {suggestions.length > 0 && (
             <View className="gap-4">
-              <Text className="text-sm font-semibold text-fg-dim">
+              <Text className="text-sm font-semibold text-muted-fg">
                 Suggestions
               </Text>
 
@@ -151,7 +151,7 @@ function SoundNameEditModalContent({
                         >
                           <Text
                             className={`
-                              text-fg-dim
+                              text-muted-fg
 
                               hover:text-fg
                             `}
@@ -170,7 +170,7 @@ function SoundNameEditModalContent({
                             {name}
                           </Text>
                           {` `}
-                          <Text className="font-sans text-sm font-normal text-fg-dim">
+                          <Text className="font-sans text-sm font-normal text-muted-fg">
                             {nameDescription}
                           </Text>
                         </Text>

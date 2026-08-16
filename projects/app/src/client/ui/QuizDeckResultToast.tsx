@@ -6,7 +6,7 @@ import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { Icon } from "./Icon";
-import { ratingToThemeClass } from "./QuizDeckResultToast.utils";
+import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { Suspense } from "./Suspense";
@@ -37,7 +37,7 @@ export function QuizDeckResultToast({
 
               sm:mb-2 sm:rounded-xl
 
-              ${ratingToThemeClass(rating)}
+              ${ratingToThemeName(rating)}
             `}
           >
             {rating === Rating.Easy ? (

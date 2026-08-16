@@ -10,7 +10,7 @@ export const ReferencePageBodySection = ({
   return (
     <View className="gap-1">
       <View>
-        <Text className="font-sans text-lg text-fg-dim">{title}</Text>
+        <Text className="font-sans text-lg text-muted-fg">{title}</Text>
       </View>
       <View>
         {typeof children === `string` ? (

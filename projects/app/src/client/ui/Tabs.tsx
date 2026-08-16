@@ -173,7 +173,7 @@ const triggerTextClass = tv({
   variants: {
     isActive: {
       true: `text-fg`,
-      false: `text-fg-dim`,
+      false: `text-muted-fg`,
     },
   },
 });

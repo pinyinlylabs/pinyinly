@@ -1069,7 +1069,7 @@ export function AiImageGenerationPanel({
       <View className="h-full flex-row items-stretch gap-4">
         <View className="h-full min-w-0 flex-1 gap-3">
           {isLoadedFromSetting ? null : (
-            <Text className="font-sans text-[13px] text-fg-dim">
+            <Text className="font-sans text-[13px] text-muted-fg">
               Loading chats...
             </Text>
           )}
@@ -1081,7 +1081,7 @@ export function AiImageGenerationPanel({
               contentContainerClassName="gap-6 px-3 py-10"
             >
               {activeThread == null || activeThread.messages.length === 0 ? (
-                <Text className="font-sans text-[14px] text-fg-dim">
+                <Text className="font-sans text-[14px] text-muted-fg">
                   Start by entering a prompt below.
                 </Text>
               ) : (
@@ -1363,7 +1363,7 @@ function AiImageUserMessage({
       {!shouldShowStyleLabel && contextEntries.length === 0 ? null : (
         <View className="flex-row flex-wrap items-center justify-end gap-1">
           {shouldShowStyleLabel ? (
-            <Text className="font-sans text-xs text-fg-dim">
+            <Text className="font-sans text-xs text-muted-fg">
               {messageStyleLabel}
             </Text>
           ) : null}
@@ -1502,7 +1502,7 @@ function AiImageAssignMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <View className="min-w-55 gap-1 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] text-fg-dim uppercase">
+      <Text className="font-sans text-[11px] text-muted-fg uppercase">
         Assign generated image
       </Text>
       {options.map((option) => (
@@ -1930,7 +1930,7 @@ function ImageReferenceTooltipContent({
         {prompt == null ? null : (
           <Text className="font-mono text-xs text-fg">{prompt}</Text>
         )}
-        <Text className="font-sans text-xs text-fg-dim">
+        <Text className="font-sans text-xs text-muted-fg">
           Image and caption included in the prompt
         </Text>
       </View>
@@ -1957,7 +1957,7 @@ function ReferencePickerMenu({
 
   return (
     <View className="max-w-90 min-w-[290px] gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] text-fg-dim uppercase">
+      <Text className="font-sans text-[11px] text-muted-fg uppercase">
         Reference images
       </Text>
 
@@ -1991,12 +1991,12 @@ function ReferencePickerMenu({
                 <Text className="font-sans text-[13px] text-fg">
                   {reference.label}
                 </Text>
-                <Text className="font-sans text-[11px] text-fg-dim">
+                <Text className="font-sans text-[11px] text-muted-fg">
                   {roleLabel} • {status}
                   {isDisabled ? ` • Disabled in prompt` : ``}
                 </Text>
                 {fallbackUsageLabelByPrimaryId.has(reference.id) ? (
-                  <Text className="font-sans text-[11px] text-fg-dim">
+                  <Text className="font-sans text-[11px] text-muted-fg">
                     {fallbackUsageLabelByPrimaryId.get(reference.id)}
                   </Text>
                 ) : null}
@@ -2032,7 +2032,7 @@ function MissingReferenceWarningMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <View className="max-w-90 min-w-75 gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] text-fg-dim uppercase">
+      <Text className="font-sans text-[11px] text-muted-fg uppercase">
         Reference status
       </Text>
 
@@ -2042,7 +2042,7 @@ function MissingReferenceWarningMenu({
             Missing references
           </Text>
           {missingReferenceLabels.map((label) => (
-            <Text key={label} className="font-sans text-[12px] text-fg-dim">
+            <Text key={label} className="font-sans text-[12px] text-muted-fg">
               • {label}
             </Text>
           ))}
@@ -2055,7 +2055,7 @@ function MissingReferenceWarningMenu({
             Fallbacks in use
           </Text>
           {fallbackUsageLabels.map((label) => (
-            <Text key={label} className="font-sans text-[12px] text-fg-dim">
+            <Text key={label} className="font-sans text-[12px] text-muted-fg">
               • {label}
             </Text>
           ))}

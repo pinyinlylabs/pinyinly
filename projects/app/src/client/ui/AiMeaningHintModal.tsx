@@ -160,14 +160,14 @@ export function AiMeaningHintModal({
             <View className="gap-2">
               <Text className="pyly-body-subheading">Suggestions</Text>
               {!hasSettledGeneration || isGenerating ? (
-                <Text className="font-sans text-[14px] text-fg-dim">
+                <Text className="font-sans text-[14px] text-muted-fg">
                   Generating hints...
                 </Text>
               ) : null}
 
               {suggestions == null ? (
                 error == null && hasSettledGeneration ? (
-                  <Text className="font-sans text-[14px] text-fg-dim">
+                  <Text className="font-sans text-[14px] text-muted-fg">
                     No hints generated.
                   </Text>
                 ) : null
@@ -182,7 +182,7 @@ export function AiMeaningHintModal({
                         <Text
                           className={`
                             rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold
-                            tracking-wide text-fg-dim uppercase
+                            tracking-wide text-muted-fg uppercase
                           `}
                         >
                           {suggestion.strategyLabel}
@@ -204,7 +204,7 @@ export function AiMeaningHintModal({
                         <Pylymark source={suggestion.hint} />
                       </Text>
                       {suggestion.explanation == null ? null : (
-                        <Text className="font-sans text-[13px] text-fg-dim">
+                        <Text className="font-sans text-[13px] text-muted-fg">
                           <Pylymark source={suggestion.explanation} />
                         </Text>
                       )}

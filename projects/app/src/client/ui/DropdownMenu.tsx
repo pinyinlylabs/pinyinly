@@ -64,9 +64,9 @@ function DropdownMenuLabel({
     <Text
       className={
         className == null
-          ? `font-sans text-[11px] text-fg-dim uppercase`
+          ? `font-sans text-[11px] text-muted-fg uppercase`
           : `
-            font-sans text-[11px] text-fg-dim uppercase
+            font-sans text-[11px] text-muted-fg uppercase
 
             ${className}
           `

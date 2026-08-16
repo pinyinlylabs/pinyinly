@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { Icon } from "./Icon";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { useDb } from "./hooks/useDb";
+import { Theme } from "./Theme";
 
 export const NewSkillModalContentNewPronunciation = ({
   hanzi,
@@ -100,57 +101,63 @@ function Header({
         }}
       />
 
-      <View className="sticky -top-30 z-10 h-46 bg-bg theme-grass-panel">
-        <View className="sticky top-1 z-10 h-14 flex-row items-center pl-4">
-          <Pressable
-            onPress={onDismiss}
-            className={`
-              size-8 rounded-md transition-transform
+      <Theme theme="grass-panel">
+        <View className="sticky -top-30 z-10 h-46 bg-bg">
+          <View className="sticky top-1 z-10 h-14 flex-row items-center pl-4">
+            <Pressable
+              onPress={onDismiss}
+              className={`
+                size-8 rounded-md transition-transform
 
-              hover:bg-fg-loud/10
+                hover:bg-fg-loud/10
 
-              active:scale-95
-            `}
-          >
-            <Icon icon="close" size={32} tintColorClassName="accent-fg-loud" />
-          </Pressable>
+                active:scale-95
+              `}
+            >
+              <Icon
+                icon="close"
+                size={32}
+                tintColorClassName="accent-fg-loud"
+              />
+            </Pressable>
+          </View>
+
+          <View className="mb-2 self-center rounded-md bg-fg-loud/10 px-2 py-1">
+            <Text
+              className={`
+                text-center font-sans text-[12px]/[14px] font-bold text-fg-loud uppercase
+                transition-all
+              `}
+            >
+              New pronunciation
+            </Text>
+          </View>
+
+          <View className="sticky top-[11px] z-0 overflow-visible px-4">
+            <Text
+              className={`
+                text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
+
+                ${entry?.isIntersecting === false ? `scale-75` : `scale-100`}
+              `}
+            >
+              {title}
+            </Text>
+          </View>
+
+          <View className="">
+            <Text
+              className={`
+                text-center font-sans text-[18px] font-normal text-fg-loud transition-opacity
+
+                ${entry?.isIntersecting === false ? `opacity-0` : `opacity-100`}
+              `}
+            >
+              {subtitle}
+            </Text>
+          </View>
         </View>
-
-        <View className="mb-2 self-center rounded-md bg-fg-loud/10 px-2 py-1">
-          <Text
-            className={`
-              text-center font-sans text-[12px]/[14px] font-bold text-fg-loud uppercase
-              transition-all
-            `}
-          >
-            New pronunciation
-          </Text>
-        </View>
-
-        <View className="sticky top-[11px] z-0 overflow-visible px-4">
-          <Text
-            className={`
-              text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
-
-              ${entry?.isIntersecting === false ? `scale-75` : `scale-100`}
-            `}
-          >
-            {title}
-          </Text>
-        </View>
-
-        <View className="">
-          <Text
-            className={`
-              text-center font-sans text-[18px] font-normal text-fg-loud transition-opacity
-
-              ${entry?.isIntersecting === false ? `opacity-0` : `opacity-100`}
-            `}
-          >
-            {subtitle}
-          </Text>
-        </View>
-      </View>
+      </Theme>
     </>
   );
 }

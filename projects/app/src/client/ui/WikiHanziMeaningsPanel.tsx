@@ -51,7 +51,7 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
   return (
     <View className="gap-4">
       {builtInMeanings.length === 0 && userMeanings.length === 0 ? (
-        <Text className="font-sans text-base text-fg-dim">
+        <Text className="font-sans text-base text-muted-fg">
           No meanings yet.
         </Text>
       ) : (
@@ -317,7 +317,7 @@ function MeaningCoreText({
           {hanzi}
         </Text>
         {pinyin == null || pinyin.length === 0 ? null : (
-          <Text className="font-sans text-base text-fg-dim">{pinyin}</Text>
+          <Text className="font-sans text-base text-muted-fg">{pinyin}</Text>
         )}
         {trailingBadge}
       </View>
@@ -334,10 +334,10 @@ function MeaningCoreText({
 function LabeledText({ children, label }: { children: string; label: string }) {
   return (
     <View className="gap-1">
-      <Text className="font-sans text-base font-medium text-fg-dim uppercase">
+      <Text className="font-sans text-base font-medium text-muted-fg uppercase">
         {label}
       </Text>
-      <Text className="font-sans text-base leading-6 text-fg-dim">
+      <Text className="font-sans text-base leading-6 text-muted-fg">
         {children}
       </Text>
     </View>

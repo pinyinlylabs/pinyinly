@@ -84,11 +84,11 @@ export function WikiHanziHeaderOverview({
           <View className="flex-row gap-1">
             {intersperse(
               uniquePinyins.map((pinyin, i) => (
-                <Text className="font-sans text-[16px] text-fg-dim" key={i}>
+                <Text className="font-sans text-[16px] text-muted-fg" key={i}>
                   {pinyin}
                 </Text>
               )),
-              <Text className="text-fg-dim/50">•</Text>,
+              <Text className="text-muted-fg/50">•</Text>,
             )}
           </View>
         )}

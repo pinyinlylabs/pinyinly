@@ -303,7 +303,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   } else if (hasPendingReviews) {
     screen = (
       <Reanimated.View entering={FadeIn} className="my-auto items-center">
-        <Text className="font-sans text-lg text-fg-dim">Loading</Text>
+        <Text className="font-sans text-lg text-muted-fg">Loading</Text>
       </Reanimated.View>
     );
   } else {

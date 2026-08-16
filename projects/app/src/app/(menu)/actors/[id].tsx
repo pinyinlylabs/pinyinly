@@ -101,7 +101,7 @@ export default function ActorIdPage() {
       <WikiTitledBox title="Used by sounds">
         <View className="p-4">
           {linkedSoundIds.length === 0 ? (
-            <Text className="pyly-body-caption text-fg-dim">
+            <Text className="pyly-body-caption text-muted-fg">
               Not currently selected by any sound.
             </Text>
           ) : (

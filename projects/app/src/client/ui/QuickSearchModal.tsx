@@ -16,7 +16,9 @@ export function QuickSearchModal({
     <PageSheetModal
       onDismiss={onDismiss}
       devUiSnapshotMode={devUiSnapshotMode}
-      suspenseFallback={<Text className="font-sans text-fg-dim">Loading…</Text>}
+      suspenseFallback={
+        <Text className="font-sans text-muted-fg">Loading…</Text>
+      }
     >
       {({ dismiss }) => <ModalContent onDismiss={dismiss} />}
     </PageSheetModal>
@@ -29,7 +31,7 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
   return (
     <View className="min-h-50 flex-1 bg-bg-high">
       <View className="h-12 flex-row items-center gap-2 border-b border-b-fg/10 px-4">
-        <Icon icon="search" size={20} tintColorClassName="accent-fg-dim" />
+        <Icon icon="search" size={20} tintColorClassName="accent-muted-fg" />
         <TextInputSingle
           autoFocus
           placeholder="Search dictionary"

@@ -33,7 +33,11 @@ export function CompactWordRows({
                 pinyin={pinyin}
                 lozenges={
                   entry.hsk == null ? null : (
-                    <HskLozenge hskLevel={entry.hsk} size="sm" color="fg-dim" />
+                    <HskLozenge
+                      hskLevel={entry.hsk}
+                      size="sm"
+                      color="muted-fg"
+                    />
                   )
                 }
               />
@@ -53,7 +57,7 @@ export function CompactWordRows({
                 icon="chevron-right"
                 size={12}
                 className="ml-2"
-                tintColorClassName="accent-fg-dim"
+                tintColorClassName="accent-muted-fg"
               />
             </Pressable>
           </Link>

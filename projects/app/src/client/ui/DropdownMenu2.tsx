@@ -42,9 +42,9 @@ function DropdownMenuSubTrigger({
         `
           text-sm select-none
 
-          group-active:text-on-accent
+          group-active:text-accent-fg
         `,
-        open && `text-on-accent`,
+        open && `text-accent-fg`,
       )}
     >
       <DropdownMenuPrimitive.SubTrigger
@@ -55,10 +55,13 @@ function DropdownMenuSubTrigger({
             active:bg-accent
 
             sm:py-1.5
+
+            web:cursor-default web:outline-none
+
+            web:focus:bg-accent web:focus:text-accent-fg
+
+            web:[&_svg]:pointer-events-none
           `,
-          Platform.select({
-            web: `focus:bg-accent focus:text-on-accent cursor-default outline-none [&_svg]:pointer-events-none`,
-          }),
           className,
           open && `bg-accent`,
           inset && `pl-8`,
@@ -138,12 +141,23 @@ function DropdownMenuSubContent({
       <SubContent
         className={cn(
           `
-            animate-in overflow-hidden rounded-md border border-border bg-bg p-1 shadow-lg
-            shadow-black/5
+            overflow-hidden rounded-md border border-border bg-bg p-1 shadow-lg shadow-black/5
+            animate-in
+
+            web:z-50 web:min-w-[8rem] web:origin-(--radix-context-menu-content-transform-origin)
+            web:animate-in web:fade-in-0 web:zoom-in-95
+
+            web:data-[side=bottom]:slide-in-from-top-2
+
+            web:data-[side=left]:slide-in-from-right-2
+
+            web:data-[side=right]:slide-in-from-left-2
+
+            web:data-[side=top]:slide-in-from-bottom-2
+
+            web:data-[state=closed]:animate-out web:data-[state=closed]:fade-out-0
+            web:data-[state=closed]:zoom-out-95
           `,
-          Platform.select({
-            web: `animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fade-in-0 data-[state=closed]:zoom-out-95 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-context-menu-content-transform-origin) z-50 min-w-[8rem]`,
-          }),
           className,
         )}
         {...props}
@@ -192,18 +206,13 @@ function DropdownMenuContent({
                     `
                       min-w-[8rem] overflow-hidden rounded-md border border-border bg-bg p-1
                       shadow-lg shadow-black/5
+
+                      web:z-50 web:max-h-(--radix-context-menu-content-available-height)
+                      web:origin-(--radix-context-menu-content-transform-origin) web:cursor-default
+                      web:animate-in web:fade-in-0 web:zoom-in-95
                     `,
-                    Platform.select({
-                      web: cn(
-                        `
-                          animate-in fade-in-0 zoom-in-95 z-50
-                          max-h-(--radix-context-menu-content-available-height)
-                          origin-(--radix-context-menu-content-transform-origin) cursor-default
-                        `,
-                        props.side === `bottom` && `slide-in-from-top-2`,
-                        props.side === `top` && `slide-in-from-bottom-2`,
-                      ),
-                    }),
+                    props.side === `bottom` && `web:slide-in-from-top-2`,
+                    props.side === `top` && `web:slide-in-from-bottom-2`,
                     className,
                   )}
                   {...props}
@@ -237,9 +246,9 @@ function DropdownMenuItem({
         `,
         variant === `destructive` &&
           `
-            text-destructive
+            text-destructive-fg
 
-            group-active:text-destructive
+            group-active:text-destructive-fg
           `,
       )}
     >
@@ -251,24 +260,20 @@ function DropdownMenuItem({
             active:bg-accent
 
             sm:py-1.5
+
+            web:cursor-default web:outline-none
+
+            web:focus:bg-accent web:focus:text-accent-fg
+
+            web:data-[disabled]:pointer-events-none
           `,
-          Platform.select({
-            web: cn(
-              `
-                cursor-default outline-none
+          variant === `destructive` &&
+            `
+              web:focus:bg-destructive/10
 
-                focus:bg-accent focus:text-on-accent
+              web:dark:focus:bg-destructive/20
+            `,
 
-                data-[disabled]:pointer-events-none
-              `,
-              variant === `destructive` &&
-                `
-                  focus:bg-destructive/10
-
-                  dark:focus:bg-destructive/20
-                `,
-            ),
-          }),
           variant === `destructive` &&
             `
               active:bg-destructive/10
@@ -293,7 +298,7 @@ function DropdownMenuCheckboxItem({
   children?: React.ReactNode;
 }) {
   return (
-    <Text.ClassContext.Provider value="text-sm text-fg select-none group-active:text-on-accent">
+    <Text.ClassContext.Provider value="text-sm text-fg select-none group-active:text-accent-fg">
       <DropdownMenuPrimitive.CheckboxItem
         className={cn(
           `
@@ -304,7 +309,7 @@ function DropdownMenuCheckboxItem({
             sm:py-1.5
           `,
           Platform.select({
-            web: `focus:bg-accent focus:text-on-accent cursor-default outline-none data-[disabled]:pointer-events-none`,
+            web: `focus:accent focus:text-accent-fg cursor-default outline-none data-[disabled]:pointer-events-none`,
           }),
           props.disabled && `opacity-50`,
           className,
@@ -335,7 +340,7 @@ function DropdownMenuRadioItem({
   children?: React.ReactNode;
 }) {
   return (
-    <Text.ClassContext.Provider value="text-sm text-fg select-none group-active:text-on-accent">
+    <Text.ClassContext.Provider value="text-sm text-fg select-none group-active:text-accent-fg">
       <DropdownMenuPrimitive.RadioItem
         className={cn(
           `
@@ -346,7 +351,7 @@ function DropdownMenuRadioItem({
             sm:py-1.5
           `,
           Platform.select({
-            web: `focus:bg-accent focus:text-on-accent cursor-default outline-none data-[disabled]:pointer-events-none`,
+            web: `focus:accent focus:text-accent-fg cursor-default outline-none data-[disabled]:pointer-events-none`,
           }),
           props.disabled && `opacity-50`,
           className,
@@ -406,7 +411,7 @@ function DropdownMenuShortcut({
 }: React.ComponentProps<typeof Text>) {
   return (
     <Text
-      className={cn(`ml-auto text-xs tracking-widest text-fg-dim`, className)}
+      className={cn(`ml-auto text-xs tracking-widest text-muted-fg`, className)}
       {...props}
     />
   );

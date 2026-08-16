@@ -637,7 +637,7 @@ export default function StrokeSegmentsDebugDemo() {
                 }}
               />
             </svg>
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Paste SVG field data (`strokes` + optional `medians`). Stroke IDs
               are array indexes. Drawn cutter paths are appended after the last
               stroke ID.
@@ -658,7 +658,7 @@ export default function StrokeSegmentsDebugDemo() {
                 min-h-52 rounded-xl bg-bg-high px-4 py-3 font-mono text-[12px] text-fg outline-none
               "
             />
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Paste either {`{"strokes":[...],"medians":[...]}`} or the raw
               field body.
             </Text>
@@ -694,7 +694,7 @@ export default function StrokeSegmentsDebugDemo() {
                 min-h-20 rounded-xl bg-bg-high px-4 py-3 font-mono text-[12px] text-fg outline-none
               "
             />
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Example: 4[1:2], 4[:1], 4[1:], or 4.
             </Text>
           </View>
@@ -711,7 +711,7 @@ export default function StrokeSegmentsDebugDemo() {
 
           <View className="gap-2 rounded-xl bg-bg-high p-3">
             <Text className="text-left pyly-dev-dt">status</Text>
-            <Text className="font-mono text-[12px] text-fg-dim">
+            <Text className="font-mono text-[12px] text-muted-fg">
               {
                 // oxlint-disable-next-line no-negated-condition
                 svgFieldError != null
@@ -731,7 +731,7 @@ export default function StrokeSegmentsDebugDemo() {
 
           <View className="gap-2 rounded-xl bg-bg-high p-3">
             <Text className="text-left pyly-dev-dt">computed closed cut</Text>
-            <Text className="font-mono text-[12px] text-fg-dim">
+            <Text className="font-mono text-[12px] text-muted-fg">
               {segmentPath ?? `null`}
             </Text>
           </View>

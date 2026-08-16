@@ -42,11 +42,11 @@ export function PinyinFinalToneEditor({
                   <Text className="font-sans text-sm text-fg">
                     {pinyinLabel}
                   </Text>
-                  <Text className="font-sans text-xs text-fg-dim">
+                  <Text className="font-sans text-xs text-muted-fg">
                     Tone {tone}
                   </Text>
                 </View>
-                <Text className="font-sans text-xs text-fg-dim">{count}</Text>
+                <Text className="font-sans text-xs text-muted-fg">{count}</Text>
               </View>
               <View className="h-2 rounded-full bg-fg/10">
                 <View
