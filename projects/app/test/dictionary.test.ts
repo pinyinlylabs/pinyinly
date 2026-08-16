@@ -1646,7 +1646,7 @@ describe(`deepDecomposeHanziWithStrokeSpecs() suite`, () => {
         ids: `⿱丷兄` as HanziIds,
         strokeSpecs: [
           `0[:10%],1` as StrokeSpecString,
-          "2-6" as StrokeSpecString,
+          `2-6` as StrokeSpecString,
         ],
       },
       {
