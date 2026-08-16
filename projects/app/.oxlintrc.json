@@ -1,6 +1,12 @@
 {
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["../oxlint-rules/base.oxlintrc.json"],
+  "jsPlugins": [
+    {
+      "name": "pinyinly",
+      "specifier": "@pinyinly/oxlint-rules"
+    }
+  ],
   "rules": {
     // "pinyinly/no-restricted-css-classes": [
     //   "error",
@@ -12,6 +18,25 @@
     // ]
   },
   "overrides": [
+    // Expo bundled files. Metro doesn't support subpath imports, so rewrite
+    // them to use the @/ path alias.
+    {
+      "files": [
+        "src/**/*.cjs",
+        "src/**/*.js",
+        "src/**/*.mjs",
+        "src/**/*.ts",
+        "src/**/*.tsx"
+      ],
+      "rules": {
+        "pinyinly/import-path-rewrite": [
+          "error",
+          {
+            "patterns": [{ "from": "^#(.+)\\.[jt]sx?$", "to": "@/$1" }]
+          }
+        ]
+      }
+    },
     // expo-router pages
     {
       "files": ["src/app/**/*.ts", "src/app/**/*.tsx"],

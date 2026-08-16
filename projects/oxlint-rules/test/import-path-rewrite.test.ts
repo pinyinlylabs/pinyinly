@@ -1,9 +1,12 @@
 import { importPathRewrite } from "#import-path-rewrite.ts";
-import { RuleTester } from "eslint";
+import { RuleTester } from "oxlint/plugins-dev";
+import { describe, test as it } from "vitest";
+
+RuleTester.describe = describe;
+RuleTester.it = it;
 
 const ruleTester = new RuleTester({
   languageOptions: {
-    ecmaVersion: 2020,
     sourceType: `module`,
   },
 });

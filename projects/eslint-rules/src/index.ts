@@ -5,24 +5,8 @@ import { getDefaultSelectors } from "eslint-plugin-better-tailwindcss/defaults";
 import type { defineConfig } from "eslint/config";
 import { globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
-import { globTemplate as globTemplateRule } from "./glob-template.ts";
-import { importNames as importNamesRule } from "./import-names.ts";
-import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.ts";
-import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.ts";
 
 export { includeIgnoreFile } from "@eslint/compat";
-
-export const plugin: ESLint.Plugin = {
-  rules: {
-    [`import-names`]: importNamesRule,
-    [`import-path-rewrite`]: importPathRewriteRule,
-    [`no-restricted-css-classes`]: noRestrictedCssClassesRule,
-    [`glob-template`]: globTemplateRule,
-  },
-};
-
-// oxlint-disable-next-line import/no-default-export
-export default plugin;
 
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
@@ -110,7 +94,6 @@ export const configs: Configs = {
 };
 
 export const plugins = {
-  [`@pinyinly`]: plugin,
   [`@stylistic`]: stylisticPlugin as ESLint.Plugin,
   [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
   [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,

@@ -1,9 +1,12 @@
 import { noRestrictedCssClasses } from "#no-restricted-css-classes.ts";
-import { RuleTester } from "eslint";
+import { RuleTester } from "oxlint/plugins-dev";
+import { describe, test as it } from "vitest";
+
+RuleTester.describe = describe;
+RuleTester.it = it;
 
 const ruleTester = new RuleTester({
   languageOptions: {
-    ecmaVersion: 2020,
     sourceType: `module`,
     parserOptions: {
       ecmaFeatures: {
@@ -11,30 +14,30 @@ const ruleTester = new RuleTester({
       },
     },
   },
-  rules: {
-    [`rule-to-test/no-restricted-css-classes`]: [
-      `error`,
-      {
-        classes: [
-          // use the default message
-          `flex-col`,
-          // use a custom message
-          { name: `flex-row`, message: `Columns are better than rows.` },
-        ],
-      },
+});
+
+const options = [
+  {
+    classes: [
+      // use the default message
+      `flex-col`,
+      // use a custom message
+      { name: `flex-row`, message: `Columns are better than rows.` },
     ],
   },
-});
+];
 
 ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
   valid: [
     {
       // Shouldn't match "flex-col".
       code: `const el = <div className="flex-column" />`,
+      options,
     },
     {
       // Shouldn't match "flex-col".
       code: `const txt = "flex-column";`,
+      options,
     },
   ],
 
@@ -42,6 +45,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     // Tests for default message.
     {
       code: `const el = <div className="flex-col" />`,
+      options,
       errors: [
         {
           message: `CSS class "flex-col" is disallowed.`,
@@ -51,6 +55,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = <div className="flex-col flex-wrap flex-1" />`,
+      options,
       errors: [
         {
           message: `CSS class "flex-col" is disallowed.`,
@@ -60,6 +65,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = "flex-col flex-wrap flex-1";`,
+      options,
       errors: [
         {
           message: `CSS class "flex-col" is disallowed.`,
@@ -72,6 +78,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     //
     {
       code: `const el = <div className="flex-row" />`,
+      options,
       errors: [
         {
           message: `Columns are better than rows.`,
@@ -81,6 +88,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = <div className="flex-row flex-wrap flex-1" />`,
+      options,
       errors: [
         {
           message: `Columns are better than rows.`,
@@ -90,6 +98,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = "flex-row flex-wrap flex-1";`,
+      options,
       errors: [
         {
           message: `Columns are better than rows.`,
@@ -99,6 +108,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = \`flex-row flex-wrap flex-1\`;`,
+      options,
       errors: [
         {
           message: `Columns are better than rows.`,
@@ -108,6 +118,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = "flex-row \\"";`,
+      options,
       errors: [
         {
           message: `Columns are better than rows.`,
@@ -117,6 +128,7 @@ ruleTester.run(`no-restricted-css-classes`, noRestrictedCssClasses, {
     },
     {
       code: `const el = \`flex-row \\\`\`;`,
+      options,
       errors: [
         {
           message: `Columns are better than rows.`,

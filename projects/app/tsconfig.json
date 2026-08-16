@@ -34,16 +34,19 @@
       "path": "./test"
     },
     {
-      "path": "../eslint-rules"
+      "path": "../audio-sprites"
     },
     {
-      "path": "../audio-sprites"
+      "path": "../eslint-rules"
     },
     {
       "path": "../lib"
     },
     {
       "path": "../mdx"
+    },
+    {
+      "path": "../oxlint-rules"
     }
   ]
 }

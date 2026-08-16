@@ -1,0 +1,27 @@
+{
+  "name": "@pinyinly/oxlint-rules",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "imports": {
+    "#*.ts": "./src/*.ts"
+  },
+  "scripts": {
+    "noop": "echo 1"
+  },
+  "dependencies": {
+    "@oxlint/plugins": "^1.78.0",
+    "@pinyinly/lib": "workspace:*"
+  },
+  "private": true,
+  "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260207.1",
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.78.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}

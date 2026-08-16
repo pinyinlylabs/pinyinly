@@ -11,10 +11,8 @@
     //   "name": "stylistic-js",
     //   "specifier": "@stylistic/eslint-plugin"
     // }
-    //   {
-    //     "name": "pinyinly",
-    //     "specifier": "@pinyinly/eslint-rules"
-    //   }
+    // Add "@pinyinly/oxlint-rules" as a jsPlugin in a project's own
+    // .oxlintrc.json (not here) if it needs the "pinyinly/*" rules.
   ],
   "ignorePatterns": ["**/*.d.ts"],
   "categories": {

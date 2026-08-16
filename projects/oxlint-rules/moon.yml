@@ -7,12 +7,16 @@ tasks:
     options:
       internal: true
 
+  lint:
+    deps:
+      - ~:oxlint
+
   fmt:
     deps:
       - ~:oxfmt
 
 tags:
-  - eslint
   - oxfmt
   - oxlint
   - typescript
+  - vitest

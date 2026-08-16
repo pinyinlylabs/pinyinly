@@ -1,12 +1,16 @@
 import { importNames as rule } from "#import-names.ts";
-import * as typescriptParser from "@typescript-eslint/parser";
-import { RuleTester } from "eslint";
+import { RuleTester } from "oxlint/plugins-dev";
+import { describe, test as it } from "vitest";
+
+RuleTester.describe = describe;
+RuleTester.it = it;
 
 const ruleTester = new RuleTester({
   languageOptions: {
-    ecmaVersion: 2020,
     sourceType: `module`,
-    parser: typescriptParser,
+    parserOptions: {
+      lang: `ts`,
+    },
   },
 });
 
@@ -66,7 +70,6 @@ ruleTester.run(`import-names`, rule, {
       errors: [
         {
           message: `Default import from "react" must be named "React".`,
-          type: `ImportDefaultSpecifier`,
         },
       ],
       output: `import React from 'react';\nconst element = React.createElement('div');`,
@@ -79,7 +82,6 @@ ruleTester.run(`import-names`, rule, {
       errors: [
         {
           message: `Named import "useState" from "react" must be named "useState".`,
-          type: `ImportSpecifier`,
         },
       ],
       output: `import { useState as useState } from 'react';\nconst [state, setState] = useState();`,
@@ -92,7 +94,6 @@ ruleTester.run(`import-names`, rule, {
       errors: [
         {
           message: `Namespace import (import * as X) is not allowed for "react". Use specific named or default imports instead.`,
-          type: `ImportNamespaceSpecifier`,
         },
       ],
     },
@@ -109,11 +110,9 @@ ruleTester.run(`import-names`, rule, {
       errors: [
         {
           message: `Default import from "react" must be named "React".`,
-          type: `ImportDefaultSpecifier`,
         },
         {
           message: `Named import "useState" from "react" must be named "useState".`,
-          type: `ImportSpecifier`,
         },
       ],
       output: `import React, { useState as useStateAlias } from 'react';\nconst element = React.createElement();\nconst [state, setState] = useStateAlias();`,

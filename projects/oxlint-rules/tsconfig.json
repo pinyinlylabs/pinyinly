@@ -4,7 +4,7 @@
     "lib": ["ESNext"],
     "module": "NodeNext",
     "esModuleInterop": true,
-    "outDir": "../../.moon/cache/types/projects/eslint-rules",
+    "outDir": "../../.moon/cache/types/projects/oxlint-rules",
     "target": "ESNext",
     "types": ["node"]
   },
@@ -13,6 +13,12 @@
   "references": [
     {
       "path": "./src"
+    },
+    {
+      "path": "./test"
+    },
+    {
+      "path": "../lib"
     }
   ]
 }

@@ -5992,6 +5992,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oxlint/plugins@npm:^1.78.0":
+  version: 1.78.0
+  resolution: "@oxlint/plugins@npm:1.78.0"
+  checksum: 10c0/cd3bdb50efc92ff7137858a7be3e6e1f60118b502f7246eab0c822b96d2103926aba91eb3e9566d985807bc9480aea292fe5e3abdb9345989b11a1610a2fb834
+  languageName: node
+  linkType: hard
+
 "@peculiar/asn1-android@npm:^2.6.0":
   version: 2.7.0
   resolution: "@peculiar/asn1-android@npm:2.7.0"
@@ -6191,11 +6198,14 @@ __metadata:
     "@pinyinly/eslint-rules": "workspace:*"
     "@pinyinly/lib": "workspace:*"
     "@pinyinly/mdx": "workspace:*"
+    "@pinyinly/oxlint-rules": "workspace:*"
+    "@radix-ui/react-dropdown-menu": "npm:^2.1.24"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-native/metro-config": "npm:0.86.0"
     "@rive-app/react-canvas": "npm:^4.21.4"
-    "@rn-primitives/dropdown-menu": "npm:^1.5.2"
+    "@rn-primitives/dropdown-menu": "patch:@rn-primitives/dropdown-menu@npm%3A1.5.2#~/.yarn/patches/@rn-primitives-dropdown-menu-npm-1.5.2-79595d43ce.patch"
+    "@rn-primitives/hooks": "npm:^1.5.2"
     "@rn-primitives/portal": "npm:^1.5.3"
     "@rn-primitives/slot": "npm:^1.5.2"
     "@sentry/core": "npm:10.37.0"
@@ -6418,7 +6428,6 @@ __metadata:
     tsx: "npm:^4.21.0"
     typescript: "npm:^6.0.3"
     typescript-eslint: "npm:^8.59.2"
-    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -6466,6 +6475,22 @@ __metadata:
     ts-essentials: "npm:^10.2.0"
     typescript: "npm:^6.0.3"
     unified: "npm:^11.0.5"
+    vitest: "npm:^4.1.10"
+  languageName: unknown
+  linkType: soft
+
+"@pinyinly/oxlint-rules@workspace:*, @pinyinly/oxlint-rules@workspace:projects/oxlint-rules":
+  version: 0.0.0-use.local
+  resolution: "@pinyinly/oxlint-rules@workspace:projects/oxlint-rules"
+  dependencies:
+    "@oxlint/plugins": "npm:^1.78.0"
+    "@pinyinly/lib": "workspace:*"
+    "@typescript/native-preview": "npm:^7.0.0-dev.20260207.1"
+    oxfmt: "npm:^0.62.0"
+    oxlint: "npm:^1.78.0"
+    oxlint-tsgolint: "npm:^7.0.2001"
+    tsx: "npm:^4.21.0"
+    typescript: "npm:^6.0.3"
     vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
@@ -6830,7 +6855,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-dropdown-menu@npm:^2.1.16":
+"@radix-ui/react-dropdown-menu@npm:^2.1.16, @radix-ui/react-dropdown-menu@npm:^2.1.24":
   version: 2.1.24
   resolution: "@radix-ui/react-dropdown-menu@npm:2.1.24"
   dependencies:
@@ -8009,7 +8034,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rn-primitives/dropdown-menu@npm:^1.5.2":
+"@rn-primitives/dropdown-menu@npm:1.5.2":
   version: 1.5.2
   resolution: "@rn-primitives/dropdown-menu@npm:1.5.2"
   dependencies:
@@ -8032,7 +8057,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rn-primitives/hooks@npm:1.5.2":
+"@rn-primitives/dropdown-menu@patch:@rn-primitives/dropdown-menu@npm%3A1.5.2#~/.yarn/patches/@rn-primitives-dropdown-menu-npm-1.5.2-79595d43ce.patch":
+  version: 1.5.2
+  resolution: "@rn-primitives/dropdown-menu@patch:@rn-primitives/dropdown-menu@npm%3A1.5.2#~/.yarn/patches/@rn-primitives-dropdown-menu-npm-1.5.2-79595d43ce.patch::version=1.5.2&hash=336155"
+  dependencies:
+    "@radix-ui/react-dropdown-menu": "npm:^2.1.16"
+    "@rn-primitives/hooks": "npm:1.5.2"
+    "@rn-primitives/slot": "npm:1.5.2"
+    "@rn-primitives/types": "npm:1.5.2"
+    "@rn-primitives/utils": "npm:1.5.2"
+  peerDependencies:
+    "@rn-primitives/portal": "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native:
+      optional: true
+    react-native-web:
+      optional: true
+  checksum: 10c0/f85046d65475ba0c0184e6e989719b6194b2ec80a72da877d9c8300a3e3ea9f0003a32837da461871676e97be51a9bda5962eb774daf6e72e16889ab73d2ed8a
+  languageName: node
+  linkType: hard
+
+"@rn-primitives/hooks@npm:1.5.2, @rn-primitives/hooks@npm:^1.5.2":
   version: 1.5.2
   resolution: "@rn-primitives/hooks@npm:1.5.2"
   dependencies:

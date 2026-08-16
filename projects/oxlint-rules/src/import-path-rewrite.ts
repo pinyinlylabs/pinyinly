@@ -15,12 +15,7 @@
  * }] }
  */
 
-import type { Rule } from "eslint";
-import type {
-  ExportAllDeclaration,
-  ExportNamedDeclaration,
-  ImportDeclaration,
-} from "estree";
+import type { CreateOnceRule, ESTree } from "@oxlint/plugins";
 
 interface PatternConfig {
   from: string;
@@ -36,7 +31,7 @@ interface RewriteRule {
   replacement: string;
 }
 
-const rule: Rule.RuleModule = {
+const rule: CreateOnceRule = {
   meta: {
     type: `suggestion`,
     docs: {
@@ -68,15 +63,10 @@ const rule: Rule.RuleModule = {
     ],
   },
 
-  create(context: Rule.RuleContext) {
-    const options = (context.options[0] ?? {}) as ImportPathRewriteOptions;
-    const patterns = options.patterns ?? [];
-
-    // Convert string patterns to RegExp objects
-    const rewriteRules: RewriteRule[] = patterns.map((pattern) => ({
-      regex: new RegExp(pattern.from, `u`),
-      replacement: pattern.to,
-    }));
+  createOnce(context) {
+    // `context.options` is only populated once the file starts linting, so
+    // rebuild the rewrite rules in `before()` rather than here.
+    let rewriteRules: RewriteRule[] = [];
 
     // Process a source value and apply rewrite rules if it matches any pattern
     function processSourceValue(value: string): string | null {
@@ -93,31 +83,31 @@ const rule: Rule.RuleModule = {
 
     // Check and report source paths for declarations
     function checkSourcePath(
-      node: ImportDeclaration | ExportAllDeclaration | ExportNamedDeclaration,
+      node:
+        | ESTree.ImportDeclaration
+        | ESTree.ExportAllDeclaration
+        | ESTree.ExportNamedDeclaration,
     ) {
-      if (
-        node.source === null ||
-        node.source === undefined ||
-        typeof node.source.value !== `string`
-      ) {
+      if (node.source === null || typeof node.source.value !== `string`) {
         return;
       }
+      const source = node.source;
 
-      const sourceValue = node.source.value;
+      const sourceValue = source.value;
       const rewrittenPath = processSourceValue(sourceValue);
 
       if (rewrittenPath !== null) {
         context.report({
-          node: node.source,
+          node: source,
           message: `Import path "${sourceValue}" should be rewritten to "${rewrittenPath}"`,
           fix(fixer) {
             // Get the quote character used in the original source
             const sourceCode = context.sourceCode;
-            const sourceText = sourceCode.getText(node.source ?? undefined);
+            const sourceText = sourceCode.getText(source);
             const quoteChar = sourceText[0] ?? `'`; // First character is the opening quote
 
             return fixer.replaceText(
-              node.source,
+              source,
               `${quoteChar}${rewrittenPath}${quoteChar}`,
             );
           },
@@ -126,6 +116,19 @@ const rule: Rule.RuleModule = {
     }
 
     return {
+      before() {
+        // Types claim `context.options` is never nullish, but it is `null` here at runtime.
+        // oxlint-disable-next-line typescript/no-unnecessary-condition
+        const options = (context.options?.[0] ??
+          {}) as ImportPathRewriteOptions;
+        const patterns = options.patterns ?? [];
+
+        // Convert string patterns to RegExp objects
+        rewriteRules = patterns.map((pattern) => ({
+          regex: new RegExp(pattern.from, `u`),
+          replacement: pattern.to,
+        }));
+      },
       ImportDeclaration: checkSourcePath,
       ExportAllDeclaration: checkSourcePath,
       ExportNamedDeclaration: checkSourcePath,

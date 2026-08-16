@@ -30,15 +30,14 @@
  * { "import-names": ["error", { "namedImports": { "react": { "useState": "useState" } } }] }
  */
 
-import type { Rule } from "eslint";
-import type { ImportDeclaration, ImportDefaultSpecifier } from "estree";
+import type { CreateOnceRule, ESTree } from "@oxlint/plugins";
 
 interface ImportNamesOptions {
   defaultImports?: Record<string, string>;
   namedImports?: Record<string, Record<string, string>>;
 }
 
-const rule: Rule.RuleModule = {
+const rule: CreateOnceRule = {
   meta: {
     type: `problem`,
     docs: {
@@ -71,13 +70,21 @@ const rule: Rule.RuleModule = {
     ],
   },
 
-  create(context: Rule.RuleContext) {
-    const options = (context.options[0] ?? {}) as ImportNamesOptions;
-    const defaultImportsConfig = options.defaultImports ?? {};
-    const namedImportsConfig = options.namedImports ?? {};
+  createOnce(context) {
+    // `context.options` is only populated once the file starts linting, so
+    // rebuild these maps in `before()` rather than here.
+    let defaultImportsConfig: Record<string, string> = {};
+    let namedImportsConfig: Record<string, Record<string, string>> = {};
 
     return {
-      ImportDeclaration(node: ImportDeclaration) {
+      before() {
+        // Types claim `context.options` is never nullish, but it is `null` here at runtime.
+        // oxlint-disable-next-line typescript/no-unnecessary-condition
+        const options = (context.options?.[0] ?? {}) as ImportNamesOptions;
+        defaultImportsConfig = options.defaultImports ?? {};
+        namedImportsConfig = options.namedImports ?? {};
+      },
+      ImportDeclaration(node: ESTree.ImportDeclaration) {
         const sourceValue = node.source.value;
         // TypeScript needs string assertion because node.source.value could be various types
         const moduleSource =
@@ -107,7 +114,7 @@ const rule: Rule.RuleModule = {
         // Check default imports
         if (expectedDefaultName !== undefined) {
           const defaultSpecifier = node.specifiers.find(
-            (s): s is ImportDefaultSpecifier =>
+            (s): s is ESTree.ImportDefaultSpecifier =>
               s.type === `ImportDefaultSpecifier`,
           );
 

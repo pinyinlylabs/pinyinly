@@ -3,10 +3,10 @@
  */
 
 import * as fs from "@pinyinly/lib/fs";
-import type { Rule } from "eslint";
+import type { CreateOnceRule } from "@oxlint/plugins";
 import path from "node:path";
 
-const rule: Rule.RuleModule = {
+const rule: CreateOnceRule = {
   meta: {
     type: `problem`,
     docs: {
@@ -16,10 +16,10 @@ const rule: Rule.RuleModule = {
     schema: [],
   },
 
-  create(context: Rule.RuleContext) {
-    const sourceCode = context.sourceCode;
+  createOnce(context) {
     return {
       Program() {
+        const sourceCode = context.sourceCode;
         const comments = sourceCode.getAllComments();
         for (let index = 0; index < comments.length; index++) {
           const comment = comments[index];
@@ -96,7 +96,7 @@ const rule: Rule.RuleModule = {
           }
           if (attributeError || globPath === null || template === null) {
             context.report({
-              loc: comment.loc ?? { line: 1, column: 0 },
+              loc: comment.loc,
               message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Available variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}, \${relpath}, \${relpathWithoutExt}. You can also use JavaScript expressions like \${path.split('.')[0]} or \${relpath.replace(/-/g, '_')}`,
             });
             continue;
@@ -115,25 +115,6 @@ const rule: Rule.RuleModule = {
           if (!closeComment) {
             continue;
           }
-
-          // Find the array node that contains this comment (optional for template use cases)
-          const tokens = sourceCode.getTokensBefore(comment, {
-            includeComments: false,
-            count: 10,
-          });
-          let arrayNode = null;
-          tokens.reverse();
-          for (const token of tokens) {
-            if (token.type === `Punctuator` && token.value === `[`) {
-              // Try to find the array node
-              const node = sourceCode.getNodeByRangeIndex(token.range[0]);
-              if (node?.type === `ArrayExpression`) {
-                arrayNode = node;
-                break;
-              }
-            }
-          }
-          // Continue even if no array node is found (for non-array use cases)
 
           // Get all files in the glob pattern
           const filePath = context.filename;
@@ -220,7 +201,7 @@ const rule: Rule.RuleModule = {
                 ? (error as Error).message
                 : String(error);
             context.report({
-              loc: comment.loc ?? arrayNode?.loc ?? { line: 1, column: 0 },
+              loc: comment.loc,
               message: `Could not process glob pattern: ${globPath}. ${errorMessage}`,
             });
             continue;
@@ -257,7 +238,7 @@ const rule: Rule.RuleModule = {
             const relPathWithoutExt = f.replace(/\.[^/.]+$/u, ``);
 
             // Create context for evaluating expressions
-            const context = {
+            const templateContext = {
               filenameWithoutExt: filenameWithoutExtension,
               pathWithoutExt: pathWithoutExtension,
               path: requirePath,
@@ -275,8 +256,8 @@ const rule: Rule.RuleModule = {
               (match, expr: string) => {
                 try {
                   // Create a function with the context variables as arguments
-                  const keys = Object.keys(context);
-                  const values = Object.values(context);
+                  const keys = Object.keys(templateContext);
+                  const values = Object.values(templateContext);
 
                   // Create a function that evaluates the expression in the given context
                   // This is safer than using eval() directly
@@ -296,9 +277,6 @@ const rule: Rule.RuleModule = {
           });
 
           // Find the range to replace
-          if (comment.range === undefined || closeComment.range === undefined) {
-            continue;
-          }
           const start = comment.range[1];
           const end = closeComment.range[0];
           const between = sourceCode.text.slice(start, end);
@@ -318,7 +296,7 @@ const rule: Rule.RuleModule = {
 
           if (isOutOfSync) {
             context.report({
-              loc: comment.loc ?? arrayNode?.loc ?? { line: 1, column: 0 },
+              loc: comment.loc,
               message: `Generated code is out of sync with files matching ${globPath}`,
               fix: (fixer) =>
                 fixer.replaceTextRange(

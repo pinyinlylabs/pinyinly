@@ -117,33 +117,30 @@ tasks:
 
   codegen:
     deps:
-      - ~:codegenEslint
+      - ~:codegenOxlint
       - ~:codegenExpoRouterTypes
       - ~:codegenPublicVendor
 
-  codegenEslint:
-    description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
+  codegenOxlint:
+    description: "Run Oxlint with codegen rules. This is separate from lint and doesn't use Oxlint caching intentionally."
     script: |
       [ -n "${CI:-}" ] && {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }
 
-      eslint . --config eslint-codegen.config.mjs --fix
+      oxlint --config .oxlintrc-codegen.json --fix .
     inputs:
       # Config files anywhere within the project
       - src/data/pinyinSoundAudio.ts
       - src/client/ui/iconRegistry.ts
       - src/**/*.demo.tsx
       - src/assets/**
+      - .oxlintrc-codegen.json
       # Environment variables
       - "$DEBUG"
-      - "$ESLINT_*"
-      - "$TIMING"
     deps:
-      - eslint-rules:src
-    env:
-      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+      - oxlint-rules:src
     toolchain: "node"
 
   codegenExpoRouterTypes:
@@ -427,3 +424,4 @@ dependsOn:
   - eslint-rules
   - lib
   - mdx
+  - oxlint-rules

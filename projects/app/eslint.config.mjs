@@ -36,14 +36,6 @@ export default defineConfig(
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
     ignores: [`*.*`, `bin/**/*`, `test/**/*`],
     rules: {
-      // Expo code doesn't support subpath imports, so rewrite them to use the
-      // @/ path alias.
-      "@pinyinly/import-path-rewrite": [
-        `error`,
-        {
-          patterns: [{ from: String.raw`^#(.+)\.[jt]sx?$`, to: `@/$1` }],
-        },
-      ],
       // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
       // pulls in the `node` types so it doesn't fail type checking on "missing
       // imports", so this lint rule catches them.

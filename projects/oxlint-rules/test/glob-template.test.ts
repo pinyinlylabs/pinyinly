@@ -1,5 +1,9 @@
 import { globTemplate } from "#glob-template.ts";
-import { RuleTester } from "eslint";
+import { RuleTester } from "oxlint/plugins-dev";
+import { describe, test as it } from "vitest";
+
+RuleTester.describe = describe;
+RuleTester.it = it;
 
 const validCodeCustomTemplate =
   `// <pyly-glob-template glob="./glob-template.test/*.svg" template="require('\${path}');">\n` +
@@ -28,10 +32,10 @@ const validCodeParentDir =
 
 const validCodeTwoParentDir =
   `const allIcons = [\n` +
-  `  // <pyly-glob-template glob="../../eslint-rules/test/glob-template.test/*.svg" template="  require('\${path}'),">\n` +
-  `  require('../../eslint-rules/test/glob-template.test/a.svg'),\n` +
-  `  require('../../eslint-rules/test/glob-template.test/b.svg'),\n` +
-  `  require('../../eslint-rules/test/glob-template.test/c.svg'),\n` +
+  `  // <pyly-glob-template glob="../../oxlint-rules/test/glob-template.test/*.svg" template="  require('\${path}'),">\n` +
+  `  require('../../oxlint-rules/test/glob-template.test/a.svg'),\n` +
+  `  require('../../oxlint-rules/test/glob-template.test/b.svg'),\n` +
+  `  require('../../oxlint-rules/test/glob-template.test/c.svg'),\n` +
   `// </pyly-glob-template>\n` +
   `];`;
 
@@ -268,16 +272,12 @@ const filename = import.meta.url.replace(`file://`, ``);
 
 const ruleTester = new RuleTester({
   languageOptions: {
-    ecmaVersion: 2020,
     sourceType: `module`,
     parserOptions: {
       ecmaFeatures: {
         jsx: true,
       },
     },
-  },
-  rules: {
-    [`rule-to-test/glob-template`]: [`error`],
   },
 });
 
