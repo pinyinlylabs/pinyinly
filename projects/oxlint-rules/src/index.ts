@@ -3,6 +3,9 @@ import { globTemplate as globTemplateRule } from "./glob-template.ts";
 import { importNames as importNamesRule } from "./import-names.ts";
 import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.ts";
 import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.ts";
+import baseConfig from "./oxlint.config.ts";
+
+export { baseConfig };
 
 // oxlint jsPlugins resolution requires a default export.
 // oxlint-disable-next-line import/no-default-export

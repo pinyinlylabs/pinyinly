@@ -6258,6 +6258,7 @@ __metadata:
     debug: "npm:^4.3.7"
     drizzle-kit: "npm:^0.31.0"
     drizzle-orm: "patch:drizzle-orm@npm%3A0.44.7#~/.yarn/patches/drizzle-orm-npm-0.44.7-0e87e239b7.patch"
+    eslint-plugin-better-tailwindcss: "npm:^4.6.1"
     expo: "npm:~57.0.4"
     expo-apple-authentication: "npm:~57.0.0"
     expo-application: "npm:~57.0.0"

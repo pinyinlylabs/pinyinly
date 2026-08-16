@@ -18,7 +18,7 @@
 - **ESLint Rules** (`projects/eslint-rules/`): Shared ESLint config (stylistic, Tailwind,
   typescript-eslint glue) still used by projects' `eslint.config.mjs`.
 - **Oxlint Rules** (`projects/oxlint-rules/`): Custom oxlint JS plugins (`@pinyinly/oxlint-rules`)
-  plus the shared `base.oxlintrc.json` extended by every project's `.oxlintrc.json`.
+  plus the shared base config extended by every project's `oxlint.config.ts`.
 
 ## CRITICAL: Verify code changes
 

@@ -63,10 +63,10 @@ export const Section = ({
         <Theme theme="light">
           <View
             className={`
-            flex-1 bg-bg/90 p-2
+              flex-1 bg-bg/90 p-2
 
-            hover:bg-bg
-          `}
+              hover:bg-bg
+            `}
           >
             <View className="flex-row items-center justify-between gap-2">
               <Link href={href} asChild>
@@ -74,10 +74,10 @@ export const Section = ({
               </Link>
               <RectButton
                 className="
-                hidden
+                  hidden
 
-                lg:flex
-              "
+                  lg:flex
+                "
                 variant="bare"
                 onPress={() => {
                   setIsLightCollapsed((current) => !current);
@@ -91,17 +91,17 @@ export const Section = ({
         <Theme theme="dark">
           <View
             className={`
-hidden flex-1 bg-bg-high p-2
+              hidden flex-1 bg-bg-high p-2
 
-            lg:flex
-          `}
+              lg:flex
+            `}
           >
             <RectButton
               className="
-              hidden self-end
+                hidden self-end
 
-              lg:flex
-            "
+                lg:flex
+              "
               variant="bare"
               onPress={() => {
                 setIsDarkCollapsed((current) => !current);
@@ -116,9 +116,8 @@ hidden flex-1 bg-bg-high p-2
         <Theme theme="light">
           <View
             className={`
-
-            ${stackContentClass({ collapsed: isLightCollapsed })}
-          `}
+              ${stackContentClass({ collapsed: isLightCollapsed })}
+            `}
           >
             {isLightCollapsed ? null : children}
           </View>
@@ -126,8 +125,8 @@ hidden flex-1 bg-bg-high p-2
         <Theme theme="dark">
           <View
             className={`
-            ${stackContentClass({ collapsed: isDarkCollapsed })}
-          `}
+              ${stackContentClass({ collapsed: isDarkCollapsed })}
+            `}
           >
             {isDarkCollapsed ? null : children}
           </View>

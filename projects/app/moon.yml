@@ -129,18 +129,21 @@ tasks:
         exit 0
       }
 
-      oxlint --config .oxlintrc-codegen.json --fix .
+      oxlint --config oxlint-codegen.config.ts --fix .
     inputs:
       # Config files anywhere within the project
       - src/data/pinyinSoundAudio.ts
       - src/client/ui/iconRegistry.ts
       - src/**/*.demo.tsx
       - src/assets/**
-      - .oxlintrc-codegen.json
+      - oxlint-codegen.config.ts
       # Environment variables
       - "$DEBUG"
     deps:
       - oxlint-rules:src
+    env:
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchain: "node"
 
   codegenExpoRouterTypes:

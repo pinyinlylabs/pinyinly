@@ -27,7 +27,6 @@ export default defineConfig(
 
   // extends ...
   configs.recommended,
-  configs.tailwind,
 
   queryPlugin.configs[`flat/recommended`],
 

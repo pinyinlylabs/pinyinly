@@ -10,4 +10,7 @@ tasks:
       - "*.{cjs,js,mjs,ts,tsx}"
       - ".oxlintrc.*"
       - "/projects/oxlint-rules/*.oxlintrc.*"
+    env:
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchain: "node"

@@ -171,6 +171,7 @@
     "chalk": "^5.5.0",
     "debug": "^4.3.7",
     "drizzle-kit": "^0.31.0",
+    "eslint-plugin-better-tailwindcss": "^4.6.1",
     "expo-atlas": "^0.4.3",
     "fast-xml-parser": "^5.10.1",
     "fontkit": "^2.0.4",

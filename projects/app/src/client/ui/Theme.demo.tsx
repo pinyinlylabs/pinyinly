@@ -25,9 +25,7 @@ export default () => {
           <ExampleStack
             title={themeClass}
             key={themeClass}
-            childrenClassName={`
-            gap-1 px-2 py-1
-          `}
+            childrenClassName={`gap-1 px-2 py-1`}
           >
             <ThemeExamples />
           </ExampleStack>

@@ -71,8 +71,8 @@ config = withUniwindConfig(config, {
   cssEntryFile: `./src/global.css`,
   dtsFile: `./uniwind-env.d.ts`,
   extraThemes: [
-    "dark-popover",
-    "light-popover",
+    `dark-popover`,
+    `light-popover`,
     `dark-danger-panel`,
     `dark-grass-panel`,
     `dark-placeholder-panel`,

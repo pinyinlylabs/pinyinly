@@ -40,9 +40,9 @@ function DropdownMenuSubTrigger({
     <Text.ClassContext.Provider
       value={cn(
         `
-          group-active:text-on-accent
-
           text-sm select-none
+
+          group-active:text-on-accent
         `,
         open && `text-on-accent`,
       )}
@@ -50,9 +50,9 @@ function DropdownMenuSubTrigger({
       <DropdownMenuPrimitive.SubTrigger
         className={cn(
           `
-            active:bg-accent
-
             group flex flex-row items-center justify-between rounded-sm p-2
+
+            active:bg-accent
 
             sm:py-1.5
           `,
@@ -137,7 +137,10 @@ function DropdownMenuSubContent({
     <NativeOnlyAnimatedView entering={FadeIn.reduceMotion(ReduceMotion.System)}>
       <SubContent
         className={cn(
-          `bg-bg border-border overflow-hidden rounded-md border p-1 shadow-lg shadow-black/5`,
+          `
+            animate-in overflow-hidden rounded-md border border-border bg-bg p-1 shadow-lg
+            shadow-black/5
+          `,
           Platform.select({
             web: `animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fade-in-0 data-[state=closed]:zoom-out-95 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-context-menu-content-transform-origin) z-50 min-w-[8rem]`,
           }),
@@ -187,16 +190,16 @@ function DropdownMenuContent({
                 <DropdownMenuPrimitive.Content
                   className={cn(
                     `
-                    border-border min-w-[8rem] overflow-hidden rounded-md border bg-bg p-1 shadow-lg
-                    shadow-black/5
-                  `,
+                      min-w-[8rem] overflow-hidden rounded-md border border-border bg-bg p-1
+                      shadow-lg shadow-black/5
+                    `,
                     Platform.select({
                       web: cn(
                         `
-                        animate-in fade-in-0 zoom-in-95 z-50
-                        max-h-(--radix-context-menu-content-available-height)
-                        origin-(--radix-context-menu-content-transform-origin) cursor-default
-                      `,
+                          animate-in fade-in-0 zoom-in-95 z-50
+                          max-h-(--radix-context-menu-content-available-height)
+                          origin-(--radix-context-menu-content-transform-origin) cursor-default
+                        `,
                         props.side === `bottom` && `slide-in-from-top-2`,
                         props.side === `top` && `slide-in-from-bottom-2`,
                       ),
@@ -228,11 +231,9 @@ function DropdownMenuItem({
     <Text.ClassContext.Provider
       value={cn(
         `
-          text-fg
+          text-sm text-fg select-none
 
           group-active:text-fg
-
-          text-sm select-none
         `,
         variant === `destructive` &&
           `
@@ -254,11 +255,9 @@ function DropdownMenuItem({
           Platform.select({
             web: cn(
               `
-                focus:text-on-accent
-
                 cursor-default outline-none
 
-                focus:bg-accent
+                focus:bg-accent focus:text-on-accent
 
                 data-[disabled]:pointer-events-none
               `,
@@ -298,9 +297,9 @@ function DropdownMenuCheckboxItem({
       <DropdownMenuPrimitive.CheckboxItem
         className={cn(
           `
-            active:bg-accent
-
             group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8
+
+            active:bg-accent
 
             sm:py-1.5
           `,
@@ -340,9 +339,9 @@ function DropdownMenuRadioItem({
       <DropdownMenuPrimitive.RadioItem
         className={cn(
           `
-            active:bg-accent
-
             group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8
+
+            active:bg-accent
 
             sm:py-1.5
           `,
@@ -356,7 +355,7 @@ function DropdownMenuRadioItem({
       >
         <View className="absolute left-2 flex size-3.5 items-center justify-center">
           <DropdownMenuPrimitive.ItemIndicator>
-            <View className="bg-fg size-2 rounded-full" />
+            <View className="size-2 rounded-full bg-fg" />
           </DropdownMenuPrimitive.ItemIndicator>
         </View>
         {children}
@@ -377,7 +376,7 @@ function DropdownMenuLabel({
     <DropdownMenuPrimitive.Label
       className={cn(
         `
-          text-fg p-2 text-sm font-medium
+          p-2 text-sm font-medium text-fg
 
           sm:py-1.5
         `,
@@ -395,7 +394,7 @@ function DropdownMenuSeparator({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
   return (
     <DropdownMenuPrimitive.Separator
-      className={cn(`bg-border -mx-1 my-1 h-px`, className)}
+      className={cn(`-mx-1 my-1 h-px bg-border`, className)}
       {...props}
     />
   );
@@ -407,7 +406,7 @@ function DropdownMenuShortcut({
 }: React.ComponentProps<typeof Text>) {
   return (
     <Text
-      className={cn(`text-fg-dim ml-auto text-xs tracking-widest`, className)}
+      className={cn(`ml-auto text-xs tracking-widest text-fg-dim`, className)}
       {...props}
     />
   );

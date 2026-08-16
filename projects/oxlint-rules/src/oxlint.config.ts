@@ -1,11 +1,13 @@
-{
-  "$schema": "../../node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "import", "eslint", "unicorn", "react"],
-  "jsPlugins": [
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  $schema: "../../node_modules/oxlint/configuration_schema.json",
+  plugins: ["typescript", "import", "eslint", "unicorn", "react"],
+  jsPlugins: [
     {
-      "name": "import-js",
-      "specifier": "eslint-plugin-import"
-    }
+      name: "import-js",
+      specifier: "eslint-plugin-import",
+    },
     // Crashes oxlint LSP
     // {
     //   "name": "stylistic-js",
@@ -14,14 +16,14 @@
     // Add "@pinyinly/oxlint-rules" as a jsPlugin in a project's own
     // .oxlintrc.json (not here) if it needs the "pinyinly/*" rules.
   ],
-  "ignorePatterns": ["**/*.d.ts"],
-  "categories": {
-    "correctness": "error",
-    "restriction": "error",
-    "pedantic": "error"
+  ignorePatterns: ["**/*.d.ts"],
+  categories: {
+    correctness: "error",
+    restriction: "error",
+    pedantic: "error",
   },
-  "rules": {
-    "complexity": "off",
+  rules: {
+    complexity: "off",
     "class-methods-use-this": "off",
     "no-bitwise": "off",
     "default-case": "off",
@@ -45,11 +47,11 @@
     "no-warning-comments": "off",
     "max-depth": "off",
     "max-classes-per-file": "off",
-    "eqeqeq": "off",
+    eqeqeq: "off",
     "max-lines": "off",
     "max-lines-per-function": "off",
-    "curly": "deny",
-    "no-console": ["deny", { "allow": ["warn", "error"] }],
+    curly: "deny",
+    "no-console": ["deny", { allow: ["warn", "error"] }],
     "no-debugger": "deny",
     "no-else-return": "deny",
     "no-useless-rename": "deny",
@@ -63,7 +65,7 @@
     "no-global-assign": "deny",
     "no-fallthrough": [
       "error",
-      { "commentPattern": ".*intentional fallthrough.*" }
+      { commentPattern: ".*intentional fallthrough.*" },
     ],
 
     "unicorn/no-thenable": "deny",
@@ -78,9 +80,9 @@
     "unicorn/numeric-separators-style": [
       "error",
       {
-        "onlyIfContainsSeparator": true,
-        "number": { "onlyIfContainsSeparator": false }
-      }
+        onlyIfContainsSeparator: true,
+        number: { onlyIfContainsSeparator: false },
+      },
     ],
     "unicorn/no-null": "off", // null used extensively
     "unicorn/number-literal-case": "off", // overwritten by prettier
@@ -99,79 +101,82 @@
     "eslint/no-restricted-imports": [
       "deny",
       {
-        "paths": [
+        paths: [
           {
-            "name": "react-native",
-            "importNames": ["SafeAreaView"],
-            "message": "Use \"useSafeAreaInsets\" from \"react-native-safe-area-context\" instead."
+            name: "react-native",
+            importNames: ["SafeAreaView"],
+            message:
+              'Use "useSafeAreaInsets" from "react-native-safe-area-context" instead.',
           },
           {
-            "name": "expo-image",
-            "importNames": ["Image"],
-            "message": "Use \"Image\" from \"@/client/ui/Image\" instead (for Uniwind support)."
+            name: "expo-image",
+            importNames: ["Image"],
+            message:
+              'Use "Image" from "@/client/ui/Image" instead (for Uniwind support).',
           },
           {
-            "name": "react-native-svg",
-            "importNames": ["Path"],
-            "message": "Use \"SvgPath\" from \"@/client/ui/SvgPath\" instead (for Uniwind support)."
+            name: "react-native-svg",
+            importNames: ["Path"],
+            message:
+              'Use "SvgPath" from "@/client/ui/SvgPath" instead (for Uniwind support).',
           },
           {
-            "name": "react",
-            "importNames": ["forwardRef", "memo", "useContext"],
-            "message": "Migrate to React 19 patterns."
+            name: "react",
+            importNames: ["forwardRef", "memo", "useContext"],
+            message: "Migrate to React 19 patterns.",
           },
           {
-            "name": "vitest",
-            "importNames": ["it"],
-            "message": "Use \"test(…)\" instead of \"it(…)\" for consistency."
+            name: "vitest",
+            importNames: ["it"],
+            message: 'Use "test(…)" instead of "it(…)" for consistency.',
           },
           {
-            "name": "hanzi",
-            "message": "Use \"@/dictionary/hanzi\" instead."
+            name: "hanzi",
+            message: 'Use "@/dictionary/hanzi" instead.',
           },
           {
-            "name": "nanoid",
-            "message": "Use \"@/util/nanoid\" instead."
+            name: "nanoid",
+            message: 'Use "@/util/nanoid" instead.',
           },
           {
-            "name": "date-fns",
-            "message": "Use \"date-fns/*\" instead for smaller bundle size.",
-            "allowTypeImports": true
+            name: "date-fns",
+            message: 'Use "date-fns/*" instead for smaller bundle size.',
+            allowTypeImports: true,
           },
           {
-            "name": "lodash",
-            "message": "Use \"lodash/*\" instead for smaller bundle size."
+            name: "lodash",
+            message: 'Use "lodash/*" instead for smaller bundle size.',
           },
           {
-            "name": "node:assert",
-            "message": "Use \"vitest\" instead."
+            name: "node:assert",
+            message: 'Use "vitest" instead.',
           },
           {
-            "name": "node:assert/strict",
-            "message": "Use \"vitest\" instead."
+            name: "node:assert/strict",
+            message: 'Use "vitest" instead.',
           },
           {
-            "name": "node:test",
-            "message": "Use \"vitest\" instead."
+            name: "node:test",
+            message: 'Use "vitest" instead.',
           },
           {
-            "name": "glob",
-            "message": "Use \"glob\" from \"@pinyinly/lib/fs\" instead."
+            name: "glob",
+            message: 'Use "glob" from "@pinyinly/lib/fs" instead.',
           },
           {
-            "name": "node:fs/promises",
-            "message": "Use \"@pinyinly/lib/fs\" instead."
+            name: "node:fs/promises",
+            message: 'Use "@pinyinly/lib/fs" instead.',
           },
           {
-            "name": "node:fs",
-            "message": "Use \"@pinyinly/lib/fs\" instead."
+            name: "node:fs",
+            message: 'Use "@pinyinly/lib/fs" instead.',
           },
           {
-            "name": "@bacons/mdx",
-            "message": "Use \"@/client/mdx\" instead."
-          }
-        ]
-      }
+            name: "@bacons/mdx",
+            message: 'Use "@/client/mdx" instead.',
+          },
+        ],
+      },
     ],
 
     "import/unambiguous": "off",
@@ -196,10 +201,10 @@
     "import-js/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": true,
-        "peerDependencies": true,
-        "optionalDependencies": false
-      }
+        devDependencies: true,
+        peerDependencies: true,
+        optionalDependencies: false,
+      },
     ],
     // Prevent importing the default as if it were named
     "import-js/no-named-default": "error",
@@ -207,7 +212,7 @@
 
     "typescript/consistent-type-imports": [
       "deny",
-      { "disallowTypeAnnotations": false }
+      { disallowTypeAnnotations: false },
     ],
     "typescript/explicit-member-accessibility": "off",
     "typescript/explicit-module-boundary-types": "off",
@@ -233,44 +238,44 @@
     "typescript/no-empty-object-type": "deny",
     "typescript/strict-boolean-expressions": [
       "deny",
-      { "allowNullableBoolean": true }
+      { allowNullableBoolean: true },
     ],
     "typescript/strict-void-return": "off",
     "typescript/switch-exhaustiveness-check": [
       "deny",
-      { "requireDefaultForNonUnion": true }
+      { requireDefaultForNonUnion: true },
     ],
     "typescript/restrict-template-expressions": [
       "deny",
       {
-        "allowAny": false,
-        "allowArray": false,
-        "allowBoolean": true,
-        "allowNever": false,
-        "allowNullish": false,
-        "allowNumber": true,
-        "allowRegExp": false
-      }
+        allowAny: false,
+        allowArray: false,
+        allowBoolean: true,
+        allowNever: false,
+        allowNullish: false,
+        allowNumber: true,
+        allowRegExp: false,
+      },
     ],
     "typescript/promise-function-async": [
       "error",
-      { "allowedPromiseNames": ["ReactNode"] }
+      { allowedPromiseNames: ["ReactNode"] },
     ],
 
     "typescript/no-useless-default-assignment": "off",
     "react/rules-of-hooks": "error",
     "react/no-react-children": "off",
     "react/no-clone-element": "off",
-    "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }],
+    "react/jsx-no-useless-fragment": ["error", { allowExpressions: true }],
     "react/jsx-no-literals": "off",
 
     "react/forbid-component-props": "off",
-    "react/jsx-filename-extension": ["error", { "extensions": ["tsx"] }],
+    "react/jsx-filename-extension": ["error", { extensions: ["tsx"] }],
     "react/no-children-prop": "error",
     "react/no-multi-comp": "off",
     "react/only-export-components": "error",
-    "react/exhaustive-deps": ["error", { "additionalHooks": "(useLiveQuery)" }],
-    "react/react-compiler": "error"
+    "react/exhaustive-deps": ["error", { additionalHooks: "(useLiveQuery)" }],
+    "react/react-compiler": "error",
 
     // "stylistic-js/quotes": ["error", "backtick"]
 
@@ -308,37 +313,37 @@
     // ],
     // "pinyinly/glob-template": "error"
   },
-  "overrides": [
+  overrides: [
     // Ban CommonJS globals in ESM files, use import.meta.* instead
     {
-      "files": ["**/*.{js,mjs,ts,tsx}"],
-      "rules": {
-        "no-restricted-globals": ["error", "__dirname", "__filename"]
-      }
+      files: ["**/*.{js,mjs,ts,tsx}"],
+      rules: {
+        "no-restricted-globals": ["error", "__dirname", "__filename"],
+      },
     },
     // Bin scripts
     {
-      "files": ["bin/**/*.{js,mjs,ts,tsx}"],
-      "rules": {
-        "no-console": "off"
-      }
+      files: ["bin/**/*.{js,mjs,ts,tsx}"],
+      rules: {
+        "no-console": "off",
+      },
     },
     {
-      "files": ["**/*.cjs", "tailwind.config.js"],
-      "rules": {
-        "import/no-commonjs": "off"
-      }
+      files: ["**/*.cjs", "tailwind.config.js"],
+      rules: {
+        "import/no-commonjs": "off",
+      },
     },
     // Config files often export their config as default.
     {
-      "files": ["*.config.*"],
-      "rules": {
-        "import/no-default-export": "off"
-      }
+      files: ["*.config.*"],
+      rules: {
+        "import/no-default-export": "off",
+      },
     },
     {
-      "files": ["test/**"],
-      "rules": {
+      files: ["test/**"],
+      rules: {
         // it's nice to be able to write a quick generator functions in a test without worrying about yield
         "require-yield": "off",
         "no-non-null-assertion": "off",
@@ -362,18 +367,14 @@
         // "typescript/return-await": "off", // this is annoying when you want a little function to return a promise
         // // It's useful to use inline type annotations for mocking.
         // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
-        "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
-      }
+        "unicorn/no-useless-undefined": "off", // writing undefined can be useful when writing mocks
+      },
     },
     {
-      "files": ["*.{test,bench,eval}.*"],
-      "rules": {
-        "typescript/no-non-null-asserted-optional-chain": "off"
-      }
-    }
+      files: ["*.{test,bench,eval}.*"],
+      rules: {
+        "typescript/no-non-null-asserted-optional-chain": "off",
+      },
+    },
   ],
-  "options": {
-    "reportUnusedDisableDirectives": "deny",
-    "respectEslintDisableDirectives": false
-  }
-}
+});
