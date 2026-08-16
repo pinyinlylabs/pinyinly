@@ -15,8 +15,6 @@
 - **Audio Sprites Metro Plugin** (`projects/expo-audio-sprites/`): Rule-based audio sprite
   generator, with Babel plugin and manifest-driven config.
 - **Emails** (`projects/emails/`): React Email templates, previewable via local dev server.
-- **ESLint Rules** (`projects/eslint-rules/`): Shared ESLint config (stylistic, Tailwind,
-  typescript-eslint glue) still used by projects' `eslint.config.mjs`.
 - **Oxlint Rules** (`projects/oxlint-rules/`): Custom oxlint JS plugins (`@pinyinly/oxlint-rules`)
   plus the shared base config extended by every project's `oxlint.config.ts`.
 

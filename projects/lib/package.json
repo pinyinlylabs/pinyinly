@@ -18,7 +18,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@pinyinly/eslint-rules": "workspace:*",
     "@types/lodash": "^4 <=4.18.x",
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "oxfmt": "^0.62.0",

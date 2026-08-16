@@ -395,12 +395,6 @@ tasks:
   lint:
     deps:
       - ~:oxlint
-      - ~:eslint
-
-  eslint:
-    deps:
-      # Lint does type-checking, so the Expo router types need to be generated first.
-      - ~:codegen
 
   oxlint:
     deps:
@@ -412,7 +406,6 @@ tasks:
       - ~:oxfmt
 
 tags:
-  - eslint
   - oxfmt
   - oxlint
   - typescript
@@ -424,7 +417,6 @@ tags:
 
 dependsOn:
   - audio-sprites
-  - eslint-rules
   - lib
   - mdx
   - oxlint-rules

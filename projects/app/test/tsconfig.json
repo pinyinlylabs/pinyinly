@@ -27,9 +27,6 @@
     },
     {
       "path": "../../lib"
-    },
-    {
-      "path": "../../eslint-rules"
     }
   ]
 }

@@ -17,6 +17,8 @@
   "private": true,
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260207.1",
+    "eslint": "^9.13.0",
+    "eslint-plugin-import": "^2.31.0",
     "oxfmt": "^0.62.0",
     "oxlint": "^1.78.0",
     "oxlint-tsgolint": "^7.0.2001",

@@ -17,9 +17,6 @@
       "path": "./test"
     },
     {
-      "path": "../eslint-rules"
-    },
-    {
       "path": "../lib"
     }
   ]

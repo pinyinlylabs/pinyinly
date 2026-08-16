@@ -20,13 +20,6 @@
       "source.fixAll": "always",
       "source.formatDocument": "always",
     },
-    "eslint.useFlatConfig": true,
-    "eslint.workingDirectories": [
-      { "directory": "./" },
-      { "pattern": "./projects/*" },
-    ],
-    // Allow loading ESLint rules written in TypeScript directly
-    "eslint.runtime": "node_modules/.bin/tsx",
     "js/ts.tsdk.path": "node_modules/typescript/lib",
     "js/ts.experimental.useTsgo": true,
     "tailwindCSS.experimental.classRegex": [

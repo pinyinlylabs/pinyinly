@@ -1,14 +1,18 @@
-import { useQueries } from "@tanstack/react-query";
+import { queryOptions, useQueries } from "@tanstack/react-query";
 import { Asset } from "expo-asset";
 import { Image } from "@/client/ui/Image";
 import { Platform } from "react-native";
 
-export function usePrefetchImages(...images: RnRequireSource[]) {
-  return useQueries({
-    queries: images.map((image) => ({
-      queryKey: [usePrefetchImages.name, image],
-      queryFn: async () => cacheImage(image),
-    })),
+export function usePrefetchImages(...images: RnRequireSource[]): void {
+  useQueries({
+    queries: images.map((image) => getPrefetchImageOptions(image)),
+  });
+}
+
+export function getPrefetchImageOptions(image: RnRequireSource) {
+  return queryOptions({
+    queryKey: [usePrefetchImages.name, image],
+    queryFn: async () => cacheImage(image),
   });
 }
 

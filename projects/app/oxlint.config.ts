@@ -1,6 +1,8 @@
 import { defineConfig } from "oxlint";
 import { baseConfig } from "@pinyinly/oxlint-rules";
 import { getDefaultSelectors } from "eslint-plugin-better-tailwindcss/defaults";
+import { builtinModules } from "node:module";
+import pluginQuery from "@tanstack/eslint-plugin-query";
 
 export default defineConfig({
   $schema: `../../node_modules/oxlint/configuration_schema.json`,
@@ -14,6 +16,11 @@ export default defineConfig({
       name: `better-tailwindcss`,
       specifier: `eslint-plugin-better-tailwindcss`,
     },
+    {
+      name: `expo-typescript-eslint`,
+      specifier: `@typescript-eslint/eslint-plugin`,
+    },
+    `@tanstack/eslint-plugin-query`,
   ],
   rules: {
     // "pinyinly/no-restricted-css-classes": [
@@ -60,8 +67,6 @@ export default defineConfig({
         "better-tailwindcss/no-unnecessary-whitespace": `error`,
       },
     },
-    // Expo bundled files. Metro doesn't support subpath imports, so rewrite
-    // them to use the @/ path alias.
     {
       files: [
         `src/**/*.cjs`,
@@ -71,10 +76,28 @@ export default defineConfig({
         `src/**/*.tsx`,
       ],
       rules: {
+        ...pluginQuery.configs.recommendedStrict.rules,
+
+        // Expo bundled files. Metro doesn't support subpath imports, so rewrite
+        // them to use the @/ path alias.
         "pinyinly/import-path-rewrite": [
           `error`,
           {
             patterns: [{ from: `^#(.+)\\.[jt]sx?$`, to: `@/$1` }],
+          },
+        ],
+        // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
+        // pulls in the `node` types so it doesn't fail type checking on "missing
+        // imports", so this lint rule catches them.
+        "expo-typescript-eslint/no-restricted-imports": [
+          `error`,
+          {
+            paths: builtinModules
+              .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
+              .map((name) => ({
+                name,
+                message: `Expo code is universal and doesn't support Node.js packages`,
+              })),
           },
         ],
       },

@@ -4,7 +4,7 @@ import { baseConfig } from "@pinyinly/oxlint-rules";
 export default defineConfig({
   extends: [baseConfig],
   options: {
-    reportUnusedDisableDirectives: "error",
+    reportUnusedDisableDirectives: `error`,
     respectEslintDisableDirectives: false,
   },
 });

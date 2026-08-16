@@ -2,14 +2,12 @@ tasks:
   lint:
     deps:
       - ~:oxlint
-      - ~:eslint
 
   fmt:
     deps:
       - ~:oxfmt
 
 tags:
-  - eslint
   - oxfmt
   - oxlint
   - typescript
