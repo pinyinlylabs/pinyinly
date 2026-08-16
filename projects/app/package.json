@@ -191,7 +191,7 @@
     "typescript": "^6.0.3",
     "ucd-full": "^16.0.0",
     "unified": "^11.0.5",
-    "vite": "^7.3.2",
+    "vite": "^8.0.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.7",
     "vitest-evals": "^0.11.0",
