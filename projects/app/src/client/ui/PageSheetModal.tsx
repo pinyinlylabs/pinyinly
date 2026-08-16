@@ -16,6 +16,7 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { Suspense } from "./Suspense";
+import { Theme } from "./Theme";
 
 export type PageSheetChild = (options: { dismiss: () => void }) => ReactNode;
 
@@ -52,17 +53,19 @@ export const PageSheetModal = ({
   suspenseFallback,
 }: PageSheetModalProps) => {
   return (
-    <PageSheetModalImpl
-      onDismiss={onDismiss}
-      onDismissRequest={onDismissRequest}
-      passivePresentation={passivePresentation}
-      disableBackgroundDismiss={disableBackgroundDismiss}
-      devUiSnapshotMode={devUiSnapshotMode}
-    >
-      {(api) => (
-        <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
-      )}
-    </PageSheetModalImpl>
+    <Theme theme="default">
+      <PageSheetModalImpl
+        onDismiss={onDismiss}
+        onDismissRequest={onDismissRequest}
+        passivePresentation={passivePresentation}
+        disableBackgroundDismiss={disableBackgroundDismiss}
+        devUiSnapshotMode={devUiSnapshotMode}
+      >
+        {(api) => (
+          <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
+        )}
+      </PageSheetModalImpl>
+    </Theme>
   );
 };
 

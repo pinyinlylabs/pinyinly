@@ -1,4 +1,4 @@
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { PropsWithChildren } from "react";
 import type { ThemeName } from "uniwind";
 import { ScopedTheme, useUniwind } from "uniwind";
@@ -9,7 +9,10 @@ type LightModeStripped<T> = T extends `light-${infer U}`
     ? U
     : never;
 
-export type PylyThemeName = ThemeName | LightModeStripped<ThemeName>;
+export type PylyThemeName =
+  | ThemeName
+  | LightModeStripped<ThemeName>
+  | `default`;
 
 export function Theme({
   children,
@@ -21,14 +24,23 @@ export function Theme({
     return <>{children}</>;
   }
 
-  // Turn a theme like "danger-panel" into "light-danger-panel" or
-  // "dark-danger-panel" depending on the parent theme.
+  const parentLightOrDark = /^(?:light|dark)\b/u.exec(parentTheme)?.[0];
   const isLightOrDark = /^(?:light|dark)\b/u.test(theme);
-  if (!isLightOrDark) {
-    const parentThemePrefix = nonNullable(
-      /^(?:light|dark)\b/u.exec(parentTheme)?.[0],
+
+  if (theme === `default`) {
+    invariant(
+      parentLightOrDark != null,
+      `Theme must be used within a parent Theme`,
     );
-    theme = `${parentThemePrefix}-${theme}` as ThemeName;
+    theme = parentLightOrDark as ThemeName;
+  } else // Turn a theme like "danger-panel" into "light-danger-panel" or
+  // "dark-danger-panel" depending on the parent theme.
+  if (!isLightOrDark) {
+    invariant(
+      parentLightOrDark != null,
+      `Theme must be used within a parent Theme`,
+    );
+    theme = `${parentLightOrDark}-${theme}` as ThemeName;
   }
 
   return <ScopedTheme theme={theme as ThemeName}>{children}</ScopedTheme>;
