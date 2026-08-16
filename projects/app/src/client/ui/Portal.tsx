@@ -11,8 +11,11 @@
 import type { PropsWithChildren } from "react";
 import { useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
+import { ScopedTheme, useUniwind } from "uniwind";
 
 export function Portal({ children }: PropsWithChildren) {
+  const { theme } = useUniwind();
+
   const element = document.createElement(`div`);
 
   useLayoutEffect(() => {
@@ -26,5 +29,8 @@ export function Portal({ children }: PropsWithChildren) {
     };
   }, [element]);
 
-  return createPortal(children, element);
+  return createPortal(
+    <ScopedTheme theme={theme}>{children}</ScopedTheme>,
+    element,
+  );
 }

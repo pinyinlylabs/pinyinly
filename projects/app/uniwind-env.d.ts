@@ -3,7 +3,7 @@
 
 declare module 'uniwind' {
     export interface UniwindConfig {
-        themes: readonly ['light', 'dark']
+        themes: readonly ['light', 'dark', 'dark-popover', 'light-popover', 'dark-danger-panel', 'dark-grass-panel', 'dark-placeholder-panel', 'dark-sky-panel', 'dark-success-panel', 'dark-warning-panel', 'light-danger-panel', 'light-grass-panel', 'light-placeholder-panel', 'light-sky-panel', 'light-success-panel', 'light-warning-panel']
     }
 }
 

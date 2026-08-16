@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { useDemoHanziKnob, useDemoHanziWordKnob } from "./utils";
+import { Theme } from "@/client/ui/Theme";
 
 export const ExampleStack = ({
   children,
@@ -59,73 +60,78 @@ export const Section = ({
   return (
     <>
       <View className="flex-row" ref={ref}>
-        <View
-          className={`
-            pyly-color-scheme-light flex-1 bg-bg/90 p-2 theme-default
+        <Theme theme="light">
+          <View
+            className={`
+            flex-1 bg-bg/90 p-2
 
             hover:bg-bg
           `}
-        >
-          <View className="flex-row items-center justify-between gap-2">
-            <Link href={href} asChild>
-              <Text className="font-mono text-2xl text-fg">{title}</Text>
-            </Link>
-            <RectButton
-              className="
+          >
+            <View className="flex-row items-center justify-between gap-2">
+              <Link href={href} asChild>
+                <Text className="font-mono text-2xl text-fg">{title}</Text>
+              </Link>
+              <RectButton
+                className="
                 hidden
 
                 lg:flex
               "
-              variant="bare"
-              onPress={() => {
-                setIsLightCollapsed((current) => !current);
-              }}
-            >
-              {isLightCollapsed ? `Show` : `Hide`}
-            </RectButton>
+                variant="bare"
+                onPress={() => {
+                  setIsLightCollapsed((current) => !current);
+                }}
+              >
+                {isLightCollapsed ? `Show` : `Hide`}
+              </RectButton>
+            </View>
           </View>
-        </View>
-        <View
-          className={`
-            pyly-color-scheme-dark hidden flex-1 bg-bg-high p-2
+        </Theme>
+        <Theme theme="dark">
+          <View
+            className={`
+hidden flex-1 bg-bg-high p-2
 
             lg:flex
           `}
-        >
-          <RectButton
-            className="
+          >
+            <RectButton
+              className="
               hidden self-end
 
               lg:flex
             "
-            variant="bare"
-            onPress={() => {
-              setIsDarkCollapsed((current) => !current);
-            }}
-          >
-            {isDarkCollapsed ? `Show` : `Hide`}
-          </RectButton>
-        </View>
+              variant="bare"
+              onPress={() => {
+                setIsDarkCollapsed((current) => !current);
+              }}
+            >
+              {isDarkCollapsed ? `Show` : `Hide`}
+            </RectButton>
+          </View>
+        </Theme>
       </View>
       <View className="lg:flex-row">
-        <View
-          className={`
-            pyly-color-scheme-light theme-default
+        <Theme theme="light">
+          <View
+            className={`
 
             ${stackContentClass({ collapsed: isLightCollapsed })}
           `}
-        >
-          {isLightCollapsed ? null : children}
-        </View>
-        <View
-          className={`
-            pyly-color-scheme-dark theme-default
-
+          >
+            {isLightCollapsed ? null : children}
+          </View>
+        </Theme>
+        <Theme theme="dark">
+          <View
+            className={`
             ${stackContentClass({ collapsed: isDarkCollapsed })}
           `}
-        >
-          {isDarkCollapsed ? null : children}
-        </View>
+          >
+            {isDarkCollapsed ? null : children}
+          </View>
+        </Theme>
       </View>
     </>
   );

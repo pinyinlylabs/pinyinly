@@ -1,18 +1,10 @@
-import { Section } from "@/client/ui/demo/components";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { FunctionComponent } from "react";
 import { lazy } from "react";
+import { Text } from "@/client/ui/Text";
 
 export default function UiDemoIndexPage() {
-  return (
-    <>
-      {Object.entries(demos).map(([name, Demo]) => (
-        <Section key={name} title={name} href={`/dev/demo/${name}`}>
-          <Demo />
-        </Section>
-      ))}
-    </>
-  );
+  return <Text className="text-fg-dim">Choose a demo from the list</Text>;
 }
 
 const lazyDemo = <Demo extends FunctionComponent>(
@@ -77,7 +69,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`TextAnswerInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextAnswerInputSingle.demo`)),
   [`TextInputMulti`]: lazyDemo(() => import(`../../../client/ui/TextInputMulti.demo`)),
   [`TextInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextInputSingle.demo`)),
-  [`Themes`]: lazyDemo(() => import(`../../../client/ui/Themes.demo`)),
+  [`Theme`]: lazyDemo(() => import(`../../../client/ui/Theme.demo`)),
   [`ThreeSplitLinesDown`]: lazyDemo(() => import(`../../../client/ui/ThreeSplitLinesDown.demo`)),
   [`ToggleButton`]: lazyDemo(() => import(`../../../client/ui/ToggleButton.demo`)),
   [`Tooltip`]: lazyDemo(() => import(`../../../client/ui/Tooltip.demo`)),

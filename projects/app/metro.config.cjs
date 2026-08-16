@@ -70,6 +70,24 @@ config = {
 config = withUniwindConfig(config, {
   cssEntryFile: `./src/global.css`,
   dtsFile: `./uniwind-env.d.ts`,
+  extraThemes: [
+    "dark-popover",
+    "light-popover",
+    `dark-danger-panel`,
+    `dark-grass-panel`,
+    `dark-placeholder-panel`,
+    `dark-sky-panel`,
+    `dark-success-panel`,
+    `dark-warning-panel`,
+    `dark`,
+    `light-danger-panel`,
+    `light-grass-panel`,
+    `light-placeholder-panel`,
+    `light-sky-panel`,
+    `light-success-panel`,
+    `light-warning-panel`,
+    `light`,
+  ],
 });
 
 module.exports = config;

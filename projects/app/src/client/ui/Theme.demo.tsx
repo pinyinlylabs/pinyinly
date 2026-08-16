@@ -2,32 +2,36 @@ import { Text, View } from "react-native";
 import { Icon } from "./Icon";
 import { RectButton } from "./RectButton";
 import { ExampleStack } from "./demo/components";
+import { Theme } from "./Theme";
 
 export default () => {
   const themeClasses = [
-    `theme-default`,
-    `theme-danger-panel`,
-    `theme-success-panel`,
-    `theme-warning-panel`,
-    `theme-grass-panel`,
-    `theme-sky-panel`,
-    `theme-placeholder-panel`,
-  ];
+    `danger-panel`,
+    `success-panel`,
+    `warning-panel`,
+    `grass-panel`,
+    `sky-panel`,
+    `placeholder-panel`,
+  ] as const;
 
   return (
     <View>
-      {themeClasses.map((themeClass) => (
-        <ExampleStack
-          title={themeClass}
-          key={themeClass}
-          childrenClassName={`
-            gap-1 px-2 py-1
+      <ExampleStack title={`default`} childrenClassName={`gap-1 px-2 py-1`}>
+        <ThemeExamples />
+      </ExampleStack>
 
-            ${themeClass}
+      {themeClasses.map((themeClass) => (
+        <Theme theme={themeClass} key={themeClass}>
+          <ExampleStack
+            title={themeClass}
+            key={themeClass}
+            childrenClassName={`
+            gap-1 px-2 py-1
           `}
-        >
-          <ThemeExamples />
-        </ExampleStack>
+          >
+            <ThemeExamples />
+          </ExampleStack>
+        </Theme>
       ))}
     </View>
   );
@@ -38,44 +42,42 @@ function ThemeExamples() {
     <>
       <View className="flex-row items-center gap-2">
         <View className="size-6 bg-fg-dim" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          fg-dim
-        </Text>
+        <Text className="font-mono text-fg">fg-dim</Text>
       </View>
 
       <View className="flex-row items-center gap-2">
         <View className="size-6 bg-fg" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          fg
-        </Text>
+        <Text className="font-mono text-fg">fg</Text>
       </View>
 
       <View className="flex-row items-center gap-2">
         <View className="size-6 bg-fg-loud" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          fg-loud
-        </Text>
+        <Text className="font-mono text-fg">fg-loud</Text>
+      </View>
+
+      <View className="flex-row items-center gap-2">
+        <View className="size-6 bg-accent" />
+        <Text className="font-mono text-fg">accent</Text>
+      </View>
+
+      <View className="flex-row items-center gap-2">
+        <View className="size-6 bg-on-accent" />
+        <Text className="font-mono text-fg">on-accent</Text>
       </View>
 
       <View className="flex-row items-center gap-2">
         <View className="size-6 bg-bg" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          bg
-        </Text>
+        <Text className="font-mono text-fg">bg</Text>
       </View>
 
       <View className="flex-row items-center gap-2">
         <View className="size-6 bg-bg-high" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          bg-high
-        </Text>
+        <Text className="font-mono text-fg">bg-high</Text>
       </View>
 
       <View className="flex-row items-center gap-2">
         <View className="size-6 bg-on-fg" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          on-fg
-        </Text>
+        <Text className="font-mono text-fg">on-fg</Text>
       </View>
 
       <View className="mt-2 w-[245px] gap-2 bg-bg px-3 py-2">

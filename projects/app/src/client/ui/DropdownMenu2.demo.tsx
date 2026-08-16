@@ -1,7 +1,9 @@
 import { ExampleStack } from "@/client/ui/demo/components";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import { RectButton } from "./RectButton";
+import { DropdownMenu } from "./DropdownMenu";
+import { Text } from "@/client/ui/Text";
 
 export default () => {
   return (
@@ -78,6 +80,29 @@ export default () => {
             </DropdownMenu2.Item>
           </DropdownMenu2.Content>
         </DropdownMenu2>
+
+        <DropdownMenu>
+          <DropdownMenu.Trigger>
+            <RectButton
+              variant="bareDim"
+              iconEnd="chevron-down"
+              iconSize={16}
+              className="justify-start"
+            >
+              {`Style`}
+            </RectButton>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <DropdownMenu.Label>Style</DropdownMenu.Label>
+            <DropdownMenu.Separator />
+            <DropdownMenu.RadioGroup value={`xx`} onValueChange={() => {}}>
+              <DropdownMenu.RadioItem value={`one`}>One</DropdownMenu.RadioItem>
+            </DropdownMenu.RadioGroup>
+            <DropdownMenu.RadioGroup value={`xx`} onValueChange={() => {}}>
+              <DropdownMenu.RadioItem value={`one`}>two</DropdownMenu.RadioItem>
+            </DropdownMenu.RadioGroup>
+          </DropdownMenu.Content>
+        </DropdownMenu>
       </ExampleStack>
     </View>
   );
