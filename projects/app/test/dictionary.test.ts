@@ -1097,7 +1097,6 @@ test(`dictionary contains entries for decomposition`, async () => {
       "龱 via 卤",
       "龴 via 令, 冷[HSK1], 痛[HSK3], 矛, 舒, 通[HSK2], 零[HSK1], 预, 领[HSK3]",
       "龵 via 看[HSK1]",
-      "龸 via 堂, 学[HSK1], 常[HSK1], 觉",
       "𠀎 via 赛",
       "𠀐 via 贵[HSK1]",
       "𠁤 via 西[HSK1]",
@@ -1169,6 +1168,7 @@ test(`dictionary structural components list`, async () => {
   expect(structural).toMatchInlineSnapshot(`
     [
       "𡗗:openHands",
+      "龸:exoticHat",
       "丨:line",
       "丶:dot",
       "丿:slash",
@@ -1179,6 +1179,7 @@ test(`dictionary structural components list`, async () => {
       "乚:second",
       "𠃌:radical",
       "亅:hook",
+      "冖:cover",
       "𭕄:radical",
       "忄:heart",
     ]
