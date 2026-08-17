@@ -386,13 +386,13 @@ export const dictionaryJsonSchema = z
   .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
   .transform((x) => new Map(x));
 
-export type DictionaryJson = z.infer<typeof dictionaryJsonSchema>;
-
 export const loadDictionaryJson = memoize0(async () =>
   dictionaryJsonSchema
     .transform(deepReadonly)
     .parse(await import(`./data/dictionary.asset.json`).then((x) => x.default)),
 );
+
+export type DictionaryJson = Awaited<ReturnType<typeof loadDictionaryJson>>;
 
 export const hanziWordMigrationsSchema = z
   .array(
@@ -455,143 +455,150 @@ export interface Dictionary {
   hsk7To9HanziWords: readonly HanziWord[];
 }
 
+export function buildDictionary(
+  dictionaryJson: DictionaryJson,
+  charactersJson: CharactersJson,
+): Dictionary {
+  const hanziMap = new Map<string, HanziWordWithMeaning[]>();
+  const glossMap = new Map<string, HanziWordWithMeaning[]>();
+  const hsk1HanziWords: HanziWord[] = [];
+  const hsk2HanziWords: HanziWord[] = [];
+  const hsk3HanziWords: HanziWord[] = [];
+  const hsk4HanziWords: HanziWord[] = [];
+  const hsk5HanziWords: HanziWord[] = [];
+  const hsk6HanziWords: HanziWord[] = [];
+  const hsk7To9HanziWords: HanziWord[] = [];
+  const structuralHanzi = new Set<HanziCharacter>();
+
+  for (const [character, data] of charactersJson.entries()) {
+    if (data.isStructural) {
+      structuralHanzi.add(character);
+    }
+  }
+
+  for (const item of dictionaryJson) {
+    const [hanziWord, meaning] = item;
+
+    mapArrayAdd(hanziMap, hanziFromHanziWord(hanziWord), item);
+
+    for (const gloss of meaning.gloss) {
+      mapArrayAdd(glossMap, gloss, item);
+    }
+
+    switch (meaning.hsk) {
+      case undefined: {
+        break;
+      }
+      case HskLevel[1]: {
+        hsk1HanziWords.push(hanziWord);
+        break;
+      }
+      case HskLevel[2]: {
+        hsk2HanziWords.push(hanziWord);
+        break;
+      }
+      case HskLevel[3]: {
+        hsk3HanziWords.push(hanziWord);
+        break;
+      }
+      case HskLevel[4]: {
+        hsk4HanziWords.push(hanziWord);
+        break;
+      }
+      case HskLevel[5]: {
+        hsk5HanziWords.push(hanziWord);
+        break;
+      }
+      case HskLevel[6]: {
+        hsk6HanziWords.push(hanziWord);
+        break;
+      }
+      case HskLevel[`7-9`]: {
+        hsk7To9HanziWords.push(hanziWord);
+        break;
+      }
+      default: {
+        throw new UnexpectedValueError(meaning.hsk);
+      }
+    }
+  }
+
+  const getPinyinUnitToHanziMap = memoize0(() => {
+    const map = new Map<PinyinUnit, Set<HanziCharacter>>();
+
+    for (const [hanziWord, meaning] of dictionaryJson) {
+      if (meaning.pinyin == null) {
+        continue;
+      }
+
+      const hanzi = hanziFromHanziWord(hanziWord);
+      const hanziCharacters = splitHanziText(hanzi);
+
+      for (const pinyin of meaning.pinyin) {
+        const pinyinUnits = matchAllPinyinUnits(pinyin).map((p) =>
+          normalizePinyinUnit(p),
+        );
+
+        invariant(
+          hanziCharacters.length === pinyinUnits.length,
+          `expected same number of hanzi characters as pinyin units: "%o" / "%o"`,
+          hanzi,
+          pinyin,
+        );
+
+        for (let i = 0; i < pinyinUnits.length; i++) {
+          const hanziCharacter = nonNullable(hanziCharacters[i]);
+          const pinyinUnit2 = nonNullable(pinyinUnits[i]);
+
+          mapSetAdd(map, pinyinUnit2, hanziCharacter);
+        }
+      }
+    }
+
+    return new Map([...map.entries()].map(([k, v]) => [k, [...v]]));
+  });
+
+  return {
+    lookupHanzi(hanzi: HanziCharacter) {
+      return hanziMap.get(hanzi) ?? emptyArray;
+    },
+    lookupHanziWord(hanziWord: HanziWord) {
+      return dictionaryJson.get(hanziWord) ?? null;
+    },
+    lookupGloss(gloss: string) {
+      return glossMap.get(gloss) ?? emptyArray;
+    },
+    lookupPinyinUnit(pinyinUnit: PinyinUnit) {
+      const pinyinUnitToHanziMap = getPinyinUnitToHanziMap();
+
+      return pinyinUnitToHanziMap.get(pinyinUnit) ?? emptyArray;
+    },
+    isStructuralHanzi(hanzi: HanziCharacter) {
+      return structuralHanzi.has(hanzi);
+    },
+    allEntries: [...dictionaryJson.entries()],
+    allHanziWords: [...dictionaryJson.keys()],
+    hsk1HanziWords,
+    hsk2HanziWords,
+    hsk3HanziWords,
+    hsk4HanziWords,
+    hsk5HanziWords,
+    hsk6HanziWords,
+    hsk7To9HanziWords,
+  };
+}
+
 /**
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
  * hanzi word meanings. Useful when building learning graphs.
  */
 export const loadDictionary = memoize0(
   async (): Promise<Readonly<Dictionary>> => {
-    const hanziMap = new Map<string, HanziWordWithMeaning[]>();
-    const glossMap = new Map<string, HanziWordWithMeaning[]>();
     const [dictionaryJson, charactersJson] = await Promise.all([
       loadDictionaryJson(),
       loadCharactersJson(),
     ]);
-    const hsk1HanziWords: HanziWord[] = [];
-    const hsk2HanziWords: HanziWord[] = [];
-    const hsk3HanziWords: HanziWord[] = [];
-    const hsk4HanziWords: HanziWord[] = [];
-    const hsk5HanziWords: HanziWord[] = [];
-    const hsk6HanziWords: HanziWord[] = [];
-    const hsk7To9HanziWords: HanziWord[] = [];
-    const structuralHanzi = new Set<HanziCharacter>();
-
-    for (const [character, data] of charactersJson.entries()) {
-      if (data.isStructural != null) {
-        structuralHanzi.add(character);
-      }
-    }
-
-    for (const item of dictionaryJson) {
-      const [hanziWord, meaning] = item;
-
-      mapArrayAdd(hanziMap, hanziFromHanziWord(hanziWord), item);
-
-      for (const gloss of meaning.gloss) {
-        mapArrayAdd(glossMap, gloss, item);
-      }
-
-      switch (meaning.hsk) {
-        case undefined: {
-          break;
-        }
-        case HskLevel[1]: {
-          hsk1HanziWords.push(hanziWord);
-          break;
-        }
-        case HskLevel[2]: {
-          hsk2HanziWords.push(hanziWord);
-          break;
-        }
-        case HskLevel[3]: {
-          hsk3HanziWords.push(hanziWord);
-          break;
-        }
-        case HskLevel[4]: {
-          hsk4HanziWords.push(hanziWord);
-          break;
-        }
-        case HskLevel[5]: {
-          hsk5HanziWords.push(hanziWord);
-          break;
-        }
-        case HskLevel[6]: {
-          hsk6HanziWords.push(hanziWord);
-          break;
-        }
-        case HskLevel[`7-9`]: {
-          hsk7To9HanziWords.push(hanziWord);
-          break;
-        }
-        default: {
-          throw new UnexpectedValueError(meaning.hsk);
-        }
-      }
-    }
-
-    const getPinyinUnitToHanziMap = memoize0(() => {
-      const map = new Map<PinyinUnit, Set<HanziCharacter>>();
-
-      for (const [hanziWord, meaning] of dictionaryJson) {
-        if (meaning.pinyin == null) {
-          continue;
-        }
-
-        const hanzi = hanziFromHanziWord(hanziWord);
-        const hanziCharacters = splitHanziText(hanzi);
-
-        for (const pinyin of meaning.pinyin) {
-          const pinyinUnits = matchAllPinyinUnits(pinyin).map((p) =>
-            normalizePinyinUnit(p),
-          );
-
-          invariant(
-            hanziCharacters.length === pinyinUnits.length,
-            `expected same number of hanzi characters as pinyin units: "%o" / "%o"`,
-            hanzi,
-            pinyin,
-          );
-
-          for (let i = 0; i < pinyinUnits.length; i++) {
-            const hanziCharacter = nonNullable(hanziCharacters[i]);
-            const pinyinUnit2 = nonNullable(pinyinUnits[i]);
-
-            mapSetAdd(map, pinyinUnit2, hanziCharacter);
-          }
-        }
-      }
-
-      return new Map([...map.entries()].map(([k, v]) => [k, [...v]]));
-    });
-
-    return {
-      lookupHanzi(hanzi: HanziCharacter) {
-        return hanziMap.get(hanzi) ?? emptyArray;
-      },
-      lookupHanziWord(hanziWord: HanziWord) {
-        return dictionaryJson.get(hanziWord) ?? null;
-      },
-      lookupGloss(gloss: string) {
-        return glossMap.get(gloss) ?? emptyArray;
-      },
-      lookupPinyinUnit(pinyinUnit: PinyinUnit) {
-        const pinyinUnitToHanziMap = getPinyinUnitToHanziMap();
-
-        return pinyinUnitToHanziMap.get(pinyinUnit) ?? emptyArray;
-      },
-      isStructuralHanzi(hanzi: HanziCharacter) {
-        return structuralHanzi.has(hanzi);
-      },
-      allEntries: [...dictionaryJson.entries()],
-      allHanziWords: [...dictionaryJson.keys()],
-      hsk1HanziWords,
-      hsk2HanziWords,
-      hsk3HanziWords,
-      hsk4HanziWords,
-      hsk5HanziWords,
-      hsk6HanziWords,
-      hsk7To9HanziWords,
-    };
+    return buildDictionary(dictionaryJson, charactersJson);
   },
 );
 

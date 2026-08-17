@@ -455,7 +455,7 @@ describe(`skillReviewQueue suite`, () => {
 
   skillTest(
     `no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`,
-    async ({ decompositionData, dictionary, charactersJson }) => {
+    ({ decompositionData, dictionary, charactersJson }) => {
       const graph = skillLearningGraph({
         decompositionData,
         charactersJson,
@@ -488,7 +488,7 @@ describe(`skillReviewQueue suite`, () => {
 
   skillTest(
     `introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`,
-    async ({ decompositionData, dictionary, charactersJson }) => {
+    ({ decompositionData, dictionary, charactersJson }) => {
       const graph = skillLearningGraph({
         decompositionData,
         charactersJson,
@@ -529,7 +529,7 @@ describe(`skillReviewQueue suite`, () => {
 
   skillTest(
     `new words are introduced before new radicals, because they are more immediately useful`,
-    async ({ decompositionData, dictionary, charactersJson }) => {
+    ({ decompositionData, dictionary, charactersJson }) => {
       const graph = skillLearningGraph({
         decompositionData,
         charactersJson,
@@ -1634,7 +1634,7 @@ describe(`skillReviewQueue suite`, () => {
 
       skillTest(
         `two pronunciations`,
-        async ({ decompositionData, dictionary, charactersJson }) => {
+        ({ decompositionData, dictionary, charactersJson }) => {
           const graph = skillLearningGraph({
             decompositionData,
             charactersJson,
@@ -1673,7 +1673,7 @@ describe(`skillReviewQueue suite`, () => {
 
       skillTest(
         `doesn't ask follow-up questions for skills that aren't introduced, even if they're in the graph`,
-        async ({ decompositionData, dictionary, charactersJson }) => {
+        ({ decompositionData, dictionary, charactersJson }) => {
           const graph = skillLearningGraph({
             decompositionData,
             charactersJson,
@@ -1710,7 +1710,7 @@ describe(`skillReviewQueue suite`, () => {
 
       skillTest(
         `doesn't queue reactive OtherAnswer if meanings share the same pinyin (e.g., 点:oClock and 点:point both use diǎn)`,
-        async ({ decompositionData, dictionary, charactersJson }) => {
+        ({ decompositionData, dictionary, charactersJson }) => {
           // Both 点:oClock and 点:point have the same pinyin "diǎn"
           // so answering one should NOT trigger an OtherAnswer reactive question
           const graph = skillLearningGraph({
@@ -1750,7 +1750,7 @@ describe(`skillReviewQueue suite`, () => {
   describe(`SkillKind.HanziWordToPinyinTyped skills`, () => {
     skillTest(
       `doesn't learn pinyin for all constituents of a single character`,
-      async ({ decompositionData, dictionary, charactersJson }) => {
+      ({ decompositionData, dictionary, charactersJson }) => {
         const graph = skillLearningGraph({
           decompositionData,
           charactersJson,
@@ -1772,7 +1772,7 @@ describe(`skillReviewQueue suite`, () => {
 
     skillTest(
       `learns the pinyin for each character in multi-character words`,
-      async ({ decompositionData, dictionary, charactersJson }) => {
+      ({ decompositionData, dictionary, charactersJson }) => {
         const graph = skillLearningGraph({
           decompositionData,
           charactersJson,
@@ -1806,7 +1806,7 @@ describe(`skillReviewQueue suite`, () => {
 
     skillTest(
       `schedules new skills in dependency order`,
-      async ({ decompositionData, dictionary, charactersJson }) => {
+      ({ decompositionData, dictionary, charactersJson }) => {
         const graph = skillLearningGraph({
           decompositionData,
           charactersJson,
@@ -1851,7 +1851,7 @@ describe(`skillReviewQueue suite`, () => {
 
     skillTest(
       `treats non-introduced skills as "not stable" and won't dependant skills`,
-      async ({ decompositionData, dictionary, charactersJson }) => {
+      ({ decompositionData, dictionary, charactersJson }) => {
         const graph = skillLearningGraph({
           decompositionData,
           charactersJson,

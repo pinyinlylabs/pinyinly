@@ -18,7 +18,7 @@ import { isCi } from "#util/env.js";
 import { PartOfSpeech } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
-import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
+import type { dictionaryJsonSchema, HanziWordMeaning } from "#dictionary.ts";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
@@ -62,6 +62,7 @@ import {
 import { 拼音, 汉, 汉字 } from "./data/helpers.ts";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
 import isEqual from "lodash/isEqual";
+import type { z } from "zod";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -1252,8 +1253,10 @@ describe(`hanziFromHanziOrHanziWord suite`, async () => {
 });
 
 describe(`upsertHanziWordMeaning suite`, async () => {
-  function helloDict(): DictionaryJson {
-    const dict: DictionaryJson = new Map([
+  type MutableDictionaryJson = z.infer<typeof dictionaryJsonSchema>;
+
+  function helloDict(): MutableDictionaryJson {
+    const dict: MutableDictionaryJson = new Map([
       [
         `你好:hello`,
         {
