@@ -117,9 +117,10 @@ tasks:
 
   codegen:
     deps:
-      - ~:codegenOxlint
       - ~:codegenExpoRouterTypes
+      - ~:codegenOxlint
       - ~:codegenPublicVendor
+      - ~:codegenUniwind
 
   codegenOxlint:
     description: "Run Oxlint with codegen rules. This is separate from lint and doesn't use Oxlint caching intentionally."
@@ -170,6 +171,32 @@ tasks:
     toolchain: "node"
     outputs:
       - "public/vendor/**/*"
+
+  codegenUniwind:
+    # The recommended command from https://docs.uniwind.dev/api/generate-artifacts
+    command: |
+      uniwind generate-artifacts
+        --css ./src/global.css 
+        --dts ./uniwind-env.d.ts
+        --theme dark-danger-panel
+        --theme dark-grass-panel
+        --theme dark-placeholder-panel
+        --theme dark-popover
+        --theme dark-sky-panel
+        --theme dark-success-panel
+        --theme dark-warning-panel
+        --theme dark
+        --theme light-danger-panel
+        --theme light-grass-panel
+        --theme light-placeholder-panel
+        --theme light-popover
+        --theme light-sky-panel
+        --theme light-success-panel
+        --theme light-warning-panel
+        --theme light
+    inputs:
+      - "/yarn.lock"
+    toolchain: "node"
 
   dbCheck:
     command: drizzle-kit check
