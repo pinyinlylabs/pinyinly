@@ -46,7 +46,6 @@ export type SkillQueueContextValue = DeepReadonly<
   | {
       loading: false;
       reviewQueue: SkillReviewQueue;
-      version: number;
     }
   | {
       loading: true;

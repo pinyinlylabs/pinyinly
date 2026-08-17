@@ -10,8 +10,7 @@
     "types": [
       "node",
       // Enable expect().toHaveTextContent() and similar matchers.
-      "@testing-library/jest-dom",
-      "@pinyinly/eslint-rules/nameof.d.ts"
+      "@testing-library/jest-dom"
     ]
   },
   "include": ["**/*"],
@@ -21,9 +20,6 @@
     },
     {
       "path": "../../lib"
-    },
-    {
-      "path": "../../eslint-rules"
     }
   ]
 }

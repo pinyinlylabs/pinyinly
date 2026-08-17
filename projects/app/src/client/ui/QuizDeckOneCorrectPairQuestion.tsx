@@ -12,7 +12,7 @@ import {
   gradeOneCorrectPairQuestion,
   oneCorrectPairChoiceText,
 } from "@/data/questions/oneCorrectPair";
-import { autoCheckUserSetting } from "@/data/userSettings";
+import { autoCheckUserToggleSetting } from "@/data/userSettings";
 import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useState } from "react";
@@ -55,7 +55,8 @@ export function QuizDeckOneCorrectPairQuestion({
   const { prompt, answer, groupA, groupB, flag } = question;
 
   const autoCheck =
-    useUserSetting({ setting: autoCheckUserSetting }).value?.enabled ?? false;
+    useUserSetting({ setting: autoCheckUserToggleSetting }).value?.enabled ??
+    false;
 
   const [selectedAChoice, setSelectedAChoice] =
     useState<OneCorrectPairQuestionChoice>();

@@ -24,7 +24,7 @@ export default function LoginPage() {
             <Text className="font-sans text-3xl font-bold text-fg">
               Welcome to Pinyinly
             </Text>
-            <Text className="font-sans text-base text-fg-dim">
+            <Text className="font-sans text-base text-muted-fg">
               Learn to read, write, and speak Mandarin Chinese with spaced
               repetition.
             </Text>
@@ -38,7 +38,7 @@ export default function LoginPage() {
               <Text className="font-sans text-lg font-semibold text-fg">
                 New here?
               </Text>
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Create an account to start learning.
               </Text>
             </View>
@@ -52,7 +52,7 @@ export default function LoginPage() {
                 }}
                 redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
               />
-              <Text className="text-center font-sans text-xs text-fg-dim">
+              <Text className="text-center font-sans text-xs text-muted-fg">
                 Sign up with your Apple ID
               </Text>
             </View>
@@ -79,7 +79,7 @@ export default function LoginPage() {
               >
                 Create account with Passkey
               </RectButton>
-              <Text className="text-center font-sans text-xs text-fg-dim">
+              <Text className="text-center font-sans text-xs text-muted-fg">
                 Or use a passkey (fingerprint, face, or security key)
               </Text>
             </View>
@@ -93,7 +93,7 @@ export default function LoginPage() {
               <Text className="font-sans text-lg font-semibold text-fg">
                 Already have an account?
               </Text>
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Sign in to continue learning.
               </Text>
             </View>
@@ -109,7 +109,7 @@ export default function LoginPage() {
               >
                 Log in with Passkey
               </RectButton>
-              <Text className="text-center font-sans text-xs text-fg-dim">
+              <Text className="text-center font-sans text-xs text-muted-fg">
                 Use your saved passkey to sign in
               </Text>
             </View>

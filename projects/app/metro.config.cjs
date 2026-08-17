@@ -10,13 +10,16 @@ const resolverOverrides = {
   [`lru-cache`]: { platform: `web` },
 };
 
+/** @type {import('metro-config').MetroConfig} */
 let config =
   // In development Sentry causes a memory leak that eventually crashes expo.
   process.env.NODE_ENV === `development`
     ? /** @type {import('metro-config').MetroConfig} */ (
         /** @type {unknown} */ (getDefaultConfig(__dirname))
       )
-    : getSentryExpoConfig(__dirname);
+    : /** @type {import('metro-config').MetroConfig} */ (
+        /** @type {unknown} */ getSentryExpoConfig(__dirname)
+      );
 
 config = {
   ...config,
@@ -67,6 +70,24 @@ config = {
 config = withUniwindConfig(config, {
   cssEntryFile: `./src/global.css`,
   dtsFile: `./uniwind-env.d.ts`,
+  extraThemes: [
+    `dark-danger-panel`,
+    `dark-grass-panel`,
+    `dark-placeholder-panel`,
+    `dark-popover`,
+    `dark-sky-panel`,
+    `dark-success-panel`,
+    `dark-warning-panel`,
+    `dark`,
+    `light-danger-panel`,
+    `light-grass-panel`,
+    `light-placeholder-panel`,
+    `light-popover`,
+    `light-sky-panel`,
+    `light-success-panel`,
+    `light-warning-panel`,
+    `light`,
+  ],
 });
 
 module.exports = config;

@@ -1,5 +1,4 @@
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -16,7 +15,10 @@ export default defineConfig({
     setupFiles: [`./test/setup.ts`],
     testTimeout: 60_000, // calling LLM can be slow
   },
-  plugins: [tsconfigPaths(), react()],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  plugins: [react()],
   define: {
     __DEV__: `true`,
   },

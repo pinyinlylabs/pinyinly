@@ -1,3 +1,4 @@
+// oxlint-disable react-hooks/rules-of-hooks
 import type { Drizzle, Transaction } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
 import { isTiming } from "#util/env.js";
@@ -49,7 +50,6 @@ async function createTestDb(annotate?: TestContext[`annotate`]) {
 export type TestDb = Awaited<ReturnType<typeof createTestDb>>;
 
 export const txTest = test
-  // TODO. can i flatten this?
   .extend<{ db: TestDb }>({
     db: [
       async ({ annotate }, use) => {

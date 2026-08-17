@@ -17,6 +17,7 @@ export const expo = {
   orientation: `portrait`,
   icon: `./src/assets/icon.png`,
   userInterfaceStyle: `automatic`,
+  // oxlint-disable-next-line typescript/no-deprecated
   assetBundlePatterns: [`**/*`],
   ios: {
     config: {

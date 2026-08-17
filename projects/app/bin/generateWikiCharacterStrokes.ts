@@ -1,8 +1,13 @@
 import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
+import { wikiCharacterDataSchema } from "#data/model.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
-import { strokeMediansCodec } from "#util/strokeMedians.ts";
-import { buildSvgSegmentPaths } from "#util/strokeSegments.ts";
+import {
+  parseSvgPaths,
+  transformArphicSpaceSvgPath,
+  transformFigmaSvgPathsToArphicTtfSpace,
+} from "#util/svgFont.ts";
+import type { StrokeMedianPoint } from "#util/strokeSpecSvgProcessor.js";
 import {
   existsSync,
   fetchWithFsDbCache,
@@ -17,6 +22,7 @@ import makeDebug from "debug";
 import isEqual from "lodash/isEqual.js";
 import path from "node:path";
 import yargs from "yargs";
+import { jsonCodec } from "@pinyinly/lib/zod";
 import z from "zod";
 
 const debug = makeDebug(`pyly`);
@@ -108,80 +114,53 @@ const dictionaryDataByCharacter = await (async () => {
 })();
 
 const wikiDir = new URL(`../src/client/wiki/`, import.meta.url).pathname;
+const arphicUkaiGlyphsDir = new URL(
+  `../src/assets/fonts/ArphicUkai/glyphs/`,
+  import.meta.url,
+).pathname;
 
 const allCharacters = await glob(`${wikiDir}/*`).then((ps) =>
   ps
     .map((p) => path.basename(p))
-    .filter((p) => isHanziCharacter(p as HanziText)),
+    .filter((p): p is HanziText => isHanziCharacter(p as HanziText)),
 );
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
-function asRecord(value: unknown): Record<string, unknown> {
-  if (typeof value === `object` && value != null && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-  return {};
+function medianPointsToSvgPath(points: readonly StrokeMedianPoint[]): string {
+  return `M ` + points.map((point) => `${point[0]} ${point[1]}`).join(` L `);
 }
 
-function readJsonRecord(filePath: string): Record<string, unknown> {
-  try {
-    const raw = JSON.parse(readFileSync(filePath, `utf-8`)) as unknown;
-    return asRecord(raw);
-  } catch {
-    return {};
-  }
-}
-
-function asStringArray(value: unknown): string[] | undefined {
-  return Array.isArray(value) && value.every((item) => typeof item === `string`)
-    ? value
-    : undefined;
-}
-
-function asStringMap(value: unknown): Record<string, string> | undefined {
-  if (typeof value !== `object` || value == null || Array.isArray(value)) {
+function getLocalGlyphSvgData(character: HanziText):
+  | {
+      strokes: string[];
+      medians?: string[];
+    }
+  | undefined {
+  const glyphFile = path.join(arphicUkaiGlyphsDir, `${character}.svg`);
+  if (!existsSync(glyphFile)) {
     return undefined;
   }
 
-  const entries = Object.entries(value);
-  if (
-    entries.every(
-      ([key, entryValue]) =>
-        typeof key === `string` && typeof entryValue === `string`,
-    )
-  ) {
-    return value as Record<string, string>;
+  const svgText = readFileSync(glyphFile, `utf-8`);
+  const rawPaths = parseSvgPaths(svgText);
+  if (rawPaths.length === 0) {
+    return undefined;
   }
 
-  return undefined;
-}
-
-function collectStrokeSpecTexts(
-  value: unknown,
-  result = new Set<string>(),
-): Set<string> {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectStrokeSpecTexts(item, result);
-    }
-    return result;
+  if (rawPaths.length % 2 === 0) {
+    return transformFigmaSvgPathsToArphicTtfSpace(rawPaths);
   }
 
-  if (typeof value !== `object` || value == null) {
-    return result;
-  }
+  debug(
+    `local glyph %O has odd path count (%d), treating all paths as strokes`,
+    character,
+    rawPaths.length,
+  );
 
-  const record = value as Record<string, unknown>;
-  if (typeof record[`strokes`] === `string`) {
-    result.add(record[`strokes`]);
-  }
-
-  for (const nestedValue of Object.values(record)) {
-    collectStrokeSpecTexts(nestedValue, result);
-  }
-
-  return result;
+  return {
+    strokes: rawPaths.map((path) => transformArphicSpaceSvgPath(path.d)),
+  };
 }
 
 for (const character of allCharacters) {
@@ -198,67 +177,72 @@ for (const character of allCharacters) {
   }
 
   const dataFile = path.join(characterWikiDir, `character.json`);
+  const existingData = jsonCodec(wikiCharacterDataSchema).parse(
+    readFileSync(dataFile, `utf-8`),
+  );
 
-  const existingData = readJsonRecord(dataFile);
-  const existingSvg = asRecord(existingData[`svg`]);
+  const existingSvg = existingData.svg;
 
   if (graphicsRecord == null) {
     debug(`no graphics data for %O`, character);
   }
 
+  const localGlyphSvgData = getLocalGlyphSvgData(character);
+  let strokeSource: `local-glyph` | `makemeahanzi` | `existing`;
+  if (localGlyphSvgData == null) {
+    if (graphicsRecord == null) {
+      strokeSource = `existing`;
+    } else {
+      strokeSource = `makemeahanzi`;
+    }
+  } else {
+    strokeSource = `local-glyph`;
+  }
+
   const nextStrokes =
-    graphicsRecord?.strokes ?? asStringArray(existingSvg[`strokes`]);
+    localGlyphSvgData?.strokes ??
+    graphicsRecord?.strokes ??
+    existingSvg.strokes;
+
+  invariant(
+    typeof nextStrokes !== `number`,
+    `expected strokes to NOT be a number for %O`,
+    character,
+  );
 
   const nextMedians =
-    graphicsRecord == null
-      ? asStringArray(existingSvg[`medians`])
-      : strokeMediansCodec.encode(graphicsRecord.medians);
+    strokeSource === `local-glyph`
+      ? (localGlyphSvgData?.medians ?? existingSvg.medians)
+      : graphicsRecord == null
+        ? existingSvg.medians
+        : graphicsRecord.medians.map((median) => medianPointsToSvgPath(median));
 
-  const strokeSpecTexts = [
-    ...collectStrokeSpecTexts(existingData[`decompositions`]),
-    ...collectStrokeSpecTexts(asRecord(existingData[`mnemonic`])[`components`]),
-  ];
-  const nextMediansPaths =
-    nextMedians == null
-      ? undefined
-      : strokeMediansCodec
-          .decode(nextMedians)
-          .map(
-            (medians) =>
-              `M ` +
-              medians.map((point) => `${point[0]} ${point[1]}`).join(` L `),
-          );
-  const generatedSegments =
-    nextStrokes == null || nextMedians == null
-      ? undefined
-      : buildSvgSegmentPaths(nextStrokes, nextMediansPaths, strokeSpecTexts);
-  const existingSegments = asStringMap(existingSvg[`segments`]);
-  const nextSegments =
-    generatedSegments == null
-      ? existingSegments
-      : existingSegments == null
-        ? generatedSegments
-        : {
-            ...existingSegments,
-            ...generatedSegments,
-          };
+  debug(`svg source for %O: %s`, character, strokeSource);
+  if (
+    strokeSource === `local-glyph` &&
+    nextMedians != null &&
+    nextMedians.length !== nextStrokes.length
+  ) {
+    debug(
+      `local glyph stroke/median length mismatch for %O: %d strokes vs %d medians`,
+      character,
+      nextStrokes.length,
+      nextMedians.length,
+    );
+  }
 
   const nextData: Record<string, unknown> = {
     ...existingData,
     hanzi: character,
   };
 
-  if (nextStrokes == null) {
-    debug(`missing svg.strokes for %O, leaving svg unchanged`, character);
-  } else {
-    nextData[`svg`] = {
-      ...(nextMedians == null ? {} : { medians: nextMedians }),
-      ...(nextSegments == null ? {} : { segments: nextSegments }),
-      strokes: nextStrokes,
-    };
-  }
+  nextData[`svg`] = {
+    ...existingSvg,
+    ...(nextMedians == null ? {} : { medians: nextMedians }),
+    strokes: nextStrokes,
+  };
 
-  {
+  if (Math.random() < 0) {
     //
     // .mnemonic updates from dictionary.txt
     //

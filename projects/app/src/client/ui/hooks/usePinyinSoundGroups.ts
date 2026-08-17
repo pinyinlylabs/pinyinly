@@ -5,9 +5,8 @@ import {
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import {
-  pinyinSoundGroupNameSettingKey,
-  pinyinSoundGroupThemeSetting,
-  pinyinSoundGroupThemeSettingKey,
+  pinyinSoundGroupNameTextSetting,
+  pinyinSoundGroupThemeTextSetting,
 } from "@/data/userSettings";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
@@ -22,8 +21,12 @@ export function usePinyinSoundGroups() {
   const relevantKeys = useMemo(() => {
     const keys: string[] = [];
     for (const { id } of chart.soundGroups) {
-      keys.push(pinyinSoundGroupNameSettingKey(id));
-      keys.push(pinyinSoundGroupThemeSettingKey(id));
+      keys.push(
+        pinyinSoundGroupNameTextSetting.entity.marshalKey({ soundGroupId: id }),
+        pinyinSoundGroupThemeTextSetting.entity.marshalKey({
+          soundGroupId: id,
+        }),
+      );
     }
     return keys;
   }, [chart.soundGroups]);
@@ -40,10 +43,12 @@ export function usePinyinSoundGroups() {
     const result = [];
 
     for (const { id, sounds } of chart.soundGroups) {
-      const themeKey = pinyinSoundGroupThemeSettingKey(id);
+      const themeKey = pinyinSoundGroupThemeTextSetting.entity.marshalKey({
+        soundGroupId: id,
+      });
 
       const themeOverride = settings.find((s) => s.key === themeKey);
-      const themeValueData = pinyinSoundGroupThemeSetting.decode(
+      const themeValueData = pinyinSoundGroupThemeTextSetting.decode(
         { soundGroupId: id },
         themeOverride?.value ?? null,
       );

@@ -21,6 +21,8 @@ import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
+import type { SkillReviewQueue } from "@/data/skills";
+import type { DeepReadonly } from "ts-essentials";
 
 export const QuizDeck = ({ className }: { className?: string }) => {
   const { width: screenWidth } = useWindowDimensions();
@@ -31,31 +33,29 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   const [latestReviewId, setLatestReviewId] = useState<string>();
   const [question, setQuestion] = useState<Question>();
-  const [questionVersion, setQuestionVersion] = useState<number>();
+  const [questionSource, setQuestionSource] =
+    useState<DeepReadonly<SkillReviewQueue> | null>();
+  const [questionCounter, setQuestionCounter] = useState(0);
+
+  const reviewQueue = skillQueue.loading ? null : skillQueue.reviewQueue;
 
   // Generate a question from the first item in the queue
   useEffect(() => {
-    if (skillQueue.loading) {
+    if (reviewQueue == null) {
       return;
     }
 
-    const { version, reviewQueue } = skillQueue;
-
-    // Don't generate if we already have a question
+    // Don't generate if we already have a question.
     if (question != null) {
       return;
     }
 
-    // Don't generate until we have a question from a newer version
-    if (questionVersion != null && version <= questionVersion) {
+    // Don't generate until we can pull a question from a fresh queue.
+    if (reviewQueue == questionSource) {
       return;
     }
 
     if (reviewQueue.items.length === 0) {
-      // No items in queue, clear question and stay on loading screen
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
-      setQuestion(undefined);
-      setQuestionVersion(undefined);
       return;
     }
 
@@ -82,11 +82,12 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           }
           // Ensure we're only moving forward in version (or setting initial version)
           invariant(
-            questionVersion == null || version > questionVersion,
-            `Queue version must increase when generating new question: ${questionVersion ?? `undefined`} -> ${version}`,
+            questionSource != reviewQueue,
+            `Queue must be different when generating new question`,
           );
           setQuestion(generatedQuestion);
-          setQuestionVersion(version);
+          setQuestionSource(reviewQueue);
+          setQuestionCounter((prev) => prev + 1);
 
           // Successfully generated a question, exit the loop
           return;
@@ -115,7 +116,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     return () => {
       abortController.abort();
     };
-  }, [question, questionVersion, skillQueue]);
+  }, [question, questionSource, reviewQueue]);
 
   const playSuccessSound = useSoundEffect(
     require(`../../assets/audio/sparkle.mp3`),
@@ -142,6 +143,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     quizProgress.undo();
     if (question != null) {
       setQuestion({ ...question });
+      setQuestionCounter((prev) => prev + 1);
     }
   };
 
@@ -290,7 +292,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
     screen = (
       <Reanimated.View
-        key={questionVersion ?? 0}
+        key={questionCounter}
         entering={questionEnterTransition}
         exiting={questionExitTransition}
         className="size-full"
@@ -301,7 +303,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   } else if (hasPendingReviews) {
     screen = (
       <Reanimated.View entering={FadeIn} className="my-auto items-center">
-        <Text className="font-sans text-lg text-fg-dim">Loading</Text>
+        <Text className="font-sans text-lg text-muted-fg">Loading</Text>
       </Reanimated.View>
     );
   } else {

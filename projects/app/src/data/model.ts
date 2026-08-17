@@ -1,4 +1,5 @@
 import type { Rating } from "@/util/fsrs";
+import type { IsEqual } from "@pinyinly/lib/types";
 import type { Interval } from "date-fns";
 import { z } from "zod";
 
@@ -46,7 +47,11 @@ export type PinyinFinalAssociationSkill =
  * - Tones: Single digit between 1 and 5, inclusive.
  */
 export type PinyinSoundId = string & z.$brand<`PinyinSoundId`>;
-export const pinyinSoundIdSchema = z.custom<PinyinSoundId>(isString);
+export const pinyinSoundIdSchema = z
+  .string()
+  .regex(/^-.{1,5}|.{1,5}-|[1-5]$/gu)
+  .brand<`PinyinSoundId`, `inout`>();
+true satisfies IsEqual<PinyinSoundId, z.infer<typeof pinyinSoundIdSchema>>;
 
 /**
  * An ID for a group of pinyin sounds.
@@ -75,6 +80,16 @@ export const assetIdSchema = z
 export type ActorId = string & z.$brand<`ActorId`>;
 export const actorIdSchema = z.custom<ActorId>(isString);
 
+export const openAiReasoningEffortSchema = z.enum([
+  `none`,
+  `minimal`,
+  `low`,
+  `medium`,
+  `high`,
+  `xhigh`,
+  `max`,
+]);
+
 /**
  * A reusable place record used by pinyin finals mnemonic locations.
  */
@@ -82,13 +97,31 @@ export type LocationId = string & z.$brand<`LocationId`>;
 export const locationIdSchema = z.custom<LocationId>(isString);
 
 export const locationSetKeySchema = z.enum([
+  `entrance`,
+  `inside`,
+  `basement`,
+  `bathroom`,
+  `backRoom`,
+  `hiddenCloset`,
+  `stairway`,
+  /** @deprecated */
+  `staircase`,
+  /** @deprecated */
   `arrival`,
+  /** @deprecated */
   `heart`,
+  /** @deprecated */
   `below`,
+  /** @deprecated */
   `ascent`,
+  /** @deprecated */
   `summit`,
 ]);
 export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
+export const locationSetKeys = locationSetKeySchema.options;
+
+export const locationSetKindSchema = z.enum([]);
+export type LocationSetKind = z.infer<typeof locationSetKindSchema>;
 
 /**
  * Persisted location-set schema used for reading/writing user settings.
@@ -96,13 +129,13 @@ export type LocationSetKey = z.infer<typeof locationSetKeySchema>;
  * Keep this permissive so older and newer saved payloads remain decodable while
  * prompt-generation schemas can evolve independently.
  */
-export const locationSetSchema = z
+export const locationSetSpecSchema = z
   .object({
-    name: z.string(),
+    purpose: z.string().optional(),
   })
   .loose();
 
-export type LocationSet = z.infer<typeof locationSetSchema>;
+export type LocationSetSpec = z.infer<typeof locationSetSpecSchema>;
 
 /**
  * Persisted location specification schema.
@@ -112,20 +145,57 @@ export type LocationSet = z.infer<typeof locationSetSchema>;
  */
 export const locationSpecSchema = z
   .object({
-    location: z.string(),
+    location: z
+      .string()
+      .describe(
+        `The name of the location using normal English capitalization as it would appear inside a sentence, not title capitalization. Proper nouns retain their normal capitalization; common nouns are lowercase.`,
+      ),
     sets: z
-      .object({
-        arrival: locationSetSchema,
-        heart: locationSetSchema,
-        below: locationSetSchema,
-        ascent: locationSetSchema,
-        summit: locationSetSchema,
-      })
-      .strict(),
+      .partialRecord(locationSetKeySchema, locationSetSpecSchema)
+      .optional(),
   })
   .loose();
 
 export type LocationSpec = z.infer<typeof locationSpecSchema>;
+
+export const pronunciationMnemonicSpecSchema = z
+  .object({
+    hook: z.string().optional(),
+    premise: z.string().optional(),
+    beats: z.array(z.string()).optional(),
+    associationStrategy: z.string().optional(),
+  })
+  .loose();
+
+export type PronunciationMnemonicSpec = z.infer<
+  typeof pronunciationMnemonicSpecSchema
+>;
+
+/**
+ * Persisted actor specification schema.
+ *
+ * Required fields are intentionally minimal to preserve backwards
+ * compatibility with older stored actor-spec versions.
+ */
+export const actorSpecSchema = z
+  .object({
+    nickname: z.string(),
+    /**
+     * Specifying the species helps avoid the image models from generating a
+     * non-human character when the actor is intended to be a human. Human race
+     * can be included like `Human (Asian)` or `Human (Black)` if desired, but
+     * is not required.
+     */
+    species: z.string().optional(),
+    /**
+     * Specifying the gender helps image model create the correct gender, and
+     * the text models to generate the correct pronouns and gendered language.
+     */
+    gender: z.enum([`male`, `female`]).optional(),
+  })
+  .loose();
+
+export type ActorSpec = z.infer<typeof actorSpecSchema>;
 
 export const hanziWordPinyinlyObjectIdKind = `hw` as const;
 export const skillPinyinlyObjectIdKind = `sk` as const;
@@ -210,21 +280,21 @@ export function assetIdFromPinyinlyObjectId(
 export function hanziWordPinyinlyObjectId(
   hanziWord: HanziWord,
 ): PinyinlyObjectId {
-  return `${hanziWordPinyinlyObjectIdKind}/${hanziWord}` as PinyinlyObjectId;
+  return `${hanziWordPinyinlyObjectIdKind}/${hanziWord}`;
 }
 
 export function skillPinyinlyObjectId(skill: Skill): PinyinlyObjectId {
-  return `${skillPinyinlyObjectIdKind}/${skill}` as PinyinlyObjectId;
+  return `${skillPinyinlyObjectIdKind}/${skill}`;
 }
 
 export function pinyinSoundIdPinyinlyObjectId(
   soundId: PinyinSoundId,
 ): PinyinlyObjectId {
-  return `${pinyinSoundIdPinyinlyObjectIdKind}/${soundId}` as PinyinlyObjectId;
+  return `${pinyinSoundIdPinyinlyObjectIdKind}/${soundId}`;
 }
 
 export function assetIdPinyinlyObjectId(assetId: AssetId): PinyinlyObjectId {
-  return `${assetIdPinyinlyObjectIdKind}/${assetId}` as PinyinlyObjectId;
+  return `${assetIdPinyinlyObjectIdKind}/${assetId}`;
 }
 
 export interface BaseSrsState {
@@ -361,14 +431,32 @@ export type HanziWord =
   | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
+ * A branded type to represent a pinyin unit that's safe for use as an ID
+ * because it's been normalized to a canonical form. This is used for keys in
+ * the database and other places where a consistent representation of pinyin is
+ * needed.
+ *
+ * The normalization is converting erhua to the canonical form, and converting
+ * numeric tone notation to diacritic tone notation. For example, `hao3` would
+ * be normalized to `hǎo`, and `er5` would be normalized to `ér`.
+ *
+ * This is only supported for PinyinUnit and not PinyinText, because PinyinText
+ * can contain multiple units, spaces, punctuation, and anything else that could
+ * be in a piece of text and it's not clear how to safely normalize that.
+ */
+export type PinyinUnitId = string & z.$brand<`PinyinUnitId`>;
+export const pinyinUnitIdSchema = z.custom<PinyinUnitId>(isString);
+
+/**
  * A single pinyin diacritic unit (e.g. `hǎo`). This should not include numeric
  * notation, use `normalizePinyin__` functions to convert numeric to diacritic
  * forms.
  *
  * A unit is a single sound or component (e.g. nǐ, or 儿 in 一点儿), so `nǐ hǎo`
- * would be two units: `nǐ` and `hǎo`.
+ * would be two units: `nǐ` and `hǎo`. Erhua is considered two Pinyin units, so
+ * `yìdiǎnr` would be three units: `yì`, `diǎn`, and `r`.
  */
-export type PinyinUnit = string & z.$brand<`PinyinUnit`>;
+export type PinyinUnit = PinyinUnitId | (string & z.$brand<`PinyinUnit`>);
 
 export type PinyinText = PinyinUnit | (string & z.$brand<`PinyinText`>);
 
@@ -654,36 +742,31 @@ export interface PinyinFinalAssociation {
   name: string;
 }
 
-const wikiCharacterComponentSchema = z.strictObject({
-  /**
-   * The hanzi character (if any) formed by the strokes. Usually this can
-   * be populated, but in some cases the strokes don't form a valid
-   * character and instead are combined for more creative visual reasons.
-   */
-  hanzi: hanziCharacterSchema.optional(),
-  label: z.string().optional(),
-  /**
-   * Comma-separated list of stroke indices (0-based) for strokes that are
-   * part of this character. Allows shorthand ranges (e.g. 0-2,5 is the same as
-   * 0,1,2,5).
-   */
-  strokes: z.string().default(``),
-  /**
-   * When the component uses a different number of strokes than `hanzi` it's
-   * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
-   * this field can be used to specify the different in stroke count.
-   */
-  strokeDiff: z.number().optional(),
-  /**
-   * What color to render this component in the decomposition illustration. This
-   * allows highlighting different components in different colors for clarity.
-   */
-  color: z.string().optional(),
-});
-
-export type WikiCharacterComponent = z.infer<
-  typeof wikiCharacterComponentSchema
+export type StrokeSpecString = string & z.$brand<`StrokeSpecString`>;
+export const strokeSpecStringSchema = z
+  .string()
+  .regex(/^[\d#[\]:+,%.-]*$/gu)
+  .brand<`StrokeSpecString`, `inout`>();
+true satisfies IsEqual<
+  StrokeSpecString,
+  z.infer<typeof strokeSpecStringSchema>
 >;
+
+/**
+ * A Hanzi IDS string.
+ */
+export type HanziIds = string & z.$brand<`HanziIds`>;
+export const hanziIdsSchema = z
+  .string()
+  .regex(
+    // 1. combining characters
+    // 2. enclosed alphanumerics
+    // 3. Han script
+    // 4. CJK strokes
+    /^(?:[⿰⿱⿲⿳⿴⿵⿶⿷⿼⿸⿹⿺⿽⿻⿾⿿]|[\u2460-\u2473]|\p{Script=Han}|[\u31C0-\u31EFコュス])+$/gu,
+  )
+  .brand<`HanziIds`, `inout`>();
+true satisfies IsEqual<HanziIds, z.infer<typeof hanziIdsSchema>>;
 
 export const idsOperatorSchema = z.enum({
   LeftToRight: `⿰`,
@@ -805,12 +888,78 @@ export function buildIdsNodeSchema<T extends z.ZodType>(
   return depth5Schema as z.ZodType<IdsNode<z.infer<T>>>;
 }
 
-// TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-export const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
-  wikiCharacterComponentSchema,
-);
+export const hanziStrokeColorSchema = z.enum([
+  `blue`,
+  `yellow`,
+  `amber`,
+  `cyanold`,
+  `fg`,
+]);
 
-export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
+export type HanziStrokeColor = z.infer<typeof hanziStrokeColorSchema>;
+
+export function hanziStrokeCountAsNumber(str: string): number | undefined {
+  if (str.length === 1) {
+    const codePoint = str.codePointAt(0);
+    if (
+      codePoint != null &&
+      codePoint >= /* ① */ 9312 &&
+      codePoint <= /* ⑳ */ 9331
+    ) {
+      return codePoint - 9311;
+    }
+  }
+  return undefined;
+}
+
+export function isHanziStrokeCountChar(
+  str: string,
+): str is HanziStrokeCountChar {
+  return hanziStrokeCountAsNumber(str) != null;
+}
+
+/**
+ * A single hanzi character that represents a stroke count (①, ②, ③, …, ⑳).
+ *
+ * This is used in IDS strings to represent the number of strokes in a component
+ * when the component itself does not have a single-character representation.
+ */
+export const hanziStrokeCountCharSchema = z
+  .string()
+  .refine((str) => hanziStrokeCountAsNumber(str) != null)
+  .brand<`HanziStrokeCountChar`, `inout`>();
+
+export type HanziStrokeCountChar = z.infer<typeof hanziStrokeCountCharSchema>;
+
+export type HanziIdsLeaf = HanziCharacter | HanziStrokeCountChar;
+
+export interface CharacterDecompositionRow {
+  hanzi: HanziCharacter;
+  ids: HanziIds;
+  strokeSpecs: readonly StrokeSpecString[];
+}
+
+export interface CharacterComponentUsageRow {
+  component: HanziCharacter;
+  usedInHanzi: readonly HanziCharacter[];
+}
+
+export interface CharacterMnemonicIdsRow {
+  hanzi: HanziCharacter;
+  ids: HanziIds;
+}
+
+export interface MnemonicHanziComponent {
+  /**
+   * Could be `null` if there's no unicode character to represent this component
+   * (might be a radical or other component that doesn't have a single
+   * character).
+   */
+  hanzi: HanziCharacter | null;
+  strokeSpec?: StrokeSpecString | null;
+  label?: string | null;
+  color?: HanziStrokeColor | null;
+}
 
 export const wikiCharacterSvgSchema = z.strictObject({
   /**
@@ -885,8 +1034,17 @@ export const wikiCharacterDataSchema = z.strictObject({
     ),
   /**
    * Alternative IDS decompositions
+   *
+   * TODO: rename to `decompositions` grep the code base for other instances too
    */
-  decompositions: z.array(wikiCharacterDecompositionSchema).optional(),
+  decompositions: z
+    .record(
+      hanziIdsSchema.describe(`partial or full IDS decomposition`),
+      z
+        .array(strokeSpecStringSchema)
+        .describe(`strokeSpec for each leaf hanzi, in DFS order`),
+    )
+    .optional(),
   /**
    * The meaning mnemonic for the character. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
@@ -895,10 +1053,35 @@ export const wikiCharacterDataSchema = z.strictObject({
   mnemonic: z
     .strictObject({
       /**
-       * The layout of the components. The first element is the combining
-       * operator, and the remaining are the components for each slot.
+       * Can be `null` if none of the decompositions should be used for the
+       * mnemonic (to avoid unnecessarily learning a component that is not
+       * relevant to the mnemonic).
        */
-      components: wikiCharacterDecompositionSchema,
+      decomposition: hanziIdsSchema
+        .describe(`reference an IDS key in decompositions`)
+        .nullable()
+        .optional(),
+      /**
+       * Override annotations for the components. Keys are component hanzi, values are the modifiers.
+       */
+      components: z
+        .record(
+          hanziCharacterSchema,
+          z
+            .object({
+              /**
+               * Override the normal gloss for the component.
+               */
+              label: z.string().optional(),
+              /**
+               * What color to render this component in the decomposition illustration. This
+               * allows highlighting different components in different colors for clarity.
+               */
+              color: z.string().optional(),
+            })
+            .strict(),
+        )
+        .optional(),
       hints: z
         .array(
           z.strictObject({
@@ -914,6 +1097,40 @@ export const wikiCharacterDataSchema = z.strictObject({
 });
 
 export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
+
+export const charactersSchema = z.array(
+  z.tuple([
+    hanziCharacterSchema,
+    z.object({
+      mnemonic: hanziIdsSchema
+        .describe(`IDS used by the mnemonic, affects learning order`)
+        .nullable()
+        .optional(),
+      decompositions: z
+        .record(
+          hanziIdsSchema.describe(`IDS (can include stroke count characters)`),
+          z.array(strokeSpecStringSchema),
+        )
+        .describe(`all IDS decompositions`)
+        .optional(),
+      componentFormOf: hanziCharacterSchema
+        .describe(
+          `the primary form of this hanzi (only relevant for component-form hanzi)`,
+        )
+        .optional(),
+      isStructural: z
+        .literal(true)
+        .optional()
+        .describe(
+          `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
+        ),
+      canonicalForm: hanziCharacterSchema.optional(),
+    }),
+  ]),
+);
+
+export type CharactersKey = z.infer<typeof charactersSchema.element>[0];
+export type CharactersValue = z.infer<typeof charactersSchema.element>[1];
 
 /**
  * Allowed image MIME types for uploads and AI generation.

@@ -2,23 +2,29 @@
   "$schema": "node_modules/oxfmt/configuration_schema.json",
   "printWidth": 80,
   "ignorePatterns": [
-    "package.json",
-    "pnpm-lock.yaml",
+    "*.asset.json",
+    "*.m4a",
+    "*.mdast.json",
     "/.yarn/releases",
-    "/projects/app/drizzle/meta",
+    "/projects/*/dist",
     "/projects/app/.vercel",
     "/projects/app/*-env.d.ts",
+    "/projects/app/drizzle/meta",
     "/projects/app/public/raw/**/*.json",
-    "/projects/app/src/assets/**/*.svg",
     "/projects/app/src/assets/**/*.json",
+    "/projects/app/src/assets/**/*.svg",
     "/projects/app/test/assets/**/*.json",
     "/projects/app/test/data/**/*.json",
-    "/projects/*/dist",
-    "*.mdast.json",
-    "*.asset.json",
-    "*.m4a"
+    "package.json",
+    "pnpm-lock.yaml"
   ],
   "overrides": [
+    {
+      "files": ["projects/app/src/client/wiki/**/*.json"],
+      "options": {
+        "printWidth": 80
+      }
+    },
     {
       "files": ["*.md", "*.mdx"],
       "options": {

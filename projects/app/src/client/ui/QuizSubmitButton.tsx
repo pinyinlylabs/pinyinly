@@ -4,8 +4,9 @@ import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
 import z from "zod";
-import { ratingToThemeClass } from "./QuizDeckResultToast.utils";
+import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
+import { Theme } from "./Theme";
 
 const quizSubmitButtonStateSchema = z.enum({
   Disabled: `Disabled`,
@@ -64,18 +65,24 @@ export const QuizSubmitButton = ({
   }, [autoFocus, buttonRef]);
 
   return (
-    <RectButton
-      variant="filled"
-      ref={mergeRefs(buttonRef, ref)}
-      disabled={disabled}
-      className={`
-        flex-1
-
-        ${disabled ? `` : rating == null ? `theme-success-panel` : ratingToThemeClass(rating)}
-      `}
-      onPress={disabled ? undefined : onPress}
+    <Theme
+      theme={
+        disabled
+          ? undefined
+          : rating == null
+            ? `success-panel`
+            : ratingToThemeName(rating)
+      }
     >
-      {text}
-    </RectButton>
+      <RectButton
+        variant="filled"
+        ref={mergeRefs(buttonRef, ref)}
+        disabled={disabled}
+        className={`flex-1`}
+        onPress={disabled ? undefined : onPress}
+      >
+        {text}
+      </RectButton>
+    </Theme>
   );
 };

@@ -154,5 +154,5 @@ export const mergeProps = <T extends Record<string, any>>(
 
     props[key] = overrideValue;
   }
-  return props as MergedProps<T>;
+  return props;
 };

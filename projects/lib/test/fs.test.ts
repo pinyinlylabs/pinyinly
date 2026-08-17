@@ -26,7 +26,7 @@ vi.mock(`node:fs/promises`, async () => {
 
 const fs = await import(`#fs.ts`);
 
-describe(`glob wrapper` satisfies HasNameOf<typeof fs.glob>, () => {
+describe(`glob wrapper`, () => {
   test(`normalizes results to NFC and defaults posix to true`, async () => {
     globRawMock.mockResolvedValue([`a/e\u0301.mp3`]);
 
@@ -48,7 +48,7 @@ describe(`glob wrapper` satisfies HasNameOf<typeof fs.glob>, () => {
   });
 });
 
-describe(`globSync wrapper` satisfies HasNameOf<typeof fs.globSync>, () => {
+describe(`globSync wrapper`, () => {
   test(`normalizes results to NFC and defaults posix to true`, () => {
     globSyncRawMock.mockReturnValue([`c/e\u0301.mp3`]);
 
@@ -61,7 +61,7 @@ describe(`globSync wrapper` satisfies HasNameOf<typeof fs.globSync>, () => {
   });
 });
 
-describe(`readdir wrapper` satisfies HasNameOf<typeof fs.readdir>, () => {
+describe(`readdir wrapper`, () => {
   test(`normalizes results to NFC`, async () => {
     readdirRawMock.mockResolvedValue([`d/e\u0301.mp3`]);
 

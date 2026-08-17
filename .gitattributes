@@ -2,7 +2,10 @@
 /.yarn/releases/*    binary
 /.yarn/plugins/**/*  binary
 /.pnp.*              binary linguist-generated
+projects/app/test/**/__screenshots__/** filter=lfs diff=lfs merge=lfs -text
 projects/app/test/data/cedict_ts-2.u8.ids filter=lfs diff=lfs merge=lfs -text
 projects/app/test/data/cedict_ts-2.u8.senseSampling.json filter=lfs diff=lfs merge=lfs -text
 projects/app/test/data/cedict_ts-2.u8.*.out filter=lfs diff=lfs merge=lfs -text
 projects/app/src/data/dictionary.asset.json filter=lfs diff=lfs merge=lfs -text
+projects/app/src/assets/fonts/ArphicUkai/ukai.ttc filter=lfs diff=lfs merge=lfs -text
+projects/app/src/assets/fonts/ArphicUming/uming_0.1.20060928.ttf filter=lfs diff=lfs merge=lfs -text

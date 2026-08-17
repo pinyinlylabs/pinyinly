@@ -32,16 +32,16 @@ export function BookmarksList({
                 hover:bg-fg/5
               `}
             >
-              <Text className="pyly-body-caption text-fg-dim">See all</Text>
+              <Text className="pyly-body-caption text-muted-fg">See all</Text>
             </Pressable>
           ) : null}
         </View>
 
         {isLoading ? (
-          <Text className="pyly-body-caption text-fg-dim">Loading...</Text>
+          <Text className="pyly-body-caption text-muted-fg">Loading...</Text>
         ) : words.length === 0 ? (
           <View className="rounded-lg bg-fg/5 p-6">
-            <Text className="pyly-body text-center text-fg-dim">
+            <Text className="pyly-body text-center text-muted-fg">
               No bookmarks yet.
             </Text>
           </View>
@@ -68,7 +68,7 @@ export function BookmarksList({
                     {item.word}
                   </Text>
                   <View className="flex-1 gap-1">
-                    <Text className="font-sans text-xs text-fg-dim">
+                    <Text className="font-sans text-xs text-muted-fg">
                       Added {format(item.createdAt, `MMM d, yyyy`)}
                     </Text>
                     {item.note == null ? null : (
@@ -91,7 +91,7 @@ export function BookmarksList({
                     <Icon
                       icon="close"
                       size={16}
-                      tintColorClassName="accent-fg-dim"
+                      tintColorClassName="accent-muted-fg"
                     />
                   </Pressable>
                 </Pressable>

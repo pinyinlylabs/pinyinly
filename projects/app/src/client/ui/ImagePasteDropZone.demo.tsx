@@ -24,7 +24,7 @@ export default () => {
       </ExampleStack>
 
       <View className="gap-1">
-        <Text className="font-sans text-[12px] text-fg-dim">
+        <Text className="font-sans text-[12px] text-muted-fg">
           {lastAssetId == null
             ? `No upload yet`
             : `Last upload: ${lastAssetId}`}

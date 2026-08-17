@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["DOM", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "../../../.moon/cache/types/projects/oxlint-rules-test",
+    "target": "ESNext",
+    "types": ["node"]
+  },
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../src"
+    }
+  ]
+}

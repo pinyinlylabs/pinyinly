@@ -1,96 +1,90 @@
-import {
-  buildMeaningHintCausualBridgePrompt,
-  buildMeaningHintLogicalPrompt,
-  buildMeaningHintPrompt,
-} from "#util/prompts/meaningHint.ts";
+import { buildMeaningHintPrompt } from "#util/prompts/meaningHint.ts";
 import { describe, expect, test } from "vitest";
+import { fmtChatPromptForSnapshot } from "./helpers";
 
-describe(
-  `buildMeaningHintCausualBridgePrompt` satisfies HasNameOf<
-    typeof buildMeaningHintCausualBridgePrompt
-  >,
-  () => {
-    test(`builds target and cue payload`, () => {
-      const result = buildMeaningHintCausualBridgePrompt({
-        hanzi: `好`,
-        meaning: {
-          hanziWord: `好`,
-          glosses: [`good`],
-        },
-        components: [
-          { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child` },
-        ],
-        count: 3,
-      });
-
-      expect(result.model).toBe(`gpt-5.4`);
-      expect(result.reasoningEffort).toBe(`none`);
-      expect(buildMeaningHintCausualBridgePrompt.strategy).toBe(
-        `casual-bridge`,
-      );
-      expect(result.messages[1]?.content).toContain(`"target": "good"`);
-      expect(result.messages[1]?.content).toContain(`"woman"`);
-      expect(result.messages[1]?.content).toContain(`"child"`);
+describe(`buildMeaningHintPrompt`, () => {
+  test(`snapshot`, () => {
+    const prompt = buildMeaningHintPrompt({
+      hanzi: `好`,
+      meaning: {
+        hanziWord: `好`,
+        glosses: [`good`, `well`],
+      },
+      components: [
+        { hanzi: `女`, meaning: `woman` },
+        { hanzi: `子`, label: `child`, meaning: `child` },
+      ],
+      count: 4,
     });
-  },
-);
 
-describe(
-  `buildMeaningHintPrompt` satisfies HasNameOf<typeof buildMeaningHintPrompt>,
-  () => {
-    test(`builds visual meaning prompt`, () => {
-      const result = buildMeaningHintPrompt({
-        hanzi: `好`,
-        meaning: {
-          hanziWord: `好`,
-          glosses: [`good`, `well`],
-        },
-        components: [
-          { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child`, meaning: `child` },
-        ],
-        count: 4,
-      });
+    expect(fmtChatPromptForSnapshot(prompt)).toMatchInlineSnapshot(`
+        {
+          "messages": "
+        =====================
+         SYSTEM MESSAGE
+        ---------------------
+        You're a helpful assistant that creates short meaning-recognition mnemonic hints for Mandarin learners.
+        Your job is to help the learner remember what a Hanzi means using its visual components.
+        Use the provided component details as the core building blocks of each hint.
+        Write vivid, concrete, and memorable mini-scenes or mental images.
+        Focus on meaning recall, not pronunciation.
+        Avoid historical or etymological claims unless directly supported by the provided component context.
+        Keep each hint to 1-2 sentences.
+        Prefer unusual but clear imagery over generic definitions.
+        Each suggestion should help a learner recall the target meaning from the character's components.
+        Do not write a plain dictionary definition.
+        Do not introduce pronunciation guidance.
+        If component context is provided, ground the hint in those components explicitly.
+        =====================
 
-      expect(result.model).toBe(`gpt-5.4`);
-      expect(buildMeaningHintPrompt.strategy).toBe(`visual`);
-      expect(result.messages[0]?.content).toContain(
-        `Focus on meaning recall, not pronunciation.`,
-      );
-      expect(result.messages[1]?.content).toContain(
-        `Generate 4 distinct mnemonic hints.`,
-      );
-    });
-  },
-);
 
-describe(
-  `buildMeaningHintLogicalPrompt` satisfies HasNameOf<
-    typeof buildMeaningHintLogicalPrompt
-  >,
-  () => {
-    test(`builds logical meaning prompt with disambiguation`, () => {
-      const result = buildMeaningHintLogicalPrompt({
-        hanzi: `好`,
-        meaning: {
-          hanziWord: `好`,
-          glosses: [`good`, `well`, `fine`],
-        },
-        components: [
-          { hanzi: `女`, meaning: `woman` },
-          { hanzi: `子`, label: `child` },
-        ],
-        count: 4,
-      });
 
-      expect(result.model).toBe(`gpt-5.4`);
-      expect(buildMeaningHintLogicalPrompt.strategy).toBe(`logical`);
-      expect(result.messages[1]?.content).toContain(
-        `"disambiguation": "well; fine"`,
-      );
-      expect(result.messages[1]?.content).toContain(`"gloss": "woman"`);
-      expect(result.messages[1]?.content).toContain(`"gloss": "child"`);
-    });
-  },
-);
+        =====================
+         USER MESSAGE
+        ---------------------
+        Generate 4 distinct mnemonic hints.
+        <data>
+        {"hanzi":"好","meaning":{"hanziWord":"好","glosses":["good","well"]},"components":[{"hanzi":"女","meaning":"woman"},{"hanzi":"子","label":"child","meaning":"child"}]}
+        </data>
+        =====================
+        ",
+          "model": "gpt-5.4",
+          "reasoningEffort": "none",
+          "schema": {
+            "name": "meaningHintOutputSchema",
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "suggestions": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "explanation": {
+                        "nullable": true,
+                        "type": "string",
+                      },
+                      "hint": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "hint",
+                      "explanation",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              },
+              "required": [
+                "suggestions",
+              ],
+              "title": "meaningHintOutputSchema",
+              "type": "object",
+            },
+            "type": "json_schema",
+          },
+        }
+      `);
+  });
+});

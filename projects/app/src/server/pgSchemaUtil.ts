@@ -141,7 +141,7 @@ export const pgBase64url = (name: string) =>
 
 export const pgZod = <
   DataType extends `text` | `json`,
-  IO extends DataType extends `text` ? string : unknown,
+  IO extends (DataType extends `text` ? string : unknown),
   T extends z4.$ZodType<IO, IO>,
 >(
   schema: T,
@@ -189,7 +189,7 @@ export const pgZod = <
 export const rizzleCustomType = <
   DataType extends `text` | `json`,
   I,
-  M extends DataType extends `text` ? string : unknown,
+  M extends (DataType extends `text` ? string : unknown),
   O,
   T extends RizzleType<RizzleTypeDef, I, M, O>,
 >(

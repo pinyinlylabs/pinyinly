@@ -1,6 +1,6 @@
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import {
-  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintExplanationTextSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/data/userSettings";
 import { View } from "react-native";
@@ -26,7 +26,7 @@ export default () => {
         />
 
         <InlineEditableSettingText
-          setting={hanziWordMeaningHintExplanationSetting}
+          setting={hanziWordMeaningHintExplanationTextSetting}
           settingKey={hintSettingKey}
           placeholder="Add an explanation"
           multiline

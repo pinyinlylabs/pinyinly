@@ -3,6 +3,8 @@ import type { OpenAI } from "openai";
 import { z } from "zod";
 import makeDebug from "debug";
 import { invariant } from "@pinyinly/lib/invariant";
+import isEqual from "lodash/isEqual";
+import type { JSONSchemaGeneratorParams } from "zod/v4/core";
 
 const debug = makeDebug(`pyly:ai.ts`);
 
@@ -21,91 +23,68 @@ export interface ChatPrompt<Schema extends z.ZodType> {
    */
   schema: Schema;
   timeout?: number;
-}
-
-const unsupportedOpenAiJsonSchemaKeywords = new Set([
-  `maxItems`,
-  `minItems`,
-  `prefixItems`,
-]);
-
-function formatJsonSchemaPath(path: readonly (number | string)[]): string {
-  let result = `$`;
-
-  for (const part of path) {
-    result +=
-      typeof part === `number`
-        ? `[${part}]`
-        : /^[a-zA-Z_][a-zA-Z0-9_]*$/u.test(part)
-          ? `.${part}`
-          : `[${JSON.stringify(part)}]`;
-  }
-
-  return result;
-}
-
-function assertOpenAiCompatibleJsonSchema(
-  value: unknown,
-  path: readonly (number | string)[] = [],
-): void {
-  if (value == null || typeof value !== `object`) {
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    for (const [index, item] of value.entries()) {
-      assertOpenAiCompatibleJsonSchema(item, [...path, index]);
-    }
-    return;
-  }
-
-  for (const [key, child] of Object.entries(value)) {
-    if (unsupportedOpenAiJsonSchemaKeywords.has(key)) {
-      throw new Error(
-        `OpenAI response format does not support JSON Schema keyword ${JSON.stringify(key)} at ${formatJsonSchemaPath([...path, key])}`,
-      );
-    }
-
-    assertOpenAiCompatibleJsonSchema(child, [...path, key]);
-  }
-
-  const isArraySchema =
-    `type` in value &&
-    (value.type === `array` ||
-      (Array.isArray(value.type) && value.type.includes(`array`)));
-
-  if (isArraySchema && !(`items` in value)) {
-    throw new Error(
-      `OpenAI response format requires JSON Schema arrays to define "items" at ${formatJsonSchemaPath(path)}`,
-    );
-  }
-}
-
-function zodToOpenAiJsonSchema<Schema extends z.ZodType>(
-  schema: Schema,
-): z.core.JSONSchema.BaseSchema {
-  const jsonSchema = z.toJSONSchema(schema, { unrepresentable: `throw` });
-  assertOpenAiCompatibleJsonSchema(jsonSchema);
-  return jsonSchema;
+  /**
+   * Optional postprocessing function to transform the raw response data into
+   * the desired format.
+   */
+  postprocess?: (data: z.infer<Schema>) => z.infer<Schema>;
 }
 
 export function zodResponseFormatJson<Schema extends z.ZodType>(
   schema: Schema,
 ): OpenAI.Responses.ResponseFormatTextJSONSchemaConfig {
+  const jsonSchema = z.toJSONSchema(schema, {
+    target: `openapi-3.0`,
+    unrepresentable: `throw`,
+    override: (ctx) => {
+      fixAdditionalPropertiesEmptyObject(ctx);
+    },
+  });
+
+  const title = schema.meta()?.title ?? `anonymous schema`;
+  const name = title.replaceAll(/[^a-zA-Z0-9_-]/gu, `_`);
+
   return {
     type: `json_schema`,
-    name: `result_shape`,
-    schema: zodToOpenAiJsonSchema(schema),
+    name: name,
+    schema: jsonSchema,
   };
 }
+
+type JsonSchemaOverride = NonNullable<JSONSchemaGeneratorParams[`override`]>;
+
+/**
+ * Fixes the `additionalProperties: {}` from a z.object().loose() schema to be
+ * `additionalProperties: true` for OpenAI compatibility.
+ */
+const fixAdditionalPropertiesEmptyObject: JsonSchemaOverride = ({
+  jsonSchema,
+}) => {
+  if (
+    jsonSchema.type === `object` &&
+    isEqual(jsonSchema.additionalProperties, {})
+  ) {
+    jsonSchema.additionalProperties = true;
+  }
+};
 
 export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   prompt: ChatPrompt<Schema>,
   options?: { signal?: AbortSignal; retries?: number; store?: boolean },
 ): Promise<{
+  /**
+   * Final data including any postprocessing applied. This is the data that
+   * should be used by the caller.
+   */
   data: z.infer<Schema>;
+  /**
+   * The raw output from the OpenAI response, which may include additional
+   * metadata and information about the response.
+   */
+  output: OpenAI.Responses.Response[`output`];
   usage?: OpenAI.Responses.ResponseUsage;
   model: string;
+  reasoning?: OpenAI.Reasoning | null;
 }> {
   const client = getOpenAIClient();
 
@@ -149,10 +128,16 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       throw e;
     }
 
+    if (prompt.postprocess != null) {
+      data = prompt.postprocess(data);
+    }
+
     return {
       data,
+      output: response.output,
       usage: response.usage,
       model: response.model,
+      reasoning: response.reasoning,
     };
   }
 }

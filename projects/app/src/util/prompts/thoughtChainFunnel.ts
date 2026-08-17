@@ -232,8 +232,7 @@ export function renderThoughtChainFunnelAscii(
   }
 
   if (invalidJoinCues.length > 0) {
-    lines.push(`|`);
-    lines.push(`* INVALID JOIN CUES`);
+    lines.push(`|`, `* INVALID JOIN CUES`);
     for (const cue of invalidJoinCues) {
       for (const cueStep of cue.cueThoughtChain) {
         lines.push(
@@ -843,14 +842,10 @@ Generate a thought funnel for the following input:
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(
-          {
-            ...entry,
-            parsedConcepts,
-          },
-          null,
-          2,
-        ),
+        data: JSON.stringify({
+          ...entry,
+          parsedConcepts,
+        }),
       }),
     },
   ];
@@ -953,7 +948,7 @@ Convert the following mnemonic representation into a guided imagination.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        input: JSON.stringify(entry, null, 2),
+        input: JSON.stringify(entry),
       }),
     },
   ];
@@ -1079,7 +1074,7 @@ Evaluate the following guided imagination.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(entry, null, 2),
+        data: JSON.stringify(entry),
       }),
     },
   ];
@@ -1673,14 +1668,10 @@ Evaluate the following thought funnel.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(
-          {
-            ...entry,
-            parsedConcepts,
-          },
-          null,
-          2,
-        ),
+        data: JSON.stringify({
+          ...entry,
+          parsedConcepts,
+        }),
       }),
     },
   ];
@@ -1946,14 +1937,10 @@ Revise the following thought funnel based on the criticisms.
     {
       role: `user`,
       content: renderPromptTemplate(userTemplate, {
-        data: JSON.stringify(
-          {
-            ...entry,
-            parsedConcepts,
-          },
-          null,
-          2,
-        ),
+        data: JSON.stringify({
+          ...entry,
+          parsedConcepts,
+        }),
       }),
     },
   ];

@@ -1,27 +1,28 @@
-import { renderPromptTemplate } from "@/util/prompts/shared";
+import {
+  locationAndLocationSetFromInput,
+  renderPromptTemplate,
+} from "@/util/prompts/shared";
 import { animatorMemorySketchSystemTemplate } from "@/util/prompts/imageStyles";
 import type { ImagePrompt } from "@/server/lib/gemini";
 import type { LocationSetKey, LocationSpec } from "@/data/model";
 
-export function buildLocationSetIdentityImagePrompt(entry: {
-  input: {
-    locationSpec: LocationSpec;
-    targetSet: LocationSetKey;
-  };
+export function buildLocationSetIdentityImagePrompt(input: {
+  locationSpec: LocationSpec;
+  locationSetKey: LocationSetKey;
 }): ImagePrompt {
   const userTemplate = `
 Create an image for one set from the supplied location specification.
 
 Use the full location specification for global visual consistency.
 
-Use only the selected targetSet for the scene content and canonical framing.
+Use only the selected set for the scene content and canonical framing.
 
 Do not blend in the framing, viewpoint, or defining setup of any other set.
 
 Instructions:
 
 - Preserve the location-wide recognition hooks and design rules where they are naturally visible.
-- Follow the selected set's name, design rules, and canonical framing.
+- Follow the selected set's name, purpose, design rules, and canonical framing.
 - Respect its avoidFraming rules.
 - Do not invent a different set.
 - Do not add characters or story actions.
@@ -33,14 +34,15 @@ Instructions:
 </input>
 `;
 
-  const variables = {
-    input: JSON.stringify(entry.input, null, 2),
-  };
+  const userPrompt = renderPromptTemplate(userTemplate, {
+    input: JSON.stringify({
+      ...locationAndLocationSetFromInput(input),
+    }),
+  });
 
-  const userPrompt = renderPromptTemplate(userTemplate, variables);
   const systemInstruction = renderPromptTemplate(
     animatorMemorySketchSystemTemplate,
-    variables,
+    {},
   );
 
   return {
@@ -49,5 +51,6 @@ Instructions:
     resolution: `1K`,
     systemInstruction,
     messages: [{ role: `user`, kind: `text`, content: userPrompt }],
+    thinkingLevel: `high`,
   };
 }

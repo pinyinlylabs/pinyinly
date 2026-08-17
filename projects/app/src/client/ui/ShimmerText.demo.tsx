@@ -11,19 +11,19 @@ export default () => {
         </ExampleStack>
 
         <ExampleStack title="small" childrenClassName="gap-3">
-          <ShimmerText className="font-sans text-[12px] text-fg-dim">
+          <ShimmerText className="font-sans text-[12px] text-muted-fg">
             Loading...
           </ShimmerText>
         </ExampleStack>
 
         <ExampleStack title="large" childrenClassName="gap-3">
-          <ShimmerText className="font-sans text-[18px] font-semibold text-fg-dim">
+          <ShimmerText className="font-sans text-[18px] font-semibold text-muted-fg">
             Generating image...
           </ShimmerText>
         </ExampleStack>
 
         <ExampleStack title="long text" childrenClassName="gap-3">
-          <ShimmerText className="font-sans text-[14px] text-fg-dim">
+          <ShimmerText className="font-sans text-[14px] text-muted-fg">
             Processing your request, please wait...
           </ShimmerText>
         </ExampleStack>

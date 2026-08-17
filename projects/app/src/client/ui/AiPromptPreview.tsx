@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { RectButton } from "./RectButton";
+import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import type { ChatPromptMessage } from "@/server/lib/ai";
 
 export type AiPromptPreviewSectionType = {
@@ -20,7 +20,9 @@ export function AiPromptPreview({
     <View className="gap-2">
       <Text className="pyly-body-subheading">{heading}</Text>
       {description == null ? null : (
-        <Text className="font-sans text-[14px] text-fg-dim">{description}</Text>
+        <Text className="font-sans text-[14px] text-muted-fg">
+          {description}
+        </Text>
       )}
 
       {sections.map((section, index) => (
@@ -32,7 +34,7 @@ export function AiPromptPreview({
             <Text
               className={`
                 rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold tracking-wide
-                text-fg-dim uppercase
+                text-muted-fg uppercase
               `}
             >
               {section.title}
@@ -53,21 +55,11 @@ export function AiPromptPreview({
 }
 
 function PromptTextBlock({ label, text }: { label: string; text: string }) {
-  const handleCopy = () => {
-    void copyToClipboard(text);
-  };
-
   return (
     <View className="gap-1">
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="pyly-body-caption text-fg-dim">{label}</Text>
-        <RectButton
-          variant="bareDim"
-          iconStart="copy"
-          iconSize={12}
-          onPress={handleCopy}
-          className="size-6 rounded p-0 text-fg-dim"
-        />
+        <Text className="pyly-body-caption text-muted-fg">{label}</Text>
+        <CopyToClipboardButton text={text} />
       </View>
       <Text
         selectable
@@ -77,26 +69,4 @@ function PromptTextBlock({ label, text }: { label: string; text: string }) {
       </Text>
     </View>
   );
-}
-
-async function copyToClipboard(text: string): Promise<boolean> {
-  if (text.length === 0) {
-    return false;
-  }
-
-  if (!(`navigator` in globalThis)) {
-    return false;
-  }
-
-  const globalNavigator = globalThis.navigator;
-  if (typeof globalNavigator.clipboard.writeText !== `function`) {
-    return false;
-  }
-
-  try {
-    await globalNavigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
 }

@@ -4,7 +4,6 @@ import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
 import type { UseDeviceStoreResult } from "#client/ui/hooks/useDeviceStore.ts";
 import { useDeviceStore } from "#client/ui/hooks/useDeviceStore.ts";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
-import type { HanziWord } from "#data/model.ts";
 import { r } from "#util/rizzle.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
@@ -44,12 +43,15 @@ baseTest(`useDeviceStore setValue types`, () => {
 
   typeChecks(() => {
     const setValue = null as unknown as HintSetValue;
-    setValue({ hanziWord: `` as HanziWord, text: `hint` });
+    setValue({ hanziWord: ``, text: `hint` });
     setValue(null);
     // @ts-expect-error missing key field
     setValue({ text: `hint` });
-    // @ts-expect-error wrong field for entity shape
-    setValue({ hanziWord: `` as HanziWord, imageId: `x` });
+    setValue({
+      hanziWord: ``,
+      // @ts-expect-error wrong field for entity shape
+      imageId: `x`,
+    });
   });
 });
 

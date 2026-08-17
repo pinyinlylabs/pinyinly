@@ -21,7 +21,7 @@ export const checkIsOffline = memoizeGlobalThis(`checkIsOffline`, () =>
       const response = await fetch(`https://cloudflare.com/cdn-cgi/trace`, {
         method: `HEAD`,
         keepalive: false,
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(10_000),
         cache: `no-cache`,
       });
       // avoid memory leak

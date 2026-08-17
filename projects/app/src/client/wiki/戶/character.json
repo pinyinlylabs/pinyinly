@@ -1,14 +1,9 @@
 {
   "hanzi": "戶",
-  "mnemonic": {
-    "components": [
-      "⿱",
-      { "hanzi": "丿", "strokes": "0" },
-      { "hanzi": "尸", "strokes": "1-3" }
-    ]
-  },
+  "svg": { "strokes": 4 },
   "simplifiedForm": "户",
-  "svg": {
-    "strokes": 4
-  }
+  "mnemonic": {
+    "decomposition": "⿱丿尸"
+  },
+  "decompositions": { "⿱丿尸": ["0", "1-3"] }
 }

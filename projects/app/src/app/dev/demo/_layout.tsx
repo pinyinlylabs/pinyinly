@@ -4,6 +4,7 @@ import type { Href } from "expo-router";
 import { StrictMode } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { demos } from ".";
+import { Theme } from "#client/ui/Theme.tsx";
 
 export default function Layout() {
   return (
@@ -43,20 +44,12 @@ export default function Layout() {
             lg:flex-row
           `}
         >
-          <View
-            className={`
-              pyly-color-scheme-light theme-default
-
-              ${examplesStackClassName}
-            `}
-          />
-          <View
-            className={`
-              pyly-color-scheme-dark theme-default
-
-              ${examplesStackClassName}
-            `}
-          />
+          <Theme theme="light">
+            <View className={examplesStackClassName} />
+          </Theme>
+          <Theme theme="dark">
+            <View className={examplesStackClassName} />
+          </Theme>
         </View>
       </ScrollView>
     </StrictMode>

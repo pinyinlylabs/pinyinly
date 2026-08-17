@@ -45,7 +45,7 @@ export function WikiTitledBox({
   return (
     <View className={containerClass({ className })} onLayout={onLayout}>
       <View className="flex-row items-center">
-        <Text className="flex-1 font-sans text-sm/normal font-semibold text-fg-dim uppercase">
+        <Text className="flex-1 font-sans text-sm/normal font-semibold text-muted-fg uppercase">
           {title}
         </Text>
         {headerAction}
@@ -123,7 +123,7 @@ export function WikiTitledBox({
       </View>
 
       {bottomCaption == null ? null : (
-        <Text className="pyly-body-caption text-fg-dim">{bottomCaption}</Text>
+        <Text className="pyly-body-caption text-muted-fg">{bottomCaption}</Text>
       )}
     </View>
   );

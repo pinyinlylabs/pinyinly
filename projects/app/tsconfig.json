@@ -10,7 +10,7 @@
       "@/*": ["./src/*"]
     },
     "target": "ESNext",
-    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
+    "types": []
   },
   "include": [
     "*",
@@ -34,9 +34,6 @@
       "path": "./test"
     },
     {
-      "path": "../eslint-rules"
-    },
-    {
       "path": "../audio-sprites"
     },
     {
@@ -44,6 +41,9 @@
     },
     {
       "path": "../mdx"
+    },
+    {
+      "path": "../oxlint-rules"
     }
   ]
 }

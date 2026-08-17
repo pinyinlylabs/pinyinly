@@ -285,7 +285,7 @@ const DesktopNavSubtleItem = ({ name, href }: NavItemProps) => {
       <Pressable>
         <Text
           className={`
-            font-sans text-sm/[32px] font-bold text-fg-dim uppercase
+            font-sans text-sm/[32px] font-bold text-muted-fg uppercase
 
             hover:text-fg
           `}

@@ -2,7 +2,6 @@ tasks:
   lint:
     deps:
       - ~:oxlint
-      - ~:eslint
 
   fmt:
     deps:
@@ -13,7 +12,6 @@ tasks:
       - "/**/*"
 
 tags:
-  - eslint
   - oxfmt
   - oxlint
   - typescript

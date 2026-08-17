@@ -11,6 +11,7 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 
 export const geminiImageModels = [
   `gemini-2.5-flash-image`,
+  `gemini-3.1-flash-image`,
   `gemini-3.1-flash-lite-image`,
 ] as const;
 
@@ -63,25 +64,23 @@ export type GeminiImageAspectRatio = z.infer<
   typeof geminiImageAspectRatioSchema
 >;
 
+export const imagePromptMessageSchema = z.discriminatedUnion(`kind`, [
+  z.object({
+    kind: z.literal(`text`),
+    role: z.literal(`user`),
+    content: z.string(),
+  }),
+  z.object({
+    kind: z.literal(`asset`),
+    role: z.literal(`user`),
+    assetId: assetIdSchema,
+  }),
+]);
+
 export const imagePromptSchema = z.object({
   model: z.enum(geminiImageModels),
   systemInstruction: z.string().optional(),
-  messages: z
-    .array(
-      z.discriminatedUnion(`kind`, [
-        z.object({
-          kind: z.literal(`text`),
-          role: z.literal(`user`),
-          content: z.string(),
-        }),
-        z.object({
-          kind: z.literal(`asset`),
-          role: z.literal(`user`),
-          assetId: assetIdSchema,
-        }),
-      ]),
-    )
-    .min(1),
+  messages: z.array(imagePromptMessageSchema).min(1),
   aspectRatio: geminiImageAspectRatioSchema.optional(),
   resolution: z.enum(geminiImageResolutionPresets).optional(),
   thinkingLevel: z.enum(geminiImageThinkingLevels).optional(),
@@ -148,6 +147,7 @@ export async function requestGeminiImage(prompt: ImagePrompt): Promise<{
 
   const response = await client.models.generateContentStream({
     model: prompt.model,
+
     config: {
       responseModalities: [`IMAGE`],
       imageConfig: {

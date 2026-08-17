@@ -1,0 +1,67 @@
+diff --git a/dist/common/hoc/withUniwind.js b/dist/common/hoc/withUniwind.js
+index ba3d143e60de4f9571301ae6ace284775961dce5..87ba43f996af0aa09cf300876186369e446dadf8 100644
+--- a/dist/common/hoc/withUniwind.js
++++ b/dist/common/hoc/withUniwind.js
+@@ -69,7 +69,7 @@ const withAutoUniwind = Component => originalProps => {
+   return /* @__PURE__ */(0, _jsxRuntime.jsx)(Component, {
+     ...props,
+     ...generatedProps,
+-    dataSet: (0, _generateDataSet.generateDataSet)(props)
++    ...generateDataSetProps(props)
+   });
+ };
+ const withManualUniwind = (Component, options) => originalProps => {
+@@ -113,6 +113,18 @@ const withManualUniwind = (Component, options) => originalProps => {
+   return /* @__PURE__ */(0, _jsxRuntime.jsx)(Component, {
+     ...props,
+     ...generatedProps,
+-    dataSet: (0, _generateDataSet.generateDataSet)(props)
++    ...generateDataSetProps(props)
+   });
+ };
++
++const toCamelCase = (str) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
++
++function generateDataSetProps(props) {
++  let dataSet;
++  Object.entries(props).forEach(([key, value]) => {
++    if (key.startsWith("data-")) {
++      (dataSet ??= {})[toCamelCase(key.slice(5))] = value;
++    }
++  });
++  return dataSet == null ? null : { ...props.dataSet, ...dataSet };
++};
+diff --git a/dist/module/hoc/withUniwind.js b/dist/module/hoc/withUniwind.js
+index 8de538ce4cedacc01df68fc04aa1be2926cf2ea3..e85dd2cbe8a60f0229ba1c2841cf2ae5ae5245a0 100644
+--- a/dist/module/hoc/withUniwind.js
++++ b/dist/module/hoc/withUniwind.js
+@@ -55,7 +55,7 @@ const withAutoUniwind = (Component) => (originalProps) => {
+     {
+       ...props,
+       ...generatedProps,
+-      dataSet: generateDataSet(props)
++      ...generateDataSetProps(props)
+     }
+   );
+ };
+@@ -91,7 +91,19 @@ const withManualUniwind = (Component, options) => (originalProps) => {
+     {
+       ...props,
+       ...generatedProps,
+-      dataSet: generateDataSet(props)
++      ...generateDataSetProps(props)
+     }
+   );
+ };
++
++const toCamelCase = (str) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
++
++function generateDataSetProps(props) {
++  let dataSet;
++  Object.entries(props).forEach(([key, value]) => {
++    if (key.startsWith("data-")) {
++      (dataSet ??= {})[toCamelCase(key.slice(5))] = value;
++    }
++  });
++  return dataSet == null ? null : { ...props.dataSet, ...dataSet };
++};

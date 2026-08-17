@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { Text, View } from "react-native";
 import { describe, expect, test, vi } from "vitest";
 
-describe(`Tabs suite` satisfies HasNameOf<typeof Tabs>, () => {
+describe(`Tabs suite`, () => {
   test(`renders with default tab selected`, () => {
     render(
       <Tabs defaultValue="tab1">

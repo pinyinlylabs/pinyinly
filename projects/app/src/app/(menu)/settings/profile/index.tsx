@@ -3,7 +3,7 @@ import { useAuth } from "@/client/auth";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
-import { userNameSetting } from "@/data/userSettings";
+import { userNameTextSetting } from "@/data/userSettings";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 
@@ -57,14 +57,14 @@ export default function ProfileSettingsPage() {
       {/* Account Name Editor */}
       {isAuthenticated && (
         <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
-          <Text className="font-sans text-sm text-fg-dim">Account Name</Text>
+          <Text className="font-sans text-sm text-muted-fg">Account Name</Text>
           <InlineEditableSettingText
-            setting={userNameSetting}
+            setting={userNameTextSetting}
             settingKey={{}}
             textClassName="pyly-body"
             placeholder="Enter account name"
           />
-          <Text className="font-sans text-xs text-fg-dim/60">
+          <Text className="font-sans text-xs text-muted-fg/60">
             Updated automatically across your devices
           </Text>
         </View>
@@ -72,7 +72,7 @@ export default function ProfileSettingsPage() {
 
       {/* Account Management */}
       <View className="gap-3 rounded-lg border bg-bg-high p-4">
-        <Text className="font-sans text-sm text-fg-dim">
+        <Text className="font-sans text-sm text-muted-fg">
           Account Management
         </Text>
 
@@ -81,7 +81,7 @@ export default function ProfileSettingsPage() {
             <Text className="font-sans text-base font-semibold text-fg">
               You&apos;re signed in
             </Text>
-            <Text className="font-sans text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-muted-fg">
               Your progress is synced across your devices.
             </Text>
             <View className="gap-2">
@@ -96,7 +96,7 @@ export default function ProfileSettingsPage() {
             <Text className="font-sans text-base font-semibold text-fg">
               Not signed in
             </Text>
-            <Text className="font-sans text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-muted-fg">
               Create an account to save your progress and sync across devices.
             </Text>
             <View className="gap-2">

@@ -22,6 +22,7 @@ export const SkillAnswerText = ({ skill }: { skill: Skill }) => {
     }
     case SkillKind.HanziWordToGlossTyped:
     case SkillKind.HanziWordToGloss: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return <HanziWordToGlossSkillAnswerText skill={skill} />;
     }
@@ -29,6 +30,7 @@ export const SkillAnswerText = ({ skill }: { skill: Skill }) => {
     case SkillKind.HanziWordToPinyinFinal:
     case SkillKind.HanziWordToPinyinInitial:
     case SkillKind.HanziWordToPinyinTone: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       return <HanziWordToPinyinSkillAnswerText skill={skill} />;
     }

@@ -1,4 +1,9 @@
-import type { HanziCharacter, WikiCharacterData } from "@/data/model";
+import type {
+  HanziCharacter,
+  HanziIds,
+  StrokeSpecString,
+  WikiCharacterData,
+} from "@/data/model";
 import { View } from "react-native";
 import { WikiHanziCharacterMeaningBox } from "./WikiHanziCharacterMeaning";
 import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
@@ -19,19 +24,10 @@ export default () => {
 export const characterData = {
   hanzi: `看` as HanziCharacter,
   mnemonic: {
-    components: [
-      `⿰`,
-      {
-        hanzi: `龵` as HanziCharacter,
-        label: `hand`,
-        strokes: `0,1,2,3`,
-      },
-      {
-        hanzi: `目` as HanziCharacter,
-        label: `eye`,
-        strokes: `4,5,6,7,8`,
-      },
-    ],
+    components: {
+      [`龵` as HanziCharacter]: { label: `hand` },
+      [`目` as HanziCharacter]: { label: `eye` },
+    },
     hints: [
       {
         meaningKey: `see`,
@@ -39,13 +35,12 @@ export const characterData = {
       },
     ],
   },
-  decompositions: [
-    [
-      `⿱`,
-      { hanzi: `手` as HanziCharacter, strokes: `0,1,2,3` },
-      { hanzi: `目` as HanziCharacter, strokes: `4,5,6,7,8` },
+  decompositions: {
+    [`⿱手目` as HanziIds]: [
+      `0,1,2,3` as StrokeSpecString,
+      `4,5,6,7,8` as StrokeSpecString,
     ],
-  ],
+  },
   svg: {
     strokes: [
       `M 493 738 Q 622 771 657 772 Q 675 771 679 777 Q 685 787 674 800 Q 629 848 588 853 Q 581 850 578 839 Q 574 808 393 748 Q 347 735 291 719 Q 284 712 289 708 Q 307 702 428 726 Q 435 727 444 728 L 493 738 Z`,

@@ -53,7 +53,7 @@ export default () => (
                 <Text className="font-sans text-sm font-bold text-fg">
                   Draft.pdf
                 </Text>
-                <Text className="font-sans text-xs text-fg-dim">
+                <Text className="font-sans text-xs text-muted-fg">
                   Updated 2 mins ago
                 </Text>
               </View>

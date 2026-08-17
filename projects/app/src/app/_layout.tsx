@@ -25,6 +25,7 @@ import { Stack, useNavigationContainerRef } from "expo-router";
 import Head from "expo-router/head";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
+import { PortalHost } from "@rn-primitives/portal";
 
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
@@ -66,6 +67,7 @@ export function UiProviders({ children }: PropsWithChildren) {
   return (
     <AudioContextProvider>
       <TooltipProvider>{children}</TooltipProvider>
+      <PortalHost />
     </AudioContextProvider>
   );
 }

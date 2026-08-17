@@ -428,7 +428,6 @@ module.exports = defineConfig({
     enforceStrictTypesCompatibility(ctx, {
       "color@^5.0.0": "4.x || 5.x",
       "debug@^4.3.7": "^4 <=4.3.x",
-      "eslint@^9.13.0": "^9 <=9.13.x",
       "lodash@^4.18.1": "^4 <=4.18.x",
       "react@19.2.7": "19.2.x",
       "pg@^8.20.0":

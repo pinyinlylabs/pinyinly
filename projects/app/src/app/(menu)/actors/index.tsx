@@ -17,7 +17,7 @@ export default function ActorsPage() {
       <View className="gap-2">
         <Text className="pyly-body-title">Actors</Text>
         <HeaderTitleProvider.ScrollTrigger title="Actors" />
-        <Text className="font-sans text-sm text-fg-dim">
+        <Text className="font-sans text-sm text-muted-fg">
           Reusable character and actor records for sound alternatives.
         </Text>
       </View>
@@ -33,14 +33,14 @@ export default function ActorsPage() {
           New actor
         </RectButton>
         {isLoading ? (
-          <Text className="self-center font-sans text-sm text-fg-dim">
+          <Text className="self-center font-sans text-sm text-muted-fg">
             Loading…
           </Text>
         ) : null}
       </View>
 
       {lastCreatedActorId == null ? null : (
-        <Text className="font-sans text-xs text-fg-dim/70">
+        <Text className="font-sans text-xs text-muted-fg/70">
           Created actor {lastCreatedActorId}
         </Text>
       )}
@@ -48,7 +48,7 @@ export default function ActorsPage() {
       <View className="gap-3">
         {actors.length === 0 ? (
           <View className="rounded-lg border border-fg/10 bg-bg-high p-4">
-            <Text className="font-sans text-sm text-fg-dim">
+            <Text className="font-sans text-sm text-muted-fg">
               No actors yet. Create one to start building the directory.
             </Text>
           </View>

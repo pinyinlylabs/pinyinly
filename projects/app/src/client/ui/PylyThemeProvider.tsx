@@ -1,8 +1,8 @@
 import { DefaultTheme, ThemeProvider } from "expo-router";
 import type { ReactNode } from "react";
-import { Platform, useColorScheme, View } from "react-native";
-import { tv } from "tailwind-variants";
+import { useColorScheme, View } from "react-native";
 import { VisualViewportCssVariables } from "./VisualViewportCssVariables";
+import { Theme } from "./Theme";
 
 export function PylyThemeProvider({ children }: { children: ReactNode }) {
   const isDarkMode = useColorScheme() === `dark`;
@@ -26,40 +26,14 @@ export function PylyThemeProvider({ children }: { children: ReactNode }) {
         fonts: DefaultTheme.fonts,
       }}
     >
-      <View
-        className={containerClass({ isWeb: Platform.OS === `web`, isDarkMode })}
-      >
-        {children}
-        <VisualViewportCssVariables />
-      </View>
+      <Theme theme={isDarkMode ? `dark` : `light`}>
+        <View className="flex-1 bg-bg">
+          {children}
+          <VisualViewportCssVariables />
+        </View>
+      </Theme>
     </ThemeProvider>
   );
 }
-
-const containerClass = tv({
-  base: `flex-1 bg-bg`,
-  variants: {
-    isWeb: {
-      false: `theme-default`,
-    },
-    isDarkMode: {
-      true: ``,
-    },
-  },
-  compoundVariants: [
-    // These are the native equivalent of adding a class to the body
-    // element, without this the root color scheme is not set.
-    {
-      isWeb: false,
-      isDarkMode: true,
-      class: `pyly-color-scheme-dark`,
-    },
-    {
-      isWeb: false,
-      isDarkMode: false,
-      class: `pyly-color-scheme-light`,
-    },
-  ],
-});
 
 const BUG_DETECTOR_COLOR = `#ff0000`;

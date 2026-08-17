@@ -6,10 +6,12 @@ export function HanziPinyinText({
   hanzi,
   pinyin,
   className = ``,
+  lozenges,
 }: {
   hanzi: HanziText;
   pinyin?: PinyinText | null;
   className?: string;
+  lozenges?: React.ReactNode;
 }) {
   const isSingleCharacter = hanzi.length === 1;
 
@@ -27,10 +29,16 @@ export function HanziPinyinText({
               {pinyin}
             </Text>
           )}
+          {lozenges}
         </>
       ) : (
         <>
-          <Text className={hanziTextClass({ isSingleCharacter })}>{hanzi}</Text>
+          <View className="flex-row items-center gap-3">
+            <Text className={hanziTextClass({ isSingleCharacter })}>
+              {hanzi}
+            </Text>
+            {lozenges}
+          </View>
           {pinyin == null ? null : (
             <Text className={pinyinTextClass({ isSingleCharacter })}>
               {pinyin}
@@ -62,7 +70,7 @@ const hanziTextClass = tv({
 });
 
 const pinyinTextClass = tv({
-  base: `font-sans text-fg-dim`,
+  base: `font-sans text-muted-fg`,
   variants: {
     isSingleCharacter: {
       false: `text-sm`,

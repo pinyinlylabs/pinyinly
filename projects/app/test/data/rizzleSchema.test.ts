@@ -32,7 +32,7 @@ test(`skill as key`, async () => {
   }
 });
 
-test(`rSkillKind()` satisfies HasNameOf<typeof rSkillKind>, async () => {
+test(`rSkillKind()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     skill: rSkillKind(),
@@ -70,7 +70,7 @@ test(`rSkillKind()` satisfies HasNameOf<typeof rSkillKind>, async () => {
   }
 });
 
-test(`rSkill()` satisfies HasNameOf<typeof rSkill>, async () => {
+test(`rSkill()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     skill: rSkill(),

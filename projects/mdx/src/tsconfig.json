@@ -8,15 +8,12 @@
     "outDir": "../../../.moon/cache/types/projects/mdx-src",
     "resolveJsonModule": true,
     "target": "ESNext",
-    "types": ["node", "@pinyinly/eslint-rules/nameof.d.ts"]
+    "types": []
   },
   "include": ["**/*"],
   "references": [
     {
       "path": "../../lib"
-    },
-    {
-      "path": "../../eslint-rules"
     }
   ]
 }

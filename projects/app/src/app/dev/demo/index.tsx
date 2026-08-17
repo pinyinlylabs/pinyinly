@@ -1,18 +1,10 @@
-import { Section } from "@/client/ui/demo/components";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { FunctionComponent } from "react";
 import { lazy } from "react";
+import { Text } from "@/client/ui/Text";
 
 export default function UiDemoIndexPage() {
-  return (
-    <>
-      {Object.entries(demos).map(([name, Demo]) => (
-        <Section key={name} title={name} href={`/dev/demo/${name}`}>
-          <Demo />
-        </Section>
-      ))}
-    </>
-  );
+  return <Text className="text-muted-fg">Choose a demo from the list</Text>;
 }
 
 const lazyDemo = <Demo extends FunctionComponent>(
@@ -27,18 +19,18 @@ const lazyDemo = <Demo extends FunctionComponent>(
 export const demos: Record<string, FunctionComponent> = {
   // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
   [`AiMeaningHintModal`]: lazyDemo(() => import(`../../../client/ui/AiMeaningHintModal.demo`)),
-  [`AiPrompts`]: lazyDemo(() => import(`../../../client/ui/AiPrompts.demo`)),
-  [`AiPronunciationHintModal`]: lazyDemo(() => import(`../../../client/ui/AiPronunciationHintModal.demo`)),
   [`AssetImage`]: lazyDemo(() => import(`../../../client/ui/AssetImage.demo`)),
   [`Breadcrumbs`]: lazyDemo(() => import(`../../../client/ui/Breadcrumbs.demo`)),
+  [`ButtonGroup`]: lazyDemo(() => import(`../../../client/ui/ButtonGroup.demo`)),
   [`CloseButton`]: lazyDemo(() => import(`../../../client/ui/CloseButton.demo`)),
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
+  [`DropdownMenu2`]: lazyDemo(() => import(`../../../client/ui/DropdownMenu2.demo`)),
   [`FloatingMenuModal`]: lazyDemo(() => import(`../../../client/ui/FloatingMenuModal.demo`)),
-  [`HanziCharacter`]: lazyDemo(() => import(`../../../client/ui/HanziCharacter.demo`)),
+  [`GlyphBuilder`]: lazyDemo(() => import(`../../../client/ui/GlyphBuilder.demo`)),
   [`HanziDecompositionEditor`]: lazyDemo(() => import(`../../../client/ui/HanziDecompositionEditor.demo`)),
+  [`HanziGraphic`]: lazyDemo(() => import(`../../../client/ui/HanziGraphic.demo`)),
   [`HanziHintOption`]: lazyDemo(() => import(`../../../client/ui/HanziHintOption.demo`)),
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
-  [`HanziTile`]: lazyDemo(() => import(`../../../client/ui/HanziTile.demo`)),
   [`HeaderTitleProvider`]: lazyDemo(() => import(`../../../client/ui/HeaderTitleProvider.demo`)),
   [`HskLozenge`]: lazyDemo(() => import(`../../../client/ui/HskLozenge.demo`)),
   [`Icon`]: lazyDemo(() => import(`../../../client/ui/Icon.demo`)),
@@ -69,14 +61,14 @@ export const demos: Record<string, FunctionComponent> = {
   [`ShimmerRect`]: lazyDemo(() => import(`../../../client/ui/ShimmerRect.demo`)),
   [`ShimmerText`]: lazyDemo(() => import(`../../../client/ui/ShimmerText.demo`)),
   [`ShootingStars`]: lazyDemo(() => import(`../../../client/ui/ShootingStars.demo`)),
-  [`StrokeSegmentsDebug`]: lazyDemo(() => import(`../../../client/ui/StrokeSegmentsDebug.demo`)),
+  [`StrokeSpec`]: lazyDemo(() => import(`../../../client/ui/StrokeSpec.demo`)),
   [`StructuralLozenge`]: lazyDemo(() => import(`../../../client/ui/StructuralLozenge.demo`)),
   [`Tabs`]: lazyDemo(() => import(`../../../client/ui/Tabs.demo`)),
   [`TextAnswerButton`]: lazyDemo(() => import(`../../../client/ui/TextAnswerButton.demo`)),
   [`TextAnswerInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextAnswerInputSingle.demo`)),
   [`TextInputMulti`]: lazyDemo(() => import(`../../../client/ui/TextInputMulti.demo`)),
   [`TextInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextInputSingle.demo`)),
-  [`Themes`]: lazyDemo(() => import(`../../../client/ui/Themes.demo`)),
+  [`Theme`]: lazyDemo(() => import(`../../../client/ui/Theme.demo`)),
   [`ThreeSplitLinesDown`]: lazyDemo(() => import(`../../../client/ui/ThreeSplitLinesDown.demo`)),
   [`ToggleButton`]: lazyDemo(() => import(`../../../client/ui/ToggleButton.demo`)),
   [`Tooltip`]: lazyDemo(() => import(`../../../client/ui/Tooltip.demo`)),

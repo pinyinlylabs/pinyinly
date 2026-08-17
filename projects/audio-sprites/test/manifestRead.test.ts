@@ -15,7 +15,7 @@ vi.mock(`node:fs/promises`, async () => {
   return promises;
 });
 
-describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
+describe(`loadManifest suite`, () => {
   let consoleErrorMock: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -208,15 +208,114 @@ describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
   });
 });
 
-describe(
-  `findSpriteSegment suite` satisfies HasNameOf<typeof findSpriteSegment>,
-  () => {
-    afterEach(() => {
-      vi.restoreAllMocks();
+describe(`findSpriteSegment suite`, () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const createTestManifest = (): SpriteManifest => ({
+    spriteFiles: [`audio-sprite.m4a`, `effects-sprite.m4a`],
+    segments: {
+      "src/sounds/beep.m4a": {
+        sprite: 0,
+        start: 0,
+        duration: 1.5,
+        hash: `abc123`,
+      },
+      "src/sounds/click.m4a": {
+        sprite: 0,
+        start: 1.5,
+        duration: 0.8,
+        hash: `def456`,
+      },
+      "src/effects/explosion.m4a": {
+        sprite: 1,
+        start: 0,
+        duration: 2,
+        hash: `ghi789`,
+      },
+    },
+    rules: [],
+    outDir: `sprites`,
+  });
+
+  test(`should handle files in different sprite files`, () => {
+    const manifest = createTestManifest();
+    const manifestPath = `/project/manifest.json`;
+    const currentFilePath = `/project/src/effects/explosion.m4a`;
+
+    const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
+
+    expect(result).toMatchInlineSnapshot(`
+        {
+          "duration": 2,
+          "spritePath": "/project/sprites/effects-sprite.m4a",
+          "start": 0,
+        }
+      `);
+  });
+
+  test(`should return null if audio file not found in manifest`, () => {
+    const manifest = createTestManifest();
+    const manifestPath = `/project/manifest.json`;
+    const currentFilePath = `/project/src/components/nonexistent.m4a`;
+
+    const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
+
+    expect(result).toBeNull();
+  });
+
+  test(`should return null and warn if sprite index is invalid`, () => {
+    const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
+      // Mock implementation
     });
 
-    const createTestManifest = (): SpriteManifest => ({
-      spriteFiles: [`audio-sprite.m4a`, `effects-sprite.m4a`],
+    const manifest: SpriteManifest = {
+      spriteFiles: [`sprites/audio-sprite.m4a`],
+      segments: {
+        "src/sounds/broken.m4a": {
+          sprite: 999, // Invalid index
+          start: 0,
+          duration: 1,
+          hash: `broken`,
+        },
+      },
+      rules: [],
+      outDir: `sprites`,
+    };
+
+    const manifestPath = `/project/manifest.json`;
+    const currentFilePath = `/project/src/sounds/broken.m4a`;
+
+    const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
+
+    expect(result).toBeNull();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      `Invalid sprite index 999 for segment src/sounds/broken.m4a`,
+    );
+
+    consoleSpy.mockRestore();
+  });
+
+  test(`should handle absolute paths correctly`, () => {
+    const manifest = createTestManifest();
+    const manifestPath = `/project/manifest.json`;
+    const audioRequirePath = `/project/src/sounds/beep.m4a`;
+
+    const result = findSpriteSegment(manifest, manifestPath, audioRequirePath);
+
+    expect(result).toMatchInlineSnapshot(`
+        {
+          "duration": 1.5,
+          "spritePath": "/project/sprites/audio-sprite.m4a",
+          "start": 0,
+        }
+      `);
+  });
+
+  test(`should normalize sprite file paths that don't start with dot`, () => {
+    const manifest: SpriteManifest = {
+      spriteFiles: [`audio-sprite.m4a`], // No subdirectory
       segments: {
         "src/sounds/beep.m4a": {
           sprite: 0,
@@ -224,128 +323,22 @@ describe(
           duration: 1.5,
           hash: `abc123`,
         },
-        "src/sounds/click.m4a": {
-          sprite: 0,
-          start: 1.5,
-          duration: 0.8,
-          hash: `def456`,
-        },
-        "src/effects/explosion.m4a": {
-          sprite: 1,
-          start: 0,
-          duration: 2,
-          hash: `ghi789`,
-        },
       },
       rules: [],
       outDir: `sprites`,
-    });
+    };
 
-    test(`should handle files in different sprite files`, () => {
-      const manifest = createTestManifest();
-      const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/effects/explosion.m4a`;
+    const manifestPath = `/project/manifest.json`;
+    const currentFilePath = `/project/src/sounds/beep.m4a`;
 
-      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
+    const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
 
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "duration": 2,
-          "spritePath": "/project/sprites/effects-sprite.m4a",
-          "start": 0,
-        }
-      `);
-    });
-
-    test(`should return null if audio file not found in manifest`, () => {
-      const manifest = createTestManifest();
-      const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/components/nonexistent.m4a`;
-
-      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
-
-      expect(result).toBeNull();
-    });
-
-    test(`should return null and warn if sprite index is invalid`, () => {
-      const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
-        // Mock implementation
-      });
-
-      const manifest: SpriteManifest = {
-        spriteFiles: [`sprites/audio-sprite.m4a`],
-        segments: {
-          "src/sounds/broken.m4a": {
-            sprite: 999, // Invalid index
-            start: 0,
-            duration: 1,
-            hash: `broken`,
-          },
-        },
-        rules: [],
-        outDir: `sprites`,
-      };
-
-      const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/sounds/broken.m4a`;
-
-      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
-
-      expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `Invalid sprite index 999 for segment src/sounds/broken.m4a`,
-      );
-
-      consoleSpy.mockRestore();
-    });
-
-    test(`should handle absolute paths correctly`, () => {
-      const manifest = createTestManifest();
-      const manifestPath = `/project/manifest.json`;
-      const audioRequirePath = `/project/src/sounds/beep.m4a`;
-
-      const result = findSpriteSegment(
-        manifest,
-        manifestPath,
-        audioRequirePath,
-      );
-
-      expect(result).toMatchInlineSnapshot(`
+    expect(result).toMatchInlineSnapshot(`
         {
           "duration": 1.5,
           "spritePath": "/project/sprites/audio-sprite.m4a",
           "start": 0,
         }
       `);
-    });
-
-    test(`should normalize sprite file paths that don't start with dot`, () => {
-      const manifest: SpriteManifest = {
-        spriteFiles: [`audio-sprite.m4a`], // No subdirectory
-        segments: {
-          "src/sounds/beep.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: `abc123`,
-          },
-        },
-        rules: [],
-        outDir: `sprites`,
-      };
-
-      const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/sounds/beep.m4a`;
-
-      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
-
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "duration": 1.5,
-          "spritePath": "/project/sprites/audio-sprite.m4a",
-          "start": 0,
-        }
-      `);
-    });
-  },
-);
+  });
+});

@@ -6,10 +6,11 @@ import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { Icon } from "./Icon";
-import { ratingToThemeClass } from "./QuizDeckResultToast.utils";
+import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { Suspense } from "./Suspense";
+import { Theme } from "./Theme";
 
 export function QuizDeckResultToast({
   skill,
@@ -31,70 +32,72 @@ export function QuizDeckResultToast({
         <Reanimated.View
           entering={disableAnimation ? undefined : entering.duration(150)}
         >
-          <View
-            className={`
-              flex-1 gap-3 overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-21
+          <Theme theme={ratingToThemeName(rating)}>
+            <View
+              className={`
+                flex-1 gap-3 overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-21
 
-              sm:mb-2 sm:rounded-xl
-
-              ${ratingToThemeClass(rating)}
-            `}
-          >
-            {rating === Rating.Easy ? (
-              <View className="flex-row items-center gap-2">
-                <Icon size={32} icon="check-circled-filled" />
-                <Text className="font-sans text-2xl font-bold text-fg">
-                  Perfect!
-                </Text>
-              </View>
-            ) : rating === Rating.Good ? (
-              <View className="flex-row items-center gap-2">
-                <Icon size={32} icon="check-circled-filled" />
-                <Text className="font-sans text-2xl font-bold text-fg">
-                  Nice!
-                </Text>
-              </View>
-            ) : rating === Rating.Hard ? (
-              <>
+                sm:mb-2 sm:rounded-xl
+              `}
+            >
+              {rating === Rating.Easy ? (
                 <View className="flex-row items-center gap-2">
-                  <Icon size={32} icon="meh-circled" />
-                  <FloatingMenuModal menu={<UndoAnswerMenu onUndo={onUndo} />}>
-                    <Text
-                      className={`pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl`}
-                    >
-                      Too slow
-                    </Text>
-                  </FloatingMenuModal>
+                  <Icon size={32} icon="check-circled-filled" />
+                  <Text className="font-sans text-2xl font-bold text-fg">
+                    Perfect!
+                  </Text>
                 </View>
-                <Text className="font-sans text-lg/none text-fg">
-                  Keep practicing and you’ll get faster!
-                </Text>
-              </>
-            ) : (
-              (invariant(rating satisfies typeof Rating.Again),
-              (
+              ) : rating === Rating.Good ? (
+                <View className="flex-row items-center gap-2">
+                  <Icon size={32} icon="check-circled-filled" />
+                  <Text className="font-sans text-2xl font-bold text-fg">
+                    Nice!
+                  </Text>
+                </View>
+              ) : rating === Rating.Hard ? (
                 <>
                   <View className="flex-row items-center gap-2">
-                    <Icon size={32} icon="close-circled-filled" />
+                    <Icon size={32} icon="meh-circled" />
                     <FloatingMenuModal
                       menu={<UndoAnswerMenu onUndo={onUndo} />}
                     >
-                      <Text className="pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl">
-                        Incorrect
+                      <Text
+                        className={`pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl`}
+                      >
+                        Too slow
                       </Text>
                     </FloatingMenuModal>
                   </View>
-                  <Text className="font-sans text-xl/none font-medium text-fg">
-                    Correct answer:
-                  </Text>
-
-                  <Text className="font-sans text-fg">
-                    <SkillAnswerText skill={skill} />
+                  <Text className="font-sans text-lg/none text-fg">
+                    Keep practicing and you’ll get faster!
                   </Text>
                 </>
-              ))
-            )}
-          </View>
+              ) : (
+                (invariant(rating satisfies typeof Rating.Again),
+                (
+                  <>
+                    <View className="flex-row items-center gap-2">
+                      <Icon size={32} icon="close-circled-filled" />
+                      <FloatingMenuModal
+                        menu={<UndoAnswerMenu onUndo={onUndo} />}
+                      >
+                        <Text className="pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl">
+                          Incorrect
+                        </Text>
+                      </FloatingMenuModal>
+                    </View>
+                    <Text className="font-sans text-xl/none font-medium text-fg">
+                      Correct answer:
+                    </Text>
+
+                    <Text className="font-sans text-fg">
+                      <SkillAnswerText skill={skill} />
+                    </Text>
+                  </>
+                ))
+              )}
+            </View>
+          </Theme>
         </Reanimated.View>
       </View>
     </Suspense>

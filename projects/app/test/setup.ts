@@ -1,35 +1,56 @@
 import type { IconRegistry } from "#client/ui/iconRegistry.js";
-import {
-  getJsonIndentForFilePath,
-  jsonStringifyShallowIndent,
-} from "@pinyinly/lib/jsonfmt";
+import { format } from "@pinyinly/lib/jsonfmt";
 import * as matchers from "@testing-library/jest-dom/matchers";
+import * as fs from "@pinyinly/lib/fs";
 import type { Component } from "react";
 import { createElement, Fragment } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
+import isEqual from "lodash/isEqual";
 
 expect.extend(matchers);
 
 expect.extend({
-  async toMatchJsonFileSnapshot(received: unknown, filePath: string) {
-    if (typeof received !== `object` || received == null) {
+  async toMatchJsonFileSnapshot(receivedObj: unknown, filePath: string) {
+    if (typeof receivedObj !== `object` || receivedObj == null) {
       return {
         pass: false,
         message: () =>
-          `toMatchJsonFileSnapshot expected an object or array, but received ${typeof received}`,
+          `toMatchJsonFileSnapshot expected an object or array, but received ${typeof receivedObj}`,
       };
     }
 
-    const indent = await getJsonIndentForFilePath(filePath);
-    const formatted = jsonStringifyShallowIndent(received, indent);
+    // Deep clone to remove any non-serializable properties. (e.g. `{ "foo":
+    // undefined }` -> `{}`)
+    receivedObj = JSON.parse(JSON.stringify(receivedObj));
 
-    await expect(formatted).toMatchFileSnapshot(filePath);
+    let expectedObj: symbol | object = Symbol(`no existing snapshot`);
+
+    try {
+      expectedObj = JSON.parse(
+        await fs.readFile(filePath, { encoding: `utf-8` }),
+      ) as object;
+    } catch (err: unknown) {
+      if (
+        !(
+          typeof err === `object` &&
+          err !== null &&
+          (err as { code?: string }).code === `ENOENT`
+        ) &&
+        !(err instanceof SyntaxError)
+      ) {
+        throw err;
+      }
+    }
+
+    if (!isEqual(receivedObj, expectedObj)) {
+      const received = await format(filePath, JSON.stringify(receivedObj));
+      await expect(received, `File: ${filePath}`).toMatchFileSnapshot(filePath);
+    }
 
     return {
       pass: true,
-      message: () =>
-        `expected JSON not to match file snapshot at "${filePath}"`,
+      message: () => `expected JSON to match file snapshot at "${filePath}"`,
     };
   },
 });

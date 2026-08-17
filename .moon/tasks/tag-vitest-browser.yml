@@ -1,0 +1,17 @@
+tasks:
+  browser:
+    command: vitest run --config vitest.browser.config.ts
+    inputs:
+      - "$DEBUG"
+      - "$DEBUG_*"
+      - "$EXPO_*"
+      - "$PYLY_*"
+      - "**/*"
+      - "/.github/workflows" # There is a test that checks workflow environment variables.
+      - "/yarn.lock" # Dependencies can change behaviour
+    options:
+      runInCI: false
+      cache: false
+    env:
+      NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    toolchain: "node"

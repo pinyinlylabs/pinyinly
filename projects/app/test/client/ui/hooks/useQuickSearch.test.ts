@@ -3,7 +3,7 @@ import { quickSearch } from "#client/ui/hooks/useQuickSearch.ts";
 import type { HanziText, HanziWord, PinyinText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 
-describe(`quickSearch suite` satisfies HasNameOf<typeof quickSearch>, () => {
+describe(`quickSearch suite`, () => {
   test(`matches non-first gloss and pinyin values`, () => {
     const entries: DictionarySearchEntry[] = [
       makeEntry({

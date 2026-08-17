@@ -1,93 +1,251 @@
+import type { StrokeSpecString } from "#data/model.js";
+import type { StrokeSpecAtom } from "#util/strokeSpec.ts";
 import {
-  formatStrokeSpec,
   normalizeStrokeSpec,
-  parseIndexRangesFromStrokeSpec,
+  mapStrokeSpec,
+  formatStrokeSpec,
   parseStrokeSpec,
-  projectStrokeSpecThroughBindings,
-  strokeSpecItemCount,
-  strokeSpecToSlotBindings,
+  flattenStrokeSpecRanges,
+  formatAtom,
+  strokeSpecFilter,
 } from "#util/strokeSpec.ts";
 import { describe, expect, test } from "vitest";
 
-describe(
-  `parseStrokeSpec suite` satisfies HasNameOf<typeof parseStrokeSpec>,
-  () => {
-    test(`parses legacy ranges`, () => {
-      const spec = parseStrokeSpec(`0-2,5`);
+describe(`parseStrokeSpec suite`, () => {
+  test(`parses ranges`, () => {
+    const spec = parseStrokeSpec(`0-2,5`);
+    expect(spec).toHaveLength(2);
+    expect(formatStrokeSpec(spec)).toBe(`0-2,5`);
+  });
 
-      expect(spec.items).toHaveLength(2);
-      expect(formatStrokeSpec(spec)).toBe(`0-2,5`);
-      expect(parseIndexRangesFromStrokeSpec(`0-2,5`)).toEqual([0, 1, 2, 5]);
-    });
+  test(`parses grouped unions`, () => {
+    const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
 
-    test(`parses slice tokens`, () => {
-      expect(normalizeStrokeSpec(`1[0:3]`)).toBe(`1[0:3]`);
-      expect(normalizeStrokeSpec(`1[:3]`)).toBe(`1[:3]`);
-      expect(normalizeStrokeSpec(`1[0:]`)).toBe(`1[0:]`);
-      expect(normalizeStrokeSpec(`1[:]`)).toBe(`1`);
-    });
+    expect(spec).toHaveLength(2);
+    expect(spec[0]).toHaveLength(2);
+    expect(spec[1]).toHaveLength(1);
+  });
 
-    test(`parses occurrence selectors`, () => {
-      expect(normalizeStrokeSpec(`1[0#1:3#2]`)).toBe(`1[0#1:3#2]`);
-      expect(normalizeStrokeSpec(`1[0#0:3#0]`)).toBe(`1[0:3]`);
-    });
+  test(`rejects malformed input`, () => {
+    expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
+    expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[foo%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[-1%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[101%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`1[%:3]`)).toThrow();
+    expect(() => parseStrokeSpec(`3-1`)).toThrow();
+    expect(() => parseStrokeSpec(`1++2`)).toThrow();
+  });
+});
 
-    test(`parses grouped unions`, () => {
-      const spec = parseStrokeSpec(`1[0:2]+7[:4],9`);
+describe(`normalizeStrokeSpec`, () => {
+  test.for([
+    [`1[0:3]`, `1[0:3]`],
+    [`1[:3]`, `1[:3]`],
+    [`1[0:]`, `1[0:]`],
+    [`1[:]`, `1`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses slice tokens`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
 
-      expect(spec.items).toHaveLength(2);
-      expect(spec.items[0]?.atoms).toHaveLength(2);
-      expect(spec.items[1]?.atoms).toHaveLength(1);
-      expect(strokeSpecItemCount(`1[0:2]+7[:4],9`)).toBe(2);
-    });
+  test.for([
+    [`1[0#1:3#2]`, `1[0#1:3#2]`],
+    [`1[0#0:3#0]`, `1[0:3]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses occurrence selectors`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
 
-    test(`normalizes whitespace`, () => {
-      expect(normalizeStrokeSpec(`  0 - 2 , 5 `)).toBe(`0-2,5`);
-      expect(normalizeStrokeSpec(` 1[ 0 : 3 ] + 2[ :4 ] `)).toBe(
-        `1[0:3]+2[:4]`,
-      );
-    });
+  test.for([
+    [`1[5%:]`, `1[5%:]`],
+    [`1[:5%]`, `1[:5%]`],
+    [`1[5%:95%]`, `1[5%:95%]`],
+    [`1[05.500%:95.000%]`, `1[5.5%:95%]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses percent selectors`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
 
-    test(`rejects malformed input`, () => {
-      expect(() => parseStrokeSpec(`1[0:3`)).toThrow();
-      expect(() => parseStrokeSpec(`1[0:3:4]`)).toThrow();
-      expect(() => parseStrokeSpec(`1[foo:3]`)).toThrow();
-      expect(() => parseStrokeSpec(`3-1`)).toThrow();
-      expect(() => parseStrokeSpec(`1++2`)).toThrow();
-    });
+  test.for([
+    [`1[5%:2]`, `1[5%:2]`],
+    [`1[2:95%]`, `1[2:95%]`],
+    [`1[2#3:95%]`, `1[2#3:95%]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `parses mixed percent and stroke selectors`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
 
-    test(`legacy numeric extraction rejects slices`, () => {
-      expect(() => parseIndexRangesFromStrokeSpec(`1[0:3]`)).toThrow();
-    });
+  test.for([
+    [`0,1,2,5`, `0-2,5`],
+    [`0,1,4,2-5`, `0,1,4,2-5`],
+    [`  0 - 2 , 5 `, `0-2,5`],
+    [` 1[ 0 : 3 ] + 2[ :4 ] `, `1[0:3]+2[:4]`],
+    [` 1[ 5% : 95% ] + 2[ 2 : 75% ] `, `1[5%:95%]+2[2:75%]`],
+  ] as [StrokeSpecString, StrokeSpecString][])(
+    `normalizes whitespace`,
+    ([input, expected]) => {
+      expect(normalizeStrokeSpec(input)).toBe(expected);
+    },
+  );
+});
 
-    test(`expands ranges into slot bindings`, () => {
-      expect(strokeSpecToSlotBindings(`0-2,5`)).toEqual([`0`, `1`, `2`, `5`]);
-      expect(strokeSpecToSlotBindings(`1[0:2]+7[:4],9`)).toEqual([
-        `1[0:2]+7[:4]`,
-        `9`,
-      ]);
-    });
+describe(`mapStrokeSpec`, () => {
+  test.for([
+    [`0-1`, `0-1`, `0,1`],
+    [`0,1`, `0[1:]`, null],
+    [`1,3`, `1,0`, `3,1`],
+    [`1,3,4`, `1,0`, `3,1`], // Should allow the base spec to be longer than the spec to map, and just ignore the extra atoms.
+    [`1+2,3`, `1,0`, `3,1+2`],
+    [`0-1+2,3`, `1,0`, `3,0-1+2`],
+    [`0`, `0,1`, null],
+    [`0`, `1`, null],
+    [`0-10`, `3-7`, `3-7`],
+    // [`2-8`, `2,1[13%:34.6%],3,4,5+6[27%:73%]`, ``],
+  ] as [StrokeSpecString, StrokeSpecString, StrokeSpecString | null][])(
+    `projects $0 through $1 to $2`,
+    ([base, spec, expected]) => {
+      expect(mapStrokeSpec(base, spec)).toBe(expected);
+    },
+  );
+});
 
-    test(`projects local ranges through parent slot bindings`, () => {
-      const parentBindings = strokeSpecToSlotBindings(`1[0:2]+7[:4],9,11`);
+describe(`flattenStrokeSpec`, () => {
+  test.for([
+    [`0`, `0`],
+    [`0-1`, `0,1`],
+    [`1,3`, `1,3`],
+    [`1-2,3`, `1,2,3`],
+    [`1+2,3`, `1+2,3`],
+    [`0[1:],2`, `0[1:],2`],
+  ] as const)(`flattens $0 to $1`, ([src, expected]) => {
+    expect(
+      formatStrokeSpec(flattenStrokeSpecRanges(parseStrokeSpec(src))),
+    ).toBe(expected);
+  });
+});
 
-      expect(
-        projectStrokeSpecThroughBindings({
-          localStrokeSpec: `0-1`,
-          sourceSlotBindingsInOriginal: parentBindings,
-        }),
-      ).toEqual([`1[0:2]+7[:4]`, `9`]);
-    });
+describe(`formatAtom`, () => {
+  test.for([
+    [
+      {
+        kind: `slice`,
+        stroke: 0,
+        from: { kind: `stroke`, stroke: 1, occurrence: 0 },
+        to: null,
+      },
+      `0[1:]`,
+    ],
+    [
+      {
+        kind: `slice`,
+        stroke: 0,
+        from: null,
+        to: { kind: `stroke`, stroke: 1, occurrence: 0 },
+      },
+      `0[:1]`,
+    ],
+    [
+      {
+        kind: `slice`,
+        stroke: 0,
+        from: { kind: `stroke`, stroke: 1, occurrence: 0 },
+        to: { kind: `stroke`, stroke: 2, occurrence: 0 },
+      },
+      `0[1:2]`,
+    ],
+    [
+      {
+        kind: `slice`,
+        stroke: 0,
+        from: { kind: `stroke`, stroke: 1, occurrence: 3 },
+        to: { kind: `stroke`, stroke: 2, occurrence: 4 },
+      },
+      `0[1#3:2#4]`,
+    ],
+    [{ kind: `slice`, stroke: 0, from: null, to: null }, `0`],
+  ] as [StrokeSpecAtom, string][])(`formats $0 to $1`, ([atom, expected]) => {
+    expect(formatAtom(atom)).toBe(expected);
+  });
+});
 
-    test(`projects grouped local unions to grouped original unions`, () => {
-      const parentBindings = strokeSpecToSlotBindings(`2,4,6`);
+describe(`strokeSpecFilter`, () => {
+  const toThrow = Symbol(`<throws>`);
+  interface TestCase {
+    strokeSpec: string;
+    pathsByAtom: Record<string, string>;
+    pathsByIndex: string[];
+    expected: string[] | typeof toThrow;
+  }
 
-      expect(
-        projectStrokeSpecThroughBindings({
-          localStrokeSpec: `0-1+2`,
-          sourceSlotBindingsInOriginal: parentBindings,
-        }),
-      ).toEqual([`2+4+6`]);
-    });
-  },
-);
+  test.for([
+    {
+      pathsByAtom: null,
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0`,
+      expected: [`path0`],
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0,1`,
+      expected: [`path0`, `path1`],
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0-1`,
+      expected: [`path0`, `path1`],
+    },
+    {
+      pathsByAtom: {
+        "0[:1]": `path0[:1]`,
+      },
+      pathsByIndex: [`path0`, `path1`],
+      strokeSpec: `0[:1]`,
+      expected: [`path0[:1]`],
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: [],
+      strokeSpec: `0-2`,
+      expected: toThrow,
+    },
+    {
+      pathsByAtom: null,
+      pathsByIndex: [`path0`],
+      strokeSpec: `0[:1]`,
+      expected: toThrow,
+    },
+    {
+      pathsByAtom: {},
+      pathsByIndex: [`path0`],
+      strokeSpec: `0[:1]`,
+      expected: toThrow,
+    },
+  ] as TestCase[])(
+    `strokeSpecFilter($strokeSpec, $pathsByAtom, $pathsByIndex) -> $expected`,
+    ({ strokeSpec, pathsByAtom, pathsByIndex, expected }) => {
+      const getResult = () =>
+        strokeSpecFilter(
+          pathsByIndex,
+          pathsByAtom,
+          strokeSpec as StrokeSpecString,
+        );
+      if (expected === toThrow) {
+        expect(getResult).toThrow();
+      } else {
+        expect(getResult()).toEqual(expected);
+      }
+    },
+  );
+});

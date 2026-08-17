@@ -5,17 +5,15 @@ import chunk from "lodash/chunk.js";
 import { describe, expect, test } from "vitest";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
 
-describe(
-  `loadIvankraHsk30 suite` satisfies HasNameOf<typeof loadIvankraHsk30>,
-  () => {
-    test(`loads ivankra hsk30 data`, async () => {
-      const entries = await loadIvankraHsk30();
-      expect(entries.length).toBeGreaterThan(11_000);
-    });
+describe(`loadIvankraHsk30 suite`, () => {
+  test(`loads ivankra hsk30 data`, async () => {
+    const entries = await loadIvankraHsk30();
+    expect(entries.length).toBeGreaterThan(11_000);
+  });
 
-    test(`spot check entries`, async () => {
-      const entries = await loadIvankraHsk30();
-      expect(entries.find((x) => x.id === `L1-0002`)).toMatchInlineSnapshot(`
+  test(`spot check entries`, async () => {
+    const entries = await loadIvankraHsk30();
+    expect(entries.find((x) => x.id === `L1-0002`)).toMatchInlineSnapshot(`
         {
           "cedict": "愛好|爱好[ai4 hao4]",
           "example": false,
@@ -33,23 +31,23 @@ describe(
           "webPinyin": "àihào",
         }
       `);
-    });
+  });
 
-    test(`check duplicates`, async () => {
-      const entries = await loadIvankraHsk30();
+  test(`check duplicates`, async () => {
+    const entries = await loadIvankraHsk30();
 
-      const actualDuplicates = [];
-      const seenHanzi = new Set<string>();
-      for (const entry of entries) {
-        if (seenHanzi.has(entry.simplified)) {
-          actualDuplicates.push(entry.simplified);
-        } else {
-          seenHanzi.add(entry.simplified);
-        }
+    const actualDuplicates = [];
+    const seenHanzi = new Set<string>();
+    for (const entry of entries) {
+      if (seenHanzi.has(entry.simplified)) {
+        actualDuplicates.push(entry.simplified);
+      } else {
+        seenHanzi.add(entry.simplified);
       }
+    }
 
-      expect(chunk(actualDuplicates, 20).map((x) => x.join(` `)))
-        .toMatchInlineSnapshot(`
+    expect(chunk(actualDuplicates, 20).map((x) => x.join(` `)))
+      .toMatchInlineSnapshot(`
           [
             "地 干 还 谁 倒 得 等 对 多 分 过 好 花 回 会 家 老 老 两 面",
             "那 省 实在 熟 头 下 小 一会儿 站 长 把 白 背 背 重 初 过去 行 叫 精神",
@@ -61,69 +59,68 @@ describe(
             "卡 签 且 率 痛 像 则 炸 之 传",
           ]
         `);
-    });
+  });
 
-    test(`unique on hanzi+pinyin+pos+level`, async () => {
-      const entries = await loadIvankraHsk30();
-      const seenKeys = new Set<string>();
+  test(`unique on hanzi+pinyin+pos+level`, async () => {
+    const entries = await loadIvankraHsk30();
+    const seenKeys = new Set<string>();
 
-      for (const entry of entries) {
-        const key = `${entry.simplified}::${entry.pinyin}::${entry.pos}::${entry.level}`;
-        if (seenKeys.has(key)) {
-          expect
-            .soft(
-              false,
-              `duplicate key found: ${entry.id}::${entry.simplified}::${entry.pinyin}::${entry.pos}::${entry.level}`,
-            )
-            .toBe(true);
-        }
-        seenKeys.add(key);
+    for (const entry of entries) {
+      const key = `${entry.simplified}::${entry.pinyin}::${entry.pos}::${entry.level}`;
+      if (seenKeys.has(key)) {
+        expect
+          .soft(
+            false,
+            `duplicate key found: ${entry.id}::${entry.simplified}::${entry.pinyin}::${entry.pos}::${entry.level}`,
+          )
+          .toBe(true);
       }
-    });
+      seenKeys.add(key);
+    }
+  });
 
-    test(`unique on hanzi+pinyin+pos`, async () => {
-      const entries = await loadIvankraHsk30();
-      const seenKeys = new Set<string>();
-      const duplicateHanzi = new Set<string>();
+  test(`unique on hanzi+pinyin+pos`, async () => {
+    const entries = await loadIvankraHsk30();
+    const seenKeys = new Set<string>();
+    const duplicateHanzi = new Set<string>();
 
-      for (const entry of entries) {
-        const key = `${entry.simplified}::${entry.pinyin}::${entry.pos.sort(sortComparatorString()).join(`/`)}`;
-        if (seenKeys.has(key)) {
-          duplicateHanzi.add(entry.simplified);
-        }
-        seenKeys.add(key);
+    for (const entry of entries) {
+      const key = `${entry.simplified}::${entry.pinyin}::${entry.pos.sort(sortComparatorString()).join(`/`)}`;
+      if (seenKeys.has(key)) {
+        duplicateHanzi.add(entry.simplified);
       }
+      seenKeys.add(key);
+    }
 
-      // only one exception.
-      expect(duplicateHanzi).toMatchInlineSnapshot(`
+    // only one exception.
+    expect(duplicateHanzi).toMatchInlineSnapshot(`
         Set {
           "称",
         }
       `);
-    });
+  });
 
-    test(`keeps expected duplicates and uniques`, async () => {
-      const entries = await loadIvankraHsk30();
+  test(`keeps expected duplicates and uniques`, async () => {
+    const entries = await loadIvankraHsk30();
 
-      for (const [id, count] of [
-        [`L1-0118`, 2],
-        [`L1-0178`, 2],
-        [`L1-0216`, 2],
-        [`L1-0224`, 2],
-        [`L1-0237`, 2],
-        [`L2-0340`, 1],
-        [`L2-0500`, 2],
-        [`L2-0686`, 2],
-        [`L3-0301`, 1],
-        [`L7-2799`, 2],
-      ] as const) {
-        expect
-          .soft(
-            entries.filter((e) => e.id === id).length,
-            `expected ${count} entries for id ${id}`,
-          )
-          .toBe(count);
-      }
-    });
-  },
-);
+    for (const [id, count] of [
+      [`L1-0118`, 2],
+      [`L1-0178`, 2],
+      [`L1-0216`, 2],
+      [`L1-0224`, 2],
+      [`L1-0237`, 2],
+      [`L2-0340`, 1],
+      [`L2-0500`, 2],
+      [`L2-0686`, 2],
+      [`L3-0301`, 1],
+      [`L7-2799`, 2],
+    ] as const) {
+      expect
+        .soft(
+          entries.filter((e) => e.id === id).length,
+          `expected ${count} entries for id ${id}`,
+        )
+        .toBe(count);
+    }
+  });
+});

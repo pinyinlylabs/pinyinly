@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -9,7 +10,8 @@ export type LozengeColor =
   | `fuchsia`
   | `rose`
   | `orange`
-  | `amber`;
+  | `amber`
+  | `muted-fg`;
 
 export function Lozenge({
   children,
@@ -17,7 +19,7 @@ export function Lozenge({
   size = `md`,
   className,
 }: {
-  children: string;
+  children: ReactNode;
   color: LozengeColor;
   size?: `sm` | `md`;
   className?: string;
@@ -41,6 +43,7 @@ const lozengeContainerClass = tv({
       rose: `border-lozenge-rose-border bg-lozenge-rose-bg`,
       orange: `border-lozenge-orange-border bg-lozenge-orange-bg`,
       amber: `border-lozenge-amber-border bg-lozenge-amber-bg`,
+      "muted-fg": `border-muted-fg/0 bg-muted-fg/10`,
     },
     size: {
       sm: `px-1.5 py-0.5`,
@@ -61,6 +64,7 @@ const lozengeTextClass = tv({
       rose: `text-lozenge-rose-fg`,
       orange: `text-lozenge-orange-fg`,
       amber: `text-lozenge-amber-fg`,
+      "muted-fg": `text-muted-fg`,
     },
     size: {
       sm: `text-[10px]`,

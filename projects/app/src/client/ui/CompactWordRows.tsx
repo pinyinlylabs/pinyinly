@@ -18,10 +18,6 @@ export function CompactWordRows({
 }: {
   dictionarySearchEntries: readonly CompactWordRowsEntry[];
 }) {
-  const hasAnyHskLozenges = dictionarySearchEntries.some(
-    (entry) => entry.hsk != null,
-  );
-
   return (
     <View className="-my-1.5 gap-1">
       {dictionarySearchEntries.map((entry, i) => {
@@ -32,18 +28,21 @@ export function CompactWordRows({
         return (
           <Link href={`/wiki/${encodeURIComponent(hanzi)}`} asChild key={i}>
             <Pressable className="flex flex-row items-center gap-2 py-1.5">
-              {hasAnyHskLozenges ? (
-                <View className="w-10">
-                  {entry.hsk == null ? null : (
-                    <HskLozenge hskLevel={entry.hsk} size="sm" />
-                  )}
-                </View>
-              ) : null}
               <HanziPinyinText
-                className="flex-1"
                 hanzi={hanzi}
                 pinyin={pinyin}
+                lozenges={
+                  entry.hsk == null ? null : (
+                    <HskLozenge
+                      hskLevel={entry.hsk}
+                      size="sm"
+                      color="muted-fg"
+                    />
+                  )
+                }
               />
+
+              <View className="flex-1" />
 
               {gloss == null ? null : (
                 <Text
@@ -58,7 +57,7 @@ export function CompactWordRows({
                 icon="chevron-right"
                 size={12}
                 className="ml-2"
-                tintColorClassName="accent-fg-dim"
+                tintColorClassName="accent-muted-fg"
               />
             </Pressable>
           </Link>

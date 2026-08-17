@@ -72,3 +72,25 @@ Avoid:
 - Tiny details that disappear at thumbnail size.
 - Wide panoramic views.
 `.trim();
+
+export const tradingCardSystemTemplate = `
+Style:
+
+- Trading card illustration style.
+- Clean, stylized illustration.
+- Timeless environment art.
+- One dominant focal point.
+- Strong silhouette and confident shapes.
+- Natural but slightly simplified color.
+- Restrained detail.
+- Real atmospheric depth without visual clutter.
+- Lighting should establish mood and direct attention to the focal point.
+- Background elements should support recognition without competing for attention.
+
+Avoid:
+
+- Photographic realism.
+- People unless they are inseparable from the location's identity.
+- Generic stock-art compositions.
+- Wide panoramic views.
+`.trim();

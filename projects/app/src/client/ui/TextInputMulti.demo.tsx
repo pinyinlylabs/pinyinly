@@ -27,7 +27,7 @@ export default () => {
               numberOfLines={3}
               style={{ minHeight: 80 }}
             />
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Characters: {emptyBare.length}
             </Text>
           </View>
@@ -43,7 +43,7 @@ export default () => {
               numberOfLines={3}
               style={{ minHeight: 80 }}
             />
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Characters: {emptyFlat.length}
             </Text>
           </View>
@@ -62,7 +62,7 @@ export default () => {
               numberOfLines={6}
               style={{ minHeight: 160 }}
             />
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Characters: {prefilledBare.length}
             </Text>
           </View>
@@ -78,7 +78,7 @@ export default () => {
               numberOfLines={6}
               style={{ minHeight: 160 }}
             />
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               Characters: {prefilledFlat.length}
             </Text>
           </View>

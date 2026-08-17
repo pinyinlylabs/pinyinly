@@ -1,27 +1,23 @@
 import type { DictionarySearchEntry } from "@/client/query";
-import {
-  characterDecompositionQuery,
-  hanziSvgPathsQuery,
-} from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
-import { isHanziCharacter, walkIdsNodeLeafs } from "@/data/hanzi";
+import { isHanziCharacter, parseIds, walkIdsNodeLeafs } from "@/data/hanzi";
 import type {
   HanziCharacter as HanziCharacterType,
   HanziText,
   HanziWord,
-  WikiCharacterComponent,
+  IdsNode,
+  MnemonicHanziComponent,
 } from "@/data/model";
 import {
   hanziWordMeaningHintCaptionSetting,
-  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintExplanationTextSetting,
   hanziWordMeaningHintImagePromptSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/data/userSettings";
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -40,6 +36,7 @@ import {
   hintFirstLineLength,
   parseHintText,
 } from "./hintText";
+import { zip } from "@pinyinly/lib/collections";
 
 export function WikiHanziCharacterMeaning({ hanzi }: { hanzi: HanziText }) {
   if (!isHanziCharacter(hanzi)) {
@@ -58,31 +55,48 @@ export function WikiHanziCharacterMeaningBox({
   const [isEditMode, setIsEditMode] = useState(false);
   const db = useDb();
 
-  const { data: selectedDecomposition } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.characterDecompositionCollection })
-        .where(({ entry }) => eq(entry.hanzi, hanzi))
-        .select(({ entry }) => ({
-          decompositionComponents: entry.decompositionComponents,
-        }))
-        .findOne(),
-    [db.characterDecompositionCollection, hanzi],
+  const { data: mnemonicDecomposition } = useLiveQuery(
+    (q) => {
+      const mnemonicQuery = q
+        .from({ mnemonic: db.characterMnemonicIdsCollection })
+        .where(({ mnemonic }) => eq(mnemonic.hanzi, hanzi))
+        .findOne();
+
+      return q
+        .from({ decomposition: db.characterDecompositionsCollection })
+        .where(({ decomposition }) => eq(decomposition.hanzi, hanzi))
+        .innerJoin({ mnemonic: mnemonicQuery }, ({ decomposition, mnemonic }) =>
+          eq(decomposition.ids, mnemonic.ids),
+        )
+        .select(({ decomposition }) => decomposition)
+        .findOne();
+    },
+    [
+      db.characterDecompositionsCollection,
+      db.characterMnemonicIdsCollection,
+      hanzi,
+    ],
   );
 
-  const selectedComponents =
-    selectedDecomposition?.decompositionComponents == null
+  // const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
+
+  const mnemonicDecompositionComponents =
+    mnemonicDecomposition?.ids == null
       ? undefined
-      : [...walkIdsNodeLeafs(selectedDecomposition.decompositionComponents)];
+      : zip(
+          walkIdsNodeLeafs(
+            parseIds(mnemonicDecomposition.ids) as IdsNode<HanziCharacterType>,
+          ),
+          mnemonicDecomposition.strokeSpecs,
+        ).map(([hanzi, strokeSpec]): MnemonicHanziComponent => ({
+          hanzi,
+          strokeSpec,
+        }));
 
-  const { data: hanziSvgPathsData } = useQuery(hanziSvgPathsQuery(hanzi));
-
-  const { data: mnemonicData } = useQuery(characterDecompositionQuery(hanzi));
-
-  const hanziList: HanziText[] = [];
-  if (selectedComponents != null) {
-    for (const component of selectedComponents) {
-      if (component.hanzi != null) {
+  const hanziList: HanziCharacterType[] = [];
+  if (mnemonicDecompositionComponents != null) {
+    for (const component of mnemonicDecompositionComponents) {
+      if (component.hanzi !== null) {
         hanziList.push(component.hanzi);
       }
     }
@@ -135,22 +149,13 @@ export function WikiHanziCharacterMeaningBox({
     ]),
   );
 
-  const defaultMnemonicComponents =
-    mnemonicData?.mnemonic?.components == null
-      ? undefined
-      : [...walkIdsNodeLeafs(mnemonicData.mnemonic.components)];
-  const componentsForAi = selectedComponents ?? defaultMnemonicComponents;
-  const meaningAiComponents = aiMeaningComponents(
-    componentsForAi,
-    glossByHanzi,
-  );
-
   return (
     <WikiTitledBox
       title="Recognize the meaning"
       onEditingChange={setIsEditMode}
       bottomCaption={
-        selectedComponents != null && selectedComponents.length > 0
+        mnemonicDecompositionComponents != null &&
+        mnemonicDecompositionComponents.length > 0
           ? `Using the components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
           : undefined
       }
@@ -162,8 +167,7 @@ export function WikiHanziCharacterMeaningBox({
           glossByHanzi={glossByHanzi}
           hanzi={hanzi}
           primaryMeaningGloss={primaryMeaningGloss}
-          selectedComponents={selectedComponents}
-          strokeSvgs={hanziSvgPathsData?.strokes}
+          hanziComponents={mnemonicDecompositionComponents}
         />
       </View>
 
@@ -173,8 +177,8 @@ export function WikiHanziCharacterMeaningBox({
 
       <MeaningsSection
         hanzi={hanzi}
-        mnemonicHints={mnemonicData?.mnemonic?.hints}
-        aiComponents={meaningAiComponents}
+        mnemonicHints={[]}
+        aiComponents={[]}
         isEditMode={isEditMode}
       />
     </WikiTitledBox>
@@ -249,7 +253,7 @@ function CoverImageSection({
             ? `Create an image for ${hanzi}`
             : `Create an image representing ${meaning.gloss[0] ?? hanzi}`)
         }
-        aspectRatio={`16:9`}
+        aspectRatio={`5:4`}
         onUploadError={handleUploadError}
         onSaveAiPrompt={(prompt) => {
           imagePromptSetting?.setValue({
@@ -268,7 +272,7 @@ function CoverImageSection({
           maxLength={120}
         />
       ) : hasCaption ? (
-        <Text className="px-10 text-left pyly-body-caption text-fg-dim">
+        <Text className="px-10 text-left pyly-body-caption text-muted-fg">
           {captionText}
         </Text>
       ) : null}
@@ -310,7 +314,7 @@ function MeaningsSection({
     const key = { hanziWord: entry.hanziWord };
     return [
       hanziWordMeaningHintTextSetting.entity.marshalKey(key),
-      hanziWordMeaningHintExplanationSetting.entity.marshalKey(key),
+      hanziWordMeaningHintExplanationTextSetting.entity.marshalKey(key),
     ];
   });
 
@@ -343,7 +347,7 @@ function MeaningsSection({
       hanziWord: entry.hanziWord,
     });
     const explanationKey =
-      hanziWordMeaningHintExplanationSetting.entity.marshalKey({
+      hanziWordMeaningHintExplanationTextSetting.entity.marshalKey({
         hanziWord: entry.hanziWord,
       });
     return (
@@ -411,14 +415,14 @@ function MeaningItem({
       <View className="flex-row items-center gap-2">
         <Text className="font-sans text-xl/normal font-medium text-fg-loud">
           <Text className="pyly-bold">{primaryGloss}</Text>
-            <Text className="text-fg-dim">⤵</Text>
+            <Text className="text-muted-fg">⤵</Text>
         </Text>
       </View>
       {isEditMode || hasHint ? (
         <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
           {isEditMode ? (
             <View className="flex-row items-center justify-between">
-              <Text className="font-sans text-[13px] text-fg-dim">
+              <Text className="font-sans text-[13px] text-muted-fg">
                 Want help brainstorming a hint?
               </Text>
               <RectButton
@@ -474,7 +478,7 @@ function MeaningItem({
         </View>
       ) : null}
       {hasHint ? null : (
-        <Text className="pl-7 pyly-body-caption text-fg-dim">
+        <Text className="pl-7 pyly-body-caption text-muted-fg">
           Add a hint to make this meaning easier to recognize.
         </Text>
       )}
@@ -508,7 +512,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
         <View className="gap-0 pt-4">
           <View className="min-w-0 flex-row gap-3">
             <View className="w-3 items-center pt-2">
-              <View className="size-1.5 rounded-full bg-fg-dim" />
+              <View className="size-1.5 rounded-full bg-muted-fg" />
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-1">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
@@ -526,13 +530,13 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
             }}
           >
             <View className="w-3 items-center">
-              <View className="h-5 w-px bg-fg-dim/35" />
-              <Text className="-mt-0.5 pyly-body-caption text-fg-dim/70">
+              <View className="h-5 w-px bg-muted-fg/35" />
+              <Text className="-mt-0.5 pyly-body-caption text-muted-fg/70">
                 {`↓`}
               </Text>
             </View>
             <View className="min-w-0 flex-1 justify-center">
-              <Text className="text-left pyly-body-caption text-fg-dim/70">
+              <Text className="text-left pyly-body-caption text-muted-fg/70">
                 {`Show ${hiddenStepCount} hidden steps`}
               </Text>
             </View>
@@ -540,7 +544,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
 
           <View className="min-w-0 flex-row gap-3">
             <View className="w-3 items-center pt-2">
-              <View className="size-1.5 rounded-full bg-fg-dim" />
+              <View className="size-1.5 rounded-full bg-muted-fg" />
             </View>
             <View className="min-w-0 flex-1 gap-0.5 pb-2">
               <View className="flex-row flex-wrap items-start justify-start gap-1">
@@ -577,14 +581,14 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                   <View
                     className={
                       isIntermediateStep
-                        ? `size-1.5 rounded-full bg-fg-dim/70`
-                        : `size-1.5 rounded-full bg-fg-dim`
+                        ? `size-1.5 rounded-full bg-muted-fg/70`
+                        : `size-1.5 rounded-full bg-muted-fg`
                     }
                   />
                   {isLastStep ? null : (
                     <>
-                      <View className="mt-1 w-px flex-1 bg-fg-dim/35" />
-                      <Text className="-mt-1 pyly-body-caption text-fg-dim/70">
+                      <View className="mt-1 w-px flex-1 bg-muted-fg/35" />
+                      <Text className="-mt-1 pyly-body-caption text-muted-fg/70">
                         {`↓`}
                       </Text>
                     </>
@@ -596,7 +600,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                     <Text
                       className={
                         isIntermediateStep
-                          ? `pyly-body text-left text-fg-dim`
+                          ? `pyly-body text-left text-muted-fg`
                           : `pyly-body text-left`
                       }
                     >
@@ -604,7 +608,7 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
                     </Text>
                   </View>
                   {linkReason == null || !isPathExpanded ? null : (
-                    <Text className="text-left pyly-body-caption text-fg-dim">
+                    <Text className="text-left pyly-body-caption text-muted-fg">
                       {linkReason}
                     </Text>
                   )}
@@ -620,36 +624,6 @@ function ExperimentalContent({ hanzi }: { hanzi: HanziText }) {
 
 function renderMentalPathThought(thought: string): ReactNode {
   return thought;
-}
-
-function aiMeaningComponents(
-  components: readonly WikiCharacterComponent[] | undefined,
-  glossByHanzi: ReadonlyMap<string, string>,
-): readonly MeaningHintComponent[] {
-  if (components == null) {
-    return [];
-  }
-
-  return components
-    .map((component) => {
-      const meaning =
-        component.hanzi == null ? undefined : glossByHanzi.get(component.hanzi);
-      const cleanedMeaning =
-        meaning == null || meaning.trim().length === 0 ? undefined : meaning;
-
-      return {
-        hanzi: component.hanzi,
-        label: component.label,
-        meaning: cleanedMeaning,
-      };
-    })
-    .filter((component) => {
-      return (
-        component.hanzi != null ||
-        component.label != null ||
-        component.meaning != null
-      );
-    });
 }
 
 function hasSettingText(value: unknown): boolean {
@@ -679,7 +653,7 @@ function MergedHintDisplay({ value }: { value: string }) {
         <Pylymark source={parsed.hint} />
       </Text>
       {parsed.description == null ? null : (
-        <Text className="font-normal text-fg-dim">
+        <Text className="font-normal text-muted-fg">
           {` `}
           <Pylymark source={parsed.description} />
         </Text>

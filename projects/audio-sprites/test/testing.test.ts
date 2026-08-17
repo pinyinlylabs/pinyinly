@@ -89,17 +89,13 @@ const sampleManifest: SpriteManifest = {
   outDir: `sprites`,
 };
 
-describe(
-  `parseSpriteFileSizeRules` satisfies HasNameOf<
-    typeof parseSpriteFileSizeRules
-  >,
-  () => {
-    test(`parses regex and min/max sizes`, () => {
-      const result = parseSpriteFileSizeRules([
-        { name: /^pinyin-/u, minSize: `50kB`, maxSize: `3MB` },
-      ]);
+describe(`parseSpriteFileSizeRules`, () => {
+  test(`parses regex and min/max sizes`, () => {
+    const result = parseSpriteFileSizeRules([
+      { name: /^pinyin-/u, minSize: `50kB`, maxSize: `3MB` },
+    ]);
 
-      expect(result).toMatchInlineSnapshot(`
+    expect(result).toMatchInlineSnapshot(`
         [
           {
             "maxBytes": 3000000,
@@ -108,11 +104,11 @@ describe(
           },
         ]
       `);
-    });
+  });
 
-    test(`accepts regex objects directly`, () => {
-      expect(parseSpriteFileSizeRules([{ name: /^sprite-/u, minSize: `1kB` }]))
-        .toMatchInlineSnapshot(`
+  test(`accepts regex objects directly`, () => {
+    expect(parseSpriteFileSizeRules([{ name: /^sprite-/u, minSize: `1kB` }]))
+      .toMatchInlineSnapshot(`
           [
             {
               "maxBytes": undefined,
@@ -121,245 +117,240 @@ describe(
             },
           ]
         `);
+  });
+
+  test(`throws for invalid range`, () => {
+    expect(() =>
+      parseSpriteFileSizeRules([
+        { name: /^sprite-/u, minSize: `2MB`, maxSize: `1MB` },
+      ]),
+    ).toThrow(/greater than or equal|to be >=/iu);
+  });
+
+  test(`throws for invalid size text`, () => {
+    expect(() =>
+      parseSpriteFileSizeRules([{ name: /^sprite-/u, minSize: `not-a-size` }]),
+    ).toThrow(`Invalid file size "not-a-size"`);
+  });
+});
+
+describe(`checkSpriteManifest`, () => {
+  test(`returns false when manifest does not exist`, async () => {
+    const result = await checkSpriteManifest({
+      manifestPath: `/nonexistent/manifest.json`,
     });
 
-    test(`throws for invalid range`, () => {
-      expect(() =>
-        parseSpriteFileSizeRules([
-          { name: /^sprite-/u, minSize: `2MB`, maxSize: `1MB` },
-        ]),
-      ).toThrow(/greater than or equal|to be >=/iu);
+    expect(result.manifestExists).toBe(false);
+    expect(result.needsRegeneration).toBe(true);
+  });
+
+  test(`detects when sprite files are missing`, async () => {
+    // Create manifest without sprite files
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(sampleManifest),
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/audio2.m4a": `fake audio content 2`,
     });
 
-    test(`throws for invalid size text`, () => {
-      expect(() =>
-        parseSpriteFileSizeRules([
-          { name: /^sprite-/u, minSize: `not-a-size` },
-        ]),
-      ).toThrow(`Invalid file size "not-a-size"`);
-    });
-  },
-);
-
-describe(
-  `checkSpriteManifest` satisfies HasNameOf<typeof checkSpriteManifest>,
-  () => {
-    test(`returns false when manifest does not exist`, async () => {
-      const result = await checkSpriteManifest({
-        manifestPath: `/nonexistent/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(false);
-      expect(result.needsRegeneration).toBe(true);
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
     });
 
-    test(`detects when sprite files are missing`, async () => {
-      // Create manifest without sprite files
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(sampleManifest),
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/audio2.m4a": `fake audio content 2`,
-      });
+    expect(result.manifestExists).toBe(true);
+    expect(result.spriteFilesExist).toBe(false);
+    expect(result.missingSpriteFiles).toEqual([`sprite-1.m4a`]);
+    expect(result.needsRegeneration).toBe(true);
+  });
 
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-      expect(result.spriteFilesExist).toBe(false);
-      expect(result.missingSpriteFiles).toEqual([`sprite-1.m4a`]);
-      expect(result.needsRegeneration).toBe(true);
+  test(`detects when hashes are outdated`, async () => {
+    // Create manifest and sprite files, but with outdated hashes
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(sampleManifest),
+      "/test/sprites/sprite-1.m4a": `sprite content`,
+      "/test/audio1.m4a": `different audio content`, // This will have a different hash
+      "/test/audio2.m4a": `fake audio content 2`,
     });
 
-    test(`detects when hashes are outdated`, async () => {
-      // Create manifest and sprite files, but with outdated hashes
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(sampleManifest),
-        "/test/sprites/sprite-1.m4a": `sprite content`,
-        "/test/audio1.m4a": `different audio content`, // This will have a different hash
-        "/test/audio2.m4a": `fake audio content 2`,
-      });
-
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-      expect(result.spriteFilesExist).toBe(true);
-      expect(result.hashesUpToDate).toBe(false);
-      expect(result.outdatedFiles.length).toBeGreaterThan(0);
-      expect(result.needsRegeneration).toBe(true);
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
     });
 
-    test(`reports input files that do not match any sprite rule`, async () => {
-      const manifestWithUnmatchedInput = {
-        ...sampleManifest,
-        rules: [
-          {
-            include: [`audio/**/*.m4a`],
-            match: `audio/wiki/.*\\.m4a`,
-            sprite: `wiki`,
-          },
-        ],
-      };
+    expect(result.manifestExists).toBe(true);
+    expect(result.spriteFilesExist).toBe(true);
+    expect(result.hashesUpToDate).toBe(false);
+    expect(result.outdatedFiles.length).toBeGreaterThan(0);
+    expect(result.needsRegeneration).toBe(true);
+  });
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithUnmatchedInput),
-        "/test/audio/wiki/matched.m4a": `matched audio content`,
-        "/test/audio/other/unmatched.m4a": `unmatched audio content`,
-      });
-
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.unmatchedInputFiles).toEqual([`audio/other/unmatched.m4a`]);
-    });
-
-    test(`throws when sprite template references missing named capture group`, async () => {
-      const manifestWithInvalidRule = {
-        ...sampleManifest,
-        rules: [
-          {
-            include: [`audio/**/*.m4a`],
-            match: `audio/[^/]+/.*\\.m4a`, // Missing (?<page>...) named capture group
-            sprite: `wiki-\${page}`, // References ${page} which doesn't exist
-          },
-        ],
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithInvalidRule),
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/audio2.m4a": `fake audio content 2`,
-      });
-
-      await expect(
-        checkSpriteManifest({
-          manifestPath: `/test/manifest.json`,
-        }),
-      ).rejects.toThrow(
-        `Rule validation failed: sprite template references variables [page] but regex pattern "audio/[^/]+/.*\\.m4a" does not define corresponding named capture groups`,
-      );
-    });
-
-    test(`passes when sprite template uses correct named capture groups`, async () => {
-      const manifestWithValidRule = {
-        ...sampleManifest,
-        rules: [
-          {
-            include: [`audio/**/*.m4a`],
-            match: `audio/(?<page>[^/]+)/.*\\.m4a`, // Has (?<page>...) named capture group
-            sprite: `wiki-\${page}`, // References ${page} which exists
-          },
-        ],
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithValidRule),
-        "/test/sprite-1.m4a": `sprite content`,
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/audio2.m4a": `fake audio content 2`,
-      });
-
-      // Should not throw
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-    });
-
-    test(`passes when sprite template has no variables`, async () => {
-      const manifestWithStaticSprite = {
-        ...sampleManifest,
-        rules: [
-          {
-            include: [`audio/**/*.m4a`],
-            match: `audio/.*\\.m4a`,
-            sprite: `static-sprite-name`, // No variables
-          },
-        ],
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithStaticSprite),
-        "/test/sprite-1.m4a": `sprite content`,
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/audio2.m4a": `fake audio content 2`,
-      });
-
-      // Should not throw
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-    });
-
-    test(`passes when sprite template uses numbered capture groups`, async () => {
-      const manifestWithNumberedGroups = {
-        ...sampleManifest,
-        rules: [
-          {
-            include: [`audio/**/*.m4a`],
-            match: `audio/([^/]+)/.*\\.m4a`, // Uses numbered capture group
-            sprite: `wiki-$1`, // References $1 (numbered, not named)
-          },
-        ],
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithNumberedGroups),
-        "/test/sprite-1.m4a": `sprite content`,
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/audio2.m4a": `fake audio content 2`,
-      });
-
-      // Should not throw (numbered groups don't need validation)
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-    });
-
-    test(`detects sprite files below minimum configured size`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
-
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(audioContent1),
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hashFileContent(audioContent2),
-          },
+  test(`reports input files that do not match any sprite rule`, async () => {
+    const manifestWithUnmatchedInput = {
+      ...sampleManifest,
+      rules: [
+        {
+          include: [`audio/**/*.m4a`],
+          match: `audio/wiki/.*\\.m4a`,
+          sprite: `wiki`,
         },
-      };
+      ],
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `1234567890`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithUnmatchedInput),
+      "/test/audio/wiki/matched.m4a": `matched audio content`,
+      "/test/audio/other/unmatched.m4a": `unmatched audio content`,
+    });
 
-      const result = await checkSpriteManifest({
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(result.unmatchedInputFiles).toEqual([`audio/other/unmatched.m4a`]);
+  });
+
+  test(`throws when sprite template references missing named capture group`, async () => {
+    const manifestWithInvalidRule = {
+      ...sampleManifest,
+      rules: [
+        {
+          include: [`audio/**/*.m4a`],
+          match: `audio/[^/]+/.*\\.m4a`, // Missing (?<page>...) named capture group
+          sprite: `wiki-\${page}`, // References ${page} which doesn't exist
+        },
+      ],
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithInvalidRule),
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/audio2.m4a": `fake audio content 2`,
+    });
+
+    await expect(
+      checkSpriteManifest({
         manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^sprite-/u, minSize: `20B` }],
-      });
+      }),
+    ).rejects.toThrow(
+      `Rule validation failed: sprite template references variables [page] but regex pattern "audio/[^/]+/.*\\.m4a" does not define corresponding named capture groups`,
+    );
+  });
 
-      expect(result.unusedSpriteFileSizeRules).toEqual([]);
-      expect(result.spriteFileSizeViolations).toMatchInlineSnapshot(`
+  test(`passes when sprite template uses correct named capture groups`, async () => {
+    const manifestWithValidRule = {
+      ...sampleManifest,
+      rules: [
+        {
+          include: [`audio/**/*.m4a`],
+          match: `audio/(?<page>[^/]+)/.*\\.m4a`, // Has (?<page>...) named capture group
+          sprite: `wiki-\${page}`, // References ${page} which exists
+        },
+      ],
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithValidRule),
+      "/test/sprite-1.m4a": `sprite content`,
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/audio2.m4a": `fake audio content 2`,
+    });
+
+    // Should not throw
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(result.manifestExists).toBe(true);
+  });
+
+  test(`passes when sprite template has no variables`, async () => {
+    const manifestWithStaticSprite = {
+      ...sampleManifest,
+      rules: [
+        {
+          include: [`audio/**/*.m4a`],
+          match: `audio/.*\\.m4a`,
+          sprite: `static-sprite-name`, // No variables
+        },
+      ],
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithStaticSprite),
+      "/test/sprite-1.m4a": `sprite content`,
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/audio2.m4a": `fake audio content 2`,
+    });
+
+    // Should not throw
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(result.manifestExists).toBe(true);
+  });
+
+  test(`passes when sprite template uses numbered capture groups`, async () => {
+    const manifestWithNumberedGroups = {
+      ...sampleManifest,
+      rules: [
+        {
+          include: [`audio/**/*.m4a`],
+          match: `audio/([^/]+)/.*\\.m4a`, // Uses numbered capture group
+          sprite: `wiki-$1`, // References $1 (numbered, not named)
+        },
+      ],
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithNumberedGroups),
+      "/test/sprite-1.m4a": `sprite content`,
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/audio2.m4a": `fake audio content 2`,
+    });
+
+    // Should not throw (numbered groups don't need validation)
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(result.manifestExists).toBe(true);
+  });
+
+  test(`detects sprite files below minimum configured size`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(audioContent1),
+        },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hashFileContent(audioContent2),
+        },
+      },
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `1234567890`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
+    });
+
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+      spriteFileSizes: [{ name: /^sprite-/u, minSize: `20B` }],
+    });
+
+    expect(result.unusedSpriteFileSizeRules).toEqual([]);
+    expect(result.spriteFileSizeViolations).toMatchInlineSnapshot(`
         [
           {
             "maxBytes": undefined,
@@ -370,44 +361,44 @@ describe(
           },
         ]
       `);
+  });
+
+  test(`detects sprite files above maximum configured size`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(audioContent1),
+        },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hashFileContent(audioContent2),
+        },
+      },
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `12345678901234567890`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
     });
 
-    test(`detects sprite files above maximum configured size`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+      spriteFileSizes: [{ name: /^sprite-/u, maxSize: `19B` }],
+    });
 
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(audioContent1),
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hashFileContent(audioContent2),
-          },
-        },
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `12345678901234567890`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^sprite-/u, maxSize: `19B` }],
-      });
-
-      expect(result.unusedSpriteFileSizeRules).toEqual([]);
-      expect(result.spriteFileSizeViolations).toMatchInlineSnapshot(`
+    expect(result.unusedSpriteFileSizeRules).toEqual([]);
+    expect(result.spriteFileSizeViolations).toMatchInlineSnapshot(`
         [
           {
             "maxBytes": 19,
@@ -418,341 +409,335 @@ describe(
           },
         ]
       `);
-    });
+  });
 
-    test(`skips sprite size checks when no rule matches`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
+  test(`skips sprite size checks when no rule matches`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
 
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(audioContent1),
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hashFileContent(audioContent2),
-          },
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(audioContent1),
         },
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `1234567890`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^wiki-/u, minSize: `1MB` }],
-      });
-
-      expect(result.spriteFileSizeViolations).toEqual([]);
-      expect(result.unusedSpriteFileSizeRules).toEqual([`^wiki-`]);
-    });
-
-    test(`throws when sprite file size rule has invalid range`, async () => {
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(sampleManifest),
-      });
-
-      await expect(
-        checkSpriteManifest({
-          manifestPath: `/test/manifest.json`,
-          spriteFileSizes: [
-            { name: /^sprite-/u, minSize: `2MB`, maxSize: `1MB` },
-          ],
-        }),
-      ).rejects.toThrow(/greater than or equal|to be >=/iu);
-    });
-
-    test(`syncs manifest when autoFix is enabled`, async () => {
-      const syncedManifest: SpriteManifest = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(`audio one`),
-          },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hashFileContent(audioContent2),
         },
-      };
+      },
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(sampleManifest),
-        "/test/audio1.m4a": `audio one`,
-      });
-
-      const syncSpy = vi
-        .spyOn(manifestWrite, `syncManifestWithFilesystem`)
-        .mockResolvedValue(syncedManifest);
-
-      await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-        autoFix: true,
-      });
-
-      expect(syncSpy).toHaveBeenCalledWith(`/test/manifest.json`);
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `1234567890`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
     });
 
-    test(`does not sync manifest when autoFix is disabled`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+      spriteFileSizes: [{ name: /^wiki-/u, minSize: `1MB` }],
+    });
 
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(audioContent1),
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hashFileContent(audioContent2),
-          },
+    expect(result.spriteFileSizeViolations).toEqual([]);
+    expect(result.unusedSpriteFileSizeRules).toEqual([`^wiki-`]);
+  });
+
+  test(`throws when sprite file size rule has invalid range`, async () => {
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(sampleManifest),
+    });
+
+    await expect(
+      checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+        spriteFileSizes: [
+          { name: /^sprite-/u, minSize: `2MB`, maxSize: `1MB` },
+        ],
+      }),
+    ).rejects.toThrow(/greater than or equal|to be >=/iu);
+  });
+
+  test(`syncs manifest when autoFix is enabled`, async () => {
+    const syncedManifest: SpriteManifest = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(`audio one`),
         },
-      };
+      },
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `sprite content`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      const syncSpy = vi.spyOn(manifestWrite, `syncManifestWithFilesystem`);
-
-      await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(syncSpy).not.toHaveBeenCalled();
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(sampleManifest),
+      "/test/audio1.m4a": `audio one`,
     });
-  },
-);
 
-describe(
-  `buildAndTestSprites` satisfies HasNameOf<typeof buildAndTestSprites>,
-  () => {
-    test(`can be called as main test helper`, async () => {
-      // Create files with content that matches the expected hashes
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
+    const syncSpy = vi
+      .spyOn(manifestWrite, `syncManifestWithFilesystem`)
+      .mockResolvedValue(syncedManifest);
 
-      // Calculate the actual hashes that will be generated
-      const crypto = await import(`node:crypto`);
-      const hash1 = crypto
-        .createHash(`sha256`)
-        .update(audioContent1)
-        .digest(`hex`);
-      const hash2 = crypto
-        .createHash(`sha256`)
-        .update(audioContent2)
-        .digest(`hex`);
+    await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+      autoFix: true,
+    });
 
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hash1,
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hash2,
-          },
+    expect(syncSpy).toHaveBeenCalledWith(`/test/manifest.json`);
+  });
+
+  test(`does not sync manifest when autoFix is disabled`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(audioContent1),
         },
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `sprite content`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      const result = await buildAndTestSprites({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-      expect(result.hashesUpToDate).toBe(true);
-      expect(result.spriteFilesExist).toBe(true);
-      expect(result.needsRegeneration).toBe(false);
-    });
-
-    test(`detects unused sprite files in output directory`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
-
-      // Calculate the actual hashes that will be generated
-      const crypto = await import(`node:crypto`);
-      const hash1 = crypto
-        .createHash(`sha256`)
-        .update(audioContent1)
-        .digest(`hex`);
-      const hash2 = crypto
-        .createHash(`sha256`)
-        .update(audioContent2)
-        .digest(`hex`);
-
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hash1,
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hash2,
-          },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hashFileContent(audioContent2),
         },
-      };
+      },
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `sprite content`,
-        "/test/sprites/old-unused-sprite.m4a": `old sprite content`,
-        "/test/sprites/another-old-sprite.m4a": `another old sprite`,
-        "/test/sprites/non-audio-file.txt": `text file`, // Should be ignored
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      const result = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-
-      expect(result.manifestExists).toBe(true);
-      expect(result.hashesUpToDate).toBe(true);
-      expect(result.spriteFilesExist).toBe(true);
-      expect(result.unusedSpriteFiles).toEqual([
-        `another-old-sprite.m4a`,
-        `old-unused-sprite.m4a`,
-      ]);
-      expect(result.needsRegeneration).toBe(false);
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `sprite content`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
     });
 
-    test(`automatically cleans up unused sprite files when autoFix is enabled`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
+    const syncSpy = vi.spyOn(manifestWrite, `syncManifestWithFilesystem`);
 
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(audioContent1),
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hashFileContent(audioContent2),
-          },
+    await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(syncSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe(`buildAndTestSprites`, () => {
+  test(`can be called as main test helper`, async () => {
+    // Create files with content that matches the expected hashes
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    // Calculate the actual hashes that will be generated
+    const crypto = await import(`node:crypto`);
+    const hash1 = crypto
+      .createHash(`sha256`)
+      .update(audioContent1)
+      .digest(`hex`);
+    const hash2 = crypto
+      .createHash(`sha256`)
+      .update(audioContent2)
+      .digest(`hex`);
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hash1,
         },
-      };
-
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `sprite content`,
-        "/test/sprites/old-unused-sprite.m4a": `old sprite content`,
-        "/test/sprites/another-old-sprite.m4a": `another old sprite`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      vi.spyOn(manifestWrite, `syncManifestWithFilesystem`).mockResolvedValue(
-        manifestWithCorrectHashes,
-      );
-
-      // Verify unused files are detected first
-      const beforeCleanup = await checkSpriteManifest({
-        manifestPath: `/test/manifest.json`,
-      });
-      expect(beforeCleanup.unusedSpriteFiles).toHaveLength(2);
-
-      // Run testSprites with autoFix enabled
-      const result = await buildAndTestSprites({
-        manifestPath: `/test/manifest.json`,
-        autoFix: true,
-      });
-
-      // After cleanup, no unused files should remain
-      expect(result.unusedSpriteFiles).toHaveLength(0);
-
-      // Verify the unused files were actually deleted from the filesystem
-      expect(vol.existsSync(`/test/sprites/old-unused-sprite.m4a`)).toBe(false);
-      expect(vol.existsSync(`/test/sprites/another-old-sprite.m4a`)).toBe(
-        false,
-      );
-      expect(vol.existsSync(`/test/sprites/sprite-1.m4a`)).toBe(true); // Expected file should remain
-    });
-
-    test(`returns result in passing scenario`, async () => {
-      const audioContent1 = `fake audio content`;
-      const audioContent2 = `fake audio content 2`;
-
-      const manifestWithCorrectHashes = {
-        ...sampleManifest,
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: hashFileContent(audioContent1),
-          },
-          "audio2.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1.5,
-            hash: hashFileContent(audioContent2),
-          },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hash2,
         },
-      };
+      },
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
-        "/test/sprites/sprite-1.m4a": `1234567890`,
-        "/test/audio1.m4a": audioContent1,
-        "/test/audio2.m4a": audioContent2,
-      });
-
-      const result = await buildAndTestSprites({
-        manifestPath: `/test/manifest.json`,
-        spriteFileSizes: [{ name: /^sprite-/u, minSize: `1B`, maxSize: `20B` }],
-      });
-
-      expect(result.spriteFileSizeViolations).toEqual([]);
-      expect(result.unusedSpriteFileSizeRules).toEqual([]);
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `sprite content`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
     });
-  },
-);
 
-describe(`buildSprites` satisfies HasNameOf<typeof buildSprites>, () => {
+    const result = await buildAndTestSprites({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(result.manifestExists).toBe(true);
+    expect(result.hashesUpToDate).toBe(true);
+    expect(result.spriteFilesExist).toBe(true);
+    expect(result.needsRegeneration).toBe(false);
+  });
+
+  test(`detects unused sprite files in output directory`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    // Calculate the actual hashes that will be generated
+    const crypto = await import(`node:crypto`);
+    const hash1 = crypto
+      .createHash(`sha256`)
+      .update(audioContent1)
+      .digest(`hex`);
+    const hash2 = crypto
+      .createHash(`sha256`)
+      .update(audioContent2)
+      .digest(`hex`);
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hash1,
+        },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hash2,
+        },
+      },
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `sprite content`,
+      "/test/sprites/old-unused-sprite.m4a": `old sprite content`,
+      "/test/sprites/another-old-sprite.m4a": `another old sprite`,
+      "/test/sprites/non-audio-file.txt": `text file`, // Should be ignored
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
+    });
+
+    const result = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+
+    expect(result.manifestExists).toBe(true);
+    expect(result.hashesUpToDate).toBe(true);
+    expect(result.spriteFilesExist).toBe(true);
+    expect(result.unusedSpriteFiles).toEqual([
+      `another-old-sprite.m4a`,
+      `old-unused-sprite.m4a`,
+    ]);
+    expect(result.needsRegeneration).toBe(false);
+  });
+
+  test(`automatically cleans up unused sprite files when autoFix is enabled`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(audioContent1),
+        },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hashFileContent(audioContent2),
+        },
+      },
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `sprite content`,
+      "/test/sprites/old-unused-sprite.m4a": `old sprite content`,
+      "/test/sprites/another-old-sprite.m4a": `another old sprite`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
+    });
+
+    vi.spyOn(manifestWrite, `syncManifestWithFilesystem`).mockResolvedValue(
+      manifestWithCorrectHashes,
+    );
+
+    // Verify unused files are detected first
+    const beforeCleanup = await checkSpriteManifest({
+      manifestPath: `/test/manifest.json`,
+    });
+    expect(beforeCleanup.unusedSpriteFiles).toHaveLength(2);
+
+    // Run testSprites with autoFix enabled
+    const result = await buildAndTestSprites({
+      manifestPath: `/test/manifest.json`,
+      autoFix: true,
+    });
+
+    // After cleanup, no unused files should remain
+    expect(result.unusedSpriteFiles).toHaveLength(0);
+
+    // Verify the unused files were actually deleted from the filesystem
+    expect(vol.existsSync(`/test/sprites/old-unused-sprite.m4a`)).toBe(false);
+    expect(vol.existsSync(`/test/sprites/another-old-sprite.m4a`)).toBe(false);
+    expect(vol.existsSync(`/test/sprites/sprite-1.m4a`)).toBe(true); // Expected file should remain
+  });
+
+  test(`returns result in passing scenario`, async () => {
+    const audioContent1 = `fake audio content`;
+    const audioContent2 = `fake audio content 2`;
+
+    const manifestWithCorrectHashes = {
+      ...sampleManifest,
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: hashFileContent(audioContent1),
+        },
+        "audio2.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1.5,
+          hash: hashFileContent(audioContent2),
+        },
+      },
+    };
+
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithCorrectHashes),
+      "/test/sprites/sprite-1.m4a": `1234567890`,
+      "/test/audio1.m4a": audioContent1,
+      "/test/audio2.m4a": audioContent2,
+    });
+
+    const result = await buildAndTestSprites({
+      manifestPath: `/test/manifest.json`,
+      spriteFileSizes: [{ name: /^sprite-/u, minSize: `1B`, maxSize: `20B` }],
+    });
+
+    expect(result.spriteFileSizeViolations).toEqual([]);
+    expect(result.unusedSpriteFileSizeRules).toEqual([]);
+  });
+});
+
+describe(`buildSprites`, () => {
   test(`returns status without asserting`, async () => {
     const audioContent1 = `fake audio content`;
     const audioContent2 = `fake audio content 2`;
@@ -821,41 +806,37 @@ describe(`buildSprites` satisfies HasNameOf<typeof buildSprites>, () => {
   });
 });
 
-describe(
-  `getAllAudioFilesBySprite` satisfies HasNameOf<
-    typeof getAllAudioFilesBySprite
-  >,
-  () => {
-    test(`groups all files by sprite index correctly`, () => {
-      const manifest: SpriteManifest = {
-        spriteFiles: [`sprites/sprite-0.m4a`, `../sprites-1.m4a`],
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: `hash1`,
-          },
-          "subdir/audio2.m4a": {
-            sprite: 1,
-            start: 0,
-            duration: 2,
-            hash: `hash2`,
-          },
-          "../audio3.m4a": {
-            sprite: 0,
-            start: 2.5,
-            duration: 1,
-            hash: `hash3`,
-          },
+describe(`getAllAudioFilesBySprite`, () => {
+  test(`groups all files by sprite index correctly`, () => {
+    const manifest: SpriteManifest = {
+      spriteFiles: [`sprites/sprite-0.m4a`, `../sprites-1.m4a`],
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `hash1`,
         },
-        rules: [],
-        outDir: `sprites`,
-      };
+        "subdir/audio2.m4a": {
+          sprite: 1,
+          start: 0,
+          duration: 2,
+          hash: `hash2`,
+        },
+        "../audio3.m4a": {
+          sprite: 0,
+          start: 2.5,
+          duration: 1,
+          hash: `hash3`,
+        },
+      },
+      rules: [],
+      outDir: `sprites`,
+    };
 
-      const spriteGroups = getAllAudioFilesBySprite(manifest);
+    const spriteGroups = getAllAudioFilesBySprite(manifest);
 
-      expect(spriteGroups).toMatchInlineSnapshot(`
+    expect(spriteGroups).toMatchInlineSnapshot(`
         Map {
           "sprites/sprite-0.m4a" => [
             {
@@ -881,91 +862,88 @@ describe(
           ],
         }
       `);
-    });
+  });
 
-    test(`handles empty manifest`, () => {
-      const manifest: SpriteManifest = {
-        spriteFiles: [],
-        segments: {},
-        rules: [],
-        outDir: `sprites`,
-      };
+  test(`handles empty manifest`, () => {
+    const manifest: SpriteManifest = {
+      spriteFiles: [],
+      segments: {},
+      rules: [],
+      outDir: `sprites`,
+    };
 
-      const spriteGroups = getAllAudioFilesBySprite(manifest);
-      expect(spriteGroups).toMatchInlineSnapshot(`Map {}`);
-    });
-  },
-);
+    const spriteGroups = getAllAudioFilesBySprite(manifest);
+    expect(spriteGroups).toMatchInlineSnapshot(`Map {}`);
+  });
+});
 
-describe(
-  `generateSprites suite` satisfies HasNameOf<typeof generateSprites>,
-  () => {
-    test(`creates output directories when they don't exist`, async () => {
-      // Create a manifest with sprite files in a nested directory
-      const manifestWithNestedSprites: SpriteManifest = {
-        spriteFiles: [`audio-sprite.m4a`],
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: `abc123`,
-          },
+describe(`generateSprites suite`, () => {
+  test(`creates output directories when they don't exist`, async () => {
+    // Create a manifest with sprite files in a nested directory
+    const manifestWithNestedSprites: SpriteManifest = {
+      spriteFiles: [`audio-sprite.m4a`],
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
         },
-        rules: [
-          {
-            include: [`audio*.m4a`],
-            match: `.*`,
-            sprite: `default`,
-          },
-        ],
-        outDir: `sprites`,
-      };
+      },
+      rules: [
+        {
+          include: [`audio*.m4a`],
+          match: `.*`,
+          sprite: `default`,
+        },
+      ],
+      outDir: `sprites`,
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithNestedSprites),
-        "/test/audio1.m4a": `fake audio content`,
-      });
-
-      // Verify directory doesn't exist initially
-      expect(vol.existsSync(`/test/sprites`)).toBe(false);
-
-      // Generate sprites should create the directory and sprite file
-      await generateSprites(`/test/manifest.json`);
-
-      // Verify directory was created
-      expect(vol.existsSync(`/test/sprites`)).toBe(true);
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithNestedSprites),
+      "/test/audio1.m4a": `fake audio content`,
     });
 
-    test(`skips generation when sprite file already exists`, async () => {
-      const manifestWithExistingSprite: SpriteManifest = {
-        spriteFiles: [`sprite-f1aada43ff61.m4a`],
-        segments: {
-          "audio1.m4a": {
-            sprite: 0,
-            start: 0,
-            duration: 1.5,
-            hash: `abc123`,
-          },
+    // Verify directory doesn't exist initially
+    expect(vol.existsSync(`/test/sprites`)).toBe(false);
+
+    // Generate sprites should create the directory and sprite file
+    await generateSprites(`/test/manifest.json`);
+
+    // Verify directory was created
+    expect(vol.existsSync(`/test/sprites`)).toBe(true);
+  });
+
+  test(`skips generation when sprite file already exists`, async () => {
+    const manifestWithExistingSprite: SpriteManifest = {
+      spriteFiles: [`sprite-f1aada43ff61.m4a`],
+      segments: {
+        "audio1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
         },
-        rules: [
-          {
-            include: [`audio*.m4a`],
-            match: `(audio.+)\\.m4a$`,
-            sprite: `sprite`,
-          },
-        ],
-        outDir: `sprites`,
-      };
+      },
+      rules: [
+        {
+          include: [`audio*.m4a`],
+          match: `(audio.+)\\.m4a$`,
+          sprite: `sprite`,
+        },
+      ],
+      outDir: `sprites`,
+    };
 
-      vol.fromJSON({
-        "/test/manifest.json": JSON.stringify(manifestWithExistingSprite),
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/sprites/sprite-f1aada43ff61.m4a": `existing sprite content`,
-      });
+    vol.fromJSON({
+      "/test/manifest.json": JSON.stringify(manifestWithExistingSprite),
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/sprites/sprite-f1aada43ff61.m4a": `existing sprite content`,
+    });
 
-      expect(globSync(`/test/**`, { fs: await import(`node:fs`) }))
-        .toMatchInlineSnapshot(`
+    expect(globSync(`/test/**`, { fs: await import(`node:fs`) }))
+      .toMatchInlineSnapshot(`
           [
             "/test",
             "/test/sprites",
@@ -975,60 +953,56 @@ describe(
           ]
         `);
 
-      await generateSprites(`/test/manifest.json`);
+    await generateSprites(`/test/manifest.json`);
 
-      // Should not have called ffmpeg since file already exists
-      expect(consoleWarnSpy).not.toHaveBeenCalledWith(
-        expect.stringContaining(`Generat`),
-      );
+    // Should not have called ffmpeg since file already exists
+    expect(consoleWarnSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining(`Generat`),
+    );
+  });
+});
+
+describe(`createAudioFileTests`, () => {
+  test(`can be called with minimal options`, async () => {
+    // Create some fake audio files in the virtual filesystem
+    vol.fromJSON({
+      "/test/audio1.m4a": `fake audio content`,
+      "/test/audio2.m4a": `fake audio content 2`,
     });
-  },
-);
 
-describe(
-  `createAudioFileTests` satisfies HasNameOf<typeof createAudioFileTests>,
-  () => {
-    test(`can be called with minimal options`, async () => {
-      // Create some fake audio files in the virtual filesystem
-      vol.fromJSON({
-        "/test/audio1.m4a": `fake audio content`,
-        "/test/audio2.m4a": `fake audio content 2`,
+    // This should not throw an error
+    expect(() => {
+      void createAudioFileTests({
+        audioGlob: `/test/*.m4a`,
       });
+    }).not.toThrow();
+  });
 
-      // This should not throw an error
-      expect(() => {
-        void createAudioFileTests({
-          audioGlob: `/test/*.m4a`,
-        });
-      }).not.toThrow();
+  test(`can be called with all options`, async () => {
+    vol.fromJSON({
+      "/test/project/audio/speech1.m4a": `fake speech content`,
+      "/test/project/audio/speech2.aac": `fake speech content 2`,
     });
 
-    test(`can be called with all options`, async () => {
-      vol.fromJSON({
-        "/test/project/audio/speech1.m4a": `fake speech content`,
-        "/test/project/audio/speech2.aac": `fake speech content 2`,
+    expect(() => {
+      void createAudioFileTests({
+        audioGlob: `/test/project/audio/*.{m4a,aac}`,
+        targetLufs: -16,
+        loudnessTolerance: 2,
+        allowedStartOrEndOffset: 0.2,
+        minDuration: 1,
+        durationTolerance: 0.1,
+        projectRoot: `/test/project`,
       });
+    }).not.toThrow();
+  });
 
-      expect(() => {
-        void createAudioFileTests({
-          audioGlob: `/test/project/audio/*.{m4a,aac}`,
-          targetLufs: -16,
-          loudnessTolerance: 2,
-          allowedStartOrEndOffset: 0.2,
-          minDuration: 1,
-          durationTolerance: 0.1,
-          projectRoot: `/test/project`,
-        });
-      }).not.toThrow();
-    });
-
-    test(`handles empty glob results gracefully`, async () => {
-      // Don't create any files, so glob will return empty array
-      expect(() => {
-        void createAudioFileTests({
-          audioGlob: `/nonexistent/*.m4a`,
-        });
-      }).not.toThrow();
-    });
-  },
-);
+  test(`handles empty glob results gracefully`, async () => {
+    // Don't create any files, so glob will return empty array
+    expect(() => {
+      void createAudioFileTests({
+        audioGlob: `/nonexistent/*.m4a`,
+      });
+    }).not.toThrow();
+  });
+});

@@ -35,14 +35,16 @@ export function ShimmerRect({ className, style }: ShimmerRectProps) {
     const startX = -shimmerWidthPx;
     const endX = containerWidth;
 
-    translateX.value = startX;
-    translateX.value = withRepeat(
-      withTiming(endX, {
-        duration: shimmerDurationMs,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
+    translateX.set(startX);
+    translateX.set(
+      withRepeat(
+        withTiming(endX, {
+          duration: shimmerDurationMs,
+          easing: Easing.linear,
+        }),
+        -1,
+        false,
+      ),
     );
 
     return () => {

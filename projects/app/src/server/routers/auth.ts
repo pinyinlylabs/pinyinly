@@ -1,6 +1,6 @@
 import { getLucia, getOrCreateUser } from "@/server/lib/auth";
 import { withDrizzle } from "@/server/lib/db";
-import { getUserName, setUserName } from "@/server/lib/queries";
+import { getUserName, setUserName } from "@/server/lib/query";
 import { procedure, router } from "@/server/lib/trpc";
 import * as schema from "@/server/pgSchema";
 import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";

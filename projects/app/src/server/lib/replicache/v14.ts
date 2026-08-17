@@ -11,7 +11,6 @@ import type {
 import { MistakeKind } from "@/data/model";
 import { v14 as schema } from "@/data/rizzleSchema";
 import type { Drizzle, Xmin } from "@/server/lib/db";
-import { setUserSetting } from "@/server/lib/userSettings";
 import {
   assertMinimumIsolationLevel,
   json_agg,
@@ -20,7 +19,7 @@ import {
   pgXmin,
   withRepeatableReadTransaction,
 } from "@/server/lib/db";
-import { updateSkillState } from "@/server/lib/queries";
+import { updateSkillState, setUserSetting } from "@/server/lib/query";
 import type { CvrEntities } from "@/server/pgSchema";
 import * as s from "@/server/pgSchema";
 import type {

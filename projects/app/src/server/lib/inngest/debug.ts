@@ -8,7 +8,7 @@ import { inngest } from "./client";
 
 export const devTestThrowRootError = inngest.createFunction(
   {
-    id: `test-throw-root-error`,
+    id: `debug/test-throw-root-error`,
     triggers: [invoke(z.object())],
   },
   () => {
@@ -18,7 +18,7 @@ export const devTestThrowRootError = inngest.createFunction(
 
 export const devTestThrowStepError = inngest.createFunction(
   {
-    id: `test-throw-step-error`,
+    id: `debug/test-throw-step-error`,
     triggers: [invoke(z.object())],
   },
   async ({ step }) => {
@@ -30,7 +30,7 @@ export const devTestThrowStepError = inngest.createFunction(
 
 export const devTestLogRootError = inngest.createFunction(
   {
-    id: `test-log-root-error`,
+    id: `debug/test-log-root-error`,
     triggers: [invoke(z.object())],
   },
   ({ logger }) => {
@@ -41,7 +41,7 @@ export const devTestLogRootError = inngest.createFunction(
 
 export const devTestLogStepError = inngest.createFunction(
   {
-    id: `test-log-step-error`,
+    id: `debug/test-log-step-error`,
     triggers: [invoke(z.object())],
   },
   async ({ step, logger }) => {
@@ -54,7 +54,7 @@ export const devTestLogStepError = inngest.createFunction(
 
 export const devTestCrypto = inngest.createFunction(
   {
-    id: `test-crypto`,
+    id: `debug/test-crypto`,
     triggers: [invoke(z.object())],
   },
   async () => {
@@ -69,7 +69,7 @@ export const devTestCrypto = inngest.createFunction(
 
 export const helloWorldEmail = inngest.createFunction(
   {
-    id: `hello-world-email`,
+    id: `debug/hello-world-email`,
     triggers: [invoke(z.object())],
   },
   async ({ step }) => {

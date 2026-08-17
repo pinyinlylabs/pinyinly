@@ -20,13 +20,6 @@
       "source.fixAll": "always",
       "source.formatDocument": "always",
     },
-    "eslint.useFlatConfig": true,
-    "eslint.workingDirectories": [
-      { "directory": "./" },
-      { "pattern": "./projects/*" },
-    ],
-    // Allow loading ESLint rules written in TypeScript directly
-    "eslint.runtime": "node_modules/.bin/tsx",
     "js/ts.tsdk.path": "node_modules/typescript/lib",
     "js/ts.experimental.useTsgo": true,
     "tailwindCSS.experimental.classRegex": [
@@ -56,6 +49,14 @@
     "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace, 'Pinyinly Components'",
     "oxc.typeAware": true,
     "oxc.enable": true,
+    "oxc.lint.customization": {
+      "no-console": {
+        "autofix": false,
+      },
+      "no-debugger": {
+        "autofix": false,
+      },
+    },
     "tailwindCSS.classAttributes": [
       "class",
       "className",
@@ -63,6 +64,5 @@
       "class:list",
       ".*ClassName",
     ],
-    "typescript.native-preview.tsdk": "./node_modules/@typescript/native-preview",
   },
 }

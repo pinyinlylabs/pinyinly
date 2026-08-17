@@ -21,9 +21,9 @@ The following commands should be used to test the code:
   - Agent guidance: when iterating on a local change, run only the relevant eval target(s) first;
     run broad evals only when explicitly requested or for final verification.
 
-- Lint uses oxlint and eslint:
+- Lint uses oxlint:
   - Run all lint (and fix): `moon run app:lint`
-  - Run file lint: `moon run app:eslint -- <filename>` or `moon run app:oxlint -- <filename>`
+  - Run file lint: `moon run app:oxlint -- <filename>`
 
 - Formatting uses oxfmt: `moon run app:fmt`
 

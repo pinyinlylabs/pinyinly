@@ -1,16 +1,16 @@
 import type {
-  UserSettingEntity,
   UserSettingEntityInput,
   UserSettingEntityLike,
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import type { UserSettingJsonEntity } from "@/data/userSettings";
 import { TextInputMulti } from "./TextInputMulti";
+import { View, Text } from "react-native";
 
-interface InlineEditableSettingJsonProps<T extends UserSettingEntity> {
+interface InlineEditableSettingJsonProps<T extends UserSettingJsonEntity> {
   setting: UserSettingEntityLike<T>;
   settingKey: UserSettingKeyInput<T>;
   readonly?: boolean;
@@ -24,7 +24,7 @@ interface InlineEditableSettingJsonProps<T extends UserSettingEntity> {
   onSaveValue?: (value: unknown) => void;
 }
 
-export function InlineEditableSettingJson<T extends UserSettingEntity>({
+export function InlineEditableSettingJson<T extends UserSettingJsonEntity>({
   setting,
   settingKey,
   readonly = false,
@@ -38,18 +38,8 @@ export function InlineEditableSettingJson<T extends UserSettingEntity>({
   onSaveValue,
 }: InlineEditableSettingJsonProps<T>) {
   const { value, setValue } = useUserSetting({ setting, key: settingKey });
-  const jsonValueField = inferJsonValueField(setting, settingKey);
-  if (jsonValueField == null) {
-    throw new Error(
-      `InlineEditableSettingJson requires exactly one non-key setting field.`,
-    );
-  }
 
-  const currentJsonValue =
-    value == null
-      ? null
-      : (((value as Record<string, unknown>)[jsonValueField] ??
-          null) as unknown);
+  const currentJsonValue = value?.value;
   const currentJsonText = formatJsonValue(currentJsonValue);
 
   const [draft, setDraft] = useState(currentJsonText);
@@ -57,14 +47,10 @@ export function InlineEditableSettingJson<T extends UserSettingEntity>({
   const [isDirty, setIsDirty] = useState(false);
   const skipNextBlurSaveRef = useRef(false);
 
-  useEffect(() => {
-    if (isDirty) {
-      return;
-    }
-
+  if (!isDirty && draft !== currentJsonText) {
     setDraft(currentJsonText);
     setError(null);
-  }, [currentJsonText, isDirty]);
+  }
 
   const handleSaveDraft = () => {
     const trimmed = draft.trim();
@@ -88,7 +74,7 @@ export function InlineEditableSettingJson<T extends UserSettingEntity>({
       const normalizedNext = JSON.stringify(parsed);
 
       if (normalizedCurrent !== normalizedNext) {
-        setValue({ [jsonValueField]: parsed } as UserSettingEntityInput<T>);
+        setValue({ value: parsed } as UserSettingEntityInput<T>);
         onSaveValue?.(parsed);
       }
 
@@ -110,7 +96,7 @@ export function InlineEditableSettingJson<T extends UserSettingEntity>({
 
       return (
         <View className={className}>
-          <Text className="pyly-body-caption text-fg-dim">
+          <Text className="pyly-body-caption text-muted-fg">
             {emptyStateText}
           </Text>
         </View>
@@ -214,38 +200,8 @@ function hasJsonContent(value: unknown): boolean {
   }
 
   if (typeof value === `object`) {
-    return Object.keys(value as Record<string, unknown>).length > 0;
+    return Object.keys(value).length > 0;
   }
 
   return true;
-}
-
-function inferJsonValueField<T extends UserSettingEntity>(
-  setting: UserSettingEntityLike<T>,
-  settingKey: UserSettingKeyInput<T>,
-): string | null {
-  const valueShape = (
-    setting.entity as unknown as {
-      _def?: {
-        valueType?: {
-          _def?: {
-            shape?: Record<string, unknown>;
-          };
-        };
-      };
-    }
-  )._def?.valueType?._def?.shape;
-
-  if (valueShape == null) {
-    return null;
-  }
-
-  const keyFieldNames = new Set(
-    Object.keys(settingKey as Record<string, unknown>),
-  );
-  const payloadFieldNames = Object.keys(valueShape).filter(
-    (fieldName) => !keyFieldNames.has(fieldName),
-  );
-
-  return payloadFieldNames.length === 1 ? (payloadFieldNames[0] ?? null) : null;
 }

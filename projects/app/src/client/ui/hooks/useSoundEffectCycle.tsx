@@ -10,11 +10,7 @@ import { useFetchAudioBuffers } from "./useFetchAudioBuffer";
 export type UseSoundEffectCycle = (sources: PylyAudioSource[]) => () => void;
 
 const useSoundEffectCycleExpoAudio: UseSoundEffectCycle = () => {
-  console.error(
-    `useSoundEffectCycle is not yet implemented on native` satisfies HasNameOf<
-      typeof useSoundEffectCycle
-    >,
-  );
+  console.error(`useSoundEffectCycle is not yet implemented on native`);
 
   const play = useEventCallback(() => {
     console.error(`not implemented`);

@@ -1,7 +1,7 @@
 import { identicalInvariant, invariant, uniqueInvariant } from "#invariant.ts";
 import { describe, expect, test } from "vitest";
 
-describe(`invariant suite` satisfies HasNameOf<typeof invariant>, () => {
+describe(`invariant suite`, () => {
   test(`does not throw when true`, () => {
     expect(() => {
       invariant(Math.random() > -1);
@@ -33,36 +33,30 @@ describe(`invariant suite` satisfies HasNameOf<typeof invariant>, () => {
   });
 });
 
-describe(
-  `uniqueInvariant suite` satisfies HasNameOf<typeof uniqueInvariant>,
-  () => {
-    test(`does not throw when every item is different`, () => {
-      expect(() => {
-        uniqueInvariant([1, 2, 3]);
-      }).not.toThrow();
-    });
+describe(`uniqueInvariant suite`, () => {
+  test(`does not throw when every item is different`, () => {
+    expect(() => {
+      uniqueInvariant([1, 2, 3]);
+    }).not.toThrow();
+  });
 
-    test(`throws when there are duplicate items`, () => {
-      expect(() => {
-        uniqueInvariant([1, 2, 1]);
-      }).toThrow();
-    });
-  },
-);
+  test(`throws when there are duplicate items`, () => {
+    expect(() => {
+      uniqueInvariant([1, 2, 1]);
+    }).toThrow();
+  });
+});
 
-describe(
-  `identicalInvariant suite` satisfies HasNameOf<typeof identicalInvariant>,
-  () => {
-    test(`does not throw when every item is the same`, () => {
-      expect(() => {
-        identicalInvariant([1, 1, 1]);
-      }).not.toThrow();
-    });
+describe(`identicalInvariant suite`, () => {
+  test(`does not throw when every item is the same`, () => {
+    expect(() => {
+      identicalInvariant([1, 1, 1]);
+    }).not.toThrow();
+  });
 
-    test(`throws when there are different items`, () => {
-      expect(() => {
-        identicalInvariant([1, 2, 1]);
-      }).toThrow();
-    });
-  },
-);
+  test(`throws when there are different items`, () => {
+    expect(() => {
+      identicalInvariant([1, 2, 1]);
+    }).toThrow();
+  });
+});

@@ -1,0 +1,374 @@
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  $schema: `../../node_modules/oxlint/configuration_schema.json`,
+  plugins: [`typescript`, `import`, `eslint`, `unicorn`, `react`],
+  jsPlugins: [
+    {
+      name: `import-js`,
+      specifier: `eslint-plugin-import`,
+    },
+    {
+      name: `stylistic-js`,
+      specifier: `@stylistic/eslint-plugin`,
+    },
+  ],
+  ignorePatterns: [`**/*.d.ts`],
+  categories: {
+    correctness: `error`,
+    restriction: `error`,
+    pedantic: `error`,
+  },
+  rules: {
+    complexity: `off`,
+    "class-methods-use-this": `off`,
+    "no-bitwise": `off`,
+    "default-case": `off`,
+    "no-empty": `off`,
+    "no-var-requires": `off`,
+    "no-void": `off`,
+    // Expo/metro stuff still uses require().
+    "no-require-imports": `off`,
+    "explicit-function-return-type": `off`,
+    "no-async-await": `off`,
+    "no-optional-chaining": `off`,
+    "no-rest-spread-properties": `off`,
+    "no-param-reassign": `off`,
+    "no-undefined": `off`,
+    "no-plusplus": `off`,
+    "no-eq-null": `off`,
+    "no-inline-comments": `off`,
+    "array-callback-return": `off`,
+    "no-useless-return": `off`,
+    "require-await": `off`,
+    "no-warning-comments": `off`,
+    "max-depth": `off`,
+    "max-classes-per-file": `off`,
+    eqeqeq: `off`,
+    "max-lines": `off`,
+    "max-lines-per-function": `off`,
+    curly: `deny`,
+    "no-console": [`deny`, { allow: [`warn`, `error`] }],
+    "no-debugger": `deny`,
+    "no-else-return": `deny`,
+    "no-useless-rename": `deny`,
+    "no-const-assign": `deny`,
+    "no-dupe-class-members": `deny`,
+    "no-dupe-else-if": `deny`,
+    "no-dupe-keys": `deny`,
+    "no-duplicate-case": `deny`,
+    "no-eval": `deny`,
+    "no-func-assign": `deny`,
+    "no-global-assign": `deny`,
+    "no-fallthrough": [
+      `error`,
+      { commentPattern: `.*intentional fallthrough.*` },
+    ],
+
+    "unicorn/no-thenable": `deny`,
+    "unicorn/no-empty-file": `deny`,
+    "unicorn/no-await-in-promise-methods": `deny`,
+    // This doesn't make sense in some cases like adding something to a readonly
+    // Set() because to add something to a set you'd have to create a new array
+    // first and spread in the old values and append the new value, so it
+    // creates an extra Array first rather than just putting the items into the
+    // Set and then adding the new item.
+    "unicorn/no-immediate-mutation": `off`,
+    "unicorn/numeric-separators-style": [
+      `error`,
+      {
+        onlyIfContainsSeparator: true,
+        number: { onlyIfContainsSeparator: false },
+      },
+    ],
+    "unicorn/no-null": `off`, // null used extensively
+    "unicorn/number-literal-case": `off`, // overwritten by prettier
+    "unicorn/prefer-module": `off`, // still need to use require(…) with metro
+    "unicorn/no-nested-ternary": `off`, // nested ternaries are not so bad
+    "unicorn/filename-case": `off`, // using camelCase for filenames
+    "unicorn/prefer-string-starts-ends-with": `error`,
+    "unicorn/no-array-callback-reference": `off`,
+    "unicorn/prefer-math-trunc": `off`,
+
+    "eslint/prefer-const": `deny`,
+    // It's annoying to have to put tailwind-variant functions above the
+    // component definition, so this rule can stay disabled.
+    "eslint/no-use-before-define": `off`,
+    "eslint/no-unused-expressions": `deny`,
+    "eslint/no-restricted-imports": [
+      `deny`,
+      {
+        paths: [
+          {
+            name: `react-native`,
+            importNames: [`SafeAreaView`],
+            message: `Use "useSafeAreaInsets" from "react-native-safe-area-context" instead.`,
+          },
+          {
+            name: `expo-image`,
+            importNames: [`Image`],
+            message: `Use "Image" from "@/client/ui/Image" instead (for Uniwind support).`,
+          },
+          {
+            name: `react-native-svg`,
+            importNames: [`Path`],
+            message: `Use "SvgPath" from "@/client/ui/SvgPath" instead (for Uniwind support).`,
+          },
+          {
+            name: `react`,
+            importNames: [`forwardRef`, `memo`, `useContext`],
+            message: `Migrate to React 19 patterns.`,
+          },
+          {
+            name: `vitest`,
+            importNames: [`it`],
+            message: `Use "test(…)" instead of "it(…)" for consistency.`,
+          },
+          {
+            name: `hanzi`,
+            message: `Use "@/dictionary/hanzi" instead.`,
+          },
+          {
+            name: `nanoid`,
+            message: `Use "@/util/nanoid" instead.`,
+          },
+          {
+            name: `date-fns`,
+            message: `Use "date-fns/*" instead for smaller bundle size.`,
+            allowTypeImports: true,
+          },
+          {
+            name: `lodash`,
+            message: `Use "lodash/*" instead for smaller bundle size.`,
+          },
+          {
+            name: `node:assert`,
+            message: `Use "vitest" instead.`,
+          },
+          {
+            name: `node:assert/strict`,
+            message: `Use "vitest" instead.`,
+          },
+          {
+            name: `node:test`,
+            message: `Use "vitest" instead.`,
+          },
+          {
+            name: `glob`,
+            message: `Use "glob" from "@pinyinly/lib/fs" instead.`,
+          },
+          {
+            name: `node:fs/promises`,
+            message: `Use "@pinyinly/lib/fs" instead.`,
+          },
+          {
+            name: `node:fs`,
+            message: `Use "@pinyinly/lib/fs" instead.`,
+          },
+          {
+            name: `@bacons/mdx`,
+            message: `Use "@/client/mdx" instead.`,
+          },
+        ],
+      },
+    ],
+
+    "import/unambiguous": `off`,
+    "import/max-dependencies": `off`,
+    // disallow non-import statements appearing before import statements
+    "import/first": `deny`,
+    // disallow AMD require/define
+    "import/no-amd": `deny`,
+    // forbid default exports - we want to standardize on named exports so that imported names are consistent
+    "import/no-default-export": `deny`,
+    // disallow imports from duplicate paths
+    "import/no-duplicates": `deny`,
+    // Forbid mutable exports
+    "import/no-mutable-exports": `deny`,
+    // Forbid a module from importing itself
+    "import/no-self-import": `deny`,
+    // Forbid import of modules using absolute paths
+    "import/no-absolute-path": `error`,
+    // enforces consistent type specifier style for named imports
+    "import/consistent-type-specifier-style": `error`,
+
+    "import-js/no-extraneous-dependencies": [
+      `error`,
+      {
+        devDependencies: true,
+        peerDependencies: true,
+        optionalDependencies: false,
+      },
+    ],
+    // Prevent importing the default as if it were named
+    "import-js/no-named-default": `error`,
+    "import-js/no-anonymous-default-export": `error`,
+
+    "typescript/consistent-type-imports": [
+      `deny`,
+      { disallowTypeAnnotations: false },
+    ],
+    "typescript/explicit-member-accessibility": `off`,
+    "typescript/explicit-module-boundary-types": `off`,
+    "typescript/no-dynamic-delete": `deny`,
+    "typescript/no-explicit-any": `deny`,
+    "typescript/no-implied-eval": `deny`,
+    "typescript/no-import-type-side-effects": `deny`,
+    "typescript/no-unnecessary-condition": `error`,
+    // Often only having one usage of a type parameter is fine because it's
+    // the only way to use "_ extends _".
+    "typescript/no-unnecessary-type-arguments": `deny`,
+    "typescript/no-unnecessary-type-assertion": `deny`,
+    "typescript/no-unnecessary-type-constraint": `deny`,
+    "typescript/no-unsafe-argument": `deny`,
+    "typescript/no-unsafe-assignment": `deny`,
+    "typescript/no-unsafe-call": `deny`,
+    "typescript/no-unsafe-member-access": `deny`,
+    "typescript/no-unsafe-return": `deny`,
+    "typescript/prefer-for-of": `deny`,
+    "typescript/prefer-readonly-parameter-types": `off`,
+    "typescript/require-await": `off`,
+    "typescript/return-await": `deny`,
+    "typescript/no-empty-object-type": `deny`,
+    "typescript/strict-boolean-expressions": [
+      `deny`,
+      { allowNullableBoolean: true },
+    ],
+    "typescript/strict-void-return": `off`,
+    "typescript/switch-exhaustiveness-check": [
+      `deny`,
+      { requireDefaultForNonUnion: true },
+    ],
+    "typescript/restrict-template-expressions": [
+      `deny`,
+      {
+        allowAny: false,
+        allowArray: false,
+        allowBoolean: true,
+        allowNever: false,
+        allowNullish: false,
+        allowNumber: true,
+        allowRegExp: false,
+      },
+    ],
+    "typescript/promise-function-async": [
+      `error`,
+      { allowedPromiseNames: [`ReactNode`] },
+    ],
+
+    "typescript/no-useless-default-assignment": `off`,
+    "react/rules-of-hooks": `error`,
+    "react/no-react-children": `off`,
+    "react/no-clone-element": `off`,
+    "react/jsx-no-useless-fragment": [`error`, { allowExpressions: true }],
+    "react/jsx-no-literals": `off`,
+
+    "react/forbid-component-props": `off`,
+    "react/jsx-filename-extension": [`error`, { extensions: [`tsx`] }],
+    "react/no-children-prop": `error`,
+    "react/no-multi-comp": `off`,
+    "react/only-export-components": `error`,
+    "react/exhaustive-deps": [`error`, { additionalHooks: `(useLiveQuery)` }],
+    "react/react-compiler": `error`,
+
+    "stylistic-js/quotes": [`error`, `backtick`],
+
+    //
+    // pinyinly
+    //
+
+    // "pinyinly/import-names": [
+    //   "error",
+    //   {
+    //     "defaultImports": {
+    //       "node:path": "path",
+    //       "react-native-reanimated": "Reanimated",
+    //       "debug": "makeDebug",
+    //     },
+    //     "namedImports": {
+    //       "posthog-react-native": {
+    //         "PostHogProvider": "RnPostHogProvider",
+    //         "usePostHog": "rnUsePostHog"
+    //       },
+    //       "posthog-js/react": {
+    //         "PostHogProvider": "WebPostHogProvider",
+    //         "usePostHog": "webUsePostHog"
+    //       },
+    //       "react": {
+    //         "Suspense": "ReactSuspense"
+    //       },
+    //       "react-native": {
+    //         "Animated": "RnAnimated",
+    //         "Easing": "RnEasing",
+    //         "Image": "RnImage"
+    //       }
+    //     }
+    //   }
+    // ],
+    // "pinyinly/glob-template": "error"
+  },
+  overrides: [
+    // Ban CommonJS globals in ESM files, use import.meta.* instead
+    {
+      files: [`**/*.{js,mjs,ts,tsx}`],
+      rules: {
+        "no-restricted-globals": [`error`, `__dirname`, `__filename`],
+      },
+    },
+    // Bin scripts
+    {
+      files: [`bin/**/*.{js,mjs,ts,tsx}`],
+      rules: {
+        "no-console": `off`,
+      },
+    },
+    {
+      files: [`**/*.cjs`, `tailwind.config.js`],
+      rules: {
+        "import/no-commonjs": `off`,
+      },
+    },
+    // Config files often export their config as default.
+    {
+      files: [`*.config.*`],
+      rules: {
+        "import/no-default-export": `off`,
+      },
+    },
+    {
+      files: [`test/**`],
+      rules: {
+        // it's nice to be able to write a quick generator functions in a test without worrying about yield
+        "require-yield": `off`,
+        "no-non-null-assertion": `off`,
+
+        "eslint/require-yield": `off`,
+        "eslint/no-empty-function": `off`,
+        "eslint/no-empty-pattern": `off`,
+        "eslint/no-inner-declarations": `off`,
+
+        "typescript/no-dynamic-delete": `off`,
+        "typescript/no-explicit-any": `off`,
+        "typescript/no-unsafe-assignment": `off`,
+        "typescript/restrict-template-expressions": `off`,
+
+        "react/rules-of-hooks": `error`,
+        // Backup from eslint config:
+        //
+        // "typescript/no-non-null-assertion": "off",
+        // "typescript/no-unsafe-assignment": "off",
+        // "typescript/require-await": "off", // this is annoying when you want a little function to return a promise
+        // "typescript/return-await": "off", // this is annoying when you want a little function to return a promise
+        // // It's useful to use inline type annotations for mocking.
+        // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
+        "unicorn/no-useless-undefined": `off`, // writing undefined can be useful when writing mocks
+      },
+    },
+    {
+      files: [`*.{test,bench,eval}.*`],
+      rules: {
+        "typescript/no-non-null-asserted-optional-chain": `off`,
+      },
+    },
+  ],
+});

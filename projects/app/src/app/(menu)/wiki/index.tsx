@@ -9,7 +9,7 @@ export default function WikiIndexPage() {
       <View className="gap-2">
         <Text className="pyly-body-title">Wiki</Text>
         <HeaderTitleProvider.ScrollTrigger title="Wiki" />
-        <Text className="pyly-body-caption text-fg-dim">
+        <Text className="pyly-body-caption text-muted-fg">
           Explore characters, words, and meanings with stories, breakdowns, and
           pronunciation.
         </Text>

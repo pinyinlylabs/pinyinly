@@ -36,6 +36,7 @@ export function makeMockTx() {
     get: async (): Promise<undefined> => {},
     scan: () => null as never,
     clientID: null as never,
+    // oxlint-disable-next-line typescript/no-deprecated
     environment: null as never,
     location: null as never,
     has: async () => false,
@@ -47,6 +48,7 @@ export function makeMockTx() {
     set: async () => {},
     mutationID: null as never,
     reason: null as never,
+    // oxlint-disable-next-line typescript/no-deprecated
     put: null as never,
     del: null as never,
   };

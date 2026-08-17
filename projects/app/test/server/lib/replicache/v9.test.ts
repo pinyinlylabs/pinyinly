@@ -17,7 +17,7 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 
-describe(`push suite` satisfies HasNameOf<typeof push>, () => {
+describe(`push suite`, () => {
   txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   describe(`database transaction isolation level`, () => {
@@ -277,7 +277,7 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
   });
 });
 
-describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
+describe(`pull suite`, () => {
   txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   describe(`database transaction isolation level`, () => {
@@ -814,107 +814,104 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
   });
 });
 
-describe(
-  `computeEntitiesState suite` satisfies HasNameOf<typeof computeEntitiesState>,
-  () => {
-    describe(`schema ${schema.version}`, () => {
-      txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
+describe(`computeEntitiesState suite`, () => {
+  describe(`schema ${schema.version}`, () => {
+    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
-      txTest(`works for non-existant user and client group`, async ({ tx }) => {
-        await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillState: [],
-          skillRating: [],
-          setting: [],
-        });
-      });
-
-      txTest(`works for user`, async ({ tx }) => {
-        const user = await createUser(tx);
-
-        await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillState: [],
-          skillRating: [],
-          setting: [],
-        });
-      });
-
-      txTest(`only includes skillState for the user`, async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1SkillState] = await tx
-          .insert(s.skillState)
-          .values([
-            {
-              userId: user1.id,
-              skill: glossToHanziWord(`我:i`),
-              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-            },
-            {
-              userId: user2.id,
-              skill: glossToHanziWord(`我:i`),
-              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-            },
-          ])
-          .returning({
-            id: s.skillState.id,
-            key: s.skillState.skill,
-            xmin: pgXmin(s.skillState),
-          });
-        invariant(user1SkillState != null);
-
-        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillRating: [],
-          skillState: [user1SkillState],
-          setting: [],
-        });
-      });
-
-      txTest(`only includes skillRating for the user`, async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1SkillRating] = await tx
-          .insert(s.skillRating)
-          .values([
-            {
-              userId: user1.id,
-              skill: glossToHanziWord(`我:i`),
-              rating: Rating.Again,
-              reviewId: nanoid(),
-            },
-            {
-              userId: user2.id,
-              skill: glossToHanziWord(`我:i`),
-              rating: Rating.Good,
-              reviewId: nanoid(),
-            },
-          ])
-          .returning({
-            id: s.skillRating.id,
-            xmin: pgXmin(s.skillRating),
-          });
-        invariant(user1SkillRating != null);
-
-        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          skillRating: [user1SkillRating],
-          skillState: [],
-          setting: [],
-        });
+    txTest(`works for non-existant user and client group`, async ({ tx }) => {
+      await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillState: [],
+        skillRating: [],
+        setting: [],
       });
     });
-  },
-);
 
-describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
+    txTest(`works for user`, async ({ tx }) => {
+      const user = await createUser(tx);
+
+      await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillState: [],
+        skillRating: [],
+        setting: [],
+      });
+    });
+
+    txTest(`only includes skillState for the user`, async ({ tx }) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1SkillState] = await tx
+        .insert(s.skillState)
+        .values([
+          {
+            userId: user1.id,
+            skill: glossToHanziWord(`我:i`),
+            srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          },
+          {
+            userId: user2.id,
+            skill: glossToHanziWord(`我:i`),
+            srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          },
+        ])
+        .returning({
+          id: s.skillState.id,
+          key: s.skillState.skill,
+          xmin: pgXmin(s.skillState),
+        });
+      invariant(user1SkillState != null);
+
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillRating: [],
+        skillState: [user1SkillState],
+        setting: [],
+      });
+    });
+
+    txTest(`only includes skillRating for the user`, async ({ tx }) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1SkillRating] = await tx
+        .insert(s.skillRating)
+        .values([
+          {
+            userId: user1.id,
+            skill: glossToHanziWord(`我:i`),
+            rating: Rating.Again,
+            reviewId: nanoid(),
+          },
+          {
+            userId: user2.id,
+            skill: glossToHanziWord(`我:i`),
+            rating: Rating.Good,
+            reviewId: nanoid(),
+          },
+        ])
+        .returning({
+          id: s.skillRating.id,
+          xmin: pgXmin(s.skillRating),
+        });
+      invariant(user1SkillRating != null);
+
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        skillRating: [user1SkillRating],
+        skillState: [],
+        setting: [],
+      });
+    });
+  });
+});
+
+describe(`computePatch suite`, () => {
   type EntitiesState = Parameters<typeof computePatch>[1];
 
   test(`unchanged entities are preserved`, async () => {
@@ -946,56 +943,175 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
   });
 });
 
-describe(
-  `retryMutation suite` satisfies HasNameOf<typeof retryMutation>,
-  () => {
-    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
+describe(`retryMutation suite`, () => {
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
-    txTest(`returns error when mutation record not found`, async ({ tx }) => {
-      const result = await retryMutation(tx, `non-existent-id`);
+  txTest(`returns error when mutation record not found`, async ({ tx }) => {
+    const result = await retryMutation(tx, `non-existent-id`);
 
-      expect(result).toEqual({
-        success: false,
-        error: `Mutation record not found: non-existent-id`,
-      });
+    expect(result).toEqual({
+      success: false,
+      error: `Mutation record not found: non-existent-id`,
+    });
+  });
+
+  txTest(`successfully retries a failed mutation`, async ({ tx }) => {
+    const user = await createUser(tx);
+    const clientGroupId = nanoid();
+    const clientId = nanoid();
+
+    // Create client group and client
+    await tx
+      .insert(s.replicacheClientGroup)
+      .values([
+        { id: clientGroupId, userId: user.id, schemaVersion: schema.version },
+      ]);
+    await tx
+      .insert(s.replicacheClient)
+      .values([{ id: clientId, clientGroupId, lastMutationId: 0 }]);
+
+    // Create a valid mutation that was marked as failed
+    const mutationArgs = schema.rateSkill.marshalArgs({
+      id: nanoid(),
+      skill: glossToHanziWord(`我:i`),
+      rating: Rating.Good,
+      durationMs: null,
+      now: new Date(),
+      reviewId: nanoid(),
     });
 
-    txTest(`successfully retries a failed mutation`, async ({ tx }) => {
+    const originalProcessedAt = new Date(Date.now() - 60_000); // 1 minute ago
+    const [mutationRecord] = await tx
+      .insert(s.replicacheMutation)
+      .values([
+        {
+          clientId,
+          mutationId: 1,
+          mutation: {
+            id: 1,
+            name: schema.rateSkill._def.alias!,
+            args: mutationArgs,
+            timestamp: Date.now(),
+            clientId,
+          },
+          success: false,
+          processedAt: originalProcessedAt,
+        },
+      ])
+      .returning();
+    invariant(mutationRecord != null);
+
+    // Retry the mutation
+    const result = await retryMutation(tx, mutationRecord.id);
+
+    expect(result).toEqual({ success: true });
+
+    // Verify the mutation record was updated
+    const updatedRecord = await tx.query.replicacheMutation.findFirst({
+      where: (t, { eq }) => eq(t.id, mutationRecord.id),
+    });
+    expect(updatedRecord?.success).toBe(true);
+    expect(updatedRecord?.processedAt.getTime()).toBeGreaterThan(
+      originalProcessedAt.getTime(),
+    );
+
+    // Verify the mutation was actually executed (skill state created)
+    const skillStates = await tx.query.skillState.findMany({
+      where: (t, { eq }) => eq(t.userId, user.id),
+    });
+    expect(skillStates).toHaveLength(1);
+  });
+
+  txTest(`returns error for invalid mutation`, async ({ tx }) => {
+    const user = await createUser(tx);
+    const clientGroupId = nanoid();
+    const clientId = nanoid();
+
+    // Create client group and client
+    await tx
+      .insert(s.replicacheClientGroup)
+      .values([
+        { id: clientGroupId, userId: user.id, schemaVersion: schema.version },
+      ]);
+    await tx
+      .insert(s.replicacheClient)
+      .values([{ id: clientId, clientGroupId, lastMutationId: 0 }]);
+
+    // Create an invalid mutation (unknown mutator name)
+    const [mutationRecord] = await tx
+      .insert(s.replicacheMutation)
+      .values([
+        {
+          clientId,
+          mutationId: 1,
+          mutation: {
+            id: 1,
+            name: `invalidMutatorName`,
+            args: {},
+            timestamp: Date.now(),
+            clientId,
+          },
+          success: false,
+          processedAt: new Date(),
+        },
+      ])
+      .returning();
+    invariant(mutationRecord != null);
+
+    // Retry should fail
+    const result = await retryMutation(tx, mutationRecord.id);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBeDefined();
+    }
+
+    // Mutation record should still be marked as failed
+    const updatedRecord = await tx.query.replicacheMutation.findFirst({
+      where: (t, { eq }) => eq(t.id, mutationRecord.id),
+    });
+    expect(updatedRecord?.success).toBe(false);
+  });
+
+  txTest(
+    `retries mutation even when lastMutationId has advanced`,
+    async ({ tx }) => {
       const user = await createUser(tx);
       const clientGroupId = nanoid();
       const clientId = nanoid();
 
-      // Create client group and client
-      await tx
-        .insert(s.replicacheClientGroup)
-        .values([
-          { id: clientGroupId, userId: user.id, schemaVersion: schema.version },
-        ]);
+      // Create client group and client with lastMutationId already advanced past our mutation
+      await tx.insert(s.replicacheClientGroup).values([
+        {
+          id: clientGroupId,
+          userId: user.id,
+          schemaVersion: schema.version,
+        },
+      ]);
       await tx
         .insert(s.replicacheClient)
-        .values([{ id: clientId, clientGroupId, lastMutationId: 0 }]);
+        .values([{ id: clientId, clientGroupId, lastMutationId: 5 }]);
 
-      // Create a valid mutation that was marked as failed
-      const mutationArgs = schema.rateSkill.marshalArgs({
-        id: nanoid(),
-        skill: glossToHanziWord(`我:i`),
-        rating: Rating.Good,
-        durationMs: null,
-        now: new Date(),
-        reviewId: nanoid(),
-      });
-
-      const originalProcessedAt = new Date(Date.now() - 60_000); // 1 minute ago
+      // Create a mutation that was recorded earlier (mutationId < lastMutationId)
+      // This simulates a mutation that failed initially but the client continued
+      const originalProcessedAt = new Date(Date.now() - 60_000);
       const [mutationRecord] = await tx
         .insert(s.replicacheMutation)
         .values([
           {
             clientId,
-            mutationId: 1,
+            mutationId: 2, // Less than lastMutationId of 5
             mutation: {
-              id: 1,
+              id: 2,
               name: schema.rateSkill._def.alias!,
-              args: mutationArgs,
+              args: schema.rateSkill.marshalArgs({
+                id: nanoid(),
+                skill: glossToHanziWord(`我:i`),
+                rating: Rating.Good,
+                durationMs: null,
+                now: new Date(),
+                reviewId: nanoid(),
+              }),
               timestamp: Date.now(),
               clientId,
             },
@@ -1006,7 +1122,7 @@ describe(
         .returning();
       invariant(mutationRecord != null);
 
-      // Retry the mutation
+      // Retry should succeed and execute the mutation (bypassing lastMutationId check)
       const result = await retryMutation(tx, mutationRecord.id);
 
       expect(result).toEqual({ success: true });
@@ -1020,133 +1136,11 @@ describe(
         originalProcessedAt.getTime(),
       );
 
-      // Verify the mutation was actually executed (skill state created)
+      // Skill state SHOULD be created since retryMutation bypasses lastMutationId checks
       const skillStates = await tx.query.skillState.findMany({
         where: (t, { eq }) => eq(t.userId, user.id),
       });
       expect(skillStates).toHaveLength(1);
-    });
-
-    txTest(`returns error for invalid mutation`, async ({ tx }) => {
-      const user = await createUser(tx);
-      const clientGroupId = nanoid();
-      const clientId = nanoid();
-
-      // Create client group and client
-      await tx
-        .insert(s.replicacheClientGroup)
-        .values([
-          { id: clientGroupId, userId: user.id, schemaVersion: schema.version },
-        ]);
-      await tx
-        .insert(s.replicacheClient)
-        .values([{ id: clientId, clientGroupId, lastMutationId: 0 }]);
-
-      // Create an invalid mutation (unknown mutator name)
-      const [mutationRecord] = await tx
-        .insert(s.replicacheMutation)
-        .values([
-          {
-            clientId,
-            mutationId: 1,
-            mutation: {
-              id: 1,
-              name: `invalidMutatorName`,
-              args: {},
-              timestamp: Date.now(),
-              clientId,
-            },
-            success: false,
-            processedAt: new Date(),
-          },
-        ])
-        .returning();
-      invariant(mutationRecord != null);
-
-      // Retry should fail
-      const result = await retryMutation(tx, mutationRecord.id);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeDefined();
-      }
-
-      // Mutation record should still be marked as failed
-      const updatedRecord = await tx.query.replicacheMutation.findFirst({
-        where: (t, { eq }) => eq(t.id, mutationRecord.id),
-      });
-      expect(updatedRecord?.success).toBe(false);
-    });
-
-    txTest(
-      `retries mutation even when lastMutationId has advanced`,
-      async ({ tx }) => {
-        const user = await createUser(tx);
-        const clientGroupId = nanoid();
-        const clientId = nanoid();
-
-        // Create client group and client with lastMutationId already advanced past our mutation
-        await tx.insert(s.replicacheClientGroup).values([
-          {
-            id: clientGroupId,
-            userId: user.id,
-            schemaVersion: schema.version,
-          },
-        ]);
-        await tx
-          .insert(s.replicacheClient)
-          .values([{ id: clientId, clientGroupId, lastMutationId: 5 }]);
-
-        // Create a mutation that was recorded earlier (mutationId < lastMutationId)
-        // This simulates a mutation that failed initially but the client continued
-        const originalProcessedAt = new Date(Date.now() - 60_000);
-        const [mutationRecord] = await tx
-          .insert(s.replicacheMutation)
-          .values([
-            {
-              clientId,
-              mutationId: 2, // Less than lastMutationId of 5
-              mutation: {
-                id: 2,
-                name: schema.rateSkill._def.alias!,
-                args: schema.rateSkill.marshalArgs({
-                  id: nanoid(),
-                  skill: glossToHanziWord(`我:i`),
-                  rating: Rating.Good,
-                  durationMs: null,
-                  now: new Date(),
-                  reviewId: nanoid(),
-                }),
-                timestamp: Date.now(),
-                clientId,
-              },
-              success: false,
-              processedAt: originalProcessedAt,
-            },
-          ])
-          .returning();
-        invariant(mutationRecord != null);
-
-        // Retry should succeed and execute the mutation (bypassing lastMutationId check)
-        const result = await retryMutation(tx, mutationRecord.id);
-
-        expect(result).toEqual({ success: true });
-
-        // Verify the mutation record was updated
-        const updatedRecord = await tx.query.replicacheMutation.findFirst({
-          where: (t, { eq }) => eq(t.id, mutationRecord.id),
-        });
-        expect(updatedRecord?.success).toBe(true);
-        expect(updatedRecord?.processedAt.getTime()).toBeGreaterThan(
-          originalProcessedAt.getTime(),
-        );
-
-        // Skill state SHOULD be created since retryMutation bypasses lastMutationId checks
-        const skillStates = await tx.query.skillState.findMany({
-          where: (t, { eq }) => eq(t.userId, user.id),
-        });
-        expect(skillStates).toHaveLength(1);
-      },
-    );
-  },
-);
+    },
+  );
+});

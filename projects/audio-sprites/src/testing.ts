@@ -210,9 +210,7 @@ export function parseSpriteFileSizeRules(
 export async function checkSpriteManifest(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
-  const fnDebug = debug.extend(
-    `checkSpriteManifest()` satisfies HasNameOf<typeof checkSpriteManifest>,
-  );
+  const fnDebug = debug.extend(`checkSpriteManifest()`);
 
   const { manifestPath, autoFix = false, spriteFileSizes = [] } = options;
   const parsedSpriteFileSizeRules = parseSpriteFileSizeRules(spriteFileSizes);
@@ -519,9 +517,7 @@ export async function generateSprites(manifestPath: string): Promise<void> {
 export async function buildSprites(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
-  const fnDebug = debug.extend(
-    `buildSprites()` satisfies HasNameOf<typeof buildSprites>,
-  );
+  const fnDebug = debug.extend(`buildSprites()`);
 
   fnDebug(`options: %o`, options);
 

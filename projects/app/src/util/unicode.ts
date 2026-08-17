@@ -60,10 +60,6 @@ export function isHanziIdeograph(char: string): boolean {
   );
 }
 
-export function isNotCjkUnifiedIdeograph(char: string): boolean {
-  return !isCjkUnifiedIdeograph(char);
-}
-
 const segmenter = new Intl.Segmenter(`en`, { granularity: `grapheme` });
 
 /**
@@ -164,4 +160,8 @@ export function toCamelCase(text: string) {
         : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
     )
     .join(``);
+}
+
+export function toTitle(text: string) {
+  return text.replaceAll(/(?:^| )\p{L}/gu, (match) => match.toUpperCase());
 }

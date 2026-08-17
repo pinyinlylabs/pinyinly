@@ -1,15 +1,13 @@
 import { trpc } from "@/client/trpc";
-import {
-  buildMeaningHintCausualBridgePrompt,
-  buildMeaningHintLogicalPrompt,
-  buildMeaningHintPrompt,
-} from "@/util/prompts/meaningHint";
+import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AiPromptPreview } from "./AiPromptPreview";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import { buildMeaningHintCausualBridgePrompt } from "@/util/prompts/meaningHintCausualBridge";
+import { buildMeaningHintLogicalPrompt } from "@/util/prompts/meaningHintLogical";
 
 export interface AiMeaningHintModalProps {
   hanzi: string;
@@ -162,14 +160,14 @@ export function AiMeaningHintModal({
             <View className="gap-2">
               <Text className="pyly-body-subheading">Suggestions</Text>
               {!hasSettledGeneration || isGenerating ? (
-                <Text className="font-sans text-[14px] text-fg-dim">
+                <Text className="font-sans text-[14px] text-muted-fg">
                   Generating hints...
                 </Text>
               ) : null}
 
               {suggestions == null ? (
                 error == null && hasSettledGeneration ? (
-                  <Text className="font-sans text-[14px] text-fg-dim">
+                  <Text className="font-sans text-[14px] text-muted-fg">
                     No hints generated.
                   </Text>
                 ) : null
@@ -184,7 +182,7 @@ export function AiMeaningHintModal({
                         <Text
                           className={`
                             rounded bg-fg-bg10 px-2 py-0.5 font-sans text-[11px] font-semibold
-                            tracking-wide text-fg-dim uppercase
+                            tracking-wide text-muted-fg uppercase
                           `}
                         >
                           {suggestion.strategyLabel}
@@ -206,7 +204,7 @@ export function AiMeaningHintModal({
                         <Pylymark source={suggestion.hint} />
                       </Text>
                       {suggestion.explanation == null ? null : (
-                        <Text className="font-sans text-[13px] text-fg-dim">
+                        <Text className="font-sans text-[13px] text-muted-fg">
                           <Pylymark source={suggestion.explanation} />
                         </Text>
                       )}

@@ -112,7 +112,7 @@ function AddCustomHintModalContent({
                   className={
                     isHintTooLong
                       ? `text-[12px] text-fg`
-                      : `text-[12px] text-fg-dim`
+                      : `text-[12px] text-muted-fg`
                   }
                   style={
                     isHintTooLong
@@ -128,7 +128,7 @@ function AddCustomHintModalContent({
                     className={
                       isHintAtLimit
                         ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
-                        : `text-right text-[11px] text-fg-dim`
+                        : `text-right text-[11px] text-muted-fg`
                     }
                   >
                     {trimmedHintLength}/{hintLengthTarget}
@@ -159,7 +159,7 @@ function AddCustomHintModalContent({
                   <Icon
                     size={16}
                     icon="chevron-down"
-                    tintColorClassName="accent-fg-dim"
+                    tintColorClassName="accent-muted-fg"
                   />
                 </Pressable>
               </View>

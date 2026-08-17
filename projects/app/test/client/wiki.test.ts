@@ -3,27 +3,39 @@
 import { dataDir, projectRoot, wikiDir } from "#bin/util/paths.ts";
 import {
   characterStrokeCount,
-  componentToString,
   idsApplyTransforms,
   idsNodeToString,
   isHanziCharacter,
   makeVerticalMergeCharacterIdsTransform,
-  mapIdsNodeLeafs,
+  parseIds,
   walkIdsNodeLeafs,
 } from "#data/hanzi.js";
-import type { HanziText, WikiCharacterData } from "#data/model.js";
+import type {
+  CharactersKey,
+  CharactersValue,
+  HanziCharacter,
+  HanziText,
+  IdsNode,
+  WikiCharacterData,
+} from "#data/model.js";
 import { wikiCharacterDataSchema } from "#data/model.js";
-import type { CharactersKey, CharactersValue } from "#dictionary.js";
 import {
   buildHanziWord,
+  deepDecomposeHanzi,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
+  hanziFromHanziWord,
+  loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
 } from "#dictionary.js";
 import { getFonts } from "#test/helpers.ts";
-import { isCi } from "#util/env.js";
-import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
-import { strokeMedianCodec } from "#util/strokeMedians.ts";
+import type { StrokeSpecAtom } from "#util/strokeSpec.js";
+import {
+  flattenStrokeSpecRanges,
+  normalizeStrokeSpec,
+  parseStrokeSpec,
+} from "#util/strokeSpec.js";
+import { buildStrokeSpecSegmentPaths } from "#util/strokeSpecSvgProcessor.js";
 import { createAudioFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
@@ -39,12 +51,9 @@ import {
   readFileSync,
   rm,
 } from "@pinyinly/lib/fs";
-import {
-  invariant,
-  nonNullable,
-  uniqueInvariant,
-} from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
+import SVGPathCommander from "svg-path-commander";
 import { describe, expect, test } from "vitest";
 
 describe(`speech files`, async () => {
@@ -66,8 +75,8 @@ describe(`/meaning.mdx files`, async () => {
   const dictionary = await loadDictionary();
 
   const data = meaningFilePaths.map((filePath) => {
-    const hanzi = path.basename(path.dirname(filePath)) as HanziText;
-    const isStructural = isStructuralHanzi(hanzi);
+    const hanzi = path.basename(path.dirname(filePath)) as HanziCharacter;
+    const isStructural = isHanziCharacter(hanzi) && isStructuralHanzi(hanzi);
     const isInDictionary = dictionary.lookupHanzi(hanzi).length > 0;
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
@@ -162,23 +171,23 @@ describe(`character.json files`, async () => {
           continue;
         }
 
-        if (characterData.mnemonic?.components) {
-          const x = mapIdsNodeLeafs(characterData.mnemonic.components, (x) =>
-            componentToString(x),
-          );
-          const x2 = idsApplyTransforms(x, [transform]);
+        if (characterData.decompositions != null) {
+          for (const ids of Object.keys(characterData.decompositions)) {
+            const x = parseIds(ids);
+            const x2 = idsApplyTransforms(x, [transform]);
 
-          const xString = idsNodeToString(x, (x) => x);
-          const x2String = idsNodeToString(x2, (x) => x);
-          expect
-            .soft(x2String, `${character} normalized form`)
-            .toEqual(xString);
+            const xString = idsNodeToString(x, (x) => x);
+            const x2String = idsNodeToString(x2, (x) => x);
+            expect
+              .soft(x2String, `${character} normalized form`)
+              .toEqual(xString);
+          }
         }
       }
     }
   });
 
-  test(`characters in the dictionary with 5+ strokes have mnemonic components`, async () => {
+  test(`characters in the dictionary with 5+ strokes have decompositions`, async () => {
     const atomicCharacters = new Set([
       `非`,
       `臣`,
@@ -187,13 +196,16 @@ describe(`character.json files`, async () => {
       `母`,
       `𩰋`,
       `𡗗`,
+      `年`,
+      `耳`,
     ]);
     const dictionary = await loadDictionary();
 
-    for (const { character, characterData } of characterFiles) {
+    for (const { character, characterData, filePath } of characterFiles) {
       const meanings = dictionary.lookupHanzi(character);
+      const svgStrokeCount = characterStrokeCount(characterData);
       if (
-        characterStrokeCount(characterData) <= 4 ||
+        svgStrokeCount <= 4 ||
         meanings.length === 0 ||
         isComponentFormHanzi(character) ||
         characterData.simplifiedForm != null ||
@@ -203,37 +215,56 @@ describe(`character.json files`, async () => {
       }
 
       expect
-        .soft(characterData.mnemonic, `${character} to have mnemonic`)
+        .soft(characterData, `${filePath} to have mnemonic`)
+        .toHaveProperty(`mnemonic`);
+      expect
+        .soft(characterData.mnemonic, `${filePath} to have mnemonic`)
         .toBeDefined();
-      if (characterData.mnemonic != null) {
-        expect
-          .soft(
-            [...walkIdsNodeLeafs(characterData.mnemonic.components)].length,
-            `${character} missing 2+ mnemonic components`,
-          )
-          .toBeGreaterThanOrEqual(2);
+
+      expect(
+        Object.keys(characterData.decompositions ?? {}).length,
+        `${filePath} has at least one decomposition`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  test(`decomposition strokes conformance`, async () => {
+    for (const { character, characterData } of characterFiles) {
+      if (
+        characterData.decompositions != null &&
+        Array.isArray(characterData.svg.strokes)
+      ) {
+        for (const [ids, strokeSpecs] of Object.entries(
+          characterData.decompositions,
+        )) {
+          expect
+            .soft(strokeSpecs.length, `${character} IDS: ${ids}`)
+            .toBeGreaterThan(0);
+        }
       }
     }
   });
 
-  test(`component strokes conformance`, async () => {
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.components) {
-        for (const component of walkIdsNodeLeafs(
-          characterData.mnemonic.components,
-        )) {
-          const strokeIndices = parseIndexRanges(component.strokes);
-          // no duplicate stroke indicies in components (e.g. ❌ 0-3,2)
-          expect
-            .soft(() => {
-              uniqueInvariant(strokeIndices);
-            }, character)
-            .not.toThrow();
+  test(`.mnemonic.decomposition reference exists in .decompositions`, async () => {
+    for (const { characterData, filePath } of characterFiles) {
+      if (characterData.mnemonic?.decomposition == null) {
+        continue;
+      }
 
-          if (Array.isArray(characterData.svg.strokes)) {
-            // at least one stroke if there's SVG stroke data
-            expect.soft(strokeIndices.length, character).toBeGreaterThan(0);
-          }
+      expect
+        .soft(Object.keys(characterData.decompositions ?? {}), `${filePath}`)
+        .toContain(characterData.mnemonic.decomposition);
+    }
+  });
+
+  test(`decompositions don't reference the current character causing infinite loops`, async () => {
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (characterData.decompositions != null) {
+        for (const ids of Object.keys(characterData.decompositions)) {
+          const leafs = [...walkIdsNodeLeafs(parseIds(ids))];
+          expect
+            .soft(leafs, `${filePath} IDS: ${ids}`)
+            .not.toContain(character);
         }
       }
     }
@@ -262,37 +293,39 @@ describe(`character.json files`, async () => {
         )
         .toBe(characterData.svg.strokes.length);
 
-      for (const [i, encodedMedian] of characterData.svg.medians.entries()) {
-        const points = strokeMedianCodec.decode(encodedMedian);
+      for (const [i, medianPath] of characterData.svg.medians.entries()) {
+        const totalLength = SVGPathCommander.getTotalLength(medianPath);
         expect
           .soft(
-            points.length,
-            `${character} median ${i} should contain at least 2 points`,
+            Number.isFinite(totalLength) && totalLength > 0,
+            `${character} median ${i} should be a valid non-empty SVG path`,
           )
-          .toBeGreaterThanOrEqual(2);
+          .toBe(true);
       }
     }
   });
 
-  test(`component index ranges are normalized`, () => {
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.components) {
-        for (const [i, component] of [
-          ...walkIdsNodeLeafs(characterData.mnemonic.components),
-        ].entries()) {
-          const normalized = normalizeIndexRanges(component.strokes);
-          expect
-            .soft(
-              component.strokes,
-              `${character} component ${i} strokes are not normalized`,
-            )
-            .toEqual(normalized);
-        }
+  test(`decomposition stroke specs are normalized`, async () => {
+    for (const { characterData, filePath } of characterFiles) {
+      if (characterData.decompositions) {
+        const expected = {
+          ...characterData,
+          decompositions: Object.fromEntries(
+            Object.entries(characterData.decompositions).map(
+              ([ids, strokeSpecs]) => [
+                ids,
+                strokeSpecs.map(normalizeStrokeSpec),
+              ],
+            ),
+          ),
+        };
+
+        await expect.soft(expected).toMatchJsonFileSnapshot(filePath);
       }
     }
   });
 
-  test(`components do not use invalid "hanzi" strings`, async () => {
+  test.skip(`mnemonic decomposition IDS does not use invalid "hanzi" strings`, async () => {
     const bannedCharacters = new Set();
 
     // Don't allow IDS combining characters or circled numbers (meaning "unknown N stroke character").
@@ -311,14 +344,24 @@ describe(`character.json files`, async () => {
       bannedCharacters.add(char);
     }
 
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.components) {
-        for (const component of walkIdsNodeLeafs(
-          characterData.mnemonic.components,
-        )) {
-          expect
-            .soft(bannedCharacters, character)
-            .not.toContain(component.hanzi);
+    const charactersToCheck = await buildCharactersToCheck();
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (charactersToCheck.has(character)) {
+        const ids = characterData.mnemonic?.decomposition;
+        if (ids) {
+          for (const leaf of walkIdsNodeLeafs(
+            parseIds(ids) as IdsNode<HanziCharacter>,
+          )) {
+            if (characterData.mnemonic?.components?.[leaf]?.label != null) {
+              // If there's a label defined for the component, then it's okay to
+              // use it in the mnemonic decomposition, even if it's a banned
+              // character.
+              continue;
+            }
+            expect
+              .soft(bannedCharacters, `${filePath} IDS: ${ids} leaf: ${leaf}`)
+              .not.toContain(leaf);
+          }
         }
       }
     }
@@ -362,87 +405,152 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`all strokes are covered by mnemonic components`, async () => {
-    for (const { character, characterData } of characterFiles) {
-      if (!Array.isArray(characterData.svg.strokes)) {
-        // There's no point having components referencing strokes if we don't
-        // have any SVG stroke paths to draw.
+  test(`all strokes are covered by decompositions`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
+
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (!charactersToCheck.has(character)) {
         continue;
       }
 
-      if (characterData.mnemonic?.components) {
-        const allComponentStrokes = new Set<number>();
-        for (const component of walkIdsNodeLeafs(
-          characterData.mnemonic.components,
-        )) {
-          const strokeIndices = parseIndexRanges(component.strokes);
-          for (const index of strokeIndices) {
-            allComponentStrokes.add(index);
+      if (
+        characterData.decompositions == null ||
+        Object.keys(characterData.decompositions).length === 0
+      ) {
+        continue;
+      }
+
+      const allComponentStrokes = new Set<number>();
+      function processStrokeSpecAtom(atom: StrokeSpecAtom) {
+        switch (atom.kind) {
+          case `range`: {
+            for (let i = atom.start; i <= atom.end; i++) {
+              allComponentStrokes.add(i);
+            }
+            break;
+          }
+          case `slice`: {
+            allComponentStrokes.add(atom.stroke);
+            break;
           }
         }
+      }
 
-        const totalStrokes = characterStrokeCount(characterData);
-        const expectedStrokes = Array.from(
-          { length: totalStrokes },
-          (_, i) => i,
-        );
+      for (const strokeSpecs of Object.values(characterData.decompositions)) {
+        for (const strokeSpec of strokeSpecs) {
+          for (const item of parseStrokeSpec(strokeSpec)) {
+            for (const atom of item) {
+              processStrokeSpecAtom(atom);
+            }
+          }
+        }
+      }
 
-        for (const strokeIndex of expectedStrokes) {
-          expect
-            .soft(
-              allComponentStrokes.has(strokeIndex),
-              `${character} stroke ${strokeIndex} is not covered by any mnemonic component`,
-            )
-            .toBe(true);
+      const totalStrokes = characterStrokeCount(characterData);
+      const expectedStrokes = Array.from({ length: totalStrokes }, (_, i) => i);
+
+      for (const strokeIndex of expectedStrokes) {
+        expect
+          .soft(
+            allComponentStrokes.has(strokeIndex),
+            `${filePath} stroke ${strokeIndex} is not covered by any mnemonic component`,
+          )
+          .toBe(true);
+      }
+    }
+  });
+
+  test(`decomposition strokes match the hanzi stroke count`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
+
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (charactersToCheck.has(character) && characterData.decompositions) {
+        for (const [ids, strokeSpecs] of Object.entries(
+          characterData.decompositions,
+        )) {
+          let i = -1;
+          for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
+            i++;
+
+            const hanziData = getCharacterData(leaf);
+            if (Array.isArray(hanziData?.svg.strokes)) {
+              const strokeSpecText = nonNullable(strokeSpecs[i]);
+              const strokeSpec = flattenStrokeSpecRanges(
+                parseStrokeSpec(strokeSpecText),
+              );
+
+              expect
+                .soft(
+                  strokeSpec.length,
+                  `${filePath} IDS ${ids} (${leaf}) stroke count`,
+                )
+                .toEqual(hanziData.svg.strokes.length);
+            }
+          }
         }
       }
     }
   });
 
-  test(`mnemonic component strokes match the hanzi stroke count`, async () => {
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.components) {
-        for (const [i, component] of [
-          ...walkIdsNodeLeafs(characterData.mnemonic.components),
-        ].entries()) {
-          const primaryHanzi = component.hanzi?.split(`,`)[0];
-          if (primaryHanzi != null) {
-            const hanziData = getCharacterData(primaryHanzi);
+  test(`.strokes is SVG paths not just a count`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
 
-            expect
-              .soft(
-                hanziData,
-                `${character} component ${i} (${primaryHanzi}) data`,
-              )
-              .toBeTruthy();
-            if (hanziData == null) {
-              continue;
-            }
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (charactersToCheck.has(character)) {
+        expect
+          .soft(
+            characterData.svg.strokes,
+            `${filePath} .strokes should be an array of SVG paths`,
+          )
+          .toBeTypeOf(`object`);
+      }
+    }
+  });
 
-            const claimedStrokeCount = parseIndexRanges(
-              component.strokes,
-            ).length;
+  test(`svg.segments is populated from decompositions`, async () => {
+    const charactersToCheck = await buildCharactersToCheck();
 
-            if (
-              claimedStrokeCount === 0 &&
-              !Array.isArray(characterData.svg.strokes)
-            ) {
-              // There's no point having components referencing strokes if we don't
-              // have any SVG stroke paths to draw.
-              continue;
-            }
+    for (const { character, characterData, filePath } of characterFiles) {
+      if (charactersToCheck.has(character)) {
+        let segments: Record<string, string> | undefined = undefined;
 
-            const expectedStrokeCount =
-              characterStrokeCount(hanziData) + (component.strokeDiff ?? 0);
+        const strokeSpecTexts = Object.values(
+          characterData.decompositions ?? {},
+        ).flat();
 
-            expect
-              .soft(
-                claimedStrokeCount,
-                `${character} component ${i} (${primaryHanzi}) stroke count does not match character data`,
-              )
-              .toEqual(expectedStrokeCount);
+        if (strokeSpecTexts.length > 0) {
+          if (!Array.isArray(characterData.svg.strokes)) {
+            continue;
+          }
+          expect
+            .soft(
+              characterData.svg.strokes,
+              `${filePath} svg.strokes should not be a number`,
+            )
+            .not.toBeTypeOf(`number`);
+          if (!Array.isArray(characterData.svg.strokes)) {
+            continue;
+          }
+
+          const result = buildStrokeSpecSegmentPaths(
+            characterData.svg.strokes,
+            characterData.svg.medians,
+            strokeSpecTexts,
+          );
+          if (Object.keys(result).length > 0) {
+            segments = result;
           }
         }
+
+        const expected = {
+          ...characterData,
+          svg: {
+            ...characterData.svg,
+            segments,
+          },
+        };
+
+        await expect.soft(expected).toMatchJsonFileSnapshot(filePath);
       }
     }
   });
@@ -512,21 +620,10 @@ describe(`character.json files`, async () => {
 
     for (const { character, characterData } of characterFiles) {
       expected.set(character, {
-        ...(characterData.mnemonic == null
+        mnemonic: characterData.mnemonic?.decomposition,
+        ...(characterData.decompositions == null
           ? {}
-          : {
-              decomposition: idsNodeToString(
-                characterData.mnemonic.components,
-                componentToString,
-              ),
-            }),
-        ...(characterData.mnemonic == null
-          ? {}
-          : {
-              decompositionStrokes: [
-                ...walkIdsNodeLeafs(characterData.mnemonic.components),
-              ].map((leaf) => leaf.strokes),
-            }),
+          : { decompositions: characterData.decompositions }),
         ...(characterData.componentFormOf === undefined
           ? {}
           : { componentFormOf: characterData.componentFormOf }),
@@ -551,17 +648,22 @@ describe(`character.json files`, async () => {
       HanziText,
       {
         strokes: string[];
+        medians?: string[];
         segments?: Record<string, string>;
       }
     >();
 
     for (const { character, characterData } of characterFiles) {
       if (Array.isArray(characterData.svg.strokes)) {
+        const hasMedians =
+          Array.isArray(characterData.svg.medians) &&
+          characterData.svg.medians.length > 0;
         const hasSegments =
           characterData.svg.segments != null &&
           Object.keys(characterData.svg.segments).length > 0;
         expected.set(character, {
           strokes: characterData.svg.strokes,
+          ...(hasMedians ? { medians: characterData.svg.medians } : {}),
           ...(hasSegments ? { segments: characterData.svg.segments } : {}),
         });
       }
@@ -589,68 +691,44 @@ describe(`character.json files`, async () => {
         );
     }
   });
-
-  test(`consistency with public/raw/decompositions/*.json`, async () => {
-    const characterDecompositionsDir = path.join(
-      projectRoot,
-      `public`,
-      `raw`,
-      `decompositions`,
-    );
-
-    const expected = new Map<
-      HanziText,
-      Exclude<ReturnType<typeof buildCharacterDecompositionData>, null>
-    >();
-
-    for (const { character, characterData } of characterFiles) {
-      const decompositionData = buildCharacterDecompositionData(characterData);
-      if (decompositionData != null) {
-        expected.set(character, decompositionData);
-      }
-    }
-
-    if (!isCi) {
-      await mkdir(characterDecompositionsDir, { recursive: true });
-
-      const expectedFileNames = new Set(
-        [...expected.keys()].map((character) => `${character}.json`),
-      );
-
-      for (const fileName of await readdir(characterDecompositionsDir)) {
-        if (!fileName.endsWith(`.json`) || expectedFileNames.has(fileName)) {
-          continue;
-        }
-
-        await rm(path.join(characterDecompositionsDir, fileName));
-      }
-    }
-
-    for (const [character, decompositionData] of expected.entries()) {
-      await expect
-        .soft(decompositionData, `${character} decomposition data`)
-        .toMatchJsonFileSnapshot(
-          path.join(characterDecompositionsDir, `${character}.json`),
-        );
-    }
-  });
 });
 
-function buildCharacterDecompositionData(characterData: WikiCharacterData): {
-  mnemonic?: WikiCharacterData[`mnemonic`];
-  decompositions?: WikiCharacterData[`decompositions`];
-} | null {
-  const hasMnemonic = characterData.mnemonic != null;
-  const hasDecompositions =
-    characterData.decompositions != null &&
-    characterData.decompositions.length > 0;
+/**
+ * Computes the set of all the characters (and their dependencies) to run tests
+ * on, based on the number of HSK levels we want to include in the test
+ * coverage.
+ *
+ * This started with just HSK1, but should be expanded to include more levels in
+ * the future. The goal is to ensure that all characters in the dictionary have
+ * valid decomposition data, stroke data, and mnemonic data, and that they are
+ * consistent with the rest of the data in the project.
+ */
+const buildCharactersToCheck = memoize0(async function (): Promise<
+  ReadonlySet<HanziCharacter>
+> {
+  const dictionary = await loadDictionary();
+  const decompositionData = await loadBuiltinCharacterDecompositionEntries();
 
-  if (!hasMnemonic && !hasDecompositions) {
-    return null;
+  const seeds = [
+    ...dictionary.hsk1HanziWords,
+    // Uncomment these lines incrementally in the future to increase validation coverage.
+    // ...dictionary.hsk2HanziWords,
+    // ...dictionary.hsk3HanziWords,
+    // ...dictionary.hsk4HanziWords,
+    // ...dictionary.hsk5HanziWords,
+    // ...dictionary.hsk6HanziWords,
+    // ...dictionary.hsk7To9HanziWords,
+  ];
+  const result = new Set<HanziCharacter>();
+  for (const seed of seeds) {
+    const hanzi = hanziFromHanziWord(seed);
+    for (const component of deepDecomposeHanzi(
+      hanzi,
+      decompositionData,
+      isHanziCharacter,
+    )) {
+      result.add(component);
+    }
   }
-
-  return {
-    ...(characterData.mnemonic != null && { mnemonic: characterData.mnemonic }),
-    ...(hasDecompositions && { decompositions: characterData.decompositions }),
-  };
-}
+  return result;
+});

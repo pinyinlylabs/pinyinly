@@ -1,18 +1,17 @@
 import type { HanziWord } from "#data/model.ts";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
-import type {
-  DictionaryJson,
-  HanziWordMeaning,
-  hanziWordMeaningSchema,
-} from "#dictionary.ts";
+import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import { dictionaryJsonSchema } from "#dictionary.ts";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { readFileWithSchema } from "@pinyinly/lib/fs";
 import type { z } from "zod";
 import { dictionaryFilePath } from "./paths.ts";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
+import { nonNullable } from "@pinyinly/lib/invariant";
 
-export const readDictionaryJson = async (): Promise<DictionaryJson> =>
+type MutableDictionaryJson = z.infer<typeof dictionaryJsonSchema>;
+
+export const readDictionaryJson = async () =>
   readFileWithSchema(dictionaryFilePath, dictionaryJsonSchema, new Map());
 
 export async function writeDictionaryJson(dict: DictionaryJson) {
@@ -20,7 +19,7 @@ export async function writeDictionaryJson(dict: DictionaryJson) {
 }
 
 export function upsertHanziWordMeaning(
-  dict: DictionaryJson,
+  dict: MutableDictionaryJson,
   hanziWord: HanziWord,
   patch: Partial<HanziWordMeaning>,
 ): void {
@@ -30,7 +29,10 @@ export function upsertHanziWordMeaning(
 
   const meaning = dict.get(hanziWord);
   if (meaning == null) {
-    dict.set(hanziWord, patch as HanziWordMeaning);
+    dict.set(hanziWord, {
+      ...patch,
+      gloss: nonNullable(patch.gloss),
+    });
   } else {
     dict.set(hanziWord, { ...meaning, ...patch });
   }
@@ -48,11 +50,16 @@ export function unparseDictionaryJson(
         return [
           hanziWord,
           {
-            ...(meaning satisfies z.input<typeof hanziWordMeaningSchema>),
             pos:
               meaning.pos == null
                 ? undefined
                 : rPartOfSpeech().marshal(meaning.pos),
+            gloss: [...meaning.gloss],
+            pinyin:
+              meaning.pinyin == null ? meaning.pinyin : [...meaning.pinyin],
+            cedict: meaning.cedict,
+            freq: meaning.freq,
+            hsk: meaning.hsk,
           },
         ];
       },

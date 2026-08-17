@@ -12,11 +12,7 @@ import type { AssetId } from "@/data/model";
 import type { UserSettingImageEntity } from "@/data/userSettings";
 import { getGeminiImageAspectRatioValue } from "@/util/geminiImageAspectRatio";
 import { useEffect, useId, useRef, useState } from "react";
-import type {
-  LayoutChangeEvent,
-  PanResponderInstance,
-  ViewStyle,
-} from "react-native";
+import type { LayoutChangeEvent, PanResponderInstance } from "react-native";
 import {
   ActivityIndicator,
   PanResponder,
@@ -447,7 +443,7 @@ function InlineEditableSettingImageHistoryMenu({
 } & FloatingMenuModalMenuProps) {
   return (
     <View className="max-w-105 gap-2 rounded-xl bg-bg-high p-3">
-      <Text className="font-sans text-[11px] text-fg-dim uppercase">
+      <Text className="font-sans text-[11px] text-muted-fg uppercase">
         History
       </Text>
       <InlineEditableSettingImageHistoryGrid
@@ -550,7 +546,9 @@ function HintImagePreview({
         `}
         style={aspectRatio == null ? { height } : { aspectRatio }}
       >
-        <Text className="font-sans text-xs text-fg-dim">No image selected</Text>
+        <Text className="font-sans text-xs text-muted-fg">
+          No image selected
+        </Text>
       </View>
     );
   }
@@ -627,13 +625,13 @@ function InlineImageRepositionEditor({
 
     if (initialAssetIdRef.current !== assetId) {
       initialAssetIdRef.current = assetId;
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setCropRect(null);
       setInitialRect(defaultCropRect);
       return;
     }
 
     if (initialRect == null) {
+      // oxlint-disable-next-line react/react-compiler
       setInitialRect(defaultCropRect);
     }
   }, [assetId, defaultCropRect, initialRect]);
@@ -654,7 +652,7 @@ function InlineImageRepositionEditor({
         style={containerStyle}
       >
         <ActivityIndicator size="small" className="text-fg" />
-        <Text className="mt-2 font-sans text-[12px] text-fg-dim">
+        <Text className="mt-2 font-sans text-[12px] text-muted-fg">
           {imageMeta.status === `error`
             ? `Failed to load image`
             : `Loading image`}
@@ -823,11 +821,7 @@ function InlineImageRepositionFrame({
       )}
       <View
         className="absolute inset-0"
-        style={
-          Platform.OS === `web`
-            ? ({ touchAction: `none` } as ViewStyle)
-            : undefined
-        }
+        style={Platform.OS === `web` ? { touchAction: `none` } : undefined}
         {...(moveResponder?.panHandlers ?? {})}
       />
       <View className="pointer-events-none absolute inset-0 items-center justify-center">

@@ -1,11 +1,6 @@
 {
-  "canonicalForm": "𩰋",
-  "decompositions": [["⿰", { "hanzi": "王" }, { "hanzi": "亅" }]],
   "hanzi": "𩰊",
-  "mnemonic": {
-    "components": { "hanzi": "𩰊" }
-  },
-  "svg": {
-    "strokes": 5
-  }
+  "svg": { "strokes": 5 },
+  "canonicalForm": "𩰋",
+  "decompositions": { "⿰王亅": ["", ""] }
 }

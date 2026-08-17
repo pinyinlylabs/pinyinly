@@ -50,6 +50,18 @@ export default () => {
             ))}
           </ExampleStack>
         </View>
+
+        <View>
+          <ExampleStack title="accent-cyan-600">
+            {fewIcons.map((icon) => (
+              <Icon
+                key={icon}
+                icon={icon}
+                tintColorClassName="accent-cyan-600"
+              />
+            ))}
+          </ExampleStack>
+        </View>
       </View>
 
       <View className="w-full flex-row gap-2">

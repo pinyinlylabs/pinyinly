@@ -14,6 +14,7 @@ import type {
   PinyinlyObjectId,
   PinyinSoundGroupId,
   PinyinSoundId,
+  PinyinUnitId,
   Skill,
   SrsStateType,
 } from "./model";
@@ -89,6 +90,7 @@ const brandedString = <T extends string>() =>
 export const rHanziOrHanziWord = brandedString<HanziText | HanziWord>;
 export const rActorId = brandedString<ActorId>;
 export const rLocationId = brandedString<LocationId>;
+export const rPinyinUnitId = brandedString<PinyinUnitId>;
 export const rAssetId = brandedString<AssetId>;
 export const rPinyinSoundId = brandedString<PinyinSoundId>;
 export const rPinyinlyObjectId = brandedString<PinyinlyObjectId>;

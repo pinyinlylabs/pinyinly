@@ -1,9 +1,4 @@
 {
   "hanzi": "𠂒",
-  "mnemonic": {
-    "components": { "hanzi": "𠂒" }
-  },
-  "svg": {
-    "strokes": 4
-  }
+  "svg": { "strokes": 4 }
 }

@@ -25,7 +25,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Overview
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 View your key metrics and recent project activity. Track
                 progress across all your active projects.
               </Text>
@@ -36,7 +36,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Analytics
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Track performance and user engagement metrics. Monitor trends
                 and identify growth opportunities.
               </Text>
@@ -47,7 +47,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Reports
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Generate and download your detailed reports. Export data in
                 multiple formats for analysis.
               </Text>
@@ -68,14 +68,14 @@ export default () => (
           </Tabs.List>
           <Tabs.Content value="upload" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Upload your image files here. Drag and drop or click to browse.
               </Text>
             </View>
           </Tabs.Content>
           <Tabs.Content value="generate" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Generate AI images using prompts. Describe what you want to
                 create.
               </Text>
@@ -112,7 +112,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Home
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Welcome to your dashboard.
               </Text>
             </View>
@@ -122,7 +122,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Profile
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Manage your profile settings.
               </Text>
             </View>
@@ -132,7 +132,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Messages
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 View your recent messages.
               </Text>
             </View>
@@ -142,7 +142,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Settings
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Configure your preferences.
               </Text>
             </View>
@@ -152,7 +152,7 @@ export default () => (
               <Text className="font-sans text-base font-bold text-fg">
                 Help
               </Text>
-              <Text className="mt-2 font-sans text-sm text-fg-dim">
+              <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Get help and support.
               </Text>
             </View>
@@ -179,21 +179,21 @@ export default () => (
           </Tabs.List>
           <Tabs.Content value="tab1" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Content for Tab 1
               </Text>
             </View>
           </Tabs.Content>
           <Tabs.Content value="tab2" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Content for Tab 2
               </Text>
             </View>
           </Tabs.Content>
           <Tabs.Content value="tab3" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Content for Tab 3
               </Text>
             </View>
@@ -217,14 +217,14 @@ export default () => (
           </Tabs.List>
           <Tabs.Content value="a" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Tab A content
               </Text>
             </View>
           </Tabs.Content>
           <Tabs.Content value="b" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Tab B content
               </Text>
             </View>
@@ -241,21 +241,21 @@ export default () => (
           </Tabs.List>
           <Tabs.Content value="first" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 First tab content
               </Text>
             </View>
           </Tabs.Content>
           <Tabs.Content value="second" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Second tab content
               </Text>
             </View>
           </Tabs.Content>
           <Tabs.Content value="third" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-sm text-fg-dim">
+              <Text className="font-sans text-sm text-muted-fg">
                 Third tab content
               </Text>
             </View>

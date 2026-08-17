@@ -31,7 +31,7 @@ export function parseDecimalFileSize(input: string): number {
     );
   }
 
-  const value = Number.parseFloat(valueText);
+  const value = Number(valueText);
   const unitLower = unitText.toLowerCase();
   const isBinary = unitLower.includes(`i`);
   const multiplier = isBinary

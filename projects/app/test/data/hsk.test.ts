@@ -62,9 +62,7 @@ test.for([
   [`junior high school`, [`high`]],
   [`A literary creation`, [`literary`]],
 ] as const)(
-  `guessMeaningKey fixture: %s → %s` satisfies HasNameOf<
-    typeof guessMeaningKey
-  >,
+  `guessMeaningKey fixture: %s → %s`,
   async ([meanings, expectedKeys]) => {
     expect(expectedKeys).toContain(guessMeaningKey(meanings.split(`; `)));
   },

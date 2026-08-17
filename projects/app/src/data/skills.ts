@@ -1,14 +1,9 @@
 import type {
-  CharacterDecompositionEntry,
+  CharactersJson,
   Dictionary,
   HanziWordWithMeaning,
 } from "@/dictionary";
-import {
-  decomposeHanzi,
-  hanziFromHanziWord,
-  loadCharactersJson,
-  loadDictionary,
-} from "@/dictionary";
+import { hanziFromHanziWord, shallowDecomposeHanzi } from "@/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
 import {
   fsrsIsForgotten,
@@ -40,6 +35,8 @@ import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
 import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
+  CharacterDecompositionRow,
+  HanziCharacter,
   HanziText,
   HanziWord,
   HanziWordSkill,
@@ -69,33 +66,41 @@ export interface Node {
 
 export type SkillLearningGraph = Map<Skill, Node>;
 
-export async function skillLearningGraph(options: {
+export function skillLearningGraph(options: {
   targetSkills: Skill[];
-  decompositionData: readonly CharacterDecompositionEntry[];
-}): Promise<SkillLearningGraph> {
+  decompositionData: readonly CharacterDecompositionRow[];
+  dictionary: Dictionary;
+  charactersJson: CharactersJson;
+}): SkillLearningGraph {
   const graph: SkillLearningGraph = new Map();
 
-  async function addSkill(skill: Skill): Promise<void> {
+  const decomposeHanzi = memoize1((hanzi: HanziText) =>
+    shallowDecomposeHanzi(hanzi, options.decompositionData, isHanziCharacter),
+  );
+
+  function addSkill(skill: Skill): void {
     // Skip doing any work if the skill is already in the graph.
     if (graph.has(skill)) {
       return;
     }
 
-    const dependencies = await skillDependencies(
+    const dependencies = skillDependencies(
       skill,
-      options.decompositionData,
+      decomposeHanzi,
+      options.dictionary,
+      options.charactersJson,
     );
 
     const node: Node = { skill, dependencies: new Set(dependencies) };
     graph.set(skill, node);
 
     for (const dependency of dependencies) {
-      await addSkill(dependency);
+      addSkill(dependency);
     }
   }
 
   for (const skill of options.targetSkills) {
-    await addSkill(skill);
+    addSkill(skill);
   }
 
   return graph;
@@ -188,17 +193,19 @@ export const finalFromPinyinFinalAssociationSkill = (
   return final;
 };
 
-export async function skillDependencies(
+export function skillDependencies(
   skill: Skill,
-  decompositionData: readonly CharacterDecompositionEntry[],
-): Promise<Skill[]> {
+  decompose: (hanzi: HanziText) => readonly HanziCharacter[],
+  dictionary: Dictionary,
+  charactersJson: CharactersJson,
+): Skill[] {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
-  const charactersJson = await loadCharactersJson();
-  const dictionary = await loadDictionary();
+  const hanziWordToGlossDepsHanzi = new Set<HanziText>(); // fast lookup
 
   switch (skillKind) {
     case SkillKind.GlossToHanziWord: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       // Learn the Hanzi -> Gloss first. It's easier to read than write (for chinese characters).
       deps.push(hanziWordToGloss(hanziWordFromSkill(skill)));
@@ -206,52 +213,50 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToGloss: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Learn the components of a hanzi word first.
-      for (let hanziCharacter of await decomposeHanzi(
-        hanzi,
-        decompositionData,
-      )) {
+      for (let hanziComponent of decompose(hanzi)) {
+        if (hanziComponent === hanzi) {
+          continue;
+        }
+
         // Use the canonical form of the character.
         {
-          let hanziCharacterData = charactersJson.get(hanziCharacter);
-          while (hanziCharacterData?.canonicalForm != null) {
-            hanziCharacter = hanziCharacterData.canonicalForm;
-            hanziCharacterData = charactersJson.get(hanziCharacter);
+          let hanziComponentData = charactersJson.get(hanziComponent);
+          while (hanziComponentData?.canonicalForm != null) {
+            hanziComponent = hanziComponentData.canonicalForm;
+            hanziComponentData = charactersJson.get(hanziComponent);
           }
         }
 
         // Check if the character was already added as a dependency by being
         // referenced in the gloss hint.
-        const depAlreadyAdded = deps.some((x) => {
-          if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
-            return (
-              hanziFromHanziWord(
-                hanziWordFromSkill(skill as HanziWordSkill),
-              ) === hanziCharacter
-            );
-          }
-          return false;
-        });
+        if (hanziWordToGlossDepsHanzi.has(hanziComponent)) {
+          continue;
+        }
 
-        // If the character wasn't already added, add it as a dependency by
-        // guessing what disambugation to use for the hanzi.
-        if (!depAlreadyAdded) {
-          const hanziWordWithMeaning =
-            await hackyGuessHanziWordToLearn(hanziCharacter);
-          if (hanziWordWithMeaning != null) {
-            const [hanziWord] = hanziWordWithMeaning;
-            deps.push(hanziWordToGloss(hanziWord));
-          }
+        // If the character wasn't already added, we need to figure out which
+        // HanziWord to learn for it. Since there's no definite answer, we have
+        // to guess.
+        const hanziWordWithMeaning = hackyGuessHanziWordToLearn(
+          hanziComponent,
+          dictionary,
+        );
+        if (hanziWordWithMeaning != null) {
+          const [hanziWord] = hanziWordWithMeaning;
+          deps.push(hanziWordToGloss(hanziWord));
+          hanziWordToGlossDepsHanzi.add(hanziComponent);
         }
       }
       break;
     }
 
     case SkillKind.HanziWordToGlossTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       deps.push(hanziWordToGloss(hanziWord));
@@ -259,6 +264,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinTyped: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -267,9 +273,7 @@ export async function skillDependencies(
       const meaning = dictionary.lookupHanziWord(hanziWord);
       invariant(
         meaning?.pinyin != null,
-        `SkillKind.HanziWordToPinyinTyped skill requires a hanzi word with pinyin.` satisfies HasNameOf<
-          typeof SkillKind.HanziWordToPinyinTyped
-        >,
+        `SkillKind.HanziWordToPinyinTyped skill requires a hanzi word with pinyin.`,
       );
 
       // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
@@ -301,6 +305,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinTone: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -315,6 +320,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinFinal: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -329,6 +335,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.HanziWordToPinyinInitial: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -345,6 +352,7 @@ export async function skillDependencies(
     }
 
     case SkillKind.PinyinToHanziWord: {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       // Learn going from Hanzi -> Pinyin first.
@@ -372,15 +380,16 @@ export async function skillDependencies(
   return deps;
 }
 
-async function hackyGuessHanziWordToLearn(
+function hackyGuessHanziWordToLearn(
   hanzi: HanziText,
-): Promise<DeepReadonly<HanziWordWithMeaning> | undefined> {
-  const dictionary = await loadDictionary();
+  dictionary: Dictionary,
+): DeepReadonly<HanziWordWithMeaning> | undefined {
   const hanziWords = dictionary.lookupHanzi(hanzi);
   for (const item of hanziWords) {
     return item;
   }
 }
+
 export function hanziWordSkill(
   type: typeof SkillKind.HanziWordToGlossTyped,
   hanziWord: HanziWord,
@@ -914,9 +923,7 @@ export function skillReviewQueue({
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
 
-  const perfMilestone = startPerformanceMilestones(
-    `skillReviewQueue` satisfies NameOf<typeof skillReviewQueue>,
-  );
+  const perfMilestone = startPerformanceMilestones(`skillReviewQueue`);
 
   function enqueueReviewOnce(
     skill: Skill,
@@ -1055,11 +1062,14 @@ export function skillReviewQueue({
   const learningOrderNewWordCandidates: Skill[] = [];
   const learningOrderNewComponentCandidates: Skill[] = [];
   for (const skill of learningOrderNewCandidates) {
+    const hanzi = isHanziWordSkill(skill)
+      ? hanziFromHanziWord(hanziWordFromSkill(skill))
+      : null;
+
     if (
-      isHanziWordSkill(skill) &&
-      dictionary.isStructuralHanzi(
-        hanziFromHanziWord(hanziWordFromSkill(skill)),
-      )
+      hanzi != null &&
+      isHanziCharacter(hanzi) &&
+      dictionary.isStructuralHanzi(hanzi)
     ) {
       learningOrderNewComponentCandidates.push(skill);
     } else {

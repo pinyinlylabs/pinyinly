@@ -107,7 +107,7 @@ export function useAuth(): AuthApi {
         ],
       });
 
-      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setInitComplete(true);
     }
   }, [doInitFirstSession, authState]);

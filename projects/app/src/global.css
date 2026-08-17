@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "uniwind";
 
+@plugin "tailwindcss-animate";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -15,7 +17,7 @@
   --color-bg-high: rgb(from var(--color-bg-high) r g b);
   --color-fg: rgb(from var(--color-fg) r g b);
   --color-fg-loud: rgb(from var(--color-fg-loud) r g b);
-  --color-fg-dim: rgb(from var(--color-fg-dim) r g b);
+  --color-muted-fg: rgb(from var(--color-muted-fg) r g b);
   --color-fg-bg5: rgb(
     from color-mix(in oklab, var(--color-fg) 5%, var(--color-bg)) r g b
   );
@@ -76,7 +78,6 @@
   --color-fg-bg100: rgb(
     from color-mix(in oklab, var(--color-fg) 100%, var(--color-bg)) r g b
   );
-  --color-on-fg: rgb(from var(--color-on-fg) r g b);
 
   --color-lozenge-emerald-bg: rgb(from var(--color-lozenge-emerald-bg) r g b);
   --color-lozenge-emerald-fg: rgb(from var(--color-lozenge-emerald-fg) r g b);
@@ -207,6 +208,11 @@
   }
 }
 
+@utility accent-* {
+  /* Workaround for icons until https://github.com/uni-stack/uniwind/pull/611 is released */
+  --pyly-accent-color: --value(--color-*);
+}
+
 @utility pyly-ref-xs {
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
@@ -235,6 +241,10 @@
 @utility pyly-ref-2xl {
   text-decoration-thickness: 4px;
   text-underline-offset: 3px;
+}
+
+@utility pyly-token-highlighted {
+  @apply outline-rose-500 from-rose-500/50 via-rose-500/50 to-rose-600/50;
 }
 
 @utility pyly-button-outline {
@@ -302,7 +312,7 @@
 }
 
 @utility pyly-body-caption {
-  @apply font-sans text-sm/normal font-normal text-fg-dim;
+  @apply font-sans text-sm/normal font-normal text-muted-fg;
 
   --pyly-ref-thickness: 2.5px;
   --pyly-ref-offset: 2px;
@@ -319,7 +329,7 @@
 }
 
 @utility pyly-body-dt {
-  @apply font-sans text-xs/normal font-medium text-fg-dim uppercase;
+  @apply font-sans text-xs/normal font-medium text-muted-fg uppercase;
 
   --pyly-ref-thickness: 2px;
   --pyly-ref-offset: 2px;
@@ -349,7 +359,7 @@
 }
 
 @utility pyly-dev-dt {
-  @apply font-mono text-xs/normal font-normal text-fg-dim uppercase;
+  @apply font-mono text-xs/normal font-normal text-muted-fg uppercase;
 }
 
 @utility font-sans {
@@ -363,74 +373,6 @@
   https://forum.figma.com/ask-the-community-7/font-in-browser-seem-bolder-than-in-the-figma-8146#post54600
   */
   @apply antialiased;
-}
-
-/* 
-  
-  THEMES
-
-  */
-@utility theme-default {
-  --color-bg: var(--color-theme-default-bg);
-  --color-bg-high: var(--color-theme-default-bg-high);
-  --color-on-fg: var(--color-theme-default-on-fg);
-  --color-fg: var(--color-theme-default-fg);
-  --color-fg-dim: var(--color-theme-default-fg-dim);
-  --color-fg-loud: var(--color-theme-default-fg-loud);
-}
-
-@utility theme-danger-panel {
-  --color-bg: var(--color-theme-danger-panel-bg);
-  --color-bg-high: var(--color-theme-danger-panel-bg-high);
-  --color-on-fg: var(--color-theme-danger-panel-on-fg);
-  --color-fg: var(--color-theme-danger-panel-fg);
-  --color-fg-dim: var(--color-theme-danger-panel-fg-dim);
-  --color-fg-loud: var(--color-theme-danger-panel-fg-loud);
-}
-
-@utility theme-success-panel {
-  --color-bg: var(--color-theme-success-panel-bg);
-  --color-bg-high: var(--color-theme-success-panel-bg-high);
-  --color-on-fg: var(--color-theme-success-panel-on-fg);
-  --color-fg: var(--color-theme-success-panel-fg);
-  --color-fg-dim: var(--color-theme-success-panel-fg-dim);
-  --color-fg-loud: var(--color-theme-success-panel-fg-loud);
-}
-
-@utility theme-warning-panel {
-  --color-bg: var(--color-theme-warning-panel-bg);
-  --color-bg-high: var(--color-theme-warning-panel-bg-high);
-  --color-on-fg: var(--color-theme-warning-panel-on-fg);
-  --color-fg: var(--color-theme-warning-panel-fg);
-  --color-fg-dim: var(--color-theme-warning-panel-fg-dim);
-  --color-fg-loud: var(--color-theme-warning-panel-fg-loud);
-}
-
-@utility theme-grass-panel {
-  --color-bg: var(--color-theme-grass-panel-bg);
-  --color-bg-high: var(--color-theme-grass-panel-bg-high);
-  --color-on-fg: var(--color-theme-grass-panel-on-fg);
-  --color-fg: var(--color-theme-grass-panel-fg);
-  --color-fg-dim: var(--color-theme-grass-panel-fg-dim);
-  --color-fg-loud: var(--color-theme-grass-panel-fg-loud);
-}
-
-@utility theme-sky-panel {
-  --color-bg: var(--color-theme-sky-panel-bg);
-  --color-bg-high: var(--color-theme-sky-panel-bg-high);
-  --color-on-fg: var(--color-theme-sky-panel-on-fg);
-  --color-fg: var(--color-theme-sky-panel-fg);
-  --color-fg-dim: var(--color-theme-sky-panel-fg-dim);
-  --color-fg-loud: var(--color-theme-sky-panel-fg-loud);
-}
-
-@utility theme-placeholder-panel {
-  --color-bg: var(--color-theme-placeholder-panel-bg);
-  --color-bg-high: var(--color-theme-placeholder-panel-bg-high);
-  --color-on-fg: var(--color-theme-placeholder-panel-on-fg);
-  --color-fg: var(--color-theme-placeholder-panel-fg);
-  --color-fg-dim: var(--color-theme-placeholder-panel-fg-dim);
-  --color-fg-loud: var(--color-theme-placeholder-panel-fg-loud);
 }
 
 /* --- */
@@ -504,6 +446,234 @@
   tab-size: 2;
 }
 
+@layer theme {
+  :root {
+    @variant dark {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #2d3031;
+      --color-bg: #1a1d1e;
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: #ffffff;
+      --color-fg: #d7d8d9;
+      --color-muted-fg: #898989;
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-popover {
+      --color-accent-fg: #78c5f9;
+      --color-accent: #39474b;
+      --color-bg-high: #2d3031;
+      --color-bg: #2d3031;
+      --color-border: #35393a;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: #ffffff;
+      --color-fg: #d7d8d9;
+      --color-muted-fg: #898989;
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-danger-panel {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #413435;
+      --color-bg: #2d3031;
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: #ff7377;
+      --color-fg: #f2555a;
+      --color-muted-fg: #db4b4f;
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-grass-panel {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #19c892;
+      --color-bg: #00c286;
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: white;
+      --color-fg: rgb(from white r g b / 0.95);
+      --color-muted-fg: rgb(from white r g b / 0.57);
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-sky-panel {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #1f6991;
+      --color-bg: var(--color-sky);
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: white;
+      --color-fg: rgb(from white r g b / 0.95);
+      --color-muted-fg: rgb(from white r g b / 0.57);
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-success-panel {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #184525;
+      --color-bg: #193222;
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: #4dff73;
+      --color-fg: #13f042;
+      --color-muted-fg: #0b9d2b;
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-warning-panel {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #563307;
+      --color-bg: #432004;
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: #ffe962;
+      --color-fg: #ffdf20;
+      --color-muted-fg: #c7ad1b;
+      --color-muted: #2d3031;
+    }
+
+    @variant dark-placeholder-panel {
+      --color-accent-fg: #1c9cf0;
+      --color-accent: #061622;
+      --color-bg-high: #2d3031;
+      --color-bg: #242727;
+      --color-border: #242628;
+      --color-destructive-fg: oklch(0.985 0 0);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-fg-loud: #898989;
+      --color-fg: #484a4b;
+      --color-muted-fg: #3b3c3d;
+      --color-muted: #2d3031;
+    }
+
+    @variant light {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #e1e3e4;
+      --color-bg: #f8f9fa;
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: #000000;
+      --color-fg: #12191d;
+      --color-muted-fg: #6c6c6c;
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-popover {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #e1e3e4;
+      --color-bg: #f8f9fa;
+      --color-border: #d7e0e5;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: #000000;
+      --color-fg: #12191d;
+      --color-muted-fg: #6c6c6c;
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-danger-panel {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #e5d6d7;
+      --color-bg: #e7e8e8;
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: #d82128;
+      --color-fg: #d8373d;
+      --color-muted-fg: #d55f63;
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-grass-panel {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #18c892;
+      --color-bg: #00c286;
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: white;
+      --color-fg: rgb(from white r g b / 0.95);
+      --color-muted-fg: rgb(from white r g b / 0.57);
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-sky-panel {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #4e8ef7;
+      --color-bg: var(--color-sky);
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: white;
+      --color-fg: rgb(from white r g b / 0.95);
+      --color-muted-fg: rgb(from white r g b / 0.57);
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-success-panel {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #cef1d0;
+      --color-bg: #e5f9e7;
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: #008e00;
+      --color-fg: #00ab00;
+      --color-muted-fg: #48b948;
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-warning-panel {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #f9f0d1;
+      --color-bg: #fefce8;
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: #a65f00;
+      --color-fg: #d08700;
+      --color-muted-fg: #c3a625;
+      --color-muted: #e5e5e6;
+    }
+
+    @variant light-placeholder-panel {
+      --color-accent-fg: #1e9df1;
+      --color-accent: #e3ecf6;
+      --color-bg-high: #ffffff;
+      --color-bg: #ecedee;
+      --color-border: #e1eaef;
+      --color-destructive-fg: oklch(1 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-fg-loud: #6c6c6c;
+      --color-fg: #c1c3c5;
+      --color-muted-fg: #828282;
+      --color-muted: #e5e5e6;
+    }
+  }
+}
+
 @layer components {
   /*
   
@@ -558,13 +728,13 @@
   /* --- */
 
   .pyly-body-dt {
-    @apply font-sans text-xs/normal font-medium text-fg-dim uppercase;
+    @apply font-sans text-xs/normal font-medium text-muted-fg uppercase;
   }
 
   /* --- */
 
   .pyly-dev-dt {
-    @apply font-mono text-xs/normal font-normal text-fg-dim uppercase;
+    @apply font-mono text-xs/normal font-normal text-muted-fg uppercase;
   }
 
   /* www */
@@ -633,55 +803,6 @@
     --color-danger: #f46368;
     --color-warning: #ffb900;
 
-    --color-theme-default-bg: #1a1d1e;
-    --color-theme-default-bg-high: #2d3031;
-    --color-theme-default-fg: #d7d8d9;
-    --color-theme-default-fg-dim: #898989;
-    --color-theme-default-fg-loud: #ffffff;
-    --color-theme-default-on-fg: #1a1d1e;
-
-    --color-theme-danger-panel-bg: #2d3031;
-    --color-theme-danger-panel-bg-high: #413435;
-    --color-theme-danger-panel-fg: #f2555a;
-    --color-theme-danger-panel-fg-dim: #db4b4f;
-    --color-theme-danger-panel-fg-loud: #ff7377;
-    --color-theme-danger-panel-on-fg: #1a1d1e;
-
-    --color-theme-grass-panel-bg: #00c286;
-    --color-theme-grass-panel-bg-high: #19c892;
-    --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
-    --color-theme-grass-panel-fg-loud: white;
-    --color-theme-grass-panel-on-fg: #00c286;
-
-    --color-theme-sky-panel-bg: var(--color-sky);
-    --color-theme-sky-panel-bg-high: #1f6991;
-    --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
-    --color-theme-sky-panel-fg-loud: white;
-    --color-theme-sky-panel-on-fg: var(--color-sky);
-
-    --color-theme-success-panel-bg: #193222;
-    --color-theme-success-panel-bg-high: #184525;
-    --color-theme-success-panel-fg: #13f042;
-    --color-theme-success-panel-fg-dim: #0b9d2b;
-    --color-theme-success-panel-fg-loud: #4dff73;
-    --color-theme-success-panel-on-fg: #1a1d1e;
-
-    --color-theme-warning-panel-bg: #432004;
-    --color-theme-warning-panel-bg-high: #563307;
-    --color-theme-warning-panel-fg: #ffdf20;
-    --color-theme-warning-panel-fg-dim: #c7ad1b;
-    --color-theme-warning-panel-fg-loud: #ffe962;
-    --color-theme-warning-panel-on-fg: #1a1d1e;
-
-    --color-theme-placeholder-panel-bg: #242727;
-    --color-theme-placeholder-panel-bg-high: #2d3031;
-    --color-theme-placeholder-panel-fg: #484a4b;
-    --color-theme-placeholder-panel-fg-dim: #3b3c3d;
-    --color-theme-placeholder-panel-fg-loud: #898989;
-    --color-theme-placeholder-panel-on-fg: #1a1d1e;
-
     --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0);
     --color-lozenge-emerald-fg: var(--color-emerald);
     --color-lozenge-emerald-border: rgb(from var(--color-emerald) r g b / 0.6);
@@ -742,55 +863,6 @@
     --color-success: var(--color-wasabi);
     --color-danger: #d8373d;
     --color-warning: #ff8904;
-
-    --color-theme-default-bg: #f8f9fa;
-    --color-theme-default-bg-high: #e1e3e4;
-    --color-theme-default-fg: #12191d;
-    --color-theme-default-fg-dim: #6c6c6c;
-    --color-theme-default-fg-loud: #000000;
-    --color-theme-default-on-fg: #ffffff;
-
-    --color-theme-danger-panel-bg: #e7e8e8;
-    --color-theme-danger-panel-bg-high: #e5d6d7;
-    --color-theme-danger-panel-fg: #d8373d;
-    --color-theme-danger-panel-fg-dim: #d55f63;
-    --color-theme-danger-panel-fg-loud: #d82128;
-    --color-theme-danger-panel-on-fg: #ffffff;
-
-    --color-theme-grass-panel-bg: #00c286;
-    --color-theme-grass-panel-bg-high: #18c892;
-    --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
-    --color-theme-grass-panel-fg-loud: white;
-    --color-theme-grass-panel-on-fg: #00c286;
-
-    --color-theme-sky-panel-bg: var(--color-sky);
-    --color-theme-sky-panel-bg-high: #4e8ef7;
-    --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
-    --color-theme-sky-panel-fg-loud: white;
-    --color-theme-sky-panel-on-fg: var(--color-sky);
-
-    --color-theme-success-panel-bg: #e5f9e7;
-    --color-theme-success-panel-bg-high: #cef1d0;
-    --color-theme-success-panel-fg: #00ab00;
-    --color-theme-success-panel-fg-dim: #48b948;
-    --color-theme-success-panel-fg-loud: #008e00;
-    --color-theme-success-panel-on-fg: #ffffff;
-
-    --color-theme-warning-panel-bg: #fefce8;
-    --color-theme-warning-panel-bg-high: #f9f0d1;
-    --color-theme-warning-panel-fg: #d08700;
-    --color-theme-warning-panel-fg-dim: #c3a625;
-    --color-theme-warning-panel-fg-loud: #a65f00;
-    --color-theme-warning-panel-on-fg: #ffffff;
-
-    --color-theme-placeholder-panel-bg: #ecedee;
-    --color-theme-placeholder-panel-bg-high: #ffffff;
-    --color-theme-placeholder-panel-fg: #c1c3c5;
-    --color-theme-placeholder-panel-fg-dim: #828282;
-    --color-theme-placeholder-panel-fg-loud: #6c6c6c;
-    --color-theme-placeholder-panel-on-fg: #ffffff;
 
     --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0.05);
     --color-lozenge-emerald-fg: var(--color-emerald);
@@ -909,6 +981,10 @@
   }
   .pyly-mdx > ul > li > ul {
     @apply my-2;
+  }
+
+  .pyly-token {
+    @apply my-0 rounded-sm bg-gradient-to-b from-sky-400/50 via-sky-500/50 to-sky-500/50 px-1 leading-5.5 font-medium text-white shadow-sm outline -outline-offset-1 outline-sky-400;
   }
 }
 
@@ -1248,55 +1324,6 @@ body {
   --color-danger: #d8373d;
   --color-warning: #ff8904;
 
-  --color-theme-default-bg: #f8f9fa;
-  --color-theme-default-bg-high: #e1e3e4;
-  --color-theme-default-fg: #12191d;
-  --color-theme-default-fg-dim: #6c6c6c;
-  --color-theme-default-fg-loud: #000000;
-  --color-theme-default-on-fg: #ffffff;
-
-  --color-theme-danger-panel-bg: #e7e8e8;
-  --color-theme-danger-panel-bg-high: #e5d6d7;
-  --color-theme-danger-panel-fg: #d8373d;
-  --color-theme-danger-panel-fg-dim: #d55f63;
-  --color-theme-danger-panel-fg-loud: #d82128;
-  --color-theme-danger-panel-on-fg: #ffffff;
-
-  --color-theme-grass-panel-bg: #00c286;
-  --color-theme-grass-panel-bg-high: #18c892;
-  --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
-  --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
-  --color-theme-grass-panel-fg-loud: white;
-  --color-theme-grass-panel-on-fg: #00c286;
-
-  --color-theme-sky-panel-bg: var(--color-sky);
-  --color-theme-sky-panel-bg-high: #4e8ef7;
-  --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
-  --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
-  --color-theme-sky-panel-fg-loud: white;
-  --color-theme-sky-panel-on-fg: var(--color-sky);
-
-  --color-theme-success-panel-bg: #e5f9e7;
-  --color-theme-success-panel-bg-high: #cef1d0;
-  --color-theme-success-panel-fg: #00ab00;
-  --color-theme-success-panel-fg-dim: #48b948;
-  --color-theme-success-panel-fg-loud: #008e00;
-  --color-theme-success-panel-on-fg: #ffffff;
-
-  --color-theme-warning-panel-bg: #fefce8;
-  --color-theme-warning-panel-bg-high: #f9f0d1;
-  --color-theme-warning-panel-fg: #d08700;
-  --color-theme-warning-panel-fg-dim: #c3a625;
-  --color-theme-warning-panel-fg-loud: #a65f00;
-  --color-theme-warning-panel-on-fg: #ffffff;
-
-  --color-theme-placeholder-panel-bg: #ecedee;
-  --color-theme-placeholder-panel-bg-high: #ffffff;
-  --color-theme-placeholder-panel-fg: #c1c3c5;
-  --color-theme-placeholder-panel-fg-dim: #828282;
-  --color-theme-placeholder-panel-fg-loud: #6c6c6c;
-  --color-theme-placeholder-panel-on-fg: #ffffff;
-
   --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0.05);
   --color-lozenge-emerald-fg: var(--color-emerald);
   --color-lozenge-emerald-border: rgb(from var(--color-emerald) r g b / 0.5);
@@ -1324,9 +1351,8 @@ body {
 
   --color-bg: var(--color-theme-default-bg);
   --color-bg-high: var(--color-theme-default-bg-high);
-  --color-on-fg: var(--color-theme-default-on-fg);
   --color-fg: var(--color-theme-default-fg);
-  --color-fg-dim: var(--color-theme-default-fg-dim);
+  --color-muted-fg: var(--color-theme-default-muted-fg);
   --color-fg-loud: var(--color-theme-default-fg-loud);
 }
 
@@ -1366,51 +1392,44 @@ body {
     --color-theme-default-bg: #1a1d1e;
     --color-theme-default-bg-high: #2d3031;
     --color-theme-default-fg: #d7d8d9;
-    --color-theme-default-fg-dim: #898989;
+    --color-theme-default-muted-fg: #898989;
     --color-theme-default-fg-loud: #ffffff;
-    --color-theme-default-on-fg: #1a1d1e;
 
     --color-theme-danger-panel-bg: #2d3031;
     --color-theme-danger-panel-bg-high: #413435;
     --color-theme-danger-panel-fg: #f2555a;
-    --color-theme-danger-panel-fg-dim: #db4b4f;
+    --color-theme-danger-panel-muted-fg: #db4b4f;
     --color-theme-danger-panel-fg-loud: #ff7377;
-    --color-theme-danger-panel-on-fg: #1a1d1e;
 
     --color-theme-grass-panel-bg: #00c286;
     --color-theme-grass-panel-bg-high: #19c892;
     --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-grass-panel-muted-fg: rgb(from white r g b / 0.57);
     --color-theme-grass-panel-fg-loud: white;
-    --color-theme-grass-panel-on-fg: #00c286;
 
     --color-theme-sky-panel-bg: var(--color-sky);
     --color-theme-sky-panel-bg-high: #1f6991;
     --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-sky-panel-muted-fg: rgb(from white r g b / 0.57);
     --color-theme-sky-panel-fg-loud: white;
-    --color-theme-sky-panel-on-fg: var(--color-sky);
 
     --color-theme-success-panel-bg: #193222;
     --color-theme-success-panel-bg-high: #184525;
     --color-theme-success-panel-fg: #13f042;
-    --color-theme-success-panel-fg-dim: #0b9d2b;
+    --color-theme-success-panel-muted-fg: #0b9d2b;
     --color-theme-success-panel-fg-loud: #4dff73;
-    --color-theme-success-panel-on-fg: #1a1d1e;
 
     --color-theme-warning-panel-bg: #432004;
     --color-theme-warning-panel-bg-high: #563307;
     --color-theme-warning-panel-fg: #ffdf20;
-    --color-theme-warning-panel-fg-dim: #c7ad1b;
+    --color-theme-warning-panel-muted-fg: #c7ad1b;
     --color-theme-warning-panel-fg-loud: #ffe962;
-    --color-theme-warning-panel-on-fg: #1a1d1e;
 
     --color-theme-placeholder-panel-bg: #242727;
     --color-theme-placeholder-panel-bg-high: #2d3031;
     --color-theme-placeholder-panel-fg: #484a4b;
-    --color-theme-placeholder-panel-fg-dim: #3b3c3d;
+    --color-theme-placeholder-panel-muted-fg: #3b3c3d;
     --color-theme-placeholder-panel-fg-loud: #898989;
-    --color-theme-placeholder-panel-on-fg: #1a1d1e;
 
     --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0);
     --color-lozenge-emerald-fg: var(--color-emerald);

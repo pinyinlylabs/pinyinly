@@ -55,7 +55,7 @@ export function GroupedHanziWords({
                 </Text>
               )}
               {entry.pinyin?.[0] == null ? null : (
-                <Text className="font-sans text-xs text-fg-dim">
+                <Text className="font-sans text-xs text-muted-fg">
                   {entry.pinyin[0]}
                 </Text>
               )}

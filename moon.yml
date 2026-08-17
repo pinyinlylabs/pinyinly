@@ -23,6 +23,17 @@ tasks:
     env:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
+  yarnDedupe:
+    script: |
+      [ -z ${CI:-} ] || CHECK_FLAG="--check"
+
+      yarn dedupe ${CHECK_FLAG:-}
+    inputs:
+      - "@group(yarnConfig)"
+      - "$CI"
+    env:
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+
   renovateCheck:
     command: yarn dlx -p renovate@43.150.0 renovate-config-validator --strict
     inputs:

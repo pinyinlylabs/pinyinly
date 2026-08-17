@@ -27,9 +27,7 @@ export function useSkillQueue(): SkillQueueContextValue {
   const store = use(SkillQueueProvider.Context);
   invariant(
     store !== null,
-    `useSkillQueue must be used within a SkillQueueProvider` satisfies HasNameOf<
-      typeof useSkillQueue
-    >,
+    `useSkillQueue must be used within a SkillQueueProvider`,
   );
 
   return store;

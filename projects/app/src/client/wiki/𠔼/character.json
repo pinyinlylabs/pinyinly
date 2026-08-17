@@ -1,9 +1,8 @@
 {
   "hanzi": "𠔼",
+  "svg": { "strokes": 3 },
   "mnemonic": {
-    "components": ["⿵", { "hanzi": "冂" }, { "hanzi": "一" }]
+    "decomposition": "⿵冂一"
   },
-  "svg": {
-    "strokes": 3
-  }
+  "decompositions": { "⿵冂一": ["", ""] }
 }

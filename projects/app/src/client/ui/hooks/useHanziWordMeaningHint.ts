@@ -2,7 +2,7 @@ import { composeHintText, parseHintText } from "@/client/ui/hintText";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { HanziWord } from "@/data/model";
 import {
-  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintExplanationTextSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/data/userSettings";
@@ -42,7 +42,10 @@ export function useHanziWordMeaningHint(
   const explanationSetting = useUserSetting(
     settingKey == null
       ? null
-      : { setting: hanziWordMeaningHintExplanationSetting, key: settingKey },
+      : {
+          setting: hanziWordMeaningHintExplanationTextSetting,
+          key: settingKey,
+        },
   );
 
   const hintTextValue = getTextSettingValue(hintSetting?.value);

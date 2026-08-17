@@ -9,7 +9,7 @@ import type {
   ImageProps as ExpoImageProps,
   ImageStyle,
 } from "@/client/ui/Image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { StyleProp } from "react-native";
 import { Text, View } from "react-native";
 
@@ -33,7 +33,11 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
  * Renders cached pending/uploaded blobs when available, otherwise falls back
  * to the CDN URL.
  */
-export function AssetImage({
+export function AssetImage({ assetId, ...restProps }: AssetImageProps) {
+  return <AssetImageImpl key={assetId} assetId={assetId} {...restProps} />;
+}
+
+function AssetImageImpl({
   assetId,
   contentFit = `cover`,
   className,
@@ -56,11 +60,6 @@ export function AssetImage({
     cachedImageSource != null && !hasImageError
       ? cachedImageSource
       : { uri: imageUrl };
-
-  useEffect(() => {
-    setImageError(false);
-    setIsLoading(true);
-  }, [assetId]);
 
   const showFailedOverlay =
     demoAssetStatus === AssetStatusKind.Failed || hasImageError;

@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "module": "NodeNext",
+    "esModuleInterop": true,
+    "outDir": "../../.moon/cache/types/projects/oxlint-rules",
+    "target": "ESNext",
+    "types": ["node"]
+  },
+  "include": ["*"],
+  "exclude": ["dist", "build", "node_modules"],
+  "references": [
+    {
+      "path": "./src"
+    },
+    {
+      "path": "./test"
+    },
+    {
+      "path": "../lib"
+    }
+  ]
+}

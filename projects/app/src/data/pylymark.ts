@@ -11,6 +11,12 @@ export interface PylymarkHanziWordNode {
   showGloss: boolean;
 }
 
+export interface PylymarkTokenNode {
+  type: `token`;
+  ref: string;
+  text: string;
+}
+
 export interface PylymarkTextNode {
   type: `text`;
   text: string;
@@ -33,6 +39,7 @@ export interface PylymarkMarkNode {
 
 export type PylymarkNode =
   | PylymarkHanziWordNode
+  | PylymarkTokenNode
   | PylymarkTextNode
   | PylymarkBoldNode
   | PylymarkItalicNode
@@ -44,7 +51,8 @@ export type PylymarkNode =
  * Supported syntax:
  *
  * - Text: plain text
- * - HanziWord: {HanziWord} (e.g. {好:good})
+ * - HanziWord: {HanziWord} (e.g. {好:good}, {好:-good} for hidden gloss)
+ * - Token: [<reference> <visible text>] (e.g. [-ong Temple], [5 roof], [表 to express])
  * - Bold: **text**
  * - Italic: *text*
  * - Mark: ==text==
@@ -52,8 +60,9 @@ export type PylymarkNode =
 export function parsePylymark(value: string): PylymarkNode[] {
   const nodes: PylymarkNode[] = [];
 
-  // Regex patterns for HanziWord, Bold, Italic, and Mark
-  const regex = /\{([^:]+):(-)?([^}]+)\}|\*\*(.+?)\*\*|\*(.+?)\*|==(.+?)==/gu;
+  // Regex patterns for HanziWord, Token, Bold, Italic, and Mark
+  const regex =
+    /\{([^:]+):(-)?([^}]+)\}|\[(.+?) (.+?)\]|\*\*(.+?)\*\*|\*(.+?)\*|==(.+?)==/gu;
   let match;
   let lastIndex = 0;
 
@@ -63,6 +72,8 @@ export function parsePylymark(value: string): PylymarkNode[] {
       hanziWordHanzi,
       hanziWordHideGloss,
       hanziWordMeaningKey,
+      tokenRef,
+      tokenText,
       boldText,
       italicText,
       markText,
@@ -90,6 +101,12 @@ export function parsePylymark(value: string): PylymarkNode[] {
         type: `hanziWord`,
         hanziWord: buildHanziWord(hanziWordHanzi, hanziWordMeaningKey),
         showGloss: hanziWordHideGloss != `-`,
+      });
+    } else if (tokenRef != null && tokenText != null) {
+      nodes.push({
+        type: `token`,
+        ref: tokenRef,
+        text: tokenText,
       });
     } else if (boldText != null) {
       // Add Bold node for the match
@@ -150,7 +167,19 @@ export function stringifyPylymark(nodes: PylymarkNode[]): string {
         case `mark`: {
           return `==${node.text}==`;
         }
+        case `token`: {
+          return `[${node.ref} ${node.text}]`;
+        }
       }
     })
     .join(``);
+}
+
+/**
+ * Convert token nodes to text nodes, preserving the text content.
+ */
+export function stripTokens(nodes: PylymarkNode[]): PylymarkNode[] {
+  return nodes.map((node) =>
+    node.type === `token` ? { type: `text`, text: node.text } : node,
+  );
 }

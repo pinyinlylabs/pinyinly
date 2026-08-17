@@ -1,5 +1,5 @@
 import { copyFileIfChanged } from "@pinyinly/lib/fs";
-import * as path from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { projectRoot } from "./util/paths.ts";
 

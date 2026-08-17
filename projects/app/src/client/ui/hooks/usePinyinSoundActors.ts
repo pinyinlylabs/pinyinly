@@ -3,18 +3,12 @@ import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { parseImageCrop } from "@/client/ui/imageCrop";
 import type { ActorId, AssetId, PinyinSoundId } from "@/data/model";
 import {
-  pinyinSoundActorDescriptionSetting,
-  pinyinSoundActorDescriptionSettingKey,
-  pinyinSoundActorImageSetting,
-  pinyinSoundActorImageSettingKey,
-  pinyinSoundActorMnemonicIdentitySetting,
-  pinyinSoundActorMnemonicIdentitySettingKey,
-  pinyinSoundActorModelSheetImageSetting,
-  pinyinSoundActorModelSheetImageSettingKey,
-  pinyinSoundActorNameSetting,
-  pinyinSoundActorNameSettingKey,
-  pinyinSoundActorSelectionSetting,
-  pinyinSoundActorSelectionSettingKey,
+  actorDescriptionTextSetting,
+  actorIdentityImageSetting,
+  actorSpecJsonSetting,
+  actorModelSheetImageSetting,
+  actorNameTextSetting,
+  pinyinSoundActorSetting,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -37,11 +31,8 @@ export interface UsePinyinSoundActorsResult {
   isLoading: boolean;
   createActor: (name?: string) => ActorId;
   saveActorToDirectory: (input: SaveActorToDirectoryInput) => ActorId;
-  soundActorIdsBySoundId: Map<PinyinSoundId, readonly ActorId[]>;
-  setSoundActorIds: (
-    soundId: PinyinSoundId,
-    actorIds: readonly ActorId[],
-  ) => void;
+  soundActorIdBySoundId: Map<PinyinSoundId, ActorId>;
+  setSoundActorId: (soundId: PinyinSoundId, actorId: ActorId | null) => void;
 }
 
 export type SaveActorToDirectoryTargetKind = `new` | `existing`;
@@ -89,21 +80,6 @@ export interface SaveActorToDirectoryInput {
   fallbackName: string;
 }
 
-function parseActorIds(value: unknown): readonly ActorId[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  const actorIds: ActorId[] = [];
-  for (const item of value) {
-    if (typeof item === `string` && item.trim().length > 0) {
-      actorIds.push(item as ActorId);
-    }
-  }
-
-  return [...new Set(actorIds)];
-}
-
 export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
   const db = useDb();
   const r = useRizzle();
@@ -147,10 +123,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     for (const setting of settings) {
       if (setting.key.startsWith(`psan/`)) {
         const actorId = setting.key.slice(`psan/`.length) as ActorId;
-        const value = pinyinSoundActorNameSetting.decode(
-          { actorId },
-          setting.value,
-        );
+        const value = actorNameTextSetting.decode({ actorId }, setting.value);
         if (value == null) {
           continue;
         }
@@ -162,7 +135,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
       if (setting.key.startsWith(`psad/`)) {
         const actorId = setting.key.slice(`psad/`.length) as ActorId;
-        const value = pinyinSoundActorDescriptionSetting.decode(
+        const value = actorDescriptionTextSetting.decode(
           { actorId },
           setting.value,
         );
@@ -177,7 +150,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
       if (setting.key.startsWith(`psai/`)) {
         const actorId = setting.key.slice(`psai/`.length) as ActorId;
-        const value = pinyinSoundActorImageSetting.decode(
+        const value = actorIdentityImageSetting.decode(
           { actorId },
           setting.value,
         );
@@ -200,8 +173,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
   }, [settings]);
 
-  const soundActorIdsBySoundId = useMemo(() => {
-    const bySoundId = new Map<PinyinSoundId, readonly ActorId[]>();
+  const soundActorIdBySoundId = useMemo(() => {
+    const bySoundId = new Map<PinyinSoundId, ActorId>();
 
     for (const setting of settings) {
       if (!setting.key.startsWith(`psas/`)) {
@@ -209,15 +182,14 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
       }
 
       const soundId = setting.key.slice(`psas/`.length) as PinyinSoundId;
-      const value = pinyinSoundActorSelectionSetting.decode(
-        { soundId },
-        setting.value,
-      );
+      const value = pinyinSoundActorSetting.decode({ soundId }, setting.value);
       if (value == null) {
         continue;
       }
 
-      bySoundId.set(value.soundId, parseActorIds(value.actorIds));
+      if (value.actorId != null) {
+        bySoundId.set(value.soundId, value.actorId);
+      }
     }
 
     return bySoundId;
@@ -227,8 +199,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     const actorId = `actor_${nanoid()}` as ActorId;
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorNameSettingKey(actorId),
-      value: pinyinSoundActorNameSetting.entity.marshalValue({
+      key: actorNameTextSetting.entity.marshalKey({ actorId }),
+      value: actorNameTextSetting.entity.marshalValue({
         actorId,
         text: name,
       }),
@@ -266,8 +238,8 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
 
     if (target.kind === `existing`) {
       void r.mutate.setSetting({
-        key: pinyinSoundActorNameSettingKey(actorId),
-        value: pinyinSoundActorNameSetting.entity.marshalValue({
+        key: actorNameTextSetting.entity.marshalKey({ actorId }),
+        value: actorNameTextSetting.entity.marshalValue({
           actorId,
           text: resolvedName,
         }),
@@ -278,11 +250,11 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     }
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorDescriptionSettingKey(actorId),
+      key: actorDescriptionTextSetting.entity.marshalKey({ actorId }),
       value:
         resolvedDescription == null
           ? null
-          : pinyinSoundActorDescriptionSetting.entity.marshalValue({
+          : actorDescriptionTextSetting.entity.marshalValue({
               actorId,
               text: resolvedDescription,
             }),
@@ -292,13 +264,13 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorMnemonicIdentitySettingKey(actorId),
+      key: actorSpecJsonSetting.entity.marshalKey({ actorId }),
       value:
         mnemonicIdentity == null
           ? null
-          : pinyinSoundActorMnemonicIdentitySetting.entity.marshalValue({
+          : actorSpecJsonSetting.entity.marshalValue({
               actorId,
-              mnemonicIdentity,
+              value: mnemonicIdentity,
             }),
       now: new Date(),
       skipHistory: false,
@@ -306,11 +278,11 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorImageSettingKey(actorId),
+      key: actorIdentityImageSetting.entity.marshalKey({ actorId }),
       value:
         image?.imageId == null
           ? null
-          : pinyinSoundActorImageSetting.entity.marshalValue({
+          : actorIdentityImageSetting.entity.marshalValue({
               actorId,
               imageId: image.imageId,
               imageCrop: image.imageCrop ?? undefined,
@@ -323,11 +295,11 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     });
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorModelSheetImageSettingKey(actorId),
+      key: actorModelSheetImageSetting.entity.marshalKey({ actorId }),
       value:
         modelSheetImage?.imageId == null
           ? null
-          : pinyinSoundActorModelSheetImageSetting.entity.marshalValue({
+          : actorModelSheetImageSetting.entity.marshalValue({
               actorId,
               imageId: modelSheetImage.imageId,
               imageCrop: modelSheetImage.imageCrop ?? undefined,
@@ -342,14 +314,10 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     return actorId;
   };
 
-  const setSoundActorIds = (
-    soundId: PinyinSoundId,
-    actorIds: readonly ActorId[],
-  ) => {
-    const normalizedActorIds = [...new Set(actorIds)];
-    if (normalizedActorIds.length === 0) {
+  const setSoundActorId = (soundId: PinyinSoundId, actorId: ActorId | null) => {
+    if (actorId == null) {
       void r.mutate.setSetting({
-        key: pinyinSoundActorSelectionSettingKey(soundId),
+        key: pinyinSoundActorSetting.entity.marshalKey({ soundId }),
         value: null,
         now: new Date(),
         skipHistory: false,
@@ -359,10 +327,10 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     }
 
     void r.mutate.setSetting({
-      key: pinyinSoundActorSelectionSettingKey(soundId),
-      value: pinyinSoundActorSelectionSetting.entity.marshalValue({
+      key: pinyinSoundActorSetting.entity.marshalKey({ soundId }),
+      value: pinyinSoundActorSetting.entity.marshalValue({
         soundId,
-        actorIds: normalizedActorIds,
+        actorId,
       }),
       now: new Date(),
       skipHistory: false,
@@ -375,7 +343,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     isLoading,
     createActor,
     saveActorToDirectory,
-    soundActorIdsBySoundId,
-    setSoundActorIds,
+    soundActorIdBySoundId,
+    setSoundActorId,
   };
 }

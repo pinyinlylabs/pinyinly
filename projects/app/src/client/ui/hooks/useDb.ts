@@ -5,9 +5,6 @@ import { use } from "react";
 
 export function useDb(): Db {
   const db = use(DbProvider.Context);
-  invariant(
-    db !== null,
-    `useDb must be used within a DbProvider` satisfies HasNameOf<typeof useDb>,
-  );
+  invariant(db !== null, `useDb must be used within a DbProvider`);
   return db;
 }

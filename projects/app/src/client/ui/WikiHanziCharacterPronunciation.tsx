@@ -1,23 +1,31 @@
-import type { DictionarySearchEntry } from "@/client/query";
-import type { LocationSetKey } from "@/client/ui/hooks/usePinyinSoundLocations";
+import { trpc } from "@/client/trpc";
+import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
-import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
-import { PartOfSpeech } from "@/data/model";
+import type {
+  AssetId,
+  HanziText,
+  HanziWord,
+  PinyinSoundId,
+  PinyinUnit,
+} from "@/data/model";
 import {
   getFinalSoundLabel,
   getInitialSoundLabel,
   isInitialSoundId,
+  pinyinUnitId,
   splitPinyinUnit,
 } from "@/data/pinyin";
 import {
-  hanziPronunciationHintMnemonicSpecSetting,
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
-  pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundDescriptionSetting,
+  getToneSoundNameFromSetKey,
+  pronunciationMnemonicSpecSetting,
+  pronunciationMnemonicImageSetting,
+  pronunciationMnemonicTextSetting,
+  pinyinSoundLocationSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameSetting,
+  pinyinSoundNameTextSetting,
+  pinyinSoundLocationSetKeySetting,
+  pronunciationMnemonicSelectedSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -26,7 +34,6 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "./InlineEditableSettingJson";
@@ -36,18 +43,18 @@ import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { ToneLabelText } from "./ToneLabelText";
 import { Tooltip } from "./Tooltip";
-import { WikiHanziCharacterPronunciationImagePicker } from "./WikiHanziCharacterPronunciationImagePicker";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation.utils";
 import { useDb } from "./hooks/useDb";
-import { useHanziPronunciationHint } from "./hooks/useHanziPronunciationHint";
+import { useHanziPronunciationMnemonicId as useHanziPronunciationMnemonicIds } from "./hooks/useHanziPronunciationMnemonicIds";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
-import {
-  composeHintText,
-  hintFirstLineLength,
-  parseHintText,
-} from "./hintText";
+import { hintFirstLineLength, parseHintText } from "./hintText";
 import { parseImageCrop } from "./imageCrop";
+import { hanziFromHanziWord } from "@/dictionary";
+import { nanoid } from "@/util/nanoid";
+import { DropdownMenu2 } from "./DropdownMenu2";
+import type { PronunciationMnemonicRecurringPromptAssociationStrategyKind } from "@/util/prompts/pronunciationMnemonicRecurring";
+import { toTitle } from "@/util/unicode";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
@@ -88,56 +95,29 @@ export function WikiHanziCharacterPronunciation({
     return null;
   }
 
-  const cueMeaning = buildCueMeaningContext({
-    cueWord: gloss,
-    gloss: firstMeaning.gloss,
-    partOfSpeech: firstMeaning.pos,
-  });
-
   return (
     <WikiHanziCharacterPronunciationBox
-      gloss={gloss}
-      cueMeaning={cueMeaning}
-      hanzi={hanzi}
+      hanziWord={firstMeaning.hanziWord}
       pinyinUnit={pronunciation.pinyinUnit}
     />
   );
 }
 
 export function WikiHanziCharacterPronunciationBox({
-  hanzi,
+  hanziWord,
   pinyinUnit,
-  gloss,
-  cueMeaning,
 }: {
-  gloss: DictionarySearchEntry[`gloss`][number];
-  cueMeaning?: string;
-  hanzi: HanziText;
+  hanziWord: HanziWord;
   pinyinUnit: PinyinUnit;
 }) {
+  const hanzi = hanziFromHanziWord(hanziWord);
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
   const initialPinyinSound = useUserSetting(
     splitPinyin == null
       ? null
       : {
-          setting: pinyinSoundNameSetting,
-          key: { soundId: splitPinyin.initialSoundId },
-        },
-  );
-  const tonePinyinSound = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameSetting,
-          key: { soundId: splitPinyin.toneSoundId },
-        },
-  );
-  const initialDescriptionSetting = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundDescriptionSetting,
+          setting: pinyinSoundNameTextSetting,
           key: { soundId: splitPinyin.initialSoundId },
         },
   );
@@ -145,13 +125,39 @@ export function WikiHanziCharacterPronunciationBox({
     splitPinyin == null
       ? null
       : {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: splitPinyin.finalSoundId },
         },
   );
+  const toneSetKeySetting = useUserSetting(
+    splitPinyin == null
+      ? null
+      : {
+          setting: pinyinSoundLocationSetKeySetting,
+          key: { soundId: splitPinyin.toneSoundId },
+        },
+  );
   const placeDirectory = usePinyinSoundLocations();
+  const actorDirectory = usePinyinSoundActors();
   const initialPinyinSoundName = initialPinyinSound?.value?.text;
-  const tonePinyinSoundName = tonePinyinSound?.value?.text;
+  const tonePinyinSoundName =
+    splitPinyin == null
+      ? null
+      : getToneSoundNameFromSetKey(
+          splitPinyin.toneSoundId,
+          toneSetKeySetting?.value?.setKey,
+        );
+  const selectedInitialActorId =
+    splitPinyin == null
+      ? null
+      : (actorDirectory.soundActorIdBySoundId.get(splitPinyin.initialSoundId) ??
+        null);
+  const selectedInitialActor =
+    selectedInitialActorId == null
+      ? null
+      : (actorDirectory.actors.find(
+          (entry) => entry.actorId === selectedInitialActorId,
+        ) ?? null);
   const selectedFinalLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedFinalLocation =
@@ -161,45 +167,86 @@ export function WikiHanziCharacterPronunciationBox({
           (place) => place.locationId === selectedFinalLocationId,
         ) ?? null);
 
-  const initialSoundDescription =
-    initialDescriptionSetting?.value?.text ?? null;
-  const finalToneLocationDescription =
-    selectedFinalLocation?.description ?? null;
-
   const initialLabel = getInitialSoundLabel(pinyinUnit);
   const finalLabel = getFinalSoundLabel(pinyinUnit);
-  const finalToneLocationSetKey = toneToLocationSetKey(splitPinyin?.tone ?? 5);
-  const finalToneLocationSetName =
-    selectedFinalLocation?.sets[finalToneLocationSetKey].name ?? null;
-  const finalToneName =
-    finalToneLocationSetName == null ||
-    finalToneLocationSetName.trim().length === 0
-      ? `Unnamed set`
-      : finalToneLocationSetName;
-  const finalLocationName = selectedFinalLocation?.name ?? null;
-  const pronunciationHint = useHanziPronunciationHint(hanzi, pinyinUnit);
-  const hintSettingKey = pronunciationHint.settingKey;
-  const hintImageSetting = useUserSetting({
-    setting: hanziPronunciationHintImageSetting,
-    key: hintSettingKey,
-  });
-  const [showAiModal, setShowAiModal] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [showHintEditor, setShowHintEditor] = useState<boolean | null>(null);
-  const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
 
-  const hintImage = hintImageSetting.value;
-  const hasHintContent = pronunciationHint.hasText;
-  const hasImageContent = hintImage?.imageId != null;
+  const finalLocationName = selectedFinalLocation?.name ?? null;
+  const pronunciationMnemonicIds = useHanziPronunciationMnemonicIds(
+    hanzi,
+    pinyinUnit,
+  );
+  const mnemonicSettingKey =
+    pronunciationMnemonicIds.selectedId == null
+      ? null
+      : {
+          hanzi,
+          pinyin: pinyinUnitId(pinyinUnit),
+          mnemonicId: pronunciationMnemonicIds.selectedId,
+        };
+  const mnemonicImageSetting = useUserSetting(
+    mnemonicSettingKey == null
+      ? null
+      : {
+          setting: pronunciationMnemonicImageSetting,
+          key: mnemonicSettingKey,
+        },
+  );
+  const mnemonicTextSetting = useUserSetting(
+    mnemonicSettingKey == null
+      ? null
+      : {
+          setting: pronunciationMnemonicTextSetting,
+          key: mnemonicSettingKey,
+        },
+  );
+
+  const hasMnemonicContent =
+    (mnemonicTextSetting?.value?.text ?? ``).trim().length > 0;
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showMnemonicEditor, setShowMnemonicEditor] = useState<boolean | null>(
+    null,
+  );
+  const [showImageEditor, setShowImageEditor] = useState<boolean | null>(null);
+  const enqueuePronunciationRecurringHintMutation =
+    trpc.ai.enqueuePronunciationRecurringHint.useMutation();
+
+  const mnemonicImage = mnemonicImageSetting?.value;
+  const hasImageContent = mnemonicImage?.imageId != null;
   const isHintSectionVisible = isEditMode
-    ? (showHintEditor ?? hasHintContent)
-    : hasHintContent;
+    ? (showMnemonicEditor ?? hasMnemonicContent)
+    : hasMnemonicContent;
   const isImageSectionVisible = isEditMode
     ? (showImageEditor ?? hasImageContent)
     : hasImageContent;
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
+  };
+  const selectedMnemonicSetting = useUserSetting({
+    setting: pronunciationMnemonicSelectedSetting,
+    key: {
+      hanzi,
+      pinyin: pinyinUnitId(pinyinUnit),
+    },
+  });
+
+  const handleUseAi = (
+    associationStrategy: PronunciationMnemonicRecurringPromptAssociationStrategyKind,
+  ) => {
+    if (selectedInitialActorId != null && selectedFinalLocationId != null) {
+      const mnemonicId = nanoid();
+      selectedMnemonicSetting.setValue({
+        hanzi,
+        pinyin: pinyinUnitId(pinyinUnit),
+        mnemonicId: mnemonicId,
+      });
+      enqueuePronunciationRecurringHintMutation.mutate({
+        hanziWord,
+        mnemonicId,
+        associationStrategy,
+      });
+    }
   };
 
   return (
@@ -222,181 +269,252 @@ export function WikiHanziCharacterPronunciationBox({
                 <SoundLinkBlock
                   soundId={splitPinyin.initialSoundId}
                   href={`/sounds/${splitPinyin.initialSoundId}`}
-                  label={initialLabel}
-                  name={initialPinyinSoundName ?? null}
+                  soundName={initialLabel}
+                  mnemonicName={
+                    initialPinyinSoundName ?? selectedInitialActor?.name ?? null
+                  }
+                  imageOverride={selectedInitialActor?.image ?? null}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
                   soundId={splitPinyin.finalSoundId}
                   href={`/sounds/${splitPinyin.finalSoundId}`}
-                  label={finalLabel}
-                  name={finalLocationName}
+                  soundName={finalLabel}
+                  mnemonicName={finalLocationName}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
                   soundId={splitPinyin.toneSoundId}
                   href={`/sounds/${splitPinyin.toneSoundId}`}
-                  label={<ToneLabelText tone={splitPinyin.tone} />}
-                  name={tonePinyinSoundName ?? null}
+                  soundName={<ToneLabelText tone={splitPinyin.tone} />}
+                  mnemonicName={tonePinyinSoundName ?? null}
                 />
               </View>
             </View>
           </View>
         </View>
       )}
-      {isEditMode && (!isHintSectionVisible || !isImageSectionVisible) ? (
-        <View className="flex-row items-start gap-4 p-4">
-          {isHintSectionVisible ? null : (
-            <RectButton
-              variant="bare"
-              iconStart="keyboard"
-              iconSize={20}
-              className="opacity-80"
-              onPress={() => {
-                setShowHintEditor(true);
-              }}
-            >
-              Add hint
-            </RectButton>
-          )}
-          {isImageSectionVisible ? null : (
-            <RectButton
-              variant="bare"
-              iconStart="photos-filled"
-              iconSize={20}
-              className="opacity-80"
-              onPress={() => {
-                setShowImageEditor(true);
-              }}
-            >
-              Add image
-            </RectButton>
-          )}
-        </View>
-      ) : null}
 
-      {isHintSectionVisible || isImageSectionVisible ? (
-        <View className="gap-4 bg-black/10 pt-4">
-          {isHintSectionVisible ? (
-            <View className={isEditMode ? `gap-2 pl-7` : `gap-1 px-7`}>
-              <ExperimentalContent hanzi={hanzi} />
-
+      {isHintSectionVisible || isImageSectionVisible || isEditMode ? (
+        <View className="bg-black/10">
+          {isHintSectionVisible && mnemonicSettingKey != null ? (
+            <View className={`px-7 py-4`}>
               <InlineEditableSettingText
                 readonly={!isEditMode}
-                setting={hanziPronunciationHintTextSetting}
-                settingKey={hintSettingKey}
+                setting={pronunciationMnemonicTextSetting}
+                settingKey={mnemonicSettingKey}
                 placeholder="Add a hint on the first line. Add details after a blank line."
                 multiline
                 maxLength={80}
                 showCounterAtRatio={0.8}
                 counterLength={hintFirstLineLength}
                 overLimitMessage="Keep the first line under 80 characters. Add details after a blank line."
-                renderDisplay={(value) => <MergedHintDisplay value={value} />}
+                renderDisplay={(value) => (
+                  <MergedHintDisplay value={value} hanzi={hanzi} />
+                )}
                 onSaveValue={(nextHintText) => {
                   const nextHintTextLength = nextHintText?.length ?? 0;
                   if (nextHintTextLength === 0) {
-                    setShowHintEditor(false);
+                    setShowMnemonicEditor(false);
                   } else {
-                    setShowHintEditor(true);
+                    setShowMnemonicEditor(true);
                   }
                 }}
               />
-
-              {isEditMode ? (
-                <View className="flex-row items-center justify-between">
-                  <Text className="font-sans text-[13px] text-fg-dim">
-                    Want help brainstorming a hint?
-                  </Text>
-                  <RectButton
-                    variant="bare"
-                    onPress={() => {
-                      setShowAiModal(true);
-                    }}
-                    disabled={
-                      splitPinyin == null || initialPinyinSoundName == null
-                    }
-                  >
-                    Use AI
-                  </RectButton>
-                </View>
-              ) : null}
             </View>
           ) : null}
 
-          {isImageSectionVisible ? (
+          {isImageSectionVisible && mnemonicSettingKey != null ? (
             isEditMode ? (
-              <WikiHanziCharacterPronunciationImagePicker
-                gloss={gloss}
-                hanzi={hanzi}
-                pinyinUnit={pinyinUnit}
-                onChangeImageId={(nextImageId) => {
-                  if (nextImageId == null) {
-                    setShowImageEditor(false);
-                  } else {
-                    setShowImageEditor(true);
-                  }
-                }}
-              />
-            ) : hintImage?.imageId == null ? null : (
+              <View className="gap-2 pt-2">
+                <InlineEditableSettingImage
+                  setting={pronunciationMnemonicImageSetting}
+                  settingKey={mnemonicSettingKey}
+                  previewHeight={200}
+                  tileSize={64}
+                  enableAiGeneration
+                  aspectRatio="16:9"
+                  onUploadError={(error) => {
+                    console.error(`Upload error:`, error);
+                  }}
+                  onChangeImageId={(nextImageId) => {
+                    if (nextImageId == null) {
+                      setShowImageEditor(false);
+                    } else {
+                      setShowImageEditor(true);
+                    }
+                  }}
+                />
+              </View>
+            ) : mnemonicImage?.imageId == null ? null : (
               <InlineEditableSettingImage
                 readonly
-                setting={hanziPronunciationHintImageSetting}
-                settingKey={hintSettingKey}
+                setting={pronunciationMnemonicImageSetting}
+                settingKey={mnemonicSettingKey}
                 previewHeight={200}
                 aspectRatio={`5:4`}
               />
             )
           ) : null}
-        </View>
-      ) : null}
 
-      {isEditMode ? (
-        <View className="gap-2 p-4">
-          <Text className="pyly-body-caption text-xs font-semibold text-fg-dim uppercase">
-            Mnemonic spec
-          </Text>
-          <InlineEditableSettingJson
-            setting={hanziPronunciationHintMnemonicSpecSetting}
-            settingKey={hintSettingKey}
-            readonly={!isEditMode}
-            placeholder='{"story": "A chef juggling cans"}'
-            emptyStateText="No mnemonic spec JSON"
-          />
-        </View>
-      ) : null}
+          {isEditMode ? (
+            <View className="flex-row items-start gap-4 p-4">
+              {isHintSectionVisible ? null : (
+                <RectButton
+                  variant="bare"
+                  iconStart="keyboard"
+                  iconSize={20}
+                  className="opacity-80"
+                  onPress={() => {
+                    setShowMnemonicEditor(true);
+                  }}
+                >
+                  Add hint
+                </RectButton>
+              )}
+              {isImageSectionVisible ? null : (
+                <RectButton
+                  variant="bare"
+                  iconStart="photos-filled"
+                  iconSize={20}
+                  className="opacity-80"
+                  onPress={() => {
+                    setShowImageEditor(true);
+                  }}
+                >
+                  Add image
+                </RectButton>
+              )}
+              {__DEV__ ? (
+                <DropdownMenu2>
+                  <DropdownMenu2.Trigger asChild>
+                    <RectButton
+                      variant="bare"
+                      iconStart="ai"
+                      iconSize={20}
+                      className="opacity-80"
+                      onPress={() => {
+                        if (
+                          selectedInitialActorId != null &&
+                          selectedFinalLocationId != null
+                        ) {
+                          const mnemonicId = nanoid();
+                          selectedMnemonicSetting.setValue({
+                            hanzi,
+                            pinyin: pinyinUnitId(pinyinUnit),
+                            mnemonicId: mnemonicId,
+                          });
+                          enqueuePronunciationRecurringHintMutation.mutate({
+                            hanziWord,
+                            mnemonicId,
+                          });
+                        }
+                      }}
+                    >
+                      Use AI
+                    </RectButton>
+                  </DropdownMenu2.Trigger>
+                  <DropdownMenu2.Content
+                    sideOffset={2}
+                    className="w-56"
+                    align="start"
+                  >
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`identityBinding`);
+                      }}
+                    >
+                      <Text>Identity binding</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`environmentRule`);
+                      }}
+                    >
+                      <Text>Environment rule</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`objectBinding`);
+                      }}
+                    >
+                      <Text>Object binding</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi(`behaviourConsequence`);
+                      }}
+                    >
+                      <Text>Behaviour consequence</Text>
+                    </DropdownMenu2.Item>
+                  </DropdownMenu2.Content>
+                </DropdownMenu2>
+              ) : null}
+              {pronunciationMnemonicIds.allIds.length < 2 ? null : (
+                <RectButton
+                  variant="bare"
+                  iconStart="shuffle"
+                  onPress={() => {
+                    const { allIds: mnemonicIds, selectedId: mnemonicId } =
+                      pronunciationMnemonicIds;
+                    if (mnemonicIds.length < 2) {
+                      return;
+                    }
 
-      {showAiModal && splitPinyin != null && initialPinyinSoundName != null ? (
-        <AiPronunciationHintModal
-          leadCharacter={{
-            name: initialPinyinSoundName,
-            bio: initialSoundDescription ?? undefined,
-          }}
-          location={{
-            name: finalToneName,
-            description:
-              finalToneLocationDescription == null ||
-              finalToneLocationDescription.length === 0
-                ? undefined
-                : finalToneLocationDescription,
-          }}
-          cue={{ word: gloss, meaning: cueMeaning }}
-          onApplyHint={({ text, explanation }) => {
-            const mergedHintText = composeHintText(text, explanation);
-            pronunciationHint.setText(mergedHintText);
-            setShowHintEditor((mergedHintText ?? ``).trim().length > 0);
-          }}
-          onDismiss={() => {
-            setShowAiModal(false);
-          }}
-        />
+                    const currentIndex =
+                      mnemonicId == null
+                        ? null
+                        : mnemonicIds.indexOf(mnemonicId);
+                    const nextIndex =
+                      currentIndex == null || currentIndex < 0
+                        ? 0
+                        : (currentIndex + 1) % mnemonicIds.length;
+                    const nextMnemonicId = mnemonicIds[nextIndex];
+                    if (nextMnemonicId == null) {
+                      return;
+                    }
+
+                    selectedMnemonicSetting.setValue({
+                      hanzi,
+                      pinyin: pinyinUnitId(pinyinUnit),
+                      mnemonicId: nextMnemonicId,
+                    });
+                  }}
+                >
+                  Shuffle
+                </RectButton>
+              )}
+            </View>
+          ) : null}
+          {isEditMode && mnemonicSettingKey != null ? (
+            <View className="gap-2 p-4">
+              <Text className="pyly-body-caption text-xs font-semibold text-muted-fg uppercase">
+                Mnemonic spec
+              </Text>
+              <InlineEditableSettingJson
+                setting={pronunciationMnemonicSpecSetting}
+                settingKey={mnemonicSettingKey}
+                readonly={!isEditMode}
+                placeholder='{"story": "A chef juggling cans"}'
+                emptyStateText="No mnemonic spec JSON"
+              />
+            </View>
+          ) : null}
+        </View>
       ) : null}
     </WikiTitledBox>
   );
 }
 
-function MergedHintDisplay({ value }: { value: string }) {
+function MergedHintDisplay({
+  value,
+  hanzi,
+}: {
+  value: string;
+  hanzi: HanziText;
+}) {
   const parsed = parseHintText(value);
 
   if (parsed.hint.length === 0 && parsed.description == null) {
@@ -404,30 +522,36 @@ function MergedHintDisplay({ value }: { value: string }) {
   }
 
   return (
-    <>
-      <Text className="font-sans font-semibold">
-        <Pylymark source={parsed.hint} />
+    <Text className="pyly-body my-2 leading-6">
+      <Text className="font-medium">
+        <Pylymark source={parsed.hint} highlightToken={hanzi} />
       </Text>
       {parsed.description == null ? null : (
-        <Text className="font-sans font-normal text-fg-dim">
-          {` `}
-          <Pylymark source={parsed.description} />
+        <Text className="mt-3 block text-sm text-muted-fg">
+          <Pylymark source={parsed.description} highlightToken={hanzi} />
         </Text>
       )}
-    </>
+    </Text>
   );
 }
 
 export function SoundLinkBlock({
   soundId,
   href,
-  label,
-  name,
+  soundName,
+  mnemonicName,
+  imageOverride,
 }: {
   soundId: PinyinSoundId;
   href: Href;
-  label: ReactNode;
-  name: string | null;
+  soundName: ReactNode;
+  mnemonicName: string | null;
+  imageOverride?: {
+    assetId: AssetId;
+    crop: ReturnType<typeof parseImageCrop>;
+    imageWidth: number | null;
+    imageHeight: number | null;
+  } | null;
 }) {
   const soundImageSetting = useUserSetting({
     setting: pinyinSoundImageSetting,
@@ -436,23 +560,33 @@ export function SoundLinkBlock({
   const isPointerHoverCapable = usePointerHoverCapability();
   const soundImage = soundImageSetting.value;
   const soundImageCrop = parseImageCrop(soundImage?.imageCrop);
+  const resolvedImage =
+    imageOverride ??
+    (soundImage?.imageId == null
+      ? null
+      : {
+          assetId: soundImage.imageId,
+          crop: soundImageCrop,
+          imageWidth: soundImage.imageWidth ?? null,
+          imageHeight: soundImage.imageHeight ?? null,
+        });
   const frameShape = isInitialSoundId(soundId) ? `circle` : `rect`;
 
   const nameLink = (
     <Link href={href} className={soundNameClass()}>
-      {name}
+      {mnemonicName == null ? null : toTitle(mnemonicName)}
     </Link>
   );
 
   return (
     <View className="w-full items-center gap-1">
       <Link href={href} className={soundNameClass({ className: `text-fg/50` })}>
-        {label}
+        {soundName}
       </Link>
-      {name == null ? null : (
+      {mnemonicName == null ? null : (
         <>
           <DownArrow />
-          {!isPointerHoverCapable || soundImage?.imageId == null ? (
+          {!isPointerHoverCapable || resolvedImage == null ? (
             nameLink
           ) : (
             <Tooltip placement="top" sideOffset={6}>
@@ -468,10 +602,10 @@ export function SoundLinkBlock({
                   `}
                 >
                   <FramedAssetImage
-                    assetId={soundImage.imageId}
-                    crop={soundImageCrop}
-                    imageWidth={soundImage.imageWidth}
-                    imageHeight={soundImage.imageHeight}
+                    assetId={resolvedImage.assetId}
+                    crop={resolvedImage.crop}
+                    imageWidth={resolvedImage.imageWidth}
+                    imageHeight={resolvedImage.imageHeight}
                     frameShape={frameShape}
                     className="size-full"
                   />
@@ -491,147 +625,4 @@ const soundNameClass = tv({
 
 function DownArrow() {
   return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
-}
-
-function toneToLocationSetKey(tone: number): LocationSetKey {
-  switch (tone) {
-    case 1: {
-      return `arrival`;
-    }
-    case 2: {
-      return `ascent`;
-    }
-    case 3: {
-      return `heart`;
-    }
-    case 4: {
-      return `below`;
-    }
-    default: {
-      return `summit`;
-    }
-  }
-}
-
-function buildCueMeaningContext({
-  cueWord,
-  gloss,
-  partOfSpeech,
-}: {
-  cueWord: string;
-  gloss: readonly string[];
-  partOfSpeech?: PartOfSpeech;
-}) {
-  const normalizedCueWord = cueWord.trim().toLowerCase();
-  const additionalGloss = gloss
-    .map((item) => item.trim())
-    .filter(
-      (item) => item.length > 0 && item.toLowerCase() !== normalizedCueWord,
-    )
-    .slice(0, 3);
-
-  const partOfSpeechText =
-    partOfSpeech == null ? null : formatPartOfSpeech(partOfSpeech);
-
-  const pieces = [
-    partOfSpeechText == null
-      ? null
-      : `intended sense part of speech: ${partOfSpeechText}`,
-    additionalGloss.length === 0
-      ? null
-      : `related glosses: ${additionalGloss.join(`; `)}`,
-  ].filter((x) => x != null);
-
-  return pieces.length === 0 ? undefined : pieces.join(`. `);
-}
-
-function formatPartOfSpeech(partOfSpeech: PartOfSpeech): string {
-  switch (partOfSpeech) {
-    case PartOfSpeech.Noun: {
-      return `noun`;
-    }
-    case PartOfSpeech.Verb: {
-      return `verb`;
-    }
-    case PartOfSpeech.Adjective: {
-      return `adjective`;
-    }
-    case PartOfSpeech.Adverb: {
-      return `adverb`;
-    }
-    case PartOfSpeech.Pronoun: {
-      return `pronoun`;
-    }
-    case PartOfSpeech.Numeral: {
-      return `numeral`;
-    }
-    case PartOfSpeech.MeasureWordOrClassifier: {
-      return `measure word or classifier`;
-    }
-    case PartOfSpeech.Preposition: {
-      return `preposition`;
-    }
-    case PartOfSpeech.Conjunction: {
-      return `conjunction`;
-    }
-    case PartOfSpeech.AuxiliaryWordOrParticle: {
-      return `auxiliary word or particle`;
-    }
-    case PartOfSpeech.Interjection: {
-      return `interjection`;
-    }
-    case PartOfSpeech.Prefix: {
-      return `prefix`;
-    }
-    case PartOfSpeech.Suffix: {
-      return `suffix`;
-    }
-    case PartOfSpeech.Phonetic: {
-      return `phonetic`;
-    }
-  }
-}
-
-function ExperimentalContent(props: { hanzi: HanziText }) {
-  void `leading-5 leading-6 leading-7 leading-8`;
-
-  return props.hanzi === `电` ? (
-    <View>
-      <Text className="pyly-body leading-7">
-        <Text
-          className="
-            my-0 inline-block rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50
-            via-sky-500/50 to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
-          "
-        >
-          [di-] Count Drac
-        </Text>
-        {` `}
-        counts the underground water gauges until{` `}
-        <Text
-          className="
-            my-0 inline-block rounded-sm border border-rose-500 bg-gradient-to-b from-rose-500/50
-            to-rose-600/50 px-1 leading-6 font-medium text-white shadow-sm
-          "
-        >
-          electricity
-        </Text>
-        {` `}
-        shocks him back to one.{` `}
-        <Text className="text-fg-dim">
-          In the pyramid’s damp{` `}
-          <Text
-            className="
-              my-0 rounded-sm border border-sky-400 bg-gradient-to-b from-sky-400/50 via-sky-500/50
-              to-sky-500/50 px-1 leading-6 font-medium text-white shadow-sm
-            "
-          >
-            [-àn] subterranean chamber
-          </Text>
-          , Count Drac keeps trying to count the water-gauge pillars, but
-          electricity jumps through the wet floor and shocks him back to one.
-        </Text>
-      </Text>
-    </View>
-  ) : null;
 }

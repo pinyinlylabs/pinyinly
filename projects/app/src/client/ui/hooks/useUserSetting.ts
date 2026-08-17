@@ -127,7 +127,7 @@ export function useUserSetting<T extends UserSettingEntity>(
     const nextValue = updater ?? null;
     const strippedValue = options.setting.encodeStoredValue(
       keyInput,
-      nextValue as RizzleEntityInput<T> | null,
+      nextValue,
     );
     const skipHistory = opts?.skipHistory === true;
 

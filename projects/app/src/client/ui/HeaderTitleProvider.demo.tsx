@@ -74,7 +74,7 @@ function HeaderTitleProviderScrollDemo({
             sticky top-0 z-10 h-13 flex-row items-center border-b border-fg/10 bg-bg/95 px-4
           `}
         >
-          <Text className="pyly-body text-fg-dim">Floating title:</Text>
+          <Text className="pyly-body text-muted-fg">Floating title:</Text>
           <View className="w-2" />
           <View className="flex-1">
             <HeaderTitleProvider.TitleText className="pyly-body-heading text-fg-loud" />
@@ -83,7 +83,7 @@ function HeaderTitleProviderScrollDemo({
 
         <ScrollView contentContainerClassName="gap-6 p-4 pb-10">
           <View className="rounded-lg border border-fg/10 bg-fg/5 p-3">
-            <Text className="pyly-body-dt text-fg-dim">
+            <Text className="pyly-body-dt text-muted-fg">
               Scroll to see the header title switch to the most recently
               scrolled-off trigger.
             </Text>
@@ -94,7 +94,7 @@ function HeaderTitleProviderScrollDemo({
               <Text className="pyly-body-heading">{section.title}</Text>
               <HeaderTitleProvider.ScrollTrigger title={section.title} />
 
-              <Text className="pyly-body text-fg-dim">{section.summary}</Text>
+              <Text className="pyly-body text-muted-fg">{section.summary}</Text>
 
               <View
                 className={

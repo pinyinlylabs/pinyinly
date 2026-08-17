@@ -117,33 +117,34 @@ tasks:
 
   codegen:
     deps:
-      - ~:codegenEslint
       - ~:codegenExpoRouterTypes
+      - ~:codegenOxlint
       - ~:codegenPublicVendor
+      - ~:codegenUniwind
 
-  codegenEslint:
-    description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
+  codegenOxlint:
+    description: "Run Oxlint with codegen rules. This is separate from lint and doesn't use Oxlint caching intentionally."
     script: |
       [ -n "${CI:-}" ] && {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }
 
-      eslint . --config eslint-codegen.config.mjs --fix
+      oxlint --config oxlint-codegen.config.ts --fix .
     inputs:
       # Config files anywhere within the project
       - src/data/pinyinSoundAudio.ts
       - src/client/ui/iconRegistry.ts
       - src/**/*.demo.tsx
       - src/assets/**
+      - oxlint-codegen.config.ts
       # Environment variables
       - "$DEBUG"
-      - "$ESLINT_*"
-      - "$TIMING"
     deps:
-      - eslint-rules:src
+      - oxlint-rules:src
     env:
-      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchain: "node"
 
   codegenExpoRouterTypes:
@@ -170,6 +171,32 @@ tasks:
     toolchain: "node"
     outputs:
       - "public/vendor/**/*"
+
+  codegenUniwind:
+    # The recommended command from https://docs.uniwind.dev/api/generate-artifacts
+    command: |
+      uniwind generate-artifacts
+        --css ./src/global.css 
+        --dts ./uniwind-env.d.ts
+        --theme dark-danger-panel
+        --theme dark-grass-panel
+        --theme dark-placeholder-panel
+        --theme dark-popover
+        --theme dark-sky-panel
+        --theme dark-success-panel
+        --theme dark-warning-panel
+        --theme dark
+        --theme light-danger-panel
+        --theme light-grass-panel
+        --theme light-placeholder-panel
+        --theme light-popover
+        --theme light-sky-panel
+        --theme light-success-panel
+        --theme light-warning-panel
+        --theme light
+    inputs:
+      - "/yarn.lock"
+    toolchain: "node"
 
   dbCheck:
     command: drizzle-kit check
@@ -270,7 +297,7 @@ tasks:
     toolchain: "node"
 
   devInngest:
-    command: npx -y inngest-cli@1.19.1 dev
+    command: npx -y inngest-cli@1.39.0 dev
     preset: watcher
 
   devMinio:
@@ -374,6 +401,13 @@ tasks:
       envFile:
         - .env.test.local
 
+  browser:
+    deps:
+      - ~:codegen
+    options:
+      envFile:
+        - .env.test.local
+
   evals:
     deps:
       - ~:codegen
@@ -388,12 +422,6 @@ tasks:
   lint:
     deps:
       - ~:oxlint
-      - ~:eslint
-
-  eslint:
-    deps:
-      # Lint does type-checking, so the Expo router types need to be generated first.
-      - ~:codegen
 
   oxlint:
     deps:
@@ -405,17 +433,17 @@ tasks:
       - ~:oxfmt
 
 tags:
-  - eslint
   - oxfmt
   - oxlint
   - typescript
   - vercel
   - vitest
   - vitest-bench
+  - vitest-browser
   - vitest-evals
 
 dependsOn:
   - audio-sprites
-  - eslint-rules
   - lib
   - mdx
+  - oxlint-rules

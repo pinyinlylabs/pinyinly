@@ -1,6 +1,6 @@
 import { AiImageStyleSettingControl } from "@/client/ui/AiImageStyleSettingControl";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
-import { autoCheckUserSetting } from "@/data/userSettings";
+import { autoCheckUserToggleSetting } from "@/data/userSettings";
 import { Text, View } from "react-native";
 
 export default function AppearanceSettingsPage() {
@@ -22,7 +22,7 @@ export default function AppearanceSettingsPage() {
             </Text>
           </View>
           <View>
-            <UserSettingToggleButton entity={autoCheckUserSetting} />
+            <UserSettingToggleButton entity={autoCheckUserToggleSetting} />
           </View>
         </View>
       </View>

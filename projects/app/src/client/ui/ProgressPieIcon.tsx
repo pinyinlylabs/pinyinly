@@ -20,7 +20,7 @@ export function ProgressPieIcon({
       className={
         warn
           ? `text-fg [--color-fg:var(--color-warning)]`
-          : `text-fg [--color-fg:var(--color-fg-dim)]`
+          : `text-fg [--color-fg:var(--color-muted-fg)]`
       }
       style={{ width: size, height: size }}
     >

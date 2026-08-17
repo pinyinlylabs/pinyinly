@@ -4,15 +4,12 @@ import { ToggleButton } from "@/client/ui/ToggleButton";
 import type { HanziText, HanziWord } from "@/data/model";
 import { Link } from "expo-router";
 import type { Href } from "expo-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import {
-  examplesStackClassName,
-  useDemoHanziKnob,
-  useDemoHanziWordKnob,
-} from "./utils";
+import { useDemoHanziKnob, useDemoHanziWordKnob } from "./utils";
+import { Theme } from "@/client/ui/Theme";
 
 export const ExampleStack = ({
   children,
@@ -57,51 +54,103 @@ export const Section = ({
   href: Href;
 }) => {
   const ref = useRef<View>(null);
+  const [isLightCollapsed, setIsLightCollapsed] = useState(false);
+  const [isDarkCollapsed, setIsDarkCollapsed] = useState(false);
+
   return (
     <>
       <View className="flex-row" ref={ref}>
-        <View
-          className={`
-            pyly-color-scheme-light flex-1 bg-bg/90 p-2 theme-default
+        <Theme theme="light">
+          <View
+            className={`
+              flex-1 bg-bg/90 p-2
 
-            hover:bg-bg
-          `}
-        >
-          <Link href={href} asChild>
-            <Text className="font-mono text-2xl text-fg">{title}</Text>
-          </Link>
-        </View>
-        <View
-          className={`
-            pyly-color-scheme-dark hidden flex-1 bg-bg-high p-2
+              hover:bg-bg
+            `}
+          >
+            <View className="flex-row items-center justify-between gap-2">
+              <Link href={href} asChild>
+                <Text className="font-mono text-2xl text-fg">{title}</Text>
+              </Link>
+              <RectButton
+                className="
+                  hidden
 
-            lg:flex
-          `}
-        />
+                  lg:flex
+                "
+                variant="bare"
+                onPress={() => {
+                  setIsLightCollapsed((current) => !current);
+                }}
+              >
+                {isLightCollapsed ? `Show` : `Hide`}
+              </RectButton>
+            </View>
+          </View>
+        </Theme>
+        <Theme theme="dark">
+          <View
+            className={`
+              hidden flex-1 bg-bg-high p-2
+
+              lg:flex
+            `}
+          >
+            <RectButton
+              className="
+                hidden self-end
+
+                lg:flex
+              "
+              variant="bare"
+              onPress={() => {
+                setIsDarkCollapsed((current) => !current);
+              }}
+            >
+              {isDarkCollapsed ? `Show` : `Hide`}
+            </RectButton>
+          </View>
+        </Theme>
       </View>
       <View className="lg:flex-row">
-        <View
-          className={`
-            pyly-color-scheme-light theme-default
-
-            ${examplesStackClassName}
-          `}
-        >
-          {children}
-        </View>
-        <View
-          className={`
-            pyly-color-scheme-dark theme-default
-
-            ${examplesStackClassName}
-          `}
-        >
-          {children}
-        </View>
+        <Theme theme="light">
+          <View
+            className={`
+              ${stackContentClass({ collapsed: isLightCollapsed })}
+            `}
+          >
+            {isLightCollapsed ? null : children}
+          </View>
+        </Theme>
+        <Theme theme="dark">
+          <View
+            className={`
+              ${stackContentClass({ collapsed: isDarkCollapsed })}
+            `}
+          >
+            {isDarkCollapsed ? null : children}
+          </View>
+        </Theme>
       </View>
     </>
   );
 };
+
+const stackContentClass = tv({
+  base: `
+    flex-row flex-wrap justify-center gap-2 bg-bg p-2
+
+    sm:justify-start
+
+    lg:flex-1 lg:shrink lg:basis-1
+  `,
+  variants: {
+    collapsed: {
+      true: `hidden`,
+      false: ``,
+    },
+  },
+});
 
 export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (

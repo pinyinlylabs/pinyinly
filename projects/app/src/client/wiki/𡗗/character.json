@@ -1,20 +1,16 @@
 {
   "hanzi": "𡗗",
+  "svg": { "strokes": 5 },
   "isStructural": true,
+  "decompositions": { "⿻𠂇③": ["0,1", "2-4"] },
   "mnemonic": {
-    "components": [
-      "⿻",
-      { "hanzi": "𠂇", "strokes": "0-1" },
-      { "label": "more hand parts", "strokes": "2-4" }
-    ],
+    "decomposition": "⿻𠂇③",
+    "components": { "③": { "label": "more hand parts" } },
     "hints": [
       {
-        "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out.",
-        "meaningKey": "openHands"
+        "meaningKey": "openHands",
+        "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out."
       }
     ]
-  },
-  "svg": {
-    "strokes": 5
   }
 }

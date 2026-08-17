@@ -84,9 +84,22 @@ export function TextInputMulti({
         className: props.className,
         variant,
       })}
+      placeholderTextColorClassName={inputPlaceholderTextColorClass({
+        variant,
+      })}
     />
   );
 }
+
+const inputPlaceholderTextColorClass = tv({
+  base: `accent-muted-fg`,
+  variants: {
+    variant: {
+      bare: `accent-muted-fg`,
+      flat: `accent-fg-bg30`,
+    },
+  },
+});
 
 const inputClass = tv({
   base: `
@@ -101,16 +114,8 @@ const inputClass = tv({
       right: `text-right`,
     },
     variant: {
-      bare: `
-        font-sans text-fg outline-none
-
-        placeholder:text-fg-dim
-      `,
-      flat: `
-        rounded-xl bg-bg-high px-4 py-3 pyly-body-input outline-none
-
-        placeholder:text-fg/30
-      `,
+      bare: `font-sans text-fg outline-none`,
+      flat: `rounded-xl bg-bg-high px-4 py-3 pyly-body-input outline-none`,
     },
   },
 });

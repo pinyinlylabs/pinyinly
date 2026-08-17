@@ -87,12 +87,10 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const containerRef = useRef<View>(null);
   const inputRef = useRef<TextInput>(null);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setDraft(displayValue);
-      setIsInputFocused(false);
-    }
-  }, [displayValue, isEditing]);
+  if (!isEditing && draft !== displayValue) {
+    setDraft(displayValue);
+    setIsInputFocused(false);
+  }
 
   useEffect(() => {
     if (!isEditing) {
@@ -122,7 +120,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         // Also check for React Native Web's modal container
         // which typically has very high z-index (9999+)
         const zIndex = window.getComputedStyle(current).zIndex;
-        if (zIndex && Number.parseInt(zIndex, 10) >= 9999) {
+        if (zIndex && Math.trunc(Number(zIndex)) >= 9999) {
           return true;
         }
         current = current.parentElement;
@@ -297,7 +295,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   className={
                     isTooLong
                       ? `font-sans text-[12px] text-fg`
-                      : `font-sans text-[12px] text-fg-dim`
+                      : `font-sans text-[12px] text-muted-fg`
                   }
                   style={
                     isTooLong ? { color: `var(--color-warning)` } : undefined
@@ -311,7 +309,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   className={
                     isAtLimit
                       ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
-                      : `text-right text-[11px] text-fg-dim`
+                      : `text-right text-[11px] text-muted-fg`
                   }
                 >
                   {currentLength}/{maxLength}
@@ -341,7 +339,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                   variant="bare"
                   iconStart="time-circled"
                   iconSize={16}
-                  className={`text-fg-dim`}
+                  className={`text-muted-fg`}
                 />
               </FloatingMenuModal>
             </View>
@@ -493,7 +491,7 @@ function InlineEditableSettingHistoryMenu({
             `}
           >
             <Text className="font-sans text-[14px] text-fg">{entry.value}</Text>
-            <Text className="font-sans text-[12px] text-fg-dim">
+            <Text className="font-sans text-[12px] text-muted-fg">
               {formatRelativeTime(entry.createdAt)}
             </Text>
           </View>

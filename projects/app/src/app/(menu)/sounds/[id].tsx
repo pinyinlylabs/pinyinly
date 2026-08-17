@@ -1,20 +1,18 @@
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
-import { AiLeadCharacterDescriptionModal } from "@/client/ui/AiLeadCharacterDescriptionModal";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { CompactWordRows } from "@/client/ui/CompactWordRows";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
+import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
-import type { SaveActorToDirectoryTarget } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
+import type { PinyinSoundLocationThoughtChainType } from "@/client/ui/hooks/usePinyinSoundLocations";
 import {
   getPinyinSoundLocationDisplaySummary,
   usePinyinSoundLocations,
 } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
-import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
-import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
@@ -26,42 +24,87 @@ import { useDb } from "@/client/ui/hooks/useDb";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
-import type { PinyinSoundId } from "@/data/model";
+import type { LocationSetKey, PinyinSoundId } from "@/data/model";
+import { locationSetKeys } from "@/data/model";
 import {
+  isToneSoundId,
   defaultPinyinSoundExamples,
   defaultPinyinSoundInstructions,
   getPinyinSoundLabel,
   isFinalSoundId,
-  isInitialSoundId,
   isInitialOrFinalSoundId,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import {
-  pinyinFinalSoundLocationSelectionSetting,
-  pinyinSoundDescriptionSetting,
-  pinyinSoundGroupNameSetting,
-  pinyinSoundImageSetting,
-  pinyinSoundMnemonicIdentitySetting,
-  pinyinSoundModelSheetImageSetting,
-  pinyinSoundNameSetting,
+  getEffectiveToneSetKeyForSoundId,
+  getLocationSetName,
+  getToneSoundNameFromSetKey,
+  pinyinSoundLocationSetting,
+  pinyinSoundGroupNameTextSetting,
+  pinyinSoundNameTextSetting,
+  pinyinSoundLocationSetKeySetting,
 } from "@/data/userSettings";
-import { and, eq, gte, useLiveQuery } from "@tanstack/react-db";
+import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { intersperse } from "@/client/react";
+
+function getThoughtChainPreviewsForSound(
+  location: {
+    thoughtChainsBySoundId: Record<
+      string,
+      PinyinSoundLocationThoughtChainType[]
+    >;
+  },
+  soundId: PinyinSoundId,
+): { chain: string[]; score: number }[] {
+  if (!isFinalSoundId(soundId)) {
+    return [];
+  }
+
+  const thoughtChains = location.thoughtChainsBySoundId[soundId] ?? [];
+
+  return [...thoughtChains]
+    .sort((left, right) => right.score - left.score)
+    .map((thoughtChain) => {
+      return {
+        chain: thoughtChain.path.map((step) => step.anchor),
+        score: thoughtChain.score,
+      };
+    });
+}
 
 export default function SoundIdPage() {
   const { id: rawId } = useLocalSearchParams<`/sounds/[id]`>();
   const id = rawId as PinyinSoundId;
   const chart = loadPylyPinyinChart();
+  const isToneSound = isToneSoundId(id);
   const isFinalSound = isFinalSoundId(id);
   const placeDirectory = usePinyinSoundLocations();
+  const toneSetKeySetting = useUserSetting(
+    isToneSound
+      ? {
+          setting: pinyinSoundLocationSetKeySetting,
+          key: { soundId: id },
+        }
+      : null,
+  );
+  const selectedToneSetKey = getEffectiveToneSetKeyForSoundId(
+    id,
+    toneSetKeySetting?.value?.setKey,
+  );
+  const toneSoundName = getToneSoundNameFromSetKey(
+    id,
+    toneSetKeySetting?.value?.setKey,
+  );
+  const hasCustomToneSetKey = toneSetKeySetting?.value != null;
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: id },
         }
       : null,
@@ -120,26 +163,32 @@ export default function SoundIdPage() {
             />
           )}
         </View>
-        <InlineEditableSettingText
-          textClassName="pyly-body-title"
-          setting={pinyinSoundNameSetting}
-          settingKey={{ soundId: id }}
-          placeholder="Name this sound"
-          readonly={isFinalSound}
-          renderDisplay={() => {
-            if (!isFinalSound) {
-              return null;
-            }
+        {isToneSound ? (
+          <Text className="pyly-ref pyly-body-subheading text-fg">
+            {toneSoundName ?? `Select a set key below`}
+          </Text>
+        ) : (
+          <InlineEditableSettingText
+            textClassName="pyly-body-title"
+            setting={pinyinSoundNameTextSetting}
+            settingKey={{ soundId: id }}
+            placeholder="Name this sound"
+            readonly={isFinalSound}
+            renderDisplay={() => {
+              if (!isFinalSound) {
+                return null;
+              }
 
-            return (
-              <Text className="pyly-ref pyly-body-subheading text-fg">
-                {finalDisplayName ?? `Select a location below`}
-              </Text>
-            );
-          }}
-        />
+              return (
+                <Text className="pyly-ref pyly-body-subheading text-fg">
+                  {finalDisplayName ?? `Select a location below`}
+                </Text>
+              );
+            }}
+          />
+        )}
 
-        {isFinalSound ? null : (
+        {isFinalSound || isToneSound ? null : (
           <RectButton
             onPress={() => {
               setIsEditSoundNameModalOpen(true);
@@ -152,7 +201,7 @@ export default function SoundIdPage() {
 
       {examplePinyins.length === 0 ? null : (
         <View className="my-5 flex-row items-center gap-4">
-          <Text className="pyly-body text-fg-dim">
+          <Text className="pyly-body text-muted-fg">
             Example pinyin: {examplePinyins.join(`, `)}
           </Text>
         </View>
@@ -169,13 +218,29 @@ export default function SoundIdPage() {
 
         <MnemonicStoryRoleSection pinyinSoundId={id} />
 
-        {/* Final-tone details editor for finals */}
+        {isToneSound && selectedToneSetKey != null ? (
+          <ToneSetKeySection
+            soundId={id}
+            selectedSetKey={selectedToneSetKey}
+            hasCustomValue={hasCustomToneSetKey}
+            onSelectSetKey={(setKey) => {
+              toneSetKeySetting?.setValue({
+                soundId: id,
+                setKey,
+              });
+            }}
+            onReset={() => {
+              toneSetKeySetting?.setValue(null);
+            }}
+          />
+        ) : null}
+
         {isFinalSound && <PinyinFinalToneEditor finalSoundId={id} />}
       </View>
 
       <SoundUsageExamplesSection pinyinSoundId={id} />
 
-      {isFinalSound ? null : (
+      {isFinalSound || isToneSound ? null : (
         <SoundNameEditModal
           soundId={id}
           isOpen={isEditSoundNameModalOpen}
@@ -193,44 +258,43 @@ function MnemonicStoryRoleSection({
 }: {
   pinyinSoundId: PinyinSoundId;
 }) {
+  const db = useDb();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showAiModal, setShowAiModal] = useState(false);
-  const [isSaveToOpen, setIsSaveToOpen] = useState(false);
-  const [isSelectPlaceOpen, setIsSelectPlaceOpen] = useState(false);
-  const [saveToResult, setSaveToResult] = useState<string | null>(null);
+  const [isSelectActorOpen, setIsSelectActorOpen] = useState(false);
   const actorDirectory = usePinyinSoundActors();
   const placeDirectory = usePinyinSoundLocations();
   const isFinalSound = isFinalSoundId(pinyinSoundId);
-  const chart = loadPylyPinyinChart();
-  const soundLabel = getPinyinSoundLabel(pinyinSoundId, chart);
-  const mnemonicDescriptionSetting = useUserSetting({
-    setting: pinyinSoundDescriptionSetting,
-    key: { soundId: pinyinSoundId },
-  });
-  const mnemonicImageSetting = useUserSetting({
-    setting: pinyinSoundImageSetting,
-    key: { soundId: pinyinSoundId },
-  });
-  const mnemonicIdentitySetting = useUserSetting({
-    setting: pinyinSoundMnemonicIdentitySetting,
-    key: { soundId: pinyinSoundId },
-  });
-  const modelSheetImageSetting = useUserSetting({
-    setting: pinyinSoundModelSheetImageSetting,
-    key: { soundId: pinyinSoundId },
-  });
-  const characterNameSetting = useUserSetting({
-    setting: pinyinSoundNameSetting,
-    key: { soundId: pinyinSoundId },
-  });
+  const finalSoundIds = loadPylyPinyinChart().soundIds.filter((soundId) =>
+    isFinalSoundId(soundId),
+  );
+  const finalLocationSelectionKeysCsv = finalSoundIds
+    .map((soundId) => pinyinSoundLocationSetting.entity.marshalKey({ soundId }))
+    .join(`,`);
+  const { data: finalLocationSelectionSettings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: db.settingCollection })
+        .where(({ setting }) =>
+          inArray(setting.key, finalLocationSelectionKeysCsv.split(`,`)),
+        ),
+    [db.settingCollection, finalLocationSelectionKeysCsv],
+  );
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
-          setting: pinyinFinalSoundLocationSelectionSetting,
+          setting: pinyinSoundLocationSetting,
           key: { soundId: pinyinSoundId },
         }
       : null,
   );
+  const selectedActorId =
+    actorDirectory.soundActorIdBySoundId.get(pinyinSoundId) ?? null;
+  const selectedActor =
+    selectedActorId == null
+      ? null
+      : (actorDirectory.actors.find(
+          (entry) => entry.actorId === selectedActorId,
+        ) ?? null);
   const selectedLocationId =
     finalPlaceSelectionSetting?.value?.locationId ?? null;
   const selectedLocation =
@@ -243,10 +307,55 @@ function MnemonicStoryRoleSection({
     selectedLocation == null
       ? null
       : getPinyinSoundLocationDisplaySummary(selectedLocation);
-  const characterName = characterNameSetting.value?.text ?? soundLabel;
-  const hasMnemonicIdentity = hasIdentityContent(
-    mnemonicIdentitySetting.value?.mnemonicIdentity,
+  const finalLocationSelectionByKey = new Map(
+    finalLocationSelectionSettings.map((setting) => [
+      setting.key,
+      setting.value,
+    ]),
   );
+  const locationUsageByLocationId = new Map<string, PinyinSoundId[]>();
+
+  for (const soundId of finalSoundIds) {
+    const settingValue =
+      finalLocationSelectionByKey.get(
+        pinyinSoundLocationSetting.entity.marshalKey({ soundId }),
+      ) ?? null;
+    const decoded = pinyinSoundLocationSetting.decode(
+      { soundId },
+      settingValue,
+    );
+    const locationId = decoded?.locationId;
+    if (locationId == null) {
+      continue;
+    }
+
+    const existing = locationUsageByLocationId.get(locationId) ?? [];
+    locationUsageByLocationId.set(locationId, [...existing, soundId]);
+  }
+
+  const availableLocations = placeDirectory.locations.filter((location) => {
+    if (selectedLocationId === location.locationId) {
+      return true;
+    }
+
+    const usedBy = locationUsageByLocationId.get(location.locationId) ?? [];
+    const usedByOtherSoundIds = usedBy.filter(
+      (soundId) => soundId !== pinyinSoundId,
+    );
+    return usedByOtherSoundIds.length === 0;
+  });
+
+  const unavailableLocations = placeDirectory.locations.filter((location) => {
+    if (selectedLocationId === location.locationId) {
+      return false;
+    }
+
+    const usedBy = locationUsageByLocationId.get(location.locationId) ?? [];
+    const usedByOtherSoundIds = usedBy.filter(
+      (soundId) => soundId !== pinyinSoundId,
+    );
+    return usedByOtherSoundIds.length > 0;
+  });
 
   const handleEditingChange = (editing: boolean) => {
     setIsEditMode(editing);
@@ -254,45 +363,7 @@ function MnemonicStoryRoleSection({
 
   const hasMnemonicContent = isFinalSound
     ? selectedLocation != null
-    : (mnemonicDescriptionSetting.value?.text ?? ``).trim().length > 0 ||
-      mnemonicImageSetting.value?.imageId != null ||
-      modelSheetImageSetting.value?.imageId != null ||
-      hasMnemonicIdentity;
-
-  const saveToActorDirectory = (target: SaveActorToDirectoryTarget) => {
-    const actorId = actorDirectory.saveActorToDirectory({
-      target,
-      name: characterNameSetting.value?.text ?? null,
-      description: mnemonicDescriptionSetting.value?.text ?? null,
-      mnemonicIdentity: mnemonicIdentitySetting.value?.mnemonicIdentity ?? null,
-      image:
-        mnemonicImageSetting.value == null
-          ? null
-          : {
-              imageId: mnemonicImageSetting.value.imageId,
-              imageCrop: mnemonicImageSetting.value.imageCrop ?? null,
-              imageWidth: mnemonicImageSetting.value.imageWidth ?? null,
-              imageHeight: mnemonicImageSetting.value.imageHeight ?? null,
-            },
-      modelSheetImage:
-        modelSheetImageSetting.value == null
-          ? null
-          : {
-              imageId: modelSheetImageSetting.value.imageId,
-              imageCrop: modelSheetImageSetting.value.imageCrop ?? null,
-              imageWidth: modelSheetImageSetting.value.imageWidth ?? null,
-              imageHeight: modelSheetImageSetting.value.imageHeight ?? null,
-            },
-      fallbackName: soundLabel,
-    });
-
-    setIsSaveToOpen(false);
-    setSaveToResult(
-      target.kind === `new`
-        ? `Saved to new actor ${actorId}.`
-        : `Overwrote actor ${actorId}.`,
-    );
-  };
+    : selectedActor != null;
 
   return (
     <WikiTitledBox
@@ -301,22 +372,22 @@ function MnemonicStoryRoleSection({
     >
       <View className="gap-4 p-4">
         {!isEditMode && !hasMnemonicContent ? (
-          <Text className="pyly-body text-fg-dim">
+          <Text className="pyly-body text-muted-fg">
             {isFinalSound
               ? `No location selected yet.`
-              : `No description, identity, or images`}
+              : `No actor selected yet.`}
           </Text>
         ) : isFinalSound ? (
           <>
             {selectedLocation == null ? (
-              <Text className="pyly-body text-fg-dim">
+              <Text className="pyly-body text-muted-fg">
                 No location selected yet.
               </Text>
             ) : (
               <>
                 {selectedLocation.description == null ||
                 selectedLocation.description.trim().length === 0 ? null : (
-                  <Text className="pyly-body text-fg-dim">
+                  <Text className="pyly-body text-muted-fg">
                     {selectedLocation.description}
                   </Text>
                 )}
@@ -341,7 +412,7 @@ function MnemonicStoryRoleSection({
                       variant="bareDim"
                       onPress={() => {
                         finalPlaceSelectionSetting?.setValue(null);
-                        setIsSelectPlaceOpen(false);
+                        setIsSelectActorOpen(false);
                       }}
                     >
                       Clear selection
@@ -357,40 +428,141 @@ function MnemonicStoryRoleSection({
                   <RectButton
                     variant="option"
                     onPress={() => {
-                      setIsSelectPlaceOpen((value) => !value);
+                      setIsSelectActorOpen((value) => !value);
                     }}
                   >
-                    {isSelectPlaceOpen
+                    {isSelectActorOpen
                       ? `Hide place list`
                       : `Choose from directory`}
                   </RectButton>
                 </View>
 
-                {isSelectPlaceOpen ? (
+                {isSelectActorOpen ? (
                   placeDirectory.locations.length === 0 ? (
-                    <Text className="pyly-body-caption text-fg-dim">
+                    <Text className="pyly-body-caption text-muted-fg">
                       No places in your directory yet. Create one in Places
                       first.
                     </Text>
                   ) : (
                     <View className="gap-2">
-                      {placeDirectory.locations.map((place) => (
-                        <RectButton
-                          key={place.locationId}
-                          variant="bareDim"
-                          onPress={() => {
-                            finalPlaceSelectionSetting?.setValue({
-                              soundId: pinyinSoundId,
-                              locationId: place.locationId,
-                            });
-                            setIsSelectPlaceOpen(false);
-                          }}
-                        >
-                          {place.name == null || place.name.trim().length === 0
-                            ? place.locationId
-                            : place.name}
-                        </RectButton>
-                      ))}
+                      {availableLocations.map((location) => {
+                        const locationName =
+                          location.name == null ||
+                          location.name.trim().length === 0
+                            ? location.locationId
+                            : location.name;
+                        const isActiveLocation =
+                          selectedLocationId === location.locationId;
+                        const thoughtChainPreviews =
+                          getThoughtChainPreviewsForSound(
+                            location,
+                            pinyinSoundId,
+                          );
+
+                        return (
+                          <Pressable
+                            key={location.locationId}
+                            onPress={() => {
+                              finalPlaceSelectionSetting?.setValue({
+                                soundId: pinyinSoundId,
+                                locationId: location.locationId,
+                              });
+                              setIsSelectActorOpen(false);
+                            }}
+                            className="
+                              rounded-lg border border-fg/10 bg-bg px-3 py-2
+
+                              active:opacity-80
+                            "
+                          >
+                            <View className="flex-row items-center justify-between gap-3">
+                              <Text className="pyly-body text-fg">
+                                {locationName}
+                              </Text>
+                              {isActiveLocation ? (
+                                <Text className="pyly-body-caption font-semibold text-fg/80">
+                                  ✓ Active
+                                </Text>
+                              ) : null}
+                            </View>
+                            {thoughtChainPreviews.length === 0 ? null : (
+                              <View className="mt-1 gap-1">
+                                {thoughtChainPreviews.map((preview, index) => {
+                                  return (
+                                    <Text
+                                      key={`${location.locationId}-${index}`}
+                                      className={`pyly-body-caption text-muted-fg`}
+                                    >
+                                      {intersperse(
+                                        preview.chain.map((step, i) => (
+                                          <Text
+                                            key={i}
+                                            className={[
+                                              i === 1 ? `` : ``,
+                                              i === 1 && index === 0
+                                                ? `text-fg/80 font-semibold`
+                                                : ``,
+                                            ].join(` `)}
+                                          >
+                                            {step}
+                                          </Text>
+                                        )),
+                                        <Text> → </Text>,
+                                      )}
+                                      {` `}
+                                      <Text className="text-muted-fg/50">
+                                        ({preview.score}%)
+                                      </Text>
+                                    </Text>
+                                  );
+                                })}
+                              </View>
+                            )}
+                          </Pressable>
+                        );
+                      })}
+
+                      {unavailableLocations.length === 0 ? null : (
+                        <View className="mt-3 gap-2 border-t border-fg/10 pt-3">
+                          <Text
+                            className="
+                              pyly-body-caption font-semibold tracking-wide text-muted-fg uppercase
+                            "
+                          >
+                            Unavailable
+                          </Text>
+                          {unavailableLocations.map((location) => {
+                            const locationName =
+                              location.name == null ||
+                              location.name.trim().length === 0
+                                ? location.locationId
+                                : location.name;
+                            const usedBy =
+                              locationUsageByLocationId.get(
+                                location.locationId,
+                              ) ?? [];
+                            const usedByOtherSoundIds = usedBy.filter(
+                              (soundId) => soundId !== pinyinSoundId,
+                            );
+
+                            return (
+                              <View
+                                key={`unavailable-${location.locationId}`}
+                                className="
+                                  rounded-lg border border-fg/10 bg-bg px-3 py-2 opacity-70
+                                "
+                              >
+                                <Text className="pyly-body text-fg">
+                                  {locationName}
+                                </Text>
+                                <Text className="pyly-body-caption text-muted-fg">
+                                  In use by: {usedByOtherSoundIds.join(`, `)}
+                                </Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
                     </View>
                   )
                 ) : null}
@@ -399,183 +571,92 @@ function MnemonicStoryRoleSection({
           </>
         ) : (
           <>
-            <View className="gap-2">
-              <InlineEditableSettingText
-                setting={pinyinSoundDescriptionSetting}
-                settingKey={{ soundId: pinyinSoundId }}
-                placeholder="Add a description to help with mnemonic generation…"
-                readonly={!isEditMode}
-                multiline
-              />
-              {isEditMode ? (
-                <View className="flex-row items-center justify-between">
-                  <Text className="font-sans text-[13px] text-fg-dim">
-                    Need a reusable mnemonic actor profile?
-                  </Text>
-                  <RectButton
-                    variant="bare"
-                    onPress={() => {
-                      setShowAiModal(true);
-                    }}
-                  >
-                    Use AI
-                  </RectButton>
-                </View>
-              ) : null}
-              {isEditMode ? (
-                <View className="gap-2 rounded-lg border border-fg/10 bg-bg-high p-3">
-                  <Text className="pyly-body-caption text-fg-dim">
-                    Actor directory
-                  </Text>
-                  <View className="flex-row flex-wrap gap-2">
+            {selectedActor == null ? (
+              <Text className="pyly-body text-muted-fg">
+                No actor selected yet.
+              </Text>
+            ) : (
+              <>
+                <View className="flex-row flex-wrap items-center gap-2">
+                  <Link href={`/actors/${selectedActor.actorId}`} asChild>
+                    <InitialSoundTile
+                      name={selectedActor.name}
+                      image={selectedActor.image}
+                      className="max-w-[220px]"
+                    />
+                  </Link>
+                  {isEditMode ? (
                     <RectButton
-                      variant="option"
+                      variant="bareDim"
                       onPress={() => {
-                        setIsSaveToOpen((value) => !value);
+                        actorDirectory.setSoundActorId(pinyinSoundId, null);
                       }}
                     >
-                      Save to…
+                      Clear selection
                     </RectButton>
-                  </View>
-
-                  {isSaveToOpen ? (
-                    <View className="gap-2">
-                      <RectButton
-                        variant="option"
-                        onPress={() => {
-                          saveToActorDirectory({ kind: `new` });
-                        }}
-                      >
-                        Create new actor
-                      </RectButton>
-
-                      {actorDirectory.actors.length === 0 ? (
-                        <Text className="pyly-body-caption text-fg-dim">
-                          No existing actors to overwrite yet.
-                        </Text>
-                      ) : (
-                        actorDirectory.actors.map((actor) => (
-                          <RectButton
-                            key={actor.actorId}
-                            variant="bareDim"
-                            onPress={() => {
-                              saveToActorDirectory({
-                                kind: `existing`,
-                                actorId: actor.actorId,
-                              });
-                            }}
-                          >
-                            Overwrite{` `}
-                            {actor.name == null ||
-                            actor.name.trim().length === 0
-                              ? actor.actorId
-                              : actor.name}
-                          </RectButton>
-                        ))
-                      )}
-                    </View>
                   ) : null}
-
-                  {saveToResult == null ? null : (
-                    <Text className="pyly-body-caption text-fg-dim">
-                      {saveToResult}
-                    </Text>
-                  )}
                 </View>
-              ) : null}
-            </View>
-            <View className="gap-2">
-              <Text className="pyly-body-caption text-fg-dim">
-                Avatar image
-              </Text>
-              <InlineEditableSettingImage
-                setting={pinyinSoundImageSetting}
-                settingKey={{ soundId: pinyinSoundId }}
-                readonly={!isEditMode}
-                enableAiGeneration
-                previewHeight={200}
-                tileSize={64}
-                frameShape={isInitialSoundId(pinyinSoundId) ? `circle` : `rect`}
-                aspectRatio={isInitialSoundId(pinyinSoundId) ? `1:1` : `16:9`}
-              />
-            </View>
-            <View className="gap-2">
-              <Text className="pyly-body-caption text-fg-dim">
-                Model sheet image
-              </Text>
-              <InlineEditableSettingImage
-                setting={pinyinSoundModelSheetImageSetting}
-                settingKey={{ soundId: pinyinSoundId }}
-                readonly={!isEditMode}
-                previewHeight={220}
-                tileSize={64}
-                enableAiGeneration
-                frameShape="rect"
-                aspectRatio="16:9"
-              />
-            </View>
-            <View className="gap-2 rounded-lg border border-fg/10 bg-bg-high p-3">
-              <Text className="pyly-body-caption text-fg-dim">
-                Mnemonic identity (JSON)
-              </Text>
-              <InlineEditableSettingJson
-                setting={pinyinSoundMnemonicIdentitySetting}
-                settingKey={{ soundId: pinyinSoundId }}
-                readonly={!isEditMode}
-                placeholder='{"traits": ["curious"]}'
-                emptyStateText="No mnemonic identity JSON"
-              />
-            </View>
+
+                {selectedActor.description == null ||
+                selectedActor.description.trim().length === 0 ? null : (
+                  <Text className="pyly-body text-muted-fg">
+                    {selectedActor.description}
+                  </Text>
+                )}
+              </>
+            )}
+
+            {isEditMode ? (
+              <View className="gap-2 rounded-lg border border-fg/10 bg-bg-high p-3">
+                <View className="flex-row flex-wrap gap-2">
+                  <RectButton
+                    variant="option"
+                    onPress={() => {
+                      setIsSelectActorOpen((value) => !value);
+                    }}
+                  >
+                    {isSelectActorOpen
+                      ? `Hide actor list`
+                      : `Choose from directory`}
+                  </RectButton>
+                </View>
+
+                {isSelectActorOpen ? (
+                  actorDirectory.actors.length === 0 ? (
+                    <Text className="pyly-body-caption text-muted-fg">
+                      No actors in your directory yet. Create one in Actors
+                      first.
+                    </Text>
+                  ) : (
+                    <View className="gap-2">
+                      {actorDirectory.actors.map((actor) => (
+                        <RectButton
+                          key={actor.actorId}
+                          variant="bareDim"
+                          onPress={() => {
+                            actorDirectory.setSoundActorId(
+                              pinyinSoundId,
+                              actor.actorId,
+                            );
+                            setIsSelectActorOpen(false);
+                          }}
+                        >
+                          {actor.name == null || actor.name.trim().length === 0
+                            ? actor.actorId
+                            : actor.name}
+                        </RectButton>
+                      ))}
+                    </View>
+                  )
+                ) : null}
+              </View>
+            ) : null}
           </>
         )}
       </View>
-
-      {showAiModal && isEditMode && !isFinalSound ? (
-        <AiLeadCharacterDescriptionModal
-          identity={characterName}
-          onApplyActor={(actor) => {
-            mnemonicDescriptionSetting.setValue({
-              soundId: pinyinSoundId,
-              text: actor.summary,
-            });
-            mnemonicIdentitySetting.setValue({
-              soundId: pinyinSoundId,
-              mnemonicIdentity: actor,
-            });
-            setShowAiModal(false);
-          }}
-          onDismiss={() => {
-            setShowAiModal(false);
-          }}
-        />
-      ) : null}
     </WikiTitledBox>
   );
 }
-
-function hasIdentityContent(value: unknown): boolean {
-  if (value == null) {
-    return false;
-  }
-
-  if (typeof value === `string`) {
-    return value.trim().length > 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  if (typeof value === `object`) {
-    return Object.keys(value as Record<string, unknown>).length > 0;
-  }
-
-  return true;
-}
-
-const pinyinPartBox = tv({
-  base: `size-20 justify-center gap-1 rounded-xl bg-bg-high p-2`,
-});
 
 function SoundUsageExamplesSection({
   pinyinSoundId,
@@ -630,11 +711,8 @@ function SoundUsageExamplesSection({
 function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
   const chart = loadPylyPinyinChart();
   const pinyinSoundGroups = usePinyinSoundGroups();
-
-  const pinyinSoundGroupId = useMemo(
-    () => chart.soundGroups.find((g) => g.sounds.includes(pinyinSoundId))?.id,
-    [chart, pinyinSoundId],
-  );
+  const pinyinSoundGroupId =
+    chart.soundGroups.find((g) => g.sounds.includes(pinyinSoundId))?.id ?? null;
 
   const pinyinSoundGroup = pinyinSoundGroups.data.find(
     (g) => g.id === pinyinSoundGroupId,
@@ -647,7 +725,7 @@ function Breadcrumb({ pinyinSoundId }: { pinyinSoundId: PinyinSoundId }) {
       {pinyinSoundGroupId == null ? null : (
         <Breadcrumbs.Item href="/sounds">
           <SettingText
-            setting={pinyinSoundGroupNameSetting}
+            setting={pinyinSoundGroupNameTextSetting}
             settingKey={{ soundGroupId: pinyinSoundGroupId }}
           />
         </Breadcrumbs.Item>
@@ -699,3 +777,63 @@ function SiblingSoundMenu({
     </DropdownMenu.Content>
   );
 }
+
+function ToneSetKeySection({
+  soundId,
+  selectedSetKey,
+  hasCustomValue,
+  onSelectSetKey,
+  onReset,
+}: {
+  soundId: PinyinSoundId;
+  selectedSetKey: LocationSetKey;
+  hasCustomValue: boolean;
+  onSelectSetKey: (setKey: LocationSetKey) => void;
+  onReset: () => void;
+}) {
+  return (
+    <WikiTitledBox title="Tone location set key">
+      <View className="gap-3 p-4">
+        <Text className="pyly-body text-muted-fg">
+          Tone {soundId} uses the{` `}
+          <Text className="pyly-bold">
+            {getLocationSetName(selectedSetKey)}
+          </Text>
+          {` `}
+          set for pronunciation mnemonics.
+        </Text>
+
+        <View className="flex-row flex-wrap gap-2">
+          {locationSetKeys.map((setKey) => {
+            const isActive = setKey === selectedSetKey;
+            return (
+              <RectButton
+                key={setKey}
+                variant={isActive ? `filled` : `option`}
+                onPress={() => {
+                  onSelectSetKey(setKey);
+                }}
+              >
+                {getLocationSetName(setKey)}
+              </RectButton>
+            );
+          })}
+        </View>
+
+        {hasCustomValue ? (
+          <RectButton variant="bareDim" onPress={onReset}>
+            Reset to default
+          </RectButton>
+        ) : (
+          <Text className="pyly-body-caption text-muted-fg">
+            Using default mapping.
+          </Text>
+        )}
+      </View>
+    </WikiTitledBox>
+  );
+}
+
+const pinyinPartBox = tv({
+  base: `size-20 justify-center gap-1 rounded-xl bg-bg-high p-2`,
+});

@@ -74,3 +74,12 @@ export function useDemoHanziKnob(defaultHanzi?: HanziText) {
 }
 
 export const examplesStackClassName = `bg-bg lg:flex-1 lg:shrink lg:basis-1 flex-row flex-wrap justify-center gap-2 p-2 sm:justify-start`;
+
+export const themeNames = [
+  `danger-panel`,
+  `success-panel`,
+  `warning-panel`,
+  `grass-panel`,
+  `sky-panel`,
+  `placeholder-panel`,
+] as const;

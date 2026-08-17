@@ -11,6 +11,9 @@ import { iconRegistry } from "./iconRegistry";
 export interface IconProps extends Pick<ImageProps, `className`> {
   icon: IconName;
   size?: 12 | 16 | 20 | 24 | 32;
+  /**
+   * Must be specified using `accent-*` classes.
+   */
   tintColorClassName?: string;
 }
 
@@ -26,9 +29,12 @@ export function Icon({ icon, className, size, tintColorClassName }: IconProps) {
 
   return (
     <Image
-      className={imageClass({ className, size })}
+      className={imageClass({
+        className: [className, tintColorClassName ?? `accent-fg`],
+        size,
+      })}
       source={iconRegistry[icon]}
-      tintColorClassName={tintColorClassName ?? `accent-fg`}
+      tintColor="currentColor"
     />
   );
 }
@@ -38,7 +44,9 @@ const imageClass = tv({
   // - `pointer-events-none` to prevent the image from being click and dragged
   // - `select-none` to not highlight with a box when it's surrounded in a text
   //   selection.
-  base: `pointer-events-none shrink text-fg select-none`,
+  //
+  // TODO: refactor --pyly-accent-color after https://github.com/uni-stack/uniwind/pull/611 is released
+  base: `pointer-events-none shrink text-[var(--pyly-accent-color)] select-none`,
   variants: {
     size: {
       12: `size-[12px]`,

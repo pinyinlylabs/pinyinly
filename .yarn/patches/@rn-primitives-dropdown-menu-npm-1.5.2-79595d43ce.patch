@@ -1,0 +1,82 @@
+diff --git a/dist/dropdown-menu.d.ts b/dist/dropdown-menu.d.ts
+index 26bab9368c33e484f6e987b83500043614d890cf..c2060335a7d4ff7dce6c45b7f30169a18e79f8b6 100644
+--- a/dist/dropdown-menu.d.ts
++++ b/dist/dropdown-menu.d.ts
+@@ -14,6 +14,7 @@ interface IRootContext {
+     setContentLayout: (contentLayout: LayoutRectangle | null) => void;
+     nativeID: string;
+ }
++declare const RootContext: React.Context<IRootContext>;
+ type RootComponentProps = RootProps & React.RefAttributes<RootRef>;
+ declare const Root: {
+     ({ asChild, onOpenChange: onOpenChangeProp, ref, ...viewProps }: RootComponentProps): React.JSX.Element;
+@@ -96,4 +97,4 @@ declare const SubTrigger: {
+ type SubContentComponentProps = SubContentProps & React.RefAttributes<SubContentRef>;
+ declare const SubContent: ({ asChild, forceMount, ref, ...props }: SubContentComponentProps) => React.JSX.Element | null;
+ 
+-export { CheckboxItem, Content, Group, Item, ItemIndicator, Label, Overlay, Portal, RadioGroup, RadioItem, Root, Separator, Sub, SubContent, SubTrigger, Trigger, useRootContext, useSubContext };
++export { CheckboxItem, Content, Group, Item, ItemIndicator, Label, Overlay, Portal, RadioGroup, RadioItem, Root, RootContext, Separator, Sub, SubContent, SubTrigger, Trigger, useRootContext, useSubContext };
+diff --git a/dist/dropdown-menu.js b/dist/dropdown-menu.js
+index a0428836cc996bd7eebb771183744f2ce9d2d22f..39c158ab289095a0ab28956e46744c965becf9fe 100644
+--- a/dist/dropdown-menu.js
++++ b/dist/dropdown-menu.js
+@@ -42,6 +42,7 @@ __export(dropdown_menu_exports, {
+   RadioGroup: () => RadioGroup,
+   RadioItem: () => RadioItem,
+   Root: () => Root,
++  RootContext: () => RootContext,
+   Separator: () => Separator,
+   Sub: () => Sub,
+   SubContent: () => SubContent,
+@@ -514,6 +515,7 @@ Content.displayName = "ContentNativeDropdownMenu";
+   RadioGroup,
+   RadioItem,
+   Root,
++  RootContext,
+   Separator,
+   Sub,
+   SubContent,
+diff --git a/dist/dropdown-menu.mjs b/dist/dropdown-menu.mjs
+index 7c0d8d6434138a2477c45ba6e3f39c5031590940..020794ebbbf3d02b7c92f0cc08a8295bc5e15bd1 100644
+--- a/dist/dropdown-menu.mjs
++++ b/dist/dropdown-menu.mjs
+@@ -475,6 +475,7 @@ export {
+   RadioGroup,
+   RadioItem,
+   Root,
++  RootContext,
+   Separator,
+   Sub,
+   SubContent,
+diff --git a/dist/dropdown-menu.web.js b/dist/dropdown-menu.web.js
+index a360bcd751bac322186edc19981bcc49ee486a46..2b3457f9b8fb71cc12a31a74a59a595170a10f41 100644
+--- a/dist/dropdown-menu.web.js
++++ b/dist/dropdown-menu.web.js
+@@ -42,6 +42,7 @@ __export(dropdown_menu_web_exports, {
+   RadioGroup: () => RadioGroup2,
+   RadioItem: () => RadioItem2,
+   Root: () => Root2,
++  RootContext: () => DropdownMenuContext,
+   Separator: () => Separator2,
+   Sub: () => Sub2,
+   SubContent: () => SubContent2,
+@@ -444,6 +445,7 @@ function onSelected(ev) {
+   RadioGroup,
+   RadioItem,
+   Root,
++  RootContext: DropdownMenuContext,
+   Separator,
+   Sub,
+   SubContent,
+diff --git a/dist/dropdown-menu.web.mjs b/dist/dropdown-menu.web.mjs
+index 68e9a69e0e998f611ac01856d7b098aaf5c0781c..69abfc053894ec169b416c2b7e3ecb1f28668201 100644
+--- a/dist/dropdown-menu.web.mjs
++++ b/dist/dropdown-menu.web.mjs
+@@ -398,6 +398,7 @@ export {
+   RadioGroup2 as RadioGroup,
+   RadioItem2 as RadioItem,
+   Root2 as Root,
++  DropdownMenuContext as RootContext,
+   Separator2 as Separator,
+   Sub2 as Sub,
+   SubContent2 as SubContent,

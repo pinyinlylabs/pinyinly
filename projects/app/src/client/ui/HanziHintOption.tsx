@@ -57,7 +57,7 @@ export function HanziHintOption({
                 <Icon
                   size={16}
                   icon="puzzle"
-                  tintColorClassName="accent-fg-dim"
+                  tintColorClassName="accent-muted-fg"
                 />
               </Pressable>
             )}
@@ -72,7 +72,7 @@ export function HanziHintOption({
                 <Icon
                   size={16}
                   icon="close"
-                  tintColorClassName="accent-fg-dim"
+                  tintColorClassName="accent-muted-fg"
                 />
               </Pressable>
             )}
@@ -81,7 +81,7 @@ export function HanziHintOption({
         <Text className="font-sans text-[14px] font-semibold text-fg-loud">
           <Pylymark source={displayHint} />
           {displayDescription == null ? null : (
-            <Text className="font-normal text-fg-dim">
+            <Text className="font-normal text-muted-fg">
               {` `}
               <Pylymark source={displayDescription} />
             </Text>

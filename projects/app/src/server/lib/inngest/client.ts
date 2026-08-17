@@ -2,11 +2,17 @@ import { eventType, Inngest } from "inngest";
 import pino from "pino";
 import pretty from "pino-pretty";
 import {
+  actorIdSchema,
   assetIdSchema,
+  hanziWordSchema,
   locationSetKeySchema,
   locationIdSchema,
+  pinyinSoundIdSchema,
+  hanziTextSchema,
+  pinyinUnitSchema,
 } from "@/data/model";
 import { z } from "zod";
+import { pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema } from "@/util/prompts/pronunciationMnemonicRecurring";
 
 declare global {
   var __pylyPino: pino.Logger | undefined;
@@ -16,7 +22,7 @@ declare global {
 // cause a large memory leak if it's re-instantiated because it hooks into
 // process.on('exit') and never removes the listener. So we store it on
 // globalThis to avoid re-instantiating it.
-globalThis.__pylyPino ??= pino(
+export const logger = (globalThis.__pylyPino ??= pino(
   { name: `inngest` },
   process.env.NODE_ENV === `development`
     ? pretty({
@@ -26,12 +32,12 @@ globalThis.__pylyPino ??= pino(
         minimumLevel: `debug`,
       })
     : undefined,
-);
+));
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
   id: `my-app`,
-  logger: globalThis.__pylyPino,
+  logger,
   // middleware: [sentryMiddleware()],
   isDev: process.env.NODE_ENV === `development`,
   checkpointing: {
@@ -92,17 +98,6 @@ export const locationPopulateLocationSetDescriptionEvent = eventType(
   },
 );
 
-export const locationPopulateLocationSetNameEvent = eventType(
-  `location/populate-location-set-name`,
-  {
-    schema: z.object({
-      userId: z.string(),
-      locationId: locationIdSchema,
-      setKey: locationSetKeySchema,
-    }),
-  },
-);
-
 export const locationPopulateLocationSpecEvent = eventType(
   `location/populate-location-spec`,
   {
@@ -113,12 +108,159 @@ export const locationPopulateLocationSpecEvent = eventType(
   },
 );
 
+export const locationPopulateLocationSetSpecEvent = eventType(
+  `location/populate-location-set-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+    }),
+  },
+);
+
+export const locationPopulateLocationSetEvent = eventType(
+  `location/populate-location-set`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+    }),
+  },
+);
+
 export const locationPopulateLocationEvent = eventType(
   `location/populate-location`,
   {
     schema: z.object({
       userId: z.string(),
       locationId: locationIdSchema,
+    }),
+  },
+);
+
+export const locationPopulateLocationSoundThoughtChainEvent = eventType(
+  `location/populate-location-sound-thought-chain`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      soundId: pinyinSoundIdSchema,
+    }),
+  },
+);
+
+export const actorPopulateActorSpecEvent = eventType(
+  `actor/populate-actor-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      actorId: actorIdSchema,
+      actorName: z.string(),
+    }),
+  },
+);
+
+export const actorPopulateModelSheetImageEvent = eventType(
+  `actor/populate-model-sheet-image`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      actorId: actorIdSchema,
+    }),
+  },
+);
+
+export const pronunciationGenerateRecurringMnemonicEvent = eventType(
+  `pronunciation/generate-recurring-mnemonic`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      locationId: locationIdSchema,
+      locationSetKey: locationSetKeySchema,
+      actorId: actorIdSchema,
+      hanziWord: hanziWordSchema,
+      associationStrategy:
+        pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
+    }),
+  },
+);
+
+export const pronunciationGenerateMnemonicStoryboardPanelsEvent = eventType(
+  `pronunciation/generate-mnemonic-storyboard-panels`,
+  {
+    schema: z.object({
+      actorId: actorIdSchema,
+      userId: z.string(),
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+      hanzi: hanziTextSchema,
+      pinyin: pinyinUnitSchema,
+      mnemonicId: z.string(),
+    }),
+  },
+);
+
+export const pronunciationGenerateMnemonicStoryboardImageEvent = eventType(
+  `pronunciation/generate-mnemonic-storyboard-image`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      actorId: actorIdSchema,
+      locationId: locationIdSchema,
+      setKey: locationSetKeySchema,
+      hook: z.string(),
+      premise: z.string(),
+      beats: z.array(z.string()),
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicSpecEvent = eventType(
+  `pronunciation/populate-mnemonic-spec`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
+      associationStrategy:
+        pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicSpecBeatsEvent = eventType(
+  `pronunciation/populate-mnemonic-spec-beats`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicImageEvent = eventType(
+  `pronunciation/populate-mnemonic-image`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
+    }),
+  },
+);
+
+export const populatePronunciationMnemonicSpecHookAndPremiseEvent = eventType(
+  `pronunciation/populate-mnemonic-spec-hook-and-premise`,
+  {
+    schema: z.object({
+      userId: z.string(),
+      hanziWord: hanziWordSchema,
+      mnemonicId: z.string(),
+      associationStrategy:
+        pronunciationMnemonicRecurringPromptAssociationStrategyKindSchema.optional(),
     }),
   },
 );

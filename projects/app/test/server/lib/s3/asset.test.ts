@@ -31,69 +31,60 @@ const mockSniffImageMimeType = vi.mocked(
   imageModule.sniffImageMimeTypeFromBuffer,
 );
 
-describe(
-  `createPresignedUploadUrl` satisfies HasNameOf<
-    typeof createPresignedUploadUrl
-  >,
-  () => {
-    test(`throws error for file size exceeding maximum`, async () => {
-      await expect(
-        createPresignedUploadUrl({
-          assetId:
-            `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` as AssetId,
-          contentType: `image/jpeg`,
-          contentLength: MAX_ASSET_SIZE_BYTES + 1,
-        }),
-      ).rejects.toThrow(/exceeds maximum/u);
-    });
-
-    test(`accepts valid parameters`, async () => {
-      const result = await createPresignedUploadUrl({
+describe(`createPresignedUploadUrl`, () => {
+  test(`throws error for file size exceeding maximum`, async () => {
+    await expect(
+      createPresignedUploadUrl({
         assetId:
           `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` as AssetId,
         contentType: `image/jpeg`,
-        contentLength: 1024,
-      });
+        contentLength: MAX_ASSET_SIZE_BYTES + 1,
+      }),
+    ).rejects.toThrow(/exceeds maximum/u);
+  });
 
-      expect(result).toHaveProperty(`uploadUrl`);
-      expect(result).toHaveProperty(`assetKey`);
-      expect(result.assetKey).toBe(
-        `blob/sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`,
-      );
-    });
-  },
-);
-
-describe(
-  `fetchAssetBase64 suite` satisfies HasNameOf<typeof fetchAssetBase64>,
-  () => {
-    beforeEach(() => {
-      vi.restoreAllMocks();
-      mockS3Send.mockReset();
-      mockSniffImageMimeType.mockReset();
+  test(`accepts valid parameters`, async () => {
+    const result = await createPresignedUploadUrl({
+      assetId: `sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` as AssetId,
+      contentType: `image/jpeg`,
+      contentLength: 1024,
     });
 
-    test(`uses sniffImageMimeTypeFromBuffer to detect mime type`, async () => {
-      const buffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
-      mockS3Send.mockResolvedValueOnce({ Body: [buffer] });
-      mockSniffImageMimeType.mockReturnValueOnce(`image/png`);
+    expect(result).toHaveProperty(`uploadUrl`);
+    expect(result).toHaveProperty(`assetKey`);
+    expect(result.assetKey).toBe(
+      `blob/sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`,
+    );
+  });
+});
 
-      const result = await fetchAssetBase64(`sha256/test-asset-id` as never);
+describe(`fetchAssetBase64 suite`, () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    mockS3Send.mockReset();
+    mockSniffImageMimeType.mockReset();
+  });
 
-      expect(mockSniffImageMimeType).toHaveBeenCalledWith(buffer);
-      expect(result.mimeType).toBe(`image/png`);
-      expect(result.data).toBe(buffer.toString(`base64`));
+  test(`uses sniffImageMimeTypeFromBuffer to detect mime type`, async () => {
+    const buffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+    mockS3Send.mockResolvedValueOnce({ Body: [buffer] });
+    mockSniffImageMimeType.mockReturnValueOnce(`image/png`);
+
+    const result = await fetchAssetBase64(`sha256/test-asset-id` as never);
+
+    expect(mockSniffImageMimeType).toHaveBeenCalledWith(buffer);
+    expect(result.mimeType).toBe(`image/png`);
+    expect(result.data).toBe(buffer.toString(`base64`));
+  });
+
+  test(`throws when sniffImageMimeTypeFromBuffer returns null`, async () => {
+    mockS3Send.mockResolvedValueOnce({
+      Body: [Buffer.from([0x00, 0x11, 0x22])],
     });
+    mockSniffImageMimeType.mockReturnValueOnce(null);
 
-    test(`throws when sniffImageMimeTypeFromBuffer returns null`, async () => {
-      mockS3Send.mockResolvedValueOnce({
-        Body: [Buffer.from([0x00, 0x11, 0x22])],
-      });
-      mockSniffImageMimeType.mockReturnValueOnce(null);
-
-      await expect(
-        fetchAssetBase64(`sha256/unknown-asset-id` as never),
-      ).rejects.toThrow(`Unsupported or unrecognized image format`);
-    });
-  },
-);
+    await expect(
+      fetchAssetBase64(`sha256/unknown-asset-id` as never),
+    ).rejects.toThrow(`Unsupported or unrecognized image format`);
+  });
+});

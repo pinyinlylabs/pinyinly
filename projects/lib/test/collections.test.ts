@@ -35,7 +35,7 @@ typeChecks(`type checks only`, () => {
   [1, 2].sort(sortComparatorString());
 });
 
-describe(`setToggle suite` satisfies HasNameOf<typeof setToggle>, () => {
+describe(`setToggle suite`, () => {
   test(`adds missing value`, () => {
     const prev = new Set([1, 2]);
     const next = setToggle(prev, 3);
@@ -53,7 +53,7 @@ describe(`setToggle suite` satisfies HasNameOf<typeof setToggle>, () => {
   });
 });
 
-describe(`setAdd suite` satisfies HasNameOf<typeof setAdd>, () => {
+describe(`setAdd suite`, () => {
   test(`adds missing value and returns new set`, () => {
     const prev = new Set([1, 2]);
     const next = setAdd(prev, 3);
@@ -70,7 +70,7 @@ describe(`setAdd suite` satisfies HasNameOf<typeof setAdd>, () => {
   });
 });
 
-describe(`setDelete suite` satisfies HasNameOf<typeof setDelete>, () => {
+describe(`setDelete suite`, () => {
   test(`deletes existing value and returns new set`, () => {
     const prev = new Set([1, 2]);
     const next = setDelete(prev, 2);
@@ -87,57 +87,46 @@ describe(`setDelete suite` satisfies HasNameOf<typeof setDelete>, () => {
   });
 });
 
-test(
-  `sortComparatorString fixtures` satisfies HasNameOf<
-    typeof sortComparatorString
-  >,
-  () => {
-    {
-      const arr = [`c`, `a`, `b`];
-      arr.sort(sortComparatorString());
-      expect(arr).toEqual([`a`, `b`, `c`]);
-    }
+test(`sortComparatorString fixtures`, () => {
+  {
+    const arr = [`c`, `a`, `b`];
+    arr.sort(sortComparatorString());
+    expect(arr).toEqual([`a`, `b`, `c`]);
+  }
 
-    {
-      const arr = [[`c`], [`a`], [`b`]];
-      arr.sort(sortComparatorString(([x]) => x!));
-      expect(arr).toEqual([[`a`], [`b`], [`c`]]);
-    }
-  },
-);
+  {
+    const arr = [[`c`], [`a`], [`b`]];
+    arr.sort(sortComparatorString(([x]) => x!));
+    expect(arr).toEqual([[`a`], [`b`], [`c`]]);
+  }
+});
 
-test(
-  `sortComparatorNumber suite` satisfies HasNameOf<typeof sortComparatorNumber>,
-  () => {
-    {
-      const arr = [3, 1, 2];
-      arr.sort(sortComparatorNumber());
-      expect(arr).toEqual([1, 2, 3]);
-    }
+test(`sortComparatorNumber suite`, () => {
+  {
+    const arr = [3, 1, 2];
+    arr.sort(sortComparatorNumber());
+    expect(arr).toEqual([1, 2, 3]);
+  }
 
-    {
-      const arr = [[3], [1], [2]];
-      arr.sort(sortComparatorNumber(([x]) => x!));
-      expect(arr).toEqual([[1], [2], [3]]);
-    }
-  },
-);
+  {
+    const arr = [[3], [1], [2]];
+    arr.sort(sortComparatorNumber(([x]) => x!));
+    expect(arr).toEqual([[1], [2], [3]]);
+  }
+});
 
-test(
-  `mergeSortComparators suite` satisfies HasNameOf<typeof mergeSortComparators>,
-  () => {
-    const arr = [`金`, `现金`, `金`, `金牌`];
-    arr.sort(
-      mergeSortComparators(
-        sortComparatorNumber((x) => x.length),
-        sortComparatorString((x) => x),
-      ),
-    );
-    expect(arr).toEqual([`金`, `金`, `现金`, `金牌`]);
-  },
-);
+test(`mergeSortComparators suite`, () => {
+  const arr = [`金`, `现金`, `金`, `金牌`];
+  arr.sort(
+    mergeSortComparators(
+      sortComparatorNumber((x) => x.length),
+      sortComparatorString((x) => x),
+    ),
+  );
+  expect(arr).toEqual([`金`, `金`, `现金`, `金牌`]);
+});
 
-test(`merge suite` satisfies HasNameOf<typeof merge>, () => {
+test(`merge suite`, () => {
   expect(merge(null, null)).toEqual(null);
   expect(merge(null, 1)).toEqual(1);
   expect(merge(1, null)).toEqual(1);
@@ -168,7 +157,7 @@ test(`merge suite` satisfies HasNameOf<typeof merge>, () => {
   );
 });
 
-test(`deepTransform suite` satisfies HasNameOf<typeof deepTransform>, () => {
+test(`deepTransform suite`, () => {
   expect(deepTransform(null, (x) => x)).toEqual(null);
   expect(
     deepTransform(new Map([[`key1`, `value1`]]), (x) =>
@@ -177,12 +166,12 @@ test(`deepTransform suite` satisfies HasNameOf<typeof deepTransform>, () => {
   ).toEqual({ key1: `value1` });
 });
 
-test(`objectInvert fixtures` satisfies HasNameOf<typeof objectInvert>, () => {
+test(`objectInvert fixtures`, () => {
   expect(objectInvert({})).toEqual({});
   expect(objectInvert({ a: 1, b: 2 })).toEqual({ 1: `a`, 2: `b` });
 });
 
-test(`mapInvert fixtures` satisfies HasNameOf<typeof mapInvert>, () => {
+test(`mapInvert fixtures`, () => {
   expect(mapInvert(new Map())).toEqual(new Map());
   expect(
     mapInvert(
@@ -199,7 +188,7 @@ test(`mapInvert fixtures` satisfies HasNameOf<typeof mapInvert>, () => {
   );
 });
 
-describe(`makeRange suite` satisfies HasNameOf<typeof makeRange>, () => {
+describe(`makeRange suite`, () => {
   test(`ascending range`, () => {
     expect(makeRange(0, 0)).toEqual([0]);
     expect(makeRange(0, 1)).toEqual([0, 1]);
@@ -212,7 +201,7 @@ describe(`makeRange suite` satisfies HasNameOf<typeof makeRange>, () => {
   });
 });
 
-describe(`objectMap suite` satisfies HasNameOf<typeof objectMap>, () => {
+describe(`objectMap suite`, () => {
   test(`fixtures`, () => {
     expect(
       objectMap({ a: 1, b: 2 }, (key, value) => [`${key}${value}`, value * 2]),
@@ -232,26 +221,23 @@ describe(`objectMap suite` satisfies HasNameOf<typeof objectMap>, () => {
   });
 });
 
-test(
-  `objectMapToArray suite` satisfies HasNameOf<typeof objectMapToArray>,
-  () => {
-    expect(
-      objectMapToArray({ a: 1, b: 2 }, (key, value) => [
-        `${key}${value}`,
-        value * 2,
-      ]),
-    ).toEqual([
-      [`a1`, 2],
-      [`b2`, 4],
-    ]);
+test(`objectMapToArray suite`, () => {
+  expect(
+    objectMapToArray({ a: 1, b: 2 }, (key, value) => [
+      `${key}${value}`,
+      value * 2,
+    ]),
+  ).toEqual([
+    [`a1`, 2],
+    [`b2`, 4],
+  ]);
 
-    expect(
-      objectMapToArray({ a: `x`, b: `y` }, (key, value) => `${key}${value}`),
-    ).toEqual([`ax`, `by`]);
-  },
-);
+  expect(
+    objectMapToArray({ a: `x`, b: `y` }, (key, value) => `${key}${value}`),
+  ).toEqual([`ax`, `by`]);
+});
 
-describe(`memoize1 suite` satisfies HasNameOf<typeof memoize1>, () => {
+describe(`memoize1 suite`, () => {
   test(`fixtures`, () => {
     const fn = (x: string) => x.toUpperCase();
     const memoized = memoize1(fn);
@@ -282,135 +268,132 @@ describe(`memoize1 suite` satisfies HasNameOf<typeof memoize1>, () => {
   });
 });
 
-describe(
-  `mutableArrayFilter suite` satisfies HasNameOf<typeof mutableArrayFilter>,
-  () => {
-    test(`filters elements in place`, () => {
-      const arr = [1, 2, 3, 4, 5];
-      mutableArrayFilter(arr, (x) => x % 2 === 0);
-      expect(arr).toEqual([2, 4]);
+describe(`mutableArrayFilter suite`, () => {
+  test(`filters elements in place`, () => {
+    const arr = [1, 2, 3, 4, 5];
+    mutableArrayFilter(arr, (x) => x % 2 === 0);
+    expect(arr).toEqual([2, 4]);
+  });
+
+  test(`preserves all elements when predicate is always true`, () => {
+    const arr = [`a`, `b`, `c`];
+    mutableArrayFilter(arr, () => true);
+    expect(arr).toEqual([`a`, `b`, `c`]);
+  });
+
+  test(`removes all elements when predicate is always false`, () => {
+    const arr = [1, 2, 3];
+    mutableArrayFilter(arr, () => false);
+    expect(arr).toEqual([]);
+  });
+
+  test(`works with empty array`, () => {
+    const arr: number[] = [];
+    mutableArrayFilter(arr, (x) => x > 0);
+    expect(arr).toEqual([]);
+  });
+
+  test(`works with single element array`, () => {
+    const arr1 = [42];
+    mutableArrayFilter(arr1, (x) => x > 40);
+    expect(arr1).toEqual([42]);
+
+    const arr2 = [42];
+    mutableArrayFilter(arr2, (x) => x < 40);
+    expect(arr2).toEqual([]);
+  });
+
+  test(`filters complex objects`, () => {
+    const arr = [
+      { id: 1, active: true },
+      { id: 2, active: false },
+      { id: 3, active: true },
+      { id: 4, active: false },
+    ];
+    mutableArrayFilter(arr, (item) => item.active);
+    expect(arr).toEqual([
+      { id: 1, active: true },
+      { id: 3, active: true },
+    ]);
+  });
+
+  test(`preserves order of filtered elements`, () => {
+    const arr = [5, 1, 8, 2, 9, 3, 6];
+    mutableArrayFilter(arr, (x) => x > 4);
+    expect(arr).toEqual([5, 8, 9, 6]);
+  });
+
+  test(`handles strings correctly`, () => {
+    const arr = [`apple`, `banana`, `cherry`, `date`];
+    mutableArrayFilter(arr, (str) => str.length <= 5);
+    expect(arr).toEqual([`apple`, `date`]);
+  });
+
+  test(`modifies array length correctly`, () => {
+    const arr = [1, 2, 3, 4, 5, 6];
+    expect(arr.length).toBe(6);
+    mutableArrayFilter(arr, (x) => x <= 2);
+    expect(arr.length).toBe(2);
+    expect(arr).toEqual([1, 2]);
+  });
+
+  test(`handles mixed types with type predicate`, () => {
+    const arr: (string | number)[] = [1, `hello`, 2, `world`, 3];
+    mutableArrayFilter(arr, (x): x is number => typeof x === `number`);
+    expect(arr).toEqual([1, 2, 3]);
+  });
+
+  test(`works with boolean values`, () => {
+    const arr = [true, false, true, false, true];
+    mutableArrayFilter(arr, (x) => x);
+    expect(arr).toEqual([true, true, true]);
+  });
+
+  test(`handles null and undefined values`, () => {
+    const arr = [1, null, 2, undefined, 3, null];
+    mutableArrayFilter(arr, (x) => x != null);
+    expect(arr).toEqual([1, 2, 3]);
+  });
+
+  test(`works with filtering by index (via closure)`, () => {
+    const arr = [`a`, `b`, `c`, `d`, `e`];
+    let index = 0;
+    mutableArrayFilter(arr, () => {
+      const shouldKeep = index % 2 === 0;
+      index++;
+      return shouldKeep;
     });
+    expect(arr).toEqual([`a`, `c`, `e`]);
+  });
 
-    test(`preserves all elements when predicate is always true`, () => {
-      const arr = [`a`, `b`, `c`];
-      mutableArrayFilter(arr, () => true);
-      expect(arr).toEqual([`a`, `b`, `c`]);
-    });
+  test(`does not affect references to filtered objects`, () => {
+    const obj1 = { name: `John` };
+    const obj2 = { name: `Jane` };
+    const obj3 = { name: `Bob` };
+    const arr = [obj1, obj2, obj3];
 
-    test(`removes all elements when predicate is always false`, () => {
-      const arr = [1, 2, 3];
-      mutableArrayFilter(arr, () => false);
-      expect(arr).toEqual([]);
-    });
+    mutableArrayFilter(arr, (obj) => obj.name.startsWith(`J`));
 
-    test(`works with empty array`, () => {
-      const arr: number[] = [];
-      mutableArrayFilter(arr, (x) => x > 0);
-      expect(arr).toEqual([]);
-    });
+    expect(arr).toHaveLength(2);
+    expect(arr[0]).toBe(obj1); // Same reference
+    expect(arr[1]).toBe(obj2); // Same reference
+    expect(arr).toEqual([obj1, obj2]);
+  });
 
-    test(`works with single element array`, () => {
-      const arr1 = [42];
-      mutableArrayFilter(arr1, (x) => x > 40);
-      expect(arr1).toEqual([42]);
+  test(`consecutive filtering operations`, () => {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-      const arr2 = [42];
-      mutableArrayFilter(arr2, (x) => x < 40);
-      expect(arr2).toEqual([]);
-    });
+    // First filter: keep even numbers
+    mutableArrayFilter(arr, (x) => x % 2 === 0);
+    expect(arr).toEqual([2, 4, 6, 8, 10]);
 
-    test(`filters complex objects`, () => {
-      const arr = [
-        { id: 1, active: true },
-        { id: 2, active: false },
-        { id: 3, active: true },
-        { id: 4, active: false },
-      ];
-      mutableArrayFilter(arr, (item) => item.active);
-      expect(arr).toEqual([
-        { id: 1, active: true },
-        { id: 3, active: true },
-      ]);
-    });
+    // Second filter: keep numbers > 5
+    mutableArrayFilter(arr, (x) => x > 5);
+    expect(arr).toEqual([6, 8, 10]);
+  });
+});
 
-    test(`preserves order of filtered elements`, () => {
-      const arr = [5, 1, 8, 2, 9, 3, 6];
-      mutableArrayFilter(arr, (x) => x > 4);
-      expect(arr).toEqual([5, 8, 9, 6]);
-    });
-
-    test(`handles strings correctly`, () => {
-      const arr = [`apple`, `banana`, `cherry`, `date`];
-      mutableArrayFilter(arr, (str) => str.length <= 5);
-      expect(arr).toEqual([`apple`, `date`]);
-    });
-
-    test(`modifies array length correctly`, () => {
-      const arr = [1, 2, 3, 4, 5, 6];
-      expect(arr.length).toBe(6);
-      mutableArrayFilter(arr, (x) => x <= 2);
-      expect(arr.length).toBe(2);
-      expect(arr).toEqual([1, 2]);
-    });
-
-    test(`handles mixed types with type predicate`, () => {
-      const arr: (string | number)[] = [1, `hello`, 2, `world`, 3];
-      mutableArrayFilter(arr, (x): x is number => typeof x === `number`);
-      expect(arr).toEqual([1, 2, 3]);
-    });
-
-    test(`works with boolean values`, () => {
-      const arr = [true, false, true, false, true];
-      mutableArrayFilter(arr, (x) => x);
-      expect(arr).toEqual([true, true, true]);
-    });
-
-    test(`handles null and undefined values`, () => {
-      const arr = [1, null, 2, undefined, 3, null];
-      mutableArrayFilter(arr, (x) => x != null);
-      expect(arr).toEqual([1, 2, 3]);
-    });
-
-    test(`works with filtering by index (via closure)`, () => {
-      const arr = [`a`, `b`, `c`, `d`, `e`];
-      let index = 0;
-      mutableArrayFilter(arr, () => {
-        const shouldKeep = index % 2 === 0;
-        index++;
-        return shouldKeep;
-      });
-      expect(arr).toEqual([`a`, `c`, `e`]);
-    });
-
-    test(`does not affect references to filtered objects`, () => {
-      const obj1 = { name: `John` };
-      const obj2 = { name: `Jane` };
-      const obj3 = { name: `Bob` };
-      const arr = [obj1, obj2, obj3];
-
-      mutableArrayFilter(arr, (obj) => obj.name.startsWith(`J`));
-
-      expect(arr).toHaveLength(2);
-      expect(arr[0]).toBe(obj1); // Same reference
-      expect(arr[1]).toBe(obj2); // Same reference
-      expect(arr).toEqual([obj1, obj2]);
-    });
-
-    test(`consecutive filtering operations`, () => {
-      const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-      // First filter: keep even numbers
-      mutableArrayFilter(arr, (x) => x % 2 === 0);
-      expect(arr).toEqual([2, 4, 6, 8, 10]);
-
-      // Second filter: keep numbers > 5
-      mutableArrayFilter(arr, (x) => x > 5);
-      expect(arr).toEqual([6, 8, 10]);
-    });
-  },
-);
-
-describe(`MinHeap` satisfies HasNameOf<typeof MinHeap>, () => {
+describe(`MinHeap`, () => {
   test(`returns the smallest items for numbers`, () => {
     const heap = new MinHeap<number>((a, b) => a - b, 3);
     for (const n of [5, 1, 9, 3, 7, 2]) {
@@ -461,7 +444,7 @@ describe(`MinHeap` satisfies HasNameOf<typeof MinHeap>, () => {
   });
 });
 
-describe(`minK suite` satisfies HasNameOf<typeof minK>, () => {
+describe(`minK suite`, () => {
   test(`returns top-k largest numbers (asc comparator)`, () => {
     const result = [...minK([5, 1, 9, 3, 7, 2], 3, (x) => x)];
     expect(result).toEqual([1, 2, 3]);
@@ -492,7 +475,7 @@ describe(`minK suite` satisfies HasNameOf<typeof minK>, () => {
   });
 });
 
-describe(`maxK suite` satisfies HasNameOf<typeof maxK>, () => {
+describe(`maxK suite`, () => {
   test(`returns top-k largest numbers (asc comparator)`, () => {
     const result = [...maxK([5, 1, 9, 3, 7, 2], 3, (x) => x)];
     expect(result).toEqual([9, 7, 5]);
@@ -523,136 +506,129 @@ describe(`maxK suite` satisfies HasNameOf<typeof maxK>, () => {
   });
 });
 
-describe(
-  `arrayFilterUnique suite` satisfies HasNameOf<typeof arrayFilterUnique>,
-  () => {
-    test(`filters out duplicate numbers with default key function`, () => {
-      const arr = [1, 2, 1, 3, 2, 4];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([1, 2, 3, 4]);
-    });
+describe(`arrayFilterUnique suite`, () => {
+  test(`filters out duplicate numbers with default key function`, () => {
+    const arr = [1, 2, 1, 3, 2, 4];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([1, 2, 3, 4]);
+  });
 
-    test(`filters out duplicate strings with default key function`, () => {
-      const arr = [`apple`, `banana`, `apple`, `cherry`, `banana`];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([`apple`, `banana`, `cherry`]);
-    });
+  test(`filters out duplicate strings with default key function`, () => {
+    const arr = [`apple`, `banana`, `apple`, `cherry`, `banana`];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([`apple`, `banana`, `cherry`]);
+  });
 
-    test(`preserves order of first occurrence`, () => {
-      const arr = [5, 1, 3, 1, 5, 2];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([5, 1, 3, 2]);
-    });
+  test(`preserves order of first occurrence`, () => {
+    const arr = [5, 1, 3, 1, 5, 2];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([5, 1, 3, 2]);
+  });
 
-    test(`handles empty array`, () => {
-      const arr: number[] = [];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([]);
-    });
+  test(`handles empty array`, () => {
+    const arr: number[] = [];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([]);
+  });
 
-    test(`handles single element`, () => {
-      const arr = [42];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([42]);
-    });
+  test(`handles single element`, () => {
+    const arr = [42];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([42]);
+  });
 
-    test(`returns all elements when all are unique`, () => {
-      const arr = [1, 2, 3, 4, 5];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([1, 2, 3, 4, 5]);
-    });
+  test(`returns all elements when all are unique`, () => {
+    const arr = [1, 2, 3, 4, 5];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([1, 2, 3, 4, 5]);
+  });
 
-    test(`filters with custom key function on objects`, () => {
-      const arr = [
-        { id: 1, name: `Alice` },
-        { id: 2, name: `Bob` },
-        { id: 1, name: `Alice2` },
-        { id: 3, name: `Charlie` },
-      ];
-      const result = arr.filter(arrayFilterUnique((x) => x.id));
-      expect(result).toEqual([
-        { id: 1, name: `Alice` },
-        { id: 2, name: `Bob` },
-        { id: 3, name: `Charlie` },
-      ]);
-    });
+  test(`filters with custom key function on objects`, () => {
+    const arr = [
+      { id: 1, name: `Alice` },
+      { id: 2, name: `Bob` },
+      { id: 1, name: `Alice2` },
+      { id: 3, name: `Charlie` },
+    ];
+    const result = arr.filter(arrayFilterUnique((x) => x.id));
+    expect(result).toEqual([
+      { id: 1, name: `Alice` },
+      { id: 2, name: `Bob` },
+      { id: 3, name: `Charlie` },
+    ]);
+  });
 
-    test(`filters with key function extracting nested property`, () => {
-      const arr = [
-        { user: { id: 1 } },
-        { user: { id: 2 } },
-        { user: { id: 1 } },
-      ];
-      const result = arr.filter(arrayFilterUnique((x) => x.user.id));
-      expect(result).toEqual([{ user: { id: 1 } }, { user: { id: 2 } }]);
-    });
+  test(`filters with key function extracting nested property`, () => {
+    const arr = [{ user: { id: 1 } }, { user: { id: 2 } }, { user: { id: 1 } }];
+    const result = arr.filter(arrayFilterUnique((x) => x.user.id));
+    expect(result).toEqual([{ user: { id: 1 } }, { user: { id: 2 } }]);
+  });
 
-    test(`handles mixed type key functions`, () => {
-      const arr = [`a`, `b`, `a`, `c`, `b`];
-      const result = arr.filter(arrayFilterUnique((x) => x.length));
-      expect(result).toEqual([`a`]);
-    });
+  test(`handles mixed type key functions`, () => {
+    const arr = [`a`, `b`, `a`, `c`, `b`];
+    const result = arr.filter(arrayFilterUnique((x) => x.length));
+    expect(result).toEqual([`a`]);
+  });
 
-    test(`filters duplicates with null/undefined values`, () => {
-      const arr = [1, null, 2, null, undefined, 2, undefined];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([1, null, 2, undefined]);
-    });
+  test(`filters duplicates with null/undefined values`, () => {
+    const arr = [1, null, 2, null, undefined, 2, undefined];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([1, null, 2, undefined]);
+  });
 
-    test(`uses Set semantics for key comparison`, () => {
-      const arr = [0, -0, Number.NaN, Number.NaN, 1];
-      const result = arr.filter(arrayFilterUnique());
-      // Note: In JavaScript Sets, 0 and -0 are considered equal,
-      // and NaN is also considered equal to itself (SameValueZero)
-      expect(result).toEqual([0, Number.NaN, 1]);
-    });
+  test(`uses Set semantics for key comparison`, () => {
+    const arr = [0, -0, Number.NaN, Number.NaN, 1];
+    const result = arr.filter(arrayFilterUnique());
+    // Note: In JavaScript Sets, 0 and -0 are considered equal,
+    // and NaN is also considered equal to itself (SameValueZero)
+    expect(result).toEqual([0, Number.NaN, 1]);
+  });
 
-    test(`works with reference equality for objects`, () => {
-      const obj1 = { id: 1 };
-      const obj2 = { id: 1 };
-      const obj3 = { id: 2 };
-      const arr = [obj1, obj2, obj3, obj1];
-      const result = arr.filter(arrayFilterUnique());
-      expect(result).toEqual([obj1, obj2, obj3]);
-    });
+  test(`works with reference equality for objects`, () => {
+    const obj1 = { id: 1 };
+    const obj2 = { id: 1 };
+    const obj3 = { id: 2 };
+    const arr = [obj1, obj2, obj3, obj1];
+    const result = arr.filter(arrayFilterUnique());
+    expect(result).toEqual([obj1, obj2, obj3]);
+  });
 
-    test(`filters with stringified JSON key function`, () => {
-      const arr = [
-        { a: 1, b: 2 },
-        { a: 1, b: 2 },
-        { a: 1, b: 3 },
-      ];
-      const result = arr.filter(arrayFilterUnique((x) => JSON.stringify(x)));
-      expect(result).toEqual([
-        { a: 1, b: 2 },
-        { a: 1, b: 3 },
-      ]);
-    });
+  test(`filters with stringified JSON key function`, () => {
+    const arr = [
+      { a: 1, b: 2 },
+      { a: 1, b: 2 },
+      { a: 1, b: 3 },
+    ];
+    const result = arr.filter(arrayFilterUnique((x) => JSON.stringify(x)));
+    expect(result).toEqual([
+      { a: 1, b: 2 },
+      { a: 1, b: 3 },
+    ]);
+  });
 
-    test(`maintains independent instances`, () => {
-      const filter1 = arrayFilterUnique();
-      const filter2 = arrayFilterUnique();
-      const arr1 = [1, 1, 2];
-      const arr2 = [1, 1, 2];
+  test(`maintains independent instances`, () => {
+    const filter1 = arrayFilterUnique();
+    const filter2 = arrayFilterUnique();
+    const arr1 = [1, 1, 2];
+    const arr2 = [1, 1, 2];
 
-      const result1 = arr1.filter(filter1);
-      const result2 = arr2.filter(filter2);
+    const result1 = arr1.filter(filter1);
+    const result2 = arr2.filter(filter2);
 
-      expect(result1).toEqual([1, 2]);
-      expect(result2).toEqual([1, 2]);
-    });
+    expect(result1).toEqual([1, 2]);
+    expect(result2).toEqual([1, 2]);
+  });
 
-    test(`does not filter across different filter instances`, () => {
-      const filter = arrayFilterUnique();
-      const arr1 = [1, 1];
-      const arr2 = [1, 1];
+  test(`does not filter across different filter instances`, () => {
+    const filter = arrayFilterUnique();
+    const arr1 = [1, 1];
+    const arr2 = [1, 1];
 
-      const result1 = arr1.filter(filter);
-      // Reusing the same filter instance will consider 1 as seen from arr1
-      const result2 = arr2.filter(filter);
+    const result1 = arr1.filter(filter);
+    // Reusing the same filter instance will consider 1 as seen from arr1
+    const result2 = arr2.filter(filter);
 
-      expect(result1).toEqual([1]);
-      expect(result2).toEqual([]); // 1 is already seen
-    });
-  },
-);
+    expect(result1).toEqual([1]);
+    expect(result2).toEqual([]); // 1 is already seen
+  });
+});

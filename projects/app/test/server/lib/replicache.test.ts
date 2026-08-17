@@ -7,7 +7,7 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { createUser, txTest } from "./dbHelpers.ts";
 
-describe(`push suite` satisfies HasNameOf<typeof push>, () => {
+describe(`push suite`, () => {
   txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   txTest(`returns correct error for invalid schema version`, async ({ tx }) => {
@@ -26,7 +26,7 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
   });
 });
 
-describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
+describe(`pull suite`, () => {
   txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
   txTest(`returns correct error for invalid schema version`, async ({ tx }) => {
@@ -45,59 +45,56 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
   });
 });
 
-describe(
-  `fetchMutations suite` satisfies HasNameOf<typeof fetchMutations>,
-  () => {
-    txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
+describe(`fetchMutations suite`, () => {
+  txTest.override({ pgConfig: { isolationLevel: `repeatable read` } });
 
-    txTest(`works for non-existant user and client group`, async ({ tx }) => {
-      const clientGroupId = nanoid();
-      const clientId = nanoid();
+  txTest(`works for non-existant user and client group`, async ({ tx }) => {
+    const clientGroupId = nanoid();
+    const clientId = nanoid();
 
-      const user = await createUser(tx);
+    const user = await createUser(tx);
 
-      // Push a mutation from client 1
-      await push(tx, user.id, {
-        profileId: ``,
-        clientGroupId,
-        pushVersion: 1,
-        schemaVersion: schema.version,
-        mutations: [
-          {
-            id: 1,
-            name: `noop`,
-            args: { arg1: `value1` },
-            timestamp: 1,
-            clientId,
-          },
-        ],
-      });
-
-      expect(
-        await fetchMutations(tx, user.id, {
-          schemaVersions: [schema.version],
-          lastMutationIds: {},
-        }),
-      ).toEqual({
-        mutations: [
-          {
-            clientGroupId,
-            mutations: [
-              {
-                args: { arg1: `value1` },
-                clientId,
-                id: 1,
-                name: `noop`,
-                timestamp: 1,
-              },
-            ],
-            schemaVersion: schema.version,
-          },
-        ],
-      });
+    // Push a mutation from client 1
+    await push(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pushVersion: 1,
+      schemaVersion: schema.version,
+      mutations: [
+        {
+          id: 1,
+          name: `noop`,
+          args: { arg1: `value1` },
+          timestamp: 1,
+          clientId,
+        },
+      ],
     });
-  },
-);
+
+    expect(
+      await fetchMutations(tx, user.id, {
+        schemaVersions: [schema.version],
+        lastMutationIds: {},
+      }),
+    ).toEqual({
+      mutations: [
+        {
+          clientGroupId,
+          mutations: [
+            {
+              args: { arg1: `value1` },
+              clientId,
+              id: 1,
+              name: `noop`,
+              timestamp: 1,
+            },
+          ],
+          schemaVersion: schema.version,
+        },
+      ],
+    });
+  });
+});
 
 describe(`schema test coverage`, () => {
   test(`every replicache schema version has a test file`, () => {

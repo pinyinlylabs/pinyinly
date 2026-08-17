@@ -1,31 +1,34 @@
-import { parseIndexRanges } from "@/util/indexRanges";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import type { WikiCharacterComponent, HanziCharacter } from "@/data/model";
-import { HanziCharacter as HanziCharacterSvg } from "./HanziCharacter";
-import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
+import type { HanziCharacter, MnemonicHanziComponent } from "@/data/model";
 import { HanziStrokesTile } from "./HanziStrokesTile";
+import { hanziSvgPathsQuery } from "@/client/query";
+import { useQuery } from "@tanstack/react-query";
+import { parseStrokeSpec } from "@/util/strokeSpec";
+import { HanziGraphic } from "./HanziGraphic";
 
 interface WikiHanziCharacterMeaningBreakdownProps {
   hanzi: HanziCharacter;
   primaryMeaningGloss: string | null;
-  selectedComponents: readonly WikiCharacterComponent[] | undefined;
-  strokeSvgs: readonly string[] | undefined;
+  hanziComponents: MnemonicHanziComponent[] | undefined;
   glossByHanzi: ReadonlyMap<string, string>;
 }
 
 function hasStrokeRanges(
-  components: readonly WikiCharacterComponent[],
+  components: readonly MnemonicHanziComponent[],
 ): boolean {
-  return components.some((component) => component.strokes.trim().length > 0);
+  return components.some(
+    (component) =>
+      component.strokeSpec != null &&
+      parseStrokeSpec(component.strokeSpec).length > 0,
+  );
 }
 
 export function WikiHanziCharacterMeaningBreakdown({
   hanzi,
   primaryMeaningGloss,
-  selectedComponents,
-  strokeSvgs,
+  hanziComponents,
   glossByHanzi,
 }: WikiHanziCharacterMeaningBreakdownProps) {
   const [sourceCenterX, setSourceCenterX] = useState<number | null>(null);
@@ -36,31 +39,33 @@ export function WikiHanziCharacterMeaningBreakdown({
     readonly number[]
   >([]);
 
+  const { data: hanziSvgPathsData } = useQuery(hanziSvgPathsQuery(hanzi));
+
+  const strokeSvgs = hanziSvgPathsData?.strokes;
+
   const showStrokeHighlights =
-    selectedComponents != null &&
-    hasStrokeRanges(selectedComponents) &&
+    hanziComponents != null &&
+    hasStrokeRanges(hanziComponents) &&
     strokeSvgs != null;
 
   const componentsElements: { key: string; element: ReactNode }[] = [];
 
   if (showStrokeHighlights) {
-    for (const [i, visualComponent] of selectedComponents.entries()) {
+    for (const [i, component] of hanziComponents.entries()) {
       const componentIndex = componentsElements.length;
       const label =
-        visualComponent.label ??
-        (visualComponent.hanzi == null
+        component.label ??
+        (component.hanzi == null
           ? null
-          : (glossByHanzi.get(visualComponent.hanzi) ?? null));
+          : (glossByHanzi.get(component.hanzi) ?? null));
       componentsElements.push({
         key: `component:${i}`,
         element: (
           <HanziStrokesTile
-            componentHanzi={visualComponent.hanzi ?? null}
-            hanzi={visualComponent.strokes.trim().length > 0 ? hanzi : null}
-            highlightColor={hanziCharacterColorSafeSchema.parse(
-              visualComponent.color,
-            )}
-            highlightStrokeRanges={visualComponent.strokes}
+            componentHanzi={component.hanzi ?? null}
+            hanzi={hanzi}
+            componentColor={component.color}
+            componentStrokeSpec={component.strokeSpec}
             label={label}
             onVisualLayout={(event) => {
               const centerX =
@@ -75,8 +80,8 @@ export function WikiHanziCharacterMeaningBreakdown({
         ),
       });
     }
-  } else if (selectedComponents != null) {
-    for (const [i, component] of selectedComponents.entries()) {
+  } else if (hanziComponents != null) {
+    for (const [i, component] of hanziComponents.entries()) {
       if (component.hanzi == null) {
         continue;
       }
@@ -91,7 +96,7 @@ export function WikiHanziCharacterMeaningBreakdown({
           <HanziStrokesTile
             componentHanzi={componentHanzi}
             hanzi={null}
-            highlightStrokeRanges=""
+            componentStrokeSpec={component.strokeSpec}
             label={label}
             onVisualLayout={(event) => {
               const centerX =
@@ -120,11 +125,7 @@ export function WikiHanziCharacterMeaningBreakdown({
         </Text>
 
         <View className="flex-1 items-center">
-          <HanziCharacterSvg
-            className="size-12"
-            strokesData={[...strokeSvgs]}
-            highlightStrokes={parseIndexRanges(`0-${strokeSvgs.length - 1}`)}
-          />
+          <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
         </View>
       </>
     );
@@ -168,18 +169,12 @@ export function WikiHanziCharacterMeaningBreakdown({
             </View>
           ) : (
             <View className="w-12">
-              <HanziCharacterSvg
-                className="size-12"
-                strokesData={[...strokeSvgs]}
-                highlightStrokes={parseIndexRanges(
-                  `0-${strokeSvgs.length - 1}`,
-                )}
-              />
+              <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
             </View>
           )}
 
           {primaryMeaningGloss == null ? null : (
-            <Text className="text-left pyly-body-caption text-fg-dim">
+            <Text className="text-left pyly-body-caption text-muted-fg">
               {primaryMeaningGloss}
             </Text>
           )}
@@ -190,11 +185,11 @@ export function WikiHanziCharacterMeaningBreakdown({
         <View className="px-6">
           <View className="relative h-6">
             <View
-              className="absolute w-px bg-fg-dim/35"
+              className="absolute w-px bg-muted-fg/35"
               style={{ left: sourceConnectorX, top: 0, height: 10 }}
             />
             <View
-              className="absolute h-px bg-fg-dim/35"
+              className="absolute h-px bg-muted-fg/35"
               style={{
                 left: connectorMinX,
                 top: 10,
@@ -204,7 +199,7 @@ export function WikiHanziCharacterMeaningBreakdown({
             {validComponentCenters.map((centerX, index) => {
               return (
                 <View
-                  className="absolute w-px bg-fg-dim/35"
+                  className="absolute w-px bg-muted-fg/35"
                   key={`decomp-line:${index}`}
                   style={{ left: centerX, top: 10, height: 14 }}
                 />
@@ -238,6 +233,3 @@ export function WikiHanziCharacterMeaningBreakdown({
     </View>
   );
 }
-
-// oxlint-disable-next-line unicorn/prefer-top-level-await
-const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);

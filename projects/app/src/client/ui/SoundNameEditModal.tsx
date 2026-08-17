@@ -1,7 +1,7 @@
 import type { PinyinSoundId } from "@/data/model";
 import {
-  pinyinSoundGroupThemeSettingKey,
-  pinyinSoundNameSetting,
+  pinyinSoundGroupThemeTextSetting,
+  pinyinSoundNameTextSetting,
 } from "@/data/userSettings";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { sortComparatorString } from "@pinyinly/lib/collections";
@@ -48,7 +48,7 @@ function SoundNameEditModalContent({
   const r = useRizzle();
   const pinyinSoundGroups = usePinyinSoundGroups();
   const { setValue: setSoundName, value: currentSoundName } = useUserSetting({
-    setting: pinyinSoundNameSetting,
+    setting: pinyinSoundNameTextSetting,
     key: { soundId },
   });
 
@@ -98,11 +98,11 @@ function SoundNameEditModalContent({
         <View className="gap-4">
           {/* Text input */}
           <View className="gap-2">
-            <Text className="font-sans text-sm font-semibold text-fg-dim">
+            <Text className="font-sans text-sm font-semibold text-muted-fg">
               Sound name
             </Text>
             <InlineEditableSettingText
-              setting={pinyinSoundNameSetting}
+              setting={pinyinSoundNameTextSetting}
               settingKey={{ soundId }}
               placeholder="Name this sound"
             />
@@ -111,7 +111,7 @@ function SoundNameEditModalContent({
           {/* Suggestions */}
           {suggestions.length > 0 && (
             <View className="gap-4">
-              <Text className="text-sm font-semibold text-fg-dim">
+              <Text className="text-sm font-semibold text-muted-fg">
                 Suggestions
               </Text>
 
@@ -127,8 +127,8 @@ function SoundNameEditModalContent({
                           onPress={() => {
                             if (pinyinSoundGroup?.id != null) {
                               void r.mutate.setSetting({
-                                key: pinyinSoundGroupThemeSettingKey(
-                                  pinyinSoundGroup.id,
+                                key: pinyinSoundGroupThemeTextSetting.entity.marshalKey(
+                                  { soundGroupId: pinyinSoundGroup.id },
                                 ),
                                 value: { t: theme },
                                 now: new Date(),
@@ -151,7 +151,7 @@ function SoundNameEditModalContent({
                         >
                           <Text
                             className={`
-                              text-fg-dim
+                              text-muted-fg
 
                               hover:text-fg
                             `}
@@ -170,7 +170,7 @@ function SoundNameEditModalContent({
                             {name}
                           </Text>
                           {` `}
-                          <Text className="font-sans text-sm font-normal text-fg-dim">
+                          <Text className="font-sans text-sm font-normal text-muted-fg">
                             {nameDescription}
                           </Text>
                         </Text>

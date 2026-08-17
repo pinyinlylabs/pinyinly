@@ -1,11 +1,33 @@
 {
   "rules": [
     {
+      "files": ["projects/app/src/data/pinyinWords.asset.json"],
+      "indentLevels": 0
+    },
+    {
+      "files": [
+        "projects/app/src/data/finalToneFrequencies.asset.json",
+        "projects/app/src/data/hanziWordMigrations.asset.json",
+        "projects/app/src/data/characters.asset.json",
+        "projects/app/src/data/dictionary.asset.json",
+        "projects/app/src/data/kangXiRadicalsStrokes.asset.json",
+        "projects/app/src/data/pinyinSoundThemeDetails.asset.json"
+      ],
+      "indentLevels": 1
+    },
+    {
+      "files": [
+        "projects/app/public/raw/mdx/*.json",
+        "projects/app/src/data/*.asset.json"
+      ],
+      "indentLevels": 2
+    },
+    {
       "files": [
         "projects/app/test/data/**/*.json",
-        "projects/app/src/data/dictionary.asset.json"
+        "projects/app/src/data/**/*.asset.json"
       ],
-      "indent": 1
+      "indentLevels": 1
     }
   ]
 }
