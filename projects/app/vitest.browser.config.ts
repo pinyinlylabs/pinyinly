@@ -23,6 +23,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     uniwind({
+      // Keep in sync between vitest.browser.config.ts + moon.yml + metro.config.cjs
       cssEntryFile: `./src/global.css`,
       dtsFile: `./uniwind-env.d.ts`,
       extraThemes: [
