@@ -2976,7 +2976,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/core@npm:^1.0.0, @floating-ui/core@npm:^1.8.0":
+"@floating-ui/core@npm:^1.8.0":
   version: 1.8.0
   resolution: "@floating-ui/core@npm:1.8.0"
   dependencies:
@@ -3008,14 +3008,14 @@ __metadata:
   linkType: hard
 
 "@floating-ui/react-native@npm:^0.10.7":
-  version: 0.10.9
-  resolution: "@floating-ui/react-native@npm:0.10.9"
+  version: 0.10.10
+  resolution: "@floating-ui/react-native@npm:0.10.10"
   dependencies:
-    "@floating-ui/core": "npm:^1.0.0"
+    "@floating-ui/core": "npm:^1.8.0"
   peerDependencies:
     react: ">=16.8.0"
     react-native: ">=0.64.0"
-  checksum: 10c0/974d10225aa2d4c622768f2dd3378d98e074952831fb016471636528a6b82aafce06d5fe5ce7a98649bed44776a4e9055c93f2087a7122a5f18ad8058b1b49cb
+  checksum: 10c0/847eaedec88ea14f303675ba54481571918662955aed58eb093f620f4bd1cb009bae22c9a427d9e11b59961b71b5a89ef5939083ff611673d68553fdd4b12ae8
   languageName: node
   linkType: hard
 
