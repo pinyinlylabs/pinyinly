@@ -32,6 +32,7 @@ import {
   fsrsSrsState,
   mockSrsState,
   prettyQueue,
+  printTextGraph,
   seedSkillReviews as seedSkillHistory,
   时,
 } from "#test/data/helpers.ts";
@@ -213,175 +214,54 @@ describe(`skillLearningGraph suite`, () => {
     },
   );
 
-  type TextGraph = Map</* id */ string, /* children */ Set<string>>;
-
-  /**
-   * Parses a text representation of a graph.
-   *
-   * Convenient when writing test cases.
-   *
-   * @example
-   *
-   * ```ts
-   * parseTextGraph(`
-   * he:一下儿:aBit
-   *   he:外:outside
-   *     he:夕:evening
-   *       he:丶:dot
-   *       he:𠂊:hands
-   *     he:卜:divine
-   *   he:一:one
-   *   he:儿:son
-   * `)
-   * ```
-   */
-  function parseTextGraph(textGraph: string) {
-    const graph: TextGraph = new Map();
-
-    // Drop empty lines
-    const lines = textGraph.split(`\n`).filter((line) => line.trim() !== ``);
-
-    // Maintain a list of the parents in the current tree branch so that when a
-    // dedent is encountered we can pop the parent off the stack and add the new
-    // branch to the correct parent.
-    const parentStack: { id: string; indent: number }[] = [];
-
-    for (const line of lines) {
-      const res = /^(\s*)(.+?)(\s*\/\/.+)?$/u.exec(line);
-      invariant(res != null);
-      const [, indentText, id, _comment] = res;
-      invariant(indentText != null);
-      invariant(id != null);
-
-      const indent = indentText.length;
-
-      // Drop any existing subtree starting at the same indent.
-      const siblingIndex = parentStack.findIndex((p) => p.indent === indent);
-      if (siblingIndex !== -1) {
-        parentStack.splice(siblingIndex);
-      }
-
-      // If there's a parent, add this as a child.
-      const parentId = parentStack.at(-1)?.id;
-      if (parentId != null) {
-        const children = graph.get(parentId);
-        invariant(children != null);
-        children.add(id);
-      }
-
-      // Add this item to the parent stack so that if it has siblings they are
-      // added to the correct parent.
-      parentStack.push({ id, indent });
-
-      // Add this item to the graph.
-      if (!graph.has(id)) {
-        graph.set(id, new Set());
-      }
-    }
-    return graph;
-  }
-
-  function skillLearningGraphToText(graph: SkillLearningGraph): TextGraph {
-    const textGraph: TextGraph = new Map();
-
-    for (const [skill, node] of graph.entries()) {
-      textGraph.set(skill, node.dependencies);
-    }
-
-    return textGraph;
-  }
-
-  test(`parseTextGraph basics`, () => {
-    expect(
-      parseTextGraph(`
-      he:一下儿:aBit
-        he:外:outside
-          he:夕:evening
-            he:丶:dot
-            he:𠂊:hands
-          he:卜:divine
-            he:丨:line
-            he:丶:dot
-        he:一:one
-        he:儿:son
-          he:丿:slash
-          he:乚:second
-      he:一:one
-      `),
-    ).toEqual(
-      new Map([
-        [
-          `he:一下儿:aBit`,
-          new Set([`he:外:outside`, `he:一:one`, `he:儿:son`]),
-        ],
-        [`he:外:outside`, new Set([`he:夕:evening`, `he:卜:divine`])],
-        [`he:夕:evening`, new Set([`he:丶:dot`, `he:𠂊:hands`])],
-        [`he:丿:slash`, new Set()],
-        [`he:乚:second`, new Set()],
-        [`he:丨:line`, new Set()],
-        [`he:一:one`, new Set()],
-        [`he:丶:dot`, new Set()],
-        [`he:𠂊:hands`, new Set()],
-        [`he:儿:son`, new Set([`he:丿:slash`, `he:乚:second`])],
-        [`he:卜:divine`, new Set([`he:丨:line`, `he:丶:dot`])],
-      ]),
-    );
-  });
-
-  function assertLearningGraphEqual(
-    actual: SkillLearningGraph,
-    expected: string,
-  ) {
-    expect(skillLearningGraphToText(actual)).toEqual(parseTextGraph(expected));
-  }
-
   skillTest(
     `supports multi-character words`,
     async ({ decompositionData, dictionary, charactersJson }) => {
-      assertLearningGraphEqual(
-        skillLearningGraph({
-          decompositionData,
-          charactersJson,
-          dictionary,
-          targetSkills: [`he:一下儿:aBit`],
-        }),
-        `
-      he:一下儿:aBit
-        he:一:one
-        he:下:below
+      expect(
+        printTextGraph(
+          skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [`he:一下儿:aBit`],
+          }),
+        ),
+      ).toMatchInlineSnapshot(`
+        "he:一下儿:aBit
           he:一:one
-          he:卜:divine
-            he:丨:line
-            he:丶:dot
-        he:儿:son
-      he:儿:son
-        he:丿:slash
-        he:乚:hidden
-      `,
-      );
+          he:下:below
+            he:一:one
+            he:卜:divine
+              he:丨:line
+              he:丶:dot
+          he:儿:9mRvV
+            he:丿:slash
+            he:乚:hidden"
+      `);
     },
   );
 
   skillTest(
     `supports HanziWordToPinyin dependency chain`,
     async ({ decompositionData, dictionary, charactersJson }) => {
-      assertLearningGraphEqual(
-        skillLearningGraph({
-          decompositionData,
-          charactersJson,
-          dictionary,
-          targetSkills: [`hp:儿:son`],
-        }),
-        `
-      hp:儿:son
-        he:儿:son
-        hpf:儿:son
-          hpi:儿:son
-            he:儿:son
-              he:丿:slash
-              he:乚:hidden
-      `,
-      );
+      expect(
+        printTextGraph(
+          skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [`hp:儿:son`],
+          }),
+        ),
+      ).toMatchInlineSnapshot(`
+        "hp:儿:son
+          he:儿:son
+            he:丿:slash
+            he:乚:hidden
+          hpf:儿:son
+            hpi:儿:son
+              he:儿:son"
+      `);
     },
   );
 
@@ -404,18 +284,35 @@ describe(`skillLearningGraph suite`, () => {
   skillTest(
     `learns the word form of component-form first`,
     ({ decompositionData, dictionary, charactersJson }) => {
-      assertLearningGraphEqual(
-        skillLearningGraph({
-          decompositionData,
-          charactersJson,
-          dictionary,
-          targetSkills: [`he:汉:chinese`],
-        }),
-        `
-        he:汉:chinese
+      expect(
+        printTextGraph(
+          skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [`he:汉:chinese`],
+          }),
+        ),
+      ).toMatchInlineSnapshot(`
+        "he:汉:chinese
           he:又:again
-          he:氵:water
-        `,
+          he:氵:water"
+      `);
+    },
+  );
+
+  skillTest(
+    `uses pinyin to decompose words into characters`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const graph = skillLearningGraph({
+        decompositionData,
+        charactersJson,
+        dictionary,
+        targetSkills: [`he:行业:industry`],
+      });
+
+      expect(graph.get(`he:行业:industry`)?.dependencies).not.toEqual(
+        new Set([`he:行:okay`, `he:业:profession`]),
       );
     },
   );
@@ -1821,31 +1718,31 @@ describe(`skillReviewQueue suite`, () => {
           dictionary,
         });
         expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-              [
-                "he:口:mouth (🌱 NEW SKILL)",
-                "he:灬:fire (🌱 NEW SKILL)",
-                "he:一:one (🌱 NEW SKILL)",
-                "he:丶:dot (🌱 NEW SKILL)",
-                "he:丨:line (🌱 NEW SKILL)",
-                "he:乚:hidden (🌱 NEW SKILL)",
-                "he:丿:slash (🌱 NEW SKILL)",
-                "he:卜:divine (🟥 BLOCKED)",
-                "he:占:occupy (🟥 BLOCKED)",
-                "he:儿:son (🟥 BLOCKED)",
-                "he:点:oClock (🟥 BLOCKED)",
-                "hpi:儿:son (🟥 BLOCKED)",
-                "hpi:点:oClock (🟥 BLOCKED)",
-                "hpi:一:one (🟥 BLOCKED)",
-                "hpf:儿:son (🟥 BLOCKED)",
-                "hpf:点:oClock (🟥 BLOCKED)",
-                "hpf:一:one (🟥 BLOCKED)",
-                "hp:儿:son (🟥 BLOCKED)",
-                "hp:点:oClock (🟥 BLOCKED)",
-                "hp:一:one (🟥 BLOCKED)",
-                "he:一点儿:aLittle (🟥 BLOCKED)",
-                "hp:一点儿:aLittle (🟥 BLOCKED)",
-              ]
-            `);
+          [
+            "he:口:mouth (🌱 NEW SKILL)",
+            "he:灬:fire (🌱 NEW SKILL)",
+            "he:一:one (🌱 NEW SKILL)",
+            "he:丶:dot (🌱 NEW SKILL)",
+            "he:丨:line (🌱 NEW SKILL)",
+            "he:乚:hidden (🌱 NEW SKILL)",
+            "he:丿:slash (🌱 NEW SKILL)",
+            "he:卜:divine (🟥 BLOCKED)",
+            "he:占:occupy (🟥 BLOCKED)",
+            "he:儿:9mRvV (🟥 BLOCKED)",
+            "he:点:oClock (🟥 BLOCKED)",
+            "hpi:儿:9mRvV (🟥 BLOCKED)",
+            "hpi:点:oClock (🟥 BLOCKED)",
+            "hpi:一:one (🟥 BLOCKED)",
+            "hpf:儿:9mRvV (🟥 BLOCKED)",
+            "hpf:点:oClock (🟥 BLOCKED)",
+            "hpf:一:one (🟥 BLOCKED)",
+            "hp:儿:9mRvV (🟥 BLOCKED)",
+            "hp:点:oClock (🟥 BLOCKED)",
+            "hp:一:one (🟥 BLOCKED)",
+            "he:一点儿:aLittle (🟥 BLOCKED)",
+            "hp:一点儿:aLittle (🟥 BLOCKED)",
+          ]
+        `);
       },
     );
 

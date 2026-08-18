@@ -3,7 +3,11 @@ import type {
   Dictionary,
   HanziWordWithMeaning,
 } from "@/dictionary";
-import { hanziFromHanziWord, shallowDecomposeHanzi } from "@/dictionary";
+import {
+  hanziFromHanziWord,
+  shallowDecomposeHanziCharacter,
+  shallowDecomposeHanziWord,
+} from "@/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
 import {
   fsrsIsForgotten,
@@ -74,8 +78,12 @@ export function skillLearningGraph(options: {
 }): SkillLearningGraph {
   const graph: SkillLearningGraph = new Map();
 
-  const decomposeHanzi = memoize1((hanzi: HanziText) =>
-    shallowDecomposeHanzi(hanzi, options.decompositionData, isHanziCharacter),
+  const decomposeHanzi = memoize1((hanzi: HanziCharacter) =>
+    shallowDecomposeHanziCharacter(
+      hanzi,
+      options.decompositionData,
+      isHanziCharacter,
+    ),
   );
 
   function addSkill(skill: Skill): void {
@@ -195,7 +203,7 @@ export const finalFromPinyinFinalAssociationSkill = (
 
 export function skillDependencies(
   skill: Skill,
-  decompose: (hanzi: HanziText) => readonly HanziCharacter[],
+  decompose: (hanzi: HanziCharacter) => readonly HanziCharacter[],
   dictionary: Dictionary,
   charactersJson: CharactersJson,
 ): Skill[] {
@@ -218,38 +226,51 @@ export function skillDependencies(
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
 
-      // Learn the components of a hanzi word first.
-      for (let hanziComponent of decompose(hanzi)) {
-        if (hanziComponent === hanzi) {
-          continue;
-        }
+      if (isHanziCharacter(hanzi)) {
+        // Learn the components of a hanzi word first.
+        for (let hanziComponent of decompose(hanzi)) {
+          if (hanziComponent === hanzi) {
+            continue;
+          }
 
-        // Use the canonical form of the character.
-        {
-          let hanziComponentData = charactersJson.get(hanziComponent);
-          while (hanziComponentData?.canonicalForm != null) {
-            hanziComponent = hanziComponentData.canonicalForm;
-            hanziComponentData = charactersJson.get(hanziComponent);
+          // Use the canonical form of the character.
+          {
+            let hanziComponentData = charactersJson.get(hanziComponent);
+            while (hanziComponentData?.canonicalForm != null) {
+              hanziComponent = hanziComponentData.canonicalForm;
+              hanziComponentData = charactersJson.get(hanziComponent);
+            }
+          }
+
+          // Check if the character was already added as a dependency by being
+          // referenced in the gloss hint.
+          if (hanziWordToGlossDepsHanzi.has(hanziComponent)) {
+            continue;
+          }
+
+          // If the character wasn't already added, we need to figure out which
+          // HanziWord to learn for it. Since there's no definite answer, we have
+          // to guess.
+          const hanziWordWithMeaning = hackyGuessHanziWordToLearn(
+            hanziComponent,
+            dictionary,
+          );
+          if (hanziWordWithMeaning != null) {
+            const [hanziWord] = hanziWordWithMeaning;
+            deps.push(hanziWordToGloss(hanziWord));
+            hanziWordToGlossDepsHanzi.add(hanziComponent);
           }
         }
-
-        // Check if the character was already added as a dependency by being
-        // referenced in the gloss hint.
-        if (hanziWordToGlossDepsHanzi.has(hanziComponent)) {
-          continue;
-        }
-
-        // If the character wasn't already added, we need to figure out which
-        // HanziWord to learn for it. Since there's no definite answer, we have
-        // to guess.
-        const hanziWordWithMeaning = hackyGuessHanziWordToLearn(
-          hanziComponent,
-          dictionary,
-        );
-        if (hanziWordWithMeaning != null) {
-          const [hanziWord] = hanziWordWithMeaning;
-          deps.push(hanziWordToGloss(hanziWord));
-          hanziWordToGlossDepsHanzi.add(hanziComponent);
+      } else {
+        try {
+          for (const item of shallowDecomposeHanziWord(hanziWord, dictionary)) {
+            deps.push(hanziWordToGloss(item));
+          }
+        } catch (err) {
+          throw new Error(
+            `Failed to decompose hanzi word "${hanziWord}" for skill "${skill}"`,
+            { cause: err },
+          );
         }
       }
       break;
