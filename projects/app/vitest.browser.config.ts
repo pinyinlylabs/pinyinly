@@ -13,7 +13,7 @@ export default defineConfig({
       headless: true,
       instances: [{ browser: `chromium` }],
     },
-    include: [`**/*.browser.test.{ts,tsx}`],
+    include: [`test/**/*.browser.test.{ts,tsx}`],
   },
   resolve: {
     tsconfigPaths: true,

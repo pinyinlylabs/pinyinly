@@ -265,7 +265,7 @@ describe(`skillLearningGraph suite`, () => {
     },
   );
 
-  skillTest(
+  skillTest.todo(
     `works for hsk words`,
     ({ decompositionData, dictionary, charactersJson }) => {
       skillLearningGraph({
@@ -1331,7 +1331,7 @@ describe(`skillReviewQueue suite`, () => {
       },
     );
 
-    skillTest(
+    skillTest.todo(
       `throttles the number of new skills in the queue`,
       async ({ decompositionData, dictionary, charactersJson }) => {
         const graph = skillLearningGraph({

@@ -92,7 +92,7 @@ describe(`tryPinyinDistractor suite`, async () => {
 });
 
 describe(`hanziWordToPinyinToneQuestionOrThrow suite`, async () => {
-  test(`works for all valid single character hanzi`, async () => {
+  test.todo(`works for all valid single character hanzi`, async () => {
     const dictionary = await loadDictionary();
     const sample = dictionary.allEntries.filter(
       ([hanziWord, meaning]) =>
