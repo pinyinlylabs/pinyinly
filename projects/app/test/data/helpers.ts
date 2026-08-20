@@ -35,7 +35,12 @@ import type {
   SkillReviewQueueItem,
 } from "#data/skills.js";
 import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
-import { hanziFromHanziWord, loadDictionary } from "#dictionary.js";
+import {
+  deepDecomposeHanzi,
+  hanziFromHanziWord,
+  loadBuiltinCharacterDecompositionEntries,
+  loadDictionary,
+} from "#dictionary.js";
 import { emojiToRating } from "#test/helpers.ts";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
@@ -946,3 +951,50 @@ export async function getHanziCharacterToPinyinUnit(): Promise<
 
   return hanziToPinyinUnit;
 }
+
+/**
+ * Computes the set of all the characters (and their dependencies) to run tests
+ * on, based on the number of HSK levels we want to include in the test
+ * coverage.
+ *
+ * This started with just HSK1, but should be expanded to include more levels in
+ * the future. The goal is to ensure that all characters in the dictionary have
+ * valid decomposition data, stroke data, and mnemonic data, and that they are
+ * consistent with the rest of the data in the project.
+ */
+export const buildCharactersToCheck = memoize0(async function (): Promise<
+  ReadonlySet<HanziCharacter>
+> {
+  const decompositionData = await loadBuiltinCharacterDecompositionEntries();
+
+  const seeds = await buildHanziWordsToCheck();
+  const result = new Set<HanziCharacter>();
+  for (const seed of seeds) {
+    const hanzi = hanziFromHanziWord(seed);
+    for (const component of deepDecomposeHanzi(
+      hanzi,
+      decompositionData,
+      isHanziCharacter,
+    )) {
+      result.add(component);
+    }
+  }
+  return result;
+});
+
+export const buildHanziWordsToCheck = memoize0(async function (): Promise<
+  ReadonlyArray<HanziWord>
+> {
+  const dictionary = await loadDictionary();
+
+  return [
+    ...dictionary.hsk1HanziWords,
+    // Uncomment these lines incrementally in the future to increase validation coverage.
+    // ...dictionary.hsk2HanziWords,
+    // ...dictionary.hsk3HanziWords,
+    // ...dictionary.hsk4HanziWords,
+    // ...dictionary.hsk5HanziWords,
+    // ...dictionary.hsk6HanziWords,
+    // ...dictionary.hsk7To9HanziWords,
+  ];
+});

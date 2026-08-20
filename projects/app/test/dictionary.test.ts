@@ -1167,28 +1167,30 @@ test(`dictionary structural components list`, async () => {
   const dictionary = await loadDictionary();
   const isStructuralHanzi = await getIsStructuralHanzi();
 
-  const structural = dictionary.allHanziWords.filter((hanziWord) => {
-    const hanzi = hanziFromHanziWord(hanziWord);
-    return isHanziCharacter(hanzi) && isStructuralHanzi(hanzi);
-  });
+  const structural = dictionary.allHanziWords
+    .filter((hanziWord) => {
+      const hanzi = hanziFromHanziWord(hanziWord);
+      return isHanziCharacter(hanzi) && isStructuralHanzi(hanzi);
+    })
+    .sort();
 
   expect(structural).toMatchInlineSnapshot(`
     [
-      "𡗗:openHands",
-      "龸:exoticHat",
       "丨:line",
       "丶:dot",
       "丿:slash",
+      "乚:hidden",
+      "乚:second",
+      "亅:hook",
+      "冖:cover",
+      "忄:heart",
+      "龸:exoticHat",
       "𠂇:hand",
       "𠂉:knife",
       "𠂊:hands",
-      "乚:hidden",
-      "乚:second",
       "𠃌:radical",
-      "亅:hook",
-      "冖:cover",
+      "𡗗:openHands",
       "𭕄:radical",
-      "忄:heart",
     ]
   `);
 });

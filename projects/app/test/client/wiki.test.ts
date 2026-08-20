@@ -21,13 +21,11 @@ import type {
 import { wikiCharacterDataSchema } from "#data/model.js";
 import {
   buildHanziWord,
-  deepDecomposeHanzi,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
-  hanziFromHanziWord,
-  loadBuiltinCharacterDecompositionEntries,
   loadDictionary,
 } from "#dictionary.js";
+import { buildCharactersToCheck } from "#test/data/helpers.ts";
 import { getFonts } from "#test/helpers.ts";
 import type { StrokeSpecAtom } from "#util/strokeSpec.js";
 import {
@@ -691,44 +689,4 @@ describe(`character.json files`, async () => {
         );
     }
   });
-});
-
-/**
- * Computes the set of all the characters (and their dependencies) to run tests
- * on, based on the number of HSK levels we want to include in the test
- * coverage.
- *
- * This started with just HSK1, but should be expanded to include more levels in
- * the future. The goal is to ensure that all characters in the dictionary have
- * valid decomposition data, stroke data, and mnemonic data, and that they are
- * consistent with the rest of the data in the project.
- */
-const buildCharactersToCheck = memoize0(async function (): Promise<
-  ReadonlySet<HanziCharacter>
-> {
-  const dictionary = await loadDictionary();
-  const decompositionData = await loadBuiltinCharacterDecompositionEntries();
-
-  const seeds = [
-    ...dictionary.hsk1HanziWords,
-    // Uncomment these lines incrementally in the future to increase validation coverage.
-    // ...dictionary.hsk2HanziWords,
-    // ...dictionary.hsk3HanziWords,
-    // ...dictionary.hsk4HanziWords,
-    // ...dictionary.hsk5HanziWords,
-    // ...dictionary.hsk6HanziWords,
-    // ...dictionary.hsk7To9HanziWords,
-  ];
-  const result = new Set<HanziCharacter>();
-  for (const seed of seeds) {
-    const hanzi = hanziFromHanziWord(seed);
-    for (const component of deepDecomposeHanzi(
-      hanzi,
-      decompositionData,
-      isHanziCharacter,
-    )) {
-      result.add(component);
-    }
-  }
-  return result;
 });
