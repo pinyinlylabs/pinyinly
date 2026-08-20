@@ -38,7 +38,7 @@ import {
   memoize0,
   memoize1,
   weakMemoize1,
-  zip,
+  zipStrict,
 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
@@ -376,6 +376,7 @@ export const hanziWordMeaningSchema = z
     cedict: cedictReferenceSchema
       .describe(`reference to the corresponding CE-DICT entry and sense`)
       .optional(),
+    charSenses: z.array(hanziWordSchema.nullable()).optional(),
   })
   .strict();
 
@@ -640,8 +641,8 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
 }
 
-export function shallowDecomposeHanzi<S extends HanziCharacter>(
-  hanzi: HanziText,
+export function shallowDecomposeHanziCharacter<S extends HanziCharacter>(
+  hanzi: HanziCharacter,
   decompositionData: readonly Readonly<
     Pick<CharacterDecompositionRow, `hanzi` | `ids`>
   >[],
@@ -653,46 +654,24 @@ export function shallowDecomposeHanzi<S extends HanziCharacter>(
   predicate: (value: HanziCharacter) => value is S = (_x): _x is S => true,
 ): readonly S[] {
   const decompositionsByHanzi = groupByHanzi(decompositionData);
-  const hanziCharacters = splitHanziText(hanzi);
 
   const result: Set<S> = new Set();
 
-  if (hanziCharacters.length > 1) {
-    for (const character of hanziCharacters) {
-      if (predicate(character)) {
-        result.add(character);
-      }
-    }
-    return [...result];
-  }
-
-  const queue = [...hanziCharacters];
-  while (queue.length > 0) {
-    const character = queue.shift();
-    if (character == null || !predicate(character)) {
-      continue;
-    }
-
-    if (isHanziStrokeCountChar(character)) {
-      // Can't decompose a stroke count character, so skip it.
-      continue;
-    }
-
+  const character = hanzi;
+  if (predicate(character)) {
     const decompositions = decompositionsByHanzi.get(character);
-    if (decompositions == null) {
-      continue;
-    }
+    if (decompositions != null) {
+      for (const decomposition of decompositions) {
+        for (const idsLeaf of parseIdsLeafs(
+          decomposition.ids,
+        ) as HanziCharacter[]) {
+          if (!predicate(idsLeaf)) {
+            // If it fails the predicate, don't add it nor descend into it.
+            continue;
+          }
 
-    for (const decomposition of decompositions) {
-      for (const idsLeaf of parseIdsLeafs(
-        decomposition.ids,
-      ) as HanziCharacter[]) {
-        if (!predicate(idsLeaf)) {
-          // If it fails the predicate, don't add it nor descend into it.
-          continue;
+          result.add(idsLeaf);
         }
-
-        result.add(idsLeaf);
       }
     }
   }
@@ -701,10 +680,63 @@ export function shallowDecomposeHanzi<S extends HanziCharacter>(
 }
 
 /**
+ * Split a HanziWord into its constituent single-character HanziWords,
+ * preserving the pinyin for each character. For example, the HanziWord `行业
+ * :industry` will be split to include `行:row` (háng) rather than `行:walk`
+ * (xíng).
+ */
+export function shallowDecomposeHanziWord(
+  hanziWord: HanziWord,
+  dictionary: Dictionary,
+): readonly HanziWord[] {
+  const hanzi = hanziFromHanziWord(hanziWord);
+  if (isHanziCharacter(hanzi)) {
+    return [];
+  }
+
+  const meaning = dictionary.lookupHanziWord(hanziWord);
+  invariant(meaning != null, `missing meaning for hanzi word %s`, hanziWord);
+  const pinyin = meaning.pinyin?.[0];
+  invariant(pinyin != null, `missing pinyin for hanzi word %s`, hanziWord);
+
+  const result: HanziWord[] = [];
+
+  charLoop: for (const [i, [charHanzi, charPinyinRaw]] of zipStrict(
+    splitHanziText(hanzi),
+    matchAllPinyinUnits(pinyin),
+  ).entries()) {
+    const explicit = meaning.charSenses?.[i];
+    if (explicit != null) {
+      result.push(explicit);
+      continue charLoop;
+    }
+
+    const charPinyin = normalizePinyinUnit(charPinyinRaw);
+    const candidates = dictionary.lookupHanzi(charHanzi);
+    for (const candidate of candidates) {
+      if (candidate[1].pinyin?.includes(charPinyin)) {
+        result.push(candidate[0]);
+        continue charLoop;
+      }
+    }
+
+    throw new Error(
+      `couldn't find matching hanzi word for character ${charHanzi} with pinyin ${charPinyin}`,
+    );
+  }
+
+  return result;
+}
+
+/**
  * Recursively decomposes a hanzi character into its IDS leaf components,
  * filtering by the given predicate, and then continues decomposing the leafs
  * recursively. Use @see shallowDecomposeHanziToIdsLeafs if you only want the
  * immediate level of decomposition.
+ *
+ * Use @see shallowDecomposeHanziWord if you want to preserve pinyin for each
+ * character, for example 行业 uses 行 which has pinyin háng and xíng, but the
+ * meaning of 行业 is háng yè.
  */
 export function deepDecomposeHanzi<S extends HanziCharacter>(
   hanzi: HanziText,
@@ -776,7 +808,7 @@ export function deepDecomposeHanziWithStrokeSpecs(
     decompositionsByHanzi
       .get(hanziCharacter)
       ?.flatMap((d) =>
-        zip(parseIdsLeafs(d.ids) as HanziIdsLeaf[], d.strokeSpecs),
+        zipStrict(parseIdsLeafs(d.ids) as HanziIdsLeaf[], d.strokeSpecs),
       )
       .map(([hanzi, strokeSpec]) =>
         isHanziStrokeCountChar(hanzi) ? null : { strokeSpec, hanzi },
@@ -792,7 +824,7 @@ export function deepDecomposeHanziWithStrokeSpecs(
     }
 
     for (const decomposition of decompositions) {
-      for (const [idsLeaf, leafStrokeSpec] of zip(
+      for (const [idsLeaf, leafStrokeSpec] of zipStrict(
         parseIdsLeafs(decomposition.ids) as HanziIdsLeaf[],
         decomposition.strokeSpecs,
       )) {

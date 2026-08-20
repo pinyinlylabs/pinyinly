@@ -36,7 +36,7 @@ import {
   hintFirstLineLength,
   parseHintText,
 } from "./hintText";
-import { zip } from "@pinyinly/lib/collections";
+import { zipStrict } from "@pinyinly/lib/collections";
 
 export function WikiHanziCharacterMeaning({ hanzi }: { hanzi: HanziText }) {
   if (!isHanziCharacter(hanzi)) {
@@ -83,7 +83,7 @@ export function WikiHanziCharacterMeaningBox({
   const mnemonicDecompositionComponents =
     mnemonicDecomposition?.ids == null
       ? undefined
-      : zip(
+      : zipStrict(
           walkIdsNodeLeafs(
             parseIds(mnemonicDecomposition.ids) as IdsNode<HanziCharacterType>,
           ),

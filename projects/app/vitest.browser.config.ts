@@ -13,7 +13,7 @@ export default defineConfig({
       headless: true,
       instances: [{ browser: `chromium` }],
     },
-    include: [`**/*.browser.test.{ts,tsx}`],
+    include: [`test/**/*.browser.test.{ts,tsx}`],
   },
   resolve: {
     tsconfigPaths: true,
@@ -23,8 +23,27 @@ export default defineConfig({
     react(),
     tailwindcss(),
     uniwind({
+      // Keep in sync between vitest.browser.config.ts + moon.yml + metro.config.cjs
       cssEntryFile: `./src/global.css`,
       dtsFile: `./uniwind-env.d.ts`,
+      extraThemes: [
+        `dark-danger-panel`,
+        `dark-grass-panel`,
+        `dark-placeholder-panel`,
+        `dark-popover`,
+        `dark-sky-panel`,
+        `dark-success-panel`,
+        `dark-warning-panel`,
+        `dark`,
+        `light-danger-panel`,
+        `light-grass-panel`,
+        `light-placeholder-panel`,
+        `light-popover`,
+        `light-sky-panel`,
+        `light-success-panel`,
+        `light-warning-panel`,
+        `light`,
+      ],
     }),
   ],
 });

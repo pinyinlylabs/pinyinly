@@ -29,9 +29,18 @@ import {
   normalizePinyinUnit,
 } from "#data/pinyin.js";
 import type { Rizzle } from "#data/rizzleSchema.js";
-import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
+import type {
+  SkillLearningGraph,
+  SkillReviewQueue,
+  SkillReviewQueueItem,
+} from "#data/skills.js";
 import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
-import { hanziFromHanziWord, loadDictionary } from "#dictionary.js";
+import {
+  deepDecomposeHanzi,
+  hanziFromHanziWord,
+  loadBuiltinCharacterDecompositionEntries,
+  loadDictionary,
+} from "#dictionary.js";
 import { emojiToRating } from "#test/helpers.ts";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
@@ -162,6 +171,60 @@ export function prettyQueue(
   queue: Pick<DeepReadonly<SkillReviewQueue>, `items`>,
 ): string[] {
   return queue.items.map((item) => skillQueueItemPretty(item));
+}
+
+/**
+ * Renders a {@link SkillLearningGraph} as an indented text tree, with each
+ * skill's dependencies nested beneath it.
+ *
+ * Skills are only expanded the first time they're seen; later occurrences are
+ * rendered as leaves. This keeps the output finite for cyclic and diamond
+ * shaped graphs.
+ *
+ * The output only depends on the shape of the graph, not on the insertion order
+ * of its entries: top-level skills are those nothing depends on, and ties
+ * everywhere are broken by sorting on the skill string.
+ */
+export function printTextGraph(graph: SkillLearningGraph): string {
+  const bySkillId = (a: Skill, b: Skill) => (a < b ? -1 : a > b ? 1 : 0);
+
+  const hasDependents = new Set<Skill>();
+  for (const node of graph.values()) {
+    for (const dependency of node.dependencies) {
+      hasDependents.add(dependency);
+    }
+  }
+
+  const lines: string[] = [];
+  const expanded = new Set<Skill>();
+
+  function walk(skill: Skill, depth: number) {
+    lines.push(`  `.repeat(depth) + skill);
+
+    if (expanded.has(skill)) {
+      return;
+    }
+    expanded.add(skill);
+
+    for (const dependency of [
+      ...(graph.get(skill)?.dependencies ?? []),
+    ].toSorted(bySkillId)) {
+      walk(dependency, depth + 1);
+    }
+  }
+
+  const skills = [...graph.keys()].toSorted(bySkillId);
+  // Roots first, then whatever's left over (e.g. skills only reachable in a cycle).
+  for (const skill of [
+    ...skills.filter((skill) => !hasDependents.has(skill)),
+    ...skills,
+  ]) {
+    if (!expanded.has(skill)) {
+      walk(skill, 0);
+    }
+  }
+
+  return lines.join(`\n`);
 }
 
 export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
@@ -888,3 +951,50 @@ export async function getHanziCharacterToPinyinUnit(): Promise<
 
   return hanziToPinyinUnit;
 }
+
+/**
+ * Computes the set of all the characters (and their dependencies) to run tests
+ * on, based on the number of HSK levels we want to include in the test
+ * coverage.
+ *
+ * This started with just HSK1, but should be expanded to include more levels in
+ * the future. The goal is to ensure that all characters in the dictionary have
+ * valid decomposition data, stroke data, and mnemonic data, and that they are
+ * consistent with the rest of the data in the project.
+ */
+export const buildCharactersToCheck = memoize0(async function (): Promise<
+  ReadonlySet<HanziCharacter>
+> {
+  const decompositionData = await loadBuiltinCharacterDecompositionEntries();
+
+  const seeds = await buildHanziWordsToCheck();
+  const result = new Set<HanziCharacter>();
+  for (const seed of seeds) {
+    const hanzi = hanziFromHanziWord(seed);
+    for (const component of deepDecomposeHanzi(
+      hanzi,
+      decompositionData,
+      isHanziCharacter,
+    )) {
+      result.add(component);
+    }
+  }
+  return result;
+});
+
+export const buildHanziWordsToCheck = memoize0(async function (): Promise<
+  ReadonlyArray<HanziWord>
+> {
+  const dictionary = await loadDictionary();
+
+  return [
+    ...dictionary.hsk1HanziWords,
+    // Uncomment these lines incrementally in the future to increase validation coverage.
+    // ...dictionary.hsk2HanziWords,
+    // ...dictionary.hsk3HanziWords,
+    // ...dictionary.hsk4HanziWords,
+    // ...dictionary.hsk5HanziWords,
+    // ...dictionary.hsk6HanziWords,
+    // ...dictionary.hsk7To9HanziWords,
+  ];
+});

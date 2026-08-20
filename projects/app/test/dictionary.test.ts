@@ -18,7 +18,12 @@ import { isCi } from "#util/env.js";
 import { PartOfSpeech } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
-import type { dictionaryJsonSchema, HanziWordMeaning } from "#dictionary.ts";
+import type {
+  Dictionary,
+  DictionaryJson,
+  dictionaryJsonSchema,
+  HanziWordMeaning,
+} from "#dictionary.ts";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
@@ -39,7 +44,9 @@ import {
   parsePartOfSpeech,
   deepDecomposeHanzi,
   deepDecomposeHanziWithStrokeSpecs,
-  shallowDecomposeHanzi,
+  shallowDecomposeHanziCharacter,
+  shallowDecomposeHanziWord,
+  buildDictionary,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -234,8 +241,8 @@ test(`hanzi word meaning-key lint`, async () => {
   const isViolating = (x: string) =>
     // no "measure word" or "radical"
     /measure ?word| radical/iu.exec(x) != null ||
-    // only allow english alphabet
-    !/^[a-zA-Z]+$/u.test(x);
+    // only nanoid characters
+    !/^[a-zA-Z0-9]+$/u.test(x);
 
   const violations = new Set(
     dict.allHanziWords.filter((hanziWord) =>
@@ -1160,28 +1167,30 @@ test(`dictionary structural components list`, async () => {
   const dictionary = await loadDictionary();
   const isStructuralHanzi = await getIsStructuralHanzi();
 
-  const structural = dictionary.allHanziWords.filter((hanziWord) => {
-    const hanzi = hanziFromHanziWord(hanziWord);
-    return isHanziCharacter(hanzi) && isStructuralHanzi(hanzi);
-  });
+  const structural = dictionary.allHanziWords
+    .filter((hanziWord) => {
+      const hanzi = hanziFromHanziWord(hanziWord);
+      return isHanziCharacter(hanzi) && isStructuralHanzi(hanzi);
+    })
+    .sort();
 
   expect(structural).toMatchInlineSnapshot(`
     [
-      "𡗗:openHands",
-      "龸:exoticHat",
       "丨:line",
       "丶:dot",
       "丿:slash",
+      "乚:hidden",
+      "乚:second",
+      "亅:hook",
+      "冖:cover",
+      "忄:heart",
+      "龸:exoticHat",
       "𠂇:hand",
       "𠂉:knife",
       "𠂊:hands",
-      "乚:hidden",
-      "乚:second",
       "𠃌:radical",
-      "亅:hook",
-      "冖:cover",
+      "𡗗:openHands",
       "𭕄:radical",
-      "忄:heart",
     ]
   `);
 });
@@ -1434,18 +1443,135 @@ describe(`parsePartOfSpeech suite`, () => {
   });
 });
 
-describe(`shallowDecomposeHanzi()`, () => {
-  test(`for multi-character hanzi, only returns each character`, async () => {
-    const result = shallowDecomposeHanzi(汉`说讠`, [
-      { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
-      { hanzi: 汉字`兑`, ids: `丷` as HanziIds },
-    ]);
+describe(`shallowDecomposeHanziWord()`, async () => {
+  function buildTestDict(
+    dict: Record<HanziWord, HanziWordMeaning>,
+  ): Dictionary {
+    return buildDictionary(
+      new Map(Object.entries(dict)) as DictionaryJson,
+      new Map(),
+    );
+  }
 
-    expect(result).toEqual([`说`, `讠`]);
+  function withPinyin(
+    result: ReturnType<typeof shallowDecomposeHanziWord>,
+    dict: Dictionary,
+  ): string[] {
+    return result.map((x) => `${x} (${dict.lookupHanziWord(x)?.pinyin?.[0]})`);
+  }
+
+  test(`single-character words returns empty array`, async () => {
+    const dict = await loadDictionary();
+    expect(shallowDecomposeHanziWord(`行:walk`, dict)).toEqual([]);
   });
 
+  test(`guesses based on pinyin when there's no explicit mapping 1`, () => {
+    const dict = buildTestDict({
+      [`人:person`]: { gloss: [`person`], pinyin: [拼音`rén`] },
+      [`行:okay`]: { gloss: [`okay`], pinyin: [拼音`xíng`] },
+      [`行:industry`]: { gloss: [`industry`], pinyin: [拼音`háng`] },
+      [`行人:pedestrian`]: { gloss: [`pedestrian`], pinyin: [拼音`xíngrén`] },
+    });
+
+    expect(withPinyin(shallowDecomposeHanziWord(`行人:pedestrian`, dict), dict))
+      .toMatchInlineSnapshot(`
+        [
+          "行:okay (xíng)",
+          "人:person (rén)",
+        ]
+      `);
+  });
+
+  test(`guesses based on pinyin when there's no explicit mapping 2`, () => {
+    const dict = buildTestDict({
+      [`行:okay`]: { gloss: [`okay`], pinyin: [拼音`xíng`] },
+      [`行:industry`]: { gloss: [`industry`], pinyin: [拼音`háng`] },
+      [`业:profession`]: { gloss: [`profession`], pinyin: [拼音`yè`] },
+      [`行业:industry`]: { gloss: [`industry`], pinyin: [拼音`hángyè`] },
+    });
+
+    expect(withPinyin(shallowDecomposeHanziWord(`行业:industry`, dict), dict))
+      .toMatchInlineSnapshot(`
+        [
+          "行:industry (háng)",
+          "业:profession (yè)",
+        ]
+      `);
+  });
+
+  test(`uses explicit character senses when available`, () => {
+    const dict = buildTestDict({
+      [`行:industry`]: { gloss: [`industry`], pinyin: [拼音`háng`] },
+      [`行:explicit`]: { gloss: [`explicit`], pinyin: [拼音`e`] },
+      [`业:profession`]: { gloss: [`profession`], pinyin: [拼音`yè`] },
+      [`业:explicit`]: { gloss: [`explicit`], pinyin: [拼音`e`] },
+      [`行业:industry`]: {
+        gloss: [`industry`],
+        pinyin: [拼音`hángyè`],
+        charSenses: [`行:explicit`, `业:explicit`],
+      },
+    });
+
+    expect(withPinyin(shallowDecomposeHanziWord(`行业:industry`, dict), dict))
+      .toMatchInlineSnapshot(`
+        [
+          "行:explicit (e)",
+          "业:explicit (e)",
+        ]
+      `);
+  });
+
+  test(`allows null in explicit character senses`, () => {
+    const base = {
+      [`行:industry`]: { gloss: [`industry`], pinyin: [拼音`háng`] },
+      [`行:explicit`]: { gloss: [`explicit`], pinyin: [拼音`e`] },
+      [`业:profession`]: { gloss: [`profession`], pinyin: [拼音`yè`] },
+      [`业:explicit`]: { gloss: [`explicit`], pinyin: [拼音`e`] },
+    };
+
+    {
+      const dict = buildTestDict({
+        ...base,
+        [`行业:industry`]: {
+          gloss: [`industry`],
+          pinyin: [拼音`hángyè`],
+          charSenses: [null, `业:explicit`],
+        },
+      });
+
+      expect(withPinyin(shallowDecomposeHanziWord(`行业:industry`, dict), dict))
+        .toMatchInlineSnapshot(`
+        [
+          "行:industry (háng)",
+          "业:explicit (e)",
+        ]
+      `);
+    }
+
+    {
+      const dict = buildTestDict({
+        ...base,
+        [`行业:industry`]: {
+          gloss: [`industry`],
+          pinyin: [拼音`hángyè`],
+          charSenses: [`行:explicit`, null],
+        },
+      });
+
+      expect(withPinyin(shallowDecomposeHanziWord(`行业:industry`, dict), dict))
+        .toMatchInlineSnapshot(`
+        [
+          "行:explicit (e)",
+          "业:profession (yè)",
+        ]
+      `);
+    }
+  });
+});
+
+describe(`shallowDecomposeHanziCharacter()`, () => {
   test(`for single-character hanzi, returns the immediate decomposition`, async () => {
-    const result = shallowDecomposeHanzi(汉`说`, [
+    const result = shallowDecomposeHanziCharacter(汉字`说`, [
       { hanzi: 汉字`说`, ids: `⿰言兑` as HanziIds },
       { hanzi: 汉字`兑`, ids: `丷` as HanziIds },
     ]);

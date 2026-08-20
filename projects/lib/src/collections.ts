@@ -556,7 +556,7 @@ export function maxK<T>(
 /**
  * Strict version of lodash/zip that throws if the arrays are not the same length.
  */
-export function zip<T1, T2>(
+export function zipStrict<T1, T2>(
   a: readonly T1[] | Generator<T1>,
   b: readonly T2[] | Generator<T2>,
 ): [T1, T2][] {
