@@ -13,7 +13,7 @@ export interface ChatPromptMessage {
   content: string;
 }
 
-export interface ChatPrompt<Schema extends z.ZodType> {
+interface ChatPromptBase<Schema extends z.ZodType> {
   model: OpenAI.AllModels;
   reasoningEffort: OpenAI.ReasoningEffort;
   messages: ChatPromptMessage[];
@@ -23,12 +23,48 @@ export interface ChatPrompt<Schema extends z.ZodType> {
    */
   schema: Schema;
   timeout?: number;
-  /**
-   * Optional postprocessing function to transform the raw response data into
-   * the desired format.
-   */
-  postprocess?: (data: z.infer<Schema>) => z.infer<Schema>;
 }
+
+/**
+ * Optional function to transform the validated response data into the shape
+ * consumers of the prompt want. This allows the schema to be optimised for the
+ * model (e.g. fewer output tokens) rather than for its consumers.
+ */
+interface ChatPromptWithOptionalTransform<
+  Schema extends z.ZodType,
+  Output = z.infer<Schema>,
+> extends ChatPromptBase<Schema> {
+  transform?: (data: z.infer<Schema>) => Output;
+}
+
+interface ChatPromptWithRequiredTransform<
+  Schema extends z.ZodType,
+  Output = z.infer<Schema>,
+> extends ChatPromptBase<Schema> {
+  transform: (data: z.infer<Schema>) => Output;
+}
+
+/**
+ * Use this when declaring a prompt, it enforces that `transform` is provided
+ * when `Output` differs from the schema's inferred type (otherwise there'd be
+ * no way to produce `Output`).
+ */
+export type ChatPrompt<Schema extends z.ZodType, Output = z.infer<Schema>> = [
+  z.infer<Schema>,
+] extends [Output]
+  ? [Output] extends [z.infer<Schema>]
+    ? ChatPromptWithOptionalTransform<Schema, Output>
+    : ChatPromptWithRequiredTransform<Schema, Output>
+  : ChatPromptWithRequiredTransform<Schema, Output>;
+
+/**
+ * Use this when accepting a prompt, `transform` is always optional here so that
+ * `Output` can be inferred from it.
+ */
+export type ChatPromptLike<
+  Schema extends z.ZodType,
+  Output = z.infer<Schema>,
+> = ChatPromptWithOptionalTransform<Schema, Output>;
 
 export function zodResponseFormatJson<Schema extends z.ZodType>(
   schema: Schema,
@@ -68,15 +104,23 @@ const fixAdditionalPropertiesEmptyObject: JsonSchemaOverride = ({
   }
 };
 
-export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
-  prompt: ChatPrompt<Schema>,
-  options?: { signal?: AbortSignal; retries?: number; store?: boolean },
+export async function requestOpenAiResponseJson<
+  Schema extends z.ZodType,
+  Output = z.infer<Schema>,
+>(
+  prompt: ChatPromptLike<Schema, Output>,
+  options?: {
+    signal?: AbortSignal;
+    retries?: number;
+    store?: boolean;
+    serviceTier?: OpenAI.Responses.Response[`service_tier`];
+  },
 ): Promise<{
   /**
-   * Final data including any postprocessing applied. This is the data that
-   * should be used by the caller.
+   * Final data, with `transform` applied if the prompt defines one. This is the
+   * data that should be used by the caller.
    */
-  data: z.infer<Schema>;
+  data: Output;
   /**
    * The raw output from the OpenAI response, which may include additional
    * metadata and information about the response.
@@ -85,6 +129,11 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
   usage?: OpenAI.Responses.ResponseUsage;
   model: string;
   reasoning?: OpenAI.Reasoning | null;
+  status?: OpenAI.Responses.Response[`status`];
+  /**
+   * Use "flex" processing to get 50% discount (Batch API pricing).
+   */
+  serviceTier?: OpenAI.Responses.Response[`service_tier`];
 }> {
   const client = getOpenAIClient();
 
@@ -98,6 +147,7 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
     },
     input: prompt.messages,
     store: options?.store,
+    service_tier: options?.serviceTier,
   };
 
   for (let retries = options?.retries ?? 2; ; retries--) {
@@ -113,9 +163,9 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       throw new Error(`OpenAI response output text was empty`);
     }
 
-    let data;
+    let parsed: z.infer<Schema>;
     try {
-      data = prompt.schema.parse(JSON.parse(content), { reportInput: true });
+      parsed = prompt.schema.parse(JSON.parse(content), { reportInput: true });
     } catch (e) {
       if (retries > 0) {
         debug(
@@ -128,9 +178,12 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       throw e;
     }
 
-    if (prompt.postprocess != null) {
-      data = prompt.postprocess(data);
-    }
+    const data =
+      prompt.transform == null
+        ? // Without a transform `Output` is inferred as `z.infer<Schema>`, but
+          // TypeScript can't narrow that from the generic parameter.
+          (parsed as Output)
+        : prompt.transform(parsed);
 
     return {
       data,
@@ -138,6 +191,8 @@ export async function requestOpenAiResponseJson<Schema extends z.ZodType>(
       usage: response.usage,
       model: response.model,
       reasoning: response.reasoning,
+      status: response.status,
+      serviceTier: response.service_tier,
     };
   }
 }

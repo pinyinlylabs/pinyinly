@@ -79,7 +79,7 @@ describeEval(
     harness: createResponsePromptHarness(buildCharacterCoreMeaningsSpecPrompt),
   },
   (it) => {
-    it.for(promptCases)(`$identity`, async (spec, { run }) => {
+    it.for(promptCases)(`$character`, async (spec, { run }) => {
       await run(spec);
     });
   },

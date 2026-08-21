@@ -21,5 +21,131 @@
   "mnemonic": {
     "decomposition": "⿰彳亍"
   },
+  "curriculumMeanings": [
+    {
+      "gloss": "go",
+      "pinyin": "xíng",
+      "description": "Movement along a course, extended to doing, carrying matters forward, and functioning.",
+      "branches": [
+        {
+          "gloss": "travel",
+          "description": "Physical movement and the people, routes, vehicles, and belongings associated with going from place to place.",
+          "occurrences": {
+            "并行": "bìng xíng",
+            "步行": "bù xíng",
+            "出行": "chū xíng",
+            "飞行": "fēi xíng",
+            "飞行员": "fēi xíng yuán",
+            "航行": "háng xíng",
+            "旅行": "lǚ xíng",
+            "旅行社": "lǚ xíng shè",
+            "平行": "píng xíng",
+            "绕行": "rào xíng",
+            "人行道": "rén xíng dào",
+            "送行": "sòng xíng",
+            "通行": "tōng xíng",
+            "通行证": "tōng xíng zhèng",
+            "同行": "tóng xíng",
+            "行": "xíng",
+            "行程": "xíng chéng",
+            "行李": "xíng li",
+            "行李箱": "xíng li xiāng",
+            "行人": "xíng rén",
+            "行驶": "xíng shǐ",
+            "行走": "xíng zǒu",
+            "一行": "yī xíng",
+            "衣食住行": "yī shí zhù xíng",
+            "游行": "yóu xíng",
+            "自行": "zì xíng",
+            "自行车": "zì xíng chē"
+          }
+        },
+        {
+          "gloss": "conduct",
+          "description": "Deliberate deeds become a person's actions and, by extension, their habitual moral bearing.",
+          "occurrences": {
+            "行动": "xíng dòng",
+            "品行": "pǐn xíng",
+            "行为": "xíng wéi",
+            "言行": "yán xíng",
+            "一言一行": "yī yán yī xíng"
+          }
+        },
+        {
+          "gloss": "execute",
+          "description": "Taking something forward becomes carrying out plans, duties, authority, policies, and organized affairs.",
+          "occurrences": {
+            "进行": "jìn xíng",
+            "举行": "jǔ xíng",
+            "履行": "lǚ xíng",
+            "强行": "qiáng xíng",
+            "施行": "shī xíng",
+            "实行": "shí xíng",
+            "试行": "shì xíng",
+            "推行": "tuī xíng",
+            "现行": "xiàn xíng",
+            "行使": "xíng shǐ",
+            "行政": "xíng zhèng",
+            "执行": "zhí xíng"
+          }
+        },
+        {
+          "gloss": "circulate",
+          "description": "What moves onward through society may be issued, spread, or become widely prevalent.",
+          "occurrences": {
+            "发行": "fā xíng",
+            "流行": "liú xíng",
+            "盛行": "shèng xíng"
+          }
+        },
+        {
+          "gloss": "operate",
+          "description": "A continuing process or system is viewed as moving along in operation.",
+          "occurrences": { "运行": "yùn xíng" }
+        },
+        {
+          "gloss": "work",
+          "description": "The ability to go forward yields the sense that something is possible or acceptable.",
+          "occurrences": { "不行": "bù xíng", "可行": "kě xíng" }
+        }
+      ]
+    },
+    {
+      "gloss": "line",
+      "pinyin": "háng",
+      "description": "An arranged row, extended to recognized lines of work, commercial establishments, and relative standing.",
+      "branches": [
+        {
+          "gloss": "profession",
+          "description": "A line of work defines an occupation, its peers, and those with or without insider expertise.",
+          "occurrences": {
+            "内行": "nèi háng",
+            "同行": "tóng háng",
+            "外行": "wài háng",
+            "行家": "háng jiā",
+            "行业": "háng yè"
+          }
+        },
+        {
+          "gloss": "commerce",
+          "description": "A business line becomes a commercial establishment and the conditions of its market activity.",
+          "occurrences": {
+            "行": "háng",
+            "行情": "háng qíng",
+            "银行": "yín háng",
+            "银行卡": "yín háng kǎ"
+          }
+        },
+        {
+          "gloss": "rank",
+          "description": "Arrangement in rows develops into placement or membership within an ordered grouping.",
+          "occurrences": {
+            "排行榜": "pái háng bǎng",
+            "行列": "háng liè"
+          }
+        }
+      ]
+    }
+  ],
   "decompositions": { "⿰彳亍": ["0-2", "3-5"] }
 }

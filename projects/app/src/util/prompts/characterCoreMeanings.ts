@@ -1,15 +1,29 @@
-import type { HanziCharacter, HanziText, PinyinText } from "@/data/model";
+import { matchAllPinyinUnits } from "@/data/pinyin";
+import { splitHanziText } from "@/data/hanzi";
+import {
+  hanziTextSchema,
+  pinyinTextSchema,
+  pinyinUnitSchema,
+} from "@/data/model";
+import type {
+  characterCurriculumMeaningSchema,
+  HanziCharacter,
+  HanziText,
+  PinyinText,
+} from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
+import isEqual from "lodash/isEqual";
 
 export type CharacterCoreMeaningsSpecInputType = {
   character: HanziCharacter;
   usages: DeepReadonly<{ hanzi: HanziText; pinyin: PinyinText }[]>;
 };
 
-export const characterCoreMeaningsSpecSchema = z
+export const characterCoreMeaningsSpecPromptOutputSchema = z
   .object({
     coreMeanings: z.array(
       z.object({
@@ -21,6 +35,12 @@ export const characterCoreMeaningsSpecSchema = z
           z.object({
             lemma: z.string(),
             description: z.string(),
+            /**
+             * Storing hanzi occurrences here wasn't the original plan (instead
+             * the occurrences would be stored on the relevant words that use
+             * this character), but it's actually useful to include them here to
+             * give more context to the branch for how it's used.
+             */
             occurrences: z.array(z.string()),
           }),
         ),
@@ -30,13 +50,12 @@ export const characterCoreMeaningsSpecSchema = z
   .strict()
   .meta({ title: `characterCoreMeaningsSpecSchema` });
 
-export type CharacterCoreMeaningsSpecType = z.infer<
-  typeof characterCoreMeaningsSpecSchema
->;
-
 export function buildCharacterCoreMeaningsSpecPrompt(
   input: CharacterCoreMeaningsSpecInputType,
-): ChatPrompt<typeof characterCoreMeaningsSpecSchema> {
+): ChatPrompt<
+  typeof characterCoreMeaningsSpecPromptOutputSchema,
+  z.infer<typeof characterCurriculumMeaningSchema>[]
+> {
   const systemTemplate = `
 # Task
 
@@ -57,7 +76,7 @@ Think like a linguist discovering the semantic structure of the character, not l
 - Every supplied occurrence must appear exactly once.
 - Do not invent vocabulary that was not supplied.
 - If the same written word appears multiple times with different pronunciations, treat them as separate occurrences.
-- Do not include pinyin anywhere in the output except "primaryReading".
+- Do not include pinyin anywhere in the output except "primaryReading" and "pronunciationExceptions".
 
 ## Core Meaning
 
@@ -96,6 +115,10 @@ Avoid title case:
 Do not optimize for dictionary precision.
 
 Choose the English word that best captures the central semantic idea.
+
+### pronunciationExceptions
+
+Include the original item from the supplied word list.
 
 ### description
 
@@ -179,8 +202,87 @@ Example:
 
   return {
     messages,
-    schema: characterCoreMeaningsSpecSchema,
+    schema: characterCoreMeaningsSpecPromptOutputSchema,
     model: `gpt-5.6-terra`,
     reasoningEffort: `medium`,
+    transform: (data) => {
+      return data.coreMeanings.map((coreMeaning) => {
+        const result: z.infer<typeof characterCurriculumMeaningSchema> = {
+          gloss: coreMeaning.lemma,
+          pinyin: pinyinUnitSchema.parse(coreMeaning.primaryReading, {
+            reportInput: true,
+          }),
+          pinyinExceptions: Object.fromEntries(
+            coreMeaning.pronunciationExceptions.map((exception) => {
+              const [, hanziRaw, pinyinRaw] =
+                exception.match(/^(.+) \((.+)\)$/u) ?? [];
+              invariant(
+                hanziRaw != null && pinyinRaw != null,
+                `Pronunciation exception "%s" is not in the expected format`,
+                exception,
+              );
+              const hanzi = hanziTextSchema.parse(hanziRaw, {
+                reportInput: true,
+              });
+              const pinyin = pinyinTextSchema.parse(pinyinRaw, {
+                reportInput: true,
+              });
+              invariant(
+                input.usages.some(
+                  (usage) => usage.hanzi === hanzi && usage.pinyin === pinyin,
+                ),
+                `Pinyin exception %s not found in supplied usages (hanzi=%s, pinyin=%s)`,
+                exception,
+                hanzi,
+                pinyin,
+              );
+              return [hanzi, pinyin];
+            }),
+          ),
+          description: coreMeaning.description,
+          branches: coreMeaning.branches.map((branch) => {
+            return {
+              gloss: branch.lemma,
+              description: branch.description,
+              occurrences: Object.fromEntries(
+                branch.occurrences.map((occurrence) => {
+                  const hanzi = hanziTextSchema.parse(occurrence, {
+                    reportInput: true,
+                  });
+                  const chars = splitHanziText(hanzi);
+                  invariant(
+                    chars.filter((c) => c === input.character).length === 1,
+                    `Occurrence %s does not contain exactly one instance of character %s`,
+                    occurrence,
+                    input.character,
+                  );
+                  const index = chars.indexOf(input.character);
+                  invariant(index > -1);
+                  const usage = input.usages.find(
+                    (usage) =>
+                      usage.hanzi === occurrence &&
+                      matchAllPinyinUnits(usage.pinyin)[index] ===
+                        coreMeaning.primaryReading,
+                  );
+                  invariant(
+                    usage != null,
+                    `Occurrence %s not found in supplied usages (pinyin=%s)`,
+                    occurrence,
+                    coreMeaning.primaryReading,
+                  );
+                  return [usage.hanzi, usage.pinyin];
+                }),
+              ),
+            };
+          }),
+        };
+
+        if (isEqual(result.pinyinExceptions, {})) {
+          delete result.pinyinExceptions;
+        }
+
+        return result;
+      });
+    },
   };
 }

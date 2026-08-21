@@ -97,7 +97,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
       - Every supplied occurrence must appear exactly once.
       - Do not invent vocabulary that was not supplied.
       - If the same written word appears multiple times with different pronunciations, treat them as separate occurrences.
-      - Do not include pinyin anywhere in the output except "primaryReading".
+      - Do not include pinyin anywhere in the output except "primaryReading" and "pronunciationExceptions".
 
       ## Core Meaning
 
@@ -136,6 +136,10 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
       Do not optimize for dictionary precision.
 
       Choose the English word that best captures the central semantic idea.
+
+      ### pronunciationExceptions
+
+      Include the original item from the supplied word list.
 
       ### description
 
@@ -276,7 +280,92 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
           },
           "type": "json_schema",
         },
+        "transform": [Function],
       }
+    `);
+  });
+
+  test(`transform sanity check`, () => {
+    const prompt = buildCharacterCoreMeaningsSpecPrompt({
+      character: `行` as HanziCharacter,
+      usages: [
+        { hanzi: `并行`, pinyin: `bìng xíng` },
+        { hanzi: `不行`, pinyin: `bù xíng` },
+        { hanzi: `同行`, pinyin: `tóng háng` },
+        { hanzi: `不行`, pinyin: `bù xíng` },
+        { hanzi: `行`, pinyin: `xíng` },
+        { hanzi: `行`, pinyin: `háng` },
+      ] as { hanzi: HanziText; pinyin: PinyinText }[],
+    });
+
+    expect(
+      prompt.transform({
+        coreMeanings: [
+          {
+            lemma: `go`,
+            primaryReading: `xíng`,
+            pronunciationExceptions: [`同行 (tóng háng)`],
+            description: `Movement from place to place extends to coordinated direction, the running of processes, undertaking or putting things into effect, and judgments of whether something works.`,
+            branches: [
+              {
+                lemma: `run`,
+                description: `Movement from place to place.`,
+                occurrences: [`并行`, `不行`, `行`],
+              },
+            ],
+          },
+          {
+            lemma: `row`,
+            primaryReading: `háng`,
+            pronunciationExceptions: [],
+            description: `An ordered row develops into a recognized sphere of activity, its members and expertise, and commercial or ranked standing.`,
+            branches: [
+              {
+                lemma: `trade`,
+                description: `A recognized occupational or commercial sphere, including its institutions, conditions, and fellow members.`,
+                occurrences: [`行`, `同行`],
+              },
+            ],
+          },
+        ],
+      }),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "branches": [
+            {
+              "description": "Movement from place to place.",
+              "gloss": "run",
+              "occurrences": {
+                "不行": "bù xíng",
+                "并行": "bìng xíng",
+                "行": "xíng",
+              },
+            },
+          ],
+          "description": "Movement from place to place extends to coordinated direction, the running of processes, undertaking or putting things into effect, and judgments of whether something works.",
+          "gloss": "go",
+          "pinyin": "xíng",
+          "pinyinExceptions": {
+            "同行": "tóng háng",
+          },
+        },
+        {
+          "branches": [
+            {
+              "description": "A recognized occupational or commercial sphere, including its institutions, conditions, and fellow members.",
+              "gloss": "trade",
+              "occurrences": {
+                "同行": "tóng háng",
+                "行": "háng",
+              },
+            },
+          ],
+          "description": "An ordered row develops into a recognized sphere of activity, its members and expertise, and commercial or ranked standing.",
+          "gloss": "row",
+          "pinyin": "háng",
+        },
+      ]
     `);
   });
 });

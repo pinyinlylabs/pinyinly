@@ -5,7 +5,7 @@ import path from "node:path";
 import type OpenAI from "openai";
 import type { z } from "zod";
 import { requestOpenAiResponseJson } from "#server/lib/ai.js";
-import type { ChatPrompt } from "#server/lib/ai.js";
+import type { ChatPrompt, ChatPromptLike } from "#server/lib/ai.js";
 
 export async function makeSimplePrompt<Schema extends z.ZodType>(
   docs: string[],
@@ -26,7 +26,8 @@ export async function makeSimplePrompt<Schema extends z.ZodType>(
 export function makeRequestOpenAiResponseJsonCached(fsDbCache: FsDbCache) {
   return async function requestOpenAiResponseJsonCached<
     Schema extends z.ZodType,
-  >(prompt: ChatPrompt<Schema>): Promise<z.infer<Schema>> {
+    Output = z.infer<Schema>,
+  >(prompt: ChatPromptLike<Schema, Output>): Promise<Output> {
     // Check cache first using a stable cache key
     const cacheKey = JSON.stringify({
       model: prompt.model,
@@ -35,7 +36,9 @@ export function makeRequestOpenAiResponseJsonCached(fsDbCache: FsDbCache) {
     const cached = fsDbCache.get(cacheKey);
     if (cached != null) {
       invariant(typeof cached === `string`);
-      return prompt.schema.parse(JSON.parse(cached));
+      // The cached value is post-transform, so it can't be validated against
+      // the prompt's schema.
+      return JSON.parse(cached) as Output;
     }
 
     const result = await requestOpenAiResponseJson(prompt);

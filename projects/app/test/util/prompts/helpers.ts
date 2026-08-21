@@ -4,7 +4,7 @@ import type {
   LocationSetSpec,
   LocationSpec,
 } from "#data/model.js";
-import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
+import type { ChatPromptLike, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
@@ -25,7 +25,7 @@ function fmtChatPromptMessagesForSnapshot(
 }
 
 export function fmtChatPromptForSnapshot<Schema extends z.ZodType>(
-  prompt: ChatPrompt<Schema>,
+  prompt: ChatPromptLike<Schema, unknown>,
 ) {
   // Make sure a title is defined.
   const meta = prompt.schema.meta();

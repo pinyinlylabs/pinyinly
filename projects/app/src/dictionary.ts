@@ -376,6 +376,12 @@ export const hanziWordMeaningSchema = z
     cedict: cedictReferenceSchema
       .describe(`reference to the corresponding CE-DICT entry and sense`)
       .optional(),
+    /**
+     * Character-by-character semantic decomposition of this word.
+     *
+     * Each entry references the dictionary sense used to explain the
+     * corresponding character's meaning within this word.
+     */
     charSenses: z.array(hanziWordSchema.nullable()).optional(),
   })
   .strict();

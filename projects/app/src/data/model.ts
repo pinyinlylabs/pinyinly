@@ -888,6 +888,60 @@ export function buildIdsNodeSchema<T extends z.ZodType>(
   return depth5Schema as z.ZodType<IdsNode<z.infer<T>>>;
 }
 
+export const characterCurriculumMeaningBranchSchema = z.object({
+  gloss: z.string(),
+  description: z.string().optional(),
+  occurrences: z
+    .record(hanziTextSchema, pinyinTextSchema)
+    .describe(
+      `Occurrences of this meaning, keyed by hanzi with their pinyin. e.g. { "你好": "nǐhǎo" }`,
+    ),
+});
+
+/**
+ * Curriculum Meanings are the semantic units used by Pinyinly's teaching
+ * curriculum. They are deliberately different from dictionary senses.
+ *
+ * A dictionary describes how a character is actually used in the language,
+ * often splitting it into many fine-grained senses. A Curriculum Meaning
+ * instead groups one or more related dictionary senses into a single,
+ * memorable concept that is easier for learners to understand and remember.
+ *
+ * Every Curriculum Meaning is associated with a single pronunciation and acts
+ * as a conceptual "anchor" from which more specific branches and vocabulary
+ * naturally grow. The goal is pedagogical clarity rather than lexicographic
+ * precision.
+ *
+ * This distinction allows the curriculum to remain stable even if the
+ * underlying dictionary changes. Dictionary senses can be merged, split, or
+ * remapped over time without changing the conceptual structure presented to
+ * learners.
+ *
+ * Information architecture:
+ *
+ *   Character
+ *     ├─ Dictionary senses      (reference data)
+ *     ├─ Curriculum meanings    (teaching model)
+ *     │    ├─ branches
+ *     │    └─ occurrences
+ *     └─ Mnemonics
+ *
+ * Dictionary data answers "What meanings does this character have?".
+ * Curriculum Meanings answer "What is the best way to teach those meanings?".
+ */
+export const characterCurriculumMeaningSchema = z.object({
+  gloss: z.string(),
+  pinyin: pinyinUnitSchema,
+  pinyinExceptions: z
+    .record(hanziTextSchema, pinyinTextSchema)
+    .optional()
+    .describe(
+      `Exceptions to the default pinyin for this meaning, keyed by hanzi, e.g. { "你好": "nǐhǎo" }`,
+    ),
+  description: z.string().optional(),
+  branches: z.array(characterCurriculumMeaningBranchSchema).optional(),
+});
+
 export const hanziStrokeColorSchema = z.enum([
   `blue`,
   `yellow`,
@@ -1094,6 +1148,10 @@ export const wikiCharacterDataSchema = z.strictObject({
         .optional(),
     })
     .optional(),
+  /**
+   * The meanings that are taught for this character in the curriculum.
+   */
+  curriculumMeanings: z.array(characterCurriculumMeaningSchema).optional(),
 });
 
 export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
