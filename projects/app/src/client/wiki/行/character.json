@@ -18,97 +18,96 @@
       "M 673 455 L 708 435 L 715 425 L 717 108 L 712 58 L 689 15 L 645 30 L 580 70"
     ]
   },
-  "mnemonic": {
-    "decomposition": "⿰彳亍"
-  },
+  "decompositions": { "⿰彳亍": ["0-2", "3-5"] },
+  "mnemonic": { "decomposition": "⿰彳亍" },
   "curriculumMeanings": [
     {
       "id": "行:go",
       "gloss": "go",
-      "hsk3": "3",
       "pinyin": "xíng",
+      "hsk3": "3",
       "description": "Movement along a course, extended to doing, carrying matters forward, and functioning.",
       "branches": [
         {
           "gloss": "travel",
           "description": "Physical movement and the people, routes, vehicles, and belongings associated with going from place to place.",
           "occurrences": {
-            "并行": "bìng xíng",
-            "步行": "bù xíng",
-            "出行": "chū xíng",
-            "飞行": "fēi xíng",
-            "飞行员": "fēi xíng yuán",
-            "航行": "háng xíng",
-            "旅行": "lǚ xíng",
-            "旅行社": "lǚ xíng shè",
-            "平行": "píng xíng",
-            "绕行": "rào xíng",
-            "人行道": "rén xíng dào",
-            "送行": "sòng xíng",
-            "通行": "tōng xíng",
-            "通行证": "tōng xíng zhèng",
-            "同行": "tóng xíng",
+            "并行": "bìngxíng",
+            "步行": "bùxíng",
+            "出行": "chūxíng",
+            "飞行": "fēixíng",
+            "飞行员": "fēixíngyuán",
+            "航行": "hángxíng",
+            "旅行": "lǚxíng",
+            "旅行社": "lǚxíngshè",
+            "平行": "píngxíng",
+            "绕行": "ràoxíng",
+            "人行道": "rénxíngdào",
+            "送行": "sòngxíng",
+            "通行": "tōngxíng",
+            "通行证": "tōngxíngzhèng",
+            "同行": "tóngxíng",
             "行": "xíng",
-            "行程": "xíng chéng",
-            "行李": "xíng li",
-            "行李箱": "xíng li xiāng",
-            "行人": "xíng rén",
-            "行驶": "xíng shǐ",
-            "行走": "xíng zǒu",
-            "一行": "yī xíng",
-            "衣食住行": "yī shí zhù xíng",
-            "游行": "yóu xíng",
-            "自行": "zì xíng",
-            "自行车": "zì xíng chē"
+            "行程": "xíngchéng",
+            "行李": "xíngli",
+            "行李箱": "xínglixiāng",
+            "行人": "xíngrén",
+            "行驶": "xíngshǐ",
+            "行走": "xíngzǒu",
+            "一行": "yīxíng",
+            "衣食住行": "yī-shí-zhù-xíng",
+            "游行": "yóuxíng",
+            "自行": "zìxíng",
+            "自行车": "zìxíngchē"
           }
         },
         {
           "gloss": "conduct",
           "description": "Deliberate deeds become a person's actions and, by extension, their habitual moral bearing.",
           "occurrences": {
-            "行动": "xíng dòng",
-            "品行": "pǐn xíng",
-            "行为": "xíng wéi",
-            "言行": "yán xíng",
-            "一言一行": "yī yán yī xíng"
+            "行动": "xíngdòng",
+            "品行": "pǐnxíng",
+            "行为": "xíngwéi",
+            "言行": "yánxíng",
+            "一言一行": "yīyányīxíng"
           }
         },
         {
           "gloss": "execute",
           "description": "Taking something forward becomes carrying out plans, duties, authority, policies, and organized affairs.",
           "occurrences": {
-            "进行": "jìn xíng",
-            "举行": "jǔ xíng",
-            "履行": "lǚ xíng",
-            "强行": "qiáng xíng",
-            "施行": "shī xíng",
-            "实行": "shí xíng",
-            "试行": "shì xíng",
-            "推行": "tuī xíng",
-            "现行": "xiàn xíng",
-            "行使": "xíng shǐ",
-            "行政": "xíng zhèng",
-            "执行": "zhí xíng"
+            "进行": "jìnxíng",
+            "举行": "jǔxíng",
+            "履行": "lǚxíng",
+            "强行": "qiángxíng",
+            "施行": "shīxíng",
+            "实行": "shíxíng",
+            "试行": "shìxíng",
+            "推行": "tuīxíng",
+            "现行": "xiànxíng",
+            "行使": "xíngshǐ",
+            "行政": "xíngzhèng",
+            "执行": "zhíxíng"
           }
         },
         {
           "gloss": "circulate",
           "description": "What moves onward through society may be issued, spread, or become widely prevalent.",
           "occurrences": {
-            "发行": "fā xíng",
-            "流行": "liú xíng",
-            "盛行": "shèng xíng"
+            "发行": "fāxíng",
+            "流行": "liúxíng",
+            "盛行": "shèngxíng"
           }
         },
         {
           "gloss": "operate",
           "description": "A continuing process or system is viewed as moving along in operation.",
-          "occurrences": { "运行": "yùn xíng" }
+          "occurrences": { "运行": "yùnxíng" }
         },
         {
           "gloss": "work",
           "description": "The ability to go forward yields the sense that something is possible or acceptable.",
-          "occurrences": { "不行": "bù xíng", "可行": "kě xíng" }
+          "occurrences": { "不行": "bùxíng", "可行": "kěxíng" }
         }
       ]
     },
@@ -122,11 +121,11 @@
           "gloss": "profession",
           "description": "A line of work defines an occupation, its peers, and those with or without insider expertise.",
           "occurrences": {
-            "内行": "nèi háng",
-            "同行": "tóng háng",
-            "外行": "wài háng",
-            "行家": "háng jiā",
-            "行业": "háng yè"
+            "内行": "nèiháng",
+            "同行": "tóngháng",
+            "外行": "wàiháng",
+            "行家": "hángjiā",
+            "行业": "hángyè"
           }
         },
         {
@@ -134,21 +133,17 @@
           "description": "A business line becomes a commercial establishment and the conditions of its market activity.",
           "occurrences": {
             "行": "háng",
-            "行情": "háng qíng",
-            "银行": "yín háng",
-            "银行卡": "yín háng kǎ"
+            "行情": "hángqíng",
+            "银行": "yínháng",
+            "银行卡": "yínhángkǎ"
           }
         },
         {
           "gloss": "rank",
           "description": "Arrangement in rows develops into placement or membership within an ordered grouping.",
-          "occurrences": {
-            "排行榜": "pái háng bǎng",
-            "行列": "háng liè"
-          }
+          "occurrences": { "排行榜": "páihángbǎng", "行列": "hángliè" }
         }
       ]
     }
-  ],
-  "decompositions": { "⿰彳亍": ["0-2", "3-5"] }
+  ]
 }

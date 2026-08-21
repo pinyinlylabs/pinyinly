@@ -1,6 +1,15 @@
 // pyly-not-src-test
 
-import { dataDir, projectRoot, wikiDir } from "#bin/util/paths.ts";
+import {
+  readDictionaryJson,
+  unparseDictionaryJson,
+} from "#bin/util/dictionary.ts";
+import {
+  dataDir,
+  dictionaryFilePath,
+  projectRoot,
+  wikiDir,
+} from "#bin/util/paths.ts";
 import {
   characterStrokeCount,
   idsApplyTransforms,
@@ -19,12 +28,15 @@ import type {
   CharacterJson,
 } from "#data/model.js";
 import { characterJsonSchema } from "#data/model.js";
+import { matchAllPinyinUnits, normalizePinyinText } from "#data/pinyin.js";
 import {
   buildHanziWord,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
+  hanziFromHanziWord,
   loadDictionary,
 } from "#dictionary.js";
+import { loadCedictDictionary } from "#test/data/cedict.ts";
 import { buildCharactersToCheck } from "#test/data/helpers.ts";
 import { getFonts } from "#test/helpers.ts";
 import type { StrokeSpecAtom } from "#util/strokeSpec.js";
@@ -50,6 +62,8 @@ import {
   rm,
 } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import { jsonCodec } from "@pinyinly/lib/zod";
+import isEqual from "lodash/isEqual";
 import path from "node:path";
 import SVGPathCommander from "svg-path-commander";
 import { describe, expect, test } from "vitest";
@@ -687,6 +701,120 @@ describe(`character.json files`, async () => {
         .toMatchJsonFileSnapshot(
           path.join(characterStrokeSvgsDir, `${character}.json`),
         );
+    }
+  });
+
+  async function* getAllCharacterJson(): AsyncIterableIterator<{
+    character: HanziCharacter;
+    characterJson: CharacterJson;
+    filePath: string;
+  }> {
+    const characterJsonFilePaths = await glob(
+      path.join(wikiDir, `*`, `/character.json`),
+    );
+    for (const filePath of characterJsonFilePaths) {
+      const characterJson = jsonCodec(characterJsonSchema).parse(
+        readFileSync(filePath, `utf-8`),
+        { reportInput: true },
+      );
+
+      yield {
+        character: characterJson.hanzi,
+        characterJson,
+        filePath,
+      };
+    }
+  }
+
+  test(`.curriculumMeanings creates dictionary.asset.json entries`, async () => {
+    const dict = await readDictionaryJson();
+
+    for await (const { characterJson } of getAllCharacterJson()) {
+      if (characterJson.curriculumMeanings != null) {
+        // Delete any existing hanzi words
+        {
+          const existingHanziWords = dict
+            .keys()
+            .filter((x) => hanziFromHanziWord(x) === characterJson.hanzi);
+
+          for (const hanziWord of existingHanziWords) {
+            dict.delete(hanziWord);
+          }
+        }
+
+        // Insert new hanzi words
+        for (const meaning of characterJson.curriculumMeanings) {
+          dict.set(meaning.id, {
+            gloss: [meaning.gloss],
+            pinyin: [meaning.pinyin],
+            hsk: meaning.hsk3,
+          });
+        }
+
+        await expect(unparseDictionaryJson(dict)).toMatchJsonFileSnapshot(
+          dictionaryFilePath,
+        );
+      }
+    }
+  });
+
+  test(`.curriculumMeanings[*].branches[*].occurrences creates dictionary.asset.json entries`, async () => {
+    const dict = await readDictionaryJson();
+    const cedictDictionary = await loadCedictDictionary();
+
+    for await (const { filePath, characterJson } of getAllCharacterJson()) {
+      if (characterJson.curriculumMeanings != null) {
+        // Delete any existing hanzi words
+        {
+          const existingHanziWords = dict
+            .keys()
+            .filter((x) => hanziFromHanziWord(x) === characterJson.hanzi);
+
+          for (const hanziWord of existingHanziWords) {
+            dict.delete(hanziWord);
+          }
+        }
+
+        // Insert new hanzi words
+        for (const meaning of characterJson.curriculumMeanings) {
+          if (!meaning.branches) {
+            continue;
+          }
+
+          for (const branch of meaning.branches) {
+            for (const [hanziStr, pinyin] of Object.entries(
+              branch.occurrences,
+            )) {
+              const hanzi = hanziStr as HanziText;
+              const entries = cedictDictionary.lookupHanzi(hanzi);
+              if (
+                entries.some(
+                  (entry) => normalizePinyinText(entry.pinyin) === pinyin,
+                )
+              ) {
+                continue;
+              }
+
+              // No dictionary match, try to find one.
+              const equalPinyinEntries = entries.filter((entry) =>
+                isEqual(
+                  matchAllPinyinUnits(normalizePinyinText(entry.pinyin)),
+                  matchAllPinyinUnits(pinyin),
+                ),
+              );
+              invariant(
+                equalPinyinEntries.length === 1,
+                `expected exactly one CEDICT entry for ${hanzi} with pinyin ${pinyin}, but found ${equalPinyinEntries.length}`,
+              );
+
+              const entry = nonNullable(equalPinyinEntries[0]);
+              branch.occurrences[hanzi] = normalizePinyinText(entry.pinyin);
+            }
+          }
+        }
+
+        await expect(characterJson).toMatchJsonFileSnapshot(filePath);
+      }
     }
   });
 });

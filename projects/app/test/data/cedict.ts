@@ -1,11 +1,12 @@
 import { pinyinTextSchema } from "#data/model.js";
-import type { PinyinNumericText, PinyinText } from "#data/model.js";
+import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { renderPromptTemplate } from "#util/prompts/shared.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
   arrayFilterUnique,
+  mapArrayAdd,
   memoize0,
   mergeSortComparators,
   sortComparatorString,
@@ -21,6 +22,7 @@ import { requestOpenAiResponseJson } from "#server/lib/ai.js";
 import type { OpenAI } from "openai";
 import { loadHsk2026 } from "./hsk";
 import type { Hsk2026Type } from "./hsk";
+import type { DeepReadonly } from "ts-essentials";
 
 export interface CedictSenseIdParamsType {
   traditional: string;
@@ -3834,6 +3836,41 @@ export const loadCedictV2 = memoize0(
     });
 
     return editedEntries;
+  },
+);
+
+export interface CedictDictionary {
+  lookupHanzi(hanzi: HanziText): readonly CedictV2EntryType[];
+  lookupPinyin(pinyin: PinyinText): readonly CedictV2EntryType[];
+  allEntries: DeepReadonly<CedictV2EntryType[]>;
+}
+
+export const buildCedictDictionary = (
+  cedictEntries: readonly CedictV2EntryType[],
+): CedictDictionary => {
+  const entriesByHanzi = new Map<HanziText, CedictV2EntryType[]>();
+  const entriesByPinyin = new Map<PinyinText, CedictV2EntryType[]>();
+
+  for (const entry of cedictEntries) {
+    mapArrayAdd(entriesByPinyin, normalizePinyinText(entry.pinyin), entry);
+    mapArrayAdd(entriesByHanzi, entry.simplified, entry);
+  }
+
+  return {
+    lookupHanzi(hanzi: HanziText): readonly CedictV2EntryType[] {
+      return entriesByHanzi.get(hanzi) ?? [];
+    },
+    lookupPinyin(pinyin: PinyinText): readonly CedictV2EntryType[] {
+      return entriesByPinyin.get(pinyin) ?? [];
+    },
+    allEntries: cedictEntries,
+  };
+};
+
+export const loadCedictDictionary = memoize0(
+  async (): Promise<CedictDictionary> => {
+    const entries = await loadCedictV2();
+    return buildCedictDictionary(entries);
   },
 );
 
