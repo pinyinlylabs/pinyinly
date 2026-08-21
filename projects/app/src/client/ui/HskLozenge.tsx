@@ -1,4 +1,4 @@
-import type { HskLevel } from "@/data/model";
+import type { Hsk3Level } from "@/data/model";
 import { Lozenge } from "./Lozenge";
 import type { LozengeColor } from "./Lozenge";
 import { Text } from "react-native";
@@ -8,7 +8,7 @@ export function HskLozenge({
   size = `md`,
   color,
 }: {
-  hskLevel: HskLevel;
+  hskLevel: Hsk3Level;
   size?: `sm` | `md`;
   color?: LozengeColor;
 }) {
@@ -31,4 +31,4 @@ const hskLevelToColor = {
   [`5`]: `rose`,
   [`6`]: `orange`,
   [`7-9`]: `amber`,
-} satisfies Record<HskLevel, LozengeColor>;
+} satisfies Record<Hsk3Level, LozengeColor>;

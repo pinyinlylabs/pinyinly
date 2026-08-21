@@ -17,6 +17,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 import isEqual from "lodash/isEqual";
+import { buildHanziWord } from "@/dictionary";
 
 export type CharacterCoreMeaningsSpecInputType = {
   character: HanziCharacter;
@@ -208,6 +209,7 @@ Example:
     transform: (data) => {
       return data.coreMeanings.map((coreMeaning) => {
         const result: z.infer<typeof characterCurriculumMeaningSchema> = {
+          id: buildHanziWord(input.character, coreMeaning.lemma),
           gloss: coreMeaning.lemma,
           pinyin: pinyinUnitSchema.parse(coreMeaning.primaryReading, {
             reportInput: true,

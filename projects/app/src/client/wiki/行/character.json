@@ -23,7 +23,9 @@
   },
   "curriculumMeanings": [
     {
+      "id": "行:go",
       "gloss": "go",
+      "hsk3": "3",
       "pinyin": "xíng",
       "description": "Movement along a course, extended to doing, carrying matters forward, and functioning.",
       "branches": [
@@ -111,6 +113,7 @@
       ]
     },
     {
+      "id": "行:line",
       "gloss": "line",
       "pinyin": "háng",
       "description": "An arranged row, extended to recognized lines of work, commercial establishments, and relative standing.",

@@ -16,9 +16,9 @@ import type {
   HanziCharacter,
   HanziText,
   IdsNode,
-  WikiCharacterData,
+  CharacterJson,
 } from "#data/model.js";
-import { wikiCharacterDataSchema } from "#data/model.js";
+import { characterJsonSchema } from "#data/model.js";
 import {
   buildHanziWord,
   getIsComponentFormHanzi,
@@ -113,13 +113,13 @@ describe(`character.json files`, async () => {
     `svgs`,
   );
 
-  const getCharacterData = memoize1(
-    (character: string): WikiCharacterData | undefined => {
+  const getCharacterJson = memoize1(
+    (character: string): CharacterJson | undefined => {
       const filePath = path.join(wikiDir, character, `character.json`);
       if (existsSync(filePath)) {
         try {
           const json = JSON.parse(readFileSync(filePath, `utf-8`)) as unknown;
-          return wikiCharacterDataSchema.parse(json);
+          return characterJsonSchema.parse(json);
         } catch (error) {
           throw new Error(`failed to read and parse ${filePath}`, {
             cause: error,
@@ -136,7 +136,7 @@ describe(`character.json files`, async () => {
         ? ([
             {
               character,
-              characterData: nonNullable(getCharacterData(character)),
+              characterJson: nonNullable(getCharacterJson(character)),
               filePath,
             },
           ] as const)
@@ -164,13 +164,13 @@ describe(`character.json files`, async () => {
 
       invariant(transform != null, `unable to parse transform for ${pattern}`);
 
-      for (const { character, characterData } of characterFiles) {
+      for (const { character, characterJson } of characterFiles) {
         if (character === replacement || ignored.includes(character)) {
           continue;
         }
 
-        if (characterData.decompositions != null) {
-          for (const ids of Object.keys(characterData.decompositions)) {
+        if (characterJson.decompositions != null) {
+          for (const ids of Object.keys(characterJson.decompositions)) {
             const x = parseIds(ids);
             const x2 = idsApplyTransforms(x, [transform]);
 
@@ -199,41 +199,41 @@ describe(`character.json files`, async () => {
     ]);
     const dictionary = await loadDictionary();
 
-    for (const { character, characterData, filePath } of characterFiles) {
+    for (const { character, characterJson, filePath } of characterFiles) {
       const meanings = dictionary.lookupHanzi(character);
-      const svgStrokeCount = characterStrokeCount(characterData);
+      const svgStrokeCount = characterStrokeCount(characterJson);
       if (
         svgStrokeCount <= 4 ||
         meanings.length === 0 ||
         isComponentFormHanzi(character) ||
-        characterData.simplifiedForm != null ||
+        characterJson.simplifiedForm != null ||
         atomicCharacters.has(character)
       ) {
         continue;
       }
 
       expect
-        .soft(characterData, `${filePath} to have mnemonic`)
+        .soft(characterJson, `${filePath} to have mnemonic`)
         .toHaveProperty(`mnemonic`);
       expect
-        .soft(characterData.mnemonic, `${filePath} to have mnemonic`)
+        .soft(characterJson.mnemonic, `${filePath} to have mnemonic`)
         .toBeDefined();
 
       expect(
-        Object.keys(characterData.decompositions ?? {}).length,
+        Object.keys(characterJson.decompositions ?? {}).length,
         `${filePath} has at least one decomposition`,
       ).toBeGreaterThan(0);
     }
   });
 
   test(`decomposition strokes conformance`, async () => {
-    for (const { character, characterData } of characterFiles) {
+    for (const { character, characterJson } of characterFiles) {
       if (
-        characterData.decompositions != null &&
-        Array.isArray(characterData.svg.strokes)
+        characterJson.decompositions != null &&
+        Array.isArray(characterJson.svg.strokes)
       ) {
         for (const [ids, strokeSpecs] of Object.entries(
-          characterData.decompositions,
+          characterJson.decompositions,
         )) {
           expect
             .soft(strokeSpecs.length, `${character} IDS: ${ids}`)
@@ -244,21 +244,21 @@ describe(`character.json files`, async () => {
   });
 
   test(`.mnemonic.decomposition reference exists in .decompositions`, async () => {
-    for (const { characterData, filePath } of characterFiles) {
-      if (characterData.mnemonic?.decomposition == null) {
+    for (const { characterJson, filePath } of characterFiles) {
+      if (characterJson.mnemonic?.decomposition == null) {
         continue;
       }
 
       expect
-        .soft(Object.keys(characterData.decompositions ?? {}), `${filePath}`)
-        .toContain(characterData.mnemonic.decomposition);
+        .soft(Object.keys(characterJson.decompositions ?? {}), `${filePath}`)
+        .toContain(characterJson.mnemonic.decomposition);
     }
   });
 
   test(`decompositions don't reference the current character causing infinite loops`, async () => {
-    for (const { character, characterData, filePath } of characterFiles) {
-      if (characterData.decompositions != null) {
-        for (const ids of Object.keys(characterData.decompositions)) {
+    for (const { character, characterJson, filePath } of characterFiles) {
+      if (characterJson.decompositions != null) {
+        for (const ids of Object.keys(characterJson.decompositions)) {
           const leafs = [...walkIdsNodeLeafs(parseIds(ids))];
           expect
             .soft(leafs, `${filePath} IDS: ${ids}`)
@@ -269,29 +269,29 @@ describe(`character.json files`, async () => {
   });
 
   test(`stroke medians conformance`, async () => {
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.svg.medians == null) {
+    for (const { character, characterJson } of characterFiles) {
+      if (characterJson.svg.medians == null) {
         continue;
       }
 
       expect
         .soft(
-          Array.isArray(characterData.svg.strokes),
+          Array.isArray(characterJson.svg.strokes),
           `${character} medians require SVG strokes`,
         )
         .toBe(true);
-      if (!Array.isArray(characterData.svg.strokes)) {
+      if (!Array.isArray(characterJson.svg.strokes)) {
         continue;
       }
 
       expect
         .soft(
-          characterData.svg.medians.length,
+          characterJson.svg.medians.length,
           `${character} medians length must match strokes length`,
         )
-        .toBe(characterData.svg.strokes.length);
+        .toBe(characterJson.svg.strokes.length);
 
-      for (const [i, medianPath] of characterData.svg.medians.entries()) {
+      for (const [i, medianPath] of characterJson.svg.medians.entries()) {
         const totalLength = SVGPathCommander.getTotalLength(medianPath);
         expect
           .soft(
@@ -304,12 +304,12 @@ describe(`character.json files`, async () => {
   });
 
   test(`decomposition stroke specs are normalized`, async () => {
-    for (const { characterData, filePath } of characterFiles) {
-      if (characterData.decompositions) {
+    for (const { characterJson, filePath } of characterFiles) {
+      if (characterJson.decompositions) {
         const expected = {
-          ...characterData,
+          ...characterJson,
           decompositions: Object.fromEntries(
-            Object.entries(characterData.decompositions).map(
+            Object.entries(characterJson.decompositions).map(
               ([ids, strokeSpecs]) => [
                 ids,
                 strokeSpecs.map(normalizeStrokeSpec),
@@ -343,14 +343,14 @@ describe(`character.json files`, async () => {
     }
 
     const charactersToCheck = await buildCharactersToCheck();
-    for (const { character, characterData, filePath } of characterFiles) {
+    for (const { character, characterJson, filePath } of characterFiles) {
       if (charactersToCheck.has(character)) {
-        const ids = characterData.mnemonic?.decomposition;
+        const ids = characterJson.mnemonic?.decomposition;
         if (ids) {
           for (const leaf of walkIdsNodeLeafs(
             parseIds(ids) as IdsNode<HanziCharacter>,
           )) {
-            if (characterData.mnemonic?.components?.[leaf]?.label != null) {
+            if (characterJson.mnemonic?.components?.[leaf]?.label != null) {
               // If there's a label defined for the component, then it's okay to
               // use it in the mnemonic decomposition, even if it's a banned
               // character.
@@ -368,11 +368,11 @@ describe(`character.json files`, async () => {
   test(`number of mnemonic hints matches number of meanings for hanzi`, async () => {
     const dictionary = await loadDictionary();
 
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.hints) {
+    for (const { character, characterJson } of characterFiles) {
+      if (characterJson.mnemonic?.hints) {
         const hanziWordMeanings = dictionary.lookupHanzi(character);
 
-        const hintsCount = characterData.mnemonic.hints.length;
+        const hintsCount = characterJson.mnemonic.hints.length;
         const meaningsCount = hanziWordMeanings.length;
 
         expect
@@ -388,9 +388,9 @@ describe(`character.json files`, async () => {
   test(`all mnemonic hint meaningKeys are valid dictionary entries`, async () => {
     const dictionary = await loadDictionary();
 
-    for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.hints) {
-        for (const hint of characterData.mnemonic.hints) {
+    for (const { character, characterJson } of characterFiles) {
+      if (characterJson.mnemonic?.hints) {
+        for (const hint of characterJson.mnemonic.hints) {
           const hanziWord = buildHanziWord(character, hint.meaningKey);
           expect
             .soft(
@@ -406,14 +406,14 @@ describe(`character.json files`, async () => {
   test(`all strokes are covered by decompositions`, async () => {
     const charactersToCheck = await buildCharactersToCheck();
 
-    for (const { character, characterData, filePath } of characterFiles) {
+    for (const { character, characterJson, filePath } of characterFiles) {
       if (!charactersToCheck.has(character)) {
         continue;
       }
 
       if (
-        characterData.decompositions == null ||
-        Object.keys(characterData.decompositions).length === 0
+        characterJson.decompositions == null ||
+        Object.keys(characterJson.decompositions).length === 0
       ) {
         continue;
       }
@@ -434,7 +434,7 @@ describe(`character.json files`, async () => {
         }
       }
 
-      for (const strokeSpecs of Object.values(characterData.decompositions)) {
+      for (const strokeSpecs of Object.values(characterJson.decompositions)) {
         for (const strokeSpec of strokeSpecs) {
           for (const item of parseStrokeSpec(strokeSpec)) {
             for (const atom of item) {
@@ -444,7 +444,7 @@ describe(`character.json files`, async () => {
         }
       }
 
-      const totalStrokes = characterStrokeCount(characterData);
+      const totalStrokes = characterStrokeCount(characterJson);
       const expectedStrokes = Array.from({ length: totalStrokes }, (_, i) => i);
 
       for (const strokeIndex of expectedStrokes) {
@@ -461,16 +461,16 @@ describe(`character.json files`, async () => {
   test(`decomposition strokes match the hanzi stroke count`, async () => {
     const charactersToCheck = await buildCharactersToCheck();
 
-    for (const { character, characterData, filePath } of characterFiles) {
-      if (charactersToCheck.has(character) && characterData.decompositions) {
+    for (const { character, characterJson, filePath } of characterFiles) {
+      if (charactersToCheck.has(character) && characterJson.decompositions) {
         for (const [ids, strokeSpecs] of Object.entries(
-          characterData.decompositions,
+          characterJson.decompositions,
         )) {
           let i = -1;
           for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
             i++;
 
-            const hanziData = getCharacterData(leaf);
+            const hanziData = getCharacterJson(leaf);
             if (Array.isArray(hanziData?.svg.strokes)) {
               const strokeSpecText = nonNullable(strokeSpecs[i]);
               const strokeSpec = flattenStrokeSpecRanges(
@@ -493,11 +493,11 @@ describe(`character.json files`, async () => {
   test(`.strokes is SVG paths not just a count`, async () => {
     const charactersToCheck = await buildCharactersToCheck();
 
-    for (const { character, characterData, filePath } of characterFiles) {
+    for (const { character, characterJson, filePath } of characterFiles) {
       if (charactersToCheck.has(character)) {
         expect
           .soft(
-            characterData.svg.strokes,
+            characterJson.svg.strokes,
             `${filePath} .strokes should be an array of SVG paths`,
           )
           .toBeTypeOf(`object`);
@@ -508,31 +508,31 @@ describe(`character.json files`, async () => {
   test(`svg.segments is populated from decompositions`, async () => {
     const charactersToCheck = await buildCharactersToCheck();
 
-    for (const { character, characterData, filePath } of characterFiles) {
+    for (const { character, characterJson, filePath } of characterFiles) {
       if (charactersToCheck.has(character)) {
         let segments: Record<string, string> | undefined = undefined;
 
         const strokeSpecTexts = Object.values(
-          characterData.decompositions ?? {},
+          characterJson.decompositions ?? {},
         ).flat();
 
         if (strokeSpecTexts.length > 0) {
-          if (!Array.isArray(characterData.svg.strokes)) {
+          if (!Array.isArray(characterJson.svg.strokes)) {
             continue;
           }
           expect
             .soft(
-              characterData.svg.strokes,
+              characterJson.svg.strokes,
               `${filePath} svg.strokes should not be a number`,
             )
             .not.toBeTypeOf(`number`);
-          if (!Array.isArray(characterData.svg.strokes)) {
+          if (!Array.isArray(characterJson.svg.strokes)) {
             continue;
           }
 
           const result = buildStrokeSpecSegmentPaths(
-            characterData.svg.strokes,
-            characterData.svg.medians,
+            characterJson.svg.strokes,
+            characterJson.svg.medians,
             strokeSpecTexts,
           );
           if (Object.keys(result).length > 0) {
@@ -541,9 +541,9 @@ describe(`character.json files`, async () => {
         }
 
         const expected = {
-          ...characterData,
+          ...characterJson,
           svg: {
-            ...characterData.svg,
+            ...characterJson.svg,
             segments,
           },
         };
@@ -616,21 +616,21 @@ describe(`character.json files`, async () => {
   test(`consistency with characters.asset.json`, async () => {
     const expected = new Map<CharactersKey, CharactersValue>();
 
-    for (const { character, characterData } of characterFiles) {
+    for (const { character, characterJson } of characterFiles) {
       expected.set(character, {
-        mnemonic: characterData.mnemonic?.decomposition,
-        ...(characterData.decompositions == null
+        mnemonic: characterJson.mnemonic?.decomposition,
+        ...(characterJson.decompositions == null
           ? {}
-          : { decompositions: characterData.decompositions }),
-        ...(characterData.componentFormOf === undefined
+          : { decompositions: characterJson.decompositions }),
+        ...(characterJson.componentFormOf === undefined
           ? {}
-          : { componentFormOf: characterData.componentFormOf }),
-        ...(characterData.isStructural === undefined
+          : { componentFormOf: characterJson.componentFormOf }),
+        ...(characterJson.isStructural === undefined
           ? {}
-          : { isStructural: characterData.isStructural }),
-        ...(characterData.canonicalForm === undefined
+          : { isStructural: characterJson.isStructural }),
+        ...(characterJson.canonicalForm === undefined
           ? {}
-          : { canonicalForm: characterData.canonicalForm }),
+          : { canonicalForm: characterJson.canonicalForm }),
       });
     }
 
@@ -651,18 +651,18 @@ describe(`character.json files`, async () => {
       }
     >();
 
-    for (const { character, characterData } of characterFiles) {
-      if (Array.isArray(characterData.svg.strokes)) {
+    for (const { character, characterJson } of characterFiles) {
+      if (Array.isArray(characterJson.svg.strokes)) {
         const hasMedians =
-          Array.isArray(characterData.svg.medians) &&
-          characterData.svg.medians.length > 0;
+          Array.isArray(characterJson.svg.medians) &&
+          characterJson.svg.medians.length > 0;
         const hasSegments =
-          characterData.svg.segments != null &&
-          Object.keys(characterData.svg.segments).length > 0;
+          characterJson.svg.segments != null &&
+          Object.keys(characterJson.svg.segments).length > 0;
         expected.set(character, {
-          strokes: characterData.svg.strokes,
-          ...(hasMedians ? { medians: characterData.svg.medians } : {}),
-          ...(hasSegments ? { segments: characterData.svg.segments } : {}),
+          strokes: characterJson.svg.strokes,
+          ...(hasMedians ? { medians: characterJson.svg.medians } : {}),
+          ...(hasSegments ? { segments: characterJson.svg.segments } : {}),
         });
       }
     }

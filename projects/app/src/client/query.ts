@@ -6,17 +6,17 @@ import type {
   HanziIds,
   HanziText,
   HanziWord,
-  HskLevel,
+  Hsk3Level,
   PartOfSpeech,
   PinyinText,
   Skill,
   SrsStateType,
 } from "@/data/model";
-import { wikiCharacterDataSchema } from "@/data/model";
+import { characterJsonSchema } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
-import { hskLevelToNumber } from "@/data/hsk";
+import { hsk3LevelToNumber } from "@/data/hsk";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -444,7 +444,7 @@ export const wikiMdxQuery = Platform.select({
   default: wikiMdxQueryNative,
 });
 
-const characterDecompositionDataSchema = wikiCharacterDataSchema.pick({
+const characterDecompositionDataSchema = characterJsonSchema.pick({
   decompositions: true,
   mnemonic: true,
 });
@@ -548,7 +548,7 @@ export interface DictionarySearchEntry {
   glossCount: number;
   pos?: PartOfSpeech;
   pinyin?: PinyinText[];
-  hsk?: HskLevel;
+  hsk?: Hsk3Level;
   hskSortKey: number;
   /**
    * The lowest HSK level at which this character first appears — either as a
@@ -556,7 +556,7 @@ export interface DictionarySearchEntry {
    * this may be lower than `hsk`. For multi-character entries this equals
    * `hsk`.
    */
-  hskFirstAppearance?: HskLevel;
+  hskFirstAppearance?: Hsk3Level;
   note?: string;
   hanziCharacterCount: number;
   isStructural?: boolean;
@@ -846,7 +846,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
 
       // Build a map of each character to the minimum HSK level it appears in
       // across all words (including multi-character words it's part of).
-      const charMinHskMap = new Map<string, HskLevel>();
+      const charMinHskMap = new Map<string, Hsk3Level>();
       for (const [hanziWord, meaning] of dictionary.allEntries) {
         if (meaning.hsk == null) {
           continue;
@@ -856,7 +856,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           const existing = charMinHskMap.get(char);
           if (
             existing == null ||
-            hskLevelToNumber(meaning.hsk) < hskLevelToNumber(existing)
+            hsk3LevelToNumber(meaning.hsk) < hsk3LevelToNumber(existing)
           ) {
             charMinHskMap.set(char, meaning.hsk);
           }
@@ -952,8 +952,8 @@ function characterMnemonicIdsCollectionOptions(): CollectionConfig<
   });
 }
 
-function dictionarySearchHskSortKey(hsk?: HskLevel): number {
-  return hsk == null ? 9999 : hskLevelToNumber(hsk);
+function dictionarySearchHskSortKey(hsk?: Hsk3Level): number {
+  return hsk == null ? 9999 : hsk3LevelToNumber(hsk);
 }
 
 export const rizzleCollectionOptions = <

@@ -1,15 +1,15 @@
-import { HskLevel } from "@/data/model";
+import { Hsk3Level } from "@/data/model";
 import { Text, View } from "react-native";
 import { HskLozenge } from "./HskLozenge";
 
 const hskLevels = [
-  HskLevel[`1`],
-  HskLevel[`2`],
-  HskLevel[`3`],
-  HskLevel[`4`],
-  HskLevel[`5`],
-  HskLevel[`6`],
-  HskLevel[`7-9`],
+  Hsk3Level[`1`],
+  Hsk3Level[`2`],
+  Hsk3Level[`3`],
+  Hsk3Level[`4`],
+  Hsk3Level[`5`],
+  Hsk3Level[`6`],
+  Hsk3Level[`7-9`],
 ];
 
 export default () => {

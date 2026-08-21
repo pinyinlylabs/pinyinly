@@ -21,8 +21,8 @@ import type {
 import {
   charactersSchema,
   hanziWordSchema,
-  HskLevel,
-  hskLevelSchema,
+  Hsk3Level,
+  hsk3LevelSchema,
   isHanziStrokeCountChar,
   PartOfSpeech,
   pinyinSoundIdSchema,
@@ -372,7 +372,7 @@ export const hanziWordMeaningSchema = z
       .string()
       .transform((x) => parsePartOfSpeech(x))
       .optional(),
-    hsk: hskLevelSchema.optional(),
+    hsk: hsk3LevelSchema.optional(),
     cedict: cedictReferenceSchema
       .describe(`reference to the corresponding CE-DICT entry and sense`)
       .optional(),
@@ -496,31 +496,31 @@ export function buildDictionary(
       case undefined: {
         break;
       }
-      case HskLevel[1]: {
+      case Hsk3Level[1]: {
         hsk1HanziWords.push(hanziWord);
         break;
       }
-      case HskLevel[2]: {
+      case Hsk3Level[2]: {
         hsk2HanziWords.push(hanziWord);
         break;
       }
-      case HskLevel[3]: {
+      case Hsk3Level[3]: {
         hsk3HanziWords.push(hanziWord);
         break;
       }
-      case HskLevel[4]: {
+      case Hsk3Level[4]: {
         hsk4HanziWords.push(hanziWord);
         break;
       }
-      case HskLevel[5]: {
+      case Hsk3Level[5]: {
         hsk5HanziWords.push(hanziWord);
         break;
       }
-      case HskLevel[6]: {
+      case Hsk3Level[6]: {
         hsk6HanziWords.push(hanziWord);
         break;
       }
-      case HskLevel[`7-9`]: {
+      case Hsk3Level[`7-9`]: {
         hsk7To9HanziWords.push(hanziWord);
         break;
       }

@@ -388,7 +388,7 @@ const skillKindSchema = z.enum({
 export const SkillKind = skillKindSchema.enum;
 export type SkillKind = z.infer<typeof skillKindSchema>;
 
-export const hskLevelSchema = z.enum({
+export const hsk3LevelSchema = z.enum({
   "1": `1`,
   "2": `2`,
   "3": `3`,
@@ -397,8 +397,8 @@ export const hskLevelSchema = z.enum({
   "6": `6`,
   "7-9": `7-9`,
 });
-export const HskLevel = hskLevelSchema.enum;
-export type HskLevel = z.infer<typeof hskLevelSchema>;
+export const Hsk3Level = hsk3LevelSchema.enum;
+export type Hsk3Level = z.infer<typeof hsk3LevelSchema>;
 
 // Adopted from https://github.com/ivankra/hsk30
 export const partOfSpeechSchema = z.enum({
@@ -930,8 +930,10 @@ export const characterCurriculumMeaningBranchSchema = z.object({
  * Curriculum Meanings answer "What is the best way to teach those meanings?".
  */
 export const characterCurriculumMeaningSchema = z.object({
+  id: hanziWordSchema,
   gloss: z.string(),
   pinyin: pinyinUnitSchema,
+  hsk3: hsk3LevelSchema.optional(),
   pinyinExceptions: z
     .record(hanziTextSchema, pinyinTextSchema)
     .optional()
@@ -1053,7 +1055,7 @@ export type WikiCharacterSvg = z.infer<typeof wikiCharacterSvgSchema>;
 /**
  * Schema for character.json files.
  */
-export const wikiCharacterDataSchema = z.strictObject({
+export const characterJsonSchema = z.strictObject({
   /**
    * The hanzi character represented by this character (e.g. 看).
    */
@@ -1154,7 +1156,7 @@ export const wikiCharacterDataSchema = z.strictObject({
   curriculumMeanings: z.array(characterCurriculumMeaningSchema).optional(),
 });
 
-export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
+export type CharacterJson = z.infer<typeof characterJsonSchema>;
 
 export const charactersSchema = z.array(
   z.tuple([

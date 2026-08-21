@@ -15,7 +15,7 @@ import type {
   StrokeSpecString,
 } from "#data/model.ts";
 import { isCi } from "#util/env.js";
-import { PartOfSpeech } from "#data/model.ts";
+import { PartOfSpeech, characterJsonSchema } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type {
@@ -68,10 +68,13 @@ import {
   parseCedictSenseId,
 } from "./data/cedict.ts";
 import { buildHanziWordsToCheck, 拼音, 汉, 汉字 } from "./data/helpers.ts";
-import { dictionaryFilePath } from "#bin/util/paths.ts";
+import { dictionaryFilePath, wikiDir } from "#bin/util/paths.ts";
 import isEqual from "lodash/isEqual";
 import type { z } from "zod";
 import { loadCompleteHskVocabulary } from "./data/completeHskVocabulary.ts";
+import { glob, readFileSync } from "@pinyinly/lib/fs";
+import path from "node:path";
+import { jsonCodec } from "@pinyinly/lib/zod";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -189,6 +192,44 @@ test(`hanzi word meaning schema enforces normalized freq bounds`, () => {
       freq: 1.1,
     }),
   ).toThrow();
+});
+
+test(`character.json curriculumMeanings drive dictionary entries`, async () => {
+  const filePaths = await glob(path.join(wikiDir, `*`, `/character.json`));
+  const dict = await readDictionaryJson();
+
+  for (const filePath of filePaths) {
+    const characterJson = jsonCodec(characterJsonSchema).parse(
+      readFileSync(filePath, `utf-8`),
+      { reportInput: true },
+    );
+
+    if (characterJson.curriculumMeanings != null) {
+      // Delete any existing hanzi words
+      {
+        const existingHanziWords = dict
+          .keys()
+          .filter((x) => hanziFromHanziWord(x) === characterJson.hanzi);
+
+        for (const hanziWord of existingHanziWords) {
+          dict.delete(hanziWord);
+        }
+      }
+
+      // Insert new hanzi words
+      for (const meaning of characterJson.curriculumMeanings) {
+        dict.set(meaning.id, {
+          gloss: [meaning.gloss],
+          pinyin: [meaning.pinyin],
+          hsk: meaning.hsk3,
+        });
+      }
+
+      await expect(unparseDictionaryJson(dict)).toMatchJsonFileSnapshot(
+        dictionaryFilePath,
+      );
+    }
+  }
 });
 
 test(`hanzi word meaning-keys are not too similar`, async () => {
@@ -566,10 +607,6 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
         "菜:vegetable",
       },
       Set {
-        "行:okay",
-        "行:walk",
-      },
-      Set {
         "表:surface",
         "表:watch",
       },
@@ -838,7 +875,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "乞 via 吃[HSK1]",
       "亇 via 竹",
       "予 via 舒, 预",
-      "亍 via 行[HSK1], 街[HSK2]",
+      "亍 via 行[HSK3], 街[HSK2]",
       "亘 via 宣",
       "亚 via 亚, 亚运会[HSK4], 普, 碰[HSK2]",
       "亦 via 变[HSK2]",

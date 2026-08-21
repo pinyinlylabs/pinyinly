@@ -2,7 +2,7 @@ import type {
   HanziCharacter,
   HanziIds,
   StrokeSpecString,
-  WikiCharacterData,
+  CharacterJson,
 } from "@/data/model";
 import { View } from "react-native";
 import { WikiHanziCharacterMeaningBox } from "./WikiHanziCharacterMeaning";
@@ -12,16 +12,16 @@ export default () => {
   return (
     <View className="max-w-125 flex-1 gap-2">
       <DemoBetaFeaturesKnob />
-      <WikiHanziCharacterMeaningBox hanzi={characterData.hanzi} />
+      <WikiHanziCharacterMeaningBox hanzi={characterJson.hanzi} />
 
       <LittlePrimaryHeader title="No mnemonic" />
 
-      <WikiHanziCharacterMeaningBox hanzi={characterData.hanzi} />
+      <WikiHanziCharacterMeaningBox hanzi={characterJson.hanzi} />
     </View>
   );
 };
 
-export const characterData = {
+export const characterJson = {
   hanzi: `看` as HanziCharacter,
   mnemonic: {
     components: {
@@ -54,4 +54,4 @@ export const characterData = {
       `M 420 26 Q 426 26 432 27 Q 487 39 604 46 C 634 48 652 49 640 63 Q 636 70 616 84 Q 601 93 572 86 Q 493 68 426 59 C 396 55 390 24 420 26 Z`,
     ],
   },
-} satisfies WikiCharacterData;
+} satisfies CharacterJson;

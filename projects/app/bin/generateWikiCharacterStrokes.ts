@@ -1,5 +1,5 @@
 import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
-import { wikiCharacterDataSchema } from "#data/model.js";
+import { characterJsonSchema } from "#data/model.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
@@ -177,7 +177,7 @@ for (const character of allCharacters) {
   }
 
   const dataFile = path.join(characterWikiDir, `character.json`);
-  const existingData = jsonCodec(wikiCharacterDataSchema).parse(
+  const existingData = jsonCodec(characterJsonSchema).parse(
     readFileSync(dataFile, `utf-8`),
   );
 

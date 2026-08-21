@@ -13,7 +13,7 @@ export interface ChatPromptMessage {
   content: string;
 }
 
-interface ChatPromptBase<Schema extends z.ZodType> {
+export interface ChatPromptBase<Schema extends z.ZodType> {
   model: OpenAI.AllModels;
   reasoningEffort: OpenAI.ReasoningEffort;
   messages: ChatPromptMessage[];
@@ -30,14 +30,14 @@ interface ChatPromptBase<Schema extends z.ZodType> {
  * consumers of the prompt want. This allows the schema to be optimised for the
  * model (e.g. fewer output tokens) rather than for its consumers.
  */
-interface ChatPromptWithOptionalTransform<
+export interface ChatPromptWithOptionalTransform<
   Schema extends z.ZodType,
   Output = z.infer<Schema>,
 > extends ChatPromptBase<Schema> {
   transform?: (data: z.infer<Schema>) => Output;
 }
 
-interface ChatPromptWithRequiredTransform<
+export interface ChatPromptWithRequiredTransform<
   Schema extends z.ZodType,
   Output = z.infer<Schema>,
 > extends ChatPromptBase<Schema> {

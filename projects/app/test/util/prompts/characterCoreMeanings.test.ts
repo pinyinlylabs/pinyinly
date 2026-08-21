@@ -345,6 +345,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
           ],
           "description": "Movement from place to place extends to coordinated direction, the running of processes, undertaking or putting things into effect, and judgments of whether something works.",
           "gloss": "go",
+          "id": "行:go",
           "pinyin": "xíng",
           "pinyinExceptions": {
             "同行": "tóng háng",
@@ -363,6 +364,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
           ],
           "description": "An ordered row develops into a recognized sphere of activity, its members and expertise, and commercial or ranked standing.",
           "gloss": "row",
+          "id": "行:row",
           "pinyin": "háng",
         },
       ]
