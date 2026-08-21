@@ -743,8 +743,12 @@ describe(`character.json files`, async () => {
         }
 
         // Insert new hanzi words
-        for (const meaning of characterJson.curriculumMeanings) {
+        for (const [
+          order,
+          meaning,
+        ] of characterJson.curriculumMeanings.entries()) {
           dict.set(meaning.id, {
+            order,
             gloss: [meaning.gloss],
             pinyin: [meaning.pinyin],
             hsk: meaning.hsk3,
@@ -758,7 +762,7 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`.curriculumMeanings[*].branches[*].occurrences creates dictionary.asset.json entries`, async () => {
+  test(`.curriculumMeanings[*].branches[*].occurrences pinyin exists in CEDICT data`, async () => {
     const dict = await readDictionaryJson();
     const cedictDictionary = await loadCedictDictionary();
 

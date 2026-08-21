@@ -59,6 +59,7 @@ export function unparseDictionaryJson(
         return [
           hanziWord,
           {
+            order: meaning.order,
             pos:
               meaning.pos == null
                 ? undefined

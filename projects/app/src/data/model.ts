@@ -1305,6 +1305,10 @@ export type CedictReference = z.infer<typeof cedictReferenceSchema>;
 export const hanziWordMeaningSchema = z
   .object({
     gloss: z.array(z.string()),
+    order: z
+      .number()
+      .optional()
+      .describe(`order of this meaning in the dictionary entry, first is 0`),
     freq: z
       .number()
       .min(0)
