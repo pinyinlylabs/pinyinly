@@ -340,6 +340,23 @@ describe(`parseCedictV2Line`, () => {
       }),
     ).toThrow(`edits rule matched multiple senses: same sense`);
   });
+
+  test(`applies pinyin edits to the returned entry`, () => {
+    const edits = parseCedictV2EditsText(
+      [
+        `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+        `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(
+      `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]] /idiom/`,
+      { edits },
+    );
+
+    expect(parsed?.pinyin).toBe(`yi1shi2zhu4xing2`);
+  });
 });
 
 describe(`parseCedictEntryRefs`, () => {
@@ -483,6 +500,52 @@ describe(`parseCedictV2EditsText`, () => {
       pinyin: ``,
       rules: [{ kind: `add`, newSense: `turtle` }],
     });
+  });
+
+  test(`parses pinyin rules`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+        `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry?.rules).toEqual([
+      {
+        kind: `pinyin`,
+        oldPinyin: `yi1-shi2-zhu4-xing2`,
+        newPinyin: `yi1shi2zhu4xing2`,
+      },
+    ]);
+  });
+
+  test(`throws when a pinyin rule's old pinyin does not match the header`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [
+          `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+          `[[wrong]] [[yi1shi2zhu4xing2]]`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(
+      `pinyin rule's old pinyin [[wrong]] does not match header pinyin [[yi1-shi2-zhu4-xing2]] (line 1)`,
+    );
+  });
+
+  test(`throws on duplicate pinyin rules in one edit block`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [
+          `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+          `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+          `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2a]]`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate pinyin rule in edit block (line 1)`);
   });
 
   test(`allows comment lines in the middle of an edits block`, () => {
@@ -1070,6 +1133,30 @@ describe(`applyCedictV2EditsToText`, () => {
       applyCedictV2EditsToText(parsed, { strict: true, edits }),
     );
     expect(output).toBe(`龜 龜 [[]] /turtle/`);
+  });
+
+  test(`renders final cedict text with an applied pinyin edit`, () => {
+    const input = `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]] /idiom/`;
+    const parsed = parseCedictV2Text(input, { strict: true });
+
+    const edits = parseCedictV2EditsText(
+      [
+        `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+        `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [output] = applyCedictV2EditsToText(parsed, {
+      strict: true,
+      edits,
+    });
+    expect(output?.pinyin).toBe(`yi1shi2zhu4xing2`);
+    expect(
+      serializeCedictV2Entries(
+        applyCedictV2EditsToText(parsed, { strict: true, edits }),
+      ),
+    ).toBe(`衣食住行 衣食住行 [[yi1shi2zhu4xing2]] /idiom/`);
   });
 });
 

@@ -61,7 +61,7 @@ export interface ParseCedictV2LineOptionsType {
   edits?: CedictV2EditsType;
 }
 
-export type CedictV2EditRuleKind = `replace` | `merge` | `add`;
+export type CedictV2EditRuleKind = `replace` | `merge` | `add` | `pinyin`;
 
 export interface CedictV2ReplaceEditRuleType {
   kind: `replace`;
@@ -80,10 +80,17 @@ export interface CedictV2AddEditRuleType {
   newSense: string;
 }
 
+export interface CedictV2PinyinEditRuleType {
+  kind: `pinyin`;
+  oldPinyin: PinyinNumericText;
+  newPinyin: PinyinNumericText;
+}
+
 export type CedictV2EditRuleType =
   | CedictV2ReplaceEditRuleType
   | CedictV2MergeEditRuleType
-  | CedictV2AddEditRuleType;
+  | CedictV2AddEditRuleType
+  | CedictV2PinyinEditRuleType;
 
 export interface CedictV2EntryEditsType {
   traditional: string;
@@ -578,16 +585,18 @@ export function parseCedictV2Line(
   }
 
   let senses = splitCedictV2Definition(definitionBody);
+  let entryPinyin = pinyin as PinyinNumericText;
 
   const entryEdits = options.edits?.entriesByKey.get(
     buildCedictV2EntryId({
       traditional,
       simplified,
-      pinyin: pinyin as PinyinNumericText,
+      pinyin: entryPinyin,
     }),
   );
   if (entryEdits != null) {
     senses = applyCedictEntryEdits(senses, entryEdits, options);
+    entryPinyin = resolveCedictEntryPinyin(entryPinyin, entryEdits);
   }
 
   if (senses.length === 0) {
@@ -601,7 +610,7 @@ export function parseCedictV2Line(
   return {
     traditional,
     simplified,
-    pinyin: pinyin as PinyinNumericText,
+    pinyin: entryPinyin,
     senses,
   };
 }
@@ -654,6 +663,31 @@ export function parseCedictV2EditsText(
       throw new Error(
         formatCedictEditsParseError(
           `edit block has no rules`,
+          lineNumber,
+          sourcePath,
+        ),
+      );
+    }
+
+    const pinyinRules = rules.filter(
+      (rule): rule is CedictV2PinyinEditRuleType => rule.kind === `pinyin`,
+    );
+
+    if (pinyinRules.length > 1) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `duplicate pinyin rule in edit block`,
+          lineNumber,
+          sourcePath,
+        ),
+      );
+    }
+
+    const [pinyinRule] = pinyinRules;
+    if (pinyinRule != null && pinyinRule.oldPinyin !== header.pinyin) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `pinyin rule's old pinyin [[${pinyinRule.oldPinyin}]] does not match header pinyin [[${header.pinyin}]]`,
           lineNumber,
           sourcePath,
         ),
@@ -1452,6 +1486,7 @@ export function applyCedictV2EditsToText(
           ? entry
           : {
               ...entry,
+              pinyin: resolveCedictEntryPinyin(entry.pinyin, entryEdits),
               senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
             };
 
@@ -1472,7 +1507,7 @@ export function applyCedictV2EditsToText(
     outputEntries.push({
       traditional: entryEdits.traditional,
       simplified: entryEdits.simplified,
-      pinyin: entryEdits.pinyin,
+      pinyin: resolveCedictEntryPinyin(entryEdits.pinyin, entryEdits),
       senses: createdSenses,
     });
   }
@@ -4430,6 +4465,34 @@ function parseCedictV2EditRule(
   lineNumber: number,
   sourcePath?: string,
 ): CedictV2EditRuleType {
+  const pinyinMatch = line.match(
+    /^\[\[(?<oldPinyin>[^\]]+)\]\]\s+\[\[(?<newPinyin>[^\]]+)\]\]$/u,
+  );
+  if (pinyinMatch != null) {
+    const oldPinyin = pinyinMatch.groups?.[`oldPinyin`]?.trim();
+    const newPinyin = pinyinMatch.groups?.[`newPinyin`]?.trim();
+    if (
+      oldPinyin == null ||
+      newPinyin == null ||
+      oldPinyin.length === 0 ||
+      newPinyin.length === 0
+    ) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `invalid edits rule line`,
+          lineNumber,
+          sourcePath,
+        ),
+      );
+    }
+
+    return {
+      kind: `pinyin`,
+      oldPinyin: oldPinyin as PinyinNumericText,
+      newPinyin: newPinyin as PinyinNumericText,
+    };
+  }
+
   const addMatch = line.match(/^\+\s*\/(?<newSense>[^/]*)\/$/u);
   if (addMatch != null) {
     const newSense = addMatch.groups?.[`newSense`]?.trim();
@@ -4621,6 +4684,17 @@ function generateUniqueCedictSenseId({
   );
 }
 
+function resolveCedictEntryPinyin(
+  pinyin: PinyinNumericText,
+  entryEdits: CedictV2EntryEditsType,
+): PinyinNumericText {
+  const pinyinRule = entryEdits.rules.find(
+    (rule): rule is CedictV2PinyinEditRuleType => rule.kind === `pinyin`,
+  );
+
+  return pinyinRule?.newPinyin ?? pinyin;
+}
+
 function applyCedictEntryEdits(
   senses: string[],
   entryEdits: CedictV2EntryEditsType,
@@ -4689,6 +4763,10 @@ function applyCedictEntryEdits(
       }
 
       nextSenses.splice(insertIndex, 0, rule.mergedSense);
+      continue;
+    }
+
+    if (rule.kind === `pinyin`) {
       continue;
     }
 

@@ -55,7 +55,7 @@
             "行驶": "xíngshǐ",
             "行走": "xíngzǒu",
             "一行": "yīxíng",
-            "衣食住行": "yī-shí-zhù-xíng",
+            "衣食住行": "yīshízhùxíng",
             "游行": "yóuxíng",
             "自行": "zìxíng",
             "自行车": "zìxíngchē"
@@ -93,11 +93,7 @@
         {
           "gloss": "circulate",
           "description": "What moves onward through society may be issued, spread, or become widely prevalent.",
-          "occurrences": {
-            "发行": "fāxíng",
-            "流行": "liúxíng",
-            "盛行": "shèngxíng"
-          }
+          "occurrences": { "发行": "fāxíng", "流行": "liúxíng", "盛行": "shèngxíng" }
         },
         {
           "gloss": "operate",

@@ -1196,6 +1196,13 @@ PU PU [[P U]]
 /refrigerator (Hong Kong usage)/ /refrigerator (Hong Kong)/
 
 #
+# Remove hyphens from primary entry pinyin (old syllable-separator convention)
+#
+
+衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]
+[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]
+
+#
 # Replace `(lit. and fig.)` with `(lit.) (fig.)`
 # 
 
