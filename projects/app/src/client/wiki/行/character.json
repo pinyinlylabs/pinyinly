@@ -25,7 +25,7 @@
       "id": "行:go",
       "gloss": "go",
       "pinyin": "xíng",
-      "hsk3": "3",
+      "hsk30": "3",
       "description": "Movement along a course, extended to doing, carrying matters forward, and functioning.",
       "branches": [
         {
@@ -93,7 +93,11 @@
         {
           "gloss": "circulate",
           "description": "What moves onward through society may be issued, spread, or become widely prevalent.",
-          "occurrences": { "发行": "fāxíng", "流行": "liúxíng", "盛行": "shèngxíng" }
+          "occurrences": {
+            "发行": "fāxíng",
+            "流行": "liúxíng",
+            "盛行": "shèngxíng"
+          }
         },
         {
           "gloss": "operate",

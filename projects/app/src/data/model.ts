@@ -390,7 +390,10 @@ const skillKindSchema = z.enum({
 export const SkillKind = skillKindSchema.enum;
 export type SkillKind = z.infer<typeof skillKindSchema>;
 
-export const hsk3LevelSchema = z.enum({
+/**
+ * HSK 3.0 levels
+ */
+export const hsk30LevelSchema = z.enum({
   "1": `1`,
   "2": `2`,
   "3": `3`,
@@ -399,8 +402,8 @@ export const hsk3LevelSchema = z.enum({
   "6": `6`,
   "7-9": `7-9`,
 });
-export const Hsk3Level = hsk3LevelSchema.enum;
-export type Hsk3Level = z.infer<typeof hsk3LevelSchema>;
+export const Hsk30Level = hsk30LevelSchema.enum;
+export type Hsk30Level = z.infer<typeof hsk30LevelSchema>;
 
 // Adopted from https://github.com/ivankra/hsk30
 export const partOfSpeechSchema = z.enum({
@@ -935,7 +938,7 @@ export const characterCurriculumMeaningSchema = z.object({
   id: hanziWordSchema,
   gloss: z.string(),
   pinyin: pinyinUnitSchema,
-  hsk3: hsk3LevelSchema.optional(),
+  hsk30: hsk30LevelSchema.optional(),
   pinyinExceptions: z
     .record(hanziTextSchema, pinyinTextSchema)
     .optional()
@@ -1328,7 +1331,7 @@ export const hanziWordMeaningSchema = z
       .string()
       .transform((x) => parsePartOfSpeech(x))
       .optional(),
-    hsk: hsk3LevelSchema.optional(),
+    hsk: hsk30LevelSchema.optional(),
     cedict: cedictReferenceSchema
       .describe(`reference to the corresponding CE-DICT entry and sense`)
       .optional(),

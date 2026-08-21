@@ -7,7 +7,7 @@ import type {
   HanziIds,
   HanziText,
   HanziWord,
-  Hsk3Level,
+  Hsk30Level,
   PartOfSpeech,
   PinyinText,
   Skill,
@@ -17,7 +17,7 @@ import { characterJsonSchema } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
-import { hsk3LevelToNumber } from "@/data/hsk";
+import { hsk30LevelToNumber } from "@/data/hsk";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -548,7 +548,7 @@ export interface DictionarySearchEntry {
   glossCount: number;
   pos?: PartOfSpeech;
   pinyin?: PinyinText[];
-  hsk?: Hsk3Level;
+  hsk?: Hsk30Level;
   hskSortKey: number;
   /**
    * The lowest HSK level at which this character first appears — either as a
@@ -556,7 +556,7 @@ export interface DictionarySearchEntry {
    * this may be lower than `hsk`. For multi-character entries this equals
    * `hsk`.
    */
-  hskFirstAppearance?: Hsk3Level;
+  hskFirstAppearance?: Hsk30Level;
   note?: string;
   hanziCharacterCount: number;
   isStructural?: boolean;
@@ -846,7 +846,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
 
       // Build a map of each character to the minimum HSK level it appears in
       // across all words (including multi-character words it's part of).
-      const charMinHskMap = new Map<string, Hsk3Level>();
+      const charMinHskMap = new Map<string, Hsk30Level>();
       for (const [hanziWord, meaning] of dictionary.allEntries) {
         if (meaning.hsk == null) {
           continue;
@@ -856,7 +856,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           const existing = charMinHskMap.get(char);
           if (
             existing == null ||
-            hsk3LevelToNumber(meaning.hsk) < hsk3LevelToNumber(existing)
+            hsk30LevelToNumber(meaning.hsk) < hsk30LevelToNumber(existing)
           ) {
             charMinHskMap.set(char, meaning.hsk);
           }
@@ -952,8 +952,8 @@ function characterMnemonicIdsCollectionOptions(): CollectionConfig<
   });
 }
 
-function dictionarySearchHskSortKey(hsk?: Hsk3Level): number {
-  return hsk == null ? 9999 : hsk3LevelToNumber(hsk);
+function dictionarySearchHskSortKey(hsk?: Hsk30Level): number {
+  return hsk == null ? 9999 : hsk30LevelToNumber(hsk);
 }
 
 export const rizzleCollectionOptions = <

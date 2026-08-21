@@ -751,7 +751,7 @@ describe(`character.json files`, async () => {
             order,
             gloss: [meaning.gloss],
             pinyin: [meaning.pinyin],
-            hsk: meaning.hsk3,
+            hsk: meaning.hsk30,
           });
         }
 

@@ -26,7 +26,7 @@ import {
   charactersSchema,
   dictionaryJsonSchema,
   hanziWordSchema,
-  Hsk3Level,
+  Hsk30Level,
   isHanziStrokeCountChar,
   pinyinSoundIdSchema,
 } from "@/data/model";
@@ -367,31 +367,31 @@ export function buildDictionary(
       case undefined: {
         break;
       }
-      case Hsk3Level[1]: {
+      case Hsk30Level[1]: {
         hsk1HanziWords.push(hanziWord);
         break;
       }
-      case Hsk3Level[2]: {
+      case Hsk30Level[2]: {
         hsk2HanziWords.push(hanziWord);
         break;
       }
-      case Hsk3Level[3]: {
+      case Hsk30Level[3]: {
         hsk3HanziWords.push(hanziWord);
         break;
       }
-      case Hsk3Level[4]: {
+      case Hsk30Level[4]: {
         hsk4HanziWords.push(hanziWord);
         break;
       }
-      case Hsk3Level[5]: {
+      case Hsk30Level[5]: {
         hsk5HanziWords.push(hanziWord);
         break;
       }
-      case Hsk3Level[6]: {
+      case Hsk30Level[6]: {
         hsk6HanziWords.push(hanziWord);
         break;
       }
-      case Hsk3Level[`7-9`]: {
+      case Hsk30Level[`7-9`]: {
         hsk7To9HanziWords.push(hanziWord);
         break;
       }

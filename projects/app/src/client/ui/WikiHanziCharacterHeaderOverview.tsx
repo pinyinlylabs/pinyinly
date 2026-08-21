@@ -2,7 +2,7 @@ import { intersperse } from "@/client/react";
 import { isStructuralHanziQuery } from "@/client/query";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
-import { hsk3LevelToNumber } from "@/data/hsk";
+import { hsk30LevelToNumber } from "@/data/hsk";
 import type { HanziCharacter, HanziText } from "@/data/model";
 import {
   arrayFilterUnique,
@@ -42,7 +42,7 @@ export function WikiHanziCharacterHeaderOverview({
   ]
     .filter((x) => x != null)
     .filter(arrayFilterUnique())
-    .sort(sortComparatorNumber(hsk3LevelToNumber));
+    .sort(sortComparatorNumber(hsk30LevelToNumber));
   const pinyins = dictionarySearchEntries
     .map((entry) => entry.pinyin?.[0])
     .filter((x) => x != null);
