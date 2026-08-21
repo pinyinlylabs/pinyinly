@@ -2,6 +2,7 @@ import type {
   CharacterComponentUsageRow,
   CharacterDecompositionRow,
   CharacterMnemonicIdsRow,
+  Dictionary,
   HanziCharacter,
   HanziIds,
   HanziText,
@@ -24,7 +25,6 @@ import {
   rankRules,
 } from "@/data/skills";
 import { userHanziMeaningDefs } from "@/data/userSettings";
-import type { Dictionary } from "@/dictionary";
 import {
   buildCharacterComponentUsageEntries,
   buildHanziWord,

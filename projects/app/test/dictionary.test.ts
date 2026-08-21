@@ -13,23 +13,24 @@ import type {
   PinyinText,
   PinyinUnit,
   StrokeSpecString,
+  DictionaryJson,
+  DictionaryJsonMutable,
+  HanziWordMeaning,
+  Dictionary,
 } from "#data/model.ts";
 import { isCi } from "#util/env.js";
-import { PartOfSpeech } from "#data/model.ts";
+import {
+  hanziWordMeaningSchema,
+  parsePartOfSpeech,
+  PartOfSpeech,
+} from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
-import type {
-  Dictionary,
-  DictionaryJson,
-  dictionaryJsonSchema,
-  HanziWordMeaning,
-} from "#dictionary.ts";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
-  hanziWordMeaningSchema,
   loadBuiltinCharacterDecompositionEntries,
   loadCharactersJson,
   loadDictionary,
@@ -41,7 +42,6 @@ import {
   meaningKeyFromHanziWord,
   oneUnitPinyinListOrNull,
   oneUnitPinyinOrNull,
-  parsePartOfSpeech,
   deepDecomposeHanzi,
   deepDecomposeHanziWithStrokeSpecs,
   shallowDecomposeHanziCharacter,
@@ -70,7 +70,6 @@ import {
 import { buildHanziWordsToCheck, 拼音, 汉, 汉字 } from "./data/helpers.ts";
 import { dictionaryFilePath } from "#bin/util/paths.ts";
 import isEqual from "lodash/isEqual";
-import type { z } from "zod";
 import { loadCompleteHskVocabulary } from "./data/completeHskVocabulary.ts";
 
 test(`radical groups have the right number of elements`, async () => {
@@ -1308,10 +1307,8 @@ describe(`hanziFromHanziOrHanziWord suite`, async () => {
 });
 
 describe(`upsertHanziWordMeaning suite`, async () => {
-  type MutableDictionaryJson = z.infer<typeof dictionaryJsonSchema>;
-
-  function helloDict(): MutableDictionaryJson {
-    const dict: MutableDictionaryJson = new Map([
+  function helloDict(): DictionaryJsonMutable {
+    const dict: DictionaryJsonMutable = new Map([
       [
         `你好:hello`,
         {

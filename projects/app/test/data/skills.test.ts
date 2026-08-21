@@ -1,4 +1,4 @@
-import type { Skill, SrsStateType } from "#data/model.ts";
+import type { Dictionary, Skill, SrsStateType } from "#data/model.ts";
 import { SkillKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
@@ -21,7 +21,7 @@ import {
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
-import type { CharactersJson, Dictionary } from "#dictionary.ts";
+import type { CharactersJson } from "#dictionary.ts";
 import {
   loadBuiltinCharacterDecompositionForMnemonicsEntries,
   loadCharactersJson,

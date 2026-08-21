@@ -11,13 +11,13 @@ import {
   historyPageData,
 } from "#client/query.js";
 import { matchAllHanziCharacters } from "#data/hanzi.ts";
+import type { Dictionary } from "#data/model.js";
 import {
   getUserHanziMeaningKeyParams,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
 } from "#data/userSettings.ts";
-import type { Dictionary } from "#dictionary.js";
 import { loadDictionary } from "#dictionary.js";
 import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";

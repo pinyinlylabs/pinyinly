@@ -1,23 +1,24 @@
 import { intersperse } from "#client/react.ts";
 import { parseIds, walkIdsNodeLeafs } from "#data/hanzi.ts";
 import type {
+  DictionaryJson,
   HanziCharacter,
   HanziText,
   HanziWord,
+  HanziWordMeaning,
+  HanziWordWithMeaning,
   IdsNode,
   PinyinText,
 } from "#data/model.ts";
-import { hanziStrokeCountAsNumber, partOfSpeechSchema } from "#data/model.ts";
-import type {
-  DictionaryJson,
-  HanziWordMeaning,
-  HanziWordWithMeaning,
-} from "#dictionary.ts";
+import {
+  hanziStrokeCountAsNumber,
+  hanziWordMeaningSchema,
+  partOfSpeechSchema,
+} from "#data/model.ts";
 import {
   allHanziCharacters,
   buildHanziWord,
   hanziFromHanziWord,
-  hanziWordMeaningSchema,
   loadCharactersJson,
   loadDictionary,
   meaningKeyFromHanziWord,

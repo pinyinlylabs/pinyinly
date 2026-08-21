@@ -1,8 +1,4 @@
-import type {
-  CharactersJson,
-  Dictionary,
-  HanziWordWithMeaning,
-} from "@/dictionary";
+import type { CharactersJson } from "@/dictionary";
 import {
   hanziFromHanziWord,
   shallowDecomposeHanziCharacter,
@@ -40,6 +36,7 @@ import type { DeepReadonly } from "ts-essentials";
 import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
   CharacterDecompositionRow,
+  Dictionary,
   HanziCharacter,
   HanziText,
   HanziWord,
@@ -47,6 +44,7 @@ import type {
   HanziWordSkillKind,
   HanziWordToGlossTypedSkill,
   HanziWordToPinyinTypedSkill,
+  HanziWordWithMeaning,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
   QuestionFlagType,

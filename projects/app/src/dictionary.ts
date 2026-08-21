@@ -7,6 +7,7 @@ import {
   walkIdsNodeLeafs,
 } from "@/data/hanzi";
 import type {
+  Dictionary,
   HanziCharacter,
   HanziWord,
   HanziIds,
@@ -17,16 +18,17 @@ import type {
   HanziIdsLeaf,
   CharacterDecompositionRow,
   CharacterComponentUsageRow,
+  DictionaryJson,
+  HanziWordMeaning,
+  HanziWordWithMeaning,
 } from "@/data/model";
 import {
   charactersSchema,
+  dictionaryJsonSchema,
   hanziWordSchema,
   Hsk3Level,
-  hsk3LevelSchema,
   isHanziStrokeCountChar,
-  PartOfSpeech,
   pinyinSoundIdSchema,
-  pinyinTextSchema,
 } from "@/data/model";
 import { matchAllPinyinUnits, normalizePinyinUnit } from "@/data/pinyin";
 import {
@@ -284,122 +286,11 @@ export const loadCharacterComponentUsageEntries = memoize0(
 
 export const wordListSchema = z.array(hanziWordSchema);
 
-const parsePosPattern = new RegExp(
-  `^(?:` +
-    [
-      `(?<noun>noun|名|n)`,
-      `(?<verb>verb|动|v)`,
-      `(?<adjective>adjective|形|adj|vs)`,
-      `(?<adverb>adverb|副|adv)`,
-      `(?<pronoun>pronoun|代|pron|det)`,
-      `(?<numeral>numeral|数|num)`,
-      `(?<measureWord>measureWord|量|m|mw)`,
-      `(?<preposition>preposition|介|prep)`,
-      `(?<conjunction>conjunction|连|conj)`,
-      `(?<auxiliaryWord>particle|助|aux|ptc)`,
-      `(?<interjection>interjection|叹|int)`,
-      `(?<prefix>prefix|前缀|pre)`,
-      `(?<suffix>suffix|后缀|suf)`,
-      `(?<phonetic>Phonetic|拟声|pho)`,
-    ].join(`|`) +
-    `)$`,
-  `iu`,
-);
-
-export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
-  const match = parsePosPattern.exec(pos);
-  if (match?.groups?.[`noun`] != null) {
-    return PartOfSpeech.Noun;
-  } else if (match?.groups?.[`verb`] != null) {
-    return PartOfSpeech.Verb;
-  } else if (match?.groups?.[`adjective`] != null) {
-    return PartOfSpeech.Adjective;
-  } else if (match?.groups?.[`adverb`] != null) {
-    return PartOfSpeech.Adverb;
-  } else if (match?.groups?.[`pronoun`] != null) {
-    return PartOfSpeech.Pronoun;
-  } else if (match?.groups?.[`numeral`] != null) {
-    return PartOfSpeech.Numeral;
-  } else if (match?.groups?.[`measureWord`] != null) {
-    return PartOfSpeech.MeasureWordOrClassifier;
-  } else if (match?.groups?.[`preposition`] != null) {
-    return PartOfSpeech.Preposition;
-  } else if (match?.groups?.[`conjunction`] != null) {
-    return PartOfSpeech.Conjunction;
-  } else if (match?.groups?.[`auxiliaryWord`] != null) {
-    return PartOfSpeech.AuxiliaryWordOrParticle;
-  } else if (match?.groups?.[`interjection`] != null) {
-    return PartOfSpeech.Interjection;
-  } else if (match?.groups?.[`prefix`] != null) {
-    return PartOfSpeech.Prefix;
-  } else if (match?.groups?.[`suffix`] != null) {
-    return PartOfSpeech.Suffix;
-  } else if (match?.groups?.[`phonetic`] != null) {
-    return PartOfSpeech.Phonetic;
-  }
-  return undefined;
-}
-
-const cedictCompactReferenceRe = /^\S+\s+\S+\s+\[\[.*?\]\]\s+[A-Za-z0-9]{5}$/u;
-
-export const cedictReferenceSchema = z
-  .string()
-  .regex(cedictCompactReferenceRe, {
-    message: `CE-DICT reference must follow this format: traditional simplified [[pinyin]] NANOID`,
-  });
-
-export type CedictReference = z.infer<typeof cedictReferenceSchema>;
-
-export const hanziWordMeaningSchema = z
-  .object({
-    gloss: z.array(z.string()),
-    freq: z
-      .number()
-      .min(0)
-      .max(1)
-      .describe(
-        `normalized meaning frequency where higher means more common usage`,
-      )
-      .optional(),
-    pinyin: z
-      .array(pinyinTextSchema)
-      .describe(
-        `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
-      )
-      .nullable()
-      .optional(),
-    pos: z
-      .string()
-      .transform((x) => parsePartOfSpeech(x))
-      .optional(),
-    hsk: hsk3LevelSchema.optional(),
-    cedict: cedictReferenceSchema
-      .describe(`reference to the corresponding CE-DICT entry and sense`)
-      .optional(),
-    /**
-     * Character-by-character semantic decomposition of this word.
-     *
-     * Each entry references the dictionary sense used to explain the
-     * corresponding character's meaning within this word.
-     */
-    charSenses: z.array(hanziWordSchema.nullable()).optional(),
-  })
-  .strict();
-
-export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
-export type HanziWordWithMeaning = [HanziWord, HanziWordMeaning];
-
-export const dictionaryJsonSchema = z
-  .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
-  .transform((x) => new Map(x));
-
 export const loadDictionaryJson = memoize0(async () =>
-  dictionaryJsonSchema
-    .transform(deepReadonly)
-    .parse(await import(`./data/dictionary.asset.json`).then((x) => x.default)),
+  dictionaryJsonSchema.parse(
+    await import(`./data/dictionary.asset.json`).then((x) => x.default),
+  ),
 );
-
-export type DictionaryJson = Awaited<ReturnType<typeof loadDictionaryJson>>;
 
 export const hanziWordMigrationsSchema = z
   .array(
@@ -441,26 +332,6 @@ export const loadKangXiRadicalsStrokes = memoize0(async () =>
       ),
     ),
 );
-
-/**
- * The type of the dictionary index returned by {@link loadDictionary}.
- */
-export interface Dictionary {
-  lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
-  lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
-  lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
-  lookupPinyinUnit(pinyinUnit: PinyinUnit): readonly HanziCharacter[];
-  isStructuralHanzi(hanzi: HanziCharacter): boolean;
-  allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
-  allHanziWords: readonly HanziWord[];
-  hsk1HanziWords: readonly HanziWord[];
-  hsk2HanziWords: readonly HanziWord[];
-  hsk3HanziWords: readonly HanziWord[];
-  hsk4HanziWords: readonly HanziWord[];
-  hsk5HanziWords: readonly HanziWord[];
-  hsk6HanziWords: readonly HanziWord[];
-  hsk7To9HanziWords: readonly HanziWord[];
-}
 
 export function buildDictionary(
   dictionaryJson: DictionaryJson,

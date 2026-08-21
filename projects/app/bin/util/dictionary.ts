@@ -1,7 +1,14 @@
-import type { HanziWord } from "#data/model.ts";
+import {
+  dictionaryJsonMutableSchema,
+  dictionaryJsonSchema,
+} from "#data/model.ts";
+import type {
+  HanziWord,
+  DictionaryJson,
+  DictionaryJsonMutable,
+  HanziWordMeaning,
+} from "#data/model.ts";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
-import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
-import { dictionaryJsonSchema } from "#dictionary.ts";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { readFileWithSchema } from "@pinyinly/lib/fs";
 import type { z } from "zod";
@@ -9,17 +16,19 @@ import { dictionaryFilePath } from "./paths.ts";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
 import { nonNullable } from "@pinyinly/lib/invariant";
 
-type MutableDictionaryJson = z.infer<typeof dictionaryJsonSchema>;
-
 export const readDictionaryJson = async () =>
-  readFileWithSchema(dictionaryFilePath, dictionaryJsonSchema, new Map());
+  readFileWithSchema(
+    dictionaryFilePath,
+    dictionaryJsonMutableSchema,
+    new Map(),
+  );
 
 export async function writeDictionaryJson(dict: DictionaryJson) {
   await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionaryJson(dict));
 }
 
 export function upsertHanziWordMeaning(
-  dict: MutableDictionaryJson,
+  dict: DictionaryJsonMutable,
   hanziWord: HanziWord,
   patch: Partial<HanziWordMeaning>,
 ): void {
