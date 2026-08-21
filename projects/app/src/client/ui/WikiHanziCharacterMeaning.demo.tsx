@@ -5,18 +5,18 @@ import type {
   CharacterJson,
 } from "@/data/model";
 import { View } from "react-native";
-import { WikiHanziCharacterMeaningBox } from "./WikiHanziCharacterMeaning";
+import { WikiHanziCharacterMeaning } from "./WikiHanziCharacterMeaning";
 import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
 
 export default () => {
   return (
     <View className="max-w-125 flex-1 gap-2">
       <DemoBetaFeaturesKnob />
-      <WikiHanziCharacterMeaningBox hanzi={characterJson.hanzi} />
+      <WikiHanziCharacterMeaning hanzi={characterJson.hanzi} />
 
       <LittlePrimaryHeader title="No mnemonic" />
 
-      <WikiHanziCharacterMeaningBox hanzi={characterJson.hanzi} />
+      <WikiHanziCharacterMeaning hanzi={characterJson.hanzi} />
     </View>
   );
 };

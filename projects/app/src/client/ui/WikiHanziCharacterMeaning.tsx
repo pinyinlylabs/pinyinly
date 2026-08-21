@@ -1,8 +1,9 @@
 import type { DictionarySearchEntry } from "@/client/query";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
-import { isHanziCharacter, parseIds, walkIdsNodeLeafs } from "@/data/hanzi";
+import { parseIds, walkIdsNodeLeafs } from "@/data/hanzi";
 import type {
+  HanziCharacter,
   HanziCharacter as HanziCharacterType,
   HanziText,
   HanziWord,
@@ -38,20 +39,11 @@ import {
 } from "./hintText";
 import { zipStrict } from "@pinyinly/lib/collections";
 
-export function WikiHanziCharacterMeaning({ hanzi }: { hanzi: HanziText }) {
-  if (!isHanziCharacter(hanzi)) {
-    return null;
-  }
-  return <WikiHanziCharacterMeaningBox hanzi={hanzi} />;
-}
-
-interface WikiHanziCharacterMeaningProps {
-  hanzi: HanziCharacterType;
-}
-
-export function WikiHanziCharacterMeaningBox({
+export function WikiHanziCharacterMeaning({
   hanzi,
-}: WikiHanziCharacterMeaningProps) {
+}: {
+  hanzi: HanziCharacter;
+}) {
   const [isEditMode, setIsEditMode] = useState(false);
   const db = useDb();
 

@@ -1,5 +1,4 @@
-import { isHanziCharacter } from "@/data/hanzi";
-import type { HanziText } from "@/data/model";
+import type { HanziCharacter } from "@/data/model";
 import { and, eq, like, not, useLiveQuery } from "@tanstack/react-db";
 import { View } from "react-native";
 import { CompactWordRows } from "./CompactWordRows";
@@ -8,7 +7,11 @@ import { WikiTitledBox } from "./WikiTitledBox";
 
 const maxUsedInWords = 5;
 
-export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
+export function WikiHanziCharacterUsedInWords({
+  hanzi,
+}: {
+  hanzi: HanziCharacter;
+}) {
   const db = useDb();
   const { data: dictionarySearchEntries } = useLiveQuery(
     (q) =>
@@ -31,10 +34,6 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
         .limit(maxUsedInWords),
     [db.dictionarySearch, hanzi],
   );
-
-  if (!isHanziCharacter(hanzi)) {
-    return null;
-  }
 
   if (dictionarySearchEntries.length === 0) {
     return null;

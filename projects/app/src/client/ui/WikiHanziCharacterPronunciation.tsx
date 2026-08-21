@@ -4,6 +4,7 @@ import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocatio
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type {
   AssetId,
+  HanziCharacter,
   HanziText,
   HanziWord,
   PinyinSoundId,
@@ -59,7 +60,7 @@ import { toTitle } from "@/util/unicode";
 export function WikiHanziCharacterPronunciation({
   hanzi,
 }: {
-  hanzi: HanziText;
+  hanzi: HanziCharacter;
 }) {
   const db = useDb();
   const { data: meanings } = useLiveQuery(

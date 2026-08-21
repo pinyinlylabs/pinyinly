@@ -1,4 +1,3 @@
-import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziCharacter, HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { use, useState } from "react";
@@ -18,18 +17,6 @@ const decompositionGridRowGap = 16;
 const decompositionGridCellMinHeight = 124;
 
 export function WikiHanziCharacterDecompositionComponents({
-  hanzi,
-}: {
-  hanzi: HanziText;
-}) {
-  if (!isHanziCharacter(hanzi)) {
-    return null;
-  }
-
-  return <WikiHanziCharacterDecompositionComponentsBox hanzi={hanzi} />;
-}
-
-function WikiHanziCharacterDecompositionComponentsBox({
   hanzi,
 }: {
   hanzi: HanziCharacter;

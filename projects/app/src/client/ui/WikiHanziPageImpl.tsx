@@ -1,6 +1,6 @@
 import type { HanziText } from "@/data/model";
-import { WikiHanziBody } from "./WikiHanziBody";
 import { View } from "react-native";
+import { WikiHanziBody } from "./WikiHanziBody";
 
 export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
   return (

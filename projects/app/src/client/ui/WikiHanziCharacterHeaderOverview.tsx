@@ -3,7 +3,7 @@ import { isStructuralHanziQuery } from "@/client/query";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { hsk3LevelToNumber } from "@/data/hsk";
-import type { HanziText } from "@/data/model";
+import type { HanziCharacter, HanziText } from "@/data/model";
 import {
   arrayFilterUnique,
   sortComparatorNumber,
@@ -18,13 +18,12 @@ import { RectButton } from "./RectButton";
 import { StructuralLozenge } from "./StructuralLozenge";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { useDb } from "./hooks/useDb";
-import { isHanziCharacter } from "@/data/hanzi";
 
-export function WikiHanziHeaderOverview({
+export function WikiHanziCharacterHeaderOverview({
   hanzi,
   ...rest
 }: {
-  hanzi: HanziText;
+  hanzi: HanziCharacter;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -51,8 +50,7 @@ export function WikiHanziHeaderOverview({
     .map((entry) => entry.gloss[0])
     .filter((x) => x != null);
   const { data: isStructuralHanzi } = useQuery(isStructuralHanziQuery);
-  const isStructural =
-    isHanziCharacter(hanzi) && isStructuralHanzi?.(hanzi) === true;
+  const isStructural = isStructuralHanzi?.(hanzi) === true;
 
   const { isPriority, toggle } = useBookmarkToggle(hanzi);
   const uniquePinyins = pinyins.filter(arrayFilterUnique());
