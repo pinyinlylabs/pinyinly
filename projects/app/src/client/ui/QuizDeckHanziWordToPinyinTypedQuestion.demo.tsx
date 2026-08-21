@@ -17,12 +17,12 @@ export default () => {
   const { data: meanings } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanziFromHanziWord(hanziWord)))
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .select(({ entry }) => ({ hanziWord: entry.hanziWord }))
         .distinct(),
-    [db.dictionarySearch, hanziWord],
+    [db.dictionaryCollection, hanziWord],
   );
   const flag =
     meanings.length > 1

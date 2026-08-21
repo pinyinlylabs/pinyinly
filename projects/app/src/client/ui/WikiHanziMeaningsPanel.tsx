@@ -1,5 +1,5 @@
 import type {
-  DictionarySearchEntry,
+  DictionaryCollectionEntry,
   UserDictionaryEntry,
 } from "@/client/query";
 import type { HanziText } from "@/data/model";
@@ -33,11 +33,11 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
   const { data: builtInMeanings } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(eq(entry.hanzi, hanzi), eq(entry.sourceKind, `builtIn`)),
         ),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   const { data: userMeanings } = useLiveQuery(
@@ -128,7 +128,7 @@ function AddMeaningButton({
 function DictionaryMeaningListItem({
   meaning,
 }: {
-  meaning: DictionarySearchEntry;
+  meaning: DictionaryCollectionEntry;
 }) {
   const primaryPinyin = meaning.pinyin?.[0];
   const secondaryPinyins = meaning.pinyin?.slice(1) ?? [];

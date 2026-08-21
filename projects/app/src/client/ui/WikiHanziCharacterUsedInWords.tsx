@@ -13,10 +13,10 @@ export function WikiHanziCharacterUsedInWords({
   hanzi: HanziCharacter;
 }) {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(like(entry.hanzi, `%${hanzi}%`), not(eq(entry.hanzi, hanzi))),
         )
@@ -32,17 +32,17 @@ export function WikiHanziCharacterUsedInWords({
         }))
         .distinct()
         .limit(maxUsedInWords),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
-  if (dictionarySearchEntries.length === 0) {
+  if (dictionaryEntries.length === 0) {
     return null;
   }
 
   return (
     <WikiTitledBox title="Used in words">
       <View className="p-3">
-        <CompactWordRows dictionarySearchEntries={dictionarySearchEntries} />
+        <CompactWordRows dictionaryEntries={dictionaryEntries} />
       </View>
     </WikiTitledBox>
   );

@@ -1,6 +1,6 @@
 import type {
   CollectionOutput,
-  DictionarySearchEntry,
+  DictionaryCollectionEntry,
   HistoryPageCollection,
   HistoryPageData,
   SettingCollection,
@@ -616,18 +616,18 @@ function settingRow({
   return { key, value };
 }
 
-describe(`dictionarySearch hanziCharacterCount`, () => {
+describe(`dictionaryCollection hanziCharacterCount`, () => {
   const test = baseTest.extend(rizzleFixture).extend(dbFixture);
 
   test(`computes hanziCharacterCount for single character entries`, async ({
     db,
   }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     // Find entries with single characters
     const singleCharEntries = entries.filter(
-      (e: DictionarySearchEntry) =>
+      (e: DictionaryCollectionEntry) =>
         matchAllHanziCharacters(e.hanzi).length === 1,
     );
     expect(singleCharEntries.length).toBeGreaterThan(0);
@@ -641,12 +641,13 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
   test(`computes hanziCharacterCount for multi-character entries`, async ({
     db,
   }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     // Find entries with multi-character words
     const multiCharEntries = entries.filter(
-      (e: DictionarySearchEntry) => matchAllHanziCharacters(e.hanzi).length > 1,
+      (e: DictionaryCollectionEntry) =>
+        matchAllHanziCharacters(e.hanzi).length > 1,
     );
     expect(multiCharEntries.length).toBeGreaterThan(0);
 
@@ -674,9 +675,9 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
       skipHistory: true,
     });
 
-    await db.dictionarySearch.preload();
-    const userEntries = db.dictionarySearch.toArray.filter(
-      (e: DictionarySearchEntry) => e.sourceKind === `user`,
+    await db.dictionaryCollection.preload();
+    const userEntries = db.dictionaryCollection.toArray.filter(
+      (e: DictionaryCollectionEntry) => e.sourceKind === `user`,
     );
 
     expect(userEntries.length).toBeGreaterThan(0);
@@ -689,9 +690,9 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
     db,
     rizzle,
   }) => {
-    await db.builtInDictionarySearch.preload();
-    const builtInEntry = db.builtInDictionarySearch.toArray.find(
-      (e: DictionarySearchEntry) => e.hsk != null,
+    await db.builtInDictionaryCollection.preload();
+    const builtInEntry = db.builtInDictionaryCollection.toArray.find(
+      (e: DictionaryCollectionEntry) => e.hsk != null,
     );
 
     expect(builtInEntry).toBeDefined();
@@ -708,9 +709,9 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
       skipHistory: true,
     });
 
-    await db.dictionarySearch.preload();
-    const userEntry = db.dictionarySearch.toArray.find(
-      (e: DictionarySearchEntry) => e.sourceKind === `user`,
+    await db.dictionaryCollection.preload();
+    const userEntry = db.dictionaryCollection.toArray.find(
+      (e: DictionaryCollectionEntry) => e.sourceKind === `user`,
     );
 
     expect(userEntry).toBeDefined();
@@ -718,8 +719,8 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
   });
 
   test(`includes glossCount for built-in entries`, async ({ db }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     expect(entries.length).toBeGreaterThan(0);
     for (const entry of entries) {
@@ -741,9 +742,9 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
       skipHistory: true,
     });
 
-    await db.dictionarySearch.preload();
-    const userEntries = db.dictionarySearch.toArray.filter(
-      (e: DictionarySearchEntry) => e.sourceKind === `user`,
+    await db.dictionaryCollection.preload();
+    const userEntries = db.dictionaryCollection.toArray.filter(
+      (e: DictionaryCollectionEntry) => e.sourceKind === `user`,
     );
 
     expect(userEntries.length).toBeGreaterThan(0);
@@ -753,17 +754,17 @@ describe(`dictionarySearch hanziCharacterCount`, () => {
   });
 });
 
-describe(`dictionarySearch hskFirstAppearance`, () => {
+describe(`dictionaryCollection hskFirstAppearance`, () => {
   const test = baseTest.extend(rizzleFixture).extend(dbFixture);
 
   test(`is defined for single-char entries that have an hsk level`, async ({
     db,
   }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     const singleCharWithHsk = entries.filter(
-      (e: DictionarySearchEntry) =>
+      (e: DictionaryCollectionEntry) =>
         e.hanziCharacterCount === 1 && e.hsk != null,
     );
     expect(singleCharWithHsk.length).toBeGreaterThan(0);
@@ -776,13 +777,13 @@ describe(`dictionarySearch hskFirstAppearance`, () => {
   test(`is lower than hsk when character appears in an earlier-level word`, async ({
     db,
   }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     // 立 is HSK5 as a standalone word, but appears in 成立 (HSK3), so
     // hskFirstAppearance should be lower than hsk.
     const liEntry = entries.find(
-      (e: DictionarySearchEntry) => e.hanzi === `立` && e.hsk === `5`,
+      (e: DictionaryCollectionEntry) => e.hanzi === `立` && e.hsk === `5`,
     );
     expect(liEntry).toBeDefined();
     expect(liEntry?.hskFirstAppearance).toBeDefined();
@@ -792,11 +793,12 @@ describe(`dictionarySearch hskFirstAppearance`, () => {
   });
 
   test(`equals hsk for multi-character entries`, async ({ db }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     const multiCharWithHsk = entries.filter(
-      (e: DictionarySearchEntry) => e.hanziCharacterCount > 1 && e.hsk != null,
+      (e: DictionaryCollectionEntry) =>
+        e.hanziCharacterCount > 1 && e.hsk != null,
     );
     expect(multiCharWithHsk.length).toBeGreaterThan(0);
 
@@ -808,11 +810,12 @@ describe(`dictionarySearch hskFirstAppearance`, () => {
   test(`is undefined for multi-character entries without hsk`, async ({
     db,
   }) => {
-    await db.builtInDictionarySearch.preload();
-    const entries = db.builtInDictionarySearch.toArray;
+    await db.builtInDictionaryCollection.preload();
+    const entries = db.builtInDictionaryCollection.toArray;
 
     const noHskEntries = entries.filter(
-      (e: DictionarySearchEntry) => e.hsk == null && e.hanziCharacterCount > 1,
+      (e: DictionaryCollectionEntry) =>
+        e.hsk == null && e.hanziCharacterCount > 1,
     );
 
     for (const entry of noHskEntries) {

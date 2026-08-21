@@ -38,7 +38,7 @@ export function WikiHanziCharacterDecompositionComponents({
     ...new Set(decompositionItems.map((x) => x.hanzi)),
   ].join(`|`);
 
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) => {
       if (dedupedHanziListKey.length === 0) {
         return null;
@@ -49,7 +49,7 @@ export function WikiHanziCharacterDecompositionComponents({
         .filter((item): item is HanziText => item.length > 0);
 
       return q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => inArray(entry.hanzi, dedupedHanziList))
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
@@ -58,7 +58,7 @@ export function WikiHanziCharacterDecompositionComponents({
           gloss: entry.gloss,
         }));
     },
-    [db.dictionarySearch, dedupedHanziListKey],
+    [db.dictionaryCollection, dedupedHanziListKey],
   );
 
   if (decompositionItems.length === 0) {
@@ -66,7 +66,7 @@ export function WikiHanziCharacterDecompositionComponents({
   }
 
   const primaryGlossByHanzi = new Map<string, string>();
-  for (const entry of dictionarySearchEntries ?? []) {
+  for (const entry of dictionaryEntries ?? []) {
     if (primaryGlossByHanzi.has(entry.hanzi)) {
       continue;
     }

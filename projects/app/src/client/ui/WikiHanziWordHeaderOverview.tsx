@@ -29,25 +29,25 @@ export function WikiHanziWordHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   const hskLevels = [
-    ...dictionarySearchEntries.map((entry) => entry.hsk),
-    ...dictionarySearchEntries.map((entry) => entry.hskFirstAppearance),
+    ...dictionaryEntries.map((entry) => entry.hsk),
+    ...dictionaryEntries.map((entry) => entry.hskFirstAppearance),
   ]
     .filter((x) => x != null)
     .filter(arrayFilterUnique())
     .sort(sortComparatorNumber(hsk30LevelToNumber));
-  const pinyins = dictionarySearchEntries
+  const pinyins = dictionaryEntries
     .map((entry) => entry.pinyin?.[0])
     .filter((x) => x != null);
-  const glosses = dictionarySearchEntries
+  const glosses = dictionaryEntries
     .map((entry) => entry.gloss[0])
     .filter((x) => x != null);
   const { data: isStructuralHanzi } = useQuery(isStructuralHanziQuery);

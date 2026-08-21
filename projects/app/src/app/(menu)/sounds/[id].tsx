@@ -664,10 +664,10 @@ function SoundUsageExamplesSection({
   pinyinSoundId: PinyinSoundId;
 }) {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(eq(entry.hanziCharacterCount, 1), gte(entry.glossCount, 1)),
         )
@@ -681,10 +681,10 @@ function SoundUsageExamplesSection({
           pinyin: entry.pinyin,
           hsk: entry.hsk,
         })),
-    [db.dictionarySearch],
+    [db.dictionaryCollection],
   );
   const usageExamples = pickSoundUsageExamplesForEntries({
-    allEntries: dictionarySearchEntries,
+    allEntries: dictionaryEntries,
     limit: 5,
     soundId: pinyinSoundId,
   });
@@ -697,7 +697,7 @@ function SoundUsageExamplesSection({
     <WikiTitledBox title="Usage examples" className="mt-10">
       <View className="p-4">
         <CompactWordRows
-          dictionarySearchEntries={usageExamples.map((entry) => ({
+          dictionaryEntries={usageExamples.map((entry) => ({
             ...entry,
             pinyin: entry.pinyin ?? null,
             hsk: entry.hsk ?? null,

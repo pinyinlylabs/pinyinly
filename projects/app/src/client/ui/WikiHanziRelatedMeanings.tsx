@@ -13,14 +13,14 @@ export function WikiHanziRelatedMeanings({ hanzi }: { hanzi: HanziText }) {
   const { data: currentEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   const { data: allEntries } = useLiveQuery(
-    (q) => q.from({ entry: db.dictionarySearch }),
-    [db.dictionarySearch],
+    (q) => q.from({ entry: db.dictionaryCollection }),
+    [db.dictionaryCollection],
   );
 
   const relatedMatches = buildRelatedMeaningMatches({
@@ -43,7 +43,7 @@ export function WikiHanziRelatedMeanings({ hanzi }: { hanzi: HanziText }) {
   return (
     <WikiTitledBox title="Similar meaning">
       <View className="gap-4 p-3">
-        <CompactWordRows dictionarySearchEntries={relatedWordRows} />
+        <CompactWordRows dictionaryEntries={relatedWordRows} />
       </View>
     </WikiTitledBox>
   );

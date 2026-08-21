@@ -66,7 +66,7 @@ export function WikiHanziCharacterPronunciation({
   const { data: meanings } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .orderBy(({ entry }) => entry.freq, {
           direction: `desc`,
@@ -81,7 +81,7 @@ export function WikiHanziCharacterPronunciation({
           pos: entry.pos,
           pinyin: entry.pinyin,
         })),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
   const pronunciation = getSharedPrimaryPronunciation(meanings);
   const firstMeaning = meanings[0];

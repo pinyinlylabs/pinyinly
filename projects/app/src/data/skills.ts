@@ -265,9 +265,12 @@ export function skillDependencies(
             deps.push(hanziWordToGloss(item));
           }
         } catch (err) {
-          throw new Error(
-            `Failed to decompose hanzi word "${hanziWord}" for skill "${skill}"`,
-            { cause: err },
+          console.error(
+            `Error decomposing hanziword`,
+            new Error(
+              `Failed to decompose hanzi word "${hanziWord}" for skill "${skill}"`,
+              { cause: err },
+            ),
           );
         }
       }

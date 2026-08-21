@@ -1,4 +1,4 @@
-import type { DictionarySearchEntry } from "@/client/query";
+import type { DictionaryCollectionEntry } from "@/client/query";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { HanziPinyinText } from "./HanziPinyinText";
@@ -6,21 +6,21 @@ import { HskLozenge } from "./HskLozenge";
 import { Icon } from "./Icon";
 
 export interface CompactWordRowsEntry {
-  hanzi: DictionarySearchEntry[`hanzi`];
-  hanziWord: DictionarySearchEntry[`hanziWord`] | undefined | null;
-  hsk: DictionarySearchEntry[`hsk`] | undefined | null;
-  gloss: DictionarySearchEntry[`gloss`] | undefined | null;
-  pinyin: DictionarySearchEntry[`pinyin`] | undefined | null;
+  hanzi: DictionaryCollectionEntry[`hanzi`];
+  hanziWord: DictionaryCollectionEntry[`hanziWord`] | undefined | null;
+  hsk: DictionaryCollectionEntry[`hsk`] | undefined | null;
+  gloss: DictionaryCollectionEntry[`gloss`] | undefined | null;
+  pinyin: DictionaryCollectionEntry[`pinyin`] | undefined | null;
 }
 
 export function CompactWordRows({
-  dictionarySearchEntries,
+  dictionaryEntries,
 }: {
-  dictionarySearchEntries: readonly CompactWordRowsEntry[];
+  dictionaryEntries: readonly CompactWordRowsEntry[];
 }) {
   return (
     <View className="-my-1.5 gap-1">
-      {dictionarySearchEntries.map((entry, i) => {
+      {dictionaryEntries.map((entry, i) => {
         const hanzi = entry.hanzi;
         const pinyin = entry.pinyin?.[0];
         const gloss = entry.gloss?.[0];

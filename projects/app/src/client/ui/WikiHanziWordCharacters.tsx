@@ -31,7 +31,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
     (q) =>
       q
         .from({ character: charactersCollection })
-        .join({ entry: db.dictionarySearch }, ({ character, entry }) =>
+        .join({ entry: db.dictionaryCollection }, ({ character, entry }) =>
           eq(character.hanzi, entry.hanzi),
         )
         .orderBy(({ character }) => character.position, `asc`)
@@ -43,7 +43,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),
-    [db.dictionarySearch, charactersCollection],
+    [db.dictionaryCollection, charactersCollection],
   );
 
   const entries = entriesWithDupes.filter(arrayFilterUnique((x) => x.hanzi));
@@ -55,7 +55,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
   return (
     <WikiTitledBox title="Characters">
       <View className="p-3">
-        <CompactWordRows dictionarySearchEntries={entries} />
+        <CompactWordRows dictionaryEntries={entries} />
       </View>
     </WikiTitledBox>
   );

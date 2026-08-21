@@ -15,10 +15,10 @@ export const NewSkillModalContentNewPronunciation = ({
   onDismiss: () => void;
 }) => {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
@@ -26,11 +26,11 @@ export const NewSkillModalContentNewPronunciation = ({
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   let pinyin: PinyinText | undefined;
-  for (const entry of dictionarySearchEntries) {
+  for (const entry of dictionaryEntries) {
     if (entry.pinyin != null) {
       const mainPinyin = entry.pinyin[0];
       if (mainPinyin != null) {
@@ -46,9 +46,9 @@ export const NewSkillModalContentNewPronunciation = ({
   }
 
   const glosses =
-    dictionarySearchEntries.length === 1
-      ? dictionarySearchEntries[0]?.gloss.join(`, `)
-      : dictionarySearchEntries.map((entry) => entry.gloss[0]).join(`, `);
+    dictionaryEntries.length === 1
+      ? dictionaryEntries[0]?.gloss.join(`, `)
+      : dictionaryEntries.map((entry) => entry.gloss[0]).join(`, `);
 
   return (
     <ScrollView

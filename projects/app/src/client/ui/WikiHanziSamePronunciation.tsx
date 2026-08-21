@@ -15,13 +15,13 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
   const { data: currentEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .orderBy(({ entry }) => entry.freq, {
           direction: `desc`,
           nulls: `last`,
         }),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   const primaryPinyin = currentEntries[0]?.pinyin?.[0];
@@ -33,7 +33,7 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
       }
 
       return q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(
             not(eq(entry.hanzi, hanzi)),
@@ -45,7 +45,7 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
           nulls: `last`,
         });
     },
-    [db.dictionarySearch, hanzi, primaryPinyin],
+    [db.dictionaryCollection, hanzi, primaryPinyin],
   );
 
   if (primaryPinyin == null) {
@@ -70,7 +70,7 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
   return (
     <WikiTitledBox title="Same pronunciation">
       <View className="p-3">
-        <CompactWordRows dictionarySearchEntries={samePronunciationRows} />
+        <CompactWordRows dictionaryEntries={samePronunciationRows} />
       </View>
     </WikiTitledBox>
   );

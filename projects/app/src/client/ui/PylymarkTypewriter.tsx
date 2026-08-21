@@ -34,21 +34,21 @@ export const PylymarkTypewriter = ({
   onAnimateEnd?: () => void;
 }) => {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
         .select(({ entry }) => ({
           hanziWord: entry.hanziWord,
           gloss: entry.gloss,
         })),
-    [db.dictionarySearch],
+    [db.dictionaryCollection],
   );
   const dictionaryEntriesByWord = useMemo(() => {
     const entriesByWord = new Map<string, { gloss: string[] }>();
-    for (const entry of dictionarySearchEntries) {
+    for (const entry of dictionaryEntries) {
       if (!entriesByWord.has(entry.hanziWord)) {
         entriesByWord.set(entry.hanziWord, {
           gloss: entry.gloss,
@@ -56,7 +56,7 @@ export const PylymarkTypewriter = ({
       }
     }
     return entriesByWord;
-  }, [dictionarySearchEntries]);
+  }, [dictionaryEntries]);
   const parsed = parsePylymark(source);
 
   const clock: Clock = {

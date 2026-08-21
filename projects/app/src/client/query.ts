@@ -535,11 +535,11 @@ export interface UserDictionaryEntry {
 
 export type UserDictionaryCollection = Collection<UserDictionaryEntry, string>;
 
-export type DictionarySearchSourceKind = `builtIn` | `user`;
+export type DictionaryCollectionSourceKind = `builtIn` | `user`;
 
-export interface DictionarySearchEntry {
+export interface DictionaryCollectionEntry {
   id: string;
-  sourceKind: DictionarySearchSourceKind;
+  sourceKind: DictionaryCollectionSourceKind;
   hanzi: HanziText;
   meaningKey: string;
   hanziWord: HanziWord;
@@ -562,13 +562,13 @@ export interface DictionarySearchEntry {
   isStructural?: boolean;
 }
 
-export type BuiltInDictionarySearchCollection = Collection<
-  DictionarySearchEntry,
+export type BuiltInDictionaryCollection = Collection<
+  DictionaryCollectionEntry,
   string
 >;
 
-export type DictionarySearchCollection = Collection<
-  DictionarySearchEntry,
+export type DictionaryCollection = Collection<
+  DictionaryCollectionEntry,
   string
 >;
 
@@ -824,18 +824,18 @@ function userDictionaryCollectionOptions({
   };
 }
 
-function builtInDictionarySearchCollectionOptions(): CollectionConfig<
-  DictionarySearchEntry,
+function builtInDictionaryCollectionOptions(): CollectionConfig<
+  DictionaryCollectionEntry,
   string
 > {
-  return staticCollectionOptions<DictionarySearchEntry, string>({
-    id: `builtInDictionarySearch`,
+  return staticCollectionOptions<DictionaryCollectionEntry, string>({
+    id: `builtInDictionary`,
     queryFn: async () => {
       const [dictionary, charactersJson] = await Promise.all([
         loadDictionary(),
         loadCharactersJson(),
       ]);
-      const entries: DictionarySearchEntry[] = [];
+      const entries: DictionaryCollectionEntry[] = [];
       const structuralHanzi = new Set<HanziText>();
 
       for (const [hanzi, data] of charactersJson) {
@@ -890,7 +890,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           pos: meaning.pos,
           pinyin,
           hsk: meaning.hsk,
-          hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
+          hskSortKey: dictionaryCollectionHskSortKey(meaning.hsk),
           hskFirstAppearance,
           hanziCharacterCount,
           isStructural: hanziCharacterCount === 1 && structuralHanzi.has(hanzi),
@@ -952,7 +952,7 @@ function characterMnemonicIdsCollectionOptions(): CollectionConfig<
   });
 }
 
-function dictionarySearchHskSortKey(hsk?: Hsk30Level): number {
+function dictionaryCollectionHskSortKey(hsk?: Hsk30Level): number {
   return hsk == null ? 9999 : hsk30LevelToNumber(hsk);
 }
 
@@ -1255,12 +1255,12 @@ export function makeDb(rizzle: Rizzle) {
   );
   characterMnemonicIdsCollection.createIndex((row) => row.hanzi);
 
-  const builtInDictionarySearch: BuiltInDictionarySearchCollection =
-    createCollection(builtInDictionarySearchCollectionOptions());
+  const builtInDictionaryCollection: BuiltInDictionaryCollection =
+    createCollection(builtInDictionaryCollectionOptions());
 
-  const dictionarySearch = createLiveQueryCollection((q) => {
+  const dictionaryCollection = createLiveQueryCollection((q) => {
     const builtinRows = q
-      .from({ builtin: builtInDictionarySearch })
+      .from({ builtin: builtInDictionaryCollection })
       .select(({ builtin: row }) => ({
         id: concat(`builtin:`, row.hanziWord),
         sourceKind: `builtIn` as const,
@@ -1300,7 +1300,7 @@ export function makeDb(rizzle: Rizzle) {
           pos: undefined,
           pinyin,
           hsk: undefined,
-          hskSortKey: dictionarySearchHskSortKey(),
+          hskSortKey: dictionaryCollectionHskSortKey(),
           hskFirstAppearance: undefined,
           note: row.note,
           hanziCharacterCount: matchAllHanziCharacters(row.hanzi).length,
@@ -1405,11 +1405,11 @@ export function makeDb(rizzle: Rizzle) {
 
   return {
     builtinCharacterDecompositions,
-    builtInDictionarySearch,
+    builtInDictionaryCollection: builtInDictionaryCollection,
     characterComponentUsage,
     characterDecompositionsCollection,
     characterMnemonicIdsCollection,
-    dictionarySearch,
+    dictionaryCollection: dictionaryCollection,
     settingCollection,
     settingHistoryCollection,
     userDictionary,

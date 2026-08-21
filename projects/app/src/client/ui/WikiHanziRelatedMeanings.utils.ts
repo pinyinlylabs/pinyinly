@@ -1,11 +1,11 @@
-import type { DictionarySearchEntry } from "@/client/query";
+import type { DictionaryCollectionEntry } from "@/client/query";
 import type { HanziText } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 
 const maxRelatedEntries = 5;
 
 export interface RelatedMeaningMatch {
-  entry: DictionarySearchEntry;
+  entry: DictionaryCollectionEntry;
   similarityScore: number;
 }
 
@@ -14,8 +14,8 @@ export function buildRelatedMeaningMatches({
   allEntries,
   hanzi,
 }: {
-  currentEntries: readonly DictionarySearchEntry[];
-  allEntries: readonly DictionarySearchEntry[];
+  currentEntries: readonly DictionaryCollectionEntry[];
+  allEntries: readonly DictionaryCollectionEntry[];
   hanzi: HanziText;
 }) {
   const currentGlosses = currentEntries

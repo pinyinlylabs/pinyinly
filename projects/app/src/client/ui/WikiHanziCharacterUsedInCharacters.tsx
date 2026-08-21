@@ -33,7 +33,7 @@ export function WikiHanziCharacterUsedInCharacters({
       return usedInHanzi.length === 0
         ? null
         : q
-            .from({ entry: db.dictionarySearch })
+            .from({ entry: db.dictionaryCollection })
             .where(({ entry }) => inArray(entry.hanzi, usedInHanzi))
             .orderBy(({ entry }) => entry.hskSortKey, `asc`)
             .orderBy(({ entry }) => entry.hanziCharacterCount, `asc`)
@@ -46,7 +46,7 @@ export function WikiHanziCharacterUsedInCharacters({
               pinyin: entry.pinyin,
             }));
     },
-    [db.dictionarySearch, componentUsageRows, hanzi],
+    [db.dictionaryCollection, componentUsageRows, hanzi],
   );
 
   const entries = (entriesWithDupes ?? [])
@@ -60,7 +60,7 @@ export function WikiHanziCharacterUsedInCharacters({
   return (
     <WikiTitledBox title="Used in characters">
       <View className="p-3">
-        <CompactWordRows dictionarySearchEntries={entries} />
+        <CompactWordRows dictionaryEntries={entries} />
       </View>
     </WikiTitledBox>
   );

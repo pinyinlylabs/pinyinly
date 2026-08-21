@@ -11,12 +11,15 @@ import { WikiHanziCharacterUsedInWords } from "./WikiHanziCharacterUsedInWords";
 import { WikiHanziRelatedMeanings } from "./WikiHanziRelatedMeanings";
 import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
 import { WikiHanziCharacterHeaderOverview } from "./WikiHanziCharacterHeaderOverview";
+import { WikiHanziCharacterChooseAMeaning } from "./WikiHanziCharacterChooseAMeaning";
 
 export function WikiHanziBodyCharacter({ hanzi }: { hanzi: HanziCharacter }) {
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-10 bg-bg py-7">
         <WikiHanziCharacterHeaderOverview hanzi={hanzi} />
+
+        <WikiHanziCharacterChooseAMeaning hanzi={hanzi} />
 
         <WikiHanziCharacterMeaning hanzi={hanzi} />
 

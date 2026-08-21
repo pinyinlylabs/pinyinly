@@ -39,7 +39,7 @@ import {
 } from "./hintText";
 import { zipStrict } from "@pinyinly/lib/collections";
 
-export function WikiHanziCharacterMeaning({
+export function WikiHanziCharacterChooseAMeaning({
   hanzi,
 }: {
   hanzi: HanziCharacter;

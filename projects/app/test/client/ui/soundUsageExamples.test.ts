@@ -1,5 +1,5 @@
 import { pickSoundUsageExamplesForEntries } from "#client/ui/soundUsageExamples.ts";
-import type { DictionarySearchEntry } from "#client/query.ts";
+import type { DictionaryCollectionEntry } from "#client/query.ts";
 import type {
   HanziText,
   HanziWord,
@@ -87,8 +87,8 @@ describe(`pickSoundUsageExamplesForEntries suite`, () => {
 
 function makeEntry(
   hanziWord: HanziWord,
-  meaning: Pick<DictionarySearchEntry, `gloss` | `pinyin`>,
-): Pick<DictionarySearchEntry, `hanziWord` | `hanzi` | `gloss` | `pinyin`> {
+  meaning: Pick<DictionaryCollectionEntry, `gloss` | `pinyin`>,
+): Pick<DictionaryCollectionEntry, `hanziWord` | `hanzi` | `gloss` | `pinyin`> {
   const hanzi = hanziWord.split(`:`)[0] as HanziText;
   return { hanziWord, hanzi, ...meaning };
 }

@@ -170,11 +170,11 @@ function HanziWordResultContent({ hanziWord }: { hanziWord: HanziWord }) {
   const { data: dictionaryEntry } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanziWord, hanziWord))
         .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
         .findOne(),
-    [db.dictionarySearch, hanziWord],
+    [db.dictionaryCollection, hanziWord],
   );
 
   const hanzi = hanziFromHanziWord(hanziWord);
