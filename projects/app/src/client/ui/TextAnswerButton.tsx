@@ -2,7 +2,8 @@ import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { Pressable } from "react-native";
 import Reanimated, {
   Easing,

@@ -1,7 +1,8 @@
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText } from "@/data/model";
 import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
 
 const externalResources = [

@@ -1,5 +1,5 @@
 import { ExampleStack } from "@/client/ui/demo/components";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import { RectButton } from "./RectButton";
 import { DropdownMenu } from "./DropdownMenu";

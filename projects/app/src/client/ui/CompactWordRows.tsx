@@ -1,6 +1,8 @@
 import type { DictionaryCollectionEntry } from "@/client/query";
 import { Link } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { HanziPinyinText } from "./HanziPinyinText";
 import { HskLozenge } from "./HskLozenge";
 import { Icon } from "./Icon";

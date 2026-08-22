@@ -1,7 +1,7 @@
 import type { HanziText } from "@/data/model";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import { WikiHanziModal } from "./WikiHanziModal";
 
 export const HanziLink = ({

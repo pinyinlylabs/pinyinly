@@ -8,7 +8,8 @@ import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { UserSettingJsonEntity } from "@/data/userSettings";
 import { TextInputMulti } from "./TextInputMulti";
-import { View, Text } from "react-native";
+import { View } from "@/client/ui/View";
+import { Text } from "@/client/ui/Text";
 
 interface InlineEditableSettingJsonProps<T extends UserSettingJsonEntity> {
   setting: UserSettingEntityLike<T>;

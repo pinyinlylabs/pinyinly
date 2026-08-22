@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { ViewProps } from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { Icon } from "./Icon";
 import { QuickSearchModal } from "./QuickSearchModal";

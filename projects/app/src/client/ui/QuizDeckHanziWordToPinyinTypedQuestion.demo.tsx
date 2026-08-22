@@ -7,7 +7,7 @@ import { hanziWordToPinyinTypedQuestionOrThrow } from "@/data/questions/hanziWor
 import { hanziWordToPinyinTyped } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { useDb } from "./hooks/useDb";
 
 export default () => {

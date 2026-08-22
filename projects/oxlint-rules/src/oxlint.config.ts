@@ -105,6 +105,16 @@ export default defineConfig({
             message: `Use "useSafeAreaInsets" from "react-native-safe-area-context" instead.`,
           },
           {
+            name: `react-native`,
+            importNames: [`View`],
+            message: `Use "View" from "@/client/ui/View" instead.`,
+          },
+          {
+            name: `react-native`,
+            importNames: [`Text`],
+            message: `Use "Text" from "@/client/ui/Text" instead.`,
+          },
+          {
             name: `expo-image`,
             importNames: [`Image`],
             message: `Use "Image" from "@/client/ui/Image" instead (for Uniwind support).`,

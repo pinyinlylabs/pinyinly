@@ -11,7 +11,8 @@ import type {
 } from "@/client/ui/Image";
 import { useState } from "react";
 import type { StyleProp } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
   /**

@@ -1,5 +1,5 @@
 import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import Reanimated, { Easing, ZoomIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 

@@ -1,5 +1,5 @@
 import type { HanziText } from "@/data/model";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiAiExplanation } from "./WikiAiExplanation";
 import { WikiHanziExternalResources } from "./WikiHanziExternalResources";

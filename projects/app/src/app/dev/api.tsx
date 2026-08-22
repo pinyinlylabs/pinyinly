@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
 import { RectButton } from "@/client/ui/RectButton";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DevApiPage() {

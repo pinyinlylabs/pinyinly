@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import Reanimated, { FadeOut } from "react-native-reanimated";
 import { Delay } from "./Delay";
 import { ImageCloud } from "./ImageCloud";

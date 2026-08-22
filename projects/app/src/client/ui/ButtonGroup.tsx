@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { createContext, use } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import type { ButtonVariant, RectButtonProps } from "./RectButton";
 import { RectButton } from "./RectButton";

@@ -1,5 +1,6 @@
 import { Slot } from "@rn-primitives/slot";
 import React from "react";
+// oxlint-disable-next-line no-restricted-imports
 import { Platform, Text as RNText } from "react-native";
 import type { Role } from "react-native";
 import type { VariantProps } from "tailwind-variants";

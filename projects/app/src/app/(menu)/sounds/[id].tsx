@@ -48,7 +48,9 @@ import {
 import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { intersperse } from "@/client/react";
 

@@ -32,7 +32,8 @@ import {
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { useMemo } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function SoundsPage() {
   "use memo";

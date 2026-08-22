@@ -1,6 +1,6 @@
 import { BookmarksList } from "@/client/ui/BookmarksList";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default function BookmarksPage() {
   return (

@@ -1,6 +1,6 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import { ShimmerText } from "@/client/ui/ShimmerText";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

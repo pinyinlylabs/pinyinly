@@ -2,7 +2,9 @@ import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
 import { createContext, use, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
 interface TabsContextValue {

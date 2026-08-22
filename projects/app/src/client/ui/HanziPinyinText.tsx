@@ -1,5 +1,6 @@
 import type { HanziText, PinyinText } from "@/data/model";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
 export function HanziPinyinText({

@@ -1,7 +1,7 @@
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { ViewProps } from "react-native";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { Rive } from "./Rive";
 import type { RiveInstance } from "./riveTypes";

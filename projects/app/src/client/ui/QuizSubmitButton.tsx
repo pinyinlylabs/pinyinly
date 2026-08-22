@@ -2,7 +2,7 @@ import { mergeRefs } from "@/client/react";
 import { Rating } from "@/util/fsrs";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
-import type { View } from "react-native";
+import type { View } from "@/client/ui/View";
 import z from "zod";
 import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";

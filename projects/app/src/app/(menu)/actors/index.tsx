@@ -4,7 +4,8 @@ import { RectButton } from "@/client/ui/RectButton";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function ActorsPage() {
   const { actors, createActor, isLoading } = usePinyinSoundActors();

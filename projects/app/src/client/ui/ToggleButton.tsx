@@ -1,4 +1,5 @@
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
 export function ToggleButton({

@@ -1,7 +1,7 @@
 import { wikiMdxQuery } from "@/client/query";
 import type { HanziText } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 import { WikiTitledBox } from "./WikiTitledBox";
 

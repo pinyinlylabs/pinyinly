@@ -1,5 +1,5 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
 
 export default () => {

@@ -1,7 +1,8 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { BookmarksList } from "@/client/ui/BookmarksList";
 import { WikiDictionarySearch } from "@/client/ui/WikiDictionarySearch";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function WikiIndexPage() {
   return (

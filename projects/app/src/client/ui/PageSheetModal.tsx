@@ -1,7 +1,8 @@
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { Modal, Platform, View } from "react-native";
+import { Modal, Platform } from "react-native";
+import { View } from "@/client/ui/View";
 import type { PressableProps } from "react-native";
 import Reanimated, {
   Easing,

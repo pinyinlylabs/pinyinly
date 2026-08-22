@@ -6,7 +6,9 @@ import {
 import { useAiImageStyleSetting } from "@/client/ui/hooks/useAiImageStyleSetting";
 import { FramedAssetImage } from "@/client/ui/ImageFrame";
 import { useAssetImageMeta } from "@/client/ui/useAssetImageMeta";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export function AiImageStyleSettingControl() {
   const { aiImageStyle, setAiImageStyle } = useAiImageStyleSetting();

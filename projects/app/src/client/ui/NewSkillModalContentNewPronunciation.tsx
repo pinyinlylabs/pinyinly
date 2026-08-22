@@ -1,7 +1,9 @@
 import type { HanziText, PinyinText } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { useDb } from "./hooks/useDb";

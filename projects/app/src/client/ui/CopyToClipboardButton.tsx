@@ -1,6 +1,8 @@
 import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
 import { useEffect, useRef, useState } from "react";
-import { Platform, Text, View } from "react-native";
+import { Platform } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Portal } from "./Portal";
 import { RectButton } from "./RectButton";
 

@@ -1,7 +1,8 @@
 import { Section } from "@/client/ui/demo/components";
 import { useLocalSearchParams } from "expo-router";
 import { StrictMode } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { demos } from ".";
 
 const NotFound = () => {

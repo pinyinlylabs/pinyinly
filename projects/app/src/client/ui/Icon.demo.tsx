@@ -1,6 +1,6 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import { Icon } from "@/client/ui/Icon";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { iconNames } from "./iconRegistry";
 
 export default () => {

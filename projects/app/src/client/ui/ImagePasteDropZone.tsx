@@ -1,15 +1,15 @@
-import type { AssetId } from "@/data/model";
 import * as ImagePicker from "expo-image-picker";
+import type { AssetId } from "@/data/model";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
   Pressable,
   Image as RnImage,
-  Text,
-  View,
 } from "react-native";
 import { useImageUploader } from "./hooks/useImageUploader";
+import { View } from "./View";
+import { Text } from "./Text";
 
 interface ImagePasteDropZoneProps {
   onUploadComplete: (assetId: AssetId) => void;

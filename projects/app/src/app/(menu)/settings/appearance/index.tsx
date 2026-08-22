@@ -1,7 +1,8 @@
 import { AiImageStyleSettingControl } from "@/client/ui/AiImageStyleSettingControl";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import { autoCheckUserToggleSetting } from "@/data/userSettings";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function AppearanceSettingsPage() {
   return (

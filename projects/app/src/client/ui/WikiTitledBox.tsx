@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ViewProps } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { WikiEditButton } from "./WikiEditButton";
 import { RectButton } from "./RectButton";

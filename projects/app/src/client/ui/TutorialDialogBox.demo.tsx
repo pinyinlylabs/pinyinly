@@ -1,5 +1,5 @@
 import { TutorialDialogBox } from "@/client/ui/TutorialDialogBox";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => (
   <View className="w-100 gap-2">

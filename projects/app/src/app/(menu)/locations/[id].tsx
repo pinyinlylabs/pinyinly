@@ -20,7 +20,9 @@ import {
 } from "@/data/userSettings";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { RectButton } from "@/client/ui/RectButton";
 
 export default function LocationIdPage() {

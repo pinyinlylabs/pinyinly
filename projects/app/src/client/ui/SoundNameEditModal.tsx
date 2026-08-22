@@ -6,7 +6,9 @@ import {
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { use, useMemo } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";

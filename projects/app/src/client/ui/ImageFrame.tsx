@@ -1,7 +1,7 @@
 import type { AssetId } from "@/data/model";
 import { useState } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { AssetImage } from "./AssetImage";
 import type { ImageCrop, ImageFrameShape } from "./imageCrop";
 

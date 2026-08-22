@@ -5,7 +5,8 @@ import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
 import { userNameTextSetting } from "@/data/userSettings";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function ProfileSettingsPage() {
   const auth = useAuth();

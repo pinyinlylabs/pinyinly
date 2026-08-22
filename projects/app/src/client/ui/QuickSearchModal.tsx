@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
 import { PageSheetModal } from "./PageSheetModal";
 import { QuickSearchResults } from "./QuickSearchResults";

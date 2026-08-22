@@ -1,6 +1,6 @@
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import type { ViewProps } from "react-native";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { Rive } from "./Rive";
 
 interface ImageCloudProps extends Pick<ViewProps, `className` | `style`> {

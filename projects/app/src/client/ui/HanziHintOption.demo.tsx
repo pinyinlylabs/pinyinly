@@ -3,7 +3,8 @@ import { HanziHintOption } from "@/client/ui/HanziHintOption";
 import { RectButton } from "@/client/ui/RectButton";
 import type { AssetId } from "@/data/model";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 const presetHint = `A **child** reaching up for knowledge`;
 const userHint = `My **classroom** memory hook`;

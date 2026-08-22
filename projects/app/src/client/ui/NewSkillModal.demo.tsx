@@ -6,7 +6,7 @@ import {
   hanziWordToPinyinTone,
   hanziWordToPinyinTyped,
 } from "@/data/skills";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

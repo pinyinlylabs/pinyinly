@@ -1,7 +1,7 @@
 import type { HanziText } from "@/data/model";
 import { and, eq, inArray, not, useLiveQuery } from "@tanstack/react-db";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { CompactWordRows } from "./CompactWordRows";
 import type { CompactWordRowsEntry } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";

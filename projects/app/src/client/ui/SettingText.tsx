@@ -6,7 +6,7 @@ import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type { UserSettingTextEntity } from "@/data/userSettings";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 
 interface SettingTextProps<T extends UserSettingTextEntity> {

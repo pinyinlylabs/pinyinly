@@ -1,7 +1,9 @@
 import type { Skill } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@pinyinly/lib/invariant";
-import { Platform, Text, View } from "react-native";
+import { Platform } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";

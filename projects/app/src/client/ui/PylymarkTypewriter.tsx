@@ -5,7 +5,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useMemo } from "react";
 import type { ReactNode } from "react";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { HanziWordLink } from "./HanziWordLink";
 import { useDb } from "./hooks/useDb";

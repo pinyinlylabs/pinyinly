@@ -3,7 +3,7 @@ import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import type { HanziCharacter } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { StructuralLozenge } from "./StructuralLozenge";
 import { Lozenge } from "./Lozenge";
 import { Text } from "./Text";

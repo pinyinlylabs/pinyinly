@@ -1,6 +1,6 @@
 import { Lozenge } from "./Lozenge";
 import { Tooltip } from "./Tooltip";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 
 export function StructuralLozenge({ size = `md` }: { size?: `sm` | `md` }) {
   return (

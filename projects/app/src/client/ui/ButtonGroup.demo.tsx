@@ -1,6 +1,6 @@
 import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { ExampleStack } from "@/client/ui/demo/components";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

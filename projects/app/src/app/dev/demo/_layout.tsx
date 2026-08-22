@@ -2,7 +2,9 @@ import { examplesStackClassName } from "@/client/ui/demo/utils";
 import { Link, Slot, usePathname } from "expo-router";
 import type { Href } from "expo-router";
 import { StrictMode } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { demos } from ".";
 import { Theme } from "#client/ui/Theme.tsx";
 

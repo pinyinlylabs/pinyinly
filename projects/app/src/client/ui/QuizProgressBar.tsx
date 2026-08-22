@@ -1,6 +1,6 @@
 import { makeRange } from "@pinyinly/lib/collections";
 import { useEffect, useMemo, useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
 import Reanimated, {
   Easing,

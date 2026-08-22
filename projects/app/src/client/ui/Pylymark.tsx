@@ -1,7 +1,7 @@
 import type { PylymarkTokenNode } from "@/data/pylymark";
 import { parsePylymark } from "@/data/pylymark";
 import { useMemo } from "react";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { pinyinSoundIdSchema } from "@/data/model";
 import type { HanziText, PinyinSoundId } from "@/data/model";

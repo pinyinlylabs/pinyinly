@@ -1,6 +1,7 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { TextInputMulti } from "./TextInputMulti";
 
 export default () => {

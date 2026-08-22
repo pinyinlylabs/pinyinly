@@ -5,7 +5,7 @@ import {
   localOnlyCollectionOptions,
   useLiveQuery,
 } from "@tanstack/react-db";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";

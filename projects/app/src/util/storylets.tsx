@@ -1,7 +1,7 @@
 import { TutorialDialogBox } from "@/client/ui/TutorialDialogBox";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { Image } from "@/client/ui/Image";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
 const screenClass = tv({

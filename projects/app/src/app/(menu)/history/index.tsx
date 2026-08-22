@@ -10,7 +10,8 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import { useLiveQuery } from "@tanstack/react-db";
 import { interval } from "date-fns/interval";
 import { intervalToDuration } from "date-fns/intervalToDuration";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function HistoryPage() {
   "use memo";

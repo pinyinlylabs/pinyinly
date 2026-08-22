@@ -12,7 +12,8 @@ import {
 import { nanoid } from "@/util/nanoid";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { WikiEditButton } from "./WikiEditButton";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";

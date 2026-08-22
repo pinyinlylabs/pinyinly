@@ -5,7 +5,9 @@ import * as html from "@expo/html-elements";
 import { Image } from "@/client/ui/Image";
 import { createContext } from "react";
 import type { ComponentType, JSX } from "react";
-import { Platform, Text, View } from "react-native";
+import { Platform } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { TextProps, ViewProps } from "react-native";
 
 export type MdxComponentsType = Record<string, ComponentType>;

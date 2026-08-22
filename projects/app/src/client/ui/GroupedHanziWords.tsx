@@ -2,7 +2,9 @@ import type { HanziWord } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { useLiveQuery, inArray } from "@tanstack/react-db";
 import { Link } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { useDb } from "./hooks/useDb";
 import type { Mutable } from "@pinyinly/lib/types";
 

@@ -2,7 +2,8 @@ import { mergeProps } from "@/client/react";
 import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
 import { cloneElement, useState } from "react";
 import type { ReactElement, RefAttributes } from "react";
-import { Modal, TouchableOpacity, View } from "react-native";
+import { Modal, TouchableOpacity } from "react-native";
+import { View } from "@/client/ui/View";
 import type { PressableProps } from "react-native";
 
 const gap = 8;

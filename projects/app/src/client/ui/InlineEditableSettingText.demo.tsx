@@ -3,7 +3,7 @@ import {
   hanziWordMeaningHintExplanationTextSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/data/userSettings";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { DemoHanziWordKnob } from "./demo/components";
 import { useDemoHanziWordKnob } from "./demo/utils";
 import { Pylymark } from "./Pylymark";

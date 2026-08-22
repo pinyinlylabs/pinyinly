@@ -18,7 +18,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Platform, Pressable, View } from "react-native";
+import { Platform, Pressable } from "react-native";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { Portal } from "./Portal";
 

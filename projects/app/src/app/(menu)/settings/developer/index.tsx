@@ -1,6 +1,7 @@
 import { DeviceStoreToggleButton } from "@/client/ui/DeviceStoreToggleButton";
 import { slowQueriesSetting } from "@/util/devtools";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function DeveloperSettingsPage() {
   return (

@@ -4,7 +4,7 @@ import type {
   StrokeSpecString,
   CharacterJson,
 } from "@/data/model";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { WikiHanziCharacterMeaning } from "./WikiHanziCharacterMeaning";
 import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
 

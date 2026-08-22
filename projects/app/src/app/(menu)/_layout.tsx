@@ -11,7 +11,9 @@ import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 

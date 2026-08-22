@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ReactNode, Ref } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { TextInput } from "react-native";
 import Reanimated, {
   useAnimatedStyle,

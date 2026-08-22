@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ViewProps } from "react-native";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import Reanimated, {
   Easing,
   useAnimatedStyle,

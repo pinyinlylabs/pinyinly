@@ -2,7 +2,7 @@ import { SkillQueueContext } from "@/client/ui/contexts";
 import { QuizQueueLozenge } from "@/client/ui/QuizQueueLozenge";
 import type { SkillReviewQueue } from "@/data/skills";
 import { ExampleStack } from "@/client/ui/demo/components";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

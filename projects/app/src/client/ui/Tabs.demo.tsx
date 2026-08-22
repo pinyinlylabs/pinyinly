@@ -1,6 +1,7 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { Tabs } from "@/client/ui/Tabs";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default () => (
   <View className="flex-1 gap-4">

@@ -2,10 +2,11 @@ import type { HanziCharacter, HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
 import type { PropsWithChildren } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "./View";
 import { useDb } from "./hooks/useDb";
 import { tv } from "tailwind-variants";
-import "@/global.css";
 
 export function WikiHanziCharacterChooseAMeaning({
   hanzi,
@@ -46,7 +47,7 @@ export function WikiHanziCharacterChooseAMeaning({
             onPressedChanged={() => {
               setSelectedMeaning(entry.hanziWord);
             }}
-            className="flex-row items-center gap-2 rounded-lg bg-muted px-3 py-2"
+            className="flex-row items-center gap-2 px-3 py-2"
           >
             <View className="gap-1">
               <Text className="font-sans text-xl/normal font-semibold text-fg">
@@ -86,11 +87,15 @@ export function ToggleButton({
 }
 
 const toggleButtonClass = tv({
-  base: `rounded-lg bg-muted px-3 py-2`,
+  base: `
+    rounded-lg bg-muted px-3 py-2
+
+    hover:bg-muted-fg/20
+  `,
   variants: {
     pressed: {
       true: `outline-2 outline-blue`,
-      false: `hover:outline-2 hover:outline-muted-fg/43`,
+      false: ``,
     },
   },
 });

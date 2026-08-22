@@ -13,7 +13,7 @@ import {
   skillKindFromSkill,
   skillKindToShorthand,
 } from "@/data/skills";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import { HanziWordRefText } from "./HanziWordRefText";
 
 export const SkillRefText = ({ skill }: { skill: Skill }) => {

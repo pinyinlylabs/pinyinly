@@ -2,7 +2,8 @@ import { DemoHanziWordKnob } from "@/client/ui/demo/components";
 import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { hanziWordMeaningHintImageSetting } from "@/data/userSettings";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`学:learn`);

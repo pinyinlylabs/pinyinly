@@ -1,7 +1,7 @@
 import type { HanziCharacter, HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { use, useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { HanziStrokesTile } from "./HanziStrokesTile";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";

@@ -1,7 +1,7 @@
 import type { Hsk30Level } from "@/data/model";
 import { Lozenge } from "./Lozenge";
 import type { LozengeColor } from "./Lozenge";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 
 export function HskLozenge({
   hskLevel,

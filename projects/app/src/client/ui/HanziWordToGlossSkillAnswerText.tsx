@@ -1,6 +1,6 @@
 import type { HanziWordSkill } from "@/data/model";
 import { hanziWordFromSkill } from "@/data/skills";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import { Pylymark } from "./Pylymark";
 
 export const HanziWordToGlossSkillAnswerText = ({

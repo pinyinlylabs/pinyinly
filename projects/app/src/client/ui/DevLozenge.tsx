@@ -1,4 +1,4 @@
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 
 export const DevLozenge = () => {
   return (

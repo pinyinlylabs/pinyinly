@@ -7,7 +7,9 @@ import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Platform, ScrollView, Text, View } from "react-native";
+import { Platform, ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function LoginPage() {
   const auth = useAuth();

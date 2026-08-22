@@ -3,7 +3,8 @@ import type { PinyinSoundId } from "@/data/model";
 import { loadPylyPinyinChart, normalizePinyinUnit } from "@/data/pinyin";
 import { loadFinalToneFrequencies } from "@/dictionary";
 import { use } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 const TONE_IDS = [`1`, `2`, `3`, `4`, `5`] as const;
 

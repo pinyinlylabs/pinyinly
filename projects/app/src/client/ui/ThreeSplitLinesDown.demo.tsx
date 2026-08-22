@@ -1,7 +1,7 @@
 import { RectButton } from "@/client/ui/RectButton";
 import { ThreeSplitLinesDown } from "@/client/ui/ThreeSplitLinesDown";
 import { useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { ExampleStack } from "./demo/components";
 
 export default () => {

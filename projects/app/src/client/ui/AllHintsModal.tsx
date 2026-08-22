@@ -1,7 +1,9 @@
 import type { AssetId, HanziText, HanziWord } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
 import { useMemo, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { HanziHintOption } from "./HanziHintOption";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";

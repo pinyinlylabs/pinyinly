@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { HanziCharacter, MnemonicHanziComponent } from "@/data/model";
 import { HanziStrokesTile } from "./HanziStrokesTile";
 import { hanziSvgPathsQuery } from "@/client/query";
