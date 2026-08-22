@@ -546,6 +546,7 @@ export interface DictionaryCollectionEntry {
   freq?: number;
   gloss: string[];
   glossCount: number;
+  order?: number;
   pos?: PartOfSpeech;
   pinyin?: PinyinText[];
   hsk?: Hsk30Level;
@@ -887,6 +888,7 @@ function builtInDictionaryCollectionOptions(): CollectionConfig<
           freq: meaning.freq,
           gloss,
           glossCount: gloss.length,
+          order: meaning.order,
           pos: meaning.pos,
           pinyin,
           hsk: meaning.hsk,
@@ -1270,6 +1272,7 @@ export function makeDb(rizzle: Rizzle) {
         freq: row.freq,
         gloss: row.gloss,
         glossCount: row.glossCount,
+        order: row.order,
         pos: row.pos,
         pinyin: row.pinyin,
         hsk: row.hsk,
@@ -1297,6 +1300,7 @@ export function makeDb(rizzle: Rizzle) {
           freq: undefined,
           gloss: [row.gloss],
           glossCount: 1,
+          order: undefined,
           pos: undefined,
           pinyin,
           hsk: undefined,
