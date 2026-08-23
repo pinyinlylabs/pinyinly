@@ -1,4 +1,4 @@
-import type { HanziCharacter } from "@/data/model";
+import type { HanziCharacter, HanziWord } from "@/data/model";
 import { View } from "@/client/ui/View";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiAiExplanation } from "./WikiAiExplanation";
@@ -10,28 +10,23 @@ import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciati
 import { WikiHanziCharacterUsedInWords } from "./WikiHanziCharacterUsedInWords";
 import { WikiHanziRelatedMeanings } from "./WikiHanziRelatedMeanings";
 import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
-import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useDb } from "./hooks/useDb";
-import { WikiHanziCharacterMultipleMeaningsHeaderOverview } from "./WikiHanziCharacterMultipleMeaningsHeaderOverview";
+import { WikiHanziCharacterHeaderOverview } from "./WikiHanziCharacterHeaderOverview";
+import { WikiHanziCharacterChooseAMeaning } from "./WikiHanziCharacterChooseAMeaning";
+import { useState } from "react";
 
-export function WikiHanziBodyCharacter({ hanzi }: { hanzi: HanziCharacter }) {
-  const db = useDb();
-
-  const { data: dictionaryEntry } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.dictionaryCollection })
-        .where(({ entry }) => eq(entry.hanzi, hanzi))
-        .findOne(),
-    [db.dictionaryCollection, hanzi],
-  );
-
-  const hanziWord = dictionaryEntry?.hanziWord ?? null;
+export function WikiHanziBodyCharacterMultipleMeanings({ hanzi }: { hanzi: HanziCharacter }) {
+  const [hanziWord, setHanziWord] = useState<HanziWord | null>(null);
 
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-10 bg-bg py-7">
-        <WikiHanziCharacterMultipleMeaningsHeaderOverview hanzi={hanzi} />
+        <WikiHanziCharacterHeaderOverview hanzi={hanzi} />
+
+        <WikiHanziCharacterChooseAMeaning
+          hanzi={hanzi}
+          hanziWord={hanziWord}
+          onHanziWordChanged={setHanziWord}
+        />
 
         <WikiHanziCharacterMeaning hanzi={hanzi} hanziWord={hanziWord} />
 
