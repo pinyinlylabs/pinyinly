@@ -1,4 +1,4 @@
-import type { HanziCharacter } from "@/data/model";
+import type { HanziCharacter, HanziWord } from "@/data/model";
 import { View } from "@/client/ui/View";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiAiExplanation } from "./WikiAiExplanation";
@@ -12,18 +12,25 @@ import { WikiHanziRelatedMeanings } from "./WikiHanziRelatedMeanings";
 import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
 import { WikiHanziCharacterHeaderOverview } from "./WikiHanziCharacterHeaderOverview";
 import { WikiHanziCharacterChooseAMeaning } from "./WikiHanziCharacterChooseAMeaning";
+import { useState } from "react";
 
 export function WikiHanziBodyCharacter({ hanzi }: { hanzi: HanziCharacter }) {
+  const [hanziWord, setHanziWord] = useState<HanziWord | null>(null);
+
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-10 bg-bg py-7">
         <WikiHanziCharacterHeaderOverview hanzi={hanzi} />
 
-        <WikiHanziCharacterChooseAMeaning hanzi={hanzi} />
+        <WikiHanziCharacterChooseAMeaning
+          hanzi={hanzi}
+          hanziWord={hanziWord}
+          onHanziWordChanged={setHanziWord}
+        />
 
-        <WikiHanziCharacterMeaning hanzi={hanzi} />
+        <WikiHanziCharacterMeaning hanzi={hanzi} hanziWord={hanziWord} />
 
-        <WikiHanziCharacterPronunciation hanzi={hanzi} />
+        <WikiHanziCharacterPronunciation hanzi={hanzi} hanziWord={hanziWord} />
 
         <WikiHanziCharacterDecompositionComponents hanzi={hanzi} />
 

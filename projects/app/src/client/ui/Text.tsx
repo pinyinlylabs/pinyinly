@@ -7,31 +7,32 @@ import type { VariantProps } from "tailwind-variants";
 import { cn, tv } from "tailwind-variants";
 
 const textVariants = tv({
-  base: cn(
-    `text-base text-fg`,
-    Platform.select({
-      web: `select-text`,
-    }),
-  ),
+  base: cn(`web:select-text`),
   variants: {
     variant: {
       default: ``,
-      h1: cn(
-        `text-center text-4xl font-extrabold tracking-tight`,
-        Platform.select({ web: `scroll-m-20 text-balance` }),
-      ),
-      h2: cn(
-        `border-b border-fg pb-2 text-3xl font-semibold tracking-tight`,
-        Platform.select({ web: `scroll-m-20 first:mt-0` }),
-      ),
-      h3: cn(
-        `text-2xl font-semibold tracking-tight`,
-        Platform.select({ web: `scroll-m-20` }),
-      ),
-      h4: cn(
-        `text-xl font-semibold tracking-tight`,
-        Platform.select({ web: `scroll-m-20` }),
-      ),
+      h1: `
+        text-center text-4xl font-extrabold tracking-tight
+
+        web:scroll-m-20 web:text-balance
+      `,
+      h2: `
+        border-b border-fg pb-2 text-3xl font-semibold tracking-tight
+
+        web:scroll-m-20
+
+        web:first:mt-0
+      `,
+      h3: `
+        text-2xl font-semibold tracking-tight
+
+        web:scroll-m-20
+      `,
+      h4: `
+        text-xl font-semibold tracking-tight
+
+        web:scroll-m-20
+      `,
       p: `
         mt-3 leading-7
 
@@ -98,6 +99,24 @@ function Text({
       {...props}
     />
   );
+
+  // const inheritedClassNames =
+  //   className == null
+  //     ? ``
+  //     : className
+  //         .split(/\s+/gu)
+  //         .filter((x) => x.startsWith(`text-`))
+  //         .join(` `);
+
+  // return inheritedClassNames.length === 0 ? (
+  //   children
+  // ) : (
+  //   // If a classname is provided, we provide it to children via context so that
+  //   // nested Text components can inherit the className.
+  //   <TextClassContext.Provider value={cn(textClass, inheritedClassNames)}>
+  //     {children}
+  //   </TextClassContext.Provider>
+  // );
 }
 
 Text.ClassContext = TextClassContext;

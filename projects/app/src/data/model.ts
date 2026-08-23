@@ -1010,6 +1010,13 @@ export interface CharacterMnemonicIdsRow {
   ids: HanziIds;
 }
 
+export interface CharacterCollectionRow {
+  hanzi: HanziCharacter;
+  isStructural: boolean;
+  strokes: number;
+  componentFormOf: HanziCharacter | null;
+}
+
 export interface MnemonicHanziComponent {
   /**
    * Could be `null` if there's no unicode character to represent this component
@@ -1163,7 +1170,7 @@ export const characterJsonSchema = z.strictObject({
 
 export type CharacterJson = z.infer<typeof characterJsonSchema>;
 
-export const charactersSchema = z.array(
+export const charactersJsonSchema = z.array(
   z.tuple([
     hanziCharacterSchema,
     z.object({
@@ -1189,13 +1196,16 @@ export const charactersSchema = z.array(
         .describe(
           `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
         ),
+      strokes: z.number().describe(`the number of strokes in this hanzi`),
       canonicalForm: hanziCharacterSchema.optional(),
     }),
   ]),
 );
 
-export type CharactersKey = z.infer<typeof charactersSchema.element>[0];
-export type CharactersValue = z.infer<typeof charactersSchema.element>[1];
+export type CharactersJsonKey = z.infer<typeof charactersJsonSchema.element>[0];
+export type CharactersJsonValue = z.infer<
+  typeof charactersJsonSchema.element
+>[1];
 
 /**
  * Allowed image MIME types for uploads and AI generation.

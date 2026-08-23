@@ -61,8 +61,10 @@ import { toTitle } from "@/util/unicode";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
+  hanziWord,
 }: {
   hanzi: HanziCharacter;
+  hanziWord: HanziWord | null;
 }) {
   const db = useDb();
   const { data: meanings } = useLiveQuery(
@@ -99,10 +101,12 @@ export function WikiHanziCharacterPronunciation({
   }
 
   return (
-    <WikiHanziCharacterPronunciationBox
-      hanziWord={firstMeaning.hanziWord}
-      pinyinUnit={pronunciation.pinyinUnit}
-    />
+    <View className={hanziWord == null ? `opacity-50` : undefined}>
+      <WikiHanziCharacterPronunciationBox
+        hanziWord={firstMeaning.hanziWord}
+        pinyinUnit={pronunciation.pinyinUnit}
+      />
+    </View>
   );
 }
 

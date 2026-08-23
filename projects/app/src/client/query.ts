@@ -1,4 +1,5 @@
 import type {
+  CharacterCollectionRow,
   CharacterComponentUsageRow,
   CharacterDecompositionRow,
   CharacterMnemonicIdsRow,
@@ -28,7 +29,6 @@ import { userHanziMeaningDefs } from "@/data/userSettings";
 import {
   buildCharacterComponentUsageEntries,
   buildHanziWord,
-  getIsStructuralHanzi,
   hanziFromHanziWord,
   loadCharactersJson,
   loadBuiltinCharacterDecompositionEntries,
@@ -194,18 +194,6 @@ export const targetSkillsQuery = () =>
     retry: false,
     structuralSharing: false,
   });
-
-export const isStructuralHanziQuery = queryOptions({
-  queryKey: [`isStructuralHanzi`],
-  queryFn: async () => {
-    await devToolsSlowQuerySleepIfEnabled();
-
-    return getIsStructuralHanzi();
-  },
-  networkMode: `offlineFirst`,
-  retry: false,
-  structuralSharing: false,
-});
 
 export const dictionaryQuery = queryOptions({
   queryKey: [`dictionary`],
@@ -560,7 +548,6 @@ export interface DictionaryCollectionEntry {
   hskFirstAppearance?: Hsk30Level;
   note?: string;
   hanziCharacterCount: number;
-  isStructural?: boolean;
 }
 
 export type BuiltInDictionaryCollection = Collection<
@@ -832,18 +819,8 @@ function builtInDictionaryCollectionOptions(): CollectionConfig<
   return staticCollectionOptions<DictionaryCollectionEntry, string>({
     id: `builtInDictionary`,
     queryFn: async () => {
-      const [dictionary, charactersJson] = await Promise.all([
-        loadDictionary(),
-        loadCharactersJson(),
-      ]);
+      const dictionary = await loadDictionary();
       const entries: DictionaryCollectionEntry[] = [];
-      const structuralHanzi = new Set<HanziText>();
-
-      for (const [hanzi, data] of charactersJson) {
-        if (data.isStructural != null) {
-          structuralHanzi.add(hanzi);
-        }
-      }
 
       // Build a map of each character to the minimum HSK level it appears in
       // across all words (including multi-character words it's part of).
@@ -895,7 +872,6 @@ function builtInDictionaryCollectionOptions(): CollectionConfig<
           hskSortKey: dictionaryCollectionHskSortKey(meaning.hsk),
           hskFirstAppearance,
           hanziCharacterCount,
-          isStructural: hanziCharacterCount === 1 && structuralHanzi.has(hanzi),
         });
       }
 
@@ -951,6 +927,32 @@ function characterMnemonicIdsCollectionOptions(): CollectionConfig<
       return entries;
     },
     getKey: (item) => `${item.hanzi}:${item.ids}`,
+  });
+}
+
+function characterCollectionOptions(): CollectionConfig<
+  CharacterCollectionRow,
+  string
+> {
+  return staticCollectionOptions<CharacterCollectionRow, string>({
+    id: `characterCollection`,
+    queryFn: async () => {
+      const charactersJson = await loadCharactersJson();
+
+      const entries: CharacterCollectionRow[] = [];
+
+      for (const [hanzi, data] of charactersJson.entries()) {
+        entries.push({
+          hanzi,
+          isStructural: data.isStructural ?? false,
+          strokes: data.strokes,
+          componentFormOf: data.componentFormOf ?? null,
+        });
+      }
+
+      return entries;
+    },
+    getKey: (item) => `${item.hanzi}`,
   });
 }
 
@@ -1249,8 +1251,14 @@ export function makeDb(rizzle: Rizzle) {
 
   const characterDecompositionsCollection = createLiveQueryCollection((q) => {
     const builtinRows = q.from({ entry: builtinCharacterDecompositions });
+    // Leaving code structured to give affordance for user-defined
+    // decompositions in the future, but for now we only have built-in
+    // decompositions.
     return q.unionAll(builtinRows);
   });
+
+  const characterCollection = createCollection(characterCollectionOptions());
+  characterCollection.createIndex((row) => row.hanzi);
 
   const characterMnemonicIdsCollection = createCollection(
     characterMnemonicIdsCollectionOptions(),
@@ -1280,7 +1288,6 @@ export function makeDb(rizzle: Rizzle) {
         hskFirstAppearance: row.hskFirstAppearance,
         hanziCharacterCount: row.hanziCharacterCount,
         note: undefined as string | undefined,
-        isStructural: row.isStructural,
       }));
 
     const userRows = q
@@ -1409,11 +1416,12 @@ export function makeDb(rizzle: Rizzle) {
 
   return {
     builtinCharacterDecompositions,
-    builtInDictionaryCollection: builtInDictionaryCollection,
+    builtInDictionaryCollection,
     characterComponentUsage,
     characterDecompositionsCollection,
     characterMnemonicIdsCollection,
-    dictionaryCollection: dictionaryCollection,
+    characterCollection,
+    dictionaryCollection,
     settingCollection,
     settingHistoryCollection,
     userDictionary,

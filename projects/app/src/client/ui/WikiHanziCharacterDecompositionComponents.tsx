@@ -1,14 +1,11 @@
 import type { HanziCharacter, HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
-import { use, useState } from "react";
+import { useState } from "react";
 import { View } from "@/client/ui/View";
 import { HanziStrokesTile } from "./HanziStrokesTile";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
-import {
-  deepDecomposeHanziWithStrokeSpecs,
-  loadBuiltinCharacterDecompositionEntries,
-} from "@/dictionary";
+import { deepDecomposeHanziWithStrokeSpecs } from "@/dictionary";
 import { parseStrokeSpec } from "@/util/strokeSpec";
 
 const decompositionGridMinColumnWidth = 130;
@@ -25,8 +22,9 @@ export function WikiHanziCharacterDecompositionComponents({
     useState<number>(0);
   const db = useDb();
 
-  const characterDecompositionEntries = use(
-    loadBuiltinCharacterDecompositionEntries(),
+  const { data: characterDecompositionEntries } = useLiveQuery(
+    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
+    [db.characterDecompositionsCollection],
   );
 
   const decompositionItems = deepDecomposeHanziWithStrokeSpecs(

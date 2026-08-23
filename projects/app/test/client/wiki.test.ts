@@ -20,8 +20,8 @@ import {
   walkIdsNodeLeafs,
 } from "#data/hanzi.js";
 import type {
-  CharactersKey,
-  CharactersValue,
+  CharactersJsonKey,
+  CharactersJsonValue,
   HanziCharacter,
   HanziText,
   IdsNode,
@@ -628,7 +628,7 @@ describe(`character.json files`, async () => {
   });
 
   test(`consistency with characters.asset.json`, async () => {
-    const expected = new Map<CharactersKey, CharactersValue>();
+    const expected = new Map<CharactersJsonKey, CharactersJsonValue>();
 
     for (const { character, characterJson } of characterFiles) {
       expected.set(character, {
@@ -645,6 +645,9 @@ describe(`character.json files`, async () => {
         ...(characterJson.canonicalForm === undefined
           ? {}
           : { canonicalForm: characterJson.canonicalForm }),
+        strokes: Array.isArray(characterJson.svg.strokes)
+          ? characterJson.svg.strokes.length
+          : characterJson.svg.strokes,
       });
     }
 

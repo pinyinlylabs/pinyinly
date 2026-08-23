@@ -23,7 +23,7 @@ import type {
   HanziWordWithMeaning,
 } from "@/data/model";
 import {
-  charactersSchema,
+  charactersJsonSchema,
   dictionaryJsonSchema,
   hanziWordSchema,
   Hsk30Level,
@@ -135,7 +135,7 @@ export const loadFinalToneFrequencies = memoize0(
 );
 
 export const loadCharactersJson = memoize0(async function loadCharactersJson() {
-  return charactersSchema
+  return charactersJsonSchema
     .transform((x) => new Map(x))
     .transform(deepReadonly)
     .parse(

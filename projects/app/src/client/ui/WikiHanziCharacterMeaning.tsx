@@ -43,8 +43,10 @@ import { zipStrict } from "@pinyinly/lib/collections";
 
 export function WikiHanziCharacterMeaning({
   hanzi,
+  hanziWord,
 }: {
   hanzi: HanziCharacter;
+  hanziWord: HanziWord | null;
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const db = useDb();
@@ -153,6 +155,7 @@ export function WikiHanziCharacterMeaning({
           ? `Using the components of a character as cues helps build cognitive connections, so the meaning is easier to remember.`
           : undefined
       }
+      className={hanziWord == null ? `opacity-50` : undefined}
     >
       <View className="gap-4 p-4">
         {isEditMode ? <HanziDecompositionEditor hanzi={hanzi} /> : null}

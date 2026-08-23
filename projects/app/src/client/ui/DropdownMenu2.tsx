@@ -308,10 +308,13 @@ function DropdownMenuCheckboxItem({
             active:bg-accent
 
             sm:py-1.5
+
+            web:cursor-default web:outline-none
+
+            web:focus:bg-accent web:focus:text-accent-fg
+
+            web:data-[disabled]:pointer-events-none
           `,
-          Platform.select({
-            web: `focus:accent focus:text-accent-fg cursor-default outline-none data-[disabled]:pointer-events-none`,
-          }),
           props.disabled && `opacity-50`,
           className,
         )}
@@ -323,7 +326,7 @@ function DropdownMenuCheckboxItem({
               icon="check"
               tintColorClassName="accent-fg"
               size={16}
-              className={Platform.select({ web: `pointer-events-none` })}
+              className={`web:pointer-events-none`}
             />
           </DropdownMenuPrimitive.ItemIndicator>
         </View>
@@ -350,10 +353,13 @@ function DropdownMenuRadioItem({
             active:bg-accent
 
             sm:py-1.5
+
+            web:cursor-default web:outline-none
+
+            web:focus:bg-accent web:focus:text-accent-fg
+
+            web:data-[disabled]:pointer-events-none
           `,
-          Platform.select({
-            web: `focus:accent focus:text-accent-fg cursor-default outline-none data-[disabled]:pointer-events-none`,
-          }),
           props.disabled && `opacity-50`,
           className,
         )}

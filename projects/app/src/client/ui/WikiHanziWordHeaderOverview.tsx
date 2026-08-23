@@ -1,5 +1,4 @@
 import { intersperse } from "@/client/react";
-import { isStructuralHanziQuery } from "@/client/query";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { hsk30LevelToNumber } from "@/data/hsk";
@@ -10,16 +9,13 @@ import {
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { HskLozenge } from "./HskLozenge";
 import { RectButton } from "./RectButton";
-import { StructuralLozenge } from "./StructuralLozenge";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { useDb } from "./hooks/useDb";
-import { isHanziCharacter } from "@/data/hanzi";
 
 export function WikiHanziWordHeaderOverview({
   hanzi,
@@ -51,9 +47,6 @@ export function WikiHanziWordHeaderOverview({
   const glosses = dictionaryEntries
     .map((entry) => entry.gloss[0])
     .filter((x) => x != null);
-  const { data: isStructuralHanzi } = useQuery(isStructuralHanziQuery);
-  const isStructural =
-    isHanziCharacter(hanzi) && isStructuralHanzi?.(hanzi) === true;
 
   const { isPriority, toggle } = useBookmarkToggle(hanzi);
   const uniquePinyins = pinyins.filter(arrayFilterUnique());
@@ -65,7 +58,6 @@ export function WikiHanziWordHeaderOverview({
           {hskLevels.map((hskLevel) => (
             <HskLozenge hskLevel={hskLevel} key={hskLevel} />
           ))}
-          {isStructural ? <StructuralLozenge /> : null}
         </View>
         <RectButton
           variant="bare"

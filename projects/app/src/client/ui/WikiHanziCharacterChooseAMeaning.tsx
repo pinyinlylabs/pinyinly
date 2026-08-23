@@ -1,6 +1,5 @@
 import type { HanziCharacter, HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useState } from "react";
 import type { PropsWithChildren } from "react";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
@@ -10,8 +9,12 @@ import { tv } from "tailwind-variants";
 
 export function WikiHanziCharacterChooseAMeaning({
   hanzi,
+  hanziWord: selectedMeaning,
+  onHanziWordChanged,
 }: {
   hanzi: HanziCharacter;
+  hanziWord: HanziWord | null;
+  onHanziWordChanged: (hanziWord: HanziWord) => void;
 }) {
   const db = useDb();
 
@@ -30,12 +33,10 @@ export function WikiHanziCharacterChooseAMeaning({
     [db.dictionaryCollection, hanzi],
   );
 
-  const [selectedMeaning, setSelectedMeaning] = useState<HanziWord>();
-
   return (
     <View className="gap-2">
       <View>
-        <Text className="flex-1 font-sans text-sm/normal font-semibold text-muted-fg uppercase">
+        <Text className="flex-1 font-sans text-sm/normal font-bold text-fg uppercase">
           Choose a meaning
         </Text>
       </View>
@@ -45,7 +46,7 @@ export function WikiHanziCharacterChooseAMeaning({
             key={entry.hanziWord}
             pressed={selectedMeaning === entry.hanziWord}
             onPressedChanged={() => {
-              setSelectedMeaning(entry.hanziWord);
+              onHanziWordChanged(entry.hanziWord);
             }}
             className="flex-row items-center gap-2 px-3 py-2"
           >
