@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ViewProps } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { tv } from "tailwind-variants";
+import { cn } from "tailwind-variants";
 import { WikiEditButton } from "./WikiEditButton";
 import { RectButton } from "./RectButton";
 
@@ -44,7 +44,7 @@ export function WikiTitledBox({
     ));
 
   return (
-    <View className={containerClass({ className })} onLayout={onLayout}>
+    <View className={cn(`gap-2`, className)} onLayout={onLayout}>
       <View className="flex-row items-center">
         <Text className="flex-1 font-sans text-sm/normal font-semibold text-muted-fg uppercase">
           {title}
@@ -129,7 +129,3 @@ export function WikiTitledBox({
     </View>
   );
 }
-
-const containerClass = tv({
-  base: `gap-2`,
-});

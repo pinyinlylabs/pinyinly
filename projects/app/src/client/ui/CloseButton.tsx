@@ -1,4 +1,4 @@
-import { tv } from "tailwind-variants";
+import { cn } from "tailwind-variants";
 import { RectButton } from "./RectButton";
 
 export const CloseButton = ({
@@ -14,11 +14,7 @@ export const CloseButton = ({
       iconStart="close"
       iconSize={32}
       onPress={onPress}
-      className={buttonClass({ className })}
+      className={cn(`size-8 rounded-md p-0 text-fg-loud`, className)}
     />
   );
 };
-
-const buttonClass = tv({
-  base: `size-8 rounded-md p-0 text-fg-loud`,
-});

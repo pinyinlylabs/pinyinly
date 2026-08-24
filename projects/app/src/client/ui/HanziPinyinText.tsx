@@ -17,11 +17,7 @@ export function HanziPinyinText({
   const isSingleCharacter = hanzi.length === 1;
 
   return (
-    <View
-      className={[containerClass({ isSingleCharacter }), className]
-        .filter(Boolean)
-        .join(` `)}
-    >
+    <View className={containerClass({ isSingleCharacter, className })}>
       {isSingleCharacter ? (
         <>
           <Text className={hanziTextClass({ isSingleCharacter })}>{hanzi}</Text>

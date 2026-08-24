@@ -2,6 +2,7 @@ import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import type { ViewProps } from "react-native";
 import { View } from "@/client/ui/View";
 import { Rive } from "./Rive";
+import { cn } from "tailwind-variants";
 
 export const NewSprout = ({
   className,
@@ -12,11 +13,7 @@ export const NewSprout = ({
 
   return (
     <View
-      className={`
-        ${className ?? ``}
-
-        [--color-fg:var(--color-success)]
-      `}
+      className={cn(className, `[--color-fg:var(--color-success)]`)}
       style={style}
     >
       <Rive

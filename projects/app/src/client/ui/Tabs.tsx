@@ -5,7 +5,7 @@ import { createContext, use, useState } from "react";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { tv } from "tailwind-variants";
+import { cn, tv } from "tailwind-variants";
 
 interface TabsContextValue {
   value: string;
@@ -28,7 +28,9 @@ export interface TabsListProps {
 }
 
 function TabsList({ className, children }: TabsListProps) {
-  return <View className={tabsListClass({ className })}>{children}</View>;
+  return (
+    <View className={cn(`rounded-lg bg-fg/5 p-1`, className)}>{children}</View>
+  );
 }
 
 export interface TabsTriggerProps {
@@ -129,10 +131,6 @@ Tabs.Trigger = TabsTrigger;
 Tabs.Content = TabsContent;
 
 export { Tabs };
-
-const tabsListClass = tv({
-  base: `rounded-lg bg-fg/5 p-1`,
-});
 
 const triggerInnerClass = tv({
   base: `

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { createContext, use } from "react";
 import { View } from "@/client/ui/View";
-import { tv } from "tailwind-variants";
+import { cn } from "tailwind-variants";
 import type { ButtonVariant, RectButtonProps } from "./RectButton";
 import { RectButton } from "./RectButton";
 
@@ -34,7 +34,14 @@ function ButtonGroup({
 }: ButtonGroupProps) {
   return (
     <ButtonGroupContext.Provider value={{ defaultButtonVariant }}>
-      <View className={buttonGroupClass({ className })}>{children}</View>
+      <View
+        className={cn(
+          `shrink flex-row items-center rounded bg-bg/90 p-0.5`,
+          className,
+        )}
+      >
+        {children}
+      </View>
     </ButtonGroupContext.Provider>
   );
 }
@@ -57,7 +64,3 @@ function ButtonGroupButton({
 ButtonGroup.Button = ButtonGroupButton;
 
 export { ButtonGroup };
-
-const buttonGroupClass = tv({
-  base: `shrink flex-row items-center rounded bg-bg/90 p-0.5`,
-});

@@ -9,6 +9,7 @@ import { Platform } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import type { TextProps, ViewProps } from "react-native";
+import { cn } from "tailwind-variants";
 
 export type MdxComponentsType = Record<string, ComponentType>;
 
@@ -88,10 +89,7 @@ function makeMdx(
       <ElementType
         {...otherStaticProps}
         {...props}
-        className={`
-          ${className}
-          ${props.className ?? ``}
-        `}
+        className={cn(className, props.className)}
       />
     );
   }
