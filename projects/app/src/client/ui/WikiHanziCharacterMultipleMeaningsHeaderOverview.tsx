@@ -26,11 +26,6 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
     [db.dictionaryCollection, hanzi],
   );
 
-  const { data: decompositionEntries } = useLiveQuery(
-    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
-    [db.characterDecompositionsCollection],
-  );
-
   const { data: characterData } = useLiveQuery(
     (q) =>
       q
