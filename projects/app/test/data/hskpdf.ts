@@ -11,7 +11,7 @@ export const hskPdfFilePath = path.join(
   `新版HSK考试大纲（词汇、汉字、语法）.pdf`,
 );
 
-export interface HskPdfRow {
+export interface HskVocabPdfRow {
   index: string;
   level: string;
   word: string;
@@ -35,18 +35,18 @@ const rowYTolerance = 2;
 // lost when pdf.js split the line into separate text runs, e.g. "bú kèqi".
 const wordGapThreshold = 1;
 
-export async function extractHskPdfRows(options: {
+export async function extractHskVocabPdfRows(options: {
   pdfPath: string;
   startPage: number;
   endPage: number;
-}): Promise<HskPdfRow[]> {
+}): Promise<HskVocabPdfRow[]> {
   const { pdfPath, startPage, endPage } = options;
 
   const data = await readFile(pdfPath);
   const doc = await pdfjsLib.getDocument({ data: new Uint8Array(data) })
     .promise;
 
-  const rows: HskPdfRow[] = [];
+  const rows: HskVocabPdfRow[] = [];
 
   for (let pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
     const page = await doc.getPage(pageNumber);
@@ -66,13 +66,15 @@ export async function extractHskPdfRows(options: {
       ];
     });
 
-    rows.push(...extractRowsFromPageItems(items));
+    rows.push(...extractVocabRowsFromPageItems(items));
   }
 
   return rows;
 }
 
-function extractRowsFromPageItems(items: PositionedTextItem[]): HskPdfRow[] {
+function extractVocabRowsFromPageItems(
+  items: PositionedTextItem[],
+): HskVocabPdfRow[] {
   const rowGroups = groupItemsIntoRows(items);
 
   const headerRow = rowGroups.find((row) =>
@@ -90,7 +92,7 @@ function extractRowsFromPageItems(items: PositionedTextItem[]): HskPdfRow[] {
     }),
   );
 
-  const rows: HskPdfRow[] = [];
+  const rows: HskVocabPdfRow[] = [];
 
   for (const row of rowGroups) {
     if (row === headerRow) {
@@ -177,4 +179,81 @@ function joinColumnText(items: PositionedTextItem[]): string {
   }
 
   return result.replaceAll(/ {2,}/gu, ` `).trim();
+}
+
+// A single row can list multiple senses at once, e.g. a word introduced at
+// HSK 1 that's tested again at HSK 2 and HSK 4.
+export interface HskVocabSense {
+  level: string;
+  partOfSpeech: string[];
+}
+
+export function extractHskVocabSenses(row: HskVocabPdfRow): HskVocabSense[] {
+  const levels = parseHskVocabLevels(row.level);
+  const partOfSpeechGroups = parseHskVocabPartOfSpeechGroups(row.partOfSpeech);
+
+  return levels.map((level, i) => ({
+    level,
+    partOfSpeech: partOfSpeechGroups[i] ?? [],
+  }));
+}
+
+export interface HskVocabPdfEntry {
+  index: string;
+  word: string;
+  pinyin: string;
+  senses: HskVocabSense[];
+}
+
+export async function extractHskVocabPdfEntries(options: {
+  pdfPath: string;
+  startPage: number;
+  endPage: number;
+}): Promise<HskVocabPdfEntry[]> {
+  const rows = await extractHskVocabPdfRows(options);
+
+  return rows.map((row) => ({
+    index: row.index,
+    word: row.word,
+    pinyin: row.pinyin,
+    senses: extractHskVocabSenses(row),
+  }));
+}
+
+// e.g. "1（2）（4）" -> ["1", "2", "4"]
+function parseHskVocabLevels(level: string): string[] {
+  const primaryMatch = /^(\d+)/u.exec(level);
+  invariant(primaryMatch != null, `couldn't parse level from "${level}"`);
+
+  const levels = [primaryMatch[1]!];
+  for (const match of level.matchAll(/（(\d+)）/gu)) {
+    levels.push(match[1]!);
+  }
+
+  return levels;
+}
+
+// e.g. "形、动、代、（数、副）" -> [["形", "动", "代"], ["数", "副"]]
+function parseHskVocabPartOfSpeechGroups(partOfSpeech: string): string[][] {
+  const groups: string[][] = [];
+  const primaryGroup: string[] = [];
+
+  for (const match of partOfSpeech.matchAll(/（([^）]*)）|([^（）]+)/gu)) {
+    if (match[1] != null) {
+      const values = match[1].split(`、`).filter((value) => value !== ``);
+      if (values.length > 0) {
+        groups.push(values);
+      }
+    } else if (match[2] != null) {
+      primaryGroup.push(
+        ...match[2].split(`、`).filter((value) => value !== ``),
+      );
+    }
+  }
+
+  if (primaryGroup.length > 0) {
+    groups.unshift(primaryGroup);
+  }
+
+  return groups;
 }
