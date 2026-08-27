@@ -121,6 +121,10 @@ import {
 } from "./data/cedict.ts";
 import { loadCompleteHskVocabulary } from "./data/completeHskVocabulary.ts";
 import { buildHanziWordsToCheck, 拼音, 汉, 汉字 } from "./data/helpers.ts";
+import { buildCharacterCoreMeaningsSpecPrompt } from "#util/prompts/characterCoreMeanings.js";
+import { requestOpenAiResponseJson } from "#server/lib/ai.js";
+import ms from "ms";
+import { buildCharacterCoreMeaningsUsages } from "./util/prompts/helpers.ts";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -326,16 +330,6 @@ test(`hanzi word meaning pinyin lint`, async () => {
     `);
 });
 
-test(`how many HSK1 characters`, async () => {
-  const dict = await loadDictionary();
-
-  expect(
-    dict.hsk3HanziWords
-      .map((x) => hanziFromHanziWord(x))
-      .filter(isHanziCharacter).length,
-  ).toMatchInlineSnapshot(`165`);
-});
-
 test.skip(`testing prompt`, async () => {
   const completeHskVocabulary = await loadCompleteHskVocabulary();
 
@@ -343,7 +337,6 @@ test.skip(`testing prompt`, async () => {
   for (const vendorItem of completeHskVocabulary) {
     if (vendorItem.simplified.includes(`行`)) {
       for (const form of vendorItem.forms) {
-        // result.push(`${vendorItem.simplified} (${form.transcriptions.pinyin})`);
         result.push({
           hanzi: vendorItem.simplified,
           pinyin: form.transcriptions.pinyin,
@@ -2410,7 +2403,65 @@ describe(`character.json files`, async () => {
     );
   });
 
-  test(`consistency with characters.asset.json`, async () => {
+  test.skip(
+    `upsert .curriculumMeanings (filtered)`,
+    { timeout: ms(`10m`) },
+    async ({ signal }) => {
+      const completeHskVocabulary = await loadCompleteHskVocabulary();
+      const cedictDictionary = await loadCedictDictionary();
+      const input = `上`;
+
+      const subset = new Set(input.split(/\s+/u));
+
+      for (const { character, characterJson, filePath } of characterFiles) {
+        if (!subset.has(character)) {
+          continue;
+        }
+
+        subset.delete(character);
+
+        if (characterJson.curriculumMeanings != null) {
+          continue;
+        }
+
+        const usages = buildCharacterCoreMeaningsUsages(
+          character,
+          cedictDictionary,
+          completeHskVocabulary,
+        );
+        // console.log(`usages for ${character}:`, usages);
+        // return;
+
+        const prompt = buildCharacterCoreMeaningsSpecPrompt({
+          character: character,
+          usages,
+        });
+
+        // console.log(`prompt=`, prompt);
+
+        const response = await requestOpenAiResponseJson(prompt, {
+          signal,
+          // Use cheaper service tier for evals to save money.
+          serviceTier: `flex`,
+        });
+
+        // console.log(`response.data=`, response.data);
+        // console.log(`response.output=`, JSON.stringify(response.output));
+
+        await expect({
+          ...characterJson,
+          curriculumMeanings: response.data,
+        }).toMatchJsonFileSnapshot(filePath);
+      }
+
+      expect(
+        subset,
+        `all subset characters should have been processed`,
+      ).toEqual(new Set());
+    },
+  );
+
+  test(`build characters.asset.json`, async () => {
     const expected = new Map<CharactersJsonKey, CharactersJsonValue>();
 
     for (const { character, characterJson } of characterFiles) {

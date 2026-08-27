@@ -71,3 +71,5 @@ describe(`assertOpenAiCompatibleJsonSchema`, () => {
     }).toThrow(/"additionalProperties"/u);
   });
 });
+
+describe(`buildCharacterCoreMeaningsUsages`, () => {});

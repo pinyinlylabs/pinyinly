@@ -13,7 +13,7 @@ import type {
 } from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 import isEqual from "lodash/isEqual";
@@ -60,19 +60,23 @@ export function buildCharacterCoreMeaningsSpecPrompt(
   const systemTemplate = `
 # Task
 
-Infer the semantic ontology of a Chinese character from the supplied vocabulary.
+Infer the semantic curriculum for a Chinese character from the supplied vocabulary.
 
 The goal is **not** to reproduce dictionary senses.
 
-Instead, discover the smallest set of stable **Core Meanings** that naturally explains how the character contributes meaning across the supplied words.
+Instead, organize the vocabulary into the smallest set of memorable concepts that will help a student understand how the character contributes meaning across many words.
 
-Think like a linguist discovering the semantic structure of the character, not like a dictionary writer.
+Think like a **curriculum designer**, not a dictionary editor.
 
 ## Principles
 
 - Prefer the smallest set of Core Meanings that naturally explains the supplied vocabulary.
-- A Branch should represent a genuine semantic development of its parent Core Meaning.
-- Do not create separate Core Meanings when a Branch is sufficient.
+- A Core Meaning should represent a stable semantic idea that can be reused across many words.
+- A Branch should represent a **teaching category**, not a dictionary sense.
+- Prefer broad, memorable conceptual groupings over fine-grained lexical distinctions.
+- Group words by the idea that best helps a student understand them, even if a dictionary would distinguish them more precisely.
+- If a Branch would contain only one or two narrowly related words, consider whether it should instead be merged into a broader teaching category.
+- Do not create unnecessary semantic distinctions merely because they exist in dictionaries.
 - Do not merge genuinely unrelated meanings merely to reduce the number of Core Meanings.
 - Every supplied occurrence must appear exactly once.
 - Do not invent vocabulary that was not supplied.
@@ -91,11 +95,11 @@ Each Core Meaning contains:
 
 ### lemma
 
-"lemma" is an English dictionary headword.
+"lemma" is a short English semantic anchor.
 
-Its purpose is to provide a stable semantic anchor for this Core Meaning.
+Its purpose is to give students a memorable central idea.
 
-Prefer a single common English lemma whenever possible.
+Prefer a single common English word.
 
 Use lowercase unless the word is a proper noun.
 
@@ -104,34 +108,41 @@ Examples of formatting:
 - "go"
 - "line"
 - "flower"
-- "spend"
 - "wood"
+- "hand"
 
 Avoid title case:
 
 - "Go"
-- "Line"
 - "Flower"
 
 Do not optimize for dictionary precision.
 
-Choose the English word that best captures the central semantic idea.
+Choose the simplest English word that best captures the central semantic idea.
 
 ### pronunciationExceptions
 
-Include the original item from the supplied word list.
+Include the original written item exactly as supplied in the input.
 
 ### description
 
-Briefly explain the semantic idea and how the major Branches naturally develop from it.
+Briefly describe the semantic scope of the Core Meaning and the major kinds of meanings it includes.
 
-Focus on the semantic network.
+Focus on the conceptual network rather than dictionary definitions.
 
 Do not define the English lemma.
 
 Do not refer to "this Core Meaning".
 
 Keep it concise.
+
+Bad example:
+
+- "Movement extends to travel, operation, circulation, and conduct."
+
+Good example:
+
+- "Physical movement, travel, operation, circulation, feasibility, and conduct."
 
 ## Branch
 
@@ -143,19 +154,32 @@ Each Branch contains:
 
 ### lemma
 
-Like Core Meanings, this is an English dictionary headword.
+Like Core Meanings, this is a short English semantic anchor.
 
-Prefer a single common English lemma whenever possible.
+Prefer a single common English word whenever possible.
 
-Use lowercase unless the word is a proper noun.
+Choose a **teaching concept**, not the most precise dictionary term.
+
+Good examples:
+
+- "travel"
+- "growth"
+- "energy"
+- "trade"
+- "shape"
+- "approval"
+
+Avoid unnecessarily specific labels when a broader concept would teach the character better.
 
 ### description
 
-Explain how this Branch develops from the parent Core Meaning.
+Describe the semantic scope of this Branch.
+
+Describe the conceptual connection.
 
 Do not simply restate the lemma.
 
-Do not refer to the Branch itself.
+Do not refer to "this Branch".
 
 Keep it concise.
 
@@ -179,6 +203,29 @@ Example:
     "旅行",
     "飞行"
   ]
+
+## Example of the desired level of abstraction
+
+Prefer conceptual teaching categories:
+
+Good:
+
+go
+- travel
+  - 步行
+  - 飞行
+  - 航行
+  - 行驶
+
+Avoid splitting into unnecessarily fine-grained categories:
+
+go
+- walk
+- fly
+- sail
+- drive
+
+The purpose is to help students understand how the character's meaning expands, not to classify every lexical nuance.
 
 ---
 
@@ -260,19 +307,38 @@ Example:
                   );
                   const index = chars.indexOf(input.character);
                   invariant(index > -1);
-                  const usage = input.usages.find(
-                    (usage) =>
-                      usage.hanzi === occurrence &&
-                      matchAllPinyinUnits(usage.pinyin)[index] ===
-                        coreMeaning.primaryReading,
+                  const usageByHanzi = input.usages.filter(
+                    (usage) => usage.hanzi === occurrence,
                   );
+                  let pinyin;
                   invariant(
-                    usage != null,
-                    `Occurrence %s not found in supplied usages (pinyin=%s)`,
+                    usageByHanzi.length > 0,
+                    `Occurrence %s not found in supplied usages`,
                     occurrence,
-                    coreMeaning.primaryReading,
                   );
-                  return [usage.hanzi, usage.pinyin];
+                  if (usageByHanzi.length === 1) {
+                    pinyin = nonNullable(usageByHanzi[0]).pinyin;
+                  } else {
+                    const exactPinyinMatch = usageByHanzi.find(
+                      (usage) =>
+                        matchAllPinyinUnits(usage.pinyin)[index] ===
+                        coreMeaning.primaryReading,
+                    );
+                    if (exactPinyinMatch == null) {
+                      const pinyinOptions = usageByHanzi.map(
+                        (usage) => usage.pinyin,
+                      );
+                      throw new Error(
+                        `Occurrence ${occurrence} has multiple supplied pinyin options (${pinyinOptions.join(
+                          `, `,
+                        )}), but none of them match the core meaning's primary reading (${coreMeaning.primaryReading}) at index ${index}`,
+                      );
+                    } else {
+                      pinyin = exactPinyinMatch.pinyin;
+                    }
+                  }
+
+                  return [occurrence, pinyin];
                 }),
               ),
             };
