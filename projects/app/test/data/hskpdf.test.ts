@@ -1,11 +1,14 @@
 // pyly-not-src-test
 
+import { normalizePinyinText } from "#data/pinyin.ts";
 import { describe, expect, test } from "vitest";
+import { loadCedictDictionary } from "./cedict";
 import {
   extractHskVocabPdfEntries,
   extractHskVocabPdfRows,
   extractHskVocabSenses,
   hskPdfFilePath,
+  loadHskVocabJson,
 } from "./hskpdf";
 
 describe(`extractHskVocabPdfRows suite`, () => {
@@ -223,6 +226,15 @@ describe(`extractHskVocabPdfEntries suite`, () => {
         { level: `4`, partOfSpeech: [`动`] },
       ],
     });
+
+    // The word column's trailing disambiguation digit must be split out.
+    expect(byIndex.get(`10`)).toEqual({
+      index: `10`,
+      word: `本`,
+      disambiguator: 1,
+      pinyin: `běn`,
+      senses: [{ level: `1`, partOfSpeech: [`量`] }],
+    });
   });
 
   test(`save to snapshot`, async () => {
@@ -233,5 +245,31 @@ describe(`extractHskVocabPdfEntries suite`, () => {
         endPage: 5,
       }),
     ).resolves.toMatchJsonFileSnapshot(`hskpdf-vocab-entries-page-4-5.json`);
+
+    await expect(
+      extractHskVocabPdfEntries({
+        pdfPath: hskPdfFilePath,
+        startPage: 4,
+        endPage: 278,
+      }),
+    ).resolves.toMatchJsonFileSnapshot(`hskpdf-vocab.json`);
   });
+});
+
+test.skip(`all entries are in CEDICT`, async () => {
+  const entries = await loadHskVocabJson();
+  const cedict = await loadCedictDictionary();
+
+  for (const entry of entries) {
+    const candidates = cedict.lookupHanzi(entry.word);
+    // CEDICT doesn't have part-of-speech data, so senses can't be checked
+    // individually, only that the hanzi+pinyin combination exists at all.
+    const found = candidates.some(
+      (candidate) => normalizePinyinText(candidate.pinyin) === entry.pinyin,
+    );
+
+    expect
+      .soft(found, `${entry.word} (${entry.pinyin}) not found in CEDICT`)
+      .toBe(true);
+  }
 });

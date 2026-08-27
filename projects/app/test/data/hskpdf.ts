@@ -1,10 +1,13 @@
+import { hanziTextSchema, pinyinTextSchema } from "#data/model.ts";
 import { readFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
+import { memoize0 } from "@pinyinly/lib/collections";
 import path from "node:path";
 // The default `pdfjs-dist` build targets browsers (e.g. it needs `DOMMatrix`);
 // the legacy build works in Node.
 // oxlint-disable-next-line no-restricted-imports
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { z } from "zod";
 
 export const hskPdfFilePath = path.join(
   import.meta.dirname,
@@ -201,6 +204,9 @@ export function extractHskVocabSenses(row: HskVocabPdfRow): HskVocabSense[] {
 export interface HskVocabPdfEntry {
   index: string;
   word: string;
+  // The word column sometimes has a trailing digit (e.g. "作为2") used to
+  // disambiguate multiple vocab entries that share the same written word.
+  disambiguator: number | undefined;
   pinyin: string;
   senses: HskVocabSense[];
 }
@@ -212,12 +218,27 @@ export async function extractHskVocabPdfEntries(options: {
 }): Promise<HskVocabPdfEntry[]> {
   const rows = await extractHskVocabPdfRows(options);
 
-  return rows.map((row) => ({
-    index: row.index,
-    word: row.word,
-    pinyin: row.pinyin,
-    senses: extractHskVocabSenses(row),
-  }));
+  return rows.map((row) => {
+    const { word, disambiguator } = parseHskVocabWord(row.word);
+    return {
+      index: row.index,
+      word,
+      disambiguator,
+      pinyin: row.pinyin,
+      senses: extractHskVocabSenses(row),
+    };
+  });
+}
+
+// e.g. "作为2" -> { word: "作为", disambiguator: 2 }
+function parseHskVocabWord(word: string): {
+  word: string;
+  disambiguator: number | undefined;
+} {
+  const match = /^(.+?)(\d+)$/u.exec(word);
+  return match == null
+    ? { word, disambiguator: undefined }
+    : { word: match[1]!, disambiguator: Number(match[2]!) };
 }
 
 // e.g. "1（2）（4）" -> ["1", "2", "4"]
@@ -257,3 +278,32 @@ function parseHskVocabPartOfSpeechGroups(partOfSpeech: string): string[][] {
 
   return groups;
 }
+
+// The full extracted vocabulary list, generated via `extractHskVocabPdfEntries`
+// and saved by a snapshot test.
+export const hskVocabJsonFilePath = path.join(
+  import.meta.dirname,
+  `hskpdf-vocab.json`,
+);
+
+const hskVocabJsonSenseSchema = z.object({
+  level: z.string(),
+  partOfSpeech: z.array(z.string()),
+});
+
+const hskVocabJsonEntrySchema = z.object({
+  index: z.string(),
+  word: hanziTextSchema,
+  disambiguator: z.number().optional(),
+  pinyin: pinyinTextSchema,
+  senses: z.array(hskVocabJsonSenseSchema),
+});
+
+export type HskVocabJsonEntry = z.infer<typeof hskVocabJsonEntrySchema>;
+
+export const loadHskVocabJson = memoize0(
+  async (): Promise<HskVocabJsonEntry[]> => {
+    const text = await readFile(hskVocabJsonFilePath, `utf8`);
+    return z.array(hskVocabJsonEntrySchema).parse(JSON.parse(text));
+  },
+);

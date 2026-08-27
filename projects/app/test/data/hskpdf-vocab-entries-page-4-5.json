@@ -8,7 +8,7 @@
   {"index":"7","pinyin":"bàn","senses":[{"level":"1","partOfSpeech":["数"]},{"level":"4","partOfSpeech":["副"]}],"word":"半"},
   {"index":"8","pinyin":"bāozi","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"包子"},
   {"index":"9","pinyin":"bēizi","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"杯子"},
-  {"index":"10","pinyin":"běn","senses":[{"level":"1","partOfSpeech":["量"]}],"word":"本1"},
+  {"disambiguator":1,"index":"10","pinyin":"běn","senses":[{"level":"1","partOfSpeech":["量"]}],"word":"本"},
   {"index":"11","pinyin":"biān","senses":[{"level":"1","partOfSpeech":["名","后缀"]}],"word":"边"},
   {"index":"12","pinyin":"bìng","senses":[{"level":"1","partOfSpeech":["名","动"]}],"word":"病"},
   {"index":"13","pinyin":"bù","senses":[{"level":"1","partOfSpeech":["副"]}],"word":"不"},
@@ -31,7 +31,7 @@
   {"index":"30","pinyin":"de","senses":[{"level":"1","partOfSpeech":["助"]}],"word":"的"},
   {"index":"31","pinyin":"dì","senses":[{"level":"1","partOfSpeech":["前缀"]}],"word":"第"},
   {"index":"32","pinyin":"dìdi","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"弟弟"},
-  {"index":"33","pinyin":"diǎn","senses":[{"level":"1","partOfSpeech":["量"]},{"level":"3","partOfSpeech":["名"]}],"word":"点1"},
+  {"disambiguator":1,"index":"33","pinyin":"diǎn","senses":[{"level":"1","partOfSpeech":["量"]},{"level":"3","partOfSpeech":["名"]}],"word":"点"},
   {"index":"34","pinyin":"diàn","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"店"},
   {"index":"35","pinyin":"diànhuà","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"电话"},
   {"index":"36","pinyin":"diànnǎo","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"电脑"},
@@ -76,7 +76,7 @@
   {"index":"75","pinyin":"hǎowánr","senses":[{"level":"1","partOfSpeech":["形"]}],"word":"好玩儿"},
   {"index":"76","pinyin":"hào","senses":[{"level":"1","partOfSpeech":["名","量"]}],"word":"号"},
   {"index":"77","pinyin":"hē","senses":[{"level":"1","partOfSpeech":["动"]}],"word":"喝"},
-  {"index":"78","pinyin":"hé","senses":[{"level":"1","partOfSpeech":["介","连"]}],"word":"和1"},
+  {"disambiguator":1,"index":"78","pinyin":"hé","senses":[{"level":"1","partOfSpeech":["介","连"]}],"word":"和"},
   {"index":"79","pinyin":"hěn","senses":[{"level":"1","partOfSpeech":["副"]}],"word":"很"},
   {"index":"80","pinyin":"hòu","senses":[{"level":"1","partOfSpeech":["名"]}],"word":"后"}
 ]
