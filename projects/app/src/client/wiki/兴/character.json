@@ -19,5 +19,58 @@
     ]
   },
   "decompositions": { "⿳𭕄一八": ["0-2", "3", "4,5"] },
-  "mnemonic": { "decomposition": "⿳𭕄一八" }
+  "mnemonic": { "decomposition": "⿳𭕄一八" },
+  "curriculumMeanings": [
+    {
+      "id": "兴:rise",
+      "gloss": "rise",
+      "pinyin": "xīng",
+      "description": "Rising, renewal, growth, flourishing, building, and stirred-up energy.",
+      "branches": [
+        {
+          "gloss": "revival",
+          "description": "Restoring strength or bringing something back into a thriving state.",
+          "occurrences": { "复兴": "fùxīng", "振兴": "zhènxīng" }
+        },
+        {
+          "gloss": "growth",
+          "description": "Coming into being, developing upward, or being established.",
+          "occurrences": { "新兴": "xīnxīng", "兴起": "xīngqǐ", "兴建": "xīngjiàn" }
+        },
+        {
+          "gloss": "prosperity",
+          "description": "Flourishing in strength, business, or overall vitality.",
+          "occurrences": { "兴隆": "xīnglóng", "兴旺": "xīngwàng" }
+        },
+        {
+          "gloss": "excitement",
+          "description": "Energy or stimulation that rouses the body or mind.",
+          "occurrences": { "兴奋": "xīngfèn", "兴奋剂": "xīngfènjì" }
+        }
+      ]
+    },
+    {
+      "id": "兴:interest",
+      "gloss": "interest",
+      "pinyin": "xìng",
+      "description": "Personal engagement, enthusiasm, emotional mood, pleasure, and disappointment.",
+      "branches": [
+        {
+          "gloss": "engagement",
+          "description": "Being drawn to something with curiosity, attention, or eager enthusiasm.",
+          "occurrences": {
+            "感兴趣": "gǎnxìngqù",
+            "兴趣": "xìngqù",
+            "兴致": "xìngzhì",
+            "兴致勃勃": "xìngzhìbóbó"
+          }
+        },
+        {
+          "gloss": "mood",
+          "description": "A positive, elevated feeling or the loss of that feeling.",
+          "occurrences": { "高兴": "gāoxìng", "扫兴": "sǎoxìng", "兴高采烈": "xìnggāocǎiliè" }
+        }
+      ]
+    }
+  ]
 }
