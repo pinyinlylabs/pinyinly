@@ -52,7 +52,7 @@
     "@types/pg@npm:*": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
     "@expo/cli@npm:0.22.23": "patch:@expo/cli@npm%3A0.22.23#~/.yarn/patches/@expo-cli-npm-0.22.23-e1b846adca.patch",
     "babel-preset-expo@npm:~12.0.10": "patch:babel-preset-expo@npm%3A12.0.10#~/.yarn/patches/babel-preset-expo-npm-12.0.10-a31546c93f.patch",
-    "react-reconciler@npm:^0.29.0": "^0.32.0",
+    "react-reconciler@npm:^0.29.0": "^0.33.0",
     "babel-preset-expo@npm:~13.1.11": "patch:babel-preset-expo@npm%3A13.1.11#~/.yarn/patches/babel-preset-expo-npm-13.1.11-662de9d30d.patch",
     "@expo/cli@npm:0.24.13": "patch:@expo/cli@npm%3A0.24.13#~/.yarn/patches/@expo-cli-npm-0.24.13-fb70ee0167.patch",
     "@expo/cli@npm:0.24.18": "patch:@expo/cli@npm%3A0.24.18#~/.yarn/patches/@expo-cli-npm-0.24.18-cea2515949.patch",
