@@ -1583,10 +1583,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electric-sql/pglite@npm:^0.4.5":
-  version: 0.4.5
-  resolution: "@electric-sql/pglite@npm:0.4.5"
-  checksum: 10c0/f1877f7f59fc27e4af9576f6c847a9c6ea4dd095d86e09142ca0a6fa99fcd32ec84d23172e3ef784533b51c5ff94bf0388814e5623bf47e4e9ec880468a30fc7
+"@electric-sql/pglite@npm:^0.5.0":
+  version: 0.5.8
+  resolution: "@electric-sql/pglite@npm:0.5.8"
+  checksum: 10c0/02af377bb73428c1fb4559683dac0a4236d62320d5cda62ad4fc45d662a74fb011f767a161cb52b9160df734066376fc80f0d1506c2bbe9506490753fa12b532
   languageName: node
   linkType: hard
 
@@ -6161,7 +6161,7 @@ __metadata:
     "@aws-sdk/s3-request-presigner": "npm:3.1044.0"
     "@aws-sdk/util-endpoints": "npm:3.996.8"
     "@babel/core": "npm:^7.20.0"
-    "@electric-sql/pglite": "npm:^0.4.5"
+    "@electric-sql/pglite": "npm:^0.5.0"
     "@expo/html-elements": "patch:@expo/html-elements@npm%3A0.13.8#~/.yarn/patches/@expo-html-elements-npm-0.13.8-bd9c25d778.patch"
     "@expo/metro-config": "npm:~57.0.3"
     "@expo/metro-runtime": "npm:~57.0.3"

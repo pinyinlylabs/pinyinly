@@ -137,7 +137,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@electric-sql/pglite": "^0.4.5",
+    "@electric-sql/pglite": "^0.5.0",
     "@expo/metro-config": "~57.0.3",
     "@inkjs/ui": "^2.0.0",
     "@inngest/test": "^1.0.0",
