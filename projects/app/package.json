@@ -142,7 +142,7 @@
     "@inkjs/ui": "^2.0.0",
     "@inngest/test": "^1.0.0",
     "@pinyinly/oxlint-rules": "workspace:*",
-    "@react-native/metro-config": "0.86.0",
+    "@react-native/metro-config": "0.87.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@tailwindcss/postcss": "^4.1.12",
     "@tailwindcss/vite": "^4.3.3",
