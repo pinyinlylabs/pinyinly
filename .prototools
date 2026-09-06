@@ -1,5 +1,5 @@
 jq = "1.8.2" # renovate: datasource=github-releases depName=jqlang/jq extractVersion=^jq-(?<version>.*)$
-moon = "1.41.8" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
+moon = "2.5.4" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
 pnpm = "9.15.9" # Keep in sync with projects/app/api/package.json#packageManager otherwise `vercel build` fails
 
 [plugins]
