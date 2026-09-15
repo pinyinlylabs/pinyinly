@@ -9649,6 +9649,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db-ivm@npm:0.1.22":
+  version: 0.1.22
+  resolution: "@tanstack/db-ivm@npm:0.1.22"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/ae434c5e8a6d0fe83addd0f149db8409c0b9cbd0eb292b32fc823b6a2b43a56a69ebae4ad6839bba6952c142907499a14cd9f10f8f0f7d9774821d3808becbae
+  languageName: node
+  linkType: hard
+
 "@tanstack/db@npm:0.6.17, @tanstack/db@npm:^0.6.17":
   version: 0.6.17
   resolution: "@tanstack/db@npm:0.6.17"
@@ -9659,6 +9671,19 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/04fe3815c9280b55c0b1138371305483b6166dd5e119f735103c5bcb829c59c28107aa0df50996cdabb9f790c9b472dafface37e8102a5d4a77cdbce2c9a4394
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.9.2":
+  version: 0.9.2
+  resolution: "@tanstack/db@npm:0.9.2"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.22"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/fe603c626292898734a0f39dd5b070e622bc95bbfa8256caf84cd19a554f53b34ca96a3e6eb27fb2b91d601db2fc5a99a31377928c2985899997a1df77768105
   languageName: node
   linkType: hard
 
@@ -9692,15 +9717,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@tanstack/query-db-collection@npm:1.2.1"
+  version: 1.2.15
+  resolution: "@tanstack/query-db-collection@npm:1.2.15"
   dependencies:
     "@standard-schema/spec": "npm:^1.1.0"
-    "@tanstack/db": "npm:0.6.17"
+    "@tanstack/db": "npm:0.9.2"
   peerDependencies:
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/4483e8fcf47ce90eff4c203a97536486311ea2afa0a8ad498f1297b0c91c5ff2bf64882e650df6a2aed16393bddefb16b58c2b75f76bcf6dcd5305920e97123a
+  checksum: 10c0/c5a3e3892b91105f9c4afc3ebca0e59fa62c9398e5ae0892cc726a3930f9a8bbef3d1491c50983f36a9e07958147bd6931e933388355ef339f691ea8000c9b17
   languageName: node
   linkType: hard
 
