@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: vitest
+
 tasks:
   test:
     command: vitest
@@ -11,4 +14,4 @@ tasks:
       - "/yarn.lock" # Dependencies can change behaviour
     env:
       NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
+    toolchains: "node"

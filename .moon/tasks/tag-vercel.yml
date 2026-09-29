@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: vercel
+
 tasks:
   testMoon1.36.2Regression:
     # See https://discord.com/channels/974160221452763146/974160221452763149/1377543280220438589
@@ -23,4 +26,4 @@ tasks:
       - $PYLY_VERCEL_PROD # Use to turn on "production" mode.
     options:
       runInCI: false
-    platform: node
+    toolchains: "node"

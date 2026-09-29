@@ -50,6 +50,14 @@ If you need to run services individually:
 
 # Guides
 
+## Updating CEDICT test data
+
+1. Download the ZIP archive from the [CC-CEDICT download page](https://cc-cedict.org/editor/editor.php?handler=Download)
+  using its [direct download link](https://cc-cedict.org/editor/editor_export_cedict.php?c=zip&v=2).
+1. Extract the ZIP archive.
+1. Copy the extracted `cedict_ts.u8` file to `projects/app/test/data/cedict_ts-2.u8`, replacing
+  the existing file.
+
 ## Writing a backend database migration
 
 1. Edit the Drizzle schema.
@@ -98,8 +106,8 @@ This will update `package.json/dependencies`, `tsconfig.json/references`,
 
 ## Upgrading Yarn
 
-Inside `toolchain.yml` edit `node.yarn.version` and update the version. Run `moon sync projects` to
-apply the change.
+Inside `toolchain.yml` edit `yarn.version` and update the version. Run `moon sync projects` to apply
+the change.
 
 ## Upgrading Moon
 

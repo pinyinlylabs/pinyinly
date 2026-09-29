@@ -75,6 +75,17 @@ export async function extractHskVocabPdfRows(options: {
   return rows;
 }
 
+// A few glyphs in the source PDF have no ToUnicode mapping for a specific
+// font, so pdf.js extracts an empty string for them even though the
+// character is visible in the PDF (verified by index against the PDF text).
+// Keyed by `${index}:${pinyin}` so a future HSK revision reusing the same
+// index for a different word can't silently pick up a stale fix.
+const knownWordExtractionFixes: Record<string, string> = {
+  "4134:hǎoróngyì": `好容易`,
+  "6616:féng": `缝`,
+  "8180:méng": `蒙`,
+};
+
 function extractVocabRowsFromPageItems(
   items: PositionedTextItem[],
 ): HskVocabPdfRow[] {
@@ -108,11 +119,24 @@ function extractVocabRowsFromPageItems(
       continue;
     }
 
+    const extractedWord = joinColumnText(
+      columnItemsFor(row, `词语`, columnStartX),
+    );
+    const pinyinText = joinColumnText(
+      columnItemsFor(row, `拼音`, columnStartX),
+    );
+    const wordFixKey = `${indexText}:${pinyinText}`;
+    const wordFix = knownWordExtractionFixes[wordFixKey];
+    invariant(
+      wordFix == null || extractedWord === ``,
+      `knownWordExtractionFixes[${wordFixKey}] is stale, word extracted fine now`,
+    );
+
     rows.push({
       index: indexText,
       level: joinColumnText(columnItemsFor(row, `等级`, columnStartX)),
-      word: joinColumnText(columnItemsFor(row, `词语`, columnStartX)),
-      pinyin: joinColumnText(columnItemsFor(row, `拼音`, columnStartX)),
+      word: wordFix ?? extractedWord,
+      pinyin: pinyinText,
       partOfSpeech: joinColumnText(columnItemsFor(row, `词性`, columnStartX)),
     });
   }
@@ -207,7 +231,7 @@ export interface HskVocabPdfEntry {
   // The word column sometimes has a trailing digit (e.g. "作为2") used to
   // disambiguate multiple vocab entries that share the same written word.
   disambiguator: number | undefined;
-  pinyin: string;
+  pinyin: string[];
   senses: HskVocabSense[];
 }
 
@@ -224,7 +248,7 @@ export async function extractHskVocabPdfEntries(options: {
       index: row.index,
       word,
       disambiguator,
-      pinyin: row.pinyin,
+      pinyin: row.pinyin.split(`/`).map((pinyin) => pinyin.trim()),
       senses: extractHskVocabSenses(row),
     };
   });
@@ -295,7 +319,7 @@ const hskVocabJsonEntrySchema = z.object({
   index: z.string(),
   word: hanziTextSchema,
   disambiguator: z.number().optional(),
-  pinyin: pinyinTextSchema,
+  pinyin: z.array(pinyinTextSchema),
   senses: z.array(hskVocabJsonSenseSchema),
 });
 

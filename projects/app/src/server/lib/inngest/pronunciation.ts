@@ -16,7 +16,7 @@ import {
   pronunciationGenerateRecurringMnemonicEvent,
 } from "./client";
 import {
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
   pinyinUnitId,
   splitPinyinUnitOrThrow,
 } from "@/data/pinyin";
@@ -266,7 +266,7 @@ async function getHanziAndPinyinForHanziWord(
 
   return {
     hanzi,
-    pinyin: normalizePinyinUnit(pinyin),
+    pinyin: pinyinUnitNumericToDiacritic(pinyin),
   };
 }
 

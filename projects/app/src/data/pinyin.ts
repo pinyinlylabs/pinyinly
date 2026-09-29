@@ -1,4 +1,9 @@
+import type { splitHanziText } from "@/data/hanzi";
+import { matchAllHanziCharacters } from "@/data/hanzi";
 import type {
+  HanziText,
+  PinyinNumericText,
+  PinyinNumericUnit,
   PinyinSoundGroupId,
   PinyinSoundId,
   PinyinText,
@@ -43,72 +48,103 @@ export const mapPinyinTextUnits = (
  * @param pinyin
  */
 export const normalizePinyinText = (pinyin: string): PinyinText => {
-  return mapPinyinTextUnits(pinyin as PinyinText, normalizePinyinUnit);
+  return mapPinyinTextUnits(pinyin as PinyinText, pinyinUnitNumericToDiacritic);
+};
+
+const apostrophe = `’`;
+
+/**
+ * Converts numeric CEDICT-style pinyin (e.g. `jin4er2`) to diacritic form,
+ * inserting an apostrophe between syllables that were concatenated without a
+ * separator whenever the following syllable starts with `a`, `o`, or `e` (the
+ * standard Hanyu Pinyin rule, e.g. `jìn’ér`, `Xī’ān`). Unlike
+ * {@link normalizePinyinText}, this avoids silently merging two syllables into
+ * an ambiguous diacritic string.
+ */
+export const pinyinNumericToDiacritic = (
+  pinyin: PinyinNumericText,
+): PinyinText => {
+  const units = matchAllPinyinUnitsWithIndexes(pinyin);
+  if (units.length === 0) {
+    return pinyin as unknown as PinyinText;
+  }
+
+  let result = ``;
+  let lastIndex = 0;
+  for (let i = 0; i < units.length; i += 2) {
+    const [index, unit] = [units[i], units[i + 1]] as [number, string];
+
+    const gap = pinyin.slice(lastIndex, index);
+    if (i > 0 && gap === `` && /^[aoe]/iu.test(unit)) {
+      result += apostrophe;
+    } else {
+      result += gap.replaceAll(`'`, apostrophe);
+    }
+    result += pinyinUnitNumericToDiacritic(unit);
+    lastIndex = index + unit.length;
+  }
+  result += pinyin.slice(lastIndex).replaceAll(`'`, apostrophe);
+  return result as PinyinText;
 };
 
 /**
  * Converts a single pinyin word written with a tone number suffix to use a tone
  * mark instead (also converts v to ü).
  */
-export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
-  pinyinOrNumeric: string,
-): PinyinUnit {
-  invariant(pinyinOrNumeric.length > 0, `pinyin must not be empty`);
+export const pinyinUnitNumericToDiacritic = memoize1(
+  function pinyinUnitNumericToDiacritic(pinyinOrNumeric: string): PinyinUnit {
+    invariant(pinyinOrNumeric.length > 0, `pinyin must not be empty`);
 
-  // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
-  //
-  // 1. If there is an a or an e, it will take the tone mark
-  // 2. If there is an ou, then the o takes the tone mark
-  // 3. Otherwise, the second vowel takes the tone mark
+    // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
+    //
+    // 1. If there is an a or an e, it will take the tone mark
+    // 2. If there is an ou, then the o takes the tone mark
+    // 3. Otherwise, the second vowel takes the tone mark
 
-  // oxlint-disable-next-line typescript/no-non-null-assertion
-  let tone = `012345`.indexOf(pinyinOrNumeric.at(-1)!);
-
-  const pinyinLengthWithoutTone =
-    tone >= 0 ? pinyinOrNumeric.length - 1 : pinyinOrNumeric.length;
-
-  let result = ``;
-  for (let i = 0; i < pinyinLengthWithoutTone; i++) {
     // oxlint-disable-next-line typescript/no-non-null-assertion
-    let char = pinyinOrNumeric[i]!;
-    let nextChar = pinyinOrNumeric[i + 1];
+    let tone = `012345`.indexOf(pinyinOrNumeric.at(-1)!);
 
-    // Handle u: → v → ü
-    if (char === `u` && nextChar === `:`) {
-      i++;
-      char = `v`;
-      nextChar = pinyinOrNumeric[i + 1];
-    }
+    const pinyinLengthWithoutTone =
+      tone >= 0 ? pinyinOrNumeric.length - 1 : pinyinOrNumeric.length;
 
-    if (tone > 0) {
-      if (char === `a` || char === `e`) {
-        // oxlint-disable-next-line typescript/no-non-null-assertion
-        result += toneMap[char][tone]!;
-        tone = -1;
-        continue;
-      } else if (char === `o` && nextChar === `u`) {
-        // oxlint-disable-next-line typescript/no-non-null-assertion
-        result += toneMap[char][tone]!;
-        tone = -1;
-        continue;
-      } else if (isPinyinVowel(char)) {
-        if (isPinyinVowel(nextChar)) {
+    let result = ``;
+    for (let i = 0; i < pinyinLengthWithoutTone; i++) {
+      // oxlint-disable-next-line typescript/no-non-null-assertion
+      let char = pinyinOrNumeric[i]!;
+      let nextChar = pinyinOrNumeric[i + 1];
+
+      // Handle u: → v → ü
+      if ((char === `u` || char === `U`) && nextChar === `:`) {
+        i++;
+        char = char === `u` ? `v` : `V`;
+        nextChar = pinyinOrNumeric[i + 1];
+      }
+
+      const lowerChar = char.toLowerCase();
+
+      if (tone > 0 && isPinyinVowel(char)) {
+        if (
+          lowerChar === `a` ||
+          lowerChar === `e` ||
+          (lowerChar === `o` && (nextChar === `u` || nextChar === `U`)) ||
+          !isPinyinVowel(nextChar)
+        ) {
+          // oxlint-disable-next-line typescript/no-non-null-assertion
+          result += toneMap[char][tone]!;
+        } else {
           // oxlint-disable-next-line typescript/no-non-null-assertion
           result += toneMap[char][5] + toneMap[nextChar][tone]!;
           i++;
-        } else {
-          // oxlint-disable-next-line typescript/no-non-null-assertion
-          result += toneMap[char][tone]!;
         }
         tone = -1;
         continue;
       }
-    }
 
-    result += isPinyinVowel(char) ? toneMap[char][5] : char;
-  }
-  return result as PinyinUnit;
-});
+      result += isPinyinVowel(char) ? toneMap[char][5] : char;
+    }
+    return result as PinyinUnit;
+  },
+);
 
 export const pinyinUnitId = memoize1(function pinyinUnitId(
   pinyin: PinyinUnit,
@@ -118,7 +154,9 @@ export const pinyinUnitId = memoize1(function pinyinUnitId(
   ) as PinyinUnitId;
 });
 
-const toneMap = {
+type ToneMarks = readonly [string, string, string, string, string, string];
+
+const lowercaseToneMap = {
   a: [`_`, `ā`, `á`, `ǎ`, `à`, `a`],
   e: [`_`, `ē`, `é`, `ě`, `è`, `e`],
   i: [`_`, `ī`, `í`, `ǐ`, `ì`, `i`],
@@ -130,16 +168,35 @@ const toneMap = {
   // Special case for m, which can take a tone in some dialects and is sometimes
   // used as a placeholder for erhua syllables.
   m: [`_`, `m̄`, `ḿ`, `m̌`, `m̀`, `m`],
+  // Standalone ng is a syllabic nasal in modern standard pinyin.
+  n: [`_`, `n̄`, `ń`, `ň`, `ǹ`, `n`],
   // fake pinyin, but used for distractors
   ï: [`_`, `ï`, `ḯ`, `î`, `ì`, `i`],
-} as const;
+} as const satisfies Record<string, ToneMarks>;
 
-const vowels = [`a`, `e`, `i`, `o`, `u`, `ü`, `v`, `ï`];
+type ToneMapKey = keyof typeof lowercaseToneMap;
+
+// Uppercase rows come after all lowercase rows to keep `ü` before `v`.
+const toneMap = {
+  ...lowercaseToneMap,
+  ...Object.fromEntries(
+    Object.entries(lowercaseToneMap).map(([key, marks]) => [
+      key.toUpperCase(),
+      marks.map((mark) => mark.toUpperCase()),
+    ]),
+  ),
+} as Record<ToneMapKey | Uppercase<ToneMapKey>, ToneMarks>;
+
+type PinyinVowel = `a` | `e` | `i` | `ï` | `o` | `u` | `ü` | `v`;
+
+const vowels = new Set<string>(
+  [`a`, `e`, `i`, `o`, `u`, `ü`, `v`, `ï`].flatMap((v) => [v, v.toUpperCase()]),
+);
 
 const isPinyinVowel = (
   char: string | null | undefined,
-): char is `a` | `e` | `i` | `ï` | `o` | `u` | `ü` =>
-  char != null && vowels.includes(char);
+): char is PinyinVowel | Uppercase<PinyinVowel> =>
+  char != null && vowels.has(char);
 
 export const splitPinyinUnitTone = memoize1(function splitPinyinUnitTone(
   unit: PinyinUnit,
@@ -161,6 +218,168 @@ export const splitPinyinUnitTone = memoize1(function splitPinyinUnitTone(
 
   return { tonelessUnit: unit, tone: 5 };
 });
+
+/**
+ * Rebuilds a pinyin string, replacing each matched unit's tone with the tone
+ * at the same index in `tones`, while preserving everything else (spacing,
+ * punctuation, capitalization, etc.) as-is.
+ */
+function rebuildPinyinTextWithTones(
+  pinyin: PinyinText,
+  indexedUnits: readonly (string | number)[],
+  tones: readonly number[],
+): PinyinText {
+  let result = ``;
+  let lastIndex = 0;
+  for (let i = 0; i < indexedUnits.length; i += 2) {
+    const index = indexedUnits[i] as number;
+    const unit = indexedUnits[i + 1] as string;
+    const tone = nonNullable(tones[i / 2]);
+    const { tonelessUnit } = splitPinyinUnitTone(
+      pinyinUnitNumericToDiacritic(unit),
+    );
+
+    result += pinyin.slice(lastIndex, index);
+    result += pinyinUnitNumericToDiacritic(`${tonelessUnit}${tone}`);
+    lastIndex = index + unit.length;
+  }
+  result += pinyin.slice(lastIndex);
+  return result as PinyinText;
+}
+
+/**
+ * Computes each pinyin unit's citation tone, one per hanzi character. Throws
+ * if the hanzi and pinyin don't have the same number of units (e.g. erhua or
+ * multi-unit syllables aren't supported).
+ */
+function citationTonesForWord(
+  hanzi: HanziText,
+  pinyin: PinyinText,
+): {
+  hanziChars: ReturnType<typeof splitHanziText>;
+  indexedUnits: readonly (string | number)[];
+  tones: number[];
+} {
+  const hanziChars = matchAllHanziCharacters(hanzi);
+  const indexedUnits = matchAllPinyinUnitsWithIndexes(pinyin);
+  const unitCount = indexedUnits.length / 2;
+
+  invariant(
+    unitCount === hanziChars.length,
+    `expected same number of hanzi characters as pinyin units: %o / %o`,
+    hanzi,
+    pinyin,
+  );
+
+  const tones = Array.from({ length: unitCount }, (_, i) => {
+    const unit = nonNullable(indexedUnits[i * 2 + 1]) as string;
+    return splitPinyinUnitTone(pinyinUnitNumericToDiacritic(unit)).tone;
+  });
+
+  return { hanziChars, indexedUnits, tones };
+}
+
+// Punctuation implies a full prosodic break, so tone sandhi (which depends on
+// adjacency) shouldn't be applied across it, unlike a plain space between
+// words within the same phrase.
+const sandhiHardBreakPattern = /[,.:;!?，。：；！？]/u;
+
+function hasHardBreakBeforeUnit(
+  indexedUnits: readonly (string | number)[],
+  pinyin: PinyinText,
+  unitIndex: number,
+): boolean {
+  if (unitIndex <= 0 || unitIndex * 2 >= indexedUnits.length) {
+    return false;
+  }
+
+  const prevEnd =
+    (indexedUnits[(unitIndex - 1) * 2] as number) +
+    (indexedUnits[(unitIndex - 1) * 2 + 1] as string).length;
+  const start = indexedUnits[unitIndex * 2] as number;
+
+  return sandhiHardBreakPattern.test(pinyin.slice(prevEnd, start));
+}
+
+/**
+ * Converts citation-form pinyin (as typically found in dictionaries such as
+ * CEDICT) into surface/spoken pinyin with productive Mandarin tone sandhi
+ * applied.
+ *
+ * Applies:
+ *
+ * - 一 (yī) sandhi: becomes tone 2 before tone 4, and tone 4 before
+ *   tone 1/2/3. It remains tone 1 when no sandhi applies, such as when
+ *   word-final or when used ordinally after 第 (e.g. 第一).
+ * - 不 (bù) sandhi: becomes tone 2 before tone 4.
+ * - Third-tone sandhi: within a run of 2+ consecutive tone-3 syllables,
+ *   syllables are paired up from the right (e.g. a run of 3 pairs up the
+ *   last two, leaving the first syllable unpaired), and the first syllable
+ *   of each pair becomes tone 2. An unpaired leading syllable keeps tone 3.
+ *
+ * This conversion is intentionally one-way. Surface pinyin cannot in general
+ * be converted unambiguously back to citation form: for example, a surface
+ * tone-2 syllable may either be lexically tone 2 or the result of third-tone
+ * sandhi. 一 and 不 are individually recoverable from the Hanzi, but
+ * third-tone sandhi is not generally reversible.
+ *
+ * Note that real third-tone sandhi is sensitive to prosodic and syntactic
+ * grouping. The consecutive-tone-3 rule used here is therefore a mechanical
+ * approximation when applied to phrases containing multiple words.
+ */
+export function applyToneSandhi(
+  hanzi: HanziText,
+  pinyin: PinyinText,
+): PinyinText {
+  const { hanziChars, indexedUnits, tones } = citationTonesForWord(
+    hanzi,
+    pinyin,
+  );
+  const sandhiTones = [...tones];
+
+  for (const [i, hanziChar] of hanziChars.entries()) {
+    const tone = tones[i];
+    const nextTone = hasHardBreakBeforeUnit(indexedUnits, pinyin, i + 1)
+      ? null
+      : tones[i + 1];
+    // Ordinal 一 (e.g. 第一, 第一天) always keeps its citation tone.
+    const isOrdinal = hanziChars[i - 1] === `第`;
+
+    if (hanziChar === `一` && tone === 1 && nextTone != null && !isOrdinal) {
+      sandhiTones[i] = nextTone === 4 ? 2 : 4;
+    } else if (hanziChar === `不` && tone === 4 && nextTone === 4) {
+      sandhiTones[i] = 2;
+    }
+  }
+
+  // 3rd-tone sandhi is computed from the original citation tones, since 一/不
+  // are never citation tone 3 there's no interaction with the rule above.
+  // Real sandhi depends on prosodic grouping, which isn't known here, so
+  // runs are approximated by pairing syllables from the right (broken early
+  // by punctuation); a leftover leading syllable in an odd-length run is
+  // left as tone 3.
+  let runStart = -1;
+  for (let i = 0; i <= tones.length; i++) {
+    if (hasHardBreakBeforeUnit(indexedUnits, pinyin, i) && runStart !== -1) {
+      for (let j = i - 1; j > runStart; j -= 2) {
+        sandhiTones[j - 1] = 2;
+      }
+      runStart = -1;
+    }
+
+    const isTone3 = tones[i] === 3;
+    if (isTone3 && runStart === -1) {
+      runStart = i;
+    } else if (!isTone3 && runStart !== -1) {
+      for (let j = i - 1; j > runStart; j -= 2) {
+        sandhiTones[j - 1] = 2;
+      }
+      runStart = -1;
+    }
+  }
+
+  return rebuildPinyinTextWithTones(pinyin, indexedUnits, sandhiTones);
+}
 
 /**
  * Given a toneless pinyin (i.e. `hao` rather than `hǎo`) split into an initial
@@ -244,7 +463,7 @@ export function pinyinUnitSuggestions(
   }
 
   const { tonelessUnit } = splitPinyinUnitTone(
-    normalizePinyinUnit(lastUnitText),
+    pinyinUnitNumericToDiacritic(lastUnitText),
   );
 
   const suggestions = toneVariationsForTonelessUnit(tonelessUnit);
@@ -256,7 +475,7 @@ const toneVariationsForTonelessUnit = memoize1(
     const result: PinyinUnitSuggestion[] = [];
     for (let i = 1; i <= 5; i++) {
       result.push({
-        pinyinUnit: normalizePinyinUnit(`${tonelessUnit}${i}`),
+        pinyinUnit: pinyinUnitNumericToDiacritic(`${tonelessUnit}${i}`),
         tone: i,
       });
     }
@@ -659,22 +878,29 @@ export const pinyinUnitPattern = (() => {
   const o = `(?:o|ō|ó|ǒ|ò)`;
   const u = `(?:u|ū|ú|ǔ|ù)`;
   const v = `(?:ü|ǖ|ǘ|ǚ|ǜ|v|u:)`;
+  const n = `(?:n|n̄|ń|ň|ǹ)`;
+  const m = `(?:m|m̄|ḿ|m̌|m̀)`;
 
-  const consonantEnd = `(?!${a}|${e}|${i}|${o}|${u}|${v})`;
-  const erBoundary = `(?=${e}r${consonantEnd})`;
+  const consonantEnd =
+    `(?:` +
+    // e.g. ___ēn like gǎnēn
+    // `(?=ēn)|` +
+    // not followed by a vowel
+    `(?!${a}|${e}|${i}|${o}|${u}|${v})` +
+    `)`;
 
   return (
     `(?:` +
     `(?:(?:[zcs]h|[gkh])u${a}ng${consonantEnd})|` +
     `(?:[jqx]i${o}ng${consonantEnd})|` +
     `(?:[nljqx]i${a}ng${consonantEnd})|` +
-    `(?:(?:[zcs]h?|[dtnlgkhrjqxy])u${a}n${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[dtnlgkhrjqxy])u${a}n)|` +
     `(?:(?:[zcs]h|[gkh])u${a}i)|` +
-    `(?:(?:[zc]h?|[rdtnlgkhsy])?${o}ng${consonantEnd})|` +
-    `(?:(?:[zcs]h?|[rbpmfdtnlgkhw])?${e}ng${consonantEnd})|` +
-    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}ng${consonantEnd})|` +
-    `(?:[bpmdtnljqxy]${i}ng${consonantEnd})|` +
-    `(?:[bpmdtnljqx]i${a}n${consonantEnd})|` +
+    `(?:(?:[zc]h?|[rdtnlgkhsy])?${o}ng)|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhw])?${e}ng)|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}ng)|` +
+    `(?:[bpmdtnljqxy]${i}ng)|` +
+    `(?:[bpmdtnljqx]i${a}n)|` +
     `(?:[bpmdtnljqx]i${a}o)|` +
     `(?:[nl](?:v|u:|ü)${e})|` +
     `(?:[nl](?:${v}))|` +
@@ -687,10 +913,8 @@ export const pinyinUnitPattern = (() => {
     `(?:(?:[zcs]h?|[rdtgkh])u${i})|` +
     `(?:(?:[zcs]h?|[rdtnlgkh])u${o})|` +
     `(?:(?:[zcs]h|[rgkh])u${a})|` +
-    `(?:(?:[zcs]h?|[rbpmfdngkhw])?${e}n${erBoundary})|` +
-    `(?:(?:[zcs]h?|[rbpmfdngkhw])?${e}n${consonantEnd})|` +
-    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}n${erBoundary})|` +
-    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}n${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rbpmfdngkhw])?${e}n)|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}n)|` +
     `(?:(?:[zcs]h?|[rpmfdtnlgkhy])?${o}u)|` +
     `(?:(?:[zcs]h?|[rbpmdtnlgkhy])?${a}o)|` +
     `(?:(?:[zs]h|[bpmfdtnlgkhwz])?${e}i)|` +
@@ -701,8 +925,11 @@ export const pinyinUnitPattern = (() => {
     `(?:(?:[zcs]h?|[rmdtnlgkhy])${e})|` +
     `(?:[bpmfwyl]?${o})|` +
     `(?:(?:[zcs]h|[bpmfdtnlgkhzcswy])?${a})|` +
-    `(?:m|m̄|ḿ|m̌|m̀)|` +
-    `(?:r${consonantEnd})` +
+    `(?:${m})|` +
+    `(?:r${consonantEnd})|` +
+    `(?:ēn)|` +
+    `(?:${e}r${consonantEnd})|` +
+    `(?:${n}g)` +
     `)` +
     `[0-5]?`
   );
@@ -713,10 +940,11 @@ const matchAllPinyinRegExp = new RegExp(pinyinUnitPattern, `igu`);
 /**
  * Find all pinyin units in a string, matches both diacritic and numeric
  * forms.
- *
- * @returns {string[]} Intentionally returns string[] rather than
- * {@link PinyinUnit[]} because they might be numeric form and not normalized.
  */
+export function matchAllPinyinUnits(input: PinyinText): PinyinUnit[];
+export function matchAllPinyinUnits(
+  input: PinyinNumericText,
+): PinyinNumericUnit[];
 export function matchAllPinyinUnits(input: string): string[] {
   const result = [];
   for (const { 0: text } of input.matchAll(matchAllPinyinRegExp)) {
@@ -904,13 +1132,9 @@ export const defaultPinyinSoundExamples = {
  *
  * A unit corresponds to one hanzi character or component.
  */
+export function pinyinUnitCount(pinyin: PinyinText): number;
+export function pinyinUnitCount(pinyin: PinyinNumericText): number;
 export function pinyinUnitCount(pinyin: string): number {
-  const trimmed = pinyin.trim();
-  if (trimmed === ``) {
-    return 0;
-  }
-  const matches = matchAllPinyinUnits(trimmed);
-  // Fallback to space-splitting if regex doesn't match (handles edge cases
-  // where the pinyin regex may not recognize all valid units)
-  return matches.length > 0 ? matches.length : trimmed.split(/\s+/u).length;
+  const matches = matchAllPinyinUnits(pinyin as PinyinText);
+  return matches.length;
 }

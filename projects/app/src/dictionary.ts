@@ -30,7 +30,10 @@ import {
   isHanziStrokeCountChar,
   pinyinSoundIdSchema,
 } from "@/data/model";
-import { matchAllPinyinUnits, normalizePinyinUnit } from "@/data/pinyin";
+import {
+  matchAllPinyinUnits,
+  pinyinUnitNumericToDiacritic,
+} from "@/data/pinyin";
 import {
   arrayFilterUnique,
   deepReadonly,
@@ -414,7 +417,7 @@ export function buildDictionary(
 
       for (const pinyin of meaning.pinyin) {
         const pinyinUnits = matchAllPinyinUnits(pinyin).map((p) =>
-          normalizePinyinUnit(p),
+          pinyinUnitNumericToDiacritic(p),
         );
 
         invariant(
@@ -588,7 +591,7 @@ export function shallowDecomposeHanziWord(
       continue charLoop;
     }
 
-    const charPinyin = normalizePinyinUnit(charPinyinRaw);
+    const charPinyin = pinyinUnitNumericToDiacritic(charPinyinRaw);
     const candidates = dictionary.lookupHanzi(charHanzi);
     for (const candidate of candidates) {
       if (candidate[1].pinyin?.includes(charPinyin)) {
@@ -773,7 +776,7 @@ export function oneUnitPinyinListOrNull(
     if (units.length === 1 && units[0] === pinyin) {
       // It's safe to cast here, because all pinyin in the dictionary are
       // already normalized.
-      return pinyin as PinyinUnit;
+      return pinyin;
     }
   }
 

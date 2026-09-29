@@ -8,7 +8,7 @@ import type {
 import {
   matchAllPinyinUnits,
   normalizePinyinText,
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
   splitPinyinUnitTone,
 } from "@/data/pinyin";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -205,14 +205,15 @@ function normalizePinyinForSearch(value: string): {
   diacritic: string;
   toneless: string;
 } {
-  const diacritic = normalizePinyinText(value).toLowerCase();
+  const diacritic = normalizePinyinText(value).toLowerCase() as PinyinText;
   const units = matchAllPinyinUnits(diacritic);
   if (units.length === 0) {
     return { diacritic, toneless: diacritic };
   }
 
   const tonelessUnits = units.map(
-    (unit) => splitPinyinUnitTone(normalizePinyinUnit(unit)).tonelessUnit,
+    (unit) =>
+      splitPinyinUnitTone(pinyinUnitNumericToDiacritic(unit)).tonelessUnit,
   );
 
   return {

@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: vitest-bench
+
 tasks:
   bench:
     command: vitest bench
@@ -8,4 +11,4 @@ tasks:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
     options:
       cache: false
-    toolchain: "node"
+    toolchains: "node"

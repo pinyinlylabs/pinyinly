@@ -26,7 +26,7 @@ import {
 import {
   loadPylyPinyinChart,
   matchAllPinyinUnits,
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
 } from "#data/pinyin.js";
 import type { Rizzle } from "#data/rizzleSchema.js";
 import type {
@@ -646,8 +646,8 @@ const getHanziJsPinyinUsageCounts = memoize0(() => {
       }
 
       const hanziCharacters = matchAllHanziCharacters(entry.simplified);
-      const pinyinUnits = matchAllPinyinUnits(entry.pinyin).map((p) =>
-        normalizePinyinUnit(p),
+      const pinyinUnits = matchAllPinyinUnits(entry.pinyin as PinyinText).map(
+        (p) => pinyinUnitNumericToDiacritic(p),
       );
 
       if (hanziCharacters.length !== pinyinUnits.length) {
@@ -682,7 +682,7 @@ const getDictionaryPinyinUsageCounts = memoize0(async () => {
 
     for (const pinyin of meaning.pinyin) {
       const pinyinUnits = matchAllPinyinUnits(pinyin).map((unit) =>
-        normalizePinyinUnit(unit),
+        pinyinUnitNumericToDiacritic(unit),
       );
 
       invariant(
@@ -905,7 +905,7 @@ export function getPinyinUnits(): readonly PinyinUnit[] {
   const allPinyinUnits: PinyinUnit[] = [];
   for (const unit of chart.units) {
     for (let i = 1; i <= 4; i++) {
-      allPinyinUnits.push(normalizePinyinUnit(`${unit}${i}`));
+      allPinyinUnits.push(pinyinUnitNumericToDiacritic(`${unit}${i}`));
     }
   }
   return allPinyinUnits;

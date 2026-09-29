@@ -7,7 +7,7 @@ import {
 } from "./cedict";
 import { createJudge, describeEval } from "vitest-evals";
 import type { HarnessMetadata, JudgeContext } from "vitest-evals";
-import { normalizePinyinText } from "#data/pinyin.js";
+import { pinyinNumericToDiacritic } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
 import { z } from "zod";
@@ -131,7 +131,7 @@ function parsedLineToEntry(
   return {
     traditional: parsed.traditional,
     simplified: parsed.simplified,
-    pinyin: normalizePinyinText(parsed.pinyin),
+    pinyin: pinyinNumericToDiacritic(parsed.pinyin),
     definition: parsed.senses,
   };
 }

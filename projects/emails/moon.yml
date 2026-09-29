@@ -6,7 +6,7 @@ fileGroups:
 tasks:
   dev:
     command: yarn email dev
-    preset: watcher
+    preset: server
 
   build:
     command: yarn email build
@@ -20,7 +20,7 @@ tasks:
     command: yarn email start
     deps:
       - build
-    preset: watcher
+    preset: server
 
   fmt:
     deps:

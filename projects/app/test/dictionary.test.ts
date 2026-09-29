@@ -47,7 +47,7 @@ import {
 } from "#data/model.ts";
 import {
   matchAllPinyinUnits,
-  normalizePinyinText,
+  pinyinNumericToDiacritic,
   pinyinUnitCount,
 } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
@@ -117,7 +117,6 @@ import {
   buildCedictSenseId,
   extractDictionaryPinyinFromCedictSense,
   findCedictSenseById,
-  parseCedictSenseId,
 } from "./data/cedict.ts";
 import { loadCompleteHskVocabulary } from "./data/completeHskVocabulary.ts";
 import { buildHanziWordsToCheck, 拼音, 汉, 汉字 } from "./data/helpers.ts";
@@ -205,11 +204,10 @@ test(`dictionary CE-DICT references resolve to existing CE-DICT senses`, async (
       continue;
     }
 
-    const parsedSenseId = nonNullable(parseCedictSenseId(meaning.cedict));
     const canonicalSenseId = buildCedictSenseId(
-      parsedSenseId.traditional,
-      parsedSenseId.simplified,
-      parsedSenseId.pinyin,
+      resolvedSense.traditional,
+      resolvedSense.simplified,
+      resolvedSense.pinyin,
       resolvedSense.id,
     );
 
@@ -2630,7 +2628,7 @@ describe(`character.json files`, async () => {
               const entries = cedictDictionary.lookupHanzi(hanzi);
               if (
                 entries.some(
-                  (entry) => normalizePinyinText(entry.pinyin) === pinyin,
+                  (entry) => pinyinNumericToDiacritic(entry.pinyin) === pinyin,
                 )
               ) {
                 continue;
@@ -2639,7 +2637,7 @@ describe(`character.json files`, async () => {
               // No dictionary match, try to find one.
               const equalPinyinEntries = entries.filter((entry) =>
                 isEqual(
-                  matchAllPinyinUnits(normalizePinyinText(entry.pinyin)),
+                  matchAllPinyinUnits(pinyinNumericToDiacritic(entry.pinyin)),
                   matchAllPinyinUnits(pinyin),
                 ),
               );
@@ -2649,7 +2647,9 @@ describe(`character.json files`, async () => {
               );
 
               const entry = nonNullable(equalPinyinEntries[0]);
-              branch.occurrences[hanzi] = normalizePinyinText(entry.pinyin);
+              branch.occurrences[hanzi] = pinyinNumericToDiacritic(
+                entry.pinyin,
+              );
             }
           }
         }

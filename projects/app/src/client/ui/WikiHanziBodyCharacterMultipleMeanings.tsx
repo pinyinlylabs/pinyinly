@@ -14,7 +14,11 @@ import { WikiHanziCharacterHeaderOverview } from "./WikiHanziCharacterHeaderOver
 import { WikiHanziCharacterChooseAMeaning } from "./WikiHanziCharacterChooseAMeaning";
 import { useState } from "react";
 
-export function WikiHanziBodyCharacterMultipleMeanings({ hanzi }: { hanzi: HanziCharacter }) {
+export function WikiHanziBodyCharacterMultipleMeanings({
+  hanzi,
+}: {
+  hanzi: HanziCharacter;
+}) {
   const [hanziWord, setHanziWord] = useState<HanziWord | null>(null);
 
   return (

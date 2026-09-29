@@ -10,7 +10,7 @@ import type {
   QuestionFlagType,
 } from "@/data/model";
 import { QuestionKind } from "@/data/model";
-import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
+import { pinyinUnitNumericToDiacritic, splitPinyinUnitOrThrow } from "@/data/pinyin";
 import { hanziWordFromSkill } from "@/data/skills";
 import {
   allHanziCharacterPronunciationsForHanzi,
@@ -182,7 +182,7 @@ async function addDistractors(
   // they don't conflict.
   const pinyinWords = shuffle(await loadPinyinWords());
   for (const tonelessPinyin of pinyinWords) {
-    const pinyin = normalizePinyinUnit(
+    const pinyin = pinyinUnitNumericToDiacritic(
       `${tonelessPinyin}${ctx.answerPinyinTone}`,
     );
 

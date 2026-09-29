@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: vitest-evals
+
 tasks:
   evals:
     command: vitest run --config vitest.evals.config.ts
@@ -14,4 +17,4 @@ tasks:
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
+    toolchains: "node"

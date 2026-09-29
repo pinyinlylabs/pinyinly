@@ -35,7 +35,11 @@
         {
           "gloss": "growth",
           "description": "Coming into being, developing upward, or being established.",
-          "occurrences": { "新兴": "xīnxīng", "兴起": "xīngqǐ", "兴建": "xīngjiàn" }
+          "occurrences": {
+            "新兴": "xīnxīng",
+            "兴起": "xīngqǐ",
+            "兴建": "xīngjiàn"
+          }
         },
         {
           "gloss": "prosperity",
@@ -59,7 +63,7 @@
           "gloss": "engagement",
           "description": "Being drawn to something with curiosity, attention, or eager enthusiasm.",
           "occurrences": {
-            "感兴趣": "gǎnxìngqù",
+            "感兴趣": "gǎn xìngqù",
             "兴趣": "xìngqù",
             "兴致": "xìngzhì",
             "兴致勃勃": "xìngzhìbóbó"
@@ -68,7 +72,11 @@
         {
           "gloss": "mood",
           "description": "A positive, elevated feeling or the loss of that feeling.",
-          "occurrences": { "高兴": "gāoxìng", "扫兴": "sǎoxìng", "兴高采烈": "xìnggāocǎiliè" }
+          "occurrences": {
+            "高兴": "gāoxìng",
+            "扫兴": "sǎoxìng",
+            "兴高采烈": "xìnggāocǎiliè"
+          }
         }
       ]
     }

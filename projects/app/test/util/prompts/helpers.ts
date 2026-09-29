@@ -5,7 +5,7 @@ import type {
   LocationSetSpec,
   LocationSpec,
 } from "#data/model.js";
-import { matchAllPinyinUnits, normalizePinyinText } from "#data/pinyin.js";
+import { matchAllPinyinUnits, pinyinNumericToDiacritic } from "#data/pinyin.js";
 import type { ChatPromptLike, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
@@ -293,7 +293,7 @@ export function buildCharacterCoreMeaningsUsages(
 
         const equalPinyinEntries = entries.filter((entry) =>
           isEqual(
-            matchAllPinyinUnits(normalizePinyinText(entry.pinyin)),
+            matchAllPinyinUnits(pinyinNumericToDiacritic(entry.pinyin)),
             matchAllPinyinUnits(form.transcriptions.pinyin),
           ),
         );
@@ -302,7 +302,7 @@ export function buildCharacterCoreMeaningsUsages(
           `expected exactly one CEDICT entry for ${vendorItem.simplified} with pinyin ${form.transcriptions.pinyin}, but found ${equalPinyinEntries.length}`,
         );
 
-        const pinyin = normalizePinyinText(
+        const pinyin = pinyinNumericToDiacritic(
           nonNullable(equalPinyinEntries[0]).pinyin,
         );
 
