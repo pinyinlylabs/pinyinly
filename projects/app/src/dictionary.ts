@@ -568,6 +568,14 @@ export function shallowDecomposeHanziCharacter<S extends HanziCharacter>(
 export function shallowDecomposeHanziWord(
   hanziWord: HanziWord,
   dictionary: Dictionary,
+  options?: {
+    /**
+     * If true, throw an error if any of the characters in the word don't have
+     * an entry in the dictionary. For example with "结构", if there's no entry
+     * for "构" then throw an error.
+     */
+    throwIfPartial: true;
+  },
 ): readonly HanziWord[] {
   const hanzi = hanziFromHanziWord(hanziWord);
   if (isHanziCharacter(hanzi)) {
@@ -581,7 +589,7 @@ export function shallowDecomposeHanziWord(
 
   const result: HanziWord[] = [];
 
-  charLoop: for (const [i, [charHanzi, charPinyinRaw]] of zipStrict(
+  charLoop: for (const [i, [charHanzi, charPinyin]] of zipStrict(
     splitHanziText(hanzi),
     matchAllPinyinUnits(pinyin),
   ).entries()) {
@@ -591,7 +599,6 @@ export function shallowDecomposeHanziWord(
       continue charLoop;
     }
 
-    const charPinyin = pinyinUnitNumericToDiacritic(charPinyinRaw);
     const candidates = dictionary.lookupHanzi(charHanzi);
     for (const candidate of candidates) {
       if (candidate[1].pinyin?.includes(charPinyin)) {
@@ -600,9 +607,11 @@ export function shallowDecomposeHanziWord(
       }
     }
 
-    throw new Error(
-      `couldn't find matching hanzi word for character ${charHanzi} with pinyin ${charPinyin}`,
-    );
+    if (options?.throwIfPartial) {
+      throw new Error(
+        `couldn't find matching hanzi word for character ${charHanzi} with pinyin ${charPinyin}`,
+      );
+    }
   }
 
   return result;

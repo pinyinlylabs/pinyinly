@@ -350,14 +350,15 @@ test.skip(`testing prompt`, async () => {
   );
 });
 
-test.skip(`entries can be decomposed`, async () => {
+test.skip(`all dictionary entries can be fully decomposed`, async () => {
   const dict = await loadDictionary();
   const hanziWords = await buildHanziWordsToCheck();
 
   for (const hanziWord of hanziWords) {
     expect
       .soft(
-        () => shallowDecomposeHanziWord(hanziWord, dict),
+        () =>
+          shallowDecomposeHanziWord(hanziWord, dict, { throwIfPartial: true }),
         `decomposing ${hanziWord}`,
       )
       .not.toThrow();

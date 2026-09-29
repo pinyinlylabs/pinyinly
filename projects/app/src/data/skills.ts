@@ -260,18 +260,8 @@ export function skillDependencies(
           }
         }
       } else {
-        try {
-          for (const item of shallowDecomposeHanziWord(hanziWord, dictionary)) {
-            deps.push(hanziWordToGloss(item));
-          }
-        } catch (err) {
-          console.error(
-            `Error decomposing hanziword`,
-            new Error(
-              `Failed to decompose hanzi word "${hanziWord}" for skill "${skill}"`,
-              { cause: err },
-            ),
-          );
+        for (const item of shallowDecomposeHanziWord(hanziWord, dictionary)) {
+          deps.push(hanziWordToGloss(item));
         }
       }
       break;
