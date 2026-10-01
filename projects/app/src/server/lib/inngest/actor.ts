@@ -71,7 +71,7 @@ export const populateActor = inngest.createFunction(
     }
 
     const { modelSheetAssetId } = await step.invoke(
-      `populate location set spec`,
+      `populate actor model sheet image`,
       {
         function: populateActorModelSheetImage,
         data: {
