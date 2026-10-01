@@ -10,7 +10,10 @@ import type {
   QuestionFlagType,
 } from "@/data/model";
 import { QuestionKind } from "@/data/model";
-import { pinyinUnitNumericToDiacritic, splitPinyinUnitOrThrow } from "@/data/pinyin";
+import {
+  pinyinUnitNumericToDiacritic,
+  splitPinyinUnitOrThrow,
+} from "@/data/pinyin";
 import { hanziWordFromSkill } from "@/data/skills";
 import {
   allHanziCharacterPronunciationsForHanzi,

@@ -30,6 +30,7 @@ import {
   getUserSetting,
   setUserSetting,
 } from "@/server/lib/query";
+import { buildPronunciationMnemonicAssociationStrategyPrompt } from "@/util/prompts/pronunciationMnemonicAssociationStrategy";
 import { buildPronunciationMnemonicRecurringPrompt } from "@/util/prompts/pronunciationMnemonicRecurring";
 import { invariant } from "@pinyinly/lib/invariant";
 import { buildPylymarkTokenizePrompt } from "@/util/prompts/pylymarkTokenize";
@@ -67,7 +68,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       hanziWord,
       locationId,
       locationSetKey,
-      associationStrategy = `identityBinding`,
+      associationStrategy: requestedAssociationStrategy,
     } = event.data;
 
     const dictionary = await loadDictionary();
@@ -90,6 +91,16 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       label: glossOrThrow(hanziWord, meaning),
       ...(cueTerms.length <= 1 ? {} : { meaning: cueTerms.join(`; `) }),
     };
+
+    let associationStrategy = requestedAssociationStrategy;
+    let associationStrategyReason: string | undefined;
+    if (associationStrategy == null) {
+      const strategyResponse = await requestOpenAiResponseJson(
+        buildPronunciationMnemonicAssociationStrategyPrompt({ cue }),
+      );
+      associationStrategy = strategyResponse.data.associationStrategy;
+      associationStrategyReason = strategyResponse.data.reason;
+    }
 
     const actorSpec = await withDrizzle(async (db) => {
       return getActorSpec(db, userId, actorId);
@@ -161,6 +172,7 @@ export const generatePronunciationRecurringMnemonic = inngest.createFunction(
       prompt,
       rawResponse: response,
       associationStrategy,
+      associationStrategyReason,
       tokenizedResponse: {
         premise: premiseTokenized.data.text,
         hook: hookTokenized.data.text,

@@ -239,7 +239,7 @@ export function WikiHanziCharacterPronunciationBox({
   });
 
   const handleUseAi = (
-    associationStrategy: PronunciationMnemonicRecurringPromptAssociationStrategyKind,
+    associationStrategy?: PronunciationMnemonicRecurringPromptAssociationStrategyKind,
   ) => {
     if (selectedInitialActorId != null && selectedFinalLocationId != null) {
       const mnemonicId = nanoid();
@@ -402,23 +402,6 @@ export function WikiHanziCharacterPronunciationBox({
                       iconStart="ai"
                       iconSize={20}
                       className="opacity-80"
-                      onPress={() => {
-                        if (
-                          selectedInitialActorId != null &&
-                          selectedFinalLocationId != null
-                        ) {
-                          const mnemonicId = nanoid();
-                          selectedMnemonicSetting.setValue({
-                            hanzi,
-                            pinyin: pinyinUnitId(pinyinUnit),
-                            mnemonicId: mnemonicId,
-                          });
-                          enqueuePronunciationRecurringHintMutation.mutate({
-                            hanziWord,
-                            mnemonicId,
-                          });
-                        }
-                      }}
                     >
                       Use AI
                     </RectButton>
@@ -428,6 +411,14 @@ export function WikiHanziCharacterPronunciationBox({
                     className="w-56"
                     align="start"
                   >
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi();
+                      }}
+                    >
+                      <Text>Auto</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Separator />
                     <DropdownMenu2.Item
                       onPress={() => {
                         handleUseAi(`identityBinding`);

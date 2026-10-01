@@ -1,6 +1,9 @@
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
 import type { PinyinSoundId } from "@/data/model";
-import { loadPylyPinyinChart, pinyinUnitNumericToDiacritic } from "@/data/pinyin";
+import {
+  loadPylyPinyinChart,
+  pinyinUnitNumericToDiacritic,
+} from "@/data/pinyin";
 import { loadFinalToneFrequencies } from "@/dictionary";
 import { use } from "react";
 import { Text } from "@/client/ui/Text";
