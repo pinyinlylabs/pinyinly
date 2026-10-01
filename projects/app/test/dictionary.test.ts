@@ -350,7 +350,7 @@ test.skip(`testing prompt`, async () => {
   );
 });
 
-test.skip(`all dictionary entries can be fully decomposed`, async () => {
+test.skip(`hanzi words to check entries can be fully decomposed`, async () => {
   const dict = await loadDictionary();
   const hanziWords = await buildHanziWordsToCheck();
 

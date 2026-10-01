@@ -24,7 +24,6 @@ import {
   pronunciationMnemonicTextSetting,
   pinyinSoundLocationSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameTextSetting,
   pinyinSoundLocationSetKeySetting,
   pronunciationMnemonicSelectedSetting,
 } from "@/data/userSettings";
@@ -120,14 +119,6 @@ export function WikiHanziCharacterPronunciationBox({
   const hanzi = hanziFromHanziWord(hanziWord);
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
-  const initialPinyinSound = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameTextSetting,
-          key: { soundId: splitPinyin.initialSoundId },
-        },
-  );
   const finalPlaceSelectionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -146,7 +137,6 @@ export function WikiHanziCharacterPronunciationBox({
   );
   const placeDirectory = usePinyinSoundLocations();
   const actorDirectory = usePinyinSoundActors();
-  const initialPinyinSoundName = initialPinyinSound?.value?.text;
   const tonePinyinSoundName =
     splitPinyin == null
       ? null
@@ -277,9 +267,7 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.initialSoundId}
                   href={`/sounds/${splitPinyin.initialSoundId}`}
                   soundName={initialLabel}
-                  mnemonicName={
-                    initialPinyinSoundName ?? selectedInitialActor?.name ?? null
-                  }
+                  mnemonicName={selectedInitialActor?.name ?? null}
                   imageOverride={selectedInitialActor?.image ?? null}
                 />
               </View>
