@@ -9649,6 +9649,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db-ivm@npm:0.1.24":
+  version: 0.1.24
+  resolution: "@tanstack/db-ivm@npm:0.1.24"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/dc1819aba05807dbf6c67d828eb605e14448bdc4631dd736e7d1578c31aae754b8b1098ebd19ffae041945cf6458a420c7a1cc18a4c5865677b8db4fe10c1ccc
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.11.0":
+  version: 0.11.0
+  resolution: "@tanstack/db@npm:0.11.0"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.24"
+    "@tanstack/pacer-lite": "npm:^0.2.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/901e91da417c3b05b9146c6d19d31bb253751383ae21011c23a133edb98c774718169555da17e24608c18cc126ae3970a83bd921b7fb01d95417724611afb711
+  languageName: node
+  linkType: hard
+
 "@tanstack/db@npm:0.6.17, @tanstack/db@npm:^0.6.17":
   version: 0.6.17
   resolution: "@tanstack/db@npm:0.6.17"
@@ -9692,15 +9717,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@tanstack/query-db-collection@npm:1.2.1"
+  version: 1.3.1
+  resolution: "@tanstack/query-db-collection@npm:1.3.1"
   dependencies:
     "@standard-schema/spec": "npm:^1.1.0"
-    "@tanstack/db": "npm:0.6.17"
+    "@tanstack/db": "npm:0.11.0"
   peerDependencies:
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/4483e8fcf47ce90eff4c203a97536486311ea2afa0a8ad498f1297b0c91c5ff2bf64882e650df6a2aed16393bddefb16b58c2b75f76bcf6dcd5305920e97123a
+  checksum: 10c0/1b873e23f09d10f914b04d47789ebad8157c07cd306e8f835aec382bf2d34a5f1b5cb3140c0145fb23d3e701f7a10212b4e5c7e87841edafe41207b52392f677
   languageName: node
   linkType: hard
 
