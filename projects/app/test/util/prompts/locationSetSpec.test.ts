@@ -40,39 +40,23 @@ describe(`buildLocationSetSpecPrompt`, () => {
 
       Design the canonical bathroom for the supplied location.
 
-      The bathroom should feel like the washroom people would naturally imagine belonging within this location.
+      The bathroom should remain immediately recognisable as a bathroom across different locations.
 
-      Interpret "bathroom" broadly according to the location. It may be a washroom, bathhouse, lavatory, privy, washing chamber, changing room, purification room, or another recognisable place for washing or sanitation.
+      It should normally contain a recognisable toilet, shower or shower-like fixture where water falls downward, and washbasin.
 
-      Choose whichever is the simplest and most recognisable fit for the supplied location.
+      Make the identity of the supplied location unmistakable within the bathroom itself. Prefer bold, playful, exaggerated, or fantastical interpretations over subtle references or merely matching materials.
 
-      Because bathrooms share many common fixtures across different locations, make a deliberate effort to give this bathroom a distinctive identity.
+      Where possible, repurpose iconic objects or mechanisms from the location to perform familiar bathroom functions, especially the shower, toilet, and washbasin. Prefer a few strong, immediately recognisable transformations over many weak thematic details.
 
-      The bathroom should contain one memorable defining idea that naturally grows out of the location itself.
+      Good repurposing takes advantage of something the original object already does or is naturally suited to do, so its new bathroom function feels intuitive once seen. If a more surprising adaptation is used, give it a simple visual or functional logic rather than introducing unexplained weirdness.
 
-      Prefer ideas that are slightly unexpected, delightfully fitting, or mildly exaggerated rather than completely ordinary.
+      For example, on a pirate ship, a suspended ship's bucket could become a shower because it already holds and pours water; a simple seat over an open hull chute could become a toilet because waste can fall through it; and a cut-open barrel could become a washbasin because it already serves as a watertight container.
 
-      The defining idea should make someone naturally think, "Of course this location's bathroom would be like that."
+      When appropriate, include distinctive clothing or personal equipment associated with the location, naturally placed as something removed, hung up, stored, or waiting to be worn.
 
-      Do not merely recreate a generic modern bathroom using the location's materials.
+      If no strong adaptation exists for a particular fixture, leave it familiar rather than forcing a weak connection.
 
-      Instead, reinterpret familiar bathroom functions in ways that naturally belong within the supplied location.
-
-      The room should have its own distinct character, shaped by how the location is used, maintained, inhabited, or remembered.
-
-      It may be pristine, neglected, luxurious, improvised, ceremonial, industrial, rustic, ancient, restored, or another character that naturally fits the location.
-
-      The room should feel lived in rather than staged.
-
-      Even when empty, it should suggest an everyday activity, recurring habit, or small ongoing story that makes it feel memorable.
-
-      A visitor should immediately be able to imagine the kinds of people who use this bathroom and how they use it.
-
-      The bathroom should feel like a destination rather than a utility room.
-
-      Avoid making it resemble the Back Room or Basement.
-
-      A visitor should be able to describe this bathroom in one memorable sentence after seeing it once.
+      A visitor should immediately recognise both the bathroom and the location it belongs to.
 
 
       ## Design rules
