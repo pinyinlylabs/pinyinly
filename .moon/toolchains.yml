@@ -27,4 +27,4 @@ typescript:
   syncProjectReferencesToPaths: false
 
 yarn:
-  version: 4.18.0
+  version: "4.18.0" # renovate: datasource=npm depName=@yarnpkg/cli

@@ -157,7 +157,7 @@
     "@types/debug": "^4 <=4.3.x",
     "@types/fontkit": "2.0.x",
     "@types/lodash": "^4 <=4.18.x",
-    "@types/ms": "^2",
+    "@types/ms": "2.1.x",
     "@types/node": "22.x",
     "@types/pg": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
     "@types/react": "19.2.x",

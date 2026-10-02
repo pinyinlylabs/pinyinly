@@ -6342,7 +6342,7 @@ __metadata:
     "@types/debug": "npm:^4 <=4.3.x"
     "@types/fontkit": "npm:2.0.x"
     "@types/lodash": "npm:^4 <=4.18.x"
-    "@types/ms": "npm:^2"
+    "@types/ms": "npm:2.1.x"
     "@types/node": "npm:22.x"
     "@types/pg": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch"
     "@types/react": "npm:19.2.x"
@@ -10300,7 +10300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ms@npm:*, @types/ms@npm:^2, @types/ms@npm:~2.1.0":
+"@types/ms@npm:*, @types/ms@npm:2.1.x, @types/ms@npm:~2.1.0":
   version: 2.1.0
   resolution: "@types/ms@npm:2.1.0"
   checksum: 10c0/5ce692ffe1549e1b827d99ef8ff71187457e0eb44adbae38fdf7b9a74bae8d20642ee963c14516db1d35fa2652e65f47680fdf679dcbde52bbfadd021f497225
