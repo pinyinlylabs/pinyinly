@@ -1,5 +1,6 @@
 import { PylymarkTypewriter } from "@/client/ui/PylymarkTypewriter";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

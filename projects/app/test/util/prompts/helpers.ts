@@ -1,14 +1,21 @@
 import type {
   ActorSpec,
+  HanziCharacter,
   LocationSetKey,
   LocationSetSpec,
   LocationSpec,
 } from "#data/model.js";
-import type { ChatPrompt, ChatPromptMessage } from "#server/lib/ai.js";
+import { matchAllPinyinUnits, pinyinNumericToDiacritic } from "#data/pinyin.js";
+import type { ChatPromptLike, ChatPromptMessage } from "#server/lib/ai.js";
 import { zodResponseFormatJson } from "#server/lib/ai.js";
 import type { ImagePrompt, ImagePromptMessage } from "#server/lib/gemini.js";
+import type { CedictDictionary } from "#test/data/cedict.ts";
+import type { CompleteHskVocabulary } from "#test/data/completeHskVocabulary.ts";
+import type { CharacterCoreMeaningsSpecInputType } from "#util/prompts/characterCoreMeanings.js";
 import type { LocationSpecWithDetail } from "#util/prompts/locationSpec.js";
 import { regExpEscape } from "#util/regExp.js";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
 import { expect } from "vitest";
 import type { z } from "zod";
@@ -25,7 +32,7 @@ function fmtChatPromptMessagesForSnapshot(
 }
 
 export function fmtChatPromptForSnapshot<Schema extends z.ZodType>(
-  prompt: ChatPrompt<Schema>,
+  prompt: ChatPromptLike<Schema, unknown>,
 ) {
   // Make sure a title is defined.
   const meta = prompt.schema.meta();
@@ -254,4 +261,58 @@ export function makeActorSpec(actorName: string): ActorSpec {
   return {
     nickname: actorName,
   };
+}
+
+export function buildCharacterCoreMeaningsUsages(
+  character: HanziCharacter,
+  cedictDictionary: CedictDictionary,
+  completeHskVocabulary: CompleteHskVocabulary,
+): CharacterCoreMeaningsSpecInputType[`usages`] {
+  const usages = [];
+  for (const vendorItem of completeHskVocabulary) {
+    if (vendorItem.simplified.includes(character)) {
+      for (const form of vendorItem.forms) {
+        // We don't want to include proper nouns because the meaning of the
+        // character in a proper noun may not be relevant to the character's
+        // general meaning. For example, the character 兴 in 复兴 means
+        // "revival" but in 兴奋 it means "excited". We want to avoid
+        // including proper nouns because they may not reflect the general
+        // meaning of the character.
+        const isProperNoun = /[A-Z]/u.test(
+          nonNullable(form.transcriptions.pinyin[0]),
+        );
+        if (isProperNoun) {
+          continue;
+        }
+
+        // The completeHskVocabulary data has the wrong pinyin convention,
+        // it uses spaces between syllables rather than spaces between
+        // words, so we lookup the hanzi from CEDICT and use those pinyin
+        // values instead.
+        const entries = cedictDictionary.lookupHanzi(vendorItem.simplified);
+
+        const equalPinyinEntries = entries.filter((entry) =>
+          isEqual(
+            matchAllPinyinUnits(pinyinNumericToDiacritic(entry.pinyin)),
+            matchAllPinyinUnits(form.transcriptions.pinyin),
+          ),
+        );
+        invariant(
+          equalPinyinEntries.length === 1,
+          `expected exactly one CEDICT entry for ${vendorItem.simplified} with pinyin ${form.transcriptions.pinyin}, but found ${equalPinyinEntries.length}`,
+        );
+
+        const pinyin = pinyinNumericToDiacritic(
+          nonNullable(equalPinyinEntries[0]).pinyin,
+        );
+
+        usages.push({
+          hanzi: vendorItem.simplified,
+          pinyin: pinyin,
+        });
+      }
+    }
+  }
+
+  return usages;
 }

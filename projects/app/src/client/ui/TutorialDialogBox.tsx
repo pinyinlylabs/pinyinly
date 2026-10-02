@@ -1,7 +1,7 @@
 import { Icon } from "@/client/ui/Icon";
 import { SpeechBubble } from "@/client/ui/SpeechBubble";
 import { useState } from "react";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import {
   Easing,
   interpolate,

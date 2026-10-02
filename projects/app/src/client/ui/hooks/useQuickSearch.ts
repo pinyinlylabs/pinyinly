@@ -1,4 +1,4 @@
-import type { DictionarySearchEntry } from "@/client/query";
+import type { DictionaryCollectionEntry } from "@/client/query";
 import type {
   HanziText,
   HanziWord,
@@ -8,7 +8,7 @@ import type {
 import {
   matchAllPinyinUnits,
   normalizePinyinText,
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
   splitPinyinUnitTone,
 } from "@/data/pinyin";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -47,16 +47,16 @@ export type QuickSearchResult =
   | QuickSearchWikiDirectResult
   | QuickSearchPinyinSoundResult;
 
-type DictionarySearchOptions = {
+type QuickSearchOptions = {
   limit?: number;
 };
 
 const hanziQueryRegex = /[\u3400-\u9FFF]/u;
 
 export function quickSearch(
-  entries: readonly DictionarySearchEntry[],
+  entries: readonly DictionaryCollectionEntry[],
   query: string,
-  options: DictionarySearchOptions = {},
+  options: QuickSearchOptions = {},
 ): readonly QuickSearchResult[] {
   const trimmedQuery = query.trim();
   if (trimmedQuery.length === 0) {
@@ -99,7 +99,7 @@ export function quickSearch(
 }
 
 function findHanziWordMatches(
-  entries: readonly DictionarySearchEntry[],
+  entries: readonly DictionaryCollectionEntry[],
   params: {
     query: string;
     lowerQuery: string;
@@ -205,14 +205,15 @@ function normalizePinyinForSearch(value: string): {
   diacritic: string;
   toneless: string;
 } {
-  const diacritic = normalizePinyinText(value).toLowerCase();
+  const diacritic = normalizePinyinText(value).toLowerCase() as PinyinText;
   const units = matchAllPinyinUnits(diacritic);
   if (units.length === 0) {
     return { diacritic, toneless: diacritic };
   }
 
   const tonelessUnits = units.map(
-    (unit) => splitPinyinUnitTone(normalizePinyinUnit(unit)).tonelessUnit,
+    (unit) =>
+      splitPinyinUnitTone(pinyinUnitNumericToDiacritic(unit)).tonelessUnit,
   );
 
   return {
@@ -253,12 +254,12 @@ function collapseWhitespace(value: string): string {
  */
 export function useQuickSearch(
   query: string,
-  options: DictionarySearchOptions = {},
+  options: QuickSearchOptions = {},
 ): readonly QuickSearchResult[] {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
-    (q) => q.from({ entry: db.dictionarySearch }),
-    [db.dictionarySearch],
+  const { data: dictionaryEntries } = useLiveQuery(
+    (q) => q.from({ entry: db.dictionaryCollection }),
+    [db.dictionaryCollection],
   );
-  return quickSearch(dictionarySearchEntries, query, options);
+  return quickSearch(dictionaryEntries, query, options);
 }

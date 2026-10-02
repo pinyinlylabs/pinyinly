@@ -6,7 +6,9 @@ import {
 } from "@/util/strokeSpecSvgProcessor";
 import { parseStrokeSpec } from "@/util/strokeSpec";
 import { useEffect, useRef, useState } from "react";
-import { Platform, Switch, Text, TextInput, View } from "react-native";
+import { Platform, Switch, TextInput } from "react-native";
+import { View } from "@/client/ui/View";
+import { Text } from "@/client/ui/Text";
 
 interface Example {
   title: string;

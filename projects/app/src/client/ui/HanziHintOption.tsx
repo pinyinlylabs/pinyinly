@@ -1,6 +1,8 @@
 import type { AssetId } from "@/data/model";
 import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
 import { parseHintText } from "./hintText";

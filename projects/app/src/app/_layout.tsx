@@ -18,7 +18,6 @@ import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
 import { TooltipProvider } from "@/client/ui/TooltipProvider";
-import "@/global.css";
 import * as Sentry from "@sentry/react-native";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Stack, useNavigationContainerRef } from "expo-router";

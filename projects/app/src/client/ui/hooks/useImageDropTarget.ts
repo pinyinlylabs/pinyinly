@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { View } from "react-native";
+import type { View } from "@/client/ui/View";
 
 interface UseImageDropTargetProps {
   disabled: boolean;

@@ -1,7 +1,8 @@
 import type { PinyinSoundId, AssetId } from "@/data/model";
 import { nullIfEmpty } from "@/util/unicode";
 import type { ViewProps } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { FramedAssetImage } from "./ImageFrame";
 import { ToneLabelText } from "./ToneLabelText";

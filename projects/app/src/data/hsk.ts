@@ -1,7 +1,7 @@
-import type { HskLevel } from "./model";
+import type { Hsk30Level } from "./model";
 
-export function hskLevelToNumber(hsk: HskLevel): number {
-  switch (hsk) {
+export function hsk30LevelToNumber(level: Hsk30Level): number {
+  switch (level) {
     case `1`:
       return 1;
     case `2`:

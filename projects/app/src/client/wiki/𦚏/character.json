@@ -1,5 +1,9 @@
 {
+  "decompositions": {
+    "⿱立月": ["", ""]
+  },
   "hanzi": "𦚏",
-  "svg": { "strokes": 9 },
-  "decompositions": { "⿱立月": ["", ""] }
+  "svg": {
+    "strokes": 9
+  }
 }

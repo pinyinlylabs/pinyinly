@@ -1,6 +1,12 @@
-import type { PinyinUnit } from "#data/model.js";
+import type {
+  HanziText,
+  PinyinNumericText,
+  PinyinText,
+  PinyinUnit,
+} from "#data/model.js";
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
+  applyToneSandhi,
   defaultPinyinSoundExamples,
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
@@ -16,7 +22,8 @@ import {
   matchAllPinyinUnits,
   matchAllPinyinUnitsWithIndexes,
   normalizePinyinText,
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
+  pinyinNumericToDiacritic,
   pinyinUnitCount,
   pinyinUnitId,
   pinyinUnitPattern,
@@ -39,7 +46,7 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   loadPylyPinyinChart();
 });
 
-describe(`normalizePinyinUnit fixtures`, () => {
+describe(`pinyinUnitNumericToDiacritic fixtures`, () => {
   // Rules: (from https://en.wikipedia.org/wiki/Pinyin)
   // 1. If there is an a or an e, it will take the tone mark
   // 2. If there is an ou, then the o takes the tone mark
@@ -146,8 +153,49 @@ describe(`normalizePinyinUnit fixtures`, () => {
     // er
     [`er2`, `ér`],
     [`er5`, `er`],
+
+    // Ou
+    [`Ou1`, `Ōu`],
+    [`Ou2`, `Óu`],
+    [`Ou3`, `Ǒu`],
+    [`Ou4`, `Òu`],
+    [`Ou5`, `Ou`],
+
+    // Uppercase vowels
+    [`A1`, `Ā`],
+    [`E2`, `É`],
+    [`I3`, `Ǐ`],
+    [`O4`, `Ò`],
+    [`U1`, `Ū`],
+    [`Ü3`, `Ǚ`],
+    [`V2`, `Ǘ`],
+    [`U:4`, `Ǜ`],
+    [`V5`, `Ü`],
+    [`Nv3`, `Nǚ`],
+
+    // Capitalized syllables
+    [`Er2`, `Ér`],
+    [`Ai4`, `Ài`],
+    [`Ao3`, `Ǎo`],
+    [`An1`, `Ān`],
+    [`Ang2`, `Áng`],
+    [`Ong1`, `Ōng`],
+    [`Liu2`, `Liú`],
+    [`Gui4`, `Guì`],
+    [`Jiang1`, `Jiāng`],
+    [`Wo3`, `Wǒ`],
+
+    // All caps
+    [`HAO3`, `HǍO`],
+    [`OU1`, `ŌU`],
+    [`LIU2`, `LIÚ`],
+    [`NU:3`, `NǙ`],
+
+    // Leaves uppercase diacritic forms as-is
+    [`Ōu`, `Ōu`],
+    [`Nǚ`, `Nǚ`],
   ] as const)(`%s → %s`, ([input, expected]) => {
-    expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
+    expect(pinyinUnitNumericToDiacritic(input as PinyinUnit)).toEqual(expected);
   });
 });
 
@@ -188,6 +236,35 @@ describe(`normalizePinyinText fixtures`, () => {
   });
 });
 
+describe(`pinyinNumericToDiacritic fixtures`, () => {
+  test.for([
+    // Concatenated with no separator, next syllable starts with a vowel that
+    // requires disambiguation.
+    [`jin4er2`, `jìn’ér`],
+    [`hei1an4`, `hēi’àn`],
+    // Source already uses a straight apostrophe as a separator; normalized to
+    // the curly form used elsewhere.
+    [`yin1'er2`, `yīn’ér`],
+    [`nu:3'er2`, `nǚ’ér`],
+    // Next syllable doesn't start with a/o/e, so no apostrophe is needed.
+    [`bu2yao4`, `búyào`],
+    // Space already separates the syllables, so no apostrophe is added.
+    [`yi1 zhen4`, `yī zhèn`],
+    // Existing hyphen already separates the syllables, so no apostrophe is
+    // added.
+    [`gao1xin1-ji4shu4`, `gāoxīn-jìshù`],
+    // Multiple ambiguous boundaries in the same word.
+    [`xi1an1'an1`, `xī’ān’ān`],
+    // Capitalized syllables
+    [`Xi1an1`, `Xī’ān`],
+    [`Ou1zhou1`, `Ōuzhōu`],
+  ] as const)(`%s → %s`, ([input, expected]) => {
+    expect(pinyinNumericToDiacritic(input as PinyinNumericText)).toEqual(
+      expected,
+    );
+  });
+});
+
 describe(`splitPinyinUnitTone fixtures`, () => {
   test.for([
     [`niú`, [`niu`, 2]],
@@ -203,11 +280,129 @@ describe(`splitPinyinUnitTone fixtures`, () => {
     [`nǜ`, [`nü`, 4]],
     [`nü`, [`nü`, 5]],
     [`Yīng`, [`Ying`, 1]],
+    [`Ōu`, [`Ou`, 1]],
+    [`Ǎi`, [`Ai`, 3]],
+    [`Ér`, [`Er`, 2]],
+    [`Nǚ`, [`Nü`, 3]],
+    [`HǍO`, [`HAO`, 3]],
+    [`LIÚ`, [`LIU`, 2]],
   ] as const)(`%s → %s`, ([input, [tonelessUnit, tone]]) => {
     expect(splitPinyinUnitTone(input as PinyinUnit)).toEqual({
       tonelessUnit,
       tone,
     });
+  });
+});
+
+describe(`applyToneSandhi fixtures`, () => {
+  test.for([
+    // Three consecutive tone-3 syllables: paired from the right (很好),
+    // leaving the leading syllable (我) unpaired and unchanged.
+    [`我很好`, `wǒ hěnhǎo`, `wǒ hénhǎo`],
+    // No sandhi-triggering context.
+    [`猫`, `māo`, `māo`],
+    // 一 before tone 4 → tone 2.
+    [`一阵`, `yīzhèn`, `yízhèn`],
+    [`一个`, `yīgè`, `yígè`],
+    [`一样`, `yīyàng`, `yíyàng`],
+
+    // 一 before tone 1/2/3 → tone 4.
+    [`一天`, `yītiān`, `yìtiān`],
+    [`一年`, `yīnián`, `yìnián`],
+    [`一点`, `yīdiǎn`, `yìdiǎn`],
+    [`一些`, `yīxiē`, `yìxiē`],
+    [`一起`, `yīqǐ`, `yìqǐ`],
+    [`一条`, `yītiáo`, `yìtiáo`],
+
+    // Multiple 一 in one phrase.
+    [`一天一夜`, `yītiān yīyè`, `yìtiān yíyè`],
+
+    // Ordinal 一 is unchanged.
+    [`第一`, `dìyī`, `dìyī`],
+    [`第一天`, `dìyī tiān`, `dìyī tiān`],
+
+    // 不 before tone 4 → tone 2.
+    [`不要`, `bùyào`, `búyào`],
+    [`不是`, `bùshì`, `búshì`],
+    [`不会`, `bùhuì`, `búhuì`],
+
+    // 不 before tone 1/2/3 is unchanged.
+    [`不听`, `bùtīng`, `bùtīng`],
+    [`不能`, `bùnéng`, `bùnéng`],
+    [`不好`, `bùhǎo`, `bùhǎo`],
+
+    // Multiple 不.
+    [`不是不好`, `bùshì bùhǎo`, `búshì bùhǎo`],
+
+    // Third-tone sandhi.
+    [`你好`, `nǐhǎo`, `níhǎo`],
+    [`很好`, `hěnhǎo`, `hénhǎo`],
+    [`可以`, `kěyǐ`, `kéyǐ`],
+    [`水果`, `shuǐguǒ`, `shuíguǒ`],
+
+    // No sandhi.
+    [`猫`, `māo`, `māo`],
+    [`中国`, `Zhōngguó`, `Zhōngguó`],
+
+    // 一 before each possible following tone.
+    [`一杯`, `yībēi`, `yìbēi`], // 1 → 一 becomes 4
+    [`一人`, `yīrén`, `yìrén`], // 2 → 一 becomes 4
+    [`一本`, `yīběn`, `yìběn`], // 3 → 一 becomes 4
+    [`一半`, `yībàn`, `yíbàn`], // 4 → 一 becomes 2
+
+    // 一 at the end of a non-ordinal expression.
+    [`十一`, `shíyī`, `shíyī`],
+
+    // Ordinal 一 should stay tone 1 even when followed by a sandhi-triggering tone.
+    [`第一名`, `dìyī míng`, `dìyī míng`],
+    [`第一步`, `dìyī bù`, `dìyī bù`],
+
+    // Multiple 一 with different outcomes.
+    [`一年一度`, `yīnián yīdù`, `yìnián yídù`],
+    [`一心一意`, `yīxīn yīyì`, `yìxīn yíyì`],
+
+    // 不 before each possible following tone.
+    [`不吃`, `bùchī`, `bùchī`], // 1
+    [`不来`, `bùlái`, `bùlái`], // 2
+    [`不想`, `bùxiǎng`, `bùxiǎng`], // 3
+    [`不对`, `bùduì`, `búduì`], // 4
+
+    // Multiple 不 with independent outcomes.
+    [`不吃不喝`, `bùchī bùhē`, `bùchī bùhē`],
+    [`不去不行`, `bùqù bùxíng`, `búqù bùxíng`],
+
+    // Third-tone sandhi should apply within a word.
+    [`总统`, `zǒngtǒng`, `zóngtǒng`],
+    [`管理`, `guǎnlǐ`, `guánlǐ`],
+
+    // Third-tone sandhi across a clear word boundary, if your function is
+    // intentionally allowed to do that.
+    [`我想`, `wǒ xiǎng`, `wó xiǎng`],
+
+    // Two separate 3+3 pairs.
+    [`你好很好`, `nǐhǎo hěnhǎo`, `níhǎo hénhǎo`],
+
+    // Tone 3 followed by a non-tone-3 syllable: unchanged.
+    [`好吃`, `hǎochī`, `hǎochī`],
+    [`很忙`, `hěnmáng`, `hěnmáng`],
+
+    // Interaction: 一 sandhi creates tone 4, but shouldn't then trigger
+    // some accidental second pass.
+    [`一点`, `yīdiǎn`, `yìdiǎn`],
+
+    // Interaction: 不 sandhi creates tone 2 and should remain there.
+    [`不要`, `bùyào`, `búyào`],
+
+    // Punctuation/phrase boundaries, if supported.
+    [`你好，我很好`, `nǐhǎo, wǒ hěnhǎo`, `níhǎo, wǒ hénhǎo`],
+
+    // Other
+    [`一无所有`, `yīwúsuǒyǒu`, `yìwúsuóyǒu`],
+    [`可不是`, `kěbushì`, `kěbushì`],
+  ] as const)(`%s (%s) → %s`, ([hanzi, pinyin, expected]) => {
+    expect(applyToneSandhi(hanzi as HanziText, pinyin as PinyinText)).toEqual(
+      expected,
+    );
   });
 });
 
@@ -308,7 +503,17 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`ni3`, [0, `ni3`]],
   [`ni4`, [0, `ni4`]],
   [`ni5`, [0, `ni5`]],
+  [`ng`, [0, `ng`]],
+  [`ng2`, [0, `ng2`]],
+  [`ng3`, [0, `ng3`]],
+  [`ng4`, [0, `ng4`]],
+  [`ng5`, [0, `ng5`]],
+  [`ng`, [0, `ng`]],
+  [`ńg`, [0, `ńg`]],
+  [`ňg`, [0, `ňg`]],
+  [`ǹg`, [0, `ǹg`]],
   [`ḿ`, [0, `ḿ`]],
+  [`téng`, [0, `téng`]],
   [`Ḿ`, [0, `Ḿ`]],
   [`r`, [0, `r`]],
   // Words
@@ -328,10 +533,18 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`xī'ān`, [0, `xī`, 3, `ān`]],
   [`xi1'an1`, [0, `xi1`, 4, `an1`]],
   [`Xi1'an1`, [0, `Xi1`, 4, `an1`]],
+  [`gǎnēn`, [0, `gǎn`, 3, `ēn`]], // Appears in HSK without a '
+  [`téngài`, [0, `téng`, 4, `ài`]], // There is no 'tén' in pinyin, so the only valid split is 'téng'ài'
+  [`ténggen`, [0, `téng`, 4, `gen`]],
+  [`Ōuzhōu`, [0, `Ōu`, 2, `zhōu`]],
   // Sentences
   [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
   [`Bù yīhuǐ'er`, [0, `Bù`, 3, `yī`, 5, `huǐ`, 9, `er`]],
   [`bù yīhuǐr`, [0, `bù`, 3, `yī`, 5, `huǐ`, 8, `r`]],
+  [`cóngér`, [0, `cóng`, 4, `ér`]],
+  [`cóng’ér`, [0, `cóng`, 5, `ér`]],
+  [`jìn’ér`, [0, `jìn`, 4, `ér`]],
+  [`kǔjìn-gānlái`, [0, `kǔ`, 2, `jìn`, 6, `gān`, 9, `lái`]],
 ];
 
 describe(`matchAllPinyinUnits suite`, () => {
@@ -357,25 +570,21 @@ describe(`matchAllPinyinUnits suite`, () => {
     }
   });
 
-  test(`fixtures`, () => {
-    for (const [input, expected] of pinyinWithIndexesFixtures) {
-      const actual = matchAllPinyinUnits(input);
-      expect([input, actual]).toEqual([
-        input,
-        expected
-          // strip out the indexes to re-use the same fixture data
-          .filter((_, i) => i % 2 === 1),
-      ]);
-    }
+  test.for(pinyinWithIndexesFixtures)(`$0`, ([input, expected]) => {
+    const actual = matchAllPinyinUnits(input as PinyinText);
+    expect([input, actual]).toEqual([
+      input,
+      expected
+        // strip out the indexes to re-use the same fixture data
+        .filter((_, i) => i % 2 === 1),
+    ]);
   });
 });
 
 describe(`matchAllPinyinUnitsWithIndexes suite`, () => {
-  test(`fixtures`, () => {
-    for (const [input, expected] of pinyinWithIndexesFixtures) {
-      const actual = matchAllPinyinUnitsWithIndexes(input);
-      expect([input, actual]).toEqual([input, expected]);
-    }
+  test.for(pinyinWithIndexesFixtures)(`$0`, ([input, expected]) => {
+    const actual = matchAllPinyinUnitsWithIndexes(input);
+    expect([input, actual]).toEqual([input, expected]);
   });
 });
 
@@ -612,7 +821,7 @@ describe(`pyly pinyin chart`, async () => {
           continue;
         }
 
-        expect(pinyin).toEqual(normalizePinyinUnit(pinyin));
+        expect(pinyin).toEqual(pinyinUnitNumericToDiacritic(pinyin));
 
         if (/^[1-5]$/u.test(soundId)) {
           expect(parts.tone).toEqual(Number(soundId));

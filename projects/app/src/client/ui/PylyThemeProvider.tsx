@@ -1,6 +1,7 @@
 import { DefaultTheme, ThemeProvider } from "expo-router";
 import type { ReactNode } from "react";
-import { useColorScheme, View } from "react-native";
+import { useColorScheme } from "react-native";
+import { View } from "@/client/ui/View";
 import { VisualViewportCssVariables } from "./VisualViewportCssVariables";
 import { Theme } from "./Theme";
 

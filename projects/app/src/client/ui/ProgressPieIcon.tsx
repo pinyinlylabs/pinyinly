@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { Circle, Svg } from "react-native-svg";
 
 export function ProgressPieIcon({

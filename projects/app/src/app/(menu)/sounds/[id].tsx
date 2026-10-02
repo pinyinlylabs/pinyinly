@@ -13,13 +13,11 @@ import {
   usePinyinSoundLocations,
 } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
-import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { PinyinSoundNameText } from "@/client/ui/PinyinSoundNameText";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import { SettingText } from "@/client/ui/SettingText";
-import { SoundNameEditModal } from "@/client/ui/SoundNameEditModal";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { pickSoundUsageExamplesForEntries } from "@/client/ui/soundUsageExamples";
@@ -42,13 +40,14 @@ import {
   getToneSoundNameFromSetKey,
   pinyinSoundLocationSetting,
   pinyinSoundGroupNameTextSetting,
-  pinyinSoundNameTextSetting,
   pinyinSoundLocationSetKeySetting,
 } from "@/data/userSettings";
 import { and, eq, gte, inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { intersperse } from "@/client/react";
 
@@ -84,6 +83,15 @@ export default function SoundIdPage() {
   const isToneSound = isToneSoundId(id);
   const isFinalSound = isFinalSoundId(id);
   const placeDirectory = usePinyinSoundLocations();
+  const actorDirectory = usePinyinSoundActors();
+  const selectedInitialActorId =
+    actorDirectory.soundActorIdBySoundId.get(id) ?? null;
+  const selectedInitialActor =
+    selectedInitialActorId == null
+      ? null
+      : (actorDirectory.actors.find(
+          (entry) => entry.actorId === selectedInitialActorId,
+        ) ?? null);
   const toneSetKeySetting = useUserSetting(
     isToneSound
       ? {
@@ -127,9 +135,6 @@ export default function SoundIdPage() {
       ? null
       : selectedFinalPlaceDisplay.name;
 
-  const [isEditSoundNameModalOpen, setIsEditSoundNameModalOpen] =
-    useState(false);
-
   const label = getPinyinSoundLabel(id, chart);
   const examplePinyins = defaultPinyinSoundExamples[id] ?? [];
   const audioSourcesByPinyinMap = getAudioSourcesByPinyinMap();
@@ -167,35 +172,20 @@ export default function SoundIdPage() {
           <Text className="pyly-ref pyly-body-subheading text-fg">
             {toneSoundName ?? `Select a set key below`}
           </Text>
+        ) : isFinalSound ? (
+          <Text className="pyly-ref pyly-body-subheading text-fg">
+            {finalDisplayName ?? `Select a location below`}
+          </Text>
+        ) : selectedInitialActor?.name == null ? (
+          <Text className="pyly-ref pyly-body-subheading text-fg">
+            Select an actor below
+          </Text>
         ) : (
-          <InlineEditableSettingText
-            textClassName="pyly-body-title"
-            setting={pinyinSoundNameTextSetting}
-            settingKey={{ soundId: id }}
-            placeholder="Name this sound"
-            readonly={isFinalSound}
-            renderDisplay={() => {
-              if (!isFinalSound) {
-                return null;
-              }
-
-              return (
-                <Text className="pyly-ref pyly-body-subheading text-fg">
-                  {finalDisplayName ?? `Select a location below`}
-                </Text>
-              );
-            }}
-          />
-        )}
-
-        {isFinalSound || isToneSound ? null : (
-          <RectButton
-            onPress={() => {
-              setIsEditSoundNameModalOpen(true);
-            }}
-            variant="bare"
-            iconStart="pencil"
-          />
+          <Link href={`/actors/${selectedInitialActor.actorId}`}>
+            <Text className="pyly-ref pyly-body-subheading text-fg">
+              {selectedInitialActor.name}
+            </Text>
+          </Link>
         )}
       </View>
 
@@ -239,16 +229,6 @@ export default function SoundIdPage() {
       </View>
 
       <SoundUsageExamplesSection pinyinSoundId={id} />
-
-      {isFinalSound || isToneSound ? null : (
-        <SoundNameEditModal
-          soundId={id}
-          isOpen={isEditSoundNameModalOpen}
-          onClose={() => {
-            setIsEditSoundNameModalOpen(false);
-          }}
-        />
-      )}
     </View>
   );
 }
@@ -664,10 +644,10 @@ function SoundUsageExamplesSection({
   pinyinSoundId: PinyinSoundId;
 }) {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(eq(entry.hanziCharacterCount, 1), gte(entry.glossCount, 1)),
         )
@@ -681,10 +661,10 @@ function SoundUsageExamplesSection({
           pinyin: entry.pinyin,
           hsk: entry.hsk,
         })),
-    [db.dictionarySearch],
+    [db.dictionaryCollection],
   );
   const usageExamples = pickSoundUsageExamplesForEntries({
-    allEntries: dictionarySearchEntries,
+    allEntries: dictionaryEntries,
     limit: 5,
     soundId: pinyinSoundId,
   });
@@ -697,7 +677,7 @@ function SoundUsageExamplesSection({
     <WikiTitledBox title="Usage examples" className="mt-10">
       <View className="p-4">
         <CompactWordRows
-          dictionarySearchEntries={usageExamples.map((entry) => ({
+          dictionaryEntries={usageExamples.map((entry) => ({
             ...entry,
             pinyin: entry.pinyin ?? null,
             hsk: entry.hsk ?? null,

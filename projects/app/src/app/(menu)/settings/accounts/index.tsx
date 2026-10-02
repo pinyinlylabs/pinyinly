@@ -3,7 +3,8 @@ import { useAuth } from "@/client/auth";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function AccountsSettingsPage() {
   const auth = useAuth();

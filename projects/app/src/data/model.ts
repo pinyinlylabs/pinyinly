@@ -1,6 +1,8 @@
 import type { Rating } from "@/util/fsrs";
+import { deepReadonly } from "@pinyinly/lib/collections";
 import type { IsEqual } from "@pinyinly/lib/types";
 import type { Interval } from "date-fns";
+import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 
 const isString = (x: unknown): x is string => typeof x === `string`;
@@ -388,7 +390,10 @@ const skillKindSchema = z.enum({
 export const SkillKind = skillKindSchema.enum;
 export type SkillKind = z.infer<typeof skillKindSchema>;
 
-export const hskLevelSchema = z.enum({
+/**
+ * HSK 3.0 levels
+ */
+export const hsk30LevelSchema = z.enum({
   "1": `1`,
   "2": `2`,
   "3": `3`,
@@ -397,8 +402,8 @@ export const hskLevelSchema = z.enum({
   "6": `6`,
   "7-9": `7-9`,
 });
-export const HskLevel = hskLevelSchema.enum;
-export type HskLevel = z.infer<typeof hskLevelSchema>;
+export const Hsk30Level = hsk30LevelSchema.enum;
+export type Hsk30Level = z.infer<typeof hsk30LevelSchema>;
 
 // Adopted from https://github.com/ivankra/hsk30
 export const partOfSpeechSchema = z.enum({
@@ -888,6 +893,62 @@ export function buildIdsNodeSchema<T extends z.ZodType>(
   return depth5Schema as z.ZodType<IdsNode<z.infer<T>>>;
 }
 
+export const characterCurriculumMeaningBranchSchema = z.object({
+  gloss: z.string(),
+  description: z.string().optional(),
+  occurrences: z
+    .record(hanziTextSchema, pinyinTextSchema)
+    .describe(
+      `Occurrences of this meaning, keyed by hanzi with their pinyin. e.g. { "你好": "nǐhǎo" }`,
+    ),
+});
+
+/**
+ * Curriculum Meanings are the semantic units used by Pinyinly's teaching
+ * curriculum. They are deliberately different from dictionary senses.
+ *
+ * A dictionary describes how a character is actually used in the language,
+ * often splitting it into many fine-grained senses. A Curriculum Meaning
+ * instead groups one or more related dictionary senses into a single,
+ * memorable concept that is easier for learners to understand and remember.
+ *
+ * Every Curriculum Meaning is associated with a single pronunciation and acts
+ * as a conceptual "anchor" from which more specific branches and vocabulary
+ * naturally grow. The goal is pedagogical clarity rather than lexicographic
+ * precision.
+ *
+ * This distinction allows the curriculum to remain stable even if the
+ * underlying dictionary changes. Dictionary senses can be merged, split, or
+ * remapped over time without changing the conceptual structure presented to
+ * learners.
+ *
+ * Information architecture:
+ *
+ *   Character
+ *     ├─ Dictionary senses      (reference data)
+ *     ├─ Curriculum meanings    (teaching model)
+ *     │    ├─ branches
+ *     │    └─ occurrences
+ *     └─ Mnemonics
+ *
+ * Dictionary data answers "What meanings does this character have?".
+ * Curriculum Meanings answer "What is the best way to teach those meanings?".
+ */
+export const characterCurriculumMeaningSchema = z.object({
+  id: hanziWordSchema,
+  gloss: z.string(),
+  pinyin: pinyinUnitSchema,
+  hsk30: hsk30LevelSchema.optional(),
+  pinyinExceptions: z
+    .record(hanziTextSchema, pinyinTextSchema)
+    .optional()
+    .describe(
+      `Exceptions to the default pinyin for this meaning, keyed by hanzi, e.g. { "你好": "nǐhǎo" }`,
+    ),
+  description: z.string().optional(),
+  branches: z.array(characterCurriculumMeaningBranchSchema).optional(),
+});
+
 export const hanziStrokeColorSchema = z.enum([
   `blue`,
   `yellow`,
@@ -949,6 +1010,13 @@ export interface CharacterMnemonicIdsRow {
   ids: HanziIds;
 }
 
+export interface CharacterCollectionRow {
+  hanzi: HanziCharacter;
+  isStructural: boolean;
+  strokes: number;
+  componentFormOf: HanziCharacter | null;
+}
+
 export interface MnemonicHanziComponent {
   /**
    * Could be `null` if there's no unicode character to represent this component
@@ -961,7 +1029,7 @@ export interface MnemonicHanziComponent {
   color?: HanziStrokeColor | null;
 }
 
-export const wikiCharacterSvgSchema = z.strictObject({
+export const characterJsonSvgSchema = z.strictObject({
   /**
    * Stroke information, ideally SVG paths but otherwise just the count.
    */
@@ -994,12 +1062,12 @@ export const wikiCharacterSvgSchema = z.strictObject({
     ),
 });
 
-export type WikiCharacterSvg = z.infer<typeof wikiCharacterSvgSchema>;
+export type CharacterJsonSvg = z.infer<typeof characterJsonSvgSchema>;
 
 /**
  * Schema for character.json files.
  */
-export const wikiCharacterDataSchema = z.strictObject({
+export const characterJsonSchema = z.strictObject({
   /**
    * The hanzi character represented by this character (e.g. 看).
    */
@@ -1007,7 +1075,7 @@ export const wikiCharacterDataSchema = z.strictObject({
   /**
    * SVG-related data (strokes, medians, and precomputed segment paths).
    */
-  svg: wikiCharacterSvgSchema,
+  svg: characterJsonSvgSchema,
   /**
    * The simplified form of this character, if it is a traditional form.
    *
@@ -1094,11 +1162,15 @@ export const wikiCharacterDataSchema = z.strictObject({
         .optional(),
     })
     .optional(),
+  /**
+   * The meanings that are taught for this character in the curriculum.
+   */
+  curriculumMeanings: z.array(characterCurriculumMeaningSchema).optional(),
 });
 
-export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
+export type CharacterJson = z.infer<typeof characterJsonSchema>;
 
-export const charactersSchema = z.array(
+export const charactersJsonSchema = z.array(
   z.tuple([
     hanziCharacterSchema,
     z.object({
@@ -1124,13 +1196,16 @@ export const charactersSchema = z.array(
         .describe(
           `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
         ),
+      strokes: z.number().describe(`the number of strokes in this hanzi`),
       canonicalForm: hanziCharacterSchema.optional(),
     }),
   ]),
 );
 
-export type CharactersKey = z.infer<typeof charactersSchema.element>[0];
-export type CharactersValue = z.infer<typeof charactersSchema.element>[1];
+export type CharactersJsonKey = z.infer<typeof charactersJsonSchema.element>[0];
+export type CharactersJsonValue = z.infer<
+  typeof charactersJsonSchema.element
+>[1];
 
 /**
  * Allowed image MIME types for uploads and AI generation.
@@ -1153,3 +1228,143 @@ export interface AiReferenceImage {
   data: string; // Base64-encoded image data
   mimeType: AllowedImageMimeType;
 }
+
+/**
+ * The type of the dictionary index returned by {@link loadDictionary}.
+ */
+export interface Dictionary {
+  lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
+  lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
+  lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
+  lookupPinyinUnit(pinyinUnit: PinyinUnit): readonly HanziCharacter[];
+  isStructuralHanzi(hanzi: HanziCharacter): boolean;
+  allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
+  allHanziWords: readonly HanziWord[];
+  hsk1HanziWords: readonly HanziWord[];
+  hsk2HanziWords: readonly HanziWord[];
+  hsk3HanziWords: readonly HanziWord[];
+  hsk4HanziWords: readonly HanziWord[];
+  hsk5HanziWords: readonly HanziWord[];
+  hsk6HanziWords: readonly HanziWord[];
+  hsk7To9HanziWords: readonly HanziWord[];
+}
+
+const parsePosPattern = new RegExp(
+  `^(?:` +
+    [
+      `(?<noun>noun|名|n)`,
+      `(?<verb>verb|动|v)`,
+      `(?<adjective>adjective|形|adj|vs)`,
+      `(?<adverb>adverb|副|adv)`,
+      `(?<pronoun>pronoun|代|pron|det)`,
+      `(?<numeral>numeral|数|num)`,
+      `(?<measureWord>measureWord|量|m|mw)`,
+      `(?<preposition>preposition|介|prep)`,
+      `(?<conjunction>conjunction|连|conj)`,
+      `(?<auxiliaryWord>particle|助|aux|ptc)`,
+      `(?<interjection>interjection|叹|int)`,
+      `(?<prefix>prefix|前缀|pre)`,
+      `(?<suffix>suffix|后缀|suf)`,
+      `(?<phonetic>Phonetic|拟声|pho)`,
+    ].join(`|`) +
+    `)$`,
+  `iu`,
+);
+
+export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
+  const match = parsePosPattern.exec(pos);
+  if (match?.groups?.[`noun`] != null) {
+    return PartOfSpeech.Noun;
+  } else if (match?.groups?.[`verb`] != null) {
+    return PartOfSpeech.Verb;
+  } else if (match?.groups?.[`adjective`] != null) {
+    return PartOfSpeech.Adjective;
+  } else if (match?.groups?.[`adverb`] != null) {
+    return PartOfSpeech.Adverb;
+  } else if (match?.groups?.[`pronoun`] != null) {
+    return PartOfSpeech.Pronoun;
+  } else if (match?.groups?.[`numeral`] != null) {
+    return PartOfSpeech.Numeral;
+  } else if (match?.groups?.[`measureWord`] != null) {
+    return PartOfSpeech.MeasureWordOrClassifier;
+  } else if (match?.groups?.[`preposition`] != null) {
+    return PartOfSpeech.Preposition;
+  } else if (match?.groups?.[`conjunction`] != null) {
+    return PartOfSpeech.Conjunction;
+  } else if (match?.groups?.[`auxiliaryWord`] != null) {
+    return PartOfSpeech.AuxiliaryWordOrParticle;
+  } else if (match?.groups?.[`interjection`] != null) {
+    return PartOfSpeech.Interjection;
+  } else if (match?.groups?.[`prefix`] != null) {
+    return PartOfSpeech.Prefix;
+  } else if (match?.groups?.[`suffix`] != null) {
+    return PartOfSpeech.Suffix;
+  } else if (match?.groups?.[`phonetic`] != null) {
+    return PartOfSpeech.Phonetic;
+  }
+  return undefined;
+}
+
+const cedictCompactReferenceRe = /^\S+\s+\S+\s+\[\[.*?\]\]\s+[A-Za-z0-9]{5}$/u;
+
+export const cedictReferenceSchema = z
+  .string()
+  .regex(cedictCompactReferenceRe, {
+    message: `CE-DICT reference must follow this format: traditional simplified [[pinyin]] NANOID`,
+  });
+
+export type CedictReference = z.infer<typeof cedictReferenceSchema>;
+
+export const hanziWordMeaningSchema = z
+  .object({
+    gloss: z.array(z.string()),
+    order: z
+      .number()
+      .optional()
+      .describe(`order of this meaning in the dictionary entry, first is 0`),
+    freq: z
+      .number()
+      .min(0)
+      .max(1)
+      .describe(
+        `normalized meaning frequency where higher means more common usage`,
+      )
+      .optional(),
+    pinyin: z
+      .array(pinyinTextSchema)
+      .describe(
+        `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
+      )
+      .nullable()
+      .optional(),
+    pos: z
+      .string()
+      .transform((x) => parsePartOfSpeech(x))
+      .optional(),
+    hsk: hsk30LevelSchema.optional(),
+    cedict: cedictReferenceSchema
+      .describe(`reference to the corresponding CE-DICT entry and sense`)
+      .optional(),
+    /**
+     * Character-by-character semantic decomposition of this word.
+     *
+     * Each entry references the dictionary sense used to explain the
+     * corresponding character's meaning within this word.
+     */
+    charSenses: z.array(hanziWordSchema.nullable()).optional(),
+  })
+  .strict();
+
+export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
+export type HanziWordWithMeaning = [HanziWord, HanziWordMeaning];
+
+export const dictionaryJsonMutableSchema = z
+  .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
+  .transform((x) => new Map(x));
+
+export type DictionaryJsonMutable = z.infer<typeof dictionaryJsonMutableSchema>;
+
+export const dictionaryJsonSchema =
+  dictionaryJsonMutableSchema.transform(deepReadonly);
+
+export type DictionaryJson = z.infer<typeof dictionaryJsonSchema>;

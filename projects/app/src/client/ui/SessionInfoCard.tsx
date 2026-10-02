@@ -3,7 +3,8 @@ import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useLiveQuery } from "@tanstack/react-db";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 type DeviceSession = UseAuth2Data[`activeDeviceSession`];
 

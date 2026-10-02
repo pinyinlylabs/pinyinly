@@ -1,8 +1,7 @@
 import { intersperse } from "@/client/react";
-import { isStructuralHanziQuery } from "@/client/query";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
-import { hskLevelToNumber } from "@/data/hsk";
+import { hsk30LevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
 import {
   arrayFilterUnique,
@@ -10,17 +9,15 @@ import {
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { HskLozenge } from "./HskLozenge";
 import { RectButton } from "./RectButton";
-import { StructuralLozenge } from "./StructuralLozenge";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { useDb } from "./hooks/useDb";
-import { isHanziCharacter } from "@/data/hanzi";
 
-export function WikiHanziHeaderOverview({
+export function WikiHanziWordHeaderOverview({
   hanzi,
   ...rest
 }: {
@@ -29,30 +26,27 @@ export function WikiHanziHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   const hskLevels = [
-    ...dictionarySearchEntries.map((entry) => entry.hsk),
-    ...dictionarySearchEntries.map((entry) => entry.hskFirstAppearance),
+    ...dictionaryEntries.map((entry) => entry.hsk),
+    ...dictionaryEntries.map((entry) => entry.hskFirstAppearance),
   ]
     .filter((x) => x != null)
     .filter(arrayFilterUnique())
-    .sort(sortComparatorNumber(hskLevelToNumber));
-  const pinyins = dictionarySearchEntries
+    .sort(sortComparatorNumber(hsk30LevelToNumber));
+  const pinyins = dictionaryEntries
     .map((entry) => entry.pinyin?.[0])
     .filter((x) => x != null);
-  const glosses = dictionarySearchEntries
+  const glosses = dictionaryEntries
     .map((entry) => entry.gloss[0])
     .filter((x) => x != null);
-  const { data: isStructuralHanzi } = useQuery(isStructuralHanziQuery);
-  const isStructural =
-    isHanziCharacter(hanzi) && isStructuralHanzi?.(hanzi) === true;
 
   const { isPriority, toggle } = useBookmarkToggle(hanzi);
   const uniquePinyins = pinyins.filter(arrayFilterUnique());
@@ -64,7 +58,6 @@ export function WikiHanziHeaderOverview({
           {hskLevels.map((hskLevel) => (
             <HskLozenge hskLevel={hskLevel} key={hskLevel} />
           ))}
-          {isStructural ? <StructuralLozenge /> : null}
         </View>
         <RectButton
           variant="bare"

@@ -1,5 +1,5 @@
 import type { PropsOf } from "@pinyinly/lib/types";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 import { RectButton } from "./RectButton";
 
 interface PinyinOptionButtonProps extends Omit<

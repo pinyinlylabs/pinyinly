@@ -1,11 +1,12 @@
 import { pinyinTextSchema } from "#data/model.js";
-import type { PinyinNumericText, PinyinText } from "#data/model.js";
-import { normalizePinyinText } from "#data/pinyin.ts";
+import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
+import { pinyinNumericToDiacritic } from "#data/pinyin.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { renderPromptTemplate } from "#util/prompts/shared.js";
 import { regExpEscape } from "#util/regExp.js";
 import {
   arrayFilterUnique,
+  mapArrayAdd,
   memoize0,
   mergeSortComparators,
   sortComparatorString,
@@ -21,6 +22,7 @@ import { requestOpenAiResponseJson } from "#server/lib/ai.js";
 import type { OpenAI } from "openai";
 import { loadHsk2026 } from "./hsk";
 import type { Hsk2026Type } from "./hsk";
+import type { DeepReadonly } from "ts-essentials";
 
 export interface CedictSenseIdParamsType {
   traditional: string;
@@ -41,6 +43,12 @@ export interface TransformedCedictV2SenseType {
   traditional: string;
   simplified: string;
   pinyinNumeric: PinyinNumericText;
+  /**
+   * Ordered, deduplicated pronunciations for this sense. The entry's primary
+   * pronunciation comes first, followed by unmarked, generic, and Beijing
+   * `pr.` alternatives. Regional, colloquial, historical, and Tai-lo
+   * alternatives are excluded.
+   */
   pinyin: PinyinText[];
   glosses: string[];
   classifiers?: string[];
@@ -59,39 +67,65 @@ export interface ParseCedictV2LineOptionsType {
   edits?: CedictV2EditsType;
 }
 
-export type CedictV2EditRuleKind = `replace` | `merge` | `add`;
+export type CedictV2EditRuleKind = `replace` | `merge` | `add` | `pinyin`;
 
 export interface CedictV2ReplaceEditRuleType {
   kind: `replace`;
   oldSense: string;
   newSense: string;
+  lineNumber?: number;
 }
 
 export interface CedictV2MergeEditRuleType {
   kind: `merge`;
   oldSenses: string[];
   mergedSense: string;
+  lineNumber?: number;
 }
 
 export interface CedictV2AddEditRuleType {
   kind: `add`;
   newSense: string;
+  lineNumber?: number;
+}
+
+export interface CedictV2PinyinEditRuleType {
+  kind: `pinyin`;
+  oldPinyin: PinyinNumericText;
+  newPinyin: PinyinNumericText;
+  lineNumber?: number;
 }
 
 export type CedictV2EditRuleType =
   | CedictV2ReplaceEditRuleType
   | CedictV2MergeEditRuleType
-  | CedictV2AddEditRuleType;
+  | CedictV2AddEditRuleType
+  | CedictV2PinyinEditRuleType;
 
 export interface CedictV2EntryEditsType {
   traditional: string;
   simplified: string;
   pinyin: PinyinNumericText;
   rules: CedictV2EditRuleType[];
+  /** Line of the block's header in the edits file. */
+  lineNumber?: number;
 }
 
 export interface CedictV2EditsType {
   entriesByKey: Map<string, CedictV2EntryEditsType>;
+  sourcePath?: string;
+}
+
+/**
+ * A stale or ambiguous edit rule found while applying edits. Collected rather
+ * than thrown so a whole edits file can be fixed in one pass.
+ */
+export interface CedictEditDiagnosticType {
+  entryId: string;
+  message: string;
+  lineNumber?: number;
+  sourcePath?: string;
+  hint?: string;
 }
 
 export interface CedictV2SenseIdRuleType {
@@ -111,19 +145,81 @@ export interface CedictV2SenseIdsType {
   entriesById: Map<string, CedictV2EntrySenseIdsType>;
 }
 
+/**
+ * A sense rule plus the entry it currently lives under, which may differ from
+ * the entry encoded in the sense ID that was looked up.
+ */
+export interface CedictResolvedSenseType extends CedictV2SenseIdRuleType {
+  traditional: string;
+  simplified: string;
+  pinyin: PinyinNumericText;
+}
+
 export interface BuildCedictV2SenseIdsTextOptionsType {
   createId?: () => string;
+}
+
+/**
+ * Why an existing `.ids` block was re-attached to a source entry whose
+ * {@link buildCedictV2EntryId} key no longer matches exactly.
+ */
+export type CedictV2EntryRematchStageKind =
+  | `normalizedPinyin`
+  | `caselessPinyin`
+  | `senseSimilarity`;
+
+export interface CedictV2EntryRematchType {
+  fromEntryId: string;
+  toEntryId: string;
+  stage: CedictV2EntryRematchStageKind;
 }
 
 export interface CedictV2SenseIdsTextStatsType {
   newIds: string[];
   mergedIds: string[];
   deletedIds: string[];
+  rematchedEntries: CedictV2EntryRematchType[];
 }
 
 export interface BuildCedictV2SenseIdsTextResultType {
   text: string;
   stats: CedictV2SenseIdsTextStatsType;
+}
+
+export interface CedictDeletedSenseType {
+  id: string;
+  entryId: string;
+  simplified: string;
+  sense: string;
+}
+
+/**
+ * Resolves dropped sense IDs back to the entry and sense text they used to
+ * describe, so callers can report what a regeneration is about to discard.
+ */
+export function findCedictDeletedSenses(
+  existingIds: CedictV2SenseIdsType,
+  deletedIds: readonly string[],
+): CedictDeletedSenseType[] {
+  const deletedIdSet = new Set(deletedIds);
+  const deletedSenses: CedictDeletedSenseType[] = [];
+
+  for (const [entryId, block] of existingIds.entriesById) {
+    for (const rule of block.rules) {
+      if (!deletedIdSet.has(rule.id)) {
+        continue;
+      }
+
+      deletedSenses.push({
+        id: rule.id,
+        entryId,
+        simplified: block.simplified,
+        sense: rule.sense,
+      });
+    }
+  }
+
+  return deletedSenses;
 }
 
 export type CedictSenseSamplingRowType = [
@@ -576,16 +672,25 @@ export function parseCedictV2Line(
   }
 
   let senses = splitCedictV2Definition(definitionBody);
+  let entryPinyin = pinyin as PinyinNumericText;
 
+  // Exact match only: a single line has no visibility of sibling entries, so
+  // fuzzy key matching here could steal another entry's edit block.
   const entryEdits = options.edits?.entriesByKey.get(
     buildCedictV2EntryId({
       traditional,
       simplified,
-      pinyin: pinyin as PinyinNumericText,
+      pinyin: entryPinyin,
     }),
   );
   if (entryEdits != null) {
-    senses = applyCedictEntryEdits(senses, entryEdits, options);
+    const diagnostics: CedictEditDiagnosticType[] = [];
+    senses = applyCedictEntryEdits(senses, entryEdits, options, diagnostics);
+    entryPinyin = resolveCedictEntryPinyin(entryPinyin, entryEdits);
+
+    if (diagnostics.length > 0 && strict) {
+      throw new Error(formatCedictEditDiagnostics(diagnostics));
+    }
   }
 
   if (senses.length === 0) {
@@ -599,7 +704,7 @@ export function parseCedictV2Line(
   return {
     traditional,
     simplified,
-    pinyin: pinyin as PinyinNumericText,
+    pinyin: entryPinyin,
     senses,
   };
 }
@@ -658,6 +763,31 @@ export function parseCedictV2EditsText(
       );
     }
 
+    const pinyinRules = rules.filter(
+      (rule): rule is CedictV2PinyinEditRuleType => rule.kind === `pinyin`,
+    );
+
+    if (pinyinRules.length > 1) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `duplicate pinyin rule in edit block`,
+          lineNumber,
+          sourcePath,
+        ),
+      );
+    }
+
+    const [pinyinRule] = pinyinRules;
+    if (pinyinRule != null && pinyinRule.oldPinyin !== header.pinyin) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `pinyin rule's old pinyin [[${pinyinRule.oldPinyin}]] does not match header pinyin [[${header.pinyin}]]`,
+          lineNumber,
+          sourcePath,
+        ),
+      );
+    }
+
     const entryId = buildCedictV2EntryId(header);
 
     if (entriesById.has(entryId)) {
@@ -675,11 +805,13 @@ export function parseCedictV2EditsText(
       simplified: header.simplified,
       pinyin: header.pinyin,
       rules,
+      lineNumber,
     });
   }
 
   return {
     entriesByKey: entriesById,
+    sourcePath,
   };
 }
 
@@ -825,6 +957,146 @@ export function parseCedictV2IdsText(
   };
 }
 
+interface CedictV2SenseIdBlockResolutionType {
+  blockByEntryId: Map<string, CedictV2EntrySenseIdsType>;
+  consumedBlockKeys: Set<string>;
+  rematchedEntries: CedictV2EntryRematchType[];
+}
+
+const CEDICT_ENTRY_REMATCH_MIN_SIMILARITY = 0.6;
+const CEDICT_ENTRY_REMATCH_MIN_MARGIN = 0.15;
+
+function flattenCedictSensesToGlosses(senses: readonly string[]): string[] {
+  return senses.flatMap((sense) => splitCedictV2Sense(sense));
+}
+
+/**
+ * Attaches each source entry to an existing `.ids` block. Runs as ordered global
+ * passes rather than per-entry so that a cosmetically-renamed entry can never
+ * steal a block that another entry still matches exactly.
+ */
+function resolveCedictV2SenseIdBlocks(
+  entries: readonly CedictV2EntryType[],
+  existingIds: CedictV2SenseIdsType,
+): CedictV2SenseIdBlockResolutionType {
+  const entryById = new Map(
+    entries.map((entry) => [buildCedictV2EntryId(entry), entry]),
+  );
+
+  const keyMatches = matchCedictEntryKeys(
+    entryById.keys(),
+    existingIds.entriesById,
+  );
+
+  const blockByEntryId = new Map<string, CedictV2EntrySenseIdsType>(
+    [...keyMatches.matchByEntryId].map(([entryId, match]) => [
+      entryId,
+      match.value,
+    ]),
+  );
+  const consumedBlockKeys = new Set(keyMatches.matchedValueKeys);
+  const rematchedEntries = [...keyMatches.rematchedEntries];
+
+  // Final pass: same simplified form, matched on gloss similarity.
+  const blocksBySimplified = new Map<
+    string,
+    { key: string; block: CedictV2EntrySenseIdsType }[]
+  >();
+  for (const [key, block] of existingIds.entriesById) {
+    if (consumedBlockKeys.has(key)) {
+      continue;
+    }
+    mapArrayAdd(blocksBySimplified, block.simplified.normalize(`NFKC`), {
+      key,
+      block,
+    });
+  }
+
+  const similarityCandidates: {
+    entryId: string;
+    blockKey: string;
+    block: CedictV2EntrySenseIdsType;
+    score: number;
+  }[] = [];
+
+  for (const entryId of keyMatches.unmatchedEntryIds) {
+    const entry = entryById.get(entryId);
+    if (entry == null) {
+      continue;
+    }
+
+    const candidateBlocks =
+      blocksBySimplified.get(entry.simplified.normalize(`NFKC`)) ?? [];
+    if (candidateBlocks.length === 0) {
+      continue;
+    }
+
+    const entryGlosses = flattenCedictSensesToGlosses(entry.senses);
+    const scored = candidateBlocks
+      .map((candidate) => ({
+        entryId,
+        blockKey: candidate.key,
+        block: candidate.block,
+        score: computeGlossesSimilarity(
+          entryGlosses,
+          flattenCedictSensesToGlosses(
+            candidate.block.rules.map((rule) => rule.sense),
+          ),
+        ),
+      }))
+      .sort(
+        mergeSortComparators(
+          (a, b) => b.score - a.score,
+          sortComparatorString((x) => x.blockKey),
+        ),
+      );
+
+    const [best, runnerUp] = scored;
+    if (best == null || best.score < CEDICT_ENTRY_REMATCH_MIN_SIMILARITY) {
+      continue;
+    }
+
+    if (
+      runnerUp != null &&
+      best.score - runnerUp.score < CEDICT_ENTRY_REMATCH_MIN_MARGIN
+    ) {
+      continue;
+    }
+
+    similarityCandidates.push(best);
+  }
+
+  similarityCandidates.sort(
+    mergeSortComparators(
+      (a, b) => b.score - a.score,
+      sortComparatorString((x) => x.entryId),
+    ),
+  );
+
+  for (const candidate of similarityCandidates) {
+    if (
+      consumedBlockKeys.has(candidate.blockKey) ||
+      blockByEntryId.has(candidate.entryId)
+    ) {
+      continue;
+    }
+
+    blockByEntryId.set(candidate.entryId, candidate.block);
+    consumedBlockKeys.add(candidate.blockKey);
+    rematchedEntries.push({
+      fromEntryId: candidate.blockKey,
+      toEntryId: candidate.entryId,
+      stage: `senseSimilarity`,
+    });
+  }
+
+  return {
+    blockByEntryId,
+    consumedBlockKeys,
+    rematchedEntries,
+  };
+}
+
 export function buildCedictV2SenseIdsText(
   entries: readonly CedictV2EntryType[],
   existingIds: CedictV2SenseIdsType,
@@ -832,10 +1104,12 @@ export function buildCedictV2SenseIdsText(
 ): BuildCedictV2SenseIdsTextResultType {
   const createId = options.createId ?? createCedictV2SenseId;
   const usedIdsBySimplified = new Map<string, Set<string>>();
-  const matchedExistingEntryKeys = new Set<string>();
   const newIds: string[] = [];
   const mergedIds: string[] = [];
   const deletedIds: string[] = [];
+
+  const { blockByEntryId, consumedBlockKeys, rematchedEntries } =
+    resolveCedictV2SenseIdBlocks(entries, existingIds);
 
   for (const entrySenseIds of existingIds.entriesById.values()) {
     const simplifiedKey = entrySenseIds.simplified.normalize(`NFKC`);
@@ -851,10 +1125,7 @@ export function buildCedictV2SenseIdsText(
   for (const entry of entries) {
     const entryId = buildCedictV2EntryId(entry);
 
-    const existingEntry = existingIds.entriesById.get(entryId);
-    if (existingEntry != null) {
-      matchedExistingEntryKeys.add(entryId);
-    }
+    const existingEntry = blockByEntryId.get(entryId);
 
     const senses = serializeCedictV2EntrySenses(entry.senses);
     if (senses.length === 0) {
@@ -1002,7 +1273,7 @@ export function buildCedictV2SenseIdsText(
   }
 
   for (const [key, existingEntry] of existingIds.entriesById) {
-    if (matchedExistingEntryKeys.has(key)) {
+    if (consumedBlockKeys.has(key)) {
       continue;
     }
 
@@ -1015,6 +1286,7 @@ export function buildCedictV2SenseIdsText(
       newIds,
       mergedIds,
       deletedIds,
+      rematchedEntries,
     },
   };
 }
@@ -1105,13 +1377,205 @@ export function buildCedictV2EntryId(
   return `${entry.traditional} ${entry.simplified} [[${entry.pinyin}]]`;
 }
 
+/**
+ * Matching-only key that survives upstream pinyin word-spacing churn (e.g.
+ * `Li2man4ji3he2` becoming `Li2man4 ji3he2`). Never serialized.
+ */
+export function normalizeCedictV2EntryMatchKey(entryId: string): string {
+  return entryId
+    .normalize(`NFKC`)
+    .replace(
+      /\[\[(.*)\]\]$/u,
+      (_, pinyin: string) => `[[${pinyin.replaceAll(/\s+/gu, ``)}]]`,
+    );
+}
+
+export interface CedictEntryMatchKeyIndexType<T> {
+  /**
+   * Exact key, then space-normalized pinyin, then case-insensitive pinyin.
+   * Fuzzy stages only resolve when the candidate is unambiguous.
+   */
+  resolve: (entryId: string) => T | null;
+}
+
+/**
+ * Builds a lookup that tolerates upstream pinyin formatting churn in keys that
+ * were captured against an older CC-CEDICT export.
+ *
+ * Only safe when lookups come from a single key at a time. When resolving a
+ * whole set of entry keys at once, use {@link matchCedictEntryKeys}, which also
+ * rejects fuzzy matches that two different entries would both claim.
+ */
+export function buildCedictEntryMatchKeyIndex<T>(
+  entriesById: ReadonlyMap<string, T>,
+): CedictEntryMatchKeyIndexType<T> {
+  // `null` marks an ambiguous key, which must never resolve.
+  const byMatchKey = new Map<string, T | null>();
+  const byCaselessMatchKey = new Map<string, T | null>();
+
+  for (const [entryId, value] of entriesById) {
+    const matchKey = normalizeCedictV2EntryMatchKey(entryId);
+    byMatchKey.set(matchKey, byMatchKey.has(matchKey) ? null : value);
+
+    const caselessMatchKey = matchKey.toLowerCase();
+    byCaselessMatchKey.set(
+      caselessMatchKey,
+      byCaselessMatchKey.has(caselessMatchKey) ? null : value,
+    );
+  }
+
+  return {
+    resolve(entryId) {
+      const exact = entriesById.get(entryId);
+      if (exact !== undefined) {
+        return exact;
+      }
+
+      const matchKey = normalizeCedictV2EntryMatchKey(entryId);
+      return (
+        byMatchKey.get(matchKey) ??
+        byCaselessMatchKey.get(matchKey.toLowerCase()) ??
+        null
+      );
+    },
+  };
+}
+
+export interface CedictEntryKeyMatchType<T> {
+  valueKey: string;
+  value: T;
+  stage: CedictV2EntryRematchStageKind | `exact`;
+}
+
+export interface CedictEntryKeyMatchResultType<T> {
+  /** Exact matches plus fuzzy rematches, keyed by the source entry ID. */
+  matchByEntryId: Map<string, CedictEntryKeyMatchType<T>>;
+  matchedValueKeys: Set<string>;
+  unmatchedEntryIds: string[];
+  rematchedEntries: CedictV2EntryRematchType[];
+}
+
+/**
+ * Matches a whole set of entry keys against keys captured from an older
+ * CC-CEDICT export, tolerating pinyin re-spacing and recapitalization.
+ *
+ * Runs as ordered global passes so a fuzzy match can never steal a value that
+ * another entry matches exactly, and requires a 1:1 correspondence at each
+ * fuzzy stage. Without that, `以 以 [[yi3]]` would caselessly claim the value
+ * belonging to its sibling entry `以 以 [[Yi3]]`.
+ */
+export function matchCedictEntryKeys<T>(
+  entryIds: Iterable<string>,
+  valuesById: ReadonlyMap<string, T>,
+): CedictEntryKeyMatchResultType<T> {
+  const matchByEntryId = new Map<string, CedictEntryKeyMatchType<T>>();
+  const matchedValueKeys = new Set<string>();
+  const rematchedEntries: CedictV2EntryRematchType[] = [];
+
+  let pendingEntryIds: string[] = [];
+  const seenEntryIds = new Set<string>();
+
+  for (const entryId of entryIds) {
+    if (seenEntryIds.has(entryId)) {
+      continue;
+    }
+    seenEntryIds.add(entryId);
+
+    const value = valuesById.get(entryId);
+    if (value === undefined) {
+      pendingEntryIds.push(entryId);
+      continue;
+    }
+
+    matchByEntryId.set(entryId, { valueKey: entryId, value, stage: `exact` });
+    matchedValueKeys.add(entryId);
+  }
+
+  const runPass = (
+    buildKey: (entryId: string) => string,
+    stage: CedictV2EntryRematchStageKind,
+  ) => {
+    const entryIdsByKey = new Map<string, string[]>();
+    for (const entryId of pendingEntryIds) {
+      mapArrayAdd(entryIdsByKey, buildKey(entryId), entryId);
+    }
+
+    const valuesByKey = new Map<string, { key: string; value: T }[]>();
+    for (const [valueKey, value] of valuesById) {
+      if (matchedValueKeys.has(valueKey)) {
+        continue;
+      }
+      mapArrayAdd(valuesByKey, buildKey(valueKey), { key: valueKey, value });
+    }
+
+    pendingEntryIds = pendingEntryIds.filter((entryId) => {
+      const matchKey = buildKey(entryId);
+      const candidateEntryIds = entryIdsByKey.get(matchKey);
+      const candidateValues = valuesByKey.get(matchKey);
+
+      if (candidateEntryIds?.length !== 1 || candidateValues?.length !== 1) {
+        return true;
+      }
+
+      const [candidate] = candidateValues;
+      if (candidate == null) {
+        return true;
+      }
+
+      matchByEntryId.set(entryId, {
+        valueKey: candidate.key,
+        value: candidate.value,
+        stage,
+      });
+      matchedValueKeys.add(candidate.key);
+      rematchedEntries.push({
+        fromEntryId: candidate.key,
+        toEntryId: entryId,
+        stage,
+      });
+      return false;
+    });
+  };
+
+  runPass(normalizeCedictV2EntryMatchKey, `normalizedPinyin`);
+  runPass(
+    (entryId) => normalizeCedictV2EntryMatchKey(entryId).toLowerCase(),
+    `caselessPinyin`,
+  );
+
+  return {
+    matchByEntryId,
+    matchedValueKeys,
+    unmatchedEntryIds: pendingEntryIds,
+    rematchedEntries,
+  };
+}
+
+const cedictV2IdsMatchIndexes = new WeakMap<
+  CedictV2SenseIdsType,
+  CedictEntryMatchKeyIndexType<CedictV2EntrySenseIdsType>
+>();
+
+function getCedictV2IdsMatchIndex(
+  ids: CedictV2SenseIdsType,
+): CedictEntryMatchKeyIndexType<CedictV2EntrySenseIdsType> {
+  const cached = cedictV2IdsMatchIndexes.get(ids);
+  if (cached != null) {
+    return cached;
+  }
+
+  const index = buildCedictEntryMatchKeyIndex(ids.entriesById);
+  cedictV2IdsMatchIndexes.set(ids, index);
+  return index;
+}
+
 export function buildSenseGroupingEntryFromCedictEntry(
   entry: CedictV2EntryType,
 ): SenseGroupingEntryType {
   return {
     traditional: entry.traditional,
     simplified: entry.simplified,
-    pinyin: normalizePinyinText(entry.pinyin),
+    pinyin: pinyinNumericToDiacritic(entry.pinyin),
     definition: serializeCedictV2EntrySenses(entry.senses).map((sense) =>
       splitCedictV2Sense(sense),
     ),
@@ -1338,10 +1802,15 @@ export function buildCedictV2GroupedSensesFromSampling(
     groupedSensesByEntryKey.set(entry.entryId, groupedSenses);
   }
 
+  const { matchByEntryId } = matchCedictEntryKeys(
+    entries.map((entry) => buildCedictV2EntryId(entry)),
+    groupedSensesByEntryKey,
+  );
+
   return entries.map((entry) => {
-    const groupedSenses = groupedSensesByEntryKey.get(
+    const groupedSenses = matchByEntryId.get(
       buildCedictV2EntryId(entry),
-    );
+    )?.value;
     if (groupedSenses == null) {
       return entry;
     }
@@ -1435,22 +1904,28 @@ export function applyCedictV2EditsToText(
   entries: readonly CedictV2EntryType[],
   options: ParseCedictV2LineOptionsType = {},
 ): CedictV2EntryType[] {
-  const matchedEntryKeys = new Set<string>();
+  const diagnostics: CedictEditDiagnosticType[] = [];
 
+  const { matchByEntryId, matchedValueKeys } = matchCedictEntryKeys(
+    entries.map((entry) => buildCedictV2EntryId(entry)),
+    options.edits?.entriesByKey ?? new Map<string, CedictV2EntryEditsType>(),
+  );
   const outputEntries = entries
     .map((entry) => {
-      const key = buildCedictV2EntryId(entry);
-      const entryEdits = options.edits?.entriesByKey.get(key);
-      if (entryEdits != null) {
-        matchedEntryKeys.add(key);
-      }
+      const entryEdits = matchByEntryId.get(buildCedictV2EntryId(entry))?.value;
 
       const nextEntry: CedictV2EntryType =
         entryEdits == null
           ? entry
           : {
               ...entry,
-              senses: applyCedictEntryEdits(entry.senses, entryEdits, options),
+              pinyin: resolveCedictEntryPinyin(entry.pinyin, entryEdits),
+              senses: applyCedictEntryEdits(
+                entry.senses,
+                entryEdits,
+                options,
+                diagnostics,
+              ),
             };
 
       return nextEntry.senses.length > 0 ? nextEntry : null;
@@ -1458,21 +1933,40 @@ export function applyCedictV2EditsToText(
     .filter((x) => x != null);
 
   for (const [key, entryEdits] of options.edits?.entriesByKey ?? []) {
-    if (matchedEntryKeys.has(key)) {
+    if (matchedValueKeys.has(key)) {
       continue;
     }
 
-    const createdSenses = applyCedictEntryEdits([], entryEdits, options);
-    if (createdSenses.length === 0) {
+    // A block with no matching source entry is only legitimate if it builds an
+    // entry from scratch (`+` rules, optionally reshaped by later rules).
+    const createdDiagnostics: CedictEditDiagnosticType[] = [];
+    const createdSenses = applyCedictEntryEdits(
+      [],
+      entryEdits,
+      options,
+      createdDiagnostics,
+    );
+
+    if (createdSenses.length === 0 || createdDiagnostics.length > 0) {
+      diagnostics.push({
+        entryId: key,
+        message: `edit block does not match any dictionary entry`,
+        lineNumber: entryEdits.lineNumber,
+        sourcePath: options.edits?.sourcePath,
+      });
       continue;
     }
 
     outputEntries.push({
       traditional: entryEdits.traditional,
       simplified: entryEdits.simplified,
-      pinyin: entryEdits.pinyin,
+      pinyin: resolveCedictEntryPinyin(entryEdits.pinyin, entryEdits),
       senses: createdSenses,
     });
+  }
+
+  if (diagnostics.length > 0 && (options.strict ?? true)) {
+    throw new Error(formatCedictEditDiagnostics(diagnostics));
   }
 
   return outputEntries;
@@ -3837,9 +4331,68 @@ export const loadCedictV2 = memoize0(
   },
 );
 
+export interface CedictDictionary {
+  lookupHanzi(hanzi: HanziText): readonly CedictV2EntryType[];
+  lookupHanziPinyin(
+    hanzi: HanziText,
+    pinyin: PinyinText,
+  ): readonly CedictV2EntryType[];
+  lookupPinyin(pinyin: PinyinText): readonly CedictV2EntryType[];
+  allEntries: DeepReadonly<CedictV2EntryType[]>;
+}
+
+export const buildCedictDictionary = (
+  cedictEntries: readonly CedictV2EntryType[],
+): CedictDictionary => {
+  const entriesByHanzi = new Map<HanziText, CedictV2EntryType[]>();
+  const entriesByHanziPinyin = new Map<
+    HanziText,
+    Map<PinyinText, CedictV2EntryType[]>
+  >();
+  const entriesByPinyin = new Map<PinyinText, CedictV2EntryType[]>();
+
+  for (const entry of cedictEntries) {
+    const simplified = entry.simplified as HanziText;
+    mapArrayAdd(entriesByPinyin, pinyinNumericToDiacritic(entry.pinyin), entry);
+    mapArrayAdd(entriesByHanzi, simplified, entry);
+
+    const entriesByPinyinForHanzi =
+      entriesByHanziPinyin.get(simplified) ??
+      new Map<PinyinText, CedictV2EntryType[]>();
+    entriesByHanziPinyin.set(simplified, entriesByPinyinForHanzi);
+
+    for (const pinyin of extractDictionaryPinyinFromCedictEntry(entry)) {
+      mapArrayAdd(entriesByPinyinForHanzi, pinyin, entry);
+    }
+  }
+
+  return {
+    lookupHanzi(hanzi: HanziText): readonly CedictV2EntryType[] {
+      return entriesByHanzi.get(hanzi) ?? [];
+    },
+    lookupHanziPinyin(
+      hanzi: HanziText,
+      pinyin: PinyinText,
+    ): readonly CedictV2EntryType[] {
+      return entriesByHanziPinyin.get(hanzi)?.get(pinyin) ?? [];
+    },
+    lookupPinyin(pinyin: PinyinText): readonly CedictV2EntryType[] {
+      return entriesByPinyin.get(pinyin) ?? [];
+    },
+    allEntries: cedictEntries,
+  };
+};
+
+export const loadCedictDictionary = memoize0(
+  async (): Promise<CedictDictionary> => {
+    const entries = await loadCedictV2();
+    return buildCedictDictionary(entries);
+  },
+);
+
 export async function findCedictSenseById(
   cedictSenseId: string,
-): Promise<CedictV2SenseIdRuleType | null> {
+): Promise<CedictResolvedSenseType | null> {
   if (cedictSenseId.length === 0) {
     return null;
   }
@@ -3850,18 +4403,25 @@ export async function findCedictSenseById(
   }
 
   const ids = await loadCedictV2Ids();
-  const idsEntry = ids.entriesById.get(buildCedictV2EntryId(senseIdParams));
+  const idsEntry = getCedictV2IdsMatchIndex(ids).resolve(
+    buildCedictV2EntryId(senseIdParams),
+  );
   const directRule = idsEntry?.rules.find(
     (rule) => rule.id === senseIdParams.id,
   );
   const idsRule =
     directRule ??
     idsEntry?.rules.find((rule) => rule.mergedIds.includes(senseIdParams.id));
-  if (idsRule == null) {
+  if (idsRule == null || idsEntry == null) {
     return null;
   }
 
-  return idsRule;
+  return {
+    ...idsRule,
+    traditional: idsEntry.traditional,
+    simplified: idsEntry.simplified,
+    pinyin: idsEntry.pinyin,
+  };
 }
 
 function shouldIncludeAlsoPrMarkerForDictionary(
@@ -3875,23 +4435,26 @@ function shouldIncludeAlsoPrMarkerForDictionary(
   );
 }
 
-function extractDictionaryPinyinFromResolvedCedictSense(
-  resolvedSense: CedictV2SenseIdRuleType,
-  primaryPinyinNumeric: PinyinNumericText,
+export function extractDictionaryPinyinFromCedictEntry(
+  entry: Pick<CedictV2EntryType, `pinyin` | `senses`>,
 ): PinyinText[] {
-  const pinyins: PinyinText[] = [normalizePinyinText(primaryPinyinNumeric)];
+  const pinyins: PinyinText[] = [pinyinNumericToDiacritic(entry.pinyin)];
 
-  for (const parsedGloss of parseCedictV2Sense(resolvedSense.sense)) {
-    for (const token of parsedGloss.tokens) {
-      if (token.kind !== `alsoPr`) {
-        continue;
+  for (const sense of entry.senses) {
+    for (const parsedGloss of parseCedictV2Sense(sense)) {
+      for (const token of parsedGloss.tokens) {
+        if (token.kind !== `alsoPr`) {
+          continue;
+        }
+
+        if (!shouldIncludeAlsoPrMarkerForDictionary(token.marker)) {
+          continue;
+        }
+
+        pinyins.push(
+          pinyinNumericToDiacritic(token.value as PinyinNumericText),
+        );
       }
-
-      if (!shouldIncludeAlsoPrMarkerForDictionary(token.marker)) {
-        continue;
-      }
-
-      pinyins.push(normalizePinyinText(token.value));
     }
   }
 
@@ -3918,15 +4481,10 @@ export async function extractDictionaryPinyinFromCedictSense(
     return null;
   }
 
-  const parsedSenseId = parseCedictSenseId(cedictSenseId);
-  if (parsedSenseId == null) {
-    return null;
-  }
-
-  return extractDictionaryPinyinFromResolvedCedictSense(
-    resolvedSense,
-    parsedSenseId.pinyin,
-  );
+  return extractDictionaryPinyinFromCedictEntry({
+    pinyin: resolvedSense.pinyin,
+    senses: [resolvedSense.sense],
+  });
 }
 
 export function buildCedictSenseId(
@@ -4393,6 +4951,35 @@ function parseCedictV2EditRule(
   lineNumber: number,
   sourcePath?: string,
 ): CedictV2EditRuleType {
+  const pinyinMatch = line.match(
+    /^\[\[(?<oldPinyin>[^\]]+)\]\]\s+\[\[(?<newPinyin>[^\]]+)\]\]$/u,
+  );
+  if (pinyinMatch != null) {
+    const oldPinyin = pinyinMatch.groups?.[`oldPinyin`]?.trim();
+    const newPinyin = pinyinMatch.groups?.[`newPinyin`]?.trim();
+    if (
+      oldPinyin == null ||
+      newPinyin == null ||
+      oldPinyin.length === 0 ||
+      newPinyin.length === 0
+    ) {
+      throw new Error(
+        formatCedictEditsParseError(
+          `invalid edits rule line`,
+          lineNumber,
+          sourcePath,
+        ),
+      );
+    }
+
+    return {
+      kind: `pinyin`,
+      oldPinyin: oldPinyin as PinyinNumericText,
+      newPinyin: newPinyin as PinyinNumericText,
+      lineNumber,
+    };
+  }
+
   const addMatch = line.match(/^\+\s*\/(?<newSense>[^/]*)\/$/u);
   if (addMatch != null) {
     const newSense = addMatch.groups?.[`newSense`]?.trim();
@@ -4409,6 +4996,7 @@ function parseCedictV2EditRule(
     return {
       kind: `add`,
       newSense,
+      lineNumber,
     };
   }
 
@@ -4447,6 +5035,7 @@ function parseCedictV2EditRule(
       kind: `merge`,
       oldSenses,
       mergedSense: oldSenses.join(`; `),
+      lineNumber,
     };
   }
 
@@ -4480,6 +5069,7 @@ function parseCedictV2EditRule(
       kind: `replace`,
       oldSense,
       newSense: ``,
+      lineNumber,
     };
   }
 
@@ -4488,6 +5078,7 @@ function parseCedictV2EditRule(
     kind: `replace`,
     oldSense,
     newSense: replacementContent,
+    lineNumber,
   };
 }
 
@@ -4584,10 +5175,94 @@ function generateUniqueCedictSenseId({
   );
 }
 
+function resolveCedictEntryPinyin(
+  pinyin: PinyinNumericText,
+  entryEdits: CedictV2EntryEditsType,
+): PinyinNumericText {
+  const pinyinRule = entryEdits.rules.find(
+    (rule): rule is CedictV2PinyinEditRuleType => rule.kind === `pinyin`,
+  );
+
+  return pinyinRule?.newPinyin ?? pinyin;
+}
+
+const CEDICT_EDIT_HINT_MIN_SIMILARITY = 0.3;
+
+function findClosestCedictSenseHint(
+  oldSense: string,
+  senses: readonly string[],
+): string | undefined {
+  const oldGlosses = splitCedictV2Sense(oldSense);
+
+  let bestSense: string | undefined;
+  let bestScore = 0;
+
+  for (const sense of senses) {
+    const score = computeGlossesSimilarity(
+      oldGlosses,
+      splitCedictV2Sense(sense),
+    );
+    if (score > bestScore) {
+      bestScore = score;
+      bestSense = sense;
+    }
+  }
+
+  return bestScore >= CEDICT_EDIT_HINT_MIN_SIMILARITY ? bestSense : undefined;
+}
+
+function buildCedictEditDiagnostic({
+  entryEdits,
+  rule,
+  options,
+  message,
+  hint,
+}: {
+  entryEdits: CedictV2EntryEditsType;
+  rule: CedictV2EditRuleType;
+  options: ParseCedictV2LineOptionsType;
+  message: string;
+  hint?: string;
+}): CedictEditDiagnosticType {
+  return {
+    entryId: buildCedictV2EntryId(entryEdits),
+    message,
+    lineNumber: rule.lineNumber ?? entryEdits.lineNumber,
+    sourcePath: options.edits?.sourcePath,
+    hint,
+  };
+}
+
+function formatCedictEditDiagnostic(
+  diagnostic: CedictEditDiagnosticType,
+): string {
+  const location =
+    diagnostic.lineNumber == null
+      ? null
+      : diagnostic.sourcePath == null
+        ? `line ${diagnostic.lineNumber}`
+        : `${diagnostic.sourcePath}:${diagnostic.lineNumber}`;
+  const hint =
+    diagnostic.hint == null ? `` : ` (did you mean: ${diagnostic.hint})`;
+  const prefix = location == null ? `` : `${location}: `;
+
+  return `${prefix}${diagnostic.entryId} — ${diagnostic.message}${hint}`;
+}
+
+export function formatCedictEditDiagnostics(
+  diagnostics: readonly CedictEditDiagnosticType[],
+): string {
+  return [
+    `${diagnostics.length} stale CC-CEDICT edit rule(s):`,
+    ...diagnostics.map((diagnostic) => formatCedictEditDiagnostic(diagnostic)),
+  ].join(`\n`);
+}
+
 function applyCedictEntryEdits(
   senses: string[],
   entryEdits: CedictV2EntryEditsType,
   options: ParseCedictV2LineOptionsType,
+  diagnostics: CedictEditDiagnosticType[],
 ): string[] {
   const nextSenses = [...senses];
 
@@ -4607,26 +5282,30 @@ function applyCedictEntryEdits(
           .filter((index) => index >= 0);
 
         if (matchingIndexes.length === 0) {
-          if (options.strict ?? true) {
-            throw new Error(
-              formatParseError(
-                `edits rule did not match sense: ${oldSense}`,
-                options,
-              ),
-            );
-          }
-
+          diagnostics.push(
+            buildCedictEditDiagnostic({
+              entryEdits,
+              rule,
+              options,
+              message: `edits rule did not match sense: ${oldSense}`,
+              hint: findClosestCedictSenseHint(oldSense, nextSenses),
+            }),
+          );
           shouldSkipRule = true;
           break;
         }
 
         if (matchingIndexes.length > 1) {
-          throw new Error(
-            formatParseError(
-              `edits rule matched multiple senses: ${oldSense}`,
+          diagnostics.push(
+            buildCedictEditDiagnostic({
+              entryEdits,
+              rule,
               options,
-            ),
+              message: `edits rule matched multiple senses: ${oldSense}`,
+            }),
           );
+          shouldSkipRule = true;
+          break;
         }
 
         const [matchingIndex] = matchingIndexes;
@@ -4655,30 +5334,37 @@ function applyCedictEntryEdits(
       continue;
     }
 
+    if (rule.kind === `pinyin`) {
+      continue;
+    }
+
     const matchIndexes = nextSenses
       .map((sense, index) => (sense === rule.oldSense ? index : -1))
       .filter((index) => index >= 0);
 
     if (matchIndexes.length === 0) {
-      if (options.strict ?? true) {
-        throw new Error(
-          formatParseError(
-            `edits rule did not match sense: ${rule.oldSense}`,
-            options,
-          ),
-        );
-      }
-
+      diagnostics.push(
+        buildCedictEditDiagnostic({
+          entryEdits,
+          rule,
+          options,
+          message: `edits rule did not match sense: ${rule.oldSense}`,
+          hint: findClosestCedictSenseHint(rule.oldSense, nextSenses),
+        }),
+      );
       continue;
     }
 
     if (matchIndexes.length > 1) {
-      throw new Error(
-        formatParseError(
-          `edits rule matched multiple senses: ${rule.oldSense}`,
+      diagnostics.push(
+        buildCedictEditDiagnostic({
+          entryEdits,
+          rule,
           options,
-        ),
+          message: `edits rule matched multiple senses: ${rule.oldSense}`,
+        }),
       );
+      continue;
     }
 
     const [matchIndex] = matchIndexes;

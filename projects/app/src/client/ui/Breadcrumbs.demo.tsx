@@ -2,7 +2,7 @@ import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import type { FloatingMenuModalMenuProps } from "@/client/ui/FloatingMenuModal";
 import { RectButton } from "@/client/ui/RectButton";
 import { ExampleStack } from "@/client/ui/demo/components";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 function DemoMenu({ onRequestClose }: FloatingMenuModalMenuProps) {
   return (

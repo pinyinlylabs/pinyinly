@@ -7,7 +7,8 @@ import type {
 import { useQuery } from "@tanstack/react-query";
 import { strokeSpecFilter } from "@/util/strokeSpec";
 import type { LayoutChangeEvent } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { HanziLink } from "./HanziLink";
 import { HanziGraphic } from "./HanziGraphic";
 

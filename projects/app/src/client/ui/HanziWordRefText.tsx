@@ -23,11 +23,11 @@ export const HanziWordRefText = ({
   const { data: meaning } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanziWord, hanziWord))
         .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
         .findOne(),
-    [db.dictionarySearch, hanziWord],
+    [db.dictionaryCollection, hanziWord],
   );
 
   let text = ``;

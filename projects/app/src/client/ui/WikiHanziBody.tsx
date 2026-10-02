@@ -1,44 +1,30 @@
 import type { HanziText } from "@/data/model";
-import { View } from "react-native";
-import { PylyMdxComponents } from "./PylyMdxComponents";
-import { WikiAiExplanation } from "./WikiAiExplanation";
-import { WikiHanziCharacterDecompositionComponents } from "./WikiHanziCharacterDecompositionComponents";
-import { WikiHanziCharacterMeaning } from "./WikiHanziCharacterMeaning";
-import { WikiHanziCharacterUsedInCharacters } from "./WikiHanziCharacterUsedInCharacters";
-import { WikiHanziExternalResources } from "./WikiHanziExternalResources";
-import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
-import { WikiHanziCharacterUsedInWords } from "./WikiHanziCharacterUsedInWords";
-import { WikiHanziRelatedMeanings } from "./WikiHanziRelatedMeanings";
-import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
-import { WikiHanziHeaderOverview } from "./WikiHanziHeaderOverview";
-import { WikiHanziWordCharacters } from "./WikiHanziWordCharacters";
+import { isHanziCharacter } from "@/data/hanzi";
+import { WikiHanziBodyCharacter } from "./WikiHanziBodyCharacter";
+import { WikiHanziBodyWord } from "./WikiHanziBodyWord";
+import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useDb } from "./hooks/useDb";
+import { WikiHanziBodyCharacterMultipleMeanings } from "./WikiHanziBodyCharacterMultipleMeanings";
 
 export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
-  return (
-    <PylyMdxComponents>
-      <View className="flex-1 gap-10 bg-bg py-7">
-        <WikiHanziHeaderOverview hanzi={hanzi} />
+  const db = useDb();
 
-        <WikiHanziWordCharacters hanzi={hanzi} />
-
-        <WikiHanziCharacterMeaning hanzi={hanzi} />
-
-        <WikiHanziCharacterPronunciation hanzi={hanzi} />
-
-        <WikiHanziCharacterDecompositionComponents hanzi={hanzi} />
-
-        <WikiHanziCharacterUsedInCharacters hanzi={hanzi} />
-
-        <WikiHanziCharacterUsedInWords hanzi={hanzi} />
-
-        <WikiHanziRelatedMeanings hanzi={hanzi} />
-
-        <WikiHanziSamePronunciation hanzi={hanzi} />
-
-        <WikiAiExplanation hanzi={hanzi} />
-
-        <WikiHanziExternalResources hanzi={hanzi} />
-      </View>
-    </PylyMdxComponents>
+  const { data: dictionaryEntries } = useLiveQuery(
+    (q) =>
+      q
+        .from({ entry: db.dictionaryCollection })
+        .where(({ entry }) => eq(entry.hanzi, hanzi)),
+    [db.dictionaryCollection, hanzi],
   );
+
+  if (isHanziCharacter(hanzi)) {
+    if (dictionaryEntries.length === 0) {
+      return null;
+    } else if (dictionaryEntries.length === 1) {
+      return <WikiHanziBodyCharacter hanzi={hanzi} />;
+    }
+    return <WikiHanziBodyCharacterMultipleMeanings hanzi={hanzi} />;
+  }
+
+  return <WikiHanziBodyWord hanzi={hanzi} />;
 }

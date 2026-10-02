@@ -3,7 +3,7 @@ import type {
   HanziText,
   IdsNode,
   HanziIds,
-  WikiCharacterData,
+  CharacterJson,
   HanziIdsLeaf,
 } from "@/data/model";
 import {
@@ -1041,8 +1041,8 @@ export function idsNodeToString<T>(
   }
 }
 
-export function characterStrokeCount(characterData: WikiCharacterData): number {
-  return typeof characterData.svg.strokes === `number`
-    ? characterData.svg.strokes
-    : characterData.svg.strokes.length;
+export function characterStrokeCount(characterJson: CharacterJson): number {
+  return typeof characterJson.svg.strokes === `number`
+    ? characterJson.svg.strokes
+    : characterJson.svg.strokes.length;
 }

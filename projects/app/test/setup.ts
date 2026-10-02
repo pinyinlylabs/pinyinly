@@ -7,6 +7,8 @@ import { createElement, Fragment } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
 import isEqual from "lodash/isEqual";
+import path from "node:path";
+import { invariant } from "@pinyinly/lib/invariant";
 
 expect.extend(matchers);
 
@@ -44,8 +46,17 @@ expect.extend({
     }
 
     if (!isEqual(receivedObj, expectedObj)) {
-      const received = await format(filePath, JSON.stringify(receivedObj));
-      await expect(received, `File: ${filePath}`).toMatchFileSnapshot(filePath);
+      // The passed in `filePath` is relative to the test file, so we need to
+      // resolve it to an absolute path, so that jsonfmt can find a suitable
+      // rule for it.
+      const testPath = expect.getState().testPath;
+      invariant(testPath != null, `expect.getState().testPath is null`);
+      const absFilePath = path.resolve(path.dirname(testPath), filePath);
+
+      const received = await format(absFilePath, JSON.stringify(receivedObj));
+      await expect(received, `File: ${absFilePath}`).toMatchFileSnapshot(
+        filePath,
+      );
     }
 
     return {

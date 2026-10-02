@@ -12,7 +12,7 @@ import type {
 } from "@/data/model";
 import { QuestionKind } from "@/data/model";
 import {
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
   splitPinyinUnitOrThrow,
   splitPinyinUnitTone,
 } from "@/data/pinyin";
@@ -182,7 +182,7 @@ async function addDistractors(
 
   loop: for (const tonelessPinyin of ctx.pinyinAnswersToneless) {
     for (const tone of shuffle(toneSuffixes)) {
-      const pinyin = normalizePinyinUnit(`${tonelessPinyin}${tone}`);
+      const pinyin = pinyinUnitNumericToDiacritic(`${tonelessPinyin}${tone}`);
 
       tryPinyinDistractor(ctx, pinyin);
 

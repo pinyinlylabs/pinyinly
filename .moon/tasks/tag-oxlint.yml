@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: oxlint
+
 tasks:
   oxlint:
     description: "Run Oxlint for fast linting"
@@ -13,4 +16,4 @@ tasks:
     env:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
+    toolchains: "node"

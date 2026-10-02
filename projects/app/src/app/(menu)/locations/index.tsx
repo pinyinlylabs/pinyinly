@@ -5,7 +5,8 @@ import { RectButton } from "@/client/ui/RectButton";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function LocationsPage() {
   const { locations, createLocation, isLoading } = usePinyinSoundLocations();

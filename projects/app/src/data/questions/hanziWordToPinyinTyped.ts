@@ -3,6 +3,7 @@ import type {
   HanziWordToPinyinTypedQuestion,
   MistakeType,
   PinyinText,
+  PinyinUnit,
   Question,
   QuestionFlagType,
   Skill,
@@ -105,12 +106,14 @@ export function gradeHanziToPinyinTypedQuestion(
   userAnswer: string,
   durationMs: number,
 ): HanziToPinyinTypedQuestionGrade {
-  let actualUnits = matchAllPinyinUnits(userAnswer);
+  let actualUnits = matchAllPinyinUnits(userAnswer as PinyinText);
 
   // If there were no syllables found (e.g. the user entered some invalid pinyin
   // like "x x") then still have a go at parsing it.
   if (actualUnits.length === 0) {
-    actualUnits = userAnswer.split(/\s+/gu).filter((x) => x.length > 0);
+    actualUnits = userAnswer
+      .split(/\s+/gu)
+      .filter((x) => x.length > 0) as PinyinUnit[];
   }
 
   // Put the skill we're testing first.
@@ -198,7 +201,7 @@ export function shouldAutoSubmitPinyinTypedAnswer(
   const expectedAnswer = answers.find((a) => a.skill === skill)?.pinyin[0];
   if (expectedAnswer != null) {
     const expectedUnitCount = matchAllPinyinUnits(expectedAnswer).length;
-    const actualUnitCount = matchAllPinyinUnits(text).length;
+    const actualUnitCount = matchAllPinyinUnits(text as PinyinText).length;
     if (expectedUnitCount === actualUnitCount) {
       return true;
     }

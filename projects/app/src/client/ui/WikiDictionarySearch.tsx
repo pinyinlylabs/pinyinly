@@ -4,7 +4,9 @@ import type { HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { useDb } from "./hooks/useDb";
 import { Icon } from "./Icon";
@@ -135,11 +137,11 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
   const { data: dictionaryEntry } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanziWord, hanziWord))
         .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
         .findOne(),
-    [db.dictionarySearch, hanziWord],
+    [db.dictionaryCollection, hanziWord],
   );
 
   return (

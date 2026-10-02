@@ -1,7 +1,7 @@
 import { DemoHanziKnob } from "@/client/ui/demo/components";
 import { useDemoHanziKnob } from "@/client/ui/demo/utils";
 import type { HanziText } from "@/data/model";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { HanziDecompositionEditor } from "./HanziDecompositionEditor";
 
 export default () => {

@@ -11,8 +11,10 @@ import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
+import { Pressable, ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
+import { cn, tv } from "tailwind-variants";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 /**
@@ -334,11 +336,7 @@ function MobileFloatingTitle({
     <Reanimated.View
       entering={FadeIn.duration(100)}
       exiting={FadeOut.duration(100)}
-      className={`
-        pointer-events-none
-
-        ${className ?? ``}
-      `}
+      className={cn(`pointer-events-none`, className)}
       style={{
         position: `fixed`,
         left: 0,

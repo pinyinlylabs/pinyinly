@@ -79,7 +79,7 @@ Rules:
     schema: pylymarkTokenizeOutputSchema,
     model: `gpt-5.4`,
     reasoningEffort: `none`,
-    postprocess: (data) => {
+    transform: (data) => {
       return {
         text: data.text.replaceAll(/\[(\d+) /gu, (_, id) => {
           const reference = referencesWithIds.find(

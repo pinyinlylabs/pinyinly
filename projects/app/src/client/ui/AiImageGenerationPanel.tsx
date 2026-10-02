@@ -26,8 +26,10 @@ import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
+import { Pressable, ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
+import { cn, tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
@@ -1334,13 +1336,7 @@ function AiImageUserMessage({
     messageStyleLabel != null && messageStyleLabel !== currentStyleLabel;
 
   return (
-    <View
-      className={`
-        items-end gap-1.5
-
-        ${className ?? ``}
-      `}
-    >
+    <View className={cn(`items-end gap-1.5`, className)}>
       <View className="max-w-140 rounded-lg bg-sky/20 p-2">
         {message.text != null && message.text.length > 0 ? (
           <Text className="mx-1 font-sans text-sm leading-snug font-medium text-fg">
@@ -1411,13 +1407,7 @@ function AiImageErrorMessage({
   className?: string;
 }) {
   return (
-    <View
-      className={`
-        items-start gap-2
-
-        ${className ?? ``}
-      `}
-    >
+    <View className={cn(`items-start gap-2`, className)}>
       <View className="max-w-140 gap-2 rounded-lg border border-fg-bg10 bg-bg-high p-3">
         <Text className="font-sans text-sm text-[crimson]">
           {message.text ?? `Unable to generate image right now.`}
@@ -1467,13 +1457,7 @@ function AiImageAssistantMessage({
   }
 
   return (
-    <View
-      className={`
-        gap-2
-
-        ${className ?? ``}
-      `}
-    >
+    <View className={cn(`gap-2`, className)}>
       <AiImageContent
         assetId={assetId}
         messageId={message.id}

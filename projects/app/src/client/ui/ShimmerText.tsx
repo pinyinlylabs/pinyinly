@@ -1,5 +1,6 @@
 import type { TextProps } from "react-native";
-import { Platform, Text } from "react-native";
+import { Platform } from "react-native";
+import { Text } from "@/client/ui/Text";
 
 export function ShimmerText({
   children,

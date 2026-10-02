@@ -1,8 +1,7 @@
-import type { HanziText } from "@/data/model";
-import { isHanziCharacter } from "@/data/hanzi";
+import type { HanziCharacter } from "@/data/model";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { eq, inArray, useLiveQuery } from "@tanstack/react-db";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
@@ -12,34 +11,29 @@ const maxUsedInCharacters = 5;
 export function WikiHanziCharacterUsedInCharacters({
   hanzi,
 }: {
-  hanzi: HanziText;
+  hanzi: HanziCharacter;
 }) {
   const db = useDb();
-  const isSingleCharacter = isHanziCharacter(hanzi);
 
   const { data: componentUsageRows } = useLiveQuery(
     (q) =>
-      isSingleCharacter
-        ? q
-            .from({ usage: db.characterComponentUsage })
-            .where(({ usage }) => eq(usage.component, hanzi))
-            .select(({ usage }) => ({ usedInHanzi: usage.usedInHanzi }))
-        : null,
-    [db.characterComponentUsage, hanzi, isSingleCharacter],
+      q
+        .from({ usage: db.characterComponentUsage })
+        .where(({ usage }) => eq(usage.component, hanzi))
+        .select(({ usage }) => ({ usedInHanzi: usage.usedInHanzi })),
+    [db.characterComponentUsage, hanzi],
   );
 
   const { data: entriesWithDupes } = useLiveQuery(
     (q) => {
-      const usedInHanzi = isSingleCharacter
-        ? ((componentUsageRows ?? [])[0]?.usedInHanzi ?? []).filter(
-            (item) => item !== hanzi,
-          )
-        : [];
+      const usedInHanzi = (componentUsageRows[0]?.usedInHanzi ?? []).filter(
+        (item) => item !== hanzi,
+      );
 
       return usedInHanzi.length === 0
         ? null
         : q
-            .from({ entry: db.dictionarySearch })
+            .from({ entry: db.dictionaryCollection })
             .where(({ entry }) => inArray(entry.hanzi, usedInHanzi))
             .orderBy(({ entry }) => entry.hskSortKey, `asc`)
             .orderBy(({ entry }) => entry.hanziCharacterCount, `asc`)
@@ -52,21 +46,21 @@ export function WikiHanziCharacterUsedInCharacters({
               pinyin: entry.pinyin,
             }));
     },
-    [db.dictionarySearch, componentUsageRows, hanzi, isSingleCharacter],
+    [db.dictionaryCollection, componentUsageRows, hanzi],
   );
 
   const entries = (entriesWithDupes ?? [])
     .filter(arrayFilterUnique((item) => item.hanzi))
     .slice(0, maxUsedInCharacters);
 
-  if (!isSingleCharacter || entries.length === 0) {
+  if (entries.length === 0) {
     return null;
   }
 
   return (
     <WikiTitledBox title="Used in characters">
       <View className="p-3">
-        <CompactWordRows dictionarySearchEntries={entries} />
+        <CompactWordRows dictionaryEntries={entries} />
       </View>
     </WikiTitledBox>
   );

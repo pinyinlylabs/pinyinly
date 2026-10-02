@@ -1,7 +1,8 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import { ImagePasteDropZone } from "@/client/ui/ImagePasteDropZone";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default () => {
   const [lastAssetId, setLastAssetId] = useState<string | null>(null);

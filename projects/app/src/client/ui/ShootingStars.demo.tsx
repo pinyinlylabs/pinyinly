@@ -2,7 +2,7 @@ import { ExampleStack } from "@/client/ui/demo/components";
 import { RectButton } from "@/client/ui/RectButton";
 import { ShootingStars } from "@/client/ui/ShootingStars";
 import { useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   const [i, setI] = useState(0);

@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
 import { RectButton } from "./RectButton";
 import { ExampleStack } from "./demo/components";

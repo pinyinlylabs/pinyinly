@@ -2,8 +2,10 @@ import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
 import { createContext, use, useState } from "react";
-import { Pressable, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
+import { cn, tv } from "tailwind-variants";
 
 interface TabsContextValue {
   value: string;
@@ -26,7 +28,9 @@ export interface TabsListProps {
 }
 
 function TabsList({ className, children }: TabsListProps) {
-  return <View className={tabsListClass({ className })}>{children}</View>;
+  return (
+    <View className={cn(`rounded-lg bg-fg/5 p-1`, className)}>{children}</View>
+  );
 }
 
 export interface TabsTriggerProps {
@@ -127,10 +131,6 @@ Tabs.Trigger = TabsTrigger;
 Tabs.Content = TabsContent;
 
 export { Tabs };
-
-const tabsListClass = tv({
-  base: `rounded-lg bg-fg/5 p-1`,
-});
 
 const triggerInnerClass = tv({
   base: `

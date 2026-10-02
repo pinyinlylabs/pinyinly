@@ -1,7 +1,9 @@
 import type { HanziText, PinyinText } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
@@ -16,10 +18,10 @@ export const NewSkillModalContentNewWord = ({
   onDismiss: () => void;
 }) => {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
@@ -27,11 +29,11 @@ export const NewSkillModalContentNewWord = ({
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   let pinyin: PinyinText | undefined;
-  for (const entry of dictionarySearchEntries) {
+  for (const entry of dictionaryEntries) {
     if (entry.pinyin != null) {
       const mainPinyin = entry.pinyin[0];
       if (mainPinyin != null) {
@@ -47,9 +49,9 @@ export const NewSkillModalContentNewWord = ({
   }
 
   const glosses =
-    dictionarySearchEntries.length === 1
-      ? dictionarySearchEntries[0]?.gloss.join(`, `)
-      : dictionarySearchEntries.map((entry) => entry.gloss[0]).join(`, `);
+    dictionaryEntries.length === 1
+      ? dictionaryEntries[0]?.gloss.join(`, `)
+      : dictionaryEntries.map((entry) => entry.gloss[0]).join(`, `);
 
   return (
     <ScrollView

@@ -1,7 +1,7 @@
 import type { Skill } from "@/data/model";
 import type { Rating } from "@/util/fsrs";
 import type { ReactNode } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizSubmitButton } from "./QuizSubmitButton";

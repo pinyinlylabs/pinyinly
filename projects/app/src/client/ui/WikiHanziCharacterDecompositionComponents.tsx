@@ -1,15 +1,11 @@
-import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziCharacter, HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
-import { use, useState } from "react";
-import { View } from "react-native";
+import { useState } from "react";
+import { View } from "@/client/ui/View";
 import { HanziStrokesTile } from "./HanziStrokesTile";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
-import {
-  deepDecomposeHanziWithStrokeSpecs,
-  loadBuiltinCharacterDecompositionEntries,
-} from "@/dictionary";
+import { deepDecomposeHanziWithStrokeSpecs } from "@/dictionary";
 import { parseStrokeSpec } from "@/util/strokeSpec";
 
 const decompositionGridMinColumnWidth = 130;
@@ -20,26 +16,15 @@ const decompositionGridCellMinHeight = 124;
 export function WikiHanziCharacterDecompositionComponents({
   hanzi,
 }: {
-  hanzi: HanziText;
-}) {
-  if (!isHanziCharacter(hanzi)) {
-    return null;
-  }
-
-  return <WikiHanziCharacterDecompositionComponentsBox hanzi={hanzi} />;
-}
-
-function WikiHanziCharacterDecompositionComponentsBox({
-  hanzi,
-}: {
   hanzi: HanziCharacter;
 }) {
   const [decompositionGridWidth, setDecompositionGridWidth] =
     useState<number>(0);
   const db = useDb();
 
-  const characterDecompositionEntries = use(
-    loadBuiltinCharacterDecompositionEntries(),
+  const { data: characterDecompositionEntries } = useLiveQuery(
+    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
+    [db.characterDecompositionsCollection],
   );
 
   const decompositionItems = deepDecomposeHanziWithStrokeSpecs(
@@ -51,7 +36,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
     ...new Set(decompositionItems.map((x) => x.hanzi)),
   ].join(`|`);
 
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) => {
       if (dedupedHanziListKey.length === 0) {
         return null;
@@ -62,7 +47,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
         .filter((item): item is HanziText => item.length > 0);
 
       return q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => inArray(entry.hanzi, dedupedHanziList))
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .orderBy(({ entry }) => entry.hanziWord, `asc`)
@@ -71,7 +56,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
           gloss: entry.gloss,
         }));
     },
-    [db.dictionarySearch, dedupedHanziListKey],
+    [db.dictionaryCollection, dedupedHanziListKey],
   );
 
   if (decompositionItems.length === 0) {
@@ -79,7 +64,7 @@ function WikiHanziCharacterDecompositionComponentsBox({
   }
 
   const primaryGlossByHanzi = new Map<string, string>();
-  for (const entry of dictionarySearchEntries ?? []) {
+  for (const entry of dictionaryEntries ?? []) {
     if (primaryGlossByHanzi.has(entry.hanzi)) {
       continue;
     }

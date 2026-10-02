@@ -2,7 +2,8 @@
 
 import { Tabs } from "#client/ui/Tabs.tsx";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { Text, View } from "react-native";
+import { Text } from "#client/ui/Text.tsx";
+import { View } from "#client/ui/View.tsx";
 import { describe, expect, test, vi } from "vitest";
 
 describe(`Tabs suite`, () => {

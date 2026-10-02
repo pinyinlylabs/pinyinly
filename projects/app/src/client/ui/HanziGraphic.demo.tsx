@@ -1,5 +1,6 @@
 import { ExampleStack } from "@/client/ui/demo/components";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { HanziGraphic } from "./HanziGraphic";
 

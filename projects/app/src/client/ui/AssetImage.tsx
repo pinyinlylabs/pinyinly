@@ -11,7 +11,9 @@ import type {
 } from "@/client/ui/Image";
 import { useState } from "react";
 import type { StyleProp } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
+import { cn } from "tailwind-variants";
 
 interface AssetImageProps extends Omit<ExpoImageProps, `source` | `style`> {
   /**
@@ -68,18 +70,11 @@ function AssetImageImpl({
     (isLoading && !showFailedOverlay);
 
   return (
-    <View
-      className={`
-        relative overflow-hidden
-
-        ${className ?? ``}
-      `}
-      style={style}
-    >
+    <View className={cn(`relative overflow-hidden`, className)} style={style}>
       <ExpoImage
         {...restImageProps}
         source={source}
-        className={`size-full ${imageClassName ?? ``}`.trim()}
+        className={cn(`size-full`, imageClassName)}
         contentFit={contentFit}
         transition={200}
         onLoadStart={() => {

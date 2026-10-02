@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export const ReferencePage = ({
   header,

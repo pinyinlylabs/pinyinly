@@ -3,7 +3,8 @@ import type { PropsOf } from "@pinyinly/lib/types";
 import Color from "color";
 import { Image } from "@/client/ui/Image";
 import { useMemo } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
+import { View } from "@/client/ui/View";
 import type { ColorValue } from "react-native";
 
 export type CircleButtonProps = {

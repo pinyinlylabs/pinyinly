@@ -1,7 +1,7 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PropsOf } from "@pinyinly/lib/types";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => (
   <View className="flex-1">

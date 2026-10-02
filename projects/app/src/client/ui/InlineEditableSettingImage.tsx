@@ -18,9 +18,9 @@ import {
   PanResponder,
   Platform,
   Pressable,
-  Text,
-  View,
 } from "react-native";
+import { View } from "@/client/ui/View";
+import { Text } from "@/client/ui/Text";
 import { Circle, Defs, Mask, Rect, Svg } from "react-native-svg";
 import type { AiReferenceImageDeclaration } from "./AiImageGenerationPanel";
 import { AiImageGenerationPanel } from "./AiImageGenerationPanel";

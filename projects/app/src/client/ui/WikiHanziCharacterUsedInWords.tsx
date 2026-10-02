@@ -1,19 +1,22 @@
-import { isHanziCharacter } from "@/data/hanzi";
-import type { HanziText } from "@/data/model";
+import type { HanziCharacter } from "@/data/model";
 import { and, eq, like, not, useLiveQuery } from "@tanstack/react-db";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
 
 const maxUsedInWords = 5;
 
-export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
+export function WikiHanziCharacterUsedInWords({
+  hanzi,
+}: {
+  hanzi: HanziCharacter;
+}) {
   const db = useDb();
-  const { data: dictionarySearchEntries } = useLiveQuery(
+  const { data: dictionaryEntries } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(like(entry.hanzi, `%${hanzi}%`), not(eq(entry.hanzi, hanzi))),
         )
@@ -29,21 +32,17 @@ export function WikiHanziCharacterUsedInWords({ hanzi }: { hanzi: HanziText }) {
         }))
         .distinct()
         .limit(maxUsedInWords),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
-  if (!isHanziCharacter(hanzi)) {
-    return null;
-  }
-
-  if (dictionarySearchEntries.length === 0) {
+  if (dictionaryEntries.length === 0) {
     return null;
   }
 
   return (
     <WikiTitledBox title="Used in words">
       <View className="p-3">
-        <CompactWordRows dictionarySearchEntries={dictionarySearchEntries} />
+        <CompactWordRows dictionaryEntries={dictionaryEntries} />
       </View>
     </WikiTitledBox>
   );

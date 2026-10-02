@@ -5,7 +5,7 @@
  * Usage: tsx buildFinalToneFrequencies.ts
  */
 
-import type { PinyinSoundId, PinyinUnit } from "#data/model.ts";
+import type { PinyinSoundId } from "#data/model.ts";
 import { matchAllPinyinUnits, splitPinyinUnit } from "#data/pinyin.js";
 import { loadDictionaryJson } from "#dictionary.js";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
@@ -22,9 +22,7 @@ async function buildFinalToneFrequencies(): Promise<FinalToneCount[]> {
   const dictionaryJson = await loadDictionaryJson();
 
   for (const [_hanziWord, meaning] of dictionaryJson) {
-    const pinyinArray = Array.isArray(meaning.pinyin)
-      ? meaning.pinyin
-      : [meaning.pinyin];
+    const pinyinArray = meaning.pinyin ?? [];
 
     for (const pinyinText of pinyinArray) {
       if (typeof pinyinText !== `string`) {
@@ -35,7 +33,7 @@ async function buildFinalToneFrequencies(): Promise<FinalToneCount[]> {
       const units = matchAllPinyinUnits(pinyinText);
 
       for (const unit of units) {
-        const split = splitPinyinUnit(unit as PinyinUnit);
+        const split = splitPinyinUnit(unit);
         if (split == null) {
           continue;
         }

@@ -22,7 +22,8 @@ const semver = require("semver");
  * @param {Context} ctx
  */
 async function enforceMoonToolchainVersion(ctx) {
-  const toolchainYaml = await fs.readFile(__dirname + "/.moon/toolchain.yml", {
+  const toolchainYamlPath = `.moon/toolchains.yml`;
+  const toolchainYaml = await fs.readFile(__dirname + "/" + toolchainYamlPath, {
     encoding: "utf-8",
   });
   const toolchainNodeVersion =
@@ -34,8 +35,9 @@ async function enforceMoonToolchainVersion(ctx) {
       toolchainYaml,
     )?.[1];
 
+  const packageJsonPath = `package.json`;
   const packageJson = JSON.parse(
-    await fs.readFile(__dirname + "/package.json", { encoding: "utf-8" }),
+    await fs.readFile(__dirname + "/" + packageJsonPath, { encoding: "utf-8" }),
   );
   const packageNodeVersion = packageJson.engines.node;
   const packageYarnVersion = packageJson.packageManager.split("yarn@")[1];
@@ -43,17 +45,15 @@ async function enforceMoonToolchainVersion(ctx) {
   if (toolchainNodeVersion != packageNodeVersion) {
     reportRootError(
       ctx,
-      `Node version mismatch: ${toolchainNodeVersion} != ${packageNodeVersion}`,
+      `Node version mismatch: ${toolchainNodeVersion} (${toolchainYamlPath}) != ${packageNodeVersion} (${packageJsonPath})`,
     );
   }
   if (toolchainYarnVersion != packageYarnVersion) {
     reportRootError(
       ctx,
-      `Yarn version mismatch: ${toolchainNodeVersion} != ${packageNodeVersion}`,
+      `Yarn version mismatch: ${toolchainYarnVersion} (${toolchainYamlPath}) != ${packageYarnVersion} (${packageJsonPath})`,
     );
   }
-  invariant(toolchainNodeVersion == packageNodeVersion);
-  invariant(toolchainYarnVersion == packageYarnVersion);
 }
 
 /**

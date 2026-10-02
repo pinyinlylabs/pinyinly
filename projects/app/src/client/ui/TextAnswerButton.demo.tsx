@@ -4,7 +4,7 @@ import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton.utils";
 import type { PropsOf } from "@pinyinly/lib/types";
 import shuffle from "lodash/shuffle";
 import { useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 const noopWikiModal = () => null;
 

@@ -1,6 +1,7 @@
 import { nullIfEmpty } from "@/util/unicode";
 import type { ViewProps } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { FramedAssetImage } from "./ImageFrame";
 import type { AssetId } from "@/data/model";
 import type { ImageCrop } from "./imageCrop";

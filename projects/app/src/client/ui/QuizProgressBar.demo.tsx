@@ -2,7 +2,8 @@ import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { RectButton } from "@/client/ui/RectButton";
 import { useCallback } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default () => {
   const quizProgress = useQuizProgress();

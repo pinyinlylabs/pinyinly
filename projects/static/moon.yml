@@ -7,7 +7,7 @@ tasks:
     command: yarn tsx --tsconfig tsconfig.json src/bin/generateSpeech.ts
     inputs:
       - src/**/*
-    preset: watcher
+    preset: server
 
   fmt:
     deps:

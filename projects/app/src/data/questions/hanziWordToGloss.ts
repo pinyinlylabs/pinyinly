@@ -1,5 +1,6 @@
 import type {
   HanziWord,
+  HanziWordMeaning,
   HanziWordSkill,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
@@ -8,7 +9,6 @@ import type {
 } from "@/data/model";
 import { QuestionKind } from "@/data/model";
 import { hanziWordFromSkill } from "@/data/skills";
-import type { HanziWordMeaning } from "@/dictionary";
 import { glossOrThrow, hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { evenHalve } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";

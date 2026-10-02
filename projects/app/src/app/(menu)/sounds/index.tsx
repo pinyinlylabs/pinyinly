@@ -26,13 +26,13 @@ import {
   pinyinSoundGroupNameTextSetting,
   pinyinSoundGroupThemeTextSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameTextSetting,
   pinyinSoundLocationSetKeySetting,
 } from "@/data/userSettings";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { useMemo } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function SoundsPage() {
   "use memo";
@@ -42,15 +42,6 @@ export default function SoundsPage() {
   const chart = loadPylyPinyinChart();
   const db = useDb();
 
-  const nameSettingKeys = useMemo(
-    () =>
-      chart.soundIds
-        .filter((soundId) => !isToneSoundId(soundId))
-        .map((soundId) =>
-          pinyinSoundNameTextSetting.entity.marshalKey({ soundId }),
-        ),
-    [chart.soundIds],
-  );
   const toneSetKeySettingKeys = useMemo(
     () =>
       chart.soundIds
@@ -91,14 +82,12 @@ export default function SoundsPage() {
   );
   const relevantKeys = useMemo(
     () => [
-      ...nameSettingKeys,
       ...toneSetKeySettingKeys,
       ...imageSettingKeys,
       ...actorSelectionKeys,
       ...finalPlaceSelectionKeys,
     ],
     [
-      nameSettingKeys,
       toneSetKeySettingKeys,
       imageSettingKeys,
       actorSelectionKeys,
@@ -206,12 +195,6 @@ export default function SoundsPage() {
         ];
       }
 
-      const nameValueData = pinyinSoundNameTextSetting.decode(
-        { soundId },
-        settingsByKey.get(
-          pinyinSoundNameTextSetting.entity.marshalKey({ soundId }),
-        ) ?? null,
-      );
       const imageValueData = pinyinSoundImageSetting.decode(
         { soundId },
         settingsByKey.get(
@@ -223,7 +206,7 @@ export default function SoundsPage() {
       return [
         soundId,
         {
-          name: nameValueData?.text ?? null,
+          name: null,
           badge: chart.soundToCustomLabel[soundId] ?? soundId,
           image:
             imageId == null

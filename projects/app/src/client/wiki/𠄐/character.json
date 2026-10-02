@@ -1,8 +1,12 @@
 {
+  "decompositions": {
+    "⿱乛亅": ["", ""]
+  },
   "hanzi": "𠄐",
-  "svg": { "strokes": 2 },
   "mnemonic": {
     "decomposition": "⿱乛亅"
   },
-  "decompositions": { "⿱乛亅": ["", ""] }
+  "svg": {
+    "strokes": 2
+  }
 }

@@ -2,7 +2,8 @@ import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { AssetImage } from "@/client/ui/AssetImage";
 import { AssetStatusKind } from "@/data/model";
 import type { AssetId } from "@/data/model";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 const loadedLandscapeAssetId =
   `sha256/PsFS7XP1JXH0cs69_Fw0j_7juNrv_rmaFltdpJjXcNw` as AssetId;

@@ -1,6 +1,8 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function HeaderTitleProviderDemo() {
   return (

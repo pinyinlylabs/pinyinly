@@ -19,7 +19,9 @@ import { useDebounce } from "@uidotdev/usehooks";
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import type { ViewProps } from "react-native";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { QuickSearchResult } from "./hooks/useQuickSearch";
 import { useQuickSearch } from "./hooks/useQuickSearch";
 import { useDb } from "./hooks/useDb";
@@ -170,11 +172,11 @@ function HanziWordResultContent({ hanziWord }: { hanziWord: HanziWord }) {
   const { data: dictionaryEntry } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanziWord, hanziWord))
         .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
         .findOne(),
-    [db.dictionarySearch, hanziWord],
+    [db.dictionaryCollection, hanziWord],
   );
 
   const hanzi = hanziFromHanziWord(hanziWord);

@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 9
+  version: 10
   cacheKey: 10c0
 
 "@adobe/css-tools@npm:^4.4.0":
@@ -3691,6 +3691,129 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@napi-rs/canvas-android-arm64@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-android-arm64@npm:1.0.8"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-darwin-arm64@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-darwin-arm64@npm:1.0.8"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-darwin-x64@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-darwin-x64@npm:1.0.8"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-arm-gnueabihf@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-linux-arm-gnueabihf@npm:1.0.8"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-arm64-gnu@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-linux-arm64-gnu@npm:1.0.8"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-arm64-musl@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-linux-arm64-musl@npm:1.0.8"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-riscv64-gnu@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-linux-riscv64-gnu@npm:1.0.8"
+  conditions: os=linux & cpu=riscv64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-x64-gnu@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-linux-x64-gnu@npm:1.0.8"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-x64-musl@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-linux-x64-musl@npm:1.0.8"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-win32-arm64-msvc@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-win32-arm64-msvc@npm:1.0.8"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-win32-x64-msvc@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas-win32-x64-msvc@npm:1.0.8"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas@npm:^1.0.0":
+  version: 1.0.8
+  resolution: "@napi-rs/canvas@npm:1.0.8"
+  dependencies:
+    "@napi-rs/canvas-android-arm64": "npm:1.0.8"
+    "@napi-rs/canvas-darwin-arm64": "npm:1.0.8"
+    "@napi-rs/canvas-darwin-x64": "npm:1.0.8"
+    "@napi-rs/canvas-linux-arm-gnueabihf": "npm:1.0.8"
+    "@napi-rs/canvas-linux-arm64-gnu": "npm:1.0.8"
+    "@napi-rs/canvas-linux-arm64-musl": "npm:1.0.8"
+    "@napi-rs/canvas-linux-riscv64-gnu": "npm:1.0.8"
+    "@napi-rs/canvas-linux-x64-gnu": "npm:1.0.8"
+    "@napi-rs/canvas-linux-x64-musl": "npm:1.0.8"
+    "@napi-rs/canvas-win32-arm64-msvc": "npm:1.0.8"
+    "@napi-rs/canvas-win32-x64-msvc": "npm:1.0.8"
+  dependenciesMeta:
+    "@napi-rs/canvas-android-arm64":
+      optional: true
+    "@napi-rs/canvas-darwin-arm64":
+      optional: true
+    "@napi-rs/canvas-darwin-x64":
+      optional: true
+    "@napi-rs/canvas-linux-arm-gnueabihf":
+      optional: true
+    "@napi-rs/canvas-linux-arm64-gnu":
+      optional: true
+    "@napi-rs/canvas-linux-arm64-musl":
+      optional: true
+    "@napi-rs/canvas-linux-riscv64-gnu":
+      optional: true
+    "@napi-rs/canvas-linux-x64-gnu":
+      optional: true
+    "@napi-rs/canvas-linux-x64-musl":
+      optional: true
+    "@napi-rs/canvas-win32-arm64-msvc":
+      optional: true
+    "@napi-rs/canvas-win32-x64-msvc":
+      optional: true
+    canvas:
+      built: true
+    skia-canvas:
+      built: true
+  checksum: 10c0/ebcff2dfbf8f7402aaf5af0f5163a39a84af61e656cf4d1a2d669ea770d15dc27c6dd7d83803daeca39fcdfb609ad548febedf883a9daac14008ecebb95e1ddf
+  languageName: node
+  linkType: hard
+
 "@napi-rs/wasm-runtime@npm:^1.1.4":
   version: 1.1.4
   resolution: "@napi-rs/wasm-runtime@npm:1.1.4"
@@ -6219,6 +6342,7 @@ __metadata:
     "@types/debug": "npm:^4 <=4.3.x"
     "@types/fontkit": "npm:2.0.x"
     "@types/lodash": "npm:^4 <=4.18.x"
+    "@types/ms": "npm:2.1.x"
     "@types/node": "npm:22.x"
     "@types/pg": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch"
     "@types/react": "npm:19.2.x"
@@ -6290,6 +6414,7 @@ __metadata:
     metro: "npm:*"
     metro-cache: "npm:*"
     moti: "npm:^0.30.0"
+    ms: "npm:^2.1.3"
     nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
     onnxruntime-web: "npm:^1.25.1"
     openai: "npm:^6.45.0"
@@ -6297,6 +6422,7 @@ __metadata:
     oxfmt: "npm:^0.62.0"
     oxlint: "npm:^1.78.0"
     oxlint-tsgolint: "npm:^7.0.2001"
+    pdfjs-dist: "npm:^6.2.108"
     pg: "npm:^8.20.0"
     pg-protocol: "npm:^1.13.0"
     pino: "npm:^10.3.1"
@@ -10174,7 +10300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ms@npm:*, @types/ms@npm:~2.1.0":
+"@types/ms@npm:*, @types/ms@npm:2.1.x, @types/ms@npm:~2.1.0":
   version: 2.1.0
   resolution: "@types/ms@npm:2.1.0"
   checksum: 10c0/5ce692ffe1549e1b827d99ef8ff71187457e0eb44adbae38fdf7b9a74bae8d20642ee963c14516db1d35fa2652e65f47680fdf679dcbde52bbfadd021f497225
@@ -19921,6 +20047,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pdfjs-dist@npm:^6.2.108":
+  version: 6.2.108
+  resolution: "pdfjs-dist@npm:6.2.108"
+  dependencies:
+    "@napi-rs/canvas": "npm:^1.0.0"
+  dependenciesMeta:
+    "@napi-rs/canvas":
+      optional: true
+  checksum: 10c0/12cf7d9e549339f716c6cb33ca89b85774067616d1aea959f6b96740a489f8d9906b42f5add5d9c2118e25f3a457126e68f490c273184689b7e714718b5293e0
+  languageName: node
+  linkType: hard
+
 "peberminta@npm:^0.9.0":
   version: 0.9.0
   resolution: "peberminta@npm:0.9.0"
@@ -21431,14 +21569,14 @@ __metadata:
 
 "resolve@patch:resolve@npm%3A^1.14.2#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.8#optional!builtin<compat/resolve>":
   version: 1.22.10
-  resolution: "resolve@patch:resolve@npm%3A1.22.10#optional!builtin<compat/resolve>::version=1.22.10&hash=c3c19d"
+  resolution: "resolve@patch:resolve@npm%3A1.22.10#optional!builtin<compat/resolve>::version=1.22.10&hash=9bd1a5"
   dependencies:
     is-core-module: "npm:^2.16.0"
     path-parse: "npm:^1.0.7"
     supports-preserve-symlinks-flag: "npm:^1.0.0"
   bin:
     resolve: bin/resolve
-  checksum: 10c0/52a4e505bbfc7925ac8f4cd91fd8c4e096b6a89728b9f46861d3b405ac9a1ccf4dcbf8befb4e89a2e11370dacd0160918163885cbc669369590f2f31f4c58939
+  checksum: 10c0/da5c4a85971e6eeb821805d117092321c6c257a6e1e45382c0b7ef41368a7e98690e01a08bac88b111443410a49e2fb17d1802ac5c51c8fc5532d77bef9f4be9
   languageName: node
   linkType: hard
 

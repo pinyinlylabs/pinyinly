@@ -1,6 +1,7 @@
 import { loadBillOfMaterials } from "@/data/bom";
 import { Fragment, use } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default function AcknowledgementsPage() {
   const billOfMaterials = use(loadBillOfMaterials());

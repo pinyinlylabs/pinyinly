@@ -4,7 +4,8 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { Link, Slot } from "expo-router";
 import { Image } from "@/client/ui/Image";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
+import { View } from "@/client/ui/View";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 

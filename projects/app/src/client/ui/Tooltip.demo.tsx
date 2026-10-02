@@ -2,7 +2,8 @@ import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { Icon } from "@/client/ui/Icon";
 import { RectButton } from "@/client/ui/RectButton";
 import { Tooltip } from "@/client/ui/Tooltip";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 
 export default () => (
   <View className="flex-1 gap-4">

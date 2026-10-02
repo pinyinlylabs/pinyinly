@@ -71,6 +71,27 @@ const promptCases: CharacterCoreMeaningsSpecInputType[] = [
       { hanzi: `自行车`, pinyin: `zì xíng chē` },
     ] as { hanzi: HanziText; pinyin: PinyinText }[],
   },
+  {
+    character: `兴` as HanziCharacter,
+    usages: [
+      { hanzi: `复兴`, pinyin: `fùxīng` },
+      { hanzi: `感兴趣`, pinyin: `gǎnxìngqù` },
+      { hanzi: `高兴`, pinyin: `gāoxìng` },
+      { hanzi: `扫兴`, pinyin: `sǎoxìng` },
+      { hanzi: `新兴`, pinyin: `xīnxīng` },
+      { hanzi: `兴奋`, pinyin: `xīngfèn` },
+      { hanzi: `兴奋剂`, pinyin: `xīngfènjì` },
+      { hanzi: `兴高采烈`, pinyin: `xìnggāocǎiliè` },
+      { hanzi: `兴建`, pinyin: `xīngjiàn` },
+      { hanzi: `兴隆`, pinyin: `xīnglóng` },
+      { hanzi: `兴起`, pinyin: `xīngqǐ` },
+      { hanzi: `兴趣`, pinyin: `xìngqù` },
+      { hanzi: `兴旺`, pinyin: `xīngwàng` },
+      { hanzi: `兴致`, pinyin: `xìngzhì` },
+      { hanzi: `兴致勃勃`, pinyin: `xìngzhìbóbó` },
+      { hanzi: `振兴`, pinyin: `zhènxīng` },
+    ] as { hanzi: HanziText; pinyin: PinyinText }[],
+  },
 ];
 
 describeEval(
@@ -79,7 +100,7 @@ describeEval(
     harness: createResponsePromptHarness(buildCharacterCoreMeaningsSpecPrompt),
   },
   (it) => {
-    it.for(promptCases)(`$identity`, async (spec, { run }) => {
+    it.for(promptCases)(`$character`, async (spec, { run }) => {
       await run(spec);
     });
   },

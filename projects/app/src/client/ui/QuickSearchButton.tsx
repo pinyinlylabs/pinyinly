@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ViewProps } from "react-native";
-import { Pressable, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
+import { cn } from "tailwind-variants";
 import { Icon } from "./Icon";
 import { QuickSearchModal } from "./QuickSearchModal";
 
@@ -19,7 +21,14 @@ export function QuickSearchButton({
           setIsModalOpen(true);
         }}
         collapsable={false}
-        className={pressableClass({ className })}
+        className={cn(
+          `
+            flex-row items-center justify-between gap-6 rounded-xl bg-bg-high px-3 py-2
+
+            hover:bg-fg/20
+          `,
+          className,
+        )}
       >
         <View className="flex-row items-center gap-2">
           <Icon icon="search" size={16} tintColorClassName="accent-muted-fg" />
@@ -42,11 +51,3 @@ export function QuickSearchButton({
     </>
   );
 }
-
-const pressableClass = tv({
-  base: `
-    flex-row items-center justify-between gap-6 rounded-xl bg-bg-high px-3 py-2
-
-    hover:bg-fg/20
-  `,
-});

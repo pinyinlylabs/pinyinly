@@ -2,7 +2,8 @@ import type { QuestionFlagType } from "@/data/model";
 import { QuestionFlagKind } from "@/data/model";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { Icon } from "./Icon";
 

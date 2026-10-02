@@ -1,6 +1,6 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

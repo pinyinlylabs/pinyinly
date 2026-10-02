@@ -1,11 +1,11 @@
-import type { DictionarySearchEntry } from "#client/query.ts";
+import type { DictionaryCollectionEntry } from "#client/query.ts";
 import { quickSearch } from "#client/ui/hooks/useQuickSearch.ts";
 import type { HanziText, HanziWord, PinyinText } from "#data/model.js";
 import { describe, expect, test } from "vitest";
 
 describe(`quickSearch suite`, () => {
   test(`matches non-first gloss and pinyin values`, () => {
-    const entries: DictionarySearchEntry[] = [
+    const entries: DictionaryCollectionEntry[] = [
       makeEntry({
         hanzi: `服` as HanziText,
         meaningKey: `clothes`,
@@ -53,7 +53,7 @@ function makeEntry({
   meaningKey: string;
   gloss: string[];
   pinyin?: PinyinText[];
-}): DictionarySearchEntry {
+}): DictionaryCollectionEntry {
   const hanziWord = `${hanzi}:${meaningKey}` as HanziWord;
 
   return {

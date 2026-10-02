@@ -1,6 +1,6 @@
 import { ExampleStack } from "@/client/ui/demo/components";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   return (

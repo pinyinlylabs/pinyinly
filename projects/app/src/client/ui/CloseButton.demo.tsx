@@ -1,6 +1,6 @@
 import { CloseButton } from "@/client/ui/CloseButton";
 import { ExampleStack } from "@/client/ui/demo/components";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => (
   <View className="flex-1">

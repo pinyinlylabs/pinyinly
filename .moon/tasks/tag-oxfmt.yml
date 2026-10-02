@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: oxfmt
+
 fileGroups:
   config:
     - "/.gitignore"

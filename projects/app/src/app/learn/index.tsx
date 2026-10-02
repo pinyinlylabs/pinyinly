@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "@/client/ui/ErrorBoundary";
 import { QuizDeck } from "@/client/ui/QuizDeck";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default function ReviewsPage() {
   return (

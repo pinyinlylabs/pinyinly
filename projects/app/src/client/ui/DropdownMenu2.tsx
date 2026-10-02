@@ -1,7 +1,8 @@
 // oxlint-disable import/namespace -- See https://github.com/oxc-project/oxc/issues/13258#issuecomment-4582968867
 import * as DropdownMenuPrimitive from "@rn-primitives/dropdown-menu";
 import { Text } from "./Text";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet } from "react-native";
+import { View } from "@/client/ui/View";
 import type { StyleProp, ViewStyle } from "react-native";
 import { FadeIn, ReduceMotion } from "react-native-reanimated";
 import { FullWindowOverlay as RNFullWindowOverlay } from "react-native-screens";
@@ -307,10 +308,13 @@ function DropdownMenuCheckboxItem({
             active:bg-accent
 
             sm:py-1.5
+
+            web:cursor-default web:outline-none
+
+            web:focus:bg-accent web:focus:text-accent-fg
+
+            web:data-[disabled]:pointer-events-none
           `,
-          Platform.select({
-            web: `focus:accent focus:text-accent-fg cursor-default outline-none data-[disabled]:pointer-events-none`,
-          }),
           props.disabled && `opacity-50`,
           className,
         )}
@@ -322,7 +326,7 @@ function DropdownMenuCheckboxItem({
               icon="check"
               tintColorClassName="accent-fg"
               size={16}
-              className={Platform.select({ web: `pointer-events-none` })}
+              className={`web:pointer-events-none`}
             />
           </DropdownMenuPrimitive.ItemIndicator>
         </View>
@@ -349,10 +353,13 @@ function DropdownMenuRadioItem({
             active:bg-accent
 
             sm:py-1.5
+
+            web:cursor-default web:outline-none
+
+            web:focus:bg-accent web:focus:text-accent-fg
+
+            web:data-[disabled]:pointer-events-none
           `,
-          Platform.select({
-            web: `focus:accent focus:text-accent-fg cursor-default outline-none data-[disabled]:pointer-events-none`,
-          }),
           props.disabled && `opacity-50`,
           className,
         )}

@@ -1,3 +1,6 @@
+inheritedBy:
+  tag: typescript
+
 tasks:
   typecheck:
     command: tsgo --build
@@ -8,4 +11,4 @@ tasks:
       - "**/*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
       - /tsconfig.base.json
       - /yarn.lock
-    toolchain: "node"
+    toolchains: "node"

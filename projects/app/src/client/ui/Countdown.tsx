@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { useEffect, useState } from "react";
-import { Text } from "react-native";
+import { Text } from "@/client/ui/Text";
 
 function diffValue(date: Date): string {
   return formatDistanceToNow(date, { addSuffix: true });

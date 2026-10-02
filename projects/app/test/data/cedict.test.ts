@@ -2,6 +2,8 @@
 import { describe, expect, test, vi } from "vitest";
 import type { CedictV2EntryType, ParsedCedictV2GlossType } from "./cedict";
 import {
+  buildCedictDictionary,
+  buildCedictEntryMatchKeyIndex,
   buildCedictSenseSampling,
   applyCedictV2EditsToText,
   applyCedictV2UnicodeNormalization,
@@ -11,6 +13,7 @@ import {
   buildSenseGlossOrderMatrix,
   buildSenseGroupingAffinityMatrix,
   cedictIdsPath,
+  cedictEditsPath,
   cedictPath,
   cedictSenseSamplingPath,
   clusterGlossesFromAffinityMatrix,
@@ -20,14 +23,17 @@ import {
   decodeCedictSenseSamplingRow,
   encodeCedictSenseSamplingRow,
   extractDictionaryPinyinFromCedictSense,
+  findCedictDeletedSenses,
   findCedictSenseById,
   isLikelyOverSplitCedictEntry,
   loadCedictSenseSampling,
   loadCedictV2,
   loadCedictV2Ids,
+  matchCedictEntryKeys,
   migrateSense,
   nestedStringSetScorer,
   parseCedictEntryRefs,
+  parseCedictSenseId,
   parseCedictSenseSamplingText,
   parseCedictV2EditsText,
   parseCedictV2Gloss,
@@ -43,13 +49,15 @@ import {
   splitCedictV2Sense,
 } from "./cedict";
 import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
+import { readDictionaryJson } from "#bin/util/dictionary.ts";
 import { isCi } from "#util/env.js";
 import {
+  mapArrayAdd,
   mergeSortComparators,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import type { PinyinNumericText } from "#data/model.js";
+import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import * as aiModule from "#server/lib/ai.js";
 import * as cedictModule from "./cedict";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/jsonfmt";
@@ -340,6 +348,23 @@ describe(`parseCedictV2Line`, () => {
       }),
     ).toThrow(`edits rule matched multiple senses: same sense`);
   });
+
+  test(`applies pinyin edits to the returned entry`, () => {
+    const edits = parseCedictV2EditsText(
+      [
+        `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+        `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const parsed = parseCedictV2Line(
+      `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]] /idiom/`,
+      { edits },
+    );
+
+    expect(parsed?.pinyin).toBe(`yi1shi2zhu4xing2`);
+  });
 });
 
 describe(`parseCedictEntryRefs`, () => {
@@ -424,15 +449,18 @@ describe(`parseCedictV2EditsText`, () => {
     const [entry] = [...parsed.entriesByKey.values()];
     expect(entry).toMatchInlineSnapshot(`
       {
+        "lineNumber": 1,
         "pinyin": "xiao3'er4",
         "rules": [
           {
             "kind": "replace",
+            "lineNumber": 2,
             "newSense": "new sense 1",
             "oldSense": "old sense 1",
           },
           {
             "kind": "replace",
+            "lineNumber": 3,
             "newSense": "",
             "oldSense": "old sense 2",
           },
@@ -450,7 +478,12 @@ describe(`parseCedictV2EditsText`, () => {
 
     const [entry] = [...parsed.entriesByKey.values()];
     expect(entry?.rules).toEqual([
-      { kind: `replace`, oldSense: `one,two`, newSense: `one/two` },
+      {
+        kind: `replace`,
+        oldSense: `one,two`,
+        newSense: `one/two`,
+        lineNumber: 2,
+      },
     ]);
   });
 
@@ -467,6 +500,7 @@ describe(`parseCedictV2EditsText`, () => {
         kind: `merge`,
         oldSenses: [`gloss 1`, `gloss 2; gloss 3`],
         mergedSense: `gloss 1; gloss 2; gloss 3`,
+        lineNumber: 2,
       },
     ]);
   });
@@ -481,8 +515,56 @@ describe(`parseCedictV2EditsText`, () => {
       traditional: `龜`,
       simplified: `龜`,
       pinyin: ``,
-      rules: [{ kind: `add`, newSense: `turtle` }],
+      rules: [{ kind: `add`, newSense: `turtle`, lineNumber: 2 }],
+      lineNumber: 1,
     });
+  });
+
+  test(`parses pinyin rules`, () => {
+    const parsed = parseCedictV2EditsText(
+      [
+        `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+        `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [entry] = [...parsed.entriesByKey.values()];
+    expect(entry?.rules).toEqual([
+      {
+        kind: `pinyin`,
+        oldPinyin: `yi1-shi2-zhu4-xing2`,
+        newPinyin: `yi1shi2zhu4xing2`,
+        lineNumber: 2,
+      },
+    ]);
+  });
+
+  test(`throws when a pinyin rule's old pinyin does not match the header`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [
+          `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+          `[[wrong]] [[yi1shi2zhu4xing2]]`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(
+      `pinyin rule's old pinyin [[wrong]] does not match header pinyin [[yi1-shi2-zhu4-xing2]] (line 1)`,
+    );
+  });
+
+  test(`throws on duplicate pinyin rules in one edit block`, () => {
+    expect(() =>
+      parseCedictV2EditsText(
+        [
+          `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+          `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+          `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2a]]`,
+          ``,
+        ].join(`\n`),
+      ),
+    ).toThrow(`duplicate pinyin rule in edit block (line 1)`);
   });
 
   test(`allows comment lines in the middle of an edits block`, () => {
@@ -500,7 +582,8 @@ describe(`parseCedictV2EditsText`, () => {
       traditional: `車上`,
       simplified: `车上`,
       pinyin: `che1 shang4`,
-      rules: [{ kind: `add`, newSense: `in a car; aboard` }],
+      rules: [{ kind: `add`, newSense: `in a car; aboard`, lineNumber: 3 }],
+      lineNumber: 1,
     });
   });
 
@@ -522,10 +605,12 @@ describe(`parseCedictV2EditsText`, () => {
     expect(entries).toMatchInlineSnapshot(`
       [
         {
+          "lineNumber": 1,
           "pinyin": "xiao3'er4",
           "rules": [
             {
               "kind": "replace",
+              "lineNumber": 2,
               "newSense": "new sense 1",
               "oldSense": "old sense 1",
             },
@@ -534,10 +619,12 @@ describe(`parseCedictV2EditsText`, () => {
           "traditional": "小二",
         },
         {
+          "lineNumber": 4,
           "pinyin": "san1geng1",
           "rules": [
             {
               "kind": "replace",
+              "lineNumber": 5,
               "newSense": "late night",
               "oldSense": "midnight",
             },
@@ -573,6 +660,7 @@ describe(`parseCedictV2EditsText`, () => {
     ).toMatchInlineSnapshot(`
       {
         "kind": "replace",
+        "lineNumber": 2,
         "newSense": "Suzhou numeral ten",
         "oldSense": "numeral 10 in the Suzhou numeral system 蘇州碼子|苏州码子[Su1zhou1 ma3zi5]",
       }
@@ -589,6 +677,7 @@ describe(`parseCedictV2EditsText`, () => {
       kind: `replace`,
       oldSense: `ten`,
       newSense: `ten (cardinal number)`,
+      lineNumber: 5,
     });
   });
 
@@ -851,6 +940,7 @@ describe(`buildCedictV2SenseIdsText`, () => {
       newIds: [],
       mergedIds: [],
       deletedIds: [],
+      rematchedEntries: [],
     });
   });
 
@@ -892,6 +982,7 @@ describe(`buildCedictV2SenseIdsText`, () => {
       newIds: [`b1111`, `c2222`, `d3333`, `e4444`],
       mergedIds: [],
       deletedIds: [],
+      rematchedEntries: [],
     });
   });
 
@@ -928,6 +1019,7 @@ describe(`buildCedictV2SenseIdsText`, () => {
       newIds: [`ccccc`],
       mergedIds: [],
       deletedIds: [],
+      rematchedEntries: [],
     });
   });
 
@@ -951,6 +1043,7 @@ describe(`buildCedictV2SenseIdsText`, () => {
       newIds: [],
       mergedIds: [],
       deletedIds: [],
+      rematchedEntries: [],
     });
   });
 
@@ -972,6 +1065,7 @@ describe(`buildCedictV2SenseIdsText`, () => {
       newIds: [],
       mergedIds: [`bbbbb`],
       deletedIds: [],
+      rematchedEntries: [],
     });
   });
 
@@ -1007,11 +1101,261 @@ describe(`buildCedictV2SenseIdsText`, () => {
       newIds: [],
       mergedIds: [],
       deletedIds: [],
+      rematchedEntries: [],
+    });
+  });
+
+  describe(`entry rematching`, () => {
+    test(`preserves ids when upstream re-spaces the pinyin`, () => {
+      const entries = [
+        parseCedictV2Line(
+          `黎曼幾何 黎曼几何 [[Li2man4 ji3he2]] /(math.) Riemannian geometry/`,
+        )!,
+      ];
+
+      const existingIds = parseCedictV2IdsText(
+        [
+          `黎曼幾何 黎曼几何 [[Li2man4ji3he2]]`,
+          `o7Ixo /(math.) Riemannian geometry/`,
+          ``,
+        ].join(`\n`),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      expect(result.text).toBe(
+        [
+          `黎曼幾何 黎曼几何 [[Li2man4 ji3he2]]`,
+          `o7Ixo /(math.) Riemannian geometry/`,
+          ``,
+        ].join(`\n`),
+      );
+      expect(result.stats).toEqual({
+        newIds: [],
+        mergedIds: [],
+        deletedIds: [],
+        rematchedEntries: [
+          {
+            fromEntryId: `黎曼幾何 黎曼几何 [[Li2man4ji3he2]]`,
+            toEntryId: `黎曼幾何 黎曼几何 [[Li2man4 ji3he2]]`,
+            stage: `normalizedPinyin`,
+          },
+        ],
+      });
+    });
+
+    test(`preserves ids when upstream changes pinyin capitalization`, () => {
+      const entries = [parseCedictV2Line(`三星 三星 [[San1xing1]] /Sanxing/`)!];
+
+      const existingIds = parseCedictV2IdsText(
+        [`三星 三星 [[san1xing1]]`, `aaaa1 /Sanxing/`, ``].join(`\n`),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      expect(result.text).toBe(
+        [`三星 三星 [[San1xing1]]`, `aaaa1 /Sanxing/`, ``].join(`\n`),
+      );
+      expect(result.stats.rematchedEntries).toEqual([
+        {
+          fromEntryId: `三星 三星 [[san1xing1]]`,
+          toEntryId: `三星 三星 [[San1xing1]]`,
+          stage: `caselessPinyin`,
+        },
+      ]);
+      expect(result.stats.newIds).toEqual([]);
+      expect(result.stats.deletedIds).toEqual([]);
+    });
+
+    test(`does not rematch when the normalized key is ambiguous`, () => {
+      const entries = [
+        parseCedictV2Line(`大學 大学 [[Da4 xue2]] /the Great Learning/`)!,
+      ];
+
+      const existingIds = parseCedictV2IdsText(
+        [
+          `大學 大学 [[Da4xue2]]`,
+          `aaaa1 /the Great Learning/`,
+          ``,
+          `大學 大学 [[da4xue2]]`,
+          `bbbb2 /university; college/`,
+          ``,
+        ].join(`\n`),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      // `Da4 xue2` normalizes to `Da4xue2` which is an exact-key sibling of
+      // `da4xue2`, so the caseless pass has two candidates and must abstain.
+      expect(result.stats.rematchedEntries).toEqual([
+        {
+          fromEntryId: `大學 大学 [[Da4xue2]]`,
+          toEntryId: `大學 大学 [[Da4 xue2]]`,
+          stage: `normalizedPinyin`,
+        },
+      ]);
+      expect(result.stats.newIds).toEqual([]);
+      expect(result.stats.deletedIds).toEqual([`bbbb2`]);
+    });
+
+    test(`prefers an exact key match over a normalized match, regardless of entry order`, () => {
+      const entries = [
+        parseCedictV2Line(`一 一 [[yi1 er4]] /one two/`)!,
+        parseCedictV2Line(`一 一 [[yi1er4]] /one two/`)!,
+      ];
+
+      const existingIds = parseCedictV2IdsText(
+        [`一 一 [[yi1er4]]`, `aaaa1 /one two/`, ``].join(`\n`),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      expect(result.text).toBe(
+        [
+          `一 一 [[yi1 er4]]`,
+          `zzzzz /one two/`,
+          ``,
+          `一 一 [[yi1er4]]`,
+          `aaaa1 /one two/`,
+          ``,
+        ].join(`\n`),
+      );
+      expect(result.stats.rematchedEntries).toEqual([]);
+      expect(result.stats.newIds).toEqual([`zzzzz`]);
+      expect(result.stats.deletedIds).toEqual([]);
+    });
+
+    test(`rematches on sense similarity when the pinyin is genuinely different`, () => {
+      const entries = [
+        parseCedictV2Line(`覈 核 [[he2]] /to examine; to check; to verify/`)!,
+      ];
+
+      const existingIds = parseCedictV2IdsText(
+        [`覈 核 [[hu2]]`, `aaaa1 /to examine; to check; to verify/`, ``].join(
+          `\n`,
+        ),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      expect(result.stats.rematchedEntries).toEqual([
+        {
+          fromEntryId: `覈 核 [[hu2]]`,
+          toEntryId: `覈 核 [[he2]]`,
+          stage: `senseSimilarity`,
+        },
+      ]);
+      expect(result.stats.newIds).toEqual([]);
+      expect(result.stats.deletedIds).toEqual([]);
+    });
+
+    test(`does not rematch unrelated senses that share a simplified form`, () => {
+      const entries = [parseCedictV2Line(`三星 三星 [[San1xing1]] /Samsung/`)!];
+
+      const existingIds = parseCedictV2IdsText(
+        [
+          `三星 三星 [[San1xing1 Xiang1]]`,
+          `aaaa1 /Sanxing township in Yilan county, Taiwan/`,
+          ``,
+        ].join(`\n`),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      expect(result.stats.rematchedEntries).toEqual([]);
+      expect(result.stats.newIds).toEqual([`zzzzz`]);
+      expect(result.stats.deletedIds).toEqual([`aaaa1`]);
+    });
+
+    test(`reports ids of entries removed upstream as deleted`, () => {
+      const entries = [parseCedictV2Line(`一 一 [[yi1]] /one/`)!];
+
+      const existingIds = parseCedictV2IdsText(
+        [
+          `一 一 [[yi1]]`,
+          `aaaa1 /one/`,
+          ``,
+          `麥寮 麦寮 [[Mai4liao2]]`,
+          `b1Ulo /Mailiao township in Yunlin county, Taiwan/`,
+          ``,
+        ].join(`\n`),
+      );
+
+      const result = buildCedictV2SenseIdsText(entries, existingIds, {
+        createId: () => `zzzzz`,
+      });
+
+      expect(result.stats.deletedIds).toEqual([`b1Ulo`]);
+      expect(result.stats.newIds).toEqual([]);
+      expect(result.stats.rematchedEntries).toEqual([]);
     });
   });
 });
 
 describe(`applyCedictV2EditsToText`, () => {
+  test(`does not let a case-variant sibling entry steal another entry's edit block`, () => {
+    // 以 has separate [[Yi3]] (Israel) and [[yi3]] (to use) entries, so the
+    // caseless fallback must not apply the [[Yi3]] edits to [[yi3]].
+    const entries = parseCedictV2Text(
+      [
+        `以 以 [[Yi3]] /abbr. for Israel 以色列[Yi3se4lie4]/`,
+        `以 以 [[yi3]] /to use/by means of/`,
+      ].join(`\n`),
+    );
+
+    const edits = parseCedictV2EditsText(
+      [
+        `以 以 [[Yi3]]`,
+        `/abbr. for Israel 以色列[Yi3se4lie4]/ /(abbr. for 以色列[Yi3se4lie4]) Israel/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    expect(applyCedictV2EditsToText(entries, { strict: true, edits })).toEqual([
+      {
+        traditional: `以`,
+        simplified: `以`,
+        pinyin: `Yi3`,
+        senses: [`(abbr. for 以色列[Yi3se4lie4]) Israel`],
+      },
+      {
+        traditional: `以`,
+        simplified: `以`,
+        pinyin: `yi3`,
+        senses: [`to use`, `by means of`],
+      },
+    ]);
+  });
+
+  test(`still applies an edit block whose pinyin was recapitalized upstream`, () => {
+    const entries = parseCedictV2Text(`三星 三星 [[San1xing1]] /Sanxing/`);
+
+    const edits = parseCedictV2EditsText(
+      [`三星 三星 [[san1xing1]]`, `/Sanxing/ /Samsung/`, ``].join(`\n`),
+    );
+
+    expect(applyCedictV2EditsToText(entries, { strict: true, edits })).toEqual([
+      {
+        traditional: `三星`,
+        simplified: `三星`,
+        pinyin: `San1xing1`,
+        senses: [`Samsung`],
+      },
+    ]);
+  });
+
   test(`renders final cedict text with applied edits`, () => {
     const input = [
       `# comment`,
@@ -1070,6 +1414,116 @@ describe(`applyCedictV2EditsToText`, () => {
       applyCedictV2EditsToText(parsed, { strict: true, edits }),
     );
     expect(output).toBe(`龜 龜 [[]] /turtle/`);
+  });
+
+  test(`creates a new entry from add rules reshaped by a merge rule`, () => {
+    const parsed = parseCedictV2Text(`# comment`, { strict: true });
+
+    const edits = parseCedictV2EditsText(
+      [
+        `畐 畐 [[fu2]]`,
+        `+ /to fill/`,
+        `+ /full; filled; abundant/`,
+        `/to fill/ += /full; filled; abundant/`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const output = serializeCedictV2Entries(
+      applyCedictV2EditsToText(parsed, { strict: true, edits }),
+    );
+    expect(output).toBe(`畐 畐 [[fu2]] /to fill; full; filled; abundant/`);
+  });
+
+  test(`renders final cedict text with an applied pinyin edit`, () => {
+    const input = `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]] /idiom/`;
+    const parsed = parseCedictV2Text(input, { strict: true });
+
+    const edits = parseCedictV2EditsText(
+      [
+        `衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]`,
+        `[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]`,
+        ``,
+      ].join(`\n`),
+    );
+
+    const [output] = applyCedictV2EditsToText(parsed, {
+      strict: true,
+      edits,
+    });
+    expect(output?.pinyin).toBe(`yi1shi2zhu4xing2`);
+    expect(
+      serializeCedictV2Entries(
+        applyCedictV2EditsToText(parsed, { strict: true, edits }),
+      ),
+    ).toBe(`衣食住行 衣食住行 [[yi1shi2zhu4xing2]] /idiom/`);
+  });
+
+  test(`reports every stale rule in a single error`, () => {
+    const parsed = parseCedictV2Text(
+      [
+        `示例 示例 [[shi4li4]] /gloss 1/gloss 2/`,
+        `小二 小二 [[xiao3'er4]] /same sense/same sense/`,
+      ].join(`\n`),
+      { strict: true },
+    );
+
+    const edits = parseCedictV2EditsText(
+      [
+        `示例 示例 [[shi4li4]]`,
+        `/missing sense/ /new sense/`,
+        ``,
+        `小二 小二 [[xiao3'er4]]`,
+        `/same sense/ /new sense/`,
+        ``,
+        `龜 龜 [[gui1]]`,
+        `/turtle/ /tortoise/`,
+        ``,
+      ].join(`\n`),
+      `edits.txt`,
+    );
+
+    expect(() => applyCedictV2EditsToText(parsed, { strict: true, edits }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      [Error: 3 stale CC-CEDICT edit rule(s):
+      edits.txt:2: 示例 示例 [[shi4li4]] — edits rule did not match sense: missing sense
+      edits.txt:5: 小二 小二 [[xiao3'er4]] — edits rule matched multiple senses: same sense
+      edits.txt:7: 龜 龜 [[gui1]] — edit block does not match any dictionary entry]
+    `);
+  });
+
+  test(`suggests the closest sense for a near-miss rule`, () => {
+    const parsed = parseCedictV2Text(
+      `了解 了解 [[liao3jie3]] /to understand; to know about/`,
+      { strict: true },
+    );
+
+    const edits = parseCedictV2EditsText(
+      [`了解 了解 [[liao3jie3]]`, `/to understand/ /to comprehend/`, ``].join(
+        `\n`,
+      ),
+      `edits.txt`,
+    );
+
+    expect(() =>
+      applyCedictV2EditsToText(parsed, { strict: true, edits }),
+    ).toThrow(`(did you mean: to understand; to know about)`);
+  });
+
+  test(`collects but does not throw diagnostics in lenient mode`, () => {
+    const parsed = parseCedictV2Text(`示例 示例 [[shi4li4]] /gloss 1/`, {
+      strict: true,
+    });
+
+    const edits = parseCedictV2EditsText(
+      [`示例 示例 [[shi4li4]]`, `/missing sense/ /new sense/`, ``].join(`\n`),
+    );
+
+    expect(
+      serializeCedictV2Entries(
+        applyCedictV2EditsToText(parsed, { strict: false, edits }),
+      ),
+    ).toBe(`示例 示例 [[shi4li4]] /gloss 1/`);
   });
 });
 
@@ -2884,7 +3338,7 @@ describe(`loadCedictV2`, () => {
     expect(histogramBySenseCount).toMatchInlineSnapshot(`
       {
         "02": {
-          "count": 26157,
+          "count": 25742,
           "examples": [
             "3C 3C [[san1 C]] /computers, communications, and consumer electronics/China Compulsory Certificate (CCC)/",
             "95後 95后 [[jiu3wu3hou4]] /people born between 1995-01-01 and 1999-12-31/Gen Z (abbr. for 95後|95后[jiu3wu3hou4] + 00後|00后[ling2ling2hou4])/",
@@ -2892,7 +3346,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "03": {
-          "count": 9453,
+          "count": 9260,
           "examples": [
             "B超 B超 [[B chao1]] /B-mode ultrasonography/prenatal ultrasound scan/abbr. for B型超聲|B型超声[B xing2chao1sheng1]/",
             "PA PA [[P A]] /public area attendant (tasked with cleaning the public areas of a hotel)/marketing assistant/sales assistant/",
@@ -2900,7 +3354,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "04": {
-          "count": 3501,
+          "count": 3460,
           "examples": [
             "□ □ [[biang4]] /(Tw) (coll.) cool/awesome/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/often written as ㄅㄧㄤˋ/",
             "ㄅㄧㄤˋ ㄅㄧㄤˋ [[xx5xx5xx5xx5]] /(Tw) (coll.) cool/awesome/pr. [biang4]/(etymologically, a contracted form of 不一樣|不一样[bu4yi1yang4])/",
@@ -2908,7 +3362,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "05": {
-          "count": 1398,
+          "count": 1371,
           "examples": [
             "PK PK [[P K]] /(slang) to take on/to challenge/to go head to head/showdown/comparison/",
             "㗂 㗂 [[sheng3]] /variant of 省[sheng3]/tight-lipped/to examine/to watch/to scour (esp. Cantonese)/",
@@ -2916,7 +3370,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "06": {
-          "count": 632,
+          "count": 625,
           "examples": [
             "一套 一套 [[yi1tao4]] /suit/a set/a collection/of the same kind/the same old stuff/set pattern of behavior/",
             "一旦 一旦 [[yi1dan4]] /in case (sth happens)/if/once (sth happens, then...)/when/in a short time/in one day/",
@@ -2924,7 +3378,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "07": {
-          "count": 330,
+          "count": 322,
           "examples": [
             "丁 丁 [[ding1]] /male adult/the 4th of the 10 Heavenly Stems 天干[tian1gan1]/fourth (used like "4" or "D")/small cube of meat or vegetable/(literary) to encounter/(archaic) ancient Chinese compass point: 195°/(chemistry) butyl/",
             "上邊 上边 [[shang4bian5]] /the top/above/overhead/upwards/the top margin/above-mentioned/those higher up/",
@@ -2932,7 +3386,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "08": {
-          "count": 142,
+          "count": 138,
           "examples": [
             "一頭 一头 [[yi1tou2]] /one head/a head full of sth/one end (of a stick)/one side/headlong/directly/rapidly/simultaneously/",
             "不是味兒 不是味儿 [[bu4shi4wei4r5]] /not the right flavor/not quite right/a bit off/fishy/queer/amiss/feel bad/be upset/",
@@ -2940,7 +3394,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "09": {
-          "count": 87,
+          "count": 86,
           "examples": [
             "一世 一世 [[yi1shi4]] /generation/period of 30 years/one's whole lifetime/lifelong/age/era/times/the whole world/the First (of numbered European kings)/",
             "世 世 [[shi4]] /life/age/generation/era/world/lifetime/epoch/descendant/noble/",
@@ -2948,7 +3402,7 @@ describe(`loadCedictV2`, () => {
           ],
         },
         "10": {
-          "count": 35,
+          "count": 33,
           "examples": [
             "不含糊 不含糊 [[bu4han2hu5]] /unambiguous/unequivocal/explicit/prudent/cautious/not negligent/unafraid/unhesitating/really good/extraordinary/",
             "任 任 [[ren4]] /to assign/to appoint/to take up a post/office/responsibility/to let/to allow/to give free rein to/no matter (how, what etc)/classifier for terms served in office, or for spouses, girlfriends etc (as in 前任男友)/",
@@ -3010,12 +3464,6 @@ describe(`loadCedictV2`, () => {
             "解 解 [[jie3]] /to divide/to break up/to split/to separate/to dissolve/to solve/to melt/to remove/to untie/to loosen/to open/to emancipate/to explain/to understand/to know/a solution/a dissection/",
           ],
         },
-        "21": {
-          "count": 1,
-          "examples": [
-            "白 白 [[bai2]] /white/snowy/pure/bright/empty/blank/plain/clear/to make clear/in vain/gratuitous/free of charge/reactionary/anti-communist/funeral/to stare coldly/to write wrong character/to state/to explain/vernacular/spoken lines in opera/",
-          ],
-        },
       }
     `);
   });
@@ -3028,6 +3476,9 @@ describe(`findCedictSenseById`, () => {
       id: `KmCz3`,
       sense: `one (also pr. [yao1])`,
       mergedIds: [],
+      traditional: `一`,
+      simplified: `一`,
+      pinyin: `yi1`,
     });
   });
 
@@ -3036,6 +3487,122 @@ describe(`findCedictSenseById`, () => {
       null,
     );
     await expect(findCedictSenseById(``)).resolves.toBe(null);
+  });
+});
+
+describe(`matchCedictEntryKeys`, () => {
+  test(`matches exact keys`, () => {
+    const result = matchCedictEntryKeys(
+      [`三星 三星 [[San1xing1]]`],
+      new Map([[`三星 三星 [[San1xing1]]`, `value`]]),
+    );
+
+    expect(result.matchByEntryId.get(`三星 三星 [[San1xing1]]`)).toEqual({
+      valueKey: `三星 三星 [[San1xing1]]`,
+      value: `value`,
+      stage: `exact`,
+    });
+    expect(result.rematchedEntries).toEqual([]);
+  });
+
+  test(`matches keys whose pinyin was re-spaced upstream`, () => {
+    const result = matchCedictEntryKeys(
+      [`黎曼幾何 黎曼几何 [[Li2man4 ji3he2]]`],
+      new Map([[`黎曼幾何 黎曼几何 [[Li2man4ji3he2]]`, `value`]]),
+    );
+
+    expect(result.rematchedEntries).toEqual([
+      {
+        fromEntryId: `黎曼幾何 黎曼几何 [[Li2man4ji3he2]]`,
+        toEntryId: `黎曼幾何 黎曼几何 [[Li2man4 ji3he2]]`,
+        stage: `normalizedPinyin`,
+      },
+    ]);
+  });
+
+  test(`matches keys whose pinyin was recapitalized upstream`, () => {
+    const result = matchCedictEntryKeys(
+      [`三星 三星 [[San1xing1]]`],
+      new Map([[`三星 三星 [[san1xing1]]`, `value`]]),
+    );
+
+    expect(result.rematchedEntries).toEqual([
+      {
+        fromEntryId: `三星 三星 [[san1xing1]]`,
+        toEntryId: `三星 三星 [[San1xing1]]`,
+        stage: `caselessPinyin`,
+      },
+    ]);
+  });
+
+  test(`does not let a sibling entry claim a value another entry matches exactly`, () => {
+    const result = matchCedictEntryKeys(
+      [`以 以 [[Yi3]]`, `以 以 [[yi3]]`],
+      new Map([[`以 以 [[Yi3]]`, `israel`]]),
+    );
+
+    expect(result.matchByEntryId.get(`以 以 [[Yi3]]`)?.value).toBe(`israel`);
+    expect(result.matchByEntryId.has(`以 以 [[yi3]]`)).toBe(false);
+    expect(result.unmatchedEntryIds).toEqual([`以 以 [[yi3]]`]);
+    expect(result.rematchedEntries).toEqual([]);
+  });
+
+  test(`abstains when two entries would both claim the same value`, () => {
+    const result = matchCedictEntryKeys(
+      [`以 以 [[Yi3]]`, `以 以 [[yi3]]`],
+      new Map([[`以 以 [[YI3]]`, `israel`]]),
+    );
+
+    expect(result.matchByEntryId.size).toBe(0);
+    expect(result.unmatchedEntryIds).toEqual([
+      `以 以 [[Yi3]]`,
+      `以 以 [[yi3]]`,
+    ]);
+  });
+
+  test(`abstains when two values would both be claimed by the same entry`, () => {
+    const result = matchCedictEntryKeys(
+      [`大學 大学 [[Da4 xue2]]`],
+      new Map([
+        [`大學 大学 [[DA4XUE2]]`, `a`],
+        [`大學 大学 [[da4xue2]]`, `b`],
+      ]),
+    );
+
+    expect(result.matchByEntryId.size).toBe(0);
+  });
+});
+
+describe(`buildCedictEntryMatchKeyIndex`, () => {
+  const index = buildCedictEntryMatchKeyIndex(
+    new Map([
+      [`黎曼幾何 黎曼几何 [[Li2man4ji3he2]]`, `respaced`],
+      [`三星 三星 [[san1xing1]]`, `recapitalized`],
+      [`大學 大学 [[Da4xue2]]`, `ambiguousUpper`],
+      [`大學 大学 [[da4 xue2]]`, `ambiguousLower`],
+    ]),
+  );
+
+  test(`resolves exact keys`, () => {
+    expect(index.resolve(`三星 三星 [[san1xing1]]`)).toBe(`recapitalized`);
+  });
+
+  test(`resolves keys whose pinyin was re-spaced upstream`, () => {
+    expect(index.resolve(`黎曼幾何 黎曼几何 [[Li2man4 ji3he2]]`)).toBe(
+      `respaced`,
+    );
+  });
+
+  test(`resolves keys whose pinyin was recapitalized upstream`, () => {
+    expect(index.resolve(`三星 三星 [[San1xing1]]`)).toBe(`recapitalized`);
+  });
+
+  test(`abstains when the caseless key is ambiguous`, () => {
+    expect(index.resolve(`大學 大学 [[DA4XUE2]]`)).toBeNull();
+  });
+
+  test(`returns null for unknown keys`, () => {
+    expect(index.resolve(`不存在 不存在 [[bu4cun2zai4]]`)).toBeNull();
   });
 });
 
@@ -3060,6 +3627,9 @@ describe(`extractDictionaryPinyinFromCedictSense`, () => {
       .mockResolvedValue({
         id: `AbCd1`,
         mergedIds: [],
+        traditional: `一`,
+        simplified: `一`,
+        pinyin: `yi1` as PinyinNumericText,
         sense: `(also pr. [yao1]); (pr. [yi2]); (Beijing pr. [yi4]); (Taiwan pr. [yi1]); (colloquial pr. [yi3]); (old pr. [yi5]); (ancient pr. [yi2]); (Tai-lo pr. [i2])`,
       });
 
@@ -3075,6 +3645,9 @@ describe(`extractDictionaryPinyinFromCedictSense`, () => {
     vi.spyOn(cedictModule.mockable, `findCedictSenseById`).mockResolvedValue({
       id: `AbCd1`,
       mergedIds: [],
+      traditional: `一`,
+      simplified: `一`,
+      pinyin: `yi1` as PinyinNumericText,
       sense: `(Taiwan pr. [yao1]); (colloquial pr. [yi3]); (old pr. [yi5]); (ancient pr. [yi2]); (Tai-lo pr. [i2])`,
     });
 
@@ -3083,6 +3656,51 @@ describe(`extractDictionaryPinyinFromCedictSense`, () => {
     );
 
     expect(actual).toEqual([`yī`]);
+  });
+});
+
+describe(`CedictDictionary.lookupHanziPinyin`, () => {
+  const easyToGetAlongWith: CedictV2EntryType = {
+    traditional: `好處`,
+    simplified: `好处`,
+    pinyin: `hao3chu3` as PinyinNumericText,
+    senses: [`easy to get along with`],
+  };
+  const benefit: CedictV2EntryType = {
+    traditional: `好處`,
+    simplified: `好处`,
+    pinyin: `hao3chu5` as PinyinNumericText,
+    senses: [
+      `benefit; advantage; merit`,
+      `(also pr. [hao3chu4])`,
+      `(also pr. [hao3chu4])`,
+      `(Taiwan pr. [hao3chu2])`,
+      `gain; profit`,
+    ],
+  };
+  const dictionary = buildCedictDictionary([easyToGetAlongWith, benefit]);
+  const hanzi = `好处` as HanziText;
+  const pinyin = `hǎochù` as PinyinText;
+
+  test(`matches an entry by an also-pr pronunciation`, () => {
+    expect(dictionary.lookupHanziPinyin(hanzi, pinyin)).toEqual([benefit]);
+  });
+
+  test(`matches primary pronunciation without changing existing lookups`, () => {
+    expect(dictionary.lookupHanziPinyin(hanzi, `hǎochu` as PinyinText)).toEqual(
+      [benefit],
+    );
+    expect(dictionary.lookupHanzi(hanzi)).toEqual([
+      easyToGetAlongWith,
+      benefit,
+    ]);
+    expect(dictionary.lookupPinyin(`hǎochu` as PinyinText)).toEqual([benefit]);
+  });
+
+  test(`does not index excluded pronunciation markers`, () => {
+    expect(dictionary.lookupHanziPinyin(hanzi, `hǎochú` as PinyinText)).toEqual(
+      [],
+    );
   });
 });
 
@@ -3948,15 +4566,51 @@ test(`write cedict .ids`, async () => {
   );
   const result = buildCedictV2SenseIdsText(regroupedEntries, ids);
 
-  expect({
-    deletedIds: result.stats.deletedIds,
-    newIds: result.stats.newIds,
-  }).toMatchObject({
-    // Comment this out if you want to update the snapshot with new ids, but
-    // normally we expect no changes to the ids if the entries haven't changed.
-    deletedIds: [],
-    // newIds: [],
+  // expect({
+  //     deletedIds: result.stats.deletedIds,
+  //     newIds: result.stats.newIds,
+  //   }).toMatchObject({
+  //     // Comment this out if you want to update the snapshot with new ids, but
+  //     // normally we expect no changes to the ids if the entries haven't changed.
+  //     deletedIds: [],
+  //     // newIds: [],
+  //   });
+
+  // Upstream CC-CEDICT regularly retires entries, so dropping IDs is only a
+  // problem when the dictionary still points at them.
+  const referencedHanziWords = new Map<string, string[]>();
+  for (const [hanziWord, meaning] of (await readDictionaryJson()).entries()) {
+    const parsed =
+      meaning.cedict == null ? null : parseCedictSenseId(meaning.cedict);
+    if (parsed == null) {
+      continue;
+    }
+
+    mapArrayAdd(
+      referencedHanziWords,
+      `${parsed.simplified} ${parsed.id}`,
+      hanziWord,
+    );
+  }
+
+  const brokenReferences = findCedictDeletedSenses(
+    ids,
+    result.stats.deletedIds,
+  ).flatMap((deleted) => {
+    const hanziWords = referencedHanziWords.get(
+      `${deleted.simplified} ${deleted.id}`,
+    );
+    return hanziWords == null
+      ? []
+      : [
+          `${hanziWords.join(`, `)} → ${deleted.entryId} ${deleted.id} /${deleted.sense}/`,
+        ];
   });
+
+  expect(
+    brokenReferences,
+    `dictionary meanings reference CE-DICT senses that this regeneration deletes; add a rule to ${cedictEditsPath} to keep the sense, or repoint the meaning`,
+  ).toEqual([]);
 
   await expect(result.text).toMatchFileSnapshot(cedictIdsPath);
 });

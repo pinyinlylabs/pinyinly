@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ViewProps } from "react-native";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import Reanimated, {
   Easing,
   useAnimatedStyle,
@@ -8,6 +8,7 @@ import Reanimated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { cn } from "tailwind-variants";
 
 interface ShimmerRectProps {
   className?: string;
@@ -58,11 +59,7 @@ export function ShimmerRect({ className, style }: ShimmerRectProps) {
 
   return (
     <View
-      className={`
-        overflow-hidden bg-fg/5
-
-        ${className ?? ``}
-      `}
+      className={cn(`overflow-hidden bg-fg/5`, className)}
       style={style}
       onLayout={(event) => {
         const { width } = event.nativeEvent.layout;

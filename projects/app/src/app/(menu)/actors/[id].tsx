@@ -17,7 +17,8 @@ import {
   actorNameTextSetting,
 } from "@/data/userSettings";
 import { useLocalSearchParams, Link } from "expo-router";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { useState } from "react";
 
 export default function ActorIdPage() {

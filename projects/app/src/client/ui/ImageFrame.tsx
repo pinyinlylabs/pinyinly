@@ -1,9 +1,10 @@
 import type { AssetId } from "@/data/model";
 import { useState } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 import { AssetImage } from "./AssetImage";
 import type { ImageCrop, ImageFrameShape } from "./imageCrop";
+import { cn } from "tailwind-variants";
 
 interface FramedAssetImageProps {
   assetId: AssetId;
@@ -34,8 +35,11 @@ export function FramedAssetImage({
 
   const rect = hasCropData ? crop.rect : null;
   const shapeClassName = frameShape === `circle` ? `rounded-full` : ``;
-  const wrapperClassName =
-    `relative overflow-hidden ${shapeClassName} ${className ?? ``}`.trim();
+  const wrapperClassName = cn(
+    `relative overflow-hidden`,
+    shapeClassName,
+    className,
+  );
 
   if (!hasCropData || rect == null) {
     return (

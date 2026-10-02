@@ -14,7 +14,7 @@ fileGroups:
   buildEasUpdateOutdir:
     - dist/eas/
 
-toolchain:
+toolchains:
   default: "node"
 
 workspace:
@@ -35,14 +35,12 @@ tasks:
     options:
       runInCI: false
       cache: false
-    toolchain: "node"
 
   buildAndroidDevClient:
     script: expo run:android
     options:
       runInCI: false
       cache: false
-    toolchain: "node"
 
   buildEasUpdate:
     # Do iOS and Android separately to avoid IO contention and maybe allow metro bundler cache re-use.
@@ -58,7 +56,6 @@ tasks:
       mutex: expo-export # reduce IO contention
     outputs:
       - "@group(buildEasUpdateOutdir)"
-    toolchain: "node"
 
   buildVercel:
     # Copy to final destination.
@@ -87,7 +84,6 @@ tasks:
       - "@group(buildVercelExpoOutdir)"
     env:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
 
   buildVercelExpoSentry:
     script: |
@@ -106,14 +102,13 @@ tasks:
     script: |
       expo export &&
       tsx --tsconfig tsconfig.node.json ./bin/buildBillOfMaterials.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
       mutex: expo-export # reduce IO contention
     env:
       EXPO_ATLAS: "true"
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
 
   codegen:
     deps:
@@ -125,7 +120,7 @@ tasks:
   codegenOxlint:
     description: "Run Oxlint with codegen rules. This is separate from lint and doesn't use Oxlint caching intentionally."
     script: |
-      [ -n "${CI:-}" ] && {
+      [ -z ${CI:-} ] || {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }
@@ -139,13 +134,14 @@ tasks:
       - src/assets/**
       - oxlint-codegen.config.ts
       # Environment variables
+      - "$CI"
       - "$DEBUG"
+      - "$NODE_OPTIONS"
     deps:
       - oxlint-rules:src
     env:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
 
   codegenExpoRouterTypes:
     # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
@@ -160,7 +156,6 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
 
   codegenPublicVendor:
     command: tsx --tsconfig tsconfig.node.json ./bin/codegenPublicVendor.ts
@@ -168,36 +163,34 @@ tasks:
       envFile: .env.local
     env:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
     outputs:
       - "public/vendor/**/*"
 
   codegenUniwind:
     # The recommended command from https://docs.uniwind.dev/api/generate-artifacts
     # Keep in sync between vitest.browser.config.ts + moon.yml + metro.config.cjs
-    command: |
-      uniwind generate-artifacts
-        --css ./src/global.css 
-        --dts ./uniwind-env.d.ts
-        --theme dark-danger-panel
-        --theme dark-grass-panel
-        --theme dark-placeholder-panel
-        --theme dark-popover
-        --theme dark-sky-panel
-        --theme dark-success-panel
-        --theme dark-warning-panel
-        --theme dark
-        --theme light-danger-panel
-        --theme light-grass-panel
-        --theme light-placeholder-panel
-        --theme light-popover
-        --theme light-sky-panel
-        --theme light-success-panel
-        --theme light-warning-panel
+    script: |
+      uniwind generate-artifacts \
+        --css ./src/global.css \
+        --dts ./uniwind-env.d.ts  \
+        --theme dark-danger-panel  \
+        --theme dark-grass-panel  \
+        --theme dark-placeholder-panel  \
+        --theme dark-popover  \
+        --theme dark-sky-panel  \
+        --theme dark-success-panel  \
+        --theme dark-warning-panel  \
+        --theme dark  \
+        --theme light-danger-panel  \
+        --theme light-grass-panel  \
+        --theme light-placeholder-panel  \
+        --theme light-popover  \
+        --theme light-sky-panel  \
+        --theme light-success-panel  \
+        --theme light-warning-panel  \
         --theme light
     inputs:
       - "/yarn.lock"
-    toolchain: "node"
 
   dbCheck:
     command: drizzle-kit check
@@ -207,11 +200,11 @@ tasks:
 
   dbGenerate:
     command: drizzle-kit generate
-    preset: watcher
+    preset: utility
 
   dbMigrate:
     command: tsx --tsconfig tsconfig.node.json ./bin/dbMigrate.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -284,7 +277,7 @@ tasks:
 
   devExpo:
     command: expo start
-    preset: watcher
+    preset: server
     options:
       # There's a memory leak that causes it to crash after a while, so we just
       # restart it.
@@ -295,22 +288,21 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
-    toolchain: "node"
 
   devInngest:
     command: npx -y inngest-cli@1.39.0 dev
-    preset: watcher
+    preset: server
 
   devMinio:
     command: minio server ./.minio --console-address :9001 --license ~/minio/minio.license
-    preset: watcher
+    preset: server
     env:
       MINIO_ROOT_USER: miniodev
       MINIO_ROOT_PASSWORD: miniodev
 
   dictionary:
     command: tsx --tsconfig tsconfig.node.json ./bin/dictionary.tsx
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -320,7 +312,7 @@ tasks:
     script: |
       expo export -p web &&
       npx expo-atlas .expo/atlas.jsonl
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
       mutex: expo-export # reduce IO contention
@@ -330,7 +322,7 @@ tasks:
 
   generateHskWordlist:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateHskWordlist.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -338,7 +330,7 @@ tasks:
 
   generateMissingFontGlyphs:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateMissingFontGlyphs.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -346,7 +338,7 @@ tasks:
 
   generateMnemonicTheme:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateMnemonicTheme.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -354,7 +346,7 @@ tasks:
 
   generateRadicalNameMnemonics:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateRadicalNameMnemonics.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -362,7 +354,7 @@ tasks:
 
   generateWikiCharacterStrokes:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateWikiCharacterStrokes.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:
@@ -370,7 +362,7 @@ tasks:
 
   generateSpeech:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateSpeech.ts
-    preset: watcher
+    preset: server
     options:
       envFile: .env.local
     env:

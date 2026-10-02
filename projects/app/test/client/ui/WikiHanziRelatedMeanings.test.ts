@@ -1,4 +1,4 @@
-import type { DictionarySearchEntry } from "#client/query.ts";
+import type { DictionaryCollectionEntry } from "#client/query.ts";
 import type { HanziText } from "#data/model.ts";
 import { buildRelatedMeaningMatches } from "#client/ui/WikiHanziRelatedMeanings.utils.ts";
 import { describe, expect, test } from "vitest";
@@ -22,7 +22,7 @@ describe(`WikiHanziRelatedMeanings`, () => {
         hskSortKey: 11,
         hanziCharacterCount: 1,
       }),
-    ] satisfies readonly DictionarySearchEntry[];
+    ] satisfies readonly DictionaryCollectionEntry[];
 
     const allEntries = [
       ...currentEntries,
@@ -66,7 +66,7 @@ describe(`WikiHanziRelatedMeanings`, () => {
         hskSortKey: 1,
         hanziCharacterCount: 1,
       }),
-    ] satisfies readonly DictionarySearchEntry[];
+    ] satisfies readonly DictionaryCollectionEntry[];
 
     const matches = buildRelatedMeaningMatches({
       currentEntries,
@@ -100,7 +100,7 @@ describe(`WikiHanziRelatedMeanings`, () => {
         hskSortKey: 10,
         hanziCharacterCount: 1,
       }),
-    ] satisfies readonly DictionarySearchEntry[];
+    ] satisfies readonly DictionaryCollectionEntry[];
 
     const allEntries = [
       ...currentEntries,
@@ -112,7 +112,7 @@ describe(`WikiHanziRelatedMeanings`, () => {
         hskSortKey: 2,
         hanziCharacterCount: 1,
       }),
-    ] satisfies readonly DictionarySearchEntry[];
+    ] satisfies readonly DictionaryCollectionEntry[];
 
     const matches = buildRelatedMeaningMatches({
       currentEntries,
@@ -138,13 +138,13 @@ function makeEntry({
   gloss: readonly string[];
   hskSortKey: number;
   hanziCharacterCount: number;
-}): DictionarySearchEntry {
+}): DictionaryCollectionEntry {
   return {
     id: `${hanziWord}:id`,
     sourceKind: `builtIn`,
-    hanzi: hanzi as DictionarySearchEntry[`hanzi`],
+    hanzi: hanzi as DictionaryCollectionEntry[`hanzi`],
     meaningKey,
-    hanziWord: hanziWord as DictionarySearchEntry[`hanziWord`],
+    hanziWord: hanziWord as DictionaryCollectionEntry[`hanziWord`],
     gloss: [...gloss],
     glossCount: gloss.length,
     hskSortKey,

@@ -75,9 +75,6 @@
 剎 刹 [[cha4]]
 /Buddhist monastery, temple or shrine (abbr. for 剎多羅|刹多罗[cha4duo1luo2], Sanskrit "ksetra")/ /Buddhist monastery, temple or shrine; (abbr. for 剎多羅|刹多罗[cha4duo1luo2]) Sanskrit "ksetra"/
 
-甲流 甲流 [[jia3liu2]]
-/abbr. for 甲型H1N1流感/ /(abbr. for 甲型H1N1流感)/
-
 沽 沽 [[Gu1]]
 /abbr. for Tianjin 天津 (also 津沽)/ /(abbr. for 天津) Tianjin/(abbr. for 津沽)/
 
@@ -152,9 +149,6 @@ PU PU [[P U]]
 
 醬紫 酱紫 [[jiang4zi3]]
 /Internet slang abbr. for 這樣子|这样子[zhe4yang4zi5]/ /(Internet slang) (abbr. for 這樣子|这样子[zhe4yang4zi5])/
-
-閨蜜 闺蜜 [[gui1mi4]]
-/(originally written 閨密|闺密, an abbr. for 閨中密友|闺中密友)/ /(originally written 閨密|闺密) (abbr. for 閨中密友|闺中密友)/
 
 雙北 双北 [[Shuang1bei3]]
 /abbr. for Taipei City 臺北市|台北市[Tai2bei3 Shi4] and New Taipei City 新北市[Xin1bei3 Shi4] (Tw)/ /(abbr. for 臺北市|台北市[Tai2bei3 Shi4]) Taipei City (Tw)/(abbr. for 新北市[Xin1bei3 Shi4]) New Taipei City (Tw)/
@@ -272,9 +266,6 @@ PU PU [[P U]]
 經 经 [[jing1]]
 /abbr. for economics 經濟|经济[jing1ji4]/ /(abbr. for 經濟|经济[jing1ji4]) economics/
 
-維 维 [[Wei2]]
-/abbr. for Uighur 維吾爾|维吾尔[Wei2wu2er3]/ /(abbr. for 維吾爾|维吾尔[Wei2wu2er3]) Uighur/
-
 珍奶 珍奶 [[zhen1nai3]]
 /abbr. for pearl milk tea 珍珠奶茶/ /(abbr. for 珍珠奶茶) pearl milk tea/
 
@@ -283,9 +274,6 @@ PU PU [[P U]]
 
 敘 叙 [[Xu4]]
 /abbr. for Syria 敘利亞|叙利亚[Xu4li4ya4]/ /(abbr. for 敘利亞|叙利亚[Xu4li4ya4]) Syria/
-
-京 京 [[Jing1]]
-/abbr. for Beijing 北京[Bei3jing1]/ /(abbr. for 北京[Bei3jing1]) Beijing/
 
 以 以 [[Yi3]]
 /abbr. for Israel 以色列[Yi3se4lie4]/ /(abbr. for 以色列[Yi3se4lie4]) Israel/
@@ -450,9 +438,6 @@ PU PU [[P U]]
 
 贏 赢 [[ying2]]
 /to beat/ += /to win/
-
-贊成 赞成 [[zan4cheng2]]
-/to approve/ += /to endorse/
 
 賞 赏 [[shang3]]
 /to bestow (a reward)/ += /to give (to an inferior)/ += /to hand down/
@@ -926,9 +911,6 @@ PU PU [[P U]]
 /to die/ += /deceased/
 /to be gone/ += /to flee/
 
-了解 了解 [[liao3jie3]]
-/to understand/ += /to realize/ += /to find out/
-
 丷 丷 [[ba1]]
 # source: ChatGPT
 + /(old) to divide; to separate; split apart/
@@ -1093,9 +1075,6 @@ PU PU [[P U]]
 紅殷殷 红殷殷 [[hong2yan1yan1]]
 /also pr. [hong2 yin1 yin1]/ /also pr. [hong2yin1yin1]/
 
-累贅 累赘 [[lei2zhui4]]
-/also pr. [lei2 zhui5]/ /also pr. [lei2zhui5]/
-
 綠林 绿林 [[Lu4lin2]]
 /also pr. [Lu:4 lin2]/ /also pr. [Lu:4lin2]/
 
@@ -1128,9 +1107,6 @@ PU PU [[P U]]
 
 著想 着想 [[zhuo2xiang3]]
 /also pr. [zhao2 xiang3]/ /also pr. [zhao2xiang3]/
-
-藤蔓 藤蔓 [[teng2man4]]
-/also pr. [teng2 wan4]/ /also pr. [teng2wan4]/
 
 血債血償 血债血偿 [[xue4zhai4xue4chang2]]
 /also pr. [xue4 zhai4 xie3 chang2]/ /also pr. [xue4zhai4xie3chang2]/
@@ -1194,6 +1170,13 @@ PU PU [[P U]]
 
 雪櫃 雪柜 [[xue3gui4]]
 /refrigerator (Hong Kong usage)/ /refrigerator (Hong Kong)/
+
+#
+# Remove hyphens from primary entry pinyin (old syllable-separator convention)
+#
+
+衣食住行 衣食住行 [[yi1-shi2-zhu4-xing2]]
+[[yi1-shi2-zhu4-xing2]] [[yi1shi2zhu4xing2]]
 
 #
 # Replace `(lit. and fig.)` with `(lit.) (fig.)`
@@ -1366,9 +1349,6 @@ PU PU [[P U]]
 /cuckoo (Cercococcyx spp., also written 杜鵑鳥|杜鹃鸟)/ /cuckoo (Cercococcyx spp.) (also written 杜鵑鳥|杜鹃鸟)/
 /Indian azalea (Rhododendron simsii Planch, also written 杜鵑花|杜鹃花)/ /Indian azalea (Rhododendron simsii Planch) (also written 杜鵑花|杜鹃花)/
 
-神治國 神治国 [[shen2zhi4guo2]]
-/also written 神權統治|神权统治[shen2quan2tong3zhi4] or 神權政治|神权政治[shen2quan2zheng4zhi4]/ /(also written 神權統治|神权统治[shen2quan2tong3zhi4]); (also written 神權政治|神权政治[shen2quan2zheng4zhi4])/
-
 脫脫 脱脱 [[Tuo1tuo1]]
 /also written Tuoketuo 托克托/ /(also written Tuoketuo 托克托)/
 
@@ -1464,9 +1444,6 @@ PU PU [[P U]]
 介紹 介绍 [[jie4shao4]]
 /to give a presentation/ /presentation/
 /introduction/ += /presentation/
-
-剛 刚 [[gang1]]
-/exactly/ /only just/
 
 冰 冰 [[bing1]]
 /unfriendly/ += /(of a person) cold/
@@ -1592,3 +1569,17 @@ PU PU [[P U]]
 
 可愛 可爱 [[ke3'ai4]]
 /cute/ += /adorable/ += /lovely/
+
+復興 复兴 [[Fùxīng]]
++ /(see 復興區|复兴区[Fu4xing1 Qu1])/
+
+嗯 嗯 [[en4]]
++ /(also pr. [ng4])/
+
+# source: ChatGPT
+精彩紛呈 精彩纷呈 [[jing1​cai3​fen1​cheng2]]
++ /brilliant and varied; splendid and diverse/
+
+# source: ChatGPT
+口哨兒 口哨儿 [[kou3​shao4r]]
++ /whistle; whistling/

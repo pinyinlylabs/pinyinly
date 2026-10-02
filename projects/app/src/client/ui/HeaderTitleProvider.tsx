@@ -5,7 +5,8 @@ import { useIsFocused } from "expo-router";
 import type { PropsWithChildren } from "react";
 import { use, useId, useLayoutEffect, useState } from "react";
 import type { TextProps } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
 function useHeaderTitleContextOrThrow() {

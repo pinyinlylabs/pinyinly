@@ -2,7 +2,7 @@ import { NewWordTutorial } from "@/client/ui/NewWordTutorial";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useState } from "react";
-import { View } from "react-native";
+import { View } from "@/client/ui/View";
 
 export default () => {
   const [rerenderCount, setRerenderCount] = useState(0);

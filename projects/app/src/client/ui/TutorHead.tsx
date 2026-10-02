@@ -1,8 +1,8 @@
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { ViewProps } from "react-native";
-import { View } from "react-native";
-import { tv } from "tailwind-variants";
+import { View } from "@/client/ui/View";
+import { cn } from "tailwind-variants";
 import { Rive } from "./Rive";
 import type { RiveInstance } from "./riveTypes";
 
@@ -27,7 +27,7 @@ export const TutorHead = ({
   }, [exit]);
 
   return (
-    <View className={wrapperClass({ className })} style={style}>
+    <View className={cn(`h-25 w-20`, className)} style={style}>
       <Rive
         src={require(`../../assets/rive/tutor-head.riv`)}
         artboardName="main"
@@ -41,7 +41,3 @@ export const TutorHead = ({
     </View>
   );
 };
-
-const wrapperClass = tv({
-  base: `h-25 w-20`,
-});

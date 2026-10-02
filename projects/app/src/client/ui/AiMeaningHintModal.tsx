@@ -1,7 +1,9 @@
 import { trpc } from "@/client/trpc";
 import { buildMeaningHintPrompt } from "@/util/prompts/meaningHint";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { AiPromptPreview } from "./AiPromptPreview";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";

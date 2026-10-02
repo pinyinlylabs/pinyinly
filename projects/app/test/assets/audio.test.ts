@@ -9,7 +9,7 @@ import { generateSpeech } from "#bin/util/speech.ts";
 import type { PinyinSoundId } from "#data/model.ts";
 import {
   defaultPinyinSoundInstructions,
-  normalizePinyinUnit,
+  pinyinUnitNumericToDiacritic,
   splitPinyinUnitTone,
 } from "#data/pinyin.js";
 import {
@@ -108,7 +108,7 @@ describe(`pinyin sounds`, () => {
           ).toEqual([]);
         } else {
           for (const item of missingItems) {
-            const normalized = normalizePinyinUnit(item.pinyin);
+            const normalized = pinyinUnitNumericToDiacritic(item.pinyin);
             const { tone } = splitPinyinUnitTone(normalized);
             const instructions = buildToneInstructions(normalized, tone);
 

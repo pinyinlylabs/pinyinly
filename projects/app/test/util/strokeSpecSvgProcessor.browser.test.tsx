@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import type { Locator } from "vitest/browser";
 import { page, locators } from "vitest/browser";
-import { View } from "react-native";
+import { View } from "#client/ui/View.tsx";
 import { HanziGraphic } from "#client/ui/HanziGraphic.tsx";
 import "#global.css";
 import { buildStrokeSpecSegmentPaths } from "#util/strokeSpecSvgProcessor.js";

@@ -128,6 +128,8 @@ export type CompleteHskVocabularyItem = z.infer<
   typeof completeHskVocabularyItemSchema
 >;
 
+export type CompleteHskVocabulary = ReadonlyArray<CompleteHskVocabularyItem>;
+
 export type CompleteHskVocabularyPos = CompleteHskVocabularyItem[`pos`][number];
 
 export interface DisambiguationHintMatch {
@@ -214,15 +216,17 @@ export function parsePos(posText: string): PartOfSpeech | undefined {
   }
 }
 
-export const loadCompleteHskVocabulary = memoize0(async () => {
-  const rawJson = await fetchWithFsDbCache(
-    `https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/refs/heads/main/complete.json`,
-    { fsDbCache },
-  );
+export const loadCompleteHskVocabulary = memoize0(
+  async (): Promise<CompleteHskVocabulary> => {
+    const rawJson = await fetchWithFsDbCache(
+      `https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/refs/heads/main/complete.json`,
+      { fsDbCache },
+    );
 
-  const data = z
-    .array(completeHskVocabularyItemSchema)
-    .parse(JSON.parse(rawJson));
+    const data = z
+      .array(completeHskVocabularyItemSchema)
+      .parse(JSON.parse(rawJson));
 
-  return data;
-});
+    return data;
+  },
+);

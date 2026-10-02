@@ -1,5 +1,6 @@
 import type { HanziText, PinyinText } from "@/data/model";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
 export function HanziPinyinText({
@@ -16,11 +17,7 @@ export function HanziPinyinText({
   const isSingleCharacter = hanzi.length === 1;
 
   return (
-    <View
-      className={[containerClass({ isSingleCharacter }), className]
-        .filter(Boolean)
-        .join(` `)}
-    >
+    <View className={containerClass({ isSingleCharacter, className })}>
       {isSingleCharacter ? (
         <>
           <Text className={hanziTextClass({ isSingleCharacter })}>{hanzi}</Text>

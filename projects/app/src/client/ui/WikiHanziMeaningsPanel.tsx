@@ -1,5 +1,5 @@
 import type {
-  DictionarySearchEntry,
+  DictionaryCollectionEntry,
   UserDictionaryEntry,
 } from "@/client/query";
 import type { HanziText } from "@/data/model";
@@ -12,7 +12,8 @@ import {
 import { nanoid } from "@/util/nanoid";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { WikiEditButton } from "./WikiEditButton";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -33,11 +34,11 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
   const { data: builtInMeanings } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(eq(entry.hanzi, hanzi), eq(entry.sourceKind, `builtIn`)),
         ),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
 
   const { data: userMeanings } = useLiveQuery(
@@ -128,7 +129,7 @@ function AddMeaningButton({
 function DictionaryMeaningListItem({
   meaning,
 }: {
-  meaning: DictionarySearchEntry;
+  meaning: DictionaryCollectionEntry;
 }) {
   const primaryPinyin = meaning.pinyin?.[0];
   const secondaryPinyins = meaning.pinyin?.slice(1) ?? [];

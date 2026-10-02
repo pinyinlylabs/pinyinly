@@ -3,10 +3,12 @@ import { FloatingMenuModal } from "@/client/ui/FloatingMenuModal";
 import type { PropsWithChildren, ReactElement, RefAttributes } from "react";
 import { Children, createContext, isValidElement, use } from "react";
 import type { PressableProps, TextProps, ViewProps } from "react-native";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { RectButtonProps } from "./RectButton";
 import { RectButton } from "./RectButton";
 import type { IconName } from "./iconRegistry";
+import { cn } from "tailwind-variants";
 
 type DropdownMenuTriggerElement = ReactElement<
   Pick<PressableProps, `onTouchEnd` | `onPress`> & RefAttributes<View>
@@ -78,15 +80,7 @@ function DropdownMenuLabel({
 }
 
 function DropdownMenuSeparator({ className }: { className?: string }) {
-  return (
-    <View
-      className={`
-        my-1 h-px bg-fg-bg10
-
-        ${className ?? ``}
-      `}
-    />
-  );
+  return <View className={cn(`my-1 h-px bg-fg-bg10`, className)} />;
 }
 
 interface DropdownMenuRadioGroupContextType {

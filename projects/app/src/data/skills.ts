@@ -1,8 +1,4 @@
-import type {
-  CharactersJson,
-  Dictionary,
-  HanziWordWithMeaning,
-} from "@/dictionary";
+import type { CharactersJson } from "@/dictionary";
 import {
   hanziFromHanziWord,
   shallowDecomposeHanziCharacter,
@@ -40,6 +36,7 @@ import type { DeepReadonly } from "ts-essentials";
 import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
   CharacterDecompositionRow,
+  Dictionary,
   HanziCharacter,
   HanziText,
   HanziWord,
@@ -47,6 +44,7 @@ import type {
   HanziWordSkillKind,
   HanziWordToGlossTypedSkill,
   HanziWordToPinyinTypedSkill,
+  HanziWordWithMeaning,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
   QuestionFlagType,
@@ -262,15 +260,8 @@ export function skillDependencies(
           }
         }
       } else {
-        try {
-          for (const item of shallowDecomposeHanziWord(hanziWord, dictionary)) {
-            deps.push(hanziWordToGloss(item));
-          }
-        } catch (err) {
-          throw new Error(
-            `Failed to decompose hanzi word "${hanziWord}" for skill "${skill}"`,
-            { cause: err },
-          );
+        for (const item of shallowDecomposeHanziWord(hanziWord, dictionary)) {
+          deps.push(hanziWordToGloss(item));
         }
       }
       break;

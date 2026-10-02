@@ -1,22 +1,24 @@
 import type {
+  CharacterCollectionRow,
   CharacterComponentUsageRow,
   CharacterDecompositionRow,
   CharacterMnemonicIdsRow,
+  Dictionary,
   HanziCharacter,
   HanziIds,
   HanziText,
   HanziWord,
-  HskLevel,
+  Hsk30Level,
   PartOfSpeech,
   PinyinText,
   Skill,
   SrsStateType,
 } from "@/data/model";
-import { wikiCharacterDataSchema } from "@/data/model";
+import { characterJsonSchema } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
-import { hskLevelToNumber } from "@/data/hsk";
+import { hsk30LevelToNumber } from "@/data/hsk";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -24,11 +26,9 @@ import {
   rankRules,
 } from "@/data/skills";
 import { userHanziMeaningDefs } from "@/data/userSettings";
-import type { Dictionary } from "@/dictionary";
 import {
   buildCharacterComponentUsageEntries,
   buildHanziWord,
-  getIsStructuralHanzi,
   hanziFromHanziWord,
   loadCharactersJson,
   loadBuiltinCharacterDecompositionEntries,
@@ -194,18 +194,6 @@ export const targetSkillsQuery = () =>
     retry: false,
     structuralSharing: false,
   });
-
-export const isStructuralHanziQuery = queryOptions({
-  queryKey: [`isStructuralHanzi`],
-  queryFn: async () => {
-    await devToolsSlowQuerySleepIfEnabled();
-
-    return getIsStructuralHanzi();
-  },
-  networkMode: `offlineFirst`,
-  retry: false,
-  structuralSharing: false,
-});
 
 export const dictionaryQuery = queryOptions({
   queryKey: [`dictionary`],
@@ -444,7 +432,7 @@ export const wikiMdxQuery = Platform.select({
   default: wikiMdxQueryNative,
 });
 
-const characterDecompositionDataSchema = wikiCharacterDataSchema.pick({
+const characterDecompositionDataSchema = characterJsonSchema.pick({
   decompositions: true,
   mnemonic: true,
 });
@@ -535,20 +523,21 @@ export interface UserDictionaryEntry {
 
 export type UserDictionaryCollection = Collection<UserDictionaryEntry, string>;
 
-export type DictionarySearchSourceKind = `builtIn` | `user`;
+export type DictionaryCollectionSourceKind = `builtIn` | `user`;
 
-export interface DictionarySearchEntry {
+export interface DictionaryCollectionEntry {
   id: string;
-  sourceKind: DictionarySearchSourceKind;
+  sourceKind: DictionaryCollectionSourceKind;
   hanzi: HanziText;
   meaningKey: string;
   hanziWord: HanziWord;
   freq?: number;
   gloss: string[];
   glossCount: number;
+  order?: number;
   pos?: PartOfSpeech;
   pinyin?: PinyinText[];
-  hsk?: HskLevel;
+  hsk?: Hsk30Level;
   hskSortKey: number;
   /**
    * The lowest HSK level at which this character first appears — either as a
@@ -556,19 +545,18 @@ export interface DictionarySearchEntry {
    * this may be lower than `hsk`. For multi-character entries this equals
    * `hsk`.
    */
-  hskFirstAppearance?: HskLevel;
+  hskFirstAppearance?: Hsk30Level;
   note?: string;
   hanziCharacterCount: number;
-  isStructural?: boolean;
 }
 
-export type BuiltInDictionarySearchCollection = Collection<
-  DictionarySearchEntry,
+export type BuiltInDictionaryCollection = Collection<
+  DictionaryCollectionEntry,
   string
 >;
 
-export type DictionarySearchCollection = Collection<
-  DictionarySearchEntry,
+export type DictionaryCollection = Collection<
+  DictionaryCollectionEntry,
   string
 >;
 
@@ -824,29 +812,19 @@ function userDictionaryCollectionOptions({
   };
 }
 
-function builtInDictionarySearchCollectionOptions(): CollectionConfig<
-  DictionarySearchEntry,
+function builtInDictionaryCollectionOptions(): CollectionConfig<
+  DictionaryCollectionEntry,
   string
 > {
-  return staticCollectionOptions<DictionarySearchEntry, string>({
-    id: `builtInDictionarySearch`,
+  return staticCollectionOptions<DictionaryCollectionEntry, string>({
+    id: `builtInDictionary`,
     queryFn: async () => {
-      const [dictionary, charactersJson] = await Promise.all([
-        loadDictionary(),
-        loadCharactersJson(),
-      ]);
-      const entries: DictionarySearchEntry[] = [];
-      const structuralHanzi = new Set<HanziText>();
-
-      for (const [hanzi, data] of charactersJson) {
-        if (data.isStructural != null) {
-          structuralHanzi.add(hanzi);
-        }
-      }
+      const dictionary = await loadDictionary();
+      const entries: DictionaryCollectionEntry[] = [];
 
       // Build a map of each character to the minimum HSK level it appears in
       // across all words (including multi-character words it's part of).
-      const charMinHskMap = new Map<string, HskLevel>();
+      const charMinHskMap = new Map<string, Hsk30Level>();
       for (const [hanziWord, meaning] of dictionary.allEntries) {
         if (meaning.hsk == null) {
           continue;
@@ -856,7 +834,7 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           const existing = charMinHskMap.get(char);
           if (
             existing == null ||
-            hskLevelToNumber(meaning.hsk) < hskLevelToNumber(existing)
+            hsk30LevelToNumber(meaning.hsk) < hsk30LevelToNumber(existing)
           ) {
             charMinHskMap.set(char, meaning.hsk);
           }
@@ -887,13 +865,13 @@ function builtInDictionarySearchCollectionOptions(): CollectionConfig<
           freq: meaning.freq,
           gloss,
           glossCount: gloss.length,
+          order: meaning.order,
           pos: meaning.pos,
           pinyin,
           hsk: meaning.hsk,
-          hskSortKey: dictionarySearchHskSortKey(meaning.hsk),
+          hskSortKey: dictionaryCollectionHskSortKey(meaning.hsk),
           hskFirstAppearance,
           hanziCharacterCount,
-          isStructural: hanziCharacterCount === 1 && structuralHanzi.has(hanzi),
         });
       }
 
@@ -952,8 +930,34 @@ function characterMnemonicIdsCollectionOptions(): CollectionConfig<
   });
 }
 
-function dictionarySearchHskSortKey(hsk?: HskLevel): number {
-  return hsk == null ? 9999 : hskLevelToNumber(hsk);
+function characterCollectionOptions(): CollectionConfig<
+  CharacterCollectionRow,
+  string
+> {
+  return staticCollectionOptions<CharacterCollectionRow, string>({
+    id: `characterCollection`,
+    queryFn: async () => {
+      const charactersJson = await loadCharactersJson();
+
+      const entries: CharacterCollectionRow[] = [];
+
+      for (const [hanzi, data] of charactersJson.entries()) {
+        entries.push({
+          hanzi,
+          isStructural: data.isStructural ?? false,
+          strokes: data.strokes,
+          componentFormOf: data.componentFormOf ?? null,
+        });
+      }
+
+      return entries;
+    },
+    getKey: (item) => `${item.hanzi}`,
+  });
+}
+
+function dictionaryCollectionHskSortKey(hsk?: Hsk30Level): number {
+  return hsk == null ? 9999 : hsk30LevelToNumber(hsk);
 }
 
 export const rizzleCollectionOptions = <
@@ -1247,20 +1251,26 @@ export function makeDb(rizzle: Rizzle) {
 
   const characterDecompositionsCollection = createLiveQueryCollection((q) => {
     const builtinRows = q.from({ entry: builtinCharacterDecompositions });
+    // Leaving code structured to give affordance for user-defined
+    // decompositions in the future, but for now we only have built-in
+    // decompositions.
     return q.unionAll(builtinRows);
   });
+
+  const characterCollection = createCollection(characterCollectionOptions());
+  characterCollection.createIndex((row) => row.hanzi);
 
   const characterMnemonicIdsCollection = createCollection(
     characterMnemonicIdsCollectionOptions(),
   );
   characterMnemonicIdsCollection.createIndex((row) => row.hanzi);
 
-  const builtInDictionarySearch: BuiltInDictionarySearchCollection =
-    createCollection(builtInDictionarySearchCollectionOptions());
+  const builtInDictionaryCollection: BuiltInDictionaryCollection =
+    createCollection(builtInDictionaryCollectionOptions());
 
-  const dictionarySearch = createLiveQueryCollection((q) => {
+  const dictionaryCollection = createLiveQueryCollection((q) => {
     const builtinRows = q
-      .from({ builtin: builtInDictionarySearch })
+      .from({ builtin: builtInDictionaryCollection })
       .select(({ builtin: row }) => ({
         id: concat(`builtin:`, row.hanziWord),
         sourceKind: `builtIn` as const,
@@ -1270,6 +1280,7 @@ export function makeDb(rizzle: Rizzle) {
         freq: row.freq,
         gloss: row.gloss,
         glossCount: row.glossCount,
+        order: row.order,
         pos: row.pos,
         pinyin: row.pinyin,
         hsk: row.hsk,
@@ -1277,7 +1288,6 @@ export function makeDb(rizzle: Rizzle) {
         hskFirstAppearance: row.hskFirstAppearance,
         hanziCharacterCount: row.hanziCharacterCount,
         note: undefined as string | undefined,
-        isStructural: row.isStructural,
       }));
 
     const userRows = q
@@ -1297,10 +1307,11 @@ export function makeDb(rizzle: Rizzle) {
           freq: undefined,
           gloss: [row.gloss],
           glossCount: 1,
+          order: undefined,
           pos: undefined,
           pinyin,
           hsk: undefined,
-          hskSortKey: dictionarySearchHskSortKey(),
+          hskSortKey: dictionaryCollectionHskSortKey(),
           hskFirstAppearance: undefined,
           note: row.note,
           hanziCharacterCount: matchAllHanziCharacters(row.hanzi).length,
@@ -1405,11 +1416,12 @@ export function makeDb(rizzle: Rizzle) {
 
   return {
     builtinCharacterDecompositions,
-    builtInDictionarySearch,
+    builtInDictionaryCollection,
     characterComponentUsage,
     characterDecompositionsCollection,
     characterMnemonicIdsCollection,
-    dictionarySearch,
+    characterCollection,
+    dictionaryCollection,
     settingCollection,
     settingHistoryCollection,
     userDictionary,

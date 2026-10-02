@@ -3,7 +3,9 @@ import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { useSoundEffectCycle } from "@/client/ui/hooks/useSoundEffectCycle";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import type { PropsWithChildren, ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
 import { MDXComponents } from "./MDXComponents";
 

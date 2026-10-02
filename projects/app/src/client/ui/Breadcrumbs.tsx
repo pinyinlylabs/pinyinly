@@ -1,7 +1,8 @@
 import type { Href } from "expo-router";
 import type { ReactElement, ReactNode } from "react";
 import { Children } from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { RectButton } from "./RectButton";

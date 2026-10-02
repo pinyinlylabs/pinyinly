@@ -4,6 +4,7 @@ import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocatio
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type {
   AssetId,
+  HanziCharacter,
   HanziText,
   HanziWord,
   PinyinSoundId,
@@ -23,7 +24,6 @@ import {
   pronunciationMnemonicTextSetting,
   pinyinSoundLocationSetting,
   pinyinSoundImageSetting,
-  pinyinSoundNameTextSetting,
   pinyinSoundLocationSetKeySetting,
   pronunciationMnemonicSelectedSetting,
 } from "@/data/userSettings";
@@ -32,7 +32,9 @@ import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { Text } from "@/client/ui/Text";
+import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { FramedAssetImage } from "./ImageFrame";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
@@ -58,14 +60,16 @@ import { toTitle } from "@/util/unicode";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
+  hanziWord,
 }: {
-  hanzi: HanziText;
+  hanzi: HanziCharacter;
+  hanziWord: HanziWord | null;
 }) {
   const db = useDb();
   const { data: meanings } = useLiveQuery(
     (q) =>
       q
-        .from({ entry: db.dictionarySearch })
+        .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .orderBy(({ entry }) => entry.freq, {
           direction: `desc`,
@@ -80,7 +84,7 @@ export function WikiHanziCharacterPronunciation({
           pos: entry.pos,
           pinyin: entry.pinyin,
         })),
-    [db.dictionarySearch, hanzi],
+    [db.dictionaryCollection, hanzi],
   );
   const pronunciation = getSharedPrimaryPronunciation(meanings);
   const firstMeaning = meanings[0];
@@ -96,10 +100,12 @@ export function WikiHanziCharacterPronunciation({
   }
 
   return (
-    <WikiHanziCharacterPronunciationBox
-      hanziWord={firstMeaning.hanziWord}
-      pinyinUnit={pronunciation.pinyinUnit}
-    />
+    <View className={hanziWord == null ? `opacity-50` : undefined}>
+      <WikiHanziCharacterPronunciationBox
+        hanziWord={firstMeaning.hanziWord}
+        pinyinUnit={pronunciation.pinyinUnit}
+      />
+    </View>
   );
 }
 
@@ -113,14 +119,6 @@ export function WikiHanziCharacterPronunciationBox({
   const hanzi = hanziFromHanziWord(hanziWord);
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
-  const initialPinyinSound = useUserSetting(
-    splitPinyin == null
-      ? null
-      : {
-          setting: pinyinSoundNameTextSetting,
-          key: { soundId: splitPinyin.initialSoundId },
-        },
-  );
   const finalPlaceSelectionSetting = useUserSetting(
     splitPinyin == null
       ? null
@@ -139,7 +137,6 @@ export function WikiHanziCharacterPronunciationBox({
   );
   const placeDirectory = usePinyinSoundLocations();
   const actorDirectory = usePinyinSoundActors();
-  const initialPinyinSoundName = initialPinyinSound?.value?.text;
   const tonePinyinSoundName =
     splitPinyin == null
       ? null
@@ -232,7 +229,7 @@ export function WikiHanziCharacterPronunciationBox({
   });
 
   const handleUseAi = (
-    associationStrategy: PronunciationMnemonicRecurringPromptAssociationStrategyKind,
+    associationStrategy?: PronunciationMnemonicRecurringPromptAssociationStrategyKind,
   ) => {
     if (selectedInitialActorId != null && selectedFinalLocationId != null) {
       const mnemonicId = nanoid();
@@ -270,9 +267,7 @@ export function WikiHanziCharacterPronunciationBox({
                   soundId={splitPinyin.initialSoundId}
                   href={`/sounds/${splitPinyin.initialSoundId}`}
                   soundName={initialLabel}
-                  mnemonicName={
-                    initialPinyinSoundName ?? selectedInitialActor?.name ?? null
-                  }
+                  mnemonicName={selectedInitialActor?.name ?? null}
                   imageOverride={selectedInitialActor?.image ?? null}
                 />
               </View>
@@ -395,23 +390,6 @@ export function WikiHanziCharacterPronunciationBox({
                       iconStart="ai"
                       iconSize={20}
                       className="opacity-80"
-                      onPress={() => {
-                        if (
-                          selectedInitialActorId != null &&
-                          selectedFinalLocationId != null
-                        ) {
-                          const mnemonicId = nanoid();
-                          selectedMnemonicSetting.setValue({
-                            hanzi,
-                            pinyin: pinyinUnitId(pinyinUnit),
-                            mnemonicId: mnemonicId,
-                          });
-                          enqueuePronunciationRecurringHintMutation.mutate({
-                            hanziWord,
-                            mnemonicId,
-                          });
-                        }
-                      }}
                     >
                       Use AI
                     </RectButton>
@@ -421,6 +399,14 @@ export function WikiHanziCharacterPronunciationBox({
                     className="w-56"
                     align="start"
                   >
+                    <DropdownMenu2.Item
+                      onPress={() => {
+                        handleUseAi();
+                      }}
+                    >
+                      <Text>Auto</Text>
+                    </DropdownMenu2.Item>
+                    <DropdownMenu2.Separator />
                     <DropdownMenu2.Item
                       onPress={() => {
                         handleUseAi(`identityBinding`);
