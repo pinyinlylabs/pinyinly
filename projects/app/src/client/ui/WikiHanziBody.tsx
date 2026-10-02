@@ -17,13 +17,14 @@ export function WikiHanziBody({ hanzi }: { hanzi: HanziText }) {
     [db.dictionaryCollection, hanzi],
   );
 
-  return isHanziCharacter(hanzi) ? (
-    dictionaryEntries.length === 1 ? (
-      <WikiHanziBodyCharacter hanzi={hanzi} />
-    ) : (
-      <WikiHanziBodyCharacterMultipleMeanings hanzi={hanzi} />
-    )
-  ) : (
-    <WikiHanziBodyWord hanzi={hanzi} />
-  );
+  if (isHanziCharacter(hanzi)) {
+    if (dictionaryEntries.length === 0) {
+      return null;
+    } else if (dictionaryEntries.length === 1) {
+      return <WikiHanziBodyCharacter hanzi={hanzi} />;
+    }
+    return <WikiHanziBodyCharacterMultipleMeanings hanzi={hanzi} />;
+  }
+
+  return <WikiHanziBodyWord hanzi={hanzi} />;
 }

@@ -1,6 +1,10 @@
 {
-  "hanzi": "戸",
-  "svg": { "strokes": 4 },
-  "simplifiedForm": "户",
-  "decompositions": {}
+  "decompositions":{
+
+  },
+  "hanzi":"戸",
+  "simplifiedForm":"户",
+  "svg":{
+    "strokes":4
+  }
 }

@@ -1,6 +1,10 @@
 {
-  "hanzi": "⺶",
-  "svg": { "strokes": 6 },
-  "componentFormOf": "羊",
-  "decompositions": {}
+  "componentFormOf":"羊",
+  "decompositions":{
+
+  },
+  "hanzi":"⺶",
+  "svg":{
+    "strokes":6
+  }
 }

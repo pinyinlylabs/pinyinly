@@ -1,149 +1,17 @@
 {
-  "hanzi": "行",
-  "svg": {
-    "strokes": [
-      "M 322 810 Q 335 771 252 668 Q 213 620 162 568 Q 152 559 148 554 Q 144 544 157 545 Q 205 545 343 696 Q 376 738 393 750 Q 403 759 401 772 Q 398 785 375 809 Q 353 828 334 831 Q 318 831 322 810 Z",
-      "M 273 414 Q 399 555 401 560 Q 400 564 400 567 Q 399 580 374 605 Q 352 626 333 628 Q 315 629 320 607 Q 329 579 315 556 Q 272 483 214 416 Q 157 352 82 284 Q 72 277 69 270 Q 65 260 78 261 Q 111 261 214 358 Q 227 371 244 385 L 273 414 Z",
-      "M 244 385 Q 274 325 247 152 Q 223 68 266 24 Q 282 8 294 34 Q 309 74 308 119 Q 307 299 312 339 Q 319 366 310 376 Q 277 412 273 414 C 251 434 232 413 244 385 Z",
-      "M 549 671 Q 509 661 539 644 Q 587 620 650 638 Q 714 654 781 671 Q 812 680 817 684 Q 826 694 820 703 Q 811 716 778 722 Q 744 726 710 712 Q 676 699 639 688 Q 597 678 549 671 Z",
-      "M 715 469 Q 796 482 914 486 Q 974 486 981 498 Q 987 511 968 524 Q 911 563 870 552 Q 734 516 416 460 Q 394 457 411 439 Q 447 409 487 422 Q 610 462 666 462 L 715 469 Z",
-      "M 635 61 Q 613 68 585 76 Q 572 80 573 72 Q 573 65 583 53 Q 644 -2 683 -48 Q 696 -58 710 -41 Q 749 10 750 117 Q 740 267 749 404 Q 756 432 749 443 Q 742 453 715 469 C 690 485 657 491 666 462 Q 681 416 683 387 Q 683 80 682 75 Q 679 66 674 59 Q 662 52 635 61 Z"
-    ],
-    "medians": [
-      "M 334 817 L 352 793 L 358 771 L 338 738 L 241 620 L 196 578 L 156 553",
-      "M 331 615 L 350 591 L 357 564 L 324 514 L 266 439 L 176 346 L 120 297 L 77 269",
-      "M 270 407 L 285 352 L 283 220 L 272 94 L 278 34",
-      "M 541 659 L 606 655 L 748 693 L 808 695",
-      "M 414 449 L 463 443 L 590 473 L 889 520 L 971 504",
-      "M 673 455 L 708 435 L 715 425 L 717 108 L 712 58 L 689 15 L 645 30 L 580 70"
-    ]
+  "curriculumMeanings":[
+    {"branches":[{"description":"Physical movement and the people, routes, vehicles, and belongings associated with going from place to place.","gloss":"travel","occurrences":{"一行":"yīxíng","人行道":"rénxíngdào","出行":"chūxíng","同行":"tóngxíng","平行":"píngxíng","并行":"bìngxíng","旅行":"lǚxíng","旅行社":"lǚxíngshè","步行":"bùxíng","游行":"yóuxíng","绕行":"ràoxíng","自行":"zìxíng","自行车":"zìxíngchē","航行":"hángxíng","行":"xíng","行人":"xíngrén","行李":"xíngli","行李箱":"xínglixiāng","行程":"xíngchéng","行走":"xíngzǒu","行驶":"xíngshǐ","衣食住行":"yīshízhùxíng","送行":"sòngxíng","通行":"tōngxíng","通行证":"tōngxíngzhèng","飞行":"fēixíng","飞行员":"fēixíngyuán"}},{"description":"Deliberate deeds become a person's actions and, by extension, their habitual moral bearing.","gloss":"conduct","occurrences":{"一言一行":"yīyányīxíng","品行":"pǐnxíng","行为":"xíngwéi","行动":"xíngdòng","言行":"yánxíng"}},{"description":"Taking something forward becomes carrying out plans, duties, authority, policies, and organized affairs.","gloss":"execute","occurrences":{"举行":"jǔxíng","实行":"shíxíng","履行":"lǚxíng","强行":"qiángxíng","执行":"zhíxíng","推行":"tuīxíng","施行":"shīxíng","现行":"xiànxíng","行使":"xíngshǐ","行政":"xíngzhèng","试行":"shìxíng","进行":"jìnxíng"}},{"description":"What moves onward through society may be issued, spread, or become widely prevalent.","gloss":"circulate","occurrences":{"发行":"fāxíng","流行":"liúxíng","盛行":"shèngxíng"}},{"description":"A continuing process or system is viewed as moving along in operation.","gloss":"operate","occurrences":{"运行":"yùnxíng"}},{"description":"The ability to go forward yields the sense that something is possible or acceptable.","gloss":"work","occurrences":{"不行":"bùxíng","可行":"kěxíng"}}],"description":"Movement along a course, extended to doing, carrying matters forward, and functioning.","gloss":"go","hsk30":"3","id":"行:go","pinyin":"xíng"},
+    {"branches":[{"description":"A line of work defines an occupation, its peers, and those with or without insider expertise.","gloss":"profession","occurrences":{"内行":"nèiháng","同行":"tóngháng","外行":"wàiháng","行业":"hángyè","行家":"hángjiā"}},{"description":"A business line becomes a commercial establishment and the conditions of its market activity.","gloss":"commerce","occurrences":{"行":"háng","行情":"hángqíng","银行":"yínháng","银行卡":"yínhángkǎ"}},{"description":"Arrangement in rows develops into placement or membership within an ordered grouping.","gloss":"rank","occurrences":{"排行榜":"páihángbǎng","行列":"hángliè"}}],"description":"An arranged row, extended to recognized lines of work, commercial establishments, and relative standing.","gloss":"line","id":"行:line","pinyin":"háng"}
+  ],
+  "decompositions":{
+    "⿰彳亍":["0-2","3-5"]
   },
-  "decompositions": { "⿰彳亍": ["0-2", "3-5"] },
-  "mnemonic": { "decomposition": "⿰彳亍" },
-  "curriculumMeanings": [
-    {
-      "id": "行:go",
-      "gloss": "go",
-      "pinyin": "xíng",
-      "hsk30": "3",
-      "description": "Movement along a course, extended to doing, carrying matters forward, and functioning.",
-      "branches": [
-        {
-          "gloss": "travel",
-          "description": "Physical movement and the people, routes, vehicles, and belongings associated with going from place to place.",
-          "occurrences": {
-            "并行": "bìngxíng",
-            "步行": "bùxíng",
-            "出行": "chūxíng",
-            "飞行": "fēixíng",
-            "飞行员": "fēixíngyuán",
-            "航行": "hángxíng",
-            "旅行": "lǚxíng",
-            "旅行社": "lǚxíngshè",
-            "平行": "píngxíng",
-            "绕行": "ràoxíng",
-            "人行道": "rénxíngdào",
-            "送行": "sòngxíng",
-            "通行": "tōngxíng",
-            "通行证": "tōngxíngzhèng",
-            "同行": "tóngxíng",
-            "行": "xíng",
-            "行程": "xíngchéng",
-            "行李": "xíngli",
-            "行李箱": "xínglixiāng",
-            "行人": "xíngrén",
-            "行驶": "xíngshǐ",
-            "行走": "xíngzǒu",
-            "一行": "yīxíng",
-            "衣食住行": "yīshízhùxíng",
-            "游行": "yóuxíng",
-            "自行": "zìxíng",
-            "自行车": "zìxíngchē"
-          }
-        },
-        {
-          "gloss": "conduct",
-          "description": "Deliberate deeds become a person's actions and, by extension, their habitual moral bearing.",
-          "occurrences": {
-            "行动": "xíngdòng",
-            "品行": "pǐnxíng",
-            "行为": "xíngwéi",
-            "言行": "yánxíng",
-            "一言一行": "yīyányīxíng"
-          }
-        },
-        {
-          "gloss": "execute",
-          "description": "Taking something forward becomes carrying out plans, duties, authority, policies, and organized affairs.",
-          "occurrences": {
-            "进行": "jìnxíng",
-            "举行": "jǔxíng",
-            "履行": "lǚxíng",
-            "强行": "qiángxíng",
-            "施行": "shīxíng",
-            "实行": "shíxíng",
-            "试行": "shìxíng",
-            "推行": "tuīxíng",
-            "现行": "xiànxíng",
-            "行使": "xíngshǐ",
-            "行政": "xíngzhèng",
-            "执行": "zhíxíng"
-          }
-        },
-        {
-          "gloss": "circulate",
-          "description": "What moves onward through society may be issued, spread, or become widely prevalent.",
-          "occurrences": {
-            "发行": "fāxíng",
-            "流行": "liúxíng",
-            "盛行": "shèngxíng"
-          }
-        },
-        {
-          "gloss": "operate",
-          "description": "A continuing process or system is viewed as moving along in operation.",
-          "occurrences": { "运行": "yùnxíng" }
-        },
-        {
-          "gloss": "work",
-          "description": "The ability to go forward yields the sense that something is possible or acceptable.",
-          "occurrences": { "不行": "bùxíng", "可行": "kěxíng" }
-        }
-      ]
-    },
-    {
-      "id": "行:line",
-      "gloss": "line",
-      "pinyin": "háng",
-      "description": "An arranged row, extended to recognized lines of work, commercial establishments, and relative standing.",
-      "branches": [
-        {
-          "gloss": "profession",
-          "description": "A line of work defines an occupation, its peers, and those with or without insider expertise.",
-          "occurrences": {
-            "内行": "nèiháng",
-            "同行": "tóngháng",
-            "外行": "wàiháng",
-            "行家": "hángjiā",
-            "行业": "hángyè"
-          }
-        },
-        {
-          "gloss": "commerce",
-          "description": "A business line becomes a commercial establishment and the conditions of its market activity.",
-          "occurrences": {
-            "行": "háng",
-            "行情": "hángqíng",
-            "银行": "yínháng",
-            "银行卡": "yínhángkǎ"
-          }
-        },
-        {
-          "gloss": "rank",
-          "description": "Arrangement in rows develops into placement or membership within an ordered grouping.",
-          "occurrences": { "排行榜": "páihángbǎng", "行列": "hángliè" }
-        }
-      ]
-    }
-  ]
+  "hanzi":"行",
+  "mnemonic":{
+    "decomposition":"⿰彳亍"
+  },
+  "svg":{
+    "medians":["M 334 817 L 352 793 L 358 771 L 338 738 L 241 620 L 196 578 L 156 553","M 331 615 L 350 591 L 357 564 L 324 514 L 266 439 L 176 346 L 120 297 L 77 269","M 270 407 L 285 352 L 283 220 L 272 94 L 278 34","M 541 659 L 606 655 L 748 693 L 808 695","M 414 449 L 463 443 L 590 473 L 889 520 L 971 504","M 673 455 L 708 435 L 715 425 L 717 108 L 712 58 L 689 15 L 645 30 L 580 70"],
+    "strokes":["M 322 810 Q 335 771 252 668 Q 213 620 162 568 Q 152 559 148 554 Q 144 544 157 545 Q 205 545 343 696 Q 376 738 393 750 Q 403 759 401 772 Q 398 785 375 809 Q 353 828 334 831 Q 318 831 322 810 Z","M 273 414 Q 399 555 401 560 Q 400 564 400 567 Q 399 580 374 605 Q 352 626 333 628 Q 315 629 320 607 Q 329 579 315 556 Q 272 483 214 416 Q 157 352 82 284 Q 72 277 69 270 Q 65 260 78 261 Q 111 261 214 358 Q 227 371 244 385 L 273 414 Z","M 244 385 Q 274 325 247 152 Q 223 68 266 24 Q 282 8 294 34 Q 309 74 308 119 Q 307 299 312 339 Q 319 366 310 376 Q 277 412 273 414 C 251 434 232 413 244 385 Z","M 549 671 Q 509 661 539 644 Q 587 620 650 638 Q 714 654 781 671 Q 812 680 817 684 Q 826 694 820 703 Q 811 716 778 722 Q 744 726 710 712 Q 676 699 639 688 Q 597 678 549 671 Z","M 715 469 Q 796 482 914 486 Q 974 486 981 498 Q 987 511 968 524 Q 911 563 870 552 Q 734 516 416 460 Q 394 457 411 439 Q 447 409 487 422 Q 610 462 666 462 L 715 469 Z","M 635 61 Q 613 68 585 76 Q 572 80 573 72 Q 573 65 583 53 Q 644 -2 683 -48 Q 696 -58 710 -41 Q 749 10 750 117 Q 740 267 749 404 Q 756 432 749 443 Q 742 453 715 469 C 690 485 657 491 666 462 Q 681 416 683 387 Q 683 80 682 75 Q 679 66 674 59 Q 662 52 635 61 Z"]
+  }
 }

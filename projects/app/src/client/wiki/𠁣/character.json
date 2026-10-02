@@ -1,1 +1,9 @@
-{ "hanzi": "𠁣", "svg": { "strokes": 4 }, "decompositions": {} }
+{
+  "decompositions":{
+
+  },
+  "hanzi":"𠁣",
+  "svg":{
+    "strokes":4
+  }
+}
