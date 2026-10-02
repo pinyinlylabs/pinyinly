@@ -28,11 +28,11 @@ runs:
   steps:
     - id: moon-query
       run: |
-        ALL_AFFECTED=$(moon query tasks --json --affected | jq '.tasks.[].[].target')
-        echo ALL_AFFECTED=$ALL_AFFECTED;
-        MATCH=$(echo $ALL_AFFECTED | jq --raw-output 'select(.=="'"$TARGET"'")')
-        echo match=$MATCH;
-        echo "match=$MATCH" >> $GITHUB_OUTPUT
+        ALL_AFFECTED=$(moon query tasks --affected | jq '.tasks.[].[].target')
+        echo "ALL_AFFECTED=$ALL_AFFECTED"
+        MATCH=$(echo "$ALL_AFFECTED" | jq --raw-output --arg target "$TARGET" 'select(. == $target)')
+        echo "match=$MATCH"
+        echo "match=$MATCH" >> "$GITHUB_OUTPUT"
       env:
         TARGET: ${{ inputs.target }}
       shell: bash
