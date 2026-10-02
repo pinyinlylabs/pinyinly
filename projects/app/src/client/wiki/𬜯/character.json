@@ -1,12 +1,12 @@
 {
-  "decompositions":{
-    "⿱艹两":["",""]
+  "decompositions": {
+    "⿱艹两": ["", ""]
   },
-  "hanzi":"𬜯",
-  "mnemonic":{
-    "decomposition":"⿱艹两"
+  "hanzi": "𬜯",
+  "mnemonic": {
+    "decomposition": "⿱艹两"
   },
-  "svg":{
-    "strokes":10
+  "svg": {
+    "strokes": 10
   }
 }

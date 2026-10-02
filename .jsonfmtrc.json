@@ -18,7 +18,6 @@
     {
       "files": [
         "projects/app/public/raw/mdx/*.json",
-        "projects/app/src/client/wiki/**/*.json",
         "projects/app/src/data/*.asset.json"
       ],
       "indentLevels": 2

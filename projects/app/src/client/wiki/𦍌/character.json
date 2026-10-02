@@ -1,13 +1,13 @@
 {
-  "componentFormOf":"羊",
-  "decompositions":{
-    "⿱䒑土":["",""]
+  "componentFormOf": "羊",
+  "decompositions": {
+    "⿱䒑土": ["", ""]
   },
-  "hanzi":"𦍌",
-  "mnemonic":{
-    "decomposition":"⿱䒑土"
+  "hanzi": "𦍌",
+  "mnemonic": {
+    "decomposition": "⿱䒑土"
   },
-  "svg":{
-    "strokes":6
+  "svg": {
+    "strokes": 6
   }
 }

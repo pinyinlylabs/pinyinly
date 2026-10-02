@@ -1,13 +1,13 @@
 {
-  "decompositions":{
-    "⿴囗㐅":["",""]
+  "decompositions": {
+    "⿴囗㐅": ["", ""]
   },
-  "hanzi":"龱",
-  "isStructural":true,
-  "mnemonic":{
-    "decomposition":"⿴囗㐅"
+  "hanzi": "龱",
+  "isStructural": true,
+  "mnemonic": {
+    "decomposition": "⿴囗㐅"
   },
-  "svg":{
-    "strokes":5
+  "svg": {
+    "strokes": 5
   }
 }

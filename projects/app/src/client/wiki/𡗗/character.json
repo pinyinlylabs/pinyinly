@@ -1,15 +1,20 @@
 {
-  "decompositions":{
-    "⿻𠂇③":["0,1","2-4"]
+  "decompositions": {
+    "⿻𠂇③": ["0,1", "2-4"]
   },
-  "hanzi":"𡗗",
-  "isStructural":true,
-  "mnemonic":{
-    "components":{"③":{"label":"more hand parts"}},
-    "decomposition":"⿻𠂇③",
-    "hints":[{"hint":"Imagine two open hands (𠂇 + 手) with fingers spread out.","meaningKey":"openHands"}]
+  "hanzi": "𡗗",
+  "isStructural": true,
+  "mnemonic": {
+    "components": { "③": { "label": "more hand parts" } },
+    "decomposition": "⿻𠂇③",
+    "hints": [
+      {
+        "hint": "Imagine two open hands (𠂇 + 手) with fingers spread out.",
+        "meaningKey": "openHands"
+      }
+    ]
   },
-  "svg":{
-    "strokes":5
+  "svg": {
+    "strokes": 5
   }
 }
