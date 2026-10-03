@@ -1,5 +1,6 @@
 import type { Db } from "@/client/query";
 import type { Rizzle } from "@/data/rizzleSchema";
+import type { Skill } from "@/data/model";
 import type { SkillReviewQueue } from "@/data/skills";
 import type { QueryClient } from "@tanstack/react-query";
 import { createContext } from "react";
@@ -46,6 +47,7 @@ export type SkillQueueContextValue = DeepReadonly<
   | {
       loading: false;
       reviewQueue: SkillReviewQueue;
+      targetSkills?: ReadonlySet<Skill>;
     }
   | {
       loading: true;

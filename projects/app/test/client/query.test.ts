@@ -1,19 +1,14 @@
 import type {
-  CollectionOutput,
   DictionaryCollectionEntry,
   HistoryPageCollection,
   HistoryPageData,
-  SettingCollection,
 } from "#client/query.js";
-import {
-  getPrioritizedHanziWords,
-  historyPageCollection,
-  historyPageData,
-} from "#client/query.js";
+import { historyPageCollection, historyPageData } from "#client/query.js";
 import { matchAllHanziCharacters } from "#data/hanzi.ts";
-import type { Dictionary } from "#data/model.js";
 import {
   getUserHanziMeaningKeyParams,
+  getStudyWordKeyParams,
+  studyWordItemSetting,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
@@ -22,6 +17,7 @@ import { loadDictionary } from "#dictionary.js";
 import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
 import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import {
   afterEach,
   test as baseTest,
@@ -195,73 +191,221 @@ function prettyData(data: HistoryPageData): string {
     .join(`\n---\n`);
 }
 
-const mockDictionary = {
-  lookupHanzi: (hanzi: string) => {
-    // Mock: "纸" has multiple hanziwords
-    if (hanzi === `纸`) {
-      return [
-        [`纸:paper` as any, { gloss: [`paper`] }],
-        [`纸:tissue` as any, { gloss: [`tissue`] }],
-      ];
+describe(`studyWordsCollection`, () => {
+  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+
+  test(`hanziWord field retains existing storage keys and aliases`, () => {
+    const createdAt = new Date();
+    const keyParams = getStudyWordKeyParams(`你好:hello`);
+    expect(studyWordItemSetting.entity.marshalKey(keyParams)).toBe(
+      `pwi/你好:hello`,
+    );
+    expect(studyWordItemSetting.entity.unmarshalKey(`pwi/你好:hello`)).toEqual({
+      hanziWord: `你好:hello`,
+    });
+    expect(
+      studyWordItemSetting.decode(keyParams, {
+        w: `你好:hello`,
+        c: createdAt.toISOString(),
+      }),
+    ).toEqual({ hanziWord: `你好:hello`, createdAt });
+    expect(
+      studyWordItemSetting.encodeStoredValue(keyParams, {
+        ...keyParams,
+        createdAt,
+      }),
+    ).toEqual({ c: createdAt.toISOString() });
+  });
+
+  test(`decodes stripped settings and tracks removal`, async ({
+    db,
+    rizzle,
+  }) => {
+    const keyParams = getStudyWordKeyParams(`你好:hello`);
+    const key = studyWordItemSetting.entity.marshalKey(keyParams);
+    const createdAt = new Date();
+    await rizzle.mutate.setSetting({
+      key,
+      value: studyWordItemSetting.encodeStoredValue(keyParams, {
+        ...keyParams,
+        createdAt,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.studyWordsCollection.preload();
+    await vi.waitFor(() => {
+      expect(db.studyWordsCollection.toArray).toEqual([
+        expect.objectContaining({ ...keyParams, createdAt }),
+      ]);
+    });
+    await rizzle.mutate.setSetting({
+      key,
+      value: null,
+      now: new Date(),
+      skipHistory: true,
+    });
+    await vi.waitFor(() => {
+      expect(db.studyWordsCollection.toArray).toEqual([]);
+    });
+  });
+
+  test(`decodes legacy full payloads and tracks added-date updates`, async ({
+    db,
+    rizzle,
+  }) => {
+    const keyParams = getStudyWordKeyParams(`你好:hello`);
+    const key = studyWordItemSetting.entity.marshalKey(keyParams);
+    const createdAt = new Date();
+    await rizzle.mutate.setSetting({
+      key,
+      value: studyWordItemSetting.entity.marshalValue({
+        ...keyParams,
+        createdAt,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.studyWordsCollection.preload();
+    await vi.waitFor(() => {
+      expect(db.studyWordsCollection.toArray).toEqual([
+        expect.objectContaining({ ...keyParams, createdAt }),
+      ]);
+    });
+    await rizzle.mutate.setSetting({
+      key,
+      value: studyWordItemSetting.encodeStoredValue(keyParams, {
+        ...keyParams,
+        createdAt: new Date(createdAt.getTime() + 1000),
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await vi.waitFor(() => {
+      expect(db.studyWordsCollection.toArray).toEqual([
+        expect.objectContaining({
+          ...keyParams,
+          createdAt: new Date(createdAt.getTime() + 1000),
+        }),
+      ]);
+    });
+  });
+
+  test(`ignores unrelated and invalid settings`, async ({ db, rizzle }) => {
+    for (const key of [
+      `userName`,
+      studyWordItemSetting.entity.marshalKey({ hanziWord: `你好:hello` }),
+      studyWordItemSetting.entity.keyPrefix,
+    ]) {
+      await rizzle.mutate.setSetting({
+        key,
+        value: {},
+        now: new Date(),
+        skipHistory: true,
+      });
     }
-    return [];
-  },
-} as unknown as Dictionary;
-
-describe(`getPrioritizedHanziWords suite`, () => {
-  baseTest(`reads prioritized words from value payload`, () => {
-    const result = getPrioritizedHanziWords(
-      [settingRow({ key: `pwi/你好:hello`, value: { w: `你好:hello` } })],
-      mockDictionary,
-    );
-
-    expect(result).toEqual([`你好:hello`]);
+    await db.studyWordsCollection.preload();
+    expect(db.studyWordsCollection.toArray).toEqual([]);
   });
 
-  baseTest(`falls back to key when payload omits word field`, () => {
-    // useUserSetting strips key params from setting values, so `w` may be absent.
-    const result = getPrioritizedHanziWords(
-      [
-        settingRow({
-          key: `pwi/你好:hello`,
-          value: { c: new Date().toISOString() },
+  test(`joins exact meanings with dates and excludes legacy character selections`, async ({
+    db,
+    rizzle,
+  }) => {
+    const dictionary = await loadDictionary();
+    const expected = dictionary.lookupHanzi(汉`好`).map(([word]) => word);
+    expect(expected.length).toBeGreaterThan(1);
+    const exactWord = nonNullable(expected[0]);
+    const createdAt = new Date();
+    for (const word of [exactWord, `missing:meaning`] as const) {
+      const keyParams = getStudyWordKeyParams(word);
+      await rizzle.mutate.setSetting({
+        key: studyWordItemSetting.entity.marshalKey(keyParams),
+        value: studyWordItemSetting.encodeStoredValue(keyParams, {
+          ...keyParams,
+          createdAt,
         }),
-      ],
-      mockDictionary,
-    );
-
-    expect(result).toEqual([`你好:hello`]);
+        now: new Date(),
+        skipHistory: true,
+      });
+    }
+    await rizzle.mutate.setSetting({
+      key: `${studyWordItemSetting.entity.keyPrefix}好`,
+      value: studyWordItemSetting.entity.marshalValue({
+        hanziWord: exactWord,
+        createdAt: new Date(),
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.studyHanziWordsCollection.preload();
+    await vi.waitFor(() => {
+      expect(
+        db.studyHanziWordsCollection.toArray
+          .map(({ hanziWord }) => hanziWord)
+          .sort(),
+      ).toEqual([exactWord]);
+      expect(db.studyHanziWordsCollection.toArray[0]?.createdAt).toEqual(
+        createdAt,
+      );
+    });
+    await rizzle.mutate.setSetting({
+      key: studyWordItemSetting.entity.marshalKey({ hanziWord: exactWord }),
+      value: null,
+      now: new Date(),
+      skipHistory: true,
+    });
+    await vi.waitFor(() => {
+      expect(
+        db.studyHanziWordsCollection.toArray.map(({ hanziWord }) => hanziWord),
+      ).toEqual([]);
+    });
   });
 
-  baseTest(`expands single hanzi to all its hanziwords`, () => {
-    const result = getPrioritizedHanziWords(
-      [
-        settingRow({
-          key: `pwi/纸`,
-          value: { c: new Date().toISOString() },
-        }),
-      ],
-      mockDictionary,
-    );
+  test(`resolved words track dictionary additions and removals`, async ({
+    db,
+    rizzle,
+  }) => {
+    const word = `里:u_priority`;
+    const keyParams = getStudyWordKeyParams(word);
+    await rizzle.mutate.setSetting({
+      key: studyWordItemSetting.entity.marshalKey(keyParams),
+      value: studyWordItemSetting.encodeStoredValue(keyParams, {
+        ...keyParams,
+        createdAt: new Date(),
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await db.studyHanziWordsCollection.preload();
+    expect(db.studyHanziWordsCollection.toArray).toEqual([]);
 
-    expect(result).toEqual([`纸:paper`, `纸:tissue`]);
-  });
-
-  baseTest(`filters unrelated keys and deduplicates words`, () => {
-    const result = getPrioritizedHanziWords(
-      [
-        settingRow({ key: `pwi/你好:hello`, value: { w: `你好:hello` } }),
-        settingRow({ key: `userName`, value: { t: `Brad` } }),
-        settingRow({
-          key: `pwi/你好:hello`,
-          value: { c: new Date().toISOString() },
-        }),
-        settingRow({ key: `pwi/再见:goodbye`, value: { w: `再见:goodbye` } }),
-      ],
-      mockDictionary,
-    );
-
-    expect(result).toEqual([`你好:hello`, `再见:goodbye`]);
+    const meaningKeyParams = getUserHanziMeaningKeyParams(汉`里`, `u_priority`);
+    const key =
+      userHanziMeaningGlossSetting.entity.marshalKey(meaningKeyParams);
+    await rizzle.mutate.setSetting({
+      key,
+      value: userHanziMeaningGlossSetting.encodeStoredValue(meaningKeyParams, {
+        ...meaningKeyParams,
+        text: `inside`,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+    await vi.waitFor(() => {
+      expect(
+        db.studyHanziWordsCollection.toArray.map(({ hanziWord }) => hanziWord),
+      ).toEqual([word]);
+    });
+    await rizzle.mutate.setSetting({
+      key,
+      value: null,
+      now: new Date(),
+      skipHistory: true,
+    });
+    await vi.waitFor(() => {
+      expect(db.studyHanziWordsCollection.toArray).toEqual([]);
+    });
   });
 });
 
@@ -605,16 +749,6 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`里:u_inside`)).toBeUndefined();
   });
 });
-
-function settingRow({
-  key,
-  value,
-}: {
-  key: string;
-  value: Record<string, unknown> | null;
-}): CollectionOutput<SettingCollection> {
-  return { key, value };
-}
 
 describe(`dictionaryCollection hanziCharacterCount`, () => {
   const test = baseTest.extend(rizzleFixture).extend(dbFixture);

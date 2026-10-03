@@ -381,6 +381,11 @@ tasks:
   test:
     tags:
       - ci
+    # vite-plugin-react-native-web treats Vitest's default "test" mode as
+    # production. Use development React so Testing Library can call act().
+    args:
+      - --mode
+      - development
     deps:
       - ~:codegen
       - audio-sprites:src

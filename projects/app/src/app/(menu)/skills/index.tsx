@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { Icon } from "@/client/ui/Icon";
 import { Link } from "expo-router";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
@@ -15,6 +16,22 @@ export default function SkillsPage() {
       <View>
         <Text className="pyly-body-title">Skills</Text>
         <HeaderTitleProvider.ScrollTrigger title="Skills" />
+      </View>
+
+      <View className="gap-2">
+        <Link href="/skills/study" asChild>
+          <Pressable
+            className={`
+              flex-row items-center justify-between rounded-lg border border-fg/10 bg-bg-high px-4
+              py-3
+
+              hover:bg-fg/5
+            `}
+          >
+            <Text className="pyly-body-title text-fg-loud">Study</Text>
+            <Icon icon="chevron-right" size={16} />
+          </Pressable>
+        </Link>
       </View>
 
       <View className="gap-2">

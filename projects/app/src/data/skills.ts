@@ -70,6 +70,7 @@ export type SkillLearningGraph = Map<Skill, Node>;
 
 export function skillLearningGraph(options: {
   targetSkills: Skill[];
+  includeDependencies?: boolean;
   decompositionData: readonly CharacterDecompositionRow[];
   dictionary: Dictionary;
   charactersJson: CharactersJson;
@@ -90,12 +91,15 @@ export function skillLearningGraph(options: {
       return;
     }
 
-    const dependencies = skillDependencies(
-      skill,
-      decomposeHanzi,
-      options.dictionary,
-      options.charactersJson,
-    );
+    const dependencies =
+      options.includeDependencies === false
+        ? emptyArray
+        : skillDependencies(
+            skill,
+            decomposeHanzi,
+            options.dictionary,
+            options.charactersJson,
+          );
 
     const node: Node = { skill, dependencies: new Set(dependencies) };
     graph.set(skill, node);
@@ -425,6 +429,20 @@ export const hanziWordToGlossTyped = (hanziWord: HanziWord) =>
 
 export const hanziWordToPinyinTyped = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord);
+
+export function hanziWordToTargetSkills(
+  hanziWord: HanziWord,
+  dictionary: Pick<Dictionary, `lookupHanziWord`>,
+): Skill[] {
+  const meaning = dictionary.lookupHanziWord(hanziWord);
+  if (meaning == null) {
+    return [];
+  }
+  return [
+    hanziWordToGlossTyped(hanziWord),
+    ...(meaning.pinyin?.[0] == null ? [] : [hanziWordToPinyinTyped(hanziWord)]),
+  ];
+}
 
 export const hanziWordToPinyinInitial = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToPinyinInitial, hanziWord);
