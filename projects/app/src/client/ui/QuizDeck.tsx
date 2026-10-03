@@ -349,9 +349,7 @@ export const QuizDeck = ({
   return (
     <View className={className}>
       {title == null ? null : (
-        <View
-          className="mb-3 w-full max-w-150 flex-row items-center justify-between self-center px-4"
-        >
+        <View className="mb-3 w-full max-w-150 flex-row items-center justify-between self-center px-4">
           <Text className="pyly-body-title">{title}</Text>
           <RectButton href={backHref} variant="bare" iconStart="chevron-left">
             Back
