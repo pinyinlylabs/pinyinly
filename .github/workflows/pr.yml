@@ -14,14 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  changes:
-    if: github.event_name != 'merge_group'
+  app-preview:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: read
-    outputs:
-      app: ${{ steps.filter.outputs.app }}
-      static: ${{ steps.filter.outputs.static }}
+    concurrency:
+      group: app-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: dorny/paths-filter@v3
         if: github.event_name == 'pull_request'
@@ -29,7 +29,7 @@ jobs:
         with:
           filters: |
             app:
-              - '.github/workflows/app-preview.yml'
+              - '.github/actions/app-preview/**'
               - '.github/workflows/pr.yml'
               - '.github/actions/setup-tools/**'
               - '.github/actions/metro-cache/**'
@@ -52,8 +52,43 @@ jobs:
               - 'projects/app/bin/dbMigrate.ts'
               - 'projects/app/drizzle.config.ts'
               - 'projects/app/.env.local.sample'
+      - name: 🏗 Clone repo
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.app == 'true'
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - uses: ./.github/actions/app-preview
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.app == 'true'
+        with:
+          neon-api-key: ${{ secrets.NEON_API_KEY }}
+          neon-project-id: ${{ secrets.NEON_PROJECT_ID }}
+          neon-username: ${{ secrets.NEON_USERNAME }}
+          assets-cdn-base-url: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
+          posthog-api-key: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
+          sentry-dsn: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_APP }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+
+  static-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    concurrency:
+      group: static-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: dorny/paths-filter@v3
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          filters: |
             static:
-              - '.github/workflows/static-preview.yml'
+              - '.github/actions/static-preview/**'
               - '.github/workflows/pr.yml'
               - '.github/actions/setup-tools/**'
               - '.moon/**'
@@ -67,17 +102,19 @@ jobs:
               - 'projects/static/package.json'
               - 'projects/static/vercel.json'
 
-  app-preview-if-needed:
-    needs: changes
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.app == 'true'
-    uses: ./.github/workflows/app-preview.yml
-    secrets: inherit
+      - name: 🏗 Clone repo
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.static == 'true'
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
 
-  static-preview-if-needed:
-    needs: changes
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.static == 'true'
-    uses: ./.github/workflows/static-preview.yml
-    secrets: inherit
+      - uses: ./.github/actions/static-preview
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.static == 'true'
+        with:
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
 
   moon-ci:
     runs-on: ubuntu-latest

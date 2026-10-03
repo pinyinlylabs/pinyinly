@@ -12,12 +12,47 @@ permissions:
 
 jobs:
   app-preview:
-    uses: ./.github/workflows/app-preview.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    concurrency:
+      group: app-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: 🏗 Clone repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - uses: ./.github/actions/app-preview
+        with:
+          neon-api-key: ${{ secrets.NEON_API_KEY }}
+          neon-project-id: ${{ secrets.NEON_PROJECT_ID }}
+          neon-username: ${{ secrets.NEON_USERNAME }}
+          assets-cdn-base-url: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
+          posthog-api-key: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
+          sentry-dsn: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_APP }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
 
   static-preview:
-    uses: ./.github/workflows/static-preview.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    concurrency:
+      group: static-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: 🏗 Clone repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - uses: ./.github/actions/static-preview
+        with:
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
 
   moon-ci:
     runs-on: ubuntu-latest

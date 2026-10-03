@@ -1,0 +1,27 @@
+name: Static preview
+description: Deploy a static site preview to Vercel.
+
+inputs:
+  vercel-org-id:
+    description: Vercel organization ID.
+    required: true
+  vercel-project-id:
+    description: Vercel static site project ID.
+    required: true
+  vercel-token:
+    description: Vercel authentication token.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup-tools
+
+    - name: 🚀 Deploy to Vercel (preview)
+      run: moon run static:deploy --color --force
+      shell: bash
+      env:
+        PYLY_VERCEL_PREVIEW: ""
+        VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
+        VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
+        VERCEL_TOKEN: ${{ inputs.vercel-token }}
