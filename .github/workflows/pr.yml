@@ -30,7 +30,6 @@ jobs:
           filters: |
             app:
               - '.github/workflows/app-preview.yml'
-              - '.github/workflows/ci-daily.yml'
               - '.github/workflows/pr.yml'
               - '.github/actions/setup-tools/**'
               - '.github/actions/metro-cache/**'
@@ -39,6 +38,7 @@ jobs:
               - '.yarnrc.yml'
               - '.yarn/patches/**'
               - 'package.json'
+              - 'tsconfig.base.json'
               - 'yarn.lock'
               - 'projects/app/moon.yml'
               - 'projects/app/package.json'
@@ -54,7 +54,6 @@ jobs:
               - 'projects/app/.env.local.sample'
             static:
               - '.github/workflows/static-preview.yml'
-              - '.github/workflows/ci-daily.yml'
               - '.github/workflows/pr.yml'
               - '.github/actions/setup-tools/**'
               - '.moon/**'
@@ -62,6 +61,7 @@ jobs:
               - '.yarnrc.yml'
               - '.yarn/patches/**'
               - 'package.json'
+              - 'tsconfig.base.json'
               - 'yarn.lock'
               - 'projects/static/moon.yml'
               - 'projects/static/package.json'
