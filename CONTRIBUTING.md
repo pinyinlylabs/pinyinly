@@ -50,6 +50,24 @@ If you need to run services individually:
 
 # Guides
 
+## Preview deployments
+
+App and static Vercel previews run daily through the CI (daily) workflow, and on pull requests that
+change the build/deployment configuration listed in the `changes` job in `.github/workflows/pr.yml`.
+PRs run only the affected preview pipeline; shared configuration changes can trigger both. Ordinary
+application/content changes and merge-queue runs do not trigger previews.
+
+To deploy previews of any branch on demand, select the **PR** or **CI (daily)** workflow in GitHub
+Actions, choose **Run workflow**, and select the branch. Both workflows call the reusable
+`.github/workflows/app-preview.yml` and `.github/workflows/static-preview.yml`, which have no
+standalone triggers. Preview runs execute without affected-file filtering or Moon task-cache
+skipping, including migrations against a temporary Neon database branch. The database branch is
+deleted after the run.
+
+Preview checks must not be required by branch protection or repository rulesets: preview jobs are
+intentionally skipped for most pull requests. The PR workflow's `moon-ci` checks are unchanged, as
+are production deployments on `main`.
+
 ## Updating CEDICT test data
 
 1. Download the ZIP archive from the

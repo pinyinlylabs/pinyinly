@@ -9,16 +9,21 @@ import { z } from "zod";
 const workflowSchema = z.object({
   jobs: z.record(
     z.string(),
-    z.object({
-      steps: z.array(
-        z
-          .object({
-            name: z.string(),
-            env: z.record(z.string(), z.unknown()),
-          })
-          .partial(),
-      ),
-    }),
+    z.union([
+      z.object({
+        steps: z.array(
+          z
+            .object({
+              name: z.string(),
+              env: z.record(z.string(), z.unknown()),
+            })
+            .partial(),
+        ),
+      }),
+      z.object({
+        uses: z.string(),
+      }),
+    ]),
   ),
 });
 
@@ -46,6 +51,9 @@ test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
     const workflow = workflowSchema.parse(YAML.parse(workflowContents));
 
     for (const [_jobName, job] of Object.entries(workflow.jobs)) {
+      if (!(`steps` in job)) {
+        continue;
+      }
       for (const step of job.steps) {
         if (step.env != null) {
           const stepExpoPublicEnvVars = new Set(
@@ -66,4 +74,21 @@ test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
   }
 
   expect(expectCount).toBeGreaterThan(0);
+});
+
+test(`workflow schema supports reusable workflow jobs alongside step jobs`, () => {
+  expect(
+    workflowSchema.parse({
+      jobs: {
+        appPreview: { uses: `./.github/workflows/app-preview.yml` },
+        test: { steps: [{ name: `Run tests` }] },
+      },
+    }),
+  ).toEqual({
+    jobs: {
+      appPreview: { uses: `./.github/workflows/app-preview.yml` },
+      test: { steps: [{ name: `Run tests` }] },
+    },
+  });
+  expect(workflowSchema.safeParse({ jobs: { test: {} } }).success).toBe(false);
 });

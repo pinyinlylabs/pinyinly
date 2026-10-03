@@ -11,6 +11,14 @@ permissions:
   contents: read
 
 jobs:
+  app-preview:
+    uses: ./.github/workflows/app-preview.yml
+    secrets: inherit
+
+  static-preview:
+    uses: ./.github/workflows/static-preview.yml
+    secrets: inherit
+
   moon-ci:
     runs-on: ubuntu-latest
     steps:
