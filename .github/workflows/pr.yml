@@ -14,96 +14,70 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  app-preview:
+  changes:
+    if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
-    env:
-      # Format: 'github_test_pr_' <run_id> [ ':' <run_attempt> ]
-      #
-      # The run attempt is only included for re-runs to keep the branch name
-      # slightly shorter and cleaner when there is no re-run.
-      NEON_BRANCH_NAME: github_test_pr_${{ github.run_id }}${{ github.run_attempt != '1' && format(':{0}', github.run_attempt) || '' }}
-      NEON_DATABASE_NAME: hao
+    permissions:
+      pull-requests: read
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      static: ${{ steps.filter.outputs.static }}
     steps:
-      - name: 🏗 Clone repo
-        uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        if: github.event_name == 'pull_request'
+        id: filter
         with:
-          fetch-depth: 0
-          lfs: true
+          filters: |
+            app:
+              - '.github/workflows/app-preview.yml'
+              - '.github/workflows/ci-daily.yml'
+              - '.github/workflows/pr.yml'
+              - '.github/actions/setup-tools/**'
+              - '.github/actions/metro-cache/**'
+              - '.moon/**'
+              - '.prototools'
+              - '.yarnrc.yml'
+              - '.yarn/patches/**'
+              - 'package.json'
+              - 'yarn.lock'
+              - 'projects/app/moon.yml'
+              - 'projects/app/package.json'
+              - 'projects/app/app.config.js'
+              - 'projects/app/babel.config.cjs'
+              - 'projects/app/metro.config.cjs'
+              - 'projects/app/postcss.config.mjs'
+              - 'projects/app/tsconfig*.json'
+              - 'projects/app/vercel.json'
+              - 'projects/app/.vercelignore'
+              - 'projects/app/bin/dbMigrate.ts'
+              - 'projects/app/drizzle.config.ts'
+              - 'projects/app/.env.local.sample'
+            static:
+              - '.github/workflows/static-preview.yml'
+              - '.github/workflows/ci-daily.yml'
+              - '.github/workflows/pr.yml'
+              - '.github/actions/setup-tools/**'
+              - '.moon/**'
+              - '.prototools'
+              - '.yarnrc.yml'
+              - '.yarn/patches/**'
+              - 'package.json'
+              - 'yarn.lock'
+              - 'projects/static/moon.yml'
+              - 'projects/static/package.json'
+              - 'projects/static/vercel.json'
 
-      - name: 🏗 Create database branch for running tests
-        uses: neondatabase/create-branch-action@v5
-        id: create-neon-branch
-        with:
-          api_key: ${{ secrets.NEON_API_KEY }}
-          branch_name: ${{ env.NEON_BRANCH_NAME }}
-          database: ${{ env.NEON_DATABASE_NAME }}
-          project_id: ${{ secrets.NEON_PROJECT_ID }}
-          username: ${{ secrets.NEON_USERNAME }}
-
-      - uses: ./.github/actions/setup-tools
-
-      - uses: ./.github/actions/metro-cache
-
-      - uses: ./.github/actions/moon-affected
-        id: moon-dbMigrate-query
-        with:
-          target: app:dbMigrate
-
-      - run: moon run app:dbMigrate --color
-        if: steps.moon-dbMigrate-query.outputs.target-affected == 'true'
-        env:
-          DATABASE_URL: ${{ steps.create-neon-branch.outputs.db_url }}
-
-      - uses: ./.github/actions/moon-affected
-        id: moon-deployVercel-query
-        with:
-          target: app:deployVercel
-
-      - name: 🚀 Deploy to Vercel (preview)
-        run: moon run app:deployVercel --color
-        if: steps.moon-deployVercel-query.outputs.target-affected == 'true'
-        env:
-          EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
-          EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
-          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
-          PYLY_VERCEL_PREVIEW: ""
-          PYLY_STRICT_EXPO_ENV_VARS: "true"
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_APP }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-      - uses: neondatabase/delete-branch-action@v3
-        with:
-          project_id: ${{ secrets.NEON_PROJECT_ID }}
-          branch: ${{ env.NEON_BRANCH_NAME }}
-          api_key: ${{ secrets.NEON_API_KEY }}
-        if: ${{ always() }}
+  app-preview:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.app == 'true'
+    uses: ./.github/workflows/app-preview.yml
+    secrets: inherit
 
   static-preview:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🏗 Clone repo
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          lfs: true
-
-      - uses: ./.github/actions/setup-tools
-
-      - uses: ./.github/actions/moon-affected
-        id: moon-deploy-query
-        with:
-          target: static:deploy
-
-      - name: 🚀 Deploy to Vercel (preview)
-        run: moon run static:deploy --color
-        if: steps.moon-deploy-query.outputs.target-affected == 'true'
-        env:
-          PYLY_VERCEL_PREVIEW: ""
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.static == 'true'
+    uses: ./.github/workflows/static-preview.yml
+    secrets: inherit
 
   moon-ci:
     runs-on: ubuntu-latest

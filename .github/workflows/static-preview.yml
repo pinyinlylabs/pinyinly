@@ -1,0 +1,31 @@
+name: Static preview
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: static-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Clone repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - uses: ./.github/actions/setup-tools
+
+      - name: 🚀 Deploy to Vercel (preview)
+        run: moon run static:deploy --color --force
+        env:
+          PYLY_VERCEL_PREVIEW: ""
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
