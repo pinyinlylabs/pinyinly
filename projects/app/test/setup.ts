@@ -2,7 +2,7 @@ import type { IconRegistry } from "#client/ui/iconRegistry.js";
 import { format } from "@pinyinly/lib/jsonfmt";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import * as fs from "@pinyinly/lib/fs";
-import type { Component } from "react";
+import type { Component, PropsWithChildren } from "react";
 import { createElement, Fragment } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
@@ -214,6 +214,9 @@ vi.mock(`expo-image-picker`, () => {
 vi.mock(`uniwind`, () => {
   return {
     withUniwind: (x: Component) => x,
+    useUniwind: () => ({ theme: `light` }),
+    ScopedTheme: ({ children }: PropsWithChildren) =>
+      createElement(Fragment, null, children),
   };
 });
 

@@ -1,6 +1,7 @@
 import type {
   AssetId,
   HanziText,
+  HanziWord,
   LocationSetKey,
   PinyinSoundId,
 } from "@/data/model";
@@ -600,19 +601,18 @@ export const pronunciationMnemonicSpecSetting = defineUserSetting({
 });
 
 //
-// Priority words list (bookmarking)
+// Study words list
 //
 
-export const prioritizedWordItemSetting = defineUserSetting({
-  entity: r.entity(`pwi/[word]`, {
-    word: r.string().alias(`w`),
+export const studyWordItemSetting = defineUserSetting({
+  entity: r.entity(`pwi/[hanziWord]`, {
+    hanziWord: rHanziWord().alias(`w`),
     createdAt: r.datetime().alias(`c`),
-    note: r.string().optional().alias(`n`),
   }),
 });
 
-export function getPrioritizedWordKeyParams(word: string) {
-  return { word };
+export function getStudyWordKeyParams(hanziWord: HanziWord) {
+  return { hanziWord };
 }
 
 //
@@ -714,7 +714,7 @@ export const userSettingDefinitions = [
   pinyinSoundLocationSetKeySetting,
   locationSetIdentityImageSetting,
   pinyinSoundNameTextSetting,
-  prioritizedWordItemSetting,
+  studyWordItemSetting,
   quickSearchPickSetting,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,

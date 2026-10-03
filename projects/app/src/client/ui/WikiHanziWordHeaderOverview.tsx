@@ -1,6 +1,4 @@
-import { intersperse } from "@/client/react";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { hsk30LevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
 import {
@@ -9,11 +7,9 @@ import {
 } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { useState } from "react";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { HskLozenge } from "./HskLozenge";
-import { RectButton } from "./RectButton";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { useDb } from "./hooks/useDb";
 
@@ -41,15 +37,6 @@ export function WikiHanziWordHeaderOverview({
     .filter((x) => x != null)
     .filter(arrayFilterUnique())
     .sort(sortComparatorNumber(hsk30LevelToNumber));
-  const pinyins = dictionaryEntries
-    .map((entry) => entry.pinyin?.[0])
-    .filter((x) => x != null);
-  const glosses = dictionaryEntries
-    .map((entry) => entry.gloss[0])
-    .filter((x) => x != null);
-
-  const { isPriority, toggle } = useBookmarkToggle(hanzi);
-  const uniquePinyins = pinyins.filter(arrayFilterUnique());
 
   return (
     <View className="gap-[10px]">
@@ -59,12 +46,6 @@ export function WikiHanziWordHeaderOverview({
             <HskLozenge hskLevel={hskLevel} key={hskLevel} />
           ))}
         </View>
-        <RectButton
-          variant="bare"
-          iconStart={isPriority ? `bookmark-filled` : `bookmark`}
-          onPress={toggle}
-          className="opacity-70"
-        />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />
@@ -72,69 +53,7 @@ export function WikiHanziWordHeaderOverview({
           {hanzi}
         </Text>
       </View>
-      <View className="gap-1">
-        {uniquePinyins.length === 0 ? null : (
-          <View className="flex-row gap-1">
-            {intersperse(
-              uniquePinyins.map((pinyin, i) => (
-                <Text className="font-sans text-[16px] text-muted-fg" key={i}>
-                  {pinyin}
-                </Text>
-              )),
-              <Text className="text-muted-fg/50">•</Text>,
-            )}
-          </View>
-        )}
-        {glosses.length === 0 ? null : (
-          <ExpandableGlosses hanzi={hanzi} glosses={glosses} />
-        )}
-      </View>
+      <WikiHanziMeaningsPanel hanzi={hanzi} />
     </View>
-  );
-}
-
-function ExpandableGlosses({
-  hanzi,
-  glosses,
-}: {
-  hanzi: HanziText;
-  glosses: readonly string[];
-}) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <>
-      <View className="flex-row items-center gap-1">
-        <View>
-          <Text>
-            {intersperse(
-              glosses.map((gloss, i) => (
-                <Text
-                  className="font-sans text-2xl font-medium text-fg-loud"
-                  key={i}
-                >
-                  {gloss}
-                </Text>
-              )),
-              <Text className="text-fg">; </Text>,
-            )}
-          </Text>
-        </View>
-
-        <RectButton
-          iconStart={expanded ? `chevron-up-circled` : `chevron-down-circled`}
-          onPress={() => {
-            setExpanded((value) => !value);
-          }}
-          variant="bare"
-          className="opacity-70"
-        />
-      </View>
-      {expanded ? (
-        <View className="mt-2">
-          <WikiHanziMeaningsPanel hanzi={hanzi} />
-        </View>
-      ) : null}
-    </>
   );
 }

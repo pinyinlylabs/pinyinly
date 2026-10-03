@@ -1,5 +1,5 @@
 import type { Dictionary, Skill, SrsStateType } from "#data/model.ts";
-import { SkillKind, SrsKind } from "#data/model.ts";
+import { pinyinTextSchema, SkillKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
 import type {
@@ -12,6 +12,9 @@ import {
   computeSkillRating,
   getHanziWordRank,
   hanziWordToGloss,
+  hanziWordToGlossTyped,
+  hanziWordToPinyinTyped,
+  hanziWordToTargetSkills,
   isHanziWordSkill,
   isHarderDifficultyStyleSkillKind,
   randomPickSkillsForReview,
@@ -75,7 +78,90 @@ const skillTest = test.extend<{
   ],
 });
 
+describe(`hanziWordToTargetSkills`, () => {
+  test(`returns meaning followed by pronunciation when pinyin is available`, () => {
+    const lookupHanziWord = vi.fn(() => ({
+      gloss: [`hello`],
+      pinyin: [pinyinTextSchema.parse(`nǐ hǎo`)],
+    }));
+    expect(hanziWordToTargetSkills(`你好:hello`, { lookupHanziWord })).toEqual([
+      hanziWordToGlossTyped(`你好:hello`),
+      hanziWordToPinyinTyped(`你好:hello`),
+    ]);
+    expect(lookupHanziWord).toHaveBeenCalledExactlyOnceWith(`你好:hello`);
+  });
+
+  test(`returns only meaning for entries without pinyin`, () => {
+    for (const pinyin of [undefined, []]) {
+      expect(
+        hanziWordToTargetSkills(`冖:cover`, {
+          lookupHanziWord: () => ({ gloss: [`cover`], pinyin }),
+        }),
+      ).toEqual([hanziWordToGlossTyped(`冖:cover`)]);
+    }
+  });
+
+  test(`returns no targets for a missing dictionary entry`, () => {
+    expect(
+      hanziWordToTargetSkills(`missing:meaning`, {
+        lookupHanziWord: () => null,
+      }),
+    ).toEqual([]);
+  });
+});
+
 describe(`skillLearningGraph suite`, () => {
+  skillTest(
+    `can omit all dependencies without looking up prerequisites`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const targetSkills: Skill[] = [
+        `he:好:good`,
+        `het:你好:hello`,
+        `hp:你好:hello`,
+        `he:好:good`,
+      ];
+      const lookup = vi.spyOn(dictionary, `lookupHanziWord`);
+      try {
+        const graph = skillLearningGraph({
+          targetSkills,
+          includeDependencies: false,
+          decompositionData,
+          dictionary,
+          charactersJson,
+        });
+        expect([...graph.keys()]).toEqual([...new Set(targetSkills)]);
+        for (const node of graph.values()) {
+          expect(node.dependencies).toEqual(new Set());
+        }
+        expect(lookup).not.toHaveBeenCalled();
+      } finally {
+        lookup.mockRestore();
+      }
+    },
+  );
+
+  skillTest(
+    `explicit dependency expansion matches the default`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const options = {
+        targetSkills: [`he:好:good`] as Skill[],
+        decompositionData,
+        dictionary,
+        charactersJson,
+      };
+      expect(
+        skillLearningGraph({ ...options, includeDependencies: true }),
+      ).toEqual(skillLearningGraph(options));
+      expect(
+        skillLearningGraph({
+          ...options,
+          targetSkills: [],
+          includeDependencies: false,
+        }),
+      ).toEqual(new Map());
+    },
+  );
+
   skillTest(
     `no targets gives an empty graph`,
     async ({ decompositionData, dictionary, charactersJson }) => {

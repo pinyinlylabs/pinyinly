@@ -1,15 +1,11 @@
-import {
-  charactersJsonQuery,
-  dictionaryQuery,
-  getPrioritizedHanziWords,
-  targetSkillsQuery,
-} from "@/client/query";
+import { charactersJsonQuery, dictionaryQuery } from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { Skill, SrsStateType } from "@/data/model";
 import type { LatestSkillRating } from "@/data/skills";
+import type { StudyListId } from "@/data/studyLists";
+import { studyListHanziWords } from "@/data/studyLists";
 import {
-  hanziWordToGlossTyped,
-  hanziWordToPinyinTyped,
+  hanziWordToTargetSkills,
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
@@ -35,12 +31,21 @@ const mockable = {
  * The queue is automatically invalidated when the underlying Replicache data
  * changes, ensuring it stays up-to-date with user progress.
  */
-function SkillQueueProvider({ children }: PropsWithChildren) {
+function SkillQueueProvider({
+  children,
+  listId,
+}: PropsWithChildren<{ listId?: StudyListId }>) {
   "use memo";
   const db = useDb();
 
   const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
-    useQuery(targetSkillsQuery());
+    useLiveQuery(
+      (q) =>
+        q
+          .from({ targetSkill: db.targetSkillsCollection })
+          .orderBy(({ targetSkill }) => targetSkill.order, `asc`),
+      [db.targetSkillsCollection],
+    );
   const { data: dictionary } = useQuery(dictionaryQuery);
   const { data: charactersJson } = useQuery(charactersJsonQuery);
   const {
@@ -55,11 +60,10 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       (q) => q.from({ skillState: db.skillStateCollection }),
       [db.skillStateCollection],
     );
-  const { data: prioritySettingsData, isLoading: isPrioritySettingsLoading } =
-    useLiveQuery(
-      (q) => q.from({ setting: db.settingCollection }),
-      [db.settingCollection],
-    );
+  const { data: studyWordsData, isLoading: isStudyWordsLoading } = useLiveQuery(
+    (q) => q.from({ word: db.studyHanziWordsCollection }),
+    [db.studyHanziWordsCollection],
+  );
   const {
     data: characterDecompositionData,
     isLoading: isCharacterDecompositionLoading,
@@ -88,44 +92,51 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
     [latestSkillRatingsData, isLatestSkillRatingsLoading],
   );
 
-  // Compute priority skills from settings
-  const prioritySkills = useMemo(() => {
-    if (dictionary == null || isPrioritySettingsLoading) {
+  // Compute Study skills from the resolved word collection
+  const studySkills = useMemo(() => {
+    if (dictionary == null || isStudyWordsLoading) {
       return null;
     }
-    const prioritizedWords = getPrioritizedHanziWords(
-      prioritySettingsData,
-      dictionary,
+    return studyWordsData.flatMap(({ hanziWord }) =>
+      hanziWordToTargetSkills(hanziWord, dictionary),
     );
-    return prioritizedWords.flatMap((w) => [
-      hanziWordToGlossTyped(w),
-      hanziWordToPinyinTyped(w),
-    ]);
-  }, [prioritySettingsData, dictionary, isPrioritySettingsLoading]);
+  }, [studyWordsData, dictionary, isStudyWordsLoading]);
 
-  // Combine base target skills with priority skills
+  // Combine base target skills with Study skills
   const allTargetSkills = useMemo(() => {
-    if (prioritySkills == null) {
+    if (studySkills == null) {
       return null;
     }
 
-    if (baseTargetSkills == null) {
-      return [];
+    if (isTargetSkillsLoading) {
+      return null;
     }
-    return [...baseTargetSkills, ...prioritySkills].filter(arrayFilterUnique());
-  }, [baseTargetSkills, prioritySkills]);
+    return [
+      ...baseTargetSkills.map(({ skill }) => skill),
+      ...studySkills,
+    ].filter(arrayFilterUnique());
+  }, [baseTargetSkills, studySkills, isTargetSkillsLoading]);
 
   const graph = useMemo(
     () =>
       dictionary == null ||
       charactersJson == null ||
       allTargetSkills == null ||
-      allTargetSkills.length === 0 ||
       isCharacterDecompositionLoading ||
       isTargetSkillsLoading
         ? null
         : skillLearningGraph({
-            targetSkills: allTargetSkills,
+            targetSkills:
+              listId == null
+                ? allTargetSkills
+                : studyListHanziWords(
+                    dictionary,
+                    listId,
+                    studyWordsData.map(({ hanziWord }) => hanziWord),
+                  ).flatMap((word) =>
+                    hanziWordToTargetSkills(word, dictionary),
+                  ),
+            includeDependencies: listId == null,
             decompositionData: characterDecompositionData,
             dictionary,
             charactersJson,
@@ -137,6 +148,8 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
       allTargetSkills,
       isCharacterDecompositionLoading,
       isTargetSkillsLoading,
+      listId,
+      studyWordsData,
     ],
   );
 
@@ -150,19 +163,37 @@ function SkillQueueProvider({ children }: PropsWithChildren) {
         ? null
         : skillReviewQueue({
             graph,
-            skillSrsStates,
-            latestSkillRatings,
+            skillSrsStates:
+              listId == null
+                ? skillSrsStates
+                : new Map(
+                    [...skillSrsStates].filter(([skill]) => graph.has(skill)),
+                  ),
+            latestSkillRatings:
+              listId == null
+                ? latestSkillRatings
+                : new Map(
+                    [...latestSkillRatings].filter(([skill]) =>
+                      graph.has(skill),
+                    ),
+                  ),
             now: new Date(),
             dictionary,
             maxQueueItems: mockable.getMaxQueueItems(),
           }),
-    [graph, dictionary, skillSrsStates, latestSkillRatings],
+    [graph, dictionary, skillSrsStates, latestSkillRatings, listId],
   );
 
   const skillQueue: SkillQueueContextValue = useMemo(
     () =>
-      reviewQueue == null ? { loading: true } : { loading: false, reviewQueue },
-    [reviewQueue],
+      reviewQueue == null
+        ? { loading: true }
+        : {
+            loading: false,
+            reviewQueue,
+            ...(listId == null ? {} : { targetSkills: new Set(graph?.keys()) }),
+          },
+    [reviewQueue, graph, listId],
   );
 
   return (

@@ -1,4 +1,4 @@
-import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
+import { useStudyToggle } from "@/client/ui/hooks/useStudyToggle";
 import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
 import type { HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -88,9 +88,6 @@ interface SearchResultCardProps {
 }
 
 function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
-  const { isPriority, toggle } = useBookmarkToggle(result.hanzi);
-  const showBookmark = result.kind === `hanziWord`;
-
   return (
     <Pressable
       onPress={() => {
@@ -108,27 +105,38 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
           <HanziWordSearchMeta hanziWord={result.hanziWord} />
         ) : null}
       </View>
-      {showBookmark ? (
-        <Tooltip>
-          <Tooltip.Trigger asChild>
-            <RectButton
-              variant="bare"
-              iconStart={isPriority ? `bookmark-filled` : `bookmark`}
-              iconSize={20}
-              className="text-muted-fg"
-              onPress={(event) => {
-                event.stopPropagation();
-                event.preventDefault();
-                toggle();
-              }}
-            />
-          </Tooltip.Trigger>
-          <Tooltip.Content>
-            <Text className="font-sans text-sm text-fg">Bookmark</Text>
-          </Tooltip.Content>
-        </Tooltip>
+      {result.kind === `hanziWord` && result.hanziWord != null ? (
+        <SearchResultStudyButton hanziWord={result.hanziWord} />
       ) : null}
     </Pressable>
+  );
+}
+
+function SearchResultStudyButton({ hanziWord }: { hanziWord: HanziWord }) {
+  const { isStudying, isLoading, toggle } = useStudyToggle(hanziWord);
+
+  return (
+    <Tooltip>
+      <Tooltip.Trigger asChild>
+        <RectButton
+          variant="bare"
+          iconStart={isStudying ? `bookmark-filled` : `bookmark`}
+          iconSize={20}
+          className="text-muted-fg"
+          disabled={isLoading}
+          onPress={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            toggle();
+          }}
+        />
+      </Tooltip.Trigger>
+      <Tooltip.Content>
+        <Text className="font-sans text-sm text-fg">
+          {isStudying ? `Studying` : `Study`}
+        </Text>
+      </Tooltip.Content>
+    </Tooltip>
   );
 }
 
