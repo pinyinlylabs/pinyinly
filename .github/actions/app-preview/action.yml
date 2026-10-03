@@ -1,0 +1,80 @@
+name: App preview
+description: Deploy an app preview using a temporary Neon database branch.
+
+inputs:
+  neon-api-key:
+    description: Neon API key.
+    required: true
+  neon-project-id:
+    description: Neon project ID.
+    required: true
+  neon-username:
+    description: Neon database username.
+    required: true
+  neon-branch-name:
+    description: Temporary branch name, unique to the run and retry attempt.
+    default: github_test_pr_${{ github.run_id }}${{ github.run_attempt != '1' && format(':{0}', github.run_attempt) || '' }}
+  assets-cdn-base-url:
+    description: Public assets CDN base URL.
+    required: true
+  posthog-api-key:
+    description: Public PostHog API key.
+    required: true
+  sentry-dsn:
+    description: Public Sentry DSN.
+    required: true
+  sentry-auth-token:
+    description: Sentry authentication token.
+    required: true
+  vercel-org-id:
+    description: Vercel organization ID.
+    required: true
+  vercel-project-id:
+    description: Vercel app project ID.
+    required: true
+  vercel-token:
+    description: Vercel authentication token.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: 🏗 Create database branch for running tests
+      uses: neondatabase/create-branch-action@v5
+      id: create-neon-branch
+      with:
+        api_key: ${{ inputs.neon-api-key }}
+        branch_name: ${{ inputs.neon-branch-name }}
+        database: hao
+        project_id: ${{ inputs.neon-project-id }}
+        username: ${{ inputs.neon-username }}
+
+    - uses: ./.github/actions/setup-tools
+
+    - uses: ./.github/actions/metro-cache
+
+    - run: moon run app:dbMigrate --color --force
+      shell: bash
+      env:
+        DATABASE_URL: ${{ steps.create-neon-branch.outputs.db_url }}
+
+    - name: 🚀 Deploy to Vercel (preview)
+      run: moon run app:deployVercel --color --force
+      shell: bash
+      env:
+        EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ inputs.assets-cdn-base-url }}
+        EXPO_PUBLIC_POSTHOG_API_KEY: ${{ inputs.posthog-api-key }}
+        EXPO_PUBLIC_SENTRY_DSN: ${{ inputs.sentry-dsn }}
+        PYLY_VERCEL_PREVIEW: ""
+        PYLY_STRICT_EXPO_ENV_VARS: "true"
+        SENTRY_AUTH_TOKEN: ${{ inputs.sentry-auth-token }}
+        VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
+        VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
+        VERCEL_TOKEN: ${{ inputs.vercel-token }}
+
+    - uses: neondatabase/delete-branch-action@v3
+      with:
+        project_id: ${{ inputs.neon-project-id }}
+        branch: ${{ inputs.neon-branch-name }}
+        api_key: ${{ inputs.neon-api-key }}
+      if: ${{ always() && steps.create-neon-branch.outcome == 'success' }}
