@@ -55,7 +55,9 @@ export default defineConfig({
         "better-tailwindcss/enforce-consistent-class-order": `error`,
         "better-tailwindcss/enforce-consistent-line-wrapping": [
           `error`,
-          { printWidth: 100, group: `emptyLine` },
+          // `loose` avoids fighting oxfmt (Prettier-compatible) over JSX
+          // attribute layout, which otherwise causes an unstable fix/format loop.
+          { printWidth: 100, group: `emptyLine`, strictness: `loose` },
         ],
         "better-tailwindcss/enforce-consistent-important-position": `error`,
         "better-tailwindcss/enforce-shorthand-classes": `error`,
