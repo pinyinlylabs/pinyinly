@@ -49,7 +49,7 @@ jobs:
         with:
           target: app:dbMigrate
 
-      - run: moon run app:dbMigrate --color --affected --remote
+      - run: moon run app:dbMigrate --color
         if: steps.moon-dbMigrate-query.outputs.target-affected == 'true'
         env:
           DATABASE_URL: ${{ steps.create-neon-branch.outputs.db_url }}
@@ -60,7 +60,7 @@ jobs:
           target: app:deployVercel
 
       - name: 🚀 Deploy to Vercel (preview)
-        run: moon run app:deployVercel --color --affected --remote
+        run: moon run app:deployVercel --color
         if: steps.moon-deployVercel-query.outputs.target-affected == 'true'
         env:
           EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
@@ -97,7 +97,7 @@ jobs:
           target: static:deploy
 
       - name: 🚀 Deploy to Vercel (preview)
-        run: moon run static:deploy --color --affected --remote
+        run: moon run static:deploy --color
         if: steps.moon-deploy-query.outputs.target-affected == 'true'
         env:
           PYLY_VERCEL_PREVIEW: ""
@@ -121,7 +121,7 @@ jobs:
 
       - uses: ./.github/actions/metro-cache
 
-      - run: moon ci --color :typecheck :lint :test :fmt
+      - run: moon run ':#ci' --color --affected
         env:
           # Exclude wiki content during CI builds to avoid bundling 3000+ MDX files.
           # Wiki is lazy-loaded, so users won't be affected—preview will just show no wiki.

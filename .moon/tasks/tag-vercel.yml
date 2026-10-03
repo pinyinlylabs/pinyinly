@@ -3,6 +3,8 @@ inheritedBy:
 
 tasks:
   testMoon1.36.2Regression:
+    tags:
+      - ci-daily
     # See https://discord.com/channels/974160221452763146/974160221452763149/1377543280220438589
     script: |
       if [ "${XXX_VALUE:+--value=$XXX_VALUE}" = "--value=123" ]; then
@@ -24,6 +26,4 @@ tasks:
       - $VERCEL_*
       - $PYLY_VERCEL_PREVIEW # Use to turn on "preview" mode.
       - $PYLY_VERCEL_PROD # Use to turn on "production" mode.
-    options:
-      runInCI: false
     toolchains: "node"

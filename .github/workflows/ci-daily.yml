@@ -22,21 +22,7 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
-      # HACK: There's a quirk/bug in moon where if you're on the default branch,
-      # `moon ci --base` is ignored and instead the previous commit is used as
-      # the base. See
-      # https://github.com/moonrepo/moon/blob/7d2f6a18fc7a1451884e6222a716605b7705a15b/crates/app/src/queries/touched_files.rs#L60
-      # and discord conversation
-      # https://discord.com/channels/974160221452763146/974160221452763149/1259352611799175278
-      # for more information.
-      - run: git checkout $(git rev-list -1 HEAD)
-
-      - run: moon ci --color --base $PYLY_EMPTY_GIT_TREE
-        env:
-          # Magic "empty" tree https://jiby.tech/post/git-diff-empty-repo/, so
-          # that all files are seen as "affected" by moon ci, and thus all CI
-          # tests are run.
-          PYLY_EMPTY_GIT_TREE: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      - run: moon run ':#ci' ':#ci-daily' --color
 
       - name: 🧾 Results
         uses: bradleyayers/moon-ci-retrospect@main

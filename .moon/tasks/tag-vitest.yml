@@ -3,6 +3,8 @@ inheritedBy:
 
 tasks:
   test:
+    tags:
+      - ci
     command: vitest
     inputs:
       - "$DEBUG"

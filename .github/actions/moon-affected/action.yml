@@ -9,7 +9,7 @@
 #   - run: yarn install
 #     if: steps.moon-deploy-query.outputs.target-affected == 'true'
 #
-#   - run: moon run app:deploy --color --affected --remote
+#   - run: moon run app:deploy --color
 #     if: steps.moon-deploy-query.outputs.target-affected == 'true'
 
 name: moon-affected
