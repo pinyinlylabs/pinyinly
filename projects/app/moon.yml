@@ -27,22 +27,20 @@ tasks:
     deps:
       - ~:buildEasUpdate
       - ~:buildVercel
-    options:
-      runInCI: false
 
   buildIosDevClient:
     script: expo run:ios
     options:
-      runInCI: false
       cache: false
 
   buildAndroidDevClient:
     script: expo run:android
     options:
-      runInCI: false
       cache: false
 
   buildEasUpdate:
+    tags:
+      - ci-daily
     # Do iOS and Android separately to avoid IO contention and maybe allow metro bundler cache re-use.
     script: |
       expo export -p ios --source-maps --output-dir @group(buildEasUpdateOutdir)
@@ -58,6 +56,8 @@ tasks:
       - "@group(buildEasUpdateOutdir)"
 
   buildVercel:
+    tags:
+      - ci-daily
     # Copy to final destination.
     command: rsync -a --delete @group(buildVercelExpoSentryOutdir) @group(buildVercelOutdir)
     deps:
@@ -193,6 +193,8 @@ tasks:
       - "/yarn.lock"
 
   dbCheck:
+    tags:
+      - ci-daily
     command: drizzle-kit check
     description: |
       Check the database schema for consistency, also makes sure the version of
@@ -200,13 +202,18 @@ tasks:
 
   dbGenerate:
     command: drizzle-kit generate
-    preset: utility
+    options:
+      cache: false
+      interactive: true
+      outputStyle: stream
 
   dbMigrate:
     command: tsx --tsconfig tsconfig.node.json ./bin/dbMigrate.ts
-    preset: server
     options:
+      cache: false
       envFile: .env.local
+      # Not `interactive: true` because that prevents it running when CI=true.
+      outputStyle: stream
     env:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
@@ -214,8 +221,6 @@ tasks:
     deps:
       - ~:deployEasUpdate
       - ~:deployVercel
-    options:
-      runInCI: false
 
   deployEasUpdate:
     deps:
@@ -223,7 +228,6 @@ tasks:
       - ~:deployEasUpdateSentry
     options:
       persistent: false
-      runInCI: false
 
   deployEasUpdateEas:
     command: npx -y eas-cli@18.11.0 update --skip-bundler --input-dir @group(buildEasUpdateOutdir) --auto --non-interactive
@@ -231,7 +235,6 @@ tasks:
       - ~:buildEasUpdate
     options:
       persistent: false
-      runInCI: false
 
   deployEasUpdateSentry:
     command: npx -y sentry-expo-upload-sourcemaps @group(buildEasUpdateOutdir)
@@ -239,7 +242,6 @@ tasks:
       - ~:buildEasUpdate
     options:
       persistent: false
-      runInCI: false
 
   deployVercel:
     deps:
@@ -247,7 +249,6 @@ tasks:
       - ~:deployVercelSentry
     options:
       persistent: false
-      runInCI: false
 
   deployVercelVercel:
     deps:
@@ -259,7 +260,6 @@ tasks:
       - ~:buildVercel
     options:
       persistent: false
-      runInCI: false
 
   dev:
     command: noop
@@ -380,10 +380,12 @@ tasks:
       # Expo doctor checks that the latest version of dependencies are used,
       # which means that it can start failing due to upstream Expo changes even
       # if nothing in the repo has broken. To avoid this breaking CI and causing
-      # noise it's run in a separate Github action workflow.
-      runInCI: false
+      # noise it's run in a separate Github action workflow (so it's
+      # intentionally not tagged `ci`).
 
   test:
+    tags:
+      - ci
     deps:
       - ~:codegen
       - audio-sprites:src
@@ -409,10 +411,14 @@ tasks:
         - .env.test.local
 
   typecheck:
+    tags:
+      - ci
     deps:
       - ~:codegen
 
   lint:
+    tags:
+      - ci
     deps:
       - ~:oxlint
 
@@ -422,6 +428,8 @@ tasks:
       - ~:codegen
 
   fmt:
+    tags:
+      - ci
     deps:
       - ~:oxfmt
 

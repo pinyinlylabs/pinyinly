@@ -1,13 +1,19 @@
 tasks:
   lint:
+    tags:
+      - ci
     deps:
       - ~:oxlint
 
   fmt:
+    tags:
+      - ci
     deps:
       - ~:oxfmt
 
   test:
+    tags:
+      - ci
     inputs:
       - "/**/*"
 

@@ -21,7 +21,7 @@
 ## CRITICAL: Verify code changes
 
 After making code changes, automatically verify the changes by running
-`moon run :lint :test :typecheck :fmt`. This is faster than running `moon ci`.
+`moon run :lint :test :typecheck :fmt` (equivalent to `moon run :#ci`).
 
 ## Project-Specific Patterns & Conventions
 

@@ -3,6 +3,8 @@ inheritedBy:
 
 tasks:
   typecheck:
+    tags:
+      - ci
     command: tsgo --build
     inputs:
       - "!dist/"

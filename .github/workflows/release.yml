@@ -31,7 +31,7 @@ jobs:
           target: app:dbMigrate
 
       - name: 🚀 Migrate database
-        run: moon run app:dbMigrate --color --affected --remote
+        run: moon run app:dbMigrate --color
         if: steps.moon-dbMigrate-query.outputs.target-affected == 'true'
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
@@ -53,7 +53,7 @@ jobs:
           target: app:deployVercel
 
       - name: 🚀 Deploy to Vercel (production)
-        run: moon run app:deployVercel --color --affected --remote
+        run: moon run app:deployVercel --color
         if: steps.moon-deployVercel-query.outputs.target-affected == 'true'
         env:
           EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
@@ -83,7 +83,7 @@ jobs:
           target: static:deploy
 
       - name: 🚀 Deploy to Vercel (production)
-        run: moon run static:deploy --color --affected --remote
+        run: moon run static:deploy --color
         if: steps.moon-deploy-query.outputs.target-affected == 'true'
         env:
           PYLY_VERCEL_PROD: ""
@@ -108,7 +108,7 @@ jobs:
           target: app:deployEasUpdate
 
       - name: 🚀 Build and deploy
-        run: moon run app:deployEasUpdate --color --affected --remote
+        run: moon run app:deployEasUpdate --color
         if: steps.moon-deployEasUpdate-query.outputs.target-affected == 'true'
         env:
           EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}

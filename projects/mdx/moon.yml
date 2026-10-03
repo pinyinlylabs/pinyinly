@@ -1,9 +1,13 @@
 tasks:
   lint:
+    tags:
+      - ci
     deps:
       - ~:oxlint
 
   fmt:
+    tags:
+      - ci
     deps:
       - ~:oxfmt
 

@@ -3,6 +3,8 @@ inheritedBy:
 
 tasks:
   bench:
+    tags:
+      - ci-daily
     command: vitest bench
     inputs:
       - "**/*"
