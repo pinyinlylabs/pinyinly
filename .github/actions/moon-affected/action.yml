@@ -13,7 +13,7 @@
 #     if: steps.moon-deploy-query.outputs.target-affected == 'true'
 
 name: moon-affected
-description: Query Moon's `--affected` knowledge
+description: Query Moon's affected tasks including transitive dependents
 inputs:
   target:
     description: Moon task ID, e.g. app:deploy
@@ -28,7 +28,7 @@ runs:
   steps:
     - id: moon-query
       run: |
-        ALL_AFFECTED=$(moon query tasks --affected | jq '.tasks.[].[].target')
+        ALL_AFFECTED=$(moon query tasks --affected --downstream=deep | jq '.tasks.[].[].target')
         echo "ALL_AFFECTED=$ALL_AFFECTED"
         MATCH=$(echo "$ALL_AFFECTED" | jq --raw-output --arg target "$TARGET" 'select(. == $target)')
         echo "match=$MATCH"
