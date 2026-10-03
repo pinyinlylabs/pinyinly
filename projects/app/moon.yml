@@ -119,13 +119,7 @@ tasks:
 
   codegenOxlint:
     description: "Run Oxlint with codegen rules. This is separate from lint and doesn't use Oxlint caching intentionally."
-    script: |
-      [ -z ${CI:-} ] || {
-        echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
-        exit 0
-      }
-
-      oxlint --config oxlint-codegen.config.ts --fix .
+    command: oxlint --config oxlint-codegen.config.ts --fix .
     inputs:
       # Config files anywhere within the project
       - src/data/pinyinSoundAudio.ts
@@ -134,7 +128,6 @@ tasks:
       - src/assets/**
       - oxlint-codegen.config.ts
       # Environment variables
-      - "$CI"
       - "$DEBUG"
       - "$NODE_OPTIONS"
     deps:
@@ -142,6 +135,8 @@ tasks:
     env:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    options:
+      runInCI: skip
 
   codegenExpoRouterTypes:
     # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
