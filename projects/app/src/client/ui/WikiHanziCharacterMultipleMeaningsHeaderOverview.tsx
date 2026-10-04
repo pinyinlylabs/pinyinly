@@ -6,6 +6,7 @@ import { StructuralLozenge } from "./StructuralLozenge";
 import { Text } from "./Text";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
+import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 
 export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
   hanzi,
@@ -16,15 +17,6 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
-
-  const { data: dictionaryEntry } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.dictionaryCollection })
-        .where(({ entry }) => eq(entry.hanzi, hanzi))
-        .findOne(),
-    [db.dictionaryCollection, hanzi],
-  );
 
   const { data: characterData } = useLiveQuery(
     (q) =>
@@ -49,10 +41,7 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
         </Text>
       </View>
       <View className="mb-3">
-        <Text className="text-lg text-fg">{dictionaryEntry?.pinyin?.[0]}</Text>
-        <Text className="text-2xl font-semibold text-fg">
-          {dictionaryEntry?.gloss[0]}
-        </Text>
+        <WikiHanziMeaningsPanel hanzi={hanzi} />
       </View>
       <View>
         <Text className="max-w-100 text-sm text-fg">

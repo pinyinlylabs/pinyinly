@@ -50,6 +50,17 @@ If you need to run services individually:
 
 # Guides
 
+## Moon task inputs
+
+Shared input exclusions live in `.moon/tasks/all.yml`. Moon 2 loads shared task configuration from
+`.moon/tasks/`, not the legacy `.moon/tasks.yml` location. Keep dependency directories, moon's
+cache, and temporary test outputs out of task inputs, even when a task uses a broad `**/*` glob.
+Moon can cache file lists within a run, so a temporary file created by one task and deleted before
+another hashes it can produce an "Attempted to hash input ... but it does not exist" warning.
+
+Exclude generated files rather than disabling missing-input warnings, so genuinely missing source
+files and misconfigured inputs remain visible. Keep source fixtures included in task inputs.
+
 ## Preview deployments
 
 App and static Vercel previews run daily through the CI (daily) workflow, and on pull requests that

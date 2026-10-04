@@ -21,11 +21,13 @@ import type { RankedHanziWord } from "@/data/skills";
 import { hsk30LevelToNumber } from "@/data/hsk";
 import {
   getHanziWordRank,
-  hanziWordToGlossTyped,
-  hanziWordToPinyinTyped,
+  hanziWordToTargetSkills,
   rankRules,
 } from "@/data/skills";
-import { userHanziMeaningDefs } from "@/data/userSettings";
+import {
+  studyWordItemSetting,
+  userHanziMeaningDefs,
+} from "@/data/userSettings";
 import {
   buildCharacterComponentUsageEntries,
   buildHanziWord,
@@ -181,20 +183,6 @@ function groupRatingsBySkill(items: CollectionOutput<HistoryPageCollection>[]) {
   return groups;
 }
 
-export const targetSkillsQuery = () =>
-  queryOptions({
-    queryKey: [`targetSkills`],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-
-      const targetSkills = await getAllTargetSkills();
-      return targetSkills;
-    },
-    networkMode: `offlineFirst`,
-    retry: false,
-    structuralSharing: false,
-  });
-
 export const dictionaryQuery = queryOptions({
   queryKey: [`dictionary`],
   queryFn: async () => {
@@ -269,56 +257,12 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
   return getTargetHanziWordsFromDictionary(dictionary);
 }
 
-/**
- * Extracts HanziWord values from priority word settings.
- * Expands single hanzi to all their hanziwords, filters invalid entries,
- * and returns unique words.
- */
-export function getPrioritizedHanziWords(
-  prioritySettings: CollectionOutput<SettingCollection>[],
-  dictionary: Dictionary,
-): HanziWord[] {
-  const settingPrefix = `pwi/`;
-  const words: HanziWord[] = [];
-  for (const setting of prioritySettings) {
-    if (!setting.key.startsWith(settingPrefix)) {
-      continue;
-    }
-
-    const wordFromValue = setting.value?.[`w`];
-    const wordFromKey = setting.key.slice(settingPrefix.length);
-    const word =
-      typeof wordFromValue === `string` && wordFromValue.length > 0
-        ? wordFromValue
-        : wordFromKey;
-
-    if (word.length === 0) {
-      continue;
-    }
-
-    // Check if word is a hanzi (no ':' separator) or a hanziword
-    if (word.includes(`:`) && typeof word === `string`) {
-      // It's a hanziword, use it directly
-      words.push(word as HanziWord);
-    } else if (typeof word === `string`) {
-      // It's just hanzi, expand to all hanziwords for that hanzi
-      const hanziWordPairs = dictionary.lookupHanzi(
-        word as unknown as HanziText,
-      );
-      for (const [hanziWord] of hanziWordPairs) {
-        words.push(hanziWord);
-      }
-    }
-  }
-  return words.filter(arrayFilterUnique());
-}
-
 export async function getAllTargetSkills(): Promise<Skill[]> {
-  const hanziWords = await getAllTargetHanziWords();
-  return hanziWords.flatMap((w) => [
-    hanziWordToGlossTyped(w),
-    hanziWordToPinyinTyped(w),
-  ]);
+  const dictionary = await loadDictionary();
+  const hanziWords = getTargetHanziWordsFromDictionary(dictionary);
+  return hanziWords.flatMap((hanziWord) =>
+    hanziWordToTargetSkills(hanziWord, dictionary),
+  );
 }
 
 export const fetchArrayBufferQuery = (uri: string | null) =>
@@ -494,7 +438,10 @@ export type HanziPinyinMistakeCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.hanziPinyinMistake>,
   string
 >;
-export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
+export type TargetSkillsCollection = Collection<
+  { skill: Skill; order: number },
+  Skill
+>;
 
 /**
  * A collection that tracks the most recent {@link SkillRating} for each
@@ -507,6 +454,68 @@ export type SettingCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.setting>,
   string
 >;
+
+export type StudyWordItem = RizzleEntityOutput<
+  typeof studyWordItemSetting.entity
+>;
+
+function decodeStudyWord(
+  setting: CollectionOutput<SettingCollection>,
+): StudyWordItem | null {
+  try {
+    const keyParams = studyWordItemSetting.entity.unmarshalKey(setting.key);
+    if (!keyParams.hanziWord.includes(`:`)) {
+      return null;
+    }
+    const item = studyWordItemSetting.decode(keyParams, setting.value);
+    return item?.hanziWord.length === 0 ? null : item;
+  } catch {
+    return null;
+  }
+}
+
+export function createStudyWordsCollection(
+  settingCollection: SettingCollection,
+) {
+  return createLiveQueryCollection((q) => {
+    const decodedWords = q
+      .from({ setting: settingCollection })
+      .where(({ setting }) =>
+        like(setting.key, `${studyWordItemSetting.entity.keyPrefix}%`),
+      )
+      .fn.select(({ setting }) => ({ item: decodeStudyWord(setting) }));
+
+    return q
+      .from({ decoded: decodedWords })
+      .fn.where(({ decoded }) => decoded.item != null)
+      .fn.select(({ decoded }) => nonNullable(decoded.item));
+  });
+}
+
+export type StudyWordsCollection = ReturnType<
+  typeof createStudyWordsCollection
+>;
+
+export function createStudyHanziWordsCollection<
+  Entry extends { hanzi: HanziText; hanziWord: HanziWord },
+  Key extends string | number,
+>(
+  studyWords: StudyWordsCollection,
+  dictionaryCollection: Collection<Entry, Key>,
+) {
+  return createLiveQueryCollection((q) =>
+    q
+      .from({ studyWord: studyWords })
+      .innerJoin({ entry: dictionaryCollection }, ({ studyWord, entry }) =>
+        eq(studyWord.hanziWord, entry.hanziWord),
+      )
+      .select(({ entry, studyWord }) => ({
+        hanziWord: entry.hanziWord,
+        createdAt: studyWord.createdAt,
+      }))
+      .distinct(),
+  );
+}
 
 export type SettingHistoryCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.settingHistory>,
@@ -1215,7 +1224,7 @@ export function makeDb(rizzle: Rizzle) {
       id: `targetSkills`,
       queryFn: async () => {
         const targetSkills = await getAllTargetSkills();
-        return targetSkills.map((skill) => ({ skill }));
+        return targetSkills.map((skill, order) => ({ skill, order }));
       },
       getKey: (item) => item.skill,
     }),
@@ -1321,6 +1330,12 @@ export function makeDb(rizzle: Rizzle) {
     return q.unionAll(builtinRows, userRows);
   });
 
+  const studyWordsCollection = createStudyWordsCollection(settingCollection);
+  const studyHanziWordsCollection = createStudyHanziWordsCollection(
+    studyWordsCollection,
+    dictionaryCollection,
+  );
+
   const characterComponentUsage: CharacterComponentUsageCollection =
     createCollection({
       autoIndex: `eager`,
@@ -1422,6 +1437,8 @@ export function makeDb(rizzle: Rizzle) {
     characterMnemonicIdsCollection,
     characterCollection,
     dictionaryCollection,
+    studyWordsCollection,
+    studyHanziWordsCollection,
     settingCollection,
     settingHistoryCollection,
     userDictionary,

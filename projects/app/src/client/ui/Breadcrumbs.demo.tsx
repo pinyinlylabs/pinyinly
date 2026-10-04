@@ -25,7 +25,7 @@ export default () => (
     >
       <Breadcrumbs>
         <Breadcrumbs.Item href="/wiki">Wiki</Breadcrumbs.Item>
-        <Breadcrumbs.Item href="/bookmarks">Bookmarks</Breadcrumbs.Item>
+        <Breadcrumbs.Item href="/skills/study">Study</Breadcrumbs.Item>
       </Breadcrumbs>
     </ExampleStack>
 

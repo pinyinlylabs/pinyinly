@@ -1,0 +1,9 @@
+implicitInputs:
+  - /yarn.lock
+  # Broad input globs must not hash dependency trees or moon's own cache.
+  - "!/**/node_modules/**"
+  - "!/.moon/cache/**"
+  # Audio tests create and delete these files while other tasks are hashing.
+  - "!/projects/audio-sprites/test/fixtures/outputs/**"
+  - "!/projects/audio-sprites/test/fixtures/test-sprite.m4a"
+  - "!/projects/audio-sprites/test/integration-test/**"

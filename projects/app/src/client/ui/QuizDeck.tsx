@@ -12,6 +12,7 @@ import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { Link } from "expo-router";
+import type { Href } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useWindowDimensions } from "react-native";
 import { Text } from "@/client/ui/Text";
@@ -26,7 +27,17 @@ import { RectButton } from "./RectButton";
 import type { SkillReviewQueue } from "@/data/skills";
 import type { DeepReadonly } from "ts-essentials";
 
-export const QuizDeck = ({ className }: { className?: string }) => {
+export const QuizDeck = ({
+  className,
+  title,
+  backHref = `/learn`,
+  emptyMessage,
+}: {
+  className?: string;
+  title?: string;
+  backHref?: Href;
+  emptyMessage?: string;
+}) => {
   const { width: screenWidth } = useWindowDimensions();
   const r = useRizzle();
   const postHog = usePostHog();
@@ -302,7 +313,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         {questionScreen}
       </Reanimated.View>
     );
-  } else if (hasPendingReviews) {
+  } else if (skillQueue.loading || hasPendingReviews) {
     screen = (
       <Reanimated.View entering={FadeIn} className="my-auto items-center">
         <Text className="font-sans text-lg text-muted-fg">Loading</Text>
@@ -325,9 +336,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           }}
         >
           <Text className="pyly-body-title">
-            👏 You’re all caught up on your reviews!
+            {emptyMessage ?? `👏 You’re all caught up on your reviews!`}
           </Text>
-          <Link dismissTo href="/learn" asChild>
+          <Link dismissTo href={backHref} asChild>
             <RectButton>Back</RectButton>
           </Link>
         </View>
@@ -337,6 +348,14 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   return (
     <View className={className}>
+      {title == null ? null : (
+        <View className="mb-3 w-full max-w-150 flex-row items-center justify-between self-center px-4">
+          <Text className="pyly-body-title">{title}</Text>
+          <RectButton href={backHref} variant="bare" iconStart="chevron-left">
+            Back
+          </RectButton>
+        </View>
+      )}
       <View
         className={`mb-5 w-full max-w-150 flex-row items-center gap-3 self-center px-4`}
       >

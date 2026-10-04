@@ -10,6 +10,8 @@ import {
   userHanziMeaningPinyinSetting,
 } from "@/data/userSettings";
 import { nanoid } from "@/util/nanoid";
+import { buildHanziWord } from "@/dictionary";
+import { StudyButton } from "./StudyButton";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
 import { Text } from "@/client/ui/Text";
@@ -144,6 +146,7 @@ function DictionaryMeaningListItem({
             glosses={meaning.gloss}
           />
         </View>
+        <StudyButton hanziWord={meaning.hanziWord} />
       </View>
 
       {secondaryPinyins.length === 0 ? null : (
@@ -246,29 +249,32 @@ function EditableUserMeaningListItem({
           )}
         </View>
 
-        <View className="flex-row items-center gap-1">
-          {isEditing ? (
-            <FloatingMenuModal
-              menu={
-                <MeaningOptionsMenu
-                  onDelete={() => {
-                    onRemoved();
-                    remove();
-                  }}
+        <View className="items-end gap-2">
+          <StudyButton hanziWord={buildHanziWord(hanzi, meaning.meaningKey)} />
+          <View className="flex-row items-center gap-1">
+            {isEditing ? (
+              <FloatingMenuModal
+                menu={
+                  <MeaningOptionsMenu
+                    onDelete={() => {
+                      onRemoved();
+                      remove();
+                    }}
+                  />
+                }
+              >
+                <RectButton
+                  variant="bareDim"
+                  iconStart="more-horizontal"
+                  iconSize={16}
                 />
-              }
-            >
-              <RectButton
-                variant="bareDim"
-                iconStart="more-horizontal"
-                iconSize={16}
-              />
-            </FloatingMenuModal>
-          ) : null}
-          <WikiEditButton
-            editing={isEditing}
-            onPress={isEditing ? onDoneEditing : onEdit}
-          />
+              </FloatingMenuModal>
+            ) : null}
+            <WikiEditButton
+              editing={isEditing}
+              onPress={isEditing ? onDoneEditing : onEdit}
+            />
+          </View>
         </View>
       </View>
     </View>
