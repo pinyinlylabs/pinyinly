@@ -18,67 +18,6 @@
   --color-fg: rgb(from var(--color-fg) r g b);
   --color-fg-loud: rgb(from var(--color-fg-loud) r g b);
   --color-muted-fg: rgb(from var(--color-muted-fg) r g b);
-  --color-fg-bg5: rgb(
-    from color-mix(in oklab, var(--color-fg) 5%, var(--color-bg)) r g b
-  );
-  --color-fg-bg10: rgb(
-    from color-mix(in oklab, var(--color-fg) 10%, var(--color-bg)) r g b
-  );
-  --color-fg-bg15: rgb(
-    from color-mix(in oklab, var(--color-fg) 15%, var(--color-bg)) r g b
-  );
-  --color-fg-bg20: rgb(
-    from color-mix(in oklab, var(--color-fg) 20%, var(--color-bg)) r g b
-  );
-  --color-fg-bg25: rgb(
-    from color-mix(in oklab, var(--color-fg) 25%, var(--color-bg)) r g b
-  );
-  --color-fg-bg30: rgb(
-    from color-mix(in oklab, var(--color-fg) 30%, var(--color-bg)) r g b
-  );
-  --color-fg-bg35: rgb(
-    from color-mix(in oklab, var(--color-fg) 35%, var(--color-bg)) r g b
-  );
-  --color-fg-bg40: rgb(
-    from color-mix(in oklab, var(--color-fg) 40%, var(--color-bg)) r g b
-  );
-  --color-fg-bg45: rgb(
-    from color-mix(in oklab, var(--color-fg) 45%, var(--color-bg)) r g b
-  );
-  --color-fg-bg50: rgb(
-    from color-mix(in oklab, var(--color-fg) 50%, var(--color-bg)) r g b
-  );
-  --color-fg-bg55: rgb(
-    from color-mix(in oklab, var(--color-fg) 55%, var(--color-bg)) r g b
-  );
-  --color-fg-bg60: rgb(
-    from color-mix(in oklab, var(--color-fg) 60%, var(--color-bg)) r g b
-  );
-  --color-fg-bg65: rgb(
-    from color-mix(in oklab, var(--color-fg) 65%, var(--color-bg)) r g b
-  );
-  --color-fg-bg70: rgb(
-    from color-mix(in oklab, var(--color-fg) 70%, var(--color-bg)) r g b
-  );
-  --color-fg-bg75: rgb(
-    from color-mix(in oklab, var(--color-fg) 75%, var(--color-bg)) r g b
-  );
-  --color-fg-bg80: rgb(
-    from color-mix(in oklab, var(--color-fg) 80%, var(--color-bg)) r g b
-  );
-  --color-fg-bg85: rgb(
-    from color-mix(in oklab, var(--color-fg) 85%, var(--color-bg)) r g b
-  );
-  --color-fg-bg90: rgb(
-    from color-mix(in oklab, var(--color-fg) 90%, var(--color-bg)) r g b
-  );
-  --color-fg-bg95: rgb(
-    from color-mix(in oklab, var(--color-fg) 95%, var(--color-bg)) r g b
-  );
-  --color-fg-bg100: rgb(
-    from color-mix(in oklab, var(--color-fg) 100%, var(--color-bg)) r g b
-  );
-
   --color-lozenge-emerald-bg: rgb(from var(--color-lozenge-emerald-bg) r g b);
   --color-lozenge-emerald-fg: rgb(from var(--color-lozenge-emerald-fg) r g b);
   --color-lozenge-emerald-border: rgb(
@@ -206,6 +145,31 @@
       background-position: -100% 0;
     }
   }
+}
+
+/* Inline derived colors so their inputs resolve in the consuming theme scope,
+   rather than inheriting a mix computed on :root. */
+@theme inline {
+  --color-fg-bg5: color-mix(in oklab, var(--color-fg) 5%, var(--color-bg));
+  --color-fg-bg10: color-mix(in oklab, var(--color-fg) 10%, var(--color-bg));
+  --color-fg-bg15: color-mix(in oklab, var(--color-fg) 15%, var(--color-bg));
+  --color-fg-bg20: color-mix(in oklab, var(--color-fg) 20%, var(--color-bg));
+  --color-fg-bg25: color-mix(in oklab, var(--color-fg) 25%, var(--color-bg));
+  --color-fg-bg30: color-mix(in oklab, var(--color-fg) 30%, var(--color-bg));
+  --color-fg-bg35: color-mix(in oklab, var(--color-fg) 35%, var(--color-bg));
+  --color-fg-bg40: color-mix(in oklab, var(--color-fg) 40%, var(--color-bg));
+  --color-fg-bg45: color-mix(in oklab, var(--color-fg) 45%, var(--color-bg));
+  --color-fg-bg50: color-mix(in oklab, var(--color-fg) 50%, var(--color-bg));
+  --color-fg-bg55: color-mix(in oklab, var(--color-fg) 55%, var(--color-bg));
+  --color-fg-bg60: color-mix(in oklab, var(--color-fg) 60%, var(--color-bg));
+  --color-fg-bg65: color-mix(in oklab, var(--color-fg) 65%, var(--color-bg));
+  --color-fg-bg70: color-mix(in oklab, var(--color-fg) 70%, var(--color-bg));
+  --color-fg-bg75: color-mix(in oklab, var(--color-fg) 75%, var(--color-bg));
+  --color-fg-bg80: color-mix(in oklab, var(--color-fg) 80%, var(--color-bg));
+  --color-fg-bg85: color-mix(in oklab, var(--color-fg) 85%, var(--color-bg));
+  --color-fg-bg90: color-mix(in oklab, var(--color-fg) 90%, var(--color-bg));
+  --color-fg-bg95: color-mix(in oklab, var(--color-fg) 95%, var(--color-bg));
+  --color-fg-bg100: color-mix(in oklab, var(--color-fg) 100%, var(--color-bg));
 }
 
 @utility accent-* {

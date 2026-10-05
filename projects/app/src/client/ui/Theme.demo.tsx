@@ -42,6 +42,21 @@ function ThemeExamples() {
       </View>
 
       <View className="flex-row items-center gap-2">
+        <View className="size-6 bg-fg-bg5" />
+        <Text className="font-mono text-fg">fg-bg5 (mixed with theme bg)</Text>
+      </View>
+
+      <View className="flex-row items-center gap-2">
+        <View className="size-6 bg-fg-bg10" />
+        <Text className="font-mono text-fg">fg-bg10 (mixed with theme bg)</Text>
+      </View>
+
+      <View className="flex-row items-center gap-2">
+        <View className="size-6 bg-fg/10" />
+        <Text className="font-mono text-fg">fg/10 (translucent)</Text>
+      </View>
+
+      <View className="flex-row items-center gap-2">
         <View className="size-6 bg-fg-loud" />
         <Text className="font-mono text-fg">fg-loud</Text>
       </View>
