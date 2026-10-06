@@ -3,23 +3,11 @@ import type {
   UserDictionaryEntry,
 } from "@/client/query";
 import type { HanziText } from "@/data/model";
-import {
-  getUserHanziMeaningKeyParams,
-  userHanziMeaningGlossSetting,
-  userHanziMeaningNoteSetting,
-  userHanziMeaningPinyinSetting,
-} from "@/data/userSettings";
-import { nanoid } from "@/util/nanoid";
 import { buildHanziWord } from "@/dictionary";
 import { StudyButton } from "./StudyButton";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
-import { useState } from "react";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { FloatingMenuModal } from "./FloatingMenuModal";
-import { WikiEditButton } from "./WikiEditButton";
-import { InlineEditableSettingText } from "./InlineEditableSettingText";
-import { RectButton } from "./RectButton";
 import { useDb } from "./hooks/useDb";
 import { useUserHanziMeaning } from "./hooks/useUserHanziMeaning";
 
@@ -29,9 +17,6 @@ interface WikiHanziMeaningsPanelProps {
 
 export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
   const db = useDb();
-  const [editingMeaningKey, setEditingMeaningKey] = useState<string | null>(
-    null,
-  );
 
   const { data: builtInMeanings } = useLiveQuery(
     (q) =>
@@ -67,64 +52,15 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
           ))}
 
           {userMeanings.map((meaning) => (
-            <EditableUserMeaningListItem
+            <UserMeaningListItem
               key={meaning.meaningKey}
               hanzi={hanzi}
               meaning={meaning}
-              isEditing={editingMeaningKey === meaning.meaningKey}
-              onEdit={() => {
-                setEditingMeaningKey(meaning.meaningKey);
-              }}
-              onDoneEditing={() => {
-                setEditingMeaningKey((current) =>
-                  current === meaning.meaningKey ? null : current,
-                );
-              }}
-              onRemoved={() => {
-                setEditingMeaningKey((current) =>
-                  current === meaning.meaningKey ? null : current,
-                );
-              }}
             />
           ))}
         </View>
       )}
-
-      <View className="flex-row justify-start">
-        <AddMeaningButton
-          hanzi={hanzi}
-          onAddMeaning={(meaningKey) => {
-            setEditingMeaningKey(meaningKey);
-          }}
-        />
-      </View>
     </View>
-  );
-}
-
-function AddMeaningButton({
-  hanzi,
-  onAddMeaning,
-}: {
-  hanzi: HanziText;
-  onAddMeaning: (meaningKey: string) => void;
-}) {
-  const [meaningKey, setMeaningKey] = useState(() => `u_${nanoid()}`);
-  const { set } = useUserHanziMeaning({ hanzi, meaningKey });
-
-  return (
-    <RectButton
-      variant="bareDim"
-      iconStart="add-circled-filled"
-      iconSize={16}
-      onPress={() => {
-        set({ gloss: `New meaning` });
-        onAddMeaning(meaningKey);
-        setMeaningKey(`u_${nanoid()}`);
-      }}
-    >
-      Add meaning
-    </RectButton>
   );
 }
 
@@ -162,23 +98,14 @@ function DictionaryMeaningListItem({
   );
 }
 
-function EditableUserMeaningListItem({
+function UserMeaningListItem({
   hanzi,
   meaning,
-  isEditing,
-  onDoneEditing,
-  onEdit,
-  onRemoved,
 }: {
   hanzi: HanziText;
   meaning: UserDictionaryEntry;
-  isEditing: boolean;
-  onDoneEditing: () => void;
-  onEdit: () => void;
-  onRemoved: () => void;
 }) {
-  const keyParams = getUserHanziMeaningKeyParams(hanzi, meaning.meaningKey);
-  const { remove, value } = useUserHanziMeaning({
+  const { value } = useUserHanziMeaning({
     hanzi,
     meaningKey: meaning.meaningKey,
   });
@@ -201,104 +128,19 @@ function EditableUserMeaningListItem({
     <View className="gap-3">
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-2">
-          {isEditing ? (
-            <View className="gap-1">
-              <View className="flex-row flex-wrap items-baseline gap-4">
-                <Text className="font-sans text-base font-normal text-fg-loud">
-                  {meaning.hanzi}
-                </Text>
-                <InlineEditableSettingText
-                  setting={userHanziMeaningPinyinSetting}
-                  settingKey={keyParams}
-                  placeholder="Add pinyin (optional)"
-                  textClassName="pyly-body"
-                />
-                {customBadge}
-              </View>
-              <View className="ml-4">
-                <InlineEditableSettingText
-                  textClassName="pyly-body"
-                  setting={userHanziMeaningGlossSetting}
-                  settingKey={keyParams}
-                  placeholder="Enter meaning..."
-                  multiline
-                />
-              </View>
-            </View>
-          ) : (
-            <MeaningCoreText
-              hanzi={meaning.hanzi}
-              pinyin={value.pinyin}
-              glosses={[value.gloss]}
-              trailingBadge={customBadge}
-            />
-          )}
-
-          {isEditing ? (
-            <View className="ml-4">
-              <InlineEditableSettingText
-                textClassName="pyly-body"
-                setting={userHanziMeaningNoteSetting}
-                settingKey={keyParams}
-                placeholder="Add a note (optional)"
-                multiline
-              />
-            </View>
-          ) : value.note == null || value.note.length === 0 ? null : (
+          <MeaningCoreText
+            hanzi={meaning.hanzi}
+            pinyin={value.pinyin}
+            glosses={[value.gloss]}
+            trailingBadge={customBadge}
+          />
+          {value.note == null || value.note.length === 0 ? null : (
             <LabeledText label="Note">{value.note}</LabeledText>
           )}
         </View>
 
-        <View className="items-end gap-2">
-          <StudyButton hanziWord={buildHanziWord(hanzi, meaning.meaningKey)} />
-          <View className="flex-row items-center gap-1">
-            {isEditing ? (
-              <FloatingMenuModal
-                menu={
-                  <MeaningOptionsMenu
-                    onDelete={() => {
-                      onRemoved();
-                      remove();
-                    }}
-                  />
-                }
-              >
-                <RectButton
-                  variant="bareDim"
-                  iconStart="more-horizontal"
-                  iconSize={16}
-                />
-              </FloatingMenuModal>
-            ) : null}
-            <WikiEditButton
-              editing={isEditing}
-              onPress={isEditing ? onDoneEditing : onEdit}
-            />
-          </View>
-        </View>
+        <StudyButton hanziWord={buildHanziWord(hanzi, meaning.meaningKey)} />
       </View>
-    </View>
-  );
-}
-
-function MeaningOptionsMenu({
-  onDelete,
-  onRequestClose,
-}: {
-  onDelete: () => void;
-  onRequestClose?: () => void;
-}) {
-  return (
-    <View className="rounded-xl bg-bg-high px-4 py-3">
-      <RectButton
-        variant="bare"
-        onPress={() => {
-          onDelete();
-          onRequestClose?.();
-        }}
-      >
-        Delete meaning
-      </RectButton>
     </View>
   );
 }
