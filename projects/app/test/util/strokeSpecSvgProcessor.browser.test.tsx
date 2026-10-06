@@ -4,6 +4,7 @@ import type { Locator } from "vitest/browser";
 import { page, locators } from "vitest/browser";
 import { View } from "#client/ui/View.tsx";
 import { HanziGraphic } from "#client/ui/HanziGraphic.tsx";
+import { ScopedVariables } from "uniwind";
 import "#global.css";
 import { buildStrokeSpecSegmentPaths } from "#util/strokeSpecSvgProcessor.js";
 import { strokeSpecFilter } from "#util/strokeSpec.js";
@@ -118,6 +119,27 @@ test.for([
     await expect.element(page.getByTagName(`path`).first()).toBeInTheDocument();
 
     await expect(page.getByTestId(`pyly-snapshot`)).toMatchScreenshot(name);
+  },
+);
+
+test.for([
+  { name: `light`, fgLoud: `#000000`, expected: `rgb(0, 0, 0)` },
+  { name: `dark`, fgLoud: `#ffffff`, expected: `rgb(255, 255, 255)` },
+] as const)(
+  `$name mode resolves scoped accent color for highlighted strokes`,
+  async ({ fgLoud, expected }) => {
+    await render(
+      <ScopedVariables variables={{ "--color-fg-loud": fgLoud }}>
+        <HanziGraphic
+          bgSvgPaths={[`M0 0L100 0L100 100L0 100Z`]}
+          fgSvgPaths={[`M0 0L100 0L100 100L0 100Z`]}
+        />
+      </ScopedVariables>,
+    );
+    await expect.element(page.getByTagName(`path`).nth(1)).toBeInTheDocument();
+    const highlightedPath = page.getByTagName(`path`).nth(1).element();
+    expect(getComputedStyle(highlightedPath).fill).toBe(expected);
+    expect(getComputedStyle(highlightedPath).stroke).toBe(expected);
   },
 );
 
