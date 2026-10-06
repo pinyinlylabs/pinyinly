@@ -17,3 +17,5 @@ tasks:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchains: "node"
+    tags:
+      - ci

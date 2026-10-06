@@ -9,7 +9,7 @@
     "react-email": "^4.0.15"
   },
   "devDependencies": {
-    "@types/react": "19.2.x",
+    "@types/react": "19.3.x",
     "oxfmt": "^0.62.0"
   }
 }

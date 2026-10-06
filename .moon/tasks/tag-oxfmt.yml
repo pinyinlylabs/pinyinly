@@ -22,3 +22,5 @@ tasks:
       - "!./projects/**/*"
       # Environment variables
       - "$CI"
+    tags:
+      - ci

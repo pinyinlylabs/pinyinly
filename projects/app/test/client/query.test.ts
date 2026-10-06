@@ -462,6 +462,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`好:u_meaningA`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "好:u_meaningA",
         "$origin": "remote",
         "$synced": true,
@@ -475,6 +476,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`好:u_meaningB`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "好:u_meaningB",
         "$origin": "remote",
         "$synced": true,
@@ -504,6 +506,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "行:u_walk",
         "$origin": "remote",
         "$synced": true,
@@ -528,6 +531,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "行:u_walk",
         "$origin": "remote",
         "$synced": true,
@@ -567,6 +571,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "行:u_walk",
         "$origin": "remote",
         "$synced": true,
@@ -606,6 +611,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "行:u_walk",
         "$origin": "remote",
         "$synced": true,
@@ -654,6 +660,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "行:u_walk",
         "$origin": "remote",
         "$synced": true,
@@ -702,6 +709,7 @@ describe(`userDictionaryCollectionOptions`, () => {
     expect(db.userDictionary.get(`行:u_walk`)).toMatchInlineSnapshot(`
       {
         "$collectionId": "userDictionary",
+        "$hasPendingWrites": false,
         "$key": "行:u_walk",
         "$origin": "remote",
         "$synced": true,

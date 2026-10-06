@@ -22,10 +22,10 @@ tasks:
       - "$CI"
     env:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    tags:
+      - ci
 
   yarnDedupe:
-    tags:
-      - ci-daily
     script: |
       [ -z ${CI:-} ] || CHECK_FLAG="--check"
 
@@ -35,24 +35,28 @@ tasks:
       - "$CI"
     env:
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    tags:
+      - ci
 
   renovateCheck:
     command: yarn dlx -p renovate@43.150.0 renovate-config-validator --strict
     inputs:
       - renovate.json5
-
-  test:
     tags:
       - ci
+
+  test:
     deps:
       - renovateCheck
       - yarnConstraints
-
-  fmt:
     tags:
       - ci
+
+  fmt:
     deps:
       - ~:oxfmt
+    tags:
+      - ci
 
 tags:
   - oxfmt
