@@ -19844,8 +19844,8 @@ __metadata:
   linkType: hard
 
 "openai@npm:^6.45.0":
-  version: 6.48.0
-  resolution: "openai@npm:6.48.0"
+  version: 6.49.0
+  resolution: "openai@npm:6.49.0"
   peerDependencies:
     "@aws-sdk/credential-provider-node": ">=3.972.0 <4"
     "@smithy/hash-node": ">=4.3.0 <5"
@@ -19863,7 +19863,7 @@ __metadata:
       optional: true
     zod:
       optional: true
-  checksum: 10c0/1e6b792e94af7dc22541343a395282d747cea596fa52d28ccc27410d5fdd82912bc0e12589bc68a88317ae58d3afc10f5fed6cb5deff3ba445817a56870d3719
+  checksum: 10c0/c9e748e8a813f948ed925949e857d758505d246d7ec7e939f79cc2ab3383083ccdefff953479afb9dcb0f634cfddb0d442fcf02b6203cc9d6b7c95d3ddbc20ef
   languageName: node
   linkType: hard
 
