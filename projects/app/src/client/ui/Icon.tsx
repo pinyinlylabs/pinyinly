@@ -30,11 +30,11 @@ export function Icon({ icon, className, size, tintColorClassName }: IconProps) {
   return (
     <Image
       className={imageClass({
-        className: [className, tintColorClassName ?? `accent-fg`],
+        className,
         size,
       })}
+      tintColorClassName={tintColorClassName ?? `accent-fg`}
       source={iconRegistry[icon]}
-      tintColor="currentColor"
     />
   );
 }
@@ -45,8 +45,7 @@ const imageClass = tv({
   // - `select-none` to not highlight with a box when it's surrounded in a text
   //   selection.
   //
-  // TODO: refactor --pyly-accent-color after https://github.com/uni-stack/uniwind/pull/611 is released
-  base: `pointer-events-none shrink text-[var(--pyly-accent-color)] select-none`,
+  base: `pointer-events-none shrink select-none`,
   variants: {
     size: {
       12: `size-[12px]`,
