@@ -6408,7 +6408,7 @@ __metadata:
     inline-style-prefixer: "npm:^7.0.1"
     inngest: "npm:^4.18.0"
     jose: "npm:^6.2.3"
-    lightningcss: "npm:1.30.1"
+    lightningcss: "npm:1.33.0"
     lodash: "npm:^4.18.1"
     lucia: "npm:^3.2.2"
     metro: "npm:*"
@@ -17458,7 +17458,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lightningcss@npm:^1.30.1, lightningcss@npm:^1.33.0":
+"lightningcss@npm:1.33.0, lightningcss@npm:^1.30.1, lightningcss@npm:^1.33.0":
   version: 1.33.0
   resolution: "lightningcss@npm:1.33.0"
   dependencies:
