@@ -784,7 +784,8 @@ function userDictionaryCollectionOptions({
               }
             }
 
-            commit();
+            // TODO: maybe await this?
+            void commit();
           } finally {
             markReadyOnce();
           }
@@ -1029,7 +1030,8 @@ export const rizzleCollectionOptions = <
               }
             }
 
-            commit();
+            // TODO: maybe await this?
+            void commit();
           } finally {
             markReadyOnce();
           }
@@ -1072,7 +1074,7 @@ export const staticCollectionOptions = <
       const signal = abortController.signal;
 
       queryFn(signal)
-        .then((items) => {
+        .then(async (items) => {
           if (signal.aborted) {
             return;
           }
@@ -1083,7 +1085,7 @@ export const staticCollectionOptions = <
             write({ type: `insert`, value: item });
           }
 
-          commit();
+          await commit();
         })
         .catch((error: unknown) => {
           console.error(`staticCollection(id=${collection.id}) error:`, error);
@@ -1162,7 +1164,8 @@ export const latestSkillRatingCollectionOptions = ({
             }
           }
 
-          commit();
+          // TODO: maybe await this?
+          void commit();
         },
         {
           prefix: entity.keyPrefix,
@@ -1383,7 +1386,7 @@ export function makeDb(rizzle: Rizzle) {
               }
             }
 
-            commit();
+            await commit();
             markReadyOnce();
           };
 
