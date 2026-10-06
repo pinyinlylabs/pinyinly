@@ -3,8 +3,6 @@ inheritedBy:
 
 tasks:
   typecheck:
-    tags:
-      - ci
     command: tsgo --build
     inputs:
       - "!dist/"
@@ -14,3 +12,5 @@ tasks:
       - /tsconfig.base.json
       - /yarn.lock
     toolchains: "node"
+    tags:
+      - ci

@@ -3,8 +3,6 @@ inheritedBy:
 
 tasks:
   testMoon1.36.2Regression:
-    tags:
-      - ci-daily
     # See https://discord.com/channels/974160221452763146/974160221452763149/1377543280220438589
     script: |
       if [ "${XXX_VALUE:+--value=$XXX_VALUE}" = "--value=123" ]; then
@@ -17,6 +15,9 @@ tasks:
     options:
       # moon doesn't use its version in the cache key, so just turn off caching
       cache: false
+    tags:
+      - ci-daily
+
   deploy:
     script: |
       yarn dlx vercel@53.1.1 pull --yes ${PYLY_VERCEL_PREVIEW+--environment=preview} ${PYLY_VERCEL_PROD+--environment=production} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} &&

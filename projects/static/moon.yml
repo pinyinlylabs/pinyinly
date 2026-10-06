@@ -10,10 +10,10 @@ tasks:
     preset: server
 
   fmt:
-    tags:
-      - ci
     deps:
       - ~:oxfmt
+    tags:
+      - ci
 
 tags:
   - oxfmt

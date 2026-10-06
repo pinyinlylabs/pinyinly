@@ -3,8 +3,6 @@ inheritedBy:
 
 tasks:
   test:
-    tags:
-      - ci
     command: vitest
     inputs:
       - "$DEBUG"
@@ -17,3 +15,5 @@ tasks:
     env:
       NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchains: "node"
+    tags:
+      - ci

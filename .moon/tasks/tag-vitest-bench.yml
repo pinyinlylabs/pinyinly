@@ -3,8 +3,6 @@ inheritedBy:
 
 tasks:
   bench:
-    tags:
-      - ci-daily
     command: vitest bench
     inputs:
       - "**/*"
@@ -14,3 +12,5 @@ tasks:
     options:
       cache: false
     toolchains: "node"
+    tags:
+      - ci-daily

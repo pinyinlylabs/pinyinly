@@ -8,16 +8,16 @@ tasks:
       internal: true
 
   lint:
-    tags:
-      - ci
     deps:
       - ~:oxlint
-
-  fmt:
     tags:
       - ci
+
+  fmt:
     deps:
       - ~:oxfmt
+    tags:
+      - ci
 
 tags:
   - oxfmt
