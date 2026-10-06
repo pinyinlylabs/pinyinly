@@ -65,5 +65,12 @@
       ".*ClassName",
     ],
     "git.worktreeIncludeFiles": [".env*.local"],
+    "chat.tools.terminal.terminalProfile.osx": {
+      "path": "zsh",
+      "env": {
+        "MOON_OUTPUT_STYLE": "buffer-only-failure",
+        "MOON_EXPERIMENT_EXPLICIT_TASK_OUTPUT_STYLE": "true",
+      },
+    },
   },
 }

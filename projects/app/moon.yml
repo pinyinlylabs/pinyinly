@@ -137,6 +137,7 @@ tasks:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     options:
       runInCI: skip
+      outputStyle: buffer-only-failure
 
   codegenExpoRouterTypes:
     # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
@@ -151,6 +152,8 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
+    options:
+      outputStyle: buffer-only-failure
 
   codegenPublicVendor:
     command: tsx --tsconfig tsconfig.node.json ./bin/codegenPublicVendor.ts
@@ -186,6 +189,8 @@ tasks:
         --theme light
     inputs:
       - "/yarn.lock"
+    options:
+      outputStyle: buffer-only-failure
 
   dbCheck:
     tags:
