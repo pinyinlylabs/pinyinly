@@ -35,3 +35,36 @@ index df3bcbbd4dee13c614466ca30af52f10bf20398c..2af45b398714f88027b2748666ab8088
  }
  export default ModalPortal;
 \ No newline at end of file
+diff --git a/dist/exports/useColorScheme/index.js b/dist/exports/useColorScheme/index.js
+index e917134c133eb7f438399d5fecf9543f3a49196a..a29aad7578667bcd03e972805a359f3f511d6921 100644
+--- a/dist/exports/useColorScheme/index.js
++++ b/dist/exports/useColorScheme/index.js
+@@ -12,17 +12,15 @@
+ 
+ import * as React from 'react';
+ import Appearance from '../Appearance';
++const subscribe = onStoreChange => {
++  const subscription = Appearance.addChangeListener(onStoreChange);
++  return subscription.remove;
++};
++const getServerSnapshot = () => 'light';
+ export default function useColorScheme() {
+-  var _React$useState = React.useState(Appearance.getColorScheme()),
+-    colorScheme = _React$useState[0],
+-    setColorScheme = _React$useState[1];
+-  React.useEffect(() => {
+-    function listener(appearance) {
+-      setColorScheme(appearance.colorScheme);
+-    }
+-    var _Appearance$addChange = Appearance.addChangeListener(listener),
+-      remove = _Appearance$addChange.remove;
+-    return remove;
+-  });
+-  return colorScheme;
++  return React.useSyncExternalStore(
++    subscribe,
++    Appearance.getColorScheme,
++    getServerSnapshot
++  );
+ }
+\ No newline at end of file
