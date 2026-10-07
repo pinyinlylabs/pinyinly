@@ -1332,8 +1332,20 @@ export function makeDb(rizzle: Rizzle) {
       });
     return q.unionAll(builtinRows, userRows);
   });
+  dictionaryCollection.createIndex((row) => row.glossCount, {
+    indexType: BTreeIndex,
+  });
+  dictionaryCollection.createIndex((row) => row.hanziCharacterCount, {
+    indexType: BTreeIndex,
+  });
+  dictionaryCollection.createIndex((row) => row.hanziWord, {
+    indexType: BTreeIndex,
+  });
 
   const studyWordsCollection = createStudyWordsCollection(settingCollection);
+  studyWordsCollection.createIndex((row) => row.hanziWord, {
+    indexType: BTreeIndex,
+  });
   const studyHanziWordsCollection = createStudyHanziWordsCollection(
     studyWordsCollection,
     dictionaryCollection,
@@ -1432,7 +1444,7 @@ export function makeDb(rizzle: Rizzle) {
       getKey: (item) => item.component,
     });
 
-  return {
+  const db = {
     builtinCharacterDecompositions,
     builtInDictionaryCollection,
     characterComponentUsage,
@@ -1452,6 +1464,22 @@ export function makeDb(rizzle: Rizzle) {
     skillStateCollection,
     targetSkillsCollection,
   };
+
+  addDbIds(db);
+
+  return db;
+}
+
+/**
+ * Adds an `id` property to each entry in the database object if it doesn't
+ * already have one. This makes debugging missing indexes much easier.
+ */
+function addDbIds(db: Record<string, { id?: string }>) {
+  for (const key in db) {
+    if (db[key] && db[key].id == null) {
+      db[key].id = key;
+    }
+  }
 }
 
 export type Db = ReturnType<typeof makeDb>;
