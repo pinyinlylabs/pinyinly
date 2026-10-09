@@ -4,7 +4,7 @@ import type { Locator } from "vitest/browser";
 import { page, locators } from "vitest/browser";
 import { View } from "#client/ui/View.tsx";
 import { HanziGraphic } from "#client/ui/HanziGraphic.tsx";
-import { ScopedVariables } from "uniwind";
+import { ScopedVariables } from "#client/ui/ScopedVariables.tsx";
 import "#global.css";
 import { buildStrokeSpecSegmentPaths } from "#util/strokeSpecSvgProcessor.js";
 import { strokeSpecFilter } from "#util/strokeSpec.js";
@@ -129,7 +129,12 @@ test.for([
   `$name mode resolves scoped accent color for highlighted strokes`,
   async ({ fgLoud, expected }) => {
     await render(
-      <ScopedVariables variables={{ "--color-fg-loud": fgLoud }}>
+      <ScopedVariables
+        variables={{
+          "--color-fg": fgLoud,
+          "--color-fg-loud": `var(--color-fg)`,
+        }}
+      >
         <HanziGraphic
           bgSvgPaths={[`M0 0L100 0L100 100L0 100Z`]}
           fgSvgPaths={[`M0 0L100 0L100 100L0 100Z`]}

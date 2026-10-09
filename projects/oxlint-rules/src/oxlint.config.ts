@@ -120,6 +120,11 @@ export default defineConfig({
             message: `Use "Image" from "@/client/ui/Image" instead (for Uniwind support).`,
           },
           {
+            name: `uniwind`,
+            importNames: [`ScopedVariables`],
+            message: `Use "ScopedVariables" from "@/client/ui/ScopedVariables" so CSS variable references are resolved on native.`,
+          },
+          {
             name: `react-native-svg`,
             importNames: [`Path`],
             message: `Use "SvgPath" from "@/client/ui/SvgPath" instead (for Uniwind support).`,

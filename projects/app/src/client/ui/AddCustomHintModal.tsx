@@ -6,6 +6,7 @@ import { Icon } from "./Icon";
 import { PageSheetModal } from "./PageSheetModal";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
+import { ScopedVariables } from "./ScopedVariables";
 import { TextInputMulti } from "./TextInputMulti";
 
 interface AddCustomHintModalProps {
@@ -126,15 +127,17 @@ function AddCustomHintModalContent({
                   detail to the explanation.
                 </Text>
                 <View className="flex-row items-center gap-1">
-                  <Text
-                    className={
-                      isHintAtLimit
-                        ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
-                        : `text-right text-[11px] text-muted-fg`
-                    }
+                  <ScopedVariables
+                    variables={{
+                      "--color-fg": isHintAtLimit
+                        ? `var(--color-warning)`
+                        : `var(--color-muted-fg)`,
+                    }}
                   >
-                    {trimmedHintLength}/{hintLengthTarget}
-                  </Text>
+                    <Text className="text-right text-[11px] text-fg">
+                      {trimmedHintLength}/{hintLengthTarget}
+                    </Text>
+                  </ScopedVariables>
                   <ProgressPieIcon
                     progress={trimmedHintLength / hintLengthTarget}
                     warn={isHintAtLimit}

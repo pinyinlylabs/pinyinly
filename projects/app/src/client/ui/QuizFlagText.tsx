@@ -6,6 +6,7 @@ import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { Icon } from "./Icon";
+import { ScopedVariables } from "./ScopedVariables";
 
 export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
@@ -14,38 +15,32 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.NewDifficulty: {
       return (
-        <View
-          className={flagViewClass({
-            className: `[--color-fg:var(--color-danger)]`,
-          })}
-        >
-          <Icon icon="dumbbell" />
-          <Text className={flagTextClass()}>Hard question</Text>
-        </View>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
+          <View className={flagViewClass()}>
+            <Icon icon="dumbbell" />
+            <Text className={flagTextClass()}>Hard question</Text>
+          </View>
+        </ScopedVariables>
       );
     }
     case QuestionFlagKind.NewSkill: {
       return (
-        <View
-          className={flagViewClass({
-            className: `[--color-fg:var(--color-success)]`,
-          })}
-        >
-          <Icon icon="plant-filled" />
-          <Text className={flagTextClass()}>New skill</Text>
-        </View>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-success)` }}>
+          <View className={flagViewClass()}>
+            <Icon icon="plant-filled" />
+            <Text className={flagTextClass()}>New skill</Text>
+          </View>
+        </ScopedVariables>
       );
     }
     case QuestionFlagKind.OtherAnswer: {
       return (
-        <View
-          className={flagViewClass({
-            className: `[--color-fg:var(--color-warning)]`,
-          })}
-        >
-          <Icon icon="shuffle" />
-          <Text className={flagTextClass()}>Other answer</Text>
-        </View>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-warning)` }}>
+          <View className={flagViewClass()}>
+            <Icon icon="shuffle" />
+            <Text className={flagTextClass()}>Other answer</Text>
+          </View>
+        </ScopedVariables>
       );
     }
     case QuestionFlagKind.Overdue: {
@@ -63,41 +58,35 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
           : `1 minute`;
 
       return (
-        <View
-          className={flagViewClass({
-            className: `[--color-fg:var(--color-danger)]`,
-          })}
-        >
-          <Icon icon="alarm" />
-          <Text className={flagTextClass()}>
-            Overdue by{` `}
-            {overdueBy}
-          </Text>
-        </View>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
+          <View className={flagViewClass()}>
+            <Icon icon="alarm" />
+            <Text className={flagTextClass()}>
+              Overdue by{` `}
+              {overdueBy}
+            </Text>
+          </View>
+        </ScopedVariables>
       );
     }
     case QuestionFlagKind.Retry: {
       return (
-        <View
-          className={flagViewClass({
-            className: `[--color-fg:var(--color-warning)]`,
-          })}
-        >
-          <Icon icon="repeat" />
-          <Text className={flagTextClass()}>Previous mistake</Text>
-        </View>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-warning)` }}>
+          <View className={flagViewClass()}>
+            <Icon icon="repeat" />
+            <Text className={flagTextClass()}>Previous mistake</Text>
+          </View>
+        </ScopedVariables>
       );
     }
     case QuestionFlagKind.WeakWord: {
       return (
-        <View
-          className={flagViewClass({
-            className: `[--color-fg:var(--color-danger)]`,
-          })}
-        >
-          <Icon icon="flag" />
-          <Text className={flagTextClass()}>Weak word</Text>
-        </View>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
+          <View className={flagViewClass()}>
+            <Icon icon="flag" />
+            <Text className={flagTextClass()}>Weak word</Text>
+          </View>
+        </ScopedVariables>
       );
     }
   }

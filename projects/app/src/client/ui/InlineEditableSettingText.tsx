@@ -18,6 +18,7 @@ import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import { ProgressPieIcon } from "./ProgressPieIcon";
 import { RectButton } from "./RectButton";
+import { ScopedVariables } from "./ScopedVariables";
 import { TextInputMulti } from "./TextInputMulti";
 import { useUserSettingTextDefaultValue } from "./hooks/useUserSettingTextDefaultValue";
 import { TextInputSingle } from "./TextInputSingle";
@@ -307,15 +308,17 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 </Text>
               )}
               <View className="flex-row items-center gap-1">
-                <Text
-                  className={
-                    isAtLimit
-                      ? `text-right text-[11px] text-fg [--color-fg:var(--color-warning)]`
-                      : `text-right text-[11px] text-muted-fg`
-                  }
+                <ScopedVariables
+                  variables={{
+                    "--color-fg": isAtLimit
+                      ? `var(--color-warning)`
+                      : `var(--color-muted-fg)`,
+                  }}
                 >
-                  {currentLength}/{maxLength}
-                </Text>
+                  <Text className="text-right text-[11px] text-fg">
+                    {currentLength}/{maxLength}
+                  </Text>
+                </ScopedVariables>
                 <ProgressPieIcon
                   progress={maxLength == 0 ? 0 : currentLength / maxLength}
                   warn={isAtLimit}

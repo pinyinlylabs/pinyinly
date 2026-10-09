@@ -22,6 +22,7 @@ import {
   withIncorrectWobbleAnimation,
 } from "./animations";
 import { ReanimatedPressable } from "./ReanimatedPressable";
+import { ScopedVariables } from "./ScopedVariables";
 import { ShootingStars } from "./ShootingStars";
 import { textAnswerButtonFontSize } from "./TextAnswerButton.utils";
 import type {
@@ -178,87 +179,98 @@ export function TextAnswerButton({
   }));
 
   const flat = pressed || disabled;
+  const foregroundColor = foregroundColorByState[state];
 
   const handleWikiModalDismiss = () => {
     setShowWikiModal(false);
   };
 
   return (
-    <ReanimatedPressable
-      {...pressableProps}
-      disabled={disabled}
-      onHoverIn={(e) => {
-        setHovered(true);
-        pressableProps.onHoverIn?.(e);
-      }}
-      onHoverOut={(e) => {
-        setHovered(false);
-        pressableProps.onHoverOut?.(e);
-      }}
-      onPressIn={(e) => {
-        setPressed(true);
-        hapticImpactIfMobile();
-        pressableProps.onPressIn?.(e);
-      }}
-      onPressOut={(e) => {
-        setPressed(false);
-        pressableProps.onPressOut?.(e);
-      }}
-      onPress={(e) => {
-        if (renderWikiModal) {
-          setShowWikiModal(true);
-        } else if (state === `error`) {
-          // Shake the button violently if the user presses it again after they
-          // already made an error.
-          rotationSv.set(withIncorrectShakeAnimation());
-        } else {
-          pressableProps.onPress?.(e);
-        }
-      }}
-      style={pressableAnimatedStyle}
-      className={pressableClass({ state, inFlexRowParent, className })}
+    <ScopedVariables
+      variables={
+        foregroundColor == null ? {} : { "--color-fg": foregroundColor }
+      }
     >
-      <Reanimated.View
-        style={bgAnimatedStyle}
-        className={bgAnimatedClass({ state })}
-      />
-      <View
-        className={rectClass({
-          flat,
-          pressed,
-          disabled,
-          filled: state !== `default` && bgFilled,
-          state,
-          hovered,
-          className,
-        })}
+      <ReanimatedPressable
+        {...pressableProps}
+        disabled={disabled}
+        onHoverIn={(e) => {
+          setHovered(true);
+          pressableProps.onHoverIn?.(e);
+        }}
+        onHoverOut={(e) => {
+          setHovered(false);
+          pressableProps.onHoverOut?.(e);
+        }}
+        onPressIn={(e) => {
+          setPressed(true);
+          hapticImpactIfMobile();
+          pressableProps.onPressIn?.(e);
+        }}
+        onPressOut={(e) => {
+          setPressed(false);
+          pressableProps.onPressOut?.(e);
+        }}
+        onPress={(e) => {
+          if (renderWikiModal) {
+            setShowWikiModal(true);
+          } else if (state === `error`) {
+            // Shake the button violently if the user presses it again after they
+            // already made an error.
+            rotationSv.set(withIncorrectShakeAnimation());
+          } else {
+            pressableProps.onPress?.(e);
+          }
+        }}
+        style={pressableAnimatedStyle}
+        className={pressableClass({ inFlexRowParent, className })}
       >
-        <Text
-          className={textClass({
+        <Reanimated.View
+          style={bgAnimatedStyle}
+          className={bgAnimatedClass({ state })}
+        />
+        <View
+          className={rectClass({
+            flat,
+            pressed,
+            disabled,
+            filled: state !== `default` && bgFilled,
             state,
-            fontSize,
-            hasWikiModal: renderWikiModal != null,
-            className: textClassName,
             hovered,
+            className,
           })}
-          numberOfLines={2}
-          ellipsizeMode="tail"
         >
-          {text}
-        </Text>
-      </View>
-      <ShootingStars
-        // The theme needs to be set on this explicitly because the Rive CSS
-        // variable proxy doesn't handle class changes.
-        className={`pointer-events-none absolute -inset-3 [--color-fg:var(--color-success)]`}
-        play={state === `success`}
-      />
-      {showWikiModal && renderWikiModal != null
-        ? renderWikiModal(handleWikiModalDismiss)
-        : null}
-    </ReanimatedPressable>
+          <Text
+            className={textClass({
+              state,
+              fontSize,
+              hasWikiModal: renderWikiModal != null,
+              className: textClassName,
+              hovered,
+            })}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {text}
+          </Text>
+        </View>
+        <ShootingStars
+          className="pointer-events-none absolute -inset-3"
+          play={state === `success`}
+        />
+        {showWikiModal && renderWikiModal != null
+          ? renderWikiModal(handleWikiModalDismiss)
+          : null}
+      </ReanimatedPressable>
+    </ScopedVariables>
   );
 }
+
+const foregroundColorByState: Partial<Record<TextAnswerButtonState, string>> = {
+  success: `var(--color-success)`,
+  error: `var(--color-danger)`,
+  warning: `var(--color-warning)`,
+};
 
 const withPulseSpringAnimation = (target: number) =>
   withSequence(
@@ -297,14 +309,6 @@ const pressableClass = tv({
   variants: {
     inFlexRowParent: {
       true: `flex-row`,
-    },
-    state: {
-      default: ``,
-      dimmed: ``,
-      selected: ``,
-      success: `[--color-fg:var(--color-success)]`,
-      error: `[--color-fg:var(--color-danger)]`,
-      warning: `[--color-fg:var(--color-warning)]`,
     },
   },
 });

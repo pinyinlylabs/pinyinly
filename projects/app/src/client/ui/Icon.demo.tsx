@@ -2,6 +2,7 @@ import { ExampleStack } from "@/client/ui/demo/components";
 import { Icon } from "@/client/ui/Icon";
 import { View } from "@/client/ui/View";
 import { iconNames } from "./iconRegistry";
+import { ScopedVariables } from "./ScopedVariables";
 
 export default () => {
   const fewIcons = [`book`, `cart`, `flag`, `home`] as const;
@@ -35,21 +36,21 @@ export default () => {
           ))}
         </ExampleStack>
 
-        <View className="[--color-fg:var(--color-success)]">
+        <ScopedVariables variables={{ "--color-fg": `var(--color-success)` }}>
           <ExampleStack title="success">
             {fewIcons.map((icon) => (
               <Icon key={icon} icon={icon} />
             ))}
           </ExampleStack>
-        </View>
+        </ScopedVariables>
 
-        <View className="[--color-fg:var(--color-warning)]">
+        <ScopedVariables variables={{ "--color-fg": `var(--color-warning)` }}>
           <ExampleStack title="warning">
             {fewIcons.map((icon) => (
               <Icon key={icon} icon={icon} />
             ))}
           </ExampleStack>
-        </View>
+        </ScopedVariables>
 
         <View>
           <ExampleStack title="accent-cyan-600">
@@ -69,19 +70,17 @@ export default () => {
           {allIcons}
         </ExampleStack>
 
-        <ExampleStack
-          title="wasabi"
-          childrenClassName={`gap-8 [--color-fg:var(--color-success)]`}
-        >
-          {allIcons}
-        </ExampleStack>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-success)` }}>
+          <ExampleStack title="wasabi" childrenClassName="gap-8">
+            {allIcons}
+          </ExampleStack>
+        </ScopedVariables>
 
-        <ExampleStack
-          title="brick"
-          childrenClassName={`gap-8 [--color-fg:var(--color-danger)]`}
-        >
-          {allIcons}
-        </ExampleStack>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
+          <ExampleStack title="brick" childrenClassName="gap-8">
+            {allIcons}
+          </ExampleStack>
+        </ScopedVariables>
       </View>
     </View>
   );
