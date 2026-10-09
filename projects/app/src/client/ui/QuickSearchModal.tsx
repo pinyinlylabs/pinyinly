@@ -17,6 +17,7 @@ export function QuickSearchModal({
   return (
     <PageSheetModal
       onDismiss={onDismiss}
+      webTopAligned
       devUiSnapshotMode={devUiSnapshotMode}
       suspenseFallback={
         <Text className="font-sans text-muted-fg">Loading…</Text>
