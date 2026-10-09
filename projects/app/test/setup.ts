@@ -214,8 +214,12 @@ vi.mock(`expo-image-picker`, () => {
 vi.mock(`uniwind`, () => {
   return {
     withUniwind: (x: Component) => x,
+    useCSSVariable: (names: string | string[]) =>
+      Array.isArray(names) ? names.map(() => `#000000`) : `#000000`,
     useUniwind: () => ({ theme: `light` }),
     ScopedTheme: ({ children }: PropsWithChildren) =>
+      createElement(Fragment, null, children),
+    ScopedVariables: ({ children }: PropsWithChildren) =>
       createElement(Fragment, null, children),
   };
 });

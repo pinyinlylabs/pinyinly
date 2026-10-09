@@ -2,7 +2,7 @@ import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import type { ViewProps } from "react-native";
 import { View } from "@/client/ui/View";
 import { Rive } from "./Rive";
-import { cn } from "tailwind-variants";
+import { ScopedVariables } from "./ScopedVariables";
 
 export const NewSprout = ({
   className,
@@ -12,17 +12,16 @@ export const NewSprout = ({
   true satisfies IsExhaustedRest<typeof rest>;
 
   return (
-    <View
-      className={cn(className, `[--color-fg:var(--color-success)]`)}
-      style={style}
-    >
-      <Rive
-        src={require(`../../assets/rive/new-sprout.riv`)}
-        artboardName="main"
-        autoplay
-        fit="contain"
-        stateMachineName="main"
-      />
-    </View>
+    <ScopedVariables variables={{ "--color-fg": `var(--color-success)` }}>
+      <View className={className} style={style}>
+        <Rive
+          src={require(`../../assets/rive/new-sprout.riv`)}
+          artboardName="main"
+          autoplay
+          fit="contain"
+          stateMachineName="main"
+        />
+      </View>
+    </ScopedVariables>
   );
 };

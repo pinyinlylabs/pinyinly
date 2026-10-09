@@ -3,6 +3,7 @@ import { RectButton } from "@/client/ui/RectButton";
 import { ShootingStars } from "@/client/ui/ShootingStars";
 import { useState } from "react";
 import { View } from "@/client/ui/View";
+import { ScopedVariables } from "./ScopedVariables";
 
 export default () => {
   const [i, setI] = useState(0);
@@ -47,10 +48,9 @@ export default () => {
       </ExampleStack>
 
       <ExampleStack title="manual (100×50) success" showFrame>
-        <ShootingStars
-          className={`h-[50px] w-25 [--color-fg:var(--color-success)]`}
-          play={play}
-        />
+        <ScopedVariables variables={{ "--color-fg": `var(--color-success)` }}>
+          <ShootingStars className="h-[50px] w-25" play={play} />
+        </ScopedVariables>
       </ExampleStack>
 
       <ExampleStack title="Controls" childrenClassName="items-center gap-2">

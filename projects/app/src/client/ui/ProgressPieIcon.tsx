@@ -1,5 +1,6 @@
 import { View } from "@/client/ui/View";
 import { Circle, Svg } from "react-native-svg";
+import { ScopedVariables } from "./ScopedVariables";
 
 export function ProgressPieIcon({
   progress,
@@ -16,36 +17,35 @@ export function ProgressPieIcon({
   const dash = `${clamped * circumference} ${circumference}`;
 
   return (
-    <View
-      className={
-        warn
-          ? `text-fg [--color-fg:var(--color-warning)]`
-          : `text-fg [--color-fg:var(--color-muted-fg)]`
-      }
-      style={{ width: size, height: size }}
+    <ScopedVariables
+      variables={{
+        "--color-fg": warn ? `var(--color-warning)` : `var(--color-muted-fg)`,
+      }}
     >
-      <Svg viewBox="0 0 36 36" width={size} height={size}>
-        <Circle
-          stroke="currentColor"
-          strokeOpacity="40%"
-          cx="18"
-          cy="18"
-          r={radius}
-          fill="none"
-          strokeWidth={3}
-        />
-        <Circle
-          stroke="currentColor"
-          cx="18"
-          cy="18"
-          r={radius}
-          fill="none"
-          strokeWidth={3}
-          strokeDasharray={dash}
-          strokeDashoffset={0}
-          transform="rotate(-90 18 18)"
-        />
-      </Svg>
-    </View>
+      <View className="text-fg" style={{ width: size, height: size }}>
+        <Svg viewBox="0 0 36 36" width={size} height={size}>
+          <Circle
+            stroke="currentColor"
+            strokeOpacity="40%"
+            cx="18"
+            cy="18"
+            r={radius}
+            fill="none"
+            strokeWidth={3}
+          />
+          <Circle
+            stroke="currentColor"
+            cx="18"
+            cy="18"
+            r={radius}
+            fill="none"
+            strokeWidth={3}
+            strokeDasharray={dash}
+            strokeDashoffset={0}
+            transform="rotate(-90 18 18)"
+          />
+        </Svg>
+      </View>
+    </ScopedVariables>
   );
 }
