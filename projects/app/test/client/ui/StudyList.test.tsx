@@ -124,6 +124,39 @@ test(`uses shared HSK rows in dated groups without notes or removal buttons`, as
   rendered.unmount();
 });
 
+test(`orders words within a day by when they were added`, async ({
+  rizzle,
+}) => {
+  for (const [word, createdAt] of [
+    [`好:good`, new Date(2026, 9, 3, 9)],
+    [`你好:hello`, new Date(2026, 9, 3, 10)],
+  ] as const) {
+    const keyParams = getStudyWordKeyParams(word);
+    await rizzle.mutate.setSetting({
+      key: studyWordItemSetting.entity.marshalKey(keyParams),
+      value: studyWordItemSetting.encodeStoredValue(keyParams, {
+        ...keyParams,
+        createdAt,
+      }),
+      now: new Date(),
+      skipHistory: true,
+    });
+  }
+
+  const rendered = render(<StudyList />, { wrapper: providers(rizzle) });
+  await waitFor(() => {
+    expect(rendered.getByText(`hello`)).toBeTruthy();
+    expect(rendered.getByText(`good`)).toBeTruthy();
+  });
+  expect(
+    rendered
+      .getByText(`你好`)
+      .compareDocumentPosition(rendered.getByText(`好`)) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
+  ).not.toBe(0);
+  rendered.unmount();
+});
+
 test(`shows HSK labels beside words without a leading indentation column`, async ({
   rizzle,
 }) => {

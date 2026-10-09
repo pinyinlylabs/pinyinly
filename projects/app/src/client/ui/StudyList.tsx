@@ -66,7 +66,10 @@ export function StudyList({
                       ? `Yesterday`
                       : format(group.date, `MMM d, yyyy`)}
                 </Text>
-                <SkillWordRows hanziWords={group.hanziWords} />
+                <SkillWordRows
+                  hanziWords={group.hanziWords}
+                  sortByProgress={false}
+                />
               </View>
             ))}
           </View>
