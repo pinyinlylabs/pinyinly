@@ -50,7 +50,7 @@ export function QuizQueueButton() {
 
 const queueButtonClass = tv({
   base: `
-    relative size-[32px] flex-row justify-center
+    relative flex size-[32px] flex-row justify-center
 
     md:justify-start
   `,
