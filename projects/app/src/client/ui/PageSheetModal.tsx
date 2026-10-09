@@ -24,6 +24,7 @@ export type PageSheetChild = (options: { dismiss: () => void }) => ReactNode;
 interface PageSheetModalProps {
   children: PageSheetChild;
   disableBackgroundDismiss?: boolean;
+  webTopAligned?: boolean;
   onDismissRequest?: (dismiss: () => void) => void;
   /**
    * If `true`, the modal will be presented with a slower animation so it is not
@@ -47,6 +48,7 @@ interface PageSheetModalProps {
 export const PageSheetModal = ({
   children,
   disableBackgroundDismiss = false,
+  webTopAligned = false,
   onDismissRequest,
   onDismiss,
   passivePresentation = false,
@@ -60,6 +62,7 @@ export const PageSheetModal = ({
         onDismissRequest={onDismissRequest}
         passivePresentation={passivePresentation}
         disableBackgroundDismiss={disableBackgroundDismiss}
+        webTopAligned={webTopAligned}
         devUiSnapshotMode={devUiSnapshotMode}
       >
         {(api) => (
@@ -83,6 +86,7 @@ const WebImpl = ({
   passivePresentation,
   onDismiss,
   devUiSnapshotMode,
+  webTopAligned,
 }: ImplProps) => {
   "use memo";
 
@@ -221,7 +225,11 @@ const WebImpl = ({
 
   return devUiSnapshotMode ? (
     <View
-      className={`size-full cursor-auto items-center justify-center bg-[black]/50 p-4`}
+      className={`
+        size-full cursor-auto items-center bg-[black]/50 px-4
+
+        ${webTopAligned ? `justify-start pt-5 pb-4` : `justify-center py-4`}
+      `}
     >
       {content}
     </View>
@@ -235,7 +243,7 @@ const WebImpl = ({
         className={`
           absolute size-full cursor-auto items-center justify-start pt-5
 
-          sm:justify-center sm:p-4
+          ${webTopAligned ? `sm:px-4 sm:pb-4` : `sm:justify-center sm:p-4`}
         `}
         style={[animatedBackgroundStyle]}
         onPressIn={onBackgroundPressIn}
