@@ -1,14 +1,19 @@
 import type { DictionaryCollectionEntry } from "@/client/query";
-import type { PinyinUnit } from "@/data/model";
+import type { HanziWord, PinyinUnit } from "@/data/model";
 import { oneUnitPinyinListOrNull } from "@/dictionary";
 
 export interface SharedPrimaryPronunciationData {
   gloss: string;
+  hanziWord: HanziWord;
   pinyinUnit: PinyinUnit;
 }
 
 export function getSharedPrimaryPronunciation(
-  meanings: readonly Pick<DictionaryCollectionEntry, `gloss` | `pinyin`>[],
+  meanings: readonly Pick<
+    DictionaryCollectionEntry,
+    `hanziWord` | `gloss` | `pinyin`
+  >[],
+  selectedMeaning?: HanziWord | null,
 ): SharedPrimaryPronunciationData | null {
   const candidates = meanings.flatMap((meaning) => {
     const gloss = meaning.gloss[0];
@@ -19,14 +24,17 @@ export function getSharedPrimaryPronunciation(
       : [
           {
             gloss,
+            hanziWord: meaning.hanziWord,
             pinyinUnit: primaryPinyin,
           },
         ];
   });
 
-  if (candidates.length === 0) {
-    return null;
-  }
-
-  return candidates[0] ?? null;
+  return (
+    (selectedMeaning == null
+      ? undefined
+      : candidates.find((meaning) => meaning.hanziWord === selectedMeaning)) ??
+    candidates[0] ??
+    null
+  );
 }
