@@ -86,23 +86,16 @@ export function WikiHanziCharacterPronunciation({
         })),
     [db.dictionaryCollection, hanzi],
   );
-  const pronunciation = getSharedPrimaryPronunciation(meanings);
-  const firstMeaning = meanings[0];
+  const pronunciation = getSharedPrimaryPronunciation(meanings, hanziWord);
 
-  if (pronunciation == null || firstMeaning == null) {
-    return null;
-  }
-
-  const gloss = firstMeaning.gloss[0];
-
-  if (gloss == null) {
+  if (pronunciation == null) {
     return null;
   }
 
   return (
     <View className={hanziWord == null ? `opacity-50` : undefined}>
       <WikiHanziCharacterPronunciationBox
-        hanziWord={firstMeaning.hanziWord}
+        hanziWord={pronunciation.hanziWord}
         pinyinUnit={pronunciation.pinyinUnit}
       />
     </View>
