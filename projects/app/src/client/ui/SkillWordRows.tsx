@@ -15,9 +15,11 @@ import { View } from "./View";
 export function SkillWordRows({
   hanziWords,
   showHskLozenges = true,
+  sortByProgress = true,
 }: {
   hanziWords: readonly HanziWord[];
   showHskLozenges?: boolean;
+  sortByProgress?: boolean;
 }) {
   const db = useDb();
   const { data: skillStates } = useLiveQuery(
@@ -59,11 +61,13 @@ export function SkillWordRows({
       }),
     };
   });
-  rows.sort(
-    (first, second) =>
-      second.absoluteProgress - first.absoluteProgress ||
-      first.hanzi.localeCompare(second.hanzi),
-  );
+  if (sortByProgress) {
+    rows.sort(
+      (first, second) =>
+        second.absoluteProgress - first.absoluteProgress ||
+        first.hanzi.localeCompare(second.hanzi),
+    );
+  }
 
   return (
     <View className="-my-1.5 gap-1">
