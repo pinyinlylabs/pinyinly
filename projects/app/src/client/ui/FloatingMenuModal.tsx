@@ -1,4 +1,5 @@
 import { mergeProps } from "@/client/react";
+import { KeyboardShortcutModalScope } from "@/client/ui/KeyboardShortcutProvider";
 import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
 import { cloneElement, useState } from "react";
 import type { ReactElement, RefAttributes } from "react";
@@ -79,12 +80,14 @@ export function FloatingMenuModal(props: {
               style={floatingStyles}
               className={isInitializing ? `invisible` : undefined}
             >
-              {cloneElement(
-                props.menu,
-                mergeProps(props.menu.props, {
-                  onRequestClose: handleDismiss,
-                }),
-              )}
+              <KeyboardShortcutModalScope active={isOpen}>
+                {cloneElement(
+                  props.menu,
+                  mergeProps(props.menu.props, {
+                    onRequestClose: handleDismiss,
+                  }),
+                )}
+              </KeyboardShortcutModalScope>
             </View>
           </TouchableOpacity>
         </TouchableOpacity>

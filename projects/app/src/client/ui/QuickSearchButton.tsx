@@ -3,9 +3,15 @@ import type { ViewProps } from "react-native";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
+import {
+  useShortcut,
+  useShortcutDisplayLabel,
+} from "@/client/ui/hooks/useShortcut";
 import { cn } from "tailwind-variants";
 import { Icon } from "./Icon";
 import { QuickSearchModal } from "./QuickSearchModal";
+
+const searchShortcut = `Mod+K`;
 
 export function QuickSearchButton({
   className,
@@ -13,6 +19,11 @@ export function QuickSearchButton({
   className?: ViewProps[`className`];
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const searchShortcutLabel = useShortcutDisplayLabel(searchShortcut);
+
+  useShortcut(searchShortcut, () => {
+    setIsModalOpen(true);
+  });
 
   return (
     <>
@@ -38,7 +49,7 @@ export function QuickSearchButton({
         </View>
 
         <Text className="font-sans text-sm font-semibold text-muted-fg">
-          ⌘ K
+          {searchShortcutLabel}
         </Text>
       </Pressable>
       {isModalOpen ? (
