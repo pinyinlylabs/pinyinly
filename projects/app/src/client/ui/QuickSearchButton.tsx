@@ -25,7 +25,7 @@ export function QuickSearchButton({
           `
             flex-row items-center justify-between gap-6 rounded-xl bg-bg-high px-3 py-2
 
-            hover:bg-fg/20
+            hover:bg-fg/5
           `,
           className,
         )}
