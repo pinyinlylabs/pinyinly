@@ -83,7 +83,7 @@ export function historyPageCollection(
 ) {
   const startDate = subDays(new Date(), 7);
 
-  return createLiveQueryCollection((q) =>
+  const collection = createLiveQueryCollection((q) =>
     q
       .from({ skillRating: skillRatingsCollection })
       .orderBy(({ skillRating }) => skillRating.createdAt, `desc`)
@@ -104,6 +104,8 @@ export function historyPageCollection(
         ),
       ),
   );
+  collection.id = `historyPage`;
+  return collection;
 }
 
 export type HistoryPageCollection = ReturnType<typeof historyPageCollection>;
@@ -667,6 +669,7 @@ function userDictionaryCollectionOptions({
       .from({ setting: settingCollection })
       .where(({ setting }) => like(setting.key, `uhm/%`)),
   );
+  userMeaningSettings.id = `userMeaningSettings`;
 
   type UserDictionaryDraft = Omit<UserDictionaryEntry, `gloss`> & {
     gloss?: string;
@@ -1341,6 +1344,9 @@ export function makeDb(rizzle: Rizzle) {
   dictionaryCollection.createIndex((row) => row.hanziWord, {
     indexType: BTreeIndex,
   });
+  dictionaryCollection.createIndex((row) => row.hanzi, {
+    indexType: BTreeIndex,
+  });
 
   const studyWordsCollection = createStudyWordsCollection(settingCollection);
   studyWordsCollection.createIndex((row) => row.hanziWord, {
@@ -1471,13 +1477,17 @@ export function makeDb(rizzle: Rizzle) {
 }
 
 /**
- * Adds an `id` property to each entry in the database object if it doesn't
- * already have one. This makes debugging missing indexes much easier.
+ * Replace generated live-query IDs with their database property names to make
+ * index warnings easier to trace.
  */
 function addDbIds(db: Record<string, { id?: string }>) {
   for (const key in db) {
-    if (db[key] && db[key].id == null) {
-      db[key].id = key;
+    const collection = db[key];
+    if (
+      collection &&
+      (collection.id == null || collection.id.startsWith(`live-query-`))
+    ) {
+      collection.id = key;
     }
   }
 }

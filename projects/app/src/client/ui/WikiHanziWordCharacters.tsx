@@ -10,21 +10,23 @@ import { CompactWordRows } from "./CompactWordRows";
 import { useDb } from "./hooks/useDb";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import { getCharacterItemsForWord } from "./WikiHanziWordCharacters.utils";
 
 export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
   const db = useDb();
+  const collectionId = useId();
 
   const charactersCollection = useMemo(
     () =>
       createCollection(
         localOnlyCollectionOptions({
+          id: `wikiHanziWordCharacters:${collectionId}`,
           initialData: getCharacterItemsForWord(hanzi),
           getKey: (item) => item.hanzi,
         }),
       ),
-    [hanzi],
+    [collectionId, hanzi],
   );
 
   const { data: entriesWithDupes } = useLiveQuery(

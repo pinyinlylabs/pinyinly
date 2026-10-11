@@ -14,7 +14,7 @@
     "source.fixAll": "always",
     "source.formatDocument": "always"
   },
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "node_modules/@typescript/native-preview",
   "js/ts.experimental.useTsgo": true,
   "tailwindCSS.experimental.classRegex": [
     // https://github.com/paolotiu/tailwind-intellisense-regex-list?tab=readme-ov-file#tailwind-variants
