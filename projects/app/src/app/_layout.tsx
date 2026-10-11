@@ -13,6 +13,7 @@ import { routingIntegration } from "@/client/sentry";
 import { useAuth } from "@/client/auth";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
+import { KeyboardShortcutProvider } from "@/client/ui/KeyboardShortcutProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
@@ -65,8 +66,10 @@ function RootLayout() {
 export function UiProviders({ children }: PropsWithChildren) {
   return (
     <AudioContextProvider>
-      <TooltipProvider>{children}</TooltipProvider>
-      <PortalHost />
+      <KeyboardShortcutProvider>
+        <TooltipProvider>{children}</TooltipProvider>
+        <PortalHost />
+      </KeyboardShortcutProvider>
     </AudioContextProvider>
   );
 }

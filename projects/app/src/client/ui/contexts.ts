@@ -43,6 +43,22 @@ export const HeaderTitleContext = createContext<HeaderTitleContextValue | null>(
   null,
 );
 
+/** Modal ordering and registration used to scope keyboard shortcuts. */
+export interface KeyboardShortcutModalContextValue {
+  /** Open modal IDs, ordered from the oldest to the topmost modal. */
+  modalStack: readonly string[];
+  /** Add or remove this modal from the active shortcut stack. */
+  setModalActive: (id: string, active: boolean) => void;
+}
+
+export const KeyboardShortcutModalContext =
+  createContext<KeyboardShortcutModalContextValue | null>(null);
+
+/** Identifies the modal scope containing a shortcut consumer, if any. */
+export const KeyboardShortcutModalIdContext = createContext<string | null>(
+  null,
+);
+
 export type SkillQueueContextValue = DeepReadonly<
   | {
       loading: false;

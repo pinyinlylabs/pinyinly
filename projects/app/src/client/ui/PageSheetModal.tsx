@@ -1,4 +1,5 @@
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
+import { KeyboardShortcutModalScope } from "@/client/ui/KeyboardShortcutProvider";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Modal, Platform } from "react-native";
@@ -57,18 +58,20 @@ export const PageSheetModal = ({
 }: PageSheetModalProps) => {
   return (
     <Theme theme="default">
-      <PageSheetModalImpl
-        onDismiss={onDismiss}
-        onDismissRequest={onDismissRequest}
-        passivePresentation={passivePresentation}
-        disableBackgroundDismiss={disableBackgroundDismiss}
-        webTopAligned={webTopAligned}
-        devUiSnapshotMode={devUiSnapshotMode}
-      >
-        {(api) => (
-          <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
-        )}
-      </PageSheetModalImpl>
+      <KeyboardShortcutModalScope active={!devUiSnapshotMode}>
+        <PageSheetModalImpl
+          onDismiss={onDismiss}
+          onDismissRequest={onDismissRequest}
+          passivePresentation={passivePresentation}
+          disableBackgroundDismiss={disableBackgroundDismiss}
+          webTopAligned={webTopAligned}
+          devUiSnapshotMode={devUiSnapshotMode}
+        >
+          {(api) => (
+            <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
+          )}
+        </PageSheetModalImpl>
+      </KeyboardShortcutModalScope>
     </Theme>
   );
 };
