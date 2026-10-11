@@ -1,23 +1,17 @@
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import type { ViewProps } from "react-native";
-import { Platform, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { useShortcut } from "@/client/ui/hooks/useShortcut";
-import { formatForDisplay } from "@tanstack/react-hotkeys";
+import {
+  useShortcut,
+  useShortcutDisplayLabel,
+} from "@/client/ui/hooks/useShortcut";
 import { cn } from "tailwind-variants";
 import { Icon } from "./Icon";
 import { QuickSearchModal } from "./QuickSearchModal";
 
 const searchShortcut = `Mod+K`;
-
-function subscribeToPlatformChanges() {
-  return () => {};
-}
-
-function getSearchShortcutLabel() {
-  return Platform.OS === `web` ? formatForDisplay(searchShortcut) : `⌘ K`;
-}
 
 export function QuickSearchButton({
   className,
@@ -25,11 +19,7 @@ export function QuickSearchButton({
   className?: ViewProps[`className`];
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const searchShortcutLabel = useSyncExternalStore(
-    subscribeToPlatformChanges,
-    getSearchShortcutLabel,
-    () => `⌘ K`,
-  );
+  const searchShortcutLabel = useShortcutDisplayLabel(searchShortcut);
 
   useShortcut(searchShortcut, () => {
     setIsModalOpen(true);

@@ -5,9 +5,11 @@ import {
   KeyboardShortcutProvider,
 } from "#client/ui/KeyboardShortcutProvider.tsx";
 import { QuickSearchButton } from "#client/ui/QuickSearchButton.tsx";
-import { useShortcut } from "#client/ui/hooks/useShortcut.ts";
+import {
+  formatShortcutForDisplay,
+  useShortcut,
+} from "#client/ui/hooks/useShortcut.ts";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { renderToString } from "react-dom/server";
 import { useState } from "react";
 import { afterEach, describe, expect, test, vi } from "vitest";
@@ -32,7 +34,7 @@ function ShortcutAction({ onTrigger }: { onTrigger: () => void }) {
 }
 
 function pressSearchShortcut(target: Document | HTMLElement = document) {
-  const usesMeta = formatForDisplay(`Mod+K`).includes(`⌘`);
+  const usesMeta = formatShortcutForDisplay(`Mod+K`).includes(`⌘`);
   fireEvent.keyDown(target, {
     key: `k`,
     metaKey: usesMeta,
@@ -84,7 +86,9 @@ describe(`useShortcut`, () => {
       </KeyboardShortcutProvider>,
     );
 
-    expect(screen.getByText(formatForDisplay(`Mod+K`))).toBeInTheDocument();
+    expect(
+      screen.getByText(formatShortcutForDisplay(`Mod+K`)),
+    ).toBeInTheDocument();
 
     pressSearchShortcut();
 
@@ -98,7 +102,7 @@ describe(`useShortcut`, () => {
       </KeyboardShortcutProvider>,
     );
 
-    expect(html).toContain(`⌘ K`);
+    expect(html).toContain(formatShortcutForDisplay(`Mod+K`, `linux`));
   });
 
   test(`does not fire while the route is unfocused`, () => {
