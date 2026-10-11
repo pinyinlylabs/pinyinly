@@ -191,7 +191,7 @@
     "inline-style-prefixer": "^7.0.1",
     "lightningcss": "1.33.0",
     "openai": "^6.45.0",
-    "oxfmt": "^0.62.0",
+    "oxfmt": "^0.72.0",
     "oxlint": "^1.78.0",
     "oxlint-tsgolint": "^7.0.2001",
     "pdfjs-dist": "^6.2.108",

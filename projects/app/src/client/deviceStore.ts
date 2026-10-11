@@ -17,10 +17,12 @@ export type DeviceStoreToggleableEntity = RizzleEntity<
 >;
 
 export type DeviceStoreEntity = RizzleAnyEntity;
-export type DeviceStoreEntityInput<T extends DeviceStoreEntity> =
-  RizzleEntityInput<T> | null;
-export type DeviceStoreEntityOutput<T extends DeviceStoreEntity> =
-  RizzleEntityOutput<T> | null;
+export type DeviceStoreEntityInput<
+  T extends DeviceStoreEntity,
+> = RizzleEntityInput<T> | null;
+export type DeviceStoreEntityOutput<
+  T extends DeviceStoreEntity,
+> = RizzleEntityOutput<T> | null;
 
 const emptySettingKeyParams = {} as const; // stable reference to utilize rizzle's internal memoization
 export function buildDeviceStoreKey(key: DeviceStoreEntity): string {
