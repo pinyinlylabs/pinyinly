@@ -20,8 +20,9 @@ export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
 >[0];
 export type UserSettingEntityInput<T extends UserSettingEntity> =
   Flatten<RizzleEntityInput<T> | null>;
-export type UserSettingEntityOutput<T extends UserSettingEntity> =
-  RizzleEntityOutput<T> | null;
+export type UserSettingEntityOutput<
+  T extends UserSettingEntity,
+> = RizzleEntityOutput<T> | null;
 
 export interface UseUserSettingResult<T extends UserSettingEntity> {
   isLoading: boolean;

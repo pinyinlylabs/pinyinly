@@ -813,9 +813,9 @@ type WithoutFirstArgumentForObj<T> = {
 };
 
 export type RizzleReplicacheMutatorTx<S extends RizzleRawSchema> = {
-  [K in keyof S as S[K] extends RizzleAnyEntity
-    ? K
-    : never]: S[K] extends RizzleAnyEntity
+  [
+    K in keyof S as S[K] extends RizzleAnyEntity ? K : never
+  ]: S[K] extends RizzleAnyEntity
     ? WithoutFirstArgumentForObj<
         RizzleReplicacheEntityMutate<S[K]> & RizzleReplicacheEntityQuery<S[K]>
       >
@@ -823,9 +823,9 @@ export type RizzleReplicacheMutatorTx<S extends RizzleRawSchema> = {
 } & { tx: WriteTransaction };
 
 export type RizzleReplicacheMutators<S extends RizzleRawSchema> = {
-  [K in keyof S as S[K] extends RizzleMutator<infer _>
-    ? K
-    : never]: S[K] extends RizzleMutator<infer P>
+  [
+    K in keyof S as S[K] extends RizzleMutator<infer _> ? K : never
+  ]: S[K] extends RizzleMutator<infer P>
     ? (
         tx: RizzleReplicacheMutatorTx<S>,
         options: RizzleObject<P>[`_output`],
@@ -834,9 +834,9 @@ export type RizzleReplicacheMutators<S extends RizzleRawSchema> = {
 };
 
 export type RizzleDrizzleMutators<S extends RizzleRawSchema, Tx> = {
-  [K in keyof S as S[K] extends RizzleMutator<infer _>
-    ? K
-    : never]: S[K] extends RizzleMutator<infer P>
+  [
+    K in keyof S as S[K] extends RizzleMutator<infer _> ? K : never
+  ]: S[K] extends RizzleMutator<infer P>
     ? (
         tx: Tx,
         userId: string,
@@ -902,17 +902,15 @@ export type RizzleReplicachePagedEntityQuery<T extends RizzleAnyEntity> =
     : never;
 
 export type RizzleReplicacheQuery<S extends RizzleRawSchema> = {
-  [K in keyof S as S[K] extends RizzleAnyEntity
-    ? K
-    : never]: S[K] extends RizzleAnyEntity
-    ? RizzleReplicacheEntityQuery<S[K]>
-    : never;
+  [
+    K in keyof S as S[K] extends RizzleAnyEntity ? K : never
+  ]: S[K] extends RizzleAnyEntity ? RizzleReplicacheEntityQuery<S[K]> : never;
 };
 
 export type RizzleReplicachePagedQuery<S extends RizzleRawSchema> = {
-  [K in keyof S as S[K] extends RizzleAnyEntity
-    ? K
-    : never]: S[K] extends RizzleAnyEntity
+  [
+    K in keyof S as S[K] extends RizzleAnyEntity ? K : never
+  ]: S[K] extends RizzleAnyEntity
     ? RizzleReplicachePagedEntityQuery<S[K]>
     : never;
 };
