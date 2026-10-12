@@ -12,7 +12,7 @@ import {
 } from "#data/userSettings.ts";
 import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { act, render, waitFor } from "@testing-library/react";
+import { act, render, waitFor, within } from "@testing-library/react";
 import { format } from "date-fns/format";
 import type { PropsWithChildren } from "react";
 import { afterEach, beforeEach, test as baseTest, expect, vi } from "vitest";
@@ -107,6 +107,10 @@ test(`uses shared HSK rows in dated groups without notes or removal buttons`, as
   const hskRow = shared.container.querySelector(`a`);
   expect(studyRow?.textContent).toBe(hskRow?.textContent);
   expect(studyRow?.querySelectorAll(`[style*="left"]`)).toHaveLength(3);
+  const sharedText = within(shared.container).getByText(`hello`);
+  const glossAndProgress = sharedText.parentElement?.parentElement;
+  expect(glossAndProgress?.contains(sharedText)).toBe(true);
+  expect(glossAndProgress?.querySelector(`[style*="left"]`)).not.toBeNull();
 
   await act(async () => {
     await rizzle.mutate.setSetting({
@@ -176,9 +180,10 @@ test(`shows HSK labels beside words without a leading indentation column`, async
     expect(rendered.getByText(`HSK`)).toBeTruthy();
   });
   const hskLabel = rendered.getByText(`HSK`);
-  expect(rendered.getByText(`一`).parentElement?.contains(hskLabel)).toBe(true);
+  const hanzi = rendered.getByText(`一`);
+  expect(hanzi.parentElement?.parentElement?.contains(hskLabel)).toBe(true);
   const row = rendered.container.querySelector(`a`)?.firstElementChild;
-  expect(row?.firstElementChild).toBe(rendered.getByText(`一`).parentElement);
+  expect(row?.firstElementChild?.contains(hanzi)).toBe(true);
   rendered.unmount();
 });
 

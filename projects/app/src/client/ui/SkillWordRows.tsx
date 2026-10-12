@@ -79,7 +79,11 @@ export function SkillWordRows({
         >
           <Pressable className="flex flex-row items-center gap-2 py-1.5">
             <HanziPinyinText
-              className="flex-1"
+              className="
+                shrink-0
+
+                sm:flex-1
+              "
               hanzi={row.hanzi}
               pinyin={row.pinyin}
               lozenges={
@@ -88,30 +92,36 @@ export function SkillWordRows({
                 )
               }
             />
-            <Text
-              className="ml-4 flex-1 text-right font-sans text-base text-fg"
-              numberOfLines={2}
-            >
-              {row.gloss}
-            </Text>
-            <View className="ml-2 w-21 items-end">
-              <View className="relative h-1.5 w-full rounded bg-fg/10">
-                {milestonePercents.map((milestonePercent) => (
-                  <View
-                    className={milestoneDotClass({
-                      reached: row.absoluteProgress >= milestonePercent / 100,
-                      rank: row.rank,
-                    })}
-                    key={milestonePercent}
-                    style={{ left: `${milestonePercent}%` }}
-                  />
-                ))}
-                {row.absoluteProgress === 0 ? null : (
-                  <View
-                    className={rankProgressClass({ rank: row.rank })}
-                    style={{ width: `${row.absoluteProgress * 100}%` }}
-                  />
-                )}
+            <View className="ml-4 flex-1 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
+              <Text
+                className="
+                  w-full text-right font-sans text-base text-fg
+
+                  sm:flex-1
+                "
+                numberOfLines={2}
+              >
+                {row.gloss}
+              </Text>
+              <View className="w-21 items-end">
+                <View className="relative h-1.5 w-full rounded bg-fg/10">
+                  {milestonePercents.map((milestonePercent) => (
+                    <View
+                      className={milestoneDotClass({
+                        reached: row.absoluteProgress >= milestonePercent / 100,
+                        rank: row.rank,
+                      })}
+                      key={milestonePercent}
+                      style={{ left: `${milestonePercent}%` }}
+                    />
+                  ))}
+                  {row.absoluteProgress === 0 ? null : (
+                    <View
+                      className={rankProgressClass({ rank: row.rank })}
+                      style={{ width: `${row.absoluteProgress * 100}%` }}
+                    />
+                  )}
+                </View>
               </View>
             </View>
             <Icon
