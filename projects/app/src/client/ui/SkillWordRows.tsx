@@ -107,10 +107,7 @@ export function SkillWordRows({
                 <View className="relative h-1.5 w-full rounded bg-fg/10">
                   {milestonePercents.map((milestonePercent) => (
                     <View
-                      className={milestoneDotClass({
-                        reached: row.absoluteProgress >= milestonePercent / 100,
-                        rank: row.rank,
-                      })}
+                      className="absolute bottom-0 z-10 size-0.5 -translate-x-1/2 bg-bg"
                       key={milestonePercent}
                       style={{ left: `${milestonePercent}%` }}
                     />
@@ -136,27 +133,6 @@ export function SkillWordRows({
     </View>
   );
 }
-
-const milestoneDotClass = tv({
-  base: `absolute top-1/2 z-10 size-1 -translate-1/2 rounded-full`,
-  variants: {
-    reached: { false: `bg-fg/30`, true: `` },
-    rank: {
-      0: `bg-fg/40`,
-      1: `bg-cyan`,
-      2: `bg-blue`,
-      3: `bg-violet`,
-      4: `bg-fuchsia`,
-    },
-  },
-  compoundVariants: [
-    { reached: false, rank: 0, className: `bg-fg/30` },
-    { reached: false, rank: 1, className: `bg-fg/30` },
-    { reached: false, rank: 2, className: `bg-fg/30` },
-    { reached: false, rank: 3, className: `bg-fg/30` },
-    { reached: false, rank: 4, className: `bg-fg/30` },
-  ],
-});
 
 const milestonePercents = [25, 50, 75] as const;
 
