@@ -117,6 +117,10 @@ tasks:
       - ~:codegenPublicVendor
       - ~:codegenUniwind
 
+  codegenWikiCharacterAsset:
+    script: |
+      moon run app:test -- dictionary.test.ts -t "build characters.asset.json" -u
+
   codegenOxlint:
     description: "Run Oxlint with codegen rules. This is separate from lint and doesn't use Oxlint caching intentionally."
     command: oxlint --config oxlint-codegen.config.ts --fix .

@@ -1271,6 +1271,12 @@ export function makeDb(rizzle: Rizzle) {
     // decompositions.
     return q.unionAll(builtinRows);
   });
+  characterDecompositionsCollection.createIndex((row) => row.ids, {
+    indexType: BTreeIndex,
+  });
+  characterDecompositionsCollection.createIndex((row) => row.hanzi, {
+    indexType: BTreeIndex,
+  });
 
   const characterCollection = createCollection(characterCollectionOptions());
   characterCollection.createIndex((row) => row.hanzi);
@@ -1345,6 +1351,9 @@ export function makeDb(rizzle: Rizzle) {
     indexType: BTreeIndex,
   });
   dictionaryCollection.createIndex((row) => row.hanzi, {
+    indexType: BTreeIndex,
+  });
+  dictionaryCollection.createIndex((row) => row.hskSortKey, {
     indexType: BTreeIndex,
   });
 
