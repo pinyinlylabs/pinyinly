@@ -108,7 +108,7 @@ approach is chosen for several reasons:
       "gloss": ["good", "nice", "friendly"],
       "pinyin": ["hǎo"],
       "example": "这个东西很好。",
-      "partOfSpeech": "adjective",
+      "partOfSpeech": "adj",
       "definition": "Describes something that is good, nice, or friendly."
     },
     {
@@ -116,7 +116,7 @@ approach is chosen for several reasons:
       "gloss": ["to like", "to enjoy"],
       "pinyin": ["hǎo"],
       "example": "我好吃辣的食物。",
-      "partOfSpeech": "verb",
+      "partOfSpeech": "v",
       "definition": "Indicates the action of liking or enjoying something."
     }
   ]
@@ -125,18 +125,33 @@ approach is chosen for several reasons:
 
 ## Valid Parts of Speech
 
-Here is a list of all valid parts of speech that can be used in the `partOfSpeech` property:
+`partOfSpeech` is optional. When included, store the conventional abbreviation:
 
-- **noun**: 名词
-- **verb**: 动词
-- **adjective**: 形容词
-- **adverb**: 副词
-- **pronoun**: 代词
-- **preposition**: 介词
-- **conjunction**: 连词
-- **interjection**: 感叹词
-- **measureWord**: 量词
-- **particle**: 助词
+- `n`: noun (名)
+- `pron`: pronoun (代)
+- `num`: numeral (数)
+- `m`: measure word (量)
+- `q`: quantifier (数量词)
+- `v`: verb (动)
+- `aux`: auxiliary (助动词)
+- `adj`: adjective (形)
+- `adv`: adverb (副)
+- `prep`: preposition (介)
+- `conj`: conjunction (连)
+- `part`: particle (助)
+- `onom`: onomatopoeia (拟声词)
+- `int`: interjection (叹)
+- `pref`: prefix (前缀)
+- `suf`: suffix (后缀)
+- `idm`: idiom (成语)
+- `S`: subject (主语)
+- `P`: predicate (谓语)
+- `O`: object (宾语)
+- `C`: complement (补语)
+- `VO`: verb-object (动宾结构)
+- `VC`: verb-complement (动补结构)
+- `VP`: verbal phrase (动词短语)
+- `AP`: adjective phrase (形容词短语)
 
 ## Why Group Pinyin by Meaning?
 
@@ -157,7 +172,7 @@ Here is a list of all valid parts of speech that can be used in the `partOfSpeec
       "gloss": ["to walk, to go"],
       "pinyin": ["xíng"],
       "example": "他能行。",
-      "partOfSpeech": "verb",
+      "partOfSpeech": "v",
       "definition": "Indicates the action of walking or going."
     },
     {
@@ -165,7 +180,7 @@ Here is a list of all valid parts of speech that can be used in the `partOfSpeec
       "gloss": ["line, row"],
       "pinyin": ["háng"],
       "example": "这家银行在哪？",
-      "partOfSpeech": "noun",
+      "partOfSpeech": "n",
       "definition": "Refers to a line or row of something."
     }
   ]
@@ -183,7 +198,7 @@ Here is a list of all valid parts of speech that can be used in the `partOfSpeec
       "gloss": ["measure word for general use"],
       "pinyin": ["gè"],
       "example": "一个苹果。",
-      "partOfSpeech": "measureWord",
+      "partOfSpeech": "m",
       "definition": "A general measure word used for counting."
     }
   ]
@@ -201,7 +216,7 @@ Here is a list of all valid parts of speech that can be used in the `partOfSpeec
       "gloss": ["suggest"],
       "pinyin": ["ba"],
       "example": "我们走吧。",
-      "partOfSpeech": "particle",
+      "partOfSpeech": "part",
       "definition": "A particle used to make suggestions."
     }
   ]
@@ -218,7 +233,6 @@ Here is a list of all valid parts of speech that can be used in the `partOfSpeec
       "meaningKey": "hands",
       "gloss": ["hands radical"],
       "example": "",
-      "partOfSpeech": "radical",
       "definition": "A radical representing hands, not used independently."
     }
   ]
@@ -230,7 +244,8 @@ Here is a list of all valid parts of speech that can be used in the `partOfSpeec
 - **Each meaning gets a stable `meaningKey`** (not just the gloss).
 - **Hanzi skill dependencies reference `{skillType}:{hanzi}:{meaningKey}`** to avoid ambiguity.
 - **Glosses and pinyin are grouped within meanings for accuracy.**
-- **Part of speech is included** to provide additional context and aid in learning.
+- **Part of speech is optional** and can provide additional context when a grammatical role is
+  clear; store it using the abbreviation above.
 - **Pinyin is space-separated** to balance simplicity and readability.
 - **Definitions are included** to provide a clear understanding of each meaning.
 - **Pinyin is optional** for Hanzi that do not have a pronunciation.

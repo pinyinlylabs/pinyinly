@@ -2,6 +2,9 @@ import { matchAllPinyinUnits } from "@/data/pinyin";
 import { splitHanziText } from "@/data/hanzi";
 import {
   hanziTextSchema,
+  PartOfSpeechAbbr,
+  PartOfSpeechName,
+  partOfSpeechNameSchema,
   pinyinTextSchema,
   pinyinUnitSchema,
 } from "@/data/model";
@@ -10,6 +13,7 @@ import type {
   HanziCharacter,
   HanziText,
   PinyinText,
+  partOfSpeechAbbreviationSchema,
 } from "@/data/model";
 import type { ChatPrompt, ChatPromptMessage } from "@/server/lib/ai";
 import { renderPromptTemplate } from "@/util/prompts/shared";
@@ -18,6 +22,37 @@ import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 import isEqual from "lodash/isEqual";
 import { buildHanziWord } from "@/dictionary";
+
+const partOfSpeechAbbreviationByName = {
+  [PartOfSpeechName.Noun]: PartOfSpeechAbbr.Noun,
+  [PartOfSpeechName.Pronoun]: PartOfSpeechAbbr.Pronoun,
+  [PartOfSpeechName.Numeral]: PartOfSpeechAbbr.Numeral,
+  [PartOfSpeechName.MeasureWord]: PartOfSpeechAbbr.MeasureWord,
+  [PartOfSpeechName.Quantifier]: PartOfSpeechAbbr.Quantifier,
+  [PartOfSpeechName.Verb]: PartOfSpeechAbbr.Verb,
+  [PartOfSpeechName.Auxiliary]: PartOfSpeechAbbr.Auxiliary,
+  [PartOfSpeechName.Adjective]: PartOfSpeechAbbr.Adjective,
+  [PartOfSpeechName.Adverb]: PartOfSpeechAbbr.Adverb,
+  [PartOfSpeechName.Preposition]: PartOfSpeechAbbr.Preposition,
+  [PartOfSpeechName.Conjunction]: PartOfSpeechAbbr.Conjunction,
+  [PartOfSpeechName.Particle]: PartOfSpeechAbbr.Particle,
+  [PartOfSpeechName.Onomatopoeia]: PartOfSpeechAbbr.Onomatopoeia,
+  [PartOfSpeechName.Interjection]: PartOfSpeechAbbr.Interjection,
+  [PartOfSpeechName.Prefix]: PartOfSpeechAbbr.Prefix,
+  [PartOfSpeechName.Suffix]: PartOfSpeechAbbr.Suffix,
+  [PartOfSpeechName.Idiom]: PartOfSpeechAbbr.Idiom,
+  [PartOfSpeechName.Subject]: PartOfSpeechAbbr.Subject,
+  [PartOfSpeechName.Predicate]: PartOfSpeechAbbr.Predicate,
+  [PartOfSpeechName.Object]: PartOfSpeechAbbr.Object,
+  [PartOfSpeechName.Complement]: PartOfSpeechAbbr.Complement,
+  [PartOfSpeechName.VerbObject]: PartOfSpeechAbbr.VerbObject,
+  [PartOfSpeechName.VerbComplement]: PartOfSpeechAbbr.VerbComplement,
+  [PartOfSpeechName.VerbalPhrase]: PartOfSpeechAbbr.VerbalPhrase,
+  [PartOfSpeechName.AdjectivePhrase]: PartOfSpeechAbbr.AdjectivePhrase,
+} satisfies Record<
+  z.infer<typeof partOfSpeechNameSchema>,
+  z.infer<typeof partOfSpeechAbbreviationSchema>
+>;
 
 export type CharacterCoreMeaningsSpecInputType = {
   character: HanziCharacter;
@@ -30,6 +65,7 @@ export const characterCoreMeaningsSpecPromptOutputSchema = z
       z.object({
         lemma: z.string(),
         primaryReading: z.string(),
+        partOfSpeech: partOfSpeechNameSchema.nullable(),
         pronunciationExceptions: z.array(z.string()),
         description: z.string(),
         branches: z.array(
@@ -89,6 +125,7 @@ Each Core Meaning contains:
 
 - "lemma"
 - "primaryReading"
+- "partOfSpeech", the full English name chosen from the supplied enum when clear, otherwise null
 - optional "pronunciationExceptions"
 - "description"
 - "branches"
@@ -261,6 +298,12 @@ The purpose is to help students understand how the character's meaning expands, 
           pinyin: pinyinUnitSchema.parse(coreMeaning.primaryReading, {
             reportInput: true,
           }),
+          ...(coreMeaning.partOfSpeech == null
+            ? {}
+            : {
+                partOfSpeech:
+                  partOfSpeechAbbreviationByName[coreMeaning.partOfSpeech],
+              }),
           pinyinExceptions: Object.fromEntries(
             coreMeaning.pronunciationExceptions.map((exception) => {
               const [, hanziRaw, pinyinRaw] =

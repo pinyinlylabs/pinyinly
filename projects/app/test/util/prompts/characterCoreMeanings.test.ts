@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { fmtChatPromptForSnapshot } from "./helpers";
 import { buildCharacterCoreMeaningsSpecPrompt } from "#util/prompts/characterCoreMeanings.ts";
+import { PartOfSpeechName } from "#data/model.js";
 import type { HanziCharacter, HanziText, PinyinText } from "#data/model.js";
 
 describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
@@ -109,6 +110,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
 
       - "lemma"
       - "primaryReading"
+      - "partOfSpeech", the full English name chosen from the supplied enum when clear, otherwise null
       - optional "pronunciationExceptions"
       - "description"
       - "branches"
@@ -297,6 +299,37 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
                     "lemma": {
                       "type": "string",
                     },
+                    "partOfSpeech": {
+                      "enum": [
+                        "noun",
+                        "pronoun",
+                        "numeral",
+                        "measure word",
+                        "quantifier",
+                        "verb",
+                        "auxiliary",
+                        "adjective",
+                        "adverb",
+                        "preposition",
+                        "conjunction",
+                        "particle",
+                        "onomatopoeia",
+                        "interjection",
+                        "prefix",
+                        "suffix",
+                        "idiom",
+                        "subject",
+                        "predicate",
+                        "object",
+                        "complement",
+                        "verb-object",
+                        "verb-complement",
+                        "verbal phrase",
+                        "adjective phrase",
+                      ],
+                      "nullable": true,
+                      "type": "string",
+                    },
                     "primaryReading": {
                       "type": "string",
                     },
@@ -310,6 +343,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
                   "required": [
                     "lemma",
                     "primaryReading",
+                    "partOfSpeech",
                     "pronunciationExceptions",
                     "description",
                     "branches",
@@ -351,6 +385,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
           {
             lemma: `go`,
             primaryReading: `xíng`,
+            partOfSpeech: PartOfSpeechName.Verb,
             pronunciationExceptions: [`同行 (tóng háng)`],
             description: `Movement from place to place extends to coordinated direction, the running of processes, undertaking or putting things into effect, and judgments of whether something works.`,
             branches: [
@@ -364,6 +399,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
           {
             lemma: `row`,
             primaryReading: `háng`,
+            partOfSpeech: null,
             pronunciationExceptions: [],
             description: `An ordered row develops into a recognized sphere of activity, its members and expertise, and commercial or ranked standing.`,
             branches: [
@@ -393,6 +429,7 @@ describe(`buildCharacterCoreMeaningsSpecPrompt`, () => {
           "description": "Movement from place to place extends to coordinated direction, the running of processes, undertaking or putting things into effect, and judgments of whether something works.",
           "gloss": "go",
           "id": "行:go",
+          "partOfSpeech": "v",
           "pinyin": "xíng",
           "pinyinExceptions": {
             "同行": "tóng háng",

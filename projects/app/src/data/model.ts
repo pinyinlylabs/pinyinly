@@ -405,25 +405,176 @@ export const hsk30LevelSchema = z.enum({
 export const Hsk30Level = hsk30LevelSchema.enum;
 export type Hsk30Level = z.infer<typeof hsk30LevelSchema>;
 
-// Adopted from https://github.com/ivankra/hsk30
 export const partOfSpeechSchema = z.enum({
-  Noun: `debug--Noun (名)`, // noun
-  Verb: `debug--Verb (动)`, // verb
-  Adjective: `debug--Adjective (形)`, // adjective; usually `Vs` (state verb, 狀態動詞) in taiwanese linguistical tradition and TOCFL
-  Adverb: `debug--Adverb (副)`, // adverb
-  Pronoun: `debug--Pronoun (代)`, // pronoun; usually `Det` in TOCFL
-  Numeral: `debug--Numeral (数)`, // numeral
-  MeasureWordOrClassifier: `debug--MeasureWordOrClassifier (量)`, // measure word/classifier
-  Preposition: `debug--Preposition (介)`, // preposition
-  Conjunction: `debug--Conjunction (连)`, // conjunction
-  AuxiliaryWordOrParticle: `debug--AuxiliaryWordOrParticle (助)`, // auxiliary word/particle; usually `Ptc` in TOCFL
-  Interjection: `debug--Interjection (叹)`, // interjection/exclamation/particle, e.g. 喂, 啊, 哎呀
-  Prefix: `debug--Prefix (前缀)`, // prefix bound forms
-  Suffix: `debug--Suffix (后缀)`, // suffix bound forms
-  Phonetic: `debug--Phonetic (拟声)`, // e.g. 哈哈 [hāhā]
+  /** Names a person, place, thing, or idea; e.g. 学生 (student). */
+  Noun: `debug--Noun (名)`,
+  /** Stands in for a noun; e.g. 我 (I), 你 (you). */
+  Pronoun: `debug--Pronoun (代)`,
+  /** States a number; e.g. 三 (three), 十 (ten). */
+  Numeral: `debug--Numeral (数)`,
+  /** Counts or measures a noun; e.g. 个 in 三个人. */
+  MeasureWord: `debug--MeasureWord (量)`,
+  /** Expresses an amount or quantity; e.g. 几 (how many), 很多 (many). */
+  Quantifier: `debug--Quantifier (数量)`,
+  /** Expresses an action or state; e.g. 走 (walk), 喜欢 (like). */
+  Verb: `debug--Verb (动)`,
+  /** Helps another verb express modality or aspect; e.g. 会 (can/will). */
+  Auxiliary: `debug--Auxiliary (助动)`,
+  /** Describes a quality or state; e.g. 大 (big), 漂亮 (beautiful). */
+  Adjective: `debug--Adjective (形)`,
+  /** Modifies a verb, adjective, or sentence; e.g. 很 (very), 不 (not). */
+  Adverb: `debug--Adverb (副)`,
+  /** Relates a noun phrase to another phrase; e.g. 在 (at), 对 (toward). */
+  Preposition: `debug--Preposition (介)`,
+  /** Connects words or clauses; e.g. 和 (and), 但是 (but). */
+  Conjunction: `debug--Conjunction (连)`,
+  /** Adds grammatical or modal meaning; e.g. 的, 了, 吧. */
+  Particle: `debug--Particle (助)`,
+  /** Imitates a sound; e.g. 哈哈 (laughter), 轰 (boom). */
+  Onomatopoeia: `debug--Onomatopoeia (拟声)`,
+  /** Expresses a sudden reaction; e.g. 哎呀 (oh!), 喂 (hey!). */
+  Interjection: `debug--Interjection (叹)`,
+  /** Bound element placed before a base; e.g. 老 in 老王. */
+  Prefix: `debug--Prefix (前缀)`,
+  /** Bound element placed after a base; e.g. 子 in 桌子. */
+  Suffix: `debug--Suffix (后缀)`,
+  /** Fixed idiomatic expression; e.g. 一石二鸟 (kill two birds with one stone). */
+  Idiom: `debug--Idiom (成语)`,
+  /** Sentence element being talked about; e.g. 人 in 人来了. */
+  Subject: `debug--Subject (主语)`,
+  /** Says something about the subject; e.g. 来了 in 人来了. */
+  Predicate: `debug--Predicate (谓语)`,
+  /** Element acted on by a verb; e.g. 苹果 in 吃苹果. */
+  Object: `debug--Object (宾语)`,
+  /** Completes a verb or adjective's meaning; e.g. 完 in 吃完. */
+  Complement: `debug--Complement (补语)`,
+  /** Verb followed by its object; e.g. 看书 (read a book). */
+  VerbObject: `debug--VerbObject (动宾结构)`,
+  /** Verb followed by a result or degree; e.g. 看完 (finish reading). */
+  VerbComplement: `debug--VerbComplement (动补结构)`,
+  /** Phrase headed by a verb; e.g. 正在吃饭 (eating right now). */
+  VerbalPhrase: `debug--VerbalPhrase (动词短语)`,
+  /** Phrase headed by an adjective; e.g. 很漂亮 (very beautiful). */
+  AdjectivePhrase: `debug--AdjectivePhrase (形容词短语)`,
 });
 export const PartOfSpeech = partOfSpeechSchema.enum;
 export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;
+
+export const partOfSpeechNameSchema = z.enum({
+  Noun: `noun`,
+  Pronoun: `pronoun`,
+  Numeral: `numeral`,
+  MeasureWord: `measure word`,
+  Quantifier: `quantifier`,
+  Verb: `verb`,
+  Auxiliary: `auxiliary`,
+  Adjective: `adjective`,
+  Adverb: `adverb`,
+  Preposition: `preposition`,
+  Conjunction: `conjunction`,
+  Particle: `particle`,
+  Onomatopoeia: `onomatopoeia`,
+  Interjection: `interjection`,
+  Prefix: `prefix`,
+  Suffix: `suffix`,
+  Idiom: `idiom`,
+  Subject: `subject`,
+  Predicate: `predicate`,
+  Object: `object`,
+  Complement: `complement`,
+  VerbObject: `verb-object`,
+  VerbComplement: `verb-complement`,
+  VerbalPhrase: `verbal phrase`,
+  AdjectivePhrase: `adjective phrase`,
+});
+export const PartOfSpeechName = partOfSpeechNameSchema.enum;
+export type PartOfSpeechName = z.infer<typeof partOfSpeechNameSchema>;
+
+export const partOfSpeechAbbreviationSchema = z.enum({
+  Noun: `n`,
+  Pronoun: `pron`,
+  Numeral: `num`,
+  MeasureWord: `m`,
+  Quantifier: `q`,
+  Verb: `v`,
+  Auxiliary: `aux`,
+  Adjective: `adj`,
+  Adverb: `adv`,
+  Preposition: `prep`,
+  Conjunction: `conj`,
+  Particle: `part`,
+  Onomatopoeia: `onom`,
+  Interjection: `int`,
+  Prefix: `pref`,
+  Suffix: `suf`,
+  Idiom: `idm`,
+  Subject: `S`,
+  Predicate: `P`,
+  Object: `O`,
+  Complement: `C`,
+  VerbObject: `VO`,
+  VerbComplement: `VC`,
+  VerbalPhrase: `VP`,
+  AdjectivePhrase: `AP`,
+});
+export const PartOfSpeechAbbr = partOfSpeechAbbreviationSchema.enum;
+export type PartOfSpeechAbbr = z.infer<typeof partOfSpeechAbbreviationSchema>;
+
+export const partOfSpeechAbbreviationByPartOfSpeech = {
+  [PartOfSpeech.Noun]: PartOfSpeechAbbr.Noun,
+  [PartOfSpeech.Pronoun]: PartOfSpeechAbbr.Pronoun,
+  [PartOfSpeech.Numeral]: PartOfSpeechAbbr.Numeral,
+  [PartOfSpeech.MeasureWord]: PartOfSpeechAbbr.MeasureWord,
+  [PartOfSpeech.Quantifier]: PartOfSpeechAbbr.Quantifier,
+  [PartOfSpeech.Verb]: PartOfSpeechAbbr.Verb,
+  [PartOfSpeech.Auxiliary]: PartOfSpeechAbbr.Auxiliary,
+  [PartOfSpeech.Adjective]: PartOfSpeechAbbr.Adjective,
+  [PartOfSpeech.Adverb]: PartOfSpeechAbbr.Adverb,
+  [PartOfSpeech.Preposition]: PartOfSpeechAbbr.Preposition,
+  [PartOfSpeech.Conjunction]: PartOfSpeechAbbr.Conjunction,
+  [PartOfSpeech.Particle]: PartOfSpeechAbbr.Particle,
+  [PartOfSpeech.Onomatopoeia]: PartOfSpeechAbbr.Onomatopoeia,
+  [PartOfSpeech.Interjection]: PartOfSpeechAbbr.Interjection,
+  [PartOfSpeech.Prefix]: PartOfSpeechAbbr.Prefix,
+  [PartOfSpeech.Suffix]: PartOfSpeechAbbr.Suffix,
+  [PartOfSpeech.Idiom]: PartOfSpeechAbbr.Idiom,
+  [PartOfSpeech.Subject]: PartOfSpeechAbbr.Subject,
+  [PartOfSpeech.Predicate]: PartOfSpeechAbbr.Predicate,
+  [PartOfSpeech.Object]: PartOfSpeechAbbr.Object,
+  [PartOfSpeech.Complement]: PartOfSpeechAbbr.Complement,
+  [PartOfSpeech.VerbObject]: PartOfSpeechAbbr.VerbObject,
+  [PartOfSpeech.VerbComplement]: PartOfSpeechAbbr.VerbComplement,
+  [PartOfSpeech.VerbalPhrase]: PartOfSpeechAbbr.VerbalPhrase,
+  [PartOfSpeech.AdjectivePhrase]: PartOfSpeechAbbr.AdjectivePhrase,
+} satisfies Record<PartOfSpeech, PartOfSpeechAbbr>;
+
+export const partOfSpeechNameByPartOfSpeech = {
+  [PartOfSpeech.Noun]: PartOfSpeechName.Noun,
+  [PartOfSpeech.Pronoun]: PartOfSpeechName.Pronoun,
+  [PartOfSpeech.Numeral]: PartOfSpeechName.Numeral,
+  [PartOfSpeech.MeasureWord]: PartOfSpeechName.MeasureWord,
+  [PartOfSpeech.Quantifier]: PartOfSpeechName.Quantifier,
+  [PartOfSpeech.Verb]: PartOfSpeechName.Verb,
+  [PartOfSpeech.Auxiliary]: PartOfSpeechName.Auxiliary,
+  [PartOfSpeech.Adjective]: PartOfSpeechName.Adjective,
+  [PartOfSpeech.Adverb]: PartOfSpeechName.Adverb,
+  [PartOfSpeech.Preposition]: PartOfSpeechName.Preposition,
+  [PartOfSpeech.Conjunction]: PartOfSpeechName.Conjunction,
+  [PartOfSpeech.Particle]: PartOfSpeechName.Particle,
+  [PartOfSpeech.Onomatopoeia]: PartOfSpeechName.Onomatopoeia,
+  [PartOfSpeech.Interjection]: PartOfSpeechName.Interjection,
+  [PartOfSpeech.Prefix]: PartOfSpeechName.Prefix,
+  [PartOfSpeech.Suffix]: PartOfSpeechName.Suffix,
+  [PartOfSpeech.Idiom]: PartOfSpeechName.Idiom,
+  [PartOfSpeech.Subject]: PartOfSpeechName.Subject,
+  [PartOfSpeech.Predicate]: PartOfSpeechName.Predicate,
+  [PartOfSpeech.Object]: PartOfSpeechName.Object,
+  [PartOfSpeech.Complement]: PartOfSpeechName.Complement,
+  [PartOfSpeech.VerbObject]: PartOfSpeechName.VerbObject,
+  [PartOfSpeech.VerbComplement]: PartOfSpeechName.VerbComplement,
+  [PartOfSpeech.VerbalPhrase]: PartOfSpeechName.VerbalPhrase,
+  [PartOfSpeech.AdjectivePhrase]: PartOfSpeechName.AdjectivePhrase,
+} satisfies Record<PartOfSpeech, PartOfSpeechName>;
 
 /**
  * A hanzi and meaning pair, e.g. `好:good`.
@@ -938,6 +1089,7 @@ export const characterCurriculumMeaningSchema = z.object({
   id: hanziWordSchema,
   gloss: z.string(),
   pinyin: pinyinUnitSchema,
+  partOfSpeech: partOfSpeechAbbreviationSchema.optional(),
   hsk30: hsk30LevelSchema.optional(),
   pinyinExceptions: z
     .record(hanziTextSchema, pinyinTextSchema)
@@ -1257,15 +1409,26 @@ const parsePosPattern = new RegExp(
       `(?<adjective>adjective|形|adj|vs)`,
       `(?<adverb>adverb|副|adv)`,
       `(?<pronoun>pronoun|代|pron|det)`,
-      `(?<numeral>numeral|数|num)`,
-      `(?<measureWord>measureWord|量|m|mw)`,
+      `(?<numeral>numeral|数词|数|num)`,
+      `(?<measureWord>measure word|measureWord|classifier|量词|量|m|mw)`,
+      `(?<quantifier>quantifier|数量词|数量|q)`,
+      `(?<auxiliary>auxiliary|助动词|助动|aux)`,
       `(?<preposition>preposition|介|prep)`,
       `(?<conjunction>conjunction|连|conj)`,
-      `(?<auxiliaryWord>particle|助|aux|ptc)`,
+      `(?<particle>particle|助词|助|part|ptc)`,
+      `(?<onomatopoeia>onomatopoeia|phonetic|拟声词|拟声|onom|pho)`,
       `(?<interjection>interjection|叹|int)`,
-      `(?<prefix>prefix|前缀|pre)`,
+      `(?<prefix>prefix|前缀|pref|pre)`,
       `(?<suffix>suffix|后缀|suf)`,
-      `(?<phonetic>Phonetic|拟声|pho)`,
+      `(?<idiom>idiom|成语|idm)`,
+      `(?<subject>subject|主语|s)`,
+      `(?<predicate>predicate|谓语|p)`,
+      `(?<object>object|宾语|o)`,
+      `(?<complement>complement|补语|c)`,
+      `(?<verbObject>verb-object|动宾结构|vo)`,
+      `(?<verbComplement>verb-complement|动补结构|vc)`,
+      `(?<verbalPhrase>verbal phrase|动词短语|vp)`,
+      `(?<adjectivePhrase>adjective phrase|形容词短语|ap)`,
     ].join(`|`) +
     `)$`,
   `iu`,
@@ -1286,21 +1449,43 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
   } else if (match?.groups?.[`numeral`] != null) {
     return PartOfSpeech.Numeral;
   } else if (match?.groups?.[`measureWord`] != null) {
-    return PartOfSpeech.MeasureWordOrClassifier;
+    return PartOfSpeech.MeasureWord;
+  } else if (match?.groups?.[`quantifier`] != null) {
+    return PartOfSpeech.Quantifier;
+  } else if (match?.groups?.[`auxiliary`] != null) {
+    return PartOfSpeech.Auxiliary;
   } else if (match?.groups?.[`preposition`] != null) {
     return PartOfSpeech.Preposition;
   } else if (match?.groups?.[`conjunction`] != null) {
     return PartOfSpeech.Conjunction;
-  } else if (match?.groups?.[`auxiliaryWord`] != null) {
-    return PartOfSpeech.AuxiliaryWordOrParticle;
+  } else if (match?.groups?.[`particle`] != null) {
+    return PartOfSpeech.Particle;
+  } else if (match?.groups?.[`onomatopoeia`] != null) {
+    return PartOfSpeech.Onomatopoeia;
   } else if (match?.groups?.[`interjection`] != null) {
     return PartOfSpeech.Interjection;
   } else if (match?.groups?.[`prefix`] != null) {
     return PartOfSpeech.Prefix;
   } else if (match?.groups?.[`suffix`] != null) {
     return PartOfSpeech.Suffix;
-  } else if (match?.groups?.[`phonetic`] != null) {
-    return PartOfSpeech.Phonetic;
+  } else if (match?.groups?.[`idiom`] != null) {
+    return PartOfSpeech.Idiom;
+  } else if (match?.groups?.[`subject`] != null) {
+    return PartOfSpeech.Subject;
+  } else if (match?.groups?.[`predicate`] != null) {
+    return PartOfSpeech.Predicate;
+  } else if (match?.groups?.[`object`] != null) {
+    return PartOfSpeech.Object;
+  } else if (match?.groups?.[`complement`] != null) {
+    return PartOfSpeech.Complement;
+  } else if (match?.groups?.[`verbObject`] != null) {
+    return PartOfSpeech.VerbObject;
+  } else if (match?.groups?.[`verbComplement`] != null) {
+    return PartOfSpeech.VerbComplement;
+  } else if (match?.groups?.[`verbalPhrase`] != null) {
+    return PartOfSpeech.VerbalPhrase;
+  } else if (match?.groups?.[`adjectivePhrase`] != null) {
+    return PartOfSpeech.AdjectivePhrase;
   }
   return undefined;
 }

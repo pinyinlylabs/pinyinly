@@ -1499,19 +1499,30 @@ describe(`lookupPinyinUnit suite`, async () => {
 describe(`parsePartOfSpeech suite`, () => {
   test.for([
     [`noun,名,N`, PartOfSpeech.Noun],
-    [`verb,动,V`, PartOfSpeech.Verb],
-    [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
-    [`adverb,副,Adv`, PartOfSpeech.Adverb],
     [`pronoun,代,Pron,Det`, PartOfSpeech.Pronoun],
     [`numeral,数,Num`, PartOfSpeech.Numeral],
-    [`measureWord,量,M`, PartOfSpeech.MeasureWordOrClassifier],
+    [`measure word,measureWord,量,M,mw`, PartOfSpeech.MeasureWord],
+    [`quantifier,数量词,q`, PartOfSpeech.Quantifier],
+    [`verb,动,V`, PartOfSpeech.Verb],
+    [`auxiliary,助动词,aux`, PartOfSpeech.Auxiliary],
+    [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
+    [`adverb,副,Adv`, PartOfSpeech.Adverb],
     [`preposition,介,Prep`, PartOfSpeech.Preposition],
     [`conjunction,连,Conj`, PartOfSpeech.Conjunction],
-    [`particle,助,Aux,Ptc`, PartOfSpeech.AuxiliaryWordOrParticle],
+    [`particle,助词,助,part,Ptc`, PartOfSpeech.Particle],
+    [`onomatopoeia,拟声词,拟声,onom,pho`, PartOfSpeech.Onomatopoeia],
     [`interjection,叹,Int`, PartOfSpeech.Interjection],
-    [`prefix,前缀,Prefix`, PartOfSpeech.Prefix],
+    [`prefix,前缀,Prefix,pref,pre`, PartOfSpeech.Prefix],
     [`suffix,后缀,Suffix`, PartOfSpeech.Suffix],
-    [`phonetic,拟声,Phonetic`, PartOfSpeech.Phonetic],
+    [`idiom,成语,Idm`, PartOfSpeech.Idiom],
+    [`subject,主语,S`, PartOfSpeech.Subject],
+    [`predicate,谓语,P`, PartOfSpeech.Predicate],
+    [`object,宾语,O`, PartOfSpeech.Object],
+    [`complement,补语,C`, PartOfSpeech.Complement],
+    [`verb-object,动宾结构,VO`, PartOfSpeech.VerbObject],
+    [`verb-complement,动补结构,VC`, PartOfSpeech.VerbComplement],
+    [`verbal phrase,动词短语,VP`, PartOfSpeech.VerbalPhrase],
+    [`adjective phrase,形容词短语,AP`, PartOfSpeech.AdjectivePhrase],
     [`radical`, undefined],
   ] as const)(`fixture: %s → %s`, ([input, expected]) => {
     for (const text of input.split(`,`)) {
@@ -2587,6 +2598,10 @@ describe(`character.json files`, async () => {
             order,
             gloss: [meaning.gloss],
             pinyin: [meaning.pinyin],
+            pos:
+              meaning.partOfSpeech == null
+                ? undefined
+                : parsePartOfSpeech(meaning.partOfSpeech),
             hsk: meaning.hsk30,
           });
         }
