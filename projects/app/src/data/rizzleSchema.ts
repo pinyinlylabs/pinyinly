@@ -18,7 +18,13 @@ import type {
   Skill,
   SrsStateType,
 } from "./model";
-import { AssetStatusKind, PartOfSpeech, SkillKind, SrsKind } from "./model";
+import {
+  AssetStatusKind,
+  partOfSpeechAbbreviationByPartOfSpeech,
+  PartOfSpeech,
+  SkillKind,
+  SrsKind,
+} from "./model";
 
 export const rSkillKind = memoize0(function rSkillKind() {
   return r.enum(SkillKind, {
@@ -43,20 +49,9 @@ export const rSkillKind = memoize0(function rSkillKind() {
 
 export const rPartOfSpeech = memoize0(function rPartOfSpeech() {
   return r.enum(PartOfSpeech, {
-    [PartOfSpeech.Noun]: `n`,
-    [PartOfSpeech.Verb]: `v`,
-    [PartOfSpeech.Adjective]: `adj`,
-    [PartOfSpeech.Adverb]: `adv`,
-    [PartOfSpeech.Pronoun]: `pron`,
-    [PartOfSpeech.Numeral]: `num`,
-    [PartOfSpeech.MeasureWordOrClassifier]: `m`,
-    [PartOfSpeech.Preposition]: `prep`,
-    [PartOfSpeech.Conjunction]: `conj`,
-    [PartOfSpeech.AuxiliaryWordOrParticle]: `aux`,
-    [PartOfSpeech.Interjection]: `int`,
+    ...partOfSpeechAbbreviationByPartOfSpeech,
     [PartOfSpeech.Prefix]: `pre`,
-    [PartOfSpeech.Suffix]: `suf`,
-    [PartOfSpeech.Phonetic]: `pho`,
+    [PartOfSpeech.Onomatopoeia]: `pho`,
   });
 });
 

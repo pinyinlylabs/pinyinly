@@ -2,7 +2,8 @@ import type {
   DictionaryCollectionEntry,
   UserDictionaryEntry,
 } from "@/client/query";
-import type { HanziText } from "@/data/model";
+import type { HanziText, PartOfSpeech } from "@/data/model";
+import { partOfSpeechNameByPartOfSpeech } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
 import { StudyButton } from "./StudyButton";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
@@ -79,6 +80,7 @@ function DictionaryMeaningListItem({
           <MeaningCoreText
             hanzi={meaning.hanzi}
             pinyin={primaryPinyin}
+            pos={meaning.pos}
             glosses={meaning.gloss}
           />
         </View>
@@ -149,11 +151,13 @@ function MeaningCoreText({
   glosses,
   hanzi,
   pinyin,
+  pos,
   trailingBadge,
 }: {
   glosses: string[];
   hanzi: HanziText;
   pinyin?: string;
+  pos?: PartOfSpeech;
   trailingBadge?: React.ReactNode;
 }) {
   const primaryGloss = glosses[0] ?? ``;
@@ -167,6 +171,11 @@ function MeaningCoreText({
         </Text>
         {pinyin == null || pinyin.length === 0 ? null : (
           <Text className="font-sans text-base text-muted-fg">{pinyin}</Text>
+        )}
+        {pos == null ? null : (
+          <Text className="font-sans text-sm text-muted-fg">
+            {partOfSpeechNameByPartOfSpeech[pos]}
+          </Text>
         )}
         {trailingBadge}
       </View>
