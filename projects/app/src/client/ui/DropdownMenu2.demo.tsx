@@ -15,7 +15,7 @@ export default () => {
               <Text>Open</Text>
             </RectButton>
           </DropdownMenu2.Trigger>
-          <DropdownMenu2.Content sideOffset={2} className="w-56" align="start">
+          <DropdownMenu2.Content className="w-56" align="start">
             <DropdownMenu2.Label>My Account</DropdownMenu2.Label>
             <DropdownMenu2.Separator />
             <DropdownMenu2.Group>

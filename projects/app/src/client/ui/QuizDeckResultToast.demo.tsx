@@ -54,7 +54,7 @@ export default () => {
                   skill={skill}
                   rating={rating}
                   disableAnimation
-                  onUndo={() => {
+                  onRepeatQuestion={() => {
                     console.log(`onUndo`);
                   }}
                 />

@@ -387,11 +387,7 @@ export function WikiHanziCharacterPronunciationBox({
                       Use AI
                     </RectButton>
                   </DropdownMenu2.Trigger>
-                  <DropdownMenu2.Content
-                    sideOffset={2}
-                    className="w-56"
-                    align="start"
-                  >
+                  <DropdownMenu2.Content className="w-56" align="start">
                     <DropdownMenu2.Item
                       onPress={() => {
                         handleUseAi();
