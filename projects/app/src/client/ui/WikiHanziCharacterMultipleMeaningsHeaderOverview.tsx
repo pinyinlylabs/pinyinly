@@ -1,5 +1,5 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import type { HanziCharacter } from "@/data/model";
+import type { HanziCharacter, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
 import { StructuralLozenge } from "./StructuralLozenge";
@@ -7,12 +7,17 @@ import { Text } from "./Text";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
+import { WikiHanziStudyMenu } from "./WikiHanziStudyMenu";
+import { WikiHanziStudyStatusLozenge } from "./WikiHanziStudyStatusLozenge";
+import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 
 export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
   hanzi,
+  hanziWord,
   ...rest
 }: {
   hanzi: HanziCharacter;
+  hanziWord: HanziWord | null;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -26,13 +31,27 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
         .findOne(),
     [db.characterCollection, hanzi],
   );
+  const { data: userMeanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ dictionary: db.userDictionary })
+        .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
+    [db.userDictionary, hanzi],
+  );
 
   return (
     <View className="gap-3 pl-4">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row gap-1">
+          <WikiHanziHskLozenges hanzi={hanzi} />
+          <WikiHanziStudyStatusLozenge
+            hanziWord={userMeanings.length === 0 ? hanziWord : null}
+          />
           {characterData?.isStructural ? <StructuralLozenge /> : null}
         </View>
+        <WikiHanziStudyMenu
+          hanziWord={userMeanings.length === 0 ? hanziWord : null}
+        />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />

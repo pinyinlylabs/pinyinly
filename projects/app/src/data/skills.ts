@@ -1543,6 +1543,22 @@ const weekInMillis = 1000 * 60 * 60 * 24 * 7;
 
 export type RankNumber = 0 | 1 | 2 | 3 | 4;
 
+export function rankToAbsoluteProgress({
+  rank,
+  completion,
+}: {
+  rank: RankNumber;
+  completion: number;
+}): number {
+  if (rank === 0) {
+    return 0;
+  }
+  if (rank === 4) {
+    return 1;
+  }
+  return Math.max(0, Math.min((rank - 1 + completion) / 4, 1));
+}
+
 export function rankName(rank: RankNumber): string {
   if (rank === 0) {
     return `Locked`;

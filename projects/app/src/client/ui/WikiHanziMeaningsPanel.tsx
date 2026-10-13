@@ -2,10 +2,7 @@ import type {
   DictionaryCollectionEntry,
   UserDictionaryEntry,
 } from "@/client/query";
-import type { HanziText, PartOfSpeech } from "@/data/model";
-import { partOfSpeechNameByPartOfSpeech } from "@/data/model";
-import { buildHanziWord } from "@/dictionary";
-import { StudyButton } from "./StudyButton";
+import type { HanziText } from "@/data/model";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -75,17 +72,11 @@ function DictionaryMeaningListItem({
 
   return (
     <View className="gap-3">
-      <View className="flex-row items-start gap-3">
-        <View className="flex-1">
-          <MeaningCoreText
-            hanzi={meaning.hanzi}
-            pinyin={primaryPinyin}
-            pos={meaning.pos}
-            glosses={meaning.gloss}
-          />
-        </View>
-        <StudyButton hanziWord={meaning.hanziWord} />
-      </View>
+      <MeaningCoreText
+        hanzi={meaning.hanzi}
+        pinyin={primaryPinyin}
+        glosses={meaning.gloss}
+      />
 
       {secondaryPinyins.length === 0 ? null : (
         <LabeledText label="Other pinyin">
@@ -128,20 +119,16 @@ function UserMeaningListItem({
 
   return (
     <View className="gap-3">
-      <View className="flex-row items-start justify-between gap-3">
-        <View className="flex-1 gap-2">
-          <MeaningCoreText
-            hanzi={meaning.hanzi}
-            pinyin={value.pinyin}
-            glosses={[value.gloss]}
-            trailingBadge={customBadge}
-          />
-          {value.note == null || value.note.length === 0 ? null : (
-            <LabeledText label="Note">{value.note}</LabeledText>
-          )}
-        </View>
-
-        <StudyButton hanziWord={buildHanziWord(hanzi, meaning.meaningKey)} />
+      <View className="gap-2">
+        <MeaningCoreText
+          hanzi={meaning.hanzi}
+          pinyin={value.pinyin}
+          glosses={[value.gloss]}
+          trailingBadge={customBadge}
+        />
+        {value.note == null || value.note.length === 0 ? null : (
+          <LabeledText label="Note">{value.note}</LabeledText>
+        )}
       </View>
     </View>
   );
@@ -151,13 +138,11 @@ function MeaningCoreText({
   glosses,
   hanzi,
   pinyin,
-  pos,
   trailingBadge,
 }: {
   glosses: string[];
   hanzi: HanziText;
   pinyin?: string;
-  pos?: PartOfSpeech;
   trailingBadge?: React.ReactNode;
 }) {
   const primaryGloss = glosses[0] ?? ``;
@@ -171,11 +156,6 @@ function MeaningCoreText({
         </Text>
         {pinyin == null || pinyin.length === 0 ? null : (
           <Text className="font-sans text-base text-muted-fg">{pinyin}</Text>
-        )}
-        {pos == null ? null : (
-          <Text className="font-sans text-sm text-muted-fg">
-            {partOfSpeechNameByPartOfSpeech[pos]}
-          </Text>
         )}
         {trailingBadge}
       </View>

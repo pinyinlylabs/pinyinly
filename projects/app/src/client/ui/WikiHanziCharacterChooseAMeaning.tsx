@@ -4,7 +4,6 @@ import type { PropsWithChildren } from "react";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "./View";
-import { StudyButton } from "./StudyButton";
 import { useDb } from "./hooks/useDb";
 import { tv } from "tailwind-variants";
 
@@ -62,11 +61,6 @@ export function WikiHanziCharacterChooseAMeaning({
           </ToggleButton>
         ))}
       </View>
-      {selectedMeaning == null ? null : (
-        <View className="flex-row">
-          <StudyButton hanziWord={selectedMeaning} />
-        </View>
-      )}
     </View>
   );
 }

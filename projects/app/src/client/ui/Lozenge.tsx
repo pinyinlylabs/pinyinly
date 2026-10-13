@@ -19,15 +19,45 @@ export function Lozenge({
   color,
   size = `md`,
   className,
+  progress,
+  progressClassName = `bg-blue/20`,
 }: {
   children: ReactNode;
   color: LozengeColor;
   size?: `sm` | `md`;
   className?: string;
+  progress?: number;
+  progressClassName?: string;
 }) {
   return (
-    <View className={lozengeContainerClass({ color, size, className })}>
-      <Text className={lozengeTextClass({ color, size })}>{children}</Text>
+    <View
+      className={lozengeContainerClass({
+        color,
+        size,
+        className:
+          progress == null
+            ? className
+            : `relative overflow-hidden ${className ?? ``}`,
+      })}
+    >
+      {progress == null || progress <= 0 ? null : (
+        <View
+          className={`
+            absolute inset-y-0 left-0
+
+            ${progressClassName}
+          `}
+          style={{ width: `${Math.min(progress, 1) * 100}%` }}
+        />
+      )}
+      <Text
+        className={`
+          ${lozengeTextClass({ color, size })}
+          ${progress == null ? `` : `relative`}
+        `}
+      >
+        {children}
+      </Text>
     </View>
   );
 }

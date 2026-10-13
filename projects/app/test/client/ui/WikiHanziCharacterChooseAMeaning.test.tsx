@@ -12,6 +12,7 @@ import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import { expect, test as baseTest, vi } from "vitest";
 import { WikiHanziCharacterChooseAMeaning } from "#client/ui/WikiHanziCharacterChooseAMeaning.tsx";
+import { WikiHanziStudyMenu } from "#client/ui/WikiHanziStudyMenu.tsx";
 
 const { useLiveQueryMock } = vi.hoisted(() => ({
   useLiveQueryMock: vi.fn(),
@@ -22,9 +23,11 @@ vi.mock(import(`@tanstack/react-db`), async (importOriginal) => ({
   useLiveQuery: useLiveQueryMock,
 }));
 
-vi.mock(import(`#client/ui/StudyButton.tsx`), () => ({
-  StudyButton: ({ hanziWord }: { hanziWord: HanziWord }) => (
-    <button type="button">{`Study ${hanziWord}`}</button>
+vi.mock(import(`#client/ui/WikiHanziStudyMenu.tsx`), () => ({
+  WikiHanziStudyMenu: ({ hanziWord }: { hanziWord: HanziWord | null }) => (
+    <button type="button" disabled={hanziWord == null}>
+      {hanziWord == null ? `Study` : `Study ${hanziWord}`}
+    </button>
   ),
 }));
 
@@ -50,11 +53,14 @@ function TestChooser() {
   const [hanziWord, setHanziWord] = useState<HanziWord | null>(null);
 
   return (
-    <WikiHanziCharacterChooseAMeaning
-      hanzi={hanzi}
-      hanziWord={hanziWord}
-      onHanziWordChanged={setHanziWord}
-    />
+    <>
+      <WikiHanziCharacterChooseAMeaning
+        hanzi={hanzi}
+        hanziWord={hanziWord}
+        onHanziWordChanged={setHanziWord}
+      />
+      <WikiHanziStudyMenu hanziWord={hanziWord} />
+    </>
   );
 }
 
@@ -72,21 +78,28 @@ function providers(rizzle: Rizzle) {
   };
 }
 
-test(`shows a study action for the selected meaning`, ({ rizzle }) => {
+test(`scopes the page study action to the selected meaning`, ({ rizzle }) => {
   useLiveQueryMock.mockReturnValue({ data: meanings });
 
   render(<TestChooser />, { wrapper: providers(rizzle) });
 
-  expect(screen.queryByText(`Study 几:howMany`)).not.toBeInTheDocument();
-  expect(screen.queryByText(`Study 几:smallTable`)).not.toBeInTheDocument();
+  expect(screen.getByRole(`button`, { name: `Study` })).toBeDisabled();
 
   fireEvent.click(screen.getByText(`how many, a few`));
 
-  expect(screen.getByText(`Study 几:howMany`)).toBeInTheDocument();
-  expect(screen.queryByText(`Study 几:smallTable`)).not.toBeInTheDocument();
+  expect(
+    screen.getByRole(`button`, { name: `Study 几:howMany` }),
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole(`button`, { name: `Study 几:smallTable` }),
+  ).not.toBeInTheDocument();
 
   fireEvent.click(screen.getByText(`small table`));
 
-  expect(screen.getByText(`Study 几:smallTable`)).toBeInTheDocument();
-  expect(screen.queryByText(`Study 几:howMany`)).not.toBeInTheDocument();
+  expect(
+    screen.getByRole(`button`, { name: `Study 几:smallTable` }),
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole(`button`, { name: `Study 几:howMany` }),
+  ).not.toBeInTheDocument();
 });

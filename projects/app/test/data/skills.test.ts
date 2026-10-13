@@ -19,6 +19,7 @@ import {
   isHarderDifficultyStyleSkillKind,
   randomPickSkillsForReview,
   rankRules,
+  rankToAbsoluteProgress,
   skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
@@ -44,6 +45,15 @@ import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+describe(`rankToAbsoluteProgress`, () => {
+  test(`converts rank completion into clamped absolute progress`, () => {
+    expect(rankToAbsoluteProgress({ rank: 0, completion: 1 })).toBe(0);
+    expect(rankToAbsoluteProgress({ rank: 2, completion: 0.5 })).toBe(0.375);
+    expect(rankToAbsoluteProgress({ rank: 4, completion: 0 })).toBe(1);
+    expect(rankToAbsoluteProgress({ rank: 3, completion: 2 })).toBe(1);
+  });
+});
 
 type CharacterDecompositionData = Awaited<
   ReturnType<typeof loadBuiltinCharacterDecompositionForMnemonicsEntries>

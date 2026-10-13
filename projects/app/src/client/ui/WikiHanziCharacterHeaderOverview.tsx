@@ -1,5 +1,5 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import type { HanziCharacter } from "@/data/model";
+import type { HanziCharacter, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
 import { StructuralLozenge } from "./StructuralLozenge";
@@ -10,12 +10,17 @@ import { useDb } from "./hooks/useDb";
 import { deepDecomposeHanziWithStrokeSpecs } from "@/dictionary";
 import { intersperse } from "@/client/react";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
+import { WikiHanziStudyMenu } from "./WikiHanziStudyMenu";
+import { WikiHanziStudyStatusLozenge } from "./WikiHanziStudyStatusLozenge";
+import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 
 export function WikiHanziCharacterHeaderOverview({
   hanzi,
+  hanziWord,
   ...rest
 }: {
   hanzi: HanziCharacter;
+  hanziWord: HanziWord | null;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -52,8 +57,11 @@ export function WikiHanziCharacterHeaderOverview({
     <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row gap-1">
+          <WikiHanziHskLozenges hanzi={hanzi} />
           {characterData?.isStructural ? <StructuralLozenge /> : null}
+          <WikiHanziStudyStatusLozenge hanziWord={hanziWord} />
         </View>
+        <WikiHanziStudyMenu hanziWord={hanziWord} />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />

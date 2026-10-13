@@ -1,16 +1,15 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import { hsk30LevelToNumber } from "@/data/hsk";
 import type { HanziText } from "@/data/model";
-import {
-  arrayFilterUnique,
-  sortComparatorNumber,
-} from "@pinyinly/lib/collections";
+import { buildHanziWord } from "@/dictionary";
+import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { HskLozenge } from "./HskLozenge";
+import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
+import { WikiHanziStudyMenu } from "./WikiHanziStudyMenu";
+import { WikiHanziStudyStatusLozenge } from "./WikiHanziStudyStatusLozenge";
 import { useDb } from "./hooks/useDb";
 
 export function WikiHanziWordHeaderOverview({
@@ -29,23 +28,30 @@ export function WikiHanziWordHeaderOverview({
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
     [db.dictionaryCollection, hanzi],
   );
-
-  const hskLevels = [
-    ...dictionaryEntries.map((entry) => entry.hsk),
-    ...dictionaryEntries.map((entry) => entry.hskFirstAppearance),
-  ]
-    .filter((x) => x != null)
-    .filter(arrayFilterUnique())
-    .sort(sortComparatorNumber(hsk30LevelToNumber));
+  const { data: userMeanings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ dictionary: db.userDictionary })
+        .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
+    [db.userDictionary, hanzi],
+  );
+  const hanziWords = [
+    ...dictionaryEntries
+      .filter((entry) => entry.sourceKind === `builtIn`)
+      .map((entry) => entry.hanziWord),
+    ...userMeanings.map((meaning) => buildHanziWord(hanzi, meaning.meaningKey)),
+  ].filter(arrayFilterUnique());
+  const studyHanziWord =
+    hanziWords.length === 1 ? (hanziWords[0] ?? null) : null;
 
   return (
     <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row gap-1">
-          {hskLevels.map((hskLevel) => (
-            <HskLozenge hskLevel={hskLevel} key={hskLevel} />
-          ))}
+          <WikiHanziHskLozenges hanzi={hanzi} />
+          <WikiHanziStudyStatusLozenge hanziWord={studyHanziWord} />
         </View>
+        <WikiHanziStudyMenu hanziWord={studyHanziWord} />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />

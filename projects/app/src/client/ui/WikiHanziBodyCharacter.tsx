@@ -31,7 +31,10 @@ export function WikiHanziBodyCharacter({ hanzi }: { hanzi: HanziCharacter }) {
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-10 bg-bg py-7">
-        <WikiHanziCharacterMultipleMeaningsHeaderOverview hanzi={hanzi} />
+        <WikiHanziCharacterMultipleMeaningsHeaderOverview
+          hanzi={hanzi}
+          hanziWord={hanziWord}
+        />
 
         <WikiHanziCharacterMeaning hanzi={hanzi} hanziWord={hanziWord} />
 
