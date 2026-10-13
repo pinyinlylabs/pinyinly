@@ -22,6 +22,14 @@
 
 After making code changes, automatically verify the changes by running `moon run ':#ci'`.
 
+## Large data files and ripgrep
+
+Avoid broad `rg` searches that include the many per-character `character.json` files under
+`projects/app/src/client/wiki/` or large `*.asset.json` datasets such as
+`projects/app/src/data/dictionary.asset.json` and `projects/app/src/data/characters.asset.json`. The
+raw public data under `projects/app/public/raw/` is excluded by `.rgignore`. When inspecting data,
+target the specific file or narrow path needed rather than searching across all of these files.
+
 ## Project-Specific Patterns & Conventions
 
 - **TypeScript Discriminated Unions:** Always use `kind` as the discriminator property (not `type`).
