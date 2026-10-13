@@ -1031,23 +1031,22 @@ export interface MnemonicHanziComponent {
 
 export const characterJsonSvgSchema = z.strictObject({
   /**
-   * Stroke information, ideally SVG paths but otherwise just the count.
+   * Stroke outlines as SVG paths, or just the stroke count.
    */
   strokes: z.union([
     z.number().describe(`Stroke count`),
-    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
+    z
+      .array(z.string())
+      .describe(`SVG outline paths for each stroke (in order)`),
   ]),
   /**
-   * Median points for each stroke, stored as compact strings so JSON parsing
-   * does not eagerly allocate nested point arrays.
-   *
-   * Format for each stroke: "x,y;x,y;..."
+   * SVG path data for each stroke's median centerline, stored in stroke order.
    */
   medians: z
     .array(z.string())
     .optional()
     .describe(
-      `Stroke medians (in order), encoded as compact strings per stroke: x,y;x,y;...`,
+      `Stroke median centerlines as SVG path strings, in stroke order.`,
     ),
   /**
    * Precomputed SVG paths for slice atoms keyed by canonical StrokeSpec atom text.
