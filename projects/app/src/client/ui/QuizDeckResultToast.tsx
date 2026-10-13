@@ -5,8 +5,7 @@ import { Platform } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
-import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
-import { FloatingMenuModal } from "./FloatingMenuModal";
+import { DropdownMenu2 } from "./DropdownMenu2";
 import { Icon } from "./Icon";
 import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
@@ -18,7 +17,7 @@ export function QuizDeckResultToast({
   skill,
   rating,
   disableAnimation = false,
-  onUndo,
+  onRepeatQuestion,
 }: {
   skill: Skill;
   rating: Rating;
@@ -26,7 +25,7 @@ export function QuizDeckResultToast({
    * Disable the enter animation for the toast, useful for demo purposes and visual snapshotting.
    */
   disableAnimation?: boolean;
-  onUndo: () => void;
+  onRepeatQuestion: () => void;
 }) {
   return (
     <Suspense fallback={null}>
@@ -58,17 +57,12 @@ export function QuizDeckResultToast({
                 </View>
               ) : rating === Rating.Hard ? (
                 <>
-                  <View className="flex-row items-center gap-2">
+                  <View className="w-full flex-row items-center gap-2 self-stretch">
                     <Icon size={32} icon="meh-circled" />
-                    <FloatingMenuModal
-                      menu={<UndoAnswerMenu onUndo={onUndo} />}
-                    >
-                      <Text
-                        className={`pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl`}
-                      >
-                        Too slow
-                      </Text>
-                    </FloatingMenuModal>
+                    <Text className="font-sans text-2xl font-bold text-fg">
+                      Too slow
+                    </Text>
+                    <UndoAnswerDropdown onRepeatQuestion={onRepeatQuestion} />
                   </View>
                   <Text className="font-sans text-lg/none text-fg">
                     Keep practicing and you’ll get faster!
@@ -78,15 +72,12 @@ export function QuizDeckResultToast({
                 (invariant(rating satisfies typeof Rating.Again),
                 (
                   <>
-                    <View className="flex-row items-center gap-2">
+                    <View className="w-full flex-row items-center gap-2 self-stretch">
                       <Icon size={32} icon="close-circled-filled" />
-                      <FloatingMenuModal
-                        menu={<UndoAnswerMenu onUndo={onUndo} />}
-                      >
-                        <Text className="pyly-ref font-sans text-2xl font-bold text-fg pyly-ref-2xl">
-                          Incorrect
-                        </Text>
-                      </FloatingMenuModal>
+                      <Text className="font-sans text-2xl font-bold text-fg">
+                        Incorrect
+                      </Text>
+                      <UndoAnswerDropdown onRepeatQuestion={onRepeatQuestion} />
                     </View>
                     <Text className="font-sans text-xl/none font-medium text-fg">
                       Correct answer:
@@ -103,6 +94,31 @@ export function QuizDeckResultToast({
         </Reanimated.View>
       </View>
     </Suspense>
+  );
+}
+
+function UndoAnswerDropdown({
+  onRepeatQuestion,
+}: {
+  onRepeatQuestion: () => void;
+}) {
+  return (
+    <View className="ml-auto">
+      <DropdownMenu2>
+        <DropdownMenu2.Trigger asChild>
+          <RectButton
+            variant="bareDim"
+            iconStart="more-horizontal"
+            iconSize={20}
+          />
+        </DropdownMenu2.Trigger>
+        <DropdownMenu2.Content align="end">
+          <DropdownMenu2.Item onPress={onRepeatQuestion}>
+            <Text>Repeat question</Text>
+          </DropdownMenu2.Item>
+        </DropdownMenu2.Content>
+      </DropdownMenu2>
+    </View>
   );
 }
 
@@ -133,23 +149,3 @@ const entering = Platform.select({
     },
   }),
 });
-
-function UndoAnswerMenu({
-  onUndo,
-  onRequestClose,
-}: {
-  onUndo: () => void;
-} & FloatingMenuModalMenuProps) {
-  const handleUndo = () => {
-    onUndo();
-    onRequestClose?.();
-  };
-
-  return (
-    <View className="rounded-xl bg-bg-high px-4 py-3">
-      <RectButton variant="bare" onPress={handleUndo}>
-        Undo answer
-      </RectButton>
-    </View>
-  );
-}
