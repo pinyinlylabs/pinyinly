@@ -59,6 +59,7 @@ export function useShortcut(
 
   useHotkey(shortcut, callback, {
     enabled: Platform.OS === `web` && isFocused && isTopmostScope,
+    conflictBehavior: `allow`,
   });
 }
 
