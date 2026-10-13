@@ -49,64 +49,31 @@ import { splitN } from "#util/unicode.js";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
-import type { Duration } from "date-fns";
-import { add } from "date-fns/add";
 // oxlint-disable-next-line no-restricted-imports
 import * as hanzijs from "hanzi";
+import ms from "ms";
 import type { DeepReadonly } from "ts-essentials";
 import { vi } from "vitest";
 
+const parseSignedDuration = (shorthand: string, errorMessage: string) => {
+  const sign = shorthand.startsWith(`-`) ? -1 : 1;
+  const magnitude = nonNullable(
+    ms(shorthand.replace(/^[+-]/u, ``) as ms.StringValue),
+    errorMessage,
+  );
+  return sign * magnitude;
+};
+
 export const date = (strings: TemplateStringsArray): Date => {
   const shorthand = strings.reduce((acc, str) => acc + str, ``);
-  return parseRelativeTimeShorthand(shorthand);
+  const duration = parseSignedDuration(
+    shorthand,
+    `invalid time shorthand ${shorthand}`,
+  );
+  return new Date(Date.now() + duration);
 };
 
 export const 时 = date;
-
-export const parseDurationShorthand = (shorthand: string): Duration => {
-  const result: Duration = {};
-
-  const regex = /(-|\+)?(\d+)([\w])/gu;
-  for (const match of shorthand.matchAll(regex)) {
-    const [, sign, multiple, unit] = match;
-    const scalar = (sign === `-` ? -1 : 1) * Number(multiple);
-
-    switch (unit ?? ``) {
-      case `s`: {
-        result.seconds = scalar;
-        break;
-      }
-      case `m`: {
-        result.minutes = scalar;
-        break;
-      }
-      case `h`: {
-        result.hours = scalar;
-        break;
-      }
-      case `d`: {
-        result.days = scalar;
-        break;
-      }
-      default: {
-        throw new Error(`invalid duration unit ${unit}`);
-      }
-    }
-  }
-
-  return result;
-};
-
-/**
- * Convert a string like "+1d" or "-5s" to a date.
- */
-export const parseRelativeTimeShorthand = (
-  shorthand: string,
-  now = new Date(),
-): Date => {
-  const duration = parseDurationShorthand(shorthand);
-  return add(now, duration);
-};
 
 export const mockSrsState = (
   prevReviewAt: Date,
@@ -279,7 +246,7 @@ export type HistoryCommand =
 
 export type HistoryEventSleep = {
   kind: `sleep`;
-  duration: Duration;
+  duration: number;
 };
 
 export type HistoryEventSkillReview = {
@@ -316,9 +283,14 @@ export function parseHistoryCommand(
   switch (op) {
     // jump forward in time
     case `💤`: {
+      const shorthand = nonNullable(opArgs, `sleep command missing duration`);
+      const duration = parseSignedDuration(
+        shorthand,
+        `invalid sleep duration ${shorthand}`,
+      );
       events.push({
         kind: `sleep`,
-        duration: parseDurationShorthand(opArgs!),
+        duration,
       });
       break;
     }
@@ -478,7 +450,7 @@ export async function seedSkillReviews(
   for (const event of historyEvents) {
     switch (event.kind) {
       case `sleep`: {
-        vi.setSystemTime(add(new Date(), event.duration));
+        vi.setSystemTime(Date.now() + event.duration);
         // Changing the time implies a new review.
         reviewId = nanoid();
         break;
