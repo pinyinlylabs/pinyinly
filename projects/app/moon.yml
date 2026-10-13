@@ -119,6 +119,7 @@ tasks:
 
   codegenWikiCharacterAsset:
     script: |
+      moon run app:test -- dictionary.test.ts -t "svg.segments is populated from decompositions" -u
       moon run app:test -- dictionary.test.ts -t "build characters.asset.json" -u
 
   codegenOxlint:
