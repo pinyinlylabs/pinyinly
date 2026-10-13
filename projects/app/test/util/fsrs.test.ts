@@ -1,4 +1,4 @@
-import { parseRelativeTimeShorthand, 时 } from "#test/data/helpers.ts";
+import { 时 } from "#test/data/helpers.ts";
 import {
   Rating,
   fsrsIsForgotten,
@@ -9,6 +9,7 @@ import type { FsrsState } from "#util/fsrs.ts";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
+import ms from "ms";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod";
 
@@ -49,11 +50,7 @@ describe(`nextReview suite`, async () => {
 
   test(`stability decreases from .Again`, () => {
     const before = nextReview(null, Rating.Good);
-    const after = nextReview(
-      before,
-      Rating.Again,
-      parseRelativeTimeShorthand(`+10m`),
-    );
+    const after = nextReview(before, Rating.Again, 时`+10m`);
 
     expect(after.stability).toBeLessThan(before.stability);
   });
@@ -453,12 +450,12 @@ describe(`fsrsPredictedRecallProbability suite`, async () => {
       expect(
         fsrsPredictedRecallProbability(
           srsState,
-          parseRelativeTimeShorthand(`+${i}d`),
+          new Date(Date.now() + ms(`${i}d`)),
         ),
       ).toBeLessThan(
         fsrsPredictedRecallProbability(
           srsState,
-          parseRelativeTimeShorthand(`+${i - 1}d`),
+          new Date(Date.now() + ms(`${i - 1}d`)),
         ),
       );
     }

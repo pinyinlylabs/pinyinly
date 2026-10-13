@@ -9,35 +9,11 @@ import {
   date,
   fsrsSrsState,
   getHanziCharacterToPinyinUnit,
-  parseDurationShorthand,
   parseHistoryCommand,
-  parseRelativeTimeShorthand,
   pickExampleHanziForPinyinUnit,
   rankExampleHanziCandidates,
   时,
 } from "./helpers.ts";
-
-describe(`parseRelativeTimeShorthand suite`, () => {
-  test(`assumes positive without a sign`, () => {
-    expect(parseRelativeTimeShorthand(`1s`, new Date(0))).toEqual(
-      new Date(1000),
-    );
-  });
-
-  test(`supports negative durations`, () => {
-    const now = new Date();
-    expect(parseRelativeTimeShorthand(`-5m`, now)).toEqual(
-      new Date(now.getTime() - 5 * 60 * 1000),
-    );
-  });
-
-  test(`supports positive durations`, () => {
-    const now = new Date();
-    expect(parseRelativeTimeShorthand(`+5m`, now)).toEqual(
-      new Date(now.getTime() + 5 * 60 * 1000),
-    );
-  });
-});
 
 describe(`date suite`, () => {
   test(`parses values`, () => {
@@ -46,8 +22,14 @@ describe(`date suite`, () => {
       now: new Date(`2025-01-01T00:00:00Z`),
     });
 
-    expect(date`+1d`).toEqual(parseRelativeTimeShorthand(`+1d`));
-    expect(date`+1m`).toEqual(parseRelativeTimeShorthand(`+1m`));
+    expect(date`1s`).toEqual(new Date(`2025-01-01T00:00:01Z`));
+    expect(date`+1d`).toEqual(new Date(`2025-01-02T00:00:00Z`));
+    expect(date`-5m`).toEqual(new Date(`2024-12-31T23:55:00Z`));
+  });
+
+  test(`rejects invalid and compound durations`, () => {
+    expect(() => date`5x`).toThrow();
+    expect(() => date`1m2s`).toThrow();
   });
 });
 
@@ -68,34 +50,21 @@ describe(`fsrsSrsState suite`, () => {
   });
 });
 
-describe(`parseDurationShorthand suite`, () => {
-  test.for([
-    [`30s`, { seconds: 30 }],
-    [`+30s`, { seconds: 30 }],
-    [`-30s`, { seconds: -30 }],
-    [`30m`, { minutes: 30 }],
-    [`+30m`, { minutes: 30 }],
-    [`-30m`, { minutes: -30 }],
-    [`1m2s`, { minutes: 1, seconds: 2 }],
-    [`1m 2s`, { minutes: 1, seconds: 2 }],
-    [`-1m 2s`, { minutes: -1, seconds: 2 }],
-  ] as const)(`parses %s`, ([input, expected]) => {
-    expect(parseDurationShorthand(input)).toEqual(expected);
-  });
-
-  test(`errors`, () => {
-    expect(
-      () => parseDurationShorthand(`5x`),
-      `unsupported unit`,
-    ).toThrowErrorMatchingInlineSnapshot(`[Error: invalid duration unit x]`);
-  });
-});
-
 describe(`parseHistoryCommand suite`, () => {
   test(`sleep`, () => {
     expect(parseHistoryCommand(`💤 5s`)).toEqual([
-      { kind: `sleep`, duration: { seconds: 5 } },
+      { kind: `sleep`, duration: 5000 },
     ]);
+    expect(parseHistoryCommand(`💤 +5s`)).toEqual([
+      { kind: `sleep`, duration: 5000 },
+    ]);
+    expect(parseHistoryCommand(`💤 -5s`)).toEqual([
+      { kind: `sleep`, duration: -5000 },
+    ]);
+  });
+
+  test(`rejects invalid sleep durations`, () => {
+    expect(() => parseHistoryCommand(`💤 5x`)).toThrow();
   });
 
   test.for([
