@@ -17,6 +17,7 @@ import {
   isHanziCharacter,
   makeVerticalMergeCharacterIdsTransform,
   parseIds,
+  walkIdsNode,
   walkIdsNodeLeafs,
 } from "#data/hanzi.js";
 import { splitHanziText } from "#data/hanzi.ts";
@@ -2247,6 +2248,35 @@ describe(`character.json files`, async () => {
     }
   });
 
+  const idsStrokeCountOverrides: Record<string, number> = {
+    "⿾ュ": 3,
+  };
+
+  function getIdsStrokeCountOverrides(ids: string): Map<number, number> {
+    const overrides = new Map<number, number>();
+    let leafIndex = 0;
+
+    for (const node of walkIdsNode(parseIds(ids))) {
+      if (Array.isArray(node)) {
+        const override =
+          idsStrokeCountOverrides[idsNodeToString(node, (x) => x)];
+        if (override != null) {
+          overrides.set(leafIndex, override);
+        }
+      } else {
+        leafIndex++;
+      }
+    }
+
+    return overrides;
+  }
+
+  test(`horizontal reflection stroke count overrides`, () => {
+    expect(getIdsStrokeCountOverrides(`⿾ュ`)).toEqual(new Map([[0, 3]]));
+    expect(getIdsStrokeCountOverrides(`⿰一⿾ュ`)).toEqual(new Map([[1, 3]]));
+    expect(getIdsStrokeCountOverrides(`ュ`)).toEqual(new Map());
+  });
+
   test(`decomposition strokes match the hanzi stroke count`, async () => {
     const charactersToCheck = await buildCharactersToCheck();
 
@@ -2255,6 +2285,7 @@ describe(`character.json files`, async () => {
         for (const [ids, strokeSpecs] of Object.entries(
           characterJson.decompositions,
         )) {
+          const strokeCountOverrides = getIdsStrokeCountOverrides(ids);
           let i = -1;
           for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
             i++;
@@ -2271,7 +2302,9 @@ describe(`character.json files`, async () => {
                   strokeSpec.length,
                   `${filePath} IDS ${ids} (${leaf}) stroke count`,
                 )
-                .toEqual(hanziData.svg.strokes.length);
+                .toEqual(
+                  strokeCountOverrides.get(i) ?? hanziData.svg.strokes.length,
+                );
             }
           }
         }
