@@ -10,8 +10,9 @@ import { useDb } from "./hooks/useDb";
 import { deepDecomposeHanziWithStrokeSpecs } from "@/dictionary";
 import { intersperse } from "@/client/react";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
-import { WikiHanziStudyMenu } from "./WikiHanziStudyMenu";
-import { WikiHanziStudyStatusLozenge } from "./WikiHanziStudyStatusLozenge";
+import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
+import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
+import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 
 export function WikiHanziCharacterHeaderOverview({
@@ -56,12 +57,13 @@ export function WikiHanziCharacterHeaderOverview({
   return (
     <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
-        <View className="flex-1 flex-row gap-1">
+        <View className="flex-1 flex-row items-center gap-1">
+          <WikiHanziBookmarkLozenge hanziWord={hanziWord} />
           <WikiHanziHskLozenges hanzi={hanzi} />
           {characterData?.isStructural ? <StructuralLozenge /> : null}
-          <WikiHanziStudyStatusLozenge hanziWord={hanziWord} />
+          <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={hanziWord} />
         </View>
-        <WikiHanziStudyMenu hanziWord={hanziWord} />
+        <WikiHanziBookmarkMenu hanziWord={hanziWord} />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />

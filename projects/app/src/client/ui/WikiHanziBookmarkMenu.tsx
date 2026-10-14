@@ -1,11 +1,11 @@
-import { useStudyToggle } from "@/client/ui/hooks/useStudyToggle";
+import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import type { HanziWord } from "@/data/model";
 import { Pressable } from "react-native";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import { Icon } from "./Icon";
 import { Text } from "./Text";
 
-export function WikiHanziStudyMenu({
+export function WikiHanziBookmarkMenu({
   hanziWord,
 }: {
   hanziWord: HanziWord | null;
@@ -30,25 +30,25 @@ export function WikiHanziStudyMenu({
       <DropdownMenu2.Content align="end" sideOffset={4}>
         {hanziWord == null ? (
           <DropdownMenu2.Item disabled>
-            <Text>Study item</Text>
+            <Text>Bookmark</Text>
           </DropdownMenu2.Item>
         ) : (
-          <StudyMenuItem hanziWord={hanziWord} />
+          <BookmarkMenuItem hanziWord={hanziWord} />
         )}
       </DropdownMenu2.Content>
     </DropdownMenu2>
   );
 }
 
-function StudyMenuItem({ hanziWord }: { hanziWord: HanziWord }) {
-  const { isStudying, isLoading, toggle } = useStudyToggle(hanziWord);
+function BookmarkMenuItem({ hanziWord }: { hanziWord: HanziWord }) {
+  const { isBookmarked, isLoading, toggle } = useBookmarkToggle(hanziWord);
   return (
     <DropdownMenu2.CheckboxItem
-      checked={isStudying}
+      checked={isBookmarked}
       disabled={isLoading}
       onCheckedChange={toggle}
     >
-      <Text>Study item</Text>
+      <Text>Bookmark</Text>
     </DropdownMenu2.CheckboxItem>
   );
 }

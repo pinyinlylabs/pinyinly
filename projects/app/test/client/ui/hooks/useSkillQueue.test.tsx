@@ -3,7 +3,7 @@
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import { useSkillQueue } from "#client/ui/hooks/useSkillQueue.ts";
-import { useStudyToggle } from "#client/ui/hooks/useStudyToggle.ts";
+import { useBookmarkToggle } from "#client/ui/hooks/useBookmarkToggle.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import { QuestionFlagKind } from "#data/model.js";
@@ -176,8 +176,8 @@ test(`scoped practice excludes unrelated retries and practices not-due targets`,
 test(`Study buttons toggle meanings independently`, async ({ rizzle }) => {
   const { result, unmount } = renderHook(
     () => ({
-      first: useStudyToggle(`好:good`),
-      second: useStudyToggle(`好:like`),
+      first: useBookmarkToggle(`好:good`),
+      second: useBookmarkToggle(`好:like`),
     }),
     { wrapper: testContextProviders({ rizzle }) },
   );
@@ -188,27 +188,27 @@ test(`Study buttons toggle meanings independently`, async ({ rizzle }) => {
     result.current.first.toggle();
   });
   await waitFor(() => {
-    expect(result.current.first.isStudying).toBe(true);
+    expect(result.current.first.isBookmarked).toBe(true);
   });
-  expect(result.current.second.isStudying).toBe(false);
+  expect(result.current.second.isBookmarked).toBe(false);
   act(() => {
     result.current.second.toggle();
   });
   await waitFor(() => {
-    expect(result.current.second.isStudying).toBe(true);
+    expect(result.current.second.isBookmarked).toBe(true);
   });
   act(() => {
     result.current.first.toggle();
   });
   await waitFor(() => {
-    expect(result.current.first.isStudying).toBe(false);
+    expect(result.current.first.isBookmarked).toBe(false);
   });
-  expect(result.current.second.isStudying).toBe(true);
+  expect(result.current.second.isBookmarked).toBe(true);
   act(() => {
     result.current.first.toggle();
   });
   await waitFor(() => {
-    expect(result.current.first.isStudying).toBe(true);
+    expect(result.current.first.isBookmarked).toBe(true);
   });
   unmount();
 });

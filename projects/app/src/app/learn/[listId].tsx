@@ -24,7 +24,7 @@ export default function ListPracticePage() {
 
   const backHref =
     parsedListId === `study`
-      ? (`/skills/study` as const)
+      ? (`/skills/bookmark` as const)
       : (`/skills/hsk/${parsedListId.slice(4)}` as const);
 
   return (

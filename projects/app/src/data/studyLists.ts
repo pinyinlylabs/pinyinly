@@ -12,10 +12,10 @@ export function parseStudyListId(
 }
 
 export function studyListTitle(listId: StudyListId): string {
-  return listId === `study` ? `Study` : `HSK ${listId.slice(4)}`;
+  return listId === `study` ? `Bookmarks` : `HSK ${listId.slice(4)}`;
 }
 
-export function groupStudyWordsByAddedDate(
+export function groupBookmarkedWordsByAddedDate(
   words: readonly { hanziWord: HanziWord; createdAt: Date }[],
   limit?: number,
 ): { date: Date; hanziWords: HanziWord[] }[] {

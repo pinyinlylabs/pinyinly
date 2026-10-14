@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 
-import type { HanziCharacter, HanziWord } from "#data/model.ts";
+import { SrsKind } from "#data/model.ts";
+import type {
+  HanziCharacter,
+  HanziWord,
+  Skill,
+  SrsStateType,
+} from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
@@ -12,7 +18,10 @@ import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import { expect, test as baseTest, vi } from "vitest";
 import { WikiHanziCharacterChooseAMeaning } from "#client/ui/WikiHanziCharacterChooseAMeaning.tsx";
-import { WikiHanziStudyMenu } from "#client/ui/WikiHanziStudyMenu.tsx";
+import { WikiHanziMeaningsPanel } from "#client/ui/WikiHanziMeaningsPanel.tsx";
+import { WikiHanziProgressLozenge } from "#client/ui/WikiHanziProgressLozenge.tsx";
+import { getHanziWordsProgress } from "#client/ui/wikiHanziProgress.ts";
+import { WikiHanziBookmarkMenu } from "#client/ui/WikiHanziBookmarkMenu.tsx";
 
 const { useLiveQueryMock } = vi.hoisted(() => ({
   useLiveQueryMock: vi.fn(),
@@ -23,10 +32,10 @@ vi.mock(import(`@tanstack/react-db`), async (importOriginal) => ({
   useLiveQuery: useLiveQueryMock,
 }));
 
-vi.mock(import(`#client/ui/WikiHanziStudyMenu.tsx`), () => ({
-  WikiHanziStudyMenu: ({ hanziWord }: { hanziWord: HanziWord | null }) => (
+vi.mock(import(`#client/ui/WikiHanziBookmarkMenu.tsx`), () => ({
+  WikiHanziBookmarkMenu: ({ hanziWord }: { hanziWord: HanziWord | null }) => (
     <button type="button" disabled={hanziWord == null}>
-      {hanziWord == null ? `Study` : `Study ${hanziWord}`}
+      {hanziWord == null ? `Bookmark` : `Bookmark ${hanziWord}`}
     </button>
   ),
 }));
@@ -59,7 +68,7 @@ function TestChooser() {
         hanziWord={hanziWord}
         onHanziWordChanged={setHanziWord}
       />
-      <WikiHanziStudyMenu hanziWord={hanziWord} />
+      <WikiHanziBookmarkMenu hanziWord={hanziWord} />
     </>
   );
 }
@@ -83,23 +92,140 @@ test(`scopes the page study action to the selected meaning`, ({ rizzle }) => {
 
   render(<TestChooser />, { wrapper: providers(rizzle) });
 
-  expect(screen.getByRole(`button`, { name: `Study` })).toBeDisabled();
+  expect(screen.getByRole(`button`, { name: `Bookmark` })).toBeDisabled();
 
   fireEvent.click(screen.getByText(`how many, a few`));
 
   expect(
-    screen.getByRole(`button`, { name: `Study 几:howMany` }),
+    screen.getByRole(`button`, { name: `Bookmark 几:howMany` }),
   ).toBeEnabled();
   expect(
-    screen.queryByRole(`button`, { name: `Study 几:smallTable` }),
+    screen.queryByRole(`button`, { name: `Bookmark 几:smallTable` }),
   ).not.toBeInTheDocument();
 
   fireEvent.click(screen.getByText(`small table`));
 
   expect(
-    screen.getByRole(`button`, { name: `Study 几:smallTable` }),
+    screen.getByRole(`button`, { name: `Bookmark 几:smallTable` }),
   ).toBeEnabled();
   expect(
-    screen.queryByRole(`button`, { name: `Study 几:howMany` }),
+    screen.queryByRole(`button`, { name: `Bookmark 几:howMany` }),
   ).not.toBeInTheDocument();
+});
+
+test(`selects a sole word meaning for the page study action by default`, ({
+  rizzle,
+}) => {
+  useLiveQueryMock
+    .mockReturnValueOnce({
+      data: [
+        {
+          sourceKind: `builtIn`,
+          id: `几:howMany`,
+          hanzi,
+          hanziWord: meanings[0]!.hanziWord,
+          gloss: meanings[0]!.gloss,
+          pinyin: meanings[0]!.pinyin,
+          note: null,
+        },
+      ],
+    })
+    .mockReturnValueOnce({ data: [] });
+  const onHanziWordSelected = vi.fn();
+
+  render(
+    <WikiHanziMeaningsPanel
+      hanzi={hanzi}
+      selectedHanziWord={null}
+      onHanziWordSelected={onHanziWordSelected}
+    />,
+    { wrapper: providers(rizzle) },
+  );
+
+  expect(onHanziWordSelected).toHaveBeenCalledExactlyOnceWith(
+    meanings[0]!.hanziWord,
+  );
+  expect(screen.queryByRole(`radio`)).not.toBeInTheDocument();
+});
+
+test(`requires a choice when a word has multiple meanings`, ({ rizzle }) => {
+  useLiveQueryMock
+    .mockReturnValueOnce({
+      data: meanings.map((meaning) => ({
+        sourceKind: `builtIn`,
+        id: meaning.hanziWord,
+        hanzi,
+        hanziWord: meaning.hanziWord,
+        gloss: meaning.gloss,
+        pinyin: meaning.pinyin,
+        note: null,
+      })),
+    })
+    .mockReturnValueOnce({ data: [] });
+  const onHanziWordSelected = vi.fn();
+
+  render(
+    <WikiHanziMeaningsPanel
+      hanzi={hanzi}
+      selectedHanziWord={null}
+      onHanziWordSelected={onHanziWordSelected}
+    />,
+    { wrapper: providers(rizzle) },
+  );
+
+  expect(onHanziWordSelected).not.toHaveBeenCalled();
+  expect(screen.getAllByRole(`radio`)).toHaveLength(2);
+
+  fireEvent.click(screen.getByText(`how many, a few`));
+
+  expect(onHanziWordSelected).toHaveBeenCalledExactlyOnceWith(
+    meanings[0]!.hanziWord,
+  );
+});
+
+test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
+  useLiveQueryMock
+    .mockReturnValueOnce({ data: [] })
+    .mockReturnValueOnce({ data: [] })
+    .mockReturnValueOnce({ data: [] });
+
+  render(<WikiHanziProgressLozenge hanzi={hanzi} />, {
+    wrapper: providers(rizzle),
+  });
+
+  expect(screen.getByText(`Locked`)).toBeInTheDocument();
+});
+
+test(`averages meaning progress until a meaning is selected`, () => {
+  const fullyLearnedSkills = [
+    `he:几:howMany`,
+    `hpi:几:howMany`,
+    `hpf:几:howMany`,
+    `hp:几:howMany`,
+  ] as Skill[];
+  const skillSrsStates = new Map<Skill, SrsStateType>(
+    fullyLearnedSkills.map((skill) => [
+      skill,
+      {
+        kind: SrsKind.FsrsFourPointFive,
+        prevReviewAt: new Date(),
+        nextReviewAt: new Date(),
+        stability: 1000,
+        difficulty: 0,
+      },
+    ]),
+  );
+
+  expect(
+    getHanziWordsProgress({
+      hanziWords: [meanings[0]!.hanziWord, meanings[1]!.hanziWord],
+      skillSrsStates,
+    }),
+  ).toEqual({ progress: 0.5, rank: 2 });
+  expect(
+    getHanziWordsProgress({
+      hanziWords: [meanings[0]!.hanziWord],
+      skillSrsStates,
+    }),
+  ).toEqual({ progress: 1, rank: 4 });
 });

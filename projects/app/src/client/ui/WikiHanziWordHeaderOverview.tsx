@@ -1,16 +1,14 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import type { HanziText } from "@/data/model";
-import { buildHanziWord } from "@/dictionary";
-import { arrayFilterUnique } from "@pinyinly/lib/collections";
+import type { HanziText, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
-import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useState } from "react";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
-import { WikiHanziStudyMenu } from "./WikiHanziStudyMenu";
-import { WikiHanziStudyStatusLozenge } from "./WikiHanziStudyStatusLozenge";
-import { useDb } from "./hooks/useDb";
+import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
+import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
+import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 
 export function WikiHanziWordHeaderOverview({
   hanzi,
@@ -20,38 +18,17 @@ export function WikiHanziWordHeaderOverview({
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
-  const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
-      q
-        .from({ entry: db.dictionaryCollection })
-        .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionaryCollection, hanzi],
-  );
-  const { data: userMeanings } = useLiveQuery(
-    (q) =>
-      q
-        .from({ dictionary: db.userDictionary })
-        .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
-    [db.userDictionary, hanzi],
-  );
-  const hanziWords = [
-    ...dictionaryEntries
-      .filter((entry) => entry.sourceKind === `builtIn`)
-      .map((entry) => entry.hanziWord),
-    ...userMeanings.map((meaning) => buildHanziWord(hanzi, meaning.meaningKey)),
-  ].filter(arrayFilterUnique());
-  const studyHanziWord =
-    hanziWords.length === 1 ? (hanziWords[0] ?? null) : null;
+  const [studyHanziWord, setStudyHanziWord] = useState<HanziWord | null>(null);
 
   return (
     <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
-        <View className="flex-1 flex-row gap-1">
+        <View className="flex-1 flex-row items-center gap-1">
+          <WikiHanziBookmarkLozenge hanziWord={studyHanziWord} />
           <WikiHanziHskLozenges hanzi={hanzi} />
-          <WikiHanziStudyStatusLozenge hanziWord={studyHanziWord} />
+          <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={studyHanziWord} />
         </View>
-        <WikiHanziStudyMenu hanziWord={studyHanziWord} />
+        <WikiHanziBookmarkMenu hanziWord={studyHanziWord} />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />
@@ -59,7 +36,11 @@ export function WikiHanziWordHeaderOverview({
           {hanzi}
         </Text>
       </View>
-      <WikiHanziMeaningsPanel hanzi={hanzi} />
+      <WikiHanziMeaningsPanel
+        hanzi={hanzi}
+        selectedHanziWord={studyHanziWord}
+        onHanziWordSelected={setStudyHanziWord}
+      />
     </View>
   );
 }

@@ -7,8 +7,9 @@ import { Text } from "./Text";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
-import { WikiHanziStudyMenu } from "./WikiHanziStudyMenu";
-import { WikiHanziStudyStatusLozenge } from "./WikiHanziStudyStatusLozenge";
+import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
+import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
+import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 
 export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
@@ -31,27 +32,16 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
         .findOne(),
     [db.characterCollection, hanzi],
   );
-  const { data: userMeanings } = useLiveQuery(
-    (q) =>
-      q
-        .from({ dictionary: db.userDictionary })
-        .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
-    [db.userDictionary, hanzi],
-  );
-
   return (
     <View className="gap-3 pl-4">
       <View className="flex-row items-center gap-1">
-        <View className="flex-1 flex-row gap-1">
+        <View className="flex-1 flex-row items-center gap-1">
+          <WikiHanziBookmarkLozenge hanziWord={hanziWord} />
           <WikiHanziHskLozenges hanzi={hanzi} />
-          <WikiHanziStudyStatusLozenge
-            hanziWord={userMeanings.length === 0 ? hanziWord : null}
-          />
+          <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={hanziWord} />
           {characterData?.isStructural ? <StructuralLozenge /> : null}
         </View>
-        <WikiHanziStudyMenu
-          hanziWord={userMeanings.length === 0 ? hanziWord : null}
-        />
+        <WikiHanziBookmarkMenu hanziWord={hanziWord} />
       </View>
       <View>
         <HeaderTitleProvider.ScrollTrigger title={hanzi} />

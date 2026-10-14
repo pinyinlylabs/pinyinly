@@ -61,8 +61,8 @@ function SkillQueueProvider({
       [db.skillStateCollection],
     );
   const { data: studyWordsData, isLoading: isStudyWordsLoading } = useLiveQuery(
-    (q) => q.from({ word: db.studyHanziWordsCollection }),
-    [db.studyHanziWordsCollection],
+    (q) => q.from({ word: db.bookmarkedHanziWordsCollection }),
+    [db.bookmarkedHanziWordsCollection],
   );
   const {
     data: characterDecompositionData,

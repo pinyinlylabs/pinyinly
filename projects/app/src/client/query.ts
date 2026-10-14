@@ -457,13 +457,13 @@ export type SettingCollection = Collection<
   string
 >;
 
-export type StudyWordItem = RizzleEntityOutput<
+export type BookmarkedWordItem = RizzleEntityOutput<
   typeof studyWordItemSetting.entity
 >;
 
-function decodeStudyWord(
+function decodeBookmarkedWord(
   setting: CollectionOutput<SettingCollection>,
-): StudyWordItem | null {
+): BookmarkedWordItem | null {
   try {
     const keyParams = studyWordItemSetting.entity.unmarshalKey(setting.key);
     if (!keyParams.hanziWord.includes(`:`)) {
@@ -476,7 +476,7 @@ function decodeStudyWord(
   }
 }
 
-export function createStudyWordsCollection(
+export function createBookmarkedWordsCollection(
   settingCollection: SettingCollection,
 ) {
   return createLiveQueryCollection((q) => {
@@ -485,7 +485,7 @@ export function createStudyWordsCollection(
       .where(({ setting }) =>
         like(setting.key, `${studyWordItemSetting.entity.keyPrefix}%`),
       )
-      .fn.select(({ setting }) => ({ item: decodeStudyWord(setting) }));
+      .fn.select(({ setting }) => ({ item: decodeBookmarkedWord(setting) }));
 
     return q
       .from({ decoded: decodedWords })
@@ -494,26 +494,26 @@ export function createStudyWordsCollection(
   });
 }
 
-export type StudyWordsCollection = ReturnType<
-  typeof createStudyWordsCollection
+export type BookmarkedWordsCollection = ReturnType<
+  typeof createBookmarkedWordsCollection
 >;
 
-export function createStudyHanziWordsCollection<
+export function createBookmarkedHanziWordsCollection<
   Entry extends { hanzi: HanziText; hanziWord: HanziWord },
   Key extends string | number,
 >(
-  studyWords: StudyWordsCollection,
+  bookmarkedWords: BookmarkedWordsCollection,
   dictionaryCollection: Collection<Entry, Key>,
 ) {
   return createLiveQueryCollection((q) =>
     q
-      .from({ studyWord: studyWords })
-      .innerJoin({ entry: dictionaryCollection }, ({ studyWord, entry }) =>
-        eq(studyWord.hanziWord, entry.hanziWord),
+      .from({ bookmarkedWord: bookmarkedWords })
+      .innerJoin({ entry: dictionaryCollection }, ({ bookmarkedWord, entry }) =>
+        eq(bookmarkedWord.hanziWord, entry.hanziWord),
       )
-      .select(({ entry, studyWord }) => ({
+      .select(({ entry, bookmarkedWord }) => ({
         hanziWord: entry.hanziWord,
-        createdAt: studyWord.createdAt,
+        createdAt: bookmarkedWord.createdAt,
       }))
       .distinct(),
   );
@@ -1357,12 +1357,13 @@ export function makeDb(rizzle: Rizzle) {
     indexType: BTreeIndex,
   });
 
-  const studyWordsCollection = createStudyWordsCollection(settingCollection);
-  studyWordsCollection.createIndex((row) => row.hanziWord, {
+  const bookmarkedWordsCollection =
+    createBookmarkedWordsCollection(settingCollection);
+  bookmarkedWordsCollection.createIndex((row) => row.hanziWord, {
     indexType: BTreeIndex,
   });
-  const studyHanziWordsCollection = createStudyHanziWordsCollection(
-    studyWordsCollection,
+  const bookmarkedHanziWordsCollection = createBookmarkedHanziWordsCollection(
+    bookmarkedWordsCollection,
     dictionaryCollection,
   );
 
@@ -1467,8 +1468,8 @@ export function makeDb(rizzle: Rizzle) {
     characterMnemonicIdsCollection,
     characterCollection,
     dictionaryCollection,
-    studyWordsCollection,
-    studyHanziWordsCollection,
+    bookmarkedWordsCollection,
+    bookmarkedHanziWordsCollection,
     settingCollection,
     settingHistoryCollection,
     userDictionary,

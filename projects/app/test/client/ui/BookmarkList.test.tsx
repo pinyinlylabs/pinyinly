@@ -4,7 +4,7 @@ import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { SkillWordRows } from "#client/ui/SkillWordRows.tsx";
-import { StudyList } from "#client/ui/StudyList.tsx";
+import { BookmarkList } from "#client/ui/BookmarkList.tsx";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import {
   getStudyWordKeyParams,
@@ -71,9 +71,9 @@ test(`uses shared HSK rows in dated groups without notes or removal buttons`, as
       skipHistory: true,
     });
   }
-  const rendered = render(<StudyList />, { wrapper: providers(rizzle) });
+  const rendered = render(<BookmarkList />, { wrapper: providers(rizzle) });
   await waitFor(() => {
-    expect(rendered.getByText(`Study (2)`)).toBeTruthy();
+    expect(rendered.getByText(`Bookmarks (2)`)).toBeTruthy();
     expect(rendered.getByText(`hello`)).toBeTruthy();
     expect(rendered.getByText(`hǎo`)).toBeTruthy();
     expect(rendered.getByText(`Today`)).toBeTruthy();
@@ -122,7 +122,7 @@ test(`uses shared HSK rows in dated groups without notes or removal buttons`, as
   });
   await waitFor(() => {
     expect(rendered.queryByText(`Today`)).toBeNull();
-    expect(rendered.getByText(`Study (1)`)).toBeTruthy();
+    expect(rendered.getByText(`Bookmarks (1)`)).toBeTruthy();
   });
   shared.unmount();
   rendered.unmount();
@@ -147,7 +147,7 @@ test(`orders words within a day by when they were added`, async ({
     });
   }
 
-  const rendered = render(<StudyList />, { wrapper: providers(rizzle) });
+  const rendered = render(<BookmarkList />, { wrapper: providers(rizzle) });
   await waitFor(() => {
     expect(rendered.getByText(`hello`)).toBeTruthy();
     expect(rendered.getByText(`good`)).toBeTruthy();
@@ -174,7 +174,7 @@ test(`shows HSK labels beside words without a leading indentation column`, async
     now: new Date(),
     skipHistory: true,
   });
-  const rendered = render(<StudyList />, { wrapper: providers(rizzle) });
+  const rendered = render(<BookmarkList />, { wrapper: providers(rizzle) });
   await waitFor(() => {
     expect(rendered.getByText(`one`)).toBeTruthy();
     expect(rendered.getByText(`HSK`)).toBeTruthy();
@@ -199,7 +199,7 @@ test(`shows older dates without the Added prefix`, async ({ rizzle }) => {
     now: new Date(),
     skipHistory: true,
   });
-  const rendered = render(<StudyList />, { wrapper: providers(rizzle) });
+  const rendered = render(<BookmarkList />, { wrapper: providers(rizzle) });
   await waitFor(() => {
     expect(rendered.getByText(format(createdAt, `MMM d, yyyy`))).toBeTruthy();
   });
