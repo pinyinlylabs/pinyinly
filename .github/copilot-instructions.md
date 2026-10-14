@@ -22,6 +22,11 @@
 
 After making code changes, automatically verify the changes by running `moon run ':#ci'`.
 
+## Formatting
+
+Format files through the relevant Moon `fmt` task; do not invoke `yarn oxfmt` directly. For example,
+format app files with `moon run app:fmt`.
+
 ## Large data files and ripgrep
 
 Avoid broad `rg` searches that include the many per-character `character.json` files under
