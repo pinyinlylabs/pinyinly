@@ -928,6 +928,7 @@ export function skillReviewQueue({
   skillSrsStates,
   latestSkillRatings,
   dictionary,
+  directSkills = emptySet,
   now = new Date(),
   maxQueueItems = Infinity,
 }: {
@@ -935,6 +936,7 @@ export function skillReviewQueue({
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
   dictionary: Dictionary;
+  directSkills?: ReadonlySet<Skill>;
   now?: Date;
   maxQueueItems?: number;
 }): SkillReviewQueue {
@@ -966,6 +968,8 @@ export function skillReviewQueue({
 
     if (srsState == null || needsToBeIntroduced(srsState, now)) {
       if (hasStableDependencies(skill)) {
+        learningOrderNewCandidates.push(skill);
+      } else if (directSkills.has(skill)) {
         learningOrderNewCandidates.push(skill);
       } else {
         learningOrderBlocked.push(skill);
@@ -1113,6 +1117,10 @@ export function skillReviewQueue({
   // how many unstable skills can be introduced at once. This is to avoid
   // overwhelming the user with too many new skills at once.
   function hasLearningCapacityForNewSkill(skill: Skill): boolean {
+    if (directSkills.has(skill)) {
+      return true;
+    }
+
     // 💭 maybe this should be dynamic, based on the number of skills that have
     // been learned. So if you know 1000 words you can probably learn more at
     // once than if you only know 10 words.

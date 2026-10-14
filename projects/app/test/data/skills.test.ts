@@ -537,6 +537,64 @@ describe(`skillReviewQueue suite`, () => {
     },
   );
 
+  skillTest(
+    `direct skills can be introduced before their dependencies are stable`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const targetSkill = `he:刀:knife` as Skill;
+      const graph = skillLearningGraph({
+        decompositionData,
+        charactersJson,
+        dictionary,
+        targetSkills: [targetSkill],
+      });
+      expect(graph.get(targetSkill)?.dependencies.size).toBeGreaterThan(0);
+
+      const queue = skillReviewQueue({
+        graph,
+        skillSrsStates: new Map(),
+        latestSkillRatings: latestSkillRatings(),
+        dictionary,
+        directSkills: new Set([targetSkill]),
+      });
+
+      expect(prettyQueue(queue)).toContain(`${targetSkill} (🌱 NEW SKILL)`);
+    },
+  );
+
+  skillTest(
+    `direct skills bypass the new-skill throttle without changing it for other skills`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const targetSkills = Array.from(
+        { length: 16 },
+        (_, index) => `he:word${index}:meaning` as Skill,
+      );
+      const graph = skillLearningGraph({
+        decompositionData,
+        charactersJson,
+        dictionary,
+        targetSkills,
+        includeDependencies: false,
+      });
+      const commonOptions = {
+        graph,
+        skillSrsStates: new Map<Skill, SrsStateType>(),
+        latestSkillRatings: latestSkillRatings(),
+        dictionary,
+      };
+
+      const ordinaryQueue = skillReviewQueue(commonOptions);
+      const directQueue = skillReviewQueue({
+        ...commonOptions,
+        directSkills: new Set(targetSkills),
+      });
+
+      expect(ordinaryQueue.newContentCount).toBe(15);
+      expect(ordinaryQueue.blockedCount).toBe(1);
+      expect(directQueue.newContentCount).toBe(16);
+      expect(directQueue.blockedCount).toBe(0);
+    },
+  );
+
   describe(`maxQueueItems argument`, () => {
     function makeMockData() {
       const skillA = `he:A:a` as Skill;
