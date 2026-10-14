@@ -163,6 +163,7 @@ function SkillQueueProvider({
         ? null
         : skillReviewQueue({
             graph,
+            directSkills: new Set(studySkills ?? []),
             skillSrsStates:
               listId == null
                 ? skillSrsStates
@@ -181,7 +182,14 @@ function SkillQueueProvider({
             dictionary,
             maxQueueItems: mockable.getMaxQueueItems(),
           }),
-    [graph, dictionary, skillSrsStates, latestSkillRatings, listId],
+    [
+      graph,
+      dictionary,
+      skillSrsStates,
+      latestSkillRatings,
+      listId,
+      studySkills,
+    ],
   );
 
   const skillQueue: SkillQueueContextValue = useMemo(
