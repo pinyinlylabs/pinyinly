@@ -321,7 +321,7 @@ export const QuizDeck = ({
             question={question}
             onNext={handleNext}
             onRating={handleRating}
-            onUndo={handleUndo}
+            onRepeatQuestion={handleUndo}
           />
         );
         break;
