@@ -1,4 +1,4 @@
-import type { StudyWordItem } from "@/client/query";
+import type { BookmarkedWordItem } from "@/client/query";
 import type { HanziWord } from "@/data/model";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
@@ -8,29 +8,29 @@ import {
 } from "@/data/userSettings";
 import { useLiveQuery } from "@tanstack/react-db";
 
-export type { StudyWordItem };
+export type { BookmarkedWordItem };
 
-export interface UseStudyWordsListResult {
-  words: StudyWordItem[];
+export interface UseBookmarksListResult {
+  words: BookmarkedWordItem[];
   isLoading: boolean;
   addWord: (hanziWord: HanziWord) => void;
   removeWord: (hanziWord: HanziWord) => void;
 }
 
 /**
- * Hook to manage the user's Study list.
- * Queries decoded Study words and provides helpers to add/remove words.
+ * Hook to manage the user's bookmarks.
+ * Queries decoded bookmarks and provides helpers to add/remove words.
  */
-export function useStudyWordsList(): UseStudyWordsListResult {
+export function useBookmarksList(): UseBookmarksListResult {
   const db = useDb();
   const r = useRizzle();
 
   const { data: words, isLoading } = useLiveQuery(
     (q) =>
       q
-        .from({ word: db.studyWordsCollection })
+        .from({ word: db.bookmarkedWordsCollection })
         .orderBy(({ word }) => word.createdAt, `desc`),
-    [db.studyWordsCollection],
+    [db.bookmarkedWordsCollection],
   );
 
   const addWord = (hanziWord: HanziWord) => {

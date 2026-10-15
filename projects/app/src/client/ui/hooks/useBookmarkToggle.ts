@@ -5,8 +5,8 @@ import {
   studyWordItemSetting,
 } from "@/data/userSettings";
 
-export interface UseStudyToggleResult {
-  isStudying: boolean;
+export interface UseBookmarkToggleResult {
+  isBookmarked: boolean;
   isLoading: boolean;
   toggle: () => void;
   add: () => void;
@@ -14,17 +14,19 @@ export interface UseStudyToggleResult {
 }
 
 /**
- * Hook to toggle a word's Study membership.
- * Provides isStudying state and toggle/add/remove functions.
+ * Hook to toggle a word's bookmark membership.
+ * Provides isBookmarked state and toggle/add/remove functions.
  */
-export function useStudyToggle(hanziWord: HanziWord): UseStudyToggleResult {
+export function useBookmarkToggle(
+  hanziWord: HanziWord,
+): UseBookmarkToggleResult {
   const keyParams = getStudyWordKeyParams(hanziWord);
   const setting = useUserSetting({
     setting: studyWordItemSetting,
     key: keyParams,
   });
 
-  const isStudying = setting.value != null;
+  const isBookmarked = setting.value != null;
   const isLoading = setting.isLoading;
 
   const add = () => {
@@ -39,7 +41,7 @@ export function useStudyToggle(hanziWord: HanziWord): UseStudyToggleResult {
   };
 
   const toggle = () => {
-    if (isStudying) {
+    if (isBookmarked) {
       remove();
     } else {
       add();
@@ -47,7 +49,7 @@ export function useStudyToggle(hanziWord: HanziWord): UseStudyToggleResult {
   };
 
   return {
-    isStudying,
+    isBookmarked,
     isLoading,
     toggle,
     add,

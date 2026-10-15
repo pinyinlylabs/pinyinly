@@ -2,11 +2,11 @@ import type {
   DictionaryCollectionEntry,
   UserDictionaryEntry,
 } from "@/client/query";
-import type { HanziText, PartOfSpeech } from "@/data/model";
-import { partOfSpeechNameByPartOfSpeech } from "@/data/model";
+import type { HanziText, HanziWord } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
-import { StudyButton } from "./StudyButton";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
+import { useEffect } from "react";
+import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { useDb } from "./hooks/useDb";
@@ -14,9 +14,15 @@ import { useUserHanziMeaning } from "./hooks/useUserHanziMeaning";
 
 interface WikiHanziMeaningsPanelProps {
   hanzi: HanziText;
+  selectedHanziWord?: HanziWord | null;
+  onHanziWordSelected?: (hanziWord: HanziWord) => void;
 }
 
-export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
+export function WikiHanziMeaningsPanel({
+  hanzi,
+  selectedHanziWord,
+  onHanziWordSelected,
+}: WikiHanziMeaningsPanelProps) {
   const db = useDb();
 
   const { data: builtInMeanings } = useLiveQuery(
@@ -36,6 +42,31 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
         .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
     [db.userDictionary, hanzi],
   );
+  const isMeaningPicker = builtInMeanings.length + userMeanings.length > 1;
+
+  useEffect(() => {
+    if (
+      selectedHanziWord != null ||
+      onHanziWordSelected == null ||
+      builtInMeanings.length + userMeanings.length !== 1
+    ) {
+      return;
+    }
+
+    const builtInMeaning = builtInMeanings[0];
+    const userMeaning = userMeanings[0];
+    if (builtInMeaning != null) {
+      onHanziWordSelected(builtInMeaning.hanziWord);
+    } else if (userMeaning != null) {
+      onHanziWordSelected(buildHanziWord(hanzi, userMeaning.meaningKey));
+    }
+  }, [
+    builtInMeanings,
+    hanzi,
+    onHanziWordSelected,
+    selectedHanziWord,
+    userMeanings,
+  ]);
 
   return (
     <View className="gap-4">
@@ -49,6 +80,10 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
             <DictionaryMeaningListItem
               key={`${meaning.sourceKind}:${meaning.id}`}
               meaning={meaning}
+              selected={
+                isMeaningPicker && selectedHanziWord === meaning.hanziWord
+              }
+              onSelect={isMeaningPicker ? onHanziWordSelected : undefined}
             />
           ))}
 
@@ -57,6 +92,11 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
               key={meaning.meaningKey}
               hanzi={hanzi}
               meaning={meaning}
+              selected={
+                isMeaningPicker &&
+                selectedHanziWord === buildHanziWord(hanzi, meaning.meaningKey)
+              }
+              onSelect={isMeaningPicker ? onHanziWordSelected : undefined}
             />
           ))}
         </View>
@@ -67,25 +107,28 @@ export function WikiHanziMeaningsPanel({ hanzi }: WikiHanziMeaningsPanelProps) {
 
 function DictionaryMeaningListItem({
   meaning,
+  selected,
+  onSelect,
 }: {
   meaning: DictionaryCollectionEntry;
+  selected: boolean;
+  onSelect?: (hanziWord: HanziWord) => void;
 }) {
   const primaryPinyin = meaning.pinyin?.[0];
   const secondaryPinyins = meaning.pinyin?.slice(1) ?? [];
 
   return (
-    <View className="gap-3">
-      <View className="flex-row items-start gap-3">
-        <View className="flex-1">
-          <MeaningCoreText
-            hanzi={meaning.hanzi}
-            pinyin={primaryPinyin}
-            pos={meaning.pos}
-            glosses={meaning.gloss}
-          />
-        </View>
-        <StudyButton hanziWord={meaning.hanziWord} />
-      </View>
+    <MeaningSelection
+      hanziWord={meaning.hanziWord}
+      selected={selected}
+      onSelect={onSelect}
+      className="gap-3"
+    >
+      <MeaningCoreText
+        hanzi={meaning.hanzi}
+        pinyin={primaryPinyin}
+        glosses={meaning.gloss}
+      />
 
       {secondaryPinyins.length === 0 ? null : (
         <LabeledText label="Other pinyin">
@@ -96,16 +139,20 @@ function DictionaryMeaningListItem({
       {meaning.note == null || meaning.note.length === 0 ? null : (
         <LabeledText label="Note">{meaning.note}</LabeledText>
       )}
-    </View>
+    </MeaningSelection>
   );
 }
 
 function UserMeaningListItem({
   hanzi,
   meaning,
+  selected,
+  onSelect,
 }: {
   hanzi: HanziText;
   meaning: UserDictionaryEntry;
+  selected: boolean;
+  onSelect?: (hanziWord: HanziWord) => void;
 }) {
   const { value } = useUserHanziMeaning({
     hanzi,
@@ -127,23 +174,60 @@ function UserMeaningListItem({
   );
 
   return (
-    <View className="gap-3">
-      <View className="flex-row items-start justify-between gap-3">
-        <View className="flex-1 gap-2">
-          <MeaningCoreText
-            hanzi={meaning.hanzi}
-            pinyin={value.pinyin}
-            glosses={[value.gloss]}
-            trailingBadge={customBadge}
-          />
-          {value.note == null || value.note.length === 0 ? null : (
-            <LabeledText label="Note">{value.note}</LabeledText>
-          )}
-        </View>
-
-        <StudyButton hanziWord={buildHanziWord(hanzi, meaning.meaningKey)} />
+    <MeaningSelection
+      hanziWord={buildHanziWord(hanzi, meaning.meaningKey)}
+      selected={selected}
+      onSelect={onSelect}
+      className="gap-3"
+    >
+      <View className="gap-2">
+        <MeaningCoreText
+          hanzi={meaning.hanzi}
+          pinyin={value.pinyin}
+          glosses={[value.gloss]}
+          trailingBadge={customBadge}
+        />
+        {value.note == null || value.note.length === 0 ? null : (
+          <LabeledText label="Note">{value.note}</LabeledText>
+        )}
       </View>
-    </View>
+    </MeaningSelection>
+  );
+}
+
+function MeaningSelection({
+  hanziWord,
+  selected,
+  onSelect,
+  className,
+  children,
+}: {
+  hanziWord: HanziWord;
+  selected: boolean;
+  onSelect?: (hanziWord: HanziWord) => void;
+  className: string;
+  children: React.ReactNode;
+}) {
+  if (onSelect == null) {
+    return <View className={className}>{children}</View>;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      className={`
+        rounded-lg border p-3
+
+        ${selected ? `border-blue bg-blue/10` : `border-fg/10 bg-muted`}
+        ${className}
+      `}
+      onPress={() => {
+        onSelect(hanziWord);
+      }}
+    >
+      {children}
+    </Pressable>
   );
 }
 
@@ -151,13 +235,11 @@ function MeaningCoreText({
   glosses,
   hanzi,
   pinyin,
-  pos,
   trailingBadge,
 }: {
   glosses: string[];
   hanzi: HanziText;
   pinyin?: string;
-  pos?: PartOfSpeech;
   trailingBadge?: React.ReactNode;
 }) {
   const primaryGloss = glosses[0] ?? ``;
@@ -171,11 +253,6 @@ function MeaningCoreText({
         </Text>
         {pinyin == null || pinyin.length === 0 ? null : (
           <Text className="font-sans text-base text-muted-fg">{pinyin}</Text>
-        )}
-        {pos == null ? null : (
-          <Text className="font-sans text-sm text-muted-fg">
-            {partOfSpeechNameByPartOfSpeech[pos]}
-          </Text>
         )}
         {trailingBadge}
       </View>

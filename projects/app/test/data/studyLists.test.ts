@@ -1,5 +1,5 @@
 import {
-  groupStudyWordsByAddedDate,
+  groupBookmarkedWordsByAddedDate,
   hskStudyListIds,
   parseStudyListId,
   studyListHanziWords,
@@ -25,7 +25,7 @@ describe(`studyListTitle()`, () => {
     for (const listId of hskStudyListIds) {
       expect(studyListTitle(listId)).toBe(`HSK ${listId.slice(4)}`);
     }
-    expect(studyListTitle(`study`)).toBe(`Study`);
+    expect(studyListTitle(`study`)).toBe(`Bookmarks`);
   });
 });
 
@@ -62,10 +62,10 @@ describe(`studyListHanziWords()`, () => {
   });
 });
 
-describe(`groupStudyWordsByAddedDate()`, () => {
+describe(`groupBookmarkedWordsByAddedDate()`, () => {
   test(`groups local calendar days newest first across year boundaries`, () => {
     expect(
-      groupStudyWordsByAddedDate([
+      groupBookmarkedWordsByAddedDate([
         { hanziWord: `你好:hello`, createdAt: new Date(2025, 11, 31, 23, 59) },
         { hanziWord: `好:good`, createdAt: new Date(2026, 0, 1, 0, 1) },
         { hanziWord: `好:like`, createdAt: new Date(2026, 0, 1, 12) },
@@ -78,7 +78,7 @@ describe(`groupStudyWordsByAddedDate()`, () => {
 
   test(`uses the newest date once per meaning and limits before grouping`, () => {
     expect(
-      groupStudyWordsByAddedDate(
+      groupBookmarkedWordsByAddedDate(
         [
           { hanziWord: `你好:hello`, createdAt: new Date(2026, 8, 30) },
           { hanziWord: `好:good`, createdAt: new Date(2026, 9, 1, 10) },
@@ -94,9 +94,9 @@ describe(`groupStudyWordsByAddedDate()`, () => {
   });
 
   test(`handles empty lists and zero preview limits`, () => {
-    expect(groupStudyWordsByAddedDate([])).toEqual([]);
+    expect(groupBookmarkedWordsByAddedDate([])).toEqual([]);
     expect(
-      groupStudyWordsByAddedDate(
+      groupBookmarkedWordsByAddedDate(
         [{ hanziWord: `你好:hello`, createdAt: new Date(2026, 9, 3) }],
         0,
       ),

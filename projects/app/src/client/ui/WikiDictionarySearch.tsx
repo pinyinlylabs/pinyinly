@@ -1,4 +1,4 @@
-import { useStudyToggle } from "@/client/ui/hooks/useStudyToggle";
+import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import { useQuickSearch } from "@/client/ui/hooks/useQuickSearch";
 import type { HanziWord } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -106,21 +106,21 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         ) : null}
       </View>
       {result.kind === `hanziWord` && result.hanziWord != null ? (
-        <SearchResultStudyButton hanziWord={result.hanziWord} />
+        <SearchResultBookmarkButton hanziWord={result.hanziWord} />
       ) : null}
     </Pressable>
   );
 }
 
-function SearchResultStudyButton({ hanziWord }: { hanziWord: HanziWord }) {
-  const { isStudying, isLoading, toggle } = useStudyToggle(hanziWord);
+function SearchResultBookmarkButton({ hanziWord }: { hanziWord: HanziWord }) {
+  const { isBookmarked, isLoading, toggle } = useBookmarkToggle(hanziWord);
 
   return (
     <Tooltip>
       <Tooltip.Trigger asChild>
         <RectButton
           variant="bare"
-          iconStart={isStudying ? `bookmark-filled` : `bookmark`}
+          iconStart={isBookmarked ? `bookmark-filled` : `bookmark`}
           iconSize={20}
           className="text-muted-fg"
           disabled={isLoading}
@@ -133,7 +133,7 @@ function SearchResultStudyButton({ hanziWord }: { hanziWord: HanziWord }) {
       </Tooltip.Trigger>
       <Tooltip.Content>
         <Text className="font-sans text-sm text-fg">
-          {isStudying ? `Studying` : `Study`}
+          {isBookmarked ? `Bookmarked` : `Bookmark`}
         </Text>
       </Tooltip.Content>
     </Tooltip>

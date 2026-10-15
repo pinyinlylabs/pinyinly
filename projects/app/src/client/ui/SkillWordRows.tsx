@@ -1,6 +1,11 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { HanziWord, Skill, SrsStateType } from "@/data/model";
-import { coerceRank, getHanziWordRank, rankRules } from "@/data/skills";
+import {
+  coerceRank,
+  getHanziWordRank,
+  rankRules,
+  rankToAbsoluteProgress,
+} from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
@@ -55,7 +60,7 @@ export function SkillWordRows({
       pinyin: meaning?.pinyin?.[0] ?? null,
       gloss: meaning?.gloss[0] ?? ``,
       rank,
-      absoluteProgress: toAbsoluteProgress({
+      absoluteProgress: rankToAbsoluteProgress({
         rank,
         completion: rankedHanziWord.completion,
       }),
@@ -135,22 +140,6 @@ export function SkillWordRows({
 }
 
 const milestonePercents = [25, 50, 75] as const;
-
-function toAbsoluteProgress({
-  rank,
-  completion,
-}: {
-  rank: 0 | 1 | 2 | 3 | 4;
-  completion: number;
-}): number {
-  if (rank === 0) {
-    return 0;
-  }
-  if (rank === 4) {
-    return 1;
-  }
-  return Math.max(0, Math.min((rank - 1 + completion) / 4, 1));
-}
 
 const rankProgressClass = tv({
   base: `h-1.5 rounded`,

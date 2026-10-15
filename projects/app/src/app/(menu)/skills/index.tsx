@@ -19,7 +19,7 @@ export default function SkillsPage() {
       </View>
 
       <View className="gap-2">
-        <Link href="/skills/study" asChild>
+        <Link href="/skills/bookmark" asChild>
           <Pressable
             className={`
               flex-row items-center justify-between rounded-lg border border-fg/10 bg-bg-high px-4
@@ -28,7 +28,7 @@ export default function SkillsPage() {
               hover:bg-fg/5
             `}
           >
-            <Text className="pyly-body-title text-fg-loud">Study</Text>
+            <Text className="pyly-body-title text-fg-loud">Bookmarks</Text>
             <Icon icon="chevron-right" size={16} />
           </Pressable>
         </Link>

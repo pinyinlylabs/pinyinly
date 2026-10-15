@@ -1,5 +1,5 @@
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import { StudyList } from "@/client/ui/StudyList";
+import { BookmarkList } from "@/client/ui/BookmarkList";
 import { WikiDictionarySearch } from "@/client/ui/WikiDictionarySearch";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -18,7 +18,7 @@ export default function WikiIndexPage() {
 
       <WikiDictionarySearch />
 
-      <StudyList showSeeAllLink limit={10} />
+      <BookmarkList showSeeAllLink limit={10} />
     </View>
   );
 }

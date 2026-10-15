@@ -191,7 +191,7 @@ function prettyData(data: HistoryPageData): string {
     .join(`\n---\n`);
 }
 
-describe(`studyWordsCollection`, () => {
+describe(`bookmarkedWordsCollection`, () => {
   const test = baseTest.extend(rizzleFixture).extend(dbFixture);
 
   test(`hanziWord field retains existing storage keys and aliases`, () => {
@@ -233,9 +233,9 @@ describe(`studyWordsCollection`, () => {
       now: new Date(),
       skipHistory: true,
     });
-    await db.studyWordsCollection.preload();
+    await db.bookmarkedWordsCollection.preload();
     await vi.waitFor(() => {
-      expect(db.studyWordsCollection.toArray).toEqual([
+      expect(db.bookmarkedWordsCollection.toArray).toEqual([
         expect.objectContaining({ ...keyParams, createdAt }),
       ]);
     });
@@ -246,7 +246,7 @@ describe(`studyWordsCollection`, () => {
       skipHistory: true,
     });
     await vi.waitFor(() => {
-      expect(db.studyWordsCollection.toArray).toEqual([]);
+      expect(db.bookmarkedWordsCollection.toArray).toEqual([]);
     });
   });
 
@@ -266,9 +266,9 @@ describe(`studyWordsCollection`, () => {
       now: new Date(),
       skipHistory: true,
     });
-    await db.studyWordsCollection.preload();
+    await db.bookmarkedWordsCollection.preload();
     await vi.waitFor(() => {
-      expect(db.studyWordsCollection.toArray).toEqual([
+      expect(db.bookmarkedWordsCollection.toArray).toEqual([
         expect.objectContaining({ ...keyParams, createdAt }),
       ]);
     });
@@ -282,7 +282,7 @@ describe(`studyWordsCollection`, () => {
       skipHistory: true,
     });
     await vi.waitFor(() => {
-      expect(db.studyWordsCollection.toArray).toEqual([
+      expect(db.bookmarkedWordsCollection.toArray).toEqual([
         expect.objectContaining({
           ...keyParams,
           createdAt: new Date(createdAt.getTime() + 1000),
@@ -304,8 +304,8 @@ describe(`studyWordsCollection`, () => {
         skipHistory: true,
       });
     }
-    await db.studyWordsCollection.preload();
-    expect(db.studyWordsCollection.toArray).toEqual([]);
+    await db.bookmarkedWordsCollection.preload();
+    expect(db.bookmarkedWordsCollection.toArray).toEqual([]);
   });
 
   test(`joins exact meanings with dates and excludes legacy character selections`, async ({
@@ -338,14 +338,14 @@ describe(`studyWordsCollection`, () => {
       now: new Date(),
       skipHistory: true,
     });
-    await db.studyHanziWordsCollection.preload();
+    await db.bookmarkedHanziWordsCollection.preload();
     await vi.waitFor(() => {
       expect(
-        db.studyHanziWordsCollection.toArray
+        db.bookmarkedHanziWordsCollection.toArray
           .map(({ hanziWord }) => hanziWord)
           .sort(),
       ).toEqual([exactWord]);
-      expect(db.studyHanziWordsCollection.toArray[0]?.createdAt).toEqual(
+      expect(db.bookmarkedHanziWordsCollection.toArray[0]?.createdAt).toEqual(
         createdAt,
       );
     });
@@ -357,7 +357,9 @@ describe(`studyWordsCollection`, () => {
     });
     await vi.waitFor(() => {
       expect(
-        db.studyHanziWordsCollection.toArray.map(({ hanziWord }) => hanziWord),
+        db.bookmarkedHanziWordsCollection.toArray.map(
+          ({ hanziWord }) => hanziWord,
+        ),
       ).toEqual([]);
     });
   });
@@ -377,8 +379,8 @@ describe(`studyWordsCollection`, () => {
       now: new Date(),
       skipHistory: true,
     });
-    await db.studyHanziWordsCollection.preload();
-    expect(db.studyHanziWordsCollection.toArray).toEqual([]);
+    await db.bookmarkedHanziWordsCollection.preload();
+    expect(db.bookmarkedHanziWordsCollection.toArray).toEqual([]);
 
     const meaningKeyParams = getUserHanziMeaningKeyParams(汉`里`, `u_priority`);
     const key =
@@ -394,7 +396,9 @@ describe(`studyWordsCollection`, () => {
     });
     await vi.waitFor(() => {
       expect(
-        db.studyHanziWordsCollection.toArray.map(({ hanziWord }) => hanziWord),
+        db.bookmarkedHanziWordsCollection.toArray.map(
+          ({ hanziWord }) => hanziWord,
+        ),
       ).toEqual([word]);
     });
     await rizzle.mutate.setSetting({
@@ -404,7 +408,7 @@ describe(`studyWordsCollection`, () => {
       skipHistory: true,
     });
     await vi.waitFor(() => {
-      expect(db.studyHanziWordsCollection.toArray).toEqual([]);
+      expect(db.bookmarkedHanziWordsCollection.toArray).toEqual([]);
     });
   });
 });

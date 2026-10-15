@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Text } from "@/client/ui/Text";
+import { Icon } from "./Icon";
+import type { IconName } from "./iconRegistry";
 import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
@@ -14,20 +16,82 @@ export type LozengeColor =
   | `amber`
   | `muted-fg`;
 
-export function Lozenge({
-  children,
-  color,
-  size = `md`,
-  className,
-}: {
-  children: ReactNode;
+type LozengeProps = {
   color: LozengeColor;
   size?: `sm` | `md`;
   className?: string;
-}) {
+  progress?: number;
+  progressClassName?: string;
+} & (
+  | {
+      kind?: `text`;
+      children: ReactNode;
+      icon?: never;
+      accessibilityLabel?: never;
+      iconTintColorClassName?: never;
+    }
+  | {
+      kind: `icon`;
+      icon: IconName;
+      children?: never;
+      accessibilityLabel?: string;
+      iconTintColorClassName?: string;
+    }
+);
+
+export function Lozenge(props: LozengeProps) {
+  const {
+    color,
+    size = `md`,
+    className,
+    progress,
+    progressClassName = `bg-blue/20`,
+  } = props;
+  const isIcon = props.kind === `icon`;
+
   return (
-    <View className={lozengeContainerClass({ color, size, className })}>
-      <Text className={lozengeTextClass({ color, size })}>{children}</Text>
+    <View
+      accessible={isIcon}
+      accessibilityLabel={isIcon ? props.accessibilityLabel : undefined}
+      style={isIcon ? { width: 26, height: 26, padding: 0 } : undefined}
+      className={lozengeContainerClass({
+        color,
+        size: isIcon ? undefined : size,
+        className: [
+          isIcon ? `flex-row items-center justify-center` : ``,
+          progress == null ? `` : `relative overflow-hidden`,
+          className,
+        ]
+          .filter(Boolean)
+          .join(` `),
+      })}
+    >
+      {progress == null || progress <= 0 ? null : (
+        <View
+          className={`
+            absolute inset-y-0 left-0
+
+            ${progressClassName}
+          `}
+          style={{ width: `${Math.min(progress, 1) * 100}%` }}
+        />
+      )}
+      {isIcon ? (
+        <Icon
+          icon={props.icon}
+          size={16}
+          tintColorClassName={props.iconTintColorClassName}
+        />
+      ) : (
+        <Text
+          className={`
+            ${lozengeTextClass({ color, size })}
+            ${progress == null ? `` : `relative`}
+          `}
+        >
+          {props.children}
+        </Text>
+      )}
     </View>
   );
 }
