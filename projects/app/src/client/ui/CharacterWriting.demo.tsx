@@ -6,12 +6,10 @@ import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { View } from "@/client/ui/View";
 import { isHanziCharacter, splitHanziText } from "@/data/hanzi";
 import type { HanziCharacter, HanziText } from "@/data/model";
+import { gradeCharacterShape } from "@/util/shapeContextGrader";
+import type { ShapeContextGrade } from "@/util/shapeContextGrader";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
-import { gradeWritingStroke } from "@/util/writingStrokeGrader";
-import type {
-  WritingStrokeGrade,
-  WritingStrokePoint as Point,
-} from "@/util/writingStrokeGrader";
+import type { WritingStrokePoint as Point } from "@/util/writingStrokeGrader";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -55,9 +53,8 @@ function CharacterWriting({
   mode: WritingMode;
 }) {
   const [currentStroke, setCurrentStroke] = useState(0);
-  const [freePaths, setFreePaths] = useState<string[]>([]);
-  const [rejectedPath, setRejectedPath] = useState(``);
-  const [lastGrade, setLastGrade] = useState<WritingStrokeGrade | null>(null);
+  const [freeStrokes, setFreeStrokes] = useState<Point[][]>([]);
+  const [lastGrade, setLastGrade] = useState<ShapeContextGrade | null>(null);
   const transformedMedians = medians.map(transformArphicSpaceSvgPath);
   const currentMedian = transformedMedians[currentStroke];
   const startPoint =
@@ -69,24 +66,14 @@ function CharacterWriting({
     if (drawnPath.length > 0 && isGuided) {
       setCurrentStroke((stroke) => Math.min(stroke + 1, medians.length));
     } else if (drawnPath.length > 0) {
-      const expectedPath = transformedMedians[currentStroke];
-      if (expectedPath != null) {
-        const grade = gradeWritingStroke(points, expectedPath);
-        setLastGrade(grade);
-        if (grade.accepted) {
-          setFreePaths((paths) => [...paths, drawnPath]);
-          setCurrentStroke((stroke) => stroke + 1);
-          setRejectedPath(``);
-        } else {
-          setRejectedPath(drawnPath);
-        }
-      }
+      const nextStrokes = [...freeStrokes, points];
+      setFreeStrokes(nextStrokes);
+      setLastGrade(gradeCharacterShape(nextStrokes, transformedMedians));
     }
   }
 
   function clearPractice() {
-    setFreePaths([]);
-    setRejectedPath(``);
+    setFreeStrokes([]);
     setLastGrade(null);
     setCurrentStroke(0);
   }
@@ -195,10 +182,10 @@ function CharacterWriting({
             )}
           </>
         ) : null}
-        {freePaths.map((path, index) => (
+        {freeStrokes.map((stroke, index) => (
           <path
             key={`free:${index}`}
-            d={path}
+            d={pathFromPoints(stroke)}
             fill="none"
             stroke="#19aaf5"
             strokeWidth="24"
@@ -207,32 +194,23 @@ function CharacterWriting({
             pointerEvents="none"
           />
         ))}
-        {rejectedPath.length === 0 ? null : (
-          <path
-            d={rejectedPath}
-            fill="none"
-            stroke="#ef4444"
-            strokeWidth="24"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
-          />
-        )}
       </HanziWritingCanvas>
       <Text className="text-center text-muted-fg">
-        {currentStroke >= medians.length
-          ? `${character} complete`
-          : `Stroke ${currentStroke + 1} of ${medians.length}`}
+        {isGuided
+          ? currentStroke >= medians.length
+            ? `${character} complete`
+            : `Stroke ${currentStroke + 1} of ${medians.length}`
+          : `${freeStrokes.length} strokes drawn`}
       </Text>
       {!isGuided && lastGrade != null ? (
         <Text className="text-center text-muted-fg">
-          {lastGrade.accepted
-            ? `Stroke accepted.`
-            : lastGrade.failure === `direction`
-              ? `Check the stroke direction and try again.`
-              : lastGrade.failure === `incomplete`
-                ? `Draw a longer stroke and try again.`
-                : `Not quite — try that stroke again.`}
+          Similarity {lastGrade.similarity.toFixed(3)} · residual error{` `}
+          {lastGrade.residualMatchingError.toFixed(3)}
+        </Text>
+      ) : null}
+      {!isGuided && lastGrade == null ? (
+        <Text className="text-center text-muted-fg">
+          Draw the character in any stroke order or direction.
         </Text>
       ) : null}
       <RectButton variant="outline" onPress={clearPractice}>

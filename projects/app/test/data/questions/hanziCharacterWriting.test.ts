@@ -61,7 +61,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     ).toBe(Rating.Hard);
   });
 
-  test(`rejects an incorrect stroke count`, () => {
+  test(`rejects empty geometry without using stroke count as a criterion`, () => {
     const result = gradeHanziCharacterWritingQuestion(
       question,
       [],
@@ -71,12 +71,12 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
 
     expect(result).toMatchObject({
       correct: false,
-      failure: `stroke-count`,
+      failure: `shape`,
       rating: Rating.Again,
     });
   });
 
-  test(`rejects a stroke drawn in the wrong direction`, () => {
+  test(`ignores stroke direction when comparing visual shape`, () => {
     const result = gradeHanziCharacterWritingQuestion(
       question,
       [
@@ -90,9 +90,8 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     );
 
     expect(result).toMatchObject({
-      correct: false,
-      failure: `stroke-shape`,
-      rating: Rating.Again,
+      correct: true,
+      failure: null,
     });
   });
 });
