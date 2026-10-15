@@ -78,7 +78,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
       grade={grade ?? undefined}
       isUserAnswerProvided={drawnStrokes.length > 0}
       onSubmit={handleSubmit}
-      onUndo={onRepeatQuestion}
+      onRepeatQuestion={onRepeatQuestion}
       showIdkButton={medianPaths.length > 0}
       skill={question.skill}
     >

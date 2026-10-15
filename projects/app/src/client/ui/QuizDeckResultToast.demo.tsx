@@ -55,7 +55,7 @@ export default () => {
                   rating={rating}
                   disableAnimation
                   onRepeatQuestion={() => {
-                    console.log(`onUndo`);
+                    console.log(`onRepeatQuestion`);
                   }}
                 />
                 <View

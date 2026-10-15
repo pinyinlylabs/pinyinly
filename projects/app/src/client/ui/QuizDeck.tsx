@@ -158,7 +158,7 @@ export const QuizDeck = ({
     setQuestion(undefined);
   };
 
-  const handleUndo = () => {
+  const handleRepeatQuestion = () => {
     if (latestReviewId != null) {
       r.mutate
         .undoReview({ reviewId: latestReviewId, now: Date.now() })
@@ -288,7 +288,7 @@ export const QuizDeck = ({
             question={question}
             onNext={handleNext}
             onRating={handleRating}
-            onRepeatQuestion={handleUndo}
+            onRepeatQuestion={handleRepeatQuestion}
           />
         );
         break;
@@ -299,7 +299,7 @@ export const QuizDeck = ({
             question={question}
             onNext={handleNext}
             onRating={handleRating}
-            onRepeatQuestion={handleUndo}
+            onRepeatQuestion={handleRepeatQuestion}
           />
         );
         break;
@@ -310,7 +310,7 @@ export const QuizDeck = ({
             question={question}
             onNext={handleNext}
             onRating={handleRating}
-            onRepeatQuestion={handleUndo}
+            onRepeatQuestion={handleRepeatQuestion}
           />
         );
         break;
@@ -321,7 +321,7 @@ export const QuizDeck = ({
             question={question}
             onNext={handleNext}
             onRating={handleRating}
-            onRepeatQuestion={handleUndo}
+            onRepeatQuestion={handleRepeatQuestion}
           />
         );
         break;
