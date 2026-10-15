@@ -41,6 +41,7 @@ export const NewSkillModal = ({
         case SkillKind.HanziWordToPinyinTyped:
         case SkillKind.HanziWordToPinyinTone:
         case SkillKind.HanziWordToPinyinFinal:
+        case SkillKind.HanziCharacterToWriting:
         case SkillKind.Deprecated_EnglishToRadical:
         case SkillKind.Deprecated_PinyinToRadical:
         case SkillKind.Deprecated_RadicalToEnglish:

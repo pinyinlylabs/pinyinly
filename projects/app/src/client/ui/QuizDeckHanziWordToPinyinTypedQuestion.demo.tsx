@@ -50,7 +50,7 @@ export default () => {
               console.log(`onRating()`);
             }}
             onRepeatQuestion={() => {
-              console.log(`onUndo()`);
+              console.log(`onRepeatQuestion()`);
             }}
             question={question}
           />

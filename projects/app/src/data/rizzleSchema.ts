@@ -39,6 +39,7 @@ export const rSkillKind = memoize0(function rSkillKind() {
     [SkillKind.HanziWordToPinyinInitial]: `hpi`,
     [SkillKind.HanziWordToPinyinFinal]: `hpf`,
     [SkillKind.HanziWordToPinyinTone]: `hpt`,
+    [SkillKind.HanziCharacterToWriting]: `hwr`,
     [SkillKind.GlossToHanziWord]: `eh`,
     [SkillKind.PinyinToHanziWord]: `ph`,
     [SkillKind.ImageToHanziWord]: `ih`,

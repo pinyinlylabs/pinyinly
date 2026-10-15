@@ -14,6 +14,7 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useMemo } from "react";
+import { Platform } from "react-native";
 import type { SkillQueueContextValue } from "./contexts";
 import { SkillQueueContext } from "./contexts";
 
@@ -98,7 +99,7 @@ function SkillQueueProvider({
       return null;
     }
     return studyWordsData.flatMap(({ hanziWord }) =>
-      hanziWordToTargetSkills(hanziWord, dictionary),
+      hanziWordToTargetSkills(hanziWord, dictionary, Platform.OS === `web`),
     );
   }, [studyWordsData, dictionary, isStudyWordsLoading]);
 
@@ -134,7 +135,11 @@ function SkillQueueProvider({
                     listId,
                     studyWordsData.map(({ hanziWord }) => hanziWord),
                   ).flatMap((word) =>
-                    hanziWordToTargetSkills(word, dictionary),
+                    hanziWordToTargetSkills(
+                      word,
+                      dictionary,
+                      Platform.OS === `web`,
+                    ),
                   ),
             includeDependencies: listId == null,
             decompositionData: characterDecompositionData,

@@ -391,6 +391,7 @@ export function parseHistoryCommand(
           case SkillKind.GlossToHanziWord:
           case SkillKind.PinyinToHanziWord:
           case SkillKind.ImageToHanziWord:
+          case SkillKind.HanziCharacterToWriting:
           case SkillKind.PinyinInitialAssociation:
           case SkillKind.PinyinFinalAssociation:
           case SkillKind.Deprecated:

@@ -4,6 +4,7 @@ import type {
   Question,
   QuestionFlagType,
   Skill,
+  HanziCharacterWritingSkill,
 } from "./model";
 import { SkillKind } from "./model";
 import { hanziWordToGlossQuestionOrThrow } from "./questions/hanziWordToGloss";
@@ -12,6 +13,7 @@ import { hanziWordToPinyinFinalQuestionOrThrow } from "./questions/hanziWordToPi
 import { hanziWordToPinyinInitialQuestionOrThrow } from "./questions/hanziWordToPinyinInitial";
 import { hanziWordToPinyinToneQuestionOrThrow } from "./questions/hanziWordToPinyinTone";
 import { hanziWordToPinyinTypedQuestionOrThrow } from "./questions/hanziWordToPinyinTyped";
+import { hanziCharacterWritingQuestionOrThrow } from "./questions/hanziCharacterWriting";
 import { skillKindFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(
@@ -19,6 +21,12 @@ export async function generateQuestionForSkillOrThrow(
   flag: QuestionFlagType | null,
 ): Promise<Question> {
   switch (skillKindFromSkill(skill)) {
+    case SkillKind.HanziCharacterToWriting: {
+      return hanziCharacterWritingQuestionOrThrow(
+        skill as HanziCharacterWritingSkill,
+        flag,
+      );
+    }
     case SkillKind.HanziWordToGloss: {
       // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;

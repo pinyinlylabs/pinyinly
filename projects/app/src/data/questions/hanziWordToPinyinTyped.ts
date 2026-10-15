@@ -78,6 +78,9 @@ function validQuestionInvariant<T extends Question>(question: T): T {
     case QuestionKind.HanziWordToGlossTyped: {
       throw new Error(`unexpected question kind HanziWordToGloss`);
     }
+    case QuestionKind.HanziCharacterWriting: {
+      throw new Error(`unexpected question kind HanziCharacterWriting`);
+    }
   }
 
   return question;
