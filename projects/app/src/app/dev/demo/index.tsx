@@ -22,6 +22,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`AssetImage`]: lazyDemo(() => import(`../../../client/ui/AssetImage.demo`)),
   [`Breadcrumbs`]: lazyDemo(() => import(`../../../client/ui/Breadcrumbs.demo`)),
   [`ButtonGroup`]: lazyDemo(() => import(`../../../client/ui/ButtonGroup.demo`)),
+  [`CharacterWriting`]: lazyDemo(() => import(`../../../client/ui/CharacterWriting.demo`)),
   [`CloseButton`]: lazyDemo(() => import(`../../../client/ui/CloseButton.demo`)),
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
   [`DropdownMenu2`]: lazyDemo(() => import(`../../../client/ui/DropdownMenu2.demo`)),

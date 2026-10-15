@@ -10,6 +10,7 @@ const isString = (x: unknown): x is string => typeof x === `string`;
 export type Skill =
   | DeprecatedSkill
   | HanziWordSkill
+  | CharacterSkill
   | PinyinInitialAssociationSkill
   | PinyinFinalAssociationSkill;
 
@@ -22,6 +23,7 @@ export type HanziWordToPinyinTypedSkill = `hp:${string}:${string}`;
 export type HanziWordToPinyinInitialSkill = `hpi:${string}:${string}`;
 export type HanziWordToPinyinToneSkill = `hpt:${string}:${string}`;
 export type HanziWordToPinyinFinalSkill = `hpf:${string}:${string}`;
+export type HanziCharacterWritingSkill = `hwr:${HanziCharacter}`;
 
 export type HanziWordSkill =
   | (string & z.$brand<`HanziWordSkill`>)
@@ -31,6 +33,8 @@ export type HanziWordSkill =
   | HanziWordToPinyinToneSkill
   | HanziWordToPinyinFinalSkill
   | `${`he` | `eh` | `ph` | `ih`}:${string}:${string}`;
+
+export type CharacterSkill = HanziCharacterWritingSkill;
 
 export type PinyinInitialAssociationSkill =
   | (string & z.$brand<`PinyinInitialAssociationSkill`>)
@@ -362,6 +366,10 @@ const skillKindSchema = z.enum({
   HanziWordToPinyinFinal: `debug--HanziWordToPinyinFinal`,
   HanziWordToPinyinInitial: `debug--HanziWordToPinyinInitial`,
   HanziWordToPinyinTone: `debug--HanziWordToPinyinTone`,
+  /**
+   * Given a character's meaning and pronunciation, write the character.
+   */
+  HanziCharacterToWriting: `debug--HanziCharacterToWriting`,
   /**
    * When shown a gloss, write the hanzi characters.
    */
@@ -739,6 +747,7 @@ const questionKindSchema = z.enum({
   OneCorrectPair: `debug--OneCorrectPair`,
   HanziWordToPinyinTyped: `debug--HanziWordToPinyinTyped`,
   HanziWordToGlossTyped: `debug--HanziWordToGlossTyped`,
+  HanziCharacterWriting: `debug--HanziCharacterWriting`,
 });
 export const QuestionKind = questionKindSchema.enum;
 export type QuestionKind = z.infer<typeof questionKindSchema>;
@@ -883,10 +892,20 @@ export interface HanziWordToPinyinTypedQuestion {
   flag: QuestionFlagType | null;
 }
 
+export interface HanziCharacterWritingQuestion {
+  kind: typeof QuestionKind.HanziCharacterWriting;
+  skill: HanziCharacterWritingSkill;
+  hanzi: HanziCharacter;
+  gloss: string;
+  pinyin: PinyinText;
+  flag: QuestionFlagType | null;
+}
+
 export type Question =
   | OneCorrectPairQuestion
   | HanziWordToGlossTypedQuestion
-  | HanziWordToPinyinTypedQuestion;
+  | HanziWordToPinyinTypedQuestion
+  | HanziCharacterWritingQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;

@@ -1,11 +1,26 @@
-import type { HanziWordSkill, Skill } from "@/data/model";
+import type {
+  HanziCharacterWritingSkill,
+  HanziWordSkill,
+  Skill,
+} from "@/data/model";
 import { SkillKind } from "@/data/model";
-import { skillKindFromSkill } from "@/data/skills";
+import {
+  hanziCharacterFromWritingSkill,
+  skillKindFromSkill,
+} from "@/data/skills";
+import { Text } from "@/client/ui/Text";
 import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
 import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 
 export const SkillAnswerText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
+    case SkillKind.HanziCharacterToWriting: {
+      return (
+        <Text>
+          {hanziCharacterFromWritingSkill(skill as HanziCharacterWritingSkill)}
+        </Text>
+      );
+    }
     case SkillKind.Deprecated_EnglishToRadical:
     case SkillKind.Deprecated_PinyinToRadical:
     case SkillKind.Deprecated_RadicalToEnglish:

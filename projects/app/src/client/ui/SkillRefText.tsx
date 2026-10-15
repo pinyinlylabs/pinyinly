@@ -1,5 +1,6 @@
 import type {
   DeprecatedSkill,
+  HanziCharacterWritingSkill,
   HanziWordSkill,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
@@ -10,6 +11,7 @@ import {
   finalFromPinyinFinalAssociationSkill,
   hanziWordFromSkill,
   initialFromPinyinInitialAssociationSkill,
+  hanziCharacterFromWritingSkill,
   skillKindFromSkill,
   skillKindToShorthand,
 } from "@/data/skills";
@@ -18,6 +20,13 @@ import { HanziWordRefText } from "./HanziWordRefText";
 
 export const SkillRefText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
+    case SkillKind.HanziCharacterToWriting: {
+      return (
+        <Text>
+          {hanziCharacterFromWritingSkill(skill as HanziCharacterWritingSkill)}
+        </Text>
+      );
+    }
     case SkillKind.PinyinFinalAssociation: {
       // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as PinyinFinalAssociationSkill;

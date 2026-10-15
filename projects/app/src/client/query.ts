@@ -262,9 +262,11 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
 export async function getAllTargetSkills(): Promise<Skill[]> {
   const dictionary = await loadDictionary();
   const hanziWords = getTargetHanziWordsFromDictionary(dictionary);
-  return hanziWords.flatMap((hanziWord) =>
-    hanziWordToTargetSkills(hanziWord, dictionary),
-  );
+  return hanziWords
+    .flatMap((hanziWord) =>
+      hanziWordToTargetSkills(hanziWord, dictionary, Platform.OS === `web`),
+    )
+    .filter(arrayFilterUnique());
 }
 
 export const fetchArrayBufferQuery = (uri: string | null) =>

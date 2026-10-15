@@ -5,6 +5,7 @@ import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
+import { hanziSvgPathsQuery } from "@/client/query";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
@@ -15,12 +16,14 @@ import { Link } from "expo-router";
 import type { Href } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useWindowDimensions } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import Reanimated, { FadeIn, Keyframe } from "react-native-reanimated";
 import { QuizDeckHanziWordToGlossTypedQuestion } from "./QuizDeckHanziWordToGlossTypedQuestion";
 import { QuizDeckHanziWordToPinyinTypedQuestion } from "./QuizDeckHanziWordToPinyinTypedQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
+import { QuizDeckHanziCharacterWritingQuestion } from "./QuizDeckHanziCharacterWritingQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
@@ -41,6 +44,7 @@ export const QuizDeck = ({
   const { width: screenWidth } = useWindowDimensions();
   const r = useRizzle();
   const postHog = usePostHog();
+  const queryClient = useQueryClient();
 
   const skillQueue = useSkillQueue();
 
@@ -88,6 +92,16 @@ export const QuizDeck = ({
             skill,
             flag ?? null,
           );
+          if (generatedQuestion.kind === QuestionKind.HanziCharacterWriting) {
+            const svgData = await queryClient.query(
+              hanziSvgPathsQuery(generatedQuestion.hanzi),
+            );
+            if (svgData?.medians == null || svgData.medians.length === 0) {
+              throw new Error(
+                `No stroke median data available for ${generatedQuestion.hanzi}`,
+              );
+            }
+          }
 
           // Check if this effect was cancelled before setting state
           if (abortController.signal.aborted as boolean) {
@@ -129,7 +143,7 @@ export const QuizDeck = ({
     return () => {
       abortController.abort();
     };
-  }, [question, questionSource, reviewQueue]);
+  }, [question, questionSource, queryClient, reviewQueue]);
 
   const playSuccessSound = useSoundEffect(
     require(`../../assets/audio/sparkle.mp3`),
@@ -297,6 +311,17 @@ export const QuizDeck = ({
             onNext={handleNext}
             onRating={handleRating}
             onRepeatQuestion={handleUndo}
+          />
+        );
+        break;
+      }
+      case QuestionKind.HanziCharacterWriting: {
+        questionScreen = (
+          <QuizDeckHanziCharacterWritingQuestion
+            question={question}
+            onNext={handleNext}
+            onRating={handleRating}
+            onUndo={handleUndo}
           />
         );
         break;

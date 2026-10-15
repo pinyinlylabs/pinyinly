@@ -1,4 +1,9 @@
-import type { Dictionary, Skill, SrsStateType } from "#data/model.ts";
+import type {
+  Dictionary,
+  Skill,
+  SrsStateType,
+  HanziCharacter,
+} from "#data/model.ts";
 import { pinyinTextSchema, SkillKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
@@ -10,6 +15,7 @@ import type {
 } from "#data/skills.ts";
 import {
   computeSkillRating,
+  hanziCharacterToWriting,
   getHanziWordRank,
   hanziWordToGloss,
   hanziWordToGlossTyped,
@@ -109,6 +115,25 @@ describe(`hanziWordToTargetSkills`, () => {
         }),
       ).toEqual([hanziWordToGlossTyped(`冖:cover`)]);
     }
+  });
+
+  test(`adds one shared writing target for single characters with pinyin`, () => {
+    const lookupHanziWord = vi.fn(() => ({
+      gloss: [`good`],
+      pinyin: [pinyinTextSchema.parse(`hǎo`)],
+    }));
+
+    expect(hanziWordToTargetSkills(`好:good`, { lookupHanziWord })).toEqual([
+      hanziWordToGlossTyped(`好:good`),
+      hanziWordToPinyinTyped(`好:good`),
+      hanziCharacterToWriting(`好` as HanziCharacter),
+    ]);
+    expect(
+      hanziWordToTargetSkills(`好:good`, { lookupHanziWord }, false),
+    ).toEqual([
+      hanziWordToGlossTyped(`好:good`),
+      hanziWordToPinyinTyped(`好:good`),
+    ]);
   });
 
   test(`returns no targets for a missing dictionary entry`, () => {
@@ -2424,25 +2449,26 @@ test(`isHanziWordSkill suite`, () => {
   );
 
   expect(skillKinds).toMatchInlineSnapshot(`
-      {
-        "debug--Deprecated": false,
-        "debug--Deprecated_EnglishToRadical": false,
-        "debug--Deprecated_PinyinToRadical": false,
-        "debug--Deprecated_RadicalToEnglish": false,
-        "debug--Deprecated_RadicalToPinyin": false,
-        "debug--GlossToHanziWord": true,
-        "debug--HanziWordToGloss": true,
-        "debug--HanziWordToGlossTyped": true,
-        "debug--HanziWordToPinyinFinal": true,
-        "debug--HanziWordToPinyinInitial": true,
-        "debug--HanziWordToPinyinTone": true,
-        "debug--HanziWordToPinyinTyped": true,
-        "debug--ImageToHanziWord": false,
-        "debug--PinyinFinalAssociation": false,
-        "debug--PinyinInitialAssociation": false,
-        "debug--PinyinToHanziWord": false,
-      }
-    `);
+    {
+      "debug--Deprecated": false,
+      "debug--Deprecated_EnglishToRadical": false,
+      "debug--Deprecated_PinyinToRadical": false,
+      "debug--Deprecated_RadicalToEnglish": false,
+      "debug--Deprecated_RadicalToPinyin": false,
+      "debug--GlossToHanziWord": true,
+      "debug--HanziCharacterToWriting": false,
+      "debug--HanziWordToGloss": true,
+      "debug--HanziWordToGlossTyped": true,
+      "debug--HanziWordToPinyinFinal": true,
+      "debug--HanziWordToPinyinInitial": true,
+      "debug--HanziWordToPinyinTone": true,
+      "debug--HanziWordToPinyinTyped": true,
+      "debug--ImageToHanziWord": false,
+      "debug--PinyinFinalAssociation": false,
+      "debug--PinyinInitialAssociation": false,
+      "debug--PinyinToHanziWord": false,
+    }
+  `);
 });
 
 test(`isHarderDifficultyStyleSkillKind suite`, () => {
@@ -2473,25 +2499,26 @@ test(`isHarderDifficultyStyleSkillKind suite`, () => {
   );
 
   expect(skillKinds).toMatchInlineSnapshot(`
-      {
-        "debug--Deprecated": false,
-        "debug--Deprecated_EnglishToRadical": false,
-        "debug--Deprecated_PinyinToRadical": false,
-        "debug--Deprecated_RadicalToEnglish": false,
-        "debug--Deprecated_RadicalToPinyin": false,
-        "debug--GlossToHanziWord": false,
-        "debug--HanziWordToGloss": false,
-        "debug--HanziWordToGlossTyped": true,
-        "debug--HanziWordToPinyinFinal": true,
-        "debug--HanziWordToPinyinInitial": false,
-        "debug--HanziWordToPinyinTone": true,
-        "debug--HanziWordToPinyinTyped": true,
-        "debug--ImageToHanziWord": false,
-        "debug--PinyinFinalAssociation": false,
-        "debug--PinyinInitialAssociation": false,
-        "debug--PinyinToHanziWord": false,
-      }
-    `);
+    {
+      "debug--Deprecated": false,
+      "debug--Deprecated_EnglishToRadical": false,
+      "debug--Deprecated_PinyinToRadical": false,
+      "debug--Deprecated_RadicalToEnglish": false,
+      "debug--Deprecated_RadicalToPinyin": false,
+      "debug--GlossToHanziWord": false,
+      "debug--HanziCharacterToWriting": false,
+      "debug--HanziWordToGloss": false,
+      "debug--HanziWordToGlossTyped": true,
+      "debug--HanziWordToPinyinFinal": true,
+      "debug--HanziWordToPinyinInitial": false,
+      "debug--HanziWordToPinyinTone": true,
+      "debug--HanziWordToPinyinTyped": true,
+      "debug--ImageToHanziWord": false,
+      "debug--PinyinFinalAssociation": false,
+      "debug--PinyinInitialAssociation": false,
+      "debug--PinyinToHanziWord": false,
+    }
+  `);
 });
 
 describe(`randomPickSkillsForReview suite`, () => {

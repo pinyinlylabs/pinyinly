@@ -21,6 +21,9 @@ This document describes the different types of skills available in Pinyinly.
 - **ImageToHanzi (`ih`)**: Translate an image to Hanzi.
 - **PinyinInitialAssociation (`pia`)**: Associate a Pinyin initial with a character/actor/entity.
 - **PinyinFinalAssociation (`pfa`)**: Associate a Pinyin final with a character/actor/entity.
+- **HanziCharacterToWriting (`hwr`)**: Write a single Hanzi character from its meaning and pinyin.
+
+Writing is a character-level skill shared by all dictionary meanings of that character.
 
 ## How Hanzi IDs Are Defined
 

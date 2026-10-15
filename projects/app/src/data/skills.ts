@@ -38,6 +38,7 @@ import type {
   CharacterDecompositionRow,
   Dictionary,
   HanziCharacter,
+  HanziCharacterWritingSkill,
   HanziText,
   HanziWord,
   HanziWordSkill,
@@ -149,6 +150,24 @@ export const skillKindFromSkill = (skill: Skill): SkillKind => {
   return rSkillKind().unmarshal(marshaledSkillKind);
 };
 
+export function hanziCharacterFromWritingSkill(
+  skill: HanziCharacterWritingSkill,
+): HanziCharacter {
+  const result = /^hwr:(.+)$/u.exec(skill);
+  invariant(result != null, `doesn't match hwr:hanzi pattern`);
+  const hanzi = result[1];
+  invariant(
+    hanzi != null && isHanziCharacter(hanzi as HanziText),
+    `invalid character writing skill`,
+  );
+  return hanzi as HanziCharacter;
+}
+
+export const hanziCharacterToWriting = (
+  hanzi: HanziCharacter,
+): HanziCharacterWritingSkill =>
+  `${rSkillKind().marshal(SkillKind.HanziCharacterToWriting)}:${hanzi}` as HanziCharacterWritingSkill;
+
 export const hanziWordFromSkill = (skill: HanziWordSkill): HanziWord => {
   const result = /^(.+?):(.+)$/u.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
@@ -222,6 +241,19 @@ export function skillDependencies(
       break;
     }
 
+    case SkillKind.HanziCharacterToWriting: {
+      const hanzi = hanziCharacterFromWritingSkill(
+        skill as HanziCharacterWritingSkill,
+      );
+      const meaning = dictionary
+        .lookupHanzi(hanzi)
+        .find(([, item]) => item.gloss[0] != null && item.pinyin?.[0] != null);
+      if (meaning != null) {
+        deps.push(hanziWordToGloss(meaning[0]));
+      }
+      break;
+    }
+
     case SkillKind.HanziWordToGloss: {
       // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
@@ -270,7 +302,6 @@ export function skillDependencies(
       }
       break;
     }
-
     case SkillKind.HanziWordToGlossTyped: {
       // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       skill = skill as HanziWordSkill;
@@ -433,14 +464,24 @@ export const hanziWordToPinyinTyped = (hanziWord: HanziWord) =>
 export function hanziWordToTargetSkills(
   hanziWord: HanziWord,
   dictionary: Pick<Dictionary, `lookupHanziWord`>,
+  includeWriting = true,
 ): Skill[] {
   const meaning = dictionary.lookupHanziWord(hanziWord);
   if (meaning == null) {
     return [];
   }
+  const hanzi = hanziFromHanziWord(hanziWord);
+  const writingSkills =
+    includeWriting &&
+    isHanziCharacter(hanzi) &&
+    meaning.gloss[0] != null &&
+    meaning.pinyin?.[0] != null
+      ? [hanziCharacterToWriting(hanzi)]
+      : [];
   return [
     hanziWordToGlossTyped(hanziWord),
     ...(meaning.pinyin?.[0] == null ? [] : [hanziWordToPinyinTyped(hanziWord)]),
+    ...writingSkills,
   ];
 }
 
@@ -1406,6 +1447,7 @@ const skillKindShorthandMapping: Record<SkillKind, string> = {
   [SkillKind.HanziWordToGloss]: `中文 → EN`,
   [SkillKind.HanziWordToGlossTyped]: `中文 → EN`,
   [SkillKind.HanziWordToPinyinTyped]: `中文 → PY`,
+  [SkillKind.HanziCharacterToWriting]: `中文 → ✍️`,
   [SkillKind.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
   [SkillKind.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
   [SkillKind.HanziWordToPinyinTone]: `中文 → PYⁿ`,
@@ -1432,6 +1474,7 @@ export function computeSkillRating(opts: {
   skill: Skill;
   correct: boolean;
   durationMs: number;
+  writingStrokeCount?: number;
 }): UnsavedSkillRating {
   const { skill, correct, durationMs } = opts;
 
@@ -1452,6 +1495,15 @@ export function computeSkillRating(opts: {
     case SkillKind.HanziWordToGlossTyped: {
       easyDuration = 5000;
       goodDuration = 10_000;
+      break;
+    }
+    case SkillKind.HanziCharacterToWriting: {
+      invariant(
+        opts.writingStrokeCount != null && opts.writingStrokeCount > 0,
+        `writing skill ratings require a positive stroke count`,
+      );
+      easyDuration = opts.writingStrokeCount * 1000;
+      goodDuration = easyDuration * 2;
       break;
     }
     case SkillKind.Deprecated:
