@@ -575,9 +575,9 @@ function solveLinearSystem(
     }
     augmented[column] = pivotRow;
     augmented[pivot] = currentRow;
-    const divisor = currentRow[column] ?? 1;
+    const divisor = pivotRow[column] ?? 1;
     for (let entry = column; entry <= size; entry++) {
-      currentRow[entry] = (currentRow[entry] ?? 0) / divisor;
+      pivotRow[entry] = (pivotRow[entry] ?? 0) / divisor;
     }
     for (let row = 0; row < size; row++) {
       if (row === column) {
@@ -590,7 +590,7 @@ function solveLinearSystem(
       }
       for (let entry = column; entry <= size; entry++) {
         targetRow[entry] =
-          (targetRow[entry] ?? 0) - factor * (currentRow[entry] ?? 0);
+          (targetRow[entry] ?? 0) - factor * (pivotRow[entry] ?? 0);
       }
     }
   }
