@@ -13,18 +13,12 @@ import {
 import { isHanziCharacter } from "@/data/hanzi";
 import { loadDictionary } from "@/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
-import { gradeWritingStroke } from "@/util/writingStrokeGrader";
-import type {
-  WritingStrokeGraderOptions,
-  WritingStrokePoint,
-} from "@/util/writingStrokeGrader";
+import { gradeCharacterShape } from "@/util/shapeContextGrader";
+import type { ShapeContextGrade } from "@/util/shapeContextGrader";
+import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import type { Rating } from "@/util/fsrs";
 
-export const hanziCharacterWritingGraderOptions: Partial<WritingStrokeGraderOptions> =
-  {
-    maxMeanDeviation: 180,
-    maxEndpointDeviation: 420,
-  };
+export const hanziCharacterWritingSimilarityThreshold = 0.55;
 
 export async function hanziCharacterWritingQuestionOrThrow(
   skill: HanziCharacterWritingSkill,
@@ -57,7 +51,8 @@ export interface HanziCharacterWritingQuestionGrade {
   correct: boolean;
   rating: Rating;
   skillRatings: UnsavedSkillRating[];
-  failure: `stroke-count` | `stroke-shape` | null;
+  failure: `shape` | null;
+  geometry: ShapeContextGrade;
 }
 
 export function gradeHanziCharacterWritingQuestion(
@@ -66,16 +61,9 @@ export function gradeHanziCharacterWritingQuestion(
   medianPaths: readonly string[],
   durationMs: number,
 ): HanziCharacterWritingQuestionGrade {
+  const geometry = gradeCharacterShape(drawnStrokes, medianPaths);
   const correct =
-    drawnStrokes.length === medianPaths.length &&
-    drawnStrokes.every((stroke, index) => {
-      const median = medianPaths[index];
-      return (
-        median != null &&
-        gradeWritingStroke(stroke, median, hanziCharacterWritingGraderOptions)
-          .accepted
-      );
-    });
+    geometry.similarity >= hanziCharacterWritingSimilarityThreshold;
 
   const skillRating = computeSkillRating({
     skill: question.skill,
@@ -88,10 +76,7 @@ export function gradeHanziCharacterWritingQuestion(
     correct,
     rating: skillRating.rating,
     skillRatings: [skillRating],
-    failure: correct
-      ? null
-      : drawnStrokes.length === medianPaths.length
-        ? `stroke-shape`
-        : `stroke-count`,
+    failure: correct ? null : `shape`,
+    geometry,
   };
 }

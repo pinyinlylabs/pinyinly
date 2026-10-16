@@ -12,6 +12,7 @@ import { transformArphicSpaceSvgPath } from "@/util/svgFont";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { HanziWritingDebug } from "./HanziWritingDebug";
 import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { QuizFlagText } from "./QuizFlagText";
@@ -47,6 +48,9 @@ export function QuizDeckHanziCharacterWritingQuestion({
   const [grade, setGrade] = useState<HanziCharacterWritingQuestionGrade | null>(
     null,
   );
+  const [debugGeometry, setDebugGeometry] = useState<
+    HanziCharacterWritingQuestionGrade[`geometry`] | null
+  >(null);
   const [startTime] = useState(nowMs);
   const { data: svgData, isLoading } = useQuery(
     hanziSvgPathsQuery(question.hanzi),
@@ -70,6 +74,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
       durationMs,
     );
     setGrade(result);
+    setDebugGeometry(result.geometry);
     onRating(result.skillRatings, emptyArray);
   };
 
@@ -163,14 +168,10 @@ export function QuizDeckHanziCharacterWritingQuestion({
             </HanziWritingCanvas>
           </View>
         )}
-        {grade?.failure === `stroke-count` ? (
+        {grade?.failure === `shape` ? (
           <Text className="text-danger">
-            This character has {medianPaths.length} strokes. You drew{` `}
-            {drawnStrokes.length}.
-          </Text>
-        ) : grade?.failure === `stroke-shape` ? (
-          <Text className="text-danger">
-            Some strokes didn’t match. Review the guide and try again.
+            The overall shape does not match closely enough yet. Review the
+            guide and try again.
           </Text>
         ) : null}
         {grade?.correct === false ? (
@@ -178,6 +179,14 @@ export function QuizDeckHanziCharacterWritingQuestion({
             Expected character: {question.hanzi}
           </Text>
         ) : null}
+        {!__DEV__ || debugGeometry == null ? null : (
+          <HanziWritingDebug
+            geometry={debugGeometry}
+            drawnStrokes={drawnStrokes}
+            referencePaths={medianPaths}
+            onGeometryChange={setDebugGeometry}
+          />
+        )}
       </View>
     </QuizDeckQuestionSkeleton>
   );
