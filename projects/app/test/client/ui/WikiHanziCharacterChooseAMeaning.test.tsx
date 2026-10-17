@@ -32,6 +32,13 @@ vi.mock(import(`@tanstack/react-db`), async (importOriginal) => ({
   useLiveQuery: useLiveQueryMock,
 }));
 
+vi.mock(import(`#client/ui/Tooltip.tsx`), () => ({
+  Tooltip: Object.assign(({ children }: PropsWithChildren) => <>{children}</>, {
+    Trigger: ({ children }: PropsWithChildren) => <>{children}</>,
+    Content: () => null,
+  }),
+}));
+
 vi.mock(import(`#client/ui/WikiHanziBookmarkMenu.tsx`), () => ({
   WikiHanziBookmarkMenu: ({ hanziWord }: { hanziWord: HanziWord | null }) => (
     <button type="button" disabled={hanziWord == null}>
@@ -193,7 +200,7 @@ test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
     wrapper: providers(rizzle),
   });
 
-  expect(screen.getByText(`Locked`)).toBeInTheDocument();
+  expect(screen.getByText(`Not Started`)).toBeInTheDocument();
 });
 
 test(`averages meaning progress until a meaning is selected`, () => {
@@ -228,4 +235,74 @@ test(`averages meaning progress until a meaning is selected`, () => {
       skillSrsStates,
     }),
   ).toEqual({ progress: 1, rank: 4 });
+});
+
+test(`shows progress within the current rank`, () => {
+  const rankOneGoalsMet = new Map<Skill, SrsStateType>(
+    [`he:几:howMany`, `hpi:几:howMany`].map((skill) => [
+      skill as Skill,
+      {
+        kind: SrsKind.FsrsFourPointFive,
+        prevReviewAt: new Date(),
+        nextReviewAt: new Date(),
+        stability: 30,
+        difficulty: 0,
+      },
+    ]),
+  );
+
+  expect(
+    getHanziWordsProgress({
+      hanziWords: [meanings[0]!.hanziWord],
+      skillSrsStates: rankOneGoalsMet,
+    }),
+  ).toEqual({ progress: 0, rank: 2 });
+
+  rankOneGoalsMet.set(`hpf:几:howMany`, {
+    kind: SrsKind.FsrsFourPointFive,
+    prevReviewAt: new Date(),
+    nextReviewAt: new Date(),
+    stability: 15,
+    difficulty: 0,
+  });
+
+  expect(
+    getHanziWordsProgress({
+      hanziWords: [meanings[0]!.hanziWord],
+      skillSrsStates: rankOneGoalsMet,
+    }),
+  ).toEqual({ progress: 0.5, rank: 2 });
+});
+
+test(`averages current-rank progress across meanings and completes the final rank`, () => {
+  const skillSrsStates = new Map<Skill, SrsStateType>(
+    [`he:几:howMany`, `hpi:几:howMany`, `hpf:几:howMany`, `hp:几:howMany`].map(
+      (skill) => [
+        skill as Skill,
+        {
+          kind: SrsKind.FsrsFourPointFive,
+          prevReviewAt: new Date(),
+          nextReviewAt: new Date(),
+          stability: 30,
+          difficulty: 0,
+        },
+      ],
+    ),
+  );
+  for (const skill of [`he:几:smallTable`, `hpi:几:smallTable`] as Skill[]) {
+    skillSrsStates.set(skill, {
+      kind: SrsKind.FsrsFourPointFive,
+      prevReviewAt: new Date(),
+      nextReviewAt: new Date(),
+      stability: 15,
+      difficulty: 0,
+    });
+  }
+
+  expect(
+    getHanziWordsProgress({
+      hanziWords: meanings.map((meaning) => meaning.hanziWord),
+      skillSrsStates,
+    }),
+  ).toEqual({ progress: 0.75, rank: 3 });
 });

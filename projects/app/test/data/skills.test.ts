@@ -9,6 +9,7 @@ import { mutators } from "#data/rizzleMutators.ts";
 import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
 import type {
   LatestSkillRating,
+  RankNumber,
   RankRules,
   SkillLearningGraph,
   SkillReviewQueue,
@@ -24,8 +25,11 @@ import {
   isHanziWordSkill,
   isHarderDifficultyStyleSkillKind,
   randomPickSkillsForReview,
+  rankPresentation,
   rankRules,
   rankToAbsoluteProgress,
+  rankToWithinLevelProgress,
+  rankName,
   skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
@@ -58,6 +62,44 @@ describe(`rankToAbsoluteProgress`, () => {
     expect(rankToAbsoluteProgress({ rank: 2, completion: 0.5 })).toBe(0.375);
     expect(rankToAbsoluteProgress({ rank: 4, completion: 0 })).toBe(1);
     expect(rankToAbsoluteProgress({ rank: 3, completion: 2 })).toBe(1);
+  });
+});
+
+describe(`proficiency presentation`, () => {
+  test(`uses the learner-facing proficiency labels`, () => {
+    const ranks: RankNumber[] = [0, 1, 2, 3, 4];
+    expect(ranks.map(rankName)).toEqual([
+      `Not Started`,
+      `Novice`,
+      `Apprentice`,
+      `Expert`,
+      `Master`,
+    ]);
+    expect(ranks.map((rank) => rankPresentation[rank].color)).toEqual([
+      `muted-fg`,
+      `blue`,
+      `emerald`,
+      `violet`,
+      `amber`,
+    ]);
+    expect(
+      Object.values(rankPresentation).map((level) => level.description),
+    ).toEqual([
+      `You haven't started practising this word yet.`,
+      `You're beginning to learn this word.`,
+      `You're building familiarity and improving your recall.`,
+      `You can remember this word reliably.`,
+      `You've developed strong, long-term knowledge of this word.`,
+    ]);
+  });
+
+  test(`shows within-level progress and treats the endpoints as empty or complete`, () => {
+    expect(rankToWithinLevelProgress({ rank: 0, completion: 1 })).toBe(0);
+    expect(rankToWithinLevelProgress({ rank: 1, completion: 0.25 })).toBe(0.25);
+    expect(rankToWithinLevelProgress({ rank: 2, completion: 0.6 })).toBe(0.6);
+    expect(rankToWithinLevelProgress({ rank: 3, completion: 0.8 })).toBe(0.8);
+    expect(rankToWithinLevelProgress({ rank: 4, completion: 0 })).toBe(1);
+    expect(rankToWithinLevelProgress({ rank: 3, completion: 2 })).toBe(1);
   });
 });
 

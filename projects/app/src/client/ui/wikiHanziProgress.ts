@@ -3,7 +3,7 @@ import {
   coerceRank,
   getHanziWordRank,
   rankRules,
-  rankToAbsoluteProgress,
+  rankToWithinLevelProgress,
 } from "@/data/skills";
 import type { RankNumber } from "@/data/skills";
 
@@ -23,7 +23,7 @@ export function getHanziWordsProgress({
     const rank = coerceRank(rankedWord.rank);
     return {
       rank,
-      progress: rankToAbsoluteProgress({
+      progress: rankToWithinLevelProgress({
         rank,
         completion: rankedWord.completion,
       }),
