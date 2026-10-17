@@ -16,49 +16,83 @@ export type LozengeColor =
   | `amber`
   | `muted-fg`;
 
-type LozengeProps = {
+type LozengeBaseProps = {
   color: LozengeColor;
-  size?: `sm` | `md`;
   className?: string;
-  progress?: number;
-  progressClassName?: string;
-} & (
-  | {
+};
+
+type LozengeProps =
+  | (LozengeBaseProps & {
       kind?: `text`;
+      size?: `sm` | `md`;
+      progress?: number;
+      progressClassName?: string;
       children: ReactNode;
       icon?: never;
       accessibilityLabel?: never;
       iconTintColorClassName?: never;
-    }
-  | {
+    })
+  | (LozengeBaseProps & {
       kind: `icon`;
       icon: IconName;
       children?: never;
       accessibilityLabel?: string;
       iconTintColorClassName?: string;
-    }
-);
+    });
 
 export function Lozenge(props: LozengeProps) {
-  const {
-    color,
-    size = `md`,
-    className,
-    progress,
-    progressClassName = `bg-blue/20`,
-  } = props;
-  const isIcon = props.kind === `icon`;
+  return props.kind === `icon` ? (
+    <IconLozenge {...props} />
+  ) : (
+    <TextLozenge {...props} />
+  );
+}
 
+function IconLozenge({
+  color,
+  className,
+  icon,
+  accessibilityLabel,
+  iconTintColorClassName,
+}: LozengeBaseProps & {
+  icon: IconName;
+  accessibilityLabel?: string;
+  iconTintColorClassName?: string;
+}) {
   return (
     <View
-      accessible={isIcon}
-      accessibilityLabel={isIcon ? props.accessibilityLabel : undefined}
-      style={isIcon ? { width: 26, height: 26, padding: 0 } : undefined}
+      accessible
+      accessibilityLabel={accessibilityLabel}
+      style={{ width: 28, height: 26, padding: 0 }}
       className={lozengeContainerClass({
         color,
-        size: isIcon ? undefined : size,
+        className: `flex-row items-center justify-center ${className ?? ``}`,
+      })}
+    >
+      <Icon icon={icon} size={16} tintColorClassName={iconTintColorClassName} />
+    </View>
+  );
+}
+
+function TextLozenge({
+  color,
+  size = `md`,
+  className,
+  progress,
+  progressClassName = `bg-blue/20`,
+  children,
+}: LozengeBaseProps & {
+  size?: `sm` | `md`;
+  progress?: number;
+  progressClassName?: string;
+  children: ReactNode;
+}) {
+  return (
+    <View
+      className={lozengeContainerClass({
+        color,
+        size,
         className: [
-          isIcon ? `flex-row items-center justify-center` : ``,
           progress == null ? `` : `relative overflow-hidden`,
           className,
         ]
@@ -76,22 +110,14 @@ export function Lozenge(props: LozengeProps) {
           style={{ width: `${Math.min(progress, 1) * 100}%` }}
         />
       )}
-      {isIcon ? (
-        <Icon
-          icon={props.icon}
-          size={16}
-          tintColorClassName={props.iconTintColorClassName}
-        />
-      ) : (
-        <Text
-          className={`
-            ${lozengeTextClass({ color, size })}
-            ${progress == null ? `` : `relative`}
-          `}
-        >
-          {props.children}
-        </Text>
-      )}
+      <Text
+        className={`
+          ${lozengeTextClass({ color, size })}
+          ${progress == null ? `` : `relative`}
+        `}
+      >
+        {children}
+      </Text>
     </View>
   );
 }
