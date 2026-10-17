@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"Directly ahead; before."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

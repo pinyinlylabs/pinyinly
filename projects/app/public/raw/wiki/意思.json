@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"The concept or message conveyed by something."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

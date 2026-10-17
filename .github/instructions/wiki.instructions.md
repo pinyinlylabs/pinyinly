@@ -19,6 +19,10 @@ longer explanations easy to scan; there is no required set of headings or frontm
 Examples: [`一/meaning.mdx`](../../projects/app/src/client/wiki/一/meaning.mdx) and
 [`一会儿/meaning.mdx`](../../projects/app/src/client/wiki/一会儿/meaning.mdx).
 
+Character `character.json` files may define an optional `exampleSentence` on each
+`curriculumMeanings` entry. It contains `hanzi`, `pinyin`, and `translation`, and is shown with the
+matching character meaning on the wiki page.
+
 When modifying or adding wiki content:
 
 1. Create or edit the appropriate `meaning.mdx` in the directory for that character or word.
@@ -43,15 +47,18 @@ imports and transforms character stroke graphics is
 
 ## Generated `public/raw` wiki data
 
-`projects/app/public/raw/mdx/` and `projects/app/public/raw/svgs/` are generated per-entry JSON data
-used by the web app at runtime. They are derived from the wiki source files:
+`projects/app/public/raw/wiki/` and `projects/app/public/raw/svgs/` are generated per-entry JSON
+data used by the web app at runtime. They are derived from the wiki source files:
 
-- `public/raw/mdx/[hanzi].json` is the compiled Markdown AST for
-  `src/client/wiki/[hanzi]/meaning.mdx`.
+- `public/raw/wiki/[hanzi].json` contains the compiled Markdown AST in `mdast` when an article
+  exists and, where present, character `curriculumMeaningExamples` from
+  `src/client/wiki/[hanzi]/character.json`. The payload also exists for entries with examples but no
+  MDX article.
 - `public/raw/svgs/[hanzi].json` contains the `svg` stroke data from
   `src/client/wiki/[hanzi]/character.json` for entries with stroke path arrays.
 
 Do not use these generated directories to discover how wiki content is authored, and do not edit
 their JSON directly. They contain many repetitive, generated files and scanning them wastes time and
 context. Read or change the corresponding `src/client/wiki/[hanzi]/meaning.mdx` or `character.json`
-source instead; the app tests regenerate/check the compiled outputs.
+source instead; the app tests regenerate/check the compiled outputs. Keep SVGs separate from the
+wiki payload because other app features load them independently.

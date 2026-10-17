@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"The hair on a person's head."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"Symbols used to represent numbers."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

@@ -2,15 +2,22 @@ import type {
   DictionaryCollectionEntry,
   UserDictionaryEntry,
 } from "@/client/query";
-import type { HanziText, HanziWord } from "@/data/model";
+import type {
+  CharacterExampleSentence,
+  HanziText,
+  HanziWord,
+} from "@/data/model";
+import { wikiPayloadQuery } from "@/client/query";
 import { buildHanziWord } from "@/dictionary";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { useDb } from "./hooks/useDb";
 import { useUserHanziMeaning } from "./hooks/useUserHanziMeaning";
+import { WikiExampleSentence } from "./WikiExampleSentence";
 
 interface WikiHanziMeaningsPanelProps {
   hanzi: HanziText;
@@ -42,6 +49,9 @@ export function WikiHanziMeaningsPanel({
         .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
     [db.userDictionary, hanzi],
   );
+
+  const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
+
   const isMeaningPicker = builtInMeanings.length + userMeanings.length > 1;
 
   useEffect(() => {
@@ -80,6 +90,11 @@ export function WikiHanziMeaningsPanel({
             <DictionaryMeaningListItem
               key={`${meaning.sourceKind}:${meaning.id}`}
               meaning={meaning}
+              exampleSentence={
+                wikiPayload?.curriculumMeaningExamples?.find(
+                  ({ id }) => id === meaning.hanziWord,
+                )?.exampleSentence
+              }
               selected={
                 isMeaningPicker && selectedHanziWord === meaning.hanziWord
               }
@@ -107,10 +122,12 @@ export function WikiHanziMeaningsPanel({
 
 function DictionaryMeaningListItem({
   meaning,
+  exampleSentence,
   selected,
   onSelect,
 }: {
   meaning: DictionaryCollectionEntry;
+  exampleSentence?: CharacterExampleSentence;
   selected: boolean;
   onSelect?: (hanziWord: HanziWord) => void;
 }) {
@@ -129,6 +146,10 @@ function DictionaryMeaningListItem({
         pinyin={primaryPinyin}
         glosses={meaning.gloss}
       />
+
+      {exampleSentence == null ? null : (
+        <WikiExampleSentence exampleSentence={exampleSentence} />
+      )}
 
       {secondaryPinyins.length === 0 ? null : (
         <LabeledText label="Other pinyin">

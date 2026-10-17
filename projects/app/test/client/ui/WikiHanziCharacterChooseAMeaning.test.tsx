@@ -16,7 +16,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
-import { expect, test as baseTest, vi } from "vitest";
+import { afterEach, beforeEach, expect, test as baseTest, vi } from "vitest";
 import { WikiHanziCharacterChooseAMeaning } from "#client/ui/WikiHanziCharacterChooseAMeaning.tsx";
 import { WikiHanziMeaningsPanel } from "#client/ui/WikiHanziMeaningsPanel.tsx";
 import { WikiHanziProgressLozenge } from "#client/ui/WikiHanziProgressLozenge.tsx";
@@ -48,6 +48,17 @@ vi.mock(import(`#client/ui/WikiHanziBookmarkMenu.tsx`), () => ({
 }));
 
 const test = baseTest.extend(rizzleFixture);
+
+beforeEach(() => {
+  vi.stubGlobal(
+    `fetch`,
+    vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
+  );
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 const hanzi = `几` as HanziCharacter;
 const meanings = [
@@ -118,6 +129,33 @@ test(`scopes the page study action to the selected meaning`, ({ rizzle }) => {
   expect(
     screen.queryByRole(`button`, { name: `Bookmark 几:howMany` }),
   ).not.toBeInTheDocument();
+});
+
+test(`shows the example sentence for its character meaning`, async ({
+  rizzle,
+}) => {
+  useLiveQueryMock.mockReturnValue({ data: meanings });
+  vi.mocked(globalThis.fetch).mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        curriculumMeaningExamples: [
+          {
+            id: meanings[0]!.hanziWord,
+            exampleSentence: {
+              hanzi: `这张桌子很小。`,
+              pinyin: `zhè zhāng zhuōzi hěn xiǎo`,
+              translation: `This table is small.`,
+            },
+          },
+        ],
+      }),
+    ),
+  );
+
+  render(<TestChooser />, { wrapper: providers(rizzle) });
+
+  expect(await screen.findByText(`This table is small.`)).toBeInTheDocument();
+  expect(screen.getByText(`这张桌子很小。`)).toBeInTheDocument();
 });
 
 test(`selects a sole word meaning for the page study action by default`, ({

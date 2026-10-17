@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"Refers to how old someone is."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

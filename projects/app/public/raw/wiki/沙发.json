@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"A comfortable seating item typically found in a living room."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

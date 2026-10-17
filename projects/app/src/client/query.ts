@@ -14,7 +14,10 @@ import type {
   Skill,
   SrsStateType,
 } from "@/data/model";
-import { characterJsonSchema } from "@/data/model";
+import {
+  characterCurriculumMeaningExampleSchema,
+  characterJsonSchema,
+} from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
@@ -299,7 +302,22 @@ const wikiMdastRootSchema = z.looseObject({
   children: z.array(z.unknown()),
 });
 
+export const wikiPayloadSchema = z
+  .strictObject({
+    mdast: wikiMdastRootSchema.optional(),
+    curriculumMeaningExamples: z
+      .array(characterCurriculumMeaningExampleSchema)
+      .optional(),
+  })
+  .refine(
+    ({ mdast, curriculumMeaningExamples }) =>
+      mdast != null ||
+      (curriculumMeaningExamples != null &&
+        curriculumMeaningExamples.length > 0),
+  );
+
 export type WikiMdastRoot = z.infer<typeof wikiMdastRootSchema>;
+export type WikiPayload = z.infer<typeof wikiPayloadSchema>;
 export type HanziSvgData = z.infer<typeof hanziSvgDataSchema>;
 
 export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
@@ -341,15 +359,15 @@ export const hanziSvgPathsQuery = Platform.select({
   default: hanziSvgPathsQueryNative,
 });
 
-export const wikiMdxQueryWeb = (hanzi: HanziText | null) =>
+export const wikiPayloadQueryWeb = (hanzi: HanziText | null) =>
   queryOptions({
-    queryKey: [`wikiMdx`, hanzi] as const,
+    queryKey: [`wikiPayload`, hanzi] as const,
     queryFn:
       hanzi == null
         ? skipToken
-        : async ({ signal }): Promise<WikiMdastRoot | null> => {
+        : async ({ signal }): Promise<WikiPayload | null> => {
             const response = await fetch(
-              `/raw/mdx/${encodeURIComponent(hanzi)}.json`,
+              `/raw/wiki/${encodeURIComponent(hanzi)}.json`,
               { signal },
             );
             if (!response.ok) {
@@ -357,27 +375,27 @@ export const wikiMdxQueryWeb = (hanzi: HanziText | null) =>
             }
 
             const json = (await response.json()) as unknown;
-            const result = wikiMdastRootSchema.safeParse(json);
+            const result = wikiPayloadSchema.safeParse(json);
             return result.success ? result.data : null;
           },
     staleTime: Infinity,
   });
 
-export const wikiMdxQueryNative = (hanzi: HanziText | null) =>
+export const wikiPayloadQueryNative = (hanzi: HanziText | null) =>
   queryOptions({
-    queryKey: [`wikiMdx`, hanzi] as const,
+    queryKey: [`wikiPayload`, hanzi] as const,
     queryFn:
       hanzi == null
         ? skipToken
-        : async (): Promise<WikiMdastRoot | null> => {
+        : async (): Promise<WikiPayload | null> => {
             return null;
           },
     staleTime: Infinity,
   });
 
-export const wikiMdxQuery = Platform.select({
-  web: wikiMdxQueryWeb,
-  default: wikiMdxQueryNative,
+export const wikiPayloadQuery = Platform.select({
+  web: wikiPayloadQueryWeb,
+  default: wikiPayloadQueryNative,
 });
 
 const characterDecompositionDataSchema = characterJsonSchema.pick({

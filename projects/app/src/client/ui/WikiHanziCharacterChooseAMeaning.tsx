@@ -1,4 +1,6 @@
 import type { HanziCharacter, HanziWord } from "@/data/model";
+import { wikiPayloadQuery } from "@/client/query";
+import { useQuery } from "@tanstack/react-query";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { PropsWithChildren } from "react";
 import { Pressable } from "react-native";
@@ -6,6 +8,7 @@ import { Text } from "@/client/ui/Text";
 import { View } from "./View";
 import { useDb } from "./hooks/useDb";
 import { tv } from "tailwind-variants";
+import { WikiExampleSentence } from "./WikiExampleSentence";
 
 export function WikiHanziCharacterChooseAMeaning({
   hanzi,
@@ -32,6 +35,7 @@ export function WikiHanziCharacterChooseAMeaning({
         })),
     [db.dictionaryCollection, hanzi],
   );
+  const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
 
   return (
     <View className="gap-2">
@@ -41,25 +45,34 @@ export function WikiHanziCharacterChooseAMeaning({
         </Text>
       </View>
       <View className="gap-3">
-        {dictionaryEntries.map((entry) => (
-          <ToggleButton
-            key={entry.hanziWord}
-            pressed={selectedMeaning === entry.hanziWord}
-            onPressedChanged={() => {
-              onHanziWordChanged(entry.hanziWord);
-            }}
-            className="flex-row items-center gap-2 px-3 py-2"
-          >
-            <View className="gap-1">
-              <Text className="font-sans text-xl/normal font-semibold text-fg">
-                {entry.pinyin?.[0]}
-              </Text>
-              <Text className="font-sans text-lg/normal font-normal text-fg">
-                {entry.gloss.join(`, `)}
-              </Text>
-            </View>
-          </ToggleButton>
-        ))}
+        {dictionaryEntries.map((entry) => {
+          const exampleSentence = wikiPayload?.curriculumMeaningExamples?.find(
+            ({ id }) => id === entry.hanziWord,
+          )?.exampleSentence;
+
+          return (
+            <ToggleButton
+              key={entry.hanziWord}
+              pressed={selectedMeaning === entry.hanziWord}
+              onPressedChanged={() => {
+                onHanziWordChanged(entry.hanziWord);
+              }}
+              className="flex-col items-stretch gap-2 px-3 py-2"
+            >
+              <View className="gap-1">
+                <Text className="font-sans text-xl/normal font-semibold text-fg">
+                  {entry.pinyin?.[0]}
+                </Text>
+                <Text className="font-sans text-lg/normal font-normal text-fg">
+                  {entry.gloss.join(`, `)}
+                </Text>
+                {exampleSentence == null ? null : (
+                  <WikiExampleSentence exampleSentence={exampleSentence} />
+                )}
+              </View>
+            </ToggleButton>
+          );
+        })}
       </View>
     </View>
   );

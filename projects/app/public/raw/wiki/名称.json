@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"A distinctive designation of something."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

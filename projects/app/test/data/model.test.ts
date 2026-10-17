@@ -12,6 +12,8 @@ import {
   assetIdPinyinlyObjectId,
   assetIdPinyinlyObjectIdKind,
   assetIdSchema,
+  characterCurriculumMeaningSchema,
+  characterCurriculumMeaningExampleSchema,
   hanziIdsSchema,
   hanziWordFromPinyinlyObjectId,
   hanziWordPinyinlyObjectId,
@@ -98,6 +100,47 @@ describe(`assetIdSchema`, () => {
 
   test(`rejects empty string`, () => {
     expect(assetIdSchema.safeParse(``).success).toBe(false);
+  });
+});
+
+describe(`characterCurriculumMeaningSchema`, () => {
+  test(`accepts an optional example sentence`, () => {
+    const meaning = {
+      id: `行:go`,
+      gloss: `go`,
+      pinyin: `xíng`,
+      exampleSentence: {
+        hanzi: `我去旅行。`,
+        pinyin: `wǒ qù lǚxíng`,
+        translation: `I travel.`,
+      },
+    };
+
+    expect(characterCurriculumMeaningSchema.parse(meaning)).toEqual(meaning);
+    expect(
+      characterCurriculumMeaningSchema.parse({
+        id: `行:go`,
+        gloss: `go`,
+        pinyin: `xíng`,
+      }).exampleSentence,
+    ).toBeUndefined();
+  });
+});
+
+describe(`characterCurriculumMeaningExampleSchema`, () => {
+  test(`validates the generated character asset example shape`, () => {
+    const example = {
+      id: `兴:interest`,
+      exampleSentence: {
+        hanzi: `我对这个话题很感兴趣。`,
+        pinyin: `wǒ duì zhège huàtí hěn gǎn xìngqù`,
+        translation: `I'm very interested in this topic.`,
+      },
+    };
+
+    expect(characterCurriculumMeaningExampleSchema.parse(example)).toEqual(
+      example,
+    );
   });
 });
 

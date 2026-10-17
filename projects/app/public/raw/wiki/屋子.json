@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"A part or division of a building enclosed by walls, floor, and ceiling."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

@@ -57,7 +57,12 @@
       "description": "Personal engagement, enthusiasm, emotional mood, pleasure, and disappointment.",
       "gloss": "interest",
       "id": "兴:interest",
-      "pinyin": "xìng"
+      "pinyin": "xìng",
+      "exampleSentence": {
+        "hanzi": "我对这个话题很感兴趣。",
+        "pinyin": "wǒ duì zhège huàtí hěn gǎn xìngqù",
+        "translation": "I'm very interested in this topic."
+      }
     }
   ],
   "decompositions": {

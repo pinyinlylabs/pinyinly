@@ -1,16 +1,16 @@
-import { wikiMdxQuery } from "@/client/query";
+import { wikiPayloadQuery } from "@/client/query";
 import type { HanziText } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
 import { View } from "@/client/ui/View";
-import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
+import { MdastContent } from "./MdastContent";
 import { WikiTitledBox } from "./WikiTitledBox";
 
 const collapsedMaxHeight = 320;
 
 export function WikiAiExplanation({ hanzi }: { hanzi: HanziText }) {
-  const { data: mdastRoot } = useQuery(wikiMdxQuery(hanzi));
+  const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
 
-  if (mdastRoot == null) {
+  if (wikiPayload?.mdast == null) {
     return null;
   }
 
@@ -21,7 +21,7 @@ export function WikiAiExplanation({ hanzi }: { hanzi: HanziText }) {
       collapsedMaxHeight={collapsedMaxHeight}
     >
       <View className="p-4">
-        <WikiMdxHanziMeaning hanzi={hanzi} />
+        <MdastContent root={wikiPayload.mdast} />
       </View>
     </WikiTitledBox>
   );

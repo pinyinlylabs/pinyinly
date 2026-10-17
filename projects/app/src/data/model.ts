@@ -1073,6 +1073,25 @@ export const characterCurriculumMeaningBranchSchema = z.object({
     ),
 });
 
+export const characterExampleSentenceSchema = z.strictObject({
+  hanzi: hanziTextSchema,
+  pinyin: pinyinTextSchema,
+  translation: z.string(),
+});
+
+export type CharacterExampleSentence = z.infer<
+  typeof characterExampleSentenceSchema
+>;
+
+export const characterCurriculumMeaningExampleSchema = z.strictObject({
+  id: hanziWordSchema,
+  exampleSentence: characterExampleSentenceSchema,
+});
+
+export type CharacterCurriculumMeaningExample = z.infer<
+  typeof characterCurriculumMeaningExampleSchema
+>;
+
 /**
  * Curriculum Meanings are the semantic units used by Pinyinly's teaching
  * curriculum. They are deliberately different from dictionary senses.
@@ -1116,6 +1135,7 @@ export const characterCurriculumMeaningSchema = z.object({
     .describe(
       `Exceptions to the default pinyin for this meaning, keyed by hanzi, e.g. { "你好": "nǐhǎo" }`,
     ),
+  exampleSentence: characterExampleSentenceSchema.optional(),
   description: z.string().optional(),
   branches: z.array(characterCurriculumMeaningBranchSchema).optional(),
 });

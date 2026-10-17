@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"A building for indoor sports."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

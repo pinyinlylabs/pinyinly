@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"An assessment intended to measure knowledge or skill."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}
