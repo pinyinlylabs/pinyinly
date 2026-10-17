@@ -1,11 +1,13 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
-import { rankName } from "@/data/skills";
-import type { coerceRank } from "@/data/skills";
+import { rankPresentation, rankToWithinLevelProgress } from "@/data/skills";
+import type { RankNumber } from "@/data/skills";
 import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { Lozenge } from "./Lozenge";
-import type { LozengeColor } from "./Lozenge";
+import { proficiencyFillProgress, proficiencyStyle } from "./proficiencyStyles";
+import { Tooltip } from "./Tooltip";
+import { Text } from "./Text";
 import { getHanziWordsProgress } from "./wikiHanziProgress";
 
 export function WikiHanziProgressLozenge({
@@ -53,29 +55,54 @@ export function WikiHanziProgressLozenge({
     skillSrsStates,
   });
 
-  return (
-    <Lozenge
-      color={rankColor[rank]}
-      progress={progress}
-      progressClassName={rankProgressClass[rank]}
-    >
-      {rankName(rank)}
-    </Lozenge>
-  );
+  return <WikiHanziProgressLozengeDisplay progress={progress} rank={rank} />;
 }
 
-const rankColor = {
-  0: `muted-fg`,
-  1: `muted-fg`,
-  2: `blue`,
-  3: `violet`,
-  4: `fuchsia`,
-} satisfies Record<ReturnType<typeof coerceRank>, LozengeColor>;
+export function WikiHanziProgressLozengeDisplay({
+  progress,
+  rank,
+}: {
+  progress: number;
+  rank: RankNumber;
+}) {
+  const level = rankPresentation[rank];
+  const style = proficiencyStyle[level.color];
+  const badgeProgress = rankToWithinLevelProgress({
+    rank,
+    completion: progress,
+  });
+  const visualProgress =
+    rank === 0 || rank === 4
+      ? badgeProgress
+      : proficiencyFillProgress(badgeProgress);
 
-const rankProgressClass = {
-  0: `bg-fg/8`,
-  1: `bg-fg/15`,
-  2: `bg-blue/20`,
-  3: `bg-violet/20`,
-  4: `bg-fuchsia/20`,
-} satisfies Record<ReturnType<typeof coerceRank>, string>;
+  return (
+    <Tooltip placement="top" sideOffset={6}>
+      <Tooltip.Trigger
+        accessibilityRole="button"
+        accessibilityLabel={`${level.label}. ${level.description}`}
+      >
+        <Lozenge
+          className={style.badgeClass}
+          color={style.lozengeColor}
+          progress={rank === 0 || rank === 4 ? undefined : visualProgress}
+          progressClassName={style.badgeProgressClass}
+        >
+          {level.label}
+        </Lozenge>
+      </Tooltip.Trigger>
+      <Tooltip.Content className="gap-2">
+        <Text className="font-sans text-sm font-semibold text-fg">
+          {level.label}
+        </Text>
+        <Text className="font-sans text-sm text-fg">{level.description}</Text>
+        <Text className="font-sans text-sm text-fg">
+          Each word has its own proficiency level. Remembering it during
+          practice helps it grow; repeated forgetting may lower it. The progress
+          fill shows how close this word is to the next level and resets when it
+          advances. Master is the highest level.
+        </Text>
+      </Tooltip.Content>
+    </Tooltip>
+  );
+}

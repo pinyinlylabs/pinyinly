@@ -3,19 +3,21 @@ import type { HanziWord, Skill, SrsStateType } from "@/data/model";
 import {
   coerceRank,
   getHanziWordRank,
+  rankPresentation,
   rankRules,
   rankToAbsoluteProgress,
+  rankToWithinLevelProgress,
 } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { Pressable } from "react-native";
-import { tv } from "tailwind-variants";
 import { HanziPinyinText } from "./HanziPinyinText";
 import { HskLozenge } from "./HskLozenge";
 import { Icon } from "./Icon";
 import { Text } from "./Text";
 import { View } from "./View";
+import { proficiencyFillProgress, proficiencyStyle } from "./proficiencyStyles";
 
 export function SkillWordRows({
   hanziWords,
@@ -60,6 +62,10 @@ export function SkillWordRows({
       pinyin: meaning?.pinyin?.[0] ?? null,
       gloss: meaning?.gloss[0] ?? ``,
       rank,
+      progress: rankToWithinLevelProgress({
+        rank,
+        completion: rankedHanziWord.completion,
+      }),
       absoluteProgress: rankToAbsoluteProgress({
         rank,
         completion: rankedHanziWord.completion,
@@ -109,7 +115,18 @@ export function SkillWordRows({
                 {row.gloss}
               </Text>
               <View className="w-21 items-end">
-                <View className="relative h-1.5 w-full rounded bg-fg/10">
+                <View
+                  accessible
+                  accessibilityRole="progressbar"
+                  accessibilityLabel={`${rankPresentation[row.rank].label} proficiency`}
+                  accessibilityValue={{
+                    min: 0,
+                    max: 100,
+                    now: Math.round(row.progress * 100),
+                    text: `${Math.round(row.progress * 100)}%`,
+                  }}
+                  className="relative h-1.5 w-full rounded bg-fg/10"
+                >
                   {milestonePercents.map((milestonePercent) => (
                     <View
                       className="absolute bottom-0 z-10 size-0.5 -translate-x-1/2 bg-bg"
@@ -117,10 +134,16 @@ export function SkillWordRows({
                       style={{ left: `${milestonePercent}%` }}
                     />
                   ))}
-                  {row.absoluteProgress === 0 ? null : (
+                  {row.progress === 0 ? null : (
                     <View
-                      className={rankProgressClass({ rank: row.rank })}
-                      style={{ width: `${row.absoluteProgress * 100}%` }}
+                      className={`
+                        h-1.5 rounded
+
+                        ${proficiencyStyle[rankPresentation[row.rank].color].barProgressClass}
+                      `}
+                      style={{
+                        width: `${proficiencyFillProgress(row.progress) * 100}%`,
+                      }}
                     />
                   )}
                 </View>
@@ -140,16 +163,3 @@ export function SkillWordRows({
 }
 
 const milestonePercents = [25, 50, 75] as const;
-
-const rankProgressClass = tv({
-  base: `h-1.5 rounded`,
-  variants: {
-    rank: {
-      0: `bg-fg/30`,
-      1: `bg-fg/70`,
-      2: `bg-blue`,
-      3: `bg-violet`,
-      4: `bg-fuchsia`,
-    },
-  },
-});

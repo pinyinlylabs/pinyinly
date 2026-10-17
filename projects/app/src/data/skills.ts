@@ -1600,6 +1600,60 @@ const weekInMillis = 1000 * 60 * 60 * 24 * 7;
 
 export type RankNumber = 0 | 1 | 2 | 3 | 4;
 
+export type ProficiencyColor =
+  | `muted-fg`
+  | `blue`
+  | `emerald`
+  | `violet`
+  | `amber`;
+
+export const rankPresentation = {
+  0: {
+    label: `Not Started`,
+    description: `You haven't started practising this word yet.`,
+    color: `muted-fg`,
+  },
+  1: {
+    label: `Novice`,
+    description: `You're beginning to learn this word.`,
+    color: `blue`,
+  },
+  2: {
+    label: `Apprentice`,
+    description: `You're building familiarity and improving your recall.`,
+    color: `emerald`,
+  },
+  3: {
+    label: `Expert`,
+    description: `You can remember this word reliably.`,
+    color: `violet`,
+  },
+  4: {
+    label: `Master`,
+    description: `You've developed strong, long-term knowledge of this word.`,
+    color: `amber`,
+  },
+} satisfies Record<
+  RankNumber,
+  { label: string; description: string; color: ProficiencyColor }
+>;
+
+export function rankToWithinLevelProgress({
+  rank,
+  completion,
+}: {
+  rank: RankNumber;
+  completion: number;
+}): number {
+  if (rank === 0) {
+    return 0;
+  }
+  if (rank === 4) {
+    return 1;
+  }
+  return Math.max(0, Math.min(completion, 1));
+}
+
 export function rankToAbsoluteProgress({
   rank,
   completion,
@@ -1617,11 +1671,7 @@ export function rankToAbsoluteProgress({
 }
 
 export function rankName(rank: RankNumber): string {
-  if (rank === 0) {
-    return `Locked`;
-  }
-
-  return `Rank ${rank}`;
+  return rankPresentation[rank].label;
 }
 
 export function coerceRank(rank: number): RankNumber {

@@ -30,5 +30,5 @@ export default defineConfig({
     respectEslintDisableDirectives: false,
   },
   // `extends` doesn't inherit `ignorePatterns`, so repeat them here.
-  ignorePatterns: [`**/*.d.ts`, `src/app/dev/**`],
+  ignorePatterns: [`**/*.d.ts`],
 });

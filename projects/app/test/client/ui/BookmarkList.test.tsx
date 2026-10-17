@@ -111,6 +111,9 @@ test(`uses shared HSK rows in dated groups without notes or removal buttons`, as
   const glossAndProgress = sharedText.parentElement?.parentElement;
   expect(glossAndProgress?.contains(sharedText)).toBe(true);
   expect(glossAndProgress?.querySelector(`[style*="left"]`)).not.toBeNull();
+  expect(
+    within(shared.container).getByRole(`progressbar`),
+  ).toHaveAccessibleName(`Not Started proficiency`);
 
   await act(async () => {
     await rizzle.mutate.setSetting({
