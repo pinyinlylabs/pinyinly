@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"The warmest season of the year."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

@@ -1,10 +1,12 @@
-import { wikiMdxQuery } from "@/client/query";
+import { wikiPayloadQuery } from "@/client/query";
 import type { HanziText } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
 import { MdastContent } from "./MdastContent";
 
 export function WikiMdxHanziMeaning({ hanzi }: { hanzi: HanziText }) {
-  const { data: root } = useQuery(wikiMdxQuery(hanzi));
+  const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
 
-  return root == null ? null : <MdastContent root={root} />;
+  return wikiPayload?.mdast == null ? null : (
+    <MdastContent root={wikiPayload.mdast} />
+  );
 }

@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"The start of a new school term."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

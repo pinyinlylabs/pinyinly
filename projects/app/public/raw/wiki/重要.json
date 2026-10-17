@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"Describes something of great significance or value."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

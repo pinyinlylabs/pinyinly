@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"Used to connect clauses indicating addition or emphasis."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

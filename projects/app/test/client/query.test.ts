@@ -3,7 +3,11 @@ import type {
   HistoryPageCollection,
   HistoryPageData,
 } from "#client/query.js";
-import { historyPageCollection, historyPageData } from "#client/query.js";
+import {
+  historyPageCollection,
+  historyPageData,
+  wikiPayloadSchema,
+} from "#client/query.js";
 import { matchAllHanziCharacters } from "#data/hanzi.ts";
 import {
   getUserHanziMeaningKeyParams,
@@ -21,6 +25,7 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import {
   afterEach,
   test as baseTest,
+  test as unitTest,
   beforeAll,
   beforeEach,
   describe,
@@ -40,6 +45,50 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+});
+
+describe(`wikiPayloadSchema`, () => {
+  unitTest(`accepts MDX and optional character examples`, () => {
+    expect(
+      wikiPayloadSchema.parse({
+        mdast: { type: `root`, children: [] },
+        curriculumMeaningExamples: [
+          {
+            id: `兴:interest`,
+            exampleSentence: {
+              hanzi: `我对这个话题很感兴趣。`,
+              pinyin: `wǒ duì zhège huàtí hěn gǎn xìngqù`,
+              translation: `I'm very interested in this topic.`,
+            },
+          },
+        ],
+      }),
+    ).toMatchObject({
+      mdast: { type: `root` },
+      curriculumMeaningExamples: [{ id: `兴:interest` }],
+    });
+  });
+
+  unitTest(`accepts character examples without an MDX article`, () => {
+    expect(
+      wikiPayloadSchema.safeParse({
+        curriculumMeaningExamples: [
+          {
+            id: `兴:interest`,
+            exampleSentence: {
+              hanzi: `我对这个话题很感兴趣。`,
+              pinyin: `wǒ duì zhège huàtí hěn gǎn xìngqù`,
+              translation: `I'm very interested in this topic.`,
+            },
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  unitTest(`rejects an empty payload`, () => {
+    expect(wikiPayloadSchema.safeParse({}).success).toBe(false);
+  });
 });
 
 describe(`historyPageCollection suite`, () => {

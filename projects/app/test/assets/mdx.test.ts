@@ -1,35 +1,105 @@
 // pyly-not-src-test
 
 import { projectRoot } from "#bin/util/paths.ts";
-import { glob, mkdir, readFile } from "@pinyinly/lib/fs";
+import type { CharacterCurriculumMeaningExample } from "#data/model.js";
+import { characterJsonSchema } from "#data/model.js";
+import {
+  existsSync,
+  glob,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+} from "@pinyinly/lib/fs";
 import { createMdxAstProcessor } from "@pinyinly/mdx/processor";
 import path from "node:path";
 import { expect, test } from "vitest";
 
-test(
-  `compiled wiki mdx json is up to date`,
-  { timeout: Infinity },
-  async () => {
-    const mdxFiles = (
-      await glob(path.join(projectRoot, `src/client/wiki/**/meaning.mdx`))
-    ).sort();
+test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
+  const mdxFiles = (
+    await glob(path.join(projectRoot, `src/client/wiki/**/meaning.mdx`))
+  ).sort();
 
-    expect(mdxFiles.length).toBeGreaterThan(100);
+  expect(mdxFiles.length).toBeGreaterThan(100);
 
-    const outputDir = path.join(projectRoot, `public/raw/mdx`);
-    await mkdir(outputDir, { recursive: true });
+  const outputDir = path.join(projectRoot, `public/raw/wiki`);
+  await mkdir(outputDir, { recursive: true });
 
-    await compileMdxFiles(
-      mdxFiles.map((mdxFilePath) => ({
-        from: mdxFilePath,
-        to: path.join(
-          outputDir,
-          `${path.basename(path.dirname(mdxFilePath))}.json`,
-        ),
-      })),
+  const mdxFilesByHanzi = new Map(
+    mdxFiles.map((mdxFilePath) => [
+      path.basename(path.dirname(mdxFilePath)),
+      mdxFilePath,
+    ]),
+  );
+
+  const examplesByHanzi = new Map<
+    string,
+    CharacterCurriculumMeaningExample[]
+  >();
+  const characterJsonFiles = await glob(
+    path.join(projectRoot, `src/client/wiki/*/character.json`),
+  );
+  for (const filePath of characterJsonFiles) {
+    const characterJson = characterJsonSchema.parse(
+      JSON.parse(await readFile(filePath, `utf8`)) as unknown,
     );
-  },
-);
+    const examples = characterJson.curriculumMeanings?.flatMap(
+      ({ id, exampleSentence }) =>
+        exampleSentence == null ? [] : [{ id, exampleSentence }],
+    );
+    if (examples != null && examples.length > 0) {
+      examplesByHanzi.set(characterJson.hanzi, examples);
+    }
+  }
+
+  const processor = createMdxAstProcessor();
+  const hanziEntries = new Set([
+    ...mdxFilesByHanzi.keys(),
+    ...examplesByHanzi.keys(),
+  ]);
+  for (const hanzi of hanziEntries) {
+    const payload: {
+      mdast?: unknown;
+      curriculumMeaningExamples?: CharacterCurriculumMeaningExample[];
+    } = {};
+
+    const mdxFilePath = mdxFilesByHanzi.get(hanzi);
+    if (mdxFilePath != null) {
+      const content = await readFile(mdxFilePath, `utf8`);
+      const treeParsed = processor.parse({ value: content, path: mdxFilePath });
+      const tree = await processor.run(treeParsed);
+      payload.mdast = sanitizeMdast(tree);
+    }
+
+    const curriculumMeanings = examplesByHanzi.get(hanzi);
+    if (curriculumMeanings != null) {
+      payload.curriculumMeaningExamples = curriculumMeanings.map(
+        ({ id, exampleSentence }) => ({
+          id,
+          exampleSentence,
+        }),
+      );
+    }
+
+    await expect(payload).toMatchJsonFileSnapshot(
+      path.join(outputDir, `${hanzi}.json`),
+    );
+  }
+
+  const expectedFileNames = new Set(
+    [...hanziEntries].map((hanzi) => `${hanzi}.json`),
+  );
+  for (const fileName of await readdir(outputDir)) {
+    if (fileName.endsWith(`.json`) && !expectedFileNames.has(fileName)) {
+      await rm(path.join(outputDir, fileName));
+    }
+  }
+
+  const legacyMdxOutputDir = path.join(projectRoot, `public/raw/mdx`);
+  if (existsSync(legacyMdxOutputDir)) {
+    await rm(legacyMdxOutputDir, { recursive: true });
+  }
+});
 
 test(`compiled demo mdx json is up to date`, async () => {
   const mdxFiles = (

@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"For this reason or because of this."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}

@@ -33,13 +33,15 @@ describe(`WikiAiExplanation`, () => {
   test(`starts collapsed and toggles to full content`, () => {
     useQueryMock.mockReturnValue({
       data: {
-        type: `root`,
-        children: [
-          {
-            type: `paragraph`,
-            children: [{ type: `text`, value: `Generated explanation` }],
-          },
-        ],
+        mdast: {
+          type: `root`,
+          children: [
+            {
+              type: `paragraph`,
+              children: [{ type: `text`, value: `Generated explanation` }],
+            },
+          ],
+        },
       },
     });
     const hanzi = `你` as HanziText;

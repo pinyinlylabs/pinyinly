@@ -1,0 +1,6 @@
+{
+  "mdast":{
+    "children":[{"children":[{"type":"text","value":"Describing something unusual or not easily understood."}],"type":"paragraph"}],
+    "type":"root"
+  }
+}
