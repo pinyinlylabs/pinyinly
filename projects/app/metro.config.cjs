@@ -2,6 +2,10 @@ const { getDefaultConfig } = require(`expo/metro-config`);
 const { withUniwindConfig } = require(`uniwind/metro`);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
 
+const expoUpdatesMockPath = require.resolve(
+  `./src/metro/expo-updates.web.dev.ts`,
+);
+
 /** @type Record<string, { moduleName?: string; platform?: string }> */
 const resolverOverrides = {
   // See https://community.apollographql.com/t/cannot-destructure-property-extends-of-tslib-default-as-it-is-undefined/9501/2
@@ -57,6 +61,15 @@ config = {
       `wasm`,
     ],
     resolveRequest: (context, moduleName, platform) => {
+      // Work around https://github.com/expo/expo/issues/47938#issuecomment-6224530932.
+      if (
+        process.env.NODE_ENV === `development` &&
+        platform === `web` &&
+        moduleName === `expo-updates`
+      ) {
+        return { type: `sourceFile`, filePath: expoUpdatesMockPath };
+      }
+
       return context.resolveRequest(
         context,
         resolverOverrides[moduleName]?.moduleName ?? moduleName,
