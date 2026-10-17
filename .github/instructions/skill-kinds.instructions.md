@@ -23,7 +23,8 @@ This document describes the different types of skills available in Pinyinly.
 - **PinyinFinalAssociation (`pfa`)**: Associate a Pinyin final with a character/actor/entity.
 - **HanziCharacterToWriting (`hwr`)**: Write a single Hanzi character from its meaning and pinyin.
 
-Writing is a character-level skill shared by all dictionary meanings of that character.
+Writing is a character-level skill shared by all dictionary meanings of that character, and is
+introduced only after the character's meaning skill is stable.
 
 ## How Hanzi IDs Are Defined
 

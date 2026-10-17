@@ -92,8 +92,10 @@ export function skillLearningGraph(options: {
       return;
     }
 
+    const isHanziCharacterWritingSkill =
+      skillKindFromSkill(skill) === SkillKind.HanziCharacterToWriting;
     const dependencies =
-      options.includeDependencies === false
+      options.includeDependencies === false && !isHanziCharacterWritingSkill
         ? emptyArray
         : skillDependencies(
             skill,
@@ -1010,7 +1012,10 @@ export function skillReviewQueue({
     if (srsState == null || needsToBeIntroduced(srsState, now)) {
       if (hasStableDependencies(skill)) {
         learningOrderNewCandidates.push(skill);
-      } else if (directSkills.has(skill)) {
+      } else if (
+        directSkills.has(skill) &&
+        skillKindFromSkill(skill) !== SkillKind.HanziCharacterToWriting
+      ) {
         learningOrderNewCandidates.push(skill);
       } else {
         learningOrderBlocked.push(skill);
