@@ -32,7 +32,9 @@ These can be run from any directory, there's no need to `cd` to a particular dir
 # UI Demos
 
 A storybook-inspired "demo" system is used for developing and testing UI components in isolation.
-Demos are located in `.demo.tsx` files next to the component they are demonstrating.
+Demos are located in `.demo.tsx` files next to the component they are demonstrating and are
+accessible at `/dev/demo/<component>` (for example, `/dev/demo/Lozenge`). Register each demo in
+`projects/app/src/app/dev/demo/index.tsx` so it appears in the demo list and route.
 
 # PostgreSQL DB Migrations
 
