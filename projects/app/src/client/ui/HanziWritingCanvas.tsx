@@ -83,7 +83,7 @@ export function HanziWritingCanvas({
     >
       <svg
         viewBox="0 0 1024 1024"
-        className="size-full touch-none"
+        className="size-full touch-none text-fg-bg30"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
