@@ -176,6 +176,24 @@ describe(`skillLearningGraph suite`, () => {
   );
 
   skillTest(
+    `keeps the meaning prerequisite for writing skills when omitting other dependencies`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const writingSkill = hanziCharacterToWriting(`好` as HanziCharacter);
+      const graph = skillLearningGraph({
+        targetSkills: [writingSkill],
+        includeDependencies: false,
+        decompositionData,
+        dictionary,
+        charactersJson,
+      });
+
+      expect(graph.get(writingSkill)?.dependencies).toEqual(
+        new Set([`he:好:good`]),
+      );
+    },
+  );
+
+  skillTest(
     `explicit dependency expansion matches the default`,
     ({ decompositionData, dictionary, charactersJson }) => {
       const options = {
@@ -593,6 +611,45 @@ describe(`skillReviewQueue suite`, () => {
       });
 
       expect(prettyQueue(queue)).toContain(`${targetSkill} (🌱 NEW SKILL)`);
+    },
+  );
+
+  skillTest(
+    `writing skills wait for their meaning prerequisite, even when directly studied`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const writingSkill = hanziCharacterToWriting(`好` as HanziCharacter);
+      const meaningSkill = `he:好:good` as Skill;
+      const graph = skillLearningGraph({
+        targetSkills: [writingSkill],
+        includeDependencies: false,
+        decompositionData,
+        dictionary,
+        charactersJson,
+      });
+      const commonOptions = {
+        graph,
+        directSkills: new Set([writingSkill]),
+        latestSkillRatings: latestSkillRatings(),
+        dictionary,
+      };
+
+      const blockedQueue = skillReviewQueue({
+        ...commonOptions,
+        skillSrsStates: new Map(),
+      });
+      expect(prettyQueue(blockedQueue)).toContain(
+        `${writingSkill} (🟥 BLOCKED)`,
+      );
+
+      const readyQueue = skillReviewQueue({
+        ...commonOptions,
+        skillSrsStates: new Map([
+          [meaningSkill, mockSrsState(时`-10d`, 时`+2d`)],
+        ]),
+      });
+      expect(prettyQueue(readyQueue)).toContain(
+        `${writingSkill} (🌱 NEW SKILL)`,
+      );
     },
   );
 
