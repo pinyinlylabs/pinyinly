@@ -10,7 +10,7 @@ import { gradeCharacterShape } from "@/util/shapeContextGrader";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import { useState } from "react";
 import type { GestureResponderEvent, LayoutChangeEvent } from "react-native";
-import { ScrollView, Switch } from "react-native";
+import { Switch } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
 
 type DebugLayerKind =
@@ -191,6 +191,48 @@ function gridPaths(
   return paths;
 }
 
+function debugViewBox(
+  geometry: ShapeContextGrade,
+  layers: Record<DebugLayerKind, boolean>,
+): string {
+  const points = [
+    ...geometry.sourcePoints,
+    ...geometry.targetPoints,
+    ...geometry.transformedPoints,
+  ];
+  if (layers.sourceGrid || layers.registeredGrid) {
+    const coordinates = Array.from(
+      { length: 7 },
+      (_, index) => -1.5 + index * 0.5,
+    );
+    for (const coordinate of coordinates) {
+      for (let index = 0; index < 17; index++) {
+        const position = -1.5 + (index * 3) / 16;
+        for (const vertical of [false, true]) {
+          const point = vertical
+            ? { x: coordinate, y: position }
+            : { x: position, y: coordinate };
+          if (layers.sourceGrid) {
+            points.push(point);
+          }
+          if (layers.registeredGrid) {
+            points.push(geometry.transform.transform(point));
+          }
+        }
+      }
+    }
+  }
+  const canvasPoints = points.map(canvasPoint);
+  const minX = Math.min(...canvasPoints.map(({ x }) => x));
+  const maxX = Math.max(...canvasPoints.map(({ x }) => x));
+  const minY = Math.min(...canvasPoints.map(({ y }) => y));
+  const maxY = Math.max(...canvasPoints.map(({ y }) => y));
+  const size = Math.max(maxX - minX, maxY - minY) + 40;
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  return `${centerX - size / 2} ${centerY - size / 2} ${size} ${size}`;
+}
+
 export function HanziWritingDebug({
   geometry,
   drawnStrokes,
@@ -248,13 +290,17 @@ export function HanziWritingDebug({
   const unmatchedTargets = new Set(geometry.unmatchedTargetIndices);
 
   return (
-    <ScrollView style={{ maxHeight: 440 }}>
+    <View>
       <View className="gap-3 rounded-lg border border-border p-3">
         <Text className="text-lg font-semibold text-fg">
           Shape Context + TPS debug
         </Text>
         <View className="w-full items-center" style={{ aspectRatio: 1 }}>
-          <Svg width="100%" height="100%" viewBox="0 0 1024 1024">
+          <Svg
+            width="100%"
+            height="100%"
+            viewBox={debugViewBox(geometry, layers)}
+          >
             {layers.sourceGrid
               ? gridPaths(geometry, false).map((path, index) => (
                   <SvgPath
@@ -468,6 +514,10 @@ export function HanziWritingDebug({
             Unmatched-point penalty: {geometry.unmatchedPointPenalty.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
+            Unmatched reference-stroke penalty:{` `}
+            {geometry.unmatchedStrokePenalty.toFixed(3)}
+          </Text>
+          <Text className="text-sm text-fg">
             Matched points: {geometry.correspondences.length}; unmatched:{` `}
             {geometry.unmatchedSourceIndices.length} handwritten /{` `}
             {geometry.unmatchedTargetIndices.length} reference
@@ -551,6 +601,6 @@ export function HanziWritingDebug({
           </Text>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }

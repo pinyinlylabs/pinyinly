@@ -11,8 +11,13 @@ import { Icon } from "./Icon";
 import type { IconName } from "./iconRegistry";
 import { NativeOnlyAnimatedView } from "./NativeOnlyAnimatedView";
 import type { PropsOf } from "@pinyinly/lib/types";
-import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
-import React from "react";
+import type {
+  ComponentProps,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+} from "react";
+import React, { cloneElement, isValidElement } from "react";
 import { Portal } from "./Portal";
 import { Theme } from "./Theme";
 import { Slot } from "@rn-primitives/slot";
@@ -142,8 +147,7 @@ function DropdownMenuSubContent({
       <SubContent
         className={cn(
           `
-            overflow-hidden rounded-md border border-border bg-bg p-1 shadow-lg shadow-black/5
-            animate-in
+            overflow-hidden rounded-md bg-bg p-1 shadow-lg shadow-black/5 animate-in
 
             web:z-50 web:min-w-[8rem] web:origin-(--radix-context-menu-content-transform-origin)
             web:animate-in web:fade-in-0 web:zoom-in-95
@@ -194,7 +198,7 @@ function DropdownMenuContent({
                       overlayStyle as ViewStyle,
                     ]),
             })}
-            className={overlayClassName}
+            className={cn(`bg-bg/50`, overlayClassName)}
             asChild={Platform.OS !== `web`}
           >
             <NativeOnlyAnimatedView
@@ -205,8 +209,7 @@ function DropdownMenuContent({
                 <DropdownMenuPrimitive.Content
                   className={cn(
                     `
-                      min-w-[8rem] overflow-hidden rounded-md border border-border bg-bg p-1
-                      shadow-lg shadow-black/5
+                      min-w-[8rem] overflow-hidden rounded-md bg-bg p-1 shadow-lg shadow-black/5
 
                       web:z-50 web:max-h-(--radix-context-menu-content-available-height)
                       web:origin-(--radix-context-menu-content-transform-origin) web:cursor-default
@@ -224,6 +227,34 @@ function DropdownMenuContent({
         </FullWindowOverlay>
       </DropdownPortal>
     </Theme>
+  );
+}
+
+function DropdownMenuTrigger({
+  asChild = false,
+  children,
+  activeClassName,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger> & {
+  activeClassName?: string;
+}) {
+  const { open } = DropdownMenuPrimitive.useRootContext();
+
+  if (asChild && open && activeClassName != null && isValidElement(children)) {
+    const element = children as ReactElement<{ className?: string }>;
+    return (
+      <DropdownMenuPrimitive.Trigger asChild {...props}>
+        {cloneElement(element, {
+          className: cn(element.props.className, activeClassName),
+        })}
+      </DropdownMenuPrimitive.Trigger>
+    );
+  }
+
+  return (
+    <DropdownMenuPrimitive.Trigger asChild={asChild} {...props}>
+      {children}
+    </DropdownMenuPrimitive.Trigger>
   );
 }
 
@@ -444,7 +475,7 @@ export function DropdownMenu2(
   return <DropdownMenuPrimitive.Root {...props} />;
 }
 
-DropdownMenu2.Trigger = DropdownMenuPrimitive.Trigger;
+DropdownMenu2.Trigger = DropdownMenuTrigger;
 DropdownMenu2.CheckboxItem = DropdownMenuCheckboxItem;
 DropdownMenu2.Content = DropdownMenuContent;
 DropdownMenu2.Group = DropdownMenuPrimitive.Group;

@@ -12,7 +12,7 @@ export function WikiHanziBookmarkMenu({
 }) {
   return (
     <DropdownMenu2>
-      <DropdownMenu2.Trigger asChild>
+      <DropdownMenu2.Trigger asChild activeClassName="bg-fg/5">
         <Pressable
           accessibilityLabel="More options"
           accessibilityRole="button"
