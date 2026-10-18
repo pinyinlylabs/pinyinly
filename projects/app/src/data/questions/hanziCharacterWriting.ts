@@ -18,7 +18,7 @@ import type { ShapeContextGrade } from "@/util/shapeContextGrader";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import type { Rating } from "@/util/fsrs";
 
-export const hanziCharacterWritingSimilarityThreshold = 0.55;
+export const hanziCharacterWritingSimilarityThreshold = 0.72;
 
 export async function hanziCharacterWritingQuestionOrThrow(
   skill: HanziCharacterWritingSkill,
