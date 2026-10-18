@@ -44,7 +44,10 @@ export interface ShapeContextGrade {
   rotationDegrees: number;
   rotationPenalty: number;
   unmatchedPointPenalty: number;
+  unmatchedStrokePenalty: number;
   correspondences: ShapeContextCorrespondence[];
+  sourceStrokeIndices: number[];
+  targetStrokeIndices: number[];
   unmatchedSourceIndices: number[];
   unmatchedTargetIndices: number[];
   sourcePoints: WritingStrokePoint[];
@@ -73,6 +76,7 @@ const radialMaximum = 2.5;
 interface SampledShape {
   points: WritingStrokePoint[];
   strokes: WritingStrokePoint[][];
+  pointStrokeIndices: number[];
 }
 
 interface MatchResult {
@@ -287,7 +291,7 @@ function samplePaths(
 function normalizeShape(strokes: WritingStrokePoint[][]): SampledShape {
   const points = strokes.flat();
   if (points.length === 0) {
-    return { points: [], strokes: [] };
+    return { points: [], strokes: [], pointStrokeIndices: [] };
   }
   const center = { x: 0, y: 0 };
   for (const point of points) {
@@ -309,7 +313,13 @@ function normalizeShape(strokes: WritingStrokePoint[][]): SampledShape {
       y: (point.y - center.y) * scale,
     })),
   );
-  return { points: normalizedStrokes.flat(), strokes: normalizedStrokes };
+  return {
+    points: normalizedStrokes.flat(),
+    strokes: normalizedStrokes,
+    pointStrokeIndices: normalizedStrokes.flatMap((stroke, strokeIndex) =>
+      stroke.map(() => strokeIndex),
+    ),
+  };
 }
 
 function rotate(
@@ -474,6 +484,9 @@ function matchPoints(
   targetPoints: readonly WritingStrokePoint[],
   unmatchedCost: number,
   spatialWeight: number,
+  sourceStrokeIndices?: readonly number[],
+  targetStrokeIndices?: readonly number[],
+  sourceStrokeTargets?: readonly (number | null)[],
 ): MatchResult {
   const sourceCount = sourceContexts.length;
   const targetCount = targetContexts.length;
@@ -502,6 +515,16 @@ function matchPoints(
       );
       const sourcePoint = sourcePoints[sourceIndex];
       const targetPoint = targetPoints[targetIndex];
+      const sourceStrokeIndex = sourceStrokeIndices?.[sourceIndex];
+      const targetStrokeIndex = targetStrokeIndices?.[targetIndex];
+      if (
+        sourceStrokeTargets != null &&
+        (sourceStrokeIndex == null ||
+          targetStrokeIndex == null ||
+          sourceStrokeTargets[sourceStrokeIndex] !== targetStrokeIndex)
+      ) {
+        return Infinity;
+      }
       return sourcePoint == null || targetPoint == null
         ? Infinity
         : descriptorCost +
@@ -521,6 +544,7 @@ function matchPoints(
     if (column < 0 || column >= realColumnCount) {
       continue;
     }
+
     const sourceIndex = sourceIsSmaller ? row : column;
     const targetIndex = sourceIsSmaller ? column : row;
     const sourcePoint = sourcePoints[sourceIndex];
@@ -547,6 +571,41 @@ function matchPoints(
     }
   }
   return { pairs, unmatchedSourceIndices, unmatchedTargetIndices, totalCost };
+}
+
+function assignSourceStrokes(
+  matches: MatchResult,
+  sourceStrokeIndices: readonly number[],
+  targetStrokeIndices: readonly number[],
+): Array<number | null> {
+  const sourceStrokeCount =
+    sourceStrokeIndices.length === 0 ? 0 : Math.max(...sourceStrokeIndices) + 1;
+  const targetStrokeCount =
+    targetStrokeIndices.length === 0 ? 0 : Math.max(...targetStrokeIndices) + 1;
+  const counts = Array.from({ length: sourceStrokeCount }, () =>
+    Array.from({ length: targetStrokeCount }, () => 0),
+  );
+  for (const match of matches.pairs) {
+    const sourceStrokeIndex = sourceStrokeIndices[match.sourceIndex];
+    const targetStrokeIndex = targetStrokeIndices[match.targetIndex];
+    if (sourceStrokeIndex != null && targetStrokeIndex != null) {
+      const row = counts[sourceStrokeIndex];
+      if (row != null) {
+        row[targetStrokeIndex] = (row[targetStrokeIndex] ?? 0) + 1;
+      }
+    }
+  }
+  return counts.map((row) => {
+    let assignedStroke: number | null = null;
+    let mostMatches = 0;
+    for (const [strokeIndex, count] of row.entries()) {
+      if (count > mostMatches) {
+        assignedStroke = strokeIndex;
+        mostMatches = count;
+      }
+    }
+    return assignedStroke;
+  });
 }
 
 function solveLinearSystem(
@@ -858,7 +917,8 @@ export function gradeCharacterShape(
         ? 1
         : (sourcePoints.length + targetPoints.length) /
           Math.max(1, sourcePoints.length + targetPoints.length);
-    const combinedCost = 2 + unmatchedPointPenalty;
+    const unmatchedStrokePenalty = target.strokes.length === 0 ? 0 : 1;
+    const combinedCost = 2 + unmatchedPointPenalty + unmatchedStrokePenalty;
     return {
       similarity: Math.exp(-combinedCost),
       combinedCost,
@@ -869,7 +929,10 @@ export function gradeCharacterShape(
       rotationDegrees: 0,
       rotationPenalty: 0,
       unmatchedPointPenalty,
+      unmatchedStrokePenalty,
       correspondences: [],
+      sourceStrokeIndices: source.pointStrokeIndices,
+      targetStrokeIndices: target.pointStrokeIndices,
       unmatchedSourceIndices: emptyMatch.unmatchedSourceIndices,
       unmatchedTargetIndices: emptyMatch.unmatchedTargetIndices,
       sourcePoints,
@@ -910,6 +973,8 @@ export function gradeCharacterShape(
       targetPoints,
       settings.unmatchedCost,
       0.04,
+      source.pointStrokeIndices,
+      target.pointStrokeIndices,
     );
     if (candidateMatches.totalCost < bestCost) {
       bestCost = candidateMatches.totalCost;
@@ -917,9 +982,31 @@ export function gradeCharacterShape(
       matches = candidateMatches;
     }
   }
-  let activeMatches = matches ?? emptyMatch;
+  const rotatedSourcePoints = sourcePoints.map((point) =>
+    rotate(point, rotationRadians),
+  );
+  const sourceStrokeTargets = assignSourceStrokes(
+    matches ?? emptyMatch,
+    source.pointStrokeIndices,
+    target.pointStrokeIndices,
+  );
+  let activeMatches = matchPoints(
+    shapeContexts(
+      rotatedSourcePoints,
+      settings.radialBins,
+      settings.angularBins,
+    ),
+    targetShapeContexts,
+    rotatedSourcePoints,
+    targetPoints,
+    settings.unmatchedCost,
+    0.04,
+    source.pointStrokeIndices,
+    target.pointStrokeIndices,
+    sourceStrokeTargets,
+  );
   const initialMatchingError = averageMatchDistance(
-    sourcePoints.map((point) => rotate(point, rotationRadians)),
+    rotatedSourcePoints,
     targetPoints,
     activeMatches.pairs,
   );
@@ -951,6 +1038,9 @@ export function gradeCharacterShape(
       targetPoints,
       settings.unmatchedCost,
       0.12,
+      source.pointStrokeIndices,
+      target.pointStrokeIndices,
+      sourceStrokeTargets,
     );
   }
   transform = fitThinPlateSpline(
@@ -971,6 +1061,15 @@ export function gradeCharacterShape(
     (activeMatches.unmatchedSourceIndices.length +
       activeMatches.unmatchedTargetIndices.length) /
     (sourcePoints.length + targetPoints.length);
+  const matchedTargetStrokeIndices = new Set(
+    activeMatches.pairs.flatMap((match) => {
+      const strokeIndex = target.pointStrokeIndices[match.targetIndex];
+      return strokeIndex == null ? [] : [strokeIndex];
+    }),
+  );
+  const unmatchedStrokePenalty =
+    (target.strokes.length - matchedTargetStrokeIndices.size) /
+    target.strokes.length;
   const bendingEnergy = transform.bendingEnergy;
   const affineDistortion = transform.affineDistortion;
   const rotationDegrees = transform.rotationDegrees;
@@ -984,7 +1083,8 @@ export function gradeCharacterShape(
     bendingEnergy * 0.04 +
     affineDistortion * 0.15 +
     rotationPenalty * 0.4 +
-    unmatchedPointPenalty * 0.5;
+    unmatchedPointPenalty * 0.5 +
+    unmatchedStrokePenalty;
   const correspondences = activeMatches.pairs.flatMap((match) => {
     const sourcePoint = sourcePoints[match.sourceIndex];
     const targetPoint = targetPoints[match.targetIndex];
@@ -1017,7 +1117,10 @@ export function gradeCharacterShape(
     rotationDegrees,
     rotationPenalty,
     unmatchedPointPenalty,
+    unmatchedStrokePenalty,
     correspondences,
+    sourceStrokeIndices: source.pointStrokeIndices,
+    targetStrokeIndices: target.pointStrokeIndices,
     unmatchedSourceIndices: activeMatches.unmatchedSourceIndices,
     unmatchedTargetIndices: activeMatches.unmatchedTargetIndices,
     sourcePoints,

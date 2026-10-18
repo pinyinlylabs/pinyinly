@@ -83,7 +83,6 @@ function CharacterWriting({
   const [exampleId, setExampleId] = useState<string | null>(
     initialExample?.id ?? null,
   );
-  const [exampleIsPositive, setExampleIsPositive] = useState(true);
   const [gradeOptions, setGradeOptions] = useState<
     ShapeContextOptions | undefined
   >(initialExample?.options);
@@ -103,7 +102,16 @@ function CharacterWriting({
       setCurrentStroke((stroke) => Math.min(stroke + 1, referencePaths.length));
     } else if (drawnPath.length > 0) {
       const nextStrokes = [...freeStrokes, points];
-      setExampleId(exampleId ?? `${character}-${Date.now()}`);
+      const now = new Date();
+      const timestamp = [
+        now.getFullYear().toString().padStart(4, `0`),
+        (now.getMonth() + 1).toString().padStart(2, `0`),
+        now.getDate().toString().padStart(2, `0`),
+        now.getHours().toString().padStart(2, `0`),
+        now.getMinutes().toString().padStart(2, `0`),
+        now.getSeconds().toString().padStart(2, `0`),
+      ].join(``);
+      setExampleId(exampleId ?? `${character}-${timestamp}`);
       setFreeStrokes(nextStrokes);
       setLastGrade(
         gradeCharacterShape(nextStrokes, referencePaths, gradeOptions),
@@ -287,29 +295,10 @@ function CharacterWriting({
               Regression test example
             </Text>
             <Text className="text-sm text-muted-fg">
-              Copy this case into the{` `}
-              {exampleIsPositive ? `positive` : `negative`} examples in
-              test/util/shapeContextGrader.test.ts.
+              Add this case to the positive or negative examples in
+              test/util/shapeContextGrader.test.ts, as appropriate.
             </Text>
             <Text className="text-sm text-muted-fg">ID: {exampleId}</Text>
-            <View className="flex-row gap-2">
-              <RectButton
-                variant={exampleIsPositive ? `filled` : `outline`}
-                onPress={() => {
-                  setExampleIsPositive(true);
-                }}
-              >
-                Positive (accept)
-              </RectButton>
-              <RectButton
-                variant={exampleIsPositive ? `outline` : `filled`}
-                onPress={() => {
-                  setExampleIsPositive(false);
-                }}
-              >
-                Negative (reject)
-              </RectButton>
-            </View>
             <View className="flex-row items-center justify-between gap-2">
               <View className="flex-row items-center gap-2">
                 <Text className="text-fg">Copy JSON</Text>
