@@ -1,6 +1,7 @@
-import type { PointerEvent, ReactNode } from "react";
-import { useRef, useState } from "react";
+import type { PointerEvent } from "react";
+import { useId, useRef, useState } from "react";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { View } from "@/client/ui/View";
 
 function pathFromPoints(points: readonly WritingStrokePoint[]): string {
@@ -11,20 +12,51 @@ function pathFromPoints(points: readonly WritingStrokePoint[]): string {
     .join(` `);
 }
 
+function getPathStartPoint(path: string): WritingStrokePoint | null {
+  const match =
+    /^[Mm]\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*[, ]\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/u.exec(
+      path,
+    );
+  if (match == null) {
+    return null;
+  }
+
+  const x = Number(match[1]);
+  const y = Number(match[2]);
+  return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+}
+
 export function HanziWritingCanvas({
-  children,
   className = `aspect-square w-full`,
   disabled = false,
+  hideGrid = false,
+  guidedPaths,
+  guidedPathIndex,
+  drawnStrokes = [],
+  gradeResult,
+  onUndo,
   onStrokeComplete,
 }: {
-  children: ReactNode;
   className?: string;
   disabled?: boolean;
+  hideGrid?: boolean;
+  guidedPaths?: readonly string[];
+  guidedPathIndex?: number;
+  drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
+  gradeResult?: `correct` | `incorrect` | null;
+  onUndo?: () => void;
   onStrokeComplete: (points: WritingStrokePoint[]) => void;
 }) {
   const [activePath, setActivePath] = useState(``);
   const pointsRef = useRef<WritingStrokePoint[]>([]);
   const isDrawingRef = useRef(false);
+  const arrowMarkerId = `${useId()}-arrow`;
+  const canUndo =
+    onUndo != null && (drawnStrokes.length > 0 || (guidedPathIndex ?? 0) > 0);
+  const currentGuidedPath =
+    guidedPathIndex == null ? null : guidedPaths?.[guidedPathIndex];
+  const currentGuidedPathStart =
+    currentGuidedPath == null ? null : getPathStartPoint(currentGuidedPath);
 
   function getPoint(event: PointerEvent<SVGSVGElement>): WritingStrokePoint {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -76,6 +108,8 @@ export function HanziWritingCanvas({
   return (
     <View
       className={`
+        relative
+
         ${className}
 
         overflow-hidden rounded-xl bg-bg
@@ -89,7 +123,118 @@ export function HanziWritingCanvas({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
       >
-        {children}
+        <defs>
+          <marker
+            id={arrowMarkerId}
+            markerWidth="18"
+            markerHeight="18"
+            refX="9"
+            refY="9"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+            viewBox="0 0 18 18"
+          >
+            <path d="M 2 2 L 16 9 L 2 16 Z" fill="#19aaf5" />
+          </marker>
+        </defs>
+        {hideGrid ? null : (
+          <>
+            <line
+              x1="512"
+              y1="24"
+              x2="512"
+              y2="1000"
+              stroke="currentColor"
+              strokeWidth="4"
+              strokeDasharray="12 12"
+              pointerEvents="none"
+            />
+            <line
+              x1="24"
+              y1="512"
+              x2="1000"
+              y2="512"
+              stroke="currentColor"
+              strokeWidth="4"
+              strokeDasharray="12 12"
+              pointerEvents="none"
+            />
+          </>
+        )}
+        {guidedPaths?.map((path, index) => (
+          <path
+            key={`guided:${index}`}
+            d={path}
+            fill="none"
+            stroke="#e2e2e2"
+            strokeWidth="48"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            pointerEvents="none"
+          />
+        ))}
+        {guidedPathIndex == null
+          ? null
+          : guidedPaths
+              ?.slice(0, guidedPathIndex)
+              .map((path, index) => (
+                <path
+                  key={`complete:${index}`}
+                  d={path}
+                  fill="none"
+                  stroke="#19aaf5"
+                  strokeWidth="24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  pointerEvents="none"
+                />
+              ))}
+        {currentGuidedPath == null ||
+        guidedPathIndex == null ||
+        guidedPathIndex >= (guidedPaths?.length ?? 0) ? null : (
+          <>
+            <path
+              d={currentGuidedPath}
+              fill="none"
+              stroke="#19aaf5"
+              strokeWidth="16"
+              strokeDasharray="24 20"
+              strokeLinecap="round"
+              markerEnd={`url(#${arrowMarkerId})`}
+              pointerEvents="none"
+            />
+            {currentGuidedPathStart == null ? null : (
+              <g pointerEvents="none">
+                <circle
+                  cx={currentGuidedPathStart.x}
+                  cy={currentGuidedPathStart.y}
+                  r="48"
+                  fill="#19aaf5"
+                />
+                <path
+                  d={`M ${currentGuidedPathStart.x - 18} ${currentGuidedPathStart.y} H ${currentGuidedPathStart.x + 17} M ${currentGuidedPathStart.x + 1} ${currentGuidedPathStart.y - 17} L ${currentGuidedPathStart.x + 19} ${currentGuidedPathStart.y} L ${currentGuidedPathStart.x + 1} ${currentGuidedPathStart.y + 17}`}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </g>
+            )}
+          </>
+        )}
+        {drawnStrokes.map((stroke, index) => (
+          <path
+            key={`stroke:${index}`}
+            d={pathFromPoints(stroke)}
+            fill="none"
+            stroke={gradeResult === `incorrect` ? `#ef4444` : `#19aaf5`}
+            strokeWidth="24"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            pointerEvents="none"
+          />
+        ))}
         {activePath.length === 0 ? null : (
           <path
             d={activePath}
@@ -110,6 +255,15 @@ export function HanziWritingCanvas({
           pointerEvents={disabled ? `none` : `all`}
         />
       </svg>
+      {canUndo ? (
+        <View className="absolute inset-x-3 top-3 items-end">
+          <ButtonGroup>
+            <ButtonGroup.Button iconStart="undo" onPress={onUndo}>
+              Undo
+            </ButtonGroup.Button>
+          </ButtonGroup>
+        </View>
+      ) : null}
     </View>
   );
 }

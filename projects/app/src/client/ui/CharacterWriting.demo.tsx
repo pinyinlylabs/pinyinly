@@ -39,28 +39,6 @@ function parseSingleHanzi(input: string): HanziCharacter | null {
   return char != null && isHanziCharacter(char) ? char : null;
 }
 
-function getPathStartPoint(path: string): Point | null {
-  const match =
-    /^[Mm]\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*[, ]\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/u.exec(
-      path,
-    );
-  if (match == null) {
-    return null;
-  }
-
-  const x = Number(match[1]);
-  const y = Number(match[2]);
-  return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
-}
-
-function pathFromPoints(points: readonly Point[]): string {
-  return points
-    .map((point, index) =>
-      index === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`,
-    )
-    .join(` `);
-}
-
 function CharacterWriting({
   character,
   referencePaths,
@@ -91,16 +69,12 @@ function CharacterWriting({
       ? null
       : gradeCharacterShape(freeStrokes, referencePaths, gradeOptions),
   );
-  const currentMedian = referencePaths[currentStroke];
-  const startPoint =
-    currentMedian == null ? null : getPathStartPoint(currentMedian);
   const isGuided = mode === `guided`;
 
   function onStrokeComplete(points: Point[]) {
-    const drawnPath = pathFromPoints(points);
-    if (drawnPath.length > 0 && isGuided) {
+    if (points.length > 0 && isGuided) {
       setCurrentStroke((stroke) => Math.min(stroke + 1, referencePaths.length));
-    } else if (drawnPath.length > 0) {
+    } else if (points.length > 0) {
       const nextStrokes = [...freeStrokes, points];
       const now = new Date();
       const timestamp = [
@@ -147,118 +121,11 @@ function CharacterWriting({
       <HanziWritingCanvas
         disabled={isGuided && currentStroke >= referencePaths.length}
         onStrokeComplete={onStrokeComplete}
-      >
-        <defs>
-          <marker
-            id="character-writing-arrow"
-            markerWidth="18"
-            markerHeight="18"
-            refX="9"
-            refY="9"
-            orient="auto"
-            markerUnits="userSpaceOnUse"
-            viewBox="0 0 18 18"
-          >
-            <path d="M 2 2 L 16 9 L 2 16 Z" fill="#19aaf5" />
-          </marker>
-        </defs>
-        <line
-          x1="512"
-          y1="24"
-          x2="512"
-          y2="1000"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeDasharray="12 12"
-          pointerEvents="none"
-        />
-        <line
-          x1="24"
-          y1="512"
-          x2="1000"
-          y2="512"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeDasharray="12 12"
-          pointerEvents="none"
-        />
-        {isGuided
-          ? referencePaths.map((median, index) => (
-              <path
-                key={`ghost:${index}`}
-                d={median}
-                fill="none"
-                stroke="#e2e2e2"
-                strokeWidth="48"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                pointerEvents="none"
-              />
-            ))
-          : null}
-        {isGuided
-          ? referencePaths
-              .slice(0, currentStroke)
-              .map((median, index) => (
-                <path
-                  key={`complete:${index}`}
-                  d={median}
-                  fill="none"
-                  stroke="#19aaf5"
-                  strokeWidth="24"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  pointerEvents="none"
-                />
-              ))
-          : null}
-        {isGuided &&
-        currentMedian != null &&
-        currentStroke < referencePaths.length ? (
-          <>
-            <path
-              d={currentMedian}
-              fill="none"
-              stroke="#19aaf5"
-              strokeWidth="16"
-              strokeDasharray="24 20"
-              strokeLinecap="round"
-              markerEnd="url(#character-writing-arrow)"
-              pointerEvents="none"
-            />
-            {startPoint == null ? null : (
-              <g pointerEvents="none">
-                <circle
-                  cx={startPoint.x}
-                  cy={startPoint.y}
-                  r="48"
-                  fill="#19aaf5"
-                />
-                <path
-                  d={`M ${startPoint.x - 18} ${startPoint.y} H ${startPoint.x + 17} M ${startPoint.x + 1} ${startPoint.y - 17} L ${startPoint.x + 19} ${startPoint.y} L ${startPoint.x + 1} ${startPoint.y + 17}`}
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="9"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </g>
-            )}
-          </>
-        ) : null}
-        {freeStrokes.map((stroke, index) => (
-          <path
-            key={`free:${index}`}
-            d={pathFromPoints(stroke)}
-            fill="none"
-            stroke="#19aaf5"
-            strokeWidth="24"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
-          />
-        ))}
-      </HanziWritingCanvas>
+        guidedPaths={isGuided ? referencePaths : undefined}
+        guidedPathIndex={isGuided ? currentStroke : undefined}
+        drawnStrokes={freeStrokes}
+        onUndo={undoLastPath}
+      />
       <Text className="text-center text-muted-fg">
         {isGuided
           ? currentStroke >= referencePaths.length
@@ -345,13 +212,6 @@ function CharacterWriting({
         </Text>
       ) : null}
       <View className="flex-row gap-2">
-        <RectButton
-          variant="outline"
-          onPress={undoLastPath}
-          disabled={isGuided ? currentStroke === 0 : freeStrokes.length === 0}
-        >
-          Undo
-        </RectButton>
         <RectButton variant="outline" onPress={clearPractice}>
           Reset practice
         </RectButton>

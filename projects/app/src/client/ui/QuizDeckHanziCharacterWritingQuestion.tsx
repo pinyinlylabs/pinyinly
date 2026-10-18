@@ -22,14 +22,6 @@ function nowMs() {
   return Date.now();
 }
 
-function pathFromPoints(points: readonly WritingStrokePoint[]): string {
-  return points
-    .map((point, index) =>
-      index === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`,
-    )
-    .join(` `);
-}
-
 export function QuizDeckHanziCharacterWritingQuestion({
   question,
   onNext,
@@ -111,59 +103,15 @@ export function QuizDeckHanziCharacterWritingQuestion({
             <HanziWritingCanvas
               className="aspect-square h-full max-h-full w-auto max-w-full"
               disabled={grade != null}
+              guidedPaths={grade == null ? undefined : medianPaths}
+              drawnStrokes={drawnStrokes}
+              gradeResult={
+                grade == null ? null : grade.correct ? `correct` : `incorrect`
+              }
               onStrokeComplete={(points) => {
                 setDrawnStrokes((strokes) => [...strokes, points]);
               }}
-            >
-              <line
-                x1="512"
-                y1="24"
-                x2="512"
-                y2="1000"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray="12 12"
-                pointerEvents="none"
-              />
-              <line
-                x1="24"
-                y1="512"
-                x2="1000"
-                y2="512"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray="12 12"
-                pointerEvents="none"
-              />
-              {grade == null
-                ? null
-                : medianPaths.map((path, index) => (
-                    <path
-                      key={`median:${index}`}
-                      d={path}
-                      fill="none"
-                      stroke="#e2e2e2"
-                      strokeWidth="48"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      pointerEvents="none"
-                    />
-                  ))}
-              {drawnStrokes.map((points, index) => (
-                <path
-                  key={`stroke:${index}`}
-                  d={pathFromPoints(points)}
-                  fill="none"
-                  stroke={
-                    grade == null || grade.correct ? `#19aaf5` : `#ef4444`
-                  }
-                  strokeWidth="24"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  pointerEvents="none"
-                />
-              ))}
-            </HanziWritingCanvas>
+            />
           </View>
         )}
         {grade?.failure === `shape` ? (
