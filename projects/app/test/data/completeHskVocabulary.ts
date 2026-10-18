@@ -6,15 +6,9 @@ import {
 } from "#data/model.ts";
 import type { HanziWord } from "#data/model.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
-import {
-  fetchWithFsDbCache,
-  makeFsDbCache,
-  readFileSync,
-} from "@pinyinly/lib/fs";
+import { readFile, readFileSync } from "@pinyinly/lib/fs";
 import { z } from "zod";
 import path from "node:path";
-
-const fsDbCache = makeFsDbCache(import.meta.filename);
 
 export const completeHskVocabularyItemSchema = z
   .object({
@@ -218,9 +212,12 @@ export function parsePos(posText: string): PartOfSpeech | undefined {
 
 export const loadCompleteHskVocabulary = memoize0(
   async (): Promise<CompleteHskVocabulary> => {
-    const rawJson = await fetchWithFsDbCache(
-      `https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/refs/heads/main/complete.json`,
-      { fsDbCache },
+    const rawJson = await readFile(
+      path.join(
+        import.meta.dirname,
+        `../vendor/complete-hsk-vocabulary/complete.json`,
+      ),
+      `utf8`,
     );
 
     const data = z
