@@ -30,6 +30,7 @@ export interface UsePinyinSoundActorsResult {
   actors: PinyinSoundActorSummary[];
   isLoading: boolean;
   createActor: (name?: string) => ActorId;
+  deleteActor: (actorId: ActorId) => Promise<void>;
   saveActorToDirectory: (input: SaveActorToDirectoryInput) => ActorId;
   soundActorIdBySoundId: Map<PinyinSoundId, ActorId>;
   setSoundActorId: (soundId: PinyinSoundId, actorId: ActorId | null) => void;
@@ -212,6 +213,33 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     return actorId;
   };
 
+  const deleteActor = async (actorId: ActorId) => {
+    const now = new Date();
+    const settingKeys = [
+      actorNameTextSetting.entity.marshalKey({ actorId }),
+      actorDescriptionTextSetting.entity.marshalKey({ actorId }),
+      actorSpecJsonSetting.entity.marshalKey({ actorId }),
+      actorIdentityImageSetting.entity.marshalKey({ actorId }),
+      actorModelSheetImageSetting.entity.marshalKey({ actorId }),
+      ...[...soundActorIdBySoundId]
+        .filter(([, selectedActorId]) => selectedActorId === actorId)
+        .map(([soundId]) =>
+          pinyinSoundActorSetting.entity.marshalKey({ soundId }),
+        ),
+    ];
+
+    await Promise.all(
+      settingKeys.map(async (key) =>
+        r.mutate.setSetting({
+          key,
+          value: null,
+          now,
+          skipHistory: true,
+        }),
+      ),
+    );
+  };
+
   const saveActorToDirectory = ({
     target,
     name,
@@ -342,6 +370,7 @@ export function usePinyinSoundActors(): UsePinyinSoundActorsResult {
     actors,
     isLoading,
     createActor,
+    deleteActor,
     saveActorToDirectory,
     soundActorIdBySoundId,
     setSoundActorId,
