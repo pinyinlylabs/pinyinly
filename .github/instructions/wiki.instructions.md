@@ -51,9 +51,9 @@ imports and transforms character stroke graphics is
 data used by the web app at runtime. They are derived from the wiki source files:
 
 - `public/raw/wiki/[hanzi].json` contains the compiled Markdown AST in `mdast` when an article
-  exists and, where present, character `curriculumMeaningExamples` from
-  `src/client/wiki/[hanzi]/character.json`. The payload also exists for entries with examples but no
-  MDX article.
+  exists and, where present, character `curriculumMeanings` and `curriculumMeaningExamples` from
+  `src/client/wiki/[hanzi]/character.json`. The payload also exists for entries with curriculum
+  meanings but no MDX article.
 - `public/raw/svgs/[hanzi].json` contains the `svg` stroke data from
   `src/client/wiki/[hanzi]/character.json` for entries with stroke path arrays.
 
