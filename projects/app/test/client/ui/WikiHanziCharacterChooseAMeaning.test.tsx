@@ -158,6 +158,54 @@ test(`shows the example sentence for its character meaning`, async ({
   expect(screen.getByText(`这张桌子很小。`)).toBeInTheDocument();
 });
 
+test(`shows descriptions beside their character meanings`, async ({
+  rizzle,
+}) => {
+  const builtInMeanings = meanings.map((meaning) => ({
+    sourceKind: `builtIn`,
+    id: meaning.hanziWord,
+    hanzi: meaning.hanzi,
+    hanziWord: meaning.hanziWord,
+    gloss: meaning.gloss,
+    pinyin: meaning.pinyin,
+    note: null,
+  }));
+  let queryCount = 0;
+  useLiveQueryMock.mockReset();
+  useLiveQueryMock.mockImplementation(() => ({
+    data: queryCount++ % 2 === 0 ? builtInMeanings : [],
+  }));
+  vi.mocked(globalThis.fetch).mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        curriculumMeanings: [
+          {
+            id: meanings[0]!.hanziWord,
+            gloss: `how many`,
+            pinyin: `jǐ`,
+            description: `Used to ask about a small number.`,
+          },
+          {
+            id: meanings[1]!.hanziWord,
+            gloss: `small table`,
+            pinyin: `jī`,
+            description: `A low table used indoors.`,
+          },
+        ],
+      }),
+    ),
+  );
+
+  render(<WikiHanziMeaningsPanel hanzi={hanzi} />, {
+    wrapper: providers(rizzle),
+  });
+
+  expect(
+    await screen.findByText(`Used to ask about a small number.`),
+  ).toBeInTheDocument();
+  expect(screen.getByText(`A low table used indoors.`)).toBeInTheDocument();
+});
+
 test(`selects a sole word meaning for the page study action by default`, ({
   rizzle,
 }) => {

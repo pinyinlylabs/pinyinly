@@ -15,6 +15,7 @@ import type {
   SrsStateType,
 } from "@/data/model";
 import {
+  characterCurriculumMeaningSchema,
   characterCurriculumMeaningExampleSchema,
   characterJsonSchema,
 } from "@/data/model";
@@ -305,13 +306,15 @@ const wikiMdastRootSchema = z.looseObject({
 export const wikiPayloadSchema = z
   .strictObject({
     mdast: wikiMdastRootSchema.optional(),
+    curriculumMeanings: z.array(characterCurriculumMeaningSchema).optional(),
     curriculumMeaningExamples: z
       .array(characterCurriculumMeaningExampleSchema)
       .optional(),
   })
   .refine(
-    ({ mdast, curriculumMeaningExamples }) =>
+    ({ mdast, curriculumMeanings, curriculumMeaningExamples }) =>
       mdast != null ||
+      (curriculumMeanings != null && curriculumMeanings.length > 0) ||
       (curriculumMeaningExamples != null &&
         curriculumMeaningExamples.length > 0),
   );

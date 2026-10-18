@@ -90,6 +90,11 @@ export function WikiHanziMeaningsPanel({
             <DictionaryMeaningListItem
               key={`${meaning.sourceKind}:${meaning.id}`}
               meaning={meaning}
+              description={
+                wikiPayload?.curriculumMeanings?.find(
+                  ({ id }) => id === meaning.hanziWord,
+                )?.description
+              }
               exampleSentence={
                 wikiPayload?.curriculumMeaningExamples?.find(
                   ({ id }) => id === meaning.hanziWord,
@@ -122,11 +127,13 @@ export function WikiHanziMeaningsPanel({
 
 function DictionaryMeaningListItem({
   meaning,
+  description,
   exampleSentence,
   selected,
   onSelect,
 }: {
   meaning: DictionaryCollectionEntry;
+  description?: string;
   exampleSentence?: CharacterExampleSentence;
   selected: boolean;
   onSelect?: (hanziWord: HanziWord) => void;
@@ -146,6 +153,10 @@ function DictionaryMeaningListItem({
         pinyin={primaryPinyin}
         glosses={meaning.gloss}
       />
+
+      {description == null || description.length === 0 ? null : (
+        <LabeledText label="Description">{description}</LabeledText>
+      )}
 
       {exampleSentence == null ? null : (
         <WikiExampleSentence exampleSentence={exampleSentence} />
