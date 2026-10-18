@@ -111,6 +111,21 @@ function CharacterWriting({
     }
   }
 
+  function undoLastPath() {
+    if (isGuided) {
+      setCurrentStroke((stroke) => Math.max(stroke - 1, 0));
+      return;
+    }
+
+    const nextStrokes = freeStrokes.slice(0, -1);
+    setFreeStrokes(nextStrokes);
+    setLastGrade(
+      nextStrokes.length === 0
+        ? null
+        : gradeCharacterShape(nextStrokes, referencePaths, gradeOptions),
+    );
+  }
+
   function clearPractice() {
     setFreeStrokes([]);
     setExampleId(null);
@@ -340,9 +355,18 @@ function CharacterWriting({
           Draw the character in any stroke order or direction.
         </Text>
       ) : null}
-      <RectButton variant="outline" onPress={clearPractice}>
-        Reset practice
-      </RectButton>
+      <View className="flex-row gap-2">
+        <RectButton
+          variant="outline"
+          onPress={undoLastPath}
+          disabled={isGuided ? currentStroke === 0 : freeStrokes.length === 0}
+        >
+          Undo
+        </RectButton>
+        <RectButton variant="outline" onPress={clearPractice}>
+          Reset practice
+        </RectButton>
+      </View>
     </View>
   );
 }
