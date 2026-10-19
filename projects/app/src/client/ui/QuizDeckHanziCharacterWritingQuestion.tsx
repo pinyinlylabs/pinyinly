@@ -17,7 +17,10 @@ import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { QuizFlagText } from "./QuizFlagText";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
-import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
+import {
+  quizTimerIdleGraceMs,
+  useQuizTimer,
+} from "@/client/ui/hooks/useQuizTimer";
 
 export function QuizDeckHanziCharacterWritingQuestion({
   question,
@@ -105,8 +108,14 @@ export function QuizDeckHanziCharacterWritingQuestion({
               gradeResult={
                 grade == null ? null : grade.correct ? `correct` : `incorrect`
               }
+              onStrokeStart={() => {
+                timer.pause();
+              }}
               onStrokeComplete={(points) => {
                 setDrawnStrokes((strokes) => [...strokes, points]);
+              }}
+              onStrokeEnd={() => {
+                timer.resumeAfter(quizTimerIdleGraceMs);
               }}
             />
           </View>

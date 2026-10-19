@@ -101,3 +101,48 @@ test(`pauses while the browser tab is hidden`, () => {
   });
   expect(result.current.getDurationMs()).toBe(350);
 });
+
+test(`excludes paused time and resumes after a delay`, () => {
+  vi.useFakeTimers({ toFake: [`Date`, `setTimeout`, `clearTimeout`] });
+
+  const { result } = renderHook(() => useQuizTimer());
+
+  act(() => {
+    vi.advanceTimersByTime(500);
+    result.current.resumeAfter(4000);
+  });
+  expect(result.current.getDurationMs()).toBe(500);
+
+  act(() => {
+    vi.advanceTimersByTime(3999);
+  });
+  expect(result.current.getDurationMs()).toBe(500);
+
+  act(() => {
+    vi.advanceTimersByTime(1);
+    vi.advanceTimersByTime(250);
+  });
+  expect(result.current.getDurationMs()).toBe(750);
+});
+
+test(`restarting a pause cancels a pending resume`, () => {
+  vi.useFakeTimers({ toFake: [`Date`, `setTimeout`, `clearTimeout`] });
+
+  const { result } = renderHook(() => useQuizTimer());
+
+  act(() => {
+    vi.advanceTimersByTime(500);
+    result.current.pause();
+    result.current.resumeAfter(4000);
+    vi.advanceTimersByTime(2000);
+    result.current.pause();
+    vi.advanceTimersByTime(5000);
+  });
+  expect(result.current.getDurationMs()).toBe(500);
+
+  act(() => {
+    result.current.resume();
+    vi.advanceTimersByTime(250);
+  });
+  expect(result.current.getDurationMs()).toBe(750);
+});

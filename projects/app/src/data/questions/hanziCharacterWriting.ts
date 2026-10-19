@@ -69,7 +69,6 @@ export function gradeHanziCharacterWritingQuestion(
     skill: question.skill,
     correct,
     durationMs,
-    writingStrokeCount: medianPaths.length,
   });
 
   return {
