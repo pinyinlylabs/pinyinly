@@ -12,6 +12,7 @@ import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useRef, useState } from "react";
+import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { QuizFlagText } from "./QuizFlagText";
@@ -41,7 +42,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
 
-  const [startTime] = useState(() => Date.now());
+  const timer = useQuizTimer();
   const hanziWord = hanziWordFromSkill(skill);
   const hanziCharacters = splitHanziText(hanziFromHanziWord(hanziWord));
 
@@ -49,7 +50,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      const durationMs = Date.now() - startTime;
+      const durationMs = timer.getDurationMs();
 
       const grade = gradeHanziToGlossTypedQuestion(
         question,

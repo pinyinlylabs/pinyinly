@@ -17,10 +17,7 @@ import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { QuizFlagText } from "./QuizFlagText";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
-
-function nowMs() {
-  return Date.now();
-}
+import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
 
 export function QuizDeckHanziCharacterWritingQuestion({
   question,
@@ -43,7 +40,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
   const [debugGeometry, setDebugGeometry] = useState<
     HanziCharacterWritingQuestionGrade[`geometry`] | null
   >(null);
-  const [startTime] = useState(nowMs);
+  const timer = useQuizTimer();
   const { data: svgData, isLoading } = useQuery(
     hanziSvgPathsQuery(question.hanzi),
   );
@@ -58,7 +55,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
       return;
     }
 
-    const durationMs = nowMs() - startTime;
+    const durationMs = timer.getDurationMs();
     const result = gradeHanziCharacterWritingQuestion(
       question,
       drawnStrokes,
