@@ -1,6 +1,8 @@
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
 import type { HanziWord } from "@/data/model";
 import { Lozenge } from "./Lozenge";
+import { Text } from "./Text";
+import { Tooltip } from "./Tooltip";
 
 export function WikiHanziBookmarkLozenge({
   hanziWord,
@@ -18,13 +20,24 @@ function BookmarkStatus({ hanziWord }: { hanziWord: HanziWord }) {
   }
 
   return (
-    <Lozenge
-      kind="icon"
-      color="blue"
-      className="bg-transparent"
-      icon="bookmark-filled"
-      accessibilityLabel="Bookmarked"
-      iconTintColorClassName="accent-blue"
-    />
+    <Tooltip placement="top" sideOffset={6}>
+      <Tooltip.Trigger
+        accessibilityRole="button"
+        accessibilityLabel="Bookmarked"
+      >
+        <Lozenge
+          kind="icon"
+          color="muted-fg"
+          icon="bookmark-filled"
+          accessibilityLabel="Bookmarked"
+          iconTintColorClassName="accent-muted-fg"
+        />
+      </Tooltip.Trigger>
+      <Tooltip.Content>
+        <Text className="font-sans text-sm text-fg">
+          Saved to your bookmarks.
+        </Text>
+      </Tooltip.Content>
+    </Tooltip>
   );
 }
