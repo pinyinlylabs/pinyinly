@@ -18,6 +18,7 @@ import {
   characterCurriculumMeaningSchema,
   characterCurriculumMeaningExampleSchema,
   characterJsonSchema,
+  hanziCharacterSchema,
 } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
@@ -307,14 +308,21 @@ export const wikiPayloadSchema = z
   .strictObject({
     mdast: wikiMdastRootSchema.optional(),
     curriculumMeanings: z.array(characterCurriculumMeaningSchema).optional(),
+    visuallySimilar: z.array(hanziCharacterSchema).optional(),
     curriculumMeaningExamples: z
       .array(characterCurriculumMeaningExampleSchema)
       .optional(),
   })
   .refine(
-    ({ mdast, curriculumMeanings, curriculumMeaningExamples }) =>
+    ({
+      mdast,
+      curriculumMeanings,
+      visuallySimilar,
+      curriculumMeaningExamples,
+    }) =>
       mdast != null ||
       (curriculumMeanings != null && curriculumMeanings.length > 0) ||
+      (visuallySimilar != null && visuallySimilar.length > 0) ||
       (curriculumMeaningExamples != null &&
         curriculumMeaningExamples.length > 0),
   );

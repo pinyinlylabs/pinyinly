@@ -1,4 +1,5 @@
 import type {
+  HanziCharacter,
   HanziCharacterWritingQuestion,
   HanziCharacterWritingSkill,
   QuestionFlagType,
@@ -14,11 +15,53 @@ import { isHanziCharacter } from "@/data/hanzi";
 import { loadDictionary } from "@/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import { gradeCharacterShape } from "@/util/shapeContextGrader";
-import type { ShapeContextGrade } from "@/util/shapeContextGrader";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import type {
+  ShapeContextGrade,
+  ShapeContextOptions,
+  WritingStrokePoint,
+} from "@/util/shapeContextGrader";
 import type { Rating } from "@/util/fsrs";
 
 export const hanziCharacterWritingSimilarityThreshold = 0.55;
+
+export interface SimilarCharacterReference {
+  hanzi: HanziCharacter;
+  medianPaths: readonly string[];
+}
+
+export interface SimilarCharacterGrade {
+  hanzi: HanziCharacter;
+  geometry: ShapeContextGrade;
+}
+
+export function isHanziCharacterWritingAccepted(
+  geometry: ShapeContextGrade,
+  similarCharacterGrades: readonly SimilarCharacterGrade[],
+): boolean {
+  return (
+    geometry.similarity >= hanziCharacterWritingSimilarityThreshold &&
+    similarCharacterGrades.every(({ geometry: similarGeometry }) => {
+      return geometry.similarity > similarGeometry.similarity;
+    })
+  );
+}
+
+export function gradeSimilarCharacters(
+  drawnStrokes: readonly (readonly WritingStrokePoint[])[],
+  similarCharacterReferences: readonly SimilarCharacterReference[],
+  options?: Partial<ShapeContextOptions>,
+  sampleCount?: number,
+): SimilarCharacterGrade[] {
+  return similarCharacterReferences.map(({ hanzi, medianPaths }) => ({
+    hanzi,
+    geometry: gradeCharacterShape(
+      drawnStrokes,
+      medianPaths,
+      options,
+      sampleCount,
+    ),
+  }));
+}
 
 export async function hanziCharacterWritingQuestionOrThrow(
   skill: HanziCharacterWritingSkill,
@@ -51,8 +94,9 @@ export interface HanziCharacterWritingQuestionGrade {
   correct: boolean;
   rating: Rating;
   skillRatings: UnsavedSkillRating[];
-  failure: `shape` | null;
+  failure: `shape` | `contrastive` | null;
   geometry: ShapeContextGrade;
+  similarCharacterGrades: SimilarCharacterGrade[];
 }
 
 export function gradeHanziCharacterWritingQuestion(
@@ -60,10 +104,19 @@ export function gradeHanziCharacterWritingQuestion(
   drawnStrokes: readonly (readonly WritingStrokePoint[])[],
   medianPaths: readonly string[],
   durationMs: number,
+  similarCharacterReferences: readonly SimilarCharacterReference[] = [],
 ): HanziCharacterWritingQuestionGrade {
   const geometry = gradeCharacterShape(drawnStrokes, medianPaths);
-  const correct =
-    geometry.similarity >= hanziCharacterWritingSimilarityThreshold;
+  const similarCharacterGrades = gradeSimilarCharacters(
+    drawnStrokes,
+    similarCharacterReferences,
+    geometry.options,
+    geometry.sampleCount,
+  );
+  const correct = isHanziCharacterWritingAccepted(
+    geometry,
+    similarCharacterGrades,
+  );
 
   const skillRating = computeSkillRating({
     skill: question.skill,
@@ -76,7 +129,12 @@ export function gradeHanziCharacterWritingQuestion(
     correct,
     rating: skillRating.rating,
     skillRatings: [skillRating],
-    failure: correct ? null : `shape`,
+    failure: correct
+      ? null
+      : geometry.similarity < hanziCharacterWritingSimilarityThreshold
+        ? `shape`
+        : `contrastive`,
     geometry,
+    similarCharacterGrades,
   };
 }

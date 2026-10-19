@@ -1,6 +1,6 @@
 import type { PointerEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import { View } from "@/client/ui/View";
 
 function pathFromPoints(points: readonly WritingStrokePoint[]): string {

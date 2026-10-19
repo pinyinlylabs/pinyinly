@@ -1,13 +1,14 @@
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { SvgPath } from "@/client/ui/SvgPath";
+import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { hanziCharacterWritingSimilarityThreshold } from "@/data/questions/hanziCharacterWriting";
 import type {
   ShapeContextGrade,
   ShapeContextOptions,
+  WritingStrokePoint,
 } from "@/util/shapeContextGrader";
 import { gradeCharacterShape } from "@/util/shapeContextGrader";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import { useState } from "react";
 import type { GestureResponderEvent, LayoutChangeEvent } from "react-native";
 import { Switch } from "react-native";
@@ -267,6 +268,11 @@ export function HanziWritingDebug({
     onGeometryChange(gradeCharacterShape(drawnStrokes, referencePaths, next));
   }
 
+  function rerunOptions(next: ShapeContextOptions) {
+    setOptions(next);
+    onGeometryChange(gradeCharacterShape(drawnStrokes, referencePaths, next));
+  }
+
   function toggleLayer(kind: DebugLayerKind, value: boolean) {
     setLayers((current) => ({ ...current, [kind]: value }));
   }
@@ -488,9 +494,9 @@ export function HanziWritingDebug({
             {geometry.similarity.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
-            Parameter preview:{` `}
+            Shape threshold only:{` `}
             {geometry.similarity >= hanziCharacterWritingSimilarityThreshold
-              ? `passes the prototype threshold`
+              ? `passed`
               : `below the prototype threshold`}
           </Text>
           <Text className="text-sm text-fg">
@@ -498,6 +504,18 @@ export function HanziWritingDebug({
           </Text>
           <Text className="text-sm text-fg">
             Residual matching error: {geometry.residualMatchingError.toFixed(3)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Reference length: {geometry.referenceLength.toFixed(3)} · sample
+            count: {geometry.sampleCount}
+          </Text>
+          <Text className="text-sm text-fg">
+            Points per stroke (source):{` `}
+            {geometry.sourceStrokeSampleCounts.join(`, `)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Points per stroke (reference):{` `}
+            {geometry.targetStrokeSampleCounts.join(`, `)}
           </Text>
           <Text className="text-sm text-fg">
             TPS bending energy: {geometry.bendingEnergy.toFixed(4)}
@@ -514,8 +532,60 @@ export function HanziWritingDebug({
             Unmatched-point penalty: {geometry.unmatchedPointPenalty.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
-            Unmatched reference-stroke penalty:{` `}
-            {geometry.unmatchedStrokePenalty.toFixed(3)}
+            Geometry coverage penalty:{` `}
+            {geometry.geometryCoveragePenalty.toFixed(3)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Coverage distance tolerance:{` `}
+            {geometry.geometryCoverageTolerance.toFixed(3)} normalized units
+          </Text>
+          <Text className="text-sm text-fg">
+            Uncovered geometry before TPS (reference / handwriting):{` `}
+            {(
+              geometry.initialGeometryCoverage.referenceToHandwriting * 100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.initialGeometryCoverage.handwritingToReference * 100
+            ).toFixed(1)}
+            %
+          </Text>
+          <Text className="text-sm text-fg">
+            Uncovered geometry after TPS (reference / handwriting):{` `}
+            {(
+              geometry.residualGeometryCoverage.referenceToHandwriting * 100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.residualGeometryCoverage.handwritingToReference * 100
+            ).toFixed(1)}
+            %
+          </Text>
+          <Text className="text-sm text-fg">
+            Longest uncovered run before TPS (reference / handwriting):{` `}
+            {(
+              geometry.initialGeometryCoverage.referenceLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.initialGeometryCoverage.handwritingLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            %
+          </Text>
+          <Text className="text-sm text-fg">
+            Longest uncovered run after TPS (reference / handwriting):{` `}
+            {(
+              geometry.residualGeometryCoverage.referenceLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.residualGeometryCoverage.handwritingLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            %
           </Text>
           <Text className="text-sm text-fg">
             Matched points: {geometry.correspondences.length}; unmatched:{` `}
@@ -539,20 +609,61 @@ export function HanziWritingDebug({
               rerun(`tpsRegularization`, value);
             }}
           />
-          <Slider
-            label="Sample points"
-            minimum={64}
-            maximum={128}
-            step={16}
-            value={options.sampleCount}
-            formatValue={(value) => `${value}`}
-            onValueChange={(value) => {
-              changeOption(`sampleCount`, value);
-            }}
-            onValueChangeComplete={(value) => {
-              rerun(`sampleCount`, value);
-            }}
-          />
+          <View className="gap-2">
+            <Text className="font-semibold text-fg">Sampling</Text>
+            <ButtonGroup>
+              <ButtonGroup.Button
+                variant={options.sampleCount == null ? `filled` : `outline`}
+                onPress={() => {
+                  rerunOptions({ ...options, sampleCount: null });
+                }}
+              >
+                Automatic
+              </ButtonGroup.Button>
+              <ButtonGroup.Button
+                variant={options.sampleCount == null ? `outline` : `filled`}
+                onPress={() => {
+                  rerunOptions({
+                    ...options,
+                    sampleCount: geometry.sampleCount,
+                  });
+                }}
+              >
+                Manual
+              </ButtonGroup.Button>
+            </ButtonGroup>
+            {options.sampleCount == null ? (
+              <Slider
+                label="Target spacing"
+                minimum={0.02}
+                maximum={0.2}
+                step={0.005}
+                value={options.sampleSpacing}
+                formatValue={(value) => value.toFixed(3)}
+                onValueChange={(value) => {
+                  changeOption(`sampleSpacing`, value);
+                }}
+                onValueChangeComplete={(value) => {
+                  rerun(`sampleSpacing`, value);
+                }}
+              />
+            ) : (
+              <Slider
+                label="Sample count override"
+                minimum={8}
+                maximum={256}
+                step={8}
+                value={options.sampleCount}
+                formatValue={(value) => `${value}`}
+                onValueChange={(value) => {
+                  changeOption(`sampleCount`, value);
+                }}
+                onValueChangeComplete={(value) => {
+                  rerun(`sampleCount`, value);
+                }}
+              />
+            )}
+          </View>
           <Slider
             label="Log-radius bins"
             minimum={3}

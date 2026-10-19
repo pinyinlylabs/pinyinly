@@ -23,6 +23,10 @@ Character `character.json` files may define an optional `exampleSentence` on eac
 `curriculumMeanings` entry. It contains `hanzi`, `pinyin`, and `translation`, and is shown with the
 matching character meaning on the wiki page.
 
+Single-character `character.json` files may also define `visuallySimilar`, a manually maintained
+list of visually confusable characters used by contrastive handwriting grading. This list is copied
+into the generated wiki payload; each listed character needs median stroke data.
+
 When modifying or adding wiki content:
 
 1. Create or edit the appropriate `meaning.mdx` in the directory for that character or word.
