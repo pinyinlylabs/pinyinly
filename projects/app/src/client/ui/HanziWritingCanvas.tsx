@@ -138,28 +138,14 @@ export function HanziWritingCanvas({
           </marker>
         </defs>
         {hideGrid ? null : (
-          <>
-            <line
-              x1="512"
-              y1="24"
-              x2="512"
-              y2="1000"
-              stroke="currentColor"
-              strokeWidth="4"
-              strokeDasharray="12 12"
-              pointerEvents="none"
-            />
-            <line
-              x1="24"
-              y1="512"
-              x2="1000"
-              y2="512"
-              stroke="currentColor"
-              strokeWidth="4"
-              strokeDasharray="12 12"
-              pointerEvents="none"
-            />
-          </>
+          <path
+            d="M 512 512 V 24 M 512 512 V 1000 M 512 512 H 24 M 512 512 H 1000"
+            stroke="currentColor"
+            strokeWidth="4"
+            strokeDasharray="12 12"
+            fill="none"
+            pointerEvents="none"
+          />
         )}
         {guidedPaths?.map((path, index) => (
           <path
