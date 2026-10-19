@@ -325,7 +325,7 @@ Customise this to suit your scenario.
 First test that tailwind works:
 
 ```
-yarn tailwindcss --input src/global.css
+moon run app:debugTailwind
 ```
 
 ## Updating the bill of materials
