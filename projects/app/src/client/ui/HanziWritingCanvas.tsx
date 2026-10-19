@@ -117,7 +117,7 @@ export function HanziWritingCanvas({
     >
       <svg
         viewBox="0 0 1024 1024"
-        className="size-full touch-none text-fg-bg30"
+        className="size-full touch-none text-fg-bg30 select-none [-webkit-touch-callout:none]"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
