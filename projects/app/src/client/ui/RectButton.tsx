@@ -68,7 +68,9 @@ export function RectButton({
   const pressable = (
     <Pressable
       {...pressableProps}
-      accessibilityRole={accessibilityRole ?? `button`}
+      accessibilityRole={
+        accessibilityRole ?? (href == null ? `button` : `link`)
+      }
       onHoverIn={(e) => {
         setHovered(true);
         pressableProps.onHoverIn?.(e);
