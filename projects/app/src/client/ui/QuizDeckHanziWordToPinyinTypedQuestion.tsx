@@ -23,6 +23,7 @@ import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
 import type { ReactNode, Ref } from "react";
 import { useRef, useState } from "react";
+import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
 import type { TextInput } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -61,7 +62,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
 
-  const [startTime] = useState(() => Date.now());
+  const timer = useQuizTimer();
   const hanziCharacters = splitHanziText(
     hanziFromHanziWord(hanziWordFromSkill(skill)),
   );
@@ -70,7 +71,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      const durationMs = Date.now() - startTime;
+      const durationMs = timer.getDurationMs();
       const grade = gradeHanziToPinyinTypedQuestion(
         question,
         userAnswerRef.current,
