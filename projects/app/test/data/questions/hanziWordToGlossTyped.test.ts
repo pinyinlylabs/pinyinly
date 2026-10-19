@@ -150,6 +150,19 @@ describe(`normalizeGlossForMatch suite`, () => {
 });
 
 describe(`gradeHanziToGlossTypedQuestion suite`, () => {
+  test.for([`what`, `why`, `how`, `what? why? how?`])(
+    `accepts %s as an answer for 怎`,
+    async (userGloss) => {
+      const question = await hanziWordToGlossTypedQuestionOrThrow(
+        `het:怎:how`,
+        null,
+      );
+      const grade = gradeHanziToGlossTypedQuestion(question, userGloss, 1000);
+
+      expect(grade.correct).toBe(true);
+    },
+  );
+
   test.for([
     [`非:not`, `non-`],
     [`非:not`, `non`],
