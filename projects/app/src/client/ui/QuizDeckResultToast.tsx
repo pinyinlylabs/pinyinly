@@ -107,9 +107,9 @@ function UndoAnswerDropdown({
       <DropdownMenu2>
         <DropdownMenu2.Trigger asChild>
           <RectButton
-            variant="bareDim"
+            variant="bare"
             iconStart="more-horizontal"
-            iconSize={20}
+            accessibilityLabel="More options"
           />
         </DropdownMenu2.Trigger>
         <DropdownMenu2.Content align="end">
