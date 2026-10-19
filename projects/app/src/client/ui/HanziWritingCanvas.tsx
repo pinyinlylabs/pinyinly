@@ -35,7 +35,9 @@ export function HanziWritingCanvas({
   drawnStrokes = [],
   gradeResult,
   onUndo,
+  onStrokeStart,
   onStrokeComplete,
+  onStrokeEnd,
 }: {
   className?: string;
   disabled?: boolean;
@@ -45,7 +47,9 @@ export function HanziWritingCanvas({
   drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
   gradeResult?: `correct` | `incorrect` | null;
   onUndo?: () => void;
+  onStrokeStart?: () => void;
   onStrokeComplete: (points: WritingStrokePoint[]) => void;
+  onStrokeEnd?: () => void;
 }) {
   const [activePath, setActivePath] = useState(``);
   const pointsRef = useRef<WritingStrokePoint[]>([]);
@@ -72,6 +76,7 @@ export function HanziWritingCanvas({
     }
 
     isDrawingRef.current = true;
+    onStrokeStart?.();
     pointsRef.current = [getPoint(event)];
     setActivePath(pathFromPoints(pointsRef.current));
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -95,12 +100,14 @@ export function HanziWritingCanvas({
     if (pointsRef.current.length > 1) {
       onStrokeComplete(pointsRef.current);
     }
+    onStrokeEnd?.();
     pointsRef.current = [];
     setActivePath(``);
   }
 
   function onPointerCancel() {
     isDrawingRef.current = false;
+    onStrokeEnd?.();
     pointsRef.current = [];
     setActivePath(``);
   }

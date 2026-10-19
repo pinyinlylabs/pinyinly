@@ -1479,7 +1479,6 @@ export function computeSkillRating(opts: {
   skill: Skill;
   correct: boolean;
   durationMs: number;
-  writingStrokeCount?: number;
 }): UnsavedSkillRating {
   const { skill, correct, durationMs } = opts;
 
@@ -1497,18 +1496,10 @@ export function computeSkillRating(opts: {
     case SkillKind.PinyinToHanziWord:
     case SkillKind.ImageToHanziWord:
     case SkillKind.HanziWordToGloss:
-    case SkillKind.HanziWordToGlossTyped: {
+    case SkillKind.HanziWordToGlossTyped:
+    case SkillKind.HanziCharacterToWriting: {
       easyDuration = 5000;
       goodDuration = 10_000;
-      break;
-    }
-    case SkillKind.HanziCharacterToWriting: {
-      invariant(
-        opts.writingStrokeCount != null && opts.writingStrokeCount > 0,
-        `writing skill ratings require a positive stroke count`,
-      );
-      easyDuration = opts.writingStrokeCount * 1000;
-      goodDuration = easyDuration * 2;
       break;
     }
     case SkillKind.Deprecated:

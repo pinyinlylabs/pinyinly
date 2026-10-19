@@ -40,7 +40,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     expect(result.rating).not.toBe(Rating.Again);
   });
 
-  test(`scales speed ratings with the character stroke count`, () => {
+  test(`uses the standard quiz speed rating thresholds`, () => {
     const strokes = Array.from({ length: 4 }, () => [
       { x: 100, y: 100 },
       { x: 500, y: 100 },
@@ -48,15 +48,19 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     const medianPaths = Array.from({ length: 4 }, () => expectedPath);
 
     expect(
-      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 3999)
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 4999)
         .rating,
     ).toBe(Rating.Easy);
     expect(
-      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 4000)
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 5000)
         .rating,
     ).toBe(Rating.Good);
     expect(
-      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 8000)
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 9999)
+        .rating,
+    ).toBe(Rating.Good);
+    expect(
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 10_000)
         .rating,
     ).toBe(Rating.Hard);
   });
