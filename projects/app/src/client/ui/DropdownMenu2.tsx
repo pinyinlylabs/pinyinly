@@ -46,7 +46,7 @@ function DropdownMenuSubTrigger({
     <Text.ClassContext.Provider
       value={cn(
         `
-          font-sans text-sm font-semibold select-none
+          font-sans text-sm font-semibold text-fg select-none
 
           group-active:text-accent-fg
         `,
@@ -74,9 +74,7 @@ function DropdownMenuSubTrigger({
         )}
         {...props}
       >
-        <Text.ClassContext.Provider value="text-fg">
-          {children}
-        </Text.ClassContext.Provider>
+        {children}
         <Icon
           icon={icon}
           tintColorClassName="accent-fg"
@@ -187,7 +185,7 @@ function DropdownMenuContent({
 }) {
   const { open } = DropdownMenuPrimitive.useRootContext();
 
-  if (Platform.OS === `web` && !open) {
+  if (Platform.OS === `web` && !open && !props.forceMount) {
     return null;
   }
 
@@ -208,9 +206,9 @@ function DropdownMenuContent({
             })}
             className={cn(
               `
-                bg-bg/50
-
                 web:fixed web:inset-0 web:z-40
+
+                ${open ? `bg-bg/50` : `pointer-events-none bg-transparent`}
               `,
               overlayClassName,
             )}
