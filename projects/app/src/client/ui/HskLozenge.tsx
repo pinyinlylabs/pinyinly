@@ -7,10 +7,12 @@ export function HskLozenge({
   hskLevel,
   size = `md`,
   color,
+  suffix,
 }: {
   hskLevel: Hsk30Level;
   size?: `sm` | `md`;
   color?: LozengeColor;
+  suffix?: string;
 }) {
   color ??= hskLevelToColor[hskLevel];
 
@@ -19,6 +21,7 @@ export function HskLozenge({
       <Text className={size == `sm` ? `opacity-80` : undefined}>HSK</Text>
       {` `}
       {hskLevel}
+      {suffix}
     </Lozenge>
   );
 }
