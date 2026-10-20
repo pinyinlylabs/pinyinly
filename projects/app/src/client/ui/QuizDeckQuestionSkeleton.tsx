@@ -35,7 +35,7 @@ export function QuizDeckQuestionSkeleton({
   const submitButtonInsetBottom = insets.bottom + 20;
 
   return (
-    <>
+    <View className="flex-1">
       <View
         className="flex-1 px-4"
         style={{ paddingBottom: submitButtonInsetBottom }}
@@ -88,6 +88,6 @@ export function QuizDeckQuestionSkeleton({
           onPress={onSubmit}
         />
       </View>
-    </>
+    </View>
   );
 }
