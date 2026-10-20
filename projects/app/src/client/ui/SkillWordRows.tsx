@@ -13,7 +13,7 @@ import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link } from "expo-router";
 import { Pressable } from "react-native";
 import { HanziPinyinText } from "./HanziPinyinText";
-import { HskLozenge } from "./HskLozenge";
+import { HskLozengeWithTooltip } from "./HskLozengeWithTooltip";
 import { Icon } from "./Icon";
 import { Text } from "./Text";
 import { View } from "./View";
@@ -59,6 +59,7 @@ export function SkillWordRows({
       hanziWord,
       hanzi: hanziFromHanziWord(hanziWord),
       hsk: meaning?.hsk ?? null,
+      hskFirstAppearance: meaning?.hskFirstAppearance ?? null,
       pinyin: meaning?.pinyin?.[0] ?? null,
       gloss: meaning?.gloss[0] ?? ``,
       rank,
@@ -98,9 +99,9 @@ export function SkillWordRows({
               hanzi={row.hanzi}
               pinyin={row.pinyin}
               lozenges={
-                !showHskLozenges || row.hsk == null ? null : (
-                  <HskLozenge hskLevel={row.hsk} size="sm" color="muted-fg" />
-                )
+                showHskLozenges ? (
+                  <HskLozengeWithTooltip entries={[row]} size="sm" />
+                ) : null
               }
             />
             <View className="ml-4 flex-1 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">

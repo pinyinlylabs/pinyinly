@@ -42,6 +42,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
           hanzi: character.hanzi,
           hanziWord: entry.hanziWord,
           hsk: entry.hsk,
+          hskFirstAppearance: entry.hskFirstAppearance,
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),

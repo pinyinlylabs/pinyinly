@@ -1,10 +1,10 @@
-import { getWikiHskLevelDetails } from "#client/ui/WikiHanziHskLozenges.utils.ts";
+import { getHskLevelDetails } from "#client/ui/HskLozengeWithTooltip.utils.ts";
 import { describe, expect, test } from "vitest";
 
-describe(`getWikiHskLevelDetails`, () => {
+describe(`getHskLevelDetails`, () => {
   test(`sorts levels and distinguishes direct listings from first appearances`, () => {
     expect(
-      getWikiHskLevelDetails([
+      getHskLevelDetails([
         { hsk: `4`, hskFirstAppearance: `2` },
         { hsk: `2`, hskFirstAppearance: `2` },
         { hsk: `7-9`, hskFirstAppearance: `6` },
@@ -17,7 +17,13 @@ describe(`getWikiHskLevelDetails`, () => {
     ]);
   });
 
+  test(`returns a first-appearance level without a direct listing`, () => {
+    expect(getHskLevelDetails([{ hskFirstAppearance: `1` }])).toEqual([
+      { hskLevel: `1`, isDirect: false, isFirstAppearance: true },
+    ]);
+  });
+
   test(`returns no levels when no HSK metadata is present`, () => {
-    expect(getWikiHskLevelDetails([{}, {}])).toEqual([]);
+    expect(getHskLevelDetails([{}, {}])).toEqual([]);
   });
 });

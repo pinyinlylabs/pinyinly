@@ -32,6 +32,7 @@ export function WikiHanziRelatedMeanings({ hanzi }: { hanzi: HanziText }) {
     ({ entry }) => ({
       ...entry,
       hsk: entry.hsk ?? null,
+      hskFirstAppearance: entry.hskFirstAppearance ?? null,
       pinyin: entry.pinyin ?? null,
     }),
   );
