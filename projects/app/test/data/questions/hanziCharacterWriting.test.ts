@@ -4,7 +4,10 @@ import type {
   HanziCharacterWritingSkill,
 } from "#data/model.ts";
 import { pinyinTextSchema, QuestionKind } from "#data/model.ts";
-import { gradeHanziCharacterWritingQuestion } from "#data/questions/hanziCharacterWriting.ts";
+import {
+  gradeHanziCharacterWritingQuestion,
+  hanziCharacterWritingSimilarityThreshold,
+} from "#data/questions/hanziCharacterWriting.ts";
 import { Rating } from "#util/fsrs.ts";
 import { describe, expect, test } from "vitest";
 
@@ -38,6 +41,33 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
       failure: null,
     });
     expect(result.rating).not.toBe(Rating.Again);
+  });
+
+  test(`rejects a shape that matches a similar character equally well`, () => {
+    const result = gradeHanziCharacterWritingQuestion(
+      question,
+      [
+        [
+          { x: 100, y: 100 },
+          { x: 500, y: 100 },
+        ],
+      ],
+      [expectedPath],
+      1000,
+      [{ hanzi: `牛` as HanziCharacter, medianPaths: [expectedPath] }],
+    );
+
+    expect(result.geometry.similarity).toBeGreaterThanOrEqual(
+      hanziCharacterWritingSimilarityThreshold,
+    );
+    expect(result.similarCharacterGrades[0]?.geometry.similarity).toBe(
+      result.geometry.similarity,
+    );
+    expect(result).toMatchObject({
+      correct: false,
+      failure: `contrastive`,
+      rating: Rating.Again,
+    });
   });
 
   test(`uses the standard quiz speed rating thresholds`, () => {

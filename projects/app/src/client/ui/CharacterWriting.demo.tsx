@@ -8,13 +8,20 @@ import { Text } from "@/client/ui/Text";
 import { TextInputMulti } from "@/client/ui/TextInputMulti";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { View } from "@/client/ui/View";
+import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
 import { isHanziCharacter, splitHanziText } from "@/data/hanzi";
 import type { HanziCharacter, HanziText } from "@/data/model";
-import { hanziCharacterWritingSimilarityThreshold } from "@/data/questions/hanziCharacterWriting";
+import {
+  hanziCharacterWritingSimilarityThreshold,
+  gradeSimilarCharacters,
+  isHanziCharacterWritingAccepted,
+} from "@/data/questions/hanziCharacterWriting";
+import type { SimilarCharacterReference } from "@/data/questions/hanziCharacterWriting";
 import { gradeCharacterShape } from "@/util/shapeContextGrader";
 import type {
   ShapeContextGrade,
   ShapeContextOptions,
+  WritingStrokePoint as Point,
 } from "@/util/shapeContextGrader";
 import type { ShapeContextGraderExample } from "@/util/shapeContextGraderExample";
 import {
@@ -26,7 +33,6 @@ import {
   shapeContextGraderExampleFragment,
 } from "@/util/shapeContextGraderExample";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
-import type { WritingStrokePoint as Point } from "@/util/writingStrokeGrader";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -42,12 +48,14 @@ function parseSingleHanzi(input: string): HanziCharacter | null {
 function CharacterWriting({
   character,
   referencePaths,
+  visuallySimilarReferences,
   mode,
   initialExample,
   onReset,
 }: {
   character: HanziCharacter;
   referencePaths: string[];
+  visuallySimilarReferences: SimilarCharacterReference[];
   mode: WritingMode;
   initialExample?: ShapeContextGraderExample;
   onReset: () => void;
@@ -64,11 +72,34 @@ function CharacterWriting({
   const [gradeOptions, setGradeOptions] = useState<
     ShapeContextOptions | undefined
   >(initialExample?.options);
+  const [debugCharacter, setDebugCharacter] = useState<HanziCharacter | null>(
+    null,
+  );
   const [lastGrade, setLastGrade] = useState<ShapeContextGrade | null>(() =>
     freeStrokes.length === 0
       ? null
       : gradeCharacterShape(freeStrokes, referencePaths, gradeOptions),
   );
+  const visuallySimilarGrades =
+    lastGrade == null
+      ? []
+      : gradeSimilarCharacters(
+          freeStrokes,
+          visuallySimilarReferences,
+          lastGrade.options,
+          lastGrade.sampleCount,
+        );
+  const isAccepted =
+    lastGrade != null &&
+    isHanziCharacterWritingAccepted(lastGrade, visuallySimilarGrades);
+  const debugSimilarGrade = visuallySimilarGrades.find(
+    ({ hanzi }) => hanzi === debugCharacter,
+  );
+  const debugReference = visuallySimilarReferences.find(
+    ({ hanzi }) => hanzi === debugCharacter,
+  );
+  const debugGeometry = debugSimilarGrade?.geometry ?? lastGrade;
+  const debugReferencePaths = debugReference?.medianPaths ?? referencePaths;
   const isGuided = mode === `guided`;
 
   function onStrokeComplete(points: Point[]) {
@@ -138,16 +169,10 @@ function CharacterWriting({
           className={`
             text-center font-semibold
 
-            ${
-              lastGrade.similarity >= hanziCharacterWritingSimilarityThreshold
-                ? `text-success`
-                : `text-danger`
-            }
+            ${isAccepted ? `text-success` : `text-danger`}
           `}
         >
-          {lastGrade.similarity >= hanziCharacterWritingSimilarityThreshold
-            ? `Accepted`
-            : `Not accepted`}
+          {isAccepted ? `Accepted` : `Not accepted`}
           {` · similarity ${lastGrade.similarity.toFixed(3)} / threshold ${hanziCharacterWritingSimilarityThreshold.toFixed(2)}`}
         </Text>
       ) : null}
@@ -157,6 +182,11 @@ function CharacterWriting({
             Similarity {lastGrade.similarity.toFixed(3)} · residual error{` `}
             {lastGrade.residualMatchingError.toFixed(3)}
           </Text>
+          {visuallySimilarGrades.map(({ hanzi, geometry }) => (
+            <Text key={hanzi} className="text-center text-muted-fg">
+              {hanzi} similarity {geometry.similarity.toFixed(3)}
+            </Text>
+          ))}
           <View className="gap-2 rounded-lg border border-border p-3">
             <Text className="font-semibold text-fg">
               Regression test example
@@ -195,15 +225,51 @@ function CharacterWriting({
               </View>
             </View>
           </View>
-          <HanziWritingDebug
-            geometry={lastGrade}
-            drawnStrokes={freeStrokes}
-            referencePaths={referencePaths}
-            onGeometryChange={(geometry) => {
-              setLastGrade(geometry);
-              setGradeOptions(geometry.options);
-            }}
-          />
+          {visuallySimilarGrades.length === 0 ? null : (
+            <View className="gap-2">
+              <Text className="font-semibold text-fg">Debug reference</Text>
+              <ButtonGroup className="flex-wrap">
+                <ButtonGroup.Button
+                  variant={debugSimilarGrade == null ? `filled` : `outline`}
+                  onPress={() => {
+                    setDebugCharacter(null);
+                  }}
+                >
+                  {character} (target)
+                </ButtonGroup.Button>
+                {visuallySimilarGrades.map(({ hanzi }) => (
+                  <ButtonGroup.Button
+                    key={hanzi}
+                    variant={debugCharacter === hanzi ? `filled` : `outline`}
+                    onPress={() => {
+                      setDebugCharacter(hanzi);
+                    }}
+                  >
+                    {hanzi}
+                  </ButtonGroup.Button>
+                ))}
+              </ButtonGroup>
+            </View>
+          )}
+          {debugGeometry == null ? null : (
+            <HanziWritingDebug
+              key={debugCharacter ?? character}
+              geometry={debugGeometry}
+              drawnStrokes={freeStrokes}
+              referencePaths={debugReferencePaths}
+              onGeometryChange={(geometry) => {
+                setGradeOptions(geometry.options);
+                setLastGrade(
+                  gradeCharacterShape(
+                    freeStrokes,
+                    referencePaths,
+                    geometry.options,
+                    geometry.sampleCount,
+                  ),
+                );
+              }}
+            />
+          )}
         </>
       ) : null}
       {!isGuided && lastGrade == null ? (
@@ -234,9 +300,11 @@ export default function CharacterWritingDemo() {
       : shapeContextGraderExampleCharacter(loadedExample),
   );
   const query = useQuery(hanziSvgPathsQuery(character));
+  const visuallySimilarData = useVisuallySimilarCharacterReferences(character);
   const referencePaths = (query.data?.medians ?? []).map(
     transformArphicSpaceSvgPath,
   );
+  const visuallySimilarReferences = visuallySimilarData.references;
 
   function loadExample() {
     try {
@@ -325,12 +393,20 @@ export default function CharacterWritingDemo() {
         <Text className="text-muted-fg">
           Enter exactly one Hanzi character.
         </Text>
-      ) : query.isLoading ? (
+      ) : query.isLoading || visuallySimilarData.isLoading ? (
         <Text className="text-muted-fg">
           Loading writing data for {character}…
         </Text>
       ) : query.isError ? (
         <Text className="text-muted-fg">Could not load writing data.</Text>
+      ) : visuallySimilarData.hasWikiError ? (
+        <Text className="text-danger">
+          Could not load visually similar character data for {character}.
+        </Text>
+      ) : visuallySimilarData.missingCharacter ? (
+        <Text className="text-danger">
+          {`Writing data is unavailable for visually similar character ${visuallySimilarData.missingCharacter}.`}
+        </Text>
       ) : referencePaths.length === 0 ? (
         <Text className="text-muted-fg">
           No median stroke data is available for {character}.
@@ -340,6 +416,7 @@ export default function CharacterWritingDemo() {
           key={`${character}:${mode}:${loadRevision}`}
           character={character}
           referencePaths={referencePaths}
+          visuallySimilarReferences={visuallySimilarReferences}
           mode={mode}
           initialExample={loadedExample ?? undefined}
           onReset={() => {

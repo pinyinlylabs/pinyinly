@@ -2,8 +2,14 @@ import { hanziSvgPathsQuery } from "@/client/query";
 import { HanziWritingDebug } from "@/client/ui/HanziWritingDebug";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
+import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
 import type { HanziCharacter } from "@/data/model";
-import { hanziCharacterWritingSimilarityThreshold } from "@/data/questions/hanziCharacterWriting";
+import {
+  gradeSimilarCharacters,
+  hanziCharacterWritingSimilarityThreshold,
+  isHanziCharacterWritingAccepted,
+} from "@/data/questions/hanziCharacterWriting";
+import type { SimilarCharacterReference } from "@/data/questions/hanziCharacterWriting";
 import { gradeCharacterShape } from "@/util/shapeContextGrader";
 import type { ShapeContextGrade } from "@/util/shapeContextGrader";
 import type { ShapeContextGraderExample } from "@/util/shapeContextGraderExample";
@@ -62,16 +68,28 @@ function viewerStateForHash(hash: string): ViewerState {
 function LoadedExampleWithPaths({
   example,
   referencePaths,
+  similarCharacterReferences,
 }: {
   example: ShapeContextGraderExample;
   referencePaths: string[];
+  similarCharacterReferences: SimilarCharacterReference[];
 }) {
   const drawnStrokes = decodeShapeContextStrokes(example.drawnStrokes);
   const [geometry, setGeometry] = useState<ShapeContextGrade>(() =>
     gradeCharacterShape(drawnStrokes, referencePaths, example.options),
   );
-  const accepted =
-    geometry.similarity >= hanziCharacterWritingSimilarityThreshold;
+  const [similarCharacterGrades, setSimilarCharacterGrades] = useState(() =>
+    gradeSimilarCharacters(
+      drawnStrokes,
+      similarCharacterReferences,
+      geometry.options,
+      geometry.sampleCount,
+    ),
+  );
+  const accepted = isHanziCharacterWritingAccepted(
+    geometry,
+    similarCharacterGrades,
+  );
 
   return (
     <View className="gap-3">
@@ -89,22 +107,37 @@ function LoadedExampleWithPaths({
         Similarity {geometry.similarity.toFixed(3)} · acceptance threshold{` `}
         {hanziCharacterWritingSimilarityThreshold.toFixed(2)}
       </Text>
+      {similarCharacterGrades.map(({ hanzi, geometry: candidate }) => (
+        <Text key={hanzi} className="text-fg">
+          {hanzi} similarity {candidate.similarity.toFixed(3)}
+        </Text>
+      ))}
       <HanziWritingDebug
         geometry={geometry}
         drawnStrokes={drawnStrokes}
         referencePaths={referencePaths}
-        onGeometryChange={setGeometry}
+        onGeometryChange={(nextGeometry) => {
+          setGeometry(nextGeometry);
+          setSimilarCharacterGrades(
+            gradeSimilarCharacters(
+              drawnStrokes,
+              similarCharacterReferences,
+              nextGeometry.options,
+              nextGeometry.sampleCount,
+            ),
+          );
+        }}
       />
     </View>
   );
 }
 
 function LoadedExample({ example }: { example: ShapeContextGraderExample }) {
-  const query = useQuery(
-    hanziSvgPathsQuery(
-      shapeContextGraderExampleCharacter(example) as HanziCharacter,
-    ),
-  );
+  const character = shapeContextGraderExampleCharacter(
+    example,
+  ) as HanziCharacter;
+  const query = useQuery(hanziSvgPathsQuery(character));
+  const visuallySimilarData = useVisuallySimilarCharacterReferences(character);
   if (query.isLoading) {
     return <Text className="text-muted-fg">Loading writing data…</Text>;
   }
@@ -113,6 +146,27 @@ function LoadedExample({ example }: { example: ShapeContextGraderExample }) {
       <Text className="text-danger">
         Could not load writing data for{` `}
         {shapeContextGraderExampleCharacter(example)}.
+      </Text>
+    );
+  }
+  if (visuallySimilarData.isLoading) {
+    return (
+      <Text className="text-muted-fg">Loading similar-character data…</Text>
+    );
+  }
+  if (visuallySimilarData.hasWikiError) {
+    return (
+      <Text className="text-danger">
+        Could not load similar-character data for {character}.
+      </Text>
+    );
+  }
+  const missingSimilarCharacter = visuallySimilarData.missingCharacter;
+  if (missingSimilarCharacter != null) {
+    return (
+      <Text className="text-danger">
+        No median stroke data is available for similar character{` `}
+        {missingSimilarCharacter}.
       </Text>
     );
   }
@@ -130,7 +184,11 @@ function LoadedExample({ example }: { example: ShapeContextGraderExample }) {
   }
 
   return (
-    <LoadedExampleWithPaths example={example} referencePaths={referencePaths} />
+    <LoadedExampleWithPaths
+      example={example}
+      referencePaths={referencePaths}
+      similarCharacterReferences={visuallySimilarData.references}
+    />
   );
 }
 

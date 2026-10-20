@@ -1263,6 +1263,10 @@ export const characterJsonSchema = z.strictObject({
    */
   hanzi: hanziCharacterSchema,
   /**
+   * Characters with similar visual shapes, used for contrastive writing grading.
+   */
+  visuallySimilar: z.array(hanziCharacterSchema).optional(),
+  /**
    * SVG-related data (strokes, medians, and precomputed segment paths).
    */
   svg: characterJsonSvgSchema,

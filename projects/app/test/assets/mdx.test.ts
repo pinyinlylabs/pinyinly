@@ -38,10 +38,12 @@ test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
   type CharacterCurriculumMeanings = NonNullable<
     CharacterJson[`curriculumMeanings`]
   >;
+  type VisuallySimilar = NonNullable<CharacterJson[`visuallySimilar`]>;
   const curriculumMeaningsByHanzi = new Map<
     string,
     CharacterCurriculumMeanings
   >();
+  const visuallySimilarByHanzi = new Map<string, VisuallySimilar>();
   const characterJsonFiles = await glob(
     path.join(projectRoot, `src/client/wiki/*/character.json`),
   );
@@ -55,17 +57,25 @@ test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
         characterJson.curriculumMeanings,
       );
     }
+    if (characterJson.visuallySimilar != null) {
+      visuallySimilarByHanzi.set(
+        characterJson.hanzi,
+        characterJson.visuallySimilar,
+      );
+    }
   }
 
   const processor = createMdxAstProcessor();
   const hanziEntries = new Set([
     ...mdxFilesByHanzi.keys(),
     ...curriculumMeaningsByHanzi.keys(),
+    ...visuallySimilarByHanzi.keys(),
   ]);
   for (const hanzi of hanziEntries) {
     const payload: {
       mdast?: unknown;
       curriculumMeanings?: CharacterCurriculumMeanings;
+      visuallySimilar?: VisuallySimilar;
       curriculumMeaningExamples?: CharacterCurriculumMeaningExample[];
     } = {};
 
@@ -87,6 +97,11 @@ test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
       if (examples.length > 0) {
         payload.curriculumMeaningExamples = examples;
       }
+    }
+
+    const visuallySimilar = visuallySimilarByHanzi.get(hanzi);
+    if (visuallySimilar != null) {
+      payload.visuallySimilar = visuallySimilar;
     }
 
     await expect(payload).toMatchJsonFileSnapshot(
