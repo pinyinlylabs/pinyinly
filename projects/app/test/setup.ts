@@ -226,10 +226,16 @@ vi.mock(`uniwind`, () => {
 
 vi.mock(`@floating-ui/react-native`, () => {
   return {
-    useFloating: () => null,
-    flip: null,
-    shift: null,
-    offset: null,
+    useFloating: () => ({
+      refs: {
+        setReference: vi.fn(),
+        setFloating: vi.fn(),
+      },
+      floatingStyles: {},
+    }),
+    flip: vi.fn(() => ({})),
+    shift: vi.fn(() => ({})),
+    offset: vi.fn(() => ({})),
   };
 });
 
