@@ -14,7 +14,6 @@ import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { HanziWritingDebug } from "./HanziWritingDebug";
 import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { QuizFlagText } from "./QuizFlagText";
@@ -41,9 +40,6 @@ export function QuizDeckHanziCharacterWritingQuestion({
   const [grade, setGrade] = useState<HanziCharacterWritingQuestionGrade | null>(
     null,
   );
-  const [debugGeometry, setDebugGeometry] = useState<
-    HanziCharacterWritingQuestionGrade[`geometry`] | null
-  >(null);
   const timer = useQuizTimer();
   const { data: svgData, isLoading } = useQuery(
     hanziSvgPathsQuery(question.hanzi),
@@ -80,7 +76,6 @@ export function QuizDeckHanziCharacterWritingQuestion({
       similarCharacterReferences,
     );
     setGrade(result);
-    setDebugGeometry(result.geometry);
     onRating(result.skillRatings, emptyArray);
   };
 
@@ -126,9 +121,19 @@ export function QuizDeckHanziCharacterWritingQuestion({
             {`Writing data is unavailable for similar character ${missingSimilarCharacter}.`}
           </Text>
         ) : (
-          <View className="min-h-0 w-full flex-1 items-center justify-center">
+          <View
+            className="
+              -mx-4 min-h-0 w-[calc(100%+2rem)] flex-1 items-center justify-center
+
+              sm:mx-0 sm:w-full
+            "
+          >
             <HanziWritingCanvas
-              className="aspect-square h-full max-h-full w-auto max-w-full"
+              className="
+                size-full max-h-full
+
+                sm:aspect-square sm:w-auto sm:max-w-full
+              "
               disabled={grade != null}
               guidedPaths={grade == null ? undefined : medianPaths}
               drawnStrokes={drawnStrokes}
@@ -159,28 +164,11 @@ export function QuizDeckHanziCharacterWritingQuestion({
             distinguishing strokes and try again.
           </Text>
         ) : null}
-        {grade != null && grade.similarCharacterGrades.length > 0 ? (
-          <Text className="text-muted-fg">
-            Similarity: {question.hanzi} {grade.geometry.similarity.toFixed(3)}
-            {grade.similarCharacterGrades.map(
-              ({ hanzi, geometry }) =>
-                ` · ${hanzi} ${geometry.similarity.toFixed(3)}`,
-            )}
-          </Text>
-        ) : null}
         {grade?.correct === false ? (
           <Text className="text-danger">
             Expected character: {question.hanzi}
           </Text>
         ) : null}
-        {!__DEV__ || debugGeometry == null ? null : (
-          <HanziWritingDebug
-            geometry={debugGeometry}
-            drawnStrokes={drawnStrokes}
-            referencePaths={medianPaths}
-            onGeometryChange={setDebugGeometry}
-          />
-        )}
       </View>
     </QuizDeckQuestionSkeleton>
   );
