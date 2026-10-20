@@ -22,7 +22,7 @@ import type {
 } from "@/util/shapeContextGrader";
 import type { Rating } from "@/util/fsrs";
 
-export const hanziCharacterWritingSimilarityThreshold = 0.55;
+export const hanziCharacterWritingSimilarityThreshold = 0.72;
 
 export interface SimilarCharacterReference {
   hanzi: HanziCharacter;
@@ -122,7 +122,6 @@ export function gradeHanziCharacterWritingQuestion(
     skill: question.skill,
     correct,
     durationMs,
-    writingStrokeCount: medianPaths.length,
   });
 
   return {

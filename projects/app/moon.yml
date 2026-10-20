@@ -305,6 +305,9 @@ tasks:
       MINIO_ROOT_USER: miniodev
       MINIO_ROOT_PASSWORD: miniodev
 
+  debugTailwind:
+    command: tailwindcss --input src/global.css
+
   dictionary:
     command: tsx --tsconfig tsconfig.node.json ./bin/dictionary.tsx
     preset: server

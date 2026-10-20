@@ -1,7 +1,6 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { DropdownMenu2 } from "@/client/ui/DropdownMenu2";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
-import { Icon } from "@/client/ui/Icon";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -22,7 +21,6 @@ import {
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { Pressable } from "react-native";
 import { useState } from "react";
 
 export default function ActorIdPage() {
@@ -70,19 +68,11 @@ export default function ActorIdPage() {
         </Breadcrumbs>
         <DropdownMenu2>
           <DropdownMenu2.Trigger asChild>
-            <Pressable
+            <RectButton
+              variant="bare"
+              iconStart="more-horizontal"
               accessibilityLabel="More options"
-              accessibilityRole="button"
-              className="
-                size-8 items-center justify-center rounded-md
-
-                hover:bg-fg/5
-
-                web:transition-colors
-              "
-            >
-              <Icon icon="more-horizontal" size={20} />
-            </Pressable>
+            />
           </DropdownMenu2.Trigger>
           <DropdownMenu2.Content align="end" sideOffset={4}>
             <DropdownMenu2.Item

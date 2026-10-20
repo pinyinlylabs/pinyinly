@@ -30,9 +30,12 @@ export type RectButtonProps = {
   iconStart?: IconName;
   iconEnd?: IconName;
   iconSize?: IconProps[`size`];
+  pressed?: boolean;
 } & Pick<
   PropsOf<typeof Pressable>,
-  keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
+  | (keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`))
+  | `accessibilityLabel`
+  | `accessibilityRole`
 >;
 
 export function RectButton({
@@ -44,15 +47,18 @@ export function RectButton({
   iconStart,
   iconEnd,
   iconSize,
+  accessibilityRole,
+  pressed: pressedProp,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
   const iconOnly = children == null && (iconStart != null || iconEnd != null);
   const resolvedIconSize = iconSize ?? iconSizeByVariant[variant];
 
-  const [pressed, setPressed] = useState(false);
+  const [pressedState, setPressedState] = useState(false);
   const [hovered, setHovered] = useState(false);
 
+  const pressed = pressedProp ?? pressedState;
   const flat = pressed || disabled;
   const textClassName = extractTextClasses(className);
   const fullTextClass = textClass({ variant, class: textClassName });
@@ -62,6 +68,9 @@ export function RectButton({
   const pressable = (
     <Pressable
       {...pressableProps}
+      accessibilityRole={
+        accessibilityRole ?? (href == null ? `button` : `link`)
+      }
       onHoverIn={(e) => {
         setHovered(true);
         pressableProps.onHoverIn?.(e);
@@ -71,12 +80,12 @@ export function RectButton({
         pressableProps.onHoverOut?.(e);
       }}
       onPressIn={(e) => {
-        setPressed(true);
+        setPressedState(true);
         hapticImpactIfMobile();
         pressableProps.onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        setPressed(false);
+        setPressedState(false);
         pressableProps.onPressOut?.(e);
       }}
       className={pressableClass({
@@ -136,26 +145,24 @@ const iconSizeByVariant: Partial<Record<ButtonVariant, IconProps[`size`]>> = {
 };
 
 const pressableClass = tv({
-  base: `web:transition-all`,
+  base: `
+    outline-transparent
+
+    focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue/50
+
+    web:transition-all
+  `,
   variants: {
     flat: {
       true: ``,
     },
     variant: {
-      filled: `
-        rounded-xl
-
-        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-fg/75
-      `,
+      filled: `rounded-xl`,
       outline: `rounded-xl`,
-      option: `
-        rounded-xl
-
-        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky/75
-      `,
-      barePrimary: `transition-transform`,
-      bare: `transition-transform`,
-      bareDim: `transition-transform`,
+      option: `rounded-xl`,
+      barePrimary: `rounded transition-transform`,
+      bare: `rounded transition-transform`,
+      bareDim: `rounded transition-transform`,
       rounded: `rounded-full transition-transform`,
     },
     inFlexRowParent: {

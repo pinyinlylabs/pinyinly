@@ -46,7 +46,7 @@ function DropdownMenuSubTrigger({
     <Text.ClassContext.Provider
       value={cn(
         `
-          font-sans text-sm font-semibold select-none
+          font-sans text-sm font-semibold text-fg select-none
 
           group-active:text-accent-fg
         `,
@@ -183,8 +183,14 @@ function DropdownMenuContent({
   overlayStyle?: StyleProp<ViewStyle>;
   overlayClassName?: string;
 }) {
+  const { open } = DropdownMenuPrimitive.useRootContext();
+
+  if (Platform.OS === `web` && !open && !props.forceMount) {
+    return null;
+  }
+
   return (
-    <Theme theme="popover">
+    <Theme theme="default">
       <DropdownPortal>
         <FullWindowOverlay>
           <DropdownMenuPrimitive.Overlay
@@ -198,7 +204,14 @@ function DropdownMenuContent({
                       overlayStyle as ViewStyle,
                     ]),
             })}
-            className={cn(`bg-bg/50`, overlayClassName)}
+            className={cn(
+              `
+                web:fixed web:inset-0 web:z-40
+
+                ${open ? `bg-bg/50` : `pointer-events-none bg-transparent`}
+              `,
+              overlayClassName,
+            )}
             asChild={Platform.OS !== `web`}
           >
             <NativeOnlyAnimatedView
@@ -206,21 +219,23 @@ function DropdownMenuContent({
               as="Pressable"
             >
               <Text.ClassContext.Provider value="text-fg">
-                <DropdownMenuPrimitive.Content
-                  className={cn(
-                    `
-                      min-w-[190px] gap-1 rounded-xl bg-bg-high p-3
+                <Theme theme="popover">
+                  <DropdownMenuPrimitive.Content
+                    className={cn(
+                      `
+                        min-w-[190px] gap-1 rounded-xl bg-bg-high p-3
 
-                      web:z-50 web:max-h-(--radix-context-menu-content-available-height)
-                      web:origin-(--radix-context-menu-content-transform-origin) web:cursor-default
-                      web:animate-in web:fade-in-0 web:zoom-in-95
-                    `,
-                    props.side === `bottom` && `web:slide-in-from-top-2`,
-                    props.side === `top` && `web:slide-in-from-bottom-2`,
-                    className,
-                  )}
-                  {...props}
-                />
+                        web:z-50 web:max-h-(--radix-context-menu-content-available-height)
+                        web:origin-(--radix-context-menu-content-transform-origin)
+                        web:cursor-default web:animate-in web:fade-in-0 web:zoom-in-95
+                      `,
+                      props.side === `bottom` && `web:slide-in-from-top-2`,
+                      props.side === `top` && `web:slide-in-from-bottom-2`,
+                      className,
+                    )}
+                    {...props}
+                  />
+                </Theme>
               </Text.ClassContext.Provider>
             </NativeOnlyAnimatedView>
           </DropdownMenuPrimitive.Overlay>
@@ -233,27 +248,17 @@ function DropdownMenuContent({
 function DropdownMenuTrigger({
   asChild = false,
   children,
-  activeClassName,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger> & {
-  activeClassName?: string;
-}) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
   const { open } = DropdownMenuPrimitive.useRootContext();
-
-  if (asChild && open && activeClassName != null && isValidElement(children)) {
-    const element = children as ReactElement<{ className?: string }>;
-    return (
-      <DropdownMenuPrimitive.Trigger asChild {...props}>
-        {cloneElement(element, {
-          className: cn(element.props.className, activeClassName),
-        })}
-      </DropdownMenuPrimitive.Trigger>
-    );
-  }
 
   return (
     <DropdownMenuPrimitive.Trigger asChild={asChild} {...props}>
-      {children}
+      {asChild && isValidElement(children)
+        ? cloneElement(children as ReactElement<{ pressed?: boolean }>, {
+            pressed: open,
+          })
+        : children}
     </DropdownMenuPrimitive.Trigger>
   );
 }
