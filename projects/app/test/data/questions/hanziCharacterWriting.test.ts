@@ -5,10 +5,16 @@ import type {
 } from "#data/model.ts";
 import { pinyinTextSchema, QuestionKind } from "#data/model.ts";
 import {
+  createHanziCharacterWritingGradeReportJson,
   gradeHanziCharacterWritingQuestion,
   hanziCharacterWritingSimilarityThreshold,
 } from "#data/questions/hanziCharacterWriting.ts";
 import { Rating } from "#util/fsrs.ts";
+import {
+  decodeShapeContextStrokes,
+  parseShapeContextGraderExampleJson,
+  shapeContextGraderExampleCharacter,
+} from "#util/shapeContextGraderExample.ts";
 import { describe, expect, test } from "vitest";
 
 const question: HanziCharacterWritingQuestion = {
@@ -127,5 +133,62 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
       correct: true,
       failure: null,
     });
+  });
+
+  test(`serializes a report in the shared writing debug example format`, () => {
+    const drawnStrokes = [
+      [
+        { x: 100, y: 100 },
+        { x: 500, y: 100 },
+      ],
+    ];
+    const grade = gradeHanziCharacterWritingQuestion(
+      question,
+      drawnStrokes,
+      [expectedPath],
+      1000,
+    );
+
+    const report = parseShapeContextGraderExampleJson(
+      createHanziCharacterWritingGradeReportJson({
+        question,
+        grade,
+        drawnStrokes,
+      }),
+    );
+
+    expect(shapeContextGraderExampleCharacter(report)).toBe(question.hanzi);
+    expect(decodeShapeContextStrokes(report.drawnStrokes)).toEqual(
+      drawnStrokes,
+    );
+    expect(report.options).toEqual(grade.geometry.options);
+  });
+
+  test(`serializes a reported false negative in the shared debug format`, () => {
+    const drawnStrokes = [
+      [
+        { x: 100, y: 100 },
+        { x: 500, y: 100 },
+      ],
+    ];
+    const grade = gradeHanziCharacterWritingQuestion(
+      question,
+      drawnStrokes,
+      [expectedPath],
+      1000,
+      [{ hanzi: `牛` as HanziCharacter, medianPaths: [expectedPath] }],
+    );
+    const report = parseShapeContextGraderExampleJson(
+      createHanziCharacterWritingGradeReportJson({
+        question,
+        grade,
+        drawnStrokes,
+      }),
+    );
+
+    expect(shapeContextGraderExampleCharacter(report)).toBe(question.hanzi);
+    expect(decodeShapeContextStrokes(report.drawnStrokes)).toEqual(
+      drawnStrokes,
+    );
   });
 });
