@@ -34,9 +34,8 @@ export function HanziWritingCanvas({
   guidedPathIndex,
   drawnStrokes = [],
   gradeResult,
-  onUndo,
   onStrokeStart,
-  onStrokeComplete,
+  onStrokesChange,
   onStrokeEnd,
 }: {
   className?: string;
@@ -46,9 +45,8 @@ export function HanziWritingCanvas({
   guidedPathIndex?: number;
   drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
   gradeResult?: `correct` | `incorrect` | null;
-  onUndo?: () => void;
   onStrokeStart?: () => void;
-  onStrokeComplete: (points: WritingStrokePoint[]) => void;
+  onStrokesChange: (strokes: WritingStrokePoint[][]) => void;
   onStrokeEnd?: () => void;
 }) {
   const [activePath, setActivePath] = useState(``);
@@ -56,7 +54,9 @@ export function HanziWritingCanvas({
   const isDrawingRef = useRef(false);
   const arrowMarkerId = `${useId()}-arrow`;
   const canUndo =
-    onUndo != null && (drawnStrokes.length > 0 || (guidedPathIndex ?? 0) > 0);
+    !disabled &&
+    guidedPathIndex == null &&
+    (drawnStrokes.length > 0 || activePath.length > 0);
   const currentGuidedPath =
     guidedPathIndex == null ? null : guidedPaths?.[guidedPathIndex];
   const currentGuidedPathStart =
@@ -98,7 +98,10 @@ export function HanziWritingCanvas({
 
     isDrawingRef.current = false;
     if (pointsRef.current.length > 1) {
-      onStrokeComplete(pointsRef.current);
+      onStrokesChange([
+        ...drawnStrokes.map((stroke) => [...stroke]),
+        [...pointsRef.current],
+      ]);
     }
     onStrokeEnd?.();
     pointsRef.current = [];
@@ -110,6 +113,21 @@ export function HanziWritingCanvas({
     onStrokeEnd?.();
     pointsRef.current = [];
     setActivePath(``);
+  }
+
+  function undoLastStroke() {
+    if (canUndo) {
+      if (activePath.length > 0) {
+        isDrawingRef.current = false;
+        pointsRef.current = [];
+        setActivePath(``);
+        onStrokeEnd?.();
+        return;
+      }
+
+      const remainingStrokes = drawnStrokes.slice(0, -1);
+      onStrokesChange(remainingStrokes.map((stroke) => [...stroke]));
+    }
   }
 
   return (
@@ -249,9 +267,18 @@ export function HanziWritingCanvas({
         />
       </svg>
       {canUndo ? (
-        <View className="absolute inset-x-3 top-3 items-end">
+        <View
+          data-testid="undo-button-container"
+          className={`
+            absolute inset-x-3 top-3 items-end opacity-100 transition-opacity delay-300 duration-200
+
+            motion-reduce:transition-none motion-reduce:delay-0
+
+            starting:pointer-events-none starting:opacity-0
+          `}
+        >
           <ButtonGroup>
-            <ButtonGroup.Button iconStart="undo" onPress={onUndo}>
+            <ButtonGroup.Button iconStart="undo" onPress={undoLastStroke}>
               Undo
             </ButtonGroup.Button>
           </ButtonGroup>

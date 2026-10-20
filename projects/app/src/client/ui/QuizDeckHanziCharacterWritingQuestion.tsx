@@ -138,9 +138,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
               onStrokeStart={() => {
                 timer.pause();
               }}
-              onStrokeComplete={(points) => {
-                setDrawnStrokes((strokes) => [...strokes, points]);
-              }}
+              onStrokesChange={setDrawnStrokes}
               onStrokeEnd={() => {
                 timer.resumeAfter(quizTimerIdleGraceMs);
               }}

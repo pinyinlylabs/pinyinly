@@ -102,41 +102,30 @@ function CharacterWriting({
   const debugReferencePaths = debugReference?.medianPaths ?? referencePaths;
   const isGuided = mode === `guided`;
 
-  function onStrokeComplete(points: Point[]) {
-    if (points.length > 0 && isGuided) {
+  function onStrokesChange(strokes: Point[][]) {
+    if (isGuided) {
       setCurrentStroke((stroke) => Math.min(stroke + 1, referencePaths.length));
-    } else if (points.length > 0) {
-      const nextStrokes = [...freeStrokes, points];
-      const now = new Date();
-      const timestamp = [
-        now.getFullYear().toString().padStart(4, `0`),
-        (now.getMonth() + 1).toString().padStart(2, `0`),
-        now.getDate().toString().padStart(2, `0`),
-        now.getHours().toString().padStart(2, `0`),
-        now.getMinutes().toString().padStart(2, `0`),
-        now.getSeconds().toString().padStart(2, `0`),
-      ].join(``);
-      setExampleId(exampleId ?? `${character}-${timestamp}`);
-      setFreeStrokes(nextStrokes);
+    } else {
+      const didAddStroke = strokes.length > freeStrokes.length;
+      if (didAddStroke) {
+        const now = new Date();
+        const timestamp = [
+          now.getFullYear().toString().padStart(4, `0`),
+          (now.getMonth() + 1).toString().padStart(2, `0`),
+          now.getDate().toString().padStart(2, `0`),
+          now.getHours().toString().padStart(2, `0`),
+          now.getMinutes().toString().padStart(2, `0`),
+          now.getSeconds().toString().padStart(2, `0`),
+        ].join(``);
+        setExampleId(exampleId ?? `${character}-${timestamp}`);
+      }
+      setFreeStrokes(strokes);
       setLastGrade(
-        gradeCharacterShape(nextStrokes, referencePaths, gradeOptions),
+        strokes.length === 0
+          ? null
+          : gradeCharacterShape(strokes, referencePaths, gradeOptions),
       );
     }
-  }
-
-  function undoLastPath() {
-    if (isGuided) {
-      setCurrentStroke((stroke) => Math.max(stroke - 1, 0));
-      return;
-    }
-
-    const nextStrokes = freeStrokes.slice(0, -1);
-    setFreeStrokes(nextStrokes);
-    setLastGrade(
-      nextStrokes.length === 0
-        ? null
-        : gradeCharacterShape(nextStrokes, referencePaths, gradeOptions),
-    );
   }
 
   function clearPractice() {
@@ -151,11 +140,10 @@ function CharacterWriting({
     <View className="w-full max-w-[560px] gap-2">
       <HanziWritingCanvas
         disabled={isGuided && currentStroke >= referencePaths.length}
-        onStrokeComplete={onStrokeComplete}
+        onStrokesChange={onStrokesChange}
         guidedPaths={isGuided ? referencePaths : undefined}
         guidedPathIndex={isGuided ? currentStroke : undefined}
         drawnStrokes={freeStrokes}
-        onUndo={undoLastPath}
       />
       <Text className="text-center text-muted-fg">
         {isGuided
