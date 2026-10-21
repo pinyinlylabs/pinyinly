@@ -1,4 +1,6 @@
 import { HanziWritingCanvas } from "#client/ui/HanziWritingCanvas.tsx";
+import { View } from "#client/ui/View.tsx";
+import type { WritingStrokePoint } from "#util/writingStrokeGrader.ts";
 import { assert, expect, test, vi } from "vitest";
 import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
@@ -101,6 +103,72 @@ test(`a held pointer can finish a stroke and CHECK remains clickable`, async () 
   await page.getByRole(`button`, { name: `CHECK` }).click();
   expect(onCheck).toHaveBeenCalledOnce();
 });
+
+test.for([346, 500])(
+  `accepts strokes at both edges of a 420px-wide, %spx-high canvas without stretching guides`,
+  async (height) => {
+    await page.viewport(420, 670);
+    const onStrokesChange = vi.fn<(strokes: WritingStrokePoint[][]) => void>();
+    await render(
+      <div
+        style={{ width: 420, height, paddingInline: 16, display: `flex` }}
+        data-testid="writing-area"
+      >
+        <View className="-mx-4 min-h-0 w-[calc(100%+2rem)] flex-1 items-center justify-center sm:mx-0 sm:w-full">
+          <HanziWritingCanvas
+            className="size-full max-h-full sm:aspect-square sm:w-auto sm:max-w-full"
+            onStrokesChange={onStrokesChange}
+          />
+        </View>
+      </div>,
+    );
+    await expect.element(page.getByTestId(`writing-area`)).toBeInTheDocument();
+    const svg = page.getByTestId(`writing-area`).element().querySelector(`svg`);
+    assert(svg != null);
+    vi.spyOn(svg, `setPointerCapture`).mockImplementation(() => {});
+    const rect = svg.getBoundingClientRect();
+    expect(rect.left).toBe(0);
+    expect(rect.right).toBe(420);
+    expect(rect.width).toBe(420);
+    expect(rect.height).toBe(height);
+    const clientY = rect.top + height / 2;
+    const startX = rect.left + 1;
+    const endX = rect.right - 1;
+    for (const clientX of [startX, endX]) {
+      const target = document.elementFromPoint(clientX, clientY);
+      expect(target === svg || svg.contains(target)).toBe(true);
+      assert(target != null);
+      dispatchPointer(svg, `pointermove`, { pointerId: 1, clientX, clientY });
+      target.dispatchEvent(
+        new PointerEvent(clientX === startX ? `pointerdown` : `pointerup`, {
+          bubbles: true,
+          pointerId: 1,
+          clientX,
+          clientY,
+        }),
+      );
+    }
+    expect(onStrokesChange).toHaveBeenCalledOnce();
+    const strokes = onStrokesChange.mock.calls[0]?.[0];
+    assert(strokes != null);
+    const points = strokes[0];
+    assert(points != null);
+    const size = Math.min(420, height);
+    expect(points).toEqual([
+      { x: ((1 - (420 - size) / 2) / size) * 1024, y: 512 },
+      { x: ((419 - (420 - size) / 2) / size) * 1024, y: 512 },
+    ]);
+    const matrix = svg.getScreenCTM();
+    assert(matrix != null);
+    const start = points[0];
+    assert(start != null);
+    const renderedStart = new DOMPoint(start.x, start.y).matrixTransform(
+      matrix,
+    );
+    expect(renderedStart.x).toBeCloseTo(startX);
+    expect(renderedStart.y).toBeCloseTo(clientY);
+  },
+);
 
 test(`Undo removes the latest stroke through onStrokesChange`, async () => {
   const onStrokesChange = vi.fn();

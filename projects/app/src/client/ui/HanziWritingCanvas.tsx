@@ -64,9 +64,11 @@ export function HanziWritingCanvas({
 
   function getPoint(event: PointerEvent<SVGSVGElement>): WritingStrokePoint {
     const rect = event.currentTarget.getBoundingClientRect();
+    // Match the SVG's default centered, uniformly scaled viewBox.
+    const size = Math.min(rect.width, rect.height);
     return {
-      x: ((event.clientX - rect.left) / rect.width) * 1024,
-      y: ((event.clientY - rect.top) / rect.height) * 1024,
+      x: ((event.clientX - rect.left - (rect.width - size) / 2) / size) * 1024,
+      y: ((event.clientY - rect.top - (rect.height - size) / 2) / size) * 1024,
     };
   }
 
