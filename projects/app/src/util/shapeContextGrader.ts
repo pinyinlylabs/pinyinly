@@ -1,8 +1,13 @@
 import SVGPathCommander from "svg-path-commander";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+
+export interface WritingStrokePoint {
+  x: number;
+  y: number;
+}
 
 export interface ShapeContextOptions {
-  sampleCount: number;
+  sampleCount: number | null;
+  sampleSpacing: number;
   radialBins: number;
   angularBins: number;
   iterations: number;
@@ -18,6 +23,13 @@ export interface ShapeContextCorrespondence {
   descriptorCost: number;
   initialDistance: number;
   residualDistance: number;
+}
+
+export interface ShapeContextGeometryCoverage {
+  referenceToHandwriting: number;
+  handwritingToReference: number;
+  referenceLongestUncoveredRun: number;
+  handwritingLongestUncoveredRun: number;
 }
 
 export interface ThinPlateSplineTransform {
@@ -44,7 +56,13 @@ export interface ShapeContextGrade {
   rotationDegrees: number;
   rotationPenalty: number;
   unmatchedPointPenalty: number;
+  initialGeometryCoverage: ShapeContextGeometryCoverage;
+  residualGeometryCoverage: ShapeContextGeometryCoverage;
+  geometryCoveragePenalty: number;
+  geometryCoverageTolerance: number;
   correspondences: ShapeContextCorrespondence[];
+  sourceStrokeIndices: number[];
+  targetStrokeIndices: number[];
   unmatchedSourceIndices: number[];
   unmatchedTargetIndices: number[];
   sourcePoints: WritingStrokePoint[];
@@ -52,12 +70,17 @@ export interface ShapeContextGrade {
   transformedPoints: WritingStrokePoint[];
   sourceStrokes: WritingStrokePoint[][];
   targetStrokes: WritingStrokePoint[][];
+  referenceLength: number;
+  sampleCount: number;
+  sourceStrokeSampleCounts: number[];
+  targetStrokeSampleCounts: number[];
   transform: ThinPlateSplineTransform;
   options: ShapeContextOptions;
 }
 
 export const shapeContextGraderDefaults: ShapeContextOptions = {
-  sampleCount: 64,
+  sampleCount: null,
+  sampleSpacing: 0.1,
   radialBins: 5,
   angularBins: 12,
   iterations: 3,
@@ -69,10 +92,19 @@ export const shapeContextGraderDefaults: ShapeContextOptions = {
 
 const radialMinimum = 0.125;
 const radialMaximum = 2.5;
+const geometryCoverageTolerance = 0.06;
 
 interface SampledShape {
   points: WritingStrokePoint[];
   strokes: WritingStrokePoint[][];
+  pointStrokeIndices: number[];
+  strokeSampleCounts: number[];
+}
+
+interface StrokeGeometryMetrics {
+  totalLength: number;
+  centroid: WritingStrokePoint;
+  scale: number;
 }
 
 interface MatchResult {
@@ -84,9 +116,13 @@ interface MatchResult {
 
 function validateOptions(options: ShapeContextOptions): void {
   if (
-    !Number.isInteger(options.sampleCount) ||
-    options.sampleCount < 8 ||
-    options.sampleCount > 256 ||
+    (options.sampleCount != null &&
+      (!Number.isInteger(options.sampleCount) ||
+        options.sampleCount < 8 ||
+        options.sampleCount > 256)) ||
+    !Number.isFinite(options.sampleSpacing) ||
+    options.sampleSpacing <= 0 ||
+    options.sampleSpacing > 1 ||
     !Number.isInteger(options.radialBins) ||
     options.radialBins < 1 ||
     options.radialBins > 16 ||
@@ -243,6 +279,97 @@ function allocateSampleCounts(
   return counts;
 }
 
+function geometryMetrics(
+  strokes: readonly (readonly WritingStrokePoint[])[],
+): StrokeGeometryMetrics {
+  const segments: Array<{
+    start: WritingStrokePoint;
+    end: WritingStrokePoint;
+    length: number;
+  }> = [];
+  let totalLength = 0;
+  let centroidX = 0;
+  let centroidY = 0;
+  for (const stroke of strokes) {
+    for (let index = 1; index < stroke.length; index++) {
+      const start = stroke[index - 1];
+      const end = stroke[index];
+      if (start == null || end == null) {
+        continue;
+      }
+      const length = distance(start, end);
+      if (length === 0) {
+        continue;
+      }
+      segments.push({ start, end, length });
+      totalLength += length;
+      centroidX += ((start.x + end.x) / 2) * length;
+      centroidY += ((start.y + end.y) / 2) * length;
+    }
+  }
+  if (totalLength === 0) {
+    const centroid = { x: 0, y: 0 };
+    let pointCount = 0;
+    for (const stroke of strokes) {
+      for (const point of stroke) {
+        if (Number.isFinite(point.x) && Number.isFinite(point.y)) {
+          centroid.x += point.x;
+          centroid.y += point.y;
+          pointCount++;
+        }
+      }
+    }
+    return {
+      totalLength: 0,
+      centroid:
+        pointCount === 0
+          ? centroid
+          : {
+              x: centroid.x / pointCount,
+              y: centroid.y / pointCount,
+            },
+      scale: 1,
+    };
+  }
+
+  const centroid = {
+    x: centroidX / totalLength,
+    y: centroidY / totalLength,
+  };
+  let squaredDistanceTotal = 0;
+  for (const { start, end, length } of segments) {
+    const startX = start.x - centroid.x;
+    const startY = start.y - centroid.y;
+    const endX = end.x - centroid.x;
+    const endY = end.y - centroid.y;
+    squaredDistanceTotal +=
+      (length *
+        (startX * startX +
+          startX * endX +
+          startY * startY +
+          startY * endY +
+          endX * endX +
+          endY * endY)) /
+      3;
+  }
+  const rms = Math.sqrt(squaredDistanceTotal / totalLength);
+  return {
+    totalLength,
+    centroid,
+    scale: rms > 1e-9 ? Math.SQRT2 / rms : 1,
+  };
+}
+
+function normalizePoint(
+  point: WritingStrokePoint,
+  metrics: StrokeGeometryMetrics,
+): WritingStrokePoint {
+  return {
+    x: (point.x - metrics.centroid.x) * metrics.scale,
+    y: (point.y - metrics.centroid.y) * metrics.scale,
+  };
+}
+
 function sampleStrokes(
   strokes: readonly (readonly WritingStrokePoint[])[],
   sampleCount: number,
@@ -263,12 +390,26 @@ function sampleStrokes(
     }
     return length;
   });
+  const metrics = geometryMetrics(cleaned);
   const counts = allocateSampleCounts(lengths, sampleCount);
   const sampledStrokes = cleaned.flatMap((stroke, index) => {
     const count = counts[index] ?? 0;
-    return count < 1 ? [] : [samplePolyline(stroke, count)];
+    return count < 1
+      ? []
+      : [
+          samplePolyline(stroke, count).map((point) =>
+            normalizePoint(point, metrics),
+          ),
+        ];
   });
-  return normalizeShape(sampledStrokes);
+  return {
+    points: sampledStrokes.flat(),
+    strokes: sampledStrokes,
+    pointStrokeIndices: sampledStrokes.flatMap((stroke, strokeIndex) =>
+      stroke.map(() => strokeIndex),
+    ),
+    strokeSampleCounts: counts,
+  };
 }
 
 function samplePaths(
@@ -276,40 +417,58 @@ function samplePaths(
   sampleCount: number,
 ): SampledShape {
   const lengths = paths.map(pathLength);
+  const metrics = geometryMetrics(paths.map((path) => samplePath(path, 256)));
   const counts = allocateSampleCounts(lengths, sampleCount);
   const strokes = paths.flatMap((path, index) => {
     const count = counts[index] ?? 0;
-    return count < 1 ? [] : [samplePath(path, count)];
+    return count < 1
+      ? []
+      : [
+          samplePath(path, count).map((point) =>
+            normalizePoint(point, metrics),
+          ),
+        ];
   });
-  return normalizeShape(strokes);
+  return {
+    points: strokes.flat(),
+    strokes,
+    pointStrokeIndices: strokes.flatMap((stroke, strokeIndex) =>
+      stroke.map(() => strokeIndex),
+    ),
+    strokeSampleCounts: counts,
+  };
 }
 
-function normalizeShape(strokes: WritingStrokePoint[][]): SampledShape {
-  const points = strokes.flat();
-  if (points.length === 0) {
-    return { points: [], strokes: [] };
-  }
-  const center = { x: 0, y: 0 };
-  for (const point of points) {
-    center.x += point.x;
-    center.y += point.y;
-  }
-  center.x /= points.length;
-  center.y /= points.length;
-  let squaredDistanceTotal = 0;
-  for (const point of points) {
-    squaredDistanceTotal +=
-      (point.x - center.x) ** 2 + (point.y - center.y) ** 2;
-  }
-  const rms = Math.sqrt(squaredDistanceTotal / points.length);
-  const scale = rms > 1e-9 ? Math.SQRT2 / rms : 1;
-  const normalizedStrokes = strokes.map((stroke) =>
-    stroke.map((point) => ({
-      x: (point.x - center.x) * scale,
-      y: (point.y - center.y) * scale,
-    })),
+function resolvedSampleCount(
+  paths: readonly string[],
+  settings: ShapeContextOptions,
+  sampleCountOverride?: number,
+): {
+  count: number;
+  referenceLength: number;
+} {
+  const lengths = paths.map(pathLength);
+  const integrationCount = 256;
+  const metrics = geometryMetrics(
+    paths.map((path) => samplePath(path, integrationCount)),
   );
-  return { points: normalizedStrokes.flat(), strokes: normalizedStrokes };
+  const referenceLength = lengths.reduce((total, length) => total + length, 0);
+  const normalizedReferenceLength = referenceLength * metrics.scale;
+  const activeStrokeCount = lengths.filter((length) => length > 0).length;
+  const requestedCount =
+    sampleCountOverride ??
+    settings.sampleCount ??
+    Math.max(
+      8,
+      Math.min(
+        256,
+        Math.ceil(normalizedReferenceLength / settings.sampleSpacing),
+      ),
+    );
+  return {
+    count: Math.max(requestedCount, Math.min(256, activeStrokeCount * 2)),
+    referenceLength: normalizedReferenceLength,
+  };
 }
 
 function rotate(
@@ -474,6 +633,9 @@ function matchPoints(
   targetPoints: readonly WritingStrokePoint[],
   unmatchedCost: number,
   spatialWeight: number,
+  sourceStrokeIndices?: readonly number[],
+  targetStrokeIndices?: readonly number[],
+  sourceStrokeTargets?: readonly (number | null)[],
 ): MatchResult {
   const sourceCount = sourceContexts.length;
   const targetCount = targetContexts.length;
@@ -502,6 +664,16 @@ function matchPoints(
       );
       const sourcePoint = sourcePoints[sourceIndex];
       const targetPoint = targetPoints[targetIndex];
+      const sourceStrokeIndex = sourceStrokeIndices?.[sourceIndex];
+      const targetStrokeIndex = targetStrokeIndices?.[targetIndex];
+      if (
+        sourceStrokeTargets != null &&
+        (sourceStrokeIndex == null ||
+          targetStrokeIndex == null ||
+          sourceStrokeTargets[sourceStrokeIndex] !== targetStrokeIndex)
+      ) {
+        return Infinity;
+      }
       return sourcePoint == null || targetPoint == null
         ? Infinity
         : descriptorCost +
@@ -521,6 +693,7 @@ function matchPoints(
     if (column < 0 || column >= realColumnCount) {
       continue;
     }
+
     const sourceIndex = sourceIsSmaller ? row : column;
     const targetIndex = sourceIsSmaller ? column : row;
     const sourcePoint = sourcePoints[sourceIndex];
@@ -547,6 +720,41 @@ function matchPoints(
     }
   }
   return { pairs, unmatchedSourceIndices, unmatchedTargetIndices, totalCost };
+}
+
+function assignSourceStrokes(
+  matches: MatchResult,
+  sourceStrokeIndices: readonly number[],
+  targetStrokeIndices: readonly number[],
+): Array<number | null> {
+  const sourceStrokeCount =
+    sourceStrokeIndices.length === 0 ? 0 : Math.max(...sourceStrokeIndices) + 1;
+  const targetStrokeCount =
+    targetStrokeIndices.length === 0 ? 0 : Math.max(...targetStrokeIndices) + 1;
+  const counts = Array.from({ length: sourceStrokeCount }, () =>
+    Array.from({ length: targetStrokeCount }, () => 0),
+  );
+  for (const match of matches.pairs) {
+    const sourceStrokeIndex = sourceStrokeIndices[match.sourceIndex];
+    const targetStrokeIndex = targetStrokeIndices[match.targetIndex];
+    if (sourceStrokeIndex != null && targetStrokeIndex != null) {
+      const row = counts[sourceStrokeIndex];
+      if (row != null) {
+        row[targetStrokeIndex] = (row[targetStrokeIndex] ?? 0) + 1;
+      }
+    }
+  }
+  return counts.map((row) => {
+    let assignedStroke: number | null = null;
+    let mostMatches = 0;
+    for (const [strokeIndex, count] of row.entries()) {
+      if (count > mostMatches) {
+        assignedStroke = strokeIndex;
+        mostMatches = count;
+      }
+    }
+    return assignedStroke;
+  });
 }
 
 function solveLinearSystem(
@@ -626,6 +834,109 @@ function makeIdentityTransform(
   };
 }
 
+function fitSimilarityTransform(
+  controls: readonly {
+    source: WritingStrokePoint;
+    target: WritingStrokePoint;
+  }[],
+  rotationRadians: number,
+  regularization: number,
+): ThinPlateSplineTransform {
+  if (controls.length === 0) {
+    return makeIdentityTransform(rotationRadians, regularization);
+  }
+
+  const sourceCenter = { x: 0, y: 0 };
+  const targetCenter = { x: 0, y: 0 };
+  for (const control of controls) {
+    sourceCenter.x += control.source.x;
+    sourceCenter.y += control.source.y;
+    targetCenter.x += control.target.x;
+    targetCenter.y += control.target.y;
+  }
+  sourceCenter.x /= controls.length;
+  sourceCenter.y /= controls.length;
+  targetCenter.x /= controls.length;
+  targetCenter.y /= controls.length;
+
+  let denominator = 0;
+  let cosineWeight = 0;
+  let sineWeight = 0;
+  for (const control of controls) {
+    const sourceX = control.source.x - sourceCenter.x;
+    const sourceY = control.source.y - sourceCenter.y;
+    const targetX = control.target.x - targetCenter.x;
+    const targetY = control.target.y - targetCenter.y;
+    denominator += sourceX * sourceX + sourceY * sourceY;
+    cosineWeight += sourceX * targetX + sourceY * targetY;
+    sineWeight += sourceX * targetY - sourceY * targetX;
+  }
+  const a = denominator > 1e-12 ? cosineWeight / denominator : 1;
+  const b = denominator > 1e-12 ? sineWeight / denominator : 0;
+  const affineX: [number, number, number] = [
+    targetCenter.x - a * sourceCenter.x + b * sourceCenter.y,
+    a,
+    -b,
+  ];
+  const affineY: [number, number, number] = [
+    targetCenter.y - b * sourceCenter.x - a * sourceCenter.y,
+    b,
+    a,
+  ];
+  return {
+    controlPoints: controls.map(({ source }) => source),
+    xWeights: controls.map(() => 0),
+    yWeights: controls.map(() => 0),
+    affineX,
+    affineY,
+    rotationRadians,
+    regularization,
+    bendingEnergy: 0,
+    affineDistortion: 0,
+    rotationDegrees: (Math.atan2(b, a) * 180) / Math.PI,
+    transform(point) {
+      const rotated = rotate(point, rotationRadians);
+      return {
+        x: affineX[0] + affineX[1] * rotated.x + affineX[2] * rotated.y,
+        y: affineY[0] + affineY[1] * rotated.x + affineY[2] * rotated.y,
+      };
+    },
+  };
+}
+
+function isEffectivelyOneDimensional(
+  points: readonly WritingStrokePoint[],
+): boolean {
+  if (points.length < 3) {
+    return true;
+  }
+  let centerX = 0;
+  let centerY = 0;
+  for (const point of points) {
+    centerX += point.x;
+    centerY += point.y;
+  }
+  centerX /= points.length;
+  centerY /= points.length;
+  let xx = 0;
+  let xy = 0;
+  let yy = 0;
+  for (const point of points) {
+    const x = point.x - centerX;
+    const y = point.y - centerY;
+    xx += x * x;
+    xy += x * y;
+    yy += y * y;
+  }
+  const trace = xx + yy;
+  const discriminant = Math.sqrt((xx - yy) ** 2 + 4 * xy * xy);
+  const smallestEigenvalue = (trace - discriminant) / 2;
+  const largestEigenvalue = (trace + discriminant) / 2;
+  return (
+    largestEigenvalue <= 1e-12 || smallestEigenvalue <= largestEigenvalue * 1e-6
+  );
+}
+
 function fitThinPlateSpline(
   source: readonly WritingStrokePoint[],
   target: readonly WritingStrokePoint[],
@@ -657,27 +968,12 @@ function fitThinPlateSpline(
     }
   }
 
-  if (controls.length < 3) {
-    const base = makeIdentityTransform(rotationRadians, regularization);
-    if (controls.length === 0) {
-      return base;
-    }
-    const offset = { x: 0, y: 0 };
-    for (const control of controls) {
-      offset.x += control.target.x - control.source.x;
-      offset.y += control.target.y - control.source.y;
-    }
-    offset.x /= controls.length;
-    offset.y /= controls.length;
-    return {
-      ...base,
-      affineX: [offset.x, 1, 0],
-      affineY: [offset.y, 0, 1],
-      transform(point) {
-        const rotated = rotate(point, rotationRadians);
-        return { x: rotated.x + offset.x, y: rotated.y + offset.y };
-      },
-    };
+  if (
+    controls.length < 3 ||
+    isEffectivelyOneDimensional(controls.map(({ source }) => source)) ||
+    isEffectivelyOneDimensional(controls.map(({ target }) => target))
+  ) {
+    return fitSimilarityTransform(controls, rotationRadians, regularization);
   }
 
   const count = controls.length;
@@ -804,6 +1100,75 @@ function fitThinPlateSpline(
   };
 }
 
+function preservesGridOrientation(
+  transform: ThinPlateSplineTransform,
+): boolean {
+  const gridCoordinates = Array.from(
+    { length: 7 },
+    (_, index) => -1.5 + index * 0.5,
+  );
+  const lineSampleCoordinates = Array.from(
+    { length: 17 },
+    (_, index) => -1.5 + (index * 3) / 16,
+  );
+  const coordinates = [
+    ...new Set([...gridCoordinates, ...lineSampleCoordinates]),
+  ].sort((a, b) => a - b);
+  const transformedRows = coordinates.map((y) =>
+    coordinates.map((x) => transform.transform({ x, y })),
+  );
+
+  for (let row = 0; row < coordinates.length - 1; row++) {
+    for (let column = 0; column < coordinates.length - 1; column++) {
+      const topLeft = transformedRows[row]?.[column];
+      const topRight = transformedRows[row]?.[column + 1];
+      const bottomLeft = transformedRows[row + 1]?.[column];
+      const bottomRight = transformedRows[row + 1]?.[column + 1];
+      if (
+        topLeft == null ||
+        topRight == null ||
+        bottomLeft == null ||
+        bottomRight == null
+      ) {
+        return false;
+      }
+      const firstTriangle =
+        (topRight.x - topLeft.x) * (bottomRight.y - topLeft.y) -
+        (topRight.y - topLeft.y) * (bottomRight.x - topLeft.x);
+      const secondTriangle =
+        (bottomRight.x - topLeft.x) * (bottomLeft.y - topLeft.y) -
+        (bottomRight.y - topLeft.y) * (bottomLeft.x - topLeft.x);
+      if (firstTriangle <= 0 || secondTriangle <= 0) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function fitThinPlateSplineWithoutFoldovers(
+  source: readonly WritingStrokePoint[],
+  target: readonly WritingStrokePoint[],
+  matches: readonly MatchResult[`pairs`][number][],
+  rotationRadians: number,
+  regularization: number,
+): ThinPlateSplineTransform {
+  for (let attempt = 0; attempt < 16; attempt++) {
+    const transform = fitThinPlateSpline(
+      source,
+      target,
+      matches,
+      rotationRadians,
+      regularization,
+    );
+    if (preservesGridOrientation(transform)) {
+      return transform;
+    }
+    regularization *= 2;
+  }
+  return makeIdentityTransform(rotationRadians, regularization);
+}
+
 function averageMatchDistance(
   source: readonly WritingStrokePoint[],
   target: readonly WritingStrokePoint[],
@@ -825,6 +1190,150 @@ function averageMatchDistance(
   return validMatches === 0 ? 2 : distanceTotal / validMatches;
 }
 
+function polylineLength(points: readonly WritingStrokePoint[]): number {
+  let length = 0;
+  for (let index = 1; index < points.length; index++) {
+    const start = points[index - 1];
+    const end = points[index];
+    if (start != null && end != null) {
+      length += distance(start, end);
+    }
+  }
+  return length;
+}
+
+function resampleStrokesForCoverage(
+  strokes: readonly (readonly WritingStrokePoint[])[],
+): WritingStrokePoint[][] {
+  const lengths = strokes.map(polylineLength);
+  const totalLength = lengths.reduce((total, length) => total + length, 0);
+  const activeStrokeCount = lengths.filter((length) => length > 0).length;
+  const sampleCount = Math.min(
+    256,
+    Math.max(activeStrokeCount * 2, Math.ceil(totalLength / 0.05)),
+  );
+  const counts = allocateSampleCounts(lengths, sampleCount);
+  return strokes.flatMap((stroke, index) => {
+    const count = counts[index] ?? 0;
+    return count < 1 ? [] : [samplePolyline(stroke, count)];
+  });
+}
+
+function distanceToStrokes(
+  point: WritingStrokePoint,
+  strokes: readonly (readonly WritingStrokePoint[])[],
+): number {
+  let nearestDistance = Infinity;
+  for (const stroke of strokes) {
+    for (let index = 1; index < stroke.length; index++) {
+      const start = stroke[index - 1];
+      const end = stroke[index];
+      if (start == null || end == null) {
+        continue;
+      }
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const lengthSquared = dx * dx + dy * dy;
+      const projection =
+        lengthSquared === 0
+          ? 0
+          : Math.max(
+              0,
+              Math.min(
+                1,
+                ((point.x - start.x) * dx + (point.y - start.y) * dy) /
+                  lengthSquared,
+              ),
+            );
+      nearestDistance = Math.min(
+        nearestDistance,
+        Math.hypot(
+          point.x - (start.x + projection * dx),
+          point.y - (start.y + projection * dy),
+        ),
+      );
+    }
+  }
+  return nearestDistance;
+}
+
+function uncoveredGeometry(
+  source: readonly (readonly WritingStrokePoint[])[],
+  target: readonly (readonly WritingStrokePoint[])[],
+): { fraction: number; longestRun: number } {
+  const sampledStrokes = resampleStrokesForCoverage(source);
+  const sourcePoints = sampledStrokes.flat();
+  const sourceLength = source.reduce(
+    (total, stroke) => total + polylineLength(stroke),
+    0,
+  );
+  if (sourcePoints.length === 0) {
+    return { fraction: 0, longestRun: 0 };
+  }
+  if (!target.some((stroke) => polylineLength(stroke) > 0)) {
+    const longestStrokeLength = Math.max(...source.map(polylineLength));
+    return {
+      fraction: 1,
+      longestRun: sourceLength > 0 ? longestStrokeLength / sourceLength : 0,
+    };
+  }
+  const uncoveredByStroke = sampledStrokes.map((stroke) =>
+    stroke.map(
+      (point) => distanceToStrokes(point, target) > geometryCoverageTolerance,
+    ),
+  );
+  const uncoveredCount = uncoveredByStroke.reduce(
+    (total, stroke) => total + stroke.filter(Boolean).length,
+    0,
+  );
+  let longestRunLength = 0;
+  for (const [strokeIndex, stroke] of sampledStrokes.entries()) {
+    const strokeLength = polylineLength(stroke);
+    const uncoveredFlags = uncoveredByStroke[strokeIndex] ?? [];
+    let runCount = 0;
+    let longestStrokeRun = 0;
+    for (const isUncovered of uncoveredFlags) {
+      if (isUncovered) {
+        runCount++;
+        longestStrokeRun = Math.max(longestStrokeRun, runCount);
+      } else {
+        runCount = 0;
+      }
+    }
+    longestRunLength = Math.max(
+      longestRunLength,
+      longestStrokeRun *
+        (stroke.length > 1 ? strokeLength / (stroke.length - 1) : 0),
+    );
+  }
+  return {
+    fraction: uncoveredCount / sourcePoints.length,
+    longestRun: sourceLength > 0 ? longestRunLength / sourceLength : 0,
+  };
+}
+
+function geometryCoverage(
+  source: readonly (readonly WritingStrokePoint[])[],
+  target: readonly (readonly WritingStrokePoint[])[],
+): ShapeContextGeometryCoverage {
+  const referenceCoverage = uncoveredGeometry(target, source);
+  const handwritingCoverage = uncoveredGeometry(source, target);
+  return {
+    referenceToHandwriting: referenceCoverage.fraction,
+    handwritingToReference: handwritingCoverage.fraction,
+    referenceLongestUncoveredRun: referenceCoverage.longestRun,
+    handwritingLongestUncoveredRun: handwritingCoverage.longestRun,
+  };
+}
+
+function geometryCoverageCost(coverage: ShapeContextGeometryCoverage): number {
+  return (
+    (coverage.referenceToHandwriting + coverage.handwritingToReference) / 2 +
+    coverage.referenceLongestUncoveredRun +
+    coverage.handwritingLongestUncoveredRun
+  );
+}
+
 function transformPoints(
   points: readonly WritingStrokePoint[],
   transform: ThinPlateSplineTransform,
@@ -836,11 +1345,25 @@ export function gradeCharacterShape(
   drawnStrokes: readonly (readonly WritingStrokePoint[])[],
   referencePaths: readonly string[],
   options: Partial<ShapeContextOptions> = {},
+  sampleCountOverride?: number,
 ): ShapeContextGrade {
   const settings = { ...shapeContextGraderDefaults, ...options };
   validateOptions(settings);
-  const source = sampleStrokes(drawnStrokes, settings.sampleCount);
-  const target = samplePaths(referencePaths, settings.sampleCount);
+  if (
+    sampleCountOverride != null &&
+    (!Number.isInteger(sampleCountOverride) ||
+      sampleCountOverride < 8 ||
+      sampleCountOverride > 256)
+  ) {
+    throw new RangeError(`Invalid shape-context sample-count override`);
+  }
+  const sampling = resolvedSampleCount(
+    referencePaths,
+    settings,
+    sampleCountOverride,
+  );
+  const source = sampleStrokes(drawnStrokes, sampling.count);
+  const target = samplePaths(referencePaths, sampling.count);
   const sourcePoints = source.points;
   const targetPoints = target.points;
   const emptyMatch = matchPoints(
@@ -852,13 +1375,20 @@ export function gradeCharacterShape(
     0,
   );
   if (sourcePoints.length === 0 || targetPoints.length === 0) {
+    const initialGeometryCoverage = geometryCoverage(
+      source.strokes,
+      target.strokes,
+    );
     const transform = makeIdentityTransform(0, settings.tpsRegularization);
     const unmatchedPointPenalty =
       sourcePoints.length + targetPoints.length === 0
         ? 1
         : (sourcePoints.length + targetPoints.length) /
           Math.max(1, sourcePoints.length + targetPoints.length);
-    const combinedCost = 2 + unmatchedPointPenalty;
+    const geometryCoveragePenalty = geometryCoverageCost(
+      initialGeometryCoverage,
+    );
+    const combinedCost = 2 + unmatchedPointPenalty + geometryCoveragePenalty;
     return {
       similarity: Math.exp(-combinedCost),
       combinedCost,
@@ -869,7 +1399,13 @@ export function gradeCharacterShape(
       rotationDegrees: 0,
       rotationPenalty: 0,
       unmatchedPointPenalty,
+      initialGeometryCoverage,
+      residualGeometryCoverage: initialGeometryCoverage,
+      geometryCoveragePenalty,
+      geometryCoverageTolerance,
       correspondences: [],
+      sourceStrokeIndices: source.pointStrokeIndices,
+      targetStrokeIndices: target.pointStrokeIndices,
       unmatchedSourceIndices: emptyMatch.unmatchedSourceIndices,
       unmatchedTargetIndices: emptyMatch.unmatchedTargetIndices,
       sourcePoints,
@@ -879,6 +1415,10 @@ export function gradeCharacterShape(
       ),
       sourceStrokes: source.strokes,
       targetStrokes: target.strokes,
+      referenceLength: sampling.referenceLength,
+      sampleCount: sampling.count,
+      sourceStrokeSampleCounts: source.strokeSampleCounts,
+      targetStrokeSampleCounts: target.strokeSampleCounts,
       transform,
       options: settings,
     };
@@ -917,9 +1457,31 @@ export function gradeCharacterShape(
       matches = candidateMatches;
     }
   }
-  let activeMatches = matches ?? emptyMatch;
+  const rotatedSourcePoints = sourcePoints.map((point) =>
+    rotate(point, rotationRadians),
+  );
+  const sourceStrokeTargets = assignSourceStrokes(
+    matches ?? emptyMatch,
+    source.pointStrokeIndices,
+    target.pointStrokeIndices,
+  );
+  let activeMatches = matchPoints(
+    shapeContexts(
+      rotatedSourcePoints,
+      settings.radialBins,
+      settings.angularBins,
+    ),
+    targetShapeContexts,
+    rotatedSourcePoints,
+    targetPoints,
+    settings.unmatchedCost,
+    0.04,
+    source.pointStrokeIndices,
+    target.pointStrokeIndices,
+    sourceStrokeTargets,
+  );
   const initialMatchingError = averageMatchDistance(
-    sourcePoints.map((point) => rotate(point, rotationRadians)),
+    rotatedSourcePoints,
     targetPoints,
     activeMatches.pairs,
   );
@@ -932,7 +1494,7 @@ export function gradeCharacterShape(
   );
 
   for (let iteration = 0; iteration < settings.iterations; iteration++) {
-    transform = fitThinPlateSpline(
+    transform = fitThinPlateSplineWithoutFoldovers(
       sourcePoints,
       targetPoints,
       activeMatches.pairs,
@@ -951,9 +1513,12 @@ export function gradeCharacterShape(
       targetPoints,
       settings.unmatchedCost,
       0.12,
+      source.pointStrokeIndices,
+      target.pointStrokeIndices,
+      sourceStrokeTargets,
     );
   }
-  transform = fitThinPlateSpline(
+  transform = fitThinPlateSplineWithoutFoldovers(
     sourcePoints,
     targetPoints,
     activeMatches.pairs,
@@ -966,6 +1531,23 @@ export function gradeCharacterShape(
     transformedPoints,
     targetPoints,
     activeMatches.pairs,
+  );
+  const rotatedSourceStrokes = source.strokes.map((stroke) =>
+    stroke.map((point) => rotate(point, rotationRadians)),
+  );
+  const initialAlignedGeometryCoverage = geometryCoverage(
+    rotatedSourceStrokes,
+    target.strokes,
+  );
+  const residualGeometryCoverage = geometryCoverage(
+    source.strokes.map((stroke) =>
+      stroke.map((point) => transform.transform(point)),
+    ),
+    target.strokes,
+  );
+  const geometryCoveragePenalty = Math.min(
+    geometryCoverageCost(initialAlignedGeometryCoverage),
+    geometryCoverageCost(residualGeometryCoverage),
   );
   const unmatchedPointPenalty =
     (activeMatches.unmatchedSourceIndices.length +
@@ -984,7 +1566,8 @@ export function gradeCharacterShape(
     bendingEnergy * 0.04 +
     affineDistortion * 0.15 +
     rotationPenalty * 0.4 +
-    unmatchedPointPenalty * 0.5;
+    unmatchedPointPenalty * 0.5 +
+    geometryCoveragePenalty;
   const correspondences = activeMatches.pairs.flatMap((match) => {
     const sourcePoint = sourcePoints[match.sourceIndex];
     const targetPoint = targetPoints[match.targetIndex];
@@ -1017,7 +1600,13 @@ export function gradeCharacterShape(
     rotationDegrees,
     rotationPenalty,
     unmatchedPointPenalty,
+    initialGeometryCoverage: initialAlignedGeometryCoverage,
+    residualGeometryCoverage,
+    geometryCoveragePenalty,
+    geometryCoverageTolerance,
     correspondences,
+    sourceStrokeIndices: source.pointStrokeIndices,
+    targetStrokeIndices: target.pointStrokeIndices,
     unmatchedSourceIndices: activeMatches.unmatchedSourceIndices,
     unmatchedTargetIndices: activeMatches.unmatchedTargetIndices,
     sourcePoints,
@@ -1025,6 +1614,10 @@ export function gradeCharacterShape(
     transformedPoints,
     sourceStrokes: source.strokes,
     targetStrokes: target.strokes,
+    referenceLength: sampling.referenceLength,
+    sampleCount: sampling.count,
+    sourceStrokeSampleCounts: source.strokeSampleCounts,
+    targetStrokeSampleCounts: target.strokeSampleCounts,
     transform,
     options: settings,
   };

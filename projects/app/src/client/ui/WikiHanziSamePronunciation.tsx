@@ -59,6 +59,7 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
       hanzi: entry.hanzi,
       hanziWord: entry.hanziWord,
       hsk: entry.hsk ?? null,
+      hskFirstAppearance: entry.hskFirstAppearance ?? null,
       gloss: entry.gloss,
       pinyin: entry.pinyin ?? null,
     }));

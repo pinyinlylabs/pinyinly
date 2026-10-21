@@ -1,5 +1,9 @@
 {
   "curriculumMeaningExamples":[
     {"exampleSentence":{"hanzi":"我对这个话题很感兴趣。","pinyin":"wǒ duì zhège huàtí hěn gǎn xìngqù","translation":"I'm very interested in this topic."},"id":"兴:interest"}
+  ],
+  "curriculumMeanings":[
+    {"branches":[{"description":"Restoring strength or bringing something back into a thriving state.","gloss":"revival","occurrences":{"复兴":"fùxīng","振兴":"zhènxīng"}},{"description":"Coming into being, developing upward, or being established.","gloss":"growth","occurrences":{"兴建":"xīngjiàn","兴起":"xīngqǐ","新兴":"xīnxīng"}},{"description":"Flourishing in strength, business, or overall vitality.","gloss":"prosperity","occurrences":{"兴旺":"xīngwàng","兴隆":"xīnglóng"}},{"description":"Energy or stimulation that rouses the body or mind.","gloss":"excitement","occurrences":{"兴奋":"xīngfèn","兴奋剂":"xīngfènjì"}}],"description":"Rising, renewal, growth, flourishing, building, and stirred-up energy.","gloss":"rise","id":"兴:rise","pinyin":"xīng"},
+    {"branches":[{"description":"Being drawn to something with curiosity, attention, or eager enthusiasm.","gloss":"engagement","occurrences":{"兴致":"xìngzhì","兴致勃勃":"xìngzhìbóbó","兴趣":"xìngqù","感兴趣":"gǎn xìngqù"}},{"description":"A positive, elevated feeling or the loss of that feeling.","gloss":"mood","occurrences":{"兴高采烈":"xìnggāocǎiliè","扫兴":"sǎoxìng","高兴":"gāoxìng"}}],"description":"Personal engagement, enthusiasm, emotional mood, pleasure, and disappointment.","exampleSentence":{"hanzi":"我对这个话题很感兴趣。","pinyin":"wǒ duì zhège huàtí hěn gǎn xìngqù","translation":"I'm very interested in this topic."},"gloss":"interest","id":"兴:interest","pinyin":"xìng"}
   ]
 }

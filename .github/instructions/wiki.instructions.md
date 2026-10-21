@@ -23,6 +23,10 @@ Character `character.json` files may define an optional `exampleSentence` on eac
 `curriculumMeanings` entry. It contains `hanzi`, `pinyin`, and `translation`, and is shown with the
 matching character meaning on the wiki page.
 
+Single-character `character.json` files may also define `visuallySimilar`, a manually maintained
+list of visually confusable characters used by contrastive handwriting grading. This list is copied
+into the generated wiki payload; each listed character needs median stroke data.
+
 When modifying or adding wiki content:
 
 1. Create or edit the appropriate `meaning.mdx` in the directory for that character or word.
@@ -51,9 +55,9 @@ imports and transforms character stroke graphics is
 data used by the web app at runtime. They are derived from the wiki source files:
 
 - `public/raw/wiki/[hanzi].json` contains the compiled Markdown AST in `mdast` when an article
-  exists and, where present, character `curriculumMeaningExamples` from
-  `src/client/wiki/[hanzi]/character.json`. The payload also exists for entries with examples but no
-  MDX article.
+  exists and, where present, character `curriculumMeanings` and `curriculumMeaningExamples` from
+  `src/client/wiki/[hanzi]/character.json`. The payload also exists for entries with curriculum
+  meanings but no MDX article.
 - `public/raw/svgs/[hanzi].json` contains the `svg` stroke data from
   `src/client/wiki/[hanzi]/character.json` for entries with stroke path arrays.
 

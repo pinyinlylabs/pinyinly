@@ -1,10 +1,9 @@
 import { hanziTextSchema, pinyinTextSchema } from "#data/model.js";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
+import { readFile } from "@pinyinly/lib/fs";
 import isEqual from "lodash/isEqual";
+import path from "node:path";
 import { z } from "zod";
-
-const fsDbCache = makeFsDbCache(import.meta.filename);
 
 export const ivankraHsk30Schema = z
   .object({
@@ -38,9 +37,12 @@ export const loadIvankraHsk30 = memoize0(
     //
     // ID,Simplified,Traditional,Pinyin,POS,Level,WebNo,WebPinyin,OCR,CEDICT,Example
     // L1-0001,爱,愛,ài,V,1,18,ài,爱,愛|爱[ai4],
-    const csv = await fetchWithFsDbCache(
-      `https://raw.githubusercontent.com/ivankra/hsk30/refs/heads/master/hsk30-expanded.csv`,
-      { fsDbCache },
+    const csv = await readFile(
+      path.join(
+        import.meta.dirname,
+        `../vendor/ivankra-hsk30/hsk30-expanded.csv`,
+      ),
+      `utf8`,
     );
 
     const lines = csv.trim().split(`\n`);

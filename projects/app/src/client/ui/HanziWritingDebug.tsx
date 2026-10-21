@@ -1,16 +1,17 @@
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { SvgPath } from "@/client/ui/SvgPath";
+import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { hanziCharacterWritingSimilarityThreshold } from "@/data/questions/hanziCharacterWriting";
 import type {
   ShapeContextGrade,
   ShapeContextOptions,
+  WritingStrokePoint,
 } from "@/util/shapeContextGrader";
 import { gradeCharacterShape } from "@/util/shapeContextGrader";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import { useState } from "react";
 import type { GestureResponderEvent, LayoutChangeEvent } from "react-native";
-import { ScrollView, Switch } from "react-native";
+import { Switch } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
 
 type DebugLayerKind =
@@ -191,6 +192,48 @@ function gridPaths(
   return paths;
 }
 
+function debugViewBox(
+  geometry: ShapeContextGrade,
+  layers: Record<DebugLayerKind, boolean>,
+): string {
+  const points = [
+    ...geometry.sourcePoints,
+    ...geometry.targetPoints,
+    ...geometry.transformedPoints,
+  ];
+  if (layers.sourceGrid || layers.registeredGrid) {
+    const coordinates = Array.from(
+      { length: 7 },
+      (_, index) => -1.5 + index * 0.5,
+    );
+    for (const coordinate of coordinates) {
+      for (let index = 0; index < 17; index++) {
+        const position = -1.5 + (index * 3) / 16;
+        for (const vertical of [false, true]) {
+          const point = vertical
+            ? { x: coordinate, y: position }
+            : { x: position, y: coordinate };
+          if (layers.sourceGrid) {
+            points.push(point);
+          }
+          if (layers.registeredGrid) {
+            points.push(geometry.transform.transform(point));
+          }
+        }
+      }
+    }
+  }
+  const canvasPoints = points.map(canvasPoint);
+  const minX = Math.min(...canvasPoints.map(({ x }) => x));
+  const maxX = Math.max(...canvasPoints.map(({ x }) => x));
+  const minY = Math.min(...canvasPoints.map(({ y }) => y));
+  const maxY = Math.max(...canvasPoints.map(({ y }) => y));
+  const size = Math.max(maxX - minX, maxY - minY) + 40;
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  return `${centerX - size / 2} ${centerY - size / 2} ${size} ${size}`;
+}
+
 export function HanziWritingDebug({
   geometry,
   drawnStrokes,
@@ -225,6 +268,11 @@ export function HanziWritingDebug({
     onGeometryChange(gradeCharacterShape(drawnStrokes, referencePaths, next));
   }
 
+  function rerunOptions(next: ShapeContextOptions) {
+    setOptions(next);
+    onGeometryChange(gradeCharacterShape(drawnStrokes, referencePaths, next));
+  }
+
   function toggleLayer(kind: DebugLayerKind, value: boolean) {
     setLayers((current) => ({ ...current, [kind]: value }));
   }
@@ -248,13 +296,17 @@ export function HanziWritingDebug({
   const unmatchedTargets = new Set(geometry.unmatchedTargetIndices);
 
   return (
-    <ScrollView style={{ maxHeight: 440 }}>
+    <View>
       <View className="gap-3 rounded-lg border border-border p-3">
         <Text className="text-lg font-semibold text-fg">
           Shape Context + TPS debug
         </Text>
         <View className="w-full items-center" style={{ aspectRatio: 1 }}>
-          <Svg width="100%" height="100%" viewBox="0 0 1024 1024">
+          <Svg
+            width="100%"
+            height="100%"
+            viewBox={debugViewBox(geometry, layers)}
+          >
             {layers.sourceGrid
               ? gridPaths(geometry, false).map((path, index) => (
                   <SvgPath
@@ -442,9 +494,9 @@ export function HanziWritingDebug({
             {geometry.similarity.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
-            Parameter preview:{` `}
+            Shape threshold only:{` `}
             {geometry.similarity >= hanziCharacterWritingSimilarityThreshold
-              ? `passes the prototype threshold`
+              ? `passed`
               : `below the prototype threshold`}
           </Text>
           <Text className="text-sm text-fg">
@@ -452,6 +504,18 @@ export function HanziWritingDebug({
           </Text>
           <Text className="text-sm text-fg">
             Residual matching error: {geometry.residualMatchingError.toFixed(3)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Reference length: {geometry.referenceLength.toFixed(3)} · sample
+            count: {geometry.sampleCount}
+          </Text>
+          <Text className="text-sm text-fg">
+            Points per stroke (source):{` `}
+            {geometry.sourceStrokeSampleCounts.join(`, `)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Points per stroke (reference):{` `}
+            {geometry.targetStrokeSampleCounts.join(`, `)}
           </Text>
           <Text className="text-sm text-fg">
             TPS bending energy: {geometry.bendingEnergy.toFixed(4)}
@@ -466,6 +530,62 @@ export function HanziWritingDebug({
           </Text>
           <Text className="text-sm text-fg">
             Unmatched-point penalty: {geometry.unmatchedPointPenalty.toFixed(3)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Geometry coverage penalty:{` `}
+            {geometry.geometryCoveragePenalty.toFixed(3)}
+          </Text>
+          <Text className="text-sm text-fg">
+            Coverage distance tolerance:{` `}
+            {geometry.geometryCoverageTolerance.toFixed(3)} normalized units
+          </Text>
+          <Text className="text-sm text-fg">
+            Uncovered geometry before TPS (reference / handwriting):{` `}
+            {(
+              geometry.initialGeometryCoverage.referenceToHandwriting * 100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.initialGeometryCoverage.handwritingToReference * 100
+            ).toFixed(1)}
+            %
+          </Text>
+          <Text className="text-sm text-fg">
+            Uncovered geometry after TPS (reference / handwriting):{` `}
+            {(
+              geometry.residualGeometryCoverage.referenceToHandwriting * 100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.residualGeometryCoverage.handwritingToReference * 100
+            ).toFixed(1)}
+            %
+          </Text>
+          <Text className="text-sm text-fg">
+            Longest uncovered run before TPS (reference / handwriting):{` `}
+            {(
+              geometry.initialGeometryCoverage.referenceLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.initialGeometryCoverage.handwritingLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            %
+          </Text>
+          <Text className="text-sm text-fg">
+            Longest uncovered run after TPS (reference / handwriting):{` `}
+            {(
+              geometry.residualGeometryCoverage.referenceLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            % /{` `}
+            {(
+              geometry.residualGeometryCoverage.handwritingLongestUncoveredRun *
+              100
+            ).toFixed(1)}
+            %
           </Text>
           <Text className="text-sm text-fg">
             Matched points: {geometry.correspondences.length}; unmatched:{` `}
@@ -489,20 +609,61 @@ export function HanziWritingDebug({
               rerun(`tpsRegularization`, value);
             }}
           />
-          <Slider
-            label="Sample points"
-            minimum={64}
-            maximum={128}
-            step={16}
-            value={options.sampleCount}
-            formatValue={(value) => `${value}`}
-            onValueChange={(value) => {
-              changeOption(`sampleCount`, value);
-            }}
-            onValueChangeComplete={(value) => {
-              rerun(`sampleCount`, value);
-            }}
-          />
+          <View className="gap-2">
+            <Text className="font-semibold text-fg">Sampling</Text>
+            <ButtonGroup>
+              <ButtonGroup.Button
+                variant={options.sampleCount == null ? `filled` : `outline`}
+                onPress={() => {
+                  rerunOptions({ ...options, sampleCount: null });
+                }}
+              >
+                Automatic
+              </ButtonGroup.Button>
+              <ButtonGroup.Button
+                variant={options.sampleCount == null ? `outline` : `filled`}
+                onPress={() => {
+                  rerunOptions({
+                    ...options,
+                    sampleCount: geometry.sampleCount,
+                  });
+                }}
+              >
+                Manual
+              </ButtonGroup.Button>
+            </ButtonGroup>
+            {options.sampleCount == null ? (
+              <Slider
+                label="Target spacing"
+                minimum={0.02}
+                maximum={0.2}
+                step={0.005}
+                value={options.sampleSpacing}
+                formatValue={(value) => value.toFixed(3)}
+                onValueChange={(value) => {
+                  changeOption(`sampleSpacing`, value);
+                }}
+                onValueChangeComplete={(value) => {
+                  rerun(`sampleSpacing`, value);
+                }}
+              />
+            ) : (
+              <Slider
+                label="Sample count override"
+                minimum={8}
+                maximum={256}
+                step={8}
+                value={options.sampleCount}
+                formatValue={(value) => `${value}`}
+                onValueChange={(value) => {
+                  changeOption(`sampleCount`, value);
+                }}
+                onValueChangeComplete={(value) => {
+                  rerun(`sampleCount`, value);
+                }}
+              />
+            )}
+          </View>
           <Slider
             label="Log-radius bins"
             minimum={3}
@@ -551,6 +712,6 @@ export function HanziWritingDebug({
           </Text>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }

@@ -1,12 +1,16 @@
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziText } from "@/data/model";
-import type { ShapeContextOptions } from "@/util/shapeContextGrader";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import { shapeContextGraderDefaults } from "@/util/shapeContextGrader";
+import type {
+  ShapeContextOptions,
+  WritingStrokePoint,
+} from "@/util/shapeContextGrader";
 import { z } from "zod";
 
 const shapeContextOptionsSchema = z
   .object({
-    sampleCount: z.number().int().min(8).max(256),
+    sampleCount: z.number().int().min(8).max(256).nullable().optional(),
+    sampleSpacing: z.number().positive().max(1).optional(),
     radialBins: z.number().int().min(1).max(16),
     angularBins: z.number().int().min(4).max(32),
     iterations: z.number().int().min(0).max(8),
@@ -15,10 +19,12 @@ const shapeContextOptionsSchema = z
     maxRotationDegrees: z.number().min(0).max(45),
     rotationSteps: z.number().int().min(1).max(12),
   })
-  .strict();
+  .strict()
+  .transform((options) => ({ ...shapeContextGraderDefaults, ...options }));
 
 export interface ShapeContextGraderExample {
   id: string;
+  skip?: boolean;
   drawnStrokes: string;
   options?: ShapeContextOptions;
 }

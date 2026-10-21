@@ -19,6 +19,7 @@ export function QuizDeckResultToast({
   rating,
   disableAnimation = false,
   onRepeatQuestion,
+  onReportWrongGrade,
 }: {
   skill: Skill;
   rating: Rating;
@@ -27,6 +28,7 @@ export function QuizDeckResultToast({
    */
   disableAnimation?: boolean;
   onRepeatQuestion: () => void;
+  onReportWrongGrade?: () => void;
 }) {
   const cleanupAnimationRef = useRef<(() => void) | null>(null);
 
@@ -85,6 +87,9 @@ export function QuizDeckResultToast({
                     <Text className="font-sans text-2xl font-bold text-fg">
                       Perfect!
                     </Text>
+                    <QuizResultDropdown
+                      onReportWrongGrade={onReportWrongGrade}
+                    />
                   </View>
                 ) : rating === Rating.Good ? (
                   <View className="flex-row items-center gap-2">
@@ -92,6 +97,9 @@ export function QuizDeckResultToast({
                     <Text className="font-sans text-2xl font-bold text-fg">
                       Nice!
                     </Text>
+                    <QuizResultDropdown
+                      onReportWrongGrade={onReportWrongGrade}
+                    />
                   </View>
                 ) : rating === Rating.Hard ? (
                   <>
@@ -100,7 +108,10 @@ export function QuizDeckResultToast({
                       <Text className="font-sans text-2xl font-bold text-fg">
                         Too slow
                       </Text>
-                      <UndoAnswerDropdown onRepeatQuestion={onRepeatQuestion} />
+                      <QuizResultDropdown
+                        onRepeatQuestion={onRepeatQuestion}
+                        onReportWrongGrade={onReportWrongGrade}
+                      />
                     </View>
                     <Text className="font-sans text-lg/none text-fg">
                       Keep practicing and you’ll get faster!
@@ -115,8 +126,9 @@ export function QuizDeckResultToast({
                         <Text className="font-sans text-2xl font-bold text-fg">
                           Incorrect
                         </Text>
-                        <UndoAnswerDropdown
+                        <QuizResultDropdown
                           onRepeatQuestion={onRepeatQuestion}
+                          onReportWrongGrade={onReportWrongGrade}
                         />
                       </View>
                       <Text className="font-sans text-xl/none font-medium text-fg">
@@ -138,25 +150,47 @@ export function QuizDeckResultToast({
   );
 }
 
-function UndoAnswerDropdown({
+function QuizResultDropdown({
   onRepeatQuestion,
+  onReportWrongGrade,
 }: {
-  onRepeatQuestion: () => void;
+  onRepeatQuestion?: () => void;
+  onReportWrongGrade?: () => void;
 }) {
+  if (onRepeatQuestion == null && onReportWrongGrade == null) {
+    return null;
+  }
+
   return (
     <View className="ml-auto">
       <DropdownMenu2>
         <DropdownMenu2.Trigger asChild>
           <RectButton
-            variant="bareDim"
-            iconStart="more-horizontal"
-            iconSize={20}
+            variant="bare"
+            iconStart={onReportWrongGrade == null ? `more-horizontal` : `flag`}
+            accessibilityLabel={
+              onReportWrongGrade == null ? `More options` : `Report a problem`
+            }
           />
         </DropdownMenu2.Trigger>
         <DropdownMenu2.Content align="end">
-          <DropdownMenu2.Item onPress={onRepeatQuestion}>
-            <Text>Repeat question</Text>
-          </DropdownMenu2.Item>
+          {onRepeatQuestion == null ? null : (
+            <DropdownMenu2.Item onPress={onRepeatQuestion}>
+              <Text>Repeat question</Text>
+            </DropdownMenu2.Item>
+          )}
+          {onReportWrongGrade == null ? null : (
+            <DropdownMenu2.Sub>
+              <DropdownMenu2.SubTrigger>
+                <Text>Report a problem</Text>
+              </DropdownMenu2.SubTrigger>
+              <DropdownMenu2.SubContent>
+                <DropdownMenu2.Item onPress={onReportWrongGrade}>
+                  <Text>Wrong grade</Text>
+                </DropdownMenu2.Item>
+              </DropdownMenu2.SubContent>
+            </DropdownMenu2.Sub>
+          )}
         </DropdownMenu2.Content>
       </DropdownMenu2>
     </View>

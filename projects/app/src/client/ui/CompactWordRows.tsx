@@ -4,13 +4,17 @@ import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { HanziPinyinText } from "./HanziPinyinText";
-import { HskLozenge } from "./HskLozenge";
+import { HskLozengeWithTooltip } from "./HskLozengeWithTooltip";
 import { Icon } from "./Icon";
 
 export interface CompactWordRowsEntry {
   hanzi: DictionaryCollectionEntry[`hanzi`];
   hanziWord: DictionaryCollectionEntry[`hanziWord`] | undefined | null;
   hsk: DictionaryCollectionEntry[`hsk`] | undefined | null;
+  hskFirstAppearance:
+    | DictionaryCollectionEntry[`hskFirstAppearance`]
+    | undefined
+    | null;
   gloss: DictionaryCollectionEntry[`gloss`] | undefined | null;
   pinyin: DictionaryCollectionEntry[`pinyin`] | undefined | null;
 }
@@ -33,15 +37,7 @@ export function CompactWordRows({
               <HanziPinyinText
                 hanzi={hanzi}
                 pinyin={pinyin}
-                lozenges={
-                  entry.hsk == null ? null : (
-                    <HskLozenge
-                      hskLevel={entry.hsk}
-                      size="sm"
-                      color="muted-fg"
-                    />
-                  )
-                }
+                lozenges={<HskLozengeWithTooltip entries={[entry]} size="sm" />}
               />
 
               <View className="flex-1" />

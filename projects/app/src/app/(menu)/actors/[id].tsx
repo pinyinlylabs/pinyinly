@@ -1,8 +1,10 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
+import { DropdownMenu2 } from "@/client/ui/DropdownMenu2";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { confirmDiscardChanges } from "@/client/ui/confirmDiscardChanges";
 import { trpc } from "@/client/trpc";
 import { RectButton } from "@/client/ui/RectButton";
 import { WikiTitledBox } from "@/client/ui/WikiTitledBox";
@@ -16,15 +18,17 @@ import {
   actorModelSheetImageSetting,
   actorNameTextSetting,
 } from "@/data/userSettings";
-import { useLocalSearchParams, Link } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { useState } from "react";
 
 export default function ActorIdPage() {
   const { id: rawId } = useLocalSearchParams<`/actors/[id]`>();
+  const router = useRouter();
   const actorId = rawId as ActorId;
   const actorDirectory = usePinyinSoundActors();
+  const [deleteError, setDeleteError] = useState(false);
 
   const actorNameSettingResult = useUserSetting({
     setting: actorNameTextSetting,
@@ -57,10 +61,59 @@ export default function ActorIdPage() {
 
   return (
     <View className="w-full gap-6 self-center pt-safe px-safe pb-2">
-      <Breadcrumbs>
-        <Breadcrumbs.Item href="/actors">Actors</Breadcrumbs.Item>
-        <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
-      </Breadcrumbs>
+      <View className="flex-row items-center justify-between">
+        <Breadcrumbs>
+          <Breadcrumbs.Item href="/actors">Actors</Breadcrumbs.Item>
+          <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
+        </Breadcrumbs>
+        <DropdownMenu2>
+          <DropdownMenu2.Trigger asChild>
+            <RectButton
+              variant="bare"
+              iconStart="more-horizontal"
+              accessibilityLabel="More options"
+            />
+          </DropdownMenu2.Trigger>
+          <DropdownMenu2.Content align="end" sideOffset={4}>
+            <DropdownMenu2.Item
+              variant="destructive"
+              disabled={actorDirectory.isLoading}
+              onPress={() => {
+                const message = `Delete ${title}? This will also remove it from any sounds that use it.`;
+                confirmDiscardChanges({
+                  title: `Delete actor?`,
+                  message,
+                  onDiscard: () => {
+                    setDeleteError(false);
+                    void actorDirectory
+                      .deleteActor(actorId)
+                      .then(() => {
+                        router.replace(`/actors`);
+                      })
+                      .catch((error: unknown) => {
+                        console.error(
+                          `Failed to delete actor "${actorId}":`,
+                          error,
+                        );
+                        setDeleteError(true);
+                      });
+                  },
+                });
+              }}
+            >
+              <Text>Delete</Text>
+            </DropdownMenu2.Item>
+          </DropdownMenu2.Content>
+        </DropdownMenu2>
+      </View>
+      {deleteError ? (
+        <Text
+          accessibilityRole="alert"
+          className="pyly-body-caption text-destructive-fg"
+        >
+          Could not delete actor. Please try again.
+        </Text>
+      ) : null}
 
       <HeaderTitleProvider.ScrollTrigger title={title} />
 

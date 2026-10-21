@@ -1,4 +1,4 @@
-import { useMultiChoiceQuizTimer } from "@/client/ui/hooks/useMultiChoiceQuizTimer";
+import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import type {
   MistakeType,
@@ -35,10 +35,6 @@ import { WikiHanziModal } from "./WikiHanziModal";
 const buttonThickness = 4;
 const gap = 12;
 
-function nowMs() {
-  return Date.now();
-}
-
 export function QuizDeckOneCorrectPairQuestion({
   question,
   onNext,
@@ -66,7 +62,7 @@ export function QuizDeckOneCorrectPairQuestion({
   const [grade, setGrade] = useState<OneCorrectPairQuestionGrade>();
 
   // Setup the timer to measure how fast they answer the question.
-  const timer = useMultiChoiceQuizTimer();
+  const timer = useQuizTimer();
 
   const choiceRowCount = Math.max(groupA.length, groupB.length);
 
@@ -79,7 +75,7 @@ export function QuizDeckOneCorrectPairQuestion({
     aChoice: OneCorrectPairQuestionChoice,
     bChoice: OneCorrectPairQuestionChoice,
   ) => {
-    const durationMs = (timer.endTime ?? nowMs()) - timer.startTime;
+    const durationMs = timer.endTime ?? timer.getDurationMs();
     const grade = gradeOneCorrectPairQuestion(
       answer,
       aChoice,

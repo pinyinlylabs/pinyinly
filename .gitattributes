@@ -9,3 +9,5 @@ projects/app/test/data/cedict_ts-2.u8.*.out filter=lfs diff=lfs merge=lfs -text
 projects/app/src/data/dictionary.asset.json filter=lfs diff=lfs merge=lfs -text
 projects/app/src/assets/fonts/ArphicUkai/ukai.ttc filter=lfs diff=lfs merge=lfs -text
 projects/app/src/assets/fonts/ArphicUming/uming_0.1.20060928.ttf filter=lfs diff=lfs merge=lfs -text
+projects/app/test/vendor/ivankra-hsk30/hsk30-expanded.csv filter=lfs diff=lfs merge=lfs -text
+projects/app/test/vendor/complete-hsk-vocabulary/complete.json filter=lfs diff=lfs merge=lfs -text

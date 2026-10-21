@@ -3,6 +3,7 @@
     "⿱十一": ["0,1", "2"]
   },
   "hanzi": "土",
+  "visuallySimilar": ["士"],
   "mnemonic": {
     "decomposition": "⿱十一"
   },

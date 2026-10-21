@@ -52,12 +52,6 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
       <View className="mb-3">
         <WikiHanziMeaningsPanel hanzi={hanzi} />
       </View>
-      <View>
-        <Text className="max-w-100 text-sm text-fg">
-          Movement along a course, extended to doing, carrying matters forward,
-          and functioning.
-        </Text>
-      </View>
     </View>
   );
 }

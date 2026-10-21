@@ -1,7 +1,10 @@
 // pyly-not-src-test
 
 import { projectRoot } from "#bin/util/paths.ts";
-import type { CharacterCurriculumMeaningExample } from "#data/model.js";
+import type {
+  CharacterJson,
+  CharacterCurriculumMeaningExample,
+} from "#data/model.js";
 import { characterJsonSchema } from "#data/model.js";
 import {
   existsSync,
@@ -32,10 +35,15 @@ test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
     ]),
   );
 
-  const examplesByHanzi = new Map<
+  type CharacterCurriculumMeanings = NonNullable<
+    CharacterJson[`curriculumMeanings`]
+  >;
+  type VisuallySimilar = NonNullable<CharacterJson[`visuallySimilar`]>;
+  const curriculumMeaningsByHanzi = new Map<
     string,
-    CharacterCurriculumMeaningExample[]
+    CharacterCurriculumMeanings
   >();
+  const visuallySimilarByHanzi = new Map<string, VisuallySimilar>();
   const characterJsonFiles = await glob(
     path.join(projectRoot, `src/client/wiki/*/character.json`),
   );
@@ -43,23 +51,31 @@ test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
     const characterJson = characterJsonSchema.parse(
       JSON.parse(await readFile(filePath, `utf8`)) as unknown,
     );
-    const examples = characterJson.curriculumMeanings?.flatMap(
-      ({ id, exampleSentence }) =>
-        exampleSentence == null ? [] : [{ id, exampleSentence }],
-    );
-    if (examples != null && examples.length > 0) {
-      examplesByHanzi.set(characterJson.hanzi, examples);
+    if (characterJson.curriculumMeanings != null) {
+      curriculumMeaningsByHanzi.set(
+        characterJson.hanzi,
+        characterJson.curriculumMeanings,
+      );
+    }
+    if (characterJson.visuallySimilar != null) {
+      visuallySimilarByHanzi.set(
+        characterJson.hanzi,
+        characterJson.visuallySimilar,
+      );
     }
   }
 
   const processor = createMdxAstProcessor();
   const hanziEntries = new Set([
     ...mdxFilesByHanzi.keys(),
-    ...examplesByHanzi.keys(),
+    ...curriculumMeaningsByHanzi.keys(),
+    ...visuallySimilarByHanzi.keys(),
   ]);
   for (const hanzi of hanziEntries) {
     const payload: {
       mdast?: unknown;
+      curriculumMeanings?: CharacterCurriculumMeanings;
+      visuallySimilar?: VisuallySimilar;
       curriculumMeaningExamples?: CharacterCurriculumMeaningExample[];
     } = {};
 
@@ -71,14 +87,21 @@ test(`compiled wiki json is up to date`, { timeout: Infinity }, async () => {
       payload.mdast = sanitizeMdast(tree);
     }
 
-    const curriculumMeanings = examplesByHanzi.get(hanzi);
+    const curriculumMeanings = curriculumMeaningsByHanzi.get(hanzi);
     if (curriculumMeanings != null) {
-      payload.curriculumMeaningExamples = curriculumMeanings.map(
-        ({ id, exampleSentence }) => ({
-          id,
-          exampleSentence,
-        }),
+      payload.curriculumMeanings = curriculumMeanings;
+
+      const examples = curriculumMeanings.flatMap(({ id, exampleSentence }) =>
+        exampleSentence == null ? [] : [{ id, exampleSentence }],
       );
+      if (examples.length > 0) {
+        payload.curriculumMeaningExamples = examples;
+      }
+    }
+
+    const visuallySimilar = visuallySimilarByHanzi.get(hanzi);
+    if (visuallySimilar != null) {
+      payload.visuallySimilar = visuallySimilar;
     }
 
     await expect(payload).toMatchJsonFileSnapshot(

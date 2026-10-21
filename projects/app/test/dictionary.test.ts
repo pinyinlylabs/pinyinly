@@ -1947,6 +1947,39 @@ describe(`character.json files`, async () => {
   expect(characterFiles.length).toBeGreaterThan(0);
   const isComponentFormHanzi = await getIsComponentFormHanzi();
 
+  test(`visually similar characters have median stroke data`, () => {
+    for (const { character, characterJson, filePath } of characterFiles) {
+      const visuallySimilar = characterJson.visuallySimilar ?? [];
+      expect(
+        new Set(visuallySimilar).size,
+        `${filePath} visuallySimilar should not contain duplicates`,
+      ).toBe(visuallySimilar.length);
+      expect(
+        visuallySimilar,
+        `${filePath} should not list itself as visually similar`,
+      ).not.toContain(character);
+
+      for (const similarCharacter of visuallySimilar) {
+        const similarCharacterJson = getCharacterJson(similarCharacter);
+        expect(
+          similarCharacterJson?.svg.medians?.length ?? 0,
+          `${similarCharacter} needs median stroke data for contrastive grading`,
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  test(`visually similar characters are reciprocally defined`, () => {
+    for (const { character, characterJson, filePath } of characterFiles) {
+      for (const similarCharacter of characterJson.visuallySimilar ?? []) {
+        expect(
+          getCharacterJson(similarCharacter)?.visuallySimilar,
+          `${filePath} lists ${similarCharacter} as visually similar, so ${similarCharacter}/character.json should list ${character}`,
+        ).toContain(character);
+      }
+    }
+  });
+
   test(`𠮛 is used instead of ⿱一口 in decompositions`, async () => {
     const specs: [pattern: string, replacement: string, ignored: string[]][] = [
       [`⿱一口`, `𠮛`, [`事`]],

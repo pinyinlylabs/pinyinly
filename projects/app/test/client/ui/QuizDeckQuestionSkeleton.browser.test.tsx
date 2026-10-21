@@ -10,7 +10,11 @@ import { render } from "vitest-browser-react";
 
 vi.mock(`#client/ui/Icon.tsx`, () => ({ Icon: () => null }));
 vi.mock(`#client/ui/DropdownMenu2.tsx`, () => ({
-  DropdownMenu2: () => null,
+  DropdownMenu2: Object.assign(() => null, {
+    Trigger: () => null,
+    Content: () => null,
+    Item: () => null,
+  }),
 }));
 vi.mock(`#client/ui/SkillAnswerText.tsx`, () => ({
   SkillAnswerText: () => `Correct answer`,

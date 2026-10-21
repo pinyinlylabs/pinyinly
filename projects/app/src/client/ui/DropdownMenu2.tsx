@@ -11,8 +11,13 @@ import { Icon } from "./Icon";
 import type { IconName } from "./iconRegistry";
 import { NativeOnlyAnimatedView } from "./NativeOnlyAnimatedView";
 import type { PropsOf } from "@pinyinly/lib/types";
-import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
-import React from "react";
+import type {
+  ComponentProps,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+} from "react";
+import React, { cloneElement, isValidElement } from "react";
 import { Portal } from "./Portal";
 import { Theme } from "./Theme";
 import { Slot } from "@rn-primitives/slot";
@@ -41,7 +46,7 @@ function DropdownMenuSubTrigger({
     <Text.ClassContext.Provider
       value={cn(
         `
-          text-sm select-none
+          font-sans text-sm font-semibold text-fg select-none
 
           group-active:text-accent-fg
         `,
@@ -51,7 +56,7 @@ function DropdownMenuSubTrigger({
       <DropdownMenuPrimitive.SubTrigger
         className={cn(
           `
-            group flex flex-row items-center justify-between rounded-sm p-2
+            group flex flex-row items-center justify-between rounded p-2
 
             active:bg-accent
 
@@ -142,11 +147,10 @@ function DropdownMenuSubContent({
       <SubContent
         className={cn(
           `
-            overflow-hidden rounded-md border border-border bg-bg p-1 shadow-lg shadow-black/5
-            animate-in
+            min-w-[190px] gap-1 rounded-xl bg-bg-high p-3 animate-in
 
-            web:z-50 web:min-w-[8rem] web:origin-(--radix-context-menu-content-transform-origin)
-            web:animate-in web:fade-in-0 web:zoom-in-95
+            web:z-50 web:origin-(--radix-context-menu-content-transform-origin) web:animate-in
+            web:fade-in-0 web:zoom-in-95
 
             web:data-[side=bottom]:slide-in-from-top-2
 
@@ -179,8 +183,14 @@ function DropdownMenuContent({
   overlayStyle?: StyleProp<ViewStyle>;
   overlayClassName?: string;
 }) {
+  const { open } = DropdownMenuPrimitive.useRootContext();
+
+  if (Platform.OS === `web` && !open && !props.forceMount) {
+    return null;
+  }
+
   return (
-    <Theme theme="popover">
+    <Theme theme="default">
       <DropdownPortal>
         <FullWindowOverlay>
           <DropdownMenuPrimitive.Overlay
@@ -194,7 +204,14 @@ function DropdownMenuContent({
                       overlayStyle as ViewStyle,
                     ]),
             })}
-            className={overlayClassName}
+            className={cn(
+              `
+                web:fixed web:inset-0 web:z-40
+
+                ${open ? `bg-bg/50` : `pointer-events-none bg-transparent`}
+              `,
+              overlayClassName,
+            )}
             asChild={Platform.OS !== `web`}
           >
             <NativeOnlyAnimatedView
@@ -202,28 +219,47 @@ function DropdownMenuContent({
               as="Pressable"
             >
               <Text.ClassContext.Provider value="text-fg">
-                <DropdownMenuPrimitive.Content
-                  className={cn(
-                    `
-                      min-w-[8rem] overflow-hidden rounded-md border border-border bg-bg p-1
-                      shadow-lg shadow-black/5
+                <Theme theme="popover">
+                  <DropdownMenuPrimitive.Content
+                    className={cn(
+                      `
+                        min-w-[190px] gap-1 rounded-xl bg-bg-high p-3
 
-                      web:z-50 web:max-h-(--radix-context-menu-content-available-height)
-                      web:origin-(--radix-context-menu-content-transform-origin) web:cursor-default
-                      web:animate-in web:fade-in-0 web:zoom-in-95
-                    `,
-                    props.side === `bottom` && `web:slide-in-from-top-2`,
-                    props.side === `top` && `web:slide-in-from-bottom-2`,
-                    className,
-                  )}
-                  {...props}
-                />
+                        web:z-50 web:max-h-(--radix-context-menu-content-available-height)
+                        web:origin-(--radix-context-menu-content-transform-origin)
+                        web:cursor-default web:animate-in web:fade-in-0 web:zoom-in-95
+                      `,
+                      props.side === `bottom` && `web:slide-in-from-top-2`,
+                      props.side === `top` && `web:slide-in-from-bottom-2`,
+                      className,
+                    )}
+                    {...props}
+                  />
+                </Theme>
               </Text.ClassContext.Provider>
             </NativeOnlyAnimatedView>
           </DropdownMenuPrimitive.Overlay>
         </FullWindowOverlay>
       </DropdownPortal>
     </Theme>
+  );
+}
+
+function DropdownMenuTrigger({
+  asChild = false,
+  children,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
+  const { open } = DropdownMenuPrimitive.useRootContext();
+
+  return (
+    <DropdownMenuPrimitive.Trigger asChild={asChild} {...props}>
+      {asChild && isValidElement(children)
+        ? cloneElement(children as ReactElement<{ pressed?: boolean }>, {
+            pressed: open,
+          })
+        : children}
+    </DropdownMenuPrimitive.Trigger>
   );
 }
 
@@ -241,7 +277,7 @@ function DropdownMenuItem({
     <Text.ClassContext.Provider
       value={cn(
         `
-          text-sm text-fg select-none
+          font-sans text-sm font-semibold text-fg select-none
 
           group-active:text-fg
         `,
@@ -256,7 +292,7 @@ function DropdownMenuItem({
       <DropdownMenuPrimitive.Item
         className={cn(
           `
-            group relative flex flex-row items-center gap-2 rounded-sm p-2
+            group relative flex flex-row items-center gap-2 rounded p-2
 
             active:bg-accent
 
@@ -299,11 +335,11 @@ function DropdownMenuCheckboxItem({
   children?: React.ReactNode;
 }) {
   return (
-    <Text.ClassContext.Provider value="text-sm text-fg select-none group-active:text-accent-fg">
+    <Text.ClassContext.Provider value="font-sans text-sm font-semibold text-fg select-none group-active:text-accent-fg">
       <DropdownMenuPrimitive.CheckboxItem
         className={cn(
           `
-            group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8
+            group relative flex flex-row items-center gap-2 rounded py-2 pr-2 pl-8
 
             active:bg-accent
 
@@ -344,11 +380,11 @@ function DropdownMenuRadioItem({
   children?: React.ReactNode;
 }) {
   return (
-    <Text.ClassContext.Provider value="text-sm text-fg select-none group-active:text-accent-fg">
+    <Text.ClassContext.Provider value="font-sans text-sm font-semibold text-fg select-none group-active:text-accent-fg">
       <DropdownMenuPrimitive.RadioItem
         className={cn(
           `
-            group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8
+            group relative flex flex-row items-center gap-2 rounded py-2 pr-2 pl-8
 
             active:bg-accent
 
@@ -388,7 +424,7 @@ function DropdownMenuLabel({
     <DropdownMenuPrimitive.Label
       className={cn(
         `
-          p-2 text-sm font-medium text-fg
+          p-2 text-sm font-semibold text-fg
 
           sm:py-1.5
         `,
@@ -444,7 +480,7 @@ export function DropdownMenu2(
   return <DropdownMenuPrimitive.Root {...props} />;
 }
 
-DropdownMenu2.Trigger = DropdownMenuPrimitive.Trigger;
+DropdownMenu2.Trigger = DropdownMenuTrigger;
 DropdownMenu2.CheckboxItem = DropdownMenuCheckboxItem;
 DropdownMenu2.Content = DropdownMenuContent;
 DropdownMenu2.Group = DropdownMenuPrimitive.Group;

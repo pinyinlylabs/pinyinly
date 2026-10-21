@@ -4,8 +4,17 @@ import type {
   HanziCharacterWritingSkill,
 } from "#data/model.ts";
 import { pinyinTextSchema, QuestionKind } from "#data/model.ts";
-import { gradeHanziCharacterWritingQuestion } from "#data/questions/hanziCharacterWriting.ts";
+import {
+  createHanziCharacterWritingGradeReportJson,
+  gradeHanziCharacterWritingQuestion,
+  hanziCharacterWritingSimilarityThreshold,
+} from "#data/questions/hanziCharacterWriting.ts";
 import { Rating } from "#util/fsrs.ts";
+import {
+  decodeShapeContextStrokes,
+  parseShapeContextGraderExampleJson,
+  shapeContextGraderExampleCharacter,
+} from "#util/shapeContextGraderExample.ts";
 import { describe, expect, test } from "vitest";
 
 const question: HanziCharacterWritingQuestion = {
@@ -40,7 +49,34 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     expect(result.rating).not.toBe(Rating.Again);
   });
 
-  test(`scales speed ratings with the character stroke count`, () => {
+  test(`rejects a shape that matches a similar character equally well`, () => {
+    const result = gradeHanziCharacterWritingQuestion(
+      question,
+      [
+        [
+          { x: 100, y: 100 },
+          { x: 500, y: 100 },
+        ],
+      ],
+      [expectedPath],
+      1000,
+      [{ hanzi: `牛` as HanziCharacter, medianPaths: [expectedPath] }],
+    );
+
+    expect(result.geometry.similarity).toBeGreaterThanOrEqual(
+      hanziCharacterWritingSimilarityThreshold,
+    );
+    expect(result.similarCharacterGrades[0]?.geometry.similarity).toBe(
+      result.geometry.similarity,
+    );
+    expect(result).toMatchObject({
+      correct: false,
+      failure: `contrastive`,
+      rating: Rating.Again,
+    });
+  });
+
+  test(`uses the standard quiz speed rating thresholds`, () => {
     const strokes = Array.from({ length: 4 }, () => [
       { x: 100, y: 100 },
       { x: 500, y: 100 },
@@ -48,15 +84,19 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     const medianPaths = Array.from({ length: 4 }, () => expectedPath);
 
     expect(
-      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 3999)
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 4999)
         .rating,
     ).toBe(Rating.Easy);
     expect(
-      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 4000)
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 5000)
         .rating,
     ).toBe(Rating.Good);
     expect(
-      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 8000)
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 9999)
+        .rating,
+    ).toBe(Rating.Good);
+    expect(
+      gradeHanziCharacterWritingQuestion(question, strokes, medianPaths, 10_000)
         .rating,
     ).toBe(Rating.Hard);
   });
@@ -93,5 +133,62 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
       correct: true,
       failure: null,
     });
+  });
+
+  test(`serializes a report in the shared writing debug example format`, () => {
+    const drawnStrokes = [
+      [
+        { x: 100, y: 100 },
+        { x: 500, y: 100 },
+      ],
+    ];
+    const grade = gradeHanziCharacterWritingQuestion(
+      question,
+      drawnStrokes,
+      [expectedPath],
+      1000,
+    );
+
+    const report = parseShapeContextGraderExampleJson(
+      createHanziCharacterWritingGradeReportJson({
+        question,
+        grade,
+        drawnStrokes,
+      }),
+    );
+
+    expect(shapeContextGraderExampleCharacter(report)).toBe(question.hanzi);
+    expect(decodeShapeContextStrokes(report.drawnStrokes)).toEqual(
+      drawnStrokes,
+    );
+    expect(report.options).toEqual(grade.geometry.options);
+  });
+
+  test(`serializes a reported false negative in the shared debug format`, () => {
+    const drawnStrokes = [
+      [
+        { x: 100, y: 100 },
+        { x: 500, y: 100 },
+      ],
+    ];
+    const grade = gradeHanziCharacterWritingQuestion(
+      question,
+      drawnStrokes,
+      [expectedPath],
+      1000,
+      [{ hanzi: `牛` as HanziCharacter, medianPaths: [expectedPath] }],
+    );
+    const report = parseShapeContextGraderExampleJson(
+      createHanziCharacterWritingGradeReportJson({
+        question,
+        grade,
+        drawnStrokes,
+      }),
+    );
+
+    expect(shapeContextGraderExampleCharacter(report)).toBe(question.hanzi);
+    expect(decodeShapeContextStrokes(report.drawnStrokes)).toEqual(
+      drawnStrokes,
+    );
   });
 });

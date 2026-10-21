@@ -1,7 +1,11 @@
 import { hanziSvgPathsQuery } from "@/client/query";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { gradeHanziCharacterWritingQuestion } from "@/data/questions/hanziCharacterWriting";
+import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
+import {
+  gradeHanziCharacterWritingQuestion,
+  createHanziCharacterWritingGradeReportJson,
+} from "@/data/questions/hanziCharacterWriting";
 import type {
   HanziCharacterWritingQuestion,
   MistakeType,
@@ -9,6 +13,8 @@ import type {
 } from "@/data/model";
 import type { HanziCharacterWritingQuestionGrade } from "@/data/questions/hanziCharacterWriting";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
+import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import * as Sentry from "@sentry/react-native";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -16,19 +22,10 @@ import { HanziWritingDebug } from "./HanziWritingDebug";
 import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { QuizFlagText } from "./QuizFlagText";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
-
-function nowMs() {
-  return Date.now();
-}
-
-function pathFromPoints(points: readonly WritingStrokePoint[]): string {
-  return points
-    .map((point, index) =>
-      index === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`,
-    )
-    .join(` `);
-}
+import {
+  quizTimerIdleGraceMs,
+  useQuizTimer,
+} from "@/client/ui/hooks/useQuizTimer";
 
 export function QuizDeckHanziCharacterWritingQuestion({
   question,
@@ -51,32 +48,62 @@ export function QuizDeckHanziCharacterWritingQuestion({
   const [debugGeometry, setDebugGeometry] = useState<
     HanziCharacterWritingQuestionGrade[`geometry`] | null
   >(null);
-  const [startTime] = useState(nowMs);
+  const timer = useQuizTimer();
   const { data: svgData, isLoading } = useQuery(
     hanziSvgPathsQuery(question.hanzi),
   );
+  const visuallySimilarData = useVisuallySimilarCharacterReferences(
+    question.hanzi,
+  );
   const medianPaths = (svgData?.medians ?? []).map(transformArphicSpaceSvgPath);
+  const similarCharacterReferences = visuallySimilarData.references;
+  const isSimilarCharacterDataLoading = visuallySimilarData.isLoading;
+  const missingSimilarCharacter = visuallySimilarData.missingCharacter ?? null;
+  const hasMissingSimilarCharacter = missingSimilarCharacter != null;
 
   const handleSubmit = () => {
     if (grade != null) {
       onNext();
       return;
     }
-    if (medianPaths.length === 0) {
+    if (
+      medianPaths.length === 0 ||
+      isSimilarCharacterDataLoading ||
+      visuallySimilarData.hasWikiError ||
+      missingSimilarCharacter != null
+    ) {
       return;
     }
 
-    const durationMs = nowMs() - startTime;
+    const durationMs = timer.getDurationMs();
     const result = gradeHanziCharacterWritingQuestion(
       question,
       drawnStrokes,
       medianPaths,
       durationMs,
+      similarCharacterReferences,
     );
     setGrade(result);
     setDebugGeometry(result.geometry);
     onRating(result.skillRatings, emptyArray);
   };
+
+  function reportWrongGrade() {
+    if (grade == null) {
+      return;
+    }
+
+    const reportJson = createHanziCharacterWritingGradeReportJson({
+      question,
+      grade,
+      drawnStrokes,
+    });
+    Sentry.withScope((scope) => {
+      scope.setTag(`report-kind`, `handwriting-grade`);
+      scope.setExtra(`handwriting-grade-report-json`, reportJson);
+      Sentry.captureMessage(`User reported a handwriting grade`);
+    });
+  }
 
   return (
     <QuizDeckQuestionSkeleton
@@ -84,7 +111,17 @@ export function QuizDeckHanziCharacterWritingQuestion({
       isUserAnswerProvided={drawnStrokes.length > 0}
       onSubmit={handleSubmit}
       onRepeatQuestion={onRepeatQuestion}
-      showIdkButton={medianPaths.length > 0}
+      onReportWrongGrade={
+        grade == null || drawnStrokes.length === 0
+          ? undefined
+          : reportWrongGrade
+      }
+      showIdkButton={
+        medianPaths.length > 0 &&
+        !isSimilarCharacterDataLoading &&
+        !visuallySimilarData.hasWikiError &&
+        missingSimilarCharacter == null
+      }
       skill={question.skill}
     >
       <View className="mx-auto min-h-0 w-full max-w-[560px] flex-1 gap-4">
@@ -100,76 +137,59 @@ export function QuizDeckHanziCharacterWritingQuestion({
             {question.pinyin}
           </Text>
         </View>
-        {isLoading ? (
+        {isLoading || isSimilarCharacterDataLoading ? (
           <Text className="text-muted-fg">Loading writing data…</Text>
         ) : medianPaths.length === 0 ? (
           <Text className="text-danger">
             Writing data is unavailable for {question.hanzi}.
+          </Text>
+        ) : visuallySimilarData.hasWikiError ? (
+          <Text className="text-danger">
+            Could not load similar-character data for {question.hanzi}.
+          </Text>
+        ) : hasMissingSimilarCharacter ? (
+          <Text className="text-danger">
+            {`Writing data is unavailable for similar character ${missingSimilarCharacter}.`}
           </Text>
         ) : (
           <View className="min-h-0 w-full flex-1 items-center justify-center">
             <HanziWritingCanvas
               className="aspect-square h-full max-h-full w-auto max-w-full"
               disabled={grade != null}
-              onStrokeComplete={(points) => {
-                setDrawnStrokes((strokes) => [...strokes, points]);
+              guidedPaths={grade == null ? undefined : medianPaths}
+              drawnStrokes={drawnStrokes}
+              gradeResult={
+                grade == null ? null : grade.correct ? `correct` : `incorrect`
+              }
+              onStrokeStart={() => {
+                timer.pause();
               }}
-            >
-              <line
-                x1="512"
-                y1="24"
-                x2="512"
-                y2="1000"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray="12 12"
-                pointerEvents="none"
-              />
-              <line
-                x1="24"
-                y1="512"
-                x2="1000"
-                y2="512"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray="12 12"
-                pointerEvents="none"
-              />
-              {grade == null
-                ? null
-                : medianPaths.map((path, index) => (
-                    <path
-                      key={`median:${index}`}
-                      d={path}
-                      fill="none"
-                      stroke="#e2e2e2"
-                      strokeWidth="48"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      pointerEvents="none"
-                    />
-                  ))}
-              {drawnStrokes.map((points, index) => (
-                <path
-                  key={`stroke:${index}`}
-                  d={pathFromPoints(points)}
-                  fill="none"
-                  stroke={
-                    grade == null || grade.correct ? `#19aaf5` : `#ef4444`
-                  }
-                  strokeWidth="24"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  pointerEvents="none"
-                />
-              ))}
-            </HanziWritingCanvas>
+              onStrokesChange={setDrawnStrokes}
+              onStrokeEnd={() => {
+                timer.resumeAfter(quizTimerIdleGraceMs);
+              }}
+            />
           </View>
         )}
         {grade?.failure === `shape` ? (
           <Text className="text-danger">
             The overall shape does not match closely enough yet. Review the
             guide and try again.
+          </Text>
+        ) : null}
+        {grade?.failure === `contrastive` ? (
+          <Text className="text-danger">
+            A visually similar character matched at least as closely. Check the
+            distinguishing strokes and try again.
+          </Text>
+        ) : null}
+        {grade != null && grade.similarCharacterGrades.length > 0 ? (
+          <Text className="text-muted-fg">
+            Similarity: {question.hanzi} {grade.geometry.similarity.toFixed(3)}
+            {grade.similarCharacterGrades.map(
+              ({ hanzi, geometry }) =>
+                ` · ${hanzi} ${geometry.similarity.toFixed(3)}`,
+            )}
           </Text>
         ) : null}
         {grade?.correct === false ? (

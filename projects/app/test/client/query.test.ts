@@ -52,6 +52,14 @@ describe(`wikiPayloadSchema`, () => {
     expect(
       wikiPayloadSchema.parse({
         mdast: { type: `root`, children: [] },
+        curriculumMeanings: [
+          {
+            id: `兴:interest`,
+            gloss: `interest`,
+            pinyin: `xìng`,
+            description: `To have an interest in something.`,
+          },
+        ],
         curriculumMeaningExamples: [
           {
             id: `兴:interest`,
@@ -65,13 +73,24 @@ describe(`wikiPayloadSchema`, () => {
       }),
     ).toMatchObject({
       mdast: { type: `root` },
+      curriculumMeanings: [
+        { id: `兴:interest`, description: `To have an interest in something.` },
+      ],
       curriculumMeaningExamples: [{ id: `兴:interest` }],
     });
   });
 
-  unitTest(`accepts character examples without an MDX article`, () => {
+  unitTest(`accepts character meanings without an MDX article`, () => {
     expect(
       wikiPayloadSchema.safeParse({
+        curriculumMeanings: [
+          {
+            id: `兴:interest`,
+            gloss: `interest`,
+            pinyin: `xìng`,
+            description: `To have an interest in something.`,
+          },
+        ],
         curriculumMeaningExamples: [
           {
             id: `兴:interest`,

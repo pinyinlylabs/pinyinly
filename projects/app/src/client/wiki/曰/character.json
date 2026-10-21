@@ -3,6 +3,7 @@
     "⿴口一": ["0,1,3", "2"]
   },
   "hanzi": "曰",
+  "visuallySimilar": ["日"],
   "mnemonic": {
     "decomposition": "⿴口一"
   },
