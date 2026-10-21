@@ -15,6 +15,10 @@ import { isHanziCharacter } from "@/data/hanzi";
 import { loadDictionary } from "@/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import { gradeCharacterShape } from "@/util/shapeContextGrader";
+import {
+  encodeShapeContextStrokes,
+  serializeShapeContextGraderExample,
+} from "@/util/shapeContextGraderExample";
 import type {
   ShapeContextGrade,
   ShapeContextOptions,
@@ -97,6 +101,22 @@ export interface HanziCharacterWritingQuestionGrade {
   failure: `shape` | `contrastive` | null;
   geometry: ShapeContextGrade;
   similarCharacterGrades: SimilarCharacterGrade[];
+}
+
+export function createHanziCharacterWritingGradeReportJson({
+  question,
+  grade,
+  drawnStrokes,
+}: {
+  question: HanziCharacterWritingQuestion;
+  grade: HanziCharacterWritingQuestionGrade;
+  drawnStrokes: readonly (readonly WritingStrokePoint[])[];
+}): string {
+  return serializeShapeContextGraderExample({
+    id: `${question.hanzi}-${Date.now()}`,
+    drawnStrokes: encodeShapeContextStrokes(drawnStrokes),
+    options: grade.geometry.options,
+  });
 }
 
 export function gradeHanziCharacterWritingQuestion(

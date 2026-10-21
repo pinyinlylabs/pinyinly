@@ -2,7 +2,10 @@ import { hanziSvgPathsQuery } from "@/client/query";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
-import { gradeHanziCharacterWritingQuestion } from "@/data/questions/hanziCharacterWriting";
+import {
+  gradeHanziCharacterWritingQuestion,
+  createHanziCharacterWritingGradeReportJson,
+} from "@/data/questions/hanziCharacterWriting";
 import type {
   HanziCharacterWritingQuestion,
   MistakeType,
@@ -11,6 +14,7 @@ import type {
 import type { HanziCharacterWritingQuestionGrade } from "@/data/questions/hanziCharacterWriting";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import * as Sentry from "@sentry/react-native";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -79,12 +83,34 @@ export function QuizDeckHanziCharacterWritingQuestion({
     onRating(result.skillRatings, emptyArray);
   };
 
+  function reportWrongGrade() {
+    if (grade == null) {
+      return;
+    }
+
+    const reportJson = createHanziCharacterWritingGradeReportJson({
+      question,
+      grade,
+      drawnStrokes,
+    });
+    Sentry.withScope((scope) => {
+      scope.setTag(`report-kind`, `handwriting-grade`);
+      scope.setExtra(`handwriting-grade-report-json`, reportJson);
+      Sentry.captureMessage(`User reported a handwriting grade`);
+    });
+  }
+
   return (
     <QuizDeckQuestionSkeleton
       grade={grade ?? undefined}
       isUserAnswerProvided={drawnStrokes.length > 0}
       onSubmit={handleSubmit}
       onRepeatQuestion={onRepeatQuestion}
+      onReportWrongGrade={
+        grade == null || drawnStrokes.length === 0
+          ? undefined
+          : reportWrongGrade
+      }
       showIdkButton={
         medianPaths.length > 0 &&
         !isSimilarCharacterDataLoading &&
@@ -143,9 +169,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
               onStrokeStart={() => {
                 timer.pause();
               }}
-              onStrokeComplete={(points) => {
-                setDrawnStrokes((strokes) => [...strokes, points]);
-              }}
+              onStrokesChange={setDrawnStrokes}
               onStrokeEnd={() => {
                 timer.resumeAfter(quizTimerIdleGraceMs);
               }}

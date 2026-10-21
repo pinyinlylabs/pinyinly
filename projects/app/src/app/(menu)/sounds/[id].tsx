@@ -660,6 +660,7 @@ function SoundUsageExamplesSection({
           glossCount: entry.glossCount,
           pinyin: entry.pinyin,
           hsk: entry.hsk,
+          hskFirstAppearance: entry.hskFirstAppearance,
         })),
     [db.dictionaryCollection],
   );
@@ -681,6 +682,7 @@ function SoundUsageExamplesSection({
             ...entry,
             pinyin: entry.pinyin ?? null,
             hsk: entry.hsk ?? null,
+            hskFirstAppearance: entry.hskFirstAppearance ?? null,
           }))}
         />
       </View>

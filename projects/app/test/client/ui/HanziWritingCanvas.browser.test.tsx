@@ -24,7 +24,7 @@ test(`prevents selection only on the writing surface`, async () => {
     <div>
       <p data-testid="prompt">Write the character for commerce</p>
       <div data-testid="writing-area">
-        <HanziWritingCanvas onStrokeComplete={vi.fn()} />
+        <HanziWritingCanvas onStrokesChange={vi.fn()} />
       </div>
     </div>,
   );
@@ -45,14 +45,14 @@ test(`prevents selection only on the writing surface`, async () => {
 });
 
 test(`a held pointer can finish a stroke and CHECK remains clickable`, async () => {
-  const onStrokeComplete = vi.fn();
+  const onStrokesChange = vi.fn();
   const onCheck = vi.fn();
   await render(
     <div>
       <div data-testid="writing-area">
         <HanziWritingCanvas
           className="size-64"
-          onStrokeComplete={onStrokeComplete}
+          onStrokesChange={onStrokesChange}
         />
       </div>
       <button type="button" onClick={onCheck}>
@@ -74,10 +74,17 @@ test(`a held pointer can finish a stroke and CHECK remains clickable`, async () 
     clientX: left + 32,
     clientY: top + 32,
   });
+  const undoButtonContainer = page.getByTestId(`undo-button-container`);
+  await expect.element(undoButtonContainer).toBeInTheDocument();
+  expect(getComputedStyle(undoButtonContainer.element()).opacity).toBe(`0`);
   // Synthetic pointers exercise drawing, not iOS's native long-press menu.
   await new Promise((resolve) => {
     setTimeout(resolve, 600);
   });
+  expect(getComputedStyle(undoButtonContainer.element()).opacity).toBe(`1`);
+  await expect
+    .element(page.getByRole(`button`, { name: `Undo` }))
+    .toBeVisible();
   dispatchPointer(svg, `pointermove`, {
     pointerId: 1,
     pointerType: `touch`,
@@ -87,9 +94,11 @@ test(`a held pointer can finish a stroke and CHECK remains clickable`, async () 
   dispatchPointer(svg, `pointerup`, { pointerId: 1, pointerType: `touch` });
 
   expect(capture).toHaveBeenCalledWith(1);
-  expect(onStrokeComplete).toHaveBeenCalledExactlyOnceWith([
-    { x: 128, y: 128 },
-    { x: 256, y: 256 },
+  expect(onStrokesChange).toHaveBeenCalledExactlyOnceWith([
+    [
+      { x: 128, y: 128 },
+      { x: 256, y: 256 },
+    ],
   ]);
   await page.getByRole(`button`, { name: `CHECK` }).click();
   expect(onCheck).toHaveBeenCalledOnce();
@@ -99,7 +108,7 @@ test.for([346, 500])(
   `accepts strokes at both edges of a 420px-wide, %spx-high canvas without stretching guides`,
   async (height) => {
     await page.viewport(420, 670);
-    const onStrokeComplete = vi.fn<(points: WritingStrokePoint[]) => void>();
+    const onStrokesChange = vi.fn<(strokes: WritingStrokePoint[][]) => void>();
     await render(
       <div
         style={{ width: 420, height, paddingInline: 16, display: `flex` }}
@@ -108,7 +117,7 @@ test.for([346, 500])(
         <View className="-mx-4 min-h-0 w-[calc(100%+2rem)] flex-1 items-center justify-center sm:mx-0 sm:w-full">
           <HanziWritingCanvas
             className="size-full max-h-full sm:aspect-square sm:w-auto sm:max-w-full"
-            onStrokeComplete={onStrokeComplete}
+            onStrokesChange={onStrokesChange}
           />
         </View>
       </div>,
@@ -139,8 +148,10 @@ test.for([346, 500])(
         }),
       );
     }
-    expect(onStrokeComplete).toHaveBeenCalledOnce();
-    const points = onStrokeComplete.mock.calls[0]?.[0];
+    expect(onStrokesChange).toHaveBeenCalledOnce();
+    const strokes = onStrokesChange.mock.calls[0]?.[0];
+    assert(strokes != null);
+    const points = strokes[0];
     assert(points != null);
     const size = Math.min(420, height);
     expect(points).toEqual([
@@ -159,15 +170,28 @@ test.for([346, 500])(
   },
 );
 
+test(`Undo removes the latest stroke through onStrokesChange`, async () => {
+  const onStrokesChange = vi.fn();
+  await render(
+    <HanziWritingCanvas
+      drawnStrokes={[[{ x: 1, y: 2 }], [{ x: 3, y: 4 }]]}
+      onStrokesChange={onStrokesChange}
+    />,
+  );
+
+  await page.getByRole(`button`, { name: `Undo` }).click();
+  expect(onStrokesChange).toHaveBeenCalledExactlyOnceWith([[{ x: 1, y: 2 }]]);
+});
+
 test.for([false, true])(
   `does not submit cancelled strokes (disabled: %s)`,
   async (disabled) => {
-    const onStrokeComplete = vi.fn();
+    const onStrokesChange = vi.fn();
     await render(
       <div data-testid="writing-area">
         <HanziWritingCanvas
           disabled={disabled}
-          onStrokeComplete={onStrokeComplete}
+          onStrokesChange={onStrokesChange}
         />
       </div>,
     );
@@ -188,7 +212,7 @@ test.for([false, true])(
     });
     dispatchPointer(svg, `pointercancel`, { pointerId: 1 });
     dispatchPointer(svg, `pointerup`, { pointerId: 1 });
-    expect(onStrokeComplete).not.toHaveBeenCalled();
+    expect(onStrokesChange).not.toHaveBeenCalled();
 
     dispatchPointer(svg, `pointerdown`, {
       pointerId: 2,
@@ -201,6 +225,6 @@ test.for([false, true])(
       clientY: 20,
     });
     dispatchPointer(svg, `pointerup`, { pointerId: 2 });
-    expect(onStrokeComplete).toHaveBeenCalledTimes(disabled ? 0 : 1);
+    expect(onStrokesChange).toHaveBeenCalledTimes(disabled ? 0 : 1);
   },
 );

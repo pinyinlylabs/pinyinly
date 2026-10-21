@@ -1,23 +1,23 @@
 import { hsk30LevelToNumber } from "@/data/hsk";
 import type { Hsk30Level } from "@/data/model";
 
-export interface WikiHskLevelDetail {
+export interface HskLevelDetail {
   hskLevel: Hsk30Level;
   isDirect: boolean;
   isFirstAppearance: boolean;
 }
 
-type DictionaryHskEntry = {
-  hsk?: Hsk30Level;
-  hskFirstAppearance?: Hsk30Level;
-};
+export interface HskLevelEntry {
+  hsk?: Hsk30Level | null;
+  hskFirstAppearance?: Hsk30Level | null;
+}
 
-export function getWikiHskLevelDetails(
-  entries: DictionaryHskEntry[],
-): WikiHskLevelDetail[] {
+export function getHskLevelDetails(
+  entries: readonly HskLevelEntry[],
+): HskLevelDetail[] {
   const levels = new Map<
     Hsk30Level,
-    Pick<WikiHskLevelDetail, `isDirect` | `isFirstAppearance`>
+    Pick<HskLevelDetail, `isDirect` | `isFirstAppearance`>
   >();
 
   for (const entry of entries) {

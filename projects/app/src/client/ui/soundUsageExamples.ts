@@ -10,7 +10,7 @@ import { oneUnitPinyinListOrNull } from "@/dictionary";
 
 export type SoundUsageExample = Pick<
   DictionaryCollectionEntry,
-  `hanziWord` | `hanzi` | `gloss` | `pinyin` | `hsk`
+  `hanziWord` | `hanzi` | `gloss` | `pinyin` | `hsk` | `hskFirstAppearance`
 >;
 
 export function pickSoundUsageExamplesForEntries({
