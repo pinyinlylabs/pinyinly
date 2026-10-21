@@ -35,7 +35,7 @@ export const iconRegistry = {
   [`document`]: require(`../../assets/icons/document.svg`),
   [`dumbbell`]: require(`../../assets/icons/dumbbell.svg`),
   [`expand`]: require(`../../assets/icons/expand.svg`),
-  [`flag-1`]: require(`../../assets/icons/flag-1.svg`),
+  [`flag-filled`]: require(`../../assets/icons/flag-filled.svg`),
   [`flag`]: require(`../../assets/icons/flag.svg`),
   [`flame-filled`]: require(`../../assets/icons/flame-filled.svg`),
   [`flame`]: require(`../../assets/icons/flame.svg`),
