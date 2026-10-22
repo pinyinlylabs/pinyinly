@@ -9,15 +9,19 @@ import {
   skillKindFromSkill,
 } from "@/data/skills";
 import { Text } from "@/client/ui/Text";
+import { HanziLink } from "./HanziLink";
 import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
 import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 
 export const SkillAnswerText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziCharacterToWriting: {
+      const hanzi = hanziCharacterFromWritingSkill(
+        skill as HanziCharacterWritingSkill,
+      );
       return (
-        <Text>
-          {hanziCharacterFromWritingSkill(skill as HanziCharacterWritingSkill)}
+        <Text className="pyly-body-2xl">
+          <HanziLink hanzi={hanzi}>{hanzi}</HanziLink>
         </Text>
       );
     }
