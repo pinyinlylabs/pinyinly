@@ -40,7 +40,9 @@ export function WikiHanziCharacterMeaningBreakdown({
     readonly number[]
   >([]);
 
-  const { data: hanziSvgPathsData } = useQuery(hanziSvgPathsQuery(hanzi));
+  const { data: hanziSvgPathsData, isLoading } = useQuery(
+    hanziSvgPathsQuery(hanzi),
+  );
 
   const strokeSvgs = hanziSvgPathsData?.strokes;
 
@@ -115,7 +117,7 @@ export function WikiHanziCharacterMeaningBreakdown({
   }
 
   if (componentsElements.length === 0) {
-    if (strokeSvgs == null) {
+    if (strokeSvgs == null && !isLoading) {
       return null;
     }
 
@@ -126,7 +128,11 @@ export function WikiHanziCharacterMeaningBreakdown({
         </Text>
 
         <View className="flex-1 items-center">
-          <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
+          <View className="size-12">
+            {strokeSvgs == null ? null : (
+              <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
+            )}
+          </View>
         </View>
       </>
     );
@@ -158,21 +164,24 @@ export function WikiHanziCharacterMeaningBreakdown({
     <View className="gap-3">
       <View className="px-6">
         <View className="gap-1 self-start">
-          {strokeSvgs == null ? (
-            <View
-              onLayout={({ nativeEvent }) => {
-                const centerX =
-                  nativeEvent.layout.x + nativeEvent.layout.width / 2;
-                setSourceCenterX(centerX);
-              }}
-            >
+          <View
+            className="size-12 items-center justify-center"
+            onLayout={
+              strokeSvgs == null
+                ? ({ nativeEvent }) => {
+                    const centerX =
+                      nativeEvent.layout.x + nativeEvent.layout.width / 2;
+                    setSourceCenterX(centerX);
+                  }
+                : undefined
+            }
+          >
+            {strokeSvgs == null ? (
               <Text className="pyly-body text-left text-lg">{hanzi}</Text>
-            </View>
-          ) : (
-            <View className="w-12">
+            ) : (
               <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
-            </View>
-          )}
+            )}
+          </View>
 
           {primaryMeaningGloss == null ? null : (
             <Text className="text-left pyly-body-caption text-muted-fg">
