@@ -71,7 +71,7 @@ export function QuizDeckQuestionSkeleton({
           <RectButton
             variant="bareDim"
             onPress={onSubmit}
-            className="text-base"
+            className="text-base text-muted-fg/50"
           >
             I don&apos;t know
           </RectButton>
