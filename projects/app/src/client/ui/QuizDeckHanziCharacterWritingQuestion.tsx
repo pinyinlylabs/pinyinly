@@ -1,6 +1,9 @@
 import { hanziSvgPathsQuery } from "@/client/query";
+import { RectButton } from "@/client/ui/RectButton";
+import { ScopedVariables } from "@/client/ui/ScopedVariables";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
 import {
   gradeHanziCharacterWritingQuestion,
@@ -12,6 +15,7 @@ import type {
   UnsavedSkillRating,
 } from "@/data/model";
 import type { HanziCharacterWritingQuestionGrade } from "@/data/questions/hanziCharacterWriting";
+import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
 import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
 import * as Sentry from "@sentry/react-native";
@@ -48,6 +52,9 @@ export function QuizDeckHanziCharacterWritingQuestion({
   const { data: svgData, isLoading } = useQuery(
     hanziSvgPathsQuery(question.hanzi),
   );
+  const pinyinAudioSource =
+    getAudioSourcesByPinyinMap().get(question.pinyin)?.[0] ?? null;
+  const playPinyinSound = useSoundEffect(pinyinAudioSource);
   const visuallySimilarData = useVisuallySimilarCharacterReferences(
     question.hanzi,
   );
@@ -123,14 +130,27 @@ export function QuizDeckHanziCharacterWritingQuestion({
         {question.flag == null ? null : <QuizFlagText flag={question.flag} />}
         <View className="gap-1">
           <Text className="font-sans text-xl font-bold text-fg-loud">
-            Write the character for
+            Write the hanzi for “{question.gloss}”
           </Text>
-          <Text className="font-sans text-2xl font-semibold text-fg">
-            {question.gloss}
-          </Text>
-          <Text className="font-sans text-lg text-muted-fg">
-            {question.pinyin}
-          </Text>
+          <View className="mt-2 flex-row items-center gap-3">
+            {pinyinAudioSource == null ? null : (
+              <ScopedVariables
+                variables={{ "--color-fg": `var(--color-cyanold)` }}
+              >
+                <RectButton
+                  accessibilityLabel="Play pronunciation"
+                  variant="filled"
+                  iconStart="speaker-2"
+                  iconSize={16}
+                  className="size-9 p-0"
+                  onPressIn={playPinyinSound}
+                />
+              </ScopedVariables>
+            )}
+            <Text className="font-sans text-lg text-fg-loud">
+              {question.pinyin}
+            </Text>
+          </View>
         </View>
         {isLoading || isSimilarCharacterDataLoading ? (
           <Text className="text-muted-fg">Loading writing data…</Text>
