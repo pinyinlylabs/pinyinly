@@ -14,7 +14,13 @@ import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziCharacterMultipleMeaningsHeaderOverview } from "./WikiHanziCharacterMultipleMeaningsHeaderOverview";
 
-export function WikiHanziBodyCharacter({ hanzi }: { hanzi: HanziCharacter }) {
+export function WikiHanziBodyCharacter({
+  hanzi,
+  onModalDismiss,
+}: {
+  hanzi: HanziCharacter;
+  onModalDismiss?: () => void;
+}) {
   const db = useDb();
 
   const { data: dictionaryEntry } = useLiveQuery(
@@ -34,6 +40,7 @@ export function WikiHanziBodyCharacter({ hanzi }: { hanzi: HanziCharacter }) {
         <WikiHanziCharacterMultipleMeaningsHeaderOverview
           hanzi={hanzi}
           hanziWord={hanziWord}
+          onModalDismiss={onModalDismiss}
         />
 
         <WikiHanziCharacterMeaning hanzi={hanzi} hanziWord={hanziWord} />

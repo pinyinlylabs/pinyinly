@@ -1,6 +1,6 @@
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { RectButton } from "@/client/ui/RectButton";
 import { usePinyinSoundLocations } from "@/client/ui/hooks/usePinyinSoundLocations";
 import { Link } from "expo-router";
@@ -22,7 +22,7 @@ export default function LocationsPage() {
 
       <View className="gap-2">
         <Text className="pyly-body-title">Locations</Text>
-        <HeaderTitleProvider.ScrollTrigger title="Locations" />
+        <HeaderProvider.ScrollTrigger title="Locations" />
         <Text className="font-sans text-sm text-muted-fg">
           Reusable location records for pinyin final tone scenes.
         </Text>

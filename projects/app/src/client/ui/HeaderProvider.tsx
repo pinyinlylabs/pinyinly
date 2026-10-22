@@ -1,29 +1,33 @@
-import { HeaderTitleContext } from "@/client/ui/contexts";
+import { HeaderContext } from "@/client/ui/contexts";
 import type { HeaderTitleScrollTriggerState } from "@/client/ui/contexts";
 import { maxK } from "@pinyinly/lib/collections";
 import { useIsFocused } from "expo-router";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { use, useId, useLayoutEffect, useState } from "react";
 import type { TextProps } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 
-function useHeaderTitleContextOrThrow() {
-  const context = use(HeaderTitleContext);
+function useHeaderContextOrThrow() {
+  const context = use(HeaderContext);
   if (context == null) {
     throw new Error(
-      `HeaderTitleProvider compound components must be used within a HeaderTitleProvider`,
+      `HeaderProvider compound components must be used within a HeaderProvider`,
     );
   }
   return context;
 }
 
-function HeaderTitleProvider({ children }: PropsWithChildren) {
+function HeaderProvider({
+  children,
+  actionsSlotEnabled = false,
+}: PropsWithChildren<{ actionsSlotEnabled?: boolean }>) {
   const [titleScrollTriggerStates, setTitleScrollTriggerStates] = useState<
     readonly HeaderTitleScrollTriggerState[]
   >([]);
   const [defaultTitle, setDefaultTitle] = useState<string | null>(null);
+  const [actionsSlotContent, setActionsSlotContent] = useState<ReactNode>(null);
 
   const activeTitleScrollTriggerState = maxK(
     titleScrollTriggerStates.filter(
@@ -38,7 +42,7 @@ function HeaderTitleProvider({ children }: PropsWithChildren) {
     activeTitleScrollTriggerState != null || defaultTitle != null;
 
   return (
-    <HeaderTitleContext.Provider
+    <HeaderContext.Provider
       value={{
         title,
         showTitle,
@@ -55,16 +59,19 @@ function HeaderTitleProvider({ children }: PropsWithChildren) {
             current.filter((state) => state.id !== id),
           );
         },
+        actionsSlotEnabled,
+        actionsSlotContent,
+        setActionsSlotContent,
       }}
     >
       {children}
-    </HeaderTitleContext.Provider>
+    </HeaderContext.Provider>
   );
 }
 
-function HeaderTitleProviderScrollTrigger({ title }: { title: string }) {
+function HeaderProviderScrollTrigger({ title }: { title: string }) {
   const { removeTitleScrollTriggerState, upsertTitleScrollTriggerState } =
-    useHeaderTitleContextOrThrow();
+    useHeaderContextOrThrow();
   const id = useId();
   const [element, setElement] = useState<Element | null>(null);
   const isFocused = useIsFocused();
@@ -179,12 +186,12 @@ function findNearestScrollContainer(element: Element): Element | null {
   return null;
 }
 
-function HeaderTitleProviderTitleText({
+function HeaderProviderTitleText({
   className,
 }: {
   className?: TextProps[`className`];
 }) {
-  const { title, showTitle } = useHeaderTitleContextOrThrow();
+  const { title, showTitle } = useHeaderContextOrThrow();
 
   if (title == null) {
     return null;
@@ -197,8 +204,8 @@ function HeaderTitleProviderTitleText({
   );
 }
 
-function HeaderTitleProviderDefaultTitle({ title }: { title: string }) {
-  const { setDefaultTitle } = useHeaderTitleContextOrThrow();
+function HeaderProviderDefaultTitle({ title }: { title: string }) {
+  const { setDefaultTitle } = useHeaderContextOrThrow();
 
   useLayoutEffect(() => {
     setDefaultTitle(title);
@@ -210,11 +217,37 @@ function HeaderTitleProviderDefaultTitle({ title }: { title: string }) {
   return null;
 }
 
-HeaderTitleProvider.TitleText = HeaderTitleProviderTitleText;
-HeaderTitleProvider.ScrollTrigger = HeaderTitleProviderScrollTrigger;
-HeaderTitleProvider.DefaultTitle = HeaderTitleProviderDefaultTitle;
+function HeaderProviderActionsPortal({ children }: PropsWithChildren) {
+  const context = use(HeaderContext);
+  const actionsSlotEnabled = context?.actionsSlotEnabled ?? false;
+  const setActionsSlotContent = context?.setActionsSlotContent;
 
-export { HeaderTitleProvider };
+  useLayoutEffect(() => {
+    if (!actionsSlotEnabled || setActionsSlotContent == null) {
+      return;
+    }
+
+    setActionsSlotContent(children);
+    return () => {
+      setActionsSlotContent(null);
+    };
+  }, [actionsSlotEnabled, children, setActionsSlotContent]);
+
+  return actionsSlotEnabled ? null : <>{children}</>;
+}
+
+function HeaderProviderActionsSlot() {
+  const { actionsSlotContent } = useHeaderContextOrThrow();
+  return <>{actionsSlotContent}</>;
+}
+
+HeaderProvider.TitleText = HeaderProviderTitleText;
+HeaderProvider.ScrollTrigger = HeaderProviderScrollTrigger;
+HeaderProvider.DefaultTitle = HeaderProviderDefaultTitle;
+HeaderProvider.ActionsPortal = HeaderProviderActionsPortal;
+HeaderProvider.ActionsSlot = HeaderProviderActionsSlot;
+
+export { HeaderProvider };
 
 const titleTextClass = tv({
   base: `transition-opacity`,

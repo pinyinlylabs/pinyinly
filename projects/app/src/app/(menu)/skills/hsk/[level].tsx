@@ -2,7 +2,7 @@ import { dictionaryQuery } from "@/client/query";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import { SkillWordRows } from "@/client/ui/SkillWordRows";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import type { Dictionary } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
@@ -33,7 +33,7 @@ export default function SkillsHskLevelRoutePage() {
 
       <View>
         <Text className="pyly-body-title">{`HSK ${parsedLevel}`}</Text>
-        <HeaderTitleProvider.ScrollTrigger title={`HSK ${parsedLevel}`} />
+        <HeaderProvider.ScrollTrigger title={`HSK ${parsedLevel}`} />
       </View>
 
       <SkillWordRows

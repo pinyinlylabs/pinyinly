@@ -16,15 +16,21 @@ import { useState } from "react";
 
 export function WikiHanziBodyCharacterMultipleMeanings({
   hanzi,
+  onModalDismiss,
 }: {
   hanzi: HanziCharacter;
+  onModalDismiss?: () => void;
 }) {
   const [hanziWord, setHanziWord] = useState<HanziWord | null>(null);
 
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-10 bg-bg py-7">
-        <WikiHanziCharacterHeaderOverview hanzi={hanzi} hanziWord={hanziWord} />
+        <WikiHanziCharacterHeaderOverview
+          hanzi={hanzi}
+          hanziWord={hanziWord}
+          onModalDismiss={onModalDismiss}
+        />
 
         <WikiHanziCharacterChooseAMeaning
           hanzi={hanzi}

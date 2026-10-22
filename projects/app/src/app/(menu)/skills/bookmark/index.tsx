@@ -1,6 +1,6 @@
 import { BookmarkList } from "@/client/ui/BookmarkList";
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { RectButton } from "@/client/ui/RectButton";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -20,7 +20,7 @@ export default function BookmarksPage() {
         <Breadcrumbs.Item href="/skills/bookmark">Bookmarks</Breadcrumbs.Item>
       </Breadcrumbs>
 
-      <HeaderTitleProvider.ScrollTrigger title="Bookmarks" />
+      <HeaderProvider.ScrollTrigger title="Bookmarks" />
       <View className="items-end">
         <RectButton
           href="/learn/study"

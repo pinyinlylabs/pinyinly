@@ -1,4 +1,4 @@
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { BookmarkList } from "@/client/ui/BookmarkList";
 import { WikiDictionarySearch } from "@/client/ui/WikiDictionarySearch";
 import { Text } from "@/client/ui/Text";
@@ -9,7 +9,7 @@ export default function WikiIndexPage() {
     <View className="gap-6">
       <View className="gap-2">
         <Text className="pyly-body-title">Wiki</Text>
-        <HeaderTitleProvider.ScrollTrigger title="Wiki" />
+        <HeaderProvider.ScrollTrigger title="Wiki" />
         <Text className="pyly-body-caption text-muted-fg">
           Explore characters, words, and meanings with stories, breakdowns, and
           pronunciation.

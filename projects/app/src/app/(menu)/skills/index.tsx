@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { Icon } from "@/client/ui/Icon";
 import { Link } from "expo-router";
 import { Pressable } from "react-native";
@@ -15,7 +15,7 @@ export default function SkillsPage() {
 
       <View>
         <Text className="pyly-body-title">Skills</Text>
-        <HeaderTitleProvider.ScrollTrigger title="Skills" />
+        <HeaderProvider.ScrollTrigger title="Skills" />
       </View>
 
       <View className="gap-2">

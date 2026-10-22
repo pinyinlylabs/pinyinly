@@ -1,6 +1,6 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { DropdownMenu2 } from "@/client/ui/DropdownMenu2";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -115,7 +115,7 @@ export default function ActorIdPage() {
         </Text>
       ) : null}
 
-      <HeaderTitleProvider.ScrollTrigger title={title} />
+      <HeaderProvider.ScrollTrigger title={title} />
 
       <View className="items-center">
         <InlineEditableSettingImage

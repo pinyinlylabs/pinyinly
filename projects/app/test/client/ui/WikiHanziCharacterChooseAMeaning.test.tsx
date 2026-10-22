@@ -86,7 +86,7 @@ function TestChooser() {
         hanziWord={hanziWord}
         onHanziWordChanged={setHanziWord}
       />
-      <WikiHanziBookmarkMenu hanziWord={hanziWord} />
+      <WikiHanziBookmarkMenu hanzi={hanzi} hanziWord={hanziWord} />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import type { HanziText, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { useState } from "react";
@@ -12,9 +12,11 @@ import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 
 export function WikiHanziWordHeaderOverview({
   hanzi,
+  onModalDismiss,
   ...rest
 }: {
   hanzi: HanziText;
+  onModalDismiss?: () => void;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -28,10 +30,16 @@ export function WikiHanziWordHeaderOverview({
           <WikiHanziHskLozenges hanzi={hanzi} />
           <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={studyHanziWord} />
         </View>
-        <WikiHanziBookmarkMenu hanziWord={studyHanziWord} />
+        <HeaderProvider.ActionsPortal>
+          <WikiHanziBookmarkMenu
+            hanziWord={studyHanziWord}
+            hanzi={hanzi}
+            onModalDismiss={onModalDismiss}
+          />
+        </HeaderProvider.ActionsPortal>
       </View>
       <View>
-        <HeaderTitleProvider.ScrollTrigger title={hanzi} />
+        <HeaderProvider.ScrollTrigger title={hanzi} />
         <Text className="font-sans text-[48px] font-semibold text-fg-loud">
           {hanzi}
         </Text>
@@ -39,7 +47,9 @@ export function WikiHanziWordHeaderOverview({
       <WikiHanziMeaningsPanel
         hanzi={hanzi}
         selectedHanziWord={studyHanziWord}
-        onHanziWordSelected={setStudyHanziWord}
+        onHanziWordSelected={(hanziWord) => {
+          setStudyHanziWord(hanziWord);
+        }}
       />
     </View>
   );
