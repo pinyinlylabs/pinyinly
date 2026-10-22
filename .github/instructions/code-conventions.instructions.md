@@ -56,3 +56,10 @@ function MyComponent({ onClick }: { onClick: () => void }) {
   return <button onClick={handleClick}>Click me</button>;
 }
 ```
+
+## Prefer CSS class-based animations
+
+- Prefer declarative CSS/Tailwind classes for animation and transitions instead of procedural
+  animation code. Class-based animations are more portable, easier to inspect, and simpler to
+  maintain.
+- Use JavaScript animation APIs only when CSS classes cannot express the required behavior.

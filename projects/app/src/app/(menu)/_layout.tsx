@@ -2,6 +2,7 @@ import { HeaderTitleContext } from "@/client/ui/contexts";
 import { Icon } from "@/client/ui/Icon";
 import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import { MobileNavMenu } from "@/client/ui/MobileNavMenu";
+import { BuildTimestampStamp } from "@/client/ui/BuildTimestampStamp";
 import { navItems } from "@/client/ui/navItems";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
@@ -11,7 +12,7 @@ import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { Pressable, ScrollView } from "react-native";
+import { Platform, Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { cn, tv } from "tailwind-variants";
@@ -92,9 +93,9 @@ function MenuLayoutContent() {
               </Link>
             </View>
 
-            <QuickSearchButton className="mb-4 place-self-stretch" />
+            <QuickSearchButton className="mb-4" />
 
-            <View className="w-50 items-stretch rounded-xl bg-bg-high py-3">
+            <View className="w-full items-stretch rounded-xl bg-bg-high py-3">
               {navItems
                 .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
@@ -141,6 +142,7 @@ function MenuLayoutContent() {
                   </Fragment>
                 ))}
             </View>
+            {Platform.OS === `web` ? <BuildTimestampStamp /> : null}
           </View>
         </View>
 
