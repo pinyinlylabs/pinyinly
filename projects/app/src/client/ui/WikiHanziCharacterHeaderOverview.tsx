@@ -2,7 +2,7 @@ import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
 import type { HanziCharacter, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
-import { StructuralLozenge } from "./StructuralLozenge";
+import { ComponentLozenge } from "./ComponentLozenge";
 import { Lozenge } from "./Lozenge";
 import { Text } from "./Text";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -60,7 +60,9 @@ export function WikiHanziCharacterHeaderOverview({
         <View className="flex-1 flex-row items-center gap-1">
           <WikiHanziBookmarkLozenge hanziWord={hanziWord} />
           <WikiHanziHskLozenges hanzi={hanzi} />
-          {characterData?.isStructural ? <StructuralLozenge /> : null}
+          {characterData?.isComponent ? (
+            <ComponentLozenge isStructural={characterData.isStructural} />
+          ) : null}
           <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={hanziWord} />
         </View>
         <WikiHanziBookmarkMenu hanziWord={hanziWord} />

@@ -989,6 +989,8 @@ function characterCollectionOptions(): CollectionConfig<
         entries.push({
           hanzi,
           isStructural: data.isStructural ?? false,
+          isComponent:
+            data.isStructural === true || data.componentFormOf != null,
           strokes: data.strokes,
           componentFormOf: data.componentFormOf ?? null,
         });

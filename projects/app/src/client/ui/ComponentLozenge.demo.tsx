@@ -1,6 +1,6 @@
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { StructuralLozenge } from "./StructuralLozenge";
+import { ComponentLozenge } from "./ComponentLozenge";
 
 export default () => {
   return (
@@ -8,13 +8,13 @@ export default () => {
       <View className="gap-2">
         <Text className="font-sans text-sm text-muted-fg">Medium</Text>
         <View className="flex-row flex-wrap gap-2">
-          <StructuralLozenge />
+          <ComponentLozenge isStructural />
         </View>
       </View>
       <View className="gap-2">
         <Text className="font-sans text-sm text-muted-fg">Small</Text>
         <View className="flex-row flex-wrap gap-2">
-          <StructuralLozenge size="sm" />
+          <ComponentLozenge isStructural={false} size="sm" />
         </View>
       </View>
     </View>

@@ -1204,6 +1204,7 @@ export interface CharacterMnemonicIdsRow {
 export interface CharacterCollectionRow {
   hanzi: HanziCharacter;
   isStructural: boolean;
+  isComponent: boolean;
   strokes: number;
   componentFormOf: HanziCharacter | null;
 }
