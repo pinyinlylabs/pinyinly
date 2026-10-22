@@ -11,6 +11,7 @@ import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { HanziLink } from "./HanziLink";
 import { HanziGraphic } from "./HanziGraphic";
+import { Icon } from "./Icon";
 
 export function HanziStrokesTile({
   componentHanzi,
@@ -31,16 +32,13 @@ export function HanziStrokesTile({
   fillWidth?: boolean;
   onVisualLayout?: (event: LayoutChangeEvent) => void;
 }) {
-  const { data: strokesData } = useQuery(hanziSvgPathsQuery(hanzi));
+  const { data: strokesData, isLoading } = useQuery(hanziSvgPathsQuery(hanzi));
 
-  if (strokesData == null) {
-    return null;
-  }
-  const segmentPathsByAtom = strokesData.segments ?? null;
-  const strokePaths = strokesData.strokes;
+  const segmentPathsByAtom = strokesData?.segments ?? null;
+  const strokePaths = strokesData?.strokes ?? [];
 
   const fgSvgPaths =
-    componentStrokeSpec == null
+    componentStrokeSpec == null || strokesData == null
       ? []
       : strokeSpecFilter(
           strokePaths,
@@ -56,8 +54,11 @@ export function HanziStrokesTile({
     <View
       className={fillWidth ? `w-full items-center gap-2` : `items-start gap-2`}
     >
-      <View className="min-w-12 items-center" onLayout={onVisualLayout}>
-        {fgSvgPaths.length > 0 ? (
+      <View
+        className="size-12 items-center justify-center"
+        onLayout={onVisualLayout}
+      >
+        {isLoading ? null : fgSvgPaths.length > 0 ? (
           <HanziGraphic
             className={`
               size-12
@@ -67,7 +68,11 @@ export function HanziStrokesTile({
             fgSvgPaths={fgSvgPaths}
             bgSvgPaths={strokePaths}
           />
-        ) : componentHanzi == null ? null : (
+        ) : componentHanzi == null ? (
+          <View accessibilityLabel="Character graphic unavailable" role="img">
+            <Icon icon="circle-warning" tintColorClassName="accent-muted-fg" />
+          </View>
+        ) : (
           <Text className="pyly-body text-center text-lg">
             {componentHanzi}
           </Text>
