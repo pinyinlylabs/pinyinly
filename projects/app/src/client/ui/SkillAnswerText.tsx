@@ -4,22 +4,17 @@ import type {
   Skill,
 } from "@/data/model";
 import { SkillKind } from "@/data/model";
-import {
-  hanziCharacterFromWritingSkill,
-  skillKindFromSkill,
-} from "@/data/skills";
-import { Text } from "@/client/ui/Text";
+import { skillKindFromSkill } from "@/data/skills";
+import { HanziCharacterWritingSkillAnswerText } from "./HanziCharacterWritingSkillAnswerText";
 import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
 import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 
 export const SkillAnswerText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziCharacterToWriting: {
-      return (
-        <Text>
-          {hanziCharacterFromWritingSkill(skill as HanziCharacterWritingSkill)}
-        </Text>
-      );
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+      skill = skill as HanziCharacterWritingSkill;
+      return <HanziCharacterWritingSkillAnswerText skill={skill} />;
     }
     case SkillKind.Deprecated_EnglishToRadical:
     case SkillKind.Deprecated_PinyinToRadical:
