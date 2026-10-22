@@ -4,19 +4,19 @@ import { useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { ScrollView } from "react-native";
 import { View } from "@/client/ui/View";
-import { HeaderTitleProvider } from "./HeaderTitleProvider";
+import { HeaderProvider } from "./HeaderProvider";
 import { CloseButton } from "./CloseButton";
-import { RectButton } from "./RectButton";
 import { WikiHanziBody } from "./WikiHanziBody";
+import { WikiHanziModalContext } from "./WikiHanziModalContext";
 
 export function WikiHanziModalImpl({
   hanzi,
   onDismiss,
-  onExpand,
+  onModalDismiss,
 }: {
   hanzi: HanziText;
   onDismiss: () => void;
-  onExpand: () => void;
+  onModalDismiss: () => void;
 }) {
   const [isHeaderBackgroundVisible, setIsHeaderBackgroundVisible] =
     useState(false);
@@ -32,39 +32,38 @@ export function WikiHanziModalImpl({
   }
 
   return (
-    <HeaderTitleProvider>
-      <ScrollView
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        className={
-          // Use a linear gradient on the background so that rubber band
-          // scrolling showing the correct color at the top and bottom.
-          `h-screen`
-        }
-        contentContainerClassName="min-h-full pb-10"
-      >
-        <Header
-          onDismiss={onDismiss}
-          onExpand={onExpand}
-          isBackgroundVisible={isHeaderBackgroundVisible}
-        />
+    <HeaderProvider actionsSlotEnabled>
+      <WikiHanziModalContext.Provider value={{ isInWikiHanziModal: true }}>
+        <ScrollView
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          className={
+            // Use a linear gradient on the background so that rubber band
+            // scrolling showing the correct color at the top and bottom.
+            `h-screen`
+          }
+          contentContainerClassName="min-h-full pb-10"
+        >
+          <Header
+            onDismiss={onDismiss}
+            isBackgroundVisible={isHeaderBackgroundVisible}
+          />
 
-        <View className="px-safe-or-4">
-          <WikiHanziBody hanzi={hanzi} />
-        </View>
-      </ScrollView>
-    </HeaderTitleProvider>
+          <View className="px-safe-or-4">
+            <WikiHanziBody hanzi={hanzi} onModalDismiss={onModalDismiss} />
+          </View>
+        </ScrollView>
+      </WikiHanziModalContext.Provider>
+    </HeaderProvider>
   );
 }
 
 function Header({
   onDismiss,
-  onExpand,
   isBackgroundVisible,
   ...rest
 }: {
   onDismiss: () => void;
-  onExpand: () => void;
   isBackgroundVisible: boolean;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
@@ -86,13 +85,11 @@ function Header({
         </View>
 
         <View className="flex-1 content-center items-center">
-          <HeaderTitleProvider.TitleText className="font-sans text-3xl text-fg-loud" />
+          <HeaderProvider.TitleText className="font-sans text-3xl text-fg-loud" />
         </View>
 
         <View className="w-20 items-end">
-          <RectButton variant="bare" onPress={onExpand} iconStart="size">
-            Expand
-          </RectButton>
+          <HeaderProvider.ActionsSlot />
         </View>
       </View>
     </View>

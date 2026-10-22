@@ -1,4 +1,4 @@
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
 import { RectButton } from "@/client/ui/RectButton";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
@@ -17,7 +17,7 @@ export default function ActorsPage() {
     <View className="gap-5">
       <View className="gap-2">
         <Text className="pyly-body-title">Actors</Text>
-        <HeaderTitleProvider.ScrollTrigger title="Actors" />
+        <HeaderProvider.ScrollTrigger title="Actors" />
         <Text className="font-sans text-sm text-muted-fg">
           Reusable character and actor records for sound alternatives.
         </Text>

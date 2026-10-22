@@ -8,11 +8,20 @@ import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
 import { WikiHanziWordHeaderOverview } from "./WikiHanziWordHeaderOverview";
 import { WikiHanziWordCharacters } from "./WikiHanziWordCharacters";
 
-export function WikiHanziBodyWord({ hanzi }: { hanzi: HanziText }) {
+export function WikiHanziBodyWord({
+  hanzi,
+  onModalDismiss,
+}: {
+  hanzi: HanziText;
+  onModalDismiss?: () => void;
+}) {
   return (
     <PylyMdxComponents>
       <View className="flex-1 gap-10 bg-bg py-7">
-        <WikiHanziWordHeaderOverview hanzi={hanzi} />
+        <WikiHanziWordHeaderOverview
+          hanzi={hanzi}
+          onModalDismiss={onModalDismiss}
+        />
 
         <WikiHanziWordCharacters hanzi={hanzi} />
 

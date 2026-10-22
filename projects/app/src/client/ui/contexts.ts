@@ -4,6 +4,7 @@ import type { Skill } from "@/data/model";
 import type { SkillReviewQueue } from "@/data/skills";
 import type { QueryClient } from "@tanstack/react-query";
 import { createContext } from "react";
+import type { ReactNode } from "react";
 import type { DeepReadonly } from "ts-essentials";
 
 // React contexts are here so that they're compatible with hot module
@@ -30,18 +31,19 @@ export interface HeaderTitleScrollTriggerState {
   top: number | null;
 }
 
-export interface HeaderTitleContextValue {
+export interface HeaderContextValue {
   title: string | null;
   showTitle: boolean;
   defaultTitle: string | null;
   setDefaultTitle: (title: string | null) => void;
   upsertTitleScrollTriggerState: (state: HeaderTitleScrollTriggerState) => void;
   removeTitleScrollTriggerState: (id: string) => void;
+  actionsSlotEnabled: boolean;
+  actionsSlotContent: ReactNode;
+  setActionsSlotContent: (content: ReactNode | null) => void;
 }
 
-export const HeaderTitleContext = createContext<HeaderTitleContextValue | null>(
-  null,
-);
+export const HeaderContext = createContext<HeaderContextValue | null>(null);
 
 /** Modal ordering and registration used to scope keyboard shortcuts. */
 export interface KeyboardShortcutModalContextValue {

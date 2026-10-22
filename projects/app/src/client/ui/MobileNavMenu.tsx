@@ -9,7 +9,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { HeaderTitleProvider } from "./HeaderTitleProvider";
+import { HeaderProvider } from "./HeaderProvider";
 import { PageSheetModal } from "./PageSheetModal";
 import { QuickSearchResults } from "./QuickSearchResults";
 import { TextInputSingle } from "./TextInputSingle";
@@ -58,12 +58,12 @@ export function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
   }
 
   return (
-    <HeaderTitleProvider>
-      <HeaderTitleProvider.DefaultTitle title="Menu" />
+    <HeaderProvider>
+      <HeaderProvider.DefaultTitle title="Menu" />
       <PageSheetModal onDismiss={onClose} suspenseFallback={null}>
         {({ dismiss }) => <NavMenuContent dismiss={dismiss} />}
       </PageSheetModal>
-    </HeaderTitleProvider>
+    </HeaderProvider>
   );
 }
 
@@ -75,7 +75,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
       <View className="flex-row px-4 py-3">
         <View className="w-8 shrink" />
         <View className="flex-1 items-center">
-          <HeaderTitleProvider.TitleText className={`pyly-body-title`} />
+          <HeaderProvider.TitleText className={`pyly-body-title`} />
         </View>
         <View className="w-8 shrink">
           <Pressable onPress={dismiss}>

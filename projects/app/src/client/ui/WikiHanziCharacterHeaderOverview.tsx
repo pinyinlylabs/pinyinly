@@ -1,4 +1,4 @@
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import type { HanziCharacter, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
@@ -18,10 +18,12 @@ import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 export function WikiHanziCharacterHeaderOverview({
   hanzi,
   hanziWord,
+  onModalDismiss,
   ...rest
 }: {
   hanzi: HanziCharacter;
   hanziWord: HanziWord | null;
+  onModalDismiss?: () => void;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -63,10 +65,16 @@ export function WikiHanziCharacterHeaderOverview({
           {characterData?.isStructural ? <StructuralLozenge /> : null}
           <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={hanziWord} />
         </View>
-        <WikiHanziBookmarkMenu hanziWord={hanziWord} />
+        <HeaderProvider.ActionsPortal>
+          <WikiHanziBookmarkMenu
+            hanziWord={hanziWord}
+            hanzi={hanzi}
+            onModalDismiss={onModalDismiss}
+          />
+        </HeaderProvider.ActionsPortal>
       </View>
       <View>
-        <HeaderTitleProvider.ScrollTrigger title={hanzi} />
+        <HeaderProvider.ScrollTrigger title={hanzi} />
         <Text className="font-sans text-[48px] font-semibold text-fg-loud">
           {hanzi}
         </Text>

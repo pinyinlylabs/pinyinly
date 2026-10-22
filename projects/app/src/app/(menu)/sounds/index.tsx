@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { useDb } from "@/client/ui/hooks/useDb";
@@ -230,7 +230,7 @@ export default function SoundsPage() {
 
       <View>
         <Text className="pyly-body-title">Sounds</Text>
-        <HeaderTitleProvider.ScrollTrigger title="Sounds" />
+        <HeaderProvider.ScrollTrigger title="Sounds" />
       </View>
 
       <View className="flex-row flex-wrap gap-2">

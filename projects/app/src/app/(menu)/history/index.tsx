@@ -1,4 +1,4 @@
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { historyPageCollection, historyPageData } from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { Icon } from "@/client/ui/Icon";
@@ -32,7 +32,7 @@ export default function HistoryPage() {
       {/* Header */}
       <View>
         <Text className="pyly-body-title">History</Text>
-        <HeaderTitleProvider.ScrollTrigger title="History" />
+        <HeaderProvider.ScrollTrigger title="History" />
       </View>
 
       <View className="gap-5">

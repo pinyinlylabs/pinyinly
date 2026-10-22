@@ -1,6 +1,6 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { trpc } from "@/client/trpc";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingJson } from "@/client/ui/InlineEditableSettingJson";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -45,7 +45,7 @@ export default function LocationIdPage() {
         <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
       </Breadcrumbs>
 
-      <HeaderTitleProvider.ScrollTrigger title={title} />
+      <HeaderProvider.ScrollTrigger title={title} />
 
       <View className="gap-1">
         <View className="w-[260px] overflow-hidden rounded-2xl">

@@ -1,6 +1,6 @@
-import { HeaderTitleContext } from "@/client/ui/contexts";
+import { HeaderContext } from "@/client/ui/contexts";
 import { Icon } from "@/client/ui/Icon";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { MobileNavMenu } from "@/client/ui/MobileNavMenu";
 import { navItems } from "@/client/ui/navItems";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
@@ -33,9 +33,9 @@ function isNavItemActive(pathname: string, href: string): boolean {
 
 export default function MenuLayout() {
   return (
-    <HeaderTitleProvider>
+    <HeaderProvider>
       <MenuLayoutContent />
-    </HeaderTitleProvider>
+    </HeaderProvider>
   );
 }
 
@@ -182,7 +182,7 @@ function MenuLayoutContent() {
 }
 
 function DesktopFloatingTitle() {
-  const title = use(HeaderTitleContext)?.title;
+  const title = use(HeaderContext)?.title;
 
   if (title == null) {
     return null;
@@ -231,7 +231,7 @@ function DesktopFloatingTitle() {
               `}
             />
 
-            <HeaderTitleProvider.TitleText className="pyly-body-title" />
+            <HeaderProvider.TitleText className="pyly-body-title" />
           </View>
         </View>
 
@@ -360,7 +360,7 @@ function MobileFloatingTitle({
         <View className="pointer-events-auto h-14 flex-row items-center">
           <View className="w-8 shrink">{leftButton ?? null}</View>
           <View className="flex-1 items-center justify-center">
-            <HeaderTitleProvider.TitleText className="pyly-body-title" />
+            <HeaderProvider.TitleText className="pyly-body-title" />
           </View>
           <View className="w-8 shrink">{rightButton ?? null}</View>
         </View>

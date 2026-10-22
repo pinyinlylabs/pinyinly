@@ -1,17 +1,17 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 
-export default function HeaderTitleProviderDemo() {
+export default function HeaderProviderDemo() {
   return (
     <View className="flex-1 gap-4">
-      <LittlePrimaryHeader title="HeaderTitleProvider Title Scroll Trigger" />
+      <LittlePrimaryHeader title="HeaderProvider Title Scroll Trigger" />
 
       <View className="flex-row flex-wrap">
         <ExampleStack title="Large sections" showFrame>
-          <HeaderTitleProviderScrollDemo
+          <HeaderProviderScrollDemo
             sections={[
               {
                 title: `Character`,
@@ -34,7 +34,7 @@ export default function HeaderTitleProviderDemo() {
         </ExampleStack>
 
         <ExampleStack title="Dense trigger changes" showFrame>
-          <HeaderTitleProviderScrollDemo
+          <HeaderProviderScrollDemo
             sections={[
               {
                 title: `Overview`,
@@ -61,7 +61,7 @@ export default function HeaderTitleProviderDemo() {
   );
 }
 
-function HeaderTitleProviderScrollDemo({
+function HeaderProviderScrollDemo({
   sections,
   compact = false,
 }: {
@@ -70,7 +70,7 @@ function HeaderTitleProviderScrollDemo({
 }) {
   return (
     <View className="h-140 w-105 overflow-hidden rounded-lg border border-fg/10 bg-bg">
-      <HeaderTitleProvider>
+      <HeaderProvider>
         <View
           className={`
             sticky top-0 z-10 h-13 flex-row items-center border-b border-fg/10 bg-bg/95 px-4
@@ -79,7 +79,7 @@ function HeaderTitleProviderScrollDemo({
           <Text className="pyly-body text-muted-fg">Floating title:</Text>
           <View className="w-2" />
           <View className="flex-1">
-            <HeaderTitleProvider.TitleText className="pyly-body-heading text-fg-loud" />
+            <HeaderProvider.TitleText className="pyly-body-heading text-fg-loud" />
           </View>
         </View>
 
@@ -94,7 +94,7 @@ function HeaderTitleProviderScrollDemo({
           {sections.map((section) => (
             <View key={section.title} className="gap-3">
               <Text className="pyly-body-heading">{section.title}</Text>
-              <HeaderTitleProvider.ScrollTrigger title={section.title} />
+              <HeaderProvider.ScrollTrigger title={section.title} />
 
               <Text className="pyly-body text-muted-fg">{section.summary}</Text>
 
@@ -108,7 +108,7 @@ function HeaderTitleProviderScrollDemo({
             </View>
           ))}
         </ScrollView>
-      </HeaderTitleProvider>
+      </HeaderProvider>
     </View>
   );
 }

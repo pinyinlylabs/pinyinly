@@ -4,7 +4,7 @@ import { CompactWordRows } from "@/client/ui/CompactWordRows";
 import { DropdownMenu } from "@/client/ui/DropdownMenu";
 import { InitialSoundTile } from "@/client/ui/InitialSoundTile";
 import { FinalSoundTile } from "@/client/ui/FinalSoundTile";
-import { HeaderTitleProvider } from "@/client/ui/HeaderTitleProvider";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { usePinyinSoundActors } from "@/client/ui/hooks/usePinyinSoundActors";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import type { PinyinSoundLocationThoughtChainType } from "@/client/ui/hooks/usePinyinSoundLocations";
@@ -153,7 +153,7 @@ export default function SoundIdPage() {
     <View className="w-full self-center pt-safe px-safe pb-2">
       <Breadcrumb pinyinSoundId={id} />
 
-      <HeaderTitleProvider.ScrollTrigger title={label} />
+      <HeaderProvider.ScrollTrigger title={label} />
 
       <View className="my-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
