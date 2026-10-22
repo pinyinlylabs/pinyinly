@@ -4,26 +4,17 @@ import type {
   Skill,
 } from "@/data/model";
 import { SkillKind } from "@/data/model";
-import {
-  hanziCharacterFromWritingSkill,
-  skillKindFromSkill,
-} from "@/data/skills";
-import { Text } from "@/client/ui/Text";
-import { HanziLink } from "./HanziLink";
+import { skillKindFromSkill } from "@/data/skills";
+import { HanziCharacterWritingSkillAnswerText } from "./HanziCharacterWritingSkillAnswerText";
 import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
 import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 
 export const SkillAnswerText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziCharacterToWriting: {
-      const hanzi = hanziCharacterFromWritingSkill(
-        skill as HanziCharacterWritingSkill,
-      );
-      return (
-        <Text className="pyly-body-2xl">
-          <HanziLink hanzi={hanzi}>{hanzi}</HanziLink>
-        </Text>
-      );
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+      skill = skill as HanziCharacterWritingSkill;
+      return <HanziCharacterWritingSkillAnswerText skill={skill} />;
     }
     case SkillKind.Deprecated_EnglishToRadical:
     case SkillKind.Deprecated_PinyinToRadical:
