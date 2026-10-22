@@ -618,7 +618,7 @@ export function getHanziWordRank({
   rankRules,
 }: {
   hanziWord: HanziWord;
-  skillSrsStates: Map<Skill, SrsStateType>;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   rankRules: RankRules;
 }): RankedHanziWord {
   let highestRank = 0;

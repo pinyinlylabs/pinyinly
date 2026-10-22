@@ -9,13 +9,16 @@ import { proficiencyFillProgress, proficiencyStyle } from "./proficiencyStyles";
 import { Tooltip } from "./Tooltip";
 import { Text } from "./Text";
 import { getHanziWordsProgress } from "./wikiHanziProgress";
+import { WikiHanziSkillLevelBreakdownContent } from "./WikiHanziSkillLevelBreakdown";
 
 export function WikiHanziProgressLozenge({
   hanzi,
   hanziWord,
+  skillSrsStates,
 }: {
   hanzi: HanziText;
   hanziWord?: HanziWord | null;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
 }) {
   const db = useDb();
   const { data: dictionaryMeanings } = useLiveQuery(
@@ -34,11 +37,6 @@ export function WikiHanziProgressLozenge({
         .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
     [db.userDictionary, hanzi],
   );
-  const { data: skillStates } = useLiveQuery(
-    (q) => q.from({ skillState: db.skillStateCollection }),
-    [db.skillStateCollection],
-  );
-
   const hanziWords = [
     ...(hanziWord == null
       ? dictionaryMeanings.map((meaning) => meaning.hanziWord)
@@ -47,23 +45,31 @@ export function WikiHanziProgressLozenge({
       ? userMeanings.map((meaning) => buildHanziWord(hanzi, meaning.meaningKey))
       : []),
   ].filter((word, index, words) => words.indexOf(word) === index);
-  const skillSrsStates = new Map<Skill, SrsStateType>(
-    skillStates.map((item) => [item.skill, item.srs]),
-  );
   const { progress, rank } = getHanziWordsProgress({
     hanziWords,
     skillSrsStates,
   });
 
-  return <WikiHanziProgressLozengeDisplay progress={progress} rank={rank} />;
+  return (
+    <WikiHanziProgressLozengeDisplay
+      progress={progress}
+      rank={rank}
+      hanziWord={hanziWord}
+      skillSrsStates={skillSrsStates}
+    />
+  );
 }
 
 export function WikiHanziProgressLozengeDisplay({
   progress,
   rank,
+  hanziWord,
+  skillSrsStates,
 }: {
   progress: number;
   rank: RankNumber;
+  hanziWord?: HanziWord | null;
+  skillSrsStates?: ReadonlyMap<Skill, SrsStateType>;
 }) {
   const level = rankPresentation[rank];
   const style = proficiencyStyle[level.color];
@@ -102,6 +108,12 @@ export function WikiHanziProgressLozengeDisplay({
           fill shows how close this word is to the next level and resets when it
           advances. Master is the highest level.
         </Text>
+        {hanziWord == null || skillSrsStates == null ? null : (
+          <WikiHanziSkillLevelBreakdownContent
+            hanziWord={hanziWord}
+            skillSrsStates={skillSrsStates}
+          />
+        )}
       </Tooltip.Content>
     </Tooltip>
   );

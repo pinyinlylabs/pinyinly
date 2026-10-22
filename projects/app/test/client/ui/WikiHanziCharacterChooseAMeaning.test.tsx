@@ -279,12 +279,15 @@ test(`requires a choice when a word has multiple meanings`, ({ rizzle }) => {
 test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
   useLiveQueryMock
     .mockReturnValueOnce({ data: [] })
-    .mockReturnValueOnce({ data: [] })
     .mockReturnValueOnce({ data: [] });
 
-  render(<WikiHanziProgressLozenge hanzi={hanzi} />, {
-    wrapper: providers(rizzle),
-  });
+  render(
+    <WikiHanziProgressLozenge
+      hanzi={hanzi}
+      skillSrsStates={new Map<Skill, SrsStateType>()}
+    />,
+    { wrapper: providers(rizzle) },
+  );
 
   expect(screen.getByText(`Not Started`)).toBeInTheDocument();
 });
