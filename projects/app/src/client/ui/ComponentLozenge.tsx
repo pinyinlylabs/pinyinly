@@ -2,7 +2,13 @@ import { Lozenge } from "./Lozenge";
 import { Tooltip } from "./Tooltip";
 import { Text } from "@/client/ui/Text";
 
-export function StructuralLozenge({ size = `md` }: { size?: `sm` | `md` }) {
+export function ComponentLozenge({
+  isStructural,
+  size = `md`,
+}: {
+  isStructural: boolean;
+  size?: `sm` | `md`;
+}) {
   return (
     <Tooltip placement="top" sideOffset={6}>
       <Tooltip.Trigger accessibilityRole="button">
@@ -12,7 +18,9 @@ export function StructuralLozenge({ size = `md` }: { size?: `sm` | `md` }) {
       </Tooltip.Trigger>
       <Tooltip.Content>
         <Text className="font-sans text-sm text-fg">
-          Components only appear in other characters, not as standalone words.
+          {isStructural
+            ? `This character is only used as a component in other characters.`
+            : `This character is used as a component and also as a character on its own.`}
         </Text>
       </Tooltip.Content>
     </Tooltip>

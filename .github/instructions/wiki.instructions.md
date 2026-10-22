@@ -27,6 +27,16 @@ Single-character `character.json` files may also define `visuallySimilar`, a man
 list of visually confusable characters used by contrastive handwriting grading. This list is copied
 into the generated wiki payload; each listed character needs median stroke data.
 
+Character data distinguishes two related component concepts:
+
+- `isStructural: true` marks a character used as a component in regular Hanzi but not independently
+  as a full word or character in modern Mandarin.
+- `componentFormOf` maps a component-form glyph to its primary character form (for
+  example, 扌 to 手).
+
+These fields describe different properties: `isStructural` describes how a character is used, while
+`componentFormOf` identifies the primary form corresponding to a component glyph.
+
 When modifying or adding wiki content:
 
 1. Create or edit the appropriate `meaning.mdx` in the directory for that character or word.
