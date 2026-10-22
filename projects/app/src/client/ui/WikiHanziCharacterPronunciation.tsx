@@ -375,58 +375,56 @@ export function WikiHanziCharacterPronunciationBox({
                   Add image
                 </RectButton>
               )}
-              {__DEV__ ? (
-                <DropdownMenu2>
-                  <DropdownMenu2.Trigger asChild>
-                    <RectButton
-                      variant="bare"
-                      iconStart="ai"
-                      iconSize={20}
-                      className="opacity-80"
-                    >
-                      Use AI
-                    </RectButton>
-                  </DropdownMenu2.Trigger>
-                  <DropdownMenu2.Content className="w-56" align="start">
-                    <DropdownMenu2.Item
-                      onPress={() => {
-                        handleUseAi();
-                      }}
-                    >
-                      <Text>Auto</Text>
-                    </DropdownMenu2.Item>
-                    <DropdownMenu2.Separator />
-                    <DropdownMenu2.Item
-                      onPress={() => {
-                        handleUseAi(`identityBinding`);
-                      }}
-                    >
-                      <Text>Identity binding</Text>
-                    </DropdownMenu2.Item>
-                    <DropdownMenu2.Item
-                      onPress={() => {
-                        handleUseAi(`environmentRule`);
-                      }}
-                    >
-                      <Text>Environment rule</Text>
-                    </DropdownMenu2.Item>
-                    <DropdownMenu2.Item
-                      onPress={() => {
-                        handleUseAi(`objectBinding`);
-                      }}
-                    >
-                      <Text>Object binding</Text>
-                    </DropdownMenu2.Item>
-                    <DropdownMenu2.Item
-                      onPress={() => {
-                        handleUseAi(`behaviourConsequence`);
-                      }}
-                    >
-                      <Text>Behaviour consequence</Text>
-                    </DropdownMenu2.Item>
-                  </DropdownMenu2.Content>
-                </DropdownMenu2>
-              ) : null}
+              <DropdownMenu2>
+                <DropdownMenu2.Trigger asChild>
+                  <RectButton
+                    variant="bare"
+                    iconStart="ai"
+                    iconSize={20}
+                    className="opacity-80"
+                  >
+                    Use AI
+                  </RectButton>
+                </DropdownMenu2.Trigger>
+                <DropdownMenu2.Content className="w-56" align="start">
+                  <DropdownMenu2.Item
+                    onPress={() => {
+                      handleUseAi();
+                    }}
+                  >
+                    <Text>Auto</Text>
+                  </DropdownMenu2.Item>
+                  <DropdownMenu2.Separator />
+                  <DropdownMenu2.Item
+                    onPress={() => {
+                      handleUseAi(`identityBinding`);
+                    }}
+                  >
+                    <Text>Identity binding</Text>
+                  </DropdownMenu2.Item>
+                  <DropdownMenu2.Item
+                    onPress={() => {
+                      handleUseAi(`environmentRule`);
+                    }}
+                  >
+                    <Text>Environment rule</Text>
+                  </DropdownMenu2.Item>
+                  <DropdownMenu2.Item
+                    onPress={() => {
+                      handleUseAi(`objectBinding`);
+                    }}
+                  >
+                    <Text>Object binding</Text>
+                  </DropdownMenu2.Item>
+                  <DropdownMenu2.Item
+                    onPress={() => {
+                      handleUseAi(`behaviourConsequence`);
+                    }}
+                  >
+                    <Text>Behaviour consequence</Text>
+                  </DropdownMenu2.Item>
+                </DropdownMenu2.Content>
+              </DropdownMenu2>
               {pronunciationMnemonicIds.allIds.length < 2 ? null : (
                 <RectButton
                   variant="bare"
