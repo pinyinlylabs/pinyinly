@@ -62,9 +62,10 @@ moon run app:browser
 After upgrading Playwright, rerun the install command to get its matching browser. On Linux, add
 `--with-deps` to install Chromium's system dependencies too. GitHub Actions does this in the shared
 `setup-test-tools` action, alongside ffmpeg, after `setup-tools` installs the toolchain and Yarn
-dependencies. The PR and daily Moon CI jobs and Copilot setup use both actions; build and deployment
-jobs only use `setup-tools`. The browser task is tagged `ci`, so the existing PR and daily Moon CI
-jobs include it.
+dependencies. CI uses `--only-shell` to skip downloading full Chrome because the tests run headless.
+The PR and daily Moon CI jobs and Copilot setup use both actions; build and deployment jobs only use
+`setup-tools`. The browser task is tagged `ci`, so the existing PR and daily Moon CI jobs include
+it.
 
 Screenshot baselines live next to the tests in
 `__screenshots__/<test filename>/<name>-chromium.png`. macOS and Linux use the same baselines, with
