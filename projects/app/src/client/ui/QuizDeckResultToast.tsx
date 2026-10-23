@@ -176,7 +176,7 @@ function QuizResultDropdown({
         <DropdownMenu2.Content align="end">
           {onRepeatQuestion == null ? null : (
             <DropdownMenu2.Item onPress={onRepeatQuestion}>
-              <Text>Repeat question</Text>
+              <Text>Undo mistake and retry</Text>
             </DropdownMenu2.Item>
           )}
           {onReportWrongGrade == null ? null : (
