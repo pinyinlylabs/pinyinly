@@ -2,6 +2,10 @@ import { assert } from "vitest";
 import { cdp } from "vitest/browser";
 import type {} from "@vitest/browser-playwright";
 
+/**
+ * Forces CSS pseudo-classes on an element found by test ID in Vitest's browser
+ * test iframe.
+ */
 export async function forcePseudoStateByTestId(
   testID: string,
   states: string[],
