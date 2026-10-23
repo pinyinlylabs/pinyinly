@@ -27,6 +27,10 @@ runs:
         YARN_ENABLE_HARDENED_MODE: ${{ github.event.pull_request.head.repo.fork && '1' || '0' }}
       shell: bash
 
+    - name: Install Chromium (for browser tests)
+      run: yarn workspace @pinyinly/app exec playwright install --with-deps chromium
+      shell: bash
+
     - name: Install ffmpeg (for tests)
       # Installing from a static build is dramatically faster than using apt-get.
       run: |

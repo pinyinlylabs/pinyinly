@@ -4,6 +4,7 @@ import reactNativeWeb from "vite-plugin-react-native-web";
 import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
 import { uniwind } from "uniwind/vite";
+import path from "node:path";
 
 export default defineConfig({
   test: {
@@ -12,6 +13,27 @@ export default defineConfig({
       enabled: true,
       headless: true,
       instances: [{ browser: `chromium` }],
+      expect: {
+        toMatchScreenshot: {
+          // Compare macOS and Linux against the same browser-specific baselines.
+          resolveScreenshotPath: ({
+            root,
+            testFileDirectory,
+            screenshotDirectory,
+            testFileName,
+            arg,
+            browserName,
+            ext,
+          }) =>
+            path.resolve(
+              root,
+              testFileDirectory,
+              screenshotDirectory,
+              testFileName,
+              `${arg}-${browserName}${ext}`,
+            ),
+        },
+      },
     },
     include: [`test/**/*.browser.test.{ts,tsx}`],
   },

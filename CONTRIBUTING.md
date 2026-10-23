@@ -50,6 +50,27 @@ If you need to run services individually:
 
 # Guides
 
+## Browser tests
+
+Browser tests run in headless Chromium through Vitest:
+
+```sh
+yarn workspace @pinyinly/app exec playwright install chromium
+moon run app:browser
+```
+
+After upgrading Playwright, rerun the install command to get its matching browser. On Linux, add
+`--with-deps` to install Chromium's system dependencies too. GitHub Actions does this in the shared
+`setup-tools` action, alongside ffmpeg. The browser task is tagged `ci`, so the existing PR and
+daily Moon CI jobs include it.
+
+Screenshot baselines live next to the tests in
+`__screenshots__/<test filename>/<name>-chromium.png`. macOS and Linux use the same baselines, with
+Vitest's default comparison tolerances. To intentionally update them, run
+`moon run app:browser -- -u`, review the image changes, then rerun without `-u`. Do not update
+baselines automatically in CI; investigate Linux differences before accepting new images or changing
+the comparison policy.
+
 ## Moon task inputs
 
 Shared input exclusions live in `.moon/tasks/all.yml`. Moon 2 loads shared task configuration from
