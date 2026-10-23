@@ -17,7 +17,7 @@ import { HskLozengeWithTooltip } from "./HskLozengeWithTooltip";
 import { Icon } from "./Icon";
 import { Text } from "./Text";
 import { View } from "./View";
-import { proficiencyFillProgress, proficiencyStyle } from "./proficiencyStyles";
+import { SkillProgressBar } from "./SkillProgressBar";
 
 export function SkillWordRows({
   hanziWords,
@@ -116,38 +116,11 @@ export function SkillWordRows({
                 {row.gloss}
               </Text>
               <View className="w-21 items-end">
-                <View
-                  accessible
-                  accessibilityRole="progressbar"
+                <SkillProgressBar
+                  progress={row.progress}
+                  color={rankPresentation[row.rank].color}
                   accessibilityLabel={`${rankPresentation[row.rank].label} proficiency`}
-                  accessibilityValue={{
-                    min: 0,
-                    max: 100,
-                    now: Math.round(row.progress * 100),
-                    text: `${Math.round(row.progress * 100)}%`,
-                  }}
-                  className="relative h-1.5 w-full rounded bg-fg/10"
-                >
-                  {milestonePercents.map((milestonePercent) => (
-                    <View
-                      className="absolute bottom-0 z-10 size-0.5 -translate-x-1/2 bg-bg"
-                      key={milestonePercent}
-                      style={{ left: `${milestonePercent}%` }}
-                    />
-                  ))}
-                  {row.progress === 0 ? null : (
-                    <View
-                      className={`
-                        h-1.5 rounded
-
-                        ${proficiencyStyle[rankPresentation[row.rank].color].barProgressClass}
-                      `}
-                      style={{
-                        width: `${proficiencyFillProgress(row.progress) * 100}%`,
-                      }}
-                    />
-                  )}
-                </View>
+                />
               </View>
             </View>
             <Icon
@@ -162,5 +135,3 @@ export function SkillWordRows({
     </View>
   );
 }
-
-const milestonePercents = [25, 50, 75] as const;

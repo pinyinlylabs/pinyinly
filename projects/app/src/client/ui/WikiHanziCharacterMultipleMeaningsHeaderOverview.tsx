@@ -11,6 +11,8 @@ import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
+import { WikiHanziSkillLevelBreakdownBox } from "./WikiHanziSkillLevelBreakdown";
+import { useSkillSrsStates } from "./hooks/useSkillSrsStates";
 
 export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
   hanzi,
@@ -25,6 +27,7 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
+  const skillSrsStates = useSkillSrsStates();
 
   const { data: characterData } = useLiveQuery(
     (q) =>
@@ -40,10 +43,14 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
         <View className="flex-1 flex-row items-center gap-1">
           <WikiHanziBookmarkLozenge hanziWord={hanziWord} />
           <WikiHanziHskLozenges hanzi={hanzi} />
-          <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={hanziWord} />
           {characterData?.isComponent ? (
             <ComponentLozenge isStructural={characterData.isStructural} />
           ) : null}
+          <WikiHanziProgressLozenge
+            hanzi={hanzi}
+            hanziWord={hanziWord}
+            skillSrsStates={skillSrsStates}
+          />
         </View>
         <HeaderProvider.ActionsPortal>
           <WikiHanziBookmarkMenu
@@ -62,6 +69,12 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
       <View className="mb-3">
         <WikiHanziMeaningsPanel hanzi={hanzi} />
       </View>
+      {hanziWord == null ? null : (
+        <WikiHanziSkillLevelBreakdownBox
+          hanziWord={hanziWord}
+          skillSrsStates={skillSrsStates}
+        />
+      )}
     </View>
   );
 }

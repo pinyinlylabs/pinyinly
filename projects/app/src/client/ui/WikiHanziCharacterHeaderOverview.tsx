@@ -14,6 +14,8 @@ import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
 import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
+import { WikiHanziSkillLevelBreakdownBox } from "./WikiHanziSkillLevelBreakdown";
+import { useSkillSrsStates } from "./hooks/useSkillSrsStates";
 
 export function WikiHanziCharacterHeaderOverview({
   hanzi,
@@ -28,6 +30,7 @@ export function WikiHanziCharacterHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
+  const skillSrsStates = useSkillSrsStates();
 
   const { data: decompositionEntries } = useLiveQuery(
     (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
@@ -65,7 +68,11 @@ export function WikiHanziCharacterHeaderOverview({
           {characterData?.isComponent ? (
             <ComponentLozenge isStructural={characterData.isStructural} />
           ) : null}
-          <WikiHanziProgressLozenge hanzi={hanzi} hanziWord={hanziWord} />
+          <WikiHanziProgressLozenge
+            hanzi={hanzi}
+            hanziWord={hanziWord}
+            skillSrsStates={skillSrsStates}
+          />
         </View>
         <HeaderProvider.ActionsPortal>
           <WikiHanziBookmarkMenu
@@ -109,6 +116,12 @@ export function WikiHanziCharacterHeaderOverview({
             )}
           </Text>
         </View>
+      )}
+      {hanziWord == null ? null : (
+        <WikiHanziSkillLevelBreakdownBox
+          hanziWord={hanziWord}
+          skillSrsStates={skillSrsStates}
+        />
       )}
     </View>
   );
