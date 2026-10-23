@@ -1,3 +1,6 @@
+// Set the build time before Metro bundles the app; Expo inlines EXPO_PUBLIC_* values into the bundle.
+process.env.EXPO_PUBLIC_BUILD_TIMESTAMP ??= new Date().toISOString();
+
 const { getDefaultConfig } = require(`expo/metro-config`);
 const { withUniwindConfig } = require(`uniwind/metro`);
 const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);

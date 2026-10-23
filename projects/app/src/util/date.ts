@@ -2,6 +2,10 @@ import type { Duration } from "date-fns";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 
+export function formatBuildTimestampVersion(date: Date): string {
+  return `v${date.toISOString().slice(2, 16).replaceAll(/\D/gu, ``)}`;
+}
+
 export function formatRelativeTime(date: Date, now = new Date()): string {
   // Determine if the date is in the future or past
   const isFuture = date.getTime() > now.getTime();

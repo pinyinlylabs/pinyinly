@@ -1,12 +1,13 @@
 import { breakpoints } from "@/client/ui/breakpoints";
 import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { Icon } from "@/client/ui/Icon";
+import { BuildTimestampStamp } from "@/client/ui/BuildTimestampStamp";
 import { navItems } from "@/client/ui/navItems";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { ReactNode } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
-import { Pressable, ScrollView } from "react-native";
+import { Platform, Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { HeaderProvider } from "./HeaderProvider";
@@ -105,7 +106,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
       ) : (
         <ScrollView
           className="flex-1"
-          contentContainerClassName="gap-8 px-4 pt-4 pb-6"
+          contentContainerClassName="items-stretch gap-8 px-4 pt-4 pb-6"
           keyboardShouldPersistTaps="handled"
         >
           {navItems
@@ -143,6 +144,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
                 </View>
               ))}
           </View>
+          {Platform.OS === `web` ? <BuildTimestampStamp /> : null}
         </ScrollView>
       )}
     </View>
@@ -163,7 +165,9 @@ function MobileNavGroup({
           <Text className="pyly-body-dt">{title}</Text>
         </View>
       )}
-      <View className="gap-0.5 overflow-hidden rounded-xl">{children}</View>
+      <View className="w-full gap-0.5 overflow-hidden rounded-xl">
+        {children}
+      </View>
     </View>
   );
 }
@@ -187,7 +191,7 @@ function MobileNavItem({
       <Pressable
         onPress={onNavigate}
         className={`
-          flex-row bg-bg-high py-2.5 pr-3 pl-4
+          w-full flex-row bg-bg-high py-2.5 pr-3 pl-4
 
           hover:bg-fg/10
         `}

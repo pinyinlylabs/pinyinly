@@ -1,5 +1,17 @@
-import { formatDurationShort, formatRelativeTime } from "#util/date.ts";
+import {
+  formatBuildTimestampVersion,
+  formatDurationShort,
+  formatRelativeTime,
+} from "#util/date.ts";
 import { describe, expect, test } from "vitest";
+
+describe(`build timestamp`, () => {
+  test(`formats UTC time as a short version string`, () => {
+    expect(
+      formatBuildTimestampVersion(new Date(`2026-10-08T12:11:59.000Z`)),
+    ).toBe(`v2610081211`);
+  });
+});
 
 describe(`formatRelativeTime suite`, () => {
   // Past date tests (ago)

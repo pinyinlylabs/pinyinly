@@ -41,6 +41,8 @@ tasks:
   buildEasUpdate:
     tags:
       - ci-daily
+    inputs:
+      - "@group(expoCliEnv)"
     # Do iOS and Android separately to avoid IO contention and maybe allow metro bundler cache re-use.
     script: |
       expo export -p ios --source-maps --output-dir @group(buildEasUpdateOutdir)

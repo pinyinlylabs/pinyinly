@@ -34,7 +34,7 @@ export function QuickSearchButton({
         collapsable={false}
         className={cn(
           `
-            flex-row items-center justify-between gap-6 rounded-xl bg-bg-high px-3 py-2
+            w-full flex-row items-center justify-between gap-6 rounded-xl bg-bg-high px-3 py-2
 
             hover:bg-fg/5
           `,
