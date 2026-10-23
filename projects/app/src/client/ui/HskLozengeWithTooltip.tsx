@@ -1,9 +1,9 @@
 import { Text } from "@/client/ui/Text";
 import { HskLozenge } from "./HskLozenge";
-import { Tooltip } from "./Tooltip";
 import { View } from "./View";
 import { getHskLevelDetails } from "./HskLozengeWithTooltip.utils";
 import type { HskLevelEntry } from "./HskLozengeWithTooltip.utils";
+import { Tooltip } from "./Tooltip";
 
 export function HskLozengeWithTooltip({
   entries,
@@ -24,15 +24,14 @@ export function HskLozengeWithTooltip({
   return (
     <View className="flex-row gap-1">
       <Tooltip placement="top" sideOffset={6}>
-        <Tooltip.Trigger
-          accessibilityRole="button"
-          accessibilityLabel={`HSK ${firstHskLevelDetail.hskLevel}${hasAdditionalLevels ? ` and additional levels` : ``}. View HSK levels.`}
-        >
+        <Tooltip.Trigger asChild>
           <HskLozenge
             hskLevel={firstHskLevelDetail.hskLevel}
             size={size}
             color="muted-fg"
             suffix={hasAdditionalLevels ? `+` : undefined}
+            accessibilityRole="button"
+            accessibilityLabel={`HSK ${firstHskLevelDetail.hskLevel}${hasAdditionalLevels ? ` and additional levels` : ``}. View HSK levels.`}
           />
         </Tooltip.Trigger>
         <Tooltip.Content className="gap-2">

@@ -98,15 +98,14 @@ export function WikiHanziProgressLozengeDisplay({
 
   return (
     <Tooltip placement="top" sideOffset={6}>
-      <Tooltip.Trigger
-        accessibilityRole="button"
-        accessibilityLabel={`${level.label}. ${level.description}`}
-      >
+      <Tooltip.Trigger asChild>
         <Lozenge
           className={style.badgeClass}
           color={style.lozengeColor}
           progress={rank === 0 || rank === 4 ? undefined : visualProgress}
           progressClassName={style.badgeProgressClass}
+          accessibilityRole="button"
+          accessibilityLabel={`${level.label}. ${level.description}`}
         >
           {level.label}
         </Lozenge>
