@@ -13,9 +13,13 @@ export default defineConfig({
     setupFiles: [`./test/setup.ts`],
     server: {
       deps: {
-        // These packages ship JSX/TSX that Node cannot execute directly. Let
+        // These packages use module formats Node cannot load directly, so let
         // Vite transform them; this regex matches resolved paths, not just names.
-        inline: [/@rn-primitives\//u, `@expo/html-elements`],
+        inline: [
+          /@rn-primitives\//u,
+          `react-native-teleport`,
+          `@expo/html-elements`,
+        ],
       },
     },
     fakeTimers: {
@@ -34,7 +38,11 @@ export default defineConfig({
       resolve: {
         // Keep the same packages in Vite's transform pipeline when happy-dom
         // loads modules through the client environment with server resolution.
-        noExternal: [/@rn-primitives\//u, `@expo/html-elements`],
+        noExternal: [
+          /@rn-primitives\//u,
+          `react-native-teleport`,
+          `@expo/html-elements`,
+        ],
       },
     },
   },

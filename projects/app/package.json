@@ -120,6 +120,7 @@
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
     "react-native-svg": "15.15.4",
+    "react-native-teleport": "^1.2.2",
     "react-native-web": "patch:react-native-web@npm%3A0.21.2#~/.yarn/patches/react-native-web-npm-0.21.2-ba4fb01a9d.patch",
     "react-native-worklets": "0.10.0",
     "react-responsive": "^10.0.0",
