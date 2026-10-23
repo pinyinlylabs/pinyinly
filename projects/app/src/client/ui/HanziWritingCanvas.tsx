@@ -272,7 +272,7 @@ export function HanziWritingCanvas({
         <View
           data-testid="undo-button-container"
           className={`
-            absolute inset-x-3 top-3 items-end opacity-100 transition-opacity delay-300 duration-200
+            absolute top-3 right-3 opacity-100 transition-opacity delay-300 duration-200
 
             motion-reduce:transition-none motion-reduce:delay-0
 
@@ -280,7 +280,11 @@ export function HanziWritingCanvas({
           `}
         >
           <ButtonGroup>
-            <ButtonGroup.Button iconStart="undo" onPress={undoLastStroke}>
+            <ButtonGroup.Button
+              variant="bareDim"
+              iconStart="undo"
+              onPress={undoLastStroke}
+            >
               Undo
             </ButtonGroup.Button>
           </ButtonGroup>
