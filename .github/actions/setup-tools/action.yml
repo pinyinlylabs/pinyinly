@@ -26,11 +26,3 @@ runs:
         # Run hardened mode only if the PR head repo is a fork, saves ~10s
         YARN_ENABLE_HARDENED_MODE: ${{ github.event.pull_request.head.repo.fork && '1' || '0' }}
       shell: bash
-
-    - name: Install ffmpeg (for tests)
-      # Installing from a static build is dramatically faster than using apt-get.
-      run: |
-        tar -xf ffmpeg-release-i686-static.tar.xz
-        echo "${PWD}"/ffmpeg-*-static >> "${GITHUB_PATH}"
-      shell: bash
-      working-directory: .github/actions/setup-tools

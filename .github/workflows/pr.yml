@@ -130,6 +130,8 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/setup-test-tools
+
       - uses: ./.github/actions/metro-cache
 
       - run: moon run ':#ci' --color --affected

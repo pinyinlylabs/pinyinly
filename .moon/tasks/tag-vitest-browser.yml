@@ -4,6 +4,8 @@ inheritedBy:
 tasks:
   browser:
     command: vitest run --config vitest.browser.config.ts
+    tags:
+      - ci
     inputs:
       - "$DEBUG"
       - "$DEBUG_*"
