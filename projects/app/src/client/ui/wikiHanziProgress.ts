@@ -37,9 +37,11 @@ for (const rule of rankRules) {
 export function getHanziWordSkillBreakdown({
   hanziWord,
   skillSrsStates,
+  hasPinyin,
 }: {
   hanziWord: HanziWord;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  hasPinyin: boolean;
 }): HanziWordSkillBreakdownItem[] {
   const skills: {
     label: string;
@@ -59,34 +61,45 @@ export function getHanziWordSkillBreakdown({
       skillKind: SkillKind.HanziWordToGlossTyped,
       contributesToWordLevel: false,
     },
-    {
-      label: `Pronunciation initial`,
-      skill: hanziWordSkill(SkillKind.HanziWordToPinyinInitial, hanziWord),
-      skillKind: SkillKind.HanziWordToPinyinInitial,
-      contributesToWordLevel: true,
-    },
-    {
-      label: `Pronunciation final`,
-      skill: hanziWordSkill(SkillKind.HanziWordToPinyinFinal, hanziWord),
-      skillKind: SkillKind.HanziWordToPinyinFinal,
-      contributesToWordLevel: true,
-    },
-    {
-      label: `Pronunciation tone`,
-      skill: hanziWordSkill(SkillKind.HanziWordToPinyinTone, hanziWord),
-      skillKind: SkillKind.HanziWordToPinyinTone,
-      contributesToWordLevel: false,
-    },
-    {
-      label: `Type full pronunciation`,
-      skill: hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord),
-      skillKind: SkillKind.HanziWordToPinyinTyped,
-      contributesToWordLevel: true,
-    },
+    ...(hasPinyin
+      ? [
+          {
+            label: `Pronunciation initial`,
+            skill: hanziWordSkill(
+              SkillKind.HanziWordToPinyinInitial,
+              hanziWord,
+            ),
+            skillKind: SkillKind.HanziWordToPinyinInitial,
+            contributesToWordLevel: true,
+          },
+          {
+            label: `Pronunciation final`,
+            skill: hanziWordSkill(SkillKind.HanziWordToPinyinFinal, hanziWord),
+            skillKind: SkillKind.HanziWordToPinyinFinal,
+            contributesToWordLevel: true,
+          },
+          {
+            label: `Type full pronunciation`,
+            skill: hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord),
+            skillKind: SkillKind.HanziWordToPinyinTyped,
+            contributesToWordLevel: true,
+          },
+        ]
+      : []),
+    ...(hasPinyin
+      ? [
+          {
+            label: `Pronunciation tone`,
+            skill: hanziWordSkill(SkillKind.HanziWordToPinyinTone, hanziWord),
+            skillKind: SkillKind.HanziWordToPinyinTone,
+            contributesToWordLevel: false,
+          },
+        ]
+      : []),
   ];
 
   const hanzi = hanziFromHanziWord(hanziWord);
-  if (isHanziCharacter(hanzi)) {
+  if (hasPinyin && isHanziCharacter(hanzi)) {
     skills.push({
       label: `Write character`,
       skill: hanziCharacterToWriting(hanzi),

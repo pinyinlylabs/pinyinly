@@ -33,7 +33,13 @@ describe(`getHanziWordSkillBreakdown`, () => {
       ],
     ]);
 
-    expect(getHanziWordSkillBreakdown({ hanziWord, skillSrsStates })).toEqual([
+    expect(
+      getHanziWordSkillBreakdown({
+        hanziWord,
+        skillSrsStates,
+        hasPinyin: true,
+      }),
+    ).toEqual([
       {
         label: `Recognize meaning`,
         skill: hanziWordSkill(SkillKind.HanziWordToGloss, hanziWord),
@@ -71,15 +77,6 @@ describe(`getHanziWordSkillBreakdown`, () => {
         status: `Not started`,
       },
       {
-        label: `Pronunciation tone`,
-        skill: hanziWordSkill(SkillKind.HanziWordToPinyinTone, hanziWord),
-        contributesToWordLevel: false,
-        stabilityDays: null,
-        targetStabilityDays: 30,
-        progress: 0,
-        status: `Not started`,
-      },
-      {
         label: `Type full pronunciation`,
         skill: hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord),
         contributesToWordLevel: true,
@@ -87,6 +84,15 @@ describe(`getHanziWordSkillBreakdown`, () => {
         targetStabilityDays: 30,
         progress: 1,
         status: `Target reached`,
+      },
+      {
+        label: `Pronunciation tone`,
+        skill: hanziWordSkill(SkillKind.HanziWordToPinyinTone, hanziWord),
+        contributesToWordLevel: false,
+        stabilityDays: null,
+        targetStabilityDays: 30,
+        progress: 0,
+        status: `Not started`,
       },
       {
         label: `Write character`,
@@ -107,14 +113,27 @@ describe(`getHanziWordSkillBreakdown`, () => {
       getHanziWordSkillBreakdown({
         hanziWord,
         skillSrsStates: new Map(),
+        hasPinyin: true,
       }).map((item) => item.label),
     ).toEqual([
       `Recognize meaning`,
       `Type meaning`,
       `Pronunciation initial`,
       `Pronunciation final`,
-      `Pronunciation tone`,
       `Type full pronunciation`,
+      `Pronunciation tone`,
     ]);
+  });
+
+  test(`omits pronunciation and writing for meanings without pinyin`, () => {
+    const hanziWord = `𠂊:hands`;
+
+    expect(
+      getHanziWordSkillBreakdown({
+        hanziWord,
+        skillSrsStates: new Map(),
+        hasPinyin: false,
+      }).map((item) => item.label),
+    ).toEqual([`Recognize meaning`, `Type meaning`]);
   });
 });

@@ -37,6 +37,17 @@ export function WikiHanziProgressLozenge({
         .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
     [db.userDictionary, hanzi],
   );
+  const hasPinyin =
+    hanziWord != null &&
+    (dictionaryMeanings.some(
+      (meaning) =>
+        meaning.hanziWord === hanziWord && meaning.pinyin?.[0] != null,
+    ) ||
+      userMeanings.some(
+        (meaning) =>
+          buildHanziWord(hanzi, meaning.meaningKey) === hanziWord &&
+          meaning.pinyin != null,
+      ));
   const hanziWords = [
     ...(hanziWord == null
       ? dictionaryMeanings.map((meaning) => meaning.hanziWord)
@@ -56,6 +67,7 @@ export function WikiHanziProgressLozenge({
       rank={rank}
       hanziWord={hanziWord}
       skillSrsStates={skillSrsStates}
+      hasPinyin={hasPinyin}
     />
   );
 }
@@ -65,11 +77,13 @@ export function WikiHanziProgressLozengeDisplay({
   rank,
   hanziWord,
   skillSrsStates,
+  hasPinyin = false,
 }: {
   progress: number;
   rank: RankNumber;
   hanziWord?: HanziWord | null;
   skillSrsStates?: ReadonlyMap<Skill, SrsStateType>;
+  hasPinyin?: boolean;
 }) {
   const level = rankPresentation[rank];
   const style = proficiencyStyle[level.color];
@@ -112,6 +126,7 @@ export function WikiHanziProgressLozengeDisplay({
           <WikiHanziSkillLevelBreakdownContent
             hanziWord={hanziWord}
             skillSrsStates={skillSrsStates}
+            hasPinyin={hasPinyin}
           />
         )}
       </Tooltip.Content>
