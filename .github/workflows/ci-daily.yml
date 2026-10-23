@@ -65,6 +65,8 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/setup-test-tools
+
       - run: moon run ':#ci' ':#ci-daily' --color
 
       - name: 🧾 Results
