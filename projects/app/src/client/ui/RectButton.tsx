@@ -31,6 +31,8 @@ export type RectButtonProps = {
   iconEnd?: IconName;
   iconSize?: IconProps[`size`];
   pressed?: boolean;
+  /** Allow selecting the button label. Defaults to false. */
+  selectable?: boolean;
 } & Pick<
   PropsOf<typeof Pressable>,
   | (keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`))
@@ -50,6 +52,7 @@ export function RectButton({
   iconSize,
   accessibilityRole,
   pressed: pressedProp,
+  selectable = false,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
@@ -62,9 +65,17 @@ export function RectButton({
   const pressed = pressedProp ?? pressedState;
   const flat = pressed || disabled;
   const textClassName = extractTextClasses(className);
-  const fullTextClass = textClass({ variant, class: textClassName });
+  const fullTextClass = textClass({
+    variant,
+    selectable,
+    class: textClassName,
+  });
   const content =
-    children == null ? null : <Text className={fullTextClass}>{children}</Text>;
+    children == null ? null : (
+      <Text selectable={selectable} className={fullTextClass}>
+        {children}
+      </Text>
+    );
 
   const pressable = (
     <Pressable
@@ -331,6 +342,14 @@ const roundedRectClass = tv({
 
 const textClass = tv({
   variants: {
+    selectable: {
+      true: `web:select-text web:[-webkit-touch-callout:default]`,
+      false: `
+        web:select-none web:[-webkit-touch-callout:none]
+
+        web:[&_*]:select-none
+      `,
+    },
     variant: {
       filled: `font-sans text-base/snug font-bold text-bg uppercase`,
       outline: `pyly-button-outline`,
