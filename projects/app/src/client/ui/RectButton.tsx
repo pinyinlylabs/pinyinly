@@ -36,6 +36,7 @@ export type RectButtonProps = {
   | (keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`))
   | `accessibilityLabel`
   | `accessibilityRole`
+  | `testID`
 >;
 
 export function RectButton({
