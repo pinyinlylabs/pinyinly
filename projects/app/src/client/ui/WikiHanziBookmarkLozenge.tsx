@@ -21,15 +21,13 @@ function BookmarkStatus({ hanziWord }: { hanziWord: HanziWord }) {
 
   return (
     <Tooltip placement="top" sideOffset={6}>
-      <Tooltip.Trigger
-        accessibilityRole="button"
-        accessibilityLabel="Bookmarked"
-      >
+      <Tooltip.Trigger asChild>
         <Lozenge
           kind="icon"
           color="muted-fg"
           icon="bookmark-filled"
           accessibilityLabel="Bookmarked"
+          accessibilityRole="button"
           iconTintColorClassName="accent-muted-fg"
         />
       </Tooltip.Trigger>

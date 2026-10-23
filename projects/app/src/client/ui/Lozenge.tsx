@@ -3,6 +3,8 @@ import { Text } from "@/client/ui/Text";
 import { Icon } from "./Icon";
 import type { IconName } from "./iconRegistry";
 import { View } from "@/client/ui/View";
+import type { PropsOf } from "@pinyinly/lib/types";
+import { Pressable } from "react-native";
 import { tv } from "tailwind-variants";
 
 export type LozengeColor =
@@ -16,7 +18,14 @@ export type LozengeColor =
   | `amber`
   | `muted-fg`;
 
-type LozengeBaseProps = {
+export type LozengePressableProps = Pick<
+  PropsOf<typeof Pressable>,
+  | (keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`))
+  | `accessibilityLabel`
+  | `accessibilityRole`
+>;
+
+type LozengeBaseProps = LozengePressableProps & {
   color: LozengeColor;
   className?: string;
 };
@@ -29,14 +38,12 @@ type LozengeProps =
       progressClassName?: string;
       children: ReactNode;
       icon?: never;
-      accessibilityLabel?: never;
       iconTintColorClassName?: never;
     })
   | (LozengeBaseProps & {
       kind: `icon`;
       icon: IconName;
       children?: never;
-      accessibilityLabel?: string;
       iconTintColorClassName?: string;
     });
 
@@ -52,25 +59,27 @@ function IconLozenge({
   color,
   className,
   icon,
-  accessibilityLabel,
   iconTintColorClassName,
+  ...pressableProps
 }: LozengeBaseProps & {
   icon: IconName;
-  accessibilityLabel?: string;
   iconTintColorClassName?: string;
 }) {
+  const Container = pressableProps.onPress == null ? View : Pressable;
+
   return (
-    <View
+    <Container
+      {...pressableProps}
       accessible
-      accessibilityLabel={accessibilityLabel}
       style={{ width: 28, height: 26, padding: 0 }}
       className={lozengeContainerClass({
         color,
-        className: `flex-row items-center justify-center ${className ?? ``}`,
+        interactive: pressableProps.onPress != null,
+        className: [`flex-row items-center justify-center`, className],
       })}
     >
       <Icon icon={icon} size={16} tintColorClassName={iconTintColorClassName} />
-    </View>
+    </Container>
   );
 }
 
@@ -81,23 +90,27 @@ function TextLozenge({
   progress,
   progressClassName = `bg-blue/20`,
   children,
+  ...pressableProps
 }: LozengeBaseProps & {
   size?: `sm` | `md`;
   progress?: number;
   progressClassName?: string;
   children: ReactNode;
 }) {
+  const Container = pressableProps.onPress == null ? View : Pressable;
+
   return (
-    <View
+    <Container
+      {...pressableProps}
+      accessible={pressableProps.accessibilityLabel != null}
       className={lozengeContainerClass({
         color,
         size,
+        interactive: pressableProps.onPress != null,
         className: [
           progress == null ? `` : `relative overflow-hidden`,
           className,
-        ]
-          .filter(Boolean)
-          .join(` `),
+        ],
       })}
     >
       {progress == null || progress <= 0 ? null : (
@@ -118,7 +131,7 @@ function TextLozenge({
       >
         {children}
       </Text>
-    </View>
+    </Container>
   );
 }
 
@@ -139,6 +152,17 @@ const lozengeContainerClass = tv({
     size: {
       sm: `px-1.5 py-0.5`,
       md: `px-2 py-1`,
+    },
+    interactive: {
+      true: `
+        outline-transparent
+
+        hover:opacity-90
+
+        focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue/50
+
+        active:opacity-80
+      `,
     },
   },
 });

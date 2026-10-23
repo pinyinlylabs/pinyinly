@@ -11,8 +11,14 @@ export function ComponentLozenge({
 }) {
   return (
     <Tooltip placement="top" sideOffset={6}>
-      <Tooltip.Trigger accessibilityRole="button">
-        <Lozenge color="amber" size={size} className="uppercase">
+      <Tooltip.Trigger asChild>
+        <Lozenge
+          color="amber"
+          size={size}
+          className="uppercase"
+          accessibilityRole="button"
+          accessibilityLabel="Component"
+        >
           Component
         </Lozenge>
       </Tooltip.Trigger>
