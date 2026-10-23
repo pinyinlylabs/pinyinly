@@ -2,8 +2,14 @@
 
 import { Tooltip } from "#client/ui/Tooltip.tsx";
 import { TooltipProvider } from "#client/ui/TooltipProvider.tsx";
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render as renderBase,
+  screen,
+} from "@testing-library/react";
+import type { ReactNode } from "react";
 import { Pressable } from "react-native";
+import { PortalProvider } from "react-native-teleport";
 import { Text } from "#client/ui/Text.tsx";
 import { View } from "#client/ui/View.tsx";
 import { describe, expect, test, vi } from "vitest";
@@ -25,6 +31,10 @@ vi.mock(`@floating-ui/react-native`, () => ({
   flip: vi.fn(() => ({})),
   offset: vi.fn(() => ({})),
 }));
+
+function render(ui: ReactNode) {
+  return renderBase(ui, { wrapper: PortalProvider });
+}
 
 describe(`Tooltip suite`, () => {
   test(`renders trigger element`, () => {

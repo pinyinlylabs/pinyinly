@@ -1,26 +1,13 @@
 import type { PropsWithChildren } from "react";
-import { useLayoutEffect } from "react";
-import { createPortal } from "react-dom";
+import { Portal as TeleportPortal } from "react-native-teleport";
 import { ScopedTheme, useUniwind } from "uniwind";
 
 export function Portal({ children }: PropsWithChildren) {
   const { theme } = useUniwind();
 
-  const element = document.createElement(`div`);
-
-  useLayoutEffect(() => {
-    if (!element.parentElement) {
-      document.body.append(element);
-    }
-    return () => {
-      if (element.parentElement) {
-        element.remove();
-      }
-    };
-  }, [element]);
-
-  return createPortal(
-    <ScopedTheme theme={theme}>{children}</ScopedTheme>,
-    element,
+  return (
+    <TeleportPortal hostName="root">
+      <ScopedTheme theme={theme}>{children}</ScopedTheme>
+    </TeleportPortal>
   );
 }

@@ -3,6 +3,7 @@ import { KeyboardShortcutModalScope } from "@/client/ui/KeyboardShortcutProvider
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Modal, Platform } from "react-native";
+import { PortalProvider } from "react-native-teleport";
 import { View } from "@/client/ui/View";
 import type { PressableProps } from "react-native";
 import Reanimated, {
@@ -227,33 +228,37 @@ const WebImpl = ({
   );
 
   return devUiSnapshotMode ? (
-    <View
-      className={`
-        size-full cursor-auto items-center bg-[black]/50 px-4
+    <PortalProvider>
+      <View
+        className={`
+          size-full cursor-auto items-center bg-[black]/50 px-4
 
-        ${webTopAligned ? `justify-start pt-5 pb-4` : `justify-center py-4`}
-      `}
-    >
-      {content}
-    </View>
+          ${webTopAligned ? `justify-start pt-5 pb-4` : `justify-center py-4`}
+        `}
+      >
+        {content}
+      </View>
+    </PortalProvider>
   ) : (
     <Modal
       presentationStyle="fullScreen"
       transparent={true}
       onRequestClose={requestDismiss}
     >
-      <ReanimatedPressable
-        className={`
-          absolute size-full cursor-auto items-center justify-start pt-5
+      <PortalProvider>
+        <ReanimatedPressable
+          className={`
+            absolute size-full cursor-auto items-center justify-start pt-5
 
-          ${webTopAligned ? `sm:px-4 sm:pb-4` : `sm:justify-center sm:p-4`}
-        `}
-        style={[animatedBackgroundStyle]}
-        onPressIn={onBackgroundPressIn}
-        onPress={onBackgroundPress}
-      >
-        {content}
-      </ReanimatedPressable>
+            ${webTopAligned ? `sm:px-4 sm:pb-4` : `sm:justify-center sm:p-4`}
+          `}
+          style={[animatedBackgroundStyle]}
+          onPressIn={onBackgroundPressIn}
+          onPress={onBackgroundPress}
+        >
+          {content}
+        </ReanimatedPressable>
+      </PortalProvider>
     </Modal>
   );
 };

@@ -23,9 +23,9 @@ import * as Sentry from "@sentry/react-native";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import Head from "expo-router/head";
+import { PortalProvider } from "react-native-teleport";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
-import { PortalHost } from "@rn-primitives/portal";
 
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
@@ -65,12 +65,13 @@ function RootLayout() {
 
 export function UiProviders({ children }: PropsWithChildren) {
   return (
-    <AudioContextProvider>
-      <KeyboardShortcutProvider>
-        <TooltipProvider>{children}</TooltipProvider>
-        <PortalHost />
-      </KeyboardShortcutProvider>
-    </AudioContextProvider>
+    <PortalProvider>
+      <AudioContextProvider>
+        <KeyboardShortcutProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </KeyboardShortcutProvider>
+      </AudioContextProvider>
+    </PortalProvider>
   );
 }
 
