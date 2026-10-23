@@ -18,9 +18,7 @@ test(`filled RectButton focus-visible with default foreground`, async () => {
   await render(
     <Theme theme="default">
       <View testID="pyly-snapshot" className="inline-flex p-8">
-        <RectButton variant="filled" testID="rect-button">
-          Continue
-        </RectButton>
+        <RectButton variant="filled" testID="rect-button" />
       </View>
     </Theme>,
   );
@@ -37,9 +35,7 @@ test(`filled RectButton focus-visible with custom foreground`, async () => {
     <Theme theme="default">
       <View testID="pyly-snapshot" className="inline-flex p-8">
         <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
-          <RectButton variant="filled" testID="rect-button">
-            Continue
-          </RectButton>
+          <RectButton variant="filled" testID="rect-button" />
         </ScopedVariables>
       </View>
     </Theme>,
@@ -50,6 +46,6 @@ test(`filled RectButton focus-visible with custom foreground`, async () => {
 
   await forcePseudoStateByTestId(`rect-button`, [`focus-visible`]);
   await expect(page.getByTestId(`pyly-snapshot`)).toMatchScreenshot(
-    `custom foreground`,
+    `custom-foreground`,
   );
 });

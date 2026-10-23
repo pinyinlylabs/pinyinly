@@ -140,6 +140,14 @@ jobs:
           # Wiki is lazy-loaded, so users won't be affected—preview will just show no wiki.
           PYLY_SLIM_WIKI_FOR_TESTING: "true"
 
+      - name: 📸 Upload Vitest attachments
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: vitest-attachments
+          path: projects/*/.vitest-attachments/
+          if-no-files-found: ignore
+
       - name: 🧾 Results
         uses: bradleyayers/moon-ci-retrospect@main
         if: ${{ always() }}
