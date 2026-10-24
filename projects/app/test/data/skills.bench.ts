@@ -8,13 +8,8 @@ import {
   loadCharactersJson,
   loadDictionary,
 } from "#dictionary.ts";
-import { bench, describe, expect } from "vitest";
+import { describe, test } from "vitest";
 import { makeLargeSkillReviewFixture } from "./skills.test";
-
-// Add a regression test to make sure Vitest bench mode sets the `MODE`
-// environment variable to 'benchmark'. This is assumed in other places in the
-// code.
-expect(process.env[`MODE`]).toBe(`benchmark`);
 
 // Load dictionary once at module level for benchmarks
 const dictionary = await loadDictionary();
@@ -28,48 +23,56 @@ describe(`skillReviewQueue`, () => {
       ratingCount: 600,
     });
 
-  bench(`large dataset + empty graph`, () => {
-    skillReviewQueue({
-      graph: new Map(),
-      skillSrsStates,
-      latestSkillRatings,
-      dictionary,
-      now,
-      maxQueueItems: graph.size,
-    });
+  test(`large dataset + empty graph`, async ({ bench }) => {
+    await bench(`large dataset + empty graph`, () => {
+      skillReviewQueue({
+        graph: new Map(),
+        skillSrsStates,
+        latestSkillRatings,
+        dictionary,
+        now,
+        maxQueueItems: graph.size,
+      });
+    }).run();
   });
 
-  bench(`large dataset + empty skillSrsStates`, () => {
-    skillReviewQueue({
-      graph,
-      skillSrsStates: new Map(),
-      latestSkillRatings,
-      dictionary,
-      now,
-      maxQueueItems: graph.size,
-    });
+  test(`large dataset + empty skillSrsStates`, async ({ bench }) => {
+    await bench(`large dataset + empty skillSrsStates`, () => {
+      skillReviewQueue({
+        graph,
+        skillSrsStates: new Map(),
+        latestSkillRatings,
+        dictionary,
+        now,
+        maxQueueItems: graph.size,
+      });
+    }).run();
   });
 
-  bench(`large dataset + empty latestSkillRatings`, () => {
-    skillReviewQueue({
-      graph,
-      skillSrsStates,
-      latestSkillRatings: new Map(),
-      dictionary,
-      now,
-      maxQueueItems: graph.size,
-    });
+  test(`large dataset + empty latestSkillRatings`, async ({ bench }) => {
+    await bench(`large dataset + empty latestSkillRatings`, () => {
+      skillReviewQueue({
+        graph,
+        skillSrsStates,
+        latestSkillRatings: new Map(),
+        dictionary,
+        now,
+        maxQueueItems: graph.size,
+      });
+    }).run();
   });
 
-  bench(`large dataset`, () => {
-    skillReviewQueue({
-      graph,
-      skillSrsStates,
-      latestSkillRatings,
-      dictionary,
-      now,
-      maxQueueItems: graph.size,
-    });
+  test(`large dataset`, async ({ bench }) => {
+    await bench(`large dataset`, () => {
+      skillReviewQueue({
+        graph,
+        skillSrsStates,
+        latestSkillRatings,
+        dictionary,
+        now,
+        maxQueueItems: graph.size,
+      });
+    }).run();
   });
 });
 
@@ -77,25 +80,29 @@ describe(`skillLearningGraph`, async () => {
   const decompositionData =
     await loadBuiltinCharacterDecompositionForMnemonicsEntries();
 
-  bench(`no target skills`, () => {
-    skillLearningGraph({
-      targetSkills: [],
-      dictionary,
-      decompositionData,
-      charactersJson,
-    });
+  test(`no target skills`, async ({ bench }) => {
+    await bench(`no target skills`, () => {
+      skillLearningGraph({
+        targetSkills: [],
+        dictionary,
+        decompositionData,
+        charactersJson,
+      });
+    }).run();
   });
 
   const hsk1TargetSkills = [...dictionary.hsk1HanziWords].map((w) =>
     hanziWordToGloss(w),
   );
-  bench(`HSK1 target skills`, () => {
-    skillLearningGraph({
-      targetSkills: hsk1TargetSkills,
-      dictionary,
-      decompositionData,
-      charactersJson,
-    });
+  test(`HSK1 target skills`, async ({ bench }) => {
+    await bench(`HSK1 target skills`, () => {
+      skillLearningGraph({
+        targetSkills: hsk1TargetSkills,
+        dictionary,
+        decompositionData,
+        charactersJson,
+      });
+    }).run();
   });
 
   const hsk1to3TargetSkills = [
@@ -104,12 +111,14 @@ describe(`skillLearningGraph`, async () => {
     ...dictionary.hsk3HanziWords,
   ].map((w) => hanziWordToGloss(w));
 
-  bench(`HSK1-3 target skills`, () => {
-    skillLearningGraph({
-      targetSkills: hsk1to3TargetSkills,
-      dictionary,
-      decompositionData,
-      charactersJson,
-    });
+  test(`HSK1-3 target skills`, async ({ bench }) => {
+    await bench(`HSK1-3 target skills`, () => {
+      skillLearningGraph({
+        targetSkills: hsk1to3TargetSkills,
+        dictionary,
+        decompositionData,
+        charactersJson,
+      });
+    }).run();
   });
 });

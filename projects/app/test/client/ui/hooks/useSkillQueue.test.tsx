@@ -14,16 +14,16 @@ import { studyWordItemSetting } from "#data/userSettings.ts";
 import { Rating } from "#util/fsrs.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { prettyQueue } from "#test/data/helpers.ts";
-import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithRizzle } from "#test/util/rizzleHelpers.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { sleep } from "@pinyinly/lib/sleep";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { act } from "react";
-import { afterEach, test as baseTest, expect, vi } from "vitest";
+import { afterEach, expect, vi } from "vitest";
 
-const test = baseTest.extend(rizzleFixture);
+const test = testWithRizzle;
 
 afterEach(() => {
   vi.resetAllMocks();

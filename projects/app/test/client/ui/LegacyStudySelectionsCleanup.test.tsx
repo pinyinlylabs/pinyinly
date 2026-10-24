@@ -9,22 +9,15 @@ import {
   getStudyWordKeyParams,
   studyWordItemSetting,
 } from "#data/userSettings.ts";
-import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithDb } from "#test/util/rizzleHelpers.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  test as baseTest,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, vi } from "vitest";
 
 const legacyStudySelectionsCleanupExpiresAt =
   LegacyStudySelectionsCleanup.expiresAt;
-const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+const test = testWithDb;
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: [`Date`] });

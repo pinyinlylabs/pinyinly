@@ -145,7 +145,7 @@ jobs:
         if: ${{ always() }}
         with:
           name: vitest-attachments
-          path: projects/*/.vitest-attachments/
+          path: projects/*/.vitest/
           if-no-files-found: ignore
 
       - name: 🧾 Results

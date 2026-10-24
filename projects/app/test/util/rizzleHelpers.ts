@@ -1,10 +1,8 @@
-import type { Db } from "#client/query.js";
 import { makeDb } from "#client/query.js";
 import { mutators } from "#data/rizzleMutators.js";
-import type { Rizzle } from "#data/rizzleSchema.js";
 import { currentSchema } from "#data/rizzleSchema.js";
 import { r } from "#util/rizzle.ts";
-import type { Fixtures } from "@vitest/runner";
+import { test } from "vitest";
 import type {
   ReadTransaction,
   ReplicacheOptions,
@@ -61,26 +59,22 @@ export function makeMockTx() {
   };
 }
 
-export const rizzleFixture: Fixtures<{ rizzle: Rizzle }> = {
-  rizzle: [
-    async ({}, use) => {
-      await using rizzle = r.replicache(
-        testReplicacheOptions(),
-        currentSchema,
-        mutators,
-      );
-      await use(rizzle);
-    },
-    { scope: `test` },
-  ],
-};
+export const testWithRizzle = test.extend(
+  `rizzle`,
+  { scope: `test` },
+  async ({}, { onCleanup }) => {
+    const rizzle = r.replicache(
+      testReplicacheOptions(),
+      currentSchema,
+      mutators,
+    );
+    onCleanup(async () => {
+      await rizzle[Symbol.asyncDispose]();
+    });
+    return rizzle;
+  },
+);
 
-export const dbFixture: Fixtures<{ db: Db }, { rizzle: Rizzle }> = {
-  db: [
-    async ({ rizzle }, use) => {
-      const db = makeDb(rizzle);
-      await use(db);
-    },
-    { scope: `test` },
-  ],
-};
+export const testWithDb = testWithRizzle.extend(`db`, async ({ rizzle }) =>
+  makeDb(rizzle),
+);

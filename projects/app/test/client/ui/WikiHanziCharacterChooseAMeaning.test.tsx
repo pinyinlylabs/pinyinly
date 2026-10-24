@@ -11,12 +11,12 @@ import type { Rizzle } from "#data/rizzleSchema.ts";
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
-import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithRizzle } from "#test/util/rizzleHelpers.ts";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
-import { afterEach, beforeEach, expect, test as baseTest, vi } from "vitest";
+import { afterEach, beforeEach, expect, vi } from "vitest";
 import { WikiHanziCharacterChooseAMeaning } from "#client/ui/WikiHanziCharacterChooseAMeaning.tsx";
 import { WikiHanziMeaningsPanel } from "#client/ui/WikiHanziMeaningsPanel.tsx";
 import { WikiHanziProgressLozenge } from "#client/ui/WikiHanziProgressLozenge.tsx";
@@ -47,7 +47,7 @@ vi.mock(import(`#client/ui/WikiHanziBookmarkMenu.tsx`), () => ({
   ),
 }));
 
-const test = baseTest.extend(rizzleFixture);
+const test = testWithRizzle;
 
 beforeEach(() => {
   vi.stubGlobal(
