@@ -22,4 +22,4 @@ node_modules
 
 
 # vitest
-.vitest-attachments
+.vitest/

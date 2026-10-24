@@ -20,11 +20,10 @@ import {
 import { loadDictionary } from "#dictionary.js";
 import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
-import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithDb } from "#test/util/rizzleHelpers.ts";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import {
   afterEach,
-  test as baseTest,
   test as unitTest,
   beforeAll,
   beforeEach,
@@ -111,22 +110,19 @@ describe(`wikiPayloadSchema`, () => {
 });
 
 describe(`historyPageCollection suite`, () => {
-  const test = baseTest
-    .extend(rizzleFixture)
-    .extend(dbFixture)
-    .extend<{ collection: HistoryPageCollection }>({
-      collection: [
-        async ({ db }, use) => {
-          const collection = historyPageCollection(
-            db.skillRatingCollection,
-            db.hanziGlossMistakeCollection,
-            db.hanziPinyinMistakeCollection,
-          );
-          await use(collection);
-        },
-        { scope: `test` },
-      ],
-    });
+  const test = testWithDb.extend<{ collection: HistoryPageCollection }>({
+    collection: [
+      async ({ db }, use) => {
+        const collection = historyPageCollection(
+          db.skillRatingCollection,
+          db.hanziGlossMistakeCollection,
+          db.hanziPinyinMistakeCollection,
+        );
+        await use(collection);
+      },
+      { scope: `test` },
+    ],
+  });
 
   test(`groups together sequential ratings for the same skill`, async ({
     collection,
@@ -260,7 +256,7 @@ function prettyData(data: HistoryPageData): string {
 }
 
 describe(`bookmarkedWordsCollection`, () => {
-  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+  const test = testWithDb;
 
   test(`hanziWord field retains existing storage keys and aliases`, () => {
     const createdAt = new Date();
@@ -482,7 +478,7 @@ describe(`bookmarkedWordsCollection`, () => {
 });
 
 describe(`userDictionaryCollectionOptions`, () => {
-  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+  const test = testWithDb;
 
   test(`builds rows from user hanzi meaning settings`, async ({
     db,
@@ -831,7 +827,7 @@ describe(`userDictionaryCollectionOptions`, () => {
 });
 
 describe(`dictionaryCollection hanziCharacterCount`, () => {
-  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+  const test = testWithDb;
 
   test(`computes hanziCharacterCount for single character entries`, async ({
     db,
@@ -969,7 +965,7 @@ describe(`dictionaryCollection hanziCharacterCount`, () => {
 });
 
 describe(`dictionaryCollection hskFirstAppearance`, () => {
-  const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+  const test = testWithDb;
 
   test(`is defined for single-char entries that have an hsk level`, async ({
     db,

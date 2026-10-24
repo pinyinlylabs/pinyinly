@@ -13,13 +13,13 @@ import {
   actorSpecJsonSetting,
   pinyinSoundActorSetting,
 } from "#data/userSettings.ts";
-import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithDb } from "#test/util/rizzleHelpers.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
-import { test as baseTest, expect } from "vitest";
+import { expect } from "vitest";
 
-const test = baseTest.extend(rizzleFixture).extend(dbFixture);
+const test = testWithDb;
 
 test(`deletes actor settings and unassigns only its sounds`, async ({
   db,

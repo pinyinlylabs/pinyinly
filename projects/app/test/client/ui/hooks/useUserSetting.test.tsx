@@ -7,7 +7,7 @@ import { useUserSetting } from "#client/ui/hooks/useUserSetting.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { autoCheckUserToggleSetting } from "#data/userSettings.ts";
-import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithRizzle as rizzleTest } from "#test/util/rizzleHelpers.ts";
 import { r } from "#util/rizzle.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
@@ -15,7 +15,7 @@ import type { PropsWithChildren } from "react";
 import { act } from "react";
 import { test as baseTest, expect } from "vitest";
 
-const testWithRizzle = baseTest.extend(rizzleFixture);
+const testWithRizzle = rizzleTest;
 
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.

@@ -1,10 +1,5 @@
 import { rSkillKind } from "@/data/rizzleSchema";
-import { bench, describe, expect } from "vitest";
-
-// Add a regression test to make sure Vitest bench mode sets the `MODE`
-// environment variable to 'benchmark'. This is assumed in other places in the
-// code.
-expect(process.env[`MODE`]).toBe(`benchmark`);
+import { describe, test } from "vitest";
 
 describe(`rSkillKind`, () => {
   const values = [
@@ -26,9 +21,11 @@ describe(`rSkillKind`, () => {
     `pfa`,
   ];
 
-  bench(`unmarshal()`, () => {
-    for (const v of values) {
-      rSkillKind().unmarshal(v);
-    }
+  test(`unmarshal()`, async ({ bench }) => {
+    await bench(`unmarshal()`, () => {
+      for (const v of values) {
+        rSkillKind().unmarshal(v);
+      }
+    }).run();
   });
 });

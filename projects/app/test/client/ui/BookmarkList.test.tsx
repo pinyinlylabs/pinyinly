@@ -10,12 +10,12 @@ import {
   getStudyWordKeyParams,
   studyWordItemSetting,
 } from "#data/userSettings.ts";
-import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
+import { testWithRizzle } from "#test/util/rizzleHelpers.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, waitFor, within } from "@testing-library/react";
 import { format } from "date-fns/format";
 import type { PropsWithChildren } from "react";
-import { afterEach, beforeEach, test as baseTest, expect, vi } from "vitest";
+import { afterEach, beforeEach, expect, vi } from "vitest";
 
 vi.mock(import(`#client/ui/Icon.tsx`), () => ({
   Icon: ({ icon }: { icon: string }) => <span data-icon={icon} />,
@@ -27,7 +27,7 @@ vi.mock(`expo-router`, () => ({
   ),
 }));
 
-const test = baseTest.extend(rizzleFixture);
+const test = testWithRizzle;
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: [`Date`] });
