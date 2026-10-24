@@ -100,10 +100,9 @@ export function QuizDeckHanziCharacterWritingQuestion({
       grade,
       drawnStrokes,
     });
-    Sentry.withScope((scope) => {
-      scope.setTag(`report-kind`, `handwriting-grade`);
-      scope.setExtra(`handwriting-grade-report-json`, reportJson);
-      Sentry.captureMessage(`User reported a handwriting grade`);
+    Sentry.captureMessage(`User reported a handwriting grade`, {
+      tags: { [`report-kind`]: `handwriting-grade` },
+      extra: { [`handwriting-grade-report-json`]: reportJson },
     });
   }
 
