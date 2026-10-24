@@ -40,13 +40,13 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,
-  onRepeatQuestion,
+  onChangeAnswer,
   onRating,
 }: {
   noAutoFocus?: boolean;
   question: HanziWordToPinyinTypedQuestion;
   onNext: () => void;
-  onRepeatQuestion: () => void;
+  onChangeAnswer: () => void;
   onRating: (
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
@@ -90,7 +90,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
       grade={grade}
       isUserAnswerProvided={!isUserAnswerEmpty}
       onSubmit={submit}
-      onRepeatQuestion={onRepeatQuestion}
+      onChangeAnswer={onChangeAnswer}
       showIdkButton
       skill={skill}
     >

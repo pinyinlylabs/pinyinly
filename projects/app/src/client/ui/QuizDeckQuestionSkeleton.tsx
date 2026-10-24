@@ -16,7 +16,7 @@ export function QuizDeckQuestionSkeleton({
   grade,
   isUserAnswerProvided,
   onSubmit,
-  onRepeatQuestion,
+  onChangeAnswer,
   onReportWrongGrade,
   showIdkButton = false,
   skill,
@@ -25,7 +25,7 @@ export function QuizDeckQuestionSkeleton({
   grade?: QuizDeckQuestionSkeletonGrade;
   isUserAnswerProvided: boolean;
   onSubmit: () => void;
-  onRepeatQuestion: () => void;
+  onChangeAnswer: () => void;
   onReportWrongGrade?: () => void;
   showIdkButton?: boolean;
   skill: Skill;
@@ -55,7 +55,7 @@ export function QuizDeckQuestionSkeleton({
         <QuizDeckResultToast
           skill={skill}
           rating={grade.rating}
-          onRepeatQuestion={onRepeatQuestion}
+          onChangeAnswer={onChangeAnswer}
           onReportWrongGrade={onReportWrongGrade}
         />
       )}

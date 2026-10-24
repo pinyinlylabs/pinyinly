@@ -41,7 +41,7 @@ test.for([Rating.Easy, Rating.Good, Rating.Hard, Rating.Again])(
               grade={graded ? { rating } : undefined}
               isUserAnswerProvided
               onSubmit={() => {}}
-              onRepeatQuestion={() => {}}
+              onChangeAnswer={() => {}}
               showIdkButton
             >
               <View testID="question" className="flex-1 justify-center">
@@ -146,7 +146,7 @@ test(`advancing before the enter animation finishes prevents replay on exit`, as
           <QuizDeckResultToast
             skill="hp:test:meaning"
             rating={Rating.Good}
-            onRepeatQuestion={() => {}}
+            onChangeAnswer={() => {}}
           />
         ) : null}
       </View>
