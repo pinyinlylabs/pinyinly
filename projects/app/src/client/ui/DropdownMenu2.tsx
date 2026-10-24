@@ -248,12 +248,17 @@ function DropdownMenuContent({
 function DropdownMenuTrigger({
   asChild = false,
   children,
+  className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
   const { open } = DropdownMenuPrimitive.useRootContext();
 
   return (
-    <DropdownMenuPrimitive.Trigger asChild={asChild} {...props}>
+    <DropdownMenuPrimitive.Trigger
+      asChild={asChild}
+      {...props}
+      className={cn(`web:select-none`, className)}
+    >
       {asChild && isValidElement(children)
         ? cloneElement(children as ReactElement<{ pressed?: boolean }>, {
             pressed: open,
