@@ -6,3 +6,6 @@ yarn = "4.18.1"
 [plugins.tools]
 jq = "https://raw.githubusercontent.com/appthrust/proto-toml-plugins/main/jq/plugin.toml"
 gojq = "https://raw.githubusercontent.com/stk0vrfl0w/proto-toml-plugins/main/plugins/gojq.toml"
+
+[settings]
+auto-install = true
