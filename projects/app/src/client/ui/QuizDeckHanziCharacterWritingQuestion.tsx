@@ -17,7 +17,7 @@ import type {
 import type { HanziCharacterWritingQuestionGrade } from "@/data/questions/hanziCharacterWriting";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import * as Sentry from "@sentry/react-native";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { useQuery } from "@tanstack/react-query";

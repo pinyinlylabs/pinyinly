@@ -1,6 +1,6 @@
 import type { PointerEvent } from "react";
 import { useId, useRef, useState } from "react";
-import type { WritingStrokePoint } from "@/util/writingStrokeGrader";
+import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { View } from "@/client/ui/View";
 
