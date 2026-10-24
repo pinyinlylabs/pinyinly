@@ -374,7 +374,11 @@ export const QuizDeck = ({
   return (
     <View className={className}>
       {title == null ? null : (
-        <View className="mb-3 w-full max-w-150 flex-row items-center justify-between self-center px-4">
+        <View
+          className="
+            mb-3 w-full max-w-screen-sm flex-row items-center justify-between self-center px-4
+          "
+        >
           <Text className="pyly-body-title">{title}</Text>
           <RectButton href={backHref} variant="bare" iconStart="chevron-left">
             Back
@@ -382,13 +386,15 @@ export const QuizDeck = ({
         </View>
       )}
       <View
-        className={`mb-5 w-full max-w-150 flex-row items-center gap-3 self-center px-4`}
+        className={`mb-5 w-full max-w-screen-sm flex-row items-center gap-3 self-center px-4`}
       >
         <QuizProgressBar progress={quizProgress.progress} />
         <QuizQueueButton />
       </View>
 
-      <View className="size-full max-w-150 flex-1 self-center">{screen}</View>
+      <View className="size-full max-w-screen-sm flex-1 self-center">
+        {screen}
+      </View>
     </View>
   );
 };
