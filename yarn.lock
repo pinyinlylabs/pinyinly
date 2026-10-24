@@ -10081,13 +10081,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vercel/cli-config@npm:0.3.1":
-  version: 0.3.1
-  resolution: "@vercel/cli-config@npm:0.3.1"
+"@vercel/cli-config@npm:0.3.3":
+  version: 0.3.3
+  resolution: "@vercel/cli-config@npm:0.3.3"
   dependencies:
     xdg-app-paths: "npm:5"
     zod: "npm:4.1.11"
-  checksum: 10c0/ece39fdba257b4a364f12d2f1708af339a73ac9235edfe264aef19c74a8aba3076b220de7989ba9dc73978584e89d1546aa73c14d045a6ec76bf5848dcacecc4
+  checksum: 10c0/f21ab7b4946181468910fef90f928a0d077f6c5423c0eadd54c43b0300bd4c808cd8ebf38b46555ae867b59d248a717f2d6e44d498bb2f651929f54e81cf1de6
   languageName: node
   linkType: hard
 
@@ -10101,10 +10101,10 @@ __metadata:
   linkType: hard
 
 "@vercel/functions@npm:^3.5.0":
-  version: 3.9.11
-  resolution: "@vercel/functions@npm:3.9.11"
+  version: 3.10.3
+  resolution: "@vercel/functions@npm:3.10.3"
   dependencies:
-    "@vercel/oidc": "npm:4.0.0"
+    "@vercel/oidc": "npm:4.0.3"
   peerDependencies:
     "@aws-sdk/credential-provider-web-identity": "*"
     ws: ">=8"
@@ -10113,18 +10113,18 @@ __metadata:
       optional: true
     ws:
       optional: true
-  checksum: 10c0/6c8fb6c4c4f76fcd54463a9ff72e7a8ee2dd100fc5207f575663224b5339dbc19d712d9d27c6a391a4b74475283455bc26762c90f1e99971940d38c9ed204a1a
+  checksum: 10c0/8eb41b957b04b2abe5cfe193509bf34a6579097ee5d01674917a1712bddb112d23003f15a1e03bfd7da794d452cc5e956adfa35d8f7eb3f80ce188006b05c2fa
   languageName: node
   linkType: hard
 
-"@vercel/oidc@npm:4.0.0":
-  version: 4.0.0
-  resolution: "@vercel/oidc@npm:4.0.0"
+"@vercel/oidc@npm:4.0.3":
+  version: 4.0.3
+  resolution: "@vercel/oidc@npm:4.0.3"
   dependencies:
-    "@vercel/cli-config": "npm:0.3.1"
+    "@vercel/cli-config": "npm:0.3.3"
     "@vercel/cli-exec": "npm:1.0.1"
     jose: "npm:^5.9.6"
-  checksum: 10c0/62806d8f574009e0186644026be6f610fc1c1826b3b7bca05ef46d7b2dc461da75f943cf83b216e827c1672b4c9f052b9693fe578b256d243aebd2f6d4278363
+  checksum: 10c0/d99c5c476153f7145278d009cd2762084840c87338762828d285361186b9a05ee56bdf4bb37558c797faa61dad320bbfa78e0e41570f61686084b4e8fbe7127d
   languageName: node
   linkType: hard
 
