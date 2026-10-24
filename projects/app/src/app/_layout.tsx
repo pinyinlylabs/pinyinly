@@ -77,6 +77,11 @@ export function UiProviders({ children }: PropsWithChildren) {
 
 function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
   const activeDeviceSession = useAuth().data?.activeDeviceSession;
+  const userId = activeDeviceSession?.userId;
+
+  useEffect(() => {
+    Sentry.setUser(userId == null ? null : { id: userId });
+  }, [userId]);
 
   return activeDeviceSession == null ? null : (
     <SessionStoreProvider
