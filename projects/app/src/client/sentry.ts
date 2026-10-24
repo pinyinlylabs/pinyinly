@@ -44,10 +44,17 @@ import { Platform } from "react-native";
 // Populate the scope with Expo specific information.
 {
   const scope = Sentry.getCurrentScope();
-  scope.setTag(`expo-update-id`, Updates.updateId);
+  if (Updates.updateId !== null && Updates.updateId !== ``) {
+    scope.setTag(`expo-update-id`, Updates.updateId);
+  }
   scope.setTag(`expo-is-embedded-update`, Updates.isEmbeddedLaunch);
   scope.setTag(`platform-os`, Platform.OS);
   scope.setTag(`platform-version`, Platform.Version);
+
+  const buildTimestamp = process.env.EXPO_PUBLIC_BUILD_TIMESTAMP;
+  if (buildTimestamp !== undefined && buildTimestamp !== ``) {
+    scope.setTag(`build-timestamp`, buildTimestamp);
+  }
 
   // Via the guide: https://docs.expo.dev/guides/using-sentry/
   const manifest = Updates.manifest;
