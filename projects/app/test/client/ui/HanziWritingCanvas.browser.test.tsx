@@ -1,6 +1,6 @@
 import { HanziWritingCanvas } from "#client/ui/HanziWritingCanvas.tsx";
 import { View } from "#client/ui/View.tsx";
-import type { WritingStrokePoint } from "#util/writingStrokeGrader.ts";
+import type { WritingStrokePoint } from "#util/shapeContextGrader.ts";
 import { assert, expect, test, vi } from "vitest";
 import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
