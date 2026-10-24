@@ -149,8 +149,8 @@ function DropdownMenuSubContent({
           `
             min-w-[190px] gap-1 rounded-xl bg-bg-high p-3 animate-in
 
-            web:z-50 web:origin-(--radix-context-menu-content-transform-origin) web:animate-in
-            web:fade-in-0 web:zoom-in-95
+            web:z-50 web:origin-(--radix-context-menu-content-transform-origin) web:bg-bg-high/80
+            web:backdrop-blur-md web:animate-in web:fade-in-0 web:zoom-in-95
 
             web:data-[side=bottom]:slide-in-from-top-2
 
@@ -227,7 +227,8 @@ function DropdownMenuContent({
 
                         web:z-50 web:max-h-(--radix-context-menu-content-available-height)
                         web:origin-(--radix-context-menu-content-transform-origin)
-                        web:cursor-default web:animate-in web:fade-in-0 web:zoom-in-95
+                        web:cursor-default web:bg-bg-high/80 web:backdrop-blur-md web:animate-in
+                        web:fade-in-0 web:zoom-in-95
                       `,
                       props.side === `bottom` && `web:slide-in-from-top-2`,
                       props.side === `top` && `web:slide-in-from-bottom-2`,
