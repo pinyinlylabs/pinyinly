@@ -18,7 +18,7 @@ export function QuizDeckResultToast({
   skill,
   rating,
   disableAnimation = false,
-  onRepeatQuestion,
+  onChangeAnswer,
   onReportWrongGrade,
 }: {
   skill: Skill;
@@ -27,7 +27,7 @@ export function QuizDeckResultToast({
    * Disable the enter animation for the toast, useful for demo purposes and visual snapshotting.
    */
   disableAnimation?: boolean;
-  onRepeatQuestion: () => void;
+  onChangeAnswer: () => void;
   onReportWrongGrade?: () => void;
 }) {
   const cleanupAnimationRef = useRef<(() => void) | null>(null);
@@ -88,6 +88,7 @@ export function QuizDeckResultToast({
                       Perfect!
                     </Text>
                     <QuizResultDropdown
+                      onChangeAnswer={onChangeAnswer}
                       onReportWrongGrade={onReportWrongGrade}
                     />
                   </View>
@@ -98,6 +99,7 @@ export function QuizDeckResultToast({
                       Nice!
                     </Text>
                     <QuizResultDropdown
+                      onChangeAnswer={onChangeAnswer}
                       onReportWrongGrade={onReportWrongGrade}
                     />
                   </View>
@@ -109,7 +111,7 @@ export function QuizDeckResultToast({
                         Too slow
                       </Text>
                       <QuizResultDropdown
-                        onRepeatQuestion={onRepeatQuestion}
+                        onChangeAnswer={onChangeAnswer}
                         onReportWrongGrade={onReportWrongGrade}
                       />
                     </View>
@@ -127,7 +129,7 @@ export function QuizDeckResultToast({
                           Incorrect
                         </Text>
                         <QuizResultDropdown
-                          onRepeatQuestion={onRepeatQuestion}
+                          onChangeAnswer={onChangeAnswer}
                           onReportWrongGrade={onReportWrongGrade}
                         />
                       </View>
@@ -151,13 +153,13 @@ export function QuizDeckResultToast({
 }
 
 function QuizResultDropdown({
-  onRepeatQuestion,
+  onChangeAnswer,
   onReportWrongGrade,
 }: {
-  onRepeatQuestion?: () => void;
+  onChangeAnswer?: () => void;
   onReportWrongGrade?: () => void;
 }) {
-  if (onRepeatQuestion == null && onReportWrongGrade == null) {
+  if (onChangeAnswer == null && onReportWrongGrade == null) {
     return null;
   }
 
@@ -174,9 +176,9 @@ function QuizResultDropdown({
           />
         </DropdownMenu2.Trigger>
         <DropdownMenu2.Content align="end">
-          {onRepeatQuestion == null ? null : (
-            <DropdownMenu2.Item onPress={onRepeatQuestion}>
-              <Text>Undo mistake and retry</Text>
+          {onChangeAnswer == null ? null : (
+            <DropdownMenu2.Item onPress={onChangeAnswer}>
+              <Text>Change answer</Text>
             </DropdownMenu2.Item>
           )}
           {onReportWrongGrade == null ? null : (

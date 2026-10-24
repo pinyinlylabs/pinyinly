@@ -54,8 +54,8 @@ export default () => {
                   skill={skill}
                   rating={rating}
                   disableAnimation
-                  onRepeatQuestion={() => {
-                    console.log(`onRepeatQuestion`);
+                  onChangeAnswer={() => {
+                    console.log(`onChangeAnswer`);
                   }}
                 />
                 <View

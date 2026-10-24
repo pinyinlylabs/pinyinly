@@ -39,7 +39,7 @@ export function QuizDeckOneCorrectPairQuestion({
   question,
   onNext,
   onRating,
-  onRepeatQuestion,
+  onChangeAnswer,
 }: {
   question: OneCorrectPairQuestion;
   onNext: () => void;
@@ -47,7 +47,7 @@ export function QuizDeckOneCorrectPairQuestion({
     ratings: readonly UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
-  onRepeatQuestion: () => void;
+  onChangeAnswer: () => void;
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
 
@@ -113,7 +113,7 @@ export function QuizDeckOneCorrectPairQuestion({
           onNext();
         }
       }}
-      onRepeatQuestion={onRepeatQuestion}
+      onChangeAnswer={onChangeAnswer}
       skill={answer.skill}
     >
       {flag?.kind === QuestionFlagKind.NewSkill ? (

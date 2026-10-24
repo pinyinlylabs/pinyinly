@@ -25,7 +25,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   question,
   onNext,
   onRating,
-  onRepeatQuestion,
+  onChangeAnswer,
 }: {
   noAutoFocus?: boolean;
   question: HanziWordToGlossTypedQuestion;
@@ -34,7 +34,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
-  onRepeatQuestion: () => void;
+  onChangeAnswer: () => void;
 }) {
   const { skill, flag, bannedMeaningPrimaryGlossHint } = question;
 
@@ -70,7 +70,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
       grade={grade}
       isUserAnswerProvided={!isUserAnswerEmpty}
       onSubmit={submit}
-      onRepeatQuestion={onRepeatQuestion}
+      onChangeAnswer={onChangeAnswer}
       showIdkButton
       skill={skill}
     >

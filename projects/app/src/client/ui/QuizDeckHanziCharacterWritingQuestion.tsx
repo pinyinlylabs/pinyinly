@@ -34,7 +34,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
   question,
   onNext,
   onRating,
-  onRepeatQuestion,
+  onChangeAnswer,
 }: {
   question: HanziCharacterWritingQuestion;
   onNext: () => void;
@@ -42,7 +42,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
-  onRepeatQuestion: () => void;
+  onChangeAnswer: () => void;
 }) {
   const [drawnStrokes, setDrawnStrokes] = useState<WritingStrokePoint[][]>([]);
   const [grade, setGrade] = useState<HanziCharacterWritingQuestionGrade | null>(
@@ -111,7 +111,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
       grade={grade ?? undefined}
       isUserAnswerProvided={drawnStrokes.length > 0}
       onSubmit={handleSubmit}
-      onRepeatQuestion={onRepeatQuestion}
+      onChangeAnswer={onChangeAnswer}
       onReportWrongGrade={
         grade == null || drawnStrokes.length === 0
           ? undefined

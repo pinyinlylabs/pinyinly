@@ -51,8 +51,8 @@ export default () => {
               onRating={() => {
                 console.log(`onRating()`);
               }}
-              onRepeatQuestion={() => {
-                console.log(`onRepeatQuestion()`);
+              onChangeAnswer={() => {
+                console.log(`onChangeAnswer()`);
               }}
               question={question}
             />
