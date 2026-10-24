@@ -16,9 +16,9 @@
     "#*.tsx": "./src/*.tsx"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1044.0",
-    "@aws-sdk/s3-request-presigner": "3.1044.0",
-    "@aws-sdk/util-endpoints": "3.996.8",
+    "@aws-sdk/client-s3": "3.1152.0",
+    "@aws-sdk/s3-request-presigner": "3.1152.0",
+    "@aws-sdk/util-endpoints": "3.996.47",
     "@expo/html-elements": "patch:@expo/html-elements@npm%3A0.13.8#~/.yarn/patches/@expo-html-elements-npm-0.13.8-bd9c25d778.patch",
     "@expo/metro-runtime": "~57.0.3",
     "@floating-ui/react-native": "^0.10.7",
