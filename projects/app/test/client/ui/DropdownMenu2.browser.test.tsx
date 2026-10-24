@@ -2,6 +2,7 @@ import { DropdownMenu2 } from "#client/ui/DropdownMenu2.tsx";
 import "#global.css";
 import { expect, test, vi } from "vitest";
 import { page } from "vitest/browser";
+import { PortalProvider } from "react-native-teleport";
 import { render } from "vitest-browser-react";
 
 vi.mock(`#client/ui/Icon.tsx`, () => ({ Icon: () => null }));
@@ -29,4 +30,41 @@ test(`double-clicking the trigger suppresses native text selection`, async () =>
   expect(
     getComputedStyle(page.getByTestId(`toast-copy`).element()).userSelect,
   ).not.toBe(`none`);
+});
+
+test(`dropdown surfaces blur the background on web`, async () => {
+  await render(
+    <PortalProvider>
+      <DropdownMenu2>
+        <DropdownMenu2.Trigger asChild>
+          <button data-testid="trigger" type="button">
+            More
+          </button>
+        </DropdownMenu2.Trigger>
+        <DropdownMenu2.Content data-testid="dropdown-content">
+          <DropdownMenu2.Sub>
+            <DropdownMenu2.SubTrigger>More options</DropdownMenu2.SubTrigger>
+            <DropdownMenu2.SubContent data-testid="dropdown-sub-content">
+              <DropdownMenu2.Item>Option</DropdownMenu2.Item>
+            </DropdownMenu2.SubContent>
+          </DropdownMenu2.Sub>
+        </DropdownMenu2.Content>
+      </DropdownMenu2>
+    </PortalProvider>,
+  );
+
+  await page.getByTestId(`trigger`).click();
+  await expect
+    .element(page.getByTestId(`dropdown-content`))
+    .toBeInTheDocument();
+  await page.getByText(`More options`).click();
+  await expect
+    .element(page.getByTestId(`dropdown-sub-content`))
+    .toBeInTheDocument();
+
+  for (const testId of [`dropdown-content`, `dropdown-sub-content`]) {
+    const menu = page.getByTestId(testId).element();
+    expect(menu.classList.contains(`web:bg-bg-high/80`)).toBe(true);
+    expect(getComputedStyle(menu).backdropFilter).toContain(`blur(`);
+  }
 });
