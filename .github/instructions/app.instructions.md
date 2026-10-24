@@ -36,6 +36,13 @@ Demos are located in `.demo.tsx` files next to the component they are demonstrat
 accessible at `/dev/demo/<component>` (for example, `/dev/demo/Lozenge`). Register each demo in
 `projects/app/src/app/dev/demo/index.tsx` so it appears in the demo list and route.
 
+# Browser Tests
+
+Browser tests are exceptional, not the default for app features or pages. Add or propose one only
+for a reusable UI component used in many parts of the app, when the test is stable and catches an
+easy-to-miss rendered UI issue (for example, a `:focus-visible` outline regression). Prefer tests
+that assert visual or interaction behavior without depending on text or content.
+
 # PostgreSQL DB Migrations
 
 Don't manually create drizzle SQL migration files, instead use the `app:dbGenerate` command which
