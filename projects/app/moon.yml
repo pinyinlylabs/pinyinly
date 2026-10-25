@@ -411,6 +411,19 @@ tasks:
       envFile:
         - .env.test.local
 
+  handwritingDiagnose:
+    description: "Run handwriting fixtures with JSON and SVG diagnostic attachments."
+    command: vitest run test/util/shapeContextGrader.test.ts --mode development --reporter=default --reporter=json --reporter=html
+    deps:
+      - ~:codegen
+      - audio-sprites:src
+    env:
+      PYLY_HANDWRITING_DIAGNOSE: "true"
+    options:
+      cache: false
+      envFile:
+        - .env.test.local
+
   browser:
     # Match vite-plugin-react-native-web's production NODE_ENV define.
     env:

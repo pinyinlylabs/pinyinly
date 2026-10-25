@@ -29,9 +29,42 @@ export interface ShapeContextGraderDiagnostic {
   algorithm: {
     kind: `shape-context-tps`;
     geometry: Omit<ShapeContextGrade, `transform`> & {
+      weightedScoreContributions: ShapeContextGraderScoreContributions;
       transform: Omit<ThinPlateSplineTransform, `transform`>;
     };
   };
+}
+
+export interface ShapeContextGraderScoreContributions {
+  initialMatchingError: number;
+  residualMatchingError: number;
+  bendingEnergy: number;
+  affineDistortion: number;
+  rotationPenalty: number;
+  unmatchedPointPenalty: number;
+  geometryCoveragePenalty: number;
+  emptyGeometryPenalty: number;
+}
+
+export function shapeContextGraderScoreContributions(
+  geometry: ShapeContextGrade,
+): ShapeContextGraderScoreContributions {
+  const contributions = {
+    initialMatchingError: geometry.initialMatchingError * 0.25,
+    residualMatchingError: geometry.residualMatchingError * 0.35,
+    bendingEnergy: geometry.bendingEnergy * 0.04,
+    affineDistortion: geometry.affineDistortion * 0.15,
+    rotationPenalty: geometry.rotationPenalty * 0.4,
+    unmatchedPointPenalty: geometry.unmatchedPointPenalty * 0.5,
+    geometryCoveragePenalty: geometry.geometryCoveragePenalty,
+  };
+  const emptyGeometryPenalty =
+    geometry.sourcePoints.length === 0 || geometry.targetPoints.length === 0
+      ? geometry.combinedCost -
+        Object.values(contributions).reduce((sum, value) => sum + value, 0)
+      : 0;
+
+  return { ...contributions, emptyGeometryPenalty };
 }
 
 export function createShapeContextGraderDiagnostic({
@@ -102,6 +135,8 @@ export function createShapeContextGraderDiagnostic({
       kind: `shape-context-tps`,
       geometry: {
         ...geometryWithoutTransform,
+        weightedScoreContributions:
+          shapeContextGraderScoreContributions(geometry),
         transform: serializableTransform,
       },
     },
@@ -287,7 +322,7 @@ export function renderShapeContextGraderDiagnosticSvg({
         `<path d="${path}" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.6"/>`,
     )
     .join(``);
-  const scoreContributions = geometry.weightedScoreContributions;
+  const scoreContributions = shapeContextGraderScoreContributions(geometry);
   const contributions = [
     `initialMatchingError: ${scoreContributions.initialMatchingError.toFixed(3)}`,
     `residualMatchingError: ${scoreContributions.residualMatchingError.toFixed(3)}`,

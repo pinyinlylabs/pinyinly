@@ -3,6 +3,7 @@ import { gradeCharacterShape } from "#util/shapeContextGrader.ts";
 import {
   createShapeContextGraderDiagnostic,
   renderShapeContextGraderDiagnosticSvg,
+  shapeContextGraderScoreContributions,
 } from "#test/util/shapeContextGraderDiagnostics.ts";
 import { expect, test } from "vitest";
 
@@ -53,7 +54,7 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
       geometry.unmatchedPointPenalty * 0.5 +
       geometry.geometryCoveragePenalty,
   );
-  const contributions = geometry.weightedScoreContributions;
+  const contributions = shapeContextGraderScoreContributions(geometry);
   expect(
     contributions.initialMatchingError +
       contributions.residualMatchingError +
@@ -64,6 +65,21 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
       contributions.geometryCoveragePenalty +
       contributions.emptyGeometryPenalty,
   ).toBeCloseTo(geometry.combinedCost, 12);
+
+  const emptyGeometry = gradeCharacterShape([], referencePaths);
+  const emptyContributions =
+    shapeContextGraderScoreContributions(emptyGeometry);
+  expect(
+    emptyContributions.initialMatchingError +
+      emptyContributions.residualMatchingError +
+      emptyContributions.bendingEnergy +
+      emptyContributions.affineDistortion +
+      emptyContributions.rotationPenalty +
+      emptyContributions.unmatchedPointPenalty +
+      emptyContributions.geometryCoveragePenalty +
+      emptyContributions.emptyGeometryPenalty,
+  ).toBeCloseTo(emptyGeometry.combinedCost, 12);
+  expect(emptyContributions.emptyGeometryPenalty).toBeGreaterThan(0);
   expect(svg).toContain(`Raw handwriting`);
   expect(svg).toContain(`Reference geometry`);
   expect(svg).toContain(`Normalized source before TPS`);

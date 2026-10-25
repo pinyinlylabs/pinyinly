@@ -14,6 +14,10 @@ import {
 import type { WritingStrokePoint } from "#util/shapeContextGrader.ts";
 import type { ShapeContextGraderExample } from "#util/shapeContextGraderExample.ts";
 import {
+  createShapeContextGraderDiagnostic,
+  renderShapeContextGraderDiagnosticSvg,
+} from "#test/util/shapeContextGraderDiagnostics.ts";
+import {
   decodeShapeContextStrokes,
   encodeShapeContextStrokes,
   parseShapeContextGraderExampleFragment,
@@ -25,6 +29,72 @@ import {
 import { transformArphicSpaceSvgPath } from "#util/svgFont.ts";
 import SVGPathCommander from "svg-path-commander";
 import { describe, expect, test } from "vitest";
+import type { TestContext } from "vitest";
+
+const handwritingDiagnosticsEnabled =
+  process.env[`PYLY_HANDWRITING_DIAGNOSE`] === `true`;
+
+async function annotateShapeContextGraderExample({
+  context,
+  example,
+  character,
+  drawnStrokes,
+  referencePaths,
+  geometry,
+  similarCharacterGrades,
+  expectedAcceptance,
+  gradingDurationMs,
+}: {
+  context: TestContext;
+  example: ShapeContextGraderExample;
+  character: string;
+  drawnStrokes: WritingStrokePoint[][];
+  referencePaths: string[];
+  geometry: ReturnType<typeof gradeCharacterShape>;
+  similarCharacterGrades: ReturnType<typeof gradeSimilarCharacters>;
+  expectedAcceptance: boolean;
+  gradingDurationMs: number;
+}): Promise<void> {
+  if (!handwritingDiagnosticsEnabled) {
+    return;
+  }
+
+  const actualAcceptance = isHanziCharacterWritingAccepted(
+    geometry,
+    similarCharacterGrades,
+  );
+  const diagnostic = createShapeContextGraderDiagnostic({
+    fixtureId: example.id,
+    targetCharacter: character,
+    encodedDrawnStrokes: example.drawnStrokes,
+    drawnStrokes,
+    referencePaths,
+    expectedAcceptance,
+    actualAcceptance,
+    acceptanceThreshold: hanziCharacterWritingSimilarityThreshold,
+    gradingDurationMs,
+    geometry,
+    contrastiveCandidates: similarCharacterGrades,
+  });
+
+  await context.annotate(`${example.id}: diagnostics.json`, {
+    body: JSON.stringify(diagnostic),
+    contentType: `application/json`,
+  });
+  await context.annotate(`${example.id}: overview.svg`, {
+    body: renderShapeContextGraderDiagnosticSvg({
+      fixtureId: example.id,
+      targetCharacter: character,
+      drawnStrokes,
+      referencePaths,
+      geometry,
+      expectedAcceptance,
+      actualAcceptance,
+      acceptanceThreshold: hanziCharacterWritingSimilarityThreshold,
+    }),
+    contentType: `image/svg+xml`,
+  });
+}
 
 function expectDebugGridDoesNotFold(
   geometry: ReturnType<typeof gradeCharacterShape>,
@@ -569,7 +639,7 @@ describe(`gradeCharacterShape`, () => {
 
   test.for(positiveShapeContextGraderExamples)(
     `applies acceptance criteria to positive example $id`,
-    async (example) => {
+    async (example, context) => {
       const character = shapeContextGraderExampleCharacter(example);
       const [referencePaths, similarReferences] = await Promise.all([
         characterPathsFor(character),
@@ -577,6 +647,9 @@ describe(`gradeCharacterShape`, () => {
       ]);
       expect(referencePaths.length).toBeGreaterThan(0);
       const drawnStrokes = decodeShapeContextStrokes(example.drawnStrokes);
+      const gradingStartedAt = handwritingDiagnosticsEnabled
+        ? performance.now()
+        : 0;
       const result = gradeCharacterShape(
         drawnStrokes,
         referencePaths,
@@ -588,6 +661,19 @@ describe(`gradeCharacterShape`, () => {
         result.options,
         result.sampleCount,
       );
+      if (handwritingDiagnosticsEnabled) {
+        await annotateShapeContextGraderExample({
+          context,
+          example,
+          character,
+          drawnStrokes,
+          referencePaths,
+          geometry: result,
+          similarCharacterGrades,
+          expectedAcceptance: true,
+          gradingDurationMs: performance.now() - gradingStartedAt,
+        });
+      }
       expect(
         similarCharacterGrades.every(
           ({ geometry }) => geometry.sampleCount === result.sampleCount,
@@ -638,13 +724,16 @@ describe(`gradeCharacterShape`, () => {
 
   test.for(negativeShapeContextGraderExamples.filter((x) => !x.skip))(
     `rejects negative example $id`,
-    async (example) => {
+    async (example, context) => {
       const character = shapeContextGraderExampleCharacter(example);
       const [referencePaths, similarReferences] = await Promise.all([
         characterPathsFor(character),
         visuallySimilarReferencesFor(character),
       ]);
       const drawnStrokes = decodeShapeContextStrokes(example.drawnStrokes);
+      const gradingStartedAt = handwritingDiagnosticsEnabled
+        ? performance.now()
+        : 0;
       const result = gradeCharacterShape(
         drawnStrokes,
         referencePaths,
@@ -656,6 +745,19 @@ describe(`gradeCharacterShape`, () => {
         result.options,
         result.sampleCount,
       );
+      if (handwritingDiagnosticsEnabled) {
+        await annotateShapeContextGraderExample({
+          context,
+          example,
+          character,
+          drawnStrokes,
+          referencePaths,
+          geometry: result,
+          similarCharacterGrades,
+          expectedAcceptance: false,
+          gradingDurationMs: performance.now() - gradingStartedAt,
+        });
+      }
       expect(
         similarCharacterGrades.every(
           ({ geometry }) => geometry.sampleCount === result.sampleCount,
