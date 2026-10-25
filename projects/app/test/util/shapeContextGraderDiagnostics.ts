@@ -1,12 +1,17 @@
 import type { SimilarCharacterGrade } from "#data/questions/hanziCharacterWriting.ts";
 import type {
+  ShapeContextCorrespondence,
   ShapeContextGrade,
   ThinPlateSplineTransform,
   WritingStrokePoint,
 } from "#util/shapeContextGrader.ts";
 
+/** Serialized points use [x, y]; point indices flatten strokes in stroke and point order. */
+export type ShapeContextDiagnosticPoint = [x: number, y: number];
+
 export interface ShapeContextGraderDiagnostic {
-  schemaVersion: 1;
+  /** Bump when changing this generated report format. */
+  schemaVersion: 2;
   fixtureId: string;
   targetCharacter: string;
   expectedAcceptance: boolean;
@@ -14,7 +19,7 @@ export interface ShapeContextGraderDiagnostic {
   gradingDurationMs: number;
   input: {
     encodedDrawnStrokes: string;
-    drawnStrokes: WritingStrokePoint[][];
+    drawnStrokes: ShapeContextDiagnosticPoint[][];
     referencePaths: string[];
   };
   score: {
@@ -28,10 +33,50 @@ export interface ShapeContextGraderDiagnostic {
   }>;
   algorithm: {
     kind: `shape-context-tps`;
-    geometry: Omit<ShapeContextGrade, `transform`> & {
-      transform: Omit<ThinPlateSplineTransform, `transform`>;
+    geometry: Omit<
+      ShapeContextGrade,
+      | `transform`
+      | `similarity`
+      | `sourcePoints`
+      | `targetPoints`
+      | `sourceStrokeIndices`
+      | `targetStrokeIndices`
+      | `transformedPoints`
+      | `correspondences`
+      | `sourceStrokes`
+      | `targetStrokes`
+    > & {
+      sourceStrokes: ShapeContextDiagnosticPoint[][];
+      targetStrokes: ShapeContextDiagnosticPoint[][];
+      transformedPoints: ShapeContextDiagnosticPoint[];
+      correspondences: Array<
+        Pick<
+          ShapeContextCorrespondence,
+          | `sourceIndex`
+          | `targetIndex`
+          | `descriptorCost`
+          | `initialDistance`
+          | `residualDistance`
+        >
+      >;
+      transform: Omit<
+        ThinPlateSplineTransform,
+        | `transform`
+        | `controlPoints`
+        | `bendingEnergy`
+        | `affineDistortion`
+        | `rotationDegrees`
+      > & {
+        controlPoints: ShapeContextDiagnosticPoint[];
+      };
     };
   };
+}
+
+function pointsAsPairs(
+  points: readonly WritingStrokePoint[],
+): ShapeContextDiagnosticPoint[] {
+  return points.map(({ x, y }) => [x, y]);
 }
 
 export function createShapeContextGraderDiagnostic({
@@ -59,22 +104,33 @@ export function createShapeContextGraderDiagnostic({
   geometry: ShapeContextGrade;
   contrastiveCandidates: readonly SimilarCharacterGrade[];
 }): ShapeContextGraderDiagnostic {
-  const { transform, ...geometryWithoutTransform } = geometry;
-  const serializableTransform: Omit<ThinPlateSplineTransform, `transform`> = {
-    controlPoints: transform.controlPoints,
-    xWeights: transform.xWeights,
-    yWeights: transform.yWeights,
-    affineX: transform.affineX,
-    affineY: transform.affineY,
-    rotationRadians: transform.rotationRadians,
-    regularization: transform.regularization,
-    bendingEnergy: transform.bendingEnergy,
-    affineDistortion: transform.affineDistortion,
-    rotationDegrees: transform.rotationDegrees,
+  const {
+    transform,
+    similarity: _similarity,
+    sourcePoints: _sourcePoints,
+    targetPoints: _targetPoints,
+    sourceStrokeIndices: _sourceStrokeIndices,
+    targetStrokeIndices: _targetStrokeIndices,
+    correspondences,
+    sourceStrokes,
+    targetStrokes,
+    transformedPoints,
+    ...geometryWithoutRedundantFields
+  } = geometry;
+  const {
+    controlPoints,
+    bendingEnergy: _bendingEnergy,
+    affineDistortion: _affineDistortion,
+    rotationDegrees: _rotationDegrees,
+    ...transformWithoutRedundantMetrics
+  } = transform;
+  const serializableTransform = {
+    ...transformWithoutRedundantMetrics,
+    controlPoints: pointsAsPairs(controlPoints),
   };
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     fixtureId,
     targetCharacter,
     expectedAcceptance,
@@ -82,9 +138,7 @@ export function createShapeContextGraderDiagnostic({
     gradingDurationMs,
     input: {
       encodedDrawnStrokes,
-      drawnStrokes: drawnStrokes.map((stroke) =>
-        stroke.map(({ x, y }) => ({ x, y })),
-      ),
+      drawnStrokes: drawnStrokes.map(pointsAsPairs),
       referencePaths: [...referencePaths],
     },
     score: {
@@ -101,7 +155,25 @@ export function createShapeContextGraderDiagnostic({
     algorithm: {
       kind: `shape-context-tps`,
       geometry: {
-        ...geometryWithoutTransform,
+        ...geometryWithoutRedundantFields,
+        sourceStrokes: sourceStrokes.map(pointsAsPairs),
+        targetStrokes: targetStrokes.map(pointsAsPairs),
+        transformedPoints: pointsAsPairs(transformedPoints),
+        correspondences: correspondences.map(
+          ({
+            sourceIndex,
+            targetIndex,
+            descriptorCost,
+            initialDistance,
+            residualDistance,
+          }) => ({
+            sourceIndex,
+            targetIndex,
+            descriptorCost,
+            initialDistance,
+            residualDistance,
+          }),
+        ),
         transform: serializableTransform,
       },
     },
@@ -184,14 +256,16 @@ function pointBounds(points: readonly WritingStrokePoint[]): PointBounds {
 
 function diagramPointMapper(
   points: readonly WritingStrokePoint[],
-  panelOffsetX: number,
+  panelX: number,
+  panelY: number,
+  panelSize: number,
 ): (point: WritingStrokePoint) => WritingStrokePoint {
   const { minX, minY, maxX, maxY } = pointBounds(points);
   const width = maxX - minX;
   const height = maxY - minY;
-  const scale = Math.min(448 / width, 448 / height);
-  const offsetX = panelOffsetX + (512 - width * scale) / 2;
-  const offsetY = (512 - height * scale) / 2;
+  const scale = Math.min((panelSize - 64) / width, (panelSize - 64) / height);
+  const offsetX = panelX + (panelSize - width * scale) / 2;
+  const offsetY = panelY + (panelSize - height * scale) / 2;
 
   return ({ x, y }) => ({
     x: offsetX + (x - minX) * scale,
@@ -246,7 +320,7 @@ export function renderShapeContextGraderDiagnosticSvg({
   acceptanceThreshold: number;
 }): string {
   const rawPoint = drawingPointMapper(drawnStrokes, 0);
-  const overlayOffsetX = 1024;
+  const overlayOffsetY = 576;
   const sourcePaths = drawnStrokes.map(
     (stroke) =>
       `<path d="${pathFromPoints(stroke, rawPoint)}" fill="none" stroke="#159fe8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
@@ -279,7 +353,9 @@ export function renderShapeContextGraderDiagnosticSvg({
       ...sourceGrid.flat(),
       ...registeredGrid.flat(),
     ],
-    overlayOffsetX,
+    0,
+    overlayOffsetY,
+    1024,
   );
   const targetPaths = geometry.targetStrokes
     .map(
@@ -366,24 +442,24 @@ export function renderShapeContextGraderDiagnosticSvg({
     .join(` · `);
 
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="640" viewBox="0 0 1536 640" role="img" aria-labelledby="title description">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1740" viewBox="0 0 1024 1740" role="img" aria-labelledby="title description">`,
     `<title id="title">Handwriting grade diagnostics for ${escapeXml(fixtureId)}</title>`,
-    `<desc id="description">Raw handwriting and reference, followed by normalized Shape Context and TPS registration diagnostics.</desc>`,
-    `<rect width="1536" height="640" fill="#fff"/>`,
+    `<desc id="description">Raw handwriting and reference geometry side by side, with a larger normalized Shape Context and TPS registration diagram below.</desc>`,
+    `<rect width="1024" height="1740" fill="#fff"/>`,
     `<rect x="0.5" y="0.5" width="511" height="511" fill="#f8fafc" stroke="#cbd5e1"/>`,
     `<rect x="512.5" y="0.5" width="511" height="511" fill="#f8fafc" stroke="#cbd5e1"/>`,
-    `<rect x="1024.5" y="0.5" width="511" height="511" fill="#f8fafc" stroke="#cbd5e1"/>`,
+    `<rect x="0.5" y="576.5" width="1023" height="1023" fill="#f8fafc" stroke="#cbd5e1"/>`,
     sourcePaths.join(``),
     `<g transform="translate(536 52) scale(0.453125)">${referencePathsSvg}</g>`,
     `<g>${sourceGridPaths}${registeredGridPaths}${targetPaths}${normalizedSourcePaths}${registeredPaths}${correspondenceLines}${unmatchedSourcePoints}${unmatchedTargetPoints}</g>`,
     `<g font-family="sans-serif" font-size="18" fill="#0f172a">`,
     `<text x="256" y="540" text-anchor="middle">Raw handwriting · ${escapeXml(targetCharacter)}</text>`,
     `<text x="768" y="540" text-anchor="middle">Reference geometry</text>`,
-    `<text x="1280" y="540" text-anchor="middle">Normalized matches and TPS registration</text>`,
-    `<text x="1280" y="559" text-anchor="middle" font-size="12">Normalized source before TPS (blue) · registered source (purple) · reference (gray)</text>`,
-    `<text x="24" y="582">Expected ${expectedAcceptance ? `accept` : `reject`} · actual ${actualAcceptance ? `accept` : `reject`} · similarity ${geometry.similarity.toFixed(4)} / threshold ${acceptanceThreshold.toFixed(2)} · combined cost ${geometry.combinedCost.toFixed(4)} · samples ${geometry.sampleCount} · matches ${geometry.correspondences.length}</text>`,
-    `<text x="24" y="608" font-size="12">${escapeXml(firstContributionLine)}</text>`,
-    `<text x="24" y="628" font-size="12">${escapeXml(secondContributionLine)}</text>`,
+    `<text x="512" y="1624" text-anchor="middle">Normalized matches and TPS registration</text>`,
+    `<text x="512" y="1645" text-anchor="middle" font-size="12">Normalized source before TPS (blue) · registered source (purple) · reference (gray)</text>`,
+    `<text x="24" y="1670">Expected ${expectedAcceptance ? `accept` : `reject`} · actual ${actualAcceptance ? `accept` : `reject`} · similarity ${geometry.similarity.toFixed(4)} / threshold ${acceptanceThreshold.toFixed(2)} · combined cost ${geometry.combinedCost.toFixed(4)} · samples ${geometry.sampleCount} · matches ${geometry.correspondences.length}</text>`,
+    `<text x="24" y="1695" font-size="12">${escapeXml(firstContributionLine)}</text>`,
+    `<text x="24" y="1718" font-size="12">${escapeXml(secondContributionLine)}</text>`,
     `</g>`,
     `</svg>`,
   ].join(``);

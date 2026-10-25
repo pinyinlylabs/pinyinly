@@ -59,10 +59,75 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
     acceptanceThreshold: 0.72,
   });
 
-  expect(serialized).toContain(`"schemaVersion":1`);
+  expect(diagnostic.schemaVersion).toBe(2);
   expect(serialized).toContain(`"expectedAcceptance":true`);
   expect(serialized).toContain(`"weightedScoreContributions"`);
   expect(serialized).not.toContain(`"transform":{}`);
+  const diagnosticGeometry = diagnostic.algorithm.geometry;
+  expect(diagnosticGeometry.sourceStrokes.flat()).toEqual(
+    geometry.sourcePoints.map(({ x, y }) => [x, y]),
+  );
+  expect(diagnosticGeometry.sourceStrokes.map(({ length }) => length)).toEqual(
+    geometry.sourceStrokes.map(({ length }) => length),
+  );
+  expect(diagnosticGeometry.targetStrokes.flat()).toEqual(
+    geometry.targetPoints.map(({ x, y }) => [x, y]),
+  );
+  expect(diagnosticGeometry.targetStrokes.map(({ length }) => length)).toEqual(
+    geometry.targetStrokes.map(({ length }) => length),
+  );
+  expect(diagnosticGeometry.transformedPoints).toEqual(
+    geometry.transformedPoints.map(({ x, y }) => [x, y]),
+  );
+  expect(diagnosticGeometry.transform.controlPoints).toEqual(
+    geometry.transform.controlPoints.map(({ x, y }) => [x, y]),
+  );
+  expect(diagnosticGeometry.correspondences).toEqual(
+    geometry.correspondences.map(
+      ({
+        sourceIndex,
+        targetIndex,
+        descriptorCost,
+        initialDistance,
+        residualDistance,
+      }) => ({
+        sourceIndex,
+        targetIndex,
+        descriptorCost,
+        initialDistance,
+        residualDistance,
+      }),
+    ),
+  );
+  expect(serialized).not.toContain(`"sourcePoints"`);
+  expect(serialized).not.toContain(`"targetPoints"`);
+  expect(serialized).not.toContain(`"sourceStrokeIndices"`);
+  expect(serialized).not.toContain(`"targetStrokeIndices"`);
+  expect(serialized).not.toContain(`"cost"`);
+  expect(diagnosticGeometry).not.toHaveProperty(`similarity`);
+  expect(diagnosticGeometry.transform).not.toHaveProperty(`bendingEnergy`);
+  expect(diagnosticGeometry.transform).not.toHaveProperty(`affineDistortion`);
+  expect(diagnosticGeometry.transform).not.toHaveProperty(`rotationDegrees`);
+  expect(diagnostic.score.similarity).toBe(geometry.similarity);
+  expect(diagnosticGeometry.weightedScoreContributions).toEqual(
+    geometry.weightedScoreContributions,
+  );
+  for (const {
+    sourceIndex,
+    targetIndex,
+  } of diagnosticGeometry.correspondences) {
+    expect(diagnosticGeometry.transformedPoints[sourceIndex]).toBeDefined();
+    expect(diagnosticGeometry.targetStrokes.flat()[targetIndex]).toBeDefined();
+  }
+  for (const index of diagnosticGeometry.unmatchedSourceIndices) {
+    expect(diagnosticGeometry.transformedPoints[index]).toBeDefined();
+  }
+  for (const index of diagnosticGeometry.unmatchedTargetIndices) {
+    expect(diagnosticGeometry.targetStrokes.flat()[index]).toBeDefined();
+  }
+  expect(geometry.transform.bendingEnergy).toBe(geometry.bendingEnergy);
+  expect(geometry.transform.affineDistortion).toBe(geometry.affineDistortion);
+  expect(geometry.transform.rotationDegrees).toBe(geometry.rotationDegrees);
   expect(geometry.combinedCost).toBe(
     geometry.initialMatchingError * 0.25 +
       geometry.residualMatchingError * 0.35 +
@@ -102,6 +167,11 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   expect(svg).toContain(`Normalized source before TPS`);
   expect(svg).toContain(`TPS registration`);
   expect(svg).toContain(`M 100 150 L 900 150`);
+  expect(svg).toContain(`width="1024" height="1740" viewBox="0 0 1024 1740"`);
+  expect(svg).toContain(`<rect x="0.5" y="0.5" width="511" height="511"`);
+  expect(svg).toContain(`<rect x="512.5" y="0.5" width="511" height="511"`);
+  expect(svg).toContain(`<rect x="0.5" y="576.5" width="1023" height="1023"`);
+  expect(svg).toContain(`<text x="512" y="1624" text-anchor="middle">`);
 
   const normalizedSourceBounds = svgPathBounds(
     svg,
