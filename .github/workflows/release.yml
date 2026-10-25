@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   database:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v7
@@ -37,7 +37,7 @@ jobs:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
   app-vercel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v7
@@ -67,7 +67,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
   static-vercel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v7
@@ -92,7 +92,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
   app-eas-update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v7

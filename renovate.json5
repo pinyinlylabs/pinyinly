@@ -66,6 +66,17 @@
       depTypeTemplate: "devDependencies",
     },
     {
+      description: "Update GitHub Actions runner images",
+      customType: "regex",
+      managerFilePatterns: ["/^.github/workflows/.*.ya?ml$/"],
+      matchStrings: [
+        // @pyly-test: "runs-on: ubuntu-24.04" currentValue=24.04
+        "runs-on:\\s*ubuntu-(?<currentValue>\\d+\\.\\d+)",
+      ],
+      datasourceTemplate: "github-runners",
+      depNameTemplate: "ubuntu",
+    },
+    {
       description: "Update pinned npx/npm i -g/yarn dlx packages",
       customType: "regex",
       managerFilePatterns: [

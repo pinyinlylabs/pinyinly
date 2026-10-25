@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   expo-doctor:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v7
