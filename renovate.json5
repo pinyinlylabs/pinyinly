@@ -3,6 +3,11 @@
   extends: ["config:recommended"],
   packageRules: [
     {
+      description: "Prioritize GitHub Actions updates over other dependencies",
+      matchManagers: ["github-actions"],
+      prPriority: 10,
+    },
+    {
       description: "Disable renovate for Expo managed packages (e.g. react-native) otherwise expo-doctor will complain",
       matchDatasources: ["npm"],
       matchDepTypes: ["dependencies"],
