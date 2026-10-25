@@ -26,7 +26,7 @@ Sentry.init({
   ),
 });
 
-const { createRequestHandler } = require(`@expo/server/adapter/vercel`);
+const { createRequestHandler } = require(`expo-server/adapter/vercel`);
 const { waitUntil } = require(`@vercel/functions`);
 
 const handler = createRequestHandler({
@@ -34,7 +34,7 @@ const handler = createRequestHandler({
   build: require(`node:path`).join(__dirname, `../dist/vercel/server`),
 });
 
-/** @type {import("@expo/server/adapter/vercel").RequestHandler} */
+/** @type {import("expo-server/adapter/vercel").RequestHandler} */
 const vercelEntrypoint = async (req, res) => {
   try {
     await handler(req, res);
