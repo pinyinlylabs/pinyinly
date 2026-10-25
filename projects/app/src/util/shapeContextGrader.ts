@@ -50,6 +50,7 @@ const shapeContextScoreWeights = {
   affineDistortion: 0.15,
   rotationPenalty: 0.4,
   unmatchedPointPenalty: 0.5,
+  geometryCoveragePenalty: 0.25,
 } as const;
 
 const emptyGeometryBaseCost = 2;
@@ -106,7 +107,7 @@ export const shapeContextGraderDefaults: ShapeContextOptions = {
   sampleSpacing: 0.1,
   radialBins: 5,
   angularBins: 12,
-  iterations: 3,
+  iterations: 1,
   tpsRegularization: 0.08,
   unmatchedCost: 0.55,
   maxRotationDegrees: 12,
@@ -1589,10 +1590,11 @@ export function gradeCharacterShape(
     ),
     target.strokes,
   );
-  const geometryCoveragePenalty = Math.min(
-    geometryCoverageCost(initialAlignedGeometryCoverage),
-    geometryCoverageCost(residualGeometryCoverage),
-  );
+  const geometryCoveragePenalty =
+    Math.min(
+      geometryCoverageCost(initialAlignedGeometryCoverage),
+      geometryCoverageCost(residualGeometryCoverage),
+    ) * shapeContextScoreWeights.geometryCoveragePenalty;
   const unmatchedPointPenalty =
     (activeMatches.unmatchedSourceIndices.length +
       activeMatches.unmatchedTargetIndices.length) /
