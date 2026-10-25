@@ -3,23 +3,41 @@ import { gradeCharacterShape } from "#util/shapeContextGrader.ts";
 import {
   createShapeContextGraderDiagnostic,
   renderShapeContextGraderDiagnosticSvg,
-  shapeContextGraderScoreContributions,
 } from "#test/util/shapeContextGraderDiagnostics.ts";
 import { expect, test } from "vitest";
+
+function svgPathBounds(
+  svg: string,
+  pathPattern: RegExp,
+): { minX: number; minY: number; maxX: number; maxY: number } {
+  const coordinates = [...svg.matchAll(pathPattern)].flatMap((match) =>
+    [...(match[1] ?? ``).matchAll(/-?\d+(?:\.\d+)?/gu)].map((number) =>
+      Number(number[0]),
+    ),
+  );
+  const xCoordinates = coordinates.filter((_, index) => index % 2 === 0);
+  const yCoordinates = coordinates.filter((_, index) => index % 2 === 1);
+  return {
+    minX: Math.min(...xCoordinates),
+    minY: Math.min(...yCoordinates),
+    maxX: Math.max(...xCoordinates),
+    maxY: Math.max(...yCoordinates),
+  };
+}
 
 test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () => {
   const drawnStrokes = [
     [
       { x: 100, y: 150 },
-      { x: 900, y: 800 },
+      { x: 900, y: 150 },
     ],
   ];
-  const referencePaths = [`M 100 150 L 900 800`];
+  const referencePaths = [`M 100 150 L 900 150`];
   const geometry = gradeCharacterShape(drawnStrokes, referencePaths);
   const diagnostic = createShapeContextGraderDiagnostic({
     fixtureId: `一-diagnostic-test`,
     targetCharacter: `一`,
-    encodedDrawnStrokes: `100,150;900,800`,
+    encodedDrawnStrokes: `100,150;900,150`,
     drawnStrokes,
     referencePaths,
     expectedAcceptance: true,
@@ -54,7 +72,7 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
       geometry.unmatchedPointPenalty * 0.5 +
       geometry.geometryCoveragePenalty,
   );
-  const contributions = shapeContextGraderScoreContributions(geometry);
+  const contributions = geometry.weightedScoreContributions;
   expect(
     contributions.initialMatchingError +
       contributions.residualMatchingError +
@@ -67,8 +85,7 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   ).toBeCloseTo(geometry.combinedCost, 12);
 
   const emptyGeometry = gradeCharacterShape([], referencePaths);
-  const emptyContributions =
-    shapeContextGraderScoreContributions(emptyGeometry);
+  const emptyContributions = emptyGeometry.weightedScoreContributions;
   expect(
     emptyContributions.initialMatchingError +
       emptyContributions.residualMatchingError +
@@ -84,5 +101,25 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   expect(svg).toContain(`Reference geometry`);
   expect(svg).toContain(`Normalized source before TPS`);
   expect(svg).toContain(`TPS registration`);
-  expect(svg).toContain(`M 100 150 L 900 800`);
+  expect(svg).toContain(`M 100 150 L 900 150`);
+
+  const normalizedSourceBounds = svgPathBounds(
+    svg,
+    /<path d="([^"]+)" fill="none" stroke="#159fe8" stroke-width="3" stroke-dasharray/gu,
+  );
+  const normalizedGridBounds = svgPathBounds(
+    svg,
+    /<path d="([^"]+)" fill="none" stroke="#94a3b8" stroke-width="1"/gu,
+  );
+  expect(Math.max(...geometry.sourcePoints.map(({ x }) => x))).toBeGreaterThan(
+    1,
+  );
+  expect(normalizedGridBounds.minX).toBeLessThan(normalizedSourceBounds.minX);
+  expect(normalizedGridBounds.maxX).toBeGreaterThan(
+    normalizedSourceBounds.maxX,
+  );
+  expect(normalizedGridBounds.minY).toBeLessThan(normalizedSourceBounds.minY);
+  expect(normalizedGridBounds.maxY).toBeGreaterThan(
+    normalizedSourceBounds.maxY,
+  );
 });

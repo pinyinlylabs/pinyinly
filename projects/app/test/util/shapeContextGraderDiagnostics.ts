@@ -29,42 +29,9 @@ export interface ShapeContextGraderDiagnostic {
   algorithm: {
     kind: `shape-context-tps`;
     geometry: Omit<ShapeContextGrade, `transform`> & {
-      weightedScoreContributions: ShapeContextGraderScoreContributions;
       transform: Omit<ThinPlateSplineTransform, `transform`>;
     };
   };
-}
-
-export interface ShapeContextGraderScoreContributions {
-  initialMatchingError: number;
-  residualMatchingError: number;
-  bendingEnergy: number;
-  affineDistortion: number;
-  rotationPenalty: number;
-  unmatchedPointPenalty: number;
-  geometryCoveragePenalty: number;
-  emptyGeometryPenalty: number;
-}
-
-export function shapeContextGraderScoreContributions(
-  geometry: ShapeContextGrade,
-): ShapeContextGraderScoreContributions {
-  const contributions = {
-    initialMatchingError: geometry.initialMatchingError * 0.25,
-    residualMatchingError: geometry.residualMatchingError * 0.35,
-    bendingEnergy: geometry.bendingEnergy * 0.04,
-    affineDistortion: geometry.affineDistortion * 0.15,
-    rotationPenalty: geometry.rotationPenalty * 0.4,
-    unmatchedPointPenalty: geometry.unmatchedPointPenalty * 0.5,
-    geometryCoveragePenalty: geometry.geometryCoveragePenalty,
-  };
-  const emptyGeometryPenalty =
-    geometry.sourcePoints.length === 0 || geometry.targetPoints.length === 0
-      ? geometry.combinedCost -
-        Object.values(contributions).reduce((sum, value) => sum + value, 0)
-      : 0;
-
-  return { ...contributions, emptyGeometryPenalty };
 }
 
 export function createShapeContextGraderDiagnostic({
@@ -135,8 +102,6 @@ export function createShapeContextGraderDiagnostic({
       kind: `shape-context-tps`,
       geometry: {
         ...geometryWithoutTransform,
-        weightedScoreContributions:
-          shapeContextGraderScoreContributions(geometry),
         transform: serializableTransform,
       },
     },
@@ -184,36 +149,77 @@ function drawingPointMapper(
   });
 }
 
-function diagramPoint(
-  point: WritingStrokePoint,
-  panelOffsetX: number,
-): WritingStrokePoint {
+interface PointBounds {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+function pointBounds(points: readonly WritingStrokePoint[]): PointBounds {
+  if (points.length === 0) {
+    return { minX: -1, minY: -1, maxX: 1, maxY: 1 };
+  }
+  const bounds = {
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+  };
+  for (const { x, y } of points) {
+    bounds.minX = Math.min(bounds.minX, x);
+    bounds.minY = Math.min(bounds.minY, y);
+    bounds.maxX = Math.max(bounds.maxX, x);
+    bounds.maxY = Math.max(bounds.maxY, y);
+  }
+  const padding =
+    Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY, 1) * 0.1;
   return {
-    x: panelOffsetX + 256 + point.x * 120,
-    y: 256 + point.y * 120,
+    minX: bounds.minX - padding,
+    minY: bounds.minY - padding,
+    maxX: bounds.maxX + padding,
+    maxY: bounds.maxY + padding,
   };
 }
 
-function gridPaths(
-  geometry: ShapeContextGrade,
+function diagramPointMapper(
+  points: readonly WritingStrokePoint[],
   panelOffsetX: number,
-  transformed: boolean,
-): string[] {
-  const paths: string[] = [];
+): (point: WritingStrokePoint) => WritingStrokePoint {
+  const { minX, minY, maxX, maxY } = pointBounds(points);
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const scale = Math.min(448 / width, 448 / height);
+  const offsetX = panelOffsetX + (512 - width * scale) / 2;
+  const offsetY = (512 - height * scale) / 2;
+
+  return ({ x, y }) => ({
+    x: offsetX + (x - minX) * scale,
+    y: offsetY + (y - minY) * scale,
+  });
+}
+
+function gridPaths(
+  bounds: PointBounds,
+  transform: (point: WritingStrokePoint) => WritingStrokePoint,
+): WritingStrokePoint[][] {
+  const paths: WritingStrokePoint[][] = [];
 
   for (let index = 0; index <= 8; index++) {
-    const coordinate = -1 + (index * 2) / 8;
+    const x = bounds.minX + ((bounds.maxX - bounds.minX) * index) / 8;
+    const y = bounds.minY + ((bounds.maxY - bounds.minY) * index) / 8;
     for (const vertical of [true, false]) {
       const points = Array.from({ length: 25 }, (_, sampleIndex) => {
-        const position = -1 + (sampleIndex * 2) / 24;
-        const point = vertical
-          ? { x: coordinate, y: position }
-          : { x: position, y: coordinate };
-        return transformed ? geometry.transform.transform(point) : point;
+        const position =
+          bounds.minY + ((bounds.maxY - bounds.minY) * sampleIndex) / 24;
+        return vertical
+          ? { x, y: position }
+          : {
+              x: bounds.minX + ((bounds.maxX - bounds.minX) * sampleIndex) / 24,
+              y,
+            };
       });
-      paths.push(
-        pathFromPoints(points, (point) => diagramPoint(point, panelOffsetX)),
-      );
+      paths.push(points.map(transform));
     }
   }
 
@@ -251,28 +257,46 @@ export function renderShapeContextGraderDiagnosticSvg({
         `<path d="${escapeXml(path)}" fill="none" stroke="#334155" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`,
     )
     .join(``);
-  const targetPaths = geometry.targetStrokes
-    .map(
-      (stroke) =>
-        `<path d="${pathFromPoints(stroke, (point) => diagramPoint(point, overlayOffsetX))}" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
-    )
-    .join(``);
-  const normalizedSourcePaths = geometry.sourceStrokes
-    .map(
-      (stroke) =>
-        `<path d="${pathFromPoints(stroke, (point) => diagramPoint(point, overlayOffsetX))}" fill="none" stroke="#159fe8" stroke-width="3" stroke-dasharray="6 4" opacity="0.8"/>`,
-    )
-    .join(``);
   const registeredStrokes = geometry.sourceStrokes.map((_, strokeIndex) =>
     geometry.transformedPoints.filter(
       (_, pointIndex) =>
         geometry.sourceStrokeIndices[pointIndex] === strokeIndex,
     ),
   );
+  const normalizedBounds = pointBounds([
+    ...geometry.sourcePoints,
+    ...geometry.targetPoints,
+  ]);
+  const sourceGrid = gridPaths(normalizedBounds, (point) => point);
+  const registeredGrid = gridPaths(normalizedBounds, (point) =>
+    geometry.transform.transform(point),
+  );
+  const diagramPoint = diagramPointMapper(
+    [
+      ...geometry.sourcePoints,
+      ...geometry.targetPoints,
+      ...geometry.transformedPoints,
+      ...sourceGrid.flat(),
+      ...registeredGrid.flat(),
+    ],
+    overlayOffsetX,
+  );
+  const targetPaths = geometry.targetStrokes
+    .map(
+      (stroke) =>
+        `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+    )
+    .join(``);
+  const normalizedSourcePaths = geometry.sourceStrokes
+    .map(
+      (stroke) =>
+        `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="#159fe8" stroke-width="3" stroke-dasharray="6 4" opacity="0.8"/>`,
+    )
+    .join(``);
   const registeredPaths = registeredStrokes
     .map(
       (stroke) =>
-        `<path d="${pathFromPoints(stroke, (point) => diagramPoint(point, overlayOffsetX))}" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
+        `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
     )
     .join(``);
   const correspondenceLines = geometry.correspondences
@@ -283,8 +307,8 @@ export function renderShapeContextGraderDiagnosticSvg({
       if (sourcePoint == null || targetPoint == null) {
         return ``;
       }
-      const start = diagramPoint(sourcePoint, overlayOffsetX);
-      const end = diagramPoint(targetPoint, overlayOffsetX);
+      const start = diagramPoint(sourcePoint);
+      const end = diagramPoint(targetPoint);
       const color =
         correspondence.residualDistance > 0.2
           ? `#ef4444`
@@ -298,7 +322,7 @@ export function renderShapeContextGraderDiagnosticSvg({
     .map((index) => geometry.transformedPoints[index])
     .filter((point): point is WritingStrokePoint => point != null)
     .map((point) => {
-      const mappedPoint = diagramPoint(point, overlayOffsetX);
+      const mappedPoint = diagramPoint(point);
       return `<circle cx="${mappedPoint.x}" cy="${mappedPoint.y}" r="4" fill="#f97316"/>`;
     })
     .join(``);
@@ -306,23 +330,23 @@ export function renderShapeContextGraderDiagnosticSvg({
     .map((index) => geometry.targetPoints[index])
     .filter((point): point is WritingStrokePoint => point != null)
     .map((point) => {
-      const mappedPoint = diagramPoint(point, overlayOffsetX);
+      const mappedPoint = diagramPoint(point);
       return `<circle cx="${mappedPoint.x}" cy="${mappedPoint.y}" r="4" fill="#ef4444"/>`;
     })
     .join(``);
-  const sourceGrid = gridPaths(geometry, overlayOffsetX, false)
+  const sourceGridPaths = sourceGrid
     .map(
       (path) =>
-        `<path d="${path}" fill="none" stroke="#94a3b8" stroke-width="1" opacity="0.45"/>`,
+        `<path d="${pathFromPoints(path, diagramPoint)}" fill="none" stroke="#94a3b8" stroke-width="1" opacity="0.45"/>`,
     )
     .join(``);
-  const registeredGrid = gridPaths(geometry, overlayOffsetX, true)
+  const registeredGridPaths = registeredGrid
     .map(
       (path) =>
-        `<path d="${path}" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.6"/>`,
+        `<path d="${pathFromPoints(path, diagramPoint)}" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.6"/>`,
     )
     .join(``);
-  const scoreContributions = shapeContextGraderScoreContributions(geometry);
+  const scoreContributions = geometry.weightedScoreContributions;
   const contributions = [
     `initialMatchingError: ${scoreContributions.initialMatchingError.toFixed(3)}`,
     `residualMatchingError: ${scoreContributions.residualMatchingError.toFixed(3)}`,
@@ -351,7 +375,7 @@ export function renderShapeContextGraderDiagnosticSvg({
     `<rect x="1024.5" y="0.5" width="511" height="511" fill="#f8fafc" stroke="#cbd5e1"/>`,
     sourcePaths.join(``),
     `<g transform="translate(536 52) scale(0.453125)">${referencePathsSvg}</g>`,
-    `<g>${sourceGrid}${registeredGrid}${targetPaths}${normalizedSourcePaths}${registeredPaths}${correspondenceLines}${unmatchedSourcePoints}${unmatchedTargetPoints}</g>`,
+    `<g>${sourceGridPaths}${registeredGridPaths}${targetPaths}${normalizedSourcePaths}${registeredPaths}${correspondenceLines}${unmatchedSourcePoints}${unmatchedTargetPoints}</g>`,
     `<g font-family="sans-serif" font-size="18" fill="#0f172a">`,
     `<text x="256" y="540" text-anchor="middle">Raw handwriting · ${escapeXml(targetCharacter)}</text>`,
     `<text x="768" y="540" text-anchor="middle">Reference geometry</text>`,

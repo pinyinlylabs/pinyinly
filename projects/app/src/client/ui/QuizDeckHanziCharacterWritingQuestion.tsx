@@ -101,7 +101,12 @@ export function QuizDeckHanziCharacterWritingQuestion({
       drawnStrokes,
     });
     Sentry.captureMessage(`User reported a handwriting grade`, {
-      tags: { [`report-kind`]: `handwriting-grade` },
+      tags: {
+        [`report-kind`]: `handwriting-grade`,
+        [`handwriting-grade-error-type`]: grade.correct
+          ? `false-positive`
+          : `false-negative`,
+      },
       extra: { [`handwriting-grade-report-json`]: reportJson },
     });
   }
