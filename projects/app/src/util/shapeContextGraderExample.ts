@@ -24,7 +24,6 @@ const shapeContextOptionsSchema = z
 
 export interface ShapeContextGraderExample {
   id: string;
-  skip?: boolean;
   drawnStrokes: string;
   options?: ShapeContextOptions;
 }

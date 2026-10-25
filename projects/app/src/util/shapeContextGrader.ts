@@ -32,6 +32,28 @@ export interface ShapeContextGeometryCoverage {
   handwritingLongestUncoveredRun: number;
 }
 
+export interface ShapeContextScoreContributions {
+  initialMatchingError: number;
+  residualMatchingError: number;
+  bendingEnergy: number;
+  affineDistortion: number;
+  rotationPenalty: number;
+  unmatchedPointPenalty: number;
+  geometryCoveragePenalty: number;
+  emptyGeometryPenalty: number;
+}
+
+const shapeContextScoreWeights = {
+  initialMatchingError: 0.25,
+  residualMatchingError: 0.35,
+  bendingEnergy: 0.04,
+  affineDistortion: 0.15,
+  rotationPenalty: 0.4,
+  unmatchedPointPenalty: 0.5,
+} as const;
+
+const emptyGeometryBaseCost = 2;
+
 export interface ThinPlateSplineTransform {
   controlPoints: WritingStrokePoint[];
   xWeights: number[];
@@ -59,6 +81,7 @@ export interface ShapeContextGrade {
   initialGeometryCoverage: ShapeContextGeometryCoverage;
   residualGeometryCoverage: ShapeContextGeometryCoverage;
   geometryCoveragePenalty: number;
+  weightedScoreContributions: ShapeContextScoreContributions;
   geometryCoverageTolerance: number;
   correspondences: ShapeContextCorrespondence[];
   sourceStrokeIndices: number[];
@@ -1388,12 +1411,32 @@ export function gradeCharacterShape(
     const geometryCoveragePenalty = geometryCoverageCost(
       initialGeometryCoverage,
     );
-    const combinedCost = 2 + unmatchedPointPenalty + geometryCoveragePenalty;
+    const weightedInitialMatchingError =
+      emptyGeometryBaseCost * shapeContextScoreWeights.initialMatchingError;
+    const weightedResidualMatchingError =
+      emptyGeometryBaseCost * shapeContextScoreWeights.residualMatchingError;
+    // Preserve the fixed empty-geometry cost while exposing its weighted components.
+    const emptyGeometryPenalty =
+      emptyGeometryBaseCost -
+      weightedInitialMatchingError -
+      weightedResidualMatchingError;
+    const weightedScoreContributions: ShapeContextScoreContributions = {
+      initialMatchingError: weightedInitialMatchingError,
+      residualMatchingError: weightedResidualMatchingError,
+      bendingEnergy: 0,
+      affineDistortion: 0,
+      rotationPenalty: 0,
+      unmatchedPointPenalty,
+      geometryCoveragePenalty,
+      emptyGeometryPenalty,
+    };
+    const combinedCost =
+      emptyGeometryBaseCost + unmatchedPointPenalty + geometryCoveragePenalty;
     return {
       similarity: Math.exp(-combinedCost),
       combinedCost,
-      initialMatchingError: 2,
-      residualMatchingError: 2,
+      initialMatchingError: emptyGeometryBaseCost,
+      residualMatchingError: emptyGeometryBaseCost,
       bendingEnergy: 0,
       affineDistortion: 0,
       rotationDegrees: 0,
@@ -1402,6 +1445,7 @@ export function gradeCharacterShape(
       initialGeometryCoverage,
       residualGeometryCoverage: initialGeometryCoverage,
       geometryCoveragePenalty,
+      weightedScoreContributions,
       geometryCoverageTolerance,
       correspondences: [],
       sourceStrokeIndices: source.pointStrokeIndices,
@@ -1560,14 +1604,28 @@ export function gradeCharacterShape(
     0,
     (Math.abs(rotationDegrees) - settings.maxRotationDegrees) / 30,
   );
+  const weightedScoreContributions: ShapeContextScoreContributions = {
+    initialMatchingError:
+      initialMatchingError * shapeContextScoreWeights.initialMatchingError,
+    residualMatchingError:
+      residualMatchingError * shapeContextScoreWeights.residualMatchingError,
+    bendingEnergy: bendingEnergy * shapeContextScoreWeights.bendingEnergy,
+    affineDistortion:
+      affineDistortion * shapeContextScoreWeights.affineDistortion,
+    rotationPenalty: rotationPenalty * shapeContextScoreWeights.rotationPenalty,
+    unmatchedPointPenalty:
+      unmatchedPointPenalty * shapeContextScoreWeights.unmatchedPointPenalty,
+    geometryCoveragePenalty,
+    emptyGeometryPenalty: 0,
+  };
   const combinedCost =
-    initialMatchingError * 0.25 +
-    residualMatchingError * 0.35 +
-    bendingEnergy * 0.04 +
-    affineDistortion * 0.15 +
-    rotationPenalty * 0.4 +
-    unmatchedPointPenalty * 0.5 +
-    geometryCoveragePenalty;
+    weightedScoreContributions.initialMatchingError +
+    weightedScoreContributions.residualMatchingError +
+    weightedScoreContributions.bendingEnergy +
+    weightedScoreContributions.affineDistortion +
+    weightedScoreContributions.rotationPenalty +
+    weightedScoreContributions.unmatchedPointPenalty +
+    weightedScoreContributions.geometryCoveragePenalty;
   const correspondences = activeMatches.pairs.flatMap((match) => {
     const sourcePoint = sourcePoints[match.sourceIndex];
     const targetPoint = targetPoints[match.targetIndex];
@@ -1603,6 +1661,7 @@ export function gradeCharacterShape(
     initialGeometryCoverage: initialAlignedGeometryCoverage,
     residualGeometryCoverage,
     geometryCoveragePenalty,
+    weightedScoreContributions,
     geometryCoverageTolerance,
     correspondences,
     sourceStrokeIndices: source.pointStrokeIndices,

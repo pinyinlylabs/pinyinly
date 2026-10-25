@@ -413,12 +413,21 @@ tasks:
 
   handwritingDiagnose:
     description: "Run handwriting fixtures with JSON and SVG diagnostic attachments."
-    command: vitest run test/util/shapeContextGrader.test.ts --mode development --reporter=default --reporter=json --reporter=html
+    command: vitest
+    args:
+      - run
+      - test/util/shapeContextGrader.test.ts
+      - --mode
+      - development
+      - --reporter=default
+      - --reporter=json
+      - --reporter=html
     deps:
       - ~:codegen
       - audio-sprites:src
     env:
-      PYLY_HANDWRITING_DIAGNOSE: "true"
+      NODE_OPTIONS: --experimental-sqlite --disable-warning=ExperimentalWarning $NODE_OPTIONS
+      PYLY_HANDWRITING_DIAGNOSE: "1"
     options:
       cache: false
       envFile:
