@@ -265,8 +265,8 @@ migration file.
 
 ## Debugging API server running on Vercel
 
-There have been compatibility issues between @expo/server and Vercel in the past. To help debug
-these it's useful to run the Vercel server locally in a JavaScript Debug Terminal.
+There have been compatibility issues between expo-server and Vercel in the past. To help debug these
+it's useful to run the Vercel server locally in a JavaScript Debug Terminal.
 
 To do this you need build the Expo web output, and then point `app/api/index.cjs` to the output
 directory, then run the vercel dev server.

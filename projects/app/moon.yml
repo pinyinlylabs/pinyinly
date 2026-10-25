@@ -71,7 +71,8 @@ tasks:
     script: |
       mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
-      expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
+      expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir) &&
+      printf '%s\n' '{"type":"commonjs"}' > @group(buildVercelExpoOutdir)server/package.json
     deps:
       - ~:codegen
     inputs:
