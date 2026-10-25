@@ -97,9 +97,10 @@ function SubContentWeb({
   ...props
 }: SubContentComponentProps) {
   const Component = asChild ? Slot : Pressable;
+  // Keep Radix's DOM wrapper: React Native Web drops its focus-capture handlers.
   return (
     <Portal>
-      <RadixDropdownMenu.SubContent forceMount={forceMount}>
+      <RadixDropdownMenu.SubContent forceMount={forceMount} className="z-50">
         <Component ref={ref} {...props} />
       </RadixDropdownMenu.SubContent>
     </Portal>
@@ -150,7 +151,7 @@ function DropdownMenuSubContent({
             min-w-[190px] gap-1 rounded-xl bg-bg-high p-3 animate-in
 
             web:z-50 web:origin-(--radix-context-menu-content-transform-origin) web:bg-bg-high/80
-            web:backdrop-blur-md web:animate-in web:fade-in-0 web:zoom-in-95
+            web:shadow-lg web:backdrop-blur-md web:animate-in web:fade-in-0 web:zoom-in-95
 
             web:data-[side=bottom]:slide-in-from-top-2
 
