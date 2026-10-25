@@ -23,7 +23,7 @@ jobs:
       group: app-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         if: github.event_name == 'pull_request'
         id: filter
         with:
@@ -82,7 +82,7 @@ jobs:
       group: static-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         if: github.event_name == 'pull_request'
         id: filter
         with:
