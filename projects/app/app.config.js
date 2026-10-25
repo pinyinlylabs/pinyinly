@@ -136,7 +136,6 @@ export const expo = {
       `expo-router`,
       {
         origin: `https://${devDomain ?? prodDomain}`,
-        unstable_useServerMiddleware: true,
       },
     ],
     [`expo-secure-store`],

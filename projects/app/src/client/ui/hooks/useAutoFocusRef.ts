@@ -1,11 +1,11 @@
 import type { RefObject } from "react";
 import { useLayoutEffect, useRef } from "react";
-import type { TextInput } from "react-native";
+import type { TextInputInstance } from "react-native";
 import { Platform } from "react-native";
 
 type UseAutoFocusRef = (
   autoFocus: boolean | undefined,
-) => RefObject<TextInput | null>;
+) => RefObject<TextInputInstance | null>;
 
 /**
  * Fixes auto-focus behaviour on Safari.
@@ -13,7 +13,7 @@ type UseAutoFocusRef = (
  * Returns a ref that can be merged with other refs using `mergeRefs`.
  */
 const useAutoFocusRefWeb: UseAutoFocusRef = (autoFocus) => {
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
 
   useLayoutEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -50,7 +50,7 @@ const useAutoFocusRefWeb: UseAutoFocusRef = (autoFocus) => {
 };
 
 const useAutoFocusRefNoOp: UseAutoFocusRef = () => {
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   return inputRef;
 };
 

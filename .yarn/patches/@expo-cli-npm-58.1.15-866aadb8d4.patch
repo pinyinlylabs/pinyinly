@@ -1,8 +1,8 @@
 diff --git a/build/src/start/server/metro/MetroBundlerDevServer.js b/build/src/start/server/metro/MetroBundlerDevServer.js
-index da1bb5f18b1a34ed412e37c705e866815c74a6c6..e35529d6b5f66259112988d4b2caface9a879d5f 100644
+index aa3b27a53e519f662ced33c2ae43cf34ee9c3a8d..a18ff71f7b7ef34cf26df434d28ec675d4917a0d 100644
 --- a/build/src/start/server/metro/MetroBundlerDevServer.js
 +++ b/build/src/start/server/metro/MetroBundlerDevServer.js
-@@ -279,7 +279,7 @@ class MetroBundlerDevServer extends _BundlerDevServer.BundlerDevServer {
+@@ -245,7 +245,7 @@ class MetroBundlerDevServer extends _BundlerDevServer.BundlerDevServer {
              const contents = await this.bundleApiRoute(filepath, {
                  platform
              });

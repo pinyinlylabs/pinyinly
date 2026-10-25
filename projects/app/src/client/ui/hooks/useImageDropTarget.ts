@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { View } from "@/client/ui/View";
+import type { ViewInstance } from "react-native";
 
 interface UseImageDropTargetProps {
   disabled: boolean;
@@ -7,7 +7,7 @@ interface UseImageDropTargetProps {
 }
 
 interface UseImageDropTargetResult {
-  imageDropTargetRef: (viewInstance: View | null) => void;
+  imageDropTargetRef: (viewInstance: ViewInstance | null) => void;
   isImageDragOver: boolean;
 }
 
@@ -36,7 +36,7 @@ export function useImageDropTarget({
     onUploadImageRef.current = onUploadImage;
   }, [onUploadImage]);
 
-  const targetRef = useCallback((viewInstance: View | null) => {
+  const targetRef = useCallback((viewInstance: ViewInstance | null) => {
     cleanupRef.current?.();
     dragDepthRef.current = 0;
     setIsDragOver(false);

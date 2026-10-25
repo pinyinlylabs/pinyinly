@@ -6,6 +6,7 @@ import { Link } from "expo-router";
 import type { Href } from "expo-router";
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
+import type { ViewInstance } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
@@ -55,7 +56,7 @@ export const Section = ({
   children: ReactNode;
   href: Href;
 }) => {
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewInstance>(null);
   const [isLightCollapsed, setIsLightCollapsed] = useState(false);
   const [isDarkCollapsed, setIsDarkCollapsed] = useState(false);
 

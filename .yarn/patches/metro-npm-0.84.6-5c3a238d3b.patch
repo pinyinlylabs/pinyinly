@@ -19,7 +19,7 @@ index f9cd35625f34cc2539f72e656384eca248307e7c..855555691f3720015d96df86be81d5b6
              getPackageForModule,
              isESMImport: dependency.data.isESMImport,
 diff --git a/src/node-haste/DependencyGraph.js b/src/node-haste/DependencyGraph.js
-index 8222d8c69059bfb3fe444acba9f96ab2cc7bec0b..932d29e897fc048767890155f9a116c189898585 100644
+index 23a74cd5e03e80c88fed1c6007be84b11cc3b475..99420da1bc2cdf229088a89b34b6724bbc85a397 100644
 --- a/src/node-haste/DependencyGraph.js
 +++ b/src/node-haste/DependencyGraph.js
 @@ -133,6 +133,7 @@ class DependencyGraph extends _events.default {

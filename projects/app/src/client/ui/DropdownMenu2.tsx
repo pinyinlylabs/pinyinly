@@ -199,7 +199,7 @@ function DropdownMenuContent({
               web: overlayStyle ?? undefined,
               native:
                 overlayStyle == null
-                  ? (StyleSheet.absoluteFill as ViewStyle)
+                  ? StyleSheet.absoluteFill
                   : StyleSheet.flatten([
                       StyleSheet.absoluteFill as ViewStyle,
                       overlayStyle as ViewStyle,
