@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   app-preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     concurrency:
       group: app-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -37,7 +37,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
 
   static-preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     concurrency:
       group: static-preview-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -55,7 +55,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
 
   moon-ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v7
