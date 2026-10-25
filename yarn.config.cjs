@@ -431,6 +431,8 @@ module.exports = defineConfig({
       "debug@^4.3.7": "^4 <=4.3.x",
       "lodash@^4.18.1": "^4 <=4.18.x",
       "react@19.3.0": "19.3.x",
+      // The assets-registry type stub is only published at 0.84.0, not alongside RN 0.88.
+      "@react-native/assets-registry@0.88.0": "^0",
       "pg@^8.20.0":
         "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
       "ws@^8.17.1": "^8 <=8.17.x",
@@ -441,7 +443,9 @@ module.exports = defineConfig({
     await enforceSingleDependencyVersion(ctx, [
       /^@aws-sdk\//,
       /^@expo\//,
-      // These upstream packages require incompatible Sentry CLI majors.
+      // Sentry RN 8.28.0 uses CLI 3.8.0, while its bundler-plugins 10.75.2 dependency
+      // requires CLI ^2.58.6. Those incompatible majors include platform-specific binaries,
+      // so allow both until Sentry aligns them while enforcing one version for other Sentry packages.
       /^@sentry\/(?!cli(?:-|$))/,
       /^@tanstack\//,
       /^@vercel\//,

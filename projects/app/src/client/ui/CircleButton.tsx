@@ -10,6 +10,7 @@ export type CircleButtonProps = {
   thickness?: number;
   scaleY?: number;
   diameter?: number;
+  // Parsed by `color` to compute the darker base; opaque native colors are unsupported.
   color?: string;
 } & PropsOf<typeof Pressable>;
 

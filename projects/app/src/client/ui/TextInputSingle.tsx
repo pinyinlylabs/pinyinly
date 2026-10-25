@@ -1,7 +1,5 @@
 import { mergeRefs } from "@/client/react";
 import type { PropsOf } from "@pinyinly/lib/types";
-import type { Ref } from "react";
-import type { TextInputInstance } from "react-native";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 import { useAutoFocusRef } from "./hooks/useAutoFocusRef";
@@ -11,7 +9,6 @@ export type TextInputVariant = `bare` | `flat`;
 interface TextInputSingleProps extends Omit<
   PropsOf<typeof TextInput>,
   // make `placeholder` mandatory (encourage a11y)
-  | `ref`
   | `placeholder`
   // exclude multiline props since this is a single-line input
   | `multiline`
@@ -26,7 +23,6 @@ interface TextInputSingleProps extends Omit<
   editable?: boolean;
   disabled?: boolean;
   placeholder: string | undefined;
-  ref?: Ref<TextInputInstance>;
   variant?: TextInputVariant;
   /**
    * @warning this does not work on mobile Safari, inputs must be focused

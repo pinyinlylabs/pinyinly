@@ -1,6 +1,5 @@
 import { mergeRefs } from "@/client/react";
 import type { PropsOf } from "@pinyinly/lib/types";
-import type { Ref } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import type { TextInputInstance } from "react-native";
 import { TextInput } from "react-native";
@@ -10,12 +9,11 @@ import type { TextInputVariant } from "./TextInputSingle";
 interface TextInputMultiProps extends Omit<
   PropsOf<typeof TextInput>,
   // make `placeholder` mandatory (encourage a11y)
-  `placeholder` | `multiline` | `textAlignVertical` | `ref`
+  `placeholder` | `multiline` | `textAlignVertical`
 > {
   disabled?: boolean;
   placeholder: string | undefined;
   autoResizeMinHeight?: number;
-  ref?: Ref<TextInputInstance>;
   variant?: TextInputVariant;
 }
 
