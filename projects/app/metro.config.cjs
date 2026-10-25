@@ -21,9 +21,7 @@ const resolverOverrides = {
 let config =
   // In development Sentry causes a memory leak that eventually crashes expo.
   process.env.NODE_ENV === `development`
-    ? /** @type {import('metro-config').MetroConfig} */ (
-        /** @type {unknown} */ (getDefaultConfig(__dirname))
-      )
+    ? /** @type {unknown} */ getDefaultConfig(__dirname)
     : /** @type {import('metro-config').MetroConfig} */ (
         /** @type {unknown} */ getSentryExpoConfig(__dirname)
       );

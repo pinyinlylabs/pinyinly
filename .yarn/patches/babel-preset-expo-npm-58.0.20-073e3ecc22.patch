@@ -1,20 +1,20 @@
 diff --git a/build/plugins/inline-env-vars.js b/build/plugins/inline-env-vars.js
-index f8725d3705c7da726a6032bb30e9ca176f557f54..5cefcac3b81cc7aed263a94b1d476229a654dd80 100644
+index 0678f7500f93d97456fd85f2d85956286e469ef3..4463dae48ae338459edb84cf0feed694075da7d2 100644
 --- a/build/plugins/inline-env-vars.js
 +++ b/build/plugins/inline-env-vars.js
-@@ -2,10 +2,12 @@
- Object.defineProperty(exports, "__esModule", { value: true });
- exports.expoInlineEnvVars = expoInlineEnvVars;
- const common_1 = require("../common");
+@@ -10,10 +10,12 @@ Object.defineProperty(exports, "expoInlineEnvVars", {
+ });
+ const _cachevary = require("../cache-vary");
+ const _common = require("../common");
 +const getenv_1 = require("getenv");
  const debug = require('debug')('expo:babel:env-vars');
  function expoInlineEnvVars(api) {
      const { types: t } = api;
-     const isProduction = api.caller(common_1.getIsProd);
+     const isProduction = api.caller(_common.getIsProd);
 +    const strictEnvVars = (0, getenv_1.boolish)('PYLY_STRICT_EXPO_ENV_VARS', false);
      function isProcessEnv(path) {
          const { object } = path.node;
-         if (!t.isMemberExpression(object) ||
+         if (!t.isMemberExpression(object) || !t.isIdentifier(object.object) || object.object.name !== 'process') {
 @@ -46,6 +48,9 @@ function expoInlineEnvVars(api) {
          const key = toMemberProperty(path);
          if (key != null && key.startsWith('EXPO_PUBLIC_')) {
@@ -24,4 +24,4 @@ index f8725d3705c7da726a6032bb30e9ca176f557f54..5cefcac3b81cc7aed263a94b1d476229
 +            }
              publicEnvVars.add(key);
              if (isProduction) {
-                 path.replaceWith(t.valueToNode(process.env[key]));
+                 (0, _cachevary.addCacheVary)(state, {

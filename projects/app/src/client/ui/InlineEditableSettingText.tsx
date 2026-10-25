@@ -9,7 +9,7 @@ import type { UserSettingTextEntity } from "@/data/userSettings";
 import { formatRelativeTime } from "@/util/date";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { TextInput } from "react-native";
+import type { TextInputInstance, ViewInstance } from "react-native";
 import { Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -87,8 +87,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const [isEditing, setIsEditing] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [draft, setDraft] = useState(displayValue);
-  const containerRef = useRef<View>(null);
-  const inputRef = useRef<TextInput>(null);
+  const containerRef = useRef<ViewInstance>(null);
+  const inputRef = useRef<TextInputInstance>(null);
 
   if (!isEditing && draft !== displayValue) {
     setDraft(displayValue);

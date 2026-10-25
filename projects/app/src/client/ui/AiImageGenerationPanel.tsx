@@ -25,7 +25,7 @@ import type {
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useRef, useState } from "react";
-import type { TextInput } from "react-native";
+import type { ScrollViewInstance, TextInputInstance } from "react-native";
 import { Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -187,7 +187,7 @@ export function AiImageGenerationPanel({
       createInitialPlaygroundState(initialPrompt),
     );
   const [isLoadedFromSetting, setIsLoadedFromSetting] = useState(false);
-  const timelineScrollRef = useRef<ScrollView>(null);
+  const timelineScrollRef = useRef<ScrollViewInstance>(null);
   const hasScrolledInitiallyRef = useRef(false);
   const previousActiveThreadIdRef = useRef<string | null>(null);
   const previousMessageCountRef = useRef(0);
@@ -1567,7 +1567,7 @@ function AiImagePromptComposer({
   const [draftPrompt, setDraftPrompt] = useState(initialDraftPrompt);
   const [isPromptInputFocused, setIsPromptInputFocused] = useState(false);
   const lastPersistedDraftPromptRef = useRef(initialDraftPrompt);
-  const promptInputRef = useRef<TextInput>(null);
+  const promptInputRef = useRef<TextInputInstance>(null);
   const { imageDropTargetRef, isImageDragOver } = useImageDropTarget({
     disabled: !editable || isProcessing,
     onUploadImage,

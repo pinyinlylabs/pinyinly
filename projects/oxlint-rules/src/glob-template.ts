@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 /**
  * @fileoverview Ensures require arrays are in sync with files in a directory, using template comments
  */

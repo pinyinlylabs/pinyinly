@@ -1,6 +1,7 @@
 import { mergeRefs } from "@/client/react";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { Ref } from "react";
+import type { TextInputInstance } from "react-native";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 import { useAutoFocusRef } from "./hooks/useAutoFocusRef";
@@ -10,6 +11,7 @@ export type TextInputVariant = `bare` | `flat`;
 interface TextInputSingleProps extends Omit<
   PropsOf<typeof TextInput>,
   // make `placeholder` mandatory (encourage a11y)
+  | `ref`
   | `placeholder`
   // exclude multiline props since this is a single-line input
   | `multiline`
@@ -24,7 +26,7 @@ interface TextInputSingleProps extends Omit<
   editable?: boolean;
   disabled?: boolean;
   placeholder: string | undefined;
-  ref?: Ref<TextInput>;
+  ref?: Ref<TextInputInstance>;
   variant?: TextInputVariant;
   /**
    * @warning this does not work on mobile Safari, inputs must be focused
@@ -48,8 +50,7 @@ export function TextInputSingle({
       {...props}
       ref={ref}
       editable={isEditable}
-      // @ts-expect-error `dataSet` isn't a standard prop in react-native, but it exists for react-native-web
-      // since https://github.com/necolas/react-native-web/releases/tag/0.13.0
+      // @ts-expect-error `dataSet` is a react-native-web-specific prop.
       dataSet={{
         // Disable the 1Password button in inputs.
         "1p-ignore": `true`,
@@ -87,6 +88,8 @@ const inputClass = tv({
       left: `text-left`,
       center: `text-center`,
       right: `text-right`,
+      start: `text-start`,
+      end: `text-end`,
     },
     variant: {
       bare: `font-sans text-fg outline-none`,

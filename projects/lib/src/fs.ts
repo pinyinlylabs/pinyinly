@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 // oxlint-disable-next-line no-restricted-imports
 import { readFileSync, writeFileSync } from "node:fs";
 

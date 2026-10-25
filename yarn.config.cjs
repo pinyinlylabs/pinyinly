@@ -113,7 +113,8 @@ async function enforceConsistentAppPnpmAndYarnDependencies({ Yarn }) {
     const pnpmDep = pnpmDeps[appDep.ident];
     if (pnpmDep != null) {
       invariant(appDep.resolution != null);
-      if (appDep.resolution.version !== pnpmDep.version) {
+      const pnpmVersion = semver.coerce(pnpmDep.version)?.version;
+      if (appDep.resolution.version !== (pnpmVersion ?? pnpmDep.version)) {
         reportRootError(
           { Yarn },
           `projects/app dependency inconsistency (pnpm/yarn has locked different versions). Dependency ${appDep.ident} has different versions in ./api/pnpm-lock.yaml (${pnpmDep.version}) and ./yarn.lock (${appDep.resolution.version})`,
@@ -440,7 +441,8 @@ module.exports = defineConfig({
     await enforceSingleDependencyVersion(ctx, [
       /^@aws-sdk\//,
       /^@expo\//,
-      /^@sentry\//,
+      // These upstream packages require incompatible Sentry CLI majors.
+      /^@sentry\/(?!cli(?:-|$))/,
       /^@tanstack\//,
       /^@vercel\//,
       /^expo-/,

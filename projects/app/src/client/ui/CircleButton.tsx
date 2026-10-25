@@ -5,13 +5,12 @@ import { Image } from "@/client/ui/Image";
 import { useMemo } from "react";
 import { Pressable } from "react-native";
 import { View } from "@/client/ui/View";
-import type { ColorValue } from "react-native";
 
 export type CircleButtonProps = {
   thickness?: number;
   scaleY?: number;
   diameter?: number;
-  color?: ColorValue;
+  color?: string;
 } & PropsOf<typeof Pressable>;
 
 export function CircleButton({

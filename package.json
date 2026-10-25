@@ -64,11 +64,10 @@
     "@types/pg@npm:8.15.5": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
     "@types/pg@npm:8.15.6": "patch:@types/pg@npm%3A8.20.0#~/.yarn/patches/@types-pg-npm-8.20.0-970b246b83.patch",
     "tslib@npm:^1.9.3": "^2.0.0",
-    "@expo/metro-config@npm:~57.0.3": "patch:@expo/metro-config@npm%3A57.0.3#~/.yarn/patches/@expo-metro-config-npm-57.0.3-4759d3a73a.patch",
-    "@expo/cli@npm:^57.0.6": "patch:@expo/cli@npm%3A57.0.6#~/.yarn/patches/@expo-cli-npm-57.0.6-6c7dce52e7.patch",
-    "babel-preset-expo@npm:~57.0.2": "patch:babel-preset-expo@npm%3A57.0.2#~/.yarn/patches/babel-preset-expo-npm-57.0.2-6935e6e94c.patch",
-    "metro@npm:0.84.4": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch",
-    "metro@npm:^0.84.3": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch",
-    "fetch-nodeshim@npm:^0.4.10": "patch:fetch-nodeshim@npm%3A0.4.10#~/.yarn/patches/fetch-nodeshim-npm-0.4.10-b2a583e1ca.patch"
+    "fetch-nodeshim@npm:^0.4.10": "patch:fetch-nodeshim@npm%3A0.4.10#~/.yarn/patches/fetch-nodeshim-npm-0.4.10-b2a583e1ca.patch",
+    "metro@npm:0.84.6": "patch:metro@npm%3A0.84.6#~/.yarn/patches/metro-npm-0.84.6-5c3a238d3b.patch",
+    "metro@npm:^0.84.6": "patch:metro@npm%3A0.84.6#~/.yarn/patches/metro-npm-0.84.6-5c3a238d3b.patch",
+    "@expo/cli@npm:^58.1.15": "patch:@expo/cli@npm%3A58.1.15#~/.yarn/patches/@expo-cli-npm-58.1.15-866aadb8d4.patch",
+    "babel-preset-expo@npm:~58.0.20": "patch:babel-preset-expo@npm%3A58.0.20#~/.yarn/patches/babel-preset-expo-npm-58.0.20-073e3ecc22.patch"
   }
 }

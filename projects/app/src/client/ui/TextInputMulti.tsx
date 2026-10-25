@@ -2,6 +2,7 @@ import { mergeRefs } from "@/client/react";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { Ref } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import type { TextInputInstance } from "react-native";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 import type { TextInputVariant } from "./TextInputSingle";
@@ -9,12 +10,12 @@ import type { TextInputVariant } from "./TextInputSingle";
 interface TextInputMultiProps extends Omit<
   PropsOf<typeof TextInput>,
   // make `placeholder` mandatory (encourage a11y)
-  `placeholder` | `multiline` | `textAlignVertical`
+  `placeholder` | `multiline` | `textAlignVertical` | `ref`
 > {
   disabled?: boolean;
   placeholder: string | undefined;
   autoResizeMinHeight?: number;
-  ref?: Ref<TextInput>;
+  ref?: Ref<TextInputInstance>;
   variant?: TextInputVariant;
 }
 
@@ -23,7 +24,7 @@ export function TextInputMulti({
   ref,
   ...props
 }: TextInputMultiProps) {
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const autoResizeMinHeight = props.autoResizeMinHeight ?? 60;
 
   const adjustHeight = useCallback(() => {
@@ -72,8 +73,7 @@ export function TextInputMulti({
       {...props}
       ref={mergeRefs(ref, inputRef)}
       multiline
-      // @ts-expect-error `dataSet` isn't a standard prop in react-native, but it exists for react-native-web
-      // since https://github.com/necolas/react-native-web/releases/tag/0.13.0
+      // @ts-expect-error `dataSet` is a react-native-web-specific prop.
       dataSet={{
         // Disable the 1Password button in inputs.
         "1p-ignore": `true`,
@@ -112,6 +112,8 @@ const inputClass = tv({
       left: `text-left`,
       center: `text-center`,
       right: `text-right`,
+      start: `text-start`,
+      end: `text-end`,
     },
     variant: {
       bare: `font-sans text-fg outline-none`,

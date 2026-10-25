@@ -24,7 +24,7 @@ import { emptyArray } from "@pinyinly/lib/collections";
 import type { ReactNode, Ref } from "react";
 import { useRef, useState } from "react";
 import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
-import type { TextInput } from "react-native";
+import type { TextInputInstance } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -187,7 +187,7 @@ const PinyinTextInputSingle = ({
   autoFocus: boolean;
   disabled?: boolean;
   editable?: boolean;
-  inputRef?: Ref<TextInput>;
+  inputRef?: Ref<TextInputInstance>;
   onChangeText: (text: string, suggestionAccepted: boolean) => void;
   onSubmit: () => void;
   hintText?: ReactNode;
