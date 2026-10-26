@@ -1,4 +1,5 @@
-import { hanziSvgPathsQuery } from "@/client/query";
+import { hanziSvgPathsQuery, skipQuery } from "@/client/query";
+import type { HanziSvgData } from "@/client/query";
 import { CopyToClipboardButton } from "@/client/ui/CopyToClipboardButton";
 import { HanziWritingCanvas } from "@/client/ui/HanziWritingCanvas";
 import { HanziWritingDebug } from "@/client/ui/HanziWritingDebug";
@@ -287,7 +288,11 @@ export default function CharacterWritingDemo() {
       ? input
       : shapeContextGraderExampleCharacter(loadedExample),
   );
-  const query = useQuery(hanziSvgPathsQuery(character));
+  const query = useQuery(
+    character == null
+      ? skipQuery<HanziSvgData | null>()
+      : hanziSvgPathsQuery(character),
+  );
   const visuallySimilarData = useVisuallySimilarCharacterReferences(character);
   const referencePaths = (query.data?.medians ?? []).map(
     transformArphicSpaceSvgPath,

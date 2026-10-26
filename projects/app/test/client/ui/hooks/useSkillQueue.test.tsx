@@ -163,8 +163,10 @@ test(`scoped practice excludes unrelated retries and practices not-due targets`,
   await waitFor(() => {
     invariant(!result.current.loading);
     const queue = result.current.reviewQueue;
-    expect(queue.items).toHaveLength(1);
-    expect(targetSkills).toContain(queue.items[0]?.skill);
+    expect(queue.items).toHaveLength(2);
+    expect(new Set(queue.items.map(({ skill }) => skill))).toEqual(
+      new Set(targetSkills),
+    );
     expect(queue.retryCount).toBe(0);
     expect(queue.dueCount).toBe(0);
     expect(queue.overDueCount).toBe(0);
@@ -270,6 +272,26 @@ test(`new users are taught the simplest words first`, async ({ rizzle }) => {
       "he:乚:hidden (🟥 BLOCKED)",
     ]
   `);
+
+  unmount();
+});
+
+test(`keeps two review items ready for the quiz`, async ({ rizzle }) => {
+  vi.spyOn(SkillQueueProvider.mockable, `getMaxQueueItems`).mockReturnValue(2);
+
+  const { result, unmount } = renderHook(useSkillQueue, {
+    wrapper: testContextProviders({ rizzle }),
+  });
+
+  await waitFor(
+    () => {
+      expect(result.current.loading).toBe(false);
+    },
+    { timeout: 5000 },
+  );
+
+  invariant(!result.current.loading, `expected skill queue to be loaded`);
+  expect(result.current.reviewQueue.items).toHaveLength(2);
 
   unmount();
 });

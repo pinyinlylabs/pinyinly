@@ -1,4 +1,5 @@
-import { hanziSvgPathsQuery } from "@/client/query";
+import { hanziSvgPathsQuery, skipQuery } from "@/client/query";
+import type { HanziSvgData } from "@/client/query";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { ToggleButton } from "@/client/ui/ToggleButton";
 import {
@@ -630,10 +631,16 @@ export default function GlyphBuilderDemo() {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const layerQueries = useQueries({
-    queries: layers.map((layer) => hanziSvgPathsQuery(layer.hanzi)),
+    queries: layers.map((layer) =>
+      layer.hanzi == null
+        ? skipQuery<HanziSvgData | null>()
+        : hanziSvgPathsQuery(layer.hanzi),
+    ),
   });
   const { data: referenceSvgData } = useQuery(
-    hanziSvgPathsQuery(referenceHanzi),
+    referenceHanzi == null
+      ? skipQuery<HanziSvgData | null>()
+      : hanziSvgPathsQuery(referenceHanzi),
   );
 
   useEffect(() => {

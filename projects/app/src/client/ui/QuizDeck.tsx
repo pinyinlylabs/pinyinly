@@ -5,7 +5,6 @@ import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
-import { hanziSvgPathsQuery } from "@/client/query";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
@@ -14,16 +13,13 @@ import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { Link } from "expo-router";
 import type { Href } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { Activity, useEffect, useState } from "react";
 import { useWindowDimensions } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import Reanimated, { FadeIn, Keyframe } from "react-native-reanimated";
-import { QuizDeckHanziWordToGlossTypedQuestion } from "./QuizDeckHanziWordToGlossTypedQuestion";
-import { QuizDeckHanziWordToPinyinTypedQuestion } from "./QuizDeckHanziWordToPinyinTypedQuestion";
-import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
-import { QuizDeckHanziCharacterWritingQuestion } from "./QuizDeckHanziCharacterWritingQuestion";
+import { QuizDeckQuestionRenderer } from "./QuizDeckQuestionRenderer";
+import { Suspense } from "./Suspense";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
@@ -44,47 +40,54 @@ export const QuizDeck = ({
   const { width: screenWidth } = useWindowDimensions();
   const r = useRizzle();
   const postHog = usePostHog();
-  const queryClient = useQueryClient();
 
   const skillQueue = useSkillQueue();
 
   const [latestReviewId, setLatestReviewId] = useState<string>();
   const [question, setQuestion] = useState<Question>();
+  const [nextQuestion, setNextQuestion] = useState<Question>();
   const [questionSource, setQuestionSource] =
+    useState<DeepReadonly<SkillReviewQueue> | null>();
+  const [nextQuestionSource, setNextQuestionSource] =
     useState<DeepReadonly<SkillReviewQueue> | null>();
   const [questionCounter, setQuestionCounter] = useState(0);
 
   const reviewQueue = skillQueue.loading ? null : skillQueue.reviewQueue;
 
-  // Generate a question from the first item in the queue
+  // Keep a question ready after the current one. The next question is reserved
+  // from the queue snapshot that produced it, even if a rating reorders the queue.
   useEffect(() => {
     if (reviewQueue == null) {
       return;
     }
 
-    // Don't generate if we already have a question.
-    if (question != null) {
+    const generatingNextQuestion = question != null;
+    const currentSkill =
+      question == null
+        ? undefined
+        : question.kind === QuestionKind.OneCorrectPair
+          ? question.answer.skill
+          : question.skill;
+    if (generatingNextQuestion && nextQuestion != null) {
       return;
     }
 
-    // Don't generate until we can pull a question from a fresh queue.
-    if (reviewQueue == questionSource) {
+    const source = generatingNextQuestion ? nextQuestionSource : questionSource;
+    if (reviewQueue === source) {
       return;
     }
 
-    if (reviewQueue.items.length === 0) {
-      return;
-    }
-
-    // Use AbortController to prevent race conditions
     const abortController = new AbortController();
+    const isAborted = () => abortController.signal.aborted;
 
     const generateQuestion = async () => {
-      // Loop through queue items until we find one that can generate a question
-      // (matching the original nextQuizQuestionQuery logic)
       for (const { skill, flag } of reviewQueue.items) {
-        if (abortController.signal.aborted) {
+        if (isAborted()) {
           return;
+        }
+
+        if (generatingNextQuestion && skill === currentSkill) {
+          continue;
         }
 
         try {
@@ -92,31 +95,18 @@ export const QuizDeck = ({
             skill,
             flag ?? null,
           );
-          if (generatedQuestion.kind === QuestionKind.HanziCharacterWriting) {
-            const svgData = await queryClient.query(
-              hanziSvgPathsQuery(generatedQuestion.hanzi),
-            );
-            if (svgData?.medians == null || svgData.medians.length === 0) {
-              throw new Error(
-                `No stroke median data available for ${generatedQuestion.hanzi}`,
-              );
-            }
-          }
-
-          // Check if this effect was cancelled before setting state
-          if (abortController.signal.aborted as boolean) {
+          if (isAborted()) {
             return;
           }
-          // Ensure we're only moving forward in version (or setting initial version)
-          invariant(
-            questionSource != reviewQueue,
-            `Queue must be different when generating new question`,
-          );
-          setQuestion(generatedQuestion);
-          setQuestionSource(reviewQueue);
-          setQuestionCounter((prev) => prev + 1);
 
-          // Successfully generated a question, exit the loop
+          if (generatingNextQuestion) {
+            setNextQuestion(generatedQuestion);
+            setNextQuestionSource(reviewQueue);
+          } else {
+            setQuestion(generatedQuestion);
+            setQuestionSource(reviewQueue);
+            setQuestionCounter((prev) => prev + 1);
+          }
           return;
         } catch (error_) {
           console.error(
@@ -129,8 +119,13 @@ export const QuizDeck = ({
         }
       }
 
-      // If we get here, no question could be generated for any skill
-      if (!abortController.signal.aborted) {
+      if (isAborted()) {
+        return;
+      }
+      if (generatingNextQuestion) {
+        setNextQuestionSource(reviewQueue);
+      } else {
+        setQuestionSource(reviewQueue);
         console.error(
           `No question found for review in queue of ${reviewQueue.items.length} items`,
         );
@@ -143,7 +138,7 @@ export const QuizDeck = ({
     return () => {
       abortController.abort();
     };
-  }, [question, questionSource, queryClient, reviewQueue]);
+  }, [nextQuestion, nextQuestionSource, question, questionSource, reviewQueue]);
 
   const playSuccessSound = useSoundEffect(
     require(`../../assets/audio/sparkle.mp3`),
@@ -153,9 +148,17 @@ export const QuizDeck = ({
   const quizProgress = useQuizProgress();
 
   const handleNext = () => {
-    // Clear the current question so the next one loads when version changes
-    // Keep questionVersion so we can detect when queue updates to a newer version
-    setQuestion(undefined);
+    if (nextQuestion == null) {
+      setQuestion(undefined);
+      setQuestionSource(reviewQueue ?? questionSource);
+      setNextQuestionSource(undefined);
+    } else {
+      setQuestion(nextQuestion);
+      setQuestionSource(nextQuestionSource);
+      setNextQuestion(undefined);
+      setNextQuestionSource(nextQuestionSource);
+      setQuestionCounter((prev) => prev + 1);
+    }
   };
 
   const handleChangeAnswer = () => {
@@ -279,55 +282,6 @@ export const QuizDeck = ({
   let screen: React.ReactNode;
 
   if (question != null) {
-    let questionScreen: React.ReactNode;
-
-    switch (question.kind) {
-      case QuestionKind.HanziWordToGlossTyped: {
-        questionScreen = (
-          <QuizDeckHanziWordToGlossTypedQuestion
-            question={question}
-            onNext={handleNext}
-            onRating={handleRating}
-            onChangeAnswer={handleChangeAnswer}
-          />
-        );
-        break;
-      }
-      case QuestionKind.HanziWordToPinyinTyped: {
-        questionScreen = (
-          <QuizDeckHanziWordToPinyinTypedQuestion
-            question={question}
-            onNext={handleNext}
-            onRating={handleRating}
-            onChangeAnswer={handleChangeAnswer}
-          />
-        );
-        break;
-      }
-      case QuestionKind.OneCorrectPair: {
-        questionScreen = (
-          <QuizDeckOneCorrectPairQuestion
-            question={question}
-            onNext={handleNext}
-            onRating={handleRating}
-            onChangeAnswer={handleChangeAnswer}
-          />
-        );
-        break;
-      }
-      case QuestionKind.HanziCharacterWriting: {
-        questionScreen = (
-          <QuizDeckHanziCharacterWritingQuestion
-            question={question}
-            onNext={handleNext}
-            onRating={handleRating}
-            onChangeAnswer={handleChangeAnswer}
-          />
-        );
-        break;
-      }
-    }
-
     screen = (
       <Reanimated.View
         key={questionCounter}
@@ -335,7 +289,18 @@ export const QuizDeck = ({
         exiting={questionExitTransition}
         className="size-full"
       >
-        {questionScreen}
+        <Suspense
+          fallback={
+            <Text className="my-auto text-center text-muted-fg">Loading</Text>
+          }
+        >
+          <QuizDeckQuestionRenderer
+            question={question}
+            onNext={handleNext}
+            onRating={handleRating}
+            onChangeAnswer={handleChangeAnswer}
+          />
+        </Suspense>
       </Reanimated.View>
     );
   } else if (skillQueue.loading || hasPendingReviews) {
@@ -394,6 +359,18 @@ export const QuizDeck = ({
 
       <View className="size-full max-w-screen-sm flex-1 self-center">
         {screen}
+        {nextQuestion == null ? null : (
+          <Activity mode="hidden">
+            <Suspense fallback={null}>
+              <QuizDeckQuestionRenderer
+                question={nextQuestion}
+                onNext={handleNext}
+                onRating={handleRating}
+                onChangeAnswer={handleChangeAnswer}
+              />
+            </Suspense>
+          </Activity>
+        )}
       </View>
     </View>
   );

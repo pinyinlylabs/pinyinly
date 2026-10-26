@@ -1,4 +1,5 @@
-import { hanziSvgPathsQuery } from "@/client/query";
+import { hanziSvgPathsQuery, skipQuery } from "@/client/query";
+import type { HanziSvgData } from "@/client/query";
 import type {
   HanziCharacter as HanziCharacterType,
   HanziStrokeColor,
@@ -32,7 +33,11 @@ export function HanziStrokesTile({
   fillWidth?: boolean;
   onVisualLayout?: (event: LayoutChangeEvent) => void;
 }) {
-  const { data: strokesData, isLoading } = useQuery(hanziSvgPathsQuery(hanzi));
+  const { data: strokesData, isLoading } = useQuery(
+    hanzi == null
+      ? skipQuery<HanziSvgData | null>()
+      : hanziSvgPathsQuery(hanzi),
+  );
 
   const segmentPathsByAtom = strokesData?.segments ?? null;
   const strokePaths = strokesData?.strokes ?? [];

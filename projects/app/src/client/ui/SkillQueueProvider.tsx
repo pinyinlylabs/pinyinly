@@ -19,7 +19,7 @@ import type { SkillQueueContextValue } from "./contexts";
 import { SkillQueueContext } from "./contexts";
 
 const mockable = {
-  getMaxQueueItems: () => 1,
+  getMaxQueueItems: () => 2,
 };
 
 /**

@@ -81,6 +81,25 @@ type ExpressionLike = Parameters<typeof isUndefined>[0];
 const isNullish = (value: ExpressionLike) =>
   or(isUndefined(value), isNull(value));
 
+/**
+ * Keeps a useQuery/useQueries hook unconditional when its input is unavailable,
+ * without fetching or supplying placeholder data. T must match the real query's
+ * data type, including null if it can return null.
+ *
+ * @example
+ * useQuery(hanzi == null
+ *   ? skipQuery<HanziSvgData | null>()
+ *   : hanziSvgPathsQuery(hanzi));
+ *
+ * Not for Suspense queries, which require a runnable query function.
+ */
+export function skipQuery<T>() {
+  return queryOptions<T>({
+    queryKey: [`skipQuery`],
+    queryFn: skipToken,
+  });
+}
+
 export function historyPageCollection(
   skillRatingsCollection: SkillRatingCollection,
   hanziGlossMistakesCollection: HanziGlossMistakeCollection,
@@ -331,37 +350,31 @@ export type WikiMdastRoot = z.infer<typeof wikiMdastRootSchema>;
 export type WikiPayload = z.infer<typeof wikiPayloadSchema>;
 export type HanziSvgData = z.infer<typeof hanziSvgDataSchema>;
 
-export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter | null) =>
-  queryOptions({
+export const hanziSvgPathsQueryWeb = (hanzi: HanziCharacter) =>
+  queryOptions<HanziSvgData | null>({
     queryKey: [`hanziSvgPaths`, hanzi] as const,
-    queryFn:
-      hanzi == null
-        ? skipToken
-        : async ({ signal }): Promise<HanziSvgData | null> => {
-            const response = await fetch(
-              `/raw/svgs/${encodeURIComponent(hanzi)}.json`,
-              { signal },
-            );
-            if (!response.ok) {
-              return null;
-            }
+    queryFn: async ({ signal }): Promise<HanziSvgData | null> => {
+      const response = await fetch(
+        `/raw/svgs/${encodeURIComponent(hanzi)}.json`,
+        { signal },
+      );
+      if (!response.ok) {
+        return null;
+      }
 
-            const json = (await response.json()) as unknown;
-            const result = hanziSvgDataSchema.safeParse(json);
-            return result.success ? result.data : null;
-          },
+      const json = (await response.json()) as unknown;
+      const result = hanziSvgDataSchema.safeParse(json);
+      return result.success ? result.data : null;
+    },
     staleTime: Infinity,
   });
 
-export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter | null) =>
-  queryOptions({
+export const hanziSvgPathsQueryNative = (hanzi: HanziCharacter) =>
+  queryOptions<HanziSvgData | null>({
     queryKey: [`hanziSvgPaths`, hanzi] as const,
-    queryFn:
-      hanzi == null
-        ? skipToken
-        : async (): Promise<HanziSvgData | null> => {
-            return null;
-          },
+    queryFn: async (): Promise<HanziSvgData | null> => {
+      return null;
+    },
     staleTime: Infinity,
   });
 
@@ -370,37 +383,31 @@ export const hanziSvgPathsQuery = Platform.select({
   default: hanziSvgPathsQueryNative,
 });
 
-export const wikiPayloadQueryWeb = (hanzi: HanziText | null) =>
-  queryOptions({
+export const wikiPayloadQueryWeb = (hanzi: HanziText) =>
+  queryOptions<WikiPayload | null>({
     queryKey: [`wikiPayload`, hanzi] as const,
-    queryFn:
-      hanzi == null
-        ? skipToken
-        : async ({ signal }): Promise<WikiPayload | null> => {
-            const response = await fetch(
-              `/raw/wiki/${encodeURIComponent(hanzi)}.json`,
-              { signal },
-            );
-            if (!response.ok) {
-              return null;
-            }
+    queryFn: async ({ signal }): Promise<WikiPayload | null> => {
+      const response = await fetch(
+        `/raw/wiki/${encodeURIComponent(hanzi)}.json`,
+        { signal },
+      );
+      if (!response.ok) {
+        return null;
+      }
 
-            const json = (await response.json()) as unknown;
-            const result = wikiPayloadSchema.safeParse(json);
-            return result.success ? result.data : null;
-          },
+      const json = (await response.json()) as unknown;
+      const result = wikiPayloadSchema.safeParse(json);
+      return result.success ? result.data : null;
+    },
     staleTime: Infinity,
   });
 
-export const wikiPayloadQueryNative = (hanzi: HanziText | null) =>
-  queryOptions({
+export const wikiPayloadQueryNative = (hanzi: HanziText) =>
+  queryOptions<WikiPayload | null>({
     queryKey: [`wikiPayload`, hanzi] as const,
-    queryFn:
-      hanzi == null
-        ? skipToken
-        : async (): Promise<WikiPayload | null> => {
-            return null;
-          },
+    queryFn: async (): Promise<WikiPayload | null> => {
+      return null;
+    },
     staleTime: Infinity,
   });
 
