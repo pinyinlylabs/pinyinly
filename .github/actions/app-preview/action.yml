@@ -61,7 +61,7 @@ runs:
     - name: 🚀 Deploy to Vercel (preview)
       id: deploy-vercel
       run: |
-        set -o pipefail
+        set -euo pipefail
         moon run app:deployVercel --color --force 2>&1 | tee "$RUNNER_TEMP/vercel-deploy.log"
 
         deployment_url="$(grep -Eo 'https://[^[:space:]]+\.vercel\.app' "$RUNNER_TEMP/vercel-deploy.log" | tail -n 1 || true)"
@@ -86,6 +86,7 @@ runs:
     - name: 🔎 Smoke-test Vercel preview
       env:
         DEPLOYMENT_URL: ${{ steps.deploy-vercel.outputs.url }}
+        VERCEL_TOKEN: ${{ inputs.vercel-token }}
       run: moon run app:smokecheck -- "$DEPLOYMENT_URL"
       shell: bash
 
