@@ -1,29 +1,29 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
-import type { HanziText, HanziWord } from "@/data/model";
+import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
-import { useState } from "react";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { useSkillSrsStates } from "./hooks/useSkillSrsStates";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
-import { WikiHanziSkillLevelBreakdownBox } from "./WikiHanziSkillLevelBreakdown";
 
 export function WikiHanziWordHeaderOverview({
   hanzi,
+  studyHanziWord,
+  onHanziWordSelected,
+  skillSrsStates,
   onModalDismiss,
   ...rest
 }: {
   hanzi: HanziText;
+  studyHanziWord: HanziWord | null;
+  onHanziWordSelected: (hanziWord: HanziWord | null) => void;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   onModalDismiss?: () => void;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
-
-  const skillSrsStates = useSkillSrsStates();
-  const [studyHanziWord, setStudyHanziWord] = useState<HanziWord | null>(null);
 
   return (
     <View className="gap-[10px]">
@@ -54,16 +54,8 @@ export function WikiHanziWordHeaderOverview({
       <WikiHanziMeaningsPanel
         hanzi={hanzi}
         selectedHanziWord={studyHanziWord}
-        onHanziWordSelected={(hanziWord) => {
-          setStudyHanziWord(hanziWord);
-        }}
+        onHanziWordSelected={onHanziWordSelected}
       />
-      {studyHanziWord == null ? null : (
-        <WikiHanziSkillLevelBreakdownBox
-          hanziWord={studyHanziWord}
-          skillSrsStates={skillSrsStates}
-        />
-      )}
     </View>
   );
 }

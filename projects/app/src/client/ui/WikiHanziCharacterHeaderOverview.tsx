@@ -1,5 +1,10 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
-import type { HanziCharacter, HanziWord } from "@/data/model";
+import type {
+  HanziCharacter,
+  HanziWord,
+  Skill,
+  SrsStateType,
+} from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
 import { ComponentLozenge } from "./ComponentLozenge";
@@ -14,23 +19,22 @@ import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
 import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
-import { WikiHanziSkillLevelBreakdownBox } from "./WikiHanziSkillLevelBreakdown";
-import { useSkillSrsStates } from "./hooks/useSkillSrsStates";
 
 export function WikiHanziCharacterHeaderOverview({
   hanzi,
   hanziWord,
+  skillSrsStates,
   onModalDismiss,
   ...rest
 }: {
   hanzi: HanziCharacter;
   hanziWord: HanziWord | null;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   onModalDismiss?: () => void;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
-  const skillSrsStates = useSkillSrsStates();
 
   const { data: decompositionEntries } = useLiveQuery(
     (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
@@ -116,12 +120,6 @@ export function WikiHanziCharacterHeaderOverview({
             )}
           </Text>
         </View>
-      )}
-      {hanziWord == null ? null : (
-        <WikiHanziSkillLevelBreakdownBox
-          hanziWord={hanziWord}
-          skillSrsStates={skillSrsStates}
-        />
       )}
     </View>
   );
