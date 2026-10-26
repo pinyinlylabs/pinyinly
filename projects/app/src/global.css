@@ -147,6 +147,43 @@
   }
 }
 
+@keyframes drawHanziStroke {
+  from {
+    visibility: visible;
+    stroke-dashoffset: 1;
+  }
+  to {
+    visibility: visible;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes growHanziBrush {
+  from {
+    stroke-width: 0;
+  }
+  to {
+    stroke-width: 140px;
+  }
+}
+
+@utility hanzi-animated-stroke {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  visibility: hidden;
+  animation:
+    drawHanziStroke var(--hanzi-stroke-duration) linear both,
+    growHanziBrush var(--hanzi-brush-growth-duration) ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hanzi-animated-stroke {
+    animation: none;
+    stroke-dashoffset: 0;
+    visibility: visible;
+  }
+}
+
 /* Inline derived colors so their inputs resolve in the consuming theme scope,
    rather than inheriting a mix computed on :root. */
 @theme inline {

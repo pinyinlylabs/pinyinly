@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Pressable } from "react-native";
 import { ExampleStack } from "@/client/ui/demo/components";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -15,9 +17,38 @@ const xueStrokes = [
   `M 557 250 Q 701 269 878 253 Q 902 250 908 259 Q 915 272 903 284 Q 875 312 831 332 Q 816 338 790 330 Q 742 321 538 295 L 495 290 Q 384 281 328 274 Q 264 264 170 264 Q 157 264 155 253 Q 154 240 173 226 Q 189 213 220 201 Q 232 197 249 205 Q 265 211 332 221 Q 408 239 506 247 L 557 250 Z`,
 ];
 
-export default () => {
+const xueMedians = [
+  `M 296 725 L 307 710 L 358 671 L 381 628`,
+  `M 447 782 L 500 728 L 518 686`,
+  `M 690 808 L 712 774 L 619 668 L 590 643`,
+  `M 212 568 L 221 546 L 220 525 L 175 444 L 171 391`,
+  `M 245 544 L 279 532 L 586 582 L 759 597 L 800 586 L 821 553 L 730 469`,
+  `M 334 430 L 355 420 L 383 417 L 557 471 L 593 467 L 617 442 L 615 437 L 577 388 L 514 326`,
+  `M 491 326 L 514 296 L 534 237 L 540 136 L 528 53 L 504 17 L 396 71`,
+  `M 168 251 L 231 233 L 449 265 L 815 296 L 896 268`,
+];
+
+export default function HanziGraphicDemo() {
+  const [animationKey, setAnimationKey] = useState(0);
+
   return (
     <>
+      <View className="w-full items-center gap-2">
+        <HanziGraphic
+          className="size-40"
+          bgSvgPaths={xueStrokes}
+          animatedMedianPaths={xueMedians}
+          animationKey={animationKey}
+        />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            setAnimationKey((previous) => previous + 1);
+          }}
+        >
+          <Text className="text-sm text-fg">Replay stroke order</Text>
+        </Pressable>
+      </View>
       <View className="w-full flex-row gap-2">
         <ExampleStack title="Fingers">
           <HanziGraphic
@@ -79,4 +110,4 @@ export default () => {
       </View>
     </>
   );
-};
+}
