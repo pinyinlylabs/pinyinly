@@ -40,14 +40,14 @@ runs:
   using: composite
   steps:
     - name: 🏗 Create database branch for running tests
-      uses: neondatabase/create-branch-action@v5
+      uses: neondatabase/create-branch-action@v6.3.1
       id: create-neon-branch
       with:
         api_key: ${{ inputs.neon-api-key }}
         branch_name: ${{ inputs.neon-branch-name }}
         database: hao
         project_id: ${{ inputs.neon-project-id }}
-        username: ${{ inputs.neon-username }}
+        role: ${{ inputs.neon-username }}
 
     - uses: ./.github/actions/setup-tools
 
@@ -72,7 +72,7 @@ runs:
         VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
         VERCEL_TOKEN: ${{ inputs.vercel-token }}
 
-    - uses: neondatabase/delete-branch-action@v3
+    - uses: "neondatabase/delete-branch-action@aed9ab1ec86e380312c7b0a9e29942e41349adf6" # v3.2.1 still uses setup-node@v4
       with:
         project_id: ${{ inputs.neon-project-id }}
         branch: ${{ inputs.neon-branch-name }}
