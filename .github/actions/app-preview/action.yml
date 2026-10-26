@@ -40,14 +40,14 @@ runs:
   using: composite
   steps:
     - name: 🏗 Create database branch for running tests
-      uses: neondatabase/create-branch-action@v5
+      uses: neondatabase/create-branch-action@6.3.1
       id: create-neon-branch
       with:
         api_key: ${{ inputs.neon-api-key }}
         branch_name: ${{ inputs.neon-branch-name }}
         database: hao
         project_id: ${{ inputs.neon-project-id }}
-        username: ${{ inputs.neon-username }}
+        role: ${{ inputs.neon-username }}
 
     - uses: ./.github/actions/setup-tools
 
@@ -72,9 +72,12 @@ runs:
         VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
         VERCEL_TOKEN: ${{ inputs.vercel-token }}
 
-    - uses: neondatabase/delete-branch-action@v3
-      with:
-        project_id: ${{ inputs.neon-project-id }}
-        branch: ${{ inputs.neon-branch-name }}
-        api_key: ${{ inputs.neon-api-key }}
+    - name: Delete database branch
       if: ${{ always() && steps.create-neon-branch.outcome == 'success' }}
+      run: npm exec --yes --ignore-scripts --package=neonctl@2.22.0 -- neonctl branches delete "$BRANCH_NAME" --project-id "$PROJECT_ID"
+      shell: bash
+      env:
+        NEON_API_KEY: ${{ inputs.neon-api-key }}
+        NEON_API_HOST: https://console.neon.tech/api/v2
+        BRANCH_NAME: ${{ inputs.neon-branch-name }}
+        PROJECT_ID: ${{ inputs.neon-project-id }}
