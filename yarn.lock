@@ -5922,7 +5922,7 @@ __metadata:
     vite-plugin-react-native-web: "npm:^3.2.0"
     vitest: "npm:^5.0.5"
     vitest-browser-react: "npm:^2.3.0"
-    vitest-evals: "npm:^0.11.0"
+    vitest-evals: "npm:^0.17.0"
     ws: "npm:^8.17.1"
     yaml: "npm:^2.7.0"
     yargs: "npm:^18.0.0"
@@ -9917,6 +9917,24 @@ __metadata:
     oxc-transform-react:
       optional: true
   checksum: 10c0/5c49e9098455e40662c60e7e3daf81088f8f3dc94dbd55746c310fc08a47962321c432dab202d5c240c91bf951c6a62ea64784b183e7ed47e6f9378d6e00e565
+  languageName: node
+  linkType: hard
+
+"@vitest-evals/core@npm:0.17.0":
+  version: 0.17.0
+  resolution: "@vitest-evals/core@npm:0.17.0"
+  dependencies:
+    zod: "npm:>=3 <5"
+  checksum: 10c0/a36bca79c613fa783964dfa872499f376716d70b694d2e412b8f9df86dc58ba010c3ea2c8860cd9e1094081d7ea1dc2b6c4595413ec24b02a445608c6aa72244
+  languageName: node
+  linkType: hard
+
+"@vitest-evals/report-ui@npm:0.17.0":
+  version: 0.17.0
+  resolution: "@vitest-evals/report-ui@npm:0.17.0"
+  dependencies:
+    "@vitest-evals/core": "npm:0.17.0"
+  checksum: 10c0/7195f373d6f9004600eceb3b0c8e4c98b9ca866e15b3d79617137158c54f716e00c385cbcb4b4f672900ba1ed22de8f676f2ee0ae8db69d4dee612264661e4d4
   languageName: node
   linkType: hard
 
@@ -22918,9 +22936,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest-evals@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "vitest-evals@npm:0.11.0"
+"vitest-evals@npm:^0.17.0":
+  version: 0.17.0
+  resolution: "vitest-evals@npm:0.17.0"
+  dependencies:
+    "@vitest-evals/core": "npm:0.17.0"
+    "@vitest-evals/report-ui": "npm:0.17.0"
   peerDependencies:
     ai: ">=4 <7"
     tinyrainbow: ">=2 <4"
@@ -22931,7 +22952,9 @@ __metadata:
       optional: true
     zod:
       optional: true
-  checksum: 10c0/d754b4702cacdd642cbe43a65e0b7746bf4b7be0c273241192fc297a16c9c5ff07de1084edfd30aa3c8e36b97a16f17fdfcccbb2188e3939b196e3a56ad01937
+  bin:
+    vitest-evals: bin/vitest-evals.js
+  checksum: 10c0/1239171a120f2e26a4b8547653c29cea048feb2c2abf8f3b2236df59c7a286108ad38231d5f18a81383a077447f9b3d350c9b4d6ce3eb7ebdaeedc0278205b06
   languageName: node
   linkType: hard
 
@@ -23467,17 +23490,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"zod@npm:>=3 <5, zod@npm:^4.4.3":
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
+  languageName: node
+  linkType: hard
+
 "zod@npm:^3.25.0, zod@npm:^3.25.76":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
-  languageName: node
-  linkType: hard
-
-"zod@npm:^4.4.3":
-  version: 4.6.7
-  resolution: "zod@npm:4.6.7"
-  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
 
