@@ -1,16 +1,15 @@
-import { execFile } from "node:child_process";
-import path from "node:path";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { promisify } from "node:util";
+import makeDebug from "debug";
 import yargs from "yargs";
 import { z } from "zod";
 
-const execFileAsync = promisify(execFile);
+const debug = makeDebug(`pyly`);
 const appRootMarker = `id="root"`;
 const appUrlSchema = z.url({ protocol: /^https?$/u });
 
 export async function assertAppResponse(response: Response): Promise<void> {
   if (!response.ok) {
+    debug(`App returned HTTP %d %s`, response.status, response.statusText);
     throw new Error(
       `App returned HTTP ${response.status} ${response.statusText}`,
     );
@@ -18,50 +17,25 @@ export async function assertAppResponse(response: Response): Promise<void> {
 
   const html = await response.text();
   if (!html.includes(appRootMarker)) {
+    debug(`Response did not contain the Expo app root: %s`, html);
     throw new Error(`Response did not contain the Expo app root.`);
   }
 }
 
 async function checkApp(inputUrl: string) {
   const url = new URL(appUrlSchema.parse(inputUrl));
-  const vercelToken = process.env[`VERCEL_TOKEN`];
-  const response =
-    vercelToken !== undefined && vercelToken.length > 0
-      ? await fetchProtectedDeployment(url)
-      : await fetch(url, {
-          signal: nonNullable(
-            AbortSignal.timeout(30_000) as RequestInit[`signal`],
-          ),
-        });
+  const vercelAutomationBypassSecret =
+    process.env[`VERCEL_AUTOMATION_BYPASS_SECRET`];
+  const response = await fetch(url, {
+    headers:
+      vercelAutomationBypassSecret !== undefined &&
+      vercelAutomationBypassSecret.length > 0
+        ? { "x-vercel-protection-bypass": vercelAutomationBypassSecret }
+        : undefined,
+    signal: nonNullable(AbortSignal.timeout(30_000) as RequestInit[`signal`]),
+  });
   await assertAppResponse(response);
   console.info(`App smoke check passed: ${url.href}`);
-}
-
-async function fetchProtectedDeployment(url: URL): Promise<Response> {
-  const { stdout } = await execFileAsync(
-    `yarn`,
-    [
-      `dlx`,
-      `vercel@53.4.0`, // renovate: datasource=npm depName=vercel
-      `curl`,
-      `/`,
-      `--deployment`,
-      url.href,
-      `--`,
-      `--silent`,
-      `--show-error`,
-      `--fail`,
-      `--max-time`,
-      `30`,
-    ],
-    {
-      cwd: path.resolve(import.meta.dirname, `..`),
-      encoding: `utf8`,
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 35_000,
-    },
-  );
-  return new Response(stdout);
 }
 
 async function main() {
@@ -76,7 +50,20 @@ async function main() {
           type: `string`,
           demandOption: true,
         }),
-      async (argv) => checkApp(argv.url),
+      async (argv) => {
+        if (argv[`debug`] === true) {
+          makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
+        }
+        await checkApp(argv.url);
+      },
+    )
+    .option(`debug`, {
+      type: `boolean`,
+      description: `Log additional diagnostic details when the check fails`,
+      default: false,
+    })
+    .epilog(
+      `If VERCEL_AUTOMATION_BYPASS_SECRET is set, it is sent as the Vercel deployment protection bypass header.`,
     )
     .version(false)
     .strict()

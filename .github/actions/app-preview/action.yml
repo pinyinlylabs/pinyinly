@@ -35,6 +35,9 @@ inputs:
   vercel-token:
     description: Vercel authentication token.
     required: true
+  vercel-automation-bypass-secret:
+    description: Vercel deployment protection bypass secret for the smoke test.
+    required: true
 
 runs:
   using: composite
@@ -86,7 +89,7 @@ runs:
     - name: 🔎 Smoke-test Vercel preview
       env:
         DEPLOYMENT_URL: ${{ steps.deploy-vercel.outputs.url }}
-        VERCEL_TOKEN: ${{ inputs.vercel-token }}
+        VERCEL_AUTOMATION_BYPASS_SECRET: ${{ inputs.vercel-automation-bypass-secret }}
       run: moon run app:smokecheck -- "$DEPLOYMENT_URL"
       shell: bash
 
