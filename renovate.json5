@@ -77,7 +77,7 @@
       depNameTemplate: "ubuntu",
     },
     {
-      description: "Update pinned npx/npm i -g/yarn dlx packages",
+      description: "Update pinned npx/npm exec/npm i -g/yarn dlx packages",
       customType: "regex",
       managerFilePatterns: [
         "/^.moon/.*.ya?ml$/",
@@ -91,7 +91,8 @@
         // @pyly-test: "npx -y -p foo@1.2.3" depName=foo currentValue=1.2.3
         // @pyly-test: "npx -y --package foo@1.2.3" depName=foo currentValue=1.2.3
         // @pyly-test: "npx -y -p @foo/bar@1.2.3" depName=@foo/bar currentValue=1.2.3
-        "(npx|npm exec|yarn dlx|pnpm dlx|npm\\s+i\\s+-g)(\\s+-[-a-z]+?)*\\s+(?:-p|--package\\s+)?(?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>\\S+)",
+        // @pyly-test: "npm exec --yes --ignore-scripts --package=neonctl@2.22.0 -- neonctl branches delete" depName=neonctl currentValue=2.22.0
+        "(npx|npm exec|yarn dlx|pnpm dlx|npm\\s+i\\s+-g)(\\s+-[-a-z]+?)*\\s+(?:-p|--package(?:\\s+|=))?(?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>\\S+)",
       ],
       datasourceTemplate: "npm",
       depTypeTemplate: "devDependencies",

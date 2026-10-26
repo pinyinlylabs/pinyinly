@@ -72,9 +72,12 @@ runs:
         VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
         VERCEL_TOKEN: ${{ inputs.vercel-token }}
 
-    - uses: "neondatabase/delete-branch-action@aed9ab1ec86e380312c7b0a9e29942e41349adf6" # v3.2.1 still uses setup-node@v4
-      with:
-        project_id: ${{ inputs.neon-project-id }}
-        branch: ${{ inputs.neon-branch-name }}
-        api_key: ${{ inputs.neon-api-key }}
+    - name: Delete database branch
       if: ${{ always() && steps.create-neon-branch.outcome == 'success' }}
+      run: npm exec --yes --ignore-scripts --package=neonctl@2.22.0 -- neonctl branches delete "$BRANCH_NAME" --project-id "$PROJECT_ID"
+      shell: bash
+      env:
+        NEON_API_KEY: ${{ inputs.neon-api-key }}
+        NEON_API_HOST: https://console.neon.tech/api/v2
+        BRANCH_NAME: ${{ inputs.neon-branch-name }}
+        PROJECT_ID: ${{ inputs.neon-project-id }}
