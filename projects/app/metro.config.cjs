@@ -72,7 +72,21 @@ config = {
       }
 
       return context.resolveRequest(
-        context,
+        {
+          ...context,
+          unstable_logWarning: (message) => {
+            // TODO [@sentry/react-native@>=8.33.0]: Remove once Sentry supports Expo Router 58 (getsentry/sentry-react-native#6901).
+            if (
+              message.includes(`expo-router/build/global-state/router-store`) &&
+              message.includes(`defined in "exports"`) &&
+              message.includes(`file does not exist`)
+            ) {
+              return;
+            }
+
+            context.unstable_logWarning(message);
+          },
+        },
         resolverOverrides[moduleName]?.moduleName ?? moduleName,
         resolverOverrides[moduleName]?.platform ?? platform,
       );

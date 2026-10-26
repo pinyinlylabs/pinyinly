@@ -4,6 +4,8 @@ import { getDefaultSelectors } from "eslint-plugin-better-tailwindcss/defaults";
 import { builtinModules } from "node:module";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 
+const isCi = process.env.CI !== undefined && process.env.CI !== ``;
+
 export default defineConfig({
   $schema: `../../node_modules/oxlint/configuration_schema.json`,
   extends: [baseConfig],
@@ -20,9 +22,23 @@ export default defineConfig({
       name: `expo-typescript-eslint`,
       specifier: `@typescript-eslint/eslint-plugin`,
     },
+    {
+      name: `unicorn-js`,
+      specifier: `eslint-plugin-unicorn`,
+    },
     `@tanstack/eslint-plugin-query`,
   ],
   rules: {
+    "unicorn-js/expiring-todo-comments": [
+      `error`,
+      {
+        terms: [`todo`, `fixme`, `xxx`],
+        ignore: [],
+        // Check dates locally, but don't let an expired TODO break CI.
+        checkDates: !isCi,
+        allowWarningComments: true,
+      },
+    ],
     // "pinyinly/no-restricted-css-classes": [
     //   "error",
     //   {
