@@ -16,6 +16,7 @@ import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
+import { WikiHanziCharacterStrokeAnimation } from "./WikiHanziCharacterStrokeAnimation";
 
 export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
   hanzi,
@@ -66,9 +67,12 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
       </View>
       <View>
         <HeaderProvider.ScrollTrigger title={hanzi} />
-        <Text className="font-sans text-[48px] font-semibold text-fg-loud">
-          {hanzi}
-        </Text>
+        <View className="flex-row items-center gap-3">
+          <Text className="font-sans text-[48px] font-semibold text-fg-loud">
+            {hanzi}
+          </Text>
+          <WikiHanziCharacterStrokeAnimation hanzi={hanzi} />
+        </View>
       </View>
       <View className="mb-3">
         <WikiHanziMeaningsPanel hanzi={hanzi} />
