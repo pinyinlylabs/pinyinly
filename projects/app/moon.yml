@@ -28,6 +28,11 @@ tasks:
       - ~:buildEasUpdate
       - ~:buildVercel
 
+  smokecheck:
+    command: tsx --tsconfig tsconfig.node.json ./bin/smokecheck.ts
+    options:
+      cache: false
+
   buildIosDevClient:
     script: expo run:ios
     options:
