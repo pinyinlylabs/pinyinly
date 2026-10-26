@@ -35,6 +35,9 @@ inputs:
   vercel-token:
     description: Vercel authentication token.
     required: true
+  vercel-automation-bypass-secret:
+    description: Vercel deployment protection bypass secret for the smoke test.
+    required: true
 
 runs:
   using: composite
@@ -59,7 +62,18 @@ runs:
         DATABASE_URL: ${{ steps.create-neon-branch.outputs.db_url }}
 
     - name: 🚀 Deploy to Vercel (preview)
-      run: moon run app:deployVercel --color --force
+      id: deploy-vercel
+      run: |
+        set -euo pipefail
+        moon run app:deployVercel --color --force 2>&1 | tee "$RUNNER_TEMP/vercel-deploy.log"
+
+        deployment_url="$(grep -Eo 'https://[^[:space:]]+\.vercel\.app' "$RUNNER_TEMP/vercel-deploy.log" | tail -n 1 || true)"
+        if [ -z "$deployment_url" ]; then
+          echo "Could not find the Vercel preview URL in deployment output." >&2
+          exit 1
+        fi
+
+        echo "url=$deployment_url" >> "$GITHUB_OUTPUT"
       shell: bash
       env:
         EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ inputs.assets-cdn-base-url }}
@@ -71,6 +85,13 @@ runs:
         VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
         VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
         VERCEL_TOKEN: ${{ inputs.vercel-token }}
+
+    - name: 🔎 Smoke-test Vercel preview
+      env:
+        DEPLOYMENT_URL: ${{ steps.deploy-vercel.outputs.url }}
+        VERCEL_AUTOMATION_BYPASS_SECRET: ${{ inputs.vercel-automation-bypass-secret }}
+      run: moon run app:smokecheck -- "$DEPLOYMENT_URL"
+      shell: bash
 
     - name: Delete database branch
       if: ${{ always() && steps.create-neon-branch.outcome == 'success' }}

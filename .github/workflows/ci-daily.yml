@@ -35,6 +35,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_APP }}
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-automation-bypass-secret: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
   static-preview:
     runs-on: ubuntu-24.04

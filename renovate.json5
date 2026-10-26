@@ -98,6 +98,16 @@
       depTypeTemplate: "devDependencies",
     },
     {
+      description: "Update pinned packages used by app bin scripts",
+      customType: "regex",
+      managerFilePatterns: ["/^projects\\/app\\/bin\\/.*\\.ts$/"],
+      matchStrings: [
+        // @pyly-test: "`vercel@53.4.0`, // renovate: datasource=npm depName=vercel" datasource=npm depName=vercel currentValue=53.4.0
+        "`vercel@(?<currentValue>[^`]+)`,\\s*//\\s*renovate:\\s+datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)",
+      ],
+      depTypeTemplate: "devDependencies",
+    },
+    {
       description: "Update Vercel runtimes",
       customType: "regex",
       managerFilePatterns: ["//vercel.json$/"],

@@ -43,6 +43,7 @@ jobs:
               - 'projects/app/moon.yml'
               - 'projects/app/package.json'
               - 'projects/app/app.config.js'
+              - 'projects/app/api/**'
               - 'projects/app/babel.config.cjs'
               - 'projects/app/metro.config.cjs'
               - 'projects/app/postcss.config.mjs'
@@ -72,6 +73,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_APP }}
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-automation-bypass-secret: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
   static-preview:
     runs-on: ubuntu-24.04
