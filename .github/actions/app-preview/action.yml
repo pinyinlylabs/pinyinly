@@ -40,7 +40,7 @@ runs:
   using: composite
   steps:
     - name: 🏗 Create database branch for running tests
-      uses: neondatabase/create-branch-action@v6.3.1
+      uses: neondatabase/create-branch-action@6.3.1
       id: create-neon-branch
       with:
         api_key: ${{ inputs.neon-api-key }}
