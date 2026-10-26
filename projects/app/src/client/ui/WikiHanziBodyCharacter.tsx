@@ -13,6 +13,8 @@ import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziCharacterMultipleMeaningsHeaderOverview } from "./WikiHanziCharacterMultipleMeaningsHeaderOverview";
+import { useSkillSrsStates } from "./hooks/useSkillSrsStates";
+import { WikiHanziSkillLevelBreakdownBox } from "./WikiHanziSkillLevelBreakdown";
 
 export function WikiHanziBodyCharacter({
   hanzi,
@@ -22,6 +24,7 @@ export function WikiHanziBodyCharacter({
   onModalDismiss?: () => void;
 }) {
   const db = useDb();
+  const skillSrsStates = useSkillSrsStates();
 
   const { data: dictionaryEntry } = useLiveQuery(
     (q) =>
@@ -40,6 +43,7 @@ export function WikiHanziBodyCharacter({
         <WikiHanziCharacterMultipleMeaningsHeaderOverview
           hanzi={hanzi}
           hanziWord={hanziWord}
+          skillSrsStates={skillSrsStates}
           onModalDismiss={onModalDismiss}
         />
 
@@ -58,6 +62,13 @@ export function WikiHanziBodyCharacter({
         <WikiHanziSamePronunciation hanzi={hanzi} />
 
         <WikiAiExplanation hanzi={hanzi} />
+
+        {hanziWord == null ? null : (
+          <WikiHanziSkillLevelBreakdownBox
+            hanziWord={hanziWord}
+            skillSrsStates={skillSrsStates}
+          />
+        )}
 
         <WikiHanziExternalResources hanzi={hanzi} />
       </View>

@@ -13,6 +13,8 @@ import { WikiHanziSamePronunciation } from "./WikiHanziSamePronunciation";
 import { WikiHanziCharacterHeaderOverview } from "./WikiHanziCharacterHeaderOverview";
 import { WikiHanziCharacterChooseAMeaning } from "./WikiHanziCharacterChooseAMeaning";
 import { useState } from "react";
+import { useSkillSrsStates } from "./hooks/useSkillSrsStates";
+import { WikiHanziSkillLevelBreakdownBox } from "./WikiHanziSkillLevelBreakdown";
 
 export function WikiHanziBodyCharacterMultipleMeanings({
   hanzi,
@@ -22,6 +24,7 @@ export function WikiHanziBodyCharacterMultipleMeanings({
   onModalDismiss?: () => void;
 }) {
   const [hanziWord, setHanziWord] = useState<HanziWord | null>(null);
+  const skillSrsStates = useSkillSrsStates();
 
   return (
     <PylyMdxComponents>
@@ -29,6 +32,7 @@ export function WikiHanziBodyCharacterMultipleMeanings({
         <WikiHanziCharacterHeaderOverview
           hanzi={hanzi}
           hanziWord={hanziWord}
+          skillSrsStates={skillSrsStates}
           onModalDismiss={onModalDismiss}
         />
 
@@ -53,6 +57,13 @@ export function WikiHanziBodyCharacterMultipleMeanings({
         <WikiHanziSamePronunciation hanzi={hanzi} />
 
         <WikiAiExplanation hanzi={hanzi} />
+
+        {hanziWord == null ? null : (
+          <WikiHanziSkillLevelBreakdownBox
+            hanziWord={hanziWord}
+            skillSrsStates={skillSrsStates}
+          />
+        )}
 
         <WikiHanziExternalResources hanzi={hanzi} />
       </View>
