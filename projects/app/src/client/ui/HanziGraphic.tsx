@@ -5,7 +5,7 @@ import { Platform } from "react-native";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
 import { SvgPath } from "./SvgPath";
 
-const strokeAnimationDuration = 400;
+const strokeAnimationDuration = 300;
 const brushGrowthDuration = 100;
 const delayBetweenStrokes = 200;
 const delayBeforeStart = 250;
@@ -43,10 +43,11 @@ export function HanziGraphic(props: {
       width="256"
       height="256"
       className={props.className ?? `size-8 shrink-0`}
+      aria-hidden={props.accessibilityLabel == null ? true : undefined}
       accessible={
         Platform.OS === `web` ? undefined : props.accessibilityLabel != null
       }
-      accessibilityRole="image"
+      accessibilityRole={props.accessibilityLabel == null ? undefined : `image`}
       accessibilityLabel={props.accessibilityLabel}
     >
       <Defs>

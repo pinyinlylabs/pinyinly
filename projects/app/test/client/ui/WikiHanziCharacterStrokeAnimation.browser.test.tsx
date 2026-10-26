@@ -67,7 +67,7 @@ test(`shows the stroke animation and accessible replay control`, async () => {
   ]);
   expect(animatedPaths.map((path) => path.style.animationDelay)).toEqual([
     `250ms`,
-    `550ms`,
+    `750ms`,
   ]);
   expect(
     animatedPaths.map((path) =>
