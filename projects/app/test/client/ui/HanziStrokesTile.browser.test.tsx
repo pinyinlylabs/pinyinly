@@ -4,6 +4,7 @@ import { render } from "vitest-browser-react";
 import type { PropsWithChildren } from "react";
 import { assert, expect, test, vi } from "vitest";
 import { page } from "vitest/browser";
+import { skipToken } from "@tanstack/react-query";
 
 const { useQueryMock } = vi.hoisted(() => ({
   useQueryMock: vi.fn(),
@@ -60,6 +61,7 @@ test.each([
 });
 
 test(`uses the character fallback when the SVG query is disabled`, async () => {
+  useQueryMock.mockClear();
   useQueryMock.mockReturnValue({ data: undefined, isLoading: false });
   await render(
     <div data-testid="tile">
@@ -74,6 +76,12 @@ test(`uses the character fallback when the SVG query is disabled`, async () => {
 
   await expect.element(page.getByText(hanzi)).toBeInTheDocument();
   await expect.element(page.getByText(`Wood`)).toBeInTheDocument();
+  expect(useQueryMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      queryKey: [`skipQuery`],
+      queryFn: skipToken,
+    }),
+  );
   const slot = page.getByTestId(`tile`).element()
     .firstElementChild?.firstElementChild;
   assert(slot != null);

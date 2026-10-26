@@ -1,4 +1,9 @@
-import { hanziSvgPathsQuery, wikiPayloadQuery } from "@/client/query";
+import {
+  hanziSvgPathsQuery,
+  skipQuery,
+  wikiPayloadQuery,
+} from "@/client/query";
+import type { WikiPayload } from "@/client/query";
 import type { HanziCharacter } from "@/data/model";
 import type { SimilarCharacterReference } from "@/data/questions/hanziCharacterWriting";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
@@ -7,7 +12,11 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 export function useVisuallySimilarCharacterReferences(
   character: HanziCharacter | null,
 ) {
-  const wikiQuery = useQuery(wikiPayloadQuery(character));
+  const wikiQuery = useQuery(
+    character == null
+      ? skipQuery<WikiPayload | null>()
+      : wikiPayloadQuery(character),
+  );
   const visuallySimilar = wikiQuery.data?.visuallySimilar ?? [];
   const similarCharacterQueries = useQueries({
     queries: visuallySimilar.map((hanzi) => hanziSvgPathsQuery(hanzi)),

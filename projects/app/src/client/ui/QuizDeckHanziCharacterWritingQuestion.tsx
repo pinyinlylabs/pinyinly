@@ -1,10 +1,9 @@
-import { hanziSvgPathsQuery } from "@/client/query";
+import { hanziSvgPathsQuery, wikiPayloadQuery } from "@/client/query";
 import { RectButton } from "@/client/ui/RectButton";
 import { ScopedVariables } from "@/client/ui/ScopedVariables";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
-import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
 import {
   gradeHanziCharacterWritingQuestion,
   createHanziCharacterWritingGradeReportJson,
@@ -20,7 +19,7 @@ import { transformArphicSpaceSvgPath } from "@/util/svgFont";
 import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import * as Sentry from "@sentry/react-native";
 import { emptyArray } from "@pinyinly/lib/collections";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { useState } from "react";
 import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
@@ -49,32 +48,40 @@ export function QuizDeckHanziCharacterWritingQuestion({
     null,
   );
   const timer = useQuizTimer();
-  const { data: svgData, isLoading } = useQuery(
-    hanziSvgPathsQuery(question.hanzi),
-  );
+  const [{ data: svgData }, { data: wikiData }] = useSuspenseQueries({
+    queries: [
+      hanziSvgPathsQuery(question.hanzi),
+      wikiPayloadQuery(question.hanzi),
+    ],
+  });
+  const visuallySimilar = wikiData?.visuallySimilar ?? [];
+  const similarCharacterQueries = useSuspenseQueries({
+    queries: visuallySimilar.map((hanzi) => hanziSvgPathsQuery(hanzi)),
+  });
   const pinyinAudioSource =
     getAudioSourcesByPinyinMap().get(question.pinyin)?.[0] ?? null;
   const playPinyinSound = useSoundEffect(pinyinAudioSource);
-  const visuallySimilarData = useVisuallySimilarCharacterReferences(
-    question.hanzi,
-  );
   const medianPaths = (svgData?.medians ?? []).map(transformArphicSpaceSvgPath);
-  const similarCharacterReferences = visuallySimilarData.references;
-  const isSimilarCharacterDataLoading = visuallySimilarData.isLoading;
-  const missingSimilarCharacter = visuallySimilarData.missingCharacter ?? null;
+  const similarCharacterReferences = visuallySimilar.flatMap((hanzi, index) => {
+    const medians = similarCharacterQueries[index]?.data?.medians;
+    return medians == null || medians.length === 0
+      ? []
+      : [{ hanzi, medianPaths: medians.map(transformArphicSpaceSvgPath) }];
+  });
+  const missingSimilarCharacter =
+    visuallySimilar.find(
+      (_, index) =>
+        (similarCharacterQueries[index]?.data?.medians?.length ?? 0) === 0,
+    ) ?? null;
   const hasMissingSimilarCharacter = missingSimilarCharacter != null;
+  const canGrade = medianPaths.length > 0 && !hasMissingSimilarCharacter;
 
   const handleSubmit = () => {
     if (grade != null) {
       onNext();
       return;
     }
-    if (
-      medianPaths.length === 0 ||
-      isSimilarCharacterDataLoading ||
-      visuallySimilarData.hasWikiError ||
-      missingSimilarCharacter != null
-    ) {
+    if (!canGrade) {
       return;
     }
 
@@ -114,7 +121,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
   return (
     <QuizDeckQuestionSkeleton
       grade={grade ?? undefined}
-      isUserAnswerProvided={drawnStrokes.length > 0}
+      isUserAnswerProvided={drawnStrokes.length > 0 && canGrade}
       onSubmit={handleSubmit}
       onChangeAnswer={onChangeAnswer}
       onReportWrongGrade={
@@ -122,12 +129,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
           ? undefined
           : reportWrongGrade
       }
-      showIdkButton={
-        medianPaths.length > 0 &&
-        !isSimilarCharacterDataLoading &&
-        !visuallySimilarData.hasWikiError &&
-        missingSimilarCharacter == null
-      }
+      showIdkButton={canGrade}
       skill={question.skill}
     >
       <View className="mx-auto min-h-0 w-full max-w-[560px] flex-1 gap-4">
@@ -156,50 +158,44 @@ export function QuizDeckHanziCharacterWritingQuestion({
             </Text>
           </View>
         </View>
-        {isLoading || isSimilarCharacterDataLoading ? (
-          <Text className="text-muted-fg">Loading writing data…</Text>
-        ) : medianPaths.length === 0 ? (
+        {medianPaths.length === 0 ? (
           <Text className="text-danger">
             Writing data is unavailable for {question.hanzi}.
           </Text>
-        ) : visuallySimilarData.hasWikiError ? (
-          <Text className="text-danger">
-            Could not load similar-character data for {question.hanzi}.
-          </Text>
-        ) : hasMissingSimilarCharacter ? (
+        ) : null}
+        {hasMissingSimilarCharacter ? (
           <Text className="text-danger">
             {`Writing data is unavailable for similar character ${missingSimilarCharacter}.`}
           </Text>
-        ) : (
-          <View
+        ) : null}
+        <View
+          className="
+            -mx-4 min-h-0 w-[calc(100%+2rem)] flex-1 items-center justify-center
+
+            sm:mx-0 sm:w-full
+          "
+        >
+          <HanziWritingCanvas
             className="
-              -mx-4 min-h-0 w-[calc(100%+2rem)] flex-1 items-center justify-center
+              size-full max-h-full
 
-              sm:mx-0 sm:w-full
+              sm:aspect-square sm:w-auto sm:max-w-full
             "
-          >
-            <HanziWritingCanvas
-              className="
-                size-full max-h-full
-
-                sm:aspect-square sm:w-auto sm:max-w-full
-              "
-              disabled={grade != null}
-              guidedPaths={grade == null ? undefined : medianPaths}
-              drawnStrokes={drawnStrokes}
-              gradeResult={
-                grade == null ? null : grade.correct ? `correct` : `incorrect`
-              }
-              onStrokeStart={() => {
-                timer.pause();
-              }}
-              onStrokesChange={setDrawnStrokes}
-              onStrokeEnd={() => {
-                timer.resumeAfter(quizTimerIdleGraceMs);
-              }}
-            />
-          </View>
-        )}
+            disabled={grade != null}
+            guidedPaths={grade == null ? undefined : medianPaths}
+            drawnStrokes={drawnStrokes}
+            gradeResult={
+              grade == null ? null : grade.correct ? `correct` : `incorrect`
+            }
+            onStrokeStart={() => {
+              timer.pause();
+            }}
+            onStrokesChange={setDrawnStrokes}
+            onStrokeEnd={() => {
+              timer.resumeAfter(quizTimerIdleGraceMs);
+            }}
+          />
+        </View>
         {grade?.failure === `shape` ? (
           <Text className="text-danger">
             The overall shape does not match closely enough yet. Review the
