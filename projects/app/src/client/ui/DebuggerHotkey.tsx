@@ -1,5 +1,8 @@
 import { useHotkey } from "@tanstack/react-hotkeys";
-import { debuggerHotkey } from "@/client/ui/debuggerHotkeyDefinition";
+import {
+  DebuggerHotkey as debuggerHotkey,
+  isDebuggerHotkeyAvailable,
+} from "@/client/ui/DebuggerHotkey.utils";
 
 export function DebuggerHotkey() {
   useHotkey(
@@ -8,7 +11,7 @@ export function DebuggerHotkey() {
       // oxlint-disable-next-line no-debugger -- Pausing is the purpose of this inspector shortcut.
       debugger;
     },
-    { conflictBehavior: `allow` },
+    { enabled: isDebuggerHotkeyAvailable, conflictBehavior: `allow` },
   );
 
   return null;
