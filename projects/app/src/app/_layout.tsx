@@ -27,7 +27,6 @@ import Head from "expo-router/head";
 import { PortalProvider } from "react-native-teleport";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
-import { Platform } from "react-native";
 
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
@@ -70,7 +69,7 @@ export function UiProviders({ children }: PropsWithChildren) {
     <PortalProvider>
       <AudioContextProvider>
         <KeyboardShortcutProvider>
-          {__DEV__ && Platform.OS === `web` ? <DebuggerHotkey /> : null}
+          <DebuggerHotkey />
           <TooltipProvider>{children}</TooltipProvider>
         </KeyboardShortcutProvider>
       </AudioContextProvider>
