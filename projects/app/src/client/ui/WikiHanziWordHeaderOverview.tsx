@@ -37,19 +37,21 @@ export function WikiHanziWordHeaderOverview({
             skillSrsStates={skillSrsStates}
           />
         </View>
-        <HeaderProvider.ActionsPortal>
-          <WikiHanziBookmarkMenu
-            hanziWord={studyHanziWord}
-            hanzi={hanzi}
-            onModalDismiss={onModalDismiss}
-          />
-        </HeaderProvider.ActionsPortal>
       </View>
       <View>
         <HeaderProvider.ScrollTrigger title={hanzi} />
-        <Text className="font-sans text-[48px] font-semibold text-fg-loud">
-          {hanzi}
-        </Text>
+        <View className="flex-row items-center gap-3">
+          <Text className="min-w-0 flex-1 font-sans text-[48px] font-semibold text-fg-loud">
+            {hanzi}
+          </Text>
+          <HeaderProvider.ActionsPortal>
+            <WikiHanziBookmarkMenu
+              hanziWord={studyHanziWord}
+              hanzi={hanzi}
+              onModalDismiss={onModalDismiss}
+            />
+          </HeaderProvider.ActionsPortal>
+        </View>
       </View>
       <WikiHanziMeaningsPanel
         hanzi={hanzi}

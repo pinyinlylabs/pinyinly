@@ -39,7 +39,7 @@ export function WikiHanziBodyCharacter({
 
   return (
     <PylyMdxComponents>
-      <View className="flex-1 gap-10 bg-bg py-7">
+      <View className="flex-1 gap-10 bg-bg pb-7">
         <WikiHanziCharacterMultipleMeaningsHeaderOverview
           hanzi={hanzi}
           hanziWord={hanziWord}

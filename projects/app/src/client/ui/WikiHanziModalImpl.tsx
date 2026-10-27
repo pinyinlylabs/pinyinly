@@ -49,7 +49,7 @@ export function WikiHanziModalImpl({
             isBackgroundVisible={isHeaderBackgroundVisible}
           />
 
-          <View className="px-safe-or-4">
+          <View className="pt-7 px-safe-or-4">
             <WikiHanziBody hanzi={hanzi} onModalDismiss={onModalDismiss} />
           </View>
         </ScrollView>

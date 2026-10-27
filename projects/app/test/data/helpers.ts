@@ -76,13 +76,19 @@ export const date = (strings: TemplateStringsArray): Date => {
 export const 时 = date;
 
 export const mockSrsState = (
-  prevReviewAt: Date,
-  nextReviewAt: Date,
+  prevReviewAt: Date | number,
+  nextReviewAt: Date | number,
 ): SrsStateMockType => {
   return {
     kind: SrsKind.Mock,
-    prevReviewAt,
-    nextReviewAt,
+    prevReviewAt:
+      typeof prevReviewAt === `number`
+        ? new Date(Date.now() + prevReviewAt)
+        : prevReviewAt,
+    nextReviewAt:
+      typeof nextReviewAt === `number`
+        ? new Date(Date.now() + nextReviewAt)
+        : nextReviewAt,
   };
 };
 

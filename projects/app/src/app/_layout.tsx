@@ -12,6 +12,7 @@ import { routingIntegration } from "@/client/sentry";
 
 import { useAuth } from "@/client/auth";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
+import { DebuggerHotkey } from "@/client/ui/DebuggerHotkey";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import { KeyboardShortcutProvider } from "@/client/ui/KeyboardShortcutProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
@@ -68,6 +69,7 @@ export function UiProviders({ children }: PropsWithChildren) {
     <PortalProvider>
       <AudioContextProvider>
         <KeyboardShortcutProvider>
+          <DebuggerHotkey />
           <TooltipProvider>{children}</TooltipProvider>
         </KeyboardShortcutProvider>
       </AudioContextProvider>

@@ -16,7 +16,7 @@ const dictionary = await loadDictionary();
 const charactersJson = await loadCharactersJson();
 
 describe(`skillReviewQueue`, () => {
-  const { graph, skillSrsStates, latestSkillRatings, now } =
+  const { graph, skillSrsStates, recentSkillRatingEvents, now } =
     makeLargeSkillReviewFixture({
       skillCount: 1000,
       introducedCount: 800,
@@ -28,7 +28,7 @@ describe(`skillReviewQueue`, () => {
       skillReviewQueue({
         graph: new Map(),
         skillSrsStates,
-        latestSkillRatings,
+        recentSkillRatingEvents,
         dictionary,
         now,
         maxQueueItems: graph.size,
@@ -41,7 +41,7 @@ describe(`skillReviewQueue`, () => {
       skillReviewQueue({
         graph,
         skillSrsStates: new Map(),
-        latestSkillRatings,
+        recentSkillRatingEvents,
         dictionary,
         now,
         maxQueueItems: graph.size,
@@ -49,12 +49,12 @@ describe(`skillReviewQueue`, () => {
     }).run();
   });
 
-  test(`large dataset + empty latestSkillRatings`, async ({ bench }) => {
-    await bench(`large dataset + empty latestSkillRatings`, () => {
+  test(`large dataset + empty recentSkillRatingEvents`, async ({ bench }) => {
+    await bench(`large dataset + empty recentSkillRatingEvents`, () => {
       skillReviewQueue({
         graph,
         skillSrsStates,
-        latestSkillRatings: new Map(),
+        recentSkillRatingEvents: [],
         dictionary,
         now,
         maxQueueItems: graph.size,
@@ -67,7 +67,7 @@ describe(`skillReviewQueue`, () => {
       skillReviewQueue({
         graph,
         skillSrsStates,
-        latestSkillRatings,
+        recentSkillRatingEvents,
         dictionary,
         now,
         maxQueueItems: graph.size,

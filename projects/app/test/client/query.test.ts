@@ -2,10 +2,12 @@ import type {
   DictionaryCollectionEntry,
   HistoryPageCollection,
   HistoryPageData,
+  SkillReviewQueueHistoryCollection,
 } from "#client/query.js";
 import {
   historyPageCollection,
   historyPageData,
+  skillReviewQueueHistoryCollection,
   wikiPayloadSchema,
   hanziSvgPathsQueryWeb,
   hanziSvgPathsQueryNative,
@@ -329,6 +331,38 @@ describe(`historyPageCollection suite`, () => {
         hpi:刀:knife: ❌(pié) 00:03:15, ❌(pié) 00:02:10
         he:刀:knife: ❌(foo) 00:01:05, ❌(foo) 00:00:00"
       `);
+  });
+});
+
+describe(`skillReviewQueueHistoryCollection suite`, () => {
+  const test = testWithDb.extend<{
+    collection: SkillReviewQueueHistoryCollection;
+  }>({
+    collection: [
+      async ({ db }, use) => {
+        const collection = skillReviewQueueHistoryCollection(
+          db.skillRatingCollection,
+          db.hanziPinyinMistakeCollection,
+        );
+        await use(collection);
+      },
+      { scope: `test` },
+    ],
+  });
+
+  test(`projects rating events and typed-pinyin mistakes`, async ({
+    collection,
+    rizzle,
+  }) => {
+    await seedSkillReviews(rizzle, [`❌ hp:刀:knife (bí)`]);
+    await collection.preload();
+
+    expect(collection.toArray).toMatchObject([
+      {
+        skill: `hp:刀:knife`,
+        pinyinMistake: `bí`,
+      },
+    ]);
   });
 });
 
