@@ -4,11 +4,17 @@ import type {
   SrsStateType,
   HanziCharacter,
 } from "#data/model.ts";
-import { pinyinTextSchema, SkillKind, SrsKind } from "#data/model.ts";
+import {
+  pinyinTextSchema,
+  QuestionFlagKind,
+  SkillKind,
+  SrsKind,
+} from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
 import type {
-  LatestSkillRating,
+  SkillReviewQueueRatingEvent,
+  SkillReviewQueueRemediatorContext,
   RankNumber,
   RankRules,
   SkillLearningGraph,
@@ -30,9 +36,16 @@ import {
   rankToAbsoluteProgress,
   rankToWithinLevelProgress,
   rankName,
+  retryFailedSkillReviewQueueRemediator,
   skillKindFromSkill,
   skillLearningGraph,
+  skillReviewQueueRemediators,
   skillReviewQueue,
+  typedPinyinComponentSkillReviewQueueRemediator,
+  wrongPinyinFinalSkillReviewQueueRemediator,
+  wrongPinyinInitialSkillReviewQueueRemediator,
+  wrongPinyinToneSkillReviewQueueRemediator,
+  writingSkillReviewQueueRemediator,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
 import type { CharactersJson } from "#dictionary.ts";
@@ -54,6 +67,7 @@ import { testReplicacheOptions } from "#test/util/rizzleHelpers.ts";
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
+import ms from "ms";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 describe(`rankToAbsoluteProgress`, () => {
@@ -515,7 +529,6 @@ describe(`skillReviewQueue suite`, () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
           dictionary,
         }),
       ).toMatchObject({
@@ -545,7 +558,7 @@ describe(`skillReviewQueue suite`, () => {
         skillSrsStates: new Map([
           [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
         ]),
-        latestSkillRatings: latestSkillRatings(),
+        recentSkillRatingEvents: recentSkillRatingEvents(),
         dictionary,
       });
       expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -579,7 +592,7 @@ describe(`skillReviewQueue suite`, () => {
         skillSrsStates: new Map([
           [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
         ]),
-        latestSkillRatings: latestSkillRatings(),
+        recentSkillRatingEvents: recentSkillRatingEvents(),
         dictionary,
       });
       // `he:刀:knife` would normally be blocked but because it's already
@@ -618,7 +631,7 @@ describe(`skillReviewQueue suite`, () => {
       const queue = skillReviewQueue({
         graph,
         skillSrsStates: new Map(),
-        latestSkillRatings: latestSkillRatings(),
+        recentSkillRatingEvents: recentSkillRatingEvents(),
         dictionary,
       });
 
@@ -647,7 +660,7 @@ describe(`skillReviewQueue suite`, () => {
       const queue = skillReviewQueue({
         graph,
         skillSrsStates: new Map(),
-        latestSkillRatings: latestSkillRatings(),
+        recentSkillRatingEvents: recentSkillRatingEvents(),
         dictionary,
         directSkills: new Set([targetSkill]),
       });
@@ -671,7 +684,7 @@ describe(`skillReviewQueue suite`, () => {
       const commonOptions = {
         graph,
         directSkills: new Set([writingSkill]),
-        latestSkillRatings: latestSkillRatings(),
+        recentSkillRatingEvents: recentSkillRatingEvents(),
         dictionary,
       };
 
@@ -712,7 +725,7 @@ describe(`skillReviewQueue suite`, () => {
       const commonOptions = {
         graph,
         skillSrsStates: new Map<Skill, SrsStateType>(),
-        latestSkillRatings: latestSkillRatings(),
+        recentSkillRatingEvents: recentSkillRatingEvents(),
         dictionary,
       };
 
@@ -740,7 +753,7 @@ describe(`skillReviewQueue suite`, () => {
         [skillC, { skill: skillC, dependencies: new Set() }],
       ]);
       const skillSrsStates = new Map<Skill, SrsStateType>();
-      const latestSkillRatings = new Map<Skill, LatestSkillRating>();
+      const recentSkillRatingEvents: SkillReviewQueueRatingEvent[] = [];
 
       return {
         skillA,
@@ -748,19 +761,20 @@ describe(`skillReviewQueue suite`, () => {
         skillC,
         graph,
         skillSrsStates,
-        latestSkillRatings,
+        recentSkillRatingEvents,
       };
     }
 
     skillTest(
       `limits the number of items in the queue`,
       async ({ dictionary }) => {
-        const { graph, skillSrsStates, latestSkillRatings } = makeMockData();
+        const { graph, skillSrsStates, recentSkillRatingEvents } =
+          makeMockData();
 
         const queue = skillReviewQueue({
           graph,
           skillSrsStates,
-          latestSkillRatings,
+          recentSkillRatingEvents,
           dictionary,
           maxQueueItems: 1,
         });
@@ -777,12 +791,13 @@ describe(`skillReviewQueue suite`, () => {
     skillTest(
       `does not limit the queue when maxQueueItems is Infinity`,
       async ({ dictionary }) => {
-        const { graph, skillSrsStates, latestSkillRatings } = makeMockData();
+        const { graph, skillSrsStates, recentSkillRatingEvents } =
+          makeMockData();
 
         const queue = skillReviewQueue({
           graph,
           skillSrsStates,
-          latestSkillRatings,
+          recentSkillRatingEvents,
           dictionary,
           maxQueueItems: Infinity,
         });
@@ -812,7 +827,7 @@ describe(`skillReviewQueue suite`, () => {
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
 
@@ -842,7 +857,7 @@ describe(`skillReviewQueue suite`, () => {
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
 
@@ -1149,6 +1164,167 @@ describe(`skillReviewQueue suite`, () => {
     );
 
     describe(`retry logic`, () => {
+      function remediatorContext(
+        dictionary: Dictionary,
+      ): SkillReviewQueueRemediatorContext {
+        return {
+          dictionary,
+          config: {
+            writingSuccessfulAttempts: 5,
+            typedPinyinWrongInitial: {
+              initialSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+            typedPinyinWrongFinal: {
+              finalSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+            typedPinyinWrongTone: {
+              toneSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+          },
+        };
+      }
+
+      function failedEvent(
+        skill: Skill,
+        pinyinMistake?: string,
+      ): SkillReviewQueueRatingEvent {
+        return {
+          id: `test-${skill}`,
+          skill,
+          rating: Rating.Again,
+          createdAt: new Date(`2026-10-27T00:00:00.000Z`),
+          pinyinMistake,
+        };
+      }
+
+      skillTest(
+        `writing remediator creates a configurable repeated-practice plan`,
+        ({ dictionary }) => {
+          const writingSkill = hanziCharacterToWriting(`好` as HanziCharacter);
+          const ordinarySkill = `he:好:good` as Skill;
+          expect(
+            writingSkillReviewQueueRemediator(
+              failedEvent(writingSkill),
+              remediatorContext(dictionary),
+            ),
+          ).toEqual([{ skill: writingSkill, successfulAttempts: 5 }]);
+          expect(
+            writingSkillReviewQueueRemediator(
+              failedEvent(ordinarySkill),
+              remediatorContext(dictionary),
+            ),
+          ).toBeNull();
+        },
+      );
+
+      skillTest(
+        `wrong-initial remediator queues initial practice before typed pinyin`,
+        ({ dictionary }) => {
+          const typedSkill = `hp:好:good` as Skill;
+          expect(
+            wrongPinyinInitialSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `nǎo`),
+              remediatorContext(dictionary),
+            ),
+          ).toEqual([
+            { skill: `hpi:好:good`, successfulAttempts: 3 },
+            { skill: typedSkill, successfulAttempts: 1 },
+          ]);
+          expect(
+            wrongPinyinInitialSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `hàn`),
+              remediatorContext(dictionary),
+            ),
+          ).toBeNull();
+        },
+      );
+
+      skillTest(
+        `wrong-final remediator queues final practice before typed pinyin`,
+        ({ dictionary }) => {
+          const typedSkill = `hp:好:good` as Skill;
+          expect(
+            wrongPinyinFinalSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `hǎi`),
+              remediatorContext(dictionary),
+            ),
+          ).toEqual([
+            { skill: `hpf:好:good`, successfulAttempts: 3 },
+            { skill: typedSkill, successfulAttempts: 1 },
+          ]);
+          expect(
+            wrongPinyinFinalSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `hāo`),
+              remediatorContext(dictionary),
+            ),
+          ).toBeNull();
+        },
+      );
+
+      skillTest(
+        `wrong-tone remediator queues tone practice before typed pinyin`,
+        ({ dictionary }) => {
+          const typedSkill = `hp:好:good` as Skill;
+          expect(
+            wrongPinyinToneSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `hāo`),
+              remediatorContext(dictionary),
+            ),
+          ).toEqual([
+            { skill: `hpt:好:good`, successfulAttempts: 3 },
+            { skill: typedSkill, successfulAttempts: 1 },
+          ]);
+          expect(
+            wrongPinyinToneSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `hǎi`),
+              remediatorContext(dictionary),
+            ),
+          ).toBeNull();
+        },
+      );
+
+      skillTest(
+        `composes initial, final, and tone practice in that order`,
+        ({ dictionary }) => {
+          const typedSkill = `hp:好:good` as Skill;
+          expect(
+            typedPinyinComponentSkillReviewQueueRemediator(
+              failedEvent(typedSkill, `nàn`),
+              remediatorContext(dictionary),
+            ),
+          ).toEqual([
+            { skill: `hpi:好:good`, successfulAttempts: 3 },
+            { skill: `hpf:好:good`, successfulAttempts: 3 },
+            { skill: `hpt:好:good`, successfulAttempts: 3 },
+            { skill: typedSkill, successfulAttempts: 1 },
+          ]);
+        },
+      );
+
+      skillTest(
+        `fallback remediator retries unmatched failures once`,
+        ({ dictionary }) => {
+          const ordinarySkill = `he:好:good` as Skill;
+          expect(
+            retryFailedSkillReviewQueueRemediator(
+              failedEvent(ordinarySkill),
+              remediatorContext(dictionary),
+            ),
+          ).toEqual([{ skill: ordinarySkill, successfulAttempts: 1 }]);
+        },
+      );
+
+      test(`runs specialized remediators before the fallback`, () => {
+        expect(skillReviewQueueRemediators).toEqual([
+          writingSkillReviewQueueRemediator,
+          typedPinyinComponentSkillReviewQueueRemediator,
+          retryFailedSkillReviewQueueRemediator,
+        ]);
+      });
+
       skillTest(
         `skills that were just failed should stay first in queue (so you retry it immediately)`,
         async ({ decompositionData, dictionary, charactersJson }) => {
@@ -1167,7 +1343,7 @@ describe(`skillReviewQueue suite`, () => {
               [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
               [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "he:丿:slash": [Rating.Again, 时`-1m`],
             }),
             dictionary,
@@ -1209,9 +1385,14 @@ describe(`skillReviewQueue suite`, () => {
             skillSrsStates: new Map([
               [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
             ]),
-            latestSkillRatings: latestSkillRatings({
-              "he:丿:slash": [Rating.Again, 时`-1m`], // it's incorrect but was never introduced
-            }),
+            recentSkillRatingEvents: [
+              {
+                id: `never-introduced`,
+                skill: `he:丿:slash`,
+                rating: Rating.Again,
+                createdAt: new Date(),
+              },
+            ],
             dictionary,
           });
 
@@ -1251,18 +1432,13 @@ describe(`skillReviewQueue suite`, () => {
                 [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
                 [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
               ]),
-              latestSkillRatings: latestSkillRatings({
+              recentSkillRatingEvents: recentSkillRatingEvents({
                 "he:八:eight": [Rating.Again, 时`-1m`],
                 "he:丿:slash": [Rating.Again, 时`-2m`],
               }),
               dictionary,
             });
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-                  [
-                    "he:八:eight (⚠️ RETRY)",
-                    "he:丿:slash (⚠️ RETRY)",
-                  ]
-                `);
+            expect(prettyQueue(queue)).toEqual([`he:八:eight (⚠️ RETRY)`]);
             expect(queue).toMatchObject({
               blockedCount: 0,
               dueCount: 0,
@@ -1281,18 +1457,13 @@ describe(`skillReviewQueue suite`, () => {
                 [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
                 [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
               ]),
-              latestSkillRatings: latestSkillRatings({
+              recentSkillRatingEvents: recentSkillRatingEvents({
                 "he:八:eight": [Rating.Again, 时`-2m`],
                 "he:丿:slash": [Rating.Again, 时`-1m`],
               }),
               dictionary,
             });
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-                  [
-                    "he:丿:slash (⚠️ RETRY)",
-                    "he:八:eight (⚠️ RETRY)",
-                  ]
-                `);
+            expect(prettyQueue(queue)).toEqual([`he:丿:slash (⚠️ RETRY)`]);
             expect(queue).toMatchObject({
               blockedCount: 0,
               dueCount: 0,
@@ -1302,6 +1473,350 @@ describe(`skillReviewQueue suite`, () => {
               retryCount: 2,
             });
           }
+        },
+      );
+
+      skillTest(
+        `writing remediation counts correct repetitions and keeps progress after another mistake`,
+        ({ decompositionData, dictionary, charactersJson }) => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+          vi.setSystemTime(new Date(`2026-10-27T00:00:00.000Z`));
+          const now = new Date();
+          const writingSkill = hanziCharacterToWriting(`好` as HanziCharacter);
+          const graph = skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [writingSkill],
+          });
+          const event = (id: string, rating: Rating, minutesAgo: number) => ({
+            id,
+            skill: writingSkill,
+            rating,
+            createdAt: new Date(
+              now.getTime() - ms(`${minutesAgo}m` as ms.StringValue),
+            ),
+          });
+          const commonOptions = {
+            graph,
+            skillSrsStates: new Map<Skill, SrsStateType>([
+              [writingSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+            ]),
+            dictionary,
+            now,
+            remediationConfig: { writingSuccessfulAttempts: 5 },
+          };
+
+          const events = [
+            event(`1`, Rating.Again, 8),
+            event(`2`, Rating.Good, 7),
+            event(`2`, Rating.Good, 7),
+            event(`3`, Rating.Good, 6),
+            event(`4`, Rating.Again, 5),
+            event(`5`, Rating.Good, 4),
+            event(`6`, Rating.Good, 3),
+            event(`7`, Rating.Good, 2),
+          ];
+          const partialQueue = skillReviewQueue({
+            ...commonOptions,
+            recentSkillRatingEvents: events.slice(0, 7),
+          });
+          expect(prettyQueue(partialQueue)[0]).toBe(
+            `${writingSkill} (⚠️ RETRY)`,
+          );
+          expect(partialQueue.retryCount).toBe(1);
+
+          const completedQueue = skillReviewQueue({
+            ...commonOptions,
+            recentSkillRatingEvents: events,
+          });
+          expect(completedQueue.retryCount).toBe(0);
+        },
+      );
+
+      skillTest(
+        `wrong typed-pinyin initials schedule initial practice before typed-pinyin retry`,
+        ({ decompositionData, dictionary, charactersJson }) => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+          vi.setSystemTime(new Date(`2026-10-27T00:00:00.000Z`));
+          const now = new Date();
+          const typedSkill = `hp:好:good` as Skill;
+          const initialSkill = `hpi:好:good` as Skill;
+          const graph = skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [typedSkill],
+          });
+
+          const remediationConfig = {
+            typedPinyinWrongInitial: {
+              initialSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+          };
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map<Skill, SrsStateType>([
+              [typedSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+            ]),
+            dictionary,
+            now,
+            recentSkillRatingEvents: [
+              {
+                id: `1`,
+                skill: typedSkill,
+                rating: Rating.Again,
+                createdAt: new Date(now.getTime() - ms(`3m`)),
+                pinyinMistake: `nǎo`,
+              },
+            ],
+            remediationConfig,
+          });
+
+          expect(prettyQueue(queue)[0]).toBe(`${initialSkill} (⚠️ RETRY)`);
+
+          const sameInitialQueue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map<Skill, SrsStateType>([
+              [typedSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+            ]),
+            dictionary,
+            now,
+            recentSkillRatingEvents: [
+              {
+                id: `2`,
+                skill: typedSkill,
+                rating: Rating.Again,
+                createdAt: new Date(now.getTime() - ms(`3m`)),
+                pinyinMistake: `hàn`,
+              },
+            ],
+            remediationConfig,
+          });
+
+          expect(prettyQueue(sameInitialQueue)[0]).toBe(
+            `${typedSkill} (⚠️ RETRY)`,
+          );
+        },
+      );
+
+      skillTest(
+        `replays configured initial, final, and tone practice in order`,
+        ({ decompositionData, dictionary, charactersJson }) => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+          vi.setSystemTime(new Date(`2026-10-27T00:00:00.000Z`));
+          const now = new Date();
+          const typedSkill = `hp:好:good` as Skill;
+          const initialSkill = `hpi:好:good` as Skill;
+          const finalSkill = `hpf:好:good` as Skill;
+          const toneSkill = `hpt:好:good` as Skill;
+          const graph = skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [typedSkill],
+          });
+          const remediationConfig = {
+            typedPinyinWrongInitial: {
+              initialSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+            typedPinyinWrongFinal: {
+              finalSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+            typedPinyinWrongTone: {
+              toneSuccessfulAttempts: 3,
+              typedSuccessfulAttempts: 1,
+            },
+          };
+          const event = (
+            id: string,
+            skill: Skill,
+            rating: Rating,
+            minutesAgo: number,
+            pinyinMistake?: string,
+          ) => ({
+            id,
+            skill,
+            rating,
+            createdAt: new Date(now.getTime() - ms(`${minutesAgo}m`)),
+            pinyinMistake,
+          });
+          const events = [
+            event(`1`, typedSkill, Rating.Again, 12, `nàn`),
+            event(`2`, initialSkill, Rating.Good, 11),
+            event(`3`, initialSkill, Rating.Good, 10),
+            event(`4`, initialSkill, Rating.Good, 9),
+            event(`5`, finalSkill, Rating.Good, 8),
+            event(`6`, finalSkill, Rating.Good, 7),
+            event(`7`, finalSkill, Rating.Good, 6),
+            event(`8`, toneSkill, Rating.Good, 5),
+            event(`9`, toneSkill, Rating.Good, 4),
+            event(`10`, toneSkill, Rating.Good, 3),
+          ];
+          const queueOptions = {
+            graph,
+            skillSrsStates: new Map<Skill, SrsStateType>([
+              [typedSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+            ]),
+            dictionary,
+            now,
+            remediationConfig,
+          };
+
+          expect(
+            prettyQueue(
+              skillReviewQueue({
+                ...queueOptions,
+                recentSkillRatingEvents: events.slice(0, 1),
+              }),
+            )[0],
+          ).toBe(`${initialSkill} (⚠️ RETRY)`);
+          expect(
+            prettyQueue(
+              skillReviewQueue({
+                ...queueOptions,
+                recentSkillRatingEvents: events.slice(0, 4),
+              }),
+            )[0],
+          ).toBe(`${finalSkill} (⚠️ RETRY)`);
+          expect(
+            prettyQueue(
+              skillReviewQueue({
+                ...queueOptions,
+                recentSkillRatingEvents: events.slice(0, 7),
+              }),
+            )[0],
+          ).toBe(`${toneSkill} (⚠️ RETRY)`);
+          expect(
+            prettyQueue(
+              skillReviewQueue({
+                ...queueOptions,
+                recentSkillRatingEvents: events,
+              }),
+            )[0],
+          ).toBe(`${typedSkill} (⚠️ RETRY)`);
+        },
+      );
+
+      skillTest(
+        `nested remediation resumes its parent and repeated initial errors do not recurse`,
+        ({ decompositionData, dictionary, charactersJson }) => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+          vi.setSystemTime(new Date(`2026-10-27T00:00:00.000Z`));
+          const now = new Date();
+          const typedSkill = `hp:好:good` as Skill;
+          const initialSkill = `hpi:好:good` as Skill;
+          const unrelatedSkill = `he:刀:knife` as Skill;
+          const graph = skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [typedSkill, unrelatedSkill],
+          });
+          const ratingEvent = (
+            id: string,
+            skill: Skill,
+            rating: Rating,
+            minutesAgo: number,
+            pinyinMistake?: string,
+          ) => ({
+            id,
+            skill,
+            rating,
+            createdAt: new Date(
+              now.getTime() - ms(`${minutesAgo}m` as ms.StringValue),
+            ),
+            pinyinMistake,
+          });
+          const config = {
+            typedPinyinWrongInitial: {
+              initialSuccessfulAttempts: 2,
+              typedSuccessfulAttempts: 1,
+            },
+          };
+          const options = {
+            graph,
+            skillSrsStates: new Map<Skill, SrsStateType>([
+              [typedSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+              [unrelatedSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+            ]),
+            recentSkillRatingEvents: recentSkillRatingEvents(),
+            dictionary,
+            now,
+            remediationConfig: config,
+          };
+
+          const whileNested = skillReviewQueue({
+            ...options,
+            recentSkillRatingEvents: [
+              ratingEvent(`1`, typedSkill, Rating.Again, 6, `nǎo`),
+              ratingEvent(`2`, initialSkill, Rating.Again, 5),
+              ratingEvent(`3`, unrelatedSkill, Rating.Again, 4),
+              ratingEvent(`4`, unrelatedSkill, Rating.Good, 3),
+              ratingEvent(`5`, initialSkill, Rating.Good, 2),
+            ],
+          });
+          expect(prettyQueue(whileNested)[0]).toBe(
+            `${initialSkill} (⚠️ RETRY)`,
+          );
+
+          const parentResumed = skillReviewQueue({
+            ...options,
+            recentSkillRatingEvents: [
+              ratingEvent(`1`, typedSkill, Rating.Again, 6, `nǎo`),
+              ratingEvent(`2`, initialSkill, Rating.Again, 5),
+              ratingEvent(`3`, unrelatedSkill, Rating.Again, 4),
+              ratingEvent(`4`, unrelatedSkill, Rating.Good, 3),
+              ratingEvent(`5`, initialSkill, Rating.Good, 2),
+              ratingEvent(`6`, initialSkill, Rating.Good, 1),
+            ],
+          });
+          expect(prettyQueue(parentResumed)[0]).toBe(
+            `${typedSkill} (⚠️ RETRY)`,
+          );
+        },
+      );
+
+      skillTest(
+        `remediation ignores failures older than its rolling history window`,
+        ({ decompositionData, dictionary, charactersJson }) => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+          vi.setSystemTime(new Date(`2026-10-27T00:00:00.000Z`));
+          const now = new Date();
+          const writingSkill = hanziCharacterToWriting(`好` as HanziCharacter);
+          const graph = skillLearningGraph({
+            decompositionData,
+            charactersJson,
+            dictionary,
+            targetSkills: [writingSkill],
+          });
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map<Skill, SrsStateType>([
+              [writingSkill, mockSrsState(ms(`-1d`), ms(`-5m`))],
+            ]),
+            dictionary,
+            now,
+            recentSkillRatingEvents: [
+              {
+                id: `old`,
+                skill: writingSkill,
+                rating: Rating.Again,
+                createdAt: new Date(now.getTime() - ms(`25h`)),
+              },
+            ],
+            remediationConfig: { writingSuccessfulAttempts: 5 },
+          });
+
+          expect(
+            queue.items.some(
+              ({ skill, flag }) =>
+                skill === writingSkill && flag?.kind === QuestionFlagKind.Retry,
+            ),
+          ).toBe(false);
         },
       );
     });
@@ -1344,7 +1859,7 @@ describe(`skillReviewQueue suite`, () => {
                 },
               ],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
             }),
             dictionary,
@@ -1390,7 +1905,7 @@ describe(`skillReviewQueue suite`, () => {
               [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
               // User does not have sufficient pronunciation competency (rank < 1)
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "he:好:good": [Rating.Good, 时`-1m`],
             }),
             dictionary,
@@ -1438,7 +1953,7 @@ describe(`skillReviewQueue suite`, () => {
                 },
               ],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "he:好:good": [Rating.Again, 时`-1m`], // No recent successful reviews - failed review instead
             }),
             dictionary,
@@ -1483,7 +1998,7 @@ describe(`skillReviewQueue suite`, () => {
                 },
               ],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
             }),
             dictionary,
@@ -1516,7 +2031,7 @@ describe(`skillReviewQueue suite`, () => {
             [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
             [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
           ]),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
         expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -1552,7 +2067,7 @@ describe(`skillReviewQueue suite`, () => {
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
         expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -1585,7 +2100,7 @@ describe(`skillReviewQueue suite`, () => {
             [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
             [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
           ]),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
         expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -1647,7 +2162,7 @@ describe(`skillReviewQueue suite`, () => {
           skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
+            recentSkillRatingEvents: recentSkillRatingEvents(),
             dictionary,
           }),
         ).toMatchObject({
@@ -1669,7 +2184,7 @@ describe(`skillReviewQueue suite`, () => {
               [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
               [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
             ]),
-            latestSkillRatings: latestSkillRatings(),
+            recentSkillRatingEvents: recentSkillRatingEvents(),
             dictionary,
           }),
         ).toMatchObject({
@@ -1705,7 +2220,7 @@ describe(`skillReviewQueue suite`, () => {
               [`het:好:good`, fsrsSrsState(时`-1s`, 时`1d`, Rating.Good)],
               [`het:好:like`, fsrsSrsState(时`-1d`, 时`5m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               // TODO refactor to combine with `skillSrsStates` to keep them consistent.
               "het:好:good": [Rating.Good, 时`-1s`],
               // "het:好:like": [Rating.Good, 时`-1d`],
@@ -1745,7 +2260,7 @@ describe(`skillReviewQueue suite`, () => {
               [`het:任:appoint`, fsrsSrsState(时`-10s`, 时`6m`, Rating.Good)],
               [`het:任:duty`, fsrsSrsState(时`-1d`, 时`7m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               // TODO refactor to combine with `skillSrsStates` to keep them consistent.
               "het:任:any": [Rating.Good, 时`-5s`],
               "het:任:appoint": [Rating.Good, 时`-10s`],
@@ -1782,7 +2297,7 @@ describe(`skillReviewQueue suite`, () => {
             skillSrsStates: new Map([
               [`het:任:any`, fsrsSrsState(时`-5s`, 时`5m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               // TODO refactor to combine with `skillSrsStates` to keep them consistent.
               "het:任:any": [Rating.Good, 时`-5s`],
             }),
@@ -1823,7 +2338,7 @@ describe(`skillReviewQueue suite`, () => {
               [`hp:几:howMany`, fsrsSrsState(时`-1s`, 时`1d`, Rating.Good)],
               [`hp:几:table`, fsrsSrsState(时`-1d`, 时`5m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "hp:几:howMany": [Rating.Good, 时`-1s`],
             }),
             dictionary,
@@ -1860,7 +2375,7 @@ describe(`skillReviewQueue suite`, () => {
             skillSrsStates: new Map([
               [`hp:几:howMany`, fsrsSrsState(时`-5s`, 时`5m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "hp:几:howMany": [Rating.Good, 时`-5s`],
             }),
             dictionary,
@@ -1901,7 +2416,7 @@ describe(`skillReviewQueue suite`, () => {
               [`hp:点:oClock`, fsrsSrsState(时`-1s`, 时`1d`, Rating.Good)],
               [`hp:点:point`, fsrsSrsState(时`-1d`, 时`5m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings({
+            recentSkillRatingEvents: recentSkillRatingEvents({
               "hp:点:oClock": [Rating.Good, 时`-1s`],
             }),
             dictionary,
@@ -1935,7 +2450,7 @@ describe(`skillReviewQueue suite`, () => {
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
 
@@ -1958,7 +2473,7 @@ describe(`skillReviewQueue suite`, () => {
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
 
@@ -1992,7 +2507,7 @@ describe(`skillReviewQueue suite`, () => {
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
+          recentSkillRatingEvents: recentSkillRatingEvents(),
           dictionary,
         });
         expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -2038,7 +2553,7 @@ describe(`skillReviewQueue suite`, () => {
           const queue = skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
+            recentSkillRatingEvents: recentSkillRatingEvents(),
             dictionary,
           });
 
@@ -2058,7 +2573,7 @@ describe(`skillReviewQueue suite`, () => {
             skillSrsStates: new Map([
               [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings(),
+            recentSkillRatingEvents: recentSkillRatingEvents(),
             dictionary,
           });
           expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -2086,7 +2601,7 @@ describe(`skillReviewQueue suite`, () => {
               [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
               [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
             ]),
-            latestSkillRatings: latestSkillRatings(),
+            recentSkillRatingEvents: recentSkillRatingEvents(),
             dictionary,
           });
           expect(prettyQueue(queue)).toMatchInlineSnapshot(`
@@ -2992,7 +3507,7 @@ describe(`makeLargeSkillReviewFixture suite`, () => {
   test(`it works with skillReviewQueue`, async () => {
     const dictionary = await loadDictionary();
 
-    const { graph, skillSrsStates, latestSkillRatings, now } =
+    const { graph, skillSrsStates, recentSkillRatingEvents, now } =
       makeLargeSkillReviewFixture({
         skillCount: 1000,
         introducedCount: 800,
@@ -3001,13 +3516,13 @@ describe(`makeLargeSkillReviewFixture suite`, () => {
 
     expect(graph.size).toBe(1000);
     expect(skillSrsStates.size).toBe(800);
-    expect(latestSkillRatings.size).toBe(600);
+    expect(recentSkillRatingEvents).toHaveLength(600);
     expect(now).toEqual(new Date(`2025-01-01T00:00:00.000Z`));
 
     skillReviewQueue({
       graph,
       skillSrsStates,
-      latestSkillRatings,
+      recentSkillRatingEvents,
       dictionary,
       now,
       maxQueueItems: graph.size,
@@ -3015,21 +3530,19 @@ describe(`makeLargeSkillReviewFixture suite`, () => {
   });
 });
 
-type LatestSkillRatingSpec = [rating: Rating, createdAt: Date];
+type SkillReviewQueueRatingEventSpec = [rating: Rating, createdAt: Date];
 
-function latestSkillRatings(
-  spec: Record<Skill, LatestSkillRatingSpec> = {},
-): Map<Skill, LatestSkillRating> {
-  const result = new Map<Skill, LatestSkillRating>();
-
-  for (const [skill, [rating, createdAt]] of Object.entries(spec) as [
-    Skill,
-    LatestSkillRatingSpec,
-  ][]) {
-    result.set(skill, { skill, rating, createdAt });
-  }
-
-  return result;
+function recentSkillRatingEvents(
+  spec: Record<Skill, SkillReviewQueueRatingEventSpec> = {},
+): SkillReviewQueueRatingEvent[] {
+  return (
+    Object.entries(spec) as [Skill, SkillReviewQueueRatingEventSpec][]
+  ).map(([skill, [rating, createdAt]], index) => ({
+    id: `test-${index}-${skill}`,
+    skill,
+    rating,
+    createdAt,
+  }));
 }
 
 /**
@@ -3070,16 +3583,18 @@ async function simulateSkillReviews({
   for await (const [, v] of rizzle.queryPaged.skillState.scan()) {
     skillSrsStates.set(v.skill, v.srs);
   }
-  const latestSkillRatings = new Map<Skill, LatestSkillRating>();
+  const recentSkillRatingEvents: SkillReviewQueueRatingEvent[] = [];
   for await (const [, v] of rizzle.queryPaged.skillRating.byCreatedAt()) {
-    latestSkillRatings.set(v.skill, v);
+    if (v.trashedAt == null) {
+      recentSkillRatingEvents.push(v);
+    }
   }
 
   // Compute the review queue.
   return skillReviewQueue({
     graph,
     skillSrsStates,
-    latestSkillRatings,
+    recentSkillRatingEvents,
     dictionary,
   });
 }
@@ -3099,7 +3614,7 @@ export function makeLargeSkillReviewFixture({
 }): {
   graph: SkillLearningGraph;
   skillSrsStates: Map<Skill, SrsStateType>;
-  latestSkillRatings: Map<Skill, LatestSkillRating>;
+  recentSkillRatingEvents: SkillReviewQueueRatingEvent[];
   skills: readonly Skill[];
   now: Date;
 } {
@@ -3145,15 +3660,16 @@ export function makeLargeSkillReviewFixture({
     skillSrsStates.set(skill, mockSrsState(prevReviewAt, nextReviewAt));
   }
 
-  const latestSkillRatings = new Map<Skill, LatestSkillRating>();
+  const recentSkillRatingEvents: SkillReviewQueueRatingEvent[] = [];
   for (let index = 0; index < ratingCount; index++) {
     const skill = skills[index % skills.length]!;
-    latestSkillRatings.set(skill, {
+    recentSkillRatingEvents.push({
+      id: `fixture-${index}`,
       skill,
       rating: index % 4 === 0 ? Rating.Again : Rating.Good,
       createdAt: new Date(now.getTime() - index * 90 * 1000),
     });
   }
 
-  return { graph, skillSrsStates, latestSkillRatings, skills, now };
+  return { graph, skillSrsStates, recentSkillRatingEvents, skills, now };
 }

@@ -495,6 +495,58 @@ export const splitPinyinUnit = memoize1(function splitPinyinUnit(
   return splitPinyinUnitWithChart(pinyinUnit, chart);
 });
 
+export type PinyinDiffMask = number;
+export const PinyinDiffMask = {
+  None: 0,
+  Initial: 1,
+  Final: 2,
+  Tone: 4,
+};
+
+export function pinyinDiff(actual: string, expected: string): PinyinDiffMask {
+  const actualUnits = matchAllPinyinUnits(actual);
+  const expectedUnits = matchAllPinyinUnits(expected);
+  if (
+    expectedUnits.length === 0 ||
+    expectedUnits.length !== actualUnits.length
+  ) {
+    return PinyinDiffMask.None;
+  }
+
+  const splitUnit = (unit: string) =>
+    splitPinyinUnit(
+      /[0-5]$/u.test(unit)
+        ? pinyinUnitNumericToDiacritic(unit)
+        : (unit as PinyinUnit),
+    );
+  let hasInitialDiff = false;
+  let hasFinalDiff = false;
+  let hasToneDiff = false;
+  for (const [index, expectedUnit] of expectedUnits.entries()) {
+    const actualUnit = actualUnits[index];
+    if (actualUnit == null) {
+      return PinyinDiffMask.None;
+    }
+
+    const expectedParts = splitUnit(expectedUnit);
+    const actualParts = splitUnit(actualUnit);
+    if (expectedParts == null || actualParts == null) {
+      return PinyinDiffMask.None;
+    }
+
+    hasInitialDiff ||=
+      expectedParts.initialSoundId !== actualParts.initialSoundId;
+    hasFinalDiff ||= expectedParts.finalSoundId !== actualParts.finalSoundId;
+    hasToneDiff ||= expectedParts.tone !== actualParts.tone;
+  }
+
+  return (
+    (hasInitialDiff ? PinyinDiffMask.Initial : 0) |
+    (hasFinalDiff ? PinyinDiffMask.Final : 0) |
+    (hasToneDiff ? PinyinDiffMask.Tone : 0)
+  );
+}
+
 /**
  * Convenience wrapper around @see splitPinyinUnit.
  */
@@ -945,6 +997,7 @@ export function matchAllPinyinUnits(input: PinyinText): PinyinUnit[];
 export function matchAllPinyinUnits(
   input: PinyinNumericText,
 ): PinyinNumericUnit[];
+export function matchAllPinyinUnits(input: string): string[];
 export function matchAllPinyinUnits(input: string): string[] {
   const result = [];
   for (const { 0: text } of input.matchAll(matchAllPinyinRegExp)) {

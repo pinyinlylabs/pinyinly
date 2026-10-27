@@ -62,3 +62,30 @@ ensures:
 
 **Future Consideration:** Mistakes may still be included in `skillRating` for specific skills, but
 this would be supplementary and not the primary mechanism for tracking errors.
+
+## Decision: Reconstructing review remediation from recent ratings
+
+**Problem:** A retry derived only from the latest rating cannot represent several successful
+practice attempts or preserve an unfinished practice goal when another skill needs remediation.
+
+**Solution:** Reconstruct ordered remediation plans by replaying the user's rating history from the
+last 24 hours. Plans consist of skill steps with a required number of successful attempts, and
+unfinished work is reconstructed after app restarts rather than stored in a separate mutable queue.
+A prioritized array of remediator strategies creates plans; the general retry strategy is the
+fallback, so ordinary retries and specialized practice share the same history-replay behavior.
+Reactive review selection derives its most recent-per-skill view from the same rating events rather
+than a separate latest-rating collection. A failure in the active skill does not recursively add the
+same skill; failures in another skill temporarily suspend the current plan and resume it once the
+nested plan is complete. Further mistakes in the active skill do not erase successful attempts
+already completed.
+
+Typed-pinyin mistakes are categorized together as initial, final, and tone bit flags so future
+remediators can target any of those dimensions. The skill queue reads projected rating events from
+its own incremental live query collection rather than reusing the history-page collection.
+
+The current queue configuration uses five successful writing attempts after a writing mistake and
+three successful focused attempts before retrying typed pinyin after an initial, final, or tone
+mistake. When multiple pinyin components are wrong, their configured practice steps run in initial,
+final, then tone order before one typed-pinyin retry. If matching rules request different typed
+retry counts, the largest configured count is used. Replays older than 24 hours do not activate
+remediation.

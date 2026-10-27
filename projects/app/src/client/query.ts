@@ -20,7 +20,7 @@ import {
   characterJsonSchema,
   hanziCharacterSchema,
 } from "@/data/model";
-import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
+import type { Rizzle } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
 import { hsk30LevelToNumber } from "@/data/hsk";
@@ -133,6 +133,44 @@ export function historyPageCollection(
 }
 
 export type HistoryPageCollection = ReturnType<typeof historyPageCollection>;
+
+export function skillReviewQueueHistoryCollection(
+  skillRatingsCollection: SkillRatingCollection,
+  hanziPinyinMistakesCollection: HanziPinyinMistakeCollection,
+) {
+  const startDate = subDays(new Date(), 7);
+
+  const collection = createLiveQueryCollection((q) =>
+    q
+      .from({ skillRating: skillRatingsCollection })
+      .leftJoin(
+        { hanziPinyinMistake: hanziPinyinMistakesCollection },
+        ({ skillRating, hanziPinyinMistake }) =>
+          eq(skillRating.reviewId, hanziPinyinMistake.reviewId),
+      )
+      .where(({ skillRating }) =>
+        and(
+          gte(skillRating.createdAt, startDate),
+          isNullish(skillRating.trashedAt),
+        ),
+      )
+      .select(({ skillRating, hanziPinyinMistake }) => ({
+        id: skillRating.id,
+        skill: skillRating.skill,
+        rating: skillRating.rating,
+        createdAt: skillRating.createdAt,
+        pinyinMistake: hanziPinyinMistake.pinyin,
+      })),
+  );
+  collection.id = `skillReviewQueueHistory`;
+  return collection;
+}
+
+export type SkillReviewQueueHistoryCollection = ReturnType<
+  typeof skillReviewQueueHistoryCollection
+>;
+export type SkillReviewQueueHistoryEvent =
+  CollectionOutput<SkillReviewQueueHistoryCollection>;
 
 export function historyPageData(
   historyCollection: CollectionOutput<HistoryPageCollection>[],
@@ -482,13 +520,6 @@ export type TargetSkillsCollection = Collection<
   { skill: Skill; order: number },
   Skill
 >;
-
-/**
- * A collection that tracks the most recent {@link SkillRating} for each
- * {@link Skill}. This can be used to determine whether a skill needs to be
- * repeated.
- */
-export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
 export type SettingCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.setting>,
@@ -1145,87 +1176,6 @@ export const staticCollectionOptions = <
   getKey,
 });
 
-export const latestSkillRatingCollectionOptions = ({
-  rizzle,
-}: {
-  rizzle: Rizzle;
-}): CollectionConfig<SkillRating, Skill> => ({
-  autoIndex: `eager`,
-  defaultIndexType: BTreeIndex,
-  id: `latestSkillRatings`,
-  sync: {
-    rowUpdateMode: `full`,
-    sync: (params) => {
-      const { begin, write, commit, markReady, collection } = params;
-      const entity = currentSchema.skillRating;
-
-      const unsubscribe = rizzle.replicache.experimentalWatch(
-        (ops) => {
-          begin();
-
-          const pendingTxLatest = new Map<Skill, SkillRating>();
-
-          for (const op of ops) {
-            switch (op.op) {
-              case `change`:
-              case `add`: {
-                const value = entity.unmarshalValue(
-                  op.newValue as RizzleEntityMarshaled<typeof entity>,
-                );
-
-                const existing =
-                  collection.get(value.skill) ??
-                  pendingTxLatest.get(value.skill);
-
-                // Don't add trashed ratings.
-                if (value.trashedAt != null) {
-                  if (op.op === `change` && existing?.id === value.id) {
-                    // If the trashed rating was the existing latest, delete it.
-                    // This is a hack and can probably cause some quirks but it
-                    // shouldn't really matter. The more correct way would be to
-                    // re-scan all ratings for the skill to find the latest
-                    // untrashed one, but that would be async and a bit
-                    // performance intensive and probably not worth it.
-                    write({ type: `delete`, value: existing });
-                  }
-                  continue;
-                }
-
-                if (existing == null) {
-                  write({ type: `insert`, value });
-                  pendingTxLatest.set(value.skill, value);
-                } else if (existing.createdAt < value.createdAt) {
-                  write({ type: `update`, value });
-                  pendingTxLatest.set(value.skill, value);
-                }
-                break;
-              }
-              case `del`: {
-                console.error(`unsupported op=${op.op} for latestSkillRatings`);
-                break;
-              }
-            }
-          }
-
-          // TODO: maybe await this?
-          void commit();
-        },
-        {
-          prefix: entity.keyPrefix,
-          initialValuesInFirstDiff: true,
-        },
-      );
-
-      markReady();
-
-      return () => {
-        unsubscribe();
-      };
-    },
-  },
-  getKey: (item) => item.skill,
-});
-
 export function makeDb(rizzle: Rizzle) {
   const skillStateCollection: SkillStateCollection = createCollection(
     rizzleCollectionOptions({
@@ -1275,9 +1225,6 @@ export function makeDb(rizzle: Rizzle) {
       getKey: (item) => item.skill,
     }),
   );
-
-  const latestSkillRatingsCollection: LatestSkillRatingsCollection =
-    createCollection(latestSkillRatingCollectionOptions({ rizzle }));
 
   const settingCollection: SettingCollection = createCollection(
     rizzleCollectionOptions({
@@ -1515,7 +1462,6 @@ export function makeDb(rizzle: Rizzle) {
     userDictionary,
     hanziGlossMistakeCollection,
     hanziPinyinMistakeCollection,
-    latestSkillRatingsCollection,
     skillRatingCollection,
     skillStateCollection,
     targetSkillsCollection,
