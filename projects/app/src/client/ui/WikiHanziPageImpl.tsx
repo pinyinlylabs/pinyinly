@@ -4,7 +4,13 @@ import { WikiHanziBody } from "./WikiHanziBody";
 
 export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
   return (
-    <View className="pb-10">
+    <View
+      className={`
+        pt-3 pb-10
+
+        sm:pt-7
+      `}
+    >
       <WikiHanziBody hanzi={hanzi} />
     </View>
   );
