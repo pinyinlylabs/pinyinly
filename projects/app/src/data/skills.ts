@@ -32,8 +32,10 @@ import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
+import ms from "ms";
 import type { DeepReadonly } from "ts-essentials";
 import { isHanziCharacter, splitHanziText } from "./hanzi";
+import { PinyinDiffMask, pinyinDiff } from "./pinyin";
 import type {
   CharacterDecompositionRow,
   Dictionary,
@@ -961,15 +963,366 @@ function getReactiveHanziToPinyinTypedSkills({
   return emptyArray;
 }
 
-export type LatestSkillRating = Pick<
+export interface SkillReviewQueueRatingEvent extends Pick<
   SkillRating,
   `skill` | `rating` | `createdAt`
->;
+> {
+  /**
+   * The rating ID deduplicates rows produced when a rating joins to multiple
+   * mistake records and provides a stable tie-breaker for same-time ratings.
+   */
+  id: SkillRating[`id`];
+  pinyinMistake?: string;
+}
+
+export interface SkillReviewQueueRemediationConfig {
+  /** Successful writing attempts required after a writing mistake. */
+  writingSuccessfulAttempts?: number;
+  /** Practice counts used when typed pinyin is wrong in its initial sound. */
+  typedPinyinWrongInitial?: {
+    /** Successful initial-only attempts required before retrying typed pinyin. */
+    initialSuccessfulAttempts: number;
+    /** Successful typed-pinyin attempts required to finish remediation. */
+    typedSuccessfulAttempts: number;
+  };
+  /** Practice counts used when typed pinyin has the wrong final sound. */
+  typedPinyinWrongFinal?: {
+    /** Successful final-only attempts required before retrying typed pinyin. */
+    finalSuccessfulAttempts: number;
+    /** Successful typed-pinyin attempts required to finish remediation. */
+    typedSuccessfulAttempts: number;
+  };
+  /** Practice counts used when typed pinyin has the wrong tone. */
+  typedPinyinWrongTone?: {
+    /** Successful tone-only attempts required before retrying typed pinyin. */
+    toneSuccessfulAttempts: number;
+    /** Successful typed-pinyin attempts required to finish remediation. */
+    typedSuccessfulAttempts: number;
+  };
+}
+
+interface SkillReviewQueueRemediationStep {
+  skill: Skill;
+  successfulAttempts: number;
+  completedAttempts: number;
+}
+
+export interface SkillReviewQueueRemediationStepSpec {
+  skill: Skill;
+  successfulAttempts: number;
+}
+
+interface SkillReviewQueueRemediationPlan {
+  steps: SkillReviewQueueRemediationStep[];
+  currentStepIndex: number;
+}
+
+export interface SkillReviewQueueRemediatorContext {
+  dictionary: Dictionary;
+  config: SkillReviewQueueRemediationConfig | undefined;
+}
+
+export type SkillReviewQueueRemediator = (
+  event: SkillReviewQueueRatingEvent,
+  context: SkillReviewQueueRemediatorContext,
+) => readonly SkillReviewQueueRemediationStepSpec[] | null;
+
+const skillReviewQueueRemediationHistoryMs = ms(`24h`);
+
+function typedPinyinMistakeMask(
+  event: SkillReviewQueueRatingEvent,
+  dictionary: Dictionary,
+): ReturnType<typeof pinyinDiff> {
+  if (
+    event.pinyinMistake == null ||
+    !isHanziWordToPinyinTypedSkill(event.skill)
+  ) {
+    return PinyinDiffMask.None;
+  }
+
+  const expectedPinyin = dictionary.lookupHanziWord(
+    hanziWordFromSkill(event.skill),
+  )?.pinyin?.[0];
+  return expectedPinyin == null
+    ? PinyinDiffMask.None
+    : pinyinDiff(event.pinyinMistake, expectedPinyin);
+}
+
+export const writingSkillReviewQueueRemediator: SkillReviewQueueRemediator = (
+  event,
+  { config },
+) => {
+  if (skillKindFromSkill(event.skill) !== SkillKind.HanziCharacterToWriting) {
+    return null;
+  }
+
+  const successfulAttempts = config?.writingSuccessfulAttempts ?? 1;
+  invariant(
+    Number.isInteger(successfulAttempts) && successfulAttempts > 0,
+    `writingSuccessfulAttempts must be a positive integer`,
+  );
+  return [{ skill: event.skill, successfulAttempts }];
+};
+
+function typedPinyinComponentRemediationPlan({
+  event,
+  mistakeMask,
+  componentMask,
+  focusedSkill,
+  focusedSuccessfulAttempts,
+  typedSuccessfulAttempts,
+}: {
+  event: SkillReviewQueueRatingEvent;
+  mistakeMask: ReturnType<typeof pinyinDiff>;
+  componentMask: ReturnType<typeof pinyinDiff>;
+  focusedSkill: (hanziWord: HanziWord) => Skill;
+  focusedSuccessfulAttempts: number | undefined;
+  typedSuccessfulAttempts: number | undefined;
+}): readonly SkillReviewQueueRemediationStepSpec[] | null {
+  if (
+    !isHanziWordToPinyinTypedSkill(event.skill) ||
+    (mistakeMask & componentMask) === 0 ||
+    focusedSuccessfulAttempts == null ||
+    typedSuccessfulAttempts == null
+  ) {
+    return null;
+  }
+
+  const hanziWord = hanziWordFromSkill(event.skill);
+  return [
+    {
+      skill: focusedSkill(hanziWord),
+      successfulAttempts: focusedSuccessfulAttempts,
+    },
+    {
+      skill: event.skill,
+      successfulAttempts: typedSuccessfulAttempts,
+    },
+  ];
+}
+
+function typedPinyinComponentPlanForEvent(
+  event: SkillReviewQueueRatingEvent,
+  config: SkillReviewQueueRemediationConfig | undefined,
+  mistakeMask: ReturnType<typeof pinyinDiff>,
+): readonly SkillReviewQueueRemediationStepSpec[] | null {
+  const rules = [
+    typedPinyinComponentRemediationPlan({
+      event,
+      mistakeMask,
+      componentMask: PinyinDiffMask.Initial,
+      focusedSkill: hanziWordToPinyinInitial,
+      focusedSuccessfulAttempts:
+        config?.typedPinyinWrongInitial?.initialSuccessfulAttempts,
+      typedSuccessfulAttempts:
+        config?.typedPinyinWrongInitial?.typedSuccessfulAttempts,
+    }),
+    typedPinyinComponentRemediationPlan({
+      event,
+      mistakeMask,
+      componentMask: PinyinDiffMask.Final,
+      focusedSkill: hanziWordToPinyinFinal,
+      focusedSuccessfulAttempts:
+        config?.typedPinyinWrongFinal?.finalSuccessfulAttempts,
+      typedSuccessfulAttempts:
+        config?.typedPinyinWrongFinal?.typedSuccessfulAttempts,
+    }),
+    typedPinyinComponentRemediationPlan({
+      event,
+      mistakeMask,
+      componentMask: PinyinDiffMask.Tone,
+      focusedSkill: hanziWordToPinyinTone,
+      focusedSuccessfulAttempts:
+        config?.typedPinyinWrongTone?.toneSuccessfulAttempts,
+      typedSuccessfulAttempts:
+        config?.typedPinyinWrongTone?.typedSuccessfulAttempts,
+    }),
+  ].filter(
+    (rule): rule is readonly SkillReviewQueueRemediationStepSpec[] =>
+      rule !== null,
+  );
+  if (rules.length === 0) {
+    return null;
+  }
+
+  const steps = rules.flatMap((rule) => rule.slice(0, -1));
+  // One typed-pinyin retry closes all matched rules, using the largest configured count.
+  const typedSuccessfulAttempts = Math.max(
+    ...rules.map((rule) => nonNullable(rule.at(-1)).successfulAttempts),
+  );
+  steps.push({
+    skill: event.skill,
+    successfulAttempts: typedSuccessfulAttempts,
+  });
+  return steps;
+}
+
+export const wrongPinyinInitialSkillReviewQueueRemediator: SkillReviewQueueRemediator =
+  (event, context) =>
+    typedPinyinComponentRemediationPlan({
+      event,
+      mistakeMask: typedPinyinMistakeMask(event, context.dictionary),
+      componentMask: PinyinDiffMask.Initial,
+      focusedSkill: hanziWordToPinyinInitial,
+      focusedSuccessfulAttempts:
+        context.config?.typedPinyinWrongInitial?.initialSuccessfulAttempts,
+      typedSuccessfulAttempts:
+        context.config?.typedPinyinWrongInitial?.typedSuccessfulAttempts,
+    });
+
+export const wrongPinyinFinalSkillReviewQueueRemediator: SkillReviewQueueRemediator =
+  (event, context) =>
+    typedPinyinComponentRemediationPlan({
+      event,
+      mistakeMask: typedPinyinMistakeMask(event, context.dictionary),
+      componentMask: PinyinDiffMask.Final,
+      focusedSkill: hanziWordToPinyinFinal,
+      focusedSuccessfulAttempts:
+        context.config?.typedPinyinWrongFinal?.finalSuccessfulAttempts,
+      typedSuccessfulAttempts:
+        context.config?.typedPinyinWrongFinal?.typedSuccessfulAttempts,
+    });
+
+export const wrongPinyinToneSkillReviewQueueRemediator: SkillReviewQueueRemediator =
+  (event, context) =>
+    typedPinyinComponentRemediationPlan({
+      event,
+      mistakeMask: typedPinyinMistakeMask(event, context.dictionary),
+      componentMask: PinyinDiffMask.Tone,
+      focusedSkill: hanziWordToPinyinTone,
+      focusedSuccessfulAttempts:
+        context.config?.typedPinyinWrongTone?.toneSuccessfulAttempts,
+      typedSuccessfulAttempts:
+        context.config?.typedPinyinWrongTone?.typedSuccessfulAttempts,
+    });
+
+export const typedPinyinComponentSkillReviewQueueRemediator: SkillReviewQueueRemediator =
+  (event, context) =>
+    typedPinyinComponentPlanForEvent(
+      event,
+      context.config,
+      typedPinyinMistakeMask(event, context.dictionary),
+    );
+
+export const retryFailedSkillReviewQueueRemediator: SkillReviewQueueRemediator =
+  (event) => {
+    return [{ skill: event.skill, successfulAttempts: 1 }];
+  };
+
+export const skillReviewQueueRemediators: readonly SkillReviewQueueRemediator[] =
+  [
+    writingSkillReviewQueueRemediator,
+    typedPinyinComponentSkillReviewQueueRemediator,
+    retryFailedSkillReviewQueueRemediator,
+  ];
+
+function skillReviewQueueRemediationPlans({
+  events,
+  graph,
+  skillSrsStates,
+  remediators,
+  remediatorContext,
+  now,
+}: {
+  events: readonly SkillReviewQueueRatingEvent[];
+  graph: SkillLearningGraph;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  remediators: readonly SkillReviewQueueRemediator[];
+  remediatorContext: SkillReviewQueueRemediatorContext;
+  now: Date;
+}): SkillReviewQueueRemediationPlan[] {
+  const cutoff = now.getTime() - skillReviewQueueRemediationHistoryMs;
+  const recentEvents = new Map<string, SkillReviewQueueRatingEvent>();
+  for (const event of events) {
+    if (
+      event.createdAt.getTime() < cutoff ||
+      event.createdAt.getTime() > now.getTime()
+    ) {
+      continue;
+    }
+
+    const previousEvent = recentEvents.get(event.id);
+    if (
+      previousEvent == null ||
+      (previousEvent.pinyinMistake == null && event.pinyinMistake != null)
+    ) {
+      recentEvents.set(event.id, event);
+    }
+  }
+
+  const orderedEvents = [...recentEvents.values()].sort(
+    mergeSortComparators(
+      sortComparatorDate(({ createdAt }) => createdAt),
+      sortComparatorString(({ id }) => id),
+    ),
+  );
+  const plans: SkillReviewQueueRemediationPlan[] = [];
+  const skillPlanCounts = new Map<Skill, number>();
+
+  for (const event of orderedEvents) {
+    const activePlan = plans.at(-1);
+    const activeStep = activePlan?.steps[activePlan.currentStepIndex];
+
+    if (event.rating === Rating.Again) {
+      if (skillPlanCounts.has(event.skill)) {
+        continue;
+      }
+
+      if (
+        !graph.has(event.skill) ||
+        needsToBeIntroduced(skillSrsStates.get(event.skill), now)
+      ) {
+        continue;
+      }
+
+      let steps: readonly SkillReviewQueueRemediationStepSpec[] | null = null;
+      for (const remediator of remediators) {
+        steps = remediator(event, remediatorContext);
+        if (steps != null) {
+          break;
+        }
+      }
+      invariant(steps != null, `a retry remediator must match every failure`);
+      invariant(steps.length > 0, `a remediator plan must have steps`);
+
+      plans.push({
+        steps: steps.map((step) => ({ ...step, completedAttempts: 0 })),
+        currentStepIndex: 0,
+      });
+      for (const { skill } of steps) {
+        skillPlanCounts.set(skill, (skillPlanCounts.get(skill) ?? 0) + 1);
+      }
+    } else if (activePlan != null && activeStep?.skill === event.skill) {
+      activeStep.completedAttempts++;
+      if (activeStep.completedAttempts < activeStep.successfulAttempts) {
+        continue;
+      }
+
+      activePlan.currentStepIndex++;
+      if (activePlan.currentStepIndex >= activePlan.steps.length) {
+        const completedPlan = plans.pop();
+        invariant(completedPlan != null);
+        for (const { skill } of completedPlan.steps) {
+          const count = nonNullable(skillPlanCounts.get(skill)) - 1;
+          if (count === 0) {
+            skillPlanCounts.delete(skill);
+          } else {
+            skillPlanCounts.set(skill, count);
+          }
+        }
+      }
+    }
+  }
+
+  return plans;
+}
 
 export function skillReviewQueue({
   graph,
   skillSrsStates,
-  latestSkillRatings,
+  recentSkillRatingEvents = emptyArray,
+  remediators = skillReviewQueueRemediators,
+  remediationConfig,
   dictionary,
   directSkills = emptySet,
   now = new Date(),
@@ -977,7 +1330,9 @@ export function skillReviewQueue({
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
-  latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
+  recentSkillRatingEvents?: readonly SkillReviewQueueRatingEvent[];
+  remediators?: readonly SkillReviewQueueRemediator[];
+  remediationConfig?: SkillReviewQueueRemediationConfig;
   dictionary: Dictionary;
   directSkills?: ReadonlySet<Skill>;
   now?: Date;
@@ -989,7 +1344,6 @@ export function skillReviewQueue({
   // Which skills have been included in the learning order.
   // This is used to avoid adding the same skill multiple times.
   const learningOrderIncluded = new Set<Skill>();
-  const learningOrderRetry: [Skill, Date][] = [];
   const learningOrderOverDue: [Skill, Date][] = [];
   const learningOrderDue: [Skill, Date][] = [];
   const learningOrderNewCandidates: Skill[] = [];
@@ -1020,27 +1374,22 @@ export function skillReviewQueue({
       } else {
         learningOrderBlocked.push(skill);
       }
-    } else {
-      const skillRating = latestSkillRatings.get(skill);
-      if (skillRating?.rating === Rating.Again) {
-        learningOrderRetry.push([skill, skillRating.createdAt]);
-      } else if (srsState.nextReviewAt > now) {
-        // Check if it should be the new newDueAt.
-        if (newDueAt == null || newDueAt > srsState.nextReviewAt) {
-          newDueAt = srsState.nextReviewAt;
-        }
-
-        learningOrderNotDue.push([skill, srsState]);
-      } else if (isOverdue(srsState, now)) {
-        learningOrderOverDue.push([skill, srsState.nextReviewAt]);
-      } else {
-        // Check if it should be the new newOverDueAt.
-        if (newOverDueAt == null || newOverDueAt > srsState.nextReviewAt) {
-          newOverDueAt = srsState.nextReviewAt;
-        }
-
-        learningOrderDue.push([skill, srsState.nextReviewAt]);
+    } else if (srsState.nextReviewAt > now) {
+      // Check if it should be the new newDueAt.
+      if (newDueAt == null || newDueAt > srsState.nextReviewAt) {
+        newDueAt = srsState.nextReviewAt;
       }
+
+      learningOrderNotDue.push([skill, srsState]);
+    } else if (isOverdue(srsState, now)) {
+      learningOrderOverDue.push([skill, srsState.nextReviewAt]);
+    } else {
+      // Check if it should be the new newOverDueAt.
+      if (newOverDueAt == null || newOverDueAt > srsState.nextReviewAt) {
+        newOverDueAt = srsState.nextReviewAt;
+      }
+
+      learningOrderDue.push([skill, srsState.nextReviewAt]);
     }
   }
 
@@ -1198,12 +1547,24 @@ export function skillReviewQueue({
 
   perfMilestone(`recentSkillRatingHistory`);
 
-  const recentSkillRatingHistoryHeap = new MinHeap<LatestSkillRating>(
+  const recentSkillRatingHistoryHeap = new MinHeap<
+    Pick<SkillReviewQueueRatingEvent, `skill` | `rating` | `createdAt`>
+  >(
     inverseSortComparator(sortComparatorDate(({ createdAt }) => createdAt)),
     20,
   );
-  for (const rating of latestSkillRatings.values()) {
-    recentSkillRatingHistoryHeap.insert(rating);
+  const latestRatingEventsBySkill = new Map<
+    Skill,
+    SkillReviewQueueRatingEvent
+  >();
+  for (const event of recentSkillRatingEvents) {
+    const previousEvent = latestRatingEventsBySkill.get(event.skill);
+    if (previousEvent == null || previousEvent.createdAt < event.createdAt) {
+      latestRatingEventsBySkill.set(event.skill, event);
+    }
+  }
+  for (const event of latestRatingEventsBySkill.values()) {
+    recentSkillRatingHistoryHeap.insert(event);
   }
   const recentSkillRatingHistory = recentSkillRatingHistoryHeap.toArray();
 
@@ -1231,6 +1592,53 @@ export function skillReviewQueue({
       dictionary,
     }),
   ];
+
+  const remediationPlans = skillReviewQueueRemediationPlans({
+    events: recentSkillRatingEvents,
+    graph,
+    skillSrsStates,
+    remediators,
+    remediatorContext: { dictionary, config: remediationConfig },
+    now,
+  });
+  const remediationSkills = new Set<Skill>();
+  for (const plan of remediationPlans) {
+    for (const { skill } of plan.steps) {
+      remediationSkills.add(skill);
+    }
+  }
+  const activeRemediationPlan = remediationPlans.at(-1);
+  const activeRemediationStep =
+    activeRemediationPlan?.steps[activeRemediationPlan.currentStepIndex];
+
+  mutableArrayFilter(
+    learningOrderOverDue,
+    ([skill]) => !remediationSkills.has(skill),
+  );
+  mutableArrayFilter(
+    learningOrderDue,
+    ([skill]) => !remediationSkills.has(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNewContent,
+    (skill) => !remediationSkills.has(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNewDifficulty,
+    (skill) => !remediationSkills.has(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNotDue,
+    ([skill]) => !remediationSkills.has(skill),
+  );
+  mutableArrayFilter(
+    learningOrderBlocked,
+    (skill) => !remediationSkills.has(skill),
+  );
+  mutableArrayFilter(
+    reactiveItems,
+    ({ skill }) => !remediationSkills.has(skill),
+  );
 
   // Remove reactive items from the other queues so that items aren't duplicated
   // and counts are correct.
@@ -1271,26 +1679,40 @@ export function skillReviewQueue({
       ),
   );
 
+  newDueAt = null;
+  for (const [, srsState] of learningOrderNotDue) {
+    if (
+      srsState != null &&
+      (newDueAt == null || newDueAt > srsState.nextReviewAt)
+    ) {
+      newDueAt = srsState.nextReviewAt;
+    }
+  }
+  newOverDueAt = null;
+  for (const [, nextReviewAt] of learningOrderDue) {
+    if (newOverDueAt == null || newOverDueAt > nextReviewAt) {
+      newOverDueAt = nextReviewAt;
+    }
+  }
+
   perfMilestone(`queueItems`);
 
   // Build items array and track index ranges
   const items: SkillReviewQueueItem[] = [];
 
-  // 1. Retry items
-  for (const [skill] of topK(
-    learningOrderRetry,
-    maxQueueItems - items.length,
-    inverseSortComparator(sortComparatorDate(([, x]) => x)),
-  )) {
-    items.push({ skill, flag: { kind: QuestionFlagKind.Retry } });
+  if (activeRemediationStep != null && maxQueueItems > items.length) {
+    items.push({
+      skill: activeRemediationStep.skill,
+      flag: { kind: QuestionFlagKind.Retry },
+    });
   }
 
-  // 2. Reactive items
+  // 1. Reactive items
   for (const item of reactiveItems.slice(0, maxQueueItems - items.length)) {
     items.push(item);
   }
 
-  // 3. Overdue items
+  // 2. Overdue items
   for (const [skill] of topK(
     learningOrderOverDue,
     maxQueueItems - items.length,
@@ -1307,7 +1729,7 @@ export function skillReviewQueue({
     });
   }
 
-  // 4. Due items
+  // 3. Due items
   for (const [skill] of topK(
     learningOrderDue,
     maxQueueItems - items.length,
@@ -1316,7 +1738,7 @@ export function skillReviewQueue({
     items.push({ skill });
   }
 
-  // 5. New content items
+  // 4. New content items
   for (const skill of learningOrderNewContent.slice(
     0,
     maxQueueItems - items.length,
@@ -1324,7 +1746,7 @@ export function skillReviewQueue({
     items.push({ skill, flag: { kind: QuestionFlagKind.NewSkill } });
   }
 
-  // 6. New difficulty items
+  // 5. New difficulty items
   for (const skill of learningOrderNewDifficulty.slice(
     0,
     maxQueueItems - items.length,
@@ -1332,7 +1754,7 @@ export function skillReviewQueue({
     items.push({ skill, flag: { kind: QuestionFlagKind.NewDifficulty } });
   }
 
-  // 7. Not due items
+  // 6. Not due items
   for (const skill of randomPickSkillsForReview(
     learningOrderNotDue,
     maxQueueItems - items.length,
@@ -1341,7 +1763,7 @@ export function skillReviewQueue({
     items.push({ skill });
   }
 
-  // 8. Blocked items
+  // 7. Blocked items
   for (const skill of learningOrderBlocked.slice(
     0,
     maxQueueItems - items.length,
@@ -1357,7 +1779,7 @@ export function skillReviewQueue({
     return {
       items,
       blockedCount: learningOrderBlocked.length,
-      retryCount: learningOrderRetry.length,
+      retryCount: remediationPlans.length,
       dueCount: learningOrderDue.length,
       overDueCount: learningOrderOverDue.length,
       newContentCount: learningOrderNewContent.length,

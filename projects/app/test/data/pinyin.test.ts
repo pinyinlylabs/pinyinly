@@ -28,6 +28,8 @@ import {
   pinyinUnitId,
   pinyinUnitPattern,
   pinyinUnitSuggestions,
+  PinyinDiffMask,
+  pinyinDiff,
   splitPinyinUnit,
   splitPinyinUnitTone,
   splitPinyinUnitWithChart,
@@ -425,6 +427,27 @@ describe(`splitPinyinUnit suite`, () => {
     [`Yīng`, { tonelessUnit: `Ying`, tone: 1 }],
   ] as const)(`%s → %s`, ([input, partial]) => {
     expect(splitPinyinUnit(input as PinyinUnit)).toMatchObject(partial);
+  });
+});
+
+describe(`pinyinDiff suite`, () => {
+  test.for([
+    [`nǎo`, `hǎo`, PinyinDiffMask.Initial],
+    [`hǎi`, `hǎo`, PinyinDiffMask.Final],
+    [`hāo`, `hǎo`, PinyinDiffMask.Tone],
+    [
+      `nàn`,
+      `hǎo`,
+      PinyinDiffMask.Initial | PinyinDiffMask.Final | PinyinDiffMask.Tone,
+    ],
+    [`nǎo hāi`, `hǎo hǎi`, PinyinDiffMask.Initial | PinyinDiffMask.Tone],
+    [`hao4`, `hao3`, PinyinDiffMask.Tone],
+    [`nǐ hǎi`, `nǐ hǎo`, PinyinDiffMask.Final],
+    [`hǎo`, `hǎo`, PinyinDiffMask.None],
+    [`nǎo`, `hǎo hǎo`, PinyinDiffMask.None],
+    [`not-valid-pinyin`, `hǎo`, PinyinDiffMask.None],
+  ] as const)(`actual=%s, expected=%s → %s`, ([actual, expected, mask]) => {
+    expect(pinyinDiff(actual, expected)).toBe(mask);
   });
 });
 

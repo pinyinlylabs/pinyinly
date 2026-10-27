@@ -1,7 +1,11 @@
-import { charactersJsonQuery, dictionaryQuery } from "@/client/query";
+import {
+  charactersJsonQuery,
+  dictionaryQuery,
+  skillReviewQueueHistoryCollection,
+} from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { Skill, SrsStateType } from "@/data/model";
-import type { LatestSkillRating } from "@/data/skills";
+import type { SkillReviewQueueRemediationConfig } from "@/data/skills";
 import type { StudyListId } from "@/data/studyLists";
 import { studyListHanziWords } from "@/data/studyLists";
 import {
@@ -21,6 +25,22 @@ import { SkillQueueContext } from "./contexts";
 const mockable = {
   getMaxQueueItems: () => 2,
 };
+
+const skillReviewQueueRemediationConfig = {
+  writingSuccessfulAttempts: 5,
+  typedPinyinWrongInitial: {
+    initialSuccessfulAttempts: 3,
+    typedSuccessfulAttempts: 1,
+  },
+  typedPinyinWrongFinal: {
+    finalSuccessfulAttempts: 3,
+    typedSuccessfulAttempts: 1,
+  },
+  typedPinyinWrongTone: {
+    toneSuccessfulAttempts: 3,
+    typedSuccessfulAttempts: 1,
+  },
+} satisfies SkillReviewQueueRemediationConfig;
 
 /**
  * Provides a global skill queue that's scoped to the session.
@@ -49,12 +69,11 @@ function SkillQueueProvider({
     );
   const { data: dictionary } = useQuery(dictionaryQuery);
   const { data: charactersJson } = useQuery(charactersJsonQuery);
-  const {
-    data: latestSkillRatingsData,
-    isLoading: isLatestSkillRatingsLoading,
-  } = useLiveQuery(
-    (q) => q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
-    [db.latestSkillRatingsCollection],
+  const { data: skillRatingHistoryData } = useLiveQuery(
+    skillReviewQueueHistoryCollection(
+      db.skillRatingCollection,
+      db.hanziPinyinMistakeCollection,
+    ),
   );
   const { data: skillStateData, isLoading: isSkillStatesLoading } =
     useLiveQuery(
@@ -81,16 +100,6 @@ function SkillQueueProvider({
             skillStateData.map((x) => [x.skill, x.srs]),
           ),
     [skillStateData, isSkillStatesLoading],
-  );
-
-  const latestSkillRatings = useMemo(
-    () =>
-      isLatestSkillRatingsLoading
-        ? null
-        : new Map<Skill, LatestSkillRating>(
-            latestSkillRatingsData.map((x) => [x.skill, x]),
-          ),
-    [latestSkillRatingsData, isLatestSkillRatingsLoading],
   );
 
   // Compute Study skills from the resolved word collection
@@ -161,10 +170,7 @@ function SkillQueueProvider({
   // Recompute the review queue when inputs are ready
   const reviewQueue = useMemo(
     () =>
-      graph == null ||
-      dictionary == null ||
-      skillSrsStates == null ||
-      latestSkillRatings == null
+      graph == null || dictionary == null || skillSrsStates == null
         ? null
         : skillReviewQueue({
             graph,
@@ -175,14 +181,8 @@ function SkillQueueProvider({
                 : new Map(
                     [...skillSrsStates].filter(([skill]) => graph.has(skill)),
                   ),
-            latestSkillRatings:
-              listId == null
-                ? latestSkillRatings
-                : new Map(
-                    [...latestSkillRatings].filter(([skill]) =>
-                      graph.has(skill),
-                    ),
-                  ),
+            recentSkillRatingEvents: skillRatingHistoryData,
+            remediationConfig: skillReviewQueueRemediationConfig,
             now: new Date(),
             dictionary,
             maxQueueItems: mockable.getMaxQueueItems(),
@@ -190,8 +190,8 @@ function SkillQueueProvider({
     [
       graph,
       dictionary,
+      skillRatingHistoryData,
       skillSrsStates,
-      latestSkillRatings,
       listId,
       studySkills,
     ],
