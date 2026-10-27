@@ -35,6 +35,7 @@ export default function HanziGraphicDemo() {
     <>
       <View className="w-full items-center gap-2">
         <HanziGraphic
+          bold
           className="size-40"
           bgSvgPaths={xueStrokes}
           animatedMedianPaths={xueMedians}
@@ -52,18 +53,21 @@ export default function HanziGraphicDemo() {
       <View className="w-full flex-row gap-2">
         <ExampleStack title="Fingers">
           <HanziGraphic
+            bold
             bgSvgPaths={xueStrokes}
             fgSvgPaths={xueStrokes.slice(0, 3)}
           />
         </ExampleStack>
         <ExampleStack title="Roof">
           <HanziGraphic
+            bold
             bgSvgPaths={xueStrokes}
             fgSvgPaths={xueStrokes.slice(3, 5)}
           />
         </ExampleStack>
         <ExampleStack title="Child">
           <HanziGraphic
+            bold
             bgSvgPaths={xueStrokes}
             fgSvgPaths={xueStrokes.slice(5, 9)}
           />
@@ -72,6 +76,7 @@ export default function HanziGraphicDemo() {
       <View className="w-full gap-2">
         <View className="flex-row gap-2">
           <HanziGraphic
+            bold
             bgSvgPaths={xueStrokes}
             fgSvgPaths={xueStrokes.slice(0, 3)}
           />
@@ -85,6 +90,7 @@ export default function HanziGraphicDemo() {
         </View>
         <View className="flex-row gap-2">
           <HanziGraphic
+            bold
             bgSvgPaths={xueStrokes}
             fgSvgPaths={xueStrokes.slice(3, 5)}
           />
@@ -97,6 +103,7 @@ export default function HanziGraphicDemo() {
         </View>
         <View className="flex-row gap-2">
           <HanziGraphic
+            bold
             bgSvgPaths={xueStrokes}
             fgSvgPaths={xueStrokes.slice(5, 9)}
           />

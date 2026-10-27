@@ -23,6 +23,7 @@ export function HanziStrokesTile({
   labelNumberOfLines,
   fillWidth = false,
   onVisualLayout,
+  bold = true,
 }: {
   componentColor?: HanziStrokeColor | null;
   componentHanzi: HanziCharacterType | null;
@@ -32,6 +33,7 @@ export function HanziStrokesTile({
   labelNumberOfLines?: number;
   fillWidth?: boolean;
   onVisualLayout?: (event: LayoutChangeEvent) => void;
+  bold?: boolean;
 }) {
   const { data: strokesData, isLoading } = useQuery(
     hanzi == null
@@ -72,6 +74,7 @@ export function HanziStrokesTile({
             `}
             fgSvgPaths={fgSvgPaths}
             bgSvgPaths={strokePaths}
+            bold={bold}
           />
         ) : componentHanzi == null ? (
           <View accessibilityLabel="Character graphic unavailable" role="img">

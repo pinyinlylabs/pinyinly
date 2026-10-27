@@ -130,7 +130,7 @@ export function WikiHanziCharacterMeaningBreakdown({
         <View className="flex-1 items-center">
           <View className="size-12">
             {strokeSvgs == null ? null : (
-              <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
+              <HanziGraphic bold className="size-12" fgSvgPaths={strokeSvgs} />
             )}
           </View>
         </View>
@@ -179,7 +179,7 @@ export function WikiHanziCharacterMeaningBreakdown({
             {strokeSvgs == null ? (
               <Text className="pyly-body text-left text-lg">{hanzi}</Text>
             ) : (
-              <HanziGraphic className="size-12" fgSvgPaths={strokeSvgs} />
+              <HanziGraphic bold className="size-12" fgSvgPaths={strokeSvgs} />
             )}
           </View>
 

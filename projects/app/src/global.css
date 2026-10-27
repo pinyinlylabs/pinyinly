@@ -163,7 +163,13 @@
     stroke-width: 0;
   }
   to {
-    stroke-width: 140px;
+    stroke-width: var(--hanzi-brush-growth-width);
+  }
+}
+
+@keyframes dimHanziForeground {
+  to {
+    opacity: 0;
   }
 }
 
@@ -172,8 +178,15 @@
   stroke-dashoffset: 1;
   visibility: hidden;
   animation:
-    drawHanziStroke var(--hanzi-stroke-duration) linear both,
-    growHanziBrush var(--hanzi-brush-growth-duration) ease-out both;
+    drawHanziStroke var(--hanzi-stroke-duration) linear
+      var(--hanzi-stroke-delay) both,
+    growHanziBrush var(--hanzi-brush-growth-duration) ease-out
+      var(--hanzi-stroke-delay) both;
+}
+
+@utility hanzi-animated-foreground {
+  animation: dimHanziForeground 2400ms ease-out var(--hanzi-graphic-dim-delay)
+    both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -181,6 +194,11 @@
     animation: none;
     stroke-dashoffset: 0;
     visibility: visible;
+  }
+
+  .hanzi-animated-foreground {
+    animation: none;
+    opacity: 0;
   }
 }
 

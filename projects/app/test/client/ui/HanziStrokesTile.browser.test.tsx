@@ -58,6 +58,13 @@ test.each([
       .element(page.getByRole(`img`, { name: `Character graphic unavailable` }))
       .toBeInTheDocument();
   }
+  if (state.data?.strokes.length === 1) {
+    const svg = page.getByTestId(`tile`).element().querySelector(`svg`);
+    assert(svg != null);
+    const paths = [...svg.querySelectorAll(`g > path`)];
+    expect(paths[0]?.getAttribute(`stroke-width`)).toBe(`20`);
+    expect(paths.at(-1)?.getAttribute(`stroke-width`)).toBe(`20`);
+  }
 });
 
 test(`uses the character fallback when the SVG query is disabled`, async () => {
