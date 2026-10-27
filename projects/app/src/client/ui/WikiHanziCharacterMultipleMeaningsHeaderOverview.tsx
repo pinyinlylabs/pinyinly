@@ -57,21 +57,23 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
             skillSrsStates={skillSrsStates}
           />
         </View>
-        <HeaderProvider.ActionsPortal>
-          <WikiHanziBookmarkMenu
-            hanziWord={hanziWord}
-            hanzi={hanzi}
-            onModalDismiss={onModalDismiss}
-          />
-        </HeaderProvider.ActionsPortal>
       </View>
       <View>
         <HeaderProvider.ScrollTrigger title={hanzi} />
         <View className="flex-row items-center gap-3">
-          <Text className="font-sans text-[48px] font-semibold text-fg-loud">
-            {hanzi}
-          </Text>
-          <WikiHanziCharacterStrokeAnimation hanzi={hanzi} />
+          <View className="min-w-0 flex-1 flex-row items-center gap-3">
+            <Text className="font-sans text-[48px] font-semibold text-fg-loud">
+              {hanzi}
+            </Text>
+            <WikiHanziCharacterStrokeAnimation hanzi={hanzi} />
+          </View>
+          <HeaderProvider.ActionsPortal>
+            <WikiHanziBookmarkMenu
+              hanziWord={hanziWord}
+              hanzi={hanzi}
+              onModalDismiss={onModalDismiss}
+            />
+          </HeaderProvider.ActionsPortal>
         </View>
       </View>
       <View className="mb-3">

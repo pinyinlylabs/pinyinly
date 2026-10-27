@@ -41,6 +41,7 @@ export default function MenuLayout() {
 }
 
 function MenuLayoutContent() {
+  const pathname = usePathname();
   const [
     isMobileTopMenuBackgroundVisible,
     setIsMobileTopMenuBackgroundVisible,
@@ -69,7 +70,9 @@ function MenuLayoutContent() {
         onScroll={handleMenuScroll}
         scrollEventThrottle={16}
         contentContainerClassName={`
-          flex-row pt-safe-offset-14 px-safe-or-4
+          flex-row px-safe-or-4
+
+          ${pathname.startsWith(`/wiki/`) ? `pt-safe-offset-2` : `pt-safe-offset-14`}
 
           sm:py-safe-offset-5
         `}
