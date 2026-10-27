@@ -12,6 +12,7 @@ import { routingIntegration } from "@/client/sentry";
 
 import { useAuth } from "@/client/auth";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
+import { DebuggerHotkey } from "@/client/ui/DebuggerHotkey";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import { KeyboardShortcutProvider } from "@/client/ui/KeyboardShortcutProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
@@ -26,6 +27,7 @@ import Head from "expo-router/head";
 import { PortalProvider } from "react-native-teleport";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
@@ -68,6 +70,7 @@ export function UiProviders({ children }: PropsWithChildren) {
     <PortalProvider>
       <AudioContextProvider>
         <KeyboardShortcutProvider>
+          {__DEV__ && Platform.OS === `web` ? <DebuggerHotkey /> : null}
           <TooltipProvider>{children}</TooltipProvider>
         </KeyboardShortcutProvider>
       </AudioContextProvider>
