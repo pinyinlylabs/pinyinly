@@ -2,14 +2,15 @@ import { hanziSvgPathsQuery } from "@/client/query";
 import type { HanziCharacter } from "@/data/model";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Pressable } from "react-native";
 import { HanziGraphic } from "./HanziGraphic";
-import { RectButton } from "./RectButton";
-import { View } from "./View";
 
-export function WikiHanziCharacterStrokeAnimation({
+export function HanziStrokesAnimatedTile({
   hanzi,
+  bold = true,
 }: {
   hanzi: HanziCharacter;
+  bold?: boolean;
 }) {
   const { data } = useQuery(hanziSvgPathsQuery(hanzi));
   const [animationKey, setAnimationKey] = useState(0);
@@ -25,23 +26,22 @@ export function WikiHanziCharacterStrokeAnimation({
   }
 
   return (
-    <View className="flex-row items-center gap-1">
+    <Pressable
+      accessibilityLabel={`Replay stroke order for ${hanzi}`}
+      accessibilityRole="button"
+      className="shrink-0"
+      onPress={() => {
+        setAnimationKey((previous) => previous + 1);
+      }}
+    >
       <HanziGraphic
-        className="size-16"
+        className="size-14"
         bgSvgPaths={data.strokes}
         animatedMedianPaths={data.medians}
         animationKey={animationKey}
+        bold={bold}
         accessibilityLabel={`${hanzi} stroke order`}
       />
-      <RectButton
-        accessibilityLabel={`Replay stroke order for ${hanzi}`}
-        variant="bareDim"
-        iconStart="repeat"
-        iconSize={16}
-        onPress={() => {
-          setAnimationKey((previous) => previous + 1);
-        }}
-      />
-    </View>
+    </Pressable>
   );
 }
