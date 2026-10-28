@@ -233,7 +233,7 @@ export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
       break;
     }
     case QuestionFlagKind.WeakWord: {
-      pretty = `${pretty} (😰 WEAK WORD)`;
+      pretty = `${pretty} (📉 WEAK WORD)`;
       break;
     }
     case undefined: {

@@ -15,9 +15,9 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.NewDifficulty: {
       return (
-        <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
+        <ScopedVariables variables={{ "--color-fg": `var(--color-purple)` }}>
           <View className={flagViewClass()}>
-            <Icon icon="dumbbell" />
+            <Icon icon="flash" />
             <Text className={flagTextClass()}>Hard question</Text>
           </View>
         </ScopedVariables>
@@ -83,7 +83,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
       return (
         <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
           <View className={flagViewClass()}>
-            <Icon icon="flag" />
+            <Icon icon="trending-down" />
             <Text className={flagTextClass()}>Weak word</Text>
           </View>
         </ScopedVariables>

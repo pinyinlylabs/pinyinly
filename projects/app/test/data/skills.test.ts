@@ -1210,7 +1210,13 @@ describe(`skillReviewQueue suite`, () => {
               failedEvent(writingSkill),
               remediatorContext(dictionary),
             ),
-          ).toEqual([{ skill: writingSkill, successfulAttempts: 5 }]);
+          ).toEqual([
+            {
+              skill: writingSkill,
+              successfulAttempts: 5,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+          ]);
           expect(
             writingSkillReviewQueueRemediator(
               failedEvent(ordinarySkill),
@@ -1230,8 +1236,16 @@ describe(`skillReviewQueue suite`, () => {
               remediatorContext(dictionary),
             ),
           ).toEqual([
-            { skill: `hpi:好:good`, successfulAttempts: 3 },
-            { skill: typedSkill, successfulAttempts: 1 },
+            {
+              skill: `hpi:好:good`,
+              successfulAttempts: 3,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+            {
+              skill: typedSkill,
+              successfulAttempts: 1,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
           ]);
           expect(
             wrongPinyinInitialSkillReviewQueueRemediator(
@@ -1252,8 +1266,16 @@ describe(`skillReviewQueue suite`, () => {
               remediatorContext(dictionary),
             ),
           ).toEqual([
-            { skill: `hpf:好:good`, successfulAttempts: 3 },
-            { skill: typedSkill, successfulAttempts: 1 },
+            {
+              skill: `hpf:好:good`,
+              successfulAttempts: 3,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+            {
+              skill: typedSkill,
+              successfulAttempts: 1,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
           ]);
           expect(
             wrongPinyinFinalSkillReviewQueueRemediator(
@@ -1274,8 +1296,16 @@ describe(`skillReviewQueue suite`, () => {
               remediatorContext(dictionary),
             ),
           ).toEqual([
-            { skill: `hpt:好:good`, successfulAttempts: 3 },
-            { skill: typedSkill, successfulAttempts: 1 },
+            {
+              skill: `hpt:好:good`,
+              successfulAttempts: 3,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+            {
+              skill: typedSkill,
+              successfulAttempts: 1,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
           ]);
           expect(
             wrongPinyinToneSkillReviewQueueRemediator(
@@ -1296,10 +1326,26 @@ describe(`skillReviewQueue suite`, () => {
               remediatorContext(dictionary),
             ),
           ).toEqual([
-            { skill: `hpi:好:good`, successfulAttempts: 3 },
-            { skill: `hpf:好:good`, successfulAttempts: 3 },
-            { skill: `hpt:好:good`, successfulAttempts: 3 },
-            { skill: typedSkill, successfulAttempts: 1 },
+            {
+              skill: `hpi:好:good`,
+              successfulAttempts: 3,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+            {
+              skill: `hpf:好:good`,
+              successfulAttempts: 3,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+            {
+              skill: `hpt:好:good`,
+              successfulAttempts: 3,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+            {
+              skill: typedSkill,
+              successfulAttempts: 1,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
           ]);
         },
       );
@@ -1522,7 +1568,7 @@ describe(`skillReviewQueue suite`, () => {
             recentSkillRatingEvents: events.slice(0, 7),
           });
           expect(prettyQueue(partialQueue)[0]).toBe(
-            `${writingSkill} (⚠️ RETRY)`,
+            `${writingSkill} (📉 WEAK WORD)`,
           );
           expect(partialQueue.retryCount).toBe(1);
 
@@ -1574,7 +1620,7 @@ describe(`skillReviewQueue suite`, () => {
             remediationConfig,
           });
 
-          expect(prettyQueue(queue)[0]).toBe(`${initialSkill} (⚠️ RETRY)`);
+          expect(prettyQueue(queue)[0]).toBe(`${initialSkill} (📉 WEAK WORD)`);
 
           const sameInitialQueue = skillReviewQueue({
             graph,
@@ -1673,7 +1719,7 @@ describe(`skillReviewQueue suite`, () => {
                 recentSkillRatingEvents: events.slice(0, 1),
               }),
             )[0],
-          ).toBe(`${initialSkill} (⚠️ RETRY)`);
+          ).toBe(`${initialSkill} (📉 WEAK WORD)`);
           expect(
             prettyQueue(
               skillReviewQueue({
@@ -1681,7 +1727,7 @@ describe(`skillReviewQueue suite`, () => {
                 recentSkillRatingEvents: events.slice(0, 4),
               }),
             )[0],
-          ).toBe(`${finalSkill} (⚠️ RETRY)`);
+          ).toBe(`${finalSkill} (📉 WEAK WORD)`);
           expect(
             prettyQueue(
               skillReviewQueue({
@@ -1689,7 +1735,7 @@ describe(`skillReviewQueue suite`, () => {
                 recentSkillRatingEvents: events.slice(0, 7),
               }),
             )[0],
-          ).toBe(`${toneSkill} (⚠️ RETRY)`);
+          ).toBe(`${toneSkill} (📉 WEAK WORD)`);
           expect(
             prettyQueue(
               skillReviewQueue({
@@ -1697,7 +1743,7 @@ describe(`skillReviewQueue suite`, () => {
                 recentSkillRatingEvents: events,
               }),
             )[0],
-          ).toBe(`${typedSkill} (⚠️ RETRY)`);
+          ).toBe(`${typedSkill} (📉 WEAK WORD)`);
         },
       );
 
@@ -1760,7 +1806,7 @@ describe(`skillReviewQueue suite`, () => {
             ],
           });
           expect(prettyQueue(whileNested)[0]).toBe(
-            `${initialSkill} (⚠️ RETRY)`,
+            `${initialSkill} (📉 WEAK WORD)`,
           );
 
           const parentResumed = skillReviewQueue({
@@ -1775,7 +1821,7 @@ describe(`skillReviewQueue suite`, () => {
             ],
           });
           expect(prettyQueue(parentResumed)[0]).toBe(
-            `${typedSkill} (⚠️ RETRY)`,
+            `${typedSkill} (📉 WEAK WORD)`,
           );
         },
       );
@@ -1814,7 +1860,8 @@ describe(`skillReviewQueue suite`, () => {
           expect(
             queue.items.some(
               ({ skill, flag }) =>
-                skill === writingSkill && flag?.kind === QuestionFlagKind.Retry,
+                skill === writingSkill &&
+                flag?.kind === QuestionFlagKind.WeakWord,
             ),
           ).toBe(false);
         },
