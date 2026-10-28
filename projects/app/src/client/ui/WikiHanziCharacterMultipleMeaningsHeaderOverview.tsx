@@ -65,7 +65,7 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
             <Text className="font-sans text-[48px] font-semibold text-fg-loud">
               {hanzi}
             </Text>
-            <HanziStrokesAnimatedTile hanzi={hanzi} />
+            <HanziStrokesAnimatedTile hanzi={hanzi} autoPlay hideFgWhenIdle />
           </View>
           <HeaderProvider.ActionsPortal>
             <WikiHanziBookmarkMenu

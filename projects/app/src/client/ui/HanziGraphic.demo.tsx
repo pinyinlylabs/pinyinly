@@ -38,8 +38,9 @@ export default function HanziGraphicDemo() {
           bold
           className="size-40"
           bgSvgPaths={xueStrokes}
-          animatedMedianPaths={xueMedians}
-          animationKey={animationKey}
+          fgSvgPaths={xueStrokes}
+          fgSvgPathsMedians={xueMedians}
+          key={animationKey}
         />
         <Pressable
           accessibilityRole="button"

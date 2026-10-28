@@ -2,7 +2,7 @@ import type { HanziCharacter, HanziText } from "@/data/model";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
 import { View } from "@/client/ui/View";
-import { HanziStrokesTile } from "./HanziStrokesTile";
+import { HanziStrokesAnimatedTile } from "./HanziStrokesAnimatedTile";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { useDb } from "./hooks/useDb";
 import { deepDecomposeHanziWithStrokeSpecs } from "@/dictionary";
@@ -117,7 +117,7 @@ export function WikiHanziCharacterDecompositionComponents({
                 width: gridCellWidth,
               }}
             >
-              <HanziStrokesTile
+              <HanziStrokesAnimatedTile
                 componentHanzi={treeItem.hanzi}
                 fillWidth
                 hanzi={hanzi}

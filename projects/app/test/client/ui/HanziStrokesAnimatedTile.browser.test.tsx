@@ -1,5 +1,5 @@
 import { HanziStrokesAnimatedTile } from "#client/ui/HanziStrokesAnimatedTile.tsx";
-import { hanziCharacterSchema } from "#data/model.ts";
+import { hanziCharacterSchema, strokeSpecStringSchema } from "#data/model.ts";
 import "#global.css";
 import { render } from "vitest-browser-react";
 import { expect, test, vi } from "vitest";
@@ -24,10 +24,14 @@ const strokes = [
   `M 400 100 L 600 100 L 600 900 L 400 900 Z`,
 ];
 const medians = [`M 150 200 L 850 200`, `M 500 150 L 500 850`];
+const subsetStrokes = [...strokes, `M 100 700 L 900 700 L 900 900 L 100 900 Z`];
+const subsetMedians = [...medians, `M 150 800 L 850 800`];
 
 test(`shows the stroke animation and accessible replay control`, async () => {
   useQueryMock.mockReturnValue({ data: { strokes, medians } });
-  await render(<HanziStrokesAnimatedTile hanzi={hanzi} />);
+  await render(
+    <HanziStrokesAnimatedTile hanzi={hanzi} autoPlay hideFgWhenIdle />,
+  );
 
   const graphic = page.getByRole(`img`, { name: `${hanzi} stroke order` });
   await expect.element(graphic).toBeInTheDocument();
@@ -198,7 +202,12 @@ test(`disables bold character outlines independently of brush width`, async () =
   useQueryMock.mockReturnValue({ data: { strokes, medians } });
   await render(
     <div>
-      <HanziStrokesAnimatedTile hanzi={hanzi} bold={false} />
+      <HanziStrokesAnimatedTile
+        hanzi={hanzi}
+        bold={false}
+        autoPlay
+        hideFgWhenIdle
+      />
     </div>,
   );
 
@@ -244,6 +253,75 @@ test(`disables bold character outlines independently of brush width`, async () =
         ),
     ].map((path) => path.getAttribute(`stroke-width`)),
   ).toEqual([null, null]);
+});
+
+test(`animates only selected strokes on tap and keeps the foreground visible`, async () => {
+  useQueryMock.mockReturnValue({
+    data: { strokes: subsetStrokes, medians: subsetMedians },
+  });
+  const componentStrokeSpec = strokeSpecStringSchema.parse(`0,2`);
+  await render(
+    <div>
+      <HanziStrokesAnimatedTile
+        hanzi={hanzi}
+        componentHanzi={hanzi}
+        componentStrokeSpec={componentStrokeSpec}
+        componentColor="blue"
+        label="Wood"
+      />
+    </div>,
+  );
+
+  const graphic = page.getByRole(`img`, { name: `${hanzi} stroke order` });
+  await expect.element(graphic).toBeInTheDocument();
+
+  const idleSvg = graphic.element();
+  const idlePaths = [...idleSvg.querySelectorAll(`g > path`)];
+  expect(idlePaths.slice(-2).map((path) => path.getAttribute(`d`))).toEqual([
+    subsetStrokes[0],
+    subsetStrokes[2],
+  ]);
+  expect(idleSvg.getAnimations({ subtree: true })).toHaveLength(0);
+
+  await page
+    .getByRole(`button`, { name: `Animate stroke order for ${hanzi}` })
+    .click();
+
+  const animatedSvg = page
+    .getByRole(`img`, { name: `${hanzi} stroke order` })
+    .element();
+  expect(
+    [...animatedSvg.querySelectorAll(`mask path`)].map((path) =>
+      path.getAttribute(`d`),
+    ),
+  ).toEqual([subsetStrokes[0], subsetStrokes[2]]);
+  const animatedPaths = [
+    ...animatedSvg.querySelectorAll<SVGPathElement>(`path[mask]`),
+  ];
+  expect(animatedPaths.map((path) => path.getAttribute(`d`))).toEqual([
+    subsetMedians[0],
+    subsetMedians[2],
+  ]);
+  expect(animatedPaths.map((path) => path.getAttribute(`stroke`))).toEqual([
+    `var(--color-fg-loud)`,
+    `var(--color-fg-loud)`,
+  ]);
+  expect(
+    animatedPaths.map((path) =>
+      path.style.getPropertyValue(`--hanzi-stroke-delay`),
+    ),
+  ).toEqual([`250ms`, `750ms`]);
+  expect(animatedSvg.querySelector(`g.hanzi-animated-foreground`)).toBeNull();
+
+  const prefersReducedMotion = window.matchMedia(
+    `(prefers-reduced-motion: reduce)`,
+  ).matches;
+  const animations = animatedSvg.getAnimations({ subtree: true });
+  expect(animations).toHaveLength(prefersReducedMotion ? 0 : 4);
+  await Promise.all(animations.map(async (animation) => animation.finished));
+  expect(
+    animatedPaths.map((path) => getComputedStyle(path).strokeDashoffset),
+  ).toEqual([`0px`, `0px`]);
 });
 
 test.each([

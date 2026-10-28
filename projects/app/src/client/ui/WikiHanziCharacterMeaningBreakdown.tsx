@@ -3,11 +3,10 @@ import type { ReactNode } from "react";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import type { HanziCharacter, MnemonicHanziComponent } from "@/data/model";
-import { HanziStrokesTile } from "./HanziStrokesTile";
+import { HanziStrokesAnimatedTile } from "./HanziStrokesAnimatedTile";
 import { hanziSvgPathsQuery } from "@/client/query";
 import { useQuery } from "@tanstack/react-query";
 import { parseStrokeSpec } from "@/util/strokeSpec";
-import { HanziGraphic } from "./HanziGraphic";
 
 interface WikiHanziCharacterMeaningBreakdownProps {
   hanzi: HanziCharacter;
@@ -64,11 +63,11 @@ export function WikiHanziCharacterMeaningBreakdown({
       componentsElements.push({
         key: `component:${i}`,
         element: (
-          <HanziStrokesTile
+          <HanziStrokesAnimatedTile
             componentHanzi={component.hanzi ?? null}
             hanzi={hanzi}
             componentColor={component.color}
-            componentStrokeSpec={component.strokeSpec}
+            componentStrokeSpec={component.strokeSpec ?? null}
             label={label}
             onVisualLayout={(event) => {
               const centerX =
@@ -96,10 +95,10 @@ export function WikiHanziCharacterMeaningBreakdown({
       componentsElements.push({
         key: `component:${i}:${componentHanzi}`,
         element: (
-          <HanziStrokesTile
+          <HanziStrokesAnimatedTile
             componentHanzi={componentHanzi}
             hanzi={null}
-            componentStrokeSpec={component.strokeSpec}
+            componentStrokeSpec={component.strokeSpec ?? null}
             label={label}
             onVisualLayout={(event) => {
               const centerX =
@@ -130,7 +129,7 @@ export function WikiHanziCharacterMeaningBreakdown({
         <View className="flex-1 items-center">
           <View className="size-12">
             {strokeSvgs == null ? null : (
-              <HanziGraphic bold className="size-12" fgSvgPaths={strokeSvgs} />
+              <HanziStrokesAnimatedTile hanzi={hanzi} />
             )}
           </View>
         </View>
@@ -179,7 +178,7 @@ export function WikiHanziCharacterMeaningBreakdown({
             {strokeSvgs == null ? (
               <Text className="pyly-body text-left text-lg">{hanzi}</Text>
             ) : (
-              <HanziGraphic bold className="size-12" fgSvgPaths={strokeSvgs} />
+              <HanziStrokesAnimatedTile hanzi={hanzi} />
             )}
           </View>
 
