@@ -21,8 +21,8 @@ export function WikiHanziCharacterChooseAMeaning({
 }) {
   const db = useDb();
 
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
@@ -33,8 +33,7 @@ export function WikiHanziCharacterChooseAMeaning({
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
   const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
 
   return (

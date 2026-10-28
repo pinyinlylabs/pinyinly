@@ -13,8 +13,8 @@ export function WikiHanziCharacterUsedInWords({
   hanzi: HanziCharacter;
 }) {
   const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
@@ -33,8 +33,7 @@ export function WikiHanziCharacterUsedInWords({
         }))
         .distinct()
         .limit(maxUsedInWords),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   if (dictionaryEntries.length === 0) {
     return null;

@@ -19,10 +19,9 @@ export function BookmarkList({
 }) {
   const router = useRouter();
   const db = useDb();
-  const { data: words, isLoading } = useLiveQuery(
-    (q) => q.from({ word: db.bookmarkedHanziWordsCollection }),
-    [db.bookmarkedHanziWordsCollection],
-  );
+  const { data: words, isLoading } = useLiveQuery({
+    query: (q) => q.from({ word: db.bookmarkedHanziWordsCollection }),
+  });
   const groups = groupBookmarkedWordsByAddedDate(words, limit);
 
   return (

@@ -222,10 +222,9 @@ const GoHomeButton = () => (
 
 function SkillCount() {
   const db = useDb();
-  const result = useLiveQuery(
-    (q) => q.from({ skillState: db.skillStateCollection }),
-    [db.skillStateCollection],
-  );
+  const result = useLiveQuery({
+    query: (q) => q.from({ skillState: db.skillStateCollection }),
+  });
   const count = result.data.length;
 
   return result.isLoading ? (

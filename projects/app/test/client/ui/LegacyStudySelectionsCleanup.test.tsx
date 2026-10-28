@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 
 import { DbProvider } from "#client/ui/DbProvider.tsx";
+import type { Db } from "#client/query.ts";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
 import { LegacyStudySelectionsCleanup } from "#client/ui/LegacyStudySelectionsCleanup.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
@@ -27,13 +28,15 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-function providers(rizzle: Rizzle) {
+function providers(rizzle: Rizzle, db: Db) {
   return function Wrapper({ children }: PropsWithChildren) {
     const queryClient = useNewQueryClient();
     return (
       <QueryClientProvider client={queryClient}>
         <RizzleProvider.Context.Provider value={rizzle}>
-          <DbProvider>{children}</DbProvider>
+          <DbProvider.Context.Provider value={db}>
+            {children}
+          </DbProvider.Context.Provider>
         </RizzleProvider.Context.Provider>
       </QueryClientProvider>
     );
@@ -83,7 +86,7 @@ describe(`LegacyStudySelectionsCleanup()`, () => {
     await db.settingCollection.preload();
     expect(db.settingCollection.get(legacyKey)?.value).toEqual(value);
     const rendered = render(<LegacyStudySelectionsCleanup />, {
-      wrapper: providers(rizzle),
+      wrapper: providers(rizzle, db),
     });
     await waitFor(() => {
       expect(db.settingCollection.get(legacyKey)?.value ?? null).toBeNull();
@@ -100,7 +103,7 @@ describe(`LegacyStudySelectionsCleanup()`, () => {
     rizzle,
   }) => {
     const rendered = render(<LegacyStudySelectionsCleanup />, {
-      wrapper: providers(rizzle),
+      wrapper: providers(rizzle, db),
     });
     await db.settingCollection.preload();
     vi.setSystemTime(legacyStudySelectionsCleanupExpiresAt);

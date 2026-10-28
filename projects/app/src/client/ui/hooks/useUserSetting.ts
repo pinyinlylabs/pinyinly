@@ -96,15 +96,14 @@ export function useUserSetting<T extends UserSettingEntity>(
   const db = useDb();
   const r = useRizzle();
 
-  const result = useLiveQuery(
-    (q) =>
+  const result = useLiveQuery({
+    query: (q) =>
       skip
         ? null
         : q
             .from({ setting: db.settingCollection })
             .where(({ setting }) => eq(setting.key, settingKey)),
-    [db.settingCollection, skip, settingKey],
-  );
+  });
 
   const isLoading = result.isLoading;
   const settingData = result.data?.[0] ?? null;

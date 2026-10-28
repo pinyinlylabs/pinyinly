@@ -14,8 +14,8 @@ export function GroupedHanziWords({
   hanziWords: readonly HanziWord[];
 }) {
   const db = useDb();
-  const { data: rows } = useLiveQuery(
-    (q) =>
+  const { data: rows } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
@@ -25,8 +25,7 @@ export function GroupedHanziWords({
         .orderBy(({ entry }) => entry.hanziCharacterCount, `asc`)
         // Sort lexically first (lowest priority)
         .orderBy(({ entry }) => entry.hanzi, `asc`),
-    [db.dictionaryCollection, hanziWords],
-  );
+  });
 
   const filteredRows = rows.filter(
     arrayFilterUnique((entry) => entry.hanziWord),

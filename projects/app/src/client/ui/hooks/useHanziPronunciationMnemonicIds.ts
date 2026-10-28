@@ -17,8 +17,8 @@ export function useHanziPronunciationMnemonicId(
 } {
   const db = useDb();
 
-  const { data: mnemonicTextSettings } = useLiveQuery(
-    (q) =>
+  const { data: mnemonicTextSettings } = useLiveQuery({
+    query: (q) =>
       q.from({ setting: db.settingCollection }).where(({ setting }) =>
         like(
           setting.key,
@@ -29,8 +29,7 @@ export function useHanziPronunciationMnemonicId(
           }),
         ),
       ),
-    [db.settingCollection, hanzi, pinyinUnit],
-  );
+  });
 
   const allIds = [
     ...new Set(

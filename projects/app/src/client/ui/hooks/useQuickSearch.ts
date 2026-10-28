@@ -257,9 +257,8 @@ export function useQuickSearch(
   options: QuickSearchOptions = {},
 ): readonly QuickSearchResult[] {
   const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) => q.from({ entry: db.dictionaryCollection }),
-    [db.dictionaryCollection],
-  );
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) => q.from({ entry: db.dictionaryCollection }),
+  });
   return quickSearch(dictionaryEntries, query, options);
 }

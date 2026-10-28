@@ -31,13 +31,12 @@ export function usePinyinSoundGroups() {
     return keys;
   }, [chart.soundGroups]);
 
-  const { data: settings, isLoading } = useLiveQuery(
-    (q) =>
+  const { data: settings, isLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ setting: db.settingCollection })
         .where(({ setting }) => inArray(setting.key, relevantKeys)),
-    [db.settingCollection, relevantKeys],
-  );
+  });
 
   const groups = useMemo(() => {
     const result = [];

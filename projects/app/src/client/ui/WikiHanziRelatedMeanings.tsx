@@ -10,18 +10,16 @@ import { buildRelatedMeaningMatches } from "./WikiHanziRelatedMeanings.utils";
 export function WikiHanziRelatedMeanings({ hanzi }: { hanzi: HanziText }) {
   const db = useDb();
 
-  const { data: currentEntries } = useLiveQuery(
-    (q) =>
+  const { data: currentEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
-  const { data: allEntries } = useLiveQuery(
-    (q) => q.from({ entry: db.dictionaryCollection }),
-    [db.dictionaryCollection],
-  );
+  const { data: allEntries } = useLiveQuery({
+    query: (q) => q.from({ entry: db.dictionaryCollection }),
+  });
 
   const relatedMatches = buildRelatedMeaningMatches({
     currentEntries,

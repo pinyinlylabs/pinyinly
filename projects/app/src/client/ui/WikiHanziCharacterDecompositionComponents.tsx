@@ -22,10 +22,10 @@ export function WikiHanziCharacterDecompositionComponents({
     useState<number>(0);
   const db = useDb();
 
-  const { data: characterDecompositionEntries } = useLiveQuery(
-    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
-    [db.characterDecompositionsCollection],
-  );
+  const { data: characterDecompositionEntries } = useLiveQuery({
+    query: (q) =>
+      q.from({ decomposition: db.characterDecompositionsCollection }),
+  });
 
   const decompositionItems = deepDecomposeHanziWithStrokeSpecs(
     hanzi,
@@ -36,8 +36,8 @@ export function WikiHanziCharacterDecompositionComponents({
     ...new Set(decompositionItems.map((x) => x.hanzi)),
   ].join(`|`);
 
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) => {
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) => {
       if (dedupedHanziListKey.length === 0) {
         return null;
       }
@@ -56,8 +56,7 @@ export function WikiHanziCharacterDecompositionComponents({
           gloss: entry.gloss,
         }));
     },
-    [db.dictionaryCollection, dedupedHanziListKey],
-  );
+  });
 
   if (decompositionItems.length === 0) {
     return null;

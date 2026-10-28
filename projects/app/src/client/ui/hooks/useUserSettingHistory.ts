@@ -24,13 +24,12 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
   const db = useDb();
   const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
   const { settingKey } = getSettingKeyInfo(userSetting, keyInput);
-  const result = useLiveQuery(
-    (q) =>
+  const result = useLiveQuery({
+    query: (q) =>
       q
         .from({ settingHistory: db.settingHistoryCollection })
         .where(({ settingHistory }) => eq(settingHistory.key, settingKey)),
-    [db.settingHistoryCollection, settingKey],
-  );
+  });
 
   const entries = result.data
     .map((entry) => ({

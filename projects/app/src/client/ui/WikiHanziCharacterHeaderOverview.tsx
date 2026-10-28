@@ -37,27 +37,25 @@ export function WikiHanziCharacterHeaderOverview({
 
   const db = useDb();
 
-  const { data: decompositionEntries } = useLiveQuery(
-    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
-    [db.characterDecompositionsCollection],
-  );
+  const { data: decompositionEntries } = useLiveQuery({
+    query: (q) =>
+      q.from({ decomposition: db.characterDecompositionsCollection }),
+  });
 
-  const { data: characterData } = useLiveQuery(
-    (q) =>
+  const { data: characterData } = useLiveQuery({
+    query: (q) =>
       q
         .from({ character: db.characterCollection })
         .where(({ character }) => eq(character.hanzi, hanzi))
         .findOne(),
-    [db.characterCollection, hanzi],
-  );
+  });
 
-  const { data: characterComponentFormsData } = useLiveQuery(
-    (q) =>
+  const { data: characterComponentFormsData } = useLiveQuery({
+    query: (q) =>
       q
         .from({ character: db.characterCollection })
         .where(({ character }) => eq(character.componentFormOf, hanzi)),
-    [db.characterCollection, hanzi],
-  );
+  });
 
   const decompositionItems = deepDecomposeHanziWithStrokeSpecs(
     hanzi,

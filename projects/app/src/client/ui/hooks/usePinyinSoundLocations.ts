@@ -171,10 +171,9 @@ export function usePinyinSoundLocations(): UsePinyinSoundLocationsResult {
   const db = useDb();
   const r = useRizzle();
 
-  const { data: settings, isLoading } = useLiveQuery(
-    (q) => q.from({ setting: db.settingCollection }),
-    [db.settingCollection],
-  );
+  const { data: settings, isLoading } = useLiveQuery({
+    query: (q) => q.from({ setting: db.settingCollection }),
+  });
 
   const byLocationId = new Map<LocationId, LocationAccumulator>();
 

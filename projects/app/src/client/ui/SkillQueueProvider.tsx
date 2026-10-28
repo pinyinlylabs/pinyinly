@@ -60,13 +60,12 @@ function SkillQueueProvider({
   const db = useDb();
 
   const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
-    useLiveQuery(
-      (q) =>
+    useLiveQuery({
+      query: (q) =>
         q
           .from({ targetSkill: db.targetSkillsCollection })
           .orderBy(({ targetSkill }) => targetSkill.order, `asc`),
-      [db.targetSkillsCollection],
-    );
+    });
   const { data: dictionary } = useQuery(dictionaryQuery);
   const { data: charactersJson } = useQuery(charactersJsonQuery);
   const { data: skillRatingHistoryData } = useLiveQuery(
@@ -76,21 +75,19 @@ function SkillQueueProvider({
     ),
   );
   const { data: skillStateData, isLoading: isSkillStatesLoading } =
-    useLiveQuery(
-      (q) => q.from({ skillState: db.skillStateCollection }),
-      [db.skillStateCollection],
-    );
+    useLiveQuery({
+      query: (q) => q.from({ skillState: db.skillStateCollection }),
+    });
   const { data: studyWordsData, isLoading: isStudyWordsLoading } = useLiveQuery(
-    (q) => q.from({ word: db.bookmarkedHanziWordsCollection }),
-    [db.bookmarkedHanziWordsCollection],
+    { query: (q) => q.from({ word: db.bookmarkedHanziWordsCollection }) },
   );
   const {
     data: characterDecompositionData,
     isLoading: isCharacterDecompositionLoading,
-  } = useLiveQuery(
-    (q) => q.from({ decomposition: db.characterDecompositionsCollection }),
-    [db.characterDecompositionsCollection],
-  );
+  } = useLiveQuery({
+    query: (q) =>
+      q.from({ decomposition: db.characterDecompositionsCollection }),
+  });
 
   const skillSrsStates = useMemo(
     () =>

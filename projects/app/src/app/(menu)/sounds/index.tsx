@@ -95,13 +95,12 @@ export default function SoundsPage() {
     ],
   );
 
-  const { data: settings } = useLiveQuery(
-    (q) =>
+  const { data: settings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ setting: db.settingCollection })
         .where(({ setting }) => inArray(setting.key, relevantKeys)),
-    [db.settingCollection, relevantKeys],
-  );
+  });
 
   const settingsByKey = new Map(
     settings.map((setting) => [setting.key, setting.value]),

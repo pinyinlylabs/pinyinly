@@ -18,8 +18,8 @@ export const NewSkillModalContentNewWord = ({
   onDismiss: () => void;
 }) => {
   const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
@@ -29,8 +29,7 @@ export const NewSkillModalContentNewWord = ({
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   let pinyin: PinyinText | undefined;
   for (const entry of dictionaryEntries) {

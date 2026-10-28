@@ -29,8 +29,8 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
     [collectionId, hanzi],
   );
 
-  const { data: entriesWithDupes } = useLiveQuery(
-    (q) =>
+  const { data: entriesWithDupes } = useLiveQuery({
+    query: (q) =>
       q
         .from({ character: charactersCollection })
         .join({ entry: db.dictionaryCollection }, ({ character, entry }) =>
@@ -46,8 +46,7 @@ export function WikiHanziWordCharacters({ hanzi }: { hanzi: HanziText }) {
           gloss: entry.gloss,
           pinyin: entry.pinyin,
         })),
-    [db.dictionaryCollection, charactersCollection],
-  );
+  });
 
   const entries = entriesWithDupes.filter(arrayFilterUnique((x) => x.hanzi));
 

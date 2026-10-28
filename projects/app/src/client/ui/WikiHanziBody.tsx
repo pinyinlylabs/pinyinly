@@ -15,13 +15,12 @@ export function WikiHanziBody({
 }) {
   const db = useDb();
 
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   if (isHanziCharacter(hanzi)) {
     if (dictionaryEntries.length === 0) {
