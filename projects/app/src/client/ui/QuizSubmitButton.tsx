@@ -23,12 +23,14 @@ interface QuizSubmitButtonProps extends Pick<
   `onPress` | `ref`
 > {
   autoFocus?: boolean;
+  isChecking?: boolean;
   isUserAnswerProvided: boolean;
   rating: Rating | null | undefined;
 }
 
 export const QuizSubmitButton = ({
   autoFocus = false,
+  isChecking = false,
   isUserAnswerProvided,
   rating,
   onPress,
@@ -38,21 +40,25 @@ export const QuizSubmitButton = ({
 
   let text;
 
-  switch (rating) {
-    case undefined:
-    case null: {
-      text = `Check`;
-      break;
-    }
-    case Rating.Easy:
-    case Rating.Good:
-    case Rating.Hard: {
-      text = `Continue`;
-      break;
-    }
-    case Rating.Again: {
-      text = `Got it`;
-      break;
+  if (isChecking) {
+    text = `Checking`;
+  } else {
+    switch (rating) {
+      case undefined:
+      case null: {
+        text = `Check`;
+        break;
+      }
+      case Rating.Easy:
+      case Rating.Good:
+      case Rating.Hard: {
+        text = `Continue`;
+        break;
+      }
+      case Rating.Again: {
+        text = `Got it`;
+        break;
+      }
     }
   }
 
@@ -77,9 +83,9 @@ export const QuizSubmitButton = ({
       <RectButton
         variant="filled"
         ref={mergeRefs(buttonRef, ref)}
-        disabled={disabled}
+        disabled={disabled || isChecking}
         className={`flex-1`}
-        onPress={disabled ? undefined : onPress}
+        onPress={disabled || isChecking ? undefined : onPress}
       >
         {text}
       </RectButton>

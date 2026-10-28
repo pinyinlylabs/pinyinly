@@ -16,6 +16,7 @@ import type {
 import type { HanziCharacterWritingQuestionGrade } from "@/data/questions/hanziCharacterWriting";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
+import { scheduler } from "@/util/scheduler";
 import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import * as Sentry from "@sentry/react-native";
 import { emptyArray } from "@pinyinly/lib/collections";
@@ -76,16 +77,13 @@ export function QuizDeckHanziCharacterWritingQuestion({
   const hasMissingSimilarCharacter = missingSimilarCharacter != null;
   const canGrade = medianPaths.length > 0 && !hasMissingSimilarCharacter;
 
-  const handleSubmit = () => {
-    if (grade != null) {
-      onNext();
-      return;
-    }
+  async function gradeAnswer(): Promise<void> {
     if (!canGrade) {
       return;
     }
 
     const durationMs = timer.getDurationMs();
+    await scheduler.yield();
     const result = gradeHanziCharacterWritingQuestion(
       question,
       drawnStrokes,
@@ -95,7 +93,16 @@ export function QuizDeckHanziCharacterWritingQuestion({
     );
     setGrade(result);
     onRating(result.skillRatings, emptyArray);
-  };
+    await scheduler.yield();
+  }
+
+  async function handleSubmit(): Promise<void> {
+    if (grade != null) {
+      onNext();
+      return;
+    }
+    await gradeAnswer();
+  }
 
   function reportWrongGrade() {
     if (grade == null) {

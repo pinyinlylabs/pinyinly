@@ -1,5 +1,9 @@
 import type { PointerEvent } from "react";
 import { useId, useRef, useState } from "react";
+import {
+  maxWritingPointCount,
+  maxWritingStrokeCount,
+} from "@/util/shapeContextGrader";
 import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { View } from "@/client/ui/View";
@@ -53,6 +57,10 @@ export function HanziWritingCanvas({
   const pointsRef = useRef<WritingStrokePoint[]>([]);
   const isDrawingRef = useRef(false);
   const arrowMarkerId = `${useId()}-arrow`;
+  const drawnPointCount = drawnStrokes.reduce(
+    (total, stroke) => total + stroke.length,
+    0,
+  );
   const canUndo =
     !disabled &&
     guidedPathIndex == null &&
@@ -73,7 +81,11 @@ export function HanziWritingCanvas({
   }
 
   function onPointerDown(event: PointerEvent<SVGSVGElement>) {
-    if (disabled) {
+    if (
+      disabled ||
+      drawnStrokes.length >= maxWritingStrokeCount ||
+      drawnPointCount >= maxWritingPointCount
+    ) {
       return;
     }
 
@@ -85,12 +97,24 @@ export function HanziWritingCanvas({
   }
 
   function onPointerMove(event: PointerEvent<SVGSVGElement>) {
-    if (!isDrawingRef.current) {
+    if (
+      !isDrawingRef.current ||
+      drawnPointCount + pointsRef.current.length >= maxWritingPointCount
+    ) {
       return;
     }
 
-    pointsRef.current = [...pointsRef.current, getPoint(event)];
-    setActivePath(pathFromPoints(pointsRef.current));
+    const point = getPoint(event);
+    const previousPoint = pointsRef.current.at(-1);
+    if (
+      previousPoint != null &&
+      Math.hypot(point.x - previousPoint.x, point.y - previousPoint.y) < 2
+    ) {
+      return;
+    }
+
+    pointsRef.current.push(point);
+    setActivePath((path) => `${path} L ${point.x} ${point.y}`);
   }
 
   function onPointerUp() {
