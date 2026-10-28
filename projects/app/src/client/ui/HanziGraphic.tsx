@@ -40,31 +40,39 @@ type AnimatedGroupProps = ComponentProps<typeof G> & {
 const AnimatedGroup = G as ComponentType<AnimatedGroupProps>;
 
 export function HanziGraphic(props: {
+  /** SVG paths for the character's background strokes. */
   bgSvgPaths?: string[];
+  /** SVG paths for the foreground strokes. */
   fgSvgPaths?: string[];
-  animatedMedianPaths?: string[];
-  animationKey?: number;
+  /** Centerline paths corresponding by index to `fgSvgPaths`, used to animate them. */
+  fgSvgPathsMedians?: string[];
+  /** When true, render foreground paths statically instead of animating them. */
+  disableAnimation?: boolean;
+  /** When true, keep the foreground hidden until its animation starts. */
+  hideFgWhenIdle?: boolean;
+  /** Whether to render strokes with the bold outline width. Defaults to true. */
   bold?: boolean;
+  /** Accessible name for the SVG image. */
   accessibilityLabel?: string;
+  /** Additional classes applied to the SVG element. */
   className?: string;
 }) {
   const id = useId().replaceAll(`:`, ``);
-  const strokes = props.bgSvgPaths ?? props.fgSvgPaths ?? [];
-  const maskIds = strokes.map((_, index) => `${id}-stroke-${index}`);
-  const animatedMedianPaths = props.animatedMedianPaths;
+  const fgSvgPaths = props.fgSvgPaths ?? [];
+  const fgSvgPathsMedians = props.fgSvgPathsMedians;
+  const maskIds = fgSvgPaths.map((_, index) => `${id}-stroke-${index}`);
+  const disableAnimation = props.disableAnimation ?? false;
   const strokeWidth = (props.bold ?? true) ? 20 : undefined;
   const animatedGraphicDimDelay =
-    animatedMedianPaths == null
+    fgSvgPathsMedians == null || disableAnimation
       ? null
       : delayBeforeStart +
-        (animatedMedianPaths.length - 1) *
+        (fgSvgPathsMedians.length - 1) *
           (strokeAnimationDuration + delayBetweenStrokes) +
         strokeAnimationDuration;
 
-  // Remount the SVG so its dimming animation restarts together with the strokes.
   return (
     <Svg
-      key={props.animationKey}
       viewBox="0 0 1024 1024"
       width="256"
       height="256"
@@ -79,28 +87,30 @@ export function HanziGraphic(props: {
       accessibilityLabel={props.accessibilityLabel}
     >
       <Defs>
-        {animatedMedianPaths?.map((_, index) => {
-          const stroke = strokes[index];
-          return stroke == null ? null : (
-            <Mask
-              key={maskIds[index]}
-              id={maskIds[index]}
-              maskUnits="userSpaceOnUse"
-              maskContentUnits="userSpaceOnUse"
-              x="-1024"
-              y="-1024"
-              width="3072"
-              height="3072"
-            >
-              <SvgPath
-                d={stroke}
-                fill="white"
-                stroke="white"
-                strokeWidth={strokeWidth}
-              />
-            </Mask>
-          );
-        })}
+        {fgSvgPathsMedians == null || disableAnimation
+          ? null
+          : fgSvgPathsMedians.map((_, index) => {
+              const stroke = fgSvgPaths[index];
+              return stroke == null ? null : (
+                <Mask
+                  key={maskIds[index]}
+                  id={maskIds[index]}
+                  maskUnits="userSpaceOnUse"
+                  maskContentUnits="userSpaceOnUse"
+                  x="-1024"
+                  y="-1024"
+                  width="3072"
+                  height="3072"
+                >
+                  <SvgPath
+                    d={stroke}
+                    fill="white"
+                    stroke="white"
+                    strokeWidth={strokeWidth}
+                  />
+                </Mask>
+              );
+            })}
       </Defs>
       <G transform="scale(1, -1) translate(0, -900)">
         {props.bgSvgPaths?.map((d, i) => (
@@ -112,11 +122,11 @@ export function HanziGraphic(props: {
             strokeWidth={strokeWidth}
           />
         ))}
-        {animatedMedianPaths == null
+        {fgSvgPathsMedians == null || disableAnimation
           ? null
-          : strokes.map((d, index) => (
+          : fgSvgPaths.map((d, index) => (
               <SvgPath
-                key={`${id}-outline-${index}-${props.animationKey ?? 0}`}
+                key={`${id}-outline-${index}`}
                 d={d}
                 fill="none"
                 strokeClassName="accent-fg-bg40"
@@ -126,9 +136,11 @@ export function HanziGraphic(props: {
                 id={`${id}-outline-${index}`}
               />
             ))}
-        {animatedMedianPaths == null ? null : (
+        {fgSvgPathsMedians == null || disableAnimation ? null : (
           <AnimatedGroup
-            className="hanzi-animated-foreground"
+            className={
+              props.hideFgWhenIdle ? `hanzi-animated-foreground` : undefined
+            }
             style={
               animatedGraphicDimDelay == null
                 ? undefined
@@ -137,11 +149,11 @@ export function HanziGraphic(props: {
                   }
             }
           >
-            {animatedMedianPaths.map((d, index) => {
+            {fgSvgPathsMedians.map((d, index) => {
               const maskId = maskIds[index];
-              return maskId == null || strokes[index] == null ? null : (
+              return maskId == null || fgSvgPaths[index] == null ? null : (
                 <AnimatedPath
-                  key={`${maskId}-${props.animationKey ?? 0}`}
+                  key={maskId}
                   d={d}
                   mask={`url(#${maskId})`}
                   fill="none"
@@ -151,7 +163,7 @@ export function HanziGraphic(props: {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={animatedBrushWidth}
-                  stroke="var(--color-fg-loud)"
+                  stroke={`var(--color-fg-loud)`}
                   className="hanzi-animated-stroke"
                   style={{
                     "--hanzi-stroke-delay": `${delayBeforeStart + index * (strokeAnimationDuration + delayBetweenStrokes)}ms`,
@@ -164,15 +176,18 @@ export function HanziGraphic(props: {
             })}
           </AnimatedGroup>
         )}
-        {props.fgSvgPaths?.map((d, i) => (
-          <SvgPath
-            key={i}
-            d={d}
-            fillClassName="accent-fg-loud"
-            strokeClassName="accent-fg-loud"
-            strokeWidth={strokeWidth}
-          />
-        ))}
+        {props.hideFgWhenIdle ||
+        (fgSvgPathsMedians != null && !disableAnimation)
+          ? null
+          : props.fgSvgPaths?.map((d, i) => (
+              <SvgPath
+                key={i}
+                d={d}
+                fillClassName="accent-fg-loud"
+                strokeClassName="accent-fg-loud"
+                strokeWidth={strokeWidth}
+              />
+            ))}
       </G>
     </Svg>
   );

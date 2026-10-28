@@ -29,7 +29,9 @@ test.each([
                 key={`${bold}`}
                 className="size-40"
                 bgSvgPaths={strokes}
-                animatedMedianPaths={medians}
+                fgSvgPaths={strokes}
+                fgSvgPathsMedians={medians}
+                hideFgWhenIdle
                 bold={bold}
                 accessibilityLabel={`animated outline ${bold ? `bold` : `normal`}`}
               />
@@ -156,9 +158,14 @@ test(`matches background and foreground outline colors`, async () => {
         <HanziGraphic
           bgSvgPaths={strokes}
           fgSvgPaths={strokes.slice(0, 1)}
-          animatedMedianPaths={medians}
+          fgSvgPathsMedians={medians.slice(0, 1)}
           bold
-          accessibilityLabel="colored outlines"
+          accessibilityLabel="animated foreground"
+        />
+        <HanziGraphic
+          fgSvgPaths={strokes.slice(0, 1)}
+          bold
+          accessibilityLabel="static foreground"
         />
       </View>
     </Theme>,
@@ -179,25 +186,25 @@ test(`matches background and foreground outline colors`, async () => {
     ...graphic.querySelectorAll<SVGPathElement>(`path[id*="-outline-"]`),
   ];
   const animatedBrush = graphic.querySelector<SVGPathElement>(`path[mask]`);
+  const staticForeground = page
+    .getByRole(`img`, { name: `static foreground` })
+    .element()
+    .querySelector<SVGPathElement>(`g > path`)!;
 
-  expect(backgroundPaths).toHaveLength(4);
-  expect(animatedOutlines).toHaveLength(3);
+  expect(backgroundPaths).toHaveLength(3);
+  expect(animatedOutlines).toHaveLength(1);
   expect(animatedBrush).not.toBeNull();
-  expect(
-    backgroundPaths.slice(0, 3).map((path) => getComputedStyle(path).stroke),
-  ).toEqual(animatedOutlines.map((path) => getComputedStyle(path).stroke));
-  expect(getComputedStyle(backgroundPaths[3]!).stroke).toBe(
+  expect(getComputedStyle(backgroundPaths[0]!).stroke).toBe(
+    getComputedStyle(animatedOutlines[0]!).stroke,
+  );
+  expect(getComputedStyle(staticForeground).stroke).toBe(
     getComputedStyle(animatedBrush!).stroke,
   );
   expect(
     backgroundPaths.map((path) => path.getAttribute(`stroke-width`)),
-  ).toEqual([`20`, `20`, `20`, `20`]);
-  expect(
-    animatedOutlines.map((path) => path.getAttribute(`stroke-width`)),
   ).toEqual([`20`, `20`, `20`]);
   expect(
-    [...graphic.querySelectorAll(`g > path:not([mask]):not([id*="-outline-"])`)]
-      .at(-1)
-      ?.getAttribute(`stroke-width`),
-  ).toBe(`20`);
+    animatedOutlines.map((path) => path.getAttribute(`stroke-width`)),
+  ).toEqual([`20`]);
+  expect(staticForeground.getAttribute(`stroke-width`)).toBe(`20`);
 });
