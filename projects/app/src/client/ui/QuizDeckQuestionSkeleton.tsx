@@ -2,10 +2,12 @@ import type { Skill } from "@/data/model";
 import type { Rating } from "@/util/fsrs";
 import type { ReactNode } from "react";
 import { View } from "@/client/ui/View";
+import { useLockFn } from "@/client/ui/hooks/useLockFn";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import { RectButton } from "./RectButton";
+import { useState } from "react";
 
 interface QuizDeckQuestionSkeletonGrade {
   rating: Rating;
@@ -24,12 +26,26 @@ export function QuizDeckQuestionSkeleton({
   children: ReactNode;
   grade?: QuizDeckQuestionSkeletonGrade;
   isUserAnswerProvided: boolean;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void> | void;
   onChangeAnswer: () => void;
   onReportWrongGrade?: () => void;
   showIdkButton?: boolean;
   skill: Skill;
 }) {
+  const [isChecking, setIsChecking] = useState(false);
+  const submit = useLockFn(async () => {
+    const result = onSubmit();
+    if (result == null) {
+      return;
+    }
+
+    setIsChecking(true);
+    try {
+      await result;
+    } finally {
+      setIsChecking(false);
+    }
+  });
   const insets = useSafeAreaInsets();
   const submitButtonHeight = 44;
   const idkButtonHeight = showIdkButton ? 28 : 0;
@@ -70,7 +86,10 @@ export function QuizDeckQuestionSkeleton({
         >
           <RectButton
             variant="bareDim"
-            onPress={onSubmit}
+            disabled={isChecking}
+            onPress={() => {
+              void submit();
+            }}
             className="text-base text-muted-fg/50"
           >
             I don&apos;t know
@@ -86,9 +105,12 @@ export function QuizDeckQuestionSkeleton({
       >
         <QuizSubmitButton
           autoFocus={showIdkButton && grade != null}
+          isChecking={isChecking}
           isUserAnswerProvided={isUserAnswerProvided}
           rating={grade?.rating}
-          onPress={onSubmit}
+          onPress={() => {
+            void submit();
+          }}
         />
       </View>
     </View>

@@ -40,7 +40,7 @@ test.for([Rating.Easy, Rating.Good, Rating.Hard, Rating.Again])(
               skill="hp:test:meaning"
               grade={graded ? { rating } : undefined}
               isUserAnswerProvided
-              onSubmit={() => {}}
+              onSubmit={() => undefined}
               onChangeAnswer={() => {}}
               showIdkButton
             >

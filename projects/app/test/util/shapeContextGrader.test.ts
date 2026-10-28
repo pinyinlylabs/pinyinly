@@ -9,6 +9,9 @@ import {
 import type { SimilarCharacterReference } from "#data/questions/hanziCharacterWriting.ts";
 import {
   gradeCharacterShape,
+  limitWritingStrokes,
+  maxWritingPointCount,
+  maxWritingStrokeCount,
   shapeContextGraderDefaults,
 } from "#util/shapeContextGrader.ts";
 import type { WritingStrokePoint } from "#util/shapeContextGrader.ts";
@@ -42,6 +45,7 @@ type HandwritingEvaluationRecord = {
   combinedCost: number;
   initialMatchingError: number;
   residualMatchingError: number;
+  sampleCount: number;
   durationMs: number;
   rotationDegrees: number;
   weightedScoreContributions: ReturnType<
@@ -242,6 +246,7 @@ function recordHandwritingEvaluation({
     combinedCost: geometry.combinedCost,
     initialMatchingError: geometry.initialMatchingError,
     residualMatchingError: geometry.residualMatchingError,
+    sampleCount: geometry.sampleCount,
     durationMs,
     rotationDegrees: geometry.rotationDegrees,
     weightedScoreContributions: geometry.weightedScoreContributions,
@@ -359,7 +364,6 @@ const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
     drawnStrokes: `300.8,158;300.1,162.7;297.7,197.7;290.5,241.3;279.4,288.2;265.9,334.2;251.6,381;238.9,424.7;227,466;216.7,502.5;207.2,535;199.2,560.4;192.9,581.1;189.7,594.6;188.1,602.5;188.1,607.3;188.1,609.7;188.1,610.4;188.9,610.4;190.5,610.4;191.3,610.4;192.1,610.4;192.9,610.4;195.3,610.4;202.4,615.2;216.7,631.9;238.9,658.1;264.3,685.1;291.3,712.1;318.3,732.7;340.5,750.2;354.8,766;363.6,781.1;367.5,795.4;368.3,810.5;368.3,816.8|413.6,427.1;381.8,462;373.1,476.3;362,496.1;339.7,538.2;315.1,585;286.6,634.3;255.6,683.5;225.4,730.3;198.4,768.4;177.8,795.4;163.5,808.1|98.4,505.7;108.8,499.3;148.4,488.2;156.4,486.6;185,483.4;227,480.3;270.7,475.5;314.3,467.6;355.6,457.2;365.1,454.9|462.8,500.9;473.1,496.1;495.3,494.6;508.8,490.6;523.9,485;561.2,473.9;599.3,463.6;640.6,453.3;681.9,439.8;721.6,426.3;762,415.2;800.1,404.1;832.7,397.7;855.7,394.5;868.4,393.7;874.8,393.7;877.1,393.7;877.1,402.5;877.1,419.1;874,444.5;868.4,475.5;863.7,516;860.5,562;858.9,608.1;858.1,650.1;858.1,680.3;855.7,697.8;851,704.1;846.2,706.5;842.2,706.5;838.3,706.5;832.7,706.5;823.2,706.5;808.9,706.5;789.8,693;771.6,675.5;755.7,655.7;747,646.2|717.6,157.2;709.7,251.7;707.3,277.8;703.3,308.8;694.6,375.5;687.4,452.5;678.7,533.5;671.6,602.5;661.2,647.8;650.1,666.8|565.2,273.1;564.4,286.6;564.4,329.4;564.4,339;562.8,367.5;558,408;551.7,451.7;543.8,503.3;535.8,560.4;527.1,613.6;520.7,659.7;514.4,697.8;509.6,730.3;506.4,754.9;506.4,773.2;506.4,786.7;506.4,797;508,804.9;514.4,811.3;523.9,816;538.2,819.2;558.8,823.2;582.6,828.7;608.8,837.5;635.8,847;662,856.5;689,862.9;712,866.8;735.1,868.4;758.1,868.4;780.3,867.6;799.4,863.7;816,860.5;827.1,858.1;833.5,857.3;836.7,857.3;837.5,857.3;839.8,857.3;843.8,857.3;847,856.5;851,855.7;854.9,854.9;857.3,854.9;860.5,853.4;864.4,849.4;870.8,830.3;881.1,769.2;887.5,710.5`,
   },
   {
-    fails: true,
     id: `她-1792722474262`,
     drawnStrokes: `284.2,100;277,140.5;277.8,146.1;272.3,176.2;260.4,219.9;246.9,269.9;231,327.1;216.7,388.2;203.2,447.7;192.1,498.5;182.6,539;175.4,566;170.7,584.3;168.3,593;168.3,594.6;173.8,595.4;184.2,602.5;204,620.8;234.2,655.7;268.3,695.4;303.2,731.1;331.8,756.5;354,774;364.4,779.5|427.1,362.8;421.5,369.9;401.7,406.4;396.9,417.6;382.6,454.1;356.4,508;322.3,566;281,623.9;240.5,677.1;208,718.4;183.4,742.2;170.7,747|118.3,484.2;144.5,471.5;154.8,469.9;180.2,469.9;223.9,465.2;269.1,458.8;316.7,452.5;367.5,443;390.5,435.8|408,511.2;430.2,507.3;462,506.5;472.3,504.9;506.4,495.3;559.6,478.7;613.6,458.8;669.2,435;723.9,408;779.5,385;830.3,367.5;873.2,356.4;900.2,355.6;910.5,361.2;911.3,383.4;911.3,413.6;905.7,450.9;897.8,493;892.2,539.8;886.7,587.4;881.9,633.5;876.4,670;870.8,691.4;863.7,696.2;860.5,696.2;858.1,696.2;856.5,696.2;855.7,694.6;852.5,692.2;847,686.7;835.1,677.1;815.2,664.4;789,650.9;764.4,640.6;745.4,632.7;733.5,622.4|714.4,165.1;699.3,216.7;697,233.4;692.2,268.3;676.3,335;655.7,416.8;637.4,506.5;628.7,584.3;624.7,640.6;620,671.6|539.8,250.9;540.6,271.5;540.6,292.9;539.8,306.4;537.4,319.9;531.8,347.7;525.5,377.9;519.1,405.6;512,436.6;505.6,468.4;501.7,500.9;497.7,531.9;495.3,560.4;493.7,584.3;493.7,602.5;493.7,619.2;493.7,635.9;493.7,652.5;493.7,667.6;494.5,681.9;495.3,694.6;496.1,707.3;496.9,716.8;498.5,724.8;500.1,731.1;500.9,735.1;502.5,739;504.1,742.2;505.6,744.6;507.2,746.2;509.6,747.8;511.2,748.6;513.6,749.4;516,749.4;517.6,750.2;520.7,750.2;523.9,750.2;526.3,751.7;530.3,753.3;534.2,754.9;539,756.5;543,758.1;549.3,760.5;556.5,762.1;564.4,764.4;574.7,766.8;585,768.4;597.7,769.2;611.2,770.8;627.1,772.4;644.6,774;663.6,774.8;683.5,776.4;703.3,778.7;722.4,781.1;741.4,784.3;759.7,786.7;777.1,789.8;794.6,792.2;812.1,793.8;829.5,794.6;846.2,794.6;862.1,794.6;877.1,785.9;893.8,769.2;912.1,742.2;935.1,699.4`,
   },
@@ -528,6 +532,39 @@ describe(`gradeCharacterShape`, () => {
     expect(result.correspondences.length).toBeGreaterThan(
       result.sourcePoints.length - 2,
     );
+  });
+
+  test(`grades a complex character within the sample limit`, async () => {
+    const paths = await characterPathsFor(`饿`);
+    const similarReferences = await visuallySimilarReferencesFor(`饿`);
+    const drawnStrokes = pointsForPaths(paths);
+    const gradingStartedAt = performance.now();
+    const result = gradeCharacterShape(drawnStrokes, paths);
+    const similarCharacterGrades = gradeSimilarCharacters(
+      drawnStrokes,
+      similarReferences,
+      result.options,
+      result.sampleCount,
+    );
+    const accepted = isHanziCharacterWritingAccepted(
+      result,
+      similarCharacterGrades,
+    );
+    recordHandwritingEvaluation({
+      example: {
+        id: `饿-synthetic-identity`,
+        drawnStrokes: encodeShapeContextStrokes(drawnStrokes),
+      },
+      expectedAcceptance: true,
+      actualAcceptance: accepted,
+      geometry: result,
+      similarCharacterGrades,
+      durationMs: performance.now() - gradingStartedAt,
+    });
+
+    expect(result.similarity).toBeGreaterThan(0.9);
+    expect(result.sampleCount).toBeLessThanOrEqual(80);
+    expect(accepted).toBe(true);
   });
 
   test(`geometry coverage detects missing and extra segments`, () => {
@@ -883,6 +920,41 @@ describe(`gradeCharacterShape`, () => {
     expect(result.sourceStrokeSampleCounts.every((count) => count >= 2)).toBe(
       true,
     );
+  });
+
+  test(`caps raw handwriting points and stroke count`, () => {
+    const longStroke = Array.from(
+      { length: maxWritingPointCount * 2 },
+      (_, x) => ({ x, y: 0 }),
+    );
+    const limitedLongStroke = limitWritingStrokes([longStroke]);
+    const limitedManyStrokes = limitWritingStrokes(
+      Array.from({ length: maxWritingStrokeCount + 1 }, () => [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ]),
+    );
+
+    expect(limitedLongStroke[0]).toHaveLength(maxWritingPointCount);
+    expect(limitedLongStroke[0]?.[0]).toEqual({ x: 0, y: 0 });
+    expect(limitedLongStroke[0]?.at(-1)).toEqual({
+      x: maxWritingPointCount * 2 - 1,
+      y: 0,
+    });
+    expect(limitedManyStrokes).toHaveLength(maxWritingStrokeCount);
+    expect(
+      limitedManyStrokes.reduce((total, stroke) => total + stroke.length, 0),
+    ).toBeLessThanOrEqual(maxWritingPointCount);
+  });
+
+  test(`bounds default sampling for long reference shapes`, () => {
+    const paths = Array.from(
+      { length: 30 },
+      (_, index) => `M 0 ${index * 10} L 1000 ${index * 10}`,
+    );
+    const result = gradeCharacterShape(pointsForPaths(paths), paths);
+
+    expect(result.sampleCount).toBeLessThanOrEqual(80);
   });
 
   for (const example of positiveHandwritingExamples) {

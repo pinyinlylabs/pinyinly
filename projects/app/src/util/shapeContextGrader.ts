@@ -1,8 +1,47 @@
 import SVGPathCommander from "svg-path-commander";
 
+// shortcut: 4096 points and 64 strokes, raise if valid handwriting is clipped.
+export const maxWritingPointCount = 4096;
+export const maxWritingStrokeCount = 64;
+
 export interface WritingStrokePoint {
   x: number;
   y: number;
+}
+
+export function limitWritingStrokes(
+  strokes: readonly (readonly WritingStrokePoint[])[],
+): WritingStrokePoint[][] {
+  let remainingPointCount = maxWritingPointCount;
+  const limitedStrokes: WritingStrokePoint[][] = [];
+  for (const stroke of strokes.slice(0, maxWritingStrokeCount)) {
+    if (remainingPointCount === 0) {
+      break;
+    }
+
+    if (stroke.length <= remainingPointCount) {
+      limitedStrokes.push([...stroke]);
+      remainingPointCount -= stroke.length;
+      continue;
+    }
+
+    const sampledStroke: WritingStrokePoint[] = [];
+    for (let index = 0; index < remainingPointCount; index++) {
+      const sourceIndex =
+        remainingPointCount === 1
+          ? 0
+          : Math.round(
+              (index * (stroke.length - 1)) / (remainingPointCount - 1),
+            );
+      const point = stroke[sourceIndex];
+      if (point != null) {
+        sampledStroke.push(point);
+      }
+    }
+    limitedStrokes.push(sampledStroke);
+    break;
+  }
+  return limitedStrokes;
 }
 
 export interface ShapeContextOptions {
@@ -117,6 +156,7 @@ export const shapeContextGraderDefaults: ShapeContextOptions = {
 const radialMinimum = 0.125;
 const radialMaximum = 2.5;
 const geometryCoverageTolerance = 0.06;
+const defaultSampleCountLimit = 80;
 
 interface SampledShape {
   points: WritingStrokePoint[];
@@ -178,19 +218,20 @@ function distance(a: WritingStrokePoint, b: WritingStrokePoint): number {
 }
 
 function pathLength(path: string): number {
-  return SVGPathCommander.getTotalLength(path);
+  return new SVGPathCommander(path).length;
 }
 
 function samplePath(path: string, count: number): WritingStrokePoint[] {
-  const length = pathLength(path);
+  const parsedPath = new SVGPathCommander(path);
+  const length = parsedPath.length;
   if (!(length > 0)) {
     return [];
   }
   if (count === 1) {
-    return [SVGPathCommander.getPointAtLength(path, length / 2)];
+    return [parsedPath.getPointAtLength(length / 2)];
   }
   return Array.from({ length: count }, (_, index) =>
-    SVGPathCommander.getPointAtLength(path, (length * index) / (count - 1)),
+    parsedPath.getPointAtLength((length * index) / (count - 1)),
   );
 }
 
@@ -485,7 +526,7 @@ function resolvedSampleCount(
     Math.max(
       8,
       Math.min(
-        256,
+        defaultSampleCountLimit,
         Math.ceil(normalizedReferenceLength / settings.sampleSpacing),
       ),
     );
@@ -1386,7 +1427,10 @@ export function gradeCharacterShape(
     settings,
     sampleCountOverride,
   );
-  const source = sampleStrokes(drawnStrokes, sampling.count);
+  const source = sampleStrokes(
+    limitWritingStrokes(drawnStrokes),
+    sampling.count,
+  );
   const target = samplePaths(referencePaths, sampling.count);
   const sourcePoints = source.points;
   const targetPoints = target.points;
