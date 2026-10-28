@@ -190,6 +190,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
             "
             disabled={grade != null}
             guidedPaths={grade == null ? undefined : medianPaths}
+            animateReferencePaths={grade != null}
             drawnStrokes={drawnStrokes}
             gradeResult={
               grade == null ? null : grade.correct ? `correct` : `incorrect`
