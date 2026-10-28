@@ -1,4 +1,4 @@
-import type { PointerEvent } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import { useId, useRef, useState } from "react";
 import {
   maxWritingPointCount,
@@ -6,7 +6,13 @@ import {
 } from "@/util/shapeContextGrader";
 import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import { ButtonGroup } from "@/client/ui/ButtonGroup";
+import { hanziStrokeAnimationTiming } from "@/client/ui/HanziStrokeAnimation";
 import { View } from "@/client/ui/View";
+
+type AnimatedGuidedPathStyle = CSSProperties & {
+  "--hanzi-stroke-delay": string;
+  "--hanzi-stroke-duration": string;
+};
 
 function pathFromPoints(points: readonly WritingStrokePoint[]): string {
   return points
@@ -35,6 +41,7 @@ export function HanziWritingCanvas({
   disabled = false,
   hideGrid = false,
   guidedPaths,
+  animateReferencePaths = false,
   guidedPathIndex,
   drawnStrokes = [],
   gradeResult,
@@ -46,6 +53,7 @@ export function HanziWritingCanvas({
   disabled?: boolean;
   hideGrid?: boolean;
   guidedPaths?: readonly string[];
+  animateReferencePaths?: boolean;
   guidedPathIndex?: number;
   drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
   gradeResult?: `correct` | `incorrect` | null;
@@ -141,6 +149,13 @@ export function HanziWritingCanvas({
     setActivePath(``);
   }
 
+  function getAnimatedGuidedPathStyle(index: number): AnimatedGuidedPathStyle {
+    return {
+      "--hanzi-stroke-delay": `${hanziStrokeAnimationTiming.delayBeforeStart + index * (hanziStrokeAnimationTiming.strokeAnimationDuration + hanziStrokeAnimationTiming.delayBetweenStrokes)}ms`,
+      "--hanzi-stroke-duration": `${hanziStrokeAnimationTiming.strokeAnimationDuration}ms`,
+    };
+  }
+
   function undoLastStroke() {
     if (canUndo) {
       if (activePath.length > 0) {
@@ -198,18 +213,40 @@ export function HanziWritingCanvas({
             pointerEvents="none"
           />
         )}
-        {guidedPaths?.map((path, index) => (
-          <path
-            key={`guided:${index}`}
-            d={path}
-            fill="none"
-            stroke="#e2e2e2"
-            strokeWidth="48"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
-          />
-        ))}
+        {guidedPaths == null ? null : (
+          <g opacity="0.8" pointerEvents="none">
+            {guidedPaths.map((path, index) => (
+              <path
+                key={`guided:${index}`}
+                d={path}
+                fill="none"
+                stroke="#e2e2e2"
+                strokeWidth="48"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))}
+          </g>
+        )}
+        {animateReferencePaths && guidedPathIndex == null
+          ? guidedPaths?.map((path, index) => (
+              <path
+                key={`guided-animated:${index}`}
+                d={path}
+                fill="none"
+                pathLength={1}
+                strokeDasharray="1"
+                strokeDashoffset={1}
+                stroke="#e2e2e2"
+                strokeWidth="48"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="hanzi-animated-reference-stroke"
+                style={getAnimatedGuidedPathStyle(index)}
+                pointerEvents="none"
+              />
+            ))
+          : null}
         {guidedPathIndex == null
           ? null
           : guidedPaths

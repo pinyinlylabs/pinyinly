@@ -1,6 +1,8 @@
 import { HanziWritingCanvas } from "#client/ui/HanziWritingCanvas.tsx";
+import { Theme } from "#client/ui/Theme.tsx";
 import { View } from "#client/ui/View.tsx";
 import type { WritingStrokePoint } from "#util/shapeContextGrader.ts";
+import "#global.css";
 import { assert, expect, test, vi } from "vitest";
 import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
@@ -228,3 +230,91 @@ test.for([false, true])(
     expect(onStrokesChange).toHaveBeenCalledTimes(disabled ? 0 : 1);
   },
 );
+
+test(`captures the reference-path animation mid-progress`, async () => {
+  const guidedPaths = [`M 120 220 H 900`, `M 512 120 V 900`, `M 160 820 H 860`];
+  await render(
+    <Theme theme="default">
+      <View testID="guided-animation-snapshot" className="w-72 bg-bg p-4">
+        <HanziWritingCanvas
+          className="size-64"
+          disabled
+          hideGrid
+          guidedPaths={guidedPaths}
+          animateReferencePaths
+          onStrokesChange={vi.fn()}
+        />
+      </View>
+    </Theme>,
+  );
+
+  const root = page.getByTestId(`guided-animation-snapshot`);
+  await expect.element(root).toBeInTheDocument();
+  const svg = root.element().querySelector(`svg`);
+  assert(svg != null);
+  const animatedPaths = [
+    ...svg.querySelectorAll<SVGPathElement>(`.hanzi-animated-reference-stroke`),
+  ];
+  expect(animatedPaths).toHaveLength(guidedPaths.length);
+  expect(
+    animatedPaths.map((path) => path.getAttribute(`stroke-width`)),
+  ).toEqual([`48`, `48`, `48`]);
+  const dimGroup = svg.querySelector<SVGGElement>(`g[opacity="0.8"]`);
+  assert(dimGroup != null);
+  const dimPaths = [
+    ...dimGroup.querySelectorAll<SVGPathElement>(`path[stroke-width="48"]`),
+  ];
+  expect(dimPaths).toHaveLength(guidedPaths.length);
+  expect(animatedPaths.map((path) => getComputedStyle(path).stroke)).toEqual(
+    dimPaths.map((path) => getComputedStyle(path).stroke),
+  );
+  expect(animatedPaths.map((path) => getComputedStyle(path).stroke)).toEqual([
+    `rgb(226, 226, 226)`,
+    `rgb(226, 226, 226)`,
+    `rgb(226, 226, 226)`,
+  ]);
+  expect(getComputedStyle(dimGroup).opacity).toBe(`0.8`);
+  expect(dimPaths.map((path) => getComputedStyle(path).opacity)).toEqual([
+    `1`,
+    `1`,
+    `1`,
+  ]);
+  expect(animatedPaths.map((path) => getComputedStyle(path).opacity)).toEqual([
+    `0`,
+    `0`,
+    `0`,
+  ]);
+
+  const animations = svg.getAnimations({ subtree: true });
+  for (const animation of animations) {
+    animation.pause();
+  }
+  await Promise.all(animations.map(async (animation) => animation.ready));
+  for (const animation of animations) {
+    animation.currentTime = 800;
+  }
+
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+
+  const progress = animatedPaths.map((path) => {
+    const strokeAnimation = path.getAnimations()[0];
+    assert(strokeAnimation != null);
+    const value = strokeAnimation.effect?.getComputedTiming().progress;
+    expect(value).not.toBeNull();
+    return Math.round((value ?? 0) * 100);
+  });
+  expect(progress).toEqual([100, 17, 0]);
+  expect(Number(getComputedStyle(animatedPaths[1]!).opacity)).toBeGreaterThan(
+    0,
+  );
+  expect(Number(getComputedStyle(animatedPaths[1]!).opacity)).toBeLessThan(1);
+  await expect(root).toMatchScreenshot(`reference-animation-mid-progress`, {
+    screenshotOptions: { animations: `allow` },
+  });
+});

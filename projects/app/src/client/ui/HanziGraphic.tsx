@@ -3,12 +3,9 @@ import type { ComponentProps, ComponentType, CSSProperties } from "react";
 import { Platform } from "react-native";
 // oxlint-disable-next-line no-restricted-imports
 import { Defs, G, Mask, Path, Svg } from "react-native-svg";
+import { hanziStrokeAnimationTiming } from "./HanziStrokeAnimation";
 import { SvgPath } from "./SvgPath";
 
-const strokeAnimationDuration = 300;
-const brushGrowthDuration = 100;
-const delayBetweenStrokes = 200;
-const delayBeforeStart = 250;
 const animatedBrushWidth = 180;
 
 type AnimatedPathStyle = CSSProperties & {
@@ -66,10 +63,11 @@ export function HanziGraphic(props: {
   const animatedGraphicDimDelay =
     fgSvgPathsMedians == null || disableAnimation
       ? null
-      : delayBeforeStart +
+      : hanziStrokeAnimationTiming.delayBeforeStart +
         (fgSvgPathsMedians.length - 1) *
-          (strokeAnimationDuration + delayBetweenStrokes) +
-        strokeAnimationDuration;
+          (hanziStrokeAnimationTiming.strokeAnimationDuration +
+            hanziStrokeAnimationTiming.delayBetweenStrokes) +
+        hanziStrokeAnimationTiming.strokeAnimationDuration;
 
   return (
     <Svg
@@ -166,9 +164,9 @@ export function HanziGraphic(props: {
                   stroke={`var(--color-fg-loud)`}
                   className="hanzi-animated-stroke"
                   style={{
-                    "--hanzi-stroke-delay": `${delayBeforeStart + index * (strokeAnimationDuration + delayBetweenStrokes)}ms`,
-                    "--hanzi-stroke-duration": `${strokeAnimationDuration}ms`,
-                    "--hanzi-brush-growth-duration": `${brushGrowthDuration}ms`,
+                    "--hanzi-stroke-delay": `${hanziStrokeAnimationTiming.delayBeforeStart + index * (hanziStrokeAnimationTiming.strokeAnimationDuration + hanziStrokeAnimationTiming.delayBetweenStrokes)}ms`,
+                    "--hanzi-stroke-duration": `${hanziStrokeAnimationTiming.strokeAnimationDuration}ms`,
+                    "--hanzi-brush-growth-duration": `${hanziStrokeAnimationTiming.brushGrowthDuration}ms`,
                     "--hanzi-brush-growth-width": `${animatedBrushWidth}px`,
                   }}
                 />
