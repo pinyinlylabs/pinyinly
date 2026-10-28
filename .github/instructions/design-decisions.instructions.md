@@ -79,6 +79,9 @@ same skill; failures in another skill temporarily suspend the current plan and r
 nested plan is complete. Further mistakes in the active skill do not erase successful attempts
 already completed.
 
+Focused writing and pinyin-component practice steps use the existing weak-word flag, while the
+general retry fallback remains “Previous mistake.”
+
 Typed-pinyin mistakes are categorized together as initial, final, and tone bit flags so future
 remediators can target any of those dimensions. The skill queue reads projected rating events from
 its own incremental live query collection rather than reusing the history-page collection.

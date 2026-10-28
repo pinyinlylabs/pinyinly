@@ -1005,11 +1005,13 @@ interface SkillReviewQueueRemediationStep {
   skill: Skill;
   successfulAttempts: number;
   completedAttempts: number;
+  flag?: QuestionFlagType;
 }
 
 export interface SkillReviewQueueRemediationStepSpec {
   skill: Skill;
   successfulAttempts: number;
+  flag?: QuestionFlagType;
 }
 
 interface SkillReviewQueueRemediationPlan {
@@ -1061,7 +1063,13 @@ export const writingSkillReviewQueueRemediator: SkillReviewQueueRemediator = (
     Number.isInteger(successfulAttempts) && successfulAttempts > 0,
     `writingSuccessfulAttempts must be a positive integer`,
   );
-  return [{ skill: event.skill, successfulAttempts }];
+  return [
+    {
+      skill: event.skill,
+      successfulAttempts,
+      flag: { kind: QuestionFlagKind.WeakWord },
+    },
+  ];
 };
 
 function typedPinyinComponentRemediationPlan({
@@ -1093,10 +1101,12 @@ function typedPinyinComponentRemediationPlan({
     {
       skill: focusedSkill(hanziWord),
       successfulAttempts: focusedSuccessfulAttempts,
+      flag: { kind: QuestionFlagKind.WeakWord },
     },
     {
       skill: event.skill,
       successfulAttempts: typedSuccessfulAttempts,
+      flag: { kind: QuestionFlagKind.WeakWord },
     },
   ];
 }
@@ -1153,6 +1163,7 @@ function typedPinyinComponentPlanForEvent(
   steps.push({
     skill: event.skill,
     successfulAttempts: typedSuccessfulAttempts,
+    flag: { kind: QuestionFlagKind.WeakWord },
   });
   return steps;
 }
@@ -1703,7 +1714,7 @@ export function skillReviewQueue({
   if (activeRemediationStep != null && maxQueueItems > items.length) {
     items.push({
       skill: activeRemediationStep.skill,
-      flag: { kind: QuestionFlagKind.Retry },
+      flag: activeRemediationStep.flag ?? { kind: QuestionFlagKind.Retry },
     });
   }
 

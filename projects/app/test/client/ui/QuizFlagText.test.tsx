@@ -6,6 +6,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
 describe(`QuizFlagText`, () => {
+  test(`shows weak word label`, () => {
+    render(<QuizFlagText flag={{ kind: QuestionFlagKind.WeakWord }} />);
+
+    expect(screen.getByText(`Weak word`)).toBeInTheDocument();
+  });
+
   test(`rounds sub-minute overdue durations up to 1 minute`, () => {
     const now = new Date();
 
