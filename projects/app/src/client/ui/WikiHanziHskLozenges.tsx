@@ -5,13 +5,12 @@ import { useDb } from "./hooks/useDb";
 
 export function WikiHanziHskLozenges({ hanzi }: { hanzi: HanziText }) {
   const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi)),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   return <HskLozengeWithTooltip entries={dictionaryEntries} />;
 }

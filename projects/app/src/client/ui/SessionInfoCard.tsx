@@ -40,10 +40,9 @@ function SessionInfoCardInner({
   showDetails,
 }: SessionInfoCardProps) {
   const db = useDb();
-  const skillResult = useLiveQuery(
-    (q) => q.from({ skillState: db.skillStateCollection }),
-    [db.skillStateCollection],
-  );
+  const skillResult = useLiveQuery({
+    query: (q) => q.from({ skillState: db.skillStateCollection }),
+  });
 
   const isAuthenticated = session.serverSessionId != null;
   const displayName =

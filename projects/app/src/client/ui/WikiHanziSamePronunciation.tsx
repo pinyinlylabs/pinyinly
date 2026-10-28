@@ -12,8 +12,8 @@ const maxSamePronunciationEntries = 5;
 export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
   const db = useDb();
 
-  const { data: currentEntries } = useLiveQuery(
-    (q) =>
+  const { data: currentEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
@@ -21,13 +21,12 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
           direction: `desc`,
           nulls: `last`,
         }),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   const primaryPinyin = currentEntries[0]?.pinyin?.[0];
 
-  const { data: matchingEntries } = useLiveQuery(
-    (q) => {
+  const { data: matchingEntries } = useLiveQuery({
+    query: (q) => {
       if (primaryPinyin == null) {
         return null;
       }
@@ -45,8 +44,7 @@ export function WikiHanziSamePronunciation({ hanzi }: { hanzi: HanziText }) {
           nulls: `last`,
         });
     },
-    [db.dictionaryCollection, hanzi, primaryPinyin],
-  );
+  });
 
   if (primaryPinyin == null) {
     return null;

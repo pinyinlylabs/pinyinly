@@ -25,13 +25,12 @@ export function useBookmarksList(): UseBookmarksListResult {
   const db = useDb();
   const r = useRizzle();
 
-  const { data: words, isLoading } = useLiveQuery(
-    (q) =>
+  const { data: words, isLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ word: db.bookmarkedWordsCollection })
         .orderBy(({ word }) => word.createdAt, `desc`),
-    [db.bookmarkedWordsCollection],
-  );
+  });
 
   const addWord = (hanziWord: HanziWord) => {
     const keyParams = getStudyWordKeyParams(hanziWord);

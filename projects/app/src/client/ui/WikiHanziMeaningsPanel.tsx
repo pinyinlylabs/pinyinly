@@ -32,23 +32,21 @@ export function WikiHanziMeaningsPanel({
 }: WikiHanziMeaningsPanelProps) {
   const db = useDb();
 
-  const { data: builtInMeanings } = useLiveQuery(
-    (q) =>
+  const { data: builtInMeanings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
           and(eq(entry.hanzi, hanzi), eq(entry.sourceKind, `builtIn`)),
         ),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
-  const { data: userMeanings } = useLiveQuery(
-    (q) =>
+  const { data: userMeanings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ dictionary: db.userDictionary })
         .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
-    [db.userDictionary, hanzi],
-  );
+  });
 
   const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
 

@@ -139,15 +139,14 @@ export function MenuDictionarySearch() {
 
 function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
   const db = useDb();
-  const { data: dictionaryEntry } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntry } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanziWord, hanziWord))
         .select(({ entry }) => ({ gloss: entry.gloss, pinyin: entry.pinyin }))
         .findOne(),
-    [db.dictionaryCollection, hanziWord],
-  );
+  });
 
   return (
     <>

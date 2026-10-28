@@ -26,14 +26,13 @@ export function WikiHanziBodyCharacter({
   const db = useDb();
   const skillSrsStates = useSkillSrsStates();
 
-  const { data: dictionaryEntry } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntry } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
         .findOne(),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   const hanziWord = dictionaryEntry?.hanziWord ?? null;
 

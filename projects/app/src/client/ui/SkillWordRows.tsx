@@ -29,17 +29,15 @@ export function SkillWordRows({
   sortByProgress?: boolean;
 }) {
   const db = useDb();
-  const { data: skillStates } = useLiveQuery(
-    (q) => q.from({ skillState: db.skillStateCollection }),
-    [db.skillStateCollection],
-  );
-  const { data: meanings } = useLiveQuery(
-    (q) =>
+  const { data: skillStates } = useLiveQuery({
+    query: (q) => q.from({ skillState: db.skillStateCollection }),
+  });
+  const { data: meanings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => inArray(entry.hanziWord, [...hanziWords])),
-    [db.dictionaryCollection, hanziWords],
-  );
+  });
   const meaningsByWord = new Map(
     meanings.map((meaning) => [meaning.hanziWord, meaning]),
   );

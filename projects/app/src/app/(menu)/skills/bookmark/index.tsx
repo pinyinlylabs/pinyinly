@@ -8,10 +8,9 @@ import { View } from "@/client/ui/View";
 
 export default function BookmarksPage() {
   const db = useDb();
-  const { data: words, isLoading } = useLiveQuery(
-    (q) => q.from({ word: db.bookmarkedHanziWordsCollection }),
-    [db.bookmarkedHanziWordsCollection],
-  );
+  const { data: words, isLoading } = useLiveQuery({
+    query: (q) => q.from({ word: db.bookmarkedHanziWordsCollection }),
+  });
 
   return (
     <View className="gap-5">

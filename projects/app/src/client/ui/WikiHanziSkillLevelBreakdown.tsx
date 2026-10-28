@@ -18,16 +18,15 @@ export function WikiHanziSkillLevelBreakdownBox({
   const db = useDb();
   const hanzi = hanziFromHanziWord(hanziWord);
   const meaningKey = meaningKeyFromHanziWord(hanziWord);
-  const { data: builtInMeaning } = useLiveQuery(
-    (q) =>
+  const { data: builtInMeaning } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanziWord, hanziWord))
         .findOne(),
-    [db.dictionaryCollection, hanziWord],
-  );
-  const { data: userMeaning } = useLiveQuery(
-    (q) =>
+  });
+  const { data: userMeaning } = useLiveQuery({
+    query: (q) =>
       q
         .from({ dictionary: db.userDictionary })
         .where(({ dictionary }) =>
@@ -37,8 +36,7 @@ export function WikiHanziSkillLevelBreakdownBox({
           ),
         )
         .findOne(),
-    [db.userDictionary, hanzi, meaningKey],
-  );
+  });
   const hasPinyin =
     builtInMeaning?.pinyin?.[0] != null || userMeaning?.pinyin != null;
 

@@ -14,16 +14,15 @@ export default () => {
   const db = useDb();
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
   const skill = hanziWordToGlossTyped(hanziWord);
-  const { data: meanings } = useLiveQuery(
-    (q) =>
+  const { data: meanings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanziFromHanziWord(hanziWord)))
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
         .select(({ entry }) => ({ hanziWord: entry.hanziWord }))
         .distinct(),
-    [db.dictionaryCollection, hanziWord],
-  );
+  });
   const flag =
     meanings.length > 1
       ? {

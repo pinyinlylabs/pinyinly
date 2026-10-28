@@ -74,15 +74,14 @@ function ActiveLegacyStudySelectionsCleanup() {
   const db = useDb();
   const rizzle = useRizzle();
   const pending = useRef(new Set<string>());
-  const { data: settings, isLoading } = useLiveQuery(
-    (q) =>
+  const { data: settings, isLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ setting: db.settingCollection })
         .where(({ setting }) =>
           like(setting.key, `${studyWordItemSetting.entity.keyPrefix}%`),
         ),
-    [db.settingCollection],
-  );
+  });
 
   useEffect(() => {
     if (isLoading) {

@@ -15,17 +15,16 @@ export function WikiHanziCharacterUsedInCharacters({
 }) {
   const db = useDb();
 
-  const { data: componentUsageRows } = useLiveQuery(
-    (q) =>
+  const { data: componentUsageRows } = useLiveQuery({
+    query: (q) =>
       q
         .from({ usage: db.characterComponentUsage })
         .where(({ usage }) => eq(usage.component, hanzi))
         .select(({ usage }) => ({ usedInHanzi: usage.usedInHanzi })),
-    [db.characterComponentUsage, hanzi],
-  );
+  });
 
-  const { data: entriesWithDupes } = useLiveQuery(
-    (q) => {
+  const { data: entriesWithDupes } = useLiveQuery({
+    query: (q) => {
       const usedInHanzi = (componentUsageRows[0]?.usedInHanzi ?? []).filter(
         (item) => item !== hanzi,
       );
@@ -47,8 +46,7 @@ export function WikiHanziCharacterUsedInCharacters({
               pinyin: entry.pinyin,
             }));
     },
-    [db.dictionaryCollection, componentUsageRows, hanzi],
-  );
+  });
 
   const entries = (entriesWithDupes ?? [])
     .filter(arrayFilterUnique((item) => item.hanzi))

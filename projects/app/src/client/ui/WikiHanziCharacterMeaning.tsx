@@ -51,8 +51,8 @@ export function WikiHanziCharacterMeaning({
   const [isEditMode, setIsEditMode] = useState(false);
   const db = useDb();
 
-  const { data: mnemonicDecomposition } = useLiveQuery(
-    (q) => {
+  const { data: mnemonicDecomposition } = useLiveQuery({
+    query: (q) => {
       const mnemonicQuery = q
         .from({ mnemonic: db.characterMnemonicIdsCollection })
         .where(({ mnemonic }) => eq(mnemonic.hanzi, hanzi))
@@ -67,12 +67,7 @@ export function WikiHanziCharacterMeaning({
         .select(({ decomposition }) => decomposition)
         .findOne();
     },
-    [
-      db.characterDecompositionsCollection,
-      db.characterMnemonicIdsCollection,
-      hanzi,
-    ],
-  );
+  });
 
   // const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
 
@@ -99,8 +94,8 @@ export function WikiHanziCharacterMeaning({
   }
   const dedupedHanziListKey = [...new Set(hanziList)].join(`|`);
 
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) => {
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) => {
       if (dedupedHanziListKey.length === 0) {
         return null;
       }
@@ -117,11 +112,10 @@ export function WikiHanziCharacterMeaning({
           gloss: entry.gloss,
         }));
     },
-    [db.dictionaryCollection, dedupedHanziListKey],
-  );
+  });
 
-  const { data: primaryMeaningEntries } = useLiveQuery(
-    (q) =>
+  const { data: primaryMeaningEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
@@ -130,8 +124,7 @@ export function WikiHanziCharacterMeaning({
         .select(({ entry }) => ({
           gloss: entry.gloss,
         })),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   const primaryMeaningGloss =
     primaryMeaningEntries[0]?.gloss[0]?.trim().length === 0
@@ -190,8 +183,8 @@ function CoverImageSection({
   isEditMode: boolean;
 }) {
   const db = useDb();
-  const { data: hanziWordMeanings } = useLiveQuery(
-    (q) =>
+  const { data: hanziWordMeanings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
@@ -201,8 +194,7 @@ function CoverImageSection({
           hanziWord: entry.hanziWord,
           gloss: entry.gloss,
         })),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
   const hanziWord = hanziWordMeanings[0]?.hanziWord;
   const meaning = hanziWordMeanings.find(
     (item) => item.hanziWord === hanziWord,
@@ -291,8 +283,8 @@ function MeaningsSection({
   isEditMode: boolean;
 }) {
   const db = useDb();
-  const { data: hanziWordMeanings } = useLiveQuery(
-    (q) =>
+  const { data: hanziWordMeanings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) => eq(entry.hanzi, hanzi))
@@ -304,8 +296,7 @@ function MeaningsSection({
           pinyin: entry.pinyin,
           hsk: entry.hsk,
         })),
-    [db.dictionaryCollection, hanzi],
-  );
+  });
 
   const userHintSettingKeys = hanziWordMeanings.flatMap((entry) => {
     const key = { hanziWord: entry.hanziWord };
@@ -315,15 +306,14 @@ function MeaningsSection({
     ];
   });
 
-  const { data: userHintSettings } = useLiveQuery(
-    (q) =>
+  const { data: userHintSettings } = useLiveQuery({
+    query: (q) =>
       userHintSettingKeys.length === 0
         ? null
         : q
             .from({ setting: db.settingCollection })
             .where(({ setting }) => inArray(setting.key, userHintSettingKeys)),
-    [db.settingCollection, userHintSettingKeys],
-  );
+  });
 
   const userHintKeysWithContent = new Set(
     (userHintSettings ?? [])

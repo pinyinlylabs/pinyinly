@@ -34,14 +34,13 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
 
   const db = useDb();
 
-  const { data: characterData } = useLiveQuery(
-    (q) =>
+  const { data: characterData } = useLiveQuery({
+    query: (q) =>
       q
         .from({ character: db.characterCollection })
         .where(({ character }) => eq(character.hanzi, hanzi))
         .findOne(),
-    [db.characterCollection, hanzi],
-  );
+  });
   return (
     <View className="gap-3 pl-4">
       <View className="flex-row items-center gap-1">

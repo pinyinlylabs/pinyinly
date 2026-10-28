@@ -250,15 +250,14 @@ function MnemonicStoryRoleSection({
   const finalLocationSelectionKeysCsv = finalSoundIds
     .map((soundId) => pinyinSoundLocationSetting.entity.marshalKey({ soundId }))
     .join(`,`);
-  const { data: finalLocationSelectionSettings } = useLiveQuery(
-    (q) =>
+  const { data: finalLocationSelectionSettings } = useLiveQuery({
+    query: (q) =>
       q
         .from({ setting: db.settingCollection })
         .where(({ setting }) =>
           inArray(setting.key, finalLocationSelectionKeysCsv.split(`,`)),
         ),
-    [db.settingCollection, finalLocationSelectionKeysCsv],
-  );
+  });
   const finalPlaceSelectionSetting = useUserSetting(
     isFinalSound
       ? {
@@ -644,8 +643,8 @@ function SoundUsageExamplesSection({
   pinyinSoundId: PinyinSoundId;
 }) {
   const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .where(({ entry }) =>
@@ -662,8 +661,7 @@ function SoundUsageExamplesSection({
           hsk: entry.hsk,
           hskFirstAppearance: entry.hskFirstAppearance,
         })),
-    [db.dictionaryCollection],
-  );
+  });
   const usageExamples = pickSoundUsageExamplesForEntries({
     allEntries: dictionaryEntries,
     limit: 5,

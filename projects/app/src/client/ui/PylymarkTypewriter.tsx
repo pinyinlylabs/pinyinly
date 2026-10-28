@@ -34,8 +34,8 @@ export const PylymarkTypewriter = ({
   onAnimateEnd?: () => void;
 }) => {
   const db = useDb();
-  const { data: dictionaryEntries } = useLiveQuery(
-    (q) =>
+  const { data: dictionaryEntries } = useLiveQuery({
+    query: (q) =>
       q
         .from({ entry: db.dictionaryCollection })
         .orderBy(({ entry }) => entry.hskSortKey, `asc`)
@@ -44,8 +44,7 @@ export const PylymarkTypewriter = ({
           hanziWord: entry.hanziWord,
           gloss: entry.gloss,
         })),
-    [db.dictionaryCollection],
-  );
+  });
   const dictionaryEntriesByWord = useMemo(() => {
     const entriesByWord = new Map<string, { gloss: string[] }>();
     for (const entry of dictionaryEntries) {
