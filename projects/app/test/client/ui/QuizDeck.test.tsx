@@ -366,3 +366,36 @@ test(`replaces the reported review and corrects quiz progress`, async () => {
 
   view.unmount();
 });
+
+test(`waits for the original review save before undoing a reported review`, async () => {
+  mocks.skillQueue = skillQueue([firstSkill]);
+  let finishOriginalSave = () => {};
+  mocks.rateSkill.mockImplementationOnce(
+    async () =>
+      new Promise<void>((resolve) => {
+        finishOriginalSave = resolve;
+      }),
+  );
+  const view = render(<QuizDeck />);
+
+  await screen.findByRole(`button`, { name: `Continue` });
+  fireEvent.click(
+    screen.getByRole(`button`, { name: `Record incorrect rating` }),
+  );
+  fireEvent.click(screen.getByRole(`button`, { name: `Report rating` }));
+  await waitFor(() => {
+    expect(mocks.rateSkill).toHaveBeenCalledTimes(1);
+  });
+  expect(mocks.undoReview).not.toHaveBeenCalled();
+
+  finishOriginalSave();
+  await waitFor(() => {
+    expect(mocks.undoReview).toHaveBeenCalledTimes(1);
+    expect(mocks.rateSkill).toHaveBeenCalledTimes(2);
+  });
+  expect(mocks.undoReview.mock.invocationCallOrder[0]).toBeGreaterThan(
+    mocks.rateSkill.mock.invocationCallOrder[0] ?? Infinity,
+  );
+
+  view.unmount();
+});
