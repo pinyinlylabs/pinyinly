@@ -12,7 +12,7 @@ import type {
   PinyinUnitSuggestions,
 } from "@/data/pinyin";
 import { pinyinUnitSuggestions } from "@/data/pinyin";
-import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
+import type { HanziToPinyinTypedQuestionRating } from "@/data/questions/hanziWordToPinyinTyped";
 import {
   gradeHanziToPinyinTypedQuestion,
   shouldAutoSubmitPinyinTypedAnswer,
@@ -60,7 +60,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
 
   const userAnswerRef = useRef(``);
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
-  const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
+  const [rating, setRating] = useState<HanziToPinyinTypedQuestionRating>();
 
   const timer = useQuizTimer();
   const hanziCharacters = splitHanziText(
@@ -68,18 +68,20 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   );
 
   const submit = () => {
-    // First time you press the button it will grade your answer, the next time
-    // it moves you to the next question.
-    if (grade == null) {
+    // First press checks your answer; the next one moves to the next question.
+    if (rating == null) {
       const durationMs = timer.getDurationMs();
-      const grade = gradeHanziToPinyinTypedQuestion(
+      const questionRating = gradeHanziToPinyinTypedQuestion(
         question,
         userAnswerRef.current,
         durationMs,
       );
 
-      setGrade(grade);
-      onRating(grade.skillRatings, grade.correct ? emptyArray : grade.mistakes);
+      setRating(questionRating);
+      onRating(
+        questionRating.skillRatings,
+        questionRating.correct ? emptyArray : questionRating.mistakes,
+      );
     } else {
       onNext();
     }
@@ -87,7 +89,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
 
   return (
     <QuizDeckQuestionSkeleton
-      grade={grade}
+      rating={rating}
       isUserAnswerProvided={!isUserAnswerEmpty}
       onSubmit={submit}
       onChangeAnswer={onChangeAnswer}
@@ -134,7 +136,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
       </View>
       <PinyinTextInputSingle
         autoFocus={!noAutoFocus}
-        editable={grade == null}
+        editable={rating == null}
         onChangeText={(text, suggestionAccepted) => {
           userAnswerRef.current = text;
           setIsUserAnswerEmpty(text.trim().length === 0);
@@ -168,7 +170,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={ratingToInputState(isUserAnswerEmpty, grade?.rating)}
+        state={ratingToInputState(isUserAnswerEmpty, rating?.rating)}
       />
     </QuizDeckQuestionSkeleton>
   );

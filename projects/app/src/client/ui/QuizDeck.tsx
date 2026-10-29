@@ -177,6 +177,56 @@ export const QuizDeck = ({
     }
   };
 
+  async function saveReview(
+    ratings: readonly UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+    now: number,
+    reviewId: string,
+  ) {
+    for (const { skill, rating, durationMs } of ratings) {
+      await r.mutate
+        .rateSkill({
+          id: nanoid(),
+          now,
+          skill,
+          durationMs,
+          rating,
+          reviewId,
+        })
+        .catch((error: unknown) => {
+          console.error(`Could not add skill rating`, error);
+        });
+    }
+
+    for (const mistake of mistakes) {
+      switch (mistake.kind) {
+        case MistakeKind.HanziGloss: {
+          await r.mutate.saveHanziGlossMistake({
+            id: nanoid(),
+            now,
+            hanziOrHanziWord: mistake.hanziOrHanziWord,
+            gloss: mistake.gloss,
+            reviewId,
+          });
+          break;
+        }
+        case MistakeKind.HanziPinyin: {
+          await r.mutate.saveHanziPinyinMistake({
+            id: nanoid(),
+            now,
+            hanziOrHanziWord: mistake.hanziOrHanziWord,
+            pinyin: mistake.pinyin,
+            reviewId,
+          });
+          break;
+        }
+        case MistakeKind.HanziPinyinInitial: {
+          throw new Error(`todo: not implemented`);
+        }
+      }
+    }
+  }
+
   const handleRating = useEventCallback(
     (
       ratings: readonly UnsavedSkillRating[],
@@ -196,54 +246,38 @@ export const QuizDeck = ({
       const reviewId = nanoid();
 
       void (async () => {
-        for (const { skill, rating, durationMs } of ratings) {
-          await r.mutate
-            .rateSkill({
-              id: nanoid(),
-              now,
-              skill,
-              durationMs,
-              rating,
-              reviewId,
-            })
-            .catch((error: unknown) => {
-              console.error(`Could not add skill rating`, error);
-            });
-        }
-
-        for (const mistake of mistakes) {
-          switch (mistake.kind) {
-            case MistakeKind.HanziGloss: {
-              await r.mutate.saveHanziGlossMistake({
-                id: nanoid(),
-                now,
-                hanziOrHanziWord: mistake.hanziOrHanziWord,
-                gloss: mistake.gloss,
-                reviewId,
-              });
-              break;
-            }
-            case MistakeKind.HanziPinyin: {
-              await r.mutate.saveHanziPinyinMistake({
-                id: nanoid(),
-                now,
-                hanziOrHanziWord: mistake.hanziOrHanziWord,
-                pinyin: mistake.pinyin,
-                reviewId,
-              });
-              break;
-            }
-            case MistakeKind.HanziPinyinInitial: {
-              throw new Error(`todo: not implemented`);
-            }
-          }
-        }
+        await saveReview(ratings, mistakes, now, reviewId);
       })().catch((error: unknown) => {
         console.error(`error in async handling in handleRating`, error);
       });
 
       setLatestReviewId(reviewId);
       quizProgress.recordAnswer(success);
+    },
+  );
+
+  const handleReportedRating = useEventCallback(
+    (
+      ratings: readonly UnsavedSkillRating[],
+      mistakes: readonly MistakeType[],
+    ) => {
+      invariant(ratings.length > 0, `ratings must not be empty`);
+      invariant(latestReviewId != null, `reported rating must have a review`);
+
+      const previousReviewId = latestReviewId;
+      const reviewId = nanoid();
+      const now = Date.now();
+      const correct = ratings.every(({ rating }) => rating !== Rating.Again);
+
+      void (async () => {
+        await r.mutate.undoReview({ reviewId: previousReviewId, now });
+        await saveReview(ratings, mistakes, now, reviewId);
+      })().catch((error: unknown) => {
+        console.error(`error in async handling in handleReportedRating`, error);
+      });
+
+      setLatestReviewId(reviewId);
+      quizProgress.replaceAnswer(correct);
     },
   );
 
@@ -298,6 +332,7 @@ export const QuizDeck = ({
             question={question}
             onNext={handleNext}
             onRating={handleRating}
+            onReportWrongRating={handleReportedRating}
             onChangeAnswer={handleChangeAnswer}
           />
         </Suspense>
@@ -366,6 +401,7 @@ export const QuizDeck = ({
                 question={nextQuestion}
                 onNext={handleNext}
                 onRating={handleRating}
+                onReportWrongRating={handleReportedRating}
                 onChangeAnswer={handleChangeAnswer}
               />
             </Suspense>

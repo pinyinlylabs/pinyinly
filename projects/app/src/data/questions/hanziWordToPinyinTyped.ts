@@ -86,7 +86,7 @@ function validQuestionInvariant<T extends Question>(question: T): T {
   return question;
 }
 
-export type HanziToPinyinTypedQuestionGrade =
+export type HanziToPinyinTypedQuestionRating =
   | {
       correct: true;
       rating: Rating;
@@ -108,7 +108,7 @@ export function gradeHanziToPinyinTypedQuestion(
   question: HanziWordToPinyinTypedQuestion,
   userAnswer: string,
   durationMs: number,
-): HanziToPinyinTypedQuestionGrade {
+): HanziToPinyinTypedQuestionRating {
   let actualUnits = matchAllPinyinUnits(userAnswer as PinyinText);
 
   // If there were no syllables found (e.g. the user entered some invalid pinyin

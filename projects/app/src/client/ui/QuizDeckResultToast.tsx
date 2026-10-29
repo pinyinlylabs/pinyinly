@@ -19,7 +19,7 @@ export function QuizDeckResultToast({
   rating,
   disableAnimation = false,
   onChangeAnswer,
-  onReportWrongGrade,
+  onReportWrongRating,
 }: {
   skill: Skill;
   rating: Rating;
@@ -28,7 +28,7 @@ export function QuizDeckResultToast({
    */
   disableAnimation?: boolean;
   onChangeAnswer: () => void;
-  onReportWrongGrade?: () => void;
+  onReportWrongRating?: () => void;
 }) {
   const cleanupAnimationRef = useRef<(() => void) | null>(null);
 
@@ -89,7 +89,7 @@ export function QuizDeckResultToast({
                     </Text>
                     <QuizResultDropdown
                       onChangeAnswer={onChangeAnswer}
-                      onReportWrongGrade={onReportWrongGrade}
+                      onReportWrongRating={onReportWrongRating}
                     />
                   </View>
                 ) : rating === Rating.Good ? (
@@ -100,7 +100,7 @@ export function QuizDeckResultToast({
                     </Text>
                     <QuizResultDropdown
                       onChangeAnswer={onChangeAnswer}
-                      onReportWrongGrade={onReportWrongGrade}
+                      onReportWrongRating={onReportWrongRating}
                     />
                   </View>
                 ) : rating === Rating.Hard ? (
@@ -112,7 +112,7 @@ export function QuizDeckResultToast({
                       </Text>
                       <QuizResultDropdown
                         onChangeAnswer={onChangeAnswer}
-                        onReportWrongGrade={onReportWrongGrade}
+                        onReportWrongRating={onReportWrongRating}
                       />
                     </View>
                     <Text className="font-sans text-lg/none text-fg">
@@ -130,7 +130,7 @@ export function QuizDeckResultToast({
                         </Text>
                         <QuizResultDropdown
                           onChangeAnswer={onChangeAnswer}
-                          onReportWrongGrade={onReportWrongGrade}
+                          onReportWrongRating={onReportWrongRating}
                         />
                       </View>
                       <Text className="font-sans text-xl/none font-medium text-fg">
@@ -154,12 +154,12 @@ export function QuizDeckResultToast({
 
 function QuizResultDropdown({
   onChangeAnswer,
-  onReportWrongGrade,
+  onReportWrongRating,
 }: {
   onChangeAnswer?: () => void;
-  onReportWrongGrade?: () => void;
+  onReportWrongRating?: () => void;
 }) {
-  if (onChangeAnswer == null && onReportWrongGrade == null) {
+  if (onChangeAnswer == null && onReportWrongRating == null) {
     return null;
   }
 
@@ -169,9 +169,9 @@ function QuizResultDropdown({
         <DropdownMenu2.Trigger asChild>
           <RectButton
             variant="bare"
-            iconStart={onReportWrongGrade == null ? `more-horizontal` : `flag`}
+            iconStart={onReportWrongRating == null ? `more-horizontal` : `flag`}
             accessibilityLabel={
-              onReportWrongGrade == null ? `More options` : `Report a problem`
+              onReportWrongRating == null ? `More options` : `Report a problem`
             }
           />
         </DropdownMenu2.Trigger>
@@ -181,14 +181,14 @@ function QuizResultDropdown({
               <Text>Change answer</Text>
             </DropdownMenu2.Item>
           )}
-          {onReportWrongGrade == null ? null : (
+          {onReportWrongRating == null ? null : (
             <DropdownMenu2.Sub>
               <DropdownMenu2.SubTrigger>
                 <Text>Report a problem</Text>
               </DropdownMenu2.SubTrigger>
               <DropdownMenu2.SubContent>
-                <DropdownMenu2.Item onPress={onReportWrongGrade}>
-                  <Text>Wrong grade</Text>
+                <DropdownMenu2.Item onPress={onReportWrongRating}>
+                  <Text>Wrong rating</Text>
                 </DropdownMenu2.Item>
               </DropdownMenu2.SubContent>
             </DropdownMenu2.Sub>

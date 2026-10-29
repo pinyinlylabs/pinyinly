@@ -6,20 +6,22 @@ import { View } from "@/client/ui/View";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import {
   gradeHanziCharacterWritingQuestion,
-  createHanziCharacterWritingGradeReportJson,
+  createHanziCharacterWritingRatingReportJson,
 } from "@/data/questions/hanziCharacterWriting";
+import { computeSkillRating } from "@/data/skills";
 import type {
   HanziCharacterWritingQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
-import type { HanziCharacterWritingQuestionGrade } from "@/data/questions/hanziCharacterWriting";
+import type { HanziCharacterWritingQuestionRating } from "@/data/questions/hanziCharacterWriting";
 import { getAudioSourcesByPinyinMap } from "@/data/pinyinSoundAudio";
 import { transformArphicSpaceSvgPath } from "@/util/svgFont";
 import { scheduler } from "@/util/scheduler";
 import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import * as Sentry from "@sentry/react-native";
 import { emptyArray } from "@pinyinly/lib/collections";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { useState } from "react";
 import { HanziWritingCanvas } from "./HanziWritingCanvas";
@@ -34,6 +36,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
   question,
   onNext,
   onRating,
+  onReportWrongRating,
   onChangeAnswer,
 }: {
   question: HanziCharacterWritingQuestion;
@@ -42,12 +45,16 @@ export function QuizDeckHanziCharacterWritingQuestion({
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
+  onReportWrongRating?: (
+    ratings: readonly UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+  ) => void;
   onChangeAnswer: () => void;
 }) {
   const [drawnStrokes, setDrawnStrokes] = useState<WritingStrokePoint[][]>([]);
-  const [grade, setGrade] = useState<HanziCharacterWritingQuestionGrade | null>(
-    null,
-  );
+  const [rating, setRating] =
+    useState<HanziCharacterWritingQuestionRating | null>(null);
+  const [hasReportedRating, setHasReportedRating] = useState(false);
   const timer = useQuizTimer();
   const [{ data: svgData }, { data: wikiData }] = useSuspenseQueries({
     queries: [
@@ -91,50 +98,66 @@ export function QuizDeckHanziCharacterWritingQuestion({
       durationMs,
       similarCharacterReferences,
     );
-    setGrade(result);
+    setRating(result);
     onRating(result.skillRatings, emptyArray);
     await scheduler.yield();
   }
 
   async function handleSubmit(): Promise<void> {
-    if (grade != null) {
+    if (rating != null) {
       onNext();
       return;
     }
     await gradeAnswer();
   }
 
-  function reportWrongGrade() {
-    if (grade == null) {
+  function reportWrongRating() {
+    if (rating == null || hasReportedRating) {
       return;
     }
 
-    const reportJson = createHanziCharacterWritingGradeReportJson({
+    const reportJson = createHanziCharacterWritingRatingReportJson({
       question,
-      grade,
+      rating,
       drawnStrokes,
     });
-    Sentry.captureMessage(`User reported a handwriting grade`, {
+    Sentry.captureMessage(`User reported a handwriting rating`, {
       tags: {
-        [`report-kind`]: `handwriting-grade`,
-        [`handwriting-grade-error-type`]: grade.correct
+        [`report-kind`]: `handwriting-rating`,
+        [`handwriting-rating-error-type`]: rating.correct
           ? `false-positive`
           : `false-negative`,
       },
-      extra: { [`handwriting-grade-report-json`]: reportJson },
+      extra: { [`handwriting-rating-report-json`]: reportJson },
+    });
+
+    const originalSkillRating = nonNullable(rating.skillRatings[0]);
+    const correctedRating = computeSkillRating({
+      skill: originalSkillRating.skill,
+      correct: !rating.correct,
+      durationMs: originalSkillRating.durationMs,
+    });
+    onReportWrongRating?.([correctedRating], emptyArray);
+    setHasReportedRating(true);
+    setRating({
+      ...rating,
+      correct: !rating.correct,
+      rating: correctedRating.rating,
+      skillRatings: [correctedRating],
+      failure: rating.correct ? rating.failure : null,
     });
   }
 
   return (
     <QuizDeckQuestionSkeleton
-      grade={grade ?? undefined}
+      rating={rating ?? undefined}
       isUserAnswerProvided={drawnStrokes.length > 0 && canGrade}
       onSubmit={handleSubmit}
       onChangeAnswer={onChangeAnswer}
-      onReportWrongGrade={
-        grade == null || drawnStrokes.length === 0
+      onReportWrongRating={
+        rating == null || drawnStrokes.length === 0 || hasReportedRating
           ? undefined
-          : reportWrongGrade
+          : reportWrongRating
       }
       showIdkButton={canGrade}
       skill={question.skill}
@@ -188,12 +211,12 @@ export function QuizDeckHanziCharacterWritingQuestion({
 
               sm:aspect-square sm:w-auto sm:max-w-full
             "
-            disabled={grade != null}
-            guidedPaths={grade == null ? undefined : medianPaths}
-            animateReferencePaths={grade != null}
+            disabled={rating != null}
+            guidedPaths={rating == null ? undefined : medianPaths}
+            animateReferencePaths={rating != null}
             drawnStrokes={drawnStrokes}
-            gradeResult={
-              grade == null ? null : grade.correct ? `correct` : `incorrect`
+            ratingResult={
+              rating == null ? null : rating.correct ? `correct` : `incorrect`
             }
             onStrokeStart={() => {
               timer.pause();
@@ -204,19 +227,19 @@ export function QuizDeckHanziCharacterWritingQuestion({
             }}
           />
         </View>
-        {grade?.failure === `shape` ? (
+        {rating?.failure === `shape` ? (
           <Text className="text-danger">
             The overall shape does not match closely enough yet. Review the
             guide and try again.
           </Text>
         ) : null}
-        {grade?.failure === `contrastive` ? (
+        {rating?.failure === `contrastive` ? (
           <Text className="text-danger">
             A visually similar character matched at least as closely. Check the
             distinguishing strokes and try again.
           </Text>
         ) : null}
-        {grade?.correct === false ? (
+        {rating?.correct === false ? (
           <Text className="text-danger">
             Expected character: {question.hanzi}
           </Text>
