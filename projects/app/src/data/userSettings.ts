@@ -243,6 +243,62 @@ export const autoCheckUserToggleSetting = defineUserSetting({
   }) satisfies UserSettingToggleableEntity,
 });
 
+export const practiceMeaningUserToggleSetting = defineUserSetting({
+  entity: r.entity(`practiceMeaning`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const practicePronunciationUserToggleSetting = defineUserSetting({
+  entity: r.entity(`practicePronunciation`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const practiceWritingUserToggleSetting = defineUserSetting({
+  entity: r.entity(`practiceWriting`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const studyBookmarksUserToggleSetting = defineUserSetting({
+  entity: r.entity(`studyBookmarks`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const studyHsk1UserToggleSetting = defineUserSetting({
+  entity: r.entity(`studyHsk1`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const studyHsk2UserToggleSetting = defineUserSetting({
+  entity: r.entity(`studyHsk2`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const studyHsk3UserToggleSetting = defineUserSetting({
+  entity: r.entity(`studyHsk3`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
+export const studyHsk4UserToggleSetting = defineUserSetting({
+  entity: r.entity(`studyHsk4`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
 export const userNameTextSetting = defineUserSetting({
   entity: r.entity(`userName`, {
     text: r.string().alias(`t`),
@@ -684,6 +740,14 @@ export const userSettingDefinitions = [
   aiImagePlaygroundTextSetting,
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
+  practiceMeaningUserToggleSetting,
+  practicePronunciationUserToggleSetting,
+  practiceWritingUserToggleSetting,
+  studyBookmarksUserToggleSetting,
+  studyHsk1UserToggleSetting,
+  studyHsk2UserToggleSetting,
+  studyHsk3UserToggleSetting,
+  studyHsk4UserToggleSetting,
   pinyinSoundLocationSetting,
   pronunciationMnemonicSelectedSetting,
   pronunciationMnemonicImagePromptSetting,

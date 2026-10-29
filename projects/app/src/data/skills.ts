@@ -71,14 +71,30 @@ export interface Node {
 
 export type SkillLearningGraph = Map<Skill, Node>;
 
+export const skillPracticeCategories = [
+  `meaning`,
+  `pronunciation`,
+  `writing`,
+] as const;
+export type SkillPracticeCategory = (typeof skillPracticeCategories)[number];
+
 export function skillLearningGraph(options: {
   targetSkills: Skill[];
   includeDependencies?: boolean;
+  excludedPracticeCategories?: ReadonlySet<SkillPracticeCategory>;
   decompositionData: readonly CharacterDecompositionRow[];
   dictionary: Dictionary;
   charactersJson: CharactersJson;
 }): SkillLearningGraph {
   const graph: SkillLearningGraph = new Map();
+  const isExcluded = (skill: Skill) => {
+    const category = skillPracticeCategoryFromSkillKind(
+      skillKindFromSkill(skill),
+    );
+    return (
+      category != null && options.excludedPracticeCategories?.has(category)
+    );
+  };
 
   const decomposeHanzi = memoize1((hanzi: HanziCharacter) =>
     shallowDecomposeHanziCharacter(
@@ -90,7 +106,7 @@ export function skillLearningGraph(options: {
 
   function addSkill(skill: Skill): void {
     // Skip doing any work if the skill is already in the graph.
-    if (graph.has(skill)) {
+    if (graph.has(skill) || isExcluded(skill)) {
       return;
     }
 
@@ -104,7 +120,7 @@ export function skillLearningGraph(options: {
             decomposeHanzi,
             options.dictionary,
             options.charactersJson,
-          );
+          ).filter((dependency) => !isExcluded(dependency));
 
     const node: Node = { skill, dependencies: new Set(dependencies) };
     graph.set(skill, node);
@@ -142,6 +158,37 @@ export function isHanziWordToPinyinSkillKind(skillKind: SkillKind): boolean {
     skillKind === SkillKind.HanziWordToPinyinTone ||
     skillKind === SkillKind.HanziWordToPinyinTyped
   );
+}
+
+export function skillPracticeCategoryFromSkillKind(
+  skillKind: SkillKind,
+): SkillPracticeCategory | null {
+  switch (skillKind) {
+    case SkillKind.HanziWordToGloss:
+    case SkillKind.HanziWordToGlossTyped:
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.ImageToHanziWord:
+      return `meaning`;
+
+    case SkillKind.HanziWordToPinyinInitial:
+    case SkillKind.HanziWordToPinyinFinal:
+    case SkillKind.HanziWordToPinyinTone:
+    case SkillKind.HanziWordToPinyinTyped:
+    case SkillKind.PinyinToHanziWord:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinFinalAssociation:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated_PinyinToRadical:
+      return `pronunciation`;
+
+    case SkillKind.HanziCharacterToWriting:
+      return `writing`;
+
+    case SkillKind.Deprecated:
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_RadicalToEnglish:
+      return null;
+  }
 }
 
 export const skillKindFromSkill = (skill: Skill): SkillKind => {

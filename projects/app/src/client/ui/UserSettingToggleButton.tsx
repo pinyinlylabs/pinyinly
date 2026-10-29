@@ -5,17 +5,22 @@ import type { UserSettingToggleableEntity } from "@/data/userSettings";
 
 export function UserSettingToggleButton({
   entity,
+  defaultEnabled = false,
+  accessibilityLabel,
 }: {
   entity: UserSettingEntityLike<UserSettingToggleableEntity>;
+  defaultEnabled?: boolean;
+  accessibilityLabel?: string;
 }) {
   const { isLoading, value, setValue } = useUserSetting({ setting: entity });
 
   return (
     <ToggleButton
-      isActive={isLoading ? null : (value?.enabled ?? false)}
+      isActive={isLoading ? null : (value?.enabled ?? defaultEnabled)}
+      accessibilityLabel={accessibilityLabel}
       onPress={() => {
         setValue((prev) => {
-          const prevEnabled = prev?.enabled ?? false;
+          const prevEnabled = prev?.enabled ?? defaultEnabled;
           return { ...prev, enabled: !prevEnabled };
         });
       }}

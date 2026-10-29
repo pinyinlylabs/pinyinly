@@ -39,6 +39,7 @@ import {
   retryFailedSkillReviewQueueRemediator,
   skillKindFromSkill,
   skillLearningGraph,
+  skillPracticeCategoryFromSkillKind,
   skillReviewQueueRemediators,
   skillReviewQueue,
   typedPinyinComponentSkillReviewQueueRemediator,
@@ -248,6 +249,43 @@ describe(`skillLearningGraph suite`, () => {
       );
     },
   );
+
+  skillTest(
+    `allows writing without disabled meaning or pronunciation prerequisites`,
+    ({ decompositionData, dictionary, charactersJson }) => {
+      const writingSkill = hanziCharacterToWriting(`好` as HanziCharacter);
+      const graph = skillLearningGraph({
+        targetSkills: [writingSkill],
+        excludedPracticeCategories: new Set([`meaning`, `pronunciation`]),
+        decompositionData,
+        dictionary,
+        charactersJson,
+      });
+
+      expect([...graph.keys()]).toEqual([writingSkill]);
+      expect(graph.get(writingSkill)?.dependencies).toEqual(new Set());
+
+      const queue = skillReviewQueue({
+        graph,
+        skillSrsStates: new Map(),
+        dictionary,
+        maxQueueItems: Infinity,
+      });
+      expect(queue.items.map(({ skill }) => skill)).toEqual([writingSkill]);
+    },
+  );
+
+  test(`groups pinyin, meaning, and writing skill kinds`, () => {
+    expect(
+      skillPracticeCategoryFromSkillKind(SkillKind.HanziWordToGlossTyped),
+    ).toBe(`meaning`);
+    expect(
+      skillPracticeCategoryFromSkillKind(SkillKind.HanziWordToPinyinInitial),
+    ).toBe(`pronunciation`);
+    expect(
+      skillPracticeCategoryFromSkillKind(SkillKind.HanziCharacterToWriting),
+    ).toBe(`writing`);
+  });
 
   skillTest(
     `explicit dependency expansion matches the default`,
