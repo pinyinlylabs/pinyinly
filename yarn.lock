@@ -5771,7 +5771,7 @@ __metadata:
     "@tanstack/query-core": "npm:^5.104.1"
     "@tanstack/query-db-collection": "npm:^1.4.8"
     "@tanstack/react-db": "npm:^0.5.4"
-    "@tanstack/react-hotkeys": "npm:^0.15.0"
+    "@tanstack/react-hotkeys": "npm:^0.16.0"
     "@tanstack/react-query": "npm:^5.104.1"
     "@tanstack/react-query-devtools": "npm:^5.104.1"
     "@testing-library/dom": "npm:^10.4.0"
@@ -8771,12 +8771,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/hotkeys@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@tanstack/hotkeys@npm:0.16.1"
+"@tanstack/hotkeys@npm:0.17.0":
+  version: 0.17.0
+  resolution: "@tanstack/hotkeys@npm:0.17.0"
   dependencies:
     "@tanstack/store": "npm:^0.11.2"
-  checksum: 10c0/7371b732daff47718acfe26ad05e5ae6fd7d41ec7477fbfa2040f194664de90af1ef8cacee8acb6bab0fcce4c94b2927766a03d0b9605041ad687c79bdae99c9
+  checksum: 10c0/9a6f56be56d3c08fb948fc4f9b5d910eeb451eb11bb702a03bb9636bd5d966e4ae592c4bcb1752b6100f0a2f1a76ed61ecacb2cfe2b07172812bb2c73f0944d3
   languageName: node
   linkType: hard
 
@@ -8846,16 +8846,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-hotkeys@npm:^0.15.0":
-  version: 0.15.1
-  resolution: "@tanstack/react-hotkeys@npm:0.15.1"
+"@tanstack/react-hotkeys@npm:^0.16.0":
+  version: 0.16.0
+  resolution: "@tanstack/react-hotkeys@npm:0.16.0"
   dependencies:
-    "@tanstack/hotkeys": "npm:0.16.1"
+    "@tanstack/hotkeys": "npm:0.17.0"
     "@tanstack/react-store": "npm:^0.11.2"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 10c0/a8c51853460cb9b14e4655b43988b4a8012b53aaac0d6fd93edc5074b023dc3eea1e4542ef86f3384710adb1ac8c16fbb0a8a2fffee5b30d856839f081e30d15
+  checksum: 10c0/2aa529ab71faa629c11f29f4c90b462feba2b4e515c4c41664a0f52bb139af92ef5f4d2b91110016a0aa5f4c0b7e97c33b212337756a76a68e1fe88de2760dd5
   languageName: node
   linkType: hard
 
