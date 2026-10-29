@@ -40,7 +40,7 @@ export function useQuizProgress() {
   const replaceAnswer = (correct: boolean) => {
     if (prevState != null) {
       setCorrectCount(prevState.correctCount + (correct ? 1 : 0));
-      setAttemptCount(prevState.attemptCount + (correct ? 0 : 1));
+      setAttemptCount(correct ? 0 : prevState.attemptCount + 1);
     }
   };
 

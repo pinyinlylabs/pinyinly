@@ -80,3 +80,18 @@ test(`replaces the latest answer and preserves its undo point`, () => {
   });
   expect(result.current.progress).toBe(0);
 });
+
+test(`resets failed attempts when an answer is corrected to success`, () => {
+  const { result } = renderHook(() => useQuizProgress());
+
+  act(() => {
+    result.current.recordAnswer(false);
+  });
+  act(() => {
+    result.current.recordAnswer(false);
+  });
+  act(() => {
+    result.current.replaceAnswer(true);
+  });
+  expect(result.current.progress).toBe(1);
+});

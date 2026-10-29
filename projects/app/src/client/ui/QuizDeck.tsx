@@ -13,7 +13,7 @@ import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import { Link } from "expo-router";
 import type { Href } from "expo-router";
-import React, { Activity, useEffect, useState } from "react";
+import React, { Activity, useEffect, useRef, useState } from "react";
 import { useWindowDimensions } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -44,6 +44,8 @@ export const QuizDeck = ({
   const skillQueue = useSkillQueue();
 
   const [latestReviewId, setLatestReviewId] = useState<string>();
+  // Review writes are chained so an undo never overtakes the save it replaces.
+  const reviewWrites = useRef<Promise<void>>(Promise.resolve());
   const [question, setQuestion] = useState<Question>();
   const [nextQuestion, setNextQuestion] = useState<Question>();
   const [questionSource, setQuestionSource] =
@@ -163,11 +165,11 @@ export const QuizDeck = ({
 
   const handleChangeAnswer = () => {
     if (latestReviewId != null) {
-      r.mutate
-        .undoReview({ reviewId: latestReviewId, now: Date.now() })
-        .catch((error: unknown) => {
-          console.error(`Could not undo review`, error);
-        });
+      const reviewId = latestReviewId;
+      const now = Date.now();
+      enqueueReviewWrite(async () => {
+        await r.mutate.undoReview({ reviewId, now });
+      }, `Could not undo review`);
       setLatestReviewId(undefined);
     }
     quizProgress.undo();
@@ -176,6 +178,14 @@ export const QuizDeck = ({
       setQuestionCounter((prev) => prev + 1);
     }
   };
+
+  function enqueueReviewWrite(write: () => Promise<void>, label: string) {
+    reviewWrites.current = reviewWrites.current
+      .then(write)
+      .catch((error: unknown) => {
+        console.error(label, error);
+      });
+  }
 
   async function saveReview(
     ratings: readonly UnsavedSkillRating[],
@@ -245,11 +255,9 @@ export const QuizDeck = ({
       const now = Date.now();
       const reviewId = nanoid();
 
-      void (async () => {
+      enqueueReviewWrite(async () => {
         await saveReview(ratings, mistakes, now, reviewId);
-      })().catch((error: unknown) => {
-        console.error(`error in async handling in handleRating`, error);
-      });
+      }, `error in async handling in handleRating`);
 
       setLatestReviewId(reviewId);
       quizProgress.recordAnswer(success);
@@ -269,12 +277,10 @@ export const QuizDeck = ({
       const now = Date.now();
       const correct = ratings.every(({ rating }) => rating !== Rating.Again);
 
-      void (async () => {
+      enqueueReviewWrite(async () => {
         await r.mutate.undoReview({ reviewId: previousReviewId, now });
         await saveReview(ratings, mistakes, now, reviewId);
-      })().catch((error: unknown) => {
-        console.error(`error in async handling in handleReportedRating`, error);
-      });
+      }, `error in async handling in handleReportedRating`);
 
       setLatestReviewId(reviewId);
       quizProgress.replaceAnswer(correct);
