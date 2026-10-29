@@ -22638,8 +22638,8 @@ __metadata:
   linkType: hard
 
 "uniwind@npm:^1.12.2":
-  version: 1.12.2
-  resolution: "uniwind@npm:1.12.2"
+  version: 1.13.1
+  resolution: "uniwind@npm:1.13.1"
   dependencies:
     "@tailwindcss/node": "npm:4.3.3"
     "@tailwindcss/oxide": "npm:4.3.3"
@@ -22660,7 +22660,7 @@ __metadata:
       optional: true
   bin:
     uniwind: dist/cli/index.mjs
-  checksum: 10c0/9918771c4755da95bc54a6869a345689a7bbfe482f3ce20f0fc8912ef1b39f7b80cf144ea68944d28bb486a7a1a6606fc1ad91d05e574a5935966a646d7098fd
+  checksum: 10c0/635d8a8cbf5281bf0e70c8fa6317eb09d69caf2b6a0d291a73a1f8a3eb474cc321eb018b8dae643bdf654cbc405085235631287ae66c845e2e55e717458fa836
   languageName: node
   linkType: hard
 
