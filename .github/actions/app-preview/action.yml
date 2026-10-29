@@ -95,7 +95,7 @@ runs:
 
     - name: Delete database branch
       if: ${{ always() && steps.create-neon-branch.outcome == 'success' }}
-      run: npm exec --yes --ignore-scripts --package=neonctl@2.22.0 -- neonctl branches delete "$BRANCH_NAME" --project-id "$PROJECT_ID"
+      run: npm exec --yes --ignore-scripts --package=neonctl@2.47.0 -- neonctl branches delete "$BRANCH_NAME" --project-id "$PROJECT_ID"
       shell: bash
       env:
         NEON_API_KEY: ${{ inputs.neon-api-key }}
