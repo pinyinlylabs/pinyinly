@@ -57,7 +57,7 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
   };
 }
 
-export type HanziToGlossTypedQuestionGrade =
+export type HanziToGlossTypedQuestionRating =
   | {
       correct: true;
       rating: Rating;
@@ -95,7 +95,7 @@ export function gradeHanziToGlossTypedQuestion(
   question: HanziWordToGlossTypedQuestion,
   userGloss: string,
   durationMs: number,
-): HanziToGlossTypedQuestionGrade {
+): HanziToGlossTypedQuestionRating {
   const normalizedUserGloss = normalizeGlossForMatch(userGloss);
 
   // Look for a correct answer.

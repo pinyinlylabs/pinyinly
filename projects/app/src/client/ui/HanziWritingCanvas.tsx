@@ -44,7 +44,7 @@ export function HanziWritingCanvas({
   animateReferencePaths = false,
   guidedPathIndex,
   drawnStrokes = [],
-  gradeResult,
+  ratingResult,
   onStrokeStart,
   onStrokesChange,
   onStrokeEnd,
@@ -56,7 +56,7 @@ export function HanziWritingCanvas({
   animateReferencePaths?: boolean;
   guidedPathIndex?: number;
   drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
-  gradeResult?: `correct` | `incorrect` | null;
+  ratingResult?: `correct` | `incorrect` | null;
   onStrokeStart?: () => void;
   onStrokesChange: (strokes: WritingStrokePoint[][]) => void;
   onStrokeEnd?: () => void;
@@ -302,7 +302,7 @@ export function HanziWritingCanvas({
             key={`stroke:${index}`}
             d={pathFromPoints(stroke)}
             fill="none"
-            stroke={gradeResult === `incorrect` ? `#ef4444` : `#19aaf5`}
+            stroke={ratingResult === `incorrect` ? `#ef4444` : `#19aaf5`}
             strokeWidth="24"
             strokeLinecap="round"
             strokeLinejoin="round"

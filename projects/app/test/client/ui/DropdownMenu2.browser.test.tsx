@@ -89,7 +89,7 @@ test.for([`light`, `dark`] as const)(
                 </DropdownMenu2.SubTrigger>
                 <DropdownMenu2.SubContent testID="submenu">
                   <DropdownMenu2.Item testID="submenu-item" onPress={onPress}>
-                    <Text>Wrong grade</Text>
+                    <Text>Wrong rating</Text>
                   </DropdownMenu2.Item>
                 </DropdownMenu2.SubContent>
               </DropdownMenu2.Sub>

@@ -37,5 +37,12 @@ export function useQuizProgress() {
     }
   };
 
-  return { recordAnswer, progress, undo };
+  const replaceAnswer = (correct: boolean) => {
+    if (prevState != null) {
+      setCorrectCount(prevState.correctCount + (correct ? 1 : 0));
+      setAttemptCount(prevState.attemptCount + (correct ? 0 : 1));
+    }
+  };
+
+  return { recordAnswer, progress, undo, replaceAnswer };
 }

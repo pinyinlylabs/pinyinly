@@ -72,7 +72,7 @@ export function oneCorrectPairQuestionHanziPinyinMistake(
   }
 }
 
-export type OneCorrectPairQuestionGrade =
+export type OneCorrectPairQuestionRating =
   | {
       correct: true;
       rating: Rating;
@@ -94,7 +94,7 @@ export function gradeOneCorrectPairQuestion(
   aChoice: OneCorrectPairQuestionChoice,
   bChoice: OneCorrectPairQuestionChoice,
   durationMs: number,
-): OneCorrectPairQuestionGrade {
+): OneCorrectPairQuestionRating {
   const isCorrect = answer.as.includes(aChoice) && answer.bs.includes(bChoice);
   const correct = isCorrect;
 

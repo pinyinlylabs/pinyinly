@@ -61,3 +61,22 @@ test(`resets fractional progress after correct answer`, () => {
 
   expect(result.current.progress).toBe(2);
 });
+
+test(`replaces the latest answer and preserves its undo point`, () => {
+  const { result } = renderHook(() => useQuizProgress());
+
+  act(() => {
+    result.current.recordAnswer(false);
+  });
+  expect(result.current.progress).toBeGreaterThan(0);
+
+  act(() => {
+    result.current.replaceAnswer(true);
+  });
+  expect(result.current.progress).toBe(1);
+
+  act(() => {
+    result.current.undo();
+  });
+  expect(result.current.progress).toBe(0);
+});

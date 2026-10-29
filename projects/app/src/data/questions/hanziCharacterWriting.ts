@@ -94,7 +94,7 @@ export async function hanziCharacterWritingQuestionOrThrow(
   };
 }
 
-export interface HanziCharacterWritingQuestionGrade {
+export interface HanziCharacterWritingQuestionRating {
   correct: boolean;
   rating: Rating;
   skillRatings: UnsavedSkillRating[];
@@ -103,19 +103,19 @@ export interface HanziCharacterWritingQuestionGrade {
   similarCharacterGrades: SimilarCharacterGrade[];
 }
 
-export function createHanziCharacterWritingGradeReportJson({
+export function createHanziCharacterWritingRatingReportJson({
   question,
-  grade,
+  rating,
   drawnStrokes,
 }: {
   question: HanziCharacterWritingQuestion;
-  grade: HanziCharacterWritingQuestionGrade;
+  rating: HanziCharacterWritingQuestionRating;
   drawnStrokes: readonly (readonly WritingStrokePoint[])[];
 }): string {
   return serializeShapeContextGraderExample({
     id: `${question.hanzi}-${Date.now()}`,
     drawnStrokes: encodeShapeContextStrokes(drawnStrokes),
-    options: grade.geometry.options,
+    options: rating.geometry.options,
   });
 }
 
@@ -125,7 +125,7 @@ export function gradeHanziCharacterWritingQuestion(
   medianPaths: readonly string[],
   durationMs: number,
   similarCharacterReferences: readonly SimilarCharacterReference[] = [],
-): HanziCharacterWritingQuestionGrade {
+): HanziCharacterWritingQuestionRating {
   const geometry = gradeCharacterShape(drawnStrokes, medianPaths);
   const similarCharacterGrades = gradeSimilarCharacters(
     drawnStrokes,

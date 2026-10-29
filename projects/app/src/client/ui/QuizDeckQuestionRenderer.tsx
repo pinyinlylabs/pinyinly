@@ -12,6 +12,10 @@ type QuizDeckQuestionRendererProps = {
     ratings: readonly UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
+  onReportWrongRating: (
+    ratings: readonly UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+  ) => void;
   onChangeAnswer: () => void;
 };
 

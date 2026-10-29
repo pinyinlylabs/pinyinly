@@ -9,26 +9,26 @@ import { QuizSubmitButton } from "./QuizSubmitButton";
 import { RectButton } from "./RectButton";
 import { useState } from "react";
 
-interface QuizDeckQuestionSkeletonGrade {
+interface QuizDeckQuestionSkeletonRating {
   rating: Rating;
 }
 
 export function QuizDeckQuestionSkeleton({
   children,
-  grade,
+  rating,
   isUserAnswerProvided,
   onSubmit,
   onChangeAnswer,
-  onReportWrongGrade,
+  onReportWrongRating,
   showIdkButton = false,
   skill,
 }: {
   children: ReactNode;
-  grade?: QuizDeckQuestionSkeletonGrade;
+  rating?: QuizDeckQuestionSkeletonRating;
   isUserAnswerProvided: boolean;
   onSubmit: () => Promise<void> | void;
   onChangeAnswer: () => void;
-  onReportWrongGrade?: () => void;
+  onReportWrongRating?: () => void;
   showIdkButton?: boolean;
   skill: Skill;
 }) {
@@ -67,12 +67,12 @@ export function QuizDeckQuestionSkeleton({
           }}
         />
       </View>
-      {grade == null ? null : (
+      {rating == null ? null : (
         <QuizDeckResultToast
           skill={skill}
-          rating={grade.rating}
+          rating={rating.rating}
           onChangeAnswer={onChangeAnswer}
-          onReportWrongGrade={onReportWrongGrade}
+          onReportWrongRating={onReportWrongRating}
         />
       )}
       {showIdkButton ? (
@@ -81,7 +81,7 @@ export function QuizDeckQuestionSkeleton({
           style={{
             bottom: submitButtonInsetBottom + submitButtonHeight + idkButtonGap,
             height: idkButtonHeight,
-            visibility: grade == null ? `visible` : `hidden`,
+            visibility: rating == null ? `visible` : `hidden`,
           }}
         >
           <RectButton
@@ -104,10 +104,10 @@ export function QuizDeckQuestionSkeleton({
         }}
       >
         <QuizSubmitButton
-          autoFocus={showIdkButton && grade != null}
+          autoFocus={showIdkButton && rating != null}
           isChecking={isChecking}
           isUserAnswerProvided={isUserAnswerProvided}
-          rating={grade?.rating}
+          rating={rating?.rating}
           onPress={() => {
             void submit();
           }}

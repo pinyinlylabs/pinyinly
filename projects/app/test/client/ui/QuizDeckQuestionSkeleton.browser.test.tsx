@@ -30,7 +30,7 @@ vi.mock(`#client/ui/Suspense.tsx`, async () => ({
 test.for([Rating.Easy, Rating.Good, Rating.Hard, Rating.Again])(
   `rating %s stays anchored without reflow or replay on question exit`,
   async (rating) => {
-    const screen = (graded: boolean) => (
+    const screen = (rated: boolean) => (
       <Theme theme="light">
         <SafeAreaInsetsContext.Provider
           value={{ top: 0, right: 0, bottom: 34, left: 0 }}
@@ -38,7 +38,7 @@ test.for([Rating.Easy, Rating.Good, Rating.Hard, Rating.Again])(
           <View testID="quiz" style={{ width: 390, height: 500 }}>
             <QuizDeckQuestionSkeleton
               skill="hp:test:meaning"
-              grade={graded ? { rating } : undefined}
+              rating={rated ? { rating } : undefined}
               isUserAnswerProvided
               onSubmit={() => undefined}
               onChangeAnswer={() => {}}

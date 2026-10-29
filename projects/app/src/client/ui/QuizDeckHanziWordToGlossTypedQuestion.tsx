@@ -1,16 +1,19 @@
 import { intersperse } from "@/client/react";
 import { splitHanziText } from "@/data/hanzi";
-import { QuestionFlagKind } from "@/data/model";
+import { MistakeKind, QuestionFlagKind } from "@/data/model";
 import type {
   HanziWordToGlossTypedQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
 import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlossTyped";
-import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
-import { hanziWordFromSkill } from "@/data/skills";
+import type { HanziToGlossTypedQuestionRating } from "@/data/questions/hanziWordToGlossTyped";
+import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
+import { Rating } from "@/util/fsrs";
 import { emptyArray } from "@pinyinly/lib/collections";
+import { nonNullable } from "@pinyinly/lib/invariant";
+import * as Sentry from "@sentry/react-native";
 import { useRef, useState } from "react";
 import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
 import { Text } from "@/client/ui/Text";
@@ -25,6 +28,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   question,
   onNext,
   onRating,
+  onReportWrongRating,
   onChangeAnswer,
 }: {
   noAutoFocus?: boolean;
@@ -34,43 +38,113 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
+  onReportWrongRating?: (
+    ratings: readonly UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+  ) => void;
   onChangeAnswer: () => void;
 }) {
   const { skill, flag, bannedMeaningPrimaryGlossHint } = question;
 
   const userAnswerRef = useRef(``);
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
-  const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
+  const [rating, setRating] = useState<HanziToGlossTypedQuestionRating>();
+  const [hasReportedRating, setHasReportedRating] = useState(false);
 
   const timer = useQuizTimer();
   const hanziWord = hanziWordFromSkill(skill);
   const hanziCharacters = splitHanziText(hanziFromHanziWord(hanziWord));
 
   const submit = () => {
-    // First time you press the button it will grade your answer, the next time
-    // it moves you to the next question.
-    if (grade == null) {
+    // First press checks your answer; the next one moves to the next question.
+    if (rating == null) {
       const durationMs = timer.getDurationMs();
 
-      const grade = gradeHanziToGlossTypedQuestion(
+      const questionRating = gradeHanziToGlossTypedQuestion(
         question,
         userAnswerRef.current,
         durationMs,
       );
 
-      setGrade(grade);
-      onRating(grade.skillRatings, grade.correct ? emptyArray : grade.mistakes);
+      setRating(questionRating);
+      onRating(
+        questionRating.skillRatings,
+        questionRating.correct ? emptyArray : questionRating.mistakes,
+      );
     } else {
       onNext();
     }
   };
 
+  const reportWrongRating = () => {
+    if (rating == null || hasReportedRating) {
+      return;
+    }
+
+    const answer = userAnswerRef.current;
+    const errorType = rating.correct ? `false-positive` : `false-negative`;
+    Sentry.captureMessage(`User reported a meaning rating`, {
+      tags: {
+        [`report-kind`]: `meaning-rating`,
+        [`meaning-rating-error-type`]: errorType,
+      },
+      extra: {
+        [`meaning-rating-report`]: {
+          hanzi: hanziFromHanziWord(hanziWord),
+          answer,
+        },
+      },
+    });
+
+    const originalSkillRating = nonNullable(rating.skillRatings[0]);
+    const correctedRating = computeSkillRating({
+      skill: originalSkillRating.skill,
+      correct: !rating.correct,
+      durationMs: originalSkillRating.durationMs,
+    });
+    const mistakes: MistakeType[] = rating.correct
+      ? [
+          {
+            kind: MistakeKind.HanziGloss,
+            hanziOrHanziWord: hanziWord,
+            gloss: answer,
+          },
+        ]
+      : [];
+    onReportWrongRating?.([correctedRating], mistakes);
+    setHasReportedRating(true);
+
+    setRating(
+      rating.correct
+        ? {
+            correct: false,
+            rating: Rating.Again,
+            skillRatings: [correctedRating],
+            expectedAnswer: nonNullable(
+              question.answers.find(({ skill }) => skill === question.skill)
+                ?.glosses[0],
+            ),
+            mistakes,
+          }
+        : {
+            correct: true,
+            rating: correctedRating.rating,
+            skillRatings: [correctedRating],
+          },
+    );
+  };
+
   return (
     <QuizDeckQuestionSkeleton
-      grade={grade}
+      rating={rating}
       isUserAnswerProvided={!isUserAnswerEmpty}
       onSubmit={submit}
       onChangeAnswer={onChangeAnswer}
+      onReportWrongRating={
+        rating == null || isUserAnswerEmpty || hasReportedRating
+          ? undefined
+          : reportWrongRating
+      }
       showIdkButton
       skill={skill}
     >
@@ -114,7 +188,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
       </View>
       <TextAnswerInputSingle
         autoFocus={!noAutoFocus}
-        editable={grade == null}
+        editable={rating == null}
         onChangeValue={(text) => {
           userAnswerRef.current = text.trim();
           setIsUserAnswerEmpty(text.trim().length === 0);
@@ -136,7 +210,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={ratingToInputState(isUserAnswerEmpty, grade?.rating)}
+        state={ratingToInputState(isUserAnswerEmpty, rating?.rating)}
         placeholder="Type in English"
         autoCorrect
       />

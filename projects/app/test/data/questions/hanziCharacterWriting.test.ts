@@ -5,7 +5,7 @@ import type {
 } from "#data/model.ts";
 import { pinyinTextSchema, QuestionKind } from "#data/model.ts";
 import {
-  createHanziCharacterWritingGradeReportJson,
+  createHanziCharacterWritingRatingReportJson,
   gradeHanziCharacterWritingQuestion,
   hanziCharacterWritingSimilarityThreshold,
 } from "#data/questions/hanziCharacterWriting.ts";
@@ -142,7 +142,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
         { x: 500, y: 100 },
       ],
     ];
-    const grade = gradeHanziCharacterWritingQuestion(
+    const rating = gradeHanziCharacterWritingQuestion(
       question,
       drawnStrokes,
       [expectedPath],
@@ -150,9 +150,9 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     );
 
     const report = parseShapeContextGraderExampleJson(
-      createHanziCharacterWritingGradeReportJson({
+      createHanziCharacterWritingRatingReportJson({
         question,
-        grade,
+        rating,
         drawnStrokes,
       }),
     );
@@ -161,7 +161,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     expect(decodeShapeContextStrokes(report.drawnStrokes)).toEqual(
       drawnStrokes,
     );
-    expect(report.options).toEqual(grade.geometry.options);
+    expect(report.options).toEqual(rating.geometry.options);
   });
 
   test(`serializes a reported false negative in the shared debug format`, () => {
@@ -171,7 +171,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
         { x: 500, y: 100 },
       ],
     ];
-    const grade = gradeHanziCharacterWritingQuestion(
+    const rating = gradeHanziCharacterWritingQuestion(
       question,
       drawnStrokes,
       [expectedPath],
@@ -179,9 +179,9 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
       [{ hanzi: `牛` as HanziCharacter, medianPaths: [expectedPath] }],
     );
     const report = parseShapeContextGraderExampleJson(
-      createHanziCharacterWritingGradeReportJson({
+      createHanziCharacterWritingRatingReportJson({
         question,
-        grade,
+        rating,
         drawnStrokes,
       }),
     );

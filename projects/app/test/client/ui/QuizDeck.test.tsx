@@ -8,7 +8,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { hanziWordToGlossTyped } from "#data/skills.ts";
-import type { Skill } from "#data/model.ts";
+import type { MistakeType, Skill } from "#data/model.ts";
+import { Rating } from "#util/fsrs.ts";
 import type { ReactNode } from "react";
 import { beforeEach, expect, test, vi } from "vitest";
 import { QuizDeck } from "#client/ui/QuizDeck.tsx";
@@ -20,6 +21,12 @@ const mocks = vi.hoisted(() => ({
   mountQuestion: vi.fn(),
   pending: null as Promise<undefined> | null,
   pendingSkill: null as Skill | null,
+  rateSkill: vi.fn(async (_input: { rating: number; reviewId: string }) => {}),
+  undoReview: vi.fn(async () => {}),
+  saveHanziGlossMistake: vi.fn(async () => {}),
+  saveHanziPinyinMistake: vi.fn(async () => {}),
+  recordAnswer: vi.fn(),
+  replaceAnswer: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -38,11 +45,19 @@ vi.mock(`#client/ui/hooks/useQuizProgress.ts`, () => ({
   useQuizProgress: () => ({
     progress: 0,
     undo: () => {},
-    recordAnswer: () => {},
+    recordAnswer: mocks.recordAnswer,
+    replaceAnswer: mocks.replaceAnswer,
   }),
 }));
 vi.mock(`#client/ui/hooks/useRizzle.ts`, () => ({
-  useRizzle: () => ({ mutate: {} }),
+  useRizzle: () => ({
+    mutate: {
+      rateSkill: mocks.rateSkill,
+      undoReview: mocks.undoReview,
+      saveHanziGlossMistake: mocks.saveHanziGlossMistake,
+      saveHanziPinyinMistake: mocks.saveHanziPinyinMistake,
+    },
+  }),
 }));
 vi.mock(`#client/ui/hooks/useSkillQueue.ts`, () => ({
   useSkillQueue: () => mocks.skillQueue,
@@ -125,9 +140,27 @@ vi.mock(`#client/ui/QuizDeckOneCorrectPairQuestion.tsx`, async () => {
     QuizDeckOneCorrectPairQuestion: ({
       question,
       onNext,
+      onRating,
+      onReportWrongRating,
     }: {
       question: { answer: { skill: Skill } };
       onNext: () => void;
+      onRating: (
+        ratings: readonly {
+          skill: Skill;
+          rating: number;
+          durationMs: number;
+        }[],
+        mistakes: readonly MistakeType[],
+      ) => void;
+      onReportWrongRating: (
+        ratings: readonly {
+          skill: Skill;
+          rating: number;
+          durationMs: number;
+        }[],
+        mistakes: readonly MistakeType[],
+      ) => void;
     }) => {
       mocks.renderQuestion(question.answer.skill);
       useEffect(() => {
@@ -140,11 +173,45 @@ vi.mock(`#client/ui/QuizDeckOneCorrectPairQuestion.tsx`, async () => {
       ) {
         use(mocks.pending);
       }
-      return jsx(`button`, {
-        "data-testid": `current-question`,
-        "data-skill": question.answer.skill,
-        onClick: onNext,
-        children: `Continue`,
+      return jsx(`div`, {
+        children: [
+          jsx(`button`, {
+            "data-testid": `current-question`,
+            "data-skill": question.answer.skill,
+            onClick: onNext,
+            children: `Continue`,
+          }),
+          jsx(`button`, {
+            onClick: () => {
+              onRating(
+                [
+                  {
+                    skill: question.answer.skill,
+                    rating: Rating.Again,
+                    durationMs: 12_000,
+                  },
+                ],
+                [],
+              );
+            },
+            children: `Record incorrect rating`,
+          }),
+          jsx(`button`, {
+            onClick: () => {
+              onReportWrongRating(
+                [
+                  {
+                    skill: question.answer.skill,
+                    rating: Rating.Hard,
+                    durationMs: 12_000,
+                  },
+                ],
+                [],
+              );
+            },
+            children: `Report rating`,
+          }),
+        ],
       });
     },
   };
@@ -264,5 +331,38 @@ test(`keeps the reserved next question when the queue reorders`, async () => {
     );
   });
   expect(mocks.mountQuestion).toHaveBeenCalledWith(secondSkill);
+  view.unmount();
+});
+
+test(`replaces the reported review and corrects quiz progress`, async () => {
+  mocks.skillQueue = skillQueue([firstSkill]);
+  const view = render(<QuizDeck />);
+
+  await screen.findByRole(`button`, { name: `Continue` });
+  fireEvent.click(
+    screen.getByRole(`button`, { name: `Record incorrect rating` }),
+  );
+  await waitFor(() => {
+    expect(mocks.rateSkill).toHaveBeenCalledTimes(1);
+  });
+  fireEvent.click(screen.getByRole(`button`, { name: `Report rating` }));
+
+  await waitFor(() => {
+    expect(mocks.undoReview).toHaveBeenCalledTimes(1);
+    expect(mocks.rateSkill).toHaveBeenCalledTimes(2);
+  });
+
+  const [originalReview, correctedReview] = mocks.rateSkill.mock.calls.map(
+    ([review]) => review,
+  );
+  expect(originalReview?.rating).toBe(Rating.Again);
+  expect(correctedReview?.rating).toBe(Rating.Hard);
+  expect(mocks.undoReview).toHaveBeenCalledWith(
+    expect.objectContaining({ reviewId: originalReview?.reviewId }),
+  );
+  expect(correctedReview?.reviewId).not.toBe(originalReview?.reviewId);
+  expect(mocks.recordAnswer).toHaveBeenCalledWith(false);
+  expect(mocks.replaceAnswer).toHaveBeenCalledWith(true);
+
   view.unmount();
 });
