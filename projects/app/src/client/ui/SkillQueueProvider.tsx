@@ -5,14 +5,30 @@ import {
 } from "@/client/query";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { Skill, SrsStateType } from "@/data/model";
-import type { SkillReviewQueueRemediationConfig } from "@/data/skills";
+import type {
+  SkillReviewQueueRemediationConfig,
+  SkillPracticeCategory,
+} from "@/data/skills";
 import type { StudyListId } from "@/data/studyLists";
-import { studyListHanziWords } from "@/data/studyLists";
+import { hskStudyListIds, studyListHanziWords } from "@/data/studyLists";
 import {
   hanziWordToTargetSkills,
+  skillKindFromSkill,
   skillLearningGraph,
+  skillPracticeCategories,
+  skillPracticeCategoryFromSkillKind,
   skillReviewQueue,
 } from "@/data/skills";
+import {
+  practiceMeaningUserToggleSetting,
+  practicePronunciationUserToggleSetting,
+  practiceWritingUserToggleSetting,
+  studyBookmarksUserToggleSetting,
+  studyHsk1UserToggleSetting,
+  studyHsk2UserToggleSetting,
+  studyHsk3UserToggleSetting,
+  studyHsk4UserToggleSetting,
+} from "@/data/userSettings";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +37,7 @@ import { useMemo } from "react";
 import { Platform } from "react-native";
 import type { SkillQueueContextValue } from "./contexts";
 import { SkillQueueContext } from "./contexts";
+import { useUserSetting } from "./hooks/useUserSetting";
 
 const mockable = {
   getMaxQueueItems: () => 2,
@@ -42,6 +59,16 @@ const skillReviewQueueRemediationConfig = {
   },
 } satisfies SkillReviewQueueRemediationConfig;
 
+function isPracticeCategoryEnabled(
+  skill: Skill,
+  excludedPracticeCategories: ReadonlySet<SkillPracticeCategory>,
+): boolean {
+  const category = skillPracticeCategoryFromSkillKind(
+    skillKindFromSkill(skill),
+  );
+  return category == null || !excludedPracticeCategories.has(category);
+}
+
 /**
  * Provides a global skill queue that's scoped to the session.
  *
@@ -58,14 +85,71 @@ function SkillQueueProvider({
 }: PropsWithChildren<{ listId?: StudyListId }>) {
   "use memo";
   const db = useDb();
-
-  const { data: baseTargetSkills, isLoading: isTargetSkillsLoading } =
-    useLiveQuery({
-      query: (q) =>
-        q
-          .from({ targetSkill: db.targetSkillsCollection })
-          .orderBy(({ targetSkill }) => targetSkill.order, `asc`),
-    });
+  const meaningPracticeSetting = useUserSetting({
+    setting: practiceMeaningUserToggleSetting,
+  });
+  const pronunciationPracticeSetting = useUserSetting({
+    setting: practicePronunciationUserToggleSetting,
+  });
+  const writingPracticeSetting = useUserSetting({
+    setting: practiceWritingUserToggleSetting,
+  });
+  const bookmarksStudySetting = useUserSetting({
+    setting: studyBookmarksUserToggleSetting,
+  });
+  const hsk1StudySetting = useUserSetting({
+    setting: studyHsk1UserToggleSetting,
+  });
+  const hsk2StudySetting = useUserSetting({
+    setting: studyHsk2UserToggleSetting,
+  });
+  const hsk3StudySetting = useUserSetting({
+    setting: studyHsk3UserToggleSetting,
+  });
+  const hsk4StudySetting = useUserSetting({
+    setting: studyHsk4UserToggleSetting,
+  });
+  const practiceSettingsLoading =
+    meaningPracticeSetting.isLoading ||
+    pronunciationPracticeSetting.isLoading ||
+    writingPracticeSetting.isLoading;
+  const studySourceSettingsLoading =
+    bookmarksStudySetting.isLoading ||
+    hsk1StudySetting.isLoading ||
+    hsk2StudySetting.isLoading ||
+    hsk3StudySetting.isLoading ||
+    hsk4StudySetting.isLoading;
+  const bookmarksEnabled = bookmarksStudySetting.value?.enabled ?? true;
+  const hsk1Enabled = hsk1StudySetting.value?.enabled ?? true;
+  const hsk2Enabled = hsk2StudySetting.value?.enabled ?? true;
+  const hsk3Enabled = hsk3StudySetting.value?.enabled ?? true;
+  const hsk4Enabled = hsk4StudySetting.value?.enabled ?? true;
+  const allStudySourcesEnabled =
+    bookmarksEnabled &&
+    hsk1Enabled &&
+    hsk2Enabled &&
+    hsk3Enabled &&
+    hsk4Enabled;
+  const meaningEnabled = meaningPracticeSetting.value?.enabled ?? true;
+  const pronunciationEnabled =
+    pronunciationPracticeSetting.value?.enabled ?? true;
+  const writingEnabled = writingPracticeSetting.value?.enabled ?? true;
+  const excludedPracticeCategories = useMemo(
+    () =>
+      new Set(
+        skillPracticeCategories.filter((category) => {
+          switch (category) {
+            case `meaning`:
+              return !meaningEnabled;
+            case `pronunciation`:
+              return !pronunciationEnabled;
+            case `writing`:
+              return !writingEnabled;
+          }
+        }),
+      ),
+    [meaningEnabled, pronunciationEnabled, writingEnabled],
+  );
   const { data: dictionary } = useQuery(dictionaryQuery);
   const { data: charactersJson } = useQuery(charactersJsonQuery);
   const { data: skillRatingHistoryData } = useLiveQuery(
@@ -94,9 +178,13 @@ function SkillQueueProvider({
       isSkillStatesLoading
         ? null
         : new Map<Skill, SrsStateType>(
-            skillStateData.map((x) => [x.skill, x.srs]),
+            skillStateData
+              .filter(({ skill }) =>
+                isPracticeCategoryEnabled(skill, excludedPracticeCategories),
+              )
+              .map((x) => [x.skill, x.srs]),
           ),
-    [skillStateData, isSkillStatesLoading],
+    [skillStateData, isSkillStatesLoading, excludedPracticeCategories],
   );
 
   // Compute Study skills from the resolved word collection
@@ -109,28 +197,50 @@ function SkillQueueProvider({
     );
   }, [studyWordsData, dictionary, isStudyWordsLoading]);
 
-  // Combine base target skills with Study skills
+  // Combine selected dictionary lists with Bookmarks
   const allTargetSkills = useMemo(() => {
-    if (studySkills == null) {
+    if (dictionary == null || studySkills == null) {
       return null;
     }
-
-    if (isTargetSkillsLoading) {
-      return null;
-    }
-    return [
-      ...baseTargetSkills.map(({ skill }) => skill),
-      ...studySkills,
-    ].filter(arrayFilterUnique());
-  }, [baseTargetSkills, studySkills, isTargetSkillsLoading]);
+    const hskSkills = hskStudyListIds
+      .filter((listId) => {
+        switch (listId) {
+          case `hsk-1`:
+            return hsk1Enabled;
+          case `hsk-2`:
+            return hsk2Enabled;
+          case `hsk-3`:
+            return hsk3Enabled;
+          case `hsk-4`:
+            return hsk4Enabled;
+        }
+      })
+      .flatMap((listId) =>
+        studyListHanziWords(dictionary, listId).flatMap((word) =>
+          hanziWordToTargetSkills(word, dictionary, Platform.OS === `web`),
+        ),
+      );
+    return [...hskSkills, ...(bookmarksEnabled ? studySkills : [])].filter(
+      arrayFilterUnique(),
+    );
+  }, [
+    dictionary,
+    studySkills,
+    bookmarksEnabled,
+    hsk1Enabled,
+    hsk2Enabled,
+    hsk3Enabled,
+    hsk4Enabled,
+  ]);
 
   const graph = useMemo(
     () =>
       dictionary == null ||
       charactersJson == null ||
       allTargetSkills == null ||
-      isCharacterDecompositionLoading ||
-      isTargetSkillsLoading
+      practiceSettingsLoading ||
+      studySourceSettingsLoading ||
+      isCharacterDecompositionLoading
         ? null
         : skillLearningGraph({
             targetSkills:
@@ -148,6 +258,7 @@ function SkillQueueProvider({
                     ),
                   ),
             includeDependencies: listId == null,
+            excludedPracticeCategories,
             decompositionData: characterDecompositionData,
             dictionary,
             charactersJson,
@@ -157,8 +268,10 @@ function SkillQueueProvider({
       charactersJson,
       characterDecompositionData,
       allTargetSkills,
+      practiceSettingsLoading,
+      studySourceSettingsLoading,
+      excludedPracticeCategories,
       isCharacterDecompositionLoading,
-      isTargetSkillsLoading,
       listId,
       studyWordsData,
     ],
@@ -171,14 +284,25 @@ function SkillQueueProvider({
         ? null
         : skillReviewQueue({
             graph,
-            directSkills: new Set(studySkills ?? []),
+            directSkills: new Set(
+              (listId != null || bookmarksEnabled
+                ? (studySkills ?? [])
+                : []
+              ).filter((skill) =>
+                isPracticeCategoryEnabled(skill, excludedPracticeCategories),
+              ),
+            ),
             skillSrsStates:
-              listId == null
+              listId == null && allStudySourcesEnabled
                 ? skillSrsStates
                 : new Map(
                     [...skillSrsStates].filter(([skill]) => graph.has(skill)),
                   ),
-            recentSkillRatingEvents: skillRatingHistoryData,
+            recentSkillRatingEvents: skillRatingHistoryData.filter(
+              ({ skill }) =>
+                isPracticeCategoryEnabled(skill, excludedPracticeCategories) &&
+                (listId != null || allStudySourcesEnabled || graph.has(skill)),
+            ),
             remediationConfig: skillReviewQueueRemediationConfig,
             now: new Date(),
             dictionary,
@@ -191,6 +315,9 @@ function SkillQueueProvider({
       skillSrsStates,
       listId,
       studySkills,
+      bookmarksEnabled,
+      allStudySourcesEnabled,
+      excludedPracticeCategories,
     ],
   );
 

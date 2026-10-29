@@ -5,9 +5,11 @@ import { tv } from "tailwind-variants";
 export function ToggleButton({
   isActive: _isActive,
   onPress,
+  accessibilityLabel,
 }: {
   isActive: boolean | null | undefined;
   onPress: () => void;
+  accessibilityLabel?: string;
 }) {
   // Coerce `null` to `undefined` to work with tailwind-variants.
   const isActive = _isActive ?? `null`;
@@ -17,6 +19,7 @@ export function ToggleButton({
       className={lozengeClass({ isActive })}
       accessibilityRole="switch"
       accessibilityState={{ checked: isActive === true }}
+      accessibilityLabel={accessibilityLabel}
       onPress={onPress}
     >
       <View className={dotClass({ isActive })} />

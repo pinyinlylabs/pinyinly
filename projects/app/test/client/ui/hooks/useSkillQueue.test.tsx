@@ -8,9 +8,25 @@ import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import { QuestionFlagKind } from "#data/model.js";
 import type { HanziWord } from "#data/model.js";
-import { hanziWordToGlossTyped, hanziWordToPinyinTyped } from "#data/skills.ts";
+import {
+  hanziWordToGloss,
+  hanziWordToGlossTyped,
+  hanziWordToPinyinTyped,
+  skillKindFromSkill,
+  skillPracticeCategoryFromSkillKind,
+} from "#data/skills.ts";
 import type { StudyListId } from "#data/studyLists.ts";
-import { studyWordItemSetting } from "#data/userSettings.ts";
+import {
+  practiceMeaningUserToggleSetting,
+  practicePronunciationUserToggleSetting,
+  practiceWritingUserToggleSetting,
+  studyBookmarksUserToggleSetting,
+  studyHsk1UserToggleSetting,
+  studyHsk2UserToggleSetting,
+  studyHsk3UserToggleSetting,
+  studyHsk4UserToggleSetting,
+  studyWordItemSetting,
+} from "#data/userSettings.ts";
 import { Rating } from "#util/fsrs.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { prettyQueue } from "#test/data/helpers.ts";
@@ -171,6 +187,152 @@ test(`scoped practice excludes unrelated retries and practices not-due targets`,
     expect(queue.dueCount).toBe(0);
     expect(queue.overDueCount).toBe(0);
     expect(queue.newContentCount + queue.newDifficultyCount).toBe(0);
+  });
+  unmount();
+});
+
+test(`practice settings filter disabled categories from the queue`, async ({
+  rizzle,
+}) => {
+  const now = new Date();
+  await Promise.all([
+    rizzle.mutate.setSetting({
+      key: practiceMeaningUserToggleSetting.entity.marshalKey({}),
+      value: practiceMeaningUserToggleSetting.entity.marshalValue({
+        enabled: false,
+      }),
+      now,
+      skipHistory: false,
+      historyId: undefined,
+    }),
+    rizzle.mutate.setSetting({
+      key: practicePronunciationUserToggleSetting.entity.marshalKey({}),
+      value: practicePronunciationUserToggleSetting.entity.marshalValue({
+        enabled: true,
+      }),
+      now,
+      skipHistory: false,
+      historyId: undefined,
+    }),
+    rizzle.mutate.setSetting({
+      key: practiceWritingUserToggleSetting.entity.marshalKey({}),
+      value: practiceWritingUserToggleSetting.entity.marshalValue({
+        enabled: false,
+      }),
+      now,
+      skipHistory: false,
+      historyId: undefined,
+    }),
+  ]);
+
+  const hanziWord = `你好:hello`;
+  await rizzle.mutate.setSetting({
+    key: studyWordItemSetting.entity.marshalKey({ hanziWord }),
+    value: studyWordItemSetting.entity.marshalValue({
+      hanziWord,
+      createdAt: now,
+    }),
+    now,
+    skipHistory: false,
+    historyId: undefined,
+  });
+
+  const { result, unmount } = renderHook(useSkillQueue, {
+    wrapper: testContextProviders({ rizzle, listId: `study` }),
+  });
+  await waitFor(() => {
+    invariant(!result.current.loading);
+    expect(result.current.targetSkills?.size).toBeGreaterThan(0);
+    expect(
+      new Set(
+        [...(result.current.targetSkills ?? [])].map((skill) =>
+          skillPracticeCategoryFromSkillKind(skillKindFromSkill(skill)),
+        ),
+      ),
+    ).toEqual(new Set([`pronunciation`]));
+    expect(result.current.reviewQueue.items.length).toBeGreaterThan(0);
+  });
+  unmount();
+});
+
+test(`global queue uses selected HSK and Bookmark sources`, async ({
+  rizzle,
+}) => {
+  vi.spyOn(SkillQueueProvider.mockable, `getMaxQueueItems`).mockReturnValue(
+    Infinity,
+  );
+  const now = new Date();
+  for (const setting of [
+    studyHsk1UserToggleSetting,
+    studyHsk2UserToggleSetting,
+    studyHsk3UserToggleSetting,
+    studyHsk4UserToggleSetting,
+    studyBookmarksUserToggleSetting,
+  ]) {
+    await rizzle.mutate.setSetting({
+      key: setting.entity.marshalKey({}),
+      value: setting.entity.marshalValue({ enabled: false }),
+      now,
+      skipHistory: false,
+      historyId: undefined,
+    });
+  }
+
+  const { result, unmount } = renderHook(useSkillQueue, {
+    wrapper: testContextProviders({ rizzle }),
+  });
+  await waitFor(() => {
+    invariant(!result.current.loading);
+    expect(result.current.reviewQueue.items).toEqual([]);
+  });
+
+  await rizzle.mutate.setSetting({
+    key: studyHsk1UserToggleSetting.entity.marshalKey({}),
+    value: studyHsk1UserToggleSetting.entity.marshalValue({ enabled: true }),
+    now,
+    skipHistory: false,
+    historyId: undefined,
+  });
+  await waitFor(() => {
+    invariant(!result.current.loading);
+    expect(
+      result.current.reviewQueue.items.map(({ skill }) => skill),
+    ).toContain(hanziWordToGloss(`人:person`));
+  });
+  await rizzle.mutate.setSetting({
+    key: studyHsk1UserToggleSetting.entity.marshalKey({}),
+    value: studyHsk1UserToggleSetting.entity.marshalValue({ enabled: false }),
+    now,
+    skipHistory: false,
+    historyId: undefined,
+  });
+
+  const hanziWord = `好:good`;
+  await rizzle.mutate.setSetting({
+    key: studyBookmarksUserToggleSetting.entity.marshalKey({}),
+    value: studyBookmarksUserToggleSetting.entity.marshalValue({
+      enabled: true,
+    }),
+    now,
+    skipHistory: false,
+    historyId: undefined,
+  });
+  await rizzle.mutate.setSetting({
+    key: studyWordItemSetting.entity.marshalKey({ hanziWord }),
+    value: studyWordItemSetting.entity.marshalValue({
+      hanziWord,
+      createdAt: now,
+    }),
+    now,
+    skipHistory: false,
+    historyId: undefined,
+  });
+
+  await waitFor(() => {
+    invariant(!result.current.loading);
+    expect(
+      result.current.reviewQueue.items.map(({ skill }) => skill),
+    ).toContain(hanziWordToGlossTyped(hanziWord));
   });
   unmount();
 });

@@ -2,6 +2,7 @@ import {
   decodeUserSettingValue,
   encodeUserSettingStoredValue,
   getEffectiveToneSetKeyForSoundId,
+  getUserSettingDefaultValue,
   getUserSettingKeyInfo,
   getToneSoundNameFromSetKey,
   getImageSettingKeyPatterns,
@@ -15,6 +16,14 @@ import {
   locationThoughtChainsJsonSetting,
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
+  practiceMeaningUserToggleSetting,
+  practicePronunciationUserToggleSetting,
+  practiceWritingUserToggleSetting,
+  studyBookmarksUserToggleSetting,
+  studyHsk1UserToggleSetting,
+  studyHsk2UserToggleSetting,
+  studyHsk3UserToggleSetting,
+  studyHsk4UserToggleSetting,
   userNameTextSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
@@ -29,6 +38,50 @@ import { 汉 } from "./helpers";
 
 const testSoundId = `-a` as PinyinSoundId;
 const testLocationId = `place_123` as LocationId;
+
+describe(`practice category settings`, () => {
+  test(`are enabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(practiceMeaningUserToggleSetting, {}),
+    ).toEqual({ enabled: true });
+    expect(
+      getUserSettingDefaultValue(practicePronunciationUserToggleSetting, {}),
+    ).toEqual({ enabled: true });
+    expect(
+      getUserSettingDefaultValue(practiceWritingUserToggleSetting, {}),
+    ).toEqual({ enabled: true });
+
+    expect(userSettingDefinitions).toContain(practiceMeaningUserToggleSetting);
+    expect(userSettingDefinitions).toContain(
+      practicePronunciationUserToggleSetting,
+    );
+    expect(userSettingDefinitions).toContain(practiceWritingUserToggleSetting);
+  });
+
+  test(`study source settings preserve the existing defaults`, () => {
+    expect(
+      getUserSettingDefaultValue(studyBookmarksUserToggleSetting, {}),
+    ).toEqual({ enabled: true });
+    expect(getUserSettingDefaultValue(studyHsk1UserToggleSetting, {})).toEqual({
+      enabled: true,
+    });
+    expect(getUserSettingDefaultValue(studyHsk2UserToggleSetting, {})).toEqual({
+      enabled: true,
+    });
+    expect(getUserSettingDefaultValue(studyHsk3UserToggleSetting, {})).toEqual({
+      enabled: true,
+    });
+    expect(getUserSettingDefaultValue(studyHsk4UserToggleSetting, {})).toEqual({
+      enabled: true,
+    });
+
+    expect(userSettingDefinitions).toContain(studyBookmarksUserToggleSetting);
+    expect(userSettingDefinitions).toContain(studyHsk1UserToggleSetting);
+    expect(userSettingDefinitions).toContain(studyHsk2UserToggleSetting);
+    expect(userSettingDefinitions).toContain(studyHsk3UserToggleSetting);
+    expect(userSettingDefinitions).toContain(studyHsk4UserToggleSetting);
+  });
+});
 
 function expectUniqueSettingKeyPaths(
   settings: readonly { entity: { _def: { keyPath: string } } }[],
