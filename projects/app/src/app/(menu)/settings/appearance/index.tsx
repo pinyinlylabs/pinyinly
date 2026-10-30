@@ -2,6 +2,7 @@ import { AiImageStyleSettingControl } from "@/client/ui/AiImageStyleSettingContr
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import {
   autoCheckUserToggleSetting,
+  newSkillLessonUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -74,7 +75,6 @@ export default function AppearanceSettingsPage() {
               <View>
                 <UserSettingToggleButton
                   entity={entity}
-                  defaultEnabled
                   accessibilityLabel={title}
                 />
               </View>
@@ -93,7 +93,6 @@ export default function AppearanceSettingsPage() {
             <View>
               <UserSettingToggleButton
                 entity={entity}
-                defaultEnabled
                 accessibilityLabel={title}
               />
             </View>
@@ -104,6 +103,24 @@ export default function AppearanceSettingsPage() {
       <View className="gap-2 pt-6">
         <Text className="pyly-body-dt">Images</Text>
         <AiImageStyleSettingControl />
+      </View>
+
+      <View className="gap-2 pt-6">
+        <Text className="pyly-body-dt">Experimental</Text>
+        <View className="flex-row items-center">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">New skill lesson</Text>
+            <Text className="pyly-body-caption">
+              Show a lesson modal when you encounter a new word.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={newSkillLessonUserToggleSetting}
+              accessibilityLabel="New skill lesson"
+            />
+          </View>
+        </View>
       </View>
     </View>
   );

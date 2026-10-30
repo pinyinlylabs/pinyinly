@@ -16,6 +16,7 @@ import {
   locationThoughtChainsJsonSetting,
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
+  newSkillLessonUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -38,6 +39,15 @@ import { 汉 } from "./helpers";
 
 const testSoundId = `-a` as PinyinSoundId;
 const testLocationId = `place_123` as LocationId;
+
+describe(`experimental settings`, () => {
+  test(`new skill lesson is disabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(newSkillLessonUserToggleSetting, {}),
+    ).toEqual({ enabled: false });
+    expect(userSettingDefinitions).toContain(newSkillLessonUserToggleSetting);
+  });
+});
 
 describe(`practice category settings`, () => {
   test(`are enabled by default and registered for syncing`, () => {

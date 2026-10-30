@@ -1,5 +1,5 @@
 import { useQuizTimer } from "@/client/ui/hooks/useQuizTimer";
-import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
 import type {
   MistakeType,
   OneCorrectPairQuestion,
@@ -12,7 +12,10 @@ import {
   gradeOneCorrectPairQuestion,
   oneCorrectPairChoiceText,
 } from "@/data/questions/oneCorrectPair";
-import { autoCheckUserToggleSetting } from "@/data/userSettings";
+import {
+  autoCheckUserToggleSetting,
+  newSkillLessonUserToggleSetting,
+} from "@/data/userSettings";
 import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useState } from "react";
@@ -51,9 +54,12 @@ export function QuizDeckOneCorrectPairQuestion({
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
 
-  const autoCheck =
-    useUserSetting({ setting: autoCheckUserToggleSetting }).value?.enabled ??
-    false;
+  const { isEnabled: autoCheck } = useUserSettingToggle(
+    autoCheckUserToggleSetting,
+  );
+  const { isEnabled: showNewSkillLesson } = useUserSettingToggle(
+    newSkillLessonUserToggleSetting,
+  );
 
   const [selectedAChoice, setSelectedAChoice] =
     useState<OneCorrectPairQuestionChoice>();
@@ -119,7 +125,7 @@ export function QuizDeckOneCorrectPairQuestion({
       onChangeAnswer={onChangeAnswer}
       skill={answer.skill}
     >
-      {flag?.kind === QuestionFlagKind.NewSkill ? (
+      {flag?.kind === QuestionFlagKind.NewSkill && showNewSkillLesson ? (
         <NewSkillModal passivePresentation skill={question.answer.skill} />
       ) : null}
 
