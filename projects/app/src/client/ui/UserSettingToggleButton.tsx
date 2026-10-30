@@ -1,28 +1,23 @@
-import type { UserSettingEntityLike } from "@/client/ui/hooks/useUserSetting";
-import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
 import { ToggleButton } from "@/client/ui/ToggleButton";
+import type { UserSettingEntityLike } from "@/client/ui/hooks/useUserSetting";
 import type { UserSettingToggleableEntity } from "@/data/userSettings";
 
 export function UserSettingToggleButton({
   entity,
-  defaultEnabled = false,
   accessibilityLabel,
 }: {
   entity: UserSettingEntityLike<UserSettingToggleableEntity>;
-  defaultEnabled?: boolean;
   accessibilityLabel?: string;
 }) {
-  const { isLoading, value, setValue } = useUserSetting({ setting: entity });
+  const { isLoading, isEnabled, setEnabled } = useUserSettingToggle(entity);
 
   return (
     <ToggleButton
-      isActive={isLoading ? null : (value?.enabled ?? defaultEnabled)}
+      isActive={isLoading ? null : isEnabled}
       accessibilityLabel={accessibilityLabel}
       onPress={() => {
-        setValue((prev) => {
-          const prevEnabled = prev?.enabled ?? defaultEnabled;
-          return { ...prev, enabled: !prevEnabled };
-        });
+        setEnabled(!isEnabled);
       }}
     />
   );

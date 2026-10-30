@@ -243,6 +243,13 @@ export const autoCheckUserToggleSetting = defineUserSetting({
   }) satisfies UserSettingToggleableEntity,
 });
 
+export const newSkillLessonUserToggleSetting = defineUserSetting({
+  entity: r.entity(`newSkillLesson`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: false }),
+});
+
 export const practiceMeaningUserToggleSetting = defineUserSetting({
   entity: r.entity(`practiceMeaning`, {
     enabled: r.boolean(`e`),
@@ -740,6 +747,7 @@ export const userSettingDefinitions = [
   aiImagePlaygroundTextSetting,
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
+  newSkillLessonUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
