@@ -2,6 +2,7 @@ import Constants, { ExecutionEnvironment } from "expo-constants";
 import { useFonts } from "expo-font";
 import * as ExpoSplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 
 const isExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
@@ -40,6 +41,32 @@ export const SplashScreen = ({ children: _children }: { children?: never }) => {
   useEffect(() => {
     if (isReady) {
       ExpoSplashScreen.hide();
+      if (Platform.OS === `web`) {
+        const startup = document.querySelector(`#pyly-startup`);
+        const fill = startup?.querySelector(`#pyly-startup-progress > div`);
+        if (
+          fill == null ||
+          window.matchMedia(`(prefers-reduced-motion: reduce)`).matches
+        ) {
+          startup?.remove();
+          return;
+        }
+
+        const animation = fill.animate(
+          [
+            { width: `${fill.getBoundingClientRect().width}px` },
+            { width: `100%` },
+          ],
+          { duration: 250, easing: `ease-out`, fill: `forwards` },
+        );
+        const timeout = window.setTimeout(() => {
+          startup?.remove();
+        }, 400);
+        return () => {
+          window.clearTimeout(timeout);
+          animation.cancel();
+        };
+      }
     }
   }, [isReady]);
 
