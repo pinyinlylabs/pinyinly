@@ -19,6 +19,7 @@ import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
+import { Suspense } from "@/client/ui/Suspense";
 import { TooltipProvider } from "@/client/ui/TooltipProvider";
 import * as Sentry from "@sentry/react-native";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -37,30 +38,34 @@ function RootLayout() {
   }, [ref]);
 
   return (
-    <PylyThemeProvider>
-      <DeviceStoreProvider>
-        <CurrentSessionStoreProvider>
-          <PostHogProvider>
-            <Head>
-              <title>Pinyinly - Learn to read Chinese</title>
-            </Head>
+    <DeviceStoreProvider>
+      <Suspense fallback={null}>
+        <PylyThemeProvider>
+          <CurrentSessionStoreProvider>
+            <PostHogProvider>
+              <Head>
+                <title>Pinyinly - Learn to read Chinese</title>
+              </Head>
 
-            <UiProviders>
-              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
-                <Stack.Screen
-                  name="login"
-                  options={{
-                    presentation: `modal`,
-                    animation: `slide_from_bottom`,
-                  }}
-                />
-              </Stack>
-            </UiProviders>
-            <SplashScreen />
-          </PostHogProvider>
-        </CurrentSessionStoreProvider>
-      </DeviceStoreProvider>
-    </PylyThemeProvider>
+              <UiProviders>
+                <Stack
+                  screenOptions={{ headerShown: false, animation: `fade` }}
+                >
+                  <Stack.Screen
+                    name="login"
+                    options={{
+                      presentation: `modal`,
+                      animation: `slide_from_bottom`,
+                    }}
+                  />
+                </Stack>
+              </UiProviders>
+              <SplashScreen />
+            </PostHogProvider>
+          </CurrentSessionStoreProvider>
+        </PylyThemeProvider>
+      </Suspense>
+    </DeviceStoreProvider>
   );
 }
 

@@ -41,6 +41,7 @@
     "@rn-primitives/dropdown-menu": "patch:@rn-primitives/dropdown-menu@npm%3A1.5.2#~/.yarn/patches/@rn-primitives-dropdown-menu-npm-1.5.2-79595d43ce.patch",
     "@rn-primitives/hooks": "^1.5.2",
     "@rn-primitives/portal": "^1.5.3",
+    "@rn-primitives/select": "^1.5.2",
     "@rn-primitives/slot": "^1.5.2",
     "@sentry/core": "10.75.2",
     "@sentry/node": "10.75.2",

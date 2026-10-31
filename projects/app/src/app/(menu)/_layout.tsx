@@ -8,7 +8,6 @@ import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
 import type { Href } from "expo-router";
 import { Link, Stack, usePathname } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
@@ -180,8 +179,6 @@ function MenuLayoutContent() {
       />
 
       <DesktopFloatingTitle />
-
-      <StatusBar style="auto" />
     </View>
   );
 }
