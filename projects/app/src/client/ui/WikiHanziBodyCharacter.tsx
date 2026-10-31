@@ -4,6 +4,7 @@ import { PylyMdxComponents } from "./PylyMdxComponents";
 import { WikiAiExplanation } from "./WikiAiExplanation";
 import { WikiHanziCharacterDecompositionComponents } from "./WikiHanziCharacterDecompositionComponents";
 import { WikiHanziCharacterMeaning } from "./WikiHanziCharacterMeaning";
+import { WikiHanziCharacterLooksSimilarTo } from "./WikiHanziCharacterLooksSimilarTo";
 import { WikiHanziCharacterUsedInCharacters } from "./WikiHanziCharacterUsedInCharacters";
 import { WikiHanziExternalResources } from "./WikiHanziExternalResources";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
@@ -57,6 +58,8 @@ export function WikiHanziBodyCharacter({
         <WikiHanziCharacterUsedInWords hanzi={hanzi} />
 
         <WikiHanziRelatedMeanings hanzi={hanzi} />
+
+        <WikiHanziCharacterLooksSimilarTo hanzi={hanzi} />
 
         <WikiHanziSamePronunciation hanzi={hanzi} />
 

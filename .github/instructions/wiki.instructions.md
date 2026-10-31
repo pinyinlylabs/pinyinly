@@ -24,8 +24,10 @@ Character `character.json` files may define an optional `exampleSentence` on eac
 matching character meaning on the wiki page.
 
 Single-character `character.json` files may also define `visuallySimilar`, a manually maintained
-list of visually confusable characters used by contrastive handwriting grading. This list is copied
-into the generated wiki payload; each listed character needs median stroke data.
+list of visually confusable characters used by contrastive handwriting grading and the character
+wiki's "Looks similar to" box. This list is copied into the generated wiki payload; each listed
+character needs median stroke data. The wiki box links to all listed characters in source order,
+adding dictionary details where available, and is hidden when the list is empty.
 
 Character data distinguishes two related component concepts:
 
