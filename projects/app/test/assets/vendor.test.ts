@@ -44,11 +44,13 @@ test(`vendor metadata is valid`, async () => {
   for (const filePath of vendorFilePaths) {
     const contents = await readFile(filePath, `utf8`);
     const parsed = pylyVendorCodec.safeParse(contents);
-    expect
-      .soft(
-        parsed.success,
-        `Invalid vendor metadata in ${path.relative(projectRoot, filePath)}: ${parsed.error.message}`,
-      )
-      .toBe(true);
+    if (!parsed.success) {
+      expect
+        .soft(
+          false,
+          `Invalid vendor metadata in ${path.relative(projectRoot, filePath)}: ${parsed.error.message}`,
+        )
+        .toBe(true);
+    }
   }
 });
