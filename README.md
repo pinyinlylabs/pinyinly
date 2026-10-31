@@ -15,4 +15,5 @@ Try it out at https://pinyin.ly — no signup needed.
 Come hang out on [Discord](https://discord.gg/ER6mMnJxXM) to chat, ask questions, or give feedback
 on _Pinyinly_!
 
-Read the contribution and developer documentation [here](./CONTRIBUTING.md).
+Read the contribution and developer documentation
+[here](./.github/instructions/guides/getting-started.instructions.md).

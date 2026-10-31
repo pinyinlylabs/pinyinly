@@ -14,7 +14,7 @@ import {
   buildSenseGroupingAffinityMatrix,
   cedictIdsPath,
   cedictEditsPath,
-  cedictPath,
+  cedictDerivativePrefixPath,
   cedictSenseSamplingPath,
   clusterGlossesFromAffinityMatrix,
   createGlossOrderSortComparator,
@@ -4622,11 +4622,11 @@ test.skipIf(isCi)(
 
     // export the entire dataset
     await writeUtf8FileIfChanged(
-      `${cedictPath}.debug.out`,
+      `${cedictDerivativePrefixPath}.debug.out`,
       serializeCedictV2Entries(entries, { debug: true }),
     );
     await writeUtf8FileIfChanged(
-      `${cedictPath}.out`,
+      `${cedictDerivativePrefixPath}.out`,
       serializeCedictV2Entries(entries),
     );
 
@@ -4658,11 +4658,11 @@ test.skipIf(isCi)(
       [`hsk7`, hsk7],
     ] as const) {
       await writeUtf8FileIfChanged(
-        `${cedictPath}.${label}.out`,
+        `${cedictDerivativePrefixPath}.${label}.out`,
         serializeCedictV2Entries(list),
       );
       await writeUtf8FileIfChanged(
-        `${cedictPath}.${label}.debug.out`,
+        `${cedictDerivativePrefixPath}.${label}.debug.out`,
         serializeCedictV2Entries(list, { debug: true }),
       );
     }

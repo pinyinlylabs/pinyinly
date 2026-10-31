@@ -1,16 +1,13 @@
 {
   "decompositions": {
-    "⿱龸子": ["0-4", "5-7"],
-    "⿳𭕄冖子": ["0-2", "3,4", "5-7"]
+    "⿱𰃮子": ["0-4", "5-7"]
   },
   "hanzi": "学",
   "mnemonic": {
     "components": {
-      "冖": { "color": "yellow", "label": "a blanket" },
-      "子": { "color": "blue", "label": "a child" },
-      "𭕄": { "label": "raised fingers" }
+      "子": { "color": "blue", "label": "a child" }
     },
-    "decomposition": "⿳𭕄冖子",
+    "decomposition": "⿱𰃮子",
     "hints": [
       {
         "hint": "A child using their hand to **learn** about the world.",

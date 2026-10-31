@@ -94,7 +94,7 @@ For local defaults, the sample uses:
 
 ## Local development (Minio)
 
-Use the setup from `CONTRIBUTING.md`:
+Use the setup from [`getting-started.instructions.md`](../guides/getting-started.instructions.md):
 
 1. Install:
    - `brew install minio/aistor/minio`
@@ -103,7 +103,9 @@ Use the setup from `CONTRIBUTING.md`:
    - `mc alias set local http://127.0.0.1:9000 miniodev miniodev`
    - `mc mb --ignore-existing local/pinyinly-assets`
    - `mc anonymous set download local/pinyinly-assets`
-   - Apply CORS config from `CONTRIBUTING.md` when testing web uploads.
+   - Apply CORS config from
+     [`getting-started.instructions.md`](../guides/getting-started.instructions.md) when testing web
+     uploads.
 3. Start app and services:
    - `moon run app:dev` (Expo + Inngest + Minio)
    - or `moon run app:devServices` for services only.

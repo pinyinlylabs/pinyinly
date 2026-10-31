@@ -16,8 +16,8 @@ new-word learning flow. Write it for learners: explain the relevant meanings and
 useful examples or grammar notes where appropriate. Use Markdown headings and formatting to make
 longer explanations easy to scan; there is no required set of headings or frontmatter.
 
-Examples: [`一/meaning.mdx`](../../projects/app/src/client/wiki/一/meaning.mdx) and
-[`一会儿/meaning.mdx`](../../projects/app/src/client/wiki/一会儿/meaning.mdx).
+Examples: [`一/meaning.mdx`](../../../projects/app/src/client/wiki/一/meaning.mdx) and
+[`一会儿/meaning.mdx`](../../../projects/app/src/client/wiki/一会儿/meaning.mdx).
 
 Character `character.json` files may define an optional `exampleSentence` on each
 `curriculumMeanings` entry. It contains `hanzi`, `pinyin`, and `translation`, and is shown with the
@@ -57,9 +57,9 @@ stores stroke graphics:
   syntax (for example, commands such as `M` and `L`), not a serialized list of `x,y` points.
 
 For a concrete example, see
-[`一/character.json`](../../projects/app/src/client/wiki/一/character.json). The generator that
+[`一/character.json`](../../../projects/app/src/client/wiki/一/character.json). The generator that
 imports and transforms character stroke graphics is
-[`generateWikiCharacterStrokes.ts`](../../projects/app/bin/generateWikiCharacterStrokes.ts).
+[`generateWikiCharacterStrokes.ts`](../../../projects/app/bin/generateWikiCharacterStrokes.ts).
 
 ## Generated `public/raw` wiki data
 

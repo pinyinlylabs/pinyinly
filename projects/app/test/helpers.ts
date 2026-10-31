@@ -47,10 +47,11 @@ export async function getFonts(): Promise<TestFont[]> {
   }
 
   return [
-    await getTestFont(`MiSans/MiSansVF`),
-    await getTestFont(`MiSans/MiSansL3`),
-    await getTestFont(`NotoSansSC-VariableFont_wght`),
-    await getTestFont(`PinyinlyComponentsVF`),
+    await getTestFont(`MiSansVF/MiSansVF`),
+    await getTestFont(`MiSansL3/MiSansL3`),
+    await getTestFont(`NotoSansSC/NotoSansSC-VariableFont_wght`),
+    await getTestFont(`LXGW_WenKai_GB/LXGWWenKaiGB-Regular`),
+    await getTestFont(`PinyinlyComponents/PinyinlyComponentsVF`),
   ];
 }
 
