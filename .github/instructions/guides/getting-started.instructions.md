@@ -1,4 +1,10 @@
-# Contribution guide
+---
+description:
+  "Human developer guide for repository setup, app and test workflows, and common contribution
+  tasks."
+---
+
+# Getting started and contributing
 
 ## Setup
 
@@ -105,15 +111,6 @@ no matching files changed or during merge-queue runs, so those checks still succ
 flat names instead of the old nested reusable-workflow check names. Deployment failures still fail
 the corresponding check. The PR workflow's `moon-ci` checks are unchanged, as are production
 deployments on `main`.
-
-## Updating CEDICT test data
-
-1. Download the ZIP archive from the
-   [CC-CEDICT download page](https://cc-cedict.org/editor/editor.php?handler=Download) using its
-   [direct download link](https://cc-cedict.org/editor/editor_export_cedict.php?c=zip&v=2).
-1. Extract the ZIP archive.
-1. Copy the extracted `cedict_ts.u8` file to `projects/app/test/data/cedict_ts-2.u8`, replacing the
-   existing file.
 
 ## Writing a backend database migration
 
@@ -365,7 +362,3 @@ To update the bill of materials run:
 ```
 moon run app:buildBillOfMaterials
 ```
-
-## AI agent instructions
-
-See `.github/instructions/*.md`

@@ -5,6 +5,7 @@ import {
   PartOfSpeech,
 } from "#data/model.ts";
 import type { HanziWord } from "#data/model.ts";
+import { testVendorDir } from "#bin/util/paths.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { readFile, readFileSync } from "@pinyinly/lib/fs";
 import { z } from "zod";
@@ -213,10 +214,7 @@ export function parsePos(posText: string): PartOfSpeech | undefined {
 export const loadCompleteHskVocabulary = memoize0(
   async (): Promise<CompleteHskVocabulary> => {
     const rawJson = await readFile(
-      path.join(
-        import.meta.dirname,
-        `../vendor/complete-hsk-vocabulary/complete.json`,
-      ),
+      path.join(testVendorDir, `complete-hsk-vocabulary/complete.json`),
       `utf8`,
     );
 

@@ -1246,6 +1246,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𬜯 via 满[HSK2]",
       "𭥴 via 增, 曾[HSK4]",
       "𭷔 via 解",
+      "𰃮 via 学[HSK1], 觉",
       " via 夜[HSK2]",
     ]
   `);

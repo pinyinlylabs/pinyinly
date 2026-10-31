@@ -26,7 +26,7 @@ test(`MiSans font weight correction`, async () => {
 
 test(`transform SVG glyphs`, async () => {
   const svgText = await fs.readFile(
-    path.resolve(projectRoot, `src/assets/fonts/MiSans/glyphs/囬.svg`),
+    path.resolve(projectRoot, `src/assets/fonts/MiSansVF/glyphs/囬.svg`),
     `utf-8`,
   );
 

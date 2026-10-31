@@ -1,4 +1,5 @@
 import { pinyinTextSchema } from "#data/model.js";
+import { testVendorDir } from "#bin/util/paths.ts";
 import type { HanziText, PinyinNumericText, PinyinText } from "#data/model.js";
 import { pinyinNumericToDiacritic } from "#data/pinyin.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -4301,10 +4302,15 @@ export function parseCedictV2Text(
   });
 }
 
-export const cedictPath = path.join(import.meta.dirname, `cedict_ts-2.u8`);
-export const cedictIdsPath = cedictPath + `.ids`;
-export const cedictEditsPath = cedictPath + `.edits`;
-export const cedictSenseSamplingPath = cedictPath + `.senseSampling.json`;
+export const cedictPath = path.join(testVendorDir, `cedict/cedict_ts-2.u8`);
+export const cedictDerivativePrefixPath = path.join(
+  import.meta.dirname,
+  `cedict_ts-2.u8`,
+);
+export const cedictIdsPath = cedictDerivativePrefixPath + `.ids`;
+export const cedictEditsPath = cedictDerivativePrefixPath + `.edits`;
+export const cedictSenseSamplingPath =
+  cedictDerivativePrefixPath + `.senseSampling.json`;
 
 export const loadCedictV2Original = memoize0(
   async (): Promise<readonly CedictV2EntryType[]> => {

@@ -1,4 +1,5 @@
 import { hanziTextSchema, pinyinTextSchema } from "#data/model.js";
+import { testVendorDir } from "#bin/util/paths.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { readFile } from "@pinyinly/lib/fs";
 import isEqual from "lodash/isEqual";
@@ -38,10 +39,7 @@ export const loadIvankraHsk30 = memoize0(
     // ID,Simplified,Traditional,Pinyin,POS,Level,WebNo,WebPinyin,OCR,CEDICT,Example
     // L1-0001,爱,愛,ài,V,1,18,ài,爱,愛|爱[ai4],
     const csv = await readFile(
-      path.join(
-        import.meta.dirname,
-        `../vendor/ivankra-hsk30/hsk30-expanded.csv`,
-      ),
+      path.join(testVendorDir, `ivankra-hsk30/hsk30-expanded.csv`),
       `utf8`,
     );
 

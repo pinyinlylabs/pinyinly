@@ -43,9 +43,9 @@ target the specific file or narrow path needed rather than searching across all 
 - **Skill Graph:** Learning skills are nodes in a directed graph, supporting dynamic, personalized
   learning paths.
 - **Word Representation:** Each Hanzi word is mapped to a set of distinct meanings, each with a
-  stable `meaning-key` (see `word-representation.instructions.md`).
-- **Skill Kinds:** See `skill-kinds.instructions.md` for all supported skill types and Hanzi ID
-  format.
+  stable `meaning-key` (see `.github/instructions/domains/word-representation.instructions.md`).
+- **Skill Kinds:** See `.github/instructions/domains/skill-kinds.instructions.md` for all supported
+  skill types and Hanzi ID format.
 - **Wiki Content:** Add/modify MDX files in `src/client/wiki/[hanzi]/meaning.mdx`. Content is
   auto-loaded.
 - **Tests:** Mirror `src/` structure in `test/` (e.g., `src/util/date.ts` →
@@ -55,8 +55,9 @@ target the specific file or narrow path needed rather than searching across all 
 
 ## References
 
-- See `.github/instructions/*.md` for detailed conventions, curriculum, SRS, and more.
-- For contribution/setup, see `CONTRIBUTING.md`.
+- See `.github/instructions/domains/` and `.github/instructions/guides/` for detailed project
+  references and development guidance.
+- For contribution/setup, see `.github/instructions/guides/getting-started.instructions.md`.
 
 ---
 

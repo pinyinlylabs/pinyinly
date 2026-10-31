@@ -30,10 +30,13 @@ export const SplashScreen = ({ children: _children }: { children?: never }) => {
     [`NationalPark`]: require(
       `../../assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
     ),
-    [`MiSansL3`]: require(`../../assets/fonts/MiSans/MiSansL3.subset.ttf`),
-    [`MiSans`]: require(`../../assets/fonts/MiSans/MiSansVF.subset.ttf`),
+    [`MiSansL3`]: require(`../../assets/fonts/MiSansL3/MiSansL3.subset.ttf`),
+    [`MiSans`]: require(`../../assets/fonts/MiSansVF/MiSansVF.subset.ttf`),
+    [`LXGWWenKaiGB`]: require(
+      `../../assets/fonts/LXGW_WenKai_GB/LXGWWenKaiGB-Regular.subset.ttf`,
+    ),
     [`PinyinlyComponents`]: require(
-      `../../assets/fonts/PinyinlyComponentsVF.subset.ttf`,
+      `../../assets/fonts/PinyinlyComponents/PinyinlyComponentsVF.subset.ttf`,
     ),
   });
   const isReady = fontsLoaded || fontError != null;

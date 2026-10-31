@@ -1,11 +1,11 @@
 {
   "decompositions": {
-    "⿱龸见": ["0-4", "5-8"],
+    "⿱𰃮见": ["0-4", "5-8"],
     "⿳𭕄冖见": ["0-2", "3,4", "5-8"]
   },
   "hanzi": "觉",
   "mnemonic": {
-    "decomposition": "⿱龸见"
+    "decomposition": "⿱𰃮见"
   },
   "svg": {
     "medians": [
