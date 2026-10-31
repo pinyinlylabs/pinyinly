@@ -8,7 +8,7 @@ import { deviceStoreQuery } from "@/client/query";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import type { RizzleEntityInput } from "@/util/rizzle";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { use, useCallback, useEffect, useRef } from "react";
 import { windowEventListenerEffect } from "./windowEventListenerEffect";
 
@@ -16,7 +16,19 @@ import { windowEventListenerEffect } from "./windowEventListenerEffect";
  * react-query wrapper around localStorage (web) and SecureStore (ios +
  * android). See {@link useDeviceStoreMutation}.
  */
-export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
+export const useDeviceStoreQuery = <T extends DeviceStoreEntity>(key: T) => {
+  const { query, queryClient } = useDeviceStoreQueryConfig(key);
+  return useQuery(query, queryClient);
+};
+
+export const useDeviceStoreSuspenseQuery = <T extends DeviceStoreEntity>(
+  key: T,
+) => {
+  const { query, queryClient } = useDeviceStoreQueryConfig(key);
+  return useSuspenseQuery(query, queryClient);
+};
+
+function useDeviceStoreQueryConfig<T extends DeviceStoreEntity>(key: T) {
   const queryClient = useDeviceStoreQueryClient();
   const query = deviceStoreQuery(key);
   const storageKey = buildDeviceStoreKey(key);
@@ -49,12 +61,12 @@ export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
     [key, queryClient, storageKey, query.queryKey],
   );
 
-  return useQuery(query, queryClient);
-};
+  return { query, queryClient };
+}
 
 /**
  * Update a storage item. `null` will delete the item, any other value will be
- * marshaled and saved.
+ * marshaled and saved. Device-local writes also run while offline.
  */
 export const useDeviceStoreMutation = <T extends DeviceStoreEntity>(key: T) => {
   const queryClient = useDeviceStoreQueryClient();
@@ -62,6 +74,7 @@ export const useDeviceStoreMutation = <T extends DeviceStoreEntity>(key: T) => {
 
   return useMutation(
     {
+      networkMode: `always`,
       mutationFn: async (value: RizzleEntityInput<T> | null) => {
         await deviceStoreSet(key, value);
 

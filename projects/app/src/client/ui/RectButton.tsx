@@ -38,6 +38,7 @@ export type RectButtonProps = {
   | (keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`))
   | `accessibilityLabel`
   | `accessibilityRole`
+  | `aria-checked`
   | `testID`
 >;
 

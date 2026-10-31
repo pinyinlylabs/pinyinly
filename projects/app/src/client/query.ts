@@ -487,7 +487,7 @@ export const fetchAudioBufferQuery = (
     throwOnError: true,
   });
 
-export const deviceStoreQuery = (key: DeviceStoreEntity) =>
+export const deviceStoreQuery = <T extends DeviceStoreEntity>(key: T) =>
   queryOptions({
     queryKey: [`deviceStore`, buildDeviceStoreKey(key)],
     queryFn: async () => {

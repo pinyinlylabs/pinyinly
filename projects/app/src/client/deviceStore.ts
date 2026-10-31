@@ -74,6 +74,9 @@ export async function deviceStoreGetByStorageKey(
 ): Promise<string | null> {
   switch (Platform.OS) {
     case `web`: {
+      if (typeof localStorage === `undefined`) {
+        return null;
+      }
       return localStorage.getItem(storageKey);
     }
     case `ios`:
