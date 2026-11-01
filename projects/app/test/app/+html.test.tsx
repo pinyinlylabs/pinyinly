@@ -32,14 +32,27 @@ function createStartupDocument() {
     </RootHtml>,
   );
   const doc = new DOMParser().parseFromString(html, `text/html`);
-  const reload = vi.fn();
   const script = doc.querySelector(`script:not([src])`);
   expect(script).not.toBeNull();
+  const errorHandlers: Record<string, (event: { target: unknown }) => void> =
+    {};
+  const addEventListener = vi.fn(
+    (
+      type: string,
+      listener: (event: { target: unknown }) => void,
+      _capture: boolean,
+    ) => {
+      errorHandlers[type] = listener;
+    },
+  );
+  const consoleError = vi.fn();
   runInNewContext(script?.textContent ?? ``, {
     document: doc,
-    window: { setTimeout, location: { reload } },
+    window: { addEventListener, setTimeout },
+    HTMLScriptElement,
+    console: { error: consoleError },
   });
-  return { doc, reload };
+  return { doc, addEventListener, consoleError, errorHandlers };
 }
 
 test(`includes a self-contained indeterminate progress bar and preserves Expo document resources`, () => {
@@ -70,8 +83,8 @@ test(`includes a self-contained indeterminate progress bar and preserves Expo do
   );
 });
 
-test(`reveals recovery at 15 seconds and reloads only when requested`, () => {
-  const { doc, reload } = createStartupDocument();
+test(`reveals recovery after 15 seconds without an in-page reload control`, () => {
+  const { doc } = createStartupDocument();
   const recovery = doc.querySelector(`#pyly-startup-recovery`);
   expect(recovery).toHaveAttribute(`hidden`);
   vi.advanceTimersByTime(14_999);
@@ -79,13 +92,49 @@ test(`reveals recovery at 15 seconds and reloads only when requested`, () => {
   vi.advanceTimersByTime(1);
   expect(recovery).not.toHaveAttribute(`hidden`);
   expect(recovery?.textContent).toContain(
-    `This is taking longer than expected.`,
+    `Still loading… This is taking longer than usual.`,
+  );
+  expect(recovery?.querySelector(`button`)).toBeNull();
+  expect(doc.body.querySelector(`style`)?.textContent).toContain(
+    `font: 12px/1.5 system-ui, sans-serif`,
+  );
+  expect(doc.body.querySelector(`style`)?.textContent).toContain(
+    `color-mix(in srgb, currentColor 60%, transparent)`,
   );
   vi.advanceTimersByTime(60_000);
   expect(doc.querySelector(`#pyly-startup-progress`)).not.toBeNull();
-  expect(reload).not.toHaveBeenCalled();
-  recovery?.querySelector(`button`)?.click();
-  expect(reload).toHaveBeenCalledExactlyOnceWith();
+});
+
+test(`reports a failed external script while startup is active`, () => {
+  const { doc, addEventListener, consoleError, errorHandlers } =
+    createStartupDocument();
+  const recovery = doc.querySelector(`#pyly-startup-recovery`);
+  const apiScript = doc.createElement(`script`);
+  apiScript.src = `/api/sentry.js`;
+  const script = doc.createElement(`script`);
+  script.src = `/app.js`;
+
+  expect(addEventListener).toHaveBeenCalledWith(
+    `error`,
+    expect.any(Function),
+    true,
+  );
+  errorHandlers[`error`]?.({ target: new Error(`unrelated`) });
+  expect(recovery).toHaveAttribute(`hidden`);
+
+  errorHandlers[`error`]?.({ target: apiScript });
+  expect(recovery).toHaveAttribute(`hidden`);
+  expect(consoleError).not.toHaveBeenCalled();
+
+  errorHandlers[`error`]?.({ target: script });
+  expect(recovery).not.toHaveAttribute(`hidden`);
+  expect(recovery?.textContent).toContain(
+    `Something went wrong while loading.`,
+  );
+  expect(consoleError).toHaveBeenCalledExactlyOnceWith(
+    `Failed to load script:`,
+    script.src,
+  );
 });
 
 test.each([0, 15_000])(
