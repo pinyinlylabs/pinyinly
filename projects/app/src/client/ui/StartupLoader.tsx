@@ -1,4 +1,8 @@
-export function StartupLoader() {
+export function StartupLoader({
+  recoveryDelayMs = 15_000,
+}: {
+  recoveryDelayMs?: number;
+}) {
   return (
     <>
       <style>{loadingStyles}</style>
@@ -14,10 +18,8 @@ export function StartupLoader() {
           </div>
           <div id="pyly-startup-recovery" hidden>
             <p role="status">
-              This is taking longer than expected. Check your connection, or
-              reload to try again.
+              Still loading… This is taking longer than usual.
             </p>
-            <button type="button">Reload</button>
           </div>
           <noscript>
             <style>{`#pyly-startup-progress { display: none; }`}</style>
@@ -25,7 +27,7 @@ export function StartupLoader() {
           </noscript>
         </div>
       </div>
-      <script>{recoveryScript}</script>
+      <script>{`(${startupScript.toString()})(${recoveryDelayMs});`}</script>
     </>
   );
 }
@@ -42,7 +44,11 @@ const loadingStyles = `
   color: #12191d;
 }
 #pyly-startup > div { max-width: 360px; }
-#pyly-startup-recovery,
+#pyly-startup-recovery {
+  color: color-mix(in srgb, currentColor 60%, transparent);
+  font: 12px/1.5 system-ui, sans-serif;
+  text-align: center;
+}
 #pyly-startup noscript {
   font: 16px/1.5 system-ui, sans-serif;
   text-align: center;
@@ -63,19 +69,6 @@ const loadingStyles = `
   opacity: 0.5;
   animation: pyly-startup-fill 60s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
 }
-#pyly-startup button {
-  padding: 8px 20px;
-  border: 1px solid currentColor;
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-#pyly-startup button:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 4px;
-}
 @keyframes pyly-startup-fill { to { width: 94%; } }
 @media (prefers-color-scheme: dark) {
   #pyly-startup { background: #1a1d1e; color: #d7d8d9; }
@@ -85,16 +78,64 @@ const loadingStyles = `
 }
 `;
 
-const recoveryScript = `
-(function () {
-  var startup = document.getElementById('pyly-startup');
-  startup.querySelector('button').addEventListener('click', function () {
-    window.location.reload();
-  });
+/**
+ * Startup script embedded into the initial HTML via `Function.toString()`.
+ *
+ * IMPORTANT: This function is serialized and executed independently
+ * of the JavaScript bundle, before the React application loads.
+ *
+ * Restrictions:
+ * - Must be self-contained: do not reference imports, module-level
+ *   variables, or functions declared outside this function.
+ * - Only reference parameters, locally declared values, and
+ *   standard browser globals.
+ * - Pass external configuration through function parameters.
+ * - Avoid language features that require external transpiler helpers.
+ *
+ * Changes must work when the serialized function is executed
+ * as a standalone inline `<script>` in the browser.
+ */
+function startupScript(recoveryDelayMs: number) {
+  const startup = document.querySelector<HTMLElement>(`#pyly-startup`);
+  const recovery = document.querySelector<HTMLElement>(
+    `#pyly-startup-recovery`,
+  );
+  const recoveryMessage = recovery?.querySelector<HTMLParagraphElement>(`p`);
+  if (!startup || !recovery || !recoveryMessage) {
+    console.error(`Could not initialize the startup loader.`);
+    return;
+  }
+  const startupElement: HTMLElement = startup;
+  const recoveryElement: HTMLElement = recovery;
+  const recoveryMessageElement: HTMLParagraphElement = recoveryMessage;
+
+  function showLoadingError() {
+    recoveryMessageElement.textContent = `Something went wrong while loading. Check your connection, or reload the page.`;
+    recoveryElement.hidden = false;
+  }
+  window.addEventListener(
+    `error`,
+    (event) => {
+      const script = event.target;
+      if (!(script instanceof HTMLScriptElement)) {
+        return;
+      }
+      const src = script.getAttribute(`src`) ?? ``;
+      // Telemetry scripts served from /api/ are non-critical to startup.
+      if (
+        script.src &&
+        !src.startsWith(`/api/`) &&
+        startupElement.isConnected
+      ) {
+        console.error(`Failed to load script:`, script.src);
+        showLoadingError();
+      }
+    },
+    true,
+  );
   window.setTimeout(function () {
-    if (startup.isConnected) {
-      document.getElementById('pyly-startup-recovery').hidden = false;
+    if (startupElement.isConnected) {
+      recoveryElement.hidden = false;
     }
-  }, 15000);
-})();
-`;
+  }, recoveryDelayMs);
+}
