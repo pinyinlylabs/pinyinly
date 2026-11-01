@@ -1,4 +1,5 @@
 import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
+import { usePreventPressFocusRef } from "@/client/ui/hooks/usePreventPressFocusRef";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
@@ -11,6 +12,7 @@ import { tv } from "tailwind-variants";
 import type { IconProps } from "./Icon";
 import { Icon } from "./Icon";
 import type { IconName } from "./iconRegistry";
+import { mergeRefs } from "@/client/react";
 
 export type ButtonVariant =
   | `filled`
@@ -22,6 +24,8 @@ export type ButtonVariant =
   | `rounded`;
 
 export type RectButtonProps = {
+  /** If true, the button should look like it's "turned on" / "lit up". Not implemented for all variants. */
+  active?: boolean;
   variant?: ButtonVariant;
   children?: ViewProps[`children`];
   className?: string;
@@ -33,16 +37,22 @@ export type RectButtonProps = {
   pressed?: boolean;
   /** Allow selecting the button label. Defaults to false. */
   selectable?: boolean;
+  /** Prevent touch events from moving focus to the button, this is useful for buttons serve as controls for text inputs. */
+  preventPressFocus?: boolean;
 } & Pick<
   PropsOf<typeof Pressable>,
-  | (keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`))
+  | (keyof PropsOf<typeof Pressable> & `on${string}`)
   | `accessibilityLabel`
   | `accessibilityRole`
   | `aria-checked`
+  | `disabled`
+  | `ref`
+  | `tabIndex`
   | `testID`
 >;
 
 export function RectButton({
+  active = false,
   children,
   variant = `outline`,
   className,
@@ -54,6 +64,7 @@ export function RectButton({
   accessibilityRole,
   pressed: pressedProp,
   selectable = false,
+  preventPressFocus = false,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
@@ -61,10 +72,11 @@ export function RectButton({
   const resolvedIconSize = iconSize ?? iconSizeByVariant[variant];
 
   const [pressedState, setPressedState] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  const [hoveredState, setHoveredState] = useState(false);
 
-  const pressed = pressedProp ?? pressedState;
-  const flat = pressed || disabled;
+  const pressed = !disabled && (pressedProp ?? pressedState);
+  const hovered = !disabled && hoveredState;
+
   const textClassName = extractTextClasses(className);
   const fullTextClass = textClass({
     variant,
@@ -78,31 +90,42 @@ export function RectButton({
       </Text>
     );
 
+  const preventPressFocusRef = usePreventPressFocusRef();
+
   const pressable = (
     <Pressable
       {...pressableProps}
+      ref={mergeRefs(
+        preventPressFocus ? preventPressFocusRef : undefined,
+        pressableProps.ref,
+      )}
       accessibilityRole={
         accessibilityRole ?? (href == null ? `button` : `link`)
       }
       onHoverIn={(e) => {
-        setHovered(true);
+        setHoveredState(true);
         pressableProps.onHoverIn?.(e);
       }}
       onHoverOut={(e) => {
-        setHovered(false);
+        setHoveredState(false);
         pressableProps.onHoverOut?.(e);
       }}
       onPressIn={(e) => {
         setPressedState(true);
         hapticImpactIfMobile();
         pressableProps.onPressIn?.(e);
+
+        // A side effect of preventPressFocus is that we manually trigger onPress here, otherwise onPress is never called.
+        // See useTouchStartPreventDefaultRef for details.
+        if (preventPressFocus) {
+          pressableProps.onPress?.(e);
+        }
       }}
       onPressOut={(e) => {
         setPressedState(false);
         pressableProps.onPressOut?.(e);
       }}
-      className={pressableClass({
-        flat,
+      className={buttonSlotClass({
         variant,
         disabled,
         inFlexRowParent,
@@ -110,13 +133,14 @@ export function RectButton({
       })}
     >
       <View
-        className={roundedRectClass({
-          flat,
-          variant,
-          disabled,
-          iconOnly,
-          hoveredOrPressed: pressed || hovered,
+        className={buttonUiClass({
+          active,
           className,
+          disabled,
+          hoveredOrPressed: hovered || pressed,
+          iconOnly,
+          pressed,
+          variant,
         })}
       >
         {iconStart == null && iconEnd == null ? (
@@ -157,7 +181,7 @@ const iconSizeByVariant: Partial<Record<ButtonVariant, IconProps[`size`]>> = {
   bareDim: 20,
 };
 
-const pressableClass = tv({
+const buttonSlotClass = tv({
   base: `
     outline-transparent
 
@@ -166,17 +190,14 @@ const pressableClass = tv({
     web:transition-all
   `,
   variants: {
-    flat: {
-      true: ``,
-    },
     variant: {
       filled: `
-        rounded-xl
+        rounded-xl pb-[3px]
 
         focus-visible:outline-fg/50
       `,
-      outline: `rounded-xl`,
-      option: `rounded-xl`,
+      outline: `rounded-xl pb-0.5`,
+      option: `rounded-xl pb-0.5`,
       barePrimary: `rounded transition-transform`,
       bare: `rounded transition-transform`,
       bareDim: `rounded transition-transform`,
@@ -191,21 +212,6 @@ const pressableClass = tv({
     },
   },
   compoundVariants: [
-    {
-      variant: `filled`,
-      flat: true,
-      class: `pt-1`,
-    },
-    {
-      variant: `outline`,
-      flat: true,
-      class: `pt-[2px]`,
-    },
-    {
-      variant: `option`,
-      flat: true,
-      class: `pt-[2px]`,
-    },
     {
       variant: `rounded`,
       disabled: false,
@@ -229,26 +235,38 @@ const pressableClass = tv({
   ],
 });
 
-const roundedRectClass = tv({
+const buttonUiClass = tv({
   base: `
     box-border items-center justify-center select-none
 
-    web:transition-[border-width]
+    web:transition-[border-color,box-shadow,translate] web:duration-100 web:ease-in-out
   `,
   variants: {
     variant: {
-      filled: `rounded-xl border-bg/20 bg-fg/95 px-4 py-2`,
-      outline: `rounded-xl border-2 border-fg/20 px-4 py-2`,
-      option: `rounded-xl border border-fg/20 px-3 py-2`,
+      filled: `
+        rounded-xl bg-fg/95 px-4 py-2
+        shadow-[0_3px_0_color-mix(in_oklab,var(--color-bg)_30%,var(--color-fg))]
+      `,
+      outline: `
+        rounded-xl border-2 border-fg/20 px-4 py-2
+        shadow-[0_2px_0_color-mix(in_oklab,var(--color-fg)_20%,transparent)]
+      `,
+      option: `
+        rounded-xl border border-fg/20 px-3 py-2
+        shadow-[0_2px_0_color-mix(in_oklab,var(--color-fg)_20%,transparent)]
+      `,
       barePrimary: `rounded bg-blue px-2 py-1`,
       bare: `rounded px-2 py-1`,
       bareDim: `rounded px-2 py-1`,
       rounded: `rounded-full border border-fg/20 px-4 py-2`,
     },
-    hoveredOrPressed: {
+    active: {
       true: ``,
     },
-    flat: {
+    pressed: {
+      true: ``,
+    },
+    hoveredOrPressed: {
       true: ``,
     },
     disabled: {
@@ -267,47 +285,44 @@ const roundedRectClass = tv({
     },
     {
       variant: `filled`,
-      flat: false,
-      class: `border-b-4`,
+      pressed: true,
+      class: `translate-y-[3px] shadow-none`,
     },
     // Outline
     {
       variant: `outline`,
-      disabled: false,
       hoveredOrPressed: true,
-      class: `border-fg/30`,
+      class: `border-fg/30 shadow-[0_2px_0_color-mix(in_oklab,var(--color-fg)_30%,transparent)]`,
     },
     {
       variant: `outline`,
-      flat: true,
-      class: `border-b-2`,
+      active: true,
+      class: `border-fg/100 shadow-[0_2px_0_color-mix(in_oklab,var(--color-fg)_100%,transparent)]`,
     },
     {
       variant: `outline`,
-      flat: false,
-      class: `border-b-4`,
+      pressed: true,
+      class: `translate-y-[2px] shadow-none`,
     },
     // Option
     {
       variant: `option`,
-      disabled: false,
       hoveredOrPressed: true,
-      class: `border-fg/30`,
+      class: `border-fg/30 shadow-[0_2px_0_color-mix(in_oklab,var(--color-fg)_30%,transparent)]`,
     },
     {
       variant: `option`,
-      flat: true,
-      class: `border-b`,
+      active: true,
+      class: `border-fg shadow-[0_2px_0_color-mix(in_oklab,var(--color-fg)_100%,transparent)]`,
     },
     {
       variant: `option`,
-      flat: false,
-      class: `border-b-[3px]`,
+      pressed: true,
+      class: `translate-y-[2px] shadow-none`,
     },
     // Rounded
     {
       variant: `rounded`,
-      disabled: false,
       hoveredOrPressed: true,
       class: `border-fg/30`,
     },
@@ -320,7 +335,6 @@ const roundedRectClass = tv({
     // BarePrimary
     {
       variant: `barePrimary`,
-      disabled: false,
       hoveredOrPressed: true,
       class: `bg-blue/90`,
     },

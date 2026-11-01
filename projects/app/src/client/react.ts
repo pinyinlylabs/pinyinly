@@ -11,7 +11,13 @@ import { Children, cloneElement, isValidElement } from "react";
 /**
  * Merges multiple refs into a single ref callback that updates all of them.
  */
-export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): RefCallback<T> {
+export function mergeRefs<T>(
+  ...refs: (Ref<T> | undefined)[]
+): RefCallback<T> | undefined {
+  if (!refs.some((ref) => ref != null)) {
+    return undefined;
+  }
+
   return (value) => {
     const cleanups: (() => void)[] = [];
 

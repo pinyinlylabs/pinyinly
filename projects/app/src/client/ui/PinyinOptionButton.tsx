@@ -1,57 +1,52 @@
 import type { PropsOf } from "@pinyinly/lib/types";
 import { Text } from "@/client/ui/Text";
+import {
+  pinyinUnitNumericToDiacritic,
+  splitPinyinUnitTone,
+} from "@/data/pinyin";
 import { RectButton } from "./RectButton";
+import { ScopedVariables } from "./ScopedVariables";
 
 interface PinyinOptionButtonProps extends Omit<
   PropsOf<typeof RectButton>,
   `variant` | `children` | `onPress`
 > {
+  active?: boolean;
   pinyin: string;
   shortcutKey: string;
   onPress?: (pinyin: string) => void;
 }
 
 export function PinyinOptionButton({
+  active = false,
   pinyin,
   shortcutKey,
   onPress,
   ...props
 }: PinyinOptionButtonProps) {
+  const showActive =
+    active &&
+    splitPinyinUnitTone(pinyinUnitNumericToDiacritic(pinyin)).tone !== 5;
+
   return (
-    <RectButton
-      {...props}
-      variant="option"
-      onPress={() => {
-        onPress?.(pinyin);
-      }}
-      onTouchEnd={(e) => {
-        // Using `onTouchEnd` instead of `onPress` to avoid the keyboard closing
-        // when the button is pressed. This is a workaround for the issue where
-        // the keyboard closes when pressing a button after typing in a
-        // TextInput.
-        //
-        // `onPress` is still needed for non-touch devices (like desktop).
-        e.preventDefault();
-        onPress?.(pinyin);
-
-        // Pass-through
-        props.onTouchEnd?.(e);
-      }}
-      onPointerDown={(e) => {
-        // Prevent focus loss on mouse/trackpad devices like desktop. The `onPress`
-        e.preventDefault();
-
-        // Pass-through
-        props.onPointerDown?.(e);
-      }}
+    <ScopedVariables
+      variables={showActive ? { "--color-fg": `var(--color-cyanold)` } : {}}
     >
-      <Text className="font-sans text-base/snug font-medium text-fg">
-        {pinyin}
-      </Text>
-      {` `}
-      <Text className="font-sans text-sm/snug text-muted-fg">
-        {shortcutKey}
-      </Text>
-    </RectButton>
+      <RectButton
+        {...props}
+        onPress={() => {
+          onPress?.(pinyin);
+        }}
+        active={showActive}
+        variant="option"
+        preventPressFocus
+      >
+        <Text className="font-sans text-base/snug font-medium text-fg">
+          {pinyin}
+        </Text>
+        {` `}
+        <Text className="font-sans text-sm/snug text-fg/50">{shortcutKey}</Text>
+      </RectButton>
+    </ScopedVariables>
   );
 }
