@@ -26,14 +26,6 @@ export function ScopedVariables({
     (name) => !Object.hasOwn(variables, name),
   );
 
-  if (variableNames.length === 0) {
-    return (
-      <UniwindScopedVariables variables={resolveReferences(variables, [], [])}>
-        {children}
-      </UniwindScopedVariables>
-    );
-  }
-
   return (
     <ResolveScopedVariables variables={variables} variableNames={variableNames}>
       {children}

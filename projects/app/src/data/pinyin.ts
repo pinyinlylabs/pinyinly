@@ -439,6 +439,7 @@ export interface PinyinUnitSuggestion {
 export interface PinyinUnitSuggestions {
   from: number;
   to: number;
+  currentTone: number;
   units: PinyinUnitSuggestion[];
 }
 
@@ -462,12 +463,12 @@ export function pinyinUnitSuggestions(
     return null;
   }
 
-  const { tonelessUnit } = splitPinyinUnitTone(
+  const { tonelessUnit, tone: currentTone } = splitPinyinUnitTone(
     pinyinUnitNumericToDiacritic(lastUnitText),
   );
 
   const suggestions = toneVariationsForTonelessUnit(tonelessUnit);
-  return { from, to, units: suggestions };
+  return { from, to, currentTone, units: suggestions };
 }
 
 const toneVariationsForTonelessUnit = memoize1(

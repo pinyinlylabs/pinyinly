@@ -457,49 +457,52 @@ describe(`pinyinUnitSuggestions suite`, () => {
       [``, null],
       [` `, null],
       // Simple cases with no tone number or accent.
-      [`ni`, [`0-2:nī:1`, `0-2:ní:2`, `0-2:nǐ:3`, `0-2:nì:4`, `0-2:ni:5`]],
+      [`ni`, [`0-2:nī:1`, `0-2:ní:2`, `0-2:nǐ:3`, `0-2:nì:4`, `✅ 0-2:ni:5`]],
       [
         `hao`,
-        [`0-3:hāo:1`, `0-3:háo:2`, `0-3:hǎo:3`, `0-3:hào:4`, `0-3:hao:5`],
+        [`0-3:hāo:1`, `0-3:háo:2`, `0-3:hǎo:3`, `0-3:hào:4`, `✅ 0-3:hao:5`],
       ],
       // Even when there's a tone number, still allow searching by it so that
       // you can replace it with a different tone.
       [
         `hao3`,
-        [`0-4:hāo:1`, `0-4:háo:2`, `0-4:hǎo:3`, `0-4:hào:4`, `0-4:hao:5`],
+        [`0-4:hāo:1`, `0-4:háo:2`, `✅ 0-4:hǎo:3`, `0-4:hào:4`, `0-4:hao:5`],
       ],
       // Support tone accents, allowing the accent to be swapped.
       [
         `hǎo`,
-        [`0-3:hāo:1`, `0-3:háo:2`, `0-3:hǎo:3`, `0-3:hào:4`, `0-3:hao:5`],
+        [`0-3:hāo:1`, `0-3:háo:2`, `✅ 0-3:hǎo:3`, `0-3:hào:4`, `0-3:hao:5`],
       ],
       // Multiple units, should match the last unit.
       [
         `nihao`,
-        [`2-5:hāo:1`, `2-5:háo:2`, `2-5:hǎo:3`, `2-5:hào:4`, `2-5:hao:5`],
+        [`2-5:hāo:1`, `2-5:háo:2`, `2-5:hǎo:3`, `2-5:hào:4`, `✅ 2-5:hao:5`],
       ],
       // Multiple units but with trailing space, shouldn't match as the
       // space is a separator.
       [`nihao `, null],
       // v / ü
-      [`nv`, [`0-2:nǖ:1`, `0-2:nǘ:2`, `0-2:nǚ:3`, `0-2:nǜ:4`, `0-2:nü:5`]], // v is treated as ü
-      [`nü`, [`0-2:nǖ:1`, `0-2:nǘ:2`, `0-2:nǚ:3`, `0-2:nǜ:4`, `0-2:nü:5`]],
+      [`nv`, [`0-2:nǖ:1`, `0-2:nǘ:2`, `0-2:nǚ:3`, `0-2:nǜ:4`, `✅ 0-2:nü:5`]], // v is treated as ü
+      [`nü`, [`0-2:nǖ:1`, `0-2:nǘ:2`, `0-2:nǚ:3`, `0-2:nǜ:4`, `✅ 0-2:nü:5`]],
     ];
 
     for (const [query, results] of fixtures) {
       const result = pinyinUnitSuggestions(query);
-      expect({
-        query,
-        results:
-          result == null
-            ? null
-            : result.units.map(
-                (x) => `${result.from}-${result.to}:${x.pinyinUnit}:${x.tone}`,
-              ),
-      }).toEqual({
-        query,
-        results,
-      });
+      expect
+        .soft({
+          query,
+          results:
+            result == null
+              ? null
+              : result.units.map(
+                  (x) =>
+                    `${result.currentTone == x.tone ? `✅ ` : ``}${result.from}-${result.to}:${x.pinyinUnit}:${x.tone}`,
+                ),
+        })
+        .toEqual({
+          query,
+          results,
+        });
     }
   });
 

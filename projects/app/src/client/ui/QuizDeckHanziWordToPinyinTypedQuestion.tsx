@@ -259,6 +259,7 @@ const PinyinTextInputSingle = ({
                 <PinyinOptionButton
                   pinyin={unit.pinyinUnit}
                   shortcutKey={unit.tone.toString()}
+                  active={unit.tone === suggestions.currentTone}
                   onPress={() => {
                     acceptSuggestion(suggestions, unit);
                   }}
