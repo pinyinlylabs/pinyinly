@@ -35,6 +35,7 @@ test(`bundled fonts render text in Chromium`, async () => {
         backgroundColor: `white`,
         boxSizing: `border-box`,
         color: `black`,
+        fontKerning: `none`,
         fontSize: `24px`,
         lineHeight: 1.3,
         padding: `24px`,
@@ -50,10 +51,5 @@ test(`bundled fonts render text in Chromium`, async () => {
   const snapshot = page.getByTestId(`font-snapshot`);
   await expect.element(snapshot).toBeInTheDocument();
   expect(snapshot.element().textContent).toBe(`Pinyinly — nǐ hǎo你好`);
-  await expect(snapshot).toMatchScreenshot(`bundled-fonts`, {
-    comparatorOptions: {
-      // The same bundled fonts rasterize differently on macOS and Linux.
-      allowedMismatchedPixelRatio: 0.03,
-    },
-  });
+  await expect(snapshot).toMatchScreenshot(`bundled-fonts`);
 });
