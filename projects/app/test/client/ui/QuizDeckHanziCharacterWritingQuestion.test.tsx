@@ -45,7 +45,7 @@ vi.mock(`#client/ui/hooks/useQuizTimer.ts`, () => ({
   }),
 }));
 vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
+  const { Fragment, jsx } = await import(`react/jsx-runtime`);
 
   return {
     QuizDeckQuestionSkeleton: ({
@@ -66,11 +66,16 @@ vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, async () => {
         "data-answer-ready": isUserAnswerProvided,
         "data-rating": rating?.rating,
         children: [
-          children,
-          jsx(`button`, { onClick: onSubmit, children: `Submit` }),
+          jsx(Fragment, { key: `question`, children }),
+          jsx(`button`, {
+            key: `submit`,
+            onClick: onSubmit,
+            children: `Submit`,
+          }),
           rating == null || onReportWrongRating == null
             ? null
             : jsx(`button`, {
+                key: `report-rating`,
                 onClick: onReportWrongRating,
                 children: `Report rating`,
               }),
