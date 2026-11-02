@@ -20,7 +20,7 @@ export interface ParsedSvgPaths extends Array<PathAttrs> {
 }
 
 const svgSize = 1024;
-const medianBoundaryTolerance = 40;
+const medianBoundaryTolerance = 50;
 
 /**
  * Parses an SVG string and extracts the path attributes from all `<path>`
@@ -111,6 +111,26 @@ export function parseSvgPaths(svgSrc: string): ParsedSvgPaths {
   return result;
 }
 
+export function parseFigmaSvgStrokeData(svgSrc: string):
+  | {
+      strokes: string[];
+      medians?: string[];
+    }
+  | undefined {
+  const paths = parseSvgPaths(svgSrc);
+  if (paths.length === 0) {
+    return undefined;
+  }
+
+  if (paths.length % 2 === 0) {
+    return transformFigmaSvgPathsToArphicTtfSpace(paths);
+  }
+
+  return {
+    strokes: paths.map((path) => transformArphicSpaceSvgPath(path.d)),
+  };
+}
+
 export function transformFigmaSvgPathsToArphicTtfSpace(paths: ParsedSvgPaths): {
   strokes: string[];
   medians: string[];
@@ -133,6 +153,9 @@ export function transformFigmaSvgPathsToArphicTtfSpace(paths: ParsedSvgPaths): {
   // element is drawn on top of the previous elements. In TTFs, the first stroke
   // is drawn first, so we need to reverse the order of the paths.
   const reversedPaths = [...paths].reverse();
+  const pathsArePairedInOrder = reversedPaths.every(
+    (path, index) => isPathClosed(path.d) === (index % 2 === 0),
+  );
 
   const strokePaths: Array<{ path: PathAttrs; pathIndex: number }> = [];
   const medianPaths: Array<{ path: PathAttrs; pathIndex: number }> = [];
@@ -160,6 +183,14 @@ export function transformFigmaSvgPathsToArphicTtfSpace(paths: ParsedSvgPaths): {
     `Expected the number of strokes and medians to match, but found ${strokePaths.length} strokes and ${medianPaths.length} medians`,
   );
 
+  for (const { path, pathIndex } of medianPaths) {
+    const subpathCount = getPathSubpathCount(path.d);
+    invariant(
+      subpathCount === 1,
+      `Expected ${formatPathLabel(`median`, path, pathIndex)} to contain exactly one contiguous subpath, but found ${subpathCount}`,
+    );
+  }
+
   const matchedMedians = new Set<number>();
   const strokes: string[] = [];
   const medians: string[] = [];
@@ -168,7 +199,9 @@ export function transformFigmaSvgPathsToArphicTtfSpace(paths: ParsedSvgPaths): {
     const matchedMedianEntries = medianPaths.filter(
       (medianEntry) =>
         !matchedMedians.has(medianEntry.pathIndex) &&
-        isPathContainedInPath(medianEntry.path.d, strokeEntry.path.d),
+        (pathsArePairedInOrder
+          ? medianEntry.pathIndex === strokeEntry.pathIndex + 1
+          : isPathContainedInPath(medianEntry.path.d, strokeEntry.path.d)),
     );
 
     invariant(
@@ -220,6 +253,12 @@ function isPathClosed(path: string): boolean {
   return SVGPathCommander.isClosedPath(SVGPathCommander.parsePathString(path));
 }
 
+function getPathSubpathCount(path: string): number {
+  return SVGPathCommander.parsePathString(path).filter(
+    ([command]) => command.toUpperCase() === `M`,
+  ).length;
+}
+
 function getPointDistanceToPath(
   path: string,
   point: { x: number; y: number },
@@ -241,7 +280,10 @@ function isPathContainedInPath(
     if (intersections !== 0) {
       return false;
     }
-    const targetPoint = SVGPathCommander.getPointAtLength(targetPath, 0);
+    const targetPoint = SVGPathCommander.getPointAtLength(
+      targetPath,
+      SVGPathCommander.getTotalLength(targetPath) / 2,
+    );
     return pointInSvgPath(boundaryPath, targetPoint.x, targetPoint.y);
   }
 }

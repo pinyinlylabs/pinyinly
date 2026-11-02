@@ -1,7 +1,11 @@
 import { describe, expect, test } from "vitest";
+import { projectRoot } from "#bin/util/paths.ts";
+import path from "node:path";
+import * as fs from "@pinyinly/lib/fs";
 import {
   pointInSvgPath,
   parseSvgPaths,
+  parseFigmaSvgStrokeData,
   transformArphicSpaceSvgPath,
   transformFigmaSvgPathsToArphicTtfSpace,
 } from "#util/svgFont.ts";
@@ -59,6 +63,41 @@ describe(`parseSvgPaths`, () => {
         },
       ]
     `);
+  });
+});
+
+describe(`parseFigmaSvgStrokeData`, () => {
+  test(`should return no data when the SVG has no paths`, () => {
+    expect(
+      parseFigmaSvgStrokeData(
+        `<svg width="1024" height="1024" viewBox="0 0 1024 1024"></svg>`,
+      ),
+    ).toBeUndefined();
+  });
+
+  test(`should treat odd path counts as stroke-only SVGs`, () => {
+    const svg = `
+      <svg width="1024" height="1024" viewBox="0 0 1024 1024">
+        <path d="M104 104 L 104 196" />
+      </svg>
+    `;
+
+    expect(parseFigmaSvgStrokeData(svg)).toEqual({
+      strokes: [`M104 796V704`],
+    });
+  });
+
+  test(`should parse the logomark SVG into matched stroke and median paths`, async () => {
+    const svg = await fs.readFile(
+      path.resolve(projectRoot, `src/assets/logo/logomark2.svg`),
+      `utf-8`,
+    );
+
+    const result = parseFigmaSvgStrokeData(svg);
+    expect(result?.strokes.length).toEqual(result?.medians?.length);
+    await expect(result).toMatchJsonFileSnapshot(
+      `../../src/assets/logo/logomark2.paths.json`,
+    );
   });
 });
 
@@ -152,7 +191,24 @@ describe(`transformFigmaSvgPathsToArphicTtfSpace`, () => {
     expect(() =>
       transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg)),
     ).toThrow(
-      /Expected stroke path 1 \(1-indexed, d=M100 100 H 200 V 200\.\.\.\) to contain exactly one median path, but found 0/u,
+      /Expected median path 1 \(1-indexed, d=M104 104 C 300 104 3\.\.\.\) to be contained within stroke path 1/u,
+    );
+  });
+
+  test(`should reject medians with disconnected subpaths`, () => {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+        <g>
+          <path d="M104 104 L 104 180 M104 220 L 104 296" stroke-dasharray="4 2" />
+          <path d="M100 100 H 200 V 300 H 100 Z" />
+        </g>
+      </svg>
+    `;
+
+    expect(() =>
+      transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg)),
+    ).toThrow(
+      /Expected median path \d+ .* to contain exactly one contiguous subpath, but found 2/u,
     );
   });
 
@@ -160,8 +216,8 @@ describe(`transformFigmaSvgPathsToArphicTtfSpace`, () => {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
         <g>
-          <path d="M145 145 L 190 190" stroke-dasharray="4 2" />
-          <path d="M100 100 H 200 V 200 H 100 Z" />
+          <path d="M55 55 L 100 100" stroke-dasharray="4 2" />
+          <path d="M0 0 H 300 V 300 H 0 Z" />
         </g>
       </svg>
     `;
@@ -169,7 +225,7 @@ describe(`transformFigmaSvgPathsToArphicTtfSpace`, () => {
     expect(() => {
       transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg));
     }).toThrowErrorMatchingInlineSnapshot(
-      `[InvariantException: Expected median path 1 (1-indexed, d=M145 145 L 190 190) start point to be within 40 units of the stroke boundary, but found 45.00]`,
+      `[InvariantException: Expected median path 1 (1-indexed, d=M55 55 L 100 100) start point to be within 50 units of the stroke boundary, but found 55.00]`,
     );
   });
 
@@ -177,8 +233,8 @@ describe(`transformFigmaSvgPathsToArphicTtfSpace`, () => {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
         <g>
-          <path d="M120 120 L 155 155" stroke-dasharray="4 2" />
-          <path d="M100 100 H 200 V 200 H 100 Z" />
+          <path d="M40 40 L 245 150" stroke-dasharray="4 2" />
+          <path d="M0 0 H 300 V 300 H 0 Z" />
         </g>
       </svg>
     `;
@@ -186,7 +242,7 @@ describe(`transformFigmaSvgPathsToArphicTtfSpace`, () => {
     expect(() => {
       transformFigmaSvgPathsToArphicTtfSpace(parseSvgPaths(svg));
     }).toThrowErrorMatchingInlineSnapshot(
-      `[InvariantException: Expected median path 1 (1-indexed, d=M120 120 L 155 155) end point to be within 40 units of the stroke boundary, but found 45.00]`,
+      `[InvariantException: Expected median path 1 (1-indexed, d=M40 40 L 245 150) end point to be within 50 units of the stroke boundary, but found 55.00]`,
     );
   });
 

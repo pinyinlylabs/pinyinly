@@ -95,10 +95,12 @@ test(`reveals recovery after 15 seconds without an in-page reload control`, () =
     `Still loading… This is taking longer than usual.`,
   );
   expect(recovery?.querySelector(`button`)).toBeNull();
-  expect(doc.body.querySelector(`style`)?.textContent).toContain(
-    `font: 12px/1.5 system-ui, sans-serif`,
+  const recoveryMessageStyle =
+    recovery?.querySelector(`p`)?.getAttribute(`style`) ?? ``;
+  expect(recoveryMessageStyle).toMatch(
+    /font:\s*12px\/1\.5 system-ui, sans-serif/u,
   );
-  expect(doc.body.querySelector(`style`)?.textContent).toContain(
+  expect(recoveryMessageStyle).toContain(
     `color-mix(in srgb, currentColor 60%, transparent)`,
   );
   vi.advanceTimersByTime(60_000);
