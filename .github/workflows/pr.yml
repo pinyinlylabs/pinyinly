@@ -148,6 +148,7 @@ jobs:
         with:
           name: vitest-attachments
           path: projects/*/.vitest/
+          include-hidden-files: true
           if-no-files-found: ignore
 
       - name: 🧾 Results
