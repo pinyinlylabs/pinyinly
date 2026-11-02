@@ -29,15 +29,16 @@ test(`bundled fonts render text in Chromium`, async () => {
 
   await render(
     <div
-      className="font-sans"
+      className="font-sans antialiased"
       data-testid="font-snapshot"
       style={{
         backgroundColor: `white`,
+        boxSizing: `border-box`,
         color: `black`,
         fontSize: `24px`,
         lineHeight: 1.3,
         padding: `24px`,
-        width: `fit-content`,
+        width: `240px`,
       }}
     >
       <div>Pinyinly — nǐ hǎo</div>
