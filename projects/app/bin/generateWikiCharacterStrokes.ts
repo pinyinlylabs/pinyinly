@@ -2,11 +2,7 @@ import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import { characterJsonSchema } from "#data/model.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
-import {
-  parseSvgPaths,
-  transformArphicSpaceSvgPath,
-  transformFigmaSvgPathsToArphicTtfSpace,
-} from "#util/svgFont.ts";
+import { parseFigmaSvgStrokeData } from "#util/svgFont.ts";
 import type { StrokeMedianPoint } from "#util/strokeSpecSvgProcessor.js";
 import {
   existsSync,
@@ -143,24 +139,19 @@ function getLocalGlyphSvgData(character: HanziText):
   }
 
   const svgText = readFileSync(glyphFile, `utf-8`);
-  const rawPaths = parseSvgPaths(svgText);
-  if (rawPaths.length === 0) {
+  const svgData = parseFigmaSvgStrokeData(svgText);
+  if (svgData == null) {
     return undefined;
   }
 
-  if (rawPaths.length % 2 === 0) {
-    return transformFigmaSvgPathsToArphicTtfSpace(rawPaths);
+  if (svgData.medians == null) {
+    debug(
+      `local glyph %O has odd path count (%d), treating all paths as strokes`,
+      character,
+      svgData.strokes.length,
+    );
   }
-
-  debug(
-    `local glyph %O has odd path count (%d), treating all paths as strokes`,
-    character,
-    rawPaths.length,
-  );
-
-  return {
-    strokes: rawPaths.map((path) => transformArphicSpaceSvgPath(path.d)),
-  };
+  return svgData;
 }
 
 for (const character of allCharacters) {
