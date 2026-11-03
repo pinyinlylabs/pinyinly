@@ -15,62 +15,51 @@ vi.mock(`@sentry/react-native`, () => ({ captureMessage }));
 vi.mock(`#client/ui/hooks/useQuizTimer.ts`, () => ({
   useQuizTimer: () => ({ getDurationMs: () => 12_000 }),
 }));
-vi.mock(`#client/ui/Text.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-  return {
-    Text: ({ children }: { children: ReactNode }) => jsx(`span`, { children }),
-  };
-});
-vi.mock(`#client/ui/View.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-  return {
-    View: ({ children }: { children: ReactNode }) => jsx(`div`, { children }),
-  };
-});
-vi.mock(`#client/ui/TextAnswerInputSingle.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-  return {
-    TextAnswerInputSingle: ({
-      onChangeValue,
-    }: {
-      onChangeValue: (value: string) => void;
-    }) =>
-      jsx(`input`, {
-        "aria-label": `Answer`,
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          onChangeValue(event.currentTarget.value);
-        },
-      }),
-  };
-});
-vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, async () => {
-  const { jsx, Fragment } = await import(`react/jsx-runtime`);
-  return {
-    QuizDeckQuestionSkeleton: ({
-      children,
-      rating,
-      onSubmit,
-      onReportWrongRating,
-    }: {
-      children: ReactNode;
-      rating?: { rating: number };
-      onSubmit: () => void;
-      onReportWrongRating?: () => void;
-    }) =>
-      jsx(Fragment, {
-        children: [
-          children,
-          jsx(`button`, { onClick: onSubmit, children: `Submit` }),
-          rating == null || onReportWrongRating == null
-            ? null
-            : jsx(`button`, {
-                onClick: onReportWrongRating,
-                children: `Report rating`,
-              }),
-        ],
-      }),
-  };
-});
+vi.mock(`#client/ui/Text.tsx`, () => ({
+  Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
+}));
+vi.mock(`#client/ui/View.tsx`, () => ({
+  View: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+vi.mock(`#client/ui/TextAnswerInputSingle.tsx`, () => ({
+  TextAnswerInputSingle: ({
+    onChangeValue,
+  }: {
+    onChangeValue: (value: string) => void;
+  }) => (
+    <input
+      aria-label="Answer"
+      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+        onChangeValue(event.currentTarget.value);
+      }}
+    />
+  ),
+}));
+vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
+  QuizDeckQuestionSkeleton: ({
+    children,
+    rating,
+    onSubmit,
+    onReportWrongRating,
+  }: {
+    children: ReactNode;
+    rating?: { rating: number };
+    onSubmit: () => void;
+    onReportWrongRating?: () => void;
+  }) => (
+    <>
+      {children}
+      <button type="button" onClick={onSubmit}>
+        Submit
+      </button>
+      {rating == null || onReportWrongRating == null ? null : (
+        <button type="button" onClick={onReportWrongRating}>
+          Report rating
+        </button>
+      )}
+    </>
+  ),
+}));
 
 test.for([
   {

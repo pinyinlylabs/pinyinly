@@ -44,65 +44,55 @@ vi.mock(`#client/ui/hooks/useQuizTimer.ts`, () => ({
     resumeAfter: () => {},
   }),
 }));
-vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, async () => {
-  const { Fragment, jsx } = await import(`react/jsx-runtime`);
-
-  return {
-    QuizDeckQuestionSkeleton: ({
-      children,
-      rating,
-      isUserAnswerProvided,
-      onSubmit,
-      onReportWrongRating,
-    }: {
-      children: React.ReactNode;
-      rating?: { rating: number };
-      isUserAnswerProvided: boolean;
-      onSubmit: () => Promise<void>;
-      onReportWrongRating?: () => void;
-    }) =>
-      jsx(`div`, {
-        "data-testid": `quiz-question`,
-        "data-answer-ready": isUserAnswerProvided,
-        "data-rating": rating?.rating,
-        children: [
-          jsx(Fragment, { key: `question`, children }),
-          jsx(`button`, {
-            key: `submit`,
-            onClick: onSubmit,
-            children: `Submit`,
-          }),
-          rating == null || onReportWrongRating == null
-            ? null
-            : jsx(`button`, {
-                key: `report-rating`,
-                onClick: onReportWrongRating,
-                children: `Report rating`,
-              }),
-        ],
-      }),
-  };
-});
-vi.mock(`#client/ui/HanziWritingCanvas.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-
-  return {
-    HanziWritingCanvas: ({
-      disabled,
-      onStrokesChange,
-    }: {
-      disabled: boolean;
-      onStrokesChange: (strokes: { x: number; y: number }[][]) => void;
-    }) =>
-      jsx(`button`, {
-        "data-testid": `writing-canvas`,
-        "data-disabled": disabled,
-        onClick: () => {
-          onStrokesChange([[{ x: 0, y: 0 }]]);
-        },
-      }),
-  };
-});
+vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
+  QuizDeckQuestionSkeleton: ({
+    children,
+    rating,
+    isUserAnswerProvided,
+    onSubmit,
+    onReportWrongRating,
+  }: {
+    children: React.ReactNode;
+    rating?: { rating: number };
+    isUserAnswerProvided: boolean;
+    onSubmit: () => Promise<void>;
+    onReportWrongRating?: () => void;
+  }) => (
+    <div
+      data-testid="quiz-question"
+      data-answer-ready={isUserAnswerProvided}
+      data-rating={rating?.rating}
+    >
+      {children}
+      <button type="button" onClick={() => void onSubmit()}>
+        Submit
+      </button>
+      {rating == null || onReportWrongRating == null ? null : (
+        <button type="button" onClick={onReportWrongRating}>
+          Report rating
+        </button>
+      )}
+    </div>
+  ),
+}));
+vi.mock(`#client/ui/HanziWritingCanvas.tsx`, () => ({
+  HanziWritingCanvas: ({
+    disabled,
+    onStrokesChange,
+  }: {
+    disabled: boolean;
+    onStrokesChange: (strokes: { x: number; y: number }[][]) => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="writing-canvas"
+      data-disabled={disabled}
+      onClick={() => {
+        onStrokesChange([[{ x: 0, y: 0 }]]);
+      }}
+    />
+  ),
+}));
 vi.mock(`#data/pinyinSoundAudio.ts`, () => ({
   getAudioSourcesByPinyinMap: () => new Map(),
 }));

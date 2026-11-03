@@ -82,19 +82,15 @@ vi.mock(import(`#data/questions.ts`), async () => {
     },
   };
 });
-vi.mock(`expo-router`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-
+vi.mock(`expo-router`, () => {
   return {
-    Link: ({ children }: { children: ReactNode }) => jsx(`div`, { children }),
+    Link: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   };
 });
-vi.mock(`react-native-reanimated`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-
+vi.mock(`react-native-reanimated`, () => {
   return {
     default: {
-      View: ({ children }: { children: ReactNode }) => jsx(`div`, { children }),
+      View: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     },
     FadeIn: {},
     Keyframe: class {
@@ -104,9 +100,7 @@ vi.mock(`react-native-reanimated`, async () => {
     },
   };
 });
-vi.mock(`#client/ui/QuizDeckHanziWordToGlossTypedQuestion.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
-
+vi.mock(`#client/ui/QuizDeckHanziWordToGlossTypedQuestion.tsx`, () => {
   return {
     QuizDeckHanziWordToGlossTypedQuestion: ({
       question,
@@ -114,17 +108,17 @@ vi.mock(`#client/ui/QuizDeckHanziWordToGlossTypedQuestion.tsx`, async () => {
     }: {
       question: { skill: Skill };
       onNext: () => void;
-    }) =>
-      jsx(
-        `button`,
-        {
-          "data-testid": `current-question`,
-          "data-skill": question.skill,
-          onClick: onNext,
-          children: `Continue`,
-        },
-        question.skill,
-      ),
+    }) => (
+      <button
+        key={question.skill}
+        type="button"
+        data-testid="current-question"
+        data-skill={question.skill}
+        onClick={onNext}
+      >
+        Continue
+      </button>
+    ),
   };
 });
 vi.mock(`#client/ui/QuizDeckHanziWordToPinyinTypedQuestion.tsx`, () => {
@@ -133,7 +127,6 @@ vi.mock(`#client/ui/QuizDeckHanziWordToPinyinTypedQuestion.tsx`, () => {
   };
 });
 vi.mock(`#client/ui/QuizDeckOneCorrectPairQuestion.tsx`, async () => {
-  const { jsx } = await import(`react/jsx-runtime`);
   const { use, useEffect } = await import(`react`);
 
   return {
@@ -173,16 +166,19 @@ vi.mock(`#client/ui/QuizDeckOneCorrectPairQuestion.tsx`, async () => {
       ) {
         use(mocks.pending);
       }
-      return jsx(`div`, {
-        children: [
-          jsx(`button`, {
-            "data-testid": `current-question`,
-            "data-skill": question.answer.skill,
-            onClick: onNext,
-            children: `Continue`,
-          }),
-          jsx(`button`, {
-            onClick: () => {
+      return (
+        <div>
+          <button
+            type="button"
+            data-testid="current-question"
+            data-skill={question.answer.skill}
+            onClick={onNext}
+          >
+            Continue
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               onRating(
                 [
                   {
@@ -193,11 +189,13 @@ vi.mock(`#client/ui/QuizDeckOneCorrectPairQuestion.tsx`, async () => {
                 ],
                 [],
               );
-            },
-            children: `Record incorrect rating`,
-          }),
-          jsx(`button`, {
-            onClick: () => {
+            }}
+          >
+            Record incorrect rating
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               onReportWrongRating(
                 [
                   {
@@ -208,11 +206,12 @@ vi.mock(`#client/ui/QuizDeckOneCorrectPairQuestion.tsx`, async () => {
                 ],
                 [],
               );
-            },
-            children: `Report rating`,
-          }),
-        ],
-      });
+            }}
+          >
+            Report rating
+          </button>
+        </div>
+      );
     },
   };
 });
