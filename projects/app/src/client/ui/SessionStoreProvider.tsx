@@ -4,7 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { DbProvider } from "./DbProvider";
 import { DeviceStoreSync } from "./DeviceStoreSync";
-import { LegacyStudySelectionsCleanup } from "./LegacyStudySelectionsCleanup";
 import { RizzleProvider } from "./RizzleProvider";
 import { SkillQueueProvider } from "./SkillQueueProvider";
 import { Suspense } from "./Suspense";
@@ -43,7 +42,6 @@ export function SessionStoreProvider({
       <QueryClientProvider client={queryClient}>
         <RizzleProvider dbName={dbName} serverSessionId={serverSessionId}>
           <DbProvider>
-            {serverSessionId == null ? null : <LegacyStudySelectionsCleanup />}
             <SkillQueueProvider>
               <DeviceStoreSync dbName={dbName} />
               <Suspense
