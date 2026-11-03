@@ -2,6 +2,8 @@ import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { useAuth } from "@/client/auth";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
+import { PasskeySettings } from "@/client/ui/PasskeySettings";
+import { Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -65,6 +67,9 @@ export default function AccountsSettingsPage() {
       <RectButton onPressIn={handleAddAccount} variant="filled">
         Add Account
       </RectButton>
+      {Platform.OS === `web` && activeDeviceSession.serverSessionId != null ? (
+        <PasskeySettings key={activeDeviceSession.serverSessionId} />
+      ) : null}
     </View>
   );
 }

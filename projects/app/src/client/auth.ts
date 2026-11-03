@@ -70,7 +70,7 @@ type AuthApi = {
     dbName: string;
     userName: string | null;
   }) => void;
-  signUpWithPasskey: (opts: { name: string }) => Promise<void>;
+  signUpWithPasskey: (opts: { displayName?: string }) => Promise<void>;
   logInWithPasskey: () => Promise<void>;
   signOut: () => void;
 };
@@ -79,10 +79,12 @@ export function useAuth(): AuthApi {
   // Step 1. Try to read the current version of the auth state from local storage.
   const authState = useDeviceStore(authStateSetting);
 
-  const { mutateAsync: startPasskeyRegistrationMutate } =
-    trpc.auth.startPasskeyRegistration.useMutation();
-  const { mutateAsync: completePasskeyRegistrationMutate } =
-    trpc.auth.completePasskeyRegistration.useMutation();
+  const { mutateAsync: createPasskeyAccountMutate } =
+    trpc.auth.createPasskeyAccount.useMutation();
+  const { mutateAsync: startAddPasskeyMutate } =
+    trpc.auth.startAddPasskey.useMutation();
+  const { mutateAsync: completeAddPasskeyMutate } =
+    trpc.auth.completeAddPasskey.useMutation();
   const { mutateAsync: startPasskeyAuthenticationMutate } =
     trpc.auth.startPasskeyAuthentication.useMutation();
   const { mutateAsync: completePasskeyAuthenticationMutate } =
@@ -148,63 +150,63 @@ export function useAuth(): AuthApi {
       cookie,
     });
 
-    if (res2.verified) {
-      const { session, user } = res2;
-      invariant(data != null, `expected auth state to be initialized`);
-
-      // Try activating an existing session first.
-      const usedExisting = logInToExistingDeviceSession(
-        (s) => s.serverSessionId === session.id,
-      );
-      if (!usedExisting) {
-        const newSession: DeviceSession = makeDeviceSession({
-          serverSessionId: session.id,
-          authMethod: `passkey`,
-          userId: user.id,
-          userName: user.name,
-        });
-        authState.setValue({
-          deviceSessions: [newSession, ...data.allDeviceSessions],
-        });
-      }
-    } else {
-      console.error(`Passkey authentication failed`, res2);
-    }
+    await activatePasskeySession(res2);
   };
 
-  const signUpWithPasskey = async ({ name }: { name: string }) => {
-    const { options: optionsJSON, cookie } =
-      await startPasskeyRegistrationMutate({ userName: name });
+  async function activatePasskeySession({
+    session,
+    user,
+  }: {
+    session: { id: string };
+    user: { id: string; name: string | null };
+  }) {
+    invariant(data != null, `expected auth state to be initialized`);
+
+    const existing = data.allDeviceSessions.find((s) => s.userId === user.id);
+    const newSession: DeviceSession = {
+      ...(existing ?? makeDeviceSession()),
+      serverSessionId: session.id,
+      authMethod: `passkey`,
+      userId: user.id,
+      userName: user.name,
+    };
+    await authState.setValueAsync({
+      deviceSessions: [
+        newSession,
+        ...data.allDeviceSessions.filter(
+          (s) => s.replicacheDbName !== newSession.replicacheDbName,
+        ),
+      ],
+    });
+  }
+
+  const signUpWithPasskey = async ({
+    displayName,
+  }: {
+    displayName?: string;
+  }) => {
+    invariant(data != null, `expected auth state to be initialized`);
+    const activeSession = data.activeDeviceSession;
+    if (activeSession.serverSessionId == null) {
+      const account = await createPasskeyAccountMutate(
+        displayName == null ? {} : { displayName },
+      );
+      await activatePasskeySession(account);
+    } else {
+      invariant(
+        activeSession.userId != null,
+        `expected authenticated device session to have a user ID`,
+      );
+    }
+
+    const { options: optionsJSON, cookie } = await startAddPasskeyMutate();
 
     const res = await startRegistration({ optionsJSON });
 
-    const res2 = await completePasskeyRegistrationMutate({
+    await completeAddPasskeyMutate({
       response: res,
       cookie,
     });
-
-    if (res2.verified) {
-      const { session, user } = res2;
-      invariant(data != null, `expected auth state to be initialized`);
-
-      // Try activating an existing session first.
-      const usedExisting = logInToExistingDeviceSession(
-        (s) => s.serverSessionId === session.id,
-      );
-      if (!usedExisting) {
-        const newSession: DeviceSession = makeDeviceSession({
-          serverSessionId: session.id,
-          authMethod: `passkey`,
-          userId: user.id,
-          userName: user.name,
-        });
-        authState.setValue({
-          deviceSessions: [newSession, ...data.allDeviceSessions],
-        });
-      }
-    } else {
-      console.error(`Passkey authentication failed`, res2);
-    }
   };
 
   const logInWithApple = useCallback(

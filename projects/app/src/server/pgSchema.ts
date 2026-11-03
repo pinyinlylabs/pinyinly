@@ -103,19 +103,26 @@ export const authOAuth2 = schema.table(
 );
 
 export const authPasskey = schema.table(`authPasskey`, {
-  id: pg.varchar(`credentialId`, { length: 100 }).primaryKey(),
+  id: pg.text(`credentialId`).primaryKey(),
+  name: pg.text(`name`),
   userId: pg
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
   publicKey: pgBase64url(`publicKey`).notNull(),
-  webauthnUserId: pgBase64url(`webauthnUserId`).notNull(),
   transports: pgPasskeyTransport(`transports`).array().default([]), // e.g. ["internal", "usb"]
   counter: pg.bigint(`counter`, { mode: `number` }).notNull().default(0),
   createdAt: pg.timestamp(`createdAt`).defaultNow(),
   lastUsedAt: pg.timestamp(`lastUsedAt`),
   deviceType: pg.varchar(`deviceType`, { length: 32 }), // e.g. "iPhone", "Android"
   isBackedUp: pg.boolean(`isBackedUp`).default(false), // synced in iCloud/Google?
+});
+
+export const authPasskeyChallenge = schema.table(`authPasskeyChallenge`, {
+  id: pg.text(`id`).primaryKey(),
+  kind: pg.text(`kind`, { enum: [`add`, `login`] }).notNull(),
+  rpId: pg.text(`rpId`).notNull(),
+  expiresAt: pg.timestamp(`expiresAt`, { withTimezone: true }).notNull(),
 });
 
 export const skillRating = schema.table(

@@ -1,11 +1,12 @@
 import { useAuth } from "@/client/auth";
+import { passkeyErrorMessage, useSupportsPasskeys } from "@/client/passkey";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { useLiveQuery } from "@tanstack/react-db";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Platform, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
@@ -14,8 +15,35 @@ import { View } from "@/client/ui/View";
 export default function LoginPage() {
   const auth = useAuth();
 
-  const [passkeyName, setPasskeyName] = useState(``);
+  const [displayName, setDisplayName] = useState(``);
   const [showDevTools, setShowDevTools] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const supported = useSupportsPasskeys();
+  const router = useRouter();
+
+  async function runPasskey(signup: boolean) {
+    if (pending) {
+      return;
+    }
+    setPending(true);
+    setErrorMessage(null);
+    try {
+      if (signup) {
+        await auth.signUpWithPasskey({
+          displayName: displayName.trim() || undefined,
+        });
+      } else {
+        await auth.logInWithPasskey();
+      }
+      router.replace(`/learn`);
+    } catch (error) {
+      console.error(`Passkey request failed`, error);
+      setErrorMessage(passkeyErrorMessage(error));
+    } finally {
+      setPending(false);
+    }
+  }
   // Web: Show friendly user-facing sign-up/log-in interface
   if (Platform.OS === `web`) {
     return (
@@ -63,20 +91,17 @@ export default function LoginPage() {
             <View className="gap-3">
               <View className="gap-2">
                 <TextInputSingle
-                  placeholder={`Your name`}
+                  placeholder={`Display name (optional)`}
                   onChangeText={(text) => {
-                    setPasskeyName(text);
+                    setDisplayName(text);
                   }}
-                  value={passkeyName}
+                  value={displayName}
                 />
               </View>
               <RectButton
-                onPressIn={() => {
-                  auth
-                    .signUpWithPasskey({ name: passkeyName })
-                    .catch((error: unknown) => {
-                      console.error(`failed to sign up with passkey`, error);
-                    });
+                disabled={!supported || pending}
+                onPress={() => {
+                  void runPasskey(true);
                 }}
               >
                 Create account with Passkey
@@ -103,10 +128,9 @@ export default function LoginPage() {
             {/* Passkey Log In */}
             <View className="gap-3">
               <RectButton
-                onPressIn={() => {
-                  auth.logInWithPasskey().catch((error: unknown) => {
-                    console.error(`failed to log in with passkey`, error);
-                  });
+                disabled={!supported || pending}
+                onPress={() => {
+                  void runPasskey(false);
                 }}
               >
                 Log in with Passkey
@@ -118,6 +142,19 @@ export default function LoginPage() {
           </View>
 
           {/* Footer */}
+          {supported ? null : (
+            <Text className="text-muted-fg">
+              Passkeys require a supported web browser on HTTPS or localhost.
+            </Text>
+          )}
+          {pending ? (
+            <Text className="text-fg">Waiting for your passkey...</Text>
+          ) : null}
+          {errorMessage == null ? null : (
+            <Text accessibilityRole="alert" className="text-fg">
+              {errorMessage}
+            </Text>
+          )}
           <View className="mt-4 gap-2" style={{ width: `100%`, maxWidth: 448 }}>
             <DevToolsSection
               collapsible
@@ -137,45 +174,9 @@ export default function LoginPage() {
   // iOS and other platforms: Return to original focused UI
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
-      <Text className="font-sans font-bold text-fg">Sign up</Text>
-      <View className="gap-2">
-        <View className="flex-row gap-2 border-y">
-          <TextInputSingle
-            placeholder={`Name`}
-            onChangeText={(text) => {
-              setPasskeyName(text);
-            }}
-            value={passkeyName}
-          />
-          <RectButton
-            onPressIn={() => {
-              auth
-                .signUpWithPasskey({ name: passkeyName })
-                .catch((error: unknown) => {
-                  console.error(`failed to sign up with passkey`, error);
-                });
-            }}
-          >
-            Create Passkey
-          </RectButton>
-        </View>
-      </View>
-
-      <Text className="font-sans font-bold text-fg">Log in</Text>
-      <View className="gap-2">
-        <View className="flex-row gap-2 border-y">
-          <RectButton
-            onPressIn={() => {
-              auth.logInWithPasskey().catch((error: unknown) => {
-                console.error(`failed to log in with passkey`, error);
-              });
-            }}
-          >
-            Log in with Passkey
-          </RectButton>
-        </View>
-      </View>
-
+      <Text className="font-sans text-fg">
+        Passkeys are available on the Pinyinly website.
+      </Text>
       <DevToolsSection />
 
       <RectButton

@@ -1,9 +1,9 @@
-import { getUserSetting } from "#server/lib/query.ts";
+import { getUserDisplayName, getUserSetting } from "#server/lib/query.ts";
 import * as s from "#server/pgSchema.ts";
 import {
   aiImageStyleTextSetting,
   pinyinSoundLocationSetKeySetting,
-  userNameTextSetting,
+  userDisplayNameTextSetting,
 } from "#data/userSettings.ts";
 import type { PinyinSoundId } from "#data/model.ts";
 import { describe, expect } from "vitest";
@@ -15,13 +15,16 @@ describe(`getUserSetting`, () => {
     await db.insert(s.user).values({ id: userId });
     await db.insert(s.userSetting).values({
       userId,
-      key: userNameTextSetting.entity.marshalKey({}),
-      value: userNameTextSetting.encodeStoredValue({}, { text: `alice` }),
+      key: userDisplayNameTextSetting.entity.marshalKey({}),
+      value: userDisplayNameTextSetting.encodeStoredValue(
+        {},
+        { text: `alice` },
+      ),
     });
 
-    const result = await getUserSetting(db, userId, userNameTextSetting, {});
+    const result = await getUserDisplayName(db, userId);
 
-    expect(result).toEqual({ text: `alice` });
+    expect(result).toBe(`alice`);
   });
 
   dbTest(

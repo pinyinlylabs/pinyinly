@@ -107,11 +107,16 @@ export interface UseDeviceStoreResult<T extends DeviceStoreEntity> {
   isLoading: boolean;
   value: DeviceStoreEntityOutput<T>;
   setValue: UseDeviceStoreSetValue<T>;
+  setValueAsync: UseDeviceStoreSetValueAsync<T>;
 }
 
 export type UseDeviceStoreSetValue<T extends DeviceStoreEntity> = (
   value: DeviceStoreEntityInput<T> | UseDeviceStoreUpdateFn<T>,
 ) => void;
+
+export type UseDeviceStoreSetValueAsync<T extends DeviceStoreEntity> = (
+  value: DeviceStoreEntityInput<T> | UseDeviceStoreUpdateFn<T>,
+) => Promise<void>;
 
 export type UseDeviceStoreUpdateFn<T extends DeviceStoreEntity> = (
   prev: DeviceStoreEntityOutput<T>,
@@ -122,7 +127,7 @@ export const useDeviceStore = <T extends DeviceStoreEntity>(
   setting: T,
 ): UseDeviceStoreResult<T> => {
   const result = useDeviceStoreQuery(setting);
-  const { mutate } = useDeviceStoreMutation(setting);
+  const { mutate, mutateAsync } = useDeviceStoreMutation(setting);
 
   const isLoading = result.isPending;
   const value = result.data ?? null;
@@ -145,7 +150,17 @@ export const useDeviceStore = <T extends DeviceStoreEntity>(
     [mutate],
   );
 
-  return { isLoading, value, setValue };
+  const setValueAsync: UseDeviceStoreSetValueAsync<T> = useCallback(
+    async (updater) => {
+      if (typeof updater === `function`) {
+        updater = updater(valueRef.current, isLoadingRef.current);
+      }
+      await mutateAsync(updater);
+    },
+    [mutateAsync],
+  );
+
+  return { isLoading, value, setValue, setValueAsync };
 };
 
 function useDeviceStoreQueryClient() {

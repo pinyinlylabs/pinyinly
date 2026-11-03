@@ -29,12 +29,27 @@ The following commands should be used to test the code:
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 
+# Environment variable types
+
+Declare app environment variables in `NodeJS.ProcessEnv` in `projects/app/src/types/node.d.ts`,
+alongside the existing variables. Include a comment for each new variable explaining its purpose and
+defaults or expected values. Do not duplicate these declarations in inline environment-object types
+to work around `noPropertyAccessFromIndexSignature`; use `NodeJS.ProcessEnv` for injected
+environment parameters. Keep runtime validation and directly related environment documentation in
+sync.
+
 # UI Demos
 
 A storybook-inspired "demo" system is used for developing and testing UI components in isolation.
 Demos are located in `.demo.tsx` files next to the component they are demonstrating and are
 accessible at `/dev/demo/<component>` (for example, `/dev/demo/Lozenge`). Register each demo in
 `projects/app/src/app/dev/demo/index.tsx` so it appears in the demo list and route.
+
+# Server Procedures
+
+Keep tRPC procedures focused on transport concerns: Zod input/output validation, authentication,
+calling server functions, and mapping results or errors. Put application and persistence logic in
+functions under `src/server/lib/`, and call those functions from the router.
 
 # Browser Tests
 
