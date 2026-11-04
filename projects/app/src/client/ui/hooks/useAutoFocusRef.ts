@@ -1,3 +1,4 @@
+import ms from "ms";
 import type { RefObject } from "react";
 import { useLayoutEffect, useRef } from "react";
 import type { TextInputInstance } from "react-native";
@@ -18,7 +19,7 @@ const useAutoFocusRefWeb: UseAutoFocusRef = (autoFocus) => {
   useLayoutEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const retryInterval = 100;
-    const expiration = Date.now() + 5000;
+    const expiration = Date.now() + ms(`5s`);
 
     function focusOrRetry() {
       if (inputRef.current == null) {

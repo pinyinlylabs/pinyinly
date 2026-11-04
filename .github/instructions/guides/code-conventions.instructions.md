@@ -35,6 +35,17 @@ export interface SquareType {
 export type ShapeType = CircleType | SquareType;
 ```
 
+## Time Durations
+
+Use the `ms` package to express elapsed durations as readable strings instead of manually
+calculating millisecond values.
+
+```typescript
+import ms from "ms";
+
+const expiresAt = new Date(Date.now() + ms(`60s`));
+```
+
 ## Avoid `useCallback` and `useMemo` with React Compiler
 
 - **Do not use `useCallback` or `useMemo`** When using the React Compiler, you do not need to

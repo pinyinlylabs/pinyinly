@@ -2,6 +2,7 @@ import { passkeyConsumeChallenge } from "#server/lib/auth.ts";
 import type { Transaction } from "#server/lib/db.ts";
 import * as schema from "#server/pgSchema.ts";
 import { dbTest } from "#test/server/lib/dbHelpers.ts";
+import ms from "ms";
 import { expect } from "vitest";
 
 dbTest(`consumes a passkey challenge atomically`, async ({ db }) => {
@@ -10,7 +11,7 @@ dbTest(`consumes a passkey challenge atomically`, async ({ db }) => {
     id: challengeId,
     kind: `login`,
     rpId: `localhost`,
-    expiresAt: new Date(Date.now() + 60_000),
+    expiresAt: new Date(Date.now() + ms(`60s`)),
   });
   expect(
     await db.query.authPasskeyChallenge.findFirst({

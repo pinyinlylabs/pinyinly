@@ -14,6 +14,7 @@ import {
   sign,
 } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, vi } from "vitest";
+import ms from "ms";
 
 const { mockWithDrizzle } = vi.hoisted(() => ({ mockWithDrizzle: vi.fn() }));
 vi.mock(`#server/lib/db.ts`, async (importOriginal) => ({
@@ -137,7 +138,7 @@ async function createPasskeyAccount(displayName = `Learner`) {
   const client = caller({
     id: account.session.id,
     userId: account.user.id,
-    expiresAt: new Date(Date.now() + 60_000),
+    expiresAt: new Date(Date.now() + ms(`60s`)),
   });
   return { client, account };
 }
@@ -180,7 +181,7 @@ describe(`passkey ceremonies`, () => {
       const client = caller({
         id: account.session.id,
         userId: account.user.id,
-        expiresAt: new Date(Date.now() + 60_000),
+        expiresAt: new Date(Date.now() + ms(`60s`)),
       });
       const authenticator = virtualAuthenticator();
       const start = await client.startAddPasskey();
@@ -410,7 +411,7 @@ describe(`passkey management`, () => {
       const owner = caller({
         id: result.session.id,
         userId: result.user.id,
-        expiresAt: new Date(Date.now() + 60_000),
+        expiresAt: new Date(Date.now() + ms(`60s`)),
       });
       const second = virtualAuthenticator();
       const start = await owner.startAddPasskey();
@@ -444,7 +445,7 @@ describe(`passkey management`, () => {
       const session = {
         id: `apple-session`,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 60_000),
+        expiresAt: new Date(Date.now() + ms(`60s`)),
       };
       await db.insert(s.authSession).values(session);
       const client = caller(session);
@@ -490,14 +491,14 @@ describe(`passkey management`, () => {
       const owner = caller({
         id: result.session.id,
         userId: result.user.id,
-        expiresAt: new Date(Date.now() + 60_000),
+        expiresAt: new Date(Date.now() + ms(`60s`)),
       });
       const other = { id: `other-user` };
       await db.insert(s.user).values(other);
       const outsider = caller({
         id: `other-session`,
         userId: other.id,
-        expiresAt: new Date(Date.now() + 60_000),
+        expiresAt: new Date(Date.now() + ms(`60s`)),
       });
       expect(await outsider.listPasskeys()).toEqual([]);
       await expect(
@@ -517,7 +518,7 @@ describe(`passkey management`, () => {
       const otherSession = caller({
         id: `different-owner-session`,
         userId: result.user.id,
-        expiresAt: new Date(Date.now() + 60_000),
+        expiresAt: new Date(Date.now() + ms(`60s`)),
       });
       await expect(
         otherSession.completeAddPasskey({

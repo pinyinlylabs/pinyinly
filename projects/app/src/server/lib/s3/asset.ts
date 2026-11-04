@@ -10,6 +10,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { getAssetsS3Client } from "./client";
+import ms from "ms";
 
 /**
  * Maximum file size for user uploads (5MB).
@@ -19,7 +20,8 @@ export const MAX_ASSET_SIZE_BYTES = 5 * 1024 * 1024;
 /**
  * Presigned URL expiration time in seconds (15 minutes).
  */
-const PRESIGNED_URL_EXPIRY_SECONDS = 15 * 60;
+const PRESIGNED_URL_EXPIRY_MILLIS = ms(`15m`);
+const PRESIGNED_URL_EXPIRY_SECONDS = PRESIGNED_URL_EXPIRY_MILLIS / 1000;
 
 export interface PresignedUploadUrlResult {
   uploadUrl: string;
@@ -72,7 +74,7 @@ export async function createPresignedUploadUrl(opts: {
   return {
     uploadUrl,
     assetKey,
-    expiresAt: Date.now() + PRESIGNED_URL_EXPIRY_SECONDS * 1000,
+    expiresAt: Date.now() + PRESIGNED_URL_EXPIRY_MILLIS,
   };
 }
 

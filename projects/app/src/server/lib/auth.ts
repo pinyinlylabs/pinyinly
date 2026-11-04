@@ -18,6 +18,7 @@ import { Lucia, TimeSpan } from "lucia";
 import { base64url } from "jose";
 import { withDrizzle } from "./db";
 import type { Drizzle, Transaction } from "./db";
+import ms from "ms";
 
 const textEncoder = new TextEncoder();
 
@@ -86,7 +87,7 @@ export async function passkeyStartRegistration(opts: {
       kind: `add`,
       userId: opts.userId,
       rpId,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      expiresAt: new Date(Date.now() + ms(`5m`)),
     });
     return { options, cookie: options.challenge };
   });

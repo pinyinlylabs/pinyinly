@@ -21,6 +21,7 @@ import type {
 import { generateAuthenticationOptions } from "@simplewebauthn/server";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
+import ms from "ms";
 import { parseJWT } from "oslo/jwt";
 import { z } from "zod";
 
@@ -176,7 +177,7 @@ export const authRouter = router({
         id: options.challenge,
         kind: `login`,
         rpId,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        expiresAt: new Date(Date.now() + ms(`5m`)),
       });
     });
     return { options, cookie: options.challenge };
