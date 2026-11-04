@@ -295,6 +295,13 @@
       "when": 1793719605778,
       "tag": "0041_aspiring_morg",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1793773071169,
+      "tag": "0042_gorgeous_korath",
+      "breakpoints": true
     }
   ]
 }

@@ -32,18 +32,24 @@ export async function passkeyConsumeChallenge(
   tx: Transaction,
   id: string,
   kind: `add` | `login`,
+  userId?: string,
 ) {
   const { rpId } = getPasskeyConfig();
+  const conditions = [
+    eq(schema.authPasskeyChallenge.id, id),
+    eq(schema.authPasskeyChallenge.kind, kind),
+    eq(schema.authPasskeyChallenge.rpId, rpId),
+    gt(schema.authPasskeyChallenge.expiresAt, new Date()),
+  ];
+  if (kind === `add`) {
+    if (userId == null) {
+      passkeyInvalidCeremony();
+    }
+    conditions.push(eq(schema.authPasskeyChallenge.userId, userId));
+  }
   const [challenge] = await tx
     .delete(schema.authPasskeyChallenge)
-    .where(
-      and(
-        eq(schema.authPasskeyChallenge.id, id),
-        eq(schema.authPasskeyChallenge.kind, kind),
-        eq(schema.authPasskeyChallenge.rpId, rpId),
-        gt(schema.authPasskeyChallenge.expiresAt, new Date()),
-      ),
-    )
+    .where(and(...conditions))
     .returning();
   if (challenge == null) {
     passkeyInvalidCeremony();
@@ -78,6 +84,7 @@ export async function passkeyStartRegistration(opts: {
     await db.insert(schema.authPasskeyChallenge).values({
       id: options.challenge,
       kind: `add`,
+      userId: opts.userId,
       rpId,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
@@ -94,7 +101,15 @@ export async function passkeyFinishRegistration(
   },
   session: { userId: string },
 ) {
-  const challenge = await passkeyConsumeChallenge(tx, input.cookie, `add`);
+  const challenge = await passkeyConsumeChallenge(
+    tx,
+    input.cookie,
+    `add`,
+    session.userId,
+  );
+  if (challenge.userId !== session.userId) {
+    passkeyInvalidCeremony();
+  }
   const { rpId, origins } = getPasskeyConfig();
   const verification = await verifyRegistrationResponse({
     response: input.response,
@@ -110,7 +125,7 @@ export async function passkeyFinishRegistration(
     verification.registrationInfo;
   await tx.insert(schema.authPasskey).values({
     id: credential.id,
-    userId: session.userId,
+    userId: challenge.userId,
     name: input.name ?? null,
     publicKey: credential.publicKey,
     counter: credential.counter,

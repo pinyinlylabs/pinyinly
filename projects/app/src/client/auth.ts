@@ -14,8 +14,6 @@ import { useDeviceStore } from "./ui/hooks/useDeviceStore";
 
 /**
  * Represents a session on the client, either anonymous or authenticated.
- *
- * An anonymous session can be "adopted" when signing in
  */
 const deviceSessionSchema = z.object({
   /**

@@ -12,6 +12,11 @@ dbTest(`consumes a passkey challenge atomically`, async ({ db }) => {
     rpId: `localhost`,
     expiresAt: new Date(Date.now() + 60_000),
   });
+  expect(
+    await db.query.authPasskeyChallenge.findFirst({
+      where: (challenge, { eq }) => eq(challenge.id, challengeId),
+    }),
+  ).toMatchObject({ userId: null });
 
   const attempts = await Promise.allSettled([
     db.transaction(async (tx) =>

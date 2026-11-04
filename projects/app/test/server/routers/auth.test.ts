@@ -185,6 +185,9 @@ describe(`passkey ceremonies`, () => {
       const authenticator = virtualAuthenticator();
       const start = await client.startAddPasskey();
       expect(start.options.user.name).toBe(`Pinyinly account`);
+      expect(await db.query.authPasskeyChallenge.findFirst()).toMatchObject({
+        userId: account.user.id,
+      });
       await client.completeAddPasskey({
         cookie: start.cookie,
         response: authenticator.registration(start.cookie),
@@ -505,6 +508,9 @@ describe(`passkey management`, () => {
       ).rejects.toThrow();
       const start = await owner.startAddPasskey();
       const response = virtualAuthenticator().registration(start.cookie);
+      await expect(
+        outsider.completeAddPasskey({ cookie: start.cookie, response }),
+      ).rejects.toThrow();
       await expect(
         caller().completeAddPasskey({ cookie: start.cookie, response }),
       ).rejects.toThrow();

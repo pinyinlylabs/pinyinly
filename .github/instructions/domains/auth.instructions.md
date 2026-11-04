@@ -43,8 +43,9 @@ them to the authenticated user's data. See
 The web login page offers Apple sign-in and passkey signup/login. Passkeys are not implemented in
 the native app. See [`login.tsx`](../../../projects/app/src/app/login.tsx).
 
-- **Passkey signup** optionally saves a display name, creates a new user and server session, then
-  adds a passkey.
+- **Passkey signup** without an authenticated session optionally saves a display name, creates a new
+  user and server session, then adds a passkey. If the user is already authenticated, the flow adds
+  a passkey to the active account instead.
 - **Apple sign-in** finds or creates a user from the Apple provider subject, then creates a server
   session. The same flow serves both first-time signup and later sign-in.
 - **Passkey login** verifies the passkey and creates a new server session for the existing user.
@@ -59,9 +60,6 @@ database is left as a separate device session; its progress is not copied to the
 starts for the authenticated database, but that does not upload the anonymous database's existing
 history. Do not promise anonymous-data migration unless an explicit migration is implemented.
 
-The auth code has a stale comment suggesting anonymous sessions can be “adopted”; the behavior above
-describes the current implementation.
-
 ## Passkey management and deployment
 
 Production uses RP ID `pinyinly.com`; `https://pinyin.ly` and `https://www.pinyin.ly` are related
@@ -75,11 +73,18 @@ environment. For other local ports, supply comma-separated localhost origins. Us
 `127.0.0.1`. Production defaults require no overrides; never deploy local overrides to production.
 See [`passkey.ts`](../../../projects/app/src/server/lib/passkey.ts).
 
-In Settings > Accounts, a signed-in user can add, rename, and remove named passkeys. The last
-passkey cannot be removed, even if Apple is linked. Removing a passkey prevents future logins with
-that credential but does not revoke sessions that are already signed in. Passkey credentials are
-server-side and scoped to their RP ID; they do not sync between local and production. Learning data
-continues to sync according to the existing account sync rules.
+Challenge rows contain the challenge value (`id`), ceremony kind (`add` or `login`), RP ID,
+expiration, and an optional account `userId`. Add-passkey challenges store the initiating account's
+user ID, and completion requires the authenticated session to match it; login challenges have no
+user ID. Challenges do not store session IDs or names. A successfully completed ceremony consumes
+its matching, unexpired challenge within the database transaction. Challenges expire after five
+minutes; hourly garbage collection deletes rows that have been expired for more than an hour.
+
+In Settings > Accounts, a signed-in user can add optionally named passkeys, rename them, and remove
+them. The last passkey cannot be removed, even if Apple is linked. Removing a passkey prevents
+future logins with that credential but does not revoke sessions that are already signed in. Passkey
+credentials are server-side and scoped to their RP ID; they do not sync between local and
+production. Learning data continues to sync according to the existing account sync rules.
 
 If passkey registration is cancelled or fails during signup, the account remains signed in and the
 user can retry in Settings > Accounts.

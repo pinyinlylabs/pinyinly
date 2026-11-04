@@ -119,9 +119,15 @@ export const authPasskey = schema.table(`authPasskey`, {
 });
 
 export const authPasskeyChallenge = schema.table(`authPasskeyChallenge`, {
+  /** The WebAuthn challenge value, used as the ID of this single-use record. */
   id: pg.text(`id`).primaryKey(),
+  /** Ceremony being performed: adding a passkey or authenticating with one. */
   kind: pg.text(`kind`, { enum: [`add`, `login`] }).notNull(),
+  /** Account bound to an add challenge; null for login challenges. */
+  userId: pg.text(`userId`).references(() => user.id),
+  /** Relying-party ID for which this challenge was issued. */
   rpId: pg.text(`rpId`).notNull(),
+  /** Time after which the challenge can no longer be consumed. */
   expiresAt: pg.timestamp(`expiresAt`, { withTimezone: true }).notNull(),
 });
 

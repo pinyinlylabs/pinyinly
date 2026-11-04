@@ -1,0 +1,2 @@
+ALTER TABLE "haohaohow"."authPasskeyChallenge" ADD COLUMN "userId" text;--> statement-breakpoint
+ALTER TABLE "haohaohow"."authPasskeyChallenge" ADD CONSTRAINT "authPasskeyChallenge_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "haohaohow"."user"("id") ON DELETE no action ON UPDATE no action;
