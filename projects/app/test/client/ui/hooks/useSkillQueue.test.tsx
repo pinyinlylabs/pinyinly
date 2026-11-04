@@ -5,6 +5,7 @@ import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import { useSkillQueue } from "#client/ui/hooks/useSkillQueue.ts";
 import { useBookmarkToggle } from "#client/ui/hooks/useBookmarkToggle.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
+import { TrpcProvider } from "#client/ui/TrpcProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import { QuestionFlagKind } from "#data/model.js";
 import type { HanziWord } from "#data/model.js";
@@ -56,15 +57,20 @@ const testContextProviders = (opts: { rizzle: Rizzle; listId?: StudyListId }) =>
     const queryClient = useNewQueryClient();
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <RizzleProvider.Context.Provider value={opts.rizzle}>
-          <DbProvider>
-            <SkillQueueProvider listId={opts.listId}>
-              {children}
-            </SkillQueueProvider>
-          </DbProvider>
-        </RizzleProvider.Context.Provider>
-      </QueryClientProvider>
+      <TrpcProvider
+        queryClient={queryClient}
+        getServerSessionId={async () => null}
+      >
+        <QueryClientProvider client={queryClient}>
+          <RizzleProvider.Context.Provider value={opts.rizzle}>
+            <DbProvider>
+              <SkillQueueProvider listId={opts.listId}>
+                {children}
+              </SkillQueueProvider>
+            </DbProvider>
+          </RizzleProvider.Context.Provider>
+        </QueryClientProvider>
+      </TrpcProvider>
     );
   };
 

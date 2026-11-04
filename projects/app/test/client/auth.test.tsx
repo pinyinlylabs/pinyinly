@@ -6,6 +6,14 @@ import { afterEach, expect, test, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   setValue: vi.fn(),
   setValueAsync: vi.fn(),
+  deviceSessions: [
+    { replicacheDbName: `anonymous-db` },
+    {
+      replicacheDbName: `existing-account-db`,
+      userId: `user`,
+      serverSessionId: `old-session`,
+    },
+  ],
   createAccount: vi.fn(),
   startAdd: vi.fn(),
   completeAdd: vi.fn(),
@@ -46,14 +54,7 @@ vi.mock(`#client/ui/hooks/useDeviceStore.ts`, () => ({
   useDeviceStore: () => ({
     isLoading: false,
     value: {
-      deviceSessions: [
-        { replicacheDbName: `anonymous-db` },
-        {
-          replicacheDbName: `existing-account-db`,
-          userId: `user`,
-          serverSessionId: `old-session`,
-        },
-      ],
+      deviceSessions: mocks.deviceSessions,
     },
     setValue: mocks.setValue,
     setValueAsync: mocks.setValueAsync,
@@ -62,6 +63,14 @@ vi.mock(`#client/ui/hooks/useDeviceStore.ts`, () => ({
 
 afterEach(() => {
   vi.clearAllMocks();
+  mocks.deviceSessions = [
+    { replicacheDbName: `anonymous-db` },
+    {
+      replicacheDbName: `existing-account-db`,
+      userId: `user`,
+      serverSessionId: `old-session`,
+    },
+  ];
 });
 
 test(`passkey login refreshes an existing account without discarding its local database`, async () => {
@@ -130,6 +139,48 @@ test(`signup activates the new account before adding its first passkey`, async (
   expect(mocks.completeAdd).toHaveBeenCalledWith({
     response: { id: `credential` },
     cookie: `challenge`,
+  });
+});
+
+test(`adding an account creates a new account even when one is already active`, async () => {
+  mocks.deviceSessions = [
+    {
+      replicacheDbName: `existing-account-db`,
+      userId: `user`,
+      serverSessionId: `old-session`,
+    },
+    { replicacheDbName: `anonymous-db` },
+  ];
+  mocks.createAccount.mockResolvedValue({
+    session: { id: `new-session` },
+    user: { id: `new-user`, name: `New account` },
+  });
+  mocks.setValueAsync.mockResolvedValue(undefined);
+  mocks.startAdd.mockResolvedValue({ options: {}, cookie: `challenge` });
+  mocks.startRegistration.mockResolvedValue({ id: `credential` });
+  mocks.completeAdd.mockResolvedValue({ verified: true });
+  const { result } = renderHook(() => useAuth());
+
+  await act(async () =>
+    result.current.signUpWithPasskey({ displayName: `New account` }),
+  );
+
+  expect(mocks.createAccount).toHaveBeenCalledWith({
+    displayName: `New account`,
+  });
+  expect(mocks.setValueAsync).toHaveBeenCalledWith({
+    deviceSessions: [
+      expect.objectContaining({
+        serverSessionId: `new-session`,
+        userId: `new-user`,
+      }),
+      {
+        replicacheDbName: `existing-account-db`,
+        userId: `user`,
+        serverSessionId: `old-session`,
+      },
+      { replicacheDbName: `anonymous-db` },
+    ],
   });
 });
 

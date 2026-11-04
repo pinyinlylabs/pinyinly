@@ -68,7 +68,10 @@ import {
   like,
   or,
 } from "@tanstack/react-db";
+import { queryCollectionOptions } from "@tanstack/query-db-collection";
+import type { QueryCollectionUtils } from "@tanstack/query-db-collection";
 import { queryOptions, skipToken } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
 import isEqual from "lodash/isEqual";
 import { Platform } from "react-native";
@@ -655,6 +658,31 @@ export type CharacterComponentUsageCollection = Collection<
   HanziText
 >;
 
+export interface PasskeyCollectionRow {
+  id: string;
+  name: string | null;
+  createdAt: Date | null;
+  lastUsedAt: Date | null;
+}
+
+export type PasskeyCollection = Collection<
+  PasskeyCollectionRow,
+  string,
+  QueryCollectionUtils<PasskeyCollectionRow, string>
+>;
+
+interface MakeDbOptions {
+  queryClient: QueryClient;
+  listPasskeys: () => Promise<
+    Array<{
+      id: string;
+      name: string | null;
+      createdAt: string | null;
+      lastUsedAt: string | null;
+    }>
+  >;
+}
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
@@ -1176,7 +1204,26 @@ export const staticCollectionOptions = <
   getKey,
 });
 
-export function makeDb(rizzle: Rizzle) {
+export function makeDb(
+  rizzle: Rizzle,
+  { queryClient, listPasskeys }: MakeDbOptions,
+) {
+  const passkeyCollection: PasskeyCollection = createCollection(
+    queryCollectionOptions({
+      queryKey: [`passkeys`],
+      queryFn: async () =>
+        (await listPasskeys()).map((passkey) => ({
+          ...passkey,
+          createdAt:
+            passkey.createdAt == null ? null : new Date(passkey.createdAt),
+          lastUsedAt:
+            passkey.lastUsedAt == null ? null : new Date(passkey.lastUsedAt),
+        })),
+      queryClient,
+      getKey: (passkey) => passkey.id,
+    }),
+  );
+
   const skillStateCollection: SkillStateCollection = createCollection(
     rizzleCollectionOptions({
       id: `skillState`,
@@ -1462,6 +1509,7 @@ export function makeDb(rizzle: Rizzle) {
     userDictionary,
     hanziGlossMistakeCollection,
     hanziPinyinMistakeCollection,
+    passkeyCollection,
     skillRatingCollection,
     skillStateCollection,
     targetSkillsCollection,

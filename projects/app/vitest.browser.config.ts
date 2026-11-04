@@ -7,6 +7,9 @@ import { uniwind } from "uniwind/vite";
 import path from "node:path";
 
 export default defineConfig({
+  optimizeDeps: {
+    include: [`@tanstack/query-db-collection`],
+  },
   test: {
     browser: {
       provider: playwright(),

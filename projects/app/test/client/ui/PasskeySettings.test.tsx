@@ -10,13 +10,28 @@ import {
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  list: vi.fn(),
   refetch: vi.fn(),
   start: vi.fn(),
   complete: vi.fn(),
   register: vi.fn(),
   rename: vi.fn(),
   remove: vi.fn(),
+  rows: [] as Array<{
+    id: string;
+    name: string | null;
+    createdAt: Date | null;
+    lastUsedAt: Date | null;
+  }>,
+}));
+vi.mock(`@tanstack/react-db`, () => ({
+  useLiveQuery: () => ({
+    data: mocks.rows,
+    isLoading: false,
+    isError: false,
+  }),
+}));
+vi.mock(`#client/ui/hooks/useDb.ts`, () => ({
+  useDb: () => ({ passkeyCollection: { utils: { refetch: mocks.refetch } } }),
 }));
 vi.mock(`#client/passkey.ts`, () => ({
   useSupportsPasskeys: () => true,
@@ -28,7 +43,6 @@ vi.mock(`@simplewebauthn/browser`, () => ({
 vi.mock(`#client/trpc.tsx`, () => ({
   trpc: {
     auth: {
-      listPasskeys: { useQuery: mocks.list },
       startAddPasskey: { useMutation: () => ({ mutateAsync: mocks.start }) },
       completeAddPasskey: {
         useMutation: () => ({ mutateAsync: mocks.complete }),
@@ -41,14 +55,9 @@ vi.mock(`#client/trpc.tsx`, () => ({
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mocks.list.mockReturnValue({
-    data: [
-      { id: `credential`, name: `Keychain`, createdAt: null, lastUsedAt: null },
-    ],
-    isPending: false,
-    isError: false,
-    refetch: mocks.refetch,
-  });
+  mocks.rows = [
+    { id: `credential`, name: `Keychain`, createdAt: null, lastUsedAt: null },
+  ];
 });
 afterEach(() => {
   cleanup();
@@ -113,17 +122,12 @@ test(`allows adding a passkey without a name`, async () => {
 });
 
 test(`requires confirmation before removing one of multiple keys`, async () => {
-  mocks.list.mockReturnValue({
-    data: [`first`, `second`].map((id) => ({
-      id,
-      name: id,
-      createdAt: null,
-      lastUsedAt: null,
-    })),
-    isPending: false,
-    isError: false,
-    refetch: mocks.refetch,
-  });
+  mocks.rows = [`first`, `second`].map((id) => ({
+    id,
+    name: id,
+    createdAt: null,
+    lastUsedAt: null,
+  }));
   render(<PasskeySettings />);
   fireEvent.click(screen.getAllByRole(`button`, { name: `Remove` })[0]!);
   expect(mocks.remove).not.toHaveBeenCalled();

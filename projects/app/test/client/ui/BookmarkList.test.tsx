@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 
 import { DbProvider } from "#client/ui/DbProvider.tsx";
+import { TrpcProvider } from "#client/ui/TrpcProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { SkillWordRows } from "#client/ui/SkillWordRows.tsx";
@@ -42,11 +43,16 @@ function providers(rizzle: Rizzle) {
   return function Wrapper({ children }: PropsWithChildren) {
     const queryClient = useNewQueryClient();
     return (
-      <QueryClientProvider client={queryClient}>
-        <RizzleProvider.Context.Provider value={rizzle}>
-          <DbProvider>{children}</DbProvider>
-        </RizzleProvider.Context.Provider>
-      </QueryClientProvider>
+      <TrpcProvider
+        queryClient={queryClient}
+        getServerSessionId={async () => null}
+      >
+        <QueryClientProvider client={queryClient}>
+          <RizzleProvider.Context.Provider value={rizzle}>
+            <DbProvider>{children}</DbProvider>
+          </RizzleProvider.Context.Provider>
+        </QueryClientProvider>
+      </TrpcProvider>
     );
   };
 }

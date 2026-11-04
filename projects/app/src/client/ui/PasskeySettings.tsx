@@ -1,7 +1,9 @@
 import { passkeyErrorMessage, useSupportsPasskeys } from "@/client/passkey";
 import { trpc } from "@/client/trpc";
 import { startRegistration } from "@simplewebauthn/browser";
+import { useLiveQuery } from "@tanstack/react-db";
 import { useState } from "react";
+import { useDb } from "./hooks/useDb";
 import { RectButton } from "./RectButton";
 import { Text } from "./Text";
 import { TextInputSingle } from "./TextInputSingle";
@@ -13,7 +15,10 @@ export function PasskeySettings() {
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
-  const passkeys = trpc.auth.listPasskeys.useQuery();
+  const db = useDb();
+  const passkeysQuery = useLiveQuery((q) =>
+    q.from({ passkey: db.passkeyCollection }),
+  );
   const start = trpc.auth.startAddPasskey.useMutation();
   const complete = trpc.auth.completeAddPasskey.useMutation();
   const rename = trpc.auth.renamePasskey.useMutation();
@@ -27,7 +32,7 @@ export function PasskeySettings() {
     setErrorMessage(null);
     try {
       await action();
-      await passkeys.refetch();
+      await db.passkeyCollection.utils.refetch();
     } catch (error) {
       console.error(`Passkey management failed`, error);
       setErrorMessage(passkeyErrorMessage(error));
@@ -43,31 +48,31 @@ export function PasskeySettings() {
         Passkeys belong to this account on this server. Your last passkey cannot
         be removed.
       </Text>
-      {passkeys.isPending ? (
+      {passkeysQuery.isLoading ? (
         <Text className="text-fg">Loading passkeys...</Text>
       ) : null}
-      {passkeys.isError ? (
+      {passkeysQuery.isError ? (
         <View className="gap-2">
           <Text accessibilityRole="alert" className="text-fg">
             Could not load passkeys.
           </Text>
           <RectButton
             onPress={() => {
-              void passkeys.refetch();
+              void db.passkeyCollection.utils.refetch();
             }}
           >
             Retry
           </RectButton>
         </View>
       ) : null}
-      {passkeys.data?.map((passkey) => (
+      {passkeysQuery.data.map((passkey) => (
         <PasskeyRow
           key={passkey.id}
           name={passkey.name}
           createdAt={passkey.createdAt}
           lastUsedAt={passkey.lastUsedAt}
           disabled={pending}
-          canRemove={passkeys.data.length > 1}
+          canRemove={passkeysQuery.data.length > 1}
           confirming={removingId === passkey.id}
           onConfirm={() => {
             setRemovingId(passkey.id);
@@ -143,8 +148,8 @@ function PasskeyRow({
   onRemove,
 }: {
   name: string | null;
-  createdAt: string | null;
-  lastUsedAt: string | null;
+  createdAt: Date | null;
+  lastUsedAt: Date | null;
   disabled: boolean;
   canRemove: boolean;
   confirming: boolean;
@@ -166,14 +171,9 @@ function PasskeyRow({
       />
       <Text className="text-muted-fg">
         Created:{` `}
-        {createdAt == null
-          ? `Unknown`
-          : new Date(createdAt).toLocaleDateString()}
-        . Last used:{` `}
-        {lastUsedAt == null
-          ? `Never`
-          : new Date(lastUsedAt).toLocaleDateString()}
-        .
+        {createdAt == null ? `Unknown` : createdAt.toLocaleDateString()}. Last
+        used:{` `}
+        {lastUsedAt == null ? `Never` : lastUsedAt.toLocaleDateString()}.
       </Text>
       <RectButton
         disabled={

@@ -184,18 +184,10 @@ export function useAuth(): AuthApi {
     displayName?: string;
   }) => {
     invariant(data != null, `expected auth state to be initialized`);
-    const activeSession = data.activeDeviceSession;
-    if (activeSession.serverSessionId == null) {
-      const account = await createPasskeyAccountMutate(
-        displayName == null ? {} : { displayName },
-      );
-      await activatePasskeySession(account);
-    } else {
-      invariant(
-        activeSession.userId != null,
-        `expected authenticated device session to have a user ID`,
-      );
-    }
+    const account = await createPasskeyAccountMutate(
+      displayName == null ? {} : { displayName },
+    );
+    await activatePasskeySession(account);
 
     const { options: optionsJSON, cookie } = await startAddPasskeyMutate();
 

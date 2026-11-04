@@ -7,6 +7,7 @@ import type {
 import {
   historyPageCollection,
   historyPageData,
+  makeDb,
   skillReviewQueueHistoryCollection,
   wikiPayloadSchema,
   hanziSvgPathsQueryWeb,
@@ -30,7 +31,7 @@ import {
 import { loadDictionary } from "#dictionary.js";
 import { seedSkillReviews, 汉 } from "#test/data/helpers.ts";
 import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
-import { testWithDb } from "#test/util/rizzleHelpers.ts";
+import { testWithDb, testWithRizzle } from "#test/util/rizzleHelpers.ts";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import {
   afterEach,
@@ -75,6 +76,45 @@ unitTest(`skipQuery preserves the data type without starting a fetch`, () => {
     queryClient.clear();
   }
 });
+
+testWithRizzle(
+  `passkey collection parses timestamps as Dates`,
+  async ({ rizzle }) => {
+    const queryClient = new QueryClient();
+    const createdAt = `2025-01-02T03:04:05.000Z`;
+    const lastUsedAt = `2025-02-03T04:05:06.000Z`;
+    const db = makeDb(rizzle, {
+      queryClient,
+      listPasskeys: async () => [
+        { id: `credential`, name: `Keychain`, createdAt, lastUsedAt },
+      ],
+    });
+
+    try {
+      await db.passkeyCollection.preload();
+      expect(
+        db.passkeyCollection.toArray.map(
+          ({ id, name, createdAt, lastUsedAt }) => ({
+            id,
+            name,
+            createdAt,
+            lastUsedAt,
+          }),
+        ),
+      ).toEqual([
+        {
+          id: `credential`,
+          name: `Keychain`,
+          createdAt: new Date(createdAt),
+          lastUsedAt: new Date(lastUsedAt),
+        },
+      ]);
+    } finally {
+      await db.passkeyCollection.cleanup();
+      queryClient.clear();
+    }
+  },
+);
 
 describe(`character asset queries`, () => {
   unitTest.for([hanziSvgPathsQueryWeb, hanziSvgPathsQueryNative])(
