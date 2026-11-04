@@ -5748,7 +5748,7 @@ __metadata:
     "@radix-ui/react-dropdown-menu": "npm:^2.1.24"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
-    "@react-native/assets-registry": "npm:0.88.0"
+    "@react-native/assets-registry": "npm:0.88.1"
     "@react-native/metro-config": "npm:0.88.1"
     "@rive-app/react-canvas": "npm:^4.21.4"
     "@rn-primitives/dropdown-menu": "patch:@rn-primitives/dropdown-menu@npm%3A1.5.2#~/.yarn/patches/@rn-primitives-dropdown-menu-npm-1.5.2-79595d43ce.patch"
@@ -7209,12 +7209,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/assets-registry@npm:0.88.0":
-  version: 0.88.0
-  resolution: "@react-native/assets-registry@npm:0.88.0"
+"@react-native/assets-registry@npm:0.88.1":
+  version: 0.88.1
+  resolution: "@react-native/assets-registry@npm:0.88.1"
   peerDependencies:
     react-native: "*"
-  checksum: 10c0/f5c16246e65eeda68a59552fc3848e983eefc46657777f945980532e5b2cf91ad927a6d84241512d17347475bd35ff8326c1c91463c5306247b5461f50cf84a0
+  checksum: 10c0/8fe60e8507b49c9e434f1d7bd0988cdd69498ceb10409da59e5e237b7bbd1759248b8670b3db525412cfd9d7c2a83369904db9ea91bfbf1033e2750e43fff833
   languageName: node
   linkType: hard
 
