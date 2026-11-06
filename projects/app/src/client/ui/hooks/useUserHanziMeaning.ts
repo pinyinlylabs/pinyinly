@@ -1,4 +1,4 @@
-import type { UserDictionaryEntry } from "@/client/query";
+import type { UserDictionaryEntry } from "@/client/db";
 import type { HanziText, PinyinText } from "@/data/model";
 import {
   getUserHanziMeaningKeyParams,

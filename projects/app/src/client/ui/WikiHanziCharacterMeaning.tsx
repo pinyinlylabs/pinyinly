@@ -1,4 +1,4 @@
-import type { DictionaryCollectionEntry } from "@/client/query";
+import type { DictionaryCollectionEntry } from "@/client/db";
 import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { useHanziWordMeaningHint } from "@/client/ui/hooks/useHanziWordMeaningHint";
 import { parseIds, walkIdsNodeLeafs } from "@/data/hanzi";

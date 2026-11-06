@@ -1,4 +1,4 @@
-import type { DictionaryCollectionEntry } from "#client/query.ts";
+import type { DictionaryCollectionEntry } from "#client/db.ts";
 import type { HanziText } from "#data/model.ts";
 import { buildRelatedMeaningMatches } from "#client/ui/WikiHanziRelatedMeanings.utils.ts";
 import { describe, expect, test } from "vitest";

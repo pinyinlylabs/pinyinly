@@ -1,4 +1,4 @@
-import type { DictionaryCollectionEntry } from "#client/query.ts";
+import type { DictionaryCollectionEntry } from "#client/db.ts";
 import { quickSearch } from "#client/ui/hooks/useQuickSearch.ts";
 import type { HanziText, HanziWord, PinyinText } from "#data/model.js";
 import { describe, expect, test } from "vitest";

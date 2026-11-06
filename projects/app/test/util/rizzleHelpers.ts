@@ -1,8 +1,7 @@
-import { makeDb } from "#client/query.js";
+import { makeDb } from "#client/db.js";
 import { mutators } from "#data/rizzleMutators.js";
 import { currentSchema } from "#data/rizzleSchema.js";
 import { r } from "#util/rizzle.ts";
-import { QueryClient } from "@tanstack/react-query";
 import { test } from "vitest";
 import type {
   ReadTransaction,
@@ -78,12 +77,6 @@ export const testWithRizzle = test.extend(
 
 export const testWithDb = testWithRizzle.extend(
   `db`,
-  async ({ rizzle }, { onCleanup }) => {
-    const queryClient = new QueryClient();
-    onCleanup(() =>{  queryClient.clear(); });
-    return makeDb(rizzle, {
-      queryClient,
-      listPasskeys: async () => [],
-    });
-  },
+  { scope: `test` },
+  async ({ rizzle }) => makeDb(rizzle, { listPasskeys: async () => [] }),
 );

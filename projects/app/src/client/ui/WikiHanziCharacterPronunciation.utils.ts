@@ -1,4 +1,4 @@
-import type { DictionaryCollectionEntry } from "@/client/query";
+import type { DictionaryCollectionEntry } from "@/client/db";
 import type { HanziWord, PinyinUnit } from "@/data/model";
 import { oneUnitPinyinListOrNull } from "@/dictionary";
 

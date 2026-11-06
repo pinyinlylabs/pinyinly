@@ -1,4 +1,4 @@
-import type { BookmarkedWordItem } from "@/client/query";
+import type { BookmarkedWordItem } from "@/client/db";
 import type { HanziWord } from "@/data/model";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";

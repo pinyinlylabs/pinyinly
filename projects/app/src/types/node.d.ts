@@ -106,17 +106,6 @@ declare global {
       PYLY_POSTMARK_SERVER_TOKEN?: string;
 
       //
-      // WebAuthn (passkeys)
-      //
-
-      // Optional RP ID override: pinyinly.com for production or localhost for
-      // local development. Defaults according to NODE_ENV.
-      PYLY_WEBAUTHN_RP_ID?: string;
-      // Optional comma-separated list of allowed WebAuthn origins. Defaults to
-      // the production related origins or http://localhost:8081 for the local RP.
-      PYLY_WEBAUTHN_ORIGINS?: string;
-
-      //
       // Other
       //
 

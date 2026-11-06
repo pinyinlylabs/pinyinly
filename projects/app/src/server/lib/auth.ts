@@ -1,5 +1,10 @@
 import * as schema from "@/server/pgSchema";
-import { getPasskeyConfig } from "@/server/lib/passkey";
+import {
+  getExpectedPasskeyOrigin,
+  getPasskeyConfig,
+  passkeyNameFromAaguid,
+  passkeyEncodeUserId,
+} from "@/server/lib/passkey";
 import { getUserDisplayName, setUserDisplayName } from "@/server/lib/query";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -19,8 +24,6 @@ import { base64url } from "jose";
 import { withDrizzle } from "./db";
 import type { Drizzle, Transaction } from "./db";
 import ms from "ms";
-
-const textEncoder = new TextEncoder();
 
 export function passkeyInvalidCeremony(): never {
   throw new TRPCError({
@@ -60,7 +63,7 @@ export async function passkeyConsumeChallenge(
 
 export async function passkeyStartRegistration(opts: {
   userId: string;
-  userName: string;
+  userDisplayName: string;
 }) {
   const { rpId } = getPasskeyConfig();
   return withDrizzle(async (db) => {
@@ -70,8 +73,9 @@ export async function passkeyStartRegistration(opts: {
     const options = await generateRegistrationOptions({
       rpName: `Pinyinly`,
       rpID: rpId,
-      userName: opts.userName || `Pinyinly account`,
-      userID: textEncoder.encode(opts.userId),
+      userName: ``,
+      userDisplayName: opts.userDisplayName || `Pinyinly account`,
+      userID: passkeyEncodeUserId(opts.userId),
       attestationType: `none`,
       authenticatorSelection: {
         residentKey: `required`,
@@ -98,7 +102,6 @@ export async function passkeyFinishRegistration(
   input: {
     cookie: string;
     response: RegistrationResponseJSON;
-    name?: string;
   },
   session: { userId: string },
 ) {
@@ -111,28 +114,45 @@ export async function passkeyFinishRegistration(
   if (challenge.userId !== session.userId) {
     passkeyInvalidCeremony();
   }
-  const { rpId, origins } = getPasskeyConfig();
+  const config = getPasskeyConfig();
   const verification = await verifyRegistrationResponse({
     response: input.response,
     expectedChallenge: challenge.id,
-    expectedOrigin: origins,
-    expectedRPID: rpId,
+    expectedOrigin: getExpectedPasskeyOrigin(
+      config,
+      input.response.response.clientDataJSON,
+    ),
+    expectedRPID: config.rpId,
     requireUserVerification: true,
   });
   if (!verification.verified) {
     passkeyInvalidCeremony();
   }
-  const { credential, credentialDeviceType, credentialBackedUp } =
+  const { aaguid, credential, credentialDeviceType, credentialBackedUp } =
     verification.registrationInfo;
+  // Serialize registration per account so concurrent ceremonies choose distinct names.
+  await tx
+    .select({ id: schema.user.id })
+    .from(schema.user)
+    .where(eq(schema.user.id, challenge.userId))
+    .for(`update`);
+  const existingNames = await tx
+    .select({ name: schema.authPasskey.name })
+    .from(schema.authPasskey)
+    .where(eq(schema.authPasskey.userId, challenge.userId));
   await tx.insert(schema.authPasskey).values({
     id: credential.id,
     userId: challenge.userId,
-    name: input.name ?? null,
+    name: passkeyNameFromAaguid(
+      aaguid,
+      existingNames.map(({ name }) => name),
+    ),
     publicKey: credential.publicKey,
     counter: credential.counter,
     transports: credential.transports,
     deviceType: credentialDeviceType,
     isBackedUp: credentialBackedUp,
+    aaguid,
   });
 }
 
@@ -147,7 +167,7 @@ export async function passkeyFinishAuthentication(input: {
         input.cookie,
         `login`,
       );
-      const { rpId, origins } = getPasskeyConfig();
+      const config = getPasskeyConfig();
       const [credential] = await tx
         .select()
         .from(schema.authPasskey)
@@ -156,7 +176,7 @@ export async function passkeyFinishAuthentication(input: {
       if (
         credential == null ||
         input.response.response.userHandle == null ||
-        base64url.encode(textEncoder.encode(credential.userId)) !==
+        base64url.encode(passkeyEncodeUserId(credential.userId)) !==
           input.response.response.userHandle
       ) {
         passkeyInvalidCeremony();
@@ -164,8 +184,11 @@ export async function passkeyFinishAuthentication(input: {
       const verification = await verifyAuthenticationResponse({
         response: input.response,
         expectedChallenge: challenge.id,
-        expectedOrigin: origins,
-        expectedRPID: rpId,
+        expectedOrigin: getExpectedPasskeyOrigin(
+          config,
+          input.response.response.clientDataJSON,
+        ),
+        expectedRPID: config.rpId,
         requireUserVerification: true,
         credential: {
           id: credential.id,

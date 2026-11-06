@@ -85,7 +85,6 @@ true satisfies IsEqual<
 const registrationInput = z.object({
   response: passkeyRegistrationResponseSchema,
   cookie: z.string().min(1).max(2048),
-  name: passkeyNameSchema.optional(),
 });
 
 export const authRouter = router({
@@ -150,7 +149,7 @@ export const authRouter = router({
       getUserDisplayName(db, ctx.session.userId),
     );
     return passkeyStartRegistration({
-      userName: displayName ?? `Pinyinly account`,
+      userDisplayName: displayName ?? `Pinyinly account`,
       userId: ctx.session.userId,
     });
   }),

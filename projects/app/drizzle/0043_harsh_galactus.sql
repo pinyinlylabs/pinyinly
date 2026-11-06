@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."authPasskey" ADD COLUMN "aaguid" text;

@@ -56,12 +56,13 @@ function virtualAuthenticator() {
       origin = `http://localhost:8081`,
       rpId = `localhost`,
       flags = 0x45,
+      aaguid = `00000000-0000-0000-0000-000000000000`,
     ): RegistrationResponseJSON {
       const length = Buffer.alloc(2);
       length.writeUInt16BE(credentialId.length);
       const data = Buffer.concat([
         authData(rpId, flags, 0),
-        Buffer.alloc(16),
+        Buffer.from(aaguid.replaceAll(`-`, ``), `hex`),
         length,
         credentialId,
         cose,
@@ -160,8 +161,7 @@ async function signup() {
 }
 
 beforeEach(() => {
-  vi.stubEnv(`PYLY_WEBAUTHN_RP_ID`, `localhost`);
-  vi.stubEnv(`PYLY_WEBAUTHN_ORIGINS`, `http://localhost:8081`);
+  vi.stubEnv(`NODE_ENV`, `development`);
 });
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -185,7 +185,10 @@ describe(`passkey ceremonies`, () => {
       });
       const authenticator = virtualAuthenticator();
       const start = await client.startAddPasskey();
-      expect(start.options.user.name).toBe(`Pinyinly account`);
+      expect(start.options.user).toMatchObject({
+        name: ``,
+        displayName: `Pinyinly account`,
+      });
       expect(await db.query.authPasskeyChallenge.findFirst()).toMatchObject({
         userId: account.user.id,
       });
@@ -193,7 +196,15 @@ describe(`passkey ceremonies`, () => {
         cookie: start.cookie,
         response: authenticator.registration(start.cookie),
       });
-      expect(await db.query.authPasskey.findMany()).toHaveLength(1);
+      expect(await db.query.authPasskey.findMany()).toMatchObject([
+        {
+          name: `Passkey`,
+          aaguid: `00000000-0000-0000-0000-000000000000`,
+        },
+      ]);
+      expect(await db.query.authPasskey.findFirst()).toMatchObject({
+        aaguid: `00000000-0000-0000-0000-000000000000`,
+      });
     },
   );
 
@@ -217,7 +228,7 @@ describe(`passkey ceremonies`, () => {
         client.completePasskeyAuthentication(input),
       ).rejects.toThrow();
       const credential = await db.query.authPasskey.findFirst();
-      expect(credential).toMatchObject({ counter: 1, name: null });
+      expect(credential).toMatchObject({ counter: 1, name: `Passkey` });
       expect(credential?.lastUsedAt).toBeInstanceOf(Date);
     },
   );
@@ -354,11 +365,7 @@ describe(`passkey ceremonies`, () => {
     `production requires the new RP and accepts both related origins`,
     async ({ db }) => {
       useDatabase(db);
-      vi.stubEnv(`PYLY_WEBAUTHN_RP_ID`, `pinyinly.com`);
-      vi.stubEnv(
-        `PYLY_WEBAUTHN_ORIGINS`,
-        `https://pinyin.ly,https://www.pinyin.ly`,
-      );
+      vi.stubEnv(`NODE_ENV`, `production`);
       const { client, account } = await createPasskeyAccount(`Production`);
       for (const origin of [`https://pinyin.ly`, `https://www.pinyin.ly`]) {
         const authenticator = virtualAuthenticator();
@@ -418,7 +425,6 @@ describe(`passkey management`, () => {
       await owner.completeAddPasskey({
         cookie: start.cookie,
         response: second.registration(start.cookie),
-        name: `Second`,
       });
       const removals = await Promise.allSettled([
         owner.removePasskey({ id: authenticator.id }),
@@ -451,6 +457,7 @@ describe(`passkey management`, () => {
       const client = caller(session);
       const first = virtualAuthenticator();
       const second = virtualAuthenticator();
+      const aaguid = `fcb1bcb4-f370-078c-6993-bc24d0ae3fbe`;
       for (const [index, authenticator] of [first, second].entries()) {
         const start = await client.startAddPasskey();
         expect(start.options.user.id).toBe(
@@ -459,13 +466,27 @@ describe(`passkey management`, () => {
         expect(start.options.excludeCredentials).toHaveLength(index);
         await client.completeAddPasskey({
           cookie: start.cookie,
-          response: authenticator.registration(start.cookie),
-          name: `Key ${index}`,
+          response: authenticator.registration(
+            start.cookie,
+            `http://localhost:8081`,
+            `localhost`,
+            0x45,
+            aaguid,
+          ),
         });
       }
       expect(await db.query.user.findMany()).toHaveLength(1);
       expect(await db.query.authSession.findMany()).toEqual([session]);
-      expect(await client.listPasskeys()).toHaveLength(2);
+      expect(await client.listPasskeys()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: `Ledger Nano X FIDO2 Authenticator`,
+          }),
+          expect.objectContaining({
+            name: `Ledger Nano X FIDO2 Authenticator (2)`,
+          }),
+        ]),
+      );
       await client.renamePasskey({ id: first.id, name: `Renamed` });
       expect(await client.listPasskeys()).toEqual(
         expect.arrayContaining([expect.objectContaining({ name: `Renamed` })]),
@@ -524,7 +545,6 @@ describe(`passkey management`, () => {
         otherSession.completeAddPasskey({
           cookie: start.cookie,
           response,
-          name: `Extra`,
         }),
       ).resolves.toMatchObject({ verified: true });
       const [listed] = await owner.listPasskeys();

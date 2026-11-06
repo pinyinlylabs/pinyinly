@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { DbProvider } from "./DbProvider";
 import { DeviceStoreSync } from "./DeviceStoreSync";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { RizzleProvider } from "./RizzleProvider";
 import { SkillQueueProvider } from "./SkillQueueProvider";
 import { Suspense } from "./Suspense";
@@ -42,16 +43,18 @@ export function SessionStoreProvider({
       <QueryClientProvider client={queryClient}>
         <RizzleProvider dbName={dbName} serverSessionId={serverSessionId}>
           <DbProvider>
-            <SkillQueueProvider>
-              <DeviceStoreSync dbName={dbName} />
-              <Suspense
-                // Use a <Suspense> here as a final safe-guard against trashing
-                // Replicache+ReactQuery+etc  and causing them to re-initialize
-                fallback={null}
-              >
-                {children}
-              </Suspense>
-            </SkillQueueProvider>
+            <ErrorBoundary>
+              <SkillQueueProvider>
+                <DeviceStoreSync dbName={dbName} />
+                <Suspense
+                  // Use a <Suspense> here as a final safe-guard against trashing
+                  // Replicache+ReactQuery+etc  and causing them to re-initialize
+                  fallback={null}
+                >
+                  {children}
+                </Suspense>
+              </SkillQueueProvider>
+            </ErrorBoundary>
           </DbProvider>
         </RizzleProvider>
       </QueryClientProvider>

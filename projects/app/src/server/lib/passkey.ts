@@ -1,39 +1,51 @@
-import { z } from "zod";
+import aaguids from "aaguids";
+import { decodeClientDataJSON } from "@simplewebauthn/server/helpers";
+import { uniqueNameWithSuffix } from "@/util/unicode";
+
+const textEncoder = new TextEncoder();
 
 export const relatedPasskeyOrigins = [
   `https://pinyin.ly`,
   `https://www.pinyin.ly`,
 ];
 
-export function getPasskeyConfig(
-  env: Partial<NodeJS.ProcessEnv> = process.env,
+export function passkeyEncodeUserId(userId: string) {
+  return textEncoder.encode(userId);
+}
+
+export function passkeyNameFromAaguid(
+  aaguid: string,
+  existingNames: (string | null)[],
 ) {
-  const rpId = z
-    .enum([`pinyinly.com`, `localhost`])
-    .parse(
-      env.PYLY_WEBAUTHN_RP_ID ??
-        (env.NODE_ENV === `production` ? `pinyinly.com` : `localhost`),
-    );
-  const origins = z
-    .array(z.url())
-    .min(1)
-    .parse(
-      env.PYLY_WEBAUTHN_ORIGINS?.split(`,`).map((value) => value.trim()) ??
-        (rpId === `localhost`
-          ? [`http://localhost:8081`]
-          : relatedPasskeyOrigins),
-    );
-  for (const origin of origins) {
-    const url = new URL(origin);
-    if (
-      url.origin !== origin ||
-      (rpId === `localhost`
-        ? url.hostname !== `localhost` ||
-          ![`http:`, `https:`].includes(url.protocol)
-        : !relatedPasskeyOrigins.includes(origin))
-    ) {
-      throw new Error(`Invalid WebAuthn origin for ${rpId}: ${origin}`);
-    }
+  const baseName = aaguids[aaguid.toLowerCase()] ?? `Passkey`;
+  return uniqueNameWithSuffix(baseName, existingNames);
+}
+
+export function getPasskeyConfig() {
+  const rpId: `pinyinly.com` | `localhost` =
+    process.env.NODE_ENV === `production` ? `pinyinly.com` : `localhost`;
+  return {
+    rpId,
+    origins: rpId === `localhost` ? [] : relatedPasskeyOrigins,
+  };
+}
+
+export function getExpectedPasskeyOrigin(
+  config: ReturnType<typeof getPasskeyConfig>,
+  clientDataJSON: string,
+): string | string[] {
+  if (config.rpId !== `localhost`) {
+    return config.origins;
   }
-  return { rpId, origins };
+
+  const origin = decodeClientDataJSON(clientDataJSON).origin;
+  const url = new URL(origin);
+  if (
+    url.origin !== origin ||
+    url.hostname !== `localhost` ||
+    ![`http:`, `https:`].includes(url.protocol)
+  ) {
+    throw new Error(`Invalid WebAuthn origin for localhost: ${origin}`);
+  }
+  return origin;
 }

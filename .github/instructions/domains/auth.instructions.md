@@ -67,11 +67,11 @@ origins. Use a current browser supporting WebAuthn Related Origin Requests. Cred
 under the old `pinyin.ly` RP ID cannot be used with the new RP ID. Native passkeys are not
 implemented.
 
-Local development uses RP ID `localhost` and a separate database. Set
-`PYLY_WEBAUTHN_RP_ID=localhost` and `PYLY_WEBAUTHN_ORIGINS=http://localhost:8081` in the app's local
-environment. For other local ports, supply comma-separated localhost origins. Use `localhost`, not
-`127.0.0.1`. Production defaults require no overrides; never deploy local overrides to production.
-See [`passkey.ts`](../../../projects/app/src/server/lib/passkey.ts).
+Local development uses RP ID `localhost` and a separate database. The server accepts HTTP or HTTPS
+origins on `localhost` at any port; the port does not scope the passkey's RP ID. Use `localhost`,
+not `127.0.0.1`. RP ID and origin configuration are hard-coded in
+[`passkey.ts`](../../../projects/app/src/server/lib/passkey.ts): production uses RP ID
+`pinyinly.com` and the related origins listed above; non-production uses `localhost`.
 
 Challenge rows contain the challenge value (`id`), ceremony kind (`add` or `login`), RP ID,
 expiration, and an optional account `userId`. Add-passkey challenges store the initiating account's
@@ -80,8 +80,10 @@ user ID. Challenges do not store session IDs or names. A successfully completed 
 its matching, unexpired challenge within the database transaction. Challenges expire after five
 minutes; hourly garbage collection deletes rows that have been expired for more than an hour.
 
-In Settings > Accounts, a signed-in user can add optionally named passkeys, rename them, and remove
-them. The last passkey cannot be removed, even if Apple is linked. Removing a passkey prevents
+In Settings > Accounts, a signed-in user can add passkeys, whose initial names are looked up from
+their AAGUID using the bundled `aaguids` package. Unknown authenticators are named `Passkey`;
+generated names are made unique within the account with numbered suffixes. Users can rename passkeys
+afterward. The last passkey cannot be removed, even if Apple is linked. Removing a passkey prevents
 future logins with that credential but does not revoke sessions that are already signed in. Passkey
 credentials are server-side and scoped to their RP ID; they do not sync between local and
 production. Learning data continues to sync according to the existing account sync rules.

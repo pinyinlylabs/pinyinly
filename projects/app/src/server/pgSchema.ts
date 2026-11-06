@@ -103,19 +103,31 @@ export const authOAuth2 = schema.table(
 );
 
 export const authPasskey = schema.table(`authPasskey`, {
+  /** WebAuthn credential ID. */
   id: pg.text(`credentialId`).primaryKey(),
+  /** Optional user-provided name for this passkey. */
   name: pg.text(`name`),
+  /** Account that owns this passkey. */
   userId: pg
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
+  /** Public key used to verify WebAuthn authentication responses. */
   publicKey: pgBase64url(`publicKey`).notNull(),
-  transports: pgPasskeyTransport(`transports`).array().default([]), // e.g. ["internal", "usb"]
+  /** Authenticator transports reported during registration. */
+  transports: pgPasskeyTransport(`transports`).array().default([]),
+  /** Authenticator signature counter used to detect cloned credentials. */
   counter: pg.bigint(`counter`, { mode: `number` }).notNull().default(0),
+  /** Time this passkey was registered. */
   createdAt: pg.timestamp(`createdAt`).defaultNow(),
+  /** Time this passkey was last used successfully. */
   lastUsedAt: pg.timestamp(`lastUsedAt`),
-  deviceType: pg.varchar(`deviceType`, { length: 32 }), // e.g. "iPhone", "Android"
-  isBackedUp: pg.boolean(`isBackedUp`).default(false), // synced in iCloud/Google?
+  /** SimpleWebAuthn's literal values: "singleDevice" or "multiDevice". */
+  deviceType: pg.varchar(`deviceType`, { length: 32 }),
+  /** Whether the authenticator reported the credential as backed up. */
+  isBackedUp: pg.boolean(`isBackedUp`).default(false),
+  /** Authenticator Attestation GUID identifying the authenticator model. */
+  aaguid: pg.text(`aaguid`),
 });
 
 export const authPasskeyChallenge = schema.table(`authPasskeyChallenge`, {

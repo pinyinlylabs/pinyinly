@@ -1,5 +1,5 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
-import { historyPageCollection, historyPageData } from "@/client/query";
+import { historyPageCollection, historyPageData } from "@/client/db";
 import { useDb } from "@/client/ui/hooks/useDb";
 import { Icon } from "@/client/ui/Icon";
 import { SkillRefText } from "@/client/ui/SkillRefText";

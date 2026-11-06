@@ -1,30 +1,78 @@
 import { GET } from "#app/.well-known/webauthn+api.ts";
 import {
+  getExpectedPasskeyOrigin,
   getPasskeyConfig,
+  passkeyNameFromAaguid,
   relatedPasskeyOrigins,
 } from "#server/lib/passkey.ts";
-import { describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 describe(`passkey RP configuration`, () => {
+  beforeEach(() => {
+    vi.stubEnv(`NODE_ENV`, `development`);
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   test(`uses explicit production and local origins`, () => {
-    expect(getPasskeyConfig({ NODE_ENV: `production` })).toEqual({
+    expect(getPasskeyConfig()).toEqual({
+      rpId: `localhost`,
+      origins: [],
+    });
+    vi.stubEnv(`NODE_ENV`, `production`);
+    expect(getPasskeyConfig()).toEqual({
       rpId: `pinyinly.com`,
       origins: relatedPasskeyOrigins,
     });
-    expect(getPasskeyConfig({ NODE_ENV: `development` })).toEqual({
-      rpId: `localhost`,
-      origins: [`http://localhost:8081`],
-    });
-    expect(
-      getPasskeyConfig({
-        NODE_ENV: `production`,
-        PYLY_WEBAUTHN_RP_ID: `localhost`,
-        PYLY_WEBAUTHN_ORIGINS: `http://localhost:8081, http://localhost:8082`,
-      }).origins,
-    ).toHaveLength(2);
   });
 
-  test(`rejects untrusted origins, URLs with paths, and unsupported RP IDs`, () => {
+  describe(`passkey AAGUID names`, () => {
+    const knownAaguid = `fcb1bcb4-f370-078c-6993-bc24d0ae3fbe`;
+    const knownName = `Ledger Nano X FIDO2 Authenticator`;
+
+    test(`uses the bundled name and falls back to Passkey for unknown AAGUIDs`, () => {
+      expect(passkeyNameFromAaguid(knownAaguid, [])).toBe(knownName);
+      expect(
+        passkeyNameFromAaguid(`00000000-0000-0000-0000-000000000000`, []),
+      ).toBe(`Passkey`);
+    });
+  });
+
+  test(`accepts any local port but keeps production origins exact`, () => {
+    const clientDataJSON = (origin: string) =>
+      Buffer.from(
+        JSON.stringify({ type: `webauthn.create`, challenge: `test`, origin }),
+      ).toString(`base64url`);
+    const localConfig = getPasskeyConfig();
+    expect(
+      getExpectedPasskeyOrigin(
+        localConfig,
+        clientDataJSON(`http://localhost:8084`),
+      ),
+    ).toBe(`http://localhost:8084`);
+
+    for (const origin of [
+      `http://127.0.0.1:8084`,
+      `http://localhost.example:8084`,
+      `https://pinyin.ly`,
+    ]) {
+      expect(() =>
+        getExpectedPasskeyOrigin(localConfig, clientDataJSON(origin)),
+      ).toThrow();
+    }
+
+    vi.stubEnv(`NODE_ENV`, `production`);
+    expect(
+      getExpectedPasskeyOrigin(
+        getPasskeyConfig(),
+        clientDataJSON(`https://pinyin.ly`),
+      ),
+    ).toEqual(relatedPasskeyOrigins);
+  });
+
+  test(`rejects untrusted localhost origins`, () => {
+    const localConfig = getPasskeyConfig();
     for (const origin of [
       `https://evil.example`,
       `https://pinyin.ly/path`,
@@ -33,21 +81,18 @@ describe(`passkey RP configuration`, () => {
       ``,
     ]) {
       expect(() =>
-        getPasskeyConfig({
-          NODE_ENV: `production`,
-          PYLY_WEBAUTHN_ORIGINS: origin,
-        }),
+        getExpectedPasskeyOrigin(
+          localConfig,
+          Buffer.from(
+            JSON.stringify({
+              type: `webauthn.create`,
+              challenge: `test`,
+              origin,
+            }),
+          ).toString(`base64url`),
+        ),
       ).toThrow();
     }
-    expect(() =>
-      getPasskeyConfig({ PYLY_WEBAUTHN_RP_ID: `pinyin.ly` }),
-    ).toThrow();
-    expect(() =>
-      getPasskeyConfig({
-        PYLY_WEBAUTHN_RP_ID: `localhost`,
-        PYLY_WEBAUTHN_ORIGINS: `http://127.0.0.1:8081`,
-      }),
-    ).toThrow();
   });
 
   test(`serves the exact related-origins document without a redirect`, async () => {

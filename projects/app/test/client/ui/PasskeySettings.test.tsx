@@ -16,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   register: vi.fn(),
   rename: vi.fn(),
   remove: vi.fn(),
+  isLoading: false,
+  isError: false,
   rows: [] as Array<{
     id: string;
     name: string | null;
@@ -26,12 +28,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock(`@tanstack/react-db`, () => ({
   useLiveQuery: () => ({
     data: mocks.rows,
-    isLoading: false,
-    isError: false,
+    isLoading: mocks.isLoading,
+    isError: mocks.isError,
   }),
 }));
 vi.mock(`#client/ui/hooks/useDb.ts`, () => ({
-  useDb: () => ({ passkeyCollection: { utils: { refetch: mocks.refetch } } }),
+  useDb: () => ({ passkeyCollection: { utils: { retry: mocks.refetch } } }),
 }));
 vi.mock(`#client/passkey.ts`, () => ({
   useSupportsPasskeys: () => true,
@@ -52,25 +54,190 @@ vi.mock(`#client/trpc.tsx`, () => ({
     },
   },
 }));
+vi.mock(`#client/ui/PageSheetModal.tsx`, () => ({
+  PageSheetModal: ({
+    children,
+    onDismiss,
+  }: {
+    children: (options: { dismiss: () => void }) => React.ReactNode;
+    onDismiss: () => void;
+  }) => <div role="dialog">{children({ dismiss: onDismiss })}</div>,
+}));
+vi.mock(`#client/ui/DropdownMenu2.tsx`, async () => {
+  const React = await import(`react`);
+  const MenuContext = React.createContext<{
+    open: boolean;
+    setOpen: (open: boolean) => void;
+  }>({ open: false, setOpen: () => {} });
+
+  function Root({ children }: React.PropsWithChildren) {
+    const [open, setOpen] = React.useState(false);
+    return (
+      <MenuContext.Provider value={{ open, setOpen }}>
+        {children}
+      </MenuContext.Provider>
+    );
+  }
+
+  function Trigger({
+    children,
+  }: {
+    children: React.ReactElement<Record<string, unknown>>;
+  }) {
+    const menu = React.useContext(MenuContext);
+    return React.cloneElement(children, {
+      onPress: () => {
+        menu.setOpen(!menu.open);
+      },
+    });
+  }
+
+  function Content({ children }: React.PropsWithChildren) {
+    const menu = React.useContext(MenuContext);
+    return menu.open ? <div role="menu">{children}</div> : null;
+  }
+
+  function Item({
+    children,
+    disabled,
+    onPress,
+  }: React.PropsWithChildren<{
+    disabled?: boolean;
+    onPress?: () => void;
+  }>) {
+    const menu = React.useContext(MenuContext);
+    return (
+      <button
+        type="button"
+        role="menuitem"
+        disabled={disabled}
+        onClick={() => {
+          onPress?.();
+          menu.setOpen(false);
+        }}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  return {
+    DropdownMenu2: Object.assign(Root, {
+      Trigger,
+      Content,
+      Item,
+    }),
+  };
+});
+
+function openPasskeySettings() {
+  fireEvent.click(screen.getByRole(`button`, { name: `Manage passkeys` }));
+}
 
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.rows = [
     { id: `credential`, name: `Keychain`, createdAt: null, lastUsedAt: null },
   ];
+  mocks.isLoading = false;
+  mocks.isError = false;
 });
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
 });
 
-test(`prevents deleting the last key and supports renaming`, async () => {
+test(`opens a passkey dialog with an add action and dismisses it`, async () => {
   render(<PasskeySettings />);
-  expect(screen.getByRole(`button`, { name: `Remove` })).toBeDisabled();
+  expect(screen.queryByText(`Your passkeys`)).not.toBeInTheDocument();
+
+  openPasskeySettings();
+  expect(await screen.findByText(`Your passkeys`)).toBeInTheDocument();
+  expect(screen.getByText(`Keychain`)).toBeInTheDocument();
+  expect(
+    screen.getByRole(`button`, { name: `Add new passkey` }),
+  ).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole(`button`, { name: `Cancel` }));
+  await waitFor(() => {
+    expect(screen.queryByText(`Your passkeys`)).not.toBeInTheDocument();
+  });
+});
+
+test(`shows dim fallback names and relative setup or use times`, () => {
+  const now = new Date();
+  mocks.rows = [
+    {
+      id: `unnamed`,
+      name: ``,
+      createdAt: new Date(now.getTime() - 60 * 60 * 1000),
+      lastUsedAt: null,
+    },
+    {
+      id: `used`,
+      name: `Keychain`,
+      createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
+      lastUsedAt: new Date(now.getTime() - 30 * 60 * 1000),
+    },
+  ];
+  render(<PasskeySettings />);
+  openPasskeySettings();
+
+  expect(screen.getByText(`Unnamed passkey`)).toBeInTheDocument();
+  expect(screen.getByText(`Set up 1 hour ago`)).toBeInTheDocument();
+  expect(screen.getByText(`Used 30 minutes ago`)).toBeInTheDocument();
+});
+
+test(`shows future passkey timestamps as time ago`, () => {
+  const now = new Date();
+  mocks.rows = [
+    {
+      id: `future-setup`,
+      name: ``,
+      createdAt: new Date(now.getTime() + 7.5 * 60 * 60 * 1000),
+      lastUsedAt: null,
+    },
+    {
+      id: `future-use`,
+      name: `Keychain`,
+      createdAt: new Date(now.getTime()),
+      lastUsedAt: new Date(now.getTime() + 5.5 * 60 * 60 * 1000),
+    },
+  ];
+  render(<PasskeySettings />);
+  openPasskeySettings();
+
+  expect(screen.getByText(`Set up 7 hours ago`)).toBeInTheDocument();
+  expect(screen.getByText(`Used 5 hours ago`)).toBeInTheDocument();
+});
+
+test(`prevents deleting the last key and saves the inline rename on Enter`, async () => {
+  mocks.rows = [
+    {
+      id: `credential`,
+      name: `Keychain`,
+      createdAt: new Date(Date.now() - 90 * 60 * 1000),
+      lastUsedAt: null,
+    },
+  ];
+  render(<PasskeySettings />);
+  openPasskeySettings();
+
+  fireEvent.click(
+    screen.getByRole(`button`, { name: `More options for Keychain` }),
+  );
+  expect(screen.getByRole(`menuitem`, { name: `Remove` })).toBeDisabled();
+  fireEvent.click(screen.getByRole(`menuitem`, { name: `Rename` }));
+  expect(screen.getByText(`Set up 1 hour ago`)).toBeInTheDocument();
+
   fireEvent.change(screen.getByLabelText(`Passkey name`), {
     target: { value: `Renamed` },
   });
-  fireEvent.click(screen.getByRole(`button`, { name: `Rename` }));
+  expect(
+    screen.queryByRole(`button`, { name: `Rename` }),
+  ).not.toBeInTheDocument();
+  const input = screen.getByLabelText(`Passkey name`);
+  fireEvent.keyDown(input, { key: `Enter`, code: `Enter` });
   await waitFor(() => {
     expect(mocks.rename).toHaveBeenCalledWith({
       id: `credential`,
@@ -82,42 +249,68 @@ test(`prevents deleting the last key and supports renaming`, async () => {
   });
 });
 
-test(`completes named passkey attachment and refreshes the list`, async () => {
+test(`saves inline rename on blur and cancels it on Escape`, async () => {
+  render(<PasskeySettings />);
+  openPasskeySettings();
+  fireEvent.click(
+    screen.getByRole(`button`, { name: `More options for Keychain` }),
+  );
+  fireEvent.click(screen.getByRole(`menuitem`, { name: `Rename` }));
+
+  const blurInput = screen.getByLabelText(`Passkey name`);
+  fireEvent.change(blurInput, { target: { value: `Blurred name` } });
+  fireEvent.blur(blurInput);
+  await waitFor(() => {
+    expect(mocks.rename).toHaveBeenCalledWith({
+      id: `credential`,
+      name: `Blurred name`,
+    });
+  });
+
+  fireEvent.click(
+    screen.getByRole(`button`, { name: `More options for Keychain` }),
+  );
+  fireEvent.click(screen.getByRole(`menuitem`, { name: `Rename` }));
+  const escapeInput = screen.getByLabelText(`Passkey name`);
+  fireEvent.change(escapeInput, { target: { value: `Discarded name` } });
+  fireEvent.keyDown(escapeInput, { key: `Escape`, code: `Escape` });
+
+  expect(screen.queryByLabelText(`Passkey name`)).not.toBeInTheDocument();
+  expect(mocks.rename).toHaveBeenCalledTimes(1);
+});
+
+test(`shows a load error instead of loading after the list request fails`, async () => {
+  mocks.isError = true;
+  mocks.isLoading = true;
+  render(<PasskeySettings />);
+  openPasskeySettings();
+
+  expect(screen.queryByText(`Loading passkeys...`)).not.toBeInTheDocument();
+  expect(
+    await screen.findByText(`Could not load passkeys.`),
+  ).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole(`button`, { name: `Retry` }));
+  expect(mocks.refetch).toHaveBeenCalled();
+});
+
+test(`adds a passkey without prompting for an initial name`, async () => {
   mocks.start.mockResolvedValue({ options: {}, cookie: `challenge` });
   mocks.register.mockResolvedValue({ id: `new-credential` });
   mocks.complete.mockResolvedValue({ verified: true });
   render(<PasskeySettings />);
-  fireEvent.change(screen.getByLabelText(`New passkey name`), {
-    target: { value: `Security key` },
-  });
-  fireEvent.click(screen.getByRole(`button`, { name: `Add passkey` }));
+  openPasskeySettings();
+  expect(screen.queryByLabelText(`New passkey name`)).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole(`button`, { name: `Add new passkey` }));
   await waitFor(() => {
     expect(mocks.complete).toHaveBeenCalledWith({
       cookie: `challenge`,
       response: { id: `new-credential` },
-      name: `Security key`,
     });
   });
   await waitFor(() => {
     expect(mocks.refetch).toHaveBeenCalled();
-  });
-  expect(screen.getByLabelText(`New passkey name`)).toHaveValue(``);
-});
-
-test(`allows adding a passkey without a name`, async () => {
-  mocks.start.mockResolvedValue({ options: {}, cookie: `challenge` });
-  mocks.register.mockResolvedValue({ id: `new-credential` });
-  mocks.complete.mockResolvedValue({ verified: true });
-  render(<PasskeySettings />);
-  fireEvent.click(screen.getByRole(`button`, { name: `Add passkey` }));
-  await waitFor(() => {
-    expect(mocks.start).toHaveBeenCalledWith();
-  });
-  await waitFor(() => {
-    expect(mocks.complete).toHaveBeenCalledWith({
-      cookie: `challenge`,
-      response: { id: `new-credential` },
-    });
   });
 });
 
@@ -129,15 +322,26 @@ test(`requires confirmation before removing one of multiple keys`, async () => {
     lastUsedAt: null,
   }));
   render(<PasskeySettings />);
-  fireEvent.click(screen.getAllByRole(`button`, { name: `Remove` })[0]!);
+  openPasskeySettings();
+
+  fireEvent.click(
+    screen.getByRole(`button`, { name: `More options for first` }),
+  );
+  fireEvent.click(screen.getByRole(`menuitem`, { name: `Remove` }));
+  expect(screen.getAllByRole(`dialog`)).toHaveLength(2);
+  expect(
+    screen.getByText(
+      `Remove this passkey? It will no longer work for new logins.`,
+    ),
+  ).toBeInTheDocument();
   expect(mocks.remove).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole(`button`, { name: `Confirm removal` }));
+  fireEvent.click(screen.getByRole(`button`, { name: `Remove passkey` }));
   await waitFor(() => {
     expect(mocks.remove).toHaveBeenCalledWith({ id: `first` });
   });
 });
 
-test(`adds a named key, disables pending actions and displays failures`, async () => {
+test(`disables pending actions and displays registration failures`, async () => {
   let resolveStart:
     | ((value: { options: object; cookie: string }) => void)
     | undefined;
@@ -149,12 +353,12 @@ test(`adds a named key, disables pending actions and displays failures`, async (
   mocks.register.mockRejectedValue(new DOMException(``, `NotAllowedError`));
   const log = vi.spyOn(console, `error`).mockImplementation(() => {});
   render(<PasskeySettings />);
-  fireEvent.change(screen.getByLabelText(`New passkey name`), {
-    target: { value: `New key` },
-  });
-  fireEvent.click(screen.getByRole(`button`, { name: `Add passkey` }));
+  openPasskeySettings();
+  fireEvent.click(screen.getByRole(`button`, { name: `Add new passkey` }));
   await waitFor(() => {
-    expect(screen.getByRole(`button`, { name: `Add passkey` })).toBeDisabled();
+    expect(
+      screen.getByRole(`button`, { name: `Add new passkey` }),
+    ).toBeDisabled();
   });
   expect(mocks.start).toHaveBeenCalledWith();
   resolveStart?.({ options: {}, cookie: `challenge` });

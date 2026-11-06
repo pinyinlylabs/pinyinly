@@ -1,7 +1,7 @@
 import type {
   DictionaryCollectionEntry,
   UserDictionaryEntry,
-} from "@/client/query";
+} from "@/client/db";
 import type {
   CharacterExampleSentence,
   HanziText,
