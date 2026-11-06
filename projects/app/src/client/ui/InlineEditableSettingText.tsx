@@ -85,14 +85,12 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const sanitizedDefaultValue = sanitizeValue(fallbackValue);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false);
   const [draft, setDraft] = useState(displayValue);
   const containerRef = useRef<ViewInstance>(null);
   const inputRef = useRef<TextInputInstance>(null);
 
   if (!isEditing && draft !== displayValue) {
     setDraft(displayValue);
-    setIsInputFocused(false);
   }
 
   useEffect(() => {
@@ -246,8 +244,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         <View
           ref={containerRef}
           className={[
-            `relative rounded-md bg-bg-high outline-2 -outline-offset-2`,
-            isInputFocused ? `outline-blue` : `outline-transparent`,
+            `relative rounded-md bg-bg-high`,
             editContainerClassName,
           ].join(` `)}
         >
@@ -259,12 +256,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
               value={draft}
               onChangeText={setDraft}
               onKeyPress={handleKeyPress}
-              onFocus={() => {
-                setIsInputFocused(true);
-              }}
-              onBlur={() => {
-                setIsInputFocused(false);
-              }}
               placeholder={placeholder}
               className={inputTextClassName}
               variant="bare"
@@ -277,12 +268,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
               value={draft}
               onChangeText={setDraft}
               onKeyPress={handleKeyPress}
-              onFocus={() => {
-                setIsInputFocused(true);
-              }}
-              onBlur={() => {
-                setIsInputFocused(false);
-              }}
               placeholder={placeholder}
               className={inputTextClassName}
               variant="bare"
