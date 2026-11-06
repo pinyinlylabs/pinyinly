@@ -1,5 +1,4 @@
 import { RectButton } from "@/client/ui/RectButton";
-import { ScopedVariables } from "@/client/ui/ScopedVariables";
 import { useWebsiteStore } from "@/client/website";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
@@ -59,13 +58,9 @@ export default function WebsiteLayout() {
                   entering={FadeIn.duration(100)}
                   exiting={FadeOut.duration(100)}
                 >
-                  <ScopedVariables
-                    variables={{ "--color-fg": `var(--color-cyanold)` }}
-                  >
-                    <RectButton href="/learn" variant="filled">
-                      Get Started
-                    </RectButton>
-                  </ScopedVariables>
+                  <RectButton color="cyanold" href="/learn" variant="filled">
+                    Get Started
+                  </RectButton>
                 </Reanimated.View>
               </View>
             )}

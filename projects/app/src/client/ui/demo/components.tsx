@@ -12,7 +12,6 @@ import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
 import { useDemoHanziKnob, useDemoHanziWordKnob } from "./utils";
 import { Theme } from "@/client/ui/Theme";
-import { ScopedVariables } from "@/client/ui/ScopedVariables";
 
 export const ExampleStack = ({
   children,
@@ -183,23 +182,16 @@ export function DemoHanziKnob({ hanzis }: { hanzis?: HanziText[] }) {
   return (
     <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
       {hanzis.map((hanzi) => (
-        <ScopedVariables
+        <RectButton
           key={hanzi}
-          variables={
-            hanzi === currentHanzi
-              ? { "--color-fg": `var(--color-cyanold)` }
-              : {}
-          }
+          color={hanzi === currentHanzi ? `cyanold` : undefined}
+          variant="filled"
+          onPressIn={() => {
+            setHanzi(hanzi);
+          }}
         >
-          <RectButton
-            variant="filled"
-            onPressIn={() => {
-              setHanzi(hanzi);
-            }}
-          >
-            {hanzi}
-          </RectButton>
-        </ScopedVariables>
+          {hanzi}
+        </RectButton>
       ))}
     </View>
   );
@@ -219,23 +211,16 @@ export function DemoHanziWordKnob({
   return (
     <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
       {hanziWords.map((hanziWord) => (
-        <ScopedVariables
+        <RectButton
           key={hanziWord}
-          variables={
-            hanziWord === currentHanziWord
-              ? { "--color-fg": `var(--color-cyanold)` }
-              : {}
-          }
+          color={hanziWord === currentHanziWord ? `cyanold` : undefined}
+          variant="filled"
+          onPressIn={() => {
+            setHanziWord(hanziWord);
+          }}
         >
-          <RectButton
-            variant="filled"
-            onPressIn={() => {
-              setHanziWord(hanziWord);
-            }}
-          >
-            {hanziWord}
-          </RectButton>
-        </ScopedVariables>
+          {hanziWord}
+        </RectButton>
       ))}
     </View>
   );

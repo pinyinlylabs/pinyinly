@@ -1,6 +1,5 @@
 import { hanziSvgPathsQuery, wikiPayloadQuery } from "@/client/query";
 import { RectButton } from "@/client/ui/RectButton";
-import { ScopedVariables } from "@/client/ui/ScopedVariables";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
@@ -170,18 +169,15 @@ export function QuizDeckHanziCharacterWritingQuestion({
           </Text>
           <View className="mt-2 flex-row items-center gap-3">
             {pinyinAudioSource == null ? null : (
-              <ScopedVariables
-                variables={{ "--color-fg": `var(--color-cyanold)` }}
-              >
-                <RectButton
-                  accessibilityLabel="Play pronunciation"
-                  variant="filled"
-                  iconStart="speaker-2"
-                  iconSize={16}
-                  className="size-9 p-0"
-                  onPressIn={playPinyinSound}
-                />
-              </ScopedVariables>
+              <RectButton
+                accessibilityLabel="Play pronunciation"
+                color="cyanold"
+                variant="filled"
+                iconStart="speaker-2"
+                iconSize={16}
+                className="size-9 p-0"
+                onPressIn={playPinyinSound}
+              />
             )}
             <Text className="font-sans text-lg text-fg-loud">
               {question.pinyin}

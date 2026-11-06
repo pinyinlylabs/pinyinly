@@ -1,5 +1,4 @@
 import { RectButton } from "@/client/ui/RectButton";
-import { ScopedVariables } from "@/client/ui/ScopedVariables";
 import { useWebsiteStore } from "@/client/website";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { useEffect } from "react";
@@ -36,18 +35,17 @@ export default function WebsitePage() {
         </View>
 
         <View className="w-[350px] items-stretch gap-2">
-          <ScopedVariables variables={{ "--color-fg": `var(--color-cyanold)` }}>
-            <RectButton
-              href="/learn"
-              variant="filled"
-              ref={(el) => {
-                //  RectButton is a <View> rather than a DOM element.
-                ref(el as Element | null);
-              }}
-            >
-              Get Started
-            </RectButton>
-          </ScopedVariables>
+          <RectButton
+            color="cyanold"
+            href="/learn"
+            variant="filled"
+            ref={(el) => {
+              //  RectButton is a <View> rather than a DOM element.
+              ref(el as Element | null);
+            }}
+          >
+            Get Started
+          </RectButton>
 
           <RectButton href="/learn" variant="outline">
             I already have an account

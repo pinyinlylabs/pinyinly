@@ -33,7 +33,6 @@ import { cn, tv } from "tailwind-variants";
 import { AssetImage } from "./AssetImage";
 import { ButtonGroup } from "./ButtonGroup";
 import { RectButton } from "./RectButton";
-import { ScopedVariables } from "./ScopedVariables";
 import { ShimmerText } from "./ShimmerText";
 import { TextInputMulti } from "./TextInputMulti";
 import { Tooltip } from "./Tooltip";
@@ -1864,11 +1863,11 @@ function AiImagePromptComposer({
                 />
               }
             >
-              <ScopedVariables
-                variables={{ "--color-fg": `var(--color-warning)` }}
-              >
-                <RectButton variant="bare" iconStart="circle-warning" />
-              </ScopedVariables>
+              <RectButton
+                color="warning"
+                variant="bare"
+                iconStart="circle-warning"
+              />
             </FloatingMenuModal>
           )}
         </View>

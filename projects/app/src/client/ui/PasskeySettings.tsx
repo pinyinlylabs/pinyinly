@@ -9,7 +9,6 @@ import { useDb } from "./hooks/useDb";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
-import { ScopedVariables } from "./ScopedVariables";
 import { Text } from "./Text";
 import { TextInputSingle } from "./TextInputSingle";
 import { View } from "./View";
@@ -172,28 +171,25 @@ export function PasskeySettings() {
                     {errorMessage}
                   </Text>
                 )}
-                <ScopedVariables
-                  variables={{ "--color-fg": `var(--color-blue)` }}
-                >
-                  <RectButton
-                    variant="filled"
-                    disabled={!supported || pending}
-                    onPress={() => {
-                      void run(async () => {
-                        const { options, cookie } = await start.mutateAsync();
-                        const response = await startRegistration({
-                          optionsJSON: options,
-                        });
-                        await complete.mutateAsync({
-                          response,
-                          cookie,
-                        });
+                <RectButton
+                  color="blue"
+                  variant="filled"
+                  disabled={!supported || pending}
+                  onPress={() => {
+                    void run(async () => {
+                      const { options, cookie } = await start.mutateAsync();
+                      const response = await startRegistration({
+                        optionsJSON: options,
                       });
-                    }}
-                  >
-                    Add new passkey
-                  </RectButton>
-                </ScopedVariables>
+                      await complete.mutateAsync({
+                        response,
+                        cookie,
+                      });
+                    });
+                  }}
+                >
+                  Add new passkey
+                </RectButton>
                 <RectButton disabled={pending} onPress={dismiss}>
                   Cancel
                 </RectButton>
@@ -236,25 +232,22 @@ export function PasskeySettings() {
                 <RectButton disabled={pending} onPress={dismiss}>
                   Cancel
                 </RectButton>
-                <ScopedVariables
-                  variables={{ "--color-fg": `var(--color-danger)` }}
+                <RectButton
+                  color="danger"
+                  variant="filled"
+                  disabled={pending}
+                  onPress={() => {
+                    void run(async () =>
+                      remove.mutateAsync({ id: passkeyToRemove.id }),
+                    ).then((removed) => {
+                      if (removed) {
+                        dismiss();
+                      }
+                    });
+                  }}
                 >
-                  <RectButton
-                    variant="filled"
-                    disabled={pending}
-                    onPress={() => {
-                      void run(async () =>
-                        remove.mutateAsync({ id: passkeyToRemove.id }),
-                      ).then((removed) => {
-                        if (removed) {
-                          dismiss();
-                        }
-                      });
-                    }}
-                  >
-                    Remove passkey
-                  </RectButton>
-                </ScopedVariables>
+                  Remove passkey
+                </RectButton>
               </View>
             </View>
           )}

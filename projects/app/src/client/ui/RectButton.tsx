@@ -9,10 +9,13 @@ import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { tv } from "tailwind-variants";
+import { ScopedVariables } from "./ScopedVariables";
 import type { IconProps } from "./Icon";
 import { Icon } from "./Icon";
 import type { IconName } from "./iconRegistry";
 import { mergeRefs } from "@/client/react";
+
+export type ButtonColor = `blue` | `cyanold` | `success` | `warning` | `danger`;
 
 export type ButtonVariant =
   | `filled`
@@ -27,6 +30,7 @@ export type RectButtonProps = {
   /** If true, the button should look like it's "turned on" / "lit up". Not implemented for all variants. */
   active?: boolean;
   variant?: ButtonVariant;
+  color?: ButtonColor;
   children?: ViewProps[`children`];
   className?: string;
   href?: Href;
@@ -55,6 +59,7 @@ export function RectButton({
   active = false,
   children,
   variant = `outline`,
+  color,
   className,
   href,
   inFlexRowParent = false,
@@ -168,12 +173,21 @@ export function RectButton({
     </Pressable>
   );
 
-  return href == null ? (
-    pressable
-  ) : (
-    <Link href={href} asChild>
-      {pressable}
-    </Link>
+  const button =
+    href == null ? (
+      pressable
+    ) : (
+      <Link href={href} asChild>
+        {pressable}
+      </Link>
+    );
+
+  return (
+    <ScopedVariables
+      variables={color == null ? {} : { "--color-fg": `var(--color-${color})` }}
+    >
+      {button}
+    </ScopedVariables>
   );
 }
 
