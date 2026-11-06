@@ -1,5 +1,4 @@
 import { RectButton } from "#client/ui/RectButton.tsx";
-import { ScopedVariables } from "#client/ui/ScopedVariables.tsx";
 import { Theme } from "#client/ui/Theme.tsx";
 import { View } from "#client/ui/View.tsx";
 import type { IconRegistry } from "#client/ui/iconRegistry.ts";
@@ -35,9 +34,7 @@ test(`filled RectButton focus-visible with custom foreground`, async () => {
   await render(
     <Theme theme="default">
       <View testID="pyly-snapshot" className="inline-flex p-8">
-        <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
-          <RectButton variant="filled" testID="rect-button" />
-        </ScopedVariables>
+        <RectButton color="danger" variant="filled" testID="rect-button" />
       </View>
     </Theme>,
   );

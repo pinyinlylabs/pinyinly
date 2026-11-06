@@ -2,7 +2,6 @@ import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
-import { ScopedVariables } from "./ScopedVariables";
 
 export default () => (
   <View className="flex-1">
@@ -23,23 +22,25 @@ export default () => (
         <RectButtonVariants />
       </ExampleStack>
 
-      <ScopedVariables variables={{ "--color-fg": `var(--color-cyanold)` }}>
-        <ExampleStack title="cyanold" childrenClassName="gap-2">
-          <RectButtonVariants />
-        </ExampleStack>
-      </ScopedVariables>
+      <ExampleStack title="blue" childrenClassName="gap-2">
+        <RectButtonVariants color="blue" />
+      </ExampleStack>
 
-      <ScopedVariables variables={{ "--color-fg": `var(--color-success)` }}>
-        <ExampleStack title="success" childrenClassName="gap-2">
-          <RectButtonVariants />
-        </ExampleStack>
-      </ScopedVariables>
+      <ExampleStack title="cyanold" childrenClassName="gap-2">
+        <RectButtonVariants color="cyanold" />
+      </ExampleStack>
 
-      <ScopedVariables variables={{ "--color-fg": `var(--color-danger)` }}>
-        <ExampleStack title="danger" childrenClassName="gap-2">
-          <RectButtonVariants />
-        </ExampleStack>
-      </ScopedVariables>
+      <ExampleStack title="success" childrenClassName="gap-2">
+        <RectButtonVariants color="success" />
+      </ExampleStack>
+
+      <ExampleStack title="warning" childrenClassName="gap-2">
+        <RectButtonVariants color="warning" />
+      </ExampleStack>
+
+      <ExampleStack title="danger" childrenClassName="gap-2">
+        <RectButtonVariants color="danger" />
+      </ExampleStack>
 
       <ExampleStack title="(disabled)" childrenClassName="gap-2">
         <RectButtonVariants disabled />

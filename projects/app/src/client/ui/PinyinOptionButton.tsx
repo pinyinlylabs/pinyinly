@@ -5,11 +5,10 @@ import {
   splitPinyinUnitTone,
 } from "@/data/pinyin";
 import { RectButton } from "./RectButton";
-import { ScopedVariables } from "./ScopedVariables";
 
 interface PinyinOptionButtonProps extends Omit<
   PropsOf<typeof RectButton>,
-  `variant` | `children` | `onPress`
+  `variant` | `children` | `onPress` | `color`
 > {
   active?: boolean;
   pinyin: string;
@@ -29,24 +28,21 @@ export function PinyinOptionButton({
     splitPinyinUnitTone(pinyinUnitNumericToDiacritic(pinyin)).tone !== 5;
 
   return (
-    <ScopedVariables
-      variables={showActive ? { "--color-fg": `var(--color-cyanold)` } : {}}
+    <RectButton
+      {...props}
+      color={showActive ? `cyanold` : undefined}
+      onPress={() => {
+        onPress?.(pinyin);
+      }}
+      active={showActive}
+      variant="option"
+      preventPressFocus
     >
-      <RectButton
-        {...props}
-        onPress={() => {
-          onPress?.(pinyin);
-        }}
-        active={showActive}
-        variant="option"
-        preventPressFocus
-      >
-        <Text className="font-sans text-base/snug font-medium text-fg">
-          {pinyin}
-        </Text>
-        {` `}
-        <Text className="font-sans text-sm/snug text-fg/50">{shortcutKey}</Text>
-      </RectButton>
-    </ScopedVariables>
+      <Text className="font-sans text-base/snug font-medium text-fg">
+        {pinyin}
+      </Text>
+      {` `}
+      <Text className="font-sans text-sm/snug text-fg/50">{shortcutKey}</Text>
+    </RectButton>
   );
 }
