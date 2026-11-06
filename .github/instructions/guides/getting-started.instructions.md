@@ -78,7 +78,10 @@ Screenshot baselines live next to the tests in
 Vitest's default comparison tolerances. To intentionally update them, run
 `moon run app:browser -- -u`, review the image changes, then rerun without `-u`. Do not update
 baselines automatically in CI; investigate Linux differences before accepting new images or changing
-the comparison policy.
+the comparison policy. Bundled fonts can still rasterize differently across operating systems. For
+text snapshots, use fixed capture bounds and a narrowly scoped
+`comparatorOptions.allowedMismatchedPixelRatio` only when CI confirms the difference is
+rasterization; also assert the exact text so the pixel allowance does not hide content changes.
 
 ## Moon task inputs
 
