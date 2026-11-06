@@ -340,10 +340,6 @@ function PasskeyRow({
             maxLength={100}
             disabled={disabled}
             autoFocus
-            variant="bare"
-            className="
-              rounded-md bg-bg-high px-3 py-2 text-fg outline-2 -outline-offset-2 outline-blue
-            "
           />
         ) : (
           <Text
