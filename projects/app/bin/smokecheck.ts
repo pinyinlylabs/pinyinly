@@ -6,6 +6,7 @@ import { z } from "zod";
 const debug = makeDebug(`pyly`);
 const appRootMarker = `id="root"`;
 const appUrlSchema = z.url({ protocol: /^https?$/u });
+const webAuthnResponseSchema = z.object({ origins: z.array(z.string()) });
 
 export async function assertAppResponse(response: Response): Promise<void> {
   if (!response.ok) {
@@ -22,19 +23,39 @@ export async function assertAppResponse(response: Response): Promise<void> {
   }
 }
 
+export async function assertWebAuthnResponse(
+  response: Response,
+): Promise<void> {
+  if (!response.ok) {
+    debug(
+      `WebAuthn endpoint returned HTTP %d %s`,
+      response.status,
+      response.statusText,
+    );
+    throw new Error(
+      `WebAuthn endpoint returned HTTP ${response.status} ${response.statusText}`,
+    );
+  }
+
+  webAuthnResponseSchema.parse(await response.json());
+}
+
 async function checkApp(inputUrl: string) {
   const url = new URL(appUrlSchema.parse(inputUrl));
   const vercelAutomationBypassSecret =
     process.env[`VERCEL_AUTOMATION_BYPASS_SECRET`];
-  const response = await fetch(url, {
-    headers:
-      vercelAutomationBypassSecret !== undefined &&
-      vercelAutomationBypassSecret.length > 0
-        ? { "x-vercel-protection-bypass": vercelAutomationBypassSecret }
-        : undefined,
-    signal: nonNullable(AbortSignal.timeout(30_000) as RequestInit[`signal`]),
-  });
+  const headers =
+    vercelAutomationBypassSecret !== undefined &&
+    vercelAutomationBypassSecret.length > 0
+      ? { "x-vercel-protection-bypass": vercelAutomationBypassSecret }
+      : undefined;
+  const signal = nonNullable(
+    AbortSignal.timeout(30_000) as RequestInit[`signal`],
+  );
+  const response = await fetch(url, { headers, signal });
   await assertAppResponse(response);
+  const webAuthnUrl = new URL(`/.well-known/webauthn`, url);
+  await assertWebAuthnResponse(await fetch(webAuthnUrl, { headers, signal }));
   console.info(`App smoke check passed: ${url.href}`);
 }
 

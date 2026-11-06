@@ -25,7 +25,7 @@ import {
   studyHsk2UserToggleSetting,
   studyHsk3UserToggleSetting,
   studyHsk4UserToggleSetting,
-  userNameTextSetting,
+  userDisplayNameTextSetting,
   userHanziMeaningDefs,
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
@@ -223,7 +223,7 @@ describe(`getUserSettingKeyInfo`, () => {
   });
 
   test(`returns empty key metadata for keyless settings`, () => {
-    const keyInfo = getUserSettingKeyInfo(userNameTextSetting, {});
+    const keyInfo = getUserSettingKeyInfo(userDisplayNameTextSetting, {});
 
     expect(keyInfo.settingKey).toBe(`userName`);
     expect(keyInfo.keyParamAliases).toEqual([]);
@@ -267,7 +267,7 @@ describe(`decodeUserSettingValue`, () => {
 
   test(`decodes keyless setting values directly`, () => {
     const decoded = decodeUserSettingValue(
-      userNameTextSetting,
+      userDisplayNameTextSetting,
       {},
       { t: `Brad` },
     );
@@ -343,7 +343,7 @@ describe(`encodeUserSettingStoredValue`, () => {
 
   test(`keeps all marshaled fields for keyless settings`, () => {
     const encoded = encodeUserSettingStoredValue(
-      userNameTextSetting,
+      userDisplayNameTextSetting,
       {},
       {
         text: `Brad`,
@@ -354,7 +354,11 @@ describe(`encodeUserSettingStoredValue`, () => {
   });
 
   test(`returns null when value is null`, () => {
-    const encoded = encodeUserSettingStoredValue(userNameTextSetting, {}, null);
+    const encoded = encodeUserSettingStoredValue(
+      userDisplayNameTextSetting,
+      {},
+      null,
+    );
 
     expect(encoded).toBeNull();
   });

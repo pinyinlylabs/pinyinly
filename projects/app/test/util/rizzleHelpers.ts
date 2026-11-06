@@ -1,4 +1,4 @@
-import { makeDb } from "#client/query.js";
+import { makeDb } from "#client/db.js";
 import { mutators } from "#data/rizzleMutators.js";
 import { currentSchema } from "#data/rizzleSchema.js";
 import { r } from "#util/rizzle.ts";
@@ -75,6 +75,8 @@ export const testWithRizzle = test.extend(
   },
 );
 
-export const testWithDb = testWithRizzle.extend(`db`, async ({ rizzle }) =>
-  makeDb(rizzle),
+export const testWithDb = testWithRizzle.extend(
+  `db`,
+  { scope: `test` },
+  async ({ rizzle }) => makeDb(rizzle, { listPasskeys: async () => [] }),
 );

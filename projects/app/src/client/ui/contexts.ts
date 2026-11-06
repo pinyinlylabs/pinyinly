@@ -1,4 +1,4 @@
-import type { Db } from "@/client/query";
+import type { Db } from "@/client/db";
 import type { Rizzle } from "@/data/rizzleSchema";
 import type { Skill } from "@/data/model";
 import type { SkillReviewQueue } from "@/data/skills";

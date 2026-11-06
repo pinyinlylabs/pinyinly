@@ -29,7 +29,7 @@ import {
   pinyinSoundLocationSetKeySetting,
   pinyinSoundLocationSetting,
   pronunciationMnemonicSpecSetting,
-  userNameTextSetting,
+  userDisplayNameTextSetting,
   getUserSettingDefaultValue,
   getUserSettingHistoryLimitFromKey,
 } from "@/data/userSettings";
@@ -214,43 +214,48 @@ export async function updateSkillState(
 }
 
 /**
- * Fetch the user name (userNameSetting) for a user.
+ * Fetch the display name for a user.
  * Returns null if no setting exists.
  */
-export async function getUserName(
-  db: Drizzle,
+export async function getUserDisplayName(
+  db: UserSettingReadDb,
   userId: string,
 ): Promise<string | null> {
-  const decoded = await getUserSetting(db, userId, userNameTextSetting, {});
+  const decoded = await getUserSetting(
+    db,
+    userId,
+    userDisplayNameTextSetting,
+    {},
+  );
   return decoded?.text ?? null;
 }
 
 /**
- * Set the user name (userNameSetting) for a user.
+ * Set the display name for a user.
  * Creates or updates the setting.
  */
-export async function setUserName(
+export async function setUserDisplayName(
   db: Drizzle,
   userId: string,
-  userName: string,
+  displayName: string,
 ): Promise<void> {
   await setUserSetting(db, userId, {
-    key: userNameTextSetting.entity.marshalKey({}),
-    value: userNameTextSetting.entity.marshalValue({
-      text: userName,
+    key: userDisplayNameTextSetting.entity.marshalKey({}),
+    value: userDisplayNameTextSetting.entity.marshalValue({
+      text: displayName,
     }),
     now: new Date(),
     skipHistory: false,
   });
 
-  const marshaledValue = userNameTextSetting.entity.marshalValue({
-    text: userName,
+  const marshaledValue = userDisplayNameTextSetting.entity.marshalValue({
+    text: displayName,
   });
   await db
     .insert(schema.userSetting)
     .values({
       userId,
-      key: userNameTextSetting.entity.marshalKey({}),
+      key: userDisplayNameTextSetting.entity.marshalKey({}),
       value: marshaledValue,
     })
     .onConflictDoUpdate({

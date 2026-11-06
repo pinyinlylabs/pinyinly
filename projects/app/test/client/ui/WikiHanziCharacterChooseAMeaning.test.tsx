@@ -9,6 +9,7 @@ import type {
 } from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { DbProvider } from "#client/ui/DbProvider.tsx";
+import { TrpcProvider } from "#client/ui/TrpcProvider.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
 import { testWithRizzle } from "#test/util/rizzleHelpers.ts";
@@ -96,11 +97,16 @@ function providers(rizzle: Rizzle) {
     const queryClient = useNewQueryClient();
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <RizzleProvider.Context.Provider value={rizzle}>
-          <DbProvider>{children}</DbProvider>
-        </RizzleProvider.Context.Provider>
-      </QueryClientProvider>
+      <TrpcProvider
+        queryClient={queryClient}
+        getServerSessionId={async () => null}
+      >
+        <QueryClientProvider client={queryClient}>
+          <RizzleProvider.Context.Provider value={rizzle}>
+            <DbProvider>{children}</DbProvider>
+          </RizzleProvider.Context.Provider>
+        </QueryClientProvider>
+      </TrpcProvider>
     );
   };
 }

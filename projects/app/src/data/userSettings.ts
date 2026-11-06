@@ -306,7 +306,8 @@ export const studyHsk4UserToggleSetting = defineUserSetting({
   defaultValue: () => ({ enabled: true }),
 });
 
-export const userNameTextSetting = defineUserSetting({
+export const userDisplayNameTextSetting = defineUserSetting({
+  // Keep the persisted key so existing display names continue to load.
   entity: r.entity(`userName`, {
     text: r.string().alias(`t`),
   }) satisfies UserSettingTextEntity,
@@ -791,7 +792,7 @@ export const userSettingDefinitions = [
   userHanziMeaningGlossSetting,
   userHanziMeaningNoteSetting,
   userHanziMeaningPinyinSetting,
-  userNameTextSetting,
+  userDisplayNameTextSetting,
 ] as const satisfies readonly UserSetting[];
 
 function userSettingPrefixFromKey(settingKey: string): string {

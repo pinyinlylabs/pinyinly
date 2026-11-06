@@ -10,7 +10,19 @@
       "includeFiles": "dist/vercel/server/**"
     }
   },
+  "redirects": [
+    {
+      "source": "/:path((?!\\.well-known/webauthn$).*)",
+      "has": [{ "type": "host", "value": "pinyinly.com" }],
+      "destination": "https://pinyin.ly/:path",
+      "permanent": true
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/.well-known/webauthn",
+      "destination": "/api/index.cjs"
+    },
     {
       "source": "/api/0opho0/static/(.*)",
       "destination": "https://eu-assets.i.posthog.com/static/$1"

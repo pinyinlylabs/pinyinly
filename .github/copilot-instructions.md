@@ -53,6 +53,9 @@ target the specific file or narrow path needed rather than searching across all 
 
   New utility functions should have tests.
 
+- **Inngest functions:** Follow `.github/instructions/domains/inngest.instructions.md` for
+  registration, checkpointed steps, and scheduled garbage collection.
+
 ## References
 
 - See `.github/instructions/domains/` and `.github/instructions/guides/` for detailed project

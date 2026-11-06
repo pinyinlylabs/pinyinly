@@ -2,6 +2,7 @@ import {
   splitN,
   toCamelCase,
   toTitle,
+  uniqueNameWithSuffix,
   unicodeShortIdentifier,
 } from "#util/unicode.ts";
 import { describe, expect, test } from "vitest";
@@ -38,6 +39,21 @@ describe(`splitN suite`, () => {
       `[Error: limit must be non-negative]`,
     );
   });
+});
+
+describe(`uniqueNameWithSuffix()`, () => {
+  test.for([
+    [`Passkey`, [], `Passkey`],
+    [`Passkey`, [`Passkey`], `Passkey (2)`],
+    [`Passkey`, [`Passkey`, `Passkey (2)`], `Passkey (3)`],
+    [`Passkey`, [`Passkey`, `Passkey (2)`, `Passkey (4)`], `Passkey (3)`],
+    [`Passkey (2)`, [`Passkey (2)`], `Passkey (3)`],
+  ] as const)(
+    `returns a unique numbered name for %s`,
+    ([name, existingNames, expected]) => {
+      expect(uniqueNameWithSuffix(name, existingNames)).toBe(expected);
+    },
+  );
 });
 
 describe(`toCamelCase() suite`, () => {

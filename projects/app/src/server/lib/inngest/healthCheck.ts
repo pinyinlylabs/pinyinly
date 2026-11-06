@@ -4,6 +4,7 @@ import { loadDictionary, loadHanziWordMigrations } from "@/dictionary";
 import * as s from "@/server/pgSchema";
 import { invariant } from "@pinyinly/lib/invariant";
 import { subDays } from "date-fns/subDays";
+import { subHours } from "date-fns/subHours";
 import { inArray, lt, notInArray, sql } from "drizzle-orm";
 import {
   pgBatchUpdate,
@@ -110,6 +111,47 @@ const replicacheGarbageCollection = inngest.createFunction(
       );
       deletedRowCount = deletedRows.length;
     } while (deletedRowCount > 0);
+  },
+);
+
+export const passkeyChallengeGarbageCollection = inngest.createFunction(
+  {
+    description: `Delete passkey challenges that expired more than one hour ago.`,
+    id: `passkeyChallengeGarbageCollection`,
+    singleton: { mode: `skip` },
+    triggers: [{ cron: `0 * * * *` }],
+  },
+  async ({ step }) => {
+    const expiresBefore = subHours(new Date(), 1);
+    let totalDeleted = 0;
+    let deletedRowCount: number;
+    let batch = 0;
+    do {
+      const { deletedRows } = await step.run(
+        `passkey challenge deletes ${batch}`,
+        async () =>
+          withDrizzle(async (db) => {
+            const rowsToDelete = await db
+              .select({ id: s.authPasskeyChallenge.id })
+              .from(s.authPasskeyChallenge)
+              .where(lt(s.authPasskeyChallenge.expiresAt, expiresBefore))
+              .limit(1000);
+            const idsToDelete = rowsToDelete.map((row) => row.id);
+            if (idsToDelete.length === 0) {
+              return { deletedRows: [] };
+            }
+            const deletedRows = await db
+              .delete(s.authPasskeyChallenge)
+              .where(inArray(s.authPasskeyChallenge.id, idsToDelete))
+              .returning({ id: s.authPasskeyChallenge.id });
+            return { deletedRows };
+          }),
+      );
+      deletedRowCount = deletedRows.length;
+      totalDeleted += deletedRowCount;
+      batch++;
+    } while (deletedRowCount === 1000);
+    return { deletedRowCount: totalDeleted };
   },
 );
 
@@ -341,6 +383,7 @@ const migrateHanziWords = inngest.createFunction(
 export const functions = [
   dataIntegrityDictionary,
   migrateHanziWords,
+  passkeyChallengeGarbageCollection,
   pgFullVacuumGarbageCollection,
   replicacheGarbageCollection,
 ];

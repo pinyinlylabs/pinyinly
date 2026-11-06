@@ -1,4 +1,4 @@
-import type { DictionaryCollectionEntry } from "@/client/query";
+import type { DictionaryCollectionEntry } from "@/client/db";
 import { Link } from "expo-router";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";

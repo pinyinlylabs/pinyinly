@@ -5,6 +5,7 @@ import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import type { UseUserSettingResult } from "#client/ui/hooks/useUserSetting.ts";
 import { useUserSetting } from "#client/ui/hooks/useUserSetting.ts";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
+import { TrpcProvider } from "#client/ui/TrpcProvider.tsx";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { autoCheckUserToggleSetting } from "#data/userSettings.ts";
 import { testWithRizzle as rizzleTest } from "#test/util/rizzleHelpers.ts";
@@ -61,11 +62,16 @@ const testContextProviders = (opts: { rizzle: Rizzle }) =>
     const queryClient = useNewQueryClient();
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <RizzleProvider.Context.Provider value={opts.rizzle}>
-          <DbProvider>{children}</DbProvider>
-        </RizzleProvider.Context.Provider>
-      </QueryClientProvider>
+      <TrpcProvider
+        queryClient={queryClient}
+        getServerSessionId={async () => null}
+      >
+        <QueryClientProvider client={queryClient}>
+          <RizzleProvider.Context.Provider value={opts.rizzle}>
+            <DbProvider>{children}</DbProvider>
+          </RizzleProvider.Context.Provider>
+        </QueryClientProvider>
+      </TrpcProvider>
     );
   };
 

@@ -14,7 +14,14 @@
     "target": "ESNext",
     "types": []
   },
-  "include": ["../.expo/types/**/*.ts", "../*.d.ts", "*", "**/*", "**/*.json"],
+  "include": [
+    "../.expo/types/**/*.ts",
+    "../*.d.ts",
+    "*",
+    "**/*",
+    "**/*.json",
+    "app/.well-known/**/*.ts"
+  ],
   "references": [
     {
       "path": "../../lib"

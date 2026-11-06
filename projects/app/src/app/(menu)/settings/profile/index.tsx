@@ -3,7 +3,7 @@ import { useAuth } from "@/client/auth";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
-import { userNameTextSetting } from "@/data/userSettings";
+import { userDisplayNameTextSetting } from "@/data/userSettings";
 import { useRouter } from "expo-router";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -55,15 +55,15 @@ export default function ProfileSettingsPage() {
         />
       </View>
 
-      {/* Account Name Editor */}
+      {/* Display Name Editor */}
       {isAuthenticated && (
         <View className="gap-3 rounded-lg border border-fg/10 bg-bg-high p-4">
-          <Text className="font-sans text-sm text-muted-fg">Account Name</Text>
+          <Text className="font-sans text-sm text-muted-fg">Display Name</Text>
           <InlineEditableSettingText
-            setting={userNameTextSetting}
+            setting={userDisplayNameTextSetting}
             settingKey={{}}
             textClassName="pyly-body"
-            placeholder="Enter account name"
+            placeholder="Enter display name"
           />
           <Text className="font-sans text-xs text-muted-fg/60">
             Updated automatically across your devices

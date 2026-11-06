@@ -1,55 +1,37 @@
-import { getLucia, getOrCreateUser } from "@/server/lib/auth";
+import {
+  getLucia,
+  getOrCreateUser,
+  createAccount,
+  passkeyFinishAuthentication,
+  passkeyFinishRegistration,
+  passkeyStartRegistration,
+} from "@/server/lib/auth";
 import { withDrizzle } from "@/server/lib/db";
-import { getUserName, setUserName } from "@/server/lib/query";
-import { procedure, router } from "@/server/lib/trpc";
+import { getPasskeyConfig } from "@/server/lib/passkey";
+import { getUserDisplayName } from "@/server/lib/query";
+import { authedProcedure, procedure, router } from "@/server/lib/trpc";
 import * as schema from "@/server/pgSchema";
 import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
-import { jwtSchema, toJwtSchema } from "@/util/jwt";
-import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { IsEqual } from "@pinyinly/lib/types";
-import type {
-  PublicKeyCredentialCreationOptionsJSON,
-  PublicKeyCredentialRequestOptionsJSON,
-} from "@simplewebauthn/browser";
 import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
-import {
-  generateAuthenticationOptions,
-  generateRegistrationOptions,
-  verifyAuthenticationResponse,
-  verifyRegistrationResponse,
-} from "@simplewebauthn/server";
+import { generateAuthenticationOptions } from "@simplewebauthn/server";
+import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
-import { base64url } from "jose";
+import ms from "ms";
 import { parseJWT } from "oslo/jwt";
 import { z } from "zod";
 
-// Define RP (Relying Party) name and ID for the WebAuthn process
-const RP_NAME = `Pinyinly`;
-const RP_ID = process.env.NODE_ENV === `production` ? `pinyin.ly` : `localhost`;
-const ORIGIN =
-  process.env.NODE_ENV === `production`
-    ? `https://pinyin.ly`
-    : `http://localhost:8081`;
-
-const textEncoder = new TextEncoder();
-
-const passkeyRegistrationCookieSchema = z.object({
-  challenge: z.string(),
-  userId: z.string(),
-  userName: z.string(),
-});
-
-const passkeyAuthenticationCookieSchema = z.object({
-  challenge: z.string(),
-});
+const credentialIdSchema = z.string().min(1).max(2048);
+const encodedSchema = z.string().min(1).max(65_536);
+const passkeyNameSchema = z.string().trim().min(1).max(100);
 
 export const passkeyAuthenticationResponseSchema = z.object({
-  id: z.string(),
-  rawId: z.string(), // base64url-encoded
+  id: credentialIdSchema,
+  rawId: credentialIdSchema,
   authenticatorAttachment: z.enum([`cross-platform`, `platform`]).optional(),
   clientExtensionResults: z
     .object({
@@ -59,10 +41,10 @@ export const passkeyAuthenticationResponseSchema = z.object({
     })
     .partial(),
   response: z.object({
-    authenticatorData: z.string(), // base64url-encoded
-    clientDataJSON: z.string(), // base64url-encoded
-    signature: z.string(), // base64url-encoded
-    userHandle: z.string().optional(), // base64url-encoded
+    authenticatorData: encodedSchema,
+    clientDataJSON: encodedSchema,
+    signature: encodedSchema,
+    userHandle: encodedSchema.optional(),
   }),
   type: z.literal(`public-key`),
 });
@@ -73,28 +55,24 @@ true satisfies IsEqual<
 >;
 
 export const passkeyRegistrationResponseSchema = z.object({
-  id: z.string(),
-  rawId: z.string(),
+  id: credentialIdSchema,
+  rawId: credentialIdSchema,
   authenticatorAttachment: z.enum([`cross-platform`, `platform`]).optional(),
   clientExtensionResults: z
     .object({
       appid: z.boolean().optional(),
-      credProps: z
-        .object({
-          rk: z.boolean().optional(),
-        })
-        .optional(),
+      credProps: z.object({ rk: z.boolean().optional() }).optional(),
       hmacCreateSecret: z.boolean().optional(),
     })
     .optional()
     .default({}),
   type: z.literal(`public-key`),
   response: z.object({
-    attestationObject: z.string(),
-    clientDataJSON: z.string(),
-    authenticatorData: z.string().optional(),
+    attestationObject: encodedSchema,
+    clientDataJSON: encodedSchema,
+    authenticatorData: encodedSchema.optional(),
     publicKeyAlgorithm: z.number().optional(),
-    publicKey: z.string().optional(),
+    publicKey: encodedSchema.optional(),
     transports: z.array(passkeyTransportEnumSchema).optional(),
   }),
 });
@@ -103,6 +81,11 @@ true satisfies IsEqual<
   z.infer<typeof passkeyRegistrationResponseSchema>,
   RegistrationResponseJSON
 >;
+
+const registrationInput = z.object({
+  response: passkeyRegistrationResponseSchema,
+  cookie: z.string().min(1).max(2048),
+});
 
 export const authRouter = router({
   signInWithApple: procedure
@@ -143,7 +126,9 @@ export const authRouter = router({
         return { session, userId };
       });
 
-      const name = await withDrizzle(async (db) => getUserName(db, userId));
+      const name = await withDrizzle(async (db) =>
+        getUserDisplayName(db, userId),
+      );
 
       return {
         session: { id: session.id },
@@ -151,238 +136,125 @@ export const authRouter = router({
       };
     }),
 
-  // Start the passkey registration process
-  startPasskeyRegistration: procedure
+  createPasskeyAccount: procedure
     .input(
       z.object({
-        userName: z.string().optional(),
+        displayName: z.string().trim().min(1).max(100).optional(),
       }),
     )
-    .output(
-      z.object({
-        options: z.custom<PublicKeyCredentialCreationOptionsJSON>(),
-        cookie: passkeyRegistrationCookieSchema.pipe(
-          toJwtSchema({ expirationTime: `5m` }),
-        ),
-      }),
-    )
-    .mutation(async (opts) => {
-      // Create a new user ID that will eventually be used to create the user.
-      const userId = nanoid();
+    .mutation(async ({ input }) => createAccount(input.displayName)),
 
-      const userName = opts.input.userName ?? ``;
+  startAddPasskey: authedProcedure.mutation(async ({ ctx }) => {
+    const displayName = await withDrizzle(async (db) =>
+      getUserDisplayName(db, ctx.session.userId),
+    );
+    return passkeyStartRegistration({
+      userDisplayName: displayName ?? `Pinyinly account`,
+      userId: ctx.session.userId,
+    });
+  }),
 
-      // Generate registration options
-      const options = await generateRegistrationOptions({
-        rpName: RP_NAME,
-        rpID: RP_ID,
-        userName,
-        userID: textEncoder.encode(userId),
+  completeAddPasskey: authedProcedure
+    .input(registrationInput)
+    .mutation(async ({ input, ctx }) =>
+      withDrizzle(async (db) =>
+        db.transaction(async (tx) => {
+          await passkeyFinishRegistration(tx, input, ctx.session);
+          return { verified: true as const };
+        }),
+      ),
+    ),
+
+  startPasskeyAuthentication: procedure.mutation(async () => {
+    const { rpId } = getPasskeyConfig();
+    const options = await generateAuthenticationOptions({
+      rpID: rpId,
+      userVerification: `required`,
+    });
+    await withDrizzle(async (db) => {
+      await db.insert(schema.authPasskeyChallenge).values({
+        id: options.challenge,
+        kind: `login`,
+        rpId,
+        expiresAt: new Date(Date.now() + ms(`5m`)),
       });
+    });
+    return { options, cookie: options.challenge };
+  }),
 
-      return {
-        options,
-        cookie: { challenge: options.challenge, userId, userName },
-      };
-    }),
-
-  // Complete the passkey registration process
-  completePasskeyRegistration: procedure
-    .input(
-      z.object({
-        response: passkeyRegistrationResponseSchema,
-        cookie: jwtSchema().pipe(passkeyRegistrationCookieSchema),
-      }),
-    )
-    .output(
-      z.discriminatedUnion(`verified`, [
-        z
-          .object({
-            verified: z.literal(true),
-            session: z.object({ id: z.string() }),
-            user: z.object({
-              id: z.string(),
-              name: z.string().nullable(),
-            }),
-          })
-          .strict(),
-        z.object({ verified: z.literal(false) }).strict(),
-      ]),
-    )
-    .mutation(async (opts) => {
-      const { cookie, response } = opts.input;
-
-      // Verify the response
-      const verification = await verifyRegistrationResponse({
-        response,
-        expectedChallenge: cookie.challenge,
-        expectedOrigin: ORIGIN,
-        expectedRPID: RP_ID,
-      });
-
-      if (!verification.verified) {
-        return { verified: false };
-      }
-
-      const { credential, credentialDeviceType, credentialBackedUp } =
-        verification.registrationInfo;
-
-      return withDrizzle(async (db) => {
-        const [newUser] = await db
-          .insert(schema.user)
-          .values({
-            id: cookie.userId,
-          })
-          .returning();
-        invariant(newUser !== undefined);
-
-        // Save the new credential to the database
-        await db
-          .insert(schema.authPasskey)
-          .values([
-            {
-              id: credential.id,
-              userId: cookie.userId,
-              publicKey: credential.publicKey,
-              counter: credential.counter,
-              transports: credential.transports,
-              deviceType: credentialDeviceType,
-              webauthnUserId: textEncoder.encode(cookie.userId),
-              isBackedUp: credentialBackedUp,
-            },
-          ])
-          .returning();
-
-        // Create a new session
-        const lucia = getLucia(db);
-        const session = await lucia.createSession(newUser.id, {});
-
-        // Create the userName setting with the provided userName
-        await setUserName(db, newUser.id, cookie.userName);
-
-        return {
-          verified: true,
-          session: { id: session.id },
-          user: { id: newUser.id, name: cookie.userName },
-        };
-      });
-    }),
-
-  // Start the passkey authentication process
-  startPasskeyAuthentication: procedure
-    .output(
-      z.object({
-        options: z.custom<PublicKeyCredentialRequestOptionsJSON>(),
-        cookie: passkeyAuthenticationCookieSchema.pipe(
-          toJwtSchema({ expirationTime: `5m` }),
-        ),
-      }),
-    )
-    .mutation(async () => {
-      const options = await generateAuthenticationOptions({ rpID: RP_ID });
-
-      return {
-        options,
-        cookie: { challenge: options.challenge },
-      };
-    }),
-
-  // Complete the passkey authentication
   completePasskeyAuthentication: procedure
     .input(
       z.object({
         response: passkeyAuthenticationResponseSchema,
-        cookie: jwtSchema().pipe(passkeyAuthenticationCookieSchema),
+        cookie: z.string().min(1).max(2048),
       }),
     )
-    .output(
-      z.discriminatedUnion(`verified`, [
-        z
-          .object({
-            verified: z.literal(true),
-            session: z.object({ id: z.string() }),
-            user: z.object({
-              id: z.string(),
-              name: z.string().nullable(),
-            }),
-          })
-          .strict(),
-        z.object({ verified: z.literal(false) }).strict(),
-      ]),
-    )
-    .mutation(async (opts) => {
-      const { response, cookie } = opts.input;
+    .mutation(async ({ input }) => passkeyFinishAuthentication(input)),
 
-      const dbResult = await withDrizzle(async (db) => {
-        if (response.response.userHandle == null) {
-          return { verified: false as const };
-        }
-
-        const credentialId = response.id;
-        const webauthnUserId = base64url.decode(response.response.userHandle);
-
-        const authPasskey = await db.query.authPasskey.findFirst({
-          where: and(
-            eq(schema.authPasskey.id, credentialId),
-            eq(schema.authPasskey.webauthnUserId, webauthnUserId),
-          ),
-        });
-
-        if (authPasskey == null) {
-          return { verified: false as const };
-        }
-
-        // Verify the authentication response
-        const verification = await verifyAuthenticationResponse({
-          response,
-          expectedChallenge: cookie.challenge,
-          expectedOrigin: ORIGIN,
-          expectedRPID: RP_ID,
-          credential: {
-            id: authPasskey.id,
-            publicKey: Buffer.from(authPasskey.publicKey),
-            counter: authPasskey.counter,
-            transports: authPasskey.transports ?? undefined,
-          },
-        });
-
-        if (!verification.verified) {
-          return { verified: false as const };
-        }
-
-        // Update the counter in the database
-        await db
-          .update(schema.authPasskey)
-          .set({
-            counter: verification.authenticationInfo.newCounter,
-            lastUsedAt: new Date(),
-          })
-          .where(eq(schema.authPasskey.id, authPasskey.id));
-
-        // Create a new session
-        const lucia = getLucia(db);
-        const session = await lucia.createSession(authPasskey.userId, {});
-
-        return {
-          verified: true as const,
-          session: { id: session.id },
-          userId: authPasskey.userId,
-        };
-      });
-
-      if (!dbResult.verified) {
-        return { verified: false };
-      }
-
-      // Get user name after successful auth
-      const name = await withDrizzle(async (db) =>
-        getUserName(db, dbResult.userId),
-      );
-
-      return {
-        verified: true,
-        session: { id: dbResult.session.id },
-        user: { id: dbResult.userId, name },
-      };
+  listPasskeys: authedProcedure.query(async ({ ctx }) =>
+    withDrizzle(async (db) => {
+      return db
+        .select({
+          id: schema.authPasskey.id,
+          name: schema.authPasskey.name,
+          createdAt: schema.authPasskey.createdAt,
+          lastUsedAt: schema.authPasskey.lastUsedAt,
+        })
+        .from(schema.authPasskey)
+        .where(eq(schema.authPasskey.userId, ctx.session.userId));
     }),
+  ),
+
+  renamePasskey: authedProcedure
+    .input(z.object({ id: credentialIdSchema, name: passkeyNameSchema }))
+    .mutation(async ({ input, ctx }) =>
+      withDrizzle(async (db) => {
+        const [updated] = await db
+          .update(schema.authPasskey)
+          .set({ name: input.name })
+          .where(
+            and(
+              eq(schema.authPasskey.id, input.id),
+              eq(schema.authPasskey.userId, ctx.session.userId),
+            ),
+          )
+          .returning({ id: schema.authPasskey.id });
+        if (updated == null) {
+          throw new TRPCError({ code: `NOT_FOUND` });
+        }
+        return updated;
+      }),
+    ),
+
+  removePasskey: authedProcedure
+    .input(z.object({ id: credentialIdSchema }))
+    .mutation(async ({ input, ctx }) =>
+      withDrizzle(async (db) =>
+        db.transaction(async (tx) => {
+          // Serialize all removals for an account, including requests for different credentials.
+          await tx
+            .select({ id: schema.user.id })
+            .from(schema.user)
+            .where(eq(schema.user.id, ctx.session.userId))
+            .for(`update`);
+          const credentials = await tx
+            .select({ id: schema.authPasskey.id })
+            .from(schema.authPasskey)
+            .where(eq(schema.authPasskey.userId, ctx.session.userId));
+          if (!credentials.some(({ id }) => id === input.id)) {
+            throw new TRPCError({ code: `NOT_FOUND` });
+          }
+          if (credentials.length <= 1) {
+            throw new TRPCError({
+              code: `BAD_REQUEST`,
+              message: `Cannot remove your last passkey`,
+            });
+          }
+          await tx
+            .delete(schema.authPasskey)
+            .where(eq(schema.authPasskey.id, input.id));
+          return { removed: true };
+        }),
+      ),
+    ),
 });

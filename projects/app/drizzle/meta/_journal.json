@@ -260,6 +260,55 @@
       "when": 1776061230350,
       "tag": "0036_useful_spacker_dave",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793248695944,
+      "tag": "0037_thin_tomas",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793708839871,
+      "tag": "0038_dry_lockjaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793709484500,
+      "tag": "0039_bent_absorbing_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793714853409,
+      "tag": "0040_robust_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793719605778,
+      "tag": "0041_aspiring_morg",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1793773071169,
+      "tag": "0042_gorgeous_korath",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1793956739244,
+      "tag": "0043_harsh_galactus",
+      "breakpoints": true
     }
   ]
 }

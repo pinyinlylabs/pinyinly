@@ -119,6 +119,26 @@ export function nullIfEmpty<T extends string>(
   return text;
 }
 
+export function uniqueNameWithSuffix(
+  name: string,
+  existingNames: Iterable<string | null>,
+): string {
+  const usedNames = new Set(existingNames);
+  if (!usedNames.has(name)) {
+    return name;
+  }
+
+  const numberedName = /^(.*) \((\d+)\)$/u.exec(name);
+  const stem = numberedName?.[1] ?? name;
+  let suffix = numberedName == null ? 2 : Number(numberedName[2]) + 1;
+  let uniqueName = `${stem} (${suffix})`;
+  while (usedNames.has(uniqueName)) {
+    suffix += 1;
+    uniqueName = `${stem} (${suffix})`;
+  }
+  return uniqueName;
+}
+
 export function splitN(str: string, sep: string, n: number): string[] {
   if (sep.length === 0) {
     throw new Error(`separator must be non-empty`);

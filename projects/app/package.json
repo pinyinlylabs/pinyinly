@@ -63,6 +63,7 @@
     "@types/apple-signin-api": "^1.5.3",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/functions": "^3.5.0",
+    "aaguids": "^0.0.73",
     "array-from-async": "^3.0.0",
     "color": "^5.0.0",
     "date-fns": "^4.0.0",

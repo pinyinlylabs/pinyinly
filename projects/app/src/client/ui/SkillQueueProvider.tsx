@@ -1,8 +1,5 @@
-import {
-  charactersJsonQuery,
-  dictionaryQuery,
-  skillReviewQueueHistoryCollection,
-} from "@/client/query";
+import { charactersJsonQuery, dictionaryQuery } from "@/client/query";
+import { skillReviewQueueHistoryCollection } from "@/client/db";
 import { useDb } from "@/client/ui/hooks/useDb";
 import type { Skill, SrsStateType } from "@/data/model";
 import type {

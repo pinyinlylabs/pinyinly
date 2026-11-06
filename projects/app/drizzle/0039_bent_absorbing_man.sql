@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."authPasskey" DROP COLUMN "webauthnUserId";

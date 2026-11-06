@@ -16,6 +16,7 @@
   --color-bg: rgb(from var(--color-bg) r g b);
   --color-bg-high: rgb(from var(--color-bg-high) r g b);
   --color-fg: rgb(from var(--color-fg) r g b);
+  --color-fg-dim: rgb(from var(--color-fg) r g b / 0.55);
   --color-fg-loud: rgb(from var(--color-fg-loud) r g b);
   --color-muted-fg: rgb(from var(--color-muted-fg) r g b);
   --color-lozenge-emerald-bg: rgb(from var(--color-lozenge-emerald-bg) r g b);

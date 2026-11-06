@@ -1,5 +1,5 @@
 import { pickSoundUsageExamplesForEntries } from "#client/ui/soundUsageExamples.ts";
-import type { DictionaryCollectionEntry } from "#client/query.ts";
+import type { DictionaryCollectionEntry } from "#client/db.ts";
 import type {
   HanziText,
   HanziWord,

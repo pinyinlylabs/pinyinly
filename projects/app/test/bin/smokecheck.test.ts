@@ -1,6 +1,6 @@
 // pyly-not-src-test
 import { describe, expect, test } from "vitest";
-import { assertAppResponse } from "#bin/smokecheck.ts";
+import { assertAppResponse, assertWebAuthnResponse } from "#bin/smokecheck.ts";
 
 describe(`assertAppResponse`, () => {
   test(`accepts the app page`, async () => {
@@ -23,5 +23,25 @@ describe(`assertAppResponse`, () => {
     await expect(
       assertAppResponse(new Response(`<html><title>Not found</title></html>`)),
     ).rejects.toThrow(`Response did not contain the Expo app root`);
+  });
+});
+
+describe(`assertWebAuthnResponse`, () => {
+  test(`accepts a response with an origins array`, async () => {
+    await expect(
+      assertWebAuthnResponse(Response.json({ origins: [`https://pinyin.ly`] })),
+    ).resolves.toBeUndefined();
+  });
+
+  test(`rejects unsuccessful responses`, async () => {
+    await expect(
+      assertWebAuthnResponse(new Response(`Not Found`, { status: 404 })),
+    ).rejects.toThrow(`WebAuthn endpoint returned HTTP 404`);
+  });
+
+  test(`rejects responses with an invalid shape`, async () => {
+    await expect(
+      assertWebAuthnResponse(Response.json({ origins: `https://pinyin.ly` })),
+    ).rejects.toThrow();
   });
 });
