@@ -10,7 +10,10 @@ vi.mock(`expo-router/html`, () => ({
     <style id="expo-reset">{`body{overflow:hidden}`}</style>
   ),
   useServerDocumentContext: () => ({
-    headNodes: <meta name="expo-head" content="preserved" />,
+    headNodes: [
+      <meta name="expo-head" content="preserved" key="expo-head" />,
+      <link rel="preload" href="/main.bundle" as="script" key="preload" />,
+    ],
     bodyNodes: <script src="/app.js" />,
     htmlAttributes: { lang: `en`, dir: `ltr` },
     bodyAttributes: { "data-expo": `preserved` },
@@ -19,9 +22,11 @@ vi.mock(`expo-router/html`, () => ({
 
 beforeEach(() => {
   vi.useFakeTimers();
+  vi.stubGlobal(`__DEV__`, true);
 });
 
 afterEach(() => {
+  vi.unstubAllGlobals();
   vi.useRealTimers();
 });
 
@@ -82,6 +87,20 @@ test(`includes a self-contained indeterminate progress bar and preserves Expo do
     `Enable JavaScript`,
   );
 });
+
+test.each([true, false])(
+  `removes the main bundle preload only in development (development: %s)`,
+  (isDev) => {
+    vi.stubGlobal(`__DEV__`, isDev);
+
+    const { doc } = createStartupDocument();
+
+    expect(doc.querySelector(`meta[name="expo-head"]`)).not.toBeNull();
+    expect(doc.querySelectorAll(`link[rel="preload"]`)).toHaveLength(
+      isDev ? 0 : 1,
+    );
+  },
+);
 
 test(`reveals recovery after 15 seconds without an in-page reload control`, () => {
   const { doc } = createStartupDocument();
