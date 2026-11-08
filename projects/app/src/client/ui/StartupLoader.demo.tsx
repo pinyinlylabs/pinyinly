@@ -19,7 +19,13 @@ export default function StartupLoaderDemo() {
           recoveryDelayMs: 15_000,
           allowScripts: false,
         },
-      ].map(({ title, recoveryDelayMs, allowScripts }) => (
+        {
+          title: `Loading error`,
+          recoveryDelayMs: 15_000,
+          allowScripts: true,
+          simulateError: true,
+        },
+      ].map(({ title, recoveryDelayMs, allowScripts, simulateError }) => (
         <ExampleStack key={title} title={title}>
           {Platform.OS === `web` ? (
             <iframe
@@ -33,6 +39,9 @@ export default function StartupLoaderDemo() {
                   </head>
                   <body>
                     <StartupLoader recoveryDelayMs={recoveryDelayMs} />
+                    {simulateError ? (
+                      <script src="/__startup-loader-demo-missing-script__.js" />
+                    ) : null}
                   </body>
                 </html>,
               )}

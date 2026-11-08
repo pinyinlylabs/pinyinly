@@ -87,7 +87,7 @@ export function StartupLoader({
           color: `var(--startup-loader-color, #12191d)`,
         }}
       >
-        <div style={{ maxWidth: 360 }}>
+        <div style={{ width: `100%`, maxWidth: 760 }}>
           <svg
             id="pyly-startup-logo"
             viewBox="0 0 1024 1024"
@@ -195,7 +195,18 @@ export function StartupLoader({
               }}
             />
           </div>
-          <div id="pyly-startup-recovery" hidden>
+          <div id="pyly-startup-recovery" style={{ visibility: `hidden` }}>
+            <h1
+              hidden
+              style={{
+                margin: `0 0 16px`,
+                color: `color-mix(in srgb, currentColor 60%, transparent)`,
+                font: `600 32px/1.2 system-ui, sans-serif`,
+                textAlign: `center`,
+              }}
+            >
+              Pinyinly couldn&apos;t load
+            </h1>
             <p
               role="status"
               style={{
@@ -209,13 +220,26 @@ export function StartupLoader({
           </div>
           <noscript>
             <style>{`[data-startup-loader-progress] { display: none; }`}</style>
+            <h1
+              style={{
+                margin: `0 0 16px`,
+                color: `color-mix(in srgb, currentColor 60%, transparent)`,
+                font: `600 32px/1.2 system-ui, sans-serif`,
+                textAlign: `center`,
+              }}
+            >
+              Enable JavaScript
+            </h1>
             <p
               style={{
+                margin: 0,
+                color: `color-mix(in srgb, currentColor 60%, transparent)`,
                 font: `16px/1.5 system-ui, sans-serif`,
                 textAlign: `center`,
               }}
             >
-              Enable JavaScript to load Pinyinly.
+              Pinyinly needs JavaScript to load. It looks like JavaScript is
+              disabled in your browser.
             </p>
           </noscript>
         </div>
@@ -234,6 +258,11 @@ const loadingStyles = `
 @keyframes pyly-startup-logo-brush-growth {
   from { stroke-width: 0; }
   to { stroke-width: 120px; }
+}
+[data-startup-loader-error] [data-startup-loader-progress] { display: none; }
+#pyly-startup-recovery p { margin: 12px 0 0; }
+[data-startup-loader-error] #pyly-startup-recovery p {
+  margin-top: 0;
 }
 @media (prefers-color-scheme: dark) {
   [data-startup-loader] {
@@ -275,17 +304,22 @@ function startupScript(recoveryDelayMs: number) {
     `#pyly-startup-recovery`,
   );
   const recoveryMessage = recovery?.querySelector<HTMLParagraphElement>(`p`);
-  if (!startup || !recovery || !recoveryMessage) {
+  const recoveryTitle = recovery?.querySelector<HTMLHeadingElement>(`h1`);
+  if (!startup || !recovery || !recoveryMessage || !recoveryTitle) {
     console.error(`Could not initialize the startup loader.`);
     return;
   }
   const startupElement: HTMLElement = startup;
   const recoveryElement: HTMLElement = recovery;
   const recoveryMessageElement: HTMLParagraphElement = recoveryMessage;
+  const recoveryTitleElement: HTMLHeadingElement = recoveryTitle;
 
   function showLoadingError() {
+    startupElement.setAttribute(`data-startup-loader-error`, ``);
+    recoveryTitleElement.hidden = false;
+    recoveryMessageElement.style.font = `16px/1.5 system-ui, sans-serif`;
     recoveryMessageElement.textContent = `Something went wrong while loading. Check your connection, or reload the page.`;
-    recoveryElement.hidden = false;
+    recoveryElement.style.visibility = `visible`;
   }
   window.addEventListener(
     `error`,
@@ -309,7 +343,7 @@ function startupScript(recoveryDelayMs: number) {
   );
   window.setTimeout(function () {
     if (startupElement.isConnected) {
-      recoveryElement.hidden = false;
+      recoveryElement.style.visibility = `visible`;
     }
   }, recoveryDelayMs);
 }

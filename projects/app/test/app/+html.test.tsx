@@ -85,12 +85,12 @@ test(`includes a self-contained indeterminate progress bar and preserves Expo do
 
 test(`reveals recovery after 15 seconds without an in-page reload control`, () => {
   const { doc } = createStartupDocument();
-  const recovery = doc.querySelector(`#pyly-startup-recovery`);
-  expect(recovery).toHaveAttribute(`hidden`);
+  const recovery = doc.querySelector<HTMLElement>(`#pyly-startup-recovery`);
+  expect(recovery?.style.visibility).toBe(`hidden`);
   vi.advanceTimersByTime(14_999);
-  expect(recovery).toHaveAttribute(`hidden`);
+  expect(recovery?.style.visibility).toBe(`hidden`);
   vi.advanceTimersByTime(1);
-  expect(recovery).not.toHaveAttribute(`hidden`);
+  expect(recovery?.style.visibility).toBe(`visible`);
   expect(recovery?.textContent).toContain(
     `Still loading… This is taking longer than usual.`,
   );
@@ -110,7 +110,7 @@ test(`reveals recovery after 15 seconds without an in-page reload control`, () =
 test(`reports a failed external script while startup is active`, () => {
   const { doc, addEventListener, consoleError, errorHandlers } =
     createStartupDocument();
-  const recovery = doc.querySelector(`#pyly-startup-recovery`);
+  const recovery = doc.querySelector<HTMLElement>(`#pyly-startup-recovery`);
   const apiScript = doc.createElement(`script`);
   apiScript.src = `/api/sentry.js`;
   const script = doc.createElement(`script`);
@@ -122,17 +122,20 @@ test(`reports a failed external script while startup is active`, () => {
     true,
   );
   errorHandlers[`error`]?.({ target: new Error(`unrelated`) });
-  expect(recovery).toHaveAttribute(`hidden`);
+  expect(recovery?.style.visibility).toBe(`hidden`);
 
   errorHandlers[`error`]?.({ target: apiScript });
-  expect(recovery).toHaveAttribute(`hidden`);
+  expect(recovery?.style.visibility).toBe(`hidden`);
   expect(consoleError).not.toHaveBeenCalled();
 
   errorHandlers[`error`]?.({ target: script });
-  expect(recovery).not.toHaveAttribute(`hidden`);
+  expect(recovery?.style.visibility).toBe(`visible`);
   expect(recovery?.textContent).toContain(
     `Something went wrong while loading.`,
   );
+  expect(
+    recovery?.querySelector<HTMLParagraphElement>(`p`)?.style.fontSize,
+  ).toBe(`16px`);
   expect(consoleError).toHaveBeenCalledExactlyOnceWith(
     `Failed to load script:`,
     script.src,
