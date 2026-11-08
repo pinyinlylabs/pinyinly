@@ -17,6 +17,7 @@ import {
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   newSkillLessonUserToggleSetting,
+  soundsPageUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -46,6 +47,13 @@ describe(`experimental settings`, () => {
       getUserSettingDefaultValue(newSkillLessonUserToggleSetting, {}),
     ).toEqual({ enabled: false });
     expect(userSettingDefinitions).toContain(newSkillLessonUserToggleSetting);
+  });
+
+  test(`Sounds page is disabled by default and registered for syncing`, () => {
+    expect(getUserSettingDefaultValue(soundsPageUserToggleSetting, {})).toEqual(
+      { enabled: false },
+    );
+    expect(userSettingDefinitions).toContain(soundsPageUserToggleSetting);
   });
 });
 
