@@ -1,10 +1,12 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { useAuth } from "@/client/auth";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { PasskeySettings } from "@/client/ui/PasskeySettings";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionInfoCard } from "@/client/ui/SessionInfoCard";
 import { userDisplayNameTextSetting } from "@/data/userSettings";
 import { useRouter } from "expo-router";
+import { Platform } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 
@@ -23,8 +25,8 @@ export default function ProfileSettingsPage() {
     auth.signOut();
   };
 
-  const handleManageAccounts = () => {
-    router.push(`/settings/accounts`);
+  const handleSwitchProfile = () => {
+    router.push(`/login/switch-profile`);
   };
 
   if (auth.data == null) {
@@ -71,43 +73,28 @@ export default function ProfileSettingsPage() {
         </View>
       )}
 
-      {/* Account Management */}
-      <View className="gap-3 rounded-lg border bg-bg-high p-4">
-        <Text className="font-sans text-sm text-muted-fg">
-          Account Management
-        </Text>
+      {Platform.OS === `web` && isAuthenticated ? (
+        <PasskeySettings key={auth.data.activeDeviceSession.serverSessionId} />
+      ) : null}
 
+      <View className="items-start gap-2">
         {isAuthenticated ? (
           <>
-            <Text className="font-sans text-base font-semibold text-fg">
-              You&apos;re signed in
-            </Text>
-            <Text className="font-sans text-sm text-muted-fg">
-              Your progress is synced across your devices.
-            </Text>
-            <View className="gap-2">
-              <RectButton onPressIn={handleManageAccounts} variant="filled">
-                Manage Accounts
-              </RectButton>
-              <RectButton onPressIn={handleSignOut}>Sign out</RectButton>
-            </View>
+            <RectButton onPressIn={handleSwitchProfile} variant="bare">
+              Switch profile
+            </RectButton>
+            <RectButton onPressIn={handleSignOut} variant="bare">
+              Sign out
+            </RectButton>
           </>
         ) : (
           <>
-            <Text className="font-sans text-base font-semibold text-fg">
-              Not signed in
-            </Text>
-            <Text className="font-sans text-sm text-muted-fg">
-              Create an account to save your progress and sync across devices.
-            </Text>
-            <View className="gap-2">
-              <RectButton onPressIn={handleSignIn} variant="filled">
-                Sign in or create account
-              </RectButton>
-              <RectButton onPressIn={handleManageAccounts}>
-                Manage Accounts
-              </RectButton>
-            </View>
+            <RectButton onPressIn={handleSignIn} variant="bare">
+              Sign in or create account
+            </RectButton>
+            <RectButton onPressIn={handleSwitchProfile} variant="bare">
+              Switch profile
+            </RectButton>
           </>
         )}
       </View>

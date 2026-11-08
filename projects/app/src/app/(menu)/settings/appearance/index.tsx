@@ -7,11 +7,9 @@ import { DeviceStoreSelect } from "@/client/ui/DeviceStoreSelect";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import {
   autoCheckUserToggleSetting,
-  newSkillLessonUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
-  soundsPageUserToggleSetting,
   studyBookmarksUserToggleSetting,
   studyHsk1UserToggleSetting,
   studyHsk2UserToggleSetting,
@@ -137,38 +135,6 @@ export default function AppearanceSettingsPage() {
       <View className="gap-2 pt-6">
         <Text className="pyly-body-dt">Images</Text>
         <AiImageStyleSettingControl />
-      </View>
-
-      <View className="gap-2 pt-6">
-        <Text className="pyly-body-dt">Experimental</Text>
-        <View className="flex-row items-center">
-          <View className="flex-1">
-            <Text className="pyly-body-heading">New skill lesson</Text>
-            <Text className="pyly-body-caption">
-              Show a lesson modal when you encounter a new word.
-            </Text>
-          </View>
-          <View>
-            <UserSettingToggleButton
-              entity={newSkillLessonUserToggleSetting}
-              accessibilityLabel="New skill lesson"
-            />
-          </View>
-        </View>
-        <View className="flex-row items-center">
-          <View className="flex-1">
-            <Text className="pyly-body-heading">Sounds page</Text>
-            <Text className="pyly-body-caption">
-              Show the Sounds page and pronunciation box on wiki pages.
-            </Text>
-          </View>
-          <View>
-            <UserSettingToggleButton
-              entity={soundsPageUserToggleSetting}
-              accessibilityLabel="Sounds page"
-            />
-          </View>
-        </View>
       </View>
     </View>
   );

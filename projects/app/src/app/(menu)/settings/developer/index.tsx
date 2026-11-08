@@ -4,7 +4,12 @@ import {
   isDebuggerHotkeyAvailable,
 } from "@/client/ui/DebuggerHotkey.utils";
 import { Kbd } from "@/client/ui/Kbd";
+import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import { useShortcutDisplayLabel } from "@/client/ui/hooks/useShortcut";
+import {
+  newSkillLessonUserToggleSetting,
+  soundsPageUserToggleSetting,
+} from "@/data/userSettings";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -31,6 +36,38 @@ export default function DeveloperSettingsPage() {
           </View>
           <View>
             <DeviceStoreToggleButton entity={slowQueriesSetting} />
+          </View>
+        </View>
+      </View>
+
+      <View className="gap-2">
+        <Text className="pyly-body-dt">Experimental</Text>
+        <View className="flex-row items-center">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">New skill lesson</Text>
+            <Text className="pyly-body-caption">
+              Show a lesson modal when you encounter a new word.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={newSkillLessonUserToggleSetting}
+              accessibilityLabel="New skill lesson"
+            />
+          </View>
+        </View>
+        <View className="flex-row items-center">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Sounds page</Text>
+            <Text className="pyly-body-caption">
+              Show the Sounds page and pronunciation box on wiki pages.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={soundsPageUserToggleSetting}
+              accessibilityLabel="Sounds page"
+            />
           </View>
         </View>
       </View>
