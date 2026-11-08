@@ -9,12 +9,10 @@ const expoUpdatesMockPath = require.resolve(
   `./src/metro/expo-updates.web.dev.ts`,
 );
 
-/** @type Record<string, { moduleName?: string; platform?: string }> */
-const resolverOverrides = {
+/** @type Record<string, string> */
+const moduleAliases = {
   // See https://community.apollographql.com/t/cannot-destructure-property-extends-of-tslib-default-as-it-is-undefined/9501/2
-  [`tslib`]: { moduleName: `tslib/tslib.es6.js` },
-  // Avoid the Node.js version which uses import("node:diagnostics_channel").
-  [`lru-cache`]: { platform: `web` },
+  [`tslib`]: `tslib/tslib.es6.js`,
 };
 
 /** @type {import('metro-config').MetroConfig} */
@@ -33,11 +31,6 @@ config = {
   transformer: {
     ...config.transformer,
     dynamicDepsInPackages: `reject`,
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: true,
-      },
-    }),
   },
 
   // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
@@ -87,11 +80,10 @@ config = {
             context.unstable_logWarning(message);
           },
         },
-        resolverOverrides[moduleName]?.moduleName ?? moduleName,
-        resolverOverrides[moduleName]?.platform ?? platform,
+        moduleAliases[moduleName] ?? moduleName,
+        platform,
       );
     },
-    unstable_enablePackageExports: true,
   },
 };
 
