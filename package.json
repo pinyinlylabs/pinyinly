@@ -67,7 +67,7 @@
     "fetch-nodeshim@npm:^0.4.10": "patch:fetch-nodeshim@npm%3A0.4.10#~/.yarn/patches/fetch-nodeshim-npm-0.4.10-b2a583e1ca.patch",
     "metro@npm:0.84.6": "patch:metro@npm%3A0.84.6#~/.yarn/patches/metro-npm-0.84.6-5c3a238d3b.patch",
     "metro@npm:^0.84.6": "patch:metro@npm%3A0.84.6#~/.yarn/patches/metro-npm-0.84.6-5c3a238d3b.patch",
-    "@expo/cli@npm:^58.1.15": "patch:@expo/cli@npm%3A58.1.15#~/.yarn/patches/@expo-cli-npm-58.1.15-866aadb8d4.patch",
-    "babel-preset-expo@npm:~58.0.20": "patch:babel-preset-expo@npm%3A58.0.20#~/.yarn/patches/babel-preset-expo-npm-58.0.20-073e3ecc22.patch"
+    "@expo/cli@npm:^58.1.19": "patch:@expo/cli@npm%3A58.1.19#~/.yarn/patches/@expo-cli-npm-58.1.19-866aadb8d4.patch",
+    "babel-preset-expo@npm:~58.0.24": "patch:babel-preset-expo@npm%3A58.0.24#~/.yarn/patches/babel-preset-expo-npm-58.0.24-073e3ecc22.patch"
   }
 }
