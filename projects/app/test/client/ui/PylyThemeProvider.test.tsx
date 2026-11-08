@@ -175,7 +175,7 @@ test(`restores the override before showing content and aligns navigation and sta
   );
 });
 
-test(`selects and persists overrides and clears them for Auto while offline`, async () => {
+test(`selects and persists overrides and clears them for System default while offline`, async () => {
   onlineManager.setOnline(false);
   const { unmount } = render(
     <PylyThemeProvider>
@@ -187,7 +187,7 @@ test(`selects and persists overrides and clears them for Auto while offline`, as
   const select = await screen.findByRole(`button`, {
     name: `Color scheme`,
   });
-  expect(select).toHaveTextContent(`Auto`);
+  expect(select).toHaveTextContent(`System default`);
   await selectColorScheme(`Dark`);
 
   await waitFor(() => {
@@ -212,7 +212,7 @@ test(`selects and persists overrides and clears them for Auto while offline`, as
     await screen.findByRole(`button`, { name: `Color scheme` }),
   ).toHaveTextContent(`Dark`);
 
-  await selectColorScheme(`Auto`);
+  await selectColorScheme(`System default`);
   await waitFor(() => {
     expect(screen.getByTestId(`app-theme`)).toHaveAttribute(
       `data-theme`,
@@ -294,7 +294,7 @@ test(`reports a failed override save without changing the active scheme and allo
   );
   expect(
     screen.getByRole(`button`, { name: `Color scheme` }),
-  ).toHaveTextContent(`Auto`);
+  ).toHaveTextContent(`System default`);
 
   await selectColorScheme(`Dark`);
   await waitFor(() => {

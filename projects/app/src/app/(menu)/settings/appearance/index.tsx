@@ -48,7 +48,7 @@ const studySourceSettings = [
 ] as const;
 
 const colorSchemeOverrideOptions = [
-  { value: `auto`, label: `Auto` },
+  { value: `auto`, label: `System default` },
   { value: ColorSchemeOverrideKind.Light, label: `Light` },
   { value: ColorSchemeOverrideKind.Dark, label: `Dark` },
 ] as const;
@@ -62,22 +62,25 @@ export default function AppearanceSettingsPage() {
       </View>
       <View className="gap-2">
         <Text className="pyly-body-dt">Theme</Text>
-        <Text className="pyly-body-heading">Dark mode</Text>
-        <Text className="pyly-body-caption">
-          Auto follows your device&apos;s appearance.
-        </Text>
-        <DeviceStoreSelect
-          entity={colorSchemeOverrideSetting}
-          entityFromValue={(value) =>
-            value === `auto` ? null : { mode: value }
-          }
-          errorMessage="Could not save your color scheme override. Please try again."
-          valueFromEntity={(value) => value?.mode ?? `auto`}
-          accessibilityLabel="Color scheme"
-          options={colorSchemeOverrideOptions}
-          placeholder="Choose a color scheme"
-          className="self-end"
-        />
+        <View className="flex-row items-center">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Dark mode</Text>
+            <Text className="pyly-body-caption">
+              Auto follows your device&apos;s appearance.
+            </Text>
+          </View>
+          <DeviceStoreSelect
+            entity={colorSchemeOverrideSetting}
+            entityFromValue={(value) =>
+              value === `auto` ? null : { mode: value }
+            }
+            errorMessage="Could not save your color scheme override. Please try again."
+            valueFromEntity={(value) => value?.mode ?? `auto`}
+            accessibilityLabel="Color scheme"
+            options={colorSchemeOverrideOptions}
+            placeholder="Choose a color scheme"
+          />
+        </View>
       </View>
       <View className="gap-2">
         <Text className="pyly-body-dt">Learning</Text>
