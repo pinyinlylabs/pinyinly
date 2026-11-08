@@ -62,14 +62,13 @@ export function Select<Value extends string>({
         className={cn(
           `
             h-10 min-w-40 flex-row items-center justify-between gap-2 rounded-xl border border-fg/20
-            bg-bg px-3 py-2
+            bg-bg px-3 py-2 outline-transparent
 
             hover:bg-fg/10
 
-            web:cursor-pointer web:transition-colors web:outline-none
+            focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue/50
 
-            web:focus-visible:outline-3 web:focus-visible:outline-offset-2
-            web:focus-visible:outline-blue/50
+            web:cursor-pointer web:transition-colors
 
             web:data-[state=open]:bg-fg/10
           `,
