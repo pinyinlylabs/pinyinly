@@ -3,6 +3,7 @@ import { Icon } from "@/client/ui/Icon";
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { MobileNavMenu } from "@/client/ui/MobileNavMenu";
 import { BuildTimestampStamp } from "@/client/ui/BuildTimestampStamp";
+import { UserSettingToggleGuard } from "@/client/ui/UserSettingToggleGuard";
 import { navItems } from "@/client/ui/navItems";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
@@ -110,12 +111,16 @@ function MenuLayoutContent() {
                       <DesktopNavGroupTitle name={section.title} />
                     )}
                     {section.items.map((item, itemIndex) => (
-                      <DesktopNavItem
+                      <UserSettingToggleGuard
                         key={itemIndex}
-                        name={item.name}
-                        href={item.href}
-                        lozenge={item.lozenge}
-                      />
+                        setting={item.guard}
+                      >
+                        <DesktopNavItem
+                          name={item.name}
+                          href={item.href}
+                          lozenge={item.lozenge}
+                        />
+                      </UserSettingToggleGuard>
                     ))}
                   </Fragment>
                 ))}
@@ -134,12 +139,16 @@ function MenuLayoutContent() {
                       <View className="invisible h-10" />
                     )}
                     {section.items.map((item, itemIndex) => (
-                      <DesktopNavSubtleItem
+                      <UserSettingToggleGuard
                         key={itemIndex}
-                        name={item.name}
-                        href={item.href}
-                        lozenge={undefined}
-                      />
+                        setting={item.guard}
+                      >
+                        <DesktopNavSubtleItem
+                          name={item.name}
+                          href={item.href}
+                          lozenge={undefined}
+                        />
+                      </UserSettingToggleGuard>
                     ))}
                   </Fragment>
                 ))}

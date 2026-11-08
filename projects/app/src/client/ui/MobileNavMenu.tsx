@@ -2,6 +2,7 @@ import { breakpoints } from "@/client/ui/breakpoints";
 import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { Icon } from "@/client/ui/Icon";
 import { BuildTimestampStamp } from "@/client/ui/BuildTimestampStamp";
+import { UserSettingToggleGuard } from "@/client/ui/UserSettingToggleGuard";
 import { navItems } from "@/client/ui/navItems";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
@@ -114,13 +115,14 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
             .map((section, sectionIndex) => (
               <MobileNavGroup key={sectionIndex} title={section.title}>
                 {section.items.map((item, itemIndex) => (
-                  <MobileNavItem
-                    key={itemIndex}
-                    name={item.name}
-                    href={item.href}
-                    lozenge={item.lozenge}
-                    onNavigate={dismiss}
-                  />
+                  <UserSettingToggleGuard key={itemIndex} setting={item.guard}>
+                    <MobileNavItem
+                      name={item.name}
+                      href={item.href}
+                      lozenge={item.lozenge}
+                      onNavigate={dismiss}
+                    />
+                  </UserSettingToggleGuard>
                 ))}
               </MobileNavGroup>
             ))}
@@ -134,12 +136,16 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
                     <View className="invisible h-10" />
                   )}
                   {section.items.map((item, itemIndex) => (
-                    <MobileNavSubtleItem
+                    <UserSettingToggleGuard
                       key={itemIndex}
-                      name={item.name}
-                      href={item.href}
-                      onNavigate={dismiss}
-                    />
+                      setting={item.guard}
+                    >
+                      <MobileNavSubtleItem
+                        name={item.name}
+                        href={item.href}
+                        onNavigate={dismiss}
+                      />
+                    </UserSettingToggleGuard>
                   ))}
                 </View>
               ))}
