@@ -4,7 +4,7 @@ import { View } from "#client/ui/View.tsx";
 import type { IconProps } from "#client/ui/Icon.tsx";
 import "#global.css";
 import { expect, test, vi } from "vitest";
-import { page } from "vitest/browser";
+import { cdp, page } from "vitest/browser";
 import { render } from "vitest-browser-react";
 
 vi.mock(import(`#client/ui/Icon.tsx`), () => ({
@@ -87,6 +87,32 @@ test.for([`light`, `dark`] as const)(
     );
   },
 );
+
+test(`select trigger has a visible focus outline`, async () => {
+  await renderSelect(`light`);
+  const trigger = page.getByRole(`button`, { name: `Color scheme` });
+  await expect.element(trigger).toBeInTheDocument();
+  const triggerElement = trigger.element();
+  const snapshot = page.getByTestId(`select-snapshot`);
+  await expect(snapshot).toMatchScreenshot(`trigger-not-focused`);
+
+  const session = cdp();
+  await session.send(`Input.dispatchKeyEvent`, {
+    type: `keyDown`,
+    key: `Tab`,
+    code: `Tab`,
+    windowsVirtualKeyCode: 9,
+  });
+  await session.send(`Input.dispatchKeyEvent`, {
+    type: `keyUp`,
+    key: `Tab`,
+    code: `Tab`,
+    windowsVirtualKeyCode: 9,
+  });
+
+  expect(triggerElement.matches(`:focus-visible`)).toBe(true);
+  await expect(snapshot).toMatchScreenshot(`trigger-focused`);
+});
 
 test(`appearance-style Select trigger is right-aligned without stretching`, async () => {
   await render(
