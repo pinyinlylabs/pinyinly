@@ -11,6 +11,7 @@ import {
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
+  soundsPageUserToggleSetting,
   studyBookmarksUserToggleSetting,
   studyHsk1UserToggleSetting,
   studyHsk2UserToggleSetting,
@@ -148,6 +149,20 @@ export default function AppearanceSettingsPage() {
             <UserSettingToggleButton
               entity={newSkillLessonUserToggleSetting}
               accessibilityLabel="New skill lesson"
+            />
+          </View>
+        </View>
+        <View className="flex-row items-center">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Sounds page</Text>
+            <Text className="pyly-body-caption">
+              Show the Sounds page and pronunciation box on wiki pages.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={soundsPageUserToggleSetting}
+              accessibilityLabel="Sounds page"
             />
           </View>
         </View>

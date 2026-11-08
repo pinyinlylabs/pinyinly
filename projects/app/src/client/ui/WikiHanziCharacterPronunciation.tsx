@@ -26,6 +26,7 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundLocationSetKeySetting,
   pronunciationMnemonicSelectedSetting,
+  soundsPageUserToggleSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -48,6 +49,7 @@ import { Tooltip } from "./Tooltip";
 import { WikiTitledBox } from "./WikiTitledBox";
 import { getSharedPrimaryPronunciation } from "./WikiHanziCharacterPronunciation.utils";
 import { useDb } from "./hooks/useDb";
+import { useUserSettingToggle } from "./hooks/useUserSettingToggle";
 import { useHanziPronunciationMnemonicId as useHanziPronunciationMnemonicIds } from "./hooks/useHanziPronunciationMnemonicIds";
 import { usePointerHoverCapability } from "./hooks/usePointerHoverCapability";
 import { hintFirstLineLength, parseHintText } from "./hintText";
@@ -66,6 +68,9 @@ export function WikiHanziCharacterPronunciation({
   hanziWord: HanziWord | null;
 }) {
   const db = useDb();
+  const { isEnabled: showSoundsPage } = useUserSettingToggle(
+    soundsPageUserToggleSetting,
+  );
   const { data: meanings } = useLiveQuery({
     query: (q) =>
       q
@@ -87,7 +92,7 @@ export function WikiHanziCharacterPronunciation({
   });
   const pronunciation = getSharedPrimaryPronunciation(meanings, hanziWord);
 
-  if (pronunciation == null) {
+  if (!showSoundsPage || pronunciation == null) {
     return null;
   }
 
