@@ -3,6 +3,7 @@ import {
   DebuggerHotkey,
   isDebuggerHotkeyAvailable,
 } from "@/client/ui/DebuggerHotkey.utils";
+import { Kbd } from "@/client/ui/Kbd";
 import { useShortcutDisplayLabel } from "@/client/ui/hooks/useShortcut";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Text } from "@/client/ui/Text";
@@ -40,9 +41,7 @@ export default function DeveloperSettingsPage() {
 
           <View className="flex-row items-center justify-between">
             <Text className="pyly-body">Debugger</Text>
-            <Text className="font-sans text-sm font-semibold text-muted-fg">
-              {debuggerHotkeyLabel}
-            </Text>
+            <Kbd>{debuggerHotkeyLabel}</Kbd>
           </View>
         </View>
       ) : null}
