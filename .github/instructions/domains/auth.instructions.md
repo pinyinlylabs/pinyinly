@@ -23,6 +23,10 @@ device session is not the same thing as an authenticated server session.
   [`trpc.ts`](../../../projects/app/src/server/lib/trpc.ts).
 - Lucia sessions expire after 365 days. Logging out switches the active device session locally; it
   does not revoke the server session. See [`auth.ts`](../../../projects/app/src/server/lib/auth.ts).
+- **Remove from this device** deletes the active local Replicache database and device-session entry.
+  For signed-in profiles, pending changes are pushed and account data remains on the server; for
+  guest profiles, progress exists only locally and is permanently deleted. After removal, the app
+  opens the profile switcher and creates a fresh local profile if none remain.
 
 ## First use and anonymous progress
 

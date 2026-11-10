@@ -2,6 +2,7 @@ import { trpc } from "@/client/trpc";
 import type { RizzleEntityOutput } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
+import { nanoid } from "@/util/nanoid";
 import {
   startAuthentication,
   startRegistration,
@@ -64,13 +65,19 @@ type AuthApi = {
   logInToExistingDeviceSession: (
     predicate: (deviceSession: DeviceSession) => boolean,
   ) => boolean;
+  createLocalProfile: (displayName: string) => void;
+  createGuestProfile: () => void;
   setDeviceSessionUserName: (opts: {
     dbName: string;
     userName: string | null;
   }) => void;
-  signUpWithPasskey: (opts: { displayName?: string }) => Promise<void>;
+  signUpWithPasskey: (opts: {
+    displayName?: string;
+    reuseCurrentDeviceSession?: boolean;
+  }) => Promise<void>;
   logInWithPasskey: () => Promise<void>;
   signOut: () => void;
+  removeActiveDeviceSession: () => Promise<void>;
 };
 
 export function useAuth(): AuthApi {
@@ -151,18 +158,21 @@ export function useAuth(): AuthApi {
     await activatePasskeySession(res2);
   };
 
-  async function activatePasskeySession({
-    session,
-    user,
-  }: {
-    session: { id: string };
-    user: { id: string; name: string | null };
-  }) {
+  async function activatePasskeySession(
+    {
+      session,
+      user,
+    }: {
+      session: { id: string };
+      user: { id: string; name: string | null };
+    },
+    deviceSessionToReuse?: DeviceSession,
+  ) {
     invariant(data != null, `expected auth state to be initialized`);
 
     const existing = data.allDeviceSessions.find((s) => s.userId === user.id);
     const newSession: DeviceSession = {
-      ...(existing ?? makeDeviceSession()),
+      ...(existing ?? deviceSessionToReuse ?? makeDeviceSession()),
       serverSessionId: session.id,
       authMethod: `passkey`,
       userId: user.id,
@@ -180,14 +190,23 @@ export function useAuth(): AuthApi {
 
   const signUpWithPasskey = async ({
     displayName,
+    reuseCurrentDeviceSession = false,
   }: {
     displayName?: string;
+    reuseCurrentDeviceSession?: boolean;
   }) => {
     invariant(data != null, `expected auth state to be initialized`);
+    const activeDeviceSession = data.activeDeviceSession;
+    const deviceSessionToReuse =
+      reuseCurrentDeviceSession &&
+      activeDeviceSession.userId == null &&
+      activeDeviceSession.serverSessionId == null
+        ? activeDeviceSession
+        : undefined;
     const account = await createPasskeyAccountMutate(
       displayName == null ? {} : { displayName },
     );
-    await activatePasskeySession(account);
+    await activatePasskeySession(account, deviceSessionToReuse);
 
     const { options: optionsJSON, cookie } = await startAddPasskeyMutate();
 
@@ -257,6 +276,42 @@ export function useAuth(): AuthApi {
     [authState, data],
   );
 
+  const createLocalProfile = useCallback(
+    (displayName: string) => {
+      invariant(data != null, `expected auth state to be initialized`);
+
+      const userName = displayName.trim();
+      invariant(userName.length > 0, `expected a non-empty profile name`);
+
+      authState.setValue({
+        deviceSessions: [
+          makeDeviceSession({ userName }),
+          ...data.allDeviceSessions,
+        ],
+      });
+    },
+    [authState, data],
+  );
+
+  const createGuestProfile = useCallback(() => {
+    invariant(data != null, `expected auth state to be initialized`);
+
+    const existingNames = new Set(
+      data.allDeviceSessions.map((session) => session.userName),
+    );
+    let userName = `Guest`;
+    for (let suffix = 2; existingNames.has(userName); suffix += 1) {
+      userName = `Guest ${suffix}`;
+    }
+
+    authState.setValue({
+      deviceSessions: [
+        makeDeviceSession({ userName }),
+        ...data.allDeviceSessions,
+      ],
+    });
+  }, [authState, data]);
+
   const logInWithServerSessionId = useCallback<
     AuthApi[`logInWithServerSessionId`]
   >(
@@ -296,6 +351,21 @@ export function useAuth(): AuthApi {
           (s) => s.replicacheDbName !== newSession.replicacheDbName,
         ),
       ],
+    });
+  }, [authState, data]);
+
+  const removeActiveDeviceSession = useCallback(async () => {
+    invariant(data != null, `expected auth state to be initialized`);
+
+    const remainingSessions = data.allDeviceSessions.filter(
+      (session) =>
+        session.replicacheDbName !== data.activeDeviceSession.replicacheDbName,
+    );
+    await authState.setValueAsync({
+      deviceSessions:
+        remainingSessions.length > 0
+          ? remainingSessions
+          : [makeDeviceSession()],
     });
   }, [authState, data]);
 
@@ -340,10 +410,13 @@ export function useAuth(): AuthApi {
     logInWithApple: logInWithApple,
     logInToExistingDeviceSession: logInToExistingDeviceSession,
     logInWithServerSessionId: logInWithServerSessionId,
+    createLocalProfile,
+    createGuestProfile,
     setDeviceSessionUserName,
     signUpWithPasskey,
     logInWithPasskey,
     signOut,
+    removeActiveDeviceSession,
   };
 }
 
@@ -355,7 +428,7 @@ function makeDeviceSession(
 ): DeviceSession {
   return {
     ...opts,
-    replicacheDbName: `hao-${new Date().toISOString()}`,
+    replicacheDbName: `hao-${new Date().toISOString()}-${nanoid()}`,
   };
 }
 

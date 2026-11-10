@@ -315,9 +315,6 @@ function DevToolsSection({
         Active DB name: {auth.data?.activeDeviceSession.replicacheDbName}
       </Text>
       <ServerSessionIdLoginForm />
-      <Link href="/dev/demo" asChild>
-        <RectButton variant="filled">Dev demo</RectButton>
-      </Link>
     </>
   );
 

@@ -55,22 +55,22 @@ export function PasskeySettings() {
   return (
     <>
       <View className="gap-3">
-        <Text className="pyly-body-title text-fg">Account security</Text>
-        <View className="flex-row items-center justify-between gap-4 rounded-lg border p-4">
+        <View className="flex-row items-center justify-between gap-4">
           <View className="flex-1 gap-1">
             <Text className="font-sans text-base font-semibold text-fg">
               Passkeys
             </Text>
             <Text className="text-muted-fg">
-              Sign in using your device&apos;s built-in security.
+              Sign in securely without a password.
             </Text>
           </View>
           <RectButton
+            variant="bare"
             onPress={() => {
               setIsOpen(true);
             }}
           >
-            Manage passkeys
+            Manage
           </RectButton>
         </View>
       </View>

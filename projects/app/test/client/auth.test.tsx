@@ -3,6 +3,13 @@ import { useAuth } from "#client/auth.ts";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 
+type MockDeviceSession = {
+  replicacheDbName: string;
+  serverSessionId?: string;
+  userId?: string;
+  userName?: string | null;
+};
+
 const mocks = vi.hoisted(() => ({
   setValue: vi.fn(),
   setValueAsync: vi.fn(),
@@ -13,7 +20,7 @@ const mocks = vi.hoisted(() => ({
       userId: `user`,
       serverSessionId: `old-session`,
     },
-  ],
+  ] as MockDeviceSession[],
   createAccount: vi.fn(),
   startAdd: vi.fn(),
   completeAdd: vi.fn(),
@@ -142,6 +149,75 @@ test(`signup activates the new account before adding its first passkey`, async (
   });
 });
 
+test(`signup can attach the new account to the active local profile database`, async () => {
+  mocks.createAccount.mockResolvedValue({
+    session: { id: `new-session` },
+    user: { id: `new-user`, name: `Learner` },
+  });
+  mocks.setValueAsync.mockResolvedValue(undefined);
+  mocks.startAdd.mockResolvedValue({ options: {}, cookie: `challenge` });
+  mocks.startRegistration.mockResolvedValue({ id: `credential` });
+  mocks.completeAdd.mockResolvedValue({ verified: true });
+  const { result } = renderHook(() => useAuth());
+
+  await act(async () =>
+    result.current.signUpWithPasskey({
+      displayName: `Learner`,
+      reuseCurrentDeviceSession: true,
+    }),
+  );
+
+  expect(mocks.setValueAsync).toHaveBeenCalledWith({
+    deviceSessions: [
+      {
+        replicacheDbName: `anonymous-db`,
+        serverSessionId: `new-session`,
+        authMethod: `passkey`,
+        userId: `new-user`,
+        userName: `Learner`,
+      },
+      {
+        replicacheDbName: `existing-account-db`,
+        userId: `user`,
+        serverSessionId: `old-session`,
+      },
+    ],
+  });
+});
+
+test(`removing the active profile activates the next saved profile`, async () => {
+  mocks.setValueAsync.mockResolvedValue(undefined);
+  const { result } = renderHook(() => useAuth());
+
+  await act(async () => result.current.removeActiveDeviceSession());
+
+  expect(mocks.setValueAsync).toHaveBeenLastCalledWith({
+    deviceSessions: [
+      {
+        replicacheDbName: `existing-account-db`,
+        userId: `user`,
+        serverSessionId: `old-session`,
+      },
+    ],
+  });
+});
+
+test(`removing the last profile creates a fresh local profile`, async () => {
+  mocks.deviceSessions = [{ replicacheDbName: `only-profile-db` }];
+  mocks.setValueAsync.mockResolvedValue(undefined);
+  const { result } = renderHook(() => useAuth());
+
+  await act(async () => result.current.removeActiveDeviceSession());
+
+  expect(mocks.setValueAsync).toHaveBeenLastCalledWith({
+    deviceSessions: [
+      {
+        replicacheDbName: expect.not.stringContaining(`only-profile-db`),
+      },
+    ],
+  });
+});
+
 test(`adding an account creates a new account even when one is already active`, async () => {
   mocks.deviceSessions = [
     {
@@ -222,4 +298,44 @@ test(`failed passkey creation keeps the newly created account session active`, a
   ).rejects.toThrow(`verification failed`);
   expect(mocks.setValueAsync).toHaveBeenCalled();
   expect(mocks.createAccount).toHaveBeenCalledTimes(1);
+});
+
+test(`creates and activates a named local profile`, () => {
+  const { result } = renderHook(() => useAuth());
+
+  act(() => {
+    result.current.createLocalProfile(`  New profile  `);
+  });
+
+  expect(mocks.setValue).toHaveBeenCalledWith({
+    deviceSessions: [
+      expect.objectContaining({
+        replicacheDbName: expect.stringMatching(/^hao-/u),
+        userName: `New profile`,
+      }),
+      ...mocks.deviceSessions,
+    ],
+  });
+});
+
+test(`creates a fresh guest profile with an unused guest name`, () => {
+  mocks.deviceSessions = [
+    { replicacheDbName: `guest-one`, userName: `Guest` },
+    { replicacheDbName: `guest-two`, userName: `Guest 2` },
+  ];
+  const { result } = renderHook(() => useAuth());
+
+  act(() => {
+    result.current.createGuestProfile();
+  });
+
+  expect(mocks.setValue).toHaveBeenCalledWith({
+    deviceSessions: [
+      expect.objectContaining({
+        replicacheDbName: expect.stringMatching(/^hao-/u),
+        userName: `Guest 3`,
+      }),
+      ...mocks.deviceSessions,
+    ],
+  });
 });

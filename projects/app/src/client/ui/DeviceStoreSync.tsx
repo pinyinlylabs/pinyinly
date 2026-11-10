@@ -17,12 +17,21 @@ import { useEffect } from "react";
 export function DeviceStoreSync({ dbName }: { dbName: string }) {
   const displayName =
     useUserSetting({ setting: userDisplayNameTextSetting }).value?.text ?? null;
-  const { setDeviceSessionUserName } = useAuth();
+  const auth = useAuth();
+  const { setDeviceSessionUserName } = auth;
+  const isAuthenticated =
+    auth.data?.allDeviceSessions.find(
+      (session) => session.replicacheDbName === dbName,
+    )?.serverSessionId != null;
 
   // Sync the display name from settings to the active DeviceSession cache.
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     setDeviceSessionUserName({ dbName, userName: displayName });
-  }, [setDeviceSessionUserName, dbName, displayName]);
+  }, [setDeviceSessionUserName, dbName, displayName, isAuthenticated]);
 
   return null;
 }

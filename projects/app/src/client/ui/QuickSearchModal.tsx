@@ -3,6 +3,7 @@ import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { Icon } from "./Icon";
+import { Kbd } from "./Kbd";
 import { PageSheetModal } from "./PageSheetModal";
 import { QuickSearchResults } from "./QuickSearchResults";
 import { TextInputSingle } from "./TextInputSingle";
@@ -45,12 +46,12 @@ function ModalContent({ onDismiss }: { onDismiss: () => void }) {
           variant="bare"
         />
         <Pressable
-          className="rounded bg-fg/10 px-1.5 py-1"
+          accessibilityRole="button"
           onPress={() => {
             onDismiss();
           }}
         >
-          <Text className="font-sans text-sm text-fg">ESC</Text>
+          <Kbd>Esc</Kbd>
         </Pressable>
       </View>
 

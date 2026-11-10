@@ -1,8 +1,5 @@
 import type { UseAuth2Data } from "@/client/auth";
 import { RectButton } from "@/client/ui/RectButton";
-import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
-import { useDb } from "@/client/ui/hooks/useDb";
-import { useLiveQuery } from "@tanstack/react-db";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 
@@ -22,14 +19,12 @@ export function SessionInfoCard({
   showDetails = true,
 }: SessionInfoCardProps) {
   return (
-    <SessionStoreProvider dbName={session.replicacheDbName}>
-      <SessionInfoCardInner
-        session={session}
-        isActive={isActive}
-        onSwitch={onSwitch}
-        showDetails={showDetails}
-      />
-    </SessionStoreProvider>
+    <SessionInfoCardInner
+      session={session}
+      isActive={isActive}
+      onSwitch={onSwitch}
+      showDetails={showDetails}
+    />
   );
 }
 
@@ -39,11 +34,6 @@ function SessionInfoCardInner({
   onSwitch,
   showDetails,
 }: SessionInfoCardProps) {
-  const db = useDb();
-  const skillResult = useLiveQuery({
-    query: (q) => q.from({ skillState: db.skillStateCollection }),
-  });
-
   const isAuthenticated = session.serverSessionId != null;
   const displayName =
     (session.userName ?? null) === null
@@ -58,8 +48,6 @@ function SessionInfoCardInner({
       : session.authMethod === `passkey`
         ? `🔑 Passkey`
         : `👤 Anonymous`;
-
-  const skillCount = skillResult.isLoading ? `...` : skillResult.data.length;
 
   return (
     <View
@@ -91,13 +79,6 @@ function SessionInfoCardInner({
       {/* Details */}
       {showDetails === true && (
         <View className="gap-1">
-          <Text className="font-sans text-sm text-muted-fg">
-            {skillCount}
-            {` `}
-            {typeof skillCount === `number` && skillCount === 1
-              ? `skill`
-              : `skills`}
-          </Text>
           {session.lastActive && (
             <Text className="font-sans text-sm text-muted-fg">
               Last active: {new Date(session.lastActive).toLocaleDateString()}

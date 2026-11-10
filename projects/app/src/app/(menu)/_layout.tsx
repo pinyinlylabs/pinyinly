@@ -103,12 +103,8 @@ function MenuLayoutContent() {
                 .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
                   <Fragment key={sectionIndex}>
-                    {/* GAP */}
-                    {sectionIndex === 0 ? null : (
-                      <View className="invisible h-10" />
-                    )}
                     {section.title == null ? null : (
-                      <DesktopNavGroupTitle name={section.title} />
+                      <View className="my-2 h-px bg-fg/5" />
                     )}
                     {section.items.map((item, itemIndex) => (
                       <UserSettingToggleGuard
@@ -126,18 +122,20 @@ function MenuLayoutContent() {
                 ))}
             </View>
 
-            {/* GAP */}
-            <View className="invisible min-h-10 flex-1" />
-
-            <View className="items-end px-5">
-              {navItems
-                .filter((section) => section.primary !== true)
-                .map((section, sectionIndex) => (
-                  <Fragment key={sectionIndex}>
-                    {/* GAP */}
-                    {sectionIndex === 0 ? null : (
-                      <View className="invisible h-10" />
-                    )}
+            {navItems
+              .filter((section) => section.primary !== true)
+              .map((section, sectionIndex) => (
+                <Fragment key={sectionIndex}>
+                  {sectionIndex === 0 ? null : (
+                    <View className="invisible min-h-10 flex-1" />
+                  )}
+                  <View
+                    className={
+                      sectionIndex === 0
+                        ? `mt-3 items-end px-5`
+                        : `items-end px-5`
+                    }
+                  >
                     {section.items.map((item, itemIndex) => (
                       <UserSettingToggleGuard
                         key={itemIndex}
@@ -150,9 +148,9 @@ function MenuLayoutContent() {
                         />
                       </UserSettingToggleGuard>
                     ))}
-                  </Fragment>
-                ))}
-            </View>
+                  </View>
+                </Fragment>
+              ))}
             {Platform.OS === `web` ? <BuildTimestampStamp /> : null}
           </View>
         </View>
@@ -257,14 +255,6 @@ function DesktopFloatingTitle() {
         ></View>
       </View>
     </Reanimated.View>
-  );
-}
-
-function DesktopNavGroupTitle({ name }: { name: string }) {
-  return (
-    <View className="h-6 items-end justify-center px-6">
-      <Text className="pyly-body-dt">{name}</Text>
-    </View>
   );
 }
 
