@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { historyPageCollection, historyPageData } from "@/client/db";
 import { useDb } from "@/client/ui/hooks/useDb";
@@ -30,8 +31,10 @@ export default function HistoryPage() {
   return (
     <View className="gap-5">
       {/* Header */}
-      <View>
-        <Text className="pyly-body-title">History</Text>
+      <View className="gap-1">
+        <Breadcrumbs>
+          <Breadcrumbs.Item href="/history">History</Breadcrumbs.Item>
+        </Breadcrumbs>
         <HeaderProvider.ScrollTrigger title="History" />
       </View>
 

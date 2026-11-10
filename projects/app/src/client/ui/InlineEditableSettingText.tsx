@@ -28,6 +28,7 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   settingKey: UserSettingKeyInput<T>;
   readonly?: boolean;
   placeholder: string;
+  fallbackText?: string;
   /**
    * @deprecated Use `useUserSettingTextDefaultValue` hook instead for better
    * consistency and to avoid confusion with the `defaultValue` prop of the
@@ -39,6 +40,8 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   showCounterAtRatio?: number;
   overLimitMessage?: string;
   counterLength?: (value: string) => number;
+  editRequest?: number;
+  disableAutofill?: boolean;
   textClassName?: string;
   displayContainerClassName?: string;
   displayHoverClassName?: string;
@@ -57,6 +60,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   settingKey,
   readonly = false,
   placeholder,
+  fallbackText,
   // oxlint-disable-next-line typescript/no-deprecated
   defaultValue,
   multiline = false,
@@ -64,6 +68,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   showCounterAtRatio = 0.8,
   overLimitMessage,
   counterLength,
+  editRequest,
+  disableAutofill = false,
   textClassName = `pyly-body`,
   displayContainerClassName,
   displayHoverClassName,
@@ -79,7 +85,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     settingKey,
   );
   const currentValue: string = value?.text ?? ``;
-  const fallbackValue = defaultValue ?? defaultValueFromHook ?? ``;
+  const fallbackValue =
+    fallbackText ?? defaultValue ?? defaultValueFromHook ?? ``;
   const displayValue = currentValue.length > 0 ? currentValue : fallbackValue;
   const hasDisplayValue = displayValue.length > 0;
   const sanitizedDefaultValue = sanitizeValue(fallbackValue);
@@ -88,6 +95,14 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const [draft, setDraft] = useState(displayValue);
   const containerRef = useRef<ViewInstance>(null);
   const inputRef = useRef<TextInputInstance>(null);
+  const previousEditRequest = useRef(editRequest);
+
+  useEffect(() => {
+    if (editRequest !== previousEditRequest.current) {
+      previousEditRequest.current = editRequest;
+      setIsEditing(true);
+    }
+  }, [editRequest]);
 
   if (!isEditing && draft !== displayValue) {
     setDraft(displayValue);
@@ -257,6 +272,9 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
               onChangeText={setDraft}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
+              autoComplete={disableAutofill ? `off` : undefined}
+              textContentType={disableAutofill ? `none` : undefined}
+              importantForAutofill={disableAutofill ? `no` : undefined}
               className={inputTextClassName}
               variant="bare"
               style={showHistoryButton ? { paddingRight: 32 } : undefined}
@@ -269,6 +287,9 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
               onChangeText={setDraft}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
+              autoComplete={disableAutofill ? `off` : undefined}
+              textContentType={disableAutofill ? `none` : undefined}
+              importantForAutofill={disableAutofill ? `no` : undefined}
               className={inputTextClassName}
               variant="bare"
               style={showHistoryButton ? { paddingRight: 32 } : undefined}

@@ -92,6 +92,12 @@ function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
 
   return activeDeviceSession == null ? null : (
     <SessionStoreProvider
+      // Session-scoped collection IDs are reused, so dispose old live queries
+      // before replacing their store scope.
+      key={JSON.stringify([
+        activeDeviceSession.replicacheDbName,
+        activeDeviceSession.serverSessionId ?? null,
+      ])}
       dbName={activeDeviceSession.replicacheDbName}
       serverSessionId={activeDeviceSession.serverSessionId}
     >

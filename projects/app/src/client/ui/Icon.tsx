@@ -10,7 +10,7 @@ import { iconRegistry } from "./iconRegistry";
 
 export interface IconProps extends Pick<ImageProps, `className`> {
   icon: IconName;
-  size?: 12 | 16 | 20 | 24 | 32;
+  size?: 12 | 16 | 20 | 24 | 32 | 48;
   /**
    * Must be specified using `accent-*` classes.
    */
@@ -53,6 +53,7 @@ const imageClass = tv({
       20: `size-[20px]`,
       24: `size-[24px]`,
       32: `size-[32px]`,
+      48: `size-[48px]`,
     },
   },
   defaultVariants: {

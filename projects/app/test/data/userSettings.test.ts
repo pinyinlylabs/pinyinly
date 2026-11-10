@@ -17,6 +17,7 @@ import {
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   newSkillLessonUserToggleSetting,
+  profileOverviewUserToggleSetting,
   soundsPageUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
@@ -54,6 +55,13 @@ describe(`experimental settings`, () => {
       { enabled: false },
     );
     expect(userSettingDefinitions).toContain(soundsPageUserToggleSetting);
+  });
+
+  test(`Profile overview is disabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(profileOverviewUserToggleSetting, {}),
+    ).toEqual({ enabled: false });
+    expect(userSettingDefinitions).toContain(profileOverviewUserToggleSetting);
   });
 });
 

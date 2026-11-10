@@ -131,7 +131,7 @@ vi.mock(`#client/ui/DropdownMenu2.tsx`, async () => {
 });
 
 function openPasskeySettings() {
-  fireEvent.click(screen.getByRole(`button`, { name: `Manage passkeys` }));
+  fireEvent.click(screen.getByRole(`button`, { name: `Manage` }));
 }
 
 beforeEach(() => {

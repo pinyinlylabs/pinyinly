@@ -134,6 +134,52 @@ describe(`InlineEditableSettingText`, () => {
     expect(input).toBeInTheDocument();
   });
 
+  test(`starts editing when edit request changes`, async () => {
+    setupTest({ currentValue: `Custom Name` });
+
+    const { rerender } = render(
+      <InlineEditableSettingText
+        setting={mockSetting}
+        settingKey={{ id: `test` }}
+        placeholder="Enter text"
+        editRequest={0}
+      />,
+    );
+
+    rerender(
+      <InlineEditableSettingText
+        setting={mockSetting}
+        settingKey={{ id: `test` }}
+        placeholder="Enter text"
+        editRequest={1}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue(`Custom Name`)).toBeInTheDocument();
+    });
+  });
+
+  test(`disables autofill in the input when requested`, async () => {
+    setupTest({ currentValue: `Profile name` });
+
+    render(
+      <InlineEditableSettingText
+        setting={mockSetting}
+        settingKey={{ id: `test` }}
+        placeholder="Enter text"
+        disableAutofill
+      />,
+    );
+
+    fireEvent.click(screen.getByText(`Profile name`));
+
+    expect(screen.getByDisplayValue(`Profile name`)).toHaveAttribute(
+      `autocomplete`,
+      `off`,
+    );
+  });
+
   test(`pre-fills input with defaultValue when editing and no override exists`, async () => {
     setupTest({ currentValue: null, defaultValue: `Default Name` });
 

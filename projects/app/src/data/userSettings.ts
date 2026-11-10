@@ -257,6 +257,13 @@ export const soundsPageUserToggleSetting = defineUserSetting({
   defaultValue: () => ({ enabled: false }),
 });
 
+export const profileOverviewUserToggleSetting = defineUserSetting({
+  entity: r.entity(`profileOverview`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: false }),
+});
+
 export const practiceMeaningUserToggleSetting = defineUserSetting({
   entity: r.entity(`practiceMeaning`, {
     enabled: r.boolean(`e`),
@@ -757,6 +764,7 @@ export const userSettingDefinitions = [
   autoCheckUserToggleSetting,
   newSkillLessonUserToggleSetting,
   soundsPageUserToggleSetting,
+  profileOverviewUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,

@@ -21,7 +21,6 @@ export interface NavGroup {
 
 export const navItems: NavGroup[] = [
   {
-    title: `Learning`,
     primary: true,
     items: [
       {
@@ -43,15 +42,17 @@ export const navItems: NavGroup[] = [
     title: `Settings`,
     primary: true,
     items: [
-      { name: `Profile`, href: `/settings/profile` },
-      { name: `Accounts`, href: `/settings/accounts` },
-      { name: `Appearance`, href: `/settings/appearance` },
+      { name: `Profile`, href: `/profile` },
+      { name: `Settings`, href: `/settings` },
     ] satisfies NavItem[],
   },
   {
+    items: [{ name: `Switch profile`, href: `/profile/switch` }],
+  },
+  {
     items: [
-      { name: `Developer`, href: `/settings/developer` },
       { name: `Acknowledgements`, href: `/acknowledgements` },
+      { name: `Developer`, href: `/settings/developer` },
     ] satisfies NavItem[],
   },
 ];

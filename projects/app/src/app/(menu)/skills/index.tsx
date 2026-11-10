@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { Icon } from "@/client/ui/Icon";
+import { SectionTitle } from "@/client/ui/SectionTitle";
 import { Link } from "expo-router";
 import { Pressable } from "react-native";
 import { Text } from "@/client/ui/Text";
@@ -13,10 +14,7 @@ export default function SkillsPage() {
         <Breadcrumbs.Item href="/skills">Skills</Breadcrumbs.Item>
       </Breadcrumbs>
 
-      <View>
-        <Text className="pyly-body-title">Skills</Text>
-        <HeaderProvider.ScrollTrigger title="Skills" />
-      </View>
+      <HeaderProvider.ScrollTrigger title="Skills" />
 
       <View className="gap-2">
         <Link href="/skills/bookmark" asChild>
@@ -35,7 +33,7 @@ export default function SkillsPage() {
       </View>
 
       <View className="gap-2">
-        <Text className="pyly-body-caption text-muted-fg">HSK</Text>
+        <SectionTitle>HSK</SectionTitle>
         {([1, 2, 3, 4] as const).map((level) => (
           <Link href={`/skills/hsk/${level}`} asChild key={level}>
             <Pressable

@@ -7,7 +7,7 @@ import { navItems } from "@/client/ui/navItems";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { ReactNode } from "react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -110,28 +110,39 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
           contentContainerClassName="items-stretch gap-8 px-4 pt-4 pb-6"
           keyboardShouldPersistTaps="handled"
         >
-          {navItems
-            .filter((section) => section.primary === true)
-            .map((section, sectionIndex) => (
-              <MobileNavGroup key={sectionIndex} title={section.title}>
-                {section.items.map((item, itemIndex) => (
-                  <UserSettingToggleGuard key={itemIndex} setting={item.guard}>
-                    <MobileNavItem
-                      name={item.name}
-                      href={item.href}
-                      lozenge={item.lozenge}
-                      onNavigate={dismiss}
-                    />
-                  </UserSettingToggleGuard>
-                ))}
-              </MobileNavGroup>
-            ))}
+          <View className="w-full overflow-hidden rounded-xl">
+            {navItems
+              .filter((section) => section.primary === true)
+              .map((section, sectionIndex) => (
+                <Fragment key={sectionIndex}>
+                  {section.title == null ? null : (
+                    <View className="my-2 h-px bg-fg/5" />
+                  )}
+                  {section.items.map((item, itemIndex) => (
+                    <UserSettingToggleGuard
+                      key={itemIndex}
+                      setting={item.guard}
+                    >
+                      <MobileNavItem
+                        name={item.name}
+                        href={item.href}
+                        lozenge={item.lozenge}
+                        onNavigate={dismiss}
+                      />
+                    </UserSettingToggleGuard>
+                  ))}
+                </Fragment>
+              ))}
+          </View>
 
           <View className="items-start px-4">
             {navItems
               .filter((section) => section.primary !== true)
               .map((section, sectionIndex) => (
-                <View key={sectionIndex}>
+                <View
+                  key={sectionIndex}
+                  className={sectionIndex === 0 ? `mt-3` : undefined}
+                >
                   {sectionIndex === 0 ? null : (
                     <View className="invisible h-10" />
                   )}
@@ -153,27 +164,6 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
           {Platform.OS === `web` ? <BuildTimestampStamp /> : null}
         </ScrollView>
       )}
-    </View>
-  );
-}
-
-function MobileNavGroup({
-  children,
-  title,
-}: {
-  children: ReactNode;
-  title?: string;
-}) {
-  return (
-    <View className="gap-2.5">
-      {title == null ? null : (
-        <View className="px-4">
-          <Text className="pyly-body-dt">{title}</Text>
-        </View>
-      )}
-      <View className="w-full gap-0.5 overflow-hidden rounded-xl">
-        {children}
-      </View>
     </View>
   );
 }

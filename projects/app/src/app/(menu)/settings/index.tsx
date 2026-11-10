@@ -1,4 +1,7 @@
 import { AiImageStyleSettingControl } from "@/client/ui/AiImageStyleSettingControl";
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
+import { SectionTitle } from "@/client/ui/SectionTitle";
 import {
   ColorSchemeOverrideKind,
   colorSchemeOverrideSetting,
@@ -7,11 +10,9 @@ import { DeviceStoreSelect } from "@/client/ui/DeviceStoreSelect";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import {
   autoCheckUserToggleSetting,
-  newSkillLessonUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
-  soundsPageUserToggleSetting,
   studyBookmarksUserToggleSetting,
   studyHsk1UserToggleSetting,
   studyHsk2UserToggleSetting,
@@ -53,16 +54,19 @@ const colorSchemeOverrideOptions = [
   { value: ColorSchemeOverrideKind.Dark, label: `Dark` },
 ] as const;
 
-export default function AppearanceSettingsPage() {
+export default function SettingsPage() {
   return (
     <View className="gap-5">
       {/* Header */}
-      <View>
-        <Text className="pyly-body-title">Appearance</Text>
+      <View className="gap-1">
+        <Breadcrumbs>
+          <Breadcrumbs.Item href="/settings">Settings</Breadcrumbs.Item>
+        </Breadcrumbs>
+        <HeaderProvider.ScrollTrigger title="Settings" />
       </View>
       <View className="gap-2">
-        <Text className="pyly-body-dt">Theme</Text>
-        <View className="flex-row items-center">
+        <SectionTitle>Theme</SectionTitle>
+        <View className="flex-row items-center gap-4">
           <View className="flex-1">
             <Text className="pyly-body-heading">Dark mode</Text>
             <Text className="pyly-body-caption">
@@ -83,9 +87,9 @@ export default function AppearanceSettingsPage() {
         </View>
       </View>
       <View className="gap-2">
-        <Text className="pyly-body-dt">Learning</Text>
+        <SectionTitle>Learning</SectionTitle>
 
-        <View className="flex-row">
+        <View className="flex-row gap-4">
           <View className="flex-1">
             <Text className="pyly-body-heading">Auto check answers</Text>
             <Text className="pyly-body-caption">
@@ -99,9 +103,9 @@ export default function AppearanceSettingsPage() {
         </View>
 
         <View className="gap-2 pt-6">
-          <Text className="pyly-body-dt">Skills to practice</Text>
+          <SectionTitle>Skills to practice</SectionTitle>
           {practiceCategorySettings.map(({ title, description, entity }) => (
-            <View key={title} className="flex-row items-center">
+            <View key={title} className="flex-row items-center gap-4">
               <View className="flex-1">
                 <Text className="pyly-body-heading">{title}</Text>
                 <Text className="pyly-body-caption">{description}</Text>
@@ -118,9 +122,9 @@ export default function AppearanceSettingsPage() {
       </View>
 
       <View className="gap-2 pt-6">
-        <Text className="pyly-body-dt">Dictionary entries to study</Text>
+        <SectionTitle>Dictionary entries to study</SectionTitle>
         {studySourceSettings.map(({ title, entity }) => (
-          <View key={title} className="flex-row items-center">
+          <View key={title} className="flex-row items-center gap-4">
             <View className="flex-1">
               <Text className="pyly-body-heading">{title}</Text>
             </View>
@@ -135,40 +139,8 @@ export default function AppearanceSettingsPage() {
       </View>
 
       <View className="gap-2 pt-6">
-        <Text className="pyly-body-dt">Images</Text>
+        <SectionTitle>Images</SectionTitle>
         <AiImageStyleSettingControl />
-      </View>
-
-      <View className="gap-2 pt-6">
-        <Text className="pyly-body-dt">Experimental</Text>
-        <View className="flex-row items-center">
-          <View className="flex-1">
-            <Text className="pyly-body-heading">New skill lesson</Text>
-            <Text className="pyly-body-caption">
-              Show a lesson modal when you encounter a new word.
-            </Text>
-          </View>
-          <View>
-            <UserSettingToggleButton
-              entity={newSkillLessonUserToggleSetting}
-              accessibilityLabel="New skill lesson"
-            />
-          </View>
-        </View>
-        <View className="flex-row items-center">
-          <View className="flex-1">
-            <Text className="pyly-body-heading">Sounds page</Text>
-            <Text className="pyly-body-caption">
-              Show the Sounds page and pronunciation box on wiki pages.
-            </Text>
-          </View>
-          <View>
-            <UserSettingToggleButton
-              entity={soundsPageUserToggleSetting}
-              accessibilityLabel="Sounds page"
-            />
-          </View>
-        </View>
       </View>
     </View>
   );

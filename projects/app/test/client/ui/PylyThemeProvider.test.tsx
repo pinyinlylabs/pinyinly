@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import AppearanceSettingsPage from "#app/(menu)/settings/appearance/index.tsx";
+import SettingsPage from "#app/(menu)/settings/index.tsx";
 import {
   buildDeviceStoreKey,
   deviceStoreGet,
@@ -39,6 +39,7 @@ vi.mock(`react-native-screens`, () => ({
 
 vi.mock(`expo-router`, () => ({
   DefaultTheme: { fonts: {} },
+  Link: ({ children }: PropsWithChildren) => <>{children}</>,
   ThemeProvider: ({
     children,
     value,
@@ -78,6 +79,10 @@ vi.mock(`#client/ui/UserSettingToggleButton.tsx`, () => ({
 
 vi.mock(`#client/ui/AiImageStyleSettingControl.tsx`, () => ({
   AiImageStyleSettingControl: () => null,
+}));
+
+vi.mock(`#client/ui/HeaderProvider.tsx`, () => ({
+  HeaderProvider: { ScrollTrigger: () => null },
 }));
 
 let queryClient: QueryClient;
@@ -179,7 +184,7 @@ test(`selects and persists overrides and clears them for System default while of
   onlineManager.setOnline(false);
   const { unmount } = render(
     <PylyThemeProvider>
-      <AppearanceSettingsPage />
+      <SettingsPage />
     </PylyThemeProvider>,
     { wrapper: Wrapper },
   );
@@ -204,7 +209,7 @@ test(`selects and persists overrides and clears them for System default while of
   queryClient.clear();
   render(
     <PylyThemeProvider>
-      <AppearanceSettingsPage />
+      <SettingsPage />
     </PylyThemeProvider>,
     { wrapper: Wrapper },
   );
@@ -242,7 +247,7 @@ test(`suspends the selector during loading and disables it while saving`, async 
       await set(entity, value);
     },
   );
-  render(<AppearanceSettingsPage />, { wrapper: Wrapper });
+  render(<SettingsPage />, { wrapper: Wrapper });
   expect(
     screen.queryByRole(`button`, { name: `Color scheme` }),
   ).not.toBeInTheDocument();
@@ -274,7 +279,7 @@ test(`suspends the selector during loading and disables it while saving`, async 
 
 test(`reports a failed override save without changing the active scheme and allows retry`, async () => {
   const log = vi.spyOn(console, `error`).mockImplementation(() => {});
-  render(<AppearanceSettingsPage />, { wrapper: Wrapper });
+  render(<SettingsPage />, { wrapper: Wrapper });
   await waitFor(() => {
     expect(
       screen.getByRole(`button`, { name: `Color scheme` }),
