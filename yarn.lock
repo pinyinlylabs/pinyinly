@@ -7500,21 +7500,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rive-app/canvas@npm:2.37.5":
-  version: 2.37.5
-  resolution: "@rive-app/canvas@npm:2.37.5"
-  checksum: 10c0/250e9ea2e116ef68ae0dcdf4103217a31d1e1b2d49d91bb780b83b17e98a10c748a5b4386bae1723911a5bd74822a1b0bc0dd8ce1f2af2a9d464997eb1e23505
+"@rive-app/canvas@npm:2.50.0":
+  version: 2.50.0
+  resolution: "@rive-app/canvas@npm:2.50.0"
+  checksum: 10c0/f2251354515436d041ae548e71e8238136cdf9208f962df2e5b2b6cda4c0565a54db0584248125d1f97573532896ce8be5c9b0f2ea9d3e7c6c7574d98dd9ffcb
   languageName: node
   linkType: hard
 
 "@rive-app/react-canvas@npm:^4.21.4":
-  version: 4.28.3
-  resolution: "@rive-app/react-canvas@npm:4.28.3"
+  version: 4.39.0
+  resolution: "@rive-app/react-canvas@npm:4.39.0"
   dependencies:
-    "@rive-app/canvas": "npm:2.37.5"
+    "@rive-app/canvas": "npm:2.50.0"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
-  checksum: 10c0/c01f6c4eeacc1cc89190e2dd092711ad9725f066a25d04519320f77e390925d14bda1dfc1a76e37e227714ec34706cec02f84b71cea5954d1204d0e959027cda
+  checksum: 10c0/a5e00dbd9e9ff4d9cac5b17aa9efe5c7eb1a2af89d3187ff26dabd7c3c0fd2f26b509c959b231b8e5e2f072af4e2e133c812765086d47a80a4ed7a152ef10e1d
   languageName: node
   linkType: hard
 
