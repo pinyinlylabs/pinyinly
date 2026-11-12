@@ -1,10 +1,12 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import {
   isAudioSpriteSource,
   resolveAudioSource,
 } from "@pinyinly/audio-sprites/client";
+import { soundEffectsUserToggleSetting } from "@/data/userSettings";
 import { useAudioPlayer } from "expo-audio";
 import { use } from "react";
 import { Platform } from "react-native";
@@ -16,8 +18,13 @@ const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
   const player = useAudioPlayer(
     source == null || isAudioSpriteSource(source) ? null : source,
   );
+  const { isEnabled } = useUserSettingToggle(soundEffectsUserToggleSetting);
 
   const play = useEventCallback(() => {
+    if (!isEnabled) {
+      return;
+    }
+
     player.play();
   });
 
@@ -34,10 +41,10 @@ const useSoundEffectWebApi: UseSoundEffect = (src) => {
 
   const audioContext = use(AudioContextProvider.Context);
   const { data: audioBuffer } = useFetchAudioBuffer(uri ?? null);
+  const { isEnabled } = useUserSettingToggle(soundEffectsUserToggleSetting);
 
   const play = useEventCallback(() => {
-    // No-op if source is null
-    if (resolved == null) {
+    if (!isEnabled || resolved == null) {
       return;
     }
 

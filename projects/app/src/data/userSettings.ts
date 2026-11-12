@@ -252,6 +252,13 @@ export const writingWeakWordRepeatCountSetting = defineUserSetting({
   defaultValue: () => ({ count: defaultWritingWeakWordRepeatCount }),
 });
 
+export const soundEffectsUserToggleSetting = defineUserSetting({
+  entity: r.entity(`soundEffects`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: true }),
+});
+
 export const newSkillLessonUserToggleSetting = defineUserSetting({
   entity: r.entity(`newSkillLesson`, {
     enabled: r.boolean(`e`),
@@ -772,6 +779,7 @@ export const userSettingDefinitions = [
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
   writingWeakWordRepeatCountSetting,
+  soundEffectsUserToggleSetting,
   newSkillLessonUserToggleSetting,
   soundsPageUserToggleSetting,
   profileOverviewUserToggleSetting,

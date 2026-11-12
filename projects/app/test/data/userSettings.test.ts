@@ -17,6 +17,7 @@ import {
   locationSetIdentityImageSetting,
   pinyinSoundImageSetting,
   newSkillLessonUserToggleSetting,
+  soundEffectsUserToggleSetting,
   profileOverviewUserToggleSetting,
   soundsPageUserToggleSetting,
   practiceMeaningUserToggleSetting,
@@ -45,6 +46,13 @@ const testSoundId = `-a` as PinyinSoundId;
 const testLocationId = `place_123` as LocationId;
 
 describe(`experimental settings`, () => {
+  test(`sound effects are enabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(soundEffectsUserToggleSetting, {}),
+    ).toEqual({ enabled: true });
+    expect(userSettingDefinitions).toContain(soundEffectsUserToggleSetting);
+  });
+
   test(`new skill lesson is disabled by default and registered for syncing`, () => {
     expect(
       getUserSettingDefaultValue(newSkillLessonUserToggleSetting, {}),
