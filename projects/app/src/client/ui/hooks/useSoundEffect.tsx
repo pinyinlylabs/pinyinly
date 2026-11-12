@@ -18,10 +18,12 @@ const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
   const player = useAudioPlayer(
     source == null || isAudioSpriteSource(source) ? null : source,
   );
-  const { isEnabled } = useUserSettingToggle(soundEffectsUserToggleSetting);
+  const { isLoading, isEnabled } = useUserSettingToggle(
+    soundEffectsUserToggleSetting,
+  );
 
   const play = useEventCallback(() => {
-    if (!isEnabled) {
+    if (isLoading || !isEnabled) {
       return;
     }
 
@@ -41,10 +43,12 @@ const useSoundEffectWebApi: UseSoundEffect = (src) => {
 
   const audioContext = use(AudioContextProvider.Context);
   const { data: audioBuffer } = useFetchAudioBuffer(uri ?? null);
-  const { isEnabled } = useUserSettingToggle(soundEffectsUserToggleSetting);
+  const { isLoading, isEnabled } = useUserSettingToggle(
+    soundEffectsUserToggleSetting,
+  );
 
   const play = useEventCallback(() => {
-    if (!isEnabled || resolved == null) {
+    if (isLoading || !isEnabled || resolved == null) {
       return;
     }
 

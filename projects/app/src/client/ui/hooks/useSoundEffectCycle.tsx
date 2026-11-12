@@ -41,10 +41,12 @@ const useSoundEffectCycleWebApi: UseSoundEffectCycle = (sources) => {
 
   const [nextSourceIndex, setNextSourceIndex] = useState(0);
   const audioContext = use(AudioContextProvider.Context);
-  const { isEnabled } = useUserSettingToggle(soundEffectsUserToggleSetting);
+  const { isLoading, isEnabled } = useUserSettingToggle(
+    soundEffectsUserToggleSetting,
+  );
 
   const play = useEventCallback(() => {
-    if (!isEnabled) {
+    if (isLoading || !isEnabled) {
       return;
     }
 
