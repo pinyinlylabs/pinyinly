@@ -15,8 +15,9 @@ export default function AddProfilePage() {
     >
       <View className="w-full max-w-lg gap-8">
         <RectButton
+          className="self-start"
           accessibilityLabel="Go back"
-          variant="bare"
+          variant="bareDim"
           iconStart="chevron-left"
           onPress={() => {
             router.back();
