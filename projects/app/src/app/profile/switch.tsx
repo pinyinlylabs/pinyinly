@@ -28,17 +28,17 @@ export default function ProfileSwitchPage() {
     >
       <View className="w-full max-w-lg gap-4">
         <View className="gap-1">
-          <View className="flex-row items-center gap-2">
-            <RectButton
-              accessibilityLabel="Go back"
-              variant="bare"
-              iconStart="chevron-left"
-              onPress={() => {
-                router.back();
-              }}
-            />
-            <Text className="pyly-body-title text-3xl">Switch profile</Text>
-          </View>
+          <RectButton
+            className="self-start"
+            accessibilityLabel="Go back"
+            variant="bareDim"
+            iconStart="chevron-left"
+            onPress={() => {
+              router.back();
+            }}
+          >
+            Switch profile
+          </RectButton>
           <Text className="pyly-body text-muted-fg">
             Choose who&apos;s learning
           </Text>
