@@ -77,6 +77,14 @@ vi.mock(`#client/ui/UserSettingToggleButton.tsx`, () => ({
   UserSettingToggleButton: () => null,
 }));
 
+vi.mock(`#client/ui/hooks/useUserSetting.ts`, () => ({
+  useUserSetting: () => ({
+    isLoading: false,
+    value: null,
+    setValue: vi.fn(),
+  }),
+}));
+
 vi.mock(`#client/ui/AiImageStyleSettingControl.tsx`, () => ({
   AiImageStyleSettingControl: () => null,
 }));

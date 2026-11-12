@@ -8,6 +8,8 @@ import {
 } from "@/client/theme";
 import { DeviceStoreSelect } from "@/client/ui/DeviceStoreSelect";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
+import { Select } from "@/client/ui/Select";
+import { useUserSetting } from "@/client/ui/hooks/useUserSetting";
 import {
   autoCheckUserToggleSetting,
   practiceMeaningUserToggleSetting,
@@ -18,6 +20,8 @@ import {
   studyHsk2UserToggleSetting,
   studyHsk3UserToggleSetting,
   studyHsk4UserToggleSetting,
+  defaultWritingWeakWordRepeatCount,
+  writingWeakWordRepeatCountSetting,
 } from "@/data/userSettings";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
@@ -54,7 +58,19 @@ const colorSchemeOverrideOptions = [
   { value: ColorSchemeOverrideKind.Dark, label: `Dark` },
 ] as const;
 
+const writingWeakWordRepeatCountOptions = [
+  { value: `1`, label: `1` },
+  { value: `2`, label: `2` },
+  { value: `3`, label: `3` },
+  { value: `4`, label: `4` },
+  { value: `5`, label: `5` },
+] as const;
+
 export default function SettingsPage() {
+  const writingWeakWordRepeatSetting = useUserSetting({
+    setting: writingWeakWordRepeatCountSetting,
+  });
+
   return (
     <View className="gap-5">
       {/* Header */}
@@ -100,6 +116,30 @@ export default function SettingsPage() {
           <View>
             <UserSettingToggleButton entity={autoCheckUserToggleSetting} />
           </View>
+        </View>
+
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">
+              Repeat writing after a mistake
+            </Text>
+            <Text className="pyly-body-caption">
+              Number of correct writing answers required for a weak word.
+            </Text>
+          </View>
+          <Select
+            accessibilityLabel="Writing repeat count"
+            options={writingWeakWordRepeatCountOptions}
+            value={String(
+              writingWeakWordRepeatSetting.value?.count ??
+                defaultWritingWeakWordRepeatCount,
+            )}
+            onValueChange={(value) => {
+              writingWeakWordRepeatSetting.setValue({ count: Number(value) });
+            }}
+            placeholder="Choose a repeat count"
+            disabled={writingWeakWordRepeatSetting.isLoading}
+          />
         </View>
 
         <View className="gap-2 pt-6">

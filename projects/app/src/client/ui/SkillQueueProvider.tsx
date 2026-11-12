@@ -25,6 +25,8 @@ import {
   studyHsk2UserToggleSetting,
   studyHsk3UserToggleSetting,
   studyHsk4UserToggleSetting,
+  defaultWritingWeakWordRepeatCount,
+  writingWeakWordRepeatCountSetting,
 } from "@/data/userSettings";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { useLiveQuery } from "@tanstack/react-db";
@@ -41,7 +43,6 @@ const mockable = {
 };
 
 const skillReviewQueueRemediationConfig = {
-  writingSuccessfulAttempts: 5,
   typedPinyinWrongInitial: {
     initialSuccessfulAttempts: 3,
     typedSuccessfulAttempts: 1,
@@ -91,6 +92,9 @@ function SkillQueueProvider({
   const writingPracticeSetting = useUserSetting({
     setting: practiceWritingUserToggleSetting,
   });
+  const writingWeakWordRepeatSetting = useUserSetting({
+    setting: writingWeakWordRepeatCountSetting,
+  });
   const bookmarksStudySetting = useUserSetting({
     setting: studyBookmarksUserToggleSetting,
   });
@@ -109,7 +113,8 @@ function SkillQueueProvider({
   const practiceSettingsLoading =
     meaningPracticeSetting.isLoading ||
     pronunciationPracticeSetting.isLoading ||
-    writingPracticeSetting.isLoading;
+    writingPracticeSetting.isLoading ||
+    writingWeakWordRepeatSetting.isLoading;
   const studySourceSettingsLoading =
     bookmarksStudySetting.isLoading ||
     hsk1StudySetting.isLoading ||
@@ -131,6 +136,9 @@ function SkillQueueProvider({
   const pronunciationEnabled =
     pronunciationPracticeSetting.value?.enabled ?? true;
   const writingEnabled = writingPracticeSetting.value?.enabled ?? true;
+  const writingSuccessfulAttempts =
+    writingWeakWordRepeatSetting.value?.count ??
+    defaultWritingWeakWordRepeatCount;
   const excludedPracticeCategories = useMemo(
     () =>
       new Set(
@@ -300,7 +308,10 @@ function SkillQueueProvider({
                 isPracticeCategoryEnabled(skill, excludedPracticeCategories) &&
                 (listId != null || allStudySourcesEnabled || graph.has(skill)),
             ),
-            remediationConfig: skillReviewQueueRemediationConfig,
+            remediationConfig: {
+              ...skillReviewQueueRemediationConfig,
+              writingSuccessfulAttempts,
+            },
             now: new Date(),
             dictionary,
             maxQueueItems: mockable.getMaxQueueItems(),
@@ -310,6 +321,7 @@ function SkillQueueProvider({
       dictionary,
       skillRatingHistoryData,
       skillSrsStates,
+      writingSuccessfulAttempts,
       listId,
       studySkills,
       bookmarksEnabled,

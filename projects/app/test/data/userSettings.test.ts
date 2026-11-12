@@ -22,6 +22,8 @@ import {
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
+  defaultWritingWeakWordRepeatCount,
+  writingWeakWordRepeatCountSetting,
   studyBookmarksUserToggleSetting,
   studyHsk1UserToggleSetting,
   studyHsk2UserToggleSetting,
@@ -106,6 +108,16 @@ describe(`practice category settings`, () => {
     expect(userSettingDefinitions).toContain(studyHsk2UserToggleSetting);
     expect(userSettingDefinitions).toContain(studyHsk3UserToggleSetting);
     expect(userSettingDefinitions).toContain(studyHsk4UserToggleSetting);
+  });
+});
+
+describe(`writing weak word repeat setting`, () => {
+  test(`defaults to one and is registered for syncing`, () => {
+    expect(defaultWritingWeakWordRepeatCount).toBe(1);
+    expect(
+      getUserSettingDefaultValue(writingWeakWordRepeatCountSetting, {}),
+    ).toEqual({ count: 1 });
+    expect(userSettingDefinitions).toContain(writingWeakWordRepeatCountSetting);
   });
 });
 

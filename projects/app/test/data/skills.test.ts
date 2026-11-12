@@ -1256,6 +1256,18 @@ describe(`skillReviewQueue suite`, () => {
             },
           ]);
           expect(
+            writingSkillReviewQueueRemediator(failedEvent(writingSkill), {
+              dictionary,
+              config: undefined,
+            }),
+          ).toEqual([
+            {
+              skill: writingSkill,
+              successfulAttempts: 1,
+              flag: { kind: QuestionFlagKind.WeakWord },
+            },
+          ]);
+          expect(
             writingSkillReviewQueueRemediator(
               failedEvent(ordinarySkill),
               remediatorContext(dictionary),
