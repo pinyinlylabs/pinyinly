@@ -243,6 +243,15 @@ export const autoCheckUserToggleSetting = defineUserSetting({
   }) satisfies UserSettingToggleableEntity,
 });
 
+export const defaultWritingWeakWordRepeatCount = 1;
+
+export const writingWeakWordRepeatCountSetting = defineUserSetting({
+  entity: r.entity(`writingWeakWordRepeatCount`, {
+    count: r.number().alias(`c`),
+  }),
+  defaultValue: () => ({ count: defaultWritingWeakWordRepeatCount }),
+});
+
 export const newSkillLessonUserToggleSetting = defineUserSetting({
   entity: r.entity(`newSkillLesson`, {
     enabled: r.boolean(`e`),
@@ -762,6 +771,7 @@ export const userSettingDefinitions = [
   aiImagePlaygroundTextSetting,
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
+  writingWeakWordRepeatCountSetting,
   newSkillLessonUserToggleSetting,
   soundsPageUserToggleSetting,
   profileOverviewUserToggleSetting,
