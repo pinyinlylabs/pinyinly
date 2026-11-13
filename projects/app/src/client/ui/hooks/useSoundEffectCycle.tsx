@@ -1,8 +1,10 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import { resolveAudioSource } from "@pinyinly/audio-sprites/client";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
+import { soundEffectsUserToggleSetting } from "@/data/userSettings";
 import { use, useState } from "react";
 import { Platform } from "react-native";
 import { useFetchAudioBuffers } from "./useFetchAudioBuffer";
@@ -39,8 +41,15 @@ const useSoundEffectCycleWebApi: UseSoundEffectCycle = (sources) => {
 
   const [nextSourceIndex, setNextSourceIndex] = useState(0);
   const audioContext = use(AudioContextProvider.Context);
+  const { isLoading, isEnabled } = useUserSettingToggle(
+    soundEffectsUserToggleSetting,
+  );
 
   const play = useEventCallback(() => {
+    if (isLoading || !isEnabled) {
+      return;
+    }
+
     setNextSourceIndex((prev) => (prev + 1) % sources.length);
 
     const resolvedSource = resolvedSources[nextSourceIndex];

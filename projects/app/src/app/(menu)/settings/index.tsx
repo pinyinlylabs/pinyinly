@@ -15,6 +15,7 @@ import {
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
+  soundEffectsUserToggleSetting,
   studyBookmarksUserToggleSetting,
   studyHsk1UserToggleSetting,
   studyHsk2UserToggleSetting,
@@ -100,6 +101,23 @@ export default function SettingsPage() {
             options={colorSchemeOverrideOptions}
             placeholder="Choose a color scheme"
           />
+        </View>
+      </View>
+      <View className="gap-2">
+        <SectionTitle>Sound</SectionTitle>
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Sound effects</Text>
+            <Text className="pyly-body-caption">
+              Play sounds when interacting with audio controls.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={soundEffectsUserToggleSetting}
+              accessibilityLabel="Sound effects"
+            />
+          </View>
         </View>
       </View>
       <View className="gap-2">
