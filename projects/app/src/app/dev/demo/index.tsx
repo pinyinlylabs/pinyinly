@@ -27,6 +27,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
   [`ComponentLozenge`]: lazyDemo(() => import(`../../../client/ui/ComponentLozenge.demo`)),
   [`DropdownMenu2`]: lazyDemo(() => import(`../../../client/ui/DropdownMenu2.demo`)),
+  [`ErrorBoundary`]: lazyDemo(() => import(`../../../client/ui/ErrorBoundary.demo`)),
   [`FloatingMenuModal`]: lazyDemo(() => import(`../../../client/ui/FloatingMenuModal.demo`)),
   [`GlyphBuilder`]: lazyDemo(() => import(`../../../client/ui/GlyphBuilder.demo`)),
   [`HanziDecompositionEditor`]: lazyDemo(() => import(`../../../client/ui/HanziDecompositionEditor.demo`)),

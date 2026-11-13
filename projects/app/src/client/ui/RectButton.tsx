@@ -415,6 +415,7 @@ const textClassPrefixList = [
   `capitalize`,
   `underline`,
   `line-through`,
+  `normal-case`,
   `italic`,
   `not-italic`,
   `tabular-nums`,
