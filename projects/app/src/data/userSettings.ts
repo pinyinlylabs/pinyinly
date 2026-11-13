@@ -245,6 +245,24 @@ export const autoCheckUserToggleSetting = defineUserSetting({
 
 export const defaultWritingWeakWordRepeatCount = 1;
 
+export const defaultMeaningWeakWordRepeatCount = 1;
+
+export const meaningWeakWordRepeatCountSetting = defineUserSetting({
+  entity: r.entity(`meaningWeakWordRepeatCount`, {
+    count: r.number().alias(`c`),
+  }),
+  defaultValue: () => ({ count: defaultMeaningWeakWordRepeatCount }),
+});
+
+export const defaultPronunciationWeakWordRepeatCount = 1;
+
+export const pronunciationWeakWordRepeatCountSetting = defineUserSetting({
+  entity: r.entity(`pronunciationWeakWordRepeatCount`, {
+    count: r.number().alias(`c`),
+  }),
+  defaultValue: () => ({ count: defaultPronunciationWeakWordRepeatCount }),
+});
+
 export const writingWeakWordRepeatCountSetting = defineUserSetting({
   entity: r.entity(`writingWeakWordRepeatCount`, {
     count: r.number().alias(`c`),
@@ -778,6 +796,8 @@ export const userSettingDefinitions = [
   aiImagePlaygroundTextSetting,
   aiImageStyleTextSetting,
   autoCheckUserToggleSetting,
+  meaningWeakWordRepeatCountSetting,
+  pronunciationWeakWordRepeatCountSetting,
   writingWeakWordRepeatCountSetting,
   soundEffectsUserToggleSetting,
   newSkillLessonUserToggleSetting,

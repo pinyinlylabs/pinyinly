@@ -23,6 +23,10 @@ import {
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
+  defaultMeaningWeakWordRepeatCount,
+  meaningWeakWordRepeatCountSetting,
+  defaultPronunciationWeakWordRepeatCount,
+  pronunciationWeakWordRepeatCountSetting,
   defaultWritingWeakWordRepeatCount,
   writingWeakWordRepeatCountSetting,
   studyBookmarksUserToggleSetting,
@@ -126,6 +130,24 @@ describe(`writing weak word repeat setting`, () => {
       getUserSettingDefaultValue(writingWeakWordRepeatCountSetting, {}),
     ).toEqual({ count: 1 });
     expect(userSettingDefinitions).toContain(writingWeakWordRepeatCountSetting);
+  });
+});
+
+describe(`meaning and pronunciation weak word repeat settings`, () => {
+  test(`default to one and are registered for syncing`, () => {
+    expect(defaultMeaningWeakWordRepeatCount).toBe(1);
+    expect(
+      getUserSettingDefaultValue(meaningWeakWordRepeatCountSetting, {}),
+    ).toEqual({ count: 1 });
+    expect(userSettingDefinitions).toContain(meaningWeakWordRepeatCountSetting);
+
+    expect(defaultPronunciationWeakWordRepeatCount).toBe(1);
+    expect(
+      getUserSettingDefaultValue(pronunciationWeakWordRepeatCountSetting, {}),
+    ).toEqual({ count: 1 });
+    expect(userSettingDefinitions).toContain(
+      pronunciationWeakWordRepeatCountSetting,
+    );
   });
 });
 
