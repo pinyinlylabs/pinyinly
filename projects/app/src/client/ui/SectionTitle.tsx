@@ -6,5 +6,5 @@ export function SectionTitle({
 }: {
   children: ComponentProps<typeof Text>[`children`];
 }) {
-  return <Text className="pyly-body-subheading text-fg-dim">{children}</Text>;
+  return <Text className="pyly-body-subheading text-muted-fg">{children}</Text>;
 }
