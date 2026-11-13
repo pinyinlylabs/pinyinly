@@ -339,7 +339,7 @@ function PasskeyRow({
             className={`
               font-sans text-sm font-semibold
 
-              ${isUnnamed ? `text-fg-dim` : `text-fg`}
+              ${isUnnamed ? `text-muted-fg` : `text-fg`}
             `}
           >
             {displayName}
