@@ -1208,18 +1208,17 @@ describe(`skillReviewQueue suite`, () => {
         return {
           dictionary,
           config: {
+            meaningSuccessfulAttempts: 1,
+            typedPinyinSuccessfulAttempts: 1,
             writingSuccessfulAttempts: 5,
             typedPinyinWrongInitial: {
               initialSuccessfulAttempts: 3,
-              typedSuccessfulAttempts: 1,
             },
             typedPinyinWrongFinal: {
               finalSuccessfulAttempts: 3,
-              typedSuccessfulAttempts: 1,
             },
             typedPinyinWrongTone: {
               toneSuccessfulAttempts: 3,
-              typedSuccessfulAttempts: 1,
             },
           },
         };
@@ -1273,6 +1272,39 @@ describe(`skillReviewQueue suite`, () => {
               remediatorContext(dictionary),
             ),
           ).toBeNull();
+        },
+      );
+
+      skillTest(
+        `meaning and typed-pinyin retries use their configured repeat counts`,
+        ({ dictionary }) => {
+          const meaningSkill = hanziWordToGloss(`好:good`);
+          const typedPinyinSkill = hanziWordToPinyinTyped(`好:good`);
+          const config: SkillReviewQueueRemediatorContext = {
+            dictionary,
+            config: {
+              meaningSuccessfulAttempts: 4,
+              typedPinyinSuccessfulAttempts: 5,
+              typedPinyinWrongInitial: { initialSuccessfulAttempts: 3 },
+            },
+          };
+
+          expect(
+            retryFailedSkillReviewQueueRemediator(
+              failedEvent(meaningSkill),
+              config,
+            ),
+          ).toEqual([{ skill: meaningSkill, successfulAttempts: 4 }]);
+          expect(
+            typedPinyinComponentSkillReviewQueueRemediator(
+              failedEvent(typedPinyinSkill, `nǎo`),
+              config,
+            )?.at(-1),
+          ).toEqual({
+            skill: typedPinyinSkill,
+            successfulAttempts: 5,
+            flag: { kind: QuestionFlagKind.WeakWord },
+          });
         },
       );
 

@@ -21,6 +21,10 @@ import {
   studyHsk2UserToggleSetting,
   studyHsk3UserToggleSetting,
   studyHsk4UserToggleSetting,
+  defaultMeaningWeakWordRepeatCount,
+  meaningWeakWordRepeatCountSetting,
+  defaultPronunciationWeakWordRepeatCount,
+  pronunciationWeakWordRepeatCountSetting,
   defaultWritingWeakWordRepeatCount,
   writingWeakWordRepeatCountSetting,
 } from "@/data/userSettings";
@@ -59,7 +63,7 @@ const colorSchemeOverrideOptions = [
   { value: ColorSchemeOverrideKind.Dark, label: `Dark` },
 ] as const;
 
-const writingWeakWordRepeatCountOptions = [
+const weakWordRepeatCountOptions = [
   { value: `1`, label: `1` },
   { value: `2`, label: `2` },
   { value: `3`, label: `3` },
@@ -70,6 +74,12 @@ const writingWeakWordRepeatCountOptions = [
 export default function SettingsPage() {
   const writingWeakWordRepeatSetting = useUserSetting({
     setting: writingWeakWordRepeatCountSetting,
+  });
+  const meaningWeakWordRepeatSetting = useUserSetting({
+    setting: meaningWeakWordRepeatCountSetting,
+  });
+  const pronunciationWeakWordRepeatSetting = useUserSetting({
+    setting: pronunciationWeakWordRepeatCountSetting,
   });
 
   return (
@@ -139,6 +149,56 @@ export default function SettingsPage() {
         <View className="flex-row items-center gap-4">
           <View className="flex-1">
             <Text className="pyly-body-heading">
+              Repeat meaning after a mistake
+            </Text>
+            <Text className="pyly-body-caption">
+              Number of correct meaning answers required for a weak word.
+            </Text>
+          </View>
+          <Select
+            accessibilityLabel="Meaning repeat count"
+            options={weakWordRepeatCountOptions}
+            value={String(
+              meaningWeakWordRepeatSetting.value?.count ??
+                defaultMeaningWeakWordRepeatCount,
+            )}
+            onValueChange={(value) => {
+              meaningWeakWordRepeatSetting.setValue({ count: Number(value) });
+            }}
+            placeholder="Choose a repeat count"
+            disabled={meaningWeakWordRepeatSetting.isLoading}
+          />
+        </View>
+
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">
+              Repeat pronunciation after a mistake
+            </Text>
+            <Text className="pyly-body-caption">
+              Number of correct pinyin answers required for a weak word.
+            </Text>
+          </View>
+          <Select
+            accessibilityLabel="Pronunciation repeat count"
+            options={weakWordRepeatCountOptions}
+            value={String(
+              pronunciationWeakWordRepeatSetting.value?.count ??
+                defaultPronunciationWeakWordRepeatCount,
+            )}
+            onValueChange={(value) => {
+              pronunciationWeakWordRepeatSetting.setValue({
+                count: Number(value),
+              });
+            }}
+            placeholder="Choose a repeat count"
+            disabled={pronunciationWeakWordRepeatSetting.isLoading}
+          />
+        </View>
+
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">
               Repeat writing after a mistake
             </Text>
             <Text className="pyly-body-caption">
@@ -147,7 +207,7 @@ export default function SettingsPage() {
           </View>
           <Select
             accessibilityLabel="Writing repeat count"
-            options={writingWeakWordRepeatCountOptions}
+            options={weakWordRepeatCountOptions}
             value={String(
               writingWeakWordRepeatSetting.value?.count ??
                 defaultWritingWeakWordRepeatCount,

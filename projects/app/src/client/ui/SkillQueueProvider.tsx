@@ -25,6 +25,10 @@ import {
   studyHsk2UserToggleSetting,
   studyHsk3UserToggleSetting,
   studyHsk4UserToggleSetting,
+  defaultMeaningWeakWordRepeatCount,
+  meaningWeakWordRepeatCountSetting,
+  defaultPronunciationWeakWordRepeatCount,
+  pronunciationWeakWordRepeatCountSetting,
   defaultWritingWeakWordRepeatCount,
   writingWeakWordRepeatCountSetting,
 } from "@/data/userSettings";
@@ -45,15 +49,12 @@ const mockable = {
 const skillReviewQueueRemediationConfig = {
   typedPinyinWrongInitial: {
     initialSuccessfulAttempts: 3,
-    typedSuccessfulAttempts: 1,
   },
   typedPinyinWrongFinal: {
     finalSuccessfulAttempts: 3,
-    typedSuccessfulAttempts: 1,
   },
   typedPinyinWrongTone: {
     toneSuccessfulAttempts: 3,
-    typedSuccessfulAttempts: 1,
   },
 } satisfies SkillReviewQueueRemediationConfig;
 
@@ -95,6 +96,12 @@ function SkillQueueProvider({
   const writingWeakWordRepeatSetting = useUserSetting({
     setting: writingWeakWordRepeatCountSetting,
   });
+  const meaningWeakWordRepeatSetting = useUserSetting({
+    setting: meaningWeakWordRepeatCountSetting,
+  });
+  const pronunciationWeakWordRepeatSetting = useUserSetting({
+    setting: pronunciationWeakWordRepeatCountSetting,
+  });
   const bookmarksStudySetting = useUserSetting({
     setting: studyBookmarksUserToggleSetting,
   });
@@ -114,7 +121,9 @@ function SkillQueueProvider({
     meaningPracticeSetting.isLoading ||
     pronunciationPracticeSetting.isLoading ||
     writingPracticeSetting.isLoading ||
-    writingWeakWordRepeatSetting.isLoading;
+    writingWeakWordRepeatSetting.isLoading ||
+    meaningWeakWordRepeatSetting.isLoading ||
+    pronunciationWeakWordRepeatSetting.isLoading;
   const studySourceSettingsLoading =
     bookmarksStudySetting.isLoading ||
     hsk1StudySetting.isLoading ||
@@ -139,6 +148,12 @@ function SkillQueueProvider({
   const writingSuccessfulAttempts =
     writingWeakWordRepeatSetting.value?.count ??
     defaultWritingWeakWordRepeatCount;
+  const meaningSuccessfulAttempts =
+    meaningWeakWordRepeatSetting.value?.count ??
+    defaultMeaningWeakWordRepeatCount;
+  const typedPinyinSuccessfulAttempts =
+    pronunciationWeakWordRepeatSetting.value?.count ??
+    defaultPronunciationWeakWordRepeatCount;
   const excludedPracticeCategories = useMemo(
     () =>
       new Set(
@@ -310,6 +325,8 @@ function SkillQueueProvider({
             ),
             remediationConfig: {
               ...skillReviewQueueRemediationConfig,
+              meaningSuccessfulAttempts,
+              typedPinyinSuccessfulAttempts,
               writingSuccessfulAttempts,
             },
             now: new Date(),
@@ -322,6 +339,8 @@ function SkillQueueProvider({
       skillRatingHistoryData,
       skillSrsStates,
       writingSuccessfulAttempts,
+      meaningSuccessfulAttempts,
+      typedPinyinSuccessfulAttempts,
       listId,
       studySkills,
       bookmarksEnabled,

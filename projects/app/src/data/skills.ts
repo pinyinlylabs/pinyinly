@@ -1023,28 +1023,26 @@ export interface SkillReviewQueueRatingEvent extends Pick<
 }
 
 export interface SkillReviewQueueRemediationConfig {
+  /** Successful meaning attempts required after a meaning mistake. */
+  meaningSuccessfulAttempts?: number;
+  /** Successful typed-pinyin attempts required after a pronunciation mistake. */
+  typedPinyinSuccessfulAttempts?: number;
   /** Successful writing attempts required after a writing mistake. */
   writingSuccessfulAttempts?: number;
   /** Practice counts used when typed pinyin is wrong in its initial sound. */
   typedPinyinWrongInitial?: {
     /** Successful initial-only attempts required before retrying typed pinyin. */
     initialSuccessfulAttempts: number;
-    /** Successful typed-pinyin attempts required to finish remediation. */
-    typedSuccessfulAttempts: number;
   };
   /** Practice counts used when typed pinyin has the wrong final sound. */
   typedPinyinWrongFinal?: {
     /** Successful final-only attempts required before retrying typed pinyin. */
     finalSuccessfulAttempts: number;
-    /** Successful typed-pinyin attempts required to finish remediation. */
-    typedSuccessfulAttempts: number;
   };
   /** Practice counts used when typed pinyin has the wrong tone. */
   typedPinyinWrongTone?: {
     /** Successful tone-only attempts required before retrying typed pinyin. */
     toneSuccessfulAttempts: number;
-    /** Successful typed-pinyin attempts required to finish remediation. */
-    typedSuccessfulAttempts: number;
   };
 }
 
@@ -1137,11 +1135,17 @@ function typedPinyinComponentRemediationPlan({
   if (
     !isHanziWordToPinyinTypedSkill(event.skill) ||
     (mistakeMask & componentMask) === 0 ||
-    focusedSuccessfulAttempts == null ||
-    typedSuccessfulAttempts == null
+    focusedSuccessfulAttempts == null
   ) {
     return null;
   }
+
+  const resolvedTypedSuccessfulAttempts = typedSuccessfulAttempts ?? 1;
+  invariant(
+    Number.isInteger(resolvedTypedSuccessfulAttempts) &&
+      resolvedTypedSuccessfulAttempts > 0,
+    `typedPinyinSuccessfulAttempts must be a positive integer`,
+  );
 
   const hanziWord = hanziWordFromSkill(event.skill);
   return [
@@ -1152,7 +1156,7 @@ function typedPinyinComponentRemediationPlan({
     },
     {
       skill: event.skill,
-      successfulAttempts: typedSuccessfulAttempts,
+      successfulAttempts: resolvedTypedSuccessfulAttempts,
       flag: { kind: QuestionFlagKind.WeakWord },
     },
   ];
@@ -1171,8 +1175,7 @@ function typedPinyinComponentPlanForEvent(
       focusedSkill: hanziWordToPinyinInitial,
       focusedSuccessfulAttempts:
         config?.typedPinyinWrongInitial?.initialSuccessfulAttempts,
-      typedSuccessfulAttempts:
-        config?.typedPinyinWrongInitial?.typedSuccessfulAttempts,
+      typedSuccessfulAttempts: config?.typedPinyinSuccessfulAttempts,
     }),
     typedPinyinComponentRemediationPlan({
       event,
@@ -1181,8 +1184,7 @@ function typedPinyinComponentPlanForEvent(
       focusedSkill: hanziWordToPinyinFinal,
       focusedSuccessfulAttempts:
         config?.typedPinyinWrongFinal?.finalSuccessfulAttempts,
-      typedSuccessfulAttempts:
-        config?.typedPinyinWrongFinal?.typedSuccessfulAttempts,
+      typedSuccessfulAttempts: config?.typedPinyinSuccessfulAttempts,
     }),
     typedPinyinComponentRemediationPlan({
       event,
@@ -1191,8 +1193,7 @@ function typedPinyinComponentPlanForEvent(
       focusedSkill: hanziWordToPinyinTone,
       focusedSuccessfulAttempts:
         config?.typedPinyinWrongTone?.toneSuccessfulAttempts,
-      typedSuccessfulAttempts:
-        config?.typedPinyinWrongTone?.typedSuccessfulAttempts,
+      typedSuccessfulAttempts: config?.typedPinyinSuccessfulAttempts,
     }),
   ].filter(
     (rule): rule is readonly SkillReviewQueueRemediationStepSpec[] =>
@@ -1203,13 +1204,9 @@ function typedPinyinComponentPlanForEvent(
   }
 
   const steps = rules.flatMap((rule) => rule.slice(0, -1));
-  // One typed-pinyin retry closes all matched rules, using the largest configured count.
-  const typedSuccessfulAttempts = Math.max(
-    ...rules.map((rule) => nonNullable(rule.at(-1)).successfulAttempts),
-  );
   steps.push({
     skill: event.skill,
-    successfulAttempts: typedSuccessfulAttempts,
+    successfulAttempts: config?.typedPinyinSuccessfulAttempts ?? 1,
     flag: { kind: QuestionFlagKind.WeakWord },
   });
   return steps;
@@ -1224,8 +1221,7 @@ export const wrongPinyinInitialSkillReviewQueueRemediator: SkillReviewQueueRemed
       focusedSkill: hanziWordToPinyinInitial,
       focusedSuccessfulAttempts:
         context.config?.typedPinyinWrongInitial?.initialSuccessfulAttempts,
-      typedSuccessfulAttempts:
-        context.config?.typedPinyinWrongInitial?.typedSuccessfulAttempts,
+      typedSuccessfulAttempts: context.config?.typedPinyinSuccessfulAttempts,
     });
 
 export const wrongPinyinFinalSkillReviewQueueRemediator: SkillReviewQueueRemediator =
@@ -1237,8 +1233,7 @@ export const wrongPinyinFinalSkillReviewQueueRemediator: SkillReviewQueueRemedia
       focusedSkill: hanziWordToPinyinFinal,
       focusedSuccessfulAttempts:
         context.config?.typedPinyinWrongFinal?.finalSuccessfulAttempts,
-      typedSuccessfulAttempts:
-        context.config?.typedPinyinWrongFinal?.typedSuccessfulAttempts,
+      typedSuccessfulAttempts: context.config?.typedPinyinSuccessfulAttempts,
     });
 
 export const wrongPinyinToneSkillReviewQueueRemediator: SkillReviewQueueRemediator =
@@ -1250,8 +1245,7 @@ export const wrongPinyinToneSkillReviewQueueRemediator: SkillReviewQueueRemediat
       focusedSkill: hanziWordToPinyinTone,
       focusedSuccessfulAttempts:
         context.config?.typedPinyinWrongTone?.toneSuccessfulAttempts,
-      typedSuccessfulAttempts:
-        context.config?.typedPinyinWrongTone?.typedSuccessfulAttempts,
+      typedSuccessfulAttempts: context.config?.typedPinyinSuccessfulAttempts,
     });
 
 export const typedPinyinComponentSkillReviewQueueRemediator: SkillReviewQueueRemediator =
@@ -1263,8 +1257,20 @@ export const typedPinyinComponentSkillReviewQueueRemediator: SkillReviewQueueRem
     );
 
 export const retryFailedSkillReviewQueueRemediator: SkillReviewQueueRemediator =
-  (event) => {
-    return [{ skill: event.skill, successfulAttempts: 1 }];
+  (event, { config }) => {
+    const skillKind = skillKindFromSkill(event.skill);
+    const successfulAttempts =
+      skillKind === SkillKind.HanziWordToGloss ||
+      skillKind === SkillKind.HanziWordToGlossTyped
+        ? (config?.meaningSuccessfulAttempts ?? 1)
+        : skillKind === SkillKind.HanziWordToPinyinTyped
+          ? (config?.typedPinyinSuccessfulAttempts ?? 1)
+          : 1;
+    invariant(
+      Number.isInteger(successfulAttempts) && successfulAttempts > 0,
+      `retry successfulAttempts must be a positive integer`,
+    );
+    return [{ skill: event.skill, successfulAttempts }];
   };
 
 export const skillReviewQueueRemediators: readonly SkillReviewQueueRemediator[] =
