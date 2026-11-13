@@ -9822,13 +9822,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vercel/cli-config@npm:0.3.1":
-  version: 0.3.1
-  resolution: "@vercel/cli-config@npm:0.3.1"
+"@vercel/cli-config@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@vercel/cli-config@npm:0.4.0"
   dependencies:
-    xdg-app-paths: "npm:5"
-    zod: "npm:4.1.11"
-  checksum: 10c0/ece39fdba257b4a364f12d2f1708af339a73ac9235edfe264aef19c74a8aba3076b220de7989ba9dc73978584e89d1546aa73c14d045a6ec76bf5848dcacecc4
+    xdg-app-paths: "npm:5.1.0"
+    zod: "npm:^4.6.6"
+  checksum: 10c0/61e6675c01919c1540dd9e93d9d0a81c20b681ee9ed70d7ad096ca5fe3105ffc6ea86e36c48a2d469ddf94aa25016a327a0a79d6d3d7dd46815527b0e324e350
   languageName: node
   linkType: hard
 
@@ -9842,10 +9842,10 @@ __metadata:
   linkType: hard
 
 "@vercel/functions@npm:^3.5.0":
-  version: 3.9.11
-  resolution: "@vercel/functions@npm:3.9.11"
+  version: 3.11.2
+  resolution: "@vercel/functions@npm:3.11.2"
   dependencies:
-    "@vercel/oidc": "npm:4.0.0"
+    "@vercel/oidc": "npm:4.0.9"
   peerDependencies:
     "@aws-sdk/credential-provider-web-identity": "*"
     ws: ">=8"
@@ -9854,18 +9854,18 @@ __metadata:
       optional: true
     ws:
       optional: true
-  checksum: 10c0/6c8fb6c4c4f76fcd54463a9ff72e7a8ee2dd100fc5207f575663224b5339dbc19d712d9d27c6a391a4b74475283455bc26762c90f1e99971940d38c9ed204a1a
+  checksum: 10c0/7604ce06e5cb8b1c1a223fa2a8ae5bb2dc0cdd9109381139d052bbd7ab13522c234303f625c7fecc2a0bf0e87aa49ce56de2621e9f0a11cf719fc103385ea70a
   languageName: node
   linkType: hard
 
-"@vercel/oidc@npm:4.0.0":
-  version: 4.0.0
-  resolution: "@vercel/oidc@npm:4.0.0"
+"@vercel/oidc@npm:4.0.9":
+  version: 4.0.9
+  resolution: "@vercel/oidc@npm:4.0.9"
   dependencies:
-    "@vercel/cli-config": "npm:0.3.1"
+    "@vercel/cli-config": "npm:0.4.0"
     "@vercel/cli-exec": "npm:1.0.1"
     jose: "npm:^5.9.6"
-  checksum: 10c0/62806d8f574009e0186644026be6f610fc1c1826b3b7bca05ef46d7b2dc461da75f943cf83b216e827c1672b4c9f052b9693fe578b256d243aebd2f6d4278363
+  checksum: 10c0/23ec03a9d762725a29a07b5cb83c0594a9594016cf2dac2471df38eaafe277e9f88a6cf8dcfc37932aa333a0e8b014c56f8017acf4aecab15ea9b79ec5c99719
   languageName: node
   linkType: hard
 
@@ -23238,17 +23238,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xdg-app-paths@npm:5":
-  version: 5.5.1
-  resolution: "xdg-app-paths@npm:5.5.1"
+"xdg-app-paths@npm:5.1.0":
+  version: 5.1.0
+  resolution: "xdg-app-paths@npm:5.1.0"
   dependencies:
-    os-paths: "npm:^4.0.1"
-    xdg-portable: "npm:^7.2.0"
-  checksum: 10c0/9fbd81fea0cb8d2a7f2473e4da90ece034c32dc6c271449ba048dc37c45da54c8c9401e65df1012071b8b9a4e1a6166d8a83beb86d943ef102bac5f22d6e3581
+    xdg-portable: "npm:^7.0.0"
+  checksum: 10c0/94e07c9c6cff80669faf3a164ac3e769ffae26821c36846a649da5a9a90b5ceb96f0dc8ad8ee91db3a55dac5adc613c7fbcf77c9dd441095cdddab8515401a84
   languageName: node
   linkType: hard
 
-"xdg-portable@npm:^7.2.0":
+"xdg-portable@npm:^7.0.0":
   version: 7.3.0
   resolution: "xdg-portable@npm:7.3.0"
   dependencies:
@@ -23389,13 +23388,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:4.1.11":
-  version: 4.1.11
-  resolution: "zod@npm:4.1.11"
-  checksum: 10c0/ce6a4c4acfbf51d7dd0f2669c82f207d62a1f00264eef608994b94eb99d86a74c99f59b0dd3e61ef82909ee136631378b709e0908f0a02a2d5c21d0c497de5db
-  languageName: node
-  linkType: hard
-
 "zod@npm:^3.25.0":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
@@ -23403,7 +23395,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^4.4.3":
+"zod@npm:^4.4.3, zod@npm:^4.6.6":
   version: 4.6.7
   resolution: "zod@npm:4.6.7"
   checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
