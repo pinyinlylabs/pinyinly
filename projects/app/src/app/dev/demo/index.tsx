@@ -50,6 +50,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`NewSkillModalContentNewWord`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewWord.demo`)),
   [`NewSprout`]: lazyDemo(() => import(`../../../client/ui/NewSprout.demo`)),
   [`NewWordTutorial`]: lazyDemo(() => import(`../../../client/ui/NewWordTutorial.demo`)),
+  [`PageSheetModal`]: lazyDemo(() => import(`../../../client/ui/PageSheetModal.demo`)),
   [`PinyinOptionButton`]: lazyDemo(() => import(`../../../client/ui/PinyinOptionButton.demo`)),
   [`PylyMdxComponents`]: lazyDemo(() => import(`../../../client/ui/PylyMdxComponents.demo`)),
   [`Pylymark`]: lazyDemo(() => import(`../../../client/ui/Pylymark.demo`)),

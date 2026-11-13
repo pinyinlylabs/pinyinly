@@ -58,22 +58,20 @@ export const PageSheetModal = ({
   suspenseFallback,
 }: PageSheetModalProps) => {
   return (
-    <Theme theme="default">
-      <KeyboardShortcutModalScope active={!devUiSnapshotMode}>
-        <PageSheetModalImpl
-          onDismiss={onDismiss}
-          onDismissRequest={onDismissRequest}
-          passivePresentation={passivePresentation}
-          disableBackgroundDismiss={disableBackgroundDismiss}
-          webTopAligned={webTopAligned}
-          devUiSnapshotMode={devUiSnapshotMode}
-        >
-          {(api) => (
-            <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
-          )}
-        </PageSheetModalImpl>
-      </KeyboardShortcutModalScope>
-    </Theme>
+    <KeyboardShortcutModalScope active={!devUiSnapshotMode}>
+      <PageSheetModalImpl
+        onDismiss={onDismiss}
+        onDismissRequest={onDismissRequest}
+        passivePresentation={passivePresentation}
+        disableBackgroundDismiss={disableBackgroundDismiss}
+        webTopAligned={webTopAligned}
+        devUiSnapshotMode={devUiSnapshotMode}
+      >
+        {(api) => (
+          <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
+        )}
+      </PageSheetModalImpl>
+    </KeyboardShortcutModalScope>
   );
 };
 
@@ -215,16 +213,18 @@ const WebImpl = ({
   });
 
   const content = (
-    <Reanimated.View
-      className={`
-        w-full flex-1 overflow-hidden rounded-t-2xl bg-bg shadow-[0_20px_60px_rgba(0,0,0,0.55)]
+    <Theme theme="default">
+      <Reanimated.View
+        className={`
+          w-full flex-1 overflow-hidden rounded-t-2xl bg-bg shadow-[0_20px_60px_rgba(0,0,0,0.55)]
 
-        sm:max-h-[80vh] sm:w-125 sm:flex-none sm:rounded-xl
-      `}
-      style={[animatedContentStyle]}
-    >
-      {children(api)}
-    </Reanimated.View>
+          sm:max-h-[80vh] sm:w-125 sm:flex-none sm:rounded-xl
+        `}
+        style={[animatedContentStyle]}
+      >
+        {children(api)}
+      </Reanimated.View>
+    </Theme>
   );
 
   return devUiSnapshotMode ? (

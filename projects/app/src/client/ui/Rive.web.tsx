@@ -6,6 +6,8 @@ import type { ViewModel } from "@rive-app/canvas";
 import type { ViewModelInstance } from "@rive-app/react-canvas";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
 import { Asset } from "expo-asset";
+import { useEffect, useRef, useState } from "react";
+import { useCSSVariable } from "uniwind";
 import type { RiveFit, RiveProps } from "./riveTypes";
 
 export function Rive({
@@ -21,7 +23,21 @@ export function Rive({
   true satisfies IsExhaustedRest<typeof rest>;
   invariant(typeof src === `string`, `src must be a string`);
 
-  const { RiveComponent, container } = useRive({
+  const [themeVariableNames, setThemeVariableNames] = useState<string[]>([]);
+  const themeViewModelRef = useRef<ViewModelInstance | null>(null);
+  const themeVariableValues = useCSSVariable(themeVariableNames);
+
+  useEffect(() => {
+    if (themeViewModelRef.current != null) {
+      applyThemeFromUniwind(
+        themeViewModelRef.current,
+        themeVariableNames,
+        themeVariableValues,
+      );
+    }
+  }, [themeVariableNames, themeVariableValues]);
+
+  const { RiveComponent } = useRive({
     artboard: artboardName,
     src,
     autoplay,
@@ -54,16 +70,12 @@ export function Rive({
       return true;
     },
     onRiveReady(rive) {
-      invariant(
-        container != null,
-        `Rive container must not be null in 'onRiveReady' callback`,
-      );
-
       // If there's a `theme` view model in the file, update it with the current
-      // theme by reading CSS values.
+      // theme by reading CSS values from Uniwind.
       const themeVm = rive.viewModelInstance?.viewModel(`theme`);
       if (themeVm != null) {
-        applyThemeFromDom(container, themeVm);
+        themeViewModelRef.current = themeVm;
+        setThemeVariableNames(getThemeVariableNames(themeVm));
       }
 
       onRiveLoad?.(rive);
@@ -101,19 +113,43 @@ const fitMap: Record<RiveFit, Fit> = {
   scaleDown: Fit.ScaleDown,
 };
 
-function applyThemeFromDom(
-  dom: HTMLElement,
-  themeViewModel: ViewModelInstance,
-) {
-  const style = getComputedStyle(dom);
+function getThemeVariableNames(themeViewModel: ViewModelInstance) {
+  return [
+    ...new Set(
+      themeViewModel.properties.flatMap((property) => {
+        if (property.type !== PropertyType.Color) {
+          return [];
+        }
+        const { name } = parseRiveColorPropertyName(property.name);
+        return [`--color-${name}`];
+      }),
+    ),
+  ];
+}
 
-  // Look at all the color properties in the theme view model and pass through
-  // the value from the DOM.
+function applyThemeFromUniwind(
+  themeViewModel: ViewModelInstance,
+  variableNames: string[],
+  variableValues: Array<string | number | undefined>,
+) {
+  const variables = new Map(
+    variableNames.map((name, index) => [name, variableValues[index]]),
+  );
+
   for (const property of themeViewModel.properties) {
     if (property.type === PropertyType.Color) {
       const { name, alpha } = parseRiveColorPropertyName(property.name);
       const cssPropertyName = `--color-${name}`;
-      const cssPropertyValue = style.getPropertyValue(cssPropertyName);
+      const cssPropertyValue = variables.get(cssPropertyName);
+      if (typeof cssPropertyValue !== `string`) {
+        console.error(
+          new Error(
+            `Expected CSS color "${cssPropertyName}" for Rive theme property "${property.name}"`,
+          ),
+          cssPropertyValue,
+        );
+        continue;
+      }
       try {
         const color = parseCssColorOrThrow(cssPropertyValue);
         applyColorToViewModel(themeViewModel, property.name, color, alpha);
