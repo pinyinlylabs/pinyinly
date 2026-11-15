@@ -229,6 +229,11 @@ export function QuizDeckHanziCharacterWritingQuestion({
             guide and try again.
           </Text>
         ) : null}
+        {rating?.failure === `stroke-segmentation` ? (
+          <Text className="text-danger">
+            Draw each reference stroke as a separate movement.
+          </Text>
+        ) : null}
         {rating?.failure === `contrastive` ? (
           <Text className="text-danger">
             A visually similar character matched at least as closely. Check the

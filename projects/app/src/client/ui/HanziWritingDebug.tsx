@@ -490,14 +490,18 @@ export function HanziWritingDebug({
         </View>
         <View className="gap-1">
           <Text className="text-sm text-fg">
-            Similarity score (not a probability):{` `}
-            {geometry.similarity.toFixed(3)}
+            Shape similarity score (not a probability):{` `}
+            {geometry.shapeSimilarity.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
             Shape threshold only:{` `}
-            {geometry.similarity >= hanziCharacterWritingSimilarityThreshold
+            {geometry.shapeSimilarity >=
+            hanziCharacterWritingSimilarityThreshold
               ? `passed`
               : `below the prototype threshold`}
+          </Text>
+          <Text className="text-sm text-fg">
+            Deformation alpha: {geometry.deformationAlpha.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
             Initial matching error: {geometry.initialMatchingError.toFixed(3)}
@@ -524,68 +528,7 @@ export function HanziWritingDebug({
             Affine distortion: {geometry.affineDistortion.toFixed(3)}
           </Text>
           <Text className="text-sm text-fg">
-            Estimated rotation: {geometry.rotationDegrees.toFixed(1)}° (penalty
-            {` `}
-            {geometry.rotationPenalty.toFixed(3)})
-          </Text>
-          <Text className="text-sm text-fg">
-            Unmatched-point penalty: {geometry.unmatchedPointPenalty.toFixed(3)}
-          </Text>
-          <Text className="text-sm text-fg">
-            Geometry coverage penalty:{` `}
-            {geometry.geometryCoveragePenalty.toFixed(3)}
-          </Text>
-          <Text className="text-sm text-fg">
-            Coverage distance tolerance:{` `}
-            {geometry.geometryCoverageTolerance.toFixed(3)} normalized units
-          </Text>
-          <Text className="text-sm text-fg">
-            Uncovered geometry before TPS (reference / handwriting):{` `}
-            {(
-              geometry.initialGeometryCoverage.referenceToHandwriting * 100
-            ).toFixed(1)}
-            % /{` `}
-            {(
-              geometry.initialGeometryCoverage.handwritingToReference * 100
-            ).toFixed(1)}
-            %
-          </Text>
-          <Text className="text-sm text-fg">
-            Uncovered geometry after TPS (reference / handwriting):{` `}
-            {(
-              geometry.residualGeometryCoverage.referenceToHandwriting * 100
-            ).toFixed(1)}
-            % /{` `}
-            {(
-              geometry.residualGeometryCoverage.handwritingToReference * 100
-            ).toFixed(1)}
-            %
-          </Text>
-          <Text className="text-sm text-fg">
-            Longest uncovered run before TPS (reference / handwriting):{` `}
-            {(
-              geometry.initialGeometryCoverage.referenceLongestUncoveredRun *
-              100
-            ).toFixed(1)}
-            % /{` `}
-            {(
-              geometry.initialGeometryCoverage.handwritingLongestUncoveredRun *
-              100
-            ).toFixed(1)}
-            %
-          </Text>
-          <Text className="text-sm text-fg">
-            Longest uncovered run after TPS (reference / handwriting):{` `}
-            {(
-              geometry.residualGeometryCoverage.referenceLongestUncoveredRun *
-              100
-            ).toFixed(1)}
-            % /{` `}
-            {(
-              geometry.residualGeometryCoverage.handwritingLongestUncoveredRun *
-              100
-            ).toFixed(1)}
-            %
+            Estimated rotation: {geometry.rotationDegrees.toFixed(1)}°
           </Text>
           <Text className="text-sm text-fg">
             Matched points: {geometry.correspondences.length}; unmatched:{` `}

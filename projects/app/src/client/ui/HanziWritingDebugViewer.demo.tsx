@@ -104,12 +104,14 @@ function LoadedExampleWithPaths({
         {accepted ? `Accepted` : `Not accepted`}
       </Text>
       <Text className="text-fg">
-        Similarity {geometry.similarity.toFixed(3)} · acceptance threshold{` `}
-        {hanziCharacterWritingSimilarityThreshold.toFixed(2)}
+        Shape similarity {geometry.shapeSimilarity.toFixed(3)} · acceptance
+        threshold {hanziCharacterWritingSimilarityThreshold.toFixed(2)} ·
+        deformation alpha {geometry.deformationAlpha.toFixed(3)}
       </Text>
       {similarCharacterGrades.map(({ hanzi, geometry: candidate }) => (
         <Text key={hanzi} className="text-fg">
-          {hanzi} similarity {candidate.similarity.toFixed(3)}
+          {hanzi} shape similarity {candidate.shapeSimilarity.toFixed(3)} ·
+          deformation alpha {candidate.deformationAlpha.toFixed(3)}
         </Text>
       ))}
       <HanziWritingDebug

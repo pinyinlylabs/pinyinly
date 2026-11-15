@@ -162,18 +162,22 @@ function CharacterWriting({
           `}
         >
           {isAccepted ? `Accepted` : `Not accepted`}
-          {` · similarity ${lastGrade.similarity.toFixed(3)} / threshold ${hanziCharacterWritingSimilarityThreshold.toFixed(2)}`}
+          {` · shape similarity ${lastGrade.shapeSimilarity.toFixed(3)} / threshold ${hanziCharacterWritingSimilarityThreshold.toFixed(2)}`}
         </Text>
       ) : null}
       {!isGuided && lastGrade != null && exampleId != null ? (
         <>
           <Text className="text-center text-muted-fg">
-            Similarity {lastGrade.similarity.toFixed(3)} · residual error{` `}
+            Shape similarity {lastGrade.shapeSimilarity.toFixed(3)} · cost
+            {` `}
+            {lastGrade.shapeCost.toFixed(3)} · alpha{` `}
+            {lastGrade.deformationAlpha.toFixed(3)} · residual error{` `}
             {lastGrade.residualMatchingError.toFixed(3)}
           </Text>
           {visuallySimilarGrades.map(({ hanzi, geometry }) => (
             <Text key={hanzi} className="text-center text-muted-fg">
-              {hanzi} similarity {geometry.similarity.toFixed(3)}
+              {hanzi} shape similarity {geometry.shapeSimilarity.toFixed(3)} ·
+              alpha {geometry.deformationAlpha.toFixed(3)}
             </Text>
           ))}
           <View className="gap-2 rounded-lg border border-border p-3">

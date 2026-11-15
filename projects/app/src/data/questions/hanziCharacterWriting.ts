@@ -38,16 +38,144 @@ export interface SimilarCharacterGrade {
   geometry: ShapeContextGrade;
 }
 
+export interface HanziCharacterWritingAcceptanceDecision {
+  primaryShapeThreshold: {
+    metric: `shapeSimilarity`;
+    comparisonOperator: `>=`;
+    observedValue: number;
+    requiredValue: number;
+    passed: boolean;
+  };
+  strokeCompleteness: {
+    passed: boolean;
+    referenceStrokeCount: number;
+    matchedReferenceStrokeCount: number;
+    unmatchedReferenceStrokeCount: number;
+    unmatchedReferenceStrokeIndices: number[];
+  };
+  contrastiveCheck: {
+    ran: boolean;
+    passed: boolean | null;
+    metric: `shapeSimilarity`;
+    comparisonOperator: `>`;
+    requiredMargin: 0;
+    observedMargin: number | null;
+    rejectingCandidateCharacter: string | null;
+    skippedReason: `primaryShapeThresholdFailed` | null;
+    candidates: Array<{
+      index: number;
+      character: string;
+      evaluated: boolean;
+      observedMargin: number | null;
+      passed: boolean | null;
+    }>;
+  };
+  finalAccepted: boolean;
+  rejectionCondition:
+    | `missingReferenceStroke`
+    | `primaryShapeThresholdFailed`
+    | `candidateShapeSimilarityNotLower`
+    | null;
+}
+
+export function evaluateHanziCharacterWritingAcceptance(
+  geometry: ShapeContextGrade,
+  similarCharacterGrades: readonly SimilarCharacterGrade[],
+): HanziCharacterWritingAcceptanceDecision {
+  const primaryPassed =
+    geometry.shapeSimilarity >= hanziCharacterWritingSimilarityThreshold;
+  const unmatchedReferenceStrokeIndices = [
+    ...geometry.unmatchedTargetStrokeIndices,
+  ];
+  const referenceStrokesComplete = unmatchedReferenceStrokeIndices.length === 0;
+  const referenceStrokeCount = geometry.targetStrokes.length;
+  const candidates: HanziCharacterWritingAcceptanceDecision[`contrastiveCheck`][`candidates`] =
+    similarCharacterGrades.map(({ hanzi }, index) => ({
+      index,
+      character: hanzi,
+      evaluated: false,
+      observedMargin: null,
+      passed: null,
+    }));
+  let contrastivePassed: boolean | null = null;
+  let observedMargin: number | null = null;
+  let rejectingCandidateCharacter: string | null = null;
+
+  if (primaryPassed) {
+    contrastivePassed = true;
+    for (const [
+      index,
+      { geometry: similarGeometry },
+    ] of similarCharacterGrades.entries()) {
+      const candidate = candidates[index];
+      if (candidate == null) {
+        throw new Error(`Missing contrastive candidate diagnostic`);
+      }
+      const margin = geometry.shapeSimilarity - similarGeometry.shapeSimilarity;
+      const passed = geometry.shapeSimilarity > similarGeometry.shapeSimilarity;
+      candidate.evaluated = true;
+      candidate.observedMargin = margin;
+      candidate.passed = passed;
+      observedMargin =
+        observedMargin == null ? margin : Math.min(observedMargin, margin);
+
+      if (!passed) {
+        contrastivePassed = false;
+        rejectingCandidateCharacter = candidate.character;
+        break;
+      }
+    }
+  }
+
+  const rejectionCondition = referenceStrokesComplete
+    ? primaryPassed
+      ? contrastivePassed === false
+        ? `candidateShapeSimilarityNotLower`
+        : null
+      : `primaryShapeThresholdFailed`
+    : `missingReferenceStroke`;
+
+  return {
+    primaryShapeThreshold: {
+      metric: `shapeSimilarity`,
+      comparisonOperator: `>=`,
+      observedValue: geometry.shapeSimilarity,
+      requiredValue: hanziCharacterWritingSimilarityThreshold,
+      passed: primaryPassed,
+    },
+    strokeCompleteness: {
+      passed: referenceStrokesComplete,
+      referenceStrokeCount,
+      matchedReferenceStrokeCount:
+        referenceStrokeCount - unmatchedReferenceStrokeIndices.length,
+      unmatchedReferenceStrokeCount: unmatchedReferenceStrokeIndices.length,
+      unmatchedReferenceStrokeIndices,
+    },
+    contrastiveCheck: {
+      ran: primaryPassed,
+      passed: contrastivePassed,
+      metric: `shapeSimilarity`,
+      comparisonOperator: `>`,
+      requiredMargin: 0,
+      observedMargin,
+      rejectingCandidateCharacter,
+      skippedReason: primaryPassed ? null : `primaryShapeThresholdFailed`,
+      candidates,
+    },
+    finalAccepted:
+      referenceStrokesComplete && primaryPassed && contrastivePassed === true,
+    rejectionCondition,
+  };
+}
+
 export function isHanziCharacterWritingAccepted(
   geometry: ShapeContextGrade,
   similarCharacterGrades: readonly SimilarCharacterGrade[],
 ): boolean {
-  return (
-    geometry.similarity >= hanziCharacterWritingSimilarityThreshold &&
-    similarCharacterGrades.every(({ geometry: similarGeometry }) => {
-      return geometry.similarity > similarGeometry.similarity;
-    })
-  );
+  return evaluateHanziCharacterWritingAcceptance(
+    geometry,
+    similarCharacterGrades,
+  ).finalAccepted;
 }
 
 export function gradeSimilarCharacters(
@@ -98,7 +226,7 @@ export interface HanziCharacterWritingQuestionRating {
   correct: boolean;
   rating: Rating;
   skillRatings: UnsavedSkillRating[];
-  failure: `shape` | `contrastive` | null;
+  failure: `shape` | `stroke-segmentation` | `contrastive` | null;
   geometry: ShapeContextGrade;
   similarCharacterGrades: SimilarCharacterGrade[];
 }
@@ -150,9 +278,11 @@ export function gradeHanziCharacterWritingQuestion(
     skillRatings: [skillRating],
     failure: correct
       ? null
-      : geometry.similarity < hanziCharacterWritingSimilarityThreshold
-        ? `shape`
-        : `contrastive`,
+      : geometry.unmatchedTargetStrokeIndices.length > 0
+        ? `stroke-segmentation`
+        : geometry.shapeSimilarity < hanziCharacterWritingSimilarityThreshold
+          ? `shape`
+          : `contrastive`,
     geometry,
     similarCharacterGrades,
   };

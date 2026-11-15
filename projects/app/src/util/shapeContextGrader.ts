@@ -52,6 +52,8 @@ export interface ShapeContextOptions {
   iterations: number;
   tpsRegularization: number;
   unmatchedCost: number;
+  missingReferenceStrokePenaltyWeight: number;
+  extraHandwritingStrokePenaltyWeight: number;
   maxRotationDegrees: number;
   rotationSteps: number;
 }
@@ -59,37 +61,53 @@ export interface ShapeContextOptions {
 export interface ShapeContextCorrespondence {
   sourceIndex: number;
   targetIndex: number;
+  targetPoint: WritingStrokePoint;
   descriptorCost: number;
   initialDistance: number;
   residualDistance: number;
 }
 
-export interface ShapeContextGeometryCoverage {
-  referenceToHandwriting: number;
-  handwritingToReference: number;
-  referenceLongestUncoveredRun: number;
-  handwritingLongestUncoveredRun: number;
+export interface ShapeContextStrokePairCost {
+  sourceStrokeIndex: number;
+  targetStrokeIndex: number;
+  direction: `forward` | `reverse`;
+  dtwCost: number;
+  centroidDistance: number;
+  lengthPenalty: number;
+  totalCost: number;
+}
+
+export interface ShapeContextStrokeAssignment {
+  sourceStrokeIndex: number;
+  targetStrokeIndex: number;
+  direction: `forward` | `reverse`;
+  cost: number;
+}
+
+export interface ShapeContextDtwAlignment {
+  sourceStrokeIndex: number;
+  targetStrokeIndex: number;
+  direction: `forward` | `reverse`;
+  sourcePointIndices: number[];
+  referencePointIndices: number[];
+  costMatrix: number[][];
+  path: Array<{ sourceIndex: number; targetIndex: number }>;
+  pathLength: number;
+  longestRepeatedIndexRun: number;
+  meanNormalizedIndexDeviation: number;
 }
 
 export interface ShapeContextScoreContributions {
   initialMatchingError: number;
   residualMatchingError: number;
-  bendingEnergy: number;
-  affineDistortion: number;
-  rotationPenalty: number;
-  unmatchedPointPenalty: number;
-  geometryCoveragePenalty: number;
+  missingReferenceStrokePenalty: number;
+  extraHandwritingStrokePenalty: number;
   emptyGeometryPenalty: number;
 }
 
 const shapeContextScoreWeights = {
   initialMatchingError: 0.25,
   residualMatchingError: 0.35,
-  bendingEnergy: 0.04,
-  affineDistortion: 0.15,
-  rotationPenalty: 0.4,
-  unmatchedPointPenalty: 0.5,
-  geometryCoveragePenalty: 0.25,
 } as const;
 
 const emptyGeometryBaseCost = 2;
@@ -109,21 +127,23 @@ export interface ThinPlateSplineTransform {
 }
 
 export interface ShapeContextGrade {
-  similarity: number;
-  combinedCost: number;
+  shapeCost: number;
+  shapeSimilarity: number;
+  deformationAlpha: number;
   initialMatchingError: number;
   residualMatchingError: number;
   bendingEnergy: number;
   affineDistortion: number;
   rotationDegrees: number;
-  rotationPenalty: number;
-  unmatchedPointPenalty: number;
-  initialGeometryCoverage: ShapeContextGeometryCoverage;
-  residualGeometryCoverage: ShapeContextGeometryCoverage;
-  geometryCoveragePenalty: number;
+  missingReferenceStrokeFraction: number;
+  extraHandwritingStrokeFraction: number;
   weightedScoreContributions: ShapeContextScoreContributions;
-  geometryCoverageTolerance: number;
   correspondences: ShapeContextCorrespondence[];
+  strokePairCosts: ShapeContextStrokePairCost[][];
+  strokeAssignments: ShapeContextStrokeAssignment[];
+  dtwAlignments: ShapeContextDtwAlignment[];
+  unmatchedSourceStrokeIndices: number[];
+  unmatchedTargetStrokeIndices: number[];
   sourceStrokeIndices: number[];
   targetStrokeIndices: number[];
   unmatchedSourceIndices: number[];
@@ -149,13 +169,14 @@ export const shapeContextGraderDefaults: ShapeContextOptions = {
   iterations: 1,
   tpsRegularization: 0.08,
   unmatchedCost: 0.55,
+  missingReferenceStrokePenaltyWeight: 1.5,
+  extraHandwritingStrokePenaltyWeight: 0.5,
   maxRotationDegrees: 12,
   rotationSteps: 1,
 };
 
 const radialMinimum = 0.125;
 const radialMaximum = 2.5;
-const geometryCoverageTolerance = 0.06;
 const defaultSampleCountLimit = 80;
 
 interface SampledShape {
@@ -172,7 +193,12 @@ interface StrokeGeometryMetrics {
 }
 
 interface MatchResult {
-  pairs: Array<{ sourceIndex: number; targetIndex: number; cost: number }>;
+  pairs: Array<{
+    sourceIndex: number;
+    targetIndex: number;
+    targetPoint: WritingStrokePoint;
+    cost: number;
+  }>;
   unmatchedSourceIndices: number[];
   unmatchedTargetIndices: number[];
   totalCost: number;
@@ -202,6 +228,12 @@ function validateOptions(options: ShapeContextOptions): void {
     !Number.isFinite(options.unmatchedCost) ||
     options.unmatchedCost <= 0 ||
     options.unmatchedCost > 5 ||
+    !Number.isFinite(options.missingReferenceStrokePenaltyWeight) ||
+    options.missingReferenceStrokePenaltyWeight < 0 ||
+    options.missingReferenceStrokePenaltyWeight > 5 ||
+    !Number.isFinite(options.extraHandwritingStrokePenaltyWeight) ||
+    options.extraHandwritingStrokePenaltyWeight < 0 ||
+    options.extraHandwritingStrokePenaltyWeight > 5 ||
     !Number.isFinite(options.maxRotationDegrees) ||
     options.maxRotationDegrees < 0 ||
     options.maxRotationDegrees > 45 ||
@@ -691,135 +723,437 @@ function hungarian(costs: readonly (readonly number[])[]): number[] {
   return assignment;
 }
 
-function matchPoints(
+interface StrokeAlignment {
+  direction: `forward` | `reverse`;
+  pathCost: number;
+  pathLength: number;
+  sourceIndices: number[];
+  targetIndices: number[];
+  costMatrix: number[][];
+  path: Array<{ sourceIndex: number; targetIndex: number }>;
+  longestRepeatedIndexRun: number;
+  meanNormalizedIndexDeviation: number;
+  pairs: MatchResult[`pairs`];
+}
+
+function alignStrokePair(
   sourceContexts: readonly (readonly number[])[],
   targetContexts: readonly (readonly number[])[],
   sourcePoints: readonly WritingStrokePoint[],
   targetPoints: readonly WritingStrokePoint[],
-  unmatchedCost: number,
   spatialWeight: number,
-  sourceStrokeIndices?: readonly number[],
-  targetStrokeIndices?: readonly number[],
-  sourceStrokeTargets?: readonly (number | null)[],
-): MatchResult {
-  const sourceCount = sourceContexts.length;
-  const targetCount = targetContexts.length;
-  if (sourceCount === 0 || targetCount === 0) {
-    return {
-      pairs: [],
-      unmatchedSourceIndices: sourcePoints.map((_, index) => index),
-      unmatchedTargetIndices: targetPoints.map((_, index) => index),
-      totalCost: (sourceCount + targetCount) * unmatchedCost,
-    };
-  }
-
-  const sourceIsSmaller = sourceCount <= targetCount;
-  const rowCount = Math.min(sourceCount, targetCount);
-  const realColumnCount = Math.max(sourceCount, targetCount);
-  const costs = Array.from({ length: rowCount }, (_, row) =>
-    Array.from({ length: realColumnCount + rowCount }, (_, column) => {
-      if (column >= realColumnCount) {
-        return 0;
-      }
-      const sourceIndex = sourceIsSmaller ? row : column;
-      const targetIndex = sourceIsSmaller ? column : row;
-      const descriptorCost = chiSquaredDistance(
-        sourceContexts[sourceIndex] ?? [],
-        targetContexts[targetIndex] ?? [],
-      );
+  sourceIndices: readonly number[],
+  targetIndices: readonly number[],
+  direction: `forward` | `reverse`,
+): StrokeAlignment | null {
+  const orderedTargetIndices =
+    direction === `forward` ? targetIndices : [...targetIndices].reverse();
+  const costs = sourceIndices.map((sourceIndex) =>
+    orderedTargetIndices.map((targetIndex) => {
       const sourcePoint = sourcePoints[sourceIndex];
       const targetPoint = targetPoints[targetIndex];
-      const sourceStrokeIndex = sourceStrokeIndices?.[sourceIndex];
-      const targetStrokeIndex = targetStrokeIndices?.[targetIndex];
-      if (
-        sourceStrokeTargets != null &&
-        (sourceStrokeIndex == null ||
-          targetStrokeIndex == null ||
-          sourceStrokeTargets[sourceStrokeIndex] !== targetStrokeIndex)
-      ) {
+      if (sourcePoint == null || targetPoint == null) {
         return Infinity;
       }
-      return sourcePoint == null || targetPoint == null
-        ? Infinity
-        : descriptorCost +
-            spatialWeight * distance(sourcePoint, targetPoint) -
-            2 * unmatchedCost;
+      return (
+        chiSquaredDistance(
+          sourceContexts[sourceIndex] ?? [],
+          targetContexts[targetIndex] ?? [],
+        ) +
+        spatialWeight * distance(sourcePoint, targetPoint)
+      );
     }),
   );
-  const assignment = hungarian(costs);
-  const pairs: MatchResult[`pairs`] = [];
-  const unmatchedSourceIndices: number[] = [];
-  const unmatchedTargetIndices: number[] = [];
-  const matchedSources = new Set<number>();
-  const matchedTargets = new Set<number>();
-  let totalCost = 0;
-  for (let row = 0; row < rowCount; row++) {
-    const column = assignment[row] ?? -1;
-    if (column < 0 || column >= realColumnCount) {
-      continue;
+  const accumulated = Array.from({ length: sourceIndices.length + 1 }, () =>
+    Array.from({ length: orderedTargetIndices.length + 1 }, () => Infinity),
+  );
+  const initialRow = accumulated[0];
+  if (initialRow == null) {
+    return null;
+  }
+  initialRow[0] = 0;
+  for (
+    let sourceOffset = 1;
+    sourceOffset <= sourceIndices.length;
+    sourceOffset++
+  ) {
+    for (
+      let targetOffset = 1;
+      targetOffset <= orderedTargetIndices.length;
+      targetOffset++
+    ) {
+      const previousRow = accumulated[sourceOffset - 1];
+      const currentRow = accumulated[sourceOffset];
+      const currentCost = costs[sourceOffset - 1]?.[targetOffset - 1];
+      if (previousRow == null || currentRow == null || currentCost == null) {
+        continue;
+      }
+      currentRow[targetOffset] =
+        currentCost +
+        Math.min(
+          previousRow[targetOffset] ?? Infinity,
+          currentRow[targetOffset - 1] ?? Infinity,
+          previousRow[targetOffset - 1] ?? Infinity,
+        );
     }
+  }
 
-    const sourceIndex = sourceIsSmaller ? row : column;
-    const targetIndex = sourceIsSmaller ? column : row;
-    const sourcePoint = sourcePoints[sourceIndex];
-    const targetPoint = targetPoints[targetIndex];
-    if (sourcePoint == null || targetPoint == null) {
+  const pathCost =
+    accumulated[sourceIndices.length]?.[orderedTargetIndices.length] ??
+    Infinity;
+  if (!Number.isFinite(pathCost)) {
+    return null;
+  }
+
+  const alignedBySource = new Map<
+    number,
+    Array<{
+      targetIndex: number;
+      targetPoint: WritingStrokePoint;
+      cost: number;
+    }>
+  >();
+  let sourceOffset = sourceIndices.length;
+  let targetOffset = orderedTargetIndices.length;
+  let pathLength = 0;
+  const path: StrokeAlignment[`path`] = [];
+  while (sourceOffset > 0 && targetOffset > 0) {
+    const sourceIndex = sourceIndices[sourceOffset - 1];
+    const targetIndex = orderedTargetIndices[targetOffset - 1];
+    const targetPoint = targetPoints[targetIndex ?? -1];
+    const cost = costs[sourceOffset - 1]?.[targetOffset - 1];
+    if (
+      sourceIndex == null ||
+      targetIndex == null ||
+      targetPoint == null ||
+      cost == null
+    ) {
+      return null;
+    }
+    const matches = alignedBySource.get(sourceIndex) ?? [];
+    matches.push({ targetIndex, targetPoint, cost });
+    alignedBySource.set(sourceIndex, matches);
+    path.push({ sourceIndex, targetIndex });
+    pathLength++;
+
+    if (sourceOffset === 1 && targetOffset === 1) {
+      break;
+    }
+    const previousSourceRow = accumulated[sourceOffset - 1];
+    const currentSourceRow = accumulated[sourceOffset];
+    const diagonal = previousSourceRow?.[targetOffset - 1] ?? Infinity;
+    const vertical = previousSourceRow?.[targetOffset] ?? Infinity;
+    const horizontal = currentSourceRow?.[targetOffset - 1] ?? Infinity;
+    if (diagonal <= vertical && diagonal <= horizontal) {
+      sourceOffset--;
+      targetOffset--;
+    } else if (vertical <= horizontal) {
+      sourceOffset--;
+    } else {
+      targetOffset--;
+    }
+  }
+  path.reverse();
+  let longestRepeatedIndexRun = path.length > 0 ? 1 : 0;
+  let sourceIndexRun = longestRepeatedIndexRun;
+  let targetIndexRun = longestRepeatedIndexRun;
+  let normalizedIndexDeviation = 0;
+  for (let index = 0; index < path.length; index++) {
+    const point = path[index];
+    if (point == null) {
       continue;
     }
-    const cost = (costs[row]?.[column] ?? 0) + 2 * unmatchedCost;
-    pairs.push({ sourceIndex, targetIndex, cost });
-    matchedSources.add(sourceIndex);
-    matchedTargets.add(targetIndex);
-    totalCost += cost;
-  }
-  for (let index = 0; index < sourceCount; index++) {
-    if (!matchedSources.has(index)) {
-      unmatchedSourceIndices.push(index);
-      totalCost += unmatchedCost;
+    const sourceNormalized =
+      sourceIndices.length <= 1
+        ? 0
+        : (point.sourceIndex - (sourceIndices[0] ?? 0)) /
+          (sourceIndices.length - 1);
+    const targetNormalized =
+      targetIndices.length <= 1
+        ? 0
+        : ((direction === `forward` ? 1 : -1) *
+            (point.targetIndex - (orderedTargetIndices[0] ?? 0))) /
+          (targetIndices.length - 1);
+    normalizedIndexDeviation += Math.abs(sourceNormalized - targetNormalized);
+    if (index === 0) {
+      continue;
     }
-  }
-  for (let index = 0; index < targetCount; index++) {
-    if (!matchedTargets.has(index)) {
-      unmatchedTargetIndices.push(index);
-      totalCost += unmatchedCost;
+    const previous = path[index - 1];
+    if (previous == null) {
+      continue;
     }
+    sourceIndexRun =
+      previous.sourceIndex === point.sourceIndex ? sourceIndexRun + 1 : 1;
+    targetIndexRun =
+      previous.targetIndex === point.targetIndex ? targetIndexRun + 1 : 1;
+    longestRepeatedIndexRun = Math.max(
+      longestRepeatedIndexRun,
+      sourceIndexRun,
+      targetIndexRun,
+    );
   }
-  return { pairs, unmatchedSourceIndices, unmatchedTargetIndices, totalCost };
+
+  const pairs: MatchResult[`pairs`] = [];
+  for (const sourceIndex of sourceIndices) {
+    const aligned = alignedBySource.get(sourceIndex);
+    if (aligned == null || aligned.length === 0) {
+      return null;
+    }
+    let targetX = 0;
+    let targetY = 0;
+    let targetIndexTotal = 0;
+    let costTotal = 0;
+    for (const match of aligned) {
+      targetX += match.targetPoint.x;
+      targetY += match.targetPoint.y;
+      targetIndexTotal += match.targetIndex;
+      costTotal += match.cost;
+    }
+    pairs.push({
+      sourceIndex,
+      targetIndex: Math.round(targetIndexTotal / aligned.length),
+      targetPoint: {
+        x: targetX / aligned.length,
+        y: targetY / aligned.length,
+      },
+      cost: costTotal / aligned.length,
+    });
+  }
+  return {
+    direction,
+    pathCost,
+    pathLength,
+    sourceIndices: [...sourceIndices],
+    targetIndices: [...orderedTargetIndices],
+    costMatrix: costs,
+    path,
+    longestRepeatedIndexRun,
+    meanNormalizedIndexDeviation:
+      pathLength === 0 ? 0 : normalizedIndexDeviation / pathLength,
+    pairs,
+  };
 }
 
-function assignSourceStrokes(
-  matches: MatchResult,
-  sourceStrokeIndices: readonly number[],
-  targetStrokeIndices: readonly number[],
-): Array<number | null> {
-  const sourceStrokeCount =
-    sourceStrokeIndices.length === 0 ? 0 : Math.max(...sourceStrokeIndices) + 1;
-  const targetStrokeCount =
-    targetStrokeIndices.length === 0 ? 0 : Math.max(...targetStrokeIndices) + 1;
-  const counts = Array.from({ length: sourceStrokeCount }, () =>
-    Array.from({ length: targetStrokeCount }, () => 0),
-  );
-  for (const match of matches.pairs) {
-    const sourceStrokeIndex = sourceStrokeIndices[match.sourceIndex];
-    const targetStrokeIndex = targetStrokeIndices[match.targetIndex];
-    if (sourceStrokeIndex != null && targetStrokeIndex != null) {
-      const row = counts[sourceStrokeIndex];
-      if (row != null) {
-        row[targetStrokeIndex] = (row[targetStrokeIndex] ?? 0) + 1;
-      }
+function matchStrokes(
+  sourceContexts: readonly (readonly number[])[],
+  targetContexts: readonly (readonly number[])[],
+  sourcePoints: readonly WritingStrokePoint[],
+  targetPoints: readonly WritingStrokePoint[],
+  sourceStrokes: readonly (readonly WritingStrokePoint[])[],
+  targetStrokes: readonly (readonly WritingStrokePoint[])[],
+  unmatchedCost: number,
+  spatialWeight: number,
+): {
+  matches: MatchResult;
+  pairCosts: ShapeContextStrokePairCost[][];
+  assignments: ShapeContextStrokeAssignment[];
+  dtwAlignments: ShapeContextDtwAlignment[];
+  unmatchedSourceStrokeIndices: number[];
+  unmatchedTargetStrokeIndices: number[];
+} {
+  const sourceIndicesByStroke: number[][] = [];
+  let sourceOffset = 0;
+  for (const stroke of sourceStrokes) {
+    const indices: number[] = [];
+    for (let index = 0; index < stroke.length; index++) {
+      indices.push(sourceOffset + index);
     }
+    sourceIndicesByStroke.push(indices);
+    sourceOffset += stroke.length;
   }
-  return counts.map((row) => {
-    let assignedStroke: number | null = null;
-    let mostMatches = 0;
-    for (const [strokeIndex, count] of row.entries()) {
-      if (count > mostMatches) {
-        assignedStroke = strokeIndex;
-        mostMatches = count;
-      }
+  const targetIndicesByStroke: number[][] = [];
+  let targetOffset = 0;
+  for (const stroke of targetStrokes) {
+    const indices: number[] = [];
+    for (let index = 0; index < stroke.length; index++) {
+      indices.push(targetOffset + index);
     }
-    return assignedStroke;
-  });
+    targetIndicesByStroke.push(indices);
+    targetOffset += stroke.length;
+  }
+  const sourceMetrics = sourceStrokes.map((stroke) =>
+    geometryMetrics([stroke]),
+  );
+  const targetMetrics = targetStrokes.map((stroke) =>
+    geometryMetrics([stroke]),
+  );
+  const alignments: (StrokeAlignment | null)[][] = [];
+  const pairCosts: ShapeContextStrokePairCost[][] = [];
+
+  for (const [
+    sourceStrokeIndex,
+    sourceIndices,
+  ] of sourceIndicesByStroke.entries()) {
+    const sourceGeometry = sourceMetrics[sourceStrokeIndex];
+    const alignmentsForStroke: (StrokeAlignment | null)[] = [];
+    const costsForStroke: ShapeContextStrokePairCost[] = [];
+    for (const [
+      targetStrokeIndex,
+      targetIndices,
+    ] of targetIndicesByStroke.entries()) {
+      const targetGeometry = targetMetrics[targetStrokeIndex];
+      const forward = alignStrokePair(
+        sourceContexts,
+        targetContexts,
+        sourcePoints,
+        targetPoints,
+        spatialWeight,
+        sourceIndices,
+        targetIndices,
+        `forward`,
+      );
+      const reverse = alignStrokePair(
+        sourceContexts,
+        targetContexts,
+        sourcePoints,
+        targetPoints,
+        spatialWeight,
+        sourceIndices,
+        targetIndices,
+        `reverse`,
+      );
+      const alignment =
+        reverse != null &&
+        (forward == null ||
+          reverse.pathCost / reverse.pathLength <
+            forward.pathCost / forward.pathLength)
+          ? reverse
+          : forward;
+      if (
+        alignment == null ||
+        sourceGeometry == null ||
+        targetGeometry == null
+      ) {
+        alignmentsForStroke.push(null);
+        costsForStroke.push({
+          sourceStrokeIndex,
+          targetStrokeIndex,
+          direction: `forward`,
+          dtwCost: Infinity,
+          centroidDistance: Infinity,
+          lengthPenalty: Infinity,
+          totalCost: Infinity,
+        });
+        continue;
+      }
+      const dtwCost = alignment.pathCost / alignment.pathLength;
+      const centroidDistance = distance(
+        sourceGeometry.centroid,
+        targetGeometry.centroid,
+      );
+      const lengthPenalty = Math.abs(
+        Math.log(
+          (sourceGeometry.totalLength + 1e-9) /
+            (targetGeometry.totalLength + 1e-9),
+        ),
+      );
+      alignmentsForStroke.push(alignment);
+      costsForStroke.push({
+        sourceStrokeIndex,
+        targetStrokeIndex,
+        direction: alignment.direction,
+        dtwCost,
+        centroidDistance,
+        lengthPenalty,
+        totalCost: dtwCost + 0.1 * centroidDistance + 0.1 * lengthPenalty,
+      });
+    }
+    alignments.push(alignmentsForStroke);
+    pairCosts.push(costsForStroke);
+  }
+
+  const sourceStrokeCount = sourceStrokes.length;
+  const targetStrokeCount = targetStrokes.length;
+  const assignmentCosts = Array.from(
+    { length: sourceStrokeCount + targetStrokeCount },
+    (_, row) =>
+      Array.from(
+        { length: sourceStrokeCount + targetStrokeCount },
+        (_, column) => {
+          if (row < sourceStrokeCount && column < targetStrokeCount) {
+            return pairCosts[row]?.[column]?.totalCost ?? Infinity;
+          }
+          if (row < sourceStrokeCount || column < targetStrokeCount) {
+            return unmatchedCost;
+          }
+          return 0;
+        },
+      ),
+  );
+  const assignment = hungarian(assignmentCosts);
+  const assignments: ShapeContextStrokeAssignment[] = [];
+  const unmatchedSourceStrokeIndices: number[] = [];
+  const matchedTargetStrokes = new Set<number>();
+  const pairs: MatchResult[`pairs`] = [];
+  const dtwAlignments: ShapeContextDtwAlignment[] = [];
+  let totalCost = 0;
+
+  for (
+    let sourceStrokeIndex = 0;
+    sourceStrokeIndex < sourceStrokeCount;
+    sourceStrokeIndex++
+  ) {
+    const targetStrokeIndex = assignment[sourceStrokeIndex] ?? -1;
+    if (targetStrokeIndex < 0 || targetStrokeIndex >= targetStrokeCount) {
+      unmatchedSourceStrokeIndices.push(sourceStrokeIndex);
+      totalCost += unmatchedCost;
+      continue;
+    }
+    const alignment = alignments[sourceStrokeIndex]?.[targetStrokeIndex];
+    const pairCost = pairCosts[sourceStrokeIndex]?.[targetStrokeIndex];
+    if (alignment == null || pairCost == null) {
+      unmatchedSourceStrokeIndices.push(sourceStrokeIndex);
+      totalCost += unmatchedCost;
+      continue;
+    }
+    assignments.push({
+      sourceStrokeIndex,
+      targetStrokeIndex,
+      direction: alignment.direction,
+      cost: pairCost.totalCost,
+    });
+    dtwAlignments.push({
+      sourceStrokeIndex,
+      targetStrokeIndex,
+      direction: alignment.direction,
+      sourcePointIndices: alignment.sourceIndices,
+      referencePointIndices: alignment.targetIndices,
+      costMatrix: alignment.costMatrix,
+      path: alignment.path,
+      pathLength: alignment.pathLength,
+      longestRepeatedIndexRun: alignment.longestRepeatedIndexRun,
+      meanNormalizedIndexDeviation: alignment.meanNormalizedIndexDeviation,
+    });
+    matchedTargetStrokes.add(targetStrokeIndex);
+    pairs.push(...alignment.pairs);
+    totalCost += pairCost.totalCost;
+  }
+
+  const unmatchedTargetStrokeIndices = targetStrokes.flatMap((_, index) =>
+    matchedTargetStrokes.has(index) ? [] : [index],
+  );
+  totalCost += unmatchedTargetStrokeIndices.length * unmatchedCost;
+  const unmatchedSourceIndices = sourceIndicesByStroke.flatMap(
+    (indices, strokeIndex) =>
+      unmatchedSourceStrokeIndices.includes(strokeIndex) ? indices : [],
+  );
+  const unmatchedTargetIndices = targetIndicesByStroke.flatMap(
+    (indices, strokeIndex) =>
+      unmatchedTargetStrokeIndices.includes(strokeIndex) ? indices : [],
+  );
+  return {
+    matches: {
+      pairs: pairs.sort((left, right) => left.sourceIndex - right.sourceIndex),
+      unmatchedSourceIndices,
+      unmatchedTargetIndices,
+      totalCost,
+    },
+    pairCosts,
+    assignments,
+    dtwAlignments,
+    unmatchedSourceStrokeIndices,
+    unmatchedTargetStrokeIndices,
+  };
 }
 
 function solveLinearSystem(
@@ -1004,7 +1338,6 @@ function isEffectivelyOneDimensional(
 
 function fitThinPlateSpline(
   source: readonly WritingStrokePoint[],
-  target: readonly WritingStrokePoint[],
   matches: readonly MatchResult[`pairs`][number][],
   rotationRadians: number,
   regularization: number,
@@ -1015,10 +1348,10 @@ function fitThinPlateSpline(
   }> = [];
   for (const match of matches) {
     const sourcePoint = source[match.sourceIndex];
-    const targetPoint = target[match.targetIndex];
-    if (sourcePoint == null || targetPoint == null) {
+    if (sourcePoint == null) {
       continue;
     }
+    const targetPoint = match.targetPoint;
     const rotatedSource = rotate(sourcePoint, rotationRadians);
     const existing = controls.find(
       (control) => distance(control.source, rotatedSource) < 1e-6,
@@ -1115,37 +1448,19 @@ function fitThinPlateSpline(
   }
   bendingEnergy = Math.max(0, bendingEnergy / count);
 
-  const [a, b, c] = affineX;
-  const [d, e, f] = affineY;
-  const trace = b * b + c * c + e * e + f * f;
-  const determinant = (b * f - c * e) ** 2;
-  const discriminant = Math.sqrt(Math.max(0, trace * trace - 4 * determinant));
-  const largestSingularValue = Math.sqrt(
-    Math.max(0, (trace + discriminant) / 2),
+  const affineDistortion = calculateAffineDistortion(affineX, affineY);
+  const rotationDegrees = calculateRotationDegrees(
+    affineX,
+    affineY,
+    rotationRadians,
   );
-  const smallestSingularValue = Math.sqrt(
-    Math.max(0, (trace - discriminant) / 2),
-  );
-  const affineDistortion =
-    smallestSingularValue <= 1e-9
-      ? 2
-      : Math.max(0, largestSingularValue / smallestSingularValue - 1) +
-        (b * f - c * e < 0 ? 2 : 0);
-  const cosine = Math.cos(rotationRadians);
-  const sine = Math.sin(rotationRadians);
-  const combinedA = b * cosine + c * sine;
-  const combinedB = -b * sine + c * cosine;
-  const combinedC = e * cosine + f * sine;
-  const combinedD = -e * sine + f * cosine;
-  const rotationDegrees =
-    (Math.atan2(combinedC - combinedB, combinedA + combinedD) * 180) / Math.PI;
 
   return {
     controlPoints: controls.map((control) => control.source),
     xWeights,
     yWeights,
-    affineX: [a, b, c],
-    affineY: [d, e, f],
+    affineX,
+    affineY,
     rotationRadians,
     regularization,
     bendingEnergy,
@@ -1165,9 +1480,90 @@ function fitThinPlateSpline(
   };
 }
 
-function preservesGridOrientation(
+interface TransformJacobian {
+  xx: number;
+  xy: number;
+  yx: number;
+  yy: number;
+}
+
+function transformJacobian(
   transform: ThinPlateSplineTransform,
-): boolean {
+  point: WritingStrokePoint,
+): TransformJacobian {
+  const { rotationRadians, controlPoints, xWeights, yWeights } = transform;
+  const cosine = Math.cos(rotationRadians);
+  const sine = Math.sin(rotationRadians);
+  const rotated = rotate(point, rotationRadians);
+  let xQx = transform.affineX[1];
+  let xQy = transform.affineX[2];
+  let yQx = transform.affineY[1];
+  let yQy = transform.affineY[2];
+
+  for (const [index, control] of controlPoints.entries()) {
+    const dx = rotated.x - control.x;
+    const dy = rotated.y - control.y;
+    const squaredDistance = dx * dx + dy * dy;
+    if (squaredDistance <= 1e-16) {
+      continue;
+    }
+    const derivative = Math.log(squaredDistance) + 1;
+    const gradientX = dx * derivative;
+    const gradientY = dy * derivative;
+    xQx += (xWeights[index] ?? 0) * gradientX;
+    xQy += (xWeights[index] ?? 0) * gradientY;
+    yQx += (yWeights[index] ?? 0) * gradientX;
+    yQy += (yWeights[index] ?? 0) * gradientY;
+  }
+
+  return {
+    xx: xQx * cosine + xQy * sine,
+    xy: -xQx * sine + xQy * cosine,
+    yx: yQx * cosine + yQy * sine,
+    yy: -yQx * sine + yQy * cosine,
+  };
+}
+
+function isValidJacobian({ xx, xy, yx, yy }: TransformJacobian): boolean {
+  const determinant = xx * yy - xy * yx;
+  if (!(determinant > 0)) {
+    return false;
+  }
+  const squaredSingularValueSum = xx * xx + xy * xy + yx * yx + yy * yy;
+  const discriminant = Math.sqrt(
+    Math.max(
+      0,
+      squaredSingularValueSum * squaredSingularValueSum -
+        4 * determinant * determinant,
+    ),
+  );
+  const largestSingularValue = Math.sqrt(
+    Math.max(0, (squaredSingularValueSum + discriminant) / 2),
+  );
+  const smallestSingularValue =
+    largestSingularValue > 0 ? determinant / largestSingularValue : 0;
+  return (
+    Number.isFinite(largestSingularValue) &&
+    Number.isFinite(smallestSingularValue) &&
+    smallestSingularValue >= 0.5 &&
+    largestSingularValue <= 2
+  );
+}
+
+function blendJacobians(
+  baseline: TransformJacobian,
+  fitted: TransformJacobian,
+  alpha: number,
+): TransformJacobian {
+  return {
+    xx: baseline.xx + alpha * (fitted.xx - baseline.xx),
+    xy: baseline.xy + alpha * (fitted.xy - baseline.xy),
+    yx: baseline.yx + alpha * (fitted.yx - baseline.yx),
+    yy: baseline.yy + alpha * (fitted.yy - baseline.yy),
+  };
+}
+
+function deformationValidationGrid(): WritingStrokePoint[] {
   const gridCoordinates = Array.from(
     { length: 7 },
     (_, index) => -1.5 + index * 0.5,
@@ -1179,10 +1575,18 @@ function preservesGridOrientation(
   const coordinates = [
     ...new Set([...gridCoordinates, ...lineSampleCoordinates]),
   ].sort((a, b) => a - b);
+  return coordinates.flatMap((y) => coordinates.map((x) => ({ x, y })));
+}
+
+function preservesGridOrientation(
+  transform: ThinPlateSplineTransform,
+): boolean {
+  const coordinates = [
+    ...new Set(deformationValidationGrid().map(({ x }) => x)),
+  ].sort((a, b) => a - b);
   const transformedRows = coordinates.map((y) =>
     coordinates.map((x) => transform.transform({ x, y })),
   );
-
   for (let row = 0; row < coordinates.length - 1; row++) {
     for (let column = 0; column < coordinates.length - 1; column++) {
       const topLeft = transformedRows[row]?.[column];
@@ -1213,30 +1617,160 @@ function preservesGridOrientation(
 
 function fitThinPlateSplineWithoutFoldovers(
   source: readonly WritingStrokePoint[],
-  target: readonly WritingStrokePoint[],
   matches: readonly MatchResult[`pairs`][number][],
   rotationRadians: number,
-  regularization: number,
+  initialRegularization: number,
 ): ThinPlateSplineTransform {
+  let regularization = initialRegularization;
+  let lastTransform = makeIdentityTransform(rotationRadians, regularization);
   for (let attempt = 0; attempt < 16; attempt++) {
-    const transform = fitThinPlateSpline(
+    lastTransform = fitThinPlateSpline(
       source,
-      target,
       matches,
       rotationRadians,
       regularization,
     );
-    if (preservesGridOrientation(transform)) {
-      return transform;
+    if (preservesGridOrientation(lastTransform)) {
+      return lastTransform;
     }
     regularization *= 2;
   }
-  return makeIdentityTransform(rotationRadians, regularization);
+  return lastTransform;
+}
+
+function calculateAffineDistortion(
+  affineX: readonly [number, number, number],
+  affineY: readonly [number, number, number],
+): number {
+  const [, b, c] = affineX;
+  const [, e, f] = affineY;
+  const trace = b * b + c * c + e * e + f * f;
+  const determinant = (b * f - c * e) ** 2;
+  const discriminant = Math.sqrt(Math.max(0, trace * trace - 4 * determinant));
+  const largestSingularValue = Math.sqrt(
+    Math.max(0, (trace + discriminant) / 2),
+  );
+  const smallestSingularValue = Math.sqrt(
+    Math.max(0, (trace - discriminant) / 2),
+  );
+  return smallestSingularValue <= 1e-9
+    ? 2
+    : Math.max(0, largestSingularValue / smallestSingularValue - 1) +
+        (b * f - c * e < 0 ? 2 : 0);
+}
+
+function calculateRotationDegrees(
+  affineX: readonly [number, number, number],
+  affineY: readonly [number, number, number],
+  rotationRadians: number,
+): number {
+  const [, b, c] = affineX;
+  const [, e, f] = affineY;
+  const cosine = Math.cos(rotationRadians);
+  const sine = Math.sin(rotationRadians);
+  const combinedA = b * cosine + c * sine;
+  const combinedB = -b * sine + c * cosine;
+  const combinedC = e * cosine + f * sine;
+  const combinedD = -e * sine + f * cosine;
+  return (
+    (Math.atan2(combinedC - combinedB, combinedA + combinedD) * 180) / Math.PI
+  );
+}
+
+function blendThinPlateSplineTransform(
+  fitted: ThinPlateSplineTransform,
+  alpha: number,
+): ThinPlateSplineTransform {
+  const affineX: [number, number, number] = [
+    alpha * fitted.affineX[0],
+    1 - alpha + alpha * fitted.affineX[1],
+    alpha * fitted.affineX[2],
+  ];
+  const affineY: [number, number, number] = [
+    alpha * fitted.affineY[0],
+    alpha * fitted.affineY[1],
+    1 - alpha + alpha * fitted.affineY[2],
+  ];
+  const xWeights = fitted.xWeights.map((weight) => alpha * weight);
+  const yWeights = fitted.yWeights.map((weight) => alpha * weight);
+  return {
+    ...fitted,
+    xWeights,
+    yWeights,
+    affineX,
+    affineY,
+    bendingEnergy: fitted.bendingEnergy * alpha * alpha,
+    affineDistortion: calculateAffineDistortion(affineX, affineY),
+    rotationDegrees: calculateRotationDegrees(
+      affineX,
+      affineY,
+      fitted.rotationRadians,
+    ),
+    transform(point) {
+      const rotated = rotate(point, fitted.rotationRadians);
+      let x = affineX[0] + affineX[1] * rotated.x + affineX[2] * rotated.y;
+      let y = affineY[0] + affineY[1] * rotated.x + affineY[2] * rotated.y;
+      for (const [index, control] of fitted.controlPoints.entries()) {
+        const kernel = tpsKernel(rotated, control);
+        x += (xWeights[index] ?? 0) * kernel;
+        y += (yWeights[index] ?? 0) * kernel;
+      }
+      return { x, y };
+    },
+  };
+}
+
+function constrainThinPlateSpline(fitted: ThinPlateSplineTransform): {
+  transform: ThinPlateSplineTransform;
+  deformationAlpha: number;
+} {
+  const validationPoints = deformationValidationGrid();
+  const fittedJacobians = validationPoints.map((point) =>
+    transformJacobian(fitted, point),
+  );
+  const cosine = Math.cos(fitted.rotationRadians);
+  const sine = Math.sin(fitted.rotationRadians);
+  const baseline: TransformJacobian = {
+    xx: cosine,
+    xy: -sine,
+    yx: sine,
+    yy: cosine,
+  };
+  const isValid = (alpha: number): boolean =>
+    fittedJacobians.every((jacobian) =>
+      isValidJacobian(blendJacobians(baseline, jacobian, alpha)),
+    );
+  if (isValid(1)) {
+    return { transform: fitted, deformationAlpha: 1 };
+  }
+
+  let validAlpha = 0;
+  let invalidAlpha = 1;
+  for (let iteration = 0; iteration < 20; iteration++) {
+    const alpha = (validAlpha + invalidAlpha) / 2;
+    if (isValid(alpha)) {
+      validAlpha = alpha;
+    } else {
+      invalidAlpha = alpha;
+    }
+  }
+  if (validAlpha === 0) {
+    return {
+      transform: makeIdentityTransform(
+        fitted.rotationRadians,
+        fitted.regularization,
+      ),
+      deformationAlpha: 0,
+    };
+  }
+  return {
+    transform: blendThinPlateSplineTransform(fitted, validAlpha),
+    deformationAlpha: validAlpha,
+  };
 }
 
 function averageMatchDistance(
   source: readonly WritingStrokePoint[],
-  target: readonly WritingStrokePoint[],
   matches: readonly MatchResult[`pairs`][number][],
 ): number {
   if (matches.length === 0) {
@@ -1246,8 +1780,8 @@ function averageMatchDistance(
   let validMatches = 0;
   for (const match of matches) {
     const sourcePoint = source[match.sourceIndex];
-    const targetPoint = target[match.targetIndex];
-    if (sourcePoint != null && targetPoint != null) {
+    if (sourcePoint != null) {
+      const targetPoint = match.targetPoint;
       distanceTotal += distance(sourcePoint, targetPoint);
       validMatches++;
     }
@@ -1267,136 +1801,22 @@ function polylineLength(points: readonly WritingStrokePoint[]): number {
   return length;
 }
 
-function resampleStrokesForCoverage(
+function unmatchedStrokeArcLengthFraction(
   strokes: readonly (readonly WritingStrokePoint[])[],
-): WritingStrokePoint[][] {
-  const lengths = strokes.map(polylineLength);
-  const totalLength = lengths.reduce((total, length) => total + length, 0);
-  const activeStrokeCount = lengths.filter((length) => length > 0).length;
-  const sampleCount = Math.min(
-    256,
-    Math.max(activeStrokeCount * 2, Math.ceil(totalLength / 0.05)),
-  );
-  const counts = allocateSampleCounts(lengths, sampleCount);
-  return strokes.flatMap((stroke, index) => {
-    const count = counts[index] ?? 0;
-    return count < 1 ? [] : [samplePolyline(stroke, count)];
-  });
-}
-
-function distanceToStrokes(
-  point: WritingStrokePoint,
-  strokes: readonly (readonly WritingStrokePoint[])[],
+  unmatchedStrokeIndices: readonly number[],
 ): number {
-  let nearestDistance = Infinity;
+  let totalLength = 0;
   for (const stroke of strokes) {
-    for (let index = 1; index < stroke.length; index++) {
-      const start = stroke[index - 1];
-      const end = stroke[index];
-      if (start == null || end == null) {
-        continue;
-      }
-      const dx = end.x - start.x;
-      const dy = end.y - start.y;
-      const lengthSquared = dx * dx + dy * dy;
-      const projection =
-        lengthSquared === 0
-          ? 0
-          : Math.max(
-              0,
-              Math.min(
-                1,
-                ((point.x - start.x) * dx + (point.y - start.y) * dy) /
-                  lengthSquared,
-              ),
-            );
-      nearestDistance = Math.min(
-        nearestDistance,
-        Math.hypot(
-          point.x - (start.x + projection * dx),
-          point.y - (start.y + projection * dy),
-        ),
-      );
-    }
+    totalLength += polylineLength(stroke);
   }
-  return nearestDistance;
-}
-
-function uncoveredGeometry(
-  source: readonly (readonly WritingStrokePoint[])[],
-  target: readonly (readonly WritingStrokePoint[])[],
-): { fraction: number; longestRun: number } {
-  const sampledStrokes = resampleStrokesForCoverage(source);
-  const sourcePoints = sampledStrokes.flat();
-  const sourceLength = source.reduce(
-    (total, stroke) => total + polylineLength(stroke),
-    0,
-  );
-  if (sourcePoints.length === 0) {
-    return { fraction: 0, longestRun: 0 };
+  if (totalLength === 0) {
+    return 0;
   }
-  if (!target.some((stroke) => polylineLength(stroke) > 0)) {
-    const longestStrokeLength = Math.max(...source.map(polylineLength));
-    return {
-      fraction: 1,
-      longestRun: sourceLength > 0 ? longestStrokeLength / sourceLength : 0,
-    };
+  let unmatchedLength = 0;
+  for (const index of unmatchedStrokeIndices) {
+    unmatchedLength += polylineLength(strokes[index] ?? []);
   }
-  const uncoveredByStroke = sampledStrokes.map((stroke) =>
-    stroke.map(
-      (point) => distanceToStrokes(point, target) > geometryCoverageTolerance,
-    ),
-  );
-  const uncoveredCount = uncoveredByStroke.reduce(
-    (total, stroke) => total + stroke.filter(Boolean).length,
-    0,
-  );
-  let longestRunLength = 0;
-  for (const [strokeIndex, stroke] of sampledStrokes.entries()) {
-    const strokeLength = polylineLength(stroke);
-    const uncoveredFlags = uncoveredByStroke[strokeIndex] ?? [];
-    let runCount = 0;
-    let longestStrokeRun = 0;
-    for (const isUncovered of uncoveredFlags) {
-      if (isUncovered) {
-        runCount++;
-        longestStrokeRun = Math.max(longestStrokeRun, runCount);
-      } else {
-        runCount = 0;
-      }
-    }
-    longestRunLength = Math.max(
-      longestRunLength,
-      longestStrokeRun *
-        (stroke.length > 1 ? strokeLength / (stroke.length - 1) : 0),
-    );
-  }
-  return {
-    fraction: uncoveredCount / sourcePoints.length,
-    longestRun: sourceLength > 0 ? longestRunLength / sourceLength : 0,
-  };
-}
-
-function geometryCoverage(
-  source: readonly (readonly WritingStrokePoint[])[],
-  target: readonly (readonly WritingStrokePoint[])[],
-): ShapeContextGeometryCoverage {
-  const referenceCoverage = uncoveredGeometry(target, source);
-  const handwritingCoverage = uncoveredGeometry(source, target);
-  return {
-    referenceToHandwriting: referenceCoverage.fraction,
-    handwritingToReference: handwritingCoverage.fraction,
-    referenceLongestUncoveredRun: referenceCoverage.longestRun,
-    handwritingLongestUncoveredRun: handwritingCoverage.longestRun,
-  };
-}
-
-function geometryCoverageCost(coverage: ShapeContextGeometryCoverage): number {
-  return (
-    (coverage.referenceToHandwriting + coverage.handwritingToReference) / 2 +
-    coverage.referenceLongestUncoveredRun +
-    coverage.handwritingLongestUncoveredRun
-  );
+  return unmatchedLength / totalLength;
 }
 
 function transformPoints(
@@ -1434,28 +1854,22 @@ export function gradeCharacterShape(
   const target = samplePaths(referencePaths, sampling.count);
   const sourcePoints = source.points;
   const targetPoints = target.points;
-  const emptyMatch = matchPoints(
-    [],
-    [],
-    sourcePoints,
-    targetPoints,
-    settings.unmatchedCost,
-    0,
-  );
   if (sourcePoints.length === 0 || targetPoints.length === 0) {
-    const initialGeometryCoverage = geometryCoverage(
-      source.strokes,
+    const unmatchedSourceStrokeIndices = source.strokes.map(
+      (_, index) => index,
+    );
+    const unmatchedTargetStrokeIndices = target.strokes.map(
+      (_, index) => index,
+    );
+    const missingReferenceStrokeFraction = unmatchedStrokeArcLengthFraction(
       target.strokes,
+      unmatchedTargetStrokeIndices,
+    );
+    const extraHandwritingStrokeFraction = unmatchedStrokeArcLengthFraction(
+      source.strokes,
+      unmatchedSourceStrokeIndices,
     );
     const transform = makeIdentityTransform(0, settings.tpsRegularization);
-    const unmatchedPointPenalty =
-      sourcePoints.length + targetPoints.length === 0
-        ? 1
-        : (sourcePoints.length + targetPoints.length) /
-          Math.max(1, sourcePoints.length + targetPoints.length);
-    const geometryCoveragePenalty = geometryCoverageCost(
-      initialGeometryCoverage,
-    );
     const weightedInitialMatchingError =
       emptyGeometryBaseCost * shapeContextScoreWeights.initialMatchingError;
     const weightedResidualMatchingError =
@@ -1465,38 +1879,47 @@ export function gradeCharacterShape(
       emptyGeometryBaseCost -
       weightedInitialMatchingError -
       weightedResidualMatchingError;
+    const missingReferenceStrokePenalty =
+      missingReferenceStrokeFraction *
+      settings.missingReferenceStrokePenaltyWeight;
+    const extraHandwritingStrokePenalty =
+      extraHandwritingStrokeFraction *
+      settings.extraHandwritingStrokePenaltyWeight;
     const weightedScoreContributions: ShapeContextScoreContributions = {
       initialMatchingError: weightedInitialMatchingError,
       residualMatchingError: weightedResidualMatchingError,
-      bendingEnergy: 0,
-      affineDistortion: 0,
-      rotationPenalty: 0,
-      unmatchedPointPenalty,
-      geometryCoveragePenalty,
+      missingReferenceStrokePenalty,
+      extraHandwritingStrokePenalty,
       emptyGeometryPenalty,
     };
-    const combinedCost =
-      emptyGeometryBaseCost + unmatchedPointPenalty + geometryCoveragePenalty;
+    const shapeCost =
+      weightedScoreContributions.initialMatchingError +
+      weightedScoreContributions.residualMatchingError +
+      weightedScoreContributions.missingReferenceStrokePenalty +
+      weightedScoreContributions.extraHandwritingStrokePenalty +
+      weightedScoreContributions.emptyGeometryPenalty;
     return {
-      similarity: Math.exp(-combinedCost),
-      combinedCost,
+      shapeCost,
+      shapeSimilarity: Math.exp(-shapeCost),
+      deformationAlpha: 1,
       initialMatchingError: emptyGeometryBaseCost,
       residualMatchingError: emptyGeometryBaseCost,
       bendingEnergy: 0,
       affineDistortion: 0,
       rotationDegrees: 0,
-      rotationPenalty: 0,
-      unmatchedPointPenalty,
-      initialGeometryCoverage,
-      residualGeometryCoverage: initialGeometryCoverage,
-      geometryCoveragePenalty,
+      missingReferenceStrokeFraction,
+      extraHandwritingStrokeFraction,
       weightedScoreContributions,
-      geometryCoverageTolerance,
       correspondences: [],
+      strokePairCosts: [],
+      strokeAssignments: [],
+      dtwAlignments: [],
+      unmatchedSourceStrokeIndices,
+      unmatchedTargetStrokeIndices,
       sourceStrokeIndices: source.pointStrokeIndices,
       targetStrokeIndices: target.pointStrokeIndices,
-      unmatchedSourceIndices: emptyMatch.unmatchedSourceIndices,
-      unmatchedTargetIndices: emptyMatch.unmatchedTargetIndices,
+      unmatchedSourceIndices: sourcePoints.map((_, index) => index),
+      unmatchedTargetIndices: targetPoints.map((_, index) => index),
       sourcePoints,
       targetPoints,
       transformedPoints: sourcePoints.map((point) =>
@@ -1514,7 +1937,6 @@ export function gradeCharacterShape(
   }
 
   let rotationRadians = 0;
-  let matches: MatchResult | null = null;
   let bestCost = Infinity;
   const targetShapeContexts = shapeContexts(
     targetPoints,
@@ -1522,6 +1944,7 @@ export function gradeCharacterShape(
     settings.angularBins,
   );
   const sourceSteps = settings.rotationSteps;
+  let strokeMatching: ReturnType<typeof matchStrokes> | undefined;
   for (let step = 0; step <= sourceSteps * 2; step++) {
     const degrees =
       settings.maxRotationDegrees === 0
@@ -1532,46 +1955,34 @@ export function gradeCharacterShape(
     const rotatedPoints = sourcePoints.map((point) =>
       rotate(point, candidateRotation),
     );
-    const candidateMatches = matchPoints(
+    const rotatedStrokes = source.strokes.map((stroke) =>
+      stroke.map((point) => rotate(point, candidateRotation)),
+    );
+    const candidateMatching = matchStrokes(
       shapeContexts(rotatedPoints, settings.radialBins, settings.angularBins),
       targetShapeContexts,
       rotatedPoints,
       targetPoints,
+      rotatedStrokes,
+      target.strokes,
       settings.unmatchedCost,
       0.04,
     );
-    if (candidateMatches.totalCost < bestCost) {
-      bestCost = candidateMatches.totalCost;
+    if (candidateMatching.matches.totalCost < bestCost) {
+      bestCost = candidateMatching.matches.totalCost;
       rotationRadians = candidateRotation;
-      matches = candidateMatches;
+      strokeMatching = candidateMatching;
     }
+  }
+  if (strokeMatching == null) {
+    throw new Error(`Rotation search did not evaluate a stroke assignment`);
   }
   const rotatedSourcePoints = sourcePoints.map((point) =>
     rotate(point, rotationRadians),
   );
-  const sourceStrokeTargets = assignSourceStrokes(
-    matches ?? emptyMatch,
-    source.pointStrokeIndices,
-    target.pointStrokeIndices,
-  );
-  let activeMatches = matchPoints(
-    shapeContexts(
-      rotatedSourcePoints,
-      settings.radialBins,
-      settings.angularBins,
-    ),
-    targetShapeContexts,
-    rotatedSourcePoints,
-    targetPoints,
-    settings.unmatchedCost,
-    0.04,
-    source.pointStrokeIndices,
-    target.pointStrokeIndices,
-    sourceStrokeTargets,
-  );
+  const activeMatches = strokeMatching.matches;
   const initialMatchingError = averageMatchDistance(
     rotatedSourcePoints,
-    targetPoints,
     activeMatches.pairs,
   );
   let transformedPoints = sourcePoints.map((point) =>
@@ -1581,106 +1992,73 @@ export function gradeCharacterShape(
     rotationRadians,
     settings.tpsRegularization,
   );
+  let deformationAlpha = 1;
 
   for (let iteration = 0; iteration < settings.iterations; iteration++) {
-    transform = fitThinPlateSplineWithoutFoldovers(
+    const constrainedTransform = constrainThinPlateSpline(
+      fitThinPlateSplineWithoutFoldovers(
+        sourcePoints,
+        activeMatches.pairs,
+        rotationRadians,
+        settings.tpsRegularization,
+      ),
+    );
+    transform = constrainedTransform.transform;
+    deformationAlpha = constrainedTransform.deformationAlpha;
+    transformedPoints = transformPoints(sourcePoints, transform);
+  }
+  const constrainedTransform = constrainThinPlateSpline(
+    fitThinPlateSplineWithoutFoldovers(
       sourcePoints,
-      targetPoints,
       activeMatches.pairs,
       rotationRadians,
       settings.tpsRegularization,
-    );
-    transformedPoints = transformPoints(sourcePoints, transform);
-    activeMatches = matchPoints(
-      shapeContexts(
-        transformedPoints,
-        settings.radialBins,
-        settings.angularBins,
-      ),
-      targetShapeContexts,
-      transformedPoints,
-      targetPoints,
-      settings.unmatchedCost,
-      0.12,
-      source.pointStrokeIndices,
-      target.pointStrokeIndices,
-      sourceStrokeTargets,
-    );
-  }
-  transform = fitThinPlateSplineWithoutFoldovers(
-    sourcePoints,
-    targetPoints,
-    activeMatches.pairs,
-    rotationRadians,
-    settings.tpsRegularization,
+    ),
   );
+  transform = constrainedTransform.transform;
+  deformationAlpha = constrainedTransform.deformationAlpha;
   transformedPoints = transformPoints(sourcePoints, transform);
 
   const residualMatchingError = averageMatchDistance(
     transformedPoints,
-    targetPoints,
     activeMatches.pairs,
   );
-  const rotatedSourceStrokes = source.strokes.map((stroke) =>
-    stroke.map((point) => rotate(point, rotationRadians)),
-  );
-  const initialAlignedGeometryCoverage = geometryCoverage(
-    rotatedSourceStrokes,
+  const missingReferenceStrokeFraction = unmatchedStrokeArcLengthFraction(
     target.strokes,
+    strokeMatching.unmatchedTargetStrokeIndices,
   );
-  const residualGeometryCoverage = geometryCoverage(
-    source.strokes.map((stroke) =>
-      stroke.map((point) => transform.transform(point)),
-    ),
-    target.strokes,
+  const extraHandwritingStrokeFraction = unmatchedStrokeArcLengthFraction(
+    source.strokes,
+    strokeMatching.unmatchedSourceStrokeIndices,
   );
-  const geometryCoveragePenalty =
-    Math.min(
-      geometryCoverageCost(initialAlignedGeometryCoverage),
-      geometryCoverageCost(residualGeometryCoverage),
-    ) * shapeContextScoreWeights.geometryCoveragePenalty;
-  const unmatchedPointPenalty =
-    (activeMatches.unmatchedSourceIndices.length +
-      activeMatches.unmatchedTargetIndices.length) /
-    (sourcePoints.length + targetPoints.length);
+  const missingReferenceStrokePenalty =
+    missingReferenceStrokeFraction *
+    settings.missingReferenceStrokePenaltyWeight;
+  const extraHandwritingStrokePenalty =
+    extraHandwritingStrokeFraction *
+    settings.extraHandwritingStrokePenaltyWeight;
   const bendingEnergy = transform.bendingEnergy;
   const affineDistortion = transform.affineDistortion;
   const rotationDegrees = transform.rotationDegrees;
-  const rotationPenalty = Math.max(
-    0,
-    (Math.abs(rotationDegrees) - settings.maxRotationDegrees) / 30,
-  );
   const weightedScoreContributions: ShapeContextScoreContributions = {
     initialMatchingError:
       initialMatchingError * shapeContextScoreWeights.initialMatchingError,
     residualMatchingError:
       residualMatchingError * shapeContextScoreWeights.residualMatchingError,
-    bendingEnergy: bendingEnergy * shapeContextScoreWeights.bendingEnergy,
-    affineDistortion:
-      affineDistortion * shapeContextScoreWeights.affineDistortion,
-    rotationPenalty: rotationPenalty * shapeContextScoreWeights.rotationPenalty,
-    unmatchedPointPenalty:
-      unmatchedPointPenalty * shapeContextScoreWeights.unmatchedPointPenalty,
-    geometryCoveragePenalty,
+    missingReferenceStrokePenalty,
+    extraHandwritingStrokePenalty,
     emptyGeometryPenalty: 0,
   };
-  const combinedCost =
+  const shapeCost =
     weightedScoreContributions.initialMatchingError +
     weightedScoreContributions.residualMatchingError +
-    weightedScoreContributions.bendingEnergy +
-    weightedScoreContributions.affineDistortion +
-    weightedScoreContributions.rotationPenalty +
-    weightedScoreContributions.unmatchedPointPenalty +
-    weightedScoreContributions.geometryCoveragePenalty;
+    weightedScoreContributions.missingReferenceStrokePenalty +
+    weightedScoreContributions.extraHandwritingStrokePenalty;
   const correspondences = activeMatches.pairs.flatMap((match) => {
     const sourcePoint = sourcePoints[match.sourceIndex];
-    const targetPoint = targetPoints[match.targetIndex];
+    const targetPoint = match.targetPoint;
     const transformedPoint = transformedPoints[match.sourceIndex];
-    if (
-      sourcePoint == null ||
-      targetPoint == null ||
-      transformedPoint == null
-    ) {
+    if (sourcePoint == null || transformedPoint == null) {
       return [];
     }
     const initialPoint = rotate(sourcePoint, rotationRadians);
@@ -1695,21 +2073,23 @@ export function gradeCharacterShape(
   });
 
   return {
-    similarity: Math.exp(-combinedCost),
-    combinedCost,
+    shapeCost,
+    shapeSimilarity: Math.exp(-shapeCost),
+    deformationAlpha,
     initialMatchingError,
     residualMatchingError,
     bendingEnergy,
     affineDistortion,
     rotationDegrees,
-    rotationPenalty,
-    unmatchedPointPenalty,
-    initialGeometryCoverage: initialAlignedGeometryCoverage,
-    residualGeometryCoverage,
-    geometryCoveragePenalty,
+    missingReferenceStrokeFraction,
+    extraHandwritingStrokeFraction,
     weightedScoreContributions,
-    geometryCoverageTolerance,
     correspondences,
+    strokePairCosts: strokeMatching.pairCosts,
+    strokeAssignments: strokeMatching.assignments,
+    dtwAlignments: strokeMatching.dtwAlignments,
+    unmatchedSourceStrokeIndices: strokeMatching.unmatchedSourceStrokeIndices,
+    unmatchedTargetStrokeIndices: strokeMatching.unmatchedTargetStrokeIndices,
     sourceStrokeIndices: source.pointStrokeIndices,
     targetStrokeIndices: target.pointStrokeIndices,
     unmatchedSourceIndices: activeMatches.unmatchedSourceIndices,
