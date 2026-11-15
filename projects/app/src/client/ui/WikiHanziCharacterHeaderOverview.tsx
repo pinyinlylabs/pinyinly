@@ -1,4 +1,5 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
+import { use } from "react";
 import type {
   HanziCharacter,
   HanziWord,
@@ -20,6 +21,7 @@ import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { HanziStrokesAnimatedTile } from "./HanziStrokesAnimatedTile";
+import { WikiPageEditModeContext } from "./WikiPageEditModeContext";
 
 export function WikiHanziCharacterHeaderOverview({
   hanzi,
@@ -36,6 +38,7 @@ export function WikiHanziCharacterHeaderOverview({
   true satisfies IsExhaustedRest<typeof rest>;
 
   const db = useDb();
+  const wikiPageEditMode = use(WikiPageEditModeContext);
 
   const { data: decompositionEntries } = useLiveQuery({
     query: (q) =>
@@ -92,6 +95,7 @@ export function WikiHanziCharacterHeaderOverview({
               hanziWord={hanziWord}
               hanzi={hanzi}
               onModalDismiss={onModalDismiss}
+              wikiPageEditMode={wikiPageEditMode}
             />
           </HeaderProvider.ActionsPortal>
         </View>

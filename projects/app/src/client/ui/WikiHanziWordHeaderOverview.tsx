@@ -1,4 +1,5 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
+import { use } from "react";
 import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { Text } from "@/client/ui/Text";
@@ -8,6 +9,7 @@ import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
 import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
 import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
+import { WikiPageEditModeContext } from "./WikiPageEditModeContext";
 
 export function WikiHanziWordHeaderOverview({
   hanzi,
@@ -24,6 +26,7 @@ export function WikiHanziWordHeaderOverview({
   onModalDismiss?: () => void;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
+  const wikiPageEditMode = use(WikiPageEditModeContext);
 
   return (
     <View className="gap-[10px]">
@@ -49,6 +52,7 @@ export function WikiHanziWordHeaderOverview({
               hanziWord={studyHanziWord}
               hanzi={hanzi}
               onModalDismiss={onModalDismiss}
+              wikiPageEditMode={wikiPageEditMode}
             />
           </HeaderProvider.ActionsPortal>
         </View>

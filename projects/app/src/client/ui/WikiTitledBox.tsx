@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { cn } from "tailwind-variants";
 import { WikiEditButton } from "./WikiEditButton";
 import { RectButton } from "./RectButton";
+import { WikiPageEditModeContext } from "./WikiPageEditModeContext";
 
 export function WikiTitledBox({
   title,
@@ -29,10 +30,13 @@ export function WikiTitledBox({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const wikiPageEditMode = use(WikiPageEditModeContext);
   const isOverflowExpandable = collapsedMaxHeight != null;
+  const isEditButtonVisible =
+    wikiPageEditMode == null || wikiPageEditMode.isEditMode;
   const headerAction =
     headerCustomAction ??
-    (onEditingChange == null ? null : (
+    (onEditingChange == null || !isEditButtonVisible ? null : (
       <WikiEditButton
         editing={isEditing}
         onPress={() => {

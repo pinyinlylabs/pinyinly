@@ -5,8 +5,23 @@ import { WikiHanziBodyWord } from "./WikiHanziBodyWord";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziBodyCharacterMultipleMeanings } from "./WikiHanziBodyCharacterMultipleMeanings";
+import { WikiPageEditModeProvider } from "./WikiPageEditModeProvider";
 
 export function WikiHanziBody({
+  hanzi,
+  onModalDismiss,
+}: {
+  hanzi: HanziText;
+  onModalDismiss?: () => void;
+}) {
+  return (
+    <WikiPageEditModeProvider key={hanzi}>
+      <WikiHanziBodyContent hanzi={hanzi} onModalDismiss={onModalDismiss} />
+    </WikiPageEditModeProvider>
+  );
+}
+
+function WikiHanziBodyContent({
   hanzi,
   onModalDismiss,
 }: {
