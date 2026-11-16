@@ -6,8 +6,10 @@ import type {
 import { pinyinTextSchema, QuestionKind } from "#data/model.ts";
 import {
   createHanziCharacterWritingRatingReportJson,
+  evaluateHanziCharacterWritingAcceptance,
   gradeHanziCharacterWritingQuestion,
   hanziCharacterWritingSimilarityThreshold,
+  isHanziCharacterWritingAccepted,
 } from "#data/questions/hanziCharacterWriting.ts";
 import { Rating } from "#util/fsrs.ts";
 import {
@@ -49,6 +51,27 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     expect(result.rating).not.toBe(Rating.Again);
   });
 
+  test(`rejects unmatched reference strokes without a stroke-count rule`, () => {
+    const result = gradeHanziCharacterWritingQuestion(
+      question,
+      [
+        [
+          { x: 100, y: 100 },
+          { x: 500, y: 100 },
+        ],
+      ],
+      [expectedPath, expectedPath],
+      1000,
+    );
+
+    expect(result.geometry.unmatchedTargetStrokeIndices).toHaveLength(1);
+    expect(result).toMatchObject({
+      correct: false,
+      failure: `stroke-segmentation`,
+      rating: Rating.Again,
+    });
+  });
+
   test(`rejects a shape that matches a similar character equally well`, () => {
     const result = gradeHanziCharacterWritingQuestion(
       question,
@@ -63,17 +86,52 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
       [{ hanzi: `牛` as HanziCharacter, medianPaths: [expectedPath] }],
     );
 
-    expect(result.geometry.similarity).toBeGreaterThanOrEqual(
+    expect(result.geometry.shapeSimilarity).toBeGreaterThanOrEqual(
       hanziCharacterWritingSimilarityThreshold,
-    );
-    expect(result.similarCharacterGrades[0]?.geometry.similarity).toBe(
-      result.geometry.similarity,
     );
     expect(result).toMatchObject({
       correct: false,
       failure: `contrastive`,
       rating: Rating.Again,
     });
+  });
+
+  test(`uses shape similarity for threshold and contrastive grading`, () => {
+    const geometry = gradeHanziCharacterWritingQuestion(
+      question,
+      [
+        [
+          { x: 100, y: 100 },
+          { x: 500, y: 100 },
+        ],
+      ],
+      [expectedPath],
+      1000,
+    ).geometry;
+    const targetGeometry = {
+      ...geometry,
+      shapeSimilarity: 0.8,
+    };
+    const moreSimilarGeometry = {
+      ...geometry,
+      shapeSimilarity: 0.9,
+    };
+    const lessSimilarGeometry = {
+      ...geometry,
+      shapeSimilarity: 0.7,
+    };
+
+    expect(isHanziCharacterWritingAccepted(targetGeometry, [])).toBe(true);
+    expect(
+      isHanziCharacterWritingAccepted(targetGeometry, [
+        { hanzi: `牛` as HanziCharacter, geometry: moreSimilarGeometry },
+      ]),
+    ).toBe(false);
+    expect(
+      isHanziCharacterWritingAccepted(targetGeometry, [
+        { hanzi: `牛` as HanziCharacter, geometry: lessSimilarGeometry },
+      ]),
+    ).toBe(true);
   });
 
   test(`uses the standard quiz speed rating thresholds`, () => {
@@ -101,7 +159,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     ).toBe(Rating.Hard);
   });
 
-  test(`rejects empty geometry without using stroke count as a criterion`, () => {
+  test(`rejects empty geometry when reference strokes remain unmatched`, () => {
     const result = gradeHanziCharacterWritingQuestion(
       question,
       [],
@@ -111,7 +169,7 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
 
     expect(result).toMatchObject({
       correct: false,
-      failure: `shape`,
+      failure: `stroke-segmentation`,
       rating: Rating.Again,
     });
   });
@@ -190,5 +248,107 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     expect(decodeShapeContextStrokes(report.drawnStrokes)).toEqual(
       drawnStrokes,
     );
+  });
+
+  test(`instruments contrastive short-circuit and no-candidate decisions`, () => {
+    const geometry = gradeHanziCharacterWritingQuestion(
+      question,
+      [
+        [
+          { x: 100, y: 100 },
+          { x: 500, y: 100 },
+        ],
+      ],
+      [expectedPath],
+      1000,
+    ).geometry;
+    const targetGeometry = {
+      ...geometry,
+      shapeSimilarity: 0.8,
+    };
+    const noCandidates = evaluateHanziCharacterWritingAcceptance(
+      targetGeometry,
+      [],
+    );
+    expect(noCandidates).toMatchObject({
+      primaryShapeThreshold: { passed: true },
+      contrastiveCheck: {
+        ran: true,
+        passed: true,
+        observedMargin: null,
+        candidates: [],
+      },
+      strokeCompleteness: {
+        passed: true,
+        referenceStrokeCount: 1,
+        matchedReferenceStrokeCount: 1,
+        unmatchedReferenceStrokeCount: 0,
+        unmatchedReferenceStrokeIndices: [],
+      },
+      finalAccepted: true,
+    });
+
+    const decision = evaluateHanziCharacterWritingAcceptance(targetGeometry, [
+      {
+        hanzi: `牛` as HanziCharacter,
+        geometry: {
+          ...targetGeometry,
+          shapeSimilarity: 0.75,
+        },
+      },
+      {
+        hanzi: `入` as HanziCharacter,
+        geometry: {
+          ...targetGeometry,
+          shapeSimilarity: 0.8,
+        },
+      },
+      {
+        hanzi: `午` as HanziCharacter,
+        geometry: {
+          ...targetGeometry,
+          shapeSimilarity: 0.7,
+        },
+      },
+    ]);
+    expect(decision.contrastiveCheck).toMatchObject({
+      ran: true,
+      passed: false,
+      metric: `shapeSimilarity`,
+      requiredMargin: 0,
+      observedMargin: 0,
+      rejectingCandidateCharacter: `入`,
+      candidates: [
+        { evaluated: true, observedMargin: expect.any(Number), passed: true },
+        { evaluated: true, observedMargin: 0, passed: false },
+        { evaluated: false, observedMargin: null, passed: null },
+      ],
+    });
+    expect(decision.contrastiveCheck.candidates[0]?.observedMargin).toBeCloseTo(
+      0.05,
+    );
+    expect(decision.rejectionCondition).toBe(
+      `candidateShapeSimilarityNotLower`,
+    );
+    const skipped = evaluateHanziCharacterWritingAcceptance(
+      { ...targetGeometry, shapeSimilarity: 0.71 },
+      [
+        {
+          hanzi: `牛` as HanziCharacter,
+          geometry: targetGeometry,
+        },
+      ],
+    );
+    expect(skipped).toMatchObject({
+      primaryShapeThreshold: { passed: false },
+      contrastiveCheck: {
+        ran: false,
+        passed: null,
+        skippedReason: `primaryShapeThresholdFailed`,
+        candidates: [{ evaluated: false, passed: null }],
+      },
+      finalAccepted: false,
+      rejectionCondition: `primaryShapeThresholdFailed`,
+    });
   });
 });

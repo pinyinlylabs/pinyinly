@@ -16,6 +16,8 @@ const shapeContextOptionsSchema = z
     iterations: z.number().int().min(0).max(8),
     tpsRegularization: z.number().positive().max(100),
     unmatchedCost: z.number().positive().max(5),
+    missingReferenceStrokePenaltyWeight: z.number().min(0).max(5).optional(),
+    extraHandwritingStrokePenaltyWeight: z.number().min(0).max(5).optional(),
     maxRotationDegrees: z.number().min(0).max(45),
     rotationSteps: z.number().int().min(1).max(12),
   })
