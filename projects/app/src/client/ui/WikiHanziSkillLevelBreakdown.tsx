@@ -74,7 +74,7 @@ export function WikiHanziSkillLevelBreakdownContent({
       {breakdown.map((item) => (
         <View className="gap-1" key={item.skill}>
           <View className="flex-row items-center justify-between gap-2">
-            <Text className="font-sans text-sm text-fg">{item.label}</Text>
+            <Text className="font-sans text-sm">{item.label}</Text>
             <Text className="font-sans text-xs text-muted-fg">
               {item.stabilityDays == null
                 ? item.status

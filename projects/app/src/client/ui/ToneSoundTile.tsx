@@ -69,7 +69,7 @@ export function ToneSoundTile({
             {decoration}
           </Text>
         )}
-        <Text className="font-sans text-2xl leading-none text-fg">
+        <Text className="font-sans text-2xl leading-none">
           {tone == null ? null : <ToneLabelText tone={tone} />}
         </Text>
       </View>

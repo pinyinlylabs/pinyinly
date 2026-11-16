@@ -33,7 +33,7 @@ function PageSheetModalExample({
   return (
     <Theme theme={theme}>
       <View className="gap-2 bg-bg p-4">
-        <Text className="text-fg">{label}</Text>
+        <Text>{label}</Text>
         <RectButton
           variant="filled"
           onPress={() => {
@@ -62,7 +62,7 @@ function PageSheetModalContent({ dismiss }: { dismiss: () => void }) {
 
   return (
     <View className="flex-1 gap-4 bg-bg p-4">
-      <Text className="text-fg">Modal theme: {theme}</Text>
+      <Text>Modal theme: {theme}</Text>
       <RectButton variant="filled" onPress={dismiss}>
         Dismiss
       </RectButton>

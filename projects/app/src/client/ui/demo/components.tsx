@@ -72,7 +72,7 @@ export const Section = ({
           >
             <View className="flex-row items-center justify-between gap-2">
               <Link href={href} asChild>
-                <Text className="font-mono text-2xl text-fg">{title}</Text>
+                <Text className="font-mono text-2xl">{title}</Text>
               </Link>
               <RectButton
                 className="

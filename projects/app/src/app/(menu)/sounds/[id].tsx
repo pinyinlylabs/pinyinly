@@ -157,9 +157,7 @@ export default function SoundIdPage() {
 
       <View className="my-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
-          <Text className="text-center font-cursive text-2xl text-fg">
-            {label}
-          </Text>
+          <Text className="text-center font-cursive text-2xl">{label}</Text>
           {soundAudioSource == null ? null : (
             <RectButton
               variant="bare"
@@ -169,20 +167,20 @@ export default function SoundIdPage() {
           )}
         </View>
         {isToneSound ? (
-          <Text className="pyly-ref pyly-body-subheading text-fg">
+          <Text className="pyly-ref pyly-body-subheading">
             {toneSoundName ?? `Select a set key below`}
           </Text>
         ) : isFinalSound ? (
-          <Text className="pyly-ref pyly-body-subheading text-fg">
+          <Text className="pyly-ref pyly-body-subheading">
             {finalDisplayName ?? `Select a location below`}
           </Text>
         ) : selectedInitialActor?.name == null ? (
-          <Text className="pyly-ref pyly-body-subheading text-fg">
+          <Text className="pyly-ref pyly-body-subheading">
             Select an actor below
           </Text>
         ) : (
           <Link href={`/actors/${selectedInitialActor.actorId}`}>
-            <Text className="pyly-ref pyly-body-subheading text-fg">
+            <Text className="pyly-ref pyly-body-subheading">
               {selectedInitialActor.name}
             </Text>
           </Link>
@@ -455,9 +453,7 @@ function MnemonicStoryRoleSection({
                             "
                           >
                             <View className="flex-row items-center justify-between gap-3">
-                              <Text className="pyly-body text-fg">
-                                {locationName}
-                              </Text>
+                              <Text className="pyly-body">{locationName}</Text>
                               {isActiveLocation ? (
                                 <Text className="pyly-body-caption font-semibold text-fg/80">
                                   ✓ Active
@@ -531,7 +527,7 @@ function MnemonicStoryRoleSection({
                                   rounded-lg border border-fg/10 bg-bg px-3 py-2 opacity-70
                                 "
                               >
-                                <Text className="pyly-body text-fg">
+                                <Text className="pyly-body">
                                   {locationName}
                                 </Text>
                                 <Text className="pyly-body-caption text-muted-fg">

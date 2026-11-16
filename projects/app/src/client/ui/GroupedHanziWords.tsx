@@ -51,9 +51,7 @@ export function GroupedHanziWords({
             </Text>
             <View className="flex-1">
               {entry.gloss[0] == null ? null : (
-                <Text className="font-sans text-sm text-fg">
-                  {entry.gloss[0]}
-                </Text>
+                <Text className="font-sans text-sm">{entry.gloss[0]}</Text>
               )}
               {entry.pinyin?.[0] == null ? null : (
                 <Text className="font-sans text-xs text-muted-fg">

@@ -77,9 +77,7 @@ export default () => {
           </View>
           {bgColors.map((bgColor) => (
             <View key={bgColor} className={`h-9 justify-center`}>
-              <Text className="pyly-dev-dt text-fg">
-                {bgColor.replace(`bg-`, ``)}
-              </Text>
+              <Text className="pyly-dev-dt">{bgColor.replace(`bg-`, ``)}</Text>
             </View>
           ))}
         </View>

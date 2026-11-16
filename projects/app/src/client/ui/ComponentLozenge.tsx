@@ -23,7 +23,7 @@ export function ComponentLozenge({
         </Lozenge>
       </Tooltip.Trigger>
       <Tooltip.Content>
-        <Text className="font-sans text-sm text-fg">
+        <Text className="font-sans text-sm">
           {isStructural
             ? `This character is only used as a component in other characters.`
             : `This character is used as a component and also as a character on its own.`}

@@ -303,7 +303,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                 <Text
                   className={
                     isTooLong
-                      ? `font-sans text-[12px] text-fg`
+                      ? `font-sans text-[12px]`
                       : `font-sans text-[12px] text-muted-fg`
                   }
                   style={
@@ -321,7 +321,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
                       : `var(--color-muted-fg)`,
                   }}
                 >
-                  <Text className="text-right text-[11px] text-fg">
+                  <Text className="text-right text-[11px]">
                     {currentLength}/{maxLength}
                   </Text>
                 </ScopedVariables>
@@ -501,7 +501,7 @@ function InlineEditableSettingHistoryMenu({
               hover:bg-fg-bg10
             `}
           >
-            <Text className="font-sans text-[14px] text-fg">{entry.value}</Text>
+            <Text className="font-sans text-[14px]">{entry.value}</Text>
             <Text className="font-sans text-[12px] text-muted-fg">
               {formatRelativeTime(entry.createdAt)}
             </Text>

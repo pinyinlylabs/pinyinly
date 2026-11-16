@@ -272,7 +272,7 @@ const DesktopNavItem = ({ name, href, lozenge }: NavItemProps) => {
     <Link href={href} asChild>
       <Pressable className={buttonContainerClass({ isFocused: isActive })}>
         <View className="relative flex-row items-center gap-2">
-          <Text className="font-sans text-sm/normal font-bold text-fg uppercase">
+          <Text className="font-sans text-sm/normal font-bold uppercase">
             {name}
           </Text>
           {lozenge}
@@ -287,11 +287,7 @@ const DesktopNavSubtleItem = ({ name, href }: NavItemProps) => {
     <Link href={href} asChild>
       <Pressable>
         <Text
-          className={`
-            font-sans text-sm/[32px] font-bold text-muted-fg uppercase
-
-            hover:text-fg
-          `}
+          className={`font-sans text-sm/[32px] font-bold text-muted-fg uppercase`}
         >
           {name}
         </Text>

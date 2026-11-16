@@ -826,7 +826,7 @@ function InlineImageRepositionFrame({
       />
       <View className="pointer-events-none absolute inset-0 items-center justify-center">
         <View className="rounded-md bg-bg/70 px-3 py-1">
-          <Text className="font-sans text-[12px] text-fg">
+          <Text className="font-sans text-[12px]">
             Drag image to reposition
           </Text>
         </View>

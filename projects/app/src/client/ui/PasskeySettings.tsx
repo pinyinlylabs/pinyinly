@@ -57,9 +57,7 @@ export function PasskeySettings() {
       <View className="gap-3">
         <View className="flex-row items-center justify-between gap-4">
           <View className="flex-1 gap-1">
-            <Text className="font-sans text-base font-semibold text-fg">
-              Passkeys
-            </Text>
+            <Text className="font-sans text-base font-semibold">Passkeys</Text>
             <Text className="text-muted-fg">
               Sign in securely without a password.
             </Text>
@@ -97,9 +95,7 @@ export function PasskeySettings() {
             >
               <View className="flex-row items-start justify-between gap-4">
                 <View className="flex-1 gap-2">
-                  <Text className="pyly-body-title text-fg">
-                    Manage passkeys
-                  </Text>
+                  <Text className="pyly-body-title">Manage passkeys</Text>
                   <Text className="text-muted-fg">
                     Use your device&apos;s built-in security, such as a
                     fingerprint, face recognition, or screen lock, to sign in.
@@ -115,15 +111,15 @@ export function PasskeySettings() {
               </View>
               <ScrollView className="min-h-0 flex-1">
                 <View className="gap-2">
-                  <Text className="font-sans text-base font-semibold text-fg">
+                  <Text className="font-sans text-base font-semibold">
                     Your passkeys
                   </Text>
                   {passkeysQuery.isLoading && !passkeysQuery.isError ? (
-                    <Text className="text-fg">Loading passkeys...</Text>
+                    <Text>Loading passkeys...</Text>
                   ) : null}
                   {passkeysQuery.isError ? (
                     <View className="gap-2">
-                      <Text accessibilityRole="alert" className="text-fg">
+                      <Text accessibilityRole="alert">
                         Could not load passkeys.
                       </Text>
                       <RectButton
@@ -165,11 +161,9 @@ export function PasskeySettings() {
                     localhost.
                   </Text>
                 )}
-                {pending ? <Text className="text-fg">Working...</Text> : null}
+                {pending ? <Text>Working...</Text> : null}
                 {errorMessage == null ? null : (
-                  <Text accessibilityRole="alert" className="text-fg">
-                    {errorMessage}
-                  </Text>
+                  <Text accessibilityRole="alert">{errorMessage}</Text>
                 )}
                 <RectButton
                   color="blue"
@@ -219,14 +213,12 @@ export function PasskeySettings() {
                 sm:p-6
               "
             >
-              <Text className="pyly-body-title text-fg">Remove passkey?</Text>
+              <Text className="pyly-body-title">Remove passkey?</Text>
               <Text className="text-muted-fg">
                 Remove this passkey? It will no longer work for new logins.
               </Text>
               {errorMessage == null ? null : (
-                <Text accessibilityRole="alert" className="text-fg">
-                  {errorMessage}
-                </Text>
+                <Text accessibilityRole="alert">{errorMessage}</Text>
               )}
               <View className="flex-row justify-end gap-2">
                 <RectButton disabled={pending} onPress={dismiss}>

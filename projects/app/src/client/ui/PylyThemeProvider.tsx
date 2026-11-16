@@ -2,6 +2,7 @@ import { DefaultTheme, ThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { useColorSchemeOverride } from "@/client/ui/hooks/useColorSchemeOverride";
+import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { VisualViewportCssVariables } from "./VisualViewportCssVariables";
 import { Theme } from "./Theme";
@@ -31,7 +32,9 @@ export function PylyThemeProvider({ children }: { children: ReactNode }) {
       <Theme theme={colorScheme}>
         <View className="flex-1 bg-bg">
           <StatusBar style={colorScheme === `dark` ? `light` : `dark`} />
-          {children}
+          <Text.ClassContext.Provider value="text-fg">
+            {children}
+          </Text.ClassContext.Provider>
           <VisualViewportCssVariables />
         </View>
       </Theme>

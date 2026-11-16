@@ -289,7 +289,7 @@ function MeaningCoreText({
       <Text className="ml-4 font-sans text-base leading-6">
         <Text className="text-fg-loud">{primaryGloss}</Text>
         {secondaryGlosses.length === 0 ? null : (
-          <Text className="text-fg">{`; ${secondaryGlosses.join(`; `)}`}</Text>
+          <Text>{`; ${secondaryGlosses.join(`; `)}`}</Text>
         )}
       </Text>
     </View>

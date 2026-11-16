@@ -51,7 +51,7 @@ export default function LoginPage() {
         <View className="items-center justify-center gap-8 px-6 py-12">
           {/* Header */}
           <View className="max-w-lg gap-2 text-center">
-            <Text className="font-sans text-3xl font-bold text-fg">
+            <Text className="font-sans text-3xl font-bold">
               Welcome to Pinyinly
             </Text>
             <Text className="font-sans text-base text-muted-fg">
@@ -65,9 +65,7 @@ export default function LoginPage() {
             className={`w-full max-w-lg gap-4 rounded-lg border bg-bg-high p-6`}
           >
             <View className="gap-2">
-              <Text className="font-sans text-lg font-semibold text-fg">
-                New here?
-              </Text>
+              <Text className="font-sans text-lg font-semibold">New here?</Text>
               <Text className="font-sans text-sm text-muted-fg">
                 Create an account to start learning.
               </Text>
@@ -117,7 +115,7 @@ export default function LoginPage() {
             className={`w-full max-w-lg gap-4 rounded-lg border bg-bg-high p-6`}
           >
             <View className="gap-2">
-              <Text className="font-sans text-lg font-semibold text-fg">
+              <Text className="font-sans text-lg font-semibold">
                 Already have an account?
               </Text>
               <Text className="font-sans text-sm text-muted-fg">
@@ -147,13 +145,9 @@ export default function LoginPage() {
               Passkeys require a supported web browser on HTTPS or localhost.
             </Text>
           )}
-          {pending ? (
-            <Text className="text-fg">Waiting for your passkey...</Text>
-          ) : null}
+          {pending ? <Text>Waiting for your passkey...</Text> : null}
           {errorMessage == null ? null : (
-            <Text accessibilityRole="alert" className="text-fg">
-              {errorMessage}
-            </Text>
+            <Text accessibilityRole="alert">{errorMessage}</Text>
           )}
           <View className="mt-4 gap-2" style={{ width: `100%`, maxWidth: 448 }}>
             <DevToolsSection
@@ -174,7 +168,7 @@ export default function LoginPage() {
   // iOS and other platforms: Return to original focused UI
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
-      <Text className="font-sans text-fg">
+      <Text className="font-sans">
         Passkeys are available on the Pinyinly website.
       </Text>
       <DevToolsSection />
@@ -229,9 +223,9 @@ function SkillCount() {
   const count = result.data.length;
 
   return result.isLoading ? (
-    <Text className="font-sans text-fg">Loading…</Text>
+    <Text className="font-sans">Loading…</Text>
   ) : (
-    <Text className="font-sans text-fg">{count} words</Text>
+    <Text className="font-sans">{count} words</Text>
   );
 }
 
@@ -258,7 +252,7 @@ function DevToolsSection({
 
   const content = (
     <>
-      <Text className="font-sans font-bold text-fg">Dev: Session List</Text>
+      <Text className="font-sans font-bold">Dev: Session List</Text>
       <View className="gap-2">
         {auth.data?.allDeviceSessions.map((x, i) => (
           <SessionStoreProvider key={i} dbName={x.replicacheDbName}>
@@ -269,25 +263,13 @@ function DevToolsSection({
               }
             >
               <View className={styled ? undefined : `flex-1`}>
-                <Text
-                  className={
-                    styled ? `font-sans text-sm text-fg` : `font-sans text-fg`
-                  }
-                >
+                <Text className={styled ? `font-sans text-sm` : `font-sans`}>
                   Skill count: <SkillCount />
                 </Text>
-                <Text
-                  className={
-                    styled ? `font-sans text-sm text-fg` : `font-sans text-fg`
-                  }
-                >
+                <Text className={styled ? `font-sans text-sm` : `font-sans`}>
                   Session ID: {x.serverSessionId}
                 </Text>
-                <Text
-                  className={
-                    styled ? `font-sans text-sm text-fg` : `font-sans text-fg`
-                  }
-                >
+                <Text className={styled ? `font-sans text-sm` : `font-sans`}>
                   DB name: {x.replicacheDbName}
                 </Text>
               </View>
@@ -304,14 +286,10 @@ function DevToolsSection({
           </SessionStoreProvider>
         ))}
       </View>
-      <Text
-        className={styled ? `font-sans text-sm text-fg` : `font-sans text-fg`}
-      >
+      <Text className={styled ? `font-sans text-sm` : `font-sans`}>
         Active Session ID: {auth.data?.activeDeviceSession.serverSessionId}
       </Text>
-      <Text
-        className={styled ? `font-sans text-sm text-fg` : `font-sans text-fg`}
-      >
+      <Text className={styled ? `font-sans text-sm` : `font-sans`}>
         Active DB name: {auth.data?.activeDeviceSession.replicacheDbName}
       </Text>
       <ServerSessionIdLoginForm />

@@ -43,9 +43,7 @@ export function PinyinFinalToneEditor({
             <View key={tone} className="gap-1">
               <View className="flex-row items-baseline justify-between">
                 <View className="flex-row items-baseline gap-2">
-                  <Text className="font-sans text-sm text-fg">
-                    {pinyinLabel}
-                  </Text>
+                  <Text className="font-sans text-sm">{pinyinLabel}</Text>
                   <Text className="font-sans text-xs text-muted-fg">
                     Tone {tone}
                   </Text>

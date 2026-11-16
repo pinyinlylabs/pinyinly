@@ -27,7 +27,7 @@ export default () => (
         </Lozenge>
       </Tooltip.Trigger>
       <Tooltip.Content>
-        <Text className="font-sans text-sm text-fg">
+        <Text className="font-sans text-sm">
           Focus or hover this lozenge to show its tooltip.
         </Text>
       </Tooltip.Content>
@@ -43,7 +43,7 @@ export default () => (
         />
       </Tooltip.Trigger>
       <Tooltip.Content>
-        <Text className="font-sans text-sm text-fg">
+        <Text className="font-sans text-sm">
           Icon lozenges use the same interactive focus styling.
         </Text>
       </Tooltip.Content>

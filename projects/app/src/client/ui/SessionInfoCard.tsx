@@ -60,7 +60,7 @@ function SessionInfoCardInner({
       {/* Header with name and active indicator */}
       <View className="flex-row items-center justify-between">
         <View className="flex-1 gap-1">
-          <Text className="font-sans text-base font-semibold text-fg">
+          <Text className="font-sans text-base font-semibold">
             {displayName}
           </Text>
           <Text className="font-sans text-sm text-muted-fg">

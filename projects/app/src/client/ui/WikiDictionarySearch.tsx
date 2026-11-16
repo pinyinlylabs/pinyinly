@@ -100,7 +100,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
       </Text>
       <View className="flex-1">
         {result.kind === `wikiDirect` ? (
-          <Text className="font-sans text-sm text-fg">Open wiki page</Text>
+          <Text className="font-sans text-sm">Open wiki page</Text>
         ) : result.kind === `hanziWord` && result.hanziWord != null ? (
           <HanziWordSearchMeta hanziWord={result.hanziWord} />
         ) : null}
@@ -132,7 +132,7 @@ function SearchResultBookmarkButton({ hanziWord }: { hanziWord: HanziWord }) {
         />
       </Tooltip.Trigger>
       <Tooltip.Content>
-        <Text className="font-sans text-sm text-fg">
+        <Text className="font-sans text-sm">
           {isBookmarked ? `Bookmarked` : `Bookmark`}
         </Text>
       </Tooltip.Content>
@@ -154,9 +154,7 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
   return (
     <>
       {dictionaryEntry?.gloss[0] == null ? null : (
-        <Text className="font-sans text-sm text-fg">
-          {dictionaryEntry.gloss[0]}
-        </Text>
+        <Text className="font-sans text-sm">{dictionaryEntry.gloss[0]}</Text>
       )}
       {dictionaryEntry?.pinyin?.[0] == null ? null : (
         <Text className="font-sans text-xs text-muted-fg">

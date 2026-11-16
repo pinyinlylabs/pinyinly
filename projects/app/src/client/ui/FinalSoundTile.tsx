@@ -94,7 +94,7 @@ export function FinalSoundTile({
       >
         <Text
           className={
-            `text-base/none font-medium text-fg` +
+            `text-base/none font-medium ` +
             (nullIfEmpty(name) == null ? ` text-fg/20` : ``)
           }
           numberOfLines={1}

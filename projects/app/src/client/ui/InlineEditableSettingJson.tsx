@@ -107,9 +107,7 @@ export function InlineEditableSettingJson<T extends UserSettingJsonEntity>({
     return (
       <View className={className}>
         {renderDisplay == null ? (
-          <Text className="font-mono text-[12px] text-fg">
-            {currentJsonText}
-          </Text>
+          <Text className="font-mono text-[12px]">{currentJsonText}</Text>
         ) : (
           renderDisplay(currentJsonValue)
         )}

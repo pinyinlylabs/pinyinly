@@ -44,7 +44,7 @@ export function CompactWordRows({
 
               {gloss == null ? null : (
                 <Text
-                  className="ml-4 flex-1 text-right font-sans text-base text-fg"
+                  className="ml-4 flex-1 text-right font-sans text-base"
                   numberOfLines={2}
                 >
                   {gloss}

@@ -32,9 +32,7 @@ function BookmarkStatus({ hanziWord }: { hanziWord: HanziWord }) {
         />
       </Tooltip.Trigger>
       <Tooltip.Content>
-        <Text className="font-sans text-sm text-fg">
-          Saved to your bookmarks.
-        </Text>
+        <Text className="font-sans text-sm">Saved to your bookmarks.</Text>
       </Tooltip.Content>
     </Tooltip>
   );
