@@ -19,6 +19,7 @@ import { useColorSchemeOverride } from "#client/ui/hooks/useColorSchemeOverride.
 import { PylyThemeProvider } from "#client/ui/PylyThemeProvider.tsx";
 import { deviceStoreQuery } from "#client/query.ts";
 import { onlineManager, QueryClient } from "@tanstack/react-query";
+import ms from "ms";
 import {
   act,
   cleanup,
@@ -170,9 +171,9 @@ test.each([
 });
 
 test.each([
-  [SimpleCronIntervalKind.Every5Seconds, 5000],
-  [SimpleCronIntervalKind.Every2Minutes, 120_000],
-  [SimpleCronIntervalKind.Every5Minutes, 300_000],
+  [SimpleCronIntervalKind.Every5Seconds, ms(`5s`)],
+  [SimpleCronIntervalKind.Every2Minutes, ms(`2m`)],
+  [SimpleCronIntervalKind.Every5Minutes, ms(`5m`)],
 ] as const)(
   `swaps themes every %s, overriding the saved theme`,
   async (interval, duration) => {
