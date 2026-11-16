@@ -1980,11 +1980,12 @@ export function gradeCharacterShape(
   const rotatedSourcePoints = sourcePoints.map((point) =>
     rotate(point, rotationRadians),
   );
-  const activeMatches = strokeMatching.matches;
+  const initialMatches = strokeMatching.matches;
   const initialMatchingError = averageMatchDistance(
     rotatedSourcePoints,
-    activeMatches.pairs,
+    initialMatches.pairs,
   );
+  let activeMatches = initialMatches;
   let transformedPoints = sourcePoints.map((point) =>
     rotate(point, rotationRadians),
   );
@@ -2006,6 +2007,25 @@ export function gradeCharacterShape(
     transform = constrainedTransform.transform;
     deformationAlpha = constrainedTransform.deformationAlpha;
     transformedPoints = transformPoints(sourcePoints, transform);
+    const transformedStrokes: WritingStrokePoint[][] = [];
+    for (const stroke of source.strokes) {
+      transformedStrokes.push(transformPoints(stroke, transform));
+    }
+    strokeMatching = matchStrokes(
+      shapeContexts(
+        transformedPoints,
+        settings.radialBins,
+        settings.angularBins,
+      ),
+      targetShapeContexts,
+      transformedPoints,
+      targetPoints,
+      transformedStrokes,
+      target.strokes,
+      settings.unmatchedCost,
+      0.04,
+    );
+    activeMatches = strokeMatching.matches;
   }
   const constrainedTransform = constrainThinPlateSpline(
     fitThinPlateSplineWithoutFoldovers(
