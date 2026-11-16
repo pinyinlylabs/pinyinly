@@ -47,12 +47,9 @@ export const navItems: NavGroup[] = [
     ] satisfies NavItem[],
   },
   {
-    items: [{ name: `Switch profile`, href: `/profile/switch` }],
-  },
-  {
     items: [
+      { name: `Switch profile`, href: `/profile/switch` },
       { name: `Acknowledgements`, href: `/acknowledgements` },
-      { name: `Developer`, href: `/settings/developer` },
     ] satisfies NavItem[],
   },
 ];
