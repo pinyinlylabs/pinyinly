@@ -1,4 +1,7 @@
-import { passkeyChallengeGarbageCollection } from "#server/lib/inngest/healthCheck.ts";
+import {
+  passkeyChallengeGarbageCollection,
+  replicacheGarbageCollection,
+} from "#server/lib/inngest/healthCheck.ts";
 import * as s from "#server/pgSchema.ts";
 import { dbTest } from "#test/server/lib/dbHelpers.ts";
 import type { TestDb } from "#test/server/lib/dbHelpers.ts";
@@ -66,5 +69,43 @@ dbTest(
       .from(s.authPasskeyChallenge)
       .where(eq(s.authPasskeyChallenge.rpId, `localhost`));
     expect(remaining.map(({ id }) => id).sort()).toEqual([`cutoff`, `recent`]);
+  },
+);
+
+dbTest(
+  `stops CVR cleanup after full batches without an empty final query`,
+  async ({ db }) => {
+    mockWithDrizzle.mockImplementation(
+      async (callback: (database: TestDb) => Promise<unknown>) => callback(db),
+    );
+    vi.useFakeTimers();
+    const now = new Date(`2026-01-02T03:00:00.000Z`);
+    vi.setSystemTime(now);
+    await db.insert(s.replicacheCvr).values(
+      Array.from({ length: 2000 }, (_, index) => ({
+        id: `cvr-${index}`,
+        lastMutationIds: {},
+        entities: {},
+        createdAt: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000),
+      })),
+    );
+
+    const engine = new InngestTestEngine({
+      function: replicacheGarbageCollection,
+    });
+    const { error } = await engine.execute({
+      events: [{ name: `inngest/function.invoked`, data: {} }],
+    });
+
+    if (error != null) {
+      throw error instanceof Error
+        ? error
+        : new Error(`Replicache CVR garbage collection failed`);
+    }
+
+    expect(mockWithDrizzle).toHaveBeenCalledTimes(2);
+    expect(
+      await db.select({ id: s.replicacheCvr.id }).from(s.replicacheCvr),
+    ).toEqual([]);
   },
 );

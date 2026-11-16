@@ -95,28 +95,19 @@ const populateLocation = inngest.createFunction(
     });
 
     const deprecatedSetKeys = [`arrival`, `heart`, `below`, `ascent`, `summit`];
-
-    for (const setKey of locationSetKeySchema.options.filter(
+    const setKeys = locationSetKeySchema.options.filter(
       (key) => !deprecatedSetKeys.includes(key),
-    )) {
-      if (deprecatedSetKeys.includes(setKey)) {
-        // Don't waste time generating deprecated sets
-        continue;
-      }
-
-      await step.sendEvent(
-        `emit population-location-set events`,
-        locationSetKeySchema.options
-          .filter((key) => !deprecatedSetKeys.includes(key))
-          .map((setKey) =>
-            locationPopulateLocationSetEvent.create({
-              locationId,
-              setKey,
-              userId,
-            }),
-          ),
-      );
-    }
+    );
+    await step.sendEvent(
+      `emit population-location-set events`,
+      setKeys.map((setKey) =>
+        locationPopulateLocationSetEvent.create({
+          locationId,
+          setKey,
+          userId,
+        }),
+      ),
+    );
 
     const currentLocationImage = await step.run(
       `read location identity image`,

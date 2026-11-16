@@ -92,7 +92,7 @@ export const replicachePush = inngest.createFunction(
         const mutationBatchSize = 20;
         while (lastSyncedMutationId < lastMutationId) {
           const newLastSyncedMutationId = await step.run(
-            `syncRemoteClient-${clientId}-${lastSyncedMutationId}`,
+            `syncRemoteClient-${remoteSync.id}-${clientId}-${lastSyncedMutationId}`,
             // oxlint-disable-next-line no-loop-func
             async () => {
               // Fetch mutations that need to be sent.
@@ -182,10 +182,11 @@ export const replicachePull = inngest.createFunction(
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
+      let batchIndex = 0;
       for (;;) {
         const fetchedMutations = await step.run(
           // Putting the user ID in is unnecessary but it helps debugging.
-          `fetchMutations-${remoteSync.id}-${remoteSync.userId}`,
+          `fetchMutations-${remoteSync.id}-${remoteSync.userId}-${batchIndex}`,
           async () => {
             const clientsState = await withDrizzle(async (db) =>
               getReplicacheClientStateForUser(db, remoteSync.userId),
@@ -212,7 +213,7 @@ export const replicachePull = inngest.createFunction(
         }
 
         await step.run(
-          `applyMutations-${remoteSync.id}-${remoteSync.userId}`,
+          `applyMutations-${remoteSync.id}-${remoteSync.userId}-${batchIndex}`,
           async () => {
             for (const {
               clientGroupId,
@@ -261,6 +262,7 @@ export const replicachePull = inngest.createFunction(
             }
           },
         );
+        batchIndex++;
       }
     }
   },
@@ -583,7 +585,7 @@ const assetSyncAll = inngest.createFunction(
         // Fan out upload jobs
         if (toUpload.length > 0) {
           await step.sendEvent(
-            `emit-uploads`,
+            `emit-uploads-${remoteSyncId}`,
             toUpload.map((assetId) =>
               serverSyncAssetPushEvent.create({
                 remoteSyncId: remoteSync.id,
@@ -596,7 +598,7 @@ const assetSyncAll = inngest.createFunction(
         // Fan out download jobs
         if (toDownload.length > 0) {
           await step.sendEvent(
-            `emit-downloads`,
+            `emit-downloads-${remoteSyncId}`,
             toDownload.map((assetId) =>
               serverSyncAssetPullEvent.create({
                 remoteSyncId: remoteSync.id,

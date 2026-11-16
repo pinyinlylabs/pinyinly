@@ -25,15 +25,15 @@ export const assetWaitForUploadAndEmitUploaded = inngest.createFunction(
     for (let i = 0; ; i++) {
       const delay = nonNullable(delays.at(i) ?? delays.at(-1));
 
-      await step.sleep(`wait-for-upload`, delay);
+      await step.sleep(`wait-for-upload-${i}`, delay);
 
-      const existResult = await step.run(`check-upload`, async () => {
+      const existResult = await step.run(`check-upload-${i}`, async () => {
         return verifyObjectExists(assetKey);
       });
 
       if (existResult.exists) {
         await step.sendEvent(
-          `emit-asset-uploaded`,
+          `emit-asset-uploaded-${i}`,
           assetUploadSucessEvent.create({
             userId,
             assetId,
