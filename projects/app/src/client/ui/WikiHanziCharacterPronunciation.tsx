@@ -253,7 +253,7 @@ export function WikiHanziCharacterPronunciationBox({
         <View className="gap-4 p-4 py-10">
           <View className="">
             <Text className="text-center font-sans text-2xl font-normal">
-              <Text className="pyly-bold">{pinyinUnit}</Text>
+              <Text className="font-semibold text-fg-loud">{pinyinUnit}</Text>
             </Text>
             <View className="px-[15%] py-2">
               <ThreeSplitLinesDown className="h-[10px] w-full" />
