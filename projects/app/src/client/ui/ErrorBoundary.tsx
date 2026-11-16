@@ -37,7 +37,7 @@ export function ErrorBoundaryErrorScreen() {
               tintColorClassName="accent-muted-fg"
             />
           </View>
-          <Text variant="h3" className="text-center text-fg">
+          <Text variant="h3" className="text-center">
             Something went wrong
           </Text>
           <Text className="mt-3 max-w-[28rem] text-center leading-6 text-muted-fg">

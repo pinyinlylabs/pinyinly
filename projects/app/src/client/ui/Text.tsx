@@ -99,24 +99,6 @@ function Text({
       {...props}
     />
   );
-
-  // const inheritedClassNames =
-  //   className == null
-  //     ? ``
-  //     : className
-  //         .split(/\s+/gu)
-  //         .filter((x) => x.startsWith(`text-`))
-  //         .join(` `);
-
-  // return inheritedClassNames.length === 0 ? (
-  //   children
-  // ) : (
-  //   // If a classname is provided, we provide it to children via context so that
-  //   // nested Text components can inherit the className.
-  //   <TextClassContext.Provider value={cn(textClass, inheritedClassNames)}>
-  //     {children}
-  //   </TextClassContext.Provider>
-  // );
 }
 
 Text.ClassContext = TextClassContext;

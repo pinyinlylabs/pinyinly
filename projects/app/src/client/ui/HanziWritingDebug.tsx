@@ -105,7 +105,7 @@ function Slider({
 
   return (
     <View className="gap-1">
-      <Text className="text-sm text-fg">
+      <Text className="text-sm">
         {label}: {formatValue(boundedValue)}
       </Text>
       <View
@@ -162,7 +162,7 @@ function DebugLayerToggle({
 }) {
   return (
     <View className="flex-row items-center justify-between gap-2">
-      <Text className="flex-1 text-sm text-fg">{debugLayerLabels[kind]}</Text>
+      <Text className="flex-1 text-sm">{debugLayerLabels[kind]}</Text>
       <Switch value={value} onValueChange={onValueChange} />
     </View>
   );
@@ -298,9 +298,7 @@ export function HanziWritingDebug({
   return (
     <View>
       <View className="gap-3 rounded-lg border border-border p-3">
-        <Text className="text-lg font-semibold text-fg">
-          Shape Context + TPS debug
-        </Text>
+        <Text className="text-lg font-semibold">Shape Context + TPS debug</Text>
         <View className="w-full items-center" style={{ aspectRatio: 1 }}>
           <Svg
             width="100%"
@@ -489,55 +487,55 @@ export function HanziWritingDebug({
           ))}
         </View>
         <View className="gap-1">
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Shape similarity score (not a probability):{` `}
             {geometry.shapeSimilarity.toFixed(3)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Shape threshold only:{` `}
             {geometry.shapeSimilarity >=
             hanziCharacterWritingSimilarityThreshold
               ? `passed`
               : `below the prototype threshold`}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Deformation alpha: {geometry.deformationAlpha.toFixed(3)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Initial matching error: {geometry.initialMatchingError.toFixed(3)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Residual matching error: {geometry.residualMatchingError.toFixed(3)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Reference length: {geometry.referenceLength.toFixed(3)} · sample
             count: {geometry.sampleCount}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Points per stroke (source):{` `}
             {geometry.sourceStrokeSampleCounts.join(`, `)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Points per stroke (reference):{` `}
             {geometry.targetStrokeSampleCounts.join(`, `)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             TPS bending energy: {geometry.bendingEnergy.toFixed(4)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Affine distortion: {geometry.affineDistortion.toFixed(3)}
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Estimated rotation: {geometry.rotationDegrees.toFixed(1)}°
           </Text>
-          <Text className="text-sm text-fg">
+          <Text className="text-sm">
             Matched points: {geometry.correspondences.length}; unmatched:{` `}
             {geometry.unmatchedSourceIndices.length} handwritten /{` `}
             {geometry.unmatchedTargetIndices.length} reference
           </Text>
         </View>
         <View className="gap-2 border-t border-border pt-2">
-          <Text className="font-semibold text-fg">Algorithm parameters</Text>
+          <Text className="font-semibold">Algorithm parameters</Text>
           <Slider
             label="TPS regularization"
             minimum={0.01}
@@ -553,7 +551,7 @@ export function HanziWritingDebug({
             }}
           />
           <View className="gap-2">
-            <Text className="font-semibold text-fg">Sampling</Text>
+            <Text className="font-semibold">Sampling</Text>
             <ButtonGroup>
               <ButtonGroup.Button
                 variant={options.sampleCount == null ? `filled` : `outline`}

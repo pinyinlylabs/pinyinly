@@ -1339,7 +1339,7 @@ function AiImageUserMessage({
     <View className={cn(`items-end gap-1.5`, className)}>
       <View className="max-w-140 rounded-lg bg-sky/20 p-2">
         {message.text != null && message.text.length > 0 ? (
-          <Text className="mx-1 font-sans text-sm leading-snug font-medium text-fg">
+          <Text className="mx-1 font-sans text-sm leading-snug font-medium">
             {message.text}
           </Text>
         ) : null}
@@ -1808,7 +1808,7 @@ function AiImagePromptComposer({
                           : `absolute top-0.5 right-1 rounded bg-bg/80 px-1`
                       }
                     >
-                      <Text className="font-sans text-[10px] text-fg">
+                      <Text className="font-sans text-[10px]">
                         {isDisabled ? `☐` : `☑`}
                       </Text>
                     </View>
@@ -1912,7 +1912,7 @@ function ImageReferenceTooltipContent({
       )}
       <View className="gap-2 px-3 py-2">
         {prompt == null ? null : (
-          <Text className="font-mono text-xs text-fg">{prompt}</Text>
+          <Text className="font-mono text-xs">{prompt}</Text>
         )}
         <Text className="font-sans text-xs text-muted-fg">
           Image and caption included in the prompt
@@ -1972,9 +1972,7 @@ function ReferencePickerMenu({
           >
             <View className="flex-row items-center justify-between gap-2">
               <View className="min-w-0 flex-1 gap-0.5">
-                <Text className="font-sans text-[13px] text-fg">
-                  {reference.label}
-                </Text>
+                <Text className="font-sans text-[13px]">{reference.label}</Text>
                 <Text className="font-sans text-[11px] text-muted-fg">
                   {roleLabel} • {status}
                   {isDisabled ? ` • Disabled in prompt` : ``}
@@ -2022,9 +2020,7 @@ function MissingReferenceWarningMenu({
 
       {missingReferenceLabels.length === 0 ? null : (
         <View className="gap-1">
-          <Text className="font-sans text-[12px] text-fg">
-            Missing references
-          </Text>
+          <Text className="font-sans text-[12px]">Missing references</Text>
           {missingReferenceLabels.map((label) => (
             <Text key={label} className="font-sans text-[12px] text-muted-fg">
               • {label}
@@ -2035,9 +2031,7 @@ function MissingReferenceWarningMenu({
 
       {fallbackUsageLabels.length === 0 ? null : (
         <View className="gap-1">
-          <Text className="font-sans text-[12px] text-fg">
-            Fallbacks in use
-          </Text>
+          <Text className="font-sans text-[12px]">Fallbacks in use</Text>
           {fallbackUsageLabels.map((label) => (
             <Text key={label} className="font-sans text-[12px] text-muted-fg">
               • {label}
@@ -2048,9 +2042,7 @@ function MissingReferenceWarningMenu({
 
       {quickActions.length === 0 ? null : (
         <View className="gap-1 pt-1">
-          <Text className="font-sans text-[12px] text-fg">
-            Quick prompt actions
-          </Text>
+          <Text className="font-sans text-[12px]">Quick prompt actions</Text>
           {quickActions.map((action) => (
             <RectButton
               key={action.id}

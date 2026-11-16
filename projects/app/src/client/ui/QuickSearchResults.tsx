@@ -153,7 +153,7 @@ function SearchResultItem({
               <Text className="font-sans text-lg font-normal text-fg-loud">
                 {result.hanzi}
               </Text>
-              <Text className="font-sans text-sm text-fg">Open wiki page</Text>
+              <Text className="font-sans text-sm">Open wiki page</Text>
             </View>
           </View>
         </ResultItem>
@@ -189,7 +189,7 @@ function HanziWordResultContent({ hanziWord }: { hanziWord: HanziWord }) {
           {hanzi}
         </Text>
         {gloss == null ? null : (
-          <Text className="font-sans text-sm text-fg">{gloss}</Text>
+          <Text className="font-sans text-sm">{gloss}</Text>
         )}
       </View>
       {pinyin == null ? null : (
@@ -221,7 +221,7 @@ function RecentQueries({
 
   return (
     <View className="">
-      <Text className="px-5 pt-6 pb-4 font-sans text-base font-semibold text-fg uppercase">
+      <Text className="px-5 pt-6 pb-4 font-sans text-base font-semibold uppercase">
         Recent
       </Text>
       {items.map((item) => {
@@ -275,7 +275,7 @@ function RecentQueries({
                     <Text className="font-sans text-lg font-normal text-fg-loud">
                       {soundId}
                     </Text>
-                    <Text className="font-sans text-sm text-fg">Sound</Text>
+                    <Text className="font-sans text-sm">Sound</Text>
                   </View>
                 </View>
               </ResultItem>
@@ -301,7 +301,7 @@ function RecentQueries({
                     <Text className="font-sans text-lg font-normal text-fg-loud">
                       {skillId}
                     </Text>
-                    <Text className="font-sans text-sm text-fg">Skill</Text>
+                    <Text className="font-sans text-sm">Skill</Text>
                   </View>
                 </View>
               </ResultItem>
@@ -327,7 +327,7 @@ function RecentQueries({
                     <Text className="font-sans text-lg font-normal text-fg-loud">
                       {assetId}
                     </Text>
-                    <Text className="font-sans text-sm text-fg">Asset</Text>
+                    <Text className="font-sans text-sm">Asset</Text>
                   </View>
                 </View>
               </ResultItem>
@@ -396,11 +396,11 @@ function NoResults({
   return (
     <View className="items-center px-4 pt-10 pb-8">
       <Text className="mb-10 font-sans text-lg font-medium text-muted-fg">
-        No results for &quot;<Text className={`text-fg`}>{query}</Text>&quot;
+        No results for &quot;<Text className={``}>{query}</Text>&quot;
       </Text>
 
       <View className="w-full items-start gap-2">
-        <Text className="font-sans text-sm font-semibold text-fg uppercase">
+        <Text className="font-sans text-sm font-semibold uppercase">
           Try searching for
         </Text>
         <View className="flex-row flex-wrap gap-2">

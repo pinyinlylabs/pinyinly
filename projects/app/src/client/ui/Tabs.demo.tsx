@@ -23,9 +23,7 @@ export default () => (
           </Tabs.List>
           <Tabs.Content value="overview" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Overview
-              </Text>
+              <Text className="font-sans text-base font-bold">Overview</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 View your key metrics and recent project activity. Track
                 progress across all your active projects.
@@ -34,9 +32,7 @@ export default () => (
           </Tabs.Content>
           <Tabs.Content value="analytics" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Analytics
-              </Text>
+              <Text className="font-sans text-base font-bold">Analytics</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Track performance and user engagement metrics. Monitor trends
                 and identify growth opportunities.
@@ -45,9 +41,7 @@ export default () => (
           </Tabs.Content>
           <Tabs.Content value="reports" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Reports
-              </Text>
+              <Text className="font-sans text-base font-bold">Reports</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Generate and download your detailed reports. Export data in
                 multiple formats for analysis.
@@ -110,9 +104,7 @@ export default () => (
           </Tabs.List>
           <Tabs.Content value="home" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Home
-              </Text>
+              <Text className="font-sans text-base font-bold">Home</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Welcome to your dashboard.
               </Text>
@@ -120,9 +112,7 @@ export default () => (
           </Tabs.Content>
           <Tabs.Content value="profile" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Profile
-              </Text>
+              <Text className="font-sans text-base font-bold">Profile</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Manage your profile settings.
               </Text>
@@ -130,9 +120,7 @@ export default () => (
           </Tabs.Content>
           <Tabs.Content value="messages" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Messages
-              </Text>
+              <Text className="font-sans text-base font-bold">Messages</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 View your recent messages.
               </Text>
@@ -140,9 +128,7 @@ export default () => (
           </Tabs.Content>
           <Tabs.Content value="settings" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Settings
-              </Text>
+              <Text className="font-sans text-base font-bold">Settings</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Configure your preferences.
               </Text>
@@ -150,9 +136,7 @@ export default () => (
           </Tabs.Content>
           <Tabs.Content value="help" className="mt-3">
             <View className="rounded-lg border border-fg/10 bg-fg/5 p-4">
-              <Text className="font-sans text-base font-bold text-fg">
-                Help
-              </Text>
+              <Text className="font-sans text-base font-bold">Help</Text>
               <Text className="mt-2 font-sans text-sm text-muted-fg">
                 Get help and support.
               </Text>

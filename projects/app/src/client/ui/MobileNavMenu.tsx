@@ -214,11 +214,7 @@ function MobileNavSubtleItem({
     <Link href={href} asChild>
       <Pressable onPress={onNavigate}>
         <Text
-          className={`
-            font-sans text-sm/[32px] font-bold text-muted-fg uppercase
-
-            hover:text-fg
-          `}
+          className={`font-sans text-sm/[32px] font-bold text-muted-fg uppercase`}
         >
           {name}
         </Text>

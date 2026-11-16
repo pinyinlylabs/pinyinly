@@ -84,7 +84,7 @@ export function QuizDeckResultToast({
                 {rating === Rating.Easy ? (
                   <View className="flex-row items-center gap-2">
                     <Icon size={32} icon="check-circled-filled" />
-                    <Text className="font-sans text-2xl font-bold text-fg">
+                    <Text className="font-sans text-2xl font-bold">
                       Perfect!
                     </Text>
                     <QuizResultDropdown
@@ -95,9 +95,7 @@ export function QuizDeckResultToast({
                 ) : rating === Rating.Good ? (
                   <View className="flex-row items-center gap-2">
                     <Icon size={32} icon="check-circled-filled" />
-                    <Text className="font-sans text-2xl font-bold text-fg">
-                      Nice!
-                    </Text>
+                    <Text className="font-sans text-2xl font-bold">Nice!</Text>
                     <QuizResultDropdown
                       onChangeAnswer={onChangeAnswer}
                       onReportWrongRating={onReportWrongRating}
@@ -107,7 +105,7 @@ export function QuizDeckResultToast({
                   <>
                     <View className="w-full flex-row items-center gap-2 self-stretch">
                       <Icon size={32} icon="meh-circled" />
-                      <Text className="font-sans text-2xl font-bold text-fg">
+                      <Text className="font-sans text-2xl font-bold">
                         Too slow
                       </Text>
                       <QuizResultDropdown
@@ -115,7 +113,7 @@ export function QuizDeckResultToast({
                         onReportWrongRating={onReportWrongRating}
                       />
                     </View>
-                    <Text className="font-sans text-lg/none text-fg">
+                    <Text className="font-sans text-lg/none">
                       Keep practicing and you’ll get faster!
                     </Text>
                   </>
@@ -125,7 +123,7 @@ export function QuizDeckResultToast({
                     <>
                       <View className="w-full flex-row items-center gap-2 self-stretch">
                         <Icon size={32} icon="close-circled-filled" />
-                        <Text className="font-sans text-2xl font-bold text-fg">
+                        <Text className="font-sans text-2xl font-bold">
                           Incorrect
                         </Text>
                         <QuizResultDropdown
@@ -133,11 +131,11 @@ export function QuizDeckResultToast({
                           onReportWrongRating={onReportWrongRating}
                         />
                       </View>
-                      <Text className="font-sans text-xl/none font-medium text-fg">
+                      <Text className="font-sans text-xl/none font-medium">
                         Correct answer:
                       </Text>
 
-                      <Text className="font-sans text-fg">
+                      <Text className="font-sans">
                         <SkillAnswerText skill={skill} />
                       </Text>
                     </>

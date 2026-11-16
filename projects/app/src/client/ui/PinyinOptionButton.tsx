@@ -38,9 +38,7 @@ export function PinyinOptionButton({
       variant="option"
       preventPressFocus
     >
-      <Text className="font-sans text-base/snug font-medium text-fg">
-        {pinyin}
-      </Text>
+      <Text className="font-sans text-base/snug font-medium">{pinyin}</Text>
       {` `}
       <Text className="font-sans text-sm/snug text-fg/50">{shortcutKey}</Text>
     </RectButton>

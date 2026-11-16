@@ -93,7 +93,7 @@ function LoadedExampleWithPaths({
 
   return (
     <View className="gap-3">
-      <Text className="text-xl font-semibold text-fg">{example.id}</Text>
+      <Text className="text-xl font-semibold">{example.id}</Text>
       <Text
         className={`
           font-semibold
@@ -103,13 +103,13 @@ function LoadedExampleWithPaths({
       >
         {accepted ? `Accepted` : `Not accepted`}
       </Text>
-      <Text className="text-fg">
+      <Text>
         Shape similarity {geometry.shapeSimilarity.toFixed(3)} · acceptance
         threshold {hanziCharacterWritingSimilarityThreshold.toFixed(2)} ·
         deformation alpha {geometry.deformationAlpha.toFixed(3)}
       </Text>
       {similarCharacterGrades.map(({ hanzi, geometry: candidate }) => (
-        <Text key={hanzi} className="text-fg">
+        <Text key={hanzi}>
           {hanzi} shape similarity {candidate.shapeSimilarity.toFixed(3)} ·
           deformation alpha {candidate.deformationAlpha.toFixed(3)}
         </Text>

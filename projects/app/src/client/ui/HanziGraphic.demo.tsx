@@ -48,7 +48,7 @@ export default function HanziGraphicDemo() {
             setAnimationKey((previous) => previous + 1);
           }}
         >
-          <Text className="text-sm text-fg">Replay stroke order</Text>
+          <Text className="text-sm">Replay stroke order</Text>
         </Pressable>
       </View>
       <View className="w-full flex-row gap-2">

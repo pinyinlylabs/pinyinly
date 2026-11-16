@@ -99,9 +99,7 @@ function AddCustomHintModalContent({
       <ScrollView className="flex-1">
         <View className="gap-4 p-4">
           <View className="gap-2">
-            <Text className="font-sans text-[14px] font-medium text-fg">
-              Your hint
-            </Text>
+            <Text className="font-sans text-[14px] font-medium">Your hint</Text>
             <TextInputMulti
               placeholder="Enter a hint that helps you remember..."
               value={hint}
@@ -113,9 +111,7 @@ function AddCustomHintModalContent({
               <View className="flex-row items-center justify-between gap-2">
                 <Text
                   className={
-                    isHintTooLong
-                      ? `text-[12px] text-fg`
-                      : `text-[12px] text-muted-fg`
+                    isHintTooLong ? `text-[12px]` : `text-[12px] text-muted-fg`
                   }
                   style={
                     isHintTooLong
@@ -134,7 +130,7 @@ function AddCustomHintModalContent({
                         : `var(--color-muted-fg)`,
                     }}
                   >
-                    <Text className="text-right text-[11px] text-fg">
+                    <Text className="text-right text-[11px]">
                       {trimmedHintLength}/{hintLengthTarget}
                     </Text>
                   </ScopedVariables>
@@ -152,7 +148,7 @@ function AddCustomHintModalContent({
           {showExplanation && canShowExplanation ? (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <Text className="font-sans text-[14px] font-medium text-fg">
+                <Text className="font-sans text-[14px] font-medium">
                   Explanation (optional)
                 </Text>
                 <Pressable

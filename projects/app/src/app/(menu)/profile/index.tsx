@@ -109,7 +109,7 @@ export default function ProfileSettingsPage() {
   if (auth.data == null) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="font-sans text-fg">Loading...</Text>
+        <Text className="font-sans">Loading...</Text>
       </View>
     );
   }

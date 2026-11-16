@@ -1642,9 +1642,7 @@ export default function GlyphBuilderDemo() {
       <View className="h-[680px] min-h-[680px] flex-row gap-4">
         <View className="w-[320px] gap-3 rounded-xl border border-fg/15 bg-bg-high p-3">
           <View className="flex-row items-center justify-between">
-            <Text className="font-sans text-base font-semibold text-fg">
-              Layers
-            </Text>
+            <Text className="font-sans text-base font-semibold">Layers</Text>
             <RectButton
               variant="bare"
               onPress={() => {
@@ -1756,9 +1754,7 @@ export default function GlyphBuilderDemo() {
         </View>
 
         <View className="flex-1 gap-3 rounded-xl border border-fg/15 bg-bg-high p-3">
-          <Text className="font-sans text-base font-semibold text-fg">
-            Preview
-          </Text>
+          <Text className="font-sans text-base font-semibold">Preview</Text>
           <View className="max-h-[400px] max-w-[400px]">
             <View
               className="aspect-square h-full rounded-lg border border-fg/20 bg-white"
@@ -1913,9 +1909,7 @@ export default function GlyphBuilderDemo() {
         </View>
 
         <View className="w-[360px] gap-3 rounded-xl border border-fg/15 bg-bg-high p-3">
-          <Text className="font-sans text-base font-semibold text-fg">
-            Inspector
-          </Text>
+          <Text className="font-sans text-base font-semibold">Inspector</Text>
           {selectedLayers.length === 0 ? (
             <Text className="pyly-body-caption text-muted-fg">
               Select one or more layers to edit them.
@@ -2122,13 +2116,13 @@ export default function GlyphBuilderDemo() {
           <View className="h-px bg-fg/15" />
 
           <View className="flex-row items-center justify-between gap-2">
-            <Text className="font-sans text-base font-semibold text-fg">
+            <Text className="font-sans text-base font-semibold">
               Merged output JSON
             </Text>
             <CopyToClipboardButton text={mergedOutputText} />
           </View>
           <ScrollView className="max-h-[340px] rounded-lg border border-fg/15 bg-bg p-2">
-            <Text className="font-mono text-xs leading-5 text-fg">
+            <Text className="font-mono text-xs leading-5">
               {mergedOutputText}
             </Text>
           </ScrollView>

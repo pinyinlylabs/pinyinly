@@ -157,13 +157,11 @@ export function ImagePasteDropZone({
       ) : uploading ? (
         <View className="flex-row items-center gap-2">
           <ActivityIndicator size="small" className="text-fg" />
-          <Text className="font-sans text-[13px] text-fg">
-            Uploading image...
-          </Text>
+          <Text className="font-sans text-[13px]">Uploading image...</Text>
         </View>
       ) : (
         <View className="items-center gap-1">
-          <Text className="font-sans text-[13px] text-fg">
+          <Text className="font-sans text-[13px]">
             Click to upload or paste an image anytime
           </Text>
           <Text className="font-sans text-[12px] text-muted-fg">Web only</Text>

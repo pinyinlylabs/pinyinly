@@ -105,7 +105,7 @@ export function SkillWordRows({
             <View className="ml-4 flex-1 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
               <Text
                 className="
-                  w-full text-right font-sans text-base text-fg
+                  w-full text-right font-sans text-base
 
                   sm:flex-1
                 "

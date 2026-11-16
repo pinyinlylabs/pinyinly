@@ -25,7 +25,7 @@ export default function AcknowledgementsPage() {
           <Fragment key={license}>
             <Text className="pyly-body mt-3">{license} License</Text>
             {pkgNames.map((pkgName, index) => (
-              <Text key={index} className="pyly-body-caption">
+              <Text key={index} className="pyly-body-caption text-muted-fg">
                 {pkgName}
               </Text>
             ))}

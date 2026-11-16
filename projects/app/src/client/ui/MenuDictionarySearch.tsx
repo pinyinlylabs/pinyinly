@@ -121,7 +121,7 @@ export function MenuDictionarySearch() {
                     ) : (
                       (result.kind satisfies `wikiDirect`,
                       (
-                        <Text className="font-sans text-sm text-fg">
+                        <Text className="font-sans text-sm">
                           Open wiki page
                         </Text>
                       ))
@@ -151,9 +151,7 @@ function HanziWordSearchMeta({ hanziWord }: { hanziWord: HanziWord }) {
   return (
     <>
       {dictionaryEntry?.gloss[0] == null ? null : (
-        <Text className="font-sans text-sm text-fg">
-          {dictionaryEntry.gloss[0]}
-        </Text>
+        <Text className="font-sans text-sm">{dictionaryEntry.gloss[0]}</Text>
       )}
       {dictionaryEntry?.pinyin?.[0] == null ? null : (
         <Text className="font-sans text-xs text-muted-fg">

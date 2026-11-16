@@ -95,8 +95,8 @@ export default function SettingsPage() {
         <SectionTitle>Theme</SectionTitle>
         <View className="flex-row items-center gap-4">
           <View className="flex-1">
-            <Text className="pyly-body-heading">Dark mode</Text>
-            <Text className="pyly-body-caption">
+            <Text className="pyly-body-heading text-fg-loud">Dark mode</Text>
+            <Text className="pyly-body-caption text-muted-fg">
               Auto follows your device&apos;s appearance.
             </Text>
           </View>
@@ -117,8 +117,10 @@ export default function SettingsPage() {
         <SectionTitle>Sound</SectionTitle>
         <View className="flex-row items-center gap-4">
           <View className="flex-1">
-            <Text className="pyly-body-heading">Sound effects</Text>
-            <Text className="pyly-body-caption">
+            <Text className="pyly-body-heading text-fg-loud">
+              Sound effects
+            </Text>
+            <Text className="pyly-body-caption text-muted-fg">
               Play sounds when interacting with audio controls.
             </Text>
           </View>
@@ -135,8 +137,10 @@ export default function SettingsPage() {
 
         <View className="flex-row gap-4">
           <View className="flex-1">
-            <Text className="pyly-body-heading">Auto check answers</Text>
-            <Text className="pyly-body-caption">
+            <Text className="pyly-body-heading text-fg-loud">
+              Auto check answers
+            </Text>
+            <Text className="pyly-body-caption text-muted-fg">
               Automatically check the answer rather than needing to press
               &quot;Check&quot;.
             </Text>
@@ -148,10 +152,10 @@ export default function SettingsPage() {
 
         <View className="flex-row items-center gap-4">
           <View className="flex-1">
-            <Text className="pyly-body-heading">
+            <Text className="pyly-body-heading text-fg-loud">
               Repeat meaning after a mistake
             </Text>
-            <Text className="pyly-body-caption">
+            <Text className="pyly-body-caption text-muted-fg">
               Number of correct meaning answers required for a weak word.
             </Text>
           </View>
@@ -172,10 +176,10 @@ export default function SettingsPage() {
 
         <View className="flex-row items-center gap-4">
           <View className="flex-1">
-            <Text className="pyly-body-heading">
+            <Text className="pyly-body-heading text-fg-loud">
               Repeat pronunciation after a mistake
             </Text>
-            <Text className="pyly-body-caption">
+            <Text className="pyly-body-caption text-muted-fg">
               Number of correct pinyin answers required for a weak word.
             </Text>
           </View>
@@ -198,10 +202,10 @@ export default function SettingsPage() {
 
         <View className="flex-row items-center gap-4">
           <View className="flex-1">
-            <Text className="pyly-body-heading">
+            <Text className="pyly-body-heading text-fg-loud">
               Repeat writing after a mistake
             </Text>
-            <Text className="pyly-body-caption">
+            <Text className="pyly-body-caption text-muted-fg">
               Number of correct writing answers required for a weak word.
             </Text>
           </View>
@@ -225,8 +229,10 @@ export default function SettingsPage() {
           {practiceCategorySettings.map(({ title, description, entity }) => (
             <View key={title} className="flex-row items-center gap-4">
               <View className="flex-1">
-                <Text className="pyly-body-heading">{title}</Text>
-                <Text className="pyly-body-caption">{description}</Text>
+                <Text className="pyly-body-heading text-fg-loud">{title}</Text>
+                <Text className="pyly-body-caption text-muted-fg">
+                  {description}
+                </Text>
               </View>
               <View>
                 <UserSettingToggleButton
@@ -244,7 +250,7 @@ export default function SettingsPage() {
         {studySourceSettings.map(({ title, entity }) => (
           <View key={title} className="flex-row items-center gap-4">
             <View className="flex-1">
-              <Text className="pyly-body-heading">{title}</Text>
+              <Text className="pyly-body-heading text-fg-loud">{title}</Text>
             </View>
             <View>
               <UserSettingToggleButton

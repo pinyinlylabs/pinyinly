@@ -181,9 +181,7 @@ function CharacterWriting({
             </Text>
           ))}
           <View className="gap-2 rounded-lg border border-border p-3">
-            <Text className="font-semibold text-fg">
-              Regression test example
-            </Text>
+            <Text className="font-semibold">Regression test example</Text>
             <Text className="text-sm text-muted-fg">
               Add this case to the positive or negative examples in
               test/util/shapeContextGrader.test.ts, as appropriate.
@@ -191,7 +189,7 @@ function CharacterWriting({
             <Text className="text-sm text-muted-fg">ID: {exampleId}</Text>
             <View className="flex-row items-center justify-between gap-2">
               <View className="flex-row items-center gap-2">
-                <Text className="text-fg">Copy JSON</Text>
+                <Text>Copy JSON</Text>
                 <CopyToClipboardButton
                   text={serializeShapeContextGraderExample({
                     id: exampleId,
@@ -220,7 +218,7 @@ function CharacterWriting({
           </View>
           {visuallySimilarGrades.length === 0 ? null : (
             <View className="gap-2">
-              <Text className="font-semibold text-fg">Debug reference</Text>
+              <Text className="font-semibold">Debug reference</Text>
               <ButtonGroup className="flex-wrap">
                 <ButtonGroup.Button
                   variant={debugSimilarGrade == null ? `filled` : `outline`}

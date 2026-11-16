@@ -62,10 +62,7 @@ function PromptTextBlock({ label, text }: { label: string; text: string }) {
         <Text className="pyly-body-caption text-muted-fg">{label}</Text>
         <CopyToClipboardButton text={text} />
       </View>
-      <Text
-        selectable
-        className="font-mono text-[13px] whitespace-pre-wrap text-fg"
-      >
+      <Text selectable className="font-mono text-[13px] whitespace-pre-wrap">
         {text}
       </Text>
     </View>

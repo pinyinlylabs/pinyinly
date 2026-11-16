@@ -35,13 +35,11 @@ export function HskLozengeWithTooltip({
           />
         </Tooltip.Trigger>
         <Tooltip.Content className="gap-2">
-          <Text className="font-sans text-sm font-semibold text-fg">
-            HSK levels
-          </Text>
+          <Text className="font-sans text-sm font-semibold">HSK levels</Text>
           {hskLevelDetails.map(({ hskLevel, isDirect, isFirstAppearance }) => (
             <View className="flex-row items-center gap-2" key={hskLevel}>
               <HskLozenge hskLevel={hskLevel} size="sm" color="muted-fg" />
-              <Text className="font-sans text-xs text-fg">
+              <Text className="font-sans text-xs">
                 {[
                   isDirect ? `Listed directly` : null,
                   isFirstAppearance

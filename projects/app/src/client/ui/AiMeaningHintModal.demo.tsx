@@ -92,9 +92,7 @@ export default () => {
                 <Text className="font-sans text-[13px] text-muted-fg">
                   Last hint
                 </Text>
-                <Text className="font-sans text-[13px] text-fg">
-                  {lastHint}
-                </Text>
+                <Text className="font-sans text-[13px]">{lastHint}</Text>
               </View>
             )}
           </View>

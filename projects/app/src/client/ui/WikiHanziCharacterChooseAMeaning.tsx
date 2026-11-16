@@ -39,7 +39,7 @@ export function WikiHanziCharacterChooseAMeaning({
   return (
     <View className="gap-2">
       <View>
-        <Text className="flex-1 font-sans text-sm/normal font-bold text-fg uppercase">
+        <Text className="flex-1 font-sans text-sm/normal font-bold uppercase">
           Choose a meaning
         </Text>
       </View>
@@ -59,10 +59,10 @@ export function WikiHanziCharacterChooseAMeaning({
               className="flex-col items-stretch gap-2 px-3 py-2"
             >
               <View className="gap-1">
-                <Text className="font-sans text-xl/normal font-semibold text-fg">
+                <Text className="font-sans text-xl/normal font-semibold">
                   {entry.pinyin?.[0]}
                 </Text>
-                <Text className="font-sans text-lg/normal font-normal text-fg">
+                <Text className="font-sans text-lg/normal font-normal">
                   {entry.gloss.join(`, `)}
                 </Text>
                 {exampleSentence == null ? null : (

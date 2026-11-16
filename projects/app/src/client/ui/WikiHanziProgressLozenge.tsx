@@ -109,11 +109,9 @@ export function WikiHanziProgressLozengeDisplay({
         </Lozenge>
       </Tooltip.Trigger>
       <Tooltip.Content className="gap-2">
-        <Text className="font-sans text-sm font-semibold text-fg">
-          {level.label}
-        </Text>
-        <Text className="font-sans text-sm text-fg">{level.description}</Text>
-        <Text className="font-sans text-sm text-fg">
+        <Text className="font-sans text-sm font-semibold">{level.label}</Text>
+        <Text className="font-sans text-sm">{level.description}</Text>
+        <Text className="font-sans text-sm">
           Each word has its own proficiency level. Remembering it during
           practice helps it grow; repeated forgetting may lower it. The progress
           fill shows how close this word is to the next level and resets when it

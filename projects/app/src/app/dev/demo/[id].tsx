@@ -8,7 +8,7 @@ import { demos } from ".";
 const NotFound = () => {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text className="font-sans text-2xl text-fg">Not found</Text>
+      <Text className="font-sans text-2xl ">Not found</Text>
       <Text className="font-sans text-lg text-fg/50">
         This demo does not exist.
       </Text>
