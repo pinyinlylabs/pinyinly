@@ -1,7 +1,7 @@
 import { DeviceStoreToggleButton } from "@/client/ui/DeviceStoreToggleButton";
 import {
-  ThemeSwapIntervalKind,
-  themeSwapIntervalSetting,
+  SimpleCronIntervalKind,
+  devThemeSwapIntervalSetting,
 } from "@/client/theme";
 import { DeviceStoreSelect } from "@/client/ui/DeviceStoreSelect";
 import {
@@ -25,11 +25,11 @@ import { View } from "@/client/ui/View";
 
 const themeSwapIntervalOptions = [
   { value: null, label: `—` },
-  { value: ThemeSwapIntervalKind.Every5Seconds, label: `Every 5 seconds` },
-  { value: ThemeSwapIntervalKind.Every2Minutes, label: `Every 2 minutes` },
-  { value: ThemeSwapIntervalKind.Every5Minutes, label: `Every 5 minutes` },
-  { value: ThemeSwapIntervalKind.Hourly, label: `Hourly` },
-  { value: ThemeSwapIntervalKind.Daily, label: `Daily` },
+  { value: SimpleCronIntervalKind.Every5Seconds, label: `Every 5 seconds` },
+  { value: SimpleCronIntervalKind.Every2Minutes, label: `Every 2 minutes` },
+  { value: SimpleCronIntervalKind.Every5Minutes, label: `Every 5 minutes` },
+  { value: SimpleCronIntervalKind.Hourly, label: `Hourly` },
+  { value: SimpleCronIntervalKind.Daily, label: `Daily` },
 ] as const;
 
 export default function DeveloperSettingsPage() {
@@ -52,7 +52,7 @@ export default function DeveloperSettingsPage() {
             </Text>
           </View>
           <DeviceStoreSelect
-            entity={themeSwapIntervalSetting}
+            entity={devThemeSwapIntervalSetting}
             entityFromValue={(value) =>
               value == null ? null : { interval: value }
             }

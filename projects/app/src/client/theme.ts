@@ -7,14 +7,14 @@ const colorSchemeOverrideKindSchema = z.enum({
 });
 export const ColorSchemeOverrideKind = colorSchemeOverrideKindSchema.enum;
 
-const themeSwapIntervalKindSchema = z.enum({
-  Every5Seconds: `5s`,
-  Every2Minutes: `2m`,
-  Every5Minutes: `5m`,
-  Hourly: `hourly`,
-  Daily: `daily`,
+const simpleCronIntervalKindSchema = z.enum({
+  Every5Seconds: `*/5 * * * * *`,
+  Every2Minutes: `0 */2 * * * *`,
+  Every5Minutes: `0 */5 * * * *`,
+  Hourly: `0 0 * * * *`,
+  Daily: `0 0 0 * * *`,
 });
-export const ThemeSwapIntervalKind = themeSwapIntervalKindSchema.enum;
+export const SimpleCronIntervalKind = simpleCronIntervalKindSchema.enum;
 
 export const colorSchemeOverrideSetting = r.entity(
   `settings.appearance.theme`,
@@ -28,16 +28,16 @@ export const colorSchemeOverrideSetting = r.entity(
   },
 );
 
-export const themeSwapIntervalSetting = r.entity(
+export const devThemeSwapIntervalSetting = r.entity(
   `settings.developer.themeSwapInterval`,
   {
     interval: r
-      .enum(ThemeSwapIntervalKind, {
-        [ThemeSwapIntervalKind.Every5Seconds]: `5s`,
-        [ThemeSwapIntervalKind.Every2Minutes]: `2m`,
-        [ThemeSwapIntervalKind.Every5Minutes]: `5m`,
-        [ThemeSwapIntervalKind.Hourly]: `hourly`,
-        [ThemeSwapIntervalKind.Daily]: `daily`,
+      .enum(SimpleCronIntervalKind, {
+        [SimpleCronIntervalKind.Every5Seconds]: `*/5 * * * * *`,
+        [SimpleCronIntervalKind.Every2Minutes]: `0 */2 * * * *`,
+        [SimpleCronIntervalKind.Every5Minutes]: `0 */5 * * * *`,
+        [SimpleCronIntervalKind.Hourly]: `0 0 * * * *`,
+        [SimpleCronIntervalKind.Daily]: `0 0 0 * * *`,
       })
       .alias(`i`),
   },

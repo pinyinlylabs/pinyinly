@@ -10,8 +10,8 @@ import * as deviceStore from "#client/deviceStore.ts";
 import {
   ColorSchemeOverrideKind,
   colorSchemeOverrideSetting,
-  ThemeSwapIntervalKind,
-  themeSwapIntervalSetting,
+  SimpleCronIntervalKind,
+  devThemeSwapIntervalSetting,
 } from "#client/theme.ts";
 import { DeviceStoreSelect } from "#client/ui/DeviceStoreSelect.tsx";
 import { DeviceStoreContext } from "#client/ui/contexts.ts";
@@ -170,9 +170,9 @@ test.each([
 });
 
 test.each([
-  [ThemeSwapIntervalKind.Every5Seconds, 5000],
-  [ThemeSwapIntervalKind.Every2Minutes, 120_000],
-  [ThemeSwapIntervalKind.Every5Minutes, 300_000],
+  [SimpleCronIntervalKind.Every5Seconds, 5000],
+  [SimpleCronIntervalKind.Every2Minutes, 120_000],
+  [SimpleCronIntervalKind.Every5Minutes, 300_000],
 ] as const)(
   `swaps themes every %s, overriding the saved theme`,
   async (interval, duration) => {
@@ -185,7 +185,7 @@ test.each([
       { mode: ColorSchemeOverrideKind.Dark },
     );
     queryClient.setQueryData<{ interval: typeof interval }>(
-      deviceStoreQuery(themeSwapIntervalSetting).queryKey,
+      deviceStoreQuery(devThemeSwapIntervalSetting).queryKey,
       { interval },
     );
     const { result } = renderHook(() => useColorSchemeOverride(), {
@@ -290,7 +290,7 @@ test(`selects and persists overrides and clears them for System default while of
 test(`device store select supports null options`, async () => {
   render(
     <DeviceStoreSelect
-      entity={themeSwapIntervalSetting}
+      entity={devThemeSwapIntervalSetting}
       entityFromValue={(value) => (value == null ? null : { interval: value })}
       valueFromEntity={(value) => value?.interval ?? null}
       accessibilityLabel="Theme swap interval"
@@ -298,19 +298,19 @@ test(`device store select supports null options`, async () => {
         [
           { value: null, label: `—` },
           {
-            value: ThemeSwapIntervalKind.Every5Seconds,
+            value: SimpleCronIntervalKind.Every5Seconds,
             label: `Every 5 seconds`,
           },
           {
-            value: ThemeSwapIntervalKind.Every2Minutes,
+            value: SimpleCronIntervalKind.Every2Minutes,
             label: `Every 2 minutes`,
           },
           {
-            value: ThemeSwapIntervalKind.Every5Minutes,
+            value: SimpleCronIntervalKind.Every5Minutes,
             label: `Every 5 minutes`,
           },
-          { value: ThemeSwapIntervalKind.Hourly, label: `Hourly` },
-          { value: ThemeSwapIntervalKind.Daily, label: `Daily` },
+          { value: SimpleCronIntervalKind.Hourly, label: `Hourly` },
+          { value: SimpleCronIntervalKind.Daily, label: `Daily` },
         ] as const
       }
       placeholder="Choose a theme swap interval"
@@ -328,8 +328,8 @@ test(`device store select supports null options`, async () => {
   await waitFor(() => {
     expect(select).toHaveTextContent(`Hourly`);
   });
-  expect(await deviceStoreGet(themeSwapIntervalSetting)).toEqual({
-    interval: ThemeSwapIntervalKind.Hourly,
+  expect(await deviceStoreGet(devThemeSwapIntervalSetting)).toEqual({
+    interval: SimpleCronIntervalKind.Hourly,
   });
 
   fireEvent.keyDown(select, { key: `ArrowDown` });
@@ -337,7 +337,7 @@ test(`device store select supports null options`, async () => {
   await waitFor(() => {
     expect(select).toHaveTextContent(`—`);
   });
-  expect(await deviceStoreGet(themeSwapIntervalSetting)).toBeNull();
+  expect(await deviceStoreGet(devThemeSwapIntervalSetting)).toBeNull();
 });
 
 test(`suspends the selector during loading and disables it while saving`, async () => {
