@@ -28,6 +28,7 @@ import {
   defaultWritingWeakWordRepeatCount,
   writingWeakWordRepeatCountSetting,
 } from "@/data/userSettings";
+import { RectButton } from "@/client/ui/RectButton";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 
@@ -259,6 +260,12 @@ export default function SettingsPage() {
       <View className="gap-2 pt-6">
         <SectionTitle>Images</SectionTitle>
         <AiImageStyleSettingControl />
+      </View>
+
+      <View className="pt-6">
+        <RectButton href="/settings/developer" variant="bare">
+          Developer settings
+        </RectButton>
       </View>
     </View>
   );
