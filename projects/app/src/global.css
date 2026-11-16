@@ -81,6 +81,7 @@
   --color-stone: rgb(from var(--color-stone) r g b);
 
   --color-transparent: transparent;
+  --color-success: rgb(from var(--color-success) r g b);
   --color-danger: rgb(from var(--color-danger) r g b);
   --color-warning: rgb(from var(--color-warning) r g b);
   --color-currentColor: currentColor;
