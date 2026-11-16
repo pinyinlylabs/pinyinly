@@ -10,12 +10,17 @@ import * as deviceStore from "#client/deviceStore.ts";
 import {
   ColorSchemeOverrideKind,
   colorSchemeOverrideSetting,
+  ThemeSwapIntervalKind,
+  themeSwapIntervalSetting,
 } from "#client/theme.ts";
+import { DeviceStoreSelect } from "#client/ui/DeviceStoreSelect.tsx";
 import { DeviceStoreContext } from "#client/ui/contexts.ts";
 import { useColorSchemeOverride } from "#client/ui/hooks/useColorSchemeOverride.ts";
 import { PylyThemeProvider } from "#client/ui/PylyThemeProvider.tsx";
+import { deviceStoreQuery } from "#client/query.ts";
 import { onlineManager, QueryClient } from "@tanstack/react-query";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -122,6 +127,7 @@ afterEach(() => {
   cleanup();
   queryClient.clear();
   onlineManager.setOnline(true);
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -162,6 +168,41 @@ test.each([
   });
   expect(result.current.colorScheme).toBe(mode);
 });
+
+test.each([
+  [ThemeSwapIntervalKind.Every5Seconds, 5000],
+  [ThemeSwapIntervalKind.Every2Minutes, 120_000],
+  [ThemeSwapIntervalKind.Every5Minutes, 300_000],
+] as const)(
+  `swaps themes every %s, overriding the saved theme`,
+  async (interval, duration) => {
+    vi.useFakeTimers({
+      now: new Date(0),
+      toFake: [`Date`, `setTimeout`, `clearTimeout`],
+    });
+    queryClient.setQueryData<{ mode: `dark` }>(
+      deviceStoreQuery(colorSchemeOverrideSetting).queryKey,
+      { mode: ColorSchemeOverrideKind.Dark },
+    );
+    queryClient.setQueryData<{ interval: typeof interval }>(
+      deviceStoreQuery(themeSwapIntervalSetting).queryKey,
+      { interval },
+    );
+    const { result } = renderHook(() => useColorSchemeOverride(), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current.colorScheme).toBe(`dark`);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(duration);
+    });
+    expect(result.current.colorScheme).toBe(`light`);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(duration);
+    });
+    expect(result.current.colorScheme).toBe(`dark`);
+  },
+);
 
 test(`restores the override before showing content and aligns navigation and status bar`, async () => {
   await deviceStoreSet(colorSchemeOverrideSetting, {
@@ -244,6 +285,59 @@ test(`selects and persists overrides and clears them for System default while of
     `data-style`,
     `dark`,
   );
+});
+
+test(`device store select supports null options`, async () => {
+  render(
+    <DeviceStoreSelect
+      entity={themeSwapIntervalSetting}
+      entityFromValue={(value) => (value == null ? null : { interval: value })}
+      valueFromEntity={(value) => value?.interval ?? null}
+      accessibilityLabel="Theme swap interval"
+      options={
+        [
+          { value: null, label: `—` },
+          {
+            value: ThemeSwapIntervalKind.Every5Seconds,
+            label: `Every 5 seconds`,
+          },
+          {
+            value: ThemeSwapIntervalKind.Every2Minutes,
+            label: `Every 2 minutes`,
+          },
+          {
+            value: ThemeSwapIntervalKind.Every5Minutes,
+            label: `Every 5 minutes`,
+          },
+          { value: ThemeSwapIntervalKind.Hourly, label: `Hourly` },
+          { value: ThemeSwapIntervalKind.Daily, label: `Daily` },
+        ] as const
+      }
+      placeholder="Choose a theme swap interval"
+    />,
+    { wrapper: Wrapper },
+  );
+
+  const select = await screen.findByRole(`button`, {
+    name: `Theme swap interval`,
+  });
+  expect(select).toHaveTextContent(`—`);
+
+  fireEvent.keyDown(select, { key: `ArrowDown` });
+  fireEvent.click(await screen.findByRole(`option`, { name: `Hourly` }));
+  await waitFor(() => {
+    expect(select).toHaveTextContent(`Hourly`);
+  });
+  expect(await deviceStoreGet(themeSwapIntervalSetting)).toEqual({
+    interval: ThemeSwapIntervalKind.Hourly,
+  });
+
+  fireEvent.keyDown(select, { key: `ArrowDown` });
+  fireEvent.click(await screen.findByRole(`option`, { name: `—` }));
+  await waitFor(() => {
+    expect(select).toHaveTextContent(`—`);
+  });
+  expect(await deviceStoreGet(themeSwapIntervalSetting)).toBeNull();
 });
 
 test(`suspends the selector during loading and disables it while saving`, async () => {

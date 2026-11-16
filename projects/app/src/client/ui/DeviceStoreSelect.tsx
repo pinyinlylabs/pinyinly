@@ -13,17 +13,18 @@ import { Text } from "@/client/ui/Text";
 
 export interface DeviceStoreSelectProps<
   Entity extends DeviceStoreEntity,
-  Value extends string,
-> extends Omit<SelectProps<Value>, `value` | `onValueChange`> {
+  Value extends string | null,
+> extends Omit<SelectProps<string>, `options` | `value` | `onValueChange`> {
   entity: Entity;
   entityFromValue: (value: Value) => DeviceStoreEntityInput<Entity>;
   errorMessage?: string;
+  options: readonly { value: Value; label: string }[];
   valueFromEntity: (value: DeviceStoreEntityOutput<Entity>) => Value;
 }
 
 export function DeviceStoreSelect<
   Entity extends DeviceStoreEntity,
-  Value extends string,
+  Value extends string | null,
 >({
   entity,
   entityFromValue,
@@ -34,14 +35,28 @@ export function DeviceStoreSelect<
 }: DeviceStoreSelectProps<Entity, Value>) {
   const { data } = useDeviceStoreSuspenseQuery(entity);
   const mutation = useDeviceStoreMutation(entity);
+  const value = valueFromEntity(data);
+  const options = selectProps.options.map((option, index) => ({
+    ...option,
+    value: String(index),
+  }));
+  const selectedIndex = selectProps.options.findIndex(
+    (option) => option.value === value,
+  );
 
   return (
     <>
       <Select
         {...selectProps}
-        value={valueFromEntity(data)}
+        options={options}
+        value={selectedIndex < 0 ? undefined : String(selectedIndex)}
         onValueChange={(value) => {
-          mutation.mutate(entityFromValue(value), {
+          const index = Number(value);
+          const selected = selectProps.options[index];
+          if (selected == null) {
+            throw new Error(`Unknown device store selection "${value}"`);
+          }
+          mutation.mutate(entityFromValue(selected.value), {
             onError: (error) => {
               console.error(`Failed to save device store selection`, error);
             },
