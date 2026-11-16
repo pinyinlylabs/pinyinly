@@ -1,5 +1,10 @@
 import { DeviceStoreToggleButton } from "@/client/ui/DeviceStoreToggleButton";
 import {
+  SimpleCronIntervalKind,
+  devThemeSwapIntervalSetting,
+} from "@/client/theme";
+import { DeviceStoreSelect } from "@/client/ui/DeviceStoreSelect";
+import {
   DebuggerHotkey,
   isDebuggerHotkeyAvailable,
 } from "@/client/ui/DebuggerHotkey.utils";
@@ -18,6 +23,15 @@ import { SectionTitle } from "@/client/ui/SectionTitle";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 
+const themeSwapIntervalOptions = [
+  { value: null, label: `—` },
+  { value: SimpleCronIntervalKind.Every5Seconds, label: `Every 5 seconds` },
+  { value: SimpleCronIntervalKind.Every2Minutes, label: `Every 2 minutes` },
+  { value: SimpleCronIntervalKind.Every5Minutes, label: `Every 5 minutes` },
+  { value: SimpleCronIntervalKind.Hourly, label: `Hourly` },
+  { value: SimpleCronIntervalKind.Daily, label: `Daily` },
+] as const;
+
 export default function DeveloperSettingsPage() {
   const debuggerHotkeyLabel = useShortcutDisplayLabel(DebuggerHotkey);
 
@@ -26,6 +40,28 @@ export default function DeveloperSettingsPage() {
       {/* Header */}
       <View>
         <Text className="pyly-body-title">Developer</Text>
+      </View>
+
+      <View className="gap-2">
+        <SectionTitle>Appearance</SectionTitle>
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Theme swapping</Text>
+            <Text className="pyly-body-caption">
+              Override the selected theme by alternating light and dark.
+            </Text>
+          </View>
+          <DeviceStoreSelect
+            entity={devThemeSwapIntervalSetting}
+            entityFromValue={(value) =>
+              value == null ? null : { interval: value }
+            }
+            valueFromEntity={(value) => value?.interval ?? null}
+            accessibilityLabel="Theme swap interval"
+            options={themeSwapIntervalOptions}
+            placeholder="Choose a theme swap interval"
+          />
+        </View>
       </View>
 
       <View className="gap-2">
