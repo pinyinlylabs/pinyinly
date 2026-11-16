@@ -83,7 +83,6 @@
   --color-transparent: transparent;
   --color-danger: rgb(from var(--color-danger) r g b);
   --color-warning: rgb(from var(--color-warning) r g b);
-  --color-success: rgb(from var(--color-success) r g b);
   --color-currentColor: currentColor;
 
   --font-cursive:
@@ -490,6 +489,8 @@
 @layer theme {
   :root {
     @variant dark {
+      color-scheme: dark;
+
       --color-accent-fg: #1c9cf0;
       --color-accent: #061622;
       --color-bg-high: #2d3031;
@@ -602,9 +603,11 @@
     }
 
     @variant light {
+      color-scheme: light;
+
       --color-accent-fg: #1e9df1;
       --color-accent: #e3ecf6;
-      --color-bg-high: #e1e3e4;
+      --color-bg-high: #ffffff;
       --color-bg: #f8f9fa;
       --color-border: #e1eaef;
       --color-destructive-fg: oklch(1 0 0);
@@ -618,7 +621,7 @@
     @variant light-popover {
       --color-accent-fg: #1e9df1;
       --color-accent: #e3ecf6;
-      --color-bg-high: #e1e3e4;
+      --color-bg-high: #ffffff;
       --color-bg: #f8f9fa;
       --color-border: #d7e0e5;
       --color-destructive-fg: oklch(1 0 0);
@@ -805,137 +808,6 @@
 
   .www-text-footer-link {
     @apply font-sans text-[15px]/normal font-medium text-fg antialiased;
-  }
-
-  /* 
-  
-  COLOR SCHEMES
-
-  */
-  .pyly-color-scheme-dark {
-    --color-red: var(--color-red-dark);
-    --color-orange: var(--color-orange-dark);
-    --color-amber: var(--color-amber-dark);
-    --color-yellow: var(--color-yellow-dark);
-    --color-lime: var(--color-lime-dark);
-    --color-wasabi: var(--color-wasabi-dark);
-    --color-green: var(--color-green-dark);
-    --color-emerald: var(--color-emerald-dark);
-    --color-teal: var(--color-teal-dark);
-    --color-cyan: var(--color-cyan-dark);
-    --color-cyanold: var(--color-cyanold-dark);
-    --color-sky: var(--color-sky-dark);
-    --color-blue: var(--color-blue-dark);
-    --color-indigo: var(--color-indigo-dark);
-    --color-violet: var(--color-violet-dark);
-    --color-purple: var(--color-purple-dark);
-    --color-fuchsia: var(--color-fuchsia-dark);
-    --color-pink: var(--color-pink-dark);
-    --color-rose: var(--color-rose-dark);
-    --color-brick: var(--color-brick-dark);
-    --color-slate: var(--color-slate-dark);
-    --color-gray: var(--color-gray-dark);
-    --color-zinc: var(--color-zinc-dark);
-    --color-neutral: var(--color-neutral-dark);
-    --color-stone: var(--color-stone-dark);
-    --color-cloud: var(--color-cloud-dark);
-
-    --color-success: var(--color-wasabi);
-    --color-danger: #f46368;
-    --color-warning: #ffb900;
-
-    --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0);
-    --color-lozenge-emerald-fg: var(--color-emerald);
-    --color-lozenge-emerald-border: rgb(from var(--color-emerald) r g b / 0.6);
-
-    --color-lozenge-blue-bg: rgb(from var(--color-blue) r g b / 0);
-    --color-lozenge-blue-fg: var(--color-blue);
-    --color-lozenge-blue-border: rgb(from var(--color-blue) r g b / 0.6);
-
-    --color-lozenge-cyan-bg: rgb(from var(--color-cyan) r g b / 0);
-    --color-lozenge-cyan-fg: var(--color-cyan);
-    --color-lozenge-cyan-border: rgb(from var(--color-cyan) r g b / 0.6);
-
-    --color-lozenge-violet-bg: rgb(from var(--color-violet) r g b / 0);
-    --color-lozenge-violet-fg: var(--color-violet);
-    --color-lozenge-violet-border: rgb(from var(--color-violet) r g b / 0.6);
-    --color-lozenge-fuchsia-bg: rgb(from var(--color-fuchsia) r g b / 0);
-    --color-lozenge-fuchsia-fg: var(--color-fuchsia);
-    --color-lozenge-fuchsia-border: rgb(from var(--color-fuchsia) r g b / 0.6);
-    --color-lozenge-rose-bg: rgb(from var(--color-rose) r g b / 0);
-    --color-lozenge-rose-fg: var(--color-rose);
-    --color-lozenge-rose-border: rgb(from var(--color-rose) r g b / 0.6);
-    --color-lozenge-orange-bg: rgb(from var(--color-orange) r g b / 0);
-    --color-lozenge-orange-fg: var(--color-orange);
-    --color-lozenge-orange-border: rgb(from var(--color-orange) r g b / 0.6);
-    --color-lozenge-amber-bg: rgb(from var(--color-amber) r g b / 0);
-    --color-lozenge-amber-fg: var(--color-amber);
-    --color-lozenge-amber-border: rgb(from var(--color-amber) r g b / 0.6);
-  }
-
-  .pyly-color-scheme-light {
-    --color-red: var(--color-red-light);
-    --color-orange: var(--color-orange-light);
-    --color-amber: var(--color-amber-light);
-    --color-yellow: var(--color-yellow-light);
-    --color-lime: var(--color-lime-light);
-    --color-wasabi: var(--color-wasabi-light);
-    --color-green: var(--color-green-light);
-    --color-emerald: var(--color-emerald-light);
-    --color-teal: var(--color-teal-light);
-    --color-cyan: var(--color-cyan-light);
-    --color-cyanold: var(--color-cyanold-light);
-    --color-sky: var(--color-sky-light);
-    --color-blue: var(--color-blue-light);
-    --color-indigo: var(--color-indigo-light);
-    --color-violet: var(--color-violet-light);
-    --color-purple: var(--color-purple-light);
-    --color-fuchsia: var(--color-fuchsia-light);
-    --color-pink: var(--color-pink-light);
-    --color-rose: var(--color-rose-light);
-    --color-brick: var(--color-brick-light);
-    --color-slate: var(--color-slate-light);
-    --color-gray: var(--color-gray-light);
-    --color-zinc: var(--color-zinc-light);
-    --color-neutral: var(--color-neutral-light);
-    --color-stone: var(--color-stone-light);
-    --color-cloud: var(--color-cloud-light);
-
-    --color-success: var(--color-wasabi);
-    --color-danger: #d8373d;
-    --color-warning: #ff8904;
-
-    --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0.05);
-    --color-lozenge-emerald-fg: var(--color-emerald);
-    --color-lozenge-emerald-border: rgb(from var(--color-emerald) r g b / 0.5);
-
-    --color-lozenge-blue-bg: rgb(from var(--color-blue) r g b / 0.05);
-    --color-lozenge-blue-fg: var(--color-blue);
-    --color-lozenge-blue-border: rgb(from var(--color-blue) r g b / 0.5);
-
-    --color-lozenge-cyan-bg: rgb(from var(--color-cyan) r g b / 0.05);
-    --color-lozenge-cyan-fg: var(--color-cyan);
-    --color-lozenge-cyan-border: rgb(from var(--color-cyan) r g b / 0.5);
-
-    --color-lozenge-violet-bg: rgb(from var(--color-violet) r g b / 0.05);
-    --color-lozenge-violet-fg: var(--color-violet);
-    --color-lozenge-violet-border: rgb(from var(--color-violet) r g b / 0.5);
-
-    --color-lozenge-fuchsia-bg: rgb(from var(--color-fuchsia) r g b / 0.05);
-    --color-lozenge-fuchsia-fg: var(--color-fuchsia);
-    --color-lozenge-fuchsia-border: rgb(from var(--color-fuchsia) r g b / 0.5);
-
-    --color-lozenge-rose-bg: rgb(from var(--color-rose) r g b / 0.05);
-    --color-lozenge-rose-fg: var(--color-rose);
-    --color-lozenge-rose-border: rgb(from var(--color-rose) r g b / 0.5);
-
-    --color-lozenge-orange-bg: rgb(from var(--color-orange) r g b / 0.05);
-    --color-lozenge-orange-fg: var(--color-orange);
-    --color-lozenge-orange-border: rgb(from var(--color-orange) r g b / 0.5);
-
-    --color-lozenge-amber-bg: rgb(from var(--color-amber) r g b / 0.05);
-    --color-lozenge-amber-fg: var(--color-amber);
-    --color-lozenge-amber-border: rgb(from var(--color-amber) r g b / 0.5);
   }
 
   /* declare MDX component clases */
@@ -1361,9 +1233,9 @@ body {
   --color-stone: var(--color-stone-light);
   --color-cloud: var(--color-cloud-light);
 
-  --color-success: var(--color-wasabi);
-  --color-danger: #d8373d;
-  --color-warning: #ff8904;
+  --color-success: light-dark(#00c410, #13f042);
+  --color-danger: light-dark(#d8373d, #f46368);
+  --color-warning: light-dark(#ff8904, #ffb900);
 
   --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0.05);
   --color-lozenge-emerald-fg: var(--color-emerald);
@@ -1389,12 +1261,6 @@ body {
   --color-lozenge-amber-bg: rgb(from var(--color-amber) r g b / 0.05);
   --color-lozenge-amber-fg: var(--color-amber);
   --color-lozenge-amber-border: rgb(from var(--color-amber) r g b / 0.5);
-
-  --color-bg: var(--color-theme-default-bg);
-  --color-bg-high: var(--color-theme-default-bg-high);
-  --color-fg: var(--color-theme-default-fg);
-  --color-muted-fg: var(--color-theme-default-muted-fg);
-  --color-fg-loud: var(--color-theme-default-fg-loud);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1426,51 +1292,11 @@ body {
     --color-stone: var(--color-stone-dark);
     --color-cloud: var(--color-cloud-dark);
 
-    --color-success: var(--color-wasabi);
-    --color-danger: #f46368;
-    --color-warning: #ffb900;
-
-    --color-theme-default-bg: #1a1d1e;
-    --color-theme-default-bg-high: #2d3031;
-    --color-theme-default-fg: #d7d8d9;
-    --color-theme-default-muted-fg: #898989;
-    --color-theme-default-fg-loud: #ffffff;
-
-    --color-theme-danger-panel-bg: #2d3031;
-    --color-theme-danger-panel-bg-high: #413435;
-    --color-theme-danger-panel-fg: #f2555a;
-    --color-theme-danger-panel-muted-fg: #db4b4f;
-    --color-theme-danger-panel-fg-loud: #ff7377;
-
     --color-theme-grass-panel-bg: #00c286;
     --color-theme-grass-panel-bg-high: #19c892;
     --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
     --color-theme-grass-panel-muted-fg: rgb(from white r g b / 0.57);
     --color-theme-grass-panel-fg-loud: white;
-
-    --color-theme-sky-panel-bg: var(--color-sky);
-    --color-theme-sky-panel-bg-high: #1f6991;
-    --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
-    --color-theme-sky-panel-muted-fg: rgb(from white r g b / 0.57);
-    --color-theme-sky-panel-fg-loud: white;
-
-    --color-theme-success-panel-bg: #193222;
-    --color-theme-success-panel-bg-high: #184525;
-    --color-theme-success-panel-fg: #13f042;
-    --color-theme-success-panel-muted-fg: #0b9d2b;
-    --color-theme-success-panel-fg-loud: #4dff73;
-
-    --color-theme-warning-panel-bg: #432004;
-    --color-theme-warning-panel-bg-high: #563307;
-    --color-theme-warning-panel-fg: #ffdf20;
-    --color-theme-warning-panel-muted-fg: #c7ad1b;
-    --color-theme-warning-panel-fg-loud: #ffe962;
-
-    --color-theme-placeholder-panel-bg: #242727;
-    --color-theme-placeholder-panel-bg-high: #2d3031;
-    --color-theme-placeholder-panel-fg: #484a4b;
-    --color-theme-placeholder-panel-muted-fg: #3b3c3d;
-    --color-theme-placeholder-panel-fg-loud: #898989;
 
     --color-lozenge-emerald-bg: rgb(from var(--color-emerald) r g b / 0);
     --color-lozenge-emerald-fg: var(--color-emerald);

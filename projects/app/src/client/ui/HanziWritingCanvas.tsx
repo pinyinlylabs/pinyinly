@@ -220,10 +220,15 @@ export function HanziWritingCanvas({
                 key={`guided:${index}`}
                 d={path}
                 fill="none"
-                stroke="#e2e2e2"
+                stroke="currentColor"
                 strokeWidth="48"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="
+                  text-fg-bg10
+
+                  dark:text-fg-bg60
+                "
               />
             ))}
           </g>
@@ -237,11 +242,15 @@ export function HanziWritingCanvas({
                 pathLength={1}
                 strokeDasharray="1"
                 strokeDashoffset={1}
-                stroke="#e2e2e2"
+                stroke="currentColor"
                 strokeWidth="48"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="hanzi-animated-reference-stroke"
+                className="
+                  hanzi-animated-reference-stroke text-fg-bg20
+
+                  dark:text-fg-bg80
+                "
                 style={getAnimatedGuidedPathStyle(index)}
                 pointerEvents="none"
               />

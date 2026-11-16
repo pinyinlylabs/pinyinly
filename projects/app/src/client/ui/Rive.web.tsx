@@ -1,5 +1,8 @@
 import type { ColorRGBA } from "@/util/color";
-import { parseCssColorOrThrow, parseRiveColorPropertyName } from "@/util/color";
+import {
+  parseCssColorForSchemeOrThrow,
+  parseRiveColorPropertyName,
+} from "@/util/color";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import type { ViewModel } from "@rive-app/canvas";
@@ -7,7 +10,7 @@ import type { ViewModelInstance } from "@rive-app/react-canvas";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
 import { Asset } from "expo-asset";
 import { useEffect, useRef, useState } from "react";
-import { useCSSVariable } from "uniwind";
+import { useCSSVariable, useUniwind } from "uniwind";
 import type { RiveFit, RiveProps } from "./riveTypes";
 
 export function Rive({
@@ -26,6 +29,7 @@ export function Rive({
   const [themeVariableNames, setThemeVariableNames] = useState<string[]>([]);
   const themeViewModelRef = useRef<ViewModelInstance | null>(null);
   const themeVariableValues = useCSSVariable(themeVariableNames);
+  const { theme } = useUniwind();
 
   useEffect(() => {
     if (themeViewModelRef.current != null) {
@@ -33,9 +37,10 @@ export function Rive({
         themeViewModelRef.current,
         themeVariableNames,
         themeVariableValues,
+        theme.startsWith(`dark`) ? `dark` : `light`,
       );
     }
-  }, [themeVariableNames, themeVariableValues]);
+  }, [theme, themeVariableNames, themeVariableValues]);
 
   const { RiveComponent } = useRive({
     artboard: artboardName,
@@ -131,6 +136,7 @@ function applyThemeFromUniwind(
   themeViewModel: ViewModelInstance,
   variableNames: string[],
   variableValues: Array<string | number | undefined>,
+  colorScheme: `light` | `dark`,
 ) {
   const variables = new Map(
     variableNames.map((name, index) => [name, variableValues[index]]),
@@ -151,7 +157,10 @@ function applyThemeFromUniwind(
         continue;
       }
       try {
-        const color = parseCssColorOrThrow(cssPropertyValue);
+        const color = parseCssColorForSchemeOrThrow(
+          cssPropertyValue,
+          colorScheme,
+        );
         applyColorToViewModel(themeViewModel, property.name, color, alpha);
       } catch (error) {
         console.error(

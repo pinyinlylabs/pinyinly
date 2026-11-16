@@ -37,7 +37,7 @@ export default () => {
       className={`
         flex-row gap-2
 
-        [.pyly-color-scheme-dark_&]:flex-row-reverse
+        [.dark_&]:flex-row-reverse
       `}
     >
       {opacities.map((o, i) => (
@@ -51,27 +51,9 @@ export default () => {
     </View>
   );
   return (
-    <View
-      className={`
-        flex-1 items-end
-
-        [.pyly-color-scheme-dark_&]:items-start
-      `}
-    >
-      <View
-        className={`
-          flex-row gap-4
-
-          [.pyly-color-scheme-dark_&]:flex-row-reverse
-        `}
-      >
-        <View
-          className={`
-            items-end gap-2
-
-            [.pyly-color-scheme-dark_&]:items-start
-          `}
-        >
+    <View className={`flex-1 items-end`}>
+      <View className={`flex-row gap-4`}>
+        <View className={`items-end gap-2`}>
           <View>
             <Text className="invisible font-sans text-xs">Colors</Text>
           </View>
@@ -91,7 +73,7 @@ export default () => {
               className={`
                 flex-row gap-2
 
-                [.pyly-color-scheme-dark_&]:flex-row-reverse
+                [.dark_&]:flex-row-reverse
               `}
             >
               {opacities.map((opacity, index) => (
