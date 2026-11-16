@@ -76,7 +76,7 @@ const dataIntegrityDictionary = inngest.createFunction(
   },
 );
 
-const replicacheGarbageCollection = inngest.createFunction(
+export const replicacheGarbageCollection = inngest.createFunction(
   {
     description: `Delete old replicache data no longer used to reduce DB bloat.`,
     id: `replicacheGarbageCollection`,
@@ -87,10 +87,11 @@ const replicacheGarbageCollection = inngest.createFunction(
     ],
   },
   async ({ step }) => {
-    let deletedRowCount = 0;
+    const batchSize = 1000;
     let batch = 0;
+    let hasMore = true;
     do {
-      const { deletedRows } = await step.run(
+      const { hasMore: nextBatchExists } = await step.run(
         `replicacheCvr table deletes ${batch}`,
         async () =>
           withDrizzle(async (db) => {
@@ -98,21 +99,26 @@ const replicacheGarbageCollection = inngest.createFunction(
               .select({ id: s.replicacheCvr.id })
               .from(s.replicacheCvr)
               .where(lt(s.replicacheCvr.createdAt, subDays(new Date(), 7)))
-              .limit(1000);
+              .limit(batchSize + 1);
 
-            const idsToDelete = rowsToDelete.map((r) => r.id);
+            const idsToDelete = rowsToDelete
+              .slice(0, batchSize)
+              .map((r) => r.id);
 
             const deletedRows = await db
               .delete(s.replicacheCvr)
               .where(inArray(s.replicacheCvr.id, idsToDelete))
               .returning({ id: s.replicacheCvr.id });
 
-            return { deletedRows };
+            return {
+              deletedRows,
+              hasMore: rowsToDelete.length > batchSize,
+            };
           }),
       );
-      deletedRowCount = deletedRows.length;
+      hasMore = nextBatchExists;
       batch++;
-    } while (deletedRowCount > 0);
+    } while (hasMore);
   },
 );
 

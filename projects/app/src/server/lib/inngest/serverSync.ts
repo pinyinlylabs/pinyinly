@@ -92,7 +92,7 @@ export const replicachePush = inngest.createFunction(
         const mutationBatchSize = 20;
         while (lastSyncedMutationId < lastMutationId) {
           const newLastSyncedMutationId = await step.run(
-            `syncRemoteClient-${clientId}-${lastSyncedMutationId}`,
+            `syncRemoteClient-${remoteSync.id}-${clientId}-${lastSyncedMutationId}`,
             // oxlint-disable-next-line no-loop-func
             async () => {
               // Fetch mutations that need to be sent.
