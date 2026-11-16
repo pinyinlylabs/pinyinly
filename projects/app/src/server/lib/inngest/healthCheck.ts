@@ -88,9 +88,10 @@ const replicacheGarbageCollection = inngest.createFunction(
   },
   async ({ step }) => {
     let deletedRowCount = 0;
+    let batch = 0;
     do {
       const { deletedRows } = await step.run(
-        `replicacheCvr table deletes`,
+        `replicacheCvr table deletes ${batch}`,
         async () =>
           withDrizzle(async (db) => {
             const rowsToDelete = await db
@@ -110,6 +111,7 @@ const replicacheGarbageCollection = inngest.createFunction(
           }),
       );
       deletedRowCount = deletedRows.length;
+      batch++;
     } while (deletedRowCount > 0);
   },
 );

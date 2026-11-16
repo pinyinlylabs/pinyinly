@@ -27,6 +27,8 @@ applyTo: "projects/app/src/server/lib/inngest/**"
 - Use stable, descriptive `step.run` names for database operations and other work that should be
   checkpointed. Keep external side effects inside steps so retries do not repeat uncheckpointed
   work.
+- In loops, use stable per-iteration step IDs (for example, an item ID or deterministic index) to
+  avoid duplicate-ID warnings. Keep the iteration order stable so retries match saved checkpoints.
 - For recurring work, use a cron trigger and account for overlapping executions where needed.
 - Prefer focused Vitest tests with `InngestTestEngine`; use database fixtures when verifying
   persistence behavior.
