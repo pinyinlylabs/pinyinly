@@ -259,18 +259,30 @@ test(`captures the reference-path animation mid-progress`, async () => {
   expect(
     animatedPaths.map((path) => path.getAttribute(`stroke-width`)),
   ).toEqual([`48`, `48`, `48`]);
-  const dimGroup = svg.querySelector<SVGGElement>(`g[opacity="0.8"]`);
-  assert(dimGroup != null);
-  const dimPaths = [
-    ...dimGroup.querySelectorAll<SVGPathElement>(`path[stroke-width="48"]`),
-  ];
-  expect(dimPaths).toHaveLength(guidedPaths.length);
-  expect(getComputedStyle(dimGroup).opacity).toBe(`0.8`);
-  expect(dimPaths.map((path) => getComputedStyle(path).opacity)).toEqual([
-    `1`,
-    `1`,
-    `1`,
-  ]);
+  expect(getComputedStyle(animatedPaths[0]!).animationIterationCount).toBe(
+    `infinite, infinite`,
+  );
+  expect(getComputedStyle(animatedPaths[0]!).animationDuration).toBe(
+    `2.3s, 2.3s`,
+  );
+  const basePaths = [
+    ...svg.querySelectorAll<SVGPathElement>(`path[stroke-width="48"]`),
+  ].filter(
+    (path) => !path.classList.contains(`hanzi-animated-reference-stroke`),
+  );
+  expect(basePaths[0]?.parentElement?.classList.contains(`opacity-[8%]`)).toBe(
+    false,
+  );
+  expect(
+    basePaths[0]?.parentElement?.classList.contains(`dark:opacity-[48%]`),
+  ).toBe(false);
+  const animatedGroup = animatedPaths[0]?.parentElement;
+  assert(animatedGroup instanceof SVGGElement);
+  expect(getComputedStyle(animatedGroup).opacity).toBe(`0.06`);
+  expect(getComputedStyle(animatedGroup).animationDuration).toBe(`2.3s`);
+  expect(getComputedStyle(animatedGroup).animationIterationCount).toBe(
+    `infinite`,
+  );
   expect(animatedPaths.map((path) => getComputedStyle(path).opacity)).toEqual([
     `0`,
     `0`,
@@ -294,14 +306,12 @@ test(`captures the reference-path animation mid-progress`, async () => {
     });
   });
 
-  const progress = animatedPaths.map((path) => {
-    const strokeAnimation = path.getAnimations()[0];
-    assert(strokeAnimation != null);
-    const value = strokeAnimation.effect?.getComputedTiming().progress;
-    expect(value).not.toBeNull();
-    return Math.round((value ?? 0) * 100);
-  });
-  expect(progress).toEqual([100, 17, 0]);
+  const strokeOffsets = animatedPaths.map((path) =>
+    Number(getComputedStyle(path).strokeDashoffset.replace(`px`, ``)),
+  );
+  expect(strokeOffsets[0]).toBe(0);
+  expect(strokeOffsets[1]).toBeCloseTo(5 / 6);
+  expect(strokeOffsets[2]).toBe(1);
   expect(Number(getComputedStyle(animatedPaths[1]!).opacity)).toBeGreaterThan(
     0,
   );
@@ -309,4 +319,37 @@ test(`captures the reference-path animation mid-progress`, async () => {
   await expect(root).toMatchScreenshot(`reference-animation-mid-progress`, {
     screenshotOptions: { animations: `allow` },
   });
+
+  for (const animation of animations) {
+    animation.currentTime = 1800;
+  }
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+  expect(Number(getComputedStyle(animatedGroup).opacity)).toBeCloseTo(0.045);
+
+  const cycleDuration = Number(
+    getComputedStyle(animatedPaths[0]!)
+      .getPropertyValue(`--hanzi-stroke-cycle-duration`)
+      .replace(`ms`, ``),
+  );
+  for (const animation of animations) {
+    animation.currentTime = 800 + cycleDuration;
+  }
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+  expect(
+    animatedPaths.map((path) =>
+      Number(getComputedStyle(path).strokeDashoffset.replace(`px`, ``)),
+    ),
+  ).toEqual(strokeOffsets);
 });

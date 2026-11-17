@@ -167,6 +167,12 @@
   }
 }
 
+@keyframes fadeOutHanziReferenceCycle {
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes growHanziBrush {
   from {
     stroke-width: 0;
@@ -199,9 +205,33 @@
   visibility: hidden;
   opacity: 0;
   animation:
-    drawHanziStroke var(--hanzi-stroke-duration) linear
-      var(--hanzi-stroke-delay) both,
-    fadeInHanziReferenceStroke 100ms ease-out var(--hanzi-stroke-delay) both;
+    drawHanziStroke var(--hanzi-stroke-cycle-duration) linear
+      var(--hanzi-stroke-delay) infinite,
+    fadeInHanziReferenceStroke var(--hanzi-stroke-cycle-duration) linear
+      var(--hanzi-stroke-delay) infinite;
+  animation-timing-function:
+    linear(
+      0 0%,
+      0 var(--hanzi-stroke-start),
+      1 var(--hanzi-stroke-end),
+      1 100%
+    ),
+    linear(
+      0 0%,
+      0 var(--hanzi-stroke-start),
+      1 var(--hanzi-reference-fade-end),
+      1 100%
+    );
+}
+
+@utility hanzi-animated-reference-cycle {
+  animation: fadeOutHanziReferenceCycle var(--hanzi-stroke-cycle-duration)
+    linear var(--hanzi-stroke-delay) infinite;
+  animation-timing-function: linear(
+    0 0%,
+    0 var(--hanzi-reference-fade-start),
+    1 100%
+  );
 }
 
 @utility hanzi-animated-foreground {
@@ -220,6 +250,11 @@
     animation: none;
     stroke-dashoffset: 0;
     visibility: visible;
+    opacity: 1;
+  }
+
+  .hanzi-animated-reference-cycle {
+    animation: none;
     opacity: 1;
   }
 
