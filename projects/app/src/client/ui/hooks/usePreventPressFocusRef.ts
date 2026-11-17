@@ -2,9 +2,9 @@ import { useCallback, useRef } from "react";
 import type { PressableInstance, ViewInstance } from "react-native";
 
 /**
- * A hook that returns a ref that can be passed to a <Pressable> or <View>, that
- * binds and prevents the default behavior of touchstart and mousedown events to
- * avoid focusing the Pressable element on press.
+ * A hook that returns a ref that can be passed to a <Pressable>, <View>, or
+ * <svg>, binding non-passive touchstart and mousedown listeners to prevent their
+ * default behavior.
  * On Web, calling .preventDefault() in onTouchStart() event will prevent
  * the native `click` event from firing, and also prevent react-native's
  * synthesized `onPress` from firing (though onPressIn and onPressOut will
@@ -21,16 +21,21 @@ import type { PressableInstance, ViewInstance } from "react-native";
  * that seems to stop focus from being taken, but still keeping the
  * Pressable onPressIn/onPressOut working.
  */
-export function usePreventPressFocusRef(): React.Ref<ViewInstance> {
+export function usePreventPressFocusRef<
+  T extends ViewInstance | SVGSVGElement = ViewInstance,
+>(): React.Ref<T> {
   const preventDefault = useCallback<EventListener>((e) => {
     e.preventDefault();
   }, []);
 
-  const refObject = useRef<HTMLElement | null>(null);
+  const refObject = useRef<HTMLElement | SVGSVGElement | null>(null);
 
   const refCallback = useCallback(
-    (el: PressableInstance | null) => {
-      if (el !== null && !(el instanceof HTMLElement)) {
+    (el: PressableInstance | SVGSVGElement | null) => {
+      if (
+        el !== null &&
+        !(el instanceof HTMLElement || el instanceof SVGSVGElement)
+      ) {
         return;
       }
 

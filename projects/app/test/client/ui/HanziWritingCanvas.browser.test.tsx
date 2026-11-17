@@ -21,7 +21,7 @@ function dispatchPointer(
   svg.dispatchEvent(new PointerEvent(kind, { bubbles: true, ...init }));
 }
 
-test(`prevents selection only on the writing surface`, async () => {
+test(`prevents selection on the writing surface`, async () => {
   await render(
     <div>
       <p data-testid="prompt">Write the character for commerce</p>
@@ -44,6 +44,26 @@ test(`prevents selection only on the writing surface`, async () => {
   expect(
     getComputedStyle(page.getByTestId(`prompt`).element()).userSelect,
   ).not.toBe(`none`);
+});
+
+test(`prevents the touchstart default on the writing surface`, async () => {
+  await render(
+    <div data-testid="writing-area">
+      <HanziWritingCanvas onStrokesChange={vi.fn()} />
+    </div>,
+  );
+
+  await expect.element(page.getByTestId(`writing-area`)).toBeInTheDocument();
+  const svg = page.getByTestId(`writing-area`).element().querySelector(`svg`);
+  assert(svg != null);
+  const touchStart = new Event(`touchstart`, {
+    bubbles: true,
+    cancelable: true,
+  });
+
+  svg.dispatchEvent(touchStart);
+
+  expect(touchStart.defaultPrevented).toBe(true);
 });
 
 test(`a held pointer can finish a stroke and CHECK remains clickable`, async () => {
