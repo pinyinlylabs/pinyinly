@@ -7,6 +7,7 @@ import {
 import type { WritingStrokePoint } from "@/util/shapeContextGrader";
 import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { hanziStrokeAnimationTiming } from "@/client/ui/HanziStrokeAnimation";
+import { usePreventPressFocusRef } from "@/client/ui/hooks/usePreventPressFocusRef";
 import { View } from "@/client/ui/View";
 
 type AnimatedGuidedPathStyle = CSSProperties & {
@@ -64,6 +65,7 @@ export function HanziWritingCanvas({
   const [activePath, setActivePath] = useState(``);
   const pointsRef = useRef<WritingStrokePoint[]>([]);
   const isDrawingRef = useRef(false);
+  const preventTouchDefaultRef = usePreventPressFocusRef<SVGSVGElement>();
   const arrowMarkerId = `${useId()}-arrow`;
   const drawnPointCount = drawnStrokes.reduce(
     (total, stroke) => total + stroke.length,
@@ -182,6 +184,7 @@ export function HanziWritingCanvas({
       `}
     >
       <svg
+        ref={preventTouchDefaultRef}
         viewBox="0 0 1024 1024"
         className="size-full touch-none text-fg-bg30 select-none [-webkit-touch-callout:none]"
         onPointerDown={onPointerDown}
