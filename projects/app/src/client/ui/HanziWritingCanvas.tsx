@@ -1,5 +1,5 @@
 import type { CSSProperties, PointerEvent } from "react";
-import { useId, useRef, useState } from "react";
+import { Fragment, useId, useRef, useState } from "react";
 import {
   maxWritingPointCount,
   maxWritingStrokeCount,
@@ -9,11 +9,18 @@ import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { hanziStrokeAnimationTiming } from "@/client/ui/HanziStrokeAnimation";
 import { usePreventPressFocusRef } from "@/client/ui/hooks/usePreventPressFocusRef";
 import { View } from "@/client/ui/View";
+import ms from "ms";
 
 type AnimatedGuidedPathStyle = CSSProperties & {
   "--hanzi-stroke-delay": string;
-  "--hanzi-stroke-duration": string;
+  "--hanzi-stroke-cycle-duration": string;
+  "--hanzi-stroke-start": string;
+  "--hanzi-stroke-end": string;
+  "--hanzi-reference-fade-end": string;
+  "--hanzi-reference-fade-start": string;
 };
+
+const referenceAnimationResetDuration = ms(`1s`);
 
 function pathFromPoints(points: readonly WritingStrokePoint[]): string {
   return points
@@ -151,10 +158,25 @@ export function HanziWritingCanvas({
     setActivePath(``);
   }
 
-  function getAnimatedGuidedPathStyle(index: number): AnimatedGuidedPathStyle {
+  function getAnimatedGuidedPathStyle(
+    index: number,
+    strokeCount: number,
+  ): AnimatedGuidedPathStyle {
+    const cycleDuration =
+      strokeCount * hanziStrokeAnimationTiming.strokeAnimationDuration +
+      (strokeCount - 1) * hanziStrokeAnimationTiming.delayBetweenStrokes +
+      referenceAnimationResetDuration;
+    const strokeStart =
+      index *
+      (hanziStrokeAnimationTiming.strokeAnimationDuration +
+        hanziStrokeAnimationTiming.delayBetweenStrokes);
     return {
-      "--hanzi-stroke-delay": `${hanziStrokeAnimationTiming.delayBeforeStart + index * (hanziStrokeAnimationTiming.strokeAnimationDuration + hanziStrokeAnimationTiming.delayBetweenStrokes)}ms`,
-      "--hanzi-stroke-duration": `${hanziStrokeAnimationTiming.strokeAnimationDuration}ms`,
+      "--hanzi-stroke-delay": `${hanziStrokeAnimationTiming.delayBeforeStart}ms`,
+      "--hanzi-stroke-cycle-duration": `${cycleDuration}ms`,
+      "--hanzi-stroke-start": `${(strokeStart / cycleDuration) * 100}%`,
+      "--hanzi-stroke-end": `${((strokeStart + hanziStrokeAnimationTiming.strokeAnimationDuration) / cycleDuration) * 100}%`,
+      "--hanzi-reference-fade-end": `${((strokeStart + 100) / cycleDuration) * 100}%`,
+      "--hanzi-reference-fade-start": `${((cycleDuration - referenceAnimationResetDuration) / cycleDuration) * 100}%`,
     };
   }
 
@@ -186,7 +208,7 @@ export function HanziWritingCanvas({
       <svg
         ref={preventTouchDefaultRef}
         viewBox="0 0 1024 1024"
-        className="size-full touch-none text-fg-bg30 select-none [-webkit-touch-callout:none]"
+        className="size-full touch-none text-fg select-none [-webkit-touch-callout:none]"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -213,31 +235,54 @@ export function HanziWritingCanvas({
             strokeWidth="4"
             strokeDasharray="12 12"
             fill="none"
+            className="opacity-30"
             pointerEvents="none"
           />
         )}
         {guidedPaths == null ? null : (
-          <g opacity="0.8" pointerEvents="none">
+          <g pointerEvents="none">
             {guidedPaths.map((path, index) => (
-              <path
-                key={`guided:${index}`}
-                d={path}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="48"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="
-                  text-fg-bg10
+              <Fragment key={index}>
+                <path
+                  d={path}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="48"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-bg"
+                />
+                <path
+                  d={path}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="48"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="
+                    text-fg/5
 
-                  dark:text-fg-bg60
-                "
-              />
+                    dark:text-fg/10
+                  "
+                />
+              </Fragment>
             ))}
           </g>
         )}
-        {animateReferencePaths && guidedPathIndex == null
-          ? guidedPaths?.map((path, index) => (
+        {animateReferencePaths &&
+        guidedPathIndex == null &&
+        guidedPaths != null &&
+        guidedPaths.length > 0 ? (
+          <g
+            className="
+              hanzi-animated-reference-cycle opacity-6
+
+              dark:opacity-20
+            "
+            pointerEvents="none"
+            style={getAnimatedGuidedPathStyle(0, guidedPaths.length)}
+          >
+            {guidedPaths.map((path, index) => (
               <path
                 key={`guided-animated:${index}`}
                 d={path}
@@ -249,16 +294,12 @@ export function HanziWritingCanvas({
                 strokeWidth="48"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="
-                  hanzi-animated-reference-stroke text-fg-bg20
-
-                  dark:text-fg-bg80
-                "
-                style={getAnimatedGuidedPathStyle(index)}
-                pointerEvents="none"
+                className="hanzi-animated-reference-stroke"
+                style={getAnimatedGuidedPathStyle(index, guidedPaths.length)}
               />
-            ))
-          : null}
+            ))}
+          </g>
+        ) : null}
         {guidedPathIndex == null
           ? null
           : guidedPaths
