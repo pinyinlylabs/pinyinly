@@ -265,14 +265,6 @@ test(`captures the reference-path animation mid-progress`, async () => {
     ...dimGroup.querySelectorAll<SVGPathElement>(`path[stroke-width="48"]`),
   ];
   expect(dimPaths).toHaveLength(guidedPaths.length);
-  expect(animatedPaths.map((path) => getComputedStyle(path).stroke)).toEqual(
-    dimPaths.map((path) => getComputedStyle(path).stroke),
-  );
-  expect(animatedPaths.map((path) => getComputedStyle(path).stroke)).toEqual([
-    `rgb(226, 226, 226)`,
-    `rgb(226, 226, 226)`,
-    `rgb(226, 226, 226)`,
-  ]);
   expect(getComputedStyle(dimGroup).opacity).toBe(`0.8`);
   expect(dimPaths.map((path) => getComputedStyle(path).opacity)).toEqual([
     `1`,

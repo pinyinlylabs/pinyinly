@@ -61,7 +61,7 @@ const countLozengePillClass = tv({
     mode: {
       overdue: `bg-brick`,
       due: `bg-cyanold`,
-      new: `bg-wasabi`,
+      new: `bg-[var(--color-success)]`,
     },
   },
   defaultVariants: {

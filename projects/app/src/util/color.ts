@@ -35,6 +35,10 @@ const rgbRegex = new RegExp(
   `rgb\\(${spacePattern}*(${scalarPattern})${spacePattern}+(${scalarPattern})${spacePattern}+(${scalarPattern})(?:${spacePattern}*\\/${spacePattern}*(${scalarPattern}))?${spacePattern}*\\)`,
   `u`,
 );
+const legacyRgbRegex = new RegExp(
+  `rgba?\\(${spacePattern}*(${scalarPattern})${spacePattern}*,${spacePattern}*(${scalarPattern})${spacePattern}*,${spacePattern}*(${scalarPattern})(?:${spacePattern}*,${spacePattern}*(${scalarPattern}))?${spacePattern}*\\)`,
+  `u`,
+);
 // One of:
 // - rgb(from <hex> r g b)
 // - rgb(from <hex> r g b / <scalar>)
@@ -64,6 +68,7 @@ export function parseCssColorOrThrow(color: string): ColorRGBA {
   }
 
   match = rgbRegex.exec(color);
+  match ??= legacyRgbRegex.exec(color);
   if (match) {
     const [_, r, g, b, a] = match;
     invariant(r != null, `red channel is required in CSS color: ${color}`);
@@ -91,6 +96,28 @@ export function parseCssColorOrThrow(color: string): ColorRGBA {
     blue,
     alpha: alpha * (parseScalar(a ?? `none`, 1) ?? 1),
   };
+}
+
+export function parseCssColorForSchemeOrThrow(
+  color: string,
+  colorScheme: `light` | `dark`,
+): ColorRGBA {
+  if (!color.trimStart().toLowerCase().startsWith(`light-dark(`)) {
+    return parseCssColorOrThrow(color);
+  }
+
+  const probe = document.createElement(`span`);
+  probe.style.colorScheme = colorScheme;
+  probe.style.color = color;
+  invariant(probe.style.color !== ``, `Invalid CSS color: ${color}`);
+  probe.style.position = `absolute`;
+  probe.style.visibility = `hidden`;
+  document.body.append(probe);
+  try {
+    return parseCssColorOrThrow(getComputedStyle(probe).color);
+  } finally {
+    probe.remove();
+  }
 }
 
 export function parseHexColor(color: string): ColorRGBA {
