@@ -9,6 +9,35 @@ export interface WritingStrokePoint {
   y: number;
 }
 
+export interface WritingStrokeSegment {
+  strokeIndex: number;
+  start: number;
+  end: number;
+}
+
+export type WritingIssueKind =
+  | `missing-stroke`
+  | `extra-stroke`
+  | `reversed-stroke`;
+
+export interface WritingIssue {
+  kind: WritingIssueKind;
+  handwriting?: WritingStrokeSegment;
+  reference?: WritingStrokeSegment;
+}
+
+export interface WritingStrokeSegmentExpectation {
+  strokeIndex: number;
+  start?: number;
+  end?: number;
+}
+
+export interface WritingIssueExpectation {
+  kind: WritingIssueKind;
+  handwriting?: WritingStrokeSegmentExpectation;
+  reference?: WritingStrokeSegmentExpectation;
+}
+
 export function limitWritingStrokes(
   strokes: readonly (readonly WritingStrokePoint[])[],
 ): WritingStrokePoint[][] {
@@ -44,6 +73,112 @@ export function limitWritingStrokes(
   return limitedStrokes;
 }
 
+function validateSegmentRange(start: number, end: number): void {
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    start < 0 ||
+    start > end ||
+    end > 1
+  ) {
+    throw new RangeError(`Invalid normalized stroke segment range`);
+  }
+}
+
+export function extractWritingStrokeSegment(
+  stroke: readonly WritingStrokePoint[],
+  start: number,
+  end: number,
+): WritingStrokePoint[] {
+  validateSegmentRange(start, end);
+  const finitePoints = stroke.filter(
+    (point) => Number.isFinite(point.x) && Number.isFinite(point.y),
+  );
+  const segments: Array<{
+    start: WritingStrokePoint;
+    end: WritingStrokePoint;
+    startLength: number;
+    length: number;
+  }> = [];
+  let totalLength = 0;
+  for (let index = 1; index < finitePoints.length; index++) {
+    const segmentStart = finitePoints[index - 1];
+    const segmentEnd = finitePoints[index];
+    if (segmentStart == null || segmentEnd == null) {
+      continue;
+    }
+    const length = distance(segmentStart, segmentEnd);
+    if (length === 0) {
+      continue;
+    }
+    segments.push({
+      start: segmentStart,
+      end: segmentEnd,
+      startLength: totalLength,
+      length,
+    });
+    totalLength += length;
+  }
+  if (totalLength === 0) {
+    return [];
+  }
+
+  const pointAt = (fraction: number): WritingStrokePoint => {
+    const targetLength = totalLength * fraction;
+    const segment =
+      segments.find(
+        (candidate) => targetLength <= candidate.startLength + candidate.length,
+      ) ?? segments.at(-1);
+    if (segment == null) {
+      throw new Error(`Missing stroke segment for normalized location`);
+    }
+    const t = (targetLength - segment.startLength) / segment.length;
+    return {
+      x: segment.start.x + (segment.end.x - segment.start.x) * t,
+      y: segment.start.y + (segment.end.y - segment.start.y) * t,
+    };
+  };
+  if (start === end) {
+    return [pointAt(start)];
+  }
+
+  const result = [pointAt(start)];
+  let traversedLength = 0;
+  for (let index = 1; index < finitePoints.length - 1; index++) {
+    const previous = finitePoints[index - 1];
+    const point = finitePoints[index];
+    if (previous == null || point == null) {
+      continue;
+    }
+    traversedLength += distance(previous, point);
+    const fraction = traversedLength / totalLength;
+    if (fraction > start && fraction < end) {
+      result.push(point);
+    }
+  }
+  result.push(pointAt(end));
+  return result;
+}
+
+export function extractReferenceStrokeSegment(
+  path: string,
+  start: number,
+  end: number,
+): WritingStrokePoint[] {
+  validateSegmentRange(start, end);
+  const parsedPath = new SVGPathCommander(path);
+  const length = parsedPath.length;
+  if (!(length > 0)) {
+    return [];
+  }
+  const stepCount = Math.max(1, Math.ceil((end - start) * 128));
+  return Array.from({ length: stepCount + 1 }, (_, index) =>
+    parsedPath.getPointAtLength(
+      length * (start + ((end - start) * index) / stepCount),
+    ),
+  ).filter((_, index) => start !== end || index === 0);
+}
+
 export interface ShapeContextOptions {
   sampleCount: number | null;
   sampleSpacing: number;
@@ -72,6 +207,8 @@ export interface ShapeContextStrokePairCost {
   targetStrokeIndex: number;
   direction: `forward` | `reverse`;
   dtwCost: number;
+  forwardDtwCost: number;
+  reverseDtwCost: number;
   centroidDistance: number;
   lengthPenalty: number;
   totalCost: number;
@@ -111,6 +248,7 @@ const shapeContextScoreWeights = {
 } as const;
 
 const emptyGeometryBaseCost = 2;
+const minimumReversedStrokeEndpointDistance = 0.02;
 
 export interface ThinPlateSplineTransform {
   controlPoints: WritingStrokePoint[];
@@ -144,6 +282,9 @@ export interface ShapeContextGrade {
   dtwAlignments: ShapeContextDtwAlignment[];
   unmatchedSourceStrokeIndices: number[];
   unmatchedTargetStrokeIndices: number[];
+  sourceStrokeOriginalIndices: number[];
+  targetStrokeOriginalIndices: number[];
+  issues: WritingIssue[];
   sourceStrokeIndices: number[];
   targetStrokeIndices: number[];
   unmatchedSourceIndices: number[];
@@ -183,6 +324,7 @@ interface SampledShape {
   points: WritingStrokePoint[];
   strokes: WritingStrokePoint[][];
   pointStrokeIndices: number[];
+  strokeOriginalIndices: number[];
   strokeSampleCounts: number[];
 }
 
@@ -505,6 +647,9 @@ function sampleStrokes(
     pointStrokeIndices: sampledStrokes.flatMap((stroke, strokeIndex) =>
       stroke.map(() => strokeIndex),
     ),
+    strokeOriginalIndices: counts.flatMap((count, index) =>
+      count < 1 ? [] : [index],
+    ),
     strokeSampleCounts: counts,
   };
 }
@@ -531,6 +676,9 @@ function samplePaths(
     strokes,
     pointStrokeIndices: strokes.flatMap((stroke, strokeIndex) =>
       stroke.map(() => strokeIndex),
+    ),
+    strokeOriginalIndices: counts.flatMap((count, index) =>
+      count < 1 ? [] : [index],
     ),
     strokeSampleCounts: counts,
   };
@@ -1030,6 +1178,10 @@ function matchStrokes(
           targetStrokeIndex,
           direction: `forward`,
           dtwCost: Infinity,
+          forwardDtwCost:
+            forward == null ? Infinity : forward.pathCost / forward.pathLength,
+          reverseDtwCost:
+            reverse == null ? Infinity : reverse.pathCost / reverse.pathLength,
           centroidDistance: Infinity,
           lengthPenalty: Infinity,
           totalCost: Infinity,
@@ -1053,6 +1205,10 @@ function matchStrokes(
         targetStrokeIndex,
         direction: alignment.direction,
         dtwCost,
+        forwardDtwCost:
+          forward == null ? Infinity : forward.pathCost / forward.pathLength,
+        reverseDtwCost:
+          reverse == null ? Infinity : reverse.pathCost / reverse.pathLength,
         centroidDistance,
         lengthPenalty,
         totalCost: dtwCost + 0.1 * centroidDistance + 0.1 * lengthPenalty,
@@ -1826,11 +1982,129 @@ function transformPoints(
   return points.map((point) => transform.transform(point));
 }
 
+export function measureStrokeDirection(points: readonly WritingStrokePoint[]): {
+  totalLength: number;
+  endpointDistance: number;
+  endpointToLengthRatio: number;
+  directionX: number;
+  directionY: number;
+} {
+  const totalLength = polylineLength(points);
+  const first = points[0] ?? { x: 0, y: 0 };
+  const last = points.at(-1) ?? { x: 0, y: 0 };
+  const deltaX = last.x - first.x;
+  const deltaY = last.y - first.y;
+  const endpointDistance = Math.hypot(deltaX, deltaY);
+  return {
+    totalLength,
+    endpointDistance,
+    endpointToLengthRatio: totalLength > 0 ? endpointDistance / totalLength : 0,
+    directionX: endpointDistance > 0 ? deltaX / endpointDistance : 0,
+    directionY: endpointDistance > 0 ? deltaY / endpointDistance : 0,
+  };
+}
+
+function detectWritingIssues({
+  sourceStrokes,
+  targetStrokes,
+  sourceStrokeOriginalIndices,
+  targetStrokeOriginalIndices,
+  strokeAssignments,
+  strokePairCosts,
+  unmatchedSourceStrokeIndices,
+  unmatchedTargetStrokeIndices,
+  unmatchedCost,
+}: {
+  sourceStrokes: readonly (readonly WritingStrokePoint[])[];
+  targetStrokes: readonly (readonly WritingStrokePoint[])[];
+  sourceStrokeOriginalIndices: readonly number[];
+  targetStrokeOriginalIndices: readonly number[];
+  strokeAssignments: readonly ShapeContextStrokeAssignment[];
+  strokePairCosts: readonly (readonly ShapeContextStrokePairCost[])[];
+  unmatchedSourceStrokeIndices: readonly number[];
+  unmatchedTargetStrokeIndices: readonly number[];
+  unmatchedCost: number;
+}): WritingIssue[] {
+  const issues: WritingIssue[] = [];
+  for (const compactIndex of unmatchedTargetStrokeIndices) {
+    const strokeIndex = targetStrokeOriginalIndices[compactIndex];
+    if (strokeIndex != null) {
+      issues.push({
+        kind: `missing-stroke`,
+        reference: { strokeIndex, start: 0, end: 1 },
+      });
+    }
+  }
+  for (const compactIndex of unmatchedSourceStrokeIndices) {
+    const strokeIndex = sourceStrokeOriginalIndices[compactIndex];
+    if (strokeIndex != null) {
+      issues.push({
+        kind: `extra-stroke`,
+        handwriting: { strokeIndex, start: 0, end: 1 },
+      });
+    }
+  }
+
+  for (const assignment of strokeAssignments) {
+    if (assignment.direction !== `reverse`) {
+      continue;
+    }
+    const sourceStrokeIndex =
+      sourceStrokeOriginalIndices[assignment.sourceStrokeIndex];
+    const targetStrokeIndex =
+      targetStrokeOriginalIndices[assignment.targetStrokeIndex];
+    const sourceStroke = sourceStrokes[assignment.sourceStrokeIndex];
+    const targetStroke = targetStrokes[assignment.targetStrokeIndex];
+    const pairCost =
+      strokePairCosts[assignment.sourceStrokeIndex]?.[
+        assignment.targetStrokeIndex
+      ];
+    if (
+      sourceStrokeIndex == null ||
+      targetStrokeIndex == null ||
+      sourceStroke == null ||
+      targetStroke == null ||
+      pairCost == null
+    ) {
+      continue;
+    }
+    const directionMeasurements = measureStrokeDirection(sourceStroke);
+    const referenceDirectionMeasurements = measureStrokeDirection(targetStroke);
+    const endpointDirectionCosine =
+      directionMeasurements.directionX *
+        referenceDirectionMeasurements.directionX +
+      directionMeasurements.directionY *
+        referenceDirectionMeasurements.directionY;
+    const directionalMargin = pairCost.forwardDtwCost - pairCost.reverseDtwCost;
+    if (
+      !(directionMeasurements.totalLength > 0) ||
+      directionMeasurements.endpointDistance <
+        minimumReversedStrokeEndpointDistance ||
+      referenceDirectionMeasurements.endpointDistance <
+        minimumReversedStrokeEndpointDistance ||
+      directionMeasurements.endpointToLengthRatio < 0.08 ||
+      referenceDirectionMeasurements.endpointToLengthRatio < 0.08 ||
+      endpointDirectionCosine > -0.5 ||
+      pairCost.totalCost >= 2 * unmatchedCost ||
+      directionalMargin < Math.max(0.02, pairCost.reverseDtwCost * 0.1)
+    ) {
+      continue;
+    }
+    issues.push({
+      kind: `reversed-stroke`,
+      handwriting: { strokeIndex: sourceStrokeIndex, start: 0, end: 1 },
+      reference: { strokeIndex: targetStrokeIndex, start: 0, end: 1 },
+    });
+  }
+  return issues;
+}
+
 export function gradeCharacterShape(
   drawnStrokes: readonly (readonly WritingStrokePoint[])[],
   referencePaths: readonly string[],
   options: Partial<ShapeContextOptions> = {},
   sampleCountOverride?: number,
+  includeIssues = true,
 ): ShapeContextGrade {
   const settings = { ...shapeContextGraderDefaults, ...options };
   validateOptions(settings);
@@ -1898,6 +2172,19 @@ export function gradeCharacterShape(
       weightedScoreContributions.missingReferenceStrokePenalty +
       weightedScoreContributions.extraHandwritingStrokePenalty +
       weightedScoreContributions.emptyGeometryPenalty;
+    const issues = includeIssues
+      ? detectWritingIssues({
+          sourceStrokes: source.strokes,
+          targetStrokes: target.strokes,
+          sourceStrokeOriginalIndices: source.strokeOriginalIndices,
+          targetStrokeOriginalIndices: target.strokeOriginalIndices,
+          strokeAssignments: [],
+          strokePairCosts: [],
+          unmatchedSourceStrokeIndices,
+          unmatchedTargetStrokeIndices,
+          unmatchedCost: settings.unmatchedCost,
+        })
+      : [];
     return {
       shapeCost,
       shapeSimilarity: Math.exp(-shapeCost),
@@ -1916,6 +2203,9 @@ export function gradeCharacterShape(
       dtwAlignments: [],
       unmatchedSourceStrokeIndices,
       unmatchedTargetStrokeIndices,
+      sourceStrokeOriginalIndices: source.strokeOriginalIndices,
+      targetStrokeOriginalIndices: target.strokeOriginalIndices,
+      issues,
       sourceStrokeIndices: source.pointStrokeIndices,
       targetStrokeIndices: target.pointStrokeIndices,
       unmatchedSourceIndices: sourcePoints.map((_, index) => index),
@@ -2091,6 +2381,21 @@ export function gradeCharacterShape(
       },
     ];
   });
+  const issues = includeIssues
+    ? detectWritingIssues({
+        sourceStrokes: source.strokes,
+        targetStrokes: target.strokes,
+        sourceStrokeOriginalIndices: source.strokeOriginalIndices,
+        targetStrokeOriginalIndices: target.strokeOriginalIndices,
+        strokeAssignments: strokeMatching.assignments,
+        strokePairCosts: strokeMatching.pairCosts,
+        unmatchedSourceStrokeIndices:
+          strokeMatching.unmatchedSourceStrokeIndices,
+        unmatchedTargetStrokeIndices:
+          strokeMatching.unmatchedTargetStrokeIndices,
+        unmatchedCost: settings.unmatchedCost,
+      })
+    : [];
 
   return {
     shapeCost,
@@ -2110,6 +2415,9 @@ export function gradeCharacterShape(
     dtwAlignments: strokeMatching.dtwAlignments,
     unmatchedSourceStrokeIndices: strokeMatching.unmatchedSourceStrokeIndices,
     unmatchedTargetStrokeIndices: strokeMatching.unmatchedTargetStrokeIndices,
+    sourceStrokeOriginalIndices: source.strokeOriginalIndices,
+    targetStrokeOriginalIndices: target.strokeOriginalIndices,
+    issues,
     sourceStrokeIndices: source.pointStrokeIndices,
     targetStrokeIndices: target.pointStrokeIndices,
     unmatchedSourceIndices: activeMatches.unmatchedSourceIndices,

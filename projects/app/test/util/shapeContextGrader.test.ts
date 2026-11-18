@@ -1,4 +1,5 @@
-import { readFile } from "@pinyinly/lib/fs";
+import { mkdir, readFile, writeFile } from "@pinyinly/lib/fs";
+import path from "node:path";
 import { z } from "zod";
 import { hanziCharacterSchema } from "#data/model.ts";
 import {
@@ -13,16 +14,24 @@ import type {
 } from "#data/questions/hanziCharacterWriting.ts";
 import {
   gradeCharacterShape,
+  extractReferenceStrokeSegment,
+  extractWritingStrokeSegment,
+  measureStrokeDirection,
   limitWritingStrokes,
   maxWritingPointCount,
   maxWritingStrokeCount,
   shapeContextGraderDefaults,
 } from "#util/shapeContextGrader.ts";
-import type { WritingStrokePoint } from "#util/shapeContextGrader.ts";
+import type {
+  WritingStrokePoint,
+  WritingIssue,
+  WritingIssueExpectation,
+} from "#util/shapeContextGrader.ts";
 import type { ShapeContextGraderExample } from "#util/shapeContextGraderExample.ts";
 import {
   createShapeContextGraderDiagnostic,
   diagnoseShapeContextStrokePresence,
+  evaluateWritingIssueExpectations,
   renderShapeContextGraderDiagnosticSvg,
 } from "#test/util/shapeContextGraderDiagnostics.ts";
 import {
@@ -43,8 +52,18 @@ import type { Browser } from "playwright";
 
 const handwritingDiagnoseMode =
   process.env[`PYLY_HANDWRITING_DIAGNOSE`] === `1`;
+type ShapeContextGraderTestExample = ShapeContextGraderExample & {
+  fails?: boolean;
+  expectedIssues?: WritingIssueExpectation[];
+  unexpectedIssues?: WritingIssueExpectation[];
+};
+
 type HandwritingEvaluationRecord = {
   id: string;
+  character: string;
+  drawnStrokes: WritingStrokePoint[][];
+  referencePaths: string[];
+  geometry: ReturnType<typeof gradeCharacterShape>;
   expectedAcceptance: boolean;
   actualAcceptance: boolean;
   rejectionCondition: HanziCharacterWritingAcceptanceDecision[`rejectionCondition`];
@@ -74,6 +93,8 @@ type HandwritingEvaluationRecord = {
   missingReferenceStrokeFraction: number;
   extraHandwritingStrokeFraction: number;
   acceptance: HanziCharacterWritingAcceptanceDecision;
+  issues: WritingIssue[];
+  issueExpectations: ReturnType<typeof evaluateWritingIssueExpectations>;
   contrastiveCandidates: Array<{
     character: string;
     shapeSimilarity: number;
@@ -84,6 +105,22 @@ type HandwritingEvaluationRecord = {
 
 const handwritingEvaluationRecords: HandwritingEvaluationRecord[] = [];
 let diagnosticBrowser: Browser | undefined;
+const handwritingReviewDirectory = path.resolve(
+  process.cwd(),
+  `.vitest/handwriting-review`,
+);
+
+function artifactName(id: string): string {
+  return encodeURIComponent(id).replaceAll(`%`, `_`);
+}
+
+function diagnosticPngPath(id: string): string {
+  return path.join(
+    handwritingReviewDirectory,
+    `diagnostics`,
+    `${artifactName(id)}.png`,
+  );
+}
 
 beforeAll(async () => {
   if (handwritingDiagnoseMode) {
@@ -92,59 +129,238 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await diagnosticBrowser?.close();
   if (!handwritingDiagnoseMode) {
+    await diagnosticBrowser?.close();
     return;
   }
 
-  const counts = {
-    truePositives: handwritingEvaluationRecords.filter(
-      ({ expectedAcceptance, actualAcceptance }) =>
-        expectedAcceptance && actualAcceptance,
-    ).length,
-    trueNegatives: handwritingEvaluationRecords.filter(
-      ({ expectedAcceptance, actualAcceptance }) =>
-        !expectedAcceptance && !actualAcceptance,
-    ).length,
-    falsePositives: handwritingEvaluationRecords.filter(
-      ({ expectedAcceptance, actualAcceptance }) =>
-        !expectedAcceptance && actualAcceptance,
-    ).length,
-    falseNegatives: handwritingEvaluationRecords.filter(
-      ({ expectedAcceptance, actualAcceptance }) =>
-        expectedAcceptance && !actualAcceptance,
-    ).length,
-  };
-  const durations = handwritingEvaluationRecords
-    .map(({ durationMs }) => durationMs)
-    .sort((a, b) => a - b);
-  const percentile = (fraction: number): number =>
-    durations[Math.ceil(fraction * durations.length) - 1] ?? 0;
+  if (diagnosticBrowser == null) {
+    throw new Error(`Handwriting diagnostics browser was not initialized`);
+  }
 
-  console.warn(
-    `PYLY_HANDWRITING_EVALUATION ${JSON.stringify({
-      total: handwritingEvaluationRecords.length,
-      ...counts,
-      accuracy:
-        (counts.truePositives + counts.trueNegatives) /
-        Math.max(1, handwritingEvaluationRecords.length),
-      errorRate:
-        (counts.falsePositives + counts.falseNegatives) /
-        Math.max(1, handwritingEvaluationRecords.length),
-      runtimeMs: {
-        mean:
-          durations.reduce((sum, duration) => sum + duration, 0) /
-          Math.max(1, durations.length),
-        median: percentile(0.5),
-        p95: percentile(0.95),
-        max: durations.at(-1) ?? 0,
-      },
-    })}`,
-  );
-  for (const example of handwritingEvaluationRecords) {
-    console.warn(
-      `PYLY_HANDWRITING_EVALUATION_EXAMPLE ${JSON.stringify(example)}`,
+  try {
+    const counts = {
+      truePositives: handwritingEvaluationRecords.filter(
+        ({ expectedAcceptance, actualAcceptance }) =>
+          expectedAcceptance && actualAcceptance,
+      ).length,
+      trueNegatives: handwritingEvaluationRecords.filter(
+        ({ expectedAcceptance, actualAcceptance }) =>
+          !expectedAcceptance && !actualAcceptance,
+      ).length,
+      falsePositives: handwritingEvaluationRecords.filter(
+        ({ expectedAcceptance, actualAcceptance }) =>
+          !expectedAcceptance && actualAcceptance,
+      ).length,
+      falseNegatives: handwritingEvaluationRecords.filter(
+        ({ expectedAcceptance, actualAcceptance }) =>
+          expectedAcceptance && !actualAcceptance,
+      ).length,
+    };
+    const durations = handwritingEvaluationRecords
+      .map(({ durationMs }) => durationMs)
+      .sort((a, b) => a - b);
+    const issueCounts = Object.fromEntries(
+      [`missing-stroke`, `extra-stroke`, `reversed-stroke`].map((kind) => [
+        kind,
+        Object.fromEntries(
+          [`accepted`, `rejected`].map((expectedDecision) => [
+            expectedDecision,
+            handwritingEvaluationRecords
+              .filter(
+                ({ expectedAcceptance }) =>
+                  expectedAcceptance === (expectedDecision === `accepted`),
+              )
+              .reduce(
+                (count, record) =>
+                  count +
+                  record.issues.filter((issue) => issue.kind === kind).length,
+                0,
+              ),
+          ]),
+        ),
+      ]),
     );
+    const percentile = (fraction: number): number =>
+      durations[Math.ceil(fraction * durations.length) - 1] ?? 0;
+
+    console.warn(
+      `PYLY_HANDWRITING_EVALUATION ${JSON.stringify({
+        total: handwritingEvaluationRecords.length,
+        ...counts,
+        accuracy:
+          (counts.truePositives + counts.trueNegatives) /
+          Math.max(1, handwritingEvaluationRecords.length),
+        errorRate:
+          (counts.falsePositives + counts.falseNegatives) /
+          Math.max(1, handwritingEvaluationRecords.length),
+        runtimeMs: {
+          mean:
+            durations.reduce((sum, duration) => sum + duration, 0) /
+            Math.max(1, durations.length),
+          median: percentile(0.5),
+          p95: percentile(0.95),
+          max: durations.at(-1) ?? 0,
+        },
+        issueCounts,
+      })}`,
+    );
+    for (const example of handwritingEvaluationRecords) {
+      const {
+        geometry: _geometry,
+        drawnStrokes: _drawnStrokes,
+        referencePaths: _referencePaths,
+        ...serializableExample
+      } = example;
+      console.warn(
+        `PYLY_HANDWRITING_EVALUATION_EXAMPLE ${JSON.stringify(serializableExample)}`,
+      );
+    }
+
+    const reviewRecords = [
+      ...new Map(
+        handwritingEvaluationRecords
+          .filter(({ id }) => !id.includes(`synthetic`))
+          .map((record) => [record.id, record]),
+      ).values(),
+    ];
+    const issueReview = reviewRecords.flatMap((record) =>
+      record.issues.map((issue) => {
+        const handwritingStrokeIndex = issue.handwriting?.strokeIndex ?? null;
+        const referenceStrokeIndex = issue.reference?.strokeIndex ?? null;
+        const assignment = record.geometry.strokeAssignments.find(
+          ({ sourceStrokeIndex, targetStrokeIndex }) =>
+            record.geometry.sourceStrokeOriginalIndices[sourceStrokeIndex] ===
+              handwritingStrokeIndex &&
+            record.geometry.targetStrokeOriginalIndices[targetStrokeIndex] ===
+              referenceStrokeIndex,
+        );
+        const pairCost =
+          assignment == null
+            ? null
+            : record.geometry.strokePairCosts[assignment.sourceStrokeIndex]?.[
+                assignment.targetStrokeIndex
+              ];
+        const handwritingDirection =
+          assignment == null
+            ? null
+            : measureStrokeDirection(
+                record.geometry.sourceStrokes[assignment.sourceStrokeIndex] ??
+                  [],
+              );
+        const referenceDirection =
+          assignment == null
+            ? null
+            : measureStrokeDirection(
+                record.geometry.targetStrokes[assignment.targetStrokeIndex] ??
+                  [],
+              );
+        const detectorMeasurements =
+          issue.kind === `reversed-stroke` && assignment != null
+            ? {
+                pairCost,
+                direction: handwritingDirection,
+                referenceDirection,
+                endpointDirectionCosine:
+                  (handwritingDirection?.directionX ?? 0) *
+                    (referenceDirection?.directionX ?? 0) +
+                  (handwritingDirection?.directionY ?? 0) *
+                    (referenceDirection?.directionY ?? 0),
+                directionalMargin:
+                  (pairCost?.forwardDtwCost ?? 0) -
+                  (pairCost?.reverseDtwCost ?? 0),
+                thresholds: {
+                  minimumEndpointDistance: 0.02,
+                  minimumEndpointToLengthRatio: 0.08,
+                  maximumEndpointDirectionCosine: -0.5,
+                  maximumPairCost: 2 * record.geometry.options.unmatchedCost,
+                  minimumDirectionalMargin: `max(0.02, reverseDtwCost * 0.1)`,
+                },
+              }
+            : issue.kind === `missing-stroke`
+              ? {
+                  unmatchedCost: record.geometry.options.unmatchedCost,
+                  alternativeAssignmentCosts:
+                    referenceStrokeIndex == null
+                      ? []
+                      : record.geometry.strokePairCosts.flatMap(
+                          (costs, sourceIndex) => {
+                            const targetIndex =
+                              record.geometry.targetStrokeOriginalIndices.indexOf(
+                                referenceStrokeIndex,
+                              );
+                            const alternative = costs[targetIndex];
+                            return alternative == null
+                              ? []
+                              : [
+                                  {
+                                    handwritingStrokeIndex:
+                                      record.geometry
+                                        .sourceStrokeOriginalIndices[
+                                        sourceIndex
+                                      ] ?? null,
+                                    totalCost: alternative.totalCost,
+                                  },
+                                ];
+                          },
+                        ),
+                }
+              : {
+                  unmatchedCost: record.geometry.options.unmatchedCost,
+                  alternativeAssignmentCosts:
+                    handwritingStrokeIndex == null
+                      ? []
+                      : (record.geometry.strokePairCosts[
+                          record.geometry.sourceStrokeOriginalIndices.indexOf(
+                            handwritingStrokeIndex,
+                          )
+                        ]?.map((cost, targetIndex) => ({
+                          referenceStrokeIndex:
+                            record.geometry.targetStrokeOriginalIndices[
+                              targetIndex
+                            ] ?? null,
+                          totalCost: cost.totalCost,
+                        })) ?? []),
+                };
+        return {
+          fixtureId: record.id,
+          character: record.character,
+          expectedAcceptance: record.expectedAcceptance,
+          actualAcceptance: record.actualAcceptance,
+          issue,
+          detectorMeasurements,
+          diagnosticPngPath: diagnosticPngPath(record.id),
+        };
+      }),
+    );
+
+    await mkdir(handwritingReviewDirectory, { recursive: true });
+    const reportPath = path.join(handwritingReviewDirectory, `review.json`);
+    await writeFile(
+      reportPath,
+      JSON.stringify(
+        {
+          schemaVersion: 1,
+          fixtureCount: reviewRecords.length,
+          issueCount: issueReview.length,
+          issues: issueReview,
+        },
+        null,
+        2,
+      ),
+    );
+    console.warn(
+      `PYLY_HANDWRITING_REVIEW_ARTIFACTS ${JSON.stringify({
+        reportPath,
+        diagnosticPngPaths: [
+          ...new Set(
+            issueReview.map(({ diagnosticPngPath }) => diagnosticPngPath),
+          ),
+        ],
+      })}`,
+    );
+  } finally {
+    await diagnosticBrowser.close();
   }
 });
 
@@ -189,7 +405,7 @@ async function annotateShapeContextGraderExample({
   gradingDurationMs,
 }: {
   context: TestContext;
-  example: ShapeContextGraderExample;
+  example: ShapeContextGraderTestExample;
   character: string;
   drawnStrokes: WritingStrokePoint[][];
   referencePaths: string[];
@@ -215,6 +431,8 @@ async function annotateShapeContextGraderExample({
     geometry,
     acceptance,
     contrastiveCandidates: similarCharacterGrades,
+    expectedIssues: example.expectedIssues,
+    unexpectedIssues: example.unexpectedIssues,
   });
   const overviewSvg = renderShapeContextGraderDiagnosticSvg({
     fixtureId: example.id,
@@ -226,12 +444,19 @@ async function annotateShapeContextGraderExample({
     contrastiveCandidates: similarCharacterGrades,
     expectedAcceptance,
     acceptanceThreshold: hanziCharacterWritingSimilarityThreshold,
+    expectedIssues: example.expectedIssues,
+    unexpectedIssues: example.unexpectedIssues,
   });
   if (diagnosticBrowser == null) {
     throw new Error(`Handwriting diagnostics browser was not initialized`);
   }
 
   const overviewPng = await renderSvgPng(diagnosticBrowser, overviewSvg);
+  if (geometry.issues.length > 0) {
+    const pngPath = diagnosticPngPath(example.id);
+    await mkdir(path.dirname(pngPath), { recursive: true });
+    await writeFile(pngPath, overviewPng);
+  }
   await context.annotate(`${example.id}: diagnostics.json`, {
     body: JSON.stringify(diagnostic),
     bodyEncoding: `utf-8`,
@@ -250,6 +475,9 @@ async function annotateShapeContextGraderExample({
 
 function recordHandwritingEvaluation({
   example,
+  character,
+  drawnStrokes,
+  referencePaths,
   expectedAcceptance,
   actualAcceptance,
   acceptance,
@@ -257,7 +485,13 @@ function recordHandwritingEvaluation({
   similarCharacterGrades,
   durationMs,
 }: {
-  example: ShapeContextGraderExample;
+  example: ShapeContextGraderExample & {
+    expectedIssues?: WritingIssueExpectation[];
+    unexpectedIssues?: WritingIssueExpectation[];
+  };
+  character: string;
+  drawnStrokes: WritingStrokePoint[][];
+  referencePaths: string[];
   expectedAcceptance: boolean;
   actualAcceptance: boolean;
   acceptance: HanziCharacterWritingAcceptanceDecision;
@@ -271,6 +505,10 @@ function recordHandwritingEvaluation({
   const strokePresence = diagnoseShapeContextStrokePresence(geometry);
   handwritingEvaluationRecords.push({
     id: example.id,
+    character,
+    drawnStrokes,
+    referencePaths,
+    geometry,
     expectedAcceptance,
     actualAcceptance,
     rejectionCondition: acceptance.rejectionCondition,
@@ -303,6 +541,12 @@ function recordHandwritingEvaluation({
     missingReferenceStrokeFraction: geometry.missingReferenceStrokeFraction,
     extraHandwritingStrokeFraction: geometry.extraHandwritingStrokeFraction,
     acceptance,
+    issues: geometry.issues,
+    issueExpectations: evaluateWritingIssueExpectations(
+      geometry.issues,
+      example.expectedIssues,
+      example.unexpectedIssues,
+    ),
     contrastiveCandidates: similarCharacterGrades.map(
       ({ hanzi, geometry: candidateGeometry }, index) => {
         const comparison = acceptance.contrastiveCheck.candidates[index];
@@ -403,11 +647,6 @@ function expectTransformJacobianBounds(
     }
   }
 }
-
-// The 图 negative fixture remains an expected failure until structural recognition is fixed.
-type ShapeContextGraderTestExample = ShapeContextGraderExample & {
-  fails?: boolean;
-};
 
 const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
   {
@@ -630,10 +869,22 @@ const negativeHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
   },
   {
     id: `看-1794183717589`,
+    expectedIssues: [
+      {
+        kind: `missing-stroke`,
+        reference: { strokeIndex: 6 },
+      },
+    ],
     drawnStrokes: `340.5,100;369.9,100;383.4,100;402.5,100;447.7,100;497.7,101.6;546.1,105.6;591.4,111.9;611.2,111.9|314.3,200;373.1,194.5;380.2,194.5;417.5,193.7;471.5,190.5;525.5,188.9;579.5,187.3;616.8,185|224.6,292.9;236.6,294.5;264.3,294.5;281.8,294.5;302.4,294.5;354.8,294.5;412,294.5;470.7,294.5;535.8,292.1;603.3,287.4;666,280.2|514.4,88.1;513.6,106.4;512.8,134.2;511.2,142.9;504.9,171.5;489,219.1;466,277;432.6,340.5;391.3,400.1;343.7,454.8;291.3,504.9;238.1,552.5;202.4,583.4|446.9,442.9;436.6,465.2;437.4,500.1;437.4,512.8;437.4,553.3;437.4,613.6;437.4,681.1;440.6,743.8;442.1,797;442.1,807.3|469.9,433.4;489.8,431.8;518.4,431.8;535.8,431.8;553.3,431.8;590.6,431.8;625.5,431.8;654.9,435.8;678.7,441.4;694.6,444.5;704.1,450.1;704.9,462.8;704.9,490.6;689.8,541.4;672.3,607.3;656.5,678.7;644.6,746.2;636.6,807.3;632.7,858.1;631.9,877.1|450.9,640.6;458,636.6;492.2,636.6;512,636.6;535,636.6;581.1,636.6;627.9,636.6;646.9,636.6|454.1,837.5;469.1,839.8;507.2,839.8;519.1,839.8;555.7,839;604.9,835.1;651.7,835.1;660.4,835.1`,
   },
   {
     id: `做-1794183743160`,
+    expectedIssues: [
+      {
+        kind: `missing-stroke`,
+        reference: { strokeIndex: 8 },
+      },
+    ],
     drawnStrokes: `396.1,110.3;400.9,117.5;400.9,142.1;400.9,158;398.5,175.4;388.2,216.7;371.5,260.4;346.1,304.8;313.6,353.2;273.1,397.7;228.6,442.1;185.7,481;167.5,495.3|362,320.7;340.5,356.4;340.5,369.9;340.5,387.4;340.5,435.8;340.5,499.3;342.9,571.5;347.7,648.5;354.8,727.9;361.2,802.5;365.1,871.6;365.9,921.6|432.6,392.9;458,381.8;462,382.6;478.7,382.6;505.6,382.6;538.2,381.8;576.3,380.2;616,379.4;645.4,378.6|551.7,216.7;549.3,228.6;549.3,260.4;549.3,272.3;549.3,309.6;550.1,370.7;550.1,442.9;550.1,519.9;550.1,596.1;550.1,646.9|438.2,641.4;437.4,673.1;438.2,694.6;442.1,720;450.1,779.5;458,839.8;463.6,892.2|434.2,659.6;450.9,639.8;471.5,639.8;477.9,639.8;496.1,639;523.1,639;550.9,639;578.7,639;600.9,639;618.4,639;627.9,641.4;628.7,650.9;628.7,673.1;620,709.7;612.8,752.5;607.3,795.4;605.7,830.3;605.7,857.3;605.7,867.6|439,872.4;440.6,870.8;464.4,868.4;471.5,867.6;500.1,866;543,865.2;587.4,865.2;597.7,865.2|773.2,236.6;769.2,266.7;770,270.7;770,294.5;765.2,334.2;747,381.8;723.9,431;698.5,473.9;670.8,510.4;641.4,540.6;624.7,557.2|741.4,378.6;745.4,378.6;769.2,378.6;776.3,378.6;797,381;825.6,385;851,387.4;873.2,387.4;888.3,387.4;896.2,387.4;899.4,387.4;900.2,391.3;898.6,416.7;883.5,460.4;862.9,518.4;843,581.1;826.3,643;811.3,703.3;796.2,759.7;778.7,806.5;758.1,845.4;735.1,877.1;712,904.1;696.2,923.2;689,935.9;689,941.4|722.4,530.3;716.8,511.2;719.2,524.7;727.1,561.2;741.4,631.1;761.3,715.2;786.7,803.3;817.6,882.7;851.7,945.4;858.9,955.7`,
   },
   {
@@ -752,6 +1003,65 @@ describe(`gradeCharacterShape`, () => {
     );
   });
 
+  test(`detects reversed horizontal and vertical strokes without flagging forward strokes`, () => {
+    for (const referencePath of [`M 0 0 L 100 0`, `M 0 0 L 0 100`]) {
+      const points = pointsForPaths([referencePath])[0];
+      if (points == null) {
+        throw new Error(`Missing straight-stroke points`);
+      }
+      const forward = gradeCharacterShape([points], [referencePath]);
+      const reversedPoints = [...points].reverse();
+      const reversed = gradeCharacterShape([reversedPoints], [referencePath]);
+      const reversedWithoutIssues = gradeCharacterShape(
+        [reversedPoints],
+        [referencePath],
+        {},
+        undefined,
+        false,
+      );
+
+      expect(forward.strokeAssignments[0]?.direction).toBe(`forward`);
+      expect(
+        forward.issues.some(({ kind }) => kind === `reversed-stroke`),
+      ).toBe(false);
+      expect(reversed.strokeAssignments[0]?.direction).toBe(`reverse`);
+      expect(reversed.issues).toContainEqual({
+        kind: `reversed-stroke`,
+        handwriting: { strokeIndex: 0, start: 0, end: 1 },
+        reference: { strokeIndex: 0, start: 0, end: 1 },
+      });
+      expect(reversedWithoutIssues.issues).toEqual([]);
+      expect(reversedWithoutIssues.shapeCost).toBe(reversed.shapeCost);
+      expect(reversedWithoutIssues.strokeAssignments).toEqual(
+        reversed.strokeAssignments,
+      );
+      expect(evaluateHanziCharacterWritingAcceptance(reversed, [])).toEqual(
+        evaluateHanziCharacterWritingAcceptance(reversedWithoutIssues, []),
+      );
+    }
+  });
+
+  test(`does not report reversed direction for sub-resolution strokes`, () => {
+    const referencePaths = [`M 0 0 L 1000 0`, `M 0 50 L 0.1 50`];
+    const sourceStrokes = pointsForPaths(referencePaths);
+    const shortStroke = sourceStrokes[1];
+    if (shortStroke == null) {
+      throw new Error(`Missing short stroke points`);
+    }
+
+    const result = gradeCharacterShape(
+      [sourceStrokes[0] ?? [], [...shortStroke].reverse()],
+      referencePaths,
+    );
+
+    expect(result.issues.some(({ kind }) => kind === `reversed-stroke`)).toBe(
+      false,
+    );
+    expect(
+      measureStrokeDirection(result.targetStrokes[1] ?? []).endpointDistance,
+    ).toBeLessThan(0.02);
+  });
+
   test(`assigns reordered strokes globally and reports unmatched strokes`, () => {
     const stroke0 = strokes[0];
     const stroke1 = strokes[1];
@@ -811,6 +1121,14 @@ describe(`gradeCharacterShape`, () => {
     );
     expect(extraSourceStroke.strokeAssignments).toHaveLength(3);
     expect(extraSourceStroke.unmatchedSourceStrokeIndices).toHaveLength(1);
+    expect(missingSourceStroke.issues).toContainEqual({
+      kind: `missing-stroke`,
+      reference: { strokeIndex: 2, start: 0, end: 1 },
+    });
+    expect(extraSourceStroke.issues).toContainEqual({
+      kind: `extra-stroke`,
+      handwriting: { strokeIndex: 3, start: 0, end: 1 },
+    });
 
     const presence = diagnoseShapeContextStrokePresence(missingSourceStroke);
     expect(presence.summary.matchedReferenceStrokeCount).toBe(2);
@@ -928,8 +1246,19 @@ describe(`gradeCharacterShape`, () => {
       geometry: missingSourceStroke,
       acceptance: missingStrokeAcceptance,
       contrastiveCandidates: [],
+      expectedIssues: [
+        {
+          kind: `missing-stroke`,
+          reference: { strokeIndex: 2 },
+        },
+      ],
     });
-    expect(missingStrokeDiagnostic.schemaVersion).toBe(19);
+    expect(missingStrokeDiagnostic.schemaVersion).toBe(20);
+    expect(missingStrokeDiagnostic.issueExpectations).toMatchObject({
+      declared: true,
+      expected: [{ satisfied: true }],
+      allSatisfied: true,
+    });
     expect(
       missingStrokeDiagnostic.algorithm.strokePresence.summary
         .unmatchedReferenceStrokeCount,
@@ -966,7 +1295,16 @@ describe(`gradeCharacterShape`, () => {
       contrastiveCandidates: [],
       expectedAcceptance: false,
       acceptanceThreshold: hanziCharacterWritingSimilarityThreshold,
+      expectedIssues: [
+        {
+          kind: `missing-stroke`,
+          reference: { strokeIndex: 2 },
+        },
+      ],
     });
+    expect(missingStrokeSvg).toContain(`Localized writing issues (1)`);
+    expect(missingStrokeSvg).toContain(`Missing stroke`);
+    expect(missingStrokeSvg).toContain(`Issue expectations satisfied`);
     expect(missingStrokeSvg).toContain(
       `data-reference-stroke-status="unmatched"`,
     );
@@ -1005,6 +1343,85 @@ describe(`gradeCharacterShape`, () => {
     expect(extraStrokeSvg).toContain(
       `data-handwriting-stroke-status="unmatched"`,
     );
+  });
+
+  test(`preserves original handwriting indices after discarding degenerate strokes`, () => {
+    const result = gradeCharacterShape(
+      [
+        [
+          { x: 5, y: 5 },
+          { x: 5, y: 5 },
+        ],
+        [
+          { x: 0, y: 0 },
+          { x: 100, y: 0 },
+        ],
+        [
+          { x: 0, y: 100 },
+          { x: 100, y: 100 },
+        ],
+      ],
+      [`M 0 0 L 100 0`],
+    );
+
+    expect(result.sourceStrokeOriginalIndices).toEqual([1, 2]);
+    expect(result.issues).toEqual([
+      {
+        kind: `extra-stroke`,
+        handwriting: { strokeIndex: 2, start: 0, end: 1 },
+      },
+    ]);
+  });
+
+  test(`preserves original reference indices after discarding degenerate paths`, () => {
+    const result = gradeCharacterShape(pointsForPaths([`M 0 0 L 100 0`]), [
+      `M 0 0 L 0 0`,
+      `M 0 0 L 100 0`,
+      `M 0 100 L 100 100`,
+    ]);
+
+    expect(result.targetStrokeOriginalIndices).toEqual([1, 2]);
+    expect(result.issues).toContainEqual({
+      kind: `missing-stroke`,
+      reference: { strokeIndex: 2, start: 0, end: 1 },
+    });
+  });
+
+  test(`extracts full, partial, and zero-length arc-length segments`, () => {
+    const stroke = [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 30 },
+    ];
+    expect(extractWritingStrokeSegment(stroke, 0, 1)).toEqual(stroke);
+    expect(extractWritingStrokeSegment(stroke, 0.25, 0.75)).toEqual([
+      { x: 10, y: 0 },
+      { x: 10, y: 20 },
+    ]);
+    expect(extractWritingStrokeSegment(stroke, 0.5, 0.5)).toEqual([
+      { x: 10, y: 10 },
+    ]);
+    const denseLine = Array.from({ length: 11 }, (_, index) => ({
+      x: index * 10,
+      y: 0,
+    }));
+    const sparseSegment = extractWritingStrokeSegment(
+      [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      0.25,
+      0.75,
+    );
+    const denseSegment = extractWritingStrokeSegment(denseLine, 0.25, 0.75);
+    expect(denseSegment[0]).toEqual(sparseSegment[0]);
+    expect(denseSegment.at(-1)).toEqual(sparseSegment.at(-1));
+    expect(
+      extractReferenceStrokeSegment(`M 0 0 L 100 0`, 0.25, 0.75).at(0),
+    ).toEqual({ x: 25, y: 0 });
+    expect(
+      extractReferenceStrokeSegment(`M 0 0 L 100 0`, 0.25, 0.75).at(-1),
+    ).toEqual({ x: 75, y: 0 });
   });
 
   test(`constrains extreme shear without rejecting the whole transform`, () => {
@@ -1124,6 +1541,9 @@ describe(`gradeCharacterShape`, () => {
         id: `饿-synthetic-identity`,
         drawnStrokes: encodeShapeContextStrokes(drawnStrokes),
       },
+      character: `饿`,
+      drawnStrokes,
+      referencePaths: paths,
       expectedAcceptance: true,
       actualAcceptance: accepted,
       acceptance,
@@ -1623,6 +2043,36 @@ describe(`gradeCharacterShape`, () => {
     expect(svg).toContain(`longest repeated-index run`);
   });
 
+  for (const example of [
+    ...positiveHandwritingExamples,
+    ...negativeHandwritingExamples,
+  ].filter(
+    ({ expectedIssues, unexpectedIssues }) =>
+      (expectedIssues?.length ?? 0) > 0 || (unexpectedIssues?.length ?? 0) > 0,
+  )) {
+    test(`${example.id} independently checks declared writing issues`, async () => {
+      const character = shapeContextGraderExampleCharacter(example);
+      const referencePaths = await characterPathsFor(character);
+      const geometry = gradeCharacterShape(
+        decodeShapeContextStrokes(example.drawnStrokes),
+        referencePaths,
+        example.options,
+      );
+      const expectationStatus = evaluateWritingIssueExpectations(
+        geometry.issues,
+        example.expectedIssues,
+        example.unexpectedIssues,
+      );
+
+      expect(
+        expectationStatus.allSatisfied,
+        `${example.id}: expected issue assertions ${JSON.stringify(
+          expectationStatus,
+        )}; actual issues ${JSON.stringify(geometry.issues)}`,
+      ).toBe(true);
+    });
+  }
+
   for (const example of positiveHandwritingExamples) {
     test(`${example.id} (example) applies acceptance criteria`, async (context) => {
       const character = shapeContextGraderExampleCharacter(example);
@@ -1675,6 +2125,9 @@ describe(`gradeCharacterShape`, () => {
       }
       recordHandwritingEvaluation({
         example,
+        character,
+        drawnStrokes,
+        referencePaths,
         expectedAcceptance: true,
         actualAcceptance: accepted,
         acceptance,
@@ -1812,6 +2265,9 @@ describe(`gradeCharacterShape`, () => {
         }
         recordHandwritingEvaluation({
           example,
+          character,
+          drawnStrokes,
+          referencePaths,
           expectedAcceptance: false,
           actualAcceptance: accepted,
           acceptance,

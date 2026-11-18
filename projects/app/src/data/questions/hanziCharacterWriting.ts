@@ -191,6 +191,7 @@ export function gradeSimilarCharacters(
       medianPaths,
       options,
       sampleCount,
+      false,
     ),
   }));
 }
