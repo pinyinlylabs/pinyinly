@@ -316,14 +316,6 @@ tasks:
   debugTailwind:
     command: tailwindcss --input src/global.css
 
-  dictionary:
-    command: tsx --tsconfig tsconfig.node.json ./bin/dictionary.tsx
-    preset: server
-    options:
-      envFile: .env.local
-    env:
-      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
-
   expoAtlas:
     script: |
       expo export -p web &&
