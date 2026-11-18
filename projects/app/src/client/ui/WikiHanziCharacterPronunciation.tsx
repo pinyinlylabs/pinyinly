@@ -26,7 +26,7 @@ import {
   pinyinSoundImageSetting,
   pinyinSoundLocationSetKeySetting,
   pronunciationMnemonicSelectedSetting,
-  soundsPageUserToggleSetting,
+  soundMnemonicsUserToggleSetting,
 } from "@/data/userSettings";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Href } from "expo-router";
@@ -68,9 +68,6 @@ export function WikiHanziCharacterPronunciation({
   hanziWord: HanziWord | null;
 }) {
   const db = useDb();
-  const { isEnabled: showSoundsPage } = useUserSettingToggle(
-    soundsPageUserToggleSetting,
-  );
   const { data: meanings } = useLiveQuery({
     query: (q) =>
       q
@@ -92,7 +89,7 @@ export function WikiHanziCharacterPronunciation({
   });
   const pronunciation = getSharedPrimaryPronunciation(meanings, hanziWord);
 
-  if (!showSoundsPage || pronunciation == null) {
+  if (pronunciation == null) {
     return null;
   }
 
@@ -113,6 +110,9 @@ export function WikiHanziCharacterPronunciationBox({
   hanziWord: HanziWord;
   pinyinUnit: PinyinUnit;
 }) {
+  const { isEnabled: showMnemonic } = useUserSettingToggle(
+    soundMnemonicsUserToggleSetting,
+  );
   const hanzi = hanziFromHanziWord(hanziWord);
   const splitPinyin = splitPinyinUnit(pinyinUnit);
 
@@ -246,8 +246,12 @@ export function WikiHanziCharacterPronunciationBox({
   return (
     <WikiTitledBox
       title="Remember the pronunciation"
-      onEditingChange={handleEditingChange}
-      bottomCaption={`Using a story can create a memorable association between the meaning and the pronunciation that you can use until you’ve memorized it.`}
+      onEditingChange={showMnemonic ? handleEditingChange : undefined}
+      bottomCaption={
+        showMnemonic
+          ? `Using a story can create a memorable association between the meaning and the pronunciation that you can use until you’ve memorized it.`
+          : undefined
+      }
     >
       {splitPinyin == null ? null : (
         <View className="gap-4 p-4 py-10">
@@ -262,26 +266,38 @@ export function WikiHanziCharacterPronunciationBox({
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
                   soundId={splitPinyin.initialSoundId}
-                  href={`/sounds/${splitPinyin.initialSoundId}`}
+                  href={
+                    showMnemonic
+                      ? `/sounds/${splitPinyin.initialSoundId}`
+                      : null
+                  }
                   soundName={initialLabel}
-                  mnemonicName={selectedInitialActor?.name ?? null}
+                  mnemonicName={
+                    showMnemonic ? (selectedInitialActor?.name ?? null) : null
+                  }
                   imageOverride={selectedInitialActor?.image ?? null}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
                   soundId={splitPinyin.finalSoundId}
-                  href={`/sounds/${splitPinyin.finalSoundId}`}
+                  href={
+                    showMnemonic ? `/sounds/${splitPinyin.finalSoundId}` : null
+                  }
                   soundName={finalLabel}
-                  mnemonicName={finalLocationName}
+                  mnemonicName={showMnemonic ? finalLocationName : null}
                 />
               </View>
               <View className="flex-1 items-center gap-1 border-fg/10">
                 <SoundLinkBlock
                   soundId={splitPinyin.toneSoundId}
-                  href={`/sounds/${splitPinyin.toneSoundId}`}
+                  href={
+                    showMnemonic ? `/sounds/${splitPinyin.toneSoundId}` : null
+                  }
                   soundName={<ToneLabelText tone={splitPinyin.tone} />}
-                  mnemonicName={tonePinyinSoundName ?? null}
+                  mnemonicName={
+                    showMnemonic ? (tonePinyinSoundName ?? null) : null
+                  }
                 />
               </View>
             </View>
@@ -289,7 +305,8 @@ export function WikiHanziCharacterPronunciationBox({
         </View>
       )}
 
-      {isHintSectionVisible || isImageSectionVisible || isEditMode ? (
+      {showMnemonic &&
+      (isHintSectionVisible || isImageSectionVisible || isEditMode) ? (
         <View className="bg-black/10">
           {isHintSectionVisible && mnemonicSettingKey != null ? (
             <View className={`px-7 py-4`}>
@@ -520,7 +537,7 @@ export function SoundLinkBlock({
   imageOverride,
 }: {
   soundId: PinyinSoundId;
-  href: Href;
+  href: Href | null;
   soundName: ReactNode;
   mnemonicName: string | null;
   imageOverride?: {
@@ -549,17 +566,34 @@ export function SoundLinkBlock({
         });
   const frameShape = isInitialSoundId(soundId) ? `circle` : `rect`;
 
-  const nameLink = (
-    <Link href={href} className={soundNameClass()}>
-      {mnemonicName == null ? null : toTitle(mnemonicName)}
-    </Link>
+  const nameLink =
+    href == null ? (
+      <Text className={soundNameClass()}>
+        {mnemonicName == null ? null : toTitle(mnemonicName)}
+      </Text>
+    ) : (
+      <Link href={href} className={soundNameClass()}>
+        {mnemonicName == null ? null : toTitle(mnemonicName)}
+      </Link>
+    );
+  const soundNameText = (
+    <Text className={soundNameClass({ className: `text-fg/50` })}>
+      {soundName}
+    </Text>
   );
 
   return (
     <View className="w-full items-center gap-1">
-      <Link href={href} className={soundNameClass({ className: `text-fg/50` })}>
-        {soundName}
-      </Link>
+      {href == null ? (
+        soundNameText
+      ) : (
+        <Link
+          href={href}
+          className={soundNameClass({ className: `text-fg/50` })}
+        >
+          {soundName}
+        </Link>
+      )}
       {mnemonicName == null ? null : (
         <>
           <DownArrow />

@@ -19,7 +19,7 @@ import {
   newSkillLessonUserToggleSetting,
   soundEffectsUserToggleSetting,
   profileOverviewUserToggleSetting,
-  soundsPageUserToggleSetting,
+  soundMnemonicsUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -64,11 +64,11 @@ describe(`experimental settings`, () => {
     expect(userSettingDefinitions).toContain(newSkillLessonUserToggleSetting);
   });
 
-  test(`Sounds page is disabled by default and registered for syncing`, () => {
-    expect(getUserSettingDefaultValue(soundsPageUserToggleSetting, {})).toEqual(
-      { enabled: false },
-    );
-    expect(userSettingDefinitions).toContain(soundsPageUserToggleSetting);
+  test(`Sound mnemonics is disabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(soundMnemonicsUserToggleSetting, {}),
+    ).toEqual({ enabled: false });
+    expect(userSettingDefinitions).toContain(soundMnemonicsUserToggleSetting);
   });
 
   test(`Profile overview is disabled by default and registered for syncing`, () => {
