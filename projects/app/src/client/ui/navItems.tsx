@@ -1,6 +1,6 @@
 import { QuizQueueLozenge } from "@/client/ui/QuizQueueLozenge";
 import type { UserSettingEntityLike } from "@/client/ui/hooks/useUserSetting";
-import { soundsPageUserToggleSetting } from "@/data/userSettings";
+import { soundMnemonicsUserToggleSetting } from "@/data/userSettings";
 import type { UserSettingToggleableEntity } from "@/data/userSettings";
 import type { Href } from "expo-router";
 import type { ReactNode } from "react";
@@ -32,7 +32,7 @@ export const navItems: NavGroup[] = [
       {
         name: `Sounds`,
         href: `/sounds`,
-        guard: soundsPageUserToggleSetting,
+        guard: soundMnemonicsUserToggleSetting,
       },
       { name: `Skills`, href: `/skills` },
       { name: `History`, href: `/history` },

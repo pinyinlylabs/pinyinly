@@ -284,7 +284,7 @@ export const newSkillLessonUserToggleSetting = defineUserSetting({
   defaultValue: () => ({ enabled: false }),
 });
 
-export const soundsPageUserToggleSetting = defineUserSetting({
+export const soundMnemonicsUserToggleSetting = defineUserSetting({
   entity: r.entity(`soundsPage`, {
     enabled: r.boolean(`e`),
   }) satisfies UserSettingToggleableEntity,
@@ -801,7 +801,7 @@ export const userSettingDefinitions = [
   writingWeakWordRepeatCountSetting,
   soundEffectsUserToggleSetting,
   newSkillLessonUserToggleSetting,
-  soundsPageUserToggleSetting,
+  soundMnemonicsUserToggleSetting,
   profileOverviewUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,

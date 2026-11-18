@@ -14,7 +14,7 @@ import { useShortcutDisplayLabel } from "@/client/ui/hooks/useShortcut";
 import {
   newSkillLessonUserToggleSetting,
   profileOverviewUserToggleSetting,
-  soundsPageUserToggleSetting,
+  soundMnemonicsUserToggleSetting,
 } from "@/data/userSettings";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Link } from "expo-router";
@@ -98,15 +98,15 @@ export default function DeveloperSettingsPage() {
         </View>
         <View className="flex-row items-center">
           <View className="flex-1">
-            <Text className="pyly-body-heading">Sounds page</Text>
+            <Text className="pyly-body-heading">Sound mnemonics</Text>
             <Text className="pyly-body-caption">
-              Show the Sounds page and pronunciation box on wiki pages.
+              Show the Sounds page and pronunciation mnemonics on wiki pages.
             </Text>
           </View>
           <View>
             <UserSettingToggleButton
-              entity={soundsPageUserToggleSetting}
-              accessibilityLabel="Sounds page"
+              entity={soundMnemonicsUserToggleSetting}
+              accessibilityLabel="Sound mnemonics"
             />
           </View>
         </View>
