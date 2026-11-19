@@ -15,6 +15,7 @@ import {
   newSkillLessonUserToggleSetting,
   profileOverviewUserToggleSetting,
   soundMnemonicsUserToggleSetting,
+  hanziWritingIssuesUserToggleSetting,
 } from "@/data/userSettings";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Link } from "expo-router";
@@ -121,6 +122,20 @@ export default function DeveloperSettingsPage() {
             <UserSettingToggleButton
               entity={profileOverviewUserToggleSetting}
               accessibilityLabel="Profile overview"
+            />
+          </View>
+        </View>
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Hanzi writing issues</Text>
+            <Text className="pyly-body-caption">
+              Render missing and extra stroke issues on the writing canvas.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={hanziWritingIssuesUserToggleSetting}
+              accessibilityLabel="Hanzi writing issues"
             />
           </View>
         </View>

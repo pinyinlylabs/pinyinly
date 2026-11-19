@@ -30,6 +30,8 @@ import {
   quizTimerIdleGraceMs,
   useQuizTimer,
 } from "@/client/ui/hooks/useQuizTimer";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
+import { hanziWritingIssuesUserToggleSetting } from "@/data/userSettings";
 
 export function QuizDeckHanziCharacterWritingQuestion({
   question,
@@ -55,6 +57,9 @@ export function QuizDeckHanziCharacterWritingQuestion({
     useState<HanziCharacterWritingQuestionRating | null>(null);
   const [hasReportedRating, setHasReportedRating] = useState(false);
   const timer = useQuizTimer();
+  const hanziWritingIssuesSetting = useUserSettingToggle(
+    hanziWritingIssuesUserToggleSetting,
+  );
   const [{ data: svgData }, { data: wikiData }] = useSuspenseQueries({
     queries: [
       hanziSvgPathsQuery(question.hanzi),
@@ -211,6 +216,12 @@ export function QuizDeckHanziCharacterWritingQuestion({
             guidedPaths={rating == null ? undefined : medianPaths}
             animateReferencePaths={rating != null}
             drawnStrokes={drawnStrokes}
+            issues={
+              !hanziWritingIssuesSetting.isLoading &&
+              hanziWritingIssuesSetting.isEnabled
+                ? rating?.geometry.issues
+                : undefined
+            }
             ratingResult={
               rating == null ? null : rating.correct ? `correct` : `incorrect`
             }

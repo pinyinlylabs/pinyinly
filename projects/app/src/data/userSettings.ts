@@ -298,6 +298,13 @@ export const profileOverviewUserToggleSetting = defineUserSetting({
   defaultValue: () => ({ enabled: false }),
 });
 
+export const hanziWritingIssuesUserToggleSetting = defineUserSetting({
+  entity: r.entity(`hanziWritingIssues`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: false }),
+});
+
 export const practiceMeaningUserToggleSetting = defineUserSetting({
   entity: r.entity(`practiceMeaning`, {
     enabled: r.boolean(`e`),
@@ -803,6 +810,7 @@ export const userSettingDefinitions = [
   newSkillLessonUserToggleSetting,
   soundMnemonicsUserToggleSetting,
   profileOverviewUserToggleSetting,
+  hanziWritingIssuesUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,

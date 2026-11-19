@@ -20,6 +20,7 @@ import {
   soundEffectsUserToggleSetting,
   profileOverviewUserToggleSetting,
   soundMnemonicsUserToggleSetting,
+  hanziWritingIssuesUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -76,6 +77,15 @@ describe(`experimental settings`, () => {
       getUserSettingDefaultValue(profileOverviewUserToggleSetting, {}),
     ).toEqual({ enabled: false });
     expect(userSettingDefinitions).toContain(profileOverviewUserToggleSetting);
+  });
+
+  test(`Hanzi writing issues is disabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(hanziWritingIssuesUserToggleSetting, {}),
+    ).toEqual({ enabled: false });
+    expect(userSettingDefinitions).toContain(
+      hanziWritingIssuesUserToggleSetting,
+    );
   });
 });
 

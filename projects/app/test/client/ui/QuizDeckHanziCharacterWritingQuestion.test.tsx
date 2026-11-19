@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense } from "react";
 import {
@@ -19,6 +25,8 @@ const mocks = vi.hoisted(() => ({
   captureMessage: vi.fn(),
   rating: undefined as HanziCharacterWritingQuestionRating | undefined,
   durationMs: 0,
+  showHanziWritingIssues: false,
+  hanziWritingIssuesLoading: false,
 }));
 
 vi.mock(`@sentry/react-native`, () => ({
@@ -42,6 +50,13 @@ vi.mock(`#client/ui/hooks/useQuizTimer.ts`, () => ({
     getDurationMs: () => mocks.durationMs,
     pause: () => {},
     resumeAfter: () => {},
+  }),
+}));
+vi.mock(`#client/ui/hooks/useUserSettingToggle.ts`, () => ({
+  useUserSettingToggle: () => ({
+    isLoading: mocks.hanziWritingIssuesLoading,
+    isEnabled: mocks.showHanziWritingIssues,
+    setEnabled: vi.fn(),
   }),
 }));
 vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
@@ -79,14 +94,17 @@ vi.mock(`#client/ui/HanziWritingCanvas.tsx`, () => ({
   HanziWritingCanvas: ({
     disabled,
     onStrokesChange,
+    issues,
   }: {
     disabled: boolean;
     onStrokesChange: (strokes: { x: number; y: number }[][]) => void;
+    issues?: readonly unknown[];
   }) => (
     <button
       type="button"
       data-testid="writing-canvas"
       data-disabled={disabled}
+      data-issues-count={issues?.length ?? 0}
       onClick={() => {
         onStrokesChange([[{ x: 0, y: 0 }]]);
       }}
@@ -101,6 +119,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.rating = undefined;
   mocks.durationMs = 0;
+  mocks.showHanziWritingIssues = false;
+  mocks.hanziWritingIssuesLoading = false;
 });
 
 const hanzi = hanziCharacterSchema.parse(`好`);
@@ -112,6 +132,63 @@ const question: HanziCharacterWritingQuestion = {
   pinyin: pinyinTextSchema.parse(`hǎo`),
   flag: null,
 };
+
+test(`renders grader issues in the writing canvas only when enabled`, async () => {
+  mocks.showHanziWritingIssues = true;
+  mocks.rating = {
+    correct: false,
+    rating: Rating.Again,
+    skillRatings: [
+      { skill: question.skill, rating: Rating.Again, durationMs: 12_000 },
+    ],
+    failure: `stroke-segmentation`,
+    geometry: {
+      issues: [
+        {
+          kind: `missing-stroke`,
+          reference: { strokeIndex: 1, start: 0, end: 1 },
+        },
+      ],
+    } as HanziCharacterWritingQuestionRating[`geometry`],
+    similarCharacterGrades: [],
+  };
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const fetch = vi
+    .spyOn(globalThis, `fetch`)
+    .mockImplementation(async (url) =>
+      url === `/raw/wiki/${encodeURIComponent(hanzi)}.json`
+        ? Response.json({ visuallySimilar: [] })
+        : Response.json({ strokes: [], medians: [`M 0 0 L 1 1`] }),
+    );
+
+  render(
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<div>Loading question</div>}>
+        <QuizDeckHanziCharacterWritingQuestion
+          question={question}
+          onNext={() => {}}
+          onRating={() => {}}
+          onChangeAnswer={() => {}}
+        />
+      </Suspense>
+    </QueryClientProvider>,
+  );
+
+  await expect(screen.findByTestId(`writing-canvas`)).resolves.toBeDefined();
+  fireEvent.click(screen.getByTestId(`writing-canvas`));
+  fireEvent.click(screen.getByRole(`button`, { name: `Submit` }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId(`writing-canvas`)).toHaveAttribute(
+      `data-issues-count`,
+      `1`,
+    );
+  });
+  fetch.mockRestore();
+  queryClient.clear();
+});
 
 test(`suspends until primary and similar-character grading data is ready`, async () => {
   const queryClient = new QueryClient({
