@@ -1,0 +1,29 @@
+diff --git a/build/UpdatesEmitter.js b/build/UpdatesEmitter.js
+index ddb92566224dec40bbdecf1e309aa14b6a3898d9..a9b646c01c34e490e497a96062a1688c573fca02 100644
+--- a/build/UpdatesEmitter.js
++++ b/build/UpdatesEmitter.js
+@@ -1,6 +1,8 @@
+ import ExpoUpdatesModule from './ExpoUpdates';
+ export let latestContext = transformNativeStateMachineContext(ExpoUpdatesModule.initialContext);
+-ExpoUpdatesModule.addListener('Expo.nativeUpdatesStateChangeEvent', _handleNativeStateChangeEvent);
++if (typeof window !== 'undefined') {
++    ExpoUpdatesModule.addListener('Expo.nativeUpdatesStateChangeEvent', _handleNativeStateChangeEvent);
++}
+ const _updatesStateChangeListeners = new Set();
+ // Reemits native state change events
+ function _handleNativeStateChangeEvent(params) {
+diff --git a/src/UpdatesEmitter.ts b/src/UpdatesEmitter.ts
+index af4cb5a879d9aee7566d023dbdd214115206f420..63278b898df66f7f54fbc5b45f385bd3ea970efe 100644
+--- a/src/UpdatesEmitter.ts
++++ b/src/UpdatesEmitter.ts
+@@ -6,7 +6,9 @@ import type {
+ 
+ export let latestContext = transformNativeStateMachineContext(ExpoUpdatesModule.initialContext);
+ 
+-ExpoUpdatesModule.addListener('Expo.nativeUpdatesStateChangeEvent', _handleNativeStateChangeEvent);
++if (typeof window !== 'undefined') {
++  ExpoUpdatesModule.addListener('Expo.nativeUpdatesStateChangeEvent', _handleNativeStateChangeEvent);
++}
+ 
+ interface UpdatesStateChangeSubscription {
+   remove(): void;

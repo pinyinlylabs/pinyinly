@@ -5836,7 +5836,7 @@ __metadata:
     expo-sqlite: "npm:~58.0.13"
     expo-status-bar: "npm:~58.0.4"
     expo-system-ui: "npm:~58.0.6"
-    expo-updates: "npm:~58.0.18"
+    expo-updates: "patch:expo-updates@npm%3A58.0.18#~/.yarn/patches/expo-updates-npm-58.0.18-37db06196e.patch"
     fast-xml-parser: "npm:^5.10.1"
     fontkit: "npm:^2.0.4"
     globals: "npm:^17.0.0"
@@ -13575,7 +13575,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-updates@npm:~58.0.18":
+"expo-updates@npm:58.0.18":
   version: 58.0.18
   resolution: "expo-updates@npm:58.0.18"
   dependencies:
@@ -13607,6 +13607,41 @@ __metadata:
   bin:
     expo-updates: bin/cli.js
   checksum: 10c0/56b95cd0b9081a3b566a87d5bd2c3cd625ab01415b0a721b587fa69057d9f4445bd9cc63f6f2180d1d11581867b9d0ab7a1e655fc1f042068cbca8c5e875acff
+  languageName: node
+  linkType: hard
+
+"expo-updates@patch:expo-updates@npm%3A58.0.18#~/.yarn/patches/expo-updates-npm-58.0.18-37db06196e.patch":
+  version: 58.0.18
+  resolution: "expo-updates@patch:expo-updates@npm%3A58.0.18#~/.yarn/patches/expo-updates-npm-58.0.18-37db06196e.patch::version=58.0.18&hash=9481e5"
+  dependencies:
+    "@expo/code-signing-certificates": "npm:^0.0.7"
+    "@expo/env": "npm:^2.5.3"
+    "@expo/plist": "npm:^0.10.1"
+    "@expo/spawn-async": "npm:^1.8.0"
+    "@react-native/asset-utils": "npm:0.88.0"
+    arg: "npm:^4.1.0"
+    chalk: "npm:^4.1.2"
+    debug: "npm:^4.3.4"
+    expo-eas-client: "npm:~58.0.2"
+    expo-manifests: "npm:~58.0.1"
+    expo-structured-headers: "npm:~58.0.1"
+    expo-updates-interface: "npm:~58.0.1"
+    getenv: "npm:^2.0.0"
+    glob: "npm:^13.0.0"
+    ignore: "npm:^5.3.1"
+    nullthrows: "npm:^1.1.1"
+    resolve-from: "npm:^5.0.0"
+  peerDependencies:
+    expo: "*"
+    expo-dev-client: "*"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo-dev-client:
+      optional: true
+  bin:
+    expo-updates: bin/cli.js
+  checksum: 10c0/94cebd0798b8d1a8d17659974ecddc535ec53bbaebbc06b7c618218c4b645d4e1004c897d0f9613771fb6dbcdb8b65533d4e3c12708a6ccf2475b1b6821ae704
   languageName: node
   linkType: hard
 
