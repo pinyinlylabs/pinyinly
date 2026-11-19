@@ -106,20 +106,8 @@ test.each([
           ...graphic
             .element()
             .querySelectorAll<SVGPathElement>(`g > path:not([mask])`),
-        ]
-          .filter((path) => !path.id.includes(`-outline-`))
-          .map((path) => path.getAttribute(`stroke-width`)),
+        ].map((path) => path.getAttribute(`stroke-width`)),
       ).toEqual(bold ? [`20`, `20`, `20`] : [null, null, null]);
-      expect(
-        [...graphic.element().querySelectorAll(`path[id*="-outline-"]`)].map(
-          (path) => path.getAttribute(`stroke-width`),
-        ),
-      ).toEqual(bold ? [`20`, `20`, `20`] : [null, null, null]);
-      expect(
-        [...graphic.element().querySelectorAll(`path[id*="-outline-"]`)].map(
-          (path) => getComputedStyle(path).opacity,
-        ),
-      ).toEqual([`1`, `1`, `1`]);
     }
 
     await new Promise<void>((resolve) => {
@@ -151,7 +139,7 @@ test.each([
   },
 );
 
-test(`matches background and foreground outline colors`, async () => {
+test(`matches static and animated foreground colors`, async () => {
   await render(
     <Theme theme="default">
       <View testID="colored-outlines">
@@ -178,12 +166,7 @@ test(`matches background and foreground outline colors`, async () => {
     .element()
     .querySelector(`svg`)!;
   const backgroundPaths = [
-    ...graphic.querySelectorAll<SVGPathElement>(
-      `g > path:not([mask]):not([id*="-outline-"])`,
-    ),
-  ];
-  const animatedOutlines = [
-    ...graphic.querySelectorAll<SVGPathElement>(`path[id*="-outline-"]`),
+    ...graphic.querySelectorAll<SVGPathElement>(`g > path:not([mask])`),
   ];
   const animatedBrush = graphic.querySelector<SVGPathElement>(`path[mask]`);
   const staticForeground = page
@@ -192,19 +175,12 @@ test(`matches background and foreground outline colors`, async () => {
     .querySelector<SVGPathElement>(`g > path`)!;
 
   expect(backgroundPaths).toHaveLength(3);
-  expect(animatedOutlines).toHaveLength(1);
   expect(animatedBrush).not.toBeNull();
-  expect(getComputedStyle(backgroundPaths[0]!).stroke).toBe(
-    getComputedStyle(animatedOutlines[0]!).stroke,
-  );
   expect(getComputedStyle(staticForeground).stroke).toBe(
     getComputedStyle(animatedBrush!).stroke,
   );
   expect(
     backgroundPaths.map((path) => path.getAttribute(`stroke-width`)),
   ).toEqual([`20`, `20`, `20`]);
-  expect(
-    animatedOutlines.map((path) => path.getAttribute(`stroke-width`)),
-  ).toEqual([`20`]);
   expect(staticForeground.getAttribute(`stroke-width`)).toBe(`20`);
 });

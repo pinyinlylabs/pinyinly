@@ -39,9 +39,9 @@ test(`shows the stroke animation and accessible replay control`, async () => {
   const svg = graphic.element();
   expect(svg).not.toHaveAttribute(`accessible`);
   expect(
-    [
-      ...svg.querySelectorAll(`g > path:not([mask]):not([id*="-outline-"])`),
-    ].map((path) => path.getAttribute(`stroke-width`)),
+    [...svg.querySelectorAll(`g > path:not([mask])`)].map((path) =>
+      path.getAttribute(`stroke-width`),
+    ),
   ).toEqual([`20`, `20`]);
   expect(
     [...svg.querySelectorAll(`mask path`)].map((path) =>
@@ -230,27 +230,10 @@ test(`disables bold character outlines independently of brush width`, async () =
     ),
   ).toEqual([null, null]);
   expect(
-    [...graphic.element().querySelectorAll(`path[id*="-outline-"]`)].map(
-      (path) => path.getAttribute(`stroke-width`),
-    ),
-  ).toEqual([null, null]);
-  expect(
-    [...graphic.element().querySelectorAll(`path[id*="-outline-"]`)].map(
-      (path) => getComputedStyle(path).animationName,
-    ),
-  ).toEqual([`none`, `none`]);
-  expect(
-    [...graphic.element().querySelectorAll(`path[id*="-outline-"]`)].map(
-      (path) => getComputedStyle(path).opacity,
-    ),
-  ).toEqual([`1`, `1`]);
-  expect(
     [
       ...graphic
         .element()
-        .querySelectorAll<SVGPathElement>(
-          `g > path:not([mask]):not([id*="-outline-"])`,
-        ),
+        .querySelectorAll<SVGPathElement>(`g > path:not([mask])`),
     ].map((path) => path.getAttribute(`stroke-width`)),
   ).toEqual([null, null]);
 });
