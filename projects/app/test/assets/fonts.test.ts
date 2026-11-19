@@ -19,7 +19,7 @@ test(`MiSans font weight correction`, async () => {
   expect
     .soft(
       miSans?.subset?.variationAxes[`wght`]?.max,
-      `MiSans max weight needs to be adjusted after subsetting`,
+      `MiSans subset wght max must be 900; set the wght axis maxValue to 900 and preserve the subset`,
     )
     .toEqual(900);
 });

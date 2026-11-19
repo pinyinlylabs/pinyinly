@@ -2298,6 +2298,10 @@ describe(`character.json files`, async () => {
     "⿾ュ": 3,
   };
 
+  const idsLeafStrokeCountOverrides: Record<string, Record<string, number>> = {
+    "⿱㐫禸": { 禸: 4 },
+  };
+
   function getIdsStrokeCountOverrides(ids: string): Map<number, number> {
     const overrides = new Map<number, number>();
     let leafIndex = 0;
@@ -2349,7 +2353,9 @@ describe(`character.json files`, async () => {
                   `${filePath} IDS ${ids} (${leaf}) stroke count`,
                 )
                 .toEqual(
-                  strokeCountOverrides.get(i) ?? hanziData.svg.strokes.length,
+                  strokeCountOverrides.get(i) ??
+                    idsLeafStrokeCountOverrides[ids]?.[leaf] ??
+                    hanziData.svg.strokes.length,
                 );
             }
           }

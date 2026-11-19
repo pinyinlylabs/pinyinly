@@ -968,8 +968,7 @@ export const buildHanziWordsToCheck = memoize0(async function (): Promise<
 
   return [
     ...dictionary.hsk1HanziWords,
-    // Uncomment these lines incrementally in the future to increase validation coverage.
-    // ...dictionary.hsk2HanziWords,
+    ...dictionary.hsk2HanziWords,
     // ...dictionary.hsk3HanziWords,
     // ...dictionary.hsk4HanziWords,
     // ...dictionary.hsk5HanziWords,

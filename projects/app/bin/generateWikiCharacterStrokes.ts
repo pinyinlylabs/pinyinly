@@ -1,6 +1,6 @@
 import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import { characterJsonSchema } from "#data/model.js";
-import type { HanziText } from "#data/model.js";
+import type { CharacterJson, HanziCharacter, HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import { parseFigmaSvgStrokeData } from "#util/svgFont.ts";
 import type { StrokeMedianPoint } from "#util/strokeSpecSvgProcessor.js";
@@ -115,11 +115,24 @@ const arphicUkaiGlyphsDir = new URL(
   import.meta.url,
 ).pathname;
 
-const allCharacters = await glob(`${wikiDir}/*`).then((ps) =>
-  ps
+const allCharacters = await glob(`${wikiDir}/*`).then((ps) => {
+  const characters: HanziCharacter[] = ps
     .map((p) => path.basename(p))
-    .filter((p): p is HanziText => isHanziCharacter(p as HanziText)),
-);
+    .filter((p): p is HanziCharacter => isHanziCharacter(p as HanziText));
+
+  if (argv.update != null) {
+    for (const character of argv.update) {
+      if (
+        isHanziCharacter(character as HanziText) &&
+        !characters.includes(character as HanziCharacter)
+      ) {
+        characters.push(character as HanziCharacter);
+      }
+    }
+  }
+
+  return characters;
+});
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
@@ -168,9 +181,12 @@ for (const character of allCharacters) {
   }
 
   const dataFile = path.join(characterWikiDir, `character.json`);
-  const existingData = jsonCodec(characterJsonSchema).parse(
-    readFileSync(dataFile, `utf-8`),
-  );
+  const existingData: CharacterJson = existsSync(dataFile)
+    ? jsonCodec(characterJsonSchema).parse(readFileSync(dataFile, `utf-8`))
+    : {
+        hanzi: character,
+        svg: { strokes: 0 },
+      };
 
   const existingSvg = existingData.svg;
 
@@ -195,11 +211,9 @@ for (const character of allCharacters) {
     graphicsRecord?.strokes ??
     existingSvg.strokes;
 
-  invariant(
-    typeof nextStrokes !== `number`,
-    `expected strokes to NOT be a number for %O`,
-    character,
-  );
+  if (typeof nextStrokes === `number`) {
+    debug(`no usable stroke paths for %O, preserving stroke count`, character);
+  }
 
   const nextMedians =
     strokeSource === `local-glyph`
@@ -212,6 +226,7 @@ for (const character of allCharacters) {
   if (
     strokeSource === `local-glyph` &&
     nextMedians != null &&
+    Array.isArray(nextStrokes) &&
     nextMedians.length !== nextStrokes.length
   ) {
     debug(
