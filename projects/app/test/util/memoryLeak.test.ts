@@ -31,5 +31,7 @@ test(`expoUpdatesMemoryLeakMiddleware allows no updates listener entry`, () => {
     },
   });
 
-  expect(() =>{  expoUpdatesMemoryLeakMiddleware(); }).not.toThrow();
+  expect(() => {
+    expoUpdatesMemoryLeakMiddleware();
+  }).not.toThrow();
 });
