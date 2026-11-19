@@ -1,5 +1,3 @@
-import { invariant } from "@pinyinly/lib/invariant";
-
 interface PylyMemoryLeakState {
   processListenerMonitorInitialized?: boolean;
   processListenerMaxCountSeen?: Record<`exit` | `beforeExit`, number>;
@@ -164,11 +162,9 @@ export function expoUpdatesMemoryLeakMiddleware(): void {
     const listeners = ExpoUpdatesModule.listeners.get(
       `Expo.nativeUpdatesStateChangeEvent`,
     );
-    invariant(
-      listeners instanceof Set,
-      `ExpoUpdates.listeners.get() should return a Set`,
-    );
-    listeners.clear();
+    if (listeners instanceof Set) {
+      listeners.clear();
+    }
   }
 }
 
