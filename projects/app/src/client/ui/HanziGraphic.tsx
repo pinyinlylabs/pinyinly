@@ -115,25 +115,19 @@ export function HanziGraphic(props: {
           <SvgPath
             key={i}
             d={d}
-            fillClassName="accent-fg-bg40"
-            strokeClassName="accent-fg-bg40"
+            fillClassName="
+              accent-fg-bg20
+
+              dark:accent-fg-bg40
+            "
+            strokeClassName="
+              accent-fg-bg20
+
+              dark:accent-fg-bg40
+            "
             strokeWidth={strokeWidth}
           />
         ))}
-        {fgSvgPathsMedians == null || disableAnimation
-          ? null
-          : fgSvgPaths.map((d, index) => (
-              <SvgPath
-                key={`${id}-outline-${index}`}
-                d={d}
-                fill="none"
-                strokeClassName="accent-fg-bg40"
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                id={`${id}-outline-${index}`}
-              />
-            ))}
         {fgSvgPathsMedians == null || disableAnimation ? null : (
           <AnimatedGroup
             className={
