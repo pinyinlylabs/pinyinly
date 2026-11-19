@@ -151,7 +151,7 @@ export function processListenerMemoryLeakMiddleware(): void {
  */
 export function expoUpdatesMemoryLeakMiddleware(): void {
   interface ExpoUpdatesModuleType {
-    listeners: Map<string, Set<(...args: unknown[]) => void>>;
+    listeners?: Map<string, Set<(...args: unknown[]) => void>>;
   }
 
   const expo = globalThis.expo as typeof globalThis.expo | undefined;
@@ -160,7 +160,7 @@ export function expoUpdatesMemoryLeakMiddleware(): void {
     | ExpoUpdatesModuleType
     | undefined;
 
-  if (ExpoUpdatesModule != null) {
+  if (ExpoUpdatesModule?.listeners != null) {
     const listeners = ExpoUpdatesModule.listeners.get(
       `Expo.nativeUpdatesStateChangeEvent`,
     );

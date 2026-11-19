@@ -93,7 +93,7 @@
     "expo-sqlite": "~58.0.13",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.6",
-    "expo-updates": "~58.0.18",
+    "expo-updates": "patch:expo-updates@npm%3A58.0.18#~/.yarn/patches/expo-updates-npm-58.0.18-37db06196e.patch",
     "inngest": "^4.18.0",
     "jose": "^6.2.3",
     "lodash": "^4.18.1",
