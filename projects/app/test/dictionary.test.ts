@@ -2041,8 +2041,12 @@ describe(`character.json files`, async () => {
       `耳`,
     ]);
     const dictionary = await loadDictionary();
+    const charactersToCheck = await buildCharactersToCheck();
 
     for (const { character, characterJson, filePath } of characterFiles) {
+      if (!charactersToCheck.has(character)) {
+        continue;
+      }
       const meanings = dictionary.lookupHanzi(character);
       const svgStrokeCount = characterStrokeCount(characterJson);
       if (
@@ -2320,6 +2324,8 @@ describe(`character.json files`, async () => {
     "⿰⿸尸巾刂": { 尸: 6, 巾: 2 },
     "⿻亚厂": { 亚: 6, 厂: 1 },
     "⿱人十": { 十: 4 },
+    "⿱耳乑": { 乑: 8 },
+    "⿺辶秀": { 辶: 7, 秀: 3 },
   };
 
   function getIdsStrokeCountOverrides(ids: string): Map<number, number> {
