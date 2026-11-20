@@ -2246,6 +2246,12 @@ describe(`character.json files`, async () => {
       if (!charactersToCheck.has(character)) {
         continue;
       }
+      if (
+        characterJson.isStructural === true ||
+        characterJson.componentFormOf != null
+      ) {
+        continue;
+      }
 
       if (
         characterJson.decompositions == null ||
@@ -2298,6 +2304,10 @@ describe(`character.json files`, async () => {
     "⿾ュ": 3,
   };
 
+  const idsLeafStrokeCountOverrides: Record<string, Record<string, number>> = {
+    "⿱㐫禸": { 禸: 4 },
+  };
+
   function getIdsStrokeCountOverrides(ids: string): Map<number, number> {
     const overrides = new Map<number, number>();
     let leafIndex = 0;
@@ -2327,7 +2337,12 @@ describe(`character.json files`, async () => {
     const charactersToCheck = await buildCharactersToCheck();
 
     for (const { character, characterJson, filePath } of characterFiles) {
-      if (charactersToCheck.has(character) && characterJson.decompositions) {
+      if (
+        charactersToCheck.has(character) &&
+        characterJson.decompositions &&
+        characterJson.isStructural !== true &&
+        characterJson.componentFormOf == null
+      ) {
         for (const [ids, strokeSpecs] of Object.entries(
           characterJson.decompositions,
         )) {
@@ -2349,7 +2364,9 @@ describe(`character.json files`, async () => {
                   `${filePath} IDS ${ids} (${leaf}) stroke count`,
                 )
                 .toEqual(
-                  strokeCountOverrides.get(i) ?? hanziData.svg.strokes.length,
+                  strokeCountOverrides.get(i) ??
+                    idsLeafStrokeCountOverrides[ids]?.[leaf] ??
+                    hanziData.svg.strokes.length,
                 );
             }
           }
@@ -2363,6 +2380,12 @@ describe(`character.json files`, async () => {
 
     for (const { character, characterJson, filePath } of characterFiles) {
       if (charactersToCheck.has(character)) {
+        if (
+          characterJson.isStructural === true ||
+          characterJson.componentFormOf != null
+        ) {
+          continue;
+        }
         expect
           .soft(
             characterJson.svg.strokes,

@@ -947,9 +947,17 @@ export const buildCharactersToCheck = memoize0(async function (): Promise<
   const decompositionData = await loadBuiltinCharacterDecompositionEntries();
 
   const seeds = await buildHanziWordsToCheck();
+  const dictionary = await loadDictionary();
+  const hsk1Words = new Set(dictionary.hsk1HanziWords);
   const result = new Set<HanziCharacter>();
   for (const seed of seeds) {
     const hanzi = hanziFromHanziWord(seed);
+    if (!hsk1Words.has(seed)) {
+      for (const character of splitHanziText(hanzi)) {
+        result.add(character);
+      }
+      continue;
+    }
     for (const component of deepDecomposeHanzi(
       hanzi,
       decompositionData,
@@ -968,8 +976,7 @@ export const buildHanziWordsToCheck = memoize0(async function (): Promise<
 
   return [
     ...dictionary.hsk1HanziWords,
-    // Uncomment these lines incrementally in the future to increase validation coverage.
-    // ...dictionary.hsk2HanziWords,
+    ...dictionary.hsk2HanziWords,
     // ...dictionary.hsk3HanziWords,
     // ...dictionary.hsk4HanziWords,
     // ...dictionary.hsk5HanziWords,
