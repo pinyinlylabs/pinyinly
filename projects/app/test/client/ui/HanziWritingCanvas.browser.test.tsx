@@ -205,6 +205,87 @@ test(`Undo removes the latest stroke through onStrokesChange`, async () => {
   expect(onStrokesChange).toHaveBeenCalledExactlyOnceWith([[{ x: 1, y: 2 }]]);
 });
 
+test(`drawn strokes are black for incorrect ratings`, async () => {
+  await render(
+    <div data-testid="incorrect-writing-canvas">
+      <HanziWritingCanvas
+        drawnStrokes={[
+          [
+            { x: 100, y: 100 },
+            { x: 300, y: 300 },
+          ],
+        ]}
+        ratingResult="incorrect"
+        onStrokesChange={vi.fn()}
+      />
+    </div>,
+  );
+
+  const root = page.getByTestId(`incorrect-writing-canvas`);
+  await expect.element(root).toBeInTheDocument();
+  const svg = root.element().querySelector(`svg`);
+  assert(svg != null);
+  const drawnStroke = svg.querySelector(`path[d="M 100 100 L 300 300"]`);
+  expect(drawnStroke?.getAttribute(`stroke`)).toBe(`#334155`);
+  expect(drawnStroke?.getAttribute(`stroke-width`)).toBe(`32`);
+});
+
+test(`renders missing and extra stroke issue highlights`, async () => {
+  await render(
+    <div data-testid="issue-writing-canvas">
+      <HanziWritingCanvas
+        guidedPaths={[`M 100 100 L 300 100`, `M 100 300 L 300 300`]}
+        drawnStrokes={[
+          [
+            { x: 500, y: 500 },
+            { x: 700, y: 500 },
+          ],
+        ]}
+        issues={[
+          {
+            kind: `missing-stroke`,
+            reference: { strokeIndex: 1, start: 0.25, end: 0.75 },
+          },
+          {
+            kind: `extra-stroke`,
+            handwriting: { strokeIndex: 0, start: 0, end: 1 },
+          },
+          {
+            kind: `reversed-stroke`,
+            handwriting: { strokeIndex: 0, start: 0, end: 1 },
+            reference: { strokeIndex: 0, start: 0, end: 1 },
+          },
+        ]}
+        onStrokesChange={vi.fn()}
+      />
+    </div>,
+  );
+
+  const root = page.getByTestId(`issue-writing-canvas`);
+  await expect.element(root).toBeInTheDocument();
+  const svg = root.element().querySelector(`svg`);
+  assert(svg != null);
+  expect(
+    svg.querySelectorAll(`[data-writing-issue-highlight="missing-stroke"]`),
+  ).toHaveLength(1);
+  expect(
+    svg.querySelectorAll(`[data-writing-issue-highlight="extra-stroke"]`),
+  ).toHaveLength(1);
+  expect(
+    svg.querySelectorAll(`[data-writing-issue-highlight="reversed-stroke"]`),
+  ).toHaveLength(0);
+
+  const missing = svg.querySelector(
+    `[data-writing-issue-highlight="missing-stroke"]`,
+  );
+  const extra = svg.querySelector(
+    `[data-writing-issue-highlight="extra-stroke"]`,
+  );
+  expect(missing?.getAttribute(`stroke`)).toBe(`#ef4444`);
+  expect(missing?.getAttribute(`stroke-width`)).toBe(`32`);
+  expect(extra?.getAttribute(`stroke`)).toBe(`#ef4444`);
+});
+
 test.for([false, true])(
   `does not submit cancelled strokes (disabled: %s)`,
   async (disabled) => {

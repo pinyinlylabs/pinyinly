@@ -6,7 +6,13 @@ import type {
   ShapeContextCorrespondence,
   ShapeContextGrade,
   ThinPlateSplineTransform,
+  WritingIssue,
+  WritingIssueExpectation,
   WritingStrokePoint,
+} from "#util/shapeContextGrader.ts";
+import {
+  extractReferenceStrokeSegment,
+  extractWritingStrokeSegment,
 } from "#util/shapeContextGrader.ts";
 
 /** Serialized points use [x, y]; point indices flatten strokes in stroke and point order. */
@@ -14,7 +20,7 @@ export type ShapeContextDiagnosticPoint = [x: number, y: number];
 
 export interface ShapeContextGraderDiagnostic {
   /** Bump when changing this generated report format. */
-  schemaVersion: 19;
+  schemaVersion: 20;
   fixtureId: string;
   targetCharacter: string;
   expectedAcceptance: boolean;
@@ -36,6 +42,8 @@ export interface ShapeContextGraderDiagnostic {
     extraHandwritingStrokePenalty: number;
     acceptanceThreshold: number;
   };
+  issues: WritingIssue[];
+  issueExpectations: WritingIssueExpectationDiagnostics;
   contrastiveCandidates: Array<{
     character: string;
     shapeSimilarity: number;
@@ -92,6 +100,70 @@ export interface ShapeContextGraderDiagnostic {
       };
     };
     strokePresence: ShapeContextStrokePresenceDiagnostics;
+  };
+}
+
+export interface WritingIssueExpectationDiagnostics {
+  declared: boolean;
+  expected: Array<{ issue: WritingIssueExpectation; satisfied: boolean }>;
+  unexpected: Array<{ issue: WritingIssueExpectation; satisfied: boolean }>;
+  allSatisfied: boolean;
+}
+
+// Localization expectations allow 3% of normalized stroke arc length.
+const issueLocalizationTolerance = 0.03;
+
+function issueMatchesExpectation(
+  issue: WritingIssue,
+  expectation: WritingIssueExpectation,
+): boolean {
+  if (issue.kind !== expectation.kind) {
+    return false;
+  }
+  for (const [geometry, segmentExpectation] of [
+    [`handwriting`, expectation.handwriting],
+    [`reference`, expectation.reference],
+  ] as const) {
+    if (segmentExpectation == null) {
+      continue;
+    }
+    const segment = issue[geometry];
+    if (
+      segment == null ||
+      segment.strokeIndex !== segmentExpectation.strokeIndex ||
+      (segmentExpectation.start != null &&
+        Math.abs(segment.start - segmentExpectation.start) >
+          issueLocalizationTolerance) ||
+      (segmentExpectation.end != null &&
+        Math.abs(segment.end - segmentExpectation.end) >
+          issueLocalizationTolerance)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function evaluateWritingIssueExpectations(
+  issues: readonly WritingIssue[],
+  expectedIssues?: readonly WritingIssueExpectation[],
+  unexpectedIssues?: readonly WritingIssueExpectation[],
+): WritingIssueExpectationDiagnostics {
+  const expected = (expectedIssues ?? []).map((issue) => ({
+    issue,
+    satisfied: issues.some((actual) => issueMatchesExpectation(actual, issue)),
+  }));
+  const unexpected = (unexpectedIssues ?? []).map((issue) => ({
+    issue,
+    satisfied: !issues.some((actual) => issueMatchesExpectation(actual, issue)),
+  }));
+  return {
+    declared: expectedIssues != null || unexpectedIssues != null,
+    expected,
+    unexpected,
+    allSatisfied:
+      expected.every(({ satisfied }) => satisfied) &&
+      unexpected.every(({ satisfied }) => satisfied),
   };
 }
 
@@ -268,6 +340,8 @@ export function createShapeContextGraderDiagnostic({
   geometry,
   acceptance,
   contrastiveCandidates,
+  expectedIssues,
+  unexpectedIssues,
 }: {
   fixtureId: string;
   targetCharacter: string;
@@ -280,6 +354,8 @@ export function createShapeContextGraderDiagnostic({
   geometry: ShapeContextGrade;
   acceptance: HanziCharacterWritingAcceptanceDecision;
   contrastiveCandidates: readonly SimilarCharacterGrade[];
+  expectedIssues?: readonly WritingIssueExpectation[];
+  unexpectedIssues?: readonly WritingIssueExpectation[];
 }): ShapeContextGraderDiagnostic {
   const {
     transform,
@@ -308,6 +384,11 @@ export function createShapeContextGraderDiagnostic({
     controlPoints: pointsAsPairs(controlPoints),
   };
   const strokePresence = diagnoseShapeContextStrokePresence(geometry);
+  const issueExpectations = evaluateWritingIssueExpectations(
+    geometry.issues,
+    expectedIssues,
+    unexpectedIssues,
+  );
   const diagnosticCandidates = contrastiveCandidates.map(
     ({ hanzi, geometry: candidateGeometry }, index) => {
       const comparison = acceptance.contrastiveCheck.candidates[index];
@@ -327,7 +408,7 @@ export function createShapeContextGraderDiagnostic({
     },
   );
   return {
-    schemaVersion: 19,
+    schemaVersion: 20,
     fixtureId,
     targetCharacter,
     expectedAcceptance,
@@ -351,6 +432,8 @@ export function createShapeContextGraderDiagnostic({
         geometry.weightedScoreContributions.extraHandwritingStrokePenalty,
       acceptanceThreshold,
     },
+    issues: geometry.issues,
+    issueExpectations,
     contrastiveCandidates: diagnosticCandidates,
     algorithm: {
       kind: `shape-context-tps`,
@@ -924,6 +1007,228 @@ function renderStrokeCompletenessPanel({
   };
 }
 
+function formatIssueExpectation(expectation: WritingIssueExpectation): string {
+  const segment = (
+    label: string,
+    value: WritingIssueExpectation[`handwriting`],
+  ): string =>
+    value == null
+      ? ``
+      : ` · ${label} #${value.strokeIndex + 1}${
+          value.start == null && value.end == null
+            ? ``
+            : ` ${value.start?.toFixed(2) ?? `*`}–${value.end?.toFixed(2) ?? `*`}`
+        }`;
+  return `${expectation.kind}${segment(`handwriting`, expectation.handwriting)}${segment(`reference`, expectation.reference)}`;
+}
+
+function writingIssueLabel(kind: WritingIssue[`kind`]): string {
+  switch (kind) {
+    case `missing-stroke`:
+      return `Missing stroke`;
+    case `extra-stroke`:
+      return `Extra stroke`;
+    case `reversed-stroke`:
+      return `Reversed stroke`;
+  }
+}
+
+function renderWritingIssuePanel({
+  drawnStrokes,
+  referencePaths,
+  geometry,
+  expectedIssues,
+  unexpectedIssues,
+  startY,
+}: {
+  drawnStrokes: readonly (readonly WritingStrokePoint[])[];
+  referencePaths: readonly string[];
+  geometry: ShapeContextGrade;
+  expectedIssues?: readonly WritingIssueExpectation[];
+  unexpectedIssues?: readonly WritingIssueExpectation[];
+  startY: number;
+}): { svg: string; height: number } {
+  const expectationStatus = evaluateWritingIssueExpectations(
+    geometry.issues,
+    expectedIssues,
+    unexpectedIssues,
+  );
+  const handwritingMapper = diagramPointMapper(
+    drawnStrokes.flat(),
+    32,
+    startY + 52,
+    448,
+  );
+  const referenceGeometry = referencePaths.map((path) =>
+    extractReferenceStrokeSegment(path, 0, 1),
+  );
+  const referenceMapper = diagramPointMapper(
+    referenceGeometry.flat(),
+    544,
+    startY + 52,
+    448,
+  );
+  const handwritingBase = drawnStrokes
+    .map(
+      (stroke) =>
+        `<path d="${pathFromPoints(stroke, handwritingMapper)}" fill="none" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
+    )
+    .join(``);
+  const referenceBase = referenceGeometry
+    .map(
+      (stroke) =>
+        `<path d="${pathFromPoints(stroke, referenceMapper)}" fill="none" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
+    )
+    .join(``);
+  const handwritingLabels = drawnStrokes
+    .map((stroke, strokeIndex) => {
+      const start = stroke[0];
+      if (start == null) {
+        return ``;
+      }
+      const point = handwritingMapper(start);
+      return `<g data-issue-stroke-label="handwriting-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-size="10" font-weight="600">${strokeIndex + 1}</text></g>`;
+    })
+    .join(``);
+  const referenceLabels = referenceGeometry
+    .map((stroke, strokeIndex) => {
+      const start = stroke[0];
+      if (start == null) {
+        return ``;
+      }
+      const point = referenceMapper(start);
+      return `<g data-issue-stroke-label="reference-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-size="10" font-weight="600">${strokeIndex + 1}</text></g>`;
+    })
+    .join(``);
+  const highlights = geometry.issues
+    .flatMap((issue) => {
+      const renderHighlight = (
+        kind: `handwriting` | `reference`,
+        points: WritingStrokePoint[],
+        mapper: (point: WritingStrokePoint) => WritingStrokePoint,
+      ): string | null => {
+        if (points.length === 0) {
+          return null;
+        }
+        const color = kind === `handwriting` ? `#ef4444` : `#22c55e`;
+        if (points.length === 1) {
+          const point = mapper(points[0] ?? { x: 0, y: 0 });
+          return `<circle data-issue-highlight="${issue.kind}-${kind}" cx="${point.x}" cy="${point.y}" r="8" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+        }
+        return `<path data-issue-highlight="${issue.kind}-${kind}" d="${pathFromPoints(points, mapper)}" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`;
+      };
+      const output: string[] = [];
+      if (issue.handwriting != null) {
+        const stroke = drawnStrokes[issue.handwriting.strokeIndex];
+        if (stroke != null) {
+          const highlight = renderHighlight(
+            `handwriting`,
+            extractWritingStrokeSegment(
+              stroke,
+              issue.handwriting.start,
+              issue.handwriting.end,
+            ),
+            handwritingMapper,
+          );
+          if (highlight != null) {
+            output.push(highlight);
+          }
+        }
+      }
+      if (issue.reference != null) {
+        const path = referencePaths[issue.reference.strokeIndex];
+        if (path != null) {
+          const highlight = renderHighlight(
+            `reference`,
+            extractReferenceStrokeSegment(
+              path,
+              issue.reference.start,
+              issue.reference.end,
+            ),
+            referenceMapper,
+          );
+          if (highlight != null) {
+            output.push(highlight);
+          }
+        }
+      }
+      return output;
+    })
+    .join(``);
+  const issueText =
+    geometry.issues.length === 0
+      ? [
+          `<text x="24" y="${startY + 526}" font-size="12">No issues detected.</text>`,
+        ]
+      : geometry.issues.flatMap((issue, issueIndex) => {
+          const issueLineOffset = issueIndex * 32;
+          const handwriting =
+            issue.handwriting == null
+              ? ``
+              : `Handwriting #${issue.handwriting.strokeIndex + 1} ${issue.handwriting.start.toFixed(2)}–${issue.handwriting.end.toFixed(2)}`;
+          const reference =
+            issue.reference == null
+              ? ``
+              : `Reference #${issue.reference.strokeIndex + 1} ${issue.reference.start.toFixed(2)}–${issue.reference.end.toFixed(2)}`;
+          const relation = [handwriting, reference].filter(Boolean).join(` → `);
+          const direction =
+            issue.kind === `reversed-stroke`
+              ? ` · drawn opposite to reference`
+              : ``;
+          return [
+            `<text x="24" y="${startY + 526 + issueLineOffset}" font-size="12" font-weight="600">${writingIssueLabel(issue.kind)}</text>`,
+            `<text x="40" y="${startY + 542 + issueLineOffset}" font-size="11">${escapeXml(relation + direction)}</text>`,
+          ];
+        });
+  const expectationLines = [
+    ...(expectedIssues ?? []).map((issue, index) => ({
+      expectation: issue,
+      satisfied: expectationStatus.expected[index]?.satisfied ?? false,
+      label: `Expected`,
+    })),
+    ...(unexpectedIssues ?? []).map((issue, index) => ({
+      expectation: issue,
+      satisfied: expectationStatus.unexpected[index]?.satisfied ?? false,
+      label: `Prohibited`,
+    })),
+  ];
+  const expectationTop =
+    startY + 526 + Math.max(0, geometry.issues.length * 32);
+  const expectationText = expectationStatus.declared
+    ? [
+        `<text x="24" y="${expectationTop + 20}" font-size="12" font-weight="600">Issue expectations ${expectationStatus.allSatisfied ? `satisfied` : `violated`}</text>`,
+        ...expectationLines.map(
+          ({ expectation, satisfied, label }, index) =>
+            `<text x="40" y="${expectationTop + 40 + index * 18}" font-size="11">${label} ${satisfied ? `satisfied` : `violated`}: ${escapeXml(formatIssueExpectation(expectation))}</text>`,
+        ),
+      ]
+    : [
+        `<text x="24" y="${expectationTop + 20}" font-size="12">No issue expectations declared.</text>`,
+      ];
+  const height =
+    expectationTop + 30 + Math.max(1, expectationLines.length) * 18;
+
+  return {
+    svg: [
+      `<g data-writing-issues="" data-issue-count="${geometry.issues.length}" data-issue-expectations-declared="${expectationStatus.declared}" data-issue-expectations-satisfied="${expectationStatus.allSatisfied}">`,
+      `<text x="24" y="${startY + 24}" font-size="18" font-weight="600">Localized writing issues (${geometry.issues.length})</text>`,
+      `<rect x="24" y="${startY + 34}" width="476" height="458" fill="#f8fafc" stroke="#cbd5e1"/>`,
+      `<rect x="524" y="${startY + 34}" width="476" height="458" fill="#f8fafc" stroke="#cbd5e1"/>`,
+      `<text x="262" y="${startY + 50}" text-anchor="middle" font-size="12">Handwriting · red highlights</text>`,
+      `<text x="762" y="${startY + 50}" text-anchor="middle" font-size="12">Reference · green highlights</text>`,
+      handwritingBase,
+      referenceBase,
+      highlights,
+      handwritingLabels,
+      referenceLabels,
+      ...issueText,
+      ...expectationText,
+      `</g>`,
+    ].join(``),
+    height,
+  };
+}
+
 export function renderShapeContextGraderDiagnosticSvg({
   fixtureId,
   targetCharacter,
@@ -934,6 +1239,8 @@ export function renderShapeContextGraderDiagnosticSvg({
   contrastiveCandidates,
   expectedAcceptance,
   acceptanceThreshold,
+  expectedIssues,
+  unexpectedIssues,
 }: {
   fixtureId: string;
   targetCharacter: string;
@@ -944,18 +1251,65 @@ export function renderShapeContextGraderDiagnosticSvg({
   contrastiveCandidates: readonly SimilarCharacterGrade[];
   expectedAcceptance: boolean;
   acceptanceThreshold: number;
+  expectedIssues?: readonly WritingIssueExpectation[];
+  unexpectedIssues?: readonly WritingIssueExpectation[];
 }): string {
   const rawPoint = drawingPointMapper(drawnStrokes, 0);
   const overlayOffsetY = 576;
-  const sourcePaths = drawnStrokes.map(
-    (stroke) =>
-      `<path d="${pathFromPoints(stroke, rawPoint)}" fill="none" stroke="#159fe8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
+  const issueExtraStrokeIndices = new Set(
+    geometry.issues.flatMap((issue) =>
+      issue.kind === `extra-stroke` && issue.handwriting != null
+        ? [issue.handwriting.strokeIndex]
+        : [],
+    ),
   );
+  const issueMissingStrokeIndices = new Set(
+    geometry.issues.flatMap((issue) =>
+      issue.kind === `missing-stroke` && issue.reference != null
+        ? [issue.reference.strokeIndex]
+        : [],
+    ),
+  );
+  const strokeLabel = (
+    kind: `handwriting` | `reference`,
+    strokeIndex: number,
+    point: WritingStrokePoint,
+    mapper: (point: WritingStrokePoint) => WritingStrokePoint,
+  ): string => {
+    const mapped = mapper(point);
+    return `<g data-stroke-number="${kind}-${strokeIndex}"><circle cx="${mapped.x + 8}" cy="${mapped.y - 8}" r="11" fill="#fff" stroke="#334155"/><text x="${mapped.x + 8}" y="${mapped.y - 4}" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="600" fill="#0f172a">${strokeIndex + 1}</text></g>`;
+  };
+  const sourcePaths = drawnStrokes.map((stroke, strokeIndex) => {
+    const color = issueExtraStrokeIndices.has(strokeIndex)
+      ? `#ef4444`
+      : `#159fe8`;
+    return `<path d="${pathFromPoints(stroke, rawPoint)}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  });
+  const sourceLabels = drawnStrokes
+    .map((stroke, strokeIndex) => {
+      const start = stroke.find(
+        (point) => Number.isFinite(point.x) && Number.isFinite(point.y),
+      );
+      return start == null
+        ? ``
+        : strokeLabel(`handwriting`, strokeIndex, start, rawPoint);
+    })
+    .join(``);
   const referencePathsSvg = referencePaths
-    .map(
-      (path) =>
-        `<path d="${escapeXml(path)}" fill="none" stroke="#334155" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`,
-    )
+    .map((path, strokeIndex) => {
+      const color = issueMissingStrokeIndices.has(strokeIndex)
+        ? `#22c55e`
+        : `#334155`;
+      return `<path d="${escapeXml(path)}" fill="none" stroke="${color}" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`;
+    })
+    .join(``);
+  const referenceLabels = referencePaths
+    .map((path, strokeIndex) => {
+      const start = extractReferenceStrokeSegment(path, 0, 0)[0];
+      return start == null
+        ? ``
+        : `<g transform="translate(536 52) scale(0.453125)">${strokeLabel(`reference`, strokeIndex, start, (point) => point)}</g>`;
+    })
     .join(``);
   const registeredStrokes = geometry.sourceStrokes.map((_, strokeIndex) =>
     geometry.transformedPoints.filter(
@@ -984,16 +1338,24 @@ export function renderShapeContextGraderDiagnosticSvg({
     1024,
   );
   const targetPaths = geometry.targetStrokes
-    .map(
-      (stroke) =>
-        `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
-    )
+    .map((stroke, compactIndex) => {
+      const strokeIndex =
+        geometry.targetStrokeOriginalIndices[compactIndex] ?? compactIndex;
+      const color = issueMissingStrokeIndices.has(strokeIndex)
+        ? `#22c55e`
+        : `#334155`;
+      return `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    })
     .join(``);
   const normalizedSourcePaths = geometry.sourceStrokes
-    .map(
-      (stroke) =>
-        `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="#159fe8" stroke-width="3" stroke-dasharray="6 4" opacity="0.8"/>`,
-    )
+    .map((stroke, compactIndex) => {
+      const strokeIndex =
+        geometry.sourceStrokeOriginalIndices[compactIndex] ?? compactIndex;
+      const color = issueExtraStrokeIndices.has(strokeIndex)
+        ? `#ef4444`
+        : `#159fe8`;
+      return `<path d="${pathFromPoints(stroke, diagramPoint)}" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="6 4" opacity="0.8"/>`;
+    })
     .join(``);
   const registeredPaths = registeredStrokes
     .map(
@@ -1144,18 +1506,28 @@ export function renderShapeContextGraderDiagnosticSvg({
     strokePresence,
     dtwHeatmaps.height,
   );
-  const svgHeight = strokePresencePanel.height;
+  const writingIssuePanel = renderWritingIssuePanel({
+    drawnStrokes,
+    referencePaths,
+    geometry,
+    expectedIssues,
+    unexpectedIssues,
+    startY: strokePresencePanel.height + 12,
+  });
+  const svgHeight = writingIssuePanel.height;
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="${svgHeight}" viewBox="0 0 1024 ${svgHeight}" role="img" aria-labelledby="title description">`,
     `<title id="title">Handwriting grade diagnostics for ${escapeXml(fixtureId)}</title>`,
-    `<desc id="description">Raw handwriting and reference geometry side by side, with a larger normalized Shape Context and TPS registration diagram, a proportional breakdown of active score contributions, the contrastive acceptance decision, the production Hungarian stroke-completeness decision, DTW alignment heatmaps, and stroke-presence diagnostics from global assignment.</desc>`,
+    `<desc id="description">Raw handwriting and reference geometry side by side with stroke numbers, a normalized Shape Context and TPS registration diagram, scoring and acceptance diagnostics, stroke-presence diagnostics, and localized writing issue highlights with fixture expectation results.</desc>`,
     `<rect width="1024" height="${svgHeight}" fill="#fff"/>`,
     `<rect x="0.5" y="0.5" width="511" height="511" fill="#f8fafc" stroke="#cbd5e1"/>`,
     `<rect x="512.5" y="0.5" width="511" height="511" fill="#f8fafc" stroke="#cbd5e1"/>`,
     `<rect x="0.5" y="576.5" width="1023" height="1023" fill="#f8fafc" stroke="#cbd5e1"/>`,
     sourcePaths.join(``),
+    sourceLabels,
     `<g transform="translate(536 52) scale(0.453125)">${referencePathsSvg}</g>`,
+    referenceLabels,
     `<g>${sourceGridPaths}${registeredGridPaths}${targetPaths}${normalizedSourcePaths}${registeredPaths}${correspondenceLines}${unmatchedSourcePoints}${unmatchedTargetPoints}</g>`,
     `<g font-family="sans-serif" font-size="18" fill="#0f172a">`,
     `<text x="256" y="540" text-anchor="middle">Raw handwriting · ${escapeXml(targetCharacter)}</text>`,
@@ -1175,6 +1547,7 @@ export function renderShapeContextGraderDiagnosticSvg({
     strokeCompletenessPanel.svg,
     dtwHeatmaps.svg,
     strokePresencePanel.svg,
+    writingIssuePanel.svg,
     `</svg>`,
   ].join(``);
 }

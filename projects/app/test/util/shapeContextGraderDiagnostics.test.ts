@@ -2,8 +2,13 @@
 import { evaluateHanziCharacterWritingAcceptance } from "#data/questions/hanziCharacterWriting.ts";
 import type { HanziCharacter } from "#data/model.ts";
 import { gradeCharacterShape } from "#util/shapeContextGrader.ts";
+import type {
+  ShapeContextGrade,
+  WritingIssue,
+} from "#util/shapeContextGrader.ts";
 import {
   createShapeContextGraderDiagnostic,
+  evaluateWritingIssueExpectations,
   renderShapeContextGraderDiagnosticSvg,
 } from "#test/util/shapeContextGraderDiagnostics.ts";
 import { expect, test } from "vitest";
@@ -109,7 +114,14 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   );
   const contributionTrackWidth = rectWidth(`data-score-contribution-track=""`);
 
-  expect(diagnostic.schemaVersion).toBe(19);
+  expect(diagnostic.schemaVersion).toBe(20);
+  expect(diagnostic.issues).toEqual([]);
+  expect(diagnostic.issueExpectations).toEqual({
+    declared: false,
+    expected: [],
+    unexpected: [],
+    allSatisfied: true,
+  });
   expect(serialized).toContain(`"expectedAcceptance":true`);
   expect(serialized).toContain(`"acceptance":`);
   expect(serialized).toContain(`"strokeCompleteness":`);
@@ -261,6 +273,15 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   expect(svg).toContain(`Initial matching error`);
   expect(svg).toContain(`Empty geometry penalty`);
   expect(svg).toContain(`DTW alignment cost heatmaps`);
+  expect(svg).toContain(`Localized writing issues (0)`);
+  expect(svg).toContain(`No issues detected.`);
+  expect(svg).toContain(`No issue expectations declared.`);
+  expect([
+    ...svg.matchAll(/data-stroke-number="handwriting-0"/gu),
+  ]).toHaveLength(1);
+  expect([...svg.matchAll(/data-stroke-number="reference-0"/gu)]).toHaveLength(
+    1,
+  );
   expect(svg).toContain(`data-dtw-cost-cell=""`);
   expect(svg).toContain(`data-dtw-proportional-diagonal="forward"`);
   expect(svg).toContain(`data-dtw-path-segment="diagonal"`);
@@ -296,6 +317,106 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   expect(normalizedGridBounds.maxY).toBeGreaterThan(
     normalizedSourceBounds.maxY,
   );
+});
+
+test(`matches partial issue expectations with approximate localization`, () => {
+  const issues: WritingIssue[] = [
+    {
+      kind: `reversed-stroke`,
+      handwriting: { strokeIndex: 2, start: 0.9, end: 1 },
+      reference: { strokeIndex: 3, start: 0.84, end: 1 },
+    },
+    {
+      kind: `extra-stroke`,
+      handwriting: { strokeIndex: 5, start: 0, end: 1 },
+    },
+  ];
+  const satisfied = evaluateWritingIssueExpectations(
+    issues,
+    [
+      {
+        kind: `reversed-stroke`,
+        handwriting: { strokeIndex: 2 },
+        reference: { strokeIndex: 3, start: 0.85, end: 1 },
+      },
+    ],
+    [
+      {
+        kind: `reversed-stroke`,
+        handwriting: { strokeIndex: 4 },
+      },
+    ],
+  );
+  const violated = evaluateWritingIssueExpectations(
+    issues,
+    [{ kind: `missing-stroke`, reference: { strokeIndex: 4 } }],
+    [{ kind: `extra-stroke`, handwriting: { strokeIndex: 5 } }],
+  );
+
+  expect(satisfied).toMatchObject({
+    declared: true,
+    allSatisfied: true,
+    expected: [{ satisfied: true }],
+    unexpected: [{ satisfied: true }],
+  });
+  expect(violated).toMatchObject({
+    declared: true,
+    allSatisfied: false,
+    expected: [{ satisfied: false }],
+    unexpected: [{ satisfied: false }],
+  });
+});
+
+test(`renders partial issue geometry and zero-length handwriting markers`, () => {
+  const drawnStrokes = [
+    [
+      { x: 0, y: 0 },
+      { x: 0, y: 100 },
+    ],
+  ];
+  const referencePaths = [`M 0 0 L 0 100 L 20 100`];
+  const originalGeometry = gradeCharacterShape(drawnStrokes, referencePaths);
+  const geometry: ShapeContextGrade = {
+    ...originalGeometry,
+    issues: [
+      {
+        kind: `reversed-stroke`,
+        handwriting: { strokeIndex: 0, start: 1, end: 1 },
+        reference: { strokeIndex: 0, start: 0.84, end: 1 },
+      },
+    ],
+  };
+  const acceptance = evaluateHanziCharacterWritingAcceptance(geometry, []);
+  const svg = renderShapeContextGraderDiagnosticSvg({
+    fixtureId: `localized-issue-diagnostic`,
+    targetCharacter: `了`,
+    drawnStrokes,
+    referencePaths,
+    geometry,
+    acceptance,
+    contrastiveCandidates: [],
+    expectedAcceptance: false,
+    acceptanceThreshold: 0.72,
+    expectedIssues: [
+      {
+        kind: `reversed-stroke`,
+        handwriting: { strokeIndex: 0, start: 1, end: 1 },
+        reference: { strokeIndex: 0, start: 0.85, end: 1 },
+      },
+    ],
+  });
+
+  expect(geometry.issues).toContainEqual(
+    expect.objectContaining({ kind: `reversed-stroke` }),
+  );
+  expect(svg).toMatch(
+    /<circle data-issue-highlight="reversed-stroke-handwriting"[^>]* fill="#ef4444"/u,
+  );
+  expect(svg).toMatch(
+    /<path data-issue-highlight="reversed-stroke-reference"[^>]* stroke="#22c55e"/u,
+  );
+  expect(svg).toContain(`Issue expectations satisfied`);
+  expect(svg).toContain(`Reversed stroke`);
 });
 
 test(`reports each hard stroke-completeness rejection reason`, () => {

@@ -1,10 +1,16 @@
-import type { CSSProperties, PointerEvent } from "react";
+import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { Fragment, useId, useRef, useState } from "react";
+import { cn } from "tailwind-variants";
 import {
+  extractReferenceStrokeSegment,
+  extractWritingStrokeSegment,
   maxWritingPointCount,
   maxWritingStrokeCount,
 } from "@/util/shapeContextGrader";
-import type { WritingStrokePoint } from "@/util/shapeContextGrader";
+import type {
+  WritingIssue,
+  WritingStrokePoint,
+} from "@/util/shapeContextGrader";
 import { ButtonGroup } from "@/client/ui/ButtonGroup";
 import { hanziStrokeAnimationTiming } from "@/client/ui/HanziStrokeAnimation";
 import { usePreventPressFocusRef } from "@/client/ui/hooks/usePreventPressFocusRef";
@@ -44,6 +50,292 @@ function getPathStartPoint(path: string): WritingStrokePoint | null {
   return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
 }
 
+function GuidedWritingPaths({
+  guidedPaths,
+  animateReferencePaths,
+  guidedPathIndex,
+  getAnimatedGuidedPathStyle,
+}: {
+  guidedPaths: readonly string[];
+  animateReferencePaths: boolean;
+  guidedPathIndex: number | undefined;
+  getAnimatedGuidedPathStyle: (
+    index: number,
+    strokeCount: number,
+  ) => AnimatedGuidedPathStyle;
+}) {
+  return (
+    <>
+      <g pointerEvents="none">
+        {guidedPaths.map((path, index) => (
+          <Fragment key={index}>
+            <path
+              d={path}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="48"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-bg"
+            />
+            <path
+              d={path}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="48"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="
+                text-fg/5
+
+                dark:text-fg/10
+              "
+            />
+          </Fragment>
+        ))}
+      </g>
+      {animateReferencePaths &&
+      guidedPathIndex == null &&
+      guidedPaths.length > 0 ? (
+        <g
+          className="
+            hanzi-animated-reference-cycle opacity-6
+
+            dark:opacity-20
+          "
+          pointerEvents="none"
+          style={getAnimatedGuidedPathStyle(0, guidedPaths.length)}
+        >
+          {guidedPaths.map((path, index) => (
+            <path
+              key={`guided-animated:${index}`}
+              d={path}
+              fill="none"
+              pathLength={1}
+              strokeDasharray="1"
+              strokeDashoffset={1}
+              stroke="currentColor"
+              strokeWidth="48"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="hanzi-animated-reference-stroke"
+              style={getAnimatedGuidedPathStyle(index, guidedPaths.length)}
+            />
+          ))}
+        </g>
+      ) : null}
+    </>
+  );
+}
+
+function GuidedWritingProgress({
+  guidedPaths,
+  guidedPathIndex,
+  arrowMarkerId,
+}: {
+  guidedPaths: readonly string[] | undefined;
+  guidedPathIndex: number | undefined;
+  arrowMarkerId: string;
+}) {
+  if (guidedPaths == null || guidedPathIndex == null) {
+    return null;
+  }
+
+  const currentGuidedPath =
+    guidedPathIndex >= guidedPaths.length ? null : guidedPaths[guidedPathIndex];
+  const currentGuidedPathStart =
+    currentGuidedPath == null ? null : getPathStartPoint(currentGuidedPath);
+
+  return (
+    <>
+      <defs>
+        <marker
+          id={arrowMarkerId}
+          markerWidth="18"
+          markerHeight="18"
+          refX="9"
+          refY="9"
+          orient="auto"
+          markerUnits="userSpaceOnUse"
+          viewBox="0 0 18 18"
+        >
+          <path d="M 2 2 L 16 9 L 2 16 Z" fill="#19aaf5" />
+        </marker>
+      </defs>
+      {guidedPaths.slice(0, guidedPathIndex).map((path, index) => (
+        <path
+          key={`complete:${index}`}
+          d={path}
+          fill="none"
+          stroke="#19aaf5"
+          strokeWidth="32"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          pointerEvents="none"
+        />
+      ))}
+      {currentGuidedPath == null ? null : (
+        <>
+          <path
+            d={currentGuidedPath}
+            fill="none"
+            stroke="#19aaf5"
+            strokeWidth="16"
+            strokeDasharray="24 20"
+            strokeLinecap="round"
+            markerEnd={`url(#${arrowMarkerId})`}
+            pointerEvents="none"
+          />
+          {currentGuidedPathStart == null ? null : (
+            <g pointerEvents="none">
+              <circle
+                cx={currentGuidedPathStart.x}
+                cy={currentGuidedPathStart.y}
+                r="48"
+                fill="#19aaf5"
+              />
+              <path
+                d={`M ${currentGuidedPathStart.x - 18} ${currentGuidedPathStart.y} H ${currentGuidedPathStart.x + 17} M ${currentGuidedPathStart.x + 1} ${currentGuidedPathStart.y - 17} L ${currentGuidedPathStart.x + 19} ${currentGuidedPathStart.y} L ${currentGuidedPathStart.x + 1} ${currentGuidedPathStart.y + 17}`}
+                fill="none"
+                stroke="white"
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+function WritingResult({
+  drawnStrokes,
+  guidedPaths,
+  issues,
+  ratingResult,
+}: {
+  drawnStrokes: readonly (readonly WritingStrokePoint[])[];
+  guidedPaths: readonly string[] | undefined;
+  issues: readonly WritingIssue[];
+  ratingResult: `correct` | `incorrect` | null | undefined;
+}) {
+  return (
+    <>
+      {drawnStrokes.map((stroke, index) => (
+        <path
+          key={`stroke:${index}`}
+          d={pathFromPoints(stroke)}
+          fill="none"
+          stroke={ratingResult === `incorrect` ? `#334155` : `#19aaf5`}
+          strokeWidth="32"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          pointerEvents="none"
+        />
+      ))}
+      {issues.flatMap((issue, issueIndex) => {
+        const output: ReactNode[] = [];
+        if (issue.kind === `extra-stroke` && issue.handwriting != null) {
+          const stroke = drawnStrokes[issue.handwriting.strokeIndex] ?? [];
+          const segment = extractWritingStrokeSegment(
+            stroke,
+            issue.handwriting.start,
+            issue.handwriting.end,
+          );
+          if (segment.length === 1) {
+            output.push(
+              <circle
+                key={`issue-extra:${issueIndex}`}
+                data-writing-issue-highlight="extra-stroke"
+                cx={segment[0]?.x}
+                cy={segment[0]?.y}
+                r="24"
+                fill="#ef4444"
+                stroke="white"
+                strokeWidth="8"
+                pointerEvents="none"
+              />,
+            );
+          } else if (segment.length > 1) {
+            output.push(
+              <path
+                key={`issue-extra:${issueIndex}`}
+                data-writing-issue-highlight="extra-stroke"
+                d={pathFromPoints(segment)}
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="32"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                pointerEvents="none"
+              />,
+            );
+          }
+        }
+        if (issue.kind === `missing-stroke` && issue.reference != null) {
+          const referencePath = guidedPaths?.[issue.reference.strokeIndex];
+          if (referencePath != null) {
+            const segment = extractReferenceStrokeSegment(
+              referencePath,
+              issue.reference.start,
+              issue.reference.end,
+            );
+            if (segment.length === 1) {
+              output.push(
+                <circle
+                  key={`issue-missing:${issueIndex}`}
+                  data-writing-issue-highlight="missing-stroke"
+                  cx={segment[0]?.x}
+                  cy={segment[0]?.y}
+                  r="24"
+                  fill="#ef4444"
+                  stroke="white"
+                  strokeWidth="8"
+                  pointerEvents="none"
+                />,
+              );
+            } else if (segment.length > 1) {
+              output.push(
+                <path
+                  key={`issue-missing:${issueIndex}`}
+                  data-writing-issue-highlight="missing-stroke"
+                  d={pathFromPoints(segment)}
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="32"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  pointerEvents="none"
+                />,
+              );
+            }
+          }
+        }
+        return output;
+      })}
+    </>
+  );
+}
+
+function FreeformWritingStroke({ activePath }: { activePath: string }) {
+  if (activePath.length === 0) {
+    return null;
+  }
+  return (
+    <path
+      d={activePath}
+      fill="none"
+      stroke="#19aaf5"
+      strokeWidth="32"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      pointerEvents="none"
+    />
+  );
+}
+
 export function HanziWritingCanvas({
   className = `aspect-square w-full`,
   disabled = false,
@@ -52,6 +344,7 @@ export function HanziWritingCanvas({
   animateReferencePaths = false,
   guidedPathIndex,
   drawnStrokes = [],
+  issues = [],
   ratingResult,
   onStrokeStart,
   onStrokesChange,
@@ -64,6 +357,7 @@ export function HanziWritingCanvas({
   animateReferencePaths?: boolean;
   guidedPathIndex?: number;
   drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
+  issues?: readonly WritingIssue[];
   ratingResult?: `correct` | `incorrect` | null;
   onStrokeStart?: () => void;
   onStrokesChange: (strokes: WritingStrokePoint[][]) => void;
@@ -82,10 +376,6 @@ export function HanziWritingCanvas({
     !disabled &&
     guidedPathIndex == null &&
     (drawnStrokes.length > 0 || activePath.length > 0);
-  const currentGuidedPath =
-    guidedPathIndex == null ? null : guidedPaths?.[guidedPathIndex];
-  const currentGuidedPathStart =
-    currentGuidedPath == null ? null : getPathStartPoint(currentGuidedPath);
 
   function getPoint(event: PointerEvent<SVGSVGElement>): WritingStrokePoint {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -197,13 +487,7 @@ export function HanziWritingCanvas({
 
   return (
     <View
-      className={`
-        relative
-
-        ${className}
-
-        overflow-hidden rounded-xl bg-bg
-      `}
+      className={cn(`relative overflow-hidden rounded-xl bg-bg`, className)}
     >
       <svg
         ref={preventTouchDefaultRef}
@@ -214,20 +498,6 @@ export function HanziWritingCanvas({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
       >
-        <defs>
-          <marker
-            id={arrowMarkerId}
-            markerWidth="18"
-            markerHeight="18"
-            refX="9"
-            refY="9"
-            orient="auto"
-            markerUnits="userSpaceOnUse"
-            viewBox="0 0 18 18"
-          >
-            <path d="M 2 2 L 16 9 L 2 16 Z" fill="#19aaf5" />
-          </marker>
-        </defs>
         {hideGrid ? null : (
           <path
             d="M 512 512 V 24 M 512 512 V 1000 M 512 512 H 24 M 512 512 H 1000"
@@ -240,139 +510,25 @@ export function HanziWritingCanvas({
           />
         )}
         {guidedPaths == null ? null : (
-          <g pointerEvents="none">
-            {guidedPaths.map((path, index) => (
-              <Fragment key={index}>
-                <path
-                  d={path}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="48"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-bg"
-                />
-                <path
-                  d={path}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="48"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="
-                    text-fg/5
-
-                    dark:text-fg/10
-                  "
-                />
-              </Fragment>
-            ))}
-          </g>
-        )}
-        {animateReferencePaths &&
-        guidedPathIndex == null &&
-        guidedPaths != null &&
-        guidedPaths.length > 0 ? (
-          <g
-            className="
-              hanzi-animated-reference-cycle opacity-6
-
-              dark:opacity-20
-            "
-            pointerEvents="none"
-            style={getAnimatedGuidedPathStyle(0, guidedPaths.length)}
-          >
-            {guidedPaths.map((path, index) => (
-              <path
-                key={`guided-animated:${index}`}
-                d={path}
-                fill="none"
-                pathLength={1}
-                strokeDasharray="1"
-                strokeDashoffset={1}
-                stroke="currentColor"
-                strokeWidth="48"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="hanzi-animated-reference-stroke"
-                style={getAnimatedGuidedPathStyle(index, guidedPaths.length)}
-              />
-            ))}
-          </g>
-        ) : null}
-        {guidedPathIndex == null
-          ? null
-          : guidedPaths
-              ?.slice(0, guidedPathIndex)
-              .map((path, index) => (
-                <path
-                  key={`complete:${index}`}
-                  d={path}
-                  fill="none"
-                  stroke="#19aaf5"
-                  strokeWidth="24"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  pointerEvents="none"
-                />
-              ))}
-        {currentGuidedPath == null ||
-        guidedPathIndex == null ||
-        guidedPathIndex >= (guidedPaths?.length ?? 0) ? null : (
-          <>
-            <path
-              d={currentGuidedPath}
-              fill="none"
-              stroke="#19aaf5"
-              strokeWidth="16"
-              strokeDasharray="24 20"
-              strokeLinecap="round"
-              markerEnd={`url(#${arrowMarkerId})`}
-              pointerEvents="none"
-            />
-            {currentGuidedPathStart == null ? null : (
-              <g pointerEvents="none">
-                <circle
-                  cx={currentGuidedPathStart.x}
-                  cy={currentGuidedPathStart.y}
-                  r="48"
-                  fill="#19aaf5"
-                />
-                <path
-                  d={`M ${currentGuidedPathStart.x - 18} ${currentGuidedPathStart.y} H ${currentGuidedPathStart.x + 17} M ${currentGuidedPathStart.x + 1} ${currentGuidedPathStart.y - 17} L ${currentGuidedPathStart.x + 19} ${currentGuidedPathStart.y} L ${currentGuidedPathStart.x + 1} ${currentGuidedPathStart.y + 17}`}
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="9"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </g>
-            )}
-          </>
-        )}
-        {drawnStrokes.map((stroke, index) => (
-          <path
-            key={`stroke:${index}`}
-            d={pathFromPoints(stroke)}
-            fill="none"
-            stroke={ratingResult === `incorrect` ? `#ef4444` : `#19aaf5`}
-            strokeWidth="24"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
-          />
-        ))}
-        {activePath.length === 0 ? null : (
-          <path
-            d={activePath}
-            fill="none"
-            stroke="#19aaf5"
-            strokeWidth="24"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pointerEvents="none"
+          <GuidedWritingPaths
+            guidedPaths={guidedPaths}
+            animateReferencePaths={animateReferencePaths}
+            guidedPathIndex={guidedPathIndex}
+            getAnimatedGuidedPathStyle={getAnimatedGuidedPathStyle}
           />
         )}
+        <GuidedWritingProgress
+          guidedPaths={guidedPaths}
+          guidedPathIndex={guidedPathIndex}
+          arrowMarkerId={arrowMarkerId}
+        />
+        <WritingResult
+          drawnStrokes={drawnStrokes}
+          guidedPaths={guidedPaths}
+          issues={issues}
+          ratingResult={ratingResult}
+        />
+        <FreeformWritingStroke activePath={activePath} />
         <rect
           x="0"
           y="0"

@@ -10,7 +10,9 @@ import { TextInputMulti } from "@/client/ui/TextInputMulti";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { View } from "@/client/ui/View";
 import { useVisuallySimilarCharacterReferences } from "@/client/ui/hooks/useVisuallySimilarCharacterReferences";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
 import { isHanziCharacter, splitHanziText } from "@/data/hanzi";
+import { hanziWritingIssuesUserToggleSetting } from "@/data/userSettings";
 import type { HanziCharacter, HanziText } from "@/data/model";
 import {
   hanziCharacterWritingSimilarityThreshold,
@@ -102,6 +104,9 @@ function CharacterWriting({
   const debugGeometry = debugSimilarGrade?.geometry ?? lastGrade;
   const debugReferencePaths = debugReference?.medianPaths ?? referencePaths;
   const isGuided = mode === `guided`;
+  const hanziWritingIssuesSetting = useUserSettingToggle(
+    hanziWritingIssuesUserToggleSetting,
+  );
 
   function onStrokesChange(strokes: Point[][]) {
     if (isGuided) {
@@ -145,6 +150,12 @@ function CharacterWriting({
         guidedPaths={isGuided ? referencePaths : undefined}
         guidedPathIndex={isGuided ? currentStroke : undefined}
         drawnStrokes={freeStrokes}
+        issues={
+          !hanziWritingIssuesSetting.isLoading &&
+          hanziWritingIssuesSetting.isEnabled
+            ? lastGrade?.issues
+            : undefined
+        }
       />
       <Text className="text-center text-muted-fg">
         {isGuided
