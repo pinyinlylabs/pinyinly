@@ -407,11 +407,11 @@ test(`new users are taught the simplest words first`, async ({ rizzle }) => {
   const queue = result.current.reviewQueue;
   expect(prettyQueue(queue).slice(0, 10)).toMatchInlineSnapshot(`
     [
-      "he:人:person (🌱 NEW SKILL)",
       "he:一:one (🌱 NEW SKILL)",
+      "he:人:person (🌱 NEW SKILL)",
       "he:口:mouth (🌱 NEW SKILL)",
-      "he:八:eight (🌱 NEW SKILL)",
       "he:乙:second (🌱 NEW SKILL)",
+      "he:八:eight (🌱 NEW SKILL)",
       "he:又:again (🌱 NEW SKILL)",
       "he:厂:cliff (🌱 NEW SKILL)",
       "he:凵:box (🌱 NEW SKILL)",
