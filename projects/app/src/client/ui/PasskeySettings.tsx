@@ -1,6 +1,7 @@
 import { passkeyErrorMessage, useSupportsPasskeys } from "@/client/passkey";
 import { trpc } from "@/client/trpc";
 import { startRegistration } from "@simplewebauthn/browser";
+import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useRef, useState } from "react";
 import { ScrollView } from "react-native";
@@ -173,7 +174,8 @@ export function PasskeySettings() {
                     void run(async () => {
                       const { options, cookie } = await start.mutateAsync();
                       const response = await startRegistration({
-                        optionsJSON: options,
+                        optionsJSON:
+                          options as PublicKeyCredentialCreationOptionsJSON,
                       });
                       await complete.mutateAsync({
                         response,

@@ -6,6 +6,7 @@ import {
   passkeyEncodeUserId,
 } from "@/server/lib/passkey";
 import { getUserDisplayName, setUserDisplayName } from "@/server/lib/query";
+import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
@@ -147,9 +148,12 @@ export async function passkeyFinishRegistration(
       aaguid,
       existingNames.map(({ name }) => name),
     ),
-    publicKey: credential.publicKey,
+    publicKey: Uint8Array.from(credential.publicKey),
     counter: credential.counter,
-    transports: credential.transports,
+    transports: credential.transports?.flatMap((transport) => {
+      const parsed = passkeyTransportEnumSchema.safeParse(transport);
+      return parsed.success ? [parsed.data] : [];
+    }),
     deviceType: credentialDeviceType,
     isBackedUp: credentialBackedUp,
     aaguid,

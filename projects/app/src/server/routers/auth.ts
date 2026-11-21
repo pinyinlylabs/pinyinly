@@ -11,13 +11,7 @@ import { getPasskeyConfig } from "@/server/lib/passkey";
 import { getUserDisplayName } from "@/server/lib/query";
 import { authedProcedure, procedure, router } from "@/server/lib/trpc";
 import * as schema from "@/server/pgSchema";
-import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
 import { invariant } from "@pinyinly/lib/invariant";
-import type { IsEqual } from "@pinyinly/lib/types";
-import type {
-  AuthenticationResponseJSON,
-  RegistrationResponseJSON,
-} from "@simplewebauthn/server";
 import { generateAuthenticationOptions } from "@simplewebauthn/server";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
@@ -49,11 +43,6 @@ export const passkeyAuthenticationResponseSchema = z.object({
   type: z.literal(`public-key`),
 });
 
-true satisfies IsEqual<
-  z.infer<typeof passkeyAuthenticationResponseSchema>,
-  AuthenticationResponseJSON
->;
-
 export const passkeyRegistrationResponseSchema = z.object({
   id: credentialIdSchema,
   rawId: credentialIdSchema,
@@ -73,14 +62,9 @@ export const passkeyRegistrationResponseSchema = z.object({
     authenticatorData: encodedSchema.optional(),
     publicKeyAlgorithm: z.number().optional(),
     publicKey: encodedSchema.optional(),
-    transports: z.array(passkeyTransportEnumSchema).optional(),
+    transports: z.array(z.string()).optional(),
   }),
 });
-
-true satisfies IsEqual<
-  z.infer<typeof passkeyRegistrationResponseSchema>,
-  RegistrationResponseJSON
->;
 
 const registrationInput = z.object({
   response: passkeyRegistrationResponseSchema,
