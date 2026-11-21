@@ -54,6 +54,7 @@ export default () => {
                   skill={skill}
                   rating={rating}
                   disableAnimation
+                  showTooSlow={rating === Rating.Hard}
                   onChangeAnswer={() => {
                     console.log(`onChangeAnswer`);
                   }}
