@@ -221,7 +221,9 @@ export function useAuth(): AuthApi {
     });
 
     await completeAddPasskeyMutate({
-      response: res,
+      response: res as Parameters<
+        typeof completeAddPasskeyMutate
+      >[0][`response`],
       cookie,
     });
   };

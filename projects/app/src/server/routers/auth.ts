@@ -11,6 +11,7 @@ import { getPasskeyConfig } from "@/server/lib/passkey";
 import { getUserDisplayName } from "@/server/lib/query";
 import { authedProcedure, procedure, router } from "@/server/lib/trpc";
 import * as schema from "@/server/pgSchema";
+import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
 import { invariant } from "@pinyinly/lib/invariant";
 import { generateAuthenticationOptions } from "@simplewebauthn/server";
 import { TRPCError } from "@trpc/server";
@@ -62,7 +63,7 @@ export const passkeyRegistrationResponseSchema = z.object({
     authenticatorData: encodedSchema.optional(),
     publicKeyAlgorithm: z.number().optional(),
     publicKey: encodedSchema.optional(),
-    transports: z.array(z.string()).optional(),
+    transports: z.array(passkeyTransportEnumSchema).optional(),
   }),
 });
 

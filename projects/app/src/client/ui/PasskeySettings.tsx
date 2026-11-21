@@ -178,7 +178,9 @@ export function PasskeySettings() {
                           options as PublicKeyCredentialCreationOptionsJSON,
                       });
                       await complete.mutateAsync({
-                        response,
+                        response: response as Parameters<
+                          typeof complete.mutateAsync
+                        >[0][`response`],
                         cookie,
                       });
                     });
