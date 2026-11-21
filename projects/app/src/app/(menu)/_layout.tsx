@@ -7,6 +7,7 @@ import { UserSettingToggleGuard } from "@/client/ui/UserSettingToggleGuard";
 import { navItems } from "@/client/ui/navItems";
 import { QuickSearchButton } from "@/client/ui/QuickSearchButton";
 import { RectButton } from "@/client/ui/RectButton";
+import { MobileSearchControl } from "@/client/ui/MobileSearchControl";
 import type { Href } from "expo-router";
 import { Link, Stack, usePathname } from "expo-router";
 import type { ReactNode } from "react";
@@ -182,7 +183,12 @@ function MenuLayoutContent() {
       <MobileFloatingTitle
         className="sm:hidden"
         isBackgroundVisible={isMobileTopMenuBackgroundVisible}
-        rightButton={<MobileNavMenuTrigger />}
+        rightButton={
+          <View className="flex-row items-center gap-2">
+            <MobileSearchControl />
+            <MobileNavMenuTrigger />
+          </View>
+        }
       />
 
       <DesktopFloatingTitle />
@@ -355,11 +361,11 @@ function MobileFloatingTitle({
         ) : null}
 
         <View className="pointer-events-auto h-14 flex-row items-center">
-          <View className="w-8 shrink">{leftButton ?? null}</View>
+          <View className="w-18 shrink">{leftButton ?? null}</View>
           <View className="flex-1 items-center justify-center">
             <HeaderProvider.TitleText className="pyly-body-title" />
           </View>
-          <View className="w-8 shrink">{rightButton ?? null}</View>
+          <View className="w-18 shrink justify-end">{rightButton ?? null}</View>
         </View>
       </View>
     </Reanimated.View>
