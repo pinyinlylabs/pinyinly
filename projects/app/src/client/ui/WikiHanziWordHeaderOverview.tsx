@@ -4,11 +4,8 @@ import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
-import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
-import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
-import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
 import { WikiPageEditModeContext } from "./WikiPageEditModeContext";
 
 export function WikiHanziWordHeaderOverview({
@@ -31,15 +28,7 @@ export function WikiHanziWordHeaderOverview({
   return (
     <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
-        <View className="flex-1 flex-row items-center gap-1">
-          <WikiHanziBookmarkLozenge hanziWord={studyHanziWord} />
-          <WikiHanziHskLozenges hanzi={hanzi} />
-          <WikiHanziProgressLozenge
-            hanzi={hanzi}
-            hanziWord={studyHanziWord}
-            skillSrsStates={skillSrsStates}
-          />
-        </View>
+        <View className="flex-1 flex-row items-center gap-1"></View>
       </View>
       <View>
         <HeaderProvider.ScrollTrigger title={hanzi} />
@@ -61,6 +50,7 @@ export function WikiHanziWordHeaderOverview({
         hanzi={hanzi}
         selectedHanziWord={studyHanziWord}
         onHanziWordSelected={onHanziWordSelected}
+        skillSrsStates={skillSrsStates}
       />
     </View>
   );

@@ -1,4 +1,9 @@
-import type { HanziCharacter, HanziWord } from "@/data/model";
+import type {
+  HanziCharacter,
+  HanziWord,
+  Skill,
+  SrsStateType,
+} from "@/data/model";
 import { wikiPayloadQuery } from "@/client/query";
 import { useQuery } from "@tanstack/react-query";
 import { eq, useLiveQuery } from "@tanstack/react-db";
@@ -9,15 +14,18 @@ import { View } from "./View";
 import { useDb } from "./hooks/useDb";
 import { tv } from "tailwind-variants";
 import { WikiExampleSentence } from "./WikiExampleSentence";
+import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 
 export function WikiHanziCharacterChooseAMeaning({
   hanzi,
   hanziWord: selectedMeaning,
   onHanziWordChanged,
+  skillSrsStates,
 }: {
   hanzi: HanziCharacter;
   hanziWord: HanziWord | null;
   onHanziWordChanged: (hanziWord: HanziWord) => void;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
 }) {
   const db = useDb();
 
@@ -62,9 +70,29 @@ export function WikiHanziCharacterChooseAMeaning({
                 <Text className="font-sans text-xl/normal font-semibold">
                   {entry.pinyin?.[0]}
                 </Text>
-                <Text className="font-sans text-lg/normal font-normal">
-                  {entry.gloss.join(`, `)}
-                </Text>
+                <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
+                  <Pressable
+                    accessibilityRole="radio"
+                    accessibilityState={{
+                      checked: selectedMeaning === entry.hanziWord,
+                    }}
+                    aria-checked={selectedMeaning === entry.hanziWord}
+                    className="min-w-0 shrink"
+                    onPress={(event) => {
+                      event.stopPropagation();
+                      onHanziWordChanged(entry.hanziWord);
+                    }}
+                  >
+                    <Text className="font-sans text-lg/normal font-normal">
+                      {entry.gloss.join(`, `)}
+                    </Text>
+                  </Pressable>
+                  <WikiHanziProgressLozenge
+                    hanziWord={entry.hanziWord}
+                    skillSrsStates={skillSrsStates}
+                    hasPinyin={entry.pinyin?.[0] != null}
+                  />
+                </View>
                 {exampleSentence == null ? null : (
                   <WikiExampleSentence exampleSentence={exampleSentence} />
                 )}
@@ -89,6 +117,8 @@ export function ToggleButton({
 }>) {
   return (
     <Pressable
+      accessible={false}
+      focusable={false}
       className={toggleButtonClass({ pressed, className })}
       onPress={() => {
         onPressedChanged(!pressed);

@@ -1,11 +1,6 @@
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { use } from "react";
-import type {
-  HanziCharacter,
-  HanziWord,
-  Skill,
-  SrsStateType,
-} from "@/data/model";
+import type { HanziCharacter, HanziWord } from "@/data/model";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { View } from "@/client/ui/View";
 import { ComponentLozenge } from "./ComponentLozenge";
@@ -17,22 +12,17 @@ import { deepDecomposeHanziWithStrokeSpecs } from "@/dictionary";
 import { intersperse } from "@/client/react";
 import { arrayFilterUnique } from "@pinyinly/lib/collections";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
-import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
-import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
-import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { HanziStrokesAnimatedTile } from "./HanziStrokesAnimatedTile";
 import { WikiPageEditModeContext } from "./WikiPageEditModeContext";
 
 export function WikiHanziCharacterHeaderOverview({
   hanzi,
   hanziWord,
-  skillSrsStates,
   onModalDismiss,
   ...rest
 }: {
   hanzi: HanziCharacter;
   hanziWord: HanziWord | null;
-  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   onModalDismiss?: () => void;
 }) {
   true satisfies IsExhaustedRest<typeof rest>;
@@ -69,16 +59,9 @@ export function WikiHanziCharacterHeaderOverview({
     <View className="gap-[10px]">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row items-center gap-1">
-          <WikiHanziBookmarkLozenge hanziWord={hanziWord} />
-          <WikiHanziHskLozenges hanzi={hanzi} />
           {characterData?.isComponent ? (
             <ComponentLozenge isStructural={characterData.isStructural} />
           ) : null}
-          <WikiHanziProgressLozenge
-            hanzi={hanzi}
-            hanziWord={hanziWord}
-            skillSrsStates={skillSrsStates}
-          />
         </View>
       </View>
       <View>

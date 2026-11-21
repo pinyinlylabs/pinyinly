@@ -337,43 +337,49 @@ function DropdownMenuItem({
 function DropdownMenuCheckboxItem({
   className,
   children,
+  asChild = false,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem> & {
   children?: React.ReactNode;
 }) {
+  // The primitive's web adapter does not forward disabled to its Pressable.
+  const Component = asChild ? Slot : Pressable;
   return (
     <Text.ClassContext.Provider value="font-sans text-sm font-semibold text-fg select-none group-active:text-accent-fg">
-      <DropdownMenuPrimitive.CheckboxItem
-        className={cn(
-          `
-            group relative flex flex-row items-center gap-2 rounded py-2 pr-2 pl-8
+      <DropdownMenuPrimitive.CheckboxItem {...props} asChild>
+        <Component
+          disabled={props.disabled}
+          role={Platform.OS === `web` ? `menuitemcheckbox` : `checkbox`}
+          className={cn(
+            `
+              group relative flex flex-row items-center gap-2 rounded py-2 pr-2 pl-8
 
-            active:bg-accent
+              active:bg-accent
 
-            sm:py-1.5
+              sm:py-1.5
 
-            web:cursor-default web:outline-none
+              web:cursor-default web:outline-none
 
-            web:focus:bg-accent web:focus:text-accent-fg
+              web:focus:bg-accent web:focus:text-accent-fg
 
-            web:data-[disabled]:pointer-events-none
-          `,
-          props.disabled && `opacity-50`,
-          className,
-        )}
-        {...props}
-      >
-        <View className="absolute left-2 flex size-3.5 items-center justify-center">
-          <DropdownMenuPrimitive.ItemIndicator>
-            <Icon
-              icon="check"
-              tintColorClassName="accent-fg"
-              size={16}
-              className={`web:pointer-events-none`}
-            />
-          </DropdownMenuPrimitive.ItemIndicator>
-        </View>
-        {children}
+              web:data-[disabled]:pointer-events-none
+            `,
+            props.disabled && `opacity-50`,
+            className,
+          )}
+        >
+          <View className="absolute left-2 flex size-3.5 items-center justify-center">
+            <DropdownMenuPrimitive.ItemIndicator>
+              <Icon
+                icon="check"
+                tintColorClassName="accent-fg"
+                size={16}
+                className={`web:pointer-events-none`}
+              />
+            </DropdownMenuPrimitive.ItemIndicator>
+          </View>
+          {children}
+        </Component>
       </DropdownMenuPrimitive.CheckboxItem>
     </Text.ClassContext.Provider>
   );

@@ -37,8 +37,8 @@ type LozengeProps =
       progress?: number;
       progressClassName?: string;
       children: ReactNode;
-      icon?: never;
-      iconTintColorClassName?: never;
+      icon?: IconName;
+      iconTintColorClassName?: string;
     })
   | (LozengeBaseProps & {
       kind: `icon`;
@@ -89,12 +89,16 @@ function TextLozenge({
   className,
   progress,
   progressClassName = `bg-blue/20`,
+  icon,
+  iconTintColorClassName,
   children,
   ...pressableProps
 }: LozengeBaseProps & {
   size?: `sm` | `md`;
   progress?: number;
   progressClassName?: string;
+  icon?: IconName;
+  iconTintColorClassName?: string;
   children: ReactNode;
 }) {
   const Container = pressableProps.onPress == null ? View : Pressable;
@@ -108,6 +112,7 @@ function TextLozenge({
         size,
         interactive: pressableProps.onPress != null,
         className: [
+          `flex-row items-center gap-1`,
           progress == null ? `` : `relative overflow-hidden`,
           className,
         ],
@@ -121,6 +126,14 @@ function TextLozenge({
             ${progressClassName}
           `}
           style={{ width: `${Math.min(progress, 1) * 100}%` }}
+        />
+      )}
+      {icon == null ? null : (
+        <Icon
+          icon={icon}
+          size={12}
+          tintColorClassName={iconTintColorClassName}
+          className="relative"
         />
       )}
       <Text

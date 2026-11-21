@@ -16,6 +16,14 @@ export default () => (
     <Lozenge color="violet" progress={0.5}>
       Rank 3
     </Lozenge>
+    <Lozenge
+      color="blue"
+      progress={0.5}
+      icon="bookmark-filled"
+      iconTintColorClassName="accent-blue"
+    >
+      Novice
+    </Lozenge>
     <Tooltip>
       <Tooltip.Trigger asChild>
         <Lozenge

@@ -4,6 +4,7 @@ import { SrsKind } from "#data/model.ts";
 import type {
   HanziCharacter,
   HanziWord,
+  PinyinText,
   Skill,
   SrsStateType,
 } from "#data/model.ts";
@@ -13,7 +14,7 @@ import { TrpcProvider } from "#client/ui/TrpcProvider.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.ts";
 import { testWithRizzle } from "#test/util/rizzleHelpers.ts";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
@@ -23,9 +24,11 @@ import { WikiHanziMeaningsPanel } from "#client/ui/WikiHanziMeaningsPanel.tsx";
 import { WikiHanziProgressLozenge } from "#client/ui/WikiHanziProgressLozenge.tsx";
 import { getHanziWordsProgress } from "#client/ui/wikiHanziProgress.ts";
 import { WikiHanziBookmarkMenu } from "#client/ui/WikiHanziBookmarkMenu.tsx";
+import type { UseUserHanziMeaningOptions } from "#client/ui/hooks/useUserHanziMeaning.ts";
 
-const { useLiveQueryMock } = vi.hoisted(() => ({
+const { useLiveQueryMock, useBookmarkToggleMock } = vi.hoisted(() => ({
   useLiveQueryMock: vi.fn(),
+  useBookmarkToggleMock: vi.fn(),
 }));
 
 vi.mock(import(`@tanstack/react-db`), async (importOriginal) => ({
@@ -33,24 +36,51 @@ vi.mock(import(`@tanstack/react-db`), async (importOriginal) => ({
   useLiveQuery: useLiveQueryMock,
 }));
 
-vi.mock(import(`#client/ui/Tooltip.tsx`), () => ({
-  Tooltip: Object.assign(({ children }: PropsWithChildren) => <>{children}</>, {
-    Trigger: ({ children }: PropsWithChildren) => <>{children}</>,
-    Content: () => null,
+vi.mock(`react-native-screens`, () => ({
+  FullWindowOverlay: ({ children }: PropsWithChildren) => <>{children}</>,
+}));
+
+vi.mock(import(`#client/ui/hooks/useBookmarkToggle.ts`), () => ({
+  useBookmarkToggle: useBookmarkToggleMock,
+}));
+
+vi.mock(import(`#client/ui/hooks/useUserHanziMeaning.ts`), () => ({
+  useUserHanziMeaning: ({ hanzi, meaningKey }: UseUserHanziMeaningOptions) => ({
+    value: {
+      hanzi,
+      meaningKey,
+      gloss: `my custom meaning`,
+      pinyin: `jǐ` as PinyinText,
+    },
+    isLoading: false,
+    set: vi.fn(),
+    remove: vi.fn(),
+    meaningKey,
   }),
 }));
 
-vi.mock(import(`#client/ui/WikiHanziBookmarkMenu.tsx`), () => ({
-  WikiHanziBookmarkMenu: ({ hanziWord }: { hanziWord: HanziWord | null }) => (
-    <button type="button" disabled={hanziWord == null}>
-      {hanziWord == null ? `Bookmark` : `Bookmark ${hanziWord}`}
-    </button>
-  ),
-}));
+vi.mock(
+  import(`#client/ui/WikiHanziBookmarkMenu.tsx`),
+  async (importOriginal) => ({
+    ...(await importOriginal()),
+    WikiHanziBookmarkMenu: ({ hanziWord }: { hanziWord: HanziWord | null }) => (
+      <button type="button" disabled={hanziWord == null}>
+        {hanziWord == null ? `Bookmark` : `Bookmark ${hanziWord}`}
+      </button>
+    ),
+  }),
+);
 
 const test = testWithRizzle;
 
 beforeEach(() => {
+  useBookmarkToggleMock.mockReturnValue({
+    isBookmarked: false,
+    isLoading: false,
+    toggle: vi.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+  });
   vi.stubGlobal(
     `fetch`,
     vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
@@ -86,6 +116,7 @@ function TestChooser() {
         hanzi={hanzi}
         hanziWord={hanziWord}
         onHanziWordChanged={setHanziWord}
+        skillSrsStates={new Map()}
       />
       <WikiHanziBookmarkMenu hanzi={hanzi} hanziWord={hanziWord} />
     </>
@@ -120,6 +151,8 @@ test(`scopes the page study action to the selected meaning`, ({ rizzle }) => {
 
   fireEvent.click(screen.getByText(`how many, a few`));
 
+  expect(screen.getByRole(`radio`, { name: `how many, a few` })).toBeChecked();
+  expect(screen.getByRole(`radio`, { name: `small table` })).not.toBeChecked();
   expect(
     screen.getByRole(`button`, { name: `Bookmark 几:howMany` }),
   ).toBeEnabled();
@@ -129,6 +162,7 @@ test(`scopes the page study action to the selected meaning`, ({ rizzle }) => {
 
   fireEvent.click(screen.getByText(`small table`));
 
+  expect(screen.getByRole(`radio`, { name: `small table` })).toBeChecked();
   expect(
     screen.getByRole(`button`, { name: `Bookmark 几:smallTable` }),
   ).toBeEnabled();
@@ -202,7 +236,7 @@ test(`shows descriptions beside their character meanings`, async ({
     ),
   );
 
-  render(<WikiHanziMeaningsPanel hanzi={hanzi} />, {
+  render(<WikiHanziMeaningsPanel hanzi={hanzi} skillSrsStates={new Map()} />, {
     wrapper: providers(rizzle),
   });
 
@@ -237,6 +271,7 @@ test(`selects a sole word meaning for the page study action by default`, ({
       hanzi={hanzi}
       selectedHanziWord={null}
       onHanziWordSelected={onHanziWordSelected}
+      skillSrsStates={new Map()}
     />,
     { wrapper: providers(rizzle) },
   );
@@ -268,18 +303,84 @@ test(`requires a choice when a word has multiple meanings`, ({ rizzle }) => {
       hanzi={hanzi}
       selectedHanziWord={null}
       onHanziWordSelected={onHanziWordSelected}
+      skillSrsStates={new Map()}
     />,
     { wrapper: providers(rizzle) },
   );
 
   expect(onHanziWordSelected).not.toHaveBeenCalled();
   expect(screen.getAllByRole(`radio`)).toHaveLength(2);
+  expect(
+    screen.getAllByRole(`button`, {
+      name: `Not Started. Not bookmarked. Bookmark and proficiency details`,
+    }),
+  ).toHaveLength(2);
+  for (const gloss of [`how many, a few`, `small table`]) {
+    const glossRow = screen.getByRole(`radio`, { name: gloss }).parentElement;
+    expect(glossRow).not.toBeNull();
+    expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(
+      `Not Started`,
+    );
+  }
 
   fireEvent.click(screen.getByText(`how many, a few`));
 
   expect(onHanziWordSelected).toHaveBeenCalledExactlyOnceWith(
     meanings[0]!.hanziWord,
   );
+});
+
+test(`shows a meaning-local lozenge for every character choice`, ({
+  rizzle,
+}) => {
+  useLiveQueryMock.mockReturnValue({ data: meanings });
+  useBookmarkToggleMock.mockImplementation((hanziWord: HanziWord) => ({
+    isBookmarked: hanziWord === meanings[0]!.hanziWord,
+    isLoading: false,
+    toggle: vi.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+  }));
+  render(<TestChooser />, { wrapper: providers(rizzle) });
+  expect(
+    screen.getByRole(`button`, {
+      name: `Not Started. Bookmarked. Bookmark and proficiency details`,
+    }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole(`button`, {
+      name: `Not Started. Not bookmarked. Bookmark and proficiency details`,
+    }),
+  ).toBeInTheDocument();
+  expect(useBookmarkToggleMock).toHaveBeenCalledWith(meanings[0]!.hanziWord);
+  expect(useBookmarkToggleMock).toHaveBeenCalledWith(meanings[1]!.hanziWord);
+});
+
+test(`shows no status lozenge when there are no meanings`, ({ rizzle }) => {
+  useLiveQueryMock.mockReturnValue({ data: [] });
+  render(<WikiHanziMeaningsPanel hanzi={hanzi} skillSrsStates={new Map()} />, {
+    wrapper: providers(rizzle),
+  });
+  expect(screen.getByText(`No meanings yet.`)).toBeInTheDocument();
+  expect(screen.queryByRole(`button`)).not.toBeInTheDocument();
+  expect(useBookmarkToggleMock).not.toHaveBeenCalled();
+});
+
+test(`shows a meaning-local lozenge beside a custom meaning`, ({ rizzle }) => {
+  useLiveQueryMock.mockReturnValueOnce({ data: [] }).mockReturnValueOnce({
+    data: [{ hanzi, meaningKey: `custom` }],
+  });
+  render(<WikiHanziMeaningsPanel hanzi={hanzi} skillSrsStates={new Map()} />, {
+    wrapper: providers(rizzle),
+  });
+  const glossRow =
+    screen.getByText(`my custom meaning`).parentElement?.parentElement;
+  expect(glossRow).not.toBeNull();
+  expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(
+    `Not Started`,
+  );
+  expect(useBookmarkToggleMock).toHaveBeenCalledWith(`几:custom`);
+  expect(screen.getByText(`Custom`)).toBeInTheDocument();
 });
 
 test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
@@ -289,13 +390,54 @@ test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
 
   render(
     <WikiHanziProgressLozenge
-      hanzi={hanzi}
+      hanziWord={meanings[0]!.hanziWord}
+      hasPinyin
       skillSrsStates={new Map<Skill, SrsStateType>()}
     />,
     { wrapper: providers(rizzle) },
   );
 
   expect(screen.getByText(`Not Started`)).toBeInTheDocument();
+});
+
+test(`keeps each meaning's proficiency independent`, ({ rizzle }) => {
+  const skillSrsStates = new Map<Skill, SrsStateType>(
+    [`he:几:howMany`, `hpi:几:howMany`, `hpf:几:howMany`, `hp:几:howMany`].map(
+      (skill) => [
+        skill as Skill,
+        {
+          kind: SrsKind.FsrsFourPointFive,
+          prevReviewAt: new Date(),
+          nextReviewAt: new Date(),
+          stability: 1000,
+          difficulty: 0,
+        },
+      ],
+    ),
+  );
+  render(
+    <>
+      {meanings.map((meaning) => (
+        <WikiHanziProgressLozenge
+          key={meaning.hanziWord}
+          hanziWord={meaning.hanziWord}
+          skillSrsStates={skillSrsStates}
+          hasPinyin
+        />
+      ))}
+    </>,
+    { wrapper: providers(rizzle) },
+  );
+  expect(
+    screen.getByRole(`button`, {
+      name: `Master. Not bookmarked. Bookmark and proficiency details`,
+    }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole(`button`, {
+      name: `Not Started. Not bookmarked. Bookmark and proficiency details`,
+    }),
+  ).toBeInTheDocument();
 });
 
 test(`averages meaning progress until a meaning is selected`, () => {

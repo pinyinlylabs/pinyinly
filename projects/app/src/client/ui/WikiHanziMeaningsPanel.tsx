@@ -6,6 +6,8 @@ import type {
   CharacterExampleSentence,
   HanziText,
   HanziWord,
+  Skill,
+  SrsStateType,
 } from "@/data/model";
 import { wikiPayloadQuery } from "@/client/query";
 import { buildHanziWord } from "@/dictionary";
@@ -18,17 +20,20 @@ import { View } from "@/client/ui/View";
 import { useDb } from "./hooks/useDb";
 import { useUserHanziMeaning } from "./hooks/useUserHanziMeaning";
 import { WikiExampleSentence } from "./WikiExampleSentence";
+import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 
 interface WikiHanziMeaningsPanelProps {
   hanzi: HanziText;
   selectedHanziWord?: HanziWord | null;
   onHanziWordSelected?: (hanziWord: HanziWord) => void;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
 }
 
 export function WikiHanziMeaningsPanel({
   hanzi,
   selectedHanziWord,
   onHanziWordSelected,
+  skillSrsStates,
 }: WikiHanziMeaningsPanelProps) {
   const db = useDb();
 
@@ -102,6 +107,7 @@ export function WikiHanziMeaningsPanel({
                 isMeaningPicker && selectedHanziWord === meaning.hanziWord
               }
               onSelect={isMeaningPicker ? onHanziWordSelected : undefined}
+              skillSrsStates={skillSrsStates}
             />
           ))}
 
@@ -115,6 +121,7 @@ export function WikiHanziMeaningsPanel({
                 selectedHanziWord === buildHanziWord(hanzi, meaning.meaningKey)
               }
               onSelect={isMeaningPicker ? onHanziWordSelected : undefined}
+              skillSrsStates={skillSrsStates}
             />
           ))}
         </View>
@@ -129,12 +136,14 @@ function DictionaryMeaningListItem({
   exampleSentence,
   selected,
   onSelect,
+  skillSrsStates,
 }: {
   meaning: DictionaryCollectionEntry;
   description?: string;
   exampleSentence?: CharacterExampleSentence;
   selected: boolean;
   onSelect?: (hanziWord: HanziWord) => void;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
 }) {
   const primaryPinyin = meaning.pinyin?.[0];
   const secondaryPinyins = meaning.pinyin?.slice(1) ?? [];
@@ -150,6 +159,10 @@ function DictionaryMeaningListItem({
         hanzi={meaning.hanzi}
         pinyin={primaryPinyin}
         glosses={meaning.gloss}
+        hanziWord={meaning.hanziWord}
+        skillSrsStates={skillSrsStates}
+        selected={selected}
+        onSelect={onSelect}
       />
 
       {description == null || description.length === 0 ? null : (
@@ -178,11 +191,13 @@ function UserMeaningListItem({
   meaning,
   selected,
   onSelect,
+  skillSrsStates,
 }: {
   hanzi: HanziText;
   meaning: UserDictionaryEntry;
   selected: boolean;
   onSelect?: (hanziWord: HanziWord) => void;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
 }) {
   const { value } = useUserHanziMeaning({
     hanzi,
@@ -216,6 +231,10 @@ function UserMeaningListItem({
           pinyin={value.pinyin}
           glosses={[value.gloss]}
           trailingBadge={customBadge}
+          hanziWord={buildHanziWord(hanzi, meaning.meaningKey)}
+          skillSrsStates={skillSrsStates}
+          selected={selected}
+          onSelect={onSelect}
         />
         {value.note == null || value.note.length === 0 ? null : (
           <LabeledText label="Note">{value.note}</LabeledText>
@@ -244,8 +263,8 @@ function MeaningSelection({
 
   return (
     <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
+      accessible={false}
+      focusable={false}
       className={`
         rounded-lg border p-3
 
@@ -266,14 +285,30 @@ function MeaningCoreText({
   hanzi,
   pinyin,
   trailingBadge,
+  hanziWord,
+  skillSrsStates,
+  selected,
+  onSelect,
 }: {
   glosses: string[];
   hanzi: HanziText;
   pinyin?: string;
   trailingBadge?: React.ReactNode;
+  hanziWord: HanziWord;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  selected: boolean;
+  onSelect?: (hanziWord: HanziWord) => void;
 }) {
   const primaryGloss = glosses[0] ?? ``;
   const secondaryGlosses = glosses.slice(1);
+  const gloss = (
+    <Text className="min-w-0 shrink font-sans text-base leading-6">
+      <Text className="text-fg-loud">{primaryGloss}</Text>
+      {secondaryGlosses.length === 0 ? null : (
+        <Text className="text-fg">{`; ${secondaryGlosses.join(`; `)}`}</Text>
+      )}
+    </Text>
+  );
 
   return (
     <View className="gap-1">
@@ -286,12 +321,29 @@ function MeaningCoreText({
         )}
         {trailingBadge}
       </View>
-      <Text className="ml-4 font-sans text-base leading-6">
-        <Text className="text-fg-loud">{primaryGloss}</Text>
-        {secondaryGlosses.length === 0 ? null : (
-          <Text>{`; ${secondaryGlosses.join(`; `)}`}</Text>
+      <View className="ml-4 flex-row flex-wrap items-center gap-x-2 gap-y-1">
+        {onSelect == null ? (
+          gloss
+        ) : (
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: selected }}
+            aria-checked={selected}
+            className="min-w-0 shrink"
+            onPress={(event) => {
+              event.stopPropagation();
+              onSelect(hanziWord);
+            }}
+          >
+            {gloss}
+          </Pressable>
         )}
-      </Text>
+        <WikiHanziProgressLozenge
+          hanziWord={hanziWord}
+          skillSrsStates={skillSrsStates}
+          hasPinyin={pinyin != null && pinyin.length > 0}
+        />
+      </View>
     </View>
   );
 }
