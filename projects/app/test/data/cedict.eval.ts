@@ -4,20 +4,15 @@ import {
   parseCedictV2Line,
   nestedStringSetScorer,
   buildCedictEntrySenseMergingPrompt,
-  senseGroupingEntrySchema,
   sampledRegroupEntry,
 } from "./cedict";
 import { createHarness, createJudge, describeEval } from "vitest-evals";
-import type { HarnessMetadata, JsonValue, JudgeContext } from "vitest-evals";
+import type { JsonValue } from "vitest-evals";
 import { pinyinNumericToDiacritic } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
-import { z } from "zod";
+import { expect } from "vitest";
 import { createResponsePromptHarness } from "#test/util/prompts/eval.ts";
-
-interface SenseGroupingHarnessMetadata extends HarnessMetadata {
-  expecteds: SenseGroupingEntryType[];
-}
 
 function formatDefinitionStable(definition: string[][]): string {
   return (
@@ -30,59 +25,47 @@ function formatDefinitionStable(definition: string[][]): string {
   );
 }
 
-const SenseGroupingJudge = createJudge(
-  `SenseGroupingJudge`,
-  async ({
-    output,
-    metadata,
-  }: JudgeContext<
-    SenseGroupingEntryType,
-    SenseGroupingEntryType,
-    SenseGroupingHarnessMetadata
-  >) => {
-    const { expecteds } = metadata;
+const SenseGroupingJudge = createJudge<
+  SenseGroupingEntryType,
+  SenseGroupingEntryType,
+  { expecteds: SenseGroupingEntryType[] }
+>(`SenseGroupingJudge`, async ({ output, expecteds }) => {
+  let bestScore;
+  let bestExpected;
 
-    let bestScore;
-    let bestExpected;
-
-    // Score the output against each expected and take the best one, since there
-    // can be multiple valid groupings.
-    for (const expected of expecteds) {
-      const score = nestedStringSetScorer({
-        actual: output.definition,
-        expected: expected.definition,
-      });
-      bestScore ??= score;
-      bestExpected ??= expected;
-      if (score.score > bestScore.score) {
-        bestScore = score;
-        bestExpected = expected;
-      }
+  // Score the output against each expected and take the best one, since there
+  // can be multiple valid groupings.
+  for (const expected of expecteds) {
+    const score = nestedStringSetScorer({
+      actual: output.definition,
+      expected: expected.definition,
+    });
+    bestScore ??= score;
+    bestExpected ??= expected;
+    if (score.score > bestScore.score) {
+      bestScore = score;
+      bestExpected = expected;
     }
+  }
 
-    invariant(bestScore != null);
-    invariant(bestExpected != null);
+  invariant(bestScore != null);
+  invariant(bestExpected != null);
 
-    return {
-      score: bestScore.score,
-      metadata: {
-        rationale:
-          bestScore.score === 1
-            ? `Exact match`
-            : `Output differed:\n${diffStringsUnified(formatDefinitionStable(bestExpected.definition), formatDefinitionStable(output.definition))}`,
-      },
-    };
-  },
-);
+  return {
+    score: bestScore.score,
+    metadata: {
+      rationale:
+        bestScore.score === 1
+          ? `Exact match`
+          : `Output differed:\n${diffStringsUnified(formatDefinitionStable(bestExpected.definition), formatDefinitionStable(output.definition))}`,
+    },
+  };
+});
 
 describeEval(
   `buildCedictEntrySenseMergingPrompt eval`,
   {
-    harness: createResponsePromptHarness(
-      buildCedictEntrySenseMergingPrompt,
-      z.object({ expecteds: z.array(senseGroupingEntrySchema) }),
-    ),
-    judges: [SenseGroupingJudge],
+    harness: createResponsePromptHarness(buildCedictEntrySenseMergingPrompt),
   },
   (it) => {
     it.for([
@@ -155,11 +138,8 @@ describeEval(
         ),
       );
 
-      await run(input, {
-        metadata: {
-          expecteds: expecteds,
-        },
-      });
+      const result = await run(input);
+      await expect(result).toSatisfyJudge(SenseGroupingJudge, { expecteds });
     });
   },
 );
@@ -167,11 +147,7 @@ describeEval(
 describeEval(
   `sampledRegroupEntry eval`,
   {
-    harness: createHarness<
-      SenseGroupingEntryType,
-      SenseGroupingEntryType,
-      SenseGroupingHarnessMetadata
-    >({
+    harness: createHarness<SenseGroupingEntryType, SenseGroupingEntryType>({
       name: `sampledRegroupEntryHarness`,
       run: async ({ input, signal, setArtifact }) => {
         const {
@@ -216,8 +192,6 @@ describeEval(
         };
       },
     }),
-
-    judges: [SenseGroupingJudge],
   },
   (it) => {
     it.for([
@@ -268,11 +242,8 @@ describeEval(
         ),
       );
 
-      await run(input, {
-        metadata: {
-          expecteds: expecteds,
-        },
-      });
+      const result = await run(input);
+      await expect(result).toSatisfyJudge(SenseGroupingJudge, { expecteds });
     });
   },
 );
