@@ -36,7 +36,7 @@
     "@radix-ui/react-dropdown-menu": "^2.1.24",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-replicache/deep-freeze": "^1.1.0",
-    "@react-native/assets-registry": "0.88.0",
+    "@react-native/assets-registry": "0.88.1",
     "@rive-app/react-canvas": "^4.21.4",
     "@rn-primitives/dropdown-menu": "patch:@rn-primitives/dropdown-menu@npm%3A1.5.2#~/.yarn/patches/@rn-primitives-dropdown-menu-npm-1.5.2-79595d43ce.patch",
     "@rn-primitives/hooks": "^1.5.2",
