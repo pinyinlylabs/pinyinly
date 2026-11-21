@@ -7,14 +7,12 @@ import { navItems } from "@/client/ui/navItems";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { ReactNode } from "react";
-import { Fragment, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useLayoutEffect, useRef } from "react";
 import { Platform, Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
 import { HeaderProvider } from "./HeaderProvider";
 import { PageSheetModal } from "./PageSheetModal";
-import { QuickSearchResults } from "./QuickSearchResults";
-import { TextInputSingle } from "./TextInputSingle";
 
 interface MobileNavMenuProps {
   isOpen: boolean;
@@ -70,8 +68,6 @@ export function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
 }
 
 function NavMenuContent({ dismiss }: { dismiss: () => void }) {
-  const [query, setQuery] = useState(``);
-
   return (
     <View className="size-full bg-bg">
       <View className="flex-row px-4 py-3">
@@ -85,82 +81,55 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
           </Pressable>
         </View>
       </View>
-      <View className="px-4 py-2">
-        <View className="flex-row items-center gap-2 rounded-xl bg-bg-high px-3 py-2">
-          <Icon icon="search" size={16} tintColorClassName="accent-muted-fg" />
-          <TextInputSingle
-            placeholder="Search…"
-            value={query}
-            onChangeText={setQuery}
-            autoCorrect={false}
-            className="flex-1"
-            variant="bare"
-          />
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="items-stretch gap-8 px-4 pt-4 pb-6"
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="w-full overflow-hidden rounded-xl bg-bg-high">
+          {navItems
+            .filter((section) => section.primary === true)
+            .map((section, sectionIndex) => (
+              <Fragment key={sectionIndex}>
+                {section.title == null ? null : (
+                  <View className="my-2 h-px bg-fg/5" />
+                )}
+                {section.items.map((item, itemIndex) => (
+                  <UserSettingToggleGuard key={itemIndex} setting={item.guard}>
+                    <MobileNavItem
+                      name={item.name}
+                      href={item.href}
+                      lozenge={item.lozenge}
+                      onNavigate={dismiss}
+                    />
+                  </UserSettingToggleGuard>
+                ))}
+              </Fragment>
+            ))}
         </View>
-      </View>
-      {query.trim().length > 0 ? (
-        <QuickSearchResults
-          query={query}
-          onChangeQuery={setQuery}
-          onSelect={dismiss}
-        />
-      ) : (
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="items-stretch gap-8 px-4 pt-4 pb-6"
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="w-full overflow-hidden rounded-xl bg-bg-high">
-            {navItems
-              .filter((section) => section.primary === true)
-              .map((section, sectionIndex) => (
-                <Fragment key={sectionIndex}>
-                  {section.title == null ? null : (
-                    <View className="my-2 h-px bg-fg/5" />
-                  )}
-                  {section.items.map((item, itemIndex) => (
-                    <UserSettingToggleGuard
-                      key={itemIndex}
-                      setting={item.guard}
-                    >
-                      <MobileNavItem
-                        name={item.name}
-                        href={item.href}
-                        lozenge={item.lozenge}
-                        onNavigate={dismiss}
-                      />
-                    </UserSettingToggleGuard>
-                  ))}
-                </Fragment>
-              ))}
-          </View>
 
-          <View className="items-start px-4">
-            {navItems
-              .filter((section) => section.primary !== true)
-              .map((section, sectionIndex) => (
-                <View
-                  key={sectionIndex}
-                  className={sectionIndex === 0 ? `mt-3` : undefined}
-                >
-                  {section.items.map((item, itemIndex) => (
-                    <UserSettingToggleGuard
-                      key={itemIndex}
-                      setting={item.guard}
-                    >
-                      <MobileNavSubtleItem
-                        name={item.name}
-                        href={item.href}
-                        onNavigate={dismiss}
-                      />
-                    </UserSettingToggleGuard>
-                  ))}
-                </View>
-              ))}
-          </View>
-          {Platform.OS === `web` ? <BuildTimestampStamp /> : null}
-        </ScrollView>
-      )}
+        <View className="items-start px-4">
+          {navItems
+            .filter((section) => section.primary !== true)
+            .map((section, sectionIndex) => (
+              <View
+                key={sectionIndex}
+                className={sectionIndex === 0 ? `mt-3` : undefined}
+              >
+                {section.items.map((item, itemIndex) => (
+                  <UserSettingToggleGuard key={itemIndex} setting={item.guard}>
+                    <MobileNavSubtleItem
+                      name={item.name}
+                      href={item.href}
+                      onNavigate={dismiss}
+                    />
+                  </UserSettingToggleGuard>
+                ))}
+              </View>
+            ))}
+        </View>
+        {Platform.OS === `web` ? <BuildTimestampStamp /> : null}
+      </ScrollView>
     </View>
   );
 }
