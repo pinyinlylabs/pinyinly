@@ -38,6 +38,11 @@ const argv = await yargs(process.argv.slice(2))
     type: `boolean`,
     default: false,
   })
+  .option(`missing-only`, {
+    type: `boolean`,
+    default: false,
+    describe: `import MakeMeAHanzi graphics only for missing, count-only, or median-missing characters`,
+  })
   .version(false)
   .strict()
   .parseAsync();
@@ -119,6 +124,34 @@ const allCharacters = await glob(`${wikiDir}/*`).then((ps) => {
   const characters: HanziCharacter[] = ps
     .map((p) => path.basename(p))
     .filter((p): p is HanziCharacter => isHanziCharacter(p as HanziText));
+
+  if (argv.missingOnly) {
+    for (const character of graphicsDataByCharacter.keys()) {
+      if (!isHanziCharacter(character as HanziText)) {
+        continue;
+      }
+      const hanziCharacter = character as HanziCharacter;
+
+      const dataFile = path.join(wikiDir, hanziCharacter, `character.json`);
+      if (!existsSync(dataFile)) {
+        continue;
+      }
+
+      const existingData = jsonCodec(characterJsonSchema).parse(
+        readFileSync(dataFile, `utf-8`),
+      );
+      const strokes = existingData.svg.strokes;
+      const medians = existingData.svg.medians;
+      if (
+        (typeof strokes === `number` ||
+          medians == null ||
+          medians.length !== strokes.length) &&
+        !characters.includes(hanziCharacter)
+      ) {
+        characters.push(hanziCharacter);
+      }
+    }
+  }
 
   if (argv.update != null) {
     for (const character of argv.update) {

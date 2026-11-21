@@ -977,8 +977,8 @@ export const buildHanziWordsToCheck = memoize0(async function (): Promise<
   return [
     ...dictionary.hsk1HanziWords,
     ...dictionary.hsk2HanziWords,
-    // ...dictionary.hsk3HanziWords,
-    // ...dictionary.hsk4HanziWords,
+    ...dictionary.hsk3HanziWords,
+    ...dictionary.hsk4HanziWords,
     // ...dictionary.hsk5HanziWords,
     // ...dictionary.hsk6HanziWords,
     // ...dictionary.hsk7To9HanziWords,
