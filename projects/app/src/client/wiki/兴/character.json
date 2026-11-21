@@ -5,7 +5,10 @@
         {
           "description": "Restoring strength or bringing something back into a thriving state.",
           "gloss": "revival",
-          "occurrences": { "复兴": "fùxīng", "振兴": "zhènxīng" }
+          "occurrences": {
+            "复兴": "fùxīng",
+            "振兴": "zhènxīng"
+          }
         },
         {
           "description": "Coming into being, developing upward, or being established.",
@@ -19,12 +22,18 @@
         {
           "description": "Flourishing in strength, business, or overall vitality.",
           "gloss": "prosperity",
-          "occurrences": { "兴旺": "xīngwàng", "兴隆": "xīnglóng" }
+          "occurrences": {
+            "兴旺": "xīngwàng",
+            "兴隆": "xīnglóng"
+          }
         },
         {
           "description": "Energy or stimulation that rouses the body or mind.",
           "gloss": "excitement",
-          "occurrences": { "兴奋": "xīngfèn", "兴奋剂": "xīngfènjì" }
+          "occurrences": {
+            "兴奋": "xīngfèn",
+            "兴奋剂": "xīngfènjì"
+          }
         }
       ],
       "description": "Rising, renewal, growth, flourishing, building, and stirred-up energy.",

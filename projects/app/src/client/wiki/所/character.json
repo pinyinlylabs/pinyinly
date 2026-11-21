@@ -5,8 +5,12 @@
   "hanzi": "所",
   "mnemonic": {
     "components": {
-      "戶": { "label": "door" },
-      "斤": { "label": "resembles an axe" }
+      "戶": {
+        "label": "door"
+      },
+      "斤": {
+        "label": "resembles an axe"
+      }
     },
     "decomposition": "⿰戶斤",
     "hints": [

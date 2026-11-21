@@ -6,8 +6,14 @@
   "hanzi": "原",
   "mnemonic": {
     "components": {
-      "厂": { "color": "yellow", "label": "cliff" },
-      "泉": { "color": "cyanold", "label": "waterfall" }
+      "厂": {
+        "color": "yellow",
+        "label": "cliff"
+      },
+      "泉": {
+        "color": "cyanold",
+        "label": "waterfall"
+      }
     },
     "decomposition": "⿰厂泉",
     "hints": [

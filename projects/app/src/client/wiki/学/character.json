@@ -5,7 +5,10 @@
   "hanzi": "学",
   "mnemonic": {
     "components": {
-      "子": { "color": "blue", "label": "a child" }
+      "子": {
+        "color": "blue",
+        "label": "a child"
+      }
     },
     "decomposition": "⿱𰃮子",
     "hints": [

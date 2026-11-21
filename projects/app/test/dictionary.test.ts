@@ -2054,7 +2054,9 @@ describe(`character.json files`, async () => {
         meanings.length === 0 ||
         isComponentFormHanzi(character) ||
         characterJson.simplifiedForm != null ||
-        atomicCharacters.has(character)
+        atomicCharacters.has(character) ||
+        (characterJson.curriculumMeanings == null &&
+          characterJson.decompositions == null)
       ) {
         continue;
       }

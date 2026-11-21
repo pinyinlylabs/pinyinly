@@ -22,6 +22,10 @@
       "M 565 116 L 669 34 L 695 2 L 710 -41"
     ]
   },
-  "decompositions": { "⿱化贝": ["0-3", "4-7"] },
-  "mnemonic": { "decomposition": "⿱化贝" }
+  "decompositions": {
+    "⿱化贝": ["0-3", "4-7"]
+  },
+  "mnemonic": {
+    "decomposition": "⿱化贝"
+  }
 }

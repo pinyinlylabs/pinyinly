@@ -5,8 +5,14 @@
   "hanzi": "福",
   "mnemonic": {
     "components": {
-      "畐": { "color": "yellow", "label": "basket in a crop field" },
-      "礻": { "color": "blue", "label": "person praying" }
+      "畐": {
+        "color": "yellow",
+        "label": "basket in a crop field"
+      },
+      "礻": {
+        "color": "blue",
+        "label": "person praying"
+      }
     },
     "decomposition": "⿰礻畐",
     "hints": [

@@ -76,12 +76,17 @@
         {
           "description": "A continuing process or system is viewed as moving along in operation.",
           "gloss": "operate",
-          "occurrences": { "运行": "yùnxíng" }
+          "occurrences": {
+            "运行": "yùnxíng"
+          }
         },
         {
           "description": "The ability to go forward yields the sense that something is possible or acceptable.",
           "gloss": "work",
-          "occurrences": { "不行": "bùxíng", "可行": "kěxíng" }
+          "occurrences": {
+            "不行": "bùxíng",
+            "可行": "kěxíng"
+          }
         }
       ],
       "description": "Movement along a course, extended to doing, carrying matters forward, and functioning.",
@@ -116,7 +121,10 @@
         {
           "description": "Arrangement in rows develops into placement or membership within an ordered grouping.",
           "gloss": "rank",
-          "occurrences": { "排行榜": "páihángbǎng", "行列": "hángliè" }
+          "occurrences": {
+            "排行榜": "páihángbǎng",
+            "行列": "hángliè"
+          }
         }
       ],
       "description": "An arranged row, extended to recognized lines of work, commercial establishments, and relative standing.",

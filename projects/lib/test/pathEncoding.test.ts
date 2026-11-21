@@ -12,6 +12,7 @@ function gitLsFilesSync(cwd: string): string[] {
     {
       cwd,
       encoding: `utf8`,
+      maxBuffer: 10 * 1024 * 1024,
       stdio: [`pipe`, `pipe`, `ignore`],
     },
   );

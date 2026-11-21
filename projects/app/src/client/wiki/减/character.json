@@ -28,6 +28,10 @@
       "M 705 731 L 791 678 L 809 658"
     ]
   },
-  "decompositions": { "⿰冫咸": ["0,1", "2-10"] },
-  "mnemonic": { "decomposition": "⿰冫咸" }
+  "decompositions": {
+    "⿰冫咸": ["0,1", "2-10"]
+  },
+  "mnemonic": {
+    "decomposition": "⿰冫咸"
+  }
 }

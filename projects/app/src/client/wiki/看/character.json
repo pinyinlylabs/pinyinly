@@ -4,7 +4,14 @@
   },
   "hanzi": "看",
   "mnemonic": {
-    "components": { "龵": { "label": "hand" }, "目": { "label": "eye" } },
+    "components": {
+      "龵": {
+        "label": "hand"
+      },
+      "目": {
+        "label": "eye"
+      }
+    },
     "decomposition": "⿱龵目",
     "hints": [
       {
