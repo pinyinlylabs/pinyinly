@@ -3480,9 +3480,9 @@ __metadata:
   linkType: hard
 
 "@neondatabase/serverless@npm:^1.0.0":
-  version: 1.2.0
-  resolution: "@neondatabase/serverless@npm:1.2.0"
-  checksum: 10c0/c220dbd926c64686df47590333cd5e3f39b8d78331021c66ad3c60157396f03ee1ea60db18c2a3e63c71310cc64e04fb4f4a56d30976ca1dc0e6ae6ad3bad419
+  version: 1.2.1
+  resolution: "@neondatabase/serverless@npm:1.2.1"
+  checksum: 10c0/2a41639407afc4971d6a0727415355aff5708c96297a215b413d4d344010110d221c98004be58494ea83fc655f589bffc133034c5c619f137a914265cbfc0232
   languageName: node
   linkType: hard
 
