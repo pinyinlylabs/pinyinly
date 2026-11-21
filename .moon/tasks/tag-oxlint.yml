@@ -10,7 +10,7 @@ tasks:
       oxlint --deny-warnings --type-aware ${FIX_FLAG:-} .
     inputs:
       - "**/*.{cjs,js,mjs,ts,tsx}"
-      - "*.{cjs,js,mjs,ts,tsx}"
+      - "*.{cjs,js,mjs,ts,tsx,json,json5}"
       - ".oxlintrc.*"
       - "/projects/oxlint-rules/*.oxlintrc.*"
     env:
