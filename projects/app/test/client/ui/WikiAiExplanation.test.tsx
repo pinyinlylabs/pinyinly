@@ -12,7 +12,7 @@ const { useQueryMock } = vi.hoisted(() => ({
 }));
 
 vi.mock(`@tanstack/react-query`, async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,
