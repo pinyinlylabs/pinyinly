@@ -21,6 +21,7 @@ import {
   profileOverviewUserToggleSetting,
   soundMnemonicsUserToggleSetting,
   hanziWritingIssuesUserToggleSetting,
+  quizResultTooSlowUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -85,6 +86,15 @@ describe(`experimental settings`, () => {
     ).toEqual({ enabled: false });
     expect(userSettingDefinitions).toContain(
       hanziWritingIssuesUserToggleSetting,
+    );
+  });
+
+  test(`Too slow quiz result is disabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(quizResultTooSlowUserToggleSetting, {}),
+    ).toEqual({ enabled: false });
+    expect(userSettingDefinitions).toContain(
+      quizResultTooSlowUserToggleSetting,
     );
   });
 });
