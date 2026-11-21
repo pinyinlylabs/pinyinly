@@ -24,6 +24,10 @@
       "M 285 211 L 339 196 L 529 228 L 861 262 L 934 238"
     ]
   },
-  "decompositions": { "⿸⿸厂日子": ["0,1", "2-5", "6-8"] },
-  "mnemonic": { "decomposition": "⿸⿸厂日子" }
+  "decompositions": {
+    "⿸⿸厂日子": ["0,1", "2-5", "6-8"]
+  },
+  "mnemonic": {
+    "decomposition": "⿸⿸厂日子"
+  }
 }

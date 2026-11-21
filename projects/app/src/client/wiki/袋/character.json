@@ -28,6 +28,10 @@
       "M 471 313 L 489 289 L 613 190 L 718 119 L 786 82 L 870 67 L 986 63"
     ]
   },
-  "decompositions": { "⿱代衣": ["0-4", "5-10"] },
-  "mnemonic": { "decomposition": "⿱代衣" }
+  "decompositions": {
+    "⿱代衣": ["0-4", "5-10"]
+  },
+  "mnemonic": {
+    "decomposition": "⿱代衣"
+  }
 }

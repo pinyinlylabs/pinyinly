@@ -5,8 +5,13 @@
   "hanzi": "坏",
   "mnemonic": {
     "components": {
-      "不": { "label": "not" },
-      "土": { "color": "amber", "label": "the ground" }
+      "不": {
+        "label": "not"
+      },
+      "土": {
+        "color": "amber",
+        "label": "the ground"
+      }
     },
     "decomposition": "⿰土不",
     "hints": [

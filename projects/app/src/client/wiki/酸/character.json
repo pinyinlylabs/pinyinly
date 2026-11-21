@@ -34,6 +34,10 @@
       "M 564 300 L 568 286 L 648 193 L 788 69 L 843 50 L 959 28"
     ]
   },
-  "decompositions": { "⿰酉夋": ["0-6", "7-13"] },
-  "mnemonic": { "decomposition": "⿰酉夋" }
+  "decompositions": {
+    "⿰酉夋": ["0-6", "7-13"]
+  },
+  "mnemonic": {
+    "decomposition": "⿰酉夋"
+  }
 }

@@ -4,7 +4,11 @@
   },
   "hanzi": "北",
   "mnemonic": {
-    "components": { "③": { "label": "don't know" } },
+    "components": {
+      "③": {
+        "label": "don't know"
+      }
+    },
     "decomposition": "⿰③匕"
   },
   "svg": {

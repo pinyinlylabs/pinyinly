@@ -5,8 +5,12 @@
   "hanzi": "弋",
   "mnemonic": {
     "components": {
-      "丶": { "label": "a bullet" },
-      "𫠠": { "label": "a man falling backwards" }
+      "丶": {
+        "label": "a bullet"
+      },
+      "𫠠": {
+        "label": "a man falling backwards"
+      }
     },
     "decomposition": "⿺𫠠丶"
   },

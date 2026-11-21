@@ -22,6 +22,10 @@
       "M 786 789 L 834 750 L 834 386 L 845 101 L 840 70 L 824 39 L 779 54 L 727 80 L 708 98 L 698 98"
     ]
   },
-  "decompositions": { "⿰⿸尸巾刂": ["0-5", "6,7"] },
-  "mnemonic": { "decomposition": "⿰⿸尸巾刂" }
+  "decompositions": {
+    "⿰⿸尸巾刂": ["0-5", "6,7"]
+  },
+  "mnemonic": {
+    "decomposition": "⿰⿸尸巾刂"
+  }
 }

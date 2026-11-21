@@ -5,7 +5,11 @@
   "hanzi": "𡗗",
   "isStructural": true,
   "mnemonic": {
-    "components": { "③": { "label": "more hand parts" } },
+    "components": {
+      "③": {
+        "label": "more hand parts"
+      }
+    },
     "decomposition": "⿻𠂇③",
     "hints": [
       {

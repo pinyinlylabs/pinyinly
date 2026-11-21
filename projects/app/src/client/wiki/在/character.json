@@ -4,7 +4,11 @@
   },
   "hanzi": "在",
   "mnemonic": {
-    "components": { "③": { "label": "arch" } }
+    "components": {
+      "③": {
+        "label": "arch"
+      }
+    }
   },
   "svg": {
     "medians": [
