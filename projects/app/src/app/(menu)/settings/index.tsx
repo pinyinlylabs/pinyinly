@@ -2,6 +2,7 @@ import { AiImageStyleSettingControl } from "@/client/ui/AiImageStyleSettingContr
 import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
 import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import { SectionTitle } from "@/client/ui/SectionTitle";
+import { UserSettingToggleGuard } from "@/client/ui/UserSettingToggleGuard";
 import {
   ColorSchemeOverrideKind,
   colorSchemeOverrideSetting,
@@ -26,6 +27,7 @@ import {
   defaultPronunciationWeakWordRepeatCount,
   pronunciationWeakWordRepeatCountSetting,
   defaultWritingWeakWordRepeatCount,
+  soundMnemonicsUserToggleSetting,
   writingWeakWordRepeatCountSetting,
 } from "@/data/userSettings";
 import { RectButton } from "@/client/ui/RectButton";
@@ -263,10 +265,12 @@ export default function SettingsPage() {
         ))}
       </View>
 
-      <View className="gap-2 pt-6">
-        <SectionTitle>Images</SectionTitle>
-        <AiImageStyleSettingControl />
-      </View>
+      <UserSettingToggleGuard setting={soundMnemonicsUserToggleSetting}>
+        <View className="gap-2 pt-6">
+          <SectionTitle>Images</SectionTitle>
+          <AiImageStyleSettingControl />
+        </View>
+      </UserSettingToggleGuard>
 
       <View className="pt-6">
         <RectButton href="/settings/developer" variant="bare">
