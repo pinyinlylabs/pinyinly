@@ -86,14 +86,14 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
         contentContainerClassName="items-stretch gap-8 px-4 pt-4 pb-6"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="w-full overflow-hidden rounded-xl bg-bg-high">
+        <View className="w-full gap-3">
           {navItems
             .filter((section) => section.primary === true)
             .map((section, sectionIndex) => (
-              <Fragment key={sectionIndex}>
-                {section.title == null ? null : (
-                  <View className="my-2 h-px bg-fg/5" />
-                )}
+              <View
+                key={sectionIndex}
+                className="w-full overflow-hidden rounded-xl bg-bg-high"
+              >
                 {section.items.map((item, itemIndex) => (
                   <UserSettingToggleGuard key={itemIndex} setting={item.guard}>
                     <MobileNavItem
@@ -104,7 +104,7 @@ function NavMenuContent({ dismiss }: { dismiss: () => void }) {
                     />
                   </UserSettingToggleGuard>
                 ))}
-              </Fragment>
+              </View>
             ))}
         </View>
 
