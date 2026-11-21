@@ -7,7 +7,7 @@ import { navItems } from "@/client/ui/navItems";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { ReactNode } from "react";
-import { Fragment, useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { Platform, Pressable, ScrollView } from "react-native";
 import { Text } from "@/client/ui/Text";
 import { View } from "@/client/ui/View";
