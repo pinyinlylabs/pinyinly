@@ -20,6 +20,13 @@ vi.mock(`#client/ui/SkillAnswerText.tsx`, () => ({
   SkillAnswerText: () => `Correct answer`,
 }));
 vi.mock(`#client/ui/RectButton.tsx`, () => ({ RectButton: () => null }));
+vi.mock(`#client/ui/hooks/useUserSettingToggle.ts`, () => ({
+  useUserSettingToggle: () => ({
+    isLoading: false,
+    isEnabled: false,
+    setEnabled: vi.fn(),
+  }),
+}));
 vi.mock(`#client/ui/QuizSubmitButton.tsx`, () => ({
   QuizSubmitButton: () => <button type="button">Continue</button>,
 }));

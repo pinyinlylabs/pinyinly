@@ -8,6 +8,8 @@ import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import { RectButton } from "./RectButton";
 import { useState } from "react";
+import { useUserSettingToggle } from "./hooks/useUserSettingToggle";
+import { quizResultTooSlowUserToggleSetting } from "@/data/userSettings";
 
 interface QuizDeckQuestionSkeletonRating {
   rating: Rating;
@@ -33,6 +35,8 @@ export function QuizDeckQuestionSkeleton({
   skill: Skill;
 }) {
   const [isChecking, setIsChecking] = useState(false);
+  const { isLoading: isTooSlowSettingLoading, isEnabled: showTooSlow } =
+    useUserSettingToggle(quizResultTooSlowUserToggleSetting);
   const submit = useLockFn(async () => {
     const result = onSubmit();
     if (result == null) {
@@ -73,6 +77,7 @@ export function QuizDeckQuestionSkeleton({
           rating={rating.rating}
           onChangeAnswer={onChangeAnswer}
           onReportWrongRating={onReportWrongRating}
+          showTooSlow={!isTooSlowSettingLoading && showTooSlow}
         />
       )}
       {showIdkButton ? (

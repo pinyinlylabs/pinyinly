@@ -16,6 +16,7 @@ import {
   profileOverviewUserToggleSetting,
   soundMnemonicsUserToggleSetting,
   hanziWritingIssuesUserToggleSetting,
+  quizResultTooSlowUserToggleSetting,
 } from "@/data/userSettings";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Link } from "expo-router";
@@ -136,6 +137,20 @@ export default function DeveloperSettingsPage() {
             <UserSettingToggleButton
               entity={hanziWritingIssuesUserToggleSetting}
               accessibilityLabel="Hanzi writing issues"
+            />
+          </View>
+        </View>
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Too slow quiz result</Text>
+            <Text className="pyly-body-caption">
+              Show a “Too slow” result when an answer takes too long.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={quizResultTooSlowUserToggleSetting}
+              accessibilityLabel="Too slow quiz result"
             />
           </View>
         </View>

@@ -4,7 +4,6 @@ import { QuizDeckHanziCharacterWritingQuestion } from "./QuizDeckHanziCharacterW
 import { QuizDeckHanziWordToGlossTypedQuestion } from "./QuizDeckHanziWordToGlossTypedQuestion";
 import { QuizDeckHanziWordToPinyinTypedQuestion } from "./QuizDeckHanziWordToPinyinTypedQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
-
 type QuizDeckQuestionRendererProps = {
   question: Question;
   onNext: () => void;

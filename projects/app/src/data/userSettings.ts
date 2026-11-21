@@ -305,6 +305,13 @@ export const hanziWritingIssuesUserToggleSetting = defineUserSetting({
   defaultValue: () => ({ enabled: false }),
 });
 
+export const quizResultTooSlowUserToggleSetting = defineUserSetting({
+  entity: r.entity(`quizResultTooSlow`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: false }),
+});
+
 export const practiceMeaningUserToggleSetting = defineUserSetting({
   entity: r.entity(`practiceMeaning`, {
     enabled: r.boolean(`e`),
@@ -811,6 +818,7 @@ export const userSettingDefinitions = [
   soundMnemonicsUserToggleSetting,
   profileOverviewUserToggleSetting,
   hanziWritingIssuesUserToggleSetting,
+  quizResultTooSlowUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,

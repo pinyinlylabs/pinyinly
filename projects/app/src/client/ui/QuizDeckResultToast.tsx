@@ -16,10 +16,11 @@ import { Theme } from "./Theme";
 
 export function QuizDeckResultToast({
   skill,
-  rating,
+  rating: ratingProp,
   disableAnimation = false,
   onChangeAnswer,
   onReportWrongRating,
+  showTooSlow = false,
 }: {
   skill: Skill;
   rating: Rating;
@@ -29,8 +30,11 @@ export function QuizDeckResultToast({
   disableAnimation?: boolean;
   onChangeAnswer: () => void;
   onReportWrongRating?: () => void;
+  showTooSlow?: boolean;
 }) {
   const cleanupAnimationRef = useRef<(() => void) | null>(null);
+  const rating =
+    ratingProp === Rating.Hard && !showTooSlow ? Rating.Good : ratingProp;
 
   return (
     <Suspense fallback={null}>
