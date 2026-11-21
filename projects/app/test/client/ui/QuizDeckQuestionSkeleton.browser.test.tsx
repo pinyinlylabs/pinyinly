@@ -145,6 +145,41 @@ test.for([Rating.Easy, Rating.Good, Rating.Hard, Rating.Again])(
   },
 );
 
+test(`Hard rating shows Nice when Too slow is omitted`, async () => {
+  await render(
+    <Theme theme="light">
+      <View testID="stage" style={{ width: 390, height: 740 }}>
+        <QuizDeckResultToast
+          skill="hp:test:meaning"
+          rating={Rating.Hard}
+          onChangeAnswer={() => {}}
+        />
+      </View>
+    </Theme>,
+  );
+
+  await expect.element(page.getByText(`Nice!`)).toBeInTheDocument();
+  await expect.element(page.getByText(`Too slow`)).not.toBeInTheDocument();
+});
+
+test(`Hard rating shows Too slow when the setting is enabled`, async () => {
+  await render(
+    <Theme theme="light">
+      <View testID="stage" style={{ width: 390, height: 740 }}>
+        <QuizDeckResultToast
+          skill="hp:test:meaning"
+          rating={Rating.Hard}
+          showTooSlow
+          onChangeAnswer={() => {}}
+        />
+      </View>
+    </Theme>,
+  );
+
+  await expect.element(page.getByText(`Too slow`)).toBeInTheDocument();
+  await expect.element(page.getByText(`Nice!`)).not.toBeInTheDocument();
+});
+
 test(`advancing before the enter animation finishes prevents replay on exit`, async () => {
   const screen = (visible: boolean) => (
     <Theme theme="light">
