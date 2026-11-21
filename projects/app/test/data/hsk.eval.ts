@@ -6,18 +6,13 @@ import {
   splitCedictV2Definition,
 } from "./cedict";
 import { createJudge, describeEval } from "vitest-evals";
-import type { HarnessMetadata, JudgeContext } from "vitest-evals";
+import { expect } from "vitest";
 import { pinyinNumericToDiacritic } from "#data/pinyin.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { diffStringsUnified } from "@vitest/utils/diff";
-import { z } from "zod";
 import type { HskLevelJudgeEntryType, HskLevelJudgeResultType } from "./hsk";
 import { buildHskLevelJudgePrompt } from "./hsk";
 import { createResponsePromptHarness } from "#test/util/prompts/eval.ts";
-
-interface HskLevelHarnessMetadata extends HarnessMetadata {
-  expecteds: string[][][];
-}
 
 function formatDefinitionStable(definition: string[][]): string {
   return (
@@ -30,51 +25,43 @@ function formatDefinitionStable(definition: string[][]): string {
   );
 }
 
-const HskLevelJudge = createJudge(
-  `HskLevelJudge`,
-  async ({
-    output,
-    metadata,
-  }: JudgeContext<
-    HskLevelJudgeEntryType,
-    HskLevelJudgeResultType,
-    HskLevelHarnessMetadata
-  >) => {
-    const { expecteds } = metadata;
+const HskLevelJudge = createJudge<
+  HskLevelJudgeEntryType,
+  HskLevelJudgeResultType,
+  { expecteds: string[][][] }
+>(`HskLevelJudge`, async ({ output, expecteds }) => {
+  const actual = output.hskRequiredDefinitions.map((s) => s.split(`; `));
+  let bestScore;
+  let bestExpected;
 
-    const actual = output.hskRequiredDefinitions.map((s) => s.split(`; `));
-    let bestScore;
-    let bestExpected;
-
-    // Score the output against each expected and take the best one, since there
-    // can be multiple valid groupings.
-    for (const expected of expecteds) {
-      const score = nestedStringSetScorer({
-        actual,
-        expected,
-      });
-      bestScore ??= score;
-      bestExpected ??= expected;
-      if (score.score > bestScore.score) {
-        bestScore = score;
-        bestExpected = expected;
-      }
+  // Score the output against each expected and take the best one, since there
+  // can be multiple valid groupings.
+  for (const expected of expecteds) {
+    const score = nestedStringSetScorer({
+      actual,
+      expected,
+    });
+    bestScore ??= score;
+    bestExpected ??= expected;
+    if (score.score > bestScore.score) {
+      bestScore = score;
+      bestExpected = expected;
     }
+  }
 
-    invariant(bestScore != null);
-    invariant(bestExpected != null);
+  invariant(bestScore != null);
+  invariant(bestExpected != null);
 
-    return {
-      score: bestScore.score,
-      metadata: {
-        rationale:
-          bestScore.score === 1
-            ? `Exact match`
-            : `Output differed:\n${diffStringsUnified(formatDefinitionStable(bestExpected), formatDefinitionStable(actual))}`,
-      },
-    };
-  },
-);
+  return {
+    score: bestScore.score,
+    metadata: {
+      rationale:
+        bestScore.score === 1
+          ? `Exact match`
+          : `Output differed:\n${diffStringsUnified(formatDefinitionStable(bestExpected), formatDefinitionStable(actual))}`,
+    },
+  };
+});
 
 const hskLevelJudgeCases = [
   {
@@ -88,13 +75,7 @@ const hskLevelJudgeCases = [
 describeEval(
   `buildHskLevelJudgePrompt eval`,
   {
-    harness: createResponsePromptHarness(
-      buildHskLevelJudgePrompt,
-      z.object({
-        expecteds: z.array(z.array(z.array(z.string()))),
-      }),
-    ),
-    judges: [HskLevelJudge],
+    harness: createResponsePromptHarness(buildHskLevelJudgePrompt),
   },
   (it) => {
     it.for(hskLevelJudgeCases)(`$name`, async (spec, { run }) => {
@@ -116,11 +97,8 @@ describeEval(
         splitCedictV2Definition(s).map((sense) => splitCedictV2Sense(sense)),
       );
 
-      await run(input, {
-        metadata: {
-          expecteds,
-        },
-      });
+      const result = await run(input);
+      await expect(result).toSatisfyJudge(HskLevelJudge, { expecteds });
     });
   },
 );

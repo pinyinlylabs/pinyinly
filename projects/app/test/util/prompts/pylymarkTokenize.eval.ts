@@ -1,14 +1,9 @@
 import { createJudge, describeEval } from "vitest-evals";
-import type { HarnessMetadata, JudgeContext } from "vitest-evals";
+import { expect } from "vitest";
 import { diffStringsUnified } from "@vitest/utils/diff";
-import { z } from "zod";
 import { buildPylymarkTokenizePrompt } from "#util/prompts/pylymarkTokenize.ts";
 import type { PylymarkTokenizeInput } from "#util/prompts/pylymarkTokenize.ts";
 import { createResponsePromptHarness } from "./eval.ts";
-
-interface PylymarkTokenizeHarnessMetadata extends HarnessMetadata {
-  expectedText: string;
-}
 
 interface PylymarkTokenizeEvalCase {
   name: string;
@@ -16,29 +11,23 @@ interface PylymarkTokenizeEvalCase {
   expectedText: string;
 }
 
-const ExpectedTextJudge = createJudge(
-  `ExpectedTextJudge`,
-  async ({
-    output,
-    metadata,
-  }: JudgeContext<
-    PylymarkTokenizeInput,
-    { text: string },
-    PylymarkTokenizeHarnessMetadata
-  >) => {
-    const score = output.text === metadata.expectedText ? 1 : 0;
+const ExpectedTextJudge = createJudge<
+  PylymarkTokenizeInput,
+  { text: string },
+  { expectedText: string }
+>(`ExpectedTextJudge`, async ({ output, expectedText }) => {
+  const score = output.text === expectedText ? 1 : 0;
 
-    return {
-      score,
-      metadata: {
-        rationale:
-          score === 1
-            ? `Exact text match.`
-            : `Annotated text mismatch:\n${diffStringsUnified(metadata.expectedText, output.text)}`,
-      },
-    };
-  },
-);
+  return {
+    score,
+    metadata: {
+      rationale:
+        score === 1
+          ? `Exact text match.`
+          : `Annotated text mismatch:\n${diffStringsUnified(expectedText, output.text)}`,
+    },
+  };
+});
 
 const pylymarkTokenizeCases: PylymarkTokenizeEvalCase[] = [
   {
@@ -145,18 +134,13 @@ const pylymarkTokenizeCases: PylymarkTokenizeEvalCase[] = [
 describeEval(
   `buildPylymarkTokenizePrompt eval`,
   {
-    harness: createResponsePromptHarness(
-      buildPylymarkTokenizePrompt,
-      z.object({ expectedText: z.string() }),
-    ),
-    judges: [ExpectedTextJudge],
+    harness: createResponsePromptHarness(buildPylymarkTokenizePrompt),
   },
   (it) => {
     it.for(pylymarkTokenizeCases)(`$name`, async (spec, { run }) => {
-      await run(spec.input, {
-        metadata: {
-          expectedText: spec.expectedText,
-        },
+      const result = await run(spec.input);
+      await expect(result).toSatisfyJudge(ExpectedTextJudge, {
+        expectedText: spec.expectedText,
       });
     });
   },

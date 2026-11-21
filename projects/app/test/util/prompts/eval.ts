@@ -1,6 +1,5 @@
 import { createHarness } from "vitest-evals";
 import type {
-  HarnessMetadata,
   JsonValue,
   JudgeHarnessInput,
   RunJudge,
@@ -50,15 +49,11 @@ export function chatPromptToJudgeHarnessInput<Schema extends z.ZodType>(
 }
 
 export function createResponsePromptHarness<
-  TMetadata extends HarnessMetadata,
   Schema extends z.ZodType<JsonValue | undefined>,
   TInput = unknown,
   TOutput extends JsonValue | undefined = z.infer<Schema>,
->(
-  buildPrompt: (input: TInput) => ChatPromptLike<Schema, TOutput>,
-  _metadataSchema?: z.ZodType<TMetadata>,
-) {
-  return createHarness<TInput, TOutput, TMetadata>({
+>(buildPrompt: (input: TInput) => ChatPromptLike<Schema, TOutput>) {
+  return createHarness<TInput, TOutput>({
     name: `responseHarness`,
     run: async ({ input, signal }) => {
       const prompt = buildPrompt(input);
