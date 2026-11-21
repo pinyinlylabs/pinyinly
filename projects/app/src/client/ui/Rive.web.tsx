@@ -47,7 +47,7 @@ export function Rive({
     src,
     autoplay,
     autoBind: true,
-    stateMachines: stateMachineName,
+    stateMachine: stateMachineName,
     layout: fit == null ? undefined : new Layout({ fit: fitMap[fit] }),
     assetLoader(asset) {
       const expoAsset = assets?.[asset.name];
