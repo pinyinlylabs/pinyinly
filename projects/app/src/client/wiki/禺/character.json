@@ -24,5 +24,6 @@
       "M 577 299 L 649 220 L 662 193 L 667 164"
     ]
   },
-  "isStructural": true
+  "isStructural": true,
+  "decompositions": { "⿱日禸": ["0-3", "4-8"] }
 }

@@ -18,5 +18,6 @@
       "M 476 450 L 501 434 L 519 412 L 513 -76"
     ]
   },
-  "isStructural": true
+  "isStructural": true,
+  "decompositions": { "⿱夂③": ["0-2", "3-5"] }
 }
