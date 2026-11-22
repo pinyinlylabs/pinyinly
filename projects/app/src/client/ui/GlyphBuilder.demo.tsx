@@ -1285,6 +1285,70 @@ export default function GlyphBuilderDemo() {
         return current;
       }
 
+      if (selectedLayerIds.includes(layerId) && selectedLayerIds.length > 1) {
+        const selectedIdSet = new Set(selectedLayerIds);
+        const selected = current.filter((layer) => selectedIdSet.has(layer.id));
+        const remaining = current.filter(
+          (layer) => !selectedIdSet.has(layer.id),
+        );
+
+        if (direction === `up`) {
+          const firstSelectedIndex = current.findIndex((layer) =>
+            selectedIdSet.has(layer.id),
+          );
+          if (firstSelectedIndex <= 0) {
+            return current;
+          }
+
+          const boundaryLayerId = current[firstSelectedIndex - 1]?.id;
+          if (boundaryLayerId == null) {
+            return current;
+          }
+
+          const boundaryIndex = remaining.findIndex(
+            (layer) => layer.id === boundaryLayerId,
+          );
+          if (boundaryIndex < 0) {
+            return current;
+          }
+
+          return [
+            ...remaining.slice(0, boundaryIndex),
+            ...selected,
+            ...remaining.slice(boundaryIndex),
+          ];
+        }
+
+        let lastSelectedIndex = -1;
+        for (let i = current.length - 1; i >= 0; i--) {
+          if (selectedIdSet.has(current[i]?.id ?? ``)) {
+            lastSelectedIndex = i;
+            break;
+          }
+        }
+        if (lastSelectedIndex < 0 || lastSelectedIndex >= current.length - 1) {
+          return current;
+        }
+
+        const boundaryLayerId = current[lastSelectedIndex + 1]?.id;
+        if (boundaryLayerId == null) {
+          return current;
+        }
+
+        const boundaryIndex = remaining.findIndex(
+          (layer) => layer.id === boundaryLayerId,
+        );
+        if (boundaryIndex < 0) {
+          return current;
+        }
+
+        return [
+          ...remaining.slice(0, boundaryIndex + 1),
+          ...selected,
+          ...remaining.slice(boundaryIndex + 1),
+        ];
+      }
+
       const targetIndex = direction === `up` ? index - 1 : index + 1;
       if (targetIndex < 0 || targetIndex >= current.length) {
         return current;
@@ -1301,6 +1365,40 @@ export default function GlyphBuilderDemo() {
       next[targetIndex] = a;
       return next;
     });
+  };
+
+  const duplicateSelectedLayers = () => {
+    if (selectedLayerIds.length === 0) {
+      return;
+    }
+
+    const selectedIdSet = new Set(selectedLayerIds);
+    const duplicatedLayerIds: string[] = [];
+    const next: GlyphLayer[] = [];
+
+    for (const layer of layers) {
+      next.push(layer);
+      if (!selectedIdSet.has(layer.id)) {
+        continue;
+      }
+
+      const duplicateId = nanoid();
+      duplicatedLayerIds.push(duplicateId);
+      next.push({
+        ...layer,
+        id: duplicateId,
+        sourceOverride:
+          layer.sourceOverride == null
+            ? undefined
+            : {
+                strokes: [...layer.sourceOverride.strokes],
+                medians: [...layer.sourceOverride.medians],
+              },
+      });
+    }
+
+    setLayers(next);
+    setSelectedLayerIds(duplicatedLayerIds);
   };
 
   const removeSelectedLayers = () => {
@@ -1742,6 +1840,13 @@ export default function GlyphBuilderDemo() {
               disabled={historyState?.future.length === 0}
             >
               Redo
+            </RectButton>
+            <RectButton
+              variant="bareDim"
+              onPress={duplicateSelectedLayers}
+              disabled={selectedLayerIds.length === 0}
+            >
+              Duplicate
             </RectButton>
             <RectButton
               variant="bareDim"

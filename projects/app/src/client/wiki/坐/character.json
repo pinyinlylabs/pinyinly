@@ -1,10 +1,10 @@
 {
   "decompositions": {
-    "⿻土从": ["0-2", "3-6"]
+    "⿻从土": ["0-3", "4-6"]
   },
   "hanzi": "坐",
   "mnemonic": {
-    "decomposition": "⿻土从"
+    "decomposition": "⿻从土"
   },
   "svg": {
     "medians": [
